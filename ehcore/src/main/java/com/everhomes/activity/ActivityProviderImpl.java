@@ -334,6 +334,11 @@ public class ActivityProviderImpl implements ActivityProivider {
             query.addConditions(Tables.EH_ACTIVITIES.STATUS.eq((byte) 2));
             query.addOrderBy(Tables.EH_ACTIVITIES.CREATE_TIME.desc());
             query.addLimit(count - activities.size());
+            
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Query activities by geohash, sql=" + query.getSQL());
+                LOGGER.debug("Query activities by geohash, bindValues=" + query.getBindValues());
+            }
 
             query.fetch().map((r) -> {
             	if(r.getEndTime().after(now)){

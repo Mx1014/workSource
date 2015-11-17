@@ -1,5 +1,7 @@
 package com.everhomes.techpark.rental;
 
+import java.text.SimpleDateFormat;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,16 +39,16 @@ public class CancelLockedRentalBillAction implements Runnable {
 		
 	}
 	private void sendMessageToUser(Long userId, String content) {
-		User user = UserContext.current().getUser();
+//		User user = UserContext.current().getUser();
 		MessageDTO messageDto = new MessageDTO();
         messageDto.setAppId(AppConstants.APPID_MESSAGING);
-        messageDto.setSenderUid(user.getId());
+        messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());
         messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()));
-        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(user.getId())));
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
         messageDto.setBodyType(MessageBodyType.TEXT.getCode());
         messageDto.setBody(content);
         messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
-        
+        LOGGER.debug("messageDTO : ++++ \n "+messageDto);
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
                 userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
 	}
@@ -58,7 +60,26 @@ public class CancelLockedRentalBillAction implements Runnable {
 			rentalBill.setStatus(SiteBillStatus.FAIL.getCode());
 			rentalProvider.updateRentalBill(rentalBill);
 		}
-		sendMessageToUser(rentalBill.getRentalUid(),"超时未支付，您的订单被取消了，请重新申请");
+		StringBuffer sb = new StringBuffer();
+		sb.append("您预定的：");
+		switch(rentalBill.getSiteType()){
+		case("MEETINGROOM"): 
+			sb.append("会议室");
+			break;
+		case("VIPPARKING"):
+			sb.append("VIP车位");
+			break;
+		case("ELECSCREEN"): 
+			sb.append("电子屏");
+			break;
+		}
+
+		sb.append("(日期:");
+		SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
+		sb.append(dateSF.format(rentalBill.getRentalDate()));
+		sb.append(")");
+		sb.append("由于超期未支付，被取消了 > <,请重新预订");
+		sendMessageToUser(rentalBill.getRentalUid(),sb.toString());
 	}
 
 }

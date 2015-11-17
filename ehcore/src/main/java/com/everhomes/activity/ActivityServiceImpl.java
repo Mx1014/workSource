@@ -27,6 +27,7 @@ import com.everhomes.category.Category;
 import com.everhomes.category.CategoryAdminStatus;
 import com.everhomes.category.CategoryConstants;
 import com.everhomes.category.CategoryProvider;
+import com.everhomes.community.CommunityAppType;
 import com.everhomes.community.CommunityGeoPoint;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -830,10 +831,15 @@ public class ActivityServiceImpl implements ActivityService {
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<Category> listActivityCategories() {
+    public List<Category> listActivityCategories(ListActivityCategoriesCommand cmd) {
         Tuple[] orderBy = new Tuple[1]; 
         orderBy[0] = new Tuple<String, SortOrder>("default_order", SortOrder.ASC);
         List<Category> result = categoryProvider.listChildCategories(CategoryConstants.CATEGORY_ID_ACTIVITY, CategoryAdminStatus.ACTIVE,orderBy);
+        
+        if(CommunityAppType.TECHPARK.getCode() == cmd.getCommunityFlagId()) {
+        	List<Category> tech = categoryProvider.listChildCategories(CategoryConstants.CATEGORY_ID_TECH_ACTIVITY, CategoryAdminStatus.ACTIVE,orderBy);
+        	result.addAll(tech);
+        }
         return result;
     }
 
@@ -1120,9 +1126,11 @@ public class ActivityServiceImpl implements ActivityService {
         
         List<CommunityGeoPoint> geoPoints = communityProvider.listCommunityGeoPoints(cmd.getCommunity_id());
         int range = cmd.getRange();
+        range = (range <= 0) ? 6 : range;
 		
 		List<String> geoHashCodes = new ArrayList<String>();
 		
+		StringBuilder strBuilder = new StringBuilder();
 		for(CommunityGeoPoint geoPoint : geoPoints){
 			
 			double latitude = geoPoint.getLatitude();
@@ -1135,6 +1143,15 @@ public class ActivityServiceImpl implements ActivityService {
 	        for(GeoHash g : adjacents) {
 	           geoHashCodes.add(g.toBase32());
 	        }
+	        
+	        if(strBuilder.length() > 0) {
+	            strBuilder.append(",");
+	        } else {
+	            strBuilder.append(geoPoint.getCommunityId());
+	        }
+		}
+		if(LOGGER.isDebugEnabled()) {
+		    LOGGER.debug("Query activities by geohash, communityId=" + cmd.getCommunity_id() + ", communities=" + strBuilder);
 		}
 		List<Condition> conditions = geoHashCodes.stream().map(r->Tables.EH_ACTIVITIES.GEOHASH.like(r+"%")).collect(Collectors.toList());
         

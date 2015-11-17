@@ -6,27 +6,15 @@ package com.everhomes.enterprise;
  *
  */
 public class UpdateContactCommand {
-    private Long id;
-    private java.lang.Long     enterpriseId;
+    private Long contactId; 
     private java.lang.String   name;
     private java.lang.String   nickName;
     private java.lang.String   avatar;
-    private java.lang.Long     role;
-    private java.lang.Byte     status;
-    private java.lang.Long     creatorUid;
-    
-    public Long getId() {
-        return id;
-    }
-    public void setId(Long id) {
-        this.id = id;
-    }
-    public java.lang.Long getEnterpriseId() {
-        return enterpriseId;
-    }
-    public void setEnterpriseId(java.lang.Long enterpriseId) {
-        this.enterpriseId = enterpriseId;
-    }
+    private java.lang.Long     role;  
+    private java.lang.Long     contactGroupId;  
+    private String employeeNo;
+    private String sex;
+      
     public java.lang.String getName() {
         return name;
     }
@@ -51,16 +39,29 @@ public class UpdateContactCommand {
     public void setRole(java.lang.Long role) {
         this.role = role;
     }
-    public java.lang.Byte getStatus() {
-        return status;
-    }
-    public void setStatus(java.lang.Byte status) {
-        this.status = status;
-    }
-    public java.lang.Long getCreatorUid() {
-        return creatorUid;
-    }
-    public void setCreatorUid(java.lang.Long creatorUid) {
-        this.creatorUid = creatorUid;
-    }
+     
+	public Long getContactId() {
+		return contactId;
+	}
+	public void setContactId(Long contactId) {
+		this.contactId = contactId;
+	}
+	public java.lang.Long getContactGroupId() {
+		return contactGroupId;
+	}
+	public void setContactGroupId(java.lang.Long contactGroupId) {
+		this.contactGroupId = contactGroupId;
+	}
+	public String getEmployeeNo() {
+		return employeeNo;
+	}
+	public void setEmployeeNo(String employeeNo) {
+		this.employeeNo = employeeNo;
+	}
+	public String getSex() {
+		return sex;
+	}
+	public void setSex(String sex) {
+		this.sex = sex;
+	}
 }

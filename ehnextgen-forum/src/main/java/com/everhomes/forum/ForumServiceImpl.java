@@ -439,10 +439,12 @@ public class ForumServiceImpl implements ForumService {
         User user = UserContext.current().getUser();
         Long userId = user.getId();
         Long communityId = cmd.getCommunityId();
-        Community community = checkCommunityParameter(userId, communityId, "queryTopicsByCategory");
+        String tag = "queryTopicsByCategory";
+        Community community = checkCommunityParameter(userId, communityId, tag);
         
-        Long forumId = ForumConstants.SYSTEM_FORUM;
-        Forum forum = this.forumProvider.findForumById(forumId);
+//        Long forumId = ForumConstants.SYSTEM_FORUM;
+//        Forum forum = this.forumProvider.findForumById(forumId);
+        Forum forum = checkForumParameter(userId, cmd.getForumId(), tag);
         
         PostEntityTag entityTag = PostEntityTag.fromCode(cmd.getEntityTag());
         

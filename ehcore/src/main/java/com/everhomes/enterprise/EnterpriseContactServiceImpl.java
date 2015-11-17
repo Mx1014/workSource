@@ -1068,28 +1068,18 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 						contact.setStatus(GroupMemberStatus.WAITING_FOR_ACCEPTANCE.getCode());
 						contact.setCreateTime(new Timestamp(System
 								.currentTimeMillis()));
+						Long contactId = enterpriseContactProvider
+								.createContact(contact);
 						// phone find user
 						User user = userService.findUserByIndentifier(PhoneNum);
 						if (null != user){
-							//已有用户，设置为正常状态，并把userId放入contact表 新家usergroup记录
+							//已有用户，设置为正常状态，并把userId放入contact表 复用大师的代码
 							contact.setUserId(user.getId());
-							contact.setStatus(GroupMemberStatus.ACTIVE.getCode());
-							Group group = groupProvider.findGroupById(enterpriseId);
-							UserGroup uGroup = userProvider.findUserGroupByOwnerAndGroup(user.getId(), enterpriseId) ;
-							if(null == uGroup){
-							uGroup=new UserGroup();
-							uGroup.setGroupDiscriminator(GroupDiscriminator.ENTERPRISE.getCode());
-							uGroup.setOwnerUid(user.getId());
-							uGroup.setGroupId(enterpriseId);
-							uGroup.setMemberStatus(GroupMemberStatus.ACTIVE.getCode());
-							uGroup.setRegionScope(RegionScope.COMMUNITY.getCode());
-							uGroup.setRegionScopeId(group.getVisibleRegionId());
-							userProvider.createUserGroup(uGroup);
-							}
+							contact.setStatus(GroupMemberStatus.ACTIVE.getCode());  
+		    				updatePendingEnterpriseContactToAuthenticated(contact);
 						}
 						// TODO: map aparment 2 user 
-						Long contactId = enterpriseContactProvider
-								.createContact(contact);
+					
 						EnterpriseContactEntry contactEntry = new EnterpriseContactEntry();
 						contactEntry.setContactId(contactId);
 						contactEntry.setEnterpriseId(enterpriseId);
@@ -1400,5 +1390,41 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 			this.enterpriseContactProvider.deleteContactGroupMember(enterpriseContactGroupMember);
 		
 		this.enterpriseContactProvider.deleteContactById(contact);
+	}
+
+	@Override
+	public EnterpriseContactDTO updateContact(UpdateContactCommand cmd) {
+		EnterpriseContact contact = this.enterpriseContactProvider.getContactById(cmd.getContactId());
+		contact.setName(cmd.getName());
+		contact.setNickName(cmd.getNickName());
+		contact.setRole(cmd.getRole());
+		contact.setSex(cmd.getSex());
+		contact.setEmployeeNo(cmd.getEmployeeNo());
+		//phone num change
+		EnterpriseContactGroupMember enterpriseContactGroupMember = this.enterpriseContactProvider.getContactGroupMemberByContactId(contact.getEnterpriseId(), cmd.getContactId());
+		if(null!=cmd.getContactGroupId()){
+			if(null == enterpriseContactGroupMember){
+				if(null != cmd.getContactGroupId()){
+					enterpriseContactGroupMember = new EnterpriseContactGroupMember();
+					enterpriseContactGroupMember.setContactGroupId(cmd.getContactGroupId());
+					enterpriseContactGroupMember
+							.setEnterpriseId(contact.getEnterpriseId());
+					enterpriseContactGroupMember.setContactId(contact.getId());
+					enterpriseContactGroupMember.setCreatorUid(UserContext.current().getUser().getId());
+					enterpriseContactGroupMember
+							.setCreateTime(new Timestamp(System
+									.currentTimeMillis()));
+					enterpriseContactProvider
+							.createContactGroupMember(enterpriseContactGroupMember);
+				}
+			}else if(!enterpriseContactGroupMember.getContactGroupId().equals(cmd.getContactGroupId())){
+				enterpriseContactGroupMember.setContactGroupId(cmd.getContactGroupId());
+				contact.setApplyGroup(this.enterpriseContactProvider.getContactGroupById(cmd.getContactGroupId()).getApplyGroup());
+	
+				enterpriseContactProvider.updateContactGroupMember(enterpriseContactGroupMember);
+			}
+		}
+		this.enterpriseContactProvider.updateContact(contact);
+		return ConvertHelper.convert(contact, EnterpriseContactDTO.class);
 	}
 }

@@ -1,5 +1,7 @@
 package com.everhomes.techpark.rental;
 
+import java.text.SimpleDateFormat;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,20 +37,19 @@ public class UpdateRentalBillStatusToPayingFinalAction implements Runnable {
 	private MessagingService messagingService;
 
 	private void sendMessageToUser(Long userId, String content) {
-		User user = UserContext.current().getUser();
+//		User user = UserContext.current().getUser();
 		MessageDTO messageDto = new MessageDTO();
         messageDto.setAppId(AppConstants.APPID_MESSAGING);
-        messageDto.setSenderUid(user.getId());
+        messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());
         messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()));
-        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(user.getId())));
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
         messageDto.setBodyType(MessageBodyType.TEXT.getCode());
         messageDto.setBody(content);
         messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
-        
+        LOGGER.debug("messageDTO : ++++ \n "+messageDto);
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
                 userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
 	}
-	
 	@Override
 	public void run() {
 		// 如果还没成功付全款，则取消订单
@@ -58,7 +59,26 @@ public class UpdateRentalBillStatusToPayingFinalAction implements Runnable {
 			rentalBill.setStatus(SiteBillStatus.PAYINGFINAL.getCode());
 			rentalProvider.updateRentalBill(rentalBill);
 			//TODO: 发通知
-			sendMessageToUser(rentalBill.getRentalUid(),"你有一个预定场所需要付全款，请及时支付，小心过期被取消哦");
+			StringBuffer sb = new StringBuffer();
+			sb.append("您预定的：");
+			switch(rentalBill.getSiteType()){
+			case("MEETINGROOM"): 
+				sb.append("会议室");
+				break;
+			case("VIPPARKING"):
+				sb.append("VIP车位");
+				break;
+			case("ELECSCREEN"): 
+				sb.append("电子屏");
+				break;
+			}
+
+			sb.append("(日期:");
+			SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
+			sb.append(dateSF.format(rentalBill.getRentalDate()));
+			sb.append(")");
+			sb.append("需要支付全款了！请速速支付，小心超期被取消哦^ ^");
+			sendMessageToUser(rentalBill.getRentalUid(),sb.toString());
 		}
 	}
 
