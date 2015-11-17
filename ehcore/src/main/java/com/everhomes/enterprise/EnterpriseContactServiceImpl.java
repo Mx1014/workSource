@@ -1068,28 +1068,18 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 						contact.setStatus(GroupMemberStatus.WAITING_FOR_ACCEPTANCE.getCode());
 						contact.setCreateTime(new Timestamp(System
 								.currentTimeMillis()));
+						Long contactId = enterpriseContactProvider
+								.createContact(contact);
 						// phone find user
 						User user = userService.findUserByIndentifier(PhoneNum);
 						if (null != user){
-							//已有用户，设置为正常状态，并把userId放入contact表 新家usergroup记录
+							//已有用户，设置为正常状态，并把userId放入contact表 复用大师的代码
 							contact.setUserId(user.getId());
-							contact.setStatus(GroupMemberStatus.ACTIVE.getCode());
-							Group group = groupProvider.findGroupById(enterpriseId);
-							UserGroup uGroup = userProvider.findUserGroupByOwnerAndGroup(user.getId(), enterpriseId) ;
-							if(null == uGroup){
-							uGroup=new UserGroup();
-							uGroup.setGroupDiscriminator(GroupDiscriminator.ENTERPRISE.getCode());
-							uGroup.setOwnerUid(user.getId());
-							uGroup.setGroupId(enterpriseId);
-							uGroup.setMemberStatus(GroupMemberStatus.ACTIVE.getCode());
-							uGroup.setRegionScope(RegionScope.COMMUNITY.getCode());
-							uGroup.setRegionScopeId(group.getVisibleRegionId());
-							userProvider.createUserGroup(uGroup);
-							}
+							contact.setStatus(GroupMemberStatus.ACTIVE.getCode());  
+		    				updatePendingEnterpriseContactToAuthenticated(contact);
 						}
 						// TODO: map aparment 2 user 
-						Long contactId = enterpriseContactProvider
-								.createContact(contact);
+					
 						EnterpriseContactEntry contactEntry = new EnterpriseContactEntry();
 						contactEntry.setContactId(contactId);
 						contactEntry.setEnterpriseId(enterpriseId);
