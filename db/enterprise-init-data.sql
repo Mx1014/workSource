@@ -51,17 +51,6 @@ INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager
 INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`) 
 		VALUES(176004, 240111044331046562, '生产力大楼', '生产力大楼', 193501, '13632650699', '广东省深圳市高新中二道5号', NULL, NULL, NULL, NULL, '生产力大厦位于南山科技园中区，科苑路与高新中二道交汇处，深南大道旁，步行至深大地铁口仅需3分-钟，周边写字楼有科兴科学园、金融科技大厦、深圳软件园、比克大厦、研祥科技大厦等甲级写字楼。园区内有百度，嗒嗒巴士等知名企业。', 'cs://1/image/aW1hZ2UvTVRwbE1tVmlPRFV3WkRZeFlXUTJORGN5Wmpka1pXWmxPRGcxTVRrNU4yTXdZZw', 2, 1, NULL, 1, '2015-11-05 14:56:31', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
-mysql> desc eh_community_geopoints;
-+--------------+-------------+------+-----+---------+-------+
-| Field        | Type        | Null | Key | Default | Extra |
-+--------------+-------------+------+-----+---------+-------+
-| id           | bigint(20)  | NO   | PRI | NULL    |       |
-| community_id | bigint(20)  | YES  |     | NULL    |       |
-| description  | varchar(64) | YES  | MUL | NULL    |       |
-| longitude    | double      | YES  |     | NULL    |       |
-| latitude     | double      | YES  |     | NULL    |       |
-| geohash      | varchar(32) | YES  | MUL | NULL    |     		
-		
 
 insert into `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`) values('239825274387091000',UUID(),'240111044331046562','13905','深圳市','13908','南山区','科技工业园大厦-二层东','科技工业园大厦','二层东','2','0','2015-11-12 22:20:25');
 insert into `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`) values('239825274387091001',UUID(),'240111044331046562','13905','深圳市','13908','南山区','科技工业园大厦-二层西','科技工业园大厦','二层西','2','0','2015-11-12 22:20:25');
