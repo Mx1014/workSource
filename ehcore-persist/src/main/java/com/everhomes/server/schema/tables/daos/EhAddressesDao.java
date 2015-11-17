@@ -277,4 +277,11 @@ public class EhAddressesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.s
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByStringTag5(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.STRING_TAG5, values);
 	}
+
+	/**
+	 * Fetch records that have <code>area_size IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAddresses> fetchByAreaSize(java.lang.Double... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES.AREA_SIZE, values);
+	}
 }
