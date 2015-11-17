@@ -102,7 +102,7 @@ public class CategoryProviderImpl implements CategoryProvider {
         }
     }
 
-    @Cacheable(value="Category", key="#id")
+    @Cacheable(value="Category", key="#id", unless="#result == null")
     @Override
     public Category findCategoryById(long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
