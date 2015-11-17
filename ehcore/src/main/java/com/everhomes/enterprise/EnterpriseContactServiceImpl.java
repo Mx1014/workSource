@@ -897,7 +897,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
         Long enterpriseId = cmd.getEnterpriseId();
         checkEnterpriseParameter(enterpriseId, userId, tag);
 
-        EnterpriseContact contact = checkEnterpriseContactParameter(userId, userId, tag);
+        EnterpriseContact contact = checkEnterpriseContactParameter(enterpriseId, userId, userId, tag);
         GroupMemberStatus status = GroupMemberStatus.fromCode(contact.getStatus());
         if(status == GroupMemberStatus.ACTIVE) {
             deleteActiveEnterpriseContact(userId, contact, false, "");
@@ -935,6 +935,25 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
         EnterpriseContact contact = this.enterpriseContactProvider.queryContactById(contactId);
         if(contact == null) {
             LOGGER.error("Enterprise contact not found, operatorUid=" + operatorUid + ", contactId=" + contactId + ", tag=" + tag);
+            throw RuntimeErrorException.errorWith(EnterpriseServiceErrorCode.SCOPE, EnterpriseServiceErrorCode.ERROR_ENTERPRISE_CONTACT_NOT_FOUND, 
+                    "Unable to find the enterprise contact");
+        }
+        
+        return contact;
+    }    
+    
+    private EnterpriseContact checkEnterpriseContactParameter(Long enterpriseId, Long targetId, Long operatorUid, String tag) {
+        if(targetId == null) {
+            LOGGER.error("Enterprise contact target user id is null, operatorUid=" + operatorUid 
+                + ", enterpriseId=" + enterpriseId + ", targetId=" + targetId + ", tag=" + tag);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Enterprise contact target user id can not be null");
+        }
+        
+        EnterpriseContact contact = this.enterpriseContactProvider.queryContactByUserId(enterpriseId, targetId);
+        if(contact == null) {
+            LOGGER.error("Enterprise contact not found, operatorUid=" + operatorUid 
+                + ", enterpriseId=" + enterpriseId + ", targetId=" + targetId + ", tag=" + tag);
             throw RuntimeErrorException.errorWith(EnterpriseServiceErrorCode.SCOPE, EnterpriseServiceErrorCode.ERROR_ENTERPRISE_CONTACT_NOT_FOUND, 
                     "Unable to find the enterprise contact");
         }
