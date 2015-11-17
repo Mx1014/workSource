@@ -1,5 +1,14 @@
 package com.everhomes.techpark.punch;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -15,9 +24,14 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
-import org.apache.naming.java.javaURLContextFactory;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -43,7 +57,7 @@ import com.google.gson.reflect.TypeToken;
 
 @Service
 public class PunchServiceImpl implements PunchService {
-
+	final String downloadDir ="\\download\\";
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(PunchServiceImpl.class);
 
@@ -61,6 +75,8 @@ public class PunchServiceImpl implements PunchService {
 	@Autowired
 	ConfigurationProvider configurationProvider;
 
+	
+	
 	private void checkCompanyIdIsNull(Long companyId) {
 		if (null == companyId || companyId.equals(0L)) {
 			LOGGER.error("Invalid company Id parameter in the command");
@@ -71,6 +87,52 @@ public class PunchServiceImpl implements PunchService {
 
 	}
 
+	
+	public String statusToString (Byte status){
+		if(status.equals(ApprovalStatus.ABSENCE.getCode()))
+			return "事假";
+		if(status.equals(ApprovalStatus.BELATE.getCode()))
+			return "迟到";
+		if(status.equals(ApprovalStatus.BLANDLE.getCode()))
+			return "迟到且早退";
+		if(status.equals(ApprovalStatus.EXCHANGE.getCode()))
+			return "调休";
+		if(status.equals(ApprovalStatus.OUTWORK.getCode()))
+			return "公出";
+		if(status.equals(ApprovalStatus.SICK.getCode()))
+			return "病假";
+		if(status.equals(ApprovalStatus.UNPUNCH.getCode()))
+			return "未打卡";
+		if(status.equals(ApprovalStatus.LEAVEEARLY.getCode()))
+			return "早退";
+		if(status.equals(ApprovalStatus.NORMAL.getCode()))
+			return "正常";
+		return "";
+		
+	}
+	public String approveStatusToString (Byte status){
+		if(status.equals(ApprovalStatus.ABSENCE.getCode()))
+			return "事假";
+		if(status.equals(ApprovalStatus.BELATE.getCode()))
+			return "迟到";
+		if(status.equals(ApprovalStatus.BLANDLE.getCode()))
+			return "迟到且早退";
+		if(status.equals(ApprovalStatus.EXCHANGE.getCode()))
+			return "调休";
+		if(status.equals(ApprovalStatus.OUTWORK.getCode()))
+			return "公出";
+		if(status.equals(ApprovalStatus.SICK.getCode()))
+			return "病假";
+		if(status.equals(ApprovalStatus.UNPUNCH.getCode()))
+			return "未打卡";
+		if(status.equals(ApprovalStatus.LEAVEEARLY.getCode()))
+			return "早退";
+		if(status.equals(ApprovalStatus.NORMAL.getCode()))
+			return "";
+		return "";
+		
+	}
+	
 	@Override
 	public ListYearPunchLogsCommandResponse getlistPunchLogs(
 			ListYearPunchLogsCommand cmd) {
@@ -1489,5 +1551,168 @@ public class PunchServiceImpl implements PunchService {
 		response.setPunchLogsMonthList(pyl.getPunchLogsMonthList());
 		return response;
 	}
+	
+	private void createPunchStatisticsBookSheetHead(Sheet sheet ){
+		Row row = sheet.createRow(sheet.getLastRowNum());
+		int i =-1 ;
+		row.createCell(++i).setCellValue("姓名");
+		row.createCell(++i).setCellValue("部门");
+		row.createCell(++i).setCellValue("打卡日期");
+		row.createCell(++i).setCellValue("工作时长");
+		row.createCell(++i).setCellValue("上班打卡");
+		row.createCell(++i).setCellValue("下班打卡");
+		row.createCell(++i).setCellValue("打卡考勤");
+		row.createCell(++i).setCellValue("审批考勤");
+		row.createCell(++i).setCellValue("审批人");
+	}
+	
+	public void setNewPunchStatisticsBookRow(Sheet sheet ,PunchStatisticsDTO dto){
+		Row row = sheet.createRow(sheet.getLastRowNum()+1);
+		int i = -1;
+		row.createCell(++i).setCellValue(dto.getUserName());
+		row.createCell(++i).setCellValue(dto.getUserDepartment());
+		row.createCell(++i).setCellValue(dateSF.format(dto.getPunchDate()));
 
+		row.createCell(++i).setCellValue(dto.getWorkTime());
+		row.createCell(++i).setCellValue(dto.getArriveTime());
+
+		row.createCell(++i).setCellValue(dto.getLeaveTime());
+		row.createCell(++i).setCellValue(statusToString(dto.getStatus()));
+		row.createCell(++i).setCellValue(approveStatusToString(dto.getApprovalStatus()));
+		row.createCell(++i).setCellValue(dto.getOperatorName());
+	}
+	
+	public void createPunchStatisticsBook(String path,List<PunchStatisticsDTO> dtos) {
+		if (null == dtos || dtos.size() == 0)
+			return;
+		Workbook wb = new XSSFWorkbook();
+		Sheet sheet = wb.createSheet("punchStatistics");
+		this.createPunchStatisticsBookSheetHead(sheet);
+		for (PunchStatisticsDTO dto : dtos )
+			this.setNewPunchStatisticsBookRow(sheet, dto);
+		try {
+			
+			FileOutputStream out = new FileOutputStream(path);
+			wb.write(out);
+			wb.close();
+			out.close();
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+					PunchServiceErrorCode.ERROR_PUNCH_ADD_DAYLOG,
+					e.getLocalizedMessage());
+		}
+	}
+
+	@Override
+	public HttpServletResponse exportPunchStatistics(
+			ExportPunchStatisticsCommand cmd ,HttpServletResponse response 
+			) { 
+		
+		checkCompanyIdIsNull(cmd.getCompanyId());
+		
+		List<EnterpriseContact> enterpriseContacts = enterpriseContactProvider
+				.queryEnterpriseContactByKeyword(cmd.getKeyword());
+		List<Long> userIds = new ArrayList<Long>();
+		for (EnterpriseContact enterpriseContact : enterpriseContacts) {
+			userIds.add(enterpriseContact.getUserId());
+		}
+
+		
+		List<PunchDayLog> result = punchProvider.listPunchDayLogs(userIds,
+				cmd.getCompanyId(), cmd.getStartDay(), cmd.getEndDay(),
+				cmd.getStatus(), cmd.getArriveTimeCompareFlag(),
+				cmd.getArriveTime(), cmd.getLeaveTimeCompareFlag(),
+				cmd.getLeaveTime(), cmd.getWorkTimeCompareFlag(),
+				cmd.getWorkTime(), null, Integer.MAX_VALUE);
+		List<PunchStatisticsDTO> dtos = result
+				.stream()
+				.map(r -> {
+					PunchStatisticsDTO dto = ConvertHelper.convert(r,
+							PunchStatisticsDTO.class);
+					processPunchStatisticsDTOTime(dto, r);
+					if (dto != null) {
+						EnterpriseContact enterpriseContact = enterpriseContactService
+								.queryContactByUserId(cmd.getCompanyId(),
+										dto.getUserId());
+						if (null != enterpriseContact) {
+
+							dto.setUserName(enterpriseContact.getName());
+							dto.setUserPhoneNumber(enterpriseContactProvider
+									.queryContactEntryByContactId(
+											enterpriseContact,
+											ContactType.MOBILE.getCode())
+									.get(0).getEntryValue());
+							// dto.setUserDepartment(enterpriseContact.get);
+							PunchExceptionApproval approval = punchProvider
+									.getExceptionApproval(dto.getUserId(),
+											dto.getCompanyId(),
+											dto.getPunchDate());
+							if (approval != null) {
+								dto.setApprovalStatus(approval
+										.getApprovalStatus());
+								enterpriseContact = enterpriseContactService
+										.queryContactByUserId(
+												cmd.getCompanyId(),
+												approval.getOperatorUid());
+
+								dto.setOperatorName(enterpriseContact.getName());
+							} else {
+								dto.setApprovalStatus((byte) 0);
+							}
+						}
+					}
+					return dto;
+				}).collect(Collectors.toList());
+		
+		URL rootPath = PunchServiceImpl.class.getResource("/");
+		String filePath =rootPath.getPath() + this.downloadDir ;
+		File file = new File(filePath);
+		if(!file.exists())
+			file.mkdirs();
+		filePath = filePath + "PunchStatistics"+System.currentTimeMillis()+".xlsx";
+		//新建了一个文件
+		this.createPunchStatisticsBook(filePath, dtos);
+		
+		return download(filePath,response);
+	}
+	public HttpServletResponse download(String path, HttpServletResponse response) {
+        try {
+            // path是指欲下载的文件的路径。
+            File file = new File(path);
+            // 取得文件名。
+            String filename = file.getName();
+            // 取得文件的后缀名。
+            String ext = filename.substring(filename.lastIndexOf(".") + 1).toUpperCase();
+
+            // 以流的形式下载文件。
+            InputStream fis = new BufferedInputStream(new FileInputStream(path));
+            byte[] buffer = new byte[fis.available()];
+            fis.read(buffer);
+            fis.close();
+            // 清空response
+            response.reset();
+            // 设置response的Header
+            response.addHeader("Content-Disposition", "attachment;filename=" + new String(filename.getBytes()));
+            response.addHeader("Content-Length", "" + file.length());
+            OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
+            response.setContentType("application/octet-stream");
+            toClient.write(buffer);
+            toClient.flush();
+            toClient.close();
+            
+            // 读取完成删除文件
+            if (file.isFile() && file.exists()) {  
+                file.delete();  
+            } 
+        } catch (IOException ex) { 
+ 			LOGGER.error(ex.getMessage());
+ 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+ 					PunchServiceErrorCode.ERROR_PUNCH_ADD_DAYLOG,
+ 					ex.getLocalizedMessage());
+     		 
+        }
+        return response;
+    }
+	
 }

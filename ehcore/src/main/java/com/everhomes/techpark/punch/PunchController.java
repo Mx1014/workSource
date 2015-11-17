@@ -1,8 +1,6 @@
 package com.everhomes.techpark.punch;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -15,9 +13,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.group.GroupDTO;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.user.UserContext;
 
 /**
  * <ul>
@@ -292,5 +288,20 @@ public class PunchController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
+	}
+
+	/**
+	 * <b>URL: /techpark/punch/exportPunchStatistics</b>
+	 * <p>
+	 * 导出公司打卡的统计结果
+	 * </p>
+	 */
+	@RequestMapping("exportPunchStatistics")
+	public  HttpServletResponse exportPunchStatistics(@Valid ExportPunchStatisticsCommand cmd,HttpServletResponse response ) {
+		HttpServletResponse commandResponse = punchService.exportPunchStatistics(cmd, response );
+//		RestResponse response = new RestResponse(commandResponse);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+		return commandResponse;
 	}
 }

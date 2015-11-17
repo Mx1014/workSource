@@ -4,21 +4,20 @@ package com.everhomes.community;
 
 import com.everhomes.rest.RestResponseBase;
 
-import java.util.List;
 import com.everhomes.community.BuildingDTO;
 
 public class GetBuildingRestResponse extends RestResponseBase {
 
-    private List<BuildingDTO> response;
+    private BuildingDTO response;
 
     public GetBuildingRestResponse () {
     }
 
-    public List<BuildingDTO> getResponse() {
+    public BuildingDTO getResponse() {
         return response;
     }
 
-    public void setResponse(List<BuildingDTO> response) {
+    public void setResponse(BuildingDTO response) {
         this.response = response;
     }
 }
