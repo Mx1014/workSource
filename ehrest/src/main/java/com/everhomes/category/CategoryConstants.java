@@ -11,6 +11,7 @@ import java.util.List;
  * <li>CATEGORY_ID_INTEREST(2): 兴趣（根类型）</li>
  * <li>CATEGORY_ID_SERVICE(3): 商家与服务（根类型）</li>
  * <li>CATEGORY_ID_ACTIVITY(4): 活动（根类型）</li>
+ * <li>CATEGORY_ID_TECH_ACTIVITY(5): 科技园活动（根类型）</li>
  * <li>CATEGORY_ID_NOTICE(1003): 帖子/公告（物业、业委、居委、公安等）</li>
  * <li>CATEGORY_ID_REPAIRS(1004): 帖子/报修（物业、业委、居委、公安等）</li>
  * <li>CATEGORY_ID_CONSULT_APPEAL(1005): 帖子/咨询与求助（物业、业委、居委、公安等）</li>
@@ -31,6 +32,9 @@ public interface CategoryConstants {
     public static final long CATEGORY_ID_SERVICE = 3L;
     /** 活动 */
     public static final long CATEGORY_ID_ACTIVITY = 4L;
+    
+    /** 科技园活动 */
+    public static final long CATEGORY_ID_TECH_ACTIVITY = 5L;
 
     /** 帖子/普通 */
     public static final long CATEGORY_ID_TOPIC_COMMON = 1001L;
