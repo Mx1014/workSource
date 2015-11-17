@@ -6,6 +6,7 @@ package com.everhomes.organization;
  * <li>parentId：父机构id。没有填科技园的organizationid</li>
  * <li>departmentName：名称</li>
  * <li>departmentType：部门组织类型：参考{@link com.everhomes.organization.DepartmentType}</li>
+ * <li>roleId：角色id</li>
  * </ul>
  */
 public class CreateDepartmentCommand {
@@ -15,6 +16,8 @@ public class CreateDepartmentCommand {
 	private Long parentId;
 	
 	private String departmentType;
+	
+	private Long roleId;
 
 	public String getDepartmentName() {
 		return departmentName;
@@ -38,6 +41,14 @@ public class CreateDepartmentCommand {
 
 	public void setDepartmentType(String departmentType) {
 		this.departmentType = departmentType;
+	}
+
+	public Long getRoleId() {
+		return roleId;
+	}
+
+	public void setRoleId(Long roleId) {
+		this.roleId = roleId;
 	}
 
 }
