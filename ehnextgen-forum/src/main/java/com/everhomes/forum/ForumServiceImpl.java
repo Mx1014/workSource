@@ -2307,63 +2307,116 @@ public class ForumServiceImpl implements ForumService {
         }
     }
     
+//    private void populatePostCreatorInfo(long userId, Post post) {
+//        Long forumId = post.getForumId();
+//        if(forumId != null) {
+//            String creatorNickName = post.getCreatorNickName();
+//            String creatorAvatar = post.getCreatorAvatar();
+//            
+//            // 社区论坛的意见反馈论坛直接使用USER表中的信息作为发帖人的信息
+//            if(forumId == ForumConstants.SYSTEM_FORUM || forumId == ForumConstants.FEEDBACK_FORUM) {
+//                User creator = userProvider.findUserById(post.getCreatorUid());
+//                if(creator != null) {
+//                    // 优先使用帖子里存储的昵称和头像（2.8转过来的数据会有这些昵称和头像，因为在2.8不同家庭有不同的昵称）
+//                    if(creatorNickName == null || creatorNickName.trim().length() == 0) {
+//                        post.setCreatorNickName(creator.getNickName());
+//                    }
+//                    if(creatorAvatar == null || creatorAvatar.trim().length() == 0) {
+//                        post.setCreatorAvatar(creator.getAvatar());
+//                    }
+//                }
+//                // TODO: set the admin flag of system forum
+//            } else {
+//                // 普通圈使用圈成员的信息
+//                Forum forum = forumProvider.findForumById(forumId);
+//                if(forum != null && EntityType.GROUP.getCode().equalsIgnoreCase(forum.getOwnerType())) {
+//                    GroupMember member = groupProvider.findGroupMemberByMemberInfo(forum.getOwnerId(), 
+//                        EntityType.USER.getCode(), post.getCreatorUid());
+//                    if(member != null) {
+//                        String nickName = member.getMemberNickName();
+//                        String avatar = member.getMemberAvatar();
+//                        if(nickName == null || nickName.trim().length() == 0) {
+//                            User creator = userProvider.findUserById(post.getCreatorUid());
+//                            if(creator != null) {
+//                                nickName = creator.getNickName();
+//                            }
+//                        }
+//                        if(avatar == null || avatar.trim().length() == 0){
+//                        	User creator = userProvider.findUserById(post.getCreatorUid());
+//                        	if(creator != null) {
+//                        		avatar = creator.getAvatar();
+//                            }
+//                        }
+//                        // 优先使用帖子里存储的昵称和头像（2.8转过来的数据会有这些昵称和头像，因为在2.8不同家庭有不同的昵称）
+//                        if(creatorNickName == null || creatorNickName.trim().length() == 0) {
+//                            post.setCreatorNickName(nickName);
+//                        }
+//                        if(creatorAvatar == null || creatorAvatar.trim().length() == 0) {
+//                            post.setCreatorAvatar(avatar);
+//                        }
+//                    }
+//                }
+//            }
+//            
+//            creatorAvatar = post.getCreatorAvatar();
+//            if(creatorAvatar != null && creatorAvatar.length() > 0) {
+//                String avatarUrl = getResourceUrlByUir(userId, creatorAvatar, 
+//                    EntityType.USER.getCode(), post.getCreatorUid());
+//                post.setCreatorAvatarUrl(avatarUrl);
+//            }
+//        }
+//        
+//        UserLike userLike = this.userProvider.findUserLike(userId, EntityType.POST.getCode(), post.getId());
+//        if(userLike != null && UserLikeType.LIKE == UserLikeType.fromCode(userLike.getLikeType())) {
+//            post.setLikeFlag(UserLikeType.LIKE.getCode());
+//        } else {
+//            post.setLikeFlag(UserLikeType.NONE.getCode());
+//        }
+//    }
+    
     private void populatePostCreatorInfo(long userId, Post post) {
+        // 优先使用帖子里存储的昵称和头像（2.8转过来的数据会有这些昵称和头像，因为在2.8不同家庭有不同的昵称）
+        String creatorNickName = post.getCreatorNickName();
+        String creatorAvatar = post.getCreatorAvatar();
+        
         Long forumId = post.getForumId();
         if(forumId != null) {
-            String creatorNickName = post.getCreatorNickName();
-            String creatorAvatar = post.getCreatorAvatar();
-            
-            // 社区论坛的意见反馈论坛直接使用USER表中的信息作为发帖人的信息
-            if(forumId == ForumConstants.SYSTEM_FORUM || forumId == ForumConstants.FEEDBACK_FORUM) {
-                User creator = userProvider.findUserById(post.getCreatorUid());
-                if(creator != null) {
-                    // 优先使用帖子里存储的昵称和头像（2.8转过来的数据会有这些昵称和头像，因为在2.8不同家庭有不同的昵称）
-                    if(creatorNickName == null || creatorNickName.trim().length() == 0) {
-                        post.setCreatorNickName(creator.getNickName());
-                    }
-                    if(creatorAvatar == null || creatorAvatar.trim().length() == 0) {
-                        post.setCreatorAvatar(creator.getAvatar());
-                    }
-                }
-                // TODO: set the admin flag of system forum
-            } else {
-                // 普通圈使用圈成员的信息
-                Forum forum = forumProvider.findForumById(forumId);
-                if(forum != null && EntityType.GROUP.getCode().equalsIgnoreCase(forum.getOwnerType())) {
-                    GroupMember member = groupProvider.findGroupMemberByMemberInfo(forum.getOwnerId(), 
-                        EntityType.USER.getCode(), post.getCreatorUid());
-                    if(member != null) {
-                        String nickName = member.getMemberNickName();
-                        String avatar = member.getMemberAvatar();
-                        if(nickName == null || nickName.trim().length() == 0) {
-                            User creator = userProvider.findUserById(post.getCreatorUid());
-                            if(creator != null) {
-                                nickName = creator.getNickName();
-                            }
-                        }
-                        if(avatar == null || avatar.trim().length() == 0){
-                        	User creator = userProvider.findUserById(post.getCreatorUid());
-                        	if(creator != null) {
-                        		avatar = creator.getAvatar();
-                            }
-                        }
-                        // 优先使用帖子里存储的昵称和头像（2.8转过来的数据会有这些昵称和头像，因为在2.8不同家庭有不同的昵称）
-                        if(creatorNickName == null || creatorNickName.trim().length() == 0) {
-                            post.setCreatorNickName(nickName);
-                        }
-                        if(creatorAvatar == null || creatorAvatar.trim().length() == 0) {
-                            post.setCreatorAvatar(avatar);
-                        }
-                    }
-                }
-            }
-            
-            creatorAvatar = post.getCreatorAvatar();
-            if(creatorAvatar != null && creatorAvatar.length() > 0) {
-                String avatarUrl = getResourceUrlByUir(userId, creatorAvatar, 
+            // 普通圈使用圈成员的信息
+            Forum forum = forumProvider.findForumById(forumId);
+            if(forum != null && EntityType.GROUP.getCode().equalsIgnoreCase(forum.getOwnerType())) {
+                GroupMember member = groupProvider.findGroupMemberByMemberInfo(forum.getOwnerId(), 
                     EntityType.USER.getCode(), post.getCreatorUid());
-                post.setCreatorAvatarUrl(avatarUrl);
+                if(member != null) {
+                    creatorAvatar = member.getMemberAvatar();
+                    if(creatorAvatar == null || creatorAvatar.trim().length() == 0) {
+                        creatorNickName = member.getMemberNickName();
+                    }
+                    if(creatorAvatar == null || creatorAvatar.trim().length() == 0){
+                        creatorAvatar = member.getMemberAvatar();
+                    }
+                }
             }
+        }
+        
+        // 无昵称时直接使用USER表中的信息作为发帖人的信息
+        User creator = userProvider.findUserById(post.getCreatorUid());
+        if(creator != null) {
+            // 优先使用帖子里存储的昵称和头像（2.8转过来的数据会有这些昵称和头像，因为在2.8不同家庭有不同的昵称）
+            if(creatorNickName == null || creatorNickName.trim().length() == 0) {
+                post.setCreatorNickName(creator.getNickName());
+            }
+            if(creatorAvatar == null || creatorAvatar.trim().length() == 0) {
+                post.setCreatorAvatar(creator.getAvatar());
+            }
+        }
+
+        post.setCreatorNickName(creatorAvatar);
+        post.setCreatorAvatar(creatorAvatar);
+        
+        if(creatorAvatar != null && creatorAvatar.length() > 0) {
+            String avatarUrl = getResourceUrlByUir(userId, creatorAvatar, 
+                EntityType.USER.getCode(), post.getCreatorUid());
+            post.setCreatorAvatarUrl(avatarUrl);
         }
         
         UserLike userLike = this.userProvider.findUserLike(userId, EntityType.POST.getCode(), post.getId());
