@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.acl.AclProvider;
+import com.everhomes.acl.Role;
 import com.everhomes.acl.RoleAssignment;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -129,5 +130,24 @@ public class AclAdminController extends ControllerBase {
         response.setRequests(result);
         
         return new RestResponse(response);
+    }
+    
+    /**
+     * <b>URL: /admin/acl/listUserRoles</b>
+     * <p>查询角色列表</p>
+     */
+    @RequestMapping("listAclRoles")
+    @RestReturn(value=Role.class, collection = true)
+    public RestResponse listAclRoles(ListAclRolesCommand cmd) {
+    	
+    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+    	List<Role> roles = this.aclProvider.getRolesByApp(cmd.getAppId());
+    	
+    	RestResponse response =  new RestResponse(roles);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
 }

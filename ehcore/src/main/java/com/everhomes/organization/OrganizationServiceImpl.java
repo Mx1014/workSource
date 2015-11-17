@@ -31,6 +31,9 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.everhomes.acl.AclProvider;
+import com.everhomes.acl.Role;
+import com.everhomes.acl.RoleAssignment;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressAdminStatus;
 import com.everhomes.address.AddressProvider;
@@ -44,6 +47,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.forum.AttachmentDescriptor;
 import com.everhomes.forum.CancelLikeTopicCommand;
@@ -187,6 +191,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	@Autowired
     private PostSearcher postSearcher; 
+	
+	@Autowired
+    private AclProvider aclProvider;
 
 	private int getPageCount(int totalCount, int pageSize){
 		int pageCount = totalCount/pageSize;
@@ -2957,6 +2964,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 		org.setStatus(OrganizationStatus.ACTIVE.getCode());
 		this.dbProvider.execute(s -> {
 			organizationProvider.createOrganization(org);
+			
+			User user = UserContext.current().getUser();
+	        RoleAssignment roleAssignment = new RoleAssignment();
+	        roleAssignment.setCreatorUid(user.getId());
+	        roleAssignment.setOwnerType("system");
+	        roleAssignment.setRoleId(cmd.getRoleId());
+	        roleAssignment.setTargetType(EntityType.ORGANIZATIONS.getCode());
+	        roleAssignment.setTargetId(org.getId());
+	        roleAssignment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	        aclProvider.createRoleAssignment(roleAssignment);
 			return s;
 		});		
 	}
@@ -2987,6 +3004,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 			List<Organization> result = organizationProvider.listDepartments(org.getPath()+"/", cmd.getPageOffset(), pageSize);
 			if(result != null && result.size() > 0) {
+				List<RoleAssignment> roleAssignments = this.aclProvider.getAllRoleAssignments();
+				Map<Long, RoleAssignment> roleAssignmentMap = new HashMap<Long, RoleAssignment>();
+	            for(RoleAssignment roleass: roleAssignments) {
+	            	if(EntityType.ORGANIZATIONS.getCode().equals(roleass.getTargetType()))
+	            		roleAssignmentMap.put(roleass.getTargetId(), roleass);
+	            }
 				response.setDepartments( result.stream().map(r->{ 
 					DepartmentDTO department = new DepartmentDTO();
 					department.setId(r.getId());
@@ -3000,6 +3023,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 					} else {
 						department.setSuperiorDepartment(str2[index]);
 					}
+					
+					if(roleAssignmentMap.get(department.getId()) != null){
+						Long roleId = roleAssignmentMap.get(department.getId()).getRoleId();
+						Role role = this.aclProvider.getRoleById(roleId);
+						if(role != null)
+							department.setRole(role.getName());
+					}
+						
 					return department; 
 				}).collect(Collectors.toList()));
 			}

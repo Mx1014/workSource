@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  *  <li>departmentName: 部门名称</li>
  *  <li>superiorDepartment: 上级部门名称</li>
  *  <li>departmentType: 部门类型</li>
+ *  <li>role: 部门角色</li>
  * </ul>
  *
  */
@@ -20,6 +21,8 @@ public class DepartmentDTO {
 	private String superiorDepartment;
 	
 	private String departmentType;
+	
+	private String role;
 
 	public Long getId() {
 		return id;
@@ -53,6 +56,14 @@ public class DepartmentDTO {
 		this.departmentType = departmentType;
 	}
 	
+	public String getRole() {
+		return role;
+	}
+
+	public void setRole(String role) {
+		this.role = role;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
