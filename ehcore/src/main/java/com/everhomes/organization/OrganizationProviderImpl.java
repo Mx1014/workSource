@@ -1143,4 +1143,36 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return list;
 	}
 
+
+	@Override
+	public List<Organization> listDepartments(String superiorPath,
+			Integer pageOffset, Integer pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		List<Organization> result  = new ArrayList<Organization>();
+		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
+		
+		query.addConditions(Tables.EH_ORGANIZATIONS.PATH.like(superiorPath));
+		
+		Integer offset = pageOffset == null ? 1 : (pageOffset - 1 ) * pageSize;
+		query.addOrderBy(Tables.EH_ORGANIZATIONS.ID.desc());
+		query.addLimit(offset, pageSize);
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, Organization.class));
+			return null;
+		});
+		return result;
+	}
+
+
+	@Override
+	public int countDepartments(String superiorPath) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		SelectJoinStep<Record1<Integer>>  step = context.selectCount().from(Tables.EH_ORGANIZATIONS);
+		Condition condition = Tables.EH_ORGANIZATIONS.PATH.like(superiorPath);
+
+		return step.where(condition).fetchOneInto(Integer.class);
+	}
+
 }

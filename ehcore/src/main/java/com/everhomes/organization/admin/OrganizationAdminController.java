@@ -17,12 +17,15 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.organization.AddOrgAddressCommand;
+import com.everhomes.organization.CreateDepartmentCommand;
 import com.everhomes.organization.CreateOrganizationByAdminCommand;
 import com.everhomes.organization.CreateOrganizationCommunityCommand;
 import com.everhomes.organization.CreateOrganizationContactCommand;
 import com.everhomes.organization.CreateOrganizationMemberCommand;
 import com.everhomes.organization.CreatePropertyOrganizationCommand;
 import com.everhomes.organization.DeleteOrganizationIdCommand;
+import com.everhomes.organization.ListDepartmentsCommand;
+import com.everhomes.organization.ListDepartmentsCommandResponse;
 import com.everhomes.organization.ListOrganizationMemberCommand;
 import com.everhomes.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.organization.ListOrganizationsCommand;
@@ -342,6 +345,41 @@ public class OrganizationAdminController extends ControllerBase {
         
         PmManagementsResponse list = this.organizationService.listPmManagements(cmd);
     	RestResponse response = new RestResponse(list);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/org/createDepartment</b>
+     * <p>创建部门</p>
+     */
+    @RequestMapping("createDepartment")
+    @RestReturn(value=String.class)
+    public RestResponse createDepartment(CreateDepartmentCommand cmd) {
+    	
+    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+    	organizationService.createDepartment(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/org/listDepartments</b>
+     * <p>列出机构部门表（）</p>
+     */
+    @RequestMapping("listDepartments")
+    @RestReturn(value=ListDepartmentsCommandResponse.class)
+    public RestResponse listDepartments(@Valid ListDepartmentsCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+        ListDepartmentsCommandResponse commandResponse = organizationService.listDepartments(cmd);
+        RestResponse response = new RestResponse(commandResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

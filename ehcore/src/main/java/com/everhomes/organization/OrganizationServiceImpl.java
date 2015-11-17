@@ -2937,4 +2937,75 @@ public class OrganizationServiceImpl implements OrganizationService {
         
         return response;
 	}
+
+	@Override
+	public void createDepartment(CreateDepartmentCommand cmd) {
+		this.checkOrgNameIsNull(cmd.getDepartmentName());
+		DepartmentType departmentType = this.checkDepartmentType(cmd.getDepartmentType());
+
+		cmd.setDepartmentType(departmentType.getCode());
+		Organization org  = new Organization();
+		org.setName(cmd.getDepartmentName());
+		org.setOrganizationType(cmd.getDepartmentType());
+		org.setParentId(cmd.getParentId());
+		
+		Organization parOrg = this.checkOrganization(cmd.getParentId());
+		org.setPath(parOrg.getPath()+"/"+org.getName());
+		org.setLevel(parOrg.getLevel()+1);
+		
+		org.setAddressId(0L);
+		org.setStatus(OrganizationStatus.ACTIVE.getCode());
+		this.dbProvider.execute(s -> {
+			organizationProvider.createOrganization(org);
+			return s;
+		});		
+	}
+	
+	private DepartmentType checkDepartmentType(String depType) {
+		DepartmentType type = DepartmentType.fromCode(depType);
+		if(type == null){
+			LOGGER.error("depType is wrong.depType=" + depType);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"depType is wrong.");
+		}
+		return type;
+
+	}
+
+	@Override
+	public ListDepartmentsCommandResponse listDepartments(
+			ListDepartmentsCommand cmd) {
+		ListDepartmentsCommandResponse response = new ListDepartmentsCommandResponse();
+		cmd.setPageOffset(cmd.getPageOffset() == null ? 1: cmd.getPageOffset());
+		Organization org = organizationProvider.findOrganizationById(cmd.getParentId());
+		if(org != null) {
+			int totalCount = organizationProvider.countDepartments(org.getPath()+"/");
+			if(totalCount == 0) return response;
+	
+			int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+			int pageCount = getPageCount(totalCount, pageSize);
+
+			List<Organization> result = organizationProvider.listDepartments(org.getPath()+"/", cmd.getPageOffset(), pageSize);
+			if(result != null && result.size() > 0) {
+				response.setDepartments( result.stream().map(r->{ 
+					DepartmentDTO department = new DepartmentDTO();
+					department.setId(r.getId());
+					department.setDepartmentName(r.getName());
+					department.setDepartmentType(r.getOrganizationType());
+					String[] str = r.getPath().split(r.getName());
+					String[] str2 = str[0].split("/");
+					int index = str2.length-1;
+					if(org.getName().equals(str2[index])) {
+						department.setSuperiorDepartment("");
+					} else {
+						department.setSuperiorDepartment(str2[index]);
+					}
+					return department; 
+				}).collect(Collectors.toList()));
+			}
+			response.setNextPageOffset(cmd.getPageOffset()==pageCount? null : cmd.getPageOffset()+1);
+		}
+
+		return response;
+	}
 }

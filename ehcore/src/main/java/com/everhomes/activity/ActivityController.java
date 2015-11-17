@@ -146,8 +146,8 @@ public class ActivityController extends ControllerBase {
      */
     @RequestMapping("listActivityCategories")
     @RestReturn(ListActivityCategories.class)
-    public RestResponse listActivityCategories(){
-        List<Category> result = activityService.listActivityCategories();
+    public RestResponse listActivityCategories(ListActivityCategoriesCommand cmd){
+        List<Category> result = activityService.listActivityCategories(cmd);
         if(CollectionUtils.isEmpty(result))
             return new RestResponse(new ListActivityCategories());
         ListActivityCategories categories=new ListActivityCategories();
