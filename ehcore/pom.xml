@@ -229,7 +229,7 @@
 		<dependency>
 			<groupId>com.everhomes</groupId>
 			<artifactId>ehplatform</artifactId>
-			<version>0.0.2-SNAPSHOT</version>
+			<version>0.0.3-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.everhomes</groupId>
@@ -239,8 +239,13 @@
 		<dependency>
 			<groupId>com.everhomes</groupId>
 			<artifactId>ehutil</artifactId>
-			<version>0.0.5-SNAPSHOT</version>
+			<version>0.0.6-SNAPSHOT</version>
 		</dependency>
+        <dependency>
+            <groupId>com.everhomes</groupId>
+            <artifactId>ehutil-common</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
         <dependency>
             <groupId>com.everhomes</groupId>
             <artifactId>ehcodegen</artifactId>
