@@ -284,6 +284,7 @@ ALTER TABLE `eh_launch_pad_layouts` ADD COLUMN `site_uri` VARCHAR(2048) NOT NULL
 ALTER TABLE `eh_launch_pad_items` ADD COLUMN `site_uri` VARCHAR(2048) NOT NULL DEFAULT '' COMMENT 'the site uri of third-part system';
 ALTER TABLE `eh_banners` ADD COLUMN `site_uri` VARCHAR(2048) NOT NULL DEFAULT '' COMMENT 'the site uri of third-part system';
 ALTER TABLE `eh_user_profiles` MODIFY COLUMN `item_name` VARCHAR(128) ;
+ALTER TABLE `eh_addresses` ADD COLUMN `area_size` DOUBLE COMMENT 'the area size of the room according to the address';
 
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'enterprise.notification', 1, 'zh_CN', '用户加入企业，用户自己的消息', '您已加入公司“${enterpriseName}”。');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'enterprise.notification', 2, 'zh_CN', '发给企业其它所有成员', '${userName}已加入公司“${enterpriseName}”。');
