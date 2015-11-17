@@ -1,5 +1,7 @@
 package com.everhomes.techpark.rental;
 
+import java.text.SimpleDateFormat;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +59,26 @@ public class UpdateRentalBillStatusToPayingFinalAction implements Runnable {
 			rentalBill.setStatus(SiteBillStatus.PAYINGFINAL.getCode());
 			rentalProvider.updateRentalBill(rentalBill);
 			//TODO: 发通知
-			sendMessageToUser(rentalBill.getRentalUid(),"你有一个预定场所需要付全款，请及时支付，小心过期被取消哦");
+			StringBuffer sb = new StringBuffer();
+			sb.append("您预定的：");
+			switch(rentalBill.getSiteType()){
+			case("MEETINGROOM"): 
+				sb.append("会议室");
+				break;
+			case("VIPPARKING"):
+				sb.append("VIP车位");
+				break;
+			case("ELECSCREEN"): 
+				sb.append("电子屏");
+				break;
+			}
+
+			sb.append("(日期:");
+			SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
+			sb.append(dateSF.format(rentalBill.getRentalDate()));
+			sb.append(")");
+			sb.append("需要支付全款了！请速速支付，小心超期被取消哦^ ^");
+			sendMessageToUser(rentalBill.getRentalUid(),sb.toString());
 		}
 	}
 
