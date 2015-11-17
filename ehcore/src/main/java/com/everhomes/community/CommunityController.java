@@ -146,7 +146,7 @@ public class CommunityController extends ControllerBase {
 	 * <p>查询指定园区内指定楼栋详情</p>
 	 */
 	@RequestMapping("getBuilding")
-    @RestReturn(value=BuildingDTO.class, collection=true)
+    @RestReturn(value=BuildingDTO.class)
 	public RestResponse getBuilding(GetBuildingCommand cmd) {
 		BuildingDTO dto = communityService.getBuilding(cmd);
 		RestResponse response =  new RestResponse(dto);
@@ -161,7 +161,7 @@ public class CommunityController extends ControllerBase {
 	 * <p>查询园区用户列表</p>
 	 */
 	@RequestMapping("listCommunityUsers")
-    @RestReturn(value=CommunityUserDto.class)
+    @RestReturn(value=CommunityUserResponse.class)
 	public RestResponse listCommunityUsers(ListCommunityUsersCommand cmd) {
 		CommunityUserResponse res = communityService.listUserCommunities(cmd);
 		RestResponse response =  new RestResponse(res);
