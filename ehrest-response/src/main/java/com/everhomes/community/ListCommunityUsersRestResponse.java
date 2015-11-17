@@ -4,20 +4,20 @@ package com.everhomes.community;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.community.admin.CommunityUserDto;
+import com.everhomes.community.admin.CommunityUserResponse;
 
 public class ListCommunityUsersRestResponse extends RestResponseBase {
 
-    private CommunityUserDto response;
+    private CommunityUserResponse response;
 
     public ListCommunityUsersRestResponse () {
     }
 
-    public CommunityUserDto getResponse() {
+    public CommunityUserResponse getResponse() {
         return response;
     }
 
-    public void setResponse(CommunityUserDto response) {
+    public void setResponse(CommunityUserResponse response) {
         this.response = response;
     }
 }

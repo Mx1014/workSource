@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-11-16 17:43:23
+// generated at 2015-11-17 18:01:53
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -121,6 +121,7 @@ public interface ApiConstants {
     public static final String ADMIN_ORG_ADDORGCONTACT_URL = "/admin/org/addOrgContact";
     public static final String ADMIN_ORG_ADDPMBUILDING_URL = "/admin/org/addPmBuilding";
     public static final String ADMIN_ORG_CANCELPMBUILDING_URL = "/admin/org/cancelPmBuilding";
+    public static final String ADMIN_ORG_CREATEDEPARTMENT_URL = "/admin/org/createDepartment";
     public static final String ADMIN_ORG_CREATEORGANIZATION_URL = "/admin/org/createOrganization";
     public static final String ADMIN_ORG_CREATEORGANIZATIONCOMMUNITY_URL = "/admin/org/createOrganizationCommunity";
     public static final String ADMIN_ORG_CREATEORGANIZATIONMEMBER_URL = "/admin/org/createOrganizationMember";
@@ -130,6 +131,7 @@ public interface ApiConstants {
     public static final String ADMIN_ORG_FINDUSERBYINDENTIFIER_URL = "/admin/org/findUserByIndentifier";
     public static final String ADMIN_ORG_IMPORTORGPOST_URL = "/admin/org/importOrgPost";
     public static final String ADMIN_ORG_IMPORTORGANIZATION_URL = "/admin/org/importOrganization";
+    public static final String ADMIN_ORG_LISTDEPARTMENTS_URL = "/admin/org/listDepartments";
     public static final String ADMIN_ORG_LISTORGMEMBERS_URL = "/admin/org/listOrgMembers";
     public static final String ADMIN_ORG_LISTORGANIZATIONS_URL = "/admin/org/listOrganizations";
     public static final String ADMIN_ORG_LISTPMBUILDINGS_URL = "/admin/org/listPmBuildings";
@@ -217,6 +219,7 @@ public interface ApiConstants {
     public static final String CONTACT_LISTCONTACTSBYPHONE_URL = "/contact/listContactsByPhone";
     public static final String CONTACT_LISTCONTACTSREQUESTBYENTERPRISEID_URL = "/contact/listContactsRequestByEnterpriseId";
     public static final String CONTACT_REJECTCONTACT_URL = "/contact/rejectContact";
+    public static final String CONTACT_UPDATECONTACT_URL = "/contact/updateContact";
     public static final String CONTENTSERVER_ADDCONFIG_URL = "/contentServer/addConfig";
     public static final String CONTENTSERVER_ADDCONTENTSERVER_URL = "/contentServer/addContentServer";
     public static final String CONTENTSERVER_DELETECONTENTSERVER_URL = "/contentServer/deleteContentServer";
@@ -341,8 +344,8 @@ public interface ApiConstants {
     public static final String OPENAPI_SYNCUSERCANCELFAVORITE_URL = "/openapi/syncUserCancelFavorite";
     public static final String OPENAPI_SYNCUSERFAVORITE_URL = "/openapi/syncUserFavorite";
     public static final String OPENAPI_SYNCUSERINFO_URL = "/openapi/syncuserinfo";
-    public static final String OPENAPI_USER_GETBIZSIGNATURE_URL = "/openapi/user/getBizSignature";
     public static final String OPENAPI_USER_SYNCOUPON_URL = "/openapi/user/synCoupon";
+    public static final String OPENAPI_USER_TESTGETTHIRDSIGNATURE_URL = "/openapi/user/testGetThirdSignature";
     public static final String ORG_ADDORGMEMBERBYPHONE_URL = "/org/addOrgMemberByPhone";
     public static final String ORG_APPLYORGANIZATIONMEMBER_URL = "/org/applyOrganizationMember";
     public static final String ORG_APPROVEORGANIZATIONMEMBER_URL = "/org/approveOrganizationMember";
@@ -468,6 +471,7 @@ public interface ApiConstants {
     public static final String TECHPARK_PUNCH_ADDPUNCHRULE_URL = "/techpark/punch/addPunchRule";
     public static final String TECHPARK_PUNCH_APPROVALPUNCHEXCEPTION_URL = "/techpark/punch/approvalPunchException";
     public static final String TECHPARK_PUNCH_DELETEPUNCHRULE_URL = "/techpark/punch/deletePunchRule";
+    public static final String TECHPARK_PUNCH_EXPORTPUNCHSTATISTICS_URL = "/techpark/punch/exportPunchStatistics";
     public static final String TECHPARK_PUNCH_GETDAYPUNCHLOGS_URL = "/techpark/punch/getDayPunchLogs";
     public static final String TECHPARK_PUNCH_GETPUNCHNEWEXCEPTION_URL = "/techpark/punch/getPunchNewException";
     public static final String TECHPARK_PUNCH_GETPUNCHRULE_URL = "/techpark/punch/getPunchRule";
