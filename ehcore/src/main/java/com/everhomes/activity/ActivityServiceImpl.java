@@ -1120,6 +1120,7 @@ public class ActivityServiceImpl implements ActivityService {
         
         List<CommunityGeoPoint> geoPoints = communityProvider.listCommunityGeoPoints(cmd.getCommunity_id());
         int range = cmd.getRange();
+        range = (range <= 0) ? 6 : range;
 		
 		List<String> geoHashCodes = new ArrayList<String>();
 		
