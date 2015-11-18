@@ -1048,6 +1048,7 @@ public class CommunityServiceImpl implements CommunityService {
 				}else {
 					///////////////////////////////////
 				}
+				building.setCommunityId(org.getCommunityId());
 				building.setDescription(s[7]);
 				building.setStatus(CommunityAdminStatus.ACTIVE.getCode());
 				

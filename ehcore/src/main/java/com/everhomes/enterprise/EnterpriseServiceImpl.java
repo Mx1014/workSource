@@ -846,6 +846,8 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 				enterprise.setDescription(s[7]);
 				enterprise.setStatus(CommunityAdminStatus.ACTIVE.getCode());
 				
+				enterprise.setCreatorUid(userId);
+				
 				LOGGER.info("add enterprise");
 				this.enterpriseProvider.createEnterprise(enterprise);
 				
