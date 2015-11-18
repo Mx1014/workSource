@@ -2387,8 +2387,9 @@ public class ForumServiceImpl implements ForumService {
                 GroupMember member = groupProvider.findGroupMemberByMemberInfo(forum.getOwnerId(), 
                     EntityType.USER.getCode(), post.getCreatorUid());
                 if(member != null) {
+                    creatorNickName = member.getMemberNickName();
                     creatorAvatar = member.getMemberAvatar();
-                    if(creatorAvatar == null || creatorAvatar.trim().length() == 0) {
+                    if(creatorNickName == null || creatorNickName.trim().length() == 0) {
                         creatorNickName = member.getMemberNickName();
                     }
                     if(creatorAvatar == null || creatorAvatar.trim().length() == 0){
@@ -2410,7 +2411,7 @@ public class ForumServiceImpl implements ForumService {
             }
         }
 
-        post.setCreatorNickName(creatorAvatar);
+        post.setCreatorNickName(creatorNickName);
         post.setCreatorAvatar(creatorAvatar);
         
         if(creatorAvatar != null && creatorAvatar.length() > 0) {
