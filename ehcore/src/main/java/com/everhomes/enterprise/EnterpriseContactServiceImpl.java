@@ -488,8 +488,9 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 
 		if (locator.getAnchor() == null)
 			locator.setAnchor(0L);
-		int count = PaginationConfigHelper
-				.getPageSize(configProvider, pageSize);
+//		int count = PaginationConfigHelper
+//				.getPageSize(configProvider, pageSize);
+		int count = pageSize==null? AppConstants.PAGINATION_MAX_SIZE:pageSize;
 		List<EnterpriseContact> contacts = this.enterpriseContactProvider
 				.listContactByEnterpriseId(locator, enterpriseId, count + 1,keyWord);
 
