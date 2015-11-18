@@ -833,6 +833,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 	private List<String> importEnterprise(List<String> list, Long userId){
 		List<String> errorDataLogs = new ArrayList<String>();
 
+		User user = UserContext.current().getUser();
 		OrganizationDTO org = this.organizationService.getUserCurrentOrganization();
 		for (String str : list) {
 			String[] s = str.split("\\|\\|");
@@ -850,7 +851,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 				
 				LOGGER.info("add enterprise");
 				this.enterpriseProvider.createEnterprise(enterprise);
-				
+				requestToJoinCommunity(user, enterprise.getId(), org.getCommunityId());
 				String contactName = s[5];
 				String contactToken = s[6];
 				UpdateContactorCommand command = new UpdateContactorCommand();

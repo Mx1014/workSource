@@ -836,7 +836,7 @@ public class ActivityServiceImpl implements ActivityService {
         orderBy[0] = new Tuple<String, SortOrder>("default_order", SortOrder.ASC);
         List<Category> result = categoryProvider.listChildCategories(CategoryConstants.CATEGORY_ID_ACTIVITY, CategoryAdminStatus.ACTIVE,orderBy);
         
-        if(cmd != null && CommunityAppType.TECHPARK.getCode() == cmd.getCommunityFlagId()) {
+        if(cmd != null && cmd.getCommunityFlagId() != null  && CommunityAppType.TECHPARK.getCode() == cmd.getCommunityFlagId()) {
         	List<Category> tech = categoryProvider.listChildCategories(CategoryConstants.CATEGORY_ID_TECH_ACTIVITY, CategoryAdminStatus.ACTIVE,orderBy);
         	result.addAll(tech);
         }
