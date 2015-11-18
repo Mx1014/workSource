@@ -34,6 +34,7 @@ public class PunchCountDTO {
     private Integer sickCount;
     private Integer exchangeCount;
     private Integer outworkCount;
+    private Long overTimeSum;
     public Integer getWorkDayCount() {
 		return workDayCount;
 	}
@@ -116,4 +117,10 @@ public class PunchCountDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+	public Long getOverTimeSum() {
+		return overTimeSum;
+	}
+	public void setOverTimeSum(Long overTimeSum) {
+		this.overTimeSum = overTimeSum;
+	}
 }

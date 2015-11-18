@@ -2,6 +2,7 @@ package com.everhomes.techpark.punch;
 
 /**
  * <ul>审批后的状态
+ *<li>OVERTIME(9):  加班</li>
  *<li>OUTWORK(8):  公出</li>
  * <li>EXCHANGE(7): 调休</li>
  * <li>SICK(6): 病假</li>
@@ -14,6 +15,7 @@ package com.everhomes.techpark.punch;
  * </ul>
  */
 public enum ApprovalStatus { 
+	OVERTIME((byte)9),
 	OUTWORK((byte)8),
 	EXCHANGE((byte)7),
 	/**<li>SICK(6): 病假</li>*/

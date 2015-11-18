@@ -508,8 +508,13 @@ public class PunchServiceImpl implements PunchService {
 			PunchLogDTO noPunchLogDTO2 = new PunchLogDTO();
 			noPunchLogDTO2.setClockStatus(ClockStatus.LEAVE.getCode());
 			pdl.getPunchLogs().add(noPunchLogDTO2);
-			if (!isWorkDay(logDay.getTime())
-					|| dateSF.format(now).equals(
+			if (!isWorkDay(logDay.getTime())){
+				pdl.setPunchStatus(PunchStatus.OVERTIME.getCode());
+				pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
+				// 如果非工作日 normal
+				return pdl;
+			}
+			if (dateSF.format(now).equals(
 							dateSF.format(logDay.getTime()))) {
 				pdl.setPunchStatus(PunchStatus.UNPUNCH.getCode());
 				pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
@@ -609,8 +614,12 @@ public class PunchServiceImpl implements PunchService {
 			}
 		}
 		// 如果是非工作日或者是当日，则设置打卡考勤为正常
-		if (!isWorkDay(logDay.getTime())
-				|| dateSF.format(now).equals(dateSF.format(logDay.getTime()))) {
+		if (!isWorkDay(logDay.getTime())){
+			pdl.setPunchStatus(PunchStatus.OVERTIME.getCode());
+			pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode()); 
+			return pdl;
+		}
+		if ( dateSF.format(now).equals(dateSF.format(logDay.getTime()))) {
 			pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode());
 
 		}
@@ -1471,6 +1480,7 @@ public class PunchServiceImpl implements PunchService {
 					ApprovalStatus.UNPUNCH.getCode()));
 			dto.setWorkCount(processListCount(list,
 					ApprovalStatus.NORMAL.getCode()));
+			dto.setOverTimeSum(processListTimeSum(list, ApprovalStatus.OVERTIME.getCode()));
 			dto.setWorkDayCount(workDayCount);
 			punchCountDTOList.add(dto);
 		}
@@ -1499,20 +1509,37 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	// 计算user的每个打卡状态的总数
-	private Integer processListCount(List<PunchDayLogDTO> list, Byte absence) {
+	private Integer processListCount(List<PunchDayLogDTO> list, Byte status) {
 		Integer count = 0;
 		for (PunchDayLogDTO punchDayLogDTO : list) {
 			if (punchDayLogDTO.getApprovalStatus() != null) {
-				if (absence == punchDayLogDTO.getApprovalStatus()) {
+				if (status == punchDayLogDTO.getApprovalStatus()) {
 					count++;
 				}
 			} else {
-				if (absence == punchDayLogDTO.getStatus()) {
+				if (status == punchDayLogDTO.getStatus()) {
 					count++;
 				}
 			}
 		}
 		return count;
+	}
+
+	// 计算user的每个打卡状态的总数
+	private Long processListTimeSum (List<PunchDayLogDTO> list, Byte status) {
+		Long timeSum = 0L;
+		for (PunchDayLogDTO punchDayLogDTO : list) {
+			if (punchDayLogDTO.getApprovalStatus() != null) {
+				if (status == punchDayLogDTO.getApprovalStatus()) {
+					timeSum += punchDayLogDTO.getWorkTime();
+				}
+			} else {
+				if (status == punchDayLogDTO.getStatus()) {
+					timeSum += punchDayLogDTO.getWorkTime();
+				}
+			}
+		}
+		return timeSum;
 	}
 
 	@Override

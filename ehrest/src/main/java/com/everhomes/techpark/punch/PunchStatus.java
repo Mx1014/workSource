@@ -10,6 +10,13 @@ package com.everhomes.techpark.punch;
  * </ul>
  */
 public enum PunchStatus {
+	OVERTIME((byte)9),
+	OUTWORK((byte)8),
+	EXCHANGE((byte)7),
+	/**<li>SICK(6): 病假</li>*/
+	SICK((byte)6),
+	/**<li>ABSENCE(5): 事假</li>*/
+	ABSENCE((byte)5),
 	/**BLANDLE(4): 迟到且早退*/
 	BLANDLE((byte)4),
 	/**UNPUNCH(3): 未打卡*/

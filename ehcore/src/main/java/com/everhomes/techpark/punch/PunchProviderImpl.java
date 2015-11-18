@@ -14,6 +14,7 @@ import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.Record3;
 import org.jooq.Record4;
+import org.jooq.Record5;
 import org.jooq.SelectHavingStep;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
@@ -912,7 +913,7 @@ public class PunchProviderImpl implements PunchProvider {
 	@Override
 	public List<PunchDayLogDTO> listPunchDayLogs(Long companyId, String startDay, String endDay) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
-		SelectJoinStep<Record4<Long, Date, Byte, Byte>>  step = context.select(Tables.EH_PUNCH_DAY_LOGS.USER_ID,Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE,Tables.EH_PUNCH_DAY_LOGS.STATUS,Tables.EH_PUNCH_EXCEPTION_APPROVALS.APPROVAL_STATUS).from(Tables.EH_PUNCH_DAY_LOGS);
+		SelectJoinStep<Record5<Long, Date, Byte, Byte, Time>>  step = context.select(Tables.EH_PUNCH_DAY_LOGS.USER_ID,Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE,Tables.EH_PUNCH_DAY_LOGS.STATUS,Tables.EH_PUNCH_EXCEPTION_APPROVALS.APPROVAL_STATUS,Tables.EH_PUNCH_DAY_LOGS.WORK_TIME).from(Tables.EH_PUNCH_DAY_LOGS);
 //		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
 		step.leftOuterJoin(Tables.EH_PUNCH_EXCEPTION_APPROVALS).on(Tables.EH_PUNCH_EXCEPTION_APPROVALS.USER_ID.eq(Tables.EH_PUNCH_DAY_LOGS.USER_ID))
 		.and(Tables.EH_PUNCH_EXCEPTION_APPROVALS.COMPANY_ID.eq(Tables.EH_PUNCH_DAY_LOGS.COMPANY_ID)).and(Tables.EH_PUNCH_EXCEPTION_APPROVALS.PUNCH_DATE.eq(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE));
@@ -930,7 +931,9 @@ public class PunchProviderImpl implements PunchProvider {
 			dto.setUserId(r.value1()); 
 			dto.setPunchTime(r.value2());
 			dto.setStatus(r.value3());
-			dto.setApprovalStatus((r.value4()));
+			dto.setApprovalStatus((r.value4()));	
+			dto.setWorkTime((r.value5().getTime()));
+
 			result.add(dto);
 	    	return null;
 		});
