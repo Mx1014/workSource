@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * 	<li>siteUri : 链接</li>
  * 	<li>signature : 签名</li>
  * 	<li>randomNum : 随机数</li>
- * 	<li>timeStamp : 时间戳</li>
+ * 	<li>timestamp : 时间戳</li>
  * 	<li>appKey : 公钥</li>
  * <ul>
  * 
@@ -26,7 +26,7 @@ public class SynThridUserCommand {
 	@NotNull
 	private Integer randomNum;
 	@NotNull
-	private Long timeStamp;
+	private Long timestamp;
 	@NotNull
 	private String appKey;
 	
@@ -49,11 +49,11 @@ public class SynThridUserCommand {
 	public void setRandomNum(Integer randomNum) {
 		this.randomNum = randomNum;
 	}
-	public Long getTimeStamp() {
-		return timeStamp;
+	public Long getTimestamp() {
+		return timestamp;
 	}
-	public void setTimeStamp(Long timeStamp) {
-		this.timeStamp = timeStamp;
+	public void setTimestamp(Long timestamp) {
+		this.timestamp = timestamp;
 	}
 	public String getAppKey() {
 		return appKey;
