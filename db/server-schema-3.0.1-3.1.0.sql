@@ -220,8 +220,8 @@ CREATE TABLE `eh_building_attachments` (
     `building_id` BIGINT NOT NULL DEFAULT 0,
     `content_type` VARCHAR(32) COMMENT 'attachment object content type',
     `content_uri` VARCHAR(1024) COMMENT 'attachment object link info on storage',
-    `creator_uid` BIGINT NOT NULL,
-    `create_time` DATETIME NOT NULL,
+    `creator_uid` BIGINT NOT NULL DEFAULT 0,
+    `create_time` DATETIME,
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

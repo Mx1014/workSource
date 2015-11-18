@@ -677,4 +677,14 @@ public class Tables {
 	 * The table ehcore.eh_version_urls
 	 */
 	public static final com.everhomes.server.schema.tables.EhVersionUrls EH_VERSION_URLS = com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS;
+
+	/**
+	 * The table ehcore.eh_yellow_pages
+	 */
+	public static final com.everhomes.server.schema.tables.EhYellowPages EH_YELLOW_PAGES = com.everhomes.server.schema.tables.EhYellowPages.EH_YELLOW_PAGES;
+
+	/**
+	 * The table ehcore.eh_yellow_page_attachments
+	 */
+	public static final com.everhomes.server.schema.tables.EhYellowPageAttachments EH_YELLOW_PAGE_ATTACHMENTS = com.everhomes.server.schema.tables.EhYellowPageAttachments.EH_YELLOW_PAGE_ATTACHMENTS;
 }

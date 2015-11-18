@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBuildingAttachments extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhBuildingAttachmentsRecord> {
 
-	private static final long serialVersionUID = -1930779666;
+	private static final long serialVersionUID = -371703180;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_building_attachments</code>
@@ -49,12 +49,12 @@ public class EhBuildingAttachments extends org.jooq.impl.TableImpl<com.everhomes
 	/**
 	 * The column <code>ehcore.eh_building_attachments.creator_uid</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBuildingAttachmentsRecord, java.lang.Long> CREATOR_UID = createField("creator_uid", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBuildingAttachmentsRecord, java.lang.Long> CREATOR_UID = createField("creator_uid", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_building_attachments.create_time</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBuildingAttachmentsRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBuildingAttachmentsRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_building_attachments</code> table reference

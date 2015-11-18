@@ -259,6 +259,8 @@ public class Keys {
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhVersionUpgradeRulesRecord> KEY_EH_VERSION_UPGRADE_RULES_PRIMARY = UniqueKeys0.KEY_EH_VERSION_UPGRADE_RULES_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhVersionUrlsRecord> KEY_EH_VERSION_URLS_PRIMARY = UniqueKeys0.KEY_EH_VERSION_URLS_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhVersionUrlsRecord> KEY_EH_VERSION_URLS_U_EH_VER_URL = UniqueKeys0.KEY_EH_VERSION_URLS_U_EH_VER_URL;
+	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhYellowPagesRecord> KEY_EH_YELLOW_PAGES_PRIMARY = UniqueKeys0.KEY_EH_YELLOW_PAGES_PRIMARY;
+	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhYellowPageAttachmentsRecord> KEY_EH_YELLOW_PAGE_ATTACHMENTS_PRIMARY = UniqueKeys0.KEY_EH_YELLOW_PAGE_ATTACHMENTS_PRIMARY;
 
 	// -------------------------------------------------------------------------
 	// FOREIGN KEY definitions
@@ -527,6 +529,8 @@ public class Keys {
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhVersionUpgradeRulesRecord> KEY_EH_VERSION_UPGRADE_RULES_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhVersionUpgradeRules.EH_VERSION_UPGRADE_RULES, com.everhomes.server.schema.tables.EhVersionUpgradeRules.EH_VERSION_UPGRADE_RULES.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhVersionUrlsRecord> KEY_EH_VERSION_URLS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS, com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhVersionUrlsRecord> KEY_EH_VERSION_URLS_U_EH_VER_URL = createUniqueKey(com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS, com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS.REALM_ID, com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS.TARGET_VERSION);
+		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhYellowPagesRecord> KEY_EH_YELLOW_PAGES_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhYellowPages.EH_YELLOW_PAGES, com.everhomes.server.schema.tables.EhYellowPages.EH_YELLOW_PAGES.ID);
+		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhYellowPageAttachmentsRecord> KEY_EH_YELLOW_PAGE_ATTACHMENTS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhYellowPageAttachments.EH_YELLOW_PAGE_ATTACHMENTS, com.everhomes.server.schema.tables.EhYellowPageAttachments.EH_YELLOW_PAGE_ATTACHMENTS.ID);
 	}
 
 	private static class ForeignKeys0 extends org.jooq.impl.AbstractKeys {
