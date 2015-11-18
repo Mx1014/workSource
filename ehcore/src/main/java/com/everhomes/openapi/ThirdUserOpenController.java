@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.print.attribute.HashAttributeSet;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -24,11 +23,8 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.user.GetBizSignatureCommand;
-import com.everhomes.user.GetSignatureCommandResponse;
 import com.everhomes.user.LoginToken;
 import com.everhomes.user.SynThridUserCommand;
-import com.everhomes.user.UserController;
 import com.everhomes.user.UserLogin;
 import com.everhomes.user.UserService;
 import com.everhomes.util.SignatureHelper;
@@ -101,20 +97,6 @@ public class ThirdUserOpenController extends ControllerBase {
 		return null;
 	}
 	
-    /**
-     * <b>URL: /openapi/user/getBizSignature</b>
-     */
-    /*@RequestMapping("getBizSignature")
-    @RestReturn(GetSignatureCommandResponse.class)
-    public RestResponse getBizSignature(@Valid GetBizSignatureCommand cmd) {
-        
-        GetSignatureCommandResponse result = userService.getThirdSignature(cmd);
-		RestResponse response =  new RestResponse(result);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-    }*/
-    
     @RequestMapping("testGetThirdSignature")
 	@RestReturn(SynThridUserCommand.class)
 	public RestResponse testGetThirdSignature(){
@@ -131,7 +113,7 @@ public class ThirdUserOpenController extends ControllerBase {
     	map.put("randomNum", randomNum+"");
     	map.put("siteUri", siteUri);
     	map.put("siteUserToken", siteUserToken);
-    	map.put("timeStamp", timeStamp+"");
+    	map.put("timestamp", timeStamp+"");
     	signature = SignatureHelper.computeSignature(map, app.getSecretKey());
     	
     	result.setAppKey(appKey);
@@ -139,7 +121,7 @@ public class ThirdUserOpenController extends ControllerBase {
     	result.setSignature(signature);
     	result.setSiteUri(siteUri);
     	result.setSiteUserToken(siteUserToken);
-    	result.setTimeStamp(timeStamp);
+    	result.setTimestamp(timeStamp);
 		
 		RestResponse response =  new RestResponse(result);
 		response.setErrorCode(ErrorCodes.SUCCESS);
