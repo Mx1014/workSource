@@ -407,6 +407,9 @@ CREATE TABLE `eh_yellow_pages` (
   `poster_uri` VARCHAR(128) DEFAULT NULL,
   `status` TINYINT(4) NOT NULL DEFAULT '2' COMMENT '0: inactive, 2: active',
   `default_order` INTEGER,
+  `longitude` DOUBLE DEFAULT NULL,
+  `latitude` DOUBLE DEFAULT NULL,
+  `geohash` VARCHAR(32) DEFAULT NULL,
   `string_tag1` VARCHAR(128) DEFAULT NULL,
   `string_tag2` VARCHAR(128) DEFAULT NULL,
   `string_tag3` VARCHAR(128) DEFAULT NULL,
@@ -423,24 +426,7 @@ CREATE TABLE `eh_yellow_pages` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4
 
 ;
-
-DROP TABLE IF EXISTS `eh_yellow_page_geopoints`;
-
-
-CREATE TABLE `eh_yellow_page_geopoints` (
-  `id` BIGINT(20) NOT NULL COMMENT 'id of the record',
-  `owner_id` BIGINT(20) DEFAULT NULL,
-  `description` VARCHAR(64) DEFAULT NULL,
-  `longitude` DOUBLE DEFAULT NULL,
-  `latitude` DOUBLE DEFAULT NULL,
-  `geohash` VARCHAR(32) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `i_eh_comm_description` (`description`),
-  KEY `i_eh_comm_geopoints` (`geohash`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4
-;
-
-DROP TABLE IF EXISTS `eh_yellow_page_attachments`;
+ 
 
 
 
