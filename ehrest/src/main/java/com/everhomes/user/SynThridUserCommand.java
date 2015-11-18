@@ -20,15 +20,10 @@ public class SynThridUserCommand {
 	private String siteUserToken;
 	@NotNull
 	private String siteUri;
-	
-	@NotNull
-	private String signature;
 	@NotNull
 	private Integer randomNum;
 	@NotNull
 	private Long timestamp;
-	@NotNull
-	private String appKey;
 	
 	
 	public String getSiteUserToken() {
@@ -36,12 +31,6 @@ public class SynThridUserCommand {
 	}
 	public void setSiteUserToken(String siteUserToken) {
 		this.siteUserToken = siteUserToken;
-	}
-	public String getSignature() {
-		return signature;
-	}
-	public void setSignature(String signature) {
-		this.signature = signature;
 	}
 	public Integer getRandomNum() {
 		return randomNum;
@@ -54,12 +43,6 @@ public class SynThridUserCommand {
 	}
 	public void setTimestamp(Long timestamp) {
 		this.timestamp = timestamp;
-	}
-	public String getAppKey() {
-		return appKey;
-	}
-	public void setAppKey(String appKey) {
-		this.appKey = appKey;
 	}
 	public String getSiteUri() {
 		return siteUri;

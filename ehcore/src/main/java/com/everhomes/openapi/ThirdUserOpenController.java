@@ -116,9 +116,9 @@ public class ThirdUserOpenController extends ControllerBase {
     	map.put("timestamp", timeStamp+"");
     	signature = SignatureHelper.computeSignature(map, app.getSecretKey());
     	
-    	result.setAppKey(appKey);
+    	//result.setAppKey(appKey);
     	result.setRandomNum(randomNum);
-    	result.setSignature(signature);
+    	//result.setSignature(signature);
     	result.setSiteUri(siteUri);
     	result.setSiteUserToken(siteUserToken);
     	result.setTimestamp(timeStamp);
