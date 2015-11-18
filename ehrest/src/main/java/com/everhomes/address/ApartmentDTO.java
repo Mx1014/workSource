@@ -21,6 +21,8 @@ public class ApartmentDTO {
     private String apartmentName;
     private String address;
     private Byte livingStatus;
+    private Double areaSize;
+    private String enterpriseName;
     
     public ApartmentDTO() {
     }
@@ -67,7 +69,25 @@ public class ApartmentDTO {
         this.familyId = familyId;
     }
     
-    @Override
+    
+    
+    public Double getAreaSize() {
+		return areaSize;
+	}
+
+	public void setAreaSize(Double areaSize) {
+		this.areaSize = areaSize;
+	}
+
+	public String getEnterpriseName() {
+		return enterpriseName;
+	}
+
+	public void setEnterpriseName(String enterpriseName) {
+		this.enterpriseName = enterpriseName;
+	}
+
+	@Override
     public boolean equals(Object obj){
         if (! (obj instanceof ApartmentDTO)) {
             return false;
