@@ -197,6 +197,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         enterprise.setContactsPhone(cmd.getContactsPhone());
         enterprise.setEnterpriseAddress(cmd.getEnterpriseAddress());
         enterprise.setEnterpriseCheckinDate(cmd.getEnterpriseCheckinDate());
+        enterprise.setPostUri(cmd.getPostUri());
         this.enterpriseProvider.createEnterprise(enterprise);
         
         requestToJoinCommunity(user, enterprise.getId(), cmd.getCommunityId());
@@ -329,19 +330,32 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         }
         
         String avatarUri = enterprise.getAvatar();
-		 if(avatarUri != null && avatarUri.length() > 0) {
-			 try{
-             
-				 dto.setAvatarUri(avatarUri);
-				 String url = contentServerService.parserUri(avatarUri, EntityType.GROUP.getCode(), enterprise.getId());
-               
-				 dto.setAvatarUrl(url);
-               
-           
+        if(avatarUri != null && avatarUri.length() > 0) {
+        	try{
+        		dto.setAvatarUri(avatarUri);
+        		String url = contentServerService.parserUri(avatarUri, EntityType.GROUP.getCode(), enterprise.getId());
+	           
+        		dto.setAvatarUrl(url);
+	       
 			 }catch(Exception e){
-               
+	           
 				 LOGGER.error("Failed to parse avatar uri, enterpriseId=" + enterprise.getId(), e);
-           
+	       
+			 }
+		 }
+        
+        String postUri = enterprise.getPostUri();
+        if(postUri != null && postUri.length() > 0) {
+        	try{
+        		dto.setPostUri(postUri);
+        		String url = contentServerService.parserUri(postUri, EntityType.GROUP.getCode(), enterprise.getId());
+	           
+        		dto.setPostUrl(url);
+	       
+			 }catch(Exception e){
+	           
+				 LOGGER.error("Failed to parse post uri, enterpriseId=" + enterprise.getId(), e);
+	       
 			 }
 		 }
 		 
@@ -644,6 +658,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         enterprise.setContactsPhone(cmd.getContactsPhone());
         enterprise.setEnterpriseAddress(cmd.getEnterpriseAddress());
         enterprise.setEnterpriseCheckinDate(cmd.getEnterpriseCheckinDate());
+        enterprise.setPostUri(cmd.getPostUri());
         this.enterpriseProvider.updateEnterprise(enterprise);
         
         List<Long> addressIds = cmd.getAddressId();

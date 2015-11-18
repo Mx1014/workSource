@@ -20,6 +20,7 @@ import com.everhomes.forum.AttachmentDescriptor;
  *  <li>entries: 公司联系人电话</li>
  *  <li>enterpriseAddress: 公司地址</li>
  *  <li>enterpriseCheckinDate: 公司入驻时间</li>
+ *  <li>postUri: 标题图</li>
  * </ul>
  * @author janson
  *
@@ -36,6 +37,7 @@ public class CreateEnterpriseCommand {
     private String entries;
     private String enterpriseAddress;
     private String enterpriseCheckinDate;
+    private String postUri;
 	@ItemType(Long.class)
     private List<Long> addressId;
     
@@ -119,6 +121,12 @@ public class CreateEnterpriseCommand {
 	}
 	public void setAddressId(List<Long> addressId) {
 		this.addressId = addressId;
+	}
+	public String getPostUri() {
+		return postUri;
+	}
+	public void setPostUri(String postUri) {
+		this.postUri = postUri;
 	}
     
 }
