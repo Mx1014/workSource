@@ -1,36 +1,6 @@
 use ehcore;
 
 
-/*Table structure for table `eh_company_phone_list` */
-
-DROP TABLE IF EXISTS `eh_group_contacts`;
-
-CREATE TABLE `eh_group_contacts` (
-	`id` BIGINT(20) NOT NULL,
-	`owner_type` VARCHAR(64) NOT NULL,
-	`owner_id` BIGINT NOT NULL COMMENT 'company id',
-	`contact_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'the user id related to the contact',	
-	`contact_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: mobile, 1: email',
-	`contact_token` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'phone number or email address',
-	`contact_name` VARCHAR(64),
-    `integral_tag1` BIGINT,
-    `integral_tag2` BIGINT,
-    `integral_tag3` BIGINT,
-    `integral_tag4` BIGINT,
-    `integral_tag5` BIGINT,
-    `string_tag1` VARCHAR(128),
-    `string_tag2` VARCHAR(128),
-    `string_tag3` VARCHAR(128),
-    `string_tag4` VARCHAR(128),
-    `string_tag5` VARCHAR(128),
-	`creator_uid` BIGINT,
-	`create_time` DATETIME,
-	`operator_uid` BIGINT,
-	`operate_time` DATETIME,
-	PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
-
-
 
 
 /*Table structure for table `eh_punch_logs` */
@@ -420,3 +390,69 @@ CREATE TABLE `eh_park_apply_card` (
   `community_id` BIGINT NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_yellow_pages`;
+
+CREATE TABLE `eh_yellow_pages` (
+  `id` BIGINT(20) NOT NULL,
+  `parent_id` BIGINT(20) NOT NULL DEFAULT 0 , 
+  `owner_type` VARCHAR(64) NOT NULL COMMENT 'community;group,organaization,exhibition,',
+  `owner_id` BIGINT(20) NOT NULL DEFAULT 0 , 
+  `name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'organization name',
+  `nick_name` VARCHAR(128) NOT NULL DEFAULT '' ,
+  `type`  TINYINT(4) NOT NULL DEFAULT 0 COMMENT '1 chuangkekongjian; 2 fuwulianmeng; 3 yuanquqiye',
+  `address` VARCHAR(255) NOT NULL DEFAULT '',
+  `contact` VARCHAR(64) ,
+  `description` TEXT,
+  `poster_uri` VARCHAR(128) DEFAULT NULL,
+  `status` TINYINT(4) NOT NULL DEFAULT '2' COMMENT '0: inactive, 2: active',
+  `default_order` INTEGER,
+  `string_tag1` VARCHAR(128) DEFAULT NULL,
+  `string_tag2` VARCHAR(128) DEFAULT NULL,
+  `string_tag3` VARCHAR(128) DEFAULT NULL,
+  `string_tag4` VARCHAR(128) DEFAULT NULL,
+  `string_tag5` VARCHAR(128) DEFAULT NULL,
+  `integral_tag1` BIGINT(20) DEFAULT NULL,
+  `integral_tag2` BIGINT(20) DEFAULT NULL,
+  `integral_tag3` BIGINT(20) DEFAULT NULL,
+  `creator_uid` BIGINT(20) DEFAULT NULL,
+  `create_time` DATETIME DEFAULT NULL,
+  `operator_uid` BIGINT(20) DEFAULT NULL,
+  `operate_time` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4
+
+;
+
+DROP TABLE IF EXISTS `eh_yellow_page_geopoints`;
+
+
+CREATE TABLE `eh_yellow_page_geopoints` (
+  `id` BIGINT(20) NOT NULL COMMENT 'id of the record',
+  `owner_id` BIGINT(20) DEFAULT NULL,
+  `description` VARCHAR(64) DEFAULT NULL,
+  `longitude` DOUBLE DEFAULT NULL,
+  `latitude` DOUBLE DEFAULT NULL,
+  `geohash` VARCHAR(32) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `i_eh_comm_description` (`description`),
+  KEY `i_eh_comm_geopoints` (`geohash`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4
+;
+
+DROP TABLE IF EXISTS `eh_yellow_page_attachments`;
+
+
+
+
+CREATE TABLE `eh_yellow_page_attachments` (
+  `id` BIGINT(20) NOT NULL COMMENT 'id of the record',
+  `owner_id` BIGINT(20) NOT NULL DEFAULT '0',
+  `content_type` VARCHAR(32) DEFAULT NULL COMMENT 'attachment object content type',
+  `content_uri` VARCHAR(1024) DEFAULT NULL COMMENT 'attachment object link info on storage',
+  `creator_uid` BIGINT(20) NOT NULL,
+  `create_time` DATETIME NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4
+
+;
