@@ -125,7 +125,7 @@ public class PunchProviderImpl implements PunchProvider {
 	// })
 	@Override
 	public void createPunchLog(PunchLog punchLog) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class,punchLog.getCompanyId() ));
 		long id = sequenceProvider.getNextSequence(NameMapper
 				.getSequenceDomainFromTablePojo(EhPunchLogs.class));
 		punchLog.setId(id);
@@ -161,7 +161,7 @@ public class PunchProviderImpl implements PunchProvider {
 		long id = sequenceProvider.getNextSequence(NameMapper
 				.getSequenceDomainFromTablePojo(EhPunchRules.class));
 		punchRule.setId(id);
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class,punchRule.getCompanyId() ));
 		EhPunchRulesRecord record = ConvertHelper.convert(punchRule,
 				EhPunchRulesRecord.class);
 		InsertQuery<EhPunchRulesRecord> query = context
@@ -236,7 +236,7 @@ public class PunchProviderImpl implements PunchProvider {
 		long id = sequenceProvider.getNextSequence(NameMapper
 				.getSequenceDomainFromTablePojo(EhPunchGeopoints.class));
 		punchGeopoint.setId(id);
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class,punchGeopoint.getCompanyId() ));
 		EhPunchGeopointsRecord record = ConvertHelper.convert(punchGeopoint,
 				EhPunchGeopointsRecord.class);
 		InsertQuery<EhPunchGeopointsRecord> query = context
@@ -332,7 +332,7 @@ public class PunchProviderImpl implements PunchProvider {
 	@Override
 	public void createPunchExceptionRequest(
 			PunchExceptionRequest punchExceptionRequest) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class,punchExceptionRequest.getCompanyId() ));
 		long id = sequenceProvider
 				.getNextSequence(NameMapper
 						.getSequenceDomainFromTablePojo(EhPunchExceptionRequests.class));
@@ -564,7 +564,7 @@ public class PunchProviderImpl implements PunchProvider {
 	@Override
 	public void createPunchExceptionApproval(
 			PunchExceptionApproval punchExceptionApproval) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class,punchExceptionApproval.getCompanyId() ));
 		long id = sequenceProvider
 				.getNextSequence(NameMapper
 						.getSequenceDomainFromTablePojo(EhPunchExceptionApprovals.class));
@@ -625,7 +625,7 @@ public class PunchProviderImpl implements PunchProvider {
 
 	@Override
 	public void createPunchDayLog(PunchDayLog punchDayLog) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class,punchDayLog.getCompanyId() ));
 		punchDayLog.setViewFlag(ViewFlags.NOTVIEW.getCode());
 		long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPunchDayLogs.class));
 		punchDayLog.setId(id);
