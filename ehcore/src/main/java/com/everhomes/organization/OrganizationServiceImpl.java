@@ -2996,13 +2996,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1: cmd.getPageOffset());
 		Organization org = organizationProvider.findOrganizationById(cmd.getParentId());
 		if(org != null) {
-			int totalCount = organizationProvider.countDepartments(org.getPath()+"/");
+			int totalCount = organizationProvider.countDepartments(org.getPath()+"/%");
 			if(totalCount == 0) return response;
 	
 			int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 			int pageCount = getPageCount(totalCount, pageSize);
 
-			List<Organization> result = organizationProvider.listDepartments(org.getPath()+"/", cmd.getPageOffset(), pageSize);
+			List<Organization> result = organizationProvider.listDepartments(org.getPath()+"/%", cmd.getPageOffset(), pageSize);
 			if(result != null && result.size() > 0) {
 				List<RoleAssignment> roleAssignments = this.aclProvider.getAllRoleAssignments();
 				Map<Long, RoleAssignment> roleAssignmentMap = new HashMap<Long, RoleAssignment>();
