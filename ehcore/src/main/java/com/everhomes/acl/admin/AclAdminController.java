@@ -133,7 +133,7 @@ public class AclAdminController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /admin/acl/listUserRoles</b>
+     * <b>URL: /admin/acl/listAclRoles</b>
      * <p>查询角色列表</p>
      */
     @RequestMapping("listAclRoles")

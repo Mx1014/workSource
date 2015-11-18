@@ -1,7 +1,7 @@
 ﻿INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, `status`, `points`, `level`, `gender`, `locale`, `salt`, `password_hash`, `create_time`)
-	VALUES (193501, UUID(), '9200857', '徐明晓', 'cs://1/image/aW1hZ2UvTVRvMU1EQTVZVEZrTkdVek9EQXhZbVE0WlRZd1l6UXdOVE0zWVdJNFkyTmlNUQ', 1, 45, '1', '0',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP());
+	VALUES (73551, UUID(), '9200857', '徐明晓', 'cs://1/image/aW1hZ2UvTVRvMU1EQTVZVEZrTkdVek9EQXhZbVE0WlRZd1l6UXdOVE0zWVdJNFkyTmlNUQ', 1, 45, '1', '0',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP());
 INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`, `create_time`)
-	VALUES (190857,  193501,  '0',  '13632650699',  '221616',  3, UTC_TIMESTAMP());
+	VALUES (71575,  73551,  '0',  '13632650699',  '221616',  3, UTC_TIMESTAMP());
 
 
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`,`address`, `building_name`, `apartment_name`, `status`, `create_time`)
@@ -19,11 +19,11 @@ INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `
 
 
 INSERT INTO `eh_enterprise_contacts` (`id`,  `enterprise_id`,  `name`,  `nick_name`,  `avatar`,  `user_id`,  `role`,  `status`,  `creator_uid`,  `create_time`)
-VALUES ('1', '176389', '徐明晓', '徐明晓', NULL, '193501', '7', '3', NULL, '2015-11-13 11:40:55');  
+VALUES (100001, 176389, '徐明晓', '徐明晓', NULL, '73551', '7', '3', NULL, '2015-11-13 11:40:55');  
 INSERT INTO `eh_enterprise_contact_entries` (`id`,  `enterprise_id`,  `contact_id`,  `entry_type`,  `entry_value`,  `creator_uid`,  `create_time`)
-VALUES ('1', '176389', '1', '0', '13632650699', NULL, '2015-11-13 11:40:55');  
+VALUES (100002, 176389, 100001, '0', '13632650699', NULL, '2015-11-13 11:40:55');  
 INSERT INTO `eh_user_groups` (`id`,  `owner_uid`,  `group_discriminator`,  `group_id`,  `region_scope`,  `region_scope_id`,  `member_role`,  `member_status`,  `create_time`)
-VALUES ('1', '193501', 'enterprise', '176389', '4', '240111044331046562', '7', '3', '2015-11-13 11:40:55');
+VALUES (312654, '73551', 'enterprise', '176389', '4', '240111044331046562', '7', '3', '2015-11-13 11:40:55');
 
 
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`) 
@@ -43,13 +43,18 @@ INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longi
 INSERT INTO `eh_organization_communities`(organization_id, community_id) VALUES(1000000, 240111044331046562);
 
 INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`) 
-		VALUES(176001, 240111044331046562, '金融基地', '金融基地', 193501, '13632650699', '深圳市南山区科技园科苑路6号', NULL, NULL, NULL, NULL, '科技园金融基地一期总建筑面积9.6万平方米，项目分A、B两栋，每栋12层，1-3层为商业裙楼，约14000平方米，4-12层为办公场所。科技园金融基地一期写字楼荣获深圳首家国际绿色建筑LEEDTM认证金奖，独享双花园广场景观，南面为3000平米外花园广场，拥有面积达5000平米的围合式中央花园。尤为值得一提的是在基地建设运营中，科技园金融基地与世界著名的物业顾问公司——世邦魏理仕全方位合作，全方位提升物业管理水平。', 'cs://1/image/aW1hZ2UvTVRvM04yVmhORE00WVRrM04yTmlaVGRsWVdJME56a3hZak5pTnpNNE5qVXlPQQ', 2, 1, NULL, 1, '2015-11-05 14:56:31', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+		VALUES(176001, 240111044331046562, '金融基地', '金融基地', 73551, '13632650699', '深圳市南山区科技园科苑路6号', NULL, 113.953143, 22.549789, 'ws103144h9mf', '科技园金融基地一期总建筑面积9.6万平方米，项目分A、B两栋，每栋12层，1-3层为商业裙楼，约14000平方米，4-12层为办公场所。科技园金融基地一期写字楼荣获深圳首家国际绿色建筑LEEDTM认证金奖，独享双花园广场景观，南面为3000平米外花园广场，拥有面积达5000平米的围合式中央花园。尤为值得一提的是在基地建设运营中，科技园金融基地与世界著名的物业顾问公司——世邦魏理仕全方位合作，全方位提升物业管理水平。', 'cs://1/image/aW1hZ2UvTVRwbE1tVmlPRFV3WkRZeFlXUTJORGN5Wmpka1pXWmxPRGcxTVRrNU4yTXdZZw', 2, 1, NULL, 1, '2015-11-05 14:56:31', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`) 
-		VALUES(176002, 240111044331046562, '金融科技大厦', '金融科技', 193501, '13632650699', '南山区高新中区科苑大道16号', NULL, NULL, NULL, NULL, '金融科技园大厦位于科技园中区，比邻腾讯，近地铁罗宝线（深大A4)，楼盘总高26层，楼盘外观形象大气，内部设施完善，交通便利。周边配套成熟，有餐饮、银行、便利店、咖啡厅等。', 'cs://1/image/aW1hZ2UvTVRwbE1URmtPVE0wWmpGaFptUTFaVEUwTldJNFpqZGlZV0UxTURFd1l6UXpOQQ', 2, 1, NULL, 1, '2015-11-05 14:56:31', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+		VALUES(176002, 240111044331046562, '金融科技大厦', '金融科技', 73551, '13632650699', '南山区高新中区科苑大道16号', NULL, 113.95097, 22.552217, 'ws1031884jcw', '金融科技园大厦位于科技园中区，比邻腾讯，近地铁罗宝线（深大A4)，楼盘总高26层，楼盘外观形象大气，内部设施完善，交通便利。周边配套成熟，有餐饮、银行、便利店、咖啡厅等。', 'cs://1/image/aW1hZ2UvTVRvM04yVmhORE00WVRrM04yTmlaVGRsWVdJME56a3hZak5pTnpNNE5qVXlPQQ', 2, 1, NULL, 1, '2015-11-05 14:56:31', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`) 
-		VALUES(176003, 240111044331046562, '科技工业园大厦', '科技园', 193501, '13632650699', '深圳市南山区科技园科苑路6号', NULL, NULL, NULL, NULL, NULL, 'cs://1/image/aW1hZ2UvTVRvMFkyVmxZakF4WTJNd1ltSmlabU5tTlRabFltWTVNR1kzTUdRM01URTRaUQ', 2, 1, NULL, 1, '2015-11-05 14:56:31', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+		VALUES(176003, 240111044331046562, '科技工业园大厦', '科技园', 73551, '13632650699', '深圳市南山区科技园科苑路6号', NULL, 113.950709, 22.558767, 'ws10348q7fzn', NULL, 'cs://1/image/aW1hZ2UvTVRvMFkyVmxZakF4WTJNd1ltSmlabU5tTlRabFltWTVNR1kzTUdRM01URTRaUQ', 2, 1, NULL, 1, '2015-11-05 14:56:31', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`) 
-		VALUES(176004, 240111044331046562, '生产力大楼', '生产力大楼', 193501, '13632650699', '广东省深圳市高新中二道5号', NULL, NULL, NULL, NULL, '生产力大厦位于南山科技园中区，科苑路与高新中二道交汇处，深南大道旁，步行至深大地铁口仅需3分-钟，周边写字楼有科兴科学园、金融科技大厦、深圳软件园、比克大厦、研祥科技大厦等甲级写字楼。园区内有百度，嗒嗒巴士等知名企业。', 'cs://1/image/aW1hZ2UvTVRwbE1tVmlPRFV3WkRZeFlXUTJORGN5Wmpka1pXWmxPRGcxTVRrNU4yTXdZZw', 2, 1, NULL, 1, '2015-11-05 14:56:31', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+		VALUES(176004, 240111044331046562, '生产力大楼', '生产力大楼', 73551, '13632650699', '广东省深圳市高新中二道5号', NULL, 113.951211, 22.551024, 'ws103129pxt6', '生产力大厦位于南山科技园中区，科苑路与高新中二道交汇处，深南大道旁，步行至深大地铁口仅需3分-钟，周边写字楼有科兴科学园、金融科技大厦、深圳软件园、比克大厦、研祥科技大厦等甲级写字楼。园区内有百度，嗒嗒巴士等知名企业。', 'cs://1/image/aW1hZ2UvTVRvd01qUmpNV00wTkdaaVltWTNNemt3TXpOak9EZGlOMk15TldZd01qWTNNUQ', 2, 1, NULL, 1, '2015-11-05 14:56:31', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
+insert into `eh_building_attachments` (`id`, `building_id`, `content_type`, `content_uri`, `creator_uid`, `create_time`) values('1','176001',NULL,'cs://1/image/aW1hZ2UvTVRwbE1tVmlPRFV3WkRZeFlXUTJORGN5Wmpka1pXWmxPRGcxTVRrNU4yTXdZZw','193501','2015-11-14 20:52:15');
+insert into `eh_building_attachments` (`id`, `building_id`, `content_type`, `content_uri`, `creator_uid`, `create_time`) values('2','176002',NULL,'cs://1/image/aW1hZ2UvTVRvM04yVmhORE00WVRrM04yTmlaVGRsWVdJME56a3hZak5pTnpNNE5qVXlPQQ','193501','2015-11-14 20:52:15');
+insert into `eh_building_attachments` (`id`, `building_id`, `content_type`, `content_uri`, `creator_uid`, `create_time`) values('3','176003',NULL,'cs://1/image/aW1hZ2UvTVRvMFkyVmxZakF4WTJNd1ltSmlabU5tTlRabFltWTVNR1kzTUdRM01URTRaUQ','193501','2015-11-14 20:52:15');
+insert into `eh_building_attachments` (`id`, `building_id`, `content_type`, `content_uri`, `creator_uid`, `create_time`) values('4','176004',NULL,'cs://1/image/aW1hZ2UvTVRvd01qUmpNV00wTkdaaVltWTNNemt3TXpOak9EZGlOMk15TldZd01qWTNNUQ','193501','2015-11-14 20:52:15');
 
 
 insert into `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`) values('239825274387091000',UUID(),'240111044331046562','13905','深圳市','13908','南山区','科技工业园大厦-二层东','科技工业园大厦','二层东','2','0','2015-11-12 22:20:25');

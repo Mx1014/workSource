@@ -605,12 +605,21 @@ public class CommunityServiceImpl implements CommunityService {
 	 * 填充楼栋信息
 	 */
 	 private void populateBuilding(Building building) {
-		 
 		 if(building == null) {
             if(LOGGER.isInfoEnabled()) {
                 LOGGER.info("The building is null");
             }
 		 } else {
+		     String posterUri = building.getPosterUri();
+             if(posterUri != null && posterUri.length() > 0) {
+                 try{
+                     String url = contentServerService.parserUri(posterUri, EntityType.BUILDING.getCode(), building.getId());
+                     building.setPosterUrl(url);
+                 }catch(Exception e){
+                     LOGGER.error("Failed to parse building poster uri, buildingId=" + building.getId() + ", posterUri=" + posterUri, e);
+                 }
+             } 
+		     
 			 populateBuildingCreatorInfo(building);
 			 populateBuildingManagerInfo(building);
 			 populateBuildingOperatorInfo(building);
@@ -707,34 +716,20 @@ public class CommunityServiceImpl implements CommunityService {
 				 LOGGER.info("The building attachment is null, buildingId=" + building.getId());
 			 }
 		 } else {
-			 
 			 String contentUri = attachment.getContentUri();
 			 if(contentUri != null && contentUri.length() > 0) {
 				 try{
-                  
 					 String url = contentServerService.parserUri(contentUri, EntityType.BUILDING.getCode(), building.getId());
-                    
 					 attachment.setContentUrl(url);
-                    
-                
 				 }catch(Exception e){
-                    
 					 LOGGER.error("Failed to parse attachment uri, buildingId=" + building.getId() + ", attachmentId=" + attachment.getId(), e);
-                
 				 }
-            
 			 } else {
-             
 				 if(LOGGER.isWarnEnabled()) {
-                 
 					 LOGGER.warn("The content uri is empty, attchmentId=" + attachment.getId());
-                
 				 }
-            
 			 }
-        
 		 }
-    
 	 }
 
 
