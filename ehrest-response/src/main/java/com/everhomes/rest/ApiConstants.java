@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-11-17 18:23:05
+// generated at 2015-11-19 17:41:00
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -34,6 +34,7 @@ public interface ApiConstants {
     public static final String ADDRESS_SUGGESTCOMMUNITY_URL = "/address/suggestCommunity";
     public static final String ADMIN_ACL_ASSIGNUSERROLE_URL = "/admin/acl/assignUserRole";
     public static final String ADMIN_ACL_DELETEUSERROLE_URL = "/admin/acl/deleteUserRole";
+    public static final String ADMIN_ACL_LISTACLROLES_URL = "/admin/acl/listAclRoles";
     public static final String ADMIN_ACL_LISTUSERROLES_URL = "/admin/acl/listUserRoles";
     public static final String ADMIN_ACTIVITY_LIST_URL = "/admin/activity/list";
     public static final String ADMIN_ADDBORDER_URL = "/admin/addBorder";
@@ -368,6 +369,7 @@ public interface ApiConstants {
     public static final String ORG_LISTORGTOPICCOMMENTS_URL = "/org/listOrgTopicComments";
     public static final String ORG_LISTORGTOPICS_URL = "/org/listOrgTopics";
     public static final String ORG_LISTORGANIZATIONCOMMUNITIES_URL = "/org/listOrganizationCommunities";
+    public static final String ORG_LISTORGANIZATIONCOMMUNITIESV2_URL = "/org/listOrganizationCommunitiesV2";
     public static final String ORG_LISTTOPICSBYTYPE_URL = "/org/listTopicsByType";
     public static final String ORG_LISTUSERRELATEDORGANIZATIONS_URL = "/org/listUserRelatedOrganizations";
     public static final String ORG_LISTUSERTASK_URL = "/org/listUserTask";
@@ -554,5 +556,7 @@ public interface ApiConstants {
     public static final String VERSION_GETUPGRADEINFO_URL = "/version/getUpgradeInfo";
     public static final String VERSION_GETVERSIONURLS_URL = "/version/getVersionUrls";
     public static final String VERSION_GETVERSIONEDCONTENT_URL = "/version/getVersionedContent";
+    public static final String YELLOWPAGE_GETYELLOWPAGEDETAIL_URL = "/yellowPage/getYellowPageDetail";
+    public static final String YELLOWPAGE_GETYELLOWPAGELIST_URL = "/yellowPage/getYellowPageList";
 
 }
