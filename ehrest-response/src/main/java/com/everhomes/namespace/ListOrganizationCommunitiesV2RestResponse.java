@@ -1,16 +1,16 @@
 // @formatter:off
 // generated at 2015-11-19 19:54:45
-package com.everhomes.organization;
+package com.everhomes.namespace;
 
 import com.everhomes.rest.RestResponseBase;
 
 import com.everhomes.organization.ListOrganizationCommunityCommandResponse;
 
-public class ListOrganizationCommunitiesRestResponse extends RestResponseBase {
+public class ListOrganizationCommunitiesV2RestResponse extends RestResponseBase {
 
     private ListOrganizationCommunityCommandResponse response;
 
-    public ListOrganizationCommunitiesRestResponse () {
+    public ListOrganizationCommunitiesV2RestResponse () {
     }
 
     public ListOrganizationCommunityCommandResponse getResponse() {

@@ -1,23 +1,23 @@
 // @formatter:off
 // generated at 2015-11-19 19:54:45
-package com.everhomes.user.admin;
+package com.everhomes.openapi;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.user.admin.UsersWithAddrResponse;
+import com.everhomes.user.SynThridUserCommand;
 
 public class UserRestResponse extends RestResponseBase {
 
-    private UsersWithAddrResponse response;
+    private SynThridUserCommand response;
 
     public UserRestResponse () {
     }
 
-    public UsersWithAddrResponse getResponse() {
+    public SynThridUserCommand getResponse() {
         return response;
     }
 
-    public void setResponse(UsersWithAddrResponse response) {
+    public void setResponse(SynThridUserCommand response) {
         this.response = response;
     }
 }

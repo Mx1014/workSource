@@ -1,5 +1,5 @@
 // @formatter:off
-// generated file: DO NOT EDIT
+// generated at 2015-11-19 19:54:44
 package com.everhomes.address;
 
 import com.everhomes.rest.RestResponseBase;

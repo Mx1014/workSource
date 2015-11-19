@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-11-19 17:41:00
+// generated at 2015-11-19 19:54:45
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -322,6 +322,7 @@ public interface ApiConstants {
     public static final String LAUNCHPAD_USERDEFINEDLAUNCHPAD_URL = "/launchpad/userDefinedLaunchPad";
     public static final String LINK_FINDLINKBYID_URL = "/link/findLinkById";
     public static final String LOCALE_GETLOCALIZEDSTRING_URL = "/locale/getLocalizedString";
+    public static final String NAMESPACE_LISTORGANIZATIONCOMMUNITIESV2_URL = "/namespace/listOrganizationCommunitiesV2";
     public static final String OAUTH2_AUTHORIZE_URL = "/oauth2/authorize";
     public static final String OAUTH2_CONFIRM_URL = "/oauth2/confirm";
     public static final String OAUTH2_TOKEN_URL = "/oauth2/token";
