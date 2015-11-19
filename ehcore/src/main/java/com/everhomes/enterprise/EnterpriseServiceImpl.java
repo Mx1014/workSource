@@ -34,6 +34,7 @@ import com.everhomes.core.AppConfig;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.forum.AttachmentDescriptor;
+import com.everhomes.group.GroupMemberStatus;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -430,16 +431,20 @@ public class EnterpriseServiceImpl implements EnterpriseService {
             Enterprise enterprise = null;
             EnterpriseDTO dto = null;
             for(EnterpriseContactEntry entry : entryList) {
-                enterprise = this.enterpriseProvider.findEnterpriseById(entry.getEnterpriseId());
+            	EnterpriseContact ec = this.enterpriseContactProvider.getContactById(entry.getContactId());
+            	if(ec.getStatus() != GroupMemberStatus.INACTIVE.getCode()) {
+            		enterprise = this.enterpriseProvider.findEnterpriseById(entry.getEnterpriseId());
+                    
+                    this.enterpriseProvider.populateEnterpriseAttachments(enterprise);
+                    this.enterpriseProvider.populateEnterpriseAddresses(enterprise);
+                    populateEnterprise(enterprise);
+                    
+                    dto = toEnterpriseDto(userId, enterprise);
+                    if(dto != null) {
+                        enterpriseList.add(dto);
+                    }
+            	}
                 
-                this.enterpriseProvider.populateEnterpriseAttachments(enterprise);
-                this.enterpriseProvider.populateEnterpriseAddresses(enterprise);
-                populateEnterprise(enterprise);
-                
-                dto = toEnterpriseDto(userId, enterprise);
-                if(dto != null) {
-                    enterpriseList.add(dto);
-                }
             }
         }
         //List<Enterprise> enterpriseList = this.enterpriseProvider.queryEnterpriseByPhone(phone);

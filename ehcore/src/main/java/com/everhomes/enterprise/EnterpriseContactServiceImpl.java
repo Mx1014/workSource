@@ -901,6 +901,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
         EnterpriseContact contact = checkEnterpriseContactParameter(enterpriseId, userId, userId, tag);
         GroupMemberStatus status = GroupMemberStatus.fromCode(contact.getStatus());
         if(status == GroupMemberStatus.ACTIVE) {
+        	contact.setStatus(GroupMemberStatus.INACTIVE.getCode());
             deleteActiveEnterpriseContact(userId, contact, false, "");
         } else {
             deletePendingEnterpriseContact(userId, contact, true);
