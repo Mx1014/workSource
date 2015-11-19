@@ -6,8 +6,8 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * 	<li>siteUserToken : 第三方用户标识</li>
- * 	<li>siteUri : 链接</li>
+ * 	<li>namespaceUserToken : 第三方用户标识</li>
+ * 	<li>namespaceId : 命令空间</li>
  * 	<li>signature : 签名</li>
  * 	<li>randomNum : 随机数</li>
  * 	<li>timestamp : 时间戳</li>
@@ -17,40 +17,47 @@ import com.everhomes.util.StringHelper;
  */
 public class SynThridUserCommand {
 	@NotNull
-	private String siteUserToken;
+	private String namespaceUserToken;
 	@NotNull
-	private String siteUri;
+	private Integer namespaceId;
 	@NotNull
 	private Integer randomNum;
 	@NotNull
 	private Long timestamp;
-	
-	
-	public String getSiteUserToken() {
-		return siteUserToken;
-	}
-	public void setSiteUserToken(String siteUserToken) {
-		this.siteUserToken = siteUserToken;
-	}
-	public Integer getRandomNum() {
-		return randomNum;
-	}
-	public void setRandomNum(Integer randomNum) {
-		this.randomNum = randomNum;
-	}
-	public Long getTimestamp() {
-		return timestamp;
-	}
-	public void setTimestamp(Long timestamp) {
-		this.timestamp = timestamp;
-	}
-	public String getSiteUri() {
-		return siteUri;
-	}
-	public void setSiteUri(String siteUri) {
-		this.siteUri = siteUri;
-	}
-	@Override
+
+	public String getNamespaceUserToken() {
+        return namespaceUserToken;
+    }
+
+    public void setNamespaceUserToken(String namespaceUserToken) {
+        this.namespaceUserToken = namespaceUserToken;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public Integer getRandomNum() {
+        return randomNum;
+    }
+
+    public void setRandomNum(Integer randomNum) {
+        this.randomNum = randomNum;
+    }
+
+    public Long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    @Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}

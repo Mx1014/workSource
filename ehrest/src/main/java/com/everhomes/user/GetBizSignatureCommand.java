@@ -4,32 +4,32 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>
- * 	<li>siteUri : 链接</li>
- * 	<li>siteUserToken : 第三方用户标识</li>
+ * 	<li>namespaceId : 链接</li>
+ * 	<li>namespaceUserToken : 第三方用户标识</li>
  * 	</ul>
  *
  */
 public class GetBizSignatureCommand {
-	private String siteUri;
-	private String siteUserToken;
+	private Integer namespaceId;
+	private String namespaceUserToken;
 	
-	public String getSiteUri() {
-		return siteUri;
-	}
+	public Integer getNamespaceId() {
+        return namespaceId;
+    }
 
-	public void setSiteUri(String siteUri) {
-		this.siteUri = siteUri;
-	}
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
-	public String getSiteUserToken() {
-		return siteUserToken;
-	}
+    public String getNamespaceUserToken() {
+        return namespaceUserToken;
+    }
 
-	public void setSiteUserToken(String siteUserToken) {
-		this.siteUserToken = siteUserToken;
-	}
+    public void setNamespaceUserToken(String namespaceUserToken) {
+        this.namespaceUserToken = namespaceUserToken;
+    }
 
-	@Override
+    @Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
