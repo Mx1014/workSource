@@ -81,6 +81,7 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.mysql.jdbc.StringUtils;
 
 
 @Component
@@ -736,9 +737,6 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public BuildingDTO updateBuilding(UpdateBuildingAdminCommand cmd) {
 		
-		String[] geoString = cmd.getGeoString().split(",");
-		double longitude = Double.valueOf(geoString[0]);
-		double latitude = Double.valueOf(geoString[1]);
 		Building building = new Building();
 		building.setAddress(cmd.getAddress());
 		building.setAliasName(cmd.getAliasName());
@@ -746,14 +744,19 @@ public class CommunityServiceImpl implements CommunityService {
 		building.setCommunityId(cmd.getCommunityId());
 		building.setContact(cmd.getContact());
 		building.setDescription(cmd.getDescription());
-		building.setLatitude(latitude);
-		building.setLongitude(longitude);
 		building.setManagerUid(cmd.getManagerUid());
 		building.setName(cmd.getName());
 		building.setPosterUri(cmd.getPosterUri());
 		building.setStatus(CommunityAdminStatus.CONFIRMING.getCode());
-		String geohash = GeoHashUtils.encode(latitude, longitude);
-		building.setGeohash(geohash);
+		if(!StringUtils.isNullOrEmpty(cmd.getGeoString())){
+			String[] geoString = cmd.getGeoString().split(",");
+			double longitude = Double.valueOf(geoString[0]);
+			double latitude = Double.valueOf(geoString[1]);
+			building.setLatitude(latitude);
+			building.setLongitude(longitude);
+			String geohash = GeoHashUtils.encode(latitude, longitude);
+			building.setGeohash(geohash);
+		}
 		
 		User user = UserContext.current().getUser();
 		long userId = user.getId();

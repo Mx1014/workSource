@@ -97,7 +97,9 @@ public class CategoryController extends ControllerBase {
 			orderBy = defaultSort();
 		}
 
-		List<Category> entityResultList = this.categoryProvider.listChildCategories(cmd.getParentId(),
+		User user = UserContext.current().getUser();
+		Integer namespaceId = (user.getNamespaceId() == null) ? 0 : user.getNamespaceId();
+		List<Category> entityResultList = this.categoryProvider.listChildCategories(namespaceId, cmd.getParentId(),
 				CategoryAdminStatus.fromCode(cmd.getStatus()), orderBy);
 
 		List<CategoryDTO> dtoResultList = entityResultList.stream().map(r -> {
@@ -183,10 +185,12 @@ public class CategoryController extends ControllerBase {
 	@RestReturn(value = CategoryDTO.class, collection = true)
 	public RestResponse listInterestCategories(HttpServletRequest request, HttpServletResponse response) {
 
+		User user = UserContext.current().getUser();
+		Integer namespaceId = (user.getNamespaceId() == null) ? 0 : user.getNamespaceId();
 		@SuppressWarnings("rawtypes")
 		Tuple[] orderBy = defaultSort();
 		@SuppressWarnings("unchecked")
-		List<Category> entityResultList = this.categoryProvider.listChildCategories(CategoryConstants.CATEGORY_ID_INTEREST,
+		List<Category> entityResultList = this.categoryProvider.listChildCategories(namespaceId, CategoryConstants.CATEGORY_ID_INTEREST,
 				CategoryAdminStatus.ACTIVE, orderBy);
 
 		List<CategoryDTO> dtoResultList = entityResultList.stream().map(r -> {
@@ -262,6 +266,7 @@ public class CategoryController extends ControllerBase {
 		User user = UserContext.current().getUser();
 		long userId = user.getId();
 
+		Integer namespaceId = (user.getNamespaceId() == null) ? 0 : user.getNamespaceId();
 		Tuple[] orderBy = defaultSort();
 		//暂时去掉
 		//        Category category = new Category();
@@ -271,7 +276,7 @@ public class CategoryController extends ControllerBase {
 		//        category.setStatus(CategoryAdminStatus.ACTIVE.getCode());
 		List<Category> entityResultList = new ArrayList<Category>();
 		//entityResultList.add(category);
-		List<Category> result = this.categoryProvider.listChildCategories(CategoryConstants.CATEGORY_ID_SERVICE,
+		List<Category> result = this.categoryProvider.listChildCategories(namespaceId, CategoryConstants.CATEGORY_ID_SERVICE,
 				CategoryAdminStatus.ACTIVE, orderBy);
 		if(result != null && !result.isEmpty())
 			entityResultList.addAll(result);
