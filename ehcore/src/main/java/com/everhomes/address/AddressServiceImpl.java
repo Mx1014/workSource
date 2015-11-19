@@ -1349,7 +1349,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             }
             
             Enterprise enterprise = this.enterpriseProvider.findEnterpriseByAddressId(r.getAddressId());
-            if(enterprise != null) {
+            if(enterprise != null && enterprise.getId() != null) {
             	r.setLivingStatus(AddressLivingStatus.ACTIVE.getCode());
             }
             
