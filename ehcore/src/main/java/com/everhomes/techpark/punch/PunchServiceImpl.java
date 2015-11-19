@@ -89,6 +89,8 @@ public class PunchServiceImpl implements PunchService {
 
 	
 	public String statusToString (Byte status){
+		if(status.equals(ApprovalStatus.OVERTIME.getCode()))
+			return "加班";
 		if(status.equals(ApprovalStatus.ABSENCE.getCode()))
 			return "事假";
 		if(status.equals(ApprovalStatus.BELATE.getCode()))
@@ -109,29 +111,7 @@ public class PunchServiceImpl implements PunchService {
 			return "正常";
 		return "";
 		
-	}
-	public String approveStatusToString (Byte status){
-		if(status.equals(ApprovalStatus.ABSENCE.getCode()))
-			return "事假";
-		if(status.equals(ApprovalStatus.BELATE.getCode()))
-			return "迟到";
-		if(status.equals(ApprovalStatus.BLANDLE.getCode()))
-			return "迟到且早退";
-		if(status.equals(ApprovalStatus.EXCHANGE.getCode()))
-			return "调休";
-		if(status.equals(ApprovalStatus.OUTWORK.getCode()))
-			return "公出";
-		if(status.equals(ApprovalStatus.SICK.getCode()))
-			return "病假";
-		if(status.equals(ApprovalStatus.UNPUNCH.getCode()))
-			return "未打卡";
-		if(status.equals(ApprovalStatus.LEAVEEARLY.getCode()))
-			return "早退";
-		if(status.equals(ApprovalStatus.NORMAL.getCode()))
-			return "";
-		return "";
-		
-	}
+	} 
 	
 	@Override
 	public ListYearPunchLogsCommandResponse getlistPunchLogs(
@@ -1605,7 +1585,9 @@ public class PunchServiceImpl implements PunchService {
 
 		row.createCell(++i).setCellValue(dto.getLeaveTime());
 		row.createCell(++i).setCellValue(statusToString(dto.getStatus()));
-		row.createCell(++i).setCellValue(approveStatusToString(dto.getApprovalStatus()));
+		if(dto.getOperatorName() != null )
+			row.createCell(++i).setCellValue(statusToString(dto.getApprovalStatus()));
+		
 		row.createCell(++i).setCellValue(dto.getOperatorName());
 	}
 	
@@ -1652,6 +1634,8 @@ public class PunchServiceImpl implements PunchService {
 				cmd.getArriveTime(), cmd.getLeaveTimeCompareFlag(),
 				cmd.getLeaveTime(), cmd.getWorkTimeCompareFlag(),
 				cmd.getWorkTime(), null, Integer.MAX_VALUE);
+		if (null == result || result.size() ==0 )
+			return null;
 		List<PunchStatisticsDTO> dtos = result
 				.stream()
 				.map(r -> {

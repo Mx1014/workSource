@@ -84,6 +84,8 @@ import com.everhomes.server.schema.tables.pojos.EhVersionRealm;
 import com.everhomes.server.schema.tables.pojos.EhVersionUpgradeRules;
 import com.everhomes.server.schema.tables.pojos.EhVersionUrls;
 import com.everhomes.server.schema.tables.pojos.EhVersionedContent;
+import com.everhomes.server.schema.tables.pojos.EhYellowPageAttachments;
+import com.everhomes.server.schema.tables.pojos.EhYellowPages;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
@@ -411,6 +413,16 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhOrganizations.class, Tables.EH_ORGANIZATIONS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_ORGANIZATIONS.ID.max()).from(Tables.EH_ORGANIZATIONS).fetchOne().value1(); 
         });
+        
+
+        syncTableSequence(null, EhYellowPages.class, Tables.EH_YELLOW_PAGES.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_YELLOW_PAGES.ID.max()).from(Tables.EH_YELLOW_PAGES).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(null, EhYellowPageAttachments.class, Tables.EH_YELLOW_PAGE_ATTACHMENTS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_YELLOW_PAGE_ATTACHMENTS.ID.max()).from(Tables.EH_YELLOW_PAGE_ATTACHMENTS).fetchOne().value1(); 
+        });
+        
     }
     
     @SuppressWarnings("rawtypes")

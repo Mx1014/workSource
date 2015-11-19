@@ -1,7 +1,13 @@
 package com.everhomes.yellowPage;
 
 import com.everhomes.util.StringHelper;
-
+/**
+ * <li>contentType: 附件类型，{@link com.everhomes.forum.PostContentType}</li>
+ * <li>contentUri: 附件访问URI</li>
+ * <li>contentUrl: 附件访问URl</li>
+ * 
+ * 
+ * */
 public class YellowPageAattchmentDTO {
 
 	private java.lang.Long     id;

@@ -750,7 +750,7 @@ public class PunchProviderImpl implements PunchProvider {
 		if(null!= status && status != 0){
 			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.STATUS.eq(status));
 		}
-		Integer offset = pageOffset == null ? 1 : (pageOffset - 1 ) * pageSize;
+		Integer offset = pageOffset == null ? 0 : (pageOffset - 1 ) * pageSize;
 		step.limit(offset , pageSize);
 		List<EhPunchDayLogsRecord> resultRecord = step.where(condition)
 				.orderBy(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.desc(),Tables.EH_PUNCH_DAY_LOGS.USER_ID.desc()).fetch()

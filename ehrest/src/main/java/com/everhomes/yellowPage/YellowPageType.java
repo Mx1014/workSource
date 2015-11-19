@@ -2,14 +2,14 @@ package com.everhomes.yellowPage;
  
 /**
  * <ul>
- * <li>CHUANGKE(1): 创客空间  </li>
+ * <li>MAKERZONE(1): 创客空间  </li>
  * <li>SERVICEALLIANCE(2): 服务联盟 </li> 
  * <li>PARKENTERPRISE(3): 园区企业</li> 
  * </ul>
  */
 public enum YellowPageType {
    
-    CHUANGKE((byte)1),SERVICEALLIANCE((byte)2),PARKENTERPRISE((byte)3);
+	MAKERZONE((byte)1),SERVICEALLIANCE((byte)2),PARKENTERPRISE((byte)3);
     
     private byte code;
     private YellowPageType(byte code) {
