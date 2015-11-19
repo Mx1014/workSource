@@ -74,4 +74,11 @@ public class EhVersionUrlsDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhVersionUrls> fetchByInfoUrl(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS.INFO_URL, values);
 	}
+
+	/**
+	 * Fetch records that have <code>namespace_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhVersionUrls> fetchByNamespaceId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS.NAMESPACE_ID, values);
+	}
 }

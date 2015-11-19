@@ -279,16 +279,16 @@ public class EhUsersDao extends org.jooq.impl.DAOImpl<com.everhomes.server.schem
 	}
 
 	/**
-	 * Fetch records that have <code>site_uri IN (values)</code>
+	 * Fetch records that have <code>namespace_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchBySiteUri(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.SITE_URI, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByNamespaceId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.NAMESPACE_ID, values);
 	}
 
 	/**
-	 * Fetch records that have <code>site_user_token IN (values)</code>
+	 * Fetch records that have <code>namespace_user_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchBySiteUserToken(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.SITE_USER_TOKEN, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByNamespaceUserId(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.NAMESPACE_USER_ID, values);
 	}
 }

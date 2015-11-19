@@ -1,3 +1,4 @@
+use ehcore;
 
 insert into `eh_punch_workday` (`id`, `date_status`, `date_tag`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) values('1','0','2015-09-10',NULL,NULL,NULL,NULL);
 insert into `eh_punch_workday` (`id`, `date_status`, `date_tag`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) values('2','0','2015-10-10',NULL,NULL,NULL,NULL);

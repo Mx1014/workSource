@@ -172,11 +172,4 @@ public class EhBannersDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sch
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchByDeleteTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.DELETE_TIME, values);
 	}
-
-	/**
-	 * Fetch records that have <code>site_uri IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBanners> fetchBySiteUri(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhBanners.EH_BANNERS.SITE_URI, values);
-	}
 }

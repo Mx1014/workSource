@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhVersionRealm extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhVersionRealmRecord> {
 
-	private static final long serialVersionUID = -1822578411;
+	private static final long serialVersionUID = -832746479;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_version_realm</code>
@@ -45,6 +45,11 @@ public class EhVersionRealm extends org.jooq.impl.TableImpl<com.everhomes.server
 	 * The column <code>ehcore.eh_version_realm.create_time</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhVersionRealmRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_version_realm.namespace_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhVersionRealmRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_version_realm</code> table reference

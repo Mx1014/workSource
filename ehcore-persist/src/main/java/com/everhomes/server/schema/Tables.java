@@ -309,6 +309,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhLocaleTemplates EH_LOCALE_TEMPLATES = com.everhomes.server.schema.tables.EhLocaleTemplates.EH_LOCALE_TEMPLATES;
 
 	/**
+	 * The table ehcore.eh_namespace_resources
+	 */
+	public static final com.everhomes.server.schema.tables.EhNamespaceResources EH_NAMESPACE_RESOURCES = com.everhomes.server.schema.tables.EhNamespaceResources.EH_NAMESPACE_RESOURCES;
+
+	/**
 	 * The table ehcore.eh_nearby_community_map
 	 */
 	public static final com.everhomes.server.schema.tables.EhNearbyCommunityMap EH_NEARBY_COMMUNITY_MAP = com.everhomes.server.schema.tables.EhNearbyCommunityMap.EH_NEARBY_COMMUNITY_MAP;

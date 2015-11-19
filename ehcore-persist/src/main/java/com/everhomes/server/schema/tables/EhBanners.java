@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBanners extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhBannersRecord> {
 
-	private static final long serialVersionUID = -714221204;
+	private static final long serialVersionUID = 797785645;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_banners</code>
@@ -34,7 +34,7 @@ public class EhBanners extends org.jooq.impl.TableImpl<com.everhomes.server.sche
 	/**
 	 * The column <code>ehcore.eh_banners.namespace_id</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_banners.appId</code>.
@@ -120,11 +120,6 @@ public class EhBanners extends org.jooq.impl.TableImpl<com.everhomes.server.sche
 	 * The column <code>ehcore.eh_banners.delete_time</code>. mark-deletion policy, historic data may be valuable
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.sql.Timestamp> DELETE_TIME = createField("delete_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "mark-deletion policy, historic data may be valuable");
-
-	/**
-	 * The column <code>ehcore.eh_banners.site_uri</code>. the site uri of third-part system
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBannersRecord, java.lang.String> SITE_URI = createField("site_uri", org.jooq.impl.SQLDataType.VARCHAR.length(2048).nullable(false).defaulted(true), this, "the site uri of third-part system");
 
 	/**
 	 * Create a <code>ehcore.eh_banners</code> table reference
