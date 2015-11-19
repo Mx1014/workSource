@@ -2404,10 +2404,10 @@ public class ForumServiceImpl implements ForumService {
         if(creator != null) {
             // 优先使用帖子里存储的昵称和头像（2.8转过来的数据会有这些昵称和头像，因为在2.8不同家庭有不同的昵称）
             if(creatorNickName == null || creatorNickName.trim().length() == 0) {
-                post.setCreatorNickName(creator.getNickName());
+                creatorNickName = creator.getNickName();
             }
             if(creatorAvatar == null || creatorAvatar.trim().length() == 0) {
-                post.setCreatorAvatar(creator.getAvatar());
+                creatorAvatar = creator.getAvatar();
             }
         }
 
