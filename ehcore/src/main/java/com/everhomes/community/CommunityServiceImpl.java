@@ -560,7 +560,7 @@ public class CommunityServiceImpl implements CommunityService {
         String posterUrl = building.getPosterUri();
         if(posterUrl != null && posterUrl.length() > 0) {
             try{
-                String url = contentServerService.parserUri(posterUrl, EntityType.BUILDING.getCode(), building.getId());
+                String url = contentServerService.parserUri(posterUrl, EntityType.USER.getCode(), UserContext.current().getUser().getId());
                 building.setPosterUrl(url);
             }catch(Exception e){
                 LOGGER.error("Failed to parse poster uri of building, building=" + building, e);
@@ -613,7 +613,7 @@ public class CommunityServiceImpl implements CommunityService {
 		     String posterUri = building.getPosterUri();
              if(posterUri != null && posterUri.length() > 0) {
                  try{
-                     String url = contentServerService.parserUri(posterUri, EntityType.BUILDING.getCode(), building.getId());
+                     String url = contentServerService.parserUri(posterUri, EntityType.USER.getCode(), UserContext.current().getUser().getId());
                      building.setPosterUrl(url);
                  }catch(Exception e){
                      LOGGER.error("Failed to parse building poster uri, buildingId=" + building.getId() + ", posterUri=" + posterUri, e);
@@ -646,7 +646,7 @@ public class CommunityServiceImpl implements CommunityService {
          }
          creatorAvatar = building.getCreatorAvatar();
          if(creatorAvatar != null && creatorAvatar.length() > 0) {
-             String avatarUrl = contentServerService.parserUri(creatorAvatar, EntityType.USER.getCode(), building.getCreatorUid());
+             String avatarUrl = contentServerService.parserUri(creatorAvatar, EntityType.USER.getCode(), UserContext.current().getUser().getId());
              building.setCreatorAvatarUrl(avatarUrl);
          }
 		 
@@ -668,7 +668,7 @@ public class CommunityServiceImpl implements CommunityService {
          }
          managerAvatar = building.getManagerAvatar();
          if(managerAvatar != null && managerAvatar.length() > 0) {
-             String avatarUrl = contentServerService.parserUri(managerAvatar, EntityType.USER.getCode(), building.getManagerUid());
+             String avatarUrl = contentServerService.parserUri(managerAvatar, EntityType.USER.getCode(), UserContext.current().getUser().getId());
              building.setManagerAvatarUrl(avatarUrl);
          }
 	 }
@@ -690,7 +690,7 @@ public class CommunityServiceImpl implements CommunityService {
 	         }
 	         operatorAvatar = building.getOperateAvatar();
 	         if(operatorAvatar != null && operatorAvatar.length() > 0) {
-	             String avatarUrl = contentServerService.parserUri(operatorAvatar, EntityType.USER.getCode(), building.getOperatorUid());
+	             String avatarUrl = contentServerService.parserUri(operatorAvatar, EntityType.USER.getCode(), UserContext.current().getUser().getId());
 	             building.setOperateAvatarUrl(avatarUrl);
 	         }
          }
@@ -719,7 +719,7 @@ public class CommunityServiceImpl implements CommunityService {
 			 String contentUri = attachment.getContentUri();
 			 if(contentUri != null && contentUri.length() > 0) {
 				 try{
-					 String url = contentServerService.parserUri(contentUri, EntityType.BUILDING.getCode(), building.getId());
+					 String url = contentServerService.parserUri(contentUri, EntityType.USER.getCode(), UserContext.current().getUser().getId());
 					 attachment.setContentUrl(url);
 				 }catch(Exception e){
 					 LOGGER.error("Failed to parse attachment uri, buildingId=" + building.getId() + ", attachmentId=" + attachment.getId(), e);
