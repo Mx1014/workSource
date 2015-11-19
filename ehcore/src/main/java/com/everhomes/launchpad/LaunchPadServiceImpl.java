@@ -145,6 +145,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	private List<LaunchPadItemDTO> getBusinessItems(GetLaunchPadItemsCommand cmd,Community community) {
 		User user = UserContext.current().getUser();
 		long userId = user.getId();
+		Integer namespaceId = (user.getNamespaceId() == null) ? 0 : user.getNamespaceId();
 		List<LaunchPadItemDTO> result = new ArrayList<LaunchPadItemDTO>();
 
 		//TODO get the businesses with the user create
@@ -195,7 +196,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			}
 		}
 
-		List<LaunchPadItem> defaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getSiteUri(),cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.ALL.getCode(),0L,null);
+		List<LaunchPadItem> defaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId,cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.ALL.getCode(),0L,null);
 		defaultItems.forEach(r ->{
 			LaunchPadItemDTO itemDTO = ConvertHelper.convert(r, LaunchPadItemDTO.class);
 			itemDTO.setIconUrl(parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId));
@@ -240,12 +241,13 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	private List<LaunchPadItemDTO> getLaunchPadItems(GetLaunchPadItemsCommand cmd, Community community, HttpServletRequest request){
 		User user = UserContext.current().getUser();
 		long userId = user.getId();
+        Integer namespaceId = (user.getNamespaceId() == null) ? 0 : user.getNamespaceId();
 		String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
 		List<LaunchPadItemDTO> result = new ArrayList<LaunchPadItemDTO>();
-		List<LaunchPadItem> defaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getSiteUri(),cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.ALL.getCode(),0L,null);
-		List<LaunchPadItem> cityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getSiteUri(),cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.CITY.getCode(),community.getCityId(),null);
-		List<LaunchPadItem> communityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getSiteUri(),cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.COMMUNITY.getCode(),community.getId(),null);
-		List<LaunchPadItem> userItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getSiteUri(),cmd.getItemLocation(), cmd.getItemGroup(), ScopeType.USER.getCode(), userId, null);
+		List<LaunchPadItem> defaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId,cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.ALL.getCode(),0L,null);
+		List<LaunchPadItem> cityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId,cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.CITY.getCode(),community.getCityId(),null);
+		List<LaunchPadItem> communityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId,cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.COMMUNITY.getCode(),community.getId(),null);
+		List<LaunchPadItem> userItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId,cmd.getItemLocation(), cmd.getItemGroup(), ScopeType.USER.getCode(), userId, null);
 		List<LaunchPadItem> allItems = new ArrayList<LaunchPadItem>();
 
 		if(defaultItems == null || defaultItems.isEmpty()){
@@ -784,8 +786,11 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid versionCode paramter.versionCode is null");
 		}
+		
+		User user = UserContext.current().getUser();
+		Integer namespaceId = (user.getNamespaceId() == null) ? 0 : user.getNamespaceId(); 
 		List<LaunchPadLayoutDTO> results = new ArrayList<LaunchPadLayoutDTO>();
-		this.launchPadProvider.findLaunchPadItemsByVersionCode(cmd.getSiteUri(),cmd.getName(),cmd.getVersionCode()).stream().map((r) ->{;
+		this.launchPadProvider.findLaunchPadItemsByVersionCode(namespaceId,cmd.getName(),cmd.getVersionCode()).stream().map((r) ->{;
 		results.add(ConvertHelper.convert(r, LaunchPadLayoutDTO.class));
 		return null;
 		}).collect(Collectors.toList());

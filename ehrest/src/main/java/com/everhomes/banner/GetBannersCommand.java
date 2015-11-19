@@ -18,7 +18,7 @@ public class GetBannersCommand {
     private String bannerLocation;
     private String bannerGroup;
     @NotNull
-    private String siteUri;
+    private Integer namespaceId;
 
     public GetBannersCommand() {
     }
@@ -52,11 +52,12 @@ public class GetBannersCommand {
         return StringHelper.toJsonString(this);
     }
 
-	public String getSiteUri() {
-		return siteUri;
-	}
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
 
-	public void setSiteUri(String siteUri) {
-		this.siteUri = siteUri;
-	}
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
 }

@@ -119,8 +119,8 @@ public class ThirdUserOpenController extends ControllerBase {
     	//result.setAppKey(appKey);
     	result.setRandomNum(randomNum);
     	//result.setSignature(signature);
-    	result.setSiteUri(siteUri);
-    	result.setSiteUserToken(siteUserToken);
+    	//result.setSiteUri(siteUri);
+    	//result.setSiteUserToken(siteUserToken);
     	result.setTimestamp(timeStamp);
 		
 		RestResponse response =  new RestResponse(result);

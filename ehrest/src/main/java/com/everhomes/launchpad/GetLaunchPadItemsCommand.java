@@ -23,7 +23,7 @@ public class GetLaunchPadItemsCommand {
     @NotNull
     private Long    communityId;
     @NotNull
-    private String siteUri;
+    private Integer namespaceId;
 
     public GetLaunchPadItemsCommand() {
     }
@@ -51,16 +51,16 @@ public class GetLaunchPadItemsCommand {
     public void setCommunityId(Long communityId) {
         this.communityId = communityId;
     }
-    
-    public String getSiteUri() {
-		return siteUri;
-	}
 
-	public void setSiteUri(String siteUri) {
-		this.siteUri = siteUri;
-	}
+	public Integer getNamespaceId() {
+        return namespaceId;
+    }
 
-	@Override
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

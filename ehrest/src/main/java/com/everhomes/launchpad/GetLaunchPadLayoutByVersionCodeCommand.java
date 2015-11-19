@@ -20,7 +20,7 @@ public class GetLaunchPadLayoutByVersionCodeCommand {
     @NotNull
     private String   name;
     @NotNull
-    private String siteUri;
+    private Integer namespaceId;
 
     public GetLaunchPadLayoutByVersionCodeCommand() {
     }
@@ -41,15 +41,15 @@ public class GetLaunchPadLayoutByVersionCodeCommand {
         this.versionCode = versionCode;
     }
 
-    public String getSiteUri() {
-		return siteUri;
-	}
+	public Integer getNamespaceId() {
+        return namespaceId;
+    }
 
-	public void setSiteUri(String siteUri) {
-		this.siteUri = siteUri;
-	}
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
-	@Override
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
