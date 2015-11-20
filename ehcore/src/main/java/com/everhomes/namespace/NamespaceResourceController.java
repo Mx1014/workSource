@@ -12,12 +12,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.organization.ListOrganizationCommunityCommandResponse;
 import com.everhomes.rest.RestResponse;
 
 /**
  * Namespace resource REST API controller
- * 
  *
  */
 @RestController
@@ -34,7 +32,7 @@ public class NamespaceResourceController extends ControllerBase {
      */
     //checked
     @RequestMapping("listCommunityByNamespace")
-    @RestReturn(value=ListOrganizationCommunityCommandResponse.class)
+    @RestReturn(value=ListCommunityByNamespaceCommandResponse.class)
     public RestResponse listCommunityByNamespace(@Valid ListCommunityByNamespaceCommand cmd) {
         ListCommunityByNamespaceCommandResponse commandResponse = namespaceResourceService.listCommunityByNamespace(cmd);
         

@@ -2797,42 +2797,42 @@ public class OrganizationServiceImpl implements OrganizationService {
 		return response;
 	}
 
-	@Override
-	public void processPartnerOrganizationUser(Long userId, Long partnerId) {
-	    long startTime = System.currentTimeMillis();
-	    if(userId == null || userId <= 0) {
-	        LOGGER.info("User id is null, ignore to process partner organization user, userId=" + userId + ", partnerId=" + partnerId);
-	        return;
-	    }
-	    User user = userProvider.findUserById(userId);
-	    if(user == null) {
-            LOGGER.error("User not found, userId=" + userId + ", partnerId=" + partnerId);
-            return;
-        }
-	    
-	    if(partnerId == null || partnerId <= 0) {
-            LOGGER.info("Partner id is null, ignore to process partner organization user, userId=" + userId + ", partnerId=" + partnerId);
-            return;
-	    }
-        Organization organization = organizationProvider.findOrganizationById(partnerId);
-        if(organization == null) {
-            LOGGER.error("Organization not found, userId=" + userId + ", partnerId=" + partnerId);
-            return;
-        }
-        
-        OrganizationType type = OrganizationType.fromCode(organization.getOrganizationType());
-        if(type == OrganizationType.PARTNER) {
-            joinPartnerOrganization(user, organization);
-            setDefaultPartnerCommunity(user, organization);
-        } else {
-            LOGGER.error("Organization is not partner type, userId=" + userId + ", partnerId=" + partnerId + ", organizationType=" + type);
-        }
-        
-        long endTime = System.currentTimeMillis();
-        if(LOGGER.isInfoEnabled()) {
-            LOGGER.info("Process partner organization user, userId=" + userId + ", partnerId=" + partnerId + ", elapse=" + (endTime - startTime));
-        }
-	}
+	// 每个不同版登录进来算不同的用户，故不需要再有partner user
+//	@Override
+//	public void processPartnerOrganizationUser(Long userId, Long partnerId) {
+//	    long startTime = System.currentTimeMillis();
+//	    if(userId == null || userId <= 0) {
+//	        LOGGER.info("User id is null, ignore to process partner organization user, userId=" + userId + ", partnerId=" + partnerId);
+//	        return;
+//	    }
+//	    User user = userProvider.findUserById(userId);
+//	    if(user == null) {
+//            LOGGER.error("User not found, userId=" + userId + ", partnerId=" + partnerId);
+//            return;
+//        }
+//	    
+//	    if(partnerId == null || partnerId <= 0) {
+//            LOGGER.info("Partner id is null, ignore to process partner organization user, userId=" + userId + ", partnerId=" + partnerId);
+//            return;
+//	    }
+//        Organization organization = organizationProvider.findOrganizationById(partnerId);
+//        if(organization == null) {
+//            LOGGER.error("Organization not found, userId=" + userId + ", partnerId=" + partnerId);
+//            return;
+//        }
+//        
+//        OrganizationType type = OrganizationType.fromCode(organization.getOrganizationType());
+//        if(type == OrganizationType.PARTNER) {
+//            setDefaultPartnerCommunity(user, organization);
+//        } else {
+//            LOGGER.error("Organization is not partner type, userId=" + userId + ", partnerId=" + partnerId + ", organizationType=" + type);
+//        }
+//        
+//        long endTime = System.currentTimeMillis();
+//        if(LOGGER.isInfoEnabled()) {
+//            LOGGER.info("Process partner organization user, userId=" + userId + ", partnerId=" + partnerId + ", elapse=" + (endTime - startTime));
+//        }
+//	}
 	
 	private void setDefaultPartnerCommunity(User user, Organization organization) {
 	    try {
@@ -2876,33 +2876,33 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    return isFound;
 	}
 	
-	private void joinPartnerOrganization(User user, Organization organization) {
-        try {
-            OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), organization.getId());
-            if(member != null) {
-                LOGGER.error("Organization member already existed, userId=" + user.getId() + ", partnerId=" + organization.getId());
-                return;
-            }
-            
-            member = new OrganizationMember();
-
-            member.setContactName(user.getNickName());
-            member.setOrganizationId(organization.getId());
-            member.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-            member.setTargetId(user.getId());
-            member.setTargetType(OrganizationMemberTargetType.USER.getCode());
-
-            UserIdentifier identifier = this.getUserMobileIdentifier(user.getId());
-            if(identifier != null){
-                member.setContactToken(identifier.getIdentifierToken());
-                member.setContactType(identifier.getIdentifierType());
-            }
-            
-            this.organizationProvider.createOrganizationMember(member);
-        } catch(Exception e) {
-            LOGGER.error("Failed to join partner organization, userId=" + user.getId() + ", partnerId=" + organization.getId(), e);
-        }
-	}
+//	private void joinPartnerOrganization(User user, Organization organization) {
+//        try {
+//            OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), organization.getId());
+//            if(member != null) {
+//                LOGGER.error("Organization member already existed, userId=" + user.getId() + ", partnerId=" + organization.getId());
+//                return;
+//            }
+//            
+//            member = new OrganizationMember();
+//
+//            member.setContactName(user.getNickName());
+//            member.setOrganizationId(organization.getId());
+//            member.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+//            member.setTargetId(user.getId());
+//            member.setTargetType(OrganizationMemberTargetType.USER.getCode());
+//
+//            UserIdentifier identifier = this.getUserMobileIdentifier(user.getId());
+//            if(identifier != null){
+//                member.setContactToken(identifier.getIdentifierToken());
+//                member.setContactType(identifier.getIdentifierType());
+//            }
+//            
+//            this.organizationProvider.createOrganizationMember(member);
+//        } catch(Exception e) {
+//            LOGGER.error("Failed to join partner organization, userId=" + user.getId() + ", partnerId=" + organization.getId(), e);
+//        }
+//	}
 
 	@Override
 	public SearchTopicsByTypeResponse searchTopicsByType(

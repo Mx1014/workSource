@@ -26,8 +26,6 @@ public class LogonCommand {
     
     private Integer namespaceId;
     
-    private Long partnerId;
-    
     public LogonCommand() {
     }
 
@@ -62,14 +60,6 @@ public class LogonCommand {
     
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
-    }
-
-    public Long getPartnerId() {
-        return partnerId;
-    }
-
-    public void setPartnerId(Long partnerId) {
-        this.partnerId = partnerId;
     }
 
     @Override

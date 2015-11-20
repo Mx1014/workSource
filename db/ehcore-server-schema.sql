@@ -910,7 +910,7 @@ CREATE TABLE `eh_forum_posts` (
  
     `embedded_app_id` BIGINT,
     `embedded_id` BIGINT,
-    `embedded_json` TEXT,
+    `embedded_json` LONGTEXT,
     `embedded_version` INTEGER NOT NULL DEFAULT 1,
     
     `integral_tag1` BIGINT COMMENT 'user for action category id',
