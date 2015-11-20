@@ -5,6 +5,7 @@ package com.everhomes.acl.admin;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
+import com.everhomes.acl.admin.RoleDTO;
 
 public class AclListAclRolesRestResponse extends RestResponseBase {
 

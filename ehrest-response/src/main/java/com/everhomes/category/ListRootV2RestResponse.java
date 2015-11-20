@@ -1,17 +1,17 @@
 // @formatter:off
 // generated file: DO NOT EDIT
-package com.everhomes.openapi;
+package com.everhomes.category;
 
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
 import com.everhomes.category.CategoryDTO;
 
-public class ListBizCategoriesRestResponse extends RestResponseBase {
+public class ListRootV2RestResponse extends RestResponseBase {
 
     private List<CategoryDTO> response;
 
-    public ListBizCategoriesRestResponse () {
+    public ListRootV2RestResponse () {
     }
 
     public List<CategoryDTO> getResponse() {

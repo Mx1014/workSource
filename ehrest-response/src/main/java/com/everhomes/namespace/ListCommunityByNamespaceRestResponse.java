@@ -1,16 +1,16 @@
 // @formatter:off
 // generated file: DO NOT EDIT
-package com.everhomes.organization;
+package com.everhomes.namespace;
 
 import com.everhomes.rest.RestResponseBase;
 
 import com.everhomes.organization.ListOrganizationCommunityCommandResponse;
 
-public class ListOrganizationCommunitiesRestResponse extends RestResponseBase {
+public class ListCommunityByNamespaceRestResponse extends RestResponseBase {
 
     private ListOrganizationCommunityCommandResponse response;
 
-    public ListOrganizationCommunitiesRestResponse () {
+    public ListCommunityByNamespaceRestResponse () {
     }
 
     public ListOrganizationCommunityCommandResponse getResponse() {

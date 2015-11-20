@@ -176,6 +176,27 @@ public class CategoryController extends ControllerBase {
 		}
 		return new RestResponse();
 	}
+	
+	/**
+     * <b>URL: /category/listRootV2</b> 列出所有的大类
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("listRootV2")
+    @RestReturn(value = CategoryDTO.class, collection = true)
+    public RestResponse listRootV2(ListCategoryV2Command cmd, HttpServletRequest request, HttpServletResponse response) {
+        List<Category> categories = this.categoryProvider.listRootCategories();
+        List<CategoryDTO> convertCategories = categories.stream().map(item -> {
+            return ConvertHelper.convert(item, CategoryDTO.class);
+        }).collect(Collectors.toList());
+
+        if(convertCategories != null){
+            int hashCode = convertCategories.hashCode();
+            if(EtagHelper.checkHeaderEtagOnly(30,hashCode+"", request, response)) {
+                return new RestResponse(convertCategories);
+            }
+        }
+        return new RestResponse();
+    }
 
 	/**
 	 * <b>URL: /category/listInterestCategories</b> 列出所有兴趣分类，客户端建圈使用
@@ -183,8 +204,8 @@ public class CategoryController extends ControllerBase {
 	@RequireAuthentication(false)
 	@RequestMapping("listInterestCategories")
 	@RestReturn(value = CategoryDTO.class, collection = true)
-	public RestResponse listInterestCategories(HttpServletRequest request, HttpServletResponse response) {
-
+	public RestResponse listInterestCategories(ListCategoryV2Command cmd, HttpServletRequest request, HttpServletResponse response) {
+	    LOGGER.info("listInterestCategories, cmd=" + cmd);
 		User user = UserContext.current().getUser();
 		Integer namespaceId = (user.getNamespaceId() == null) ? 0 : user.getNamespaceId();
 		@SuppressWarnings("rawtypes")
@@ -205,6 +226,35 @@ public class CategoryController extends ControllerBase {
 		}
 		return new RestResponse();
 	}
+
+    /**
+     * <b>URL: /category/listInterestCategoriesV2</b> 列出所有兴趣分类，客户端建圈使用
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("listInterestCategoriesV2")
+    @RestReturn(value = CategoryDTO.class, collection = true)
+    public RestResponse listInterestCategoriesV2(ListCategoryV2Command cmd, HttpServletRequest request, HttpServletResponse response) {
+
+        User user = UserContext.current().getUser();
+        Integer namespaceId = (user.getNamespaceId() == null) ? 0 : user.getNamespaceId();
+        @SuppressWarnings("rawtypes")
+        Tuple[] orderBy = defaultSort();
+        @SuppressWarnings("unchecked")
+        List<Category> entityResultList = this.categoryProvider.listChildCategories(namespaceId, CategoryConstants.CATEGORY_ID_INTEREST,
+                CategoryAdminStatus.ACTIVE, orderBy);
+
+        List<CategoryDTO> dtoResultList = entityResultList.stream().map(r -> {
+            return ConvertHelper.convert(r, CategoryDTO.class);
+        }).collect(Collectors.toList());
+
+        if(dtoResultList != null){
+            int hashCode = dtoResultList.hashCode();
+            if(EtagHelper.checkHeaderEtagOnly(30,hashCode+"", request, response)) {
+                return new RestResponse(dtoResultList);
+            }
+        }
+        return new RestResponse();
+    }
 
 	/**
 	 * <b>URL: /category/listContentCategories</b> 

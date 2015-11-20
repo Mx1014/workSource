@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-11-20 09:40:33
+// generated at 2015-11-20 10:25:04
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -196,7 +196,9 @@ public interface ApiConstants {
     public static final String CATEGORY_LISTCONTENTCATEGORIES_URL = "/category/listContentCategories";
     public static final String CATEGORY_LISTDESCENDANTS_URL = "/category/listDescendants";
     public static final String CATEGORY_LISTINTERESTCATEGORIES_URL = "/category/listInterestCategories";
+    public static final String CATEGORY_LISTINTERESTCATEGORIESV2_URL = "/category/listInterestCategoriesV2";
     public static final String CATEGORY_LISTROOT_URL = "/category/listRoot";
+    public static final String CATEGORY_LISTROOTV2_URL = "/category/listRootV2";
     public static final String CATEGORY_UPDATECATEGORYLOGOURI_URL = "/category/updateCategoryLogoUri";
     public static final String COMMUNITY_GET_URL = "/community/get";
     public static final String COMMUNITY_GETBUILDING_URL = "/community/getBuilding";
@@ -322,7 +324,7 @@ public interface ApiConstants {
     public static final String LAUNCHPAD_USERDEFINEDLAUNCHPAD_URL = "/launchpad/userDefinedLaunchPad";
     public static final String LINK_FINDLINKBYID_URL = "/link/findLinkById";
     public static final String LOCALE_GETLOCALIZEDSTRING_URL = "/locale/getLocalizedString";
-    public static final String NAMESPACE_LISTORGANIZATIONCOMMUNITIESV2_URL = "/namespace/listOrganizationCommunitiesV2";
+    public static final String NAMESPACE_LISTCOMMUNITYBYNAMESPACE_URL = "/namespace/listCommunityByNamespace";
     public static final String OAUTH2_AUTHORIZE_URL = "/oauth2/authorize";
     public static final String OAUTH2_CONFIRM_URL = "/oauth2/confirm";
     public static final String OAUTH2_TOKEN_URL = "/oauth2/token";
