@@ -57,4 +57,16 @@ public class YellowPageController  extends ControllerBase {
          response.setErrorDescription("OK");
          return response;
     }
+    
+    @RequireAuthentication(false)
+    @RequestMapping("deleteYellowPage")
+    @RestReturn(value=String.class)
+    public RestResponse deleteYellowPage(@Valid DeleteYellowPageCommand cmd) {
+    	 this.yellowPageService.deleteYellowPage(cmd);
+    	 RestResponse response = new RestResponse();
+         response.setErrorCode(ErrorCodes.SUCCESS);
+         response.setErrorDescription("OK");
+         return response;
+    }
+    
 }

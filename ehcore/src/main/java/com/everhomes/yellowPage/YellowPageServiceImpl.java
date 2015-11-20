@@ -161,5 +161,17 @@ public class YellowPageServiceImpl implements YellowPageService {
 		
 	}
 
+	@Override
+	public void deleteYellowPage(DeleteYellowPageCommand cmd) {
+		// TODO Auto-generated method stub
+		YellowPage yellowPage = this.yellowPageProvider.getYellowPageById(cmd.getId());
+		if (null == yellowPage)
+		{
+			 LOGGER.error("YellowPage already deleted , YellowPage Id =" + cmd.getId() );
+		}
+		yellowPage.setStatus(YellowPageStatus.INACTIVE.getCode());
+		this.yellowPageProvider.updateYellowPage(yellowPage);
+	}
+
 	
 }
