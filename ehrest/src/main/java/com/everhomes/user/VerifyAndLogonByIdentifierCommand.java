@@ -16,7 +16,6 @@ import com.everhomes.util.StringHelper;
  *         <li>invitationCode:邀请码</li>
  *         <li>namespaceId:名字空间</li>
  *         <li>nickName:昵称</li>
- *         <li>partnerId: 园区合作商</li>
  *         </ul>
  */
 public class VerifyAndLogonByIdentifierCommand {
@@ -36,8 +35,6 @@ public class VerifyAndLogonByIdentifierCommand {
     private String deviceIdentifier;
 
     private Integer namespaceId;
-    
-    private Long partnerId;
 
     public VerifyAndLogonByIdentifierCommand() {
     }
@@ -96,14 +93,6 @@ public class VerifyAndLogonByIdentifierCommand {
 
     public void setNickName(String nickName) {
         this.nickName = nickName;
-    }
-
-    public Long getPartnerId() {
-        return partnerId;
-    }
-
-    public void setPartnerId(Long partnerId) {
-        this.partnerId = partnerId;
     }
 
     @Override

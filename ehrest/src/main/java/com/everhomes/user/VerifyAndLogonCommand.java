@@ -36,8 +36,6 @@ public class VerifyAndLogonCommand {
     
     private Integer namespaceId;
     
-    private Long partnerId;
-    
     public VerifyAndLogonCommand() {
     }
 
@@ -97,14 +95,6 @@ public class VerifyAndLogonCommand {
 
     public void setNickName(String nickName) {
         this.nickName = nickName;
-    }
-
-    public Long getPartnerId() {
-        return partnerId;
-    }
-
-    public void setPartnerId(Long partnerId) {
-        this.partnerId = partnerId;
     }
 
     @Override
