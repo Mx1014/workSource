@@ -137,15 +137,20 @@ public class AclAdminController extends ControllerBase {
      * <p>查询角色列表</p>
      */
     @RequestMapping("listAclRoles")
-    @RestReturn(value=Role.class, collection = true)
+    @RestReturn(value=RoleDTO.class, collection = true)
     public RestResponse listAclRoles(ListAclRolesCommand cmd) {
     	
     	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
     	List<Role> roles = this.aclProvider.getRolesByApp(cmd.getAppId());
-    	
-    	RestResponse response =  new RestResponse(roles);
+    	List<RoleDTO> roleDto = new ArrayList<RoleDTO>();
+    	roleDto = roles.stream().map(r -> {
+    		RoleDTO dto = ConvertHelper.convert(r, RoleDTO.class);
+    		
+    		return dto;
+    	}).collect(Collectors.toList());
+    	RestResponse response =  new RestResponse(roleDto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
