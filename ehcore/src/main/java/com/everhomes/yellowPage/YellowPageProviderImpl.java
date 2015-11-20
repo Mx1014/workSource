@@ -11,16 +11,20 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
+import com.everhomes.enterprise.EnterpriseContactEntry;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhEnterpriseContactEntriesDao;
 import com.everhomes.server.schema.tables.daos.EhYellowPageAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhYellowPagesDao;
+import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.pojos.EhYellowPageAttachments;
 import com.everhomes.server.schema.tables.pojos.EhYellowPages;
+import com.everhomes.server.schema.tables.records.EhEnterpriseContactEntriesRecord;
 import com.everhomes.server.schema.tables.records.EhYellowPageAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhYellowPagesRecord;
 import com.everhomes.util.ConvertHelper;
@@ -128,4 +132,27 @@ public class YellowPageProviderImpl implements YellowPageProvider {
             return ConvertHelper.convert(r, YellowPage.class);
         });
 	}
+
+
+	@Override
+	public void deleteYellowPageAttachmentsByOwnerId(Long ownerId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		 
+        SelectQuery<EhYellowPageAttachmentsRecord> query = context.selectQuery(Tables.EH_YELLOW_PAGE_ATTACHMENTS);
+        query.addConditions(Tables.EH_YELLOW_PAGE_ATTACHMENTS.OWNER_ID.eq(ownerId));
+        
+        
+        query.fetch().map((r) -> {
+        	YellowPageAttachment ece = ConvertHelper.convert(r, YellowPageAttachment.class);
+        	this.deleteYellowPageAttachment(ece);
+        	return null;
+        });
+	}
+	
+	@Override
+    public void deleteYellowPageAttachment(YellowPageAttachment attachment) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite()); 
+        EhYellowPageAttachmentsDao dao = new EhYellowPageAttachmentsDao(context.configuration());
+        dao.delete(attachment);        
+    }
 }

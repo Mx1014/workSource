@@ -14,8 +14,10 @@ import ch.hsr.geohash.GeoHash;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
+import com.everhomes.forum.PostContentType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.techpark.rental.AttachmentType;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 
@@ -156,18 +158,27 @@ public class YellowPageServiceImpl implements YellowPageService {
 			yp =  ConvertHelper.convert(cmd,YellowPage.class);
 		}
 		this.yellowPageProvider.createYellowPage(yp);
-		for (YellowPageAattchmentDTO dto: cmd.getAttachments()){
-			YellowPageAttachment attachment =  ConvertHelper.convert(dto,YellowPageAttachment.class);
-			attachment.setOwnerId(yp.getId());
-			this.yellowPageProvider.createYellowPageAttachments(attachment);
-		}
+		createYellowPageAttachments(cmd.getAttachments(),yp.getId());
+		
 		
 	} 
+	private void createYellowPageAttachments(
+			List<YellowPageAattchmentDTO> attachments,Long ownerId) {
+		for (YellowPageAattchmentDTO dto:attachments ){
+			if(null == dto.getContentUri())
+				continue;
+			YellowPageAttachment attachment =  ConvertHelper.convert(dto,YellowPageAttachment.class);
+			attachment.setOwnerId(ownerId);
+			attachment.setContentType(PostContentType.IMAGE.getCode());
+			this.yellowPageProvider.createYellowPageAttachments(attachment);
+		}
+	}
+
 	@Override
 	public void deleteYellowPage(DeleteYellowPageCommand cmd) {
-		// TODO Auto-generated method stub
+		 
 		YellowPage yellowPage = this.yellowPageProvider.getYellowPageById(cmd.getId());
-		if (null == yellowPage)
+		if (null == yellowPage)	
 		{
 			 LOGGER.error("YellowPage already deleted , YellowPage Id =" + cmd.getId() );
 		}
@@ -175,6 +186,25 @@ public class YellowPageServiceImpl implements YellowPageService {
 		if(null != yellowPage.getLatitude())
 			yellowPage.setGeohash(GeoHashUtils.encode(yellowPage.getLatitude(), yellowPage.getLongitude()));
 		this.yellowPageProvider.updateYellowPage(yellowPage);
+	}
+
+	@Override
+	public void updateYellowPage(UpdateYellowPageCommand cmd) {
+		YellowPage yp = null;
+		if(cmd.getType().equals(YellowPageType.SERVICEALLIANCE.getCode())){
+			ServiceAlliance serviceAlliance =  ConvertHelper.convert(cmd ,ServiceAlliance.class);
+			yp = ConvertHelper.convert(serviceAlliance,YellowPage.class);
+		} 
+		else if (cmd.getType().equals(YellowPageType.MAKERZONE.getCode())){
+			MakerZone makerZone =  ConvertHelper.convert(cmd ,MakerZone.class);
+			yp = ConvertHelper.convert(makerZone,YellowPage.class);
+		} 
+		else{
+			yp =  ConvertHelper.convert(cmd,YellowPage.class);
+		}
+		this.yellowPageProvider.updateYellowPage(yp);
+		this.yellowPageProvider.deleteYellowPageAttachmentsByOwnerId(yp.getId());
+		createYellowPageAttachments(cmd.getAttachments(),yp.getId());
 	}
 
 	
