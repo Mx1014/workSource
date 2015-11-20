@@ -1,5 +1,5 @@
-
-// generated at 2015-11-20 10:25:04
+// @formatter:off
+// generated at 2015-11-20 10:45:14
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -348,7 +348,7 @@ public interface ApiConstants {
     public static final String OPENAPI_SYNCUSERCANCELFAVORITE_URL = "/openapi/syncUserCancelFavorite";
     public static final String OPENAPI_SYNCUSERFAVORITE_URL = "/openapi/syncUserFavorite";
     public static final String OPENAPI_SYNCUSERINFO_URL = "/openapi/syncuserinfo";
-    public static final String OPENAPI_USER_SYNCOUPON_URL = "/openapi/user/synCoupon";
+    public static final String OPENAPI_USER_INITCOUPON_URL = "/openapi/user/initCoupon";
     public static final String OPENAPI_USER_TESTGETTHIRDSIGNATURE_URL = "/openapi/user/testGetThirdSignature";
     public static final String ORG_ADDORGMEMBERBYPHONE_URL = "/org/addOrgMemberByPhone";
     public static final String ORG_APPLYORGANIZATIONMEMBER_URL = "/org/applyOrganizationMember";
@@ -559,6 +559,7 @@ public interface ApiConstants {
     public static final String VERSION_GETUPGRADEINFO_URL = "/version/getUpgradeInfo";
     public static final String VERSION_GETVERSIONURLS_URL = "/version/getVersionUrls";
     public static final String VERSION_GETVERSIONEDCONTENT_URL = "/version/getVersionedContent";
+    public static final String YELLOWPAGE_ADDYELLOWPAGE_URL = "/yellowPage/addYellowPage";
     public static final String YELLOWPAGE_GETYELLOWPAGEDETAIL_URL = "/yellowPage/getYellowPageDetail";
     public static final String YELLOWPAGE_GETYELLOWPAGELIST_URL = "/yellowPage/getYellowPageList";
 
