@@ -967,7 +967,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         
         String key = UserCurrentEntityType.ORGANIZATION.getUserProfileKey();
         long timestemp = DateHelper.currentGMTTime().getTime();
-        userActivityProvider.updateUserCurrentEntityProfile(user.getId(), key, cmd.getOrganizationId(), timestemp);
+        userActivityProvider.updateUserCurrentEntityProfile(user.getId(), key, cmd.getOrganizationId(), timestemp, user.getNamespaceId());
 	}
 
 	@Override

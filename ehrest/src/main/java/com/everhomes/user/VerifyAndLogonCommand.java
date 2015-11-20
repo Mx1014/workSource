@@ -15,7 +15,6 @@ import com.everhomes.util.StringHelper;
  *<li>invitationCode:邀请码</li>
  *<li>namespaceId:名字空间</li>
  *<li>nickName:昵称</li>
- *<li>partnerId: 园区合作商</li>
  *</ul>
  */
 public class VerifyAndLogonCommand {

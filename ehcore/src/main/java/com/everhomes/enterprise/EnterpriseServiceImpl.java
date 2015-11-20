@@ -719,7 +719,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 		validUserEnterprise(userId,cmd.getEnterpriseId());
 		   
 		String key = UserCurrentEntityType.ENTERPRISE.getUserProfileKey();
-        userActivityProvider.updateUserCurrentEntityProfile(userId, key, cmd.getEnterpriseId(), timestemp);
+        userActivityProvider.updateUserCurrentEntityProfile(userId, key, cmd.getEnterpriseId(), timestemp, user.getNamespaceId());
 	}
 
 	public void validUserEnterprise(Long userId, Long enterpriseId) { 
