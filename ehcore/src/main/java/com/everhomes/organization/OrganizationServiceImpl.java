@@ -2834,47 +2834,47 @@ public class OrganizationServiceImpl implements OrganizationService {
 //        }
 //	}
 	
-	private void setDefaultPartnerCommunity(User user, Organization organization) {
-	    try {
-	        List<UserCurrentEntity> entityList = userService.listUserCurrentEntity(user.getId());
-	        if(!containPartnerCommunity(entityList)) {
-	            int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, 1);
-	            List<OrganizationCommunity> result = organizationProvider.listOrganizationCommunities(organization.getId(), 1, pageSize);
-	            if(result != null && result.size() > 0) {
-	                Long communityId = result.get(0).getCommunityId();
-	                userService.updateUserCurrentCommunityToProfile(user.getId(), communityId);
-	                if(LOGGER.isInfoEnabled()) {
-	                    LOGGER.info("Set default partner community, userId=" + user.getId() + ", communityId=" + communityId 
-	                        + ", partnerId=" + organization.getId());
-	                }
-	            } else {
-	                if(LOGGER.isInfoEnabled()) {
-	                    LOGGER.info("Community not found, ignore to set default partner community, userId=" + user.getId()  
-	                        + ", partnerId=" + organization.getId());
-	                }
-	            }
-	        }
-	    } catch(Exception e) {
-	        LOGGER.error("Failed to set default partner community, userId=" + user.getId() + ", partnerId=" + organization.getId());
-	    }
-	}
+//	private void setDefaultPartnerCommunity(User user, Organization organization) {
+//	    try {
+//	        List<UserCurrentEntity> entityList = userService.listUserCurrentEntity(user.getId());
+//	        if(!containPartnerCommunity(entityList)) {
+//	            int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, 1);
+//	            List<OrganizationCommunity> result = organizationProvider.listOrganizationCommunities(organization.getId(), 1, pageSize);
+//	            if(result != null && result.size() > 0) {
+//	                Long communityId = result.get(0).getCommunityId();
+//	                userService.updateUserCurrentCommunityToProfile(user.getId(), communityId);
+//	                if(LOGGER.isInfoEnabled()) {
+//	                    LOGGER.info("Set default partner community, userId=" + user.getId() + ", communityId=" + communityId 
+//	                        + ", partnerId=" + organization.getId());
+//	                }
+//	            } else {
+//	                if(LOGGER.isInfoEnabled()) {
+//	                    LOGGER.info("Community not found, ignore to set default partner community, userId=" + user.getId()  
+//	                        + ", partnerId=" + organization.getId());
+//	                }
+//	            }
+//	        }
+//	    } catch(Exception e) {
+//	        LOGGER.error("Failed to set default partner community, userId=" + user.getId() + ", partnerId=" + organization.getId());
+//	    }
+//	}
 	
-	private boolean containPartnerCommunity(List<UserCurrentEntity> entityList) {
-	    if(entityList == null || entityList.size() == 0) {
-	        return false;
-	    }
-	    
-	    boolean isFound = false;
-	    for(UserCurrentEntity entity : entityList) {
-	        UserCurrentEntityType type = UserCurrentEntityType.fromCode(entity.getEntityType());
-	        if(type == UserCurrentEntityType.COMMUNITY_COMMERCIAL) {
-	            isFound = true;
-	            break;
-	        }
-	    }
-	    
-	    return isFound;
-	}
+//	private boolean containPartnerCommunity(List<UserCurrentEntity> entityList) {
+//	    if(entityList == null || entityList.size() == 0) {
+//	        return false;
+//	    }
+//	    
+//	    boolean isFound = false;
+//	    for(UserCurrentEntity entity : entityList) {
+//	        UserCurrentEntityType type = UserCurrentEntityType.fromCode(entity.getEntityType());
+//	        if(type == UserCurrentEntityType.COMMUNITY_COMMERCIAL) {
+//	            isFound = true;
+//	            break;
+//	        }
+//	    }
+//	    
+//	    return isFound;
+//	}
 	
 //	private void joinPartnerOrganization(User user, Organization organization) {
 //        try {
