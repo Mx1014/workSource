@@ -172,7 +172,8 @@ public class YellowPageServiceImpl implements YellowPageService {
 			 LOGGER.error("YellowPage already deleted , YellowPage Id =" + cmd.getId() );
 		}
 		yellowPage.setStatus(YellowPageStatus.INACTIVE.getCode());
-		yellowPage.setGeohash(GeoHashUtils.encode(yellowPage.getLatitude(), yellowPage.getLongitude()));
+		if(null != yellowPage.getLatitude())
+			yellowPage.setGeohash(GeoHashUtils.encode(yellowPage.getLatitude(), yellowPage.getLongitude()));
 		this.yellowPageProvider.updateYellowPage(yellowPage);
 	}
 
