@@ -95,6 +95,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	                    SelectQuery<? extends Record> query) {
 	                query.addConditions(Tables.EH_YELLOW_PAGES.OWNER_TYPE.eq(ownerType));
 	                query.addConditions(Tables.EH_YELLOW_PAGES.OWNER_ID.eq(ownerId));
+	                query.addConditions(Tables.EH_YELLOW_PAGES.STATUS.eq(YellowPageStatus.ACTIVE.getCode()));
 	                if(null!=parentId)
 	                	query.addConditions(Tables.EH_YELLOW_PAGES.PARENT_ID.eq(parentId));
 	                return query;

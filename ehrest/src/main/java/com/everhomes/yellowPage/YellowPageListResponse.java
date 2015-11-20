@@ -2,9 +2,11 @@ package com.everhomes.yellowPage;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 public class YellowPageListResponse {
+	@ItemType(YellowPageDTO.class)
 	private List<YellowPageDTO> yellowPages;
 	@Override
 	    public String toString() {
