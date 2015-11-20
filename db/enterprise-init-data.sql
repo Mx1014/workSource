@@ -34,6 +34,9 @@ INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, 
 
 		
 
+INSERT INTO `eh_forums`(`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
+		VALUES(177000, UUID(), 0, 2, '', 0, '创客空间论坛', '', 0, 0, UTC_TIMESTAMP(), UTC_TIMESTAMP());
+		
 
 INSERT INTO `eh_forums`(`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
 		VALUES(176520, UUID(), 0, 2, '', 0, '科技园论坛', '', 0, 0, UTC_TIMESTAMP(), UTC_TIMESTAMP());
