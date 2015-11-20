@@ -44,11 +44,11 @@ public class ThirdUserOpenController extends ControllerBase {
 	private AppProvider appProvider;
 	
 	/**
-     * <b>URL: /openapi/user/synCoupon</b>
+     * <b>URL: /openapi/user/initCoupon</b>
      */
-    @RequestMapping("synCoupon")
+    @RequestMapping("initCoupon")
     @RestReturn(String.class)
-    public RestResponse synCoupon(@Valid SynThridUserCommand cmd,HttpServletRequest request, HttpServletResponse response) {
+    public RestResponse initCoupon(@Valid SynThridUserCommand cmd,HttpServletRequest request, HttpServletResponse response) {
     	UserLogin login = this.userService.synThridUser(cmd);
     	
 		LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber());
