@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPosts extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhForumPostsRecord> {
 
-	private static final long serialVersionUID = -565565534;
+	private static final long serialVersionUID = -137493219;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_forum_posts</code>
@@ -164,7 +164,7 @@ public class EhForumPosts extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	/**
 	 * The column <code>ehcore.eh_forum_posts.embedded_json</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.String> EMBEDDED_JSON = createField("embedded_json", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.String> EMBEDDED_JSON = createField("embedded_json", org.jooq.impl.SQLDataType.CLOB, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_forum_posts.embedded_version</code>.

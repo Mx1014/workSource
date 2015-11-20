@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUsers implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1357342587;
+	private static final long serialVersionUID = -632815433;
 
 	private java.lang.Long     id;
 	private java.lang.String   uuid;
@@ -46,7 +46,7 @@ public class EhUsers implements java.io.Serializable {
 	private java.lang.String   salt;
 	private java.lang.String   passwordHash;
 	private java.lang.Integer  namespaceId;
-	private java.lang.String   namespaceUserId;
+	private java.lang.String   namespaceUserToken;
 
 	public EhUsers() {}
 
@@ -84,7 +84,7 @@ public class EhUsers implements java.io.Serializable {
 		java.lang.String   salt,
 		java.lang.String   passwordHash,
 		java.lang.Integer  namespaceId,
-		java.lang.String   namespaceUserId
+		java.lang.String   namespaceUserToken
 	) {
 		this.id = id;
 		this.uuid = uuid;
@@ -119,7 +119,7 @@ public class EhUsers implements java.io.Serializable {
 		this.salt = salt;
 		this.passwordHash = passwordHash;
 		this.namespaceId = namespaceId;
-		this.namespaceUserId = namespaceUserId;
+		this.namespaceUserToken = namespaceUserToken;
 	}
 
 	public java.lang.Long getId() {
@@ -386,11 +386,11 @@ public class EhUsers implements java.io.Serializable {
 		this.namespaceId = namespaceId;
 	}
 
-	public java.lang.String getNamespaceUserId() {
-		return this.namespaceUserId;
+	public java.lang.String getNamespaceUserToken() {
+		return this.namespaceUserToken;
 	}
 
-	public void setNamespaceUserId(java.lang.String namespaceUserId) {
-		this.namespaceUserId = namespaceUserId;
+	public void setNamespaceUserToken(java.lang.String namespaceUserToken) {
+		this.namespaceUserToken = namespaceUserToken;
 	}
 }
