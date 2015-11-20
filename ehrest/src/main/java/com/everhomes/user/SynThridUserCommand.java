@@ -8,10 +8,12 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * 	<li>namespaceUserToken : 第三方用户标识</li>
  * 	<li>namespaceId : 命令空间</li>
- * 	<li>signature : 签名</li>
  * 	<li>randomNum : 随机数</li>
  * 	<li>timestamp : 时间戳</li>
- * 	<li>appKey : 公钥</li>
+ * 	<li>sign : 签名</li>
+ * 	<li>key : 公钥</li>
+ * 	<li>userName : 用户名</li>
+ * 	<li>deviceIdentifier : 设备标识</li>
  * <ul>
  * 
  */
