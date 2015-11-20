@@ -36,10 +36,12 @@ INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `
 
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`) 
 		VALUES(1000001, 0, 'PM', '科技园物业', 0, '', '/1000001', 1, 2);
-
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status)
 	VALUES(1000001, 1000001, 'USER', 73551, 'manager', '徐明晓', 0, '13632650699', 2);	
 
+INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
+	VALUES(1001, 1000000, 'COMMUNITY', 240111044331046562, '2015-11-20 21:30:55');	
+	
 INSERT INTO `eh_forums`(`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
 		VALUES(177000, UUID(), 0, 2, '', 0, '创客空间论坛', '', 0, 0, UTC_TIMESTAMP(), UTC_TIMESTAMP());
 	

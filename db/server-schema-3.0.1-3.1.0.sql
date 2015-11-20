@@ -321,6 +321,7 @@ ALTER TABLE `eh_categories` ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0
 ALTER TABLE `eh_scoped_configurations` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE `eh_launch_pad_layouts` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE `eh_launch_pad_items` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
+UPDATE `eh_groups` SET namespace_id=0 WHERE namespace_id IS NULL;
 ALTER TABLE `eh_groups` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE `eh_forums` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE `eh_banners` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
