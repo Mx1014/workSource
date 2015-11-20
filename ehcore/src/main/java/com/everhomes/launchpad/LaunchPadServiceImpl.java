@@ -47,6 +47,7 @@ import com.everhomes.launchpad.admin.LaunchPadItemAdminDTO;
 import com.everhomes.launchpad.admin.ListLaunchPadLayoutAdminCommand;
 import com.everhomes.launchpad.admin.UpdateLaunchPadItemAdminCommand;
 import com.everhomes.launchpad.admin.UpdateLaunchPadLayoutAdminCommand;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.GetOrgDetailCommand;
 import com.everhomes.organization.ListUserRelatedOrganizationsCommand;
 import com.everhomes.organization.OrganizationDTO;
@@ -595,7 +596,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			item.setIconUri(cmd.getIconUri());
 			item.setItemWidth(cmd.getItemWidth() == null ? 1 : cmd.getItemWidth());
 			item.setItemHeight(cmd.getItemHeight() == null ? 1 : cmd.getItemHeight());
-			item.setNamespaceId(cmd.getNamespaceId() == null ? 0 : cmd.getNamespaceId());
+			item.setNamespaceId(cmd.getNamespaceId() == null ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId());
 			item.setScopeCode(itemScope.getScopeCode());
 			item.setScopeId(itemScope.getScopeId());
 			item.setDefaultOrder(itemScope.getDefaultOrder() == null ? 0 : itemScope.getDefaultOrder());
