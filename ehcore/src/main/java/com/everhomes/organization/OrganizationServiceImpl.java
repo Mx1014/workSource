@@ -2633,6 +2633,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				PmBuildingDTO dto = new PmBuildingDTO();
 				dto.setBuildingId(r.getScopeId());
 				Building building = communityProvider.findBuildingById(r.getScopeId());
+				if(building != null)
 				dto.setBuildingName(building.getName());
 				return dto;
 			}).collect(Collectors.toList());

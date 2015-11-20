@@ -1600,7 +1600,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			}
 			else
 				dto.setOwed(OwedType.NO_OWED.getCode());
-
+			dto.setAreaSize(apartmentDTO.getAreaSize());
+			dto.setEnterpriseName(apartmentDTO.getEnterpriseName());
 			list.add(dto);
 		}
 		return list;

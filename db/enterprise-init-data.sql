@@ -26,10 +26,13 @@ INSERT INTO `eh_user_groups` (`id`,  `owner_uid`,  `group_discriminator`,  `grou
 VALUES (312654, '73551', 'enterprise', '176389', '4', '240111044331046562', '7', '3', '2015-11-13 11:40:55');
 
 
+
+delete from `eh_organizations` where id = (1000001,1000000);
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`) 
-		VALUES(1000000, 0, 'PARTNER', '科技园版', 0, '', '/1000000', 1, 2);
-INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`) 
-		VALUES(1000001, 0, 'GANC', '科技园物业', 0, '', '/1000001', 1, 2);
+		VALUES(1000001, 0, 'PM', '科技园物业', 0, '', '/1000001', 1, 2);
+		
+
+		
 
 
 INSERT INTO `eh_forums`(`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
@@ -40,8 +43,7 @@ INSERT INTO `eh_forums`(`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `o
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`)
 	VALUES( 240111044331046562, UUID(), 13905, '深圳市',  13908, '南山区', '科技园', '科技工业园', '深圳市南山区科技园', NULL, '深圳科技工业园是我国大陆第一个高新科技产业园', '深圳科技工业园是我国大陆第一个高新科技产业园，于1985年由深圳市政府和中国科学院共同创办。1991年，经国务院批准，深圳科技工业园成为首批国家级高新技术产业园区。\r\n\r\n园区占地面积1.15平方公里，经过不断的开发建设，深圳科技工业园已成为投资环境优越、高新技术企业云集、科技开发实力雄厚、人才济济的科技园区。\r\n\r\n近几年来，公司紧紧抓住深圳市产业结构调整的机遇，重点推进深圳市金融服务技术创新基地、深港动漫及网游产业孵化基地、深港生产力基地的建设工作。走出了一条金融产业、文化产业与科技产业相互融合、共同发展的新型道路，力将科技园打造成为具有高科技含量的金融创新区与文化创意园。科技园金融基地作为深圳市率先启用的金融基地于2009年3月投入使用，目前已吸引大批知名的金融企业、金融服务类企业入驻，品牌效应初步树立。', NULL, NULL, NULL, NULL, NULL,NULL, 389, 1,NULL,'2','2015-11-05 14:43:25', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'1', 176520, 176521, UTC_TIMESTAMP());
 INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) VALUES(240111044331046665, 240111044331046562, '', 113.953126, 22.549823, 'ws103144hr9m');
-INSERT INTO `eh_organization_communities`(organization_id, community_id) VALUES(1000000, 240111044331046562);
-
+INSERT INTO `eh_organization_communities`(organization_id, community_id) VALUES(1000001, 240111044331046562);
 INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`) 
 		VALUES(176001, 240111044331046562, '金融基地', '金融基地', 73551, '13632650699', '深圳市南山区科技园科苑路6号', NULL, 113.953143, 22.549789, 'ws103144h9mf', '科技园金融基地一期总建筑面积9.6万平方米，项目分A、B两栋，每栋12层，1-3层为商业裙楼，约14000平方米，4-12层为办公场所。科技园金融基地一期写字楼荣获深圳首家国际绿色建筑LEEDTM认证金奖，独享双花园广场景观，南面为3000平米外花园广场，拥有面积达5000平米的围合式中央花园。尤为值得一提的是在基地建设运营中，科技园金融基地与世界著名的物业顾问公司——世邦魏理仕全方位合作，全方位提升物业管理水平。', 'cs://1/image/aW1hZ2UvTVRwbE1tVmlPRFV3WkRZeFlXUTJORGN5Wmpka1pXWmxPRGcxTVRrNU4yTXdZZw', 2, 1, NULL, 1, '2015-11-05 14:56:31', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`) 
