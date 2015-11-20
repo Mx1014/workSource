@@ -47,4 +47,14 @@ public class YellowPageController  extends ControllerBase {
     }
     
     
+    @RequireAuthentication(false)
+    @RequestMapping("addYellowPage")
+    @RestReturn(value=String.class)
+    public RestResponse addYellowPage(@Valid AddYellowPageCommand cmd) {
+    	 this.yellowPageService.addYellowPage(cmd);
+    	 RestResponse response = new RestResponse();
+         response.setErrorCode(ErrorCodes.SUCCESS);
+         response.setErrorDescription("OK");
+         return response;
+    }
 }

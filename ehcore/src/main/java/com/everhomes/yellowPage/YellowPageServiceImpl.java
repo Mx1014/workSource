@@ -97,6 +97,13 @@ public class YellowPageServiceImpl implements YellowPageService {
 			ServiceAlliance serviceAlliance =  ConvertHelper.convert(yellowPage ,ServiceAlliance.class);
 			response = ConvertHelper.convert(serviceAlliance,YellowPageDTO.class);
 		} 
+		else if (cmd.getType().equals(YellowPageType.MAKERZONE.getCode())){
+			MakerZone makerZone =  ConvertHelper.convert(yellowPage ,MakerZone.class);
+			response = ConvertHelper.convert(makerZone,YellowPageDTO.class);
+		} 
+		else{
+				response =  ConvertHelper.convert(yellowPage,YellowPageDTO.class);
+		}
 		return response;
 	}
  
@@ -118,8 +125,41 @@ public class YellowPageServiceImpl implements YellowPageService {
     			ServiceAlliance serviceAlliance =  ConvertHelper.convert(yellowPage ,ServiceAlliance.class);
     			response.getYellowPages().add( ConvertHelper.convert(serviceAlliance,YellowPageDTO.class) );
     		} 
+
+    		else if (cmd.getType().equals(YellowPageType.MAKERZONE.getCode())){
+    			MakerZone makerZone =  ConvertHelper.convert(yellowPage ,MakerZone.class);
+    			response.getYellowPages().add(ConvertHelper.convert(makerZone,YellowPageDTO.class));
+    		} 
+
+    		else{
+    			response.getYellowPages().add(ConvertHelper.convert(yellowPage,YellowPageDTO.class));
+    		}
         }
         return response;
 	}
 
+	@Override
+	public void addYellowPage(AddYellowPageCommand cmd) { 
+		YellowPage yp = null;
+		if(cmd.getType().equals(YellowPageType.SERVICEALLIANCE.getCode())){
+			ServiceAlliance serviceAlliance =  ConvertHelper.convert(cmd ,ServiceAlliance.class);
+			yp = ConvertHelper.convert(serviceAlliance,YellowPage.class);
+		} 
+		else if (cmd.getType().equals(YellowPageType.MAKERZONE.getCode())){
+			MakerZone makerZone =  ConvertHelper.convert(cmd ,MakerZone.class);
+			yp = ConvertHelper.convert(makerZone,YellowPage.class);
+		} 
+		else{
+			yp =  ConvertHelper.convert(cmd,YellowPage.class);
+		}
+		this.yellowPageProvider.createYellowPage(yp);
+		for (YellowPageAattchmentDTO dto: cmd.getAttachments()){
+			YellowPageAttachment attachment =  ConvertHelper.convert(dto,YellowPageAttachment.class);
+			attachment.setOwnerId(yp.getId());
+			this.yellowPageProvider.createYellowPageAttachments(attachment);
+		}
+		
+	}
+
+	
 }

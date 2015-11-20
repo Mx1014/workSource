@@ -29,7 +29,7 @@ import com.everhomes.util.StringHelper;
 *<li> attachments: 附件列表</li>
 
  * */
-public class YellowPageDTO {
+public class AddYellowPageCommand {
 	private java.lang.Long     id;
 	private java.lang.Long     parentId;
 	private java.lang.String   ownerType;
