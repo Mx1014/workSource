@@ -5,20 +5,19 @@ package com.everhomes.acl.admin;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.acl.Role;
 
 public class AclListAclRolesRestResponse extends RestResponseBase {
 
-    private List<Role> response;
+    private List<RoleDTO> response;
 
     public AclListAclRolesRestResponse () {
     }
 
-    public List<Role> getResponse() {
+    public List<RoleDTO> getResponse() {
         return response;
     }
 
-    public void setResponse(List<Role> response) {
+    public void setResponse(List<RoleDTO> response) {
         this.response = response;
     }
 }
