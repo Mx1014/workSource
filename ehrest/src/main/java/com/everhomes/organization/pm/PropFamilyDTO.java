@@ -21,6 +21,8 @@ public class PropFamilyDTO {
     private Long addressId;
     private String address;
     private Byte livingStatus;
+    private String enterpriseName;
+    private Double areaSize;
     
     private Byte owed;
     
@@ -85,6 +87,24 @@ public class PropFamilyDTO {
 
 	public void setLivingStatus(Byte livingStatus) {
 		this.livingStatus = livingStatus;
+	}
+	
+	
+
+	public String getEnterpriseName() {
+		return enterpriseName;
+	}
+
+	public void setEnterpriseName(String enterpriseName) {
+		this.enterpriseName = enterpriseName;
+	}
+
+	public Double getAreaSize() {
+		return areaSize;
+	}
+
+	public void setAreaSize(Double areaSize) {
+		this.areaSize = areaSize;
 	}
 
 	@Override
