@@ -4,7 +4,6 @@ package com.everhomes.organization;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
-
 import com.everhomes.util.StringHelper;
 
 /**
@@ -30,16 +29,15 @@ public class ListOrganizationCommunityCommandResponse {
 		this.nextPageOffset = nextPageOffset;
 	}
 
-	
-	public List<OrganizationCommunityDTO> getCommunities() {
-		return communities;
-	}
+    public List<OrganizationCommunityDTO> getCommunities() {
+        return communities;
+    }
 
-	public void setCommunities(List<OrganizationCommunityDTO> communities) {
-		this.communities = communities;
-	}
+    public void setCommunities(List<OrganizationCommunityDTO> communities) {
+        this.communities = communities;
+    }
 
-	@Override
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
