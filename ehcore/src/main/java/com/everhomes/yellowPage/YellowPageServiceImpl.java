@@ -3,10 +3,13 @@ package com.everhomes.yellowPage;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import ch.hsr.geohash.GeoHash;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
@@ -159,8 +162,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 			this.yellowPageProvider.createYellowPageAttachments(attachment);
 		}
 		
-	}
-
+	} 
 	@Override
 	public void deleteYellowPage(DeleteYellowPageCommand cmd) {
 		// TODO Auto-generated method stub
@@ -170,6 +172,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 			 LOGGER.error("YellowPage already deleted , YellowPage Id =" + cmd.getId() );
 		}
 		yellowPage.setStatus(YellowPageStatus.INACTIVE.getCode());
+		yellowPage.setGeohash(GeoHashUtils.encode(yellowPage.getLatitude(), yellowPage.getLongitude()));
 		this.yellowPageProvider.updateYellowPage(yellowPage);
 	}
 
