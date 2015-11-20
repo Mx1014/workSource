@@ -4,20 +4,20 @@ package com.everhomes.namespace;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.organization.ListOrganizationCommunityCommandResponse;
+import com.everhomes.namespace.ListCommunityByNamespaceCommandResponse;
 
 public class ListCommunityByNamespaceRestResponse extends RestResponseBase {
 
-    private ListOrganizationCommunityCommandResponse response;
+    private ListCommunityByNamespaceCommandResponse response;
 
     public ListCommunityByNamespaceRestResponse () {
     }
 
-    public ListOrganizationCommunityCommandResponse getResponse() {
+    public ListCommunityByNamespaceCommandResponse getResponse() {
         return response;
     }
 
-    public void setResponse(ListOrganizationCommunityCommandResponse response) {
+    public void setResponse(ListCommunityByNamespaceCommandResponse response) {
         this.response = response;
     }
 }
