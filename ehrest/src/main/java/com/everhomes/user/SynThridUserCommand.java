@@ -24,6 +24,14 @@ public class SynThridUserCommand {
 	private Integer randomNum;
 	@NotNull
 	private Long timestamp;
+	@NotNull
+	private String sign;
+	@NotNull
+	private String key;
+	
+	private String userName;
+    
+    private String deviceIdentifier;
 
 	public String getNamespaceUserToken() {
         return namespaceUserToken;
@@ -57,7 +65,39 @@ public class SynThridUserCommand {
         this.timestamp = timestamp;
     }
 
-    @Override
+    public String getSign() {
+		return sign;
+	}
+
+	public void setSign(String sign) {
+		this.sign = sign;
+	}
+
+	public String getKey() {
+		return key;
+	}
+
+	public void setKey(String key) {
+		this.key = key;
+	}
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	public String getDeviceIdentifier() {
+		return deviceIdentifier;
+	}
+
+	public void setDeviceIdentifier(String deviceIdentifier) {
+		this.deviceIdentifier = deviceIdentifier;
+	}
+
+	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
