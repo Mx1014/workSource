@@ -13,20 +13,23 @@ import com.everhomes.util.StringHelper;
  *<li>identifierToken:手机号或者邮箱</li>
  *<li>ifExistsThenOverride:如果identifier已经存在是否进行覆盖</li>
  *<li>channel_id:渠道</li>
+ *<li>namespaceId:名字空间ID</li>
  *<ul>
  */
 public class SignupCommand {
     @Pattern(regexp = "mobile|email")
     @NotNull
-    String type;
+    private String type;
     
     @NotNull
-    String token;
+    private String token;
     
-    Long channel_id;
+    private Long channel_id;
     
     
-    Integer ifExistsThenOverride;
+    private Integer ifExistsThenOverride;
+    
+    private Integer namespaceId;
     
     public Long getChannel_id() {
 		return channel_id;
@@ -61,6 +64,14 @@ public class SignupCommand {
     
     public void setIfExistsThenOverride(Integer ifExistsThenOverride) {
         this.ifExistsThenOverride = ifExistsThenOverride;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     @Override

@@ -37,6 +37,7 @@ public class CreateGroupCommand {
 
     // json of List<RegionDescriptor>
     private String explicitRegionDescriptorsJson;
+    private Integer namespaceId;
     
     public CreateGroupCommand() {
     }
@@ -135,6 +136,14 @@ public class CreateGroupCommand {
 
     public void setVisibleRegionId(Long visibleRegionId) {
         this.visibleRegionId = visibleRegionId;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     @Override

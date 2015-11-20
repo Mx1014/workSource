@@ -488,8 +488,9 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 
 		if (locator.getAnchor() == null)
 			locator.setAnchor(0L);
-		int count = PaginationConfigHelper
-				.getPageSize(configProvider, pageSize);
+//		int count = PaginationConfigHelper
+//				.getPageSize(configProvider, pageSize);
+		int count = pageSize==null? AppConstants.PAGINATION_MAX_SIZE:pageSize;
 		List<EnterpriseContact> contacts = this.enterpriseContactProvider
 				.listContactByEnterpriseId(locator, enterpriseId, count + 1,keyWord);
 
@@ -900,6 +901,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
         EnterpriseContact contact = checkEnterpriseContactParameter(enterpriseId, userId, userId, tag);
         GroupMemberStatus status = GroupMemberStatus.fromCode(contact.getStatus());
         if(status == GroupMemberStatus.ACTIVE) {
+        	contact.setStatus(GroupMemberStatus.INACTIVE.getCode());
             deleteActiveEnterpriseContact(userId, contact, false, "");
         } else {
             deletePendingEnterpriseContact(userId, contact, true);

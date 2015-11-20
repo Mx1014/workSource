@@ -1,36 +1,6 @@
 use ehcore;
 
 
-/*Table structure for table `eh_company_phone_list` */
-
-DROP TABLE IF EXISTS `eh_group_contacts`;
-
-CREATE TABLE `eh_group_contacts` (
-	`id` BIGINT(20) NOT NULL,
-	`owner_type` VARCHAR(64) NOT NULL,
-	`owner_id` BIGINT NOT NULL COMMENT 'company id',
-	`contact_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'the user id related to the contact',	
-	`contact_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: mobile, 1: email',
-	`contact_token` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'phone number or email address',
-	`contact_name` VARCHAR(64),
-    `integral_tag1` BIGINT,
-    `integral_tag2` BIGINT,
-    `integral_tag3` BIGINT,
-    `integral_tag4` BIGINT,
-    `integral_tag5` BIGINT,
-    `string_tag1` VARCHAR(128),
-    `string_tag2` VARCHAR(128),
-    `string_tag3` VARCHAR(128),
-    `string_tag4` VARCHAR(128),
-    `string_tag5` VARCHAR(128),
-	`creator_uid` BIGINT,
-	`create_time` DATETIME,
-	`operator_uid` BIGINT,
-	`operate_time` DATETIME,
-	PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
-
-
 
 
 /*Table structure for table `eh_punch_logs` */
@@ -38,9 +8,9 @@ CREATE TABLE `eh_group_contacts` (
 DROP TABLE IF EXISTS `eh_punch_logs`;
 
 CREATE TABLE `eh_punch_logs` (
-  `id` BIGINT(20) NOT NULL COMMENT 'id',
-  `user_id` BIGINT(20) COMMENT 'user''s id',
-  `company_id` BIGINT(20) COMMENT 'compay id',
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `user_id` BIGINT COMMENT 'user''s id',
+  `company_id` BIGINT COMMENT 'compay id',
   `longitude` DOUBLE,
   `latitude` DOUBLE,
   `punch_date` DATE COMMENT 'user punch date',
@@ -52,9 +22,9 @@ CREATE TABLE `eh_punch_logs` (
 DROP TABLE IF EXISTS `eh_punch_day_logs`;
 
 CREATE TABLE `eh_punch_day_logs` (
-  `id` BIGINT(20) NOT NULL COMMENT 'id',
-  `user_id` BIGINT(20) COMMENT 'user''s id',
-  `company_id` BIGINT(20) COMMENT 'compay id',
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `user_id` BIGINT COMMENT 'user''s id',
+  `company_id` BIGINT COMMENT 'compay id',
   `punch_date` DATE COMMENT 'user punch date',
   `arrive_time` TIME ,
   `leave_time` TIME ,
@@ -73,8 +43,8 @@ CREATE TABLE `eh_punch_day_logs` (
 DROP TABLE IF EXISTS `eh_punch_rules`;
 
 CREATE TABLE `eh_punch_rules` (
-  `id` BIGINT(20) NOT NULL COMMENT 'id',
-  `company_id` BIGINT(20) NOT NULL COMMENT 'rule company id', 
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `company_id` BIGINT NOT NULL COMMENT 'rule company id', 
   `start_early_time` TIME COMMENT 'how early can i arrive',
   `start_late_time` TIME COMMENT 'how late can i arrive ',
   `work_time` TIME COMMENT 'how long do i must be work',
@@ -91,8 +61,8 @@ CREATE TABLE `eh_punch_rules` (
 DROP TABLE IF EXISTS `eh_punch_geopoints`;
 
 CREATE TABLE `eh_punch_geopoints` (
-  `id` BIGINT(20) NOT NULL COMMENT 'id of the record',
-  `company_id` BIGINT(20) DEFAULT NULL,
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `company_id` BIGINT DEFAULT NULL,
   `description` VARCHAR(256) DEFAULT NULL,
   `longitude` DOUBLE DEFAULT NULL,
   `latitude` DOUBLE DEFAULT NULL,
@@ -110,9 +80,9 @@ CREATE TABLE `eh_punch_geopoints` (
 DROP TABLE IF EXISTS `eh_punch_exception_requests`;
 
 CREATE TABLE `eh_punch_exception_requests` (
-  `id` BIGINT(20) NOT NULL COMMENT 'id',
-  `user_id` BIGINT(20) COMMENT 'user''s id',
-  `company_id` BIGINT(20) COMMENT 'compay id',
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `user_id` BIGINT COMMENT 'user''s id',
+  `company_id` BIGINT COMMENT 'compay id',
   `punch_date` DATE COMMENT 'user punch date',
   `request_type` TINYINT(4) COMMENT '0:request ;  1:approval',
   `description` VARCHAR(256) ,
@@ -132,9 +102,9 @@ CREATE TABLE `eh_punch_exception_requests` (
 DROP TABLE IF EXISTS `eh_punch_exception_approvals`;
 
 CREATE TABLE `eh_punch_exception_approvals` (
-  `id` BIGINT(20) NOT NULL COMMENT 'id',
-  `user_id` BIGINT(20) COMMENT 'user''s id',
-  `company_id` BIGINT(20) COMMENT 'compay id',
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `user_id` BIGINT COMMENT 'user''s id',
+  `company_id` BIGINT COMMENT 'compay id',
   `punch_date` DATE COMMENT 'user punch date',
   `approval_status` TINYINT NOT NULL DEFAULT 1 COMMENT 'NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)',
 	`creator_uid` BIGINT,
@@ -150,7 +120,7 @@ CREATE TABLE `eh_punch_exception_approvals` (
 DROP TABLE IF EXISTS `eh_punch_workday`;
 
 CREATE TABLE `eh_punch_workday` (
-  `id` BIGINT(20) NOT NULL COMMENT 'id',
+  `id` BIGINT NOT NULL COMMENT 'id',
   `date_status` TINYINT(4) COMMENT '0:weekend work date ;  1:holiday',
   `date_tag` DATE COMMENT 'date',
 	`creator_uid` BIGINT,
@@ -185,10 +155,10 @@ CREATE TABLE `eh_rental_rules` (
   `datetime_tag1` DATETIME,
   `datetime_tag2` DATETIME,
   `datetime_tag3` DATETIME,
-  `integral_tag1` BIGINT(20) ,
-  `integral_tag2` BIGINT(20) ,
-  `integral_tag3` BIGINT(20) ,
-  `integral_tag4` BIGINT(20) ,
+  `integral_tag1` BIGINT ,
+  `integral_tag2` BIGINT ,
+  `integral_tag3` BIGINT ,
+  `integral_tag4` BIGINT ,
   `string_tag1` VARCHAR(128) ,
   `string_tag2` VARCHAR(128) ,
   `string_tag3` VARCHAR(128) ,
@@ -208,7 +178,7 @@ DROP TABLE IF EXISTS `eh_rental_sites`;
 CREATE TABLE `eh_rental_sites`(
   `id` BIGINT NOT NULL COMMENT 'id',
   `parent_id` BIGINT ,
-  `community_id` BIGINT(20) NOT NULL COMMENT ' enterprise  community id', 
+  `community_id` BIGINT NOT NULL COMMENT ' enterprise  community id', 
   `site_type`  VARCHAR(128) ,
   `site_name` VARCHAR(127),
   `site_type2` TINYINT(4),
@@ -253,7 +223,7 @@ DROP TABLE IF EXISTS `eh_rental_site_rules`;
 
 CREATE TABLE `eh_rental_site_rules`(
   `id` BIGINT  NOT NULL COMMENT 'id',
-  `community_id` BIGINT(20) NOT NULL COMMENT ' enterprise  community id', 
+  `community_id` BIGINT NOT NULL COMMENT ' enterprise  community id', 
   `site_type`  VARCHAR(128) ,
   `rental_site_id` BIGINT NOT NULL COMMENT 'rental_site id', 
   `rental_type` tinyint(4) COMMENT '0: as hour:min  1-as half day 2-as day',
@@ -279,7 +249,7 @@ DROP TABLE IF EXISTS `eh_rental_bills`;
 
 CREATE TABLE `eh_rental_bills`(
   `id` BIGINT NOT NULL COMMENT 'id',
-  `community_id` BIGINT(20) NOT NULL COMMENT ' enterprise  community id', 
+  `community_id` BIGINT NOT NULL COMMENT ' enterprise  community id', 
   `site_type`  VARCHAR(128) ,
   `rental_site_id` BIGINT NOT NULL COMMENT 'id',
   `rental_uid` BIGINT COMMENT 'rental user id',
@@ -311,7 +281,7 @@ DROP TABLE IF EXISTS  `eh_rental_bill_attachments`;
 
 CREATE TABLE `eh_rental_bill_attachments`(
   `id` BIGINT NOT NULL COMMENT 'id',
-  `community_id` BIGINT(20) NOT NULL COMMENT ' enterprise  community id', 
+  `community_id` BIGINT NOT NULL COMMENT ' enterprise  community id', 
   `site_type`  VARCHAR(128) ,
   `rental_bill_id` BIGINT ,
   `attachment_type` TINYINT COMMENT '0:String 1:email 2:attachment file',  
@@ -329,7 +299,7 @@ DROP TABLE IF EXISTS  `eh_rental_sites_bills`;
 
 CREATE TABLE `eh_rental_sites_bills`(
   `id` BIGINT NOT NULL COMMENT 'id',
-  `community_id` BIGINT(20) NOT NULL COMMENT ' enterprise  community id', 
+  `community_id` BIGINT NOT NULL COMMENT ' enterprise  community id', 
   `site_type`  VARCHAR(128) ,
   `rental_bill_id` BIGINT ,
   `rental_site_rule_id` BIGINT ,  
@@ -345,7 +315,7 @@ DROP TABLE IF EXISTS  `eh_rental_items_bills`;
 
 CREATE TABLE `eh_rental_items_bills`(
   `id` BIGINT NOT NULL COMMENT 'id',
-  `community_id` BIGINT(20) NOT NULL COMMENT ' enterprise  community id', 
+  `community_id` BIGINT NOT NULL COMMENT ' enterprise  community id', 
   `site_type`  VARCHAR(128) ,
   `rental_bill_id` BIGINT ,
   `rental_site_item_id` BIGINT ,  
@@ -362,7 +332,7 @@ CREATE TABLE `eh_rental_items_bills`(
 DROP TABLE IF EXISTS  `eh_rental_bill_paybill_map`;
 CREATE TABLE `eh_rental_bill_paybill_map`(
   `id` BIGINT NOT NULL COMMENT 'id',
-  `community_id` BIGINT(20) NOT NULL COMMENT ' enterprise  community id', 
+  `community_id` BIGINT NOT NULL COMMENT ' enterprise  community id', 
   `site_type`  VARCHAR(128) ,
   `rental_bill_id` BIGINT ,
   `online_pay_bill_id` BIGINT ,
@@ -420,3 +390,53 @@ CREATE TABLE `eh_park_apply_card` (
   `community_id` BIGINT NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+#
+# member of global sharding group
+#
+DROP TABLE IF EXISTS `eh_yellow_pages`;
+CREATE TABLE `eh_yellow_pages` (
+	`id` BIGINT NOT NULL,
+	`parent_id` BIGINT NOT NULL DEFAULT 0 , 
+	`owner_type` VARCHAR(64) NOT NULL COMMENT 'community;group,organaization,exhibition,',
+	`owner_id` BIGINT NOT NULL DEFAULT 0 , 
+	`name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'organization name',
+	`nick_name` VARCHAR(128) NOT NULL DEFAULT '' ,
+	`type`  TINYINT(4) NOT NULL DEFAULT 0 COMMENT '1 chuangkekongjian; 2 fuwulianmeng; 3 yuanquqiye',
+	`address` VARCHAR(255) NOT NULL DEFAULT '',
+	`contact` VARCHAR(64) ,
+	`description` TEXT,
+	`poster_uri` VARCHAR(128) DEFAULT NULL, 
+	`status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: waitingForConfirmation, 2: active',
+	`default_order` INTEGER,
+	`longitude` DOUBLE DEFAULT NULL,
+	`latitude` DOUBLE DEFAULT NULL,
+	`geohash` VARCHAR(32) DEFAULT NULL,
+    `integral_tag1` BIGINT,
+    `integral_tag2` BIGINT,
+    `integral_tag3` BIGINT,
+    `integral_tag4` BIGINT,
+    `integral_tag5` BIGINT,
+    `string_tag1` VARCHAR(128),
+    `string_tag2` VARCHAR(128),
+    `string_tag3` VARCHAR(128),
+    `string_tag4` VARCHAR(128),
+    `string_tag5` VARCHAR(128),
+	`creator_uid` BIGINT,
+	`create_time` DATETIME,
+	
+	PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+#
+# member of global sharding group
+#
+CREATE TABLE `eh_yellow_page_attachments` (
+	`id` BIGINT NOT NULL COMMENT 'id of the record',
+	`owner_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'the id reference to eh_yellow_pages',
+	`content_type` VARCHAR(32) DEFAULT NULL COMMENT 'attachment object content type',
+	`content_uri` VARCHAR(1024) DEFAULT NULL COMMENT 'attachment object link info on storage',
+	`creator_uid` BIGINT NOT NULL DEFAULT 0,
+	`create_time` DATETIME,
+	PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;

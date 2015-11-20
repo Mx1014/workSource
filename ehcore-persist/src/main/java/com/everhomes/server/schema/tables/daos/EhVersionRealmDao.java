@@ -74,4 +74,11 @@ public class EhVersionRealmDao extends org.jooq.impl.DAOImpl<com.everhomes.serve
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhVersionRealm> fetchByCreateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhVersionRealm.EH_VERSION_REALM.CREATE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>namespace_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhVersionRealm> fetchByNamespaceId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhVersionRealm.EH_VERSION_REALM.NAMESPACE_ID, values);
+	}
 }

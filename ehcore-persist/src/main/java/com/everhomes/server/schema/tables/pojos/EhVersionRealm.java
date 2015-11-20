@@ -11,12 +11,13 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhVersionRealm implements java.io.Serializable {
 
-	private static final long serialVersionUID = 799473790;
+	private static final long serialVersionUID = -30030130;
 
 	private java.lang.Long     id;
 	private java.lang.String   realm;
 	private java.lang.String   description;
 	private java.sql.Timestamp createTime;
+	private java.lang.Integer  namespaceId;
 
 	public EhVersionRealm() {}
 
@@ -24,12 +25,14 @@ public class EhVersionRealm implements java.io.Serializable {
 		java.lang.Long     id,
 		java.lang.String   realm,
 		java.lang.String   description,
-		java.sql.Timestamp createTime
+		java.sql.Timestamp createTime,
+		java.lang.Integer  namespaceId
 	) {
 		this.id = id;
 		this.realm = realm;
 		this.description = description;
 		this.createTime = createTime;
+		this.namespaceId = namespaceId;
 	}
 
 	public java.lang.Long getId() {
@@ -62,5 +65,13 @@ public class EhVersionRealm implements java.io.Serializable {
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+	public java.lang.Integer getNamespaceId() {
+		return this.namespaceId;
+	}
+
+	public void setNamespaceId(java.lang.Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 }

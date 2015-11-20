@@ -150,15 +150,27 @@ public class OrganizationController extends ControllerBase {
 	@RequestMapping("listOrganizationCommunities")
 	@RestReturn(value=ListOrganizationCommunityCommandResponse.class)
 	public RestResponse listOrganizationCommunities(@Valid ListOrganizationCommunityCommand cmd) {
-//	    if(cmd.getOrganizationId() == null) {
-//	        cmd.setOrganizationId(1000000L);
-//	    }
 		ListOrganizationCommunityCommandResponse commandResponse = organizationService.listOrganizationCommunities(cmd);
 		RestResponse response = new RestResponse(commandResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	/**
+     * <b>URL: /org/listOrganizationCommunitiesV2</b>
+     * <p>根据机构ID列出机构所管辖的小区信息，与listOrganizationCommunities的区别是返回值是CommunityDTO</p>
+     */
+    //checked
+    @RequestMapping("listOrganizationCommunitiesV2")
+    @RestReturn(value=ListOrganizationCommunityCommandResponse.class)
+    public RestResponse listOrganizationCommunitiesV2(@Valid ListOrganizationCommunityCommand cmd) {
+        ListOrganizationCommunityV2CommandResponse commandResponse = organizationService.listOrganizationCommunitiesV2(cmd);
+        RestResponse response = new RestResponse(commandResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 	/**
 	 * <b>URL: /org/findUserByIndentifier</b>

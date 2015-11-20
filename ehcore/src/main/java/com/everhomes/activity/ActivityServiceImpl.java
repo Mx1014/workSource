@@ -832,14 +832,16 @@ public class ActivityServiceImpl implements ActivityService {
     @SuppressWarnings("unchecked")
     @Override
     public List<Category> listActivityCategories(ListActivityCategoriesCommand cmd) {
+    	User user = UserContext.current().getUser();
+		Integer namespaceId = (user.getNamespaceId() == null) ? 0 : user.getNamespaceId();
         Tuple[] orderBy = new Tuple[1]; 
         orderBy[0] = new Tuple<String, SortOrder>("default_order", SortOrder.ASC);
-        List<Category> result = categoryProvider.listChildCategories(CategoryConstants.CATEGORY_ID_ACTIVITY, CategoryAdminStatus.ACTIVE,orderBy);
+        List<Category> result = categoryProvider.listChildCategories(namespaceId, CategoryConstants.CATEGORY_ID_ACTIVITY, CategoryAdminStatus.ACTIVE,orderBy);
         
-        if(cmd != null && cmd.getCommunityFlagId() != null  && CommunityAppType.TECHPARK.getCode() == cmd.getCommunityFlagId()) {
-        	List<Category> tech = categoryProvider.listChildCategories(CategoryConstants.CATEGORY_ID_TECH_ACTIVITY, CategoryAdminStatus.ACTIVE,orderBy);
-        	result.addAll(tech);
-        }
+//        if(cmd != null && cmd.getCommunityFlagId() != null  && CommunityAppType.TECHPARK.getCode() == cmd.getCommunityFlagId()) {
+//        	List<Category> tech = categoryProvider.listChildCategories(namespaceId, CategoryConstants.CATEGORY_ID_TECH_ACTIVITY, CategoryAdminStatus.ACTIVE,orderBy);
+//        	result.addAll(tech);
+//        }
         return result;
     }
 

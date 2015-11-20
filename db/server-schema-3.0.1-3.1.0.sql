@@ -220,8 +220,8 @@ CREATE TABLE `eh_building_attachments` (
     `building_id` BIGINT NOT NULL DEFAULT 0,
     `content_type` VARCHAR(32) COMMENT 'attachment object content type',
     `content_uri` VARCHAR(1024) COMMENT 'attachment object link info on storage',
-    `creator_uid` BIGINT NOT NULL,
-    `create_time` DATETIME NOT NULL,
+    `creator_uid` BIGINT NOT NULL DEFAULT 0,
+    `create_time` DATETIME,
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -251,7 +251,7 @@ CREATE TABLE `eh_organization_assigned_scopes` (
   `scope_id` BIGINT,
   
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 # 
 # member of eh_users partition
@@ -265,26 +265,70 @@ CREATE TABLE `eh_user_communities` (
     `community_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'redendant info for quickly distinguishing associated community', 
     `community_id` BIGINT NOT NULL DEFAULT 0,
     `join_policy` TINYINT NOT NULL DEFAULT 1 COMMENT '1: register, 2: request to join',
-    `create_time` DATETIME NOT NULL,
+    `create_time` DATETIME,
     
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_usr_community`(`owner_uid`, `community_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-# reuse eh_communities for eh_enterprise_communities
+#
+# member of global partition
+#
+-- DROP TABLE IF EXISTS `eh_namespace_resources`;
+CREATE TABLE `eh_namespace_resources` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `namespace_id` INTEGER NOT NULL DEFAULT 0,
+    `resource_type` VARCHAR(128) COMMENT 'COMMUNITY',
+    `resource_id` BIGINT NOT NULL DEFAULT 0,
+    `create_time` DATETIME,
+    PRIMARY KEY (`id`),
+    UNIQUE `u_eh_namespace_resource_id`(`namespace_id`, `resource_type`, `resource_id`),
+    INDEX `i_eh_resource_id`(`resource_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+
+-- reuse eh_communities for eh_enterprise_communities
 ALTER TABLE `eh_communities` ADD COLUMN `community_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: residential, 1: commercial';
 ALTER TABLE `eh_communities` ADD COLUMN `default_forum_id` BIGINT NOT NULL DEFAULT 1 COMMENT 'the default forum for the community, forum-1 is system default forum';
 ALTER TABLE `eh_communities` ADD COLUMN `feedback_forum_id` BIGINT NOT NULL DEFAULT 2 COMMENT 'the default forum for the community, forum-2 is system feedback forum';
 ALTER TABLE `eh_communities` ADD COLUMN `update_time` DATETIME;
 ALTER TABLE `eh_groups` ADD COLUMN `visible_region_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'the type of region where the group belong to';
 ALTER TABLE `eh_groups` ADD COLUMN `visible_region_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the id of region where the group belong to';
-ALTER TABLE `eh_users` ADD COLUMN `site_uri` VARCHAR(2048) NOT NULL DEFAULT '' COMMENT 'the site uri of third-part system';
-ALTER TABLE `eh_users` ADD COLUMN `site_user_token` VARCHAR(2048) NOT NULL DEFAULT '' COMMENT 'the site user token of third-part system';
-ALTER TABLE `eh_launch_pad_layouts` ADD COLUMN `site_uri` VARCHAR(2048) NOT NULL DEFAULT '' COMMENT 'the site uri of third-part system';
-ALTER TABLE `eh_launch_pad_items` ADD COLUMN `site_uri` VARCHAR(2048) NOT NULL DEFAULT '' COMMENT 'the site uri of third-part system';
-ALTER TABLE `eh_banners` ADD COLUMN `site_uri` VARCHAR(2048) NOT NULL DEFAULT '' COMMENT 'the site uri of third-part system';
 ALTER TABLE `eh_user_profiles` MODIFY COLUMN `item_name` VARCHAR(128) ;
 ALTER TABLE `eh_addresses` ADD COLUMN `area_size` DOUBLE COMMENT 'the area size of the room according to the address';
+
+-- ALTER TABLE `eh_users` DROP COLUMN `site_uri`;
+-- ALTER TABLE `eh_users` DROP COLUMN `site_user_token`;
+-- ALTER TABLE `eh_launch_pad_layouts` DROP COLUMN `site_uri`;
+-- ALTER TABLE `eh_launch_pad_items` DROP COLUMN `site_uri`;
+-- ALTER TABLE `eh_banners` DROP COLUMN `site_uri`;
+
+-- ALTER TABLE `eh_users` ADD COLUMN `site_uri` VARCHAR(2048) NOT NULL DEFAULT '' COMMENT 'the site uri of third-part system';
+-- ALTER TABLE `eh_users` ADD COLUMN `site_user_token` VARCHAR(2048) NOT NULL DEFAULT '' COMMENT 'the site user token of third-part system';
+-- ALTER TABLE `eh_launch_pad_layouts` ADD COLUMN `site_uri` VARCHAR(2048) NOT NULL DEFAULT '' COMMENT 'the site uri of third-part system';
+-- ALTER TABLE `eh_launch_pad_items` ADD COLUMN `site_uri` VARCHAR(2048) NOT NULL DEFAULT '' COMMENT 'the site uri of third-part system';
+-- ALTER TABLE `eh_banners` ADD COLUMN `site_uri` VARCHAR(2048) NOT NULL DEFAULT '' COMMENT 'the site uri of third-part system';
+ALTER TABLE `eh_users` ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE `eh_users` ADD COLUMN `namespace_user_id` VARCHAR(2048) NOT NULL DEFAULT '';
+ALTER TABLE `eh_user_identifiers` ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE `eh_version_realm` ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE `eh_version_upgrade_rules` ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE `eh_version_urls` ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE `eh_versioned_content` ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE `eh_categories` ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
+
+ALTER TABLE `eh_scoped_configurations` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE `eh_launch_pad_layouts` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE `eh_launch_pad_items` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE `eh_groups` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE `eh_forums` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE `eh_banners` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE `eh_binary_resources` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE `eh_rtxt_resources` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE `eh_events` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE `eh_polls` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
+
 
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'enterprise.notification', 1, 'zh_CN', '用户加入企业，用户自己的消息', '您已加入公司“${enterpriseName}”。');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'enterprise.notification', 2, 'zh_CN', '发给企业其它所有成员', '${userName}已加入公司“${enterpriseName}”。');

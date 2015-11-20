@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLaunchPadLayouts extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhLaunchPadLayoutsRecord> {
 
-	private static final long serialVersionUID = 1038941366;
+	private static final long serialVersionUID = -2078216493;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_launch_pad_layouts</code>
@@ -34,7 +34,7 @@ public class EhLaunchPadLayouts extends org.jooq.impl.TableImpl<com.everhomes.se
 	/**
 	 * The column <code>ehcore.eh_launch_pad_layouts.namespace_id</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadLayoutsRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadLayoutsRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_launch_pad_layouts.name</code>.
@@ -65,11 +65,6 @@ public class EhLaunchPadLayouts extends org.jooq.impl.TableImpl<com.everhomes.se
 	 * The column <code>ehcore.eh_launch_pad_layouts.create_time</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadLayoutsRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
-
-	/**
-	 * The column <code>ehcore.eh_launch_pad_layouts.site_uri</code>. the site uri of third-part system
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadLayoutsRecord, java.lang.String> SITE_URI = createField("site_uri", org.jooq.impl.SQLDataType.VARCHAR.length(2048).nullable(false).defaulted(true), this, "the site uri of third-part system");
 
 	/**
 	 * Create a <code>ehcore.eh_launch_pad_layouts</code> table reference

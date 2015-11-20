@@ -12,6 +12,8 @@ public class VersionRequestCommand {
     
     private String locale;
     
+    private Integer namespaceId;
+    
     public VersionRequestCommand() {
     }
 
@@ -38,4 +40,13 @@ public class VersionRequestCommand {
     public void setLocale(String locale) {
         this.locale = locale;
     }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+    
 }

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhVersionedContent extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhVersionedContentRecord> {
 
-	private static final long serialVersionUID = -1627456015;
+	private static final long serialVersionUID = 654894073;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_versioned_content</code>
@@ -60,6 +60,11 @@ public class EhVersionedContent extends org.jooq.impl.TableImpl<com.everhomes.se
 	 * The column <code>ehcore.eh_versioned_content.create_time</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhVersionedContentRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_versioned_content.namespace_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhVersionedContentRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_versioned_content</code> table reference

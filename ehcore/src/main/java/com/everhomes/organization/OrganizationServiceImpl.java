@@ -37,6 +37,7 @@ import com.everhomes.acl.RoleAssignment;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressAdminStatus;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.address.CommunityDTO;
 import com.everhomes.app.AppConstants;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryConstants;
@@ -786,6 +787,32 @@ public class OrganizationServiceImpl implements OrganizationService {
 		response.setNextPageOffset(cmd.getPageOffset()==pageCount? null : cmd.getPageOffset()+1);
 		return response;
 	}
+	
+	@Override
+    public ListOrganizationCommunityV2CommandResponse listOrganizationCommunitiesV2(ListOrganizationCommunityCommand cmd) {
+        ListOrganizationCommunityV2CommandResponse response = new ListOrganizationCommunityV2CommandResponse();
+
+        cmd.setPageOffset(cmd.getPageOffset() == null ? 1: cmd.getPageOffset());
+        int totalCount = organizationProvider.countOrganizationCommunitys(cmd.getOrganizationId());
+        if(totalCount == 0) return response;
+
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        int pageCount = getPageCount(totalCount, pageSize);
+
+        List<OrganizationCommunity> result = organizationProvider.listOrganizationCommunities(cmd.getOrganizationId(),cmd.getPageOffset(),pageSize);
+        List<CommunityDTO> communityList = new ArrayList<CommunityDTO>();
+        if(result != null && result.size() > 0){
+            CommunityDTO dto = null;
+            for (OrganizationCommunity organizationCommunity : result) {
+                Community community = communityProvider.findCommunityById(organizationCommunity.getCommunityId());
+                dto = ConvertHelper.convert(community, CommunityDTO.class);
+                communityList.add(dto);
+            }
+        }
+        response.setCommunities(communityList);
+        response.setNextPageOffset(cmd.getPageOffset()==pageCount? null : cmd.getPageOffset()+1);
+        return response;
+    }
 
 	@Override
 	public List<Long> getOrganizationCommunityIdById(Long organizationId) {
@@ -2634,7 +2661,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				dto.setBuildingId(r.getScopeId());
 				Building building = communityProvider.findBuildingById(r.getScopeId());
 				if(building != null)
-				dto.setBuildingName(building.getName());
+					dto.setBuildingName(building.getName());
 				return dto;
 			}).collect(Collectors.toList());
 			

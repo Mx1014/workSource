@@ -309,6 +309,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhLocaleTemplates EH_LOCALE_TEMPLATES = com.everhomes.server.schema.tables.EhLocaleTemplates.EH_LOCALE_TEMPLATES;
 
 	/**
+	 * The table ehcore.eh_namespace_resources
+	 */
+	public static final com.everhomes.server.schema.tables.EhNamespaceResources EH_NAMESPACE_RESOURCES = com.everhomes.server.schema.tables.EhNamespaceResources.EH_NAMESPACE_RESOURCES;
+
+	/**
 	 * The table ehcore.eh_nearby_community_map
 	 */
 	public static final com.everhomes.server.schema.tables.EhNearbyCommunityMap EH_NEARBY_COMMUNITY_MAP = com.everhomes.server.schema.tables.EhNearbyCommunityMap.EH_NEARBY_COMMUNITY_MAP;
@@ -677,4 +682,14 @@ public class Tables {
 	 * The table ehcore.eh_version_urls
 	 */
 	public static final com.everhomes.server.schema.tables.EhVersionUrls EH_VERSION_URLS = com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS;
+
+	/**
+	 * The table ehcore.eh_yellow_pages
+	 */
+	public static final com.everhomes.server.schema.tables.EhYellowPages EH_YELLOW_PAGES = com.everhomes.server.schema.tables.EhYellowPages.EH_YELLOW_PAGES;
+
+	/**
+	 * The table ehcore.eh_yellow_page_attachments
+	 */
+	public static final com.everhomes.server.schema.tables.EhYellowPageAttachments EH_YELLOW_PAGE_ATTACHMENTS = com.everhomes.server.schema.tables.EhYellowPageAttachments.EH_YELLOW_PAGE_ATTACHMENTS;
 }

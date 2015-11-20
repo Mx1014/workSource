@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUserIdentifiers implements java.io.Serializable {
 
-	private static final long serialVersionUID = -582702716;
+	private static final long serialVersionUID = 160362770;
 
 	private java.lang.Long     id;
 	private java.lang.Long     ownerUid;
@@ -21,6 +21,7 @@ public class EhUserIdentifiers implements java.io.Serializable {
 	private java.lang.Byte     claimStatus;
 	private java.sql.Timestamp createTime;
 	private java.sql.Timestamp notifyTime;
+	private java.lang.Integer  namespaceId;
 
 	public EhUserIdentifiers() {}
 
@@ -32,7 +33,8 @@ public class EhUserIdentifiers implements java.io.Serializable {
 		java.lang.String   verificationCode,
 		java.lang.Byte     claimStatus,
 		java.sql.Timestamp createTime,
-		java.sql.Timestamp notifyTime
+		java.sql.Timestamp notifyTime,
+		java.lang.Integer  namespaceId
 	) {
 		this.id = id;
 		this.ownerUid = ownerUid;
@@ -42,6 +44,7 @@ public class EhUserIdentifiers implements java.io.Serializable {
 		this.claimStatus = claimStatus;
 		this.createTime = createTime;
 		this.notifyTime = notifyTime;
+		this.namespaceId = namespaceId;
 	}
 
 	public java.lang.Long getId() {
@@ -106,5 +109,13 @@ public class EhUserIdentifiers implements java.io.Serializable {
 
 	public void setNotifyTime(java.sql.Timestamp notifyTime) {
 		this.notifyTime = notifyTime;
+	}
+
+	public java.lang.Integer getNamespaceId() {
+		return this.namespaceId;
+	}
+
+	public void setNamespaceId(java.lang.Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 }

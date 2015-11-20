@@ -19,6 +19,7 @@ public class PunchDayLogDTO {
 	private Long id;
 	private Long userId;
     private Date punchTime;
+	private Long    workTime;
     private Byte status;
     private Byte approvalStatus;
     public Long getId() {
@@ -55,4 +56,10 @@ public class PunchDayLogDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+	public Long getWorkTime() {
+		return workTime;
+	}
+	public void setWorkTime(Long workTime) {
+		this.workTime = workTime;
+	}
 }

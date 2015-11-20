@@ -11,7 +11,7 @@ package com.everhomes.server.schema;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Ehcore extends org.jooq.impl.SchemaImpl {
 
-	private static final long serialVersionUID = 1854038604;
+	private static final long serialVersionUID = 1850422856;
 
 	/**
 	 * The singleton instance of <code>ehcore</code>
@@ -93,6 +93,7 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhLinks.EH_LINKS,
 			com.everhomes.server.schema.tables.EhLocaleStrings.EH_LOCALE_STRINGS,
 			com.everhomes.server.schema.tables.EhLocaleTemplates.EH_LOCALE_TEMPLATES,
+			com.everhomes.server.schema.tables.EhNamespaceResources.EH_NAMESPACE_RESOURCES,
 			com.everhomes.server.schema.tables.EhNearbyCommunityMap.EH_NEARBY_COMMUNITY_MAP,
 			com.everhomes.server.schema.tables.EhOauth2Codes.EH_OAUTH2_CODES,
 			com.everhomes.server.schema.tables.EhOauth2Tokens.EH_OAUTH2_TOKENS,
@@ -166,6 +167,8 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhVersionedContent.EH_VERSIONED_CONTENT,
 			com.everhomes.server.schema.tables.EhVersionRealm.EH_VERSION_REALM,
 			com.everhomes.server.schema.tables.EhVersionUpgradeRules.EH_VERSION_UPGRADE_RULES,
-			com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS);
+			com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS,
+			com.everhomes.server.schema.tables.EhYellowPages.EH_YELLOW_PAGES,
+			com.everhomes.server.schema.tables.EhYellowPageAttachments.EH_YELLOW_PAGE_ATTACHMENTS);
 	}
 }

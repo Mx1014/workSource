@@ -81,6 +81,7 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import com.mysql.jdbc.StringUtils;
 
 
 @Component
@@ -560,7 +561,7 @@ public class CommunityServiceImpl implements CommunityService {
         String posterUrl = building.getPosterUri();
         if(posterUrl != null && posterUrl.length() > 0) {
             try{
-                String url = contentServerService.parserUri(posterUrl, EntityType.BUILDING.getCode(), building.getId());
+                String url = contentServerService.parserUri(posterUrl, EntityType.USER.getCode(), UserContext.current().getUser().getId());
                 building.setPosterUrl(url);
             }catch(Exception e){
                 LOGGER.error("Failed to parse poster uri of building, building=" + building, e);
@@ -613,7 +614,7 @@ public class CommunityServiceImpl implements CommunityService {
 		     String posterUri = building.getPosterUri();
              if(posterUri != null && posterUri.length() > 0) {
                  try{
-                     String url = contentServerService.parserUri(posterUri, EntityType.BUILDING.getCode(), building.getId());
+                     String url = contentServerService.parserUri(posterUri, EntityType.USER.getCode(), UserContext.current().getUser().getId());
                      building.setPosterUrl(url);
                  }catch(Exception e){
                      LOGGER.error("Failed to parse building poster uri, buildingId=" + building.getId() + ", posterUri=" + posterUri, e);
@@ -646,7 +647,7 @@ public class CommunityServiceImpl implements CommunityService {
          }
          creatorAvatar = building.getCreatorAvatar();
          if(creatorAvatar != null && creatorAvatar.length() > 0) {
-             String avatarUrl = contentServerService.parserUri(creatorAvatar, EntityType.USER.getCode(), building.getCreatorUid());
+             String avatarUrl = contentServerService.parserUri(creatorAvatar, EntityType.USER.getCode(), UserContext.current().getUser().getId());
              building.setCreatorAvatarUrl(avatarUrl);
          }
 		 
@@ -668,7 +669,7 @@ public class CommunityServiceImpl implements CommunityService {
          }
          managerAvatar = building.getManagerAvatar();
          if(managerAvatar != null && managerAvatar.length() > 0) {
-             String avatarUrl = contentServerService.parserUri(managerAvatar, EntityType.USER.getCode(), building.getManagerUid());
+             String avatarUrl = contentServerService.parserUri(managerAvatar, EntityType.USER.getCode(), UserContext.current().getUser().getId());
              building.setManagerAvatarUrl(avatarUrl);
          }
 	 }
@@ -690,7 +691,7 @@ public class CommunityServiceImpl implements CommunityService {
 	         }
 	         operatorAvatar = building.getOperateAvatar();
 	         if(operatorAvatar != null && operatorAvatar.length() > 0) {
-	             String avatarUrl = contentServerService.parserUri(operatorAvatar, EntityType.USER.getCode(), building.getOperatorUid());
+	             String avatarUrl = contentServerService.parserUri(operatorAvatar, EntityType.USER.getCode(), UserContext.current().getUser().getId());
 	             building.setOperateAvatarUrl(avatarUrl);
 	         }
          }
@@ -719,7 +720,7 @@ public class CommunityServiceImpl implements CommunityService {
 			 String contentUri = attachment.getContentUri();
 			 if(contentUri != null && contentUri.length() > 0) {
 				 try{
-					 String url = contentServerService.parserUri(contentUri, EntityType.BUILDING.getCode(), building.getId());
+					 String url = contentServerService.parserUri(contentUri, EntityType.USER.getCode(), UserContext.current().getUser().getId());
 					 attachment.setContentUrl(url);
 				 }catch(Exception e){
 					 LOGGER.error("Failed to parse attachment uri, buildingId=" + building.getId() + ", attachmentId=" + attachment.getId(), e);
@@ -736,9 +737,6 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public BuildingDTO updateBuilding(UpdateBuildingAdminCommand cmd) {
 		
-		String[] geoString = cmd.getGeoString().split(",");
-		double longitude = Double.valueOf(geoString[0]);
-		double latitude = Double.valueOf(geoString[1]);
 		Building building = new Building();
 		building.setAddress(cmd.getAddress());
 		building.setAliasName(cmd.getAliasName());
@@ -746,14 +744,19 @@ public class CommunityServiceImpl implements CommunityService {
 		building.setCommunityId(cmd.getCommunityId());
 		building.setContact(cmd.getContact());
 		building.setDescription(cmd.getDescription());
-		building.setLatitude(latitude);
-		building.setLongitude(longitude);
 		building.setManagerUid(cmd.getManagerUid());
 		building.setName(cmd.getName());
 		building.setPosterUri(cmd.getPosterUri());
 		building.setStatus(CommunityAdminStatus.CONFIRMING.getCode());
-		String geohash = GeoHashUtils.encode(latitude, longitude);
-		building.setGeohash(geohash);
+		if(!StringUtils.isNullOrEmpty(cmd.getGeoString())){
+			String[] geoString = cmd.getGeoString().split(",");
+			double longitude = Double.valueOf(geoString[0]);
+			double latitude = Double.valueOf(geoString[1]);
+			building.setLatitude(latitude);
+			building.setLongitude(longitude);
+			String geohash = GeoHashUtils.encode(latitude, longitude);
+			building.setGeohash(geohash);
+		}
 		
 		User user = UserContext.current().getUser();
 		long userId = user.getId();

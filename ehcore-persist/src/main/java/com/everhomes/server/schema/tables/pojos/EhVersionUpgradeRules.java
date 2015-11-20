@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhVersionUpgradeRules implements java.io.Serializable {
 
-	private static final long serialVersionUID = -965360414;
+	private static final long serialVersionUID = 452845506;
 
 	private java.lang.Long     id;
 	private java.lang.Long     realmId;
@@ -21,6 +21,7 @@ public class EhVersionUpgradeRules implements java.io.Serializable {
 	private java.lang.String   targetVersion;
 	private java.lang.Byte     forceUpgrade;
 	private java.sql.Timestamp createTime;
+	private java.lang.Integer  namespaceId;
 
 	public EhVersionUpgradeRules() {}
 
@@ -32,7 +33,8 @@ public class EhVersionUpgradeRules implements java.io.Serializable {
 		java.lang.Integer  order,
 		java.lang.String   targetVersion,
 		java.lang.Byte     forceUpgrade,
-		java.sql.Timestamp createTime
+		java.sql.Timestamp createTime,
+		java.lang.Integer  namespaceId
 	) {
 		this.id = id;
 		this.realmId = realmId;
@@ -42,6 +44,7 @@ public class EhVersionUpgradeRules implements java.io.Serializable {
 		this.targetVersion = targetVersion;
 		this.forceUpgrade = forceUpgrade;
 		this.createTime = createTime;
+		this.namespaceId = namespaceId;
 	}
 
 	public java.lang.Long getId() {
@@ -106,5 +109,13 @@ public class EhVersionUpgradeRules implements java.io.Serializable {
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+	public java.lang.Integer getNamespaceId() {
+		return this.namespaceId;
+	}
+
+	public void setNamespaceId(java.lang.Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 }

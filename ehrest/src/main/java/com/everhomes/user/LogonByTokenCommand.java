@@ -13,6 +13,8 @@ public class LogonByTokenCommand {
     @NotNull
     private String loginToken;
     
+    private Integer namespaceId;
+    
     public LogonByTokenCommand() {
     }
 
@@ -22,6 +24,14 @@ public class LogonByTokenCommand {
 
     public void setLoginToken(String loginToken) {
         this.loginToken = loginToken;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     @Override

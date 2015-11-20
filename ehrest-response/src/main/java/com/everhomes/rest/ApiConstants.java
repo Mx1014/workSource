@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-11-17 18:23:05
+// generated at 2015-11-20 10:45:14
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -34,6 +34,7 @@ public interface ApiConstants {
     public static final String ADDRESS_SUGGESTCOMMUNITY_URL = "/address/suggestCommunity";
     public static final String ADMIN_ACL_ASSIGNUSERROLE_URL = "/admin/acl/assignUserRole";
     public static final String ADMIN_ACL_DELETEUSERROLE_URL = "/admin/acl/deleteUserRole";
+    public static final String ADMIN_ACL_LISTACLROLES_URL = "/admin/acl/listAclRoles";
     public static final String ADMIN_ACL_LISTUSERROLES_URL = "/admin/acl/listUserRoles";
     public static final String ADMIN_ACTIVITY_LIST_URL = "/admin/activity/list";
     public static final String ADMIN_ADDBORDER_URL = "/admin/addBorder";
@@ -195,7 +196,9 @@ public interface ApiConstants {
     public static final String CATEGORY_LISTCONTENTCATEGORIES_URL = "/category/listContentCategories";
     public static final String CATEGORY_LISTDESCENDANTS_URL = "/category/listDescendants";
     public static final String CATEGORY_LISTINTERESTCATEGORIES_URL = "/category/listInterestCategories";
+    public static final String CATEGORY_LISTINTERESTCATEGORIESV2_URL = "/category/listInterestCategoriesV2";
     public static final String CATEGORY_LISTROOT_URL = "/category/listRoot";
+    public static final String CATEGORY_LISTROOTV2_URL = "/category/listRootV2";
     public static final String CATEGORY_UPDATECATEGORYLOGOURI_URL = "/category/updateCategoryLogoUri";
     public static final String COMMUNITY_GET_URL = "/community/get";
     public static final String COMMUNITY_GETBUILDING_URL = "/community/getBuilding";
@@ -321,6 +324,7 @@ public interface ApiConstants {
     public static final String LAUNCHPAD_USERDEFINEDLAUNCHPAD_URL = "/launchpad/userDefinedLaunchPad";
     public static final String LINK_FINDLINKBYID_URL = "/link/findLinkById";
     public static final String LOCALE_GETLOCALIZEDSTRING_URL = "/locale/getLocalizedString";
+    public static final String NAMESPACE_LISTCOMMUNITYBYNAMESPACE_URL = "/namespace/listCommunityByNamespace";
     public static final String OAUTH2_AUTHORIZE_URL = "/oauth2/authorize";
     public static final String OAUTH2_CONFIRM_URL = "/oauth2/confirm";
     public static final String OAUTH2_TOKEN_URL = "/oauth2/token";
@@ -344,7 +348,7 @@ public interface ApiConstants {
     public static final String OPENAPI_SYNCUSERCANCELFAVORITE_URL = "/openapi/syncUserCancelFavorite";
     public static final String OPENAPI_SYNCUSERFAVORITE_URL = "/openapi/syncUserFavorite";
     public static final String OPENAPI_SYNCUSERINFO_URL = "/openapi/syncuserinfo";
-    public static final String OPENAPI_USER_SYNCOUPON_URL = "/openapi/user/synCoupon";
+    public static final String OPENAPI_USER_INITCOUPON_URL = "/openapi/user/initCoupon";
     public static final String OPENAPI_USER_TESTGETTHIRDSIGNATURE_URL = "/openapi/user/testGetThirdSignature";
     public static final String ORG_ADDORGMEMBERBYPHONE_URL = "/org/addOrgMemberByPhone";
     public static final String ORG_APPLYORGANIZATIONMEMBER_URL = "/org/applyOrganizationMember";
@@ -368,6 +372,7 @@ public interface ApiConstants {
     public static final String ORG_LISTORGTOPICCOMMENTS_URL = "/org/listOrgTopicComments";
     public static final String ORG_LISTORGTOPICS_URL = "/org/listOrgTopics";
     public static final String ORG_LISTORGANIZATIONCOMMUNITIES_URL = "/org/listOrganizationCommunities";
+    public static final String ORG_LISTORGANIZATIONCOMMUNITIESV2_URL = "/org/listOrganizationCommunitiesV2";
     public static final String ORG_LISTTOPICSBYTYPE_URL = "/org/listTopicsByType";
     public static final String ORG_LISTUSERRELATEDORGANIZATIONS_URL = "/org/listUserRelatedOrganizations";
     public static final String ORG_LISTUSERTASK_URL = "/org/listUserTask";
@@ -554,5 +559,8 @@ public interface ApiConstants {
     public static final String VERSION_GETUPGRADEINFO_URL = "/version/getUpgradeInfo";
     public static final String VERSION_GETVERSIONURLS_URL = "/version/getVersionUrls";
     public static final String VERSION_GETVERSIONEDCONTENT_URL = "/version/getVersionedContent";
+    public static final String YELLOWPAGE_ADDYELLOWPAGE_URL = "/yellowPage/addYellowPage";
+    public static final String YELLOWPAGE_GETYELLOWPAGEDETAIL_URL = "/yellowPage/getYellowPageDetail";
+    public static final String YELLOWPAGE_GETYELLOWPAGELIST_URL = "/yellowPage/getYellowPageList";
 
 }

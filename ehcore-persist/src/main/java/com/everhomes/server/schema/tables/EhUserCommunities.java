@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUserCommunities extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhUserCommunitiesRecord> {
 
-	private static final long serialVersionUID = -2079426026;
+	private static final long serialVersionUID = 90853333;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_user_communities</code>
@@ -54,7 +54,7 @@ public class EhUserCommunities extends org.jooq.impl.TableImpl<com.everhomes.ser
 	/**
 	 * The column <code>ehcore.eh_user_communities.create_time</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserCommunitiesRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP.nullable(false), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserCommunitiesRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_user_communities</code> table reference

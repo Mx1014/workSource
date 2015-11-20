@@ -34,6 +34,7 @@ import com.everhomes.core.AppConfig;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.forum.AttachmentDescriptor;
+import com.everhomes.group.GroupMemberStatus;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -197,6 +198,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         enterprise.setContactsPhone(cmd.getContactsPhone());
         enterprise.setEnterpriseAddress(cmd.getEnterpriseAddress());
         enterprise.setEnterpriseCheckinDate(cmd.getEnterpriseCheckinDate());
+        enterprise.setPostUri(cmd.getPostUri());
         this.enterpriseProvider.createEnterprise(enterprise);
         
         requestToJoinCommunity(user, enterprise.getId(), cmd.getCommunityId());
@@ -329,19 +331,32 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         }
         
         String avatarUri = enterprise.getAvatar();
-		 if(avatarUri != null && avatarUri.length() > 0) {
-			 try{
-             
-				 dto.setAvatarUri(avatarUri);
-				 String url = contentServerService.parserUri(avatarUri, EntityType.GROUP.getCode(), enterprise.getId());
-               
-				 dto.setAvatarUrl(url);
-               
-           
+        if(avatarUri != null && avatarUri.length() > 0) {
+        	try{
+        		dto.setAvatarUri(avatarUri);
+        		String url = contentServerService.parserUri(avatarUri, EntityType.GROUP.getCode(), enterprise.getId());
+	           
+        		dto.setAvatarUrl(url);
+	       
 			 }catch(Exception e){
-               
+	           
 				 LOGGER.error("Failed to parse avatar uri, enterpriseId=" + enterprise.getId(), e);
-           
+	       
+			 }
+		 }
+        
+        String postUri = enterprise.getPostUri();
+        if(postUri != null && postUri.length() > 0) {
+        	try{
+        		dto.setPostUri(postUri);
+        		String url = contentServerService.parserUri(postUri, EntityType.GROUP.getCode(), enterprise.getId());
+	           
+        		dto.setPostUrl(url);
+	       
+			 }catch(Exception e){
+	           
+				 LOGGER.error("Failed to parse post uri, enterpriseId=" + enterprise.getId(), e);
+	       
 			 }
 		 }
 		 
@@ -416,16 +431,20 @@ public class EnterpriseServiceImpl implements EnterpriseService {
             Enterprise enterprise = null;
             EnterpriseDTO dto = null;
             for(EnterpriseContactEntry entry : entryList) {
-                enterprise = this.enterpriseProvider.findEnterpriseById(entry.getEnterpriseId());
+            	EnterpriseContact ec = this.enterpriseContactProvider.getContactById(entry.getContactId());
+            	if(ec.getStatus() != GroupMemberStatus.INACTIVE.getCode()) {
+            		enterprise = this.enterpriseProvider.findEnterpriseById(entry.getEnterpriseId());
+                    
+                    this.enterpriseProvider.populateEnterpriseAttachments(enterprise);
+                    this.enterpriseProvider.populateEnterpriseAddresses(enterprise);
+                    populateEnterprise(enterprise);
+                    
+                    dto = toEnterpriseDto(userId, enterprise);
+                    if(dto != null) {
+                        enterpriseList.add(dto);
+                    }
+            	}
                 
-                this.enterpriseProvider.populateEnterpriseAttachments(enterprise);
-                this.enterpriseProvider.populateEnterpriseAddresses(enterprise);
-                populateEnterprise(enterprise);
-                
-                dto = toEnterpriseDto(userId, enterprise);
-                if(dto != null) {
-                    enterpriseList.add(dto);
-                }
             }
         }
         //List<Enterprise> enterpriseList = this.enterpriseProvider.queryEnterpriseByPhone(phone);
@@ -644,6 +663,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         enterprise.setContactsPhone(cmd.getContactsPhone());
         enterprise.setEnterpriseAddress(cmd.getEnterpriseAddress());
         enterprise.setEnterpriseCheckinDate(cmd.getEnterpriseCheckinDate());
+        enterprise.setPostUri(cmd.getPostUri());
         this.enterpriseProvider.updateEnterprise(enterprise);
         
         List<Long> addressIds = cmd.getAddressId();

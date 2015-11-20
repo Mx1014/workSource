@@ -44,11 +44,11 @@ public class ThirdUserOpenController extends ControllerBase {
 	private AppProvider appProvider;
 	
 	/**
-     * <b>URL: /openapi/user/synCoupon</b>
+     * <b>URL: /openapi/user/initCoupon</b>
      */
-    @RequestMapping("synCoupon")
+    @RequestMapping("initCoupon")
     @RestReturn(String.class)
-    public RestResponse synCoupon(@Valid SynThridUserCommand cmd,HttpServletRequest request, HttpServletResponse response) {
+    public RestResponse initCoupon(@Valid SynThridUserCommand cmd,HttpServletRequest request, HttpServletResponse response) {
     	UserLogin login = this.userService.synThridUser(cmd);
     	
 		LoginToken token = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber());
@@ -116,11 +116,11 @@ public class ThirdUserOpenController extends ControllerBase {
     	map.put("timestamp", timeStamp+"");
     	signature = SignatureHelper.computeSignature(map, app.getSecretKey());
     	
-    	result.setAppKey(appKey);
+    	//result.setAppKey(appKey);
     	result.setRandomNum(randomNum);
-    	result.setSignature(signature);
-    	result.setSiteUri(siteUri);
-    	result.setSiteUserToken(siteUserToken);
+    	//result.setSignature(signature);
+    	//result.setSiteUri(siteUri);
+    	//result.setSiteUserToken(siteUserToken);
     	result.setTimestamp(timeStamp);
 		
 		RestResponse response =  new RestResponse(result);
