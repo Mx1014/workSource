@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>nextPageAnchor：分页的锚点，下一页开始取数据的位置</li>
- * <li>members：group成员信息，参考{@link com.everhomes.group.GroupMemberDTO}</li>
+ * <li>communities：小区/园区信息，参考{@link com.everhomes.address.CommunityDTO}</li>
  * </ul>
  */
 public class ListCommunityByNamespaceCommandResponse {

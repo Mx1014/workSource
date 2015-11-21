@@ -5,7 +5,7 @@ INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `ide
 
 -- 特殊：科技园公司
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`, `namespace_id`)
-	VALUES(176389, UUID(), '深圳市科技园','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176918, 1, 1000000); 
+	VALUES(176389, UUID(), '深圳市科技园','', 1, 0, 240111044331046562, 'enterprise',  1, 1, '2015-11-12 22:05:33', '2015-11-12 22:05:33', 176919, 1, 1000000); 
 INSERT INTO `eh_enterprise_addresses` (`id`, `enterprise_id`, `address_id`, `status`, `create_time`) 
 	VALUES(100389, 176389, 239825274387091389, 2, '2015-11-12 22:20:25');
 INSERT INTO `eh_enterprise_community_map` (`id`, `community_id`, `member_type`, `member_id`, `member_status`, `update_time`, `create_time`) 
