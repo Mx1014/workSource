@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-11-20 15:09:39
+// generated at 2015-11-21 15:13:41
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -563,5 +563,7 @@ public interface ApiConstants {
     public static final String YELLOWPAGE_DELETEYELLOWPAGE_URL = "/yellowPage/deleteYellowPage";
     public static final String YELLOWPAGE_GETYELLOWPAGEDETAIL_URL = "/yellowPage/getYellowPageDetail";
     public static final String YELLOWPAGE_GETYELLOWPAGELIST_URL = "/yellowPage/getYellowPageList";
+    public static final String YELLOWPAGE_GETYELLOWPAGETOPIC_URL = "/yellowPage/getYellowPageTopic";
+    public static final String YELLOWPAGE_UPDATEYELLOWPAGE_URL = "/yellowPage/updateYellowPage";
 
 }
