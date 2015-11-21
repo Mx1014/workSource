@@ -92,7 +92,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	
 	@Override
 	public List<YellowPage> queryYellowPages(CrossShardListingLocator locator,
-			int pageSize, String ownerType, Long ownerId, Long parentId) {
+			int pageSize, String ownerType, Long ownerId, Long parentId, Byte type) {
 	        List<YellowPage> yellowPages = this.queryYellowPagesByOwnerId(locator, ownerId, pageSize, new ListingQueryBuilderCallback() {
 
 	            @Override
@@ -108,6 +108,8 @@ public class YellowPageProviderImpl implements YellowPageProvider {
                 	else {
                 		query.addConditions(Tables.EH_YELLOW_PAGES.PARENT_ID.ne(0L));
 					}
+	                if(null!=type)
+	                	query.addConditions(Tables.EH_YELLOW_PAGES.TYPE.eq(type));
 	                return query;
 	            }
 	            

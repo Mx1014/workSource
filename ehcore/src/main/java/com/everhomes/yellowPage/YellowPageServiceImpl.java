@@ -119,7 +119,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        List<YellowPage> yellowPages = this.yellowPageProvider.queryYellowPages(locator, pageSize + 1,cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParentId());
+        List<YellowPage> yellowPages = this.yellowPageProvider.queryYellowPages(locator, pageSize + 1,cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParentId(),cmd.getType());
         if(null == yellowPages || yellowPages.size() == 0)
         	return null;
         response.setYellowPages(new ArrayList<YellowPageDTO>());
@@ -209,8 +209,23 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 	@Override
 	public YellowPageDTO getYellowPageTopic(GetYellowPageTopicCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		 
+		YellowPage yellowPage = this.yellowPageProvider.queryYellowPageTopic(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getType());
+	
+		populateYellowPage(yellowPage);
+		YellowPageDTO response = null;
+		if(cmd.getType().equals(YellowPageType.SERVICEALLIANCE.getCode())){
+			ServiceAlliance serviceAlliance =  ConvertHelper.convert(yellowPage ,ServiceAlliance.class);
+			response = ConvertHelper.convert(serviceAlliance,YellowPageDTO.class);
+		} 
+		else if (cmd.getType().equals(YellowPageType.MAKERZONE.getCode())){
+			MakerZone makerZone =  ConvertHelper.convert(yellowPage ,MakerZone.class);
+			response = ConvertHelper.convert(makerZone,YellowPageDTO.class);
+		} 
+		else{
+				response =  ConvertHelper.convert(yellowPage,YellowPageDTO.class);
+		}
+		return response;
 	}
 
 	
