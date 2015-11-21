@@ -207,5 +207,11 @@ public class YellowPageServiceImpl implements YellowPageService {
 		createYellowPageAttachments(cmd.getAttachments(),yp.getId());
 	}
 
+	@Override
+	public YellowPageDTO getYellowPageTopic(GetYellowPageTopicCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	
 }

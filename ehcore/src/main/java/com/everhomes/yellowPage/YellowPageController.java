@@ -33,7 +33,17 @@ public class YellowPageController  extends ControllerBase {
          response.setErrorDescription("OK");
          return response;
     }
-    
+
+    @RequireAuthentication(false)
+    @RequestMapping("getYellowPageTopic")
+    @RestReturn(value=YellowPageDTO.class)
+    public RestResponse getYellowPageTopic(@Valid GetYellowPageTopicCommand cmd) {
+    	YellowPageDTO res = this.yellowPageService.getYellowPageTopic(cmd);
+    	 RestResponse response = new RestResponse(res);
+         response.setErrorCode(ErrorCodes.SUCCESS);
+         response.setErrorDescription("OK");
+         return response;
+    }
     
     @RequireAuthentication(false)
     @RequestMapping("getYellowPageList")

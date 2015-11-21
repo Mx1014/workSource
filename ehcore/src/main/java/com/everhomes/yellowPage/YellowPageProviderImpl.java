@@ -157,4 +157,34 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         EhYellowPageAttachmentsDao dao = new EhYellowPageAttachmentsDao(context.configuration());
         dao.delete(attachment);        
     }
+
+
+	@Override
+	public YellowPage queryYellowPageTopic(String ownerType, Long ownerId,
+			Byte type) {
+		// TODO Auto-generated method stub
+		   CrossShardListingLocator locator = new CrossShardListingLocator();
+	        locator.setAnchor(0L);
+	        List<YellowPage> yellowPages = this.queryYellowPagesByOwnerId(locator, ownerId, 20, new ListingQueryBuilderCallback() {
+
+	            @Override
+	            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+	                    SelectQuery<? extends Record> query) {
+	            	if (!StringUtils.isEmpty(ownerType) )
+	            		query.addConditions(Tables.EH_YELLOW_PAGES.OWNER_TYPE.eq(ownerType));
+	                query.addConditions(Tables.EH_YELLOW_PAGES.OWNER_ID.eq(ownerId));
+	                //topic
+	                query.addConditions(Tables.EH_YELLOW_PAGES.PARENT_ID.eq(0L));
+	                query.addConditions(Tables.EH_YELLOW_PAGES.TYPE.eq(type));
+	                query.addConditions(Tables.EH_YELLOW_PAGES.STATUS.eq(YellowPageStatus.ACTIVE.getCode()));
+	                return query;
+	            }
+	            
+	        });
+	        
+	        if(yellowPages != null && yellowPages.size() > 0) {
+	            return yellowPages.get(0);
+	        }
+	        return null;
+	}
 }
