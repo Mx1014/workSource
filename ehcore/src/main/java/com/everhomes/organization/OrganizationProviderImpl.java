@@ -207,7 +207,6 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOrganizationMembersDao dao = new EhOrganizationMembersDao(context.configuration());
 		dao.update(departmentMember);
-
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationMembers.class, departmentMember.getId());
 	}
 
@@ -250,6 +249,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		});
 		return result;
 	}
+	
 
 	@Override
 	public List<OrganizationMember> listOrganizationMembers(Long memberUid) {
@@ -1175,4 +1175,36 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return step.where(condition).fetchOneInto(Integer.class);
 	}
 
+	@Override
+	public List<OrganizationMember> listParentOrganizationMembers(String superiorPath, Integer offset,Integer pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
+		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+		query.addConditions(
+				Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.in(
+						context.select(Tables.EH_ORGANIZATIONS.ID).from(Tables.EH_ORGANIZATIONS)
+						.where(Tables.EH_ORGANIZATIONS.PATH.like(superiorPath + "/%")
+								.or(Tables.EH_ORGANIZATIONS.PATH.eq(superiorPath)))));
+		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
+		query.addLimit(offset.intValue(), pageSize);
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, OrganizationMember.class));
+			return null;
+		});
+		return result;
+	}
+	
+	@Override
+	public boolean updateOrganizationMemberByIds(List<Long> ids, Long deptId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		int count = context.update(Tables.EH_ORGANIZATION_MEMBERS)
+		.set(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID, deptId)
+		.where(Tables.EH_ORGANIZATION_MEMBERS.ID.in(ids)).execute();
+		if(count == 0)
+			return false;
+		return true;
+	}
+	
+	
 }

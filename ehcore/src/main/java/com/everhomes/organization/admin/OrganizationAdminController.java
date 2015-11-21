@@ -40,6 +40,7 @@ import com.everhomes.organization.pm.ListPmManagementsCommand;
 import com.everhomes.organization.pm.PmBuildingDTO;
 import com.everhomes.organization.pm.PmManagementsResponse;
 import com.everhomes.organization.pm.UnassignedBuildingDTO;
+import com.everhomes.organization.pm.UpdateOrganizationMemberByIdsCommand;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserTokenCommand;
@@ -384,5 +385,39 @@ public class OrganizationAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /admin/org/listParentOrganizationMembers</b>
+     * <p>查询园区全部的员工（）</p>
+     */
+    @RequestMapping("listParentOrganizationMembers")
+    @RestReturn(value=ListOrganizationMemberCommandResponse.class)
+    public RestResponse listParentOrganizationMembers(@Valid ListOrganizationMemberCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+        ListOrganizationMemberCommandResponse commandResponse = organizationService.ListParentOrganizationMembers(cmd);
+        RestResponse response = new RestResponse(commandResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/org/updateOrganizationMemberByIds</b>
+     * <p>批量移动员工部门（）</p>
+     */
+    @RequestMapping("updateOrganizationMemberByIds")
+    @RestReturn(value=UpdateOrganizationMemberByIdsCommand.class)
+    public RestResponse updateOrganizationMemberByIds(@Valid UpdateOrganizationMemberByIdsCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        boolean res = organizationService.updateOrganizationMemberByIds(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
     
 }

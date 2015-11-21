@@ -45,6 +45,8 @@ import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.CommunityUser;
+import com.everhomes.community.admin.CommunityUserDto;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
@@ -92,6 +94,7 @@ import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.organization.pm.PropertyServiceErrorCode;
 import com.everhomes.organization.pm.UnassignedBuildingDTO;
+import com.everhomes.organization.pm.UpdateOrganizationMemberByIdsCommand;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.region.RegionScope;
@@ -3068,4 +3071,36 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 		return response;
 	}
+	
+	@Override
+	public ListOrganizationMemberCommandResponse ListParentOrganizationMembers(
+			ListOrganizationMemberCommand cmd) {
+		ListOrganizationMemberCommandResponse response = new ListOrganizationMemberCommandResponse();
+		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
+		if(null == org)
+			return response;
+		
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		Integer offset = cmd.getPageOffset() == null ? 0 : (cmd.getPageOffset() - 1 ) * pageSize;
+		
+		List<OrganizationMember> organizationMembers = this.organizationProvider.listParentOrganizationMembers(org.getPath(), offset, pageSize + 1);
+		
+		if(organizationMembers != null && organizationMembers.size() > pageSize) {
+			organizationMembers.remove(organizationMembers.size() - 1);
+			response.setNextPageOffset(cmd.getPageOffset() + 1);
+		}
+		
+		response.setMembers(organizationMembers.stream().map((c) ->{
+			return ConvertHelper.convert(c, OrganizationMemberDTO.class);
+		}).collect(Collectors.toList()));
+		
+		return response;
+	}
+	
+	@Override
+	public boolean updateOrganizationMemberByIds(
+			UpdateOrganizationMemberByIdsCommand cmd) {
+		return organizationProvider.updateOrganizationMemberByIds(cmd.getIds(), cmd.getOrgId());
+	}
+	
 }
