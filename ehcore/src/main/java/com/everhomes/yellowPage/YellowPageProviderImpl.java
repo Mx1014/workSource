@@ -3,6 +3,7 @@ package com.everhomes.yellowPage;
 import java.sql.Timestamp;
 import java.util.List;
 
+import org.elasticsearch.common.lang3.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -97,7 +98,8 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	            @Override
 	            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
 	                    SelectQuery<? extends Record> query) {
-	                query.addConditions(Tables.EH_YELLOW_PAGES.OWNER_TYPE.eq(ownerType));
+	            	if (!StringUtils.isEmpty(ownerType) )
+	            		query.addConditions(Tables.EH_YELLOW_PAGES.OWNER_TYPE.eq(ownerType));
 	                query.addConditions(Tables.EH_YELLOW_PAGES.OWNER_ID.eq(ownerId));
 	                query.addConditions(Tables.EH_YELLOW_PAGES.STATUS.eq(YellowPageStatus.ACTIVE.getCode()));
 	                if(null!=parentId)
