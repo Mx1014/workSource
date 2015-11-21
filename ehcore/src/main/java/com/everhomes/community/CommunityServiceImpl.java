@@ -747,7 +747,7 @@ public class CommunityServiceImpl implements CommunityService {
 		building.setManagerUid(cmd.getManagerUid());
 		building.setName(cmd.getName());
 		building.setPosterUri(cmd.getPosterUri());
-		building.setStatus(CommunityAdminStatus.CONFIRMING.getCode());
+		building.setStatus(CommunityAdminStatus.ACTIVE.getCode());
 		if(!StringUtils.isNullOrEmpty(cmd.getGeoString())){
 			String[] geoString = cmd.getGeoString().split(",");
 			double longitude = Double.valueOf(geoString[0]);

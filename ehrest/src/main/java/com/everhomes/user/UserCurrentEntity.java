@@ -13,6 +13,8 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class UserCurrentEntity {
+    private Integer namespaceId;
+    
     private String entityType;
     
     private String entityId;
@@ -22,6 +24,14 @@ public class UserCurrentEntity {
     private Long timestamp;
     
     public UserCurrentEntity() {
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     public String getEntityType() {

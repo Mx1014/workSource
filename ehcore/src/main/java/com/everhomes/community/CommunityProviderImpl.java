@@ -665,6 +665,7 @@ public class CommunityProviderImpl implements CommunityProvider {
         }
         
         query.addConditions(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId));
+        query.addConditions(Tables.EH_BUILDINGS.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
         query.addOrderBy(Tables.EH_BUILDINGS.ID.desc());
         query.addLimit(count);
         

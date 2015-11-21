@@ -310,7 +310,7 @@ ALTER TABLE `eh_addresses` ADD COLUMN `area_size` DOUBLE COMMENT 'the area size 
 -- ALTER TABLE `eh_launch_pad_items` ADD COLUMN `site_uri` VARCHAR(2048) NOT NULL DEFAULT '' COMMENT 'the site uri of third-part system';
 -- ALTER TABLE `eh_banners` ADD COLUMN `site_uri` VARCHAR(2048) NOT NULL DEFAULT '' COMMENT 'the site uri of third-part system';
 ALTER TABLE `eh_users` ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
-ALTER TABLE `eh_users` ADD COLUMN `namespace_user_id` VARCHAR(2048) NOT NULL DEFAULT '';
+ALTER TABLE `eh_users` ADD COLUMN `namespace_user_token` VARCHAR(2048) NOT NULL DEFAULT '';
 ALTER TABLE `eh_user_identifiers` ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE `eh_version_realm` ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE `eh_version_upgrade_rules` ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
@@ -321,6 +321,7 @@ ALTER TABLE `eh_categories` ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0
 ALTER TABLE `eh_scoped_configurations` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE `eh_launch_pad_layouts` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE `eh_launch_pad_items` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
+UPDATE `eh_groups` SET namespace_id=0 WHERE namespace_id IS NULL;
 ALTER TABLE `eh_groups` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE `eh_forums` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE `eh_banners` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;

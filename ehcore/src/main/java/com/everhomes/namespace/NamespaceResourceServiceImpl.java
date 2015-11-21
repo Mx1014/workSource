@@ -36,16 +36,27 @@ public class NamespaceResourceServiceImpl implements NamespaceResourceService {
 	    ListCommunityByNamespaceCommandResponse response = new ListCommunityByNamespaceCommandResponse();
 	    
 	    // TODO: 暂时先不分页查，后面再补
-	    int namespaceId = (cmd.getNamespaceId() == null) ? 0 : cmd.getNamespaceId();
+	    int namespaceId = (cmd.getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
 	    List<NamespaceResource> result = namespaceResourceProvider.listResourceByNamespace(namespaceId, NamespaceResourceType.COMMUNITY);
 	    
 	    List<CommunityDTO> communityList = new ArrayList<CommunityDTO>();
         if(result != null && result.size() > 0){
             CommunityDTO dto = null;
             for (NamespaceResource resource : result) {
-                Community community = communityProvider.findCommunityById(resource.getNamespaceId());
-                dto = ConvertHelper.convert(community, CommunityDTO.class);
-                communityList.add(dto);
+                NamespaceResourceType type = NamespaceResourceType.fromCode(resource.getResourceType());
+                if(type == NamespaceResourceType.COMMUNITY) {
+                    Community community = communityProvider.findCommunityById(resource.getResourceId());
+                    if(community != null) {
+                        dto = ConvertHelper.convert(community, CommunityDTO.class);
+                        communityList.add(dto);
+                    } else {
+                        LOGGER.error("Community not found, namespaceId=" + resource.getNamespaceId() 
+                            + ", communityId=" + resource.getResourceId() + ", cmd=" + cmd);
+                    }
+                } else {
+                    LOGGER.error("Unsupported namespace resource type, namespaceId=" + resource.getNamespaceId() 
+                        + ", type=" + type + ", communityId=" + resource.getResourceId() + ", cmd=" + cmd);
+                }
             }
         }
         response.setCommunities(communityList);

@@ -113,7 +113,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     @Override
     public List<Enterprise> listEnterpriseByCommunityId(ListingLocator locator, Long communityId, Integer status, int pageSize) {
         List<EnterpriseCommunityMap> enterpriseMaps = this.enterpriseProvider.queryEnterpriseMapByCommunityId(locator
-                , communityId, pageSize, new ListingQueryBuilderCallback() {
+                , communityId, pageSize+1, new ListingQueryBuilderCallback() {
 
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
@@ -719,7 +719,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 		validUserEnterprise(userId,cmd.getEnterpriseId());
 		   
 		String key = UserCurrentEntityType.ENTERPRISE.getUserProfileKey();
-        userActivityProvider.updateUserCurrentEntityProfile(userId, key, cmd.getEnterpriseId(), timestemp);
+        userActivityProvider.updateUserCurrentEntityProfile(userId, key, cmd.getEnterpriseId(), timestemp, user.getNamespaceId());
 	}
 
 	public void validUserEnterprise(Long userId, Long enterpriseId) { 

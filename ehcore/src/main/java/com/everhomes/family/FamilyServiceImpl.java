@@ -1016,11 +1016,11 @@ public class FamilyServiceImpl implements FamilyService {
                 u.setAddress(address.getAddress());
                 u.setCommunityId(address.getCommunityId());
 
-                userService.updateUserCurrentCommunityToProfile(userId, address.getCommunityId());
+                userService.updateUserCurrentCommunityToProfile(userId, address.getCommunityId(), u.getNamespaceId());
                 
                 long timestemp = DateHelper.currentGMTTime().getTime();
                 String key = UserCurrentEntityType.FAMILY.getUserProfileKey();
-                userActivityProvider.updateUserCurrentEntityProfile(userId, key, familyId, timestemp);
+                userActivityProvider.updateUserCurrentEntityProfile(userId, key, familyId, timestemp, u.getNamespaceId());
             }
         }
         else {

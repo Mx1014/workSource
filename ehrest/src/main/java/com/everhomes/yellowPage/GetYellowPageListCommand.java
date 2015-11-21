@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
 
 public class GetYellowPageListCommand {
 
-	@NotNull
+	 
 	private String ownerType;
 	@NotNull
 	private Long ownerId;

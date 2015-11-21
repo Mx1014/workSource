@@ -11,6 +11,8 @@ public class ResendVerificationCodeCommand {
     @NotNull
     private String signupToken;
     
+    private Integer namespaceId;
+    
     public ResendVerificationCodeCommand() {
     }
 
@@ -21,4 +23,13 @@ public class ResendVerificationCodeCommand {
     public void setSignupToken(String signupToken) {
         this.signupToken = signupToken;
     }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+    
 }
