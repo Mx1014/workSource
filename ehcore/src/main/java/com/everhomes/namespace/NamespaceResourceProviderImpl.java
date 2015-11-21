@@ -34,7 +34,7 @@ public class NamespaceResourceProviderImpl implements NamespaceResourceProvider 
         return ConvertHelper.convert(dao.findById(namespaceId), NamespaceResource.class);
     }
 
-    @Cacheable(value = "listResourceByNamespace", key="#namespaceId", unless="#result.size() == 0")
+    @Cacheable(value = "listResourceByNamespace", key="{#namespaceId, #type}", unless="#result.size() == 0")
     @Override
     public List<NamespaceResource> listResourceByNamespace(Integer namespaceId, NamespaceResourceType type) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());

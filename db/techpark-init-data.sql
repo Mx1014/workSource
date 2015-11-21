@@ -1,5 +1,7 @@
 use ehcore;
 
+INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(1000000, '科技园版');
+
 INSERT INTO `eh_punch_workday` (`id`, `date_status`, `date_tag`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES('1','0','2015-09-10',NULL,NULL,NULL,NULL);
 INSERT INTO `eh_punch_workday` (`id`, `date_status`, `date_tag`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES('2','0','2015-10-10',NULL,NULL,NULL,NULL);
 INSERT INTO `eh_punch_workday` (`id`, `date_status`, `date_tag`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES('3','1','2015-10-01',NULL,NULL,NULL,NULL);
@@ -19,6 +21,33 @@ INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'renta
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'rental', '10004', 'zh_CN', '场所数量不够');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'rental', '10005', 'zh_CN', '订单超时失效了');
 
+
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(11001, 1, 0, '普通', '帖子/普通', 0, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(11002, 1, 0, '紧急通知', '帖子/紧急通知', 0, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(11003, 1, 0, '公告', '帖子/公告', 0, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(11004, 1, 0, '报修', '帖子/报修', 0, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(11005, 1, 0, '咨询与求助', '帖子/咨询与求助', 0, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(11006, 1, 0, '投诉与建议', '帖子/投诉与建议', 0, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(11007, 1, 0, '二手和租售', '帖子/二手和租售', 0, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(11008, 1, 0, '免费物品', '帖子/免费物品', 0, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(11009, 1, 0, '失物招领', '帖子/失物招领', 0, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(11010, 1, 0, '活动', '帖子/活动', 0, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(11011, 1, 0, '投票', '帖子/投票', 0, 2, UTC_TIMESTAMP(), 1000000);	
+
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(11101, 11010, 0, '活动', '帖子/活动', 0, 2, UTC_TIMESTAMP(), 1000000);	
+
 INSERT INTO `eh_launch_pad_layouts`(id, namespace_id, name, layout_json, version_code, min_version_code, status, create_time) 
 	VALUES (11, 1000000, 'ServiceMarketLayout', '{"versionCode":"2015111401","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Coupons","instanceConfig":{"itemGroup":"Coupons"},"style":"Default","defaultOrder":3,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}', '2015111401', '2015061701', '2', '2015-06-24 16:09:30');
 INSERT INTO `eh_launch_pad_layouts`(id, namespace_id, name, layout_json, version_code, min_version_code, status, create_time) 
@@ -27,7 +56,7 @@ INSERT INTO `eh_launch_pad_layouts`(id, namespace_id, name, layout_json, version
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`) 
 	VALUES(701, 1000000, 0, 1, 240111044331046562, '/home','GovAgencies','园区入驻','园区入驻','cs://1/image/aW1hZ2UvTVRvNFlXSXdaRGRqTnpKaU56UmtZMll3WlRNeU1XUmxOekU0WXpNNU9HWmpZUQ','1','1','28',NULL,'0','0','1','1','','0',NULL,NULL,NULL);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`) 
-	VALUES(702, 1000000, 0, 1, 240111044331046562, '/home','GovAgencies','交流大厅','交流大厅','cs://1/image/aW1hZ2UvTVRwaE5HRTBNR1ZtTmpSa1lqVm1NbVJrWVRNNFlURXdZMlppTnpVNE1ESTRaQQ','1','1','29',NULL,'0','0','1','1','','0',NULL,NULL,NULL);
+	VALUES(702, 1000000, 0, 1, 240111044331046562, '/home','GovAgencies','交流大厅','交流大厅','cs://1/image/aW1hZ2UvTVRwaE5HRTBNR1ZtTmpSa1lqVm1NbVJrWVRNNFlURXdZMlppTnpVNE1ESTRaQQ','1','1','15', '{"contentCategory":11010,"actionCategory":0,"entityTag":"USER","forumId":176520}','0','0','1','1','','0',NULL,NULL,NULL);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`) 
 	VALUES(703, 1000000, 0, 1, 240111044331046562, '/home','GovAgencies','服务联盟','服务联盟','cs://1/image/aW1hZ2UvTVRvM016RmpNelJtTURGbU9ETTJZVEJrTWprNE1qbGpZbU0xTTJZMFlqWTFNZw','1','1','33','{\"type\":\"2\"}','0','0','1','1','','0',NULL,NULL,NULL);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`) 
