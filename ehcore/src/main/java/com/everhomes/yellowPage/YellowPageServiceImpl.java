@@ -125,7 +125,7 @@ public class YellowPageServiceImpl implements YellowPageService {
         response.setYellowPages(new ArrayList<YellowPageDTO>());
       
         for (YellowPage yellowPage : yellowPages){
-        	populateYellowPageUrl(yellowPage);
+        	populateYellowPage(yellowPage);
         	if(cmd.getType().equals(YellowPageType.SERVICEALLIANCE.getCode())){
     			ServiceAlliance serviceAlliance =  ConvertHelper.convert(yellowPage ,ServiceAlliance.class);
     			response.getYellowPages().add( ConvertHelper.convert(serviceAlliance,YellowPageDTO.class) );
