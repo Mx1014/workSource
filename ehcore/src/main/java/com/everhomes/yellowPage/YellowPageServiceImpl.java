@@ -211,7 +211,11 @@ public class YellowPageServiceImpl implements YellowPageService {
 	public YellowPageDTO getYellowPageTopic(GetYellowPageTopicCommand cmd) {
 		 
 		YellowPage yellowPage = this.yellowPageProvider.queryYellowPageTopic(cmd.getOwnerType(),cmd.getOwnerId(),cmd.getType());
-	
+		if (null == yellowPage)
+			{
+			LOGGER.error("can not find the topic community ID = "+cmd.getOwnerId() +"; and type = "+cmd.getType()); 
+			return null;
+			}
 		populateYellowPage(yellowPage);
 		YellowPageDTO response = null;
 		if(cmd.getType().equals(YellowPageType.SERVICEALLIANCE.getCode())){
