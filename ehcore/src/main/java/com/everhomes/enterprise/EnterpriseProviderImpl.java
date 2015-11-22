@@ -251,7 +251,7 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
             queryBuilderCallback.buildCondition(locator, query);
  
         if(locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS.ID.gt(locator.getAnchor()));
+            query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.ID.gt(locator.getAnchor()));
             }
         
         //query.addOrderBy(Tables.EH_ENTERPRISE_CONTACTS.CREATE_TIME.desc()); ERROR hear
