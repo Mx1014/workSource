@@ -361,6 +361,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 					departmentMember.setContactToken(identifier.getIdentifierToken());
 				}
 				departmentMember.setContactType(IdentifierType.MOBILE.getCode());
+				departmentMember.setTargetId(identifier.getOwnerUid());
 				organizationProvider.createOrganizationMember(departmentMember);
 			}
 		}
@@ -1376,6 +1377,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	private String getOrganizationMemberRejectForApplicant(String operName,String orgName, Long userId) {
 		User user = this.userProvider.findUserById(userId);
+		
+		if(null == user){
+			LOGGER.error("Users do not register.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Users do not register.");
+		}
+		
 		String locale = user.getLocale();
 		if(locale == null)
 			locale = "zh_CN";
@@ -1796,7 +1804,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 		Organization organization = this.checkOrganization(cmd.getOrganizationId());
 		OrganizationMember communityPmMember = this.checkDesOrgMember(cmd.getMemberId(),cmd.getOrganizationId());
 		User user = UserContext.current().getUser();
-		OrganizationMember operOrgMember = this.checkOperOrgMember(user.getId(), cmd.getOrganizationId());
+		
+		if(null == cmd.getParentId()) cmd.setParentId(cmd.getOrganizationId());
+		OrganizationMember operOrgMember = this.checkOperOrgMember(user.getId(), cmd.getParentId());
 
 		dbProvider.execute((status) -> {
 			organizationProvider.deleteOrganizationMember(communityPmMember);

@@ -12,10 +12,14 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class OrganizationMemberCommand {
+	
+	private Long parentId;
+	
 	@NotNull
 	private Long organizationId;
 	@NotNull
 	private Long memberId;
+	
 	public Long getOrganizationId() {
 		return organizationId;
 	}
@@ -27,6 +31,14 @@ public class OrganizationMemberCommand {
 	}
 	public void setMemberId(Long memberId) {
 		this.memberId = memberId;
+	}
+	
+	
+	public Long getParentId() {
+		return parentId;
+	}
+	public void setParentId(Long parentId) {
+		this.parentId = parentId;
 	}
 	@Override
 	public String toString() {
