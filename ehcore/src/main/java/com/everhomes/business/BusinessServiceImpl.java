@@ -472,7 +472,14 @@ public class BusinessServiceImpl implements BusinessService {
 		if(business.getTargetType() == BusinessTargetType.ZUOLIN.getCode()){
 			String businessDetailUrl = null;
 			try {
-				businessDetailUrl = URLEncoder.encode(detailUrl.trim() + business.getTargetId(), "utf-8");
+				if(detailUrl.contains("#sign_suffix")){
+					detailUrl = detailUrl.trim();
+					String prefix = detailUrl.substring(0,detailUrl.indexOf("#sign_suffix"));
+					String suffix = detailUrl.substring(detailUrl.indexOf("#sign_suffix"));
+					businessDetailUrl = URLEncoder.encode(prefix+business.getTargetId(), "utf-8")+suffix;
+				}
+				else
+					businessDetailUrl = URLEncoder.encode(detailUrl.trim() + business.getTargetId(), "utf-8");
 			} catch (UnsupportedEncodingException e) {
 				LOGGER.error("unsported encoding.");
 			}
