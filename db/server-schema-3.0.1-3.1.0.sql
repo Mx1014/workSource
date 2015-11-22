@@ -330,6 +330,7 @@ ALTER TABLE `eh_rtxt_resources` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DE
 ALTER TABLE `eh_events` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE `eh_polls` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
 
+-- ALTER TABLE `eh_categories` DROP INDEX `u_eh_category_name`;
 
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'enterprise.notification', 1, 'zh_CN', '用户加入企业，用户自己的消息', '您已加入公司“${enterpriseName}”。');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'enterprise.notification', 2, 'zh_CN', '发给企业其它所有成员', '${userName}已加入公司“${enterpriseName}”。');
@@ -356,5 +357,39 @@ INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'enter
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'parking', '10001', 'zh_CN', '车牌号位数错误');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'parking', '10002', 'zh_CN', '该车牌已有月卡');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'parking', '10003', 'zh_CN', '该车牌已申请月卡');
+
+INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(1000000, '科技园版');
+INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(999999, '讯美园区版');
+INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(999998, '华为园区版');
+
+-- INSERT INTO `eh_acl_privileges` (`app_id`,`name`,`description`) VALUES(32, '设置组的管理员，普通成员的增删改Group_member_mgt', '设置组的管理员，普通成员的增删改');
+-- INSERT INTO `eh_acl_privileges` (`app_id`,`name`,`description`) VALUES(32, 'Group_mgt', '组的增删改');
+-- INSERT INTO `eh_acl_privileges` (`app_id`,`name`,`description`) VALUES(32, 'Post_mgt', '帖子的增删改，置顶等');
+-- INSERT INTO `eh_acl_privileges` (`app_id`,`name`,`description`) VALUES(32, 'Task_mgt', '分配任务、修改任务状态、关闭任务、评论任务');
+-- INSERT INTO `eh_acl_privileges` (`app_id`,`name`,`description`) VALUES(32, 'Accounting', '1.物业账单的上传、缴费状态的修改等;2.电商收入管理');
+-- INSERT INTO `eh_acl_privileges` (`app_id`,`name`,`description`) VALUES(32, 'Property_mgt', '1.楼栋的增删改查;2.招商、入驻申请处理（现在没有该功能）');
+-- INSERT INTO `eh_acl_privileges` (`app_id`,`name`,`description`) VALUES(32, 'Sevice_operator', '会议室预定、停车位预定、电子屏预定、停车充值');
+-- INSERT INTO `eh_acl_privileges` (`app_id`,`name`,`description`) VALUES(32, 'Banner_input', '创建banner，只能创建，不能审核和发布');
+-- INSERT INTO `eh_acl_privileges` (`app_id`,`name`,`description`) VALUES(32, 'Banner_publish', '审核和发布banner');
+-- INSERT INTO `eh_acl_privileges` (`app_id`,`name`,`description`) VALUES(32, 'Market_mgt', '服务广场配置哪些服务');
+
+INSERT INTO `eh_acl_privileges` (`app_id`,`name`,`description`) VALUES(10001, 32, '机构所有权限', '机构所有权限');
+
+INSERT INTO `eh_acl_roles` (`id`, `app_id`,`name`,`description`) VALUES(1001, 32, '所有权限', '所有权限（All rights）');
+INSERT INTO `eh_acl_roles` (`id`, `app_id`,`name`,`description`) VALUES(1002, 32, '任务管理', '任务管理（Task_mgt）');
+INSERT INTO `eh_acl_roles` (`id`, `app_id`,`name`,`description`) VALUES(1003, 32, '财务管理', '财务管理（Accounting）');
+INSERT INTO `eh_acl_roles` (`id`, `app_id`,`name`,`description`) VALUES(1004, 32, '招商管理', '招商管理（Property_mgt）');
+INSERT INTO `eh_acl_roles` (`id`, `app_id`,`name`,`description`) VALUES(1005, 32, '组人员管理', '组人员管理（Group_member_mgt）');
+INSERT INTO `eh_acl_roles` (`id`, `app_id`,`name`,`description`) VALUES(1006, 32, '服务管理', '服务管理（Sevice_operator）');
+INSERT INTO `eh_acl_roles` (`id`, `app_id`,`name`,`description`) VALUES(1007, 32, '客服管理', '客服管理（ke fu）');
+
+INSERT INTO `eh_acls` (`id`, `owner_type`,`grant_type`,`privilege_id`,`role_id`,`creator_uid`,`create_time`) VALUES(10001, 'EhOrganizations', 1, 10001, 1001, 1, '2015-11-14 19:16:27');
+INSERT INTO `eh_acls` (`id`, `owner_type`,`grant_type`,`privilege_id`,`role_id`,`creator_uid`,`create_time`) VALUES(10002, 'EhOrganizations', 1, 10001, 1002, 1, '2015-11-14 19:16:27');
+INSERT INTO `eh_acls` (`id`, `owner_type`,`grant_type`,`privilege_id`,`role_id`,`creator_uid`,`create_time`) VALUES(10003, 'EhOrganizations', 1, 10001, 1003, 1, '2015-11-14 19:16:27');
+INSERT INTO `eh_acls` (`id`, `owner_type`,`grant_type`,`privilege_id`,`role_id`,`creator_uid`,`create_time`) VALUES(10004, 'EhOrganizations', 1, 10001, 1004, 1, '2015-11-14 19:16:27');
+INSERT INTO `eh_acls` (`id`, `owner_type`,`grant_type`,`privilege_id`,`role_id`,`creator_uid`,`create_time`) VALUES(10005, 'EhOrganizations', 1, 10001, 1005, 1, '2015-11-14 19:16:27');
+INSERT INTO `eh_acls` (`id`, `owner_type`,`grant_type`,`privilege_id`,`role_id`,`creator_uid`,`create_time`) VALUES(10006, 'EhOrganizations', 1, 10001, 1006, 1, '2015-11-14 19:16:27');
+
+
 
 SET foreign_key_checks = 1;

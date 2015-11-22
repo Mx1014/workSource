@@ -32,6 +32,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.acl.AclProvider;
+import com.everhomes.acl.ResourceUserRoleResolver;
 import com.everhomes.acl.Role;
 import com.everhomes.acl.RoleAssignment;
 import com.everhomes.address.Address;
@@ -39,6 +40,7 @@ import com.everhomes.address.AddressAdminStatus;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.address.CommunityDTO;
 import com.everhomes.app.AppConstants;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryConstants;
 import com.everhomes.category.CategoryProvider;
@@ -3102,5 +3104,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 			UpdateOrganizationMemberByIdsCommand cmd) {
 		return organizationProvider.updateOrganizationMemberByIds(cmd.getIds(), cmd.getOrgId());
 	}
-	
+    
+	@Override
+    public void checkOrganizationPrivilege(long uid, long organizationId, long privilege) {
+        ResourceUserRoleResolver resolver = PlatformContext.getComponent(EntityType.ORGANIZATIONS.getCode());
+        List<Long> roles = resolver.determineRoleInResource(uid, organizationId, EntityType.ORGANIZATIONS.getCode(), organizationId);
+        if(!this.aclProvider.checkAccess(EntityType.GROUP.getCode(), organizationId, EntityType.USER.getCode(), uid, privilege, 
+                roles))
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, 
+                    "Insufficient privilege");
+    }
 }
