@@ -20,10 +20,12 @@ public enum YellowPageType {
         return this.code;
     }
     
-    public static YellowPageType fromCode(byte code) {
-        for(YellowPageType t : YellowPageType.values()) {
-            if (t.code == code) {
-                return t;
+    public static YellowPageType fromCode(Byte code) {
+        if(code != null) {
+            for(YellowPageType t : YellowPageType.values()) {
+                if (t.code == code) {
+                    return t;
+                }
             }
         }
         
