@@ -47,7 +47,7 @@ public class ParkAdminController extends ControllerBase{
 	@RestReturn(value = String.class)
 	public RestResponse addParkingCharge(CreateParkingChargeCommand cmd){
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         parkService.addCharge(cmd);
         RestResponse response = new RestResponse();
@@ -65,7 +65,7 @@ public class ParkAdminController extends ControllerBase{
 	@RestReturn(value = String.class)
 	public RestResponse deleteParkingCharge(DeleteParkingChargeCommand cmd){
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 
         parkService.deleteCharge(cmd);
         RestResponse response = new RestResponse();
@@ -83,7 +83,7 @@ public class ParkAdminController extends ControllerBase{
 	@RestReturn(value = WaitingDaysResponse.class)
 	public RestResponse setWaitingDays(SetWaitingDaysCommand cmd) {
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         configurationProvider.setValue(ConfigConstants.PARKING_CARD_VALID_DAYS, cmd.getDays());
         
@@ -107,7 +107,7 @@ public class ParkAdminController extends ControllerBase{
 	@RestReturn(value = WaitingDaysResponse.class)
 	public RestResponse getWaitingDays() {
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         WaitingDaysResponse waitingDays = new WaitingDaysResponse();
         waitingDays.setWaitingDays(configurationProvider.getValue(ConfigConstants.PARKING_CARD_VALID_DAYS, ""));
@@ -128,7 +128,7 @@ public class ParkAdminController extends ControllerBase{
 	@RestReturn(value = RechargeRecordList.class)
 	public RestResponse searchRechargeRecordList(SearchRechargeRecordCommand cmd) {
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 
         RechargeRecordList result = parkService.searchRechargeRecord(cmd);
         RestResponse response = new RestResponse(result);
@@ -146,7 +146,7 @@ public class ParkAdminController extends ControllerBase{
 	@RestReturn(value = ApplyParkCardList.class)
 	public RestResponse searchApplyCardList(SearchApplyCardCommand cmd) {
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 
         ApplyParkCardList list = parkService.searchApplyCardList(cmd);
         RestResponse response = new RestResponse(list);
@@ -164,7 +164,7 @@ public class ParkAdminController extends ControllerBase{
 	@RestReturn(value = ApplyParkCardList.class)
 	public RestResponse offerCard(OfferCardCommand cmd) {
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 
         ApplyParkCardList list = parkService.offerCard(cmd);
         RestResponse response = new RestResponse(list);
@@ -182,7 +182,7 @@ public class ParkAdminController extends ControllerBase{
 	@RestReturn(value = ApplyParkCardDTO.class)
 	public RestResponse fetchCard(FetchCardCommand cmd) {
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 
         ApplyParkCardDTO result = parkService.fetchCard(cmd);
         RestResponse response = new RestResponse(result);

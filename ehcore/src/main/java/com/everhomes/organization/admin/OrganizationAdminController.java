@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.apache.taglibs.standard.lang.jstl.Literal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ import com.everhomes.organization.CreateOrganizationContactCommand;
 import com.everhomes.organization.CreateOrganizationMemberCommand;
 import com.everhomes.organization.CreatePropertyOrganizationCommand;
 import com.everhomes.organization.DeleteOrganizationIdCommand;
+import com.everhomes.organization.GetUserResourcePrivilege;
 import com.everhomes.organization.ListDepartmentsCommand;
 import com.everhomes.organization.ListDepartmentsCommandResponse;
 import com.everhomes.organization.ListOrganizationMemberCommand;
@@ -80,7 +82,7 @@ public class OrganizationAdminController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse createOrganizationMember(@Valid CreateOrganizationMemberCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
     	organizationService.createOrganizationMember(cmd);
         RestResponse response = new RestResponse();
@@ -168,7 +170,7 @@ public class OrganizationAdminController extends ControllerBase {
     @RestReturn(value=ListOrganizationMemberCommandResponse.class)
     public RestResponse listOrgMembers(@Valid ListOrganizationMemberCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
     	ListOrganizationMemberCommandResponse commandResponse = organizationService.listOrgMembers(cmd);
         RestResponse response = new RestResponse(commandResponse);
@@ -203,7 +205,7 @@ public class OrganizationAdminController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse deleteOrganization(@Valid DeleteOrganizationIdCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
     	organizationService.deleteOrganization(cmd);
         RestResponse response = new RestResponse();
@@ -269,7 +271,7 @@ public class OrganizationAdminController extends ControllerBase {
     public RestResponse addPmBuilding(AddPmBuildingCommand cmd) {
     	
     	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
     	this.organizationService.addPmBuilding(cmd);
     	RestResponse response = new RestResponse();
@@ -305,7 +307,7 @@ public class OrganizationAdminController extends ControllerBase {
     public RestResponse listPmBuildings(ListPmBuildingCommand cmd) {
     	
     	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+       // resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         List<PmBuildingDTO> list = this.organizationService.listPmBuildings(cmd);
     	RestResponse response = new RestResponse(list);
@@ -323,7 +325,7 @@ public class OrganizationAdminController extends ControllerBase {
     public RestResponse listUnassignedBuilding(ListPmBuildingCommand cmd) {
     	
     	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         List<UnassignedBuildingDTO> list = this.organizationService.listUnassignedBuilding(cmd);
     	RestResponse response = new RestResponse(list);
@@ -342,7 +344,7 @@ public class OrganizationAdminController extends ControllerBase {
     public RestResponse listPmManagements(ListPmManagementsCommand cmd) {
     	
     	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+       // resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         PmManagementsResponse list = this.organizationService.listPmManagements(cmd);
     	RestResponse response = new RestResponse(list);
@@ -360,7 +362,7 @@ public class OrganizationAdminController extends ControllerBase {
     public RestResponse createDepartment(CreateDepartmentCommand cmd) {
     	
     	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
     	organizationService.createDepartment(cmd);
         RestResponse response = new RestResponse();
@@ -377,7 +379,7 @@ public class OrganizationAdminController extends ControllerBase {
     @RestReturn(value=ListDepartmentsCommandResponse.class)
     public RestResponse listDepartments(@Valid ListDepartmentsCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         ListDepartmentsCommandResponse commandResponse = organizationService.listDepartments(cmd);
         RestResponse response = new RestResponse(commandResponse);
@@ -394,7 +396,7 @@ public class OrganizationAdminController extends ControllerBase {
     @RestReturn(value=ListOrganizationMemberCommandResponse.class)
     public RestResponse listParentOrganizationMembers(@Valid ListOrganizationMemberCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+       // resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         ListOrganizationMemberCommandResponse commandResponse = organizationService.ListParentOrganizationMembers(cmd);
         RestResponse response = new RestResponse(commandResponse);
@@ -411,7 +413,7 @@ public class OrganizationAdminController extends ControllerBase {
     @RestReturn(value=UpdateOrganizationMemberByIdsCommand.class)
     public RestResponse updateOrganizationMemberByIds(@Valid UpdateOrganizationMemberByIdsCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         boolean res = organizationService.updateOrganizationMemberByIds(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -419,5 +421,19 @@ public class OrganizationAdminController extends ControllerBase {
         return response;
     }
     
+    
+    /**
+     * <b>URL: /admin/org/getUserResourcePrivilege</b>
+     * <p>获取权限资源</p>
+     */
+    @RequestMapping("getUserResourcePrivilege")
+    @RestReturn(value=Long.class, collection=true)
+    public RestResponse getUserResourcePrivilege(@Valid GetUserResourcePrivilege cmd) {
+        List<Long> res = organizationService.getUserResourcePrivilege(UserContext.current().getUser().getId(), cmd.getOrganizationId());
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
 }

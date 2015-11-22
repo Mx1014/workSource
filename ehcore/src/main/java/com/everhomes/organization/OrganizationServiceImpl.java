@@ -35,6 +35,7 @@ import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.ResourceUserRoleResolver;
 import com.everhomes.acl.Role;
 import com.everhomes.acl.RoleAssignment;
+import com.everhomes.acl.RoleConstants;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressAdminStatus;
 import com.everhomes.address.AddressProvider;
@@ -3114,4 +3115,27 @@ public class OrganizationServiceImpl implements OrganizationService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, 
                     "Insufficient privilege");
     }
+	
+	@Override
+	public List<Long> getUserResourcePrivilege(long uid, long organizationId) {
+		
+		List<Long> resources = new ArrayList<Long>();
+		
+		OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(uid, organizationId);
+		
+		if(null == organizationMember){
+			resources.add(RoleConstants.ORGANIZATION_TASK_MGT);
+			return resources;
+		}
+		
+		if(OrganizationMemberGroupType.MANAGER.getCode().equals(organizationMember.getMemberGroup())){
+			resources.add(RoleConstants.ORGANIZATION_ADMIN);
+			return resources;
+		}else{
+			resources.add(RoleConstants.ORGANIZATION_TASK_MGT);
+		}
+		resources.addAll(aclProvider.getRolesFromResourceAssignments("system", null, EntityType.ORGANIZATIONS.getCode(), organizationId, null));
+		
+		return resources;
+	}
 }
