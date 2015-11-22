@@ -8,6 +8,10 @@ INSERT INTO `eh_punch_workday` (`id`, `date_status`, `date_tag`, `creator_uid`, 
 INSERT INTO `eh_punch_workday` (`id`, `date_status`, `date_tag`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES('5','1','2015-10-05',NULL,NULL,NULL,NULL);
 INSERT INTO `eh_punch_workday` (`id`, `date_status`, `date_tag`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES('6','1','2015-10-06',NULL,NULL,NULL,NULL);
 INSERT INTO `eh_punch_workday` (`id`, `date_status`, `date_tag`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES('7','1','2015-10-07',NULL,NULL,NULL,NULL);
+
+ DELETE FROM  `eh_rental_rules`  ; 
+ 
+  
 INSERT INTO `eh_rental_rules` (`id`, `community_id`, `site_type`, `rental_start_time`, `rental_end_time`, `pay_start_time`, `pay_end_time`, `payment_ratio`, `refund_flag`, `contact_num`, `time_tag1`, `time_tag2`, `time_tag3`, `date_tag1`, `date_tag2`, `date_tag3`, `datetime_tag1`, `datetime_tag2`, `datetime_tag3`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `string_tag1`, `string_tag2`, `string_tag3`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) 
 	VALUES('1','240111044331048623','MEETINGROOM','2592000000','172800000','1728000000','691200000','10','1','13530178444',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'100011','2015-10-30 11:29:32');
 INSERT INTO `eh_rental_rules` (`id`, `community_id`, `site_type`, `rental_start_time`, `rental_end_time`, `pay_start_time`, `pay_end_time`, `payment_ratio`, `refund_flag`, `contact_num`, `time_tag1`, `time_tag2`, `time_tag3`, `date_tag1`, `date_tag2`, `date_tag3`, `datetime_tag1`, `datetime_tag2`, `datetime_tag3`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `string_tag1`, `string_tag2`, `string_tag3`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) 
