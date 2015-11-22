@@ -755,6 +755,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 
 		User user = userProvider.findUserById(member.getTargetId());
+		
+		if(null == user){
+			LOGGER.error("Users do not register.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Users do not register.");
+		}
+		
 		String locale = user.getLocale();
 		if(locale == null) 
 			locale = "zh_CN";
@@ -1477,8 +1484,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 		Post topic = this.checkTopic(cmd.getTopicId());
 		OrganizationMember desOrgMember = this.checkDesOrgMember(cmd.getUserId(),organization.getId());
 		User user = UserContext.current().getUser();
-		OrganizationMember operOrgMember = this.checkOperOrgMember(user.getId(),organization.getId());
-		OrganizationTask task = this.checkOrgTask(organization.getId(), cmd.getTopicId());
+		if(null == cmd.getParentId()) cmd.setParentId(organization.getId());
+		OrganizationMember operOrgMember = this.checkOperOrgMember(user.getId(), cmd.getParentId());
+		OrganizationTask task = this.checkOrgTask(cmd.getParentId(), cmd.getTopicId());
 
 		dbProvider.execute((status) -> {
 //			///////////////////////////////////////////////////

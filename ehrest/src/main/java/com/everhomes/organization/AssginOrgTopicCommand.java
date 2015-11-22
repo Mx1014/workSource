@@ -14,6 +14,9 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class AssginOrgTopicCommand {
+	
+	@NotNull
+	private Long parentId;
 	@NotNull
 	private Long organizationId;
 	@NotNull
@@ -48,6 +51,16 @@ public class AssginOrgTopicCommand {
     public void setUserId(Long userId) {
         this.userId = userId;
     }
+    
+    
+
+	public Long getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(Long parentId) {
+		this.parentId = parentId;
+	}
 
 	@Override
     public String toString() {
