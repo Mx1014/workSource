@@ -691,10 +691,9 @@ public class PunchServiceImpl implements PunchService {
 		List<PunchGeopoint> punchGeopoints = punchProvider
 				.listPunchGeopointsByCompanyId(cmd.getCompanyId());
 		if (punchGeopoints.size() == 0)
-			throw RuntimeErrorException
-					.errorWith(ErrorCodes.SCOPE_GENERAL,
-							ErrorCodes.ERROR_INVALID_PARAMETER,
-							"Invalid companyId parameter in the command:companyId has no geo point");
+			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+ 					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
+ 				"公司没有设置打卡规则");
 		for (PunchGeopoint punchGeopoint : punchGeopoints) {
 			if (caculateDistance(cmd.getLongitude(), cmd.getLatitude(),
 					punchGeopoint.getLongitude(), punchGeopoint.getLatitude()) <= punchGeopoint
