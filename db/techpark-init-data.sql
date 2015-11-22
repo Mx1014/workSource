@@ -9,6 +9,13 @@ INSERT INTO `eh_punch_workday` (`id`, `date_status`, `date_tag`, `creator_uid`, 
 INSERT INTO `eh_punch_workday` (`id`, `date_status`, `date_tag`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES('6','1','2015-10-06',NULL,NULL,NULL,NULL);
 INSERT INTO `eh_punch_workday` (`id`, `date_status`, `date_tag`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES('7','1','2015-10-07',NULL,NULL,NULL,NULL);
 
+
+insert into `eh_punch_rules` (`id`, `company_id`, `start_early_time`, `start_late_time`, `work_time`, `time_tag1`, `time_tag2`, `time_tag3`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) values('2','178395','08:30:00','09:30:00','10:00:00',NULL,NULL,NULL,'195506','2015-11-22 09:24:38',NULL,NULL);
+
+
+insert into `eh_punch_geopoints` (`id`, `company_id`, `description`, `longitude`, `latitude`, `geohash`, `distance`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) values('2','178395','深圳科技工业园大厦(科苑路6号(近深南大道))','113.952909','22.549597','ws10311bzjx3','1000','195506','2015-11-22 09:24:38',NULL,NULL);
+ 
+ 
  DELETE FROM  `eh_rental_rules`  ; 
  
   
