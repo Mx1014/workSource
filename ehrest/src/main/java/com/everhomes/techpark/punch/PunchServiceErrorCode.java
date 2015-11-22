@@ -9,4 +9,6 @@ public interface PunchServiceErrorCode {
     static final int ERROR_PUNCH_ADD_DAYLOG = 10004;  //计算打卡日志有问题
     static final int ERROR_PUNCH_REFRESH_DAYLOG = 10005;  //计算打卡日志有问题
     
+    static final int ERROR_ENTERPRISE_DIDNOT_SETTING = 10010;  //公司没有设置打卡规则
+    
 }
