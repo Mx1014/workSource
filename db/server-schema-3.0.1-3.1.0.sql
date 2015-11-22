@@ -373,7 +373,7 @@ INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(999998, '华为园区版');
 -- INSERT INTO `eh_acl_privileges` (`app_id`,`name`,`description`) VALUES(32, 'Banner_publish', '审核和发布banner');
 -- INSERT INTO `eh_acl_privileges` (`app_id`,`name`,`description`) VALUES(32, 'Market_mgt', '服务广场配置哪些服务');
 
-INSERT INTO `eh_acl_privileges` (`app_id`,`name`,`description`) VALUES(10001, 32, '机构所有权限', '机构所有权限');
+-- INSERT INTO `eh_acl_privileges` (`app_id`,`name`,`description`) VALUES(10001, 32, '机构所有权限', '机构所有权限');
 
 INSERT INTO `eh_acl_roles` (`id`, `app_id`,`name`,`description`) VALUES(1001, 32, '所有权限', '所有权限（All rights）');
 INSERT INTO `eh_acl_roles` (`id`, `app_id`,`name`,`description`) VALUES(1002, 32, '任务管理', '任务管理（Task_mgt）');
@@ -383,12 +383,12 @@ INSERT INTO `eh_acl_roles` (`id`, `app_id`,`name`,`description`) VALUES(1005, 32
 INSERT INTO `eh_acl_roles` (`id`, `app_id`,`name`,`description`) VALUES(1006, 32, '服务管理', '服务管理（Sevice_operator）');
 INSERT INTO `eh_acl_roles` (`id`, `app_id`,`name`,`description`) VALUES(1007, 32, '客服管理', '客服管理（ke fu）');
 
-INSERT INTO `eh_acls` (`id`, `owner_type`,`grant_type`,`privilege_id`,`role_id`,`creator_uid`,`create_time`) VALUES(10001, 'EhOrganizations', 1, 10001, 1001, 1, '2015-11-14 19:16:27');
-INSERT INTO `eh_acls` (`id`, `owner_type`,`grant_type`,`privilege_id`,`role_id`,`creator_uid`,`create_time`) VALUES(10002, 'EhOrganizations', 1, 10001, 1002, 1, '2015-11-14 19:16:27');
-INSERT INTO `eh_acls` (`id`, `owner_type`,`grant_type`,`privilege_id`,`role_id`,`creator_uid`,`create_time`) VALUES(10003, 'EhOrganizations', 1, 10001, 1003, 1, '2015-11-14 19:16:27');
-INSERT INTO `eh_acls` (`id`, `owner_type`,`grant_type`,`privilege_id`,`role_id`,`creator_uid`,`create_time`) VALUES(10004, 'EhOrganizations', 1, 10001, 1004, 1, '2015-11-14 19:16:27');
-INSERT INTO `eh_acls` (`id`, `owner_type`,`grant_type`,`privilege_id`,`role_id`,`creator_uid`,`create_time`) VALUES(10005, 'EhOrganizations', 1, 10001, 1005, 1, '2015-11-14 19:16:27');
-INSERT INTO `eh_acls` (`id`, `owner_type`,`grant_type`,`privilege_id`,`role_id`,`creator_uid`,`create_time`) VALUES(10006, 'EhOrganizations', 1, 10001, 1006, 1, '2015-11-14 19:16:27');
+-- INSERT INTO `eh_acls` (`id`, `owner_type`,`grant_type`,`privilege_id`,`role_id`,`creator_uid`,`create_time`) VALUES(10001, 'EhOrganizations', 1, 10001, 1001, 1, '2015-11-14 19:16:27');
+-- INSERT INTO `eh_acls` (`id`, `owner_type`,`grant_type`,`privilege_id`,`role_id`,`creator_uid`,`create_time`) VALUES(10002, 'EhOrganizations', 1, 10001, 1002, 1, '2015-11-14 19:16:27');
+-- INSERT INTO `eh_acls` (`id`, `owner_type`,`grant_type`,`privilege_id`,`role_id`,`creator_uid`,`create_time`) VALUES(10003, 'EhOrganizations', 1, 10001, 1003, 1, '2015-11-14 19:16:27');
+-- INSERT INTO `eh_acls` (`id`, `owner_type`,`grant_type`,`privilege_id`,`role_id`,`creator_uid`,`create_time`) VALUES(10004, 'EhOrganizations', 1, 10001, 1004, 1, '2015-11-14 19:16:27');
+-- INSERT INTO `eh_acls` (`id`, `owner_type`,`grant_type`,`privilege_id`,`role_id`,`creator_uid`,`create_time`) VALUES(10005, 'EhOrganizations', 1, 10001, 1005, 1, '2015-11-14 19:16:27');
+-- INSERT INTO `eh_acls` (`id`, `owner_type`,`grant_type`,`privilege_id`,`role_id`,`creator_uid`,`create_time`) VALUES(10006, 'EhOrganizations', 1, 10001, 1006, 1, '2015-11-14 19:16:27');
 
 
 
