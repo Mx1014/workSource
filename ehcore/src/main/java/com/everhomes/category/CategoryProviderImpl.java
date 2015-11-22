@@ -162,6 +162,12 @@ public class CategoryProviderImpl implements CategoryProvider {
             selectStep.where(condition);
         }
         
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query child categories, namespaceId=" + namespaceId + ", parentId=" + parentId + ", status=" + status);
+            LOGGER.debug("Query child categories, sql=" + selectStep.getSQL());
+            LOGGER.debug("Query child categories, bindValues=" + selectStep.getBindValues());
+        }
+        
         if(orderByFields != null) {
             result = selectStep.orderBy(orderByFields).fetch().map(
                 new DefaultRecordMapper(Tables.EH_CATEGORIES.recordType(), Category.class)

@@ -21,28 +21,28 @@ INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'renta
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'rental', '10005', 'zh_CN', '订单超时失效了');
 
 
-INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(4201, 4, 0, '亲子与教育', '活动/亲子与教育', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(4202, 4, 0, '运动与音乐', '活动/运动与音乐', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(4203, 4, 0, '宠物会', '活动/宠物会', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(4204, 4, 0, '美食与厨艺', '活动/美食与厨艺', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(4205, 4, 0, '美容化妆', '活动/美容化妆', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(4206, 4, 0, '家庭装饰', '活动/家庭装饰', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(4207, 4, 0, '其他', '活动/其他', 1, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(4208, 4001, 0, '亲子', '活动/亲子与教育/亲子', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(4209, 4001, 0, '教育', '活动/亲子与教育/教育', 0, 2, UTC_TIMESTAMP());	
-INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(4210, 4002, 0, '运动', '活动/运动与音乐/运动', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(4211, 4002, 0, '音乐', '活动/运动与音乐/音乐', 0, 2, UTC_TIMESTAMP());
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(4201, 4, 0, '亲子与教育', '活动/亲子与教育', 0, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(4202, 4, 0, '运动与音乐', '活动/运动与音乐', 0, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(4203, 4, 0, '宠物会', '活动/宠物会', 0, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(4204, 4, 0, '美食与厨艺', '活动/美食与厨艺', 0, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(4205, 4, 0, '美容化妆', '活动/美容化妆', 0, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(4206, 4, 0, '家庭装饰', '活动/家庭装饰', 0, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(4207, 4, 0, '其他', '活动/其他', 1, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(4208, 4001, 0, '亲子', '活动/亲子与教育/亲子', 0, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(4209, 4001, 0, '教育', '活动/亲子与教育/教育', 0, 2, UTC_TIMESTAMP(), 1000000);	
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(4210, 4002, 0, '运动', '活动/运动与音乐/运动', 0, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(4211, 4002, 0, '音乐', '活动/运动与音乐/音乐', 0, 2, UTC_TIMESTAMP(), 1000000);
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
     VALUES(4213, 4, 0, '科技', '活动/科技', 0, 2, UTC_TIMESTAMP(), 1000000);
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
