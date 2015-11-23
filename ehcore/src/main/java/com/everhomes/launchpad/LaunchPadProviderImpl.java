@@ -9,6 +9,8 @@ import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectJoinStep;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,9 +27,10 @@ import com.everhomes.util.ConvertHelper;
 
 @Component
 public class LaunchPadProviderImpl implements LaunchPadProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(LaunchPadProvider.class);
+
 	@Autowired
 	private DbProvider dbProvider;
-
 	@Override
 	public void createLaunchPadItem(LaunchPadItem item) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -151,10 +154,17 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 
         condition = condition.and(Tables.EH_LAUNCH_PAD_LAYOUTS.NAMESPACE_ID.eq(namespaceId));
 		condition = condition.and(Tables.EH_LAUNCH_PAD_LAYOUTS.STATUS.eq(LaunchPadLayoutStatus.ACTIVE.getCode()));
+
+        
 		step.where(condition).orderBy(Tables.EH_LAUNCH_PAD_LAYOUTS.VERSION_CODE.desc()).fetch().map((r) ->{
 			layouts.add(ConvertHelper.convert(r, LaunchPadLayout.class));
 			return null;
-		});
+		});        
+		
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query launch pad items by version code, sql=" + step.getSQL());
+            LOGGER.debug("Query launch pad items by version code, bindValues=" + step.getBindValues());
+        }
 
 		return layouts;
 	}

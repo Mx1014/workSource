@@ -230,7 +230,7 @@ public class CommunityAdminController extends ControllerBase {
 	public RestResponse deleteBuilding(DeleteBuildingAdminCommand cmd) {
     	
     	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 
         this.communityService.deleteBuilding(cmd);
 
@@ -248,7 +248,7 @@ public class CommunityAdminController extends ControllerBase {
 	public RestResponse updateBuilding(UpdateBuildingAdminCommand cmd) {
 		
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 
         BuildingDTO dto = this.communityService.updateBuilding(cmd);
 
@@ -266,7 +266,7 @@ public class CommunityAdminController extends ControllerBase {
 	public RestResponse verifyBuildingName(VerifyBuildingNameAdminCommand cmd) {
 		
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 
         Boolean verify = this.communityService.verifyBuildingName(cmd);
 
@@ -284,7 +284,7 @@ public class CommunityAdminController extends ControllerBase {
 	public RestResponse getCommunityManagers(ListCommunityManagersAdminCommand cmd) {
 		
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         List<CommunityManagerDTO> manager = this.communityService.getCommunityManagers(cmd);
 		RestResponse response =  new RestResponse(manager);

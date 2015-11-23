@@ -128,7 +128,7 @@ public class ThirdUserOpenController extends ControllerBase {
 		map.put("randomNum", cmd.getRandomNum()+"");
 		map.put("timestamp", cmd.getTimestamp()+"");
 		map.put("key", cmd.getKey());
-		String sign = cmd.getSign();
+		String sign = URLDecoder.decode(cmd.getSign());
 		String nSign = SignatureHelper.computeSignature(map, app.getSecretKey());
 		if(!sign.equals(nSign)){
 			LOGGER.error("no oauth to access.nSign="+nSign+",sign="+sign+",key="+key+",timestamp="+timestamp+",randomNum="+randomNum+",namespaceId="+namespaceId+",namespaceUserToken="+namespaceUserToken);

@@ -789,7 +789,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		}
 		
 		User user = UserContext.current().getUser();
-		Integer namespaceId = (user.getNamespaceId() == null) ? 0 : user.getNamespaceId(); 
+		Integer namespaceId = (cmd.getNamespaceId() == null) ? 0 : cmd.getNamespaceId(); 
 		List<LaunchPadLayoutDTO> results = new ArrayList<LaunchPadLayoutDTO>();
 		this.launchPadProvider.findLaunchPadItemsByVersionCode(namespaceId,cmd.getName(),cmd.getVersionCode()).stream().map((r) ->{;
 		results.add(ConvertHelper.convert(r, LaunchPadLayoutDTO.class));
