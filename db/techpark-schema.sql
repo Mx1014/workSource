@@ -1,7 +1,3 @@
-use ehcore;
-
-
-
 
 /*Table structure for table `eh_punch_logs` */
 
@@ -10,12 +6,13 @@ DROP TABLE IF EXISTS `eh_punch_logs`;
 CREATE TABLE `eh_punch_logs` (
   `id` BIGINT NOT NULL COMMENT 'id',
   `user_id` BIGINT COMMENT 'user''s id',
-  `company_id` BIGINT COMMENT 'compay id',
+  `enterprise_id` BIGINT COMMENT 'compay id',
   `longitude` DOUBLE,
   `latitude` DOUBLE,
   `punch_date` DATE COMMENT 'user punch date',
   `punch_time` DATETIME COMMENT 'user check time',
   `punch_status` TINYINT(4) COMMENT '1:Normal ;  0:Not in punch area',
+  `identification` VARCHAR(255) COMMENT 'unique identification for a phone',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -24,16 +21,19 @@ DROP TABLE IF EXISTS `eh_punch_day_logs`;
 CREATE TABLE `eh_punch_day_logs` (
   `id` BIGINT NOT NULL COMMENT 'id',
   `user_id` BIGINT COMMENT 'user''s id',
-  `company_id` BIGINT COMMENT 'compay id',
+  `enterprise_id` BIGINT COMMENT 'compay id',
   `punch_date` DATE COMMENT 'user punch date',
   `arrive_time` TIME ,
+  `noon_leave_time` TIME ,
+  `afternoon_arrive_time` TIME ,
   `leave_time` TIME ,
   `work_time` TIME COMMENT 'how long did employee work',
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT 'NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)',
-	`creator_uid` BIGINT,
-	`create_time` DATETIME,
-	`view_flag` TINYINT NOT NULL DEFAULT 1 COMMENT 'is view(0) not view(1)',
- 
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `view_flag` TINYINT NOT NULL DEFAULT 1 COMMENT 'is view(0) not view(1)',
+  `punch_times_per_day` TINYINT  NOT NULL DEFAULT 2 COMMENT '2 or  4 times', 
+  
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -44,15 +44,18 @@ DROP TABLE IF EXISTS `eh_punch_rules`;
 
 CREATE TABLE `eh_punch_rules` (
   `id` BIGINT NOT NULL COMMENT 'id',
-  `company_id` BIGINT NOT NULL COMMENT 'rule company id', 
+  `enterprise_id` BIGINT NOT NULL COMMENT 'rule company id', 
   `start_early_time` TIME COMMENT 'how early can i arrive',
   `start_late_time` TIME COMMENT 'how late can i arrive ',
   `work_time` TIME COMMENT 'how long do i must be work',
+  `noon_leave_time` TIME ,
+  `afternoon_arrive_time` TIME ,
   `time_tag1` TIME,
   `time_tag2` TIME,
   `time_tag3` TIME,
-	`creator_uid` BIGINT,
-	`create_time` DATETIME,
+  `punch_times_per_day` TINYINT  NOT NULL DEFAULT 2 COMMENT '2 or  4 times', 
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
   `operator_uid` BIGINT,
   `operate_time` DATETIME,
   PRIMARY KEY (`id`)
@@ -62,14 +65,14 @@ DROP TABLE IF EXISTS `eh_punch_geopoints`;
 
 CREATE TABLE `eh_punch_geopoints` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `company_id` BIGINT DEFAULT NULL,
+  `enterprise_id` BIGINT DEFAULT NULL,
   `description` VARCHAR(256) DEFAULT NULL,
   `longitude` DOUBLE DEFAULT NULL,
   `latitude` DOUBLE DEFAULT NULL,
   `geohash` VARCHAR(32) DEFAULT NULL,
   `distance` DOUBLE ,
-	`creator_uid` BIGINT,
-	`create_time` DATETIME,
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
   `operator_uid` BIGINT,
   `operate_time` DATETIME,
   PRIMARY KEY (`id`)
@@ -82,18 +85,18 @@ DROP TABLE IF EXISTS `eh_punch_exception_requests`;
 CREATE TABLE `eh_punch_exception_requests` (
   `id` BIGINT NOT NULL COMMENT 'id',
   `user_id` BIGINT COMMENT 'user''s id',
-  `company_id` BIGINT COMMENT 'compay id',
+  `enterprise_id` BIGINT COMMENT 'compay id',
   `punch_date` DATE COMMENT 'user punch date',
   `request_type` TINYINT(4) COMMENT '0:request ;  1:approval',
   `description` VARCHAR(256) ,
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive, 1: waitingForApproval, 2:active',
   `process_code` TINYINT COMMENT 'NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)',
   `process_details` TEXT,
-	`creator_uid` BIGINT,
-	`create_time` DATETIME,
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
   `operator_uid` BIGINT,
   `operate_time` DATETIME,
-	`view_flag` TINYINT NOT NULL DEFAULT 1 COMMENT 'is view(0) not view(1)',
+  `view_flag` TINYINT NOT NULL DEFAULT 1 COMMENT 'is view(0) not view(1)',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -104,14 +107,17 @@ DROP TABLE IF EXISTS `eh_punch_exception_approvals`;
 CREATE TABLE `eh_punch_exception_approvals` (
   `id` BIGINT NOT NULL COMMENT 'id',
   `user_id` BIGINT COMMENT 'user''s id',
-  `company_id` BIGINT COMMENT 'compay id',
+  `enterprise_id` BIGINT COMMENT 'compay id',
   `punch_date` DATE COMMENT 'user punch date',
   `approval_status` TINYINT NOT NULL DEFAULT 1 COMMENT 'NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)',
-	`creator_uid` BIGINT,
-	`create_time` DATETIME,
+  `morning_approval_status` TINYINT NOT NULL DEFAULT 1 COMMENT 'NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)',
+  `afternoon_approval_status` TINYINT NOT NULL DEFAULT 1 COMMENT 'NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
   `operator_uid` BIGINT,
   `operate_time` DATETIME,
-	`view_flag` TINYINT NOT NULL DEFAULT 1 COMMENT 'is view(0) not view(1)',
+  `view_flag` TINYINT NOT NULL DEFAULT 1 COMMENT 'is view(0) not view(1)',
+  `punch_times_per_day` TINYINT  NOT NULL DEFAULT 2 COMMENT '2 or  4 times', 
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -121,15 +127,15 @@ DROP TABLE IF EXISTS `eh_punch_workday`;
 
 CREATE TABLE `eh_punch_workday` (
   `id` BIGINT NOT NULL COMMENT 'id',
+  `enterprise_id` BIGINT COMMENT 'compay id',
   `date_status` TINYINT(4) COMMENT '0:weekend work date ;  1:holiday',
   `date_tag` DATE COMMENT 'date',
-	`creator_uid` BIGINT,
-	`create_time` DATETIME,
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
   `operator_uid` BIGINT,
   `operate_time` DATETIME,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
-
 
 
 DROP TABLE IF EXISTS `eh_rental_rules`;
