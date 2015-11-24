@@ -93,6 +93,7 @@ import com.everhomes.messaging.MessageChannel;
 import com.everhomes.messaging.MessageDTO;
 import com.everhomes.messaging.MessagingConstants;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.AccountType;
 import com.everhomes.organization.BillTransactionResult;
 import com.everhomes.organization.BillingAccountHelper;
@@ -763,8 +764,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Override
 	public UserTokenCommandResponse findUserByIndentifier(UserTokenCommand cmd) {
+        User operator = UserContext.current().getUser();
+        Integer namespaceId = Namespace.DEFAULT_NAMESPACE;
+        if(operator != null) {
+            namespaceId = operator.getNamespaceId();
+        }
+        
 		UserTokenCommandResponse commandResponse = new UserTokenCommandResponse();
-		User user = userService.findUserByIndentifier(cmd.getUserIdentifier());
+		User user = userService.findUserByIndentifier(namespaceId, cmd.getUserIdentifier());
 		if(user != null)
 		{
 			List<String> phones = new ArrayList<String>();
@@ -1885,11 +1892,17 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 
 	private void processCommunityPmOwner(Long communityId,List<CommunityPmOwner> owners,String message) {
+        User operator = UserContext.current().getUser();
+        Integer namespaceId = Namespace.DEFAULT_NAMESPACE;
+        if(operator != null) {
+            namespaceId = operator.getNamespaceId();
+        }
+        
 		List<String> phones = new ArrayList<String>();
 		List<Long> userIds = new ArrayList<Long>();
 		if(owners != null && owners.size() > 0){
 			for (CommunityPmOwner communityPmOwner : owners) {
-				User userPhone = userService.findUserByIndentifier(communityPmOwner.getContactToken());
+				User userPhone = userService.findUserByIndentifier(namespaceId, communityPmOwner.getContactToken());
 
 				if(userPhone == null){// 3-不是user，发短信
 					phones.add(communityPmOwner.getContactToken());

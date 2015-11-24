@@ -21,11 +21,13 @@ import com.everhomes.messaging.MessageChannel;
 import com.everhomes.messaging.MessageDTO;
 import com.everhomes.messaging.MessagingConstants;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.thirdpartuser.ThirdpartUser;
 import com.everhomes.thirdpartuser.ThirdpartUserProvider;
 import com.everhomes.user.MessageChannelType;
 import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
@@ -65,10 +67,16 @@ public class DoorVenderController extends ControllerBase {
     
     @RequestMapping("notifyMessage")
     @RestReturn(NotifyDoorMessageResponse.class)
-    public RestResponse notifyMessage(@Valid NotifyDoorMessageCommand cmd) {
+    public RestResponse notifyMessage(@Valid NotifyDoorMessageCommand cmd) {        
+        User operator = UserContext.current().getUser();
+        Integer namespaceId = Namespace.DEFAULT_NAMESPACE;
+        if(operator != null) {
+            namespaceId = operator.getNamespaceId();
+        }
+        
         NotifyDoorMessageResponse rsp = new NotifyDoorMessageResponse();
         for(String phone: cmd.getPhones()) {
-            User u = userService.findUserByIndentifier(phone);
+            User u = userService.findUserByIndentifier(namespaceId, phone);
             if(null == u) {
                 rsp.getPhoneStatus().add(new PhoneStatus(phone, "NOT_FOUND"));
                 continue;
@@ -85,9 +93,15 @@ public class DoorVenderController extends ControllerBase {
     @RequestMapping("notifyDoorLock")
     @RestReturn(NotifyDoorMessageResponse.class)
     public RestResponse notifyDoorLock(@Valid NotifyDoorLockCommand cmd) {
+        User operator = UserContext.current().getUser();
+        Integer namespaceId = Namespace.DEFAULT_NAMESPACE;
+        if(operator != null) {
+            namespaceId = operator.getNamespaceId();
+        }
+        
         NotifyDoorMessageResponse rsp = new NotifyDoorMessageResponse();
         for(String phone: cmd.getPhones()) {
-            User u = userService.findUserByIndentifier(phone);
+            User u = userService.findUserByIndentifier(namespaceId, phone);
             if(null == u) {
                 rsp.getPhoneStatus().add(new PhoneStatus(phone, "NOT_FOUND"));
                 continue;

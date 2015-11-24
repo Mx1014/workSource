@@ -82,6 +82,7 @@ import com.everhomes.messaging.MessageChannel;
 import com.everhomes.messaging.MessageDTO;
 import com.everhomes.messaging.MessagingConstants;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.pm.AddPmBuildingCommand;
 import com.everhomes.organization.pm.CancelPmBuildingCommand;
 import com.everhomes.organization.pm.CommunityPmContact;
@@ -535,8 +536,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Override
 	public UserTokenCommandResponse findUserByIndentifier(UserTokenCommand cmd) {
+        User operator = UserContext.current().getUser();
+        Integer namespaceId = Namespace.DEFAULT_NAMESPACE;
+        if(operator != null) {
+            namespaceId = operator.getNamespaceId();
+        }
+        
 		UserTokenCommandResponse commandResponse = new UserTokenCommandResponse();
-		User user = userService.findUserByIndentifier(cmd.getUserIdentifier());
+		User user = userService.findUserByIndentifier(namespaceId, cmd.getUserIdentifier());
 		if(user != null)
 		{
 			List<String> phones = new ArrayList<String>();
@@ -2323,6 +2330,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	@Override
 	public void executeImportOrgPost(String filePath, Long userId) {
+	    User operator = UserContext.current().getUser();
+	    
 		String password = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92";
 		long parseBeginTime = System.currentTimeMillis();
 		LOGGER.info(parseBeginTime+"executeImportOrgPost-parseBeginTime="+parseBeginTime);
@@ -2392,7 +2401,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			//token
 			User tokenUser = null;
 			if(r.getToken() != null && !r.getToken().trim().equals("")){
-				tokenUser = this.userService.findUserByIndentifier(r.getToken());
+				tokenUser = this.userService.findUserByIndentifier(operator.getNamespaceId(), r.getToken());
 				if(tokenUser == null){
 					User user = new User();
 					user.setAccountName(r.getToken());

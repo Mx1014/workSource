@@ -46,6 +46,7 @@ import com.everhomes.messaging.MessagingConstants;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.messaging.MetaObjectType;
 import com.everhomes.messaging.QuestionMetaObject;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.region.RegionScope;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -137,6 +138,14 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		List<Enterprise> enterprises = this.enterpriseProvider.queryEnterpriseByPhone(identifier.getIdentifierToken());
 		Map<Long, Long> ctx = new HashMap<Long, Long>();
 		for (Enterprise enterprise : enterprises) {
+		    if(enterprise.getNamespaceId() == null || enterprise.getNamespaceId().equals(identifier.getNamespaceId())) {
+		        if(LOGGER.isDebugEnabled()) {
+		            LOGGER.debug("Ignore the enterprise who is dismatched to namespace, enterpriseId=" + enterprise.getId() 
+		                + ", enterpriseNamespaceId=" + enterprise.getNamespaceId() + ", userId=" + identifier.getOwnerUid() 
+		                + ", userNamespaceId=" + identifier.getNamespaceId());
+		        }
+		        continue;
+		    }
 			EnterpriseContact contact = this.getContactByPhone(enterprise.getId(), identifier.getIdentifierToken());
 			if (contact != null) {
 			    GroupMemberStatus status = GroupMemberStatus.fromCode(contact.getStatus());
@@ -1025,8 +1034,13 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	}
 
 	private void convertContactExcelFile(Long enterpriseId,
-			MultipartFile[] files) { 
-		Long creatorId = UserContext.current().getUser().getId();
+			MultipartFile[] files) {
+        User operator = UserContext.current().getUser();
+        Integer namespaceId = Namespace.DEFAULT_NAMESPACE;
+        if(operator != null) {
+            namespaceId = operator.getNamespaceId();
+        }
+        
 		List<EnterpriseContact> contacts = new ArrayList<EnterpriseContact>();
 		Map<String, Long> groupMap = new HashMap<String, Long>();
 		initContactGroupMap(enterpriseId, groupMap);
@@ -1085,14 +1099,14 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 						contact.setApplyGroup(applyGroup);
 						contact.setName(name);
 						contact.setSex(sex);
-						contact.setCreatorUid(creatorId);
+						contact.setCreatorUid(operator.getId());
 						contact.setStatus(GroupMemberStatus.WAITING_FOR_ACCEPTANCE.getCode());
 						contact.setCreateTime(new Timestamp(System
 								.currentTimeMillis()));
 						Long contactId = enterpriseContactProvider
 								.createContact(contact);
 						// phone find user
-						User user = userService.findUserByIndentifier(PhoneNum);
+						User user = userService.findUserByIndentifier(namespaceId, PhoneNum);
 						if (null != user){
 							//已有用户，设置为正常状态，并把userId放入contact表 复用大师的代码
 							contact.setUserId(user.getId());
@@ -1108,7 +1122,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 								.setEntryType(EnterpriseContactEntryType.Mobile
 										.getCode());
 						contactEntry.setEntryValue(PhoneNum);
-						contactEntry.setCreatorUid(creatorId);
+						contactEntry.setCreatorUid(operator.getId());
 						contactEntry.setCreateTime(new Timestamp(System
 								.currentTimeMillis()));
 						enterpriseContactProvider
@@ -1147,7 +1161,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 												.toString());
 										enterpriseContactGroup.setApplyGroup(groupNamePath.toString());
 										enterpriseContactGroup
-												.setCreatorUid(creatorId);
+												.setCreatorUid(operator.getId());
 										enterpriseContactGroup
 												.setCreateTime(new Timestamp(System
 														.currentTimeMillis()));
@@ -1171,7 +1185,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 									enterpriseContactGroup.setName(applyGroup);
 									enterpriseContactGroup.setApplyGroup(applyGroup);
 									enterpriseContactGroup.setPath("\\");
-									enterpriseContactGroup.setCreatorUid(creatorId);
+									enterpriseContactGroup.setCreatorUid(operator.getId());
 									enterpriseContactGroup.setCreateTime(new Timestamp(System
 													.currentTimeMillis()));
 									enterpriseContactProvider
@@ -1187,7 +1201,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 							enterpriseContactGroupMember
 									.setEnterpriseId(enterpriseId);
 							enterpriseContactGroupMember.setContactId(contactId);
-							enterpriseContactGroupMember.setCreatorUid(creatorId);
+							enterpriseContactGroupMember.setCreatorUid(operator.getId());
 							enterpriseContactGroupMember
 									.setCreateTime(new Timestamp(System
 											.currentTimeMillis()));
@@ -1325,6 +1339,8 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 
 	@Override
 	public void addContact(AddContactCommand cmd) { 
+	    User operator = UserContext.current().getUser();
+	    
 		List<EnterpriseContactEntry> oldContactEntrys = enterpriseContactProvider
 				.queryContactEntryByEnterpriseIdAndPhone(null,
 						cmd.getEnterpriseId(), cmd.getPhone(), null);
@@ -1346,7 +1362,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		contact.setCreateTime(new Timestamp(System
 				.currentTimeMillis()));
 		// phone find user
-		User user = userService.findUserByIndentifier(cmd.getPhone());
+		User user = userService.findUserByIndentifier(operator.getNamespaceId(), cmd.getPhone());
 		if (null != user){
 			contact.setUserId(user.getId());
 			
