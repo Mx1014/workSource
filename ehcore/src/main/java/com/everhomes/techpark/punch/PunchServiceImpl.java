@@ -329,7 +329,7 @@ public class PunchServiceImpl implements PunchService {
 			// 数据库没有计算好的数据
 			punchDayLog = new PunchDayLog();
 			punchDayLog.setUserId(userId);
-			punchDayLog.setCompanyId(companyId);
+			punchDayLog.setEnterpriseId(companyId);
 			punchDayLog.setCreatorUid(userId);
 			punchDayLog.setPunchDate(java.sql.Date.valueOf(dateSF.format(logDay
 					.getTime())));
@@ -356,7 +356,7 @@ public class PunchServiceImpl implements PunchService {
 		} else {
 			// 数据库有计算好的数据
 			punchDayLog.setUserId(userId);
-			punchDayLog.setCompanyId(companyId);
+			punchDayLog.setEnterpriseId(companyId);
 			punchDayLog.setCreatorUid(userId);
 			punchDayLog.setPunchDate(java.sql.Date.valueOf(dateSF.format(logDay
 					.getTime())));
@@ -634,7 +634,7 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public PunchClockResponse createPunchLog(PunchClockCommand cmd) {
 
-		checkCompanyIdIsNull(cmd.getCompanyId());
+		checkCompanyIdIsNull(cmd.getEnterpriseId());
 		if (cmd.getLatitude() == null || cmd.getLatitude().equals(0))
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -644,18 +644,12 @@ public class PunchServiceImpl implements PunchService {
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid Longitude parameter in the command");
 		PunchClockResponse request = new PunchClockResponse();
-		Long userId = UserContext.current().getUser().getId();
-		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");// 设置日期格式
-		String punchTime = df.format(new Date());// new Date()为获取当前系统时间为打卡时间
-		SimpleDateFormat datetimeSF = new SimpleDateFormat(
-				"yyyy-MM-dd HH:mm:ss");
-		SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
-		PunchLog punchLog = new PunchLog();
-		punchLog.setCompanyId(cmd.getCompanyId());
+		Long userId = UserContext.current().getUser().getId(); 
+		// new Date()为获取当前系统时间为打卡时间
+		String punchTime = dateSF.format(new Date());
+		PunchLog punchLog = ConvertHelper.convert(cmd, PunchLog.class);
 		punchLog.setUserId(userId);
 		punchLog.setPunchTime(Timestamp.valueOf(punchTime));
-		punchLog.setLatitude(cmd.getLatitude());
-		punchLog.setLongitude(cmd.getLongitude());
 		request.setPunchCode(verifyCompanyGoePoints(cmd).getCode());
 		punchLog.setPunchStatus(request.getPunchCode());
 		Calendar punCalendar = Calendar.getInstance();
@@ -673,7 +667,7 @@ public class PunchServiceImpl implements PunchService {
 				.getTime())));
 		punchProvider.createPunchLog(punchLog);
 		try {
-			refreshPunchDayLog(userId, cmd.getCompanyId(), punCalendar);
+			refreshPunchDayLog(userId, cmd.getEnterpriseId(), punCalendar);
 		} catch (ParseException e) {
 			LOGGER.error(e.toString());
 
@@ -689,7 +683,7 @@ public class PunchServiceImpl implements PunchService {
 	private ClockCode verifyCompanyGoePoints(PunchClockCommand cmd) {
 		ClockCode code = ClockCode.NOTINAREA;
 		List<PunchGeopoint> punchGeopoints = punchProvider
-				.listPunchGeopointsByCompanyId(cmd.getCompanyId());
+				.listPunchGeopointsByCompanyId(cmd.getEnterpriseId());
 		if (punchGeopoints.size() == 0)
 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
  					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
@@ -734,48 +728,65 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public void createPunchRule(AddPunchRuleCommand cmd) {
 		Long userId = UserContext.current().getUser().getId();
-		checkCompanyIdIsNull(cmd.getCompanyId());
+		checkCompanyIdIsNull(cmd.getEnterpriseId());
 		PunchRule punchRule = punchProvider.findPunchRuleByCompanyId(cmd
-				.getCompanyId());
-		String startEarlyTime = cmd.getStartEarlyTime();
-		String startLastTime = cmd.getStartLateTime();
-		String endEarlyTime = cmd.getEndEarlyTime();
-
-		if (punchRule == null) {
+				.getEnterpriseId()); 
+		if(punchRule == null) {
 			punchRule = ConvertHelper.convert(cmd, PunchRule.class);
 
-			convertTime(punchRule, startEarlyTime, startLastTime, endEarlyTime);
+			convertTime(punchRule, cmd.getStartEarlyTime(), cmd.getStartLateTime(), cmd.getEndEarlyTime());
 			punchRule.setCreatorUid(userId);
 			punchRule.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 					.getTime()));
 			punchProvider.createPunchRule(punchRule);
-			createPunchGeopoints(userId, cmd.getLocations(), cmd.getCompanyId());
-
+			createPunchGeopoints(userId, cmd.getPunchGeoPoints(),cmd.getEnterpriseId());
 		}
 
 	}
-
-	private void createPunchGeopoints(Long userId, String locations,
-			Long compantId) {
-		JSONObject jsonObject = (JSONObject) JSONValue.parse(locations);
-		JSONArray locationValue = (JSONArray) jsonObject.get("locations");
-		Gson gson = new Gson();
-		List<PunchGeopoint> geopoints = gson.fromJson(locationValue.toString(),
-				new TypeToken<List<PunchGeopoint>>() {
-				}.getType());
-		for (PunchGeopoint punchGeopoint : geopoints) {
-			punchGeopoint.setCompanyId(compantId);
+	@Override
+	public void updatePunchRule(UpdatePunchRuleCommand cmd) {
+		Long userId = UserContext.current().getUser().getId();
+		checkCompanyIdIsNull(cmd.getEnterpriseId());
+		PunchRule punchRule = punchProvider.findPunchRuleByCompanyId(cmd
+				.getEnterpriseId()); 
+		if (punchRule != null) {
+			convertTime(punchRule, cmd.getStartEarlyTime(), cmd.getStartLateTime(), cmd.getEndEarlyTime());
+			punchRule.setAfternoonArriveTime(convertTime(cmd.getAfternoonArriveTime()));
+			punchRule.setPunchTimesPerDay(cmd.getPunchTimesPerDay());
+			punchRule.setNoonLeaveTime(convertTime(cmd.getNoonLeaveTime()));
+			punchRule.setOperatorUid(userId);
+			punchRule.setOperateTime(new Timestamp(DateHelper.currentGMTTime()
+					.getTime()));
+			punchProvider.updatePunchRule(punchRule);
+			if (null!=cmd.getPunchGeoPoints()) {
+				List<PunchGeopoint> geopoints = punchProvider
+						.listPunchGeopointsByCompanyId(cmd.getEnterpriseId());
+				if (geopoints != null && geopoints.size() > 0) {
+					for (PunchGeopoint punchGeopoint : geopoints) {
+						punchProvider.deletePunchGeopoint(punchGeopoint);
+					}
+				}
+				createPunchGeopoints(userId, cmd.getPunchGeoPoints(),
+						cmd.getEnterpriseId());
+			}
+		}
+	}
+	
+	private void createPunchGeopoints(Long userId, List<PunchGeoPointDTO> punchGeoPoints,
+			Long enterpriseId) { 
+		for (PunchGeoPointDTO punchGeopointDTO : punchGeoPoints) {
+			PunchGeopoint punchGeopoint = ConvertHelper.convert(punchGeopointDTO, PunchGeopoint.class);
+			punchGeopoint.setEnterpriseId(enterpriseId);
 			punchGeopoint.setCreatorUid(userId);
-			punchGeopoint.setCreateTime(new Timestamp(DateHelper
-					.currentGMTTime().getTime()));
+			punchGeopoint.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			punchGeopoint.setGeohash(GeoHashUtils.encode(
 					punchGeopoint.getLatitude(), punchGeopoint.getLongitude()));
 			punchProvider.createPunchGeopoint(punchGeopoint);
 		}
 	}
 
-	private void convertTime(PunchRule punchRule, String startEarlyTime,
-			String startLastTime, String endEarlyTime) {
+	private void convertTime(PunchRule punchRule, Long startEarlyTime,
+			Long startLastTime, Long endEarlyTime) {
 		Time startEarly = convertTime(startEarlyTime);
 		punchRule.setStartEarlyTime(startEarly);
 		punchRule.setStartLateTime(convertTime(startLastTime));
@@ -783,8 +794,8 @@ public class PunchServiceImpl implements PunchService {
 		Long workTime = endEarly.getTime() - startEarly.getTime();
 		// long hours = (workTime/(1000* 60 * 60));
 		// long minutes = (workTime-hours*(1000* 60 * 60))/(1000* 60);
-		String workTimeStr = getGMTtimeString("HH:mm:ss", workTime);
-		punchRule.setWorkTime(convertTime(workTimeStr));
+//		String workTimeStr = getGMTtimeString("HH:mm:ss", workTime);
+		punchRule.setWorkTime(convertTime(workTime));
 	}
 
 	public String getGMTtimeString(String dateFormat, long time) {
@@ -801,35 +812,13 @@ public class PunchServiceImpl implements PunchService {
 		}
 		return null;
 	}
-
-	@Override
-	public void updatePunchRule(UpdatePunchRuleCommand cmd) {
-		Long userId = UserContext.current().getUser().getId();
-		checkCompanyIdIsNull(cmd.getCompanyId());
-		PunchRule punchRule = punchProvider.findPunchRuleByCompanyId(cmd
-				.getCompanyId());
-		String startEarlyTime = cmd.getStartEarlyTime();
-		String startLastTime = cmd.getStartLateTime();
-		String endEarlyTime = cmd.getEndEarlyTime();
-		if (punchRule != null) {
-			convertTime(punchRule, startEarlyTime, startLastTime, endEarlyTime);
-			punchRule.setOperatorUid(userId);
-			punchRule.setOperateTime(new Timestamp(DateHelper.currentGMTTime()
-					.getTime()));
-			punchProvider.updatePunchRule(punchRule);
-			if (!StringUtils.isEmpty(cmd.getLocations())) {
-				List<PunchGeopoint> geopoints = punchProvider
-						.listPunchGeopointsByCompanyId(cmd.getCompanyId());
-				if (geopoints != null && geopoints.size() > 0) {
-					for (PunchGeopoint punchGeopoint : geopoints) {
-						punchProvider.deletePunchGeopoint(punchGeopoint);
-					}
-				}
-				createPunchGeopoints(userId, cmd.getLocations(),
-						cmd.getCompanyId());
-			}
+	private Time convertTime(Long TimeLong) {
+		if (null != TimeLong) {
+			return new Time(TimeLong);
 		}
+		return null;
 	}
+	
 
 	@Override
 	public GetPunchRuleCommandResponse getPunchRuleByCompanyId(
@@ -1007,7 +996,7 @@ public class PunchServiceImpl implements PunchService {
 					"Invalid description parameter in the command");
 
 		PunchExceptionRequest punchExceptionRequest = new PunchExceptionRequest();
-		punchExceptionRequest.setCompanyId(cmd.getCompanyId());
+		punchExceptionRequest.setEnterpriseId(cmd.getCompanyId());
 		punchExceptionRequest.setRequestType(PunchRquestType.REQUEST.getCode());
 		punchExceptionRequest.setUserId(userId);
 		punchExceptionRequest.setCreatorUid(userId);
@@ -1192,7 +1181,7 @@ public class PunchServiceImpl implements PunchService {
 		checkCompanyIdIsNull(cmd.getCompanyId());
 		// 插入一条eh_punch_exception_requests 记录
 		PunchExceptionRequest punchExceptionRequest = new PunchExceptionRequest();
-		punchExceptionRequest.setCompanyId(cmd.getCompanyId());
+		punchExceptionRequest.setEnterpriseId(cmd.getCompanyId());
 		punchExceptionRequest
 				.setRequestType(PunchRquestType.APPROVAL.getCode());
 		punchExceptionRequest.setProcessCode(cmd.getProcessCode());
@@ -1217,7 +1206,7 @@ public class PunchServiceImpl implements PunchService {
 		if (null == punchExceptionApproval) {
 			if (cmd.getStatus().equals(ExceptionProcessStatus.ACTIVE.getCode())) {
 				punchExceptionApproval = new PunchExceptionApproval();
-				punchExceptionApproval.setCompanyId(cmd.getCompanyId());
+				punchExceptionApproval.setEnterpriseId(cmd.getCompanyId());
 				punchExceptionApproval.setApprovalStatus(cmd.getProcessCode());
 				punchExceptionApproval.setUserId(cmd.getUserId());
 				punchExceptionApproval.setCreatorUid(cmd.getCreatorUid());
@@ -1234,7 +1223,7 @@ public class PunchServiceImpl implements PunchService {
 			}
 		} else {
 			if (cmd.getStatus().equals(ExceptionProcessStatus.ACTIVE.getCode())) {
-				punchExceptionApproval.setCompanyId(cmd.getCompanyId());
+				punchExceptionApproval.setEnterpriseId(cmd.getCompanyId());
 				punchExceptionApproval.setApprovalStatus(cmd.getProcessCode());
 				punchExceptionApproval.setUserId(cmd.getUserId());
 				punchExceptionApproval.setCreatorUid(cmd.getCreatorUid());

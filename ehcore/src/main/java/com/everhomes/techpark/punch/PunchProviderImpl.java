@@ -70,7 +70,7 @@ public class PunchProviderImpl implements PunchProvider {
 				Tables.EH_PUNCH_LOGS);
 		Condition condition = Tables.EH_PUNCH_LOGS.PUNCH_DATE.equal(date);
 		Condition condition2 = Tables.EH_PUNCH_LOGS.USER_ID.equal(userId);
-		Condition condition3 = Tables.EH_PUNCH_LOGS.COMPANY_ID.equal(companyId);
+		Condition condition3 = Tables.EH_PUNCH_LOGS.ENTERPRISE_ID.equal(companyId);
 		Condition condition4 = Tables.EH_PUNCH_LOGS.PUNCH_STATUS.equal(clockCode);
 		condition = condition.and(condition2);
 		condition = condition.and(condition3);
@@ -94,7 +94,7 @@ public class PunchProviderImpl implements PunchProvider {
 		Condition condition3 = Tables.EH_PUNCH_LOGS.PUNCH_DATE.between(
 				beginSqlDate, endSqlDate);
 		Condition condition2 = Tables.EH_PUNCH_LOGS.USER_ID.equal(userId);
-		Condition condition = Tables.EH_PUNCH_LOGS.COMPANY_ID.equal(companyId);
+		Condition condition = Tables.EH_PUNCH_LOGS.ENTERPRISE_ID.equal(companyId);
 		condition = condition.and(condition2);
 		condition = condition.and(condition3);
 		step.where(condition);
@@ -109,7 +109,7 @@ public class PunchProviderImpl implements PunchProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_PUNCH_RULES);
-		Condition condition = Tables.EH_PUNCH_RULES.COMPANY_ID.equal(companyId);
+		Condition condition = Tables.EH_PUNCH_RULES.ENTERPRISE_ID.equal(companyId);
 		step.where(condition);
 		List<PunchRule> result = step.orderBy(Tables.EH_PUNCH_RULES.ID.desc())
 				.fetch().map((r) -> {
@@ -126,7 +126,7 @@ public class PunchProviderImpl implements PunchProvider {
 	// })
 	@Override
 	public void createPunchLog(PunchLog punchLog) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class,punchLog.getCompanyId() ));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class,punchLog.getEnterpriseId() ));
 		long id = sequenceProvider.getNextSequence(NameMapper
 				.getSequenceDomainFromTablePojo(EhPunchLogs.class));
 		punchLog.setId(id);
@@ -146,7 +146,7 @@ public class PunchProviderImpl implements PunchProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_PUNCH_GEOPOINTS);
-		Condition condition = Tables.EH_PUNCH_GEOPOINTS.COMPANY_ID
+		Condition condition = Tables.EH_PUNCH_GEOPOINTS.ENTERPRISE_ID
 				.equal(companyId);
 		step.where(condition);
 		List<PunchGeopoint> result = step
@@ -162,7 +162,7 @@ public class PunchProviderImpl implements PunchProvider {
 		long id = sequenceProvider.getNextSequence(NameMapper
 				.getSequenceDomainFromTablePojo(EhPunchRules.class));
 		punchRule.setId(id);
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class,punchRule.getCompanyId() ));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class,punchRule.getEnterpriseId() ));
 		EhPunchRulesRecord record = ConvertHelper.convert(punchRule,
 				EhPunchRulesRecord.class);
 		InsertQuery<EhPunchRulesRecord> query = context
@@ -220,7 +220,7 @@ public class PunchProviderImpl implements PunchProvider {
 
 		SelectQuery<EhPunchRulesRecord> query = context
 				.selectQuery(Tables.EH_PUNCH_RULES);
-		query.addConditions(Tables.EH_PUNCH_RULES.COMPANY_ID.eq(companyId));
+		query.addConditions(Tables.EH_PUNCH_RULES.ENTERPRISE_ID.eq(companyId));
 
 		List<PunchRule> result = new ArrayList<>();
 		query.fetch().map((r) -> {
@@ -237,7 +237,7 @@ public class PunchProviderImpl implements PunchProvider {
 		long id = sequenceProvider.getNextSequence(NameMapper
 				.getSequenceDomainFromTablePojo(EhPunchGeopoints.class));
 		punchGeopoint.setId(id);
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class,punchGeopoint.getCompanyId() ));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class,punchGeopoint.getEnterpriseId() ));
 		EhPunchGeopointsRecord record = ConvertHelper.convert(punchGeopoint,
 				EhPunchGeopointsRecord.class);
 		InsertQuery<EhPunchGeopointsRecord> query = context
@@ -333,7 +333,7 @@ public class PunchProviderImpl implements PunchProvider {
 	@Override
 	public void createPunchExceptionRequest(
 			PunchExceptionRequest punchExceptionRequest) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class,punchExceptionRequest.getCompanyId() ));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class,punchExceptionRequest.getEnterpriseId() ));
 		long id = sequenceProvider
 				.getNextSequence(NameMapper
 						.getSequenceDomainFromTablePojo(EhPunchExceptionRequests.class));
@@ -358,7 +358,7 @@ public class PunchProviderImpl implements PunchProvider {
 		Condition condition = Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE
 				.equal(date);
 		Condition condition2 = Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.equal(userId);
-		Condition condition3 = Tables.EH_PUNCH_EXCEPTION_REQUESTS.COMPANY_ID.equal(companyId);
+		Condition condition3 = Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.equal(companyId);
 		condition = condition.and(condition2);
 		condition = condition.and(condition3);
 		step.where(condition);
@@ -380,7 +380,7 @@ public class PunchProviderImpl implements PunchProvider {
 		Condition condition = Tables.EH_PUNCH_EXCEPTION_APPROVALS.PUNCH_DATE
 				.equal(date);
 		Condition condition2 = Tables.EH_PUNCH_EXCEPTION_APPROVALS.USER_ID.equal(userId);
-		Condition condition3 = Tables.EH_PUNCH_EXCEPTION_APPROVALS.COMPANY_ID.equal(companyId);
+		Condition condition3 = Tables.EH_PUNCH_EXCEPTION_APPROVALS.ENTERPRISE_ID.equal(companyId);
 		condition = condition.and(condition2);
 		condition = condition.and(condition3);
 		step.where(condition);
@@ -404,7 +404,7 @@ public class PunchProviderImpl implements PunchProvider {
 //		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
 //		step.join(Tables.).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
 	 
-		Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.COMPANY_ID.equal(companyId));
+		Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.equal(companyId));
 		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId));
 		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.REQUEST_TYPE.eq(requestType));
 		if(userIds != null)
@@ -432,7 +432,7 @@ public class PunchProviderImpl implements PunchProvider {
 //		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
 //		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
 	 
-		Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.COMPANY_ID.equal(companyId));
+		Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.equal(companyId));
 		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId));
 		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.REQUEST_TYPE.eq(requestType));
 
@@ -473,7 +473,7 @@ public class PunchProviderImpl implements PunchProvider {
 //		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
 //		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
 	 
-		Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.COMPANY_ID.equal(companyId));
+		Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.equal(companyId));
 //		condition = condition.and(Tables.EH_GROUP_CONTACTS.OWNER_TYPE.eq(OwnerType.COMPANY.getCode()).and(Tables.EH_GROUP_CONTACTS.OWNER_ID.eq(companyId)));
 		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.REQUEST_TYPE.eq(requestType));
 		if(null!=userIds){
@@ -513,7 +513,7 @@ public class PunchProviderImpl implements PunchProvider {
 //		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
 //		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
 	 
-		Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.COMPANY_ID.equal(companyId));
+		Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.equal(companyId));
 //		condition = condition.and(Tables.EH_GROUP_CONTACTS.OWNER_TYPE.eq(OwnerType.COMPANY.getCode()).and(Tables.EH_GROUP_CONTACTS.OWNER_ID.eq(companyId)));
 		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.REQUEST_TYPE.eq(requestType));
 
@@ -549,7 +549,7 @@ public class PunchProviderImpl implements PunchProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_PUNCH_EXCEPTION_APPROVALS);
-		Condition condition = (Tables.EH_PUNCH_EXCEPTION_APPROVALS.COMPANY_ID.equal(companyId));
+		Condition condition = (Tables.EH_PUNCH_EXCEPTION_APPROVALS.ENTERPRISE_ID.equal(companyId));
 		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_APPROVALS.USER_ID.eq(userId));
 		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_APPROVALS.PUNCH_DATE.eq(punchDate));
 		step.where(condition);
@@ -565,7 +565,7 @@ public class PunchProviderImpl implements PunchProvider {
 	@Override
 	public void createPunchExceptionApproval(
 			PunchExceptionApproval punchExceptionApproval) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class,punchExceptionApproval.getCompanyId() ));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class,punchExceptionApproval.getEnterpriseId() ));
 		long id = sequenceProvider
 				.getNextSequence(NameMapper
 						.getSequenceDomainFromTablePojo(EhPunchExceptionApprovals.class));
@@ -611,7 +611,7 @@ public class PunchProviderImpl implements PunchProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_PUNCH_DAY_LOGS);
-		Condition condition = (Tables.EH_PUNCH_DAY_LOGS.COMPANY_ID.equal(companyId));
+		Condition condition = (Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.equal(companyId));
 		condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.USER_ID.eq(userId));
 		condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.eq(punchDate));
 		step.where(condition);
@@ -626,7 +626,7 @@ public class PunchProviderImpl implements PunchProvider {
 
 	@Override
 	public void createPunchDayLog(PunchDayLog punchDayLog) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class,punchDayLog.getCompanyId() ));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class,punchDayLog.getEnterpriseId() ));
 		punchDayLog.setViewFlag(ViewFlags.NOTVIEW.getCode());
 		long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPunchDayLogs.class));
 		punchDayLog.setId(id);
@@ -663,7 +663,7 @@ public class PunchProviderImpl implements PunchProvider {
 //		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
 //		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_DAY_LOGS.USER_ID));
 	 
-		Condition condition = (Tables.EH_PUNCH_DAY_LOGS.COMPANY_ID.equal(companyId));
+		Condition condition = (Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.equal(companyId));
 //		condition = condition.and(Tables.EH_GROUP_CONTACTS.OWNER_TYPE.eq(OwnerType.COMPANY.getCode()).and(Tables.EH_GROUP_CONTACTS.OWNER_ID.eq(companyId)));
 		if(userIds != null)
 			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.USER_ID.in(userIds));
@@ -714,7 +714,7 @@ public class PunchProviderImpl implements PunchProvider {
 //		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
 //		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_DAY_LOGS.USER_ID));
 	 
-		Condition condition = (Tables.EH_PUNCH_DAY_LOGS.COMPANY_ID.equal(companyId));
+		Condition condition = (Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.equal(companyId));
 //		condition = condition.and(Tables.EH_GROUP_CONTACTS.OWNER_TYPE.eq(OwnerType.COMPANY.getCode()).and(Tables.EH_GROUP_CONTACTS.OWNER_ID.eq(companyId)));
 		if(userIds != null)
 			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.USER_ID.in(userIds));
@@ -770,7 +770,7 @@ public class PunchProviderImpl implements PunchProvider {
 //		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
 //		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_DAY_LOGS.USER_ID));
 //	 
-		Condition condition = (Tables.EH_PUNCH_DAY_LOGS.COMPANY_ID.equal(companyId));
+		Condition condition = (Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.equal(companyId));
 		condition= condition.and(Tables.EH_PUNCH_DAY_LOGS.USER_ID.equal(userId));
 //		condition = condition.and(Tables.EH_GROUP_CONTACTS.OWNER_TYPE.eq(OwnerType.COMPANY.getCode()).and(Tables.EH_GROUP_CONTACTS.OWNER_ID.eq(companyId)));
 		 
@@ -801,7 +801,7 @@ public class PunchProviderImpl implements PunchProvider {
 		SelectJoinStep<Record>  step = context.select(Tables.EH_PUNCH_EXCEPTION_REQUESTS.fields()).from(Tables.EH_PUNCH_EXCEPTION_REQUESTS);
 //		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
 //		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
-		Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.COMPANY_ID.equal(companyId));
+		Condition condition = (Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.equal(companyId));
 		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId));
 		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.REQUEST_TYPE.eq(PunchRquestType.APPROVAL.getCode()));
 		condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.VIEW_FLAG.eq(ViewFlags.NOTVIEW.getCode()) );
@@ -826,21 +826,21 @@ public class PunchProviderImpl implements PunchProvider {
 		   DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(com.everhomes.server.schema.tables.EhPunchExceptionRequests.class,companyId));
 	        context.update(Tables.EH_PUNCH_EXCEPTION_REQUESTS).set(Tables.EH_PUNCH_EXCEPTION_REQUESTS.VIEW_FLAG, ViewFlags.ISVIEW.getCode())
 	        .where(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID.eq(userId))
-	        .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.COMPANY_ID.eq(companyId))
+	        .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID.eq(companyId))
 	        .and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PUNCH_DATE.eq(logDate)).execute() ;
 
 			//update 日志表
 	        context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(com.everhomes.server.schema.tables.EhPunchDayLogs.class,companyId));
 	        context.update(Tables.EH_PUNCH_DAY_LOGS).set(Tables.EH_PUNCH_DAY_LOGS.VIEW_FLAG, ViewFlags.ISVIEW.getCode())
 	        .where(Tables.EH_PUNCH_DAY_LOGS.USER_ID.eq(userId))
-	        .and(Tables.EH_PUNCH_DAY_LOGS.COMPANY_ID.eq(companyId))
+	        .and(Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.eq(companyId))
 	        .and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.eq(logDate)).execute() ;
 
 			//update 审批表
 	        context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(com.everhomes.server.schema.tables.EhPunchExceptionApprovals.class,companyId));
 	        context.update(Tables.EH_PUNCH_EXCEPTION_APPROVALS).set(Tables.EH_PUNCH_EXCEPTION_APPROVALS.VIEW_FLAG, ViewFlags.ISVIEW.getCode())
 	        .where(Tables.EH_PUNCH_EXCEPTION_APPROVALS.USER_ID.eq(userId))
-	        .and(Tables.EH_PUNCH_EXCEPTION_APPROVALS.COMPANY_ID.eq(companyId))
+	        .and(Tables.EH_PUNCH_EXCEPTION_APPROVALS.ENTERPRISE_ID.eq(companyId))
 	        .and(Tables.EH_PUNCH_EXCEPTION_APPROVALS.PUNCH_DATE.eq(logDate)).execute() ;
 	}
 	
@@ -849,7 +849,7 @@ public class PunchProviderImpl implements PunchProvider {
 			String endDay) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
 		
-		Condition condition = Tables.EH_PUNCH_DAY_LOGS.COMPANY_ID.eq(companyId);
+		Condition condition = Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.eq(companyId);
 		if(!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
 			Date startDate = Date.valueOf(startDay);
 			Date endDate = Date.valueOf(endDay);
@@ -882,7 +882,7 @@ public class PunchProviderImpl implements PunchProvider {
 			String endDay) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
 		
-		Condition condition = Tables.EH_PUNCH_EXCEPTION_APPROVALS.COMPANY_ID.eq(companyId);
+		Condition condition = Tables.EH_PUNCH_EXCEPTION_APPROVALS.ENTERPRISE_ID.eq(companyId);
 		if(!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
 			Date startDate = Date.valueOf(startDay);
 			Date endDate = Date.valueOf(endDay);
@@ -916,9 +916,9 @@ public class PunchProviderImpl implements PunchProvider {
 		SelectJoinStep<Record5<Long, Date, Byte, Byte, Time>>  step = context.select(Tables.EH_PUNCH_DAY_LOGS.USER_ID,Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE,Tables.EH_PUNCH_DAY_LOGS.STATUS,Tables.EH_PUNCH_EXCEPTION_APPROVALS.APPROVAL_STATUS,Tables.EH_PUNCH_DAY_LOGS.WORK_TIME).from(Tables.EH_PUNCH_DAY_LOGS);
 //		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
 		step.leftOuterJoin(Tables.EH_PUNCH_EXCEPTION_APPROVALS).on(Tables.EH_PUNCH_EXCEPTION_APPROVALS.USER_ID.eq(Tables.EH_PUNCH_DAY_LOGS.USER_ID))
-		.and(Tables.EH_PUNCH_EXCEPTION_APPROVALS.COMPANY_ID.eq(Tables.EH_PUNCH_DAY_LOGS.COMPANY_ID)).and(Tables.EH_PUNCH_EXCEPTION_APPROVALS.PUNCH_DATE.eq(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE));
+		.and(Tables.EH_PUNCH_EXCEPTION_APPROVALS.ENTERPRISE_ID.eq(Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID)).and(Tables.EH_PUNCH_EXCEPTION_APPROVALS.PUNCH_DATE.eq(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE));
 	 
-		Condition condition = (Tables.EH_PUNCH_DAY_LOGS.COMPANY_ID.equal(companyId));
+		Condition condition = (Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.equal(companyId));
 		if(!StringUtils.isEmpty(startDay) && !StringUtils.isEmpty(endDay)) {
 			Date startDate = Date.valueOf(startDay);
 			Date endDate = Date.valueOf(endDay);

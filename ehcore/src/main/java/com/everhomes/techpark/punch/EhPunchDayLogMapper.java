@@ -16,7 +16,7 @@ public class EhPunchDayLogMapper implements RecordMapper<Record,  EhPunchDayLogs
     public EhPunchDayLogsRecord map(Record r) {
     	EhPunchDayLogsRecord post = new EhPunchDayLogsRecord();  
         post.setId(r.getValue((Field<Long>)r.field("id"))); 
-        post.setCompanyId(r.getValue((Field<Long>)r.field("company_id")));
+        post.setEnterpriseId(r.getValue((Field<Long>)r.field("company_id")));
         post.setCreateTime(r.getValue((Field<Timestamp>)r.field("create_time"))); 
         post.setCreatorUid(r.getValue((Field<Long>)r.field("creator_uid"))); 
         post.setArriveTime(r.getValue((Field<Time>)r.field("arrive_time"))); 

@@ -1,8 +1,11 @@
 // @formatter:off
 package com.everhomes.techpark.punch;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -21,56 +24,134 @@ public class UpdatePunchRuleCommand {
 	@NotNull
 	private Long     id;
 	@NotNull
-	private Long     companyId;
+	private Long     EnterpriseId;
 	
 	@NotNull
-	private String      startEarlyTime;
+	private Long      startEarlyTime;
 	@NotNull
-	private String      startLateTime;
+	private Long      startLateTime;
 	@NotNull
-	private String      endEarlyTime;
+	private Long      endEarlyTime;
+	@NotNull
+	private Long noonLeaveTime;
+	@NotNull
+	private Long afternoonArriveTime;
 	
-	private String      locations;
+	private Byte punchTimesPerDay;
 	
-	public UpdatePunchRuleCommand() {
-    }
+	@ItemType(PunchGeoPointDTO.class)
+	private  List<PunchGeoPointDTO>  punchGeoPoints;
+	 
+	
+	
 	public Long getId() {
 		return id;
 	}
+
+
+
 	public void setId(Long id) {
 		this.id = id;
 	}
-	public Long getCompanyId() {
-		return companyId;
+
+
+
+	public Long getEnterpriseId() {
+		return EnterpriseId;
 	}
-	public void setCompanyId(Long companyId) {
-		this.companyId = companyId;
+
+
+
+	public void setEnterpriseId(Long enterpriseId) {
+		EnterpriseId = enterpriseId;
 	}
-	public String getStartEarlyTime() {
+
+
+
+	public Long getStartEarlyTime() {
 		return startEarlyTime;
 	}
-	public void setStartEarlyTime(String startEarlyTime) {
+
+
+
+	public void setStartEarlyTime(Long startEarlyTime) {
 		this.startEarlyTime = startEarlyTime;
 	}
-	public String getStartLateTime() {
+
+
+
+	public Long getStartLateTime() {
 		return startLateTime;
 	}
-	public void setStartLateTime(String startLateTime) {
+
+
+
+	public void setStartLateTime(Long startLateTime) {
 		this.startLateTime = startLateTime;
 	}
-	public String getEndEarlyTime() {
+
+
+
+	public Long getEndEarlyTime() {
 		return endEarlyTime;
 	}
-	public void setEndEarlyTime(String endEarlyTime) {
+
+
+
+	public void setEndEarlyTime(Long endEarlyTime) {
 		this.endEarlyTime = endEarlyTime;
 	}
-	
-	public String getLocations() {
-		return locations;
+
+
+
+	public Long getNoonLeaveTime() {
+		return noonLeaveTime;
 	}
-	public void setLocations(String locations) {
-		this.locations = locations;
+
+
+
+	public void setNoonLeaveTime(Long noonLeaveTime) {
+		this.noonLeaveTime = noonLeaveTime;
 	}
+
+
+
+	public Long getAfternoonArriveTime() {
+		return afternoonArriveTime;
+	}
+
+
+
+	public void setAfternoonArriveTime(Long afternoonArriveTime) {
+		this.afternoonArriveTime = afternoonArriveTime;
+	}
+
+
+
+	public Byte getPunchTimesPerDay() {
+		return punchTimesPerDay;
+	}
+
+
+
+	public void setPunchTimesPerDay(Byte punchTimesPerDay) {
+		this.punchTimesPerDay = punchTimesPerDay;
+	}
+
+
+
+	public List<PunchGeoPointDTO> getPunchGeoPoints() {
+		return punchGeoPoints;
+	}
+
+
+
+	public void setPunchGeoPoints(List<PunchGeoPointDTO> punchGeoPoints) {
+		this.punchGeoPoints = punchGeoPoints;
+	}
+
+
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
