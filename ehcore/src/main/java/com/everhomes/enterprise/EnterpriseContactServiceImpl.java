@@ -138,7 +138,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		List<Enterprise> enterprises = this.enterpriseProvider.queryEnterpriseByPhone(identifier.getIdentifierToken());
 		Map<Long, Long> ctx = new HashMap<Long, Long>();
 		for (Enterprise enterprise : enterprises) {
-		    if(enterprise.getNamespaceId() == null || enterprise.getNamespaceId().equals(identifier.getNamespaceId())) {
+		    if(enterprise.getNamespaceId() == null || !enterprise.getNamespaceId().equals(identifier.getNamespaceId())) {
 		        if(LOGGER.isDebugEnabled()) {
 		            LOGGER.debug("Ignore the enterprise who is dismatched to namespace, enterpriseId=" + enterprise.getId() 
 		                + ", enterpriseNamespaceId=" + enterprise.getNamespaceId() + ", userId=" + identifier.getOwnerUid() 
@@ -155,6 +155,10 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
     				updatePendingEnterpriseContactToAuthenticated(contact);
     				
     				sendMessageForContactApproved(ctx, contact);
+    				if(LOGGER.isInfoEnabled()) {
+    				    LOGGER.info("User join the enterprise automatically, userId=" + identifier.getOwnerUid() 
+                            + ", contactId=" + contact.getId() + ", enterpriseId=" + enterprise.getId());
+    				}
 			    } else {
 			        if(LOGGER.isDebugEnabled()) {
 			            LOGGER.debug("Enterprise contact is already authenticated, userId=" + identifier.getOwnerUid() 
