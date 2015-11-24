@@ -329,6 +329,7 @@ ALTER TABLE `eh_binary_resources` MODIFY COLUMN `namespace_id` INTEGER NOT NULL 
 ALTER TABLE `eh_rtxt_resources` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE `eh_events` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE `eh_polls` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE `eh_devices` MODIFY COLUMN `device_id` VARCHAR(2048) NOT NULL DEFAULT '';
 
 -- ALTER TABLE `eh_categories` DROP INDEX `u_eh_category_name`;
 
@@ -338,20 +339,7 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'enterprise.notification', 4, 'zh_CN', '发给企业其它所有成员', '您已离开公司“${enterpriseName}”。');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'enterprise.notification', 5, 'zh_CN', '发给企业其它所有成员', '${userName}已离开公司“${enterpriseName}”。');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'park.notification', 1, 'zh_CN', '有新的月卡发放通知排队用户申请月卡成功', '月卡申报成功，请于“${deadline}” 18:00前去领取，否则自动失效。');
-
-
-INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(4012, 4, 0, '科技', '活动/科技', 0, 2, UTC_TIMESTAMP());	
-INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(4013, 4, 0, '论坛', '活动/论坛', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(4014, 4, 0, '创客', '活动/创客', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(4015, 4, 0, '项目', '活动/项目', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(4016, 4, 0, '联谊', '活动/联谊', 0, 2, UTC_TIMESTAMP());
-INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
-    VALUES(4017, 4, 0, '沙龙', '活动/沙龙', 0, 2, UTC_TIMESTAMP());     
+  
 
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'enterprise', '10001', 'zh_CN', '公司不存在');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'parking', '10001', 'zh_CN', '车牌号位数错误');
