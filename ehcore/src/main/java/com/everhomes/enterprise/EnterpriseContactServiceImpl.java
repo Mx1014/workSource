@@ -1393,8 +1393,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	}
 
 	@Override
-	public void deleteContactById(DeleteContactByIdCommand cmd) {
-		// TODO Auto-generated method stub
+	public void deleteContactById(DeleteContactByIdCommand cmd) { 
 		EnterpriseContact contact = this.enterpriseContactProvider.getContactById(cmd.getContactId());
 		EnterpriseContactGroupMember enterpriseContactGroupMember = this.enterpriseContactProvider.getContactGroupMemberByContactId(cmd.getEnterpriseId(), cmd.getContactId());
 		List<EnterpriseContactEntry> contactEntrys = this.enterpriseContactProvider.queryContactEntryByContactId(contact);
