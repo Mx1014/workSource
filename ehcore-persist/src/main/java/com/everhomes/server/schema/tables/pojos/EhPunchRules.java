@@ -11,16 +11,19 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchRules implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1231918820;
+	private static final long serialVersionUID = -1504730066;
 
 	private java.lang.Long     id;
-	private java.lang.Long     companyId;
+	private java.lang.Long     enterpriseId;
 	private java.sql.Time      startEarlyTime;
 	private java.sql.Time      startLateTime;
 	private java.sql.Time      workTime;
+	private java.sql.Time      noonLeaveTime;
+	private java.sql.Time      afternoonArriveTime;
 	private java.sql.Time      timeTag1;
 	private java.sql.Time      timeTag2;
 	private java.sql.Time      timeTag3;
+	private java.lang.Byte     punchTimesPerDay;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
 	private java.lang.Long     operatorUid;
@@ -30,26 +33,32 @@ public class EhPunchRules implements java.io.Serializable {
 
 	public EhPunchRules(
 		java.lang.Long     id,
-		java.lang.Long     companyId,
+		java.lang.Long     enterpriseId,
 		java.sql.Time      startEarlyTime,
 		java.sql.Time      startLateTime,
 		java.sql.Time      workTime,
+		java.sql.Time      noonLeaveTime,
+		java.sql.Time      afternoonArriveTime,
 		java.sql.Time      timeTag1,
 		java.sql.Time      timeTag2,
 		java.sql.Time      timeTag3,
+		java.lang.Byte     punchTimesPerDay,
 		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime,
 		java.lang.Long     operatorUid,
 		java.sql.Timestamp operateTime
 	) {
 		this.id = id;
-		this.companyId = companyId;
+		this.enterpriseId = enterpriseId;
 		this.startEarlyTime = startEarlyTime;
 		this.startLateTime = startLateTime;
 		this.workTime = workTime;
+		this.noonLeaveTime = noonLeaveTime;
+		this.afternoonArriveTime = afternoonArriveTime;
 		this.timeTag1 = timeTag1;
 		this.timeTag2 = timeTag2;
 		this.timeTag3 = timeTag3;
+		this.punchTimesPerDay = punchTimesPerDay;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
 		this.operatorUid = operatorUid;
@@ -64,12 +73,12 @@ public class EhPunchRules implements java.io.Serializable {
 		this.id = id;
 	}
 
-	public java.lang.Long getCompanyId() {
-		return this.companyId;
+	public java.lang.Long getEnterpriseId() {
+		return this.enterpriseId;
 	}
 
-	public void setCompanyId(java.lang.Long companyId) {
-		this.companyId = companyId;
+	public void setEnterpriseId(java.lang.Long enterpriseId) {
+		this.enterpriseId = enterpriseId;
 	}
 
 	public java.sql.Time getStartEarlyTime() {
@@ -96,6 +105,22 @@ public class EhPunchRules implements java.io.Serializable {
 		this.workTime = workTime;
 	}
 
+	public java.sql.Time getNoonLeaveTime() {
+		return this.noonLeaveTime;
+	}
+
+	public void setNoonLeaveTime(java.sql.Time noonLeaveTime) {
+		this.noonLeaveTime = noonLeaveTime;
+	}
+
+	public java.sql.Time getAfternoonArriveTime() {
+		return this.afternoonArriveTime;
+	}
+
+	public void setAfternoonArriveTime(java.sql.Time afternoonArriveTime) {
+		this.afternoonArriveTime = afternoonArriveTime;
+	}
+
 	public java.sql.Time getTimeTag1() {
 		return this.timeTag1;
 	}
@@ -118,6 +143,14 @@ public class EhPunchRules implements java.io.Serializable {
 
 	public void setTimeTag3(java.sql.Time timeTag3) {
 		this.timeTag3 = timeTag3;
+	}
+
+	public java.lang.Byte getPunchTimesPerDay() {
+		return this.punchTimesPerDay;
+	}
+
+	public void setPunchTimesPerDay(java.lang.Byte punchTimesPerDay) {
+		this.punchTimesPerDay = punchTimesPerDay;
 	}
 
 	public java.lang.Long getCreatorUid() {

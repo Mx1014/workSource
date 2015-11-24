@@ -11,11 +11,11 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchExceptionRequests implements java.io.Serializable {
 
-	private static final long serialVersionUID = 662419882;
+	private static final long serialVersionUID = -1290297824;
 
 	private java.lang.Long     id;
 	private java.lang.Long     userId;
-	private java.lang.Long     companyId;
+	private java.lang.Long     enterpriseId;
 	private java.sql.Date      punchDate;
 	private java.lang.Byte     requestType;
 	private java.lang.String   description;
@@ -33,7 +33,7 @@ public class EhPunchExceptionRequests implements java.io.Serializable {
 	public EhPunchExceptionRequests(
 		java.lang.Long     id,
 		java.lang.Long     userId,
-		java.lang.Long     companyId,
+		java.lang.Long     enterpriseId,
 		java.sql.Date      punchDate,
 		java.lang.Byte     requestType,
 		java.lang.String   description,
@@ -48,7 +48,7 @@ public class EhPunchExceptionRequests implements java.io.Serializable {
 	) {
 		this.id = id;
 		this.userId = userId;
-		this.companyId = companyId;
+		this.enterpriseId = enterpriseId;
 		this.punchDate = punchDate;
 		this.requestType = requestType;
 		this.description = description;
@@ -78,12 +78,12 @@ public class EhPunchExceptionRequests implements java.io.Serializable {
 		this.userId = userId;
 	}
 
-	public java.lang.Long getCompanyId() {
-		return this.companyId;
+	public java.lang.Long getEnterpriseId() {
+		return this.enterpriseId;
 	}
 
-	public void setCompanyId(java.lang.Long companyId) {
-		this.companyId = companyId;
+	public void setEnterpriseId(java.lang.Long enterpriseId) {
+		this.enterpriseId = enterpriseId;
 	}
 
 	public java.sql.Date getPunchDate() {

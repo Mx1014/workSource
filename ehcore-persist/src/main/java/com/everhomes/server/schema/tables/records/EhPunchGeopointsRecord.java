@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchGeopointsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhPunchGeopointsRecord> implements org.jooq.Record11<java.lang.Long, java.lang.Long, java.lang.String, java.lang.Double, java.lang.Double, java.lang.String, java.lang.Double, java.lang.Long, java.sql.Timestamp, java.lang.Long, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = -1631437432;
+	private static final long serialVersionUID = 1020853638;
 
 	/**
 	 * Setter for <code>ehcore.eh_punch_geopoints.id</code>. id of the record
@@ -28,16 +28,16 @@ public class EhPunchGeopointsRecord extends org.jooq.impl.UpdatableRecordImpl<co
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_punch_geopoints.company_id</code>.
+	 * Setter for <code>ehcore.eh_punch_geopoints.enterprise_id</code>.
 	 */
-	public void setCompanyId(java.lang.Long value) {
+	public void setEnterpriseId(java.lang.Long value) {
 		setValue(1, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_punch_geopoints.company_id</code>.
+	 * Getter for <code>ehcore.eh_punch_geopoints.enterprise_id</code>.
 	 */
-	public java.lang.Long getCompanyId() {
+	public java.lang.Long getEnterpriseId() {
 		return (java.lang.Long) getValue(1);
 	}
 
@@ -212,7 +212,7 @@ public class EhPunchGeopointsRecord extends org.jooq.impl.UpdatableRecordImpl<co
 	 */
 	@Override
 	public org.jooq.Field<java.lang.Long> field2() {
-		return com.everhomes.server.schema.tables.EhPunchGeopoints.EH_PUNCH_GEOPOINTS.COMPANY_ID;
+		return com.everhomes.server.schema.tables.EhPunchGeopoints.EH_PUNCH_GEOPOINTS.ENTERPRISE_ID;
 	}
 
 	/**
@@ -300,7 +300,7 @@ public class EhPunchGeopointsRecord extends org.jooq.impl.UpdatableRecordImpl<co
 	 */
 	@Override
 	public java.lang.Long value2() {
-		return getCompanyId();
+		return getEnterpriseId();
 	}
 
 	/**
@@ -389,7 +389,7 @@ public class EhPunchGeopointsRecord extends org.jooq.impl.UpdatableRecordImpl<co
 	 */
 	@Override
 	public EhPunchGeopointsRecord value2(java.lang.Long value) {
-		setCompanyId(value);
+		setEnterpriseId(value);
 		return this;
 	}
 
@@ -496,11 +496,11 @@ public class EhPunchGeopointsRecord extends org.jooq.impl.UpdatableRecordImpl<co
 	/**
 	 * Create a detached, initialised EhPunchGeopointsRecord
 	 */
-	public EhPunchGeopointsRecord(java.lang.Long id, java.lang.Long companyId, java.lang.String description, java.lang.Double longitude, java.lang.Double latitude, java.lang.String geohash, java.lang.Double distance, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime) {
+	public EhPunchGeopointsRecord(java.lang.Long id, java.lang.Long enterpriseId, java.lang.String description, java.lang.Double longitude, java.lang.Double latitude, java.lang.String geohash, java.lang.Double distance, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime) {
 		super(com.everhomes.server.schema.tables.EhPunchGeopoints.EH_PUNCH_GEOPOINTS);
 
 		setValue(0, id);
-		setValue(1, companyId);
+		setValue(1, enterpriseId);
 		setValue(2, description);
 		setValue(3, longitude);
 		setValue(4, latitude);

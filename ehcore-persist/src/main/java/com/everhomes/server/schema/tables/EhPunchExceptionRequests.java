@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchExceptionRequests extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord> {
 
-	private static final long serialVersionUID = 1689423673;
+	private static final long serialVersionUID = 701797423;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_punch_exception_requests</code>
@@ -37,9 +37,9 @@ public class EhPunchExceptionRequests extends org.jooq.impl.TableImpl<com.everho
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord, java.lang.Long> USER_ID = createField("user_id", org.jooq.impl.SQLDataType.BIGINT, this, "user's id");
 
 	/**
-	 * The column <code>ehcore.eh_punch_exception_requests.company_id</code>. compay id
+	 * The column <code>ehcore.eh_punch_exception_requests.enterprise_id</code>. compay id
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord, java.lang.Long> COMPANY_ID = createField("company_id", org.jooq.impl.SQLDataType.BIGINT, this, "compay id");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord, java.lang.Long> ENTERPRISE_ID = createField("enterprise_id", org.jooq.impl.SQLDataType.BIGINT, this, "compay id");
 
 	/**
 	 * The column <code>ehcore.eh_punch_exception_requests.punch_date</code>. user punch date

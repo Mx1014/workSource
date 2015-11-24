@@ -48,10 +48,10 @@ public class EhPunchRulesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	}
 
 	/**
-	 * Fetch records that have <code>company_id IN (values)</code>
+	 * Fetch records that have <code>enterprise_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByCompanyId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.COMPANY_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByEnterpriseId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.ENTERPRISE_ID, values);
 	}
 
 	/**
@@ -76,6 +76,20 @@ public class EhPunchRulesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	}
 
 	/**
+	 * Fetch records that have <code>noon_leave_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByNoonLeaveTime(java.sql.Time... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.NOON_LEAVE_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>afternoon_arrive_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByAfternoonArriveTime(java.sql.Time... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.AFTERNOON_ARRIVE_TIME, values);
+	}
+
+	/**
 	 * Fetch records that have <code>time_tag1 IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByTimeTag1(java.sql.Time... values) {
@@ -94,6 +108,13 @@ public class EhPunchRulesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByTimeTag3(java.sql.Time... values) {
 		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.TIME_TAG3, values);
+	}
+
+	/**
+	 * Fetch records that have <code>punch_times_per_day IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchRules> fetchByPunchTimesPerDay(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchRules.EH_PUNCH_RULES.PUNCH_TIMES_PER_DAY, values);
 	}
 
 	/**

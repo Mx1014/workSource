@@ -11,10 +11,10 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchGeopoints implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1927020337;
+	private static final long serialVersionUID = -481338775;
 
 	private java.lang.Long     id;
-	private java.lang.Long     companyId;
+	private java.lang.Long     enterpriseId;
 	private java.lang.String   description;
 	private java.lang.Double   longitude;
 	private java.lang.Double   latitude;
@@ -29,7 +29,7 @@ public class EhPunchGeopoints implements java.io.Serializable {
 
 	public EhPunchGeopoints(
 		java.lang.Long     id,
-		java.lang.Long     companyId,
+		java.lang.Long     enterpriseId,
 		java.lang.String   description,
 		java.lang.Double   longitude,
 		java.lang.Double   latitude,
@@ -41,7 +41,7 @@ public class EhPunchGeopoints implements java.io.Serializable {
 		java.sql.Timestamp operateTime
 	) {
 		this.id = id;
-		this.companyId = companyId;
+		this.enterpriseId = enterpriseId;
 		this.description = description;
 		this.longitude = longitude;
 		this.latitude = latitude;
@@ -61,12 +61,12 @@ public class EhPunchGeopoints implements java.io.Serializable {
 		this.id = id;
 	}
 
-	public java.lang.Long getCompanyId() {
-		return this.companyId;
+	public java.lang.Long getEnterpriseId() {
+		return this.enterpriseId;
 	}
 
-	public void setCompanyId(java.lang.Long companyId) {
-		this.companyId = companyId;
+	public void setEnterpriseId(java.lang.Long enterpriseId) {
+		this.enterpriseId = enterpriseId;
 	}
 
 	public java.lang.String getDescription() {

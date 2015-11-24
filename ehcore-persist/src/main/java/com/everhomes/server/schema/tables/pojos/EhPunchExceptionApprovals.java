@@ -11,43 +11,52 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchExceptionApprovals implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1843934726;
+	private static final long serialVersionUID = -1776702098;
 
 	private java.lang.Long     id;
 	private java.lang.Long     userId;
-	private java.lang.Long     companyId;
+	private java.lang.Long     enterpriseId;
 	private java.sql.Date      punchDate;
 	private java.lang.Byte     approvalStatus;
+	private java.lang.Byte     morningApprovalStatus;
+	private java.lang.Byte     afternoonApprovalStatus;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
 	private java.lang.Long     operatorUid;
 	private java.sql.Timestamp operateTime;
 	private java.lang.Byte     viewFlag;
+	private java.lang.Byte     punchTimesPerDay;
 
 	public EhPunchExceptionApprovals() {}
 
 	public EhPunchExceptionApprovals(
 		java.lang.Long     id,
 		java.lang.Long     userId,
-		java.lang.Long     companyId,
+		java.lang.Long     enterpriseId,
 		java.sql.Date      punchDate,
 		java.lang.Byte     approvalStatus,
+		java.lang.Byte     morningApprovalStatus,
+		java.lang.Byte     afternoonApprovalStatus,
 		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime,
 		java.lang.Long     operatorUid,
 		java.sql.Timestamp operateTime,
-		java.lang.Byte     viewFlag
+		java.lang.Byte     viewFlag,
+		java.lang.Byte     punchTimesPerDay
 	) {
 		this.id = id;
 		this.userId = userId;
-		this.companyId = companyId;
+		this.enterpriseId = enterpriseId;
 		this.punchDate = punchDate;
 		this.approvalStatus = approvalStatus;
+		this.morningApprovalStatus = morningApprovalStatus;
+		this.afternoonApprovalStatus = afternoonApprovalStatus;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
 		this.operatorUid = operatorUid;
 		this.operateTime = operateTime;
 		this.viewFlag = viewFlag;
+		this.punchTimesPerDay = punchTimesPerDay;
 	}
 
 	public java.lang.Long getId() {
@@ -66,12 +75,12 @@ public class EhPunchExceptionApprovals implements java.io.Serializable {
 		this.userId = userId;
 	}
 
-	public java.lang.Long getCompanyId() {
-		return this.companyId;
+	public java.lang.Long getEnterpriseId() {
+		return this.enterpriseId;
 	}
 
-	public void setCompanyId(java.lang.Long companyId) {
-		this.companyId = companyId;
+	public void setEnterpriseId(java.lang.Long enterpriseId) {
+		this.enterpriseId = enterpriseId;
 	}
 
 	public java.sql.Date getPunchDate() {
@@ -88,6 +97,22 @@ public class EhPunchExceptionApprovals implements java.io.Serializable {
 
 	public void setApprovalStatus(java.lang.Byte approvalStatus) {
 		this.approvalStatus = approvalStatus;
+	}
+
+	public java.lang.Byte getMorningApprovalStatus() {
+		return this.morningApprovalStatus;
+	}
+
+	public void setMorningApprovalStatus(java.lang.Byte morningApprovalStatus) {
+		this.morningApprovalStatus = morningApprovalStatus;
+	}
+
+	public java.lang.Byte getAfternoonApprovalStatus() {
+		return this.afternoonApprovalStatus;
+	}
+
+	public void setAfternoonApprovalStatus(java.lang.Byte afternoonApprovalStatus) {
+		this.afternoonApprovalStatus = afternoonApprovalStatus;
 	}
 
 	public java.lang.Long getCreatorUid() {
@@ -128,5 +153,13 @@ public class EhPunchExceptionApprovals implements java.io.Serializable {
 
 	public void setViewFlag(java.lang.Byte viewFlag) {
 		this.viewFlag = viewFlag;
+	}
+
+	public java.lang.Byte getPunchTimesPerDay() {
+		return this.punchTimesPerDay;
+	}
+
+	public void setPunchTimesPerDay(java.lang.Byte punchTimesPerDay) {
+		this.punchTimesPerDay = punchTimesPerDay;
 	}
 }

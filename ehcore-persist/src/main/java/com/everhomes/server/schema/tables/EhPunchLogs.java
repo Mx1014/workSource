@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchLogs extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhPunchLogsRecord> {
 
-	private static final long serialVersionUID = -2007921493;
+	private static final long serialVersionUID = -24426289;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_punch_logs</code>
@@ -37,9 +37,9 @@ public class EhPunchLogs extends org.jooq.impl.TableImpl<com.everhomes.server.sc
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchLogsRecord, java.lang.Long> USER_ID = createField("user_id", org.jooq.impl.SQLDataType.BIGINT, this, "user's id");
 
 	/**
-	 * The column <code>ehcore.eh_punch_logs.company_id</code>. compay id
+	 * The column <code>ehcore.eh_punch_logs.enterprise_id</code>. compay id
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchLogsRecord, java.lang.Long> COMPANY_ID = createField("company_id", org.jooq.impl.SQLDataType.BIGINT, this, "compay id");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchLogsRecord, java.lang.Long> ENTERPRISE_ID = createField("enterprise_id", org.jooq.impl.SQLDataType.BIGINT, this, "compay id");
 
 	/**
 	 * The column <code>ehcore.eh_punch_logs.longitude</code>.
@@ -65,6 +65,11 @@ public class EhPunchLogs extends org.jooq.impl.TableImpl<com.everhomes.server.sc
 	 * The column <code>ehcore.eh_punch_logs.punch_status</code>. 1:Normal ;  0:Not in punch area
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchLogsRecord, java.lang.Byte> PUNCH_STATUS = createField("punch_status", org.jooq.impl.SQLDataType.TINYINT, this, "1:Normal ;  0:Not in punch area");
+
+	/**
+	 * The column <code>ehcore.eh_punch_logs.identification</code>. unique identification for a phone
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchLogsRecord, java.lang.String> IDENTIFICATION = createField("identification", org.jooq.impl.SQLDataType.VARCHAR.length(255), this, "unique identification for a phone");
 
 	/**
 	 * Create a <code>ehcore.eh_punch_logs</code> table reference

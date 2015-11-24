@@ -11,37 +11,40 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchLogs implements java.io.Serializable {
 
-	private static final long serialVersionUID = 333555480;
+	private static final long serialVersionUID = -1477992638;
 
 	private java.lang.Long     id;
 	private java.lang.Long     userId;
-	private java.lang.Long     companyId;
+	private java.lang.Long     enterpriseId;
 	private java.lang.Double   longitude;
 	private java.lang.Double   latitude;
 	private java.sql.Date      punchDate;
 	private java.sql.Timestamp punchTime;
 	private java.lang.Byte     punchStatus;
+	private java.lang.String   identification;
 
 	public EhPunchLogs() {}
 
 	public EhPunchLogs(
 		java.lang.Long     id,
 		java.lang.Long     userId,
-		java.lang.Long     companyId,
+		java.lang.Long     enterpriseId,
 		java.lang.Double   longitude,
 		java.lang.Double   latitude,
 		java.sql.Date      punchDate,
 		java.sql.Timestamp punchTime,
-		java.lang.Byte     punchStatus
+		java.lang.Byte     punchStatus,
+		java.lang.String   identification
 	) {
 		this.id = id;
 		this.userId = userId;
-		this.companyId = companyId;
+		this.enterpriseId = enterpriseId;
 		this.longitude = longitude;
 		this.latitude = latitude;
 		this.punchDate = punchDate;
 		this.punchTime = punchTime;
 		this.punchStatus = punchStatus;
+		this.identification = identification;
 	}
 
 	public java.lang.Long getId() {
@@ -60,12 +63,12 @@ public class EhPunchLogs implements java.io.Serializable {
 		this.userId = userId;
 	}
 
-	public java.lang.Long getCompanyId() {
-		return this.companyId;
+	public java.lang.Long getEnterpriseId() {
+		return this.enterpriseId;
 	}
 
-	public void setCompanyId(java.lang.Long companyId) {
-		this.companyId = companyId;
+	public void setEnterpriseId(java.lang.Long enterpriseId) {
+		this.enterpriseId = enterpriseId;
 	}
 
 	public java.lang.Double getLongitude() {
@@ -106,5 +109,13 @@ public class EhPunchLogs implements java.io.Serializable {
 
 	public void setPunchStatus(java.lang.Byte punchStatus) {
 		this.punchStatus = punchStatus;
+	}
+
+	public java.lang.String getIdentification() {
+		return this.identification;
+	}
+
+	public void setIdentification(java.lang.String identification) {
+		this.identification = identification;
 	}
 }

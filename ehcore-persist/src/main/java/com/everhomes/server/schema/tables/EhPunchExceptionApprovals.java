@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchExceptionApprovals extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhPunchExceptionApprovalsRecord> {
 
-	private static final long serialVersionUID = 1817256312;
+	private static final long serialVersionUID = -2041320277;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_punch_exception_approvals</code>
@@ -37,9 +37,9 @@ public class EhPunchExceptionApprovals extends org.jooq.impl.TableImpl<com.everh
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchExceptionApprovalsRecord, java.lang.Long> USER_ID = createField("user_id", org.jooq.impl.SQLDataType.BIGINT, this, "user's id");
 
 	/**
-	 * The column <code>ehcore.eh_punch_exception_approvals.company_id</code>. compay id
+	 * The column <code>ehcore.eh_punch_exception_approvals.enterprise_id</code>. compay id
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchExceptionApprovalsRecord, java.lang.Long> COMPANY_ID = createField("company_id", org.jooq.impl.SQLDataType.BIGINT, this, "compay id");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchExceptionApprovalsRecord, java.lang.Long> ENTERPRISE_ID = createField("enterprise_id", org.jooq.impl.SQLDataType.BIGINT, this, "compay id");
 
 	/**
 	 * The column <code>ehcore.eh_punch_exception_approvals.punch_date</code>. user punch date
@@ -50,6 +50,16 @@ public class EhPunchExceptionApprovals extends org.jooq.impl.TableImpl<com.everh
 	 * The column <code>ehcore.eh_punch_exception_approvals.approval_status</code>. NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchExceptionApprovalsRecord, java.lang.Byte> APPROVAL_STATUS = createField("approval_status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)");
+
+	/**
+	 * The column <code>ehcore.eh_punch_exception_approvals.morning_approval_status</code>. NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchExceptionApprovalsRecord, java.lang.Byte> MORNING_APPROVAL_STATUS = createField("morning_approval_status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)");
+
+	/**
+	 * The column <code>ehcore.eh_punch_exception_approvals.afternoon_approval_status</code>. NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchExceptionApprovalsRecord, java.lang.Byte> AFTERNOON_APPROVAL_STATUS = createField("afternoon_approval_status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)");
 
 	/**
 	 * The column <code>ehcore.eh_punch_exception_approvals.creator_uid</code>.
@@ -75,6 +85,11 @@ public class EhPunchExceptionApprovals extends org.jooq.impl.TableImpl<com.everh
 	 * The column <code>ehcore.eh_punch_exception_approvals.view_flag</code>. is view(0) not view(1)
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchExceptionApprovalsRecord, java.lang.Byte> VIEW_FLAG = createField("view_flag", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "is view(0) not view(1)");
+
+	/**
+	 * The column <code>ehcore.eh_punch_exception_approvals.punch_times_per_day</code>. 2 or  4 times
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchExceptionApprovalsRecord, java.lang.Byte> PUNCH_TIMES_PER_DAY = createField("punch_times_per_day", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "2 or  4 times");
 
 	/**
 	 * Create a <code>ehcore.eh_punch_exception_approvals</code> table reference

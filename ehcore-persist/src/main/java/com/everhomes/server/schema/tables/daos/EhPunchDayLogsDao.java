@@ -55,10 +55,10 @@ public class EhPunchDayLogsDao extends org.jooq.impl.DAOImpl<com.everhomes.serve
 	}
 
 	/**
-	 * Fetch records that have <code>company_id IN (values)</code>
+	 * Fetch records that have <code>enterprise_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchDayLogs> fetchByCompanyId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhPunchDayLogs.EH_PUNCH_DAY_LOGS.COMPANY_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchDayLogs> fetchByEnterpriseId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchDayLogs.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID, values);
 	}
 
 	/**
@@ -73,6 +73,20 @@ public class EhPunchDayLogsDao extends org.jooq.impl.DAOImpl<com.everhomes.serve
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchDayLogs> fetchByArriveTime(java.sql.Time... values) {
 		return fetch(com.everhomes.server.schema.tables.EhPunchDayLogs.EH_PUNCH_DAY_LOGS.ARRIVE_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>noon_leave_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchDayLogs> fetchByNoonLeaveTime(java.sql.Time... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchDayLogs.EH_PUNCH_DAY_LOGS.NOON_LEAVE_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>afternoon_arrive_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchDayLogs> fetchByAfternoonArriveTime(java.sql.Time... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchDayLogs.EH_PUNCH_DAY_LOGS.AFTERNOON_ARRIVE_TIME, values);
 	}
 
 	/**
@@ -97,6 +111,20 @@ public class EhPunchDayLogsDao extends org.jooq.impl.DAOImpl<com.everhomes.serve
 	}
 
 	/**
+	 * Fetch records that have <code>morning_status IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchDayLogs> fetchByMorningStatus(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchDayLogs.EH_PUNCH_DAY_LOGS.MORNING_STATUS, values);
+	}
+
+	/**
+	 * Fetch records that have <code>afternoon_status IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchDayLogs> fetchByAfternoonStatus(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchDayLogs.EH_PUNCH_DAY_LOGS.AFTERNOON_STATUS, values);
+	}
+
+	/**
 	 * Fetch records that have <code>creator_uid IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchDayLogs> fetchByCreatorUid(java.lang.Long... values) {
@@ -115,5 +143,12 @@ public class EhPunchDayLogsDao extends org.jooq.impl.DAOImpl<com.everhomes.serve
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchDayLogs> fetchByViewFlag(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhPunchDayLogs.EH_PUNCH_DAY_LOGS.VIEW_FLAG, values);
+	}
+
+	/**
+	 * Fetch records that have <code>punch_times_per_day IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchDayLogs> fetchByPunchTimesPerDay(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchDayLogs.EH_PUNCH_DAY_LOGS.PUNCH_TIMES_PER_DAY, values);
 	}
 }

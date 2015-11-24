@@ -55,10 +55,10 @@ public class EhPunchExceptionApprovalsDao extends org.jooq.impl.DAOImpl<com.ever
 	}
 
 	/**
-	 * Fetch records that have <code>company_id IN (values)</code>
+	 * Fetch records that have <code>enterprise_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchExceptionApprovals> fetchByCompanyId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhPunchExceptionApprovals.EH_PUNCH_EXCEPTION_APPROVALS.COMPANY_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchExceptionApprovals> fetchByEnterpriseId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchExceptionApprovals.EH_PUNCH_EXCEPTION_APPROVALS.ENTERPRISE_ID, values);
 	}
 
 	/**
@@ -73,6 +73,20 @@ public class EhPunchExceptionApprovalsDao extends org.jooq.impl.DAOImpl<com.ever
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchExceptionApprovals> fetchByApprovalStatus(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhPunchExceptionApprovals.EH_PUNCH_EXCEPTION_APPROVALS.APPROVAL_STATUS, values);
+	}
+
+	/**
+	 * Fetch records that have <code>morning_approval_status IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchExceptionApprovals> fetchByMorningApprovalStatus(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchExceptionApprovals.EH_PUNCH_EXCEPTION_APPROVALS.MORNING_APPROVAL_STATUS, values);
+	}
+
+	/**
+	 * Fetch records that have <code>afternoon_approval_status IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchExceptionApprovals> fetchByAfternoonApprovalStatus(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchExceptionApprovals.EH_PUNCH_EXCEPTION_APPROVALS.AFTERNOON_APPROVAL_STATUS, values);
 	}
 
 	/**
@@ -108,5 +122,12 @@ public class EhPunchExceptionApprovalsDao extends org.jooq.impl.DAOImpl<com.ever
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchExceptionApprovals> fetchByViewFlag(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhPunchExceptionApprovals.EH_PUNCH_EXCEPTION_APPROVALS.VIEW_FLAG, values);
+	}
+
+	/**
+	 * Fetch records that have <code>punch_times_per_day IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchExceptionApprovals> fetchByPunchTimesPerDay(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchExceptionApprovals.EH_PUNCH_EXCEPTION_APPROVALS.PUNCH_TIMES_PER_DAY, values);
 	}
 }

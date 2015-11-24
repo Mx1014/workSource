@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchExceptionRequestsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord> implements org.jooq.Record14<java.lang.Long, java.lang.Long, java.lang.Long, java.sql.Date, java.lang.Byte, java.lang.String, java.lang.Byte, java.lang.Byte, java.lang.String, java.lang.Long, java.sql.Timestamp, java.lang.Long, java.sql.Timestamp, java.lang.Byte> {
 
-	private static final long serialVersionUID = -1628139070;
+	private static final long serialVersionUID = -214877694;
 
 	/**
 	 * Setter for <code>ehcore.eh_punch_exception_requests.id</code>. id
@@ -42,16 +42,16 @@ public class EhPunchExceptionRequestsRecord extends org.jooq.impl.UpdatableRecor
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_punch_exception_requests.company_id</code>. compay id
+	 * Setter for <code>ehcore.eh_punch_exception_requests.enterprise_id</code>. compay id
 	 */
-	public void setCompanyId(java.lang.Long value) {
+	public void setEnterpriseId(java.lang.Long value) {
 		setValue(2, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_punch_exception_requests.company_id</code>. compay id
+	 * Getter for <code>ehcore.eh_punch_exception_requests.enterprise_id</code>. compay id
 	 */
-	public java.lang.Long getCompanyId() {
+	public java.lang.Long getEnterpriseId() {
 		return (java.lang.Long) getValue(2);
 	}
 
@@ -262,7 +262,7 @@ public class EhPunchExceptionRequestsRecord extends org.jooq.impl.UpdatableRecor
 	 */
 	@Override
 	public org.jooq.Field<java.lang.Long> field3() {
-		return com.everhomes.server.schema.tables.EhPunchExceptionRequests.EH_PUNCH_EXCEPTION_REQUESTS.COMPANY_ID;
+		return com.everhomes.server.schema.tables.EhPunchExceptionRequests.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID;
 	}
 
 	/**
@@ -374,7 +374,7 @@ public class EhPunchExceptionRequestsRecord extends org.jooq.impl.UpdatableRecor
 	 */
 	@Override
 	public java.lang.Long value3() {
-		return getCompanyId();
+		return getEnterpriseId();
 	}
 
 	/**
@@ -488,7 +488,7 @@ public class EhPunchExceptionRequestsRecord extends org.jooq.impl.UpdatableRecor
 	 */
 	@Override
 	public EhPunchExceptionRequestsRecord value3(java.lang.Long value) {
-		setCompanyId(value);
+		setEnterpriseId(value);
 		return this;
 	}
 
@@ -613,12 +613,12 @@ public class EhPunchExceptionRequestsRecord extends org.jooq.impl.UpdatableRecor
 	/**
 	 * Create a detached, initialised EhPunchExceptionRequestsRecord
 	 */
-	public EhPunchExceptionRequestsRecord(java.lang.Long id, java.lang.Long userId, java.lang.Long companyId, java.sql.Date punchDate, java.lang.Byte requestType, java.lang.String description, java.lang.Byte status, java.lang.Byte processCode, java.lang.String processDetails, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.Byte viewFlag) {
+	public EhPunchExceptionRequestsRecord(java.lang.Long id, java.lang.Long userId, java.lang.Long enterpriseId, java.sql.Date punchDate, java.lang.Byte requestType, java.lang.String description, java.lang.Byte status, java.lang.Byte processCode, java.lang.String processDetails, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.Byte viewFlag) {
 		super(com.everhomes.server.schema.tables.EhPunchExceptionRequests.EH_PUNCH_EXCEPTION_REQUESTS);
 
 		setValue(0, id);
 		setValue(1, userId);
-		setValue(2, companyId);
+		setValue(2, enterpriseId);
 		setValue(3, punchDate);
 		setValue(4, requestType);
 		setValue(5, description);

@@ -1,4 +1,4 @@
-
+use `ehcore`;
 /*Table structure for table `eh_punch_logs` */
 
 DROP TABLE IF EXISTS `eh_punch_logs`;

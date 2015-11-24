@@ -55,10 +55,10 @@ public class EhPunchExceptionRequestsDao extends org.jooq.impl.DAOImpl<com.everh
 	}
 
 	/**
-	 * Fetch records that have <code>company_id IN (values)</code>
+	 * Fetch records that have <code>enterprise_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchExceptionRequests> fetchByCompanyId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhPunchExceptionRequests.EH_PUNCH_EXCEPTION_REQUESTS.COMPANY_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchExceptionRequests> fetchByEnterpriseId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchExceptionRequests.EH_PUNCH_EXCEPTION_REQUESTS.ENTERPRISE_ID, values);
 	}
 
 	/**

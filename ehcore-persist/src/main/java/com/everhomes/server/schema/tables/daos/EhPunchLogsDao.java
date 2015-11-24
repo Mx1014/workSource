@@ -55,10 +55,10 @@ public class EhPunchLogsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.s
 	}
 
 	/**
-	 * Fetch records that have <code>company_id IN (values)</code>
+	 * Fetch records that have <code>enterprise_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchLogs> fetchByCompanyId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhPunchLogs.EH_PUNCH_LOGS.COMPANY_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchLogs> fetchByEnterpriseId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchLogs.EH_PUNCH_LOGS.ENTERPRISE_ID, values);
 	}
 
 	/**
@@ -94,5 +94,12 @@ public class EhPunchLogsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.s
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchLogs> fetchByPunchStatus(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhPunchLogs.EH_PUNCH_LOGS.PUNCH_STATUS, values);
+	}
+
+	/**
+	 * Fetch records that have <code>identification IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchLogs> fetchByIdentification(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchLogs.EH_PUNCH_LOGS.IDENTIFICATION, values);
 	}
 }

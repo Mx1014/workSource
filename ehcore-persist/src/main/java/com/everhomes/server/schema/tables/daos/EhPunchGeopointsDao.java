@@ -48,10 +48,10 @@ public class EhPunchGeopointsDao extends org.jooq.impl.DAOImpl<com.everhomes.ser
 	}
 
 	/**
-	 * Fetch records that have <code>company_id IN (values)</code>
+	 * Fetch records that have <code>enterprise_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchGeopoints> fetchByCompanyId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhPunchGeopoints.EH_PUNCH_GEOPOINTS.COMPANY_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchGeopoints> fetchByEnterpriseId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchGeopoints.EH_PUNCH_GEOPOINTS.ENTERPRISE_ID, values);
 	}
 
 	/**

@@ -11,46 +11,61 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchDayLogs implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1753620068;
+	private static final long serialVersionUID = 1688434268;
 
 	private java.lang.Long     id;
 	private java.lang.Long     userId;
-	private java.lang.Long     companyId;
+	private java.lang.Long     enterpriseId;
 	private java.sql.Date      punchDate;
 	private java.sql.Time      arriveTime;
+	private java.sql.Time      noonLeaveTime;
+	private java.sql.Time      afternoonArriveTime;
 	private java.sql.Time      leaveTime;
 	private java.sql.Time      workTime;
 	private java.lang.Byte     status;
+	private java.lang.Byte     morningStatus;
+	private java.lang.Byte     afternoonStatus;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
 	private java.lang.Byte     viewFlag;
+	private java.lang.Byte     punchTimesPerDay;
 
 	public EhPunchDayLogs() {}
 
 	public EhPunchDayLogs(
 		java.lang.Long     id,
 		java.lang.Long     userId,
-		java.lang.Long     companyId,
+		java.lang.Long     enterpriseId,
 		java.sql.Date      punchDate,
 		java.sql.Time      arriveTime,
+		java.sql.Time      noonLeaveTime,
+		java.sql.Time      afternoonArriveTime,
 		java.sql.Time      leaveTime,
 		java.sql.Time      workTime,
 		java.lang.Byte     status,
+		java.lang.Byte     morningStatus,
+		java.lang.Byte     afternoonStatus,
 		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime,
-		java.lang.Byte     viewFlag
+		java.lang.Byte     viewFlag,
+		java.lang.Byte     punchTimesPerDay
 	) {
 		this.id = id;
 		this.userId = userId;
-		this.companyId = companyId;
+		this.enterpriseId = enterpriseId;
 		this.punchDate = punchDate;
 		this.arriveTime = arriveTime;
+		this.noonLeaveTime = noonLeaveTime;
+		this.afternoonArriveTime = afternoonArriveTime;
 		this.leaveTime = leaveTime;
 		this.workTime = workTime;
 		this.status = status;
+		this.morningStatus = morningStatus;
+		this.afternoonStatus = afternoonStatus;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
 		this.viewFlag = viewFlag;
+		this.punchTimesPerDay = punchTimesPerDay;
 	}
 
 	public java.lang.Long getId() {
@@ -69,12 +84,12 @@ public class EhPunchDayLogs implements java.io.Serializable {
 		this.userId = userId;
 	}
 
-	public java.lang.Long getCompanyId() {
-		return this.companyId;
+	public java.lang.Long getEnterpriseId() {
+		return this.enterpriseId;
 	}
 
-	public void setCompanyId(java.lang.Long companyId) {
-		this.companyId = companyId;
+	public void setEnterpriseId(java.lang.Long enterpriseId) {
+		this.enterpriseId = enterpriseId;
 	}
 
 	public java.sql.Date getPunchDate() {
@@ -91,6 +106,22 @@ public class EhPunchDayLogs implements java.io.Serializable {
 
 	public void setArriveTime(java.sql.Time arriveTime) {
 		this.arriveTime = arriveTime;
+	}
+
+	public java.sql.Time getNoonLeaveTime() {
+		return this.noonLeaveTime;
+	}
+
+	public void setNoonLeaveTime(java.sql.Time noonLeaveTime) {
+		this.noonLeaveTime = noonLeaveTime;
+	}
+
+	public java.sql.Time getAfternoonArriveTime() {
+		return this.afternoonArriveTime;
+	}
+
+	public void setAfternoonArriveTime(java.sql.Time afternoonArriveTime) {
+		this.afternoonArriveTime = afternoonArriveTime;
 	}
 
 	public java.sql.Time getLeaveTime() {
@@ -117,6 +148,22 @@ public class EhPunchDayLogs implements java.io.Serializable {
 		this.status = status;
 	}
 
+	public java.lang.Byte getMorningStatus() {
+		return this.morningStatus;
+	}
+
+	public void setMorningStatus(java.lang.Byte morningStatus) {
+		this.morningStatus = morningStatus;
+	}
+
+	public java.lang.Byte getAfternoonStatus() {
+		return this.afternoonStatus;
+	}
+
+	public void setAfternoonStatus(java.lang.Byte afternoonStatus) {
+		this.afternoonStatus = afternoonStatus;
+	}
+
 	public java.lang.Long getCreatorUid() {
 		return this.creatorUid;
 	}
@@ -139,5 +186,13 @@ public class EhPunchDayLogs implements java.io.Serializable {
 
 	public void setViewFlag(java.lang.Byte viewFlag) {
 		this.viewFlag = viewFlag;
+	}
+
+	public java.lang.Byte getPunchTimesPerDay() {
+		return this.punchTimesPerDay;
+	}
+
+	public void setPunchTimesPerDay(java.lang.Byte punchTimesPerDay) {
+		this.punchTimesPerDay = punchTimesPerDay;
 	}
 }

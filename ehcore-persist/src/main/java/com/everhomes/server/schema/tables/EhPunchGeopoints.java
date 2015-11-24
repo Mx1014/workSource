@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchGeopoints extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhPunchGeopointsRecord> {
 
-	private static final long serialVersionUID = 1665248633;
+	private static final long serialVersionUID = -1909534751;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_punch_geopoints</code>
@@ -32,9 +32,9 @@ public class EhPunchGeopoints extends org.jooq.impl.TableImpl<com.everhomes.serv
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchGeopointsRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id of the record");
 
 	/**
-	 * The column <code>ehcore.eh_punch_geopoints.company_id</code>.
+	 * The column <code>ehcore.eh_punch_geopoints.enterprise_id</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchGeopointsRecord, java.lang.Long> COMPANY_ID = createField("company_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchGeopointsRecord, java.lang.Long> ENTERPRISE_ID = createField("enterprise_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_punch_geopoints.description</code>.
