@@ -32,7 +32,7 @@ INSERT INTO `eh_enterprise_community_map` (`id`, `community_id`, `member_type`, 
 VALUES('419','233','enterprise','419','2','1','2015-10-27 16:28:41',NULL,NULL,NULL,NULL,NULL,NULL,'1',NULL,NULL,'2015-10-27 16:28:41',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 
 INSERT INTO `eh_enterprise_addresses` (`id`, `enterprise_id`, `address_id`, `status`, `creator_uid`, `create_time`, `operator_uid`, `process_code`, `process_details`, `proof_resource_uri`, `approve_time`, `update_time`)
- VALUES('1','419','24206890946790451','2',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'0000-00-00 00:00:00');
+ VALUES('1','419','24206890946790451','2',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2015-08-16 13:14:03');
  
  
 ;
