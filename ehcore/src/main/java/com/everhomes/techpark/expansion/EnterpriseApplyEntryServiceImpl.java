@@ -1,0 +1,117 @@
+package com.everhomes.techpark.expansion;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
+
+@Component
+public class EnterpriseApplyEntryServiceImpl implements
+		EnterpriseApplyEntryService {
+	
+	@Autowired
+	private ConfigurationProvider configurationProvider;
+	
+	@Autowired
+	private EnterpriseApplyEntryProvider enterpriseApplyEntryProvider;
+
+	@Override
+	public ListEnterpriseDetailResponse listEnterpriseDetails(
+			ListEnterpriseDetailCommand cmd) {
+		
+		ListEnterpriseDetailResponse res = new ListEnterpriseDetailResponse();
+		
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		Integer offset = cmd.getPageAnchor() == null ? 0 : (cmd.getPageAnchor() - 1 ) * pageSize;
+		List<EnterpriseDetail> enterpriseDetails = enterpriseApplyEntryProvider.listEnterpriseDetails(cmd.getCommunityId(), offset, pageSize + 1);
+		
+		if(enterpriseDetails != null && enterpriseDetails.size() > pageSize) {
+			enterpriseDetails.remove(enterpriseDetails.size() - 1);
+			res.setNextPageAnchor(cmd.getPageAnchor() + 1);
+		}
+		
+		List<EnterpriseDetailDTO> dtos = enterpriseDetails.stream().map((c) ->{
+			return ConvertHelper.convert(c, EnterpriseDetailDTO.class);
+		}).collect(Collectors.toList());
+		
+		res.setDetails(dtos);
+		return res;
+	}
+
+	@Override
+	public GetEnterpriseDetailByIdResponse getEnterpriseDetailById(
+			GetEnterpriseDetailByIdCommand cmd) {
+		GetEnterpriseDetailByIdResponse res = new GetEnterpriseDetailByIdResponse();
+		EnterpriseDetail enterpriseDetail = enterpriseApplyEntryProvider.getEnterpriseDetailById(cmd.getId());
+		res.setDetail(ConvertHelper.convert(enterpriseDetail, EnterpriseDetailDTO.class));
+		return res;
+	}
+
+	@Override
+	public ListEnterpriseApplyEntryResponse listApplyEntrys(
+			ListEnterpriseApplyEntryCommand cmd) {
+		
+		ListEnterpriseApplyEntryResponse res = new ListEnterpriseApplyEntryResponse();
+		
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		Integer offset = cmd.getPageAnchor() == null ? 0 : (cmd.getPageAnchor() - 1 ) * pageSize;
+		List<EnterpriseOpRequest> enterpriseOpRequests = enterpriseApplyEntryProvider.listApplyEntrys(cmd.getCommunityId(), offset, pageSize + 1);
+		
+		if(enterpriseOpRequests != null && enterpriseOpRequests.size() > pageSize) {
+			enterpriseOpRequests.remove(enterpriseOpRequests.size() - 1);
+			res.setNextPageAnchor(cmd.getPageAnchor() + 1);
+		}
+		
+		List<EnterpriseApplyEntryDTO> dtos = enterpriseOpRequests.stream().map((c) ->{
+			return ConvertHelper.convert(c, EnterpriseApplyEntryDTO.class);
+		}).collect(Collectors.toList());
+		
+		res.setEntrys(dtos);
+		return res;
+	}
+
+	@Override
+	public boolean applyEntry(EnterpriseApplyEntryCommand cmd) {
+		EnterpriseOpRequest request = new EnterpriseOpRequest();
+		request.setSourceType(cmd.getSourceType());
+		request.setApplyType(cmd.getApplyType());
+		request.setEnterpriseName(cmd.getEnterpriseName());
+		request.setEnterpriseId(cmd.getEnterpriseId());
+		request.setApplyContact(cmd.getApplyUserName());
+		request.setApplyUserId(UserContext.current().getUser().getId());
+		request.setDescription(cmd.getDescription());
+		request.setSizeUnit(cmd.getSizeUnit());
+		request.setStatus(ApplyEntryStatus.PROCESSING.getCode());
+		request.setAreaSize(cmd.getAreaSize());
+		request.setOperatorUid(request.getApplyUserId());
+		request.setCommunityId(cmd.getCommunityId());
+		request.setNamespaceId(cmd.getNamespaceId());
+		enterpriseApplyEntryProvider.createApplyEntry(request);
+		return true;
+	}
+
+	@Override
+	public boolean applyRenew(EnterpriseApplyRenewCommand cmd) {
+		EnterpriseOpRequest request = enterpriseApplyEntryProvider.getEnterpriseOpRequestByBuildIdAndUserId(cmd.getBuildId(), UserContext.current().getUser().getId());
+		
+		if(null == request){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"You have not applied for admission");
+		}
+		
+		request.setApplyType(ApplyEntryApplyType.RENEW.getCode());
+		request.setStatus(ApplyEntryStatus.PROCESSING.getCode());
+		enterpriseApplyEntryProvider.createApplyEntry(request);
+		return true;
+	}
+
+}

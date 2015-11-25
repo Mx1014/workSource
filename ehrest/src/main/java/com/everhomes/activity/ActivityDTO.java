@@ -57,6 +57,8 @@ public class ActivityDTO {
     private Integer processStatus;
     private String uuid;
     
+    private String guest;
+    
     public ActivityDTO() {
     }
 
@@ -271,7 +273,16 @@ public class ActivityDTO {
         this.uuid = uuid;
     }
 
-    @Override
+    
+    public String getGuest() {
+		return guest;
+	}
+
+	public void setGuest(String guest) {
+		this.guest = guest;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

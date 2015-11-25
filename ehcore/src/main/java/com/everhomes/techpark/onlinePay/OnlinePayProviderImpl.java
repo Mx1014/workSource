@@ -12,6 +12,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhRechargeInfoDao;
 import com.everhomes.server.schema.tables.pojos.EhRechargeInfo;
+import com.everhomes.techpark.onlinePay.OnlinePayProvider;
 import com.everhomes.techpark.park.RechargeInfo;
 import com.everhomes.util.ConvertHelper;
 
