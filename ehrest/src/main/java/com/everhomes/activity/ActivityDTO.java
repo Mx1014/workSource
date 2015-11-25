@@ -31,6 +31,7 @@ import com.everhomes.util.StringHelper;
  */
 public class ActivityDTO {
     private Long activityId;
+    private Integer namespaceId;
     private Long postId;
     private Long forumId;
     private Long categoryId;
@@ -56,7 +57,6 @@ public class ActivityDTO {
     private Integer userActivityStatus;
     private Integer processStatus;
     private String uuid;
-    
     private String guest;
     
     public ActivityDTO() {
@@ -70,6 +70,14 @@ public class ActivityDTO {
         this.activityId = activityId;
     }
     
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
     public Long getCategoryId() {
         return categoryId;
     }
@@ -273,7 +281,6 @@ public class ActivityDTO {
         this.uuid = uuid;
     }
 
-    
     public String getGuest() {
 		return guest;
 	}
@@ -281,8 +288,7 @@ public class ActivityDTO {
 	public void setGuest(String guest) {
 		this.guest = guest;
 	}
-
-	@Override
+	
     public String toString() {
         return StringHelper.toJsonString(this);
     }

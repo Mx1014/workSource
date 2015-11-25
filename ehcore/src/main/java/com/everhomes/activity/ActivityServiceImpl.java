@@ -143,6 +143,9 @@ public class ActivityServiceImpl implements ActivityService {
         activity.setNamespaceId(0);
         activity.setCreatorUid(user.getId());
         activity.setGroupDiscriminator(EntityType.ACTIVITY.getCode());
+        Integer namespaceId = (cmd.getNamespaceId() == null) ? 0 : cmd.getNamespaceId();
+        activity.setNamespaceId(namespaceId);
+        activity.setGuest(cmd.getGuest());
         
         // avoid nullpoint
         activity.setCheckinAttendeeCount(0);

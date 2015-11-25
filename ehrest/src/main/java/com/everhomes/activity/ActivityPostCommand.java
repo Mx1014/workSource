@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * 
  * @author elians
  *<ul>
+ *<li>namespaceId:命名空间</li>
  *<li>subject:主题</li>
  *<li>description:描述</li>
  *<li>location:位置</li>
@@ -26,9 +27,11 @@ import com.everhomes.util.StringHelper;
  *<li>latitude:纬度</li>
  *<li>changeVersion:版本</li>
  *<li>posterUri:海报</li>
+ *<li>guest:嘉宾</li>
  *</ul>
  */
 public class ActivityPostCommand{
+    private Integer namespaceId;
     private String subject;
     private String description;
     private String location;
@@ -47,8 +50,17 @@ public class ActivityPostCommand{
     private String tag;
     private transient Long id;
     private String posterUri;
+    private String guest;
     
     public ActivityPostCommand() {
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     public String getSubject() {
@@ -193,6 +205,14 @@ public class ActivityPostCommand{
 
     public void setPosterUri(String posterUri) {
         this.posterUri = posterUri;
+    }
+
+    public String getGuest() {
+        return guest;
+    }
+
+    public void setGuest(String guest) {
+        this.guest = guest;
     }
 
     @Override
