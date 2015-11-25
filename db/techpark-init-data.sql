@@ -1,4 +1,31 @@
 use ehcore;
+ 
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+VALUES('100001','0','0','服务联盟类型','服务联盟类型','0','2','2015-11-24 11:37:24',NULL,NULL,NULL,'1000000');
+ 
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+VALUES('100002','100001','0','知识产权','服务联盟类型/知识产权','0','2','2015-11-24 11:37:24',NULL,NULL,NULL,'1000000');
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+VALUES('100003','100001','0','法律事务','服务联盟类型/法律事务','0','2','2015-11-24 11:37:24',NULL,NULL,NULL,'1000000');
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+VALUES('100004','100001','0','项目申报','服务联盟类型/项目申报','0','2','2015-11-24 11:37:24',NULL,NULL,NULL,'1000000');
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+VALUES('100005','100001','0','人力资源','服务联盟类型/人力资源','0','2','2015-11-24 11:37:24',NULL,NULL,NULL,'1000000');
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+VALUES('100006','100001','0','管理咨询','服务联盟类型/管理咨询','0','2','2015-11-24 11:37:24',NULL,NULL,NULL,'1000000');
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+VALUES('100007','100001','0','信息化建设','服务联盟类型/信息化建设','0','2','2015-11-24 11:37:24',NULL,NULL,NULL,'1000000');
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+VALUES('100008','100001','0','财税服务','服务联盟类型/财税服务','0','2','2015-11-24 11:37:24',NULL,NULL,NULL,'1000000');
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+VALUES('100009','100001','0','办公服务','服务联盟类型/办公服务','0','2','2015-11-24 11:37:24',NULL,NULL,NULL,'1000000');
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+VALUES('100010','100001','0','员工关怀','服务联盟类型/员工关怀','0','2','2015-11-24 11:37:24',NULL,NULL,NULL,'1000000');
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+VALUES('100011','100001','0','外贸实务','服务联盟类型/外贸实务','0','2','2015-11-24 11:37:24',NULL,NULL,NULL,'1000000');
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+VALUES('100012','100001','0','其他','服务联盟类型/其他','0','2','2015-11-24 11:37:24',NULL,NULL,NULL,'1000000');
+
 
 
 INSERT INTO `eh_punch_workday` (`id`, `date_status`, `date_tag`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES('1','0','2015-09-10',NULL,NULL,NULL,NULL);
@@ -8,6 +35,7 @@ INSERT INTO `eh_punch_workday` (`id`, `date_status`, `date_tag`, `creator_uid`, 
 INSERT INTO `eh_punch_workday` (`id`, `date_status`, `date_tag`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES('5','1','2015-10-05',NULL,NULL,NULL,NULL);
 INSERT INTO `eh_punch_workday` (`id`, `date_status`, `date_tag`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES('6','1','2015-10-06',NULL,NULL,NULL,NULL);
 INSERT INTO `eh_punch_workday` (`id`, `date_status`, `date_tag`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) VALUES('7','1','2015-10-07',NULL,NULL,NULL,NULL);
+
 
 
 insert into `eh_punch_rules` (`id`, `company_id`, `start_early_time`, `start_late_time`, `work_time`, `time_tag1`, `time_tag2`, `time_tag3`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) values('2','178395','08:30:00','09:30:00','10:00:00',NULL,NULL,NULL,'195506','2015-11-22 09:24:38',NULL,NULL);
