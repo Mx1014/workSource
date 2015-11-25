@@ -48,6 +48,20 @@ public class EhEnterpriseOpRequestsDao extends org.jooq.impl.DAOImpl<com.everhom
 	}
 
 	/**
+	 * Fetch records that have <code>namespace_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhEnterpriseOpRequests> fetchByNamespaceId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhEnterpriseOpRequests.EH_ENTERPRISE_OP_REQUESTS.NAMESPACE_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>community_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhEnterpriseOpRequests> fetchByCommunityId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhEnterpriseOpRequests.EH_ENTERPRISE_OP_REQUESTS.COMMUNITY_ID, values);
+	}
+
+	/**
 	 * Fetch records that have <code>source_type IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhEnterpriseOpRequests> fetchBySourceType(java.lang.String... values) {

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhEnterpriseOpRequests extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhEnterpriseOpRequestsRecord> {
 
-	private static final long serialVersionUID = -991135919;
+	private static final long serialVersionUID = 942177232;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_enterprise_op_requests</code>
@@ -30,6 +30,16 @@ public class EhEnterpriseOpRequests extends org.jooq.impl.TableImpl<com.everhome
 	 * The column <code>ehcore.eh_enterprise_op_requests.id</code>. id of the record
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEnterpriseOpRequestsRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id of the record");
+
+	/**
+	 * The column <code>ehcore.eh_enterprise_op_requests.namespace_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEnterpriseOpRequestsRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_enterprise_op_requests.community_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEnterpriseOpRequestsRecord, java.lang.Long> COMMUNITY_ID = createField("community_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_enterprise_op_requests.source_type</code>. enterprise, marker zone
