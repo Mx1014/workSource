@@ -189,6 +189,16 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhEnterpriseContactGroupMembers EH_ENTERPRISE_CONTACT_GROUP_MEMBERS = com.everhomes.server.schema.tables.EhEnterpriseContactGroupMembers.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS;
 
 	/**
+	 * The table ehcore.eh_enterprise_details
+	 */
+	public static final com.everhomes.server.schema.tables.EhEnterpriseDetails EH_ENTERPRISE_DETAILS = com.everhomes.server.schema.tables.EhEnterpriseDetails.EH_ENTERPRISE_DETAILS;
+
+	/**
+	 * The table ehcore.eh_enterprise_op_requests
+	 */
+	public static final com.everhomes.server.schema.tables.EhEnterpriseOpRequests EH_ENTERPRISE_OP_REQUESTS = com.everhomes.server.schema.tables.EhEnterpriseOpRequests.EH_ENTERPRISE_OP_REQUESTS;
+
+	/**
 	 * The table ehcore.eh_events
 	 */
 	public static final com.everhomes.server.schema.tables.EhEvents EH_EVENTS = com.everhomes.server.schema.tables.EhEvents.EH_EVENTS;

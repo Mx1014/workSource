@@ -62,7 +62,7 @@
 		eh_park_charge | eh_recharge_info| eh_park_apply_card | eh_rental_bill_paybill_map |
         eh_enterprise_contact_group_members | eh_enterprise_community_map | eh_building_attachments | eh_buildings |
         eh_enterprise_attachments | eh_organization_assigned_scopes | eh_user_communities |
-        eh_yellow_pages | eh_yellow_page_attachments | eh_namespace_resources
+        eh_yellow_pages | eh_yellow_page_attachments | eh_namespace_resources | eh_enterprise_details | eh_enterprise_op_requests
         </includes>
             <!-- All elements that are excluded from your schema
             (A Java regular expression. Use the pipe to separate several expressions).

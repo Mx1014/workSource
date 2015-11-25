@@ -379,5 +379,37 @@ INSERT INTO `eh_acl_roles` (`id`, `app_id`,`name`,`description`) VALUES(1007, 32
 -- INSERT INTO `eh_acls` (`id`, `owner_type`,`grant_type`,`privilege_id`,`role_id`,`creator_uid`,`create_time`) VALUES(10006, 'EhOrganizations', 1, 10001, 1006, 1, '2015-11-14 19:16:27');
 
 
+CREATE TABLE `eh_enterprise_details` ( 
+	`id` BIGINT NOT NULL COMMENT 'id of the record', 
+	`enterprise_id` BIGINT NOT NULL COMMENT 'group id', 
+	`description` text COMMENT 'description', 
+	`contact` VARCHAR(128) COMMENT 'the phone number',
+	`address` VARCHAR(256) COMMENT 'address str', 
+    `create_time` DATETIME,
+	PRIMARY KEY (`id`) 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4; 
+
+CREATE TABLE `eh_enterprise_op_requests` ( 
+	`id` BIGINT NOT NULL COMMENT 'id of the record', 
+    `source_type` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'enterprise, marker zone',
+    `source_id` BIGINT NOT NULL DEFAULT 0,
+	`enterprise_name` VARCHAR(128) NOT NULL COMMENT 'enterprise name', 
+    `enterprise_id` BIGINT NOT NULL DEFAULT 0,
+	`apply_contact` VARCHAR(128) COMMENT 'contact phone', 
+	`apply_user_id` BIGINT COMMENT 'user id', 
+	`apply_user_name` BIGINT COMMENT 'apply user name', 
+	`apply_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'apply type 1:apply 2:The expansion of rent 3:Renew', 
+	`description` TEXT COMMENT 'description', 
+	`size_unit` TINYINT COMMENT '1:singleton 2:square meters', 
+    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: requesting, 2: accepted',
+	`area_size` DOUBLE, 
+	`create_time` DATETIME, 
+    `operator_uid` BIGINT,
+    `process_message` TEXT,
+    `process_time` DATETIME,
+	PRIMARY KEY (`id`) 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE `eh_activities` ADD COLUMN `guest` VARCHAR(2048) ;
 
 SET foreign_key_checks = 1;
