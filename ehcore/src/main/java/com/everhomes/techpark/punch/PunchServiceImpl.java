@@ -1025,7 +1025,7 @@ public class PunchServiceImpl implements PunchService {
 			dto.setNoonLeaveTime(punchRule.getNoonLeaveTime().getTime());
 			dto.setStartEarlyTime(punchRule.getStartEarlyTime().getTime());
 			dto.setStartLateTime(punchRule.getStartLateTime().getTime());
-			dto.setEndEarlyTime(punchRule.getStartEarlyTime().getTime() + punchRule.getWorkTime().getTime()-MILLISECONDGMT);
+			dto.setEndEarlyTime(punchRule.getStartEarlyTime().getTime() + punchRule.getWorkTime().getTime() +MILLISECONDGMT);
 			List<PunchGeopoint> geopoints = punchProvider
 					.listPunchGeopointsByCompanyId(cmd.getEnterpriseId());
 			dto.setPunchGeoPoints(new ArrayList<PunchGeoPointDTO>());

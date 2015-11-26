@@ -13,7 +13,7 @@ import com.everhomes.util.StringHelper;
  */
 public class PunchExceptionDTO {
 
-	private String Name;
+	private String name;
 	private Long createTime;
 	 
 	private String exceptionComment;
@@ -30,17 +30,7 @@ public class PunchExceptionDTO {
 	}
 
 
-
-	public String getName() {
-		return Name;
-	}
-
-
-
-	public void setName(String name) {
-		Name = name;
-	}
-
+ 
 
 
 	public Long getCreateTime() {
@@ -87,6 +77,22 @@ public class PunchExceptionDTO {
 
 	public void setProcessCode(Byte processCode) {
 		this.processCode = processCode;
+	}
+
+
+
+
+
+	public String getName() {
+		return name;
+	}
+
+
+
+
+
+	public void setName(String name) {
+		this.name = name;
 	}
  
 }

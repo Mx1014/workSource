@@ -97,7 +97,7 @@ public class PunchController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("listYearPunchLogs")
-	@RestReturn(value = ListYearPunchLogsCommandResponse.class, collection = true)
+	@RestReturn(value = ListYearPunchLogsCommandResponse.class)
 	public RestResponse listYearPunchLogs(@Valid ListYearPunchLogsCommand cmd) {
 
 		RestResponse res = new RestResponse();
@@ -116,7 +116,7 @@ public class PunchController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("listMonthPunchLogs")
-	@RestReturn(value = ListMonthPunchLogsCommandResponse.class, collection = true)
+	@RestReturn(value = ListMonthPunchLogsCommandResponse.class)
 	public RestResponse listMonthPunchLogs(@Valid ListMonthPunchLogsCommand cmd) {
 
 		RestResponse res = new RestResponse();
@@ -135,7 +135,7 @@ public class PunchController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("getDayPunchLogs")
-	@RestReturn(value = PunchLogsDay.class, collection = true)
+	@RestReturn(value = PunchLogsDay.class)
 	public RestResponse getDayPunchLogs(@Valid GetDayPunchLogsCommand cmd) {
 
 		RestResponse res = new RestResponse();

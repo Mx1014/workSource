@@ -18,6 +18,8 @@ public class GetYellowPageListCommand {
 	private Long pageAnchor;
     
 	private Integer pageSize;
+
+	private java.lang.String   serviceType;
 	
 	public String getOwnerType() {
 		return ownerType;
@@ -71,4 +73,12 @@ public class GetYellowPageListCommand {
 	    public String toString() {
 	        return StringHelper.toJsonString(this);
 	    }
+
+	public java.lang.String getServiceType() {
+		return serviceType;
+	}
+
+	public void setServiceType(java.lang.String serviceType) {
+		this.serviceType = serviceType;
+	}
 }
