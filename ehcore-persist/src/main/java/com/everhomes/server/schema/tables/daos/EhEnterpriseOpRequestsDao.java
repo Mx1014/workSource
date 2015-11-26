@@ -106,7 +106,7 @@ public class EhEnterpriseOpRequestsDao extends org.jooq.impl.DAOImpl<com.everhom
 	/**
 	 * Fetch records that have <code>apply_user_name IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhEnterpriseOpRequests> fetchByApplyUserName(java.lang.Long... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhEnterpriseOpRequests> fetchByApplyUserName(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhEnterpriseOpRequests.EH_ENTERPRISE_OP_REQUESTS.APPLY_USER_NAME, values);
 	}
 

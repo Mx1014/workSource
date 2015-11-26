@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhEnterpriseOpRequests implements java.io.Serializable {
 
-	private static final long serialVersionUID = -840154723;
+	private static final long serialVersionUID = 167263571;
 
 	private java.lang.Long     id;
 	private java.lang.Integer  namespaceId;
@@ -22,7 +22,7 @@ public class EhEnterpriseOpRequests implements java.io.Serializable {
 	private java.lang.Long     enterpriseId;
 	private java.lang.String   applyContact;
 	private java.lang.Long     applyUserId;
-	private java.lang.Long     applyUserName;
+	private java.lang.String   applyUserName;
 	private java.lang.Byte     applyType;
 	private java.lang.String   description;
 	private java.lang.Byte     sizeUnit;
@@ -45,7 +45,7 @@ public class EhEnterpriseOpRequests implements java.io.Serializable {
 		java.lang.Long     enterpriseId,
 		java.lang.String   applyContact,
 		java.lang.Long     applyUserId,
-		java.lang.Long     applyUserName,
+		java.lang.String   applyUserName,
 		java.lang.Byte     applyType,
 		java.lang.String   description,
 		java.lang.Byte     sizeUnit,
@@ -149,11 +149,11 @@ public class EhEnterpriseOpRequests implements java.io.Serializable {
 		this.applyUserId = applyUserId;
 	}
 
-	public java.lang.Long getApplyUserName() {
+	public java.lang.String getApplyUserName() {
 		return this.applyUserName;
 	}
 
-	public void setApplyUserName(java.lang.Long applyUserName) {
+	public void setApplyUserName(java.lang.String applyUserName) {
 		this.applyUserName = applyUserName;
 	}
 
