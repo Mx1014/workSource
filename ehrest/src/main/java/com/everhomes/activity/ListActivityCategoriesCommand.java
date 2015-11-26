@@ -9,6 +9,8 @@ import com.everhomes.util.StringHelper;
  */
 public class ListActivityCategoriesCommand {
 	
+	private Long parentId;
+	
 	private Long communityFlagId;
 	
 	private Integer namespaceId;
@@ -29,7 +31,16 @@ public class ListActivityCategoriesCommand {
         this.namespaceId = namespaceId;
     }
 
-    @Override
+    
+    public Long getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(Long parentId) {
+		this.parentId = parentId;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

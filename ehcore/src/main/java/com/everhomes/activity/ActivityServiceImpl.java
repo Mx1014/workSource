@@ -836,10 +836,15 @@ public class ActivityServiceImpl implements ActivityService {
     @Override
     public List<Category> listActivityCategories(ListActivityCategoriesCommand cmd) {
     	User user = UserContext.current().getUser();
-		Integer namespaceId = (user.getNamespaceId() == null) ? 0 : user.getNamespaceId();
+    	Integer namespaceId = ( null == cmd.getNamespaceId() ) ? user.getNamespaceId() : cmd.getNamespaceId();
+    	
+    	namespaceId = ( namespaceId == null ) ? 0 : namespaceId;
+    	
+    	Long parentId = ( null == cmd.getParentId() ) ? CategoryConstants.CATEGORY_ID_ACTIVITY : cmd.getParentId();
+    	
         Tuple[] orderBy = new Tuple[1]; 
         orderBy[0] = new Tuple<String, SortOrder>("default_order", SortOrder.ASC);
-        List<Category> result = categoryProvider.listChildCategories(namespaceId, CategoryConstants.CATEGORY_ID_ACTIVITY, CategoryAdminStatus.ACTIVE,orderBy);
+        List<Category> result = categoryProvider.listChildCategories(namespaceId, parentId, CategoryAdminStatus.ACTIVE,orderBy);
         
 //        if(cmd != null && cmd.getCommunityFlagId() != null  && CommunityAppType.TECHPARK.getCode() == cmd.getCommunityFlagId()) {
 //        	List<Category> tech = categoryProvider.listChildCategories(namespaceId, CategoryConstants.CATEGORY_ID_TECH_ACTIVITY, CategoryAdminStatus.ACTIVE,orderBy);

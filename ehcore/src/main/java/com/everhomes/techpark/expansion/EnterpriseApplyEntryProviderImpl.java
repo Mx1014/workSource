@@ -85,13 +85,13 @@ public class EnterpriseApplyEntryProviderImpl implements
 
 	@Override
 	public EnterpriseOpRequest getEnterpriseOpRequestByBuildIdAndUserId(
-			Long buildId, Long userId) {
+			Long id, Long userId) {
 		List<EnterpriseOpRequest> enterpriseOpRequests = new ArrayList<EnterpriseOpRequest>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhEnterpriseOpRequestsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_OP_REQUESTS);
 		query.addConditions(Tables.EH_ENTERPRISE_OP_REQUESTS.APPLY_USER_ID.eq(userId));
-		if(null != buildId)
-			query.addConditions(Tables.EH_ENTERPRISE_OP_REQUESTS.SOURCE_ID.eq(buildId));
+		if(null != id)
+			query.addConditions(Tables.EH_ENTERPRISE_OP_REQUESTS.ID.eq(id));
 		query.addConditions(Tables.EH_ENTERPRISE_OP_REQUESTS.STATUS.eq(ApplyEntryStatus.RESIDED_IN.getCode()));
 		
 		query.fetch().map((r) -> {
@@ -103,6 +103,31 @@ public class EnterpriseApplyEntryProviderImpl implements
 			return null;
 		}
 		return enterpriseOpRequests.get(0);
+	}
+	
+	@Override
+	public List<LeasePromotion> listLeasePromotions(Long communityId,
+			int offset, int pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<LeasePromotion> leasePromotions = new ArrayList<LeasePromotion>();
+		context.select().from(Tables.EH_LEASE_PROMOTIONS)
+						.where(Tables.EH_LEASE_PROMOTIONS.COMMUNITY_ID.eq(communityId))
+						.limit(offset, pageSize)
+						.fetch().map((r) -> {
+							List<LeasePromotionAttachment> attachments = new ArrayList<LeasePromotionAttachment>();
+							context.select().from(Tables.EH_LEASE_PROMOTION_ATTACHMENTS)
+							.where(Tables.EH_LEASE_PROMOTION_ATTACHMENTS.LEASE_ID.eq(r.getValue(Tables.EH_LEASE_PROMOTIONS.ID)))
+							.fetch().map((t) -> {
+								attachments.add(ConvertHelper.convert(r, LeasePromotionAttachment.class));
+								return null;
+							});
+							
+							LeasePromotion leasePromotion = ConvertHelper.convert(r, LeasePromotion.class);
+							leasePromotion.setAttachments(attachments);
+							leasePromotions.add(leasePromotion);
+							return null;
+						});
+		return leasePromotions;
 	}
 
 }

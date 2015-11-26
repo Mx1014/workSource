@@ -95,8 +95,8 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	@RequestMapping("listForRents")
 	@RestReturn(value=ListBuildingForRentResponse.class)
 	public RestResponse listForRents(ListBuildingForRentCommand cmd){
-//		boolean b = enterpriseApplyEntryService.applyRenew(cmd);
-		RestResponse response = new RestResponse();
+		ListBuildingForRentResponse res = enterpriseApplyEntryService.listLeasePromotions(cmd);
+		RestResponse response = new RestResponse(res);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

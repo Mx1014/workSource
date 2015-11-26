@@ -2,15 +2,14 @@ package com.everhomes.techpark.expansion;
 
 public class EnterpriseApplyRenewCommand {
     
-	private Long buildId;
+	private Long id;
 
-	public Long getBuildId() {
-		return buildId;
+	public Long getId() {
+		return id;
 	}
 
-	public void setBuildId(Long buildId) {
-		this.buildId = buildId;
+	public void setId(Long id) {
+		this.id = id;
 	}
-	
-    
+
 }

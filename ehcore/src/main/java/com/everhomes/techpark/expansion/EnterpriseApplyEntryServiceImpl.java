@@ -100,7 +100,7 @@ public class EnterpriseApplyEntryServiceImpl implements
 
 	@Override
 	public boolean applyRenew(EnterpriseApplyRenewCommand cmd) {
-		EnterpriseOpRequest request = enterpriseApplyEntryProvider.getEnterpriseOpRequestByBuildIdAndUserId(cmd.getBuildId(), UserContext.current().getUser().getId());
+		EnterpriseOpRequest request = enterpriseApplyEntryProvider.getEnterpriseOpRequestByBuildIdAndUserId(cmd.getId(), UserContext.current().getUser().getId());
 		
 		if(null == request){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
@@ -112,6 +112,28 @@ public class EnterpriseApplyEntryServiceImpl implements
 		request.setStatus(ApplyEntryStatus.PROCESSING.getCode());
 		enterpriseApplyEntryProvider.createApplyEntry(request);
 		return true;
+	}
+	
+	@Override
+	public ListBuildingForRentResponse listLeasePromotions(
+			ListBuildingForRentCommand cmd) {
+		ListBuildingForRentResponse res = new ListBuildingForRentResponse();
+		
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		Integer offset = cmd.getPageAnchor() == null ? 0 : (cmd.getPageAnchor() - 1 ) * pageSize;
+		List<LeasePromotion> leasePromotions = enterpriseApplyEntryProvider.listLeasePromotions(cmd.getCommunityId(), offset, pageSize + 1);
+		
+		if(leasePromotions != null && leasePromotions.size() > pageSize) {
+			leasePromotions.remove(leasePromotions.size() - 1);
+			res.setNextPageAnchor(cmd.getPageAnchor() + 1);
+		}
+		
+		List<BuildingForRentDTO> dtos = leasePromotions.stream().map((c) ->{
+			return ConvertHelper.convert(c, BuildingForRentDTO.class);
+		}).collect(Collectors.toList());
+		
+		res.setDtos(dtos);
+		return res;
 	}
 
 }
