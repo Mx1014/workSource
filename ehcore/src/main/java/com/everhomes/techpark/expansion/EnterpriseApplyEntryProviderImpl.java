@@ -89,8 +89,11 @@ public class EnterpriseApplyEntryProviderImpl implements
 		List<EnterpriseOpRequest> enterpriseOpRequests = new ArrayList<EnterpriseOpRequest>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhEnterpriseOpRequestsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_OP_REQUESTS);
-		query.addConditions(Tables.EH_ENTERPRISE_OP_REQUESTS.SOURCE_ID.eq(buildId));
 		query.addConditions(Tables.EH_ENTERPRISE_OP_REQUESTS.APPLY_USER_ID.eq(userId));
+		if(null != buildId)
+			query.addConditions(Tables.EH_ENTERPRISE_OP_REQUESTS.SOURCE_ID.eq(buildId));
+		query.addConditions(Tables.EH_ENTERPRISE_OP_REQUESTS.STATUS.eq(ApplyEntryStatus.RESIDED_IN.getCode()));
+		
 		query.fetch().map((r) -> {
 			enterpriseOpRequests.add(ConvertHelper.convert(r, EnterpriseOpRequest.class));
 			return null;

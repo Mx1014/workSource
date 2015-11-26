@@ -88,4 +88,18 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 		return response;
 	}
 	
+	/**
+	 * <b>URL: /techpark/entry/listForRents
+	 * <p>
+	 */
+	@RequestMapping("listForRents")
+	@RestReturn(value=ListBuildingForRentResponse.class)
+	public RestResponse listForRents(ListBuildingForRentCommand cmd){
+//		boolean b = enterpriseApplyEntryService.applyRenew(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 }
