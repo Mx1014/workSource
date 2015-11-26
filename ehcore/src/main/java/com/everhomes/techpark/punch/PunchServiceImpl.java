@@ -317,7 +317,7 @@ public class PunchServiceImpl implements PunchService {
 			newPunchDayLog.setId(punchDayLog.getId());
 			punchProvider.updatePunchDayLog(newPunchDayLog);
 		}
-		return punchDayLog;
+		return newPunchDayLog;
 	}
 
 	private Time getDAOTime(Long arriveTime) {
@@ -665,7 +665,7 @@ public class PunchServiceImpl implements PunchService {
 					}
 				}
 				realWorkTime = realWorkTime + punchMinAndMaxTime.get(1).getTimeInMillis()- punchMinAndMaxTime.get(0).getTimeInMillis();
-				punchDayLog.setAfternoonArriveTime(getDAOTime(arriveCalendar.getTimeInMillis()));
+				punchDayLog.setAfternoonArriveTime(getDAOTime(punchMinAndMaxTime.get(0).getTimeInMillis()));
 				punchDayLog.setLeaveTime( getDAOTime(punchMinAndMaxTime.get(1).getTimeInMillis()));
 				punchDayLog.setWorkTime(getDAOTime(realWorkTime));
 			}
@@ -894,7 +894,7 @@ public class PunchServiceImpl implements PunchService {
 				.getEnterpriseId()); 
 		if(punchRule == null) {
 			punchRule = ConvertHelper.convert(cmd, PunchRule.class);
-			punchRule.setAfternoonArriveTime(convertTime(cmd.getAfternoonArriveTime()));
+ 			punchRule.setAfternoonArriveTime(convertTime(cmd.getAfternoonArriveTime()));
 			punchRule.setPunchTimesPerDay(cmd.getPunchTimesPerDay());
 			punchRule.setNoonLeaveTime(convertTime(cmd.getNoonLeaveTime())); 
 			convertTime(punchRule, cmd.getStartEarlyTime(), cmd.getStartLateTime(), cmd.getEndEarlyTime());
