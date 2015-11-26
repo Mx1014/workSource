@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-11-25 20:02:44
+// generated at 2015-11-26 12:35:51
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -335,6 +335,7 @@ public interface ApiConstants {
     public static final String OPENAPI_FINDTOKENBYUSERID_URL = "/openapi/findTokenByUserId";
     public static final String OPENAPI_GETUSERDEFAULTADDRESS_URL = "/openapi/getUserDefaultAddress";
     public static final String OPENAPI_GETUSERDETAILBYUUID_URL = "/openapi/getUserDetailByUuid";
+    public static final String OPENAPI_GETUSERINFOBYID_URL = "/openapi/getUserInfoById";
     public static final String OPENAPI_GETUSERINFOBYUUID_URL = "/openapi/getUserInfoByUuid";
     public static final String OPENAPI_GETUSERSERVICEADDRESS_URL = "/openapi/getUserServiceAddress";
     public static final String OPENAPI_INVALIDCOUPON_URL = "/openapi/invalidCoupon";
@@ -469,6 +470,7 @@ public interface ApiConstants {
     public static final String TECHPARK_ENTRY_GETENTERPRISEDETAILBYID_URL = "/techpark/entry/getEnterpriseDetailById";
     public static final String TECHPARK_ENTRY_LISTAPPLYENTRYS_URL = "/techpark/entry/listApplyEntrys";
     public static final String TECHPARK_ENTRY_LISTENTERPRISEDETAILS_URL = "/techpark/entry/listEnterpriseDetails";
+    public static final String TECHPARK_ENTRY_LISTFORRENTS_URL = "/techpark/entry/listForRents";
     public static final String TECHPARK_ONLINEPAY_ONLINEPAYBILL_URL = "/techpark/onlinePay/onlinePayBill";
     public static final String TECHPARK_PARK_APPLYPARKINGCARD_URL = "/techpark/park/applyParkingCard";
     public static final String TECHPARK_PARK_GETRECHARGEDPLATE_URL = "/techpark/park/getRechargedPlate";
