@@ -304,6 +304,16 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhLaunchPadLayouts EH_LAUNCH_PAD_LAYOUTS = com.everhomes.server.schema.tables.EhLaunchPadLayouts.EH_LAUNCH_PAD_LAYOUTS;
 
 	/**
+	 * The table ehcore.eh_lease_promotions
+	 */
+	public static final com.everhomes.server.schema.tables.EhLeasePromotions EH_LEASE_PROMOTIONS = com.everhomes.server.schema.tables.EhLeasePromotions.EH_LEASE_PROMOTIONS;
+
+	/**
+	 * The table ehcore.eh_lease_promotion_attachments
+	 */
+	public static final com.everhomes.server.schema.tables.EhLeasePromotionAttachments EH_LEASE_PROMOTION_ATTACHMENTS = com.everhomes.server.schema.tables.EhLeasePromotionAttachments.EH_LEASE_PROMOTION_ATTACHMENTS;
+
+	/**
 	 * The table ehcore.eh_links
 	 */
 	public static final com.everhomes.server.schema.tables.EhLinks EH_LINKS = com.everhomes.server.schema.tables.EhLinks.EH_LINKS;
