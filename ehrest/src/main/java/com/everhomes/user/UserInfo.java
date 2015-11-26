@@ -62,6 +62,8 @@ public class UserInfo {
     private String regionName;
     private String regionPath;
     private String avatarUri;
+    private Integer namespaceId;
+    private String namespaceUserToken;
 
     private String uuid;
 
@@ -277,8 +279,24 @@ public class UserInfo {
     public void setEntityList(List<UserCurrentEntity> entityList) {
         this.entityList = entityList;
     }
+    
+    public Integer getNamespaceId() {
+		return namespaceId;
+	}
 
-    @Override
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public String getNamespaceUserToken() {
+		return namespaceUserToken;
+	}
+
+	public void setNamespaceUserToken(String namespaceUserToken) {
+		this.namespaceUserToken = namespaceUserToken;
+	}
+
+	@Override
     public int hashCode() {
         return HashCodeBuilder.reflectionHashCode(this);
     }

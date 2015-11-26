@@ -35,6 +35,7 @@ import com.everhomes.user.FindTokenByUserIdCommand;
 import com.everhomes.user.GetUserByUuidResponse;
 import com.everhomes.user.GetUserDefaultAddressCommand;
 import com.everhomes.user.GetUserDetailByUuidResponse;
+import com.everhomes.user.GetUserInfoByIdCommand;
 import com.everhomes.user.GetUserInfoByUuid;
 import com.everhomes.user.IdentifierType;
 import com.everhomes.user.ListUserCommand;
@@ -45,6 +46,7 @@ import com.everhomes.user.UserActivityService;
 import com.everhomes.user.UserDtoForBiz;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserInfo;
+import com.everhomes.user.UserInfoFroBiz;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
@@ -347,6 +349,16 @@ public class BusinessOpenController extends ControllerBase {
     	String token = WebTokenGenerator.getInstance().toWebToken(signUpToken);
     	
     	RestResponse response =  new RestResponse(token);
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+		return response;
+    }
+    
+    @RequestMapping("getUserInfoById")
+    @RestReturn(UserInfoFroBiz.class)
+    public RestResponse getUserInfoById(@Valid GetUserInfoByIdCommand cmd) {
+    	UserInfoFroBiz user = this.userService.getUserInfoById(cmd);
+    	RestResponse response =  new RestResponse(user);
     	response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
 		return response;
