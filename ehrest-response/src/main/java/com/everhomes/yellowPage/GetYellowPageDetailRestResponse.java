@@ -4,21 +4,20 @@ package com.everhomes.yellowPage;
 
 import com.everhomes.rest.RestResponseBase;
 
-import java.util.List;
 import com.everhomes.yellowPage.YellowPageDTO;
 
 public class GetYellowPageDetailRestResponse extends RestResponseBase {
 
-    private List<YellowPageDTO> response;
+    private YellowPageDTO response;
 
     public GetYellowPageDetailRestResponse () {
     }
 
-    public List<YellowPageDTO> getResponse() {
+    public YellowPageDTO getResponse() {
         return response;
     }
 
-    public void setResponse(List<YellowPageDTO> response) {
+    public void setResponse(YellowPageDTO response) {
         this.response = response;
     }
 }
