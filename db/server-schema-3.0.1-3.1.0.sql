@@ -399,7 +399,7 @@ CREATE TABLE `eh_enterprise_op_requests` (
     `enterprise_id` BIGINT NOT NULL DEFAULT 0,
 	`apply_contact` VARCHAR(128) COMMENT 'contact phone', 
 	`apply_user_id` BIGINT COMMENT 'user id', 
-	`apply_user_name` BIGINT COMMENT 'apply user name', 
+	`apply_user_name` VARCHAR(128) COMMENT 'apply user name', 
 	`apply_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'apply type 1:apply 2:The expansion of rent 3:Renew', 
 	`description` TEXT COMMENT 'description', 
 	`size_unit` TINYINT COMMENT '1:singleton 2:square meters', 
