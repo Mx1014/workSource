@@ -25,7 +25,7 @@ public class YellowPageController  extends ControllerBase {
     
     @RequireAuthentication(false)
     @RequestMapping("getYellowPageDetail")
-    @RestReturn(value=YellowPageDTO.class, collection = true)
+    @RestReturn(value=YellowPageDTO.class)
     public RestResponse getYellowPageDetail(@Valid GetYellowPageDetailCommand cmd) {
     	YellowPageDTO res = this.yellowPageService.getYellowPageDetail(cmd);
     	 RestResponse response = new RestResponse(res);
@@ -36,7 +36,7 @@ public class YellowPageController  extends ControllerBase {
 
     @RequireAuthentication(false)
     @RequestMapping("getYellowPageTopic")
-    @RestReturn(value=YellowPageDTO.class, collection = true)
+    @RestReturn(value=YellowPageDTO.class)
     public RestResponse getYellowPageTopic(@Valid GetYellowPageTopicCommand cmd) {
     	YellowPageDTO res = this.yellowPageService.getYellowPageTopic(cmd);
     	 RestResponse response = new RestResponse(res);
