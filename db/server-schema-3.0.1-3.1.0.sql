@@ -378,7 +378,22 @@ INSERT INTO `eh_acl_roles` (`id`, `app_id`,`name`,`description`) VALUES(1007, 32
 -- INSERT INTO `eh_acls` (`id`, `owner_type`,`grant_type`,`privilege_id`,`role_id`,`creator_uid`,`create_time`) VALUES(10005, 'EhOrganizations', 1, 10001, 1005, 1, '2015-11-14 19:16:27');
 -- INSERT INTO `eh_acls` (`id`, `owner_type`,`grant_type`,`privilege_id`,`role_id`,`creator_uid`,`create_time`) VALUES(10006, 'EhOrganizations', 1, 10001, 1006, 1, '2015-11-14 19:16:27');
 
+alter table eh_version_realm drop index `u_eh_ver_realm`;
+alter table eh_version_realm add unique key `u_eh_ver_realm` (`realm`,`namespace_id`);
+insert into `eh_version_realm` (`id`, `realm`, `description`, `create_time`, `namespace_id`) values('3','Andriod',NULL,'2015-11-26 16:10:58','1000000');
+insert into `eh_version_realm` (`id`, `realm`, `description`, `create_time`, `namespace_id`) values('4','iOS',NULL,'2015-11-26 16:10:59','1000000');
+insert into `eh_version_realm` (`id`, `realm`, `description`, `create_time`, `namespace_id`) values('5','Andriod',NULL,'2015-11-26 16:15:29','999999');
+insert into `eh_version_realm` (`id`, `realm`, `description`, `create_time`, `namespace_id`) values('6','iOS',NULL,'2015-11-26 16:15:29','999999');
 
+insert into `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`, `namespace_id`) values(5,'3','-0.1','1048576','0','1.0.0','0','2015-11-26 16:10:59', 1000000);
+insert into `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`, `namespace_id`) values(6,'4','-0.1','1048576','0','1.0.0','0','2015-11-26 16:10:59', 1000000);
+insert into `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`, `namespace_id`) values(7,'5','-0.1','3145728','0','3.0.0','0','2015-11-26 16:15:29', 999999);
+insert into `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`, `namespace_id`) values(8,'6','-0.1','3145728','0','3.0.0','0','2015-11-26 16:15:29', 999999);
+
+
+# 
+# member of eh_groups partition
+#
 CREATE TABLE `eh_enterprise_details` ( 
 	`id` BIGINT NOT NULL COMMENT 'id of the record', 
 	`enterprise_id` BIGINT NOT NULL COMMENT 'group id', 
@@ -389,6 +404,9 @@ CREATE TABLE `eh_enterprise_details` (
 	PRIMARY KEY (`id`) 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4; 
 
+# 
+# member of global partition
+#
 CREATE TABLE `eh_enterprise_op_requests` ( 
 	`id` BIGINT NOT NULL COMMENT 'id of the record', 
     `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -412,6 +430,9 @@ CREATE TABLE `eh_enterprise_op_requests` (
 	PRIMARY KEY (`id`) 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+#
+# member of global partition
+#
 CREATE TABLE `eh_lease_promotions` ( 
 	`id` BIGINT NOT NULL COMMENT 'id of the record', 
     `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -426,6 +447,9 @@ CREATE TABLE `eh_lease_promotions` (
 	PRIMARY KEY (`id`) 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4; 
 
+#
+# member of global partition
+#
 CREATE TABLE `eh_lease_promotion_attachments` ( 
 	`id` bigint(20) NOT NULL COMMENT 'id of the record', 
 	`lease_id` bigint(20) NOT NULL DEFAULT '0', 
