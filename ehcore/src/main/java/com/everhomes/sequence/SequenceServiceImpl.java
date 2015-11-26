@@ -36,6 +36,8 @@ import com.everhomes.server.schema.tables.pojos.EhEnterpriseContactEntries;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseContactGroupMembers;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseContactGroups;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseContacts;
+import com.everhomes.server.schema.tables.pojos.EhEnterpriseDetails;
+import com.everhomes.server.schema.tables.pojos.EhEnterpriseOpRequests;
 import com.everhomes.server.schema.tables.pojos.EhForumAssignedScopes;
 import com.everhomes.server.schema.tables.pojos.EhForumAttachments;
 import com.everhomes.server.schema.tables.pojos.EhForumPosts;
@@ -43,6 +45,9 @@ import com.everhomes.server.schema.tables.pojos.EhForums;
 import com.everhomes.server.schema.tables.pojos.EhGroupMembers;
 import com.everhomes.server.schema.tables.pojos.EhGroupOpRequests;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
+import com.everhomes.server.schema.tables.pojos.EhLeasePromotionAttachments;
+import com.everhomes.server.schema.tables.pojos.EhLeasePromotions;
+import com.everhomes.server.schema.tables.pojos.EhNamespaceResources;
 import com.everhomes.server.schema.tables.pojos.EhNearbyCommunityMap;
 import com.everhomes.server.schema.tables.pojos.EhOauth2Codes;
 import com.everhomes.server.schema.tables.pojos.EhOauth2Tokens;
@@ -71,6 +76,7 @@ import com.everhomes.server.schema.tables.pojos.EhRentalSiteItems;
 import com.everhomes.server.schema.tables.pojos.EhRentalSiteRules;
 import com.everhomes.server.schema.tables.pojos.EhRentalSites;
 import com.everhomes.server.schema.tables.pojos.EhRentalSitesBills;
+import com.everhomes.server.schema.tables.pojos.EhUserCommunities;
 import com.everhomes.server.schema.tables.pojos.EhUserFavorites;
 import com.everhomes.server.schema.tables.pojos.EhUserGroups;
 import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
@@ -79,6 +85,7 @@ import com.everhomes.server.schema.tables.pojos.EhUserInvitations;
 import com.everhomes.server.schema.tables.pojos.EhUserLikes;
 import com.everhomes.server.schema.tables.pojos.EhUserPosts;
 import com.everhomes.server.schema.tables.pojos.EhUserProfiles;
+import com.everhomes.server.schema.tables.pojos.EhUserServiceAddresses;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.server.schema.tables.pojos.EhVersionRealm;
 import com.everhomes.server.schema.tables.pojos.EhVersionUpgradeRules;
@@ -109,6 +116,11 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhAcls.class, com.everhomes.schema.Tables.EH_ACLS.getName(), (dbContext) -> { 
             return dbContext.select(com.everhomes.schema.Tables.EH_ACLS.ID.max())
                 .from(com.everhomes.schema.Tables.EH_ACLS).fetchOne().value1(); 
+        });
+
+        syncTableSequence(null, EhAcls.class, com.everhomes.schema.Tables.EH_ACL_ROLE_ASSIGNMENTS.getName(), (dbContext) -> { 
+            return dbContext.select(com.everhomes.schema.Tables.EH_ACL_ROLE_ASSIGNMENTS.ID.max())
+                .from(com.everhomes.schema.Tables.EH_ACL_ROLE_ASSIGNMENTS).fetchOne().value1(); 
         });
         
         syncTableSequence(null, EhServerShardMap.class, com.everhomes.schema.Tables.EH_SERVER_SHARD_MAP.getName(), (dbContext) -> { 
@@ -165,8 +177,12 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_USER_PROFILES.ID.max()).from(Tables.EH_USER_PROFILES).fetchOne().value1(); 
         });
         
-        syncTableSequence(EhUsers.class, UserServiceAddress.class, Tables.EH_USER_SERVICE_ADDRESSES.getName(), (dbContext) -> { 
+        syncTableSequence(EhUsers.class, EhUserServiceAddresses.class, Tables.EH_USER_SERVICE_ADDRESSES.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_USER_SERVICE_ADDRESSES.ID.max()).from(Tables.EH_USER_SERVICE_ADDRESSES).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(EhUsers.class, EhUserCommunities.class, Tables.EH_USER_COMMUNITIES.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_USER_COMMUNITIES.ID.max()).from(Tables.EH_USER_COMMUNITIES).fetchOne().value1(); 
         });
         
         syncTableSequence(EhForums.class, EhForums.class, Tables.EH_FORUMS.getName(), (dbContext) -> { 
@@ -423,6 +439,25 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_YELLOW_PAGE_ATTACHMENTS.ID.max()).from(Tables.EH_YELLOW_PAGE_ATTACHMENTS).fetchOne().value1(); 
         });
         
+        syncTableSequence(null, EhNamespaceResources.class, Tables.EH_NAMESPACE_RESOURCES.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_NAMESPACE_RESOURCES.ID.max()).from(Tables.EH_NAMESPACE_RESOURCES).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(EhGroups.class, EhEnterpriseDetails.class, Tables.EH_ENTERPRISE_DETAILS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_ENTERPRISE_DETAILS.ID.max()).from(Tables.EH_ENTERPRISE_DETAILS).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(null, EhEnterpriseOpRequests.class, Tables.EH_ENTERPRISE_OP_REQUESTS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_ENTERPRISE_OP_REQUESTS.ID.max()).from(Tables.EH_ENTERPRISE_OP_REQUESTS).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(null, EhLeasePromotions.class, Tables.EH_LEASE_PROMOTIONS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_LEASE_PROMOTIONS.ID.max()).from(Tables.EH_LEASE_PROMOTIONS).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(null, EhLeasePromotionAttachments.class, Tables.EH_LEASE_PROMOTION_ATTACHMENTS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_LEASE_PROMOTION_ATTACHMENTS.ID.max()).from(Tables.EH_LEASE_PROMOTION_ATTACHMENTS).fetchOne().value1(); 
+        });
     }
     
     @SuppressWarnings("rawtypes")
