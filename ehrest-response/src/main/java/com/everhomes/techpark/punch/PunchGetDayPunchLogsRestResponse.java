@@ -5,20 +5,20 @@ package com.everhomes.techpark.punch;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.techpark.punch.PunchLogsDayList;
+import com.everhomes.techpark.punch.PunchLogsDay;
 
 public class PunchGetDayPunchLogsRestResponse extends RestResponseBase {
 
-    private List<PunchLogsDayList> response;
+    private List<PunchLogsDay> response;
 
     public PunchGetDayPunchLogsRestResponse () {
     }
 
-    public List<PunchLogsDayList> getResponse() {
+    public List<PunchLogsDay> getResponse() {
         return response;
     }
 
-    public void setResponse(List<PunchLogsDayList> response) {
+    public void setResponse(List<PunchLogsDay> response) {
         this.response = response;
     }
 }

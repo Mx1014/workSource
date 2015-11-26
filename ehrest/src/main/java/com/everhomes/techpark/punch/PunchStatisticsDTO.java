@@ -31,12 +31,12 @@ public class PunchStatisticsDTO{
 	private String userDepartment;
 	private String     userPhoneNumber;
 	private Long     enterpriseId;
-	private Date     punchDate;
-	private String      arriveTime;
-	private java.sql.Time      noonLeaveTime;
-	private java.sql.Time      afternoonArriveTime;
-	private String      leaveTime;
-	private String      workTime;
+	private Long     punchDate;
+	private Long      arriveTime;
+	private Long     noonLeaveTime;
+	private Long      afternoonArriveTime;
+	private Long      leaveTime;
+	private Long      workTime;
 	private Byte     status;
 	private java.lang.Byte     morningStatus;
 	private java.lang.Byte     afternoonStatus;
@@ -70,28 +70,7 @@ public class PunchStatisticsDTO{
 	public void setAfternoonApprovalStatus(java.lang.Byte afternoonApprovalStatus) {
 		this.afternoonApprovalStatus = afternoonApprovalStatus;
 	}
-
-
-	public java.sql.Time getNoonLeaveTime() {
-		return noonLeaveTime;
-	}
-
-
-	public void setNoonLeaveTime(java.sql.Time noonLeaveTime) {
-		this.noonLeaveTime = noonLeaveTime;
-	}
-
-
-	public java.sql.Time getAfternoonArriveTime() {
-		return afternoonArriveTime;
-	}
-
-
-	public void setAfternoonArriveTime(java.sql.Time afternoonArriveTime) {
-		this.afternoonArriveTime = afternoonArriveTime;
-	}
-
-
+ 
 	public java.lang.Byte getMorningStatus() {
 		return morningStatus;
 	}
@@ -161,45 +140,65 @@ public class PunchStatisticsDTO{
 		this.userName = userName;
 	}
 
- 
-	public Date getPunchDate() {
+  
+  
+
+	public Long getPunchDate() {
 		return punchDate;
 	}
 
 
-	public void setPunchDate(Date punchDate) {
+	public void setPunchDate(Long punchDate) {
 		this.punchDate = punchDate;
 	}
 
 
-	 
-
-	public String getArriveTime() {
+	public Long getArriveTime() {
 		return arriveTime;
 	}
 
 
-	public void setArriveTime(String arriveTime) {
+	public void setArriveTime(Long arriveTime) {
 		this.arriveTime = arriveTime;
 	}
 
 
-	public String getLeaveTime() {
+	public Long getNoonLeaveTime() {
+		return noonLeaveTime;
+	}
+
+
+	public void setNoonLeaveTime(Long noonLeaveTime) {
+		this.noonLeaveTime = noonLeaveTime;
+	}
+
+
+	public Long getAfternoonArriveTime() {
+		return afternoonArriveTime;
+	}
+
+
+	public void setAfternoonArriveTime(Long afternoonArriveTime) {
+		this.afternoonArriveTime = afternoonArriveTime;
+	}
+
+
+	public Long getLeaveTime() {
 		return leaveTime;
 	}
 
 
-	public void setLeaveTime(String leaveTime) {
+	public void setLeaveTime(Long leaveTime) {
 		this.leaveTime = leaveTime;
 	}
 
 
-	public String getWorkTime() {
+	public Long getWorkTime() {
 		return workTime;
 	}
 
 
-	public void setWorkTime(String workTime) {
+	public void setWorkTime(Long workTime) {
 		this.workTime = workTime;
 	}
 
