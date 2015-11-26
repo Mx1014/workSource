@@ -26,7 +26,7 @@ public class VersionServiceTest extends CoreServerTestCase {
         this.versionProvider.createVersionRealm(realm);
         Assert.assertTrue(realm.getId() != null);
         
-        VersionRealm realmFound = this.versionProvider.findVersionRealmByName("Andriod");
+        VersionRealm realmFound = this.versionProvider.findVersionRealmByName(0, "Andriod");
         Assert.assertTrue(realmFound != null);
         Assert.assertTrue(realmFound.getId().longValue() == realm.getId().longValue());
 
@@ -59,19 +59,19 @@ public class VersionServiceTest extends CoreServerTestCase {
         rule.setMatchingUpperBound(range.getUpperBound());
         this.versionProvider.createVersionUpgradeRule(rule);
 
-        VersionUpgradeRule matchedRule = this.versionProvider.matchVersionUpgradeRule(realm.getId(), new Version(1, 0, 1));
+        VersionUpgradeRule matchedRule = this.versionProvider.matchVersionUpgradeRule(0, realm.getId(), new Version(1, 0, 1));
         Assert.assertTrue(matchedRule != null);
         Version targetVersion = Version.fromVersionString(matchedRule.getTargetVersion());
         Assert.assertTrue(targetVersion != null);
         Assert.assertTrue(targetVersion.getMajor() == 2);
         
-        matchedRule = this.versionProvider.matchVersionUpgradeRule(realm.getId(), new Version(2, 0, 0));
+        matchedRule = this.versionProvider.matchVersionUpgradeRule(0, realm.getId(), new Version(2, 0, 0));
         Assert.assertTrue(matchedRule != null);
         targetVersion = Version.fromVersionString(matchedRule.getTargetVersion());
         Assert.assertTrue(targetVersion != null);
         Assert.assertTrue(targetVersion.getMajor() == 4);
 
-        matchedRule = this.versionProvider.matchVersionUpgradeRule(realm.getId(), new Version(5, 0, 0));
+        matchedRule = this.versionProvider.matchVersionUpgradeRule(0, realm.getId(), new Version(5, 0, 0));
         Assert.assertTrue(matchedRule == null);
         
         List<VersionUpgradeRule> rules = this.versionProvider.listVersionUpgradeRules(realm.getId());
