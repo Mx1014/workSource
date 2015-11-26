@@ -35,8 +35,8 @@ public class PunchExceptionRequestDTO{
 	private Long     userId;
 	private String     userName;
 	private String     userPhoneNumber;
-	private Long     companyId;
-	private Date     punchDate;
+	private Long     enterpriseId;
+	private Long     punchDate;
 	private Byte     requestType;
 	private String   description;
 	private Byte     status;
@@ -48,11 +48,38 @@ public class PunchExceptionRequestDTO{
 	private String     operatorName;
 	private Timestamp operateTime;
 	private Byte punchStatus;
-	private String arriveTime;
-	private String leaveTime;
-	private String workTime;
+
+	private java.lang.Byte     morningPunchStatus;
+	private java.lang.Byte     afternoonPunchStatus;
+	private Long arriveTime;
+	private Long leaveTime;
+	private Long workTime;
+	private Long      noonLeaveTime;
+	private Long    afternoonArriveTime;
+	private java.lang.Byte     punchTimesPerDay;
  
-    public Long getId() {
+    public Long getEnterpriseId() {
+		return enterpriseId;
+	}
+
+
+	public void setEnterpriseId(Long enterpriseId) {
+		this.enterpriseId = enterpriseId;
+	}
+
+ 
+
+	public java.lang.Byte getPunchTimesPerDay() {
+		return punchTimesPerDay;
+	}
+
+
+	public void setPunchTimesPerDay(java.lang.Byte punchTimesPerDay) {
+		this.punchTimesPerDay = punchTimesPerDay;
+	}
+
+
+	public Long getId() {
 		return id;
 	}
 
@@ -82,26 +109,8 @@ public class PunchExceptionRequestDTO{
 	}
 
 
-	public Long getCompanyId() {
-		return companyId;
-	}
-
-
-	public void setCompanyId(Long companyId) {
-		this.companyId = companyId;
-	}
-
-
-	public Date getPunchDate() {
-		return punchDate;
-	}
-
-
-	public void setPunchDate(Date punchDate) {
-		this.punchDate = punchDate;
-	}
-
-
+ 
+ 
 	public Byte getRequestType() {
 		return requestType;
 	}
@@ -208,36 +217,8 @@ public class PunchExceptionRequestDTO{
 	public void setPunchStatus(Byte punchStatus) {
 		this.punchStatus = punchStatus;
 	}
-
-
-	public String getArriveTime() {
-		return arriveTime;
-	}
-
-
-	public void setArriveTime(String arriveTime) {
-		this.arriveTime = arriveTime;
-	}
-
-
-	public String getLeaveTime() {
-		return leaveTime;
-	}
-
-
-	public void setLeaveTime(String leaveTime) {
-		this.leaveTime = leaveTime;
-	}
-
-
-	public String getWorkTime() {
-		return workTime;
-	}
-
-
-	public void setWorkTime(String workTime) {
-		this.workTime = workTime;
-	}
+ 
+ 
 
 
 	public String getOperatorName() {
@@ -257,6 +238,86 @@ public class PunchExceptionRequestDTO{
 
 	public void setUserPhoneNumber(String userPhoneNumber) {
 		this.userPhoneNumber = userPhoneNumber;
+	}
+
+
+	public java.lang.Byte getMorningPunchStatus() {
+		return morningPunchStatus;
+	}
+
+
+	public void setMorningPunchStatus(java.lang.Byte morningPunchStatus) {
+		this.morningPunchStatus = morningPunchStatus;
+	}
+
+
+	public java.lang.Byte getAfternoonPunchStatus() {
+		return afternoonPunchStatus;
+	}
+
+
+	public void setAfternoonPunchStatus(java.lang.Byte afternoonPunchStatus) {
+		this.afternoonPunchStatus = afternoonPunchStatus;
+	}
+
+
+	public Long getPunchDate() {
+		return punchDate;
+	}
+
+
+	public void setPunchDate(Long punchDate) {
+		this.punchDate = punchDate;
+	}
+
+
+	public Long getArriveTime() {
+		return arriveTime;
+	}
+
+
+	public void setArriveTime(Long arriveTime) {
+		this.arriveTime = arriveTime;
+	}
+
+
+	public Long getLeaveTime() {
+		return leaveTime;
+	}
+
+
+	public void setLeaveTime(Long leaveTime) {
+		this.leaveTime = leaveTime;
+	}
+
+
+	public Long getWorkTime() {
+		return workTime;
+	}
+
+
+	public void setWorkTime(Long workTime) {
+		this.workTime = workTime;
+	}
+
+
+	public Long getNoonLeaveTime() {
+		return noonLeaveTime;
+	}
+
+
+	public void setNoonLeaveTime(Long noonLeaveTime) {
+		this.noonLeaveTime = noonLeaveTime;
+	}
+
+
+	public Long getAfternoonArriveTime() {
+		return afternoonArriveTime;
+	}
+
+
+	public void setAfternoonArriveTime(Long afternoonArriveTime) {
+		this.afternoonArriveTime = afternoonArriveTime;
 	}
 
  

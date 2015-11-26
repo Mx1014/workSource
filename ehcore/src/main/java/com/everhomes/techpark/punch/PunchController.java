@@ -135,11 +135,11 @@ public class PunchController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("getDayPunchLogs")
-	@RestReturn(value = PunchLogsDayList.class, collection = true)
+	@RestReturn(value = PunchLogsDay.class, collection = true)
 	public RestResponse getDayPunchLogs(@Valid GetDayPunchLogsCommand cmd) {
 
 		RestResponse res = new RestResponse();
-		PunchLogsDayList pdl = punchService.getDayPunchLogs(cmd);
+		PunchLogsDay pdl = punchService.getDayPunchLogs(cmd);
 		res.setErrorCode(ErrorCodes.SUCCESS);
 		res.setErrorDescription("OK");
 		res.setResponseObject(pdl);

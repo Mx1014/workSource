@@ -20,7 +20,7 @@ import com.everhomes.util.StringHelper;
  */
 public class ApprovalPunchExceptionCommand{
 	private Long     userId;
-	private Long     companyId;
+	private Long     enterpriseId;
 	private String     punchDate;
 	private Byte     status;
 	private Byte     processCode;
@@ -41,16 +41,7 @@ public class ApprovalPunchExceptionCommand{
 	}
 
  
-
-	public Long getCompanyId() {
-		return companyId;
-	}
-
-
-	public void setCompanyId(Long companyId) {
-		this.companyId = companyId;
-	}
-
+ 
  
 
 
@@ -123,6 +114,16 @@ public class ApprovalPunchExceptionCommand{
 
 	public void setPunchDate(String punchDate) {
 		this.punchDate = punchDate;
+	}
+
+
+	public Long getEnterpriseId() {
+		return enterpriseId;
+	}
+
+
+	public void setEnterpriseId(Long enterpriseId) {
+		this.enterpriseId = enterpriseId;
 	}
 
  }

@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  */
 public class ListPunchCountCommand {
 	@NotNull
-	private Long    companyId;
+	private Long    enterpriseId;
 	
 	private String startDay;
 	
@@ -22,13 +22,7 @@ public class ListPunchCountCommand {
 	
 	
 	public ListPunchCountCommand() {
-    }
-	public Long getCompanyId() {
-		return companyId;
-	}
-	public void setCompanyId(Long companyId) {
-		this.companyId = companyId;
-	}
+    } 
 	public String getStartDay() {
 		return startDay;
 	}
@@ -45,4 +39,10 @@ public class ListPunchCountCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+	public Long getEnterpriseId() {
+		return enterpriseId;
+	}
+	public void setEnterpriseId(Long enterpriseId) {
+		this.enterpriseId = enterpriseId;
+	}
 }

@@ -19,7 +19,7 @@ import com.everhomes.util.StringHelper;
  */
 public class ListPunchExceptionRequestCommand {
 	@NotNull
-	private Long    companyId;
+	private Long    enterpriseId;
 	private String keyword;
 	private String startDay;
 	private String endDay;
@@ -29,13 +29,7 @@ public class ListPunchExceptionRequestCommand {
 	private Integer pageSize;
 	
 	public ListPunchExceptionRequestCommand() {
-    }
-	public Long getCompanyId() {
-		return companyId;
-	}
-	public void setCompanyId(Long companyId) {
-		this.companyId = companyId;
-	}
+    } 
 	public String getKeyword() {
 		return keyword;
 	}
@@ -82,4 +76,10 @@ public class ListPunchExceptionRequestCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+	public Long getEnterpriseId() {
+		return enterpriseId;
+	}
+	public void setEnterpriseId(Long enterpriseId) {
+		this.enterpriseId = enterpriseId;
+	}
 }

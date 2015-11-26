@@ -24,7 +24,7 @@ import com.everhomes.util.StringHelper;
  */
 public class ExportPunchStatisticsCommand {
 	@NotNull
-	private Long    companyId;
+	private Long    enterpriseId;
 	private String keyword;
 	private String startDay;
 	private String endDay;
@@ -38,13 +38,7 @@ public class ExportPunchStatisticsCommand {
 	
 	
 	public ExportPunchStatisticsCommand() {
-    }
-	public Long getCompanyId() {
-		return companyId;
-	}
-	public void setCompanyId(Long companyId) {
-		this.companyId = companyId;
-	}
+    } 
 	public String getKeyword() {
 		return keyword;
 	}
@@ -109,5 +103,11 @@ public class ExportPunchStatisticsCommand {
 	}
 	public void setLeaveTime(String leaveTime) {
 		this.leaveTime = leaveTime;
+	}
+	public Long getEnterpriseId() {
+		return enterpriseId;
+	}
+	public void setEnterpriseId(Long enterpriseId) {
+		this.enterpriseId = enterpriseId;
 	}
 }

@@ -117,7 +117,7 @@ public class PunchServiceImpl implements PunchService {
 	public ListYearPunchLogsCommandResponse getlistPunchLogs(
 			ListYearPunchLogsCommand cmd) {
 
-		checkCompanyIdIsNull(cmd.getCompanyId());
+		checkCompanyIdIsNull(cmd.getEnterpriseId());
 		if (cmd.getQueryYear() == null || cmd.getQueryYear().isEmpty())
 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -151,10 +151,10 @@ public class PunchServiceImpl implements PunchService {
 		}
 		// List<java.sql.Date> dateList =
 		// punchProvider.listPunchLogsBwteenTwoDay(
-		// userId, cmd.getCompanyId(), dateSF.format(start.getTime()),
+		// userId, cmd.getEnterpriseId(), dateSF.format(start.getTime()),
 		// dateSF.format(end.getTime()));
 
-		pyl = getlistPunchLogsBetweenTwoCalendar(pyl, cmd.getCompanyId(),
+		pyl = getlistPunchLogsBetweenTwoCalendar(pyl, cmd.getEnterpriseId(),
 				start, end);
 		return pyl;
 	}
@@ -175,19 +175,19 @@ public class PunchServiceImpl implements PunchService {
 				// 如果pml为空，即是循环第一次，建立新的pml
 				pml = new PunchLogsMonthList();
 				pml.setPunchMonth(String.valueOf(start.get(Calendar.MONTH) + 1));
-				pml.setPunchLogsDayListInfos(new ArrayList<PunchLogsDayList>());
+				pml.setPunchLogsDayListInfos(new ArrayList<PunchLogsDay>());
 				pyl.getPunchLogsMonthList().add(pml);
 			} else if (!pml.getPunchMonth().equals(
 					String.valueOf(start.get(Calendar.MONTH) + 1))) {
 				// 如果pml的月份和start不一样，建立新的pml
 				pml = new PunchLogsMonthList();
 				pml.setPunchMonth(String.valueOf(start.get(Calendar.MONTH) + 1));
-				pml.setPunchLogsDayListInfos(new ArrayList<PunchLogsDayList>());
+				pml.setPunchLogsDayListInfos(new ArrayList<PunchLogsDay>());
 				pyl.getPunchLogsMonthList().add(pml);
 			}
 
 			try {
-				PunchLogsDayList pdl = makePunchLogsDayStatus(userId,
+				PunchLogsDay pdl = makePunchLogsDayStatus(userId,
 						CompanyId, start);
 				if (null != pdl) {
 					pml.getPunchLogsDayList().add(pdl);
@@ -204,9 +204,9 @@ public class PunchServiceImpl implements PunchService {
 		return pyl;
 	}
 
-	private PunchLogsDayList makePunchLogsDayStatus(Long userId,
+	private PunchLogsDay makePunchLogsDayStatus(Long userId,
 			Long companyId, Calendar logDay) throws ParseException {
-		PunchLogsDayList pdl = new PunchLogsDayList();
+		PunchLogsDay pdl = new PunchLogsDay();
 		pdl.setPunchDay(String.valueOf(logDay.get(Calendar.DAY_OF_MONTH)));
 		// Long beginFunctionTimeLong = DateHelper.currentGMTTime().getTime();
 		PunchDayLog punchDayLog = punchProvider.getDayPunchLogByDate(userId,
@@ -284,7 +284,7 @@ public class PunchServiceImpl implements PunchService {
 
 	private PunchDayLog refreshPunchDayLog(Long userId, Long companyId,
 			Calendar logDay) throws ParseException {
-		PunchLogsDayList pdl = new PunchLogsDayList();
+		PunchLogsDay pdl = new PunchLogsDay();
 		pdl.setPunchDay(String.valueOf(logDay.get(Calendar.DAY_OF_MONTH)));
 		pdl.setPunchLogs(new ArrayList<PunchLogDTO>());
 		PunchDayLog newPunchDayLog = new PunchDayLog();
@@ -340,7 +340,7 @@ public class PunchServiceImpl implements PunchService {
 	 * @return PunchLogsDayList：计算好的当日打卡状态
 	 * */
 	@Override
-	public PunchLogsDayList makePunchLogsDayListInfo(Long userId,
+	public PunchLogsDay makePunchLogsDayListInfo(Long userId,
 			Long companyId, Calendar logDay) {
 		Date now = new Date();
 		
@@ -362,7 +362,7 @@ public class PunchServiceImpl implements PunchService {
 				return null;
 			}
 		} 
-		PunchLogsDayList pdl = ConvertHelper.convert(punchDayLog, PunchLogsDayList.class) ;
+		PunchLogsDay pdl = ConvertHelper.convert(punchDayLog, PunchLogsDay.class) ;
 		pdl.setPunchStatus(punchDayLog.getStatus());
 		pdl.setMorningApprovalStatus(punchDayLog.getMorningStatus());
 		pdl.setAfternoonPunchStatus(punchDayLog.getAfternoonStatus()); 
@@ -408,8 +408,8 @@ public class PunchServiceImpl implements PunchService {
 	 * 计算每一天的打卡状态，返回值PDL
 	 * @param punchDayLog 
 	 * */
-	private PunchLogsDayList caculateDayLog(Long userId, Long companyId,
-			Calendar logDay, PunchLogsDayList pdl, PunchDayLog punchDayLog) throws ParseException {
+	private PunchLogsDay caculateDayLog(Long userId, Long companyId,
+			Calendar logDay, PunchLogsDay pdl, PunchDayLog punchDayLog) throws ParseException {
 		List<PunchLog> punchLogs = punchProvider.listPunchLogsByDate(userId,
 				companyId, dateSF.format(logDay.getTime()),
 				ClockCode.SUCESS.getCode());
@@ -687,7 +687,7 @@ public class PunchServiceImpl implements PunchService {
 	 * 更改异常标志
 	 * */
 	private void makeExceptionForDayList(Long userId, Long companyId,
-			Calendar logDay, PunchLogsDayList pdl) {
+			Calendar logDay, PunchLogsDay pdl) {
 		// TODO： 四次打卡和加班
 		PunchExceptionApproval exceptionApproval = punchProvider
 				.getPunchExceptionApprovalByDate(userId, companyId,
@@ -806,7 +806,7 @@ public class PunchServiceImpl implements PunchService {
 		PunchClockResponse request = new PunchClockResponse();
 		Long userId = UserContext.current().getUser().getId(); 
 		// new Date()为获取当前系统时间为打卡时间
-		String punchTime = dateSF.format(new Date());
+		String punchTime = datetimeSF.format(new Date());
 		PunchLog punchLog = ConvertHelper.convert(cmd, PunchLog.class);
 		punchLog.setUserId(userId);
 		punchLog.setPunchTime(Timestamp.valueOf(punchTime));
@@ -1156,7 +1156,7 @@ public class PunchServiceImpl implements PunchService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid description parameter in the command");
-
+//		PunchRule rule = this.punchProvider.getPunchRuleByCompanyId(cmd.getEnterpriseId());
 		PunchExceptionRequest punchExceptionRequest = new PunchExceptionRequest();
 		punchExceptionRequest.setEnterpriseId(cmd.getEnterpriseId());
 		punchExceptionRequest.setRequestType(PunchRquestType.REQUEST.getCode());
@@ -1169,7 +1169,7 @@ public class PunchServiceImpl implements PunchService {
 				.getPunchDate()));
 		punchExceptionRequest.setStatus(ExceptionProcessStatus.WAITFOR
 				.getCode());
-		punchExceptionRequest.setViewFlag(ViewFlags.NOTVIEW.getCode());
+		punchExceptionRequest.setViewFlag(ViewFlags.NOTVIEW.getCode()); 
 		punchProvider.createPunchExceptionRequest(punchExceptionRequest);
 
 	}
@@ -1177,7 +1177,7 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public ListPunchExceptionRequestCommandResponse listExceptionRequests(
 			ListPunchExceptionRequestCommand cmd) {
-		checkCompanyIdIsNull(cmd.getCompanyId());
+		checkCompanyIdIsNull(cmd.getEnterpriseId());
 		ListPunchExceptionRequestCommandResponse response = new ListPunchExceptionRequestCommandResponse();
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
 		List<EnterpriseContact> enterpriseContacts = enterpriseContactProvider
@@ -1187,7 +1187,7 @@ public class PunchServiceImpl implements PunchService {
 			userIds.add(enterpriseContact.getUserId());
 		}
 		int totalCount = punchProvider.countExceptionRequests(userIds,
-				cmd.getCompanyId(), cmd.getStartDay(), cmd.getEndDay(),
+				cmd.getEnterpriseId(), cmd.getStartDay(), cmd.getEndDay(),
 				cmd.getExceptionStatus(), cmd.getProcessCode(),
 				PunchRquestType.REQUEST.getCode());
 		if (totalCount == 0)
@@ -1198,7 +1198,7 @@ public class PunchServiceImpl implements PunchService {
 		int pageCount = getPageCount(totalCount, pageSize);
 
 		List<PunchExceptionRequest> result = punchProvider
-				.listExceptionRequests(userIds, cmd.getCompanyId(),
+				.listExceptionRequests(userIds, cmd.getEnterpriseId(),
 						cmd.getStartDay(), cmd.getEndDay(),
 						cmd.getExceptionStatus(), cmd.getProcessCode(),
 						cmd.getPageOffset(), pageSize,
@@ -1209,47 +1209,40 @@ public class PunchServiceImpl implements PunchService {
 					PunchExceptionRequestDTO dto = ConvertHelper.convert(r,
 							PunchExceptionRequestDTO.class);
 					Calendar logDay = Calendar.getInstance();
-					logDay.setTime(dto.getPunchDate());
-					PunchLogsDayList pdl = null;
-					try {
-						pdl = this.makePunchLogsDayListInfo(dto.getUserId(),
-								dto.getCompanyId(), logDay);
-					} catch (Exception e) {
+					logDay.setTime(new java.sql.Date(dto.getPunchDate()));
 
-						e.printStackTrace();
-					}
-					if (null == pdl)
-						throw RuntimeErrorException.errorWith(
-								ErrorCodes.SCOPE_GENERAL,
-								ErrorCodes.ERROR_INVALID_PARAMETER,
-								"Invalid description parameter in the command");
-					dto.setPunchStatus(pdl.getPunchStatus());
-					Long arriveTime = null;
-					Long leaveTime = null;
-					for (PunchLogDTO pDto : pdl.getPunchLogs()) {
-						if (pDto.getClockStatus().equals(
-								ClockStatus.LEAVE.getCode())) {
-							leaveTime = pDto.getPunchTime();
-						} else {
-							arriveTime = pDto.getPunchTime();
+					PunchDayLog punchDayLog = punchProvider.getDayPunchLogByDate(dto.getUserId(),
+							dto.getEnterpriseId(), dateSF.format(logDay.getTime()));
+					if (null == punchDayLog) {
+						// 插入数据
+						try {
+							punchDayLog = refreshPunchDayLog(dto.getUserId(),
+									dto.getEnterpriseId(),logDay);
+						} catch (ParseException e) {
+							throw RuntimeErrorException.errorWith(
+									PunchServiceErrorCode.SCOPE,
+									PunchServiceErrorCode.ERROR_PUNCH_REFRESH_DAYLOG,
+									"ERROR IN REFRESHPUNCHDAYLOG  LINE 353");
 						}
-					}
-					if (leaveTime.equals(0L) || arriveTime.equals(0L)) {
-						if (arriveTime.equals(0L)) {
-
-						} else {
-							dto.setArriveTime(getGMTtimeString("HH:mm:ss",
-									arriveTime));
+						if (null == punchDayLog) {
+							// 验证后为空
+							throw RuntimeErrorException.errorWith(
+									ErrorCodes.SCOPE_GENERAL,
+									ErrorCodes.ERROR_INVALID_PARAMETER,
+									"Invalid description parameter in the command");
 						}
-
-					} else {
-						Long workTime = leaveTime - arriveTime;
-						dto.setArriveTime(timeSF.format(new Date(arriveTime)));
-						dto.setLeaveTime(timeSF.format(new Date(leaveTime)));
-						dto.setWorkTime(getGMTtimeString("HH:mm:ss", workTime));
-					}
+					} 
+					dto.setPunchStatus(punchDayLog.getStatus());
+					dto.setMorningPunchStatus(punchDayLog.getMorningStatus());
+					dto.setAfternoonPunchStatus(punchDayLog.getAfternoonStatus());
+					dto.setNoonLeaveTime(punchDayLog.getNoonLeaveTime().getTime());
+					dto.setAfternoonArriveTime(punchDayLog.getAfternoonArriveTime().getTime());
+					dto.setArriveTime(punchDayLog.getArriveTime().getTime());
+					dto.setLeaveTime(punchDayLog.getLeaveTime().getTime());
+					dto.setWorkTime(punchDayLog.getWorkTime().getTime());
+					dto.setPunchTimesPerDay(punchDayLog.getPunchTimesPerDay());
 					EnterpriseContact enterpriseContact = enterpriseContactService
-							.queryContactByUserId(cmd.getCompanyId(),
+							.queryContactByUserId(cmd.getEnterpriseId(),
 									dto.getUserId());
 
 					dto.setUserName(enterpriseContact.getName());
@@ -1261,7 +1254,7 @@ public class PunchServiceImpl implements PunchService {
 					if (null != dto.getOperatorUid()
 							&& 0 != dto.getOperatorUid()) {
 						enterpriseContact = enterpriseContactService
-								.queryContactByUserId(cmd.getCompanyId(),
+								.queryContactByUserId(cmd.getEnterpriseId(),
 										dto.getOperatorUid());
 
 						dto.setOperatorName(enterpriseContact.getName());
@@ -1292,11 +1285,11 @@ public class PunchServiceImpl implements PunchService {
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid company Id parameter in the command");
 		}
-		checkCompanyIdIsNull(cmd.getCompanyId());
+		checkCompanyIdIsNull(cmd.getEnterpriseId());
 		ListPunchExceptionRequestCommandResponse response = new ListPunchExceptionRequestCommandResponse();
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
 		int totalCount = punchProvider.countExceptionRequests(cmd.getUserId(),
-				null, cmd.getCompanyId(), cmd.getPunchDate(),
+				null, cmd.getEnterpriseId(), cmd.getPunchDate(),
 				cmd.getPunchDate(), null, null,
 				PunchRquestType.APPROVAL.getCode());
 		if (totalCount == 0)
@@ -1307,7 +1300,7 @@ public class PunchServiceImpl implements PunchService {
 
 		List<PunchExceptionRequest> result = punchProvider
 				.listExceptionRequests(cmd.getUserId(), null,
-						cmd.getCompanyId(), cmd.getPunchDate(),
+						cmd.getEnterpriseId(), cmd.getPunchDate(),
 						cmd.getPunchDate(), null, null, cmd.getPageOffset(),
 						pageSize, PunchRquestType.APPROVAL.getCode());
 		response.setExceptionRequestList(result
@@ -1316,7 +1309,7 @@ public class PunchServiceImpl implements PunchService {
 					PunchExceptionRequestDTO dto = ConvertHelper.convert(r,
 							PunchExceptionRequestDTO.class);
 					EnterpriseContact enterpriseContact = enterpriseContactService
-							.queryContactByUserId(cmd.getCompanyId(),
+							.queryContactByUserId(cmd.getEnterpriseId(),
 									dto.getUserId());
 
 					dto.setUserName(enterpriseContact.getName());
@@ -1340,10 +1333,10 @@ public class PunchServiceImpl implements PunchService {
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid company Id parameter in the command");
 		}
-		checkCompanyIdIsNull(cmd.getCompanyId());
+		checkCompanyIdIsNull(cmd.getEnterpriseId());
 		// 插入一条eh_punch_exception_requests 记录
 		PunchExceptionRequest punchExceptionRequest = new PunchExceptionRequest();
-		punchExceptionRequest.setEnterpriseId(cmd.getCompanyId());
+		punchExceptionRequest.setEnterpriseId(cmd.getEnterpriseId());
 		punchExceptionRequest
 				.setRequestType(PunchRquestType.APPROVAL.getCode());
 		punchExceptionRequest.setProcessCode(cmd.getProcessCode());
@@ -1363,12 +1356,12 @@ public class PunchServiceImpl implements PunchService {
 		// 查eh_punch_exception_approvals有无数据：无数据，结果是同意则插入 /有数据 如果结果是同意
 		// 则修改，结果是驳回则删除
 		PunchExceptionApproval punchExceptionApproval = punchProvider
-				.getExceptionApproval(cmd.getUserId(), cmd.getCompanyId(),
+				.getExceptionApproval(cmd.getUserId(), cmd.getEnterpriseId(),
 						java.sql.Date.valueOf(cmd.getPunchDate()));
 		if (null == punchExceptionApproval) {
 			if (cmd.getStatus().equals(ExceptionProcessStatus.ACTIVE.getCode())) {
 				punchExceptionApproval = new PunchExceptionApproval();
-				punchExceptionApproval.setEnterpriseId(cmd.getCompanyId());
+				punchExceptionApproval.setEnterpriseId(cmd.getEnterpriseId());
 				punchExceptionApproval.setApprovalStatus(cmd.getProcessCode());
 				punchExceptionApproval.setUserId(cmd.getUserId());
 				punchExceptionApproval.setCreatorUid(cmd.getCreatorUid());
@@ -1385,7 +1378,7 @@ public class PunchServiceImpl implements PunchService {
 			}
 		} else {
 			if (cmd.getStatus().equals(ExceptionProcessStatus.ACTIVE.getCode())) {
-				punchExceptionApproval.setEnterpriseId(cmd.getCompanyId());
+				punchExceptionApproval.setEnterpriseId(cmd.getEnterpriseId());
 				punchExceptionApproval.setApprovalStatus(cmd.getProcessCode());
 				punchExceptionApproval.setUserId(cmd.getUserId());
 				punchExceptionApproval.setCreatorUid(cmd.getCreatorUid());
@@ -1408,7 +1401,7 @@ public class PunchServiceImpl implements PunchService {
 		// 更新eh_punch_exception_requests当天当人的申请记录
 		List<PunchExceptionRequest> results = punchProvider
 				.listExceptionRequests(cmd.getUserId(), null,
-						cmd.getCompanyId(), cmd.getPunchDate(),
+						cmd.getEnterpriseId(), cmd.getPunchDate(),
 						cmd.getPunchDate(), null, null, 1, 999999,
 						PunchRquestType.REQUEST.getCode());
 		for (PunchExceptionRequest result : results) {
@@ -1427,7 +1420,7 @@ public class PunchServiceImpl implements PunchService {
 	@Override
 	public ListPunchStatisticsCommandResponse listPunchStatistics(
 			ListPunchStatisticsCommand cmd) {
-		checkCompanyIdIsNull(cmd.getCompanyId());
+		checkCompanyIdIsNull(cmd.getEnterpriseId());
 		ListPunchStatisticsCommandResponse response = new ListPunchStatisticsCommandResponse();
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
 		List<EnterpriseContact> enterpriseContacts = enterpriseContactProvider
@@ -1438,7 +1431,7 @@ public class PunchServiceImpl implements PunchService {
 		}
 
 		int totalCount = punchProvider.countPunchDayLogs(userIds,
-				cmd.getCompanyId(), cmd.getStartDay(), cmd.getEndDay(),
+				cmd.getEnterpriseId(), cmd.getStartDay(), cmd.getEndDay(),
 				cmd.getArriveTimeCompareFlag(), cmd.getArriveTime(),
 				cmd.getLeaveTimeCompareFlag(), cmd.getLeaveTime(),
 				cmd.getWorkTimeCompareFlag(), cmd.getWorkTime(),
@@ -1451,7 +1444,7 @@ public class PunchServiceImpl implements PunchService {
 		int pageCount = getPageCount(totalCount, pageSize);
 
 		List<PunchDayLog> result = punchProvider.listPunchDayLogs(userIds,
-				cmd.getCompanyId(), cmd.getStartDay(), cmd.getEndDay(),
+				cmd.getEnterpriseId(), cmd.getStartDay(), cmd.getEndDay(),
 				cmd.getStatus(), cmd.getArriveTimeCompareFlag(),
 				cmd.getArriveTime(), cmd.getLeaveTimeCompareFlag(),
 				cmd.getLeaveTime(), cmd.getWorkTimeCompareFlag(),
@@ -1464,7 +1457,7 @@ public class PunchServiceImpl implements PunchService {
 					processPunchStatisticsDTOTime(dto, r);
 					if (dto != null) {
 						EnterpriseContact enterpriseContact = enterpriseContactService
-								.queryContactByUserId(cmd.getCompanyId(),
+								.queryContactByUserId(cmd.getEnterpriseId(),
 										dto.getUserId());
 						if (null != enterpriseContact) {
 
@@ -1477,14 +1470,16 @@ public class PunchServiceImpl implements PunchService {
 							// dto.setUserDepartment(enterpriseContact.get);
 							PunchExceptionApproval approval = punchProvider
 									.getExceptionApproval(dto.getUserId(),
-											dto.getCompanyId(),
+											dto.getEnterpriseId(),
 											dto.getPunchDate());
 							if (approval != null) {
 								dto.setApprovalStatus(approval
 										.getApprovalStatus());
+								dto.setMorningApprovalStatus(approval.getMorningApprovalStatus());
+								dto.setAfternoonApprovalStatus(approval.getAfternoonApprovalStatus());
 								enterpriseContact = enterpriseContactService
 										.queryContactByUserId(
-												cmd.getCompanyId(),
+												cmd.getEnterpriseId(),
 												approval.getOperatorUid());
 
 								dto.setOperatorName(enterpriseContact.getName());
@@ -1541,7 +1536,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	@Override
-	public PunchLogsDayList getDayPunchLogs(GetDayPunchLogsCommand cmd) {
+	public PunchLogsDay getDayPunchLogs(GetDayPunchLogsCommand cmd) {
 		Long userId = UserContext.current().getUser().getId();
 		checkCompanyIdIsNull(cmd.getEnterpirseId());
 		Calendar logDay = Calendar.getInstance();
@@ -1558,7 +1553,7 @@ public class PunchServiceImpl implements PunchService {
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid queryDate parameter in the command");
 		}
-		PunchLogsDayList pdl = makePunchLogsDayListInfo(userId,
+		PunchLogsDay pdl = makePunchLogsDayListInfo(userId,
 				cmd.getEnterpirseId(), logDay);
 		punchProvider.viewDateFlags(userId, cmd.getEnterpirseId(),
 				dateSF.format(logDay.getTime()));
@@ -1574,7 +1569,7 @@ public class PunchServiceImpl implements PunchService {
 		Integer workDayCount = countWorkDayCount(cmd.getStartDay(),
 				cmd.getEndDay());
 		List<PunchDayLogDTO> punchDayLogDTOList = punchProvider
-				.listPunchDayLogs(cmd.getCompanyId(), cmd.getStartDay(),
+				.listPunchDayLogs(cmd.getEnterpriseId(), cmd.getStartDay(),
 						cmd.getEndDay());
 		Map<Long, List<PunchDayLogDTO>> map = buildUserPunchCountMap(punchDayLogDTOList);
 
@@ -1583,7 +1578,7 @@ public class PunchServiceImpl implements PunchService {
 			PunchCountDTO dto = new PunchCountDTO();
 			dto.setUserId(userId);
 			EnterpriseContact enterpriseContact = enterpriseContactService
-					.queryContactByUserId(cmd.getCompanyId(), dto.getUserId());
+					.queryContactByUserId(cmd.getEnterpriseId(), dto.getUserId());
 			if (null == enterpriseContact)
 				continue;
 			dto.setUserName(enterpriseContact.getName());
@@ -1768,7 +1763,7 @@ public class PunchServiceImpl implements PunchService {
 			ExportPunchStatisticsCommand cmd ,HttpServletResponse response 
 			) { 
 		
-		checkCompanyIdIsNull(cmd.getCompanyId());
+		checkCompanyIdIsNull(cmd.getEnterpriseId());
 		
 		List<EnterpriseContact> enterpriseContacts = enterpriseContactProvider
 				.queryEnterpriseContactByKeyword(cmd.getKeyword());
@@ -1779,7 +1774,7 @@ public class PunchServiceImpl implements PunchService {
 
 		
 		List<PunchDayLog> result = punchProvider.listPunchDayLogs(userIds,
-				cmd.getCompanyId(), cmd.getStartDay(), cmd.getEndDay(),
+				cmd.getEnterpriseId(), cmd.getStartDay(), cmd.getEndDay(),
 				cmd.getStatus(), cmd.getArriveTimeCompareFlag(),
 				cmd.getArriveTime(), cmd.getLeaveTimeCompareFlag(),
 				cmd.getLeaveTime(), cmd.getWorkTimeCompareFlag(),
@@ -1794,7 +1789,7 @@ public class PunchServiceImpl implements PunchService {
 					processPunchStatisticsDTOTime(dto, r);
 					if (dto != null) {
 						EnterpriseContact enterpriseContact = enterpriseContactService
-								.queryContactByUserId(cmd.getCompanyId(),
+								.queryContactByUserId(cmd.getEnterpriseId(),
 										dto.getUserId());
 						if (null != enterpriseContact) {
 
@@ -1807,14 +1802,14 @@ public class PunchServiceImpl implements PunchService {
 							// dto.setUserDepartment(enterpriseContact.get);
 							PunchExceptionApproval approval = punchProvider
 									.getExceptionApproval(dto.getUserId(),
-											dto.getCompanyId(),
+											dto.getEnterpriseId(),
 											dto.getPunchDate());
 							if (approval != null) {
 								dto.setApprovalStatus(approval
 										.getApprovalStatus());
 								enterpriseContact = enterpriseContactService
 										.queryContactByUserId(
-												cmd.getCompanyId(),
+												cmd.getEnterpriseId(),
 												approval.getOperatorUid());
 
 								dto.setOperatorName(enterpriseContact.getName());

@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>PunchLogs: 打卡记录list</li>
  * </ul>
  */
-public class PunchLogsDayList{
+public class PunchLogsDay{
  
 
     private String punchDay;
@@ -27,9 +27,9 @@ public class PunchLogsDayList{
     private Byte exceptionStatus ;
 	private java.lang.Byte     punchTimesPerDay;
     @ItemType(PunchLogDTO.class)
-    private List<PunchLogDTO> PunchLogs;
+    private List<PunchLogDTO> punchLogs;
     @ItemType(PunchExceptionDTO.class)
-    private List<PunchExceptionDTO> PunchExceptionDTOs;
+    private List<PunchExceptionDTO> punchExceptionDTOs;
     
     
  
@@ -82,19 +82,7 @@ public class PunchLogsDayList{
 		this.afternoonApprovalStatus = afternoonApprovalStatus;
 	}
 
-
-
-	public List<PunchLogDTO> getPunchLogs() {
-		return PunchLogs;
-	}
-
-
-
-	public void setPunchLogs(List<PunchLogDTO> punchLogs) {
-		PunchLogs = punchLogs;
-	}
-
-	 
+ 
 
     @Override
     public String toString() {
@@ -150,17 +138,7 @@ public class PunchLogsDayList{
 	}
 
 
-
-	public List<PunchExceptionDTO> getPunchExceptionDTOs() {
-		return PunchExceptionDTOs;
-	}
-
-
-
-	public void setPunchExceptionDTOs(List<PunchExceptionDTO> punchExceptionDTOs) {
-		PunchExceptionDTOs = punchExceptionDTOs;
-	}
-
+ 
 
 
 	public java.lang.Byte getPunchTimesPerDay() {
@@ -171,6 +149,30 @@ public class PunchLogsDayList{
 
 	public void setPunchTimesPerDay(java.lang.Byte punchTimesPerDay) {
 		this.punchTimesPerDay = punchTimesPerDay;
+	}
+
+
+
+	public List<PunchExceptionDTO> getPunchExceptionDTOs() {
+		return punchExceptionDTOs;
+	}
+
+
+
+	public void setPunchExceptionDTOs(List<PunchExceptionDTO> punchExceptionDTOs) {
+		this.punchExceptionDTOs = punchExceptionDTOs;
+	}
+
+
+
+	public List<PunchLogDTO> getPunchLogs() {
+		return punchLogs;
+	}
+
+
+
+	public void setPunchLogs(List<PunchLogDTO> punchLogs) {
+		this.punchLogs = punchLogs;
 	}
 
 

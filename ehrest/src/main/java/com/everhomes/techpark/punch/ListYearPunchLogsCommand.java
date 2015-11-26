@@ -10,15 +10,9 @@ import com.everhomes.util.StringHelper;
  */
 public class ListYearPunchLogsCommand {
  
-    private Long companyId; 
+    private Long enterpriseId; 
     private String queryYear;
-     public Long getCompanyId() {
-         return companyId;
-     }
-
-     public void setCompanyId(Long companyId) {
-         this.companyId = companyId;
-     }
+     
 
      @Override
      public String toString() {
@@ -31,6 +25,14 @@ public class ListYearPunchLogsCommand {
 
 	public void setQueryYear(String queryYear) {
 		this.queryYear = queryYear;
+	}
+
+	public Long getEnterpriseId() {
+		return enterpriseId;
+	}
+
+	public void setEnterpriseId(Long enterpriseId) {
+		this.enterpriseId = enterpriseId;
 	}
  
 

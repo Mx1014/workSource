@@ -16,19 +16,19 @@ public class PunchLogsMonthList{
  
 
     private String punchMonth; 
-    @ItemType(PunchLogsDayList.class)
-    private List<PunchLogsDayList> punchLogsDayList;
+    @ItemType(PunchLogsDay.class)
+    private List<PunchLogsDay> punchLogsDayList;
  
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
  
-	public List<PunchLogsDayList> getPunchLogsDayList() {
+	public List<PunchLogsDay> getPunchLogsDayList() {
 		return punchLogsDayList;
 	}
 
-	public void setPunchLogsDayListInfos(List<PunchLogsDayList> punchLogsDayList) {
+	public void setPunchLogsDayListInfos(List<PunchLogsDay> punchLogsDayList) {
 		this.punchLogsDayList = punchLogsDayList;
 	}
 

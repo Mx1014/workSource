@@ -30,16 +30,108 @@ public class PunchStatisticsDTO{
 	private String     userName;
 	private String userDepartment;
 	private String     userPhoneNumber;
-	private Long     companyId;
+	private Long     enterpriseId;
 	private Date     punchDate;
 	private String      arriveTime;
+	private java.sql.Time      noonLeaveTime;
+	private java.sql.Time      afternoonArriveTime;
 	private String      leaveTime;
 	private String      workTime;
 	private Byte     status;
+	private java.lang.Byte     morningStatus;
+	private java.lang.Byte     afternoonStatus;
 	private Long     creatorUid;
 	private Timestamp createTime;
 	private String     operatorName;
 	private Byte     approvalStatus;
+	private java.lang.Byte     morningApprovalStatus;
+	private java.lang.Byte     afternoonApprovalStatus;
+	private java.lang.Byte     viewFlag;
+	private java.lang.Byte     punchTimesPerDay;
+	
+	
+	
+	
+	public java.lang.Byte getMorningApprovalStatus() {
+		return morningApprovalStatus;
+	}
+
+
+	public void setMorningApprovalStatus(java.lang.Byte morningApprovalStatus) {
+		this.morningApprovalStatus = morningApprovalStatus;
+	}
+
+
+	public java.lang.Byte getAfternoonApprovalStatus() {
+		return afternoonApprovalStatus;
+	}
+
+
+	public void setAfternoonApprovalStatus(java.lang.Byte afternoonApprovalStatus) {
+		this.afternoonApprovalStatus = afternoonApprovalStatus;
+	}
+
+
+	public java.sql.Time getNoonLeaveTime() {
+		return noonLeaveTime;
+	}
+
+
+	public void setNoonLeaveTime(java.sql.Time noonLeaveTime) {
+		this.noonLeaveTime = noonLeaveTime;
+	}
+
+
+	public java.sql.Time getAfternoonArriveTime() {
+		return afternoonArriveTime;
+	}
+
+
+	public void setAfternoonArriveTime(java.sql.Time afternoonArriveTime) {
+		this.afternoonArriveTime = afternoonArriveTime;
+	}
+
+
+	public java.lang.Byte getMorningStatus() {
+		return morningStatus;
+	}
+
+
+	public void setMorningStatus(java.lang.Byte morningStatus) {
+		this.morningStatus = morningStatus;
+	}
+
+
+	public java.lang.Byte getAfternoonStatus() {
+		return afternoonStatus;
+	}
+
+
+	public void setAfternoonStatus(java.lang.Byte afternoonStatus) {
+		this.afternoonStatus = afternoonStatus;
+	}
+
+
+	public java.lang.Byte getViewFlag() {
+		return viewFlag;
+	}
+
+
+	public void setViewFlag(java.lang.Byte viewFlag) {
+		this.viewFlag = viewFlag;
+	}
+
+
+	public java.lang.Byte getPunchTimesPerDay() {
+		return punchTimesPerDay;
+	}
+
+
+	public void setPunchTimesPerDay(java.lang.Byte punchTimesPerDay) {
+		this.punchTimesPerDay = punchTimesPerDay;
+	}
+
+
 	public Long getId() {
 		return id;
 	}
@@ -69,17 +161,7 @@ public class PunchStatisticsDTO{
 		this.userName = userName;
 	}
 
-
-	public Long getCompanyId() {
-		return companyId;
-	}
-
-
-	public void setCompanyId(Long companyId) {
-		this.companyId = companyId;
-	}
-
-
+ 
 	public Date getPunchDate() {
 		return punchDate;
 	}
@@ -195,6 +277,16 @@ public class PunchStatisticsDTO{
 
 	public void setUserPhoneNumber(String userPhoneNumber) {
 		this.userPhoneNumber = userPhoneNumber;
+	}
+
+
+	public Long getEnterpriseId() {
+		return enterpriseId;
+	}
+
+
+	public void setEnterpriseId(Long enterpriseId) {
+		this.enterpriseId = enterpriseId;
 	}
 
 
