@@ -9,6 +9,8 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.techpark.onlinePay.OnlinePayBillCommand;
+import com.everhomes.techpark.onlinePay.OnlinePayService;
 import com.everhomes.techpark.park.RechargeInfoDTO;
 
 @RestDoc(value = "OnlinePay controller", site = "ehcore")

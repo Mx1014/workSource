@@ -391,6 +391,8 @@ CREATE TABLE `eh_enterprise_details` (
 
 CREATE TABLE `eh_enterprise_op_requests` ( 
 	`id` BIGINT NOT NULL COMMENT 'id of the record', 
+    `namespace_id` INTEGER NOT NULL DEFAULT 0,
+    `community_id` BIGINT NOT NULL DEFAULT 0,
     `source_type` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'enterprise, marker zone',
     `source_id` BIGINT NOT NULL DEFAULT 0,
 	`enterprise_name` VARCHAR(128) NOT NULL COMMENT 'enterprise name', 

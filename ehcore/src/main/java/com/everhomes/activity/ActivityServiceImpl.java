@@ -143,6 +143,9 @@ public class ActivityServiceImpl implements ActivityService {
         activity.setNamespaceId(0);
         activity.setCreatorUid(user.getId());
         activity.setGroupDiscriminator(EntityType.ACTIVITY.getCode());
+        Integer namespaceId = (cmd.getNamespaceId() == null) ? 0 : cmd.getNamespaceId();
+        activity.setNamespaceId(namespaceId);
+        activity.setGuest(cmd.getGuest());
         
         // avoid nullpoint
         activity.setCheckinAttendeeCount(0);
@@ -1188,6 +1191,63 @@ public class ActivityServiceImpl implements ActivityService {
             dto.setGroupId(activity.getGroupId());
             dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
             dto.setForumId(post.getForumId());
+            return dto;
+        }).filter(r->r!=null).collect(Collectors.toList());
+        if(activityDtos.size()<value){
+            locator.setAnchor(null);
+        }
+        return new Tuple<Long, List<ActivityDTO>>(locator.getAnchor(), activityDtos);
+	}
+	
+	@Override
+	public Tuple<Long, List<ActivityDTO>> listActivitiesByNamespaceIdAndTag(
+			ListActivitiesByNamespaceIdAndTagCommand cmd) {
+		 
+		CrossShardListingLocator locator=new CrossShardListingLocator();
+		
+        if(null !=cmd.getAnchor()){
+            locator.setAnchor(cmd.getAnchor());
+        }
+        Condition condtion = Tables.EH_ACTIVITIES.NAMESPACE_ID.eq(cmd.getNamespaceId());
+        
+        if(!StringUtils.isEmpty(cmd.getTag())){
+            condtion= condtion.and(Tables.EH_ACTIVITIES.TAG.eq(cmd.getTag()));
+        }
+
+        int value=configurationProvider.getIntValue("pagination.page.size", AppConstants.PAGINATION_DEFAULT_SIZE);
+        
+        List<Activity> ret = activityProvider.listActivities(locator, value+1,condtion,Operator.OR, null);
+        
+        List<ActivityDTO> activityDtos = ret.stream().map(activity->{
+            Post post = forumProvider.findPostById(activity.getPostId());
+            if(post==null){
+                return null;
+            }
+            if(activity.getPosterUri()==null){
+            	this.forumProvider.populatePostAttachments(post);
+            	List<Attachment> attachmentList = post.getAttachments();
+            	if(attachmentList != null && attachmentList.size() != 0){
+            		for(Attachment attachment : attachmentList){
+            			if(PostContentType.IMAGE.getCode().equals(attachment.getContentType()))
+            				activity.setPosterUri(attachment.getContentUri());
+            			break;
+            		}
+            	}
+            }
+            ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+            dto.setActivityId(activity.getId());
+            dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
+            dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+            dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
+            dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
+            dto.setProcessStatus(getStatus(activity).getCode());
+            dto.setFamilyId(activity.getCreatorFamilyId());
+            dto.setStartTime(activity.getStartTime().toString());
+            dto.setStopTime(activity.getEndTime().toString());
+            dto.setGroupId(activity.getGroupId());
+            dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
+            dto.setForumId(post.getForumId());
+            dto.setGuest(activity.getGuest());
             return dto;
         }).filter(r->r!=null).collect(Collectors.toList());
         if(activityDtos.size()<value){

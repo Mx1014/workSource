@@ -11,9 +11,11 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhEnterpriseOpRequests implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1010225565;
+	private static final long serialVersionUID = -840154723;
 
 	private java.lang.Long     id;
+	private java.lang.Integer  namespaceId;
+	private java.lang.Long     communityId;
 	private java.lang.String   sourceType;
 	private java.lang.Long     sourceId;
 	private java.lang.String   enterpriseName;
@@ -35,6 +37,8 @@ public class EhEnterpriseOpRequests implements java.io.Serializable {
 
 	public EhEnterpriseOpRequests(
 		java.lang.Long     id,
+		java.lang.Integer  namespaceId,
+		java.lang.Long     communityId,
 		java.lang.String   sourceType,
 		java.lang.Long     sourceId,
 		java.lang.String   enterpriseName,
@@ -53,6 +57,8 @@ public class EhEnterpriseOpRequests implements java.io.Serializable {
 		java.sql.Timestamp processTime
 	) {
 		this.id = id;
+		this.namespaceId = namespaceId;
+		this.communityId = communityId;
 		this.sourceType = sourceType;
 		this.sourceId = sourceId;
 		this.enterpriseName = enterpriseName;
@@ -77,6 +83,22 @@ public class EhEnterpriseOpRequests implements java.io.Serializable {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
+	}
+
+	public java.lang.Integer getNamespaceId() {
+		return this.namespaceId;
+	}
+
+	public void setNamespaceId(java.lang.Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public java.lang.Long getCommunityId() {
+		return this.communityId;
+	}
+
+	public void setCommunityId(java.lang.Long communityId) {
+		this.communityId = communityId;
 	}
 
 	public java.lang.String getSourceType() {
