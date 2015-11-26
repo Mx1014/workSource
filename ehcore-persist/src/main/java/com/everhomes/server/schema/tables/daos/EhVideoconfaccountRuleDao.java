@@ -71,7 +71,7 @@ public class EhVideoconfaccountRuleDao extends org.jooq.impl.DAOImpl<com.everhom
 	/**
 	 * Fetch records that have <code>package_price IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhVideoconfaccountRule> fetchByPackagePrice(java.lang.Long... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhVideoconfaccountRule> fetchByPackagePrice(java.math.BigDecimal... values) {
 		return fetch(com.everhomes.server.schema.tables.EhVideoconfaccountRule.EH_VIDEOCONFACCOUNT_RULE.PACKAGE_PRICE, values);
 	}
 }

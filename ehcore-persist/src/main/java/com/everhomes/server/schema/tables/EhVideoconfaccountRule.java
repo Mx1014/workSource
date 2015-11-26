@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhVideoconfaccountRule extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhVideoconfaccountRuleRecord> {
 
-	private static final long serialVersionUID = -878845800;
+	private static final long serialVersionUID = 1962621183;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_videoconfaccount_rule</code>
@@ -49,7 +49,7 @@ public class EhVideoconfaccountRule extends org.jooq.impl.TableImpl<com.everhome
 	/**
 	 * The column <code>ehcore.eh_videoconfaccount_rule.package_price</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhVideoconfaccountRuleRecord, java.lang.Long> PACKAGE_PRICE = createField("package_price", org.jooq.impl.SQLDataType.BIGINT, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhVideoconfaccountRuleRecord, java.math.BigDecimal> PACKAGE_PRICE = createField("package_price", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_videoconfaccount_rule</code> table reference

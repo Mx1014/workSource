@@ -11,22 +11,22 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhVideoconfaccountRule implements java.io.Serializable {
 
-	private static final long serialVersionUID = -355655825;
+	private static final long serialVersionUID = 596348065;
 
-	private java.lang.Long    id;
-	private java.lang.Byte    accountType;
-	private java.lang.Byte    confTpye;
-	private java.lang.Integer minimumMonths;
-	private java.lang.Long    packagePrice;
+	private java.lang.Long       id;
+	private java.lang.Byte       accountType;
+	private java.lang.Byte       confTpye;
+	private java.lang.Integer    minimumMonths;
+	private java.math.BigDecimal packagePrice;
 
 	public EhVideoconfaccountRule() {}
 
 	public EhVideoconfaccountRule(
-		java.lang.Long    id,
-		java.lang.Byte    accountType,
-		java.lang.Byte    confTpye,
-		java.lang.Integer minimumMonths,
-		java.lang.Long    packagePrice
+		java.lang.Long       id,
+		java.lang.Byte       accountType,
+		java.lang.Byte       confTpye,
+		java.lang.Integer    minimumMonths,
+		java.math.BigDecimal packagePrice
 	) {
 		this.id = id;
 		this.accountType = accountType;
@@ -67,11 +67,11 @@ public class EhVideoconfaccountRule implements java.io.Serializable {
 		this.minimumMonths = minimumMonths;
 	}
 
-	public java.lang.Long getPackagePrice() {
+	public java.math.BigDecimal getPackagePrice() {
 		return this.packagePrice;
 	}
 
-	public void setPackagePrice(java.lang.Long packagePrice) {
+	public void setPackagePrice(java.math.BigDecimal packagePrice) {
 		this.packagePrice = packagePrice;
 	}
 }

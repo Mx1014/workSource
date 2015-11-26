@@ -465,7 +465,7 @@ CREATE TABLE `eh_videoconfaccount_rule` (
   `account_type` TINYINT COMMENT '0-single 1-multiple',
   `conf_tpye` TINYINT COMMENT '0-25方仅视频 1-25方支持电话 2-100方仅视频 3-100方支持电话',
   `minimum_months` INT,
-  `package_price` DECIMAL,
+  `package_price` DECIMAL(10,2),
   PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
  
