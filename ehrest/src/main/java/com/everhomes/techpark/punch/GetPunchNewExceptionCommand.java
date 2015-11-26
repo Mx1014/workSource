@@ -1,5 +1,7 @@
 package com.everhomes.techpark.punch;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 
@@ -9,21 +11,22 @@ import com.everhomes.util.StringHelper;
 * </ul>
 */
 public class GetPunchNewExceptionCommand {
- 
-    private Long companyId; 
-    
-     public Long getCompanyId() {
-         return companyId;
-     }
 
-     public void setCompanyId(Long companyId) {
-         this.companyId = companyId;
-     }
-
+	@NotNull
+	private Long     enterpriseId;
+     
      @Override
      public String toString() {
          return StringHelper.toJsonString(this);
      }
+
+	public Long getEnterpriseId() {
+		return enterpriseId;
+	}
+
+	public void setEnterpriseId(Long enterpriseId) {
+		this.enterpriseId = enterpriseId;
+	}
  
 
  }

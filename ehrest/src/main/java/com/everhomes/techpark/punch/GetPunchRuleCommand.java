@@ -10,20 +10,22 @@ import com.everhomes.util.StringHelper;
 */
 public class GetPunchRuleCommand {
  
-     private Long companyId;
+     private Long enterpriseId;
     
-    
-     public Long getCompanyId() {
-         return companyId;
-     }
-
-     public void setCompanyId(Long companyId) {
-         this.companyId = companyId;
-     }
-
+     
      @Override
      public String toString() {
          return StringHelper.toJsonString(this);
      }
+
+
+	public Long getEnterpriseId() {
+		return enterpriseId;
+	}
+
+
+	public void setEnterpriseId(Long enterpriseId) {
+		this.enterpriseId = enterpriseId;
+	}
 
  }

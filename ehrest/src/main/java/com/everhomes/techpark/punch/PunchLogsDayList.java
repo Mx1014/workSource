@@ -1,6 +1,5 @@
 package com.everhomes.techpark.punch;
-
-import java.sql.Timestamp;
+ 
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
@@ -20,8 +19,13 @@ public class PunchLogsDayList{
 
     private String punchDay;
     private Byte punchStatus ;
+	private Byte morningPunchStatus;
+	private Byte afternoonPunchStatus;
     private Byte approvalStatus ;
+	private Byte morningApprovalStatus;
+	private Byte afternoonApprovalStatus;
     private Byte exceptionStatus ;
+	private java.lang.Byte     punchTimesPerDay;
     @ItemType(PunchLogDTO.class)
     private List<PunchLogDTO> PunchLogs;
     @ItemType(PunchExceptionDTO.class)
@@ -30,6 +34,54 @@ public class PunchLogsDayList{
     
  
  
+
+
+	public Byte getMorningPunchStatus() {
+		return morningPunchStatus;
+	}
+
+
+
+	public void setMorningPunchStatus(Byte morningPunchStatus) {
+		this.morningPunchStatus = morningPunchStatus;
+	}
+
+
+
+	public Byte getAfternoonPunchStatus() {
+		return afternoonPunchStatus;
+	}
+
+
+
+	public void setAfternoonPunchStatus(Byte afternoonPunchStatus) {
+		this.afternoonPunchStatus = afternoonPunchStatus;
+	}
+
+
+
+	public Byte getMorningApprovalStatus() {
+		return morningApprovalStatus;
+	}
+
+
+
+	public void setMorningApprovalStatus(Byte morningApprovalStatus) {
+		this.morningApprovalStatus = morningApprovalStatus;
+	}
+
+
+
+	public Byte getAfternoonApprovalStatus() {
+		return afternoonApprovalStatus;
+	}
+
+
+
+	public void setAfternoonApprovalStatus(Byte afternoonApprovalStatus) {
+		this.afternoonApprovalStatus = afternoonApprovalStatus;
+	}
+
 
 
 	public List<PunchLogDTO> getPunchLogs() {
@@ -107,6 +159,18 @@ public class PunchLogsDayList{
 
 	public void setPunchExceptionDTOs(List<PunchExceptionDTO> punchExceptionDTOs) {
 		PunchExceptionDTOs = punchExceptionDTOs;
+	}
+
+
+
+	public java.lang.Byte getPunchTimesPerDay() {
+		return punchTimesPerDay;
+	}
+
+
+
+	public void setPunchTimesPerDay(java.lang.Byte punchTimesPerDay) {
+		this.punchTimesPerDay = punchTimesPerDay;
 	}
 
 

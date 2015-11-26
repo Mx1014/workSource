@@ -780,12 +780,18 @@ public class PunchProviderImpl implements PunchProvider {
 			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.between(startDate).and(endDate));
 		}
 		 //不等于正常状态
-			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.STATUS.ne(PunchStatus.NORMAL.getCode()) );
-			condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.VIEW_FLAG.eq(ViewFlags.NOTVIEW.getCode()) );
+		List<Byte> ExceptionStatus = new ArrayList<Byte>();
+		ExceptionStatus.add(PunchStatus.BELATE.getCode());
+		ExceptionStatus.add(PunchStatus.LEAVEEARLY.getCode());
+		ExceptionStatus.add(PunchStatus.BLANDLE.getCode());
+		ExceptionStatus.add(PunchStatus.UNPUNCH.getCode());
+		condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.STATUS.in(ExceptionStatus).or(Tables.EH_PUNCH_DAY_LOGS.MORNING_STATUS.in(ExceptionStatus))
+				.or(Tables.EH_PUNCH_DAY_LOGS.AFTERNOON_STATUS.in(ExceptionStatus)));
+		condition = condition.and(Tables.EH_PUNCH_DAY_LOGS.VIEW_FLAG.eq(ViewFlags.NOTVIEW.getCode()) );
 		 
 		List<EhPunchDayLogsRecord> resultRecord = step.where(condition)
 				.orderBy(Tables.EH_PUNCH_DAY_LOGS.ID.desc()).fetch()
-				.map(new EhPunchDayLogMapper());
+ 				.map(new EhPunchDayLogMapper());
 		
 		List<PunchDayLog> result = resultRecord.stream().map((r) -> {
             return ConvertHelper.convert(r, PunchDayLog.class);

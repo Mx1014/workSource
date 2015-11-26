@@ -2,6 +2,10 @@ package com.everhomes.techpark.punch;
 
 /**
  * <ul>审批后的状态
+ *<li>HALFOUTWORK(13):  半天公出</li>
+ *<li>HALFEXCHANGE(12):  半天调休</li>
+ *<li>HALFABSENCE(11):  半天病假</li>
+ *<li>HALFSICK(10):  半天事假</li>
  *<li>OVERTIME(9):  加班</li>
  *<li>OUTWORK(8):  公出</li>
  * <li>EXCHANGE(7): 调休</li>
@@ -15,6 +19,10 @@ package com.everhomes.techpark.punch;
  * </ul>
  */
 public enum ApprovalStatus { 
+	HALFOUTWORK((byte)13),
+	HALFEXCHANGE((byte)12),
+	HALFABSENCE((byte)11),
+	HALFSICK((byte)10),
 	OVERTIME((byte)9),
 	OUTWORK((byte)8),
 	EXCHANGE((byte)7),

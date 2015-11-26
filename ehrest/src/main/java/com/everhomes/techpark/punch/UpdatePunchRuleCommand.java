@@ -24,7 +24,7 @@ public class UpdatePunchRuleCommand {
 	@NotNull
 	private Long     id;
 	@NotNull
-	private Long     EnterpriseId;
+	private Long     enterpriseId;
 	
 	@NotNull
 	private Long      startEarlyTime;
@@ -54,18 +54,7 @@ public class UpdatePunchRuleCommand {
 		this.id = id;
 	}
 
-
-
-	public Long getEnterpriseId() {
-		return EnterpriseId;
-	}
-
-
-
-	public void setEnterpriseId(Long enterpriseId) {
-		EnterpriseId = enterpriseId;
-	}
-
+ 
 
 
 	public Long getStartEarlyTime() {
@@ -156,4 +145,16 @@ public class UpdatePunchRuleCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+
+
+	public Long getEnterpriseId() {
+		return enterpriseId;
+	}
+
+
+
+	public void setEnterpriseId(Long enterpriseId) {
+		this.enterpriseId = enterpriseId;
+	}
 }

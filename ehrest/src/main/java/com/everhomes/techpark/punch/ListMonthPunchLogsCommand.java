@@ -1,5 +1,7 @@
 package com.everhomes.techpark.punch;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
  /**
@@ -9,17 +11,12 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class ListMonthPunchLogsCommand {
- 
-    private Long companyId; 
+
+	@NotNull
+	private Long     enterpriseId; 
+	@NotNull
     private Long queryTime;
-     public Long getCompanyId() {
-         return companyId;
-     }
-
-     public void setCompanyId(Long companyId) {
-         this.companyId = companyId;
-     }
-
+     
      @Override
      public String toString() {
          return StringHelper.toJsonString(this);
@@ -31,6 +28,14 @@ public class ListMonthPunchLogsCommand {
 
 	public void setQueryTime(Long queryTime) {
 		this.queryTime = queryTime;
+	}
+
+	public Long getEnterpriseId() {
+		return enterpriseId;
+	}
+
+	public void setEnterpriseId(Long enterpriseId) {
+		this.enterpriseId = enterpriseId;
 	}
  
  

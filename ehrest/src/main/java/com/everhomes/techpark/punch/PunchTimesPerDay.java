@@ -6,18 +6,18 @@ package com.everhomes.techpark.punch;
  * </ul>
  */
 public enum PunchTimesPerDay {
-    TWICE(2),FORTH(4);
+    TWICE((byte)2),FORTH((byte)4);
     
-    private Integer code;
-    private PunchTimesPerDay(Integer code) {
+    private Byte code;
+    private PunchTimesPerDay(Byte code) {
         this.code = code;
     }
     
-    public Integer getCode() {
+    public Byte getCode() {
         return this.code;
     }
     
-    public static PunchTimesPerDay fromCode(Integer code) {
+    public static PunchTimesPerDay fromCode(Byte code) {
         for(PunchTimesPerDay t : PunchTimesPerDay.values()) {
             if (t.code == code) {
                 return t;

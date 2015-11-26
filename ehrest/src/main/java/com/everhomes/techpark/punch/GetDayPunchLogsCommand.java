@@ -10,15 +10,9 @@ import com.everhomes.util.StringHelper;
  */
 public class GetDayPunchLogsCommand {
  
-    private Long companyId; 
+    private Long enterpirseId; 
     private String queryDate;
-     public Long getCompanyId() {
-         return companyId;
-     }
-
-     public void setCompanyId(Long companyId) {
-         this.companyId = companyId;
-     }
+    
 
      @Override
      public String toString() {
@@ -32,6 +26,16 @@ public class GetDayPunchLogsCommand {
 
 	public void setQueryDate(String queryDate) {
 		this.queryDate = queryDate;
+	}
+
+
+	public Long getEnterpirseId() {
+		return enterpirseId;
+	}
+
+
+	public void setEnterpirseId(Long enterpirseId) {
+		this.enterpirseId = enterpirseId;
 	}
  
 

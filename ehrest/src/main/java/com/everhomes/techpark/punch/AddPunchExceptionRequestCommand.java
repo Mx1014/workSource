@@ -11,18 +11,11 @@ import com.everhomes.util.StringHelper;
  */
 public class AddPunchExceptionRequestCommand {
 
-    private Long companyId;
+    private Long enterpriseId;
     private String punchDate;
     private String requestDescription;
  
-
-     public Long getCompanyId() {
-         return companyId;
-     }
-
-     public void setCompanyId(Long companyId) {
-         this.companyId = companyId;
-     }
+ 
 
      @Override
      public String toString() {
@@ -43,6 +36,14 @@ public class AddPunchExceptionRequestCommand {
 
 	public void setRequestDescription(String requestDescription) {
 		this.requestDescription = requestDescription;
+	}
+
+	public Long getEnterpriseId() {
+		return enterpriseId;
+	}
+
+	public void setEnterpriseId(Long enterpriseId) {
+		this.enterpriseId = enterpriseId;
 	}
  
  

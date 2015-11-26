@@ -3,9 +3,11 @@ package com.everhomes.techpark.punch;
 
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -27,99 +29,134 @@ public class PunchRuleDTO {
 	@NotNull
 	private Long     id;
 	@NotNull
-	private Long     companyId;
+	private Long     EnterpriseId;
 	
 	@NotNull
-	private String      startEarlyTime;
+	private Long      startEarlyTime;
 	@NotNull
-	private String      startLateTime;
+	private Long      startLateTime;
 	@NotNull
-	private String      endEarlyTime;
+	private Long      endEarlyTime;
 	@NotNull
-	private String      endLateTime;
-	private Time workTime;
-	private Long     createUid;
-	private Timestamp createTime;
-	private Long     updateUid;
-	private Timestamp updateTime;
+	private Long noonLeaveTime;
+	@NotNull
+	private Long afternoonArriveTime;
 	
-	@NotNull
-	private String      locations;
+	private Byte punchTimesPerDay;
 	
-	public PunchRuleDTO() {
-    }
+	@ItemType(PunchGeoPointDTO.class)
+	private  List<PunchGeoPointDTO>  punchGeoPoints;
+	
+	 
+	 
 	public Long getId() {
 		return id;
 	}
+
+
+
 	public void setId(Long id) {
 		this.id = id;
 	}
-	public Long getCompanyId() {
-		return companyId;
+
+
+
+	public Long getEnterpriseId() {
+		return EnterpriseId;
 	}
-	public void setCompanyId(Long companyId) {
-		this.companyId = companyId;
+
+
+
+	public void setEnterpriseId(Long enterpriseId) {
+		EnterpriseId = enterpriseId;
 	}
-	public String getStartEarlyTime() {
+
+
+
+	public Long getStartEarlyTime() {
 		return startEarlyTime;
 	}
-	public void setStartEarlyTime(String startEarlyTime) {
+
+
+
+	public void setStartEarlyTime(Long startEarlyTime) {
 		this.startEarlyTime = startEarlyTime;
 	}
-	public String getStartLateTime() {
+
+
+
+	public Long getStartLateTime() {
 		return startLateTime;
 	}
-	public void setStartLateTime(String startLateTime) {
+
+
+
+	public void setStartLateTime(Long startLateTime) {
 		this.startLateTime = startLateTime;
 	}
-	public String getEndEarlyTime() {
+
+
+
+	public Long getEndEarlyTime() {
 		return endEarlyTime;
 	}
-	public void setEndEarlyTime(String endEarlyTime) {
+
+
+
+	public void setEndEarlyTime(Long endEarlyTime) {
 		this.endEarlyTime = endEarlyTime;
 	}
-	public String getEndLateTime() {
-		return endLateTime;
+
+
+
+	public Long getNoonLeaveTime() {
+		return noonLeaveTime;
 	}
-	public void setEndLateTime(String endLateTime) {
-		this.endLateTime = endLateTime;
+
+
+
+	public void setNoonLeaveTime(Long noonLeaveTime) {
+		this.noonLeaveTime = noonLeaveTime;
 	}
-	public Time getWorkTime() {
-		return workTime;
+
+
+
+	public Long getAfternoonArriveTime() {
+		return afternoonArriveTime;
 	}
-	public void setWorkTime(Time workTime) {
-		this.workTime = workTime;
+
+
+
+	public void setAfternoonArriveTime(Long afternoonArriveTime) {
+		this.afternoonArriveTime = afternoonArriveTime;
 	}
-	public Long getCreateUid() {
-		return createUid;
+
+
+
+	public Byte getPunchTimesPerDay() {
+		return punchTimesPerDay;
 	}
-	public void setCreateUid(Long createUid) {
-		this.createUid = createUid;
+
+
+
+	public void setPunchTimesPerDay(Byte punchTimesPerDay) {
+		this.punchTimesPerDay = punchTimesPerDay;
 	}
-	public Timestamp getCreateTime() {
-		return createTime;
+
+
+
+	public List<PunchGeoPointDTO> getPunchGeoPoints() {
+		return punchGeoPoints;
 	}
-	public void setCreateTime(Timestamp createTime) {
-		this.createTime = createTime;
+
+
+
+	public void setPunchGeoPoints(List<PunchGeoPointDTO> punchGeoPoints) {
+		this.punchGeoPoints = punchGeoPoints;
 	}
-	public Long getUpdateUid() {
-		return updateUid;
-	}
-	public void setUpdateUid(Long updateUid) {
-		this.updateUid = updateUid;
-	}
-	public Timestamp getUpdateTime() {
-		return updateTime;
-	}
-	public void setUpdateTime(Timestamp updateTime) {
-		this.updateTime = updateTime;
-	}
-	public String getLocations() {
-		return locations;
-	}
-	public void setLocations(String locations) {
-		this.locations = locations;
-	}
+
+
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

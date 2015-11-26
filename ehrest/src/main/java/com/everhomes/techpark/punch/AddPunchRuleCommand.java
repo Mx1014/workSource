@@ -16,17 +16,16 @@ import com.everhomes.util.StringHelper;
  * <li>startEarlyTime：最早上班时间</li>
  * <li>startLateTime：最晚上班时间（如果是硬性工作时间，startLateTime = startEarlyTime）</li>
  * <li>endEarlyTime：最早下班班时间</li>
- * <li>endLateTime：最晚下班时间（如果是硬性工作时间，startLateTime = startEarlyTime）</li>
- * <li>workTime：每天工作时间 ,有由后台处理 (startLateTime - startEarlyTime)</li>
- * <li>locations：打卡地点的json数组</li>
+ * <li>noonLeaveTime：中午下班时间 </li>
+ * <li>afternoonArriveTime： 下午上班时间 </li>
+ * <li>punchTimesPerDay：每天打卡次数，2次或者4次)</li>
+ * <li>punchGeoPoints：打卡地点的的数组</li>
  * </ul>
  */
 public class AddPunchRuleCommand {
-	
+	  
 	@NotNull
-	private Long     id;
-	@NotNull
-	private Long     EnterpriseId;
+	private Long     enterpriseId;
 	
 	@NotNull
 	private Long      startEarlyTime;
@@ -44,30 +43,10 @@ public class AddPunchRuleCommand {
 	@ItemType(PunchGeoPointDTO.class)
 	private  List<PunchGeoPointDTO>  punchGeoPoints;
 	 
-	
-	public Long getId() {
-		return id;
-	}
+	 
 
 
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-
-
-	public Long getEnterpriseId() {
-		return EnterpriseId;
-	}
-
-
-
-	public void setEnterpriseId(Long enterpriseId) {
-		EnterpriseId = enterpriseId;
-	}
-
-
+ 
 
 	public Long getStartEarlyTime() {
 		return startEarlyTime;
@@ -156,5 +135,17 @@ public class AddPunchRuleCommand {
 
 	public void setPunchGeoPoints(List<PunchGeoPointDTO> punchGeoPoints) {
 		this.punchGeoPoints = punchGeoPoints;
+	}
+
+
+
+	public Long getEnterpriseId() {
+		return enterpriseId;
+	}
+
+
+
+	public void setEnterpriseId(Long enterpriseId) {
+		this.enterpriseId = enterpriseId;
 	}
 }
