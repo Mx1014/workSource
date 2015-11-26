@@ -10,6 +10,7 @@ package com.everhomes.pusher;
  *
  */
 public class RecentMessageCommand {
+    private Integer namespaceId;
     private String deviceId;
     private Long anchor;
     private Integer count;
@@ -31,6 +32,13 @@ public class RecentMessageCommand {
     }
     public void setCount(Integer count) {
         this.count = count;
+    }
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+    
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
     
     

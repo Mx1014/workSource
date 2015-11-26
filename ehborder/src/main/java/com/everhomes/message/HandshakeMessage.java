@@ -3,6 +3,7 @@ package com.everhomes.message;
 import java.util.Map;
 
 public class HandshakeMessage {
+//    private Integer namespaceId;
     private String deviceId;
     private String deviceType;
     private Map<String,String> meta;
@@ -25,6 +26,5 @@ public class HandshakeMessage {
     public void setMeta(Map<String, String> meta) {
         this.meta = meta;
     }
-    
     
 }

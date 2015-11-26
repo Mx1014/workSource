@@ -231,13 +231,21 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
             dev.setMeta(pdu.getMeta());
             
             Map<String, String> params = new HashMap<String, String>();
-            params.put("deviceId", pdu.getDeviceId());
+            
+            //Add for name space
+//            if(pdu.getNamespaceId() != null && !pdu.getNamespaceId().equals(0)) {
+//                params.put("namespaceId", pdu.getNamespaceId().toString());
+//                dev.setDeviceId("ns:" + pdu.getNamespaceId() + ":" + dev.getDeviceId());
+//                }
+            
+            params.put("deviceId", dev.getDeviceId());
             params.put("platform", "android");
             params.put("product", "");
             params.put("brand", "");
             params.put("deviceModel", "");
             params.put("systemVersion", "");
             params.put("meta", "{}");
+            
             restCall("pusher/registDevice", params, new ListenableFutureCallback<ResponseEntity<String>> () {
                 @Override
                 public void onSuccess(ResponseEntity<String> result) {
@@ -300,6 +308,10 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
             } else {
                 params.put("count", "10");
                 }
+            
+            if(msgCmd.getNamespaceId() != null && !msgCmd.getNamespaceId().equals(0)) {
+                params.put("namespaceId", msgCmd.getNamespaceId().toString());
+            }
            
             restCall("pusher/recentMessages", params, new ListenableFutureCallback<ResponseEntity<String>> () {
                 @Override
@@ -389,7 +401,7 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
         
         //TODO 推送策略控制 ?
         if(pduServer.getMessageType().equals("UNICAST")) {
-            String deviceId = pduServer.getDeviceId();
+            String deviceId = pduServer.getDeviceId();//already has name space hear.
             WebSocketSession clientSession = device2sessionMap.get(deviceId);
             if (clientSession == null) {
                 LOGGER.warn("unicast deviceId: " + deviceId + " not found");
@@ -413,7 +425,7 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
                }
         }
         
-        pduServer.getNotification();
+        //pduServer.getNotification();
         
     }
     
