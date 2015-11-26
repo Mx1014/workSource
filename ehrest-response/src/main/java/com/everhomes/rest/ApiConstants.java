@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-11-21 15:13:41
+// generated at 2015-11-26 10:23:18
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -9,6 +9,7 @@ public interface ApiConstants {
     public static final String ACTIVITY_CONFIRM_URL = "/activity/confirm";
     public static final String ACTIVITY_FINDACTIVITYDETAILS_URL = "/activity/findActivityDetails";
     public static final String ACTIVITY_LIST_URL = "/activity/list";
+    public static final String ACTIVITY_LISTACTIVITIESBYNAMESPACEIDANDTAG_URL = "/activity/listActivitiesByNamespaceIdAndTag";
     public static final String ACTIVITY_LISTACTIVITIESBYTAG_URL = "/activity/listActivitiesByTag";
     public static final String ACTIVITY_LISTACTIVITYCATEGORIES_URL = "/activity/listActivityCategories";
     public static final String ACTIVITY_LISTCITYACTIVITIES_URL = "/activity/listCityActivities";
@@ -130,14 +131,17 @@ public interface ApiConstants {
     public static final String ADMIN_ORG_DELETEORGANIZATION_URL = "/admin/org/deleteOrganization";
     public static final String ADMIN_ORG_DELETEORGANIZATIONMEMBER_URL = "/admin/org/deleteOrganizationMember";
     public static final String ADMIN_ORG_FINDUSERBYINDENTIFIER_URL = "/admin/org/findUserByIndentifier";
+    public static final String ADMIN_ORG_GETUSERRESOURCEPRIVILEGE_URL = "/admin/org/getUserResourcePrivilege";
     public static final String ADMIN_ORG_IMPORTORGPOST_URL = "/admin/org/importOrgPost";
     public static final String ADMIN_ORG_IMPORTORGANIZATION_URL = "/admin/org/importOrganization";
     public static final String ADMIN_ORG_LISTDEPARTMENTS_URL = "/admin/org/listDepartments";
     public static final String ADMIN_ORG_LISTORGMEMBERS_URL = "/admin/org/listOrgMembers";
     public static final String ADMIN_ORG_LISTORGANIZATIONS_URL = "/admin/org/listOrganizations";
+    public static final String ADMIN_ORG_LISTPARENTORGANIZATIONMEMBERS_URL = "/admin/org/listParentOrganizationMembers";
     public static final String ADMIN_ORG_LISTPMBUILDINGS_URL = "/admin/org/listPmBuildings";
     public static final String ADMIN_ORG_LISTPMMANAGEMENTS_URL = "/admin/org/listPmManagements";
     public static final String ADMIN_ORG_LISTUNASSIGNEDBUILDING_URL = "/admin/org/listUnassignedBuilding";
+    public static final String ADMIN_ORG_UPDATEORGANIZATIONMEMBERBYIDS_URL = "/admin/org/updateOrganizationMemberByIds";
     public static final String ADMIN_PINGBORDER_URL = "/admin/pingBorder";
     public static final String ADMIN_PUSHMESSAGE_CREATEPUSHMESSAGE_URL = "/admin/pushmessage/createPushMessage";
     public static final String ADMIN_PUSHMESSAGE_DELETEPUSHMESSAGE_URL = "/admin/pushmessage/deletePushMessage";
@@ -196,9 +200,7 @@ public interface ApiConstants {
     public static final String CATEGORY_LISTCONTENTCATEGORIES_URL = "/category/listContentCategories";
     public static final String CATEGORY_LISTDESCENDANTS_URL = "/category/listDescendants";
     public static final String CATEGORY_LISTINTERESTCATEGORIES_URL = "/category/listInterestCategories";
-    public static final String CATEGORY_LISTINTERESTCATEGORIESV2_URL = "/category/listInterestCategoriesV2";
     public static final String CATEGORY_LISTROOT_URL = "/category/listRoot";
-    public static final String CATEGORY_LISTROOTV2_URL = "/category/listRootV2";
     public static final String CATEGORY_UPDATECATEGORYLOGOURI_URL = "/category/updateCategoryLogoUri";
     public static final String COMMUNITY_GET_URL = "/community/get";
     public static final String COMMUNITY_GETBUILDING_URL = "/community/getBuilding";
@@ -462,6 +464,11 @@ public interface ApiConstants {
     public static final String REGION_LISTCHILDREN_URL = "/region/listChildren";
     public static final String REGION_LISTDESCENDANTS_URL = "/region/listDescendants";
     public static final String REGION_LISTREGIONBYKEYWORD_URL = "/region/listRegionByKeyword";
+    public static final String TECHPARK_ENTRY_APPLYENTRY_URL = "/techpark/entry/applyEntry";
+    public static final String TECHPARK_ENTRY_APPLYRENEW_URL = "/techpark/entry/applyRenew";
+    public static final String TECHPARK_ENTRY_GETENTERPRISEDETAILBYID_URL = "/techpark/entry/getEnterpriseDetailById";
+    public static final String TECHPARK_ENTRY_LISTAPPLYENTRYS_URL = "/techpark/entry/listApplyEntrys";
+    public static final String TECHPARK_ENTRY_LISTENTERPRISEDETAILS_URL = "/techpark/entry/listEnterpriseDetails";
     public static final String TECHPARK_ONLINEPAY_ONLINEPAYBILL_URL = "/techpark/onlinePay/onlinePayBill";
     public static final String TECHPARK_PARK_APPLYPARKINGCARD_URL = "/techpark/park/applyParkingCard";
     public static final String TECHPARK_PARK_GETRECHARGEDPLATE_URL = "/techpark/park/getRechargedPlate";
