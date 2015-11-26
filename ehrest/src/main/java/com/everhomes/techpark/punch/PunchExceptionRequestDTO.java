@@ -40,6 +40,11 @@ public class PunchExceptionRequestDTO{
 	private Byte     requestType;
 	private String   description;
 	private Byte     status;
+
+	private java.lang.Byte     approvalStatus;
+	private java.lang.Byte     morningApprovalStatus;
+	private java.lang.Byte     afternoonApprovalStatus;
+	
 	private Byte     processCode;
 	private String   processDetails;
 	private Long     creatorUid;
@@ -58,7 +63,37 @@ public class PunchExceptionRequestDTO{
 	private Long    afternoonArriveTime;
 	private java.lang.Byte     punchTimesPerDay;
  
-    public Long getEnterpriseId() {
+    public java.lang.Byte getApprovalStatus() {
+		return approvalStatus;
+	}
+
+
+	public void setApprovalStatus(java.lang.Byte approvalStatus) {
+		this.approvalStatus = approvalStatus;
+	}
+
+
+	public java.lang.Byte getMorningApprovalStatus() {
+		return morningApprovalStatus;
+	}
+
+
+	public void setMorningApprovalStatus(java.lang.Byte morningApprovalStatus) {
+		this.morningApprovalStatus = morningApprovalStatus;
+	}
+
+
+	public java.lang.Byte getAfternoonApprovalStatus() {
+		return afternoonApprovalStatus;
+	}
+
+
+	public void setAfternoonApprovalStatus(java.lang.Byte afternoonApprovalStatus) {
+		this.afternoonApprovalStatus = afternoonApprovalStatus;
+	}
+
+
+	public Long getEnterpriseId() {
 		return enterpriseId;
 	}
 

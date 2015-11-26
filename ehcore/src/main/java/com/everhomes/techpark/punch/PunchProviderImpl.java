@@ -710,7 +710,7 @@ public class PunchProviderImpl implements PunchProvider {
 			Byte workTimeCompareFlag, String workTime, Integer pageOffset,
 			Integer pageSize){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
-		SelectJoinStep<Record>  step = context.select(Tables.EH_PUNCH_DAY_LOGS.fields()).from(Tables.EH_PUNCH_DAY_LOGS);
+		SelectJoinStep<Record>  step = context.select().from(Tables.EH_PUNCH_DAY_LOGS);
 //		step.join(Tables.EH_GROUP_CONTACTS, JoinType.JOIN).connectBy(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_EXCEPTION_REQUESTS.USER_ID));
 //		step.join(Tables.EH_GROUP_CONTACTS).on(Tables.EH_GROUP_CONTACTS.CONTACT_UID.eq(Tables.EH_PUNCH_DAY_LOGS.USER_ID));
 	 
@@ -752,13 +752,19 @@ public class PunchProviderImpl implements PunchProvider {
 		}
 		Integer offset = pageOffset == null ? 0 : (pageOffset - 1 ) * pageSize;
 		step.limit(offset , pageSize);
-		List<EhPunchDayLogsRecord> resultRecord = step.where(condition)
-				.orderBy(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.desc(),Tables.EH_PUNCH_DAY_LOGS.USER_ID.desc()).fetch()
-				.map(new EhPunchDayLogMapper());
-		
-		List<PunchDayLog> result = resultRecord.stream().map((r) -> {
-            return ConvertHelper.convert(r, PunchDayLog.class);
-        }).collect(Collectors.toList());
+//		List<EhPunchDayLogsRecord> resultRecord = step.where(condition)
+//				.orderBy(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.desc(),Tables.EH_PUNCH_DAY_LOGS.USER_ID.desc()).fetch()
+//				.map(new EhPunchDayLogMapper());
+//		
+//		List<PunchDayLog> result = resultRecord.stream().map((r) -> {
+//            return ConvertHelper.convert(r, PunchDayLog.class);
+//        }).collect(Collectors.toList());
+		List<PunchDayLog> result  = new ArrayList<PunchDayLog>();
+		step.where(condition)
+				.orderBy(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.desc(),Tables.EH_PUNCH_DAY_LOGS.USER_ID.desc()).fetch().map((r) -> {
+					result.add( ConvertHelper.convert(r, PunchDayLog.class));
+			 return null;
+		});
 		return result;
 	}
 

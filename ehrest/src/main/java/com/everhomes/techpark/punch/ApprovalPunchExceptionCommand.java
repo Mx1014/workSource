@@ -3,6 +3,8 @@ package com.everhomes.techpark.punch;
 import java.sql.Date;
 import java.sql.Timestamp;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
  /**
@@ -19,14 +21,21 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class ApprovalPunchExceptionCommand{
+	@NotNull
 	private Long     userId;
+	@NotNull
 	private Long     enterpriseId;
+	@NotNull
 	private String     punchDate;
-	private Byte     status;
-	private Byte     processCode;
+	private Byte    status;
+	private java.lang.Byte     morningApprovalStatus;
+	private java.lang.Byte     afternoonApprovalStatus;
+	private Byte     approvalStatus;
 	private String   processDetails;
 	private Long     creatorUid;
 	private Long     operatorUid;
+	@NotNull
+	private java.lang.Byte     punchTimesPerDay;
  
   
 
@@ -44,6 +53,47 @@ public class ApprovalPunchExceptionCommand{
  
  
 
+ 
+
+	public Byte getApprovalStatus() {
+		return approvalStatus;
+	}
+
+
+	public void setApprovalStatus(Byte approvalStatus) {
+		this.approvalStatus = approvalStatus;
+	}
+
+
+	public java.lang.Byte getMorningApprovalStatus() {
+		return morningApprovalStatus;
+	}
+
+
+	public void setMorningApprovalStatus(java.lang.Byte morningApprovalStatus) {
+		this.morningApprovalStatus = morningApprovalStatus;
+	}
+
+
+	public java.lang.Byte getAfternoonApprovalStatus() {
+		return afternoonApprovalStatus;
+	}
+
+
+	public void setAfternoonApprovalStatus(java.lang.Byte afternoonApprovalStatus) {
+		this.afternoonApprovalStatus = afternoonApprovalStatus;
+	}
+
+
+	public java.lang.Byte getPunchTimesPerDay() {
+		return punchTimesPerDay;
+	}
+
+
+	public void setPunchTimesPerDay(java.lang.Byte punchTimesPerDay) {
+		this.punchTimesPerDay = punchTimesPerDay;
+	}
+ 
 
 	public Byte getStatus() {
 		return status;
@@ -52,16 +102,6 @@ public class ApprovalPunchExceptionCommand{
 
 	public void setStatus(Byte status) {
 		this.status = status;
-	}
-
-
-	public Byte getProcessCode() {
-		return processCode;
-	}
-
-
-	public void setProcessCode(Byte processCode) {
-		this.processCode = processCode;
 	}
 
 
