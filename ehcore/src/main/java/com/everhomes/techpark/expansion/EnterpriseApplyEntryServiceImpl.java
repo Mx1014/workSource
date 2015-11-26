@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.entity.EntityType;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -22,6 +24,9 @@ public class EnterpriseApplyEntryServiceImpl implements
 	
 	@Autowired
 	private EnterpriseApplyEntryProvider enterpriseApplyEntryProvider;
+	
+	@Autowired
+	private ContentServerService contentServerService;
 
 	@Override
 	public ListEnterpriseDetailResponse listEnterpriseDetails(
@@ -31,7 +36,7 @@ public class EnterpriseApplyEntryServiceImpl implements
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		Integer offset = cmd.getPageAnchor() == null ? 0 : (cmd.getPageAnchor() - 1 ) * pageSize;
-		List<EnterpriseDetail> enterpriseDetails = enterpriseApplyEntryProvider.listEnterpriseDetails(cmd.getCommunityId(), offset, pageSize + 1);
+		List<EnterpriseDetail> enterpriseDetails = enterpriseApplyEntryProvider.listEnterpriseDetails(cmd.getCommunityId(),cmd.getBuildingName(), offset, pageSize + 1);
 		
 		if(enterpriseDetails != null && enterpriseDetails.size() > pageSize) {
 			enterpriseDetails.remove(enterpriseDetails.size() - 1);
@@ -85,7 +90,8 @@ public class EnterpriseApplyEntryServiceImpl implements
 		request.setApplyType(cmd.getApplyType());
 		request.setEnterpriseName(cmd.getEnterpriseName());
 		request.setEnterpriseId(cmd.getEnterpriseId());
-		request.setApplyContact(cmd.getApplyUserName());
+		request.setApplyUserName(cmd.getApplyUserName());
+		request.setApplyContact(cmd.getContactPhone());
 		request.setApplyUserId(UserContext.current().getUser().getId());
 		request.setDescription(cmd.getDescription());
 		request.setSizeUnit(cmd.getSizeUnit());
@@ -126,6 +132,15 @@ public class EnterpriseApplyEntryServiceImpl implements
 		if(leasePromotions != null && leasePromotions.size() > pageSize) {
 			leasePromotions.remove(leasePromotions.size() - 1);
 			res.setNextPageAnchor(cmd.getPageAnchor() + 1);
+		}
+		for (LeasePromotion leasePromotion : leasePromotions) {
+			List<LeasePromotionAttachment> attachments = leasePromotion.getAttachments();
+			if(null != attachments){
+				for (LeasePromotionAttachment leasePromotionAttachment : attachments) {
+					leasePromotionAttachment.setContentUrl(contentServerService.parserUri(leasePromotionAttachment.getContentUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
+				}
+			}
+				
 		}
 		
 		List<BuildingForRentDTO> dtos = leasePromotions.stream().map((c) ->{

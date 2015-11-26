@@ -1,6 +1,7 @@
 package com.everhomes.techpark.expansion;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 import com.everhomes.util.StringHelper;
 
@@ -16,6 +17,7 @@ public class BuildingForRentDTO {
 	
 	private Timestamp createTime;
 
+	private List<BuildingForRentAttachmentDTO> attachments;
 	
 	
 	public Long getId() {
@@ -74,6 +76,18 @@ public class BuildingForRentDTO {
 
 	public void setCreateTime(Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+
+
+	public List<BuildingForRentAttachmentDTO> getAttachments() {
+		return attachments;
+	}
+
+
+
+	public void setAttachments(List<BuildingForRentAttachmentDTO> attachments) {
+		this.attachments = attachments;
 	}
 
 

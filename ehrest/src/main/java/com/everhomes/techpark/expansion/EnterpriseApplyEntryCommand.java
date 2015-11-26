@@ -17,6 +17,8 @@ public class EnterpriseApplyEntryCommand {
 	
 	private String applyUserName;
 	
+	private String contactPhone;
+	
 	@NotNull
 	private Byte applyType;
 	
@@ -161,6 +163,20 @@ public class EnterpriseApplyEntryCommand {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+
+
+
+
+	public String getContactPhone() {
+		return contactPhone;
+	}
+
+
+
+	public void setContactPhone(String contactPhone) {
+		this.contactPhone = contactPhone;
 	}
 
 

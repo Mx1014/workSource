@@ -6,12 +6,21 @@ public class ListEnterpriseDetailCommand {
    
     private Long communityId;
     
+    private String buildingName;
     
     public Long getCommunityId() {
 		return communityId;
 	}
 	public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
+	}
+	
+	
+	public String getBuildingName() {
+		return buildingName;
+	}
+	public void setBuildingName(String buildingName) {
+		this.buildingName = buildingName;
 	}
 	public Integer getPageAnchor() {
         return pageAnchor;
@@ -25,5 +34,7 @@ public class ListEnterpriseDetailCommand {
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
     }
+    
+    
     
 }
