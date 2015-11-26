@@ -54,6 +54,9 @@ import org.springframework.stereotype.Component;
 
 
 
+
+
+
 import com.bosigao.cxf.Service1;
 import com.bosigao.cxf.Service1Soap;
 import com.everhomes.app.AppConstants;
@@ -653,5 +656,93 @@ public class ParkServiceImpl implements ParkService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"validStatus is null.");
 		}
+	}
+
+	private Integer getPaymentRanking(String orderNo) {
+		
+		Timestamp begin = strToTimestamp("20151215");
+		Long billId = Long.valueOf(orderNo);
+		RechargeInfo rechargeInfo = onlinePayProvider.findRechargeInfoByOrderId(billId);
+		if(rechargeInfo == null) {
+			LOGGER.error("the bill id is not in list.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"the bill id is not in list.");
+		}
+		Timestamp payTime = rechargeInfo.getRechargeTime();
+		
+		int count = parkProvider.getPaymentRanking(payTime, begin);
+		
+		return count;
+	}
+
+	@Override
+	public String rechargeTop100(OnlinePayBillCommand cmd) {
+		RechargeInfoDTO info = onlinePayService.onlinePayBill(cmd);
+		
+		if(cmd.getPayStatus().toLowerCase().equals("fail")) {
+			return "payFailed";
+		}
+		if(cmd.getPayStatus().toLowerCase().equals("success")) {
+			String carNumber = info.getPlateNumber();
+			String cost = (int)(info.getRechargeAmount()*100) +"";
+			String flag = "2"; //停车场系统接口的传入参数，2表示是车牌号
+			String payTime = info.getRechargeTime().toString();
+			String validStart = timestampToStr(info.getOldValidityperiod());
+			String validEnd = timestampToStr(info.getNewValidityperiod());
+			
+			URL wsdlURL = Service1.WSDL_LOCATION;
+			
+			Service1 ss = new Service1(wsdlURL, SERVICE_NAME);
+	        Service1Soap port = ss.getService1Soap12();
+	        LOGGER.info("refreshParkingSystem");
+	        
+	        String json = port.cardPayMoney("", carNumber, flag, cost, validStart, validEnd, payTime, "sign");
+			
+			ResultHolder resultHolder = GsonUtil.fromJson(json, ResultHolder.class);
+			this.checkResultHolderIsNull(resultHolder,carNumber);
+			
+			if(resultHolder.isSuccess()){
+				updateRechargeOrder(Long.valueOf(cmd.getOrderNo()));
+			}
+			
+			int ranking = getPaymentRanking(cmd.getOrderNo());
+			
+			if(ranking <= 100)
+				return "top100";
+			
+		}
+		return "outof100";
+	}
+	
+	@Scheduled(cron="0 0 2 * * ? ")
+	@Override
+	public void refreshRechargeStatus() {
+		LOGGER.info("refresh recharge status.");
+		List<RechargeInfo> rechargeInfo = parkProvider.findPaysuccessAndWaitingrefreshInfo();
+		rechargeInfo.stream().map(info -> {
+			String carNumber = info.getPlateNumber();
+			String cost = (int)(info.getRechargeAmount()*100) +"";
+			String flag = "2"; //停车场系统接口的传入参数，2表示是车牌号
+			String payTime = info.getRechargeTime().toString();
+			String validStart = timestampToStr(info.getOldValidityperiod());
+			String validEnd = timestampToStr(info.getNewValidityperiod());
+			
+			URL wsdlURL = Service1.WSDL_LOCATION;
+			
+			Service1 ss = new Service1(wsdlURL, SERVICE_NAME);
+	        Service1Soap port = ss.getService1Soap12();
+	        LOGGER.info("refreshParkingSystem");
+	        
+	        String json = port.cardPayMoney("", carNumber, flag, cost, validStart, validEnd, payTime, "sign");
+			
+			ResultHolder resultHolder = GsonUtil.fromJson(json, ResultHolder.class);
+			this.checkResultHolderIsNull(resultHolder,carNumber);
+			
+			if(resultHolder.isSuccess()){
+				updateRechargeOrder(info.getBillId());
+			}
+			return null;
+		});
+		
 	}
 }
