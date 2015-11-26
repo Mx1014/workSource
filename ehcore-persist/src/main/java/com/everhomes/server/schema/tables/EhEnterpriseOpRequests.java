@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhEnterpriseOpRequests extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhEnterpriseOpRequestsRecord> {
 
-	private static final long serialVersionUID = 942177232;
+	private static final long serialVersionUID = -1086950307;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_enterprise_op_requests</code>
@@ -74,7 +74,7 @@ public class EhEnterpriseOpRequests extends org.jooq.impl.TableImpl<com.everhome
 	/**
 	 * The column <code>ehcore.eh_enterprise_op_requests.apply_user_name</code>. apply user name
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEnterpriseOpRequestsRecord, java.lang.Long> APPLY_USER_NAME = createField("apply_user_name", org.jooq.impl.SQLDataType.BIGINT, this, "apply user name");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEnterpriseOpRequestsRecord, java.lang.String> APPLY_USER_NAME = createField("apply_user_name", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "apply user name");
 
 	/**
 	 * The column <code>ehcore.eh_enterprise_op_requests.apply_type</code>. apply type 1:apply 2:The expansion of rent 3:Renew

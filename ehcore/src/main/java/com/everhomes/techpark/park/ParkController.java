@@ -170,4 +170,21 @@ public class ParkController extends ControllerBase{
 		return response;
 		
 	}
+	
+
+	/**
+	 * <b>URL: /techpark/park/getPaymentRanking</b>
+	 * @return payFailed; top100; outof100
+	 */
+	@RequestMapping("getPaymentRanking")
+	@RestReturn(value = String.class)
+	public RestResponse getPaymentRanking(OnlinePayBillCommand cmd) {
+		
+		String count = parkService.rechargeTop100(cmd);
+		RestResponse response = new RestResponse(count);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+		
+	}
 }

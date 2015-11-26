@@ -10,6 +10,8 @@ import java.util.Set;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
+import org.jooq.Record1;
+import org.jooq.SelectConditionStep;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -26,6 +28,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhParkApplyCardDao;
 import com.everhomes.server.schema.tables.daos.EhParkChargeDao;
 import com.everhomes.server.schema.tables.pojos.EhAddresses;
+import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhParkApplyCard;
 import com.everhomes.server.schema.tables.pojos.EhParkCharge;
 import com.everhomes.server.schema.tables.pojos.EhRechargeInfo;
@@ -33,6 +36,7 @@ import com.everhomes.server.schema.tables.records.EhParkApplyCardRecord;
 import com.everhomes.server.schema.tables.records.EhParkChargeRecord;
 import com.everhomes.server.schema.tables.records.EhRechargeInfoRecord;
 import com.everhomes.sharding.ShardIterator;
+import com.everhomes.techpark.onlinePay.PayStatus;
 import com.everhomes.techpark.onlinePay.RechargeStatus;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
@@ -166,7 +170,7 @@ public class ParkProviderImpl implements ParkProvider {
 	@Override
 	public int waitingCardCount(Long communityId) {
 		final Integer[] count = new Integer[1];
-		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
+		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
                 (DSLContext context, Object reducingContext)-> {
                     count[0] = context.selectCount().from(Tables.EH_PARK_APPLY_CARD)
                             .where(Tables.EH_PARK_APPLY_CARD.APPLY_STATUS.equal(ApplyParkingCardStatus.WAITING.getCode()))
@@ -447,5 +451,48 @@ public class ParkProviderImpl implements ParkProvider {
 		return plateNumber;
 	}
 
-	
+	@Override
+	public int getPaymentRanking(Timestamp rechargeTime, Timestamp begin) {
+		final Integer[] count = new Integer[1];
+		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhRechargeInfo.class), null, 
+                (DSLContext context, Object reducingContext)-> {
+                	SelectConditionStep<Record1<Integer>> query = context.selectCount().from(Tables.EH_RECHARGE_INFO)
+                            .where(Tables.EH_RECHARGE_INFO.RECHARGE_STATUS.eq(RechargeStatus.SUCCESS.getCode()))
+                            .and(Tables.EH_RECHARGE_INFO.RECHARGE_TIME.between(begin, rechargeTime))
+                            .and(Tables.EH_RECHARGE_INFO.RECHARGE_STATUS.eq(RechargeStatus.SUCCESS.getCode()));
+                    count[0] = query.fetchOneInto(Integer.class);
+                    return true;
+                });
+		return count[0];
+	}
+
+	@Override
+	public List<RechargeInfo> findPaysuccessAndWaitingrefreshInfo() {
+		
+		List<RechargeInfo> rechargeInfo = new ArrayList<RechargeInfo>();
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhRechargeInfo.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+		this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
+			SelectQuery<EhRechargeInfoRecord> query = context.selectQuery(Tables.EH_RECHARGE_INFO);
+			
+			query.addConditions(Tables.EH_RECHARGE_INFO.RECHARGE_STATUS.ne(RechargeStatus.SUCCESS.getCode()));
+			query.addConditions(Tables.EH_RECHARGE_INFO.PAYMENT_STATUS.eq(PayStatus.PAID.getCode()));
+			
+			query.addOrderBy(Tables.EH_RECHARGE_INFO.ID.desc());
+
+			query.fetch().map((r) -> {
+				rechargeInfo.add(ConvertHelper.convert(r, RechargeInfo.class));
+				return null;
+			});
+			
+			
+			return AfterAction.next;
+		});
+		return rechargeInfo;
+	}
+
 }
