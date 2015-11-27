@@ -85,21 +85,26 @@ public class EnterpriseApplyEntryServiceImpl implements
 
 	@Override
 	public boolean applyEntry(EnterpriseApplyEntryCommand cmd) {
-		EnterpriseOpRequest request = new EnterpriseOpRequest();
-		request.setSourceType(cmd.getSourceType());
-		request.setApplyType(cmd.getApplyType());
-		request.setEnterpriseName(cmd.getEnterpriseName());
-		request.setEnterpriseId(cmd.getEnterpriseId());
-		request.setApplyUserName(cmd.getApplyUserName());
-		request.setApplyContact(cmd.getContactPhone());
+		EnterpriseOpRequest request = ConvertHelper.convert(cmd, EnterpriseOpRequest.class);
 		request.setApplyUserId(UserContext.current().getUser().getId());
-		request.setDescription(cmd.getDescription());
-		request.setSizeUnit(cmd.getSizeUnit());
-		request.setStatus(ApplyEntryStatus.PROCESSING.getCode());
-		request.setAreaSize(cmd.getAreaSize());
+		if(null != cmd.getContactPhone())
+			request.setApplyContact(cmd.getContactPhone());
+		
 		request.setOperatorUid(request.getApplyUserId());
-		request.setCommunityId(cmd.getCommunityId());
-		request.setNamespaceId(cmd.getNamespaceId());
+		request.setStatus(ApplyEntryStatus.PROCESSING.getCode());
+//		request.setSourceType(cmd.getSourceType());
+//		request.setApplyType(cmd.getApplyType());
+//		request.setEnterpriseName(cmd.getEnterpriseName());
+//		request.setEnterpriseId(cmd.getEnterpriseId());
+//		request.setApplyUserName(cmd.getApplyUserName());
+//		request.setApplyContact(cmd.getContactPhone());
+//		request.setApplyUserId(UserContext.current().getUser().getId());
+//		request.setDescription(cmd.getDescription());
+//		request.setSizeUnit(cmd.getSizeUnit());
+//		request.setAreaSize(cmd.getAreaSize());
+//		request.setOperatorUid(request.getApplyUserId());
+//		request.setCommunityId(cmd.getCommunityId());
+//		request.setNamespaceId(cmd.getNamespaceId());
 		enterpriseApplyEntryProvider.createApplyEntry(request);
 		return true;
 	}
