@@ -3,21 +3,21 @@ package com.everhomes.techpark.park;
 /**
  * <ul>
  *  <li>plateNumber: 车牌号</li>
- *  <li>enterpriseCommunityId: 园区id</li>
+ *  <li>communityId: 园区id</li>
  * </ul>
  */
 public class PlateNumberCommand {
 
-	private Long enterpriseCommunityId;
+	private Long communityId;
 	
 	private String plateNumber;
 	
-	public Long getEnterpriseCommunityId() {
-		return enterpriseCommunityId;
+	public Long getCommunityId() {
+		return communityId;
 	}
 
-	public void setEnterpriseCommunityId(Long enterpriseCommunityId) {
-		this.enterpriseCommunityId = enterpriseCommunityId;
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
 
 	public String getPlateNumber() {

@@ -28,14 +28,14 @@ public class CreateRechargeOrderCommand {
 	@NotNull
 	private String validityPeriod;
 	
-	private Long enterpriseCommunityId;
+	private Long communityId;
 
-	public Long getEnterpriseCommunityId() {
-		return enterpriseCommunityId;
+	public Long getCommunityId() {
+		return communityId;
 	}
 
-	public void setEnterpriseCommunityId(Long enterpriseCommunityId) {
-		this.enterpriseCommunityId = enterpriseCommunityId;
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
 
 	public String getValidityPeriod() {

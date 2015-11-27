@@ -4,21 +4,21 @@ package com.everhomes.techpark.park;
  * 
  * amount: 发卡数
  * 
- * enterpriseCommunityId:园区id
+ * communityId:园区id
  *
  */
 public class OfferCardCommand {
 	
-	private Long enterpriseCommunityId;
+	private Long communityId;
 	
 	private Integer amount;
 
-	public Long getEnterpriseCommunityId() {
-		return enterpriseCommunityId;
+	public Long getCommunityId() {
+		return communityId;
 	}
 
-	public void setEnterpriseCommunityId(Long enterpriseCommunityId) {
-		this.enterpriseCommunityId = enterpriseCommunityId;
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
 
 	public Integer getAmount() {
