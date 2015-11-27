@@ -34,7 +34,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
     }
     
     @Bean
-    public WebSocketHandler pusherHandler() {
+    public PusherWebSocketHandler pusherHandler() {
         return new PusherWebSocketHandler();
     }
     
