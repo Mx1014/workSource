@@ -1588,8 +1588,8 @@ public class PunchServiceImpl implements PunchService {
 										.queryContactByUserId(
 												cmd.getEnterpriseId(),
 												approval.getOperatorUid());
-
-								dto.setOperatorName(enterpriseContact.getName());
+								if(null !=enterpriseContact )
+									dto.setOperatorName(enterpriseContact.getName());
 							} else {
 								dto.setApprovalStatus((byte) 0);
 							}
