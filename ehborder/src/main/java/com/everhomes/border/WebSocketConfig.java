@@ -28,14 +28,14 @@ public class WebSocketConfig implements WebSocketConfigurer {
         return new ClientWebSocketHandler();
     }
     
-    @Bean 
-    public WebSocketHandler interServerHandler() {
-        return new ServerWebSocketHandler();
-    }
-    
     @Bean
     public PusherWebSocketHandler pusherHandler() {
         return new PusherWebSocketHandler();
+    }
+    
+    @Bean 
+    public WebSocketHandler interServerHandler() {
+        return new ServerWebSocketHandler();
     }
     
     @Bean
