@@ -4,21 +4,20 @@ package com.everhomes.techpark.punch;
 
 import com.everhomes.rest.RestResponseBase;
 
-import java.util.List;
 import com.everhomes.techpark.punch.ListMonthPunchLogsCommandResponse;
 
 public class PunchListMonthPunchLogsRestResponse extends RestResponseBase {
 
-    private List<ListMonthPunchLogsCommandResponse> response;
+    private ListMonthPunchLogsCommandResponse response;
 
     public PunchListMonthPunchLogsRestResponse () {
     }
 
-    public List<ListMonthPunchLogsCommandResponse> getResponse() {
+    public ListMonthPunchLogsCommandResponse getResponse() {
         return response;
     }
 
-    public void setResponse(List<ListMonthPunchLogsCommandResponse> response) {
+    public void setResponse(ListMonthPunchLogsCommandResponse response) {
         this.response = response;
     }
 }
