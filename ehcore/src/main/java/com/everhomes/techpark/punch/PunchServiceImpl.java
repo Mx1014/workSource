@@ -416,18 +416,64 @@ public class PunchServiceImpl implements PunchService {
 					.getCode() : ExceptionStatus.EXCEPTION.getCode());
 			}
 			else if(pdl.getPunchTimesPerDay().equals(PunchTimesPerDay.FORTH.getCode())){
-				pdl.setMorningPunchStatus(punchDayLog.getMorningStatus().equals(
+				pdl.setExceptionStatus(punchDayLog.getMorningStatus().equals(
 						PunchStatus.NORMAL.getCode())||punchDayLog.getMorningStatus().equals(
-								PunchStatus.OVERTIME.getCode()) ? ExceptionStatus.NORMAL
+								PunchStatus.OVERTIME.getCode())||punchDayLog.getAfternoonStatus().equals(
+										PunchStatus.NORMAL.getCode())||punchDayLog.getAfternoonStatus().equals(
+												PunchStatus.OVERTIME.getCode()) ? ExceptionStatus.NORMAL
 						.getCode() : ExceptionStatus.EXCEPTION.getCode());
-				pdl.setAfternoonPunchStatus(punchDayLog.getAfternoonStatus().equals(
-						PunchStatus.NORMAL.getCode())||punchDayLog.getAfternoonStatus().equals(
-								PunchStatus.OVERTIME.getCode()) ? ExceptionStatus.NORMAL
-						.getCode() : ExceptionStatus.EXCEPTION.getCode());
+				 
+				
 			}
 		}
-		makeExceptionForDayList(userId, companyId, logDay, pdl);
 
+		List<PunchExceptionRequest> exceptionRequests = punchProvider
+				.listExceptionRequestsByDate(userId, companyId,
+						dateSF.format(logDay.getTime()));
+		if (exceptionRequests.size() > 0) {
+			for (PunchExceptionRequest exceptionRequest : exceptionRequests) {
+
+				PunchExceptionDTO punchExceptionDTO = new PunchExceptionDTO();
+
+				punchExceptionDTO.setRequestType(exceptionRequest
+						.getRequestType());
+				punchExceptionDTO.setCreateTime(exceptionRequest
+						.getCreateTime().getTime());
+				if (exceptionRequest.getRequestType().equals(
+						PunchRquestType.REQUEST.getCode())) {
+					// 对于申请
+					punchExceptionDTO.setExceptionComment(exceptionRequest
+							.getDescription());
+					EnterpriseContact enterpriseContact = enterpriseContactService
+							.queryContactByUserId(companyId,
+									exceptionRequest.getUserId());
+
+					if (null == enterpriseContact) {
+						punchExceptionDTO.setName("无此人");
+					} else {
+						punchExceptionDTO.setName(enterpriseContact.getName());
+					}
+				} else {
+					// 审批
+					punchExceptionDTO.setExceptionComment(exceptionRequest
+							.getProcessDetails());
+					EnterpriseContact enterpriseContact = enterpriseContactService
+							.queryContactByUserId(companyId,
+									exceptionRequest.getOperatorUid());
+					if (null == enterpriseContact) {
+						punchExceptionDTO.setName("无此人");
+					} else {
+						punchExceptionDTO.setName(enterpriseContact.getName());
+					}
+					punchExceptionDTO.setProcessCode(exceptionRequest
+							.getProcessCode());
+				}
+				if (null == pdl.getPunchExceptionDTOs()) {
+					pdl.setPunchExceptionDTOs(new ArrayList<PunchExceptionDTO>());
+				}
+				pdl.getPunchExceptionDTOs().add(punchExceptionDTO);
+			}
+		}
 		return pdl;
 	}
 
@@ -1264,11 +1310,16 @@ public class PunchServiceImpl implements PunchService {
 					dto.setPunchStatus(punchDayLog.getStatus());
 					dto.setMorningPunchStatus(punchDayLog.getMorningStatus());
 					dto.setAfternoonPunchStatus(punchDayLog.getAfternoonStatus());
-					dto.setNoonLeaveTime(punchDayLog.getNoonLeaveTime().getTime());
-					dto.setAfternoonArriveTime(punchDayLog.getAfternoonArriveTime().getTime());
-					dto.setArriveTime(punchDayLog.getArriveTime().getTime());
-					dto.setLeaveTime(punchDayLog.getLeaveTime().getTime());
-					dto.setWorkTime(punchDayLog.getWorkTime().getTime());
+					if(null!=punchDayLog.getNoonLeaveTime() )
+						dto.setNoonLeaveTime(punchDayLog.getNoonLeaveTime().getTime());
+					if(null!=punchDayLog.getAfternoonArriveTime() )
+						dto.setAfternoonArriveTime(punchDayLog.getAfternoonArriveTime().getTime());
+					if(null!=punchDayLog.getArriveTime() )
+						dto.setArriveTime(punchDayLog.getArriveTime().getTime());
+					if(null!=punchDayLog.getLeaveTime() )
+						dto.setLeaveTime(punchDayLog.getLeaveTime().getTime());
+					if(null!=punchDayLog.getWorkTime() )
+						dto.setWorkTime(punchDayLog.getWorkTime().getTime()); 
 					dto.setPunchTimesPerDay(punchDayLog.getPunchTimesPerDay());
 					EnterpriseContact enterpriseContact = enterpriseContactService
 							.queryContactByUserId(cmd.getEnterpriseId(),
