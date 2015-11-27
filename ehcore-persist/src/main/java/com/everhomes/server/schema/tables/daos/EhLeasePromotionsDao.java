@@ -76,6 +76,13 @@ public class EhLeasePromotionsDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	}
 
 	/**
+	 * Fetch records that have <code>rent_areas IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLeasePromotions> fetchByRentAreas(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLeasePromotions.EH_LEASE_PROMOTIONS.RENT_AREAS, values);
+	}
+
+	/**
 	 * Fetch records that have <code>description IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLeasePromotions> fetchByDescription(java.lang.String... values) {

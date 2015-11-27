@@ -433,19 +433,24 @@ CREATE TABLE `eh_enterprise_op_requests` (
 #
 # member of global partition
 #
-CREATE TABLE `eh_lease_promotions` ( 
+
+
+ DROP TABLE `eh_lease_promotions`;
+
+ CREATE TABLE `eh_lease_promotions` ( 
 	`id` BIGINT NOT NULL COMMENT 'id of the record', 
     `namespace_id` INTEGER NOT NULL DEFAULT 0,
     `community_id` BIGINT NOT NULL DEFAULT 0,
 	`rent_type` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'For rent', 
 	`subject` VARCHAR(512) NULL, 
-	`description` text NULL, 
+	`rent_areas` VARCHAR(100) NULL, 
+	`description` TEXT NULL, 
 	`create_uid` BIGINT, 
 	`create_time` DATETIME, 
 	`update_time` DATETIME, 
 	`status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: active', 
 	PRIMARY KEY (`id`) 
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4; 
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4; 
 
 #
 # member of global partition

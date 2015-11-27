@@ -11,13 +11,14 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLeasePromotions implements java.io.Serializable {
 
-	private static final long serialVersionUID = 611161301;
+	private static final long serialVersionUID = -78467457;
 
 	private java.lang.Long     id;
 	private java.lang.Integer  namespaceId;
 	private java.lang.Long     communityId;
 	private java.lang.String   rentType;
 	private java.lang.String   subject;
+	private java.lang.String   rentAreas;
 	private java.lang.String   description;
 	private java.lang.Long     createUid;
 	private java.sql.Timestamp createTime;
@@ -32,6 +33,7 @@ public class EhLeasePromotions implements java.io.Serializable {
 		java.lang.Long     communityId,
 		java.lang.String   rentType,
 		java.lang.String   subject,
+		java.lang.String   rentAreas,
 		java.lang.String   description,
 		java.lang.Long     createUid,
 		java.sql.Timestamp createTime,
@@ -43,6 +45,7 @@ public class EhLeasePromotions implements java.io.Serializable {
 		this.communityId = communityId;
 		this.rentType = rentType;
 		this.subject = subject;
+		this.rentAreas = rentAreas;
 		this.description = description;
 		this.createUid = createUid;
 		this.createTime = createTime;
@@ -88,6 +91,14 @@ public class EhLeasePromotions implements java.io.Serializable {
 
 	public void setSubject(java.lang.String subject) {
 		this.subject = subject;
+	}
+
+	public java.lang.String getRentAreas() {
+		return this.rentAreas;
+	}
+
+	public void setRentAreas(java.lang.String rentAreas) {
+		this.rentAreas = rentAreas;
 	}
 
 	public java.lang.String getDescription() {
