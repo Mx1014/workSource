@@ -1409,23 +1409,33 @@ public class PunchServiceImpl implements PunchService {
 							.queryContactByUserId(cmd.getEnterpriseId(),
 									dto.getUserId());
 					PunchExceptionApproval  approval = punchProvider.getExceptionApproval(cmd.getUserId(), cmd.getEnterpriseId(), java.sql.Date.valueOf(cmd.getPunchDate()));
+					dto.setUserName(enterpriseContact.getName());
+					if (null != dto.getOperatorUid()
+							&& 0 != dto.getOperatorUid()) {
+						enterpriseContact = enterpriseContactService
+								.queryContactByUserId(cmd.getEnterpriseId(),
+										dto.getOperatorUid());
+
+
+						if (null == enterpriseContact) {
+							dto.setOperatorName("无此人");
+						} else {
+							dto.setOperatorName(enterpriseContact.getName());
+						}
+					}
+					
 					if(null== approval){
 						return dto;
 					}  
 					dto.setPunchTimesPerDay(approval.getPunchTimesPerDay());
-					dto.setUserName(enterpriseContact.getName());
 					dto.setPunchDate(approval.getPunchDate().getTime());
 					dto.setUserPhoneNumber(enterpriseContactProvider
 							.queryContactEntryByContactId(enterpriseContact,
 									ContactType.MOBILE.getCode()).get(0)
 							.getEntryValue());
 					 
-
-					if (null == enterpriseContact) {
-						dto.setOperatorName("无此人");
-					} else {
-						dto.setOperatorName(enterpriseContact.getName());
-					}
+					
+					
 					return dto;
 				}).collect(Collectors.toList()));
 
