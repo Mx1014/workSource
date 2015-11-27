@@ -90,10 +90,24 @@ public class EhPunchExceptionRequestsDao extends org.jooq.impl.DAOImpl<com.everh
 	}
 
 	/**
-	 * Fetch records that have <code>process_code IN (values)</code>
+	 * Fetch records that have <code>approval_status IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchExceptionRequests> fetchByProcessCode(java.lang.Byte... values) {
-		return fetch(com.everhomes.server.schema.tables.EhPunchExceptionRequests.EH_PUNCH_EXCEPTION_REQUESTS.PROCESS_CODE, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchExceptionRequests> fetchByApprovalStatus(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchExceptionRequests.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_STATUS, values);
+	}
+
+	/**
+	 * Fetch records that have <code>morning_approval_status IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchExceptionRequests> fetchByMorningApprovalStatus(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchExceptionRequests.EH_PUNCH_EXCEPTION_REQUESTS.MORNING_APPROVAL_STATUS, values);
+	}
+
+	/**
+	 * Fetch records that have <code>afternoon_approval_status IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPunchExceptionRequests> fetchByAfternoonApprovalStatus(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPunchExceptionRequests.EH_PUNCH_EXCEPTION_REQUESTS.AFTERNOON_APPROVAL_STATUS, values);
 	}
 
 	/**

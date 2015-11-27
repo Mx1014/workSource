@@ -21,8 +21,10 @@ public class EhPunchExceptionRequestMapper implements RecordMapper<Record, EhPun
         post.setCreatorUid(r.getValue((Field<Long>)r.field("creator_uid"))); 
         post.setDescription(r.getValue((Field<String>)r.field("description"))); 
         post.setOperateTime(r.getValue((Field<Timestamp>)r.field("operate_time"))); 
-        post.setOperatorUid(r.getValue((Field<Long>)r.field("operator_uid"))); 
-        post.setProcessCode(r.getValue((Field<Byte>)r.field("process_code"))); 
+        post.setOperatorUid(r.getValue((Field<Long>)r.field("operator_uid")));  
+        post.setApprovalStatus(r.getValue((Field<Byte>)r.field("approval_status"))); 
+        post.setMorningApprovalStatus(r.getValue((Field<Byte>)r.field("morning_approval_status"))); 
+        post.setAfternoonApprovalStatus(r.getValue((Field<Byte>)r.field("afternoon_approval_status"))); 
         post.setProcessDetails(r.getValue((Field<String>)r.field("process_details"))); 
         post.setPunchDate(r.getValue((Field<Date>)r.field("punch_date"))); 
         post.setRequestType(r.getValue((Field<Byte>)r.field("request_type"))); 

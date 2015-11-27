@@ -418,7 +418,7 @@ public class PunchProviderImpl implements PunchProvider {
 			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(status));
 		}
 		if(null!= processCode &&  processCode != 0){
-			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PROCESS_CODE.eq(processCode));
+			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_STATUS.eq(processCode));
 		}
 		return step.where(condition).fetchOneInto(Integer.class);
 	
@@ -447,7 +447,7 @@ public class PunchProviderImpl implements PunchProvider {
 			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(status));
 		}
 		if(null!= processCode &&  processCode != 0){
-			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PROCESS_CODE.eq(processCode));
+			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_STATUS.eq(processCode));
 		}
 		 
 		Integer offset = pageOffset == null ? 1 : (pageOffset - 1 ) * pageSize;
@@ -488,7 +488,7 @@ public class PunchProviderImpl implements PunchProvider {
 			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(status));
 		}
 		if(null!= processCode &&  processCode != 0){
-			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PROCESS_CODE.eq(processCode));
+			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_STATUS.eq(processCode));
 		}
 		return step.where(condition).fetchOneInto(Integer.class);
 	
@@ -528,7 +528,7 @@ public class PunchProviderImpl implements PunchProvider {
 			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.STATUS.eq(status));
 		}
 		if(null!= processCode &&  processCode != 0){
-			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.PROCESS_CODE.eq(processCode));
+			condition = condition.and(Tables.EH_PUNCH_EXCEPTION_REQUESTS.APPROVAL_STATUS.eq(processCode));
 		}
 		Integer offset = pageOffset == null ? 1 : (pageOffset - 1 ) * pageSize;
 		step.limit(offset , pageSize);

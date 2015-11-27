@@ -9,12 +9,12 @@ import com.everhomes.util.StringHelper;
  * <ul>
 
  * <li>sourceId：来源ID：黄页ID</li>
- * <li>sourceType：来源类型，字符串，MAKERZONE之类的</li>
+ * <li>sourceType：来源类型building /market_zone /for_rent 的 参考{@link com.everhomes.techpark.expansion.ApplyEntrySourceType}}</li>
  * <li>enterpriseName：申请公司名</li>
  * <li>enterpriseId：申请公司ID</li>
  * <li>applyUserName：申请人 </li>
- * <li>applyType：申请类型  APPLY(1):申请 EXPANSION(2): 扩租 RENEW(3):续租</li> 
- * <li>sizeUnit：size的单位：SINGLETON(1)一整个？  SQUARE_METERS(2)平方米</li>
+ * <li>applyType：申请类型  APPLY(1):申请 EXPANSION(2): 扩租 RENEW(3):续租 参考{@link com.everhomes.techpark.expansion.ApplyEntryApplyType}}</li>
+ * <li>sizeUnit：size的单位：SINGLETON(1)一整个？  SQUARE_METERS(2)平方米 参考{@link com.everhomes.techpark.expansion.ApplyEntrySizeUnit}}</li>
  * <li>areaSize：地点大小，选择平方米估计就有的选</li>
  * <li>communityId：园区ID</li>
  * <li>namespaceId：命名空间</li>

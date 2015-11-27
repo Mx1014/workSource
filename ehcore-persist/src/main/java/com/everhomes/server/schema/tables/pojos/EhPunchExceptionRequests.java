@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchExceptionRequests implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1290297824;
+	private static final long serialVersionUID = 2070284580;
 
 	private java.lang.Long     id;
 	private java.lang.Long     userId;
@@ -20,7 +20,9 @@ public class EhPunchExceptionRequests implements java.io.Serializable {
 	private java.lang.Byte     requestType;
 	private java.lang.String   description;
 	private java.lang.Byte     status;
-	private java.lang.Byte     processCode;
+	private java.lang.Byte     approvalStatus;
+	private java.lang.Byte     morningApprovalStatus;
+	private java.lang.Byte     afternoonApprovalStatus;
 	private java.lang.String   processDetails;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
@@ -38,7 +40,9 @@ public class EhPunchExceptionRequests implements java.io.Serializable {
 		java.lang.Byte     requestType,
 		java.lang.String   description,
 		java.lang.Byte     status,
-		java.lang.Byte     processCode,
+		java.lang.Byte     approvalStatus,
+		java.lang.Byte     morningApprovalStatus,
+		java.lang.Byte     afternoonApprovalStatus,
 		java.lang.String   processDetails,
 		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime,
@@ -53,7 +57,9 @@ public class EhPunchExceptionRequests implements java.io.Serializable {
 		this.requestType = requestType;
 		this.description = description;
 		this.status = status;
-		this.processCode = processCode;
+		this.approvalStatus = approvalStatus;
+		this.morningApprovalStatus = morningApprovalStatus;
+		this.afternoonApprovalStatus = afternoonApprovalStatus;
 		this.processDetails = processDetails;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
@@ -118,12 +124,28 @@ public class EhPunchExceptionRequests implements java.io.Serializable {
 		this.status = status;
 	}
 
-	public java.lang.Byte getProcessCode() {
-		return this.processCode;
+	public java.lang.Byte getApprovalStatus() {
+		return this.approvalStatus;
 	}
 
-	public void setProcessCode(java.lang.Byte processCode) {
-		this.processCode = processCode;
+	public void setApprovalStatus(java.lang.Byte approvalStatus) {
+		this.approvalStatus = approvalStatus;
+	}
+
+	public java.lang.Byte getMorningApprovalStatus() {
+		return this.morningApprovalStatus;
+	}
+
+	public void setMorningApprovalStatus(java.lang.Byte morningApprovalStatus) {
+		this.morningApprovalStatus = morningApprovalStatus;
+	}
+
+	public java.lang.Byte getAfternoonApprovalStatus() {
+		return this.afternoonApprovalStatus;
+	}
+
+	public void setAfternoonApprovalStatus(java.lang.Byte afternoonApprovalStatus) {
+		this.afternoonApprovalStatus = afternoonApprovalStatus;
 	}
 
 	public java.lang.String getProcessDetails() {

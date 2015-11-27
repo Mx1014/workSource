@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchExceptionRequests extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord> {
 
-	private static final long serialVersionUID = 701797423;
+	private static final long serialVersionUID = -1030475595;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_punch_exception_requests</code>
@@ -59,12 +59,22 @@ public class EhPunchExceptionRequests extends org.jooq.impl.TableImpl<com.everho
 	/**
 	 * The column <code>ehcore.eh_punch_exception_requests.status</code>. 0: inactive, 1: waitingForApproval, 2:active
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: inactive, 1: waitingForApproval, 2:active");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.defaulted(true), this, "0: inactive, 1: waitingForApproval, 2:active");
 
 	/**
-	 * The column <code>ehcore.eh_punch_exception_requests.process_code</code>. NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)
+	 * The column <code>ehcore.eh_punch_exception_requests.approval_status</code>. NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord, java.lang.Byte> PROCESS_CODE = createField("process_code", org.jooq.impl.SQLDataType.TINYINT, this, "NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord, java.lang.Byte> APPROVAL_STATUS = createField("approval_status", org.jooq.impl.SQLDataType.TINYINT, this, "NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)");
+
+	/**
+	 * The column <code>ehcore.eh_punch_exception_requests.morning_approval_status</code>. NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord, java.lang.Byte> MORNING_APPROVAL_STATUS = createField("morning_approval_status", org.jooq.impl.SQLDataType.TINYINT, this, "NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)");
+
+	/**
+	 * The column <code>ehcore.eh_punch_exception_requests.afternoon_approval_status</code>. NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord, java.lang.Byte> AFTERNOON_APPROVAL_STATUS = createField("afternoon_approval_status", org.jooq.impl.SQLDataType.TINYINT, this, "NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)");
 
 	/**
 	 * The column <code>ehcore.eh_punch_exception_requests.process_details</code>.

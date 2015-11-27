@@ -391,7 +391,7 @@ public class PunchServiceImpl implements PunchService {
 		} 
 		PunchLogsDay pdl = ConvertHelper.convert(punchDayLog, PunchLogsDay.class) ;
 		pdl.setPunchStatus(punchDayLog.getStatus());
-		pdl.setMorningApprovalStatus(punchDayLog.getMorningStatus());
+		pdl.setMorningPunchStatus(punchDayLog.getMorningStatus());
 		pdl.setAfternoonPunchStatus(punchDayLog.getAfternoonStatus()); 
 		pdl.setPunchDay(String.valueOf(logDay.get(Calendar.DAY_OF_MONTH)));
 		pdl.setPunchLogs(new ArrayList<PunchLogDTO>());
@@ -433,7 +433,7 @@ public class PunchServiceImpl implements PunchService {
 		if (exceptionRequests.size() > 0) {
 			for (PunchExceptionRequest exceptionRequest : exceptionRequests) {
 
-				PunchExceptionDTO punchExceptionDTO = new PunchExceptionDTO();
+				PunchExceptionDTO punchExceptionDTO = ConvertHelper.convert(exceptionRequest , PunchExceptionDTO.class);
 
 				punchExceptionDTO.setRequestType(exceptionRequest
 						.getRequestType());
@@ -464,9 +464,7 @@ public class PunchServiceImpl implements PunchService {
 						punchExceptionDTO.setName("无此人");
 					} else {
 						punchExceptionDTO.setName(enterpriseContact.getName());
-					}
-					punchExceptionDTO.setProcessCode(exceptionRequest
-							.getProcessCode());
+					} 
 				}
 				if (null == pdl.getPunchExceptionDTOs()) {
 					pdl.setPunchExceptionDTOs(new ArrayList<PunchExceptionDTO>());
@@ -794,9 +792,9 @@ public class PunchServiceImpl implements PunchService {
 						dateSF.format(logDay.getTime()));
 		if (exceptionRequests.size() > 0) {
 			for (PunchExceptionRequest exceptionRequest : exceptionRequests) {
+ 
 
-				PunchExceptionDTO punchExceptionDTO = new PunchExceptionDTO();
-
+				PunchExceptionDTO punchExceptionDTO = ConvertHelper.convert(exceptionRequest , PunchExceptionDTO.class);
 				punchExceptionDTO.setRequestType(exceptionRequest
 						.getRequestType());
 				punchExceptionDTO.setCreateTime(exceptionRequest
@@ -826,9 +824,7 @@ public class PunchServiceImpl implements PunchService {
 						punchExceptionDTO.setName("无此人");
 					} else {
 						punchExceptionDTO.setName(enterpriseContact.getName());
-					}
-					punchExceptionDTO.setProcessCode(exceptionRequest
-							.getProcessCode());
+					} 
 				}
 				if (null == pdl.getPunchExceptionDTOs()) {
 					pdl.setPunchExceptionDTOs(new ArrayList<PunchExceptionDTO>());
@@ -1400,11 +1396,15 @@ public class PunchServiceImpl implements PunchService {
 							.queryContactByUserId(cmd.getEnterpriseId(),
 									dto.getUserId());
 					PunchExceptionApproval  approval = punchProvider.getExceptionApproval(cmd.getUserId(), cmd.getEnterpriseId(), java.sql.Date.valueOf(cmd.getPunchDate()));
+					if(null== approval){
+						return dto;
+					}
 					dto.setPunchTimesPerDay(approval.getPunchTimesPerDay());
 					dto.setApprovalStatus(approval.getApprovalStatus());
 					dto.setMorningApprovalStatus(approval.getMorningApprovalStatus());
 					dto.setAfternoonApprovalStatus(approval.getAfternoonApprovalStatus());
 					dto.setUserName(enterpriseContact.getName());
+					dto.setPunchDate(approval.getPunchDate().getTime());
 					dto.setUserPhoneNumber(enterpriseContactProvider
 							.queryContactEntryByContactId(enterpriseContact,
 									ContactType.MOBILE.getCode()).get(0)
@@ -1427,11 +1427,10 @@ public class PunchServiceImpl implements PunchService {
 		}
 		checkCompanyIdIsNull(cmd.getEnterpriseId());
 		// 插入一条eh_punch_exception_requests 记录
-		PunchExceptionRequest punchExceptionRequest = new PunchExceptionRequest();
+		PunchExceptionRequest punchExceptionRequest = ConvertHelper.convert(cmd,PunchExceptionRequest.class );
 		punchExceptionRequest.setEnterpriseId(cmd.getEnterpriseId());
 		punchExceptionRequest
-				.setRequestType(PunchRquestType.APPROVAL.getCode());
-		punchExceptionRequest.setProcessCode(cmd.getApprovalStatus());
+				.setRequestType(PunchRquestType.APPROVAL.getCode()); 
 		punchExceptionRequest.setProcessDetails(cmd.getProcessDetails());
 		punchExceptionRequest.setUserId(cmd.getUserId());
 		punchExceptionRequest.setCreatorUid(cmd.getCreatorUid());
@@ -1462,7 +1461,7 @@ public class PunchServiceImpl implements PunchService {
 		punchExceptionApproval.setPunchDate(java.sql.Date.valueOf(cmd
 				.getPunchDate()));
 		punchExceptionApproval.setViewFlag(ViewFlags.NOTVIEW.getCode());
-		
+		punchExceptionApproval.setPunchTimesPerDay(cmd.getPunchTimesPerDay());
 		PunchExceptionApproval oldpunchExceptionApproval = punchProvider
 				.getExceptionApproval(cmd.getUserId(), cmd.getEnterpriseId(),
 						java.sql.Date.valueOf(cmd.getPunchDate()));
