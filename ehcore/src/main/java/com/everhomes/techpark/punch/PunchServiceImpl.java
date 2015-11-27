@@ -1398,11 +1398,8 @@ public class PunchServiceImpl implements PunchService {
 					PunchExceptionApproval  approval = punchProvider.getExceptionApproval(cmd.getUserId(), cmd.getEnterpriseId(), java.sql.Date.valueOf(cmd.getPunchDate()));
 					if(null== approval){
 						return dto;
-					}
-					dto.setPunchTimesPerDay(approval.getPunchTimesPerDay());
-					dto.setApprovalStatus(approval.getApprovalStatus());
-					dto.setMorningApprovalStatus(approval.getMorningApprovalStatus());
-					dto.setAfternoonApprovalStatus(approval.getAfternoonApprovalStatus());
+					}  
+					 
 					dto.setUserName(enterpriseContact.getName());
 					dto.setPunchDate(approval.getPunchDate().getTime());
 					dto.setUserPhoneNumber(enterpriseContactProvider

@@ -13,6 +13,8 @@ public class BuildingForRentDTO {
 	
 	private String subject;
 	
+	private java.lang.String   rentAreas;
+	
 	private Byte status;
 	
 	private Timestamp createTime;
@@ -96,5 +98,17 @@ public class BuildingForRentDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+
+
+	public java.lang.String getRentAreas() {
+		return rentAreas;
+	}
+
+
+
+	public void setRentAreas(java.lang.String rentAreas) {
+		this.rentAreas = rentAreas;
+	}
 
 }
