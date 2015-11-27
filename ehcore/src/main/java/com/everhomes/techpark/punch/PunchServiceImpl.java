@@ -1399,7 +1399,7 @@ public class PunchServiceImpl implements PunchService {
 					if(null== approval){
 						return dto;
 					}  
-					 
+					dto.setPunchTimesPerDay(approval.getPunchTimesPerDay());
 					dto.setUserName(enterpriseContact.getName());
 					dto.setPunchDate(approval.getPunchDate().getTime());
 					dto.setUserPhoneNumber(enterpriseContactProvider
@@ -1427,8 +1427,8 @@ public class PunchServiceImpl implements PunchService {
 		PunchExceptionRequest punchExceptionRequest = ConvertHelper.convert(cmd,PunchExceptionRequest.class );
 		punchExceptionRequest.setEnterpriseId(cmd.getEnterpriseId());
 		punchExceptionRequest
-				.setRequestType(PunchRquestType.APPROVAL.getCode()); 
-		punchExceptionRequest.setProcessDetails(cmd.getProcessDetails());
+				.setRequestType(PunchRquestType.APPROVAL.getCode());  
+		punchExceptionRequest.setDescription(cmd.getProcessDetails());
 		punchExceptionRequest.setUserId(cmd.getUserId());
 		punchExceptionRequest.setCreatorUid(cmd.getCreatorUid());
 		punchExceptionRequest.setCreateTime(new Timestamp(DateHelper
@@ -1437,8 +1437,7 @@ public class PunchServiceImpl implements PunchService {
 		punchExceptionRequest.setOperateTime(new Timestamp(DateHelper
 				.currentGMTTime().getTime()));
 		punchExceptionRequest.setPunchDate(java.sql.Date.valueOf(cmd
-				.getPunchDate()));
-		punchExceptionRequest.setStatus(cmd.getApprovalStatus());
+				.getPunchDate())); 
 		punchExceptionRequest.setViewFlag(ViewFlags.NOTVIEW.getCode());
 		punchProvider.createPunchExceptionRequest(punchExceptionRequest);
 		// 查eh_punch_exception_approvals有无数据：无数据，结果是同意则插入 /有数据 如果结果是同意

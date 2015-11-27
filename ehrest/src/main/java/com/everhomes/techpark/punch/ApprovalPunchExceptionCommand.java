@@ -27,10 +27,12 @@ public class ApprovalPunchExceptionCommand{
 	private Long     enterpriseId;
 	@NotNull
 	private String     punchDate;
+	@NotNull
 	private Byte    status;
 	private java.lang.Byte     morningApprovalStatus;
 	private java.lang.Byte     afternoonApprovalStatus;
 	private Byte     approvalStatus;
+	@NotNull
 	private String   processDetails;
 	private Long     creatorUid;
 	private Long     operatorUid;
