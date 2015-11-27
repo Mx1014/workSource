@@ -15,6 +15,8 @@ public class BuildingForRentDTO {
 	
 	private java.lang.String   rentAreas;
 	
+	private java.lang.String   description;
+	
 	private Byte status;
 	
 	private Timestamp createTime;
@@ -109,6 +111,18 @@ public class BuildingForRentDTO {
 
 	public void setRentAreas(java.lang.String rentAreas) {
 		this.rentAreas = rentAreas;
+	}
+
+
+
+	public java.lang.String getDescription() {
+		return description;
+	}
+
+
+
+	public void setDescription(java.lang.String description) {
+		this.description = description;
 	}
 
 }
