@@ -134,6 +134,7 @@ public class EnterpriseApplyEntryServiceImpl implements
 			res.setNextPageAnchor(cmd.getPageAnchor() + 1);
 		}
 		for (LeasePromotion leasePromotion : leasePromotions) {
+			leasePromotion.setPosterUrl(contentServerService.parserUri(leasePromotion.getPosterUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
 			List<LeasePromotionAttachment> attachments = leasePromotion.getAttachments();
 			if(null != attachments){
 				for (LeasePromotionAttachment leasePromotionAttachment : attachments) {

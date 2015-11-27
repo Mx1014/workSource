@@ -16,6 +16,8 @@ public class BuildingForRentDTO {
 	private java.lang.String   rentAreas;
 	
 	private java.lang.String   description;
+	private java.lang.String   posterUri;
+	private java.lang.String   posterUrl;
 	
 	private Byte status;
 	
@@ -123,6 +125,30 @@ public class BuildingForRentDTO {
 
 	public void setDescription(java.lang.String description) {
 		this.description = description;
+	}
+
+
+
+	public java.lang.String getPosterUri() {
+		return posterUri;
+	}
+
+
+
+	public void setPosterUri(java.lang.String posterUri) {
+		this.posterUri = posterUri;
+	}
+
+
+
+	public java.lang.String getPosterUrl() {
+		return posterUrl;
+	}
+
+
+
+	public void setPosterUrl(java.lang.String posterUrl) {
+		this.posterUrl = posterUrl;
 	}
 
 }

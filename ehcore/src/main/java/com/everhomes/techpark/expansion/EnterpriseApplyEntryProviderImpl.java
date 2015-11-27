@@ -158,7 +158,7 @@ public class EnterpriseApplyEntryProviderImpl implements
 							context.select().from(Tables.EH_LEASE_PROMOTION_ATTACHMENTS)
 							.where(Tables.EH_LEASE_PROMOTION_ATTACHMENTS.LEASE_ID.eq(r.getValue(Tables.EH_LEASE_PROMOTIONS.ID)))
 							.fetch().map((t) -> {
-								attachments.add(ConvertHelper.convert(r, LeasePromotionAttachment.class));
+								attachments.add(ConvertHelper.convert(t, LeasePromotionAttachment.class));
 								return null;
 							});
 							
