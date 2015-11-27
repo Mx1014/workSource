@@ -1493,23 +1493,25 @@ public class PunchServiceImpl implements PunchService {
 				punchProvider.deletePunchExceptionApproval(punchExceptionApproval.getId());
 			}
 		}
-//		// 更新eh_punch_exception_requests当天当人的申请记录
-//		List<PunchExceptionRequest> results = punchProvider
-//				.listExceptionRequests(cmd.getUserId(), null,
-//						cmd.getEnterpriseId(), cmd.getPunchDate(),
-//						cmd.getPunchDate(), null, null, 1, 999999,
-//						PunchRquestType.REQUEST.getCode());
-//		for (PunchExceptionRequest result : results) {
-//
-//			result.setProcessCode(cmd.getApprovalStatus());
-//			result.setProcessDetails(cmd.getProcessDetails());
-//			result.setUserId(cmd.getUserId());
-//			result.setOperatorUid(cmd.getOperatorUid());
-//			result.setOperateTime(new Timestamp(DateHelper.currentGMTTime()
-//					.getTime()));
-//			result.setStatus(cmd.getStatus());
-//			punchProvider.updatePunchExceptionRequest(result);
-//		}
+		// 更新eh_punch_exception_requests当天当人的申请记录
+		List<PunchExceptionRequest> results = punchProvider
+				.listExceptionRequests(cmd.getUserId(), null,
+						cmd.getEnterpriseId(), cmd.getPunchDate(),
+						cmd.getPunchDate(), null, null, 1, 999999,
+						PunchRquestType.REQUEST.getCode());
+		for (PunchExceptionRequest result : results) {
+
+			result.setApprovalStatus(cmd.getApprovalStatus());
+			result.setMorningApprovalStatus(cmd.getMorningApprovalStatus());
+			result.setAfternoonApprovalStatus(cmd.getAfternoonApprovalStatus());
+			result.setProcessDetails(cmd.getProcessDetails());
+			result.setUserId(cmd.getUserId());
+			result.setOperatorUid(cmd.getOperatorUid());
+			result.setOperateTime(new Timestamp(DateHelper.currentGMTTime()
+					.getTime()));
+			result.setStatus(cmd.getStatus());
+			punchProvider.updatePunchExceptionRequest(result);
+		}
 	}
 
 	@Override
