@@ -25,6 +25,7 @@ import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.Request;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
@@ -1341,8 +1342,20 @@ public class PunchServiceImpl implements PunchService {
 								.queryContactByUserId(cmd.getEnterpriseId(),
 										dto.getOperatorUid());
 
-						dto.setOperatorName(enterpriseContact.getName());
+
+						if (null == enterpriseContact) {
+							dto.setOperatorName("无此人");
+						} else {
+							dto.setOperatorName(enterpriseContact.getName());
+						}
 					}
+					
+					PunchExceptionApproval  approval = punchProvider.getExceptionApproval(r.getUserId(), cmd.getEnterpriseId(),r.getPunchDate());
+					if(null!= approval){
+						dto.setMorningApprovalStatus(approval.getMorningApprovalStatus());
+						dto.setAfternoonApprovalStatus(approval.getAfternoonApprovalStatus());
+					}  
+					
 					return dto;
 				}).collect(Collectors.toList()));
 
@@ -1406,6 +1419,13 @@ public class PunchServiceImpl implements PunchService {
 							.queryContactEntryByContactId(enterpriseContact,
 									ContactType.MOBILE.getCode()).get(0)
 							.getEntryValue());
+					 
+
+					if (null == enterpriseContact) {
+						dto.setOperatorName("无此人");
+					} else {
+						dto.setOperatorName(enterpriseContact.getName());
+					}
 					return dto;
 				}).collect(Collectors.toList()));
 
