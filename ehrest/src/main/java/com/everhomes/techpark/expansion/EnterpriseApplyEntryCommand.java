@@ -5,6 +5,22 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+
+ * <li>sourceId：来源ID：黄页ID</li>
+ * <li>sourceType：来源类型，字符串，MAKERZONE之类的</li>
+ * <li>enterpriseName：申请公司名</li>
+ * <li>enterpriseId：申请公司ID</li>
+ * <li>applyUserName：申请人 </li>
+ * <li>applyType：申请类型  APPLY(1):申请 EXPANSION(2): 扩租 RENEW(3):续租</li> 
+ * <li>sizeUnit：size的单位：SINGLETON(1)一整个？  SQUARE_METERS(2)平方米</li>
+ * <li>areaSize：地点大小，选择平方米估计就有的选</li>
+ * <li>communityId：园区ID</li>
+ * <li>namespaceId：命名空间</li>
+ * <li>description：随便写一点什么</li> 
+ * </ul>
+ */
 public class EnterpriseApplyEntryCommand {
 	
 	private Long sourceId ; 
@@ -21,8 +37,7 @@ public class EnterpriseApplyEntryCommand {
 	
 	@NotNull
 	private Byte applyType;
-	
-	@NotNull
+	 
 	private Byte sizeUnit;
 	
 	private Double areaSize;

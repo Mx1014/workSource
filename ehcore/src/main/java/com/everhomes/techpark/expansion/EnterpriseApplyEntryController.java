@@ -61,7 +61,7 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	}
 	
 	/**
-	 * <b>URL: /techpark/entry/parkApplyEntry
+	 * <b>URL: /techpark/entry/applyEntry
 	 * <p>
 	 */
 	@RequestMapping("applyEntry")
@@ -74,19 +74,20 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 		return response;
 	}
 	
-	/**
-	 * <b>URL: /techpark/entry/applyRenew
-	 * <p>
-	 */
-	@RequestMapping("applyRenew")
-	@RestReturn(value=String.class)
-	public RestResponse applyRenew(EnterpriseApplyRenewCommand cmd){
-		boolean b = enterpriseApplyEntryService.applyRenew(cmd);
-		RestResponse response = new RestResponse(b);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+//	/**
+//	续租也用上面那个 applyEntry
+//	 * <b>URL: /techpark/entry/applyRenew
+//	 * <p>
+//	 */
+//	@RequestMapping("applyRenew")
+//	@RestReturn(value=String.class)
+//	public RestResponse applyRenew(EnterpriseApplyRenewCommand cmd){
+//		boolean b = enterpriseApplyEntryService.applyRenew(cmd);
+//		RestResponse response = new RestResponse(b);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
 	
 	/**
 	 * <b>URL: /techpark/entry/listForRents
