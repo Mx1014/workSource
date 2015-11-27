@@ -2,18 +2,18 @@ package com.everhomes.techpark.park;
 
 public class ParkResponseListCommand {
 	
-	private Long enterpriseCommunityId;
+	private Long communityId;
 	
 	private Integer pageOffset;
 	
 	private Integer pageSize;
 	
-	public Long getEnterpriseCommunityId() {
-		return enterpriseCommunityId;
+	public Long getCommunityId() {
+		return communityId;
 	}
 
-	public void setEnterpriseCommunityId(Long enterpriseCommunityId) {
-		this.enterpriseCommunityId = enterpriseCommunityId;
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
 
 	public Integer getPageOffset() {

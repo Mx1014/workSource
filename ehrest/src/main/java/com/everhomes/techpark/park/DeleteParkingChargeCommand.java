@@ -13,7 +13,7 @@ public class DeleteParkingChargeCommand {
 	@NotNull
 	private Double amount;
 	
-	private Long enterpriseCommunityId;
+	private Long communityId;
 
 	public Long getId() {
 		return id;
@@ -39,12 +39,12 @@ public class DeleteParkingChargeCommand {
 		this.amount = amount;
 	}
 
-	public Long getEnterpriseCommunityId() {
-		return enterpriseCommunityId;
+	public Long getCommunityId() {
+		return communityId;
 	}
 
-	public void setEnterpriseCommunityId(Long enterpriseCommunityId) {
-		this.enterpriseCommunityId = enterpriseCommunityId;
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
 
 }

@@ -4,7 +4,7 @@ public class FetchCardCommand {
 	
 	private String applierPhone;
 	
-	private Long enterpriseCommunityId;
+	private Long communityId;
 
 	public String getApplierPhone() {
 		return applierPhone;
@@ -14,12 +14,12 @@ public class FetchCardCommand {
 		this.applierPhone = applierPhone;
 	}
 
-	public Long getEnterpriseCommunityId() {
-		return enterpriseCommunityId;
+	public Long getCommunityId() {
+		return communityId;
 	}
 
-	public void setEnterpriseCommunityId(Long enterpriseCommunityId) {
-		this.enterpriseCommunityId = enterpriseCommunityId;
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
 
 }

@@ -133,7 +133,7 @@ public class ParkServiceImpl implements ParkService {
 		ParkCharge parkCharge = new ParkCharge();
 		parkCharge.setMonths(cmd.getMonths());
 		parkCharge.setAmount(cmd.getAmount());
-		parkCharge.setCommunityId(cmd.getEnterpriseCommunityId());
+		parkCharge.setCommunityId(cmd.getCommunityId());
 		
 		parkProvider.addCharge(parkCharge);
 		
@@ -149,7 +149,7 @@ public class ParkServiceImpl implements ParkService {
 		parkCharge.setId(cmd.getId());
 		parkCharge.setMonths(cmd.getMonths());
 		parkCharge.setAmount(cmd.getAmount());
-		parkCharge.setCommunityId(cmd.getEnterpriseCommunityId());
+		parkCharge.setCommunityId(cmd.getCommunityId());
 		
 		parkProvider.deleteCharge(parkCharge);
 	}
@@ -165,7 +165,7 @@ public class ParkServiceImpl implements ParkService {
         int offset = (int) PaginationHelper.offsetFromPageOffset((long) pageOffset, pageSize);
         
 		ParkResponseList response = new ParkResponseList();
-		List<ParkCharge> parkCharge = parkProvider.listParkingChargeByEnterpriseCommunityId(cmd.getEnterpriseCommunityId(), offset, pageSize);
+		List<ParkCharge> parkCharge = parkProvider.listParkingChargeByEnterpriseCommunityId(cmd.getCommunityId(), offset, pageSize);
 		
 		if(parkCharge != null && parkCharge.size() == pageSize){
 			response.setNextPageOffset(pageOffset + 1);
@@ -210,7 +210,7 @@ public class ParkServiceImpl implements ParkService {
 		order.setBillId(bill);
 		order.setPaymentStatus(PayStatus.WAITING_FOR_PAY.getCode());
 		order.setRechargeStatus(RechargeStatus.HANDING.getCode());
-		order.setCommunityId(cmd.getEnterpriseCommunityId());
+		order.setCommunityId(cmd.getCommunityId());
 		order.setOldValidityperiod(addDays(cmd.getValidityPeriod(), 1));
 		order.setNewValidityperiod(addMonth(cmd.getValidityPeriod(), cmd.getMonths()));;
 		
@@ -292,7 +292,7 @@ public class ParkServiceImpl implements ParkService {
 		locator.setAnchor(cmd.getPageAnchor() == null ? 0L : cmd.getPageAnchor());
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		
-		List<RechargeInfo> recordInfo = parkProvider.listRechargeRecord(cmd.getEnterpriseCommunityId(), user.getId(), locator, pageSize + 1);
+		List<RechargeInfo> recordInfo = parkProvider.listRechargeRecord(cmd.getCommunityId(), user.getId(), locator, pageSize + 1);
 		List<RechargeRecordDTO> rechargeRecord = new ArrayList<RechargeRecordDTO>();
 		
 		recordInfo.forEach(record -> {
@@ -359,10 +359,10 @@ public class ParkServiceImpl implements ParkService {
 		apply.setApplyTime(new Timestamp(System.currentTimeMillis()));
 		apply.setFetchStatus(FetchStatus.NO.getCode());
 		apply.setPlateNumber(cmd.getPlateNumber());
-		apply.setCommunityId(cmd.getEnterpriseCommunityId());
+		apply.setCommunityId(cmd.getCommunityId());
 		
 		parkProvider.applyParkingCard(apply);
-		String count = parkProvider.waitingCardCount(cmd.getEnterpriseCommunityId()) - 1 + "";
+		String count = parkProvider.waitingCardCount(cmd.getCommunityId()) - 1 + "";
 		return count;
 	}
 
@@ -381,7 +381,7 @@ public class ParkServiceImpl implements ParkService {
 			Timestamp time = strToTimestamp(cmd.getEndDay());
 			end = addDays(cmd.getEndDay(), 1);
 		}
- 		List<ParkApplyCard> appliers = parkProvider.searchApply(cmd.getEnterpriseCommunityId(),cmd.getApplierName(), cmd.getApplierPhone(), cmd.getPlateNumber(), cmd.getApplyStatus(), begin, end, locator, pageSize + 1);
+ 		List<ParkApplyCard> appliers = parkProvider.searchApply(cmd.getCommunityId(),cmd.getApplierName(), cmd.getApplierPhone(), cmd.getPlateNumber(), cmd.getApplyStatus(), begin, end, locator, pageSize + 1);
 		List<ApplyParkCardDTO> applyDto = new ArrayList<ApplyParkCardDTO>();
 		
 		appliers.forEach(apply -> {
@@ -408,7 +408,7 @@ public class ParkServiceImpl implements ParkService {
 		locator.setAnchor(cmd.getPageAnchor() == null ? 0L : cmd.getPageAnchor());
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		
-		List<RechargeInfo> recordInfo = parkProvider.searchRechargeRecord(cmd.getEnterpriseCommunityId(), cmd.getOwnerName(), cmd.getRechargePhone(), cmd.getPlateNumber(), locator, pageSize + 1);
+		List<RechargeInfo> recordInfo = parkProvider.searchRechargeRecord(cmd.getCommunityId(), cmd.getOwnerName(), cmd.getRechargePhone(), cmd.getPlateNumber(), locator, pageSize + 1);
 		List<RechargeRecordDTO> rechargeRecord = new ArrayList<RechargeRecordDTO>();
 		
 		recordInfo.forEach(record -> {
@@ -443,7 +443,7 @@ public class ParkServiceImpl implements ParkService {
 					"offering cards number is null.");
 		}
 		
-		int count = parkProvider.waitingCardCount(cmd.getEnterpriseCommunityId());
+		int count = parkProvider.waitingCardCount(cmd.getCommunityId());
 		
 		if(cmd.getAmount() > count) {
 			LOGGER.error(" offering cards number is greater than waiting people, there are only " + count + " people waiting for cards.");
@@ -451,7 +451,7 @@ public class ParkServiceImpl implements ParkService {
 					"offering cards number is greater than waiting people, there are only " + count + " people waiting for cards.");
 		}
 		
-		List<ParkApplyCard> topAppliers = parkProvider.searchTopAppliers(cmd.getAmount(), cmd.getEnterpriseCommunityId());
+		List<ParkApplyCard> topAppliers = parkProvider.searchTopAppliers(cmd.getAmount(), cmd.getCommunityId());
 		
 		Map<String, Object> map = new HashMap<String, Object>();
 		String deadline = deadline();
@@ -511,7 +511,7 @@ public class ParkServiceImpl implements ParkService {
 	@Override
 	public ApplyParkCardDTO fetchCard(FetchCardCommand cmd) {
 		
-		ParkApplyCard applier = parkProvider.findApplierByPhone(cmd.getApplierPhone(), cmd.getEnterpriseCommunityId());
+		ParkApplyCard applier = parkProvider.findApplierByPhone(cmd.getApplierPhone(), cmd.getCommunityId());
 		
 		if(applier == null) {
 			LOGGER.error("the applier is unable to fetch card now");

@@ -11,7 +11,7 @@ public class CreateParkingChargeCommand {
 	@NotNull
 	private Double amount;
 	
-	private Long enterpriseCommunityId;
+	private Long communityId;
 
 	public Byte getMonths() {
 		return months;
@@ -29,13 +29,13 @@ public class CreateParkingChargeCommand {
 		this.amount = amount;
 	}
 
-	public Long getEnterpriseCommunityId() {
-		return enterpriseCommunityId;
+	public Long getCommunityId() {
+		return communityId;
 	}
 
-	public void setEnterpriseCommunityId(Long enterpriseCommunityId) {
-		this.enterpriseCommunityId = enterpriseCommunityId;
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
-	
+
 	
 }

@@ -5,7 +5,7 @@ package com.everhomes.techpark.park;
  *  <li>ownerName: 车主姓名</li>
  *  <li>rechargePhone: 充值人人手机号</li>
  *  <li>plateNumber: 车牌号</li>
- *  <li>enterpriseCommunityId: 园区id</li>
+ *  <li>communityId: 园区id</li>
  * </ul>
  *
  */
@@ -17,18 +17,18 @@ public class SearchRechargeRecordCommand {
 	
 	private String plateNumber;
 	
-	private Long enterpriseCommunityId;
+	private Long communityId;
 	
 	private Long pageAnchor;
 	
 	private Integer pageSize; 
 
-	public Long getEnterpriseCommunityId() {
-		return enterpriseCommunityId;
+	public Long getCommunityId() {
+		return communityId;
 	}
 
-	public void setEnterpriseCommunityId(Long enterpriseCommunityId) {
-		this.enterpriseCommunityId = enterpriseCommunityId;
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
 
 	public String getOwnerName() {
