@@ -72,6 +72,7 @@ public class Keys {
 	// UNIQUE and PRIMARY KEY definitions
 	// -------------------------------------------------------------------------
 
+	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhAccountVedioconfRecord> KEY_EH_ACCOUNT_VEDIOCONF_PRIMARY = UniqueKeys0.KEY_EH_ACCOUNT_VEDIOCONF_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhActivitiesRecord> KEY_EH_ACTIVITIES_PRIMARY = UniqueKeys0.KEY_EH_ACTIVITIES_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhActivitiesRecord> KEY_EH_ACTIVITIES_U_EH_UUID = UniqueKeys0.KEY_EH_ACTIVITIES_U_EH_UUID;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhActivityRosterRecord> KEY_EH_ACTIVITY_ROSTER_PRIMARY = UniqueKeys0.KEY_EH_ACTIVITY_ROSTER_PRIMARY;
@@ -222,6 +223,7 @@ public class Keys {
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord> KEY_EH_SCOPED_CONFIGURATIONS_PRIMARY = UniqueKeys0.KEY_EH_SCOPED_CONFIGURATIONS_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhSearchKeywordsRecord> KEY_EH_SEARCH_KEYWORDS_PRIMARY = UniqueKeys0.KEY_EH_SEARCH_KEYWORDS_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhSearchKeywordsRecord> KEY_EH_SEARCH_KEYWORDS_U_KWORD_SCOPED_KWORD = UniqueKeys0.KEY_EH_SEARCH_KEYWORDS_U_KWORD_SCOPED_KWORD;
+	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhSourceAccountRecord> KEY_EH_SOURCE_ACCOUNT_PRIMARY = UniqueKeys0.KEY_EH_SOURCE_ACCOUNT_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhStateTriggersRecord> KEY_EH_STATE_TRIGGERS_PRIMARY = UniqueKeys0.KEY_EH_STATE_TRIGGERS_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhStatsByCityRecord> KEY_EH_STATS_BY_CITY_PRIMARY = UniqueKeys0.KEY_EH_STATS_BY_CITY_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhStatsByCityRecord> KEY_EH_STATS_BY_CITY_U_STATS_CITY_REPORT = UniqueKeys0.KEY_EH_STATS_BY_CITY_U_STATS_CITY_REPORT;
@@ -265,6 +267,8 @@ public class Keys {
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhVersionUpgradeRulesRecord> KEY_EH_VERSION_UPGRADE_RULES_PRIMARY = UniqueKeys0.KEY_EH_VERSION_UPGRADE_RULES_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhVersionUrlsRecord> KEY_EH_VERSION_URLS_PRIMARY = UniqueKeys0.KEY_EH_VERSION_URLS_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhVersionUrlsRecord> KEY_EH_VERSION_URLS_U_EH_VER_URL = UniqueKeys0.KEY_EH_VERSION_URLS_U_EH_VER_URL;
+	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhVideoconfaccountRuleRecord> KEY_EH_VIDEOCONFACCOUNT_RULE_PRIMARY = UniqueKeys0.KEY_EH_VIDEOCONFACCOUNT_RULE_PRIMARY;
+	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhWarningContactsRecord> KEY_EH_WARNING_CONTACTS_PRIMARY = UniqueKeys0.KEY_EH_WARNING_CONTACTS_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhYellowPagesRecord> KEY_EH_YELLOW_PAGES_PRIMARY = UniqueKeys0.KEY_EH_YELLOW_PAGES_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhYellowPageAttachmentsRecord> KEY_EH_YELLOW_PAGE_ATTACHMENTS_PRIMARY = UniqueKeys0.KEY_EH_YELLOW_PAGE_ATTACHMENTS_PRIMARY;
 
@@ -348,6 +352,7 @@ public class Keys {
 	}
 
 	private static class UniqueKeys0 extends org.jooq.impl.AbstractKeys {
+		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhAccountVedioconfRecord> KEY_EH_ACCOUNT_VEDIOCONF_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhAccountVedioconf.EH_ACCOUNT_VEDIOCONF, com.everhomes.server.schema.tables.EhAccountVedioconf.EH_ACCOUNT_VEDIOCONF.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhActivitiesRecord> KEY_EH_ACTIVITIES_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES, com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhActivitiesRecord> KEY_EH_ACTIVITIES_U_EH_UUID = createUniqueKey(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES, com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.UUID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhActivityRosterRecord> KEY_EH_ACTIVITY_ROSTER_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER, com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER.ID);
@@ -498,6 +503,7 @@ public class Keys {
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhScopedConfigurationsRecord> KEY_EH_SCOPED_CONFIGURATIONS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhScopedConfigurations.EH_SCOPED_CONFIGURATIONS, com.everhomes.server.schema.tables.EhScopedConfigurations.EH_SCOPED_CONFIGURATIONS.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhSearchKeywordsRecord> KEY_EH_SEARCH_KEYWORDS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhSearchKeywords.EH_SEARCH_KEYWORDS, com.everhomes.server.schema.tables.EhSearchKeywords.EH_SEARCH_KEYWORDS.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhSearchKeywordsRecord> KEY_EH_SEARCH_KEYWORDS_U_KWORD_SCOPED_KWORD = createUniqueKey(com.everhomes.server.schema.tables.EhSearchKeywords.EH_SEARCH_KEYWORDS, com.everhomes.server.schema.tables.EhSearchKeywords.EH_SEARCH_KEYWORDS.SCOPE, com.everhomes.server.schema.tables.EhSearchKeywords.EH_SEARCH_KEYWORDS.SCOPE_ID, com.everhomes.server.schema.tables.EhSearchKeywords.EH_SEARCH_KEYWORDS.KEYWORD);
+		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhSourceAccountRecord> KEY_EH_SOURCE_ACCOUNT_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhSourceAccount.EH_SOURCE_ACCOUNT, com.everhomes.server.schema.tables.EhSourceAccount.EH_SOURCE_ACCOUNT.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhStateTriggersRecord> KEY_EH_STATE_TRIGGERS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhStateTriggers.EH_STATE_TRIGGERS, com.everhomes.server.schema.tables.EhStateTriggers.EH_STATE_TRIGGERS.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhStatsByCityRecord> KEY_EH_STATS_BY_CITY_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhStatsByCity.EH_STATS_BY_CITY, com.everhomes.server.schema.tables.EhStatsByCity.EH_STATS_BY_CITY.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhStatsByCityRecord> KEY_EH_STATS_BY_CITY_U_STATS_CITY_REPORT = createUniqueKey(com.everhomes.server.schema.tables.EhStatsByCity.EH_STATS_BY_CITY, com.everhomes.server.schema.tables.EhStatsByCity.EH_STATS_BY_CITY.CITY_ID, com.everhomes.server.schema.tables.EhStatsByCity.EH_STATS_BY_CITY.STATS_DATE, com.everhomes.server.schema.tables.EhStatsByCity.EH_STATS_BY_CITY.STATS_TYPE);
@@ -541,6 +547,8 @@ public class Keys {
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhVersionUpgradeRulesRecord> KEY_EH_VERSION_UPGRADE_RULES_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhVersionUpgradeRules.EH_VERSION_UPGRADE_RULES, com.everhomes.server.schema.tables.EhVersionUpgradeRules.EH_VERSION_UPGRADE_RULES.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhVersionUrlsRecord> KEY_EH_VERSION_URLS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS, com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhVersionUrlsRecord> KEY_EH_VERSION_URLS_U_EH_VER_URL = createUniqueKey(com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS, com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS.REALM_ID, com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS.TARGET_VERSION);
+		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhVideoconfaccountRuleRecord> KEY_EH_VIDEOCONFACCOUNT_RULE_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhVideoconfaccountRule.EH_VIDEOCONFACCOUNT_RULE, com.everhomes.server.schema.tables.EhVideoconfaccountRule.EH_VIDEOCONFACCOUNT_RULE.ID);
+		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhWarningContactsRecord> KEY_EH_WARNING_CONTACTS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhWarningContacts.EH_WARNING_CONTACTS, com.everhomes.server.schema.tables.EhWarningContacts.EH_WARNING_CONTACTS.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhYellowPagesRecord> KEY_EH_YELLOW_PAGES_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhYellowPages.EH_YELLOW_PAGES, com.everhomes.server.schema.tables.EhYellowPages.EH_YELLOW_PAGES.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhYellowPageAttachmentsRecord> KEY_EH_YELLOW_PAGE_ATTACHMENTS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhYellowPageAttachments.EH_YELLOW_PAGE_ATTACHMENTS, com.everhomes.server.schema.tables.EhYellowPageAttachments.EH_YELLOW_PAGE_ATTACHMENTS.ID);
 	}

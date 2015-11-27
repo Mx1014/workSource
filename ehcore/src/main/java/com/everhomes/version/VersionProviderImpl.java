@@ -202,7 +202,7 @@ public class VersionProviderImpl implements VersionProvider {
         return null;
     }
 
-    @Cacheable(value="VersionUpgrade-Match", key="{#realmId, #version}", unless="#result == null")
+    @Cacheable(value="VersionUpgrade-Match", key="{#namespaceId, #realmId, #version}", unless="#result == null")
     @Override
     public VersionUpgradeRule matchVersionUpgradeRule(Integer namespaceId, long realmId, Version version) {
         double encodedValue = (double)version.getEncodedValue();
