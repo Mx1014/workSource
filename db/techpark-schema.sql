@@ -91,7 +91,7 @@ CREATE TABLE `eh_punch_exception_requests` (
   `punch_date` DATE COMMENT 'user punch date',
   `request_type` TINYINT(4) COMMENT '0:request ;  1:approval',
   `description` VARCHAR(256) ,
-  `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive, 1: waitingForApproval, 2:active',
+  `status` TINYINT  DEFAULT 1 COMMENT '0: inactive, 1: waitingForApproval, 2:active',
   `process_code` TINYINT COMMENT 'NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)',
   `process_details` TEXT,
   `creator_uid` BIGINT,
