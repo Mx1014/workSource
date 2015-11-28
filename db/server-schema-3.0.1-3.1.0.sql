@@ -466,12 +466,98 @@ CREATE TABLE `eh_lease_promotion_attachments` (
 	PRIMARY KEY (`id`) 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `eh_videoconfaccount_rule` (
+CREATE TABLE `eh_videoconf_account_rule` (
   `id` BIGINT NOT NULL COMMENT 'id',
   `account_type` TINYINT COMMENT '0-single 1-multiple',
   `conf_tpye` TINYINT COMMENT '0-25方仅视频 1-25方支持电话 2-100方仅视频 3-100方支持电话',
   `minimum_months` INT,
   `package_price` DECIMAL(10,2),
+  PRIMARY KEY (`id`)
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+ 
+CREATE TABLE `eh_order_invoice` (
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `order_id` BIGINT NOT NULL COMMENT 'order_id',
+  `taxpayer_type` TINYINT COMMENT '0-COMPANY_TAXPAYER 1-INDIVIDUAL_TAXPAYER',
+  `vat_type` TINYINT COMMENT '0-GENERAL_TAXPAYER 1-NON_GENERAL_TAXPAYER',
+  `expense_type` TINYINT COMMENT '0-CONF',
+  `company_name` VARCHAR(20),
+  `vat_code` VARCHAR(20),
+  `vat_address` VARCHAR(128),
+  `vat_phone` VARCHAR(20),
+  `vat_bankName` VARCHAR(20),
+  `vat_bankAccount` VARCHAR(20),
+  `address` VARCHAR(128),
+  `zip_code` VARCHAR(20),
+  `consignee` VARCHAR(20),
+  `contact` VARCHAR(20),
+  `contract_flag` TINYINT COMMENT '0-dont need 1-need',
+  PRIMARY KEY (`id`)
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+ 
+CREATE TABLE `eh_videoconf_order` (
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `order_id` BIGINT NOT NULL COMMENT 'order_id',
+  `enterprise_id` BIGINT NOT NULL COMMENT 'enterprise_id',
+  `quantity` INT,
+  `package_months` INT,
+  `amount` DECIMAL(10,2),
+  `invoice_flag` TINYINT COMMENT '0-dont need 1-need',
+  `make_out_flag` TINYINT COMMENT '0-uninvoice 1-invoiced',
+  `account_type` TINYINT COMMENT '0-single 1-multiple',
+  `conf_tpye` TINYINT COMMENT '0-25方仅视频 1-25方支持电话 2-100方仅视频 3-100方支持电话',
+  `buy_channel` TINYINT COMMENT '0-offline 1-online',
+  `create_time` DATETIME,
+  PRIMARY KEY (`id`)
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+ 
+CREATE TABLE `eh_order_account` (
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `order_id` BIGINT,
+  `enterprise_id` BIGINT,
+  `account_id` BIGINT,
+  PRIMARY KEY (`id`)
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+ 
+CREATE TABLE `eh_videoconf_account` (
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `enterprise_id` BIGINT NOT NULL COMMENT 'enterprise_id',
+  `valid_date` DATETIME,
+  `status` TINYINT COMMENT '0-invalid 1-valid 2-locked',
+  `account_type` TINYINT COMMENT '0-single 1-multiple',
+  `conf_tpye` TINYINT COMMENT '0-25方仅视频 1-25方支持电话 2-100方仅视频 3-100方支持电话',
+  `user_type` TINYINT COMMENT '0-trial user 1-new user 2-renewal user',
+  `occupy_flag` TINYINT COMMENT '0-available 1-occupied',
+  `delete_flag` TINYINT COMMENT '0-delete 1-active',
+  `update_time` DATETIME,
+  PRIMARY KEY (`id`)
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+ 
+CREATE TABLE `eh_enterprise_videoconf_account` (
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `enterprise_id` BIGINT NOT NULL COMMENT 'enterprise_id',
+  `account_id` BIGINT,
+  `user_id` BIGINT,
+  `contact_id` BIGINT,
+  `update_time` DATETIME,
+  PRIMARY KEY (`id`)
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+ 
+CREATE TABLE `eh_videoconf_enterprise` (
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `enterprise_id` BIGINT NOT NULL COMMENT 'enterprise_id',
+  `enterprise_contactor` VARCHAR(20),
+  `mobile` VARCHAR(20),
+  `status` TINYINT COMMENT '0-formally use 1-on trial 2-overdue',
+  `total_account` INT,
+  `valid_account` INT,
+  `valid_date` DATETIME,
+  `account_type` TINYINT COMMENT '0-single 1-multiple',
+  `conf_tpye` TINYINT COMMENT '0-25方仅视频 1-25方支持电话 2-100方仅视频 3-100方支持电话',
+  `buy_channel` TINYINT COMMENT '0-offline 1-online',
+  `lock_flag` TINYINT COMMENT '0-unlock 1-locked',
+  `community_id` BIGINT NOT NULL COMMENT ' enterprise  community id',
+  `update_time` DATETIME,
   PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
  

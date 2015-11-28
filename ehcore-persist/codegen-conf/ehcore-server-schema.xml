@@ -64,7 +64,8 @@
         eh_enterprise_attachments | eh_organization_assigned_scopes | eh_user_communities |
         eh_yellow_pages | eh_yellow_page_attachments | eh_namespace_resources | eh_enterprise_details | eh_enterprise_op_requests |
         eh_lease_promotions | eh_lease_promotion_attachments | 
-        eh_videoconfaccount_rule | eh_warning_contacts | eh_source_account | eh_account_vedioconf
+        eh_videoconf_account_rule | eh_order_invoice | eh_videoconf_order | eh_order_account | eh_videoconf_account | 
+        eh_enterprise_videoconf_account | eh_videoconf_enterprise | eh_warning_contacts | eh_source_account | eh_account_vedioconf 
         </includes>
             <!-- All elements that are excluded from your schema
             (A Java regular expression. Use the pipe to separate several expressions).

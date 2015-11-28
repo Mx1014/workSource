@@ -11,13 +11,12 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLeasePromotions implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1577790981;
+	private static final long serialVersionUID = -78467457;
 
 	private java.lang.Long     id;
 	private java.lang.Integer  namespaceId;
 	private java.lang.Long     communityId;
 	private java.lang.String   rentType;
-	private java.lang.String   posterUri;
 	private java.lang.String   subject;
 	private java.lang.String   rentAreas;
 	private java.lang.String   description;
@@ -33,7 +32,6 @@ public class EhLeasePromotions implements java.io.Serializable {
 		java.lang.Integer  namespaceId,
 		java.lang.Long     communityId,
 		java.lang.String   rentType,
-		java.lang.String   posterUri,
 		java.lang.String   subject,
 		java.lang.String   rentAreas,
 		java.lang.String   description,
@@ -46,7 +44,6 @@ public class EhLeasePromotions implements java.io.Serializable {
 		this.namespaceId = namespaceId;
 		this.communityId = communityId;
 		this.rentType = rentType;
-		this.posterUri = posterUri;
 		this.subject = subject;
 		this.rentAreas = rentAreas;
 		this.description = description;
@@ -86,14 +83,6 @@ public class EhLeasePromotions implements java.io.Serializable {
 
 	public void setRentType(java.lang.String rentType) {
 		this.rentType = rentType;
-	}
-
-	public java.lang.String getPosterUri() {
-		return this.posterUri;
-	}
-
-	public void setPosterUri(java.lang.String posterUri) {
-		this.posterUri = posterUri;
 	}
 
 	public java.lang.String getSubject() {

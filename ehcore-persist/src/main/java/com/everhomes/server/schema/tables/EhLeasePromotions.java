@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLeasePromotions extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord> {
 
-	private static final long serialVersionUID = -1513326753;
+	private static final long serialVersionUID = -2066059350;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_lease_promotions</code>
@@ -45,11 +45,6 @@ public class EhLeasePromotions extends org.jooq.impl.TableImpl<com.everhomes.ser
 	 * The column <code>ehcore.eh_lease_promotions.rent_type</code>. For rent
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord, java.lang.String> RENT_TYPE = createField("rent_type", org.jooq.impl.SQLDataType.VARCHAR.length(128).nullable(false).defaulted(true), this, "For rent");
-
-	/**
-	 * The column <code>ehcore.eh_lease_promotions.poster_uri</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord, java.lang.String> POSTER_URI = createField("poster_uri", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_lease_promotions.subject</code>.
