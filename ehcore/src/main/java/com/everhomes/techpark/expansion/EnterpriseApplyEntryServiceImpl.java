@@ -43,16 +43,16 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			ListEnterpriseDetailCommand cmd) {
 		
 		ListEnterpriseDetailResponse res = new ListEnterpriseDetailResponse();
+		//TODO: 这里分页有问题，先注释掉，查全部
+//		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+//		Integer offset = cmd.getPageAnchor() == null ? 0 : (cmd.getPageAnchor() - 1 ) * pageSize;
+		List<EnterpriseDetail> enterpriseDetails = enterpriseApplyEntryProvider.listEnterpriseDetails(cmd.getCommunityId(),cmd.getBuildingName(), 0, Integer.MAX_VALUE);
 		
-		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		Integer offset = cmd.getPageAnchor() == null ? 0 : (cmd.getPageAnchor() - 1 ) * pageSize;
-		List<EnterpriseDetail> enterpriseDetails = enterpriseApplyEntryProvider.listEnterpriseDetails(cmd.getCommunityId(),cmd.getBuildingName(), offset, pageSize + 1);
-		
-		if(enterpriseDetails != null && enterpriseDetails.size() > pageSize) {
-			enterpriseDetails.remove(enterpriseDetails.size() - 1);
-			res.setNextPageAnchor(cmd.getPageAnchor() + 1);
-		}
-		
+//		if(enterpriseDetails != null && enterpriseDetails.size() > pageSize) {
+//			enterpriseDetails.remove(enterpriseDetails.size() - 1);
+//			res.setNextPageAnchor(cmd.getPageAnchor() + 1);
+//		}
+//		
 		List<EnterpriseDetailDTO> dtos = enterpriseDetails.stream().map((c) ->{
 			// return ConvertHelper.convert(c, EnterpriseDetailDTO.class);
 		    return toEnterpriseDetailDTO(c);

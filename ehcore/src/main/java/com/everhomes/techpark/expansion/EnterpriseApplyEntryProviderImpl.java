@@ -58,6 +58,7 @@ public class EnterpriseApplyEntryProviderImpl implements
 	                .fetch().map((r) -> {
 	                	EnterpriseDetail enterpriseDetail = ConvertHelper.convert(r, EnterpriseDetail.class);
 	                	enterpriseDetail.setBuildingName(r.getValue(Tables.EH_ADDRESSES.BUILDING_NAME));
+	                	enterpriseDetail.setEnterpriseId(r.getValue(Tables.EH_ENTERPRISE_ADDRESSES.ENTERPRISE_ID));
 	                	enterpriseDetail.setId(r.getValue(Tables.EH_GROUPS.ID));
 	                	enterpriseDetail.setEnterpriseName(r.getValue(Tables.EH_GROUPS.NAME));
 	                	String description =  r.getValue(Tables.EH_ENTERPRISE_DETAILS.DESCRIPTION);

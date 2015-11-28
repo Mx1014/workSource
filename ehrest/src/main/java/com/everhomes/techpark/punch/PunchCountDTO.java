@@ -28,13 +28,16 @@ public class PunchCountDTO {
     private Integer workCount;
     private Integer belateCount;
     private Integer leaveEarlyCount;
-    private Integer unPunchCount;
+    private Double unPunchCount;
     private Integer blandleCount;
-    private Integer absenceCount;
-    private Integer sickCount;
-    private Integer exchangeCount;
-    private Integer outworkCount;
+    private Double absenceCount;
+    private Double sickCount;
+    private Double exchangeCount;
+    private Double outworkCount;
     private Long overTimeSum;
+	private java.lang.Byte     punchTimesPerDay;
+	
+	
     public Integer getWorkDayCount() {
 		return workDayCount;
 	}
@@ -59,10 +62,10 @@ public class PunchCountDTO {
 	public void setLeaveEarlyCount(Integer leaveEarlyCount) {
 		this.leaveEarlyCount = leaveEarlyCount;
 	}
-	public Integer getUnPunchCount() {
+	public Double getUnPunchCount() {
 		return unPunchCount;
 	}
-	public void setUnPunchCount(Integer unPunchCount) {
+	public void setUnPunchCount(Double unPunchCount) {
 		this.unPunchCount = unPunchCount;
 	}
 	public Integer getBlandleCount() {
@@ -70,29 +73,30 @@ public class PunchCountDTO {
 	}
 	public void setBlandleCount(Integer blandleCount) {
 		this.blandleCount = blandleCount;
-	}
-	public Integer getAbsenceCount() {
+	} 
+	
+	public Double getAbsenceCount() {
 		return absenceCount;
 	}
-	public void setAbsenceCount(Integer absenceCount) {
+	public void setAbsenceCount(Double absenceCount) {
 		this.absenceCount = absenceCount;
 	}
-	public Integer getSickCount() {
+	public Double getSickCount() {
 		return sickCount;
 	}
-	public void setSickCount(Integer sickCount) {
+	public void setSickCount(Double sickCount) {
 		this.sickCount = sickCount;
 	}
-	public Integer getExchangeCount() {
+	public Double getExchangeCount() {
 		return exchangeCount;
 	}
-	public void setExchangeCount(Integer exchangeCount) {
+	public void setExchangeCount(Double exchangeCount) {
 		this.exchangeCount = exchangeCount;
 	}
-	public Integer getOutworkCount() {
+	public Double getOutworkCount() {
 		return outworkCount;
 	}
-	public void setOutworkCount(Integer outworkCount) {
+	public void setOutworkCount(Double outworkCount) {
 		this.outworkCount = outworkCount;
 	}
 	public Long getUserId() {
@@ -122,5 +126,11 @@ public class PunchCountDTO {
 	}
 	public void setOverTimeSum(Long overTimeSum) {
 		this.overTimeSum = overTimeSum;
+	}
+	public java.lang.Byte getPunchTimesPerDay() {
+		return punchTimesPerDay;
+	}
+	public void setPunchTimesPerDay(java.lang.Byte punchTimesPerDay) {
+		this.punchTimesPerDay = punchTimesPerDay;
 	}
 }
