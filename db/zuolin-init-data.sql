@@ -8,6 +8,8 @@ ALTER TABLE eh_punch_day_logs CHANGE company_id `enterprise_id` BIGINT COMMENT '
 ALTER TABLE eh_punch_day_logs ADD COLUMN `morning_status` TINYINT  DEFAULT NULL COMMENT 'NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)';
 ALTER TABLE eh_punch_day_logs ADD COLUMN `afternoon_status` TINYINT  DEFAULT NULL COMMENT 'NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)';
 ALTER TABLE eh_punch_day_logs ADD COLUMN  `punch_times_per_day` TINYINT  NOT NULL DEFAULT 2 COMMENT '2 or  4 times';
+ALTER TABLE eh_punch_day_logs ADD COLUMN  `noon_leave_time` TIME ;
+ALTER TABLE eh_punch_day_logs ADD COLUMN `afternoon_arrive_time` TIME ; 
 
 ALTER TABLE `eh_punch_rules` CHANGE company_id `enterprise_id` BIGINT COMMENT 'compay id';
 ALTER TABLE eh_punch_rules ADD COLUMN  `noon_leave_time` TIME ;
