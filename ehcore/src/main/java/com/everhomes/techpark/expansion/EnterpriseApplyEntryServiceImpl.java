@@ -1,24 +1,31 @@
 package com.everhomes.techpark.expansion;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.enterprise.EnterpriseAttachment;
+import com.everhomes.enterprise.EnterpriseAttachmentDTO;
+import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 @Component
-public class EnterpriseApplyEntryServiceImpl implements
-		EnterpriseApplyEntryService {
-	
+public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseApplyEntryServiceImpl.class);
+    
 	@Autowired
 	private ConfigurationProvider configurationProvider;
 	
@@ -27,6 +34,9 @@ public class EnterpriseApplyEntryServiceImpl implements
 	
 	@Autowired
 	private ContentServerService contentServerService;
+	
+	@Autowired
+	private EnterpriseProvider enterpriseProvider;
 
 	@Override
 	public ListEnterpriseDetailResponse listEnterpriseDetails(
@@ -44,7 +54,8 @@ public class EnterpriseApplyEntryServiceImpl implements
 		}
 		
 		List<EnterpriseDetailDTO> dtos = enterpriseDetails.stream().map((c) ->{
-			return ConvertHelper.convert(c, EnterpriseDetailDTO.class);
+			// return ConvertHelper.convert(c, EnterpriseDetailDTO.class);
+		    return toEnterpriseDetailDTO(c);
 		}).collect(Collectors.toList());
 		
 		res.setDetails(dtos);
@@ -56,8 +67,44 @@ public class EnterpriseApplyEntryServiceImpl implements
 			GetEnterpriseDetailByIdCommand cmd) {
 		GetEnterpriseDetailByIdResponse res = new GetEnterpriseDetailByIdResponse();
 		EnterpriseDetail enterpriseDetail = enterpriseApplyEntryProvider.getEnterpriseDetailById(cmd.getId());
-		res.setDetail(ConvertHelper.convert(enterpriseDetail, EnterpriseDetailDTO.class));
+		// res.setDetail(ConvertHelper.convert(enterpriseDetail, EnterpriseDetailDTO.class));
+		res.setDetail(toEnterpriseDetailDTO(enterpriseDetail));
 		return res;
+	}
+	
+	private EnterpriseDetailDTO toEnterpriseDetailDTO(EnterpriseDetail enterpriseDetail) {
+	    User user = UserContext.current().getUser();
+	    Long userId = (user == null) ? -1L : user.getId();
+	    
+	    EnterpriseDetailDTO dto = null;
+	    if(enterpriseDetail != null) {
+	        dto = ConvertHelper.convert(enterpriseDetail, EnterpriseDetailDTO.class);
+	        
+	        List<EnterpriseAttachment> attachments = enterpriseProvider.listEnterpriseAttachments(enterpriseDetail.getEnterpriseId());
+	        if(attachments != null && attachments.size() > 0)
+	        {
+	            List<EnterpriseAttachmentDTO> attachmentDtoList = new ArrayList<EnterpriseAttachmentDTO>();
+	            for(EnterpriseAttachment attachment : attachments) {
+	                EnterpriseAttachmentDTO attachmentDto = ConvertHelper.convert(attachment, EnterpriseAttachmentDTO.class);
+	                String uri = attachment.getContentUri();
+	                if(uri != null && uri.length() > 0) {
+	                    try{
+	                        String url = contentServerService.parserUri(uri, EntityType.GROUP.getCode(), enterpriseDetail.getEnterpriseId());
+	                        attachmentDto.setContentUrl(url);
+	                    }catch(Exception e){
+	                        LOGGER.error("Failed to parse content uri of enterprise attachments, userId=" + userId 
+	                            + ", enterpriseId=" + enterpriseDetail.getEnterpriseId(), e);
+	                    }
+	                }
+	                
+	                attachmentDtoList.add(attachmentDto);
+	            }
+	            
+	            dto.setAttachments(attachmentDtoList);
+	        }
+	    }
+	    
+	    return dto;
 	}
 
 	@Override

@@ -1,20 +1,25 @@
 package com.everhomes.techpark.expansion;
 
+import java.sql.Timestamp;
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
+import com.everhomes.enterprise.EnterpriseAttachmentDTO;
 import com.everhomes.util.StringHelper;
 
 public class EnterpriseDetailDTO {
-	
 	private Long id;
-	
 	private Long enterpriseId;
-	
 	private String enterpriseName;
-	
 	private String contactPhone;
-	
 	private String address;
-	
 	private String description;
+    private Double longitude;
+    private Double latitude;
+    private String geohash;
+    private Timestamp createTime;
+    @ItemType(EnterpriseAttachmentDTO.class)
+    private List<EnterpriseAttachmentDTO> attachments;
 
 	public Long getId() {
 		return id;
@@ -64,7 +69,47 @@ public class EnterpriseDetailDTO {
 		this.enterpriseName = enterpriseName;
 	}
 	
-	@Override
+	public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public String getGeohash() {
+        return geohash;
+    }
+
+    public void setGeohash(String geohash) {
+        this.geohash = geohash;
+    }
+
+    public Timestamp getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Timestamp createTime) {
+        this.createTime = createTime;
+    }
+
+    public List<EnterpriseAttachmentDTO> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(List<EnterpriseAttachmentDTO> attachments) {
+        this.attachments = attachments;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

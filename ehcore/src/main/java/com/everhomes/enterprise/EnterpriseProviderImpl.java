@@ -22,6 +22,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.forum.Attachment;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupProvider;
@@ -40,6 +41,7 @@ import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseAddresses;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseAttachments;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseCommunityMap;
+import com.everhomes.server.schema.tables.pojos.EhForumPosts;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.records.EhEnterpriseAddressesRecord;
 import com.everhomes.server.schema.tables.records.EhEnterpriseAttachmentsRecord;
@@ -392,6 +394,16 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
         
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhEnterpriseAddresses.class, null);		
 	}
+	
+	@Override
+    public List<EnterpriseAttachment> listEnterpriseAttachments(long enterpriseId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class, enterpriseId));
+        
+        return context.selectFrom(Tables.EH_ENTERPRISE_ATTACHMENTS)
+            .where(Tables.EH_ENTERPRISE_ATTACHMENTS.ENTERPRISE_ID.eq(enterpriseId))
+            .fetch()
+            .map((r)-> { return ConvertHelper.convert(r, EnterpriseAttachment.class); } );
+    }
 
 	@Override
 	public void populateEnterpriseAttachments(Enterprise enterprise) {
