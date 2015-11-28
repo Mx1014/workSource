@@ -1,5 +1,33 @@
 USE `ehcore`;
 
+#alter tables
+ALTER TABLE `eh_punch_logs` ADD COLUMN  `identification` VARCHAR(255) COMMENT 'unique identification for a phone';
+ALTER TABLE `eh_punch_logs` CHANGE company_id `enterprise_id` BIGINT COMMENT 'compay id';
+ALTER TABLE eh_punch_day_logs CHANGE company_id `enterprise_id` BIGINT COMMENT 'compay id';
+ALTER TABLE eh_punch_day_logs ADD COLUMN `morning_status` TINYINT  DEFAULT NULL COMMENT 'NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)';
+ALTER TABLE eh_punch_day_logs ADD COLUMN `afternoon_status` TINYINT  DEFAULT NULL COMMENT 'NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)';
+ALTER TABLE eh_punch_day_logs ADD COLUMN  `punch_times_per_day` TINYINT  NOT NULL DEFAULT 2 COMMENT '2 or  4 times';
+
+ALTER TABLE `eh_punch_rules` CHANGE company_id `enterprise_id` BIGINT COMMENT 'compay id';
+ALTER TABLE eh_punch_rules ADD COLUMN  `noon_leave_time` TIME ;
+ALTER TABLE eh_punch_rules ADD COLUMN `afternoon_arrive_time` TIME ;
+ALTER TABLE eh_punch_rules ADD COLUMN  `punch_times_per_day` TINYINT  NOT NULL DEFAULT 2 COMMENT '2 or  4 times';
+
+ALTER TABLE `eh_punch_geopoints` CHANGE company_id `enterprise_id` BIGINT COMMENT 'compay id';
+
+ALTER TABLE `eh_punch_exception_requests` CHANGE company_id `enterprise_id` BIGINT COMMENT 'compay id';
+ALTER TABLE eh_punch_exception_requests  CHANGE process_code  `approval_status` TINYINT COMMENT 'NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)',
+ALTER TABLE eh_punch_exception_requests ADD COLUMN  `morning_approval_status` TINYINT  DEFAULT 1 COMMENT 'NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)',
+ALTER TABLE eh_punch_exception_requests ADD COLUMN   `afternoon_approval_status` TINYINT DEFAULT 1 COMMENT 'NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)',
+
+
+ALTER TABLE `eh_punch_exception_approvals` CHANGE company_id `enterprise_id` BIGINT COMMENT 'compay id';
+ALTER TABLE eh_punch_exception_approvals ADD COLUMN  `morning_approval_status` TINYINT  DEFAULT 1 COMMENT 'NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)',
+ALTER TABLE eh_punch_exception_approvals ADD COLUMN   `afternoon_approval_status` TINYINT DEFAULT 1 COMMENT 'NORMAL(0)BELATE(1)LEAVEEARLY(2)UNPUNCH(3)BLANDLE(4)ABSENCE(5)SICK(6)EXCHANGE(7)',
+ALTER TABLE eh_punch_exception_approvals ADD COLUMN  `punch_times_per_day` TINYINT  NOT NULL DEFAULT 2 COMMENT '2 or  4 times';
+
+ALTER TABLE `eh_punch_workday`  ADD COLUMN  `enterprise_id` BIGINT COMMENT 'compay id';
+
 
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`) 
 VALUES('233',UUID(),'5636851','深圳市','4151','南山区','武汉大学产学研大楼','武汉大学','深圳市南山区科技园',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1000087',NULL,'2','2015-11-05 14:43:25',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'1','3','4',NULL);
