@@ -14,11 +14,6 @@ package com.everhomes.server.schema;
 public class Tables {
 
 	/**
-	 * The table ehcore.eh_account_vedioconf
-	 */
-	public static final com.everhomes.server.schema.tables.EhAccountVedioconf EH_ACCOUNT_VEDIOCONF = com.everhomes.server.schema.tables.EhAccountVedioconf.EH_ACCOUNT_VEDIOCONF;
-
-	/**
 	 * The table ehcore.eh_activities
 	 */
 	public static final com.everhomes.server.schema.tables.EhActivities EH_ACTIVITIES = com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES;
@@ -309,16 +304,6 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhLaunchPadLayouts EH_LAUNCH_PAD_LAYOUTS = com.everhomes.server.schema.tables.EhLaunchPadLayouts.EH_LAUNCH_PAD_LAYOUTS;
 
 	/**
-	 * The table ehcore.eh_lease_promotions
-	 */
-	public static final com.everhomes.server.schema.tables.EhLeasePromotions EH_LEASE_PROMOTIONS = com.everhomes.server.schema.tables.EhLeasePromotions.EH_LEASE_PROMOTIONS;
-
-	/**
-	 * The table ehcore.eh_lease_promotion_attachments
-	 */
-	public static final com.everhomes.server.schema.tables.EhLeasePromotionAttachments EH_LEASE_PROMOTION_ATTACHMENTS = com.everhomes.server.schema.tables.EhLeasePromotionAttachments.EH_LEASE_PROMOTION_ATTACHMENTS;
-
-	/**
 	 * The table ehcore.eh_links
 	 */
 	public static final com.everhomes.server.schema.tables.EhLinks EH_LINKS = com.everhomes.server.schema.tables.EhLinks.EH_LINKS;
@@ -574,11 +559,6 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhSearchKeywords EH_SEARCH_KEYWORDS = com.everhomes.server.schema.tables.EhSearchKeywords.EH_SEARCH_KEYWORDS;
 
 	/**
-	 * The table ehcore.eh_source_account
-	 */
-	public static final com.everhomes.server.schema.tables.EhSourceAccount EH_SOURCE_ACCOUNT = com.everhomes.server.schema.tables.EhSourceAccount.EH_SOURCE_ACCOUNT;
-
-	/**
 	 * The table ehcore.eh_state_triggers
 	 */
 	public static final com.everhomes.server.schema.tables.EhStateTriggers EH_STATE_TRIGGERS = com.everhomes.server.schema.tables.EhStateTriggers.EH_STATE_TRIGGERS;
@@ -712,16 +692,6 @@ public class Tables {
 	 * The table ehcore.eh_version_urls
 	 */
 	public static final com.everhomes.server.schema.tables.EhVersionUrls EH_VERSION_URLS = com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS;
-
-	/**
-	 * The table ehcore.eh_videoconfaccount_rule
-	 */
-	public static final com.everhomes.server.schema.tables.EhVideoconfaccountRule EH_VIDEOCONFACCOUNT_RULE = com.everhomes.server.schema.tables.EhVideoconfaccountRule.EH_VIDEOCONFACCOUNT_RULE;
-
-	/**
-	 * The table ehcore.eh_warning_contacts
-	 */
-	public static final com.everhomes.server.schema.tables.EhWarningContacts EH_WARNING_CONTACTS = com.everhomes.server.schema.tables.EhWarningContacts.EH_WARNING_CONTACTS;
 
 	/**
 	 * The table ehcore.eh_yellow_pages

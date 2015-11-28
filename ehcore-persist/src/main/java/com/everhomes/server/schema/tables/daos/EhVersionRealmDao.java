@@ -55,13 +55,6 @@ public class EhVersionRealmDao extends org.jooq.impl.DAOImpl<com.everhomes.serve
 	}
 
 	/**
-	 * Fetch a unique record that has <code>realm = value</code>
-	 */
-	public com.everhomes.server.schema.tables.pojos.EhVersionRealm fetchOneByRealm(java.lang.String value) {
-		return fetchOne(com.everhomes.server.schema.tables.EhVersionRealm.EH_VERSION_REALM.REALM, value);
-	}
-
-	/**
 	 * Fetch records that have <code>description IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhVersionRealm> fetchByDescription(java.lang.String... values) {

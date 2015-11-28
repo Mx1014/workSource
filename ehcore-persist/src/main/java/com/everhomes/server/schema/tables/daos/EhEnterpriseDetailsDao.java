@@ -76,6 +76,27 @@ public class EhEnterpriseDetailsDao extends org.jooq.impl.DAOImpl<com.everhomes.
 	}
 
 	/**
+	 * Fetch records that have <code>longitude IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhEnterpriseDetails> fetchByLongitude(java.lang.Double... values) {
+		return fetch(com.everhomes.server.schema.tables.EhEnterpriseDetails.EH_ENTERPRISE_DETAILS.LONGITUDE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>latitude IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhEnterpriseDetails> fetchByLatitude(java.lang.Double... values) {
+		return fetch(com.everhomes.server.schema.tables.EhEnterpriseDetails.EH_ENTERPRISE_DETAILS.LATITUDE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>geohash IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhEnterpriseDetails> fetchByGeohash(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhEnterpriseDetails.EH_ENTERPRISE_DETAILS.GEOHASH, values);
+	}
+
+	/**
 	 * Fetch records that have <code>create_time IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhEnterpriseDetails> fetchByCreateTime(java.sql.Timestamp... values) {

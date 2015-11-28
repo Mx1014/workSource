@@ -11,13 +11,16 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhEnterpriseDetails implements java.io.Serializable {
 
-	private static final long serialVersionUID = 176189544;
+	private static final long serialVersionUID = -900329482;
 
 	private java.lang.Long     id;
 	private java.lang.Long     enterpriseId;
 	private java.lang.String   description;
 	private java.lang.String   contact;
 	private java.lang.String   address;
+	private java.lang.Double   longitude;
+	private java.lang.Double   latitude;
+	private java.lang.String   geohash;
 	private java.sql.Timestamp createTime;
 
 	public EhEnterpriseDetails() {}
@@ -28,6 +31,9 @@ public class EhEnterpriseDetails implements java.io.Serializable {
 		java.lang.String   description,
 		java.lang.String   contact,
 		java.lang.String   address,
+		java.lang.Double   longitude,
+		java.lang.Double   latitude,
+		java.lang.String   geohash,
 		java.sql.Timestamp createTime
 	) {
 		this.id = id;
@@ -35,6 +41,9 @@ public class EhEnterpriseDetails implements java.io.Serializable {
 		this.description = description;
 		this.contact = contact;
 		this.address = address;
+		this.longitude = longitude;
+		this.latitude = latitude;
+		this.geohash = geohash;
 		this.createTime = createTime;
 	}
 
@@ -76,6 +85,30 @@ public class EhEnterpriseDetails implements java.io.Serializable {
 
 	public void setAddress(java.lang.String address) {
 		this.address = address;
+	}
+
+	public java.lang.Double getLongitude() {
+		return this.longitude;
+	}
+
+	public void setLongitude(java.lang.Double longitude) {
+		this.longitude = longitude;
+	}
+
+	public java.lang.Double getLatitude() {
+		return this.latitude;
+	}
+
+	public void setLatitude(java.lang.Double latitude) {
+		this.latitude = latitude;
+	}
+
+	public java.lang.String getGeohash() {
+		return this.geohash;
+	}
+
+	public void setGeohash(java.lang.String geohash) {
+		this.geohash = geohash;
 	}
 
 	public java.sql.Timestamp getCreateTime() {

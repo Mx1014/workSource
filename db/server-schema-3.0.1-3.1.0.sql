@@ -400,6 +400,9 @@ CREATE TABLE `eh_enterprise_details` (
 	`description` text COMMENT 'description', 
 	`contact` VARCHAR(128) COMMENT 'the phone number',
 	`address` VARCHAR(256) COMMENT 'address str', 
+    `longitude` DOUBLE,
+    `latitude` DOUBLE,
+    `geohash` VARCHAR(32),
     `create_time` DATETIME,
 	PRIMARY KEY (`id`) 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4; 
@@ -434,8 +437,6 @@ CREATE TABLE `eh_enterprise_op_requests` (
 # member of global partition
 #
 
-
- DROP TABLE `eh_lease_promotions`;
 
  CREATE TABLE `eh_lease_promotions` ( 
 	`id` BIGINT NOT NULL COMMENT 'id of the record', 

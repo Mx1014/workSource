@@ -11,7 +11,7 @@ package com.everhomes.server.schema;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Ehcore extends org.jooq.impl.SchemaImpl {
 
-	private static final long serialVersionUID = 1688219738;
+	private static final long serialVersionUID = -414386739;
 
 	/**
 	 * The singleton instance of <code>ehcore</code>
@@ -34,7 +34,6 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 
 	private final java.util.List<org.jooq.Table<?>> getTables0() {
 		return java.util.Arrays.<org.jooq.Table<?>>asList(
-			com.everhomes.server.schema.tables.EhAccountVedioconf.EH_ACCOUNT_VEDIOCONF,
 			com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES,
 			com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER,
 			com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES,
@@ -93,8 +92,6 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhGroupVisibleScopes.EH_GROUP_VISIBLE_SCOPES,
 			com.everhomes.server.schema.tables.EhLaunchPadItems.EH_LAUNCH_PAD_ITEMS,
 			com.everhomes.server.schema.tables.EhLaunchPadLayouts.EH_LAUNCH_PAD_LAYOUTS,
-			com.everhomes.server.schema.tables.EhLeasePromotions.EH_LEASE_PROMOTIONS,
-			com.everhomes.server.schema.tables.EhLeasePromotionAttachments.EH_LEASE_PROMOTION_ATTACHMENTS,
 			com.everhomes.server.schema.tables.EhLinks.EH_LINKS,
 			com.everhomes.server.schema.tables.EhLocaleStrings.EH_LOCALE_STRINGS,
 			com.everhomes.server.schema.tables.EhLocaleTemplates.EH_LOCALE_TEMPLATES,
@@ -146,7 +143,6 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhRtxtResources.EH_RTXT_RESOURCES,
 			com.everhomes.server.schema.tables.EhScopedConfigurations.EH_SCOPED_CONFIGURATIONS,
 			com.everhomes.server.schema.tables.EhSearchKeywords.EH_SEARCH_KEYWORDS,
-			com.everhomes.server.schema.tables.EhSourceAccount.EH_SOURCE_ACCOUNT,
 			com.everhomes.server.schema.tables.EhStateTriggers.EH_STATE_TRIGGERS,
 			com.everhomes.server.schema.tables.EhStatsByCity.EH_STATS_BY_CITY,
 			com.everhomes.server.schema.tables.EhTemplates.EH_TEMPLATES,
@@ -174,8 +170,6 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhVersionRealm.EH_VERSION_REALM,
 			com.everhomes.server.schema.tables.EhVersionUpgradeRules.EH_VERSION_UPGRADE_RULES,
 			com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS,
-			com.everhomes.server.schema.tables.EhVideoconfaccountRule.EH_VIDEOCONFACCOUNT_RULE,
-			com.everhomes.server.schema.tables.EhWarningContacts.EH_WARNING_CONTACTS,
 			com.everhomes.server.schema.tables.EhYellowPages.EH_YELLOW_PAGES,
 			com.everhomes.server.schema.tables.EhYellowPageAttachments.EH_YELLOW_PAGE_ATTACHMENTS);
 	}
