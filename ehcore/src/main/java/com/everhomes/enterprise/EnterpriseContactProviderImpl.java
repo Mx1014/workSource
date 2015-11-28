@@ -703,7 +703,30 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
             return ConvertHelper.convert(r, EnterpriseContactGroupMember.class);
         });
     }
-    
+
+    @Override
+    public  List<EnterpriseContactGroupMember> listContactGroupMemberByContactGroupId(Long enterpriseId, Long groupId) {
+        ListingLocator locator = new ListingLocator();
+        
+        List<EnterpriseContactGroupMember> members = this.queryContactGroupMemberByEnterpriseId(locator, enterpriseId, 1, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS.ENTERPRISE_ID.eq(enterpriseId));
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS.CONTACT_GROUP_ID.eq(groupId));
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACT_GROUP_MEMBERS.CONTACT_STATUS.ne(EnterpriseGroupMemberStatus.INACTIVE.getCode()));
+                return query;
+            }
+            
+        });
+        
+        if(null != members && members.size() > 0) {
+            return members;
+        }
+        
+        return null;
+    }
     @Override
     public EnterpriseContactGroupMember getContactGroupMemberByContactId(Long enterpriseId, Long contactId, Long groupId) {
         ListingLocator locator = new ListingLocator();
@@ -988,6 +1011,48 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
             return contacts.get(0);
         }
         return null;
+	}
+
+	@Override
+	public List<EnterpriseContact> queryEnterpriseContactByKeywordAndGroupId(
+			Long enterpriseId,String keyword, Long enterpriseGroupId) {
+		// TODO Auto-generated method stub
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		List<Long> contactIds = new ArrayList<Long>();
+		if(enterpriseGroupId!=null ){
+			List<EnterpriseContactGroupMember> groupMembers = this.listContactGroupMemberByContactGroupId(enterpriseId, enterpriseGroupId);
+	       
+	        for(EnterpriseContactGroupMember member : groupMembers ){
+	        	contactIds.add(member.getContactId());
+	        }
+        }
+		final List<EnterpriseContact> contacts = new ArrayList<EnterpriseContact>();
+        if(locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhGroups.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            
+            locator.setShardIterator(shardIterator);
+        }
+        
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
+            SelectQuery<EhEnterpriseContactsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CONTACTS); 
+            if(!StringUtils.isEmpty(keyword)){
+            	query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.NAME.like("%"+keyword+"%"));
+            }
+            if(enterpriseGroupId!=null ){
+            	 query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.ID.in(contactIds));
+            }
+            if(null!=enterpriseId){
+            	query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.ENTERPRISE_ID.in(enterpriseId));
+            }
+            List<EhEnterpriseContactsRecord> records = query.fetch().map(new EnterpriseContactRecordMapper());
+            records.stream().map((r) -> {
+                contacts.add(ConvertHelper.convert(r, EnterpriseContact.class));
+                return null;
+            }).collect(Collectors.toList());
+            return AfterAction.next;
+        });
+        return contacts;
 	}
 
 //    @Override

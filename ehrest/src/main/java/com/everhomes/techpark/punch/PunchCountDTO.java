@@ -36,6 +36,7 @@ public class PunchCountDTO {
     private Double outworkCount;
     private Long overTimeSum;
 	private java.lang.Byte     punchTimesPerDay;
+	private String userEnterpriseGroup;
 	
 	
     public Integer getWorkDayCount() {
@@ -132,5 +133,11 @@ public class PunchCountDTO {
 	}
 	public void setPunchTimesPerDay(java.lang.Byte punchTimesPerDay) {
 		this.punchTimesPerDay = punchTimesPerDay;
+	}
+	public String getUserEnterpriseGroup() {
+		return userEnterpriseGroup;
+	}
+	public void setUserEnterpriseGroup(String userEnterpriseGroup) {
+		this.userEnterpriseGroup = userEnterpriseGroup;
 	}
 }

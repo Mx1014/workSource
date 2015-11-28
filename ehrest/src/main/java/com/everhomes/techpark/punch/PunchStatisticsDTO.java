@@ -28,6 +28,7 @@ public class PunchStatisticsDTO{
 	private Long     id;
 	private Long     userId;
 	private String     userName;
+	private String userEnterpriseGroup;
 	private String userDepartment;
 	private String     userPhoneNumber;
 	private Long     enterpriseId;
@@ -286,6 +287,16 @@ public class PunchStatisticsDTO{
 
 	public void setEnterpriseId(Long enterpriseId) {
 		this.enterpriseId = enterpriseId;
+	}
+
+
+	public String getUserEnterpriseGroup() {
+		return userEnterpriseGroup;
+	}
+
+
+	public void setUserEnterpriseGroup(String userEnterpriseGroup) {
+		this.userEnterpriseGroup = userEnterpriseGroup;
 	}
 
 

@@ -20,6 +20,7 @@ public class ListPunchCountCommand {
 	
 	private String endDay;
 	
+	private Long enterpriseGroupId;
 	
 	public ListPunchCountCommand() {
     } 
@@ -44,5 +45,11 @@ public class ListPunchCountCommand {
 	}
 	public void setEnterpriseId(Long enterpriseId) {
 		this.enterpriseId = enterpriseId;
+	}
+	public Long getEnterpriseGroupId() {
+		return enterpriseGroupId;
+	}
+	public void setEnterpriseGroupId(Long enterpriseGroupId) {
+		this.enterpriseGroupId = enterpriseGroupId;
 	}
 }

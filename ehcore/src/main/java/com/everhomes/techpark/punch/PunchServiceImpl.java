@@ -1531,7 +1531,7 @@ public class PunchServiceImpl implements PunchService {
 		ListPunchStatisticsCommandResponse response = new ListPunchStatisticsCommandResponse();
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
 		List<EnterpriseContact> enterpriseContacts = enterpriseContactProvider
-				.queryEnterpriseContactByKeyword(cmd.getKeyword());
+				.queryEnterpriseContactByKeywordAndGroupId(cmd.getEnterpriseId(), cmd.getKeyword(), cmd.getEnterpriseGroupId());
 		List<Long> userIds = new ArrayList<Long>();
 		for (EnterpriseContact enterpriseContact : enterpriseContacts) {
 			userIds.add(enterpriseContact.getUserId());
@@ -1566,8 +1566,9 @@ public class PunchServiceImpl implements PunchService {
 						EnterpriseContact enterpriseContact = enterpriseContactService
 								.queryContactByUserId(cmd.getEnterpriseId(),
 										dto.getUserId());
+						
 						if (null != enterpriseContact) {
-
+							dto.setUserEnterpriseGroup(enterpriseContact.getApplyGroup());
 							dto.setUserName(enterpriseContact.getName());
 							dto.setUserPhoneNumber(enterpriseContactProvider
 									.queryContactEntryByContactId(
@@ -1689,10 +1690,9 @@ public class PunchServiceImpl implements PunchService {
 		List<PunchCountDTO> punchCountDTOList = new ArrayList<PunchCountDTO>();
 		Integer workDayCount = countWorkDayCount(cmd.getStartDay(),
 				cmd.getEndDay());
-		List<PunchDayLogDTO> punchDayLogDTOList = punchProvider
-				.listPunchDayLogs(cmd.getEnterpriseId(), cmd.getStartDay(),
-						cmd.getEndDay());
-		Map<Long, List<PunchDayLogDTO>> map = buildUserPunchCountMap(punchDayLogDTOList);
+		ListPunchStatisticsCommand paramCommand =  ConvertHelper.convert(cmd, ListPunchStatisticsCommand.class );
+		List<PunchStatisticsDTO>punchDayLogDTOList =  this.listPunchStatistics(paramCommand).getPunchList();
+		Map<Long, List<PunchStatisticsDTO>> map = buildUserPunchCountMap(punchDayLogDTOList);
 		PunchRule rule = this.punchProvider.getPunchRuleByCompanyId(cmd.getEnterpriseId());
 		Set<Long> userIds = map.keySet();
 		for (Long userId : userIds) {
@@ -1708,7 +1708,9 @@ public class PunchServiceImpl implements PunchService {
 					.queryContactEntryByContactId(enterpriseContact,
 							ContactType.MOBILE.getCode()).get(0)
 					.getEntryValue());
-			List<PunchDayLogDTO> list = map.get(userId);
+			dto.setWorkDayCount(workDayCount);
+			List<PunchStatisticsDTO> list = map.get(userId);
+			dto.setUserEnterpriseGroup(list.get(0).getUserEnterpriseGroup());
 			if(dto.getPunchTimesPerDay().equals(PunchTimesPerDay.TWICE.getCode())){
 				processTwicePunchListCount(list, dto);
 			}
@@ -1723,12 +1725,8 @@ public class PunchServiceImpl implements PunchService {
 		return response;
 	}
 
-	private void processForthPunchListCount(List<PunchDayLogDTO> list,
+	private void processForthPunchListCount(List<PunchStatisticsDTO> list,
 			PunchCountDTO dto) {
-		// TODO Auto-generated method stub
-		
-	}
-	private void processTwicePunchListCount(List<PunchDayLogDTO> list, PunchCountDTO dto) {
 		// TODO Auto-generated method stub
 		dto.setWorkCount(0);
 		dto.setUnPunchCount(0.0);
@@ -1740,7 +1738,142 @@ public class PunchServiceImpl implements PunchService {
 		dto.setBelateCount(0);
 		dto.setAbsenceCount(0.0); 
 		dto.setOverTimeSum(0L); 
-		for (PunchDayLogDTO punchDayLogDTO : list) {
+		for (PunchStatisticsDTO punchDayLogDTO : list) {
+			if (punchDayLogDTO.getMorningApprovalStatus() != null) {
+				//上午
+				if(ApprovalStatus.UNPUNCH.getCode() == punchDayLogDTO.getMorningApprovalStatus()){
+					dto.setUnPunchCount(dto.getUnPunchCount()+0.5);
+				}else if(ApprovalStatus.SICK.getCode() == punchDayLogDTO.getMorningApprovalStatus()){
+					dto.setSickCount(dto.getSickCount()+0.5);
+				}else if(ApprovalStatus.HALFSICK.getCode() == punchDayLogDTO.getMorningApprovalStatus()){
+					dto.setSickCount(dto.getSickCount()+0.5);
+				}else if(ApprovalStatus.OUTWORK.getCode() == punchDayLogDTO.getMorningApprovalStatus()){
+					dto.setOutworkCount(dto.getOutworkCount()+0.5);
+				}else if(ApprovalStatus.HALFOUTWORK.getCode() == punchDayLogDTO.getMorningApprovalStatus()){
+					dto.setOutworkCount(dto.getOutworkCount()+0.5);
+				}else if(ApprovalStatus.LEAVEEARLY.getCode() == punchDayLogDTO.getMorningApprovalStatus()){
+					dto.setLeaveEarlyCount(dto.getLeaveEarlyCount()+1);
+				}else if(ApprovalStatus.EXCHANGE.getCode() == punchDayLogDTO.getMorningApprovalStatus()){
+					dto.setExchangeCount(dto.getExchangeCount()+0.5);
+				}else if(ApprovalStatus.HALFEXCHANGE.getCode() == punchDayLogDTO.getMorningApprovalStatus()){
+					dto.setExchangeCount(dto.getExchangeCount()+0.5);
+				}else if(ApprovalStatus.BLANDLE.getCode() == punchDayLogDTO.getMorningApprovalStatus()){
+					dto.setBlandleCount(dto.getBlandleCount()+1);
+				}else if(ApprovalStatus.BELATE.getCode() == punchDayLogDTO.getMorningApprovalStatus()){
+					dto.setBelateCount(dto.getBelateCount()+1);
+				}else if(ApprovalStatus.ABSENCE.getCode() == punchDayLogDTO.getMorningApprovalStatus()){
+					dto.setAbsenceCount(dto.getAbsenceCount()+0.5);
+				}else if(ApprovalStatus.HALFABSENCE.getCode() == punchDayLogDTO.getMorningApprovalStatus()){
+					dto.setAbsenceCount(dto.getAbsenceCount()+0.5);
+				}
+				//下午
+				
+				if(ApprovalStatus.UNPUNCH.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()){
+					dto.setUnPunchCount(dto.getUnPunchCount()+0.5);
+				}else if(ApprovalStatus.SICK.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()){
+					dto.setSickCount(dto.getSickCount()+0.5);
+				}else if(ApprovalStatus.HALFSICK.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()){
+					dto.setSickCount(dto.getSickCount()+0.5);
+				}else if(ApprovalStatus.OUTWORK.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()){
+					dto.setOutworkCount(dto.getOutworkCount()+0.5);
+				}else if(ApprovalStatus.HALFOUTWORK.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()){
+					dto.setOutworkCount(dto.getOutworkCount()+0.5);
+				}else if(ApprovalStatus.LEAVEEARLY.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()){
+					dto.setLeaveEarlyCount(dto.getLeaveEarlyCount()+1);
+				}else if(ApprovalStatus.EXCHANGE.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()){
+					dto.setExchangeCount(dto.getExchangeCount()+0.5);
+				}else if(ApprovalStatus.HALFEXCHANGE.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()){
+					dto.setExchangeCount(dto.getExchangeCount()+0.5);
+				}else if(ApprovalStatus.BLANDLE.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()){
+					dto.setBlandleCount(dto.getBlandleCount()+1);
+				}else if(ApprovalStatus.BELATE.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()){
+					dto.setBelateCount(dto.getBelateCount()+1);
+				}else if(ApprovalStatus.ABSENCE.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()){
+					dto.setAbsenceCount(dto.getAbsenceCount()+0.5);
+				}else if(ApprovalStatus.HALFABSENCE.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()){
+					dto.setAbsenceCount(dto.getAbsenceCount()+0.5);
+				}
+				//加班和正常
+				if(ApprovalStatus.OVERTIME.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()||ApprovalStatus.OVERTIME.getCode() == punchDayLogDTO.getMorningApprovalStatus()){
+					dto.setOverTimeSum(dto.getOverTimeSum()+ punchDayLogDTO.getWorkTime());
+				}else  if(ApprovalStatus.NORMAL.getCode() == punchDayLogDTO.getAfternoonApprovalStatus()&&ApprovalStatus.NORMAL.getCode() == punchDayLogDTO.getMorningApprovalStatus()) {
+					dto.setWorkCount(dto.getWorkCount()+1);
+				}
+			} else {
+				//上午
+				if(ApprovalStatus.UNPUNCH.getCode() == punchDayLogDTO.getMorningStatus()){
+					dto.setUnPunchCount(dto.getUnPunchCount()+0.5);
+				}else if(ApprovalStatus.SICK.getCode() == punchDayLogDTO.getMorningStatus()){
+					dto.setSickCount(dto.getSickCount()+0.5);
+				}else if(ApprovalStatus.HALFSICK.getCode() == punchDayLogDTO.getMorningStatus()){
+					dto.setSickCount(dto.getSickCount()+0.5);
+				}else if(ApprovalStatus.OUTWORK.getCode() == punchDayLogDTO.getMorningStatus()){
+					dto.setOutworkCount(dto.getOutworkCount()+0.5);
+				}else if(ApprovalStatus.HALFOUTWORK.getCode() == punchDayLogDTO.getMorningStatus()){
+					dto.setOutworkCount(dto.getOutworkCount()+0.5);
+				}else if(ApprovalStatus.LEAVEEARLY.getCode() == punchDayLogDTO.getMorningStatus()){
+					dto.setLeaveEarlyCount(dto.getLeaveEarlyCount()+1);
+				}else if(ApprovalStatus.EXCHANGE.getCode() == punchDayLogDTO.getMorningStatus()){
+					dto.setExchangeCount(dto.getExchangeCount()+0.5);
+				}else if(ApprovalStatus.HALFEXCHANGE.getCode() == punchDayLogDTO.getMorningStatus()){
+					dto.setExchangeCount(dto.getExchangeCount()+0.5);
+				}else if(ApprovalStatus.BLANDLE.getCode() == punchDayLogDTO.getMorningStatus()){
+					dto.setBlandleCount(dto.getBlandleCount()+1);
+				}else if(ApprovalStatus.BELATE.getCode() == punchDayLogDTO.getMorningStatus()){
+					dto.setBelateCount(dto.getBelateCount()+1);
+				}else if(ApprovalStatus.ABSENCE.getCode() == punchDayLogDTO.getMorningStatus()){
+					dto.setAbsenceCount(dto.getAbsenceCount()+0.5);
+				}else if(ApprovalStatus.HALFABSENCE.getCode() == punchDayLogDTO.getMorningStatus()){
+					dto.setAbsenceCount(dto.getAbsenceCount()+0.5);
+				}
+				//下午
+				
+				if(ApprovalStatus.UNPUNCH.getCode() == punchDayLogDTO.getAfternoonStatus()){
+					dto.setUnPunchCount(dto.getUnPunchCount()+0.5);
+				}else if(ApprovalStatus.SICK.getCode() == punchDayLogDTO.getAfternoonStatus()){
+					dto.setSickCount(dto.getSickCount()+0.5);
+				}else if(ApprovalStatus.HALFSICK.getCode() == punchDayLogDTO.getAfternoonStatus()){
+					dto.setSickCount(dto.getSickCount()+0.5);
+				}else if(ApprovalStatus.OUTWORK.getCode() == punchDayLogDTO.getAfternoonStatus()){
+					dto.setOutworkCount(dto.getOutworkCount()+0.5);
+				}else if(ApprovalStatus.HALFOUTWORK.getCode() == punchDayLogDTO.getAfternoonStatus()){
+					dto.setOutworkCount(dto.getOutworkCount()+0.5);
+				}else if(ApprovalStatus.LEAVEEARLY.getCode() == punchDayLogDTO.getAfternoonStatus()){
+					dto.setLeaveEarlyCount(dto.getLeaveEarlyCount()+1);
+				}else if(ApprovalStatus.EXCHANGE.getCode() == punchDayLogDTO.getAfternoonStatus()){
+					dto.setExchangeCount(dto.getExchangeCount()+0.5);
+				}else if(ApprovalStatus.HALFEXCHANGE.getCode() == punchDayLogDTO.getAfternoonStatus()){
+					dto.setExchangeCount(dto.getExchangeCount()+0.5);
+				}else if(ApprovalStatus.BLANDLE.getCode() == punchDayLogDTO.getAfternoonStatus()){
+					dto.setBlandleCount(dto.getBlandleCount()+1);
+				}else if(ApprovalStatus.BELATE.getCode() == punchDayLogDTO.getAfternoonStatus()){
+					dto.setBelateCount(dto.getBelateCount()+1);
+				}else if(ApprovalStatus.ABSENCE.getCode() == punchDayLogDTO.getAfternoonStatus()){
+					dto.setAbsenceCount(dto.getAbsenceCount()+0.5);
+				}else if(ApprovalStatus.HALFABSENCE.getCode() == punchDayLogDTO.getAfternoonStatus()){
+					dto.setAbsenceCount(dto.getAbsenceCount()+0.5);
+				}
+				//加班和正常
+				if(ApprovalStatus.OVERTIME.getCode() == punchDayLogDTO.getAfternoonStatus()||ApprovalStatus.OVERTIME.getCode() == punchDayLogDTO.getMorningStatus()){
+					dto.setOverTimeSum(dto.getOverTimeSum()+ punchDayLogDTO.getWorkTime());
+				}else  if(ApprovalStatus.NORMAL.getCode() == punchDayLogDTO.getAfternoonStatus()&&ApprovalStatus.NORMAL.getCode() == punchDayLogDTO.getMorningStatus()) {
+					dto.setWorkCount(dto.getWorkCount()+1);
+				} 
+			}
+		}
+	}
+	private void processTwicePunchListCount(List<PunchStatisticsDTO> list, PunchCountDTO dto) {
+		dto.setWorkCount(0);
+		dto.setUnPunchCount(0.0);
+		dto.setSickCount(0.0);
+		dto.setOutworkCount(0.0);
+		dto.setLeaveEarlyCount(0);
+		dto.setExchangeCount(0.0);
+		dto.setBlandleCount(0);
+		dto.setBelateCount(0);
+		dto.setAbsenceCount(0.0); 
+		dto.setOverTimeSum(0L); 
+		for (PunchStatisticsDTO punchDayLogDTO : list) {
 			if (punchDayLogDTO.getApprovalStatus() != null) {
 				if (ApprovalStatus.NORMAL.getCode() == punchDayLogDTO.getApprovalStatus()) {
 					dto.setWorkCount(dto.getWorkCount()+1);
@@ -1772,33 +1905,33 @@ public class PunchServiceImpl implements PunchService {
 					dto.setOverTimeSum(dto.getOverTimeSum()+ punchDayLogDTO.getWorkTime());
 				} 
 			} else {
-				if (ApprovalStatus.NORMAL.getCode() == punchDayLogDTO.getApprovalStatus()) {
+				if (ApprovalStatus.NORMAL.getCode() == punchDayLogDTO.getStatus()) {
 					dto.setWorkCount(dto.getWorkCount()+1);
-				}else if(ApprovalStatus.UNPUNCH.getCode() == punchDayLogDTO.getApprovalStatus()){
+				}else if(ApprovalStatus.UNPUNCH.getCode() == punchDayLogDTO.getStatus()){
 					dto.setUnPunchCount(dto.getUnPunchCount()+1);
-				}else if(ApprovalStatus.SICK.getCode() == punchDayLogDTO.getApprovalStatus()){
+				}else if(ApprovalStatus.SICK.getCode() == punchDayLogDTO.getStatus()){
 					dto.setSickCount(dto.getSickCount()+1);
-				}else if(ApprovalStatus.HALFSICK.getCode() == punchDayLogDTO.getApprovalStatus()){
+				}else if(ApprovalStatus.HALFSICK.getCode() == punchDayLogDTO.getStatus()){
 					dto.setSickCount(dto.getSickCount()+0.5);
-				}else if(ApprovalStatus.OUTWORK.getCode() == punchDayLogDTO.getApprovalStatus()){
+				}else if(ApprovalStatus.OUTWORK.getCode() == punchDayLogDTO.getStatus()){
 					dto.setOutworkCount(dto.getOutworkCount()+1);
-				}else if(ApprovalStatus.HALFOUTWORK.getCode() == punchDayLogDTO.getApprovalStatus()){
+				}else if(ApprovalStatus.HALFOUTWORK.getCode() == punchDayLogDTO.getStatus()){
 					dto.setOutworkCount(dto.getOutworkCount()+0.5);
-				}else if(ApprovalStatus.LEAVEEARLY.getCode() == punchDayLogDTO.getApprovalStatus()){
+				}else if(ApprovalStatus.LEAVEEARLY.getCode() == punchDayLogDTO.getStatus()){
 					dto.setLeaveEarlyCount(dto.getLeaveEarlyCount()+1);
-				}else if(ApprovalStatus.EXCHANGE.getCode() == punchDayLogDTO.getApprovalStatus()){
+				}else if(ApprovalStatus.EXCHANGE.getCode() == punchDayLogDTO.getStatus()){
 					dto.setExchangeCount(dto.getExchangeCount()+1);
-				}else if(ApprovalStatus.HALFEXCHANGE.getCode() == punchDayLogDTO.getApprovalStatus()){
+				}else if(ApprovalStatus.HALFEXCHANGE.getCode() == punchDayLogDTO.getStatus()){
 					dto.setExchangeCount(dto.getExchangeCount()+0.5);
-				}else if(ApprovalStatus.BLANDLE.getCode() == punchDayLogDTO.getApprovalStatus()){
+				}else if(ApprovalStatus.BLANDLE.getCode() == punchDayLogDTO.getStatus()){
 					dto.setBlandleCount(dto.getBlandleCount()+1);
-				}else if(ApprovalStatus.BELATE.getCode() == punchDayLogDTO.getApprovalStatus()){
+				}else if(ApprovalStatus.BELATE.getCode() == punchDayLogDTO.getStatus()){
 					dto.setBelateCount(dto.getBelateCount()+1);
-				}else if(ApprovalStatus.ABSENCE.getCode() == punchDayLogDTO.getApprovalStatus()){
+				}else if(ApprovalStatus.ABSENCE.getCode() == punchDayLogDTO.getStatus()){
 					dto.setAbsenceCount(dto.getAbsenceCount()+1);
-				}else if(ApprovalStatus.HALFABSENCE.getCode() == punchDayLogDTO.getApprovalStatus()){
+				}else if(ApprovalStatus.HALFABSENCE.getCode() == punchDayLogDTO.getStatus()){
 					dto.setAbsenceCount(dto.getAbsenceCount()+0.5);
-				}else if(ApprovalStatus.OVERTIME.getCode() == punchDayLogDTO.getApprovalStatus()){
+				}else if(ApprovalStatus.OVERTIME.getCode() == punchDayLogDTO.getStatus()){
 					dto.setOverTimeSum(dto.getOverTimeSum()+ punchDayLogDTO.getWorkTime());
 				} 
 			}
@@ -1806,17 +1939,17 @@ public class PunchServiceImpl implements PunchService {
 	}
 	 
 	// 创建每个user的打卡map信息
-	private Map<Long, List<PunchDayLogDTO>> buildUserPunchCountMap(
-			List<PunchDayLogDTO> punchDayLogDTOList) {
-		Map<Long, List<PunchDayLogDTO>> map = new HashMap<Long, List<PunchDayLogDTO>>();
+	private Map<Long, List<PunchStatisticsDTO>> buildUserPunchCountMap(
+			List<PunchStatisticsDTO> punchDayLogDTOList) {
+		Map<Long, List<PunchStatisticsDTO>> map = new HashMap<Long, List<PunchStatisticsDTO>>();
 		if (punchDayLogDTOList != null && punchDayLogDTOList.size() > 0) {
-			for (PunchDayLogDTO punchDayLogDTO : punchDayLogDTOList) {
+			for (PunchStatisticsDTO punchDayLogDTO : punchDayLogDTOList) {
 				Long userId = punchDayLogDTO.getUserId();
 				if (map.containsKey(userId)) {
-					List<PunchDayLogDTO> list = map.get(userId);
+					List<PunchStatisticsDTO> list = map.get(userId);
 					list.add(punchDayLogDTO);
 				} else {
-					List<PunchDayLogDTO> list = new ArrayList<PunchDayLogDTO>();
+					List<PunchStatisticsDTO> list = new ArrayList<PunchStatisticsDTO>();
 					list.add(punchDayLogDTO);
 					map.put(userId, list);
 				}

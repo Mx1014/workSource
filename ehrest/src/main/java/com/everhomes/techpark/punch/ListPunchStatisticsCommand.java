@@ -37,6 +37,8 @@ public class ListPunchStatisticsCommand {
 	private Byte status;
 	private Integer pageOffset;
 	private Integer pageSize;
+
+	private Long enterpriseGroupId;
 	
 	
 	public ListPunchStatisticsCommand() {
@@ -123,5 +125,11 @@ public class ListPunchStatisticsCommand {
 	}
 	public void setEnterpriseId(Long enterpriseId) {
 		this.enterpriseId = enterpriseId;
+	}
+	public Long getEnterpriseGroupId() {
+		return enterpriseGroupId;
+	}
+	public void setEnterpriseGroupId(Long enterpriseGroupId) {
+		this.enterpriseGroupId = enterpriseGroupId;
 	}
 }
