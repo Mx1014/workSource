@@ -597,4 +597,9 @@ CREATE TABLE `eh_account_vedioconf` (
 
 ALTER TABLE `eh_activities` ADD COLUMN `guest` VARCHAR(2048) ;
 
+-- 20151130
+ALTER TABLE `eh_enterprise_addresses` ADD COLUMN `building_id` BIGINT NOT NULL DEFAULT 0; 
+ALTER TABLE `eh_enterprise_addresses` ADD COLUMN `building_name` VARCHAR(128);
+
+
 SET foreign_key_checks = 1;
