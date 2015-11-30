@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhEnterpriseAddresses implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1944982358;
+	private static final long serialVersionUID = 72839574;
 
 	private java.lang.Long     id;
 	private java.lang.Long     enterpriseId;
@@ -25,6 +25,8 @@ public class EhEnterpriseAddresses implements java.io.Serializable {
 	private java.lang.String   proofResourceUri;
 	private java.sql.Timestamp approveTime;
 	private java.sql.Timestamp updateTime;
+	private java.lang.Long     buildingId;
+	private java.lang.String   buildingName;
 
 	public EhEnterpriseAddresses() {}
 
@@ -40,7 +42,9 @@ public class EhEnterpriseAddresses implements java.io.Serializable {
 		java.lang.String   processDetails,
 		java.lang.String   proofResourceUri,
 		java.sql.Timestamp approveTime,
-		java.sql.Timestamp updateTime
+		java.sql.Timestamp updateTime,
+		java.lang.Long     buildingId,
+		java.lang.String   buildingName
 	) {
 		this.id = id;
 		this.enterpriseId = enterpriseId;
@@ -54,6 +58,8 @@ public class EhEnterpriseAddresses implements java.io.Serializable {
 		this.proofResourceUri = proofResourceUri;
 		this.approveTime = approveTime;
 		this.updateTime = updateTime;
+		this.buildingId = buildingId;
+		this.buildingName = buildingName;
 	}
 
 	public java.lang.Long getId() {
@@ -150,5 +156,21 @@ public class EhEnterpriseAddresses implements java.io.Serializable {
 
 	public void setUpdateTime(java.sql.Timestamp updateTime) {
 		this.updateTime = updateTime;
+	}
+
+	public java.lang.Long getBuildingId() {
+		return this.buildingId;
+	}
+
+	public void setBuildingId(java.lang.Long buildingId) {
+		this.buildingId = buildingId;
+	}
+
+	public java.lang.String getBuildingName() {
+		return this.buildingName;
+	}
+
+	public void setBuildingName(java.lang.String buildingName) {
+		this.buildingName = buildingName;
 	}
 }
