@@ -12,6 +12,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.schema.tables.pojos.EhAclRoleAssignments;
 import com.everhomes.schema.tables.pojos.EhAcls;
 import com.everhomes.schema.tables.pojos.EhContentShardMap;
 import com.everhomes.schema.tables.pojos.EhServerShardMap;
@@ -113,12 +114,12 @@ public class SequenceServiceImpl implements SequenceService {
 
     @Override
     public void syncSequence() {
-        syncTableSequence(null, EhAcls.class, com.everhomes.schema.Tables.EH_ACLS.getName(), (dbContext) -> { 
+        syncTableSequence(EhAcls.class, EhAcls.class, com.everhomes.schema.Tables.EH_ACLS.getName(), (dbContext) -> { 
             return dbContext.select(com.everhomes.schema.Tables.EH_ACLS.ID.max())
                 .from(com.everhomes.schema.Tables.EH_ACLS).fetchOne().value1(); 
         });
 
-        syncTableSequence(null, EhAcls.class, com.everhomes.schema.Tables.EH_ACL_ROLE_ASSIGNMENTS.getName(), (dbContext) -> { 
+        syncTableSequence(EhAcls.class, EhAclRoleAssignments.class, com.everhomes.schema.Tables.EH_ACL_ROLE_ASSIGNMENTS.getName(), (dbContext) -> { 
             return dbContext.select(com.everhomes.schema.Tables.EH_ACL_ROLE_ASSIGNMENTS.ID.max())
                 .from(com.everhomes.schema.Tables.EH_ACL_ROLE_ASSIGNMENTS).fetchOne().value1(); 
         });

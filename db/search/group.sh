@@ -1,5 +1,5 @@
 ELASTIC=elasticsearch:9200
-INDEX=everhomesv31x
+INDEX=everhomesv32x
 
 curl -XPUT "http://$ELASTIC/$INDEX" -d '
     "settings" : {
