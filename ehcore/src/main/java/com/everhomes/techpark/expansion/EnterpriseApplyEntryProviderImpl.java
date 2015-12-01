@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
-import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,12 +13,15 @@ import org.springframework.util.StringUtils;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
+import com.everhomes.enterprise.EnterpriseAddress;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseOpRequestsDao;
-import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseOpRequests;
+import com.everhomes.server.schema.tables.records.EhEnterpriseAddressesRecord;
+import com.everhomes.server.schema.tables.records.EhEnterpriseDetailsRecord;
 import com.everhomes.server.schema.tables.records.EhEnterpriseOpRequestsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -33,68 +35,34 @@ public class EnterpriseApplyEntryProviderImpl implements
 
 	@Autowired
 	private SequenceProvider sequenceProvider;
-
-	@Override
-	public List<EnterpriseDetail> listEnterpriseDetails(Long communityId,String buildingName,
-			int offset, int pageSize) {
-		List<EnterpriseDetail> enterpriseDetails = new ArrayList<EnterpriseDetail>();
+	
+	public List<EnterpriseAddress> listBuildingEnterprisesByBuildingName(String buildingName, ListingLocator locator, int pageSize){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhEnterpriseAddressesRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_ADDRESSES);
+		query.addConditions(Tables.EH_ENTERPRISE_ADDRESSES.BUILDING_NAME.eq(buildingName));
+		query.addGroupBy(Tables.EH_ENTERPRISE_ADDRESSES.ENTERPRISE_ID);
+		if(locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_ENTERPRISE_ADDRESSES.ID.gt(locator.getAnchor()));
+        }
+		query.addLimit(pageSize);
+		List<EnterpriseAddress> enterpriseAddresses = query.fetch().map((r) -> {
+			return ConvertHelper.convert(r, EnterpriseAddress.class);
+		});
 		
-		 this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
-	               (DSLContext context, Object reducingContext) -> {
-	            Condition cond = Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId);
-	           	if(!StringUtils.isEmpty(buildingName)){
-	           		cond = cond.and(Tables.EH_ADDRESSES.BUILDING_NAME.eq(buildingName));
-	            }
-	            context.select().from(Tables.EH_ENTERPRISE_ADDRESSES)
-	            	.leftOuterJoin(Tables.EH_ADDRESSES)
-	            	.on(Tables.EH_ENTERPRISE_ADDRESSES.ADDRESS_ID.eq(Tables.EH_ADDRESSES.ID))
-	            	.leftOuterJoin(Tables.EH_GROUPS)
-	            	.on(Tables.EH_GROUPS.ID.eq(Tables.EH_ENTERPRISE_ADDRESSES.ENTERPRISE_ID))
-	            	.leftOuterJoin(Tables.EH_ENTERPRISE_DETAILS)
-	            	.on(Tables.EH_GROUPS.ID.eq(Tables.EH_ENTERPRISE_DETAILS.ENTERPRISE_ID))
-	                .where(cond)
-	                .groupBy(Tables.EH_GROUPS.ID)
-	                .limit(offset, pageSize)
-	                .fetch().map((r) -> {
-	                	EnterpriseDetail enterpriseDetail = ConvertHelper.convert(r, EnterpriseDetail.class);
-	                	enterpriseDetail.setBuildingName(r.getValue(Tables.EH_ADDRESSES.BUILDING_NAME));
-	                	enterpriseDetail.setEnterpriseId(r.getValue(Tables.EH_ENTERPRISE_ADDRESSES.ENTERPRISE_ID));
-	                	enterpriseDetail.setId(r.getValue(Tables.EH_GROUPS.ID));
-	                	enterpriseDetail.setEnterpriseName(r.getValue(Tables.EH_GROUPS.NAME));
-	                	String description =  r.getValue(Tables.EH_ENTERPRISE_DETAILS.DESCRIPTION);
-	                	enterpriseDetail.setDescription(StringUtils.isEmpty(description) ? r.getValue(Tables.EH_GROUPS.DESCRIPTION) : description);
-	                	String contact =  r.getValue(Tables.EH_ENTERPRISE_DETAILS.CONTACT);
-	                	enterpriseDetail.setContact(StringUtils.isEmpty(contact) ? r.getValue(Tables.EH_GROUPS.STRING_TAG1) : contact);
-	                	String address = r.getValue(Tables.EH_ENTERPRISE_DETAILS.ADDRESS);
-	                	enterpriseDetail.setDescription(StringUtils.isEmpty(address) ? r.getValue(Tables.EH_GROUPS.STRING_TAG2) : address);
-	                	
-	                	enterpriseDetails.add(enterpriseDetail);
-	        			return null;
-	        		});
-	            return true;
-	        });
-		 
-		
-		 
-		return enterpriseDetails;
+		if(enterpriseAddresses.size() >= pageSize) {
+	            locator.setAnchor(enterpriseAddresses.get(enterpriseAddresses.size() - 1).getId());
+	    }
+		return enterpriseAddresses;
 	}
 
 	@Override
 	public EnterpriseDetail getEnterpriseDetailById(Long id) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		Record r= context.select().from(Tables.EH_GROUPS).leftOuterJoin(Tables.EH_ENTERPRISE_DETAILS)
-		.on(Tables.EH_GROUPS.ID.eq(Tables.EH_ENTERPRISE_DETAILS.ENTERPRISE_ID))
-		.where(Tables.EH_GROUPS.ID.eq(id)).fetchOne();
-		EnterpriseDetail enterpriseDetail = ConvertHelper.convert(r, EnterpriseDetail.class);
-		enterpriseDetail.setId(r.getValue(Tables.EH_GROUPS.ID));
-    	enterpriseDetail.setEnterpriseName(r.getValue(Tables.EH_GROUPS.NAME));
-		String description =  r.getValue(Tables.EH_ENTERPRISE_DETAILS.DESCRIPTION);
-    	enterpriseDetail.setDescription(StringUtils.isEmpty(description) ? r.getValue(Tables.EH_GROUPS.DESCRIPTION) : description);
-    	String contact =  r.getValue(Tables.EH_ENTERPRISE_DETAILS.CONTACT);
-    	enterpriseDetail.setContact(StringUtils.isEmpty(contact) ? r.getValue(Tables.EH_GROUPS.STRING_TAG1) : contact);
-    	String address = r.getValue(Tables.EH_ENTERPRISE_DETAILS.ADDRESS);
-    	enterpriseDetail.setDescription(StringUtils.isEmpty(address) ? r.getValue(Tables.EH_GROUPS.STRING_TAG2) : address);
-		return enterpriseDetail;
+		
+		SelectQuery<EhEnterpriseDetailsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_DETAILS);
+		query.addConditions(Tables.EH_ENTERPRISE_DETAILS.ENTERPRISE_ID.eq(id));
+		
+		return ConvertHelper.convert(query.fetchOne(), EnterpriseDetail.class);
 	}
 
 	@Override
