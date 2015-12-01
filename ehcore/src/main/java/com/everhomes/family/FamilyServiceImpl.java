@@ -656,6 +656,8 @@ public class FamilyServiceImpl implements FamilyService {
         this.familyProvider.leaveFamilyAtAddress(address, userGroup);
         setCurrentFamilyAfterApproval(userGroup.getOwnerUid(),0,1);
         
+        //TODO create reject history
+        
         if(cmd.getOperatorRole() == Role.ResourceOperator)
             sendFamilyNotificationForMemberRejectFamily(address,group,member,userId);
         else if(cmd.getOperatorRole() == Role.SystemAdmin)
