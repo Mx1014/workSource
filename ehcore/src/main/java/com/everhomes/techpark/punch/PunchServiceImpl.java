@@ -2017,8 +2017,9 @@ public class PunchServiceImpl implements PunchService {
 			end.setTime(new java.sql.Date(cmd.getQueryTime()));
 			start.set(Calendar.DAY_OF_MONTH,
 					start.getActualMinimum(Calendar.DAY_OF_MONTH));
+			end.add(Calendar.MONTH, 1);
 			end.set(Calendar.DAY_OF_MONTH,
-					end.getActualMaximum(Calendar.DAY_OF_MONTH));
+					end.getActualMinimum(Calendar.DAY_OF_MONTH));
 		}
 
 		ListYearPunchLogsCommandResponse pyl = new ListYearPunchLogsCommandResponse();

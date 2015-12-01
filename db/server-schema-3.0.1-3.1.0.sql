@@ -437,35 +437,35 @@ CREATE TABLE `eh_enterprise_op_requests` (
 # member of global partition
 #
 
-DROP TABLE `eh_lease_promotions` ;
+-- DROP TABLE `eh_lease_promotions` ;
 
 CREATE TABLE `eh_lease_promotions` (
-  `id` bigint(20) NOT NULL COMMENT 'id of the record',
-  `namespace_id` int(11) NOT NULL DEFAULT '0',
-  `community_id` bigint(20) NOT NULL DEFAULT '0',
-  `rent_type` varchar(128) NOT NULL DEFAULT '' COMMENT 'For rent',
-  `poster_uri` varchar(128) DEFAULT NULL,
-  `subject` varchar(512) DEFAULT NULL,
-  `rent_areas` varchar(100) DEFAULT NULL,
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `community_id` BIGINT NOT NULL DEFAULT 0,
+  `rent_type` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'For rent',
+  `poster_uri` VARCHAR(128),
+  `subject` VARCHAR(512),
+  `rent_areas` VARCHAR(1024),
   `description` text,
-  `create_uid` bigint(20) DEFAULT NULL,
-  `create_time` datetime DEFAULT NULL,
-  `update_time` datetime DEFAULT NULL,
-  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: inactive, 1: active',
+  `create_uid` BIGINT,
+  `create_time` DATETIME,
+  `update_time` DATETIME,
+  `status` TINYINT NOT NULL DEFAULT '0' COMMENT '0: inactive, 1: active',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 #
 # member of global partition
 #
 CREATE TABLE `eh_lease_promotion_attachments` ( 
-	`id` bigint(20) NOT NULL COMMENT 'id of the record', 
-	`lease_id` bigint(20) NOT NULL DEFAULT '0', 
-	`content_type` varchar(32) DEFAULT NULL COMMENT 'attachment object content type', 
-	`content_uri` varchar(1024) DEFAULT NULL COMMENT 'attachment object link info on storage', 
-	`creator_uid` bigint(20) NOT NULL, 
-	`create_time` datetime NOT NULL, 
+	`id` BIGINT NOT NULL COMMENT 'id of the record', 
+	`lease_id` BIGINT NOT NULL DEFAULT '0', 
+	`content_type` VARCHAR(32) COMMENT 'attachment object content type', 
+	`content_uri` VARCHAR(1024) COMMENT 'attachment object link info on storage', 
+	`creator_uid` BIGINT, 
+	`create_time` DATETIME, 
 	PRIMARY KEY (`id`) 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

@@ -4,18 +4,32 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.jooq.Record;
+import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
+import com.everhomes.address.AddressProvider;
+import com.everhomes.address.ApartmentDTO;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.enterprise.EnterpriseAddress;
 import com.everhomes.enterprise.EnterpriseAttachment;
 import com.everhomes.enterprise.EnterpriseAttachmentDTO;
+import com.everhomes.enterprise.EnterpriseCommunityMap;
+import com.everhomes.enterprise.EnterpriseCommunityMapStatus;
+import com.everhomes.enterprise.EnterpriseCommunityMapType;
 import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.group.Group;
+import com.everhomes.group.GroupProvider;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -37,27 +51,59 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	
 	@Autowired
 	private EnterpriseProvider enterpriseProvider;
+	
+	@Autowired
+	private GroupProvider groupProvider;
+	
+	
 
 	@Override
 	public ListEnterpriseDetailResponse listEnterpriseDetails(
 			ListEnterpriseDetailCommand cmd) {
 		
 		ListEnterpriseDetailResponse res = new ListEnterpriseDetailResponse();
-		//TODO: 这里分页有问题，先注释掉，查全部
-//		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-//		Integer offset = cmd.getPageAnchor() == null ? 0 : (cmd.getPageAnchor() - 1 ) * pageSize;
-		List<EnterpriseDetail> enterpriseDetails = enterpriseApplyEntryProvider.listEnterpriseDetails(cmd.getCommunityId(),cmd.getBuildingName(), 0, Integer.MAX_VALUE);
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		
-//		if(enterpriseDetails != null && enterpriseDetails.size() > pageSize) {
-//			enterpriseDetails.remove(enterpriseDetails.size() - 1);
-//			res.setNextPageAnchor(cmd.getPageAnchor() + 1);
-//		}
-//		
-		List<EnterpriseDetailDTO> dtos = enterpriseDetails.stream().map((c) ->{
-			// return ConvertHelper.convert(c, EnterpriseDetailDTO.class);
-		    return toEnterpriseDetailDTO(c);
-		}).collect(Collectors.toList());
+		List<Long> enterpriseIds = new ArrayList<Long>();
+		ListingLocator locator = new ListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+		//根据楼栋名称查询
+		if(!StringUtils.isEmpty(cmd.getBuildingName())){
+			List<EnterpriseAddress> enterpriseAddresses = enterpriseApplyEntryProvider.listBuildingEnterprisesByBuildingName(cmd.getBuildingName(), locator, pageSize+1);
+			for (EnterpriseAddress enterpriseAddress : enterpriseAddresses) {
+				enterpriseIds.add(enterpriseAddress.getEnterpriseId());
+			}
+		}else{
+			List<EnterpriseCommunityMap> enterpriseMaps = this.enterpriseProvider.queryEnterpriseMapByCommunityId(locator
+		                , cmd.getCommunityId(), pageSize+1, new ListingQueryBuilderCallback() {
+
+		            @Override
+		            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+		                    SelectQuery<? extends Record> query) {
+		                query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.COMMUNITY_ID.eq(cmd.getCommunityId()));
+		                query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_TYPE.eq(EnterpriseCommunityMapType.Enterprise.getCode()));
+		                query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_STATUS.ne(EnterpriseCommunityMapStatus.Inactive.getCode()));
+		                return query;
+		            }
+		      });    
+			
+			for (EnterpriseCommunityMap enterpriseCommunityMap : enterpriseMaps) {
+				enterpriseIds.add(enterpriseCommunityMap.getMemberId());
+			}
+		}
 		
+		List<EnterpriseDetailDTO> dtos = new ArrayList<EnterpriseDetailDTO>();
+		
+		if(null != locator.getAnchor())
+			enterpriseIds.remove(enterpriseIds.size()-1);
+		
+		for (Long enterpriseId : enterpriseIds) {
+			EnterpriseDetail enterpriseDetail = this.getEnterpriseDetailByEnterpriseId(enterpriseId);
+			if(null != enterpriseDetail)
+				dtos.add(toEnterpriseDetailDTO(enterpriseDetail));
+		}
+		
+		res.setNextPageAnchor(locator.getAnchor());
 		res.setDetails(dtos);
 		return res;
 	}
@@ -66,10 +112,30 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	public GetEnterpriseDetailByIdResponse getEnterpriseDetailById(
 			GetEnterpriseDetailByIdCommand cmd) {
 		GetEnterpriseDetailByIdResponse res = new GetEnterpriseDetailByIdResponse();
-		EnterpriseDetail enterpriseDetail = enterpriseApplyEntryProvider.getEnterpriseDetailById(cmd.getId());
-		// res.setDetail(ConvertHelper.convert(enterpriseDetail, EnterpriseDetailDTO.class));
+		EnterpriseDetail enterpriseDetail = this.getEnterpriseDetailByEnterpriseId(cmd.getId());
 		res.setDetail(toEnterpriseDetailDTO(enterpriseDetail));
 		return res;
+	}
+	
+	private EnterpriseDetail getEnterpriseDetailByEnterpriseId(Long enterpriseId){
+		Group group = groupProvider.findGroupById(enterpriseId);
+		
+		if(null == group){
+			return null;
+		}
+		EnterpriseDetail enterpriseDetail = enterpriseApplyEntryProvider.getEnterpriseDetailById(enterpriseId);
+		if(null == enterpriseDetail){
+			enterpriseDetail = new EnterpriseDetail();
+		}
+		enterpriseDetail.setEnterpriseId(group.getId());
+    	enterpriseDetail.setEnterpriseName(group.getName());
+		String description =  enterpriseDetail.getDescription();
+    	enterpriseDetail.setDescription(StringUtils.isEmpty(description) ? group.getDescription() : description);
+    	String contact =  enterpriseDetail.getContact();
+    	enterpriseDetail.setContact(StringUtils.isEmpty(contact) ? group.getEnterpriseContact() : contact);
+    	String address = enterpriseDetail.getAddress();
+    	enterpriseDetail.setDescription(StringUtils.isEmpty(address) ? group.getEnterpriseContact() : address);
+    	return enterpriseDetail;
 	}
 	
 	private EnterpriseDetailDTO toEnterpriseDetailDTO(EnterpriseDetail enterpriseDetail) {
@@ -139,19 +205,6 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		
 		request.setOperatorUid(request.getApplyUserId());
 		request.setStatus(ApplyEntryStatus.PROCESSING.getCode());
-//		request.setSourceType(cmd.getSourceType());
-//		request.setApplyType(cmd.getApplyType());
-//		request.setEnterpriseName(cmd.getEnterpriseName());
-//		request.setEnterpriseId(cmd.getEnterpriseId());
-//		request.setApplyUserName(cmd.getApplyUserName());
-//		request.setApplyContact(cmd.getContactPhone());
-//		request.setApplyUserId(UserContext.current().getUser().getId());
-//		request.setDescription(cmd.getDescription());
-//		request.setSizeUnit(cmd.getSizeUnit());
-//		request.setAreaSize(cmd.getAreaSize());
-//		request.setOperatorUid(request.getApplyUserId());
-//		request.setCommunityId(cmd.getCommunityId());
-//		request.setNamespaceId(cmd.getNamespaceId());
 		enterpriseApplyEntryProvider.createApplyEntry(request);
 		return true;
 	}

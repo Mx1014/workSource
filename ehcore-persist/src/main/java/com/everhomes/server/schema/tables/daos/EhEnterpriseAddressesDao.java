@@ -123,4 +123,18 @@ public class EhEnterpriseAddressesDao extends org.jooq.impl.DAOImpl<com.everhome
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhEnterpriseAddresses> fetchByUpdateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhEnterpriseAddresses.EH_ENTERPRISE_ADDRESSES.UPDATE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>building_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhEnterpriseAddresses> fetchByBuildingId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhEnterpriseAddresses.EH_ENTERPRISE_ADDRESSES.BUILDING_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>building_name IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhEnterpriseAddresses> fetchByBuildingName(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhEnterpriseAddresses.EH_ENTERPRISE_ADDRESSES.BUILDING_NAME, values);
+	}
 }
