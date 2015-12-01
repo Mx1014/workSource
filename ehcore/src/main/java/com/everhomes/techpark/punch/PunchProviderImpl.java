@@ -18,6 +18,8 @@ import org.jooq.Record5;
 import org.jooq.SelectHavingStep;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -53,6 +55,8 @@ import com.everhomes.util.ConvertHelper;
 @Component
 public class PunchProviderImpl implements PunchProvider {
 
+	private static final Logger LOGGER = LoggerFactory
+			.getLogger(PunchServiceImpl.class);
 	@Autowired
 	private DbProvider dbProvider;
 
@@ -127,8 +131,14 @@ public class PunchProviderImpl implements PunchProvider {
 	@Override
 	public void createPunchLog(PunchLog punchLog) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class,punchLog.getEnterpriseId() ));
-		long id = sequenceProvider.getNextSequence(NameMapper
-				.getSequenceDomainFromTablePojo(EhPunchLogs.class));
+//		long id = sequenceProvider.getNextSequence(NameMapper
+//				.getSequenceDomainFromTablePojo(EhPunchLogs.class));
+		String key = NameMapper.getSequenceDomainFromTablePojo(EhPunchLogs.class);
+		long id = sequenceProvider.getNextSequence(key);
+		if(LOGGER.isDebugEnabled()) {
+		    LOGGER.debug("line 139 : Create punch log, key=" + key + ", newId=" + id + ", enterpriseId=" + punchLog.getEnterpriseId());
+		}
+
 		punchLog.setId(id);
 		EhPunchLogsRecord record = ConvertHelper.convert(punchLog,
 				EhPunchLogsRecord.class);
@@ -628,7 +638,12 @@ public class PunchProviderImpl implements PunchProvider {
 	public void createPunchDayLog(PunchDayLog punchDayLog) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class,punchDayLog.getEnterpriseId() ));
 		punchDayLog.setViewFlag(ViewFlags.NOTVIEW.getCode());
-		long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPunchDayLogs.class));
+//		long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhPunchDayLogs.class));
+		String key = NameMapper.getSequenceDomainFromTablePojo(EhPunchDayLogs.class);
+		long id = sequenceProvider.getNextSequence(key);
+		if(LOGGER.isDebugEnabled()) {
+		    LOGGER.debug("line 645 : Create punch day log, key=" + key + ", newId=" + id + ", enterpriseId=" + punchDayLog.getEnterpriseId());
+		}
 		punchDayLog.setId(id);
 		EhPunchDayLogsRecord record = ConvertHelper.convert(punchDayLog, EhPunchDayLogsRecord.class);
 		InsertQuery<EhPunchDayLogsRecord> query = context.insertQuery(Tables.EH_PUNCH_DAY_LOGS);
