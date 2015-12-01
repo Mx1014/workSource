@@ -1,7 +1,7 @@
 package com.everhomes.techpark.expansion;
 
 public class ListEnterpriseDetailCommand {
-    private Integer pageAnchor;
+    private Long pageAnchor;
     private Integer pageSize;
    
     private Long communityId;
@@ -22,10 +22,10 @@ public class ListEnterpriseDetailCommand {
 	public void setBuildingName(String buildingName) {
 		this.buildingName = buildingName;
 	}
-	public Integer getPageAnchor() {
+	public Long getPageAnchor() {
         return pageAnchor;
     }
-    public void setPageAnchor(Integer pageAnchor) {
+    public void setPageAnchor(Long pageAnchor) {
         this.pageAnchor = pageAnchor;
     }
     public Integer getPageSize() {
