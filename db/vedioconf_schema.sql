@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS `eh_conf_account_categories`;
 CREATE TABLE `eh_conf_account_categories` (
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`channel_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: single, 1: multiple',
@@ -7,6 +8,7 @@ CREATE TABLE `eh_conf_account_categories` (
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
  
+ DROP TABLE IF EXISTS `eh_conf_invoices`;
 CREATE TABLE `eh_conf_invoices` (
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`order_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to id of eh_conf_orders',
@@ -27,6 +29,7 @@ CREATE TABLE `eh_conf_invoices` (
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
  
+DROP TABLE IF EXISTS `eh_conf_orders`;
 CREATE TABLE `eh_conf_orders` (
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the enterprise id who own the order',
@@ -46,6 +49,7 @@ CREATE TABLE `eh_conf_orders` (
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
  
+DROP TABLE IF EXISTS `eh_conf_order_account_map`;
 CREATE TABLE `eh_conf_order_account_map` (
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`order_id` BIGINT NOT NULL DEFAULT 0,
@@ -54,6 +58,7 @@ CREATE TABLE `eh_conf_order_account_map` (
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_conf_source_accounts`;
 CREATE TABLE `eh_conf_source_accounts` (
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`account_name` VARCHAR(128) NOT NULL DEFAULT '',
@@ -64,6 +69,7 @@ CREATE TABLE `eh_conf_source_accounts` (
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
  
+DROP TABLE IF EXISTS `eh_conf_accounts`;
 CREATE TABLE `eh_conf_accounts` (
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`enterprise_id` BIGINT NOT NULL COMMENT 'enterprise_id',
@@ -85,6 +91,7 @@ CREATE TABLE `eh_conf_accounts` (
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
  
+DROP TABLE IF EXISTS `eh_conf_account_histories`;
 CREATE TABLE `eh_conf_account_histories` (
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`enterprise_id` BIGINT NOT NULL COMMENT 'enterprise_id',
@@ -102,7 +109,7 @@ CREATE TABLE `eh_conf_account_histories` (
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
-
+DROP TABLE IF EXISTS `eh_conf_conferences`;
 CREATE TABLE `eh_conf_conferences` (
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`conf_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'the conference id from 3rd conference provider',
@@ -125,7 +132,7 @@ CREATE TABLE `eh_conf_conferences` (
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
- 
+DROP TABLE IF EXISTS `eh_conf_enterprises`;
 CREATE TABLE `eh_conf_enterprises` (
 	`id` BIGINT NOT NULL COMMENT 'id',
     `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -145,7 +152,8 @@ CREATE TABLE `eh_conf_enterprises` (
 	UNIQUE `u_eh_enterprise_id`(`enterprise_id`),
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
- 
+
+DROP TABLE IF EXISTS `eh_warning_contacts`;
 CREATE TABLE `eh_warning_contacts` (
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`contactor` VARCHAR(20),
