@@ -11,10 +11,10 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteRules implements java.io.Serializable {
 
-	private static final long serialVersionUID = 658840129;
+	private static final long serialVersionUID = -1074412933;
 
 	private java.lang.Long     id;
-	private java.lang.Long     communityId;
+	private java.lang.Long     ownerId;
 	private java.lang.String   siteType;
 	private java.lang.Long     rentalSiteId;
 	private java.lang.Byte     rentalType;
@@ -31,12 +31,13 @@ public class EhRentalSiteRules implements java.io.Serializable {
 	private java.sql.Timestamp createTime;
 	private java.lang.Long     operatorUid;
 	private java.sql.Timestamp operateTime;
+	private java.lang.String   ownerType;
 
 	public EhRentalSiteRules() {}
 
 	public EhRentalSiteRules(
 		java.lang.Long     id,
-		java.lang.Long     communityId,
+		java.lang.Long     ownerId,
 		java.lang.String   siteType,
 		java.lang.Long     rentalSiteId,
 		java.lang.Byte     rentalType,
@@ -52,10 +53,11 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime,
 		java.lang.Long     operatorUid,
-		java.sql.Timestamp operateTime
+		java.sql.Timestamp operateTime,
+		java.lang.String   ownerType
 	) {
 		this.id = id;
-		this.communityId = communityId;
+		this.ownerId = ownerId;
 		this.siteType = siteType;
 		this.rentalSiteId = rentalSiteId;
 		this.rentalType = rentalType;
@@ -72,6 +74,7 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		this.createTime = createTime;
 		this.operatorUid = operatorUid;
 		this.operateTime = operateTime;
+		this.ownerType = ownerType;
 	}
 
 	public java.lang.Long getId() {
@@ -82,12 +85,12 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		this.id = id;
 	}
 
-	public java.lang.Long getCommunityId() {
-		return this.communityId;
+	public java.lang.Long getOwnerId() {
+		return this.ownerId;
 	}
 
-	public void setCommunityId(java.lang.Long communityId) {
-		this.communityId = communityId;
+	public void setOwnerId(java.lang.Long ownerId) {
+		this.ownerId = ownerId;
 	}
 
 	public java.lang.String getSiteType() {
@@ -216,5 +219,13 @@ public class EhRentalSiteRules implements java.io.Serializable {
 
 	public void setOperateTime(java.sql.Timestamp operateTime) {
 		this.operateTime = operateTime;
+	}
+
+	public java.lang.String getOwnerType() {
+		return this.ownerType;
+	}
+
+	public void setOwnerType(java.lang.String ownerType) {
+		this.ownerType = ownerType;
 	}
 }

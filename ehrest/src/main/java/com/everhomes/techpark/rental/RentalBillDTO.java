@@ -39,7 +39,8 @@ import com.everhomes.util.StringHelper;
  */
 public class RentalBillDTO {
 	private Long rentalBillId;
-	private Long communityId;
+	private String ownerType;
+	private Long ownerId;
 	private String siteType;
 	private String siteName;
 	private String buildingName;
@@ -271,13 +272,22 @@ public class RentalBillDTO {
 	public void setUnPayPrice(Double unPayPrice) {
 		this.unPayPrice = unPayPrice;
 	}
+ 
 
-	public Long getCommunityId() {
-		return communityId;
+	public String getOwnerType() {
+		return ownerType;
 	}
 
-	public void setCommunityId(Long communityId) {
-		this.communityId = communityId;
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
 	}
 
 	public Double getRentalCount() {

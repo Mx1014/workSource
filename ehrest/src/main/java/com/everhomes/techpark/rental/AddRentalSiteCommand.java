@@ -7,7 +7,8 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * 添加场所
- * <li>enterpriseCommunityId：园区id</li>
+ * <li>ownerType：所有者类型 参考{@link com.everhomes.techpark.rental.RentalOwnerType}}</li>
+ * <li>ownerId：园区id</li>
  * <li>siteType：场所类型</li>
  * <li>siteName：场所名称</li>
  * <li>buildingName：楼栋名称</li>
@@ -20,8 +21,11 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class AddRentalSiteCommand {
+
 	@NotNull
-	private Long communityId;
+	private String ownerType;
+	@NotNull
+	private Long ownerId;
 	@NotNull
 	private String siteType;
 	@NotNull
@@ -120,11 +124,25 @@ public class AddRentalSiteCommand {
 		this.company = company;
 	}
 
-	public Long getCommunityId() {
-		return communityId;
+
+	public String getOwnerType() {
+		return ownerType;
 	}
 
-	public void setCommunityId(Long communityId) {
-		this.communityId = communityId;
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
 	}
+
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+
+	 
 }

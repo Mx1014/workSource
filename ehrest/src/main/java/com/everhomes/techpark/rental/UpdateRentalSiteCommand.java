@@ -20,7 +20,8 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class UpdateRentalSiteCommand {
-	private Long communityId;
+	private String ownerType;
+	private Long ownerId;
 	private String siteType;
 	@NotNull
 	private Long rentalSiteId;
@@ -112,12 +113,24 @@ public class UpdateRentalSiteCommand {
 	public void setRentalSiteId(Long rentalSiteId) {
 		this.rentalSiteId = rentalSiteId;
 	}
+ 
 
-	public Long getCommunityId() {
-		return communityId;
+	public String getOwnerType() {
+		return ownerType;
 	}
 
-	public void setCommunityId(Long communityId) {
-		this.communityId = communityId;
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
 	}
 }

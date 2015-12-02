@@ -11,10 +11,10 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalBillPaybillMap implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1932689765;
+	private static final long serialVersionUID = 503078133;
 
 	private java.lang.Long     id;
-	private java.lang.Long     communityId;
+	private java.lang.Long     ownerId;
 	private java.lang.String   siteType;
 	private java.lang.Long     rentalBillId;
 	private java.lang.Long     onlinePayBillId;
@@ -22,22 +22,24 @@ public class EhRentalBillPaybillMap implements java.io.Serializable {
 	private java.sql.Timestamp createTime;
 	private java.lang.Long     operatorUid;
 	private java.sql.Timestamp operateTime;
+	private java.lang.String   ownerType;
 
 	public EhRentalBillPaybillMap() {}
 
 	public EhRentalBillPaybillMap(
 		java.lang.Long     id,
-		java.lang.Long     communityId,
+		java.lang.Long     ownerId,
 		java.lang.String   siteType,
 		java.lang.Long     rentalBillId,
 		java.lang.Long     onlinePayBillId,
 		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime,
 		java.lang.Long     operatorUid,
-		java.sql.Timestamp operateTime
+		java.sql.Timestamp operateTime,
+		java.lang.String   ownerType
 	) {
 		this.id = id;
-		this.communityId = communityId;
+		this.ownerId = ownerId;
 		this.siteType = siteType;
 		this.rentalBillId = rentalBillId;
 		this.onlinePayBillId = onlinePayBillId;
@@ -45,6 +47,7 @@ public class EhRentalBillPaybillMap implements java.io.Serializable {
 		this.createTime = createTime;
 		this.operatorUid = operatorUid;
 		this.operateTime = operateTime;
+		this.ownerType = ownerType;
 	}
 
 	public java.lang.Long getId() {
@@ -55,12 +58,12 @@ public class EhRentalBillPaybillMap implements java.io.Serializable {
 		this.id = id;
 	}
 
-	public java.lang.Long getCommunityId() {
-		return this.communityId;
+	public java.lang.Long getOwnerId() {
+		return this.ownerId;
 	}
 
-	public void setCommunityId(java.lang.Long communityId) {
-		this.communityId = communityId;
+	public void setOwnerId(java.lang.Long ownerId) {
+		this.ownerId = ownerId;
 	}
 
 	public java.lang.String getSiteType() {
@@ -117,5 +120,13 @@ public class EhRentalBillPaybillMap implements java.io.Serializable {
 
 	public void setOperateTime(java.sql.Timestamp operateTime) {
 		this.operateTime = operateTime;
+	}
+
+	public java.lang.String getOwnerType() {
+		return this.ownerType;
+	}
+
+	public void setOwnerType(java.lang.String ownerType) {
+		this.ownerType = ownerType;
 	}
 }

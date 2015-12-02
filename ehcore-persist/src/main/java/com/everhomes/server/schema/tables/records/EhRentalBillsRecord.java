@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalBillsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhRentalBillsRecord> {
 
-	private static final long serialVersionUID = -1978221601;
+	private static final long serialVersionUID = 449074250;
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.id</code>. id
@@ -28,16 +28,16 @@ public class EhRentalBillsRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_bills.community_id</code>.  enterprise  community id
+	 * Setter for <code>ehcore.eh_rental_bills.owner_id</code>.     community id or organization id 
 	 */
-	public void setCommunityId(java.lang.Long value) {
+	public void setOwnerId(java.lang.Long value) {
 		setValue(1, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_bills.community_id</code>.  enterprise  community id
+	 * Getter for <code>ehcore.eh_rental_bills.owner_id</code>.     community id or organization id 
 	 */
-	public java.lang.Long getCommunityId() {
+	public java.lang.Long getOwnerId() {
 		return (java.lang.Long) getValue(1);
 	}
 
@@ -363,6 +363,20 @@ public class EhRentalBillsRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 		return (java.sql.Timestamp) getValue(24);
 	}
 
+	/**
+	 * Setter for <code>ehcore.eh_rental_bills.owner_type</code>. owner type : community ; organization
+	 */
+	public void setOwnerType(java.lang.String value) {
+		setValue(25, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_rental_bills.owner_type</code>. owner type : community ; organization
+	 */
+	public java.lang.String getOwnerType() {
+		return (java.lang.String) getValue(25);
+	}
+
 	// -------------------------------------------------------------------------
 	// Primary key information
 	// -------------------------------------------------------------------------
@@ -389,11 +403,11 @@ public class EhRentalBillsRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	/**
 	 * Create a detached, initialised EhRentalBillsRecord
 	 */
-	public EhRentalBillsRecord(java.lang.Long id, java.lang.Long communityId, java.lang.String siteType, java.lang.Long rentalSiteId, java.lang.Long rentalUid, java.sql.Date rentalDate, java.sql.Timestamp startTime, java.sql.Timestamp endTime, java.lang.Double rentalCount, java.lang.Double payTotalMoney, java.lang.Double siteTotalMoney, java.lang.Double reserveMoney, java.sql.Timestamp reserveTime, java.sql.Timestamp payStartTime, java.sql.Timestamp payEndTime, java.sql.Timestamp payTime, java.sql.Timestamp cancelTime, java.lang.Double paidMoney, java.lang.Byte status, java.lang.Byte visibleFlag, java.lang.Byte invoiceFlag, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime) {
+	public EhRentalBillsRecord(java.lang.Long id, java.lang.Long ownerId, java.lang.String siteType, java.lang.Long rentalSiteId, java.lang.Long rentalUid, java.sql.Date rentalDate, java.sql.Timestamp startTime, java.sql.Timestamp endTime, java.lang.Double rentalCount, java.lang.Double payTotalMoney, java.lang.Double siteTotalMoney, java.lang.Double reserveMoney, java.sql.Timestamp reserveTime, java.sql.Timestamp payStartTime, java.sql.Timestamp payEndTime, java.sql.Timestamp payTime, java.sql.Timestamp cancelTime, java.lang.Double paidMoney, java.lang.Byte status, java.lang.Byte visibleFlag, java.lang.Byte invoiceFlag, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.String ownerType) {
 		super(com.everhomes.server.schema.tables.EhRentalBills.EH_RENTAL_BILLS);
 
 		setValue(0, id);
-		setValue(1, communityId);
+		setValue(1, ownerId);
 		setValue(2, siteType);
 		setValue(3, rentalSiteId);
 		setValue(4, rentalUid);
@@ -417,5 +431,6 @@ public class EhRentalBillsRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 		setValue(22, createTime);
 		setValue(23, operatorUid);
 		setValue(24, operateTime);
+		setValue(25, ownerType);
 	}
 }

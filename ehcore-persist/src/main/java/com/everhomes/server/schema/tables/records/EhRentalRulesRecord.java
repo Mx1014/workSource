@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalRulesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhRentalRulesRecord> {
 
-	private static final long serialVersionUID = -2085644670;
+	private static final long serialVersionUID = 745020955;
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_rules.id</code>. id
@@ -28,16 +28,16 @@ public class EhRentalRulesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_rules.community_id</code>.  enterprise  community id
+	 * Setter for <code>ehcore.eh_rental_rules.owner_id</code>.     community id or organization id 
 	 */
-	public void setCommunityId(java.lang.Long value) {
+	public void setOwnerId(java.lang.Long value) {
 		setValue(1, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_rules.community_id</code>.  enterprise  community id
+	 * Getter for <code>ehcore.eh_rental_rules.owner_id</code>.     community id or organization id 
 	 */
-	public java.lang.Long getCommunityId() {
+	public java.lang.Long getOwnerId() {
 		return (java.lang.Long) getValue(1);
 	}
 
@@ -433,6 +433,20 @@ public class EhRentalRulesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 		return (java.sql.Timestamp) getValue(29);
 	}
 
+	/**
+	 * Setter for <code>ehcore.eh_rental_rules.owner_type</code>. owner type : community ; organization
+	 */
+	public void setOwnerType(java.lang.String value) {
+		setValue(30, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_rental_rules.owner_type</code>. owner type : community ; organization
+	 */
+	public java.lang.String getOwnerType() {
+		return (java.lang.String) getValue(30);
+	}
+
 	// -------------------------------------------------------------------------
 	// Primary key information
 	// -------------------------------------------------------------------------
@@ -459,11 +473,11 @@ public class EhRentalRulesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	/**
 	 * Create a detached, initialised EhRentalRulesRecord
 	 */
-	public EhRentalRulesRecord(java.lang.Long id, java.lang.Long communityId, java.lang.String siteType, java.lang.Long rentalStartTime, java.lang.Long rentalEndTime, java.lang.Long payStartTime, java.lang.Long payEndTime, java.lang.Integer paymentRatio, java.lang.Byte refundFlag, java.lang.String contactNum, java.sql.Time timeTag1, java.sql.Time timeTag2, java.sql.Time timeTag3, java.sql.Date dateTag1, java.sql.Date dateTag2, java.sql.Date dateTag3, java.sql.Timestamp datetimeTag1, java.sql.Timestamp datetimeTag2, java.sql.Timestamp datetimeTag3, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime) {
+	public EhRentalRulesRecord(java.lang.Long id, java.lang.Long ownerId, java.lang.String siteType, java.lang.Long rentalStartTime, java.lang.Long rentalEndTime, java.lang.Long payStartTime, java.lang.Long payEndTime, java.lang.Integer paymentRatio, java.lang.Byte refundFlag, java.lang.String contactNum, java.sql.Time timeTag1, java.sql.Time timeTag2, java.sql.Time timeTag3, java.sql.Date dateTag1, java.sql.Date dateTag2, java.sql.Date dateTag3, java.sql.Timestamp datetimeTag1, java.sql.Timestamp datetimeTag2, java.sql.Timestamp datetimeTag3, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.String ownerType) {
 		super(com.everhomes.server.schema.tables.EhRentalRules.EH_RENTAL_RULES);
 
 		setValue(0, id);
-		setValue(1, communityId);
+		setValue(1, ownerId);
 		setValue(2, siteType);
 		setValue(3, rentalStartTime);
 		setValue(4, rentalEndTime);
@@ -492,5 +506,6 @@ public class EhRentalRulesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 		setValue(27, createTime);
 		setValue(28, operatorUid);
 		setValue(29, operateTime);
+		setValue(30, ownerType);
 	}
 }

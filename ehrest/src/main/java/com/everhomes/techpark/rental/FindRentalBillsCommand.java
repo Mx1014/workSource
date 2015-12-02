@@ -14,7 +14,9 @@ import com.everhomes.util.StringHelper;
  */
 public class FindRentalBillsCommand {
 
-	private Long communityId;
+
+	private String ownerType;
+	private Long ownerId;
 	private String siteType;  
 	
 	private Long pageAnchor;
@@ -78,16 +80,33 @@ public class FindRentalBillsCommand {
 
 
 
-	public Long getCommunityId() {
-		return communityId;
+	public String getOwnerType() {
+		return ownerType;
 	}
 
 
 
 
-	public void setCommunityId(Long communityId) {
-		this.communityId = communityId;
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
 	}
+
+
+
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+
+
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+
+
+ 
 
  
 

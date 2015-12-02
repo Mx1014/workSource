@@ -6,14 +6,18 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>某日某场所预定状态
- * <li>rentalSiteId：场所id</li>
+ * <li>ownerType：所有者类型 参考{@link com.everhomes.techpark.rental.RentalOwnerType}}</li>
+ * <li>ownerId：园区id</li>
  * <li>rentalType： time(0),halfday(1){@link com.everhomes.techpark.rental.RentalType} </li> 
  * <li>ruleDate：日期</li> 
  * </ul>
  */
 public class FindRentalSitesStatusCommand {
 	@NotNull
-	private Long communityId;
+
+	private String ownerType;
+	@NotNull
+	private Long ownerId;
 	@NotNull
 	private String siteType;
 	@NotNull
@@ -62,12 +66,23 @@ public class FindRentalSitesStatusCommand {
 	}
 
 
-	public Long getCommunityId() {
-		return communityId;
+	public String getOwnerType() {
+		return ownerType;
 	}
 
 
-	public void setCommunityId(Long communityId) {
-		this.communityId = communityId;
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
 	}
+
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+ 
 }

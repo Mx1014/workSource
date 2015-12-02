@@ -72,12 +72,14 @@ public class RentalProviderImpl implements RentalProvider {
 	}
 
 	@Override
-	public RentalRule getRentalRule(Long enterpriseCommunityId, String siteType) {
+	public RentalRule getRentalRule(Long ownerId,String ownerType,  String siteType) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTAL_RULES);
-		Condition condition = Tables.EH_RENTAL_RULES.COMMUNITY_ID
-				.equal(enterpriseCommunityId);
+		Condition condition = Tables.EH_RENTAL_RULES.OWNER_ID
+				.equal(ownerId);
+		condition = condition.and(Tables.EH_RENTAL_RULES.OWNER_TYPE
+				.equal(ownerType));
 		condition = condition.and(Tables.EH_RENTAL_RULES.SITE_TYPE
 				.equal(siteType));
 		step.where(condition);
@@ -359,12 +361,14 @@ public class RentalProviderImpl implements RentalProvider {
 
 	@Override
 	public List<RentalBill> listRentalBills(Long userId,
-			Long enterpriseCommunityId, String siteType,
+			Long ownerId,String ownerType, String siteType,
 			ListingLocator locator, int count, Byte status) {
 		final List<RentalBill> result = new ArrayList<RentalBill>();
 		Condition condition = Tables.EH_RENTAL_BILLS.ID.lt(locator.getAnchor());
-		condition = condition.and(Tables.EH_RENTAL_BILLS.COMMUNITY_ID
-				.eq(enterpriseCommunityId));
+		condition = condition.and(Tables.EH_RENTAL_BILLS.OWNER_ID
+				.eq(ownerId));
+		condition = condition.and(Tables.EH_RENTAL_BILLS.OWNER_TYPE
+				.eq(ownerType));
 		if (StringUtils.isNotEmpty(siteType))
 			condition = condition.and(Tables.EH_RENTAL_BILLS.SITE_TYPE
 					.eq(siteType));
@@ -579,13 +583,17 @@ public class RentalProviderImpl implements RentalProvider {
 	}
 
 	@Override
-	public int countRentalSites(Long enterpriseCommunityId, String siteType,
+	public int countRentalSites(Long ownerId,String ownerType,  String siteType,
 			String keyword) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record1<Integer>> step = context.selectCount().from(
 				Tables.EH_RENTAL_SITES);
-		Condition condition = Tables.EH_RENTAL_SITES.COMMUNITY_ID
-				.equal(enterpriseCommunityId);
+		Condition condition = Tables.EH_RENTAL_SITES.OWNER_TYPE
+				.equal(ownerType);
+		
+
+		condition = condition.and(Tables.EH_RENTAL_SITES.OWNER_ID
+				.equal(ownerId));
 		condition = condition.and(Tables.EH_RENTAL_SITES.SITE_TYPE
 				.equal(siteType));
 		if (!StringUtils.isEmpty(keyword)) {
@@ -649,14 +657,16 @@ public class RentalProviderImpl implements RentalProvider {
 	}
 
 	@Override
-	public int countRentalBills(Long enterpriseCommunityId, String siteType,
+	public int countRentalBills(Long ownerId,String ownerType, String siteType,
 			Long rentalSiteId, Byte billStatus, Long startTime, Long endTime,
 			Byte invoiceFlag) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record1<Integer>> step = context.selectCount().from(
 				Tables.EH_RENTAL_BILLS);
-		Condition condition = Tables.EH_RENTAL_BILLS.COMMUNITY_ID
-				.equal(enterpriseCommunityId);
+		Condition condition = Tables.EH_RENTAL_BILLS.OWNER_ID
+				.equal(ownerId);
+		condition = condition.and(Tables.EH_RENTAL_BILLS.OWNER_TYPE
+				.equal(ownerType));
 		if (StringUtils.isNotEmpty(siteType))
 			condition = condition.and(Tables.EH_RENTAL_BILLS.SITE_TYPE
 					.equal(siteType));
@@ -680,15 +690,17 @@ public class RentalProviderImpl implements RentalProvider {
 	}
 
 	@Override
-	public List<RentalBill> listRentalBills(Long enterpriseCommunityId,
+	public List<RentalBill> listRentalBills(Long ownerId,String ownerType,
 			String siteType, Long rentalSiteId, Byte billStatus,
 			Integer pageOffset, Integer pageSize, Long startTime, Long endTime,
 			Byte invoiceFlag) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTAL_BILLS);
-		Condition condition = Tables.EH_RENTAL_BILLS.COMMUNITY_ID
-				.equal(enterpriseCommunityId);
+		Condition condition = Tables.EH_RENTAL_BILLS.OWNER_ID
+				.equal(ownerId);
+		condition = condition.and(Tables.EH_RENTAL_BILLS.OWNER_TYPE
+				.equal(ownerType));
 		if (StringUtils.isNotEmpty(siteType))
 			condition = condition.and(Tables.EH_RENTAL_BILLS.SITE_TYPE
 					.equal(siteType));
@@ -720,14 +732,16 @@ public class RentalProviderImpl implements RentalProvider {
 	}
 
 	@Override
-	public List<RentalSite> findRentalSites(Long enterpriseCommunityId,
+	public List<RentalSite> findRentalSites(Long ownerId,String ownerType, 
 			String siteType, String keyword, Integer pageOffset,
 			Integer pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTAL_SITES);
-		Condition condition = Tables.EH_RENTAL_SITES.COMMUNITY_ID
-				.equal(enterpriseCommunityId);
+		Condition condition = Tables.EH_RENTAL_SITES.OWNER_ID
+				.equal(ownerId);
+		condition = condition.and(Tables.EH_RENTAL_SITES.OWNER_TYPE
+				.equal(ownerType));
 		condition = condition.and(Tables.EH_RENTAL_SITES.SITE_TYPE
 				.equal(siteType));
 		if (!StringUtils.isEmpty(keyword)) {

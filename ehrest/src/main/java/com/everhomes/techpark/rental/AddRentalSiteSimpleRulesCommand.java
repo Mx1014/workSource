@@ -31,7 +31,9 @@ import com.everhomes.util.StringHelper;
  */
 public class AddRentalSiteSimpleRulesCommand {
 	@NotNull
-	private Long communityId;
+
+	private String ownerType;
+	private Long ownerId;
 	@NotNull
 	private String siteType;
 	@NotNull
@@ -318,15 +320,29 @@ public class AddRentalSiteSimpleRulesCommand {
 
 
 
-	public Long getCommunityId() {
-		return communityId;
+	public String getOwnerType() {
+		return ownerType;
 	}
 
 
 
-	public void setCommunityId(Long communityId) {
-		this.communityId = communityId;
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
 	}
+
+
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+
+ 
 
  
  

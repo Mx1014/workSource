@@ -12,7 +12,8 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class FindRentalSitesCommand {
-	private Long communityId;
+	private String ownerType;
+	private Long ownerId;
 	private String siteType;
 	private String keyword;
 	private Integer pageOffset;
@@ -44,11 +45,17 @@ public class FindRentalSitesCommand {
 	}
 	public void setKeyword(String keyword) {
 		this.keyword = keyword;
+	} 
+	public String getOwnerType() {
+		return ownerType;
 	}
-	public Long getCommunityId() {
-		return communityId;
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
 	}
-	public void setCommunityId(Long communityId) {
-		this.communityId = communityId;
+	public Long getOwnerId() {
+		return ownerId;
 	}
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	} 
 }

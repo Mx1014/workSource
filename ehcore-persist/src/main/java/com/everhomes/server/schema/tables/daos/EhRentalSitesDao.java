@@ -55,10 +55,10 @@ public class EhRentalSitesDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	}
 
 	/**
-	 * Fetch records that have <code>community_id IN (values)</code>
+	 * Fetch records that have <code>owner_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchByCommunityId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.COMMUNITY_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchByOwnerId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.OWNER_ID, values);
 	}
 
 	/**
@@ -185,5 +185,12 @@ public class EhRentalSitesDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchByOperateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.OPERATE_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>owner_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchByOwnerType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.OWNER_TYPE, values);
 	}
 }

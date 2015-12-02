@@ -27,7 +27,8 @@ public class AddRentalBillCommand {
 	@NotNull
 	private Long rentalSiteId;
 	@NotNull
-	private Long communityId;
+	private String ownerType;
+	private Long ownerId;
 	@NotNull
 	private String siteType; 
 	private Long rentalDate;
@@ -105,13 +106,22 @@ public class AddRentalBillCommand {
 		this.rentalCount = rentalCount;
 	}
 
-	public Long getCommunityId() {
-		return communityId;
+	public String getOwnerType() {
+		return ownerType;
 	}
 
-	public void setCommunityId(Long communityId) {
-		this.communityId = communityId;
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
 	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+ 
 
 //	public List<SiteItemDTO> getRentalItems() {
 //		return rentalItems;

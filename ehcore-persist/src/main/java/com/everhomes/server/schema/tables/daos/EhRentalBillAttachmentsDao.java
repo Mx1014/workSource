@@ -48,10 +48,10 @@ public class EhRentalBillAttachmentsDao extends org.jooq.impl.DAOImpl<com.everho
 	}
 
 	/**
-	 * Fetch records that have <code>community_id IN (values)</code>
+	 * Fetch records that have <code>owner_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBillAttachments> fetchByCommunityId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRentalBillAttachments.EH_RENTAL_BILL_ATTACHMENTS.COMMUNITY_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBillAttachments> fetchByOwnerId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalBillAttachments.EH_RENTAL_BILL_ATTACHMENTS.OWNER_ID, values);
 	}
 
 	/**
@@ -115,5 +115,12 @@ public class EhRentalBillAttachmentsDao extends org.jooq.impl.DAOImpl<com.everho
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBillAttachments> fetchByOperateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalBillAttachments.EH_RENTAL_BILL_ATTACHMENTS.OPERATE_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>owner_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBillAttachments> fetchByOwnerType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalBillAttachments.EH_RENTAL_BILL_ATTACHMENTS.OWNER_TYPE, values);
 	}
 }

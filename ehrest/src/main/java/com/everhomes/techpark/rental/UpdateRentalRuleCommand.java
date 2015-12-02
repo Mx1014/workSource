@@ -4,7 +4,8 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
 *更新预定规则
- * <li>enterpriseCommunityId：园区id</li>
+ * <li>ownerType：所有者类型 参考{@link com.everhomes.techpark.rental.RentalOwnerType}}</li>
+ * <li>ownerId：园区id</li>
  * <li>siteType：场所类型</li>
  * <li>rentalStartTime：最早预定时间</li>
  * <li>rentalEndTime：最晚预定时间</li>
@@ -16,7 +17,8 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class UpdateRentalRuleCommand {
-	private Long communityId;
+	private String ownerType;
+	private Long ownerId;
 	private String siteType ;
 	private Long rentalStartTime;
 	private Long rentalEndTime;
@@ -78,10 +80,17 @@ public class UpdateRentalRuleCommand {
 	public void setPayEndTime(Long payEndTime) {
 		this.payEndTime = payEndTime;
 	}
-	public Long getCommunityId() {
-		return communityId;
+ 
+	public String getOwnerType() {
+		return ownerType;
 	}
-	public void setCommunityId(Long communityId) {
-		this.communityId = communityId;
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+	public Long getOwnerId() {
+		return ownerId;
+	}
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
 	}
 }

@@ -2,6 +2,8 @@ package com.everhomes.techpark.rental;
 
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 /**
@@ -22,7 +24,8 @@ import com.everhomes.util.StringHelper;
  */
 public class RentalSiteDTO {
 	private Long rentalSiteId;
-	private Long communityId;
+	private String ownerType;
+	private Long ownerId;
 	private String siteType;
 	private String siteName;
 	private String buildingName;
@@ -131,11 +134,24 @@ public class RentalSiteDTO {
 		this.contactName = contactName;
 	}
 
-	public Long getCommunityId() {
-		return communityId;
+
+	public String getOwnerType() {
+		return ownerType;
 	}
 
-	public void setCommunityId(Long communityId) {
-		this.communityId = communityId;
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
 	}
+
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+ 
 }
