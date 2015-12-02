@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>communityId: 小区Id</li>
  * <li>buildingName: 楼栋号</li>
  * <li>apartmentName: 门牌号</li>
+ * <li>historyId: 历史表ID</li>
  * </ul>
  */
 public class ClaimAddressCommand {
@@ -25,6 +26,9 @@ public class ClaimAddressCommand {
     
     @NotNull
     private String apartmentName;
+    
+    @NotNull
+    private Long historyId;
 
     public ClaimAddressCommand() {
     }
@@ -61,6 +65,14 @@ public class ClaimAddressCommand {
         this.apartmentName = apartmentName;
     }
     
+    public Long getHistoryId() {
+        return historyId;
+    }
+
+    public void setHistoryId(Long historyId) {
+        this.historyId = historyId;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

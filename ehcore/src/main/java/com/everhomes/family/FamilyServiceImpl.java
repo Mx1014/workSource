@@ -474,7 +474,49 @@ public class FamilyServiceImpl implements FamilyService {
         User user = UserContext.current().getUser();
         Long userId = user.getId();
        
-        return this.familyProvider.getUserFamiliesByUserId(userId);
+        List<FamilyDTO> families = this.familyProvider.getUserFamiliesByUserId(userId);
+        Map<Long, Long> checkList = new HashMap<Long, Long>();
+        for(FamilyDTO f : families) {
+            checkList.put(f.getAddressId(), 1l);
+        }
+        
+        //Merge histories
+        List<UserGroupHistory> histories = this.userGroupHistoryProvider.queryUserGroupHistoryByUserId(userId);
+        for(UserGroupHistory o : histories) {
+            if(!checkList.containsKey(o.getAddressId())) {
+                
+                checkList.put(o.getAddressId(), 1l);
+                
+                FamilyDTO family = new FamilyDTO();
+                family.setId(o.getId());
+                //family.setMembershipStatus(GroupMemberStatus.REJECT.getCode());
+                family.setMembershipStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
+                Community community = this.communityProvider.findCommunityById(o.getCommunityId());
+                if(community != null){
+                    family.setCommunityId(o.getCommunityId());
+                    family.setCommunityName(community.getName());
+                    family.setCityId(community.getCityId());
+                    family.setCityName(community.getCityName()+community.getAreaName());
+                    family.setCommunityType(community.getCommunityType());
+                    family.setDefaultForumId(community.getDefaultForumId());
+                    family.setFeedbackForumId(community.getFeedbackForumId());
+                    }
+                
+                Address address = this.addressProvider.findAddressById(o.getAddressId());
+                if(address != null){
+                    family.setBuildingName(address.getBuildingName());
+                    family.setApartmentName(address.getApartmentName());
+                    family.setAddressStatus(address.getStatus());
+                    String addrStr = FamilyUtils.joinDisplayName(community.getCityName(),community.getAreaName(), community.getName(), 
+                            address.getBuildingName(), address.getApartmentName());
+                    family.setDisplayName(addrStr);
+                    family.setAddress(addrStr);
+                    }
+                
+                families.add(family);
+                }
+        }
+        return families;
     }
 
     @Override
@@ -665,7 +707,7 @@ public class FamilyServiceImpl implements FamilyService {
         UserGroupHistory history = new UserGroupHistory();
         history.setGroupId(familyId);
         history.setGroupDiscriminator(GroupDiscriminator.FAMILY.getCode());
-        history.setOwnerUid(userId);
+        history.setOwnerUid(memberUid);
         history.setAddressId(address.getId());
         history.setCommunityId(group.getIntegralTag2());
         this.userGroupHistoryProvider.createUserGroupHistory(history);

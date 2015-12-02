@@ -15,7 +15,11 @@ import java.util.stream.Collectors;
 
 
 
+
+
 import javax.annotation.PostConstruct;
+
+
 
 
 
@@ -31,7 +35,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 
+
+
 import ch.qos.logback.core.joran.conditional.ElseAction;
+
+
 
 
 
@@ -79,6 +87,8 @@ import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserGroupHistory;
+import com.everhomes.user.UserGroupHistoryProvider;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserServiceAddress;
 import com.everhomes.util.ConvertHelper;
@@ -141,6 +151,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     
     @Autowired
     private EnterpriseProvider enterpriseProvider;
+    
+    @Autowired
+    private UserGroupHistoryProvider userGroupHistoryProvider;
     
     @PostConstruct
     public void setup() {
@@ -526,6 +539,13 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             || cmd.getApartmentName() == null || cmd.getApartmentName().isEmpty()) {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid communityId, buildingName or appartmentName parameter");
+        }
+        
+        if(cmd.getHistoryId() != null) {
+            UserGroupHistory history = this.userGroupHistoryProvider.getHistoryById(cmd.getHistoryId());
+            if(null != history) {
+                this.userGroupHistoryProvider.deleteUserGroupHistory(history);
+            }
         }
         
         if(cmd.getReplacedAddressId() == null) {

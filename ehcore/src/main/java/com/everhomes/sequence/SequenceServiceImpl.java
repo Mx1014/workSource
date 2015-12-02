@@ -79,6 +79,7 @@ import com.everhomes.server.schema.tables.pojos.EhRentalSites;
 import com.everhomes.server.schema.tables.pojos.EhRentalSitesBills;
 import com.everhomes.server.schema.tables.pojos.EhUserCommunities;
 import com.everhomes.server.schema.tables.pojos.EhUserFavorites;
+import com.everhomes.server.schema.tables.pojos.EhUserGroupHistories;
 import com.everhomes.server.schema.tables.pojos.EhUserGroups;
 import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.pojos.EhUserInvitationRoster;
@@ -458,6 +459,10 @@ public class SequenceServiceImpl implements SequenceService {
         
         syncTableSequence(null, EhLeasePromotionAttachments.class, Tables.EH_LEASE_PROMOTION_ATTACHMENTS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_LEASE_PROMOTION_ATTACHMENTS.ID.max()).from(Tables.EH_LEASE_PROMOTION_ATTACHMENTS).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(EhUsers.class, EhUserGroupHistories.class, Tables.EH_USER_GROUP_HISTORIES.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_USER_GROUP_HISTORIES.ID.max()).from(Tables.EH_USER_GROUP_HISTORIES).fetchOne().value1(); 
         });
     }
     
