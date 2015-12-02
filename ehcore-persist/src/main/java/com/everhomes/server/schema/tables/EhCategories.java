@@ -116,13 +116,13 @@ public class EhCategories extends org.jooq.impl.TableImpl<com.everhomes.server.s
 		return com.everhomes.server.schema.Keys.KEY_EH_CATEGORIES_PRIMARY;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public java.util.List<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhCategoriesRecord>> getKeys() {
-		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhCategoriesRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_CATEGORIES_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_CATEGORIES_U_EH_CATEGORY_NAME);
-	}
+//	/**
+//	 * {@inheritDoc}
+//	 */
+//	@Override
+//	public java.util.List<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhCategoriesRecord>> getKeys() {
+//		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhCategoriesRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_CATEGORIES_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_CATEGORIES_U_EH_CATEGORY_NAME);
+//	}
 
 	/**
 	 * {@inheritDoc}

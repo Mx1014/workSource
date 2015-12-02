@@ -14,11 +14,6 @@ package com.everhomes.server.schema;
 public class Tables {
 
 	/**
-	 * The table ehcore.eh_account_vedioconf
-	 */
-	public static final com.everhomes.server.schema.tables.EhAccountVedioconf EH_ACCOUNT_VEDIOCONF = com.everhomes.server.schema.tables.EhAccountVedioconf.EH_ACCOUNT_VEDIOCONF;
-
-	/**
 	 * The table ehcore.eh_activities
 	 */
 	public static final com.everhomes.server.schema.tables.EhActivities EH_ACTIVITIES = com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES;
@@ -139,6 +134,56 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhCommunityProfiles EH_COMMUNITY_PROFILES = com.everhomes.server.schema.tables.EhCommunityProfiles.EH_COMMUNITY_PROFILES;
 
 	/**
+	 * The table ehcore.eh_conf_accounts
+	 */
+	public static final com.everhomes.server.schema.tables.EhConfAccounts EH_CONF_ACCOUNTS = com.everhomes.server.schema.tables.EhConfAccounts.EH_CONF_ACCOUNTS;
+
+	/**
+	 * The table ehcore.eh_conf_account_categories
+	 */
+	public static final com.everhomes.server.schema.tables.EhConfAccountCategories EH_CONF_ACCOUNT_CATEGORIES = com.everhomes.server.schema.tables.EhConfAccountCategories.EH_CONF_ACCOUNT_CATEGORIES;
+
+	/**
+	 * The table ehcore.eh_conf_account_histories
+	 */
+	public static final com.everhomes.server.schema.tables.EhConfAccountHistories EH_CONF_ACCOUNT_HISTORIES = com.everhomes.server.schema.tables.EhConfAccountHistories.EH_CONF_ACCOUNT_HISTORIES;
+
+	/**
+	 * The table ehcore.eh_conf_conferences
+	 */
+	public static final com.everhomes.server.schema.tables.EhConfConferences EH_CONF_CONFERENCES = com.everhomes.server.schema.tables.EhConfConferences.EH_CONF_CONFERENCES;
+
+	/**
+	 * The table ehcore.eh_conf_enterprises
+	 */
+	public static final com.everhomes.server.schema.tables.EhConfEnterprises EH_CONF_ENTERPRISES = com.everhomes.server.schema.tables.EhConfEnterprises.EH_CONF_ENTERPRISES;
+
+	/**
+	 * The table ehcore.eh_conf_invoices
+	 */
+	public static final com.everhomes.server.schema.tables.EhConfInvoices EH_CONF_INVOICES = com.everhomes.server.schema.tables.EhConfInvoices.EH_CONF_INVOICES;
+
+	/**
+	 * The table ehcore.eh_conf_orders
+	 */
+	public static final com.everhomes.server.schema.tables.EhConfOrders EH_CONF_ORDERS = com.everhomes.server.schema.tables.EhConfOrders.EH_CONF_ORDERS;
+
+	/**
+	 * The table ehcore.eh_conf_order_account_map
+	 */
+	public static final com.everhomes.server.schema.tables.EhConfOrderAccountMap EH_CONF_ORDER_ACCOUNT_MAP = com.everhomes.server.schema.tables.EhConfOrderAccountMap.EH_CONF_ORDER_ACCOUNT_MAP;
+
+	/**
+	 * The table ehcore.eh_conf_reservations
+	 */
+	public static final com.everhomes.server.schema.tables.EhConfReservations EH_CONF_RESERVATIONS = com.everhomes.server.schema.tables.EhConfReservations.EH_CONF_RESERVATIONS;
+
+	/**
+	 * The table ehcore.eh_conf_source_accounts
+	 */
+	public static final com.everhomes.server.schema.tables.EhConfSourceAccounts EH_CONF_SOURCE_ACCOUNTS = com.everhomes.server.schema.tables.EhConfSourceAccounts.EH_CONF_SOURCE_ACCOUNTS;
+
+	/**
 	 * The table ehcore.eh_content_server
 	 */
 	public static final com.everhomes.server.schema.tables.EhContentServer EH_CONTENT_SERVER = com.everhomes.server.schema.tables.EhContentServer.EH_CONTENT_SERVER;
@@ -202,11 +247,6 @@ public class Tables {
 	 * The table ehcore.eh_enterprise_op_requests
 	 */
 	public static final com.everhomes.server.schema.tables.EhEnterpriseOpRequests EH_ENTERPRISE_OP_REQUESTS = com.everhomes.server.schema.tables.EhEnterpriseOpRequests.EH_ENTERPRISE_OP_REQUESTS;
-
-	/**
-	 * The table ehcore.eh_enterprise_videoconf_account
-	 */
-	public static final com.everhomes.server.schema.tables.EhEnterpriseVideoconfAccount EH_ENTERPRISE_VIDEOCONF_ACCOUNT = com.everhomes.server.schema.tables.EhEnterpriseVideoconfAccount.EH_ENTERPRISE_VIDEOCONF_ACCOUNT;
 
 	/**
 	 * The table ehcore.eh_events
@@ -357,16 +397,6 @@ public class Tables {
 	 * The table ehcore.eh_oauth2_tokens
 	 */
 	public static final com.everhomes.server.schema.tables.EhOauth2Tokens EH_OAUTH2_TOKENS = com.everhomes.server.schema.tables.EhOauth2Tokens.EH_OAUTH2_TOKENS;
-
-	/**
-	 * The table ehcore.eh_order_account
-	 */
-	public static final com.everhomes.server.schema.tables.EhOrderAccount EH_ORDER_ACCOUNT = com.everhomes.server.schema.tables.EhOrderAccount.EH_ORDER_ACCOUNT;
-
-	/**
-	 * The table ehcore.eh_order_invoice
-	 */
-	public static final com.everhomes.server.schema.tables.EhOrderInvoice EH_ORDER_INVOICE = com.everhomes.server.schema.tables.EhOrderInvoice.EH_ORDER_INVOICE;
 
 	/**
 	 * The table ehcore.eh_organizations
@@ -589,11 +619,6 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhSearchKeywords EH_SEARCH_KEYWORDS = com.everhomes.server.schema.tables.EhSearchKeywords.EH_SEARCH_KEYWORDS;
 
 	/**
-	 * The table ehcore.eh_source_account
-	 */
-	public static final com.everhomes.server.schema.tables.EhSourceAccount EH_SOURCE_ACCOUNT = com.everhomes.server.schema.tables.EhSourceAccount.EH_SOURCE_ACCOUNT;
-
-	/**
 	 * The table ehcore.eh_state_triggers
 	 */
 	public static final com.everhomes.server.schema.tables.EhStateTriggers EH_STATE_TRIGGERS = com.everhomes.server.schema.tables.EhStateTriggers.EH_STATE_TRIGGERS;
@@ -732,26 +757,6 @@ public class Tables {
 	 * The table ehcore.eh_version_urls
 	 */
 	public static final com.everhomes.server.schema.tables.EhVersionUrls EH_VERSION_URLS = com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS;
-
-	/**
-	 * The table ehcore.eh_videoconf_account
-	 */
-	public static final com.everhomes.server.schema.tables.EhVideoconfAccount EH_VIDEOCONF_ACCOUNT = com.everhomes.server.schema.tables.EhVideoconfAccount.EH_VIDEOCONF_ACCOUNT;
-
-	/**
-	 * The table ehcore.eh_videoconf_account_rule
-	 */
-	public static final com.everhomes.server.schema.tables.EhVideoconfAccountRule EH_VIDEOCONF_ACCOUNT_RULE = com.everhomes.server.schema.tables.EhVideoconfAccountRule.EH_VIDEOCONF_ACCOUNT_RULE;
-
-	/**
-	 * The table ehcore.eh_videoconf_enterprise
-	 */
-	public static final com.everhomes.server.schema.tables.EhVideoconfEnterprise EH_VIDEOCONF_ENTERPRISE = com.everhomes.server.schema.tables.EhVideoconfEnterprise.EH_VIDEOCONF_ENTERPRISE;
-
-	/**
-	 * The table ehcore.eh_videoconf_order
-	 */
-	public static final com.everhomes.server.schema.tables.EhVideoconfOrder EH_VIDEOCONF_ORDER = com.everhomes.server.schema.tables.EhVideoconfOrder.EH_VIDEOCONF_ORDER;
 
 	/**
 	 * The table ehcore.eh_warning_contacts
