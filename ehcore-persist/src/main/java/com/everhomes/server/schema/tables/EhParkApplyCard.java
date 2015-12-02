@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkApplyCard extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhParkApplyCardRecord> {
 
-	private static final long serialVersionUID = -668549595;
+	private static final long serialVersionUID = 1412924549;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_park_apply_card</code>
@@ -39,12 +39,17 @@ public class EhParkApplyCard extends org.jooq.impl.TableImpl<com.everhomes.serve
 	/**
 	 * The column <code>ehcore.eh_park_apply_card.applier_name</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkApplyCardRecord, java.lang.String> APPLIER_NAME = createField("applier_name", org.jooq.impl.SQLDataType.VARCHAR.length(20), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkApplyCardRecord, java.lang.String> APPLIER_NAME = createField("applier_name", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_park_apply_card.applier_phone</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkApplyCardRecord, java.lang.String> APPLIER_PHONE = createField("applier_phone", org.jooq.impl.SQLDataType.VARCHAR.length(20), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_park_apply_card.company_name</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkApplyCardRecord, java.lang.String> COMPANY_NAME = createField("company_name", org.jooq.impl.SQLDataType.VARCHAR.length(256), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_park_apply_card.plate_number</code>.

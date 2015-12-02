@@ -69,6 +69,13 @@ public class EhParkApplyCardDao extends org.jooq.impl.DAOImpl<com.everhomes.serv
 	}
 
 	/**
+	 * Fetch records that have <code>company_name IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkApplyCard> fetchByCompanyName(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkApplyCard.EH_PARK_APPLY_CARD.COMPANY_NAME, values);
+	}
+
+	/**
 	 * Fetch records that have <code>plate_number IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkApplyCard> fetchByPlateNumber(java.lang.String... values) {

@@ -390,8 +390,9 @@ DROP TABLE IF EXISTS `eh_park_apply_card`;
 CREATE TABLE `eh_park_apply_card` (
   `id` BIGINT NOT NULL COMMENT 'id',
   `applier_id` BIGINT,
-  `applier_name` VARCHAR(20),
+  `applier_name` VARCHAR(128),
   `applier_phone` VARCHAR(20),
+  `company_name` VARCHAR(256),
   `plate_number` VARCHAR(20),
   `apply_time` DATETIME,
   `apply_status` TINYINT,
