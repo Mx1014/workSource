@@ -6,12 +6,14 @@ import java.util.List;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.DeleteQuery;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.enterprise.EnterpriseAddress;
 import com.everhomes.listing.ListingLocator;
@@ -19,10 +21,15 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseOpRequestsDao;
+import com.everhomes.server.schema.tables.daos.EhLeasePromotionAttachmentsDao;
+import com.everhomes.server.schema.tables.daos.EhLeasePromotionsDao;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseOpRequests;
+import com.everhomes.server.schema.tables.pojos.EhLeasePromotionAttachments;
+import com.everhomes.server.schema.tables.pojos.EhLeasePromotions;
 import com.everhomes.server.schema.tables.records.EhEnterpriseAddressesRecord;
 import com.everhomes.server.schema.tables.records.EhEnterpriseDetailsRecord;
 import com.everhomes.server.schema.tables.records.EhEnterpriseOpRequestsRecord;
+import com.everhomes.server.schema.tables.records.EhLeasePromotionAttachmentsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 
@@ -115,28 +122,99 @@ public class EnterpriseApplyEntryProviderImpl implements
 	}
 	
 	@Override
-	public List<LeasePromotion> listLeasePromotions(Long communityId,
+	public List<LeasePromotion> listLeasePromotions(LeasePromotion leasePromotion,
 			int offset, int pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		List<LeasePromotion> leasePromotions = new ArrayList<LeasePromotion>();
+		Condition cond = Tables.EH_LEASE_PROMOTIONS.NAMESPACE_ID.eq(leasePromotion.getNamespaceId());
+		if(null != leasePromotion.getCommunityId()){
+			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.COMMUNITY_ID.eq(leasePromotion.getCommunityId()));
+		}
+		if(null != leasePromotion.getStatus()){
+			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.STATUS.eq(leasePromotion.getStatus()));
+		}
+		if(null != leasePromotion.getBuildingId()){
+			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.BUILDING_ID.eq(leasePromotion.getBuildingId()));
+		}
 		context.select().from(Tables.EH_LEASE_PROMOTIONS)
-						.where(Tables.EH_LEASE_PROMOTIONS.COMMUNITY_ID.eq(communityId))
+						.where(cond)
 						.limit(offset, pageSize)
 						.fetch().map((r) -> {
-							List<LeasePromotionAttachment> attachments = new ArrayList<LeasePromotionAttachment>();
-							context.select().from(Tables.EH_LEASE_PROMOTION_ATTACHMENTS)
-							.where(Tables.EH_LEASE_PROMOTION_ATTACHMENTS.LEASE_ID.eq(r.getValue(Tables.EH_LEASE_PROMOTIONS.ID)))
-							.fetch().map((t) -> {
-								attachments.add(ConvertHelper.convert(t, LeasePromotionAttachment.class));
-								return null;
-							});
-							
-							LeasePromotion leasePromotion = ConvertHelper.convert(r, LeasePromotion.class);
-							leasePromotion.setAttachments(attachments);
-							leasePromotions.add(leasePromotion);
+							LeasePromotion lease = ConvertHelper.convert(r, LeasePromotion.class);
+							List<LeasePromotionAttachment> attachments = this.getAttachments(lease.getId());
+							lease.setAttachments(attachments);
+							leasePromotions.add(lease);
 							return null;
 						});
 		return leasePromotions;
 	}
-
+	
+	private List<LeasePromotionAttachment> getAttachments(Long leaseId){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		List<LeasePromotionAttachment> attachments = context.select().from(Tables.EH_LEASE_PROMOTION_ATTACHMENTS)
+		.where(Tables.EH_LEASE_PROMOTION_ATTACHMENTS.LEASE_ID.eq(leaseId))
+		.fetch().map((t) -> {
+			return ConvertHelper.convert(t, LeasePromotionAttachment.class);
+		});
+		return attachments;
+	}
+	
+	
+	@Override
+	public LeasePromotion createLeasePromotion(LeasePromotion leasePromotion) {
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhLeasePromotions.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhLeasePromotions.class));
+		leasePromotion.setId(id);
+		leasePromotion.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		leasePromotion.setUpdateTime(leasePromotion.getCreateTime());
+		EhLeasePromotionsDao dao = new EhLeasePromotionsDao(context.configuration());
+		dao.insert(leasePromotion);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhLeasePromotions.class, null);
+		return leasePromotion;
+	}
+	
+	@Override
+	public LeasePromotion getLeasePromotionById(Long id){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		EhLeasePromotionsDao dao = new EhLeasePromotionsDao(context.configuration());
+		LeasePromotion leasePromotion = ConvertHelper.convert(dao.findById(id), LeasePromotion.class);
+		List<LeasePromotionAttachment> attachments = this.getAttachments(leasePromotion.getId());
+		leasePromotion.setAttachments(attachments);
+		return leasePromotion;
+	}
+	
+	@Override
+	public boolean updateLeasePromotion(LeasePromotion leasePromotion){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		EhLeasePromotionsDao dao = new EhLeasePromotionsDao(context.configuration());
+		leasePromotion.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		dao.update(leasePromotion);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhLeasePromotions.class, null);
+		return true;
+	}
+	
+	@Override
+	public boolean deleteLeasePromotionAttachment(Long leaseId){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DeleteQuery<EhLeasePromotionAttachmentsRecord> r = context.deleteQuery(Tables.EH_LEASE_PROMOTION_ATTACHMENTS);
+		r.addConditions(Tables.EH_LEASE_PROMOTION_ATTACHMENTS.LEASE_ID.eq(leaseId));
+		r.execute();
+		return true;
+	}
+	
+	@Override
+	public boolean addPromotionAttachment(LeasePromotionAttachment attachment){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhLeasePromotionAttachments.class));
+		attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		attachment.setId(id);
+		EhLeasePromotionAttachmentsDao dao = new EhLeasePromotionAttachmentsDao(context.configuration());
+		dao.insert(attachment);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhLeasePromotionAttachments.class, null);
+		return true;
+	}
+	
 }

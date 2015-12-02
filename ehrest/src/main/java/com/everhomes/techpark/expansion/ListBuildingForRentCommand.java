@@ -11,8 +11,24 @@ public class ListBuildingForRentCommand {
     
     private Long communityId;
     
+    private Byte status;
     
-    public Integer getNamespaceId() {
+    private Long buildingId;
+    
+    
+    public Byte getStatus() {
+		return status;
+	}
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
+	public Long getBuildingId() {
+		return buildingId;
+	}
+	public void setBuildingId(Long buildingId) {
+		this.buildingId = buildingId;
+	}
+	public Integer getNamespaceId() {
 		return namespaceId;
 	}
 	public void setNamespaceId(Integer namespaceId) {
