@@ -7,10 +7,11 @@ package com.everhomes.group;
  * <li>WAITING_FOR_APPROVAL: 等待批准加入（自己主动申请加入、且未被批准加入时为此状态）</li>
  * <li>WAITING_FOR_ACCEPTANCE: 邀请后等待被邀请人同意加入（邀请别人加入、且被邀请人未同时加入时为此状态）</li>
  * <li>ACTIVE: 正常成员</li>
+ * <li>REJECT: 被驳回</li>
  * </ul>
  */
 public enum GroupMemberStatus {
-    INACTIVE((byte)0), WAITING_FOR_APPROVAL((byte)1), WAITING_FOR_ACCEPTANCE((byte)2), ACTIVE((byte)3);
+    INACTIVE((byte)0), WAITING_FOR_APPROVAL((byte)1), WAITING_FOR_ACCEPTANCE((byte)2), ACTIVE((byte)3), REJECT((byte)4);
     
     private byte code;
     private GroupMemberStatus(byte code) {

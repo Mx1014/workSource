@@ -11,16 +11,14 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUserGroupHistories implements java.io.Serializable {
 
-	private static final long serialVersionUID = 639083831;
+	private static final long serialVersionUID = -365305695;
 
 	private java.lang.Long     id;
 	private java.lang.Long     ownerUid;
 	private java.lang.String   groupDiscriminator;
 	private java.lang.Long     groupId;
-	private java.lang.Byte     regionScope;
-	private java.lang.Long     regionScopeId;
-	private java.lang.Long     memberRole;
-	private java.lang.Byte     memberStatus;
+	private java.lang.Long     communityId;
+	private java.lang.Long     addressId;
 	private java.sql.Timestamp createTime;
 
 	public EhUserGroupHistories() {}
@@ -30,20 +28,16 @@ public class EhUserGroupHistories implements java.io.Serializable {
 		java.lang.Long     ownerUid,
 		java.lang.String   groupDiscriminator,
 		java.lang.Long     groupId,
-		java.lang.Byte     regionScope,
-		java.lang.Long     regionScopeId,
-		java.lang.Long     memberRole,
-		java.lang.Byte     memberStatus,
+		java.lang.Long     communityId,
+		java.lang.Long     addressId,
 		java.sql.Timestamp createTime
 	) {
 		this.id = id;
 		this.ownerUid = ownerUid;
 		this.groupDiscriminator = groupDiscriminator;
 		this.groupId = groupId;
-		this.regionScope = regionScope;
-		this.regionScopeId = regionScopeId;
-		this.memberRole = memberRole;
-		this.memberStatus = memberStatus;
+		this.communityId = communityId;
+		this.addressId = addressId;
 		this.createTime = createTime;
 	}
 
@@ -79,36 +73,20 @@ public class EhUserGroupHistories implements java.io.Serializable {
 		this.groupId = groupId;
 	}
 
-	public java.lang.Byte getRegionScope() {
-		return this.regionScope;
+	public java.lang.Long getCommunityId() {
+		return this.communityId;
 	}
 
-	public void setRegionScope(java.lang.Byte regionScope) {
-		this.regionScope = regionScope;
+	public void setCommunityId(java.lang.Long communityId) {
+		this.communityId = communityId;
 	}
 
-	public java.lang.Long getRegionScopeId() {
-		return this.regionScopeId;
+	public java.lang.Long getAddressId() {
+		return this.addressId;
 	}
 
-	public void setRegionScopeId(java.lang.Long regionScopeId) {
-		this.regionScopeId = regionScopeId;
-	}
-
-	public java.lang.Long getMemberRole() {
-		return this.memberRole;
-	}
-
-	public void setMemberRole(java.lang.Long memberRole) {
-		this.memberRole = memberRole;
-	}
-
-	public java.lang.Byte getMemberStatus() {
-		return this.memberStatus;
-	}
-
-	public void setMemberStatus(java.lang.Byte memberStatus) {
-		this.memberStatus = memberStatus;
+	public void setAddressId(java.lang.Long addressId) {
+		this.addressId = addressId;
 	}
 
 	public java.sql.Timestamp getCreateTime() {

@@ -82,6 +82,8 @@ import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserCurrentEntityType;
 import com.everhomes.user.UserGroup;
+import com.everhomes.user.UserGroupHistory;
+import com.everhomes.user.UserGroupHistoryProvider;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserInfo;
 import com.everhomes.user.UserLocation;
@@ -154,6 +156,9 @@ public class FamilyServiceImpl implements FamilyService {
     
     @Autowired 
     private UserActivityProvider userActivityProvider;
+    
+    @Autowired
+    private UserGroupHistoryProvider userGroupHistoryProvider;
     
     @Override
     public Family getOrCreatefamily(Address address)      {
@@ -656,7 +661,14 @@ public class FamilyServiceImpl implements FamilyService {
         this.familyProvider.leaveFamilyAtAddress(address, userGroup);
         setCurrentFamilyAfterApproval(userGroup.getOwnerUid(),0,1);
         
-        //TODO create reject history
+        //Create reject history
+        UserGroupHistory history = new UserGroupHistory();
+        history.setGroupId(familyId);
+        history.setGroupDiscriminator(GroupDiscriminator.FAMILY.getCode());
+        history.setOwnerUid(userId);
+        history.setAddressId(address.getId());
+        history.setCommunityId(group.getIntegralTag2());
+        this.userGroupHistoryProvider.createUserGroupHistory(history);
         
         if(cmd.getOperatorRole() == Role.ResourceOperator)
             sendFamilyNotificationForMemberRejectFamily(address,group,member,userId);

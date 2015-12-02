@@ -69,31 +69,17 @@ public class EhUserGroupHistoriesDao extends org.jooq.impl.DAOImpl<com.everhomes
 	}
 
 	/**
-	 * Fetch records that have <code>region_scope IN (values)</code>
+	 * Fetch records that have <code>community_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserGroupHistories> fetchByRegionScope(java.lang.Byte... values) {
-		return fetch(com.everhomes.server.schema.tables.EhUserGroupHistories.EH_USER_GROUP_HISTORIES.REGION_SCOPE, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserGroupHistories> fetchByCommunityId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUserGroupHistories.EH_USER_GROUP_HISTORIES.COMMUNITY_ID, values);
 	}
 
 	/**
-	 * Fetch records that have <code>region_scope_id IN (values)</code>
+	 * Fetch records that have <code>address_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserGroupHistories> fetchByRegionScopeId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhUserGroupHistories.EH_USER_GROUP_HISTORIES.REGION_SCOPE_ID, values);
-	}
-
-	/**
-	 * Fetch records that have <code>member_role IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserGroupHistories> fetchByMemberRole(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhUserGroupHistories.EH_USER_GROUP_HISTORIES.MEMBER_ROLE, values);
-	}
-
-	/**
-	 * Fetch records that have <code>member_status IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserGroupHistories> fetchByMemberStatus(java.lang.Byte... values) {
-		return fetch(com.everhomes.server.schema.tables.EhUserGroupHistories.EH_USER_GROUP_HISTORIES.MEMBER_STATUS, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserGroupHistories> fetchByAddressId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUserGroupHistories.EH_USER_GROUP_HISTORIES.ADDRESS_ID, values);
 	}
 
 	/**
