@@ -26,7 +26,8 @@ ALTER TABLE  `eh_rental_rules`   ADD COLUMN `overtime_time` BIGINT(20) DEFAULT N
 
 ALTER TABLE `eh_rental_sites` ADD COLUMN  `owner_type` VARCHAR(255) COMMENT 'owner type : community ; organization';
 ALTER TABLE `eh_rental_sites`  CHANGE `community_id` `owner_id` BIGINT(20) NOT NULL COMMENT '    community id or organization id ';
- 
+ALTER TABLE `eh_rental_sites` ADD COLUMN `introduction` TEXT;
+ALTER TABLE `eh_rental_sites` ADD COLUMN `notice` TEXT;
 
 ALTER TABLE `eh_rental_sites_bills` ADD COLUMN  `owner_type` VARCHAR(255) COMMENT 'owner type : community ; organization';
 ALTER TABLE `eh_rental_sites_bills`  CHANGE `community_id` `owner_id` BIGINT(20) NOT NULL COMMENT '    community id or organization id ';
