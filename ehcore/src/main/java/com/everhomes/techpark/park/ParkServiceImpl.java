@@ -355,6 +355,7 @@ public class ParkServiceImpl implements ParkService {
 		apply.setApplierId(cmd.getUserId());
 		apply.setApplierName(cmd.getUserName());
 		apply.setApplierPhone(cmd.getPhoneNumber());
+		apply.setCompanyName(cmd.getCompanyName());
 		apply.setApplyStatus(ApplyParkingCardStatus.WAITING.getCode());
 		apply.setApplyTime(new Timestamp(System.currentTimeMillis()));
 		apply.setFetchStatus(FetchStatus.NO.getCode());
