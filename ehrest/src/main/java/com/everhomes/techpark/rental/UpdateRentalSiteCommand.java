@@ -32,6 +32,8 @@ public class UpdateRentalSiteCommand {
 	private String company;
 	private String contactName;
 	private String contactPhonenum; 
+	private String introduction;
+	private String notice;
 
 	@Override
 	public String toString() {
@@ -132,5 +134,25 @@ public class UpdateRentalSiteCommand {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+
+
+	public String getIntroduction() {
+		return introduction;
+	}
+
+
+	public void setIntroduction(String introduction) {
+		this.introduction = introduction;
+	}
+
+
+	public String getNotice() {
+		return notice;
+	}
+
+
+	public void setNotice(String notice) {
+		this.notice = notice;
 	}
 }

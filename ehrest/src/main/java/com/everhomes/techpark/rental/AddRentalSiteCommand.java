@@ -18,6 +18,8 @@ import com.everhomes.util.StringHelper;
  * <li>contactName：联系人</li>
  * <li>contactPhonenum：电话号码</li>
  * <li>siteItems：场所商品json字符串</li>
+ * <li>notice：须知</li>
+ * <li>introduction：简介</li>
  * </ul>
  */
 public class AddRentalSiteCommand {
@@ -30,18 +32,14 @@ public class AddRentalSiteCommand {
 	private String siteType;
 	@NotNull
 	private String siteName;
-	@NotNull
 	private String buildingName;
-	@NotNull
 	private String address;
-	@NotNull
 	private String spec;
-	@NotNull
 	private String company;
-	@NotNull
 	private String contactName;
-	@NotNull
 	private String contactPhonenum;
+	private String introduction;
+	private String notice;
 	private String siteItems;
 
 	@Override
@@ -142,6 +140,26 @@ public class AddRentalSiteCommand {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+
+
+	public String getIntroduction() {
+		return introduction;
+	}
+
+
+	public void setIntroduction(String introduction) {
+		this.introduction = introduction;
+	}
+
+
+	public String getNotice() {
+		return notice;
+	}
+
+
+	public void setNotice(String notice) {
+		this.notice = notice;
 	}
 
 	 

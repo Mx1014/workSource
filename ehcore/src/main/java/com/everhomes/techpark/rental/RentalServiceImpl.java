@@ -129,17 +129,7 @@ public class RentalServiceImpl implements RentalService {
 
 	@Override
 	public Long addRentalSite(AddRentalSiteCommand cmd) {
-		RentalSite rentalsite = new RentalSite();
-		rentalsite.setOwnerId(cmd.getOwnerId());
-		rentalsite.setOwnerType(cmd.getOwnerType());
-		rentalsite.setAddress(cmd.getAddress());
-		rentalsite.setBuildingName(cmd.getBuildingName());
-		rentalsite.setSiteName(cmd.getSiteName());
-		rentalsite.setOwnCompanyName(cmd.getCompany());
-		rentalsite.setContactName(cmd.getContactName());
-		rentalsite.setContactPhonenum(cmd.getContactPhonenum());
-		rentalsite.setSiteType(cmd.getSiteType());
-		rentalsite.setSpec(cmd.getSpec());
+		RentalSite rentalsite = ConvertHelper.convert(cmd, RentalSite.class);
 		rentalsite.setStatus(RentalSiteStatus.NORMAL.getCode());
 		Long siteId = rentalProvider.createRentalSite(rentalsite);
 		if (null != cmd.getSiteItems()
@@ -994,18 +984,7 @@ public class RentalServiceImpl implements RentalService {
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid price   parameter in the command");
 		}
-		RentalSite rentalsite = new RentalSite();
-		rentalsite.setOwnerId(cmd.getOwnerId());
-		rentalsite.setOwnerType(cmd.getOwnerType());
-		rentalsite.setAddress(cmd.getAddress());
-		rentalsite.setId(cmd.getRentalSiteId());
-		rentalsite.setBuildingName(cmd.getBuildingName());
-		rentalsite.setSiteName(cmd.getSiteName());
-		rentalsite.setOwnCompanyName(cmd.getCompany());
-		rentalsite.setContactName(cmd.getContactName());
-		rentalsite.setContactPhonenum(cmd.getContactPhonenum());
-		rentalsite.setSiteType(cmd.getSiteType());
-		rentalsite.setSpec(cmd.getSpec());
+		RentalSite rentalsite = ConvertHelper.convert(cmd, RentalSite.class);
 		rentalsite.setStatus(RentalSiteStatus.NORMAL.getCode());
 		rentalProvider.updateRentalSite(rentalsite);
 	}
