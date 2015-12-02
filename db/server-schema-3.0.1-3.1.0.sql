@@ -605,7 +605,7 @@ ALTER TABLE `eh_enterprise_addresses` ADD COLUMN `building_name` VARCHAR(128);
 ALTER TABLE `eh_lease_promotions` ADD COLUMN `building_id` BIGINT NOT NULL DEFAULT 0; 
 ALTER TABLE `eh_lease_promotions` ADD COLUMN `rent_position` VARCHAR(128) COMMENT 'rent position'; 
 ALTER TABLE `eh_lease_promotions` ADD COLUMN `contacts` VARCHAR(128); 
-ALTER TABLE `eh_lease_promotions` ADD COLUMN `contact_phone` VARCHAR(128; 
+ALTER TABLE `eh_lease_promotions` ADD COLUMN `contact_phone` VARCHAR(128); 
 ALTER TABLE `eh_lease_promotions` ADD COLUMN `enter_time` DATETIME COMMENT 'enter time'; 
 
 
