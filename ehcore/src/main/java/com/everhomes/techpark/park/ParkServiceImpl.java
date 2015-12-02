@@ -346,15 +346,15 @@ public class ParkServiceImpl implements ParkService {
 							UserContext.current().getUser().getLocale(),"the plateNumber is already applied."));
 		}
 			
-		User user = UserContext.current().getUser();
-		List<UserIdentifier> identifiers = this.userProvider.listUserIdentifiersOfUser(user.getId());
-        List<String> phones = identifiers.stream().filter((r)-> { return IdentifierType.fromCode(r.getIdentifierType()) == IdentifierType.MOBILE; })
-            .map((r) -> { return r.getIdentifierToken(); })
-            .collect(Collectors.toList());
+//		User user = UserContext.current().getUser();
+//		List<UserIdentifier> identifiers = this.userProvider.listUserIdentifiersOfUser(user.getId());
+//        List<String> phones = identifiers.stream().filter((r)-> { return IdentifierType.fromCode(r.getIdentifierType()) == IdentifierType.MOBILE; })
+//            .map((r) -> { return r.getIdentifierToken(); })
+//            .collect(Collectors.toList());
 		ParkApplyCard apply = new ParkApplyCard();
-		apply.setApplierId(user.getId());
-		apply.setApplierName(user.getNickName());
-		apply.setApplierPhone(phones.get(0));
+		apply.setApplierId(cmd.getUserId());
+		apply.setApplierName(cmd.getUserName());
+		apply.setApplierPhone(cmd.getPhoneNumber());
 		apply.setApplyStatus(ApplyParkingCardStatus.WAITING.getCode());
 		apply.setApplyTime(new Timestamp(System.currentTimeMillis()));
 		apply.setFetchStatus(FetchStatus.NO.getCode());
@@ -378,7 +378,6 @@ public class ParkServiceImpl implements ParkService {
 			begin = strToTimestamp(cmd.getBeginDay());
 		}
 		if(!StringUtils.isEmpty(cmd.getEndDay())) {
-			Timestamp time = strToTimestamp(cmd.getEndDay());
 			end = addDays(cmd.getEndDay(), 1);
 		}
  		List<ParkApplyCard> appliers = parkProvider.searchApply(cmd.getCommunityId(),cmd.getApplierName(), cmd.getApplierPhone(), cmd.getPlateNumber(), cmd.getApplyStatus(), begin, end, locator, pageSize + 1);

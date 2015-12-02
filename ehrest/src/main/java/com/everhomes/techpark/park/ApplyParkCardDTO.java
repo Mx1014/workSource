@@ -10,6 +10,8 @@ public class ApplyParkCardDTO {
 	
 	private String applierPhone;
 	
+	private String companyName;
+	
 	private String plateNumber;
 	
 	private Timestamp applyTime;
@@ -49,6 +51,14 @@ public class ApplyParkCardDTO {
 
 	public void setApplierPhone(String applierPhone) {
 		this.applierPhone = applierPhone;
+	}
+
+	public String getCompanyName() {
+		return companyName;
+	}
+
+	public void setCompanyName(String companyName) {
+		this.companyName = companyName;
 	}
 
 	public String getPlateNumber() {
