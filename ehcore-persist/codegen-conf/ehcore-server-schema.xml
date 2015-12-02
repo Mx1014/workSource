@@ -6,7 +6,7 @@
     <driver>com.mysql.jdbc.Driver</driver>
     <url>jdbc:mysql://db-master:3306/ehcore</url>
     <user>ehcore</user>
-    <password>ehcore</password>
+    <password>123456</password>
 </jdbc>
 
 <generator>
@@ -58,14 +58,14 @@
         eh_enterprise_contact_group_members | eh_enterprise_community_members |
         eh_punch_logs | eh_punch_rules | eh_punch_geopoints | eh_punch_exception_requests | eh_punch_workday |
         eh_punch_exception_approvals | eh_punch_day_logs | eh_rental_rules | eh_rental_sites | eh_rental_site_items |
-		eh_rental_site_rules | eh_rental_bills | eh_rental_sites_bills | eh_rental_bill_attachments | eh_rental_items_bills | 
+		eh_rental_site_rules | eh_rental_bills | eh_rental_sites_bills | eh_rental_bill_attachments | eh_rental_items_bills |
 		eh_park_charge | eh_recharge_info| eh_park_apply_card | eh_rental_bill_paybill_map |
         eh_enterprise_contact_group_members | eh_enterprise_community_map | eh_building_attachments | eh_buildings |
         eh_enterprise_attachments | eh_organization_assigned_scopes | eh_user_communities |
         eh_yellow_pages | eh_yellow_page_attachments | eh_namespace_resources | eh_enterprise_details | eh_enterprise_op_requests |
-        eh_lease_promotions | eh_lease_promotion_attachments | 
-        eh_videoconf_account_rule | eh_order_invoice | eh_videoconf_order | eh_order_account | eh_videoconf_account | 
-        eh_enterprise_videoconf_account | eh_videoconf_enterprise | eh_warning_contacts | eh_source_account | eh_account_vedioconf 
+        eh_lease_promotions | eh_lease_promotion_attachments |
+        eh_videoconf_account_rule | eh_order_invoice | eh_videoconf_order | eh_order_account | eh_videoconf_account |
+        eh_enterprise_videoconf_account | eh_videoconf_enterprise | eh_warning_contacts | eh_source_account | eh_account_vedioconf | eh_user_group_histories
         </includes>
             <!-- All elements that are excluded from your schema
             (A Java regular expression. Use the pipe to separate several expressions).

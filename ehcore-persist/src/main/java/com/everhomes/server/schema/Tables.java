@@ -659,6 +659,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhUserGroups EH_USER_GROUPS = com.everhomes.server.schema.tables.EhUserGroups.EH_USER_GROUPS;
 
 	/**
+	 * The table ehcore.eh_user_group_histories
+	 */
+	public static final com.everhomes.server.schema.tables.EhUserGroupHistories EH_USER_GROUP_HISTORIES = com.everhomes.server.schema.tables.EhUserGroupHistories.EH_USER_GROUP_HISTORIES;
+
+	/**
 	 * The table ehcore.eh_user_identifiers
 	 */
 	public static final com.everhomes.server.schema.tables.EhUserIdentifiers EH_USER_IDENTIFIERS = com.everhomes.server.schema.tables.EhUserIdentifiers.EH_USER_IDENTIFIERS;
