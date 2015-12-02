@@ -1,7 +1,10 @@
 package com.everhomes.techpark.expansion;
 
+import javax.validation.constraints.NotNull;
+
 public class FindLeasePromotionByIdCommand {
 	
+	@NotNull
 	private Long id;
 
 	public Long getId() {

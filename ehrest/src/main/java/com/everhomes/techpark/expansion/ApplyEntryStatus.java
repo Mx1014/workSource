@@ -1,6 +1,10 @@
 package com.everhomes.techpark.expansion;
 
-
+/**
+ * PROCESSING(1):处理中
+ * RESIDED_IN(2): 已入住
+ * INVALID(3):已作废
+ * */
 public enum ApplyEntryStatus {
 	
 	PROCESSING((byte)1), RESIDED_IN((byte)2), INVALID((byte)3);

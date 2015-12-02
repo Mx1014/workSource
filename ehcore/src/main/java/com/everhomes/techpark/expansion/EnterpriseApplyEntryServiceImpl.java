@@ -335,4 +335,36 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}
 		return ConvertHelper.convert(leasePromotion, BuildingForRentDTO.class);
 	}
+	
+	@Override
+	public boolean updateLeasePromotionStatus(UpdateLeasePromotionStatusCommand cmd){
+		LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getId());
+		
+		if(LeasePromotionStatus.RENTAL.getCode() == cmd.getStatus()){
+			if(LeasePromotionStatus.RENTING.getCode() != leasePromotion.getStatus()){
+				LOGGER.error("Status can not be modified. cause:data status ="+ leasePromotion.getStatus());
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"Status can not be modified.");
+			}
+		}
+		
+		return enterpriseApplyEntryProvider.updateLeasePromotionStatus(cmd.getId(), cmd.getStatus());
+		
+	}
+	
+	@Override
+	public boolean updateApplyEntryStatus(UpdateApplyEntryStatusCommand cmd){
+		EnterpriseOpRequest request = enterpriseApplyEntryProvider.getApplyEntryById(cmd.getId());
+		
+		if(ApplyEntryStatus.RESIDED_IN.getCode() == cmd.getStatus()){
+			if(ApplyEntryStatus.PROCESSING.getCode() != request.getStatus()){
+				LOGGER.error("Status can not be modified. cause:data status ="+ request.getStatus());
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"Status can not be modified.");
+			}
+		}
+		
+		return enterpriseApplyEntryProvider.updateApplyEntryStatus(cmd.getId(), cmd.getStatus());
+		
+	}
 }

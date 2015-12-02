@@ -2,10 +2,13 @@ package com.everhomes.techpark.expansion;
 
 import javax.validation.constraints.NotNull;
 
-public class GetEnterpriseDetailByIdCommand {
+public class UpdateApplyEntryStatusCommand {
 	
 	@NotNull
 	private Long id;
+	
+	@NotNull
+	private Byte status;
 
 	public Long getId() {
 		return id;
@@ -14,7 +17,14 @@ public class GetEnterpriseDetailByIdCommand {
 	public void setId(Long id) {
 		this.id = id;
 	}
-	
-	
 
+	public Byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
+	
+	
 }

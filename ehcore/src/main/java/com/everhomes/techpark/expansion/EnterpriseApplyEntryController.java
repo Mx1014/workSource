@@ -144,4 +144,30 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 		return response;
 	}
 	
+	/**
+	 * <b>URL: /techpark/entry/updateApplyEntryStatus
+	 * <p>
+	 */
+	@RequestMapping("updateApplyEntryStatus")
+	@RestReturn(value=String.class)
+	public RestResponse updateApplyEntryStatus(UpdateApplyEntryStatusCommand cmd){
+		RestResponse response = new RestResponse(enterpriseApplyEntryService.updateApplyEntryStatus(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /techpark/entry/updateLeasePromotionStatus
+	 * <p>
+	 */
+	@RequestMapping("updateLeasePromotionStatus")
+	@RestReturn(value=String.class)
+	public RestResponse updateLeasePromotionStatus(UpdateLeasePromotionStatusCommand cmd){
+		RestResponse response = new RestResponse(enterpriseApplyEntryService.updateLeasePromotionStatus(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 }

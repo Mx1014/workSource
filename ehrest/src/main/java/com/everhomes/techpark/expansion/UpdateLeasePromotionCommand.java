@@ -3,6 +3,8 @@ package com.everhomes.techpark.expansion;
 import java.sql.Timestamp;
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.discover.ItemType;
 
 /**
@@ -21,7 +23,10 @@ import com.everhomes.discover.ItemType;
  * </ul>
  */
 public class UpdateLeasePromotionCommand {
+	
+	@NotNull
 	private Long id;
+	@NotNull
 	private Long     buildingId;
 	private String   rentPosition;
 	private String   rentType;

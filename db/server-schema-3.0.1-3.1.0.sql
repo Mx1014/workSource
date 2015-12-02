@@ -609,6 +609,7 @@ ALTER TABLE `eh_lease_promotions` ADD COLUMN `contact_phone` VARCHAR(128);
 ALTER TABLE `eh_lease_promotions` ADD COLUMN `enter_time` DATETIME COMMENT 'enter time'; 
 
 
+ALTER TABLE `eh_enterprise_op_requests` MODIFY COLUMN apply_user_name VARCHAR(128) COMMENT 'apply user name';
 
 
 

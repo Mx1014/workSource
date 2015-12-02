@@ -8,6 +8,7 @@ import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.DeleteQuery;
 import org.jooq.SelectQuery;
+import org.jooq.UpdateQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -31,6 +32,7 @@ import com.everhomes.server.schema.tables.records.EhEnterpriseAddressesRecord;
 import com.everhomes.server.schema.tables.records.EhEnterpriseDetailsRecord;
 import com.everhomes.server.schema.tables.records.EhEnterpriseOpRequestsRecord;
 import com.everhomes.server.schema.tables.records.EhLeasePromotionAttachmentsRecord;
+import com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 
@@ -206,6 +208,14 @@ public class EnterpriseApplyEntryProviderImpl implements
 	}
 	
 	@Override
+	public EnterpriseOpRequest getApplyEntryById(Long id){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		EhEnterpriseOpRequestsDao dao = new EhEnterpriseOpRequestsDao(context.configuration());
+		EnterpriseOpRequest enterpriseOpRequest = ConvertHelper.convert(dao.findById(id), EnterpriseOpRequest.class);
+		return enterpriseOpRequest;
+	}
+	
+	@Override
 	public boolean updateLeasePromotion(LeasePromotion leasePromotion){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		EhLeasePromotionsDao dao = new EhLeasePromotionsDao(context.configuration());
@@ -237,6 +247,22 @@ public class EnterpriseApplyEntryProviderImpl implements
 		return true;
 	}
 	
+	public boolean updateLeasePromotionStatus(long id, byte status){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		UpdateQuery<EhLeasePromotionsRecord> r = context.updateQuery(Tables.EH_LEASE_PROMOTIONS);
+		r.addValue(Tables.EH_LEASE_PROMOTIONS.STATUS, status);
+		r.addConditions(Tables.EH_LEASE_PROMOTIONS.ID.eq(id));
+		r.execute();
+		return true;
+	}
 	
+	public boolean updateApplyEntryStatus(long id, byte status){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		UpdateQuery<EhEnterpriseOpRequestsRecord> r = context.updateQuery(Tables.EH_ENTERPRISE_OP_REQUESTS);
+		r.addValue(Tables.EH_ENTERPRISE_OP_REQUESTS.STATUS, status);
+		r.addConditions(Tables.EH_ENTERPRISE_OP_REQUESTS.ID.eq(id));
+		r.execute();
+		return true;
+	}
 	
 }

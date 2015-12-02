@@ -2,6 +2,8 @@ package com.everhomes.techpark.expansion;
 
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.discover.ItemType;
 
 /**
@@ -21,8 +23,13 @@ import com.everhomes.discover.ItemType;
  */
 public class CreateLeasePromotionCommand {
 	
+	@NotNull
 	private Integer  namespaceId;
+	
+	@NotNull
 	private Long     communityId;
+	
+	@NotNull
 	private Long     buildingId;
 	private String   rentPosition;
 	private String   rentType;
