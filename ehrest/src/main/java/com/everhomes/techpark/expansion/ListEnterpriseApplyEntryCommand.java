@@ -8,6 +8,12 @@ public class ListEnterpriseApplyEntryCommand {
     
     private Long communityId;
     
+    private String applyType;
+	
+	private String status; 
+	
+	private String sourceType; //1:enterprise 2:chuangke space 
+    
     
     public Integer getNamespaceId() {
 		return namespaceId;
@@ -20,6 +26,25 @@ public class ListEnterpriseApplyEntryCommand {
 	}
 	public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
+	}
+	
+	public String getApplyType() {
+		return applyType;
+	}
+	public void setApplyType(String applyType) {
+		this.applyType = applyType;
+	}
+	public String getStatus() {
+		return status;
+	}
+	public void setStatus(String status) {
+		this.status = status;
+	}
+	public String getSourceType() {
+		return sourceType;
+	}
+	public void setSourceType(String sourceType) {
+		this.sourceType = sourceType;
 	}
 	public Integer getPageAnchor() {
         return pageAnchor;

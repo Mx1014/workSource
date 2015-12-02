@@ -179,9 +179,11 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		
 		ListEnterpriseApplyEntryResponse res = new ListEnterpriseApplyEntryResponse();
 		
+		EnterpriseOpRequest request = ConvertHelper.convert(cmd, EnterpriseOpRequest.class);
+		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		Integer offset = cmd.getPageAnchor() == null ? 0 : (cmd.getPageAnchor() - 1 ) * pageSize;
-		List<EnterpriseOpRequest> enterpriseOpRequests = enterpriseApplyEntryProvider.listApplyEntrys(cmd.getCommunityId(), offset, pageSize + 1);
+		List<EnterpriseOpRequest> enterpriseOpRequests = enterpriseApplyEntryProvider.listApplyEntrys(request, offset, pageSize + 1);
 		
 		if(enterpriseOpRequests != null && enterpriseOpRequests.size() > pageSize) {
 			enterpriseOpRequests.remove(enterpriseOpRequests.size() - 1);
