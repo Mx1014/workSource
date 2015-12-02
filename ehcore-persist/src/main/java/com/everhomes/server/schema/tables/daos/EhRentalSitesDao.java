@@ -193,4 +193,18 @@ public class EhRentalSitesDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchByOwnerType(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.OWNER_TYPE, values);
 	}
+
+	/**
+	 * Fetch records that have <code>introduction IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchByIntroduction(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.INTRODUCTION, values);
+	}
+
+	/**
+	 * Fetch records that have <code>notice IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchByNotice(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.NOTICE, values);
+	}
 }

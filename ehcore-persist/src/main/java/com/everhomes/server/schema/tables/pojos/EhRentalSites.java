@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSites implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1292855373;
+	private static final long serialVersionUID = 750950511;
 
 	private java.lang.Long     id;
 	private java.lang.Long     parentId;
@@ -35,6 +35,8 @@ public class EhRentalSites implements java.io.Serializable {
 	private java.lang.Long     operatorUid;
 	private java.sql.Timestamp operateTime;
 	private java.lang.String   ownerType;
+	private java.lang.String   introduction;
+	private java.lang.String   notice;
 
 	public EhRentalSites() {}
 
@@ -60,7 +62,9 @@ public class EhRentalSites implements java.io.Serializable {
 		java.sql.Timestamp createTime,
 		java.lang.Long     operatorUid,
 		java.sql.Timestamp operateTime,
-		java.lang.String   ownerType
+		java.lang.String   ownerType,
+		java.lang.String   introduction,
+		java.lang.String   notice
 	) {
 		this.id = id;
 		this.parentId = parentId;
@@ -84,6 +88,8 @@ public class EhRentalSites implements java.io.Serializable {
 		this.operatorUid = operatorUid;
 		this.operateTime = operateTime;
 		this.ownerType = ownerType;
+		this.introduction = introduction;
+		this.notice = notice;
 	}
 
 	public java.lang.Long getId() {
@@ -260,5 +266,21 @@ public class EhRentalSites implements java.io.Serializable {
 
 	public void setOwnerType(java.lang.String ownerType) {
 		this.ownerType = ownerType;
+	}
+
+	public java.lang.String getIntroduction() {
+		return this.introduction;
+	}
+
+	public void setIntroduction(java.lang.String introduction) {
+		this.introduction = introduction;
+	}
+
+	public java.lang.String getNotice() {
+		return this.notice;
+	}
+
+	public void setNotice(java.lang.String notice) {
+		this.notice = notice;
 	}
 }
