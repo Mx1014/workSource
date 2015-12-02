@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalRules extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalRulesRecord> {
 
-	private static final long serialVersionUID = -1659508534;
+	private static final long serialVersionUID = -1284124022;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_rules</code>
@@ -180,6 +180,21 @@ public class EhRentalRules extends org.jooq.impl.TableImpl<com.everhomes.server.
 	 * The column <code>ehcore.eh_rental_rules.owner_type</code>. owner type : community ; organization
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRulesRecord, java.lang.String> OWNER_TYPE = createField("owner_type", org.jooq.impl.SQLDataType.VARCHAR.length(255), this, "owner type : community ; organization");
+
+	/**
+	 * The column <code>ehcore.eh_rental_rules.rental_type</code>. 0: as hour:min  1-as half day 2-as day
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRulesRecord, java.lang.Byte> RENTAL_TYPE = createField("rental_type", org.jooq.impl.SQLDataType.TINYINT, this, "0: as hour:min  1-as half day 2-as day");
+
+	/**
+	 * The column <code>ehcore.eh_rental_rules.cancel_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRulesRecord, java.lang.Long> CANCEL_TIME = createField("cancel_time", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_rental_rules.overtime_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalRulesRecord, java.lang.Long> OVERTIME_TIME = createField("overtime_time", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_rental_rules</code> table reference

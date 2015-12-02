@@ -256,4 +256,25 @@ public class EhRentalRulesDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalRules> fetchByOwnerType(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalRules.EH_RENTAL_RULES.OWNER_TYPE, values);
 	}
+
+	/**
+	 * Fetch records that have <code>rental_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalRules> fetchByRentalType(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalRules.EH_RENTAL_RULES.RENTAL_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>cancel_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalRules> fetchByCancelTime(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalRules.EH_RENTAL_RULES.CANCEL_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>overtime_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalRules> fetchByOvertimeTime(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalRules.EH_RENTAL_RULES.OVERTIME_TIME, values);
+	}
 }

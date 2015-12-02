@@ -34,6 +34,7 @@ import com.everhomes.techpark.onlinePay.OnlinePayBillCommand;
 import com.everhomes.techpark.onlinePay.OnlinePayService;
 import com.everhomes.techpark.onlinePay.PayStatus;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
@@ -100,19 +101,27 @@ public class RentalServiceImpl implements RentalService {
 			UpdateRentalRuleCommand cmd) {
 		Long userId = UserContext.current().getUser().getId();
 		checkEnterpriseCommunityIdIsNull(cmd.getOwnerId());
-		RentalRule rentalRule = rentalProvider.getRentalRule(
-				cmd.getOwnerId(),cmd.getOwnerType(), cmd.getSiteType());
-		rentalRule.setOwnerId(cmd.getOwnerId());
-		rentalRule.setOwnerType(cmd.getOwnerType());
-		rentalRule.setContactNum(cmd.getContactNum());
-		rentalRule.setPayEndTime(cmd.getPayEndTime());
-		rentalRule.setPaymentRatio(cmd.getPayRatio());
-		rentalRule.setPayStartTime(cmd.getPayStartTime());
-		rentalRule.setRefundFlag(cmd.getRefundFlag());
-		rentalRule.setRentalEndTime(cmd.getRentalEndTime());
-		rentalRule.setRentalStartTime(cmd.getRentalStartTime());
-		rentalRule.setOperateTime(new Timestamp(DateHelper.currentGMTTime()
-				.getTime()));
+//		RentalRule rentalRule = rentalProvider.getRentalRule(
+//				cmd.getOwnerId(),cmd.getOwnerType(), cmd.getSiteType());
+//		rentalRule.setOwnerId(cmd.getOwnerId());
+//		rentalRule.setOwnerType(cmd.getOwnerType());
+//		rentalRule.setContactNum(cmd.getContactNum());
+//		rentalRule.setPayEndTime(cmd.getPayEndTime());
+//		rentalRule.setPaymentRatio(cmd.getPayRatio());
+//		rentalRule.setPayStartTime(cmd.getPayStartTime());
+//		rentalRule.setRefundFlag(cmd.getRefundFlag());
+//		rentalRule.setRentalType(cmd.getRentalType());
+//		rentalRule.setOvertimeTime(cmd.getOvertimeTime());
+//		rentalRule.setSiteType(cmd.getSiteType());
+//		rentalRule.setRentalEndTime(cmd.getRentalEndTime());
+//		rentalRule.setRentalStartTime(cmd.getRentalStartTime());
+//		rentalRule.setOperateTime(new Timestamp(DateHelper.currentGMTTime()
+//				.getTime()));
+//		rentalRule.setContactAddress(cmd.getContactAddress());
+//		rentalRule.setContactName(cmd.getContactName());
+//		rentalRule.setOperatorUid(userId);
+		RentalRule rentalRule =ConvertHelper.convert(cmd,RentalRule.class  );
+		rentalRule.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		rentalRule.setOperatorUid(userId);
 		rentalProvider.updateRentalRule(rentalRule);
 		return null;
@@ -809,19 +818,9 @@ public class RentalServiceImpl implements RentalService {
 	public GetRentalTypeRuleCommandResponse getRentalTypeRule(
 			GetRentalTypeRuleCommand cmd) {
 		checkEnterpriseCommunityIdIsNull(cmd.getOwnerId());
-		GetRentalTypeRuleCommandResponse response = new GetRentalTypeRuleCommandResponse();
 		RentalRule rentalRule = rentalProvider.getRentalRule(
 				cmd.getOwnerId(),cmd.getOwnerType(), cmd.getSiteType());
-		response.setContactNum(rentalRule.getContactNum());
-		response.setOwnerId(cmd.getOwnerId());
-		response.setOwnerType(cmd.getOwnerType());
-		response.setPayEndTime(rentalRule.getPayEndTime());
-		response.setPayRatio(rentalRule.getPaymentRatio());
-		response.setPayStartTime(rentalRule.getPayStartTime());
-		response.setRefundFlag(rentalRule.getRefundFlag());
-		response.setRentalEndTime(rentalRule.getRentalEndTime());
-		response.setRentalStartTime(rentalRule.getRentalStartTime());
-		response.setSiteType(rentalRule.getSiteType());
+		GetRentalTypeRuleCommandResponse response = ConvertHelper.convert(rentalRule, GetRentalTypeRuleCommandResponse.class);
 		return response;
 	}
 

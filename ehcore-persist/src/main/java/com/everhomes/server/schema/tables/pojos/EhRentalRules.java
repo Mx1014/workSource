@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalRules implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1628904710;
+	private static final long serialVersionUID = -1750886796;
 
 	private java.lang.Long     id;
 	private java.lang.Long     ownerId;
@@ -44,6 +44,9 @@ public class EhRentalRules implements java.io.Serializable {
 	private java.lang.Long     operatorUid;
 	private java.sql.Timestamp operateTime;
 	private java.lang.String   ownerType;
+	private java.lang.Byte     rentalType;
+	private java.lang.Long     cancelTime;
+	private java.lang.Long     overtimeTime;
 
 	public EhRentalRules() {}
 
@@ -78,7 +81,10 @@ public class EhRentalRules implements java.io.Serializable {
 		java.sql.Timestamp createTime,
 		java.lang.Long     operatorUid,
 		java.sql.Timestamp operateTime,
-		java.lang.String   ownerType
+		java.lang.String   ownerType,
+		java.lang.Byte     rentalType,
+		java.lang.Long     cancelTime,
+		java.lang.Long     overtimeTime
 	) {
 		this.id = id;
 		this.ownerId = ownerId;
@@ -111,6 +117,9 @@ public class EhRentalRules implements java.io.Serializable {
 		this.operatorUid = operatorUid;
 		this.operateTime = operateTime;
 		this.ownerType = ownerType;
+		this.rentalType = rentalType;
+		this.cancelTime = cancelTime;
+		this.overtimeTime = overtimeTime;
 	}
 
 	public java.lang.Long getId() {
@@ -359,5 +368,29 @@ public class EhRentalRules implements java.io.Serializable {
 
 	public void setOwnerType(java.lang.String ownerType) {
 		this.ownerType = ownerType;
+	}
+
+	public java.lang.Byte getRentalType() {
+		return this.rentalType;
+	}
+
+	public void setRentalType(java.lang.Byte rentalType) {
+		this.rentalType = rentalType;
+	}
+
+	public java.lang.Long getCancelTime() {
+		return this.cancelTime;
+	}
+
+	public void setCancelTime(java.lang.Long cancelTime) {
+		this.cancelTime = cancelTime;
+	}
+
+	public java.lang.Long getOvertimeTime() {
+		return this.overtimeTime;
+	}
+
+	public void setOvertimeTime(java.lang.Long overtimeTime) {
+		this.overtimeTime = overtimeTime;
 	}
 }

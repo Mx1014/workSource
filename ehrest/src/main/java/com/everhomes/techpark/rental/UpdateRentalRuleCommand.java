@@ -12,8 +12,13 @@ import com.everhomes.util.StringHelper;
  * <li>payStartTime：最早付全款时间</li>
  * <li>payEndTime：最晚付全款时间</li>
  * <li>payRatio：定金比例（%）</li>
+ * <li>rentalType：0按时间 1按半天 2按全天 参考{@link com.everhomes.techpark.rental.RentalType} </li> 
  * <li>refundFlag：退不退定金(0退,1不退,default 1)</li>
  * <li>contactNum：电话号码</li>
+ * <li>cancelTime：提前取消时间</li>
+ * <li>overtimeTime：过期时间</li>
+ * <li>contactAddress：联系地址</li>
+ * <li>contactName：联系人</li>
  * </ul>
  */
 public class UpdateRentalRuleCommand {
@@ -26,7 +31,12 @@ public class UpdateRentalRuleCommand {
 	private Long payEndTime;
 	private Integer payRatio;
 	private Byte refundFlag;
+	private Byte rentalType;
 	private String contactNum;
+	private Long cancelTime;
+	private Long overtimeTime;
+	private String contactAddress;
+	private String contactName;
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -92,5 +102,35 @@ public class UpdateRentalRuleCommand {
 	}
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+	public Byte getRentalType() {
+		return rentalType;
+	}
+	public void setRentalType(Byte rentalType) {
+		this.rentalType = rentalType;
+	}
+	public Long getCancelTime() {
+		return cancelTime;
+	}
+	public void setCancelTime(Long cancelTime) {
+		this.cancelTime = cancelTime;
+	}
+	public Long getOvertimeTime() {
+		return overtimeTime;
+	}
+	public void setOvertimeTime(Long overtimeTime) {
+		this.overtimeTime = overtimeTime;
+	}
+	public String getContactAddress() {
+		return contactAddress;
+	}
+	public void setContactAddress(String contactAddress) {
+		this.contactAddress = contactAddress;
+	}
+	public String getContactName() {
+		return contactName;
+	}
+	public void setContactName(String contactName) {
+		this.contactName = contactName;
 	}
 }

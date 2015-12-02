@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalRulesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhRentalRulesRecord> {
 
-	private static final long serialVersionUID = 745020955;
+	private static final long serialVersionUID = -1176848678;
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_rules.id</code>. id
@@ -447,6 +447,48 @@ public class EhRentalRulesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 		return (java.lang.String) getValue(30);
 	}
 
+	/**
+	 * Setter for <code>ehcore.eh_rental_rules.rental_type</code>. 0: as hour:min  1-as half day 2-as day
+	 */
+	public void setRentalType(java.lang.Byte value) {
+		setValue(31, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_rental_rules.rental_type</code>. 0: as hour:min  1-as half day 2-as day
+	 */
+	public java.lang.Byte getRentalType() {
+		return (java.lang.Byte) getValue(31);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_rental_rules.cancel_time</code>.
+	 */
+	public void setCancelTime(java.lang.Long value) {
+		setValue(32, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_rental_rules.cancel_time</code>.
+	 */
+	public java.lang.Long getCancelTime() {
+		return (java.lang.Long) getValue(32);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_rental_rules.overtime_time</code>.
+	 */
+	public void setOvertimeTime(java.lang.Long value) {
+		setValue(33, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_rental_rules.overtime_time</code>.
+	 */
+	public java.lang.Long getOvertimeTime() {
+		return (java.lang.Long) getValue(33);
+	}
+
 	// -------------------------------------------------------------------------
 	// Primary key information
 	// -------------------------------------------------------------------------
@@ -473,7 +515,7 @@ public class EhRentalRulesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	/**
 	 * Create a detached, initialised EhRentalRulesRecord
 	 */
-	public EhRentalRulesRecord(java.lang.Long id, java.lang.Long ownerId, java.lang.String siteType, java.lang.Long rentalStartTime, java.lang.Long rentalEndTime, java.lang.Long payStartTime, java.lang.Long payEndTime, java.lang.Integer paymentRatio, java.lang.Byte refundFlag, java.lang.String contactNum, java.sql.Time timeTag1, java.sql.Time timeTag2, java.sql.Time timeTag3, java.sql.Date dateTag1, java.sql.Date dateTag2, java.sql.Date dateTag3, java.sql.Timestamp datetimeTag1, java.sql.Timestamp datetimeTag2, java.sql.Timestamp datetimeTag3, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.String ownerType) {
+	public EhRentalRulesRecord(java.lang.Long id, java.lang.Long ownerId, java.lang.String siteType, java.lang.Long rentalStartTime, java.lang.Long rentalEndTime, java.lang.Long payStartTime, java.lang.Long payEndTime, java.lang.Integer paymentRatio, java.lang.Byte refundFlag, java.lang.String contactNum, java.sql.Time timeTag1, java.sql.Time timeTag2, java.sql.Time timeTag3, java.sql.Date dateTag1, java.sql.Date dateTag2, java.sql.Date dateTag3, java.sql.Timestamp datetimeTag1, java.sql.Timestamp datetimeTag2, java.sql.Timestamp datetimeTag3, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.String ownerType, java.lang.Byte rentalType, java.lang.Long cancelTime, java.lang.Long overtimeTime) {
 		super(com.everhomes.server.schema.tables.EhRentalRules.EH_RENTAL_RULES);
 
 		setValue(0, id);
@@ -507,5 +549,8 @@ public class EhRentalRulesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 		setValue(28, operatorUid);
 		setValue(29, operateTime);
 		setValue(30, ownerType);
+		setValue(31, rentalType);
+		setValue(32, cancelTime);
+		setValue(33, overtimeTime);
 	}
 }
