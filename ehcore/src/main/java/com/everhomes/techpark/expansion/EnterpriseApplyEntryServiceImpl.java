@@ -1,6 +1,8 @@
 package com.everhomes.techpark.expansion;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -12,8 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.everhomes.address.AddressProvider;
-import com.everhomes.address.ApartmentDTO;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -230,9 +230,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			ListBuildingForRentCommand cmd) {
 		ListBuildingForRentResponse res = new ListBuildingForRentResponse();
 		
+		LeasePromotion lease = ConvertHelper.convert(cmd, LeasePromotion.class);
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		Integer offset = cmd.getPageAnchor() == null ? 0 : (cmd.getPageAnchor() - 1 ) * pageSize;
-		List<LeasePromotion> leasePromotions = enterpriseApplyEntryProvider.listLeasePromotions(cmd.getCommunityId(), offset, pageSize + 1);
+		List<LeasePromotion> leasePromotions = enterpriseApplyEntryProvider.listLeasePromotions(lease, offset, pageSize + 1);
 		
 		if(leasePromotions != null && leasePromotions.size() > pageSize) {
 			leasePromotions.remove(leasePromotions.size() - 1);
@@ -257,4 +258,79 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		return res;
 	}
 
+	@Override
+	public boolean createLeasePromotion(CreateLeasePromotionCommand cmd){
+		LeasePromotion leasePromotion = ConvertHelper.convert(cmd, LeasePromotion.class);
+		leasePromotion.setEnterTime(new Timestamp(cmd.getEnterTime()));
+		leasePromotion.setCreateUid(UserContext.current().getUser().getId());
+		leasePromotion.setStatus(LeasePromotionStatus.RENTING.getCode());
+		leasePromotion = enterpriseApplyEntryProvider.createLeasePromotion(leasePromotion);
+		
+		List<BuildingForRentAttachmentDTO> attachmentDTOs= cmd.getAttachments();
+		
+		if(StringUtils.isEmpty(attachmentDTOs)){
+			return true;
+		}
+		
+		
+		/**
+		 * 重新添加
+		 */
+		for (BuildingForRentAttachmentDTO buildingForRentAttachmentDTO : attachmentDTOs) {
+			LeasePromotionAttachment attachment = ConvertHelper.convert(buildingForRentAttachmentDTO, LeasePromotionAttachment.class);
+			attachment.setLeaseId(leasePromotion.getId());
+			attachment.setCreatorUid(leasePromotion.getCreateUid());
+			enterpriseApplyEntryProvider.addPromotionAttachment(attachment);
+		}
+		return true;
+	}
+
+	@Override
+	public boolean updateLeasePromotion(UpdateLeasePromotionCommand cmd){
+		
+		LeasePromotion leasePromotion = ConvertHelper.convert(cmd, LeasePromotion.class);
+		LeasePromotion lease = enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getId());
+		
+		leasePromotion.setEnterTime(new Timestamp(cmd.getEnterTime()));
+		leasePromotion.setStatus(LeasePromotionStatus.RENTING.getCode());
+		leasePromotion.setCreateTime(lease.getCreateTime());
+		leasePromotion.setCreateUid(lease.getCreateUid());
+		enterpriseApplyEntryProvider.updateLeasePromotion(leasePromotion);
+		
+		List<BuildingForRentAttachmentDTO> attachmentDTOs= cmd.getAttachments();
+		
+		if(StringUtils.isEmpty(attachmentDTOs)){
+			return true;
+		}
+		
+		/**
+		 * 先删除全部图片
+		 */
+		enterpriseApplyEntryProvider.deleteLeasePromotionAttachment(leasePromotion.getId());
+		
+		/**
+		 * 重新添加
+		 */
+		for (BuildingForRentAttachmentDTO buildingForRentAttachmentDTO : attachmentDTOs) {
+			LeasePromotionAttachment attachment = ConvertHelper.convert(buildingForRentAttachmentDTO, LeasePromotionAttachment.class);
+			attachment.setLeaseId(leasePromotion.getId());
+			attachment.setCreatorUid(UserContext.current().getUser().getId());
+			enterpriseApplyEntryProvider.addPromotionAttachment(attachment);
+		}
+		
+		return true;
+	}
+	
+	@Override
+	public BuildingForRentDTO findLeasePromotionById(Long id){
+		LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(id);
+		leasePromotion.setPosterUrl(contentServerService.parserUri(leasePromotion.getPosterUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
+		List<LeasePromotionAttachment> attachments = leasePromotion.getAttachments();
+		if(null != attachments){
+			for (LeasePromotionAttachment leasePromotionAttachment : attachments) {
+				leasePromotionAttachment.setContentUrl(contentServerService.parserUri(leasePromotionAttachment.getContentUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
+			}
+		}
+		return ConvertHelper.convert(leasePromotion, BuildingForRentDTO.class);
+	}
 }

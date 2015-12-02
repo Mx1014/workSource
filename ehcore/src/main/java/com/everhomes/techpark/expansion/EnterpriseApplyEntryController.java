@@ -103,4 +103,45 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 		return response;
 	}
 	
+	/**
+	 * <b>URL: /techpark/entry/createLeasePromotion
+	 * <p>
+	 */
+	@RequestMapping("createLeasePromotion")
+	@RestReturn(value=String.class)
+	public RestResponse createLeasePromotion(CreateLeasePromotionCommand cmd){
+		boolean res = enterpriseApplyEntryService.createLeasePromotion(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /techpark/entry/updateLeasePromotion
+	 * <p>
+	 */
+	@RequestMapping("updateLeasePromotion")
+	@RestReturn(value=String.class)
+	public RestResponse updateLeasePromotion(UpdateLeasePromotionCommand cmd){
+		boolean res = enterpriseApplyEntryService.updateLeasePromotion(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /techpark/entry/findLeasePromotionById
+	 * <p>
+	 */
+	@RequestMapping("findLeasePromotionById")
+	@RestReturn(value=BuildingForRentDTO.class)
+	public RestResponse findLeasePromotionById(FindLeasePromotionByIdCommand cmd){
+		RestResponse response = new RestResponse(enterpriseApplyEntryService.findLeasePromotionById(cmd.getId()));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 }
