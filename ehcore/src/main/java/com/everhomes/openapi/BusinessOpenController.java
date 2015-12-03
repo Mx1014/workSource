@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,6 +23,7 @@ import com.everhomes.category.CategoryAdminStatus;
 import com.everhomes.category.CategoryConstants;
 import com.everhomes.category.CategoryDTO;
 import com.everhomes.category.CategoryProvider;
+import com.everhomes.category.CategoryProviderImpl;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -59,6 +62,7 @@ import com.everhomes.util.WebTokenGenerator;
 @RestController
 @RequestMapping("/openapi")
 public class BusinessOpenController extends ControllerBase {
+	private static final Logger LOGGER = LoggerFactory.getLogger(BusinessOpenController.class);
     private static final String DEFAULT_SORT = "default_order";
     @Autowired
     private UserService userService;
@@ -200,6 +204,10 @@ public class BusinessOpenController extends ControllerBase {
         if(null != meta && meta.size() > 0) {
             messageDto.getMeta().putAll(meta);
             }
+        
+        LOGGER.debug("sendMessageToUser-bizuserId="+User.BIZ_UID);
+        LOGGER.debug("sendMessageToUser-BIZ_USER_LOGIN="+StringHelper.toJsonString(User.BIZ_USER_LOGIN));
+        
         messagingService.routeMessage(User.BIZ_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
                 userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
     }
