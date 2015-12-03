@@ -49,6 +49,8 @@ public class RentalBillDTO {
 	private String companyName;
 	private String contactName;
 	private String contactPhonenum;
+	private String introduction;
+	private String notice; 
 	private Long startTime;
 	private Long endTime;
 	private Long reserveTime;
@@ -312,6 +314,22 @@ public class RentalBillDTO {
 
 	public void setBillAttachments(List<BillAttachmentDTO> billAttachments) {
 		this.billAttachments = billAttachments;
+	}
+
+	public String getIntroduction() {
+		return introduction;
+	}
+
+	public void setIntroduction(String introduction) {
+		this.introduction = introduction;
+	}
+
+	public String getNotice() {
+		return notice;
+	}
+
+	public void setNotice(String notice) {
+		this.notice = notice;
 	}
  
 }

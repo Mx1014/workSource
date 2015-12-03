@@ -715,6 +715,8 @@ public class RentalServiceImpl implements RentalService {
 		dto.setCompanyName(rs.getOwnCompanyName());
 		dto.setContactName(rs.getContactName());
 		dto.setContactPhonenum(rs.getContactPhonenum());
+		dto.setNotice(rs.getNotice());
+		dto.setIntroduction(rs.getIntroduction());
 		dto.setRentalBillId(bill.getId());
 		dto.setOwnerId(bill.getOwnerId());
 		dto.setOwnerType(bill.getOwnerType());
