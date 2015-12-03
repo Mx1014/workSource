@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -39,6 +40,7 @@ import com.everhomes.family.Family;
 import com.everhomes.family.FamilyDTO;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.forum.Attachment;
+import com.everhomes.forum.ForumNotificationTemplateCode;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.Post;
@@ -49,6 +51,7 @@ import com.everhomes.group.RejectJoinGroupRequestCommand;
 import com.everhomes.group.RequestToJoinGroupCommand;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
+import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessageBodyType;
 import com.everhomes.messaging.MessageChannel;
 import com.everhomes.messaging.MessageDTO;
@@ -133,6 +136,9 @@ public class ActivityServiceImpl implements ActivityService {
     
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private LocaleTemplateService localeTemplateService;
 
     @Override
     public void createPost(ActivityPostCommand cmd, Long postId) {
@@ -194,6 +200,7 @@ public class ActivityServiceImpl implements ActivityService {
         
     }
 
+    //活动报名
     @Override
     public ActivityDTO signup(ActivitySignupCommand cmd) {
         User user = UserContext.current().getUser();
@@ -261,7 +268,38 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setProcessStatus(getStatus(activity).getCode());
         dto.setForumId(post.getForumId());
         dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
+        
+        //Send message to creator
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("userName", user.getNickName());
+        map.put("postName", activity.getSubject());
+        sendMessageCode(activity.getCreatorUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_SIGNUP_TO_CREATOR);
+        
         return dto;
+    }
+    
+    private void sendMessageCode(Long uid, String locale, Map<String, String> content, int code) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        String scope = ActivityNotificationTemplateCode.SCOPE;
+        
+        String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+        sendMessageToUser(uid, notifyTextForOther, null);
+    }
+    
+    private void sendMessageToUser(Long uid, String content, Map<String, String> meta) {
+        MessageDTO messageDto = new MessageDTO();
+        messageDto.setAppId(AppConstants.APPID_MESSAGING);
+        messageDto.setSenderUid(User.SYSTEM_UID);
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid.toString()));
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+        messageDto.setBody(content);
+        messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+        if(null != meta && meta.size() > 0) {
+            messageDto.getMeta().putAll(meta);
+            }
+        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
+                uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
     }
 
     private ActivityRoster createRoster(ActivitySignupCommand cmd, User user, Activity activity) {
@@ -316,6 +354,13 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setForumId(post.getForumId());
         dto.setUserActivityStatus(ActivityStatus.UN_SIGNUP.getCode());
         dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
+        
+        //Send message to creator
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("userName", user.getNickName());
+        map.put("postName", activity.getSubject());
+        sendMessageCode(activity.getCreatorUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_SIGNUP_CANCEL_TO_CREATOR);
+        
         return dto;
     }
 
@@ -535,6 +580,7 @@ public class ActivityServiceImpl implements ActivityService {
         return null;
     }
 
+    //活动确认
     @Override
     public ActivityDTO confirm(ActivityConfirmCommand cmd) {
         ActivityRoster item = activityProvider.findRosterById(cmd.getRosterId());
@@ -597,6 +643,12 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setStartTime(activity.getStartTime().toString());
         dto.setStopTime(activity.getEndTime().toString());
         dto.setGroupId(activity.getGroupId());
+        
+        //管理员同意活动的报名
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("userName", user.getNickName());
+        map.put("postName", activity.getSubject());
+        sendMessageCode(item.getUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_CREATOR_CONFIRM_TO_USER);
         return dto;
     }
 

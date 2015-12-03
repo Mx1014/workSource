@@ -31,4 +31,10 @@ public interface GroupNotificationTemplateCode {
     static final int GROUP_MEMBER_INVOKE_FOR_APPLICANT = 25; // 圈里的人被踢出圈，通知退出人
     static final int GROUP_MEMBER_INVOKE_FOR_OPERATOR = 26; // 圈里的人被踢出圈，通知操作者
     static final int GROUP_MEMBER_INVOKE_FOR_OTHER = 27; // 圈里的人被踢出圈，通知其它人
+    
+    static final int GROUP_MEMBER_PUBLIC_APPLICANT = 28; //您已订阅兴趣圈“瑞地自由度”
+    static final int GROUP_MEMBER_PUBLIC_MEMBER_CHANGE = 29; //兴趣圈‘瑞地自由度’人数有变化
+    static final int GROUP_MEMBER_DELETED_ADMIN = 30;   //彭海星已删除圈“瑞地自由度”
+    static final int GROUP_MEMBER_DELETED_OPERATOR = 31;    //您已删除圈“瑞地自由度”
+    static final int GROUP_MEMBER_DELETE_MEMBER = 32;   //您已取消订阅兴趣圈“瑞地自由度”
 }

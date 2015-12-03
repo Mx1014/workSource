@@ -476,8 +476,10 @@ public class FamilyServiceImpl implements FamilyService {
        
         List<FamilyDTO> families = this.familyProvider.getUserFamiliesByUserId(userId);
         Map<Long, Long> checkList = new HashMap<Long, Long>();
-        for(FamilyDTO f : families) {
-            checkList.put(f.getAddressId(), 1l);
+        if(null != families) {
+          for(FamilyDTO f : families) {
+                checkList.put(f.getAddressId(), 1l);
+            }     
         }
         
         //Merge histories
@@ -489,8 +491,8 @@ public class FamilyServiceImpl implements FamilyService {
                 
                 FamilyDTO family = new FamilyDTO();
                 family.setId(o.getId());
-                //family.setMembershipStatus(GroupMemberStatus.REJECT.getCode());
-                family.setMembershipStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
+                family.setMembershipStatus(GroupMemberStatus.REJECT.getCode());
+                //family.setMembershipStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
                 Community community = this.communityProvider.findCommunityById(o.getCommunityId());
                 if(community != null){
                     family.setCommunityId(o.getCommunityId());
@@ -1978,4 +1980,11 @@ public class FamilyServiceImpl implements FamilyService {
       return familyDto;
     }
 
+    @Override
+    public void deleteHistoryById(Long id) {
+        UserGroupHistory history = this.userGroupHistoryProvider.getHistoryById(id);
+        if(history != null) {
+            this.userGroupHistoryProvider.deleteUserGroupHistory(history);
+        }
+    }
 }

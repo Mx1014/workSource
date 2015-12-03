@@ -6,6 +6,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -52,10 +53,17 @@ import com.everhomes.forum.admin.SearchTopicAdminCommandResponse;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupMember;
+import com.everhomes.group.GroupNotificationTemplateCode;
 import com.everhomes.group.GroupPrivacy;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
+import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.messaging.MessageBodyType;
+import com.everhomes.messaging.MessageChannel;
+import com.everhomes.messaging.MessageDTO;
+import com.everhomes.messaging.MessagingConstants;
+import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -72,6 +80,7 @@ import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.IdentifierType;
+import com.everhomes.user.MessageChannelType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
@@ -148,6 +157,12 @@ public class ForumServiceImpl implements ForumService {
     
     @Autowired
     private HotPostService hotPostService;
+    
+    @Autowired
+    private MessagingService messagingService;
+    
+    @Autowired
+    private LocaleTemplateService localeTemplateService;
     
     @Override
     public boolean isSystemForum(long forumId) {
@@ -839,11 +854,45 @@ public class ForumServiceImpl implements ForumService {
         // Populate the result post the same as query
         populatePost(userId, post, null, true);
         
+        //Send message to post creator
+        
         AddUserPointCommand pointCmd = new AddUserPointCommand(userId, PointType.CREATE_COMMENT.name(), 
             userPointService.getItemPoint(PointType.CREATE_COMMENT), userId);  
         userPointService.addPoint(pointCmd);
         
+        if(!post.getCreatorUid().equals(userId)) {
+            //Send message to creator
+            Map<String, String> map = new HashMap<String, String>();
+            map.put("userName", user.getNickName());
+            map.put("postName", post.getSubject());
+            sendMessageCode(post.getCreatorUid(), user.getLocale(), map, ForumNotificationTemplateCode.FORUM_REPLAY_ONE_TO_CREATOR);
+        }
+        
         return ConvertHelper.convert(post, PostDTO.class);
+    }
+    
+    private void sendMessageCode(Long uid, String locale, Map<String, String> content, int code) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        String scope = ForumNotificationTemplateCode.SCOPE;
+        
+        String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+        sendMessageToUser(uid, notifyTextForOther, null);
+    }
+    
+    private void sendMessageToUser(Long uid, String content, Map<String, String> meta) {
+        MessageDTO messageDto = new MessageDTO();
+        messageDto.setAppId(AppConstants.APPID_MESSAGING);
+        messageDto.setSenderUid(User.SYSTEM_UID);
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid.toString()));
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+        messageDto.setBody(content);
+        messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+        if(null != meta && meta.size() > 0) {
+            messageDto.getMeta().putAll(meta);
+            }
+        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
+                uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
     }
     
     @Override

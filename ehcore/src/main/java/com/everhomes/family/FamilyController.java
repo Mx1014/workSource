@@ -339,7 +339,15 @@ public class FamilyController extends ControllerBase {
         return response;
     }
     
-    
+    @RequestMapping("deleteHistoryById")
+    @RestReturn(value=String.class)
+    public RestResponse deleteHistoryById(DeleteHistoryByIdCommand cmd) {
+        this.familyService.deleteHistoryById(cmd.getHistoryId());
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;        
+    }
     
 //    /**
 //     * <b>URL: /family/setPrimaryFamily</b>
