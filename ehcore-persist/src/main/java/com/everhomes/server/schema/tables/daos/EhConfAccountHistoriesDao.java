@@ -15,7 +15,6 @@ public class EhConfAccountHistoriesDao extends org.jooq.impl.DAOImpl<com.everhom
 	 * Create a new EhConfAccountHistoriesDao without any configuration
 	 */
 	public EhConfAccountHistoriesDao() {
-		
 		super(com.everhomes.server.schema.tables.EhConfAccountHistories.EH_CONF_ACCOUNT_HISTORIES, com.everhomes.server.schema.tables.pojos.EhConfAccountHistories.class);
 	}
 
@@ -126,9 +125,30 @@ public class EhConfAccountHistoriesDao extends org.jooq.impl.DAOImpl<com.everhom
 	}
 
 	/**
-	 * Fetch records that have <code>update_time IN (values)</code>
+	 * Fetch records that have <code>operator_uid IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfAccountHistories> fetchByUpdateTime(java.sql.Timestamp... values) {
-		return fetch(com.everhomes.server.schema.tables.EhConfAccountHistories.EH_CONF_ACCOUNT_HISTORIES.UPDATE_TIME, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfAccountHistories> fetchByOperatorUid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhConfAccountHistories.EH_CONF_ACCOUNT_HISTORIES.OPERATOR_UID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>operation_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfAccountHistories> fetchByOperationType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhConfAccountHistories.EH_CONF_ACCOUNT_HISTORIES.OPERATION_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>process_details IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfAccountHistories> fetchByProcessDetails(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhConfAccountHistories.EH_CONF_ACCOUNT_HISTORIES.PROCESS_DETAILS, values);
+	}
+
+	/**
+	 * Fetch records that have <code>operate_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfAccountHistories> fetchByOperateTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhConfAccountHistories.EH_CONF_ACCOUNT_HISTORIES.OPERATE_TIME, values);
 	}
 }

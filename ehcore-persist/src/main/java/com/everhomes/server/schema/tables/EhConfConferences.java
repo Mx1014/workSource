@@ -11,12 +11,12 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfConferences extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhConfConferencesRecord> {
 
-	private static final long serialVersionUID = -1053519313;
+	private static final long serialVersionUID = -1553283670;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_conf_conferences</code>
 	 */
-	public static final  com.everhomes.server.schema.tables.EhConfConferences EH_CONF_CONFERENCES = new com.everhomes.server.schema.tables.EhConfConferences();
+	public static final com.everhomes.server.schema.tables.EhConfConferences EH_CONF_CONFERENCES = new com.everhomes.server.schema.tables.EhConfConferences();
 
 	/**
 	 * The class holding records for this type
@@ -92,9 +92,9 @@ public class EhConfConferences extends org.jooq.impl.TableImpl<com.everhomes.ser
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfConferencesRecord, java.lang.Integer> JOIN_POLICY = createField("join_policy", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "0: free join, 1: conf host first");
 
 	/**
-	 * The column <code>ehcore.eh_conf_conferences.source_account</code>. reference to eh_source_accounts
+	 * The column <code>ehcore.eh_conf_conferences.source_account_id</code>. reference to eh_source_accounts
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfConferencesRecord, java.lang.String> SOURCE_ACCOUNT = createField("source_account", org.jooq.impl.SQLDataType.VARCHAR.length(128).nullable(false).defaulted(true), this, "reference to eh_source_accounts");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfConferencesRecord, java.lang.Long> SOURCE_ACCOUNT_ID = createField("source_account_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "reference to eh_source_accounts");
 
 	/**
 	 * The column <code>ehcore.eh_conf_conferences.conf_account_id</code>. reference to eh_conf_accounts

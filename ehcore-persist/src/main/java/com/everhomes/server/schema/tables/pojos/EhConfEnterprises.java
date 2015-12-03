@@ -11,15 +11,15 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfEnterprises implements java.io.Serializable {
 
-	private static final long serialVersionUID =  -1661315857;
+	private static final long serialVersionUID = -453650457;
 
 	private java.lang.Long     id;
 	private java.lang.Integer  namespaceId;
 	private java.lang.Long     enterpriseId;
 	private java.lang.String   contactName;
 	private java.lang.String   contact;
-	private java.lang.Byte     accountType;
 	private java.lang.Integer  accountAmount;
+	private java.lang.Integer  trialAccountAmount;
 	private java.lang.Integer  activeAccountAmount;
 	private java.lang.Byte     buyChannel;
 	private java.lang.Byte     status;
@@ -37,8 +37,8 @@ public class EhConfEnterprises implements java.io.Serializable {
 		java.lang.Long     enterpriseId,
 		java.lang.String   contactName,
 		java.lang.String   contact,
-		java.lang.Byte     accountType,
 		java.lang.Integer  accountAmount,
+		java.lang.Integer  trialAccountAmount,
 		java.lang.Integer  activeAccountAmount,
 		java.lang.Byte     buyChannel,
 		java.lang.Byte     status,
@@ -53,8 +53,8 @@ public class EhConfEnterprises implements java.io.Serializable {
 		this.enterpriseId = enterpriseId;
 		this.contactName = contactName;
 		this.contact = contact;
-		this.accountType = accountType;
 		this.accountAmount = accountAmount;
+		this.trialAccountAmount = trialAccountAmount;
 		this.activeAccountAmount = activeAccountAmount;
 		this.buyChannel = buyChannel;
 		this.status = status;
@@ -105,20 +105,20 @@ public class EhConfEnterprises implements java.io.Serializable {
 		this.contact = contact;
 	}
 
-	public java.lang.Byte getAccountType() {
-		return this.accountType;
-	}
-
-	public void setAccountType(java.lang.Byte accountType) {
-		this.accountType = accountType;
-	}
-
 	public java.lang.Integer getAccountAmount() {
 		return this.accountAmount;
 	}
 
 	public void setAccountAmount(java.lang.Integer accountAmount) {
 		this.accountAmount = accountAmount;
+	}
+
+	public java.lang.Integer getTrialAccountAmount() {
+		return this.trialAccountAmount;
+	}
+
+	public void setTrialAccountAmount(java.lang.Integer trialAccountAmount) {
+		this.trialAccountAmount = trialAccountAmount;
 	}
 
 	public java.lang.Integer getActiveAccountAmount() {

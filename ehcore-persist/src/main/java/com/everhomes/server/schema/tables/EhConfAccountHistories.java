@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfAccountHistories extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhConfAccountHistoriesRecord> {
 
-	private static final long serialVersionUID = -217176869;
+	private static final long serialVersionUID = -1455040610;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_conf_account_histories</code>
@@ -23,7 +23,6 @@ public class EhConfAccountHistories extends org.jooq.impl.TableImpl<com.everhome
 	 */
 	@Override
 	public java.lang.Class<com.everhomes.server.schema.tables.records.EhConfAccountHistoriesRecord> getRecordType() {
-		
 		return com.everhomes.server.schema.tables.records.EhConfAccountHistoriesRecord.class;
 	}
 
@@ -88,9 +87,24 @@ public class EhConfAccountHistories extends org.jooq.impl.TableImpl<com.everhome
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfAccountHistoriesRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_conf_account_histories.update_time</code>.
+	 * The column <code>ehcore.eh_conf_account_histories.operator_uid</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfAccountHistoriesRecord, java.sql.Timestamp> UPDATE_TIME = createField("update_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfAccountHistoriesRecord, java.lang.Long> OPERATOR_UID = createField("operator_uid", org.jooq.impl.SQLDataType.BIGINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_conf_account_histories.operation_type</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfAccountHistoriesRecord, java.lang.String> OPERATION_TYPE = createField("operation_type", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_conf_account_histories.process_details</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfAccountHistoriesRecord, java.lang.String> PROCESS_DETAILS = createField("process_details", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_conf_account_histories.operate_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfAccountHistoriesRecord, java.sql.Timestamp> OPERATE_TIME = createField("operate_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_conf_account_histories</code> table reference

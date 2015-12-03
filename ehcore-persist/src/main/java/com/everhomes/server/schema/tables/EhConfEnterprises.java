@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfEnterprises extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhConfEnterprisesRecord> {
 
-	private static final long serialVersionUID =  -1777902596;
+	private static final long serialVersionUID = 953726980;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_conf_enterprises</code>
@@ -52,14 +52,14 @@ public class EhConfEnterprises extends org.jooq.impl.TableImpl<com.everhomes.ser
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfEnterprisesRecord, java.lang.String> CONTACT = createField("contact", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_conf_enterprises.account_type</code>. 0: none, 1: trial, 2: normal
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfEnterprisesRecord, java.lang.Byte> ACCOUNT_TYPE = createField("account_type", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: none, 1: trial, 2: normal");
-
-	/**
 	 * The column <code>ehcore.eh_conf_enterprises.account_amount</code>. the total amount of active or inactive accounts the enterprise owned
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfEnterprisesRecord, java.lang.Integer> ACCOUNT_AMOUNT = createField("account_amount", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "the total amount of active or inactive accounts the enterprise owned");
+
+	/**
+	 * The column <code>ehcore.eh_conf_enterprises.trial_account_amount</code>. the total amount of trial accounts the enterprise owned
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfEnterprisesRecord, java.lang.Integer> TRIAL_ACCOUNT_AMOUNT = createField("trial_account_amount", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "the total amount of trial accounts the enterprise owned");
 
 	/**
 	 * The column <code>ehcore.eh_conf_enterprises.active_account_amount</code>. the total amount of active accounts the enterprise owned

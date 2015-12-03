@@ -15,7 +15,6 @@ public class EhConfEnterprisesDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	 * Create a new EhConfEnterprisesDao without any configuration
 	 */
 	public EhConfEnterprisesDao() {
-		
 		super(com.everhomes.server.schema.tables.EhConfEnterprises.EH_CONF_ENTERPRISES, com.everhomes.server.schema.tables.pojos.EhConfEnterprises.class);
 	}
 
@@ -84,17 +83,17 @@ public class EhConfEnterprisesDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	}
 
 	/**
-	 * Fetch records that have <code>account_type IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfEnterprises> fetchByAccountType(java.lang.Byte... values) {
-		return fetch(com.everhomes.server.schema.tables.EhConfEnterprises.EH_CONF_ENTERPRISES.ACCOUNT_TYPE, values);
-	}
-
-	/**
 	 * Fetch records that have <code>account_amount IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfEnterprises> fetchByAccountAmount(java.lang.Integer... values) {
 		return fetch(com.everhomes.server.schema.tables.EhConfEnterprises.EH_CONF_ENTERPRISES.ACCOUNT_AMOUNT, values);
+	}
+
+	/**
+	 * Fetch records that have <code>trial_account_amount IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfEnterprises> fetchByTrialAccountAmount(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhConfEnterprises.EH_CONF_ENTERPRISES.TRIAL_ACCOUNT_AMOUNT, values);
 	}
 
 	/**

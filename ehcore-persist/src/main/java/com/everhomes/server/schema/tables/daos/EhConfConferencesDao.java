@@ -15,7 +15,6 @@ public class EhConfConferencesDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	 * Create a new EhConfConferencesDao without any configuration
 	 */
 	public EhConfConferencesDao() {
-		
 		super(com.everhomes.server.schema.tables.EhConfConferences.EH_CONF_CONFERENCES, com.everhomes.server.schema.tables.pojos.EhConfConferences.class);
 	}
 
@@ -133,10 +132,10 @@ public class EhConfConferencesDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	}
 
 	/**
-	 * Fetch records that have <code>source_account IN (values)</code>
+	 * Fetch records that have <code>source_account_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfConferences> fetchBySourceAccount(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhConfConferences.EH_CONF_CONFERENCES.SOURCE_ACCOUNT, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfConferences> fetchBySourceAccountId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhConfConferences.EH_CONF_CONFERENCES.SOURCE_ACCOUNT_ID, values);
 	}
 
 	/**

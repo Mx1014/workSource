@@ -11,9 +11,9 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfConferences implements java.io.Serializable {
 
-	private static final long serialVersionUID = 21759914;
+	private static final long serialVersionUID = -2010931512;
 
-	private java.lang.Long      id;
+	private java.lang.Long     id;
 	private java.lang.Integer  confId;
 	private java.lang.String   subject;
 	private java.lang.String   description;
@@ -26,7 +26,7 @@ public class EhConfConferences implements java.io.Serializable {
 	private java.lang.Integer  maxCount;
 	private java.lang.String   confHostKey;
 	private java.lang.Integer  joinPolicy;
-	private java.lang.String   sourceAccount;
+	private java.lang.Long     sourceAccountId;
 	private java.lang.Long     confAccountId;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
@@ -48,7 +48,7 @@ public class EhConfConferences implements java.io.Serializable {
 		java.lang.Integer  maxCount,
 		java.lang.String   confHostKey,
 		java.lang.Integer  joinPolicy,
-		java.lang.String   sourceAccount,
+		java.lang.Long     sourceAccountId,
 		java.lang.Long     confAccountId,
 		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime,
@@ -67,7 +67,7 @@ public class EhConfConferences implements java.io.Serializable {
 		this.maxCount = maxCount;
 		this.confHostKey = confHostKey;
 		this.joinPolicy = joinPolicy;
-		this.sourceAccount = sourceAccount;
+		this.sourceAccountId = sourceAccountId;
 		this.confAccountId = confAccountId;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
@@ -178,12 +178,12 @@ public class EhConfConferences implements java.io.Serializable {
 		this.joinPolicy = joinPolicy;
 	}
 
-	public java.lang.String getSourceAccount() {
-		return this.sourceAccount;
+	public java.lang.Long getSourceAccountId() {
+		return this.sourceAccountId;
 	}
 
-	public void setSourceAccount(java.lang.String sourceAccount) {
-		this.sourceAccount = sourceAccount;
+	public void setSourceAccountId(java.lang.Long sourceAccountId) {
+		this.sourceAccountId = sourceAccountId;
 	}
 
 	public java.lang.Long getConfAccountId() {

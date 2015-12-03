@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfAccountHistories implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1319839780;
+	private static final long serialVersionUID = 2009294910;
 
 	private java.lang.Long     id;
 	private java.lang.Long     enterpriseId;
@@ -25,7 +25,10 @@ public class EhConfAccountHistories implements java.io.Serializable {
 	private java.sql.Timestamp deleteTime;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
-	private java.sql.Timestamp updateTime;
+	private java.lang.Long     operatorUid;
+	private java.lang.String   operationType;
+	private java.lang.String   processDetails;
+	private java.sql.Timestamp operateTime;
 
 	public EhConfAccountHistories() {}
 
@@ -42,7 +45,10 @@ public class EhConfAccountHistories implements java.io.Serializable {
 		java.sql.Timestamp deleteTime,
 		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime,
-		java.sql.Timestamp updateTime
+		java.lang.Long     operatorUid,
+		java.lang.String   operationType,
+		java.lang.String   processDetails,
+		java.sql.Timestamp operateTime
 	) {
 		this.id = id;
 		this.enterpriseId = enterpriseId;
@@ -56,7 +62,10 @@ public class EhConfAccountHistories implements java.io.Serializable {
 		this.deleteTime = deleteTime;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
-		this.updateTime = updateTime ;
+		this.operatorUid = operatorUid;
+		this.operationType = operationType;
+		this.processDetails = processDetails;
+		this.operateTime = operateTime;
 	}
 
 	public java.lang.Long getId() {
@@ -155,11 +164,35 @@ public class EhConfAccountHistories implements java.io.Serializable {
 		this.createTime = createTime;
 	}
 
-	public java.sql.Timestamp getUpdateTime() {
-		return this.updateTime;
+	public java.lang.Long getOperatorUid() {
+		return this.operatorUid;
 	}
 
-	public void setUpdateTime(java.sql.Timestamp updateTime) {
-		this.updateTime = updateTime;
+	public void setOperatorUid(java.lang.Long operatorUid) {
+		this.operatorUid = operatorUid;
+	}
+
+	public java.lang.String getOperationType() {
+		return this.operationType;
+	}
+
+	public void setOperationType(java.lang.String operationType) {
+		this.operationType = operationType;
+	}
+
+	public java.lang.String getProcessDetails() {
+		return this.processDetails;
+	}
+
+	public void setProcessDetails(java.lang.String processDetails) {
+		this.processDetails = processDetails;
+	}
+
+	public java.sql.Timestamp getOperateTime() {
+		return this.operateTime;
+	}
+
+	public void setOperateTime(java.sql.Timestamp operateTime) {
+		this.operateTime = operateTime;
 	}
 }
