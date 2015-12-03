@@ -482,7 +482,7 @@ public class FamilyServiceImpl implements FamilyService {
             }     
         }
         
-        //Merge histories
+        //Merge histories, add by Janson
         List<UserGroupHistory> histories = this.userGroupHistoryProvider.queryUserGroupHistoryByUserId(userId);
         for(UserGroupHistory o : histories) {
             if(!checkList.containsKey(o.getAddressId())) {
@@ -491,8 +491,7 @@ public class FamilyServiceImpl implements FamilyService {
                 
                 FamilyDTO family = new FamilyDTO();
                 family.setId(o.getId());
-                family.setMembershipStatus(GroupMemberStatus.REJECT.getCode());
-                //family.setMembershipStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
+                family.setMembershipStatus(GroupMemberStatus.INACTIVE.getCode());
                 Community community = this.communityProvider.findCommunityById(o.getCommunityId());
                 if(community != null){
                     family.setCommunityId(o.getCommunityId());
@@ -1147,7 +1146,20 @@ public class FamilyServiceImpl implements FamilyService {
             member.setProofResourceUri(proofResourceUri);
         }
         this.groupProvider.updateGroupMember(member);
+        
         //更新之后，发送命令
+        //Add by Janson
+//        Address address = this.addressProvider.findAddressById(group.getIntegralTag1());
+//        if(null == address) {
+//            return;
+//        }
+//        
+//        Map<String, Object> map = bulidMapBeforeSendFamilyNotification(address,group,member,0L,0L);
+//        
+//        String scope = FamilyNotificationTemplateCode.SCOPE;
+//        int code = FamilyNotificationTemplateCode.FAMILY_MEMBER_QUICK_APPLICANT;
+//        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, user.getLocale(), map, "");
+//        sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
     }
 
     @Override

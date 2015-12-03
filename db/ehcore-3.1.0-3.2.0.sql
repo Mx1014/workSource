@@ -44,6 +44,8 @@ ALTER TABLE `eh_rental_bill_paybill_map`  CHANGE `community_id` `owner_id` BIGIN
 ALTER TABLE `eh_rental_bill_attachments` ADD COLUMN  `owner_type` VARCHAR(255) COMMENT 'owner type : community ; organization';
 ALTER TABLE `eh_rental_bill_attachments`  CHANGE `community_id` `owner_id` BIGINT(20) NOT NULL COMMENT '    community id or organization id ';
 
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'family.notification', 20, 'zh_CN', '地址加速审核，通知操作者', '您已提交加速审核${address}，我们会尽快为您处理的。');
+
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'group.notification', 28, 'zh_CN', '加入公众圈', '您已订阅兴趣圈 “${groupName}”');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'group.notification', 29, 'zh_CN', '加入公众圈,管理员', '兴趣圈“${groupName}”人数有变化');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'group.notification', 30, 'zh_CN', '管理员收到删除消息', '${userName}已删除圈“${groupName}”');

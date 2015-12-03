@@ -23,4 +23,5 @@ public interface FamilyNotificationTemplateCode {
     static final int FAMILY_MEMBER_REVOKE_FOR_APPLICANT = 17; // 某家庭成员被踢出家庭，通知被踢人
     static final int FAMILY_MEMBER_REVOKE_FOR_OPERATOR = 18; // 某家庭成员被踢出家庭，通知操作人
     static final int FAMILY_MEMBER_REVOKE_FOR_OTHER = 19; // 某家庭成员被踢出家庭，通知家庭其它成员
+    static final int FAMILY_MEMBER_QUICK_APPLICANT = 20; // 地址加速审核，通知操作者
 }

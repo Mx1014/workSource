@@ -39,6 +39,9 @@ public enum GroupMemberStatus {
         case 3:
             return ACTIVE;
             
+        case 4:
+            return REJECT;
+            
         default :
             assert(false);
             break;
