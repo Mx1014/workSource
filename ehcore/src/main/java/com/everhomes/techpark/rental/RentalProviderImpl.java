@@ -176,17 +176,17 @@ public class RentalProviderImpl implements RentalProvider {
 
 	@Override
 	public List<RentalSiteRule> findRentalSiteRules(Long rentalSiteId,
-			String ruleDate, Timestamp beginDate, Byte rentalType) {
+			String ruleDate, Timestamp beginDate, Byte rentalType, Byte dateLength) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTAL_SITE_RULES);
 		Condition condition = Tables.EH_RENTAL_SITE_RULES.RENTAL_TYPE
 				.eq(rentalType);
 		if (null != ruleDate) {
-			if (rentalType.equals(RentalType.HOUR.getCode())) {
+			if (dateLength.equals(DateLength.DAY.getCode())) {
 				condition = Tables.EH_RENTAL_SITE_RULES.SITE_RENTAL_DATE
 						.equal(Date.valueOf(ruleDate));
-			} else {
+			} else if (dateLength.equals(DateLength.MONTH.getCode())) {
 				Calendar calendar = Calendar.getInstance();
 				calendar.setTime(Date.valueOf(ruleDate));
 				// month begin
@@ -205,6 +205,25 @@ public class RentalProviderImpl implements RentalProvider {
 								.lessOrEqual(new java.sql.Date(calendar
 										.getTime().getTime())));
 
+			}else if (dateLength.equals(DateLength.WEEK.getCode())) {
+				Calendar calendar = Calendar.getInstance();
+				calendar.setTime(Date.valueOf(ruleDate));
+				// month begin
+				calendar.set(Calendar.DAY_OF_WEEK,
+						calendar.getActualMinimum(Calendar.DAY_OF_WEEK));
+				condition = condition
+						.and(Tables.EH_RENTAL_SITE_RULES.SITE_RENTAL_DATE
+								.greaterOrEqual(new java.sql.Date(calendar
+										.getTime().getTime())));
+
+				// month end
+				calendar.set(Calendar.DAY_OF_WEEK,
+						calendar.getActualMaximum(Calendar.DAY_OF_WEEK));
+				condition = condition
+						.and(Tables.EH_RENTAL_SITE_RULES.SITE_RENTAL_DATE
+								.lessOrEqual(new java.sql.Date(calendar
+										.getTime().getTime())));
+
 			}
 		}
 		if (null != rentalSiteId) {
@@ -214,6 +233,7 @@ public class RentalProviderImpl implements RentalProvider {
 		}
 
 		if (null != beginDate && rentalType.equals(RentalType.HOUR.getCode())) {
+//		if (null != beginDate) {
 			condition = condition.and(Tables.EH_RENTAL_SITE_RULES.BEGIN_TIME
 					.lessOrEqual(beginDate));
 

@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>beginDate：开始日期(Long)</li>
  * <li>endDate：结束日期(Long)</li>
  * <li>rentalStep：最小预定时间(整数，rentalType=0为多少个半小时，rentalType=1为多少个半天，rentalType=2为多少天)</li> 
+ * <li>TimeStep：坐标轴单位时间（小时）</li>
  * <li>beginTime：开始时间(hour)</li>
  * <li>endTime：结束时间(hour)</li>
  * <li>counts：场所数量</li> 
@@ -46,7 +47,7 @@ public class AddRentalSiteSimpleRulesCommand {
 	private Long endDate; 
 	private Double timeStep; 
 	@NotNull
-	private Integer rentalStep;
+	private Integer rentalStep; 
 	private Double beginTime; 
 	private Double endTime;
 	@NotNull
@@ -341,6 +342,7 @@ public class AddRentalSiteSimpleRulesCommand {
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
 	}
+ 
 
  
 

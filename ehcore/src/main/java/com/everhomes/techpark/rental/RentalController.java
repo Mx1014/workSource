@@ -422,5 +422,26 @@ public class RentalController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	 
+	
+	/**
+	 * <b>URL: /techpark/rental/findRentalSitesStatus</b>
+	 * <p>
+	 * 查询某服务预约某周的状态
+	 * </p>
+	 */
+
+	@RequestMapping("findRentalSiteWeekStatus")
+	@RestReturn(value = FindRentalSiteWeekStatusCommandResponse.class)
+	public RestResponse findRentalSiteWeekStatus(@Valid FindRentalSiteWeekStatusCommand cmd) {
+		FindRentalSiteWeekStatusCommandResponse findRentalSiteDayStatusCommandResponse = rentalService
+				.findRentalSiteWeekStatus(cmd);
+		RestResponse response = new RestResponse(
+				findRentalSiteDayStatusCommandResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 	
 }

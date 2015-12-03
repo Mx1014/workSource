@@ -34,6 +34,8 @@ public class RentalSiteDTO {
 	private String companyName;
 	private String contactName;
 	private String contactPhonenum;
+	private String introduction;
+	private String notice; 
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> siteItems;
 	@ItemType(RentalSiteRulesDTO.class)
@@ -152,6 +154,26 @@ public class RentalSiteDTO {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+
+
+	public String getIntroduction() {
+		return introduction;
+	}
+
+
+	public void setIntroduction(String introduction) {
+		this.introduction = introduction;
+	}
+
+
+	public String getNotice() {
+		return notice;
+	}
+
+
+	public void setNotice(String notice) {
+		this.notice = notice;
 	}
  
 }
