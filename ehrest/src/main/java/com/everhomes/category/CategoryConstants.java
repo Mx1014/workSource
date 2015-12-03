@@ -61,6 +61,13 @@ public interface CategoryConstants {
     /** 帖子/投票 */
     public static final long CATEGORY_ID_TOPIC_POLLING = 1011L;
     
+   public static final long CATEGORY_ID_CONF_CAPACITY = 200001L;
+    
+    public static final long CATEGORY_ID_CONF_TYPE = 300001L;
+    
+    public static final long CATEGORY_ID_ACCOUNT_TYPE = 400001L;
+    
+    
     /** 政府机构相关的类型 */
     public static final List<Long> GA_RELATED_CATEGORIES = Arrays.asList(
         CATEGORY_ID_NOTICE, 

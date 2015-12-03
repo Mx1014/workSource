@@ -1,4 +1,3 @@
-DROP TABLE IF EXISTS `eh_conf_account_categories`;
 CREATE TABLE `eh_conf_account_categories` (
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`channel_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: single, 1: multiple',
@@ -8,7 +7,6 @@ CREATE TABLE `eh_conf_account_categories` (
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
  
- DROP TABLE IF EXISTS `eh_conf_invoices`;
 CREATE TABLE `eh_conf_invoices` (
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`order_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to id of eh_conf_orders',
@@ -29,7 +27,6 @@ CREATE TABLE `eh_conf_invoices` (
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
  
-DROP TABLE IF EXISTS `eh_conf_orders`;
 CREATE TABLE `eh_conf_orders` (
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the enterprise id who own the order',
@@ -49,7 +46,6 @@ CREATE TABLE `eh_conf_orders` (
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
  
-DROP TABLE IF EXISTS `eh_conf_order_account_map`;
 CREATE TABLE `eh_conf_order_account_map` (
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`order_id` BIGINT NOT NULL DEFAULT 0,
@@ -58,7 +54,6 @@ CREATE TABLE `eh_conf_order_account_map` (
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
-DROP TABLE IF EXISTS `eh_conf_source_accounts`;
 CREATE TABLE `eh_conf_source_accounts` (
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`account_name` VARCHAR(128) NOT NULL DEFAULT '',
@@ -69,7 +64,6 @@ CREATE TABLE `eh_conf_source_accounts` (
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
  
-DROP TABLE IF EXISTS `eh_conf_accounts`;
 CREATE TABLE `eh_conf_accounts` (
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`enterprise_id` BIGINT NOT NULL COMMENT 'enterprise_id',
@@ -91,7 +85,6 @@ CREATE TABLE `eh_conf_accounts` (
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
  
-DROP TABLE IF EXISTS `eh_conf_account_histories`;
 CREATE TABLE `eh_conf_account_histories` (
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`enterprise_id` BIGINT NOT NULL COMMENT 'enterprise_id',
@@ -105,11 +98,14 @@ CREATE TABLE `eh_conf_account_histories` (
 	`delete_time` DATETIME,
 	`creator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'the user id who create the account',
 	`create_time` DATETIME,
-	`update_time` DATETIME,
+	`operator_uid` BIGINT,
+    `operation_type` VARCHAR(32),
+    `process_details` TEXT,
+	`operate_time` DATETIME,
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
-DROP TABLE IF EXISTS `eh_conf_conferences`;
+
 CREATE TABLE `eh_conf_conferences` (
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`conf_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'the conference id from 3rd conference provider',
@@ -124,7 +120,7 @@ CREATE TABLE `eh_conf_conferences` (
 	`max_count` INTEGER NOT NULL DEFAULT 0 COMMENT 'the max amount of allowed attendees',
 	`conf_host_key` VARCHAR(128) COMMENT 'the password of the conference, set by the creator',
     `join_policy` INTEGER NOT NULL DEFAULT 1 COMMENT '0: free join, 1: conf host first',
-	`source_account` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'reference to eh_source_accounts',
+	`source_account_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to eh_source_accounts',
 	`conf_account_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to eh_conf_accounts',
 	`creator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'the user id who create the account',
 	`create_time` DATETIME,
@@ -132,15 +128,15 @@ CREATE TABLE `eh_conf_conferences` (
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
-DROP TABLE IF EXISTS `eh_conf_enterprises`;
+ 
 CREATE TABLE `eh_conf_enterprises` (
 	`id` BIGINT NOT NULL COMMENT 'id',
     `namespace_id` INTEGER NOT NULL DEFAULT 0,
 	`enterprise_id` BIGINT NOT NULL COMMENT 'enterprise_id, reference to the id of eh_groups, unique',
 	`contact_name` VARCHAR(128),
 	`contact` VARCHAR(128),
-	`account_type` TINYINT NOT NULL DEFAULT 2 COMMENT '0: none, 1: trial, 2: normal',
 	`account_amount` INTEGER NOT NULL DEFAULT 0 COMMENT 'the total amount of active or inactive accounts the enterprise owned',
+	`trial_account_amount` INTEGER NOT NULL DEFAULT 0 COMMENT 'the total amount of trial accounts the enterprise owned',
 	`active_account_amount` INTEGER NOT NULL DEFAULT 0 COMMENT 'the total amount of active accounts the enterprise owned',
 	`buy_channel` TINYINT NOT NULL DEFAULT 0 COMMENT '0: offline, 1: online',
 	`status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: active, 2: locked',
@@ -152,8 +148,7 @@ CREATE TABLE `eh_conf_enterprises` (
 	UNIQUE `u_eh_enterprise_id`(`enterprise_id`),
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
-
-DROP TABLE IF EXISTS `eh_warning_contacts`;
+ 
 CREATE TABLE `eh_warning_contacts` (
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`contactor` VARCHAR(20),
