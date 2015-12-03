@@ -449,11 +449,11 @@ public class ForumServiceImpl implements ForumService {
         PostEntityTag entityTag = PostEntityTag.fromCode(cmd.getEntityTag());
         
         // 各区域ID，说明见com.everhomes.forum.PostEntityTag
-        Map<String, Long> gaRegionIdMap = this.organizationService.getOrganizationRegionMap(communityId);
-        if(LOGGER.isInfoEnabled()) {
-            LOGGER.info("Ga regions for query topics by category, userId=" + userId 
-                + ", communityId=" + communityId + ", map=" + gaRegionIdMap);
-        }
+//        Map<String, Long> gaRegionIdMap = this.organizationService.getOrganizationRegionMap(communityId);
+//        if(LOGGER.isInfoEnabled()) {
+//            LOGGER.info("Ga regions for query topics by category, userId=" + userId 
+//                + ", communityId=" + communityId + ", map=" + gaRegionIdMap);
+//        }
 
         Condition visibilityCondition = buildPostCategoryQryCondition(user, entityTag, community, 
             cmd.getContentCategory(), cmd.getActionCategory());
@@ -1913,11 +1913,21 @@ public class ForumServiceImpl implements ForumService {
             userCondition = buildDefaultForumPostQryConditionForCommunity(user, community, scope);
         } else {
             // 对于指定entityTag，则对creatorTag和targetTag进行限制
-            Condition privacyCondition = Tables.EH_FORUM_POSTS.PRIVATE_FLAG.notEqual(PostPrivacy.PRIVATE.getCode());
+            // Condition privacyCondition = Tables.EH_FORUM_POSTS.PRIVATE_FLAG.notEqual(PostPrivacy.PRIVATE.getCode());
             Condition entityCondition = Tables.EH_FORUM_POSTS.CREATOR_TAG.eq(entityTag.getCode());
             entityCondition = entityCondition.or(Tables.EH_FORUM_POSTS.TARGET_TAG.eq(entityTag.getCode()));
-            Condition visibleCondition = buildDefaultForumPostQryConditionByOrganization(user, community);
-            userCondition = privacyCondition.and(entityCondition.and(visibleCondition));
+            //Condition visibleCondition = buildDefaultForumPostQryConditionByOrganization(user, community);
+            // 对于物业等政府相关的类型，则只查本小区的
+            VisibilityScope scope = VisibilityScope.NEARBY_COMMUNITIES;
+            if(contentCatogry != null && CategoryConstants.GA_RELATED_CATEGORIES.contains(contentCatogry.getId())) {
+                scope = VisibilityScope.COMMUNITY;
+            }
+            Condition visibleCondition = buildDefaultForumPostQryConditionForCommunity(user, community, scope);
+            if(visibleCondition != null) {
+                userCondition = entityCondition.and(visibleCondition);
+            } else {
+                userCondition = entityCondition;
+            }
         }
         
         if(userCondition == null) {
