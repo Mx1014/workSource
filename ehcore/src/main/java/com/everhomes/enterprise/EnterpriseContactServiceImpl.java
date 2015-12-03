@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.app.AppConstants;
@@ -534,7 +535,12 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 			if (entries != null && entries.size() > 0) {
 				detail.setPhone(entries.get(0).getEntryValue());
 			}
-
+			
+			if(StringUtils.isEmpty(detail.getAvatar())){
+				User user = userProvider.findUserById(contact.getUserId());
+				detail.setAvatar(user.getAvatar());
+			}
+				
 			details.add(detail);
 
 		}
