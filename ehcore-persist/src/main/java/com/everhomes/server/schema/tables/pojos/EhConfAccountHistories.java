@@ -56,7 +56,7 @@ public class EhConfAccountHistories implements java.io.Serializable {
 		this.deleteTime = deleteTime;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
-		this.updateTime = updateTime;
+		this.updateTime = updateTime ;
 	}
 
 	public java.lang.Long getId() {

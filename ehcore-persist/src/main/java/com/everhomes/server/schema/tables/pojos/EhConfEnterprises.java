@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfEnterprises implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1661315857;
+	private static final long serialVersionUID =  -1661315857;
 
 	private java.lang.Long     id;
 	private java.lang.Integer  namespaceId;

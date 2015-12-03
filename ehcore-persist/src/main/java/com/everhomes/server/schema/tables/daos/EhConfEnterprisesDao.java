@@ -15,6 +15,7 @@ public class EhConfEnterprisesDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	 * Create a new EhConfEnterprisesDao without any configuration
 	 */
 	public EhConfEnterprisesDao() {
+		
 		super(com.everhomes.server.schema.tables.EhConfEnterprises.EH_CONF_ENTERPRISES, com.everhomes.server.schema.tables.pojos.EhConfEnterprises.class);
 	}
 

@@ -15,6 +15,7 @@ public class EhConfConferencesDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	 * Create a new EhConfConferencesDao without any configuration
 	 */
 	public EhConfConferencesDao() {
+		
 		super(com.everhomes.server.schema.tables.EhConfConferences.EH_CONF_CONFERENCES, com.everhomes.server.schema.tables.pojos.EhConfConferences.class);
 	}
 

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfEnterprisesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhConfEnterprisesRecord> implements org.jooq.Record15<java.lang.Long, java.lang.Integer, java.lang.Long, java.lang.String, java.lang.String, java.lang.Byte, java.lang.Integer, java.lang.Integer, java.lang.Byte, java.lang.Byte, java.lang.Long, java.sql.Timestamp, java.sql.Timestamp, java.lang.Long, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = 1991135449;
+	private static final long serialVersionUID =  1991135449;
 
 	/**
 	 * Setter for <code>ehcore.eh_conf_enterprises.id</code>. id

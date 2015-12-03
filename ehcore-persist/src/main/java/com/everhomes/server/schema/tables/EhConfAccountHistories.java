@@ -23,6 +23,7 @@ public class EhConfAccountHistories extends org.jooq.impl.TableImpl<com.everhome
 	 */
 	@Override
 	public java.lang.Class<com.everhomes.server.schema.tables.records.EhConfAccountHistoriesRecord> getRecordType() {
+		
 		return com.everhomes.server.schema.tables.records.EhConfAccountHistoriesRecord.class;
 	}
 

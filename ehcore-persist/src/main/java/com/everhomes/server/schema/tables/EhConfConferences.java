@@ -16,7 +16,7 @@ public class EhConfConferences extends org.jooq.impl.TableImpl<com.everhomes.ser
 	/**
 	 * The singleton instance of <code>ehcore.eh_conf_conferences</code>
 	 */
-	public static final com.everhomes.server.schema.tables.EhConfConferences EH_CONF_CONFERENCES = new com.everhomes.server.schema.tables.EhConfConferences();
+	public static final  com.everhomes.server.schema.tables.EhConfConferences EH_CONF_CONFERENCES = new com.everhomes.server.schema.tables.EhConfConferences();
 
 	/**
 	 * The class holding records for this type

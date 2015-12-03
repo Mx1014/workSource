@@ -15,6 +15,7 @@ public class EhConfAccountHistoriesDao extends org.jooq.impl.DAOImpl<com.everhom
 	 * Create a new EhConfAccountHistoriesDao without any configuration
 	 */
 	public EhConfAccountHistoriesDao() {
+		
 		super(com.everhomes.server.schema.tables.EhConfAccountHistories.EH_CONF_ACCOUNT_HISTORIES, com.everhomes.server.schema.tables.pojos.EhConfAccountHistories.class);
 	}
 

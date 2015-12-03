@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfAccountHistoriesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhConfAccountHistoriesRecord> implements org.jooq.Record13<java.lang.Long, java.lang.Long, java.sql.Timestamp, java.lang.Byte, java.lang.Long, java.lang.Byte, java.lang.Long, java.sql.Timestamp, java.lang.Long, java.sql.Timestamp, java.lang.Long, java.sql.Timestamp, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = 1033277288;
+	private static final long serialVersionUID =  1033277288;
 
 	/**
 	 * Setter for <code>ehcore.eh_conf_account_histories.id</code>. id

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfEnterprises extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhConfEnterprisesRecord> {
 
-	private static final long serialVersionUID = -1777902596;
+	private static final long serialVersionUID =  -1777902596;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_conf_enterprises</code>

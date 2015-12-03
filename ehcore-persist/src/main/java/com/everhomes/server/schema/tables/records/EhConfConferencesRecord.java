@@ -17,6 +17,7 @@ public class EhConfConferencesRecord extends org.jooq.impl.UpdatableRecordImpl<c
 	 * Setter for <code>ehcore.eh_conf_conferences.id</code>. id
 	 */
 	public void setId(java.lang.Long value) {
+		
 		setValue(0, value);
 	}
 

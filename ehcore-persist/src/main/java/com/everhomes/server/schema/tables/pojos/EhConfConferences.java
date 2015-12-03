@@ -13,7 +13,7 @@ public class EhConfConferences implements java.io.Serializable {
 
 	private static final long serialVersionUID = 21759914;
 
-	private java.lang.Long     id;
+	private java.lang.Long      id;
 	private java.lang.Integer  confId;
 	private java.lang.String   subject;
 	private java.lang.String   description;
