@@ -618,6 +618,17 @@ public class RentalServiceImpl implements RentalService {
 					System.currentTimeMillis() + cancelTime);
 
 		}
+		
+		
+		if(null!=rentalBill.getEndTime()&&null!=rentalRule.getOvertimeTime()){
+			//超期未确认的置为超时
+			final Job job1 = new Job(
+					IncompleteUnsuccessRentalBillAction.class.getName(),
+					new Object[] { String.valueOf(rentalBill.getId()) });
+
+			jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
+					rentalBill.getEndTime().getTime() + rentalRule.getOvertimeTime());
+		}
 		// 循环存site订单
 		for (RentalSiteRule rsr : rentalSiteRules) {
 			RentalSitesBill rsb = new RentalSitesBill();
@@ -1417,6 +1428,58 @@ public class RentalServiceImpl implements RentalService {
 							UserContext.current().getUser().getLocale(),
 							"did not pay for the bill ,can not confirm")); 
 		}
+		RentalBillDTO dto = new RentalBillDTO();
+		mappingRentalBillDTO(dto, bill);
+		return dto;
+	}
+
+	@Override
+	public RentalBillDTO completeBill(CompleteBillCommand cmd) {
+		RentalBill bill = this.rentalProvider.findRentalBillById(cmd.getRentalBillId());
+		if (bill.getStatus().equals(SiteBillStatus.SUCCESS.getCode())){
+			throw RuntimeErrorException
+			.errorWith(
+					RentalServiceErrorCode.SCOPE,
+					RentalServiceErrorCode.ERROR_NOT_SUCCESS,
+					localeStringService.getLocalizedString(
+							String.valueOf(RentalServiceErrorCode.SCOPE),
+							String.valueOf(RentalServiceErrorCode.ERROR_NOT_SUCCESS),
+							UserContext.current().getUser().getLocale(),
+							"order is not success order.")); 
+		} 
+		bill.setStatus(SiteBillStatus.COMPLETE.getCode());
+		rentalProvider.updateRentalBill(bill);
+	 
+		RentalBillDTO dto = new RentalBillDTO();
+		mappingRentalBillDTO(dto, bill);
+		return dto;
+	}
+
+	@Override
+	public RentalBillDTO incompleteBill(IncompleteBillCommand cmd) {
+		RentalBill bill = this.rentalProvider.findRentalBillById(cmd.getRentalBillId());
+		if (!bill.getStatus().equals(SiteBillStatus.COMPLETE.getCode())){
+			throw RuntimeErrorException
+			.errorWith(
+					RentalServiceErrorCode.SCOPE,
+					RentalServiceErrorCode.ERROR_NOT_COMPLETE,
+					localeStringService.getLocalizedString(
+							String.valueOf(RentalServiceErrorCode.SCOPE),
+							String.valueOf(RentalServiceErrorCode.ERROR_NOT_COMPLETE),
+							UserContext.current().getUser().getLocale(),
+							"order is not complete order.")); 
+		} 
+		RentalRule rule = this.rentalProvider.getRentalRule(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSiteType());
+		java.util.Date cancelTime = new java.util.Date();
+		if (cancelTime.before(new java.util.Date(bill.getEndTime().getTime()
+				+ rule.getOvertimeTime()))) {
+			bill.setStatus(SiteBillStatus.SUCCESS.getCode());
+		}else{
+			bill.setStatus(SiteBillStatus.OVERTIME.getCode());
+		}
+		
+		rentalProvider.updateRentalBill(bill);
+	 
 		RentalBillDTO dto = new RentalBillDTO();
 		mappingRentalBillDTO(dto, bill);
 		return dto;

@@ -460,4 +460,42 @@ public class RentalController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	
+	/**
+	 * <b>URL: /techpark/rental/findRentalSitesStatus</b>
+	 * <p>
+	 * 查询某服务预约某周的状态
+	 * </p>
+	 */
+
+	@RequestMapping("completeBill")
+	@RestReturn(value = String.class)
+	public RestResponse completeBill(@Valid CompleteBillCommand cmd) {
+		RentalBillDTO bill = rentalService.completeBill(cmd);
+		RestResponse response = new RestResponse(bill);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /techpark/rental/findRentalSitesStatus</b>
+	 * <p>
+	 * 查询某服务预约某周的状态
+	 * </p>
+	 */
+
+	@RequestMapping("incompleteBill")
+	@RestReturn(value = String.class)
+	public RestResponse incompleteBill(@Valid IncompleteBillCommand cmd) {
+		RentalBillDTO bill = rentalService.incompleteBill(cmd);
+		RestResponse response = new RestResponse(bill);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	
+	
 }

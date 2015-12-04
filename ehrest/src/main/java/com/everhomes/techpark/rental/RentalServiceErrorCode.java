@@ -10,6 +10,8 @@ public interface RentalServiceErrorCode {
     static final int ERROR_BILL_OVERTIME = 10005;  //订单超时失效了！
     static final int ERROR_CANCEL_OVERTIME = 10006;  //未到预定时间
     static final int ERROR_DID_NOT_PAY = 10007;  //未到预定时间
+    static final int ERROR_NOT_SUCCESS = 10008;  //未到预定时间
+    static final int ERROR_NOT_COMPLETE = 10009;  //未到预定时间
 //    static final int ERROR_PUNCH_REFRESH_DAYLOG = 10005;  //计算打卡日志有问题
     
 }
