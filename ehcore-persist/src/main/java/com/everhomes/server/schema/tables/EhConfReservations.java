@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfReservations extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhConfReservationsRecord> {
 
-	private static final long serialVersionUID = 2001803283;
+	private static final long serialVersionUID = -1854197154;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_conf_reservations</code>
@@ -30,6 +30,16 @@ public class EhConfReservations extends org.jooq.impl.TableImpl<com.everhomes.se
 	 * The column <code>ehcore.eh_conf_reservations.id</code>. id
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfReservationsRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id");
+
+	/**
+	 * The column <code>ehcore.eh_conf_reservations.enterprise_id</code>. enterprise_id, reference to the id of eh_groups, unique
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfReservationsRecord, java.lang.Long> ENTERPRISE_ID = createField("enterprise_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "enterprise_id, reference to the id of eh_groups, unique");
+
+	/**
+	 * The column <code>ehcore.eh_conf_reservations.creator_phone</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfReservationsRecord, java.lang.String> CREATOR_PHONE = createField("creator_phone", org.jooq.impl.SQLDataType.VARCHAR.length(20), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_conf_reservations.conf_account_id</code>. referenece to id of eh_conf_accounts

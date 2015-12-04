@@ -153,6 +153,20 @@ public class EhConfConferencesDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	}
 
 	/**
+	 * Fetch records that have <code>join_url IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfConferences> fetchByJoinUrl(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhConfConferences.EH_CONF_CONFERENCES.JOIN_URL, values);
+	}
+
+	/**
+	 * Fetch records that have <code>start_url IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfConferences> fetchByStartUrl(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhConfConferences.EH_CONF_CONFERENCES.START_URL, values);
+	}
+
+	/**
 	 * Fetch records that have <code>create_time IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfConferences> fetchByCreateTime(java.sql.Timestamp... values) {

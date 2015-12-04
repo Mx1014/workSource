@@ -48,6 +48,20 @@ public class EhConfReservationsDao extends org.jooq.impl.DAOImpl<com.everhomes.s
 	}
 
 	/**
+	 * Fetch records that have <code>enterprise_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfReservations> fetchByEnterpriseId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhConfReservations.EH_CONF_RESERVATIONS.ENTERPRISE_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>creator_phone IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfReservations> fetchByCreatorPhone(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhConfReservations.EH_CONF_RESERVATIONS.CREATOR_PHONE, values);
+	}
+
+	/**
 	 * Fetch records that have <code>conf_account_id IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfReservations> fetchByConfAccountId(java.lang.Long... values) {

@@ -11,9 +11,11 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfReservations implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1366394180;
+	private static final long serialVersionUID = -1503809030;
 
 	private java.lang.Long     id;
+	private java.lang.Long     enterpriseId;
+	private java.lang.String   creatorPhone;
 	private java.lang.Long     confAccountId;
 	private java.lang.String   subject;
 	private java.lang.String   description;
@@ -31,6 +33,8 @@ public class EhConfReservations implements java.io.Serializable {
 
 	public EhConfReservations(
 		java.lang.Long     id,
+		java.lang.Long     enterpriseId,
+		java.lang.String   creatorPhone,
 		java.lang.Long     confAccountId,
 		java.lang.String   subject,
 		java.lang.String   description,
@@ -45,6 +49,8 @@ public class EhConfReservations implements java.io.Serializable {
 		java.sql.Timestamp createTime
 	) {
 		this.id = id;
+		this.enterpriseId = enterpriseId;
+		this.creatorPhone = creatorPhone;
 		this.confAccountId = confAccountId;
 		this.subject = subject;
 		this.description = description;
@@ -65,6 +71,22 @@ public class EhConfReservations implements java.io.Serializable {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
+	}
+
+	public java.lang.Long getEnterpriseId() {
+		return this.enterpriseId;
+	}
+
+	public void setEnterpriseId(java.lang.Long enterpriseId) {
+		this.enterpriseId = enterpriseId;
+	}
+
+	public java.lang.String getCreatorPhone() {
+		return this.creatorPhone;
+	}
+
+	public void setCreatorPhone(java.lang.String creatorPhone) {
+		this.creatorPhone = creatorPhone;
 	}
 
 	public java.lang.Long getConfAccountId() {

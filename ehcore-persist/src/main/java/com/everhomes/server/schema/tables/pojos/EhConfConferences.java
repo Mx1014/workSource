@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfConferences implements java.io.Serializable {
 
-	private static final long serialVersionUID = -2010931512;
+	private static final long serialVersionUID = -179063982;
 
 	private java.lang.Long     id;
 	private java.lang.Integer  confId;
@@ -29,6 +29,8 @@ public class EhConfConferences implements java.io.Serializable {
 	private java.lang.Long     sourceAccountId;
 	private java.lang.Long     confAccountId;
 	private java.lang.Long     creatorUid;
+	private java.lang.String   joinUrl;
+	private java.lang.String   startUrl;
 	private java.sql.Timestamp createTime;
 	private java.lang.Byte     status;
 
@@ -51,6 +53,8 @@ public class EhConfConferences implements java.io.Serializable {
 		java.lang.Long     sourceAccountId,
 		java.lang.Long     confAccountId,
 		java.lang.Long     creatorUid,
+		java.lang.String   joinUrl,
+		java.lang.String   startUrl,
 		java.sql.Timestamp createTime,
 		java.lang.Byte     status
 	) {
@@ -70,6 +74,8 @@ public class EhConfConferences implements java.io.Serializable {
 		this.sourceAccountId = sourceAccountId;
 		this.confAccountId = confAccountId;
 		this.creatorUid = creatorUid;
+		this.joinUrl = joinUrl;
+		this.startUrl = startUrl;
 		this.createTime = createTime;
 		this.status = status;
 	}
@@ -200,6 +206,22 @@ public class EhConfConferences implements java.io.Serializable {
 
 	public void setCreatorUid(java.lang.Long creatorUid) {
 		this.creatorUid = creatorUid;
+	}
+
+	public java.lang.String getJoinUrl() {
+		return this.joinUrl;
+	}
+
+	public void setJoinUrl(java.lang.String joinUrl) {
+		this.joinUrl = joinUrl;
+	}
+
+	public java.lang.String getStartUrl() {
+		return this.startUrl;
+	}
+
+	public void setStartUrl(java.lang.String startUrl) {
+		this.startUrl = startUrl;
 	}
 
 	public java.sql.Timestamp getCreateTime() {

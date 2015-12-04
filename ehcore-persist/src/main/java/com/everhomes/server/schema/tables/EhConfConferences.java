@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfConferences extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhConfConferencesRecord> {
 
-	private static final long serialVersionUID = -1553283670;
+	private static final long serialVersionUID = 145982194;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_conf_conferences</code>
@@ -105,6 +105,16 @@ public class EhConfConferences extends org.jooq.impl.TableImpl<com.everhomes.ser
 	 * The column <code>ehcore.eh_conf_conferences.creator_uid</code>. the user id who create the account
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfConferencesRecord, java.lang.Long> CREATOR_UID = createField("creator_uid", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "the user id who create the account");
+
+	/**
+	 * The column <code>ehcore.eh_conf_conferences.join_url</code>. user use the url to join the meeting
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfConferencesRecord, java.lang.String> JOIN_URL = createField("join_url", org.jooq.impl.SQLDataType.VARCHAR.length(256), this, "user use the url to join the meeting");
+
+	/**
+	 * The column <code>ehcore.eh_conf_conferences.start_url</code>. user who start the meeting use this url
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfConferencesRecord, java.lang.String> START_URL = createField("start_url", org.jooq.impl.SQLDataType.VARCHAR.length(256), this, "user who start the meeting use this url");
 
 	/**
 	 * The column <code>ehcore.eh_conf_conferences.create_time</code>.
