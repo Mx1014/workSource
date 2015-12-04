@@ -15,7 +15,21 @@ import java.util.stream.Collectors;
 
 
 
+
+
+
+
+
+
+
 import javax.annotation.PostConstruct;
+
+
+
+
+
+
+
 
 
 
@@ -31,13 +45,29 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 
+
+
+
+
+
+
+
 import ch.qos.logback.core.joran.conditional.ElseAction;
 
 
 
+
+
+
+
+
+
+
 import com.everhomes.address.admin.CorrectAddressAdminCommand;
+import com.everhomes.address.admin.ImportAddressCommand;
 import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusSubscriber;
+import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityDataInfo;
 import com.everhomes.community.CommunityDoc;
@@ -87,6 +117,8 @@ import com.everhomes.util.FileHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
+import com.everhomes.util.excel.RowResult;
+import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.util.file.DataFileHandler;
 import com.everhomes.util.file.DataProcessConstants;
 
@@ -1124,7 +1156,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 	}
 
 	@Override
-	public void importAddressInfos(MultipartFile[] files) {
+	public void importAddressInfos( MultipartFile[] files) {
 		long startTime =  System.currentTimeMillis();
 		
 		User user  = UserContext.current().getUser();
@@ -1362,6 +1394,180 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         return results;
 	}
 
-
-
+	@Override
+	public void importParkAddressData(ImportAddressCommand cmd,
+		MultipartFile[] files) {
+		long communityId = cmd.getCommunityId();
+		
+		if(org.springframework.util.StringUtils.isEmpty(files) || files.length == 0){
+			LOGGER.error("File content is empty。");
+			throw new RuntimeErrorException("File content is empty。");
+		}
+		
+		try {
+			List list = PropMrgOwnerHandler.processorExcel(files[0].getInputStream());
+			
+			List<String[]> datas = this.convertToParkDatas(list);
+			
+			Community community = communityProvider.findCommunityById(communityId);
+			
+			this.batchAddAddresses(community, datas);
+			
+		} catch (Exception e) {
+			throw new RuntimeErrorException("File parsing error");
+		}
+		
+	}
+	
+	@Override
+	public void importAddressData(MultipartFile[] files) {
+		
+		if(org.springframework.util.StringUtils.isEmpty(files) || files.length == 0){
+			LOGGER.error("File content is empty。");
+			throw new RuntimeErrorException("File content is empty。");
+		}
+		
+		try {
+			List list = PropMrgOwnerHandler.processorExcel(files[0].getInputStream());
+			
+			Map<String, List<String[]>> dataMap = this.convertToAddrDatas(list);
+			
+			
+			for (String key : dataMap.keySet()) {
+				List<String[]> datas = dataMap.get(key);
+				String[] str = datas.get(0);
+				String cityName = str[3];
+				String areaName = str[4];
+				String communityName = str[5];
+				Long cityId = regionProvider.findRegionByPath("/" + cityName).getId();
+				if(null == cityId){
+					LOGGER.error("The city does not exist。 data = " + key);
+					continue;
+				}
+				Long areaId = regionProvider.findRegionByPath("/" + cityName + "/" + areaName).getId();
+				if(null == areaId){
+					LOGGER.error("The area does not exist。 data = " + key);
+					continue;
+				}
+				List<Community>  communitys = communityProvider.findCommunitiesByNameCityIdAreaId(communityName, cityId, areaId);
+				
+				if(null == communitys || 0 == communitys.size()){
+					LOGGER.error("The community does not exist。 data = " + key);
+					continue;
+				}
+				Community community = communitys.get(0);
+				
+				this.batchAddAddresses(community, datas);
+			}
+			
+			
+			
+		} catch (Exception e) {
+			throw new RuntimeErrorException("File parsing error");
+		}
+		
+	}
+	
+	private void batchAddAddresses(Community community, List<String[]> datas){
+		
+		
+		for (String[] arr : datas) {
+			
+			if(org.springframework.util.StringUtils.isEmpty(arr[0]) 
+					|| org.springframework.util.StringUtils.isEmpty(arr[1]) ){
+				LOGGER.error("Data is not complete or empty. data = " + arr[0] + "|" + arr[1] + "|" + arr[2]);
+				continue;
+			}
+			
+			Building building = communityProvider.findBuildingByCommunityIdAndName(community.getId(), arr[0]);
+			
+			if(null == building){
+				building = new Building();
+				building.setCommunityId(community.getId());
+				building.setName(arr[0]);
+				building.setOperatorUid(UserContext.current().getUser().getId());
+				building = communityProvider.createBuilding(building.getOperatorUid(), building);
+			}
+			
+			double areaSize = 0;
+			try {
+				areaSize = Double.parseDouble(arr[2]);
+			} catch (Exception e) {
+			}
+			
+			Address address = new Address();
+			address.setCommunityId(community.getId());
+			address.setCityId(community.getCityId());
+			address.setCityName(community.getCityName());
+			address.setAreaId(community.getAreaId());
+			address.setAreaName(community.getAreaName());
+			address.setBuildingName(building.getName());
+			address.setApartmentName(arr[1]);
+			address.setAreaSize(areaSize);
+			address.setAddress(building.getName() + "-" + arr[1]);
+			address.setStatus(AddressAdminStatus.ACTIVE.getCode());
+			
+			Address addr = addressProvider.findAddressByCommunityAndAddress(address.getCityId(), address.getAreaId(), address.getCommunityId(), address.getAddress());
+			
+			if(null != addr){
+				LOGGER.error("Data already exists. data = " + arr[0] + "|" + arr[1] + "|" + arr[2]);
+				continue;
+			}
+			addressProvider.createAddress(address);
+		}
+	}
+	
+	 private Map<String, List<String[]>> convertToAddrDatas(List list) {
+		 Map<String, List<String[]>> map = new HashMap<String, List<String[]>>();
+		 String key = "";
+		 List<String[]> values = null;
+			boolean firstRow = true;
+			for (Object o : list) {
+				if(firstRow){
+					firstRow = false;
+					continue;
+				}
+				RowResult r = (RowResult)o;
+				
+				if(null == r.getA() || "".equals(r.getA()) || "null".equals(r.getA())
+						||null == r.getB() || "".equals(r.getB()) || "null".equals(r.getB())
+						||null == r.getC() || "".equals(r.getC()) || "null".equals(r.getC()))
+					continue;
+				key = r.getA() + r.getB() + r.getC();
+				String[] value = new String[6];
+				value[3] = r.getA();
+				value[4] = r.getB();
+				value[5] = r.getC();
+				value[0] = r.getD();
+				value[1] = r.getE();
+				value[2] = r.getF();
+				if(null == map.get(key)){
+					values = new ArrayList<String[]>();
+					values.add(value);
+					map.put(key, values);
+				}else{
+					map.get(key).add(value);
+				}
+				
+			}
+			return map;
+	}
+	 
+	 private List<String[]> convertToParkDatas(List list) {
+			List<String[]> result = new ArrayList<String[]>();
+			boolean firstRow = true;
+			for (Object o : list) {
+				if(firstRow){
+					firstRow = false;
+					continue;
+				}
+				RowResult r = (RowResult)o;
+				String[] s = new String[3];
+				s[0] = r.getA();
+				s[1] = r.getB();
+				s[2] = r.getC();
+				result.add(s);
+			}
+			return result;
+	}
 }
