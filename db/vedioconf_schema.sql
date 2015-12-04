@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS `eh_conf_account_categories`;
 CREATE TABLE `eh_conf_account_categories` (
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`channel_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: single, 1: multiple',
@@ -7,6 +8,7 @@ CREATE TABLE `eh_conf_account_categories` (
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
  
+DROP TABLE IF EXISTS `eh_conf_invoices`;
 CREATE TABLE `eh_conf_invoices` (
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`order_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to id of eh_conf_orders',
@@ -26,7 +28,8 @@ CREATE TABLE `eh_conf_invoices` (
 	`contract_flag` TINYINT COMMENT '0-dont need 1-need',
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
- 
+
+DROP TABLE IF EXISTS `eh_conf_orders`;
 CREATE TABLE `eh_conf_orders` (
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the enterprise id who own the order',
@@ -45,7 +48,8 @@ CREATE TABLE `eh_conf_orders` (
     `create_time` DATETIME,
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
- 
+
+DROP TABLE IF EXISTS `eh_conf_order_account_map`;
 CREATE TABLE `eh_conf_order_account_map` (
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`order_id` BIGINT NOT NULL DEFAULT 0,
@@ -54,6 +58,7 @@ CREATE TABLE `eh_conf_order_account_map` (
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_conf_source_accounts`;
 CREATE TABLE `eh_conf_source_accounts` (
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`account_name` VARCHAR(128) NOT NULL DEFAULT '',
@@ -64,6 +69,7 @@ CREATE TABLE `eh_conf_source_accounts` (
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
  
+DROP TABLE IF EXISTS `eh_conf_accounts`;
 CREATE TABLE `eh_conf_accounts` (
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`enterprise_id` BIGINT NOT NULL COMMENT 'enterprise_id',
@@ -84,7 +90,8 @@ CREATE TABLE `eh_conf_accounts` (
 	`update_time` DATETIME,
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
- 
+
+DROP TABLE IF EXISTS `eh_conf_account_histories`;
 CREATE TABLE `eh_conf_account_histories` (
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`enterprise_id` BIGINT NOT NULL COMMENT 'enterprise_id',
@@ -105,7 +112,7 @@ CREATE TABLE `eh_conf_account_histories` (
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
-
+DROP TABLE IF EXISTS `eh_conf_conferences`;
 CREATE TABLE `eh_conf_conferences` (
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`conf_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'the conference id from 3rd conference provider',
@@ -123,12 +130,14 @@ CREATE TABLE `eh_conf_conferences` (
 	`source_account_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to eh_source_accounts',
 	`conf_account_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to eh_conf_accounts',
 	`creator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'the user id who create the account',
+	`join_url` VARCHAR(256) COMMENT 'user use the url to join the meeting',
+	`start_url` VARCHAR(256) COMMENT 'user who start the meeting use this url',
 	`create_time` DATETIME,
 	`status` TINYINT COMMENT '0: close, 1: on progress, 2: failed',
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
- 
+DROP TABLE IF EXISTS `eh_conf_enterprises`;
 CREATE TABLE `eh_conf_enterprises` (
 	`id` BIGINT NOT NULL COMMENT 'id',
     `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -148,7 +157,8 @@ CREATE TABLE `eh_conf_enterprises` (
 	UNIQUE `u_eh_enterprise_id`(`enterprise_id`),
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
- 
+
+DROP TABLE IF EXISTS `eh_warning_contacts`;
 CREATE TABLE `eh_warning_contacts` (
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`contactor` VARCHAR(20),
@@ -157,9 +167,11 @@ CREATE TABLE `eh_warning_contacts` (
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
  
-
+DROP TABLE IF EXISTS `eh_conf_reservations`;
 CREATE TABLE `eh_conf_reservations` (
 	`id` BIGINT NOT NULL COMMENT 'id',
+	`enterprise_id` BIGINT NOT NULL COMMENT 'enterprise_id, reference to the id of eh_groups, unique',
+	`creator_phone` VARCHAR(20),
 	`conf_account_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'referenece to id of eh_conf_accounts',
 	`subject` VARCHAR(128) COMMENT 'the conference subject',
 	`description` TEXT,
