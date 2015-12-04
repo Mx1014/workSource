@@ -61,3 +61,5 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'rental', '10006', 'zh_CN', '已经过了预定取消时间');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'rental', '10007', 'zh_CN', '您还未付款！');
+INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'rental', '10008', 'zh_CN', '不是已预订订单');
+INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'rental', '10009', 'zh_CN', '不是已完成订单');
