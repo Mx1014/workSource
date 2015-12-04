@@ -1055,6 +1055,19 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         return contacts;
 	}
 
+	@Override
+	public List<EnterpriseContact> queryContactByEnterpriseId(Long enterpriseId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class, enterpriseId));
+		 
+        SelectQuery<EhEnterpriseContactsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CONTACTS);
+
+        query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.ENTERPRISE_ID.eq(enterpriseId));
+        query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.USER_ID.ne(0L));
+        
+        return query.fetch().map((r) -> {
+            return ConvertHelper.convert(r, EnterpriseContact.class);
+        });
+	}
 //    @Override
 //    public List<EnterpriseContact> queryEnterpriseContactWithJoin() {
 //        EnterpriseContactRecordMapper
