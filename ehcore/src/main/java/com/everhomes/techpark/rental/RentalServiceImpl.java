@@ -389,7 +389,7 @@ public class RentalServiceImpl implements RentalService {
 		response.setRentalSites(new ArrayList<RentalSiteDTO>());
 		for (RentalSite rentalSite : rentalSites) {
 			RentalSiteDTO rSiteDTO =ConvertHelper.convert(rentalSite, RentalSiteDTO.class);
-			
+			rSiteDTO.setRentalSiteId(rentalSite.getId());
 			rSiteDTO.setSiteItems(new ArrayList<SiteItemDTO>());
 			List<RentalSiteItem> items = rentalProvider
 					.findRentalSiteItems(rentalSite.getId());
@@ -537,7 +537,7 @@ public class RentalServiceImpl implements RentalService {
 					rentalBill.setEndTime(rentalSiteRule.getEndTime());
 				}
 			}
-			siteTotalMoney += rentalSiteRule.getPrice()
+			siteTotalMoney += (null == rentalSiteRule.getPrice()?0:rentalSiteRule.getPrice())
 					* (cmd.getRentalCount() / rentalSiteRule.getUnit());
 		}
 
@@ -625,7 +625,7 @@ public class RentalServiceImpl implements RentalService {
 			rsb.setOwnerType(cmd.getOwnerType());
 			rsb.setSiteType(cmd.getSiteType());
 			rsb.setRentalBillId(rentalBillId);
-			rsb.setTotalMoney(rsr.getPrice()
+			rsb.setTotalMoney( (null ==rsr.getPrice()?0:rsr.getPrice()) 
 					* (int) (cmd.getRentalCount() / rsr.getUnit()));
 			rsb.setRentalCount(cmd.getRentalCount());
 			rsb.setRentalSiteRuleId(rsr.getId());
@@ -964,8 +964,24 @@ public class RentalServiceImpl implements RentalService {
 
 	@Override
 	public void cancelRentalBill(CancelRentalBillCommand cmd) {
-		rentalProvider.cancelRentalBillById(cmd.getRentalBillId());
-
+		RentalRule rule = this.rentalProvider.getRentalRule(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSiteType());
+		java.util.Date cancelTime = new java.util.Date();
+		RentalBill bill = this.rentalProvider.findRentalBillById(cmd.getRentalBillId());
+		if (cancelTime.before(new java.util.Date(bill.getStartTime().getTime()
+				- rule.getCancelTime()))) {
+			LOGGER.error("cancel over time");
+			throw RuntimeErrorException
+					.errorWith(
+							RentalServiceErrorCode.SCOPE,
+							RentalServiceErrorCode.ERROR_CANCEL_OVERTIME,
+							localeStringService.getLocalizedString(
+									String.valueOf(RentalServiceErrorCode.SCOPE),
+									String.valueOf(RentalServiceErrorCode.ERROR_CANCEL_OVERTIME),
+									UserContext.current().getUser().getLocale(),
+									"cancel bill over time"));
+		}else{
+			rentalProvider.cancelRentalBillById(cmd.getRentalBillId());
+		}
 	}
 
 	@Override
@@ -1357,6 +1373,41 @@ public class RentalServiceImpl implements RentalService {
 			}
 		}
 		return response;
+	}
+
+	@Override
+	public RentalBillDTO confirmBill(ConfirmBillCommand cmd) {
+		RentalBill bill = this.rentalProvider.findRentalBillById(cmd.getRentalBillId());
+		if (bill.getStatus().equals(SiteBillStatus.FAIL.getCode())){
+			throw RuntimeErrorException
+			.errorWith(
+					RentalServiceErrorCode.SCOPE,
+					RentalServiceErrorCode.ERROR_RESERVE_TOO_LATE,
+					localeStringService.getLocalizedString(
+							String.valueOf(RentalServiceErrorCode.SCOPE),
+							String.valueOf(RentalServiceErrorCode.ERROR_RESERVE_TOO_LATE),
+							UserContext.current().getUser().getLocale(),
+							"too late to order the service")); 
+		}
+		if (bill.getPayTotalMoney().equals(0.0)){
+			bill.setStatus(SiteBillStatus.SUCCESS.getCode());
+			rentalProvider.updateRentalBill(bill);
+		}
+		else {
+
+			throw RuntimeErrorException
+			.errorWith(
+					RentalServiceErrorCode.SCOPE,
+					RentalServiceErrorCode.ERROR_DID_NOT_PAY,
+					localeStringService.getLocalizedString(
+							String.valueOf(RentalServiceErrorCode.SCOPE),
+							String.valueOf(RentalServiceErrorCode.ERROR_DID_NOT_PAY),
+							UserContext.current().getUser().getLocale(),
+							"did not pay for the bill ,can not confirm")); 
+		}
+		RentalBillDTO dto = new RentalBillDTO();
+		mappingRentalBillDTO(dto, bill);
+		return dto;
 	}
 
 }

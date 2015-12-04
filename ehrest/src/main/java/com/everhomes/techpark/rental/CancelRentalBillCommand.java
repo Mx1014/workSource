@@ -10,8 +10,8 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class CancelRentalBillCommand {
-	@NotNull
-	private Long enterpriseCommunityId;
+	private String ownerType;
+	private Long ownerId;
 	@NotNull
 	private String siteType; 
 	@NotNull
@@ -25,15 +25,7 @@ public class CancelRentalBillCommand {
     } 
 
 	 
-
-	public Long getEnterpriseCommunityId() {
-		return enterpriseCommunityId;
-	}
-
-	public void setEnterpriseCommunityId(Long enterpriseCommunityId) {
-		this.enterpriseCommunityId = enterpriseCommunityId;
-	}
-
+ 
 	public String getSiteType() {
 		return siteType;
 	}
@@ -52,6 +44,30 @@ public class CancelRentalBillCommand {
 
 	public void setRentalBillId(Long rentalBillId) {
 		this.rentalBillId = rentalBillId;
+	}
+
+
+
+	public String getOwnerType() {
+		return ownerType;
+	}
+
+
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
 	} 
  
 }

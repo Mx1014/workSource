@@ -57,3 +57,7 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'activity.notification', 1, 'zh_CN', '有人报名了活动，通知活动发起者', '${userName}报名参加了活动“${postName}”');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'activity.notification', 2, 'zh_CN', '有人取消了活动报名，通知活动发起者', '${userName}取消了活动“${postName}”报名');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'activity.notification', 3, 'zh_CN', '活动被管理员同意，通知活动报名者', '您报名的活动“${postName}”已经通过管理员同意');
+
+
+INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'rental', '10006', 'zh_CN', '已经过了预定取消时间');
+INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'rental', '10007', 'zh_CN', '您还未付款！');

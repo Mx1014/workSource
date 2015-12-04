@@ -444,4 +444,20 @@ public class RentalController extends ControllerBase {
 	}
 	
 	
+	/**
+	 * <b>URL: /techpark/rental/findRentalSitesStatus</b>
+	 * <p>
+	 * 查询某服务预约某周的状态
+	 * </p>
+	 */
+
+	@RequestMapping("confirmBill")
+	@RestReturn(value = String.class)
+	public RestResponse confirmBill(@Valid ConfirmBillCommand cmd) {
+		RentalBillDTO bill = rentalService.confirmBill(cmd);
+		RestResponse response = new RestResponse(bill);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }
