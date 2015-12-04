@@ -28,6 +28,16 @@ import com.everhomes.server.schema.tables.pojos.EhBusinessVisibleScopes;
 import com.everhomes.server.schema.tables.pojos.EhBusinesses;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhCommunityGeopoints;
+import com.everhomes.server.schema.tables.pojos.EhConfAccountCategories;
+import com.everhomes.server.schema.tables.pojos.EhConfAccountHistories;
+import com.everhomes.server.schema.tables.pojos.EhConfAccounts;
+import com.everhomes.server.schema.tables.pojos.EhConfConferences;
+import com.everhomes.server.schema.tables.pojos.EhConfEnterprises;
+import com.everhomes.server.schema.tables.pojos.EhConfInvoices;
+import com.everhomes.server.schema.tables.pojos.EhConfOrderAccountMap;
+import com.everhomes.server.schema.tables.pojos.EhConfOrders;
+import com.everhomes.server.schema.tables.pojos.EhConfReservations;
+import com.everhomes.server.schema.tables.pojos.EhConfSourceAccounts;
 import com.everhomes.server.schema.tables.pojos.EhContentServerResources;
 import com.everhomes.server.schema.tables.pojos.EhCooperationRequests;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseAddresses;
@@ -93,6 +103,7 @@ import com.everhomes.server.schema.tables.pojos.EhVersionRealm;
 import com.everhomes.server.schema.tables.pojos.EhVersionUpgradeRules;
 import com.everhomes.server.schema.tables.pojos.EhVersionUrls;
 import com.everhomes.server.schema.tables.pojos.EhVersionedContent;
+import com.everhomes.server.schema.tables.pojos.EhWarningContacts;
 import com.everhomes.server.schema.tables.pojos.EhYellowPageAttachments;
 import com.everhomes.server.schema.tables.pojos.EhYellowPages;
 import com.everhomes.sharding.ShardIterator;
@@ -463,6 +474,50 @@ public class SequenceServiceImpl implements SequenceService {
         
         syncTableSequence(EhUsers.class, EhUserGroupHistories.class, Tables.EH_USER_GROUP_HISTORIES.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_USER_GROUP_HISTORIES.ID.max()).from(Tables.EH_USER_GROUP_HISTORIES).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(null, EhConfAccountCategories.class, Tables.EH_CONF_ACCOUNT_CATEGORIES.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_CONF_ACCOUNT_CATEGORIES.ID.max()).from(Tables.EH_CONF_ACCOUNT_CATEGORIES).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(EhConfOrders.class, EhConfInvoices.class, Tables.EH_CONF_INVOICES.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_CONF_INVOICES.ID.max()).from(Tables.EH_CONF_INVOICES).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(null, EhConfOrders.class, Tables.EH_CONF_ORDERS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_CONF_ORDERS.ID.max()).from(Tables.EH_CONF_ORDERS).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(EhGroups.class, EhConfOrderAccountMap.class, Tables.EH_CONF_ORDER_ACCOUNT_MAP.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_CONF_ORDER_ACCOUNT_MAP.ID.max()).from(Tables.EH_CONF_ORDER_ACCOUNT_MAP).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(null, EhConfSourceAccounts.class, Tables.EH_CONF_SOURCE_ACCOUNTS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_CONF_SOURCE_ACCOUNTS.ID.max()).from(Tables.EH_CONF_SOURCE_ACCOUNTS).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(EhGroups.class, EhConfAccounts.class, Tables.EH_CONF_ACCOUNTS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_CONF_ACCOUNTS.ID.max()).from(Tables.EH_CONF_ACCOUNTS).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(EhGroups.class, EhConfAccountHistories.class, Tables.EH_CONF_ACCOUNT_HISTORIES.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_CONF_ACCOUNT_HISTORIES.ID.max()).from(Tables.EH_CONF_ACCOUNT_HISTORIES).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(null, EhConfConferences.class, Tables.EH_CONF_CONFERENCES.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_CONF_CONFERENCES.ID.max()).from(Tables.EH_CONF_CONFERENCES).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(EhGroups.class, EhConfEnterprises.class, Tables.EH_CONF_ENTERPRISES.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_CONF_ENTERPRISES.ID.max()).from(Tables.EH_CONF_ENTERPRISES).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(null, EhWarningContacts.class, Tables.EH_WARNING_CONTACTS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_WARNING_CONTACTS.ID.max()).from(Tables.EH_WARNING_CONTACTS).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(EhGroups.class, EhConfReservations.class, Tables.EH_CONF_RESERVATIONS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_CONF_RESERVATIONS.ID.max()).from(Tables.EH_CONF_RESERVATIONS).fetchOne().value1(); 
         });
     }
     

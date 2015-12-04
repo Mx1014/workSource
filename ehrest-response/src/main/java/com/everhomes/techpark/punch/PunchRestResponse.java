@@ -1,24 +1,23 @@
 // @formatter:off
-// generated at 2015-11-20 09:40:32
+// generated at 2015-12-04 14:52:03
 package com.everhomes.techpark.punch;
 
 import com.everhomes.rest.RestResponseBase;
 
-import java.util.List;
 import com.everhomes.techpark.punch.ListYearPunchLogsCommandResponse;
 
 public class PunchRestResponse extends RestResponseBase {
 
-    private List<ListYearPunchLogsCommandResponse> response;
+    private ListYearPunchLogsCommandResponse response;
 
     public PunchRestResponse () {
     }
 
-    public List<ListYearPunchLogsCommandResponse> getResponse() {
+    public ListYearPunchLogsCommandResponse getResponse() {
         return response;
     }
 
-    public void setResponse(List<ListYearPunchLogsCommandResponse> response) {
+    public void setResponse(ListYearPunchLogsCommandResponse response) {
         this.response = response;
     }
 }

@@ -1,0 +1,751 @@
+package com.everhomes.videoconf;
+
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.SelectQuery;
+import org.jooq.tools.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.everhomes.activity.Activity;
+import com.everhomes.address.CommunityAdminStatus;
+import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DbProvider;
+import com.everhomes.enterprise.Enterprise;
+import com.everhomes.enterprise.EnterpriseCommunityMapStatus;
+import com.everhomes.enterprise.EnterpriseCommunityMapType;
+import com.everhomes.group.GroupDiscriminator;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhConfAccountCategoriesDao;
+import com.everhomes.server.schema.tables.daos.EhConfAccountsDao;
+import com.everhomes.server.schema.tables.daos.EhConfConferencesDao;
+import com.everhomes.server.schema.tables.daos.EhConfInvoicesDao;
+import com.everhomes.server.schema.tables.daos.EhConfReservationsDao;
+import com.everhomes.server.schema.tables.daos.EhConfSourceAccountsDao;
+import com.everhomes.server.schema.tables.daos.EhGroupsDao;
+import com.everhomes.server.schema.tables.daos.EhWarningContactsDao;
+import com.everhomes.server.schema.tables.pojos.EhActivities;
+import com.everhomes.server.schema.tables.pojos.EhCommunities;
+import com.everhomes.server.schema.tables.pojos.EhConfAccountCategories;
+import com.everhomes.server.schema.tables.pojos.EhConfAccounts;
+import com.everhomes.server.schema.tables.pojos.EhConfConferences;
+import com.everhomes.server.schema.tables.pojos.EhConfEnterprises;
+import com.everhomes.server.schema.tables.pojos.EhConfInvoices;
+import com.everhomes.server.schema.tables.pojos.EhConfOrders;
+import com.everhomes.server.schema.tables.pojos.EhConfReservations;
+import com.everhomes.server.schema.tables.pojos.EhConfSourceAccounts;
+import com.everhomes.server.schema.tables.pojos.EhGroups;
+import com.everhomes.server.schema.tables.pojos.EhWarningContacts;
+import com.everhomes.server.schema.tables.records.EhActivitiesRecord;
+import com.everhomes.server.schema.tables.records.EhConfAccountsRecord;
+import com.everhomes.server.schema.tables.records.EhConfOrdersRecord;
+import com.everhomes.server.schema.tables.records.EhConfReservationsRecord;
+import com.everhomes.server.schema.tables.records.EhEnterpriseCommunityMapRecord;
+import com.everhomes.sharding.ShardIterator;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.IterationMapReduceCallback.AfterAction;
+
+@Component
+public class VideoConfProviderImpl implements VideoConfProvider {
+
+	@Autowired
+    private DbProvider dbProvider;
+    
+    @Autowired
+    private SequenceProvider sequenceProvider;
+    
+	@Override
+	public void createConfAccountCategories(ConfAccountCategories rule) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+
+        long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhConfAccountCategories.class));
+        rule.setId(id);
+
+        EhConfAccountCategoriesDao dao = new EhConfAccountCategoriesDao(context.configuration());
+        dao.insert(rule);
+	}
+
+	@Override
+	public void updateConfAccountCategories(ConfAccountCategories rule) {
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        
+		EhConfAccountCategoriesDao dao = new EhConfAccountCategoriesDao(context.configuration());
+        dao.update(rule);
+	}
+
+	@Override
+	public List<ConfAccountCategories> listConfAccountCategories(int pageOffset,int pageSize) {
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhConfAccountCategories.class));
+		List<ConfAccountCategories> rules = new ArrayList<ConfAccountCategories>();
+		
+		context.select().from(Tables.EH_CONF_ACCOUNT_CATEGORIES).limit(pageSize).offset(pageOffset).fetch().map(r ->{
+
+			ConfAccountCategories rule = new ConfAccountCategories();
+			rule.setId(r.getValue(Tables.EH_CONF_ACCOUNT_CATEGORIES.ID));
+			rule.setChannelType(r.getValue(Tables.EH_CONF_ACCOUNT_CATEGORIES.CHANNEL_TYPE));
+			rule.setConfType(r.getValue(Tables.EH_CONF_ACCOUNT_CATEGORIES.CONF_TYPE));
+			rule.setMinPeriod(r.getValue(Tables.EH_CONF_ACCOUNT_CATEGORIES.MIN_PERIOD));
+			rule.setAmount(r.getValue(Tables.EH_CONF_ACCOUNT_CATEGORIES.AMOUNT));
+			
+			rules.add(rule);
+			return null;
+        });
+		
+		return rules;
+	}
+
+	@Override
+	public void createWarningContacts(WarningContacts contactor) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+
+        long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhWarningContacts.class));
+        contactor.setId(id);
+
+        EhWarningContactsDao dao = new EhWarningContactsDao(context.configuration());
+        dao.insert(contactor);
+		
+	}
+
+	@Override
+	public void updateWarningContacts(WarningContacts contactor) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        
+		EhWarningContactsDao dao = new EhWarningContactsDao(context.configuration());
+        dao.update(contactor);
+		
+	}
+
+	@Override
+	public void deleteWarningContacts(long id) {
+		 DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhWarningContacts.class));
+		 EhWarningContactsDao dao = new EhWarningContactsDao(context.configuration());
+		 dao.deleteById(id);		
+	}
+
+	@Override
+	public List<WarningContacts> listWarningContacts(int pageOffset,
+			int pageSize) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhWarningContacts.class));
+		List<WarningContacts> contacts = new ArrayList<WarningContacts>();
+		
+		context.select().from(Tables.EH_WARNING_CONTACTS).limit(pageSize).offset(pageOffset).fetch().map(r ->{
+
+			WarningContacts contact = new WarningContacts();
+			contact.setId(r.getValue(Tables.EH_WARNING_CONTACTS.ID));
+			contact.setContactor(r.getValue(Tables.EH_WARNING_CONTACTS.CONTACTOR));
+			contact.setMobile(r.getValue(Tables.EH_WARNING_CONTACTS.MOBILE));
+			contact.setEmail(r.getValue(Tables.EH_WARNING_CONTACTS.EMAIL));
+			
+			contacts.add(contact);
+			return null;
+        });
+		
+		return contacts;
+	}
+
+	@Override
+	public void createSourceVideoConfAccount(ConfSourceAccounts account) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+
+        long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhConfSourceAccounts.class));
+        account.setId(id);
+        
+        if(account.getExpiredDate().before(new Timestamp(DateHelper.currentGMTTime().getTime()))) {
+        	account.setStatus((byte) 0);
+        }
+        else {
+        	account.setStatus((byte) 1);
+        }
+
+        EhConfSourceAccountsDao dao = new EhConfSourceAccountsDao(context.configuration());
+        dao.insert(account);
+		
+	}
+
+	@Override
+	public void extendedSourceAccountPeriod(ConfSourceAccounts account) {
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        
+		if(account.getExpiredDate().before(new Timestamp(DateHelper.currentGMTTime().getTime()))) {
+			account.setStatus((byte) 0);
+        }
+        else {
+        	account.setStatus((byte) 1);
+        }
+		
+		EhConfSourceAccountsDao dao = new EhConfSourceAccountsDao(context.configuration());
+		dao.update(account);
+	}
+
+	@Override
+	public List<ConfSourceAccounts> listSourceAccount(String sourceAccount, List<Long> accountCategory,
+			int pageOffset, int pageSize) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhConfSourceAccounts.class));
+		Condition cond = Tables.EH_CONF_SOURCE_ACCOUNTS.ID.ge(1L);
+		if(!StringUtils.isBlank(sourceAccount)){
+			cond = cond.and(Tables.EH_CONF_SOURCE_ACCOUNTS.ACCOUNT_NAME.eq(sourceAccount));
+		}
+		
+		if(accountCategory != null) {
+			cond = cond.and(Tables.EH_CONF_SOURCE_ACCOUNTS.ACCOUNT_CATEGORY_ID.in(accountCategory));
+		}
+		List<ConfSourceAccounts> accounts = new ArrayList<ConfSourceAccounts>();
+		
+		context.select().from(Tables.EH_CONF_SOURCE_ACCOUNTS).where(cond).limit(pageSize).offset(pageOffset).fetch().map(r ->{
+			ConfSourceAccounts account = new ConfSourceAccounts();
+			account.setId(r.getValue(Tables.EH_CONF_SOURCE_ACCOUNTS.ID));
+			account.setAccountCategoryId(r.getValue(Tables.EH_CONF_SOURCE_ACCOUNTS.ACCOUNT_CATEGORY_ID));
+			account.setPassword(r.getValue(Tables.EH_CONF_SOURCE_ACCOUNTS.PASSWORD));
+			account.setAccountName(r.getValue(Tables.EH_CONF_SOURCE_ACCOUNTS.ACCOUNT_NAME));
+			account.setStatus(r.getValue(Tables.EH_CONF_SOURCE_ACCOUNTS.STATUS));
+			account.setExpiredDate(r.getValue(Tables.EH_CONF_SOURCE_ACCOUNTS.EXPIRED_DATE));
+			
+			accounts.add(account);
+			return null;
+        });
+		
+		return accounts;
+	}
+
+	@Override
+	public ConfSourceAccounts findSourceAccountById(long id) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhConfSourceAccounts.class, id));
+		EhConfSourceAccountsDao dao = new EhConfSourceAccountsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), ConfSourceAccounts.class);
+	}
+
+	@Override
+	public void createInvoice(ConfInvoices invoice) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+
+        long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhConfInvoices.class));
+        invoice.setId(id);
+
+        EhConfInvoicesDao dao = new EhConfInvoicesDao(context.configuration());
+        dao.insert(invoice);		
+	}
+
+//	@Override
+//	public List<ConfEnterprises> listEnterpriseWithVideoConfAccount(Long communityId, Byte status, CrossShardListingLocator locator, Integer pageSize) {
+//
+//		List<ConfEnterprises> enterprises=new ArrayList<ConfEnterprises>();
+//		if (locator.getShardIterator() == null) {
+//            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhVideoconfEnterprise.class);
+//            ShardIterator shardIterator = new ShardIterator(accessSpec);
+//            locator.setShardIterator(shardIterator);
+//        }
+//        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+//            SelectQuery<EhVideoconfEnterpriseRecord> query = context.selectQuery(Tables.EH_VIDEOCONF_ENTERPRISE);
+//            
+//            if(locator.getAnchor() != null)
+//            	query.addConditions(Tables.EH_VIDEOCONF_ENTERPRISE.ID.gt(locator.getAnchor()));
+//            
+//            if(communityId != null)
+//            	query.addConditions(Tables.EH_VIDEOCONF_ENTERPRISE.COMMUNITY_ID.eq(communityId));
+//            if(status != null)
+//            	query.addConditions(Tables.EH_VIDEOCONF_ENTERPRISE.STATUS.eq(status));
+//            
+//            query.addLimit(pageSize - enterprises.size());
+//            
+//            query.fetch().map((r) -> {
+//            	
+//            	enterprises.add(ConvertHelper.convert(r, ConfEnterprises.class));
+//                return null;
+//            });
+//
+//            if (enterprises.size() >= pageSize) {
+//                locator.setAnchor(enterprises.get(enterprises.size() - 1).getId());
+//                return AfterAction.done;
+//            }
+//            return AfterAction.next;
+//        });
+//
+//        if (enterprises.size() > 0) {
+//            locator.setAnchor(enterprises.get(enterprises.size() - 1).getId());
+//        }
+//       if(enterprises.size()>=pageSize){
+//            return enterprises.subList(0, enterprises.size()-1);
+//        }
+//		
+//		return enterprises;
+//	}
+//
+//	@Override
+//	public void createVideoconfEnterprise(ConfEnterprises enterprise) {
+//		 DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, enterprise.getCommunityId()));
+//
+//		long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhVideoconfEnterprise.class));
+//        enterprise.setId(id);
+//        enterprise.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//        enterprise.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//        enterprise.setCreatorUid(UserContext.current().getUser().getId());
+//        enterprise.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//        enterprise.setStatus((byte) 1);
+//
+//        EhVideoconfEnterpriseDao dao = new EhVideoconfEnterpriseDao(context.configuration());
+//        dao.insert(enterprise);
+//		
+//	}
+//
+//	@Override
+//	public void updateVideoconfEnterprise(ConfEnterprises enterprise) {
+//		 DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, enterprise.getCommunityId()));
+//		enterprise.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//		EhVideoconfEnterpriseDao dao = new EhVideoconfEnterpriseDao(context.configuration());
+//        dao.update(enterprise);
+//		
+//	}
+
+	@Override
+	public ConfEnterprises findByEnterpriseId(Long enterpriseId) {
+		
+		final ConfEnterprises[] result = new ConfEnterprises[1];
+		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhConfEnterprises.class), result, 
+				(DSLContext context, Object reducingContext) -> {
+					List<ConfEnterprises> list = context.select().from(Tables.EH_CONF_ENTERPRISES)
+							.where(Tables.EH_CONF_ENTERPRISES.ENTERPRISE_ID.eq(enterpriseId))
+							.fetch().map((r) -> {
+								return ConvertHelper.convert(r, ConfEnterprises.class);
+							});
+
+					if(list != null && !list.isEmpty()){
+						result[0] = list.get(0);
+						return false;
+					}
+
+					return true;
+				});
+
+		return result[0];
+	}
+
+//	@Override
+//	public List<Long> ListVideoconfEnterprise(Long communityId) {
+//		final List<Long> enterpriseIds = new ArrayList<Long>();
+//        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class, communityId));
+// 
+//        SelectQuery<EhVideoconfEnterpriseRecord> query = context.selectQuery(Tables.EH_VIDEOCONF_ENTERPRISE);
+//       
+//        query.addConditions(Tables.EH_VIDEOCONF_ENTERPRISE.COMMUNITY_ID.eq(communityId));
+//        query.fetch().map((r) -> {
+//        	enterpriseIds.add(r.getEnterpriseId());
+//             return null;
+//        });
+//        
+//       
+//        return enterpriseIds;
+//	}
+
+	@Override
+	public InvoiceDTO getInvoiceByOrderId(Long orderId) {
+		
+		final InvoiceDTO[] result = new InvoiceDTO[1];
+		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhConfInvoices.class), result, 
+				(DSLContext context, Object reducingContext) -> {
+					List<ConfInvoices> list = context.select().from(Tables.EH_CONF_INVOICES)
+							.where(Tables.EH_CONF_INVOICES.ORDER_ID.eq(orderId))
+							.fetch().map((r) -> {
+								return ConvertHelper.convert(r, ConfInvoices.class);
+							});
+
+					if(list != null && !list.isEmpty()){
+						ConfInvoices invoice = list.get(0);
+						result[0] = ConvertHelper.convert(invoice, InvoiceDTO.class);
+						return false;
+					}
+
+					return true;
+				});
+
+		return result[0];
+	}
+
+	@Override
+	public ConfAccounts findVideoconfAccountById(Long id) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhConfAccounts.class, id));
+		EhConfAccountsDao dao = new EhConfAccountsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), ConfAccounts.class);
+	}
+
+	@Override
+	public void updateConfAccounts(ConfAccounts account) {
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        
+		EhConfAccountsDao dao = new EhConfAccountsDao(context.configuration());
+        dao.update(account);
+	}
+
+//	@Override
+//	public void updateEnterpriseVideoconfAccount(
+//			ConfAccountHistories account) {
+//		
+//		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+//        
+//		EhEnterpriseVideoconfAccountDao dao = new EhEnterpriseVideoconfAccountDao(context.configuration());
+//        dao.update(account);
+//	}
+//
+//	@Override
+//	public void createEnterpriseVideoconfAccount(ConfAccountHistories account) {
+//		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+//
+//        long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseVideoconfAccount.class));
+//        account.setId(id);
+//
+//        EhEnterpriseVideoconfAccountDao dao = new EhEnterpriseVideoconfAccountDao(context.configuration());
+//        dao.insert(account);
+//	}
+//
+//	@Override
+//	public List<ConfOrderAccountMap> findOrderAccountByOrderId(Long orderId,
+//			CrossShardListingLocator locator, Integer pageSize) {
+//		List<ConfOrderAccountMap> accounts=new ArrayList<ConfOrderAccountMap>();
+//		if (locator.getShardIterator() == null) {
+//            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhOrderAccount.class);
+//            ShardIterator shardIterator = new ShardIterator(accessSpec);
+//            locator.setShardIterator(shardIterator);
+//        }
+//        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+//            SelectQuery<EhOrderAccountRecord> query = context.selectQuery(Tables.EH_ORDER_ACCOUNT);
+//            
+//            if(locator.getAnchor() != null)
+//            	query.addConditions(Tables.EH_ORDER_ACCOUNT.ID.gt(locator.getAnchor()));
+//            
+//            if(orderId != null)
+//            	query.addConditions(Tables.EH_ORDER_ACCOUNT.ORDER_ID.eq(orderId));
+//            
+//            
+//            query.addLimit(pageSize - accounts.size());
+//            
+//            query.fetch().map((r) -> {
+//            	
+//            	accounts.add(ConvertHelper.convert(r, ConfOrderAccountMap.class));
+//                return null;
+//            });
+//
+//            if (accounts.size() >= pageSize) {
+//                locator.setAnchor(accounts.get(accounts.size() - 1).getId());
+//                return AfterAction.done;
+//            }
+//            return AfterAction.next;
+//        });
+//
+//        if (accounts.size() > 0) {
+//            locator.setAnchor(accounts.get(accounts.size() - 1).getId());
+//        }
+//
+//        return accounts;
+//	}
+//
+//	@Override
+//	public ConfAccountHistories findEnterpriseAccountByAccountId(
+//			Long accountId) {
+//		final ConfAccountHistories[] result = new ConfAccountHistories[1];
+//		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhEnterpriseVideoconfAccount.class), result, 
+//				(DSLContext context, Object reducingContext) -> {
+//					List<ConfAccountHistories> list = context.select().from(Tables.EH_ENTERPRISE_VIDEOCONF_ACCOUNT)
+//							.where(Tables.EH_ENTERPRISE_VIDEOCONF_ACCOUNT.ACCOUNT_ID.eq(accountId))
+//							.fetch().map((r) -> {
+//								return ConvertHelper.convert(r, ConfAccountHistories.class);
+//							});
+//
+//					if(list != null && !list.isEmpty()){
+//						result[0] = list.get(0);
+//						return false;
+//					}
+//
+//					return true;
+//				});
+//
+//		return result[0];
+//	}
+//
+	@Override
+	public ConfAccounts findAccountByUserId(Long userId) {
+		final ConfAccounts[] result = new ConfAccounts[1];
+		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhConfAccounts.class), result, 
+				(DSLContext context, Object reducingContext) -> {
+					List<ConfAccounts> list = context.select().from(Tables.EH_CONF_ACCOUNTS)
+							.where(Tables.EH_CONF_ACCOUNTS.OWNER_ID.eq(userId))
+							.and(Tables.EH_CONF_ACCOUNTS.STATUS.ne((byte) 0))
+							.fetch().map((r) -> {
+								return ConvertHelper.convert(r, ConfAccounts.class);
+							});
+
+					if(list != null && !list.isEmpty()){
+						result[0] = list.get(0);
+						return false;
+					}
+
+					return true;
+				});
+
+		return result[0];
+	}
+
+	@Override
+	public List<Long> findUsersByEnterpriseId(
+			Long enterpriseId) {
+
+		final List<Long> userIds = new ArrayList<Long>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhConfAccounts.class));
+ 
+        SelectQuery<EhConfAccountsRecord> query = context.selectQuery(Tables.EH_CONF_ACCOUNTS);
+       
+        query.addConditions(Tables.EH_CONF_ACCOUNTS.ENTERPRISE_ID.eq(enterpriseId));
+        query.addConditions(Tables.EH_CONF_ACCOUNTS.STATUS.ne((byte) 0));
+        query.fetch().map((r) -> {
+        	userIds.add(r.getOwnerId());
+             return null;
+        });
+        
+       
+        return userIds;
+	}
+
+//	@Override
+//	public Long countVideoconfAccountByConfType(Byte confType) {
+//		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhVideoconfAccount.class));
+//		Long count = context.selectCount().from(Tables.EH_VIDEOCONF_ACCOUNT)
+//                .where(Tables.EH_VIDEOCONF_ACCOUNT.CONF_TPYE.eq(confType))
+//                .fetchOne(0, Long.class);
+//		return count;
+//	}
+//
+//	@Override
+//	public Long countValidAccountByConfType(Byte confType) {
+//		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhVideoconfAccount.class));
+//		Long count = context.selectCount().from(Tables.EH_VIDEOCONF_ACCOUNT)
+//                .where(Tables.EH_VIDEOCONF_ACCOUNT.CONF_TPYE.eq(confType))
+//                .and(Tables.EH_VIDEOCONF_ACCOUNT.STATUS.ne((byte) 0))
+//                .fetchOne(0, Long.class);
+//		return count;
+//	}
+
+	@Override
+	public Long newAccountsByConfType(Long values, Timestamp startTime,
+			Timestamp endTime) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhConfAccounts.class));
+		Long count = context.selectCount().from(Tables.EH_CONF_ACCOUNTS)
+                .where(Tables.EH_CONF_ACCOUNTS.ACCOUNT_CATEGORY_ID.in(values))
+                .and(Tables.EH_CONF_ACCOUNTS.CREATE_TIME.between(startTime, endTime))
+                .fetchOne(0, Long.class);
+		return count;
+	}
+
+	@Override
+	public List<ConfOrders> findOrdersByEnterpriseId(Long enterpriseId,
+			CrossShardListingLocator locator, Integer pageSize) {
+		List<ConfOrders> orders = new ArrayList<ConfOrders>();
+		
+		if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhConfOrders.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+            SelectQuery<EhConfOrdersRecord> query = context.selectQuery(Tables.EH_CONF_ORDERS);
+            
+            if(locator.getAnchor() != null)
+            	query.addConditions(Tables.EH_CONF_ORDERS.ID.gt(locator.getAnchor()));
+            
+            if(enterpriseId != null)
+            	query.addConditions(Tables.EH_CONF_ORDERS.OWNER_ID.eq(enterpriseId));
+           
+            query.addLimit(pageSize - orders.size());
+            
+            query.fetch().map((r) -> {
+            	
+            	orders.add(ConvertHelper.convert(r, ConfOrders.class));
+                return null;
+            });
+
+            if (orders.size() >= pageSize) {
+                locator.setAnchor(orders.get(orders.size() - 1).getId());
+                return AfterAction.done;
+            }
+            return AfterAction.next;
+        });
+
+        return orders;
+	}
+
+	@Override
+	public void updateConfConferences(ConfConferences conf) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        
+		EhConfConferencesDao dao = new EhConfConferencesDao(context.configuration());
+        dao.update(conf);
+	}
+
+	@Override
+	public ConfSourceAccounts findSpareAccount(List<Long> accountCategory) {
+		final ConfSourceAccounts[] result = new ConfSourceAccounts[1];
+		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhConfSourceAccounts.class), result, 
+				(DSLContext context, Object reducingContext) -> {
+					List<ConfSourceAccounts> list = context.select().from(Tables.EH_CONF_SOURCE_ACCOUNTS)
+							.where(Tables.EH_CONF_SOURCE_ACCOUNTS.ACCOUNT_CATEGORY_ID.in(accountCategory))
+							.fetch().map((r) -> {
+								return ConvertHelper.convert(r, ConfSourceAccounts.class);
+							});
+
+					if(list != null && !list.isEmpty()){
+						result[0] = list.get(0);
+						return false;
+					}
+
+					return true;
+				});
+
+		return result[0];
+	}
+
+	@Override
+	public List<Long> findAccountCategoriesByConfType(Byte confType) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhConfAccountCategories.class));
+		List<Long> accountCategories = new ArrayList<Long>();
+		
+		context.select().from(Tables.EH_CONF_ACCOUNT_CATEGORIES).where(Tables.EH_CONF_ACCOUNT_CATEGORIES.CONF_TYPE.eq(confType)).fetch().map(r ->{
+
+			accountCategories.add(r.getValue(Tables.EH_CONF_ACCOUNT_CATEGORIES.ID));
+			return null;
+        });
+		
+		return accountCategories;
+	}
+
+	@Override
+	public ConfAccountCategories findAccountCategoriesById(Long id) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhConfAccountCategories.class, id));
+		EhConfAccountCategoriesDao dao = new EhConfAccountCategoriesDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), ConfAccountCategories.class);
+	}
+
+	@Override
+	public void createConfConferences(ConfConferences conf) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+
+        long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhConfConferences.class));
+        conf.setId(id);
+
+        EhConfConferencesDao dao = new EhConfConferencesDao(context.configuration());
+        dao.insert(conf);
+		
+	}
+
+	@Override
+	public void createReserveVideoConf(ConfReservations reservation) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+
+        long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhConfReservations.class));
+        reservation.setId(id);
+
+        EhConfReservationsDao dao = new EhConfReservationsDao(context.configuration());
+        dao.insert(reservation);
+	}
+
+	@Override
+	public void updateReserveVideoConf(ConfReservations reservation) {
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		
+		reservation.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		EhConfReservationsDao dao = new EhConfReservationsDao(context.configuration());
+        dao.update(reservation);
+	}
+
+	@Override
+	public ConfReservations findReservationConfById(long id) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhConfReservations.class, id));
+		EhConfReservationsDao dao = new EhConfReservationsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), ConfReservations.class);
+	}
+
+	@Override
+	public List<ConfReservations> findReservationConfByAccountId(Long accountId, CrossShardListingLocator locator, Integer pageSize) {
+
+		List<ConfReservations> reservations = new ArrayList<ConfReservations>();
+		
+		if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhConfReservations.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+            SelectQuery<EhConfReservationsRecord> query = context.selectQuery(Tables.EH_CONF_RESERVATIONS);
+            
+            if(locator.getAnchor() != null)
+            	query.addConditions(Tables.EH_CONF_RESERVATIONS.ID.gt(locator.getAnchor()));
+            
+            if(accountId != null)
+            	query.addConditions(Tables.EH_CONF_RESERVATIONS.CONF_ACCOUNT_ID.eq(accountId));
+           
+            query.addLimit(pageSize - reservations.size());
+            
+            query.fetch().map((r) -> {
+            	
+            	reservations.add(ConvertHelper.convert(r, ConfReservations.class));
+                return null;
+            });
+
+            if (reservations.size() >= pageSize) {
+                locator.setAnchor(reservations.get(reservations.size() - 1).getId());
+                return AfterAction.done;
+            }
+            return AfterAction.next;
+        });
+
+        return reservations;
+	}
+
+	@Override
+	public ConfAccounts findAccountByAssignedSourceId(Long assignedSourceId) {
+		
+		final ConfAccounts[] result = new ConfAccounts[1];
+		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhConfAccounts.class), result, 
+				(DSLContext context, Object reducingContext) -> {
+					List<ConfAccounts> list = context.select().from(Tables.EH_CONF_ACCOUNTS)
+							.where(Tables.EH_CONF_ACCOUNTS.ASSIGNED_SOURCE_ID.eq(assignedSourceId))
+							.fetch().map((r) -> {
+								return ConvertHelper.convert(r, ConfAccounts.class);
+							});
+
+					if(list != null && !list.isEmpty()){
+						result[0] = list.get(0);
+						return false;
+					}
+
+					return true;
+				});
+
+		return result[0];
+	}
+
+	@Override
+	public ConfConferences findConfConferencesById(Long id) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhConfConferences.class, id));
+		EhConfConferencesDao dao = new EhConfConferencesDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), ConfConferences.class);
+	}
+
+	@Override
+	public ConfConferences findConfConferencesByConfId(Integer confId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+}

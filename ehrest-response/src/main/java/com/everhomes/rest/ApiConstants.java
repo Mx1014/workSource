@@ -1,5 +1,9 @@
 // @formatter:off
+<<<<<<< HEAD
 // generated at 2015-12-04 11:31:23
+=======
+// generated at 2015-12-04 14:52:03
+>>>>>>> cf8a321952c795942e9516f45089593c3b974d16
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -209,6 +213,39 @@ public interface ApiConstants {
     public static final String COMMUNITY_LISTBUILDINGS_URL = "/community/listBuildings";
     public static final String COMMUNITY_LISTCOMMUNITYUSERS_URL = "/community/listCommunityUsers";
     public static final String COMMUNITY_UPDATECOMMUNITYREQUESTSTATUS_URL = "/community/updateCommunityRequestStatus";
+    public static final String CONF_ADDSOURCEVIDEOCONFACCOUNT_URL = "/conf/addSourceVideoConfAccount";
+    public static final String CONF_CANCELVIDEOCONF_URL = "/conf/cancelVideoConf";
+    public static final String CONF_CREATEINVOICE_URL = "/conf/createInvoice";
+    public static final String CONF_CREATEVIDEOCONFINVITATION_URL = "/conf/createVideoConfInvitation";
+    public static final String CONF_DELETERESERVATIONCONF_URL = "/conf/deleteReservationConf";
+    public static final String CONF_DELETEWARNINGCONTACTOR_URL = "/conf/deleteWarningContactor";
+    public static final String CONF_EXTENDEDSOURCEACCOUNTPERIOD_URL = "/conf/extendedSourceAccountPeriod";
+    public static final String CONF_GETACCOUNTTYPE_URL = "/conf/getAccountType";
+    public static final String CONF_GETCONFCAPACITY_URL = "/conf/getConfCapacity";
+    public static final String CONF_GETCONFTYPE_URL = "/conf/getConfType";
+    public static final String CONF_GETEARLYWARNINGLINE_URL = "/conf/getEarlyWarningLine";
+    public static final String CONF_GETMINIMUMACCOUNTS_URL = "/conf/getMinimumAccounts";
+    public static final String CONF_GETPREFERENTIALSTATUS_URL = "/conf/getPreferentialStatus";
+    public static final String CONF_GETVIDEOCONFACCOUNTPREFERENTIALRULE_URL = "/conf/getVideoConfAccountPreferentialRule";
+    public static final String CONF_GETVIDEOCONFACCOUNTTRIALRULE_URL = "/conf/getVideoConfAccountTrialRule";
+    public static final String CONF_JOINVIDEOCONF_URL = "/conf/joinVideoConf";
+    public static final String CONF_LISTCONFACCOUNTCATEGORIES_URL = "/conf/listConfAccountCategories";
+    public static final String CONF_LISTCONFORDER_URL = "/conf/listConfOrder";
+    public static final String CONF_LISTINVOICEBYORDERID_URL = "/conf/listInvoiceByOrderId";
+    public static final String CONF_LISTRESERVATIONCONF_URL = "/conf/listReservationConf";
+    public static final String CONF_LISTSOURCEVIDEOCONFACCOUNT_URL = "/conf/listSourceVideoConfAccount";
+    public static final String CONF_LISTUSERSWITHOUTVIDEOCONFPRIVILEGE_URL = "/conf/listUsersWithoutVideoConfPrivilege";
+    public static final String CONF_LISTWARNINGCONTACTOR_URL = "/conf/listWarningContactor";
+    public static final String CONF_RESERVEVIDEOCONF_URL = "/conf/reserveVideoConf";
+    public static final String CONF_SETEARLYWARNINGLINE_URL = "/conf/setEarlyWarningLine";
+    public static final String CONF_SETMINIMUMACCOUNTS_URL = "/conf/setMinimumAccounts";
+    public static final String CONF_SETPREFERENTIALSTATUS_URL = "/conf/setPreferentialStatus";
+    public static final String CONF_SETVIDEOCONFACCOUNTPREFERENTIALRULE_URL = "/conf/setVideoConfAccountPreferentialRule";
+    public static final String CONF_SETVIDEOCONFACCOUNTTRIALRULE_URL = "/conf/setVideoConfAccountTrialRule";
+    public static final String CONF_SETWARNINGCONTACTOR_URL = "/conf/setWarningContactor";
+    public static final String CONF_STARTVIDEOCONF_URL = "/conf/startVideoConf";
+    public static final String CONF_UPDATECONFACCOUNTCATEGORIES_URL = "/conf/updateConfAccountCategories";
+    public static final String CONF_VERIFYVIDEOCONFACCOUNT_URL = "/conf/verifyVideoConfAccount";
     public static final String CONTACT_ADDCONTACT_URL = "/contact/addContact";
     public static final String CONTACT_ADDCONTACTGROUP_URL = "/contact/addContactGroup";
     public static final String CONTACT_APPROVECONTACT_URL = "/contact/approveContact";

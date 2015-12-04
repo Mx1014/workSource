@@ -1,0 +1,50 @@
+package com.everhomes.videoconf;
+
+import java.sql.Timestamp;
+
+import com.everhomes.util.StringHelper;
+
+/**
+ * <ul>
+ *  <li>sourceAccountName: 源账号</li>
+ *  <li>confId: 会议id</li>
+ *  <li>endTime: 结束时间</li>
+ * </ul>
+ */
+public class CancelVideoConfCommand {
+
+	private Integer confId;
+	
+	private String sourceAccountName;
+	
+	private Timestamp endTime;
+
+	public Integer getConfId() {
+		return confId;
+	}
+
+	public void setConfId(Integer confId) {
+		this.confId = confId;
+	}
+	
+	public String getSourceAccountName() {
+		return sourceAccountName;
+	}
+
+	public void setSourceAccountName(String sourceAccountName) {
+		this.sourceAccountName = sourceAccountName;
+	}
+
+	public Timestamp getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(Timestamp endTime) {
+		this.endTime = endTime;
+	}
+
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}
