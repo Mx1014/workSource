@@ -22,6 +22,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class UpdateRentalRuleCommand {
+	private Long id;
 	private String ownerType;
 	private Long ownerId;
 	private String siteType ;
@@ -132,5 +133,11 @@ public class UpdateRentalRuleCommand {
 	}
 	public void setContactName(String contactName) {
 		this.contactName = contactName;
+	}
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
 	}
 }

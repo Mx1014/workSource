@@ -30,7 +30,7 @@ import com.everhomes.util.StringHelper;
  * <li>choosen：选择的日期</li>
  * </ul>
  */
-public class AddRentalSiteSimpleRulesCommand {
+public class AddRentalSiteSingleSimpleRule {
 	@NotNull
 
 	private String ownerType;
@@ -48,8 +48,8 @@ public class AddRentalSiteSimpleRulesCommand {
 	private Double timeStep; 
 	@NotNull
 	private Integer rentalStep; 
-	@ItemType(TimeInterval.class)
-	private List<TimeInterval> timeInterval;
+	private Double beginTime; 
+	private Double endTime;
 	@NotNull
 	private Double counts;
 	@NotNull
@@ -149,7 +149,28 @@ public class AddRentalSiteSimpleRulesCommand {
 	}
 
 
- 
+
+	public Double getBeginTime() {
+		return beginTime;
+	}
+
+
+
+	public void setBeginTime(Double beginTime) {
+		this.beginTime = beginTime;
+	}
+
+
+
+	public Double getEndTime() {
+		return endTime;
+	}
+
+
+
+	public void setEndTime(Double endTime) {
+		this.endTime = endTime;
+	}
 
   
 
@@ -320,18 +341,6 @@ public class AddRentalSiteSimpleRulesCommand {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
-	}
-
-
-
-	public List<TimeInterval> getTimeInterval() {
-		return timeInterval;
-	}
-
-
-
-	public void setTimeInterval(List<TimeInterval> timeInterval) {
-		this.timeInterval = timeInterval;
 	}
  
 

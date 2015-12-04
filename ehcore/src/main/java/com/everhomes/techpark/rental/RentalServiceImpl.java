@@ -810,6 +810,18 @@ public class RentalServiceImpl implements RentalService {
 
 	@Override
 	public void addRentalSiteSimpleRules(AddRentalSiteSimpleRulesCommand cmd) {
+		
+		for(TimeInterval timeInterval:cmd.getTimeInterval()){
+			AddRentalSiteSingleSimpleRule signleCmd=ConvertHelper.convert(cmd, AddRentalSiteSingleSimpleRule.class );
+			signleCmd.setBeginTime(timeInterval.getBeginTime());
+			signleCmd.setEndTime(timeInterval.getEndTime());
+			addRentalSiteSingleSimpleRule(signleCmd);
+		}
+		
+	}
+	
+	
+	public void addRentalSiteSingleSimpleRule(AddRentalSiteSingleSimpleRule cmd) {
 		Long userId = UserContext.current().getUser().getId();
 		Integer billCount = rentalProvider.countRentalSiteBills(
 				cmd.getRentalSiteId(), cmd.getBeginDate(), cmd.getEndDate());
