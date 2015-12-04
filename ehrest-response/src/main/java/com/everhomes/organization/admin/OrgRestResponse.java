@@ -1,24 +1,23 @@
 // @formatter:off
-// generated at 2015-11-20 09:40:32
+// generated at 2015-12-04 14:52:02
 package com.everhomes.organization.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import java.util.List;
-import com.everhomes.organization.pm.UnassignedBuildingDTO;
+import com.everhomes.organization.pm.UpdateOrganizationMemberByIdsCommand;
 
 public class OrgRestResponse extends RestResponseBase {
 
-    private List<UnassignedBuildingDTO> response;
+    private UpdateOrganizationMemberByIdsCommand response;
 
     public OrgRestResponse () {
     }
 
-    public List<UnassignedBuildingDTO> getResponse() {
+    public UpdateOrganizationMemberByIdsCommand getResponse() {
         return response;
     }
 
-    public void setResponse(List<UnassignedBuildingDTO> response) {
+    public void setResponse(UpdateOrganizationMemberByIdsCommand response) {
         this.response = response;
     }
 }

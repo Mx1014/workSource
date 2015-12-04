@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-11-28 11:19:59
+// generated at 2015-12-04 14:52:03
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -209,6 +209,39 @@ public interface ApiConstants {
     public static final String COMMUNITY_LISTBUILDINGS_URL = "/community/listBuildings";
     public static final String COMMUNITY_LISTCOMMUNITYUSERS_URL = "/community/listCommunityUsers";
     public static final String COMMUNITY_UPDATECOMMUNITYREQUESTSTATUS_URL = "/community/updateCommunityRequestStatus";
+    public static final String CONF_ADDSOURCEVIDEOCONFACCOUNT_URL = "/conf/addSourceVideoConfAccount";
+    public static final String CONF_CANCELVIDEOCONF_URL = "/conf/cancelVideoConf";
+    public static final String CONF_CREATEINVOICE_URL = "/conf/createInvoice";
+    public static final String CONF_CREATEVIDEOCONFINVITATION_URL = "/conf/createVideoConfInvitation";
+    public static final String CONF_DELETERESERVATIONCONF_URL = "/conf/deleteReservationConf";
+    public static final String CONF_DELETEWARNINGCONTACTOR_URL = "/conf/deleteWarningContactor";
+    public static final String CONF_EXTENDEDSOURCEACCOUNTPERIOD_URL = "/conf/extendedSourceAccountPeriod";
+    public static final String CONF_GETACCOUNTTYPE_URL = "/conf/getAccountType";
+    public static final String CONF_GETCONFCAPACITY_URL = "/conf/getConfCapacity";
+    public static final String CONF_GETCONFTYPE_URL = "/conf/getConfType";
+    public static final String CONF_GETEARLYWARNINGLINE_URL = "/conf/getEarlyWarningLine";
+    public static final String CONF_GETMINIMUMACCOUNTS_URL = "/conf/getMinimumAccounts";
+    public static final String CONF_GETPREFERENTIALSTATUS_URL = "/conf/getPreferentialStatus";
+    public static final String CONF_GETVIDEOCONFACCOUNTPREFERENTIALRULE_URL = "/conf/getVideoConfAccountPreferentialRule";
+    public static final String CONF_GETVIDEOCONFACCOUNTTRIALRULE_URL = "/conf/getVideoConfAccountTrialRule";
+    public static final String CONF_JOINVIDEOCONF_URL = "/conf/joinVideoConf";
+    public static final String CONF_LISTCONFACCOUNTCATEGORIES_URL = "/conf/listConfAccountCategories";
+    public static final String CONF_LISTCONFORDER_URL = "/conf/listConfOrder";
+    public static final String CONF_LISTINVOICEBYORDERID_URL = "/conf/listInvoiceByOrderId";
+    public static final String CONF_LISTRESERVATIONCONF_URL = "/conf/listReservationConf";
+    public static final String CONF_LISTSOURCEVIDEOCONFACCOUNT_URL = "/conf/listSourceVideoConfAccount";
+    public static final String CONF_LISTUSERSWITHOUTVIDEOCONFPRIVILEGE_URL = "/conf/listUsersWithoutVideoConfPrivilege";
+    public static final String CONF_LISTWARNINGCONTACTOR_URL = "/conf/listWarningContactor";
+    public static final String CONF_RESERVEVIDEOCONF_URL = "/conf/reserveVideoConf";
+    public static final String CONF_SETEARLYWARNINGLINE_URL = "/conf/setEarlyWarningLine";
+    public static final String CONF_SETMINIMUMACCOUNTS_URL = "/conf/setMinimumAccounts";
+    public static final String CONF_SETPREFERENTIALSTATUS_URL = "/conf/setPreferentialStatus";
+    public static final String CONF_SETVIDEOCONFACCOUNTPREFERENTIALRULE_URL = "/conf/setVideoConfAccountPreferentialRule";
+    public static final String CONF_SETVIDEOCONFACCOUNTTRIALRULE_URL = "/conf/setVideoConfAccountTrialRule";
+    public static final String CONF_SETWARNINGCONTACTOR_URL = "/conf/setWarningContactor";
+    public static final String CONF_STARTVIDEOCONF_URL = "/conf/startVideoConf";
+    public static final String CONF_UPDATECONFACCOUNTCATEGORIES_URL = "/conf/updateConfAccountCategories";
+    public static final String CONF_VERIFYVIDEOCONFACCOUNT_URL = "/conf/verifyVideoConfAccount";
     public static final String CONTACT_ADDCONTACT_URL = "/contact/addContact";
     public static final String CONTACT_ADDCONTACTGROUP_URL = "/contact/addContactGroup";
     public static final String CONTACT_APPROVECONTACT_URL = "/contact/approveContact";
@@ -244,6 +277,7 @@ public interface ApiConstants {
     public static final String ENTERPRISE_SETCURRENTENTERPRISE_URL = "/enterprise/setCurrentEnterprise";
     public static final String ENTERPRISE_SYNCINDEX_URL = "/enterprise/syncIndex";
     public static final String FAMILY_APPROVEMEMBER_URL = "/family/approveMember";
+    public static final String FAMILY_DELETEHISTORYBYID_URL = "/family/deleteHistoryById";
     public static final String FAMILY_FINDFAMILYBYADDRESSID_URL = "/family/findFamilyByAddressId";
     public static final String FAMILY_FINDFAMILYBYKEYWORD_URL = "/family/findFamilyByKeyword";
     public static final String FAMILY_GET_URL = "/family/get";
@@ -289,6 +323,7 @@ public interface ApiConstants {
     public static final String GROUP_APPROVEADMINROLE_URL = "/group/approveAdminRole";
     public static final String GROUP_APPROVEJOINREQUEST_URL = "/group/approveJoinRequest";
     public static final String GROUP_CREATE_URL = "/group/create";
+    public static final String GROUP_DELETEBYID_URL = "/group/deleteById";
     public static final String GROUP_GET_URL = "/group/get";
     public static final String GROUP_GETADMINROLESTATUS_URL = "/group/getAdminRoleStatus";
     public static final String GROUP_GETGROUPMEMBERSNAPSHOT_URL = "/group/getGroupMemberSnapshot";
@@ -503,6 +538,7 @@ public interface ApiConstants {
     public static final String TECHPARK_RENTAL_ADDRENTALSITEITEMS_URL = "/techpark/rental/addRentalSiteItems";
     public static final String TECHPARK_RENTAL_ADDRENTALSITESIMPLERULES_URL = "/techpark/rental/addRentalSiteSimpleRules";
     public static final String TECHPARK_RENTAL_CANCELRENTALBILL_URL = "/techpark/rental/cancelRentalBill";
+    public static final String TECHPARK_RENTAL_CONFIRMBILL_URL = "/techpark/rental/confirmBill";
     public static final String TECHPARK_RENTAL_DELETERENTALBILL_URL = "/techpark/rental/deleteRentalBill";
     public static final String TECHPARK_RENTAL_DELETERENTALSITE_URL = "/techpark/rental/deleteRentalSite";
     public static final String TECHPARK_RENTAL_DELETERENTALSITEITEM_URL = "/techpark/rental/deleteRentalSiteItem";
@@ -510,6 +546,7 @@ public interface ApiConstants {
     public static final String TECHPARK_RENTAL_FINDRENTALBILLS_URL = "/techpark/rental/findRentalBills";
     public static final String TECHPARK_RENTAL_FINDRENTALSITEITEMS_URL = "/techpark/rental/findRentalSiteItems";
     public static final String TECHPARK_RENTAL_FINDRENTALSITERULES_URL = "/techpark/rental/findRentalSiteRules";
+    public static final String TECHPARK_RENTAL_FINDRENTALSITEWEEKSTATUS_URL = "/techpark/rental/findRentalSiteWeekStatus";
     public static final String TECHPARK_RENTAL_FINDRENTALSITES_URL = "/techpark/rental/findRentalSites";
     public static final String TECHPARK_RENTAL_FINDRENTALSITESSTATUS_URL = "/techpark/rental/findRentalSitesStatus";
     public static final String TECHPARK_RENTAL_GETRENTALSITETYPE_URL = "/techpark/rental/getRentalSiteType";
