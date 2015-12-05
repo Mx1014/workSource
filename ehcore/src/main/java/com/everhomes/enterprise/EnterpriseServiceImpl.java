@@ -765,7 +765,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 				String salt=EncryptionUtils.createRandomSalt();
 				newuser.setSalt(salt);
 				try {
-					newuser.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s","123456",salt)));
+					newuser.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s","8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",salt)));
 				} catch (Exception e) {
 					LOGGER.error("encode password failed");
 					throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Unable to create password hash");
