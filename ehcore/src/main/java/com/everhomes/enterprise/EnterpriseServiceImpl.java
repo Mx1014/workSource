@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.validation.Valid;
 
@@ -751,42 +752,43 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         	enterCon.setRole(RoleConstants.ResourceUser);
         	this.enterpriseContactProvider.updateContact(enterCon);
         }
-		EnterpriseContactEntry entry = this.enterpriseContactProvider.getEnterpriseContactEntryByPhone(cmd.getEnterpriseId(), cmd.getEntryValue());
-		if(entry == null) {
+        
+        UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(cmd.getEntryValue());
+		if(identifier == null) {
 			//帮他在左邻注册一个账号
-			UserIdentifier identifier = this.dbProvider.execute((TransactionStatus status) -> {
+			identifier = this.dbProvider.execute((TransactionStatus status) -> {
 				User newuser = new User();
 				newuser.setStatus(UserStatus.ACTIVE.getCode());
 				newuser.setNamespaceId(cmd.getNamespaceId());
 				newuser.setAccountName(cmd.getContactName());
 				newuser.setNickName(cmd.getContactName());
 				String salt=EncryptionUtils.createRandomSalt();
-				user.setSalt(salt);
+				newuser.setSalt(salt);
 				try {
-					user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s","123456",salt)));
+					newuser.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s","123456",salt)));
 				} catch (Exception e) {
 					LOGGER.error("encode password failed");
 					throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Unable to create password hash");
 
 				}
-				userProvider.createUser(user);
+
+				userProvider.createUser(newuser);
 
 				UserIdentifier newIdentifier = new UserIdentifier();
-				newIdentifier.setOwnerUid(user.getId());
+				newIdentifier.setOwnerUid(newuser.getId());
 				newIdentifier.setIdentifierType(IdentifierType.MOBILE.getCode());
 				newIdentifier.setIdentifierToken(cmd.getEntryValue());
 				newIdentifier.setNamespaceId(cmd.getNamespaceId());
 
-				String verificationCode = RandomGenerator.getRandomDigitalString(6);
 				newIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
-				newIdentifier.setVerificationCode(verificationCode);
-				newIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 				userProvider.createIdentifier(newIdentifier);
 
 				return newIdentifier;
 			});
-    		
-    		
+		}
+		
+		EnterpriseContactEntry entry = this.enterpriseContactProvider.getEnterpriseContactEntryByPhone(cmd.getEnterpriseId(), cmd.getEntryValue());
+		if(entry == null) {
 			EnterpriseContact ec = new EnterpriseContact();
 			ec.setUserId(identifier.getOwnerUid());
     		ec.setCreatorUid(userId);
@@ -812,6 +814,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 			enterpriseContact.setRole(RoleConstants.SystemAdmin);
 			this.enterpriseContactProvider.updateContact(enterpriseContact);
 		}
+		
 	}
 
 	@Override
