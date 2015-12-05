@@ -57,9 +57,11 @@ import org.springframework.stereotype.Component;
 
 
 
+
 import com.bosigao.cxf.Service1;
 import com.bosigao.cxf.Service1Soap;
 import com.everhomes.app.AppConstants;
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -660,7 +662,7 @@ public class ParkServiceImpl implements ParkService {
 
 	private Integer getPaymentRanking(String orderNo) {
 		
-		Timestamp begin = strToTimestamp("20151215");
+		Timestamp begin = strToTimestamp(ConfigConstants.PARKING_PREFERENTIAL_STARTTIME);
 		Long billId = Long.valueOf(orderNo);
 		RechargeInfo rechargeInfo = onlinePayProvider.findRechargeInfoByOrderId(billId);
 		if(rechargeInfo == null) {
@@ -669,6 +671,11 @@ public class ParkServiceImpl implements ParkService {
 					"the bill id is not in list.");
 		}
 		Timestamp payTime = rechargeInfo.getRechargeTime();
+		Timestamp end = strToTimestamp(ConfigConstants.PARKING_PREFERENTIAL_ENDTIME);
+		
+		if(payTime.after(end)) {
+			return 0;
+		}
 		
 		int count = parkProvider.getPaymentRanking(payTime, begin);
 		
@@ -676,7 +683,7 @@ public class ParkServiceImpl implements ParkService {
 	}
 
 	@Override
-	public String rechargeTop100(OnlinePayBillCommand cmd) {
+	public String rechargeTop(OnlinePayBillCommand cmd) {
 		RechargeInfoDTO info = onlinePayService.onlinePayBill(cmd);
 		
 		if(cmd.getPayStatus().toLowerCase().equals("fail")) {
@@ -707,11 +714,16 @@ public class ParkServiceImpl implements ParkService {
 			
 			int ranking = getPaymentRanking(cmd.getOrderNo());
 			
-			if(ranking <= 100)
-				return "top100";
+			int range = Integer.valueOf(configurationProvider.getValue(ConfigConstants.PARKING_PREFERENTIAL_RANGE, "0"));
+			
+			if(ranking == 0)
+				return "the activity was finished";
+			
+			if(ranking <= range)
+				return "in the range";
 			
 		}
-		return "outof100";
+		return "out of range";
 	}
 	
 	@Scheduled(cron="0 0 2 * * ? ")

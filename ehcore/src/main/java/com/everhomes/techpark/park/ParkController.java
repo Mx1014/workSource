@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -23,6 +25,8 @@ public class ParkController extends ControllerBase{
 	@Autowired
 	private ParkService parkService;
 	
+	@Autowired
+    private ConfigurationProvider configurationProvider;
 	/**
 	 * <b>URL: /techpark/park/recharge</b>
 	 * customer recharge parking card, write a record into record table 
@@ -174,17 +178,64 @@ public class ParkController extends ControllerBase{
 
 	/**
 	 * <b>URL: /techpark/park/getPaymentRanking</b>
-	 * @return payFailed; top100; outof100
+	 * @return payFailed; is in range
 	 */
 	@RequestMapping("getPaymentRanking")
 	@RestReturn(value = String.class)
 	public RestResponse getPaymentRanking(OnlinePayBillCommand cmd) {
 		
-		String count = parkService.rechargeTop100(cmd);
+		String count = parkService.rechargeTop(cmd);
 		RestResponse response = new RestResponse(count);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 		
+	}
+	
+	/**
+	 * <b>URL: /techpark/park/setParkingPreferentialRule</b>
+	 * 停车缴费活动规则设置
+	 * @return
+	 */
+	@RequestMapping("setParkingPreferentialRule")
+	@RestReturn(value = ParkingPreferentialRuleDTO.class)
+	public RestResponse setParkingPreferentialRule(SetParkingPreferentialRuleCommand cmd) {
+		
+        configurationProvider.setValue(ConfigConstants.PARKING_PREFERENTIAL_STARTTIME, cmd.getStartTime());
+        configurationProvider.setValue(ConfigConstants.PARKING_PREFERENTIAL_ENDTIME, cmd.getEndTime());
+        configurationProvider.setValue(ConfigConstants.PARKING_PREFERENTIAL_RANGE, cmd.getRange());
+        
+        ParkingPreferentialRuleDTO parkingPreferential = new ParkingPreferentialRuleDTO();
+
+        parkingPreferential.setStartTime(configurationProvider.getValue(ConfigConstants.PARKING_PREFERENTIAL_STARTTIME, "0"));
+        parkingPreferential.setEndTime(configurationProvider.getValue(ConfigConstants.PARKING_PREFERENTIAL_ENDTIME, "0"));
+        parkingPreferential.setRange(configurationProvider.getValue(ConfigConstants.PARKING_PREFERENTIAL_RANGE, "0"));
+        
+		RestResponse response = new RestResponse(parkingPreferential);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+		
+	}
+	
+	/**
+	 * <b>URL: /techpark/park/getParkingPreferentialRule</b>
+	 * 获取车缴费活动规则
+	 * @return
+	 */
+	@RequestMapping("getParkingPreferentialRule")
+	@RestReturn(value = ParkingPreferentialRuleDTO.class)
+	public RestResponse getParkingPreferentialRule() {
+		
+		ParkingPreferentialRuleDTO parkingPreferential = new ParkingPreferentialRuleDTO();
+
+        parkingPreferential.setStartTime(configurationProvider.getValue(ConfigConstants.PARKING_PREFERENTIAL_STARTTIME, "0"));
+        parkingPreferential.setEndTime(configurationProvider.getValue(ConfigConstants.PARKING_PREFERENTIAL_ENDTIME, "0"));
+        parkingPreferential.setRange(configurationProvider.getValue(ConfigConstants.PARKING_PREFERENTIAL_RANGE, "0"));
+        
+		RestResponse response = new RestResponse(parkingPreferential);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 }

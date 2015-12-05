@@ -458,8 +458,7 @@ public class ParkProviderImpl implements ParkProvider {
                 (DSLContext context, Object reducingContext)-> {
                 	SelectConditionStep<Record1<Integer>> query = context.selectCount().from(Tables.EH_RECHARGE_INFO)
                             .where(Tables.EH_RECHARGE_INFO.RECHARGE_STATUS.eq(RechargeStatus.SUCCESS.getCode()))
-                            .and(Tables.EH_RECHARGE_INFO.RECHARGE_TIME.between(begin, rechargeTime))
-                            .and(Tables.EH_RECHARGE_INFO.RECHARGE_STATUS.eq(RechargeStatus.SUCCESS.getCode()));
+                            .and(Tables.EH_RECHARGE_INFO.RECHARGE_TIME.between(begin, rechargeTime));
                     count[0] = query.fetchOneInto(Integer.class);
                     return true;
                 });
