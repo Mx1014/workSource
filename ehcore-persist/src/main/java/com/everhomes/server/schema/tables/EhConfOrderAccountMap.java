@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfOrderAccountMap extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhConfOrderAccountMapRecord> {
 
-	private static final long serialVersionUID = 848031259;
+	private static final long serialVersionUID = -852724816;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_conf_order_account_map</code>
@@ -45,6 +45,11 @@ public class EhConfOrderAccountMap extends org.jooq.impl.TableImpl<com.everhomes
 	 * The column <code>ehcore.eh_conf_order_account_map.conf_account_id</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfOrderAccountMapRecord, java.lang.Long> CONF_ACCOUNT_ID = createField("conf_account_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_conf_order_account_map.assiged_flag</code>. whether the account has assiged to user, 0: none, 1: assigned
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfOrderAccountMapRecord, java.lang.Byte> ASSIGED_FLAG = createField("assiged_flag", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "whether the account has assiged to user, 0: none, 1: assigned");
 
 	/**
 	 * Create a <code>ehcore.eh_conf_order_account_map</code> table reference

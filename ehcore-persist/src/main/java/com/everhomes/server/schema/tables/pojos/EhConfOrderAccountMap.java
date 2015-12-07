@@ -11,12 +11,13 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfOrderAccountMap implements java.io.Serializable {
 
-	private static final long serialVersionUID = -839645830;
+	private static final long serialVersionUID = -1505796518;
 
 	private java.lang.Long id;
 	private java.lang.Long orderId;
 	private java.lang.Long enterpriseId;
 	private java.lang.Long confAccountId;
+	private java.lang.Byte assigedFlag;
 
 	public EhConfOrderAccountMap() {}
 
@@ -24,12 +25,14 @@ public class EhConfOrderAccountMap implements java.io.Serializable {
 		java.lang.Long id,
 		java.lang.Long orderId,
 		java.lang.Long enterpriseId,
-		java.lang.Long confAccountId
+		java.lang.Long confAccountId,
+		java.lang.Byte assigedFlag
 	) {
 		this.id = id;
 		this.orderId = orderId;
 		this.enterpriseId = enterpriseId;
 		this.confAccountId = confAccountId;
+		this.assigedFlag = assigedFlag;
 	}
 
 	public java.lang.Long getId() {
@@ -62,5 +65,13 @@ public class EhConfOrderAccountMap implements java.io.Serializable {
 
 	public void setConfAccountId(java.lang.Long confAccountId) {
 		this.confAccountId = confAccountId;
+	}
+
+	public java.lang.Byte getAssigedFlag() {
+		return this.assigedFlag;
+	}
+
+	public void setAssigedFlag(java.lang.Byte assigedFlag) {
+		this.assigedFlag = assigedFlag;
 	}
 }

@@ -67,4 +67,11 @@ public class EhConfOrderAccountMapDao extends org.jooq.impl.DAOImpl<com.everhome
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfOrderAccountMap> fetchByConfAccountId(java.lang.Long... values) {
 		return fetch(com.everhomes.server.schema.tables.EhConfOrderAccountMap.EH_CONF_ORDER_ACCOUNT_MAP.CONF_ACCOUNT_ID, values);
 	}
+
+	/**
+	 * Fetch records that have <code>assiged_flag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfOrderAccountMap> fetchByAssigedFlag(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhConfOrderAccountMap.EH_CONF_ORDER_ACCOUNT_MAP.ASSIGED_FLAG, values);
+	}
 }
