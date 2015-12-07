@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-11-28 11:19:59
+// generated at 2015-12-03 14:07:04
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -216,6 +216,7 @@ public interface ApiConstants {
     public static final String CONTACT_CREATECONTACTBYUSERIDCOMMAND_URL = "/contact/createContactByUserIdCommand";
     public static final String CONTACT_DELETECONTACTBYID_URL = "/contact/deleteContactById";
     public static final String CONTACT_DELETECONTACTGROUPBYID_URL = "/contact/deleteContactGroupById";
+    public static final String CONTACT_GETUSERENTERPRISECONTACT_URL = "/contact/getUserEnterpriseContact";
     public static final String CONTACT_IMPORTCONTACTS_URL = "/contact/importContacts";
     public static final String CONTACT_LEAVE_URL = "/contact/leave";
     public static final String CONTACT_LISTCONTACTGROUPNAMESBYENTERPRISEID_URL = "/contact/listContactGroupNamesByEnterpriseId";
@@ -289,6 +290,7 @@ public interface ApiConstants {
     public static final String GROUP_APPROVEADMINROLE_URL = "/group/approveAdminRole";
     public static final String GROUP_APPROVEJOINREQUEST_URL = "/group/approveJoinRequest";
     public static final String GROUP_CREATE_URL = "/group/create";
+    public static final String GROUP_DELETEBYID_URL = "/group/deleteById";
     public static final String GROUP_GET_URL = "/group/get";
     public static final String GROUP_GETADMINROLESTATUS_URL = "/group/getAdminRoleStatus";
     public static final String GROUP_GETGROUPMEMBERSNAPSHOT_URL = "/group/getGroupMemberSnapshot";
@@ -466,10 +468,15 @@ public interface ApiConstants {
     public static final String REGION_LISTDESCENDANTS_URL = "/region/listDescendants";
     public static final String REGION_LISTREGIONBYKEYWORD_URL = "/region/listRegionByKeyword";
     public static final String TECHPARK_ENTRY_APPLYENTRY_URL = "/techpark/entry/applyEntry";
+    public static final String TECHPARK_ENTRY_CREATELEASEPROMOTION_URL = "/techpark/entry/createLeasePromotion";
+    public static final String TECHPARK_ENTRY_FINDLEASEPROMOTIONBYID_URL = "/techpark/entry/findLeasePromotionById";
     public static final String TECHPARK_ENTRY_GETENTERPRISEDETAILBYID_URL = "/techpark/entry/getEnterpriseDetailById";
     public static final String TECHPARK_ENTRY_LISTAPPLYENTRYS_URL = "/techpark/entry/listApplyEntrys";
     public static final String TECHPARK_ENTRY_LISTENTERPRISEDETAILS_URL = "/techpark/entry/listEnterpriseDetails";
     public static final String TECHPARK_ENTRY_LISTFORRENTS_URL = "/techpark/entry/listForRents";
+    public static final String TECHPARK_ENTRY_UPDATEAPPLYENTRYSTATUS_URL = "/techpark/entry/updateApplyEntryStatus";
+    public static final String TECHPARK_ENTRY_UPDATELEASEPROMOTION_URL = "/techpark/entry/updateLeasePromotion";
+    public static final String TECHPARK_ENTRY_UPDATELEASEPROMOTIONSTATUS_URL = "/techpark/entry/updateLeasePromotionStatus";
     public static final String TECHPARK_ONLINEPAY_ONLINEPAYBILL_URL = "/techpark/onlinePay/onlinePayBill";
     public static final String TECHPARK_PARK_APPLYPARKINGCARD_URL = "/techpark/park/applyParkingCard";
     public static final String TECHPARK_PARK_GETPAYMENTRANKING_URL = "/techpark/park/getPaymentRanking";

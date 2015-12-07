@@ -8,8 +8,10 @@ import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.DeleteQuery;
 import org.jooq.SelectQuery;
+import org.jooq.UpdateQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
@@ -30,6 +32,7 @@ import com.everhomes.server.schema.tables.records.EhEnterpriseAddressesRecord;
 import com.everhomes.server.schema.tables.records.EhEnterpriseDetailsRecord;
 import com.everhomes.server.schema.tables.records.EhEnterpriseOpRequestsRecord;
 import com.everhomes.server.schema.tables.records.EhLeasePromotionAttachmentsRecord;
+import com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 
@@ -73,12 +76,31 @@ public class EnterpriseApplyEntryProviderImpl implements
 	}
 
 	@Override
-	public List<EnterpriseOpRequest> listApplyEntrys(Long communityId,
+	public List<EnterpriseOpRequest> listApplyEntrys(EnterpriseOpRequest request,
 			int offset, int pageSize) {
 		List<EnterpriseOpRequest> enterpriseOpRequests = new ArrayList<EnterpriseOpRequest>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		Condition cond = Tables.EH_ENTERPRISE_OP_REQUESTS.NAMESPACE_ID.eq(request.getNamespaceId());
+		
+		if(!StringUtils.isEmpty(request.getCommunityId())){
+			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.COMMUNITY_ID.eq(request.getCommunityId()));
+		}
+		
+		if(!StringUtils.isEmpty(request.getApplyType())){
+			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.APPLY_TYPE.eq(request.getApplyType()));
+		}
+		
+		if(!StringUtils.isEmpty(request.getStatus())){
+			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.STATUS.eq(request.getStatus()));
+		}
+
+		if(!StringUtils.isEmpty(request.getSourceType())){
+			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.SOURCE_TYPE.eq(request.getSourceType()));
+		}
+		
 		SelectQuery<EhEnterpriseOpRequestsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_OP_REQUESTS);
-		query.addConditions(Tables.EH_ENTERPRISE_OP_REQUESTS.COMMUNITY_ID.eq(communityId));
+		query.addConditions(cond);
 		query.addLimit(offset, pageSize);
 		query.fetch().map((r) -> {
 			enterpriseOpRequests.add(ConvertHelper.convert(r, EnterpriseOpRequest.class));
@@ -127,13 +149,13 @@ public class EnterpriseApplyEntryProviderImpl implements
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		List<LeasePromotion> leasePromotions = new ArrayList<LeasePromotion>();
 		Condition cond = Tables.EH_LEASE_PROMOTIONS.NAMESPACE_ID.eq(leasePromotion.getNamespaceId());
-		if(null != leasePromotion.getCommunityId()){
+		if(!StringUtils.isEmpty(leasePromotion.getCommunityId())){
 			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.COMMUNITY_ID.eq(leasePromotion.getCommunityId()));
 		}
-		if(null != leasePromotion.getStatus()){
+		if(!StringUtils.isEmpty(leasePromotion.getStatus())){
 			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.STATUS.eq(leasePromotion.getStatus()));
 		}
-		if(null != leasePromotion.getBuildingId()){
+		if(!StringUtils.isEmpty(leasePromotion.getBuildingId())){
 			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.BUILDING_ID.eq(leasePromotion.getBuildingId()));
 		}
 		context.select().from(Tables.EH_LEASE_PROMOTIONS)
@@ -186,6 +208,14 @@ public class EnterpriseApplyEntryProviderImpl implements
 	}
 	
 	@Override
+	public EnterpriseOpRequest getApplyEntryById(Long id){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		EhEnterpriseOpRequestsDao dao = new EhEnterpriseOpRequestsDao(context.configuration());
+		EnterpriseOpRequest enterpriseOpRequest = ConvertHelper.convert(dao.findById(id), EnterpriseOpRequest.class);
+		return enterpriseOpRequest;
+	}
+	
+	@Override
 	public boolean updateLeasePromotion(LeasePromotion leasePromotion){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		EhLeasePromotionsDao dao = new EhLeasePromotionsDao(context.configuration());
@@ -214,6 +244,24 @@ public class EnterpriseApplyEntryProviderImpl implements
 		EhLeasePromotionAttachmentsDao dao = new EhLeasePromotionAttachmentsDao(context.configuration());
 		dao.insert(attachment);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhLeasePromotionAttachments.class, null);
+		return true;
+	}
+	
+	public boolean updateLeasePromotionStatus(long id, byte status){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		UpdateQuery<EhLeasePromotionsRecord> r = context.updateQuery(Tables.EH_LEASE_PROMOTIONS);
+		r.addValue(Tables.EH_LEASE_PROMOTIONS.STATUS, status);
+		r.addConditions(Tables.EH_LEASE_PROMOTIONS.ID.eq(id));
+		r.execute();
+		return true;
+	}
+	
+	public boolean updateApplyEntryStatus(long id, byte status){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		UpdateQuery<EhEnterpriseOpRequestsRecord> r = context.updateQuery(Tables.EH_ENTERPRISE_OP_REQUESTS);
+		r.addValue(Tables.EH_ENTERPRISE_OP_REQUESTS.STATUS, status);
+		r.addConditions(Tables.EH_ENTERPRISE_OP_REQUESTS.ID.eq(id));
+		r.execute();
 		return true;
 	}
 	

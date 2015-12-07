@@ -49,6 +49,20 @@ public class EnterpriseContactController extends ControllerBase {
     public RestResponse createContactByPhoneCommand(@Valid CreateContactByPhoneCommand cmd) {
         return null;
     }
+    /**
+     * <b>URL: /contact/getUserEnterpriseContact</b>
+     * <p>获取当前登录用户的通讯录信息</p>
+     * @return {@link EnterpriseContactDTO}
+     */
+    @RequestMapping("getUserEnterpriseContact")
+    @RestReturn(value=EnterpriseContactDTO.class)
+    public RestResponse getUserEnterpriseContact(@Valid GetUserEnterpriseContactCommand cmd) {
+    	EnterpriseContactDTO contactDTO = this.enterpriseContactService.getUserEnterpriseContact(cmd);
+    	RestResponse response = new RestResponse(contactDTO);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+    }
     
     /**
      * <b>URL: /contact/importContacts</b>

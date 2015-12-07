@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.app.AppConstants;
@@ -534,7 +535,12 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 			if (entries != null && entries.size() > 0) {
 				detail.setPhone(entries.get(0).getEntryValue());
 			}
-
+			
+			if(StringUtils.isEmpty(detail.getAvatar())){
+				User user = userProvider.findUserById(contact.getUserId());
+				detail.setAvatar(user.getAvatar());
+			}
+				
 			details.add(detail);
 
 		}
@@ -1466,5 +1472,33 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		}
 		this.enterpriseContactProvider.updateContact(contact);
 		return ConvertHelper.convert(contact, EnterpriseContactDTO.class);
+	}
+
+	@Override
+	public EnterpriseContactDTO getUserEnterpriseContact(
+			GetUserEnterpriseContactCommand cmd) { 
+		EnterpriseContact  contact = this.enterpriseContactProvider.queryContactByUserId(cmd.getEnterpriseId(),   UserContext.current().getUser().getId());
+		if(null == contact)
+			throw RuntimeErrorException.errorWith(EnterpriseServiceErrorCode.SCOPE, EnterpriseServiceErrorCode.ERROR_ENTERPRISE_CONTACT_NOT_FOUND, 
+                    "can not find enterprise contact !!!");
+		EnterpriseContactDTO  dto = ConvertHelper.convert(contact, EnterpriseContactDTO.class);
+		EnterpriseContactGroupMember member = this.enterpriseContactProvider
+				.getContactGroupMemberByContactId(contact.getEnterpriseId(),
+						contact.getId());
+		if (member != null) {
+			EnterpriseContactGroup group = this.enterpriseContactProvider
+					.getContactGroupById(member.getContactGroupId());
+			if (group != null) {
+				dto.setGroupName(group.getName());
+			}
+		}
+
+		List<EnterpriseContactEntry> entries = this.enterpriseContactProvider
+				.queryContactEntryByContactId(contact);
+		if (entries != null && entries.size() > 0) {
+			dto.setPhone(entries.get(0).getEntryValue());
+		}
+		
+		return dto;
 	}
 }

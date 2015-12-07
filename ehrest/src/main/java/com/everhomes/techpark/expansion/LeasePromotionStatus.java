@@ -1,9 +1,9 @@
 package com.everhomes.techpark.expansion;
 
 /**
- * APPLY(1):招租中
- * EXPANSION(2): 已出租
- * RENEW(3):下线
+ * RENTING(1):招租中
+ * RENTAL(2): 已出租
+ * OFFLINE(3):下线
  * */
 public enum LeasePromotionStatus {
 	

@@ -121,7 +121,7 @@ public class YellowPageServiceImpl implements YellowPageService {
         locator.setAnchor(cmd.getPageAnchor());
         List<YellowPage> yellowPages = this.yellowPageProvider.queryYellowPages(locator, pageSize + 1,cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParentId(),cmd.getType(),cmd.getServiceType());
         if(null == yellowPages || yellowPages.size() == 0)
-        	return null;
+        	return response;
         response.setYellowPages(new ArrayList<YellowPageDTO>());
       
         for (YellowPage yellowPage : yellowPages){

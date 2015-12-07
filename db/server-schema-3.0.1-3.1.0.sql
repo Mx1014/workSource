@@ -349,6 +349,8 @@ INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'parki
 INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(1000000, '科技园版');
 INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(999999, '讯美园区版');
 INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(999998, '华为园区版');
+INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(999997, '左邻服务版');
+INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(999996, '上海联通版');
 
 -- INSERT INTO `eh_acl_privileges` (`app_id`,`name`,`description`) VALUES(32, '设置组的管理员，普通成员的增删改Group_member_mgt', '设置组的管理员，普通成员的增删改');
 -- INSERT INTO `eh_acl_privileges` (`app_id`,`name`,`description`) VALUES(32, 'Group_mgt', '组的增删改');
@@ -605,10 +607,11 @@ ALTER TABLE `eh_enterprise_addresses` ADD COLUMN `building_name` VARCHAR(128);
 ALTER TABLE `eh_lease_promotions` ADD COLUMN `building_id` BIGINT NOT NULL DEFAULT 0; 
 ALTER TABLE `eh_lease_promotions` ADD COLUMN `rent_position` VARCHAR(128) COMMENT 'rent position'; 
 ALTER TABLE `eh_lease_promotions` ADD COLUMN `contacts` VARCHAR(128); 
-ALTER TABLE `eh_lease_promotions` ADD COLUMN `contact_phone` VARCHAR(128; 
+ALTER TABLE `eh_lease_promotions` ADD COLUMN `contact_phone` VARCHAR(128); 
 ALTER TABLE `eh_lease_promotions` ADD COLUMN `enter_time` DATETIME COMMENT 'enter time'; 
 
 
+ALTER TABLE `eh_enterprise_op_requests` MODIFY COLUMN apply_user_name VARCHAR(128) COMMENT 'apply user name';
 
 
 

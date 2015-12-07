@@ -179,9 +179,11 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		
 		ListEnterpriseApplyEntryResponse res = new ListEnterpriseApplyEntryResponse();
 		
+		EnterpriseOpRequest request = ConvertHelper.convert(cmd, EnterpriseOpRequest.class);
+		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		Integer offset = cmd.getPageAnchor() == null ? 0 : (cmd.getPageAnchor() - 1 ) * pageSize;
-		List<EnterpriseOpRequest> enterpriseOpRequests = enterpriseApplyEntryProvider.listApplyEntrys(cmd.getCommunityId(), offset, pageSize + 1);
+		List<EnterpriseOpRequest> enterpriseOpRequests = enterpriseApplyEntryProvider.listApplyEntrys(request, offset, pageSize + 1);
 		
 		if(enterpriseOpRequests != null && enterpriseOpRequests.size() > pageSize) {
 			enterpriseOpRequests.remove(enterpriseOpRequests.size() - 1);
@@ -332,5 +334,37 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			}
 		}
 		return ConvertHelper.convert(leasePromotion, BuildingForRentDTO.class);
+	}
+	
+	@Override
+	public boolean updateLeasePromotionStatus(UpdateLeasePromotionStatusCommand cmd){
+		LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getId());
+		
+		if(LeasePromotionStatus.RENTAL.getCode() == cmd.getStatus()){
+			if(LeasePromotionStatus.RENTING.getCode() != leasePromotion.getStatus()){
+				LOGGER.error("Status can not be modified. cause:data status ="+ leasePromotion.getStatus());
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"Status can not be modified.");
+			}
+		}
+		
+		return enterpriseApplyEntryProvider.updateLeasePromotionStatus(cmd.getId(), cmd.getStatus());
+		
+	}
+	
+	@Override
+	public boolean updateApplyEntryStatus(UpdateApplyEntryStatusCommand cmd){
+		EnterpriseOpRequest request = enterpriseApplyEntryProvider.getApplyEntryById(cmd.getId());
+		
+		if(ApplyEntryStatus.RESIDED_IN.getCode() == cmd.getStatus()){
+			if(ApplyEntryStatus.PROCESSING.getCode() != request.getStatus()){
+				LOGGER.error("Status can not be modified. cause:data status ="+ request.getStatus());
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"Status can not be modified.");
+			}
+		}
+		
+		return enterpriseApplyEntryProvider.updateApplyEntryStatus(cmd.getId(), cmd.getStatus());
+		
 	}
 }

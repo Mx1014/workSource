@@ -189,7 +189,12 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		step.where(condition).fetch().map((r) ->{
 			items.add(ConvertHelper.convert(r, LaunchPadItem.class));
 			return null;
-		});
+		});       
+        
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query launch pad items by tag and scope, sql=" + step.getSQL());
+            LOGGER.debug("Query launch pad items by tag and scope, bindValues=" + step.getBindValues());
+        }
 
 		return items;
 	}
