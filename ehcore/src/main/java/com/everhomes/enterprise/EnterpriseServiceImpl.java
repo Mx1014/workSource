@@ -441,7 +441,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
             EnterpriseDTO dto = null;
             for(EnterpriseContactEntry entry : entryList) {
             	EnterpriseContact ec = this.enterpriseContactProvider.getContactById(entry.getContactId());
-            	if(ec.getStatus() != GroupMemberStatus.INACTIVE.getCode() && ec.getUserId() == userId) {
+            	if(ec.getStatus() != GroupMemberStatus.INACTIVE.getCode() && ec.getUserId().equals(userId)) {
             		enterprise = this.enterpriseProvider.findEnterpriseById(entry.getEnterpriseId());
                     
                     this.enterpriseProvider.populateEnterpriseAttachments(enterprise);
@@ -936,5 +936,5 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 		return errorDataLogs;
 		
 	}
-
+	
 }
