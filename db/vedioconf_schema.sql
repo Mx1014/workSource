@@ -55,6 +55,7 @@ CREATE TABLE `eh_conf_order_account_map` (
 	`order_id` BIGINT NOT NULL DEFAULT 0,
 	`enterprise_id` BIGINT NOT NULL DEFAULT 0,
 	`conf_account_id` BIGINT NOT NULL DEFAULT 0,
+	`assiged_flag` TINYINT NOT NULL DEFAULT 0 COMMENT 'whether the account has assiged to user, 0: none, 1: assigned',
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
