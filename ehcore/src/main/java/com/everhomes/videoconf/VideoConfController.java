@@ -1,12 +1,12 @@
 package com.everhomes.videoconf;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -14,8 +14,6 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 
 @RestDoc(value = "VideoConf controller", site = "ehcore")
 @RestController
@@ -489,54 +487,38 @@ public class VideoConfController  extends ControllerBase{
 		return response;
 	}
 	
-//	/**
-//	 * <b>URL: /conf/listEnterpriseWithVideoConfAccount</b>
-//	 * 列出有视频会议账号的企业
-//	 * @return
-//	 */
-//	@RequestMapping("listEnterpriseWithVideoConfAccount")
-//	@RestReturn(value = ListEnterpriseWithVideoConfAccountResponse.class)
-//	public RestResponse listEnterpriseWithVideoConfAccount(ListEnterpriseWithVideoConfAccountCommand cmd) {
-//
-//		ListEnterpriseWithVideoConfAccountResponse enterprise = videoConfService.listEnterpriseWithVideoConfAccount(cmd);
-//		RestResponse response = new RestResponse(enterprise);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-//	
-//	/**
-//	 * <b>URL: /conf/listEnterpriseWithoutVideoConfAccount</b>
-//	 * 列出没有视频会议账号的企业
-//	 * @return
-//	 */
-//	@RequestMapping("listEnterpriseWithoutVideoConfAccount")
-//	@RestReturn(value = ListEnterpriseWithoutVideoConfAccountResponse.class)
-//	public RestResponse listEnterpriseWithoutVideoConfAccount(ListEnterpriseWithoutVideoConfAccountCommand cmd) {
-//
-//		ListEnterpriseWithoutVideoConfAccountResponse enterprise = videoConfService.listEnterpriseWithoutVideoConfAccount(cmd);
-//		RestResponse response = new RestResponse(enterprise);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-//	
-//	/**
-//	 * <b>URL: /conf/setEnterpriseLockStatus</b>
-//	 * 锁定or解锁企业所有视频会议账号
-//	 * @return
-//	 */
-//	@RequestMapping("setEnterpriseLockStatus")
-//	@RestReturn(value = String.class)
-//	public RestResponse setEnterpriseLockStatus(EnterpriseLockStatusCommand cmd) {
-//
-//		videoConfService.setEnterpriseLockStatus(cmd);
-//		RestResponse response = new RestResponse();
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-//	
+	/**
+	 * <b>URL: /conf/listEnterpriseWithVideoConfAccount</b>
+	 * 列出有视频会议账号的企业
+	 * @return
+	 */
+	@RequestMapping("listEnterpriseWithVideoConfAccount")
+	@RestReturn(value = ListEnterpriseWithVideoConfAccountResponse.class)
+	public RestResponse listEnterpriseWithVideoConfAccount(ListEnterpriseWithVideoConfAccountCommand cmd) {
+
+		ListEnterpriseWithVideoConfAccountResponse enterprise = videoConfService.listEnterpriseWithVideoConfAccount(cmd);
+		RestResponse response = new RestResponse(enterprise);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /conf/setEnterpriseLockStatus</b>
+	 * 锁定or解锁企业所有视频会议账号
+	 * @return
+	 */
+	@RequestMapping("setEnterpriseLockStatus")
+	@RestReturn(value = String.class)
+	public RestResponse setEnterpriseLockStatus(EnterpriseLockStatusCommand cmd) {
+
+		videoConfService.setEnterpriseLockStatus(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 //	/**
 //	 * <b>URL: /conf/listVideoConfAccount</b>
 //	 * 查看企业视频会议账号
@@ -664,23 +646,23 @@ public class VideoConfController  extends ControllerBase{
 //		response.setErrorDescription("OK");
 //		return response;
 //	}
-//	
-//	/**
-//	 * <b>URL: /conf/listVideoConfAccountByOrderId</b>
-//	 * 查看订单账号信息
-//	 * @return
-//	 */
-//	@RequestMapping("listVideoConfAccountByOrderId")
-//	@RestReturn(value = ListConfOrderAccountResponse.class)
-//	public RestResponse listVideoConfAccountByOrderId(ListVideoConfAccountByOrderIdCommand cmd) {
-//
-//		ListConfOrderAccountResponse accounts = videoConfService.listVideoConfAccountByOrderId(cmd);
-//		RestResponse response = new RestResponse(accounts);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-//	
+	
+	/**
+	 * <b>URL: /conf/listVideoConfAccountByOrderId</b>
+	 * 查看订单账号信息
+	 * @return
+	 */
+	@RequestMapping("listVideoConfAccountByOrderId")
+	@RestReturn(value = ListConfOrderAccountResponse.class)
+	public RestResponse listVideoConfAccountByOrderId(ListVideoConfAccountByOrderIdCommand cmd) {
+
+		ListConfOrderAccountResponse accounts = videoConfService.listVideoConfAccountByOrderId(cmd);
+		RestResponse response = new RestResponse(accounts);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 	/**
 	 * <b>URL: /conf/listInvoiceByOrderId</b>
 	 * 查看开票信息
@@ -761,6 +743,22 @@ public class VideoConfController  extends ControllerBase{
 		return response;
 	}
 	
+	/**
+	 * <b>URL: /conf/createAccountOwner</b>
+	 * 企业分配账号给用户
+	 * @return
+	 */
+	@RequestMapping("createAccountOwner")
+	@RestReturn(value = String.class)
+	public RestResponse createAccountOwner(CreateAccountOwnerCommand cmd) {
+
+		videoConfService.createAccountOwner(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 //	/**
 //	 * <b>URL: /conf/applyVideoConfAccount</b>
 //	 * 企业申请免费试用账号
@@ -788,6 +786,38 @@ public class VideoConfController  extends ControllerBase{
 
 		List<EnterpriseUsersDTO> users = videoConfService.listUsersWithoutVideoConfPrivilege(cmd);
 		RestResponse response = new RestResponse(users);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /conf/listOrdersWithUnassignAccount</b>
+	 * 查看企业账号没分配完的订单
+	 * @return
+	 */
+	@RequestMapping("listOrdersWithUnassignAccount")
+	@RestReturn(value = Long.class, collection = true)
+	public RestResponse listOrdersWithUnassignAccount(ListUsersWithoutVideoConfPrivilegeCommand cmd) {
+
+		Set<Long> orders = videoConfService.listOrdersWithUnassignAccount(cmd);
+		RestResponse response = new RestResponse(orders);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /conf/listUnassignAccountsByOrder</b>
+	 * 查看订单没分配完的账号情况
+	 * @return
+	 */
+	@RequestMapping("listUnassignAccountsByOrder")
+	@RestReturn(value = UnassignAccountResponse.class)
+	public RestResponse listUnassignAccountsByOrder(ListUnassignAccountsByOrderCommand cmd) {
+
+		UnassignAccountResponse unassignAccounts = videoConfService.listUnassignAccountsByOrder(cmd);
+		RestResponse response = new RestResponse(unassignAccounts);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -904,5 +934,7 @@ public class VideoConfController  extends ControllerBase{
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	
 	
 }

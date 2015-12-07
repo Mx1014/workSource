@@ -1,13 +1,14 @@
 package com.everhomes.videoconf;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URLDecoder;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -17,13 +18,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.bosigao.cxf.Service1;
-import com.bosigao.cxf.Service1Soap;
+import com.everhomes.app.AppConstants;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryAdminStatus;
 import com.everhomes.category.CategoryConstants;
 import com.everhomes.category.CategoryProvider;
-import com.everhomes.community.ListCommunitesByStatusCommandResponse;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.enterprise.Enterprise;
@@ -31,19 +30,12 @@ import com.everhomes.enterprise.EnterpriseContact;
 import com.everhomes.enterprise.EnterpriseContactEntry;
 import com.everhomes.enterprise.EnterpriseContactProvider;
 import com.everhomes.enterprise.EnterpriseProvider;
-import com.everhomes.family.FamilyNotificationTemplateCode;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.organization.pm.OnlinePayPmBillCommand;
-import com.everhomes.organization.pm.PropertyMgrServiceImpl;
-import com.everhomes.organization.pm.pay.BaseVo;
 import com.everhomes.organization.pm.pay.GsonUtil;
-import com.everhomes.organization.pm.pay.RestUtil;
 import com.everhomes.organization.pm.pay.ResultHolder;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
-import com.everhomes.techpark.park.RechargeInfoDTO;
-import com.everhomes.techpark.park.RechargeSuccessResponse;
 import com.everhomes.user.IdentifierType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -53,6 +45,9 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
 
 @Component
 public class VideoConfServiceImpl implements VideoConfService {
@@ -477,23 +472,46 @@ public class VideoConfServiceImpl implements VideoConfService {
 		
 	}
 
-//	@Override
-//	public ListEnterpriseWithVideoConfAccountResponse listEnterpriseWithVideoConfAccount(
-//			ListEnterpriseWithVideoConfAccountCommand cmd) {
-//		
-//		ListEnterpriseWithVideoConfAccountResponse response = new ListEnterpriseWithVideoConfAccountResponse();
-//		
-//		CrossShardListingLocator locator=new CrossShardListingLocator();
-//	    locator.setAnchor(cmd.getPageAnchor());
-//	    int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-//	    
-//	    List<ConfEnterprises> enterprises = vcProvider.listEnterpriseWithVideoConfAccount(cmd.getCommunityId(), cmd.getStatus(), locator, pageSize+1);
-//		
-////	    List<EnterpriseConfAccountDTO> enterpriseDto = //感觉放在searcher里面更好呢
-//	    
-//		return response;
-//	}
-//
+	@Override
+	public ListEnterpriseWithVideoConfAccountResponse listEnterpriseWithVideoConfAccount(
+			ListEnterpriseWithVideoConfAccountCommand cmd) {
+		
+		ListEnterpriseWithVideoConfAccountResponse response = new ListEnterpriseWithVideoConfAccountResponse();
+		
+		CrossShardListingLocator locator=new CrossShardListingLocator();
+	    locator.setAnchor(cmd.getPageAnchor());
+	    int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+	    
+	    List<ConfEnterprises> enterprises = vcProvider.listEnterpriseWithVideoConfAccount(cmd.getNamespaceId(), cmd.getStatus(), locator, pageSize+1);
+	    Long nextPageAnchor = null;
+		if(enterprises != null && enterprises.size() > pageSize) {
+			enterprises.remove(enterprises.size() - 1);
+			nextPageAnchor = enterprises.get(enterprises.size() -1).getId();
+		}
+		response.setNextPageAnchor(nextPageAnchor);
+		
+	    List<EnterpriseConfAccountDTO> enterpriseDto = enterprises.stream().map(r -> {
+
+	    	EnterpriseConfAccountDTO dto = new EnterpriseConfAccountDTO();
+	    	dto.setId(r.getId());
+	    	dto.setEnterpriseId(r.getEnterpriseId());
+	    	Enterprise enterprise = enterpriseProvider.findEnterpriseById(r.getEnterpriseId());
+	    	dto.setEnterpriseName(enterprise.getName());
+	    	dto.setEnterpriseDisplayName(enterprise.getDisplayName());
+	    	dto.setEnterpriseContactor(r.getContactName());
+	    	dto.setMobile(r.getContact());
+	    	dto.setStatus(r.getStatus());
+	    	dto.setTotalAccount(r.getAccountAmount());
+	    	dto.setValidAccount(r.getActiveAccountAmount());
+	    	dto.setBuyChannel(r.getBuyChannel());
+	    	return dto;
+	    	
+	    }).collect(Collectors.toList());
+	    response.setEnterpriseConfAccounts(enterpriseDto);
+	    
+		return response;
+	}
+
 //	@Override
 //	public ListEnterpriseWithoutVideoConfAccountResponse listEnterpriseWithoutVideoConfAccount(
 //			ListEnterpriseWithoutVideoConfAccountCommand cmd) {
@@ -526,17 +544,42 @@ public class VideoConfServiceImpl implements VideoConfService {
 //		
 //		return response;
 //	}
-//
-//	@Override
-//	public void setEnterpriseLockStatus(EnterpriseLockStatusCommand cmd) {
-//		
-//		ConfEnterprises enterprise = vcProvider.findByEnterpriseId(cmd.getEnterpriseId());
-//		
-//		enterprise.setLockFlag(cmd.getLockStatus());
-//		vcProvider.updateVideoconfEnterprise(enterprise);
-//
-//	}
-//
+
+	@Override
+	public void setEnterpriseLockStatus(EnterpriseLockStatusCommand cmd) {
+		CrossShardListingLocator locator=new CrossShardListingLocator();
+	    int pageSize = Integer.MAX_VALUE;
+		ConfEnterprises enterprise = vcProvider.findByEnterpriseId(cmd.getEnterpriseId());
+		List<ConfAccounts> accounts = vcProvider.listConfAccountsByEnterpriseId(cmd.getEnterpriseId(), locator, pageSize);
+		if(accounts != null && accounts.size() > 0) {
+			if(cmd.getLockStatus() == 1) {
+				enterprise.setStatus((byte) 2);
+				accounts.stream().map(r -> {
+					r.setStatus((byte) 2);
+					vcProvider.updateConfAccounts(r);
+					return null;
+				});
+			}
+			
+			if(cmd.getLockStatus() == 0) {
+				enterprise.setStatus((byte) 0);
+				accounts.stream().map(r -> {
+					if(r.getExpiredDate().before(new Timestamp(DateHelper.currentGMTTime().getTime()))){
+						r.setStatus((byte) 0);
+					} else {
+						r.setStatus((byte) 1);
+						enterprise.setStatus((byte) 1);
+					}
+					vcProvider.updateConfAccounts(r);
+					return null;
+				});
+				
+			}
+			vcProvider.updateVideoconfEnterprise(enterprise);
+		}
+
+	}
+
 //	@Override
 //	public ListVideoConfAccountResponse listVideoConfAccount(
 //			ListEnterpriseWithVideoConfAccountCommand cmd) {
@@ -663,50 +706,51 @@ public class VideoConfServiceImpl implements VideoConfService {
 //		// TODO Auto-generated method stub
 //		return null;
 //	}
-//
-//	@Override
-//	public ListConfOrderAccountResponse listVideoConfAccountByOrderId(
-//			ListVideoConfAccountByOrderIdCommand cmd) {
-//
-//		CrossShardListingLocator locator=new CrossShardListingLocator();
-//	    locator.setAnchor(cmd.getPageAnchor());
-//	    int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-//		
-//		List<ConfOrderAccountMap> order = vcProvider.findOrderAccountByOrderId(cmd.getOrderId(), locator, pageSize+1);
-//		List<ConfAccounts> accounts = order.stream().map(r -> {
-//			ConfAccounts account = vcProvider.findVideoconfAccountById(r.getAccountId());
-//			return account;
-//		}).collect(Collectors.toList());
-//		Long nextPageAnchor = null;
-//		if(accounts != null && accounts.size() > pageSize) {
-//			accounts.remove(accounts.size() - 1);
-//			nextPageAnchor = accounts.get(accounts.size() -1).getId();
-//		}
-//		ListConfOrderAccountResponse response = new ListConfOrderAccountResponse();
-//		response.setNextPageAnchor(nextPageAnchor);
-//		
-//		List<ConfOrderAccountDTO> orderAccounts = accounts.stream().map(r -> {
-//			ConfOrderAccountDTO accountDto = new ConfOrderAccountDTO();
-//			accountDto.setId(r.getId());
-//			accountDto.setConfType(r.getConfType());
-//			ConfAccountHistories enterpriseAccount = vcProvider.findEnterpriseAccountByAccountId(r.getId());
-//			if(enterpriseAccount != null) {
-//				EnterpriseContact contact = enterpriseContactProvider.getContactById(enterpriseAccount.getContactId());
-//				if(contact != null) {
-//					accountDto.setUserId(enterpriseAccount.getUserId());
-//					accountDto.setDepartment(contact.getStringTag1());
-//					accountDto.setUserName(contact.getName());
-//					List<EnterpriseContactEntry> entry = enterpriseContactProvider.queryContactEntryByContactId(contact);
-//					if(entry != null && entry.size() >0)
-//						accountDto.setMobile(entry.get(0).getEntryValue());
-//				}
-//			}
-//			return accountDto;
-//		}).collect(Collectors.toList());
-//		
-//		response.setOrderAccounts(orderAccounts);
-//		return response;
-//	}
+
+	@Override
+	public ListConfOrderAccountResponse listVideoConfAccountByOrderId(
+			ListVideoConfAccountByOrderIdCommand cmd) {
+
+		CrossShardListingLocator locator=new CrossShardListingLocator();
+	    locator.setAnchor(cmd.getPageAnchor());
+	    int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		
+		List<ConfOrderAccountMap> order = vcProvider.findOrderAccountByOrderId(cmd.getOrderId(), locator, pageSize+1);
+		List<ConfAccounts> accounts = order.stream().map(r -> {
+			ConfAccounts account = vcProvider.findVideoconfAccountById(r.getConfAccountId());
+			return account;
+		}).collect(Collectors.toList());
+		Long nextPageAnchor = null;
+		if(accounts != null && accounts.size() > pageSize) {
+			accounts.remove(accounts.size() - 1);
+			nextPageAnchor = accounts.get(accounts.size() -1).getId();
+		}
+		ListConfOrderAccountResponse response = new ListConfOrderAccountResponse();
+		response.setNextPageAnchor(nextPageAnchor);
+		
+		List<ConfOrderAccountDTO> orderAccounts = accounts.stream().map(r -> {
+			ConfOrderAccountDTO accountDto = new ConfOrderAccountDTO();
+			accountDto.setId(r.getId());
+			
+			accountDto.setUserId(r.getOwnerId());
+			EnterpriseContact contact = enterpriseContactProvider.queryContactByUserId(r.getEnterpriseId(), r.getOwnerId());
+			if(contact != null) {
+				accountDto.setDepartment(contact.getStringTag1());
+				accountDto.setUserName(contact.getName());
+				
+				List<EnterpriseContactEntry> entry = enterpriseContactProvider.queryContactEntryByContactId(contact);
+				if(entry != null && entry.size() > 0) {
+					accountDto.setMobile(entry.get(0).getEntryValue());
+				}
+			}
+			ConfAccountCategories category = vcProvider.findAccountCategoriesById(r.getAccountCategoryId());
+			accountDto.setConfType(category.getConfType());
+			return accountDto;
+		}).collect(Collectors.toList());
+		
+		response.setOrderAccounts(orderAccounts);
+		return response;
+	}
 
 	@Override
 	public InvoiceDTO listInvoiceByOrderId(ListInvoiceByOrderIdCommand cmd) {
@@ -812,19 +856,75 @@ public class VideoConfServiceImpl implements VideoConfService {
 	@Override
 	public ListEnterpriseVideoConfAccountResponse listVideoConfAccountByEnterpriseId(
 			ListEnterpriseVideoConfAccountCommand cmd) {
-		// TODO Auto-generated method stub
+
+		ListEnterpriseVideoConfAccountResponse response = new ListEnterpriseVideoConfAccountResponse();
+		CrossShardListingLocator locator=new CrossShardListingLocator();
+	    locator.setAnchor(cmd.getPageAnchor());
+	    int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		List<ConfAccounts> accounts = vcProvider.listConfAccountsByEnterpriseId(cmd.getEnterpriseId(), locator, pageSize+1);
+		
+		Long nextPageAnchor = null;
+		if(accounts != null && accounts.size() > pageSize) {
+			accounts.remove(accounts.size() - 1);
+			nextPageAnchor = accounts.get(accounts.size() -1).getId();
+		}
+		response.setNextPageAnchor(nextPageAnchor);
+		
+		List<ConfAccountDTO> confAccounts = accounts.stream().map(r -> {
+			
+			ConfAccountDTO dto = new ConfAccountDTO();
+			
+			dto.setId(r.getId());
+			dto.setUserId(r.getOwnerId());
+			dto.setValidDate(r.getExpiredDate());
+			dto.setStatus(r.getStatus());
+			ConfAccountCategories category = vcProvider.findAccountCategoriesById(r.getAccountCategoryId());
+			if(category != null) {
+				dto.setAccoutnType(category.getChannelType());
+				dto.setConfType(category.getConfType());
+			}
+			
+			EnterpriseContact contact = enterpriseContactProvider.queryContactByUserId(r.getEnterpriseId(), r.getOwnerId());
+			if(contact != null) {
+				dto.setDepartment(contact.getStringTag1());
+				dto.setUserName(contact.getName());
+				List<EnterpriseContactEntry> entry = enterpriseContactProvider.queryContactEntryByContactId(contact);
+				if(entry != null && entry.size() >0) {
+					dto.setMobile(entry.get(0).getEntryValue());
+				}
+			}
+			return dto;
+		}).collect(Collectors.toList());
+		response.setConfAccounts(confAccounts);
+		
 		return null;
 	}
 
+	private Timestamp addMonth(Timestamp lastUpdate, int months) {
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(lastUpdate);
+		calendar.add(Calendar.MONTH, months);
+		Timestamp newPeriod = new Timestamp(calendar.getTimeInMillis());
+		
+		return newPeriod;
+	}
+	
 	@Override
 	public void assignVideoConfAccount(
 			AssignVideoConfAccountCommand cmd) {
 		
 		
 		ConfAccounts account = vcProvider.findVideoconfAccountById(cmd.getAccountId());
+		if(account == null)
+			LOGGER.error("account is not exist!");
+
+		Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+		if(now.before(addMonth(account.getOwnTime(), 3)))
+			LOGGER.error("account has assigned in last 3 month!");
 		account.setOwnerId(cmd.getUserId());
-		account.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		account.setOwnTime(account.getUpdateTime());
+		account.setUpdateTime(now);
+		account.setOwnTime(now);
 		vcProvider.updateConfAccounts(account);
 
 		ConfAccountHistories history = new ConfAccountHistories();
@@ -834,12 +934,12 @@ public class VideoConfServiceImpl implements VideoConfService {
 		history.setAccountCategoryId(account.getAccountCategoryId());
 		history.setAccountType(account.getAccountType());
 		history.setOwnerId(account.getOwnerId());
-		history.setOwnTime(account.getOwnTime());
+		history.setOwnTime(now);
 		history.setCreatorUid(account.getCreatorUid());
 		history.setCreateTime(account.getCreateTime());
 		history.setOperatorUid(UserContext.current().getUser().getId());
 		history.setOperationType("assign account");
-		history.setOperateTime(account.getUpdateTime());
+		history.setOperateTime(now);
 		history.setProcessDetails("");
 		vcProvider.createConfAccountHistories(history);
 		
@@ -928,6 +1028,16 @@ public class VideoConfServiceImpl implements VideoConfService {
 		vcProvider.updateConfAccounts(account);
 	}
 
+	private static String strDecode(String json){
+		String newJson="";
+		try {
+			newJson=URLDecoder.decode(json,"UTF-8");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return newJson;
+	}
+	
 	@SuppressWarnings({ "unchecked", "rawtypes"})
 	@Override
 	public StartVideoConfResponse startVideoConf(StartVideoConfCommand cmd) {
@@ -950,18 +1060,20 @@ public class VideoConfServiceImpl implements VideoConfService {
 					LOGGER.info("startVideoConf-restUrl"+path);
 		
 				try {
-					BaseVo<Map> bvo=new BaseVo<Map>();
-					Map<String,String> map=new HashMap<String,String>();
-					map.put("loginName", accountName);
-					map.put("timeStamp", timestamp.toString());
-					map.put("token", token);
-					map.put("confName", cmd.getConfName());
-					map.put("hostKey", cmd.getPassword());
-					map.put("startTime", cmd.getStartTime().toString());
-					map.put("duration", cmd.getDuration().toString());
-					map.put("optionJbh", "0");
-					bvo.setBody(map);
-					String json=RestUtil.restWan(GsonUtil.toJson(bvo), path);
+					Client client = Client.create();
+					WebResource r = client.resource(path);
+					StartReservation sr = new StartReservation();
+					sr.setLoginName(accountName);
+					sr.setTimeStamp(timestamp.toString());
+					sr.setToken(token);
+					sr.setConfName(cmd.getConfName());
+					sr.setHostKey(cmd.getPassword());
+					sr.setStartTime(new Date(cmd.getStartTime()));
+					sr.setDuration(cmd.getDuration());
+					sr.setOptionJbh(0);
+					ClientResponse clientResponse = r.post(ClientResponse.class, sr);
+					String result = clientResponse.getEntity(String.class);
+					String json = strDecode(result);
 		
 					if(LOGGER.isDebugEnabled())
 						LOGGER.error("startVideoConf,json="+json);
@@ -1143,6 +1255,87 @@ public class VideoConfServiceImpl implements VideoConfService {
 		}
 		
 		return response;
+	}
+
+	@Override
+	public Set<Long> listOrdersWithUnassignAccount(
+			ListUsersWithoutVideoConfPrivilegeCommand cmd) {
+
+		Set<Long> orders = vcProvider.listOrdersWithUnassignAccount(cmd.getEnterpriseId());
+		return orders;
+	}
+
+	@Override
+	public UnassignAccountResponse listUnassignAccountsByOrder(
+			ListUnassignAccountsByOrderCommand cmd) {
+		UnassignAccountResponse response = new UnassignAccountResponse();
+		
+		int count = vcProvider.countOrderAccounts(cmd.getOrderId(), null);
+		int unassignAccount = vcProvider.countOrderAccounts(cmd.getOrderId(), (byte) 0);
+		response.setAccountsCount(count);
+		response.setUnassignAccountsCount(unassignAccount);
+		
+		List<Long> accountIds = vcProvider.listUnassignAccountIds(cmd.getOrderId());
+		response.setAccountIds(accountIds);
+		
+		if(accountIds != null && accountIds.size() > 0) {
+			ConfAccounts account = vcProvider.findVideoconfAccountById(accountIds.get(0));
+			if(account != null) {
+				response.setExpiredDate(account.getExpiredDate());
+				ConfAccountCategories category = vcProvider.findAccountCategoriesById(account.getAccountCategoryId());
+				if(category != null)
+					response.setConfType(category.getConfType());
+			}
+				
+		}
+		
+		return response;
+	}
+
+	@Override
+	public void createAccountOwner(CreateAccountOwnerCommand cmd) {
+		List<Long> accountIds = cmd.getAccountIds();
+		List<Long> userIds = cmd.getUserIds();
+		if(userIds.size() > accountIds.size()) {
+			LOGGER.error("user count is cannot larger than account count");
+		}
+		accountIds = accountIds.subList(0, userIds.size()-1);
+		
+		accountIds.stream().map(accountId -> {
+			
+		if(userIds.size() > 0) {
+			ConfAccounts account = vcProvider.findVideoconfAccountById(accountId);
+			if(account == null)
+				LOGGER.error("account is not exist!");
+	
+			Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+
+			account.setOwnerId(userIds.get(0));
+			account.setUpdateTime(now);
+			account.setOwnTime(now);
+			vcProvider.updateConfAccounts(account);
+			userIds.remove(0);
+			
+			ConfAccountHistories history = new ConfAccountHistories();
+			history.setEnterpriseId(account.getEnterpriseId());
+			history.setExpiredDate(account.getExpiredDate());
+			history.setStatus(account.getStatus());
+			history.setAccountCategoryId(account.getAccountCategoryId());
+			history.setAccountType(account.getAccountType());
+			history.setOwnerId(account.getOwnerId());
+			history.setOwnTime(now);
+			history.setCreatorUid(account.getCreatorUid());
+			history.setCreateTime(account.getCreateTime());
+			history.setOperatorUid(UserContext.current().getUser().getId());
+			history.setOperationType("assign account");
+			history.setOperateTime(now);
+			history.setProcessDetails("");
+			vcProvider.createConfAccountHistories(history);
+		}
+		
+		return null;
+		});
+		
 	}
 
 }
