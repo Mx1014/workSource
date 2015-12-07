@@ -99,7 +99,7 @@ public class AddressAdminController extends ControllerBase {
      */
     @RequestMapping(value="importParkAddressData", method = RequestMethod.POST)
     @RestReturn(value=String.class)
-    public RestResponse importParkAddressData(@Valid ImportAddressCommand cmd, @RequestParam(value = "attachment_file_") MultipartFile[] files) {
+    public RestResponse importParkAddressData(@Valid ImportAddressCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
         
     	addressService.importParkAddressData(cmd, files);
         RestResponse response = new RestResponse();
@@ -115,7 +115,7 @@ public class AddressAdminController extends ControllerBase {
      */
     @RequestMapping(value="importAddressData", method = RequestMethod.POST)
     @RestReturn(value=String.class)
-    public RestResponse importAddressData(@RequestParam(value = "attachment_file_") MultipartFile[] files) {
+    public RestResponse importAddressData(@RequestParam(value = "attachment") MultipartFile[] files) {
 //        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 //        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
