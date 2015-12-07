@@ -49,11 +49,17 @@ import com.everhomes.search.EnterpriseSearcher;
 import com.everhomes.search.GroupQueryResult;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.EncryptionUtils;
+import com.everhomes.user.IdentifierClaimStatus;
+import com.everhomes.user.IdentifierType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserCurrentEntityType;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserServiceErrorCode;
+import com.everhomes.user.UserStatus;
 import com.everhomes.user.admin.ImportDataResponse;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -109,6 +115,9 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     
     @Autowired
     private OrganizationService organizationService;
+    
+    @Autowired
+    private UserProvider userProvider;
     
     @Override
     public List<Enterprise> listEnterpriseByCommunityId(ListingLocator locator, Long communityId, Integer status, int pageSize) {
@@ -741,9 +750,45 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         	enterCon.setRole(RoleConstants.ResourceUser);
         	this.enterpriseContactProvider.updateContact(enterCon);
         }
+        
+        UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(cmd.getEntryValue());
+		if(identifier == null) {
+			//帮他在左邻注册一个账号
+			identifier = this.dbProvider.execute((TransactionStatus status) -> {
+				User newuser = new User();
+				newuser.setStatus(UserStatus.ACTIVE.getCode());
+				newuser.setNamespaceId(cmd.getNamespaceId());
+				newuser.setAccountName(cmd.getContactName());
+				newuser.setNickName(cmd.getContactName());
+				String salt=EncryptionUtils.createRandomSalt();
+				newuser.setSalt(salt);
+				try {
+					newuser.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s","8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",salt)));
+				} catch (Exception e) {
+					LOGGER.error("encode password failed");
+					throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Unable to create password hash");
+
+				}
+
+				userProvider.createUser(newuser);
+
+				UserIdentifier newIdentifier = new UserIdentifier();
+				newIdentifier.setOwnerUid(newuser.getId());
+				newIdentifier.setIdentifierType(IdentifierType.MOBILE.getCode());
+				newIdentifier.setIdentifierToken(cmd.getEntryValue());
+				newIdentifier.setNamespaceId(cmd.getNamespaceId());
+
+				newIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
+				userProvider.createIdentifier(newIdentifier);
+
+				return newIdentifier;
+			});
+		}
+		
 		EnterpriseContactEntry entry = this.enterpriseContactProvider.getEnterpriseContactEntryByPhone(cmd.getEnterpriseId(), cmd.getEntryValue());
 		if(entry == null) {
 			EnterpriseContact ec = new EnterpriseContact();
+			ec.setUserId(identifier.getOwnerUid());
     		ec.setCreatorUid(userId);
     		ec.setEnterpriseId(cmd.getEnterpriseId());
     		if(cmd.getContactName() != null) 
@@ -759,6 +804,9 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     		conentry.setEntryValue(cmd.getEntryValue());
     		conentry.setContactId(contactId);
     		this.enterpriseContactProvider.createContactEntry(conentry);
+    		
+    		
+    		
 		} else {
 			EnterpriseContact enterpriseContact = this.enterpriseContactProvider.queryContactById(entry.getContactId());
 			enterpriseContact.setRole(RoleConstants.SystemAdmin);
