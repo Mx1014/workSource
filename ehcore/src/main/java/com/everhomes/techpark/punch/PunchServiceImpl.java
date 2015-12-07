@@ -1053,13 +1053,13 @@ public class PunchServiceImpl implements PunchService {
 		return null;
 	}
 	 
-	private Long convertTimeToGMTMillisecond(Time time) {
-		if (null != time) {
-			//从8点开始计算
-			return time.getTime()+MILLISECONDGMT;
-		}
-		return null;
-	}
+//	private Long convertTimeToGMTMillisecond(Time time) {
+//		if (null != time) {
+//			//从8点开始计算
+//			return time.getTime()+MILLISECONDGMT;
+//		}
+//		return null;
+//	}
 	
     private final Long MILLISECONDGMT=8*3600*1000L;
 	@Override
@@ -1608,19 +1608,19 @@ public class PunchServiceImpl implements PunchService {
 	private void processPunchStatisticsDTOTime(PunchStatisticsDTO dto,
 			PunchDayLog r) {
 		if(null!= r.getArriveTime())
-			dto.setArriveTime( convertTimeToGMTMillisecond(r.getArriveTime()));
+			dto.setArriveTime(   r.getArriveTime().getTime());
 
 		if(null!= r.getLeaveTime())
-			dto.setLeaveTime( convertTimeToGMTMillisecond(r.getLeaveTime()));
+			dto.setLeaveTime( r.getLeaveTime().getTime());
 
 		if(null!= r.getWorkTime())
-			dto.setWorkTime( convertTimeToGMTMillisecond(r.getWorkTime()));
+			dto.setWorkTime(  r.getWorkTime().getTime());
 
 		if(null!= r.getNoonLeaveTime())
-			dto.setNoonLeaveTime( convertTimeToGMTMillisecond(r.getNoonLeaveTime()));
+			dto.setNoonLeaveTime(  r.getNoonLeaveTime().getTime());
 
 		if(null!= r.getAfternoonArriveTime())
-			dto.setAfternoonArriveTime( convertTimeToGMTMillisecond(r.getAfternoonArriveTime()));
+			dto.setAfternoonArriveTime(  r.getAfternoonArriveTime().getTime());
 		if(null!= r.getPunchDate())
 			dto.setPunchDate(r.getPunchDate().getTime());
 		dto.setPunchTimesPerDay(r.getPunchTimesPerDay());
