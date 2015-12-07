@@ -810,6 +810,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 		} else {
 			EnterpriseContact enterpriseContact = this.enterpriseContactProvider.queryContactById(entry.getContactId());
 			enterpriseContact.setRole(RoleConstants.SystemAdmin);
+			enterpriseContact.setUserId(identifier.getOwnerUid());
 			this.enterpriseContactProvider.updateContact(enterpriseContact);
 		}
 	}
