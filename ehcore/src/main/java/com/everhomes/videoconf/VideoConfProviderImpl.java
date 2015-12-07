@@ -24,6 +24,7 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhConfAccountCategoriesDao;
+import com.everhomes.server.schema.tables.daos.EhConfAccountHistoriesDao;
 import com.everhomes.server.schema.tables.daos.EhConfAccountsDao;
 import com.everhomes.server.schema.tables.daos.EhConfConferencesDao;
 import com.everhomes.server.schema.tables.daos.EhConfInvoicesDao;
@@ -34,6 +35,7 @@ import com.everhomes.server.schema.tables.daos.EhWarningContactsDao;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhConfAccountCategories;
+import com.everhomes.server.schema.tables.pojos.EhConfAccountHistories;
 import com.everhomes.server.schema.tables.pojos.EhConfAccounts;
 import com.everhomes.server.schema.tables.pojos.EhConfConferences;
 import com.everhomes.server.schema.tables.pojos.EhConfEnterprises;
@@ -745,6 +747,17 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 	public ConfConferences findConfConferencesByConfId(Integer confId) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void createConfAccountHistories(ConfAccountHistories history) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+
+        long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhConfAccountHistories.class));
+        history.setId(id);
+
+        EhConfAccountHistoriesDao dao = new EhConfAccountHistoriesDao(context.configuration());
+        dao.insert(history);
 	}
 
 

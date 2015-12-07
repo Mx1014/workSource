@@ -808,32 +808,43 @@ public class VideoConfServiceImpl implements VideoConfService {
 //
 //		return null;
 //	}
-//
-//	@Override
-//	public ListEnterpriseVideoConfAccountResponse listVideoConfAccountByEnterpriseId(
-//			ListEnterpriseVideoConfAccountCommand cmd) {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
-//
-//	@Override
-//	public void assignVideoConfAccount(
-//			AssignVideoConfAccountCommand cmd) {
-//		ConfAccountHistories account = new ConfAccountHistories();
-//		account.setEnterpriseId(cmd.getEnterpriseId());
-//		account.setAccountId(cmd.getAccountId());
-//		account.setUserId(cmd.getUserId());
-//		account.setContactId(cmd.getContactId());
-//		
-//		if(cmd.getId() != null) {
-//			account.setId(cmd.getId());
-//			vcProvider.updateEnterpriseVideoconfAccount(account);
-//		} else {
-//			vcProvider.createEnterpriseVideoconfAccount(account);
-//		}
-//		
-//	}
-//
+
+	@Override
+	public ListEnterpriseVideoConfAccountResponse listVideoConfAccountByEnterpriseId(
+			ListEnterpriseVideoConfAccountCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void assignVideoConfAccount(
+			AssignVideoConfAccountCommand cmd) {
+		
+		
+		ConfAccounts account = vcProvider.findVideoconfAccountById(cmd.getAccountId());
+		account.setOwnerId(cmd.getUserId());
+		account.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		account.setOwnTime(account.getUpdateTime());
+		vcProvider.updateConfAccounts(account);
+
+		ConfAccountHistories history = new ConfAccountHistories();
+		history.setEnterpriseId(account.getEnterpriseId());
+		history.setExpiredDate(account.getExpiredDate());
+		history.setStatus(account.getStatus());
+		history.setAccountCategoryId(account.getAccountCategoryId());
+		history.setAccountType(account.getAccountType());
+		history.setOwnerId(account.getOwnerId());
+		history.setOwnTime(account.getOwnTime());
+		history.setCreatorUid(account.getCreatorUid());
+		history.setCreateTime(account.getCreateTime());
+		history.setOperatorUid(UserContext.current().getUser().getId());
+		history.setOperationType("assign account");
+		history.setOperateTime(account.getUpdateTime());
+		history.setProcessDetails("");
+		vcProvider.createConfAccountHistories(history);
+		
+	}
+
 //	@Override
 //	public String applyVideoConfAccount(ApplyVideoConfAccountCommand cmd) {
 //		// TODO Auto-generated method stub
@@ -973,7 +984,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 						response.setStartConfUrl(startUrl);
 						
 						ConfConferences conf = new ConfConferences();
-						conf.setConfId((Integer) data.get("id"));
+						conf.setConfId((Integer) data.get("meetingNo"));
 						conf.setSubject((String) data.get("meetingName"));
 						conf.setStartTime(new Timestamp(cmd.getStartTime()));
 						conf.setExpectDuration((Integer) data.get("duration"));
@@ -1020,8 +1031,10 @@ public class VideoConfServiceImpl implements VideoConfService {
 				ConfAccounts account = vcProvider.findAccountByUserId(user.getOwnerUid());
 				if(account != null) {
 					ConfConferences conf = vcProvider.findConfConferencesById(account.getAssignedConfId());
-					if(conf != null)
+					if(conf != null) {
 						response.setJoinUrl(conf.getJoinUrl());
+						response.setCondId(conf.getConfId());
+					}
 				}
 			}
 		}
@@ -1029,8 +1042,10 @@ public class VideoConfServiceImpl implements VideoConfService {
 		else if(cmd.getConfId().length() < 11) {
 			Integer confId = Integer.valueOf(cmd.getConfId()); 
 			ConfConferences conf = vcProvider.findConfConferencesByConfId(confId);
-			if(conf != null)
+			if(conf != null) {
 				response.setJoinUrl(conf.getJoinUrl());
+				response.setCondId(conf.getConfId());
+			}
 		}
 		
 		else {

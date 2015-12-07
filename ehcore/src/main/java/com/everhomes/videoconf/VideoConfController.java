@@ -728,39 +728,39 @@ public class VideoConfController  extends ControllerBase{
 //		response.setErrorDescription("OK");
 //		return response;
 //	}
-//	
-//	/**
-//	 * <b>URL: /conf/listVideoConfAccountByEnterpriseId</b>
-//	 * 企业管理自己的账号
-//	 * @return
-//	 */
-//	@RequestMapping("listVideoConfAccountByEnterpriseId")
-//	@RestReturn(value = ListEnterpriseVideoConfAccountResponse.class)
-//	public RestResponse listVideoConfAccountByEnterpriseId(ListEnterpriseVideoConfAccountCommand cmd) {
-//
-//		ListEnterpriseVideoConfAccountResponse accounts = videoConfService.listVideoConfAccountByEnterpriseId(cmd);
-//		RestResponse response = new RestResponse(accounts);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-//	
-//	/**
-//	 * <b>URL: /conf/assignVideoConfAccount</b>
-//	 * 企业分配账号或更换账号的使用用户
-//	 * @return
-//	 */
-//	@RequestMapping("assignVideoConfAccount")
-//	@RestReturn(value = String.class)
-//	public RestResponse assignVideoConfAccount(AssignVideoConfAccountCommand cmd) {
-//
-//		videoConfService.assignVideoConfAccount(cmd);
-//		RestResponse response = new RestResponse();
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-//	
+	
+	/**
+	 * <b>URL: /conf/listVideoConfAccountByEnterpriseId</b>
+	 * 企业管理自己的账号
+	 * @return
+	 */
+	@RequestMapping("listVideoConfAccountByEnterpriseId")
+	@RestReturn(value = ListEnterpriseVideoConfAccountResponse.class)
+	public RestResponse listVideoConfAccountByEnterpriseId(ListEnterpriseVideoConfAccountCommand cmd) {
+
+		ListEnterpriseVideoConfAccountResponse accounts = videoConfService.listVideoConfAccountByEnterpriseId(cmd);
+		RestResponse response = new RestResponse(accounts);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /conf/assignVideoConfAccount</b>
+	 * 企业更换账号的使用用户
+	 * @return
+	 */
+	@RequestMapping("assignVideoConfAccount")
+	@RestReturn(value = String.class)
+	public RestResponse assignVideoConfAccount(AssignVideoConfAccountCommand cmd) {
+
+		videoConfService.assignVideoConfAccount(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 //	/**
 //	 * <b>URL: /conf/applyVideoConfAccount</b>
 //	 * 企业申请免费试用账号
