@@ -441,7 +441,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
             EnterpriseDTO dto = null;
             for(EnterpriseContactEntry entry : entryList) {
             	EnterpriseContact ec = this.enterpriseContactProvider.getContactById(entry.getContactId());
-            	if(ec.getStatus() != GroupMemberStatus.INACTIVE.getCode()) {
+            	if(ec.getStatus() != GroupMemberStatus.INACTIVE.getCode() && ec.getUserId() == userId) {
             		enterprise = this.enterpriseProvider.findEnterpriseById(entry.getEnterpriseId());
                     
                     this.enterpriseProvider.populateEnterpriseAttachments(enterprise);
