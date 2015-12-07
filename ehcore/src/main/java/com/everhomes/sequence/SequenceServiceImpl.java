@@ -12,7 +12,10 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
+
+import com.everhomes.schema.tables.pojos.EhAclPrivileges;
 import com.everhomes.schema.tables.pojos.EhAclRoleAssignments;
+import com.everhomes.schema.tables.pojos.EhAclRoles;
 import com.everhomes.schema.tables.pojos.EhAcls;
 import com.everhomes.schema.tables.pojos.EhContentShardMap;
 import com.everhomes.schema.tables.pojos.EhServerShardMap;
@@ -94,10 +97,8 @@ import com.everhomes.server.schema.tables.pojos.EhVersionUrls;
 import com.everhomes.server.schema.tables.pojos.EhVersionedContent;
 import com.everhomes.server.schema.tables.pojos.EhYellowPageAttachments;
 import com.everhomes.server.schema.tables.pojos.EhYellowPages;
-import com.everhomes.sharding.ShardIterator;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserServiceAddress;
 
 @Component
 public class SequenceServiceImpl implements SequenceService {
@@ -117,6 +118,16 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(EhAcls.class, EhAcls.class, com.everhomes.schema.Tables.EH_ACLS.getName(), (dbContext) -> { 
             return dbContext.select(com.everhomes.schema.Tables.EH_ACLS.ID.max())
                 .from(com.everhomes.schema.Tables.EH_ACLS).fetchOne().value1(); 
+        });
+
+        syncTableSequence(EhAcls.class, EhAclPrivileges.class, com.everhomes.schema.Tables.EH_ACL_PRIVILEGES.getName(), (dbContext) -> { 
+            return dbContext.select(com.everhomes.schema.Tables.EH_ACL_PRIVILEGES.ID.max())
+                .from(com.everhomes.schema.Tables.EH_ACL_PRIVILEGES).fetchOne().value1(); 
+        });
+
+        syncTableSequence(EhAcls.class, EhAclRoles.class, com.everhomes.schema.Tables.EH_ACL_ROLES.getName(), (dbContext) -> { 
+            return dbContext.select(com.everhomes.schema.Tables.EH_ACL_ROLES.ID.max())
+                .from(com.everhomes.schema.Tables.EH_ACL_ROLES).fetchOne().value1(); 
         });
 
         syncTableSequence(EhAcls.class, EhAclRoleAssignments.class, com.everhomes.schema.Tables.EH_ACL_ROLE_ASSIGNMENTS.getName(), (dbContext) -> { 

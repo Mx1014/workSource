@@ -9,6 +9,8 @@ import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
 import org.jooq.Record;
+import org.jooq.Result;
+import org.jooq.ResultQuery;
 import org.jooq.SelectJoinStep;
 import org.jooq.impl.DefaultRecordMapper;
 import org.slf4j.Logger;
@@ -402,5 +404,19 @@ public class RegionProviderImpl implements RegionProvider {
 				);
 
 		return result;
+	}
+	
+	@Override
+	public Region findRegionByPath(String path){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+		SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_REGIONS);
+		Condition condition = Tables.EH_REGIONS.PATH.like("%" +path);
+		selectStep.where(condition);
+		Result<Record> r = selectStep.fetch();
+		if(r.size() == 0){
+			return new Region();
+		}
+		return ConvertHelper.convert(r.get(0), Region.class);
 	}
 }
