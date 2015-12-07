@@ -751,7 +751,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         	this.enterpriseContactProvider.updateContact(enterCon);
         }
         
-        UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(cmd.getEntryValue());
+        UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(cmd.getNamespaceId(),cmd.getEntryValue());
 		if(identifier == null) {
 			//帮他在左邻注册一个账号
 			identifier = this.dbProvider.execute((TransactionStatus status) -> {
