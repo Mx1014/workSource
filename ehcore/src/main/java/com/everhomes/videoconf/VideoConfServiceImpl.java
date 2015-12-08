@@ -1011,6 +1011,11 @@ public class VideoConfServiceImpl implements VideoConfService {
 	@Override
 	public StartVideoConfResponse startVideoConf(StartVideoConfCommand cmd) {
 		StartVideoConfResponse response = new StartVideoConfResponse();
+		
+		response.setConfHostId("8EubJ8t9RkWXneUEpY6m7Q");
+		response.setToken("n7m8_1qELfzv0uzc-niIQ3DjevC9LtHeQjl0FpC1eYM.BgIgWE1JL2I5aDNRNW5sd1ZNZ3p0Z3dtWTM4TE5WVHlYZ2lANWVhMTA5MDJhZTYwNDAwMjEwYzg2MmVhZTA3ZjY3OTFkNjJkZTYyYjUxM2U5YTFhZWRlMDBiODg1MTFkNjIzYgA");
+		response.setConfHostName("luzuo");
+		response.setMaxCount(6);
 		String path = "http://api.confcloud.cn/openapi/confReservation";
 		
 		ConfAccounts account = vcProvider.findVideoconfAccountById(cmd.getAccountId());
