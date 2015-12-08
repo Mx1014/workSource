@@ -1,5 +1,6 @@
 package com.everhomes.videoconf;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -13,14 +14,9 @@ import org.jooq.tools.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.activity.Activity;
-import com.everhomes.address.CommunityAdminStatus;
+import com.everhomes.address.AddressAdminStatus;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
-import com.everhomes.enterprise.Enterprise;
-import com.everhomes.enterprise.EnterpriseCommunityMapStatus;
-import com.everhomes.enterprise.EnterpriseCommunityMapType;
-import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
@@ -34,9 +30,8 @@ import com.everhomes.server.schema.tables.daos.EhConfInvoicesDao;
 import com.everhomes.server.schema.tables.daos.EhConfOrdersDao;
 import com.everhomes.server.schema.tables.daos.EhConfReservationsDao;
 import com.everhomes.server.schema.tables.daos.EhConfSourceAccountsDao;
-import com.everhomes.server.schema.tables.daos.EhGroupsDao;
 import com.everhomes.server.schema.tables.daos.EhWarningContactsDao;
-import com.everhomes.server.schema.tables.pojos.EhActivities;
+import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhConfAccountCategories;
 import com.everhomes.server.schema.tables.pojos.EhConfAccountHistories;
@@ -48,18 +43,14 @@ import com.everhomes.server.schema.tables.pojos.EhConfOrderAccountMap;
 import com.everhomes.server.schema.tables.pojos.EhConfOrders;
 import com.everhomes.server.schema.tables.pojos.EhConfReservations;
 import com.everhomes.server.schema.tables.pojos.EhConfSourceAccounts;
-import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.pojos.EhWarningContacts;
-import com.everhomes.server.schema.tables.records.EhActivitiesRecord;
 import com.everhomes.server.schema.tables.records.EhConfAccountsRecord;
 import com.everhomes.server.schema.tables.records.EhConfEnterprisesRecord;
 import com.everhomes.server.schema.tables.records.EhConfOrderAccountMapRecord;
 import com.everhomes.server.schema.tables.records.EhConfOrdersRecord;
 import com.everhomes.server.schema.tables.records.EhConfReservationsRecord;
-import com.everhomes.server.schema.tables.records.EhEnterpriseCommunityMapRecord;
 import com.everhomes.sharding.ShardIterator;
-import com.everhomes.techpark.park.ApplyParkingCardStatus;
-import com.everhomes.user.UserContext;
+import com.everhomes.techpark.onlinePay.PayStatus;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
@@ -883,21 +874,36 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 	}
 
 	@Override
-	public List<ConfOrders> findOrdersByAccountId(Long accountId,
+	public List<OrderBriefDTO> findOrdersByAccountId(Long accountId,
 			CrossShardListingLocator locator, Integer pageSize) {
-		List<ConfOrders> orders = new ArrayList<ConfOrders>();
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhConfOrderAccountMap.class));
- 
-        SelectQuery<EhConfOrderAccountMapRecord> query = context.selectQuery(Tables.EH_CONF_ORDER_ACCOUNT_MAP);
-       
-        query.addConditions(Tables.EH_CONF_ORDER_ACCOUNT_MAP.CONF_ACCOUNT_ID.eq(accountId));
-        query.fetch().map((r) -> {
-        	ConfOrders order = findOredrById(r.getOrderId());
-        	if(order != null)
-        		orders.add(order);
-             return null;
+		List<OrderBriefDTO> orders = new ArrayList<OrderBriefDTO>();
+		
+		if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhConfReservations.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+            SelectQuery<EhConfAccountsRecord> query = context.selectQuery(Tables.EH_CONF_ACCOUNTS);
+            query.addConditions(Tables.EH_CONF_ACCOUNTS.OWNER_ID.ne(0L));
+            if(locator.getAnchor() != null)
+            	query.addConditions(Tables.EH_CONF_ACCOUNTS.ID.gt(locator.getAnchor()));
+            
+            query.addConditions(Tables.EH_CONF_ACCOUNTS.ENTERPRISE_ID.eq(accountId));
+           
+            query.addLimit(pageSize - orders.size());
+            
+            query.fetch().map((r) -> {
+            	/////////////
+                return null;
+            });
+
+            if (orders.size() >= pageSize) {
+                locator.setAnchor(orders.get(orders.size() - 1).getId());
+                return AfterAction.done;
+            }
+            return AfterAction.next;
         });
-        
        
         return orders;
 	}
@@ -907,6 +913,35 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhConfOrders.class, id));
 		EhConfOrdersDao dao = new EhConfOrdersDao(context.configuration());
         return ConvertHelper.convert(dao.findById(id), ConfOrders.class);
+	}
+
+	@Override
+	public CountAccountOrdersAndMonths countAccountOrderInfo(Long accountId) {
+		CountAccountOrdersAndMonths counts = new CountAccountOrdersAndMonths();
+		final Integer[] count = new Integer[1];
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhConfOrderAccountMap.class), null, 
+                (DSLContext context, Object reducingContext)-> {
+                    count[0] = context.selectCount().from(Tables.EH_CONF_ORDER_ACCOUNT_MAP)
+                            .where(Tables.EH_CONF_ORDER_ACCOUNT_MAP.CONF_ACCOUNT_ID.equal(accountId))
+                            .fetchOneInto(Integer.class);
+                    return true;
+                });
+        
+        counts.setOrders(count[0]);
+        
+        final BigDecimal[] months = new BigDecimal[1];
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhConfOrders.class), null, 
+                (DSLContext context, Object reducingContext)-> {
+                	months[0] = context.select(Tables.EH_CONF_ORDERS.PERIOD.sum()).from(Tables.EH_CONF_ORDERS)
+                            .leftOuterJoin(Tables.EH_CONF_ORDER_ACCOUNT_MAP)
+                            .on(Tables.EH_CONF_ORDERS.ID.eq(Tables.EH_CONF_ORDER_ACCOUNT_MAP.ORDER_ID))
+                            .where(Tables.EH_CONF_ORDER_ACCOUNT_MAP.CONF_ACCOUNT_ID.equal(accountId))
+                                    .and(Tables.EH_CONF_ORDERS.STATUS.equal(PayStatus.PAID.getCode()))
+                    .fetchOneInto(BigDecimal.class);
+                    return true;
+                });
+        counts.setMonths(months[0]);
+        return counts;
 	}
 
 

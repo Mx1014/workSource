@@ -621,10 +621,10 @@ public class VideoConfController  extends ControllerBase{
 	 * @return
 	 */
 	@RequestMapping("listOrderByAccount")
-	@RestReturn(value = ListVideoConfAccountOrderResponse.class)
+	@RestReturn(value = ListOrderByAccountResponse.class)
 	public RestResponse listOrderByAccount(ListOrderByAccountCommand cmd) {
 
-		ListVideoConfAccountOrderResponse orderRecord = videoConfService.listOrderByAccount(cmd);
+		ListOrderByAccountResponse orderRecord = videoConfService.listOrderByAccount(cmd);
 		RestResponse response = new RestResponse(orderRecord);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -633,7 +633,7 @@ public class VideoConfController  extends ControllerBase{
 	
 	/**
 	 * <b>URL: /conf/listConfOrder</b>
-	 * 查看订单记录
+	 * 查看企业订单记录
 	 * @return
 	 */
 	@RequestMapping("listConfOrder")
