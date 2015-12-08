@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  *  <li>quantity: 购买数量</li>
  *  <li>period: 包月时间</li>
  *  <li>amount: 金额</li>
+ *  <li>accountCategoryId: 购买视频会议账号的类型</li>
  *  <li>invoiceFlag: 是否需要发票 0-dont need 1-need</li>
  *  <li>makeOutFlag: 是否已开票 0-uninvoice 1-invoiced</li>
  *  <li>buyChannel: 购买渠道 0-offline 1-online</li>
@@ -44,6 +45,8 @@ public class ConfOrderDTO {
 	private Integer period;
 	
 	private BigDecimal amount;
+	
+	private Long accountCategoryId;
 	
 	private Byte invoiceFlag;
 	
@@ -127,6 +130,14 @@ public class ConfOrderDTO {
 
 	public void setAmount(BigDecimal amount) {
 		this.amount = amount;
+	}
+
+	public Long getAccountCategoryId() {
+		return accountCategoryId;
+	}
+
+	public void setAccountCategoryId(Long accountCategoryId) {
+		this.accountCategoryId = accountCategoryId;
 	}
 
 	public Byte getInvoiceFlag() {

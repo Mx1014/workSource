@@ -519,6 +519,22 @@ public class VideoConfController  extends ControllerBase{
 		return response;
 	}
 	
+	/**
+	 * <b>URL: /conf/updateContactor</b>
+	 * 锁定or解锁企业所有视频会议账号
+	 * @return
+	 */
+	@RequestMapping("updateContactor")
+	@RestReturn(value = String.class)
+	public RestResponse updateContactor(UpdateContactorCommand cmd) {
+
+		videoConfService.updateContactor(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 //	/**
 //	 * <b>URL: /conf/listVideoConfAccount</b>
 //	 * 查看企业视频会议账号
@@ -600,8 +616,24 @@ public class VideoConfController  extends ControllerBase{
 //	}
 //	
 	/**
+	 * <b>URL: /conf/listOrderByAccount</b>
+	 * 查看账号订单记录
+	 * @return
+	 */
+	@RequestMapping("listOrderByAccount")
+	@RestReturn(value = ListOrderByAccountResponse.class)
+	public RestResponse listOrderByAccount(ListOrderByAccountCommand cmd) {
+
+		ListOrderByAccountResponse orderRecord = videoConfService.listOrderByAccount(cmd);
+		RestResponse response = new RestResponse(orderRecord);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
 	 * <b>URL: /conf/listConfOrder</b>
-	 * 查看订单记录
+	 * 查看企业订单记录
 	 * @return
 	 */
 	@RequestMapping("listConfOrder")

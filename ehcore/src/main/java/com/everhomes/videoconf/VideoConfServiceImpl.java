@@ -512,38 +512,6 @@ public class VideoConfServiceImpl implements VideoConfService {
 		return response;
 	}
 
-//	@Override
-//	public ListEnterpriseWithoutVideoConfAccountResponse listEnterpriseWithoutVideoConfAccount(
-//			ListEnterpriseWithoutVideoConfAccountCommand cmd) {
-//
-//		List<Long> communityEnterpriseId = enterpriseProvider.queryCommunityEnterprise(cmd.getCommunityId());
-//		List<Long> videoconfEnterpriseId = vcProvider.ListVideoconfEnterprise(cmd.getCommunityId());
-//		
-//		communityEnterpriseId.removeAll(videoconfEnterpriseId);
-//		
-//		List<EnterpriseWithoutVideoConfAccountDTO> enterprises = communityEnterpriseId.stream().map(r -> {
-//			
-//			EnterpriseWithoutVideoConfAccountDTO e = new EnterpriseWithoutVideoConfAccountDTO();
-//			e.setEnterpriseId(r);
-//			Enterprise enterprise = enterpriseProvider.findEnterpriseById(r);
-//			e.setEnterpriseName(enterprise.getName());
-//			EnterpriseContact contact = enterpriseContactProvider.queryEnterpriseContactor(r);
-//			if(contact != null) {
-//				e.setEnterpriseContactor(contact.getName());
-//				 List<EnterpriseContactEntry> entry = enterpriseContactProvider.queryContactEntryByContactId(contact);
-//				 if(entry != null && entry.size() > 0) {
-//					 e.setMobile(entry.get(0).getEntryValue());
-//				 }
-//			}
-//			
-//			return e;
-//		}).collect(Collectors.toList());
-//		
-//		ListEnterpriseWithoutVideoConfAccountResponse response = new ListEnterpriseWithoutVideoConfAccountResponse();
-//		response.setEnterprises(enterprises);
-//		
-//		return response;
-//	}
 
 	@Override
 	public void setEnterpriseLockStatus(EnterpriseLockStatusCommand cmd) {
@@ -694,6 +662,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		dto.setQuantity(order.getQuantity());
 		dto.setPeriod(order.getPeriod());
 		dto.setAmount(order.getAmount());
+		dto.setAccountCategoryId(order.getAccountCategoryId());
 		dto.setInvoiceFlag(order.getInvoiceReqFlag());
 		dto.setMakeOutFlag(order.getInvoiceIssueFlag());
 		dto.setBuyChannel(order.getOnlineFlag());
@@ -1042,6 +1011,11 @@ public class VideoConfServiceImpl implements VideoConfService {
 	@Override
 	public StartVideoConfResponse startVideoConf(StartVideoConfCommand cmd) {
 		StartVideoConfResponse response = new StartVideoConfResponse();
+		
+		response.setConfHostId("8EubJ8t9RkWXneUEpY6m7Q");
+		response.setToken("n7m8_1qELfzv0uzc-niIQ3DjevC9LtHeQjl0FpC1eYM.BgIgWE1JL2I5aDNRNW5sd1ZNZ3p0Z3dtWTM4TE5WVHlYZ2lANWVhMTA5MDJhZTYwNDAwMjEwYzg2MmVhZTA3ZjY3OTFkNjJkZTYyYjUxM2U5YTFhZWRlMDBiODg1MTFkNjIzYgA");
+		response.setConfHostName("luzuo");
+		response.setMaxCount(6);
 		String path = "http://api.confcloud.cn/openapi/confReservation";
 		
 		ConfAccounts account = vcProvider.findVideoconfAccountById(cmd.getAccountId());
@@ -1092,8 +1066,11 @@ public class VideoConfServiceImpl implements VideoConfService {
 //							"optionJbh":true,"meetingNo":"1884458151"}
 
 						
-						String startUrl = (String) data.get("startUrl");
-						response.setStartConfUrl(startUrl);
+//						response.setStartConfUrl(startUrl);
+						response.setConfHostId("8EubJ8t9RkWXneUEpY6m7Q");
+						response.setToken("n7m8_1qELfzv0uzc-niIQ3DjevC9LtHeQjl0FpC1eYM.BgIgWE1JL2I5aDNRNW5sd1ZNZ3p0Z3dtWTM4TE5WVHlYZ2lANWVhMTA5MDJhZTYwNDAwMjEwYzg2MmVhZTA3ZjY3OTFkNjJkZTYyYjUxM2U5YTFhZWRlMDBiODg1MTFkNjIzYgA");
+						response.setConfHostName("luzuo");
+						response.setMaxCount(6);
 						
 						ConfConferences conf = new ConfConferences();
 						conf.setConfId((Integer) data.get("meetingNo"));
@@ -1336,6 +1313,43 @@ public class VideoConfServiceImpl implements VideoConfService {
 		return null;
 		});
 		
+	}
+
+	@Override
+	public void updateContactor(UpdateContactorCommand cmd) {
+		ConfEnterprises enterprise = vcProvider.findByEnterpriseId(cmd.getEnterpriseId());
+		enterprise.setContactName(cmd.getContactorName());
+		enterprise.setContact(cmd.getContactor());
+		
+		vcProvider.updateVideoconfEnterprise(enterprise);
+		
+	}
+
+	@Override
+	public ListOrderByAccountResponse listOrderByAccount(
+			ListOrderByAccountCommand cmd) {
+		CountAccountOrdersAndMonths counts = vcProvider.countAccountOrderInfo(cmd.getAccountId());
+		CrossShardListingLocator locator=new CrossShardListingLocator();
+	    locator.setAnchor(cmd.getPageAnchor());
+	    int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+	    
+	    ListOrderByAccountResponse response = new ListOrderByAccountResponse();
+		response.setCounts(counts);
+		List<OrderBriefDTO> orders = vcProvider.findOrdersByAccountId(cmd.getAccountId(), locator, pageSize+1);
+		if(orders != null && orders.size() > 0) {
+			
+			Long nextPageAnchor = null;
+			if(orders != null && orders.size() > pageSize) {
+				orders.remove(orders.size() - 1);
+				nextPageAnchor = orders.get(orders.size() -1).getId();
+			}
+			
+			response.setNextPageAnchor(nextPageAnchor);
+			
+			response.setOrderBriefs(orders);
+		}
+		
+		return response;
 	}
 
 }

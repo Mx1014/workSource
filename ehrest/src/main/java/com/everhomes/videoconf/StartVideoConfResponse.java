@@ -5,20 +5,53 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *  <li>startConfUrl: 开始会议地址</li>
+ *  <li>confHostId: 会议主持人id</li>
+ *  <li>confHostName: 会议主持人name</li>
+ *  <li>maxCount: 最大与会人数</li>
+ *  <li>token: token</li>
  * </ul>
  *
  */
 public class StartVideoConfResponse {
 
-	private String startConfUrl;
+	private String confHostId;
 	
-	public String getStartConfUrl() {
-		return startConfUrl;
+	private String confHostName;
+	
+	private Integer maxCount;
+	
+	private String token;
+	
+	public String getConfHostId() {
+		return confHostId;
 	}
 
-	public void setStartConfUrl(String startConfUrl) {
-		this.startConfUrl = startConfUrl;
+	public void setConfHostId(String confHostId) {
+		this.confHostId = confHostId;
+	}
+
+	public String getConfHostName() {
+		return confHostName;
+	}
+
+	public void setConfHostName(String confHostName) {
+		this.confHostName = confHostName;
+	}
+
+	public Integer getMaxCount() {
+		return maxCount;
+	}
+
+	public void setMaxCount(Integer maxCount) {
+		this.maxCount = maxCount;
+	}
+
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
 	}
 
 	@Override
