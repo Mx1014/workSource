@@ -31,6 +31,7 @@ import com.everhomes.server.schema.tables.daos.EhConfAccountsDao;
 import com.everhomes.server.schema.tables.daos.EhConfConferencesDao;
 import com.everhomes.server.schema.tables.daos.EhConfEnterprisesDao;
 import com.everhomes.server.schema.tables.daos.EhConfInvoicesDao;
+import com.everhomes.server.schema.tables.daos.EhConfOrdersDao;
 import com.everhomes.server.schema.tables.daos.EhConfReservationsDao;
 import com.everhomes.server.schema.tables.daos.EhConfSourceAccountsDao;
 import com.everhomes.server.schema.tables.daos.EhGroupsDao;
@@ -828,7 +829,7 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 
 	@Override
 	public List<Long> listUnassignAccountIds(Long orderId) {
-		final List<Long> accountIds = new ArrayList<Long>();
+		List<Long> accountIds = new ArrayList<Long>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhConfOrderAccountMap.class));
  
         SelectQuery<EhConfOrderAccountMapRecord> query = context.selectQuery(Tables.EH_CONF_ORDER_ACCOUNT_MAP);
@@ -879,6 +880,33 @@ public class VideoConfProviderImpl implements VideoConfProvider {
         });
 
         return accounts;
+	}
+
+	@Override
+	public List<ConfOrders> findOrdersByAccountId(Long accountId,
+			CrossShardListingLocator locator, Integer pageSize) {
+		List<ConfOrders> orders = new ArrayList<ConfOrders>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhConfOrderAccountMap.class));
+ 
+        SelectQuery<EhConfOrderAccountMapRecord> query = context.selectQuery(Tables.EH_CONF_ORDER_ACCOUNT_MAP);
+       
+        query.addConditions(Tables.EH_CONF_ORDER_ACCOUNT_MAP.CONF_ACCOUNT_ID.eq(accountId));
+        query.fetch().map((r) -> {
+        	ConfOrders order = findOredrById(r.getOrderId());
+        	if(order != null)
+        		orders.add(order);
+             return null;
+        });
+        
+       
+        return orders;
+	}
+
+	@Override
+	public ConfOrders findOredrById(Long id) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhConfOrders.class, id));
+		EhConfOrdersDao dao = new EhConfOrdersDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), ConfOrders.class);
 	}
 
 

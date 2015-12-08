@@ -512,38 +512,6 @@ public class VideoConfServiceImpl implements VideoConfService {
 		return response;
 	}
 
-//	@Override
-//	public ListEnterpriseWithoutVideoConfAccountResponse listEnterpriseWithoutVideoConfAccount(
-//			ListEnterpriseWithoutVideoConfAccountCommand cmd) {
-//
-//		List<Long> communityEnterpriseId = enterpriseProvider.queryCommunityEnterprise(cmd.getCommunityId());
-//		List<Long> videoconfEnterpriseId = vcProvider.ListVideoconfEnterprise(cmd.getCommunityId());
-//		
-//		communityEnterpriseId.removeAll(videoconfEnterpriseId);
-//		
-//		List<EnterpriseWithoutVideoConfAccountDTO> enterprises = communityEnterpriseId.stream().map(r -> {
-//			
-//			EnterpriseWithoutVideoConfAccountDTO e = new EnterpriseWithoutVideoConfAccountDTO();
-//			e.setEnterpriseId(r);
-//			Enterprise enterprise = enterpriseProvider.findEnterpriseById(r);
-//			e.setEnterpriseName(enterprise.getName());
-//			EnterpriseContact contact = enterpriseContactProvider.queryEnterpriseContactor(r);
-//			if(contact != null) {
-//				e.setEnterpriseContactor(contact.getName());
-//				 List<EnterpriseContactEntry> entry = enterpriseContactProvider.queryContactEntryByContactId(contact);
-//				 if(entry != null && entry.size() > 0) {
-//					 e.setMobile(entry.get(0).getEntryValue());
-//				 }
-//			}
-//			
-//			return e;
-//		}).collect(Collectors.toList());
-//		
-//		ListEnterpriseWithoutVideoConfAccountResponse response = new ListEnterpriseWithoutVideoConfAccountResponse();
-//		response.setEnterprises(enterprises);
-//		
-//		return response;
-//	}
 
 	@Override
 	public void setEnterpriseLockStatus(EnterpriseLockStatusCommand cmd) {
@@ -694,6 +662,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		dto.setQuantity(order.getQuantity());
 		dto.setPeriod(order.getPeriod());
 		dto.setAmount(order.getAmount());
+		dto.setAccountCategoryId(order.getAccountCategoryId());
 		dto.setInvoiceFlag(order.getInvoiceReqFlag());
 		dto.setMakeOutFlag(order.getInvoiceIssueFlag());
 		dto.setBuyChannel(order.getOnlineFlag());
@@ -1336,6 +1305,48 @@ public class VideoConfServiceImpl implements VideoConfService {
 		return null;
 		});
 		
+	}
+
+	@Override
+	public void updateContactor(UpdateContactorCommand cmd) {
+		ConfEnterprises enterprise = vcProvider.findByEnterpriseId(cmd.getEnterpriseId());
+		enterprise.setContactName(cmd.getContactorName());
+		enterprise.setContact(cmd.getContactor());
+		
+		vcProvider.updateVideoconfEnterprise(enterprise);
+		
+	}
+
+	@Override
+	public ListVideoConfAccountOrderResponse listOrderByAccount(
+			ListOrderByAccountCommand cmd) {
+		CrossShardListingLocator locator=new CrossShardListingLocator();
+	    locator.setAnchor(cmd.getPageAnchor());
+	    int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+	    
+		ListVideoConfAccountOrderResponse response = new ListVideoConfAccountOrderResponse();
+		
+		List<ConfOrders> orders = vcProvider.findOrdersByAccountId(cmd.getAccountId(), locator, pageSize+1);
+		if(orders != null && orders.size() > 0) {
+			
+			Long nextPageAnchor = null;
+			if(orders != null && orders.size() > pageSize) {
+				orders.remove(orders.size() - 1);
+				nextPageAnchor = orders.get(orders.size() -1).getId();
+			}
+			
+			response.setNextPageAnchor(nextPageAnchor);
+			
+			List<ConfOrderDTO> confOrders = orders.stream().map(r -> {
+				
+				ConfOrderDTO dto = toConfOrderDTO(r);
+				return dto;
+			}).collect(Collectors.toList());
+			
+			response.setConfOrders(confOrders);
+		}
+		
+		return response;
 	}
 
 }
