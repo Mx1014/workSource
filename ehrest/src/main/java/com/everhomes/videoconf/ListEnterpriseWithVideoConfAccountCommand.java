@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>keyword: 搜索关键字</li>
  * <li>status: 状态 0-formally use 1-on trial 2-overdue</li>
- * <li>communityId: 园区id</li>
+ * <li>namespaceId: 命名空间</li>
  * <li>pageAnchor: 本页开始的锚点</li>
  * <li>pageSize: 每页的数量</li>
  * </ul>
@@ -18,7 +18,7 @@ public class ListEnterpriseWithVideoConfAccountCommand {
 	
 	private Byte status;
 	
-	private Long communityId;
+	private Integer namespaceId;
 	
 	private Long pageAnchor;
 	
@@ -40,12 +40,12 @@ public class ListEnterpriseWithVideoConfAccountCommand {
 		this.status = status;
 	}
 
-	public Long getCommunityId() {
-		return communityId;
+	public Integer getNamespaceId() {
+		return namespaceId;
 	}
 
-	public void setCommunityId(Long communityId) {
-		this.communityId = communityId;
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	public Long getPageAnchor() {

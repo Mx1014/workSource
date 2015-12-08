@@ -2,7 +2,9 @@ package com.everhomes.videoconf;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -27,6 +29,7 @@ import com.everhomes.server.schema.tables.daos.EhConfAccountCategoriesDao;
 import com.everhomes.server.schema.tables.daos.EhConfAccountHistoriesDao;
 import com.everhomes.server.schema.tables.daos.EhConfAccountsDao;
 import com.everhomes.server.schema.tables.daos.EhConfConferencesDao;
+import com.everhomes.server.schema.tables.daos.EhConfEnterprisesDao;
 import com.everhomes.server.schema.tables.daos.EhConfInvoicesDao;
 import com.everhomes.server.schema.tables.daos.EhConfReservationsDao;
 import com.everhomes.server.schema.tables.daos.EhConfSourceAccountsDao;
@@ -40,6 +43,7 @@ import com.everhomes.server.schema.tables.pojos.EhConfAccounts;
 import com.everhomes.server.schema.tables.pojos.EhConfConferences;
 import com.everhomes.server.schema.tables.pojos.EhConfEnterprises;
 import com.everhomes.server.schema.tables.pojos.EhConfInvoices;
+import com.everhomes.server.schema.tables.pojos.EhConfOrderAccountMap;
 import com.everhomes.server.schema.tables.pojos.EhConfOrders;
 import com.everhomes.server.schema.tables.pojos.EhConfReservations;
 import com.everhomes.server.schema.tables.pojos.EhConfSourceAccounts;
@@ -47,10 +51,13 @@ import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.pojos.EhWarningContacts;
 import com.everhomes.server.schema.tables.records.EhActivitiesRecord;
 import com.everhomes.server.schema.tables.records.EhConfAccountsRecord;
+import com.everhomes.server.schema.tables.records.EhConfEnterprisesRecord;
+import com.everhomes.server.schema.tables.records.EhConfOrderAccountMapRecord;
 import com.everhomes.server.schema.tables.records.EhConfOrdersRecord;
 import com.everhomes.server.schema.tables.records.EhConfReservationsRecord;
 import com.everhomes.server.schema.tables.records.EhEnterpriseCommunityMapRecord;
 import com.everhomes.sharding.ShardIterator;
+import com.everhomes.techpark.park.ApplyParkingCardStatus;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -239,51 +246,48 @@ public class VideoConfProviderImpl implements VideoConfProvider {
         dao.insert(invoice);		
 	}
 
-//	@Override
-//	public List<ConfEnterprises> listEnterpriseWithVideoConfAccount(Long communityId, Byte status, CrossShardListingLocator locator, Integer pageSize) {
-//
-//		List<ConfEnterprises> enterprises=new ArrayList<ConfEnterprises>();
-//		if (locator.getShardIterator() == null) {
-//            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhVideoconfEnterprise.class);
-//            ShardIterator shardIterator = new ShardIterator(accessSpec);
-//            locator.setShardIterator(shardIterator);
-//        }
-//        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
-//            SelectQuery<EhVideoconfEnterpriseRecord> query = context.selectQuery(Tables.EH_VIDEOCONF_ENTERPRISE);
-//            
-//            if(locator.getAnchor() != null)
-//            	query.addConditions(Tables.EH_VIDEOCONF_ENTERPRISE.ID.gt(locator.getAnchor()));
-//            
-//            if(communityId != null)
-//            	query.addConditions(Tables.EH_VIDEOCONF_ENTERPRISE.COMMUNITY_ID.eq(communityId));
-//            if(status != null)
-//            	query.addConditions(Tables.EH_VIDEOCONF_ENTERPRISE.STATUS.eq(status));
-//            
-//            query.addLimit(pageSize - enterprises.size());
-//            
-//            query.fetch().map((r) -> {
-//            	
-//            	enterprises.add(ConvertHelper.convert(r, ConfEnterprises.class));
-//                return null;
-//            });
-//
-//            if (enterprises.size() >= pageSize) {
-//                locator.setAnchor(enterprises.get(enterprises.size() - 1).getId());
-//                return AfterAction.done;
-//            }
-//            return AfterAction.next;
-//        });
-//
-//        if (enterprises.size() > 0) {
-//            locator.setAnchor(enterprises.get(enterprises.size() - 1).getId());
-//        }
-//       if(enterprises.size()>=pageSize){
-//            return enterprises.subList(0, enterprises.size()-1);
-//        }
-//		
-//		return enterprises;
-//	}
-//
+	@Override
+	public List<ConfEnterprises> listEnterpriseWithVideoConfAccount(Integer namespaceId, Byte status, CrossShardListingLocator locator, Integer pageSize) {
+
+		List<ConfEnterprises> enterprises=new ArrayList<ConfEnterprises>();
+		if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhConfEnterprises.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+            SelectQuery<EhConfEnterprisesRecord> query = context.selectQuery(Tables.EH_CONF_ENTERPRISES);
+            
+            if(locator.getAnchor() != null)
+            	query.addConditions(Tables.EH_CONF_ENTERPRISES.ID.gt(locator.getAnchor()));
+            
+            if(namespaceId != null)
+            	query.addConditions(Tables.EH_CONF_ENTERPRISES.NAMESPACE_ID.eq(namespaceId));
+            if(status != null)
+            	query.addConditions(Tables.EH_CONF_ENTERPRISES.STATUS.eq(status));
+            
+            query.addLimit(pageSize - enterprises.size());
+            
+            query.fetch().map((r) -> {
+            	
+            	enterprises.add(ConvertHelper.convert(r, ConfEnterprises.class));
+                return null;
+            });
+
+            if (enterprises.size() >= pageSize) {
+                locator.setAnchor(enterprises.get(enterprises.size() - 1).getId());
+                return AfterAction.done;
+            }
+            return AfterAction.next;
+        });
+
+        if (enterprises.size() > 0) {
+            locator.setAnchor(enterprises.get(enterprises.size() - 1).getId());
+        }
+		
+		return enterprises;
+	}
+
 //	@Override
 //	public void createVideoconfEnterprise(ConfEnterprises enterprise) {
 //		 DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, enterprise.getCommunityId()));
@@ -300,15 +304,15 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 //        dao.insert(enterprise);
 //		
 //	}
-//
-//	@Override
-//	public void updateVideoconfEnterprise(ConfEnterprises enterprise) {
-//		 DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, enterprise.getCommunityId()));
-//		enterprise.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-//		EhVideoconfEnterpriseDao dao = new EhVideoconfEnterpriseDao(context.configuration());
-//        dao.update(enterprise);
-//		
-//	}
+
+	@Override
+	public void updateVideoconfEnterprise(ConfEnterprises enterprise) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class));
+		enterprise.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		EhConfEnterprisesDao dao = new EhConfEnterprisesDao(context.configuration());
+        dao.update(enterprise);
+		
+	}
 
 	@Override
 	public ConfEnterprises findByEnterpriseId(Long enterpriseId) {
@@ -410,48 +414,48 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 //        EhEnterpriseVideoconfAccountDao dao = new EhEnterpriseVideoconfAccountDao(context.configuration());
 //        dao.insert(account);
 //	}
-//
-//	@Override
-//	public List<ConfOrderAccountMap> findOrderAccountByOrderId(Long orderId,
-//			CrossShardListingLocator locator, Integer pageSize) {
-//		List<ConfOrderAccountMap> accounts=new ArrayList<ConfOrderAccountMap>();
-//		if (locator.getShardIterator() == null) {
-//            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhOrderAccount.class);
-//            ShardIterator shardIterator = new ShardIterator(accessSpec);
-//            locator.setShardIterator(shardIterator);
-//        }
-//        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
-//            SelectQuery<EhOrderAccountRecord> query = context.selectQuery(Tables.EH_ORDER_ACCOUNT);
-//            
-//            if(locator.getAnchor() != null)
-//            	query.addConditions(Tables.EH_ORDER_ACCOUNT.ID.gt(locator.getAnchor()));
-//            
-//            if(orderId != null)
-//            	query.addConditions(Tables.EH_ORDER_ACCOUNT.ORDER_ID.eq(orderId));
-//            
-//            
-//            query.addLimit(pageSize - accounts.size());
-//            
-//            query.fetch().map((r) -> {
-//            	
-//            	accounts.add(ConvertHelper.convert(r, ConfOrderAccountMap.class));
-//                return null;
-//            });
-//
-//            if (accounts.size() >= pageSize) {
-//                locator.setAnchor(accounts.get(accounts.size() - 1).getId());
-//                return AfterAction.done;
-//            }
-//            return AfterAction.next;
-//        });
-//
-//        if (accounts.size() > 0) {
-//            locator.setAnchor(accounts.get(accounts.size() - 1).getId());
-//        }
-//
-//        return accounts;
-//	}
-//
+
+	@Override
+	public List<ConfOrderAccountMap> findOrderAccountByOrderId(Long orderId,
+			CrossShardListingLocator locator, Integer pageSize) {
+		List<ConfOrderAccountMap> accounts=new ArrayList<ConfOrderAccountMap>();
+		if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhConfOrderAccountMap.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+            SelectQuery<EhConfOrderAccountMapRecord> query = context.selectQuery(Tables.EH_CONF_ORDER_ACCOUNT_MAP);
+            
+            if(locator.getAnchor() != null)
+            	query.addConditions(Tables.EH_CONF_ORDER_ACCOUNT_MAP.ID.gt(locator.getAnchor()));
+            
+            if(orderId != null)
+            	query.addConditions(Tables.EH_CONF_ORDER_ACCOUNT_MAP.ORDER_ID.eq(orderId));
+            
+            query.addConditions(Tables.EH_CONF_ORDER_ACCOUNT_MAP.ASSIGED_FLAG.eq((byte)1));
+            query.addLimit(pageSize - accounts.size());
+            
+            query.fetch().map((r) -> {
+            	
+            	accounts.add(ConvertHelper.convert(r, ConfOrderAccountMap.class));
+                return null;
+            });
+
+            if (accounts.size() >= pageSize) {
+                locator.setAnchor(accounts.get(accounts.size() - 1).getId());
+                return AfterAction.done;
+            }
+            return AfterAction.next;
+        });
+
+        if (accounts.size() > 0) {
+            locator.setAnchor(accounts.get(accounts.size() - 1).getId());
+        }
+
+        return accounts;
+	}
+
 //	@Override
 //	public ConfAccountHistories findEnterpriseAccountByAccountId(
 //			Long accountId) {
@@ -745,8 +749,25 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 
 	@Override
 	public ConfConferences findConfConferencesByConfId(Integer confId) {
-		// TODO Auto-generated method stub
-		return null;
+
+		final ConfConferences[] result = new ConfConferences[1];
+		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhConfConferences.class), result, 
+				(DSLContext context, Object reducingContext) -> {
+					List<ConfConferences> list = context.select().from(Tables.EH_CONF_CONFERENCES)
+							.where(Tables.EH_CONF_CONFERENCES.CONF_ID.eq(confId))
+							.fetch().map((r) -> {
+								return ConvertHelper.convert(r, ConfConferences.class);
+							});
+
+					if(list != null && !list.isEmpty()){
+						result[0] = list.get(0);
+						return false;
+					}
+
+					return true;
+				});
+
+		return result[0];
 	}
 
 	@Override
@@ -758,6 +779,106 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 
         EhConfAccountHistoriesDao dao = new EhConfAccountHistoriesDao(context.configuration());
         dao.insert(history);
+	}
+
+	@Override
+	public Set<Long> listOrdersWithUnassignAccount(Long enterpriseId) {
+
+		final Set<Long> orders = new HashSet<Long>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhConfOrderAccountMap.class));
+ 
+        SelectQuery<EhConfOrderAccountMapRecord> query = context.selectQuery(Tables.EH_CONF_ORDER_ACCOUNT_MAP);
+       
+        query.addConditions(Tables.EH_CONF_ORDER_ACCOUNT_MAP.ENTERPRISE_ID.eq(enterpriseId));
+        query.addConditions(Tables.EH_CONF_ORDER_ACCOUNT_MAP.ASSIGED_FLAG.eq((byte)0));
+        query.fetch().map((r) -> {
+        	orders.add(r.getOrderId());
+             return null;
+        });
+        
+       
+        return orders;
+	}
+
+	@Override
+	public int countOrderAccounts(Long orderId, Byte assignFlag) {
+		final Integer[] count = new Integer[1];
+		if(assignFlag == null) {
+			this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
+                (DSLContext context, Object reducingContext)-> {
+                    count[0] = context.selectCount().from(Tables.EH_CONF_ORDER_ACCOUNT_MAP)
+                            .where(Tables.EH_CONF_ORDER_ACCOUNT_MAP.ORDER_ID.eq(orderId))
+                    .fetchOneInto(Integer.class);
+                    return true;
+                });
+		}
+		else {
+			this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
+	                (DSLContext context, Object reducingContext)-> {
+	                    count[0] = context.selectCount().from(Tables.EH_CONF_ORDER_ACCOUNT_MAP)
+	                            .where(Tables.EH_CONF_ORDER_ACCOUNT_MAP.ORDER_ID.eq(orderId))
+	                            .and(Tables.EH_CONF_ORDER_ACCOUNT_MAP.ASSIGED_FLAG.eq(assignFlag))
+	                    .fetchOneInto(Integer.class);
+	                    return true;
+	                });
+		}
+		
+		return count[0];
+	}
+
+	@Override
+	public List<Long> listUnassignAccountIds(Long orderId) {
+		final List<Long> accountIds = new ArrayList<Long>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhConfOrderAccountMap.class));
+ 
+        SelectQuery<EhConfOrderAccountMapRecord> query = context.selectQuery(Tables.EH_CONF_ORDER_ACCOUNT_MAP);
+       
+        query.addConditions(Tables.EH_CONF_ORDER_ACCOUNT_MAP.ORDER_ID.eq(orderId));
+        query.addConditions(Tables.EH_CONF_ORDER_ACCOUNT_MAP.ASSIGED_FLAG.eq((byte)0));
+        query.fetch().map((r) -> {
+        	accountIds.add(r.getConfAccountId());
+             return null;
+        });
+        
+       
+        return accountIds;
+	}
+
+	@Override
+	public List<ConfAccounts> listConfAccountsByEnterpriseId(Long enterpriseId,
+			CrossShardListingLocator locator, Integer pageSize) {
+		List<ConfAccounts> accounts = new ArrayList<ConfAccounts>();
+		
+		if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhConfReservations.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+            SelectQuery<EhConfAccountsRecord> query = context.selectQuery(Tables.EH_CONF_ACCOUNTS);
+            query.addConditions(Tables.EH_CONF_ACCOUNTS.OWNER_ID.ne(0L));
+            if(locator.getAnchor() != null)
+            	query.addConditions(Tables.EH_CONF_ACCOUNTS.ID.gt(locator.getAnchor()));
+            
+            if(enterpriseId != null)
+            	query.addConditions(Tables.EH_CONF_ACCOUNTS.ENTERPRISE_ID.eq(enterpriseId));
+           
+            query.addLimit(pageSize - accounts.size());
+            
+            query.fetch().map((r) -> {
+            	
+            	accounts.add(ConvertHelper.convert(r, ConfAccounts.class));
+                return null;
+            });
+
+            if (accounts.size() >= pageSize) {
+                locator.setAnchor(accounts.get(accounts.size() - 1).getId());
+                return AfterAction.done;
+            }
+            return AfterAction.next;
+        });
+
+        return accounts;
 	}
 
 

@@ -12,13 +12,9 @@ import com.everhomes.util.StringHelper;
  *  <li>enterpriseDisplayName: 企业简称</li>
  *  <li>enterpriseContactor: 企业联系人</li>
  *  <li>mobile: 手机号</li>
- *  <li>status: 状态 </li>
+ *  <li>status: 状态 0: inactive, 1: active, 2: locked </li>
  *  <li>totalAccount: 账号总数</li>
  *  <li>validAccount: 有效账号数</li>
- *  <li>validDate: 有效期</li>
- *  <li>accountType: 账号类型 0-single 1-multiple</li>
- *  <li>confType: 会议类型 0-25方仅视频 1-25方支持电话 2-100方仅视频 3-100方支持电话</li>
- *  <li>lockFlag: 是否被锁定  0-unlock 1-locked</li>
  *  <li>buyChannel: 购买渠道 0-offline 1-online</li>
  * </ul>
  *
@@ -38,19 +34,11 @@ public class EnterpriseConfAccountDTO {
 	
 	private String mobile;
 	
-	private String status;
+	private Byte status;
 	
 	private Integer totalAccount;
 	
 	private Integer validAccount;
-	
-	private Timestamp validDate;
-	
-	private Byte accountType;
-	
-	private Byte confType;
-	
-	private Byte lockFlag;
 	
 	private Byte buyChannel;
 
@@ -102,11 +90,11 @@ public class EnterpriseConfAccountDTO {
 		this.mobile = mobile;
 	}
 
-	public String getStatus() {
+	public Byte getStatus() {
 		return status;
 	}
 
-	public void setStatus(String status) {
+	public void setStatus(Byte status) {
 		this.status = status;
 	}
 
@@ -124,38 +112,6 @@ public class EnterpriseConfAccountDTO {
 
 	public void setValidAccount(Integer validAccount) {
 		this.validAccount = validAccount;
-	}
-
-	public Timestamp getValidDate() {
-		return validDate;
-	}
-
-	public void setValidDate(Timestamp validDate) {
-		this.validDate = validDate;
-	}
-
-	public Byte getAccountType() {
-		return accountType;
-	}
-
-	public void setAccountType(Byte accountType) {
-		this.accountType = accountType;
-	}
-
-	public Byte getConfType() {
-		return confType;
-	}
-
-	public void setConfType(Byte confType) {
-		this.confType = confType;
-	}
-
-	public Byte getLockFlag() {
-		return lockFlag;
-	}
-
-	public void setLockFlag(Byte lockFlag) {
-		this.lockFlag = lockFlag;
 	}
 
 	public Byte getBuyChannel() {
