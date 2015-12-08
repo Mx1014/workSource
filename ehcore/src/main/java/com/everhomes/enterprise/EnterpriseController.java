@@ -192,5 +192,18 @@ public class EnterpriseController extends ControllerBase {
       return res;
   }
    
+  /**
+   * <b>URL: /enterprise/findEnterpriseByAddress</b>
+   * <p>根据门牌查询企业</p>
+   * @return
+   */
+  @RequestMapping("findEnterpriseByAddress")
+  @RestReturn(value=EnterpriseDTO.class)
+   public RestResponse findEnterpriseByAddress(@Valid FindEnterpriseByAddressCommand cmd) {
+      RestResponse res = new RestResponse(this.enterpriseService.findEnterpriseByAddress(cmd.getAddressId()));
+      res.setErrorCode(ErrorCodes.SUCCESS);
+      res.setErrorDescription("OK");
+      return res;
+  }
    
 }

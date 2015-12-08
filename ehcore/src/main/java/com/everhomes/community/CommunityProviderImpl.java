@@ -908,6 +908,9 @@ public class CommunityProviderImpl implements CommunityProvider {
 	public List<CommunityUser> listUserCommunities(CommunityUser communityUser,int pageOffset,int pageSize) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class));
 		
+//		context.select().from(Tables.EH_USERS).
+		
+		
 		Condition cond = Tables.EH_USER_COMMUNITIES.COMMUNITY_ID.eq(communityUser.getCommunityId());
 		if(1 == communityUser.getIsAuth()){
 			cond = cond.and(Tables.EH_ENTERPRISE_CONTACTS.STATUS.eq(EnterpriseContactStatus.ACTIVE.getCode()));
@@ -925,6 +928,11 @@ public class CommunityProviderImpl implements CommunityProvider {
 		}
 		
 		List<CommunityUser> communityUsers = new ArrayList<CommunityUser>();
+		
+		
+		
+		
+		
 		
 		context.select().from(Tables.EH_USER_COMMUNITIES).leftOuterJoin(Tables.EH_ENTERPRISE_CONTACTS).
 						on(Tables.EH_USER_COMMUNITIES.OWNER_UID.eq(Tables.EH_ENTERPRISE_CONTACTS.USER_ID)).

@@ -257,15 +257,15 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
             }
         
         //query.addOrderBy(Tables.EH_ENTERPRISE_CONTACTS.CREATE_TIME.desc()); ERROR hear
-        query.addLimit(count - contacts.size());
+//        query.addLimit(count - contacts.size());
         query.fetch().map((r) -> {
         	 contacts.add(ConvertHelper.convert(r, EnterpriseCommunityMap.class));
              return null;
         });
         
-        if(contacts.size() >= count) {
-            locator.setAnchor(contacts.get(contacts.size() - 1).getId());
-        }
+//        if(contacts.size() >= count) {
+//            locator.setAnchor(contacts.get(contacts.size() - 1).getId());
+//        }
         
         return contacts;
     }

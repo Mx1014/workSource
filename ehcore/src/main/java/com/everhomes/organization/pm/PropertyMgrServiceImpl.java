@@ -1554,16 +1554,18 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		List<PropFamilyDTO> list = new ArrayList<PropFamilyDTO>();
 		User user  = UserContext.current().getUser();
 
-		this.checkOrganizationIdIsNull(cmd.getOrganizationId());
-		Organization organization = this.checkOrganization(cmd.getOrganizationId());
+		if(null == cmd.getCommunityId()){
+			Organization organization = this.checkOrganization(cmd.getOrganizationId());
 
-		OrganizationCommunity  orgCom = this.propertyMgrProvider.findPmCommunityByOrgId(cmd.getOrganizationId());
-		if(orgCom == null){
-			LOGGER.error("Unable to find the community by organizationId="+cmd.getOrganizationId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Unable to find the community by organizationId");
+			OrganizationCommunity  orgCom = this.propertyMgrProvider.findPmCommunityByOrgId(cmd.getOrganizationId());
+			if(orgCom == null){
+				LOGGER.error("Unable to find the community by organizationId="+cmd.getOrganizationId());
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"Unable to find the community by organizationId");
+			}
+			cmd.setCommunityId(orgCom.getCommunityId());
 		}
-		cmd.setCommunityId(orgCom.getCommunityId());
+		
 
 		//权限控制
 		Tuple<Integer,List<ApartmentDTO>> apts = addressService.listApartmentsByKeyword(cmd);

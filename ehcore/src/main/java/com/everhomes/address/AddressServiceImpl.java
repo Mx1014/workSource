@@ -434,11 +434,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         long startTime = System.currentTimeMillis();
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
                 (DSLContext context, Object reducingContext)-> {
-                    
-                    context.selectDistinct(Tables.EH_ADDRESSES.ID,Tables.EH_ADDRESSES.APARTMENT_NAME,Tables.EH_ADDRESSES.AREA_SIZE,Tables.EH_GROUPS.NAME)
-                        .from(Tables.EH_ADDRESSES).leftOuterJoin(Tables.EH_ENTERPRISE_COMMUNITY_MAP)
-                        .on(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(Tables.EH_ENTERPRISE_COMMUNITY_MAP.COMMUNITY_ID))
-                        .leftOuterJoin(Tables.EH_GROUPS).on(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_ID.eq(Tables.EH_GROUPS.ID))
+                    context.selectDistinct(Tables.EH_ADDRESSES.ID,Tables.EH_ADDRESSES.APARTMENT_NAME,Tables.EH_ADDRESSES.AREA_SIZE)
+                        .from(Tables.EH_ADDRESSES)
                         .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId())
                         .and(Tables.EH_ADDRESSES.BUILDING_NAME.equal(cmd.getBuildingName())
                                 .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.equal(cmd.getBuildingName()))))
@@ -449,7 +446,6 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                             apartment.setAddressId(r.getValue(Tables.EH_ADDRESSES.ID));
                             apartment.setApartmentName(r.getValue(Tables.EH_ADDRESSES.APARTMENT_NAME));
                             apartment.setAreaSize(r.getValue(Tables.EH_ADDRESSES.AREA_SIZE));
-                            apartment.setEnterpriseName(r.getValue(Tables.EH_GROUPS.NAME));
                             results.add(apartment);
                             return null;
                         });

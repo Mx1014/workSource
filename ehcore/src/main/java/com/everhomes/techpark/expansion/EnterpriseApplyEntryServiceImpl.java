@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import com.everhomes.community.Building;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -55,7 +57,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Autowired
 	private GroupProvider groupProvider;
 	
-	
+	@Autowired
+	private CommunityProvider communityProvider;
 
 	@Override
 	public ListEnterpriseDetailResponse listEnterpriseDetails(
@@ -190,6 +193,16 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			res.setNextPageAnchor(cmd.getPageAnchor() + 1);
 		}
 		
+		for (EnterpriseOpRequest enterpriseOpRequest : enterpriseOpRequests) {
+			if(ApplyEntrySourceType.BUILDING.equals(enterpriseOpRequest.getSourceType())){
+				Building building = communityProvider.findBuildingById(enterpriseOpRequest.getSourceId());
+				if(null != building)enterpriseOpRequest.setSourceName(building.getName());
+			}else if(ApplyEntrySourceType.FOR_RENT.equals(enterpriseOpRequest.getSourceType())){
+				LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(enterpriseOpRequest.getSourceId());
+				if(null != leasePromotion)enterpriseOpRequest.setSourceName(leasePromotion.getSubject());
+			}
+		}
+		
 		List<EnterpriseApplyEntryDTO> dtos = enterpriseOpRequests.stream().map((c) ->{
 			return ConvertHelper.convert(c, EnterpriseApplyEntryDTO.class);
 		}).collect(Collectors.toList());
@@ -266,6 +279,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		leasePromotion.setEnterTime(new Timestamp(cmd.getEnterTime()));
 		leasePromotion.setCreateUid(UserContext.current().getUser().getId());
 		leasePromotion.setStatus(LeasePromotionStatus.RENTING.getCode());
+		leasePromotion.setRentType(LeasePromotionType.ORDINARY.getCode());
 		leasePromotion = enterpriseApplyEntryProvider.createLeasePromotion(leasePromotion);
 		
 		List<BuildingForRentAttachmentDTO> attachmentDTOs= cmd.getAttachments();
