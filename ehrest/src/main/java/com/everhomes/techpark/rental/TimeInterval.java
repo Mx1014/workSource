@@ -7,6 +7,7 @@ public class TimeInterval {
 	private Double beginTime; 
 	private Double endTime;
 
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

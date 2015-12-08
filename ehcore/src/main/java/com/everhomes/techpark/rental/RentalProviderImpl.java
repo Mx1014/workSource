@@ -2,7 +2,9 @@ package com.everhomes.techpark.rental;
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.sql.Time;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -542,9 +544,12 @@ public class RentalProviderImpl implements RentalProvider {
 
 	}
 
+	SimpleDateFormat timeSF = new SimpleDateFormat("HH:mm:ss");
+	SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
+	SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	@Override
 	public Integer countRentalSiteBills(Long rentalSiteId, Long beginDate,
-			Long endDate) {
+			Long endDate,Time beginTime,Time endTime) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectOnConditionStep<Record1<Integer>> step = context
 				.selectCount()
@@ -563,6 +568,13 @@ public class RentalProviderImpl implements RentalProvider {
 			condition = condition
 					.and(Tables.EH_RENTAL_SITE_RULES.SITE_RENTAL_DATE.between(
 							new Date(beginDate), new Date(endDate)));
+		}
+		if (null != beginTime && null != endTime) {
+			//TODO: delete between two time in a day
+//			Timestamp beginTimestamp = Timestamp.valueOf(s)
+//			condition = condition
+//					.and(Tables.EH_RENTAL_SITE_RULES.SITE_RENTAL_DATE.between(
+//							new Date(beginDate), new Date(endDate)));
 		}
 		step.where(condition);
 		Integer result = step.fetchOne().value1().intValue();

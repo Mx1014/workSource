@@ -550,10 +550,14 @@ public class RentalServiceImpl implements RentalService {
 				* rentalRule.getPaymentRatio() / 100);
 		rentalBill.setReserveTime(Timestamp.valueOf(datetimeSF
 				.format(reserveTime)));
-		rentalBill.setPayStartTime(new Timestamp(cmd.getStartTime()
-				- rentalRule.getPayStartTime()));
-		rentalBill.setPayEndTime(new Timestamp(cmd.getStartTime()
-				- rentalRule.getPayEndTime()));
+		if(rentalRule.getPayStartTime()!=null){
+			rentalBill.setPayStartTime(new Timestamp(cmd.getStartTime()
+					- rentalRule.getPayStartTime()));
+		}
+		if(rentalRule.getPayEndTime()!=null){
+			rentalBill.setPayEndTime(new Timestamp(cmd.getStartTime()
+					- rentalRule.getPayEndTime()));
+		}
 		rentalBill.setPaidMoney(0.0);
 		//
 		if (rentalRule.getPaymentRatio() <100 && reserveTime.before(new java.util.Date(cmd.getStartTime()
@@ -821,8 +825,20 @@ public class RentalServiceImpl implements RentalService {
 
 	@Override
 	public void addRentalSiteSimpleRules(AddRentalSiteSimpleRulesCommand cmd) {
-		
+		Integer billCount = rentalProvider.countRentalSiteBills(
+				cmd.getRentalSiteId(), cmd.getBeginDate(), cmd.getEndDate(),null,null);
+		if (billCount > 0) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid price   parameter in the command");
+		}
+		Integer deleteCount = rentalProvider.deleteRentalSiteRules(
+				cmd.getRentalSiteId(), cmd.getBeginDate(), cmd.getEndDate());
+		LOGGER.debug("delete count = " + String.valueOf(deleteCount)
+				+ "  from rental site rules  ");
 		for(TimeInterval timeInterval:cmd.getTimeInterval()){
+			if(timeInterval.getBeginTime() == null || timeInterval.getEndTime()==null)
+				continue;
 			AddRentalSiteSingleSimpleRule signleCmd=ConvertHelper.convert(cmd, AddRentalSiteSingleSimpleRule.class );
 			signleCmd.setBeginTime(timeInterval.getBeginTime());
 			signleCmd.setEndTime(timeInterval.getEndTime());
@@ -834,17 +850,7 @@ public class RentalServiceImpl implements RentalService {
 	
 	public void addRentalSiteSingleSimpleRule(AddRentalSiteSingleSimpleRule cmd) {
 		Long userId = UserContext.current().getUser().getId();
-		Integer billCount = rentalProvider.countRentalSiteBills(
-				cmd.getRentalSiteId(), cmd.getBeginDate(), cmd.getEndDate());
-		if (billCount > 0) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid price   parameter in the command");
-		}
-		Integer deleteCount = rentalProvider.deleteRentalSiteRules(
-				cmd.getRentalSiteId(), cmd.getBeginDate(), cmd.getEndDate());
-		LOGGER.debug("delete count = " + String.valueOf(deleteCount)
-				+ "  from rental site rules  ");
+		
 		// if (null == cmd.getWeekendPrice() || null == cmd.getWorkdayPrice())
 		// throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 		// ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -1011,7 +1017,7 @@ public class RentalServiceImpl implements RentalService {
 	public void updateRentalSite(UpdateRentalSiteCommand cmd) {
 		// 已有未取消的预定，不能修改
 		Integer billCount = rentalProvider.countRentalSiteBills(
-				cmd.getRentalSiteId(), null, null);
+				cmd.getRentalSiteId(), null, null, null, null);
 		if (billCount > 0) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -1026,7 +1032,7 @@ public class RentalServiceImpl implements RentalService {
 	public void deleteRentalSite(DeleteRentalSiteCommand cmd) {
 		// 已有未取消的预定，不能删除
 		Integer billCount = rentalProvider.countRentalSiteBills(
-				cmd.getRentalSiteId(), null, null);
+				cmd.getRentalSiteId(), null, null, null, null);
 		if (billCount > 0) {
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
 					RentalServiceErrorCode.ERROR_HAVE_BILL,
@@ -1334,7 +1340,7 @@ public class RentalServiceImpl implements RentalService {
 			dayDto.setSiteRules(new ArrayList<RentalSiteRulesDTO>());
 			dayDto.setRentalDate(start.getTimeInMillis());
 			List<RentalSiteRule> rentalSiteRules = rentalProvider
-					.findRentalSiteRules(cmd.getSiteId(), dateSF.format(new java.util.Date(cmd.getRuleDate())),
+					.findRentalSiteRules(cmd.getSiteId(), dateSF.format(new java.util.Date(start.getTimeInMillis())),
 							beginTime, cmd.getRentalType()==null?RentalType.DAY.getCode():cmd.getRentalType(), DateLength.DAY.getCode());
 			// 查sitebills
 			if (null != rentalSiteRules && rentalSiteRules.size() > 0) {
