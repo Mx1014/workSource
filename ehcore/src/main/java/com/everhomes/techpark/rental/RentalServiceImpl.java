@@ -132,6 +132,9 @@ public class RentalServiceImpl implements RentalService {
 	public Long addRentalSite(AddRentalSiteCommand cmd) {
 		RentalSite rentalsite = ConvertHelper.convert(cmd, RentalSite.class);
 		rentalsite.setStatus(RentalSiteStatus.NORMAL.getCode());
+		rentalsite.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+				.getTime()));
+		rentalsite.setCreatorUid( UserContext.current().getUser().getId());
 		Long siteId = rentalProvider.createRentalSite(rentalsite);
 		if (null != cmd.getSiteItems()
 				&& !StringUtils.isEmpty(cmd.getSiteItems())) {
@@ -390,6 +393,7 @@ public class RentalServiceImpl implements RentalService {
 		for (RentalSite rentalSite : rentalSites) {
 			RentalSiteDTO rSiteDTO =ConvertHelper.convert(rentalSite, RentalSiteDTO.class);
 			rSiteDTO.setRentalSiteId(rentalSite.getId());
+			rSiteDTO.setCreateTime(rentalSite.getCreateTime().getTime());
 			rSiteDTO.setSiteItems(new ArrayList<SiteItemDTO>());
 			List<RentalSiteItem> items = rentalProvider
 					.findRentalSiteItems(rentalSite.getId());
@@ -1042,10 +1046,47 @@ public class RentalServiceImpl implements RentalService {
 							UserContext.current().getUser().getLocale(),
 							"HAS BILL IN YOUR DELETE STUFF"));
 		}
-		rentalProvider.updateRentalSiteStatus(cmd.getRentalSiteId(),
-				RentalSiteStatus.DELETED.getCode());
+		rentalProvider.deleteRentalSiteRules(cmd.getRentalSiteId(), null, null);
+		rentalProvider.deleteRentalBillById(cmd.getRentalSiteId());
 	}
+	@Override
+	public void disableRentalSite(DisableRentalSiteCommand cmd) {
+		// 已有未取消的预定，不能删除
+		Integer billCount = rentalProvider.countRentalSiteBills(
+				cmd.getRentalSiteId(), null, null, null, null);
+		if (billCount > 0) {
+			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+					RentalServiceErrorCode.ERROR_HAVE_BILL,
+					localeStringService.getLocalizedString(String
+							.valueOf(RentalServiceErrorCode.SCOPE), String
+							.valueOf(RentalServiceErrorCode.ERROR_HAVE_BILL),
+							UserContext.current().getUser().getLocale(),
+							"HAS BILL IN YOUR DELETE STUFF"));
+		}
+		rentalProvider.updateRentalSiteStatus(cmd.getRentalSiteId(),
+				RentalSiteStatus.DISABLE.getCode());
+	}
+	
 
+	@Override
+	public void enableRentalSite(EnableRentalSiteCommand cmd) {
+		// 已有未取消的预定，不能删除
+		Integer billCount = rentalProvider.countRentalSiteBills(
+				cmd.getRentalSiteId(), null, null, null, null);
+		if (billCount > 0) {
+			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+					RentalServiceErrorCode.ERROR_HAVE_BILL,
+					localeStringService.getLocalizedString(String
+							.valueOf(RentalServiceErrorCode.SCOPE), String
+							.valueOf(RentalServiceErrorCode.ERROR_HAVE_BILL),
+							UserContext.current().getUser().getLocale(),
+							"HAS BILL IN YOUR DELETE STUFF"));
+		}
+		rentalProvider.updateRentalSiteStatus(cmd.getRentalSiteId(),
+				RentalSiteStatus.NORMAL.getCode());
+	}
+	
+	
 	@Override
 	public void deleteRentalSiteItem(DeleteRentalSiteItemCommand cmd) {
 		Integer billCount = rentalProvider.countRentalSiteItemBills(cmd
@@ -1491,4 +1532,84 @@ public class RentalServiceImpl implements RentalService {
 		return dto;
 	}
 
+	@Override
+	public BatchCompleteBillCommandResponse batchIncompleteBill(BatchIncompleteBillCommand cmd) { 
+		BatchCompleteBillCommandResponse response = new BatchCompleteBillCommandResponse();
+		response.setBills(new ArrayList<RentalBillDTO>());
+		for (Long billId : cmd.getRentalBillIds()){
+			IncompleteBillCommand cmd2 = ConvertHelper.convert(cmd, IncompleteBillCommand.class);
+			cmd2.setRentalBillId(billId);
+			response.getBills().add(this.incompleteBill(cmd2));
+		}
+		return response;
+	}
+
+	@Override
+	public BatchCompleteBillCommandResponse batchCompleteBill(BatchCompleteBillCommand cmd) {
+		BatchCompleteBillCommandResponse response = new BatchCompleteBillCommandResponse();
+		response.setBills(new ArrayList<RentalBillDTO>());
+		for (Long billId : cmd.getRentalBillIds()){
+			CompleteBillCommand cmd2 = ConvertHelper.convert(cmd, CompleteBillCommand.class);
+			cmd2.setRentalBillId(billId);
+			response.getBills().add(this.completeBill(cmd2));
+		}
+		return response;
+	}
+	
+	@Override
+	public ListRentalBillCountCommandResponse listRentalBillCount(ListRentalBillCountCommand cmd) {
+		ListRentalBillCountCommandResponse response = new ListRentalBillCountCommandResponse(); 
+		response.setRentalBillCounts(new ArrayList<RentalBillCountDTO>());
+		if(cmd.getRentalSiteId() == null ){
+			List<RentalSite>  sites = this.rentalProvider.findRentalSites(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSiteType(),null , null, null);
+			for(RentalSite site : sites){
+				response.getRentalBillCounts().add(processRentalBillCountDTO(site,cmd.getBeginDate(),cmd.getEndDate()));
+			}
+		}
+		else{
+			RentalSite site = this.rentalProvider.getRentalSiteById(cmd.getRentalSiteId());
+			response.getRentalBillCounts().add(processRentalBillCountDTO(site,cmd.getBeginDate(),cmd.getEndDate()));
+			
+		}
+		
+		return response;
+	}
+	
+	private RentalBillCountDTO processRentalBillCountDTO(RentalSite site,
+			Long beginDate, Long endDate) {
+		RentalBillCountDTO dto = new RentalBillCountDTO();
+		List<RentalBill> bills = this.rentalProvider.listRentalBills(site.getOwnerId(), site.getOwnerType(), site.getSiteType(), 
+				site.getId(),beginDate,endDate);
+		dto.setSiteName(site.getSiteName());
+		processRentalBillCountDTO(dto, bills);
+		return dto;
+	} 
+
+	private void processRentalBillCountDTO(RentalBillCountDTO dto, List<RentalBill> bills ){
+		Integer sumCount =0;                    
+		Integer completeCount =0;               
+		Integer cancelCount=0;                      
+		Integer overTimeCount=0;                 
+		Integer successCount=0;                  
+		for(RentalBill bill : bills){
+			sumCount++;
+			if(bill.getStatus().equals(SiteBillStatus.COMPLETE.getCode())){
+				completeCount++;
+			}
+			else 	if(bill.getStatus().equals(SiteBillStatus.FAIL.getCode())){
+				cancelCount ++;
+			}
+			else 	if(bill.getStatus().equals(SiteBillStatus.OVERTIME.getCode())){
+				overTimeCount ++ ;
+			}
+			else 	if(bill.getStatus().equals(SiteBillStatus.SUCCESS.getCode())){
+				successCount ++;
+			} 
+		}
+		dto.setSumCount(sumCount);
+		dto.setCancelCount(cancelCount);
+		dto.setCompleteCount(completeCount);
+		dto.setOverTimeCount(overTimeCount);
+		dto.setSuccessCount(successCount);
+	}
 }

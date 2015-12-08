@@ -36,6 +36,8 @@ public class RentalSiteDTO {
 	private String contactPhonenum;
 	private String introduction;
 	private String notice; 
+	private java.lang.Byte     status;
+	private Long createTime;
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> siteItems;
 	@ItemType(RentalSiteRulesDTO.class)
@@ -174,6 +176,26 @@ public class RentalSiteDTO {
 
 	public void setNotice(String notice) {
 		this.notice = notice;
+	}
+
+
+	public Long getCreateTime() {
+		return createTime;
+	}
+
+
+	public void setCreateTime(Long createTime) {
+		this.createTime = createTime;
+	}
+
+
+	public java.lang.Byte getStatus() {
+		return status;
+	}
+
+
+	public void setStatus(java.lang.Byte status) {
+		this.status = status;
 	}
  
 }

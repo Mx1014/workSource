@@ -1,5 +1,7 @@
 package com.everhomes.techpark.rental;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -107,7 +109,7 @@ public class RentalController extends ControllerBase {
 	/**
 	 * <b>URL: /techpark/rental/updateRentalSite</b>
 	 * <p>
-	 * 添加具体场所
+	 * 更新具体场所
 	 * </p>
 	 */
 	@RequestMapping("updateRentalSite")
@@ -136,6 +138,39 @@ public class RentalController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+
+	/**
+	 * <b>URL: /techpark/rental/deleteRentalSite</b>
+	 * <p>
+	 * 删除具体场所
+	 * </p>
+	 */
+	@RequestMapping("disableRentalSite")
+	@RestReturn(value = String.class)
+	public RestResponse disableRentalSite(@Valid DisableRentalSiteCommand cmd) {
+		rentalService.disableRentalSite(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	/**
+	 * <b>URL: /techpark/rental/deleteRentalSite</b>
+	 * <p>
+	 * 删除具体场所
+	 * </p>
+	 */
+	@RequestMapping("enableRentalSite")
+	@RestReturn(value = String.class)
+	public RestResponse enableRentalSite(@Valid EnableRentalSiteCommand cmd) {
+		rentalService.enableRentalSite(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 	/**
 	 * <b>URL: /techpark/rental/findRentalSites</b>
 	 * <p>
@@ -447,7 +482,7 @@ public class RentalController extends ControllerBase {
 	/**
 	 * <b>URL: /techpark/rental/findRentalSitesStatus</b>
 	 * <p>
-	 * 查询某服务预约某周的状态
+	 * 确认预约- 状态置为成功
 	 * </p>
 	 */
 
@@ -461,16 +496,33 @@ public class RentalController extends ControllerBase {
 		return response;
 	}
 	
-	
+
 	/**
 	 * <b>URL: /techpark/rental/findRentalSitesStatus</b>
 	 * <p>
-	 * 查询某服务预约某周的状态
+	 * 完成预约- 状态置为已完成
+	 * </p>
+	 */
+
+	@RequestMapping("batchCompleteBill")
+	@RestReturn(value = BatchCompleteBillCommandResponse.class )
+	public RestResponse batchCompleteBill(@Valid BatchCompleteBillCommand cmd) {
+		BatchCompleteBillCommandResponse res= rentalService.batchCompleteBill(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /techpark/rental/findRentalSitesStatus</b>
+	 * <p>
+	 * 完成预约- 状态置为已完成
 	 * </p>
 	 */
 
 	@RequestMapping("completeBill")
-	@RestReturn(value = String.class)
+	@RestReturn(value = RentalBillDTO.class)
 	public RestResponse completeBill(@Valid CompleteBillCommand cmd) {
 		RentalBillDTO bill = rentalService.completeBill(cmd);
 		RestResponse response = new RestResponse(bill);
@@ -478,18 +530,53 @@ public class RentalController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
 	/**
 	 * <b>URL: /techpark/rental/findRentalSitesStatus</b>
 	 * <p>
-	 * 查询某服务预约某周的状态
+	 * 未完成预约- 状态置为未完成
+	 * </p>
+	 */
+
+	@RequestMapping("batchIncompleteBill")
+	@RestReturn(value = BatchCompleteBillCommandResponse.class)
+	public RestResponse batchIncompleteBill(@Valid BatchIncompleteBillCommand cmd) {
+		BatchCompleteBillCommandResponse res = rentalService.batchIncompleteBill(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /techpark/rental/findRentalSitesStatus</b>
+	 * <p>
+	 * 未完成预约- 状态置为未完成
 	 * </p>
 	 */
 
 	@RequestMapping("incompleteBill")
-	@RestReturn(value = String.class)
+	@RestReturn(value = RentalBillDTO.class)
 	public RestResponse incompleteBill(@Valid IncompleteBillCommand cmd) {
 		RentalBillDTO bill = rentalService.incompleteBill(cmd);
+		RestResponse response = new RestResponse(bill);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+
+
+	/**
+	 * <b>URL: /techpark/rental/listRentalBillCount</b>
+	 * <p>
+	 * 数据统计
+	 * </p>
+	 */
+
+	@RequestMapping("listRentalBillCount")
+	@RestReturn(value = ListRentalBillCountCommandResponse.class)
+	public RestResponse listRentalBillCount(@Valid ListRentalBillCountCommand cmd) {
+		ListRentalBillCountCommandResponse bill = rentalService.listRentalBillCount(cmd);
 		RestResponse response = new RestResponse(bill);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

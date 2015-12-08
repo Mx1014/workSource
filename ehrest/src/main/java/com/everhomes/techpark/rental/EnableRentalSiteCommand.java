@@ -5,28 +5,28 @@ import javax.validation.constraints.NotNull;
 import com.everhomes.util.StringHelper;
 
 /**
- * <ul>某日某场所预定状态 
- * <li>rentalBillId：订单ID</li> 
+ * <ul>
+ * 更新预定规则
+ * <li>enterpriseCommunityId：园区id</li>
+ * <li>siteType：场所类型</li>
+ * <li>rentalSiteId：场所id</li> 
  * </ul>
  */
-public class DeleteRentalBillCommand {
+public class EnableRentalSiteCommand {
 	@NotNull
 	private String ownerType;
 	private Long ownerId;
 	@NotNull
-	private String siteType; 
+	private String siteType;
 	@NotNull
-	private Long rentalBillId; 
-	
+	private Long rentalSiteId; 
+
 	@Override
-    public String toString() {
-
-		
-        return StringHelper.toJsonString(this);
-    } 
-
-	 
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
  
+
 	public String getSiteType() {
 		return siteType;
 	}
@@ -34,41 +34,28 @@ public class DeleteRentalBillCommand {
 	public void setSiteType(String siteType) {
 		this.siteType = siteType;
 	}
-
-
-
-	public Long getRentalBillId() {
-		return rentalBillId;
+ 
+	public Long getRentalSiteId() {
+		return rentalSiteId;
 	}
 
-
-
-	public void setRentalBillId(Long rentalBillId) {
-		this.rentalBillId = rentalBillId;
+	public void setRentalSiteId(Long rentalSiteId) {
+		this.rentalSiteId = rentalSiteId;
 	}
-
-
 
 	public String getOwnerType() {
 		return ownerType;
 	}
 
-
-
 	public void setOwnerType(String ownerType) {
 		this.ownerType = ownerType;
 	}
-
-
 
 	public Long getOwnerId() {
 		return ownerId;
 	}
 
-
-
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
-	} 
- 
+	}
 }

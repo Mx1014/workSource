@@ -14,7 +14,8 @@ import com.everhomes.util.StringHelper;
  */
 public class DeleteRentalSiteCommand {
 	@NotNull
-	private Long enterpriseCommunityId;
+	private String ownerType;
+	private Long ownerId;
 	@NotNull
 	private String siteType;
 	@NotNull
@@ -24,15 +25,7 @@ public class DeleteRentalSiteCommand {
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
-
-	public Long getEnterpriseCommunityId() {
-		return enterpriseCommunityId;
-	}
-
-	public void setEnterpriseCommunityId(Long enterpriseCommunityId) {
-		this.enterpriseCommunityId = enterpriseCommunityId;
-	}
-
+ 
 	public String getSiteType() {
 		return siteType;
 	}
@@ -47,5 +40,21 @@ public class DeleteRentalSiteCommand {
 
 	public void setRentalSiteId(Long rentalSiteId) {
 		this.rentalSiteId = rentalSiteId;
+	}
+
+	public String getOwnerType() {
+		return ownerType;
+	}
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
 	}
 }

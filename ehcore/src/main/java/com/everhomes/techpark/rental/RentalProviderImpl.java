@@ -636,8 +636,8 @@ public class RentalProviderImpl implements RentalProvider {
 					.or(Tables.EH_RENTAL_SITES.BUILDING_NAME.like("%" + keyword
 							+ "%")));
 		}
-		condition = condition.and(Tables.EH_RENTAL_SITES.STATUS
-				.eq(RentalSiteStatus.NORMAL.getCode()));
+//		condition = condition.and(Tables.EH_RENTAL_SITES.STATUS
+//				.eq(RentalSiteStatus.NORMAL.getCode()));
 		return step.where(condition).fetchOneInto(Integer.class);
 
 	}
@@ -784,8 +784,8 @@ public class RentalProviderImpl implements RentalProvider {
 					.or(Tables.EH_RENTAL_SITES.BUILDING_NAME.like("%" + keyword
 							+ "%")));
 		}
-		condition = condition.and(Tables.EH_RENTAL_SITES.STATUS
-				.eq(RentalSiteStatus.NORMAL.getCode()));
+//		condition = condition.and(Tables.EH_RENTAL_SITES.STATUS
+//				.eq(RentalSiteStatus.NORMAL.getCode()));
 		step.where(condition);
 		if (null != pageSize) {
 			Integer offset = pageOffset == null ? 1 : (pageOffset - 1)
@@ -948,5 +948,36 @@ public class RentalProviderImpl implements RentalProvider {
 		if (null != result && result.size() > 0)
 			return result.get(0);
 		return null;
+	}
+
+	@Override
+	public List<RentalBill> listRentalBills(Long ownerId, String ownerType,
+			String siteType, Long rentalSiteId, Long beginDate, Long endDate) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTAL_BILLS);
+		Condition condition = Tables.EH_RENTAL_BILLS.OWNER_ID
+				.equal(ownerId);
+		condition = condition.and(Tables.EH_RENTAL_BILLS.OWNER_TYPE
+				.equal(ownerType));
+		if (StringUtils.isNotEmpty(siteType))
+			condition = condition.and(Tables.EH_RENTAL_BILLS.SITE_TYPE
+					.equal(siteType));
+		if (null != rentalSiteId)
+			condition = condition.and(Tables.EH_RENTAL_BILLS.RENTAL_SITE_ID
+					.equal(rentalSiteId));
+		if (null != beginDate)
+			condition = condition.and(Tables.EH_RENTAL_BILLS.RENTAL_DATE
+					.greaterOrEqual(new Date(beginDate)));
+		if (null != endDate)
+			condition = condition.and(Tables.EH_RENTAL_BILLS.RENTAL_DATE
+					.lessOrEqual(new Date(endDate)));
+		step.where(condition);
+		List<RentalBill> result = step
+				.orderBy(Tables.EH_RENTAL_BILLS.ID.desc()).fetch().map((r) -> {
+					return ConvertHelper.convert(r, RentalBill.class);
+				});
+
+		return result;
 	}
 }
