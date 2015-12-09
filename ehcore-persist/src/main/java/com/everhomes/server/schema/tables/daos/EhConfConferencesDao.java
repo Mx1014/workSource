@@ -50,7 +50,7 @@ public class EhConfConferencesDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	/**
 	 * Fetch records that have <code>conf_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfConferences> fetchByConfId(java.lang.Integer... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfConferences> fetchByConfId(java.lang.Long... values) {
 		return fetch(com.everhomes.server.schema.tables.EhConfConferences.EH_CONF_CONFERENCES.CONF_ID, values);
 	}
 
@@ -106,7 +106,7 @@ public class EhConfConferencesDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	/**
 	 * Fetch records that have <code>conf_host_name IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfConferences> fetchByConfHostName(java.lang.Byte... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfConferences> fetchByConfHostName(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhConfConferences.EH_CONF_CONFERENCES.CONF_HOST_NAME, values);
 	}
 

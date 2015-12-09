@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfReservations implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1503809030;
+	private static final long serialVersionUID = 1235314426;
 
 	private java.lang.Long     id;
 	private java.lang.Long     enterpriseId;
@@ -19,7 +19,7 @@ public class EhConfReservations implements java.io.Serializable {
 	private java.lang.Long     confAccountId;
 	private java.lang.String   subject;
 	private java.lang.String   description;
-	private java.lang.Byte     confHostName;
+	private java.lang.String   confHostName;
 	private java.lang.String   confHostKey;
 	private java.sql.Timestamp startTime;
 	private java.lang.String   timeZone;
@@ -38,7 +38,7 @@ public class EhConfReservations implements java.io.Serializable {
 		java.lang.Long     confAccountId,
 		java.lang.String   subject,
 		java.lang.String   description,
-		java.lang.Byte     confHostName,
+		java.lang.String   confHostName,
 		java.lang.String   confHostKey,
 		java.sql.Timestamp startTime,
 		java.lang.String   timeZone,
@@ -113,11 +113,11 @@ public class EhConfReservations implements java.io.Serializable {
 		this.description = description;
 	}
 
-	public java.lang.Byte getConfHostName() {
+	public java.lang.String getConfHostName() {
 		return this.confHostName;
 	}
 
-	public void setConfHostName(java.lang.Byte confHostName) {
+	public void setConfHostName(java.lang.String confHostName) {
 		this.confHostName = confHostName;
 	}
 

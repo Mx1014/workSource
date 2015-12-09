@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfReservations extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhConfReservationsRecord> {
 
-	private static final long serialVersionUID = -1854197154;
+	private static final long serialVersionUID = 1910236799;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_conf_reservations</code>
@@ -59,7 +59,7 @@ public class EhConfReservations extends org.jooq.impl.TableImpl<com.everhomes.se
 	/**
 	 * The column <code>ehcore.eh_conf_reservations.conf_host_name</code>. the conf host name of the conference
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfReservationsRecord, java.lang.Byte> CONF_HOST_NAME = createField("conf_host_name", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "the conf host name of the conference");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfReservationsRecord, java.lang.String> CONF_HOST_NAME = createField("conf_host_name", org.jooq.impl.SQLDataType.VARCHAR.length(256).nullable(false).defaulted(true), this, "the conf host name of the conference");
 
 	/**
 	 * The column <code>ehcore.eh_conf_reservations.conf_host_key</code>. the password of the conference, set by the creator

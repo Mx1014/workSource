@@ -11,10 +11,10 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfConferences implements java.io.Serializable {
 
-	private static final long serialVersionUID = -179063982;
+	private static final long serialVersionUID = 398230174;
 
 	private java.lang.Long     id;
-	private java.lang.Integer  confId;
+	private java.lang.Long     confId;
 	private java.lang.String   subject;
 	private java.lang.String   description;
 	private java.sql.Timestamp startTime;
@@ -22,7 +22,7 @@ public class EhConfConferences implements java.io.Serializable {
 	private java.lang.Integer  expectDuration;
 	private java.lang.Integer  realDuration;
 	private java.lang.String   confHostId;
-	private java.lang.Byte     confHostName;
+	private java.lang.String   confHostName;
 	private java.lang.Integer  maxCount;
 	private java.lang.String   confHostKey;
 	private java.lang.Integer  joinPolicy;
@@ -38,7 +38,7 @@ public class EhConfConferences implements java.io.Serializable {
 
 	public EhConfConferences(
 		java.lang.Long     id,
-		java.lang.Integer  confId,
+		java.lang.Long     confId,
 		java.lang.String   subject,
 		java.lang.String   description,
 		java.sql.Timestamp startTime,
@@ -46,7 +46,7 @@ public class EhConfConferences implements java.io.Serializable {
 		java.lang.Integer  expectDuration,
 		java.lang.Integer  realDuration,
 		java.lang.String   confHostId,
-		java.lang.Byte     confHostName,
+		java.lang.String   confHostName,
 		java.lang.Integer  maxCount,
 		java.lang.String   confHostKey,
 		java.lang.Integer  joinPolicy,
@@ -88,11 +88,11 @@ public class EhConfConferences implements java.io.Serializable {
 		this.id = id;
 	}
 
-	public java.lang.Integer getConfId() {
+	public java.lang.Long getConfId() {
 		return this.confId;
 	}
 
-	public void setConfId(java.lang.Integer confId) {
+	public void setConfId(java.lang.Long confId) {
 		this.confId = confId;
 	}
 
@@ -152,11 +152,11 @@ public class EhConfConferences implements java.io.Serializable {
 		this.confHostId = confHostId;
 	}
 
-	public java.lang.Byte getConfHostName() {
+	public java.lang.String getConfHostName() {
 		return this.confHostName;
 	}
 
-	public void setConfHostName(java.lang.Byte confHostName) {
+	public void setConfHostName(java.lang.String confHostName) {
 		this.confHostName = confHostName;
 	}
 

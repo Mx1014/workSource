@@ -85,7 +85,7 @@ public class EhConfReservationsDao extends org.jooq.impl.DAOImpl<com.everhomes.s
 	/**
 	 * Fetch records that have <code>conf_host_name IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfReservations> fetchByConfHostName(java.lang.Byte... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfReservations> fetchByConfHostName(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhConfReservations.EH_CONF_RESERVATIONS.CONF_HOST_NAME, values);
 	}
 

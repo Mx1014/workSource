@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfConferences extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhConfConferencesRecord> {
 
-	private static final long serialVersionUID = 145982194;
+	private static final long serialVersionUID = 1618993686;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_conf_conferences</code>
@@ -34,7 +34,7 @@ public class EhConfConferences extends org.jooq.impl.TableImpl<com.everhomes.ser
 	/**
 	 * The column <code>ehcore.eh_conf_conferences.conf_id</code>. the conference id from 3rd conference provider
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfConferencesRecord, java.lang.Integer> CONF_ID = createField("conf_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "the conference id from 3rd conference provider");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfConferencesRecord, java.lang.Long> CONF_ID = createField("conf_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "the conference id from 3rd conference provider");
 
 	/**
 	 * The column <code>ehcore.eh_conf_conferences.subject</code>. the conference subject from 3rd conference provider
@@ -74,7 +74,7 @@ public class EhConfConferences extends org.jooq.impl.TableImpl<com.everhomes.ser
 	/**
 	 * The column <code>ehcore.eh_conf_conferences.conf_host_name</code>. the conf host name of the conference
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfConferencesRecord, java.lang.Byte> CONF_HOST_NAME = createField("conf_host_name", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "the conf host name of the conference");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfConferencesRecord, java.lang.String> CONF_HOST_NAME = createField("conf_host_name", org.jooq.impl.SQLDataType.VARCHAR.length(256).nullable(false).defaulted(true), this, "the conf host name of the conference");
 
 	/**
 	 * The column <code>ehcore.eh_conf_conferences.max_count</code>. the max amount of allowed attendees
