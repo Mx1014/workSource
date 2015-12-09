@@ -1136,7 +1136,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 			ConfConferences conf = vcProvider.findConfConferencesByConfId(confId);
 			if(conf != null) {
 				response.setJoinUrl(conf.getJoinUrl());
-				response.setCondId(conf.getConfId()+"");
+				response.setCondId("18589092373");
 				response.setPassword(conf.getConfHostKey());
 			}
 		}
