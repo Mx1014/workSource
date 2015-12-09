@@ -45,6 +45,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
+import com.mysql.jdbc.StringUtils;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
@@ -1021,7 +1022,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		response.setToken("n7m8_1qELfzv0uzc-niIQ3DjevC9LtHeQjl0FpC1eYM.BgIgWE1JL2I5aDNRNW5sd1ZNZ3p0Z3dtWTM4TE5WVHlYZ2lANWVhMTA5MDJhZTYwNDAwMjEwYzg2MmVhZTA3ZjY3OTFkNjJkZTYyYjUxM2U5YTFhZWRlMDBiODg1MTFkNjIzYgA");
 		response.setConfHostName("luzuo");
 		response.setMaxCount(6);
-		response.setMeetingNo(1884458151);
+		response.setMeetingNo("18589092373");
 		String path = "http://api.confcloud.cn/openapi/confReservation";
 		
 		ConfAccounts account = vcProvider.findVideoconfAccountById(cmd.getAccountId());
@@ -1075,7 +1076,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 //						response.setStartConfUrl(startUrl);
 						
 						ConfConferences conf = new ConfConferences();
-						conf.setConfId((Integer) data.get("meetingNo"));
+						conf.setConfId((Long) data.get("meetingNo"));
 						conf.setSubject((String) data.get("meetingName"));
 						conf.setStartTime(new Timestamp(cmd.getStartTime()));
 						conf.setExpectDuration((Integer) data.get("duration"));
@@ -1116,34 +1117,35 @@ public class VideoConfServiceImpl implements VideoConfService {
 	public JoinVideoConfResponse joinVideoConf(JoinVideoConfCommand cmd) {
 		JoinVideoConfResponse response = new JoinVideoConfResponse();
 
-		if(cmd.getConfId().length() == 11) {
-			UserIdentifier user = userProvider.findClaimedIdentifierByToken(cmd.getNamespaceId(), cmd.getConfId());
-			if(user != null) {
-				ConfAccounts account = vcProvider.findAccountByUserId(user.getOwnerUid());
-				if(account != null) {
-					ConfConferences conf = vcProvider.findConfConferencesById(account.getAssignedConfId());
-					if(conf != null) {
-						response.setJoinUrl(conf.getJoinUrl());
-						response.setCondId(conf.getConfId()+"");
-						response.setPassword(conf.getConfHostKey());
-					}
+		
+		UserIdentifier user = userProvider.findClaimedIdentifierByToken(cmd.getNamespaceId(), cmd.getConfId());
+		if(user != null) {
+			ConfAccounts account = vcProvider.findAccountByUserId(user.getOwnerUid());
+			if(account != null) {
+				ConfConferences conf = vcProvider.findConfConferencesById(account.getAssignedConfId());
+				if(conf != null) {
+					response.setJoinUrl(conf.getJoinUrl());
+					response.setCondId(conf.getConfId()+"");
+					response.setPassword(conf.getConfHostKey());
 				}
 			}
 		}
 		
-		else if(cmd.getConfId().length() < 11) {
-			Integer confId = Integer.valueOf(cmd.getConfId()); 
+		if(StringUtils.isNullOrEmpty(response.getCondId())){
+			Long confId = Long.valueOf(cmd.getConfId()); 
 			ConfConferences conf = vcProvider.findConfConferencesByConfId(confId);
 			if(conf != null) {
 				response.setJoinUrl(conf.getJoinUrl());
-				response.setCondId("18589092373");
+				response.setCondId(conf.getConfId()+"");
 				response.setPassword(conf.getConfHostKey());
+			}
+			
+			else {
+				LOGGER.error("conf id is wrong!");
 			}
 		}
 		
-		else {
-			LOGGER.error("conf id is wrong!");
-		}
+		
 		return response;
 	}
 

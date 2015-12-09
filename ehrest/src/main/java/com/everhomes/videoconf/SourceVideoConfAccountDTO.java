@@ -36,7 +36,7 @@ public class SourceVideoConfAccountDTO {
 	
 	private Long occupyAccountId;
 	
-	private Integer confId;
+	private Long confId;
 
 	public Long getId() {
 		return id;
@@ -102,14 +102,14 @@ public class SourceVideoConfAccountDTO {
 		this.occupyAccountId = occupyAccountId;
 	}
 
-	public Integer getConfId() {
+	public Long getConfId() {
 		return confId;
 	}
 
-	public void setConfId(Integer confId) {
+	public void setConfId(Long confId) {
 		this.confId = confId;
 	}
-	
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

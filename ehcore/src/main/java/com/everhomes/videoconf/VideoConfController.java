@@ -14,6 +14,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.util.RequireAuthentication;
 
 @RestDoc(value = "VideoConf controller", site = "ehcore")
 @RestController
@@ -908,6 +909,7 @@ public class VideoConfController  extends ControllerBase{
 	 * 加入会议
 	 * @return
 	 */
+	@RequireAuthentication(false)
 	@RequestMapping("joinVideoConf")
 	@RestReturn(value = JoinVideoConfResponse.class)
 	public RestResponse joinVideoConf(JoinVideoConfCommand cmd) {

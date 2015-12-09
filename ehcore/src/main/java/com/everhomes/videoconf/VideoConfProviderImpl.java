@@ -740,7 +740,7 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 	}
 
 	@Override
-	public ConfConferences findConfConferencesByConfId(Integer confId) {
+	public ConfConferences findConfConferencesByConfId(Long confId) {
 
 		final ConfConferences[] result = new ConfConferences[1];
 		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhConfConferences.class), result, 

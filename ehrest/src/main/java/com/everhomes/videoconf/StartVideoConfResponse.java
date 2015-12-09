@@ -23,7 +23,7 @@ public class StartVideoConfResponse {
 	
 	private String token;
 	
-	private Integer meetingNo;
+	private String meetingNo;
 	
 	public String getConfHostId() {
 		return confHostId;
@@ -57,11 +57,11 @@ public class StartVideoConfResponse {
 		this.token = token;
 	}
 
-	public Integer getMeetingNo() {
+	public String getMeetingNo() {
 		return meetingNo;
 	}
 
-	public void setMeetingNo(Integer meetingNo) {
+	public void setMeetingNo(String meetingNo) {
 		this.meetingNo = meetingNo;
 	}
 
