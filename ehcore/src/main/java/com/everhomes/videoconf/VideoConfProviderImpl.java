@@ -684,7 +684,7 @@ public class VideoConfProviderImpl implements VideoConfProvider {
         }
         this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
             SelectQuery<EhConfReservationsRecord> query = context.selectQuery(Tables.EH_CONF_RESERVATIONS);
-            
+            query.addConditions(Tables.EH_CONF_RESERVATIONS.STATUS.eq((byte) 1));
             if(locator.getAnchor() != null)
             	query.addConditions(Tables.EH_CONF_RESERVATIONS.ID.gt(locator.getAnchor()));
             
@@ -879,22 +879,32 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 		List<OrderBriefDTO> orders = new ArrayList<OrderBriefDTO>();
 		
 		if (locator.getShardIterator() == null) {
-            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhConfReservations.class);
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhConfOrderAccountMap.class);
             ShardIterator shardIterator = new ShardIterator(accessSpec);
             locator.setShardIterator(shardIterator);
         }
         this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
-            SelectQuery<EhConfAccountsRecord> query = context.selectQuery(Tables.EH_CONF_ACCOUNTS);
-            query.addConditions(Tables.EH_CONF_ACCOUNTS.OWNER_ID.ne(0L));
+            SelectQuery<EhConfOrderAccountMapRecord> query = context.selectQuery(Tables.EH_CONF_ORDER_ACCOUNT_MAP);
+            query.addConditions(Tables.EH_CONF_ORDER_ACCOUNT_MAP.CONF_ACCOUNT_ID.ne(accountId));
             if(locator.getAnchor() != null)
-            	query.addConditions(Tables.EH_CONF_ACCOUNTS.ID.gt(locator.getAnchor()));
+            	query.addConditions(Tables.EH_CONF_ORDER_ACCOUNT_MAP.ID.gt(locator.getAnchor()));
             
-            query.addConditions(Tables.EH_CONF_ACCOUNTS.ENTERPRISE_ID.eq(accountId));
-           
             query.addLimit(pageSize - orders.size());
             
             query.fetch().map((r) -> {
             	/////////////
+            	ConfOrders order = findOredrById(r.getOrderId());
+            	if(order != null) {
+	            	OrderBriefDTO dto = new OrderBriefDTO();
+	            	dto.setId(order.getId());
+	            	dto.setCreateTime(order.getCreateTime());
+	            	dto.setPeriod(order.getPeriod());
+	            	ConfAccountCategories categority = findAccountCategoriesById(order.getAccountCategoryId());
+	            	if(categority != null)
+	            		dto.setConfType(categority.getConfType());
+	            	
+	            	orders.add(dto);
+            	}
                 return null;
             });
 
@@ -942,6 +952,20 @@ public class VideoConfProviderImpl implements VideoConfProvider {
                 });
         counts.setMonths(months[0]);
         return counts;
+	}
+
+	@Override
+	public int countConfByAccount(Long accountId) {
+		final Integer[] count = new Integer[1];
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhConfConferences.class), null, 
+                (DSLContext context, Object reducingContext)-> {
+                    count[0] = context.selectCount().from(Tables.EH_CONF_CONFERENCES)
+                            .where(Tables.EH_CONF_CONFERENCES.CONF_ACCOUNT_ID.equal(accountId))
+                            .fetchOneInto(Integer.class);
+                    return true;
+                });
+        
+        return count[0];
 	}
 
 

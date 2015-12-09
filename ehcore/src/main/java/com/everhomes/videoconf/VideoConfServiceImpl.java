@@ -554,34 +554,39 @@ public class VideoConfServiceImpl implements VideoConfService {
 //		// TODO Auto-generated method stub
 //		return null;
 //	}
-//
-//	@Override
-//	public ListVideoConfAccountConfRecordResponse listVideoConfAccountConfRecord(
-//			ListVideoConfAccountConfRecordCommand cmd) {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
-//
-//	@Override
-//	public void updateVideoConfAccount(UpdateVideoConfAccountCommand cmd) {
-//
-//		ConfAccounts account = vcProvider.findVideoconfAccountById(cmd.getAccountId());
-//		account.setValidDate(new Timestamp(cmd.getValidDate()));
-//		account.setConfType(cmd.getConfType());
-//		
-//		if(account.getStatus() != 2) {
-//			if(account.getValidDate().before(new Timestamp(DateHelper.currentGMTTime().getTime()))) {
-//	        	account.setStatus((byte) 0);
-//	        }
-//	        else {
-//	        	account.setStatus((byte) 1);
-//	        }
-//		}
-//		
-//		vcProvider.updateVideoconfAccount(account);
-//
-//	}
-//
+
+	@Override
+	public ListVideoConfAccountConfRecordResponse listVideoConfAccountConfRecord(
+			ListVideoConfAccountConfRecordCommand cmd) {
+
+		ListVideoConfAccountConfRecordResponse response = new ListVideoConfAccountConfRecordResponse();
+		
+		int countConf = vcProvider.countConfByAccount(cmd.getAccountId());
+		response.setConfCount(countConf);
+		
+		return response;
+	}
+
+	@Override
+	public void updateVideoConfAccount(UpdateVideoConfAccountCommand cmd) {
+
+		ConfAccounts account = vcProvider.findVideoconfAccountById(cmd.getAccountId());
+		account.setExpiredDate(new Timestamp(cmd.getValidDate()));
+		account.setAccountCategoryId(cmd.getAccountCategoryId());
+
+		if(account.getStatus() != 2) {
+			if(account.getExpiredDate().before(new Timestamp(DateHelper.currentGMTTime().getTime()))) {
+	        	account.setStatus((byte) 0);
+	        }
+	        else {
+	        	account.setStatus((byte) 1);
+	        }
+		}
+		
+		vcProvider.updateConfAccounts(account);
+
+	}
+
 //	@Override
 //	public void deleteVideoConfAccount(DeleteVideoConfAccountCommand cmd) {
 //
@@ -590,25 +595,25 @@ public class VideoConfServiceImpl implements VideoConfService {
 //		
 //		vcProvider.updateVideoconfAccount(account);
 //	}
-//
-//	@Override
-//	public void extendedVideoConfAccountPeriod(
-//			ExtendedVideoConfAccountPeriodCommand cmd) {
-//		ConfAccounts account = vcProvider.findVideoconfAccountById(cmd.getAccountId());
-//		account.setValidDate(new Timestamp(cmd.getValidDate()));
-//		
-//		if(account.getStatus() != 2) {
-//			if(account.getValidDate().before(new Timestamp(DateHelper.currentGMTTime().getTime()))) {
-//	        	account.setStatus((byte) 0);
-//	        }
-//	        else {
-//	        	account.setStatus((byte) 1);
-//	        }
-//		}
-//		
-//		vcProvider.updateVideoconfAccount(account);
-//
-//	}
+
+	@Override
+	public void extendedVideoConfAccountPeriod(
+			ExtendedVideoConfAccountPeriodCommand cmd) {
+		ConfAccounts account = vcProvider.findVideoconfAccountById(cmd.getAccountId());
+		account.setExpiredDate(new Timestamp(cmd.getValidDate()));
+		
+		if(account.getStatus() != 2) {
+			if(account.getExpiredDate().before(new Timestamp(DateHelper.currentGMTTime().getTime()))) {
+	        	account.setStatus((byte) 0);
+	        }
+	        else {
+	        	account.setStatus((byte) 1);
+	        }
+		}
+		
+		vcProvider.updateConfAccounts(account);
+
+	}
 
 	@Override
 	public ListVideoConfAccountOrderResponse listConfOrder(
@@ -728,12 +733,12 @@ public class VideoConfServiceImpl implements VideoConfService {
 		return invoice;
 	}
 
-//	@Override
-//	public void updateVideoConfAccountOrderInfo(UpdateAccountOrderCommand cmd) {
-//		// TODO Auto-generated method stub
-//
-//	}
-//
+	@Override
+	public void updateVideoConfAccountOrderInfo(UpdateAccountOrderCommand cmd) {
+		// TODO Auto-generated method stub
+
+	}
+
 //	@Override
 //	public List<VideoConfAccountStatisticsDTO> getVideoConfAccountStatistics(
 //			GetVideoConfAccountStatisticsCommand cmd) {
@@ -1351,5 +1356,6 @@ public class VideoConfServiceImpl implements VideoConfService {
 		
 		return response;
 	}
+
 
 }
