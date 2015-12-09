@@ -116,13 +116,13 @@ public class YellowPageServiceImpl implements YellowPageService {
 	public YellowPageListResponse getYellowPageList(
 			GetYellowPageListCommand cmd) { 
 		YellowPageListResponse response = new YellowPageListResponse();
+		response.setYellowPages(new ArrayList<YellowPageDTO>());
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         List<YellowPage> yellowPages = this.yellowPageProvider.queryYellowPages(locator, pageSize + 1,cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParentId(),cmd.getType(),cmd.getServiceType());
         if(null == yellowPages || yellowPages.size() == 0)
         	return response;
-        response.setYellowPages(new ArrayList<YellowPageDTO>());
       
         for (YellowPage yellowPage : yellowPages){
         	populateYellowPage(yellowPage);
