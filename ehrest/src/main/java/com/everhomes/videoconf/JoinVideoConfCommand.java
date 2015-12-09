@@ -1,5 +1,7 @@
 package com.everhomes.videoconf;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -9,9 +11,9 @@ import com.everhomes.util.StringHelper;
  *
  */
 public class JoinVideoConfCommand {
-	
+	@NotNull
 	private String confId;
-	
+	@NotNull
 	private Integer namespaceId;
 
 	public String getConfId() {

@@ -14,7 +14,7 @@ public class JoinVideoConfResponse {
 	
 	private String joinUrl;
 	
-	private Integer condId;
+	private String condId;
 	
 	private String password;
 	
@@ -26,11 +26,11 @@ public class JoinVideoConfResponse {
 		this.joinUrl = joinUrl;
 	}
 
-	public Integer getCondId() {
+	public String getCondId() {
 		return condId;
 	}
 
-	public void setCondId(Integer condId) {
+	public void setCondId(String condId) {
 		this.condId = condId;
 	}
 
