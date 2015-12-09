@@ -116,7 +116,7 @@ CREATE TABLE `eh_conf_account_histories` (
 DROP TABLE IF EXISTS `eh_conf_conferences`;
 CREATE TABLE `eh_conf_conferences` (
 	`id` BIGINT NOT NULL COMMENT 'id',
-	`conf_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'the conference id from 3rd conference provider',
+	`conf_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the conference id from 3rd conference provider',
 	`subject` VARCHAR(128) COMMENT 'the conference subject from 3rd conference provider',
 	`description` TEXT,
 	`start_time` DATETIME,
@@ -124,7 +124,7 @@ CREATE TABLE `eh_conf_conferences` (
 	`expect_duration` INTEGER NOT NULL DEFAULT 0 COMMENT 'how long the conference expected to last, unit: minute',
 	`real_duration` INTEGER NOT NULL DEFAULT 0 COMMENT 'how long the conference really lasted, unit: minute',
 	`conf_host_id` VARCHAR(128) NOT NULL DEFAULT 0 COMMENT 'the conf host id from 3rd conference provider',
-	`conf_host_name` TINYINT NOT NULL DEFAULT 0 COMMENT 'the conf host name of the conference',
+	`conf_host_name` VARCHAR(256) NOT NULL DEFAULT 0 COMMENT 'the conf host name of the conference',
 	`max_count` INTEGER NOT NULL DEFAULT 0 COMMENT 'the max amount of allowed attendees',
 	`conf_host_key` VARCHAR(128) COMMENT 'the password of the conference, set by the creator',
     `join_policy` INTEGER NOT NULL DEFAULT 1 COMMENT '0: free join, 1: conf host first',
@@ -176,7 +176,7 @@ CREATE TABLE `eh_conf_reservations` (
 	`conf_account_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'referenece to id of eh_conf_accounts',
 	`subject` VARCHAR(128) COMMENT 'the conference subject',
 	`description` TEXT,
-	`conf_host_name` TINYINT NOT NULL DEFAULT 0 COMMENT 'the conf host name of the conference',
+	`conf_host_name` VARCHAR(256) NOT NULL DEFAULT 0 COMMENT 'the conf host name of the conference',
 	`conf_host_key` VARCHAR(128) COMMENT 'the password of the conference, set by the creator',
 	`start_time` DATETIME,
 	`time_zone` VARCHAR(64),
