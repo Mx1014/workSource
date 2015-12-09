@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  *  <li>confHostName: 会议主持人name</li>
  *  <li>maxCount: 最大与会人数</li>
  *  <li>token: token</li>
+ *  <li>meetingNo: 会议id</li>
  * </ul>
  *
  */
@@ -21,6 +22,8 @@ public class StartVideoConfResponse {
 	private Integer maxCount;
 	
 	private String token;
+	
+	private Integer meetingNo;
 	
 	public String getConfHostId() {
 		return confHostId;
@@ -52,6 +55,14 @@ public class StartVideoConfResponse {
 
 	public void setToken(String token) {
 		this.token = token;
+	}
+
+	public Integer getMeetingNo() {
+		return meetingNo;
+	}
+
+	public void setMeetingNo(Integer meetingNo) {
+		this.meetingNo = meetingNo;
 	}
 
 	@Override

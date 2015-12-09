@@ -550,39 +550,39 @@ public class VideoConfController  extends ControllerBase{
 //		response.setErrorDescription("OK");
 //		return response;
 //	}
-//	
-//	/**
-//	 * <b>URL: /conf/listVideoConfAccountConfRecord</b>
-//	 * 查看开会记录
-//	 * @return
-//	 */
-//	@RequestMapping("listVideoConfAccountConfRecord")
-//	@RestReturn(value = ListVideoConfAccountConfRecordResponse.class)
-//	public RestResponse listVideoConfAccountConfRecord(ListVideoConfAccountConfRecordCommand cmd) {
-//
-//		ListVideoConfAccountConfRecordResponse confRecord = videoConfService.listVideoConfAccountConfRecord(cmd);
-//		RestResponse response = new RestResponse(confRecord);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-//	
-//	/**
-//	 * <b>URL: /conf/updateVideoConfAccount</b>
-//	 * 修改视频会议账号
-//	 * @return
-//	 */
-//	@RequestMapping("updateVideoConfAccount")
-//	@RestReturn(value = String.class)
-//	public RestResponse updateVideoConfAccount(UpdateVideoConfAccountCommand cmd) {
-//
-//		videoConfService.updateVideoConfAccount(cmd);
-//		RestResponse response = new RestResponse();
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-//	
+	
+	/**
+	 * <b>URL: /conf/listVideoConfAccountConfRecord</b>
+	 * 查看开会记录
+	 * @return
+	 */
+	@RequestMapping("listVideoConfAccountConfRecord")
+	@RestReturn(value = ListVideoConfAccountConfRecordResponse.class)
+	public RestResponse listVideoConfAccountConfRecord(ListVideoConfAccountConfRecordCommand cmd) {
+
+		ListVideoConfAccountConfRecordResponse confRecord = videoConfService.listVideoConfAccountConfRecord(cmd);
+		RestResponse response = new RestResponse(confRecord);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /conf/updateVideoConfAccount</b>
+	 * 修改视频会议账号
+	 * @return
+	 */
+	@RequestMapping("updateVideoConfAccount")
+	@RestReturn(value = String.class)
+	public RestResponse updateVideoConfAccount(UpdateVideoConfAccountCommand cmd) {
+
+		videoConfService.updateVideoConfAccount(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 //	/**
 //	 * <b>URL: /conf/deleteVideoConfAccount</b>
 //	 * 删除视频会议账号
@@ -598,23 +598,23 @@ public class VideoConfController  extends ControllerBase{
 //		response.setErrorDescription("OK");
 //		return response;
 //	}
-//	
-//	/**
-//	 * <b>URL: /conf/extendedVideoConfAccountPeriod</b>
-//	 * 延长视频会议账号试用期
-//	 * @return
-//	 */
-//	@RequestMapping("extendedVideoConfAccountPeriod")
-//	@RestReturn(value = String.class)
-//	public RestResponse extendedVideoConfAccountPeriod(ExtendedVideoConfAccountPeriodCommand cmd) {
-//
-//		videoConfService.extendedVideoConfAccountPeriod(cmd);
-//		RestResponse response = new RestResponse();
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-//	
+	
+	/**
+	 * <b>URL: /conf/extendedVideoConfAccountPeriod</b>
+	 * 延长视频会议账号试用期
+	 * @return
+	 */
+	@RequestMapping("extendedVideoConfAccountPeriod")
+	@RestReturn(value = String.class)
+	public RestResponse extendedVideoConfAccountPeriod(ExtendedVideoConfAccountPeriodCommand cmd) {
+
+		videoConfService.extendedVideoConfAccountPeriod(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 	/**
 	 * <b>URL: /conf/listOrderByAccount</b>
 	 * 查看账号订单记录

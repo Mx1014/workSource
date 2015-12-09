@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *  <li>accountId: 账号id</li>
  *  <li>validDate: 有效期</li>
- *  <li>confType: 会议类型 0-25方仅视频 1-25方支持电话 2-100方仅视频 3-100方支持电话</li>
+ *  <li>accountCategoryId: 会议账号销售规则id</li>
  * </ul>
  *
  */
@@ -16,7 +16,7 @@ public class UpdateVideoConfAccountCommand {
 	
 	private Long validDate;
 	
-	private Byte confType;
+	private Long accountCategoryId;
 
 	public Long getAccountId() {
 		return accountId;
@@ -33,15 +33,15 @@ public class UpdateVideoConfAccountCommand {
 	public void setValidDate(Long validDate) {
 		this.validDate = validDate;
 	}
-
-	public Byte getConfType() {
-		return confType;
-	}
-
-	public void setConfType(Byte confType) {
-		this.confType = confType;
-	}
 	
+	public Long getAccountCategoryId() {
+		return accountCategoryId;
+	}
+
+	public void setAccountCategoryId(Long accountCategoryId) {
+		this.accountCategoryId = accountCategoryId;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
