@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  *  <li>confHostName: 会议主持人name</li>
  *  <li>maxCount: 最大与会人数</li>
  *  <li>token: token</li>
+ *  <li>meetingNo: 会议id</li>
  * </ul>
  *
  */

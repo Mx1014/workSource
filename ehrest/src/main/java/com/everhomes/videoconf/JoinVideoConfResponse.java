@@ -6,6 +6,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *  <li>joinUrl: 加入会议地址</li>
  *  <li>confId: 会议号</li>
+ *  <li>password: 会议密码</li>
  * </ul>
  *
  */
@@ -14,6 +15,8 @@ public class JoinVideoConfResponse {
 	private String joinUrl;
 	
 	private Integer condId;
+	
+	private String password;
 	
 	public String getJoinUrl() {
 		return joinUrl;
@@ -29,6 +32,14 @@ public class JoinVideoConfResponse {
 
 	public void setCondId(Integer condId) {
 		this.condId = condId;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
 	}
 
 	@Override
