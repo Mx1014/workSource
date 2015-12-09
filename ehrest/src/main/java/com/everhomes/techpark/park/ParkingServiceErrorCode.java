@@ -8,4 +8,5 @@ public interface ParkingServiceErrorCode {
     static final int ERROR_PLATE_EXIST = 10002;  //车牌已有月卡
     static final int ERROR_PLATE_APPLIED = 10003;  //车牌已申请
     
+    static final int ERROR_PLATE_APPLIED_SERVER = 10004;  //服务器忙
 }

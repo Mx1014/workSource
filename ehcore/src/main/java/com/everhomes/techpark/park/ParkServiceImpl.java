@@ -351,20 +351,27 @@ public class ParkServiceImpl implements ParkService {
 //        List<String> phones = identifiers.stream().filter((r)-> { return IdentifierType.fromCode(r.getIdentifierType()) == IdentifierType.MOBILE; })
 //            .map((r) -> { return r.getIdentifierToken(); })
 //            .collect(Collectors.toList());
-		ParkApplyCard apply = new ParkApplyCard();
-		apply.setApplierId(cmd.getUserId());
-		apply.setApplierName(cmd.getUserName());
-		apply.setApplierPhone(cmd.getPhoneNumber());
-		apply.setCompanyName(cmd.getCompanyName());
-		apply.setApplyStatus(ApplyParkingCardStatus.WAITING.getCode());
-		apply.setApplyTime(new Timestamp(System.currentTimeMillis()));
-		apply.setFetchStatus(FetchStatus.NO.getCode());
-		apply.setPlateNumber(cmd.getPlateNumber());
-		apply.setCommunityId(cmd.getCommunityId());
-		
-		parkProvider.applyParkingCard(apply);
-		String count = parkProvider.waitingCardCount(cmd.getCommunityId()) - 1 + "";
-		return count;
+		try {
+			ParkApplyCard apply = new ParkApplyCard();
+			apply.setApplierId(cmd.getUserId());
+			apply.setApplierName(cmd.getUserName());
+			apply.setApplierPhone(cmd.getPhoneNumber());
+			apply.setCompanyName(cmd.getCompanyName());
+			apply.setApplyStatus(ApplyParkingCardStatus.WAITING.getCode());
+			apply.setApplyTime(new Timestamp(System.currentTimeMillis()));
+			apply.setFetchStatus(FetchStatus.NO.getCode());
+			apply.setPlateNumber(cmd.getPlateNumber());
+			apply.setCommunityId(cmd.getCommunityId());
+			
+			parkProvider.applyParkingCard(apply);
+			String count = parkProvider.waitingCardCount(cmd.getCommunityId()) - 1 + "";
+			return count;
+		} catch(Exception e) {
+			throw RuntimeErrorException.errorWith(ParkingServiceErrorCode.SCOPE, ParkingServiceErrorCode.ERROR_PLATE_APPLIED_SERVER,
+					localeStringService.getLocalizedString(String.valueOf(ParkingServiceErrorCode.SCOPE), 
+							String.valueOf(ParkingServiceErrorCode.ERROR_PLATE_APPLIED_SERVER),
+							UserContext.current().getUser().getLocale(),"the server is busy."));
+		}
 	}
 
 	@Override
