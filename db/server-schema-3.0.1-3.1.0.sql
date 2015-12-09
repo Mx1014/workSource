@@ -345,6 +345,7 @@ INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'enter
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'parking', '10001', 'zh_CN', '车牌号位数错误');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'parking', '10002', 'zh_CN', '该车牌已有月卡');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'parking', '10003', 'zh_CN', '该车牌已申请月卡');
+INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'parking', '10004', 'zh_CN', '服务器忙');
 
 INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(1000000, '科技园版');
 INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(999999, '讯美园区版');
