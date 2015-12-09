@@ -34,7 +34,7 @@ public class EnterpriseApplyEntryDTO {
 	
 	private Timestamp createTime;
 
-	
+	private String sourceName;
 
 
 	public Long getId() {
@@ -228,6 +228,20 @@ public class EnterpriseApplyEntryDTO {
 
 	public void setCreateTime(Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+
+
+
+	public String getSourceName() {
+		return sourceName;
+	}
+
+
+
+
+	public void setSourceName(String sourceName) {
+		this.sourceName = sourceName;
 	}
 
 

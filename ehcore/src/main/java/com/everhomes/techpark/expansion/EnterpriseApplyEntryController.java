@@ -48,7 +48,7 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	
 	/**
 	 * <b>URL: /techpark/entry/listApplyEntrys
-	 * <p>
+	 * <p>入住信息列表
 	 */
 	@RequestMapping("listApplyEntrys")
 	@RestReturn(value=EnterpriseApplyEntryResponse.class)
@@ -62,7 +62,7 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	
 	/**
 	 * <b>URL: /techpark/entry/applyEntry
-	 * <p>
+	 * <p>申请入住
 	 */
 	@RequestMapping("applyEntry")
 	@RestReturn(value=String.class)
@@ -91,7 +91,7 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	
 	/**
 	 * <b>URL: /techpark/entry/listForRents
-	 * <p>
+	 * <p>招租列表
 	 */
 	@RequestMapping("listForRents")
 	@RestReturn(value=ListBuildingForRentResponse.class)
@@ -105,7 +105,7 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	
 	/**
 	 * <b>URL: /techpark/entry/createLeasePromotion
-	 * <p>
+	 * <p>创建招租
 	 */
 	@RequestMapping("createLeasePromotion")
 	@RestReturn(value=String.class)
@@ -119,7 +119,7 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	
 	/**
 	 * <b>URL: /techpark/entry/updateLeasePromotion
-	 * <p>
+	 * <p>修改招租
 	 */
 	@RequestMapping("updateLeasePromotion")
 	@RestReturn(value=String.class)
@@ -133,7 +133,7 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	
 	/**
 	 * <b>URL: /techpark/entry/findLeasePromotionById
-	 * <p>
+	 * <p>根据id查询招租
 	 */
 	@RequestMapping("findLeasePromotionById")
 	@RestReturn(value=BuildingForRentDTO.class)
@@ -146,7 +146,7 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	
 	/**
 	 * <b>URL: /techpark/entry/updateApplyEntryStatus
-	 * <p>
+	 * <p>修改入住状态
 	 */
 	@RequestMapping("updateApplyEntryStatus")
 	@RestReturn(value=String.class)
@@ -159,7 +159,7 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	
 	/**
 	 * <b>URL: /techpark/entry/updateLeasePromotionStatus
-	 * <p>
+	 * <p>修改招租状态
 	 */
 	@RequestMapping("updateLeasePromotionStatus")
 	@RestReturn(value=String.class)

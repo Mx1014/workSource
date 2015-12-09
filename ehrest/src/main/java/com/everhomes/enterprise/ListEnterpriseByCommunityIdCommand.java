@@ -16,6 +16,8 @@ public class ListEnterpriseByCommunityIdCommand {
     
     Integer status;
     
+    private String enterpriseName;
+    
     private Long pageAnchor;
     private Integer pageSize;
 
@@ -50,6 +52,14 @@ public class ListEnterpriseByCommunityIdCommand {
     public void setStatus(Integer status) {
         this.status = status;
     }
+
+	public String getEnterpriseName() {
+		return enterpriseName;
+	}
+
+	public void setEnterpriseName(String enterpriseName) {
+		this.enterpriseName = enterpriseName;
+	}
     
     
 }
