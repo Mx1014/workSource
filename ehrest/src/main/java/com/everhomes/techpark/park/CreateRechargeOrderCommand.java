@@ -27,7 +27,8 @@ public class CreateRechargeOrderCommand {
 	private String ownerName;
 	@NotNull
 	private String validityPeriod;
-	
+
+	private String cardType;
 	private Long communityId;
 
 	public Long getCommunityId() {
@@ -76,6 +77,14 @@ public class CreateRechargeOrderCommand {
 
 	public void setOwnerName(String ownerName) {
 		this.ownerName = ownerName;
+	}
+
+	public String getCardType() {
+		return cardType;
+	}
+
+	public void setCardType(String cardType) {
+		this.cardType = cardType;
 	}
 
 }

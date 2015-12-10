@@ -11,13 +11,14 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRechargeInfo implements java.io.Serializable {
 
-	private static final long serialVersionUID = 284314698;
+	private static final long serialVersionUID = -63040418;
 
 	private java.lang.Long     id;
 	private java.lang.Long     billId;
 	private java.lang.String   plateNumber;
 	private java.lang.Byte     numberType;
 	private java.lang.String   ownerName;
+	private java.lang.String   cardType;
 	private java.lang.Long     rechargeUserid;
 	private java.lang.String   rechargeUsername;
 	private java.lang.String   rechargePhone;
@@ -38,6 +39,7 @@ public class EhRechargeInfo implements java.io.Serializable {
 		java.lang.String   plateNumber,
 		java.lang.Byte     numberType,
 		java.lang.String   ownerName,
+		java.lang.String   cardType,
 		java.lang.Long     rechargeUserid,
 		java.lang.String   rechargeUsername,
 		java.lang.String   rechargePhone,
@@ -55,6 +57,7 @@ public class EhRechargeInfo implements java.io.Serializable {
 		this.plateNumber = plateNumber;
 		this.numberType = numberType;
 		this.ownerName = ownerName;
+		this.cardType = cardType;
 		this.rechargeUserid = rechargeUserid;
 		this.rechargeUsername = rechargeUsername;
 		this.rechargePhone = rechargePhone;
@@ -106,6 +109,14 @@ public class EhRechargeInfo implements java.io.Serializable {
 
 	public void setOwnerName(java.lang.String ownerName) {
 		this.ownerName = ownerName;
+	}
+
+	public java.lang.String getCardType() {
+		return this.cardType;
+	}
+
+	public void setCardType(java.lang.String cardType) {
+		this.cardType = cardType;
 	}
 
 	public java.lang.Long getRechargeUserid() {
