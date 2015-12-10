@@ -628,8 +628,7 @@ public class ParkServiceImpl implements ParkService {
 				
 				String validEnd = (String) card.get("validEnd");
 
-//				TODO:String cardType = (String) card.get("cardType");
-				String cardType = "普通月卡";
+				String cardType = (String) card.get("cardDescript"); 
 				Timestamp validityPeriod = strToTimestamp(validEnd);
 
 				
@@ -771,9 +770,23 @@ public class ParkServiceImpl implements ParkService {
 	@Override
 	public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
 		ListCardTypeResponse response = new ListCardTypeResponse();
-		response.setCardTypes(new ArrayList<String>());
-		//TODO: 等接口
-		response.getCardTypes().add("普通月卡");
+//		response.setCardTypes(new ArrayList<String>());
+		URL wsdlURL = Service1.WSDL_LOCATION;
+ 
+		Service1 ss = new Service1(wsdlURL, SERVICE_NAME);
+        Service1Soap port = ss.getService1Soap12();
+        LOGGER.info("verifyRechargedPlate");
+        String json = port.getAllCardDescript();
+        
+        GetAllCardDescriptDTO cardDescriptDTO = GsonUtil.fromJson(json, GetAllCardDescriptDTO.class);
+        
+        
+        if(LOGGER.isDebugEnabled())
+			LOGGER.error("cardDescriptDTO="+cardDescriptDTO.isSuccess());
+
+		if(cardDescriptDTO.isSuccess()){
+			response.setCardTypes(cardDescriptDTO.getCardDescript());
+		}
 		return response;
 	}
 }
