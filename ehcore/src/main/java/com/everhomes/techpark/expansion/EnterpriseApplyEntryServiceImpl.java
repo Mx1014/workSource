@@ -137,7 +137,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
     	String contact =  enterpriseDetail.getContact();
     	enterpriseDetail.setContact(StringUtils.isEmpty(contact) ? group.getEnterpriseContact() : contact);
     	String address = enterpriseDetail.getAddress();
-    	enterpriseDetail.setDescription(StringUtils.isEmpty(address) ? group.getEnterpriseContact() : address);
+    	enterpriseDetail.setAddress(StringUtils.isEmpty(address) ? group.getEnterpriseAddress() : address);
+    	enterpriseDetail.setAvatar(group.getAvatar());
     	return enterpriseDetail;
 	}
 	
@@ -148,7 +149,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	    EnterpriseDetailDTO dto = null;
 	    if(enterpriseDetail != null) {
 	        dto = ConvertHelper.convert(enterpriseDetail, EnterpriseDetailDTO.class);
-	        
+	        dto.setAvatarUri(enterpriseDetail.getAvatar());
+	        dto.setAvatarUrl(contentServerService.parserUri(dto.getAvatarUri(),EntityType.GROUP.getCode(), enterpriseDetail.getEnterpriseId()));
 	        List<EnterpriseAttachment> attachments = enterpriseProvider.listEnterpriseAttachments(enterpriseDetail.getEnterpriseId());
 	        if(attachments != null && attachments.size() > 0)
 	        {

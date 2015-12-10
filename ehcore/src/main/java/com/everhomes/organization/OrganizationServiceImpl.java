@@ -1849,6 +1849,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	private String getOrganizationMemberDeleteForManager(String operName,String userName, String orgName, Long managerId) {
 		User user = this.userProvider.findUserById(managerId);	
+		if(null == user){
+			return null;
+		}
 		String locale = user.getLocale();
 		if(locale == null)
 			locale = "zh_CN";
