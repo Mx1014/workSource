@@ -762,7 +762,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
             includeList = getEnterpriseAdminIncludeList(enterprise.getId(), user.getId(), user.getId());
             if(includeList.size() > 0) {
                 QuestionMetaObject metaObject = createGroupQuestionMetaObject(enterprise, contact, null);
-                sendEnterpriseNotification(enterprise.getId(), null, includeList, notifyTextForApplicant, 
+                sendEnterpriseNotification(enterprise.getId(), includeList, null, notifyTextForApplicant, 
                     MetaObjectType.ENTERPRISE_REQUEST_TO_JOIN, metaObject);
                 if(LOGGER.isDebugEnabled()) {
                     LOGGER.debug("Send waiting approval message to admin contact in enterprise, userId=" + user.getId() 
