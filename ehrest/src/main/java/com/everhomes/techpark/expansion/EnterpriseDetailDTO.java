@@ -17,6 +17,8 @@ public class EnterpriseDetailDTO {
     private Double longitude;
     private Double latitude;
     private String geohash;
+    private String avatarUri;
+    private String avatarUrl;
     private Timestamp createTime;
     @ItemType(EnterpriseAttachmentDTO.class)
     private List<EnterpriseAttachmentDTO> attachments;
@@ -101,7 +103,24 @@ public class EnterpriseDetailDTO {
         this.createTime = createTime;
     }
 
-    public List<EnterpriseAttachmentDTO> getAttachments() {
+    
+    public String getAvatarUri() {
+		return avatarUri;
+	}
+
+	public void setAvatarUri(String avatarUri) {
+		this.avatarUri = avatarUri;
+	}
+
+	public String getAvatarUrl() {
+		return avatarUrl;
+	}
+
+	public void setAvatarUrl(String avatarUrl) {
+		this.avatarUrl = avatarUrl;
+	}
+
+	public List<EnterpriseAttachmentDTO> getAttachments() {
         return attachments;
     }
 
