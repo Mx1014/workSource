@@ -15,6 +15,8 @@ public class PlateInfo {
 	
 	private String cardType;
 	
+	private String cardCode;
+	
 	private String isValid;
 	
 	@ItemType(value = ParkingChargeDTO.class)
@@ -66,6 +68,14 @@ public class PlateInfo {
 
 	public void setCardType(String cardType) {
 		this.cardType = cardType;
+	}
+
+	public String getCardCode() {
+		return cardCode;
+	}
+
+	public void setCardCode(String cardCode) {
+		this.cardCode = cardCode;
 	}
 
 }
