@@ -76,14 +76,31 @@ public class ParkProviderImpl implements ParkProvider {
 		dao.delete(parkCharge);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhParkCharge.class, parkCharge.getId());
 	}
-
+	@Override
+	public ParkCharge findParkingChargeById(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhParkChargeRecord> query = context.selectQuery(Tables.EH_PARK_CHARGE);
+		query.addConditions(Tables.EH_PARK_CHARGE.ID.eq(id));
+		 
+		List<ParkCharge> result = new ArrayList<ParkCharge>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, ParkCharge.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+		return result.get(0);
+	}
 	@Override
 	public List<ParkCharge> listParkingChargeByEnterpriseCommunityId(
-			Long communityId, int offset, int pageSize) {
+			Long communityId,String cardType, Integer offset, Integer pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhParkChargeRecord> query = context.selectQuery(Tables.EH_PARK_CHARGE);
 		query.addConditions(Tables.EH_PARK_CHARGE.COMMUNITY_ID.eq(communityId));
-		query.addLimit(offset, pageSize);
+		if(!StringUtils.isEmpty(cardType))
+			query.addConditions(Tables.EH_PARK_CHARGE.CARD_TYPE.eq(cardType));
+		if(null!=offset && null != pageSize)
+			query.addLimit(offset, pageSize);
 		
 		List<ParkCharge> result = new ArrayList<ParkCharge>();
 		query.fetch().map((r) -> {

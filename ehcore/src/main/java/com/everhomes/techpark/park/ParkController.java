@@ -43,7 +43,7 @@ public class ParkController extends ControllerBase{
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
 	/**
 	 * 
 	 * <b>URL: /techpark/park/rechargeResult</b>
@@ -54,6 +54,22 @@ public class ParkController extends ControllerBase{
 	public RestResponse rechargeResult(RechargeResultSearchCommand cmd) {
 		
 		RechargeSuccessResponse result = parkService.getRechargeStatus(cmd.getBillId());
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * 
+	 * <b>URL: /techpark/park/listCardType</b>
+	 * @return
+	 */
+	@RequestMapping("rechargeResult")
+	@RestReturn(value = ListCardTypeResponse.class)
+	public RestResponse listCardType(ListCardTypeCommand cmd) {
+		
+		ListCardTypeResponse result = parkService.listCardType(cmd);
 		RestResponse response = new RestResponse(result);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

@@ -353,15 +353,18 @@ CREATE TABLE `eh_rental_bill_paybill_map`(
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4; 
 
+
 DROP TABLE IF EXISTS `eh_park_charge`;
 
 CREATE TABLE `eh_park_charge`(
   `id` BIGINT NOT NULL COMMENT 'id',
   `months` TINYINT,
+  `card_type` VARCHAR(128),
   `amount` DOUBLE,
   `community_id` BIGINT,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
 DROP TABLE IF EXISTS `eh_recharge_info`;
 
 CREATE TABLE `eh_recharge_info`(
@@ -370,6 +373,7 @@ CREATE TABLE `eh_recharge_info`(
   `plate_number` VARCHAR(20),
   `number_type` TINYINT COMMENT '0-car plate',
   `owner_name` VARCHAR(20) COMMENT 'plate number owner name',
+  `card_type` VARCHAR(128),
   `recharge_userid` BIGINT,
   `recharge_username` VARCHAR(20) ,
   `recharge_phone` VARCHAR(20) ,

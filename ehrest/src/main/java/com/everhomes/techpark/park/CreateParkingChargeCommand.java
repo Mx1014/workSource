@@ -10,7 +10,8 @@ public class CreateParkingChargeCommand {
 	
 	@NotNull
 	private Double amount;
-	
+
+	private String cardType;
 	private Long communityId;
 
 	public Byte getMonths() {
@@ -35,6 +36,14 @@ public class CreateParkingChargeCommand {
 
 	public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
+	}
+
+	public String getCardType() {
+		return cardType;
+	}
+
+	public void setCardType(String cardType) {
+		this.cardType = cardType;
 	}
 
 	
