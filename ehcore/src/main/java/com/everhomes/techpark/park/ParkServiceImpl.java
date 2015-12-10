@@ -555,29 +555,32 @@ public class ParkServiceImpl implements ParkService {
 			OnlinePayBillCommand cmd) {
 
 		RechargeInfoDTO info = onlinePayService.onlinePayBill(cmd);
-		String carNumber = info.getPlateNumber();
-		String cost = (int)(info.getRechargeAmount()*100) +"";
-		String flag = "2"; //停车场系统接口的传入参数，2表示是车牌号
-		String payTime = info.getRechargeTime().toString();
-//		response.setSign("sign");
-		String validStart = timestampToStr(info.getOldValidityperiod());
-		String validEnd = timestampToStr(info.getNewValidityperiod());
-		
-		URL wsdlURL = Service1.WSDL_LOCATION;
-		
-		Service1 ss = new Service1(wsdlURL, SERVICE_NAME);
-        Service1Soap port = ss.getService1Soap12();
-        LOGGER.info("refreshParkingSystem");
-        
-        String json = port.cardPayMoney("", carNumber, flag, cost, validStart, validEnd, payTime, "sign");
-		
-		ResultHolder resultHolder = GsonUtil.fromJson(json, ResultHolder.class);
-		this.checkResultHolderIsNull(resultHolder,carNumber);
-		
-		if(resultHolder.isSuccess()){
-			updateRechargeOrder(Long.valueOf(cmd.getOrderNo()));
+		if(cmd.getPayStatus().toLowerCase().equals("fail")) {
+			LOGGER.error("pay failed.orderNo ="+cmd.getOrderNo());
 		}
-	
+		else {
+			String carNumber = info.getPlateNumber();
+			String cost = (int)(info.getRechargeAmount()*100) +"";
+			String flag = "2"; //停车场系统接口的传入参数，2表示是车牌号
+			String payTime = info.getRechargeTime().toString();
+			String validStart = timestampToStr(info.getOldValidityperiod());
+			String validEnd = timestampToStr(info.getNewValidityperiod());
+			
+			URL wsdlURL = Service1.WSDL_LOCATION;
+			
+			Service1 ss = new Service1(wsdlURL, SERVICE_NAME);
+	        Service1Soap port = ss.getService1Soap12();
+	        LOGGER.info("refreshParkingSystem");
+	        
+	        String json = port.cardPayMoney("", carNumber, flag, cost, validStart, validEnd, payTime, "sign");
+			
+			ResultHolder resultHolder = GsonUtil.fromJson(json, ResultHolder.class);
+			this.checkResultHolderIsNull(resultHolder,carNumber);
+			
+			if(resultHolder.isSuccess()){
+				updateRechargeOrder(Long.valueOf(cmd.getOrderNo()));
+			}
+		}
 		RechargeSuccessResponse rechargeResponse = getRechargeStatus(Long.valueOf(cmd.getOrderNo()));
 		return rechargeResponse;
 		
