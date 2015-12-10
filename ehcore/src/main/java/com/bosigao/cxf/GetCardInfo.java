@@ -8,9 +8,9 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>anonymous complex type锟斤拷 Java 锟洁。
+ * <p>anonymous complex type的 Java 类。
  * 
- * <p>锟斤拷锟斤拷模式片锟斤拷指锟斤拷锟斤拷锟斤拷锟节达拷锟斤拷锟叫碉拷预锟斤拷锟斤拷锟捷★拷
+ * <p>以下模式片段指定包含在此类中的预期内容。
  * 
  * <pre>
  * &lt;complexType&gt;
@@ -45,7 +45,7 @@ public class GetCardInfo {
     protected String sign;
 
     /**
-     * 锟斤拷取cardCode锟斤拷锟皆碉拷值锟斤拷
+     * 获取cardCode属性的值。
      * 
      * @return
      *     possible object is
@@ -57,7 +57,7 @@ public class GetCardInfo {
     }
 
     /**
-     * 锟斤拷锟斤拷cardCode锟斤拷锟皆碉拷值锟斤拷
+     * 设置cardCode属性的值。
      * 
      * @param value
      *     allowed object is
@@ -69,7 +69,7 @@ public class GetCardInfo {
     }
 
     /**
-     * 锟斤拷取carNumber锟斤拷锟皆碉拷值锟斤拷
+     * 获取carNumber属性的值。
      * 
      * @return
      *     possible object is
@@ -81,7 +81,7 @@ public class GetCardInfo {
     }
 
     /**
-     * 锟斤拷锟斤拷carNumber锟斤拷锟皆碉拷值锟斤拷
+     * 设置carNumber属性的值。
      * 
      * @param value
      *     allowed object is
@@ -93,7 +93,7 @@ public class GetCardInfo {
     }
 
     /**
-     * 锟斤拷取flag锟斤拷锟皆碉拷值锟斤拷
+     * 获取flag属性的值。
      * 
      * @return
      *     possible object is
@@ -105,7 +105,7 @@ public class GetCardInfo {
     }
 
     /**
-     * 锟斤拷锟斤拷flag锟斤拷锟皆碉拷值锟斤拷
+     * 设置flag属性的值。
      * 
      * @param value
      *     allowed object is
@@ -117,7 +117,7 @@ public class GetCardInfo {
     }
 
     /**
-     * 锟斤拷取sign锟斤拷锟皆碉拷值锟斤拷
+     * 获取sign属性的值。
      * 
      * @return
      *     possible object is
@@ -129,7 +129,7 @@ public class GetCardInfo {
     }
 
     /**
-     * 锟斤拷锟斤拷sign锟斤拷锟皆碉拷值锟斤拷
+     * 设置sign属性的值。
      * 
      * @param value
      *     allowed object is

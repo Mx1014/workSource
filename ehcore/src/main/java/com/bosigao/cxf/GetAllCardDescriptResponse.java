@@ -18,7 +18,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent&gt;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
  *       &lt;sequence&gt;
- *         &lt;element name="GetCardInfoResult" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
+ *         &lt;element name="GetAllCardDescriptResult" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
  *     &lt;/restriction&gt;
  *   &lt;/complexContent&gt;
@@ -29,36 +29,36 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "getCardInfoResult"
+    "getAllCardDescriptResult"
 })
-@XmlRootElement(name = "GetCardInfoResponse")
-public class GetCardInfoResponse {
+@XmlRootElement(name = "GetAllCardDescriptResponse")
+public class GetAllCardDescriptResponse {
 
-    @XmlElement(name = "GetCardInfoResult")
-    protected String getCardInfoResult;
+    @XmlElement(name = "GetAllCardDescriptResult")
+    protected String getAllCardDescriptResult;
 
     /**
-     * 获取getCardInfoResult属性的值。
+     * 获取getAllCardDescriptResult属性的值。
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getGetCardInfoResult() {
-        return getCardInfoResult;
+    public String getGetAllCardDescriptResult() {
+        return getAllCardDescriptResult;
     }
 
     /**
-     * 设置getCardInfoResult属性的值。
+     * 设置getAllCardDescriptResult属性的值。
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setGetCardInfoResult(String value) {
-        this.getCardInfoResult = value;
+    public void setGetAllCardDescriptResult(String value) {
+        this.getAllCardDescriptResult = value;
     }
 
 }

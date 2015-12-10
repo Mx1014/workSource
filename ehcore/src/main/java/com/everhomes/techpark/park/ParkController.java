@@ -61,7 +61,7 @@ public class ParkController extends ControllerBase{
 	 * <b>URL: /techpark/park/listCardType</b>
 	 * @return
 	 */
-	@RequestMapping("rechargeResult")
+	@RequestMapping("listCardType")
 	@RestReturn(value = ListCardTypeResponse.class)
 	public RestResponse listCardType(ListCardTypeCommand cmd) {
 		
