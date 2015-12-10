@@ -632,7 +632,7 @@ public class ParkServiceImpl implements ParkService {
 				String plateNumber = (String) card.get("carNumber");
 				
 				String validEnd = (String) card.get("validEnd");
-
+				String cardCode = (String) card.get("cardCode");
 				String cardType = (String) card.get("cardDescript"); 
 				Timestamp validityPeriod = strToTimestamp(validEnd);
 
@@ -641,6 +641,7 @@ public class ParkServiceImpl implements ParkService {
 				response.setPlateNumber(plateNumber);
 				response.setValidityPeriod(validityPeriod);
 				response.setCardType(cardType);
+				response.setCardCode(cardCode);
 				response.setIsValid("true");
 				List<ParkCharge> parkCharge = parkProvider.listParkingChargeByEnterpriseCommunityId(cmd.getCommunityId(),cardType, null, null);
 				response.setParkingCharge(parkCharge.stream().map(r->{
