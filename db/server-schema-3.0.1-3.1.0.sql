@@ -331,6 +331,19 @@ ALTER TABLE `eh_events` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE `eh_polls` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
 -- ALTER TABLE `eh_devices` MODIFY COLUMN `device_id` VARCHAR(2048) NOT NULL DEFAULT '';
 
+-- update at 20151210
+ALTER TABLE eh_park_charge ADD COLUMN `card_type`  VARCHAR(128);
+ALTER TABLE eh_recharge_info ADD COLUMN  `card_type`  VARCHAR(128);
+ALTER TABLE eh_park_charge ADD COLUMN `card_type`  VARCHAR(128);
+ALTER TABLE eh_recharge_info ADD COLUMN  `card_type`  VARCHAR(128);
+ALTER TABLE `eh_configurations` ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE `eh_configurations` ADD COLUMN `display_name` VARCHAR(128);
+UPDATE `eh_park_charge` SET card_type = '普通月卡';
+UPDATE `eh_launch_pad_items` SET action_data = '{"cardDescription":"目前仅开通金融基地停车场
+其他停车场线上充值功能正在建设中"}' WHERE action_type = 30 ;
+update `eh_launch_pad_items` set `action_data` = '{"privateFlag":0,"keywords":"不传"}' , `action_type` = 36 where `id` = 813;
+
+
 -- ALTER TABLE `eh_categories` DROP INDEX `u_eh_category_name`;
 
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'enterprise.notification', 1, 'zh_CN', '用户加入企业，用户自己的消息', '您已加入公司“${enterpriseName}”。');
