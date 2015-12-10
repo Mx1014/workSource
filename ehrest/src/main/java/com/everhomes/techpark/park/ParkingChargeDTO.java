@@ -5,6 +5,7 @@ public class ParkingChargeDTO {
 	private Long id;
 	
 	private Byte months;
+	private String cardType;
 	
 	private Double amount;
 	
@@ -40,6 +41,14 @@ public class ParkingChargeDTO {
 
 	public void setEnterpriseCommunityId(Long enterpriseCommunityId) {
 		this.enterpriseCommunityId = enterpriseCommunityId;
+	}
+
+	public String getCardType() {
+		return cardType;
+	}
+
+	public void setCardType(String cardType) {
+		this.cardType = cardType;
 	}
 	
 
