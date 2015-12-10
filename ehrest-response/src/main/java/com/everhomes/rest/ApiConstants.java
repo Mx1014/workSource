@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-12-03 14:07:04
+// generated at 2015-12-10 17:13:58
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -42,8 +42,10 @@ public interface ApiConstants {
     public static final String ADMIN_ADDNAMESPACE_URL = "/admin/addNamespace";
     public static final String ADMIN_ADDPERSISTSERVER_URL = "/admin/addPersistServer";
     public static final String ADMIN_ADDRESS_CORRECTADDRESS_URL = "/admin/address/correctAddress";
+    public static final String ADMIN_ADDRESS_IMPORTADDRESSDATA_URL = "/admin/address/importAddressData";
     public static final String ADMIN_ADDRESS_IMPORTADDRESSINFOS_URL = "/admin/address/importAddressInfos";
     public static final String ADMIN_ADDRESS_IMPORTCOMMUNITYINFOS_URL = "/admin/address/importCommunityInfos";
+    public static final String ADMIN_ADDRESS_IMPORTPARKADDRESSDATA_URL = "/admin/address/importParkAddressData";
     public static final String ADMIN_BANNER_CREATEBANNER_URL = "/admin/banner/createBanner";
     public static final String ADMIN_BANNER_DELETEBANNER_URL = "/admin/banner/deleteBanner";
     public static final String ADMIN_BANNER_GETBANNERBYID_URL = "/admin/banner/getBannerById";
@@ -236,6 +238,7 @@ public interface ApiConstants {
     public static final String ECARD_POST_URL = "/ecard/post";
     public static final String ENTERPRISE_ENTERPRISECOMMUNITIES_URL = "/enterprise/enterpriseCommunities";
     public static final String ENTERPRISE_ENTERPRISEDETAIL_URL = "/enterprise/enterpriseDetail";
+    public static final String ENTERPRISE_FINDENTERPRISEBYADDRESS_URL = "/enterprise/findEnterpriseByAddress";
     public static final String ENTERPRISE_INVITETOJOINCOMMUNITY_URL = "/enterprise/inviteToJoinCommunity";
     public static final String ENTERPRISE_LISTENTERPRISEBYCOMMUNITYID_URL = "/enterprise/listEnterpriseByCommunityId";
     public static final String ENTERPRISE_LISTENTERPRISEBYPHONE_URL = "/enterprise/listEnterpriseByPhone";
@@ -302,6 +305,7 @@ public interface ApiConstants {
     public static final String GROUP_LISTADMINOPREQUESTS_URL = "/group/listAdminOpRequests";
     public static final String GROUP_LISTGROUPWAITINGACCEPTANCES_URL = "/group/listGroupWaitingAcceptances";
     public static final String GROUP_LISTGROUPWAITINGAPPROVALS_URL = "/group/listGroupWaitingApprovals";
+    public static final String GROUP_LISTGROUPSBYNAMESPACEID_URL = "/group/listGroupsByNamespaceId";
     public static final String GROUP_LISTGROUPSBYTAG_URL = "/group/listGroupsByTag";
     public static final String GROUP_LISTMEMBERSINROLE_URL = "/group/listMembersInRole";
     public static final String GROUP_LISTMEMBERSINSTATUS_URL = "/group/listMembersInStatus";
@@ -481,6 +485,7 @@ public interface ApiConstants {
     public static final String TECHPARK_PARK_APPLYPARKINGCARD_URL = "/techpark/park/applyParkingCard";
     public static final String TECHPARK_PARK_GETPAYMENTRANKING_URL = "/techpark/park/getPaymentRanking";
     public static final String TECHPARK_PARK_GETRECHARGEDPLATE_URL = "/techpark/park/getRechargedPlate";
+    public static final String TECHPARK_PARK_LISTCARDTYPE_URL = "/techpark/park/listCardType";
     public static final String TECHPARK_PARK_LISTPARKINGCHARGE_URL = "/techpark/park/listParkingCharge";
     public static final String TECHPARK_PARK_LISTRECHARGERECORD_URL = "/techpark/park/listRechargeRecord";
     public static final String TECHPARK_PARK_RECHARGE_URL = "/techpark/park/recharge";
