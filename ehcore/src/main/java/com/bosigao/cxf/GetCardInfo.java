@@ -8,9 +8,9 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>anonymous complex typeµÄ Java Àà¡£
+ * <p>anonymous complex typeçš„ Java ç±»ã€‚
  * 
- * <p>ÒÔÏÂÄ£Ê½Æ¬¶ÎÖ¸¶¨°üº¬ÔÚ´ËÀàÖĞµÄÔ¤ÆÚÄÚÈİ¡£
+ * <p>ä»¥ä¸‹æ¨¡å¼ç‰‡æ®µæŒ‡å®šåŒ…å«åœ¨æ­¤ç±»ä¸­çš„é¢„æœŸå†…å®¹ã€‚
  * 
  * <pre>
  * &lt;complexType&gt;
@@ -45,7 +45,7 @@ public class GetCardInfo {
     protected String sign;
 
     /**
-     * »ñÈ¡cardCodeÊôĞÔµÄÖµ¡£
+     * è·å–cardCodeå±æ€§çš„å€¼ã€‚
      * 
      * @return
      *     possible object is
@@ -57,7 +57,7 @@ public class GetCardInfo {
     }
 
     /**
-     * ÉèÖÃcardCodeÊôĞÔµÄÖµ¡£
+     * è®¾ç½®cardCodeå±æ€§çš„å€¼ã€‚
      * 
      * @param value
      *     allowed object is
@@ -69,7 +69,7 @@ public class GetCardInfo {
     }
 
     /**
-     * »ñÈ¡carNumberÊôĞÔµÄÖµ¡£
+     * è·å–carNumberå±æ€§çš„å€¼ã€‚
      * 
      * @return
      *     possible object is
@@ -81,7 +81,7 @@ public class GetCardInfo {
     }
 
     /**
-     * ÉèÖÃcarNumberÊôĞÔµÄÖµ¡£
+     * è®¾ç½®carNumberå±æ€§çš„å€¼ã€‚
      * 
      * @param value
      *     allowed object is
@@ -93,7 +93,7 @@ public class GetCardInfo {
     }
 
     /**
-     * »ñÈ¡flagÊôĞÔµÄÖµ¡£
+     * è·å–flagå±æ€§çš„å€¼ã€‚
      * 
      * @return
      *     possible object is
@@ -105,7 +105,7 @@ public class GetCardInfo {
     }
 
     /**
-     * ÉèÖÃflagÊôĞÔµÄÖµ¡£
+     * è®¾ç½®flagå±æ€§çš„å€¼ã€‚
      * 
      * @param value
      *     allowed object is
@@ -117,7 +117,7 @@ public class GetCardInfo {
     }
 
     /**
-     * »ñÈ¡signÊôĞÔµÄÖµ¡£
+     * è·å–signå±æ€§çš„å€¼ã€‚
      * 
      * @return
      *     possible object is
@@ -129,7 +129,7 @@ public class GetCardInfo {
     }
 
     /**
-     * ÉèÖÃsignÊôĞÔµÄÖµ¡£
+     * è®¾ç½®signå±æ€§çš„å€¼ã€‚
      * 
      * @param value
      *     allowed object is
