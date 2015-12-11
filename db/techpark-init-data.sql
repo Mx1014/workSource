@@ -54,10 +54,10 @@ INSERT INTO `eh_punch_workday` (`id`, `date_status`, `date_tag`, `creator_uid`, 
 
 
 
-insert into `eh_punch_rules` (`id`, `company_id`, `start_early_time`, `start_late_time`, `work_time`, `time_tag1`, `time_tag2`, `time_tag3`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) values('2','178395','08:30:00','09:30:00','10:00:00',NULL,NULL,NULL,'195506','2015-11-22 09:24:38',NULL,NULL);
+insert into `eh_punch_rules` (`id`, `enterprise_id`, `start_early_time`, `start_late_time`, `work_time`, `time_tag1`, `time_tag2`, `time_tag3`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) values('2','178395','08:30:00','09:30:00','10:00:00',NULL,NULL,NULL,'195506','2015-11-22 09:24:38',NULL,NULL);
 
 
-insert into `eh_punch_geopoints` (`id`, `company_id`, `description`, `longitude`, `latitude`, `geohash`, `distance`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) values('2','178395','深圳科技工业园大厦(科苑路6号(近深南大道))','113.952909','22.549597','ws10311bzjx3','1000','195506','2015-11-22 09:24:38',NULL,NULL);
+insert into `eh_punch_geopoints` (`id`, `enterprise_id`, `description`, `longitude`, `latitude`, `geohash`, `distance`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) values('2','178395','深圳科技工业园大厦(科苑路6号(近深南大道))','113.952909','22.549597','ws10311bzjx3','1000','195506','2015-11-22 09:24:38',NULL,NULL);
  
  
  DELETE FROM  `eh_rental_rules`  ; 
@@ -892,6 +892,6 @@ insert into `eh_rental_site_rules` (`id`, `community_id`, `site_type`, `rental_s
 insert into `eh_rental_site_rules` (`id`, `community_id`, `site_type`, `rental_site_id`, `rental_type`, `amorpm`, `rentalStep`, `begin_time`, `end_time`, `counts`, `unit`, `price`, `site_rental_date`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) values('728','240111044331048623','ELECSCREEN','17','2',NULL,'1',NULL,NULL,'1','1','100','2015-12-29','0','193501','2015-11-21 06:19:38',NULL,NULL);
 insert into `eh_rental_site_rules` (`id`, `community_id`, `site_type`, `rental_site_id`, `rental_type`, `amorpm`, `rentalStep`, `begin_time`, `end_time`, `counts`, `unit`, `price`, `site_rental_date`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) values('729','240111044331048623','ELECSCREEN','17','2',NULL,'1',NULL,NULL,'1','1','100','2015-12-30','0','193501','2015-11-21 06:19:38',NULL,NULL);
 
---园区热线
+-- 园区热线
 insert into `eh_yellow_pages` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `nick_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`) values('10000','0','namespace','1000000','园区服务热线','园区服务热线','4','','','深圳科技工业园是我国大陆第一个高新科技产业园\', \'深圳科技工业园是我国大陆第一个高新科技产业园，于1985年由深圳市政府和中国科学院共同创办。1991年，经国务院批准，深圳科技工业园成为首批国家级高新技术产业园区。\r\n\r\n园区占地面积1.15平方公里，经过不断的开发建设，深圳科技工业园已成为投资环境优越、高新技术企业云集、科技开发实力雄厚、人才济济的科技园','cs://1/image/aW1hZ2UvTVRvd01qUmpNV00wTkdaaVltWTNNemt3TXpOak9EZGlOMk15TldZd01qWTNNUQ','2','2','113.953126','22.549823','ws103144hr9m',NULL,NULL,NULL,NULL,NULL,'Dave Lee','1355125','知识产权',NULL,NULL,NULL,'2015-11-19 16:50:35');
 
