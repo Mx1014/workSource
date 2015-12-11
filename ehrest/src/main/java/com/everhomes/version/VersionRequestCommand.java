@@ -2,6 +2,8 @@ package com.everhomes.version;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.util.StringHelper;
+
 public class VersionRequestCommand {
 
     @NotNull
@@ -11,8 +13,6 @@ public class VersionRequestCommand {
     private VersionDTO currentVersion;
     
     private String locale;
-    
-    private Integer namespaceId;
     
     public VersionRequestCommand() {
     }
@@ -40,13 +40,9 @@ public class VersionRequestCommand {
     public void setLocale(String locale) {
         this.locale = locale;
     }
-
-    public Integer getNamespaceId() {
-        return namespaceId;
-    }
-
-    public void setNamespaceId(Integer namespaceId) {
-        this.namespaceId = namespaceId;
-    }
     
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }
