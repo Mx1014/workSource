@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -22,9 +23,11 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.everhomes.acl.Role;
 import com.everhomes.app.AppConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
@@ -105,6 +108,9 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
     
     @Autowired
     private CoordinationProvider coordinationProvider;
+    
+    @Autowired
+    private ContentServerService contentServerService;
 
 	@Override
 	public void addContactGroupMember(EnterpriseContactGroupMember member) {
@@ -293,9 +299,44 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 					+ userId + ", cmd=" + cmd);
 			return null;
 		} else {
+	        Map<Long, Long> ctx = new HashMap<Long, Long>();
+		    sendMessageForContactRequestToJoin(ctx, result);
 			return ConvertHelper.convert(result, EnterpriseContactDTO.class);
 		}
 	}
+	
+    private QuestionMetaObject createGroupQuestionMetaObject(Enterprise enterprise, EnterpriseContact requestor, EnterpriseContact target) {
+        QuestionMetaObject metaObject = new QuestionMetaObject();
+        
+        if(enterprise != null) {
+            metaObject.setResourceType(EntityType.GROUP.getCode());
+            metaObject.setResourceId(enterprise.getId());
+        }
+        
+        if(requestor != null) {
+            metaObject.setRequestorUid(requestor.getUserId());
+            metaObject.setRequestTime(requestor.getCreateTime());
+            metaObject.setRequestorNickName(requestor.getName());
+            String avatar = requestor.getAvatar();
+            metaObject.setRequestorAvatar(avatar);
+            if(avatar != null && avatar.length() > 0) {
+                try{
+                    String url = contentServerService.parserUri(avatar, EntityType.GROUP.getCode(), enterprise.getId());
+                    metaObject.setRequestorAvatarUrl(url);
+                }catch(Exception e){
+                    LOGGER.error("Failed to parse avatar uri of enterprise contact, enterpriseId=" + enterprise.getId() 
+                        + ", contactId=" + requestor.getId() + ", userId=" + requestor.getUserId(), e);
+                }
+            }
+        }
+        
+        if(target != null) {
+            metaObject.setTargetType(EntityType.USER.getCode());
+            metaObject.setTargetId(target.getUserId());
+        }
+        
+        return metaObject;
+    }
 
 	/**
 	 * 批准用户加入企业
@@ -655,7 +696,85 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 			}
 		}
 		return members;
-	}
+	}    
+	
+	private List<Long> getEnterpriseAdminIncludeList(Long enterpriseId, Long operatorId, Long targetId) {
+        CrossShardListingLocator locator = new CrossShardListingLocator(enterpriseId);
+        List<EnterpriseContact> adminMembers = this.enterpriseContactProvider.queryContactByEnterpriseId(locator, enterpriseId, Integer.MAX_VALUE, (loc, query) -> {
+            Condition c = Tables.EH_ENTERPRISE_CONTACTS.ROLE.eq(Role.ResourceCreator);
+            c = c.or(Tables.EH_ENTERPRISE_CONTACTS.ROLE.eq(Role.ResourceAdmin));
+            query.addConditions(c);
+            return query;
+        });
+        List<Long> includeList = new ArrayList<Long>();
+        for(EnterpriseContact adminMember : adminMembers) {
+            if((operatorId == null || !operatorId.equals(adminMember.getUserId())) 
+                && (targetId == null || !targetId.equals(adminMember.getUserId()))) {
+                includeList.add(adminMember.getUserId());
+            }
+        }
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Get enterprise contact admin include list, enterpriseId=" + enterpriseId + ", operatorId=" + operatorId 
+                + ", targetId=" + targetId + ", includeList=" + includeList);
+        }
+        
+        return includeList;
+    }
+
+    private void sendMessageForContactRequestToJoin(Map<Long, Long> ctx, EnterpriseContact contact) {
+        Long check = null;
+        if (ctx != null) {
+            check = ctx.get(contact.getEnterpriseId());
+        }
+
+        if (check == null) {
+            if (ctx != null) {
+                ctx.put(contact.getEnterpriseId(), 1l);
+            }
+
+            Enterprise enterprise = this.enterpriseService.getEnterpriseById(contact.getEnterpriseId());
+            User user = userProvider.findUserById(contact.getUserId());
+
+            Map<String, String> map = new HashMap<String, String>();
+            map.put("enterpriseName", enterprise.getName());
+
+            String userName = contact.getNickName();
+            if (userName == null || userName.trim().isEmpty()) {
+                userName = contact.getName();
+                if (null != userName) {
+                    userName = "";
+                }
+            }
+            map.put("userName", userName);
+            String locale = user.getLocale();
+
+            // send notification to who is requesting to join the enterprise
+            String scope = EnterpriseNotifyTemplateCode.SCOPE;
+            int code = EnterpriseNotifyTemplateCode.ENTERPRISE_CONTACT_REQUEST_TO_JOIN_FOR_APPLICANT;
+            String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+            List<Long> includeList = new ArrayList<Long>();
+            includeList.add(contact.getUserId());
+            sendEnterpriseNotification(enterprise.getId(), includeList, null, notifyTextForApplicant, null, null);
+
+            // send notification to all the other members in the group
+            code = EnterpriseNotifyTemplateCode.ENTERPRISE_CONTACT_REQUEST_TO_JOIN_FOR_OPERATOR;
+            notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+            includeList = getEnterpriseAdminIncludeList(enterprise.getId(), user.getId(), user.getId());
+            if(includeList.size() > 0) {
+                QuestionMetaObject metaObject = createGroupQuestionMetaObject(enterprise, contact, null);
+                sendEnterpriseNotification(enterprise.getId(), includeList, null, notifyTextForApplicant, 
+                    MetaObjectType.ENTERPRISE_REQUEST_TO_JOIN, metaObject);
+                if(LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Send waiting approval message to admin contact in enterprise, userId=" + user.getId() 
+                        + ", enterpriseId=" + enterprise.getId() + ", adminList=" + includeList);
+                }
+            } else {
+                if(LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("No admin contact found in enterprise, userId=" + user.getId() + ", enterpriseId=" + enterprise.getId());
+                }
+            }
+        }
+    }
 
 	private void sendMessageForContactApproved(Map<Long, Long> ctx, EnterpriseContact contact) {
 		Long check = null;

@@ -331,6 +331,20 @@ ALTER TABLE `eh_events` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE `eh_polls` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
 -- ALTER TABLE `eh_devices` MODIFY COLUMN `device_id` VARCHAR(2048) NOT NULL DEFAULT '';
 
+-- update at 20151210
+ALTER TABLE eh_park_charge ADD COLUMN `card_type`  VARCHAR(128);
+ALTER TABLE eh_recharge_info ADD COLUMN  `card_type`  VARCHAR(128);
+ALTER TABLE eh_park_charge ADD COLUMN `card_type`  VARCHAR(128);
+ALTER TABLE eh_recharge_info ADD COLUMN  `card_type`  VARCHAR(128);
+ALTER TABLE `eh_configurations` ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE `eh_configurations` ADD COLUMN `display_name` VARCHAR(128);
+ALTER TABLE `eh_configurations` DROP INDEX `u_eh_conf_name`;
+UPDATE `eh_park_charge` SET card_type = '普通月卡';
+UPDATE `eh_launch_pad_items` SET action_data = '{"cardDescription":"目前仅开通金融基地停车场
+其他停车场线上充值功能正在建设中"}' WHERE action_type = 30 ;
+update `eh_launch_pad_items` set `action_data` = '{"privateFlag":0,"keywords":"不传"}' , `action_type` = 36 where `id` = 813;
+
+
 -- ALTER TABLE `eh_categories` DROP INDEX `u_eh_category_name`;
 
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'enterprise.notification', 1, 'zh_CN', '用户加入企业，用户自己的消息', '您已加入公司“${enterpriseName}”。');
@@ -338,8 +352,12 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'enterprise.notification', 3, 'zh_CN', '拒绝加入公司', '您被拒绝加入公司“${enterpriseName}”。');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'enterprise.notification', 4, 'zh_CN', '发给企业其它所有成员', '您已离开公司“${enterpriseName}”。');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'enterprise.notification', 5, 'zh_CN', '发给企业其它所有成员', '${userName}已离开公司“${enterpriseName}”。');
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'enterprise.notification', 6, 'zh_CN', '发给申请加入企业的请求者', '${userName}申请加入公司“${enterpriseName}”。');
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'enterprise.notification', 7, 'zh_CN', '有人申请加入企业，发给企业管理员', '${userName}正申请加入公司“${enterpriseName}”，您同意此申请吗？');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'park.notification', 1, 'zh_CN', '有新的月卡发放通知排队用户申请月卡成功', '月卡申报成功，请于“${deadline}” 18:00前去领取，否则自动失效。');
-  
+
+INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (1000000, 'app.agreements.url', '/mobile/static/app_agreements/techpark_agreements.html', 'the relative path for techpark app agreements');
+INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (999999, 'app.agreements.url', '/mobile/static/app_agreements/xunmei_agreements.html', 'the relative path for techpark app agreements');
 
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'enterprise', '10001', 'zh_CN', '公司不存在');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'parking', '10001', 'zh_CN', '车牌号位数错误');
