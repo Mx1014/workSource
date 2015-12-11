@@ -12,6 +12,8 @@ public class GetYellowPageListCommand {
 	private Long ownerId;
 	@NotNull
 	private Byte type;
+	
+	private String keywords;
 
 	private Long parentId;
 	
@@ -51,6 +53,15 @@ public class GetYellowPageListCommand {
 
 	public void setParentId(Long parentId) {
 		this.parentId = parentId;
+	}
+
+	
+	public String getKeywords() {
+		return keywords;
+	}
+
+	public void setKeywords(String keywords) {
+		this.keywords = keywords;
 	}
 
 	public Long getPageAnchor() {

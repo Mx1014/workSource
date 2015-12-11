@@ -383,4 +383,15 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		return enterpriseApplyEntryProvider.updateApplyEntryStatus(cmd.getId(), cmd.getStatus());
 		
 	}
+	
+	@Override
+	public boolean deleteApplyEntry(DeleteApplyEntryCommand cmd){
+		return enterpriseApplyEntryProvider.deleteApplyEntry(cmd.getId());
+	}
+	
+	@Override
+	public boolean deleteLeasePromotion(DeleteLeasePromotionCommand cmd){
+		return enterpriseApplyEntryProvider.deleteLeasePromotion(cmd.getId());
+	}
+	
 }
