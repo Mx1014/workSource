@@ -170,6 +170,10 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 --	VALUES('821', 1000000, 0, 0, 0, '/home','Bizs','VIDEO_MEETING','视频会议','cs://1/image/aW1hZ2UvTVRveE9HRmlOelV6TUdJNE9ERTRaalF6Wm1Nd05EWmxabVkyTkRjMlltVTNaZw','1','1','27',NULL,'0','0','1','1','','0',NULL,NULL,NULL);
 -- INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`) 
 --	VALUES('822', 1000000, 0, 0, 0, '/home','Bizs','CARPOOL','拼车','cs://1/image/aW1hZ2UvTVRvME16a3lPVEJrTjJOaE5qTXhPV1prWVdKbE5EZzNOakEzWm1VM05tWTFPUQ','1','1','0',NULL,'0','0','1','1','','0',NULL,NULL,NULL);
+
+INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag,target_type, target_id) 
+	VALUES (827, 1000000, 0, '0', 0, '/home', 'Bizs', '更多', '更多', 'cs://1/image/aW1hZ2UvTVRvNE1XRTNZVEUxT0RGaE1EQmpZakF6TmprNE1EZ3paR1k0TVRVMFptUTJZdw', 1, 1, 1, '{"itemLocation":"/home", "itemGroup":"Bizs"}', 30, 0, 1, 1, '', 0,NULL, NULL, NULL);
+
 	
 INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag) 
 	VALUES (823, 1000000, 0, 0, 0, '/home/Pm', 'GaActions', 'ADVISE', '投诉建议', 'cs://1/image/aW1hZ2UvTVRwall6VTVOV1U0WkdRMk56aGxPRFV3TVRBMk5qVXlNVFkzWVRZek56aGpOdw', 1, 1, 19, '{"contentCategory":1006,"actionCategory":0,"forumId":176520,"targetEntityTag":"PM","embedAppId":27,"visibleRegionType":0}', 0, 0, 1, 1, '', 0,NULL);
