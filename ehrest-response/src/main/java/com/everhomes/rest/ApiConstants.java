@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-12-10 17:13:58
+// generated at 2015-12-11 10:49:15
 package com.everhomes.rest;
 
 public interface ApiConstants {
