@@ -334,11 +334,10 @@ ALTER TABLE `eh_polls` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
 
 -- update at 20151210
 -- ALTER TABLE eh_park_charge ADD COLUMN `card_type`  VARCHAR(128);
-ALTER TABLE eh_recharge_info ADD COLUMN  `card_type`  VARCHAR(128);
-ALTER TABLE eh_recharge_info ADD COLUMN  `card_type`  VARCHAR(128);
-ALTER TABLE `eh_configurations` ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
-ALTER TABLE `eh_configurations` ADD COLUMN `display_name` VARCHAR(128);
-ALTER TABLE `eh_configurations` DROP INDEX `u_eh_conf_name`;
+-- ALTER TABLE eh_recharge_info ADD COLUMN  `card_type`  VARCHAR(128);
+-- ALTER TABLE `eh_configurations` ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
+-- ALTER TABLE `eh_configurations` ADD COLUMN `display_name` VARCHAR(128);
+-- ALTER TABLE `eh_configurations` DROP INDEX `u_eh_conf_name`;
 UPDATE `eh_park_charge` SET card_type = '普通月卡';
 UPDATE `eh_launch_pad_items` SET action_data = '{"cardDescription":"目前仅开通金融基地停车场
 其他停车场线上充值功能正在建设中"}' WHERE action_type = 30 ;
@@ -654,7 +653,7 @@ ALTER TABLE `eh_lease_promotions` ADD COLUMN `contact_phone` VARCHAR(128);
 ALTER TABLE `eh_lease_promotions` ADD COLUMN `enter_time` DATETIME COMMENT 'enter time'; 
 
 -- 20151211 by xiongying
-ALTER TABLE `eh_park_apply_card` ADD COLUMN `company_name` VARCHAR(256) NOT NULL DEFAULT '';
+-- ALTER TABLE `eh_park_apply_card` ADD COLUMN `company_name` VARCHAR(256) NOT NULL DEFAULT '';
 
 
 ALTER TABLE `eh_enterprise_op_requests` MODIFY COLUMN apply_user_name VARCHAR(128) COMMENT 'apply user name';

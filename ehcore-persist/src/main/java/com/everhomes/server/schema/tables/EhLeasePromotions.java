@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLeasePromotions extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord> {
 
-	private static final long serialVersionUID = -766808442;
+	private static final long serialVersionUID = -1492500668;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_lease_promotions</code>
@@ -42,16 +42,6 @@ public class EhLeasePromotions extends org.jooq.impl.TableImpl<com.everhomes.ser
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord, java.lang.Long> COMMUNITY_ID = createField("community_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_lease_promotions.building_id</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord, java.lang.Long> BUILDING_ID = createField("building_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_lease_promotions.rent_position</code>. rent position
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord, java.lang.String> RENT_POSITION = createField("rent_position", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "rent position");
-
-	/**
 	 * The column <code>ehcore.eh_lease_promotions.rent_type</code>. For rent
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord, java.lang.String> RENT_TYPE = createField("rent_type", org.jooq.impl.SQLDataType.VARCHAR.length(128).nullable(false).defaulted(true), this, "For rent");
@@ -72,24 +62,9 @@ public class EhLeasePromotions extends org.jooq.impl.TableImpl<com.everhomes.ser
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord, java.lang.String> RENT_AREAS = createField("rent_areas", org.jooq.impl.SQLDataType.VARCHAR.length(1024), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_lease_promotions.contacts</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord, java.lang.String> CONTACTS = createField("contacts", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_lease_promotions.contact_phone</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord, java.lang.String> CONTACT_PHONE = createField("contact_phone", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
-
-	/**
 	 * The column <code>ehcore.eh_lease_promotions.description</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord, java.lang.String> DESCRIPTION = createField("description", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_lease_promotions.enter_time</code>. enter time
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord, java.sql.Timestamp> ENTER_TIME = createField("enter_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "enter time");
 
 	/**
 	 * The column <code>ehcore.eh_lease_promotions.create_uid</code>.
@@ -107,9 +82,34 @@ public class EhLeasePromotions extends org.jooq.impl.TableImpl<com.everhomes.ser
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord, java.sql.Timestamp> UPDATE_TIME = createField("update_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_lease_promotions.status</code>. 1: renting, 2: Rental, 3:offline
+	 * The column <code>ehcore.eh_lease_promotions.status</code>. 0: inactive, 1: active
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "1: renting, 2: Rental, 3:offline");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: inactive, 1: active");
+
+	/**
+	 * The column <code>ehcore.eh_lease_promotions.building_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord, java.lang.Long> BUILDING_ID = createField("building_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_lease_promotions.rent_position</code>. rent position
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord, java.lang.String> RENT_POSITION = createField("rent_position", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "rent position");
+
+	/**
+	 * The column <code>ehcore.eh_lease_promotions.contacts</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord, java.lang.String> CONTACTS = createField("contacts", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_lease_promotions.contact_phone</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord, java.lang.String> CONTACT_PHONE = createField("contact_phone", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_lease_promotions.enter_time</code>. enter time
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord, java.sql.Timestamp> ENTER_TIME = createField("enter_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "enter time");
 
 	/**
 	 * Create a <code>ehcore.eh_lease_promotions</code> table reference
