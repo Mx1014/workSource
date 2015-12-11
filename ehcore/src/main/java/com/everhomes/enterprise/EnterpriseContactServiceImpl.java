@@ -579,7 +579,10 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 			
 			if(StringUtils.isEmpty(detail.getAvatar())){
 				User user = userProvider.findUserById(contact.getUserId());
-				detail.setAvatar(user.getAvatar());
+				if(null != user){
+					detail.setAvatar(user.getAvatar());
+				}
+				
 			}
 				
 			details.add(detail);

@@ -202,6 +202,9 @@ public class EnterpriseApplyEntryProviderImpl implements
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		EhLeasePromotionsDao dao = new EhLeasePromotionsDao(context.configuration());
 		LeasePromotion leasePromotion = ConvertHelper.convert(dao.findById(id), LeasePromotion.class);
+		
+		if(null == leasePromotion) 
+			return leasePromotion;
 		List<LeasePromotionAttachment> attachments = this.getAttachments(leasePromotion.getId());
 		leasePromotion.setAttachments(attachments);
 		return leasePromotion;
