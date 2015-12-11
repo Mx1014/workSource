@@ -8,9 +8,9 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>anonymous complex typeµÄ Java Àà¡£
+ * <p>anonymous complex typeçš„ Java ç±»ã€‚
  * 
- * <p>ÒÔÏÂÄ£Ê½Æ¬¶ÎÖ¸¶¨°üº¬ÔÚ´ËÀàÖĞµÄÔ¤ÆÚÄÚÈİ¡£
+ * <p>ä»¥ä¸‹æ¨¡å¼ç‰‡æ®µæŒ‡å®šåŒ…å«åœ¨æ­¤ç±»ä¸­çš„é¢„æœŸå†…å®¹ã€‚
  * 
  * <pre>
  * &lt;complexType&gt;
@@ -57,7 +57,7 @@ public class CardPayMoney {
     protected String sign;
 
     /**
-     * »ñÈ¡cardCodeÊôĞÔµÄÖµ¡£
+     * è·å–cardCodeå±æ€§çš„å€¼ã€‚
      * 
      * @return
      *     possible object is
@@ -69,7 +69,7 @@ public class CardPayMoney {
     }
 
     /**
-     * ÉèÖÃcardCodeÊôĞÔµÄÖµ¡£
+     * è®¾ç½®cardCodeå±æ€§çš„å€¼ã€‚
      * 
      * @param value
      *     allowed object is
@@ -81,7 +81,7 @@ public class CardPayMoney {
     }
 
     /**
-     * »ñÈ¡carNumberÊôĞÔµÄÖµ¡£
+     * è·å–carNumberå±æ€§çš„å€¼ã€‚
      * 
      * @return
      *     possible object is
@@ -93,7 +93,7 @@ public class CardPayMoney {
     }
 
     /**
-     * ÉèÖÃcarNumberÊôĞÔµÄÖµ¡£
+     * è®¾ç½®carNumberå±æ€§çš„å€¼ã€‚
      * 
      * @param value
      *     allowed object is
@@ -105,7 +105,7 @@ public class CardPayMoney {
     }
 
     /**
-     * »ñÈ¡flagÊôĞÔµÄÖµ¡£
+     * è·å–flagå±æ€§çš„å€¼ã€‚
      * 
      * @return
      *     possible object is
@@ -117,7 +117,7 @@ public class CardPayMoney {
     }
 
     /**
-     * ÉèÖÃflagÊôĞÔµÄÖµ¡£
+     * è®¾ç½®flagå±æ€§çš„å€¼ã€‚
      * 
      * @param value
      *     allowed object is
@@ -129,7 +129,7 @@ public class CardPayMoney {
     }
 
     /**
-     * »ñÈ¡costÊôĞÔµÄÖµ¡£
+     * è·å–costå±æ€§çš„å€¼ã€‚
      * 
      * @return
      *     possible object is
@@ -141,7 +141,7 @@ public class CardPayMoney {
     }
 
     /**
-     * ÉèÖÃcostÊôĞÔµÄÖµ¡£
+     * è®¾ç½®costå±æ€§çš„å€¼ã€‚
      * 
      * @param value
      *     allowed object is
@@ -153,7 +153,7 @@ public class CardPayMoney {
     }
 
     /**
-     * »ñÈ¡validStartÊôĞÔµÄÖµ¡£
+     * è·å–validStartå±æ€§çš„å€¼ã€‚
      * 
      * @return
      *     possible object is
@@ -165,7 +165,7 @@ public class CardPayMoney {
     }
 
     /**
-     * ÉèÖÃvalidStartÊôĞÔµÄÖµ¡£
+     * è®¾ç½®validStartå±æ€§çš„å€¼ã€‚
      * 
      * @param value
      *     allowed object is
@@ -177,7 +177,7 @@ public class CardPayMoney {
     }
 
     /**
-     * »ñÈ¡validEndÊôĞÔµÄÖµ¡£
+     * è·å–validEndå±æ€§çš„å€¼ã€‚
      * 
      * @return
      *     possible object is
@@ -189,7 +189,7 @@ public class CardPayMoney {
     }
 
     /**
-     * ÉèÖÃvalidEndÊôĞÔµÄÖµ¡£
+     * è®¾ç½®validEndå±æ€§çš„å€¼ã€‚
      * 
      * @param value
      *     allowed object is
@@ -201,7 +201,7 @@ public class CardPayMoney {
     }
 
     /**
-     * »ñÈ¡payTimeÊôĞÔµÄÖµ¡£
+     * è·å–payTimeå±æ€§çš„å€¼ã€‚
      * 
      * @return
      *     possible object is
@@ -213,7 +213,7 @@ public class CardPayMoney {
     }
 
     /**
-     * ÉèÖÃpayTimeÊôĞÔµÄÖµ¡£
+     * è®¾ç½®payTimeå±æ€§çš„å€¼ã€‚
      * 
      * @param value
      *     allowed object is
@@ -225,7 +225,7 @@ public class CardPayMoney {
     }
 
     /**
-     * »ñÈ¡signÊôĞÔµÄÖµ¡£
+     * è·å–signå±æ€§çš„å€¼ã€‚
      * 
      * @return
      *     possible object is
@@ -237,7 +237,7 @@ public class CardPayMoney {
     }
 
     /**
-     * ÉèÖÃsignÊôĞÔµÄÖµ¡£
+     * è®¾ç½®signå±æ€§çš„å€¼ã€‚
      * 
      * @param value
      *     allowed object is
