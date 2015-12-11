@@ -358,6 +358,9 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 
 INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (1000000, 'app.agreements.url', '/mobile/static/app_agreements/techpark_agreements.html', 'the relative path for techpark app agreements');
 INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (999999, 'app.agreements.url', '/mobile/static/app_agreements/xunmei_agreements.html', 'the relative path for techpark app agreements');
+INSERT INTO `eh_configurations` (`namespace_id`, `name`, `display_name`, `value`, `description`) VALUES (1000000, 'yzx.vcode.templateid', '科技园注册码短信模板', '18077', 'vcode sms template id(yxz)');
+INSERT INTO `eh_configurations` (`namespace_id`, `name`, `display_name`, `value`, `description`) VALUES (999999, 'yzx.vcode.templateid', '讯美注册码短信模板', '18086', 'vcode sms template id(xunmei)');
+INSERT INTO `eh_configurations` (`namespace_id`, `name`, `display_name`, `value`, `description`) VALUES (999995, 'yzx.vcode.templateid', '金隅嘉业注册码短信模板', '18091', 'vcode sms template id(jinyujiaye)');
 
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'enterprise', '10001', 'zh_CN', '公司不存在');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'parking', '10001', 'zh_CN', '车牌号位数错误');
@@ -370,6 +373,7 @@ INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(999999, '讯美园区版');
 INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(999998, '华为园区版');
 INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(999997, '左邻服务版');
 INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(999996, '上海联通版');
+INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(999995, '金隅嘉业版');
 
 -- INSERT INTO `eh_acl_privileges` (`app_id`,`name`,`description`) VALUES(32, '设置组的管理员，普通成员的增删改Group_member_mgt', '设置组的管理员，普通成员的增删改');
 -- INSERT INTO `eh_acl_privileges` (`app_id`,`name`,`description`) VALUES(32, 'Group_mgt', '组的增删改');
