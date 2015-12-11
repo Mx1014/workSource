@@ -196,7 +196,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}
 		
 		for (EnterpriseOpRequest enterpriseOpRequest : enterpriseOpRequests) {
-			if(ApplyEntrySourceType.BUILDING.equals(enterpriseOpRequest.getSourceType())){
+			if(ApplyEntrySourceType.BUILDING.getCode().equals(enterpriseOpRequest.getSourceType())){
 				Building building = communityProvider.findBuildingById(enterpriseOpRequest.getSourceId());
 				if(null != building)enterpriseOpRequest.setSourceName(building.getName());
 			}else if(ApplyEntrySourceType.FOR_RENT.equals(enterpriseOpRequest.getSourceType())){
