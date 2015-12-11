@@ -1282,17 +1282,6 @@ public class PropertyMgrController extends ControllerBase {
 		return response;
 	}
 	
-	@RequestMapping("testOnline")
-	@RestReturn(value=String.class)
-	public RestResponse testOnline(@Valid FindPmBillByOrderNoCommand cmd) {
-		String orderNo = cmd.getOrderNo();
-		propertyMgrService.remoteUpdateOrgOrderByOrderNo(orderNo);
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	
 	@RequestMapping("getWebToken")
     @RestReturn(value=String.class)
     public RestResponse getWebToken(@Valid FindPmBillByOrderNoCommand cmd){
