@@ -14,6 +14,8 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.techpark.onlinePay.OnlinePayBillCommand;
+import com.everhomes.techpark.park.RechargeSuccessResponse;
 import com.everhomes.util.RequireAuthentication;
 
 @RestDoc(value = "VideoConf controller", site = "ehcore")
@@ -26,6 +28,27 @@ public class VideoConfController  extends ControllerBase{
 	
 	@Autowired
     private ConfigurationProvider configurationProvider;
+	
+	/**
+	 * <b>URL: /conf/getAppDownloadURL</b>
+	 * 获取视频会议app的下载路径
+	 * @return
+	 */
+	@RequestMapping("getAppDownloadURL")
+	@RestReturn(value = String.class)
+	public RestResponse getAppDownloadURL(DownloadAppCommand cmd) {
+		String url = null;
+		
+		if(cmd.getAppType() == 0)
+			url = configurationProvider.getValue(ConfigConstants.VIDEOCONF_APPURL_IOS, "");
+		if(cmd.getAppType() == 1)
+			url = configurationProvider.getValue(ConfigConstants.VIDEOCONF_APPURL_ANDRIOD, "");
+		RestResponse response = new RestResponse(url);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+		
+	}
 	
 	/**
 	 * <b>URL: /conf/setVideoConfAccountTrialRule</b>
@@ -522,7 +545,7 @@ public class VideoConfController  extends ControllerBase{
 	
 	/**
 	 * <b>URL: /conf/updateContactor</b>
-	 * 锁定or解锁企业所有视频会议账号
+	 * 修改企业联系人（修改客户）
 	 * @return
 	 */
 	@RequestMapping("updateContactor")
@@ -663,22 +686,54 @@ public class VideoConfController  extends ControllerBase{
 //		response.setErrorDescription("OK");
 //		return response;
 //	}
-//	
-//	/**
-//	 * <b>URL: /conf/updateVideoConfAccountOrderInfo</b>
-//	 * 修改订单
-//	 * @return
-//	 */
-//	@RequestMapping("updateVideoConfAccountOrderInfo")
-//	@RestReturn(value = String.class)
-//	public RestResponse updateVideoConfAccountOrderInfo(UpdateAccountOrderCommand cmd) {
-//
-//		videoConfService.updateVideoConfAccountOrderInfo(cmd);
-//		RestResponse response = new RestResponse();
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
+	
+	/**
+	 * <b>URL: /conf/createConfAccountOrder</b>
+	 * 增加订单
+	 * @return
+	 */
+	@RequestMapping("createConfAccountOrder")
+	@RestReturn(value = String.class)
+	public RestResponse createConfAccountOrder(CreateConfAccountOrderCommand cmd) {
+
+		videoConfService.createConfAccountOrder(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /conf/updateVideoConfAccountOrderInfo</b>
+	 * 修改订单
+	 * @return
+	 */
+	@RequestMapping("updateVideoConfAccountOrderInfo")
+	@RestReturn(value = String.class)
+	public RestResponse updateVideoConfAccountOrderInfo(UpdateAccountOrderCommand cmd) {
+
+		videoConfService.updateVideoConfAccountOrderInfo(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /conf/confPaymentCallBack</b>
+	 * 订单支付回调函数
+	 * @return
+	 */
+	@RequestMapping("confPaymentCallBack")
+	@RestReturn(value = RechargeSuccessResponse.class)
+	public RestResponse confPaymentCallBack(OnlinePayBillCommand cmd) {
+		
+//		RechargeSuccessResponse refresh = videoConfService.confPaymentCallBack(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	
 	/**
 	 * <b>URL: /conf/listVideoConfAccountByOrderId</b>

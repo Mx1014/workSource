@@ -13,20 +13,20 @@ import com.everhomes.util.StringHelper;
  */
 public class CancelVideoConfCommand {
 
-	private Integer confId;
+	private Long confId;
 	
 	private String sourceAccountName;
 	
 	private Timestamp endTime;
 
-	public Integer getConfId() {
+	public Long getConfId() {
 		return confId;
 	}
 
-	public void setConfId(Integer confId) {
+	public void setConfId(Long confId) {
 		this.confId = confId;
 	}
-	
+
 	public String getSourceAccountName() {
 		return sourceAccountName;
 	}

@@ -51,6 +51,7 @@ import com.everhomes.server.schema.tables.records.EhConfOrdersRecord;
 import com.everhomes.server.schema.tables.records.EhConfReservationsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.techpark.onlinePay.PayStatus;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
@@ -307,13 +308,14 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 	}
 
 	@Override
-	public ConfEnterprises findByEnterpriseId(Long enterpriseId) {
+	public ConfEnterprises findByEnterpriseId(Integer namespaceId, Long enterpriseId) {
 		
 		final ConfEnterprises[] result = new ConfEnterprises[1];
 		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhConfEnterprises.class), result, 
 				(DSLContext context, Object reducingContext) -> {
 					List<ConfEnterprises> list = context.select().from(Tables.EH_CONF_ENTERPRISES)
 							.where(Tables.EH_CONF_ENTERPRISES.ENTERPRISE_ID.eq(enterpriseId))
+							.and(Tables.EH_CONF_ENTERPRISES.NAMESPACE_ID.eq(namespaceId))
 							.fetch().map((r) -> {
 								return ConvertHelper.convert(r, ConfEnterprises.class);
 							});
@@ -966,6 +968,49 @@ public class VideoConfProviderImpl implements VideoConfProvider {
                 });
         
         return count[0];
+	}
+
+	@Override
+	public void updateConfOrders(ConfOrders order) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        
+		EhConfOrdersDao dao = new EhConfOrdersDao(context.configuration());
+        dao.update(order);
+	}
+
+	@Override
+	public void createConfOrders(ConfOrders order) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+
+        long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhConfOrders.class));
+        order.setId(id);
+        order.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        order.setCreatorUid(UserContext.current().getUser().getId());
+        EhConfOrdersDao dao = new EhConfOrdersDao(context.configuration());
+        dao.insert(order);
+	}
+
+	@Override
+	public void createConfEnterprises(ConfEnterprises enterprise) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+
+        long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhConfEnterprises.class));
+        enterprise.setId(id);
+        enterprise.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        enterprise.setUpdateTime(enterprise.getCreateTime());
+        enterprise.setCreatorUid(UserContext.current().getUser().getId());
+        EhConfEnterprisesDao dao = new EhConfEnterprisesDao(context.configuration());
+        dao.insert(enterprise);
+		
+	}
+
+	@Override
+	public void updateConfEnterprises(ConfEnterprises enterprise) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		
+		enterprise.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		EhConfEnterprisesDao dao = new EhConfEnterprisesDao(context.configuration());
+        dao.update(enterprise);
 	}
 
 

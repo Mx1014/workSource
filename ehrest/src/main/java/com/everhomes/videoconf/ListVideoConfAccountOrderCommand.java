@@ -4,6 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ *  <li>namespaceId: 命名空间 </li>
  * <li>enterpriseId: 企业id</li>
  * <li>pageAnchor: 本页开始的锚点</li>
  * <li>pageSize: 每页的数量</li>
@@ -11,11 +12,21 @@ import com.everhomes.util.StringHelper;
  */
 public class ListVideoConfAccountOrderCommand {
 	
+	private Integer namespaceId;
+	
 	private Long enterpriseId;
 	
 	private Long pageAnchor;
 	
     private Integer pageSize;
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 
 	public Long getEnterpriseId() {
 		return enterpriseId;

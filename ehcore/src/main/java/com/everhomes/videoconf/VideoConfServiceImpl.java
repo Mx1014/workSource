@@ -1,7 +1,10 @@
 package com.everhomes.videoconf;
 
+import java.io.IOException;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -13,18 +16,23 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.NameValuePair;
+import org.apache.commons.httpclient.methods.PostMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Component;
 
-import com.everhomes.app.AppConstants;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryAdminStatus;
 import com.everhomes.category.CategoryConstants;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.enterprise.Enterprise;
 import com.everhomes.enterprise.EnterpriseContact;
 import com.everhomes.enterprise.EnterpriseContactEntry;
@@ -32,10 +40,13 @@ import com.everhomes.enterprise.EnterpriseContactProvider;
 import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.organization.VendorType;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.organization.pm.pay.ResultHolder;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
+import com.everhomes.techpark.onlinePay.OnlinePayBillCommand;
+import com.everhomes.techpark.onlinePay.PayStatus;
 import com.everhomes.user.IdentifierType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -43,12 +54,10 @@ import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
 import com.mysql.jdbc.StringUtils;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
 
 @Component
 public class VideoConfServiceImpl implements VideoConfService {
@@ -518,7 +527,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 	public void setEnterpriseLockStatus(EnterpriseLockStatusCommand cmd) {
 		CrossShardListingLocator locator=new CrossShardListingLocator();
 	    int pageSize = Integer.MAX_VALUE;
-		ConfEnterprises enterprise = vcProvider.findByEnterpriseId(cmd.getEnterpriseId());
+		ConfEnterprises enterprise = vcProvider.findByEnterpriseId(cmd.getNamespaceId(), cmd.getEnterpriseId());
 		List<ConfAccounts> accounts = vcProvider.listConfAccountsByEnterpriseId(cmd.getEnterpriseId(), locator, pageSize);
 		if(accounts != null && accounts.size() > 0) {
 			if(cmd.getLockStatus() == 1) {
@@ -639,7 +648,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 			
 			List<ConfOrderDTO> confOrders = orders.stream().map(r -> {
 				
-				ConfOrderDTO dto = toConfOrderDTO(r);
+				ConfOrderDTO dto = toConfOrderDTO(cmd.getNamespaceId(), r);
 				return dto;
 			}).collect(Collectors.toList());
 			
@@ -649,7 +658,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		return response;
 	}
 	
-	private ConfOrderDTO toConfOrderDTO(ConfOrders order) {
+	private ConfOrderDTO toConfOrderDTO(Integer namespaceId, ConfOrders order) {
 		
 		ConfOrderDTO dto = new ConfOrderDTO();
 		dto.setId(order.getId());
@@ -658,7 +667,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		if(enterprise != null)
 			dto.setEnterpriseName(enterprise.getName());
 
-		ConfEnterprises enterpriseContact = vcProvider.findByEnterpriseId(order.getOwnerId());
+		ConfEnterprises enterpriseContact = vcProvider.findByEnterpriseId(namespaceId, order.getOwnerId());
 		if(enterpriseContact != null) {
 			dto.setContactor(enterpriseContact.getContactName());
 			dto.setMobile(enterpriseContact.getContact());
@@ -736,7 +745,19 @@ public class VideoConfServiceImpl implements VideoConfService {
 
 	@Override
 	public void updateVideoConfAccountOrderInfo(UpdateAccountOrderCommand cmd) {
-		// TODO Auto-generated method stub
+		ConfEnterprises confEnterprise = vcProvider.findByEnterpriseId(cmd.getNamespaceId(), cmd.getEnterpriseId());
+		confEnterprise.setContactName(cmd.getContactor());
+		confEnterprise.setContact(cmd.getMobile());
+		vcProvider.updateVideoconfEnterprise(confEnterprise);
+		
+		ConfOrders order = vcProvider.findOredrById(cmd.getId());
+		
+		//xiongying
+		order.setAmount(cmd.getAmount());
+//		order.setInvoiceReqFlag(cmd.getInvoiceFlag());
+		order.setInvoiceIssueFlag(cmd.getMakeOutFlag());
+		order.setOnlineFlag(cmd.getBuyChannel());
+		vcProvider.updateConfOrders(order);
 
 	}
 
@@ -872,7 +893,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		}).collect(Collectors.toList());
 		response.setConfAccounts(confAccounts);
 		
-		return null;
+		return response;
 	}
 
 	private Timestamp addMonth(Timestamp lastUpdate, int months) {
@@ -985,7 +1006,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 	@Override
 	public void cancelVideoConf(CancelVideoConfCommand cmd) {
 
-		ConfConferences conf = new ConfConferences();
+		ConfConferences conf = vcProvider.findConfConferencesByConfId(cmd.getConfId());
 		conf.setStatus((byte) 0);
 		conf.setEndTime(cmd.getEndTime());
 		
@@ -1018,11 +1039,6 @@ public class VideoConfServiceImpl implements VideoConfService {
 	public StartVideoConfResponse startVideoConf(StartVideoConfCommand cmd) {
 		StartVideoConfResponse response = new StartVideoConfResponse();
 		
-		response.setConfHostId("8EubJ8t9RkWXneUEpY6m7Q");
-		response.setToken("n7m8_1qELfzv0uzc-niIQ3DjevC9LtHeQjl0FpC1eYM.BgIgWE1JL2I5aDNRNW5sd1ZNZ3p0Z3dtWTM4TE5WVHlYZ2lANWVhMTA5MDJhZTYwNDAwMjEwYzg2MmVhZTA3ZjY3OTFkNjJkZTYyYjUxM2U5YTFhZWRlMDBiODg1MTFkNjIzYgA");
-		response.setConfHostName("luzuo");
-		response.setMaxCount(6);
-		response.setMeetingNo("18589092373");
 		String path = "http://api.confcloud.cn/openapi/confReservation";
 		
 		ConfAccounts account = vcProvider.findVideoconfAccountById(cmd.getAccountId());
@@ -1036,24 +1052,40 @@ public class VideoConfServiceImpl implements VideoConfService {
 				Long timestamp = DateHelper.currentGMTTime().getTime();
 				String tokenString = accountName + "|" + configurationProvider.getValue(ConfigConstants.VIDEOCONF_SECRET_KEY, "0") + "|" + timestamp;
 				String token = DigestUtils.md5Hex(tokenString);
+				SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				String sd = sdf.format(new Date(cmd.getStartTime()));
 				
 				if(LOGGER.isDebugEnabled())
 					LOGGER.info("startVideoConf-restUrl"+path);
 		
 				try {
-					Client client = Client.create();
-					WebResource r = client.resource(path);
-					StartReservation sr = new StartReservation();
-					sr.setLoginName(accountName);
-					sr.setTimeStamp(timestamp.toString());
-					sr.setToken(token);
-					sr.setConfName(cmd.getConfName());
-					sr.setHostKey(cmd.getPassword());
-					sr.setStartTime(new Date(cmd.getStartTime()));
-					sr.setDuration(cmd.getDuration());
-					sr.setOptionJbh(0);
-					ClientResponse clientResponse = r.post(ClientResponse.class, sr);
-					String result = clientResponse.getEntity(String.class);
+//					StartReservation sr = new StartReservation();
+//					sr.setLoginName(accountName);
+//					sr.setTimeStamp(timestamp.toString());
+//					sr.setToken(token);
+//					sr.setConfName(cmd.getConfName());
+//					sr.setHostKey(cmd.getPassword());
+//					sr.setStartTime(new Date(cmd.getStartTime()));
+//					sr.setDuration(cmd.getDuration());
+//					sr.setOptionJbh(0);
+					Map<String, String> sPara = new HashMap<String, String>() ;
+				    sPara.put("loginName", accountName); 
+				    sPara.put("timeStamp", timestamp.toString());
+				    sPara.put("token", token); 
+				    sPara.put("confName", cmd.getConfName());
+				    sPara.put("hostKey", cmd.getPassword());
+				    sPara.put("startTime", sd); 
+				    sPara.put("duration", cmd.getDuration().toString());
+				    sPara.put("optionJbh", "0");
+				    NameValuePair[] param = generatNameValuePair(sPara);
+				    HttpClient httpClient = new HttpClient();  
+			          
+			        HttpMethod method = postMethod(path, param);  
+			          
+			        httpClient.executeMethod(method);  
+			          
+			        String result = method.getResponseBodyAsString();  
+			        System.out.println(result);  
 					String json = strDecode(result);
 		
 					if(LOGGER.isDebugEnabled())
@@ -1066,21 +1098,20 @@ public class VideoConfServiceImpl implements VideoConfService {
 		
 					if(resultHolder.getData() != null){
 						Map<String,Object> data = (Map<String, Object>) resultHolder.getData();
-//						"data":{"startTime":"2015-12-03 10:20:07",
-//							"id":17962,"duration":12,"meetingName":"qwwq","confStatu":0,
-//							"h323pwd":"374657",
-//							"joinUrl":"http://meeting.confcloud.cn/j/1884458151?pwd=l0DYtsnc9qI%3D","hostKey":"121211",
-//							"optionJbh":true,"meetingNo":"1884458151"}
-
 						
-//						response.setStartConfUrl(startUrl);
+						response.setConfHostId("8EubJ8t9RkWXneUEpY6m7Q");
+						response.setToken("n7m8_1qELfzv0uzc-niIQ3DjevC9LtHeQjl0FpC1eYM.BgIgWE1JL2I5aDNRNW5sd1ZNZ3p0Z3dtWTM4TE5WVHlYZ2lANWVhMTA5MDJhZTYwNDAwMjEwYzg2MmVhZTA3ZjY3OTFkNjJkZTYyYjUxM2U5YTFhZWRlMDBiODg1MTFkNjIzYgA");
+						response.setConfHostName("luzuo");
+						response.setMaxCount(6);
+						response.setMeetingNo("18589092373");
 						
+						Object obj = data.get("meetingNo");
 						ConfConferences conf = new ConfConferences();
-						conf.setConfId((Long) data.get("meetingNo"));
-						conf.setSubject((String) data.get("meetingName"));
+						conf.setConfId(Long.valueOf(String.valueOf(data.get("meetingNo"))));
+						conf.setSubject(String.valueOf(data.get("meetingName")));
 						conf.setStartTime(new Timestamp(cmd.getStartTime()));
-						conf.setExpectDuration((Integer) data.get("duration"));
-						conf.setConfHostKey((String) data.get("hostKey"));
+						conf.setExpectDuration(cmd.getDuration());
+						conf.setConfHostKey(String.valueOf(data.get("hostKey")));
 						conf.setJoinPolicy(1);
 						conf.setSourceAccountId(sourceAccount.getId());
 						conf.setConfAccountId(cmd.getAccountId());
@@ -1100,7 +1131,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 						confAccount.setAssignedSourceId(sourceAccount.getId());
 						confAccount.setAssignedTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 						
-						vcProvider.updateConfAccounts(account);
+						vcProvider.updateConfAccounts(confAccount);
 						
 					}
 				} catch (Exception e) {
@@ -1112,7 +1143,23 @@ public class VideoConfServiceImpl implements VideoConfService {
 		}
 		return response;
 	}
+	 private static NameValuePair[] generatNameValuePair(Map<String, String> properties) {
+         NameValuePair[] nameValuePair = new NameValuePair[properties.size()];
+         int i = 0;
+         for (Map.Entry<String, String> entry : properties.entrySet()) {
+             nameValuePair[i++] = new NameValuePair(entry.getKey(), entry.getValue());
+         }
 
+         return nameValuePair;
+     }
+	 
+	 private static HttpMethod postMethod(String url, NameValuePair[] param) throws IOException{   
+	        PostMethod post = new PostMethod(url);  
+	        post.setRequestHeader("Content-Type","application/x-www-form-urlencoded;charset=utf-8");    
+	        post.setRequestBody(param);  
+	        post.releaseConnection();  
+	        return post;  
+	    }  
 	@Override
 	public JoinVideoConfResponse joinVideoConf(JoinVideoConfCommand cmd) {
 		JoinVideoConfResponse response = new JoinVideoConfResponse();
@@ -1325,7 +1372,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 
 	@Override
 	public void updateContactor(UpdateContactorCommand cmd) {
-		ConfEnterprises enterprise = vcProvider.findByEnterpriseId(cmd.getEnterpriseId());
+		ConfEnterprises enterprise = vcProvider.findByEnterpriseId(cmd.getNamespaceId(), cmd.getEnterpriseId());
 		enterprise.setContactName(cmd.getContactorName());
 		enterprise.setContact(cmd.getContactor());
 		
@@ -1360,5 +1407,158 @@ public class VideoConfServiceImpl implements VideoConfService {
 		return response;
 	}
 
+	@Override
+	public void createConfAccountOrder(CreateConfAccountOrderCommand cmd) {
+		ConfOrders order = new ConfOrders();
+		 
+		order.setOwnerId(cmd.getEnterpriseId());
+		order.setQuantity(cmd.getQuantity());
+		order.setPeriod(cmd.getPeriod());
+		order.setAmount(cmd.getAmount());
+		order.setStatus(PayStatus.WAITING_FOR_PAY.getCode());
+		order.setInvoiceReqFlag(cmd.getInvoiceFlag());
+		order.setInvoiceIssueFlag(cmd.getMakeOutFlag());
+		order.setOnlineFlag(cmd.getBuyChannel());
+		order.setAccountCategoryId(cmd.getAccountCategoryId());
+		vcProvider.createConfOrders(order);
+		
+		if(order.getInvoiceReqFlag() == 1) {
+			ConfInvoices invoice = ConvertHelper.convert(cmd.getInvoice(), ConfInvoices.class);
+			vcProvider.createInvoice(invoice);
+		}
+		
+		
+		ConfEnterprises enterprise = vcProvider.findByEnterpriseId(cmd.getNamespaceId(), cmd.getEnterpriseId());
+		if(enterprise == null) {
+			ConfEnterprises confEnterprise = new ConfEnterprises();
+			confEnterprise.setEnterpriseId(cmd.getEnterpriseId());
+			confEnterprise.setNamespaceId(cmd.getNamespaceId());
+			confEnterprise.setContactName(cmd.getContactor());
+			confEnterprise.setContact(cmd.getMobile());
+			vcProvider.createConfEnterprises(confEnterprise);
+		} else {
+			enterprise.setContactName(cmd.getContactor());
+			enterprise.setContact(cmd.getMobile());
+			vcProvider.updateConfEnterprises(enterprise);
+		}
+			
+	}
+
+	@Override
+	public void confPaymentCallBack(OnlinePayBillCommand cmd) {
+		//fail
+		if(cmd.getPayStatus().toLowerCase().equals("fail"))
+			this.onlinePayBillFail(cmd);
+		//success
+		if(cmd.getPayStatus().toLowerCase().equals("success"))
+			this.onlinePayBillSuccess(cmd);
+		
+	}
+
+	private ConfOrders onlinePayBillFail(OnlinePayBillCommand cmd) {
+		
+		if(LOGGER.isDebugEnabled())
+			LOGGER.error("confPayBillFail");
+		this.checkOrderNoIsNull(cmd.getOrderNo());
+		Long orderId = this.convertOrderNoToOrderId(cmd.getOrderNo());
+		
+		ConfOrders order = this.checkOrder(orderId);
+				
+		Date cunnentTime = new Date();
+		Timestamp currentTimestamp = new Timestamp(cunnentTime.getTime());
+//		this.updateOrderStatus(order, currentTimestamp, PayStatus.INACTIVE.getCode(), RechargeStatus.INACTIVE.getCode());
+		
+		return order;
+	}
+	
+	private ConfOrders onlinePayBillSuccess(OnlinePayBillCommand cmd) {
+		
+		if(LOGGER.isDebugEnabled())
+			LOGGER.error("confPayBillSuccess");
+		this.checkOrderNoIsNull(cmd.getOrderNo());
+		this.checkVendorTypeIsNull(cmd.getVendorType());
+		this.checkPayAmountIsNull(cmd.getPayAmount());
+		
+		Long orderId = this.convertOrderNoToOrderId(cmd.getOrderNo());
+		ConfOrders order = this.checkOrder(orderId);
+		
+		double payAmount = new Double(cmd.getPayAmount());
+		
+		Long payTime = System.currentTimeMillis();
+		Timestamp payTimeStamp = new Timestamp(payTime);
+		
+		this.checkVendorTypeFormat(cmd.getVendorType());
+		
+//		if(order.getPaymentStatus().byteValue() == PayStatus.WAITING_FOR_PAY.getCode()) {
+//			order.setRechargeAmount(payAmount);
+//			this.updateOrderStatus(order, payTimeStamp, PayStatus.PAID.getCode(), RechargeStatus.UPDATING.getCode());
+//			
+//		}
+		
+		return order;
+	}
+	
+	private void checkPayAmountIsNull(String payAmount) {
+		
+		if(payAmount == null || payAmount.trim().equals("")){
+			LOGGER.error("payAmount is null or empty.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"payAmount or is null or empty.");
+		}
+
+	}
+
+	private void checkVendorTypeIsNull(String vendorType) {
+		
+		if(vendorType == null || vendorType.trim().equals("")){
+			LOGGER.error("vendorType is null or empty.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"vendorType is null or empty.");
+		}
+
+	}
+
+	private void checkOrderNoIsNull(String orderNo) {
+		
+		if(orderNo == null || orderNo.trim().equals("")){
+			LOGGER.error("orderNo is null or empty.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"orderNo is null or empty.");
+		}
+
+	}
+	
+	private void checkVendorTypeFormat(String vendorType) {
+		if(VendorType.fromCode(vendorType) == null){
+			LOGGER.error("vendor type is wrong.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"vendor type is wrong.");
+		}
+	}
+	
+	private ConfOrders checkOrder(Long orderId) {
+		
+		ConfOrders order = vcProvider.findOredrById(orderId);
+		
+		if(order == null){
+			LOGGER.error("the order not found.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"the order not found.");
+		}
+		return order;
+	}
+	
+	private void updateOrderStatus(ConfOrders order, Timestamp payTimeStamp, byte paymentStatus) {
+		
+//		order.setRechargeTime(payTimeStamp);
+//		order.setPaymentStatus(paymentStatus);
+//		order.setRechargeStatus(rechargeStatus);
+//		this.onlinePayProvider.updateRehargeInfo(order);
+	}
+	
+	private Long convertOrderNoToOrderId(String orderNo) {
+		
+		return Long.valueOf(orderNo);
+	}
 
 }

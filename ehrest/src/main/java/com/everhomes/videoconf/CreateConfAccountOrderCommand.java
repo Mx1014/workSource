@@ -7,23 +7,23 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *  <li>namespaceId: 命名空间 </li>
- *  <li>id: 主键id</li>
  *  <li>enterpriseId: 企业id </li>
  *  <li>enterpriseName: 企业名称</li>
  *  <li>contactor: 企业联系人</li>
  *  <li>mobile: 手机号</li>
+ *  <li>quantity: 账号数量</li>
+ *  <li>period: 每个账号可使用几个月</li>
  *  <li>amount: 金额</li>
  *  <li>invoiceFlag: 是否需要发票 0-dont need 1-need</li>
  *  <li>makeOutFlag: 是否已开票 0-uninvoice 1-invoiced</li>
  *  <li>buyChannel: 购买渠道0-offline 1-online</li>
+ *  <li>accountCategoryId: 购买的账号类型</li>
  *  <li>invoice: 发票信息，参考{@link com.everhomes.videoconf.InvoiceDTO}</li>
  * </ul>
  *
  */
-public class UpdateAccountOrderCommand {
+public class CreateConfAccountOrderCommand {
 	private Integer namespaceId;
-
-	private Long id;
 	
 	private Long enterpriseId;
 	
@@ -35,6 +35,10 @@ public class UpdateAccountOrderCommand {
 	
 	private Byte buyChannel;
 	
+	private Integer quantity;
+	
+	private Integer period;
+	
 	private BigDecimal amount;
 	
 	private Byte invoiceFlag;
@@ -42,21 +46,15 @@ public class UpdateAccountOrderCommand {
 	private Byte makeOutFlag;
 	
 	private InvoiceDTO invoice;
-
+	
+	private Long accountCategoryId;
+	
 	public Integer getNamespaceId() {
 		return namespaceId;
 	}
 
 	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	public Long getEnterpriseId() {
@@ -99,6 +97,22 @@ public class UpdateAccountOrderCommand {
 		this.buyChannel = buyChannel;
 	}
 
+	public Integer getQuantity() {
+		return quantity;
+	}
+
+	public void setQuantity(Integer quantity) {
+		this.quantity = quantity;
+	}
+
+	public Integer getPeriod() {
+		return period;
+	}
+
+	public void setPeriod(Integer period) {
+		this.period = period;
+	}
+
 	public BigDecimal getAmount() {
 		return amount;
 	}
@@ -130,9 +144,18 @@ public class UpdateAccountOrderCommand {
 	public void setInvoice(InvoiceDTO invoice) {
 		this.invoice = invoice;
 	}
-	
+
+	public Long getAccountCategoryId() {
+		return accountCategoryId;
+	}
+
+	public void setAccountCategoryId(Long accountCategoryId) {
+		this.accountCategoryId = accountCategoryId;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
 }
