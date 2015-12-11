@@ -8,9 +8,9 @@ public class ListEnterpriseApplyEntryCommand {
     
     private Long communityId;
     
-    private String applyType;
+    private Byte applyType;
 	
-	private String status; 
+	private Byte status; 
 	
 	private String sourceType; //1:enterprise 2:chuangke space 
     
@@ -28,16 +28,16 @@ public class ListEnterpriseApplyEntryCommand {
 		this.communityId = communityId;
 	}
 	
-	public String getApplyType() {
+	public Byte getApplyType() {
 		return applyType;
 	}
-	public void setApplyType(String applyType) {
+	public void setApplyType(Byte applyType) {
 		this.applyType = applyType;
 	}
-	public String getStatus() {
+	public Byte getStatus() {
 		return status;
 	}
-	public void setStatus(String status) {
+	public void setStatus(Byte status) {
 		this.status = status;
 	}
 	public String getSourceType() {
