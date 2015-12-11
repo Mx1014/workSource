@@ -15,6 +15,8 @@ public class ListGroupsByNamespaceIdCommand {
     private Byte privateFlag;
     
     private String keywords;
+    
+    private Long categoryId;
 
 	public Long getPageAnchor() {
 		return pageAnchor;
@@ -62,6 +64,14 @@ public class ListGroupsByNamespaceIdCommand {
 
 	public void setKeywords(String keywords) {
 		this.keywords = keywords;
+	}
+
+	public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
 	}
     
     
