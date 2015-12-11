@@ -4,12 +4,9 @@ package com.everhomes.enterprise;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import javax.validation.Valid;
 
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -24,7 +21,6 @@ import com.everhomes.acl.RoleConstants;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.address.CommunityAdminStatus;
-import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityDoc;
 import com.everhomes.community.CommunityProvider;
@@ -119,10 +115,10 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     private OrganizationService organizationService;
     
     @Autowired
-	private UserProvider userProvider;
+    private UserProvider userProvider;
     
     @Override
-    public List<Enterprise> listEnterpriseByCommunityId(ListingLocator locator, Long communityId, Integer status, int pageSize) {
+    public List<Enterprise> listEnterpriseByCommunityId(ListingLocator locator,String enterpriseName, Long communityId, Integer status, int pageSize) {
         List<EnterpriseCommunityMap> enterpriseMaps = this.enterpriseProvider.queryEnterpriseMapByCommunityId(locator
                 , communityId, pageSize+1, new ListingQueryBuilderCallback() {
 
@@ -132,6 +128,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
                 query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.COMMUNITY_ID.eq(communityId));
                 query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_TYPE.eq(EnterpriseCommunityMapType.Enterprise.getCode()));
                 query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_STATUS.ne(EnterpriseCommunityMapStatus.Inactive.getCode()));
+   
                 if(status != null) {
                     query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_STATUS.eq(status.byteValue()));    
                 }
@@ -142,9 +139,23 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         
         List<Enterprise> enterprises = new ArrayList<Enterprise>();
         for(EnterpriseCommunityMap cm : enterpriseMaps) {
+        	
+        	if(pageSize == enterprises.size()){
+        		locator.setAnchor(cm.getId());
+        		break;
+        	}
+        	
             Enterprise enterprise = enterpriseProvider.getEnterpriseById(cm.getMemberId());
+            
             if(enterprise != null) {
-                enterprises.add(enterprise);
+            	if(!org.springframework.util.StringUtils.isEmpty(enterpriseName)){
+            		if(enterpriseName.equals(enterprise.getName())){
+            			enterprises.add(enterprise);
+            		}
+            	}else{
+            		enterprises.add(enterprise);
+            	}
+                
             }
             
         }
@@ -166,7 +177,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        List<Enterprise> enterprises = this.listEnterpriseByCommunityId(locator, cmd.getCommunityId(), cmd.getStatus(), pageSize);
+        List<Enterprise> enterprises = this.listEnterpriseByCommunityId(locator, cmd.getEnterpriseName(),cmd.getCommunityId(), cmd.getStatus(), pageSize);
         
         populateEnterprises(enterprises);
        
@@ -443,7 +454,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
             EnterpriseDTO dto = null;
             for(EnterpriseContactEntry entry : entryList) {
             	EnterpriseContact ec = this.enterpriseContactProvider.getContactById(entry.getContactId());
-            	if(ec.getStatus() != GroupMemberStatus.INACTIVE.getCode()) {
+            	if(ec.getStatus() != GroupMemberStatus.INACTIVE.getCode() && ec.getUserId().equals(userId)) {
             		enterprise = this.enterpriseProvider.findEnterpriseById(entry.getEnterpriseId());
                     
                     this.enterpriseProvider.populateEnterpriseAttachments(enterprise);
@@ -752,8 +763,8 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         	enterCon.setRole(RoleConstants.ResourceUser);
         	this.enterpriseContactProvider.updateContact(enterCon);
         }
-        
-        UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(cmd.getEntryValue());
+
+        UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(cmd.getNamespaceId(),cmd.getEntryValue());
 		if(identifier == null) {
 			//帮他在左邻注册一个账号
 			identifier = this.dbProvider.execute((TransactionStatus status) -> {
@@ -811,7 +822,8 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     		
 		} else {
 			EnterpriseContact enterpriseContact = this.enterpriseContactProvider.queryContactById(entry.getContactId());
-			enterpriseContact.setRole(RoleConstants.SystemAdmin);
+			enterpriseContact.setRole(RoleConstants.ResourceAdmin);
+			enterpriseContact.setUserId(identifier.getOwnerUid());
 			this.enterpriseContactProvider.updateContact(enterpriseContact);
 		}
 		
@@ -938,5 +950,11 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 		return errorDataLogs;
 		
 	}
-
+	
+	@Override
+	public EnterpriseDTO findEnterpriseByAddress(Long addressId){
+		Enterprise enterprise = enterpriseProvider.findEnterpriseByAddressId(addressId);
+		return ConvertHelper.convert(enterprise, EnterpriseDTO.class);
+	}
+	
 }

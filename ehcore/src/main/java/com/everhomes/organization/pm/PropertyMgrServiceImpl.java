@@ -124,7 +124,6 @@ import com.everhomes.organization.TxType;
 import com.everhomes.organization.VendorType;
 import com.everhomes.organization.pm.pay.BaseVo;
 import com.everhomes.organization.pm.pay.GsonUtil;
-import com.everhomes.organization.pm.pay.RestUtil;
 import com.everhomes.organization.pm.pay.ResultHolder;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
@@ -1554,16 +1553,18 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		List<PropFamilyDTO> list = new ArrayList<PropFamilyDTO>();
 		User user  = UserContext.current().getUser();
 
-		this.checkOrganizationIdIsNull(cmd.getOrganizationId());
-		Organization organization = this.checkOrganization(cmd.getOrganizationId());
+		if(null == cmd.getCommunityId()){
+			Organization organization = this.checkOrganization(cmd.getOrganizationId());
 
-		OrganizationCommunity  orgCom = this.propertyMgrProvider.findPmCommunityByOrgId(cmd.getOrganizationId());
-		if(orgCom == null){
-			LOGGER.error("Unable to find the community by organizationId="+cmd.getOrganizationId());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Unable to find the community by organizationId");
+			OrganizationCommunity  orgCom = this.propertyMgrProvider.findPmCommunityByOrgId(cmd.getOrganizationId());
+			if(orgCom == null){
+				LOGGER.error("Unable to find the community by organizationId="+cmd.getOrganizationId());
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"Unable to find the community by organizationId");
+			}
+			cmd.setCommunityId(orgCom.getCommunityId());
 		}
-		cmd.setCommunityId(orgCom.getCommunityId());
+		
 
 		//权限控制
 		Tuple<Integer,List<ApartmentDTO>> apts = addressService.listApartmentsByKeyword(cmd);
@@ -1988,7 +1989,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				for(OrganizationOrder order : orders){
 					String orderNo = this.convertOrderIdToOrderNo(order.getId());
 					LOGGER.error("remoteUpdate:orderNo="+orderNo);
-					this.remoteUpdateOrgOrderByOrderNo(orderNo);
+					//this.remoteUpdateOrgOrderByOrderNo(orderNo);
 				}
 			}
 		}
@@ -3349,91 +3350,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		dto.setName(bill.getName());
 		dto.setDescription(order.getDescription());
 		return dto;
-	}
-
-	@SuppressWarnings({ "unchecked", "rawtypes"})
-	@Override
-	public void remoteUpdateOrgOrderByOrderNo(String orderNo) {
-		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-		String restUrl = this.configurationProvider.getValue("common.pay.url", "http://testpay.zuolin.com/EDS_PAY/");
-		restUrl = restUrl + "rest/pay_common/payInfo_record/get_payInfo_record_by_orderNo_and_orderType";
-
-		if(LOGGER.isDebugEnabled())
-			LOGGER.info("remoteUpdateOrgOrderByOrderNo-restUrl"+restUrl);
-
-		try {
-			BaseVo<Map> bvo=new BaseVo<Map>();
-			Map<String,String> map=new HashMap<String,String>();
-			map.put("orderNo", orderNo);
-			map.put("orderType", "wuye");
-			bvo.setBody(map);
-			String json=RestUtil.restWan(GsonUtil.toJson(bvo), restUrl);
-
-			if(LOGGER.isDebugEnabled())
-				LOGGER.error("updateOrder,json="+json);
-
-			ResultHolder resultHolder = GsonUtil.fromJson(json, ResultHolder.class);
-			this.checkResultHolderIsNull(resultHolder,orderNo);
-
-			if(LOGGER.isDebugEnabled())
-				LOGGER.error("resultHolder="+resultHolder.isSuccess());
-
-			if(resultHolder.isSuccess()){
-				Map<String,Object> data = (Map<String, Object>) resultHolder.getData();
-				String payStatus = (String) data.get("payStatus");//waiting:未支付、succes:支付成功、fail:支付失败
-				this.checkPayStatusIsNull(payStatus,orderNo);
-
-				if(LOGGER.isDebugEnabled())
-					LOGGER.error("payStatus="+payStatus);
-
-				if(payStatus.equals("fail")){
-					OnlinePayPmBillCommand command = new OnlinePayPmBillCommand();
-					command.setPayStatus(payStatus);
-					command.setOrderNo(orderNo);
-
-					if(LOGGER.isDebugEnabled())
-						LOGGER.error("failcommand="+command.toString());
-
-					this.onlinePayPmBill(command);
-				}
-				else if(payStatus.equals("success")){
-					//verdorType
-					String verdorTypeStr = (String) data.get("onlinePayStyleNo");//alipay、支付宝  wechat、微信
-					String verdorType = this.convertToVerdorType(verdorTypeStr);
-					//amount
-					Double amountDouble = (Double) data.get("payAmount");
-					String amount = Double.toString(amountDouble);
-					//payTime
-					if(LOGGER.isDebugEnabled())
-						LOGGER.error("payDate="+(String) data.get("payDate"));
-					
-					/*String payTimeStr = (String) data.get("payDate");
-					String payTime = Long.toString(format.parse(payTimeStr).getTime());*/
-					//patAccount
-					String payAccount = (String) data.get("payAccount");
-					if(payAccount == null)
-						payAccount = "test account";
-					//String payObj = "{testPayObj}";
-
-					OnlinePayPmBillCommand command = new OnlinePayPmBillCommand();
-					command.setPayStatus(payStatus);
-					command.setOrderNo(orderNo);
-					command.setPayAccount(payAccount);
-					command.setPayAmount(amount);
-					command.setPayObj(null);
-					command.setPayTime(null);
-					command.setVendorType(verdorType);
-
-					if(LOGGER.isDebugEnabled())
-						LOGGER.error("successcommand="+command.toString());
-
-					this.onlinePayPmBill(command);
-				}
-			}
-		} catch (Exception e) {
-			LOGGER.error("remoteUpdateOrgOrderByOrderNo-error.orderNo="+orderNo+".exception message="+e.getMessage());
-		}
 	}
 
 	private String convertToVerdorType(String verdorTypeStr) {

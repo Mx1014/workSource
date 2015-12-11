@@ -20,6 +20,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
 import com.everhomes.address.CommunityAdminStatus;
 import com.everhomes.address.CommunityDTO;
 import com.everhomes.app.AppConstants;
@@ -45,9 +47,16 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
+import com.everhomes.enterprise.EnterpriseAddress;
+import com.everhomes.enterprise.EnterpriseContact;
+import com.everhomes.enterprise.EnterpriseContactProvider;
+import com.everhomes.enterprise.EnterpriseContactStatus;
+import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.forum.AttachmentDescriptor;
+import com.everhomes.group.Group;
 import com.everhomes.group.GroupDTO;
+import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
@@ -69,6 +78,7 @@ import com.everhomes.region.RegionServiceErrorCode;
 import com.everhomes.search.CommunitySearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.IdentifierType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
@@ -113,6 +123,18 @@ public class CommunityServiceImpl implements CommunityService {
 	
 	@Autowired
 	private OrganizationService organizationService;
+	
+	@Autowired
+	private EnterpriseContactProvider enterpriseContactProvider;
+	
+	@Autowired
+	private GroupProvider groupProvider;
+	
+	@Autowired
+	private EnterpriseProvider enterpriseProvider;
+	
+	@Autowired
+	private AddressProvider addressProvider;
 
 	@Override
 	public ListCommunitesByStatusCommandResponse listCommunitiesByStatus(ListCommunitesByStatusCommand cmd) {
@@ -1068,24 +1090,66 @@ public class CommunityServiceImpl implements CommunityService {
 	public CommunityUserResponse listUserCommunities(
 			ListCommunityUsersCommand cmd) {
 		CommunityUserResponse res = new CommunityUserResponse();
-		CommunityUser communityUser = new CommunityUser();
-		communityUser.setCommunityId(cmd.getCommunityId());
-		communityUser.setUserName(cmd.getKeywords());
-		communityUser.setPhone(cmd.getKeywords());
-		communityUser.setIsAuth(cmd.getIsAuth());
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		Integer offset = cmd.getPageOffset() == null ? 0 : (cmd.getPageOffset() - 1 ) * pageSize;
-		List<CommunityUser> communityUsers = this.communityProvider.listUserCommunities(communityUser, offset, pageSize + 1);
 		
-		if(communityUsers != null && communityUsers.size() > pageSize) {
-			communityUsers.remove(communityUsers.size() - 1);
-			res.setNextPageOffset(cmd.getPageOffset() + 1);
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		
+		List<User> users = null;
+		
+		if(org.springframework.util.StringUtils.isEmpty(cmd.getKeywords()) && 0 == cmd.getIsAuth()){
+			users = userProvider.findUserByNamespaceId(cmd.getNamespaceId(), locator, pageSize + 1);
+		}else if(!org.springframework.util.StringUtils.isEmpty(cmd.getKeywords())){
+			users = userProvider.listUserByKeywords(cmd.getKeywords());
+		}else{
+			users = userProvider.findUserByNamespaceId(cmd.getNamespaceId(), locator, 10000);
 		}
-		List<CommunityUserDto> communityUserDtos = communityUsers.stream().map((c) ->{
-			CommunityUserDto dto = ConvertHelper.convert(c, CommunityUserDto.class);
-			return dto;
-		}).collect(Collectors.toList());
-		res.setUserCommunities(communityUserDtos);
+		
+		List<CommunityUserDto> dtos = new ArrayList<CommunityUserDto>();
+		
+		if(null == users) 
+			return res;
+		
+		for (User user : users) {
+			CommunityUserDto dto = new CommunityUserDto();
+			dto.setUserId(user.getId());
+			dto.setUserName(user.getNickName());
+			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+			dto.setPhone(userIdentifier.getIdentifierToken());
+			EnterpriseContact contact = enterpriseContactProvider.queryContactByUserId(user.getId());
+			if(null == contact){
+				dto.setIsAuth(2);
+			}else{
+				dto.setIsAuth(EnterpriseContactStatus.ACTIVE.getCode() == contact.getStatus() ? 1 : 2);
+				Group group = groupProvider.findGroupById(contact.getEnterpriseId());
+				if(null != group)
+					dto.setEnterpriseName(group.getName());
+				
+				List<EnterpriseAddress> addresses = enterpriseProvider.findEnterpriseAddressByEnterpriseId(contact.getEnterpriseId());
+				if(addresses.size() > 0){
+					Address address = addressProvider.findAddressById(addresses.get(0).getAddressId());
+					dto.setAddressName(address.getAddress());
+					dto.setAddressId(address.getId());
+					dto.setBuildingName(address.getBuildingName());
+				}
+			}
+			
+			if(0 != cmd.getIsAuth()){
+				if(cmd.getIsAuth().equals(dto.getIsAuth())){
+					dtos.add(dto);
+				}
+			}else{
+				dtos.add(dto);
+			}
+			
+			
+			
+			if(dtos.size() == pageSize){
+				res.setNextPageOffset(user.getId());
+				break;
+			}
+		}
+		res.setUserCommunities(dtos);
 		return res;
 	}
 }

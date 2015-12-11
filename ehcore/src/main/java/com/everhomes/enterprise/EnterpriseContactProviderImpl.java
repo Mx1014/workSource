@@ -15,6 +15,7 @@ import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Operator;
 import org.jooq.Record;
+import org.jooq.Result;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -138,6 +139,21 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         
         if(contacts != null && contacts.size() > 0) {
             return contacts.get(0);
+        }
+        return null;
+    }
+    
+    @Override
+    public EnterpriseContact queryContactByUserId(Long userId) {
+    	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+    	SelectQuery<EhEnterpriseContactsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CONTACTS);
+    	query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.USER_ID.eq(userId));
+        query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.STATUS.ne(GroupMemberStatus.INACTIVE.getCode()));
+        
+        Result<EhEnterpriseContactsRecord> r= query.fetch();
+        
+        if(null != r && r.size() > 0){
+        	return ConvertHelper.convert(r.get(0), EnterpriseContact.class);
         }
         return null;
     }

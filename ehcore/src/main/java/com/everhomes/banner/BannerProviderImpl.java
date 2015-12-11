@@ -10,6 +10,8 @@ import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
 import org.jooq.Record;
 import org.jooq.SelectJoinStep;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -38,6 +40,8 @@ import com.everhomes.util.DateHelper;
 
 @Component
 public class BannerProviderImpl implements BannerProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BannerProviderImpl.class);
+    
     @Autowired
     private DbProvider dbProvider;
     
@@ -114,8 +118,15 @@ public class BannerProviderImpl implements BannerProvider {
         if(condition != null) {
             step.where(condition);
         }
+        
         List<Banner> result = step.orderBy(Tables.EH_BANNERS.ORDER.desc()).
                 fetch().map((r) ->{ return ConvertHelper.convert(r, Banner.class);});
+        
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query banners by tag and scope, sql=" + step.getSQL());
+            LOGGER.debug("Query banners by tag and scope, bindValues=" + step.getBindValues());
+        }
+        
         return result;
     }
     

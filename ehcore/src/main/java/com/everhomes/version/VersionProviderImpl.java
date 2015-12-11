@@ -110,12 +110,11 @@ public class VersionProviderImpl implements VersionProvider {
 
     @Cacheable(value="VersionRealm-Name", key="{#namespaceId, #realmName}", unless="#result == null")
     @Override
-    public VersionRealm findVersionRealmByName(Integer namespaceId, String realmName) {
+    public VersionRealm findVersionRealmByName(String realmName) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 
         List<VersionRealm> realms = context.select().from(Tables.EH_VERSION_REALM)
             .where(Tables.EH_VERSION_REALM.REALM.eq(realmName))
-            .and(Tables.EH_VERSION_REALM.NAMESPACE_ID.eq(namespaceId))
             .fetch().map((record)-> {
                 return ConvertHelper.convert(record, VersionRealm.class);
             });
@@ -202,9 +201,9 @@ public class VersionProviderImpl implements VersionProvider {
         return null;
     }
 
-    @Cacheable(value="VersionUpgrade-Match", key="{#namespaceId, #realmId, #version}", unless="#result == null")
+    @Cacheable(value="VersionUpgrade-Match", key="{#realmId, #version}", unless="#result == null")
     @Override
-    public VersionUpgradeRule matchVersionUpgradeRule(Integer namespaceId, long realmId, Version version) {
+    public VersionUpgradeRule matchVersionUpgradeRule(long realmId, Version version) {
         double encodedValue = (double)version.getEncodedValue();
         
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -213,7 +212,6 @@ public class VersionProviderImpl implements VersionProvider {
             .where(Tables.EH_VERSION_UPGRADE_RULES.REALM_ID.eq(realmId))
             .and(Tables.EH_VERSION_UPGRADE_RULES.MATCHING_LOWER_BOUND.lessThan(encodedValue))
             .and(Tables.EH_VERSION_UPGRADE_RULES.MATCHING_UPPER_BOUND.greaterThan(encodedValue))
-            .and(Tables.EH_VERSION_UPGRADE_RULES.NAMESPACE_ID.eq(namespaceId))
             .orderBy(Tables.EH_VERSION_UPGRADE_RULES.ORDER.asc())
             .fetch().map((record)-> {
                 return ConvertHelper.convert(record, VersionUpgradeRule.class);
@@ -398,12 +396,12 @@ public class VersionProviderImpl implements VersionProvider {
         return null;
     }
     
-    @Cacheable(value="VersionUrl-Version", key="{#namespaceId, #realmName, #targetVersion}", unless="#result == null")
+    @Cacheable(value="VersionUrl-Version", key="{#realmName, #targetVersion}", unless="#result == null")
     @Override
-    public VersionUrl findVersionUrlByVersion(Integer namespaceId, String realmName, String targetVersion) {
+    public VersionUrl findVersionUrlByVersion(String realmName, String targetVersion) {
         
         VersionProvider self = PlatformContext.getComponent(VersionProvider.class);
-        VersionRealm realm = self.findVersionRealmByName(namespaceId, realmName);
+        VersionRealm realm = self.findVersionRealmByName(realmName);
         if(realm == null)
             return null;
         
@@ -412,7 +410,6 @@ public class VersionProviderImpl implements VersionProvider {
         List<VersionUrl> versionUrls = context.select().from(Tables.EH_VERSION_URLS)
             .where(Tables.EH_VERSION_URLS.REALM_ID.eq(realm.getId()))
             .and(Tables.EH_VERSION_URLS.TARGET_VERSION.eq(targetVersion))
-            .and(Tables.EH_VERSION_URLS.NAMESPACE_ID.eq(namespaceId))
             .fetch().map((record)-> {
                 return ConvertHelper.convert(record, VersionUrl.class);
             });

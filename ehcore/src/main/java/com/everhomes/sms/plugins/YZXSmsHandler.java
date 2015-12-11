@@ -147,12 +147,12 @@ public class YZXSmsHandler implements SmsHandler {
         try { 
             auth = EncryptUtil.base64Encoder(src);
         } catch (Exception e) {
-            LOGGER.error("Encoder accountsid is error.src={}",src);
+            LOGGER.error("Send sms, encoder accountsid is error, src=" + src, e);
         }
         headers.put("Authorization", auth);
         
         String result = channel.sendMessage(uri, SmsBuilder.HttpMethod.POST.val(), null, headers,entityJsonStr).getMessage();
-        LOGGER.info("send message result={}",result);
+        LOGGER.info("Send sms, result={}, uri={}, headers={}", result, uri, headers);
     }
 
     private String createUrl(String accountSid, String authToken,String timestamp) {

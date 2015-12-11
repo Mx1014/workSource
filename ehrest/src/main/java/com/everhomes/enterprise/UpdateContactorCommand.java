@@ -7,7 +7,7 @@ import javax.validation.constraints.NotNull;
  *  <li>contactName: 企业联系人姓名</li>
  *  <li>entryValue: 企业联系人手机号</li>
  *  <li>enterpriseId: 企业id</li>
- *  <li>communityId: 小区id</li>
+ *  <li>communityId: 园区id</li>
  *  <li>namespaceId: 指定园区的标示</li>
  * </ul>
  *

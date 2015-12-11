@@ -11,25 +11,25 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLeasePromotions implements java.io.Serializable {
 
-	private static final long serialVersionUID = 882564095;
+	private static final long serialVersionUID = -1513245831;
 
 	private java.lang.Long     id;
 	private java.lang.Integer  namespaceId;
 	private java.lang.Long     communityId;
-	private java.lang.Long     buildingId;
-	private java.lang.String   rentPosition;
 	private java.lang.String   rentType;
 	private java.lang.String   posterUri;
 	private java.lang.String   subject;
 	private java.lang.String   rentAreas;
-	private java.lang.String   contacts;
-	private java.lang.String   contactPhone;
 	private java.lang.String   description;
-	private java.sql.Timestamp enterTime;
 	private java.lang.Long     createUid;
 	private java.sql.Timestamp createTime;
 	private java.sql.Timestamp updateTime;
 	private java.lang.Byte     status;
+	private java.lang.Long     buildingId;
+	private java.lang.String   rentPosition;
+	private java.lang.String   contacts;
+	private java.lang.String   contactPhone;
+	private java.sql.Timestamp enterTime;
 
 	public EhLeasePromotions() {}
 
@@ -37,38 +37,38 @@ public class EhLeasePromotions implements java.io.Serializable {
 		java.lang.Long     id,
 		java.lang.Integer  namespaceId,
 		java.lang.Long     communityId,
-		java.lang.Long     buildingId,
-		java.lang.String   rentPosition,
 		java.lang.String   rentType,
 		java.lang.String   posterUri,
 		java.lang.String   subject,
 		java.lang.String   rentAreas,
-		java.lang.String   contacts,
-		java.lang.String   contactPhone,
 		java.lang.String   description,
-		java.sql.Timestamp enterTime,
 		java.lang.Long     createUid,
 		java.sql.Timestamp createTime,
 		java.sql.Timestamp updateTime,
-		java.lang.Byte     status
+		java.lang.Byte     status,
+		java.lang.Long     buildingId,
+		java.lang.String   rentPosition,
+		java.lang.String   contacts,
+		java.lang.String   contactPhone,
+		java.sql.Timestamp enterTime
 	) {
 		this.id = id;
 		this.namespaceId = namespaceId;
 		this.communityId = communityId;
-		this.buildingId = buildingId;
-		this.rentPosition = rentPosition;
 		this.rentType = rentType;
 		this.posterUri = posterUri;
 		this.subject = subject;
 		this.rentAreas = rentAreas;
-		this.contacts = contacts;
-		this.contactPhone = contactPhone;
 		this.description = description;
-		this.enterTime = enterTime;
 		this.createUid = createUid;
 		this.createTime = createTime;
 		this.updateTime = updateTime;
 		this.status = status;
+		this.buildingId = buildingId;
+		this.rentPosition = rentPosition;
+		this.contacts = contacts;
+		this.contactPhone = contactPhone;
+		this.enterTime = enterTime;
 	}
 
 	public java.lang.Long getId() {
@@ -93,22 +93,6 @@ public class EhLeasePromotions implements java.io.Serializable {
 
 	public void setCommunityId(java.lang.Long communityId) {
 		this.communityId = communityId;
-	}
-
-	public java.lang.Long getBuildingId() {
-		return this.buildingId;
-	}
-
-	public void setBuildingId(java.lang.Long buildingId) {
-		this.buildingId = buildingId;
-	}
-
-	public java.lang.String getRentPosition() {
-		return this.rentPosition;
-	}
-
-	public void setRentPosition(java.lang.String rentPosition) {
-		this.rentPosition = rentPosition;
 	}
 
 	public java.lang.String getRentType() {
@@ -143,36 +127,12 @@ public class EhLeasePromotions implements java.io.Serializable {
 		this.rentAreas = rentAreas;
 	}
 
-	public java.lang.String getContacts() {
-		return this.contacts;
-	}
-
-	public void setContacts(java.lang.String contacts) {
-		this.contacts = contacts;
-	}
-
-	public java.lang.String getContactPhone() {
-		return this.contactPhone;
-	}
-
-	public void setContactPhone(java.lang.String contactPhone) {
-		this.contactPhone = contactPhone;
-	}
-
 	public java.lang.String getDescription() {
 		return this.description;
 	}
 
 	public void setDescription(java.lang.String description) {
 		this.description = description;
-	}
-
-	public java.sql.Timestamp getEnterTime() {
-		return this.enterTime;
-	}
-
-	public void setEnterTime(java.sql.Timestamp enterTime) {
-		this.enterTime = enterTime;
 	}
 
 	public java.lang.Long getCreateUid() {
@@ -205,5 +165,45 @@ public class EhLeasePromotions implements java.io.Serializable {
 
 	public void setStatus(java.lang.Byte status) {
 		this.status = status;
+	}
+
+	public java.lang.Long getBuildingId() {
+		return this.buildingId;
+	}
+
+	public void setBuildingId(java.lang.Long buildingId) {
+		this.buildingId = buildingId;
+	}
+
+	public java.lang.String getRentPosition() {
+		return this.rentPosition;
+	}
+
+	public void setRentPosition(java.lang.String rentPosition) {
+		this.rentPosition = rentPosition;
+	}
+
+	public java.lang.String getContacts() {
+		return this.contacts;
+	}
+
+	public void setContacts(java.lang.String contacts) {
+		this.contacts = contacts;
+	}
+
+	public java.lang.String getContactPhone() {
+		return this.contactPhone;
+	}
+
+	public void setContactPhone(java.lang.String contactPhone) {
+		this.contactPhone = contactPhone;
+	}
+
+	public java.sql.Timestamp getEnterTime() {
+		return this.enterTime;
+	}
+
+	public void setEnterTime(java.sql.Timestamp enterTime) {
+		this.enterTime = enterTime;
 	}
 }

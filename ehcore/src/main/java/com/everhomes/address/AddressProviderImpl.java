@@ -282,4 +282,25 @@ public class AddressProviderImpl implements AddressProvider {
 			return ConvertHelper.convert(r, Address.class);
 		return null;
 	}
+	
+	 @Override
+	 public Address findAddressByCommunityAndAddress(Long cityId, Long areaId, Long communityId, String addressName) {
+		 List<Address> addresses = new ArrayList<Address>();
+	        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
+	                (DSLContext context, Object reducingContext)-> {
+	                   context.select().from(Tables.EH_ADDRESSES)
+	                   .where(Tables.EH_ADDRESSES.CITY_ID.eq(cityId)
+	                           .and(Tables.EH_ADDRESSES.AREA_ID.eq(areaId))
+	                           .and(Tables.EH_ADDRESSES.ADDRESS.eq(addressName))
+	                           .and(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId)))
+	                   .fetch().map(r ->{
+	                	   addresses.add(ConvertHelper.convert(r, Address.class));
+	                       return null;
+	                   });
+	                   return true; 
+	                });
+	        if(0 == addresses.size())
+	        	return null;
+	        return addresses.get(0);
+	  }
 }

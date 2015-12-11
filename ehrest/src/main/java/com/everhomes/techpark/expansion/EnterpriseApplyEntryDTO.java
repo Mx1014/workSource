@@ -22,11 +22,11 @@ public class EnterpriseApplyEntryDTO {
 	
 	private String applyUserName;
 	
-	private String applyType;
+	private Byte applyType;
 	
-	private String sizeUnit;
+	private Byte sizeUnit;
 	
-	private String status;
+	private Byte status;
 	
 	private Double areaSize;
 	
@@ -34,7 +34,7 @@ public class EnterpriseApplyEntryDTO {
 	
 	private Timestamp createTime;
 
-	
+	private String sourceName;
 
 
 	public Long getId() {
@@ -149,42 +149,42 @@ public class EnterpriseApplyEntryDTO {
 
 
 
-	public String getApplyType() {
+	public Byte getApplyType() {
 		return applyType;
 	}
 
 
 
 
-	public void setApplyType(String applyType) {
+	public void setApplyType(Byte applyType) {
 		this.applyType = applyType;
 	}
 
 
 
 
-	public String getSizeUnit() {
+	public Byte getSizeUnit() {
 		return sizeUnit;
 	}
 
 
 
 
-	public void setSizeUnit(String sizeUnit) {
+	public void setSizeUnit(Byte sizeUnit) {
 		this.sizeUnit = sizeUnit;
 	}
 
 
 
 
-	public String getStatus() {
+	public Byte getStatus() {
 		return status;
 	}
 
 
 
 
-	public void setStatus(String status) {
+	public void setStatus(Byte status) {
 		this.status = status;
 	}
 
@@ -228,6 +228,20 @@ public class EnterpriseApplyEntryDTO {
 
 	public void setCreateTime(Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+
+
+
+	public String getSourceName() {
+		return sourceName;
+	}
+
+
+
+
+	public void setSourceName(String sourceName) {
+		this.sourceName = sourceName;
 	}
 
 

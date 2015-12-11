@@ -54,10 +54,10 @@ INSERT INTO `eh_punch_workday` (`id`, `date_status`, `date_tag`, `creator_uid`, 
 
 
 
-insert into `eh_punch_rules` (`id`, `company_id`, `start_early_time`, `start_late_time`, `work_time`, `time_tag1`, `time_tag2`, `time_tag3`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) values('2','178395','08:30:00','09:30:00','10:00:00',NULL,NULL,NULL,'195506','2015-11-22 09:24:38',NULL,NULL);
+insert into `eh_punch_rules` (`id`, `enterprise_id`, `start_early_time`, `start_late_time`, `work_time`, `time_tag1`, `time_tag2`, `time_tag3`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) values('2','178395','08:30:00','09:30:00','10:00:00',NULL,NULL,NULL,'195506','2015-11-22 09:24:38',NULL,NULL);
 
 
-insert into `eh_punch_geopoints` (`id`, `company_id`, `description`, `longitude`, `latitude`, `geohash`, `distance`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) values('2','178395','深圳科技工业园大厦(科苑路6号(近深南大道))','113.952909','22.549597','ws10311bzjx3','1000','195506','2015-11-22 09:24:38',NULL,NULL);
+insert into `eh_punch_geopoints` (`id`, `enterprise_id`, `description`, `longitude`, `latitude`, `geohash`, `distance`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) values('2','178395','深圳科技工业园大厦(科苑路6号(近深南大道))','113.952909','22.549597','ws10311bzjx3','1000','195506','2015-11-22 09:24:38',NULL,NULL);
  
  
  DELETE FROM  `eh_rental_rules`  ; 
@@ -134,7 +134,7 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 -- for testserver30
 DELETE FROM `eh_launch_pad_items` WHERE ID=809 OR ID=810;
 INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag) 
-	VALUES (809, 1000000, 0, 0, 0, '/home', 'Coupons', '优惠券', '优惠券', 'cs://1/image/aW1hZ2UvTVRwaFl6RTRZMlppT1dOak1HRTVZVFpqWlRKaFltWmtNMk0xTmpoak1XUmpaQQ', 3, 1, 14, '{"url":"http://121.199.69.107:8080/zl-ec?hideNavigationBar=1&sourceUrl=http%3A%2F%2F121.199.69.107:8080%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2Fpromotions%2F#sign_suffix"}', 1, 0, 1, 1, '', 0,NULL);
+	VALUES (809, 1000000, 0, 0, 0, '/home', 'Coupons', '优惠券', '优惠券', 'cs://1/image/aW1hZ2UvTVRwbFlXUTBOemd5WkdZd1l6RTVaV1l6WkRRNU1UZ3dOVFl3T1Rjd1pEazFNdw', 3, 1, 14, '{"url":"http://121.199.69.107:8080/zl-ec?hideNavigationBar=1&sourceUrl=http%3A%2F%2F121.199.69.107:8080%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2Fpromotions%2F#sign_suffix"}', 1, 0, 1, 1, '', 0,NULL);
 INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag) 
 	VALUES (810, 1000000, 0, 0, 0, '/home', 'Coupons', '市场动态', '市场动态', 'cs://1/image/aW1hZ2UvTVRwaU5HUTJNMkptTldVMk5qUTVZakk0TVdRNFl6WXlaak0zT1dNNU16TTRNdw', 5, 1, 14, '{"url":"http://biz.zuolin.com/zl-ec?hideNavigationBar=1&sourceUrl=http://biz.zuolin.com%2fweb%2fapp%2fuser%2findex.html%23%2fstore%2fdetails%2f14477417463124576784#sign_suffix"}', 2, 0, 1, 1, '', 0,NULL);
 update eh_configurations set `value`='http://121.199.69.107:8080/zl-ec?hideNavigationBar=1&sourceUrl=http://121.199.69.107:8080' where name='prefix.url';
@@ -170,6 +170,10 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 --	VALUES('821', 1000000, 0, 0, 0, '/home','Bizs','VIDEO_MEETING','视频会议','cs://1/image/aW1hZ2UvTVRveE9HRmlOelV6TUdJNE9ERTRaalF6Wm1Nd05EWmxabVkyTkRjMlltVTNaZw','1','1','27',NULL,'0','0','1','1','','0',NULL,NULL,NULL);
 -- INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`) 
 --	VALUES('822', 1000000, 0, 0, 0, '/home','Bizs','CARPOOL','拼车','cs://1/image/aW1hZ2UvTVRvME16a3lPVEJrTjJOaE5qTXhPV1prWVdKbE5EZzNOakEzWm1VM05tWTFPUQ','1','1','0',NULL,'0','0','1','1','','0',NULL,NULL,NULL);
+
+INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag,target_type, target_id) 
+	VALUES (827, 1000000, 0, '0', 0, '/home', 'Bizs', '更多', '更多', 'cs://1/image/aW1hZ2UvTVRvNE1XRTNZVEUxT0RGaE1EQmpZakF6TmprNE1EZ3paR1k0TVRVMFptUTJZdw', 1, 1, 1, '{"itemLocation":"/home", "itemGroup":"Bizs"}', 30, 0, 1, 1, '', 0,NULL, NULL, NULL);
+
 	
 INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag) 
 	VALUES (823, 1000000, 0, 0, 0, '/home/Pm', 'GaActions', 'ADVISE', '投诉建议', 'cs://1/image/aW1hZ2UvTVRwall6VTVOV1U0WkdRMk56aGxPRFV3TVRBMk5qVXlNVFkzWVRZek56aGpOdw', 1, 1, 19, '{"contentCategory":1006,"actionCategory":0,"forumId":176520,"targetEntityTag":"PM","embedAppId":27,"visibleRegionType":0}', 0, 0, 1, 1, '', 0,NULL);
@@ -887,3 +891,7 @@ insert into `eh_rental_site_rules` (`id`, `community_id`, `site_type`, `rental_s
 insert into `eh_rental_site_rules` (`id`, `community_id`, `site_type`, `rental_site_id`, `rental_type`, `amorpm`, `rentalStep`, `begin_time`, `end_time`, `counts`, `unit`, `price`, `site_rental_date`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) values('727','240111044331048623','ELECSCREEN','17','2',NULL,'1',NULL,NULL,'1','1','100','2015-12-28','0','193501','2015-11-21 06:19:38',NULL,NULL);
 insert into `eh_rental_site_rules` (`id`, `community_id`, `site_type`, `rental_site_id`, `rental_type`, `amorpm`, `rentalStep`, `begin_time`, `end_time`, `counts`, `unit`, `price`, `site_rental_date`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) values('728','240111044331048623','ELECSCREEN','17','2',NULL,'1',NULL,NULL,'1','1','100','2015-12-29','0','193501','2015-11-21 06:19:38',NULL,NULL);
 insert into `eh_rental_site_rules` (`id`, `community_id`, `site_type`, `rental_site_id`, `rental_type`, `amorpm`, `rentalStep`, `begin_time`, `end_time`, `counts`, `unit`, `price`, `site_rental_date`, `status`, `creator_uid`, `create_time`, `operator_uid`, `operate_time`) values('729','240111044331048623','ELECSCREEN','17','2',NULL,'1',NULL,NULL,'1','1','100','2015-12-30','0','193501','2015-11-21 06:19:38',NULL,NULL);
+
+-- 园区热线
+insert into `eh_yellow_pages` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `nick_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`) values('10000','0','namespace','1000000','园区服务热线','园区服务热线','4','','','深圳科技工业园是我国大陆第一个高新科技产业园\', \'深圳科技工业园是我国大陆第一个高新科技产业园，于1985年由深圳市政府和中国科学院共同创办。1991年，经国务院批准，深圳科技工业园成为首批国家级高新技术产业园区。\r\n\r\n园区占地面积1.15平方公里，经过不断的开发建设，深圳科技工业园已成为投资环境优越、高新技术企业云集、科技开发实力雄厚、人才济济的科技园','cs://1/image/aW1hZ2UvTVRvd01qUmpNV00wTkdaaVltWTNNemt3TXpOak9EZGlOMk15TldZd01qWTNNUQ','2','2','113.953126','22.549823','ws103144hr9m',NULL,NULL,NULL,NULL,NULL,'Dave Lee','1355125','知识产权',NULL,NULL,NULL,'2015-11-19 16:50:35');
+

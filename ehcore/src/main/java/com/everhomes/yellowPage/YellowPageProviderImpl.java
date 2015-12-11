@@ -93,7 +93,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	@Override
 	public List<YellowPage> queryYellowPages(CrossShardListingLocator locator,
 			int pageSize, String ownerType, Long ownerId, Long parentId, Byte type,
-			String serviceType) {
+			String serviceType,String keywords) {
 	        List<YellowPage> yellowPages = this.queryYellowPagesByOwnerId(locator, ownerId, pageSize, new ListingQueryBuilderCallback() {
 
 	            @Override
@@ -103,6 +103,11 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	            		query.addConditions(Tables.EH_YELLOW_PAGES.OWNER_TYPE.eq(ownerType));
 	                query.addConditions(Tables.EH_YELLOW_PAGES.OWNER_ID.eq(ownerId));
 	                query.addConditions(Tables.EH_YELLOW_PAGES.STATUS.eq(YellowPageStatus.ACTIVE.getCode()));
+	                
+	                if(!org.springframework.util.StringUtils.isEmpty(keywords)){
+	                	query.addConditions(Tables.EH_YELLOW_PAGES.NAME.like(keywords + "%"));
+	                }
+	                
 	                if(null!=parentId){
 	                	query.addConditions(Tables.EH_YELLOW_PAGES.PARENT_ID.eq(parentId));
 	                }

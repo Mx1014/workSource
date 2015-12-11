@@ -582,8 +582,8 @@ public class CommunityProviderImpl implements CommunityProvider {
                 	Condition condition = Tables.EH_COMMUNITIES.NAME.eq(name);
                     if(cityId != null)
                     	condition = condition.and(Tables.EH_COMMUNITIES.CITY_ID.eq(cityId));
-                    /*if(areaId != null)
-                    	condition = condition.and(Tables.EH_COMMUNITIES.AREA_ID.eq(areaId));*/
+                    if(areaId != null)
+                    	condition = condition.and(Tables.EH_COMMUNITIES.AREA_ID.eq(areaId));
                     
                     context.select().from(Tables.EH_COMMUNITIES)
                     .where(condition).fetch().map(r ->{
@@ -594,6 +594,7 @@ public class CommunityProviderImpl implements CommunityProvider {
                 });
         return result;
     }
+    
 
     @Override
     public List<Community> findCommunitiesByIds(List<Long> ids) {
@@ -693,6 +694,16 @@ public class CommunityProviderImpl implements CommunityProvider {
         EhBuildingsDao dao = new EhBuildingsDao(context.configuration());
         return ConvertHelper.convert(dao.findById(id), Building.class);
 	}
+	
+	@Override
+	public Building findBuildingByCommunityIdAndName(long communityId, String buildingName) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBuildings.class));
+		SelectQuery<EhBuildingsRecord> query = context.selectQuery(Tables.EH_BUILDINGS);
+		query.addConditions(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId));
+		query.addConditions(Tables.EH_BUILDINGS.NAME.eq(buildingName));
+		
+        return ConvertHelper.convert(query.fetchOne(), Building.class);
+	}
 
 	@Override
 	public void populateBuildingAttachments(final Building building) {
@@ -736,7 +747,7 @@ public class CommunityProviderImpl implements CommunityProvider {
     }
 
 	@Override
-	public void createBuilding(Long creatorId, Building building) {
+	public Building createBuilding(Long creatorId, Building building) {
 
 		long id = this.sequnceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhBuildings.class));
         
@@ -748,6 +759,8 @@ public class CommunityProviderImpl implements CommunityProvider {
         dao.insert(building);
         
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhBuildings.class, null);
+        
+        return building;
 	}
 
 	@Override
@@ -895,6 +908,9 @@ public class CommunityProviderImpl implements CommunityProvider {
 	public List<CommunityUser> listUserCommunities(CommunityUser communityUser,int pageOffset,int pageSize) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class));
 		
+//		context.select().from(Tables.EH_USERS).
+		
+		
 		Condition cond = Tables.EH_USER_COMMUNITIES.COMMUNITY_ID.eq(communityUser.getCommunityId());
 		if(1 == communityUser.getIsAuth()){
 			cond = cond.and(Tables.EH_ENTERPRISE_CONTACTS.STATUS.eq(EnterpriseContactStatus.ACTIVE.getCode()));
@@ -912,6 +928,11 @@ public class CommunityProviderImpl implements CommunityProvider {
 		}
 		
 		List<CommunityUser> communityUsers = new ArrayList<CommunityUser>();
+		
+		
+		
+		
+		
 		
 		context.select().from(Tables.EH_USER_COMMUNITIES).leftOuterJoin(Tables.EH_ENTERPRISE_CONTACTS).
 						on(Tables.EH_USER_COMMUNITIES.OWNER_UID.eq(Tables.EH_ENTERPRISE_CONTACTS.USER_ID)).

@@ -464,11 +464,11 @@ public class ForumServiceImpl implements ForumService {
         PostEntityTag entityTag = PostEntityTag.fromCode(cmd.getEntityTag());
         
         // 各区域ID，说明见com.everhomes.forum.PostEntityTag
-        Map<String, Long> gaRegionIdMap = this.organizationService.getOrganizationRegionMap(communityId);
-        if(LOGGER.isInfoEnabled()) {
-            LOGGER.info("Ga regions for query topics by category, userId=" + userId 
-                + ", communityId=" + communityId + ", map=" + gaRegionIdMap);
-        }
+//        Map<String, Long> gaRegionIdMap = this.organizationService.getOrganizationRegionMap(communityId);
+//        if(LOGGER.isInfoEnabled()) {
+//            LOGGER.info("Ga regions for query topics by category, userId=" + userId 
+//                + ", communityId=" + communityId + ", map=" + gaRegionIdMap);
+//        }
 
         Condition visibilityCondition = buildPostCategoryQryCondition(user, entityTag, community, 
             cmd.getContentCategory(), cmd.getActionCategory());
@@ -645,9 +645,15 @@ public class ForumServiceImpl implements ForumService {
         User operator = UserContext.current().getUser();
         Long operatorId = operator.getId();
         Long organizationId = cmd.getOrganizationId();
+        Long communityId = cmd.getCommunityId();
+        final Long forumId = cmd.getForumId();
         Organization organization = checkOrganizationParameter(operatorId, organizationId, "listOrganizationTopics");
-        
-        List<Long> communityIdList = organizationService.getOrganizationCommunityIdById(organizationId);
+        List<Long> communityIdList = new ArrayList<Long>();
+        if(null == communityId){
+        	communityIdList = organizationService.getOrganizationCommunityIdById(organizationId);
+        }else{
+        	communityIdList.add(communityId);
+        }
         if(communityIdList.size() == 0) {
             LOGGER.error("Organization community is not found, operatorId=" + operatorId + ", organizationId=" + organizationId);
             throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
@@ -666,7 +672,11 @@ public class ForumServiceImpl implements ForumService {
         List<Post> posts = this.forumProvider.queryPosts(locator, pageSize + 1, (loc, query) -> {
             query.addJoin(Tables.EH_FORUM_ASSIGNED_SCOPES, JoinType.LEFT_OUTER_JOIN, 
                 Tables.EH_FORUM_ASSIGNED_SCOPES.OWNER_ID.eq(Tables.EH_FORUM_POSTS.ID));
-            query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ID.eq(ForumConstants.SYSTEM_FORUM));
+            if(null == forumId){
+            	query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ID.eq(ForumConstants.SYSTEM_FORUM));
+            }else{
+            	query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ID.eq(forumId));
+            }
             query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
             query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
             if(visibilityCondition != null) {
@@ -1962,11 +1972,21 @@ public class ForumServiceImpl implements ForumService {
             userCondition = buildDefaultForumPostQryConditionForCommunity(user, community, scope);
         } else {
             // 对于指定entityTag，则对creatorTag和targetTag进行限制
-            Condition privacyCondition = Tables.EH_FORUM_POSTS.PRIVATE_FLAG.notEqual(PostPrivacy.PRIVATE.getCode());
+            // Condition privacyCondition = Tables.EH_FORUM_POSTS.PRIVATE_FLAG.notEqual(PostPrivacy.PRIVATE.getCode());
             Condition entityCondition = Tables.EH_FORUM_POSTS.CREATOR_TAG.eq(entityTag.getCode());
             entityCondition = entityCondition.or(Tables.EH_FORUM_POSTS.TARGET_TAG.eq(entityTag.getCode()));
-            Condition visibleCondition = buildDefaultForumPostQryConditionByOrganization(user, community);
-            userCondition = privacyCondition.and(entityCondition.and(visibleCondition));
+            //Condition visibleCondition = buildDefaultForumPostQryConditionByOrganization(user, community);
+            // 对于物业等政府相关的类型，则只查本小区的
+            VisibilityScope scope = VisibilityScope.NEARBY_COMMUNITIES;
+            if(contentCatogry != null && CategoryConstants.GA_RELATED_CATEGORIES.contains(contentCatogry.getId())) {
+                scope = VisibilityScope.COMMUNITY;
+            }
+            Condition visibleCondition = buildDefaultForumPostQryConditionForCommunity(user, community, scope);
+            if(visibleCondition != null) {
+                userCondition = entityCondition.and(visibleCondition);
+            } else {
+                userCondition = entityCondition;
+            }
         }
         
         if(userCondition == null) {

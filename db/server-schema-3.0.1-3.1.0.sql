@@ -317,6 +317,7 @@ ALTER TABLE `eh_version_upgrade_rules` ADD COLUMN `namespace_id` INTEGER NOT NUL
 ALTER TABLE `eh_version_urls` ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE `eh_versioned_content` ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE `eh_categories` ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE `eh_categories` DROP INDEX `u_eh_category_name`;
 
 ALTER TABLE `eh_scoped_configurations` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE `eh_launch_pad_layouts` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
@@ -331,6 +332,18 @@ ALTER TABLE `eh_events` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE `eh_polls` MODIFY COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
 -- ALTER TABLE `eh_devices` MODIFY COLUMN `device_id` VARCHAR(2048) NOT NULL DEFAULT '';
 
+-- update at 20151210
+-- ALTER TABLE eh_park_charge ADD COLUMN `card_type`  VARCHAR(128);
+-- ALTER TABLE eh_recharge_info ADD COLUMN  `card_type`  VARCHAR(128);
+-- ALTER TABLE `eh_configurations` ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
+-- ALTER TABLE `eh_configurations` ADD COLUMN `display_name` VARCHAR(128);
+-- ALTER TABLE `eh_configurations` DROP INDEX `u_eh_conf_name`;
+UPDATE `eh_park_charge` SET card_type = '普通月卡';
+UPDATE `eh_launch_pad_items` SET action_data = '{"cardDescription":"目前仅开通金融基地停车场
+其他停车场线上充值功能正在建设中"}' WHERE action_type = 30 ;
+update `eh_launch_pad_items` set `action_data` = '{"privateFlag":0,"keywords":"不传"}' , `action_type` = 36 where `id` = 813;
+
+
 -- ALTER TABLE `eh_categories` DROP INDEX `u_eh_category_name`;
 
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'enterprise.notification', 1, 'zh_CN', '用户加入企业，用户自己的消息', '您已加入公司“${enterpriseName}”。');
@@ -338,17 +351,30 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'enterprise.notification', 3, 'zh_CN', '拒绝加入公司', '您被拒绝加入公司“${enterpriseName}”。');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'enterprise.notification', 4, 'zh_CN', '发给企业其它所有成员', '您已离开公司“${enterpriseName}”。');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'enterprise.notification', 5, 'zh_CN', '发给企业其它所有成员', '${userName}已离开公司“${enterpriseName}”。');
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'enterprise.notification', 6, 'zh_CN', '发给申请加入企业的请求者', '${userName}申请加入公司“${enterpriseName}”。');
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'enterprise.notification', 7, 'zh_CN', '有人申请加入企业，发给企业管理员', '${userName}正申请加入公司“${enterpriseName}”，您同意此申请吗？');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'park.notification', 1, 'zh_CN', '有新的月卡发放通知排队用户申请月卡成功', '月卡申报成功，请于“${deadline}” 18:00前去领取，否则自动失效。');
-  
+
+INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (1000000, 'app.agreements.url', '/mobile/static/app_agreements/techpark_agreements.html', 'the relative path for techpark app agreements');
+INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (999999, 'app.agreements.url', '/mobile/static/app_agreements/xunmei_agreements.html', 'the relative path for techpark app agreements');
+INSERT INTO `eh_configurations` (`namespace_id`, `name`, `display_name`, `value`, `description`) VALUES (1000000, 'yzx.vcode.templateid', '科技园注册码短信模板', '18077', 'vcode sms template id(yxz)');
+INSERT INTO `eh_configurations` (`namespace_id`, `name`, `display_name`, `value`, `description`) VALUES (999999, 'yzx.vcode.templateid', '讯美注册码短信模板', '18086', 'vcode sms template id(xunmei)');
+INSERT INTO `eh_configurations` (`namespace_id`, `name`, `display_name`, `value`, `description`) VALUES (999995, 'yzx.vcode.templateid', '金隅嘉业注册码短信模板', '18091', 'vcode sms template id(jinyujiaye)');
+
+INSERT INTO `eh_configurations` (`namespace_id`, `name`, `display_name`, `value`, `description`) VALUES (0, 'user.avatar.undisclosured.url', '用户头像(性别保密)', 'cs://1/image/aW1hZ2UvTVRvME1qVTBZalpqT1dGa05USm1aVEE1WVRnMU9EWmhOVE0zTm1Nd1pXSTVZUQ', '性别保密用户的默认头像');
 
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'enterprise', '10001', 'zh_CN', '公司不存在');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'parking', '10001', 'zh_CN', '车牌号位数错误');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'parking', '10002', 'zh_CN', '该车牌已有月卡');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'parking', '10003', 'zh_CN', '该车牌已申请月卡');
+INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'parking', '10004', 'zh_CN', '服务器忙');
 
 INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(1000000, '科技园版');
 INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(999999, '讯美园区版');
 INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(999998, '华为园区版');
+INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(999997, '左邻服务版');
+INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(999996, '上海联通版');
+INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(999995, '金隅嘉业版');
 
 -- INSERT INTO `eh_acl_privileges` (`app_id`,`name`,`description`) VALUES(32, '设置组的管理员，普通成员的增删改Group_member_mgt', '设置组的管理员，普通成员的增删改');
 -- INSERT INTO `eh_acl_privileges` (`app_id`,`name`,`description`) VALUES(32, 'Group_mgt', '组的增删改');
@@ -380,15 +406,33 @@ INSERT INTO `eh_acl_roles` (`id`, `app_id`,`name`,`description`) VALUES(1007, 32
 
 alter table eh_version_realm drop index `u_eh_ver_realm`;
 alter table eh_version_realm add unique key `u_eh_ver_realm` (`realm`,`namespace_id`);
-insert into `eh_version_realm` (`id`, `realm`, `description`, `create_time`, `namespace_id`) values('3','Andriod',NULL,'2015-11-26 16:10:58','1000000');
-insert into `eh_version_realm` (`id`, `realm`, `description`, `create_time`, `namespace_id`) values('4','iOS',NULL,'2015-11-26 16:10:59','1000000');
-insert into `eh_version_realm` (`id`, `realm`, `description`, `create_time`, `namespace_id`) values('5','Andriod',NULL,'2015-11-26 16:15:29','999999');
-insert into `eh_version_realm` (`id`, `realm`, `description`, `create_time`, `namespace_id`) values('6','iOS',NULL,'2015-11-26 16:15:29','999999');
 
-insert into `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`, `namespace_id`) values(5,'3','-0.1','1048576','0','1.0.0','0','2015-11-26 16:10:59', 1000000);
-insert into `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`, `namespace_id`) values(6,'4','-0.1','1048576','0','1.0.0','0','2015-11-26 16:10:59', 1000000);
-insert into `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`, `namespace_id`) values(7,'5','-0.1','3145728','0','3.0.0','0','2015-11-26 16:15:29', 999999);
-insert into `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`, `namespace_id`) values(8,'6','-0.1','3145728','0','3.0.0','0','2015-11-26 16:15:29', 999999);
+insert into `eh_version_realm` (`id`, `realm`, `description`, `create_time`) values('3','Android_Techpark',NULL,'2015-11-26 16:10:58');
+insert into `eh_version_realm` (`id`, `realm`, `description`, `create_time`) values('4','iOS_Techpark',NULL,'2015-11-26 16:10:59');
+insert into `eh_version_realm` (`id`, `realm`, `description`, `create_time`) values('5','Android_Xunmei',NULL,'2015-11-26 16:15:29');
+insert into `eh_version_realm` (`id`, `realm`, `description`, `create_time`) values('6','iOS_Xunmei',NULL,'2015-11-26 16:15:29');
+insert into `eh_version_realm` (`id`, `realm`, `description`, `create_time`) values('7','Android_Hwpark',NULL,'2015-11-26 16:15:29');
+insert into `eh_version_realm` (`id`, `realm`, `description`, `create_time`) values('8','iOS_Hwpark',NULL,'2015-11-26 16:15:29');
+insert into `eh_version_realm` (`id`, `realm`, `description`, `create_time`) values('9','Android_IService',NULL,'2015-11-26 16:15:29');
+insert into `eh_version_realm` (`id`, `realm`, `description`, `create_time`) values('10','iOS_IService',NULL,'2015-11-26 16:15:29');
+insert into `eh_version_realm` (`id`, `realm`, `description`, `create_time`) values('11','Android_ShUnicom',NULL,'2015-11-26 16:15:29');
+insert into `eh_version_realm` (`id`, `realm`, `description`, `create_time`) values('12','iOS_ShUnicom',NULL,'2015-11-26 16:15:29');
+insert into `eh_version_realm` (`id`, `realm`, `description`, `create_time`) values('13','Android_JYJY',NULL,'2015-11-26 16:15:29');
+insert into `eh_version_realm` (`id`, `realm`, `description`, `create_time`) values('14','iOS_JYJY',NULL,'2015-11-26 16:15:29');
+
+insert into `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) values(5,3,'-0.1','1048576','0','1.0.0','0','2015-11-26 16:10:59');
+insert into `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) values(6,4,'-0.1','1048576','0','1.0.0','0','2015-11-26 16:10:59');
+insert into `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) values(7,5,'-0.1','3145728','0','3.0.0','0','2015-11-26 16:15:29');
+insert into `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) values(8,6,'-0.1','3145728','0','3.0.0','0','2015-11-26 16:15:29');
+insert into `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) values(9,7,'-0.1','3145728','0','3.0.0','0','2015-11-26 16:15:29');
+insert into `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) values(10,8,'-0.1','3145728','0','3.0.0','0','2015-11-26 16:15:29');
+insert into `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) values(11,9,'-0.1','3145728','0','3.0.0','0','2015-11-26 16:15:29');
+insert into `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) values(12,10,'-0.1','3145728','0','3.0.0','0','2015-11-26 16:15:29');
+insert into `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) values(13,11,'-0.1','3145728','0','3.0.0','0','2015-11-26 16:15:29');
+insert into `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) values(14,12,'-0.1','3145728','0','3.0.0','0','2015-11-26 16:15:29');
+insert into `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) values(15,13,'-0.1','3145728','0','3.0.0','0','2015-11-26 16:15:29');
+insert into `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) values(16,14,'-0.1','3145728','0','3.0.0','0','2015-11-26 16:15:29');
+
 
 
 # 
@@ -474,6 +518,22 @@ ALTER TABLE `eh_activities` ADD COLUMN `guest` VARCHAR(2048) ;
 -- 20151130
 ALTER TABLE `eh_enterprise_addresses` ADD COLUMN `building_id` BIGINT NOT NULL DEFAULT 0; 
 ALTER TABLE `eh_enterprise_addresses` ADD COLUMN `building_name` VARCHAR(128);
+
+-- 20151202
+ALTER TABLE `eh_lease_promotions` ADD COLUMN `building_id` BIGINT NOT NULL DEFAULT 0; 
+ALTER TABLE `eh_lease_promotions` ADD COLUMN `rent_position` VARCHAR(128) COMMENT 'rent position'; 
+ALTER TABLE `eh_lease_promotions` ADD COLUMN `contacts` VARCHAR(128); 
+ALTER TABLE `eh_lease_promotions` ADD COLUMN `contact_phone` VARCHAR(128); 
+ALTER TABLE `eh_lease_promotions` ADD COLUMN `enter_time` DATETIME COMMENT 'enter time'; 
+
+-- 20151211 by xiongying
+-- ALTER TABLE `eh_park_apply_card` ADD COLUMN `company_name` VARCHAR(256) NOT NULL DEFAULT '';
+
+
+ALTER TABLE `eh_enterprise_op_requests` MODIFY COLUMN apply_user_name VARCHAR(128) COMMENT 'apply user name';
+
+ALTER TABLE `eh_version_realm` DROP COLUMN `namespace_id`;
+ALTER TABLE `eh_version_upgrade_rules` DROP COLUMN `namespace_id`;
 
 
 SET foreign_key_checks = 1;

@@ -48,7 +48,7 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	
 	/**
 	 * <b>URL: /techpark/entry/listApplyEntrys
-	 * <p>
+	 * <p>入住信息列表
 	 */
 	@RequestMapping("listApplyEntrys")
 	@RestReturn(value=EnterpriseApplyEntryResponse.class)
@@ -62,7 +62,7 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	
 	/**
 	 * <b>URL: /techpark/entry/applyEntry
-	 * <p>
+	 * <p>申请入住
 	 */
 	@RequestMapping("applyEntry")
 	@RestReturn(value=String.class)
@@ -91,13 +91,106 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	
 	/**
 	 * <b>URL: /techpark/entry/listForRents
-	 * <p>
+	 * <p>招租列表
 	 */
 	@RequestMapping("listForRents")
 	@RestReturn(value=ListBuildingForRentResponse.class)
 	public RestResponse listForRents(ListBuildingForRentCommand cmd){
 		ListBuildingForRentResponse res = enterpriseApplyEntryService.listLeasePromotions(cmd);
 		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /techpark/entry/createLeasePromotion
+	 * <p>创建招租
+	 */
+	@RequestMapping("createLeasePromotion")
+	@RestReturn(value=String.class)
+	public RestResponse createLeasePromotion(CreateLeasePromotionCommand cmd){
+		boolean res = enterpriseApplyEntryService.createLeasePromotion(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /techpark/entry/updateLeasePromotion
+	 * <p>修改招租
+	 */
+	@RequestMapping("updateLeasePromotion")
+	@RestReturn(value=String.class)
+	public RestResponse updateLeasePromotion(UpdateLeasePromotionCommand cmd){
+		boolean res = enterpriseApplyEntryService.updateLeasePromotion(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /techpark/entry/findLeasePromotionById
+	 * <p>根据id查询招租
+	 */
+	@RequestMapping("findLeasePromotionById")
+	@RestReturn(value=BuildingForRentDTO.class)
+	public RestResponse findLeasePromotionById(FindLeasePromotionByIdCommand cmd){
+		RestResponse response = new RestResponse(enterpriseApplyEntryService.findLeasePromotionById(cmd.getId()));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /techpark/entry/updateApplyEntryStatus
+	 * <p>修改入住状态
+	 */
+	@RequestMapping("updateApplyEntryStatus")
+	@RestReturn(value=String.class)
+	public RestResponse updateApplyEntryStatus(UpdateApplyEntryStatusCommand cmd){
+		RestResponse response = new RestResponse(enterpriseApplyEntryService.updateApplyEntryStatus(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /techpark/entry/updateLeasePromotionStatus
+	 * <p>修改招租状态
+	 */
+	@RequestMapping("updateLeasePromotionStatus")
+	@RestReturn(value=String.class)
+	public RestResponse updateLeasePromotionStatus(UpdateLeasePromotionStatusCommand cmd){
+		RestResponse response = new RestResponse(enterpriseApplyEntryService.updateLeasePromotionStatus(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /techpark/entry/deleteApplyEntry
+	 * <p>删除招租
+	 */
+	@RequestMapping("deleteApplyEntry")
+	@RestReturn(value=String.class)
+	public RestResponse deleteApplyEntry(DeleteApplyEntryCommand cmd){
+		RestResponse response = new RestResponse(enterpriseApplyEntryService.deleteApplyEntry(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /techpark/entry/deleteLeasePromotion
+	 * <p>删除招租
+	 */
+	@RequestMapping("deleteLeasePromotion")
+	@RestReturn(value=String.class)
+	public RestResponse deleteLeasePromotion(DeleteLeasePromotionCommand cmd){
+		RestResponse response = new RestResponse(enterpriseApplyEntryService.deleteLeasePromotion(cmd));
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

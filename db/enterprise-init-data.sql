@@ -67,7 +67,7 @@ INSERT INTO `eh_building_attachments` (`id`, `building_id`, `content_type`, `con
 	VALUES(4,176121,NULL,'cs://1/image/aW1hZ2UvTVRwaU1XTmpOR0UwWkRoaE9EYzNOelZqTmpVMFpHVXdPVFF5WWpJMFlXUTROQQ','193501','2015-11-14 20:52:15');
 
 INSERT INTO `eh_lease_promotions` (`id`, `namespace_id`, `community_id`, `rent_type`, `subject`, `rent_areas`,`poster_uri`, `description`, `status`)
-VALUES ('1', '1000000', '240111044331048623', 'rent_type', '金融基地1栋11楼招租', '300平米', 'cs://1/image/aW1hZ2UvTVRveE5tVXdPVEUzWWpFMk1qUTBZbVV4TVRGaE5UazROemMyTkRCaE4yVTNNUQ','<body><ul>招租面积：200平米</ul><ul>入住时间：2016年4月1日</ul><ul>详细信息：<li>空间大</li><li>位置好</li><li>周边配套齐全</li></ul></body>', 2);
+VALUES ('1', '1000000', '240111044331048623', 'rent_type', '金融基地1栋11楼招租', '300平米', 'cs://1/image/aW1hZ2UvTVRveE5tVXdPVEUzWWpFMk1qUTBZbVV4TVRGaE5UazROemMyTkRCaE4yVTNNUQ','<body>招租面积：200平米<br><br>入驻时间：2016年4月1日<br><br>详细信息：<br>1.空间大<br>2.位置好<br>3.周边配套齐全</body>', 2);
  
 INSERT INTO `eh_lease_promotion_attachments` (`id`, `lease_id`, `content_type`, `content_uri`, `creator_uid`, `create_time`)
 VALUES ('1',  '1',  'image',  'cs://1/image/aW1hZ2UvTVRwaE5XTmxNRFF6TWpVeE1tTmtNakE0WlRGaE9UY3pPRGd5TkRObU56RXpaZw',  '1',  '2015-11-27 16:46:37');

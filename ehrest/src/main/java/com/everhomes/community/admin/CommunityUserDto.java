@@ -20,7 +20,7 @@ public class CommunityUserDto {
 	
 	private String buildingName;
 	
-	private String addressId;
+	private Long addressId;
 	
 	private String addressName;
 	
@@ -95,11 +95,11 @@ public class CommunityUserDto {
 		this.buildingName = buildingName;
 	}
 
-	public String getAddressId() {
+	public Long getAddressId() {
 		return addressId;
 	}
 
-	public void setAddressId(String addressId) {
+	public void setAddressId(Long addressId) {
 		this.addressId = addressId;
 	}
 

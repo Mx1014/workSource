@@ -54,11 +54,13 @@ CREATE TABLE `eh_content_shard_map` (
 DROP TABLE IF EXISTS `eh_configurations`;
 CREATE TABLE `eh_configurations` (
     `id` INTEGER NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
+    `namespace_id` INTEGER NOT NULL DEFAULT 0,
     `name` VARCHAR(64) NOT NULL,
+    `display_name` VARCHAR(128),
     `value` VARCHAR(256) NOT NULL,
     `description` VARCHAR(256),
     PRIMARY KEY (`id`),
-    UNIQUE `u_eh_conf_name` (`name`)
+    UNIQUE `u_eh_conf_namespace_name` (`namespace_id`, `name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_messages`;

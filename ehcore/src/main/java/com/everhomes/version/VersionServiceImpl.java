@@ -33,13 +33,12 @@ public class VersionServiceImpl implements VersionService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid current version parameter in the command");
         
-        Integer namespaceId = (cmd.getNamespaceId() == null) ? 0 : cmd.getNamespaceId();
-        VersionRealm realm = this.versionProvider.findVersionRealmByName(namespaceId, cmd.getRealm());
+        VersionRealm realm = this.versionProvider.findVersionRealmByName(cmd.getRealm());
         if(realm == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid realm parameter in the command, realm does not exist");
         
-        VersionUpgradeRule rule = this.versionProvider.matchVersionUpgradeRule(namespaceId, realm.getId(), 
+        VersionUpgradeRule rule = this.versionProvider.matchVersionUpgradeRule(realm.getId(), 
                 ConvertHelper.convert(cmd.getCurrentVersion(), Version.class));
         
         if(rule == null)
@@ -64,7 +63,7 @@ public class VersionServiceImpl implements VersionService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid current version parameter in the command");
         
-        VersionRealm realm = this.versionProvider.findVersionRealmByName(cmd.getNamespaceId(), cmd.getRealm());
+        VersionRealm realm = this.versionProvider.findVersionRealmByName(cmd.getRealm());
         if(realm == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid realm parameter in the command, realm does not exist");
@@ -88,14 +87,13 @@ public class VersionServiceImpl implements VersionService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid current version parameter in the command");
 
-        Integer namespaceId = (cmd.getNamespaceId() == null) ? 0 : cmd.getNamespaceId();
-        VersionRealm realm = this.versionProvider.findVersionRealmByName(namespaceId, cmd.getRealm());
+        VersionRealm realm = this.versionProvider.findVersionRealmByName(cmd.getRealm());
         if(realm == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid realm parameter in the command, realm does not exist");
         
         Version version = ConvertHelper.convert(cmd.getCurrentVersion(), Version.class);
-        VersionUrl versionUrl = this.versionProvider.findVersionUrlByVersion(namespaceId, cmd.getRealm(), version.toString());
+        VersionUrl versionUrl = this.versionProvider.findVersionUrlByVersion(cmd.getRealm(), version.toString());
         if(versionUrl == null)
             throw RuntimeErrorException.errorWith(VersionServiceErrorCode.SCOPE, VersionServiceErrorCode.ERROR_NO_VERSION_URL_SET, 
                     "No version URLs has been setup yet");

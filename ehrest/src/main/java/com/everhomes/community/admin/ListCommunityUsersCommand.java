@@ -8,12 +8,12 @@ import org.apache.commons.lang.StringUtils;
 
 public class ListCommunityUsersCommand {
 	
-	private Integer pageOffset;
+	private Long pageAnchor;
     
     private Integer pageSize;
 	
 	@NotNull
-	private Long communityId;
+	private Integer namespaceId;
 	
 	private Integer isAuth;
 	
@@ -21,15 +21,16 @@ public class ListCommunityUsersCommand {
 	
 	
 
-	public Integer getPageOffset() {
-		if(null == this.pageOffset){
-			return 1;
+
+	public Long getPageAnchor() {
+		if(null == pageAnchor){
+			return 0l;
 		}
-		return pageOffset;
+		return pageAnchor;
 	}
 
-	public void setPageOffset(Integer pageOffset) {
-		this.pageOffset = pageOffset;
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
 	}
 
 	public Integer getPageSize() {
@@ -40,14 +41,15 @@ public class ListCommunityUsersCommand {
 		this.pageSize = pageSize;
 	}
 
-	public Long getCommunityId() {
-		return communityId;
+
+
+	public Integer getNamespaceId() {
+		return namespaceId;
 	}
 
-	public void setCommunityId(Long communityId) {
-		this.communityId = communityId;
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
-
 
 	public Integer getIsAuth() {
 		if(null == this.isAuth){

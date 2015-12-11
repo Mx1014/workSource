@@ -91,5 +91,40 @@ public class AddressAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /admin/address/importParkAddressData</b>
+     * @param files 上传的文件
+     * @return 上传的结果
+     */
+    @RequestMapping(value="importParkAddressData", method = RequestMethod.POST)
+    @RestReturn(value=String.class)
+    public RestResponse importParkAddressData(@Valid ImportAddressCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
+        
+    	addressService.importParkAddressData(cmd, files);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/address/importAddressInfos</b>
+     * @param files 上传的文件
+     * @return 上传的结果
+     */
+    @RequestMapping(value="importAddressData", method = RequestMethod.POST)
+    @RestReturn(value=String.class)
+    public RestResponse importAddressData(@RequestParam(value = "attachment") MultipartFile[] files) {
+//        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+    	addressService.importAddressData(files);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
 
 }

@@ -1,7 +1,7 @@
 package com.everhomes.techpark.expansion;
 
 /***
- * SINGLETON(1)谁知道是什么鬼
+ * SINGLETON(1) 个
  * SQUARE_METERS(2)平方米
  * */
 public enum ApplyEntrySizeUnit {

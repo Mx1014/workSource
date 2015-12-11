@@ -439,8 +439,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		Condition condition = null;
 		if(type != null && !type.equals(""))
 			condition = Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE.eq(type);
-		if(!StringUtils.isEmpty(name))
-			condition = condition.and(Tables.EH_ORGANIZATIONS.NAME.eq(name));
+		if(!StringUtils.isEmpty(name)) {
+		    if(condition != null) {
+		        condition = condition.and(Tables.EH_ORGANIZATIONS.NAME.eq(name));
+		    } else {
+		        condition = Tables.EH_ORGANIZATIONS.NAME.eq(name);
+		    }
+		}
 		
 		if(condition == null)
 			return step.fetchOneInto(Integer.class);

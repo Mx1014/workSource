@@ -6,16 +6,17 @@ import com.everhomes.discover.ItemType;
 
 public class CommunityUserResponse {
 	
-	private Integer nextPageOffset;
+	private Long nextPageOffset;
 	
 	@ItemType(CommunityUserDto.class)
 	private List<CommunityUserDto> userCommunities;
 
-	public Integer getNextPageOffset() {
+
+	public Long getNextPageOffset() {
 		return nextPageOffset;
 	}
 
-	public void setNextPageOffset(Integer nextPageOffset) {
+	public void setNextPageOffset(Long nextPageOffset) {
 		this.nextPageOffset = nextPageOffset;
 	}
 
