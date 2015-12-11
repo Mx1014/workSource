@@ -22,8 +22,10 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.schema.Tables;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 
@@ -95,14 +97,15 @@ public class ConfigurationAdminController extends ControllerBase {
         long offset = PaginationHelper.offsetFromPageOffset(pageOffset, pageSize);
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         
-        List<ConfigurationDTO> result = context.select().from("eh_configurations").limit((int)pageSize).offset((int)offset).fetch().map(r ->{
-            ConfigurationDTO dto = new ConfigurationDTO();
-            dto.setId((Integer)r.getValue("id"));
-            dto.setName((String)r.getValue("name"));
-            dto.setValue((String)r.getValue("value"));
-            dto.setDescription((String)r.getValue("description"));
-            return dto;
-            
+        List<ConfigurationDTO> result = context.select().from(Tables.EH_CONFIGURATIONS).limit((int)pageSize).offset((int)offset).fetch().map(r ->{
+            // 修改为convert的形式  by lqs 20151211 
+//            ConfigurationDTO dto = new ConfigurationDTO();
+//            dto.setId((Integer)r.getValue("id"));
+//            dto.setName((String)r.getValue("name"));
+//            dto.setValue((String)r.getValue("value"));
+//            dto.setDescription((String)r.getValue("description"));
+//            return dto;
+            return ConvertHelper.convert(r, ConfigurationDTO.class); 
         });
         ListConfigurationsAdminCommandResponse response = new ListConfigurationsAdminCommandResponse();
         if(result != null && result.size() == pageSize){
