@@ -1470,6 +1470,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 				
 		Date cunnentTime = new Date();
 		Timestamp currentTimestamp = new Timestamp(cunnentTime.getTime());
+		order.setOnlineFlag((byte) 1);
 		this.updateOrderStatus(order, currentTimestamp, PayStatus.INACTIVE.getCode());
 		
 		return order;
@@ -1492,6 +1493,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		this.checkVendorTypeFormat(cmd.getVendorType());
 		
 		if(order.getStatus().byteValue() == PayStatus.WAITING_FOR_PAY.getCode()) {
+			order.setOnlineFlag((byte) 1);
 			this.updateOrderStatus(order, payTimeStamp, PayStatus.PAID.getCode());
 			
 		}
@@ -1553,6 +1555,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		order.setPayerId(UserContext.current().getUser().getId());
 		order.setPaidTime(payTimeStamp);
 		order.setStatus(paymentStatus);
+		
 		vcProvider.updateConfOrders(order);
 		
 		if(order.getStatus().byteValue() == PayStatus.PAID.getCode()) {
@@ -1584,6 +1587,17 @@ public class VideoConfServiceImpl implements VideoConfService {
 	private Long convertOrderNoToOrderId(String orderNo) {
 		
 		return Long.valueOf(orderNo);
+	}
+
+	@Override
+	public void offlinePayBill(OfflinePayBillCommand cmd) {
+
+		ConfOrders order = this.checkOrder(cmd.getOrderId());
+		
+		Long payTime = System.currentTimeMillis();
+		Timestamp payTimeStamp = new Timestamp(payTime);
+		this.updateOrderStatus(order, payTimeStamp, PayStatus.PAID.getCode());
+		
 	}
 
 }
