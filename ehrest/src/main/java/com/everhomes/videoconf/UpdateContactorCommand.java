@@ -7,7 +7,6 @@ import com.everhomes.util.StringHelper;
  *  <li>contactorName: 企业联系人姓名</li>
  *  <li>contactor: 手机号</li>
  *  <li>enterpriseId: 企业id</li>
- *  <li>namespaceId: 命名空间</li>
  * </ul>
  *
  */
@@ -18,8 +17,6 @@ public class UpdateContactorCommand {
 	private String contactor;
 	
 	private Long enterpriseId;
-	
-	private Integer namespaceId;
 
 	public String getContactorName() {
 		return contactorName;
@@ -43,14 +40,6 @@ public class UpdateContactorCommand {
 
 	public void setEnterpriseId(Long enterpriseId) {
 		this.enterpriseId = enterpriseId;
-	}
-
-	public Integer getNamespaceId() {
-		return namespaceId;
-	}
-
-	public void setNamespaceId(Integer namespaceId) {
-		this.namespaceId = namespaceId;
 	}
 
 	@Override

@@ -725,10 +725,10 @@ public class VideoConfController  extends ControllerBase{
 	 * @return
 	 */
 	@RequestMapping("confPaymentCallBack")
-	@RestReturn(value = RechargeSuccessResponse.class)
+	@RestReturn(value = String.class)
 	public RestResponse confPaymentCallBack(OnlinePayBillCommand cmd) {
 		
-//		RechargeSuccessResponse refresh = videoConfService.confPaymentCallBack(cmd);
+		videoConfService.confPaymentCallBack(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
