@@ -1,0 +1,23 @@
+// @formatter:off
+// generated file: DO NOT EDIT
+package com.everhomes.videoconf;
+
+import com.everhomes.rest.RestResponseBase;
+
+import com.everhomes.videoconf.VideoConfAccountPreferentialRuleDTO;
+
+public class GetVideoConfAccountPreferentialRuleRestResponse extends RestResponseBase {
+
+    private VideoConfAccountPreferentialRuleDTO response;
+
+    public GetVideoConfAccountPreferentialRuleRestResponse () {
+    }
+
+    public VideoConfAccountPreferentialRuleDTO getResponse() {
+        return response;
+    }
+
+    public void setResponse(VideoConfAccountPreferentialRuleDTO response) {
+        this.response = response;
+    }
+}
