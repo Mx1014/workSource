@@ -22,6 +22,7 @@ public class OnlinePayBillCommand {
 	@NotNull
 	private String payStatus;
 	private String vendorType;
+	@NotNull
 	private String orderNo;
 	
 	private String payTime;

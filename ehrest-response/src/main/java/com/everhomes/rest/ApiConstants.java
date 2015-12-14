@@ -1,5 +1,9 @@
 // @formatter:off
+<<<<<<< HEAD
 // generated at 2015-12-14 13:52:58
+=======
+// generated at 2015-12-12 17:31:51
+>>>>>>> f591bb44df8bf8f736ca6544c2b2fa51ce288429
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -247,6 +251,7 @@ public interface ApiConstants {
     public static final String CONF_LISTVIDEOCONFACCOUNTBYORDERID_URL = "/conf/listVideoConfAccountByOrderId";
     public static final String CONF_LISTVIDEOCONFACCOUNTCONFRECORD_URL = "/conf/listVideoConfAccountConfRecord";
     public static final String CONF_LISTWARNINGCONTACTOR_URL = "/conf/listWarningContactor";
+    public static final String CONF_OFFLINEPAYBILL_URL = "/conf/offlinePayBill";
     public static final String CONF_RESERVEVIDEOCONF_URL = "/conf/reserveVideoConf";
     public static final String CONF_SETEARLYWARNINGLINE_URL = "/conf/setEarlyWarningLine";
     public static final String CONF_SETENTERPRISELOCKSTATUS_URL = "/conf/setEnterpriseLockStatus";
@@ -356,7 +361,6 @@ public interface ApiConstants {
     public static final String GROUP_LISTADMINOPREQUESTS_URL = "/group/listAdminOpRequests";
     public static final String GROUP_LISTGROUPWAITINGACCEPTANCES_URL = "/group/listGroupWaitingAcceptances";
     public static final String GROUP_LISTGROUPWAITINGAPPROVALS_URL = "/group/listGroupWaitingApprovals";
-    public static final String GROUP_LISTGROUPSBYNAMESPACEID_URL = "/group/listGroupsByNamespaceId";
     public static final String GROUP_LISTGROUPSBYTAG_URL = "/group/listGroupsByTag";
     public static final String GROUP_LISTMEMBERSINROLE_URL = "/group/listMembersInRole";
     public static final String GROUP_LISTMEMBERSINSTATUS_URL = "/group/listMembersInStatus";

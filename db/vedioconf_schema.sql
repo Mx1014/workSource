@@ -150,7 +150,7 @@ CREATE TABLE `eh_conf_enterprises` (
 	`active_account_amount` INTEGER NOT NULL DEFAULT 0 COMMENT 'the total amount of active accounts the enterprise owned',
 	`buy_channel` TINYINT NOT NULL DEFAULT 0 COMMENT '0: offline, 1: online',
 	`status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: active, 2: locked',
-	`deleter_uid` BIGINT NOT NULL COMMENT 'deleter id',
+	`deleter_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'deleter id',
 	`delete_time` DATETIME,
 	`update_time` DATETIME,
 	`creator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'the user id who create the enterrpise',

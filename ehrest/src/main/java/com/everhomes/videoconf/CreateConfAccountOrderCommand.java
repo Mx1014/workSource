@@ -6,7 +6,6 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *  <li>namespaceId: 命名空间 </li>
  *  <li>enterpriseId: 企业id </li>
  *  <li>enterpriseName: 企业名称</li>
  *  <li>contactor: 企业联系人</li>
@@ -23,8 +22,6 @@ import com.everhomes.util.StringHelper;
  *
  */
 public class CreateConfAccountOrderCommand {
-	private Integer namespaceId;
-	
 	private Long enterpriseId;
 	
 	private String enterpriseName;
@@ -49,14 +46,6 @@ public class CreateConfAccountOrderCommand {
 	
 	private Long accountCategoryId;
 	
-	public Integer getNamespaceId() {
-		return namespaceId;
-	}
-
-	public void setNamespaceId(Integer namespaceId) {
-		this.namespaceId = namespaceId;
-	}
-
 	public Long getEnterpriseId() {
 		return enterpriseId;
 	}

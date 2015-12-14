@@ -527,7 +527,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 	public void setEnterpriseLockStatus(EnterpriseLockStatusCommand cmd) {
 		CrossShardListingLocator locator=new CrossShardListingLocator();
 	    int pageSize = Integer.MAX_VALUE;
-		ConfEnterprises enterprise = vcProvider.findByEnterpriseId(cmd.getNamespaceId(), cmd.getEnterpriseId());
+		ConfEnterprises enterprise = vcProvider.findByEnterpriseId(cmd.getEnterpriseId());
 		List<ConfAccounts> accounts = vcProvider.listConfAccountsByEnterpriseId(cmd.getEnterpriseId(), locator, pageSize);
 		if(accounts != null && accounts.size() > 0) {
 			if(cmd.getLockStatus() == 1) {
@@ -648,7 +648,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 			
 			List<ConfOrderDTO> confOrders = orders.stream().map(r -> {
 				
-				ConfOrderDTO dto = toConfOrderDTO(cmd.getNamespaceId(), r);
+				ConfOrderDTO dto = toConfOrderDTO(r);
 				return dto;
 			}).collect(Collectors.toList());
 			
@@ -658,7 +658,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		return response;
 	}
 	
-	private ConfOrderDTO toConfOrderDTO(Integer namespaceId, ConfOrders order) {
+	private ConfOrderDTO toConfOrderDTO(ConfOrders order) {
 		
 		ConfOrderDTO dto = new ConfOrderDTO();
 		dto.setId(order.getId());
@@ -667,7 +667,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		if(enterprise != null)
 			dto.setEnterpriseName(enterprise.getName());
 
-		ConfEnterprises enterpriseContact = vcProvider.findByEnterpriseId(namespaceId, order.getOwnerId());
+		ConfEnterprises enterpriseContact = vcProvider.findByEnterpriseId(order.getOwnerId());
 		if(enterpriseContact != null) {
 			dto.setContactor(enterpriseContact.getContactName());
 			dto.setMobile(enterpriseContact.getContact());
@@ -745,7 +745,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 
 	@Override
 	public void updateVideoConfAccountOrderInfo(UpdateAccountOrderCommand cmd) {
-		ConfEnterprises confEnterprise = vcProvider.findByEnterpriseId(cmd.getNamespaceId(), cmd.getEnterpriseId());
+		ConfEnterprises confEnterprise = vcProvider.findByEnterpriseId(cmd.getEnterpriseId());
 		confEnterprise.setContactName(cmd.getContactor());
 		confEnterprise.setContact(cmd.getMobile());
 		vcProvider.updateVideoconfEnterprise(confEnterprise);
@@ -1040,7 +1040,11 @@ public class VideoConfServiceImpl implements VideoConfService {
 		StartVideoConfResponse response = new StartVideoConfResponse();
 		
 		String path = "http://api.confcloud.cn/openapi/confReservation";
-		
+		response.setConfHostId("8EubJ8t9RkWXneUEpY6m7Q");
+		response.setToken("n7m8_1qELfzv0uzc-niIQ3DjevC9LtHeQjl0FpC1eYM.BgIgWE1JL2I5aDNRNW5sd1ZNZ3p0Z3dtWTM4TE5WVHlYZ2lANWVhMTA5MDJhZTYwNDAwMjEwYzg2MmVhZTA3ZjY3OTFkNjJkZTYyYjUxM2U5YTFhZWRlMDBiODg1MTFkNjIzYgA");
+		response.setConfHostName("luzuo");
+		response.setMaxCount(6);
+		response.setMeetingNo("18589092373");
 		ConfAccounts account = vcProvider.findVideoconfAccountById(cmd.getAccountId());
 		if(account != null) {
 			ConfAccountCategories category = vcProvider.findAccountCategoriesById(account.getAccountCategoryId());
@@ -1099,11 +1103,12 @@ public class VideoConfServiceImpl implements VideoConfService {
 					if(resultHolder.getData() != null){
 						Map<String,Object> data = (Map<String, Object>) resultHolder.getData();
 						
-						response.setConfHostId("8EubJ8t9RkWXneUEpY6m7Q");
-						response.setToken("n7m8_1qELfzv0uzc-niIQ3DjevC9LtHeQjl0FpC1eYM.BgIgWE1JL2I5aDNRNW5sd1ZNZ3p0Z3dtWTM4TE5WVHlYZ2lANWVhMTA5MDJhZTYwNDAwMjEwYzg2MmVhZTA3ZjY3OTFkNjJkZTYyYjUxM2U5YTFhZWRlMDBiODg1MTFkNjIzYgA");
-						response.setConfHostName("luzuo");
+						response.setConfHostId(String.valueOf(data.get("meetingNo")));
+						response.setToken(String.valueOf(data.get("meetingNo")));
+						User user = userProvider.findUserById(account.getOwnerId());
+						response.setConfHostName(user.getNickName());
 						response.setMaxCount(6);
-						response.setMeetingNo("18589092373");
+						response.setMeetingNo(String.valueOf(data.get("meetingNo")));
 						
 						Object obj = data.get("meetingNo");
 						ConfConferences conf = new ConfConferences();
@@ -1372,7 +1377,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 
 	@Override
 	public void updateContactor(UpdateContactorCommand cmd) {
-		ConfEnterprises enterprise = vcProvider.findByEnterpriseId(cmd.getNamespaceId(), cmd.getEnterpriseId());
+		ConfEnterprises enterprise = vcProvider.findByEnterpriseId(cmd.getEnterpriseId());
 		enterprise.setContactName(cmd.getContactorName());
 		enterprise.setContact(cmd.getContactor());
 		
@@ -1418,7 +1423,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		order.setStatus(PayStatus.WAITING_FOR_PAY.getCode());
 		order.setInvoiceReqFlag(cmd.getInvoiceFlag());
 		order.setInvoiceIssueFlag(cmd.getMakeOutFlag());
-		order.setOnlineFlag(cmd.getBuyChannel());
+//		order.setOnlineFlag(cmd.getBuyChannel());
 		order.setAccountCategoryId(cmd.getAccountCategoryId());
 		vcProvider.createConfOrders(order);
 		
@@ -1428,11 +1433,10 @@ public class VideoConfServiceImpl implements VideoConfService {
 		}
 		
 		
-		ConfEnterprises enterprise = vcProvider.findByEnterpriseId(cmd.getNamespaceId(), cmd.getEnterpriseId());
+		ConfEnterprises enterprise = vcProvider.findByEnterpriseId(cmd.getEnterpriseId());
 		if(enterprise == null) {
 			ConfEnterprises confEnterprise = new ConfEnterprises();
 			confEnterprise.setEnterpriseId(cmd.getEnterpriseId());
-			confEnterprise.setNamespaceId(cmd.getNamespaceId());
 			confEnterprise.setContactName(cmd.getContactor());
 			confEnterprise.setContact(cmd.getMobile());
 			vcProvider.createConfEnterprises(confEnterprise);
@@ -1466,7 +1470,8 @@ public class VideoConfServiceImpl implements VideoConfService {
 				
 		Date cunnentTime = new Date();
 		Timestamp currentTimestamp = new Timestamp(cunnentTime.getTime());
-//		this.updateOrderStatus(order, currentTimestamp, PayStatus.INACTIVE.getCode(), RechargeStatus.INACTIVE.getCode());
+		order.setOnlineFlag((byte) 1);
+		this.updateOrderStatus(order, currentTimestamp, PayStatus.INACTIVE.getCode());
 		
 		return order;
 	}
@@ -1482,18 +1487,16 @@ public class VideoConfServiceImpl implements VideoConfService {
 		Long orderId = this.convertOrderNoToOrderId(cmd.getOrderNo());
 		ConfOrders order = this.checkOrder(orderId);
 		
-		double payAmount = new Double(cmd.getPayAmount());
-		
 		Long payTime = System.currentTimeMillis();
 		Timestamp payTimeStamp = new Timestamp(payTime);
 		
 		this.checkVendorTypeFormat(cmd.getVendorType());
 		
-//		if(order.getPaymentStatus().byteValue() == PayStatus.WAITING_FOR_PAY.getCode()) {
-//			order.setRechargeAmount(payAmount);
-//			this.updateOrderStatus(order, payTimeStamp, PayStatus.PAID.getCode(), RechargeStatus.UPDATING.getCode());
-//			
-//		}
+		if(order.getStatus().byteValue() == PayStatus.WAITING_FOR_PAY.getCode()) {
+			order.setOnlineFlag((byte) 1);
+			this.updateOrderStatus(order, payTimeStamp, PayStatus.PAID.getCode());
+			
+		}
 		
 		return order;
 	}
@@ -1549,16 +1552,52 @@ public class VideoConfServiceImpl implements VideoConfService {
 	}
 	
 	private void updateOrderStatus(ConfOrders order, Timestamp payTimeStamp, byte paymentStatus) {
+		order.setPayerId(UserContext.current().getUser().getId());
+		order.setPaidTime(payTimeStamp);
+		order.setStatus(paymentStatus);
 		
-//		order.setRechargeTime(payTimeStamp);
-//		order.setPaymentStatus(paymentStatus);
-//		order.setRechargeStatus(rechargeStatus);
-//		this.onlinePayProvider.updateRehargeInfo(order);
+		vcProvider.updateConfOrders(order);
+		
+		if(order.getStatus().byteValue() == PayStatus.PAID.getCode()) {
+			for(int i = 0; i < order.getQuantity(); i++) {
+				ConfAccounts account = new ConfAccounts();
+				account.setStatus((byte) 1);
+				account.setEnterpriseId(order.getOwnerId());
+				account.setExpiredDate(addMonth(order.getPaidTime(), order.getPeriod()));
+				account.setAccountCategoryId(order.getAccountCategoryId());
+				vcProvider.createConfAccounts(account);
+				
+				ConfOrderAccountMap map = new ConfOrderAccountMap();
+				map.setOrderId(order.getId());
+				map.setEnterpriseId(order.getOwnerId());
+				map.setConfAccountId(account.getId());
+				vcProvider.createConfOrderAccountMap(map);
+
+				ConfEnterprises enterprise = vcProvider.findByEnterpriseId(order.getOwnerId());
+				enterprise.setBuyChannel(order.getOnlineFlag());
+				enterprise.setAccountAmount(enterprise.getAccountAmount()+order.getQuantity());
+				enterprise.setActiveAccountAmount(enterprise.getActiveAccountAmount()+order.getQuantity());
+				vcProvider.updateConfEnterprises(enterprise);
+				
+			}
+		}
+		
 	}
 	
 	private Long convertOrderNoToOrderId(String orderNo) {
 		
 		return Long.valueOf(orderNo);
+	}
+
+	@Override
+	public void offlinePayBill(OfflinePayBillCommand cmd) {
+
+		ConfOrders order = this.checkOrder(cmd.getOrderId());
+		
+		Long payTime = System.currentTimeMillis();
+		Timestamp payTimeStamp = new Timestamp(payTime);
+		this.updateOrderStatus(order, payTimeStamp, PayStatus.PAID.getCode());
+		
 	}
 
 }

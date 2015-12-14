@@ -725,10 +725,26 @@ public class VideoConfController  extends ControllerBase{
 	 * @return
 	 */
 	@RequestMapping("confPaymentCallBack")
-	@RestReturn(value = RechargeSuccessResponse.class)
+	@RestReturn(value = String.class)
 	public RestResponse confPaymentCallBack(OnlinePayBillCommand cmd) {
 		
-//		RechargeSuccessResponse refresh = videoConfService.confPaymentCallBack(cmd);
+		videoConfService.confPaymentCallBack(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /conf/offlinePayBill</b>
+	 * 线下购买支付
+	 * @return
+	 */
+	@RequestMapping("offlinePayBill")
+	@RestReturn(value = String.class)
+	public RestResponse offlinePayBill(OfflinePayBillCommand cmd) {
+		
+		videoConfService.offlinePayBill(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

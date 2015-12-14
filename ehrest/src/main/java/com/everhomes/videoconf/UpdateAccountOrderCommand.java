@@ -6,7 +6,6 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *  <li>namespaceId: 命名空间 </li>
  *  <li>id: 主键id</li>
  *  <li>enterpriseId: 企业id </li>
  *  <li>enterpriseName: 企业名称</li>
@@ -21,7 +20,6 @@ import com.everhomes.util.StringHelper;
  *
  */
 public class UpdateAccountOrderCommand {
-	private Integer namespaceId;
 
 	private Long id;
 	
@@ -42,14 +40,6 @@ public class UpdateAccountOrderCommand {
 	private Byte makeOutFlag;
 	
 	private InvoiceDTO invoice;
-
-	public Integer getNamespaceId() {
-		return namespaceId;
-	}
-
-	public void setNamespaceId(Integer namespaceId) {
-		this.namespaceId = namespaceId;
-	}
 
 	public Long getId() {
 		return id;

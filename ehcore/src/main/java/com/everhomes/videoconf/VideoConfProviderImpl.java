@@ -27,6 +27,7 @@ import com.everhomes.server.schema.tables.daos.EhConfAccountsDao;
 import com.everhomes.server.schema.tables.daos.EhConfConferencesDao;
 import com.everhomes.server.schema.tables.daos.EhConfEnterprisesDao;
 import com.everhomes.server.schema.tables.daos.EhConfInvoicesDao;
+import com.everhomes.server.schema.tables.daos.EhConfOrderAccountMapDao;
 import com.everhomes.server.schema.tables.daos.EhConfOrdersDao;
 import com.everhomes.server.schema.tables.daos.EhConfReservationsDao;
 import com.everhomes.server.schema.tables.daos.EhConfSourceAccountsDao;
@@ -308,14 +309,13 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 	}
 
 	@Override
-	public ConfEnterprises findByEnterpriseId(Integer namespaceId, Long enterpriseId) {
+	public ConfEnterprises findByEnterpriseId(Long enterpriseId) {
 		
 		final ConfEnterprises[] result = new ConfEnterprises[1];
 		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhConfEnterprises.class), result, 
 				(DSLContext context, Object reducingContext) -> {
 					List<ConfEnterprises> list = context.select().from(Tables.EH_CONF_ENTERPRISES)
 							.where(Tables.EH_CONF_ENTERPRISES.ENTERPRISE_ID.eq(enterpriseId))
-							.and(Tables.EH_CONF_ENTERPRISES.NAMESPACE_ID.eq(namespaceId))
 							.fetch().map((r) -> {
 								return ConvertHelper.convert(r, ConfEnterprises.class);
 							});
@@ -1011,6 +1011,32 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 		enterprise.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		EhConfEnterprisesDao dao = new EhConfEnterprisesDao(context.configuration());
         dao.update(enterprise);
+	}
+
+	@Override
+	public void createConfAccounts(ConfAccounts account) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+
+        long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhConfAccounts.class));
+        account.setId(id);
+        account.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        account.setUpdateTime(account.getCreateTime());
+        account.setCreatorUid(UserContext.current().getUser().getId());
+        EhConfAccountsDao dao = new EhConfAccountsDao(context.configuration());
+        dao.insert(account);
+		
+	}
+
+	@Override
+	public void createConfOrderAccountMap(ConfOrderAccountMap map) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+
+        long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhConfOrderAccountMap.class));
+        map.setId(id);
+
+        EhConfOrderAccountMapDao dao = new EhConfOrderAccountMapDao(context.configuration());
+        dao.insert(map);
+		
 	}
 
 
