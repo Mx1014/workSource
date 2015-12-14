@@ -1423,7 +1423,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		order.setStatus(PayStatus.WAITING_FOR_PAY.getCode());
 		order.setInvoiceReqFlag(cmd.getInvoiceFlag());
 		order.setInvoiceIssueFlag(cmd.getMakeOutFlag());
-		order.setOnlineFlag(cmd.getBuyChannel());
+//		order.setOnlineFlag(cmd.getBuyChannel());
 		order.setAccountCategoryId(cmd.getAccountCategoryId());
 		vcProvider.createConfOrders(order);
 		
