@@ -7,7 +7,7 @@ public class ParkResponseListCommand {
 	private Integer pageOffset;
 	
 	private Integer pageSize;
-	
+	private String cardType;
 	public Long getCommunityId() {
 		return communityId;
 	}
@@ -30,6 +30,14 @@ public class ParkResponseListCommand {
 
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
+	}
+
+	public String getCardType() {
+		return cardType;
+	}
+
+	public void setCardType(String cardType) {
+		this.cardType = cardType;
 	} 
 	
 }

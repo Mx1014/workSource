@@ -120,7 +120,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        List<YellowPage> yellowPages = this.yellowPageProvider.queryYellowPages(locator, pageSize + 1,cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParentId(),cmd.getType(),cmd.getServiceType());
+        List<YellowPage> yellowPages = this.yellowPageProvider.queryYellowPages(locator, pageSize + 1,cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParentId(),cmd.getType(),cmd.getServiceType(),cmd.getKeywords());
         if(null == yellowPages || yellowPages.size() == 0)
         	return response;
       
@@ -164,6 +164,8 @@ public class YellowPageServiceImpl implements YellowPageService {
 	} 
 	private void createYellowPageAttachments(
 			List<YellowPageAattchmentDTO> attachments,Long ownerId) {
+		if(null == attachments)
+			return;
 		for (YellowPageAattchmentDTO dto:attachments ){
 			if(null == dto.getContentUri())
 				continue;

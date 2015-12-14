@@ -15,6 +15,7 @@ public class UserTokenCommand {
     @NotNull
     private String userIdentifier;
    
+    private Integer namespaceId;
     
     public UserTokenCommand() {
     }
@@ -27,7 +28,16 @@ public class UserTokenCommand {
         this.userIdentifier = userIdentifier;
     }
 
-    @Override
+    
+    public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

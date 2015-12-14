@@ -62,20 +62,6 @@ public class EhLeasePromotionsDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	}
 
 	/**
-	 * Fetch records that have <code>building_id IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLeasePromotions> fetchByBuildingId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhLeasePromotions.EH_LEASE_PROMOTIONS.BUILDING_ID, values);
-	}
-
-	/**
-	 * Fetch records that have <code>rent_position IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLeasePromotions> fetchByRentPosition(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhLeasePromotions.EH_LEASE_PROMOTIONS.RENT_POSITION, values);
-	}
-
-	/**
 	 * Fetch records that have <code>rent_type IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLeasePromotions> fetchByRentType(java.lang.String... values) {
@@ -104,31 +90,10 @@ public class EhLeasePromotionsDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	}
 
 	/**
-	 * Fetch records that have <code>contacts IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLeasePromotions> fetchByContacts(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhLeasePromotions.EH_LEASE_PROMOTIONS.CONTACTS, values);
-	}
-
-	/**
-	 * Fetch records that have <code>contact_phone IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLeasePromotions> fetchByContactPhone(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhLeasePromotions.EH_LEASE_PROMOTIONS.CONTACT_PHONE, values);
-	}
-
-	/**
 	 * Fetch records that have <code>description IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLeasePromotions> fetchByDescription(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhLeasePromotions.EH_LEASE_PROMOTIONS.DESCRIPTION, values);
-	}
-
-	/**
-	 * Fetch records that have <code>enter_time IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLeasePromotions> fetchByEnterTime(java.sql.Timestamp... values) {
-		return fetch(com.everhomes.server.schema.tables.EhLeasePromotions.EH_LEASE_PROMOTIONS.ENTER_TIME, values);
 	}
 
 	/**
@@ -157,5 +122,40 @@ public class EhLeasePromotionsDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLeasePromotions> fetchByStatus(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhLeasePromotions.EH_LEASE_PROMOTIONS.STATUS, values);
+	}
+
+	/**
+	 * Fetch records that have <code>building_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLeasePromotions> fetchByBuildingId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLeasePromotions.EH_LEASE_PROMOTIONS.BUILDING_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>rent_position IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLeasePromotions> fetchByRentPosition(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLeasePromotions.EH_LEASE_PROMOTIONS.RENT_POSITION, values);
+	}
+
+	/**
+	 * Fetch records that have <code>contacts IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLeasePromotions> fetchByContacts(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLeasePromotions.EH_LEASE_PROMOTIONS.CONTACTS, values);
+	}
+
+	/**
+	 * Fetch records that have <code>contact_phone IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLeasePromotions> fetchByContactPhone(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLeasePromotions.EH_LEASE_PROMOTIONS.CONTACT_PHONE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>enter_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLeasePromotions> fetchByEnterTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLeasePromotions.EH_LEASE_PROMOTIONS.ENTER_TIME, values);
 	}
 }

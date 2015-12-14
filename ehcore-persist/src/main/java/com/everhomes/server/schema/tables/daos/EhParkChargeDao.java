@@ -55,6 +55,13 @@ public class EhParkChargeDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	}
 
 	/**
+	 * Fetch records that have <code>card_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkCharge> fetchByCardType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkCharge.EH_PARK_CHARGE.CARD_TYPE, values);
+	}
+
+	/**
 	 * Fetch records that have <code>amount IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkCharge> fetchByAmount(java.lang.Double... values) {

@@ -8,13 +8,17 @@ package com.everhomes.messaging;
  * <li>GROUP_INVITE_TO_JOIN: 邀请用户加入gropu需要被邀请者同意/拒绝</li>
  * <li>GROUP_REQUEST_TO_BE_ADMIN: 用户主动申请成为group管理员需要审核</li>
  * <li>GROUP_INVITE_TO_BE_ADMIN: 邀请用户成为group管理员需要被邀请者同意/拒绝</li>
+ * <li>ENTERPRISE_REQUEST_TO_JOIN: 主动申请加入企业需要审核</li>
+ * <li>ENTERPRISE_INVITE_TO_JOIN: 邀请用户加入企业需要同意</li>
  * </ul>
  */
 public enum MetaObjectType {
     GROUP_REQUEST_TO_JOIN("group.requestToJoin"), 
     GROUP_INVITE_TO_JOIN("group.inviteToJoin"), 
     GROUP_REQUEST_TO_BE_ADMIN("group.requestToBeAdmin"), 
-    GROUP_INVITE_TO_BE_ADMIN("group.inviteToBeAdmin");
+    GROUP_INVITE_TO_BE_ADMIN("group.inviteToBeAdmin"),
+    ENTERPRISE_REQUEST_TO_JOIN("enterprise.requestToJoin"), 
+    ENTERPRISE_INVITE_TO_JOIN("enterprise.inviteToJoin");
     
     private String code;
     private MetaObjectType(String code) {

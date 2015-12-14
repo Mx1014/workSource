@@ -131,6 +131,7 @@ public class ParkServiceImpl implements ParkService {
 //		Long parkId = user.getCommunityId();
 		
 		ParkCharge parkCharge = new ParkCharge();
+		parkCharge.setCardType(cmd.getCardType());
 		parkCharge.setMonths(cmd.getMonths());
 		parkCharge.setAmount(cmd.getAmount());
 		parkCharge.setCommunityId(cmd.getCommunityId());
@@ -145,12 +146,7 @@ public class ParkServiceImpl implements ParkService {
 		User user = UserContext.current().getUser();
 //		Long parkId = user.getCommunityId();
 		
-		ParkCharge parkCharge = new ParkCharge();
-		parkCharge.setId(cmd.getId());
-		parkCharge.setMonths(cmd.getMonths());
-		parkCharge.setAmount(cmd.getAmount());
-		parkCharge.setCommunityId(cmd.getCommunityId());
-		
+		ParkCharge parkCharge =  parkProvider.findParkingChargeById(cmd.getId());
 		parkProvider.deleteCharge(parkCharge);
 	}
 
@@ -165,7 +161,7 @@ public class ParkServiceImpl implements ParkService {
         int offset = (int) PaginationHelper.offsetFromPageOffset((long) pageOffset, pageSize);
         
 		ParkResponseList response = new ParkResponseList();
-		List<ParkCharge> parkCharge = parkProvider.listParkingChargeByEnterpriseCommunityId(cmd.getCommunityId(), offset, pageSize);
+		List<ParkCharge> parkCharge = parkProvider.listParkingChargeByEnterpriseCommunityId(cmd.getCommunityId(),cmd.getCardType(), offset, pageSize);
 		
 		if(parkCharge != null && parkCharge.size() == pageSize){
 			response.setNextPageOffset(pageOffset + 1);
@@ -198,6 +194,7 @@ public class ParkServiceImpl implements ParkService {
 		if(phones != null)
 			order.setRechargePhone(phones.get(0));
 		order.setNumberType((byte) 0);
+		order.setCardType( cmd.getCardType());
 		order.setOwnerName(cmd.getOwnerName());
 		order.setPlateNumber(cmd.getPlateNumber());
 		order.setRechargeAmount(cmd.getAmount());
@@ -615,6 +612,7 @@ public class ParkServiceImpl implements ParkService {
         if(LOGGER.isDebugEnabled())
 			LOGGER.error("resultHolder="+resultHolder.isSuccess());
 
+		PlateInfo response = new PlateInfo();
 		if(resultHolder.isSuccess()){
 			Map<String,Object> data = (Map<String, Object>) resultHolder.getData();
 			Map<String,Object> card = (Map<String, Object>) data.get("card");
@@ -625,31 +623,40 @@ public class ParkServiceImpl implements ParkService {
 				LOGGER.error("validStatus="+validStatus);
 
 			if(!validStatus){
-				PlateInfo command = new PlateInfo();
-				command.setIsValid("false");
+				response.setIsValid("false");
 				
-				return command;
+				return response;
 			}
 			else if(validStatus){
 				String ownerName = (String) card.get("userName");
 				String plateNumber = (String) card.get("carNumber");
 				
 				String validEnd = (String) card.get("validEnd");
+				String cardCode = (String) card.get("cardCode");
+				String cardType = (String) card.get("cardDescript"); 
 				Timestamp validityPeriod = strToTimestamp(validEnd);
 
-				PlateInfo command = new PlateInfo();
-				command.setOwnerName(ownerName);
-				command.setPlateNumber(plateNumber);
-				command.setValidityPeriod(validityPeriod);
-				command.setIsValid("true");
-
+				
+				response.setOwnerName(ownerName);
+				response.setPlateNumber(plateNumber);
+				response.setValidityPeriod(validityPeriod);
+				response.setCardType(cardType);
+				response.setCardCode(cardCode);
+				response.setIsValid("true");
+				List<ParkCharge> parkCharge = parkProvider.listParkingChargeByEnterpriseCommunityId(cmd.getCommunityId(),cardType, null, null);
+				response.setParkingCharge(parkCharge.stream().map(r->{
+					ParkingChargeDTO dto = ConvertHelper.convert(r, ParkingChargeDTO.class);
+					return dto;
+				}).collect(Collectors.toList()));
+				
 				if(LOGGER.isDebugEnabled())
-					LOGGER.error("successcommand="+command.toString());
+					LOGGER.error("successcommand="+response.toString());
 
-				return command;
+				return response;
 			}
 		}
-		return null;
+		
+		return response;
 	}
 	
 	private void checkResultHolderIsNull(ResultHolder resultHolder,String plateNo) {
@@ -754,5 +761,28 @@ public class ParkServiceImpl implements ParkService {
 			return null;
 		});
 		
+	}
+
+	@Override
+	public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
+		ListCardTypeResponse response = new ListCardTypeResponse();
+//		response.setCardTypes(new ArrayList<String>());
+		URL wsdlURL = Service1.WSDL_LOCATION;
+ 
+		Service1 ss = new Service1(wsdlURL, SERVICE_NAME);
+        Service1Soap port = ss.getService1Soap12();
+        LOGGER.info("verifyRechargedPlate");
+        String json = port.getAllCardDescript();
+        
+        GetAllCardDescriptDTO cardDescriptDTO = GsonUtil.fromJson(json, GetAllCardDescriptDTO.class);
+        
+        
+        if(LOGGER.isDebugEnabled())
+			LOGGER.error("cardDescriptDTO="+cardDescriptDTO.isSuccess());
+
+		if(cardDescriptDTO.isSuccess()){
+			response.setCardTypes(cardDescriptDTO.getCardDescript());
+		}
+		return response;
 	}
 }

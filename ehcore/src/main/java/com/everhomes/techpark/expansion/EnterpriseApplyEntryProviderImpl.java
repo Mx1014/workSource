@@ -202,6 +202,9 @@ public class EnterpriseApplyEntryProviderImpl implements
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		EhLeasePromotionsDao dao = new EhLeasePromotionsDao(context.configuration());
 		LeasePromotion leasePromotion = ConvertHelper.convert(dao.findById(id), LeasePromotion.class);
+		
+		if(null == leasePromotion) 
+			return leasePromotion;
 		List<LeasePromotionAttachment> attachments = this.getAttachments(leasePromotion.getId());
 		leasePromotion.setAttachments(attachments);
 		return leasePromotion;
@@ -247,6 +250,7 @@ public class EnterpriseApplyEntryProviderImpl implements
 		return true;
 	}
 	
+	@Override
 	public boolean updateLeasePromotionStatus(long id, byte status){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		UpdateQuery<EhLeasePromotionsRecord> r = context.updateQuery(Tables.EH_LEASE_PROMOTIONS);
@@ -256,12 +260,29 @@ public class EnterpriseApplyEntryProviderImpl implements
 		return true;
 	}
 	
+	@Override
 	public boolean updateApplyEntryStatus(long id, byte status){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		UpdateQuery<EhEnterpriseOpRequestsRecord> r = context.updateQuery(Tables.EH_ENTERPRISE_OP_REQUESTS);
 		r.addValue(Tables.EH_ENTERPRISE_OP_REQUESTS.STATUS, status);
 		r.addConditions(Tables.EH_ENTERPRISE_OP_REQUESTS.ID.eq(id));
 		r.execute();
+		return true;
+	}
+	
+	@Override
+	public boolean deleteLeasePromotion(long id){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		EhLeasePromotionsDao dao = new EhLeasePromotionsDao(context.configuration());
+		dao.deleteById(id);
+		return true;
+	}
+	
+	@Override
+	public boolean deleteApplyEntry(long id){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		EhEnterpriseOpRequestsDao dao = new EhEnterpriseOpRequestsDao(context.configuration());
+		dao.deleteById(id);
 		return true;
 	}
 	

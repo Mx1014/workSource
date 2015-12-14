@@ -9,9 +9,9 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>anonymous complex type�� Java �ࡣ
+ * <p>anonymous complex type的 Java 类。
  * 
- * <p>����ģʽƬ��ָ�������ڴ����е�Ԥ�����ݡ�
+ * <p>以下模式片段指定包含在此类中的预期内容。
  * 
  * <pre>
  * &lt;complexType&gt;
@@ -38,7 +38,7 @@ public class GetCardInfoResponse {
     protected String getCardInfoResult;
 
     /**
-     * ��ȡgetCardInfoResult���Ե�ֵ��
+     * 获取getCardInfoResult属性的值。
      * 
      * @return
      *     possible object is
@@ -50,7 +50,7 @@ public class GetCardInfoResponse {
     }
 
     /**
-     * ����getCardInfoResult���Ե�ֵ��
+     * 设置getCardInfoResult属性的值。
      * 
      * @param value
      *     allowed object is

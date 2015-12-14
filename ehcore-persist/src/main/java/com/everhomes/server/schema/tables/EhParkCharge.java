@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkCharge extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhParkChargeRecord> {
 
-	private static final long serialVersionUID = 1158540367;
+	private static final long serialVersionUID = -1403493223;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_park_charge</code>
@@ -35,6 +35,11 @@ public class EhParkCharge extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	 * The column <code>ehcore.eh_park_charge.months</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkChargeRecord, java.lang.Byte> MONTHS = createField("months", org.jooq.impl.SQLDataType.TINYINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_park_charge.card_type</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkChargeRecord, java.lang.String> CARD_TYPE = createField("card_type", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_park_charge.amount</code>.

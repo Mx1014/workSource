@@ -8,9 +8,9 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>anonymous complex type�� Java �ࡣ
+ * <p>anonymous complex type的 Java 类。
  * 
- * <p>����ģʽƬ��ָ�������ڴ����е�Ԥ�����ݡ�
+ * <p>以下模式片段指定包含在此类中的预期内容。
  * 
  * <pre>
  * &lt;complexType&gt;
@@ -57,7 +57,7 @@ public class CardPayMoney {
     protected String sign;
 
     /**
-     * ��ȡcardCode���Ե�ֵ��
+     * 获取cardCode属性的值。
      * 
      * @return
      *     possible object is
@@ -69,7 +69,7 @@ public class CardPayMoney {
     }
 
     /**
-     * ����cardCode���Ե�ֵ��
+     * 设置cardCode属性的值。
      * 
      * @param value
      *     allowed object is
@@ -81,7 +81,7 @@ public class CardPayMoney {
     }
 
     /**
-     * ��ȡcarNumber���Ե�ֵ��
+     * 获取carNumber属性的值。
      * 
      * @return
      *     possible object is
@@ -93,7 +93,7 @@ public class CardPayMoney {
     }
 
     /**
-     * ����carNumber���Ե�ֵ��
+     * 设置carNumber属性的值。
      * 
      * @param value
      *     allowed object is
@@ -105,7 +105,7 @@ public class CardPayMoney {
     }
 
     /**
-     * ��ȡflag���Ե�ֵ��
+     * 获取flag属性的值。
      * 
      * @return
      *     possible object is
@@ -117,7 +117,7 @@ public class CardPayMoney {
     }
 
     /**
-     * ����flag���Ե�ֵ��
+     * 设置flag属性的值。
      * 
      * @param value
      *     allowed object is
@@ -129,7 +129,7 @@ public class CardPayMoney {
     }
 
     /**
-     * ��ȡcost���Ե�ֵ��
+     * 获取cost属性的值。
      * 
      * @return
      *     possible object is
@@ -141,7 +141,7 @@ public class CardPayMoney {
     }
 
     /**
-     * ����cost���Ե�ֵ��
+     * 设置cost属性的值。
      * 
      * @param value
      *     allowed object is
@@ -153,7 +153,7 @@ public class CardPayMoney {
     }
 
     /**
-     * ��ȡvalidStart���Ե�ֵ��
+     * 获取validStart属性的值。
      * 
      * @return
      *     possible object is
@@ -165,7 +165,7 @@ public class CardPayMoney {
     }
 
     /**
-     * ����validStart���Ե�ֵ��
+     * 设置validStart属性的值。
      * 
      * @param value
      *     allowed object is
@@ -177,7 +177,7 @@ public class CardPayMoney {
     }
 
     /**
-     * ��ȡvalidEnd���Ե�ֵ��
+     * 获取validEnd属性的值。
      * 
      * @return
      *     possible object is
@@ -189,7 +189,7 @@ public class CardPayMoney {
     }
 
     /**
-     * ����validEnd���Ե�ֵ��
+     * 设置validEnd属性的值。
      * 
      * @param value
      *     allowed object is
@@ -201,7 +201,7 @@ public class CardPayMoney {
     }
 
     /**
-     * ��ȡpayTime���Ե�ֵ��
+     * 获取payTime属性的值。
      * 
      * @return
      *     possible object is
@@ -213,7 +213,7 @@ public class CardPayMoney {
     }
 
     /**
-     * ����payTime���Ե�ֵ��
+     * 设置payTime属性的值。
      * 
      * @param value
      *     allowed object is
@@ -225,7 +225,7 @@ public class CardPayMoney {
     }
 
     /**
-     * ��ȡsign���Ե�ֵ��
+     * 获取sign属性的值。
      * 
      * @return
      *     possible object is
@@ -237,7 +237,7 @@ public class CardPayMoney {
     }
 
     /**
-     * ����sign���Ե�ֵ��
+     * 设置sign属性的值。
      * 
      * @param value
      *     allowed object is

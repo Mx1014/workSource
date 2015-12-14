@@ -170,4 +170,30 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 		return response;
 	}
 	
+	/**
+	 * <b>URL: /techpark/entry/deleteApplyEntry
+	 * <p>删除招租
+	 */
+	@RequestMapping("deleteApplyEntry")
+	@RestReturn(value=String.class)
+	public RestResponse deleteApplyEntry(DeleteApplyEntryCommand cmd){
+		RestResponse response = new RestResponse(enterpriseApplyEntryService.deleteApplyEntry(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /techpark/entry/deleteLeasePromotion
+	 * <p>删除招租
+	 */
+	@RequestMapping("deleteLeasePromotion")
+	@RestReturn(value=String.class)
+	public RestResponse deleteLeasePromotion(DeleteLeasePromotionCommand cmd){
+		RestResponse response = new RestResponse(enterpriseApplyEntryService.deleteLeasePromotion(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 }

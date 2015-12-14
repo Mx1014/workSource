@@ -137,7 +137,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
     	String contact =  enterpriseDetail.getContact();
     	enterpriseDetail.setContact(StringUtils.isEmpty(contact) ? group.getEnterpriseContact() : contact);
     	String address = enterpriseDetail.getAddress();
-    	enterpriseDetail.setDescription(StringUtils.isEmpty(address) ? group.getEnterpriseContact() : address);
+    	enterpriseDetail.setAddress(StringUtils.isEmpty(address) ? group.getEnterpriseAddress() : address);
+    	enterpriseDetail.setAvatar(group.getAvatar());
     	return enterpriseDetail;
 	}
 	
@@ -148,7 +149,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	    EnterpriseDetailDTO dto = null;
 	    if(enterpriseDetail != null) {
 	        dto = ConvertHelper.convert(enterpriseDetail, EnterpriseDetailDTO.class);
-	        
+	        dto.setAvatarUri(enterpriseDetail.getAvatar());
+	        dto.setAvatarUrl(contentServerService.parserUri(dto.getAvatarUri(),EntityType.GROUP.getCode(), enterpriseDetail.getEnterpriseId()));
 	        List<EnterpriseAttachment> attachments = enterpriseProvider.listEnterpriseAttachments(enterpriseDetail.getEnterpriseId());
 	        if(attachments != null && attachments.size() > 0)
 	        {
@@ -194,10 +196,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		}
 		
 		for (EnterpriseOpRequest enterpriseOpRequest : enterpriseOpRequests) {
-			if(ApplyEntrySourceType.BUILDING.equals(enterpriseOpRequest.getSourceType())){
+			if(ApplyEntrySourceType.BUILDING.getCode().equals(enterpriseOpRequest.getSourceType())){
 				Building building = communityProvider.findBuildingById(enterpriseOpRequest.getSourceId());
 				if(null != building)enterpriseOpRequest.setSourceName(building.getName());
-			}else if(ApplyEntrySourceType.FOR_RENT.equals(enterpriseOpRequest.getSourceType())){
+			}else if(ApplyEntrySourceType.FOR_RENT.getCode().equals(enterpriseOpRequest.getSourceType())){
 				LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(enterpriseOpRequest.getSourceId());
 				if(null != leasePromotion)enterpriseOpRequest.setSourceName(leasePromotion.getSubject());
 			}
@@ -381,4 +383,15 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		return enterpriseApplyEntryProvider.updateApplyEntryStatus(cmd.getId(), cmd.getStatus());
 		
 	}
+	
+	@Override
+	public boolean deleteApplyEntry(DeleteApplyEntryCommand cmd){
+		return enterpriseApplyEntryProvider.deleteApplyEntry(cmd.getId());
+	}
+	
+	@Override
+	public boolean deleteLeasePromotion(DeleteLeasePromotionCommand cmd){
+		return enterpriseApplyEntryProvider.deleteLeasePromotion(cmd.getId());
+	}
+	
 }
