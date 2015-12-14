@@ -8,10 +8,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.activity.ActivityPostCommand;
 import com.everhomes.app.AppConstants;
 import com.everhomes.category.CategoryConstants;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.forum.Forum;
 import com.everhomes.forum.ForumEmbeddedHandler;
+import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.Post;
 import com.everhomes.forum.PostEntityTag;
 import com.everhomes.forum.PostPrivacy;
@@ -29,6 +32,9 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 
 	@Autowired
 	private OrganizationProvider organizationProvider;
+	
+	@Autowired
+	private ForumProvider forumProvider;
 
 	@Override
 	public String renderEmbeddedObjectSnapshot(Post post) {
@@ -85,6 +91,19 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_CLASS_NOT_FOUND,
 					"Failed to pre-process the organization task.");
 		}
+		
+		 ActivityPostCommand cmd = (ActivityPostCommand) StringHelper.fromJsonString(post.getEmbeddedJson(),
+	                ActivityPostCommand.class);
+	        
+	        if(null == cmd.getNamespaceId()){
+	        	Forum forum = forumProvider.findForumById(post.getForumId());
+	        	if(null != forum)
+	        		cmd.setNamespaceId(forum.getNamespaceId());
+	        	else
+					cmd.setNamespaceId(0);
+	        }
+	        
+	        post.setEmbeddedJson(StringHelper.toJsonString(cmd));
 
 		return post;	
 	}

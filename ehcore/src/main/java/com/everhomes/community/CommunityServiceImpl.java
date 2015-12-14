@@ -679,7 +679,9 @@ public class CommunityServiceImpl implements CommunityService {
 		 
 		 String managerNickName = building.getManagerNickName();
          String managerAvatar = building.getManagerAvatar();
-         
+         if(null == building.getManagerUid()){
+        	 return;
+         }
          User manager = userProvider.findUserById(building.getManagerUid());
          if(manager != null) {
              if(managerNickName == null || managerNickName.trim().length() == 0) {

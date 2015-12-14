@@ -5,16 +5,16 @@ import java.util.List;
 import com.everhomes.discover.ItemType;
 
 public class ListEnterpriseApplyEntryResponse {
-    private Integer nextPageAnchor;
+    private Long nextPageAnchor;
     
     @ItemType(EnterpriseApplyEntryDTO.class)
     private List<EnterpriseApplyEntryDTO> entrys;
 
-    public Integer getNextPageAnchor() {
+    public Long getNextPageAnchor() {
         return nextPageAnchor;
     }
 
-    public void setNextPageAnchor(Integer nextPageAnchor) {
+    public void setNextPageAnchor(Long nextPageAnchor) {
         this.nextPageAnchor = nextPageAnchor;
     }
 

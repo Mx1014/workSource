@@ -247,7 +247,7 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
             , int count, ListingQueryBuilderCallback queryBuilderCallback) {
     	final List<EnterpriseCommunityMap> contacts = new ArrayList<EnterpriseCommunityMap>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class, comunityId));
- 
+        count = count + 1;
         SelectQuery<EhEnterpriseCommunityMapRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_COMMUNITY_MAP);
         if(queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
@@ -256,16 +256,16 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
             query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.ID.gt(locator.getAnchor()));
             }
         
-        //query.addOrderBy(Tables.EH_ENTERPRISE_CONTACTS.CREATE_TIME.desc()); ERROR hear
-//        query.addLimit(count - contacts.size());
+        query.addLimit(count - contacts.size());
         query.fetch().map((r) -> {
         	 contacts.add(ConvertHelper.convert(r, EnterpriseCommunityMap.class));
              return null;
         });
         
-//        if(contacts.size() >= count) {
-//            locator.setAnchor(contacts.get(contacts.size() - 1).getId());
-//        }
+        if(contacts.size() >= count) {
+        	contacts.remove(contacts.size() - 1);
+            locator.setAnchor(contacts.get(contacts.size() - 1).getId());
+        }
         
         return contacts;
     }

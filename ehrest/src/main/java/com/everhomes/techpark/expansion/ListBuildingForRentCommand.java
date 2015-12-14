@@ -3,7 +3,7 @@ package com.everhomes.techpark.expansion;
 
 
 public class ListBuildingForRentCommand {
-    private Integer pageAnchor;
+    private Long pageAnchor;
     
     private Integer pageSize;
    
@@ -40,10 +40,10 @@ public class ListBuildingForRentCommand {
 	public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
 	}
-	public Integer getPageAnchor() {
+	public Long getPageAnchor() {
         return pageAnchor;
     }
-    public void setPageAnchor(Integer pageAnchor) {
+    public void setPageAnchor(Long pageAnchor) {
         this.pageAnchor = pageAnchor;
     }
     public Integer getPageSize() {

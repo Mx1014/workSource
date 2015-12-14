@@ -17,6 +17,8 @@ public class ListOrganizationMemberCommandResponse {
 	
 	private Integer nextPageOffset;
 	
+	private Long nextPageAnchor;
+	
 	@ItemType(OrganizationMemberDTO.class)
     private List<OrganizationMemberDTO> members;
 	public ListOrganizationMemberCommandResponse() {
@@ -28,6 +30,14 @@ public class ListOrganizationMemberCommandResponse {
 
 	public void setNextPageOffset(Integer nextPageOffset) {
 		this.nextPageOffset = nextPageOffset;
+	}
+	
+	public Long getNextPageAnchor() {
+		return nextPageAnchor;
+	}
+
+	public void setNextPageAnchor(Long nextPageAnchor) {
+		this.nextPageAnchor = nextPageAnchor;
 	}
 
 	public List<OrganizationMemberDTO> getMembers() {

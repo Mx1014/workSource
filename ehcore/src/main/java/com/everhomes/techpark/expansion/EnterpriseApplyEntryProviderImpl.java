@@ -77,10 +77,10 @@ public class EnterpriseApplyEntryProviderImpl implements
 
 	@Override
 	public List<EnterpriseOpRequest> listApplyEntrys(EnterpriseOpRequest request,
-			int offset, int pageSize) {
+			ListingLocator locator, int pageSize) {
 		List<EnterpriseOpRequest> enterpriseOpRequests = new ArrayList<EnterpriseOpRequest>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		
+		pageSize = pageSize + 1;
 		Condition cond = Tables.EH_ENTERPRISE_OP_REQUESTS.NAMESPACE_ID.eq(request.getNamespaceId());
 		
 		if(!StringUtils.isEmpty(request.getCommunityId())){
@@ -99,13 +99,24 @@ public class EnterpriseApplyEntryProviderImpl implements
 			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.SOURCE_TYPE.eq(request.getSourceType()));
 		}
 		
+		if(null != locator.getAnchor()){
+			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.ID.gt(locator.getAnchor()));
+		}
+		
 		SelectQuery<EhEnterpriseOpRequestsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_OP_REQUESTS);
 		query.addConditions(cond);
-		query.addLimit(offset, pageSize);
+		query.addLimit(pageSize);
 		query.fetch().map((r) -> {
 			enterpriseOpRequests.add(ConvertHelper.convert(r, EnterpriseOpRequest.class));
 			return null;
 		});
+		
+		if(enterpriseOpRequests.size() >= pageSize) {
+			enterpriseOpRequests.remove(enterpriseOpRequests.size() - 1);
+            locator.setAnchor(enterpriseOpRequests.get(enterpriseOpRequests.size() - 1).getId());
+		}
+		
+		
 		return enterpriseOpRequests;
 	}
 
@@ -145,9 +156,10 @@ public class EnterpriseApplyEntryProviderImpl implements
 	
 	@Override
 	public List<LeasePromotion> listLeasePromotions(LeasePromotion leasePromotion,
-			int offset, int pageSize) {
+			ListingLocator locator, int pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		List<LeasePromotion> leasePromotions = new ArrayList<LeasePromotion>();
+		pageSize = pageSize + 1;
 		Condition cond = Tables.EH_LEASE_PROMOTIONS.NAMESPACE_ID.eq(leasePromotion.getNamespaceId());
 		if(!StringUtils.isEmpty(leasePromotion.getCommunityId())){
 			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.COMMUNITY_ID.eq(leasePromotion.getCommunityId()));
@@ -158,9 +170,12 @@ public class EnterpriseApplyEntryProviderImpl implements
 		if(!StringUtils.isEmpty(leasePromotion.getBuildingId())){
 			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.BUILDING_ID.eq(leasePromotion.getBuildingId()));
 		}
+		if(null != locator.getAnchor()){
+			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.ID.gt(locator.getAnchor()));
+		}
 		context.select().from(Tables.EH_LEASE_PROMOTIONS)
 						.where(cond)
-						.limit(offset, pageSize)
+						.limit(pageSize)
 						.fetch().map((r) -> {
 							LeasePromotion lease = ConvertHelper.convert(r, LeasePromotion.class);
 							List<LeasePromotionAttachment> attachments = this.getAttachments(lease.getId());
@@ -168,6 +183,11 @@ public class EnterpriseApplyEntryProviderImpl implements
 							leasePromotions.add(lease);
 							return null;
 						});
+		
+		if(leasePromotions.size() >= pageSize) {
+			leasePromotions.remove(leasePromotions.size() - 1);
+            locator.setAnchor(leasePromotions.get(leasePromotions.size() - 1).getId());
+		}
 		return leasePromotions;
 	}
 	

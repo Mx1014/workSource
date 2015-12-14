@@ -1,7 +1,7 @@
 package com.everhomes.techpark.expansion;
 
 public class ListEnterpriseApplyEntryCommand {
-    private Integer pageAnchor;
+    private Long pageAnchor;
     private Integer pageSize;
    
     private Integer namespaceId;
@@ -46,10 +46,10 @@ public class ListEnterpriseApplyEntryCommand {
 	public void setSourceType(String sourceType) {
 		this.sourceType = sourceType;
 	}
-	public Integer getPageAnchor() {
+	public Long getPageAnchor() {
         return pageAnchor;
     }
-    public void setPageAnchor(Integer pageAnchor) {
+    public void setPageAnchor(Long  pageAnchor) {
         this.pageAnchor = pageAnchor;
     }
     public Integer getPageSize() {

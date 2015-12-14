@@ -37,7 +37,6 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.OrganizationDTO;
-import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.search.CommunitySearcher;
@@ -118,7 +117,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     @Override
     public List<Enterprise> listEnterpriseByCommunityId(ListingLocator locator,String enterpriseName, Long communityId, Integer status, int pageSize) {
         List<EnterpriseCommunityMap> enterpriseMaps = this.enterpriseProvider.queryEnterpriseMapByCommunityId(locator
-                , communityId, pageSize+1, new ListingQueryBuilderCallback() {
+                , communityId, pageSize, new ListingQueryBuilderCallback() {
 
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
@@ -135,14 +134,10 @@ public class EnterpriseServiceImpl implements EnterpriseService {
             }
         });    
         
+        
+        
         List<Enterprise> enterprises = new ArrayList<Enterprise>();
         for(EnterpriseCommunityMap cm : enterpriseMaps) {
-        	
-        	if(pageSize == enterprises.size()){
-        		locator.setAnchor(cm.getId());
-        		break;
-        	}
-        	
             Enterprise enterprise = enterpriseProvider.getEnterpriseById(cm.getMemberId());
             
             if(enterprise != null) {
