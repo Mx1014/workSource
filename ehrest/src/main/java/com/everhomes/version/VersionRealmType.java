@@ -18,6 +18,8 @@ package com.everhomes.version;
  * <li>IOS_SHUNICOM("iOS_ShUnicom"): 上海联通iOS版APP</li>
  * <li>ANDROID_JYJY("Android_JYJY"): 金隅嘉业Android版APP</li>
  * <li>IOS_JYJY("iOS_JYJY"): 金隅嘉业iOS版APP</li>
+ * <li>ANDROID_VIDEOCONF("Android_Videoconf"): 视频会议Android版APP</li>
+ * <li>IOS_VIDEOCONF("iOS_Videoconf"): 视频会议iOS版APP</li>
  * </ul>
  */
 public enum VersionRealmType {
@@ -34,7 +36,9 @@ public enum VersionRealmType {
     ANDROID_SHUNICOM("Android_ShUnicom"), 
     IOS_SHUNICOM("iOS_ShUnicom"), 
     ANDROID_JYJY("Android_JYJY"), 
-    IOS_JYJY("iOS_JYJY");
+    IOS_JYJY("iOS_JYJY"),
+    ANDROID_VIDEOCONF("Android_Videoconf"), 
+    IOS_VIDEOCONF("iOS_Videoconf");
     
     private String code;
     private VersionRealmType(String code) {
