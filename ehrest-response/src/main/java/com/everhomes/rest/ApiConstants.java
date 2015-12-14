@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-12-11 13:48:17
+// generated at 2015-12-11 21:00:02
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -449,7 +449,6 @@ public interface ApiConstants {
     public static final String PM_SENDPMPAYMESSAGETOALLOWEFAMILIES_URL = "/pm/sendPmPayMessageToAllOweFamilies";
     public static final String PM_SETAPARTMENTSTATUS_URL = "/pm/setApartmentStatus";
     public static final String PM_SETPROPCURRENTCOMMUNITY_URL = "/pm/setPropCurrentCommunity";
-    public static final String PM_TESTONLINE_URL = "/pm/testOnline";
     public static final String PM_UPDATEPMBILL_URL = "/pm/updatePmBill";
     public static final String PM_UPDATEPMBILLS_URL = "/pm/updatePmBills";
     public static final String POLL_SHOWRESULT_URL = "/poll/showResult";
@@ -473,6 +472,8 @@ public interface ApiConstants {
     public static final String REGION_LISTREGIONBYKEYWORD_URL = "/region/listRegionByKeyword";
     public static final String TECHPARK_ENTRY_APPLYENTRY_URL = "/techpark/entry/applyEntry";
     public static final String TECHPARK_ENTRY_CREATELEASEPROMOTION_URL = "/techpark/entry/createLeasePromotion";
+    public static final String TECHPARK_ENTRY_DELETEAPPLYENTRY_URL = "/techpark/entry/deleteApplyEntry";
+    public static final String TECHPARK_ENTRY_DELETELEASEPROMOTION_URL = "/techpark/entry/deleteLeasePromotion";
     public static final String TECHPARK_ENTRY_FINDLEASEPROMOTIONBYID_URL = "/techpark/entry/findLeasePromotionById";
     public static final String TECHPARK_ENTRY_GETENTERPRISEDETAILBYID_URL = "/techpark/entry/getEnterpriseDetailById";
     public static final String TECHPARK_ENTRY_LISTAPPLYENTRYS_URL = "/techpark/entry/listApplyEntrys";
