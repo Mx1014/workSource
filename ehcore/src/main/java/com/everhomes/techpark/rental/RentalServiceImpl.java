@@ -224,6 +224,7 @@ public class RentalServiceImpl implements RentalService {
 		response.setSites(new ArrayList<RentalSiteDTO>());
 		RentalRule rentalRule = rentalProvider.getRentalRule(
 				cmd.getCommunityId(), cmd.getSiteType());
+		response.setContactNum(rentalRule.getContactNum());
 		// 查sites
 		List<RentalSite> rentalSites = rentalProvider.findRentalSites(
 				cmd.getCommunityId(), cmd.getSiteType(), null, null, null);

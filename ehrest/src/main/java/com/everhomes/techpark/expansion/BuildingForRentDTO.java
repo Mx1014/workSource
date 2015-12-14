@@ -3,6 +3,8 @@ package com.everhomes.techpark.expansion;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
+
 
 public class BuildingForRentDTO {
 	private Long id;
@@ -23,7 +25,7 @@ public class BuildingForRentDTO {
 	private Byte     status;
 	
 	private Timestamp createTime;
-
+	@ItemType(BuildingForRentAttachmentDTO.class)
 	private List<BuildingForRentAttachmentDTO> attachments;
 
 	public Long getId() {
