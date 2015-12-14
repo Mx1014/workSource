@@ -956,17 +956,15 @@ public class VideoConfServiceImpl implements VideoConfService {
 		List<EnterpriseContact> contact = enterpriseContactProvider.queryContactByEnterpriseId(cmd.getEnterpriseId());
 		
 		if(contact != null &contact.size() > 0) {
-			contact.stream().map(r -> {
-				contactMap.put(r.getUserId(), r);
-				return null;
-			});
+			for(EnterpriseContact con : contact) {
+				contactMap.put(con.getUserId(), con);
+			}
 		}
 		
 		if(users != null && users.size() > 0) {
-			users.stream().map(r -> {
-				contactMap.remove(r);
-				return null;
-			});
+			for(Long uId : users) {
+				contactMap.remove(uId);
+			}
 		}
 		
 		List<EnterpriseContact> ec = new ArrayList<EnterpriseContact>(contactMap.values());
@@ -1333,45 +1331,45 @@ public class VideoConfServiceImpl implements VideoConfService {
 	public void createAccountOwner(CreateAccountOwnerCommand cmd) {
 		List<Long> accountIds = cmd.getAccountIds();
 		List<Long> userIds = cmd.getUserIds();
+		if(userIds == null || userIds.isEmpty())
 		if(userIds.size() > accountIds.size()) {
 			LOGGER.error("user count is cannot larger than account count");
 		}
-		accountIds = accountIds.subList(0, userIds.size()-1);
 		
-		accountIds.stream().map(accountId -> {
-			
-		if(userIds.size() > 0) {
-			ConfAccounts account = vcProvider.findVideoconfAccountById(accountId);
-			if(account == null)
-				LOGGER.error("account is not exist!");
+//		accountIds.stream().map(accountId -> {
+		for(Long accountId : accountIds) {	 
+			if(userIds.size() > 0) {
+				ConfAccounts account = vcProvider.findVideoconfAccountById(accountId);
+				if(account == null)
+					LOGGER.error("account is not exist!");
+		
+				Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
 	
-			Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
-
-			account.setOwnerId(userIds.get(0));
-			account.setUpdateTime(now);
-			account.setOwnTime(now);
-			vcProvider.updateConfAccounts(account);
-			userIds.remove(0);
-			
-			ConfAccountHistories history = new ConfAccountHistories();
-			history.setEnterpriseId(account.getEnterpriseId());
-			history.setExpiredDate(account.getExpiredDate());
-			history.setStatus(account.getStatus());
-			history.setAccountCategoryId(account.getAccountCategoryId());
-			history.setAccountType(account.getAccountType());
-			history.setOwnerId(account.getOwnerId());
-			history.setOwnTime(now);
-			history.setCreatorUid(account.getCreatorUid());
-			history.setCreateTime(account.getCreateTime());
-			history.setOperatorUid(UserContext.current().getUser().getId());
-			history.setOperationType("assign account");
-			history.setOperateTime(now);
-			history.setProcessDetails("");
-			vcProvider.createConfAccountHistories(history);
-		}
-		
-		return null;
-		});
+				account.setOwnerId(userIds.get(0));
+				account.setUpdateTime(now);
+				account.setOwnTime(now);
+				vcProvider.updateConfAccounts(account);
+				userIds.remove(0);
+				
+				ConfAccountHistories history = new ConfAccountHistories();
+				history.setEnterpriseId(account.getEnterpriseId());
+				history.setExpiredDate(account.getExpiredDate());
+				history.setStatus(account.getStatus());
+				history.setAccountCategoryId(account.getAccountCategoryId());
+				history.setAccountType(account.getAccountType());
+				history.setOwnerId(account.getOwnerId());
+				history.setOwnTime(now);
+				history.setCreatorUid(account.getCreatorUid());
+				history.setCreateTime(account.getCreateTime());
+				history.setOperatorUid(UserContext.current().getUser().getId());
+				history.setOperationType("assign account");
+				history.setOperateTime(now);
+				history.setProcessDetails("");
+				vcProvider.createConfAccountHistories(history);
+			}
+		}	
+//		return null;
+//		});
 		
 	}
 
@@ -1432,13 +1430,13 @@ public class VideoConfServiceImpl implements VideoConfService {
 			vcProvider.createInvoice(invoice);
 		}
 		
-		
 		ConfEnterprises enterprise = vcProvider.findByEnterpriseId(cmd.getEnterpriseId());
 		if(enterprise == null) {
 			ConfEnterprises confEnterprise = new ConfEnterprises();
 			confEnterprise.setEnterpriseId(cmd.getEnterpriseId());
 			confEnterprise.setContactName(cmd.getContactor());
 			confEnterprise.setContact(cmd.getMobile());
+			confEnterprise.setStatus((byte) 1);
 			vcProvider.createConfEnterprises(confEnterprise);
 		} else {
 			enterprise.setContactName(cmd.getContactor());
@@ -1573,13 +1571,13 @@ public class VideoConfServiceImpl implements VideoConfService {
 				map.setConfAccountId(account.getId());
 				vcProvider.createConfOrderAccountMap(map);
 
-				ConfEnterprises enterprise = vcProvider.findByEnterpriseId(order.getOwnerId());
-				enterprise.setBuyChannel(order.getOnlineFlag());
-				enterprise.setAccountAmount(enterprise.getAccountAmount()+order.getQuantity());
-				enterprise.setActiveAccountAmount(enterprise.getActiveAccountAmount()+order.getQuantity());
-				vcProvider.updateConfEnterprises(enterprise);
-				
 			}
+			
+			ConfEnterprises enterprise = vcProvider.findByEnterpriseId(order.getOwnerId());
+			enterprise.setBuyChannel(order.getOnlineFlag());
+			enterprise.setAccountAmount(enterprise.getAccountAmount()+order.getQuantity());
+			enterprise.setActiveAccountAmount(enterprise.getActiveAccountAmount()+order.getQuantity());
+			vcProvider.updateConfEnterprises(enterprise);
 		}
 		
 	}

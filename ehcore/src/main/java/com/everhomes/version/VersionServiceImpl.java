@@ -91,7 +91,9 @@ public class VersionServiceImpl implements VersionService {
         if(realm == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid realm parameter in the command, realm does not exist");
-        
+        if(cmd.getCurrentVersion() != null && cmd.getCurrentVersion().getTag() == null) {
+        	cmd.getCurrentVersion().setTag("");
+        }
         Version version = ConvertHelper.convert(cmd.getCurrentVersion(), Version.class);
         VersionUrl versionUrl = this.versionProvider.findVersionUrlByVersion(cmd.getRealm(), version.toString());
         if(versionUrl == null)
