@@ -83,10 +83,10 @@ public class EhRentalSiteRulesDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	}
 
 	/**
-	 * Fetch records that have <code>rentalStep IN (values)</code>
+	 * Fetch records that have <code>rental_step IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchByRentalstep(java.lang.Integer... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES.RENTALSTEP, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchByRentalStep(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES.RENTAL_STEP, values);
 	}
 
 	/**
@@ -171,5 +171,12 @@ public class EhRentalSiteRulesDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchByOwnerType(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES.OWNER_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>time_step IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchByTimeStep(java.lang.Double... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES.TIME_STEP, values);
 	}
 }

@@ -33,7 +33,10 @@ ALTER TABLE `eh_rental_sites_bills` ADD COLUMN  `owner_type` VARCHAR(255) COMMEN
 ALTER TABLE `eh_rental_sites_bills`  CHANGE `community_id` `owner_id` BIGINT(20) NOT NULL COMMENT '    community id or organization id ';
 
 ALTER TABLE `eh_rental_site_rules` ADD COLUMN  `owner_type` VARCHAR(255) COMMENT 'owner type : community ; organization';
-ALTER TABLE `eh_rental_si`ehcore`te_rules`  CHANGE `community_id` `owner_id` BIGINT(20) NOT NULL COMMENT '    community id or organization id ';
+ALTER TABLE `eh_rental_site_rules`  CHANGE `community_id` `owner_id` BIGINT(20) NOT NULL COMMENT '    community id or organization id ';
+ALTER TABLE `eh_rental_site_rules` ADD COLUMN  `time_step` double ;
+ALTER TABLE `eh_rental_site_rules`  CHANGE  `rentalStep` `rental_step` int(11) DEFAULT 1 COMMENT 'how many time_step must be rental every time ';
+
 
 ALTER TABLE `eh_rental_bills` ADD COLUMN  `owner_type` VARCHAR(255) COMMENT 'owner type : community ; organization';
 ALTER TABLE `eh_rental_bills`  CHANGE `community_id` `owner_id` BIGINT(20) NOT NULL COMMENT '    community id or organization id ';

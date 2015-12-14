@@ -265,8 +265,9 @@ public class RentalServiceImpl implements RentalService {
 					dto.setId(rsr.getId());
 					dto.setRentalSiteId(rsr.getRentalSiteId());
 					dto.setRentalType(rsr.getRentalType());
-					dto.setRentalStep(rsr.getRentalstep());
+					dto.setRentalStep(rsr.getRentalStep());
 					if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
+						dto.setTimeStep(rsr.getTimeStep());
 						dto.setBeginTime(rsr.getBeginTime().getTime());
 						dto.setEndTime(rsr.getEndTime().getTime());
 					} else if (dto.getRentalType().equals(
@@ -429,8 +430,9 @@ public class RentalServiceImpl implements RentalService {
 				dto.setId(rsr.getId());
 				dto.setRentalSiteId(rsr.getRentalSiteId());
 				dto.setRentalType(rsr.getRentalType());
-				dto.setRentalStep(rsr.getRentalstep());
+				dto.setRentalStep(rsr.getRentalStep()); 
 				if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
+					dto.setTimeStep(rsr.getTimeStep());
 					dto.setBeginTime(rsr.getBeginTime().getTime());
 					dto.setEndTime(rsr.getEndTime().getTime());
 				} else if (dto.getRentalType().equals(
@@ -790,8 +792,9 @@ public class RentalServiceImpl implements RentalService {
 			ruleDto.setId(rsr.getId());
 			ruleDto.setRentalSiteId(rsr.getRentalSiteId());
 			ruleDto.setRentalType(rsr.getRentalType());
-			ruleDto.setRentalStep(rsr.getRentalstep());
+			ruleDto.setRentalStep(rsr.getRentalStep()); 
 			if (ruleDto.getRentalType().equals(RentalType.HOUR.getCode())) {
+				ruleDto.setTimeStep(rsr.getTimeStep());
 				ruleDto.setBeginTime(rsr.getBeginTime().getTime());
 				ruleDto.setEndTime(rsr.getEndTime().getTime());
 			} else if (ruleDto.getRentalType().equals(
@@ -888,7 +891,8 @@ public class RentalServiceImpl implements RentalService {
 								+ ":00"));
 
 						// i = i + cmd.getTimeStep();
-						rsr.setRentalstep(cmd.getRentalStep());
+						rsr.setRentalStep(cmd.getRentalStep()); 
+						rsr.setTimeStep(cmd.getTimeStep());
 //						i = i + 0.5;
 						i = i + cmd.getTimeStep();
 						rsr.setEndTime(Timestamp.valueOf(dateSF.format(start
@@ -933,7 +937,7 @@ public class RentalServiceImpl implements RentalService {
 					rsr.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 							.getTime()));
 					rsr.setCreatorUid(userId);
-					rsr.setRentalstep(cmd.getRentalStep());
+					rsr.setRentalStep(cmd.getRentalStep());
 					if (weekday == 1 || weekday == 7) {
 						rsr.setPrice(cmd.getWeekendAMPrice());
 						rsr.setAmorpm(AmorpmFlag.AM.getCode());
@@ -958,7 +962,7 @@ public class RentalServiceImpl implements RentalService {
 					rsr.setRentalSiteId(cmd.getRentalSiteId());
 					rsr.setRentalType(cmd.getRentalType());
 					rsr.setCounts(cmd.getCounts());
-					rsr.setRentalstep(cmd.getRentalStep());
+					rsr.setRentalStep(cmd.getRentalStep());
 					rsr.setUnit(cmd.getUnit());
 					if (weekday == 1 || weekday == 7) {
 						rsr.setPrice(cmd.getWeekendPrice());
@@ -1027,8 +1031,16 @@ public class RentalServiceImpl implements RentalService {
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid price   parameter in the command");
 		}
-		RentalSite rentalsite = ConvertHelper.convert(cmd, RentalSite.class);
-		rentalsite.setStatus(RentalSiteStatus.NORMAL.getCode());
+		RentalSite rentalsite = this.rentalProvider.getRentalSiteById(cmd.getRentalSiteId()); 
+		rentalsite.setAddress(cmd.getAddress());
+		rentalsite.setSiteName(cmd.getSiteName());
+		rentalsite.setBuildingName(cmd.getBuildingName());
+		rentalsite.setSpec(cmd.getSpec());
+		rentalsite.setOwnCompanyName(cmd.getCompany());
+		rentalsite.setContactName(cmd.getContactName());
+		rentalsite.setContactPhonenum(cmd.getContactPhonenum());
+		rentalsite.setIntroduction(cmd.getIntroduction());
+		rentalsite.setNotice(cmd.getNotice());
 		rentalProvider.updateRentalSite(rentalsite);
 	}
 
@@ -1048,6 +1060,7 @@ public class RentalServiceImpl implements RentalService {
 		}
 		rentalProvider.deleteRentalSiteRules(cmd.getRentalSiteId(), null, null);
 		rentalProvider.deleteRentalBillById(cmd.getRentalSiteId());
+		rentalProvider.deleteRentalSite(cmd.getRentalSiteId());
 	}
 	@Override
 	public void disableRentalSite(DisableRentalSiteCommand cmd) {
@@ -1390,7 +1403,7 @@ public class RentalServiceImpl implements RentalService {
 					dto.setId(rsr.getId());
 					dto.setRentalSiteId(rsr.getRentalSiteId());
 					dto.setRentalType(rsr.getRentalType());
-					dto.setRentalStep(rsr.getRentalstep());
+					dto.setRentalStep(rsr.getRentalStep());
 					if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
 						dto.setBeginTime(rsr.getBeginTime().getTime());
 						dto.setEndTime(rsr.getEndTime().getTime());

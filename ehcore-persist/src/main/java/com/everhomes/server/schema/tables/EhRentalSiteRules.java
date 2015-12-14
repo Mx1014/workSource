@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteRules extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord> {
 
-	private static final long serialVersionUID = -1005770274;
+	private static final long serialVersionUID = -469686305;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_site_rules</code>
@@ -57,9 +57,9 @@ public class EhRentalSiteRules extends org.jooq.impl.TableImpl<com.everhomes.ser
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Byte> AMORPM = createField("amorpm", org.jooq.impl.SQLDataType.TINYINT, this, "0:am  1:pm");
 
 	/**
-	 * The column <code>ehcore.eh_rental_site_rules.rentalStep</code>. how much every order
+	 * The column <code>ehcore.eh_rental_site_rules.rental_step</code>. how many time_step must be rental every time 
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Integer> RENTALSTEP = createField("rentalStep", org.jooq.impl.SQLDataType.INTEGER.defaulted(true), this, "how much every order");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Integer> RENTAL_STEP = createField("rental_step", org.jooq.impl.SQLDataType.INTEGER.defaulted(true), this, "how many time_step must be rental every time ");
 
 	/**
 	 * The column <code>ehcore.eh_rental_site_rules.begin_time</code>.
@@ -120,6 +120,11 @@ public class EhRentalSiteRules extends org.jooq.impl.TableImpl<com.everhomes.ser
 	 * The column <code>ehcore.eh_rental_site_rules.owner_type</code>. owner type : community ; organization
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.String> OWNER_TYPE = createField("owner_type", org.jooq.impl.SQLDataType.VARCHAR.length(255), this, "owner type : community ; organization");
+
+	/**
+	 * The column <code>ehcore.eh_rental_site_rules.time_step</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Double> TIME_STEP = createField("time_step", org.jooq.impl.SQLDataType.DOUBLE, this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_rental_site_rules</code> table reference
