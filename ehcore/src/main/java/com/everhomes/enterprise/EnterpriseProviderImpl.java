@@ -265,7 +265,7 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
         
         if(contacts.size() >= count) {
         	contacts.remove(contacts.size() - 1);
-            locator.setAnchor(contacts.get(contacts.size() - 1).getId());
+            locator.setAnchor(contacts.get(contacts.size() - 1).getMemberId());
         }
         
         return contacts;
