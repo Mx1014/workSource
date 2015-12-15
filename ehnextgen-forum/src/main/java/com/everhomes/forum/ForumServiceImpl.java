@@ -625,6 +625,7 @@ public class ForumServiceImpl implements ForumService {
         return new ListPostCommandResponse(nextPageAnchor, postDtoList);
     }
     
+    @Override
     public ListPostCommandResponse listActivityPostByCategoryAndTag(ListActivityTopicByCategoryAndTagCommand cmd, boolean isPopulated) {
         long startTime = System.currentTimeMillis();
         User operator = UserContext.current().getUser();
@@ -676,7 +677,8 @@ public class ForumServiceImpl implements ForumService {
     }
     
     private Condition buildActivityPostByCategoryAndTag(Long userId, Community community, ListActivityTopicByCategoryAndTagCommand cmd) {
-        Condition condition = Tables.EH_FORUM_POSTS.EMBEDDED_APP_ID.eq(AppConstants.APPID_ACTIVITY);
+        Condition condition = Tables.EH_FORUM_POSTS.FORUM_ID.eq(community.getDefaultForumId());
+        condition = condition.and(Tables.EH_FORUM_POSTS.EMBEDDED_APP_ID.eq(AppConstants.APPID_ACTIVITY));
         Category contentCatogry = null;
         Long contentCategoryId = cmd.getCategoryId();
         if(contentCategoryId != null && contentCategoryId.longValue() > 0) {
@@ -687,7 +689,7 @@ public class ForumServiceImpl implements ForumService {
         }
         
         if(cmd.getTag() != null) {
-//                condition = condition.and(Tables.EH_FORUM_POSTS.T)
+            condition = condition.and(Tables.EH_FORUM_POSTS.TAG.eq(cmd.getTag()));
         }
         
         return condition;
