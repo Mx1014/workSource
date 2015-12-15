@@ -271,8 +271,11 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			}
 			
 			Building building = communityProvider.findBuildingById(leasePromotion.getBuildingId());
-			if(null != building)
+			if(null != building){
 				leasePromotion.setBuildingName(building.getName());
+				leasePromotion.setAddress(building.getAddress());
+			}
+				
 		}
 		
 		List<BuildingForRentDTO> dtos = leasePromotions.stream().map((c) ->{

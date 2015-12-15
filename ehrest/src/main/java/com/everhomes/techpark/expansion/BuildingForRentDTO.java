@@ -23,6 +23,7 @@ public class BuildingForRentDTO {
 	private String   description;
 	private Timestamp enterTime;
 	private Byte     status;
+	private String address;
 	
 	private Timestamp createTime;
 	@ItemType(BuildingForRentAttachmentDTO.class)
@@ -171,6 +172,14 @@ public class BuildingForRentDTO {
 
 	public void setAttachments(List<BuildingForRentAttachmentDTO> attachments) {
 		this.attachments = attachments;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
 	}
 	
 	

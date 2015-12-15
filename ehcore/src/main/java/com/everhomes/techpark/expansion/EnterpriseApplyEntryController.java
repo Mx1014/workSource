@@ -19,7 +19,7 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	private EnterpriseApplyEntryService enterpriseApplyEntryService;
 	
 	/**
-	 * <b>URL: /techpark/entry/listEnterpriseExpansions
+	 * <b>URL: /techpark/entry/listEnterpriseDetails
 	 * <p>企业列表
 	 */
 	@RequestMapping("listEnterpriseDetails")
