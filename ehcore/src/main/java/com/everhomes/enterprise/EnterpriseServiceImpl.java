@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -51,6 +52,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserCurrentEntityType;
+import com.everhomes.user.UserGender;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserServiceErrorCode;
@@ -767,6 +769,8 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 				newuser.setNamespaceId(cmd.getNamespaceId());
 				newuser.setAccountName(cmd.getContactName());
 				newuser.setNickName(cmd.getContactName());
+				newuser.setCommunityId(cmd.getCommunityId());
+				newuser.setGender(UserGender.UNDISCLOSURED.getCode());
 				String salt=EncryptionUtils.createRandomSalt();
 				newuser.setSalt(salt);
 				try {

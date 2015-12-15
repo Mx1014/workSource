@@ -140,7 +140,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	}
 
 	@Override
-	public void processUserForContact(UserIdentifier identifier) {
+	public EnterpriseContact processUserForContact(UserIdentifier identifier) {
 		User user = userProvider.findUserById(identifier.getOwnerUid());
 		List<Enterprise> enterprises = this.enterpriseProvider.queryEnterpriseByPhone(identifier.getIdentifierToken());
 		Map<Long, Long> ctx = new HashMap<Long, Long>();
@@ -156,7 +156,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 			EnterpriseContact contact = this.getContactByPhone(enterprise.getId(), identifier.getIdentifierToken());
 			if (contact != null) {
 			    GroupMemberStatus status = GroupMemberStatus.fromCode(contact.getStatus());
-			    if(status != GroupMemberStatus.ACTIVE) {
+			    if(!contact.getStatus().equals(GroupMemberStatus.ACTIVE.getCode())) {
     				contact.setUserId(user.getId());
     				contact.setStatus(GroupMemberStatus.ACTIVE.getCode());
     				updatePendingEnterpriseContactToAuthenticated(contact);
@@ -172,6 +172,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 			                + ", contactId=" + contact.getId() + ", enterpriseId=" + enterprise.getId());
 			        }
 			    }
+			    return contact;
 			} else {
 			    if(LOGGER.isDebugEnabled()) {
                     LOGGER.debug("Enterprise contact not found, ignore to match contact, userId=" + identifier.getOwnerUid() 
@@ -179,6 +180,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
                 }
 			}
 		}
+		return null;
 	}
 
 	/**
