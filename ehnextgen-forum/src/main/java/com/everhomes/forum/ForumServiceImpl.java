@@ -2607,10 +2607,7 @@ public class ForumServiceImpl implements ForumService {
         VisibleRegionType regionType = VisibleRegionType.fromCode(post.getVisibleRegionType());
         Long regionId = post.getVisibleRegionId();
         
-        if(regionId == 0L){
-        	post.setCreatorNickName(post.getCreatorNickName());
-        }
-        else if(regionType != null && regionId != null) {
+        if(regionType != null && regionId != null) {
             String creatorNickName = post.getCreatorNickName();
             if(creatorNickName == null) {
                 creatorNickName = "";
