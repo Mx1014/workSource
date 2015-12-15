@@ -625,6 +625,74 @@ public class ForumServiceImpl implements ForumService {
         return new ListPostCommandResponse(nextPageAnchor, postDtoList);
     }
     
+    public ListPostCommandResponse listActivityPostByCategoryAndTag(ListActivityTopicByCategoryAndTagCommand cmd, boolean isPopulated) {
+        long startTime = System.currentTimeMillis();
+        User operator = UserContext.current().getUser();
+        Long operatorId = operator.getId();
+        Long communityId = cmd.getCommunityId();
+        Community community = checkCommunityParameter(operatorId, communityId, "listActivityPostByCategoryAndTag");
+        
+        Condition condition = buildActivityPostByCategoryAndTag(operatorId, community, cmd);
+        
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        List<Post> posts = this.forumProvider.queryPosts(locator, pageSize + 1, (loc, query) -> {
+            query.addJoin(Tables.EH_FORUM_ASSIGNED_SCOPES, JoinType.LEFT_OUTER_JOIN,
+                Tables.EH_FORUM_ASSIGNED_SCOPES.OWNER_ID.eq(Tables.EH_FORUM_POSTS.ID));
+            
+            query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
+            query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+            if(condition != null) {
+                query.addConditions(condition);
+            }
+            
+            return query;
+        });
+        
+        if(isPopulated) {
+            this.forumProvider.populatePostAttachments(posts);
+            
+            populatePosts(operatorId, posts, communityId, false);
+        }
+        
+        Long nextPageAnchor = null;
+        if(posts.size() > pageSize) {
+            posts.remove(posts.size() - 1);
+            nextPageAnchor = posts.get(posts.size() - 1).getId();
+        }
+        
+        List<PostDTO> postDtoList = posts.stream().map((r) -> {
+          return ConvertHelper.convert(r, PostDTO.class);  
+        }).collect(Collectors.toList());
+        
+        if(LOGGER.isInfoEnabled()) {
+            long endTime = System.currentTimeMillis();
+            LOGGER.info("List activity topics by category and tag, userId=" + operatorId + ", size=" + postDtoList.size() 
+                + ", elapse=" + (endTime - startTime) + ", cmd=" + cmd);
+        }
+        
+        return new ListPostCommandResponse(nextPageAnchor, postDtoList);
+    }
+    
+    private Condition buildActivityPostByCategoryAndTag(Long userId, Community community, ListActivityTopicByCategoryAndTagCommand cmd) {
+        Condition condition = Tables.EH_FORUM_POSTS.EMBEDDED_APP_ID.eq(AppConstants.APPID_ACTIVITY);
+        Category contentCatogry = null;
+        Long contentCategoryId = cmd.getCategoryId();
+        if(contentCategoryId != null && contentCategoryId.longValue() > 0) {
+            contentCatogry = this.categoryProvider.findCategoryById(contentCategoryId);
+        }
+        if(contentCatogry != null) {
+            condition = condition.and(Tables.EH_FORUM_POSTS.CATEGORY_PATH.like(contentCatogry.getPath() + "%"));
+        }
+        
+        if(cmd.getTag() != null) {
+//                condition = condition.and(Tables.EH_FORUM_POSTS.T)
+        }
+        
+        return condition;
+    }
+    
     public CheckUserPostDTO checkUserPostStatus(CheckUserPostCommand cmd) {
         long startTime = System.currentTimeMillis();
         User operator = UserContext.current().getUser();

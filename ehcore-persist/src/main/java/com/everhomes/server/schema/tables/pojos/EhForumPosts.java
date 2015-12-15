@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPosts implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1850856877;
+	private static final long serialVersionUID = 308784303;
 
 	private java.lang.Long     id;
 	private java.lang.String   uuid;
@@ -60,6 +60,7 @@ public class EhForumPosts implements java.io.Serializable {
 	private java.sql.Timestamp createTime;
 	private java.lang.Long     deleterUid;
 	private java.sql.Timestamp deleteTime;
+	private java.lang.String   tag;
 
 	public EhForumPosts() {}
 
@@ -110,7 +111,8 @@ public class EhForumPosts implements java.io.Serializable {
 		java.sql.Timestamp updateTime,
 		java.sql.Timestamp createTime,
 		java.lang.Long     deleterUid,
-		java.sql.Timestamp deleteTime
+		java.sql.Timestamp deleteTime,
+		java.lang.String   tag
 	) {
 		this.id = id;
 		this.uuid = uuid;
@@ -159,6 +161,7 @@ public class EhForumPosts implements java.io.Serializable {
 		this.createTime = createTime;
 		this.deleterUid = deleterUid;
 		this.deleteTime = deleteTime;
+		this.tag = tag;
 	}
 
 	public java.lang.Long getId() {
@@ -535,5 +538,13 @@ public class EhForumPosts implements java.io.Serializable {
 
 	public void setDeleteTime(java.sql.Timestamp deleteTime) {
 		this.deleteTime = deleteTime;
+	}
+
+	public java.lang.String getTag() {
+		return this.tag;
+	}
+
+	public void setTag(java.lang.String tag) {
+		this.tag = tag;
 	}
 }
