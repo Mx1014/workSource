@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>communityId: 小区ID</li>
  * <li>forumId: 论坛ID</li>
  * <li>timestamp: 客户端最新帖子创建时间</li>
+ * <li>status: 是否有新帖状态，参考{@link com.everhomes.forum.CheckUserPostStatus}</li>
  * </ul>
  */
 public class CheckUserPostDTO {

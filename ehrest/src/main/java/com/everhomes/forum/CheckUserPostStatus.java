@@ -2,9 +2,9 @@
 package com.everhomes.forum;
 
 /**
- * <ul>帖子状态
- * <li>NONE: 无新帖子</li>
- * <li>NEW_POST: 有新帖子</li>
+ * <ul>是否有帖子状态
+ * <li>NONE(0): 无新帖子</li>
+ * <li>NEW_POST(1): 有新帖子</li>
  * </ul>
  */
 public enum CheckUserPostStatus {

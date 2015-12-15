@@ -106,7 +106,7 @@ public class ForumController extends ControllerBase {
      */
     @RequestMapping("checkUserPostStatus")
     @RestReturn(value=CheckUserPostDTO.class)
-    public RestResponse listUserRelatedTopics(CheckUserPostCommand cmd) {
+    public RestResponse checkUserPostStatus(CheckUserPostCommand cmd) {
         CheckUserPostDTO cmdResponse = this.forumService.checkUserPostStatus(cmd);
         
         RestResponse response = new RestResponse(cmdResponse);
