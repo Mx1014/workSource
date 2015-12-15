@@ -85,6 +85,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
 import com.everhomes.visibility.VisibilityScope;
 import com.everhomes.visibility.VisibleRegionType;
 
@@ -626,7 +627,8 @@ public class ForumServiceImpl implements ForumService {
     }
     
     @Override
-    public ListPostCommandResponse listActivityPostByCategoryAndTag(ListActivityTopicByCategoryAndTagCommand cmd) {
+    public Tuple<Long, List<Post>> listActivityPostByCategoryAndTag(ListActivityTopicByCategoryAndTagCommand cmd) {
+    	
         long startTime = System.currentTimeMillis();
         User operator = UserContext.current().getUser();
         Long operatorId = operator.getId();
@@ -660,18 +662,22 @@ public class ForumServiceImpl implements ForumService {
             posts.remove(posts.size() - 1);
             nextPageAnchor = posts.get(posts.size() - 1).getId();
         }
-        
-        List<PostDTO> postDtoList = posts.stream().map((r) -> {
-          return ConvertHelper.convert(r, PostDTO.class);  
-        }).collect(Collectors.toList());
+//        List<PostDTO> postDtoList = posts.stream().map((r) -> {
+//        	if(r != null && r.getAttachments() != null && r.getAttachments().size() > 0) {
+//        		for(Attachment attachment : r.getAttachments()) {
+//        			ConvertHelper.convert(attachment, AttachmentDTO.class);
+//        		}
+//        	}
+//          return ConvertHelper.convert(r, PostDTO.class);  
+//        }).collect(Collectors.toList());
         
         if(LOGGER.isInfoEnabled()) {
             long endTime = System.currentTimeMillis();
-            LOGGER.info("List activity topics by category and tag, userId=" + operatorId + ", size=" + postDtoList.size() 
+            LOGGER.info("List activity topics by category and tag, userId=" + operatorId + ", size=" + posts.size() 
                 + ", elapse=" + (endTime - startTime) + ", cmd=" + cmd);
         }
         
-        return new ListPostCommandResponse(nextPageAnchor, postDtoList);
+        return new Tuple<Long, List<Post>>(nextPageAnchor, posts);
     }
     
     private Condition buildActivityPostByCategoryAndTag(Long userId, Community community, ListActivityTopicByCategoryAndTagCommand cmd) {
@@ -686,7 +692,7 @@ public class ForumServiceImpl implements ForumService {
             condition = condition.and(Tables.EH_FORUM_POSTS.CATEGORY_PATH.like(contentCatogry.getPath() + "%"));
         }
         
-        if(cmd.getTag() != null) {
+        if(!StringUtils.isEmpty(cmd.getTag())) {
             condition = condition.and(Tables.EH_FORUM_POSTS.TAG.eq(cmd.getTag()));
         }
         

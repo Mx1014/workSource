@@ -1273,40 +1273,45 @@ public class ActivityServiceImpl implements ActivityService {
 		command.setPageAnchor(cmd.getPageAnchor());
 		command.setPageSize(cmd.getPageSize());
 		command.setTag(cmd.getTag());
-	    ListPostCommandResponse post = forumService.listActivityPostByCategoryAndTag(command);
+		Tuple<Long, List<Post>> post = forumService.listActivityPostByCategoryAndTag(command);
 	    if(post != null) {
-	    	response.setNextPageAnchor(post.getNextPageAnchor());
-	    	List<PostDTO> posts = post.getPosts();
+	    	response.setNextPageAnchor(post.first());
+	    	List<Post> posts = post.second();
 	    	if(posts != null) {
 	    		List<ActivityDTO> activityDtos = posts.stream().map(r -> {
 	    			Activity activity = activityProvider.findActivityById(r.getEmbeddedId());
-	    			if(activity.getPosterUri()==null){
-	    	           
-	    				List<AttachmentDTO> attachmentList = r.getAttachments();
-			            if(attachmentList != null && attachmentList.size() != 0){
-			                for(AttachmentDTO attachment : attachmentList){
-			                    if(PostContentType.IMAGE.getCode().equals(attachment.getContentType()))
-			                    	activity.setPosterUri(attachment.getContentUri());
-			                    break;
-			                }
-			            }
-	    	        }
-	    			ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
-	    			dto.setActivityId(activity.getId());
-	    	        dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
-	    	        dto.setEnrollUserCount(activity.getSignupAttendeeCount());
-	    	        dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
-	    	        dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
-	    	        dto.setProcessStatus(getStatus(activity).getCode());
-	    	        dto.setFamilyId(activity.getCreatorFamilyId());
-	    	        dto.setStartTime(activity.getStartTime().toString());
-	    	        dto.setStopTime(activity.getEndTime().toString());
-	    	        dto.setGroupId(activity.getGroupId());
-	    	        dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
-	    	        dto.setForumId(r.getForumId());
-	    	        dto.setGuest(activity.getGuest());
-	    			
-	    			return dto;
+	    			if(activity != null) {
+		    			if(activity.getPosterUri()==null){
+		    	           
+		    				List<Attachment> attachmentList = r.getAttachments();
+				            if(attachmentList != null && attachmentList.size() != 0){
+				                for(Attachment attachment : attachmentList){
+				                    if(PostContentType.IMAGE.getCode().equals(attachment.getContentType()))
+				                    	activity.setPosterUri(attachment.getContentUri());
+				                    break;
+				                }
+				            }
+		    	        }
+		    			ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+		    			dto.setActivityId(activity.getId());
+		    	        dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
+		    	        dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+		    	        dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
+		    	        dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
+		    	        dto.setProcessStatus(getStatus(activity).getCode());
+		    	        dto.setFamilyId(activity.getCreatorFamilyId());
+		    	        dto.setStartTime(activity.getStartTime().toString());
+		    	        dto.setStopTime(activity.getEndTime().toString());
+		    	        dto.setGroupId(activity.getGroupId());
+		    	        dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
+		    	        dto.setForumId(r.getForumId());
+		    	        dto.setGuest(activity.getGuest());
+		    			
+		    			return dto;
+	    			}
+	    			else {
+	    				return null;
+	    			}
 	    		}).filter(r->r!=null).collect(Collectors.toList());
 	    		
 	    		response.setActivities(activityDtos);
