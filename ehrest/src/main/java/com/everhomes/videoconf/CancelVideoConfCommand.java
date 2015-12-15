@@ -17,7 +17,7 @@ public class CancelVideoConfCommand {
 	
 	private String sourceAccountName;
 	
-	private Timestamp endTime;
+	private Long endTime;
 
 	public Long getConfId() {
 		return confId;
@@ -35,11 +35,11 @@ public class CancelVideoConfCommand {
 		this.sourceAccountName = sourceAccountName;
 	}
 
-	public Timestamp getEndTime() {
+	public Long getEndTime() {
 		return endTime;
 	}
 
-	public void setEndTime(Timestamp endTime) {
+	public void setEndTime(Long endTime) {
 		this.endTime = endTime;
 	}
 

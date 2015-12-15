@@ -1005,21 +1005,26 @@ public class VideoConfServiceImpl implements VideoConfService {
 	public void cancelVideoConf(CancelVideoConfCommand cmd) {
 
 		ConfConferences conf = vcProvider.findConfConferencesByConfId(cmd.getConfId());
-		conf.setStatus((byte) 0);
-		conf.setEndTime(cmd.getEndTime());
 		
-		int minutes = (int) ((conf.getEndTime().getTime()-conf.getStartTime().getTime())/60000);
-		conf.setRealDuration(minutes);
-		
-		vcProvider.updateConfConferences(conf);
-		
-		ConfAccounts account = vcProvider.findVideoconfAccountById(conf.getConfAccountId());
-		account.setAssignedConfId(0L);
-		account.setAssignedFlag((byte) 0);
-		account.setAssignedSourceId(0L);
-		account.setAssignedTime(null);
-		
-		vcProvider.updateConfAccounts(account);
+		if(conf != null && conf.getStatus() != 0) {
+			conf.setStatus((byte) 0);
+			conf.setEndTime(new Timestamp(cmd.getEndTime()));
+			
+			int minutes = (int) ((conf.getEndTime().getTime()-conf.getStartTime().getTime())/60000);
+			conf.setRealDuration(minutes);
+			
+			vcProvider.updateConfConferences(conf);
+			
+			ConfAccounts account = vcProvider.findVideoconfAccountById(conf.getConfAccountId());
+			if(account != null) {
+				account.setAssignedConfId(0L);
+				account.setAssignedFlag((byte) 0);
+				account.setAssignedSourceId(0L);
+				account.setAssignedTime(null);
+				
+				vcProvider.updateConfAccounts(account);
+			}
+		}
 	}
 
 	private static String strDecode(String json){
@@ -1437,6 +1442,11 @@ public class VideoConfServiceImpl implements VideoConfService {
 			confEnterprise.setContactName(cmd.getContactor());
 			confEnterprise.setContact(cmd.getMobile());
 			confEnterprise.setStatus((byte) 1);
+			
+			User user = UserContext.current().getUser();
+	    	Integer namespaceId = user.getNamespaceId();
+	    	namespaceId = ( namespaceId == null ) ? 0 : namespaceId;
+	    	confEnterprise.setNamespaceId(namespaceId);
 			vcProvider.createConfEnterprises(confEnterprise);
 		} else {
 			enterprise.setContactName(cmd.getContactor());
