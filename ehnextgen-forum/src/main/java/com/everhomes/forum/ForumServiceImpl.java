@@ -625,6 +625,58 @@ public class ForumServiceImpl implements ForumService {
         return new ListPostCommandResponse(nextPageAnchor, postDtoList);
     }
     
+    public CheckUserPostDTO checkUserPostStatus(CheckUserPostCommand cmd) {
+        long startTime = System.currentTimeMillis();
+        User operator = UserContext.current().getUser();
+        Long operatorId = operator.getId();
+        Long communityId = cmd.getCommunityId();
+        Community community = checkCommunityParameter(operatorId, communityId, "listUserRelatedTopics");
+        
+        // 各区域ID，说明见com.everhomes.forum.PostEntityTag
+        // Map<String, Long> gaRegionIdMap = this.organizationService.getOrganizationRegionMap(communityId);
+        
+        // Condition condition = buildPostQryConditionByUserRelated(operator, community, gaRegionIdMap);
+        Condition condition = buildPostQryConditionByUserRelated(operator, community);
+        
+        int pageSize = 1; // 只查最新一个
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        List<Post> posts = this.forumProvider.queryPosts(locator, pageSize + 1, (loc, query) -> {
+            query.addJoin(Tables.EH_FORUM_ASSIGNED_SCOPES, JoinType.LEFT_OUTER_JOIN,
+                Tables.EH_FORUM_ASSIGNED_SCOPES.OWNER_ID.eq(Tables.EH_FORUM_POSTS.ID));
+            
+            query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
+            query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+            if(condition != null) {
+                query.addConditions(condition);
+            }
+            
+            return query;
+        });
+        
+        CheckUserPostDTO dto = ConvertHelper.convert(cmd, CheckUserPostDTO.class);
+        dto.setStatus(CheckUserPostStatus.NONE.getCode());
+        if(posts.size() > 0) {
+            Timestamp createTime = posts.get(0).getCreateTime();
+            // 客户端指定时间戳时，有新帖超过时间戳则认识为新帖
+            if(cmd.getTimestamp() != null) {
+                if(createTime != null && cmd.getTimestamp() < createTime.getTime()) {
+                    dto.setTimestamp(createTime.getTime());
+                    dto.setStatus(CheckUserPostStatus.NEW_POST.getCode());
+                }
+            } else {
+                // 客户端不指定时间戳时，有帖则认为有新帖
+                dto.setTimestamp(createTime.getTime());
+                dto.setStatus(CheckUserPostStatus.NEW_POST.getCode());
+            }
+        }
+        long endTime = System.currentTimeMillis();
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Check the user post status, operatorId=" + operatorId + ", elapse=" + (endTime - startTime) + ", result=" + dto);
+        }
+        
+        return dto;
+    }
+    
     public ListPostCommandResponse queryOrganizationTopics(QueryOrganizationTopicCommand cmd) {
         long startTime = System.currentTimeMillis();
         User operator = UserContext.current().getUser();

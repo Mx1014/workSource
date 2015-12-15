@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-12-11 21:00:02
+// generated at 2015-12-15 10:10:10
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -272,6 +272,7 @@ public interface ApiConstants {
     public static final String FLEAMARKET_POST_URL = "/fleamarket/post";
     public static final String FLEAMARKET_UPDATE_URL = "/fleamarket/update";
     public static final String FORUM_CANCELLIKETOPIC_URL = "/forum/cancelLikeTopic";
+    public static final String FORUM_CHECKUSERPOSTSTATUS_URL = "/forum/checkUserPostStatus";
     public static final String FORUM_DELETECOMMENT_URL = "/forum/deleteComment";
     public static final String FORUM_DELETETOPIC_URL = "/forum/deleteTopic";
     public static final String FORUM_GETTOPIC_URL = "/forum/getTopic";
