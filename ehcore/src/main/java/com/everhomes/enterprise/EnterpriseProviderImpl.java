@@ -253,9 +253,10 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
             queryBuilderCallback.buildCondition(locator, query);
  
         if(locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.ID.gt(locator.getAnchor()));
-            }
-        
+            query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_ID.lt(locator.getAnchor()));
+        }
+        query.addGroupBy(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_ID);
+        query.addOrderBy(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_ID.desc());
         query.addLimit(count - contacts.size());
         query.fetch().map((r) -> {
         	 contacts.add(ConvertHelper.convert(r, EnterpriseCommunityMap.class));

@@ -274,6 +274,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			if(null != building){
 				leasePromotion.setBuildingName(building.getName());
 				leasePromotion.setAddress(building.getAddress());
+				leasePromotion.setLatitude(building.getLatitude());
+				leasePromotion.setLongitude(building.getLongitude());
 			}
 				
 		}

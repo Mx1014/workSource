@@ -1497,7 +1497,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		User user = userService.findUserByIndentifier(operator.getNamespaceId(), cmd.getPhone());
 		if (null != user){
 			contact.setUserId(user.getId());
-			
+			contact.setStatus(GroupMemberStatus.ACTIVE.getCode());
 			Group group = groupProvider.findGroupById(cmd.getEnterpriseId());
 			UserGroup uGroup =new UserGroup();
 			uGroup.setGroupDiscriminator(GroupDiscriminator.ENTERPRISE.getCode());

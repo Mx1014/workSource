@@ -754,6 +754,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         EnterpriseContact enterCon = this.enterpriseContactProvider.queryEnterpriseContactor(cmd.getEnterpriseId());
         if(enterCon != null) {
         	enterCon.setRole(RoleConstants.ResourceUser);
+        	enterCon.setStatus(EnterpriseContactStatus.ACTIVE.getCode());
         	this.enterpriseContactProvider.updateContact(enterCon);
         }
         
@@ -801,6 +802,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     			ec.setName(cmd.getContactName());
     		
     		ec.setRole(RoleConstants.SystemAdmin);
+    		ec.setStatus(EnterpriseContactStatus.ACTIVE.getCode());
     		Long contactId = this.enterpriseContactProvider.createContact(ec);
     		
     		EnterpriseContactEntry conentry = new EnterpriseContactEntry();
@@ -817,6 +819,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 			EnterpriseContact enterpriseContact = this.enterpriseContactProvider.queryContactById(entry.getContactId());
 			enterpriseContact.setRole(RoleConstants.ResourceAdmin);
 			enterpriseContact.setUserId(identifier.getOwnerUid());
+			enterpriseContact.setStatus(EnterpriseContactStatus.ACTIVE.getCode());
 			this.enterpriseContactProvider.updateContact(enterpriseContact);
 		}
 	}
