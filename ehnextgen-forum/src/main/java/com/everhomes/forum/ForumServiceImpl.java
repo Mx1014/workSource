@@ -626,7 +626,7 @@ public class ForumServiceImpl implements ForumService {
     }
     
     @Override
-    public ListPostCommandResponse listActivityPostByCategoryAndTag(ListActivityTopicByCategoryAndTagCommand cmd, boolean isPopulated) {
+    public ListPostCommandResponse listActivityPostByCategoryAndTag(ListActivityTopicByCategoryAndTagCommand cmd) {
         long startTime = System.currentTimeMillis();
         User operator = UserContext.current().getUser();
         Long operatorId = operator.getId();
@@ -651,11 +651,9 @@ public class ForumServiceImpl implements ForumService {
             return query;
         });
         
-        if(isPopulated) {
-            this.forumProvider.populatePostAttachments(posts);
-            
-            populatePosts(operatorId, posts, communityId, false);
-        }
+        this.forumProvider.populatePostAttachments(posts);
+        
+        populatePosts(operatorId, posts, communityId, false);
         
         Long nextPageAnchor = null;
         if(posts.size() > pageSize) {
