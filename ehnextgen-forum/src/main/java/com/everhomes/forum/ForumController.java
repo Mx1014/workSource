@@ -101,6 +101,21 @@ public class ForumController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /forum/checkUserPostStatus</b>
+     * <p>检查请求者是否有新帖</p>
+     */
+    @RequestMapping("checkUserPostStatus")
+    @RestReturn(value=CheckUserPostDTO.class)
+    public RestResponse listUserRelatedTopics(CheckUserPostCommand cmd) {
+        CheckUserPostDTO cmdResponse = this.forumService.checkUserPostStatus(cmd);
+        
+        RestResponse response = new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
      * <b>URL: /forum/queryTopicsByCategory</b>
      * <p>按指定类型查询的帖子列表（仅查询社区论坛）</p>
      */

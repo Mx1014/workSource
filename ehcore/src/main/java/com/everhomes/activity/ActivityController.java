@@ -221,9 +221,8 @@ public class ActivityController extends ControllerBase {
     @RequestMapping("listActivitiesByNamespaceIdAndTag")
     @RestReturn(value=ListActivitiesReponse.class)
    public RestResponse listActivitiesByNamespaceIdAndTag(@Valid ListActivitiesByNamespaceIdAndTagCommand cmd){
-        Tuple<Long, List<ActivityDTO>> tuple = activityService.listActivitiesByNamespaceIdAndTag(cmd);
-        ListActivitiesReponse rsp=new ListActivitiesReponse(tuple.first(),tuple.second());
-        RestResponse response = new RestResponse(rsp);
+        ListActivitiesReponse cmdResponse = activityService.listActivitiesByNamespaceIdAndTag(cmd);
+        RestResponse response = new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
        return response;
