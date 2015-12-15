@@ -339,6 +339,12 @@ public class RentalServiceImpl implements RentalService {
 	@Override
 	public FindRentalSiteItemsCommandResponse findRentalSiteItems(
 			FindRentalSiteItemsCommand cmd) {
+
+		if(null!=cmd.getCommunityId()){
+			cmd.setOwnerId(cmd.getCommunityId());
+			cmd.setOwnerType(RentalOwnerType.COMMUNITY.getCode());
+		}
+
 		FindRentalSiteItemsCommandResponse response = new FindRentalSiteItemsCommandResponse();
 		response.setSiteItems(new ArrayList<SiteItemDTO>());
 		List<RentalSiteItem> rsiSiteItems = rentalProvider
@@ -1351,6 +1357,11 @@ public class RentalServiceImpl implements RentalService {
 
 	@Override
 	public void deleteRentalBill(DeleteRentalBillCommand cmd) {
+
+		if(null!=cmd.getCommunityId()){
+			cmd.setOwnerId(cmd.getCommunityId());
+			cmd.setOwnerType(RentalOwnerType.COMMUNITY.getCode());
+		}
 
 		rentalProvider.deleteRentalBillById(cmd.getRentalBillId());
 

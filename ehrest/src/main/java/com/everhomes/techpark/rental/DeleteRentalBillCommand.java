@@ -10,7 +10,8 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class DeleteRentalBillCommand {
-	@NotNull
+
+	private Long communityId;
 	private String ownerType;
 	private Long ownerId;
 	@NotNull
@@ -69,6 +70,18 @@ public class DeleteRentalBillCommand {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+
+
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	} 
  
 }
