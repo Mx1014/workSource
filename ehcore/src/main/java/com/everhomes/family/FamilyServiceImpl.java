@@ -52,6 +52,7 @@ import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupMemberStatus;
 import com.everhomes.group.GroupPrivacy;
 import com.everhomes.group.GroupProvider;
+import com.everhomes.group.GroupService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
@@ -315,8 +316,25 @@ public class FamilyServiceImpl implements FamilyService {
         return FamilyUtils.joinDisplayName(community.getCityName(),community.getAreaName(), community.getName(), buildingName, apartmentName);
         
     }
-        
-    private void sendFamilyNotification(Long familyId,List<Long> includeList, List<Long> excludeList, 
+    
+    private void sendMessageToUser(Long uid, String content, Map<String, String> meta) {
+        MessageDTO messageDto = new MessageDTO();
+        messageDto.setAppId(AppConstants.APPID_MESSAGING);
+        messageDto.setSenderUid(User.SYSTEM_UID);
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid.toString()));
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+        messageDto.setBody(content);
+        messageDto.setMetaAppId(AppConstants.APPID_FAMILY);
+        if(null != meta && meta.size() > 0) {
+            messageDto.getMeta().putAll(meta);
+            }
+        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
+                uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+    }
+    
+     //TODO when user group session?
+    private void sendFamilyNotificationGroupSession(Long familyId,List<Long> includeList, List<Long> excludeList, 
             String message, MetaObjectType metaObjectType, QuestionMetaObject metaObject) {
         if(message != null && message.length() != 0) {
             String channelType = MessageChannelType.GROUP.getCode();
@@ -342,6 +360,39 @@ public class FamilyServiceImpl implements FamilyService {
                 channelToken, messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
 
             LOGGER.info("Send family notification,familyId=" + familyId + ",includeList=" + includeList + ",exculdeList=" + excludeList);
+        }
+    }
+    
+    private void sendFamilyNotification(Long familyId,List<Long> includeList, List<Long> excludeList, 
+            String message, MetaObjectType metaObjectType, QuestionMetaObject metaObject) {
+        //User session
+        Map<String, String> meta = null;
+        if(metaObjectType != null && metaObject != null) {
+            meta = new HashMap<String, String>();
+            meta.put(MessageMetaConstant.META_OBJECT_TYPE, metaObjectType.getCode());
+            meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
+        }
+        
+        if(includeList != null && includeList.size() > 0) {
+            for(Long userId : includeList) {
+                sendMessageToUser(userId, message, meta);
+            }
+            return;
+        }
+        
+        Map<Long, Long> exclude = new HashMap<Long, Long>();
+        if(excludeList != null) {
+            for(Long userId : excludeList) {
+                exclude.put(userId, 1l);
+            }
+        }
+        
+        ListingLocator locator = new ListingLocator(familyId);
+        List<GroupMember> members = this.groupProvider.listGroupMembers(locator, 1000);
+        for(GroupMember gm : members) {
+            if(exclude.get(gm.getMemberId()) == null) {
+                sendMessageToUser(gm.getMemberId(), message, meta);
+            }
         }
     }
 
