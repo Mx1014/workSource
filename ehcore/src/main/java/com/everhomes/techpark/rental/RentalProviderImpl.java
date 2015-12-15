@@ -691,7 +691,7 @@ public class RentalProviderImpl implements RentalProvider {
 	@Override
 	public int countRentalBills(Long ownerId,String ownerType, String siteType,
 			Long rentalSiteId, Byte billStatus, Long startTime, Long endTime,
-			Byte invoiceFlag) {
+			Byte invoiceFlag,Long userId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record1<Integer>> step = context.selectCount().from(
 				Tables.EH_RENTAL_BILLS);
@@ -705,12 +705,15 @@ public class RentalProviderImpl implements RentalProvider {
 		if (null != rentalSiteId)
 			condition = condition.and(Tables.EH_RENTAL_BILLS.RENTAL_SITE_ID
 					.equal(rentalSiteId));
+		if (null != userId)
+			condition = condition.and(Tables.EH_RENTAL_BILLS.RENTAL_UID
+								.equal(userId));
 		if (null != startTime)
 			condition = condition.and(Tables.EH_RENTAL_BILLS.START_TIME
-					.greaterOrEqual(new Timestamp(startTime)));
+					.lessOrEqual(new Timestamp(endTime)));
 		if (null != endTime)
 			condition = condition.and(Tables.EH_RENTAL_BILLS.END_TIME
-					.greaterOrEqual(new Timestamp(endTime)));
+					.greaterOrEqual(new Timestamp(startTime)));
 		if (null != billStatus)
 			condition = condition.and(Tables.EH_RENTAL_BILLS.STATUS
 					.equal(billStatus));

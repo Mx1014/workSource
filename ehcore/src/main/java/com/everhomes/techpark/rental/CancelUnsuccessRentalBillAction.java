@@ -83,7 +83,7 @@ public class CancelUnsuccessRentalBillAction implements Runnable {
 			sb.append(dateSF.format(rentalBill.getRentalDate()));
 		}
 		sb.append(")");
-		sb.append("由于超期未付款被取消了 > <,请重新预订");
+		sb.append("由于超期被取消了 > <,请重新预订");
 		sendMessageToUser(rentalBill.getRentalUid(),sb.toString());
 		
 	}

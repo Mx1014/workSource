@@ -41,6 +41,7 @@ public class RentalBillDTO {
 	private Long rentalBillId;
 	private String ownerType;
 	private Long ownerId;
+	private Long communityId;
 	private String siteType;
 	private String siteName;
 	private String buildingName;
@@ -330,6 +331,14 @@ public class RentalBillDTO {
 
 	public void setNotice(String notice) {
 		this.notice = notice;
+	}
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
  
 }

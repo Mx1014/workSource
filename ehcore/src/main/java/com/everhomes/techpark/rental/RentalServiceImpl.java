@@ -480,8 +480,20 @@ public class RentalServiceImpl implements RentalService {
 			cmd.setOwnerId(cmd.getCommunityId());
 			cmd.setOwnerType(RentalOwnerType.COMMUNITY.getCode());
 		}
-
+		
 		Long userId = UserContext.current().getUser().getId();
+		int count = this.rentalProvider.countRentalBills(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSiteType(), null, SiteBillStatus.SUCCESS.getCode(), cmd.getStartTime(), cmd.getEndTime(), null,userId);
+		if(count > 0 ){
+			throw RuntimeErrorException
+			.errorWith(
+					RentalServiceErrorCode.SCOPE,
+					RentalServiceErrorCode.ERROR_ORDER_DUPLICATE,
+					localeStringService.getLocalizedString(
+							String.valueOf(RentalServiceErrorCode.SCOPE),
+							String.valueOf(RentalServiceErrorCode.ERROR_ORDER_DUPLICATE),
+							UserContext.current().getUser().getLocale(),
+							"ORDER DUPLICATE IN THIS TIME "));
+		}
 		RentalBillDTO response = new RentalBillDTO();
 		java.util.Date reserveTime = new java.util.Date();
 		List<RentalSiteRule> rentalSiteRules = new ArrayList<RentalSiteRule>();
@@ -582,7 +594,8 @@ public class RentalServiceImpl implements RentalService {
 		}
 		rentalBill.setPaidMoney(0.0);
 		//
-		if (rentalRule.getPaymentRatio() <100 && reserveTime.before(new java.util.Date(cmd.getStartTime()
+		
+		if (rentalRule.getPaymentRatio()!=null&&(rentalRule.getPaymentRatio()==null?0:rentalRule.getPaymentRatio()) <100 && reserveTime.before(new java.util.Date(cmd.getStartTime()
 				- rentalRule.getPayStartTime()))) {
 			//定金比例在100以内 在支付时间之前 为锁定待支付
 			rentalBill.setStatus(SiteBillStatus.LOCKED.getCode());
@@ -755,6 +768,9 @@ public class RentalServiceImpl implements RentalService {
 		dto.setSpec(rs.getSpec());
 		dto.setCompanyName(rs.getOwnCompanyName());
 		dto.setContactName(rs.getContactName());
+		if(rs.getOwnerType().equals(RentalOwnerType.COMMUNITY.getCode())){
+			dto.setCommunityId(rs.getOwnerId());
+		}
 		dto.setContactPhonenum(rs.getContactPhonenum());
 		dto.setNotice(rs.getNotice());
 		dto.setIntroduction(rs.getIntroduction());
@@ -1319,7 +1335,7 @@ public class RentalServiceImpl implements RentalService {
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
 		int totalCount = rentalProvider.countRentalBills(cmd.getOwnerId(),cmd.getOwnerType(),
 				cmd.getSiteType(), cmd.getRentalSiteId(), cmd.getBillStatus(),
-				cmd.getStartTime(), cmd.getEndTime(), cmd.getInvoiceFlag());
+				cmd.getStartTime(), cmd.getEndTime(), cmd.getInvoiceFlag(),null);
 		if (totalCount == 0)
 			return response;
 
