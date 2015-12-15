@@ -15,6 +15,7 @@ public class UpdateConfigurationAdminCommand {
     @NotNull
     private String name;
     private String value;
+    private Integer namespaceId;
 
     public String getName() {
         return name;
@@ -30,6 +31,14 @@ public class UpdateConfigurationAdminCommand {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     @Override

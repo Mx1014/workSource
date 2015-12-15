@@ -21,6 +21,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.schema.Tables;
 import com.everhomes.user.UserContext;
@@ -52,7 +53,9 @@ public class ConfigurationAdminController extends ControllerBase {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
-        configurationProvider.setValue(cmd.getName(), cmd.getValue());
+        Integer namespaceId = (cmd.getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
+        
+        configurationProvider.setValue(namespaceId, cmd.getName(), cmd.getValue());
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
