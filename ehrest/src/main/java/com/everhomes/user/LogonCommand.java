@@ -26,6 +26,8 @@ public class LogonCommand {
     
     private Integer namespaceId;
     
+    private String pusherIdentify;
+    
     public LogonCommand() {
     }
 
@@ -60,6 +62,14 @@ public class LogonCommand {
     
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
+    }
+
+    public String getPusherIdentify() {
+        return pusherIdentify;
+    }
+
+    public void setPusherIdentify(String pusherIdentify) {
+        this.pusherIdentify = pusherIdentify;
     }
 
     @Override

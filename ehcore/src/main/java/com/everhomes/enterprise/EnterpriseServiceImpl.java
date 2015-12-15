@@ -8,6 +8,11 @@ import java.util.List;
 
 
 
+
+
+
+
+
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -31,6 +36,8 @@ import com.everhomes.core.AppConfig;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.forum.AttachmentDescriptor;
+import com.everhomes.group.Group;
+import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupMemberStatus;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
@@ -53,6 +60,7 @@ import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserCurrentEntityType;
 import com.everhomes.user.UserGender;
+import com.everhomes.user.UserGroup;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserServiceErrorCode;
@@ -402,6 +410,8 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         return dto;
     }
     
+    
+    
     @Override
     public List<EnterpriseCommunity> listEnterpriseEnrollCommunties(CrossShardListingLocator locator, Long enterpriseId, int pageSize) {
         List<EnterpriseCommunityMap> ms = this.enterpriseProvider.queryEnterpriseCommunityMap(locator, pageSize, new ListingQueryBuilderCallback() {
@@ -479,6 +489,90 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         //List<Enterprise> enterpriseList = this.enterpriseProvider.queryEnterpriseByPhone(phone);
         
         return enterpriseList;
+    }
+    
+    @Override
+    public List<EnterpriseDTO> listUserRelatedEnterprises(ListUserRelatedEnterprisesCommand cmd) {
+        long startTime = System.currentTimeMillis();
+        User user = UserContext.current().getUser();
+        Long userId = user.getId();
+        
+        Long communityId = cmd.getCommunityId();
+        List<Long> enterpriseIdList = listEnterpriseIdByCommunityId(communityId);
+        
+        List<UserGroup> userGroupList = userProvider.listUserGroups(user.getId(), GroupDiscriminator.ENTERPRISE.getCode());
+        int size = (userGroupList == null) ? 0 : userGroupList.size();
+
+        List<EnterpriseDTO> enterpriseList = new ArrayList<EnterpriseDTO>();
+        if(size > 0) {
+            Enterprise enterprise = null;
+            EnterpriseDTO dto = null;
+            for(UserGroup userGroup : userGroupList) {
+                GroupMemberStatus status = GroupMemberStatus.fromCode(userGroup.getMemberStatus());
+                if(status != GroupMemberStatus.ACTIVE) {
+                    if(LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("The group is filtered for not in active member status, userId=" + userId 
+                            + ", enterpriseId=" + userGroup.getGroupId() + ", memberStatus=" + status);
+                    }
+                    continue;
+                }
+                
+                if(communityId != null && !enterpriseIdList.contains(userGroup.getGroupId())) {
+                    if(LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("The group is filtered for not in the community, userId=" + userId 
+                            + ", enterpriseId=" + userGroup.getGroupId() + ", communityId=" + communityId);
+                    }
+                    continue;
+                }
+                
+                enterprise = this.enterpriseProvider.findEnterpriseById(userGroup.getGroupId());
+                
+                this.enterpriseProvider.populateEnterpriseAttachments(enterprise);
+                this.enterpriseProvider.populateEnterpriseAddresses(enterprise);
+                populateEnterprise(enterprise);
+                
+                // 为了使得企业信息里包含园区信息（特别是论坛信息），故需要给企业一个当前使用的园区
+                enterprise.setVisibleRegionType(VisibleRegionType.COMMUNITY.getCode());
+                enterprise.setVisibleRegionId(communityId);
+                dto = toEnterpriseDto(userId, enterprise);
+                if(dto != null) {
+                    enterpriseList.add(dto);
+                }
+            }
+        }
+
+        if(LOGGER.isInfoEnabled()) {
+            long endTime = System.currentTimeMillis();
+            LOGGER.info("List user related enterprises, userId=" + userId + ", size=" + size 
+                    + ", elapse=" + (endTime - startTime) + ", cmd=" + cmd);
+        }
+        
+        return enterpriseList;
+    }
+    
+    private List<Long> listEnterpriseIdByCommunityId(Long communityId) {
+        List<Long> enterpriseIdList = new ArrayList<Long>();
+        if(communityId != null) {
+            List<EnterpriseCommunityMap> enterpriseMapList = listEnterpriseCommunityMapByCommunityId(communityId);
+            if(enterpriseMapList != null) {
+                for(EnterpriseCommunityMap map : enterpriseMapList) {
+                    enterpriseIdList.add(map.getMemberId());
+                }
+            }
+        }
+        
+        return enterpriseIdList;
+    }
+    
+    private List<EnterpriseCommunityMap> listEnterpriseCommunityMapByCommunityId(Long communityId) {
+        ListingLocator locator = new ListingLocator();
+        List<EnterpriseCommunityMap> enterpriseMapList = this.enterpriseProvider.queryEnterpriseMapByCommunityId(locator, 
+            communityId, Integer.MAX_VALUE - 1, (loc, query) -> {
+            query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.COMMUNITY_ID.eq(communityId));
+            return null;
+        });
+        
+        return enterpriseMapList;
     }
 
     @Override
