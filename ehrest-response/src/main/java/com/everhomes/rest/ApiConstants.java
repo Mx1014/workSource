@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-12-15 10:10:10
+// generated at 2015-12-15 20:32:23
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -242,6 +242,7 @@ public interface ApiConstants {
     public static final String ENTERPRISE_INVITETOJOINCOMMUNITY_URL = "/enterprise/inviteToJoinCommunity";
     public static final String ENTERPRISE_LISTENTERPRISEBYCOMMUNITYID_URL = "/enterprise/listEnterpriseByCommunityId";
     public static final String ENTERPRISE_LISTENTERPRISEBYPHONE_URL = "/enterprise/listEnterpriseByPhone";
+    public static final String ENTERPRISE_LISTUSERRELATEDENTERPRISES_URL = "/enterprise/listUserRelatedEnterprises";
     public static final String ENTERPRISE_REQUESTTOJOINCOMMUNITY_URL = "/enterprise/requestToJoinCommunity";
     public static final String ENTERPRISE_SEARCHCOMMUNITIES_URL = "/enterprise/searchCommunities";
     public static final String ENTERPRISE_SEARCHENTERPRISE_URL = "/enterprise/searchEnterprise";
