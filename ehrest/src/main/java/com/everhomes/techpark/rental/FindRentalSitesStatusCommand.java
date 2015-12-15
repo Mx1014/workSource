@@ -13,10 +13,10 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class FindRentalSitesStatusCommand {
-	@NotNull
 
-	private String ownerType;
-	@NotNull
+	private Long communityId;
+
+	private String ownerType; 
 	private Long ownerId;
 	@NotNull
 	private String siteType;
@@ -83,6 +83,16 @@ public class FindRentalSitesStatusCommand {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
  
 }

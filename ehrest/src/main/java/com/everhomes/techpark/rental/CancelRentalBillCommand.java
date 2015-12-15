@@ -12,6 +12,8 @@ import com.everhomes.util.StringHelper;
 public class CancelRentalBillCommand {
 	private String ownerType;
 	private Long ownerId;
+
+	private Long communityId;
 	@NotNull
 	private String siteType; 
 	@NotNull
@@ -68,6 +70,18 @@ public class CancelRentalBillCommand {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+
+
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	} 
  
 }

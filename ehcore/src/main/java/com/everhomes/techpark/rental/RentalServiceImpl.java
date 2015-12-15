@@ -225,11 +225,16 @@ public class RentalServiceImpl implements RentalService {
 	public FindRentalSitesStatusCommandResponse findRentalSiteDayStatus(
 			FindRentalSitesStatusCommand cmd) {
 
+		if(null!=cmd.getCommunityId()){
+			cmd.setOwnerId(cmd.getCommunityId());
+			cmd.setOwnerType(RentalOwnerType.COMMUNITY.getCode());
+		}
 		java.util.Date reserveTime = new java.util.Date();
 		FindRentalSitesStatusCommandResponse response = new FindRentalSitesStatusCommandResponse();
 		response.setSites(new ArrayList<RentalSiteDTO>());
 		RentalRule rentalRule = rentalProvider.getRentalRule(
 				cmd.getOwnerId(),cmd.getOwnerType(), cmd.getSiteType());
+		response.setContactNum(rentalRule.getContactNum());
 		// 查sites
 		List<RentalSite> rentalSites = rentalProvider.findRentalSites(
 				cmd.getOwnerId(),cmd.getOwnerType(), cmd.getSiteType(), null, null, null);
@@ -465,6 +470,11 @@ public class RentalServiceImpl implements RentalService {
 
 	@Override
 	public RentalBillDTO addRentalBill(AddRentalBillCommand cmd) {
+		if(null!=cmd.getCommunityId()){
+			cmd.setOwnerId(cmd.getCommunityId());
+			cmd.setOwnerType(RentalOwnerType.COMMUNITY.getCode());
+		}
+
 		Long userId = UserContext.current().getUser().getId();
 		RentalBillDTO response = new RentalBillDTO();
 		java.util.Date reserveTime = new java.util.Date();
@@ -553,7 +563,7 @@ public class RentalServiceImpl implements RentalService {
 		rentalBill.setSiteTotalMoney(siteTotalMoney);
 		rentalBill.setPayTotalMoney(siteTotalMoney);
 		rentalBill.setReserveMoney(siteTotalMoney
-				* rentalRule.getPaymentRatio() / 100);
+				* (rentalRule.getPaymentRatio()==null?0:rentalRule.getPaymentRatio())/ 100);
 		rentalBill.setReserveTime(Timestamp.valueOf(datetimeSF
 				.format(reserveTime)));
 		if(rentalRule.getPayStartTime()!=null){
@@ -690,7 +700,11 @@ public class RentalServiceImpl implements RentalService {
 	@Override
 	public FindRentalBillsCommandResponse findRentalBills(
 			FindRentalBillsCommand cmd) {
-
+		if(null!=cmd.getCommunityId()){
+			cmd.setOwnerId(cmd.getCommunityId());
+			cmd.setOwnerType(RentalOwnerType.COMMUNITY.getCode());
+		}
+		
 		Long userId = UserContext.current().getUser().getId();
 		if (cmd.getPageAnchor() == null)
 			cmd.setPageAnchor(9223372036854775807L);
@@ -835,9 +849,13 @@ public class RentalServiceImpl implements RentalService {
 		Integer billCount = rentalProvider.countRentalSiteBills(
 				cmd.getRentalSiteId(), cmd.getBeginDate(), cmd.getEndDate(),null,null);
 		if (billCount > 0) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid price   parameter in the command");
+			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+					RentalServiceErrorCode.ERROR_HAVE_BILL,
+					localeStringService.getLocalizedString(String
+							.valueOf(RentalServiceErrorCode.SCOPE), String
+							.valueOf(RentalServiceErrorCode.ERROR_HAVE_BILL),
+							UserContext.current().getUser().getLocale(),
+							"HAS BILL IN YOUR DELETE STUFF"));
 		}
 		Integer deleteCount = rentalProvider.deleteRentalSiteRules(
 				cmd.getRentalSiteId(), cmd.getBeginDate(), cmd.getEndDate());
@@ -1001,6 +1019,10 @@ public class RentalServiceImpl implements RentalService {
 
 	@Override
 	public void cancelRentalBill(CancelRentalBillCommand cmd) {
+		if(null!=cmd.getCommunityId()){
+			cmd.setOwnerId(cmd.getCommunityId());
+			cmd.setOwnerType(RentalOwnerType.COMMUNITY.getCode());
+		}
 		RentalRule rule = this.rentalProvider.getRentalRule(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSiteType());
 		java.util.Date cancelTime = new java.util.Date();
 		RentalBill bill = this.rentalProvider.findRentalBillById(cmd.getRentalBillId());
@@ -1027,9 +1049,13 @@ public class RentalServiceImpl implements RentalService {
 		Integer billCount = rentalProvider.countRentalSiteBills(
 				cmd.getRentalSiteId(), null, null, null, null);
 		if (billCount > 0) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid price   parameter in the command");
+			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+					RentalServiceErrorCode.ERROR_HAVE_BILL,
+					localeStringService.getLocalizedString(String
+							.valueOf(RentalServiceErrorCode.SCOPE), String
+							.valueOf(RentalServiceErrorCode.ERROR_HAVE_BILL),
+							UserContext.current().getUser().getLocale(),
+							"HAS BILL IN YOUR DELETE STUFF"));
 		}
 		RentalSite rentalsite = this.rentalProvider.getRentalSiteById(cmd.getRentalSiteId()); 
 		rentalsite.setAddress(cmd.getAddress());
@@ -1139,6 +1165,10 @@ public class RentalServiceImpl implements RentalService {
 	public AddRentalBillItemCommandResponse addRentalItemBill(
 			AddRentalBillItemCommand cmd) {
 
+		if(null!=cmd.getCommunityId()){
+			cmd.setOwnerId(cmd.getCommunityId());
+			cmd.setOwnerType(RentalOwnerType.COMMUNITY.getCode());
+		}
 		// 循环存物品订单
 		AddRentalBillItemCommandResponse response = new AddRentalBillItemCommandResponse();
 		Long userId = UserContext.current().getUser().getId();
@@ -1405,6 +1435,7 @@ public class RentalServiceImpl implements RentalService {
 					dto.setRentalType(rsr.getRentalType());
 					dto.setRentalStep(rsr.getRentalStep());
 					if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
+						dto.setTimeStep(rsr.getTimeStep());
 						dto.setBeginTime(rsr.getBeginTime().getTime());
 						dto.setEndTime(rsr.getEndTime().getTime());
 					} else if (dto.getRentalType().equals(

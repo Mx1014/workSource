@@ -17,6 +17,7 @@ public class FindRentalBillsCommand {
 
 	private String ownerType;
 	private Long ownerId;
+	private Long communityId;
 	private String siteType;  
 	
 	private Long pageAnchor;
@@ -103,6 +104,20 @@ public class FindRentalBillsCommand {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+
+
+
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+
+
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
 
 

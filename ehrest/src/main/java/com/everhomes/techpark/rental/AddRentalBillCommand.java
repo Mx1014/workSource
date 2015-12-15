@@ -26,7 +26,7 @@ import com.everhomes.util.StringHelper;
 public class AddRentalBillCommand {
 	@NotNull
 	private Long rentalSiteId;
-	@NotNull
+	private Long communityId;
 	private String ownerType;
 	private Long ownerId;
 	@NotNull
@@ -120,6 +120,14 @@ public class AddRentalBillCommand {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
  
 
