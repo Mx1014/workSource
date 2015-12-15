@@ -1273,19 +1273,19 @@ public class ActivityServiceImpl implements ActivityService {
 		command.setPageAnchor(cmd.getPageAnchor());
 		command.setPageSize(cmd.getPageSize());
 		command.setTag(cmd.getTag());
-		Tuple<Long, List<Post>> post = forumService.listActivityPostByCategoryAndTag(command);
+		ListPostCommandResponse post = forumService.listActivityPostByCategoryAndTag(command);
 	    if(post != null) {
-	    	response.setNextPageAnchor(post.first());
-	    	List<Post> posts = post.second();
+	    	response.setNextPageAnchor(post.getNextPageAnchor());
+	    	List<PostDTO> posts = post.getPosts();
 	    	if(posts != null) {
 	    		List<ActivityDTO> activityDtos = posts.stream().map(r -> {
 	    			Activity activity = activityProvider.findActivityById(r.getEmbeddedId());
 	    			if(activity != null) {
 		    			if(activity.getPosterUri()==null){
 		    	           
-		    				List<Attachment> attachmentList = r.getAttachments();
+		    				List<AttachmentDTO> attachmentList = r.getAttachments();
 				            if(attachmentList != null && attachmentList.size() != 0){
-				                for(Attachment attachment : attachmentList){
+				                for(AttachmentDTO attachment : attachmentList){
 				                    if(PostContentType.IMAGE.getCode().equals(attachment.getContentType()))
 				                    	activity.setPosterUri(attachment.getContentUri());
 				                    break;

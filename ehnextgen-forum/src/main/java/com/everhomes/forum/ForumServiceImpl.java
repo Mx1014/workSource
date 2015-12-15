@@ -627,7 +627,7 @@ public class ForumServiceImpl implements ForumService {
     }
     
     @Override
-    public Tuple<Long, List<Post>> listActivityPostByCategoryAndTag(ListActivityTopicByCategoryAndTagCommand cmd) {
+    public ListPostCommandResponse listActivityPostByCategoryAndTag(ListActivityTopicByCategoryAndTagCommand cmd) {
     	
         long startTime = System.currentTimeMillis();
         User operator = UserContext.current().getUser();
@@ -662,22 +662,26 @@ public class ForumServiceImpl implements ForumService {
             posts.remove(posts.size() - 1);
             nextPageAnchor = posts.get(posts.size() - 1).getId();
         }
-//        List<PostDTO> postDtoList = posts.stream().map((r) -> {
-//        	if(r != null && r.getAttachments() != null && r.getAttachments().size() > 0) {
-//        		for(Attachment attachment : r.getAttachments()) {
-//        			ConvertHelper.convert(attachment, AttachmentDTO.class);
-//        		}
-//        	}
-//          return ConvertHelper.convert(r, PostDTO.class);  
-//        }).collect(Collectors.toList());
+        List<PostDTO> postDtoList = posts.stream().map((r) -> {
+        	
+        	PostDTO dto = ConvertHelper.convert(r, PostDTO.class);
+        	if(r != null && r.getAttachments() != null && r.getAttachments().size() > 0) {
+        		List<AttachmentDTO> attachments = new ArrayList<AttachmentDTO>();
+        		for(Attachment attachment : r.getAttachments()) {
+        			attachments.add(ConvertHelper.convert(attachment, AttachmentDTO.class));
+        		}
+        		dto.setAttachments(attachments);
+        	}
+          return dto;  
+        }).collect(Collectors.toList());
         
         if(LOGGER.isInfoEnabled()) {
             long endTime = System.currentTimeMillis();
-            LOGGER.info("List activity topics by category and tag, userId=" + operatorId + ", size=" + posts.size() 
+            LOGGER.info("List activity topics by category and tag, userId=" + operatorId + ", size=" + postDtoList.size() 
                 + ", elapse=" + (endTime - startTime) + ", cmd=" + cmd);
         }
         
-        return new Tuple<Long, List<Post>>(nextPageAnchor, posts);
+        return new ListPostCommandResponse(nextPageAnchor, postDtoList);
     }
     
     private Condition buildActivityPostByCategoryAndTag(Long userId, Community community, ListActivityTopicByCategoryAndTagCommand cmd) {
