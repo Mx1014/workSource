@@ -544,8 +544,18 @@ public class PunchServiceImpl implements PunchService {
 			List<Calendar> punchMinAndMaxTime = getMinAndMaxTimeFromPunchlogs(punchLogs);
 			Calendar arriveCalendar = punchMinAndMaxTime.get(0);
 			Calendar leaveCalendar = punchMinAndMaxTime.get(1);
-			long realWorkTime = leaveCalendar.getTimeInMillis() - arriveCalendar.getTimeInMillis()
+			Time leaveCalendarTime = Time.valueOf(timeSF.format(leaveCalendar.getTime()));
+			Time arriveCalendarTime = Time.valueOf(timeSF.format(arriveCalendar.getTime()));
+			Time AfternoonArriveTimeTime = Time.valueOf(timeSF.format(punchRule.getAfternoonArriveTime()));
+			Time NoonLeaveTimeTime = Time.valueOf(timeSF.format(punchRule.getNoonLeaveTime()));
+			long realWorkTime = 0L;
+			if(leaveCalendarTime.after(AfternoonArriveTimeTime)&&arriveCalendarTime.before(NoonLeaveTimeTime)){
+				realWorkTime =leaveCalendar.getTimeInMillis() - arriveCalendar.getTimeInMillis()
 					-punchRule.getAfternoonArriveTime().getTime() +punchRule.getNoonLeaveTime().getTime();
+			}else {
+				realWorkTime =leaveCalendar.getTimeInMillis() - arriveCalendar.getTimeInMillis();
+						
+			}
 			punchDayLog.setArriveTime(getDAOTime(arriveCalendar.getTimeInMillis()));
 			punchDayLog.setLeaveTime(getDAOTime(leaveCalendar.getTimeInMillis() )); 
 			punchDayLog.setWorkTime(convertTime(realWorkTime));
