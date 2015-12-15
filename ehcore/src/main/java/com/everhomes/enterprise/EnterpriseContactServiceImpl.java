@@ -404,7 +404,8 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
         });
     }
 	
-	private void createOrUpdateUserGroup(EnterpriseContact contact) {
+    @Override
+	public void createOrUpdateUserGroup(EnterpriseContact contact) {
         UserGroup userGroup = userProvider.findUserGroupByOwnerAndGroup(contact.getId(), contact.getEnterpriseId());
         if(userGroup == null) {
             createUserGroup(contact);
@@ -415,7 +416,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 
     private void createUserGroup(EnterpriseContact contact) {
         Long enterpriseId = contact.getEnterpriseId();
-        Long contactId = contact.getId();
+        Long contactId = contact.getUserId();
         
         UserGroup userGroup = new UserGroup();
         userGroup.setOwnerUid(contactId);

@@ -101,6 +101,9 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     @Autowired 
     EnterpriseContactProvider enterpriseContactProvider; 
     
+    @Autowired 
+    EnterpriseContactService enterpriseContactService; 
+    
     @Autowired
     private AddressProvider addressProvider;
     
@@ -118,7 +121,19 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     
     @Override
     public List<Enterprise> listEnterpriseByCommunityId(ListingLocator locator,String enterpriseName, Long communityId, Integer status, int pageSize) {
-        List<EnterpriseCommunityMap> enterpriseMaps = this.enterpriseProvider.queryEnterpriseMapByCommunityId(locator
+    	List<Enterprise> enterprises = new ArrayList<Enterprise>();
+    	Long groupId = null;
+    	if(!org.springframework.util.StringUtils.isEmpty(enterpriseName)){
+    		Enterprise enterprise = new Enterprise();
+    		enterprise.setName(enterpriseName);;
+    		enterprises = enterpriseProvider.listEnterprisesByName(new CrossShardListingLocator(), 10000, enterprise);
+    		if(enterprises.size() > 0)
+    			groupId = enterprises.get(0).getId();
+    	}
+    	
+    	Long enterpriseId = groupId;
+    	
+    	List<EnterpriseCommunityMap> enterpriseMaps = this.enterpriseProvider.queryEnterpriseMapByCommunityId(locator
                 , communityId, pageSize, new ListingQueryBuilderCallback() {
 
             @Override
@@ -127,7 +142,8 @@ public class EnterpriseServiceImpl implements EnterpriseService {
                 query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.COMMUNITY_ID.eq(communityId));
                 query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_TYPE.eq(EnterpriseCommunityMapType.Enterprise.getCode()));
                 query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_STATUS.ne(EnterpriseCommunityMapStatus.Inactive.getCode()));
-   
+                if(null != enterpriseId)
+                	query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_ID.eq(enterpriseId));
                 if(status != null) {
                     query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_STATUS.eq(status.byteValue()));    
                 }
@@ -135,25 +151,16 @@ public class EnterpriseServiceImpl implements EnterpriseService {
                 return query;
             }
         });    
-        
-        
-        
-        List<Enterprise> enterprises = new ArrayList<Enterprise>();
-        for(EnterpriseCommunityMap cm : enterpriseMaps) {
-            Enterprise enterprise = enterpriseProvider.getEnterpriseById(cm.getMemberId());
-            
-            if(enterprise != null) {
-            	if(!org.springframework.util.StringUtils.isEmpty(enterpriseName)){
-            		if(enterpriseName.equals(enterprise.getName())){
-            			enterprises.add(enterprise);
-            		}
-            	}else{
-            		enterprises.add(enterprise);
-            	}
-                
-            }
-            
-        }
+    	
+    	if(org.springframework.util.StringUtils.isEmpty(enterpriseName)){
+    		for(EnterpriseCommunityMap cm : enterpriseMaps) {
+	            Enterprise enterprise = enterpriseProvider.getEnterpriseById(cm.getMemberId());
+	            if(enterprise != null) {
+	            	enterprises.add(enterprise);
+	            }
+	            
+    		}
+    	}
        
         this.enterpriseProvider.populateEnterpriseAttachments(enterprises);
         this.enterpriseProvider.populateEnterpriseAddresses(enterprises);
@@ -220,13 +227,15 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         
         requestToJoinCommunity(user, enterprise.getId(), cmd.getCommunityId());
         
-        List<Long> addressIds = cmd.getAddressId();
-        if(addressIds != null && addressIds.size() > 0) {
+        List<EnterpriseAddressDTO> addressDtos = cmd.getAddressDTOs();
+        if(addressDtos != null && addressDtos.size() > 0) {
         	List<Address> address = new ArrayList<Address>();
-        	for(Long addressId :addressIds) {
-        		if(addressId != null) {
+        	for(EnterpriseAddressDTO addressDto :addressDtos) {
+        		if(addressDto != null) {
 	        		EnterpriseAddress enterpriseAddr = new EnterpriseAddress();
-	                enterpriseAddr.setAddressId(addressId);
+	                enterpriseAddr.setAddressId(addressDto.getAddressId());
+	                enterpriseAddr.setBuildingId(addressDto.getBuildingId());
+	                enterpriseAddr.setBuildingName(addressDto.getBuildingName());
 	                enterpriseAddr.setEnterpriseId(enterprise.getId());
 	                enterpriseAddr.setCreatorUid(userId);
 	                enterpriseAddr.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -235,10 +244,13 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 	
 	                this.enterpriseProvider.createEnterpriseAddress(enterpriseAddr);
 	                
-	                Address addr = this.addressProvider.findAddressById(addressId);
-	                if(addr != null)
-	                	address.add(addr);
-        		}
+	                if(null != addressDto.getAddressId()){
+	                	Address addr = this.addressProvider.findAddressById(addressDto.getAddressId());
+	 	                if(addr != null)
+	 	                	address.add(addr);
+	         		}
+	                }
+	               
         	}
         	enterprise.setAddress(address);
         }
@@ -683,7 +695,14 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         enterprise.setPostUri(cmd.getPostUri());
         this.enterpriseProvider.updateEnterprise(enterprise);
         
-        List<Long> addressIds = cmd.getAddressId();
+        List<EnterpriseAddressDTO> addressDtos = cmd.getAddressDTOs();
+        List<Long> addressIds = new ArrayList<Long>();
+        if(addressDtos != null && addressDtos.size() > 0){
+        	for (EnterpriseAddressDTO enterpriseAddressDTO : addressDtos) {
+             	addressIds.add(enterpriseAddressDTO.getAddressId());
+     		}
+        }
+       
         List<EnterpriseAddress> eas = enterpriseProvider.findEnterpriseAddressByEnterpriseId(cmd.getId());
         if(eas != null && eas.size() > 0) {
         	for(EnterpriseAddress ea : eas) {
@@ -694,13 +713,15 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         }
         if(addressIds != null && addressIds.size() > 0) {
         	List<Address> address = new ArrayList<Address>();
-        	for(Long addressId :addressIds) {
-        		if(addressId != null) {
-        			Boolean isExist = this.enterpriseProvider.isExistInEnterpriseAddresses(cmd.getId(), addressId);
+        	for(EnterpriseAddressDTO enterpriseAddressDTO : addressDtos) {
+        		if(enterpriseAddressDTO.getAddressId() != null) {
+        			Boolean isExist = this.enterpriseProvider.isExistInEnterpriseAddresses(cmd.getId(), enterpriseAddressDTO.getAddressId());
         			if(!isExist) {
         			
 		        		EnterpriseAddress enterpriseAddr = new EnterpriseAddress();
-		                enterpriseAddr.setAddressId(addressId);
+		                enterpriseAddr.setAddressId(enterpriseAddressDTO.getAddressId());
+		                enterpriseAddr.setBuildingId(enterpriseAddressDTO.getBuildingId());
+		                enterpriseAddr.setBuildingName(enterpriseAddressDTO.getBuildingName());
 		                enterpriseAddr.setEnterpriseId(enterprise.getId());
 		                enterpriseAddr.setCreatorUid(userId);
 		                enterpriseAddr.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -710,7 +731,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 		                this.enterpriseProvider.createEnterpriseAddress(enterpriseAddr);
         			}
 	                
-	                Address addr = this.addressProvider.findAddressById(addressId);
+	                Address addr = this.addressProvider.findAddressById(enterpriseAddressDTO.getAddressId());
 	                if(addr != null)
 	                	address.add(addr);
         		}
@@ -816,8 +837,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     		conentry.setEntryValue(cmd.getEntryValue());
     		conentry.setContactId(contactId);
     		this.enterpriseContactProvider.createContactEntry(conentry);
-    		
-    		
+    		enterpriseContactService.createOrUpdateUserGroup(ec);
     		
 		} else {
 			EnterpriseContact enterpriseContact = this.enterpriseContactProvider.queryContactById(entry.getContactId());
@@ -825,6 +845,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 			enterpriseContact.setUserId(identifier.getOwnerUid());
 			enterpriseContact.setStatus(EnterpriseContactStatus.ACTIVE.getCode());
 			this.enterpriseContactProvider.updateContact(enterpriseContact);
+			enterpriseContactService.createOrUpdateUserGroup(enterpriseContact);
 		}
 	}
 
