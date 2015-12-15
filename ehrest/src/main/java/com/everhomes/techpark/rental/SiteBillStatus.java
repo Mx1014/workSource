@@ -2,7 +2,6 @@ package com.everhomes.techpark.rental;
  
 /**
  * <ul>
- * <li>OVERTIME(-1): 超时未完成</li>
  * <li>LOCKED(0): 锁定，待支付 </li>
  * <li>RESERVED(1): 支付订金成功</li>
  * <li>SUCCESS(2): 全部支付预定成功</li>
@@ -11,11 +10,12 @@ package com.everhomes.techpark.rental;
  * <li>TOPAYRES(5):进入支付定金</li>
  * <li>TOPAYFINAL(6): 进入支付全款</li>
  * <li>COMPLETE(7): 完成预约</li>
+ * <li>OVERTIME(8): 超时未完成</li>
  * </ul>
  */
 public enum SiteBillStatus {
    
-	OVERTIME((byte)-1),
+	
 	LOCKED((byte)0),
 	RESERVED((byte)1),
 	SUCCESS((byte)2),
@@ -23,7 +23,8 @@ public enum SiteBillStatus {
 	FAIL((byte)4),
 	TOPAYRES((byte)5),
 	TOPAYFINAL((byte)6),
-	COMPLETE((byte)7);
+	COMPLETE((byte)7),
+	OVERTIME((byte)8);
 	
     
     private byte code;
