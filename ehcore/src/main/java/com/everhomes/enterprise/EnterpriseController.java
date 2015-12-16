@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.enterprise;
 
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.group.GroupDTO;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.search.EnterpriseSearcher;
 import com.everhomes.user.UserContext;
@@ -191,6 +193,23 @@ public class EnterpriseController extends ControllerBase {
       
       return res;
   }
+  
+  /**
+  * <b>URL: /enterprise/listUserRelatedEnterprises</b>
+  * <p>列出个人相关的企业</p>
+  * @return {@link EnterpriseDTO}
+  */
+  @RequestMapping("listUserRelatedEnterprises")
+  @RestReturn(value=EnterpriseDTO.class, collection=true)
+  public RestResponse listUserRelatedEnterprises(@Valid ListUserRelatedEnterprisesCommand cmd) {
+     List<EnterpriseDTO> enterprises = this.enterpriseService.listUserRelatedEnterprises(cmd);
+     
+     RestResponse res = new RestResponse(enterprises);
+     res.setErrorCode(ErrorCodes.SUCCESS);
+     res.setErrorDescription("OK");
+     
+     return res;
+     }
    
   /**
    * <b>URL: /enterprise/findEnterpriseByAddress</b>

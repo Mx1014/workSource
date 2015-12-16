@@ -76,7 +76,7 @@ messaging.routing.block.size: 1000
 #
 # iOS cert
 #
-apns.certname: apns-develop
+apns.certname: apns-product
 
 forum.postbox.size: 1000
 forum.flush.interval: 3000

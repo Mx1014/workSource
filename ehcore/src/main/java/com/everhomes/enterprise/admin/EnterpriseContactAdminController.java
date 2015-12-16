@@ -88,4 +88,15 @@ public class EnterpriseContactAdminController extends ControllerBase {
         return res;        
     }
     
+    @RequestMapping("syncContact")
+    @RestReturn(value=String.class)
+    public RestResponse syncContact() {
+        this.enterpriseContactService.syncEnterpriseContacts();
+        
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;        
+    }
+    
 }

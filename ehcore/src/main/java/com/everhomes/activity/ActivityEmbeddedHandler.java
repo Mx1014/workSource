@@ -13,6 +13,7 @@ import com.everhomes.forum.Forum;
 import com.everhomes.forum.ForumEmbeddedHandler;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.Post;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.StringHelper;
@@ -69,7 +70,11 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
         	if(null != forum)
         		cmd.setNamespaceId(forum.getNamespaceId());
         	else
-				cmd.setNamespaceId(0);
+				cmd.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
+        }
+        
+        if(cmd.getTag() != null) {
+            post.setTag(cmd.getTag());
         }
         
         post.setEmbeddedJson(StringHelper.toJsonString(cmd));

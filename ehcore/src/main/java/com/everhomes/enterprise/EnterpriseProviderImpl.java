@@ -13,6 +13,7 @@ import org.jooq.SelectConditionStep;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
@@ -150,7 +151,7 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
     }
     
     @Override
-    public List<Enterprise> queryEnterprises(CrossShardListingLocator locator, int count, ListingQueryBuilderCallback callback) {
+    public List<Enterprise> queryEnterprises(CrossShardListingLocator locator, int count, ListingQueryBuilderCallback callback, Enterprise enterprise) {
         List<Group> groups = this.queryGroupsWithOk(locator, count, new ListingQueryBuilderCallback() {
 
             @Override
@@ -159,6 +160,11 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
                 if(callback != null)
                     callback.buildCondition(locator, query);
                 query.addConditions(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.ENTERPRISE.getCode()));
+                if(null != enterprise){
+                	if(!StringUtils.isEmpty(enterprise.getName())){
+                		query.addConditions(Tables.EH_GROUPS.NAME.like(enterprise.getName() + "%"));
+                	}
+                }
                 return query;
             }
             
@@ -173,7 +179,12 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
     
     @Override
     public List<Enterprise> listEnterprises(CrossShardListingLocator locator, int count) {
-        return this.queryEnterprises(locator, count, null);
+        return this.queryEnterprises(locator, count, null, null);
+    }
+    
+    @Override
+    public List<Enterprise> listEnterprisesByName(CrossShardListingLocator locator, int count, Enterprise enterprise) {
+        return this.queryEnterprises(locator, count, null, enterprise);
     }
     
     @Override
@@ -265,7 +276,7 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
         
         if(contacts.size() >= count) {
         	contacts.remove(contacts.size() - 1);
-            locator.setAnchor(contacts.get(contacts.size() - 1).getId());
+            locator.setAnchor(contacts.get(contacts.size() - 1).getMemberId());
         }
         
         return contacts;

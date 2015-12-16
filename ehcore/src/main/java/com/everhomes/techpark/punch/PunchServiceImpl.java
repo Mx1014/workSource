@@ -544,8 +544,18 @@ public class PunchServiceImpl implements PunchService {
 			List<Calendar> punchMinAndMaxTime = getMinAndMaxTimeFromPunchlogs(punchLogs);
 			Calendar arriveCalendar = punchMinAndMaxTime.get(0);
 			Calendar leaveCalendar = punchMinAndMaxTime.get(1);
-			long realWorkTime = leaveCalendar.getTimeInMillis() - arriveCalendar.getTimeInMillis()
+			Time leaveCalendarTime = Time.valueOf(timeSF.format(leaveCalendar.getTime()));
+			Time arriveCalendarTime = Time.valueOf(timeSF.format(arriveCalendar.getTime()));
+			Time AfternoonArriveTimeTime = Time.valueOf(timeSF.format(punchRule.getAfternoonArriveTime()));
+			Time NoonLeaveTimeTime = Time.valueOf(timeSF.format(punchRule.getNoonLeaveTime()));
+			long realWorkTime = 0L;
+			if(leaveCalendarTime.after(AfternoonArriveTimeTime)&&arriveCalendarTime.before(NoonLeaveTimeTime)){
+				realWorkTime =leaveCalendar.getTimeInMillis() - arriveCalendar.getTimeInMillis()
 					-punchRule.getAfternoonArriveTime().getTime() +punchRule.getNoonLeaveTime().getTime();
+			}else {
+				realWorkTime =leaveCalendar.getTimeInMillis() - arriveCalendar.getTimeInMillis();
+						
+			}
 			punchDayLog.setArriveTime(getDAOTime(arriveCalendar.getTimeInMillis()));
 			punchDayLog.setLeaveTime(getDAOTime(leaveCalendar.getTimeInMillis() )); 
 			punchDayLog.setWorkTime(convertTime(realWorkTime));
@@ -1584,7 +1594,10 @@ public class PunchServiceImpl implements PunchService {
 								if(null !=enterpriseContact )
 									dto.setOperatorName(enterpriseContact.getName());
 							} else {
-								dto.setApprovalStatus((byte) 0);
+
+								//do nothing
+//								dto.setApprovalStatus((byte) 0);
+
 							}
 						}
 					}
@@ -1683,6 +1696,7 @@ public class PunchServiceImpl implements PunchService {
 		Integer workDayCount = countWorkDayCount(cmd.getStartDay(),
 				cmd.getEndDay());
 		ListPunchStatisticsCommand paramCommand =  ConvertHelper.convert(cmd, ListPunchStatisticsCommand.class );
+		paramCommand.setPageSize(Integer.MAX_VALUE);
 		List<PunchStatisticsDTO>punchDayLogDTOList =  this.listPunchStatistics(paramCommand).getPunchList();
 		Map<Long, List<PunchStatisticsDTO>> map = buildUserPunchCountMap(punchDayLogDTOList);
 		PunchRule rule = this.punchProvider.getPunchRuleByCompanyId(cmd.getEnterpriseId());
@@ -1718,8 +1732,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	private void processForthPunchListCount(List<PunchStatisticsDTO> list,
-			PunchCountDTO dto) {
-		// TODO Auto-generated method stub
+			PunchCountDTO dto) { 
 		dto.setWorkCount(0);
 		dto.setUnPunchCount(0.0);
 		dto.setSickCount(0.0);

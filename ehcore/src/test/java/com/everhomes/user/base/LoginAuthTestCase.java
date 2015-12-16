@@ -60,7 +60,7 @@ public class LoginAuthTestCase extends CoreServerTestCase {
      * @param password 密码
      */
     protected User logon(String phone, String password) {
-    	UserLogin login = userService.logon(0, phone, EncryptionUtils.hashPassword(password), null);
+    	UserLogin login = userService.logon(0, phone, EncryptionUtils.hashPassword(password), null, null);
         Assert.assertNotNull(login);
         Assert.assertTrue(login.getLoginId() > 0);
         

@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jooq.Condition;
 import org.jooq.Record;
@@ -18,6 +19,7 @@ import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
@@ -140,45 +142,52 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	}
 
 	@Override
-	public void processUserForContact(UserIdentifier identifier) {
-		User user = userProvider.findUserById(identifier.getOwnerUid());
-		List<Enterprise> enterprises = this.enterpriseProvider.queryEnterpriseByPhone(identifier.getIdentifierToken());
-		Map<Long, Long> ctx = new HashMap<Long, Long>();
-		for (Enterprise enterprise : enterprises) {
-		    if(enterprise.getNamespaceId() == null || !enterprise.getNamespaceId().equals(identifier.getNamespaceId())) {
-		        if(LOGGER.isDebugEnabled()) {
-		            LOGGER.debug("Ignore the enterprise who is dismatched to namespace, enterpriseId=" + enterprise.getId() 
-		                + ", enterpriseNamespaceId=" + enterprise.getNamespaceId() + ", userId=" + identifier.getOwnerUid() 
-		                + ", userNamespaceId=" + identifier.getNamespaceId());
-		        }
-		        continue;
-		    }
-			EnterpriseContact contact = this.getContactByPhone(enterprise.getId(), identifier.getIdentifierToken());
-			if (contact != null) {
-			    GroupMemberStatus status = GroupMemberStatus.fromCode(contact.getStatus());
-			    if(status != GroupMemberStatus.ACTIVE) {
-    				contact.setUserId(user.getId());
-    				contact.setStatus(GroupMemberStatus.ACTIVE.getCode());
-    				updatePendingEnterpriseContactToAuthenticated(contact);
-    				
-    				sendMessageForContactApproved(ctx, contact);
-    				if(LOGGER.isInfoEnabled()) {
-    				    LOGGER.info("User join the enterprise automatically, userId=" + identifier.getOwnerUid() 
-                            + ", contactId=" + contact.getId() + ", enterpriseId=" + enterprise.getId());
-    				}
-			    } else {
-			        if(LOGGER.isDebugEnabled()) {
-			            LOGGER.debug("Enterprise contact is already authenticated, userId=" + identifier.getOwnerUid() 
-			                + ", contactId=" + contact.getId() + ", enterpriseId=" + enterprise.getId());
-			        }
-			    }
-			} else {
-			    if(LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Enterprise contact not found, ignore to match contact, userId=" + identifier.getOwnerUid() 
-                        + ", enterpriseId=" + enterprise.getId());
-                }
-			}
+	public EnterpriseContact processUserForContact(UserIdentifier identifier) {
+		try {
+		    User user = userProvider.findUserById(identifier.getOwnerUid());
+	        List<Enterprise> enterprises = this.enterpriseProvider.queryEnterpriseByPhone(identifier.getIdentifierToken());
+	        Map<Long, Long> ctx = new HashMap<Long, Long>();
+	        for (Enterprise enterprise : enterprises) {
+	            if(enterprise.getNamespaceId() == null || !enterprise.getNamespaceId().equals(identifier.getNamespaceId())) {
+	                if(LOGGER.isDebugEnabled()) {
+	                    LOGGER.debug("Ignore the enterprise who is dismatched to namespace, enterpriseId=" + enterprise.getId() 
+	                        + ", enterpriseNamespaceId=" + enterprise.getNamespaceId() + ", userId=" + identifier.getOwnerUid() 
+	                        + ", userNamespaceId=" + identifier.getNamespaceId());
+	                }
+	                continue;
+	            }
+	            EnterpriseContact contact = this.getContactByPhone(enterprise.getId(), identifier.getIdentifierToken());
+	            if (contact != null) {
+	                GroupMemberStatus status = GroupMemberStatus.fromCode(contact.getStatus());
+	                if(!contact.getStatus().equals(GroupMemberStatus.ACTIVE.getCode())) {
+	                    contact.setUserId(user.getId());
+	                    contact.setStatus(GroupMemberStatus.ACTIVE.getCode());
+	                    updatePendingEnterpriseContactToAuthenticated(contact);
+	                    updateEnterpriseContactUser(contact);
+	                    
+	                    sendMessageForContactApproved(ctx, contact);
+	                    if(LOGGER.isInfoEnabled()) {
+	                        LOGGER.info("User join the enterprise automatically, userId=" + identifier.getOwnerUid() 
+	                            + ", contactId=" + contact.getId() + ", enterpriseId=" + enterprise.getId());
+	                    }
+	                } else {
+	                    if(LOGGER.isDebugEnabled()) {
+	                        LOGGER.debug("Enterprise contact is already authenticated, userId=" + identifier.getOwnerUid() 
+	                            + ", contactId=" + contact.getId() + ", enterpriseId=" + enterprise.getId());
+	                    }
+	                }
+	                return contact;
+	            } else {
+	                if(LOGGER.isDebugEnabled()) {
+	                    LOGGER.debug("Enterprise contact not found, ignore to match contact, userId=" + identifier.getOwnerUid() 
+	                        + ", enterpriseId=" + enterprise.getId());
+	                }
+	            }
+	        }
+		} catch(Exception e) {
+		    LOGGER.error("Failed to process the enterprise contact for the user, userId=" + identifier.getOwnerUid(), e);
 		}
+		return null;
 	}
 
 	/**
@@ -382,6 +391,52 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		sendMessageForContactApproved(null, contact);
 	}
 	
+	private void updateEnterpriseContactUser(EnterpriseContact contact) {
+	    try {
+	        if(contact == null) {
+	            return;
+	        }
+	        
+	        User user = userProvider.findUserById(contact.getUserId());
+	        if(user == null) {
+	            LOGGER.error("User not found for the enterprise contact, contactId=" + contact.getId() 
+	                + ", enterpriseId=" + contact.getEnterpriseId() + ", contactUserId=" + contact.getUserId());
+	        } else {
+	            boolean needUpdated = false;
+	            if(user.getNickName() == null) {
+	                String name = contact.getName();
+	                String nickName = contact.getNickName();
+	                if(nickName != null) {
+	                    user.setNickName(nickName);
+	                    needUpdated = true;
+	                } else {
+	                    if(name != null) {
+	                        user.setNickName(name);
+	                        needUpdated = true;
+	                    }
+	                }
+	            }
+	            
+	            String avatarUri = contact.getAvatar();
+	            if(user.getAvatar() == null && avatarUri != null) {
+	                user.setAvatar(avatarUri);
+	                needUpdated = true;
+	            }
+	            
+	            if(needUpdated) {
+	                userProvider.updateUser(user);
+	                if(LOGGER.isDebugEnabled()) {
+	                    LOGGER.debug("Update the user info for existing enterprise contact, contactId=" + contact.getId() 
+	                        + ", enterpriseId=" + contact.getEnterpriseId() + ", contactUserId=" + contact.getUserId() 
+	                        + ", nickName=" + user.getNickName() + ", avatar=" + user.getAvatar());
+	                }
+	            }
+	        }
+	    } catch (Exception e) {
+	        LOGGER.error("Failed to update enterprise contact user info, contact=" + contact, e);
+	    }
+	}
+	
     /**
      * 当企业成员加入group或者接受别人邀请加入group时，成员状态则待审核变为active，
      * 此时group里的成员数需要增加，为了保证成员数的正确性，需要添加锁；
@@ -402,7 +457,8 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
         });
     }
 	
-	private void createOrUpdateUserGroup(EnterpriseContact contact) {
+    @Override
+	public void createOrUpdateUserGroup(EnterpriseContact contact) {
         UserGroup userGroup = userProvider.findUserGroupByOwnerAndGroup(contact.getId(), contact.getEnterpriseId());
         if(userGroup == null) {
             createUserGroup(contact);
@@ -413,7 +469,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 
     private void createUserGroup(EnterpriseContact contact) {
         Long enterpriseId = contact.getEnterpriseId();
-        Long contactId = contact.getId();
+        Long contactId = contact.getUserId();
         
         UserGroup userGroup = new UserGroup();
         userGroup.setOwnerUid(contactId);
@@ -1622,5 +1678,40 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		}
 		
 		return dto;
+	}
+	
+	@Override
+	public void syncEnterpriseContacts() {
+	    long startTime = System.currentTimeMillis();
+	    int pageSize = 1000;
+        AtomicInteger round = new AtomicInteger(0);
+	    AtomicInteger insertCount = new AtomicInteger(0);
+	    AtomicInteger dupCount = new AtomicInteger(0);
+	    this.enterpriseContactProvider.iterateEnterpriseContacts(pageSize, (locator, query) -> {
+	        query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.USER_ID.gt(0L));
+	        round.incrementAndGet();
+	        return null;
+	    }, (contact) -> {
+	        Long userId = contact.getUserId();
+	        Long enterpriseId = contact.getEnterpriseId();
+	        UserGroup userGroup = this.userProvider.findUserGroupByOwnerAndGroup(userId, enterpriseId);
+	        if(userGroup == null) {
+	            try {
+	                createUserGroup(contact);
+	                insertCount.incrementAndGet();
+	            } catch (DuplicateKeyException e) {
+	                // Skip the duplicated records
+	                dupCount.incrementAndGet();
+	            } catch (Exception e) {
+	                LOGGER.error("Failed to sync the enterprise contacts, contact=" + contact, e);
+	            }
+	        }
+	    });
+	    
+	    if(LOGGER.isDebugEnabled()) {
+	        long endTime = System.currentTimeMillis();
+	        LOGGER.debug("Sync the enterprise contacts, round=" + round.intValue() + ", insertCount=" + insertCount.intValue() 
+	            + ", dupCount=" + dupCount.intValue() + ", elapse=" + (endTime - startTime));
+	    }
 	}
 }

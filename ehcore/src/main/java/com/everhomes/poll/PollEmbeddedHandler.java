@@ -53,8 +53,8 @@ public class PollEmbeddedHandler implements ForumEmbeddedHandler {
     public Post preProcessEmbeddedObject(Post post) {
         Long id = shardingProvider.allocShardableContentId(EhPolls.class).second();
         post.setEmbeddedId(id);
-        ActivityPostCommand cmd = (ActivityPostCommand) StringHelper.fromJsonString(post.getEmbeddedJson(),
-                ActivityPostCommand.class);
+        PollPostCommand cmd = (PollPostCommand) StringHelper.fromJsonString(post.getEmbeddedJson(),
+            PollPostCommand.class);
         
         if(null == cmd.getNamespaceId()){
         	Forum forum = forumProvider.findForumById(post.getForumId());

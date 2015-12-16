@@ -111,6 +111,45 @@ INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `defau
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
     VALUES(4207, 4, 0, '其他', '活动/其他', 1, 2, UTC_TIMESTAMP(), 1000000);
 
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(4602, 2, 0, '运动与音乐', '兴趣/运动与音乐', 10, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(4608, 2, 0, '旅游摄影', '兴趣/旅游摄影', 20, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(4601, 2, 0, '亲子与教育', '兴趣/亲子与教育', 30, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(4603, 2, 0, '美食与厨艺', '兴趣/美食与厨艺', 40, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(4605, 2, 0, '家庭装饰', '兴趣/家庭装饰', 50, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(4604, 2, 0, '美容化妆', '兴趣/美容化妆', 60, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(4607, 2, 0, '宠物会', '兴趣/宠物会', 70, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(4606, 2, 0, '名牌汇', '兴趣/名牌汇', 80, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(4611, 2, 0, '同事群', '兴趣/同事群', 90, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(4610, 2, 0, '老乡群', '兴趣/老乡群', 100, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(4612, 2, 0, '同学群', '兴趣/同学群', 110, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(4609, 2, 0, '拼车', '兴趣/拼车', 120, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(4613, 2, 0, '其他', '兴趣/其他', 200, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(4614, 2001, 0, '亲子', '兴趣/亲子与教育/亲子', 0, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(4615, 2001, 0, '教育', '兴趣/亲子与教育/教育', 0, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(4616, 2002, 0, '运动', '兴趣/运动与音乐/运动', 0, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(4617, 2002, 0, '音乐', '兴趣/运动与音乐/音乐', 0, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(4618, 2008, 0, '旅游', '兴趣/旅游摄影/旅游', 0, 2, UTC_TIMESTAMP(), 1000000);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(4619, 2008, 0, '摄影', '兴趣/旅游摄影/摄影', 0, 2, UTC_TIMESTAMP(), 1000000);	
+	
 	
 INSERT INTO `eh_launch_pad_layouts`(id, namespace_id, name, layout_json, version_code, min_version_code, status, create_time) 
 	VALUES (11, 1000000, 'ServiceMarketLayout', '{"versionCode":"2015111401","versionName":"3.0.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Coupons","instanceConfig":{"itemGroup":"Coupons"},"style":"Default","defaultOrder":3,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}', '2015111401', '2015061701', '2', '2015-06-24 16:09:30');
@@ -120,7 +159,7 @@ INSERT INTO `eh_launch_pad_layouts`(id, namespace_id, name, layout_json, version
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`) 
 	VALUES(801, 1000000, 0, 0, 0, '/home','GovAgencies','园区入驻','园区入驻','cs://1/image/aW1hZ2UvTVRvNFlXSXdaRGRqTnpKaU56UmtZMll3WlRNeU1XUmxOekU0WXpNNU9HWmpZUQ','1','1','28',NULL,'0','0','1','1','','0',NULL,NULL,NULL);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`) 
-	VALUES(802, 1000000, 0, 0, 0, '/home','GovAgencies','交流大厅','交流大厅','cs://1/image/aW1hZ2UvTVRwaE5HRTBNR1ZtTmpSa1lqVm1NbVJrWVRNNFlURXdZMlppTnpVNE1ESTRaQQ','1','1','29', NULL,'0','0','1','1','','0',NULL,NULL,NULL);
+	VALUES(802, 1000000, 0, 0, 0, '/home','GovAgencies','交流大厅','交流大厅','cs://1/image/aW1hZ2UvTVRwaE5HRTBNR1ZtTmpSa1lqVm1NbVJrWVRNNFlURXdZMlppTnpVNE1ESTRaQQ','1','1','29', '{"categoryId":1003}','0','0','1','1','','0',NULL,NULL,NULL);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`) 
 	VALUES(803, 1000000, 0, 0, 0, '/home','GovAgencies','服务联盟','服务联盟','cs://1/image/aW1hZ2UvTVRvM016RmpNelJtTURGbU9ETTJZVEJrTWprNE1qbGpZbU0xTTJZMFlqWTFNZw','1','1','33','{"type":2,"parentId":100001}','0','0','1','1','','0',NULL,NULL,NULL);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`) 
@@ -149,7 +188,7 @@ update eh_configurations set `value`='%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Froll
 -- INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`) 
 --	VALUES('811', 1000000, 0, 0, 0, '/home','Bizs','CAR_USE','用车','cs://1/image/aW1hZ2UvTVRwbE9UUmpOMkpsTVdaaU9UTTFNREUwTVdVek1qUXpaV0ppWlRobFpqbGtOZw','1','1','0',NULL,'0','0','1','1','','0',NULL,NULL,NULL);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`) 
-	VALUES('812', 1000000, 0, 0, 0, '/home','Bizs','PUNCH','打卡','cs://1/image/aW1hZ2UvTVRwa01ESXpZalEwTkdZeE1ETTNPRGMyWkdVMU5UQXlOMlZrT1dKaE9UZzBNZw','1','1','23',NULL,'0','0','1','1','','0',NULL,NULL,NULL);
+	VALUES('812', 1000000, 0, 0, 0, '/home','Bizs','PUNCH','打卡考勤','cs://1/image/aW1hZ2UvTVRwa01ESXpZalEwTkdZeE1ETTNPRGMyWkdVMU5UQXlOMlZrT1dKaE9UZzBNZw','1','1','23',NULL,'0','0','1','1','','0',NULL,NULL,NULL);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`) 
 	VALUES('813', 1000000, 0, 0, 0, '/home','Bizs','CLUB','俱乐部','cs://1/image/aW1hZ2UvTVRwbE9XVTRNelUzT1dReU4ySXdNREJpT0RBeFpqQTNZakZqTUdZMk1EZzJNZw','1','1','36','{"privateFlag": 0}','0','0','1','1','','0',NULL,NULL,NULL);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`) 
@@ -159,7 +198,7 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`) 
 	VALUES('816', 1000000, 0, 0, 0, '/home','Bizs','ENTERPRISE','园区企业','cs://1/image/aW1hZ2UvTVRveVptTmpNMkU0WkdGbE1HUmhObUZrT0RZM1ltVmtZbUptTUdKbU4yUmtOdw','1','1','34','{"type":3}','0','0','1','1','','0',NULL,NULL,NULL);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`) 
-	VALUES('817', 1000000, 0, 0, 0, '/home','Bizs','PUNCH','停车','cs://1/image/aW1hZ2UvTVRwbVkyRTVNR1pqTURJNE1qY3pOVEZqTlRFMVpUZzFZVEU1T0RSak16RTFZUQ','1','1','30',NULL,'0','0','1','1','','0',NULL,NULL,NULL);
+	VALUES('817', 1000000, 0, 0, 0, '/home','Bizs','PUNCH','停车充值','cs://1/image/aW1hZ2UvTVRwbVkyRTVNR1pqTURJNE1qY3pOVEZqTlRFMVpUZzFZVEU1T0RSak16RTFZUQ','1','1','30',NULL,'0','0','1','1','','0',NULL,NULL,NULL);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`) 
 	VALUES('818', 1000000, 0, 0, 0, '/home','Bizs','ELECSCREEN','电子屏','cs://1/image/aW1hZ2UvTVRwbU1tWTJZbUk1T0dNNFlXUmpNalEyTnpBMFlXSXhNakU0WVRVM016QTFPQQ','1','1','26',NULL,'0','0','1','1','','0',NULL,NULL,NULL);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`) 
@@ -171,6 +210,11 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 -- INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`) 
 --	VALUES('822', 1000000, 0, 0, 0, '/home','Bizs','CARPOOL','拼车','cs://1/image/aW1hZ2UvTVRvME16a3lPVEJrTjJOaE5qTXhPV1prWVdKbE5EZzNOakEzWm1VM05tWTFPUQ','1','1','0',NULL,'0','0','1','1','','0',NULL,NULL,NULL);
 
+INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag,target_type, target_id) 
+	VALUES (1074, 1000000, 0, '0', 0, '/home', 'Bizs', 'ft创业咖啡', 'ft创业咖啡', 'shop/3007/14500851352511802584033.png', 1, 1, 14, '', 1, 0, 1, 1, '', 0,NULL, 'biz', 79);
+INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag,target_type, target_id) 
+	VALUES (831, 1000000, 0, '0', 0, '/home', 'Bizs', '邱哥手工吐司', '邱哥手工吐司', 'shop/3007/1450084435652-755542646.png', 1, 1, 14, '', 1, 0, 1, 1, '', 0,NULL, 'biz', 80);
+	
 INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag,target_type, target_id) 
 	VALUES (827, 1000000, 0, '0', 0, '/home', 'Bizs', '更多', '更多', 'cs://1/image/aW1hZ2UvTVRvNE1XRTNZVEUxT0RGaE1EQmpZakF6TmprNE1EZ3paR1k0TVRVMFptUTJZdw', 1, 1, 1, '{"itemLocation":"/home", "itemGroup":"Bizs"}', 30, 0, 1, 1, '', 0,NULL, NULL, NULL);
 
