@@ -1614,6 +1614,17 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 			this.enterpriseContactProvider.deleteContactGroupMember(enterpriseContactGroupMember);
 		
 		this.enterpriseContactProvider.deleteContactById(contact);
+		
+		GroupMemberStatus status = GroupMemberStatus.fromCode(contact.getStatus());
+		if(0 != contact.getUserId() && null != contact.getUserId()){
+			 if(status == GroupMemberStatus.ACTIVE) {
+			      contact.setStatus(GroupMemberStatus.INACTIVE.getCode());
+			      deleteActiveEnterpriseContact(contact.getUserId(), contact, false, "");
+			 } else {
+			      deletePendingEnterpriseContact(contact.getUserId(), contact, true);
+			 }
+		}
+	   
 	}
 
 	@Override

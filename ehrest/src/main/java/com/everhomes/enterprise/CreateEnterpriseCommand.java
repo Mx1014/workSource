@@ -38,6 +38,7 @@ public class CreateEnterpriseCommand {
     private String enterpriseAddress;
     private String enterpriseCheckinDate;
     private String postUri;
+    private Integer namespaceId;
     
     @ItemType(EnterpriseAddressDTO.class)
 	private List<EnterpriseAddressDTO> addressDTOs;
@@ -129,6 +130,12 @@ public class CreateEnterpriseCommand {
 	}
 	public void setPostUri(String postUri) {
 		this.postUri = postUri;
+	}
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
     
 }

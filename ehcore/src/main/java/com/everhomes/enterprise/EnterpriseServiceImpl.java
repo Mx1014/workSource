@@ -231,6 +231,12 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         enterprise.setEnterpriseAddress(cmd.getEnterpriseAddress());
         enterprise.setEnterpriseCheckinDate(cmd.getEnterpriseCheckinDate());
         enterprise.setPostUri(cmd.getPostUri());
+        enterprise.setNamespaceId(cmd.getNamespaceId());
+        
+        if(null == cmd.getNamespaceId()){
+        	enterprise.setNamespaceId(0);
+        }
+        
         this.enterpriseProvider.createEnterprise(enterprise);
         
         requestToJoinCommunity(user, enterprise.getId(), cmd.getCommunityId());
@@ -787,6 +793,11 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         enterprise.setEnterpriseAddress(cmd.getEnterpriseAddress());
         enterprise.setEnterpriseCheckinDate(cmd.getEnterpriseCheckinDate());
         enterprise.setPostUri(cmd.getPostUri());
+        enterprise.setNamespaceId(cmd.getNamespaceId());
+        
+        if(null == cmd.getNamespaceId()){
+        	enterprise.setNamespaceId(0);
+        }
         this.enterpriseProvider.updateEnterprise(enterprise);
         
         List<EnterpriseAddressDTO> addressDtos = cmd.getAddressDTOs();
