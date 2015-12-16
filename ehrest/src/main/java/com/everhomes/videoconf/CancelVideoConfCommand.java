@@ -1,6 +1,5 @@
 package com.everhomes.videoconf;
 
-import java.sql.Timestamp;
 
 import com.everhomes.util.StringHelper;
 
@@ -8,7 +7,6 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *  <li>sourceAccountName: 源账号</li>
  *  <li>confId: 会议id</li>
- *  <li>endTime: 结束时间</li>
  * </ul>
  */
 public class CancelVideoConfCommand {
@@ -17,8 +15,6 @@ public class CancelVideoConfCommand {
 	
 	private String sourceAccountName;
 	
-	private Long endTime;
-
 	public Long getConfId() {
 		return confId;
 	}
@@ -33,14 +29,6 @@ public class CancelVideoConfCommand {
 
 	public void setSourceAccountName(String sourceAccountName) {
 		this.sourceAccountName = sourceAccountName;
-	}
-
-	public Long getEndTime() {
-		return endTime;
-	}
-
-	public void setEndTime(Long endTime) {
-		this.endTime = endTime;
 	}
 
 	@Override
