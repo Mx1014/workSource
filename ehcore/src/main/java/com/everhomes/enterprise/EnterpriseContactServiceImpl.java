@@ -18,6 +18,7 @@ import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
@@ -1625,5 +1626,26 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		}
 		
 		return dto;
+	}
+	
+	public void syncEnterpriseContacts() {
+	    int pageSize = 1000;
+	    this.enterpriseContactProvider.iterateEnterpriseContacts(pageSize, (locator, query) -> {
+	        query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.USER_ID.gt(0L));
+	        return null;
+	    }, (contact) -> {
+	        Long userId = contact.getUserId();
+	        Long enterpriseId = contact.getEnterpriseId();
+	        UserGroup userGroup = this.userProvider.findUserGroupByOwnerAndGroup(userId, enterpriseId);
+	        if(userGroup == null) {
+	            try {
+	                createUserGroup(contact);
+	            } catch (DuplicateKeyException e) {
+	                // Skip the duplicated records
+	            } catch (Exception e) {
+	                LOGGER.error("Failed to sync the enterprise contacts, contact=" + contact, e);
+	            }
+	        }
+	    });
 	}
 }
