@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jooq.Condition;
 import org.jooq.Record;
@@ -1628,10 +1629,16 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		return dto;
 	}
 	
+	@Override
 	public void syncEnterpriseContacts() {
+	    long startTime = System.currentTimeMillis();
 	    int pageSize = 1000;
+        AtomicInteger round = new AtomicInteger(0);
+	    AtomicInteger insertCount = new AtomicInteger(0);
+	    AtomicInteger dupCount = new AtomicInteger(0);
 	    this.enterpriseContactProvider.iterateEnterpriseContacts(pageSize, (locator, query) -> {
 	        query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.USER_ID.gt(0L));
+	        round.incrementAndGet();
 	        return null;
 	    }, (contact) -> {
 	        Long userId = contact.getUserId();
@@ -1640,12 +1647,20 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	        if(userGroup == null) {
 	            try {
 	                createUserGroup(contact);
+	                insertCount.incrementAndGet();
 	            } catch (DuplicateKeyException e) {
 	                // Skip the duplicated records
+	                dupCount.incrementAndGet();
 	            } catch (Exception e) {
 	                LOGGER.error("Failed to sync the enterprise contacts, contact=" + contact, e);
 	            }
 	        }
 	    });
+	    
+	    if(LOGGER.isDebugEnabled()) {
+	        long endTime = System.currentTimeMillis();
+	        LOGGER.debug("Sync the enterprise contacts, round=" + round.intValue() + ", insertCount=" + insertCount.intValue() 
+	            + ", dupCount=" + dupCount.intValue() + ", elapse=" + (endTime - startTime));
+	    }
 	}
 }
