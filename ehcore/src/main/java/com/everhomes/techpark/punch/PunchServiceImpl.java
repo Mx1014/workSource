@@ -1693,6 +1693,7 @@ public class PunchServiceImpl implements PunchService {
 		Integer workDayCount = countWorkDayCount(cmd.getStartDay(),
 				cmd.getEndDay());
 		ListPunchStatisticsCommand paramCommand =  ConvertHelper.convert(cmd, ListPunchStatisticsCommand.class );
+		paramCommand.setPageSize(Integer.MAX_VALUE);
 		List<PunchStatisticsDTO>punchDayLogDTOList =  this.listPunchStatistics(paramCommand).getPunchList();
 		Map<Long, List<PunchStatisticsDTO>> map = buildUserPunchCountMap(punchDayLogDTOList);
 		PunchRule rule = this.punchProvider.getPunchRuleByCompanyId(cmd.getEnterpriseId());
