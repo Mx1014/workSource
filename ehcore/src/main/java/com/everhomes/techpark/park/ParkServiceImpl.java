@@ -58,6 +58,8 @@ import org.springframework.stereotype.Component;
 
 
 
+import org.springframework.transaction.annotation.Transactional;
+
 import com.bosigao.cxf.Service1;
 import com.bosigao.cxf.Service1Soap;
 import com.everhomes.app.AppConstants;
@@ -559,30 +561,32 @@ public class ParkServiceImpl implements ParkService {
 			OnlinePayBillCommand cmd) {
 
 		RechargeInfoDTO info = onlinePayService.onlinePayBill(cmd);
-		if(cmd.getPayStatus().toLowerCase().equals("fail")) {
-			LOGGER.error("pay failed.orderNo ="+cmd.getOrderNo());
-		}
-		else {
-			String carNumber = info.getPlateNumber();
-			String cost = (int)(info.getRechargeAmount()*100) +"";
-			String flag = "2"; //停车场系统接口的传入参数，2表示是车牌号
-			String payTime = info.getRechargeTime().toString();
-			String validStart = timestampToStr(info.getOldValidityperiod());
-			String validEnd = timestampToStr(info.getNewValidityperiod());
-			
-			URL wsdlURL = Service1.WSDL_LOCATION;
-			
-			Service1 ss = new Service1(wsdlURL, SERVICE_NAME);
-	        Service1Soap port = ss.getService1Soap12();
-	        LOGGER.info("refreshParkingSystem");
-	        
-	        String json = port.cardPayMoney("", carNumber, flag, cost, validStart, validEnd, payTime, "sign");
-			
-			ResultHolder resultHolder = GsonUtil.fromJson(json, ResultHolder.class);
-			this.checkResultHolderIsNull(resultHolder,carNumber);
-			
-			if(resultHolder.isSuccess()){
-				updateRechargeOrder(Long.valueOf(cmd.getOrderNo()));
+		if(info.getRechargeStatus() != RechargeStatus.SUCCESS.getCode()) {
+			if(cmd.getPayStatus().toLowerCase().equals("fail")) {
+				LOGGER.error("pay failed.orderNo ="+cmd.getOrderNo());
+			}
+			else {
+				String carNumber = info.getPlateNumber();
+				String cost = (int)(info.getRechargeAmount()*100) +"";
+				String flag = "2"; //停车场系统接口的传入参数，2表示是车牌号
+				String payTime = info.getRechargeTime().toString();
+				String validStart = timestampToStr(info.getOldValidityperiod());
+				String validEnd = timestampToStr(info.getNewValidityperiod());
+				
+				URL wsdlURL = Service1.WSDL_LOCATION;
+				
+				Service1 ss = new Service1(wsdlURL, SERVICE_NAME);
+		        Service1Soap port = ss.getService1Soap12();
+		        LOGGER.info("refreshParkingSystem");
+		        
+		        String json = port.cardPayMoney("", carNumber, flag, cost, validStart, validEnd, payTime, "sign");
+				
+				ResultHolder resultHolder = GsonUtil.fromJson(json, ResultHolder.class);
+				this.checkResultHolderIsNull(resultHolder,carNumber);
+				
+				if(resultHolder.isSuccess()){
+					updateRechargeOrder(Long.valueOf(cmd.getOrderNo()));
+				}
 			}
 		}
 		RechargeSuccessResponse rechargeResponse = getRechargeStatus(Long.valueOf(cmd.getOrderNo()));
@@ -687,6 +691,9 @@ public class ParkServiceImpl implements ParkService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"the bill id is not in list.");
 		}
+		if(rechargeInfo.getRechargeStatus() != RechargeStatus.SUCCESS.getCode()) {
+			return -1;
+		}
 		Timestamp payTime = rechargeInfo.getRechargeTime();
 		Timestamp end = strToTimestamp(ConfigConstants.PARKING_PREFERENTIAL_ENDTIME);
 		
@@ -699,35 +706,14 @@ public class ParkServiceImpl implements ParkService {
 		return count;
 	}
 
+	@Transactional
 	@Override
-	public String rechargeTop(OnlinePayBillCommand cmd) {
-		RechargeInfoDTO info = onlinePayService.onlinePayBill(cmd);
+	public String rechargeTop(PaymentRankingCommand cmd) {
 		
 		if(cmd.getPayStatus().toLowerCase().equals("fail")) {
 			return "payFailed";
 		}
 		if(cmd.getPayStatus().toLowerCase().equals("success")) {
-			String carNumber = info.getPlateNumber();
-			String cost = (int)(info.getRechargeAmount()*100) +"";
-			String flag = "2"; //停车场系统接口的传入参数，2表示是车牌号
-			String payTime = info.getRechargeTime().toString();
-			String validStart = timestampToStr(info.getOldValidityperiod());
-			String validEnd = timestampToStr(info.getNewValidityperiod());
-			
-			URL wsdlURL = Service1.WSDL_LOCATION;
-			
-			Service1 ss = new Service1(wsdlURL, SERVICE_NAME);
-	        Service1Soap port = ss.getService1Soap12();
-	        LOGGER.info("refreshParkingSystem");
-	        
-	        String json = port.cardPayMoney("", carNumber, flag, cost, validStart, validEnd, payTime, "sign");
-			
-			ResultHolder resultHolder = GsonUtil.fromJson(json, ResultHolder.class);
-			this.checkResultHolderIsNull(resultHolder,carNumber);
-			
-			if(resultHolder.isSuccess()){
-				updateRechargeOrder(Long.valueOf(cmd.getOrderNo()));
-			}
 			
 			int ranking = getPaymentRanking(cmd.getOrderNo());
 			
@@ -735,6 +721,9 @@ public class ParkServiceImpl implements ParkService {
 			
 			if(ranking == 0)
 				return "the activity was finished";
+			
+			if(ranking == -1)
+				return "recharge unfinished";
 			
 			if(ranking <= range)
 				return "in the range";
