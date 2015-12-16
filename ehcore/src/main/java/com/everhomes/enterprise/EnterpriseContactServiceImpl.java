@@ -240,33 +240,33 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		User user = UserContext.current().getUser();
 		Long userId = (user == null) ? 0L : user.getId();
 		EnterpriseContact result = this.dbProvider.execute((TransactionStatus status) -> {
-					EnterpriseContact contact = new EnterpriseContact();
-					contact.setCreatorUid(userId);
-					contact.setEnterpriseId(cmd.getEnterpriseId());
-					contact.setName(cmd.getName());
-					contact.setNickName(cmd.getNickName());
-					contact.setAvatar(user.getAvatar());
-					contact.setUserId(userId);
+			EnterpriseContact contact = new EnterpriseContact();
+			contact.setCreatorUid(userId);
+			contact.setEnterpriseId(cmd.getEnterpriseId());
+			contact.setName(cmd.getName());
+			contact.setNickName(cmd.getNickName());
+			contact.setAvatar(user.getAvatar());
+			contact.setUserId(userId);
 
-					// Create it
-					contact.setStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
-					this.enterpriseContactProvider.createContact(contact);
+			// Create it
+			contact.setStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
+			this.enterpriseContactProvider.createContact(contact);
 
-					UserIdentifier identifier = userProvider
-							.findClaimedIdentifierByOwnerAndType(userId,
-									IdentifierType.MOBILE.getCode());
-					EnterpriseContactEntry entry = new EnterpriseContactEntry();
-					entry.setContactId(contact.getId());
-					entry.setCreatorUid(UserContext.current().getUser().getId());
-					entry.setEnterpriseId(contact.getEnterpriseId());
-					entry.setEntryType(EnterpriseContactEntryType.Mobile
-							.getCode());
-					entry.setEntryValue(identifier.getIdentifierToken());
+			UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(userId,
+							IdentifierType.MOBILE.getCode());
+			EnterpriseContactEntry entry = new EnterpriseContactEntry();
+			entry.setContactId(contact.getId());
+			entry.setCreatorUid(UserContext.current().getUser().getId());
+			entry.setEnterpriseId(contact.getEnterpriseId());
+			entry.setEntryType(EnterpriseContactEntryType.Mobile.getCode());
+			entry.setEntryValue(identifier.getIdentifierToken());
 
-					this.enterpriseContactProvider.createContactEntry(entry);
+			this.enterpriseContactProvider.createContactEntry(entry);
+			
+			createUserGroup(contact);
 
-					return contact;
-				});
+			return contact;
+		});
 
 		// Create contact entry from userinfo
 		// UserInfo userInfo =
@@ -292,17 +292,13 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		if(null!= cmd.getGroupId() ){
 			EnterpriseContactGroupMember enterpriseContactGroupMember = new EnterpriseContactGroupMember();
 			enterpriseContactGroupMember.setContactGroupId(cmd.getGroupId());
-			enterpriseContactGroupMember
-					.setEnterpriseId(cmd.getEnterpriseId());
+			enterpriseContactGroupMember.setEnterpriseId(cmd.getEnterpriseId());
 			enterpriseContactGroupMember.setContactId(result.getId());
 			enterpriseContactGroupMember.setCreatorUid(UserContext.current().getUser().getId());
-			enterpriseContactGroupMember
-					.setCreateTime(new Timestamp(System
-							.currentTimeMillis()));
-			enterpriseContactProvider
-					.createContactGroupMember(enterpriseContactGroupMember);
+			enterpriseContactGroupMember.setCreateTime(new Timestamp(System.currentTimeMillis()));
+			enterpriseContactProvider.createContactGroupMember(enterpriseContactGroupMember);
 		}
-		// TODO 发消息给所有根管理员
+		
 		if (result == null) {
 			LOGGER.error("Failed to apply for enterprise contact, userId="
 					+ userId + ", cmd=" + cmd);
