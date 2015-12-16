@@ -211,6 +211,11 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 --	VALUES('822', 1000000, 0, 0, 0, '/home','Bizs','CARPOOL','拼车','cs://1/image/aW1hZ2UvTVRvME16a3lPVEJrTjJOaE5qTXhPV1prWVdKbE5EZzNOakEzWm1VM05tWTFPUQ','1','1','0',NULL,'0','0','1','1','','0',NULL,NULL,NULL);
 
 INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag,target_type, target_id) 
+	VALUES (1074, 1000000, 0, '0', 0, '/home', 'Bizs', 'ft创业咖啡', 'ft创业咖啡', 'shop/3007/14500851352511802584033.png', 1, 1, 14, '', 1, 0, 1, 1, '', 0,NULL, 'biz', 79);
+INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag,target_type, target_id) 
+	VALUES (831, 1000000, 0, '0', 0, '/home', 'Bizs', '邱哥手工吐司', '邱哥手工吐司', 'shop/3007/1450084435652-755542646.png', 1, 1, 14, '', 1, 0, 1, 1, '', 0,NULL, 'biz', 80);
+	
+INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag,target_type, target_id) 
 	VALUES (827, 1000000, 0, '0', 0, '/home', 'Bizs', '更多', '更多', 'cs://1/image/aW1hZ2UvTVRvNE1XRTNZVEUxT0RGaE1EQmpZakF6TmprNE1EZ3paR1k0TVRVMFptUTJZdw', 1, 1, 1, '{"itemLocation":"/home", "itemGroup":"Bizs"}', 30, 0, 1, 1, '', 0,NULL, NULL, NULL);
 
 	
