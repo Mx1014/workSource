@@ -1729,8 +1729,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	private void processForthPunchListCount(List<PunchStatisticsDTO> list,
-			PunchCountDTO dto) {
-		// TODO Auto-generated method stub
+			PunchCountDTO dto) { 
 		dto.setWorkCount(0);
 		dto.setUnPunchCount(0.0);
 		dto.setSickCount(0.0);
