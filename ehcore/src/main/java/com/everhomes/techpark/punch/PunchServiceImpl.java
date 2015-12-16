@@ -1594,7 +1594,8 @@ public class PunchServiceImpl implements PunchService {
 								if(null !=enterpriseContact )
 									dto.setOperatorName(enterpriseContact.getName());
 							} else {
-								dto.setApprovalStatus((byte) 0);
+								//do nothing
+//								dto.setApprovalStatus((byte) 0);
 							}
 						}
 					}
@@ -1729,8 +1730,7 @@ public class PunchServiceImpl implements PunchService {
 	}
 
 	private void processForthPunchListCount(List<PunchStatisticsDTO> list,
-			PunchCountDTO dto) {
-		// TODO Auto-generated method stub
+			PunchCountDTO dto) { 
 		dto.setWorkCount(0);
 		dto.setUnPunchCount(0.0);
 		dto.setSickCount(0.0);

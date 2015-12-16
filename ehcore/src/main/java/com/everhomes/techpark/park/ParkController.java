@@ -198,7 +198,7 @@ public class ParkController extends ControllerBase{
 	 */
 	@RequestMapping("getPaymentRanking")
 	@RestReturn(value = String.class)
-	public RestResponse getPaymentRanking(OnlinePayBillCommand cmd) {
+	public RestResponse getPaymentRanking(PaymentRankingCommand cmd) {
 		
 		String count = parkService.rechargeTop(cmd);
 		RestResponse response = new RestResponse(count);

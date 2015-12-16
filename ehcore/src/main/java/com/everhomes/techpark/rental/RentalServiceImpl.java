@@ -1048,8 +1048,9 @@ public class RentalServiceImpl implements RentalService {
 		RentalRule rule = this.rentalProvider.getRentalRule(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSiteType());
 		java.util.Date cancelTime = new java.util.Date();
 		RentalBill bill = this.rentalProvider.findRentalBillById(cmd.getRentalBillId());
-		if (cancelTime.after(new java.util.Date(bill.getStartTime().getTime()
+		if (bill.getStatus().equals(SiteBillStatus.SUCCESS.getCode())&&cancelTime.after(new java.util.Date(bill.getStartTime().getTime()
 				- rule.getCancelTime()))) {
+			//当成功预约之后要判断是否过了取消时间
 			LOGGER.error("cancel over time");
 			throw RuntimeErrorException
 					.errorWith(
