@@ -1008,7 +1008,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		
 		if(conf != null && conf.getStatus() != 0) {
 			conf.setStatus((byte) 0);
-			conf.setEndTime(new Timestamp(cmd.getEndTime()));
+			conf.setEndTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			
 			int minutes = (int) ((conf.getEndTime().getTime()-conf.getStartTime().getTime())/60000);
 			conf.setRealDuration(minutes);
@@ -1060,7 +1060,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 				String tokenString = accountName + "|" + configurationProvider.getValue(ConfigConstants.VIDEOCONF_SECRET_KEY, "0") + "|" + timestamp;
 				String token = DigestUtils.md5Hex(tokenString);
 				SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-				String sd = sdf.format(new Date(cmd.getStartTime()));
+				String sd = sdf.format(timestamp);
 				
 				if(LOGGER.isDebugEnabled())
 					LOGGER.info("startVideoConf-restUrl"+path);
@@ -1117,7 +1117,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 						ConfConferences conf = new ConfConferences();
 						conf.setConfId(Long.valueOf(String.valueOf(data.get("meetingNo"))));
 						conf.setSubject(String.valueOf(data.get("meetingName")));
-						conf.setStartTime(new Timestamp(cmd.getStartTime()));
+						conf.setStartTime(new Timestamp(timestamp));
 						conf.setExpectDuration(cmd.getDuration());
 						conf.setConfHostKey(String.valueOf(data.get("hostKey")));
 						conf.setJoinPolicy(1);
