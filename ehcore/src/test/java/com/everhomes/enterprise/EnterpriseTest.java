@@ -94,7 +94,7 @@ public class EnterpriseTest extends LoginAuthTestCase {
         
         int count = 100;
         CrossShardListingLocator l1 = new CrossShardListingLocator();
-        List<Enterprise> ents = this.enterpriseProvider.queryEnterprises(l1, count, null);
+        List<Enterprise> ents = this.enterpriseProvider.queryEnterprises(l1, count, null, null);
         Assert.assertTrue(ents.size() > 0);
         
         CrossShardListingLocator l2 = new CrossShardListingLocator();

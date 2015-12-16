@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  * 
  * @author elians
  *<ul>
+ * <li>namespaceId:命名空间</li>
  * <li>startTime:开始时间，时间格式为:YYYY-MM-DD hh:mm:ss</li>
  * <li>multiChoiceFlag:多选标记</li>
  * <li>anonymousFlag:匿名标记,1 为匿名,0为公开</li>
@@ -16,6 +17,7 @@ import com.everhomes.util.StringHelper;
  *</li>
  */
 public class PollPostCommand{
+    private Integer namespaceId;
     private String startTime;
     private String stopTime;
     private Integer multiChoiceFlag;
@@ -26,6 +28,14 @@ public class PollPostCommand{
     private List<PollItemDTO> itemList;
     
     public PollPostCommand() {
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     public String getStartTime() {
