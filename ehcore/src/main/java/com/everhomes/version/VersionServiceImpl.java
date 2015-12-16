@@ -123,4 +123,36 @@ public class VersionServiceImpl implements VersionService {
         response.setInfoUrl(StringHelper.interpolate(versionUrl.getInfoUrl(), params));
         return response;
     }
+
+	@Override
+	public VersionUrlResponse getVersionUrlsWithoutCurrentVersion(
+			WithoutCurrentVersionRequestCommand cmd) {
+		if(cmd.getRealm() == null || cmd.getRealm().isEmpty())
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid realm parameter in the command");
+
+        VersionRealm realm = this.versionProvider.findVersionRealmByName(cmd.getRealm());
+        
+        if(realm == null)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid realm parameter in the command, realm does not exist");
+
+    	VersionUrl versionUrl = this.versionProvider.findVersionUrlByVersion(cmd.getRealm(), null);
+        if(versionUrl == null)
+            throw RuntimeErrorException.errorWith(VersionServiceErrorCode.SCOPE, VersionServiceErrorCode.ERROR_NO_VERSION_URL_SET, 
+                    "No version URLs has been setup yet");
+        
+        VersionUrlResponse response = new VersionUrlResponse();
+        Map<String, String> params = new HashMap<String, String>();
+        if(cmd.getLocale() == null || cmd.getLocale().isEmpty())
+            params.put("locale", "en_US");
+        else
+            params.put("locale", cmd.getLocale());
+        
+        params.put("homeurl", this.configurationProvider.getValue(ConfigConstants.HOME_URL, ""));
+        response.setDownloadUrl(StringHelper.interpolate(versionUrl.getDownloadUrl(), params));
+        response.setInfoUrl(StringHelper.interpolate(versionUrl.getInfoUrl(), params));
+        return response;
+        	
+	}
 }
