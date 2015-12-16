@@ -263,7 +263,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 
 			this.enterpriseContactProvider.createContactEntry(entry);
 			
-			createUserGroup(contact);
+			createOrUpdateUserGroup(contact);
 
 			return contact;
 		});
