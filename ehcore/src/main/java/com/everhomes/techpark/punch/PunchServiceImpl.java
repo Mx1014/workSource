@@ -1594,7 +1594,10 @@ public class PunchServiceImpl implements PunchService {
 								if(null !=enterpriseContact )
 									dto.setOperatorName(enterpriseContact.getName());
 							} else {
-								dto.setApprovalStatus((byte) 0);
+
+								//do nothing
+//								dto.setApprovalStatus((byte) 0);
+
 							}
 						}
 					}
