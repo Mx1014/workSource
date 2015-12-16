@@ -515,9 +515,9 @@ public class EnterpriseServiceImpl implements EnterpriseService {
             EnterpriseDTO dto = null;
             for(UserGroup userGroup : userGroupList) {
                 GroupMemberStatus status = GroupMemberStatus.fromCode(userGroup.getMemberStatus());
-                if(status != GroupMemberStatus.ACTIVE) {
+                if(status == GroupMemberStatus.INACTIVE) {
                     if(LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("The group is filtered for not in active member status, userId=" + userId 
+                        LOGGER.debug("The group is filtered for in inactive member status, userId=" + userId 
                             + ", enterpriseId=" + userGroup.getGroupId() + ", memberStatus=" + status);
                     }
                     continue;
