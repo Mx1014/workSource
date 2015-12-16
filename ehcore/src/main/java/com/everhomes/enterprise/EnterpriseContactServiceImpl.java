@@ -454,7 +454,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	
     @Override
 	public void createOrUpdateUserGroup(EnterpriseContact contact) {
-        UserGroup userGroup = userProvider.findUserGroupByOwnerAndGroup(contact.getId(), contact.getEnterpriseId());
+        UserGroup userGroup = userProvider.findUserGroupByOwnerAndGroup(contact.getUserId(), contact.getEnterpriseId());
         if(userGroup == null) {
             createUserGroup(contact);
         } else {
@@ -464,10 +464,10 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 
     private void createUserGroup(EnterpriseContact contact) {
         Long enterpriseId = contact.getEnterpriseId();
-        Long contactId = contact.getUserId();
+        Long contactUserId = contact.getUserId();
         
         UserGroup userGroup = new UserGroup();
-        userGroup.setOwnerUid(contactId);
+        userGroup.setOwnerUid(contactUserId);
         userGroup.setGroupDiscriminator(GroupDiscriminator.ENTERPRISE.getCode());
         userGroup.setGroupId(enterpriseId);
         userGroup.setMemberRole(contact.getRole());
@@ -477,8 +477,8 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
     
     private void updateUserGroupStatus(EnterpriseContact contact) {
         Long enterpriseId = contact.getEnterpriseId();
-        Long contactId = contact.getId();
-        UserGroup userGroup = userProvider.findUserGroupByOwnerAndGroup(contactId, enterpriseId);
+        Long contactUserId = contact.getUserId();
+        UserGroup userGroup = userProvider.findUserGroupByOwnerAndGroup(contactUserId, enterpriseId);
         userGroup.setMemberStatus(contact.getStatus());
         userProvider.updateUserGroup(userGroup);
     }
@@ -530,12 +530,12 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
             List<Long> contactIds = new ArrayList<Long>();
             contactIds.add(contact.getId());
             this.enterpriseContactProvider.deleteContactEntryByContactId(contactIds);
-            this.userProvider.deleteUserGroup(contact.getId(), contact.getEnterpriseId());
+            this.userProvider.deleteUserGroup(contact.getUserId(), contact.getEnterpriseId());
             return null;
         });
         
         if(LOGGER.isInfoEnabled()) {
-            LOGGER.info("Enterprise contact is deleted(pending), operatorUid=" + operatorUid + ", contactId=" + contact.getId() 
+            LOGGER.info("Enterprise contact is deleted(pending), operatorUid=" + operatorUid + ", contactUserId=" + contact.getUserId() 
                 + ", enterpriseId=" + contact.getEnterpriseId() + ", status=" + contact.getStatus() + ", removeFromDb=" + removeFromDb);
         }
     } 
