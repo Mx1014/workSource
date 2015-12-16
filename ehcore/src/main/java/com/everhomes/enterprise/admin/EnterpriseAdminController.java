@@ -20,6 +20,7 @@ import com.everhomes.enterprise.Enterprise;
 import com.everhomes.enterprise.EnterpriseApproveCommand;
 import com.everhomes.enterprise.EnterpriseDTO;
 import com.everhomes.enterprise.EnterpriseService;
+import com.everhomes.enterprise.ImportEnterpriseDataCommand;
 import com.everhomes.enterprise.ListEnterpriseByCommunityIdCommand;
 import com.everhomes.enterprise.ListEnterpriseResponse;
 import com.everhomes.enterprise.UpdateContactorCommand;
@@ -132,7 +133,7 @@ public class EnterpriseAdminController extends ControllerBase {
    
     @RequestMapping("importEnterpriseData")
     @RestReturn(value=ImportDataResponse.class)
-    public RestResponse importEnterpriseData(@RequestParam(value = "attachment") MultipartFile[] files){
+    public RestResponse importEnterpriseData(@Valid ImportEnterpriseDataCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
     	User manaUser = UserContext.current().getUser();
 		Long userId = manaUser.getId();
 		if(null == files || null == files[0]){
@@ -140,7 +141,7 @@ public class EnterpriseAdminController extends ControllerBase {
 			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
 					"files is null");
 		}
-		ImportDataResponse importDataResponse = this.enterpriseService.importEnterpriseData(files[0], userId);
+		ImportDataResponse importDataResponse = this.enterpriseService.importEnterpriseData(files[0], userId, cmd);
         RestResponse response = new RestResponse(importDataResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

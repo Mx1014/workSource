@@ -981,7 +981,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 
 	@Override
 	public ImportDataResponse importEnterpriseData(MultipartFile mfile,
-			Long userId) {
+			Long userId, ImportEnterpriseDataCommand cmd) {
 		ImportDataResponse importDataResponse = new ImportDataResponse();
 		try {
 			//解析excel
@@ -994,7 +994,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 			}
 			LOGGER.debug("Start import data...,total:" + resultList.size());
 			//导入数据，返回导入错误的日志数据集
-			List<String> errorDataLogs = importEnterprise(convertToStrList(resultList), userId);
+			List<String> errorDataLogs = importEnterprise(convertToStrList(resultList), userId, cmd);
 			LOGGER.debug("End import data...,fail:" + errorDataLogs.size());
 			if(null == errorDataLogs || errorDataLogs.isEmpty()){
 				LOGGER.debug("Data import all success...");
@@ -1038,8 +1038,10 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 		return result;
 	}
 	
-	private List<String> importEnterprise(List<String> list, Long userId){
+	private List<String> importEnterprise(List<String> list, Long userId, ImportEnterpriseDataCommand cmd){
 		List<String> errorDataLogs = new ArrayList<String>();
+		
+		Integer namespaceId = cmd.getNamespaceId() == null ? 0 : cmd.getNamespaceId();
 
 		User user = UserContext.current().getUser();
 		OrganizationDTO org = this.organizationService.getUserCurrentOrganization();
@@ -1056,6 +1058,8 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 				enterprise.setStatus(CommunityAdminStatus.ACTIVE.getCode());
 				
 				enterprise.setCreatorUid(userId);
+				
+				enterprise.setNamespaceId(namespaceId);
 				
 				LOGGER.info("add enterprise");
 				this.enterpriseProvider.createEnterprise(enterprise);
