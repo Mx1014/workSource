@@ -616,5 +616,23 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
         dao.update(ea);
 		
 	}
+
+	@Override
+	public EnterpriseAddress findEnterpriseAddressByAddressId(Long addressId) {
+		final EnterpriseAddress[] result = new EnterpriseAddress[1];
+
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhEnterpriseAddresses.class), result, 
+            (DSLContext context, Object reducingContext) -> {
+           	 context.select().from(Tables.EH_ENTERPRISE_ADDRESSES)
+       		 .where(Tables.EH_ENTERPRISE_ADDRESSES.ADDRESS_ID.eq(addressId))
+       		 .fetch().map(r ->{
+       			return result[0] = ConvertHelper.convert(r,EnterpriseAddress.class);
+       		});
+           	 return true;
+       				 
+            });
+        
+        return result[0];
+	}
 	
 }
