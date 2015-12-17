@@ -14,9 +14,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -52,11 +50,19 @@ import com.everhomes.auditlog.AuditLogProvider;
 import com.everhomes.category.CategoryConstants;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.CommunityType;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
+import com.everhomes.enterprise.EnterpriseAddress;
+import com.everhomes.enterprise.EnterpriseCommunityMap;
+import com.everhomes.enterprise.EnterpriseCommunityMapType;
+import com.everhomes.enterprise.EnterpriseContact;
+import com.everhomes.enterprise.EnterpriseContactEntry;
+import com.everhomes.enterprise.EnterpriseContactProvider;
+import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.family.ApproveMemberCommand;
 import com.everhomes.family.Family;
 import com.everhomes.family.FamilyBillingAccount;
@@ -88,6 +94,7 @@ import com.everhomes.group.Group;
 import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.messaging.MessageBodyType;
 import com.everhomes.messaging.MessageChannel;
 import com.everhomes.messaging.MessageDTO;
@@ -122,11 +129,11 @@ import com.everhomes.organization.OrganizationType;
 import com.everhomes.organization.PaidType;
 import com.everhomes.organization.TxType;
 import com.everhomes.organization.VendorType;
-import com.everhomes.organization.pm.pay.BaseVo;
-import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.organization.pm.pay.ResultHolder;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
+import com.everhomes.techpark.company.ContactType;
 import com.everhomes.user.IdentifierType;
 import com.everhomes.user.MessageChannelType;
 import com.everhomes.user.SetCurrentCommunityCommand;
@@ -217,6 +224,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Autowired
 	private AuditLogProvider auditLogProvider;
+	
+	@Autowired
+	private EnterpriseProvider enterpriseProvider;
+	
+	@Autowired
+	private EnterpriseContactProvider enterpriseContactProvider;
 
 	@Override
 	public void applyPropertyMember(applyPropertyMemberCommand cmd) {
@@ -1108,9 +1121,126 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Override
 	public void sendNoticeToFamily(PropCommunityBuildAddessCommand cmd) {
-		Long communityId = cmd.getCommunityId();
+		
 		this.checkCommunityIdIsNull(cmd.getCommunityId());
-		this.checkCommunity(cmd.getCommunityId());
+		Community community = this.checkCommunity(cmd.getCommunityId());
+		if(community.getCommunityType() == CommunityType.RESIDENTIAL.getCode()) {
+			sendNoticeToCommunityPmOwner(cmd);
+		} 
+		
+		else if(community.getCommunityType() == CommunityType.COMMERCIAL.getCode()) {
+			sendNoticeToEnterpriseContactor(cmd);
+		}
+		
+	}
+	
+	public void sendNoticeToEnterpriseContactor(PropCommunityBuildAddessCommand cmd) {
+		
+		Long communityId = cmd.getCommunityId();
+		List<String> buildingNames = cmd.getBuildingNames();
+		List<Long> addressIds = cmd.getAddressIds();
+		
+		List<Long> enterpriseIds = new ArrayList<Long>();
+		List<EnterpriseContact> contacts = new ArrayList<EnterpriseContact>();
+		
+		//按园区发送: buildingNames 和 addressIds 为空。
+		if((buildingNames == null || buildingNames.size() == 0) && (addressIds == null || addressIds.size() == 0)){
+			List<EnterpriseCommunityMap> enterpriseMapList = enterpriseProvider.queryEnterpriseMapByCommunityId(new ListingLocator(), 
+		            communityId, Integer.MAX_VALUE - 1, (loc, query) -> {
+		                query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.COMMUNITY_ID.eq(communityId));
+		                query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_TYPE.eq(EnterpriseCommunityMapType.Enterprise.getCode()));
+		                return null;
+		            });
+			if(enterpriseMapList != null && enterpriseMapList.size() > 0) {
+				for(EnterpriseCommunityMap enterpriseMap : enterpriseMapList) {
+					enterpriseIds.add(enterpriseMap.getMemberId());
+					List<EnterpriseContact> contactList = enterpriseContactProvider.queryContactByEnterpriseId(new ListingLocator(), 
+							enterpriseMap.getMemberId(), Integer.MAX_VALUE - 1, null);
+					contacts.addAll(contactList);
+				}
+			}
+		}
+		
+		//按地址发送：
+		else if(addressIds != null && addressIds.size()  > 0){
+			for (Long addressId : addressIds) {
+				EnterpriseAddress enterpriseAddress = enterpriseProvider.findEnterpriseAddressByAddressId(addressId);
+				if(enterpriseAddress != null) {
+					enterpriseIds.add(enterpriseAddress.getEnterpriseId());
+					List<EnterpriseContact> contactList = enterpriseContactProvider.queryContactByEnterpriseId(new ListingLocator(), 
+							enterpriseAddress.getEnterpriseId(), Integer.MAX_VALUE - 1, null);
+					contacts.addAll(contactList);
+				}
+			}
+		}
+		
+		//按楼栋发送：
+		else if((addressIds == null || addressIds.size()  == 0 )  && (buildingNames != null && buildingNames.size() > 0)){
+			for (String buildingName : buildingNames) {
+				List<ApartmentDTO> addresses =  addressProvider.listApartmentsByBuildingName(communityId, buildingName, 1, Integer.MAX_VALUE);
+				if(addresses != null && addresses.size() > 0){
+					for (ApartmentDTO address : addresses) {
+						EnterpriseAddress enterpriseAddress = enterpriseProvider.findEnterpriseAddressByAddressId(address.getAddressId());
+						if(enterpriseAddress != null) {
+							enterpriseIds.add(enterpriseAddress.getEnterpriseId());
+							List<EnterpriseContact> contactList = enterpriseContactProvider.queryContactByEnterpriseId(new ListingLocator(), 
+									enterpriseAddress.getEnterpriseId(), Integer.MAX_VALUE - 1, null);
+							contacts.addAll(contactList);
+						}
+					}
+				}
+			}
+		}
+		
+//		if(enterpriseIds != null && enterpriseIds.size() > 0){
+//			for (Long enterpriseId : enterpriseIds) {
+//				sendNoticeToFamilyById(enterpriseId, cmd.getMessage());
+//			}
+//		}
+
+		processCommunityEnterpriseContactor(communityId,contacts,cmd.getMessage());
+	}
+	
+	private void processCommunityEnterpriseContactor(Long communityId,List<EnterpriseContact> contacts,String message) {
+
+        List<String> phones = new ArrayList<String>();
+		List<Long> userIds = new ArrayList<Long>();
+		if(contacts != null && contacts.size() > 0){
+			for (EnterpriseContact contact : contacts) {
+
+				if(contact.getUserId() == 0){// 不是user，发短信
+					List<EnterpriseContactEntry> entries = enterpriseContactProvider.queryContactEntryByContactId(contact, ContactType.MOBILE.getCode());
+					if(entries != null && entries.size() > 0) {
+						phones.add(entries.get(0).getEntryValue());
+					}
+					
+				}
+				else{//是user，发个人消息
+					userIds.add(contact.getUserId());
+					
+				}
+			}
+		}
+
+		//是user，发个人信息.
+		if(userIds != null && userIds.size() > 0){
+			for (Long userId : userIds) {
+				sendNoticeToUserById(userId, message);
+			}
+		}
+
+		//不是user，发短信。
+		if(phones != null && phones.size() > 0 ){
+			for (String phone : phones) {
+				smsProvider.sendSms(phone, message);
+			}
+		}
+
+	}
+	
+	public void sendNoticeToCommunityPmOwner(PropCommunityBuildAddessCommand cmd) {
+		
+		Long communityId = cmd.getCommunityId();
 		Organization org = this.checkOrganizationByCommIdAndOrgType(communityId, OrganizationType.PM.getCode());
 		Long orgId = org.getId();
 
