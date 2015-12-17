@@ -762,16 +762,26 @@ public class RentalServiceImpl implements RentalService {
 	void mappingRentalBillDTO(RentalBillDTO dto, RentalBill bill) {
 		RentalSite rs = rentalProvider
 				.getRentalSiteById(bill.getRentalSiteId());
+		RentalRule rr=rentalProvider.getRentalRule(bill.getOwnerId(), bill.getOwnerType(), bill.getSiteType());
 		dto.setSiteName(rs.getSiteName());
 		dto.setBuildingName(rs.getBuildingName());
-		dto.setAddress(rs.getAddress());
+		if(StringUtils.isEmpty( rs.getAddress())){
+			dto.setAddress(rr.getContactAddress());
+		}else{
+			dto.setAddress(rs.getAddress());
+		}
+		if(StringUtils.isEmpty( rs.getContactPhonenum())){
+			dto.setContactPhonenum(rr.getContactNum());
+		}else{
+			dto.setContactPhonenum(rs.getContactPhonenum());
+		}
 		dto.setSpec(rs.getSpec());
 		dto.setCompanyName(rs.getOwnCompanyName());
 		dto.setContactName(rs.getContactName());
 		if(rs.getOwnerType().equals(RentalOwnerType.COMMUNITY.getCode())){
 			dto.setCommunityId(rs.getOwnerId());
 		}
-		dto.setContactPhonenum(rs.getContactPhonenum());
+		
 		dto.setNotice(rs.getNotice());
 		dto.setIntroduction(rs.getIntroduction());
 		dto.setRentalBillId(bill.getId());
