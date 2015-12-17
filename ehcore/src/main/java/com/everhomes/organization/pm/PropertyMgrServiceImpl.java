@@ -133,7 +133,10 @@ import com.everhomes.organization.pm.pay.ResultHolder;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
+<<<<<<< HEAD
 import com.everhomes.sms.SmsTemplateCode;
+=======
+>>>>>>> add sendNoticeToEnterpriseContactor
 import com.everhomes.techpark.company.ContactType;
 import com.everhomes.user.IdentifierType;
 import com.everhomes.user.MessageChannelType;
