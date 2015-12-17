@@ -127,16 +127,18 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     @Autowired
     private UserProvider userProvider;
     
+    
     @Override
     public List<Enterprise> listEnterpriseByCommunityId(ListingLocator locator,String enterpriseName, Long communityId, Integer status, int pageSize) {
     	List<Enterprise> enterprises = new ArrayList<Enterprise>();
+    	List<Enterprise> enters = new ArrayList<Enterprise>();
     	Long groupId = null;
     	if(!org.springframework.util.StringUtils.isEmpty(enterpriseName)){
     		Enterprise enterprise = new Enterprise();
     		enterprise.setName(enterpriseName);;
-    		enterprises = enterpriseProvider.listEnterprisesByName(new CrossShardListingLocator(), 10000, enterprise);
-    		if(enterprises.size() > 0)
-    			groupId = enterprises.get(0).getId();
+    		enters = enterpriseProvider.listEnterprisesByName(new CrossShardListingLocator(), 10000, enterprise);
+    		if(enters.size() > 0)
+    			groupId = enters.get(0).getId();
     	}
     	
     	Long enterpriseId = groupId;
@@ -167,6 +169,10 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 	            	enterprises.add(enterprise);
 	            }
 	            
+    		}
+    	}else{
+    		if(enterpriseMaps.size() > 0 && enters.size() > 0){
+    			enterprises.add(enters.get(0));
     		}
     	}
        
@@ -278,6 +284,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 	        	}
 	        	enterprise.setAddress(address);
 	        }
+	        enterpriseSearcher.feedDoc(enterprise);
 	        return null;
         });
         
@@ -988,6 +995,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 			
 			List<Long> contactIds = this.enterpriseContactProvider.deleteContactByEnterpriseId(cmd.getEnterpriseId());
 			this.enterpriseContactProvider.deleteContactEntryByContactId(contactIds);
+			enterpriseSearcher.deleteById(cmd.getEnterpriseId());
 		}
 	}
 
@@ -1085,6 +1093,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 				//userId查communityId
 				command.setCommunityId(org.getCommunityId());
 				updateContactor(command);
+				enterpriseSearcher.feedDoc(enterprise);
 				return null;
 			});
 		}
