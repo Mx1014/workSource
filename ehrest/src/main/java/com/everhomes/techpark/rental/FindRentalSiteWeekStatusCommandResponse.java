@@ -11,6 +11,7 @@ public class FindRentalSiteWeekStatusCommandResponse {
 	private Long ownerId;
 	private String ownerName;
 	private String siteType;
+	private String contactNum;
 	private String siteName; 
 	private String introduction;
 	private String notice; 
@@ -107,6 +108,16 @@ public class FindRentalSiteWeekStatusCommandResponse {
 
 	public void setOwnerName(String ownerName) {
 		this.ownerName = ownerName;
+	}
+
+
+	public String getContactNum() {
+		return contactNum;
+	}
+
+
+	public void setContactNum(String contactNum) {
+		this.contactNum = contactNum;
 	}
  
 

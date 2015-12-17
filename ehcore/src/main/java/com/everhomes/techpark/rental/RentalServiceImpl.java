@@ -1433,7 +1433,7 @@ public class RentalServiceImpl implements RentalService {
 		RentalRule rentalRule = rentalProvider.getRentalRule(
 				cmd.getOwnerId(),cmd.getOwnerType(), cmd.getSiteType());
 		java.util.Date nowTime = new java.util.Date();
-		
+		response.setContactNum(rentalRule.getContactNum());
 		Timestamp beginTime = new Timestamp(nowTime.getTime()
 				+ rentalRule.getRentalStartTime());
 		Calendar start = Calendar.getInstance();
