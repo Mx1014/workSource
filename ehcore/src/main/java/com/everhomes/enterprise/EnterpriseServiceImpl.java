@@ -151,7 +151,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
                     SelectQuery<? extends Record> query) {
                 query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.COMMUNITY_ID.eq(communityId));
                 query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_TYPE.eq(EnterpriseCommunityMapType.Enterprise.getCode()));
-                query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_STATUS.ne(EnterpriseCommunityMapStatus.Inactive.getCode()));
+                query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_STATUS.ne(EnterpriseCommunityMapStatus.INACTIVE.getCode()));
                 if(null != enterpriseId)
                 	query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_ID.eq(enterpriseId));
                 if(status != null) {
@@ -587,6 +587,8 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         List<EnterpriseCommunityMap> enterpriseMapList = this.enterpriseProvider.queryEnterpriseMapByCommunityId(locator, 
             communityId, Integer.MAX_VALUE - 1, (loc, query) -> {
             query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.COMMUNITY_ID.eq(communityId));
+            // 包含已经审核和待审核的
+            query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_STATUS.ne(EnterpriseCommunityMapStatus.INACTIVE.getCode()));
             return null;
         });
         
@@ -600,7 +602,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         ec.setCreatorUid(admin.getId());
         ec.setMemberId(enterpriseId);
         ec.setMemberType(EnterpriseCommunityMapType.Enterprise.getCode());
-        ec.setMemberStatus(EnterpriseCommunityMapStatus.Approving.getCode());
+        ec.setMemberStatus(EnterpriseCommunityMapStatus.WAITING_FOR_APPROVAL.getCode());
         ec.setApproveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         this.enterpriseProvider.createEnterpriseCommunityMap(ec);
     }
@@ -608,7 +610,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     @Override
     public void approve(User admin, Long enterpriseId, Long communityId) {
         EnterpriseCommunityMap ec = this.enterpriseProvider.findEnterpriseCommunityByEnterpriseId(enterpriseId, communityId);
-        ec.setMemberStatus(EnterpriseCommunityMapStatus.Approved.getCode());
+        ec.setMemberStatus(EnterpriseCommunityMapStatus.ACTIVE.getCode());
         ec.setOperatorUid(admin.getId());
         this.enterpriseProvider.updateEnterpriseCommunityMap(ec);        
     }
@@ -616,7 +618,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     @Override
     public void reject(User admin, Long enterpriseId, Long communityId) {
         EnterpriseCommunityMap ec = this.enterpriseProvider.findEnterpriseCommunityByEnterpriseId(enterpriseId, communityId);
-        ec.setMemberStatus(EnterpriseCommunityMapStatus.Inactive.getCode());
+        ec.setMemberStatus(EnterpriseCommunityMapStatus.INACTIVE.getCode());
         ec.setOperatorUid(admin.getId());
         this.enterpriseProvider.updateEnterpriseCommunityMap(ec);        
     }
@@ -634,7 +636,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         ec.setCreatorUid(UserContext.current().getUser().getId());
         ec.setMemberId(enterpriseId);
         ec.setMemberType(EnterpriseCommunityMapType.Enterprise.getCode());
-        ec.setMemberStatus(EnterpriseCommunityMapStatus.Inviting.getCode());
+        ec.setMemberStatus(EnterpriseCommunityMapStatus.WAITING_FOR_ACCEPTANCE.getCode());
         ec.setApproveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         this.enterpriseProvider.createEnterpriseCommunityMap(ec);
     }
@@ -971,7 +973,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 	public void deleteEnterprise(DeleteEnterpriseCommand cmd) {
 		EnterpriseCommunityMap ec = this.enterpriseProvider.findEnterpriseCommunityByEnterpriseId(cmd.getCommunityId(), cmd.getEnterpriseId());
 		if(ec != null) {
-			ec.setMemberStatus(EnterpriseCommunityMapStatus.Inactive.getCode());
+			ec.setMemberStatus(EnterpriseCommunityMapStatus.INACTIVE.getCode());
 			this.enterpriseProvider.updateEnterpriseCommunityMap(ec);
 	
 			List<EnterpriseAddress> eas = this.enterpriseProvider.findEnterpriseAddressByEnterpriseId(cmd.getEnterpriseId());
