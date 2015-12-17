@@ -289,6 +289,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 	        	enterprise.setAddress(address);
 	        }
 
+	        
 	        enterpriseSearcher.feedDoc(enterprise);
 	        return null;
         });
