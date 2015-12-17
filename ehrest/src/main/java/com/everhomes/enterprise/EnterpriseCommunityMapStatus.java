@@ -1,7 +1,7 @@
 package com.everhomes.enterprise;
 
 public enum EnterpriseCommunityMapStatus {
-    Inviting((byte)3), Approving((byte)2), Approved((byte)1), Inactive((byte)0);
+    INACTIVE((byte)0), WAITING_FOR_APPROVAL((byte)1), WAITING_FOR_ACCEPTANCE((byte)2), ACTIVE((byte)3);
     
     private byte code;
     private EnterpriseCommunityMapStatus(byte code) {
