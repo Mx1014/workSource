@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-12-15 20:32:23
+// generated at 2015-12-17 13:23:15
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -82,6 +82,7 @@ public interface ApiConstants {
     public static final String ADMIN_CONTACT_CREATECONTACT_URL = "/admin/contact/createContact";
     public static final String ADMIN_CONTACT_CREATECONTACTENTRY_URL = "/admin/contact/createContactEntry";
     public static final String ADMIN_CONTACT_LISTAPROVINGCONTACT_URL = "/admin/contact/listAprovingContact";
+    public static final String ADMIN_CONTACT_SYNCCONTACT_URL = "/admin/contact/syncContact";
     public static final String ADMIN_CREATEAPP_URL = "/admin/createApp";
     public static final String ADMIN_ENTERPRISE_APPROVE_URL = "/admin/enterprise/approve";
     public static final String ADMIN_ENTERPRISE_CREATEENTERPRISE_URL = "/admin/enterprise/createEnterprise";
@@ -645,6 +646,7 @@ public interface ApiConstants {
     public static final String USER_VERIFYANDLOGONBYIDENTIFIER_URL = "/user/verifyAndLogonByIdentifier";
     public static final String VERSION_GETUPGRADEINFO_URL = "/version/getUpgradeInfo";
     public static final String VERSION_GETVERSIONURLS_URL = "/version/getVersionUrls";
+    public static final String VERSION_GETVERSIONURLSWITHOUTCURRENTVERSION_URL = "/version/getVersionUrlsWithoutCurrentVersion";
     public static final String VERSION_GETVERSIONEDCONTENT_URL = "/version/getVersionedContent";
     public static final String YELLOWPAGE_ADDYELLOWPAGE_URL = "/yellowPage/addYellowPage";
     public static final String YELLOWPAGE_DELETEYELLOWPAGE_URL = "/yellowPage/deleteYellowPage";
