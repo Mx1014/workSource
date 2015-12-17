@@ -243,7 +243,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 	        enterpriseCommunityMap.setCommunityId(cmd.getCommunityId());
 	        enterpriseCommunityMap.setMemberType(EnterpriseCommunityMapType.Enterprise.getCode());
 	        enterpriseCommunityMap.setMemberId(enterprise.getId());
-	        enterpriseCommunityMap.setMemberStatus(EnterpriseCommunityMapStatus.Approving.getCode());
+	        enterpriseCommunityMap.setMemberStatus(EnterpriseCommunityMapStatus.ACTIVE.getCode());
 	        enterpriseCommunityMap.setCreatorUid(userId);
 	        enterpriseCommunityMap.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 	        enterpriseCommunityMap.setApproveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));

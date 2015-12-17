@@ -60,6 +60,7 @@ import com.everhomes.user.IdentifierType;
 import com.everhomes.user.MessageChannelType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserGender;
 import com.everhomes.user.UserGroup;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
@@ -591,7 +592,11 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	@Override
 	public List<EnterpriseContactDetail> listContactByEnterpriseId(
 			ListingLocator locator, Long enterpriseId, Integer pageSize,String keyWord) {
-
+		Enterprise enterprise = this.enterpriseProvider.getEnterpriseById(enterpriseId);
+		if(null==enterprise){
+			 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+	                    "Enterprise id is wrong");
+		}
 		if (locator.getAnchor() == null)
 			locator.setAnchor(0L);
 //		int count = PaginationConfigHelper
@@ -633,6 +638,10 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 				if(null != user){
 					detail.setAvatar(user.getAvatar());
 				}
+				else{
+					detail.setAvatar(userService.getUserAvatarUriByGender(contact.getUserId(), enterprise.getNamespaceId(), UserGender.UNDISCLOSURED.getCode()));
+				}
+				
 				
 			}
 				
