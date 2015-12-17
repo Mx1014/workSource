@@ -11,6 +11,7 @@ public class BuildingForRentDTO {
 	private Integer  namespaceId;
 	private Long     communityId;
 	private Long     buildingId;
+	private String buildingName;
 	private String   rentPosition;
 	private String   rentType;
 	private String   posterUri;
@@ -22,6 +23,10 @@ public class BuildingForRentDTO {
 	private String   description;
 	private Timestamp enterTime;
 	private Byte     status;
+	private String address;
+	private Double longitude;
+	
+	private Double latitude;
 	
 	private Timestamp createTime;
 	@ItemType(BuildingForRentAttachmentDTO.class)
@@ -49,6 +54,15 @@ public class BuildingForRentDTO {
 
 	public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
+	}
+	
+
+	public String getBuildingName() {
+		return buildingName;
+	}
+
+	public void setBuildingName(String buildingName) {
+		this.buildingName = buildingName;
 	}
 
 	public Long getBuildingId() {
@@ -161,6 +175,30 @@ public class BuildingForRentDTO {
 
 	public void setAttachments(List<BuildingForRentAttachmentDTO> attachments) {
 		this.attachments = attachments;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	public Double getLongitude() {
+		return longitude;
+	}
+
+	public void setLongitude(Double longitude) {
+		this.longitude = longitude;
+	}
+
+	public Double getLatitude() {
+		return latitude;
+	}
+
+	public void setLatitude(Double latitude) {
+		this.latitude = latitude;
 	}
 	
 	

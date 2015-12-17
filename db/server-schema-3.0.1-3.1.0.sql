@@ -513,6 +513,7 @@ CREATE TABLE `eh_lease_promotion_attachments` (
 	PRIMARY KEY (`id`) 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+
 ALTER TABLE `eh_activities` ADD COLUMN `guest` VARCHAR(2048) ;
 
 -- 20151130
@@ -535,5 +536,6 @@ ALTER TABLE `eh_enterprise_op_requests` MODIFY COLUMN apply_user_name VARCHAR(12
 ALTER TABLE `eh_version_realm` DROP COLUMN `namespace_id`;
 ALTER TABLE `eh_version_upgrade_rules` DROP COLUMN `namespace_id`;
 
+ALTER TABLE `eh_forum_posts` ADD COLUMN `tag` VARCHAR(32);
 
 SET foreign_key_checks = 1;

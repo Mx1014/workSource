@@ -3114,14 +3114,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 			return response;
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		Integer offset = cmd.getPageOffset() == null ? 0 : (cmd.getPageOffset() - 1 ) * pageSize;
 		
-		List<OrganizationMember> organizationMembers = this.organizationProvider.listParentOrganizationMembers(org.getPath(), offset, pageSize + 1);
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		List<OrganizationMember> organizationMembers = this.organizationProvider.listParentOrganizationMembers(org.getPath(), locator, pageSize);
 		
-		if(organizationMembers != null && organizationMembers.size() > pageSize) {
-			organizationMembers.remove(organizationMembers.size() - 1);
-			response.setNextPageOffset(cmd.getPageOffset() + 1);
-		}
+		response.setNextPageAnchor(locator.getAnchor());
 		
 		response.setMembers(organizationMembers.stream().map((c) ->{
 			return ConvertHelper.convert(c, OrganizationMemberDTO.class);

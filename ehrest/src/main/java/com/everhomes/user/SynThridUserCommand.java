@@ -33,7 +33,9 @@ public class SynThridUserCommand {
 	
 	private String userName;
     
-    private String deviceIdentifier;
+   private String deviceIdentifier;
+    
+    private String pusherIdentify;
 
 	public String getNamespaceUserToken() {
         return namespaceUserToken;
@@ -99,7 +101,15 @@ public class SynThridUserCommand {
 		this.deviceIdentifier = deviceIdentifier;
 	}
 
-	@Override
+	public String getPusherIdentify() {
+        return pusherIdentify;
+    }
+
+    public void setPusherIdentify(String pusherIdentify) {
+        this.pusherIdentify = pusherIdentify;
+    }
+
+    @Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}

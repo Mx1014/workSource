@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-12-11 21:00:02
+// generated at 2015-12-15 20:32:23
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -293,6 +293,7 @@ public interface ApiConstants {
     public static final String ENTERPRISE_INVITETOJOINCOMMUNITY_URL = "/enterprise/inviteToJoinCommunity";
     public static final String ENTERPRISE_LISTENTERPRISEBYCOMMUNITYID_URL = "/enterprise/listEnterpriseByCommunityId";
     public static final String ENTERPRISE_LISTENTERPRISEBYPHONE_URL = "/enterprise/listEnterpriseByPhone";
+    public static final String ENTERPRISE_LISTUSERRELATEDENTERPRISES_URL = "/enterprise/listUserRelatedEnterprises";
     public static final String ENTERPRISE_REQUESTTOJOINCOMMUNITY_URL = "/enterprise/requestToJoinCommunity";
     public static final String ENTERPRISE_SEARCHCOMMUNITIES_URL = "/enterprise/searchCommunities";
     public static final String ENTERPRISE_SEARCHENTERPRISE_URL = "/enterprise/searchEnterprise";
@@ -324,6 +325,7 @@ public interface ApiConstants {
     public static final String FLEAMARKET_POST_URL = "/fleamarket/post";
     public static final String FLEAMARKET_UPDATE_URL = "/fleamarket/update";
     public static final String FORUM_CANCELLIKETOPIC_URL = "/forum/cancelLikeTopic";
+    public static final String FORUM_CHECKUSERPOSTSTATUS_URL = "/forum/checkUserPostStatus";
     public static final String FORUM_DELETECOMMENT_URL = "/forum/deleteComment";
     public static final String FORUM_DELETETOPIC_URL = "/forum/deleteTopic";
     public static final String FORUM_GETTOPIC_URL = "/forum/getTopic";

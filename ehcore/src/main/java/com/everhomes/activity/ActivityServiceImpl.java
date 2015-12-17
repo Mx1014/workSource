@@ -28,7 +28,6 @@ import com.everhomes.category.Category;
 import com.everhomes.category.CategoryAdminStatus;
 import com.everhomes.category.CategoryConstants;
 import com.everhomes.category.CategoryProvider;
-import com.everhomes.community.CommunityAppType;
 import com.everhomes.community.CommunityGeoPoint;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -40,11 +39,14 @@ import com.everhomes.family.Family;
 import com.everhomes.family.FamilyDTO;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.forum.Attachment;
-import com.everhomes.forum.ForumNotificationTemplateCode;
+import com.everhomes.forum.AttachmentDTO;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
+import com.everhomes.forum.ListActivityTopicByCategoryAndTagCommand;
+import com.everhomes.forum.ListPostCommandResponse;
 import com.everhomes.forum.Post;
 import com.everhomes.forum.PostContentType;
+import com.everhomes.forum.PostDTO;
 import com.everhomes.group.GroupService;
 import com.everhomes.group.LeaveGroupCommand;
 import com.everhomes.group.RejectJoinGroupRequestCommand;
@@ -1256,61 +1258,119 @@ public class ActivityServiceImpl implements ActivityService {
         return new Tuple<Long, List<ActivityDTO>>(locator.getAnchor(), activityDtos);
 	}
 	
+//	@Override
+//	public Tuple<Long, List<ActivityDTO>> listActivitiesByNamespaceIdAndTag(
+//			ListActivitiesByNamespaceIdAndTagCommand cmd) {
+//		 
+//		CrossShardListingLocator locator=new CrossShardListingLocator();
+//		
+//        if(null !=cmd.getAnchor()){
+//            locator.setAnchor(cmd.getAnchor());
+//        }
+//        Condition condtion = Tables.EH_ACTIVITIES.NAMESPACE_ID.eq(cmd.getNamespaceId());
+//        
+//        if(!StringUtils.isEmpty(cmd.getTag())){
+//            condtion= condtion.and(Tables.EH_ACTIVITIES.TAG.eq(cmd.getTag()));
+//        }
+//
+//        int value=configurationProvider.getIntValue("pagination.page.size", AppConstants.PAGINATION_DEFAULT_SIZE);
+//        
+//        List<Activity> ret = activityProvider.listActivities(locator, value+1,condtion,Operator.OR, null);
+//        
+//        List<ActivityDTO> activityDtos = ret.stream().map(activity->{
+//            Post post = forumProvider.findPostById(activity.getPostId());
+//            if(post==null){
+//                return null;
+//            }
+//            if(activity.getPosterUri()==null){
+//            	this.forumProvider.populatePostAttachments(post);
+//            	List<Attachment> attachmentList = post.getAttachments();
+//            	if(attachmentList != null && attachmentList.size() != 0){
+//            		for(Attachment attachment : attachmentList){
+//            			if(PostContentType.IMAGE.getCode().equals(attachment.getContentType()))
+//            				activity.setPosterUri(attachment.getContentUri());
+//            			break;
+//            		}
+//            	}
+//            }
+//            ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+//            dto.setActivityId(activity.getId());
+//            dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
+//            dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+//            dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
+//            dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
+//            dto.setProcessStatus(getStatus(activity).getCode());
+//            dto.setFamilyId(activity.getCreatorFamilyId());
+//            dto.setStartTime(activity.getStartTime().toString());
+//            dto.setStopTime(activity.getEndTime().toString());
+//            dto.setGroupId(activity.getGroupId());
+//            dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
+//            dto.setForumId(post.getForumId());
+//            dto.setGuest(activity.getGuest());
+//            return dto;
+//        }).filter(r->r!=null).collect(Collectors.toList());
+//        if(activityDtos.size()<value){
+//            locator.setAnchor(null);
+//        }
+//        return new Tuple<Long, List<ActivityDTO>>(locator.getAnchor(), activityDtos);
+//	}
 	@Override
-	public Tuple<Long, List<ActivityDTO>> listActivitiesByNamespaceIdAndTag(
-			ListActivitiesByNamespaceIdAndTagCommand cmd) {
-		 
-		CrossShardListingLocator locator=new CrossShardListingLocator();
-		
-        if(null !=cmd.getAnchor()){
-            locator.setAnchor(cmd.getAnchor());
-        }
-        Condition condtion = Tables.EH_ACTIVITIES.NAMESPACE_ID.eq(cmd.getNamespaceId());
-        
-        if(!StringUtils.isEmpty(cmd.getTag())){
-            condtion= condtion.and(Tables.EH_ACTIVITIES.TAG.eq(cmd.getTag()));
-        }
-
-        int value=configurationProvider.getIntValue("pagination.page.size", AppConstants.PAGINATION_DEFAULT_SIZE);
-        
-        List<Activity> ret = activityProvider.listActivities(locator, value+1,condtion,Operator.OR, null);
-        
-        List<ActivityDTO> activityDtos = ret.stream().map(activity->{
-            Post post = forumProvider.findPostById(activity.getPostId());
-            if(post==null){
-                return null;
-            }
-            if(activity.getPosterUri()==null){
-            	this.forumProvider.populatePostAttachments(post);
-            	List<Attachment> attachmentList = post.getAttachments();
-            	if(attachmentList != null && attachmentList.size() != 0){
-            		for(Attachment attachment : attachmentList){
-            			if(PostContentType.IMAGE.getCode().equals(attachment.getContentType()))
-            				activity.setPosterUri(attachment.getContentUri());
-            			break;
-            		}
-            	}
-            }
-            ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
-            dto.setActivityId(activity.getId());
-            dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
-            dto.setEnrollUserCount(activity.getSignupAttendeeCount());
-            dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
-            dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
-            dto.setProcessStatus(getStatus(activity).getCode());
-            dto.setFamilyId(activity.getCreatorFamilyId());
-            dto.setStartTime(activity.getStartTime().toString());
-            dto.setStopTime(activity.getEndTime().toString());
-            dto.setGroupId(activity.getGroupId());
-            dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
-            dto.setForumId(post.getForumId());
-            dto.setGuest(activity.getGuest());
-            return dto;
-        }).filter(r->r!=null).collect(Collectors.toList());
-        if(activityDtos.size()<value){
-            locator.setAnchor(null);
-        }
-        return new Tuple<Long, List<ActivityDTO>>(locator.getAnchor(), activityDtos);
+	public ListActivitiesReponse listActivitiesByNamespaceIdAndTag(ListActivitiesByNamespaceIdAndTagCommand cmd) {
+		ListActivitiesReponse response = new ListActivitiesReponse(null, null);
+		ListActivityTopicByCategoryAndTagCommand command = new ListActivityTopicByCategoryAndTagCommand();
+		command.setCategoryId(cmd.getCategoryId());
+		command.setCommunityId(cmd.getCommunityId());
+		command.setPageAnchor(cmd.getPageAnchor());
+		command.setPageSize(cmd.getPageSize());
+		command.setTag(cmd.getTag());
+		ListPostCommandResponse post = forumService.listActivityPostByCategoryAndTag(command);
+	    if(post != null) {
+	    	response.setNextPageAnchor(post.getNextPageAnchor());
+	    	List<PostDTO> posts = post.getPosts();
+	    	if(posts != null) {
+	    		List<ActivityDTO> activityDtos = posts.stream().map(r -> {
+	    			Activity activity = activityProvider.findActivityById(r.getEmbeddedId());
+	    			if(activity != null) {
+		    			if(activity.getPosterUri()==null){
+		    	           
+		    				List<AttachmentDTO> attachmentList = r.getAttachments();
+				            if(attachmentList != null && attachmentList.size() != 0){
+				                for(AttachmentDTO attachment : attachmentList){
+				                    if(PostContentType.IMAGE.getCode().equals(attachment.getContentType()))
+				                    	activity.setPosterUri(attachment.getContentUri());
+				                    break;
+				                }
+				            }
+		    	        }
+		    			ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+		    			dto.setActivityId(activity.getId());
+		    	        dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
+		    	        dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+		    	        dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
+		    	        dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
+		    	        dto.setProcessStatus(getStatus(activity).getCode());
+		    	        dto.setFamilyId(activity.getCreatorFamilyId());
+		    	        dto.setStartTime(activity.getStartTime().toString());
+		    	        dto.setStopTime(activity.getEndTime().toString());
+		    	        dto.setGroupId(activity.getGroupId());
+		    	        dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
+		    	        dto.setForumId(r.getForumId());
+		    	        dto.setGuest(activity.getGuest());
+		    			
+		    			return dto;
+	    			}
+	    			else {
+	    				return null;
+	    			}
+	    		}).filter(r->r!=null).collect(Collectors.toList());
+	    		
+	    		response.setActivities(activityDtos);
+	    	}
+	    }
+	    
+	    
+	    
+	    return response;
 	}
 	
 }

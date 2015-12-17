@@ -29,6 +29,7 @@ import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupProvider;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.server.schema.Tables;
@@ -59,6 +60,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	
 	@Autowired
 	private CommunityProvider communityProvider;
+	
 
 	@Override
 	public ListEnterpriseDetailResponse listEnterpriseDetails(
@@ -102,8 +104,12 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		
 		for (Long enterpriseId : enterpriseIds) {
 			EnterpriseDetail enterpriseDetail = this.getEnterpriseDetailByEnterpriseId(enterpriseId);
-			if(null != enterpriseDetail)
-				dtos.add(toEnterpriseDetailDTO(enterpriseDetail));
+			if(null != enterpriseDetail){
+				EnterpriseDetailDTO dto = toEnterpriseDetailDTO(enterpriseDetail);
+				dto.setContactPhone(enterpriseDetail.getContact());
+				dtos.add(dto);
+			}
+				
 		}
 		
 		res.setNextPageAnchor(locator.getAnchor());
@@ -116,7 +122,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			GetEnterpriseDetailByIdCommand cmd) {
 		GetEnterpriseDetailByIdResponse res = new GetEnterpriseDetailByIdResponse();
 		EnterpriseDetail enterpriseDetail = this.getEnterpriseDetailByEnterpriseId(cmd.getId());
-		res.setDetail(toEnterpriseDetailDTO(enterpriseDetail));
+		EnterpriseDetailDTO dto = toEnterpriseDetailDTO(enterpriseDetail);
+		dto.setContactPhone(enterpriseDetail.getContact());
+		res.setDetail(dto);
 		return res;
 	}
 	
@@ -187,14 +195,11 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		EnterpriseOpRequest request = ConvertHelper.convert(cmd, EnterpriseOpRequest.class);
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		Integer offset = cmd.getPageAnchor() == null ? 0 : (cmd.getPageAnchor() - 1 ) * pageSize;
-		List<EnterpriseOpRequest> enterpriseOpRequests = enterpriseApplyEntryProvider.listApplyEntrys(request, offset, pageSize + 1);
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+	    locator.setAnchor(cmd.getPageAnchor());
+		List<EnterpriseOpRequest> enterpriseOpRequests = enterpriseApplyEntryProvider.listApplyEntrys(request, locator, pageSize);
 		
-		if(enterpriseOpRequests != null && enterpriseOpRequests.size() > pageSize) {
-			enterpriseOpRequests.remove(enterpriseOpRequests.size() - 1);
-			res.setNextPageAnchor(cmd.getPageAnchor() + 1);
-		}
-		
+		res.setNextPageAnchor(locator.getAnchor());
 		for (EnterpriseOpRequest enterpriseOpRequest : enterpriseOpRequests) {
 			if(ApplyEntrySourceType.BUILDING.getCode().equals(enterpriseOpRequest.getSourceType())){
 				Building building = communityProvider.findBuildingById(enterpriseOpRequest.getSourceId());
@@ -249,13 +254,13 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		
 		LeasePromotion lease = ConvertHelper.convert(cmd, LeasePromotion.class);
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		Integer offset = cmd.getPageAnchor() == null ? 0 : (cmd.getPageAnchor() - 1 ) * pageSize;
-		List<LeasePromotion> leasePromotions = enterpriseApplyEntryProvider.listLeasePromotions(lease, offset, pageSize + 1);
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+	    locator.setAnchor(cmd.getPageAnchor());
+	    
+		List<LeasePromotion> leasePromotions = enterpriseApplyEntryProvider.listLeasePromotions(lease, locator, pageSize);
 		
-		if(leasePromotions != null && leasePromotions.size() > pageSize) {
-			leasePromotions.remove(leasePromotions.size() - 1);
-			res.setNextPageAnchor(cmd.getPageAnchor() + 1);
-		}
+		res.setNextPageAnchor(locator.getAnchor());
+		
 		for (LeasePromotion leasePromotion : leasePromotions) {
 			leasePromotion.setPosterUrl(contentServerService.parserUri(leasePromotion.getPosterUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
 			List<LeasePromotionAttachment> attachments = leasePromotion.getAttachments();
@@ -263,6 +268,14 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				for (LeasePromotionAttachment leasePromotionAttachment : attachments) {
 					leasePromotionAttachment.setContentUrl(contentServerService.parserUri(leasePromotionAttachment.getContentUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
 				}
+			}
+			
+			Building building = communityProvider.findBuildingById(leasePromotion.getBuildingId());
+			if(null != building){
+				leasePromotion.setBuildingName(building.getName());
+				leasePromotion.setAddress(building.getAddress());
+				leasePromotion.setLatitude(building.getLatitude());
+				leasePromotion.setLongitude(building.getLongitude());
 			}
 				
 		}

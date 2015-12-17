@@ -13,6 +13,7 @@ import org.jooq.SelectConditionStep;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
@@ -150,7 +151,7 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
     }
     
     @Override
-    public List<Enterprise> queryEnterprises(CrossShardListingLocator locator, int count, ListingQueryBuilderCallback callback) {
+    public List<Enterprise> queryEnterprises(CrossShardListingLocator locator, int count, ListingQueryBuilderCallback callback, Enterprise enterprise) {
         List<Group> groups = this.queryGroupsWithOk(locator, count, new ListingQueryBuilderCallback() {
 
             @Override
@@ -159,6 +160,11 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
                 if(callback != null)
                     callback.buildCondition(locator, query);
                 query.addConditions(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.ENTERPRISE.getCode()));
+                if(null != enterprise){
+                	if(!StringUtils.isEmpty(enterprise.getName())){
+                		query.addConditions(Tables.EH_GROUPS.NAME.like(enterprise.getName() + "%"));
+                	}
+                }
                 return query;
             }
             
@@ -173,7 +179,12 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
     
     @Override
     public List<Enterprise> listEnterprises(CrossShardListingLocator locator, int count) {
-        return this.queryEnterprises(locator, count, null);
+        return this.queryEnterprises(locator, count, null, null);
+    }
+    
+    @Override
+    public List<Enterprise> listEnterprisesByName(CrossShardListingLocator locator, int count, Enterprise enterprise) {
+        return this.queryEnterprises(locator, count, null, enterprise);
     }
     
     @Override
@@ -247,25 +258,26 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
             , int count, ListingQueryBuilderCallback queryBuilderCallback) {
     	final List<EnterpriseCommunityMap> contacts = new ArrayList<EnterpriseCommunityMap>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class, comunityId));
- 
+        count = count + 1;
         SelectQuery<EhEnterpriseCommunityMapRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_COMMUNITY_MAP);
         if(queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
  
         if(locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.ID.gt(locator.getAnchor()));
-            }
-        
-        //query.addOrderBy(Tables.EH_ENTERPRISE_CONTACTS.CREATE_TIME.desc()); ERROR hear
-//        query.addLimit(count - contacts.size());
+            query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_ID.lt(locator.getAnchor()));
+        }
+        query.addGroupBy(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_ID);
+        query.addOrderBy(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_ID.desc());
+        query.addLimit(count - contacts.size());
         query.fetch().map((r) -> {
         	 contacts.add(ConvertHelper.convert(r, EnterpriseCommunityMap.class));
              return null;
         });
         
-//        if(contacts.size() >= count) {
-//            locator.setAnchor(contacts.get(contacts.size() - 1).getId());
-//        }
+        if(contacts.size() >= count) {
+        	contacts.remove(contacts.size() - 1);
+            locator.setAnchor(contacts.get(contacts.size() - 1).getMemberId());
+        }
         
         return contacts;
     }

@@ -44,4 +44,12 @@ public class VersionController extends ControllerBase {
         VersionUrlResponse cmdResponse = this.versionService.getVersionUrls(cmd);
         return new RestResponse(cmdResponse);
     }
+    
+    @RequestMapping("getVersionUrlsWithoutCurrentVersion")
+    @RestReturn(value=VersionUrlResponse.class)
+    public RestResponse getVersionUrlsWithoutCurrentVersion(@Valid WithoutCurrentVersionRequestCommand cmd) {
+
+        VersionUrlResponse cmdResponse = this.versionService.getVersionUrlsWithoutCurrentVersion(cmd);
+        return new RestResponse(cmdResponse);
+    }
 }

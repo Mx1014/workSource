@@ -15,7 +15,10 @@ import com.everhomes.util.StringHelper;
 public class ListOrganizationMemberCommand {
 	@NotNull
 	private Long    organizationId;
+	private Long pageAnchor;
+	
 	private Integer pageOffset;
+	
 	private Integer pageSize;
 	
 	public ListOrganizationMemberCommand() {
@@ -31,13 +34,12 @@ public class ListOrganizationMemberCommand {
 		this.organizationId = organizationId;
 	}
 
-
-	public Integer getPageOffset() {
-		return pageOffset;
+	public Long getPageAnchor() {
+		return pageAnchor;
 	}
 
-	public void setPageOffset(Integer pageOffset) {
-		this.pageOffset = pageOffset;
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
 	}
 
 	public Integer getPageSize() {
@@ -47,6 +49,18 @@ public class ListOrganizationMemberCommand {
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
 	}
+	
+	
+
+	public Integer getPageOffset() {
+		return pageOffset;
+	}
+
+
+	public void setPageOffset(Integer pageOffset) {
+		this.pageOffset = pageOffset;
+	}
+
 
 	@Override
     public String toString() {

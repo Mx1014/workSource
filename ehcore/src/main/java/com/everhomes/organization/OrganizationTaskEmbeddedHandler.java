@@ -12,6 +12,7 @@ import com.everhomes.app.AppConstants;
 import com.everhomes.category.CategoryConstants;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.forum.ForumEmbeddedHandler;
+import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.Post;
 import com.everhomes.forum.PostEntityTag;
 import com.everhomes.forum.PostPrivacy;
@@ -29,6 +30,9 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 
 	@Autowired
 	private OrganizationProvider organizationProvider;
+	
+	@Autowired
+	private ForumProvider forumProvider;
 
 	@Override
 	public String renderEmbeddedObjectSnapshot(Post post) {

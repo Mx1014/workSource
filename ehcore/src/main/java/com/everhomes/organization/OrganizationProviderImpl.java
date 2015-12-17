@@ -28,6 +28,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
@@ -1181,9 +1182,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
 	@Override
-	public List<OrganizationMember> listParentOrganizationMembers(String superiorPath, Integer offset,Integer pageSize) {
+	public List<OrganizationMember> listParentOrganizationMembers(String superiorPath, CrossShardListingLocator locator,Integer pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		
+		pageSize = pageSize + 1;
 		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
 		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
 		query.addConditions(
@@ -1191,12 +1192,19 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 						context.select(Tables.EH_ORGANIZATIONS.ID).from(Tables.EH_ORGANIZATIONS)
 						.where(Tables.EH_ORGANIZATIONS.PATH.like(superiorPath + "/%")
 								.or(Tables.EH_ORGANIZATIONS.PATH.eq(superiorPath)))));
+		if(null != locator.getAnchor())
+			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ID.lt(locator.getAnchor()));
 		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
-		query.addLimit(offset.intValue(), pageSize);
+		query.addLimit(pageSize);
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, OrganizationMember.class));
 			return null;
 		});
+		
+		if(result.size() >= pageSize){
+			result.remove(result.size() - 1);
+			locator.setAnchor(result.get(result.size() - 1).getId());
+		}
 		return result;
 	}
 	

@@ -38,8 +38,10 @@ public class CreateEnterpriseCommand {
     private String enterpriseAddress;
     private String enterpriseCheckinDate;
     private String postUri;
-	@ItemType(Long.class)
-    private List<Long> addressId;
+    private Integer namespaceId;
+    
+    @ItemType(EnterpriseAddressDTO.class)
+	private List<EnterpriseAddressDTO> addressDTOs;
     
     @ItemType(AttachmentDescriptor.class)
     private List<AttachmentDescriptor> attachments;
@@ -116,17 +118,24 @@ public class CreateEnterpriseCommand {
     public void setDescription(java.lang.String description) {
         this.description = description;
     }
-	public List<Long> getAddressId() {
-		return addressId;
+    
+	public List<EnterpriseAddressDTO> getAddressDTOs() {
+		return addressDTOs;
 	}
-	public void setAddressId(List<Long> addressId) {
-		this.addressId = addressId;
+	public void setAddressDTOs(List<EnterpriseAddressDTO> addressDTOs) {
+		this.addressDTOs = addressDTOs;
 	}
 	public String getPostUri() {
 		return postUri;
 	}
 	public void setPostUri(String postUri) {
 		this.postUri = postUri;
+	}
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
     
 }

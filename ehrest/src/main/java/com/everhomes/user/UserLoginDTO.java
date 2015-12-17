@@ -16,6 +16,8 @@ public class UserLoginDTO {
     private Long portalRole;
     
     private Long partnerId;
+    
+    private String pusherIdentify;
 
     public UserLoginDTO() {
     }
@@ -100,6 +102,14 @@ public class UserLoginDTO {
         this.partnerId = partnerId;
     }
     
+    public String getPusherIdentify() {
+        return pusherIdentify;
+    }
+
+    public void setPusherIdentify(String pusherIdentify) {
+        this.pusherIdentify = pusherIdentify;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

@@ -23,7 +23,9 @@ import org.springframework.stereotype.Component;
 import com.everhomes.acl.RoleConstants;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
+import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupMemberStatus;
+import com.everhomes.group.IterateGroupMemberCallback;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -292,6 +294,41 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         return contacts;
     }
     
+    @Override
+    public void iterateEnterpriseContacts(int count, ListingQueryBuilderCallback queryBuilderCallback, 
+        IterateEnterpriseContactCallback callback) {
+        if(count <= 0 || callback == null) {
+            return;
+        }
+        
+        List<EnterpriseContact> contactList = null;
+        int maxIndex = 0; // Max index of group list in loop
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        Long pageAnchor = null;
+        do {
+            locator.setAnchor(pageAnchor);
+            
+            contactList = queryContacts(locator, count + 1, queryBuilderCallback);
+            
+            if(contactList == null || contactList.size() == 0) {
+                break;
+            } else {
+                // if there are still more records in db
+                if(contactList.size() > count) {
+                    maxIndex = contactList.size() - 2;
+                    pageAnchor = contactList.get(contactList.size() - 2).getId();
+                } else {
+                    // no more record in db
+                    maxIndex = contactList.size() - 1;
+                    pageAnchor = null;
+                }
+
+                for(int i = 0; i <= maxIndex; i++) {
+                    callback.process(contactList.get(i));
+                }
+            }
+        } while (pageAnchor != null);
+    }
     
     @Override
     public void createContactEntry(EnterpriseContactEntry entry) {

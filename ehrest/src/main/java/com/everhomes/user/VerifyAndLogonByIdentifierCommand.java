@@ -35,6 +35,8 @@ public class VerifyAndLogonByIdentifierCommand {
     private String deviceIdentifier;
 
     private Integer namespaceId;
+    
+    private String pusherIdentify;
 
     public VerifyAndLogonByIdentifierCommand() {
     }
@@ -93,6 +95,14 @@ public class VerifyAndLogonByIdentifierCommand {
 
     public void setNickName(String nickName) {
         this.nickName = nickName;
+    }
+
+    public String getPusherIdentify() {
+        return pusherIdentify;
+    }
+
+    public void setPusherIdentify(String pusherIdentify) {
+        this.pusherIdentify = pusherIdentify;
     }
 
     @Override

@@ -1,55 +1,33 @@
-package com.everhomes.activity;
+// @formatter:off
+package com.everhomes.forum;
 
 import com.everhomes.util.StringHelper;
+
 /**
- * 
- *<ul>
- *<li>namespaceId: 定制版本ID</li>
- *<li>communityId: 所在小区/园区ID</li>
- *<li>categoryId: 活动所在帖子的类型ID</li>
- *<li>tag:活动标签</li>
+ * <ul>
+ * <li>communityId: 当前小区ID</li>
+ * <li>categoryId: 帖子类型ID</li>
  * <li>pageAnchor: 开始的锚点</li>
+ * <li>tag: 帖子标签</li>
  * <li>pageSize: 每页的数量</li>
- *</ul>
+ * </ul>
  */
-public class ListActivitiesByNamespaceIdAndTagCommand {
-    private Integer namespaceId;
+public class ListActivityTopicByCategoryAndTagCommand {
     private Long communityId;
     private Long categoryId;
     private String tag;
     private Long pageAnchor;
     private Integer pageSize;
-
-	public String getTag() {
-        return tag;
+    
+    public ListActivityTopicByCategoryAndTagCommand() {
     }
-
-    public void setTag(String tag) {
-        this.tag = tag;
-    }
-
+	
     public Long getCommunityId() {
         return communityId;
     }
 
     public void setCommunityId(Long communityId) {
         this.communityId = communityId;
-    }
-
-    public Integer getNamespaceId() {
-        return namespaceId;
-    }
-
-    public void setNamespaceId(Integer namespaceId) {
-        this.namespaceId = namespaceId;
-    }
-
-    public Long getCategoryId() {
-        return categoryId;
-    }
-
-    public void setCategoryId(Long categoryId) {
-        this.categoryId = categoryId;
     }
 
     public Long getPageAnchor() {
@@ -66,6 +44,22 @@ public class ListActivitiesByNamespaceIdAndTagCommand {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
     }
 
     @Override

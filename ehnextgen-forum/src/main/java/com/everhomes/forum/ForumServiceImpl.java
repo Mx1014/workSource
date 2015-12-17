@@ -94,6 +94,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
 import com.everhomes.visibility.VisibilityScope;
 import com.everhomes.visibility.VisibleRegionType;
 
@@ -649,6 +650,135 @@ public class ForumServiceImpl implements ForumService {
         }
         
         return new ListPostCommandResponse(nextPageAnchor, postDtoList);
+    }
+    
+    @Override
+    public ListPostCommandResponse listActivityPostByCategoryAndTag(ListActivityTopicByCategoryAndTagCommand cmd) {
+    	
+        long startTime = System.currentTimeMillis();
+        User operator = UserContext.current().getUser();
+        Long operatorId = operator.getId();
+        Long communityId = cmd.getCommunityId();
+        Community community = checkCommunityParameter(operatorId, communityId, "listActivityPostByCategoryAndTag");
+        
+        Condition condition = buildActivityPostByCategoryAndTag(operatorId, community, cmd);
+        
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        List<Post> posts = this.forumProvider.queryPosts(locator, pageSize + 1, (loc, query) -> {
+            query.addJoin(Tables.EH_FORUM_ASSIGNED_SCOPES, JoinType.LEFT_OUTER_JOIN,
+                Tables.EH_FORUM_ASSIGNED_SCOPES.OWNER_ID.eq(Tables.EH_FORUM_POSTS.ID));
+            
+            query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
+            query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+            if(condition != null) {
+                query.addConditions(condition);
+            }
+            
+            return query;
+        });
+        
+        this.forumProvider.populatePostAttachments(posts);
+        
+        populatePosts(operatorId, posts, communityId, false);
+        
+        Long nextPageAnchor = null;
+        if(posts.size() > pageSize) {
+            posts.remove(posts.size() - 1);
+            nextPageAnchor = posts.get(posts.size() - 1).getId();
+        }
+        List<PostDTO> postDtoList = posts.stream().map((r) -> {
+        	
+        	PostDTO dto = ConvertHelper.convert(r, PostDTO.class);
+        	if(r != null && r.getAttachments() != null && r.getAttachments().size() > 0) {
+        		List<AttachmentDTO> attachments = new ArrayList<AttachmentDTO>();
+        		for(Attachment attachment : r.getAttachments()) {
+        			attachments.add(ConvertHelper.convert(attachment, AttachmentDTO.class));
+        		}
+        		dto.setAttachments(attachments);
+        	}
+          return dto;  
+        }).collect(Collectors.toList());
+        
+        if(LOGGER.isInfoEnabled()) {
+            long endTime = System.currentTimeMillis();
+            LOGGER.info("List activity topics by category and tag, userId=" + operatorId + ", size=" + postDtoList.size() 
+                + ", elapse=" + (endTime - startTime) + ", cmd=" + cmd);
+        }
+        
+        return new ListPostCommandResponse(nextPageAnchor, postDtoList);
+    }
+    
+    private Condition buildActivityPostByCategoryAndTag(Long userId, Community community, ListActivityTopicByCategoryAndTagCommand cmd) {
+        Condition condition = Tables.EH_FORUM_POSTS.FORUM_ID.eq(community.getDefaultForumId());
+        condition = condition.and(Tables.EH_FORUM_POSTS.EMBEDDED_APP_ID.eq(AppConstants.APPID_ACTIVITY));
+        Category contentCatogry = null;
+        Long contentCategoryId = cmd.getCategoryId();
+        if(contentCategoryId != null && contentCategoryId.longValue() > 0) {
+            contentCatogry = this.categoryProvider.findCategoryById(contentCategoryId);
+        }
+        if(contentCatogry != null) {
+            condition = condition.and(Tables.EH_FORUM_POSTS.CATEGORY_PATH.like(contentCatogry.getPath() + "%"));
+        }
+        
+        if(!StringUtils.isEmpty(cmd.getTag())) {
+            condition = condition.and(Tables.EH_FORUM_POSTS.TAG.eq(cmd.getTag()));
+        }
+        
+        return condition;
+    }
+    
+    public CheckUserPostDTO checkUserPostStatus(CheckUserPostCommand cmd) {
+        long startTime = System.currentTimeMillis();
+        User operator = UserContext.current().getUser();
+        Long operatorId = operator.getId();
+        Long communityId = cmd.getCommunityId();
+        Community community = checkCommunityParameter(operatorId, communityId, "listUserRelatedTopics");
+        
+        // 各区域ID，说明见com.everhomes.forum.PostEntityTag
+        // Map<String, Long> gaRegionIdMap = this.organizationService.getOrganizationRegionMap(communityId);
+        
+        // Condition condition = buildPostQryConditionByUserRelated(operator, community, gaRegionIdMap);
+        Condition condition = buildPostQryConditionByUserRelated(operator, community);
+        
+        int pageSize = 1; // 只查最新一个
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        List<Post> posts = this.forumProvider.queryPosts(locator, pageSize + 1, (loc, query) -> {
+            query.addJoin(Tables.EH_FORUM_ASSIGNED_SCOPES, JoinType.LEFT_OUTER_JOIN,
+                Tables.EH_FORUM_ASSIGNED_SCOPES.OWNER_ID.eq(Tables.EH_FORUM_POSTS.ID));
+            
+            query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
+            query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+            if(condition != null) {
+                query.addConditions(condition);
+            }
+            
+            return query;
+        });
+        
+        CheckUserPostDTO dto = ConvertHelper.convert(cmd, CheckUserPostDTO.class);
+        dto.setStatus(CheckUserPostStatus.NONE.getCode());
+        if(posts.size() > 0) {
+            Timestamp createTime = posts.get(0).getCreateTime();
+            // 客户端指定时间戳时，有新帖超过时间戳则认识为新帖
+            if(cmd.getTimestamp() != null) {
+                if(createTime != null && cmd.getTimestamp() < createTime.getTime()) {
+                    dto.setTimestamp(createTime.getTime());
+                    dto.setStatus(CheckUserPostStatus.NEW_POST.getCode());
+                }
+            } else {
+                // 客户端不指定时间戳时，有帖则认为有新帖
+                dto.setTimestamp(createTime.getTime());
+                dto.setStatus(CheckUserPostStatus.NEW_POST.getCode());
+            }
+        }
+        long endTime = System.currentTimeMillis();
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Check the user post status, operatorId=" + operatorId + ", elapse=" + (endTime - startTime) + ", result=" + dto);
+        }
+        
+        return dto;
     }
     
     public ListPostCommandResponse queryOrganizationTopics(QueryOrganizationTopicCommand cmd) {
@@ -2545,10 +2675,7 @@ public class ForumServiceImpl implements ForumService {
         VisibleRegionType regionType = VisibleRegionType.fromCode(post.getVisibleRegionType());
         Long regionId = post.getVisibleRegionId();
         
-        if(regionId == 0L){
-        	post.setCreatorNickName(post.getCreatorNickName());
-        }
-        else if(regionType != null && regionId != null) {
+        if(regionType != null && regionId != null) {
             String creatorNickName = post.getCreatorNickName();
             if(creatorNickName == null) {
                 creatorNickName = "";

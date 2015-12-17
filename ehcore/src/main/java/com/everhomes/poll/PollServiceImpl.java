@@ -72,12 +72,17 @@ public class PollServiceImpl implements PollService {
             poll.setCreatorUid(user.getId());
             poll.setPollCount(0);
             poll.setPostId(postId);
-            long startTimeMs=convert(cmd.getStartTime(), "yyyy-MM-dd HH:mm:ss").getTime();
-            long endTimeMs=convert(cmd.getStopTime(), "yyyy-MM-dd HH:mm:ss").getTime();
-            poll.setStartTime(new Timestamp(startTimeMs));
-            poll.setStartTimeMs(startTimeMs);
-            poll.setEndTimeMs(endTimeMs);
-            poll.setEndTime(new Timestamp(endTimeMs));
+            // 当没有填开始时间或截止时间时会报空指针，故加上判断 by lqs 20151216
+            if(cmd.getStartTime() != null) {
+                long startTimeMs=convert(cmd.getStartTime(), "yyyy-MM-dd HH:mm:ss").getTime();
+                poll.setStartTime(new Timestamp(startTimeMs));
+                poll.setStartTimeMs(startTimeMs);
+            }
+            if(cmd.getStopTime() != null) {
+                long endTimeMs=convert(cmd.getStopTime(), "yyyy-MM-dd HH:mm:ss").getTime();
+                poll.setEndTimeMs(endTimeMs);
+                poll.setEndTime(new Timestamp(endTimeMs));
+            }
             poll.setStatus(PollStatus.Published.getCode());
             poll.setId(cmd.getId());
             pollProvider.createPoll(poll);
@@ -310,7 +315,7 @@ public class PollServiceImpl implements PollService {
         SimpleDateFormat f=new SimpleDateFormat(format);
         try {
             return f.parse(time);
-        } catch (ParseException e) {
+        } catch (Exception e) {
             return new Date();
         }
     }
