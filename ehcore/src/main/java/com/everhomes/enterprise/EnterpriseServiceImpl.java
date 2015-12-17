@@ -238,40 +238,50 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         if(null == cmd.getNamespaceId()){
         	enterprise.setNamespaceId(0);
         }
-        
-        this.enterpriseProvider.createEnterprise(enterprise);
-        
-        requestToJoinCommunity(user, enterprise.getId(), cmd.getCommunityId());
-        
-        List<EnterpriseAddressDTO> addressDtos = cmd.getAddressDTOs();
-        if(addressDtos != null && addressDtos.size() > 0) {
-        	List<Address> address = new ArrayList<Address>();
-        	for(EnterpriseAddressDTO addressDto :addressDtos) {
-        		if(addressDto != null) {
-	        		EnterpriseAddress enterpriseAddr = new EnterpriseAddress();
-	                enterpriseAddr.setAddressId(addressDto.getAddressId());
-	                enterpriseAddr.setBuildingId(addressDto.getBuildingId());
-	                enterpriseAddr.setBuildingName(addressDto.getBuildingName());
-	                enterpriseAddr.setEnterpriseId(enterprise.getId());
-	                enterpriseAddr.setCreatorUid(userId);
-	                enterpriseAddr.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-	                enterpriseAddr.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-	                enterpriseAddr.setStatus(EnterpriseAddressStatus.WAITING_FOR_APPROVAL.getCode());
-	
-	                this.enterpriseProvider.createEnterpriseAddress(enterpriseAddr);
-	                
-	                if(null != addressDto.getAddressId()){
-	                	Address addr = this.addressProvider.findAddressById(addressDto.getAddressId());
-	 	                if(addr != null)
-	 	                	address.add(addr);
-	         		}
-	                }
-	               
-        	}
-        	enterprise.setAddress(address);
-        }
-        
-        
+        this.dbProvider.execute((status) -> {
+	        this.enterpriseProvider.createEnterprise(enterprise);
+
+	        EnterpriseCommunityMap enterpriseCommunityMap = new EnterpriseCommunityMap();
+	        enterpriseCommunityMap.setCommunityId(cmd.getCommunityId());
+	        enterpriseCommunityMap.setMemberType(EnterpriseCommunityMapType.Enterprise.getCode());
+	        enterpriseCommunityMap.setMemberId(enterprise.getId());
+	        enterpriseCommunityMap.setMemberStatus(EnterpriseCommunityMapStatus.Approving.getCode());
+	        enterpriseCommunityMap.setCreatorUid(userId);
+	        enterpriseCommunityMap.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	        enterpriseCommunityMap.setApproveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	        this.enterpriseProvider.createEnterpriseCommunityMap(enterpriseCommunityMap);
+	        
+	        requestToJoinCommunity(user, enterprise.getId(), cmd.getCommunityId());
+	        
+	        List<EnterpriseAddressDTO> addressDtos = cmd.getAddressDTOs();
+	        if(addressDtos != null && addressDtos.size() > 0) {
+	        	List<Address> address = new ArrayList<Address>();
+	        	for(EnterpriseAddressDTO addressDto :addressDtos) {
+	        		if(addressDto != null) {
+		        		EnterpriseAddress enterpriseAddr = new EnterpriseAddress();
+		                enterpriseAddr.setAddressId(addressDto.getAddressId());
+		                enterpriseAddr.setBuildingId(addressDto.getBuildingId());
+		                enterpriseAddr.setBuildingName(addressDto.getBuildingName());
+		                enterpriseAddr.setEnterpriseId(enterprise.getId());
+		                enterpriseAddr.setCreatorUid(userId);
+		                enterpriseAddr.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		                enterpriseAddr.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		                enterpriseAddr.setStatus(EnterpriseAddressStatus.WAITING_FOR_APPROVAL.getCode());
+		
+		                this.enterpriseProvider.createEnterpriseAddress(enterpriseAddr);
+		                
+		                if(null != addressDto.getAddressId()){
+		                	Address addr = this.addressProvider.findAddressById(addressDto.getAddressId());
+		 	                if(addr != null)
+		 	                	address.add(addr);
+		         		}
+		                }
+		               
+	        	}
+	        	enterprise.setAddress(address);
+	        }
+	        return null;
+        });
         
         processEnterpriseAttachments(userId, cmd.getAttachments(), enterprise);
         
