@@ -286,14 +286,18 @@ public class ForumServiceImpl implements ForumService {
         }
     }
     
-    @Override
     public List<PostDTO> getTopicById(List<Long> topicIds, Long communityId, boolean isDetail) {
+        return getTopicById(topicIds, communityId, isDetail, false);
+    }
+    
+    @Override
+    public List<PostDTO> getTopicById(List<Long> topicIds, Long communityId, boolean isDetail, boolean getByOwnerId) {
         List<PostDTO> postDtoList = new ArrayList<PostDTO>();
 
         PostDTO postDto = null;
         for(Long topicId : topicIds) {
             try {
-                postDto = getTopicById(topicId, communityId, isDetail);
+                postDto = getTopicById(topicId, communityId, isDetail, getByOwnerId);
                 postDtoList.add(postDto);
             } catch(Exception e) {
                 LOGGER.error(e.toString());
@@ -305,13 +309,20 @@ public class ForumServiceImpl implements ForumService {
     
     @Override
     public PostDTO getTopicById(Long topicId, Long communityId, boolean isDetail) {
+        return getTopicById(topicId, communityId, isDetail, false);
+    }
+    
+    @Override
+    public PostDTO getTopicById(Long topicId, Long communityId, boolean isDetail, boolean getByOwnerId) {
         User user = UserContext.current().getUser();
         Long userId = user.getId();
         
         Post post = checkPostParameter(userId, -1L, topicId, "getTopicById");
         if(post != null) {
             if(PostStatus.ACTIVE != PostStatus.fromCode(post.getStatus())) {
-            	if(!(post.getCreatorUid() != post.getDeleterUid() && post.getCreatorUid() == userId)){
+                //Added by Janson
+                if( (!(getByOwnerId && post.getCreatorUid().equals(userId)))
+                        && (!(post.getCreatorUid() != post.getDeleterUid() && post.getCreatorUid() == userId)) ){
             		LOGGER.error("Forum post already deleted, userId=" + userId + ", topicId=" + topicId);
             		throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
             				ForumServiceErrorCode.ERROR_FORUM_TOPIC_DELETED, "Forum post already deleted");

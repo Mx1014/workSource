@@ -58,8 +58,6 @@ import org.springframework.stereotype.Component;
 
 
 
-import org.springframework.transaction.annotation.Transactional;
-
 import com.bosigao.cxf.Service1;
 import com.bosigao.cxf.Service1Soap;
 import com.everhomes.app.AppConstants;
@@ -82,7 +80,6 @@ import com.everhomes.techpark.onlinePay.OnlinePayProvider;
 import com.everhomes.techpark.onlinePay.OnlinePayService;
 import com.everhomes.techpark.onlinePay.PayStatus;
 import com.everhomes.techpark.onlinePay.RechargeStatus;
-import com.everhomes.techpark.rental.RentalServiceErrorCode;
 import com.everhomes.user.IdentifierType;
 import com.everhomes.user.MessageChannelType;
 import com.everhomes.user.User;
@@ -683,7 +680,7 @@ public class ParkServiceImpl implements ParkService {
 
 	private Integer getPaymentRanking(String orderNo) {
 		
-		Timestamp begin = strToTimestamp(ConfigConstants.PARKING_PREFERENTIAL_STARTTIME);
+		Timestamp begin = strToTimestamp(configurationProvider.getValue(ConfigConstants.PARKING_PREFERENTIAL_STARTTIME, "000000"));
 		Long billId = Long.valueOf(orderNo);
 		RechargeInfo rechargeInfo = onlinePayProvider.findRechargeInfoByOrderId(billId);
 		if(rechargeInfo == null) {
@@ -695,7 +692,7 @@ public class ParkServiceImpl implements ParkService {
 			return -1;
 		}
 		Timestamp payTime = rechargeInfo.getRechargeTime();
-		Timestamp end = strToTimestamp(ConfigConstants.PARKING_PREFERENTIAL_ENDTIME);
+		Timestamp end = strToTimestamp(configurationProvider.getValue(ConfigConstants.PARKING_PREFERENTIAL_ENDTIME, "000000"));
 		
 		if(payTime.after(end)) {
 			return 0;
@@ -706,7 +703,6 @@ public class ParkServiceImpl implements ParkService {
 		return count;
 	}
 
-	@Transactional
 	@Override
 	public String rechargeTop(PaymentRankingCommand cmd) {
 		
