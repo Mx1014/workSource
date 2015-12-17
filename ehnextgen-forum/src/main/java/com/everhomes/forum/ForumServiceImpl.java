@@ -330,7 +330,7 @@ public class ForumServiceImpl implements ForumService {
             }
             
             this.forumProvider.populatePostAttachments(post);
-            populatePost(userId, post, communityId, isDetail);
+            populatePost(userId, post, communityId, isDetail, getByOwnerId);
             
             return ConvertHelper.convert(post, PostDTO.class);
         } else {
@@ -881,7 +881,7 @@ public class ForumServiceImpl implements ForumService {
             userPointService.getItemPoint(PointType.CREATE_COMMENT), userId);  
         userPointService.addPoint(pointCmd);
         
-        if(!post.getCreatorUid().equals(userId)) {
+        if(!post.getCreatorUid().equals(userId) && !post.getStatus().equals(PostStatus.INACTIVE.getCode())) {
             //Send message to creator
             Map<String, String> map = new HashMap<String, String>();
             map.put("userName", user.getNickName());
@@ -2329,6 +2329,10 @@ public class ForumServiceImpl implements ForumService {
         }
     }
     
+    private void populatePost(long userId, Post post, Long communityId, boolean isDetail) {
+        populatePost(userId, post, communityId, isDetail, false);
+    }
+    
     /**
      * 填充帖子信息，主要是补充发帖/评论人信息和附件信息
      * @param userId 查帖人
@@ -2336,7 +2340,7 @@ public class ForumServiceImpl implements ForumService {
      * @param communityId 用户当前所在的小区ID
      * @param isDetail 是否查的是详情（详情的填充内容和列表填充内容略有不同，后者简略一些）
      */
-    private void populatePost(long userId, Post post, Long communityId, boolean isDetail) {
+    private void populatePost(long userId, Post post, Long communityId, boolean isDetail, boolean getOwnTopics) {
         long startTime = System.currentTimeMillis();
         if(post == null) {
             if(LOGGER.isInfoEnabled()) {
@@ -2362,7 +2366,7 @@ public class ForumServiceImpl implements ForumService {
                 
                 populatePostAttachements(userId, post, post.getAttachments());
                 
-                populatePostStatus(userId, post);
+                populatePostStatus(userId, post, getOwnTopics);
                 
                 populatePostRegionInfo(userId, post);
                 
@@ -2508,7 +2512,11 @@ public class ForumServiceImpl implements ForumService {
         }
     }
     
-    private void populatePostStatus(long userId, Post post) {
+    private void populatePostStatus(long userId, Post post, boolean getOwnTopics) {
+        if(getOwnTopics && post.getCreatorUid().equals(userId)) {
+            return;
+        }
+        
         if(PostStatus.INACTIVE == PostStatus.fromCode(post.getStatus())) {
             User user = this.userProvider.findUserById(userId);
             String locale = user.getLocale();
