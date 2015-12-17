@@ -266,7 +266,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 		                enterpriseAddr.setCreatorUid(userId);
 		                enterpriseAddr.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		                enterpriseAddr.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		                enterpriseAddr.setStatus(EnterpriseAddressStatus.WAITING_FOR_APPROVAL.getCode());
+		                enterpriseAddr.setStatus(EnterpriseAddressStatus.ACTIVE.getCode());
 		
 		                this.enterpriseProvider.createEnterpriseAddress(enterpriseAddr);
 		                
@@ -660,7 +660,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
             	address.setEnterpriseId(enterprise.getId());
             	address.setCreatorUid(userId);
             	address.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-            	address.setStatus(EnterpriseAddressStatus.WAITING_FOR_APPROVAL.getCode());
+            	address.setStatus(EnterpriseAddressStatus.ACTIVE.getCode());
 
                 try {
                     this.enterpriseProvider.createEnterpriseAddress(address);
@@ -845,7 +845,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 		                enterpriseAddr.setCreatorUid(userId);
 		                enterpriseAddr.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		                enterpriseAddr.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		                enterpriseAddr.setStatus(EnterpriseAddressStatus.WAITING_FOR_APPROVAL.getCode());
+		                enterpriseAddr.setStatus(EnterpriseAddressStatus.ACTIVE.getCode());
 		
 		                this.enterpriseProvider.createEnterpriseAddress(enterpriseAddr);
         			}
