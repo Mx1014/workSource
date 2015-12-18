@@ -1084,7 +1084,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		
 		GroupMemberStatus status = GroupMemberStatus.fromCode(contact.getStatus());
 		if(status == GroupMemberStatus.ACTIVE) {
-		    deleteActiveEnterpriseContact(operatorUid, contact, false, "");
+		    deleteActiveEnterpriseContact(operatorUid, contact, true, "");
 		} else {
 		    deletePendingEnterpriseContact(operatorUid, contact, true);
 		}
@@ -1105,7 +1105,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
         GroupMemberStatus status = GroupMemberStatus.fromCode(contact.getStatus());
         if(status == GroupMemberStatus.ACTIVE) {
         	contact.setStatus(GroupMemberStatus.INACTIVE.getCode());
-            deleteActiveEnterpriseContact(userId, contact, false, "");
+            deleteActiveEnterpriseContact(userId, contact, true, "");
         } else {
             deletePendingEnterpriseContact(userId, contact, true);
         }
@@ -1625,7 +1625,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		if(0 != contact.getUserId() && null != contact.getUserId()){
 			 if(status == GroupMemberStatus.ACTIVE) {
 			      contact.setStatus(GroupMemberStatus.INACTIVE.getCode());
-			      deleteActiveEnterpriseContact(contact.getUserId(), contact, false, "");
+			      deleteActiveEnterpriseContact(contact.getUserId(), contact, true, "");
 			 } else {
 			      deletePendingEnterpriseContact(contact.getUserId(), contact, true);
 			 }
