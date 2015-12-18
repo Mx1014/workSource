@@ -43,7 +43,7 @@ public class EnterpriseSearcherImpl extends AbstractElasticSearch implements Ent
 
     @Override
     public String getIndexType() {
-        return SearchUtils.GROUPINDEXTYPE;
+        return SearchUtils.ENTERPRISEINDEXTYPE;
     }
     
     private XContentBuilder createDoc(Enterprise enterprise){
