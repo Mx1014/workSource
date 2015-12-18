@@ -28,6 +28,7 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/group" -d '
             "category": {"type":"string", "index":"not_analyzed"},
             "creatorUid":{"type":"long"},
             "categoryId":{"type":"long"},
+			"namespaceId":{"type":"long"},
             "createTime":{"type":"date"}
         }
     }

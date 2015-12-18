@@ -34,6 +34,7 @@ import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.CommunityService;
 import com.everhomes.community.GetNearbyCommunitiesByIdCommand;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.forum.Forum;
 import com.everhomes.forum.ForumConstants;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
@@ -48,6 +49,7 @@ import com.everhomes.group.GroupDTO;
 import com.everhomes.group.GroupService;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.IdentifierType;
@@ -113,6 +115,12 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
             b.field("visibleRegionType", post.getVisibleRegionType());
             b.field("visibleRegionId", post.getVisibleRegionId());
             b.field("parentPostId", post.getParentPostId());
+            Forum forum = forumProvider.findForumById(post.getForumId());
+            Integer namespaceId = Namespace.DEFAULT_NAMESPACE;
+            if(forum != null) {
+                namespaceId = forum.getNamespaceId();
+            }
+            b.field("namespaceId", namespaceId);
             
             User u = userProvider.findUserById(post.getCreatorUid());
             if(null != u) {
@@ -270,6 +278,9 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
                     comFilter = FilterBuilders.boolFilter().should(comFilter,boolInFilter("forumId", groupIds)); 
                      }
                  }
+            
+            Integer namespaceId = (cmd.getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
+            comFilter = FilterBuilders.boolFilter().should(comFilter, FilterBuilders.termFilter("namespaceId", namespaceId));
             
             fb = comFilter;
         } else {
