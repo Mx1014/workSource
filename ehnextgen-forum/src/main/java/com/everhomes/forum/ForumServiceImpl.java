@@ -1037,7 +1037,8 @@ public class ForumServiceImpl implements ForumService {
             userPointService.getItemPoint(PointType.CREATE_COMMENT), userId);  
         userPointService.addPoint(pointCmd);
         
-        if(!post.getCreatorUid().equals(userId) && !post.getStatus().equals(PostStatus.INACTIVE.getCode())) {
+        Post topic = this.forumProvider.findPostById(post.getParentPostId());
+        if(topic != null && !topic.getCreatorUid().equals(userId) && !topic.getStatus().equals(PostStatus.INACTIVE.getCode())) {
             //Send message to creator
             Map<String, String> map = new HashMap<String, String>();
             map.put("userName", user.getNickName());
@@ -1908,6 +1909,7 @@ public class ForumServiceImpl implements ForumService {
         commentPost.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         commentPost.setPrivateFlag(PostPrivacy.PUBLIC.getCode());
         commentPost.setAssignedFlag(PostAssignedFlag.NONE.getCode());
+        commentPost.setStatus(PostStatus.ACTIVE.getCode());
         
         return commentPost;
     }
