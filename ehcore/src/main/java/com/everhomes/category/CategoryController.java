@@ -276,8 +276,10 @@ public class CategoryController extends ControllerBase {
 		//        category.setStatus(CategoryAdminStatus.ACTIVE.getCode());
 		List<Category> entityResultList = new ArrayList<Category>();
 		//entityResultList.add(category);
-		List<Category> result = this.categoryProvider.listChildCategories(namespaceId, CategoryConstants.CATEGORY_ID_SERVICE,
-				CategoryAdminStatus.ACTIVE, orderBy);
+		List<Category> result = this.categoryProvider.listChildCategories(namespaceId, CategoryConstants.CATEGORY_ID_SERVICE,CategoryAdminStatus.ACTIVE, orderBy);
+		if(result==null)
+			result = this.categoryProvider.listChildCategories(0, CategoryConstants.CATEGORY_ID_SERVICE,CategoryAdminStatus.ACTIVE, orderBy);
+		
 		if(result != null && !result.isEmpty())
 			entityResultList.addAll(result);
 		List<CategoryDTO> dtoResultList = entityResultList.stream().map(r -> {
