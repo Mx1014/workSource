@@ -1045,7 +1045,7 @@ public class ForumServiceImpl implements ForumService {
             String subject = (topic.getSubject() == null) ? "" : topic.getSubject();
             map.put("userName", userName);
             map.put("postName", subject);
-            sendMessageCode(post.getCreatorUid(), user.getLocale(), map, ForumNotificationTemplateCode.FORUM_REPLAY_ONE_TO_CREATOR);
+            sendMessageCode(topic.getCreatorUid(), user.getLocale(), map, ForumNotificationTemplateCode.FORUM_REPLAY_ONE_TO_CREATOR);
         }
         
         return ConvertHelper.convert(post, PostDTO.class);
