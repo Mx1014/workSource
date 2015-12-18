@@ -20,7 +20,6 @@ public interface SmsTemplateCode {
 
     static final String KEY_PHONE = "phone";
     static final String KEY_TOPICTYPE = "topicType";
-    
     static final String KEY_MSG = "msg";
 
     static final int VERIFICATION_CODE = 1; // 验证码
