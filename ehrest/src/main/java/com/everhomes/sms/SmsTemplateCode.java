@@ -20,8 +20,12 @@ public interface SmsTemplateCode {
 
     static final String KEY_PHONE = "phone";
     static final String KEY_TOPICTYPE = "topicType";
+    
+    
+    static final String KEY_MSG = "msg";
 
     static final int VERIFICATION_CODE = 1; // 验证码
     static final int WY_BILL_CODE = 3; //物业账单信息
     static final int ORGANIZATION_ASSIGNED_CODE = 4; //给被分配人员发短信:分配请求服务帖任务给处理员
+    static final int WY_SEND_MSG_CODE = 5; // 物业一键推送消息
 }

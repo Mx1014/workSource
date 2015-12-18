@@ -1234,12 +1234,19 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			}
 		}
 
-		//不是user，发短信。
-		if(phones != null && phones.size() > 0 ){
-			for (String phone : phones) {
-				smsProvider.sendSms(phone, message);
-			}
-		}
+	    List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_MSG, message);
+	    String templateScope = SmsTemplateCode.SCOPE;
+	    int templateId = SmsTemplateCode.WY_SEND_MSG_CODE;
+	    String templateLocale = UserContext.current().getUser().getLocale();
+	    String[] phoneArray = new String[phones.size()];  
+	    phones.toArray(phoneArray);  
+	    smsProvider.sendSms(UserContext.current().getUser().getNamespaceId(),phoneArray , templateScope, templateId, templateLocale, variables);
+//		//不是user，发短信。
+//		if(phones != null && phones.size() > 0 ){
+//			for (String phone : phones) {
+//				smsProvider.sendSms(phone, message);
+//			}
+//		}
 
 	}
 	
@@ -2067,11 +2074,19 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		}
 
 		//不是user，发短信。
-		if(phones != null && phones.size() > 0 ){
-			for (String phone : phones) {
-				smsProvider.sendSms(phone, message);
-			}
-		}
+	
+	    List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_MSG, message);
+	    String templateScope = SmsTemplateCode.SCOPE;
+	    int templateId = SmsTemplateCode.WY_SEND_MSG_CODE;
+	    String templateLocale = UserContext.current().getUser().getLocale();
+	    String[] phoneArray = new String[phones.size()];  
+	    phones.toArray(phoneArray);  
+	    smsProvider.sendSms(namespaceId,phoneArray , templateScope, templateId, templateLocale, variables);
+//		if(phones != null && phones.size() > 0 ){
+//			for (String phone : phones) {
+//				smsProvider.sendSms(phone, message);
+//			}
+//		}
 
 	}
 

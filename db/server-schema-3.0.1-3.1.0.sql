@@ -557,6 +557,9 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'sms.default', 4, 'zh_CN', '给被分配人员发短信:分配请求服务帖任务给处理员', '业主${phone}发布了新的${topicType}帖，您已被分配处理该业主的需求，请尽快联系该业主。');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'sms.default.yzx', 4, 'zh_CN', '给被分配人员发短信:分配请求服务帖任务给处理员', '');
 
+#物业一键推送消息
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'sms.default', 5, 'zh_CN', '物业一键推送消息', '左邻温馨提醒您：${msg}祝您生活愉快。');
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'sms.default.yzx', 5, 'zh_CN', '物业一键推送消息', '');
 
 
 SET foreign_key_checks = 1;
