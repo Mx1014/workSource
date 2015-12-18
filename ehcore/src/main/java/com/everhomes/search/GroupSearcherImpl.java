@@ -130,9 +130,6 @@ public class GroupSearcherImpl extends AbstractElasticSearch implements GroupSea
     public void syncFromDb() {
         List<Group> groups = new ArrayList<Group>();
         int pageSize = 200;
-        AtomicInteger count = new AtomicInteger(); 
-        
-        
         
         this.deleteAll();
         
@@ -152,14 +149,14 @@ public class GroupSearcherImpl extends AbstractElasticSearch implements GroupSea
             if(groups.size() >= pageSize) {
                 this.bulkUpdate(groups);
                 groups.clear();
-                LOGGER.info("Sync group(iterate), process count: " + count.get());
+                LOGGER.info("Sync group(iterate), process count: " + groups.size());
             }
         });
         
         if(groups.size() > 0) {
             this.bulkUpdate(groups);
             groups.clear();
-            LOGGER.info("Sync group(update), process count: " + count.get());
+            LOGGER.info("Sync group(syncupdate), process count: " + groups.size());
         }
         
         //TODO merge ?
