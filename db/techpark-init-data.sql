@@ -168,7 +168,7 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 -- INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag) 
 --	VALUES (809, 1000000, 0, 0, 0, '/home', 'Coupons', '优惠券', '优惠券', 'cs://1/image/aW1hZ2UvTVRwaFl6RTRZMlppT1dOak1HRTVZVFpqWlRKaFltWmtNMk0xTmpoak1XUmpaQQ', 3, 1, 14, '{"url":"http://biz.zuolin.com/zl-ec?hideNavigationBar=1&sourceUrl=http%3A%2F%2Fbiz.zuolin.com%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2Fpromotions%2F#sign_suffix"}', 1, 0, 1, 1, '', 0,NULL);
 -- INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag) 
---	VALUES (810, 1000000, 0, 0, 0, '/home', 'Coupons', '市场动态', '市场动态', 'cs://1/image/aW1hZ2UvTVRwaU5HUTJNMkptTldVMk5qUTVZakk0TVdRNFl6WXlaak0zT1dNNU16TTRNdw', 5, 1, 14, '{"url":"http://biz.zuolin.com/zl-ec?hideNavigationBar=1&sourceUrl=http://biz.zuolin.com/web/app/user/index.html#/store/details/14477417463124576784#sign_suffix"}', 2, 0, 1, 1, '', 0,NULL);
+--	VALUES (810, 1000000, 0, 0, 0, '/home', 'Coupons', '市场动态', '市场动态', 'cs://1/image/aW1hZ2UvTVRwaU5HUTJNMkptTldVMk5qUTVZakk0TVdRNFl6WXlaak0zT1dNNU16TTRNdw', 5, 1, 14, '{"url":"https://zuolin.com/mobile/static/coming_soon/index.html"}', 2, 0, 1, 1, '', 0,NULL);
 
 -- for testserver30
 DELETE FROM `eh_launch_pad_items` WHERE ID=809 OR ID=810;
