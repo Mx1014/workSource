@@ -327,7 +327,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
             metaObject.setRequestorAvatar(avatar);
             if(avatar != null && avatar.length() > 0) {
                 try{
-                    String url = contentServerService.parserUri(avatar, EntityType.GROUP.getCode(), enterprise.getId());
+                    String url = contentServerService.parserUri(avatar,  EntityType.USER.getCode(),UserContext.current().getUser().getId());
                     metaObject.setRequestorAvatarUrl(url);
                 }catch(Exception e){
                     LOGGER.error("Failed to parse avatar uri of enterprise contact, enterpriseId=" + enterprise.getId() 
@@ -645,6 +645,8 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 				
 			}
 				
+			String url = contentServerService.parserUri(detail.getAvatar(),  EntityType.USER.getCode(),detail.getUserId());
+			detail.setAvatar(url);
 			details.add(detail);
 
 		}

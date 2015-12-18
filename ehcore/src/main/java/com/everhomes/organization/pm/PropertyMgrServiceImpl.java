@@ -133,6 +133,7 @@ import com.everhomes.organization.pm.pay.ResultHolder;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
+import com.everhomes.sms.SmsTemplateCode;
 import com.everhomes.techpark.company.ContactType;
 import com.everhomes.user.IdentifierType;
 import com.everhomes.user.MessageChannelType;
@@ -544,7 +545,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	 */
 	private void sendMSMToUser(long topicId, long userId, long owerId, long category) {
 		//给维修人员发送短信是否显示业主地址
-		String template = configProvider.getValue(ASSIGN_TASK_AUTO_SMS, "");
+//		String template = configProvider.getValue(ASSIGN_TASK_AUTO_SMS, "");
 		List<UserIdentifier> userList = this.userProvider.listUserIdentifiersOfUser(userId);
 		userList.stream().filter((u) -> {
 			if(u.getIdentifierType() != IdentifierType.MOBILE.getCode())
@@ -553,12 +554,16 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		});
 		if(userList == null || userList.isEmpty()) return ;
 		String cellPhone = userList.get(0).getIdentifierToken();
-		if(StringUtils.isEmpty(template)){
-			template = "该物业已在处理";
-		}
-		if (!StringUtils.isEmpty(template)) {
-			this.smsProvider.sendSms(cellPhone, template);
-		}
+//		if(StringUtils.isEmpty(template)){
+//			template = "该物业已在处理";
+//		}
+//		if (!StringUtils.isEmpty(template)) {
+//			this.smsProvider.sendSms(cellPhone, template);
+//		}
+	    String templateScope = SmsTemplateCode.SCOPE;
+	    int templateId = SmsTemplateCode.VERIFICATION_CODE;
+	    String templateLocale = UserContext.current().getUser().getLocale();
+	    smsProvider.sendSms( userList.get(0).getNamespaceId(), cellPhone, templateScope, templateId, templateLocale, null);
 	}
 
 	@Override
@@ -2970,8 +2975,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		}
 		//短信发送物业缴费通知
 		this.dbProvider.execute(s -> {
-			String message = this.getPmPayMessage(bill,waitPayAmount,payAmount);
-			this.sendPmPayMessageToUnRegisterUserInFamily(org.getId(),addressId,message);
+			List<Tuple<String, Object>> variables  = this.getPmPayVariables(bill,waitPayAmount,payAmount);
+			this.sendPmPayMessageToUnRegisterUserInFamily(org.getId(),addressId,variables);
 			bill.setNotifyCount((bill.getNotifyCount() == null?0:bill.getNotifyCount())+1);
 			bill.setNotifyTime(new Timestamp(System.currentTimeMillis()));
 			this.organizationProvider.updateOrganizationBill(bill);
@@ -2988,12 +2993,16 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		return null;
 	}
 
-	private void sendPmPayMessageToUnRegisterUserInFamily(Long organizationId,Long addressId,String message) {
+	private void sendPmPayMessageToUnRegisterUserInFamily(Long organizationId,Long addressId,List<Tuple<String, Object>> variables) {
 		List<OrganizationOwners> orgOwnerList = this.organizationProvider.listOrganizationOwnersByOrgIdAndAddressId(organizationId,addressId);
 		if(orgOwnerList != null && !orgOwnerList.isEmpty()){
 			for(OrganizationOwners orgOwner : orgOwnerList){
-				if(orgOwner.getContactToken() != null)
-					smsProvider.sendSms(orgOwner.getContactToken(), message);
+				if(orgOwner.getContactToken() != null){
+					String templateScope = SmsTemplateCode.SCOPE;
+				    int templateId = SmsTemplateCode.WY_BILL_CODE;
+				    String templateLocale = UserContext.current().getUser().getLocale();
+				    smsProvider.sendSms(UserContext.current().getUser().getNamespaceId(), orgOwner.getContactToken(), templateScope, templateId, templateLocale, variables);
+				} 
 			}
 		}
 	}
@@ -3011,9 +3020,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				if(waitPayAmount.compareTo(BigDecimal.ZERO) > 0){//欠费
 					Long addressId = bill.getEntityId();
 					//短信发送物业缴费通知
-					this.dbProvider.execute(s -> {
-						String message = this.getPmPayMessage(bill, waitPayAmount, paidAmount);
-						this.sendPmPayMessageToUnRegisterUserInFamily(organization.getId(),addressId,message);
+					this.dbProvider.execute(s -> { 
+						List<Tuple<String, Object>> variables  = this.getPmPayVariables(bill,waitPayAmount,paidAmount);
+						this.sendPmPayMessageToUnRegisterUserInFamily(organization.getId(),addressId,variables);
 						bill.setNotifyCount((bill.getNotifyCount() == null?0:bill.getNotifyCount())+1);
 						bill.setNotifyTime(new Timestamp(System.currentTimeMillis()));
 						this.organizationProvider.updateOrganizationBill(bill);
@@ -3024,7 +3033,30 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 		}
 	}
-
+	private  List<Tuple<String, Object>> getPmPayVariables (CommunityPmBill bill, BigDecimal balance, BigDecimal payAmount){Calendar cal = Calendar.getInstance();
+	cal.setTime(bill.getStartDate()); 
+	List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_YEAR,String.valueOf(cal.get(Calendar.YEAR)) );
+	int month = cal.get(Calendar.MONTH)+1;
+	if(month < 10)
+		smsProvider.addToTupleList(variables, SmsTemplateCode.KEY_MONTH, "0"+month); 
+	else
+		smsProvider.addToTupleList(variables, SmsTemplateCode.KEY_MONTH, month); 
+	smsProvider.addToTupleList(variables, SmsTemplateCode.KEY_DUEAMOUNT, bill.getDueAmount()); 
+	smsProvider.addToTupleList(variables, SmsTemplateCode.KEY_OWEAMOUNT, bill.getOweAmount()); 
+	smsProvider.addToTupleList(variables, SmsTemplateCode.KEY_PAYAMOUNT, payAmount); 
+	smsProvider.addToTupleList(variables, SmsTemplateCode.KEY_BALANCE, balance); 
+	if(bill.getDescription() != null && !bill.getDescription().isEmpty()){
+		if(bill.getDescription().length() > 15)
+			smsProvider.addToTupleList(variables, SmsTemplateCode.KEY_DESCRIPTION, bill.getDescription().substring(0, 14)+"..."); 
+		else
+			smsProvider.addToTupleList(variables, SmsTemplateCode.KEY_DESCRIPTION, bill.getDescription()+"。"); 
+	}
+	else{
+		smsProvider.addToTupleList(variables, SmsTemplateCode.KEY_DESCRIPTION, "" ); 
+	} 
+	return variables;
+		 
+	}
 	private String getPmPayMessage(CommunityPmBill bill, BigDecimal balance, BigDecimal payAmount){
 		//String str = "您2015年07月物业账单为，本月金额：300.00,往期欠款：200.00，本月实付金额：100.00，应付金额：400.00 ，+ 账单说明。 请尽快使用左邻缴纳物业费。";
 		StringBuilder builder = new StringBuilder();
@@ -3055,6 +3087,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		return builder.toString();
 	}
 
+	
 	@Override
 	public GetFamilyStatisticCommandResponse getFamilyStatistic(GetFamilyStatisticCommand cmd) {
 		this.checkFamilyIdIsNull(cmd.getFamilyId());

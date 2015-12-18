@@ -48,8 +48,6 @@ import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
-import com.everhomes.community.CommunityUser;
-import com.everhomes.community.admin.CommunityUserDto;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
@@ -106,6 +104,7 @@ import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
+import com.everhomes.sms.SmsTemplateCode;
 import com.everhomes.user.EncryptionUtils;
 import com.everhomes.user.IdentifierClaimStatus;
 import com.everhomes.user.IdentifierType;
@@ -113,7 +112,6 @@ import com.everhomes.user.MessageChannelType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
-import com.everhomes.user.UserCurrentEntity;
 import com.everhomes.user.UserCurrentEntityType;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserInfo;
@@ -128,6 +126,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.visibility.VisibleRegionType;
@@ -1595,36 +1594,32 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 
 	private void sendSmToOrgMemberForAssignOrgTopic(Organization organization,OrganizationMember operOrgMember, OrganizationMember desOrgMember,OrganizationTask task) {
-
-		String locale = "zh_CN";
-		String template = null;
-
+ 
 		OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getCreatorUid(), organization.getId());
+		 List<Tuple<String, Object>> variables =null;
 		//组织代发求助帖
 		if(member != null){
-			Map<String,Object> map = new HashMap<String,Object>();
-			map.put("orgName", organization.getName());
-			map.put("topicType",OrganizationTaskType.fromCode(task.getTaskType()).getName());
-			map.put("phone", operOrgMember.getContactToken());
-			template = this.localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, 
-					OrganizationNotificationTemplateCode.ORGANIZATION_ASSIGN_TOPIC_BY_MANAGER_FOR_MEMBER, locale, map, "");
+			variables =  smsProvider.toTupleList(SmsTemplateCode.KEY_PHONE, operOrgMember.getContactToken()); 
+			
 		}
-		else{//用户自己发求助帖
-			Map<String,Object> map = new HashMap<String,Object>();
-			map.put("topicType",OrganizationTaskType.fromCode(task.getTaskType()).getName());
+		else{//用户自己发求助帖 
 			User user = this.userProvider.findUserById(task.getCreatorUid());
 			if(user != null){
 				UserIdentifier identify = this.getUserMobileIdentifier(user.getId());
 				if(identify != null){
-					map.put("phone", identify.getIdentifierToken());
+					variables =  smsProvider.toTupleList(SmsTemplateCode.KEY_PHONE, operOrgMember.getContactToken()); 
+				}
+				else {
+					variables =  smsProvider.toTupleList(SmsTemplateCode.KEY_PHONE, ""); 
 				}
 			}
-			template = this.localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_ASSIGN_TOPIC_FOR_MEMBER, locale, map, "");
+		
 		}
-
-		if(template == null || template.equals("")) template = "您有新的任务";
-
-		this.smsProvider.sendSms(desOrgMember.getContactToken(), template);
+		smsProvider.addToTupleList(variables, SmsTemplateCode.KEY_TOPICTYPE, OrganizationTaskType.fromCode(task.getTaskType()).getName());
+	    String templateScope = SmsTemplateCode.SCOPE;
+	    int templateId = SmsTemplateCode.ORGANIZATION_ASSIGNED_CODE;
+	    String templateLocale = UserContext.current().getUser().getLocale();
+	    smsProvider.sendSms(UserContext.current().getUser().getNamespaceId(), desOrgMember.getContactToken(), templateScope, templateId, templateLocale, variables);
 	}
 
 	@Override
