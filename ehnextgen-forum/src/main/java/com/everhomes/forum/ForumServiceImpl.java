@@ -265,7 +265,7 @@ public class ForumServiceImpl implements ForumService {
             } catch(Exception e) {
                 LOGGER.error("Failed to update the view count of post, userId=" + userId + ", postId=" + postId, e);
             }
-            PostDTO postDto =  getTopicById(postId, cmd.getCommunityId(), true);
+            PostDTO postDto =  getTopicById(postId, cmd.getCommunityId(), true, true);
             
             long endTime = System.currentTimeMillis();
             if(LOGGER.isInfoEnabled()) {
@@ -323,7 +323,7 @@ public class ForumServiceImpl implements ForumService {
             if(PostStatus.ACTIVE != PostStatus.fromCode(post.getStatus())) {
                 //Added by Janson
                 if( (!(getByOwnerId && post.getCreatorUid().equals(userId)))
-                        && (!(post.getCreatorUid() != post.getDeleterUid() && post.getCreatorUid() == userId)) ){
+                        && (post.getCreatorUid().equals(post.getDeleterUid()) || post.getCreatorUid() != userId.longValue()) ){
             		LOGGER.error("Forum post already deleted, userId=" + userId + ", topicId=" + topicId);
             		throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
             				ForumServiceErrorCode.ERROR_FORUM_TOPIC_DELETED, "Forum post already deleted");
@@ -343,6 +343,11 @@ public class ForumServiceImpl implements ForumService {
     
     @Override
     public void deletePost(Long forumId, Long postId) {
+        deletePost(forumId, postId, true);
+    }
+    
+    @Override
+    public void deletePost(Long forumId, Long postId, boolean deleteUserPost) {
         User user = UserContext.current().getUser();
         Long userId = user.getId();
         
@@ -371,12 +376,16 @@ public class ForumServiceImpl implements ForumService {
             post.setStatus(PostStatus.INACTIVE.getCode());
             post.setDeleterUid(userId);
             post.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            
             try {
                 this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_POST.getCode()).enter(()-> {
                     this.forumProvider.updatePost(post);
-                    if(userId.equals(post.getCreatorUid())){
-                    	userActivityProvider.updateProfileIfNotExist(post.getCreatorUid(), UserProfileContstant.POSTED_TOPIC_COUNT, -1);
-                    }
+                    if(deleteUserPost) {
+                        if(userId.equals(post.getCreatorUid())){
+                            this.userActivityProvider.deletePostedTopic(userId, postId); 
+                            userActivityProvider.updateProfileIfNotExist(post.getCreatorUid(), UserProfileContstant.POSTED_TOPIC_COUNT, -1);
+                            }
+                        }
                     if(userIds.size() != 0){
                     	for(Long id:userIds){
                     		userActivityProvider.deleteFavorite(id, postId, "topic");
@@ -393,6 +402,23 @@ public class ForumServiceImpl implements ForumService {
                 LOGGER.error("Failed to update the post status, userId=" + userId + ", postId=" + postId, e);
             }
         } else {
+            //Added by Janson
+            if(deleteUserPost) {
+                try {
+                        this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_POST.getCode()).enter(()-> {
+                            if(userId.equals(post.getCreatorUid())){
+                                //Try delete the exists inactive post
+                                if(this.userActivityProvider.deletePostedTopic(userId, postId) > 0) {
+                                    userActivityProvider.updateProfileIfNotExist(post.getCreatorUid(), UserProfileContstant.POSTED_TOPIC_COUNT, -1);    
+                                    }
+                                }
+                            
+                        return null;
+                        });
+                } catch(Exception e) {
+                    LOGGER.error("Failed to update the post status, userId=" + userId + ", postId=" + postId, e);
+                }
+            }
             if(LOGGER.isInfoEnabled()) {
                 LOGGER.info("The post is already deleted, userId=" + userId + ", postId=" + postId);
             }
