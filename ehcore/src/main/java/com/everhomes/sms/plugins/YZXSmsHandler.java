@@ -47,7 +47,6 @@ import com.google.gson.Gson;
 public class YZXSmsHandler implements SmsHandler {
     protected final static Logger LOGGER = LoggerFactory.getLogger(YZXSmsHandler.class);
     
-    private static final String YZX_SUFFIX = "yzx";
     private static final String YZX_ACCOUNT_SID = "yzx.account.sid";
     private static final String YZX_TOKEN = "yzx.token";
     private static final String YZX_APP_ID = "yzx.appid";
