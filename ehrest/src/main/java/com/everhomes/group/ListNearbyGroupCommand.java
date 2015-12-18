@@ -13,6 +13,8 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class ListNearbyGroupCommand {
+    private Integer namespaceId;
+    
     private Long categoryId;
     
     private Double longitude;
@@ -24,6 +26,14 @@ public class ListNearbyGroupCommand {
     private Integer pageSize;
     
     public ListNearbyGroupCommand() {
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     public Long getCategoryId() {

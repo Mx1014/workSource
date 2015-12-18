@@ -13,6 +13,8 @@ package com.everhomes.group;
  * </ul>
  */
 public class SearchGroupCommand {
+    private Integer namespaceId;
+    
     private String queryString;
     
     private Long pageAnchor;
@@ -22,6 +24,14 @@ public class SearchGroupCommand {
     public SearchGroupCommand() {
     }
     
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
     public Long getPageAnchor() {
         return pageAnchor;
     }
