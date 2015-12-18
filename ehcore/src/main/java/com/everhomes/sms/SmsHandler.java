@@ -1,5 +1,9 @@
 package com.everhomes.sms;
 
+import java.util.List;
+
+import com.everhomes.util.Tuple;
+
 /**
  * send msm handler
  * 
@@ -38,4 +42,7 @@ public interface SmsHandler {
      * @param templateId,yzx sms need templateId
      */
     void doSend(String[] phoneNumbers, String text, String templateId);
+    
+    void doSend(Integer namespaceId, String phoneNumber, String templateScope, int templateId, String templateLocale, List<Tuple<String, Object>> variables);
+    void doSend(Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId, String templateLocale, List<Tuple<String, Object>> variables);
 }
