@@ -20,6 +20,7 @@ public class SearchGroupCommand {
     private Integer namespaceId;
     
     private Long communityId;
+
     private String queryString;
     
     private Long pageAnchor;
