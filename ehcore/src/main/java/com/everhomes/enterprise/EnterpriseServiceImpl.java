@@ -252,7 +252,6 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 	        enterpriseCommunityMap.setMemberType(EnterpriseCommunityMapType.Enterprise.getCode());
 	        enterpriseCommunityMap.setMemberId(enterprise.getId());
 
-	        
 	        enterpriseCommunityMap.setMemberStatus(EnterpriseCommunityMapStatus.ACTIVE.getCode());
 	        enterpriseCommunityMap.setCreatorUid(userId);
 	        enterpriseCommunityMap.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -289,7 +288,6 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 	        	enterprise.setAddress(address);
 	        }
 
-	        
 	        enterpriseSearcher.feedDoc(enterprise);
 	        return null;
         });
