@@ -155,11 +155,15 @@ public class MWSmsHandler implements SmsHandler {
         
         String content = localeTemplateService.getLocaleTemplateString(templateScope, templateId, 
             templateLocale, map, "");
+<<<<<<< HEAD
         if(content != null && content.trim().length() > 0) {
             doSend(phoneNumbers, content);
         } else {
             LOGGER.error("The mw template id is empty, namespaceId=" + namespaceId + ", templateScope=" + templateScope 
                 + ", templateId=" + templateId + ", templateLocale=" + templateLocale);
         }
+=======
+        doSend(phoneNumbers, content);
+>>>>>>> add namespace support to sms
     }
 }

@@ -47,6 +47,7 @@ import com.google.gson.Gson;
 public class YZXSmsHandler implements SmsHandler {
     protected final static Logger LOGGER = LoggerFactory.getLogger(YZXSmsHandler.class);
     
+    private static final String YZX_SUFFIX = "yzx";
     private static final String YZX_ACCOUNT_SID = "yzx.account.sid";
     private static final String YZX_TOKEN = "yzx.token";
     private static final String YZX_APP_ID = "yzx.appid";
@@ -229,6 +230,7 @@ public class YZXSmsHandler implements SmsHandler {
         // 需要在template表既定义一种有模板内容的，同时再加一种templateLocale+厂商后缀的模板（模板值为厂商要求的模板ID）
         StringBuilder strBuilder = new StringBuilder();
         templateScope = strBuilder.append(templateScope).append(".").append(SmsTemplateCode.YZX_SUFFIX).toString();
+
         String yzxTemplateId = localeTemplateService.getLocaleTemplateString(templateScope, templateId, 
             templateLocale, new HashMap<String, Object>(), "");
         
