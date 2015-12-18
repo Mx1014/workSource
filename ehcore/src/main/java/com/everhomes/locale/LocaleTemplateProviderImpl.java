@@ -47,7 +47,7 @@ public class LocaleTemplateProviderImpl implements LocaleTemplateProvider {
         return ConvertHelper.convert(record, LocaleTemplate.class);
     }
     
-    @Cacheable(value="LocaleTemplateByScope", key="{#scope, #code, #locale}")
+    @Cacheable(value="LocaleTemplateByScope", key="{#scope, #code, #locale}", unless="#result == null")
     @Override
     public LocaleTemplate findLocaleTemplateByScope(String scope, int code, String locale) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
