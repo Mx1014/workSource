@@ -60,6 +60,7 @@ import com.everhomes.user.IdentifierType;
 import com.everhomes.user.MessageChannelType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserGender;
 import com.everhomes.user.UserGroup;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
@@ -326,7 +327,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
             metaObject.setRequestorAvatar(avatar);
             if(avatar != null && avatar.length() > 0) {
                 try{
-                    String url = contentServerService.parserUri(avatar, EntityType.GROUP.getCode(), enterprise.getId());
+                    String url = contentServerService.parserUri(avatar,  EntityType.USER.getCode(),UserContext.current().getUser().getId());
                     metaObject.setRequestorAvatarUrl(url);
                 }catch(Exception e){
                     LOGGER.error("Failed to parse avatar uri of enterprise contact, enterpriseId=" + enterprise.getId() 
@@ -497,7 +498,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
                 } else {
                     this.enterpriseContactProvider.updateContact(contact);
                 }
-                this.userProvider.deleteUserGroup(contact.getId(), contact.getEnterpriseId());
+                this.userProvider.deleteUserGroup(contact.getUserId(), contact.getEnterpriseId());
                 
                 Group group = this.groupProvider.findGroupById(contact.getEnterpriseId());
                 long memberCount = group.getMemberCount() - 1;
@@ -510,7 +511,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
         });
         
         if(LOGGER.isInfoEnabled()) {
-            LOGGER.info("Enterprise contact is deleted(active), operatorUid=" + operatorUid + ", contactId=" + contact.getId() 
+            LOGGER.info("Enterprise contact is deleted(active), operatorUid=" + operatorUid + ", contactId=" + contact.getUserId() 
                 + ", enterpriseId=" + contact.getEnterpriseId() + ", status=" + contact.getStatus() + ", removeFromDb=" + removeFromDb);
         }
     } 
@@ -591,7 +592,11 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	@Override
 	public List<EnterpriseContactDetail> listContactByEnterpriseId(
 			ListingLocator locator, Long enterpriseId, Integer pageSize,String keyWord) {
-
+		Enterprise enterprise = this.enterpriseProvider.getEnterpriseById(enterpriseId);
+		if(null==enterprise){
+			 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+	                    "Enterprise id is wrong");
+		}
 		if (locator.getAnchor() == null)
 			locator.setAnchor(0L);
 //		int count = PaginationConfigHelper
@@ -633,9 +638,15 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 				if(null != user){
 					detail.setAvatar(user.getAvatar());
 				}
+				else{
+					detail.setAvatar(userService.getUserAvatarUriByGender(contact.getUserId(), enterprise.getNamespaceId(), UserGender.UNDISCLOSURED.getCode()));
+				}
+				
 				
 			}
 				
+			String url = contentServerService.parserUri(detail.getAvatar(),  EntityType.USER.getCode(),detail.getUserId());
+			detail.setAvatar(url);
 			details.add(detail);
 
 		}
@@ -1073,7 +1084,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		
 		GroupMemberStatus status = GroupMemberStatus.fromCode(contact.getStatus());
 		if(status == GroupMemberStatus.ACTIVE) {
-		    deleteActiveEnterpriseContact(operatorUid, contact, false, "");
+		    deleteActiveEnterpriseContact(operatorUid, contact, true, "");
 		} else {
 		    deletePendingEnterpriseContact(operatorUid, contact, true);
 		}
@@ -1094,7 +1105,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
         GroupMemberStatus status = GroupMemberStatus.fromCode(contact.getStatus());
         if(status == GroupMemberStatus.ACTIVE) {
         	contact.setStatus(GroupMemberStatus.INACTIVE.getCode());
-            deleteActiveEnterpriseContact(userId, contact, false, "");
+            deleteActiveEnterpriseContact(userId, contact, true, "");
         } else {
             deletePendingEnterpriseContact(userId, contact, true);
         }
@@ -1614,7 +1625,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		if(0 != contact.getUserId() && null != contact.getUserId()){
 			 if(status == GroupMemberStatus.ACTIVE) {
 			      contact.setStatus(GroupMemberStatus.INACTIVE.getCode());
-			      deleteActiveEnterpriseContact(contact.getUserId(), contact, false, "");
+			      deleteActiveEnterpriseContact(contact.getUserId(), contact, true, "");
 			 } else {
 			      deletePendingEnterpriseContact(contact.getUserId(), contact, true);
 			 }

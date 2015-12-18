@@ -129,16 +129,18 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     @Autowired
     private UserProvider userProvider;
     
+    
     @Override
     public List<Enterprise> listEnterpriseByCommunityId(ListingLocator locator,String enterpriseName, Long communityId, Integer status, int pageSize) {
     	List<Enterprise> enterprises = new ArrayList<Enterprise>();
+    	List<Enterprise> enters = new ArrayList<Enterprise>();
     	Long groupId = null;
     	if(!org.springframework.util.StringUtils.isEmpty(enterpriseName)){
     		Enterprise enterprise = new Enterprise();
     		enterprise.setName(enterpriseName);;
-    		enterprises = enterpriseProvider.listEnterprisesByName(new CrossShardListingLocator(), 10000, enterprise);
-    		if(enterprises.size() > 0)
-    			groupId = enterprises.get(0).getId();
+    		enters = enterpriseProvider.listEnterprisesByName(new CrossShardListingLocator(), 10000, enterprise);
+    		if(enters.size() > 0)
+    			groupId = enters.get(0).getId();
     	}
     	
     	Long enterpriseId = groupId;
@@ -151,7 +153,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
                     SelectQuery<? extends Record> query) {
                 query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.COMMUNITY_ID.eq(communityId));
                 query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_TYPE.eq(EnterpriseCommunityMapType.Enterprise.getCode()));
-                query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_STATUS.ne(EnterpriseCommunityMapStatus.Inactive.getCode()));
+                query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_STATUS.ne(EnterpriseCommunityMapStatus.INACTIVE.getCode()));
                 if(null != enterpriseId)
                 	query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_ID.eq(enterpriseId));
                 if(status != null) {
@@ -169,6 +171,10 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 	            	enterprises.add(enterprise);
 	            }
 	            
+    		}
+    	}else{
+    		if(enterpriseMaps.size() > 0 && enters.size() > 0){
+    			enterprises.add(enters.get(0));
     		}
     	}
        
@@ -238,40 +244,51 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         if(null == cmd.getNamespaceId()){
         	enterprise.setNamespaceId(0);
         }
-        
-        this.enterpriseProvider.createEnterprise(enterprise);
-        
-        requestToJoinCommunity(user, enterprise.getId(), cmd.getCommunityId());
-        
-        List<EnterpriseAddressDTO> addressDtos = cmd.getAddressDTOs();
-        if(addressDtos != null && addressDtos.size() > 0) {
-        	List<Address> address = new ArrayList<Address>();
-        	for(EnterpriseAddressDTO addressDto :addressDtos) {
-        		if(addressDto != null) {
-	        		EnterpriseAddress enterpriseAddr = new EnterpriseAddress();
-	                enterpriseAddr.setAddressId(addressDto.getAddressId());
-	                enterpriseAddr.setBuildingId(addressDto.getBuildingId());
-	                enterpriseAddr.setBuildingName(addressDto.getBuildingName());
-	                enterpriseAddr.setEnterpriseId(enterprise.getId());
-	                enterpriseAddr.setCreatorUid(userId);
-	                enterpriseAddr.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-	                enterpriseAddr.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-	                enterpriseAddr.setStatus(EnterpriseAddressStatus.WAITING_FOR_APPROVAL.getCode());
-	
-	                this.enterpriseProvider.createEnterpriseAddress(enterpriseAddr);
-	                
-	                if(null != addressDto.getAddressId()){
-	                	Address addr = this.addressProvider.findAddressById(addressDto.getAddressId());
-	 	                if(addr != null)
-	 	                	address.add(addr);
-	         		}
-	                }
-	               
-        	}
-        	enterprise.setAddress(address);
-        }
-        
-        
+        this.dbProvider.execute((status) -> {
+	        this.enterpriseProvider.createEnterprise(enterprise);
+
+	        EnterpriseCommunityMap enterpriseCommunityMap = new EnterpriseCommunityMap();
+	        enterpriseCommunityMap.setCommunityId(cmd.getCommunityId());
+	        enterpriseCommunityMap.setMemberType(EnterpriseCommunityMapType.Enterprise.getCode());
+	        enterpriseCommunityMap.setMemberId(enterprise.getId());
+	        enterpriseCommunityMap.setMemberStatus(EnterpriseCommunityMapStatus.ACTIVE.getCode());
+	        enterpriseCommunityMap.setCreatorUid(userId);
+	        enterpriseCommunityMap.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	        enterpriseCommunityMap.setApproveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	        this.enterpriseProvider.createEnterpriseCommunityMap(enterpriseCommunityMap);
+	        
+	        requestToJoinCommunity(user, enterprise.getId(), cmd.getCommunityId());
+	        
+	        List<EnterpriseAddressDTO> addressDtos = cmd.getAddressDTOs();
+	        if(addressDtos != null && addressDtos.size() > 0) {
+	        	List<Address> address = new ArrayList<Address>();
+	        	for(EnterpriseAddressDTO addressDto :addressDtos) {
+	        		if(addressDto != null) {
+		        		EnterpriseAddress enterpriseAddr = new EnterpriseAddress();
+		                enterpriseAddr.setAddressId(addressDto.getAddressId());
+		                enterpriseAddr.setBuildingId(addressDto.getBuildingId());
+		                enterpriseAddr.setBuildingName(addressDto.getBuildingName());
+		                enterpriseAddr.setEnterpriseId(enterprise.getId());
+		                enterpriseAddr.setCreatorUid(userId);
+		                enterpriseAddr.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		                enterpriseAddr.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		                enterpriseAddr.setStatus(EnterpriseAddressStatus.ACTIVE.getCode());
+		
+		                this.enterpriseProvider.createEnterpriseAddress(enterpriseAddr);
+		                
+		                if(null != addressDto.getAddressId()){
+		                	Address addr = this.addressProvider.findAddressById(addressDto.getAddressId());
+		 	                if(addr != null)
+		 	                	address.add(addr);
+		         		}
+		                }
+		               
+	        	}
+	        	enterprise.setAddress(address);
+	        }
+	        enterpriseSearcher.feedDoc(enterprise);
+	        return null;
+        });
         
         processEnterpriseAttachments(userId, cmd.getAttachments(), enterprise);
         
@@ -577,6 +594,8 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         List<EnterpriseCommunityMap> enterpriseMapList = this.enterpriseProvider.queryEnterpriseMapByCommunityId(locator, 
             communityId, Integer.MAX_VALUE - 1, (loc, query) -> {
             query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.COMMUNITY_ID.eq(communityId));
+            // 包含已经审核和待审核的
+            query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_STATUS.ne(EnterpriseCommunityMapStatus.INACTIVE.getCode()));
             return null;
         });
         
@@ -590,7 +609,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         ec.setCreatorUid(admin.getId());
         ec.setMemberId(enterpriseId);
         ec.setMemberType(EnterpriseCommunityMapType.Enterprise.getCode());
-        ec.setMemberStatus(EnterpriseCommunityMapStatus.Approving.getCode());
+        ec.setMemberStatus(EnterpriseCommunityMapStatus.WAITING_FOR_APPROVAL.getCode());
         ec.setApproveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         this.enterpriseProvider.createEnterpriseCommunityMap(ec);
     }
@@ -598,7 +617,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     @Override
     public void approve(User admin, Long enterpriseId, Long communityId) {
         EnterpriseCommunityMap ec = this.enterpriseProvider.findEnterpriseCommunityByEnterpriseId(enterpriseId, communityId);
-        ec.setMemberStatus(EnterpriseCommunityMapStatus.Approved.getCode());
+        ec.setMemberStatus(EnterpriseCommunityMapStatus.ACTIVE.getCode());
         ec.setOperatorUid(admin.getId());
         this.enterpriseProvider.updateEnterpriseCommunityMap(ec);        
     }
@@ -606,7 +625,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     @Override
     public void reject(User admin, Long enterpriseId, Long communityId) {
         EnterpriseCommunityMap ec = this.enterpriseProvider.findEnterpriseCommunityByEnterpriseId(enterpriseId, communityId);
-        ec.setMemberStatus(EnterpriseCommunityMapStatus.Inactive.getCode());
+        ec.setMemberStatus(EnterpriseCommunityMapStatus.INACTIVE.getCode());
         ec.setOperatorUid(admin.getId());
         this.enterpriseProvider.updateEnterpriseCommunityMap(ec);        
     }
@@ -624,7 +643,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         ec.setCreatorUid(UserContext.current().getUser().getId());
         ec.setMemberId(enterpriseId);
         ec.setMemberType(EnterpriseCommunityMapType.Enterprise.getCode());
-        ec.setMemberStatus(EnterpriseCommunityMapStatus.Inviting.getCode());
+        ec.setMemberStatus(EnterpriseCommunityMapStatus.WAITING_FOR_ACCEPTANCE.getCode());
         ec.setApproveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         this.enterpriseProvider.createEnterpriseCommunityMap(ec);
     }
@@ -648,7 +667,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
             	address.setEnterpriseId(enterprise.getId());
             	address.setCreatorUid(userId);
             	address.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-            	address.setStatus(EnterpriseAddressStatus.WAITING_FOR_APPROVAL.getCode());
+            	address.setStatus(EnterpriseAddressStatus.ACTIVE.getCode());
 
                 try {
                     this.enterpriseProvider.createEnterpriseAddress(address);
@@ -833,7 +852,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 		                enterpriseAddr.setCreatorUid(userId);
 		                enterpriseAddr.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		                enterpriseAddr.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		                enterpriseAddr.setStatus(EnterpriseAddressStatus.WAITING_FOR_APPROVAL.getCode());
+		                enterpriseAddr.setStatus(EnterpriseAddressStatus.ACTIVE.getCode());
 		
 		                this.enterpriseProvider.createEnterpriseAddress(enterpriseAddr);
         			}
@@ -961,7 +980,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 	public void deleteEnterprise(DeleteEnterpriseCommand cmd) {
 		EnterpriseCommunityMap ec = this.enterpriseProvider.findEnterpriseCommunityByEnterpriseId(cmd.getCommunityId(), cmd.getEnterpriseId());
 		if(ec != null) {
-			ec.setMemberStatus(EnterpriseCommunityMapStatus.Inactive.getCode());
+			ec.setMemberStatus(EnterpriseCommunityMapStatus.INACTIVE.getCode());
 			this.enterpriseProvider.updateEnterpriseCommunityMap(ec);
 	
 			List<EnterpriseAddress> eas = this.enterpriseProvider.findEnterpriseAddressByEnterpriseId(cmd.getEnterpriseId());
@@ -979,6 +998,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 			
 			List<Long> contactIds = this.enterpriseContactProvider.deleteContactByEnterpriseId(cmd.getEnterpriseId());
 			this.enterpriseContactProvider.deleteContactEntryByContactId(contactIds);
+			enterpriseSearcher.deleteById(cmd.getEnterpriseId());
 		}
 	}
 
@@ -1076,6 +1096,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 				//userId查communityId
 				command.setCommunityId(org.getCommunityId());
 				updateContactor(command);
+				enterpriseSearcher.feedDoc(enterprise);
 				return null;
 			});
 		}

@@ -293,7 +293,7 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
                 query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.COMMUNITY_ID.eq(communityId));
                 query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_ID.eq(enterpriseId));
                 query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_TYPE.eq(EnterpriseCommunityMapType.Enterprise.getCode()));
-                query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_STATUS.ne(EnterpriseCommunityMapStatus.Inactive.getCode()));
+                query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_STATUS.ne(EnterpriseCommunityMapStatus.INACTIVE.getCode()));
                 return query;
             }
             
@@ -615,6 +615,24 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
         ea.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         dao.update(ea);
 		
+	}
+
+	@Override
+	public EnterpriseAddress findEnterpriseAddressByAddressId(Long addressId) {
+		final EnterpriseAddress[] result = new EnterpriseAddress[1];
+
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhEnterpriseAddresses.class), result, 
+            (DSLContext context, Object reducingContext) -> {
+           	 context.select().from(Tables.EH_ENTERPRISE_ADDRESSES)
+       		 .where(Tables.EH_ENTERPRISE_ADDRESSES.ADDRESS_ID.eq(addressId))
+       		 .fetch().map(r ->{
+       			return result[0] = ConvertHelper.convert(r,EnterpriseAddress.class);
+       		});
+           	 return true;
+       				 
+            });
+        
+        return result[0];
 	}
 	
 }

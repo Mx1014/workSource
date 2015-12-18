@@ -5,6 +5,8 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>namespaceId: 命名空间ID</li>
+ * <li>communityId: 用户当前小区ID</li>
  * <li>categoryId: 请求人所在位置对应的经度</li>
  * <li>longitude: 请求人所在位置对应的经度</li>
  * <li>latitude: 请求人所在位置对应的纬度</li>
@@ -13,6 +15,10 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class ListNearbyGroupCommand {
+    private Integer namespaceId;
+    
+    private Long communityId;
+    
     private Long categoryId;
     
     private Double longitude;
@@ -24,6 +30,22 @@ public class ListNearbyGroupCommand {
     private Integer pageSize;
     
     public ListNearbyGroupCommand() {
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
     public Long getCategoryId() {

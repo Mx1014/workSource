@@ -1219,5 +1219,15 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return true;
 	}
 	
+	@Override
+	public OrganizationMember findOrganizationMemberByOrgIdAndToken(
+			String contactPhone, Long organizationId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Condition condition = Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId).and(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(contactPhone));
+		Record r = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(condition).fetchAny();
+		if(r != null)
+			return ConvertHelper.convert(r, OrganizationMember.class);
+		return null;
+	}
 	
 }

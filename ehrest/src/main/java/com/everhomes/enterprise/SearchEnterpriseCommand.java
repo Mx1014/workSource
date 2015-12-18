@@ -1,14 +1,23 @@
 package com.everhomes.enterprise;
 
+import com.everhomes.util.StringHelper;
+
 public class SearchEnterpriseCommand {
-    String keyword;
+    private Integer namespaceId;
+    private String keyword;
     
     //TODO for communityId, not support now.
-    Long communityId;
+    private Long communityId;
     
     private Long pageAnchor;
     private Integer pageSize;
     
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
     public String getKeyword() {
         return keyword;
     }
@@ -33,5 +42,9 @@ public class SearchEnterpriseCommand {
     public void setCommunityId(Long communityId) {
         this.communityId = communityId;
     }
-    
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

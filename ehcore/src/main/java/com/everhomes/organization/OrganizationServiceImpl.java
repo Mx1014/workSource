@@ -48,8 +48,6 @@ import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
-import com.everhomes.community.CommunityUser;
-import com.everhomes.community.admin.CommunityUserDto;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
@@ -106,6 +104,7 @@ import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
+import com.everhomes.sms.SmsTemplateCode;
 import com.everhomes.user.EncryptionUtils;
 import com.everhomes.user.IdentifierClaimStatus;
 import com.everhomes.user.IdentifierType;
@@ -113,7 +112,6 @@ import com.everhomes.user.MessageChannelType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
-import com.everhomes.user.UserCurrentEntity;
 import com.everhomes.user.UserCurrentEntityType;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserInfo;
@@ -128,6 +126,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.visibility.VisibleRegionType;
@@ -728,15 +727,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 
 	@Caching(evict={@CacheEvict(value="ForumPostById", key="#topicId")})
-	private void sendComment(long topicId, long forumId, long orgId, long userId, long category) {
-
+	private void sendComment(long topicId, long forumId, long orgId, OrganizationMember member, long category,int namespaceId) {
+		User user = UserContext.current().getUser();
 		Post comment = new Post();
 		comment.setParentPostId(topicId);
 		comment.setForumId(forumId);
 		comment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		comment.setCreatorUid(userId);
+		comment.setCreatorUid(user.getId());
 		comment.setContentType(PostContentType.TEXT.getCode());
-		String template = this.getOrganizationAssignTopicForCommentTemplate(orgId,userId);
+		String template = this.getOrganizationAssignTopicForCommentTemplate(orgId,member,namespaceId);
 		if(StringUtils.isEmpty(template)){
 			template = "该请求已安排人员处理";
 		}
@@ -753,16 +752,22 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 	}
 
-	private String getOrganizationAssignTopicForCommentTemplate(long orgId,long userId) {
-
+	private String getOrganizationAssignTopicForCommentTemplate(long orgId,OrganizationMember member,int namespaceId) {
+		
 		Map<String,Object> map = new HashMap<String, Object>();
-		OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, orgId);
 		if(member != null){
 			map.put("memberName", member.getContactName());
 			map.put("memberContactToken", member.getContactToken());
 		}
-
-		User user = userProvider.findUserById(member.getTargetId());
+		User user = null;
+		if(0 == member.getTargetId()){
+			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, member.getContactToken());
+			if(userIdentifier != null)
+				user = userProvider.findUserById(userIdentifier.getOwnerUid());
+		}else{
+			user = userProvider.findUserById(member.getTargetId());
+		}
+		
 		
 		if(null == user){
 			LOGGER.error("Users do not register.");
@@ -1495,20 +1500,28 @@ public class OrganizationServiceImpl implements OrganizationService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"propterty organizationId or topicId or userId paramter can not be null or empty.");
 		}
+		
 		Organization organization = this.checkOrganization(cmd.getOrganizationId());
 		Post topic = this.checkTopic(cmd.getTopicId());
-		OrganizationMember desOrgMember = this.checkDesOrgMember(cmd.getUserId(),organization.getId());
+		OrganizationMember desOrgMember = null;
+		if( 0 == cmd.getUserId()){
+			desOrgMember = this.checkDesOrgMember(cmd.getContactPhone(),organization.getId());
+		}else{
+			desOrgMember = this.checkDesOrgMember(cmd.getUserId(),organization.getId());
+		}
+		
+		OrganizationMember member = desOrgMember;
 		User user = UserContext.current().getUser();
+		int namespaceId = null == cmd.getNamespaceId() ? user.getNamespaceId() : cmd.getNamespaceId();
 		if(null == cmd.getParentId()) cmd.setParentId(organization.getId());
 		OrganizationMember operOrgMember = this.checkOperOrgMember(user.getId(), cmd.getParentId());
 		OrganizationTask task = this.checkOrgTask(cmd.getParentId(), cmd.getTopicId());
 
 		dbProvider.execute((status) -> {
 //			///////////////////////////////////////////////////
-			List<OrganizationMember> member = this.organizationProvider.listOrganizationMembers(cmd.getUserId());
-			
-			if(member != null && member.size() > 0){
-				String orgGroup = member.get(0).getMemberGroup();
+//			List<OrganizationMember> member = this.organizationProvider.listOrganizationMembers(cmd.getUserId());
+			if(member != null){
+				String orgGroup = member.getMemberGroup();
 				if(OrganizationGroup.CUSTOMER_SERVICE.getCode().equals(orgGroup) || 
 						orgGroup == OrganizationGroup.CUSTOMER_SERVICE.getCode()){
 					task.setTaskStatus(OrganizationTaskStatus.PROCESSING.getCode());
@@ -1519,13 +1532,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 				}
 			}
 			task.setOperateTime(new Timestamp(System.currentTimeMillis()));
-			task.setOperatorUid(desOrgMember.getTargetId());;
+			task.setOperatorUid(user.getId());
 			task.setProcessingTime(new Timestamp(System.currentTimeMillis()));
 			this.organizationProvider.updateOrganizationTask(task);
 			//发送评论
-			sendComment(cmd.getTopicId(),topic.getForumId(),organization.getId(),desOrgMember.getTargetId(),topic.getCategoryId());
+			sendComment(cmd.getTopicId(),topic.getForumId(),organization.getId(),member,topic.getCategoryId(),namespaceId);
 			//给分配的处理人员发任务分配短信
-			sendSmToOrgMemberForAssignOrgTopic(organization,operOrgMember,desOrgMember,task);
+			sendSmToOrgMemberForAssignOrgTopic(organization,operOrgMember,member,task);
 			return status;
 		});
 	}
@@ -1559,6 +1572,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 		return desOrgMember;
 	}
+	
+	private OrganizationMember checkDesOrgMember(String contactPhone, Long orgId) {
+		OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(contactPhone, orgId);
+		if(desOrgMember == null){
+			LOGGER.error("User is not in the organization.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"User is not in the organization.");
+		}
+		return desOrgMember;
+	}
 
 	private Post checkTopic(Long topicId) {
 		Post topic = this.forumProvider.findPostById(topicId);
@@ -1571,36 +1594,32 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 
 	private void sendSmToOrgMemberForAssignOrgTopic(Organization organization,OrganizationMember operOrgMember, OrganizationMember desOrgMember,OrganizationTask task) {
-
-		String locale = "zh_CN";
-		String template = null;
-
+ 
 		OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getCreatorUid(), organization.getId());
+		 List<Tuple<String, Object>> variables =null;
 		//组织代发求助帖
 		if(member != null){
-			Map<String,Object> map = new HashMap<String,Object>();
-			map.put("orgName", organization.getName());
-			map.put("topicType",OrganizationTaskType.fromCode(task.getTaskType()).getName());
-			map.put("phone", operOrgMember.getContactToken());
-			template = this.localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, 
-					OrganizationNotificationTemplateCode.ORGANIZATION_ASSIGN_TOPIC_BY_MANAGER_FOR_MEMBER, locale, map, "");
+			variables =  smsProvider.toTupleList(SmsTemplateCode.KEY_PHONE, operOrgMember.getContactToken()); 
+			
 		}
-		else{//用户自己发求助帖
-			Map<String,Object> map = new HashMap<String,Object>();
-			map.put("topicType",OrganizationTaskType.fromCode(task.getTaskType()).getName());
+		else{//用户自己发求助帖 
 			User user = this.userProvider.findUserById(task.getCreatorUid());
 			if(user != null){
 				UserIdentifier identify = this.getUserMobileIdentifier(user.getId());
 				if(identify != null){
-					map.put("phone", identify.getIdentifierToken());
+					variables =  smsProvider.toTupleList(SmsTemplateCode.KEY_PHONE, operOrgMember.getContactToken()); 
+				}
+				else {
+					variables =  smsProvider.toTupleList(SmsTemplateCode.KEY_PHONE, ""); 
 				}
 			}
-			template = this.localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_ASSIGN_TOPIC_FOR_MEMBER, locale, map, "");
+		
 		}
-
-		if(template == null || template.equals("")) template = "您有新的任务";
-
-		this.smsProvider.sendSms(desOrgMember.getContactToken(), template);
+		smsProvider.addToTupleList(variables, SmsTemplateCode.KEY_TOPICTYPE, OrganizationTaskType.fromCode(task.getTaskType()).getName());
+	    String templateScope = SmsTemplateCode.SCOPE;
+	    int templateId = SmsTemplateCode.ORGANIZATION_ASSIGNED_CODE;
+	    String templateLocale = UserContext.current().getUser().getLocale();
+	    smsProvider.sendSms(UserContext.current().getUser().getNamespaceId(), desOrgMember.getContactToken(), templateScope, templateId, templateLocale, variables);
 	}
 
 	@Override
