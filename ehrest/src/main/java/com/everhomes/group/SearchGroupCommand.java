@@ -1,9 +1,13 @@
 // @formatter:off
 package com.everhomes.group;
 
+import com.everhomes.util.StringHelper;
+
 
 /**
  * <ul>
+ * <li>namespaceId: 命名空间ID</li>
+ * <li>communityId: 用户当前小区ID</li>
  * <li>familyId: 请求人所在的家庭ID</li>
  * <li>longitude: 请求人所有位置的经度</li> 
  * <li>latitude: 请求人所有位置的纬度</li> 
@@ -14,6 +18,8 @@ package com.everhomes.group;
  */
 public class SearchGroupCommand {
     private Integer namespaceId;
+    
+    private Long communityId;
     
     private String queryString;
     
@@ -30,6 +36,14 @@ public class SearchGroupCommand {
 
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
     public Long getPageAnchor() {
@@ -55,5 +69,9 @@ public class SearchGroupCommand {
     public void setQueryString(String queryString) {
         this.queryString = queryString;
     }
-    
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }
