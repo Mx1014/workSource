@@ -1051,8 +1051,7 @@ public class ForumServiceImpl implements ForumService {
         return ConvertHelper.convert(post, PostDTO.class);
     }
     
-    private void sendMessageCode(Long uid, String locale, Map<String, String> content, int code) {
-        Map<String, Object> map = new HashMap<String, Object>();
+    private void sendMessageCode(Long uid, String locale, Map<String, String> map, int code) {
         String scope = ForumNotificationTemplateCode.SCOPE;
         
         String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
