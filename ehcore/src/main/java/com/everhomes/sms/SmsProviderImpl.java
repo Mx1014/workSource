@@ -1,6 +1,7 @@
 //@format
 package com.everhomes.sms;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -140,5 +141,18 @@ public class SmsProviderImpl implements SmsProvider {
             }
             return null;
         });
+    }
+    
+    public List<Tuple<String, Object>> toTupleList(String key, Object value) {
+        List<Tuple<String, Object>> list = new ArrayList<Tuple<String,Object>>();
+        Tuple<String, Object> variable = new Tuple<String, Object>(key, value);
+        list.add(variable);
+        
+        return list;
+    }
+    
+    public void addToTupleList(List<Tuple<String, Object>> list, String key, Object value) {
+        Tuple<String, Object> variable = new Tuple<String, Object>(key, value);
+        list.add(variable);
     }
 }
