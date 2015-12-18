@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.EnterpriseSearcher;
 import com.everhomes.search.GroupQueryFilter;
@@ -48,6 +49,7 @@ public class EnterpriseSearcherImpl extends AbstractElasticSearch implements Ent
     private XContentBuilder createDoc(Enterprise enterprise){
         try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
+            b.field("namespaceId", enterprise.getNamespaceId());
             b.field("name", enterprise.getName());
             b.field("description", enterprise.getDescription());
             b.field("createTime", enterprise.getCreateTime());
@@ -131,7 +133,7 @@ public class EnterpriseSearcherImpl extends AbstractElasticSearch implements Ent
         if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
             qb = QueryBuilders.matchAllQuery();
         } else {
-            qb = QueryBuilders.multiMatchQuery(cmd.keyword)
+            qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
                     .field("name", 5.0f)
                     .field("name.pinyin_prefix", 2.0f)
                     .field("name.pinyin_gram", 1.0f);    
@@ -148,6 +150,10 @@ public class EnterpriseSearcherImpl extends AbstractElasticSearch implements Ent
 //        if(null != fb) {
 //            qb = QueryBuilders.filteredQuery(qb, fb);
 //        }
+        
+        Integer namespaceId = (cmd.getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
+        FilterBuilder fb = FilterBuilders.termFilter("namespaceId", namespaceId);
+        qb = QueryBuilders.filteredQuery(qb, fb);
         
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         
