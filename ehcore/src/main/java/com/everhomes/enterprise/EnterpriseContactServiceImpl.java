@@ -498,7 +498,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
                 } else {
                     this.enterpriseContactProvider.updateContact(contact);
                 }
-                this.userProvider.deleteUserGroup(contact.getId(), contact.getEnterpriseId());
+                this.userProvider.deleteUserGroup(contact.getUserId(), contact.getEnterpriseId());
                 
                 Group group = this.groupProvider.findGroupById(contact.getEnterpriseId());
                 long memberCount = group.getMemberCount() - 1;
@@ -511,7 +511,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
         });
         
         if(LOGGER.isInfoEnabled()) {
-            LOGGER.info("Enterprise contact is deleted(active), operatorUid=" + operatorUid + ", contactId=" + contact.getId() 
+            LOGGER.info("Enterprise contact is deleted(active), operatorUid=" + operatorUid + ", contactId=" + contact.getUserId() 
                 + ", enterpriseId=" + contact.getEnterpriseId() + ", status=" + contact.getStatus() + ", removeFromDb=" + removeFromDb);
         }
     } 
