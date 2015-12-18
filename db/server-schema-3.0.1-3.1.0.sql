@@ -551,7 +551,6 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'sms.default', 3, 'zh_CN', '账单信息', '您${year}年${month}月物业账单为:本月金额￥${dueAmount}，往期欠款￥${oweAmount}，本月实付金额￥${payAmount}，应付金额￥${balance}。${description}请尽快使用左邻缴纳物业费。');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'sms.default.yzx',3, 'zh_CN', '账单信息', '');
 
-
 -- 给被分配人员发短信
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'sms.default', 4, 'zh_CN', '给被分配人员发短信:分配请求服务帖任务给处理员', '业主${phone}发布了新的${topicType}帖，您已被分配处理该业主的需求，请尽快联系该业主。');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'sms.default.yzx', 4, 'zh_CN', '给被分配人员发短信:分配请求服务帖任务给处理员', '');
@@ -559,5 +558,6 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 -- 物业一键推送消息
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'sms.default', 5, 'zh_CN', '物业一键推送消息', '左邻温馨提醒您：${msg}祝您生活愉快。');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'sms.default.yzx', 5, 'zh_CN', '物业一键推送消息', '');
+
 
 SET foreign_key_checks = 1;
