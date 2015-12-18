@@ -1041,8 +1041,10 @@ public class ForumServiceImpl implements ForumService {
         if(topic != null && !topic.getCreatorUid().equals(userId) && !topic.getStatus().equals(PostStatus.INACTIVE.getCode())) {
             //Send message to creator
             Map<String, String> map = new HashMap<String, String>();
-            map.put("userName", user.getNickName());
-            map.put("postName", post.getSubject());
+            String userName = (user.getNickName() == null) ? "" : user.getNickName();
+            String subject = (topic.getSubject() == null) ? "" : topic.getSubject();
+            map.put("userName", userName);
+            map.put("postName", subject);
             sendMessageCode(post.getCreatorUid(), user.getLocale(), map, ForumNotificationTemplateCode.FORUM_REPLAY_ONE_TO_CREATOR);
         }
         
