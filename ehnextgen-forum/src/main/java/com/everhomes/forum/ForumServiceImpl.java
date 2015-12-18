@@ -1070,6 +1070,11 @@ public class ForumServiceImpl implements ForumService {
         if(null != meta && meta.size() > 0) {
             messageDto.getMeta().putAll(meta);
             }
+        
+        if(LOGGER.isInfoEnabled()) {
+            LOGGER.info("forum sendMessageToUser " + content + " uid= " + uid);
+        }
+        
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
                 uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
     }
