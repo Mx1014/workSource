@@ -539,4 +539,8 @@ ALTER TABLE `eh_version_upgrade_rules` DROP COLUMN `namespace_id`;
 
 ALTER TABLE `eh_forum_posts` ADD COLUMN `tag` VARCHAR(32);
 
+
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'sms.default', 1, 'zh_CN', '验证码', '您的验证码为${vcode}，10分钟内有效，感谢您的使用。');
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'sms.default.yzx', 1, 'zh_CN', '验证码', '9547');
+
 SET foreign_key_checks = 1;

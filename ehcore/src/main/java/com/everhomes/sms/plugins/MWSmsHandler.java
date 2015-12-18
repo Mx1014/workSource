@@ -155,6 +155,11 @@ public class MWSmsHandler implements SmsHandler {
         
         String content = localeTemplateService.getLocaleTemplateString(templateScope, templateId, 
             templateLocale, map, "");
-        doSend(phoneNumbers, content);
+        if(content != null && content.trim().length() > 0) {
+            doSend(phoneNumbers, content);
+        } else {
+            LOGGER.error("The mw template id is empty, namespaceId=" + namespaceId + ", templateScope=" + templateScope 
+                + ", templateId=" + templateId + ", templateLocale=" + templateLocale);
+        }
     }
 }
