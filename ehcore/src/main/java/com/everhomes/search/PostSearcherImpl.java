@@ -196,7 +196,6 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
     public void syncFromDb() {
         List<Post> posts = new ArrayList<Post>();
         int pageSize = 200;
-        AtomicInteger count = new AtomicInteger();
         this.deleteAll();
         
         this.forumProvider.iteratePosts(pageSize, new IteratePostCallback() {
@@ -225,7 +224,7 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
         if(posts.size() > 0) {
             this.bulkUpdate(posts);
             posts.clear();
-            LOGGER.info("posts process count: " + count.get());
+            LOGGER.info("posts process count: " + posts.size());
         }
         
         this.optimize(1);
