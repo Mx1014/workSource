@@ -14,6 +14,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class SearchTopicCommand {
+    private Integer namespaceId;
     private Double longitude;
     private Double latitude;
     
@@ -29,6 +30,14 @@ public class SearchTopicCommand {
     private Integer pageSize;
     
     public SearchTopicCommand() {
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
     }
 
     public Double getLongitude() {

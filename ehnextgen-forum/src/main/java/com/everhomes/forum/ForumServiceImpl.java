@@ -265,7 +265,7 @@ public class ForumServiceImpl implements ForumService {
             } catch(Exception e) {
                 LOGGER.error("Failed to update the view count of post, userId=" + userId + ", postId=" + postId, e);
             }
-            PostDTO postDto =  getTopicById(postId, cmd.getCommunityId(), true);
+            PostDTO postDto =  getTopicById(postId, cmd.getCommunityId(), true, true);
             
             long endTime = System.currentTimeMillis();
             if(LOGGER.isInfoEnabled()) {
@@ -323,7 +323,7 @@ public class ForumServiceImpl implements ForumService {
             if(PostStatus.ACTIVE != PostStatus.fromCode(post.getStatus())) {
                 //Added by Janson
                 if( (!(getByOwnerId && post.getCreatorUid().equals(userId)))
-                        && (!(post.getCreatorUid() != post.getDeleterUid() && post.getCreatorUid() == userId)) ){
+                        && (post.getCreatorUid().equals(post.getDeleterUid()) || post.getCreatorUid() != userId.longValue()) ){
             		LOGGER.error("Forum post already deleted, userId=" + userId + ", topicId=" + topicId);
             		throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
             				ForumServiceErrorCode.ERROR_FORUM_TOPIC_DELETED, "Forum post already deleted");
@@ -343,6 +343,11 @@ public class ForumServiceImpl implements ForumService {
     
     @Override
     public void deletePost(Long forumId, Long postId) {
+        deletePost(forumId, postId, true);
+    }
+    
+    @Override
+    public void deletePost(Long forumId, Long postId, boolean deleteUserPost) {
         User user = UserContext.current().getUser();
         Long userId = user.getId();
         
@@ -371,12 +376,16 @@ public class ForumServiceImpl implements ForumService {
             post.setStatus(PostStatus.INACTIVE.getCode());
             post.setDeleterUid(userId);
             post.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            
             try {
                 this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_POST.getCode()).enter(()-> {
                     this.forumProvider.updatePost(post);
-                    if(userId.equals(post.getCreatorUid())){
-                    	userActivityProvider.updateProfileIfNotExist(post.getCreatorUid(), UserProfileContstant.POSTED_TOPIC_COUNT, -1);
-                    }
+                    if(deleteUserPost) {
+                        if(userId.equals(post.getCreatorUid())){
+                            this.userActivityProvider.deletePostedTopic(userId, postId); 
+                            userActivityProvider.updateProfileIfNotExist(post.getCreatorUid(), UserProfileContstant.POSTED_TOPIC_COUNT, -1);
+                            }
+                        }
                     if(userIds.size() != 0){
                     	for(Long id:userIds){
                     		userActivityProvider.deleteFavorite(id, postId, "topic");
@@ -393,6 +402,23 @@ public class ForumServiceImpl implements ForumService {
                 LOGGER.error("Failed to update the post status, userId=" + userId + ", postId=" + postId, e);
             }
         } else {
+            //Added by Janson
+            if(deleteUserPost) {
+                try {
+                        this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_POST.getCode()).enter(()-> {
+                            if(userId.equals(post.getCreatorUid())){
+                                //Try delete the exists inactive post
+                                if(this.userActivityProvider.deletePostedTopic(userId, postId) > 0) {
+                                    userActivityProvider.updateProfileIfNotExist(post.getCreatorUid(), UserProfileContstant.POSTED_TOPIC_COUNT, -1);    
+                                    }
+                                }
+                            
+                        return null;
+                        });
+                } catch(Exception e) {
+                    LOGGER.error("Failed to update the post status, userId=" + userId + ", postId=" + postId, e);
+                }
+            }
             if(LOGGER.isInfoEnabled()) {
                 LOGGER.info("The post is already deleted, userId=" + userId + ", postId=" + postId);
             }
@@ -1011,19 +1037,21 @@ public class ForumServiceImpl implements ForumService {
             userPointService.getItemPoint(PointType.CREATE_COMMENT), userId);  
         userPointService.addPoint(pointCmd);
         
-        if(!post.getCreatorUid().equals(userId) && !post.getStatus().equals(PostStatus.INACTIVE.getCode())) {
+        Post topic = this.forumProvider.findPostById(post.getParentPostId());
+        if(topic != null && !topic.getCreatorUid().equals(userId) && !topic.getStatus().equals(PostStatus.INACTIVE.getCode())) {
             //Send message to creator
             Map<String, String> map = new HashMap<String, String>();
-            map.put("userName", user.getNickName());
-            map.put("postName", post.getSubject());
-            sendMessageCode(post.getCreatorUid(), user.getLocale(), map, ForumNotificationTemplateCode.FORUM_REPLAY_ONE_TO_CREATOR);
+            String userName = (user.getNickName() == null) ? "" : user.getNickName();
+            String subject = (topic.getSubject() == null) ? "" : topic.getSubject();
+            map.put("userName", userName);
+            map.put("postName", subject);
+            sendMessageCode(topic.getCreatorUid(), user.getLocale(), map, ForumNotificationTemplateCode.FORUM_REPLAY_ONE_TO_CREATOR);
         }
         
         return ConvertHelper.convert(post, PostDTO.class);
     }
     
-    private void sendMessageCode(Long uid, String locale, Map<String, String> content, int code) {
-        Map<String, Object> map = new HashMap<String, Object>();
+    private void sendMessageCode(Long uid, String locale, Map<String, String> map, int code) {
         String scope = ForumNotificationTemplateCode.SCOPE;
         
         String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
@@ -1042,6 +1070,11 @@ public class ForumServiceImpl implements ForumService {
         if(null != meta && meta.size() > 0) {
             messageDto.getMeta().putAll(meta);
             }
+        
+        if(LOGGER.isInfoEnabled()) {
+            LOGGER.info("forum sendMessageToUser " + content + " uid= " + uid);
+        }
+        
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
                 uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
     }
@@ -1882,6 +1915,7 @@ public class ForumServiceImpl implements ForumService {
         commentPost.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         commentPost.setPrivateFlag(PostPrivacy.PUBLIC.getCode());
         commentPost.setAssignedFlag(PostAssignedFlag.NONE.getCode());
+        commentPost.setStatus(PostStatus.ACTIVE.getCode());
         
         return commentPost;
     }

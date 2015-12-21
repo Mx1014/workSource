@@ -10,6 +10,9 @@ public class SearchUtils {
     //public static final String COMMUNITYINDEXNAME = "everhomesv3";
     public static final String COMMUNITYINDEXTYPE = "community";
     
+    //public static final String ENTERPRISEINDEXNAME = "everhomesv3";
+    public static final String ENTERPRISEINDEXTYPE = "enterprise";
+    
     public static Long getLongField(Object o) {
         Long v = -1l;
         String s = "";

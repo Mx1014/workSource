@@ -27,6 +27,7 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/topic" -d '
 			"forumName":{"type":"string", "index":"no", "store":"yes"},
 			"displayName":{"type":"string", "index":"no", "store":"yes"},
             "parentPostId": {"type":"long"},
+			"namespaceId": {"type":"long"},
             "location": {
                 "type": "geo_point",
                 "geohash": true,

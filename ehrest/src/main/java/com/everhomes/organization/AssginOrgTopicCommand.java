@@ -11,6 +11,8 @@ import com.everhomes.util.StringHelper;
  * <li>organizationId : 组织id</li>
  * <li>topicId: 帖子ID</li>
  * <li>userId: 接收任务的用户Id</li>
+ * <li>contactPhone: 电话号码</li>
+ * <li>namespaceId: namespaceId</li>
  * </ul>
  */
 public class AssginOrgTopicCommand {
@@ -23,6 +25,10 @@ public class AssginOrgTopicCommand {
 	private Long topicId;
 	@NotNull
     private Long userId;
+	
+	private String contactPhone;
+	
+	private Integer namespaceId;
     
     public Long getOrganizationId() {
 		return organizationId;
@@ -60,6 +66,25 @@ public class AssginOrgTopicCommand {
 
 	public void setParentId(Long parentId) {
 		this.parentId = parentId;
+	}
+
+	
+	public String getContactPhone() {
+		return contactPhone;
+	}
+
+	public void setContactPhone(String contactPhone) {
+		this.contactPhone = contactPhone;
+	}
+	
+	
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	@Override

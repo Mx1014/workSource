@@ -25,6 +25,7 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/enterprise" -d '
                 }
             }, 
             "description":{"type":"string","index_analyzer":"ansj_index", "search_analyzer":"ansj_query", "similarity":"BM25", "store":"yes"},
+			"namespaceId":{"type":"long"},
             "createTime":{"type":"date"}
         }
     }
