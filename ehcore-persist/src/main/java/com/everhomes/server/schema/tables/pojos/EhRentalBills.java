@@ -11,64 +11,64 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalBills implements java.io.Serializable {
 
-	private static final long serialVersionUID = 575638771;
+	private static final long serialVersionUID = 987385087;
 
-	private java.lang.Long     id;
-	private java.lang.Long     ownerId;
-	private java.lang.String   siteType;
-	private java.lang.Long     rentalSiteId;
-	private java.lang.Long     rentalUid;
-	private java.sql.Date      rentalDate;
-	private java.sql.Timestamp startTime;
-	private java.sql.Timestamp endTime;
-	private java.lang.Double   rentalCount;
-	private java.lang.Double   payTotalMoney;
-	private java.lang.Double   siteTotalMoney;
-	private java.lang.Double   reserveMoney;
-	private java.sql.Timestamp reserveTime;
-	private java.sql.Timestamp payStartTime;
-	private java.sql.Timestamp payEndTime;
-	private java.sql.Timestamp payTime;
-	private java.sql.Timestamp cancelTime;
-	private java.lang.Double   paidMoney;
-	private java.lang.Byte     status;
-	private java.lang.Byte     visibleFlag;
-	private java.lang.Byte     invoiceFlag;
-	private java.lang.Long     creatorUid;
-	private java.sql.Timestamp createTime;
-	private java.lang.Long     operatorUid;
-	private java.sql.Timestamp operateTime;
-	private java.lang.String   ownerType;
+	private java.lang.Long       id;
+	private java.lang.Long       ownerId;
+	private java.lang.String     siteType;
+	private java.lang.Long       rentalSiteId;
+	private java.lang.Long       rentalUid;
+	private java.sql.Date        rentalDate;
+	private java.sql.Timestamp   startTime;
+	private java.sql.Timestamp   endTime;
+	private java.lang.Double     rentalCount;
+	private java.math.BigDecimal payTotalMoney;
+	private java.math.BigDecimal siteTotalMoney;
+	private java.math.BigDecimal reserveMoney;
+	private java.sql.Timestamp   reserveTime;
+	private java.sql.Timestamp   payStartTime;
+	private java.sql.Timestamp   payEndTime;
+	private java.sql.Timestamp   payTime;
+	private java.sql.Timestamp   cancelTime;
+	private java.math.BigDecimal paidMoney;
+	private java.lang.Byte       status;
+	private java.lang.Byte       visibleFlag;
+	private java.lang.Byte       invoiceFlag;
+	private java.lang.Long       creatorUid;
+	private java.sql.Timestamp   createTime;
+	private java.lang.Long       operatorUid;
+	private java.sql.Timestamp   operateTime;
+	private java.lang.String     ownerType;
 
 	public EhRentalBills() {}
 
 	public EhRentalBills(
-		java.lang.Long     id,
-		java.lang.Long     ownerId,
-		java.lang.String   siteType,
-		java.lang.Long     rentalSiteId,
-		java.lang.Long     rentalUid,
-		java.sql.Date      rentalDate,
-		java.sql.Timestamp startTime,
-		java.sql.Timestamp endTime,
-		java.lang.Double   rentalCount,
-		java.lang.Double   payTotalMoney,
-		java.lang.Double   siteTotalMoney,
-		java.lang.Double   reserveMoney,
-		java.sql.Timestamp reserveTime,
-		java.sql.Timestamp payStartTime,
-		java.sql.Timestamp payEndTime,
-		java.sql.Timestamp payTime,
-		java.sql.Timestamp cancelTime,
-		java.lang.Double   paidMoney,
-		java.lang.Byte     status,
-		java.lang.Byte     visibleFlag,
-		java.lang.Byte     invoiceFlag,
-		java.lang.Long     creatorUid,
-		java.sql.Timestamp createTime,
-		java.lang.Long     operatorUid,
-		java.sql.Timestamp operateTime,
-		java.lang.String   ownerType
+		java.lang.Long       id,
+		java.lang.Long       ownerId,
+		java.lang.String     siteType,
+		java.lang.Long       rentalSiteId,
+		java.lang.Long       rentalUid,
+		java.sql.Date        rentalDate,
+		java.sql.Timestamp   startTime,
+		java.sql.Timestamp   endTime,
+		java.lang.Double     rentalCount,
+		java.math.BigDecimal payTotalMoney,
+		java.math.BigDecimal siteTotalMoney,
+		java.math.BigDecimal reserveMoney,
+		java.sql.Timestamp   reserveTime,
+		java.sql.Timestamp   payStartTime,
+		java.sql.Timestamp   payEndTime,
+		java.sql.Timestamp   payTime,
+		java.sql.Timestamp   cancelTime,
+		java.math.BigDecimal paidMoney,
+		java.lang.Byte       status,
+		java.lang.Byte       visibleFlag,
+		java.lang.Byte       invoiceFlag,
+		java.lang.Long       creatorUid,
+		java.sql.Timestamp   createTime,
+		java.lang.Long       operatorUid,
+		java.sql.Timestamp   operateTime,
+		java.lang.String     ownerType
 	) {
 		this.id = id;
 		this.ownerId = ownerId;
@@ -170,27 +170,27 @@ public class EhRentalBills implements java.io.Serializable {
 		this.rentalCount = rentalCount;
 	}
 
-	public java.lang.Double getPayTotalMoney() {
+	public java.math.BigDecimal getPayTotalMoney() {
 		return this.payTotalMoney;
 	}
 
-	public void setPayTotalMoney(java.lang.Double payTotalMoney) {
+	public void setPayTotalMoney(java.math.BigDecimal payTotalMoney) {
 		this.payTotalMoney = payTotalMoney;
 	}
 
-	public java.lang.Double getSiteTotalMoney() {
+	public java.math.BigDecimal getSiteTotalMoney() {
 		return this.siteTotalMoney;
 	}
 
-	public void setSiteTotalMoney(java.lang.Double siteTotalMoney) {
+	public void setSiteTotalMoney(java.math.BigDecimal siteTotalMoney) {
 		this.siteTotalMoney = siteTotalMoney;
 	}
 
-	public java.lang.Double getReserveMoney() {
+	public java.math.BigDecimal getReserveMoney() {
 		return this.reserveMoney;
 	}
 
-	public void setReserveMoney(java.lang.Double reserveMoney) {
+	public void setReserveMoney(java.math.BigDecimal reserveMoney) {
 		this.reserveMoney = reserveMoney;
 	}
 
@@ -234,11 +234,11 @@ public class EhRentalBills implements java.io.Serializable {
 		this.cancelTime = cancelTime;
 	}
 
-	public java.lang.Double getPaidMoney() {
+	public java.math.BigDecimal getPaidMoney() {
 		return this.paidMoney;
 	}
 
-	public void setPaidMoney(java.lang.Double paidMoney) {
+	public void setPaidMoney(java.math.BigDecimal paidMoney) {
 		this.paidMoney = paidMoney;
 	}
 

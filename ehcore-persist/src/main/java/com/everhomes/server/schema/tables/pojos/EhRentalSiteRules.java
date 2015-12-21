@@ -11,52 +11,52 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteRules implements java.io.Serializable {
 
-	private static final long serialVersionUID = 403927939;
+	private static final long serialVersionUID = 108782339;
 
-	private java.lang.Long     id;
-	private java.lang.Long     ownerId;
-	private java.lang.String   siteType;
-	private java.lang.Long     rentalSiteId;
-	private java.lang.Byte     rentalType;
-	private java.lang.Byte     amorpm;
-	private java.lang.Integer  rentalStep;
-	private java.sql.Timestamp beginTime;
-	private java.sql.Timestamp endTime;
-	private java.lang.Double   counts;
-	private java.lang.Double   unit;
-	private java.lang.Double   price;
-	private java.sql.Date      siteRentalDate;
-	private java.lang.Byte     status;
-	private java.lang.Long     creatorUid;
-	private java.sql.Timestamp createTime;
-	private java.lang.Long     operatorUid;
-	private java.sql.Timestamp operateTime;
-	private java.lang.String   ownerType;
-	private java.lang.Double   timeStep;
+	private java.lang.Long       id;
+	private java.lang.Long       ownerId;
+	private java.lang.String     siteType;
+	private java.lang.Long       rentalSiteId;
+	private java.lang.Byte       rentalType;
+	private java.lang.Byte       amorpm;
+	private java.lang.Integer    rentalStep;
+	private java.sql.Timestamp   beginTime;
+	private java.sql.Timestamp   endTime;
+	private java.lang.Double     counts;
+	private java.lang.Double     unit;
+	private java.math.BigDecimal price;
+	private java.sql.Date        siteRentalDate;
+	private java.lang.Byte       status;
+	private java.lang.Long       creatorUid;
+	private java.sql.Timestamp   createTime;
+	private java.lang.Long       operatorUid;
+	private java.sql.Timestamp   operateTime;
+	private java.lang.String     ownerType;
+	private java.lang.Double     timeStep;
 
 	public EhRentalSiteRules() {}
 
 	public EhRentalSiteRules(
-		java.lang.Long     id,
-		java.lang.Long     ownerId,
-		java.lang.String   siteType,
-		java.lang.Long     rentalSiteId,
-		java.lang.Byte     rentalType,
-		java.lang.Byte     amorpm,
-		java.lang.Integer  rentalStep,
-		java.sql.Timestamp beginTime,
-		java.sql.Timestamp endTime,
-		java.lang.Double   counts,
-		java.lang.Double   unit,
-		java.lang.Double   price,
-		java.sql.Date      siteRentalDate,
-		java.lang.Byte     status,
-		java.lang.Long     creatorUid,
-		java.sql.Timestamp createTime,
-		java.lang.Long     operatorUid,
-		java.sql.Timestamp operateTime,
-		java.lang.String   ownerType,
-		java.lang.Double   timeStep
+		java.lang.Long       id,
+		java.lang.Long       ownerId,
+		java.lang.String     siteType,
+		java.lang.Long       rentalSiteId,
+		java.lang.Byte       rentalType,
+		java.lang.Byte       amorpm,
+		java.lang.Integer    rentalStep,
+		java.sql.Timestamp   beginTime,
+		java.sql.Timestamp   endTime,
+		java.lang.Double     counts,
+		java.lang.Double     unit,
+		java.math.BigDecimal price,
+		java.sql.Date        siteRentalDate,
+		java.lang.Byte       status,
+		java.lang.Long       creatorUid,
+		java.sql.Timestamp   createTime,
+		java.lang.Long       operatorUid,
+		java.sql.Timestamp   operateTime,
+		java.lang.String     ownerType,
+		java.lang.Double     timeStep
 	) {
 		this.id = id;
 		this.ownerId = ownerId;
@@ -168,11 +168,11 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		this.unit = unit;
 	}
 
-	public java.lang.Double getPrice() {
+	public java.math.BigDecimal getPrice() {
 		return this.price;
 	}
 
-	public void setPrice(java.lang.Double price) {
+	public void setPrice(java.math.BigDecimal price) {
 		this.price = price;
 	}
 

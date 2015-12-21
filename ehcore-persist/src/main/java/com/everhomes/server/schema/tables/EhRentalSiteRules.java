@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteRules extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord> {
 
-	private static final long serialVersionUID = -469686305;
+	private static final long serialVersionUID = 1335334213;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_site_rules</code>
@@ -82,9 +82,9 @@ public class EhRentalSiteRules extends org.jooq.impl.TableImpl<com.everhomes.ser
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Double> UNIT = createField("unit", org.jooq.impl.SQLDataType.DOUBLE, this, "1 or 0.5 basketball yard can rental half");
 
 	/**
-	 * The column <code>ehcore.eh_rental_site_rules.price</code>. how much every step every unit
+	 * The column <code>ehcore.eh_rental_site_rules.price</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Double> PRICE = createField("price", org.jooq.impl.SQLDataType.DOUBLE, this, "how much every step every unit");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.math.BigDecimal> PRICE = createField("price", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_rental_site_rules.site_rental_date</code>. which day

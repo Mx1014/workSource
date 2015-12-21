@@ -47,6 +47,17 @@ ALTER TABLE `eh_rental_bill_paybill_map`  CHANGE `community_id` `owner_id` BIGIN
 ALTER TABLE `eh_rental_bill_attachments` ADD COLUMN  `owner_type` VARCHAR(255) COMMENT 'owner type : community ; organization';
 ALTER TABLE `eh_rental_bill_attachments`  CHANGE `community_id` `owner_id` BIGINT(20) NOT NULL COMMENT '    community id or organization id ';
 
+
+ALTER TABLE `eh_rental_bills` CHANGE `paid_money` `paid_money` DECIMAL(10,2) DEFAULT NULL;
+ALTER TABLE `eh_rental_bills` CHANGE `pay_total_money` `pay_total_money` DECIMAL(10,2) DEFAULT NULL;
+ALTER TABLE `eh_rental_bills` CHANGE `site_total_money` `site_total_money` DECIMAL(10,2) DEFAULT NULL;
+ALTER TABLE `eh_rental_bills` CHANGE `reserve_money` `reserve_money` DECIMAL(10,2) DEFAULT NULL;
+ALTER TABLE `eh_rental_items_bills` CHANGE `total_money` `total_money` DECIMAL(10,2) DEFAULT NULL;
+ALTER TABLE `eh_rental_site_items` CHANGE `price` `price` DECIMAL(10,2) DEFAULT NULL;
+ALTER TABLE `eh_rental_site_rules` CHANGE `price` `price` DECIMAL(10,2) DEFAULT NULL;
+ALTER TABLE `eh_rental_sites_bills` CHANGE `total_money` `total_money` DECIMAL(10,2) DEFAULT NULL; 
+
+
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'family.notification', 20, 'zh_CN', '地址加速审核，通知操作者', '您已提交加速审核${address}，我们会尽快为您处理的。');
 
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'group.notification', 28, 'zh_CN', '加入公众圈', '您已订阅兴趣圈 “${groupName}”');

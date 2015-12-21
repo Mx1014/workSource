@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalBillsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhRentalBillsRecord> {
 
-	private static final long serialVersionUID = 449074250;
+	private static final long serialVersionUID = -1729444008;
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.id</code>. id
@@ -140,45 +140,45 @@ public class EhRentalBillsRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_bills.pay_total_money</code>. total money ,include items and site
+	 * Setter for <code>ehcore.eh_rental_bills.pay_total_money</code>.
 	 */
-	public void setPayTotalMoney(java.lang.Double value) {
+	public void setPayTotalMoney(java.math.BigDecimal value) {
 		setValue(9, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_bills.pay_total_money</code>. total money ,include items and site
+	 * Getter for <code>ehcore.eh_rental_bills.pay_total_money</code>.
 	 */
-	public java.lang.Double getPayTotalMoney() {
-		return (java.lang.Double) getValue(9);
+	public java.math.BigDecimal getPayTotalMoney() {
+		return (java.math.BigDecimal) getValue(9);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.site_total_money</code>.
 	 */
-	public void setSiteTotalMoney(java.lang.Double value) {
+	public void setSiteTotalMoney(java.math.BigDecimal value) {
 		setValue(10, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_bills.site_total_money</code>.
 	 */
-	public java.lang.Double getSiteTotalMoney() {
-		return (java.lang.Double) getValue(10);
+	public java.math.BigDecimal getSiteTotalMoney() {
+		return (java.math.BigDecimal) getValue(10);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_bills.reserve_money</code>. total money * reserve ratio
+	 * Setter for <code>ehcore.eh_rental_bills.reserve_money</code>.
 	 */
-	public void setReserveMoney(java.lang.Double value) {
+	public void setReserveMoney(java.math.BigDecimal value) {
 		setValue(11, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_bills.reserve_money</code>. total money * reserve ratio
+	 * Getter for <code>ehcore.eh_rental_bills.reserve_money</code>.
 	 */
-	public java.lang.Double getReserveMoney() {
-		return (java.lang.Double) getValue(11);
+	public java.math.BigDecimal getReserveMoney() {
+		return (java.math.BigDecimal) getValue(11);
 	}
 
 	/**
@@ -252,17 +252,17 @@ public class EhRentalBillsRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_bills.paid_money</code>. already paid money 
+	 * Setter for <code>ehcore.eh_rental_bills.paid_money</code>.
 	 */
-	public void setPaidMoney(java.lang.Double value) {
+	public void setPaidMoney(java.math.BigDecimal value) {
 		setValue(17, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_bills.paid_money</code>. already paid money 
+	 * Getter for <code>ehcore.eh_rental_bills.paid_money</code>.
 	 */
-	public java.lang.Double getPaidMoney() {
-		return (java.lang.Double) getValue(17);
+	public java.math.BigDecimal getPaidMoney() {
+		return (java.math.BigDecimal) getValue(17);
 	}
 
 	/**
@@ -403,7 +403,7 @@ public class EhRentalBillsRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	/**
 	 * Create a detached, initialised EhRentalBillsRecord
 	 */
-	public EhRentalBillsRecord(java.lang.Long id, java.lang.Long ownerId, java.lang.String siteType, java.lang.Long rentalSiteId, java.lang.Long rentalUid, java.sql.Date rentalDate, java.sql.Timestamp startTime, java.sql.Timestamp endTime, java.lang.Double rentalCount, java.lang.Double payTotalMoney, java.lang.Double siteTotalMoney, java.lang.Double reserveMoney, java.sql.Timestamp reserveTime, java.sql.Timestamp payStartTime, java.sql.Timestamp payEndTime, java.sql.Timestamp payTime, java.sql.Timestamp cancelTime, java.lang.Double paidMoney, java.lang.Byte status, java.lang.Byte visibleFlag, java.lang.Byte invoiceFlag, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.String ownerType) {
+	public EhRentalBillsRecord(java.lang.Long id, java.lang.Long ownerId, java.lang.String siteType, java.lang.Long rentalSiteId, java.lang.Long rentalUid, java.sql.Date rentalDate, java.sql.Timestamp startTime, java.sql.Timestamp endTime, java.lang.Double rentalCount, java.math.BigDecimal payTotalMoney, java.math.BigDecimal siteTotalMoney, java.math.BigDecimal reserveMoney, java.sql.Timestamp reserveTime, java.sql.Timestamp payStartTime, java.sql.Timestamp payEndTime, java.sql.Timestamp payTime, java.sql.Timestamp cancelTime, java.math.BigDecimal paidMoney, java.lang.Byte status, java.lang.Byte visibleFlag, java.lang.Byte invoiceFlag, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.String ownerType) {
 		super(com.everhomes.server.schema.tables.EhRentalBills.EH_RENTAL_BILLS);
 
 		setValue(0, id);
