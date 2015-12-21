@@ -15,6 +15,7 @@ public class FindRentalSiteWeekStatusCommandResponse {
 	private String siteName; 
 	private String introduction;
 	private String notice; 
+	private Long anchorTime;
 	@ItemType(RentalSiteDayRulesDTO.class)
 	private List<RentalSiteDayRulesDTO> siteDays;
 	
@@ -118,6 +119,16 @@ public class FindRentalSiteWeekStatusCommandResponse {
 
 	public void setContactNum(String contactNum) {
 		this.contactNum = contactNum;
+	}
+
+
+	public Long getAnchorTime() {
+		return anchorTime;
+	}
+
+
+	public void setAnchorTime(Long anchorTime) {
+		this.anchorTime = anchorTime;
 	}
  
 

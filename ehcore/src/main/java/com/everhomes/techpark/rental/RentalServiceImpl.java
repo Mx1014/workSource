@@ -1431,9 +1431,10 @@ public class RentalServiceImpl implements RentalService {
 			FindRentalSiteWeekStatusCommand cmd) {
 		 
 		java.util.Date reserveTime = new java.util.Date(); 
+		
 		RentalSite rs = this.rentalProvider.getRentalSiteById(cmd.getSiteId());
 		FindRentalSiteWeekStatusCommandResponse response = ConvertHelper.convert(rs, FindRentalSiteWeekStatusCommandResponse.class);
-
+		response.setAnchorTime(0L);
 		if(cmd.getOwnerType().equals(RentalOwnerType.ORGANIZATION.getCode())){
 			Organization org = this.organizationProvider.findOrganizationById(cmd.getOwnerId());
 			response.setOwnerName(org.getName());
@@ -1475,6 +1476,20 @@ public class RentalServiceImpl implements RentalService {
 						dto.setTimeStep(rsr.getTimeStep());
 						dto.setBeginTime(rsr.getBeginTime().getTime());
 						dto.setEndTime(rsr.getEndTime().getTime());
+						if(response.getAnchorTime().equals(0L)){
+							response.setAnchorTime(dto.getBeginTime());
+						}else{
+							try {
+								if(timeSF.parse(timeSF.format(new java.util.Date(response.getAnchorTime()))).after(
+										timeSF.parse(timeSF.format(new java.util.Date(dto.getBeginTime()))))){
+									response.setAnchorTime(dto.getBeginTime());
+								}
+							} catch (Exception e) {
+								LOGGER.error("anchorTime error  dto = "+ dto );
+							}
+							
+							
+						}
 					} else if (dto.getRentalType().equals(
 							RentalType.HALFDAY.getCode())) {
 						dto.setAmorpm(rsr.getAmorpm());
