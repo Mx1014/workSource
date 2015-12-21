@@ -744,10 +744,11 @@ public class RentalProviderImpl implements RentalProvider {
 					.equal(rentalSiteId));
 		if (null != startTime)
 			condition = condition.and(Tables.EH_RENTAL_BILLS.START_TIME
-					.greaterOrEqual(new Timestamp(startTime)));
+					.lessOrEqual(new Timestamp(endTime)));
 		if (null != endTime)
 			condition = condition.and(Tables.EH_RENTAL_BILLS.END_TIME
-					.lessOrEqual(new Timestamp(endTime)));
+					.greaterOrEqual(new Timestamp(startTime)));
+		 
 		if (null != billStatus)
 			condition = condition.and(Tables.EH_RENTAL_BILLS.STATUS
 					.equal(billStatus));
