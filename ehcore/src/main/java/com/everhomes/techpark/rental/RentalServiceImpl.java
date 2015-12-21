@@ -1,5 +1,6 @@
 package com.everhomes.techpark.rental;
 
+import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -1573,7 +1574,7 @@ public class RentalServiceImpl implements RentalService {
 							UserContext.current().getUser().getLocale(),
 							"too late to order the service")); 
 		}
-		if (bill.getPayTotalMoney().equals(0.0)){
+		if (bill.getPayTotalMoney().equals(new BigDecimal(0))){
 			bill.setStatus(SiteBillStatus.SUCCESS.getCode());
 			rentalProvider.updateRentalBill(bill);
 		}
