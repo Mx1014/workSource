@@ -50,6 +50,7 @@ public class RentalBillDTO {
 	private String companyName;
 	private String contactName;
 	private String contactPhonenum;
+	private String userPhone;
 	private String introduction;
 	private String notice; 
 	private Long startTime;
@@ -339,6 +340,14 @@ public class RentalBillDTO {
 
 	public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
+	}
+
+	public String getUserPhone() {
+		return userPhone;
+	}
+
+	public void setUserPhone(String userPhone) {
+		this.userPhone = userPhone;
 	}
  
 }

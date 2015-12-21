@@ -33,7 +33,10 @@ import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.onlinePay.OnlinePayService;
+import com.everhomes.user.IdentifierType;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -77,6 +80,8 @@ public class RentalServiceImpl implements RentalService {
 	private ConfigurationProvider configurationProvider;
 	@Autowired
 	RentalProvider rentalProvider;
+	@Autowired
+	private UserProvider userProvider;
 
 	private int getPageCount(int totalCount, int pageSize) {
 		int pageCount = totalCount / pageSize;
@@ -488,7 +493,7 @@ public class RentalServiceImpl implements RentalService {
 		Long userId = UserContext.current().getUser().getId();
 		int count = this.rentalProvider.countRentalBills(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSiteType(), null, SiteBillStatus.SUCCESS.getCode(), cmd.getStartTime(), cmd.getEndTime(), null,userId);
 		if(count > 0 ){ 
-			RentalBill bill =  this.rentalProvider.listRentalBills(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSiteType(), null, SiteBillStatus.SUCCESS.getCode(), 0,10,cmd.getStartTime(), cmd.getEndTime(), null,userId).
+			RentalBill bill =  this.rentalProvider.listRentalBills(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSiteType(), null, SiteBillStatus.SUCCESS.getCode(), 1,10,cmd.getStartTime(), cmd.getEndTime(), null,userId).
 					get(0);
 			mappingRentalBillDTO(billDTO, bill);
 			response.setAddBillCode(AddBillCode.CONFLICT.getCode());
@@ -762,6 +767,9 @@ public class RentalServiceImpl implements RentalService {
 		RentalSite rs = rentalProvider
 				.getRentalSiteById(bill.getRentalSiteId());
 		RentalRule rr=rentalProvider.getRentalRule(bill.getOwnerId(), bill.getOwnerType(), bill.getSiteType());
+		
+		UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(bill.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
+		dto.setUserPhone(userIdentifier.getIdentifierToken());
 		dto.setSiteName(rs.getSiteName());
 		dto.setBuildingName(rs.getBuildingName());
 		if(StringUtils.isEmpty( rs.getAddress())){
