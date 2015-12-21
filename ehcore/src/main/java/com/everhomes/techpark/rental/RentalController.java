@@ -315,15 +315,29 @@ public class RentalController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("addRentalBill")
-	@RestReturn(value = AddRentalBillCommandResponse.class)
+	@RestReturn(value = RentalBillDTO.class)
 	public RestResponse addRentalBill(@Valid AddRentalBillCommand cmd) {
+		AddRentalBillCommandResponse res = rentalService.addRentalBill(cmd); 
+		RestResponse response = new RestResponse(res.getRentalBill());
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	/**
+	 * <b>URL: /techpark/rental/addRentalBill</b>
+	 * <p>
+	 * 添加订单
+	 * </p>
+	 */
+	@RequestMapping("addServiceRentalBill")
+	@RestReturn(value = AddRentalBillCommandResponse.class)
+	public RestResponse addServiceRentalBill(@Valid AddRentalBillCommand cmd) {
 		AddRentalBillCommandResponse res = rentalService.addRentalBill(cmd); 
 		RestResponse response = new RestResponse(res);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
 	/**
 	 * <b>URL: /techpark/rental/addRentalItemBill</b>
 	 * <p>
