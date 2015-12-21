@@ -50,6 +50,7 @@ public class RentalBillDTO {
 	private String companyName;
 	private String contactName;
 	private String contactPhonenum;
+	private String userName;
 	private String userPhone;
 	private String introduction;
 	private String notice; 
@@ -348,6 +349,14 @@ public class RentalBillDTO {
 
 	public void setUserPhone(String userPhone) {
 		this.userPhone = userPhone;
+	}
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
 	}
  
 }

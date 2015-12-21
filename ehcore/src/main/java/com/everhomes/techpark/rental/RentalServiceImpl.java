@@ -34,6 +34,7 @@ import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.onlinePay.OnlinePayService;
 import com.everhomes.user.IdentifierType;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
@@ -770,6 +771,8 @@ public class RentalServiceImpl implements RentalService {
 		
 		UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(bill.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
 		dto.setUserPhone(userIdentifier.getIdentifierToken());
+		User user = this.userProvider.findUserById(bill.getRentalUid());
+		dto.setUserName(user.getNickName());
 		dto.setSiteName(rs.getSiteName());
 		dto.setBuildingName(rs.getBuildingName());
 		if(StringUtils.isEmpty( rs.getAddress())){
