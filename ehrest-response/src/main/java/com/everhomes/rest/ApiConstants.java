@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-12-21 16:45:15
+// generated at 2015-12-21 18:41:04
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -572,7 +572,6 @@ public interface ApiConstants {
     public static final String TECHPARK_RENTAL_ADDRENTALSITE_URL = "/techpark/rental/addRentalSite";
     public static final String TECHPARK_RENTAL_ADDRENTALSITEITEMS_URL = "/techpark/rental/addRentalSiteItems";
     public static final String TECHPARK_RENTAL_ADDRENTALSITESIMPLERULES_URL = "/techpark/rental/addRentalSiteSimpleRules";
-    public static final String TECHPARK_RENTAL_ADDSERVICERENTALBILL_URL = "/techpark/rental/addServiceRentalBill";
     public static final String TECHPARK_RENTAL_BATCHCOMPLETEBILL_URL = "/techpark/rental/batchCompleteBill";
     public static final String TECHPARK_RENTAL_BATCHINCOMPLETEBILL_URL = "/techpark/rental/batchIncompleteBill";
     public static final String TECHPARK_RENTAL_CANCELRENTALBILL_URL = "/techpark/rental/cancelRentalBill";
@@ -599,6 +598,7 @@ public interface ApiConstants {
     public static final String TECHPARK_RENTAL_ONLINEPAYCALLBACK_URL = "/techpark/rental/onlinePayCallback";
     public static final String TECHPARK_RENTAL_UPDATERENTALRULE_URL = "/techpark/rental/updateRentalRule";
     public static final String TECHPARK_RENTAL_UPDATERENTALSITE_URL = "/techpark/rental/updateRentalSite";
+    public static final String TECHPARK_RENTAL_VERIFYSERVICERENTALBILL_URL = "/techpark/rental/verifyServiceRentalBill";
     public static final String USER_ADMINLOGON_URL = "/user/adminLogon";
     public static final String USER_APPAGREEMENTS_URL = "/user/appAgreements";
     public static final String USER_APPIDSTATUS_URL = "/user/appIdStatus";

@@ -479,16 +479,10 @@ public class RentalServiceImpl implements RentalService {
 
 		return response;
 	}
-
 	@Override
-	public AddRentalBillCommandResponse addRentalBill(AddRentalBillCommand cmd) {
-		AddRentalBillCommandResponse response = new AddRentalBillCommandResponse();
+	public VerifyRentalBillCommandResponse VerifyRentalBill(AddRentalBillCommand cmd){
+		VerifyRentalBillCommandResponse response = new VerifyRentalBillCommandResponse();
 		response.setAddBillCode(AddBillCode.NORMAL.getCode());
-		if(null!=cmd.getCommunityId()){
-			cmd.setOwnerId(cmd.getCommunityId());
-			cmd.setOwnerType(RentalOwnerType.COMMUNITY.getCode());
-		}
-
 		RentalBillDTO billDTO = new RentalBillDTO();
 		response.setRentalBill(billDTO);
 		Long userId = UserContext.current().getUser().getId();
@@ -500,6 +494,20 @@ public class RentalServiceImpl implements RentalService {
 			response.setAddBillCode(AddBillCode.CONFLICT.getCode());
 			return response;
 		}
+		return response;
+	}
+	@Override
+	public RentalBillDTO addRentalBill(AddRentalBillCommand cmd) {
+
+		Long userId = UserContext.current().getUser().getId();
+		if(null!=cmd.getCommunityId()){
+			cmd.setOwnerId(cmd.getCommunityId());
+			cmd.setOwnerType(RentalOwnerType.COMMUNITY.getCode());
+		}
+
+		RentalBillDTO billDTO = new RentalBillDTO();
+		
+		
 		java.util.Date reserveTime = new java.util.Date();
 		List<RentalSiteRule> rentalSiteRules = new ArrayList<RentalSiteRule>();
 		RentalRule rentalRule = rentalProvider.getRentalRule(
@@ -690,7 +698,7 @@ public class RentalServiceImpl implements RentalService {
 			rentalProvider.createRentalSiteBill(rsb);
 		}
 		mappingRentalBillDTO(billDTO, rentalBill);
-		return response;
+		return billDTO;
 	}
 
 	private void valiRentalBill(Double rentalcount, List<Long> rentalSiteRuleIds) {

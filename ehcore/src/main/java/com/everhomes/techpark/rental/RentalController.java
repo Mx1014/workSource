@@ -317,8 +317,8 @@ public class RentalController extends ControllerBase {
 	@RequestMapping("addRentalBill")
 	@RestReturn(value = RentalBillDTO.class)
 	public RestResponse addRentalBill(@Valid AddRentalBillCommand cmd) {
-		AddRentalBillCommandResponse res = rentalService.addRentalBill(cmd); 
-		RestResponse response = new RestResponse(res.getRentalBill());
+		RentalBillDTO res = rentalService.addRentalBill(cmd); 
+		RestResponse response = new RestResponse(res);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -329,10 +329,10 @@ public class RentalController extends ControllerBase {
 	 * 添加订单
 	 * </p>
 	 */
-	@RequestMapping("addServiceRentalBill")
-	@RestReturn(value = AddRentalBillCommandResponse.class)
-	public RestResponse addServiceRentalBill(@Valid AddRentalBillCommand cmd) {
-		AddRentalBillCommandResponse res = rentalService.addRentalBill(cmd); 
+	@RequestMapping("verifyServiceRentalBill")
+	@RestReturn(value = VerifyRentalBillCommandResponse.class)
+	public RestResponse verifyServiceRentalBill(@Valid AddRentalBillCommand cmd) {
+		VerifyRentalBillCommandResponse res = rentalService.VerifyRentalBill(cmd); 
 		RestResponse response = new RestResponse(res);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

@@ -2,7 +2,7 @@ package com.everhomes.techpark.rental;
 
 import com.everhomes.util.StringHelper;
 
-public class AddRentalBillCommandResponse {
+public class VerifyRentalBillCommandResponse {
 	private Byte addBillCode; 
 	private RentalBillDTO rentalBill;
 	@Override
