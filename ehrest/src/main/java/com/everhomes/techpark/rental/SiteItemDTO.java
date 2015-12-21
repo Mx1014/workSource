@@ -1,5 +1,7 @@
 package com.everhomes.techpark.rental;
 
+import java.math.BigDecimal;
+
 import com.everhomes.util.StringHelper;
 /**
  * <ul>
@@ -12,7 +14,7 @@ import com.everhomes.util.StringHelper;
 public class SiteItemDTO {
 	private Long id;
 	private String itemName;
-	private Double itemPrice;
+	private BigDecimal itemPrice;
 	private Integer counts;
 	
 	
@@ -52,26 +54,7 @@ public class SiteItemDTO {
 
 
 
-
-
-
-
-	public Double getItemPrice() {
-		return itemPrice;
-	}
-
-
-
-
-
-
-
-	public void setItemPrice(Double itemPrice) {
-		this.itemPrice = itemPrice;
-	}
-
-
-
+ 
 
 
 
@@ -88,6 +71,26 @@ public class SiteItemDTO {
 
 	public void setItemName(String itemName) {
 		this.itemName = itemName;
+	}
+
+
+
+
+
+
+
+	public BigDecimal getItemPrice() {
+		return itemPrice;
+	}
+
+
+
+
+
+
+
+	public void setItemPrice(BigDecimal itemPrice) {
+		this.itemPrice = itemPrice;
 	}
 
 

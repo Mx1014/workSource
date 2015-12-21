@@ -47,7 +47,7 @@ public class AddRentalSiteRulesCommand {
 	@NotNull
 	private Double unit;
 	@NotNull
-	private Double price;
+	private java.math.BigDecimal price;
 	@NotNull
 	private Byte loopType;
 	@NotNull
@@ -221,14 +221,15 @@ public class AddRentalSiteRulesCommand {
 	}
 
 
+ 
 
-	public Double getPrice() {
+	public java.math.BigDecimal getPrice() {
 		return price;
 	}
 
 
 
-	public void setPrice(Double price) {
+	public void setPrice(java.math.BigDecimal price) {
 		this.price = price;
 	}
 

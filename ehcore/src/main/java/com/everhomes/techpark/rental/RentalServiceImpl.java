@@ -540,7 +540,7 @@ public class RentalServiceImpl implements RentalService {
 		rentalBill.setRentalDate(new Date(cmd.getRentalDate()));
 		this.valiRentalBill(cmd.getRentalCount(), cmd.getRentalSiteRuleIds());
 		rentalBill.setRentalCount(cmd.getRentalCount());
-		Double siteTotalMoney = 0.0;
+		java.math.BigDecimal siteTotalMoney = new java.math.BigDecimal(0);
 		for (Long siteRuleId : cmd.getRentalSiteRuleIds()) {
 			if (null == siteRuleId)
 				continue;
@@ -576,8 +576,8 @@ public class RentalServiceImpl implements RentalService {
 					rentalBill.setEndTime(rentalSiteRule.getEndTime());
 				}
 			}
-			siteTotalMoney += (null == rentalSiteRule.getPrice()?0:rentalSiteRule.getPrice())
-					* (cmd.getRentalCount() / rentalSiteRule.getUnit());
+			siteTotalMoney.add(  (null == rentalSiteRule.getPrice()?new java.math.BigDecimal(0):rentalSiteRule.getPrice()).multiply(
+				new   java.math.BigDecimal(cmd.getRentalCount() / rentalSiteRule.getUnit())));
 		}
 
 		// for (SiteItemDTO siDto : cmd.getRentalItems()) {
@@ -585,8 +585,8 @@ public class RentalServiceImpl implements RentalService {
 		// }
 		rentalBill.setSiteTotalMoney(siteTotalMoney);
 		rentalBill.setPayTotalMoney(siteTotalMoney);
-		rentalBill.setReserveMoney(siteTotalMoney
-				* (rentalRule.getPaymentRatio()==null?0:rentalRule.getPaymentRatio())/ 100);
+		rentalBill.setReserveMoney(siteTotalMoney.multiply(
+				 new java.math.BigDecimal((rentalRule.getPaymentRatio()==null?0:rentalRule.getPaymentRatio())/ 100)));
 		rentalBill.setReserveTime(Timestamp.valueOf(datetimeSF
 				.format(reserveTime)));
 		if(rentalRule.getPayStartTime()!=null){
@@ -597,7 +597,7 @@ public class RentalServiceImpl implements RentalService {
 			rentalBill.setPayEndTime(new Timestamp(cmd.getStartTime()
 					- rentalRule.getPayEndTime()));
 		}
-		rentalBill.setPaidMoney(0.0);
+		rentalBill.setPaidMoney(new java.math.BigDecimal (0));
 		//
 		
 		if (rentalRule.getPaymentRatio()!=null&&(rentalRule.getPaymentRatio()==null?0:rentalRule.getPaymentRatio()) <100 && reserveTime.before(new java.util.Date(cmd.getStartTime()
@@ -680,8 +680,7 @@ public class RentalServiceImpl implements RentalService {
 			rsb.setOwnerType(cmd.getOwnerType());
 			rsb.setSiteType(cmd.getSiteType());
 			rsb.setRentalBillId(rentalBillId);
-			rsb.setTotalMoney( (null ==rsr.getPrice()?0:rsr.getPrice()) 
-					* (int) (cmd.getRentalCount() / rsr.getUnit()));
+			rsb.setTotalMoney( (null ==rsr.getPrice()?new java.math.BigDecimal(0):rsr.getPrice()).multiply (new java.math.BigDecimal(cmd.getRentalCount() / rsr.getUnit())));
 			rsb.setRentalCount(cmd.getRentalCount());
 			rsb.setRentalSiteRuleId(rsr.getId());
 			rsb.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
@@ -829,7 +828,7 @@ public class RentalServiceImpl implements RentalService {
 		dto.setSitePrice(bill.getSiteTotalMoney());
 		dto.setReservePrice(bill.getReserveMoney());
 		dto.setPaidPrice(bill.getPaidMoney());
-		dto.setUnPayPrice(bill.getPayTotalMoney() - bill.getPaidMoney());
+		dto.setUnPayPrice(bill.getPayTotalMoney().subtract(bill.getPaidMoney()));
 		dto.setInvoiceFlag(bill.getInvoiceFlag());
 		dto.setStatus(bill.getStatus());
 		dto.setRentalSiteRules(new ArrayList<RentalSiteRulesDTO>());
@@ -1234,12 +1233,12 @@ public class RentalServiceImpl implements RentalService {
 					cmd.getInvoiceFlag());
 		if (null != cmd.getRentalItems()) {
 			if (cmd.getRentalItems().get(0).getItemPrice() != null) {
-				double itemMoney = 0.0;
+				java.math.BigDecimal itemMoney = new java.math.BigDecimal(0);
 				for (SiteItemDTO siDto : cmd.getRentalItems()) {
 					if (cmd.getRentalItems().get(0).getItemPrice() == null)
 						continue;
 					RentalItemsBill rib = new RentalItemsBill();
-					rib.setTotalMoney(siDto.getItemPrice() * siDto.getCounts());
+					rib.setTotalMoney(siDto.getItemPrice().multiply( new java.math.BigDecimal(siDto.getCounts())));
 
 					rib.setCommunityId(cmd.getOwnerId());
 					rib.setRentalSiteItemId(siDto.getId());
@@ -1248,12 +1247,12 @@ public class RentalServiceImpl implements RentalService {
 					rib.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 							.getTime()));
 					rib.setCreatorUid(userId);
-					itemMoney += rib.getTotalMoney();
+					itemMoney  = itemMoney.add(rib.getTotalMoney());
 					rentalProvider.createRentalItemBill(rib);
 				}
-				if (itemMoney > 0) {
-					bill.setPayTotalMoney(bill.getSiteTotalMoney() + itemMoney);
-					bill.setReserveMoney(bill.getReserveMoney() + itemMoney);
+				if (itemMoney.doubleValue() > 0) {
+					bill.setPayTotalMoney(bill.getSiteTotalMoney().add(itemMoney));
+					bill.setReserveMoney(bill.getReserveMoney().add(itemMoney));
 				}
 			
 
@@ -1267,7 +1266,7 @@ public class RentalServiceImpl implements RentalService {
 			// 预付金额为0，且状态为locked，直接进入支付定金成功状态
 			if(bill.getReserveMoney().equals(0.0))
 				bill.setStatus(SiteBillStatus.RESERVED.getCode());
-			else if (bill.getReserveMoney().equals(bill.getPayTotalMoney()-bill.getPaidMoney()))
+			else if (bill.getReserveMoney().equals(bill.getPayTotalMoney().subtract(bill.getPaidMoney())))
 				bill.setStatus(SiteBillStatus.PAYINGFINAL.getCode());
 
 		}
@@ -1301,10 +1300,10 @@ public class RentalServiceImpl implements RentalService {
 				.equals(SiteBillStatus.PAYINGFINAL.getCode())) {
 			orderNo = onlinePayService.createBillId(DateHelper
 					.currentGMTTime().getTime());
-			response.setAmount(bill.getPayTotalMoney() - bill.getPaidMoney());
+			response.setAmount(bill.getPayTotalMoney().subtract(bill.getPaidMoney()));
 			response.setOrderNo(String.valueOf(orderNo));
 		} else {
-			response.setAmount(0.0);
+			response.setAmount(new java.math.BigDecimal(0));
 		}
 		// save bill and online pay bill
 		RentalBillPaybillMap billmap = new RentalBillPaybillMap();
@@ -1420,7 +1419,7 @@ public class RentalServiceImpl implements RentalService {
 		{
 			RentalBillPaybillMap bpbMap= rentalProvider.findRentalBillPaybillMapByOrderNo(cmd.getOrderNo());
 			RentalBill bill = rentalProvider.findRentalBillById(bpbMap.getRentalBillId());
-			bill.setPaidMoney(bill.getPaidMoney()+Double.valueOf(cmd.getPayAmount()));
+			bill.setPaidMoney(bill.getPaidMoney().add(new java.math.BigDecimal(cmd.getPayAmount())));
 			if(bill.getStatus().equals(SiteBillStatus.LOCKED.getCode())){
 				bill.setStatus(SiteBillStatus.RESERVED.getCode());
 			}

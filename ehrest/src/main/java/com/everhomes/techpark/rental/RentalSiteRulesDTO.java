@@ -27,7 +27,7 @@ public class RentalSiteRulesDTO {
 	private Long endTime;
 	private Double counts;
 	private Double unit;
-	private Double price;
+	private java.math.BigDecimal price;
 	private Integer rentalStep;
 	private Double timeStep;
 	private Long ruleDate; 
@@ -139,14 +139,16 @@ public class RentalSiteRulesDTO {
 	}
 
 
+ 
 
-	public Double getPrice() {
+
+	public java.math.BigDecimal getPrice() {
 		return price;
 	}
 
 
 
-	public void setPrice(Double price) {
+	public void setPrice(java.math.BigDecimal price) {
 		this.price = price;
 	}
 

@@ -23,7 +23,7 @@ public class AddRentalSiteItemsCommand {
 	@NotNull
 	private String itemName;
 	@NotNull
-	private Double itemPrice;
+	private java.math.BigDecimal itemPrice;
 	@NotNull
 	private Integer counts;
 	@Override
@@ -60,10 +60,10 @@ public class AddRentalSiteItemsCommand {
 	public void setSiteType(String siteType) {
 		this.siteType = siteType;
 	}
-	public Double getItemPrice() {
+	public java.math.BigDecimal getItemPrice() {
 		return itemPrice;
 	}
-	public void setItemPrice(Double itemPrice) {
+	public void setItemPrice(java.math.BigDecimal itemPrice) {
 		this.itemPrice = itemPrice;
-	}
+	} 
 }

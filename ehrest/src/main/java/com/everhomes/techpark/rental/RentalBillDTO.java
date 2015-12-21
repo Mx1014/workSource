@@ -1,5 +1,6 @@
 package com.everhomes.techpark.rental;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
@@ -61,11 +62,11 @@ public class RentalBillDTO {
 	private Long payTime;
 	private Long cancelTime;
 	private Long payDeadLineTime;
-	private Double sitePrice;
-	private Double totalPrice;
-	private Double reservePrice;
-	private Double paidPrice;
-	private Double unPayPrice;
+	private BigDecimal  sitePrice;
+	private BigDecimal  totalPrice;
+	private BigDecimal  reservePrice;
+	private BigDecimal paidPrice;
+	private BigDecimal unPayPrice;
 	private Byte invoiceFlag;
 	private Byte status;
 	private Double rentalCount;
@@ -237,47 +238,48 @@ public class RentalBillDTO {
 	public void setStatus(Byte status) {
 		this.status = status;
 	}
+ 
+ 
 
-	public Double getSitePrice() {
+	public BigDecimal getSitePrice() {
 		return sitePrice;
 	}
 
-	public void setSitePrice(Double sitePrice) {
+	public void setSitePrice(BigDecimal sitePrice) {
 		this.sitePrice = sitePrice;
 	}
 
-	public Double getTotalPrice() {
+	public BigDecimal getTotalPrice() {
 		return totalPrice;
 	}
 
-	public void setTotalPrice(Double totalPrice) {
+	public void setTotalPrice(BigDecimal totalPrice) {
 		this.totalPrice = totalPrice;
 	}
 
-	public Double getReservePrice() {
+	public BigDecimal getReservePrice() {
 		return reservePrice;
 	}
 
-	public void setReservePrice(Double reservePrice) {
+	public void setReservePrice(BigDecimal reservePrice) {
 		this.reservePrice = reservePrice;
 	}
 
-	public Double getPaidPrice() {
+	public BigDecimal getPaidPrice() {
 		return paidPrice;
 	}
 
-	public void setPaidPrice(Double paidPrice) {
+	public void setPaidPrice(BigDecimal paidPrice) {
 		this.paidPrice = paidPrice;
 	}
 
-	public Double getUnPayPrice() {
+	public BigDecimal getUnPayPrice() {
 		return unPayPrice;
 	}
 
-	public void setUnPayPrice(Double unPayPrice) {
+	public void setUnPayPrice(BigDecimal unPayPrice) {
 		this.unPayPrice = unPayPrice;
 	}
- 
 
 	public String getOwnerType() {
 		return ownerType;

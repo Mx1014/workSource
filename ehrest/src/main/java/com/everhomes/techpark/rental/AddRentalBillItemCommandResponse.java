@@ -4,7 +4,7 @@ import com.everhomes.util.StringHelper;
 
 public class AddRentalBillItemCommandResponse {
 	private String orderNo;
-	private Double amount;
+	private java.math.BigDecimal amount;
 	private String name;
 	private String description;
 	private String orderType;
@@ -18,10 +18,11 @@ public class AddRentalBillItemCommandResponse {
 	public void setOrderNo(String orderNo) {
 		this.orderNo = orderNo;
 	}
-	public Double getAmount() {
+	 
+	public java.math.BigDecimal getAmount() {
 		return amount;
 	}
-	public void setAmount(Double amount) {
+	public void setAmount(java.math.BigDecimal amount) {
 		this.amount = amount;
 	}
 	public String getName() {

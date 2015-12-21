@@ -54,12 +54,12 @@ public class AddRentalSiteSingleSimpleRule {
 	private Double counts;
 	@NotNull
 	private Double unit;
-	private Double workdayPrice;
-	private Double weekendPrice;
-	private Double workdayAMPrice;
-	private Double weekendAMPrice;
-	private Double workdayPMPrice;
-	private Double weekendPMPrice;
+	private java.math.BigDecimal workdayPrice;
+	private java.math.BigDecimal weekendPrice;
+	private java.math.BigDecimal workdayAMPrice;
+	private java.math.BigDecimal weekendAMPrice;
+	private java.math.BigDecimal workdayPMPrice;
+	private java.math.BigDecimal weekendPMPrice;
 	@NotNull
 	private Byte loopType;
 	@NotNull
@@ -224,74 +224,75 @@ public class AddRentalSiteSingleSimpleRule {
 	}
 
 
+ 
 
-	public Double getWorkdayPrice() {
+	public java.math.BigDecimal getWorkdayPrice() {
 		return workdayPrice;
 	}
 
 
 
-	public void setWorkdayPrice(Double workdayPrice) {
+	public void setWorkdayPrice(java.math.BigDecimal workdayPrice) {
 		this.workdayPrice = workdayPrice;
 	}
 
 
 
-	public Double getWeekendPrice() {
+	public java.math.BigDecimal getWeekendPrice() {
 		return weekendPrice;
 	}
 
 
 
-	public void setWeekendPrice(Double weekendPrice) {
+	public void setWeekendPrice(java.math.BigDecimal weekendPrice) {
 		this.weekendPrice = weekendPrice;
 	}
 
 
 
-	public Double getWorkdayAMPrice() {
+	public java.math.BigDecimal getWorkdayAMPrice() {
 		return workdayAMPrice;
 	}
 
 
 
-	public void setWorkdayAMPrice(Double workdayAMPrice) {
+	public void setWorkdayAMPrice(java.math.BigDecimal workdayAMPrice) {
 		this.workdayAMPrice = workdayAMPrice;
 	}
 
 
 
-	public Double getWeekendAMPrice() {
+	public java.math.BigDecimal getWeekendAMPrice() {
 		return weekendAMPrice;
 	}
 
 
 
-	public void setWeekendAMPrice(Double weekendAMPrice) {
+	public void setWeekendAMPrice(java.math.BigDecimal weekendAMPrice) {
 		this.weekendAMPrice = weekendAMPrice;
 	}
 
 
 
-	public Double getWorkdayPMPrice() {
+	public java.math.BigDecimal getWorkdayPMPrice() {
 		return workdayPMPrice;
 	}
 
 
 
-	public void setWorkdayPMPrice(Double workdayPMPrice) {
+	public void setWorkdayPMPrice(java.math.BigDecimal workdayPMPrice) {
 		this.workdayPMPrice = workdayPMPrice;
 	}
 
 
 
-	public Double getWeekendPMPrice() {
+	public java.math.BigDecimal getWeekendPMPrice() {
 		return weekendPMPrice;
 	}
 
 
 
-	public void setWeekendPMPrice(Double weekendPMPrice) {
+	public void setWeekendPMPrice(java.math.BigDecimal weekendPMPrice) {
 		this.weekendPMPrice = weekendPMPrice;
 	}
 
