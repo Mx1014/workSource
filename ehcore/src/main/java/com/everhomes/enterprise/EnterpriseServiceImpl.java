@@ -954,7 +954,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     		if(cmd.getContactName() != null) 
     			ec.setName(cmd.getContactName());
     		
-    		ec.setRole(RoleConstants.SystemAdmin);
+    		ec.setRole(RoleConstants.ResourceAdmin);
     		ec.setStatus(EnterpriseContactStatus.ACTIVE.getCode());
     		Long contactId = this.enterpriseContactProvider.createContact(ec);
     		
