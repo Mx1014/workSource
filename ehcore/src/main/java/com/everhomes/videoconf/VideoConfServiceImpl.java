@@ -1043,11 +1043,6 @@ public class VideoConfServiceImpl implements VideoConfService {
 		StartVideoConfResponse response = new StartVideoConfResponse();
 		
 		String path = "http://api.confcloud.cn/openapi/confReservation";
-		response.setConfHostId("8EubJ8t9RkWXneUEpY6m7Q");
-		response.setToken("n7m8_1qELfzv0uzc-niIQ3DjevC9LtHeQjl0FpC1eYM.BgIgWE1JL2I5aDNRNW5sd1ZNZ3p0Z3dtWTM4TE5WVHlYZ2lANWVhMTA5MDJhZTYwNDAwMjEwYzg2MmVhZTA3ZjY3OTFkNjJkZTYyYjUxM2U5YTFhZWRlMDBiODg1MTFkNjIzYgA");
-		response.setConfHostName("luzuo");
-		response.setMaxCount(6);
-		response.setMeetingNo("18589092373");
 		ConfAccounts account = vcProvider.findVideoconfAccountById(cmd.getAccountId());
 		if(account != null) {
 			ConfAccountCategories category = vcProvider.findAccountCategoriesById(account.getAccountCategoryId());
@@ -1066,15 +1061,6 @@ public class VideoConfServiceImpl implements VideoConfService {
 					LOGGER.info("startVideoConf-restUrl"+path);
 		
 				try {
-//					StartReservation sr = new StartReservation();
-//					sr.setLoginName(accountName);
-//					sr.setTimeStamp(timestamp.toString());
-//					sr.setToken(token);
-//					sr.setConfName(cmd.getConfName());
-//					sr.setHostKey(cmd.getPassword());
-//					sr.setStartTime(new Date(cmd.getStartTime()));
-//					sr.setDuration(cmd.getDuration());
-//					sr.setOptionJbh(0);
 					Map<String, String> sPara = new HashMap<String, String>() ;
 				    sPara.put("loginName", accountName); 
 				    sPara.put("timeStamp", timestamp.toString());
@@ -1106,11 +1092,10 @@ public class VideoConfServiceImpl implements VideoConfService {
 					if(resultHolder.getData() != null){
 						Map<String,Object> data = (Map<String, Object>) resultHolder.getData();
 						
-						response.setConfHostId(String.valueOf(data.get("meetingNo")));
-						response.setToken(String.valueOf(data.get("meetingNo")));
-						User user = userProvider.findUserById(account.getOwnerId());
-						response.setConfHostName(user.getNickName());
-						response.setMaxCount(6);
+						response.setConfHostId(String.valueOf(data.get("userId")));
+						response.setToken(String.valueOf(data.get("zoomToken")));
+						response.setConfHostName(UserContext.current().getUser().getNickName());
+						response.setMaxCount((Double.valueOf(String.valueOf(data.get("maxCount")))).intValue());
 						response.setMeetingNo(String.valueOf(data.get("meetingNo")));
 						
 						Object obj = data.get("meetingNo");
@@ -1125,9 +1110,9 @@ public class VideoConfServiceImpl implements VideoConfService {
 						conf.setConfAccountId(cmd.getAccountId());
 						conf.setCreatorUid(UserContext.current().getUser().getId());
 						conf.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-//						conf.setConfHostId((String) data.get("id"));
+						conf.setConfHostId(String.valueOf(data.get("userId")));
 //						conf.setConfHostName(confHostName);
-//						conf.setMaxCount(maxCount);
+						conf.setMaxCount((Double.valueOf(String.valueOf(data.get("maxCount")))).intValue());
 						conf.setStatus((byte) 1);
 						
 						
@@ -1141,7 +1126,10 @@ public class VideoConfServiceImpl implements VideoConfService {
 						
 						vcProvider.updateConfAccounts(confAccount);
 						
+					}else {
+						LOGGER.error("startVideoConf error,json="+json);
 					}
+					
 				} catch (Exception e) {
 					LOGGER.error("startVideoConf-error.sourceAccount="+sourceAccount.getAccountName()+".exception message="+e.getMessage());
 				}
