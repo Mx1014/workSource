@@ -728,7 +728,7 @@ public class RentalProviderImpl implements RentalProvider {
 	public List<RentalBill> listRentalBills(Long ownerId,String ownerType,
 			String siteType, Long rentalSiteId, Byte billStatus,
 			Integer pageOffset, Integer pageSize, Long startTime, Long endTime,
-			Byte invoiceFlag) {
+			Byte invoiceFlag,Long userId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTAL_BILLS);
@@ -755,6 +755,9 @@ public class RentalProviderImpl implements RentalProvider {
 			condition = condition.and(Tables.EH_RENTAL_BILLS.INVOICE_FLAG
 					.equal(invoiceFlag));
 		}
+		if (null != userId)
+			condition = condition.and(Tables.EH_RENTAL_BILLS.RENTAL_UID
+								.equal(userId));
 		Integer offset = pageOffset == null ? 1 : (pageOffset - 1) * pageSize;
 		step.limit(offset, pageSize);
 		step.where(condition);

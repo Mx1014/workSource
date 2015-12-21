@@ -475,26 +475,25 @@ public class RentalServiceImpl implements RentalService {
 	}
 
 	@Override
-	public RentalBillDTO addRentalBill(AddRentalBillCommand cmd) {
+	public AddRentalBillCommandResponse addRentalBill(AddRentalBillCommand cmd) {
+		AddRentalBillCommandResponse response = new AddRentalBillCommandResponse();
+		response.setAddBillCode(AddBillCode.NORMAL.getCode());
 		if(null!=cmd.getCommunityId()){
 			cmd.setOwnerId(cmd.getCommunityId());
 			cmd.setOwnerType(RentalOwnerType.COMMUNITY.getCode());
 		}
-		
+
+		RentalBillDTO billDTO = new RentalBillDTO();
+		response.setRentalBill(billDTO);
 		Long userId = UserContext.current().getUser().getId();
 		int count = this.rentalProvider.countRentalBills(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSiteType(), null, SiteBillStatus.SUCCESS.getCode(), cmd.getStartTime(), cmd.getEndTime(), null,userId);
-		if(count > 0 ){
-			throw RuntimeErrorException
-			.errorWith(
-					RentalServiceErrorCode.SCOPE,
-					RentalServiceErrorCode.ERROR_ORDER_DUPLICATE,
-					localeStringService.getLocalizedString(
-							String.valueOf(RentalServiceErrorCode.SCOPE),
-							String.valueOf(RentalServiceErrorCode.ERROR_ORDER_DUPLICATE),
-							UserContext.current().getUser().getLocale(),
-							"ORDER DUPLICATE IN THIS TIME "));
+		if(count > 0 ){ 
+			RentalBill bill =  this.rentalProvider.listRentalBills(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSiteType(), null, SiteBillStatus.SUCCESS.getCode(), 0,10,cmd.getStartTime(), cmd.getEndTime(), null,userId).
+					get(0);
+			mappingRentalBillDTO(billDTO, bill);
+			response.setAddBillCode(AddBillCode.CONFLICT.getCode());
+			return response;
 		}
-		RentalBillDTO response = new RentalBillDTO();
 		java.util.Date reserveTime = new java.util.Date();
 		List<RentalSiteRule> rentalSiteRules = new ArrayList<RentalSiteRule>();
 		RentalRule rentalRule = rentalProvider.getRentalRule(
@@ -685,7 +684,7 @@ public class RentalServiceImpl implements RentalService {
 
 			rentalProvider.createRentalSiteBill(rsb);
 		}
-		mappingRentalBillDTO(response, rentalBill);
+		mappingRentalBillDTO(billDTO, rentalBill);
 		return response;
 	}
 
@@ -1357,7 +1356,7 @@ public class RentalServiceImpl implements RentalService {
 		List<RentalBill> bills = rentalProvider.listRentalBills(
 				cmd.getOwnerId(),cmd.getOwnerType(), cmd.getSiteType(), cmd.getRentalSiteId(),
 				cmd.getBillStatus(), cmd.getPageOffset(), pageSize,
-				cmd.getStartTime(), cmd.getEndTime(), cmd.getInvoiceFlag());
+				cmd.getStartTime(), cmd.getEndTime(), cmd.getInvoiceFlag(),null);
 		response.setRentalBills(new ArrayList<RentalBillDTO>());
 		for (RentalBill bill : bills) {
 			RentalBillDTO dto = new RentalBillDTO();

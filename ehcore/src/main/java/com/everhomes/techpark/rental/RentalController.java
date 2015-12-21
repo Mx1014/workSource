@@ -315,10 +315,10 @@ public class RentalController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("addRentalBill")
-	@RestReturn(value = RentalBillDTO.class)
+	@RestReturn(value = AddRentalBillCommandResponse.class)
 	public RestResponse addRentalBill(@Valid AddRentalBillCommand cmd) {
-		RentalBillDTO bill = rentalService.addRentalBill(cmd); 
-		RestResponse response = new RestResponse(bill);
+		AddRentalBillCommandResponse res = rentalService.addRentalBill(cmd); 
+		RestResponse response = new RestResponse(res);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
