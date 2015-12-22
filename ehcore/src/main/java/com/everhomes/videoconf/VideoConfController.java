@@ -18,7 +18,7 @@ import com.everhomes.techpark.onlinePay.OnlinePayBillCommand;
 import com.everhomes.techpark.park.RechargeSuccessResponse;
 import com.everhomes.util.RequireAuthentication;
 
-@RestDoc(value = "VideoConf controller", site = "ehcore")
+@RestDoc(value = "VideoConf controller", site = "core")
 @RestController
 @RequestMapping("/conf")
 public class VideoConfController  extends ControllerBase{

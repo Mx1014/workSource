@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *  <li>enterpriseId: 企业id</li>
- *  <li>lockStatus: 锁定状态 0: 解锁    1: 锁定</li>
+ *  <li>lockStatus: 锁定状态 1: 解锁    2: 锁定</li>
  * </ul>
  *
  */

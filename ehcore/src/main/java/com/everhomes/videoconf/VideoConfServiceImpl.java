@@ -530,7 +530,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		ConfEnterprises enterprise = vcProvider.findByEnterpriseId(cmd.getEnterpriseId());
 		List<ConfAccounts> accounts = vcProvider.listConfAccountsByEnterpriseId(cmd.getEnterpriseId(), locator, pageSize);
 		if(accounts != null && accounts.size() > 0) {
-			if(cmd.getLockStatus() == 1) {
+			if(cmd.getLockStatus() == 2) {
 				enterprise.setStatus((byte) 2);
 				accounts.stream().map(r -> {
 					r.setStatus((byte) 2);
@@ -539,7 +539,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 				});
 			}
 			
-			if(cmd.getLockStatus() == 0) {
+			if(cmd.getLockStatus() == 1) {
 				enterprise.setStatus((byte) 0);
 				accounts.stream().map(r -> {
 					if(r.getExpiredDate().before(new Timestamp(DateHelper.currentGMTTime().getTime()))){
