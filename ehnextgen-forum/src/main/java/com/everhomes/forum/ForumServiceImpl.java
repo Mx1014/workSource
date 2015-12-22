@@ -1861,7 +1861,12 @@ public class ForumServiceImpl implements ForumService {
         
         PostPrivacy privateFlag = PostPrivacy.fromCode(cmd.getPrivateFlag());
         if(privateFlag == null) {
-            privateFlag =  PostPrivacy.PUBLIC;
+            // 政府机构发的维修之类的帖，默认不公开
+            if(CategoryConstants.GA_PRIVACY_CATEGORIES.contains(post.getContentCategory())) {
+                privateFlag =  PostPrivacy.PRIVATE;
+            } else {
+                privateFlag =  PostPrivacy.PUBLIC;
+            }
         }
         post.setPrivateFlag(privateFlag.getCode());
         
