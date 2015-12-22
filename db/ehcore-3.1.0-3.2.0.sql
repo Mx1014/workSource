@@ -78,3 +78,7 @@ INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'renta
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'rental', '10008', 'zh_CN', '不是已预订订单');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'rental', '10009', 'zh_CN', '不是已完成订单'); 
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'rental', '10010', 'zh_CN', '您在这个时间段已经有别的预约了哟');
+
+
+
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'group.notification', 33, 'zh_CN', '兴趣圈“${groupName}”推荐');
