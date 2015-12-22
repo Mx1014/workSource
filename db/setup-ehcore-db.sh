@@ -61,11 +61,11 @@ if [ $? -ne 0 ]; then
   exit 7
 fi
 
-mysql --user=ehcore --password=ehcore ehcore < server-schema-3.0.1-3.1.0.sql
-if [ $? -ne 0 ]; then
-  printf "Error: Cannot execute ehcore-server-schema-3.0.1-3.1.0.sql\n"
-  exit 7
-fi
+# mysql --user=ehcore --password=ehcore ehcore < server-schema-3.0.1-3.1.0.sql
+# if [ $? -ne 0 ]; then
+#   printf "Error: Cannot execute ehcore-server-schema-3.0.1-3.1.0.sql\n"
+#   exit 7
+# fi
 
 mysql --user=ehcore --password=ehcore ehcore < techpark-schema.sql
 if [ $? -ne 0 ]; then
