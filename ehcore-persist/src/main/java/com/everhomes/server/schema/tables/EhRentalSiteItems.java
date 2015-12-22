@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteItems extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalSiteItemsRecord> {
 
-	private static final long serialVersionUID = 1299167492;
+	private static final long serialVersionUID = 1845737738;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_site_items</code>
@@ -32,9 +32,9 @@ public class EhRentalSiteItems extends org.jooq.impl.TableImpl<com.everhomes.ser
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteItemsRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id");
 
 	/**
-	 * The column <code>ehcore.eh_rental_site_items.rental_site_id</code>.   rental_site id
+	 * The column <code>ehcore.eh_rental_site_items.rental_site_id</code>. rental_site id
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteItemsRecord, java.lang.Long> RENTAL_SITE_ID = createField("rental_site_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "  rental_site id");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteItemsRecord, java.lang.Long> RENTAL_SITE_ID = createField("rental_site_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "rental_site id");
 
 	/**
 	 * The column <code>ehcore.eh_rental_site_items.name</code>.
@@ -44,7 +44,7 @@ public class EhRentalSiteItems extends org.jooq.impl.TableImpl<com.everhomes.ser
 	/**
 	 * The column <code>ehcore.eh_rental_site_items.price</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteItemsRecord, java.math.BigDecimal> PRICE = createField("price", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteItemsRecord, java.lang.Double> PRICE = createField("price", org.jooq.impl.SQLDataType.DOUBLE, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_rental_site_items.counts</code>. item count

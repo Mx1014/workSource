@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchExceptionRequests extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord> {
 
-	private static final long serialVersionUID = -1285107413;
+	private static final long serialVersionUID = -1315589941;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_punch_exception_requests</code>
@@ -47,9 +47,9 @@ public class EhPunchExceptionRequests extends org.jooq.impl.TableImpl<com.everho
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord, java.sql.Date> PUNCH_DATE = createField("punch_date", org.jooq.impl.SQLDataType.DATE, this, "user punch date");
 
 	/**
-	 * The column <code>ehcore.eh_punch_exception_requests.request_type</code>. 0:request ;  1:approval
+	 * The column <code>ehcore.eh_punch_exception_requests.request_type</code>. 0:request, 1:approval
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord, java.lang.Byte> REQUEST_TYPE = createField("request_type", org.jooq.impl.SQLDataType.TINYINT, this, "0:request ;  1:approval");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord, java.lang.Byte> REQUEST_TYPE = createField("request_type", org.jooq.impl.SQLDataType.TINYINT, this, "0:request, 1:approval");
 
 	/**
 	 * The column <code>ehcore.eh_punch_exception_requests.description</code>.

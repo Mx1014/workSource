@@ -11,38 +11,39 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSitesBills implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1494174883;
+	private static final long serialVersionUID = 1450196193;
 
-	private java.lang.Long       id;
-	private java.lang.Long       ownerId;
-	private java.lang.String     siteType;
-	private java.lang.Long       rentalBillId;
-	private java.lang.Long       rentalSiteRuleId;
-	private java.lang.Double     rentalCount;
-	private java.math.BigDecimal totalMoney;
-	private java.lang.Long       creatorUid;
-	private java.sql.Timestamp   createTime;
-	private java.lang.Long       operatorUid;
-	private java.sql.Timestamp   operateTime;
-	private java.lang.String     ownerType;
+	private java.lang.Long     id;
+	private java.lang.String   ownerType;
+	private java.lang.Long     ownerId;
+	private java.lang.String   siteType;
+	private java.lang.Long     rentalBillId;
+	private java.lang.Long     rentalSiteRuleId;
+	private java.lang.Double   rentalCount;
+	private java.lang.Double   totalMoney;
+	private java.lang.Long     creatorUid;
+	private java.sql.Timestamp createTime;
+	private java.lang.Long     operatorUid;
+	private java.sql.Timestamp operateTime;
 
 	public EhRentalSitesBills() {}
 
 	public EhRentalSitesBills(
-		java.lang.Long       id,
-		java.lang.Long       ownerId,
-		java.lang.String     siteType,
-		java.lang.Long       rentalBillId,
-		java.lang.Long       rentalSiteRuleId,
-		java.lang.Double     rentalCount,
-		java.math.BigDecimal totalMoney,
-		java.lang.Long       creatorUid,
-		java.sql.Timestamp   createTime,
-		java.lang.Long       operatorUid,
-		java.sql.Timestamp   operateTime,
-		java.lang.String     ownerType
+		java.lang.Long     id,
+		java.lang.String   ownerType,
+		java.lang.Long     ownerId,
+		java.lang.String   siteType,
+		java.lang.Long     rentalBillId,
+		java.lang.Long     rentalSiteRuleId,
+		java.lang.Double   rentalCount,
+		java.lang.Double   totalMoney,
+		java.lang.Long     creatorUid,
+		java.sql.Timestamp createTime,
+		java.lang.Long     operatorUid,
+		java.sql.Timestamp operateTime
 	) {
 		this.id = id;
+		this.ownerType = ownerType;
 		this.ownerId = ownerId;
 		this.siteType = siteType;
 		this.rentalBillId = rentalBillId;
@@ -53,7 +54,6 @@ public class EhRentalSitesBills implements java.io.Serializable {
 		this.createTime = createTime;
 		this.operatorUid = operatorUid;
 		this.operateTime = operateTime;
-		this.ownerType = ownerType;
 	}
 
 	public java.lang.Long getId() {
@@ -62,6 +62,14 @@ public class EhRentalSitesBills implements java.io.Serializable {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
+	}
+
+	public java.lang.String getOwnerType() {
+		return this.ownerType;
+	}
+
+	public void setOwnerType(java.lang.String ownerType) {
+		this.ownerType = ownerType;
 	}
 
 	public java.lang.Long getOwnerId() {
@@ -104,11 +112,11 @@ public class EhRentalSitesBills implements java.io.Serializable {
 		this.rentalCount = rentalCount;
 	}
 
-	public java.math.BigDecimal getTotalMoney() {
+	public java.lang.Double getTotalMoney() {
 		return this.totalMoney;
 	}
 
-	public void setTotalMoney(java.math.BigDecimal totalMoney) {
+	public void setTotalMoney(java.lang.Double totalMoney) {
 		this.totalMoney = totalMoney;
 	}
 
@@ -142,13 +150,5 @@ public class EhRentalSitesBills implements java.io.Serializable {
 
 	public void setOperateTime(java.sql.Timestamp operateTime) {
 		this.operateTime = operateTime;
-	}
-
-	public java.lang.String getOwnerType() {
-		return this.ownerType;
-	}
-
-	public void setOwnerType(java.lang.String ownerType) {
-		this.ownerType = ownerType;
 	}
 }

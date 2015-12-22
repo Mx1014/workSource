@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchWorkdayRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhPunchWorkdayRecord> implements org.jooq.Record8<java.lang.Long, java.lang.Long, java.lang.Byte, java.sql.Date, java.lang.Long, java.sql.Timestamp, java.lang.Long, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = 1240419734;
+	private static final long serialVersionUID = -1539164554;
 
 	/**
 	 * Setter for <code>ehcore.eh_punch_workday.id</code>. id
@@ -42,14 +42,14 @@ public class EhPunchWorkdayRecord extends org.jooq.impl.UpdatableRecordImpl<com.
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_punch_workday.date_status</code>. 0:weekend work date ;  1:holiday
+	 * Setter for <code>ehcore.eh_punch_workday.date_status</code>. 0:weekend work date, 1:holiday
 	 */
 	public void setDateStatus(java.lang.Byte value) {
 		setValue(2, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_punch_workday.date_status</code>. 0:weekend work date ;  1:holiday
+	 * Getter for <code>ehcore.eh_punch_workday.date_status</code>. 0:weekend work date, 1:holiday
 	 */
 	public java.lang.Byte getDateStatus() {
 		return (java.lang.Byte) getValue(2);

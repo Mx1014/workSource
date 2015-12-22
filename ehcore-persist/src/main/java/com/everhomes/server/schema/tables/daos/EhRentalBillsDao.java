@@ -48,6 +48,13 @@ public class EhRentalBillsDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	}
 
 	/**
+	 * Fetch records that have <code>owner_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBills> fetchByOwnerType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalBills.EH_RENTAL_BILLS.OWNER_TYPE, values);
+	}
+
+	/**
 	 * Fetch records that have <code>owner_id IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBills> fetchByOwnerId(java.lang.Long... values) {
@@ -106,21 +113,21 @@ public class EhRentalBillsDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	/**
 	 * Fetch records that have <code>pay_total_money IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBills> fetchByPayTotalMoney(java.math.BigDecimal... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBills> fetchByPayTotalMoney(java.lang.Double... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalBills.EH_RENTAL_BILLS.PAY_TOTAL_MONEY, values);
 	}
 
 	/**
 	 * Fetch records that have <code>site_total_money IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBills> fetchBySiteTotalMoney(java.math.BigDecimal... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBills> fetchBySiteTotalMoney(java.lang.Double... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalBills.EH_RENTAL_BILLS.SITE_TOTAL_MONEY, values);
 	}
 
 	/**
 	 * Fetch records that have <code>reserve_money IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBills> fetchByReserveMoney(java.math.BigDecimal... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBills> fetchByReserveMoney(java.lang.Double... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalBills.EH_RENTAL_BILLS.RESERVE_MONEY, values);
 	}
 
@@ -162,7 +169,7 @@ public class EhRentalBillsDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	/**
 	 * Fetch records that have <code>paid_money IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBills> fetchByPaidMoney(java.math.BigDecimal... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBills> fetchByPaidMoney(java.lang.Double... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalBills.EH_RENTAL_BILLS.PAID_MONEY, values);
 	}
 
@@ -213,12 +220,5 @@ public class EhRentalBillsDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBills> fetchByOperateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalBills.EH_RENTAL_BILLS.OPERATE_TIME, values);
-	}
-
-	/**
-	 * Fetch records that have <code>owner_type IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBills> fetchByOwnerType(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRentalBills.EH_RENTAL_BILLS.OWNER_TYPE, values);
 	}
 }

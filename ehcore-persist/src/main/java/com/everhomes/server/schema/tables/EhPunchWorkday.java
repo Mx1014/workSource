@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchWorkday extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhPunchWorkdayRecord> {
 
-	private static final long serialVersionUID = 448648018;
+	private static final long serialVersionUID = 1475222532;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_punch_workday</code>
@@ -37,9 +37,9 @@ public class EhPunchWorkday extends org.jooq.impl.TableImpl<com.everhomes.server
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchWorkdayRecord, java.lang.Long> ENTERPRISE_ID = createField("enterprise_id", org.jooq.impl.SQLDataType.BIGINT, this, "compay id");
 
 	/**
-	 * The column <code>ehcore.eh_punch_workday.date_status</code>. 0:weekend work date ;  1:holiday
+	 * The column <code>ehcore.eh_punch_workday.date_status</code>. 0:weekend work date, 1:holiday
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchWorkdayRecord, java.lang.Byte> DATE_STATUS = createField("date_status", org.jooq.impl.SQLDataType.TINYINT, this, "0:weekend work date ;  1:holiday");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchWorkdayRecord, java.lang.Byte> DATE_STATUS = createField("date_status", org.jooq.impl.SQLDataType.TINYINT, this, "0:weekend work date, 1:holiday");
 
 	/**
 	 * The column <code>ehcore.eh_punch_workday.date_tag</code>. date

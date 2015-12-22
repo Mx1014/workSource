@@ -11,31 +11,28 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhVersionUrls implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1674045887;
+	private static final long serialVersionUID = -465569215;
 
-	private java.lang.Long    id;
-	private java.lang.Long    realmId;
-	private java.lang.String  targetVersion;
-	private java.lang.String  downloadUrl;
-	private java.lang.String  infoUrl;
-	private java.lang.Integer namespaceId;
+	private java.lang.Long   id;
+	private java.lang.Long   realmId;
+	private java.lang.String targetVersion;
+	private java.lang.String downloadUrl;
+	private java.lang.String infoUrl;
 
 	public EhVersionUrls() {}
 
 	public EhVersionUrls(
-		java.lang.Long    id,
-		java.lang.Long    realmId,
-		java.lang.String  targetVersion,
-		java.lang.String  downloadUrl,
-		java.lang.String  infoUrl,
-		java.lang.Integer namespaceId
+		java.lang.Long   id,
+		java.lang.Long   realmId,
+		java.lang.String targetVersion,
+		java.lang.String downloadUrl,
+		java.lang.String infoUrl
 	) {
 		this.id = id;
 		this.realmId = realmId;
 		this.targetVersion = targetVersion;
 		this.downloadUrl = downloadUrl;
 		this.infoUrl = infoUrl;
-		this.namespaceId = namespaceId;
 	}
 
 	public java.lang.Long getId() {
@@ -76,13 +73,5 @@ public class EhVersionUrls implements java.io.Serializable {
 
 	public void setInfoUrl(java.lang.String infoUrl) {
 		this.infoUrl = infoUrl;
-	}
-
-	public java.lang.Integer getNamespaceId() {
-		return this.namespaceId;
-	}
-
-	public void setNamespaceId(java.lang.Integer namespaceId) {
-		this.namespaceId = namespaceId;
 	}
 }

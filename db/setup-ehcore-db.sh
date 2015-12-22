@@ -67,9 +67,15 @@ fi
 #   exit 7
 # fi
 
-mysql --user=ehcore --password=ehcore ehcore < techpark-schema.sql
+mysql --user=ehcore --password=ehcore ehcore < ehcore-park-schema.sql
 if [ $? -ne 0 ]; then
-  printf "Error: Cannot execute techpark-schema.sql\n"
+  printf "Error: Cannot execute ehcore-park-schema.sql\n"
+  exit 7
+fi
+
+mysql --user=ehcore --password=ehcore ehcore < ehcore-conf-schema.sql
+if [ $? -ne 0 ]; then
+  printf "Error: Cannot execute ehcore-conf-schema.sql\n"
   exit 7
 fi
   

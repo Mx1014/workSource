@@ -11,34 +11,34 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalItemsBills implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1317059331;
+	private static final long serialVersionUID = 795939831;
 
-	private java.lang.Long       id;
-	private java.lang.Long       communityId;
-	private java.lang.String     siteType;
-	private java.lang.Long       rentalBillId;
-	private java.lang.Long       rentalSiteItemId;
-	private java.lang.Integer    rentalCount;
-	private java.math.BigDecimal totalMoney;
-	private java.lang.Long       creatorUid;
-	private java.sql.Timestamp   createTime;
-	private java.lang.Long       operatorUid;
-	private java.sql.Timestamp   operateTime;
+	private java.lang.Long     id;
+	private java.lang.Long     communityId;
+	private java.lang.String   siteType;
+	private java.lang.Long     rentalBillId;
+	private java.lang.Long     rentalSiteItemId;
+	private java.lang.Integer  rentalCount;
+	private java.lang.Double   totalMoney;
+	private java.lang.Long     creatorUid;
+	private java.sql.Timestamp createTime;
+	private java.lang.Long     operatorUid;
+	private java.sql.Timestamp operateTime;
 
 	public EhRentalItemsBills() {}
 
 	public EhRentalItemsBills(
-		java.lang.Long       id,
-		java.lang.Long       communityId,
-		java.lang.String     siteType,
-		java.lang.Long       rentalBillId,
-		java.lang.Long       rentalSiteItemId,
-		java.lang.Integer    rentalCount,
-		java.math.BigDecimal totalMoney,
-		java.lang.Long       creatorUid,
-		java.sql.Timestamp   createTime,
-		java.lang.Long       operatorUid,
-		java.sql.Timestamp   operateTime
+		java.lang.Long     id,
+		java.lang.Long     communityId,
+		java.lang.String   siteType,
+		java.lang.Long     rentalBillId,
+		java.lang.Long     rentalSiteItemId,
+		java.lang.Integer  rentalCount,
+		java.lang.Double   totalMoney,
+		java.lang.Long     creatorUid,
+		java.sql.Timestamp createTime,
+		java.lang.Long     operatorUid,
+		java.sql.Timestamp operateTime
 	) {
 		this.id = id;
 		this.communityId = communityId;
@@ -101,11 +101,11 @@ public class EhRentalItemsBills implements java.io.Serializable {
 		this.rentalCount = rentalCount;
 	}
 
-	public java.math.BigDecimal getTotalMoney() {
+	public java.lang.Double getTotalMoney() {
 		return this.totalMoney;
 	}
 
-	public void setTotalMoney(java.math.BigDecimal totalMoney) {
+	public void setTotalMoney(java.lang.Double totalMoney) {
 		this.totalMoney = totalMoney;
 	}
 

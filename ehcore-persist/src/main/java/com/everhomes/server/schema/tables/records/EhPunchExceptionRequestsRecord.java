@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchExceptionRequestsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhPunchExceptionRequestsRecord> implements org.jooq.Record16<java.lang.Long, java.lang.Long, java.lang.Long, java.sql.Date, java.lang.Byte, java.lang.String, java.lang.Byte, java.lang.Byte, java.lang.Byte, java.lang.Byte, java.lang.String, java.lang.Long, java.sql.Timestamp, java.lang.Long, java.sql.Timestamp, java.lang.Byte> {
 
-	private static final long serialVersionUID = -1178077060;
+	private static final long serialVersionUID = 175364252;
 
 	/**
 	 * Setter for <code>ehcore.eh_punch_exception_requests.id</code>. id
@@ -70,14 +70,14 @@ public class EhPunchExceptionRequestsRecord extends org.jooq.impl.UpdatableRecor
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_punch_exception_requests.request_type</code>. 0:request ;  1:approval
+	 * Setter for <code>ehcore.eh_punch_exception_requests.request_type</code>. 0:request, 1:approval
 	 */
 	public void setRequestType(java.lang.Byte value) {
 		setValue(4, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_punch_exception_requests.request_type</code>. 0:request ;  1:approval
+	 * Getter for <code>ehcore.eh_punch_exception_requests.request_type</code>. 0:request, 1:approval
 	 */
 	public java.lang.Byte getRequestType() {
 		return (java.lang.Byte) getValue(4);

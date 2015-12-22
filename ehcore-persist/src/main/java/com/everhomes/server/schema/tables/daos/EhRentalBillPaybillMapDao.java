@@ -48,6 +48,13 @@ public class EhRentalBillPaybillMapDao extends org.jooq.impl.DAOImpl<com.everhom
 	}
 
 	/**
+	 * Fetch records that have <code>owner_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBillPaybillMap> fetchByOwnerType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalBillPaybillMap.EH_RENTAL_BILL_PAYBILL_MAP.OWNER_TYPE, values);
+	}
+
+	/**
 	 * Fetch records that have <code>owner_id IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBillPaybillMap> fetchByOwnerId(java.lang.Long... values) {
@@ -101,12 +108,5 @@ public class EhRentalBillPaybillMapDao extends org.jooq.impl.DAOImpl<com.everhom
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBillPaybillMap> fetchByOperateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalBillPaybillMap.EH_RENTAL_BILL_PAYBILL_MAP.OPERATE_TIME, values);
-	}
-
-	/**
-	 * Fetch records that have <code>owner_type IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBillPaybillMap> fetchByOwnerType(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRentalBillPaybillMap.EH_RENTAL_BILL_PAYBILL_MAP.OWNER_TYPE, values);
 	}
 }

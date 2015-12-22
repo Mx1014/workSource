@@ -11,32 +11,32 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteItems implements java.io.Serializable {
 
-	private static final long serialVersionUID = 2144178988;
+	private static final long serialVersionUID = -1631097236;
 
-	private java.lang.Long       id;
-	private java.lang.Long       rentalSiteId;
-	private java.lang.String     name;
-	private java.math.BigDecimal price;
-	private java.lang.Integer    counts;
-	private java.lang.Byte       status;
-	private java.lang.Long       creatorUid;
-	private java.sql.Timestamp   createTime;
-	private java.lang.Long       operatorUid;
-	private java.sql.Timestamp   operateTime;
+	private java.lang.Long     id;
+	private java.lang.Long     rentalSiteId;
+	private java.lang.String   name;
+	private java.lang.Double   price;
+	private java.lang.Integer  counts;
+	private java.lang.Byte     status;
+	private java.lang.Long     creatorUid;
+	private java.sql.Timestamp createTime;
+	private java.lang.Long     operatorUid;
+	private java.sql.Timestamp operateTime;
 
 	public EhRentalSiteItems() {}
 
 	public EhRentalSiteItems(
-		java.lang.Long       id,
-		java.lang.Long       rentalSiteId,
-		java.lang.String     name,
-		java.math.BigDecimal price,
-		java.lang.Integer    counts,
-		java.lang.Byte       status,
-		java.lang.Long       creatorUid,
-		java.sql.Timestamp   createTime,
-		java.lang.Long       operatorUid,
-		java.sql.Timestamp   operateTime
+		java.lang.Long     id,
+		java.lang.Long     rentalSiteId,
+		java.lang.String   name,
+		java.lang.Double   price,
+		java.lang.Integer  counts,
+		java.lang.Byte     status,
+		java.lang.Long     creatorUid,
+		java.sql.Timestamp createTime,
+		java.lang.Long     operatorUid,
+		java.sql.Timestamp operateTime
 	) {
 		this.id = id;
 		this.rentalSiteId = rentalSiteId;
@@ -74,11 +74,11 @@ public class EhRentalSiteItems implements java.io.Serializable {
 		this.name = name;
 	}
 
-	public java.math.BigDecimal getPrice() {
+	public java.lang.Double getPrice() {
 		return this.price;
 	}
 
-	public void setPrice(java.math.BigDecimal price) {
+	public void setPrice(java.lang.Double price) {
 		this.price = price;
 	}
 

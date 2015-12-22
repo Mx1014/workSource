@@ -1,3 +1,7 @@
+SET foreign_key_checks = 0;
+
+use `ehcore`;
+
 DROP TABLE IF EXISTS `eh_conf_account_categories`;
 CREATE TABLE `eh_conf_account_categories` (
 	`id` BIGINT NOT NULL COMMENT 'id',
@@ -204,3 +208,6 @@ CREATE TABLE `eh_conf_reservations` (
 -- public final static String USER_ID = "8EubJ8t9RkWXneUEpY6m7Q";
 -- token
 -- public final static String ZOOM_TOKEN = "n7m8_1qELfzv0uzc-niIQ3DjevC9LtHeQjl0FpC1eYM.BgIgWE1JL2I5aDNRNW5sd1ZNZ3p0Z3dtWTM4TE5WVHlYZ2lANWVhMTA5MDJhZTYwNDAwMjEwYzg2MmVhZTA3ZjY3OTFkNjJkZTYyYjUxM2U5YTFhZWRlMDBiODg1MTFkNjIzYgA";
+
+
+SET foreign_key_checks = 1;

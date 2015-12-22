@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchRulesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhPunchRulesRecord> implements org.jooq.Record15<java.lang.Long, java.lang.Long, java.sql.Time, java.sql.Time, java.sql.Time, java.sql.Time, java.sql.Time, java.sql.Time, java.sql.Time, java.sql.Time, java.lang.Byte, java.lang.Long, java.sql.Timestamp, java.lang.Long, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = -1189634810;
+	private static final long serialVersionUID = -699692448;
 
 	/**
 	 * Setter for <code>ehcore.eh_punch_rules.id</code>. id
@@ -56,14 +56,14 @@ public class EhPunchRulesRecord extends org.jooq.impl.UpdatableRecordImpl<com.ev
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_punch_rules.start_late_time</code>. how late can i arrive 
+	 * Setter for <code>ehcore.eh_punch_rules.start_late_time</code>. how late can i arrive
 	 */
 	public void setStartLateTime(java.sql.Time value) {
 		setValue(3, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_punch_rules.start_late_time</code>. how late can i arrive 
+	 * Getter for <code>ehcore.eh_punch_rules.start_late_time</code>. how late can i arrive
 	 */
 	public java.sql.Time getStartLateTime() {
 		return (java.sql.Time) getValue(3);
@@ -154,14 +154,14 @@ public class EhPunchRulesRecord extends org.jooq.impl.UpdatableRecordImpl<com.ev
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_punch_rules.punch_times_per_day</code>. 2 or  4 times
+	 * Setter for <code>ehcore.eh_punch_rules.punch_times_per_day</code>. 2 or 4 times
 	 */
 	public void setPunchTimesPerDay(java.lang.Byte value) {
 		setValue(10, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_punch_rules.punch_times_per_day</code>. 2 or  4 times
+	 * Getter for <code>ehcore.eh_punch_rules.punch_times_per_day</code>. 2 or 4 times
 	 */
 	public java.lang.Byte getPunchTimesPerDay() {
 		return (java.lang.Byte) getValue(10);

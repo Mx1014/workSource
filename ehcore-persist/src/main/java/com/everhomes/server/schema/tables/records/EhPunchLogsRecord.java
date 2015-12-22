@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchLogsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhPunchLogsRecord> implements org.jooq.Record9<java.lang.Long, java.lang.Long, java.lang.Long, java.lang.Double, java.lang.Double, java.sql.Date, java.sql.Timestamp, java.lang.Byte, java.lang.String> {
 
-	private static final long serialVersionUID = -1519974983;
+	private static final long serialVersionUID = -1640795367;
 
 	/**
 	 * Setter for <code>ehcore.eh_punch_logs.id</code>. id
@@ -112,14 +112,14 @@ public class EhPunchLogsRecord extends org.jooq.impl.UpdatableRecordImpl<com.eve
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_punch_logs.punch_status</code>. 1:Normal ;  0:Not in punch area
+	 * Setter for <code>ehcore.eh_punch_logs.punch_status</code>. 1:Normal, 0:Not in punch area
 	 */
 	public void setPunchStatus(java.lang.Byte value) {
 		setValue(7, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_punch_logs.punch_status</code>. 1:Normal ;  0:Not in punch area
+	 * Getter for <code>ehcore.eh_punch_logs.punch_status</code>. 1:Normal, 0:Not in punch area
 	 */
 	public java.lang.Byte getPunchStatus() {
 		return (java.lang.Byte) getValue(7);

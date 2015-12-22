@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchDayLogsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhPunchDayLogsRecord> implements org.jooq.Record16<java.lang.Long, java.lang.Long, java.lang.Long, java.sql.Date, java.sql.Time, java.sql.Time, java.sql.Time, java.sql.Time, java.sql.Time, java.lang.Byte, java.lang.Byte, java.lang.Byte, java.lang.Long, java.sql.Timestamp, java.lang.Byte, java.lang.Byte> {
 
-	private static final long serialVersionUID = 770223669;
+	private static final long serialVersionUID = -388566951;
 
 	/**
 	 * Setter for <code>ehcore.eh_punch_day_logs.id</code>. id
@@ -224,14 +224,14 @@ public class EhPunchDayLogsRecord extends org.jooq.impl.UpdatableRecordImpl<com.
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_punch_day_logs.punch_times_per_day</code>. 2 or  4 times
+	 * Setter for <code>ehcore.eh_punch_day_logs.punch_times_per_day</code>. 2 or 4 times
 	 */
 	public void setPunchTimesPerDay(java.lang.Byte value) {
 		setValue(15, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_punch_day_logs.punch_times_per_day</code>. 2 or  4 times
+	 * Getter for <code>ehcore.eh_punch_day_logs.punch_times_per_day</code>. 2 or 4 times
 	 */
 	public java.lang.Byte getPunchTimesPerDay() {
 		return (java.lang.Byte) getValue(15);

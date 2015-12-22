@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchLogs extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhPunchLogsRecord> {
 
-	private static final long serialVersionUID = -24426289;
+	private static final long serialVersionUID = -1492143679;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_punch_logs</code>
@@ -62,9 +62,9 @@ public class EhPunchLogs extends org.jooq.impl.TableImpl<com.everhomes.server.sc
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchLogsRecord, java.sql.Timestamp> PUNCH_TIME = createField("punch_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "user check time");
 
 	/**
-	 * The column <code>ehcore.eh_punch_logs.punch_status</code>. 1:Normal ;  0:Not in punch area
+	 * The column <code>ehcore.eh_punch_logs.punch_status</code>. 1:Normal, 0:Not in punch area
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchLogsRecord, java.lang.Byte> PUNCH_STATUS = createField("punch_status", org.jooq.impl.SQLDataType.TINYINT, this, "1:Normal ;  0:Not in punch area");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchLogsRecord, java.lang.Byte> PUNCH_STATUS = createField("punch_status", org.jooq.impl.SQLDataType.TINYINT, this, "1:Normal, 0:Not in punch area");
 
 	/**
 	 * The column <code>ehcore.eh_punch_logs.identification</code>. unique identification for a phone

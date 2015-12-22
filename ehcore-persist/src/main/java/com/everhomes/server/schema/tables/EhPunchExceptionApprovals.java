@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchExceptionApprovals extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhPunchExceptionApprovalsRecord> {
 
-	private static final long serialVersionUID = 1439560040;
+	private static final long serialVersionUID = -1943295336;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_punch_exception_approvals</code>
@@ -87,9 +87,9 @@ public class EhPunchExceptionApprovals extends org.jooq.impl.TableImpl<com.everh
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchExceptionApprovalsRecord, java.lang.Byte> VIEW_FLAG = createField("view_flag", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "is view(0) not view(1)");
 
 	/**
-	 * The column <code>ehcore.eh_punch_exception_approvals.punch_times_per_day</code>. 2 or  4 times
+	 * The column <code>ehcore.eh_punch_exception_approvals.punch_times_per_day</code>. 2 or 4 times
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchExceptionApprovalsRecord, java.lang.Byte> PUNCH_TIMES_PER_DAY = createField("punch_times_per_day", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "2 or  4 times");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchExceptionApprovalsRecord, java.lang.Byte> PUNCH_TIMES_PER_DAY = createField("punch_times_per_day", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "2 or 4 times");
 
 	/**
 	 * Create a <code>ehcore.eh_punch_exception_approvals</code> table reference

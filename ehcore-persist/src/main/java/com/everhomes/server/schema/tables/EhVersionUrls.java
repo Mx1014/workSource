@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhVersionUrls extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhVersionUrlsRecord> {
 
-	private static final long serialVersionUID = -1827805805;
+	private static final long serialVersionUID = 2123073255;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_version_urls</code>
@@ -50,11 +50,6 @@ public class EhVersionUrls extends org.jooq.impl.TableImpl<com.everhomes.server.
 	 * The column <code>ehcore.eh_version_urls.info_url</code>. example configuration: http://serviceurl/download/client-package-info/${locale}/andriod-${major}-${minor}-${revision}.html
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhVersionUrlsRecord, java.lang.String> INFO_URL = createField("info_url", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "example configuration: http://serviceurl/download/client-package-info/${locale}/andriod-${major}-${minor}-${revision}.html");
-
-	/**
-	 * The column <code>ehcore.eh_version_urls.namespace_id</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhVersionUrlsRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_version_urls</code> table reference

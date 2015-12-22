@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPunchRules extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhPunchRulesRecord> {
 
-	private static final long serialVersionUID = -1909348162;
+	private static final long serialVersionUID = -1832472074;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_punch_rules</code>
@@ -42,9 +42,9 @@ public class EhPunchRules extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchRulesRecord, java.sql.Time> START_EARLY_TIME = createField("start_early_time", org.jooq.impl.SQLDataType.TIME, this, "how early can i arrive");
 
 	/**
-	 * The column <code>ehcore.eh_punch_rules.start_late_time</code>. how late can i arrive 
+	 * The column <code>ehcore.eh_punch_rules.start_late_time</code>. how late can i arrive
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchRulesRecord, java.sql.Time> START_LATE_TIME = createField("start_late_time", org.jooq.impl.SQLDataType.TIME, this, "how late can i arrive ");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchRulesRecord, java.sql.Time> START_LATE_TIME = createField("start_late_time", org.jooq.impl.SQLDataType.TIME, this, "how late can i arrive");
 
 	/**
 	 * The column <code>ehcore.eh_punch_rules.work_time</code>. how long do i must be work
@@ -77,9 +77,9 @@ public class EhPunchRules extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchRulesRecord, java.sql.Time> TIME_TAG3 = createField("time_tag3", org.jooq.impl.SQLDataType.TIME, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_punch_rules.punch_times_per_day</code>. 2 or  4 times
+	 * The column <code>ehcore.eh_punch_rules.punch_times_per_day</code>. 2 or 4 times
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchRulesRecord, java.lang.Byte> PUNCH_TIMES_PER_DAY = createField("punch_times_per_day", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "2 or  4 times");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPunchRulesRecord, java.lang.Byte> PUNCH_TIMES_PER_DAY = createField("punch_times_per_day", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "2 or 4 times");
 
 	/**
 	 * The column <code>ehcore.eh_punch_rules.creator_uid</code>.
