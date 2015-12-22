@@ -211,7 +211,7 @@ CREATE TABLE `eh_app_promotions` (
 DROP TABLE IF EXISTS `eh_scoped_configurations`;
 CREATE TABLE `eh_scoped_configurations`(
     `id` BIGINT NOT NULL AUTO_INCREMENT,
-    `namespace_id` INTEGER,
+    `namespace_id` INTEGER NOT NULL DEFAULT 0,
     `app_id` BIGINT,
     `scope_type` VARCHAR(32),
     `scope_id` BIGINT,
@@ -232,8 +232,6 @@ CREATE TABLE `eh_scoped_configurations`(
     `string_tag3` VARCHAR(128),
     `string_tag4` VARCHAR(128),
     `string_tag5` VARCHAR(128),
-	
-	`namespace_id` INTEGER NOT NULL DEFAULT 0,
     
     PRIMARY KEY (`id`),
     INDEX `i_eh_scoped_cfg_combo`(`namespace_id`, `app_id`, `scope_type`, `scope_id`, `item_name`),
@@ -249,15 +247,13 @@ CREATE TABLE `eh_scoped_configurations`(
 DROP TABLE IF EXISTS `eh_launch_pad_layouts`;
 CREATE TABLE `eh_launch_pad_layouts` (
     `id` BIGINT NOT NULL AUTO_INCREMENT,
-    `namespace_id` INTEGER,
+    `namespace_id` INTEGER NOT NULL DEFAULT 0,
     `name` VARCHAR(32),
     `layout_json` TEXT,
     `version_code` BIGINT NOT NULL DEFAULT 0 COMMENT 'the current version code',    
     `min_version_code` BIGINT NOT NULL DEFAULT 0 COMMENT 'the minmum version code which is compatible',    
     `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: waitingForConfirmation, 2: active',
     `create_time` DATETIME,
-	
-	`namespace_id` INTEGER NOT NULL DEFAULT 0,
 
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -268,7 +264,7 @@ CREATE TABLE `eh_launch_pad_layouts` (
 DROP TABLE IF EXISTS `eh_launch_pad_items`;
 CREATE TABLE `eh_launch_pad_items` (
     `id` BIGINT NOT NULL AUTO_INCREMENT,
-    `namespace_id` INTEGER,
+    `namespace_id` INTEGER NOT NULL DEFAULT 0,
     `app_id` BIGINT,
 	`scope_code` TINYINT NOT NULL DEFAULT 0 COMMENT '0: all, 1: community, 2: city, 3: user',
     `scope_id` BIGINT,
@@ -290,8 +286,6 @@ CREATE TABLE `eh_launch_pad_items` (
     `tag` VARCHAR(1024),
     `target_type` VARCHAR(32),
     `target_id` BIGINT COMMENT 'the entity id linked back to the orginal resource',
-	
-	`namespace_id` INTEGER NOT NULL DEFAULT 0,
 
     PRIMARY KEY (`id`),
     INDEX `i_eh_scoped_cfg_combo`(`namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_name`),
@@ -2686,7 +2680,6 @@ CREATE TABLE `eh_enterprise_op_requests` (
     `operator_uid` BIGINT,
     `process_message` TEXT,
     `process_time` DATETIME,
-	`apply_user_name` VARCHAR(128) COMMENT 'apply user name',
 	
 	PRIMARY KEY (`id`) 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -1,3 +1,5 @@
+SET foreign_key_checks = 0;
+
 use `ehcore`;
 /*Table structure for table `eh_punch_logs` */
 
@@ -5,7 +7,7 @@ use `ehcore`;
 # member of global partition
 # the rent promotions published by the park managements
 #
-DROP TABLE `eh_lease_promotions` ;
+DROP TABLE IF EXISTS `eh_lease_promotions`;
 CREATE TABLE `eh_lease_promotions` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -32,6 +34,7 @@ CREATE TABLE `eh_lease_promotions` (
 #
 # member of global partition
 #
+DROP TABLE IF EXISTS `eh_lease_promotion_attachments`;
 CREATE TABLE `eh_lease_promotion_attachments` ( 
 	`id` BIGINT NOT NULL COMMENT 'id of the record', 
 	`lease_id` BIGINT NOT NULL DEFAULT '0', 
@@ -86,7 +89,7 @@ CREATE TABLE `eh_punch_rules` (
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`enterprise_id` BIGINT NOT NULL COMMENT 'rule company id', 
 	`start_early_time` TIME COMMENT 'how early can i arrive',
-	`start_late_time` TIME COMMENT 'how late can i arrive ',
+	`start_late_time` TIME COMMENT 'how late can i arrive',
 	`work_time` TIME COMMENT 'how long do i must be work',
 	`noon_leave_time` TIME,
 	`afternoon_arrive_time` TIME,
@@ -177,15 +180,15 @@ CREATE TABLE `eh_punch_workday` (
 DROP TABLE IF EXISTS `eh_rental_rules`;
 CREATE TABLE `eh_rental_rules` (
 	`id` BIGINT NOT NULL COMMENT 'id',
-	`owner_type` VARCHAR(255) COMMENT 'owner type : community ; organization',
-	`owner_id` BIGINT NOT NULL COMMENT 'community id or organization id ';
-	`site_type` VARCHAR(20) COMMENT 'rule for what function ',
+	`owner_type` VARCHAR(255) COMMENT 'owner type: community, organization',
+	`owner_id` BIGINT NOT NULL COMMENT 'community id or organization id',
+	`site_type` VARCHAR(20) COMMENT 'rule for what function',
 	`rental_start_time` BIGINT,
 	`rental_end_time` BIGINT,
 	`pay_start_time` BIGINT,
 	`pay_end_time` BIGINT,
 	`payment_ratio` INT COMMENT 'payment ratio',
-	`refund_flag` TINYINT NOT NULL DEFAULT 1 COMMENT '0: allow refund, 1: can not refund ',
+	`refund_flag` TINYINT NOT NULL DEFAULT 1 COMMENT '0: allow refund, 1: can not refund',
 	`contact_num` VARCHAR(20) COMMENT 'phone number',
 	`time_tag1` TIME,
 	`time_tag2` TIME,
@@ -220,9 +223,9 @@ DROP TABLE IF EXISTS `eh_rental_sites`;
 CREATE TABLE `eh_rental_sites`(
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`parent_id` BIGINT ,
-	`owner_type` VARCHAR(255) COMMENT 'owner type : community ; organization',
-	`owner_id` BIGINT NOT NULL COMMENT 'community id or organization id ', 
-	`site_type` VARCHAR(128) ,
+	`owner_type` VARCHAR(255) COMMENT 'owner type: community, organization',
+	`owner_id` BIGINT NOT NULL COMMENT 'community id or organization id', 
+	`site_type` VARCHAR(128),
 	`site_name` VARCHAR(127),
 	`site_type2` TINYINT,
 	`building_name` VARCHAR(128) ,
@@ -252,7 +255,7 @@ DROP TABLE IF EXISTS `eh_rental_site_items`;
 CREATE TABLE `eh_rental_site_items`(
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`rental_site_id` BIGINT NOT NULL COMMENT 'rental_site id', 
-	`name` VARCHAR(128) ,
+	`name` VARCHAR(128),
 	`price` DOUBLE, 
 	`counts` INT COMMENT 'item count',
 	`status` TINYINT, 
@@ -267,9 +270,9 @@ CREATE TABLE `eh_rental_site_items`(
 DROP TABLE IF EXISTS `eh_rental_site_rules`;
 CREATE TABLE `eh_rental_site_rules`(
 	`id` BIGINT NOT NULL COMMENT 'id',
-	`owner_type` VARCHAR(255) COMMENT 'owner type : community ; organization',
+	`owner_type` VARCHAR(255) COMMENT 'owner type: community, organization',
 	`owner_id` BIGINT NOT NULL COMMENT 'community id or organization id', 
-	`site_type` VARCHAR(128) ,
+	`site_type` VARCHAR(128),
 	`rental_site_id` BIGINT NOT NULL COMMENT 'rental_site id', 
 	`rental_type` TINYINT COMMENT '0: as hour:min, 1-as half day 2-as day',
 	`amorpm` TINYINT COMMENT '0: am, 1: pm',
@@ -295,24 +298,24 @@ CREATE TABLE `eh_rental_site_rules`(
 DROP TABLE IF EXISTS `eh_rental_bills`;
 CREATE TABLE `eh_rental_bills`(
 	`id` BIGINT NOT NULL COMMENT 'id',
-	`owner_type` VARCHAR(255) COMMENT 'owner type : community ; organization',
+	`owner_type` VARCHAR(255) COMMENT 'owner type: community, organization',
 	`owner_id` BIGINT NOT NULL COMMENT 'community id or organization id', 
-	`site_type` VARCHAR(128) ,
+	`site_type` VARCHAR(128),
 	`rental_site_id` BIGINT NOT NULL COMMENT 'id',
 	`rental_uid` BIGINT COMMENT 'rental user id',
 	`rental_date` DATE COMMENT 'rental target date',
-	`start_time` DATETIME COMMENT 'begin datetime unuse ',
+	`start_time` DATETIME COMMENT 'begin datetime unuse',
 	`end_time` DATETIME COMMENT 'end datetime unuse',
-	`rental_count` DOUBLE COMMENT 'amount of rental sites ',
+	`rental_count` DOUBLE COMMENT 'amount of rental sites',
 	`pay_total_money` double DEFAULT NULL COMMENT 'total money ,include items and site',
 	`site_total_money` double DEFAULT NULL,
 	`reserve_money` DOUBLE COMMENT 'total money * reserve ratio',
-	`reserve_time` DATETIME COMMENT 'reserve time ',
+	`reserve_time` DATETIME COMMENT 'reserve time',
 	`pay_start_time` DATETIME ,
 	`pay_end_time` DATETIME,
 	`pay_time` DATETIME,
 	`cancel_time` DATETIME,
-	`paid_money` DOUBLE COMMENT'already paid money ',
+	`paid_money` DOUBLE COMMENT'already paid money',
 	`status` TINYINT COMMENT'0:wait for reserve, 1:paid reserve, 2:paid all money reserve success, 3:wait for final payment, 4:unlock reserve fail',
 	`visible_flag` TINYINT DEFAULT '0' COMMENT '0:visible 1:unvisible',
 	`invoice_flag` TINYINT DEFAULT '1' COMMENT '0:want invocie 1 no need',
@@ -327,12 +330,12 @@ CREATE TABLE `eh_rental_bills`(
 DROP TABLE IF EXISTS `eh_rental_bill_attachments`;
 CREATE TABLE `eh_rental_bill_attachments`(
 	`id` BIGINT NOT NULL COMMENT 'id',
-	`owner_type` VARCHAR(255) COMMENT 'owner type : community ; organization',
+	`owner_type` VARCHAR(255) COMMENT 'owner type: community, organization',
 	`owner_id` BIGINT NOT NULL COMMENT 'community id or organization id', 
-	`site_type` VARCHAR(128) ,
-	`rental_bill_id` BIGINT ,
+	`site_type` VARCHAR(128),
+	`rental_bill_id` BIGINT,
 	`attachment_type` TINYINT COMMENT '0:String 1:email 2:attachment file',
-	`content` VARCHAR(500) ,
+	`content` VARCHAR(500),
 	`file_path` VARCHAR(500),
 	`creator_uid` BIGINT,
 	`create_time` DATETIME,
@@ -345,10 +348,10 @@ CREATE TABLE `eh_rental_bill_attachments`(
 DROP TABLE IF EXISTS `eh_rental_sites_bills`;
 CREATE TABLE `eh_rental_sites_bills`(
 	`id` BIGINT NOT NULL COMMENT 'id',
-	`owner_type` VARCHAR(255) COMMENT 'owner type : community ; organization',
+	`owner_type` VARCHAR(255) COMMENT 'owner type: community, organization',
 	`owner_id` BIGINT NOT NULL COMMENT 'community id or organization id', 
-	`site_type` VARCHAR(128) ,
-	`rental_bill_id` BIGINT ,
+	`site_type` VARCHAR(128),
+	`rental_bill_id` BIGINT,
 	`rental_site_rule_id` BIGINT,
 	`rental_count` DOUBLE,
 	`total_money` DOUBLE,
@@ -365,8 +368,8 @@ DROP TABLE IF EXISTS `eh_rental_items_bills`;
 CREATE TABLE `eh_rental_items_bills`(
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`community_id` BIGINT NOT NULL COMMENT 'enterprise, community id', 
-	`site_type` VARCHAR(128) ,
-	`rental_bill_id` BIGINT ,
+	`site_type` VARCHAR(128),
+	`rental_bill_id` BIGINT,
 	`rental_site_item_id` BIGINT ,
 	`rental_count` INT,
 	`total_money` DOUBLE,
@@ -381,10 +384,10 @@ CREATE TABLE `eh_rental_items_bills`(
 DROP TABLE IF EXISTS `eh_rental_bill_paybill_map`;
 CREATE TABLE `eh_rental_bill_paybill_map`(
 	`id` BIGINT NOT NULL COMMENT 'id',
-	`owner_type` VARCHAR(255) COMMENT 'owner type : community ; organization'
+	`owner_type` VARCHAR(255) COMMENT 'owner type: community, organization',
 	`owner_id` BIGINT NOT NULL COMMENT 'community id or organization id', 
-	`site_type` VARCHAR(128) ,
-	`rental_bill_id` BIGINT ,
+	`site_type` VARCHAR(128),
+	`rental_bill_id` BIGINT,
 	`online_pay_bill_id` BIGINT ,
 	`creator_uid` BIGINT,
 	`create_time` DATETIME,
@@ -484,6 +487,7 @@ CREATE TABLE `eh_yellow_pages` (
 #
 # member of global sharding group
 #
+DROP TABLE IF EXISTS `eh_yellow_page_attachments`;
 CREATE TABLE `eh_yellow_page_attachments` (
 	`id` BIGINT NOT NULL COMMENT 'id of the record',
 	`owner_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'the id reference to eh_yellow_pages',
@@ -493,3 +497,5 @@ CREATE TABLE `eh_yellow_page_attachments` (
 	`create_time` DATETIME,
 	PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+SET foreign_key_checks = 1;
