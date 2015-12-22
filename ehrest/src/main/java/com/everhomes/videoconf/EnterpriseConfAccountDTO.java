@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  *  <li>enterpriseDisplayName: 企业简称</li>
  *  <li>enterpriseContactor: 企业联系人</li>
  *  <li>mobile: 手机号</li>
+ *  <li>useStatus: 企业使用状态 0-formally use 1-on trial 2-overdue </li>
  *  <li>status: 状态 0: inactive, 1: active, 2: locked </li>
  *  <li>totalAccount: 账号总数</li>
  *  <li>validAccount: 有效账号数</li>
@@ -33,6 +34,8 @@ public class EnterpriseConfAccountDTO {
 	private String enterpriseContactor;
 	
 	private String mobile;
+	
+	private Byte useStatus;
 	
 	private Byte status;
 	
@@ -88,6 +91,14 @@ public class EnterpriseConfAccountDTO {
 
 	public void setMobile(String mobile) {
 		this.mobile = mobile;
+	}
+
+	public Byte getUseStatus() {
+		return useStatus;
+	}
+
+	public void setUseStatus(Byte useStatus) {
+		this.useStatus = useStatus;
 	}
 
 	public Byte getStatus() {

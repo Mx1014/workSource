@@ -23,7 +23,6 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.stereotype.Component;
 
 import com.everhomes.category.Category;
@@ -43,6 +42,7 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.VendorType;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.organization.pm.pay.ResultHolder;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.techpark.onlinePay.OnlinePayBillCommand;
@@ -510,6 +510,15 @@ public class VideoConfServiceImpl implements VideoConfService {
 	    	dto.setEnterpriseDisplayName(enterprise.getDisplayName());
 	    	dto.setEnterpriseContactor(r.getContactName());
 	    	dto.setMobile(r.getContact());
+	    	if(r.getActiveAccountAmount() > 0)
+	    		dto.setUseStatus((byte) 0);
+	    	if(r.getActiveAccountAmount() == 0 && r.getTrialAccountAmount() > 0) {
+	    		dto.setUseStatus((byte) 1);
+	    	}
+	    	if(r.getActiveAccountAmount() == 0 && r.getTrialAccountAmount() == 0) {
+	    		dto.setUseStatus((byte) 2);
+	    	}
+	    	
 	    	dto.setStatus(r.getStatus());
 	    	dto.setTotalAccount(r.getAccountAmount());
 	    	dto.setValidAccount(r.getActiveAccountAmount());
