@@ -997,7 +997,7 @@ public class RentalServiceImpl implements RentalService {
 					rsr.setSiteType(cmd.getSiteType());
 					rsr.setRentalSiteId(cmd.getRentalSiteId());
 					rsr.setRentalType(cmd.getRentalType());
-					rsr.setCounts(cmd.getCounts());
+					rsr.setCounts(cmd.getCounts()==null?1:cmd.getCounts());
 					rsr.setUnit(cmd.getUnit());
 					rsr.setSiteRentalDate(Date.valueOf(dateSF.format(start
 							.getTime())));
