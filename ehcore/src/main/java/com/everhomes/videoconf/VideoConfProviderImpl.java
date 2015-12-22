@@ -257,8 +257,21 @@ public class VideoConfProviderImpl implements VideoConfProvider {
             
             if(namespaceId != null)
             	query.addConditions(Tables.EH_CONF_ENTERPRISES.NAMESPACE_ID.eq(namespaceId));
-            if(status != null)
-            	query.addConditions(Tables.EH_CONF_ENTERPRISES.STATUS.eq(status));
+            
+            //status: 状态 0-formally use 1-on trial 2-overdue
+            if(status != null) {
+            	if(status == 0)
+            		query.addConditions(Tables.EH_CONF_ENTERPRISES.ACTIVE_ACCOUNT_AMOUNT.gt(0));
+            	if(status == 1) {
+            		query.addConditions(Tables.EH_CONF_ENTERPRISES.ACTIVE_ACCOUNT_AMOUNT.eq(0));
+            		query.addConditions(Tables.EH_CONF_ENTERPRISES.TRIAL_ACCOUNT_AMOUNT.gt(0));
+            	}
+            	if(status == 2) {
+            		query.addConditions(Tables.EH_CONF_ENTERPRISES.ACTIVE_ACCOUNT_AMOUNT.eq(0));
+            		query.addConditions(Tables.EH_CONF_ENTERPRISES.TRIAL_ACCOUNT_AMOUNT.eq(0));
+            	}
+            		
+            }
             
             query.addLimit(pageSize - enterprises.size());
             

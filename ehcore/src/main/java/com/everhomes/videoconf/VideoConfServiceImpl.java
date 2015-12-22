@@ -872,7 +872,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 			
 			dto.setId(r.getId());
 			dto.setUserId(r.getOwnerId());
-			dto.setValidDate(r.getExpiredDate());
+			dto.setUpdateDate(r.getUpdateTime());
 			dto.setStatus(r.getStatus());
 			ConfAccountCategories category = vcProvider.findAccountCategoriesById(r.getAccountCategoryId());
 			if(category != null) {
@@ -880,6 +880,8 @@ public class VideoConfServiceImpl implements VideoConfService {
 				dto.setConfType(category.getConfType());
 			}
 			
+			Enterprise enterprise = enterpriseProvider.findEnterpriseById(r.getEnterpriseId());
+			dto.setEnterpriseName(enterprise.getName());
 			EnterpriseContact contact = enterpriseContactProvider.queryContactByUserId(r.getEnterpriseId(), r.getOwnerId());
 			if(contact != null) {
 				dto.setDepartment(contact.getStringTag1());
