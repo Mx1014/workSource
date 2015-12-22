@@ -113,21 +113,21 @@ public class EhRentalBillsDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	/**
 	 * Fetch records that have <code>pay_total_money IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBills> fetchByPayTotalMoney(java.lang.Double... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBills> fetchByPayTotalMoney(java.math.BigDecimal... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalBills.EH_RENTAL_BILLS.PAY_TOTAL_MONEY, values);
 	}
 
 	/**
 	 * Fetch records that have <code>site_total_money IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBills> fetchBySiteTotalMoney(java.lang.Double... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBills> fetchBySiteTotalMoney(java.math.BigDecimal... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalBills.EH_RENTAL_BILLS.SITE_TOTAL_MONEY, values);
 	}
 
 	/**
 	 * Fetch records that have <code>reserve_money IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBills> fetchByReserveMoney(java.lang.Double... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBills> fetchByReserveMoney(java.math.BigDecimal... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalBills.EH_RENTAL_BILLS.RESERVE_MONEY, values);
 	}
 
@@ -169,7 +169,7 @@ public class EhRentalBillsDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	/**
 	 * Fetch records that have <code>paid_money IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBills> fetchByPaidMoney(java.lang.Double... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBills> fetchByPaidMoney(java.math.BigDecimal... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalBills.EH_RENTAL_BILLS.PAID_MONEY, values);
 	}
 

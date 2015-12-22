@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalBills extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalBillsRecord> {
 
-	private static final long serialVersionUID = -1850709049;
+	private static final long serialVersionUID = 1014529415;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_bills</code>
@@ -79,17 +79,17 @@ public class EhRentalBills extends org.jooq.impl.TableImpl<com.everhomes.server.
 	/**
 	 * The column <code>ehcore.eh_rental_bills.pay_total_money</code>. total money ,include items and site
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.lang.Double> PAY_TOTAL_MONEY = createField("pay_total_money", org.jooq.impl.SQLDataType.DOUBLE, this, "total money ,include items and site");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.math.BigDecimal> PAY_TOTAL_MONEY = createField("pay_total_money", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "total money ,include items and site");
 
 	/**
 	 * The column <code>ehcore.eh_rental_bills.site_total_money</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.lang.Double> SITE_TOTAL_MONEY = createField("site_total_money", org.jooq.impl.SQLDataType.DOUBLE, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.math.BigDecimal> SITE_TOTAL_MONEY = createField("site_total_money", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_rental_bills.reserve_money</code>. total money * reserve ratio
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.lang.Double> RESERVE_MONEY = createField("reserve_money", org.jooq.impl.SQLDataType.DOUBLE, this, "total money * reserve ratio");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.math.BigDecimal> RESERVE_MONEY = createField("reserve_money", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "total money * reserve ratio");
 
 	/**
 	 * The column <code>ehcore.eh_rental_bills.reserve_time</code>. reserve time
@@ -119,7 +119,7 @@ public class EhRentalBills extends org.jooq.impl.TableImpl<com.everhomes.server.
 	/**
 	 * The column <code>ehcore.eh_rental_bills.paid_money</code>. already paid money
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.lang.Double> PAID_MONEY = createField("paid_money", org.jooq.impl.SQLDataType.DOUBLE, this, "already paid money");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalBillsRecord, java.math.BigDecimal> PAID_MONEY = createField("paid_money", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "already paid money");
 
 	/**
 	 * The column <code>ehcore.eh_rental_bills.status</code>. 0:wait for reserve, 1:paid reserve, 2:paid all money reserve success, 3:wait for final payment, 4:unlock reserve fail
