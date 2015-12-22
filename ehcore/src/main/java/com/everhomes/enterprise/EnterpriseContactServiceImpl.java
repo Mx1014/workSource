@@ -499,6 +499,9 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
                     this.enterpriseContactProvider.updateContact(contact);
                 }
                 this.userProvider.deleteUserGroup(contact.getUserId(), contact.getEnterpriseId());
+                List<Long> contactIds = new ArrayList<Long>();
+                contactIds.add(contact.getId());
+                this.enterpriseContactProvider.deleteContactEntryByContactId(contactIds);
                 
                 Group group = this.groupProvider.findGroupById(contact.getEnterpriseId());
                 long memberCount = group.getMemberCount() - 1;
