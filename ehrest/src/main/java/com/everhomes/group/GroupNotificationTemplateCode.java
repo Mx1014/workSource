@@ -37,4 +37,6 @@ public interface GroupNotificationTemplateCode {
     static final int GROUP_MEMBER_DELETED_ADMIN = 30;   //彭海星已删除圈“瑞地自由度”
     static final int GROUP_MEMBER_DELETED_OPERATOR = 31;    //您已删除圈“瑞地自由度”
     static final int GROUP_MEMBER_DELETE_MEMBER = 32;   //您已取消订阅兴趣圈“瑞地自由度”
+    
+    static final int GROUP_RECOMMEND = 33;   //兴趣圈推荐
 }
