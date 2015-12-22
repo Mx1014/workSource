@@ -99,6 +99,7 @@ public class CategoryController extends ControllerBase {
 
 		User user = UserContext.current().getUser();
 		Integer namespaceId = (user.getNamespaceId() == null) ? 0 : user.getNamespaceId();
+		namespaceId = cmd.getNamespaceId() == null ? namespaceId : cmd.getNamespaceId();
 		List<Category> entityResultList = this.categoryProvider.listChildCategories(namespaceId, cmd.getParentId(),
 				CategoryAdminStatus.fromCode(cmd.getStatus()), orderBy);
 
