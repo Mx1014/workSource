@@ -768,16 +768,20 @@ public class OrganizationServiceImpl implements OrganizationService {
 			user = userProvider.findUserById(member.getTargetId());
 		}
 		
+		// 当被分派任务的人不在左邻系统中时，使用当前用户来获取locale，而不是抛异常 by lqs 20151222
+//		if(null == user){
+//			LOGGER.error("Users do not register.");
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+//					"Users do not register.");
+//		}
 		
-		if(null == user){
-			LOGGER.error("Users do not register.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Users do not register.");
-		}
-		
-		String locale = user.getLocale();
-		if(locale == null) 
-			locale = "zh_CN";
+		String locale = "zh_CN";
+		if(user == null) {
+		    user = UserContext.current().getUser();
+		} 
+		if(user != null) {
+            locale = user.getLocale();
+        }
 
 		String notifyText = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_ASSIGN_TOPIC_FOR_COMMENT, locale, map, "");
 
