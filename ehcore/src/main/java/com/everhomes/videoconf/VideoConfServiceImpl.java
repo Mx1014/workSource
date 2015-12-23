@@ -541,25 +541,23 @@ public class VideoConfServiceImpl implements VideoConfService {
 		if(accounts != null && accounts.size() > 0) {
 			if(cmd.getLockStatus() == 2) {
 				enterprise.setStatus((byte) 2);
-				accounts.stream().map(r -> {
-					r.setStatus((byte) 2);
-					vcProvider.updateConfAccounts(r);
-					return null;
-				});
+				for(ConfAccounts account : accounts) {
+					account.setStatus((byte) 2);
+					vcProvider.updateConfAccounts(account);
+				}
 			}
 			
 			if(cmd.getLockStatus() == 1) {
 				enterprise.setStatus((byte) 0);
-				accounts.stream().map(r -> {
-					if(r.getExpiredDate().before(new Timestamp(DateHelper.currentGMTTime().getTime()))){
-						r.setStatus((byte) 0);
+				for(ConfAccounts account : accounts) {
+					if(account.getExpiredDate().before(new Timestamp(DateHelper.currentGMTTime().getTime()))){
+						account.setStatus((byte) 0);
 					} else {
-						r.setStatus((byte) 1);
+						account.setStatus((byte) 1);
 						enterprise.setStatus((byte) 1);
 					}
-					vcProvider.updateConfAccounts(r);
-					return null;
-				});
+					vcProvider.updateConfAccounts(account);
+				}
 				
 			}
 			vcProvider.updateVideoconfEnterprise(enterprise);
