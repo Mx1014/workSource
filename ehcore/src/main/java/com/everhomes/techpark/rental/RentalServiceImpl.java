@@ -1598,7 +1598,8 @@ public class RentalServiceImpl implements RentalService {
 	@Override
 	public RentalBillDTO completeBill(CompleteBillCommand cmd) {
 		RentalBill bill = this.rentalProvider.findRentalBillById(cmd.getRentalBillId());
-		if (bill.getStatus().equals(SiteBillStatus.SUCCESS.getCode())){
+		if (!bill.getStatus().equals(SiteBillStatus.SUCCESS.getCode())
+				&&!bill.getStatus().equals(SiteBillStatus.OVERTIME.getCode())){
 			throw RuntimeErrorException
 			.errorWith(
 					RentalServiceErrorCode.SCOPE,
