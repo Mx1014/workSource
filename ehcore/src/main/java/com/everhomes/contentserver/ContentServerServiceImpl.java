@@ -205,7 +205,7 @@ public class ContentServerServiceImpl implements ContentServerService {
                 ContentServerResource resource = contentServerProvider.findByResourceId(resourceId);
                 if(resource != null) {
                     metaData = resource.getMetadata();
-                    if(metaData != null) {
+                    if(metaData != null && metaData.trim().length() > 0) {
                         HashMap map = (HashMap)StringHelper.fromJsonString(metaData, HashMap.class);
                         Object widthObj = map.get("width");
                         if(widthObj != null) {
