@@ -288,7 +288,6 @@ CREATE TABLE `eh_rental_site_rules`(
 	`operator_uid` BIGINT,
 	`operate_time` DATETIME,
 	`time_step` DOUBLE,
-	`rental_step` INT DEFAULT 1 COMMENT 'how many time_step must be rental every time',
 
 	PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;

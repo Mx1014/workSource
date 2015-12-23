@@ -3,13 +3,14 @@ package com.everhomes.launchpad;
 
 /**
  * <ul>组内控件风格
- * <li>DEFAULT：默认</li>
- * <li>METRO: Metro</li>
- * <li>LIGHT: Light</li>
+ * <li>DEFAULT("Default")：默认</li>
+ * <li>METRO("Metro"): Metro</li>
+ * <li>LIGHT("Light"): Light</li>
+ * <li>GALLERY("Gallery"): Gallery</li>
  * </ul>
  */
 public enum Style {
-    DEFAULT("Default"),METRO("Metro"),LIGHT("Light");
+    DEFAULT("Default"),METRO("Metro"),LIGHT("Light"),GALLERY("Gallery");
     
     private String code;
        
