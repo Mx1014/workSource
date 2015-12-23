@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteItemsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhRentalSiteItemsRecord> implements org.jooq.Record10<java.lang.Long, java.lang.Long, java.lang.String, java.math.BigDecimal, java.lang.Integer, java.lang.Byte, java.lang.Long, java.sql.Timestamp, java.lang.Long, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = 576442226;
+	private static final long serialVersionUID = -1042987406;
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_site_items.id</code>. id
@@ -28,14 +28,14 @@ public class EhRentalSiteItemsRecord extends org.jooq.impl.UpdatableRecordImpl<c
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_site_items.rental_site_id</code>.   rental_site id
+	 * Setter for <code>ehcore.eh_rental_site_items.rental_site_id</code>. rental_site id
 	 */
 	public void setRentalSiteId(java.lang.Long value) {
 		setValue(1, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_site_items.rental_site_id</code>.   rental_site id
+	 * Getter for <code>ehcore.eh_rental_site_items.rental_site_id</code>. rental_site id
 	 */
 	public java.lang.Long getRentalSiteId() {
 		return (java.lang.Long) getValue(1);

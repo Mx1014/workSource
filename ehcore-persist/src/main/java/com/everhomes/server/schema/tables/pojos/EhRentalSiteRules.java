@@ -11,15 +11,16 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteRules implements java.io.Serializable {
 
-	private static final long serialVersionUID = 108782339;
+	private static final long serialVersionUID = 1176164983;
 
 	private java.lang.Long       id;
+	private java.lang.String     ownerType;
 	private java.lang.Long       ownerId;
 	private java.lang.String     siteType;
 	private java.lang.Long       rentalSiteId;
+	private java.lang.Integer    rentalStep;
 	private java.lang.Byte       rentalType;
 	private java.lang.Byte       amorpm;
-	private java.lang.Integer    rentalStep;
 	private java.sql.Timestamp   beginTime;
 	private java.sql.Timestamp   endTime;
 	private java.lang.Double     counts;
@@ -31,19 +32,19 @@ public class EhRentalSiteRules implements java.io.Serializable {
 	private java.sql.Timestamp   createTime;
 	private java.lang.Long       operatorUid;
 	private java.sql.Timestamp   operateTime;
-	private java.lang.String     ownerType;
 	private java.lang.Double     timeStep;
 
 	public EhRentalSiteRules() {}
 
 	public EhRentalSiteRules(
 		java.lang.Long       id,
+		java.lang.String     ownerType,
 		java.lang.Long       ownerId,
 		java.lang.String     siteType,
 		java.lang.Long       rentalSiteId,
+		java.lang.Integer    rentalStep,
 		java.lang.Byte       rentalType,
 		java.lang.Byte       amorpm,
-		java.lang.Integer    rentalStep,
 		java.sql.Timestamp   beginTime,
 		java.sql.Timestamp   endTime,
 		java.lang.Double     counts,
@@ -55,16 +56,16 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		java.sql.Timestamp   createTime,
 		java.lang.Long       operatorUid,
 		java.sql.Timestamp   operateTime,
-		java.lang.String     ownerType,
 		java.lang.Double     timeStep
 	) {
 		this.id = id;
+		this.ownerType = ownerType;
 		this.ownerId = ownerId;
 		this.siteType = siteType;
 		this.rentalSiteId = rentalSiteId;
+		this.rentalStep = rentalStep;
 		this.rentalType = rentalType;
 		this.amorpm = amorpm;
-		this.rentalStep = rentalStep;
 		this.beginTime = beginTime;
 		this.endTime = endTime;
 		this.counts = counts;
@@ -76,7 +77,6 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		this.createTime = createTime;
 		this.operatorUid = operatorUid;
 		this.operateTime = operateTime;
-		this.ownerType = ownerType;
 		this.timeStep = timeStep;
 	}
 
@@ -86,6 +86,14 @@ public class EhRentalSiteRules implements java.io.Serializable {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
+	}
+
+	public java.lang.String getOwnerType() {
+		return this.ownerType;
+	}
+
+	public void setOwnerType(java.lang.String ownerType) {
+		this.ownerType = ownerType;
 	}
 
 	public java.lang.Long getOwnerId() {
@@ -112,6 +120,14 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		this.rentalSiteId = rentalSiteId;
 	}
 
+	public java.lang.Integer getRentalStep() {
+		return this.rentalStep;
+	}
+
+	public void setRentalStep(java.lang.Integer rentalStep) {
+		this.rentalStep = rentalStep;
+	}
+
 	public java.lang.Byte getRentalType() {
 		return this.rentalType;
 	}
@@ -126,14 +142,6 @@ public class EhRentalSiteRules implements java.io.Serializable {
 
 	public void setAmorpm(java.lang.Byte amorpm) {
 		this.amorpm = amorpm;
-	}
-
-	public java.lang.Integer getRentalStep() {
-		return this.rentalStep;
-	}
-
-	public void setRentalStep(java.lang.Integer rentalStep) {
-		this.rentalStep = rentalStep;
 	}
 
 	public java.sql.Timestamp getBeginTime() {
@@ -222,14 +230,6 @@ public class EhRentalSiteRules implements java.io.Serializable {
 
 	public void setOperateTime(java.sql.Timestamp operateTime) {
 		this.operateTime = operateTime;
-	}
-
-	public java.lang.String getOwnerType() {
-		return this.ownerType;
-	}
-
-	public void setOwnerType(java.lang.String ownerType) {
-		this.ownerType = ownerType;
 	}
 
 	public java.lang.Double getTimeStep() {
