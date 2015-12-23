@@ -11,16 +11,15 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteRules implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1090977269;
+	private static final long serialVersionUID = 108782339;
 
 	private java.lang.Long       id;
-	private java.lang.String     ownerType;
 	private java.lang.Long       ownerId;
 	private java.lang.String     siteType;
 	private java.lang.Long       rentalSiteId;
 	private java.lang.Byte       rentalType;
 	private java.lang.Byte       amorpm;
-	private java.lang.Integer    rentalstep;
+	private java.lang.Integer    rentalStep;
 	private java.sql.Timestamp   beginTime;
 	private java.sql.Timestamp   endTime;
 	private java.lang.Double     counts;
@@ -32,20 +31,19 @@ public class EhRentalSiteRules implements java.io.Serializable {
 	private java.sql.Timestamp   createTime;
 	private java.lang.Long       operatorUid;
 	private java.sql.Timestamp   operateTime;
+	private java.lang.String     ownerType;
 	private java.lang.Double     timeStep;
-	private java.lang.Integer    rentalStep;
 
 	public EhRentalSiteRules() {}
 
 	public EhRentalSiteRules(
 		java.lang.Long       id,
-		java.lang.String     ownerType,
 		java.lang.Long       ownerId,
 		java.lang.String     siteType,
 		java.lang.Long       rentalSiteId,
 		java.lang.Byte       rentalType,
 		java.lang.Byte       amorpm,
-		java.lang.Integer    rentalstep,
+		java.lang.Integer    rentalStep,
 		java.sql.Timestamp   beginTime,
 		java.sql.Timestamp   endTime,
 		java.lang.Double     counts,
@@ -57,17 +55,16 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		java.sql.Timestamp   createTime,
 		java.lang.Long       operatorUid,
 		java.sql.Timestamp   operateTime,
-		java.lang.Double     timeStep,
-		java.lang.Integer    rentalStep
+		java.lang.String     ownerType,
+		java.lang.Double     timeStep
 	) {
 		this.id = id;
-		this.ownerType = ownerType;
 		this.ownerId = ownerId;
 		this.siteType = siteType;
 		this.rentalSiteId = rentalSiteId;
 		this.rentalType = rentalType;
 		this.amorpm = amorpm;
-		this.rentalstep = rentalstep;
+		this.rentalStep = rentalStep;
 		this.beginTime = beginTime;
 		this.endTime = endTime;
 		this.counts = counts;
@@ -79,8 +76,8 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		this.createTime = createTime;
 		this.operatorUid = operatorUid;
 		this.operateTime = operateTime;
+		this.ownerType = ownerType;
 		this.timeStep = timeStep;
-		this.rentalStep = rentalStep;
 	}
 
 	public java.lang.Long getId() {
@@ -89,14 +86,6 @@ public class EhRentalSiteRules implements java.io.Serializable {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
-	}
-
-	public java.lang.String getOwnerType() {
-		return this.ownerType;
-	}
-
-	public void setOwnerType(java.lang.String ownerType) {
-		this.ownerType = ownerType;
 	}
 
 	public java.lang.Long getOwnerId() {
@@ -139,12 +128,12 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		this.amorpm = amorpm;
 	}
 
-	public java.lang.Integer getRentalstep() {
-		return this.rentalstep;
+	public java.lang.Integer getRentalStep() {
+		return this.rentalStep;
 	}
 
-	public void setRentalstep(java.lang.Integer rentalstep) {
-		this.rentalstep = rentalstep;
+	public void setRentalStep(java.lang.Integer rentalStep) {
+		this.rentalStep = rentalStep;
 	}
 
 	public java.sql.Timestamp getBeginTime() {
@@ -235,19 +224,19 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		this.operateTime = operateTime;
 	}
 
+	public java.lang.String getOwnerType() {
+		return this.ownerType;
+	}
+
+	public void setOwnerType(java.lang.String ownerType) {
+		this.ownerType = ownerType;
+	}
+
 	public java.lang.Double getTimeStep() {
 		return this.timeStep;
 	}
 
 	public void setTimeStep(java.lang.Double timeStep) {
 		this.timeStep = timeStep;
-	}
-
-	public java.lang.Integer getRentalStep() {
-		return this.rentalStep;
-	}
-
-	public void setRentalStep(java.lang.Integer rentalStep) {
-		this.rentalStep = rentalStep;
 	}
 }

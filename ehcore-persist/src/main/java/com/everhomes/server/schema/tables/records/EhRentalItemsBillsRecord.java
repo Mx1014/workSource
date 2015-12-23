@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalItemsBillsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhRentalItemsBillsRecord> implements org.jooq.Record11<java.lang.Long, java.lang.Long, java.lang.String, java.lang.Long, java.lang.Long, java.lang.Integer, java.math.BigDecimal, java.lang.Long, java.sql.Timestamp, java.lang.Long, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = 1650087148;
+	private static final long serialVersionUID = 114187572;
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_items_bills.id</code>. id
@@ -28,14 +28,14 @@ public class EhRentalItemsBillsRecord extends org.jooq.impl.UpdatableRecordImpl<
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_items_bills.community_id</code>. enterprise, community id
+	 * Setter for <code>ehcore.eh_rental_items_bills.community_id</code>.  enterprise  community id
 	 */
 	public void setCommunityId(java.lang.Long value) {
 		setValue(1, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_items_bills.community_id</code>. enterprise, community id
+	 * Getter for <code>ehcore.eh_rental_items_bills.community_id</code>.  enterprise  community id
 	 */
 	public java.lang.Long getCommunityId() {
 		return (java.lang.Long) getValue(1);
