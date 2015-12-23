@@ -81,4 +81,5 @@ INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'renta
 
 
 
-INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'group.notification', 33, 'zh_CN', '兴趣圈“${groupName}”推荐');
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'group.notification', 33, 'zh_CN', '兴趣圈分享', '兴趣圈“${groupName}”推荐');
+INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, 'sms.vcodetest.flag','true','是否可以发送测试验证码短信');
