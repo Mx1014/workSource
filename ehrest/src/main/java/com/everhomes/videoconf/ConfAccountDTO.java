@@ -15,6 +15,9 @@ import com.everhomes.util.StringHelper;
  *  <li>confType: 会议类型 0-25方仅视频 1-25方支持电话 2-100方仅视频 3-100方支持电话</li>
  *  <li>accountType: 账号类型 0-single 1-multiple</li>
  *  <li>updateDate: 更新时间</li>
+ *  <li>validDate: 有效期</li>
+ *  <li>userType: 用户类型  0-试用用户  1-新增用户  2-续约用户</li>
+ *  <li>validFlag: 有效状态  0-过期  1-有效 </li>
  *  <li>status: 状态 0-invalid 1-valid 2-locked</li>
  * </ul>
  *
@@ -38,6 +41,12 @@ public class ConfAccountDTO {
 	private Byte accoutnType;
 	
 	private Timestamp updateDate;
+	
+	private Timestamp validDate;
+	
+	private Byte userType;
+	
+	private Byte validFlag;
 	
 	private Byte status;
 
@@ -111,6 +120,30 @@ public class ConfAccountDTO {
 
 	public void setUpdateDate(Timestamp updateDate) {
 		this.updateDate = updateDate;
+	}
+
+	public Timestamp getValidDate() {
+		return validDate;
+	}
+
+	public void setValidDate(Timestamp validDate) {
+		this.validDate = validDate;
+	}
+
+	public Byte getUserType() {
+		return userType;
+	}
+
+	public void setUserType(Byte userType) {
+		this.userType = userType;
+	}
+
+	public Byte getValidFlag() {
+		return validFlag;
+	}
+
+	public void setValidFlag(Byte validFlag) {
+		this.validFlag = validFlag;
 	}
 
 	public Byte getStatus() {

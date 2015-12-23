@@ -869,6 +869,8 @@ public class VideoConfProviderImpl implements VideoConfProvider {
             
             if(enterpriseId != null)
             	query.addConditions(Tables.EH_CONF_ACCOUNTS.ENTERPRISE_ID.eq(enterpriseId));
+            
+            query.addConditions(Tables.EH_CONF_ACCOUNTS.DELETE_UID.eq(0L));
            
             query.addLimit(pageSize - accounts.size());
             
@@ -1050,6 +1052,20 @@ public class VideoConfProviderImpl implements VideoConfProvider {
         EhConfOrderAccountMapDao dao = new EhConfOrderAccountMapDao(context.configuration());
         dao.insert(map);
 		
+	}
+
+	@Override
+	public int countOrdersByAccountId(Long accountId) {
+		final Integer[] count = new Integer[1];
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhConfOrderAccountMap.class), null, 
+                (DSLContext context, Object reducingContext)-> {
+                    count[0] = context.selectCount().from(Tables.EH_CONF_ORDER_ACCOUNT_MAP)
+                            .where(Tables.EH_CONF_ORDER_ACCOUNT_MAP.CONF_ACCOUNT_ID.equal(accountId))
+                            .fetchOneInto(Integer.class);
+                    return true;
+                });
+        
+        return count[0];
 	}
 
 

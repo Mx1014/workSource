@@ -606,14 +606,15 @@ public class VideoConfServiceImpl implements VideoConfService {
 
 	}
 
-//	@Override
-//	public void deleteVideoConfAccount(DeleteVideoConfAccountCommand cmd) {
-//
-//		ConfAccounts account = vcProvider.findVideoconfAccountById(cmd.getAccountId());
-//		account.setDeleteFlag((byte) 0);
-//		
-//		vcProvider.updateVideoconfAccount(account);
-//	}
+	@Override
+	public void deleteVideoConfAccount(DeleteVideoConfAccountCommand cmd) {
+
+		ConfAccounts account = vcProvider.findVideoconfAccountById(cmd.getAccountId());
+		account.setDeleteUid(UserContext.current().getUser().getId());
+		account.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		
+		vcProvider.updateConfAccounts(account);
+	}
 
 	@Override
 	public void extendedVideoConfAccountPeriod(
@@ -881,8 +882,23 @@ public class VideoConfServiceImpl implements VideoConfService {
 			
 			dto.setId(r.getId());
 			dto.setUserId(r.getOwnerId());
+			dto.setValidDate(r.getExpiredDate());
 			dto.setUpdateDate(r.getUpdateTime());
+			if(r.getAccountType() == 1)
+				dto.setUserType((byte) 0);
+			else {
+				if(vcProvider.countOrdersByAccountId(r.getId()) == 1)
+					dto.setUserType((byte) 1);
+				else {
+					dto.setUserType((byte) 2);
+				}
+			}
 			dto.setStatus(r.getStatus());
+			if(new Timestamp(DateHelper.currentGMTTime().getTime()).after(r.getExpiredDate()))
+				dto.setValidFlag((byte) 0);
+			else {
+				dto.setValidFlag((byte) 1);
+			}
 			ConfAccountCategories category = vcProvider.findAccountCategoriesById(r.getAccountCategoryId());
 			if(category != null) {
 				dto.setAccoutnType(category.getChannelType());
