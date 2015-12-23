@@ -607,21 +607,21 @@ public class VideoConfController  extends ControllerBase{
 		return response;
 	}
 	
-//	/**
-//	 * <b>URL: /conf/deleteVideoConfAccount</b>
-//	 * 删除视频会议账号
-//	 * @return
-//	 */
-//	@RequestMapping("deleteVideoConfAccount")
-//	@RestReturn(value = String.class)
-//	public RestResponse deleteVideoConfAccount(DeleteVideoConfAccountCommand cmd) {
-//
-//		videoConfService.deleteVideoConfAccount(cmd);
-//		RestResponse response = new RestResponse();
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
+	/**
+	 * <b>URL: /conf/deleteVideoConfAccount</b>
+	 * 删除视频会议账号
+	 * @return
+	 */
+	@RequestMapping("deleteVideoConfAccount")
+	@RestReturn(value = String.class)
+	public RestResponse deleteVideoConfAccount(DeleteVideoConfAccountCommand cmd) {
+
+		videoConfService.deleteVideoConfAccount(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	
 	/**
 	 * <b>URL: /conf/extendedVideoConfAccountPeriod</b>
