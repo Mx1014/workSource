@@ -1097,17 +1097,17 @@ public class RentalServiceImpl implements RentalService {
 	@Override
 	public void updateRentalSite(UpdateRentalSiteCommand cmd) {
 		// 已有未取消的预定，不能修改
-		Integer billCount = rentalProvider.countRentalSiteBills(
-				cmd.getRentalSiteId(), null, null, null, null);
-		if (billCount > 0) {
-			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-					RentalServiceErrorCode.ERROR_HAVE_BILL,
-					localeStringService.getLocalizedString(String
-							.valueOf(RentalServiceErrorCode.SCOPE), String
-							.valueOf(RentalServiceErrorCode.ERROR_HAVE_BILL),
-							UserContext.current().getUser().getLocale(),
-							"HAS BILL IN YOUR DELETE STUFF"));
-		}
+//		Integer billCount = rentalProvider.countRentalSiteBills(
+//				cmd.getRentalSiteId(), null, null, null, null);
+//		if (billCount > 0) {
+//			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+//					RentalServiceErrorCode.ERROR_HAVE_BILL,
+//					localeStringService.getLocalizedString(String
+//							.valueOf(RentalServiceErrorCode.SCOPE), String
+//							.valueOf(RentalServiceErrorCode.ERROR_HAVE_BILL),
+//							UserContext.current().getUser().getLocale(),
+//							"HAS BILL IN YOUR DELETE STUFF"));
+//		}
 		RentalSite rentalsite = this.rentalProvider.getRentalSiteById(cmd.getRentalSiteId()); 
 		rentalsite.setAddress(cmd.getAddress());
 		rentalsite.setSiteName(cmd.getSiteName());
@@ -1574,7 +1574,7 @@ public class RentalServiceImpl implements RentalService {
 							UserContext.current().getUser().getLocale(),
 							"too late to order the service")); 
 		}
-		if (bill.getPayTotalMoney().equals(new BigDecimal(0))){
+		if (Double.valueOf(0.0).equals(bill.getPayTotalMoney().doubleValue())){
 			bill.setStatus(SiteBillStatus.SUCCESS.getCode());
 			rentalProvider.updateRentalBill(bill);
 		}
