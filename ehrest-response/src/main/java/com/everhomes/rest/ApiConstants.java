@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-12-22 14:24:06
+// generated at 2015-12-23 17:48:00
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -178,6 +178,7 @@ public interface ApiConstants {
     public static final String ADMIN_USER_LISTVEST_URL = "/admin/user/listVest";
     public static final String ADMIN_USER_SEARCHINVITATEDUSER_URL = "/admin/user/searchInvitatedUser";
     public static final String ADMIN_USER_SEARCHUSERSWITHADDR_URL = "/admin/user/searchUsersWithAddr";
+    public static final String ADMIN_USER_SENDUSERTESTSMS_URL = "/admin/user/sendUserTestSms";
     public static final String APPKEY_ISTRUSTEDAPP_URL = "/appkey/isTrustedApp";
     public static final String APPKEY_ISVALIDAPPURLBINDING_URL = "/appkey/isValidAppUrlBinding";
     public static final String BANNER_CLICKBANNER_URL = "/banner/clickBanner";
@@ -221,6 +222,7 @@ public interface ApiConstants {
     public static final String CONF_CREATEINVOICE_URL = "/conf/createInvoice";
     public static final String CONF_CREATEVIDEOCONFINVITATION_URL = "/conf/createVideoConfInvitation";
     public static final String CONF_DELETERESERVATIONCONF_URL = "/conf/deleteReservationConf";
+    public static final String CONF_DELETEVIDEOCONFACCOUNT_URL = "/conf/deleteVideoConfAccount";
     public static final String CONF_DELETEWARNINGCONTACTOR_URL = "/conf/deleteWarningContactor";
     public static final String CONF_EXTENDEDSOURCEACCOUNTPERIOD_URL = "/conf/extendedSourceAccountPeriod";
     public static final String CONF_EXTENDEDVIDEOCONFACCOUNTPERIOD_URL = "/conf/extendedVideoConfAccountPeriod";
