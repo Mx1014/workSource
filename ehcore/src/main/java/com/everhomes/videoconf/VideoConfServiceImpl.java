@@ -538,17 +538,20 @@ public class VideoConfServiceImpl implements VideoConfService {
 	    int pageSize = Integer.MAX_VALUE;
 		ConfEnterprises enterprise = vcProvider.findByEnterpriseId(cmd.getEnterpriseId());
 		List<ConfAccounts> accounts = vcProvider.listConfAccountsByEnterpriseId(cmd.getEnterpriseId(), locator, pageSize);
-		if(accounts != null && accounts.size() > 0) {
-			if(cmd.getLockStatus() == 2) {
-				enterprise.setStatus((byte) 2);
+		
+		if(cmd.getLockStatus() == 2) {
+			enterprise.setStatus((byte) 2);
+			if(accounts != null && accounts.size() > 0) {
 				for(ConfAccounts account : accounts) {
 					account.setStatus((byte) 2);
 					vcProvider.updateConfAccounts(account);
 				}
 			}
+		}
 			
-			if(cmd.getLockStatus() == 1) {
-				enterprise.setStatus((byte) 0);
+		if(cmd.getLockStatus() == 1) {
+			enterprise.setStatus((byte) 0);
+			if(accounts != null && accounts.size() > 0) {
 				for(ConfAccounts account : accounts) {
 					if(account.getExpiredDate().before(new Timestamp(DateHelper.currentGMTTime().getTime()))){
 						account.setStatus((byte) 0);
@@ -560,9 +563,10 @@ public class VideoConfServiceImpl implements VideoConfService {
 				}
 				
 			}
-			vcProvider.updateVideoconfEnterprise(enterprise);
+			
 		}
 
+		vcProvider.updateVideoconfEnterprise(enterprise);
 	}
 
 //	@Override

@@ -314,7 +314,7 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 
 	@Override
 	public void updateVideoconfEnterprise(ConfEnterprises enterprise) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhConfEnterprises.class));
 		enterprise.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		EhConfEnterprisesDao dao = new EhConfEnterprisesDao(context.configuration());
         dao.update(enterprise);
