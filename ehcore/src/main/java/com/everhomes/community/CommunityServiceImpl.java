@@ -1117,6 +1117,10 @@ public class CommunityServiceImpl implements CommunityService {
 			dto.setUserId(user.getId());
 			dto.setUserName(user.getNickName());
 			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+			if(null == userIdentifier){
+				LOGGER.debug("userIdentifier is null...userId = " + user.getId());
+				continue;
+			}
 			dto.setPhone(userIdentifier.getIdentifierToken());
 			EnterpriseContact contact = enterpriseContactProvider.queryContactByUserId(user.getId());
 			if(null == contact){
