@@ -538,6 +538,7 @@ ALTER TABLE `eh_version_upgrade_rules` DROP COLUMN `namespace_id`;
 
 ALTER TABLE `eh_forum_posts` ADD COLUMN `tag` VARCHAR(32);
 
+ALTER TABLE `eh_locale_templates` ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
 
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(0, 'sms.default', 1, 'zh_CN', '验证码', '您的验证码为${vcode}，10分钟内有效，感谢您的使用。');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(0, 'sms.default.yzx', 1, 'zh_CN', '验证码-左邻', '9547');
@@ -546,12 +547,12 @@ INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `des
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999995, 'sms.default.yzx', 1, 'zh_CN', '验证码-金隅嘉业', '18091');
 
 
--- 给物业维修人员发短信
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(0, 'sms.default', 2, 'zh_CN', '给物业维修人员发短信-左邻', '业主${ownerName}发布了新的${subject}帖，您已被分配处理该业主的需求，请尽快联系该业主。');
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(0, 'sms.default.yzx', 2, 'zh_CN', '给物业维修人员发短信-左邻', '10832');
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(1000000, 'sms.default.yzx', 2, 'zh_CN', '给物业维修人员发短信-科技园', '18529');
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999999, 'sms.default.yzx', 2, 'zh_CN', '给物业维修人员发短信-讯美', '18530');
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999995, 'sms.default.yzx', 2, 'zh_CN', '给物业维修人员发短信-金隅嘉业', '18532');
+-- 给物业维修人员发短信 （没用到）
+-- INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(0, 'sms.default', 2, 'zh_CN', '给物业维修人员发短信-左邻', '管理员{1}给您分配了{2}帖的任务，管理员电话{3}，请尽快与管理员联系处理问题。');
+-- INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(0, 'sms.default.yzx', 2, 'zh_CN', '给物业维修人员发短信-左邻', '10832');
+-- INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(1000000, 'sms.default.yzx', 2, 'zh_CN', '给物业维修人员发短信-科技园', '18529');
+-- INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999999, 'sms.default.yzx', 2, 'zh_CN', '给物业维修人员发短信-讯美', '18530');
+-- INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999995, 'sms.default.yzx', 2, 'zh_CN', '给物业维修人员发短信-金隅嘉业', '18532');
 
 -- 账单信息
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(0, 'sms.default', 3, 'zh_CN', '账单信息', '您${year}年${month}月物业账单为:本月金额￥${dueAmount}，往期欠款￥${oweAmount}，本月实付金额￥${payAmount}，应付金额￥${balance}。${description}请尽快使用左邻缴纳物业费。');
@@ -559,15 +560,16 @@ INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `des
 
 -- 给被分配人员发短信
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(0, 'sms.default', 4, 'zh_CN', '给被分配任务人员发短信-左邻', '业主${phone}发布了新的${topicType}帖，您已被分配处理该业主的需求，请尽快联系该业主。');
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(0, 'sms.default.yzx', 4, 'zh_CN', '给被分配任务人员发短信-左邻', '10879');
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(1000000, 'sms.default.yzx', 4, 'zh_CN', '给被分配任务人员发短信-科技园', '18534');
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999999, 'sms.default.yzx', 4, 'zh_CN', '给被分配任务人员发短信-讯美', '18535');
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999995, 'sms.default.yzx', 4, 'zh_CN', '给被分配任务人员发短信-金隅嘉业', '18538');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(0, 'sms.default.yzx', 4, 'zh_CN', '给被分配任务人员发短信-左邻', '10832');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(1000000, 'sms.default.yzx', 4, 'zh_CN', '给被分配任务人员发短信-科技园', '18529');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999999, 'sms.default.yzx', 4, 'zh_CN', '给被分配任务人员发短信-讯美', '18530');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999995, 'sms.default.yzx', 4, 'zh_CN', '给被分配任务人员发短信-金隅嘉业', '18532');
 
 -- 物业一键推送消息
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(0, 'sms.default', 5, 'zh_CN', '物业一键推送消息', '左邻温馨提醒您：${msg}祝您生活愉快。');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(0, 'sms.default.yzx', 5, 'zh_CN', '物业一键推送消息', '');
 
 INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (999999, 'sms.handler.type', 'YZX', 'sms handler');
+
 
 SET foreign_key_checks = 1;

@@ -230,7 +230,7 @@ public class YZXSmsHandler implements SmsHandler {
         StringBuilder strBuilder = new StringBuilder();
         templateScope = strBuilder.append(templateScope).append(".").append(SmsTemplateCode.YZX_SUFFIX).toString();
 
-        String yzxTemplateId = localeTemplateService.getLocaleTemplateString(templateScope, templateId, 
+        String yzxTemplateId = localeTemplateService.getLocaleTemplateString(namespaceId, templateScope, templateId, 
             templateLocale, new HashMap<String, Object>(), "");
         
         if(yzxTemplateId != null && yzxTemplateId.trim().length() > 0) {
