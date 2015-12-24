@@ -478,6 +478,23 @@ public class VideoConfServiceImpl implements VideoConfService {
 			accountDto.setOccupyFlag((byte) 0);
 		}
 		
+		ConfAccountCategories category = vcProvider.findAccountCategoriesById(account.getAccountCategoryId());
+		if(category.getConfType() == 0) {
+			accountDto.setConfType(ConfCapacity.CONF_CAPACITY_25.getCode()+ConfType.CONF_TYPE_VIDEO_ONLY.getCode());
+		}
+		
+		if(category.getConfType() == 1) {
+			accountDto.setConfType(ConfCapacity.CONF_CAPACITY_25.getCode()+ConfType.CONF_TYPE_PHONE_SUPPORT.getCode());
+		}
+
+		if(category.getConfType() == 2) {
+			accountDto.setConfType(ConfCapacity.CONF_CAPACITY_100.getCode()+ConfType.CONF_TYPE_VIDEO_ONLY.getCode());
+		}
+
+		if(category.getConfType() == 3) {
+			accountDto.setConfType(ConfCapacity.CONF_CAPACITY_100.getCode()+ConfType.CONF_TYPE_PHONE_SUPPORT.getCode());
+		}
+		
 		return accountDto;
 		
 	}
