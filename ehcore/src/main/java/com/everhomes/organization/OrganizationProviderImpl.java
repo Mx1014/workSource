@@ -79,6 +79,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		
 		long id = shardingProvider.allocShardableContentId(EhOrganizations.class).second();
 		department.setId(id);
+		department.setPath(department.getPath() + "/" + id);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, id));
 		EhOrganizationsDao dao = new EhOrganizationsDao(context.configuration());
 		dao.insert(department);
