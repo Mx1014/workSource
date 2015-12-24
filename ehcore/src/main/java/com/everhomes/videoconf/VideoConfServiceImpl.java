@@ -685,10 +685,15 @@ public class VideoConfServiceImpl implements VideoConfService {
 			dto.setMobile(enterpriseContact.getContact());
 		}
 		
+		ConfAccountCategories category = vcProvider.findAccountCategoriesById(order.getAccountCategoryId());
+		if(category != null)
+			dto.setAccountChannelType(category.getChannelType());
 		dto.setCreateTime(order.getCreateTime());
 		dto.setQuantity(order.getQuantity());
 		dto.setPeriod(order.getPeriod());
 		dto.setAmount(order.getAmount());
+		int assignedAccount = vcProvider.countOrderAccounts(order.getId(), (byte) 1);
+		dto.setAssignedQuantity(assignedAccount);
 		dto.setAccountCategoryId(order.getAccountCategoryId());
 		dto.setInvoiceFlag(order.getInvoiceReqFlag());
 		dto.setMakeOutFlag(order.getInvoiceIssueFlag());
