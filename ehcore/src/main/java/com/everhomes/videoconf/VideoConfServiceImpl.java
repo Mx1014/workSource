@@ -299,7 +299,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		Integer offset = cmd.getPageOffset() == null ? 0 : (cmd.getPageOffset() - 1 ) * pageSize;
 		
-		List<VideoConfAccountRuleDTO> rules = vcProvider.listConfAccountCategories(offset, pageSize + 1).stream().map(r -> {
+		List<VideoConfAccountRuleDTO> rules = vcProvider.listConfAccountCategories(cmd.getChannelType(), cmd.getConfType(), offset, pageSize + 1).stream().map(r -> {
 			
 			return toRuleDto(r);
 		}).collect(Collectors.toList());
