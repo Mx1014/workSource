@@ -5,14 +5,15 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>warningLine: 预警线</li>
- * <li>confType: 会议类型 0-25方仅视频; 1-25方支持电话; 2-100方仅视频; 3-100方支持电话</li>
+ * <li>warningLineType: 预警线类型 0-源账号比率; 1-资源占用率; 2-25方仅视频比率; 3-25方支持电话比率; 4-100方仅视频比率; 5-100方支持电话比率; 
+ * 								6-25方仅视频占用率; 7-25方支持电话占用率; 8-100方仅视频占用率; 9-100方支持电话占用率</li>
  * </ul>
  */
 public class SetEarlyWarningLineCommand {
 	
 	private String warningLine;
 	
-	private Byte confType;
+	private Byte warningLineType;
 
 	public String getWarningLine() {
 		return warningLine;
@@ -22,12 +23,13 @@ public class SetEarlyWarningLineCommand {
 		this.warningLine = warningLine;
 	}
 	
-	public Byte getConfType() {
-		return confType;
+
+	public Byte getWarningLineType() {
+		return warningLineType;
 	}
 
-	public void setConfType(Byte confType) {
-		this.confType = confType;
+	public void setWarningLineType(Byte warningLineType) {
+		this.warningLineType = warningLineType;
 	}
 
 	@Override
