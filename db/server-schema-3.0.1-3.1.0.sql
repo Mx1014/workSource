@@ -571,5 +571,6 @@ INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `des
 
 INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (999999, 'sms.handler.type', 'YZX', 'sms handler');
 
+ALTER TABLE `eh_organizations` ADD COLUMN `department_type` VARCHAR(64);
 
 SET foreign_key_checks = 1;

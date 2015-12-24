@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizations implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1337633507;
+	private static final long serialVersionUID = -40205779;
 
 	private java.lang.Long    id;
 	private java.lang.Long    parentId;
@@ -22,6 +22,7 @@ public class EhOrganizations implements java.io.Serializable {
 	private java.lang.String  path;
 	private java.lang.Integer level;
 	private java.lang.Byte    status;
+	private java.lang.String  departmentType;
 
 	public EhOrganizations() {}
 
@@ -34,7 +35,8 @@ public class EhOrganizations implements java.io.Serializable {
 		java.lang.String  description,
 		java.lang.String  path,
 		java.lang.Integer level,
-		java.lang.Byte    status
+		java.lang.Byte    status,
+		java.lang.String  departmentType
 	) {
 		this.id = id;
 		this.parentId = parentId;
@@ -45,6 +47,7 @@ public class EhOrganizations implements java.io.Serializable {
 		this.path = path;
 		this.level = level;
 		this.status = status;
+		this.departmentType = departmentType;
 	}
 
 	public java.lang.Long getId() {
@@ -117,5 +120,13 @@ public class EhOrganizations implements java.io.Serializable {
 
 	public void setStatus(java.lang.Byte status) {
 		this.status = status;
+	}
+
+	public java.lang.String getDepartmentType() {
+		return this.departmentType;
+	}
+
+	public void setDepartmentType(java.lang.String departmentType) {
+		this.departmentType = departmentType;
 	}
 }
