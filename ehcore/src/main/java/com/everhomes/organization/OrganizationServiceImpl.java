@@ -1528,17 +1528,18 @@ public class OrganizationServiceImpl implements OrganizationService {
 		dbProvider.execute((status) -> {
 //			///////////////////////////////////////////////////
 //			List<OrganizationMember> member = this.organizationProvider.listOrganizationMembers(cmd.getUserId());
-			if(member != null){
-				String orgGroup = member.getMemberGroup();
-				if(OrganizationGroup.CUSTOMER_SERVICE.getCode().equals(orgGroup) || 
-						orgGroup == OrganizationGroup.CUSTOMER_SERVICE.getCode()){
-					task.setTaskStatus(OrganizationTaskStatus.PROCESSING.getCode());
-				}
-				
-				else {
-					task.setTaskStatus(OrganizationTaskStatus.UNPROCESSED.getCode());
-				}
-			}
+//			if(member != null){
+//				String orgGroup = member.getMemberGroup();
+//				if(OrganizationGroup.CUSTOMER_SERVICE.getCode().equals(orgGroup) || 
+//						orgGroup == OrganizationGroup.CUSTOMER_SERVICE.getCode()){
+//					task.setTaskStatus(OrganizationTaskStatus.PROCESSING.getCode());
+//				}
+//				
+//				else {
+//					task.setTaskStatus(OrganizationTaskStatus.UNPROCESSED.getCode());
+//				}
+//			}
+			task.setTaskStatus(OrganizationTaskStatus.PROCESSING.getCode());
 			task.setOperateTime(new Timestamp(System.currentTimeMillis()));
 			task.setOperatorUid(user.getId());
 			task.setProcessingTime(new Timestamp(System.currentTimeMillis()));

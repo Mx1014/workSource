@@ -299,7 +299,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		Integer offset = cmd.getPageOffset() == null ? 0 : (cmd.getPageOffset() - 1 ) * pageSize;
 		
-		List<VideoConfAccountRuleDTO> rules = vcProvider.listConfAccountCategories(offset, pageSize + 1).stream().map(r -> {
+		List<VideoConfAccountRuleDTO> rules = vcProvider.listConfAccountCategories(cmd.getChannelType(), cmd.getConfType(), offset, pageSize + 1).stream().map(r -> {
 			
 			return toRuleDto(r);
 		}).collect(Collectors.toList());
@@ -476,6 +476,23 @@ public class VideoConfServiceImpl implements VideoConfService {
 			accountDto.setConfId(account.getConfId());
 		} else {
 			accountDto.setOccupyFlag((byte) 0);
+		}
+		
+		ConfAccountCategories category = vcProvider.findAccountCategoriesById(account.getAccountCategoryId());
+		if(category.getConfType() == 0) {
+			accountDto.setConfType(ConfCapacity.CONF_CAPACITY_25.getCode()+ConfType.CONF_TYPE_VIDEO_ONLY.getCode());
+		}
+		
+		if(category.getConfType() == 1) {
+			accountDto.setConfType(ConfCapacity.CONF_CAPACITY_25.getCode()+ConfType.CONF_TYPE_PHONE_SUPPORT.getCode());
+		}
+
+		if(category.getConfType() == 2) {
+			accountDto.setConfType(ConfCapacity.CONF_CAPACITY_100.getCode()+ConfType.CONF_TYPE_VIDEO_ONLY.getCode());
+		}
+
+		if(category.getConfType() == 3) {
+			accountDto.setConfType(ConfCapacity.CONF_CAPACITY_100.getCode()+ConfType.CONF_TYPE_PHONE_SUPPORT.getCode());
 		}
 		
 		return accountDto;
@@ -685,10 +702,15 @@ public class VideoConfServiceImpl implements VideoConfService {
 			dto.setMobile(enterpriseContact.getContact());
 		}
 		
+		ConfAccountCategories category = vcProvider.findAccountCategoriesById(order.getAccountCategoryId());
+		if(category != null)
+			dto.setAccountChannelType(category.getChannelType());
 		dto.setCreateTime(order.getCreateTime());
 		dto.setQuantity(order.getQuantity());
 		dto.setPeriod(order.getPeriod());
 		dto.setAmount(order.getAmount());
+		int assignedAccount = vcProvider.countOrderAccounts(order.getId(), (byte) 1);
+		dto.setAssignedQuantity(assignedAccount);
 		dto.setAccountCategoryId(order.getAccountCategoryId());
 		dto.setInvoiceFlag(order.getInvoiceReqFlag());
 		dto.setMakeOutFlag(order.getInvoiceIssueFlag());

@@ -45,6 +45,7 @@ import com.everhomes.server.schema.tables.pojos.EhConfOrders;
 import com.everhomes.server.schema.tables.pojos.EhConfReservations;
 import com.everhomes.server.schema.tables.pojos.EhConfSourceAccounts;
 import com.everhomes.server.schema.tables.pojos.EhWarningContacts;
+import com.everhomes.server.schema.tables.records.EhConfAccountCategoriesRecord;
 import com.everhomes.server.schema.tables.records.EhConfAccountsRecord;
 import com.everhomes.server.schema.tables.records.EhConfEnterprisesRecord;
 import com.everhomes.server.schema.tables.records.EhConfOrderAccountMapRecord;
@@ -87,12 +88,20 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 	}
 
 	@Override
-	public List<ConfAccountCategories> listConfAccountCategories(int pageOffset,int pageSize) {
+	public List<ConfAccountCategories> listConfAccountCategories(Byte channelType, Byte confType, int pageOffset,int pageSize) {
 		
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhConfAccountCategories.class));
 		List<ConfAccountCategories> rules = new ArrayList<ConfAccountCategories>();
+		SelectQuery<EhConfAccountCategoriesRecord> query = context.selectQuery(Tables.EH_CONF_ACCOUNT_CATEGORIES);
+		if(channelType != null)
+			query.addConditions(Tables.EH_CONF_ACCOUNT_CATEGORIES.CHANNEL_TYPE.eq(channelType));
+
+		if(confType != null)
+			query.addConditions(Tables.EH_CONF_ACCOUNT_CATEGORIES.CONF_TYPE.eq(confType));
 		
-		context.select().from(Tables.EH_CONF_ACCOUNT_CATEGORIES).limit(pageSize).offset(pageOffset).fetch().map(r ->{
+		query.addLimit(pageOffset, pageSize);
+
+		query.fetch().map((r) ->{
 
 			ConfAccountCategories rule = new ConfAccountCategories();
 			rule.setId(r.getValue(Tables.EH_CONF_ACCOUNT_CATEGORIES.ID));
