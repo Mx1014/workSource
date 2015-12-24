@@ -3050,6 +3050,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		Organization org  = new Organization();
 		org.setName(cmd.getDepartmentName());
 		org.setOrganizationType(OrganizationType.PM.getCode());
+		org.setDepartmentType(cmd.getDepartmentType());
 		org.setParentId(cmd.getParentId());
 		
 		Organization parOrg = this.checkOrganization(cmd.getParentId());
@@ -3113,9 +3114,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 					DepartmentDTO department = new DepartmentDTO();
 					department.setId(r.getId());
 					department.setDepartmentName(r.getName());
-					department.setDepartmentType(r.getOrganizationType());
-					if(0 != r.getParentId() && cmd.getParentId() != r.getParentId())
-						department.setSuperiorDepartment(deptMaps.get(r.getParentId()).getName());
+					department.setDepartmentType(r.getDepartmentType());
+					department.setSuperiorDepartment(null == deptMaps.get(r.getParentId()) ? "" : deptMaps.get(r.getParentId()).getName());
 					if(roleAssignmentMap.get(department.getId()) != null){
 						Long roleId = roleAssignmentMap.get(department.getId()).getRoleId();
 						Role role = this.aclProvider.getRoleById(roleId);
