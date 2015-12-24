@@ -38,6 +38,7 @@ import com.everhomes.enterprise.EnterpriseContactEntry;
 import com.everhomes.enterprise.EnterpriseContactProvider;
 import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.VendorType;
 import com.everhomes.organization.pm.pay.GsonUtil;
@@ -876,12 +877,12 @@ public class VideoConfServiceImpl implements VideoConfService {
 //		
 //		return statisticsDto;
 //	}
-//
-//	@Override
-//	public List<SourceVideoConfAccountStatistics> getSourceVideoConfAccountStatistics() {
-//
-//		return null;
-//	}
+
+	@Override
+	public List<SourceVideoConfAccountStatistics> getSourceVideoConfAccountStatistics() {
+
+		return null;
+	}
 
 	@Override
 	public ListEnterpriseVideoConfAccountResponse listVideoConfAccountByEnterpriseId(
@@ -999,26 +1000,35 @@ public class VideoConfServiceImpl implements VideoConfService {
 //	}
 
 	@Override
-	public List<EnterpriseUsersDTO> listUsersWithoutVideoConfPrivilege(
+	public ListUsersWithoutVideoConfPrivilegeResponse listUsersWithoutVideoConfPrivilege(
 			ListUsersWithoutVideoConfPrivilegeCommand cmd) {
+		ListUsersWithoutVideoConfPrivilegeResponse response = new ListUsersWithoutVideoConfPrivilegeResponse();
 		List<Long> users = vcProvider.findUsersByEnterpriseId(cmd.getEnterpriseId());
-		Map<Long, EnterpriseContact> contactMap = new HashMap<Long, EnterpriseContact>();
-		
+
+		List<EnterpriseContact> ec = new ArrayList<EnterpriseContact>();
 		List<EnterpriseContact> contact = enterpriseContactProvider.queryContactByEnterpriseId(cmd.getEnterpriseId());
+		if(cmd.getPageAnchor() == null)
+			cmd.setPageAnchor(0L);
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		
 		if(contact != null &contact.size() > 0) {
-			for(EnterpriseContact con : contact) {
-				contactMap.put(con.getUserId(), con);
-			}
+				for(EnterpriseContact con : contact) {
+					if(!(users != null && users.contains(con.getUserId()))) {
+						if(con.getUserId() > cmd.getPageAnchor())
+							ec.add(con);
+					}
+						
+				}
 		}
+
 		
-		if(users != null && users.size() > 0) {
-			for(Long uId : users) {
-				contactMap.remove(uId);
-			}
+		Long nextPageAnchor = null;
+		if(ec != null && ec.size() > pageSize) {
+			ec = ec.subList(0, pageSize);
+			ec.remove(ec.size() - 1);
+			nextPageAnchor = ec.get(ec.size() -1).getUserId();
 		}
-		
-		List<EnterpriseContact> ec = new ArrayList<EnterpriseContact>(contactMap.values());
+		response.setNextPageAnchor(nextPageAnchor);
 		
 		List<EnterpriseUsersDTO> usersDto = ec.stream().map(r -> {
 			EnterpriseUsersDTO user = new EnterpriseUsersDTO();
@@ -1034,9 +1044,9 @@ public class VideoConfServiceImpl implements VideoConfService {
 			
 			return user;
 		}).collect(Collectors.toList());
+		response.setEnterpriseUsers(usersDto);
 		
-		
-		return usersDto;
+		return response;
 	}
 
 	@Override

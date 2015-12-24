@@ -798,22 +798,22 @@ public class VideoConfController  extends ControllerBase{
 //		response.setErrorDescription("OK");
 //		return response;
 //	}
-//	
-//	/**
-//	 * <b>URL: /conf/getSourceVideoConfAccountStatistics</b>
-//	 * 源账号资源监测
-//	 * @return
-//	 */
-//	@RequestMapping("getSourceVideoConfAccountStatistics")
-//	@RestReturn(value = SourceVideoConfAccountStatistics.class, collection = true)
-//	public RestResponse getSourceVideoConfAccountStatistics() {
-//
-//		List<SourceVideoConfAccountStatistics> sourceStatistics = videoConfService.getSourceVideoConfAccountStatistics();
-//		RestResponse response = new RestResponse(sourceStatistics);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
+	
+	/**
+	 * <b>URL: /conf/getSourceVideoConfAccountStatistics</b>
+	 * 源账号资源监测
+	 * @return
+	 */
+	@RequestMapping("getSourceVideoConfAccountStatistics")
+	@RestReturn(value = SourceVideoConfAccountStatistics.class, collection = true)
+	public RestResponse getSourceVideoConfAccountStatistics() {
+
+		List<SourceVideoConfAccountStatistics> sourceStatistics = videoConfService.getSourceVideoConfAccountStatistics();
+		RestResponse response = new RestResponse(sourceStatistics);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	
 	/**
 	 * <b>URL: /conf/listVideoConfAccountByEnterpriseId</b>
@@ -885,10 +885,10 @@ public class VideoConfController  extends ControllerBase{
 	 * @return
 	 */
 	@RequestMapping("listUsersWithoutVideoConfPrivilege")
-	@RestReturn(value = EnterpriseUsersDTO.class, collection = true)
+	@RestReturn(value = ListUsersWithoutVideoConfPrivilegeResponse.class)
 	public RestResponse listUsersWithoutVideoConfPrivilege(ListUsersWithoutVideoConfPrivilegeCommand cmd) {
 
-		List<EnterpriseUsersDTO> users = videoConfService.listUsersWithoutVideoConfPrivilege(cmd);
+		ListUsersWithoutVideoConfPrivilegeResponse users = videoConfService.listUsersWithoutVideoConfPrivilege(cmd);
 		RestResponse response = new RestResponse(users);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

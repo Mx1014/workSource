@@ -1117,6 +1117,8 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.ENTERPRISE_ID.eq(enterpriseId));
         query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.USER_ID.ne(0L));
         
+        query.addOrderBy(Tables.EH_ENTERPRISE_CONTACTS.USER_ID);
+        
         return query.fetch().map((r) -> {
             return ConvertHelper.convert(r, EnterpriseContact.class);
         });
