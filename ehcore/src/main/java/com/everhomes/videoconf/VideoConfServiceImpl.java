@@ -549,7 +549,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 	    	dto.setBuyChannel(r.getBuyChannel());
 	    	return dto;
 	    	
-	    }).collect(Collectors.toList());
+	    }).filter(t->t!=null).collect(Collectors.toList());
 	    response.setEnterpriseConfAccounts(enterpriseDto);
 	    
 		return response;
@@ -953,6 +953,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 			dto.setEnterpriseName(enterprise.getName());
 			EnterpriseContact contact = enterpriseContactProvider.queryContactByUserId(r.getEnterpriseId(), r.getOwnerId());
 			if(contact != null) {
+				
 				dto.setDepartment(contact.getStringTag1());
 				dto.setUserName(contact.getName());
 				List<EnterpriseContactEntry> entry = enterpriseContactProvider.queryContactEntryByContactId(contact);
@@ -960,8 +961,13 @@ public class VideoConfServiceImpl implements VideoConfService {
 					dto.setMobile(entry.get(0).getEntryValue());
 				}
 			}
+			if(!StringUtils.isNullOrEmpty(cmd.getKeyword())) {
+	    		if(!cmd.getKeyword().equals(dto.getUserName()) && !cmd.getKeyword().equals(dto.getDepartment()) 
+	    				&& !cmd.getKeyword().equals(dto.getMobile()))
+	    			return null;
+	    	}
 			return dto;
-		}).collect(Collectors.toList());
+		}).filter(r->r!=null).collect(Collectors.toList());
 		response.setConfAccounts(confAccounts);
 		
 		return response;
@@ -1408,7 +1414,14 @@ public class VideoConfServiceImpl implements VideoConfService {
 	public void createAccountOwner(CreateAccountOwnerCommand cmd) {
 		List<Long> accountIds = cmd.getAccountIds();
 		List<Long> userIds = cmd.getUserIds();
-		if(userIds == null || userIds.isEmpty())
+		if(userIds == null || userIds.isEmpty()){
+			LOGGER.error("user count is null");
+			return ;
+		}
+		if(accountIds == null || accountIds.isEmpty()){
+			LOGGER.error("account count is null");
+			return ;
+		}
 		if(userIds.size() > accountIds.size()) {
 			LOGGER.error("user count is cannot larger than account count");
 		}
