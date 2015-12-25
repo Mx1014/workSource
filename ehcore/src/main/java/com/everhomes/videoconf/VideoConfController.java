@@ -197,27 +197,63 @@ public class VideoConfController  extends ControllerBase{
 	public RestResponse setEarlyWarningLine(SetEarlyWarningLineCommand cmd) {
 		
 		Double warningLine = 0.0000;
-		if(cmd.getConfType() == 0) {
-	        configurationProvider.setValue(ConfigConstants.VIDEOCONF_ACCOUNT_WARNING_LINE_0, cmd.getWarningLine());
-	        String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_WARNING_LINE_0, "0.0000");
+		if(cmd.getWarningLineType() == 0) {
+	        configurationProvider.setValue(ConfigConstants.VIDEOCONF_SOURCEACCOUNT_RADIO_WARNING_LINE, cmd.getWarningLine());
+	        String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_SOURCEACCOUNT_RADIO_WARNING_LINE, "0.0000");
 	        warningLine = Double.valueOf(line);
 		}
 		
-		if(cmd.getConfType() == 1) {
-	        configurationProvider.setValue(ConfigConstants.VIDEOCONF_ACCOUNT_WARNING_LINE_1, cmd.getWarningLine());
-	        String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_WARNING_LINE_1, "0.0000");
+		if(cmd.getWarningLineType() == 1) {
+	        configurationProvider.setValue(ConfigConstants.VIDEOCONF_SOURCEACCOUNT_OCCUPANCY_WARNING_LINE, cmd.getWarningLine());
+	        String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_SOURCEACCOUNT_OCCUPANCY_WARNING_LINE, "0.0000");
 	        warningLine = Double.valueOf(line);
 		}
 		
-		if(cmd.getConfType() == 2) {
-	        configurationProvider.setValue(ConfigConstants.VIDEOCONF_ACCOUNT_WARNING_LINE_2, cmd.getWarningLine());
-	        String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_WARNING_LINE_2, "0.0000");
+		if(cmd.getWarningLineType() == 2) {
+	        configurationProvider.setValue(ConfigConstants.VIDEOCONF_ACCOUNT_RADIO_WARNING_LINE_25VIDEO, cmd.getWarningLine());
+	        String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_RADIO_WARNING_LINE_25VIDEO, "0.0000");
 	        warningLine = Double.valueOf(line);
 		}
 		
-		if(cmd.getConfType() == 3) {
-	        configurationProvider.setValue(ConfigConstants.VIDEOCONF_ACCOUNT_WARNING_LINE_3, cmd.getWarningLine());
-	        String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_WARNING_LINE_3, "0.0000");
+		if(cmd.getWarningLineType() == 3) {
+	        configurationProvider.setValue(ConfigConstants.VIDEOCONF_ACCOUNT_RADIO_WARNING_LINE_25PHONE, cmd.getWarningLine());
+	        String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_RADIO_WARNING_LINE_25PHONE, "0.0000");
+	        warningLine = Double.valueOf(line);
+		}
+		
+		if(cmd.getWarningLineType() == 4) {
+	        configurationProvider.setValue(ConfigConstants.VIDEOCONF_ACCOUNT_RADIO_WARNING_LINE_100VIDEO, cmd.getWarningLine());
+	        String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_RADIO_WARNING_LINE_100VIDEO, "0.0000");
+	        warningLine = Double.valueOf(line);
+		}
+		
+		if(cmd.getWarningLineType() == 5) {
+	        configurationProvider.setValue(ConfigConstants.VIDEOCONF_ACCOUNT_RADIO_WARNING_LINE_100PHONE, cmd.getWarningLine());
+	        String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_RADIO_WARNING_LINE_100PHONE, "0.0000");
+	        warningLine = Double.valueOf(line);
+		}
+		
+		if(cmd.getWarningLineType() == 6) {
+	        configurationProvider.setValue(ConfigConstants.VIDEOCONF_ACCOUNT_OCCUPANCY_WARNING_LINE_25VIDEO, cmd.getWarningLine());
+	        String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_OCCUPANCY_WARNING_LINE_25VIDEO, "0.0000");
+	        warningLine = Double.valueOf(line);
+		}
+		
+		if(cmd.getWarningLineType() == 7) {
+	        configurationProvider.setValue(ConfigConstants.VIDEOCONF_ACCOUNT_OCCUPANCY_WARNING_LINE_25PHONE, cmd.getWarningLine());
+	        String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_OCCUPANCY_WARNING_LINE_25PHONE, "0.0000");
+	        warningLine = Double.valueOf(line);
+		}
+		
+		if(cmd.getWarningLineType() == 8) {
+	        configurationProvider.setValue(ConfigConstants.VIDEOCONF_ACCOUNT_OCCUPANCY_WARNING_LINE_100VIDEO, cmd.getWarningLine());
+	        String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_OCCUPANCY_WARNING_LINE_100VIDEO, "0.0000");
+	        warningLine = Double.valueOf(line);
+		}
+		
+		if(cmd.getWarningLineType() == 9) {
+	        configurationProvider.setValue(ConfigConstants.VIDEOCONF_ACCOUNT_OCCUPANCY_WARNING_LINE_100PHONE, cmd.getWarningLine());
+	        String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_OCCUPANCY_WARNING_LINE_100PHONE, "0.0000");
 	        warningLine = Double.valueOf(line);
 		}
 		
@@ -237,26 +273,7 @@ public class VideoConfController  extends ControllerBase{
 	@RestReturn(value = Double.class)
 	public RestResponse getEarlyWarningLine(GetEarlyWarningLineCommand cmd) {
 		
-		Double warningLine = 0.0000;
-		if(cmd.getConfType() == 0) {
-			String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_WARNING_LINE_0, "0.0000");
-	        warningLine = Double.valueOf(line);
-		}
-		
-		if(cmd.getConfType() == 1) {
-			String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_WARNING_LINE_1, "0.0000");
-	        warningLine = Double.valueOf(line);
-		}
-		
-		if(cmd.getConfType() == 2) {
-			String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_WARNING_LINE_2, "0.0000");
-	        warningLine = Double.valueOf(line);
-		}
-		
-		if(cmd.getConfType() == 3) {
-			String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_WARNING_LINE_3, "0.0000");
-	        warningLine = Double.valueOf(line);
-		}
+		Double warningLine = videoConfService.getEarlyWarningLine(cmd.getWarningLineType());
         		
 		RestResponse response = new RestResponse(warningLine);
 		response.setErrorCode(ErrorCodes.SUCCESS);

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -880,8 +881,17 @@ public class VideoConfServiceImpl implements VideoConfService {
 
 	@Override
 	public List<SourceVideoConfAccountStatistics> getSourceVideoConfAccountStatistics() {
+		
+		List<SourceVideoConfAccountStatistics> statistics = new ArrayList<SourceVideoConfAccountStatistics>();
 
-		return null;
+		for(Byte i = 0; i < 10; i++){
+			SourceVideoConfAccountStatistics monitor = new SourceVideoConfAccountStatistics();
+			monitor.setMonitoringPoints(i);
+			monitor.setWarningLine(getEarlyWarningLine(i));
+			monitor.setRatio(getRadio(i));
+			statistics.add(monitor);
+		}
+		return statistics;
 	}
 
 	@Override
@@ -1409,6 +1419,14 @@ public class VideoConfServiceImpl implements VideoConfService {
 				vcProvider.updateConfAccounts(account);
 				userIds.remove(0);
 				
+				List<ConfOrderAccountMap> maps = vcProvider.findOrderAccountByAccountId(accountId);
+				if(maps != null && maps.size() > 0) {
+					for(ConfOrderAccountMap map : maps) {
+						map.setAssigedFlag((byte) 1);
+						vcProvider.updateConfOrderAccountMap(map);
+					}
+				}
+				
 				ConfAccountHistories history = new ConfAccountHistories();
 				history.setEnterpriseId(account.getEnterpriseId());
 				history.setExpiredDate(account.getExpiredDate());
@@ -1661,4 +1679,134 @@ public class VideoConfServiceImpl implements VideoConfService {
 		
 	}
 
+	@Override
+	public Double getEarlyWarningLine(Byte warningLineType) {
+		Double warningLine = 0.0000;
+		if(warningLineType == 0) {
+			String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_SOURCEACCOUNT_RADIO_WARNING_LINE, "0.0000");
+	        warningLine = Double.valueOf(line);
+		}
+		
+		if(warningLineType == 1) {
+			String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_SOURCEACCOUNT_OCCUPANCY_WARNING_LINE, "0.0000");
+	        warningLine = Double.valueOf(line);
+		}
+		
+		if(warningLineType == 2) {
+			String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_RADIO_WARNING_LINE_25VIDEO, "0.0000");
+	        warningLine = Double.valueOf(line);
+		}
+		
+		if(warningLineType == 3) {
+			String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_RADIO_WARNING_LINE_25PHONE, "0.0000");
+	        warningLine = Double.valueOf(line);
+		}
+		
+		if(warningLineType == 4) {
+			String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_RADIO_WARNING_LINE_100VIDEO, "0.0000");
+	        warningLine = Double.valueOf(line);
+		}
+		
+		if(warningLineType == 5) {
+			String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_RADIO_WARNING_LINE_100PHONE, "0.0000");
+	        warningLine = Double.valueOf(line);
+		}
+		
+		if(warningLineType == 6) {
+			String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_OCCUPANCY_WARNING_LINE_25VIDEO, "0.0000");
+	        warningLine = Double.valueOf(line);
+		}
+		
+		if(warningLineType == 7) {
+			String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_OCCUPANCY_WARNING_LINE_25PHONE, "0.0000");
+	        warningLine = Double.valueOf(line);
+		}
+		
+		if(warningLineType == 8) {
+			String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_OCCUPANCY_WARNING_LINE_100VIDEO, "0.0000");
+	        warningLine = Double.valueOf(line);
+		}
+		
+		if(warningLineType == 9) {
+			String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_OCCUPANCY_WARNING_LINE_100PHONE, "0.0000");
+	        warningLine = Double.valueOf(line);
+		}
+		
+		return warningLine;
+	}
+	
+	private Double getActiveAccountRadio(Byte confType) {
+		NumberFormat numberFormat = NumberFormat.getInstance();   
+        numberFormat.setMaximumFractionDigits(4);
+        
+		List<Long> accountCategoryIds = vcProvider.findAccountCategoriesByConfType(confType);
+		int countActiveAccounts = vcProvider.countActiveAccounts(accountCategoryIds);
+		int countActiveSourceAccounts = vcProvider.countActiveSourceAccounts(accountCategoryIds);
+		if(countActiveSourceAccounts == 0) 
+			return 0.0000;
+		String radio = numberFormat.format((float)countActiveAccounts/(float)countActiveSourceAccounts);
+		return Double.valueOf(radio);
+	}
+	
+	private Double getOccupiedAccountRadio(Byte confType) {
+		NumberFormat numberFormat = NumberFormat.getInstance();   
+        numberFormat.setMaximumFractionDigits(4);
+        
+        List<Long> accountCategoryIds = vcProvider.findAccountCategoriesByConfType(confType);
+		int countOccupiedAccounts = vcProvider.countOccupiedAccounts(accountCategoryIds);
+		int countActiveSourceAccounts = vcProvider.countActiveSourceAccounts(accountCategoryIds);
+		if(countActiveSourceAccounts == 0) 
+			return 0.0000;
+		String radio = numberFormat.format((float)countOccupiedAccounts/(float)countActiveSourceAccounts);
+		return Double.valueOf(radio);
+	}
+
+	private Double getRadio(Byte monitorType) {
+		
+		NumberFormat numberFormat = NumberFormat.getInstance();   
+        numberFormat.setMaximumFractionDigits(4);   
+		if(monitorType == 0) {
+			return getActiveAccountRadio(null);
+		}
+		
+		if(monitorType == 1) {
+			return getOccupiedAccountRadio(null);
+		}
+
+		if(monitorType == 2) {
+			return getActiveAccountRadio((byte) 0); 
+		}
+		
+		if(monitorType == 3) {
+			return getActiveAccountRadio((byte) 1); 
+		}
+
+		if(monitorType == 4) {
+			return getActiveAccountRadio((byte) 2); 
+		}
+		
+		if(monitorType == 5) {
+			return getActiveAccountRadio((byte) 3); 
+		}
+		
+		if(monitorType == 6) {
+			return getOccupiedAccountRadio((byte) 0);
+		}
+		
+		if(monitorType == 7) {
+			return getOccupiedAccountRadio((byte) 1);
+		}
+
+		if(monitorType == 8) {
+			return getOccupiedAccountRadio((byte) 2);
+		}
+		
+		if(monitorType == 9) {
+			return getOccupiedAccountRadio((byte) 3);
+		}
+		
+		return 0.0000;
+		
+	}
+	
 }

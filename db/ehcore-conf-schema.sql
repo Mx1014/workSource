@@ -106,7 +106,7 @@ CREATE TABLE `eh_conf_account_histories` (
 	`account_type` TINYINT NOT NULL DEFAULT 2 COMMENT '0: none, 1: trial, 2: normal',
 	`owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the user id who use the account, reference to the id of eh_users',
 	`own_time` DATETIME COMMENT 'the time when the user own the account',
-	`deleter_uid` BIGINT NOT NULL COMMENT 'deleter id',
+	`deleter_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'deleter id',
 	`delete_time` DATETIME,
 	`creator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'the user id who create the account',
 	`create_time` DATETIME,

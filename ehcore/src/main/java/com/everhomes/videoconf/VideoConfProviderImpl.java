@@ -640,8 +640,12 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhConfAccountCategories.class));
 		List<Long> accountCategories = new ArrayList<Long>();
 		
-		context.select().from(Tables.EH_CONF_ACCOUNT_CATEGORIES).where(Tables.EH_CONF_ACCOUNT_CATEGORIES.CONF_TYPE.eq(confType)).fetch().map(r ->{
-
+		SelectQuery<EhConfAccountCategoriesRecord> query = context.selectQuery(Tables.EH_CONF_ACCOUNT_CATEGORIES);
+		
+		if(confType != null)
+			query.addConditions(Tables.EH_CONF_ACCOUNT_CATEGORIES.CONF_TYPE.eq(confType));
+		
+		query.fetch().map((r) ->{
 			accountCategories.add(r.getValue(Tables.EH_CONF_ACCOUNT_CATEGORIES.ID));
 			return null;
         });
@@ -1075,6 +1079,90 @@ public class VideoConfProviderImpl implements VideoConfProvider {
                 });
         
         return count[0];
+	}
+
+	@Override
+	public int countActiveAccounts(List<Long> accountCategoryIds) {
+		final Integer[] count = new Integer[1];
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhConfAccounts.class), null, 
+                (DSLContext context, Object reducingContext)-> {
+                    count[0] = context.selectCount().from(Tables.EH_CONF_ACCOUNTS)
+                            .where(Tables.EH_CONF_ACCOUNTS.ACCOUNT_CATEGORY_ID.in(accountCategoryIds))
+                            .and(Tables.EH_CONF_ACCOUNTS.STATUS.ne((byte) 0))
+                            .and(Tables.EH_CONF_ACCOUNTS.EXPIRED_DATE.ge(new Timestamp(DateHelper.currentGMTTime().getTime())))
+                            .and(Tables.EH_CONF_ACCOUNTS.DELETE_UID.eq(0L))
+                            .fetchOneInto(Integer.class);
+                    return true;
+                });
+        
+        return count[0];
+	}
+
+	@Override
+	public int countOccupiedAccounts(List<Long> accountCategoryIds) {
+		final Integer[] count = new Integer[1];
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhConfAccounts.class), null, 
+                (DSLContext context, Object reducingContext)-> {
+                    count[0] = context.selectCount().from(Tables.EH_CONF_ACCOUNTS)
+                            .where(Tables.EH_CONF_ACCOUNTS.ACCOUNT_CATEGORY_ID.in(accountCategoryIds))
+                            .and(Tables.EH_CONF_ACCOUNTS.ASSIGNED_FLAG.eq((byte) 1))
+                            .and(Tables.EH_CONF_ACCOUNTS.STATUS.ne((byte) 0))
+                            .and(Tables.EH_CONF_ACCOUNTS.EXPIRED_DATE.ge(new Timestamp(DateHelper.currentGMTTime().getTime())))
+                            .and(Tables.EH_CONF_ACCOUNTS.DELETE_UID.eq(0L))
+                            .fetchOneInto(Integer.class);
+                    return true;
+                });
+        
+        return count[0];
+	}
+
+	@Override
+	public int countActiveSourceAccounts(List<Long> accountCategoryIds) {
+		final Integer[] count = new Integer[1];
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhConfSourceAccounts.class), null, 
+                (DSLContext context, Object reducingContext)-> {
+                    count[0] = context.selectCount().from(Tables.EH_CONF_SOURCE_ACCOUNTS)
+                    		.where(Tables.EH_CONF_SOURCE_ACCOUNTS.ACCOUNT_CATEGORY_ID.in(accountCategoryIds))
+                            .and(Tables.EH_CONF_SOURCE_ACCOUNTS.STATUS.ne((byte) 0))
+                            .and(Tables.EH_CONF_SOURCE_ACCOUNTS.EXPIRED_DATE.ge(new Timestamp(DateHelper.currentGMTTime().getTime())))
+                            .fetchOneInto(Integer.class);
+                    return true;
+                });
+        
+        return count[0];
+	}
+
+	@Override
+	public void updateConfOrderAccountMap(ConfOrderAccountMap map) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        
+		EhConfOrderAccountMapDao dao = new EhConfOrderAccountMapDao(context.configuration());
+        dao.update(map);
+		
+	}
+
+	@Override
+	public List<ConfOrderAccountMap> findOrderAccountByAccountId(Long accountId) {
+		List<ConfOrderAccountMap> maps = new ArrayList<ConfOrderAccountMap>();
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhConfAccountCategories.class));
+        SelectQuery<EhConfOrderAccountMapRecord> query = context.selectQuery(Tables.EH_CONF_ORDER_ACCOUNT_MAP);
+        
+        
+        if(accountId != null)
+        	query.addConditions(Tables.EH_CONF_ORDER_ACCOUNT_MAP.CONF_ACCOUNT_ID.eq(accountId));
+        
+        query.addConditions(Tables.EH_CONF_ORDER_ACCOUNT_MAP.ASSIGED_FLAG.eq((byte)0));
+        
+        query.fetch().map((r) -> {
+        	
+        	maps.add(ConvertHelper.convert(r, ConfOrderAccountMap.class));
+            return null;
+        });
+
+        
+
+        return maps;
 	}
 
 
