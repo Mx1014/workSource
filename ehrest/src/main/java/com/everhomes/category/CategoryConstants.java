@@ -64,11 +64,13 @@ public interface CategoryConstants {
     /** 帖子/投票 */
     public static final long CATEGORY_ID_TOPIC_POLLING = 1011L;
     
-   public static final long CATEGORY_ID_CONF_CAPACITY = 500001L;
+    public static final long CATEGORY_ID_CONF = 200001L;
     
-    public static final long CATEGORY_ID_CONF_TYPE = 600001L;
+    public static final long CATEGORY_ID_CONF_CAPACITY = 200101L;
     
-    public static final long CATEGORY_ID_ACCOUNT_TYPE = 700001L;
+    public static final long CATEGORY_ID_CONF_TYPE = 200201L;
+    
+    public static final long CATEGORY_ID_ACCOUNT_TYPE = 200301L;
     
     
     /** 政府机构相关的类型 */
