@@ -5,6 +5,8 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>enterpriseId: 企业id</li>
+ * <li>status: 有效状态</li>
+ * <li>keyword: 关键字：姓名 手机号 部门</li>
  * <li>pageAnchor: 本页开始的锚点</li>
  * <li>pageSize: 每页的数量</li>
  * </ul>
@@ -12,6 +14,10 @@ import com.everhomes.util.StringHelper;
 public class ListEnterpriseVideoConfAccountCommand {
 	
 	private Long enterpriseId;
+	
+	private Byte status;
+	
+	private String keyword;
 	
 	private Long pageAnchor;
 	
@@ -25,6 +31,22 @@ public class ListEnterpriseVideoConfAccountCommand {
 		this.enterpriseId = enterpriseId;
 	}
 	
+	public Byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
+
+	public String getKeyword() {
+		return keyword;
+	}
+
+	public void setKeyword(String keyword) {
+		this.keyword = keyword;
+	}
+
 	public Long getPageAnchor() {
 		return pageAnchor;
 	}

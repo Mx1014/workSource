@@ -38,7 +38,7 @@ public class ConfAccountDTO {
 	
 	private Byte confType;
 	
-	private Byte accoutnType;
+	private Byte accountType;
 	
 	private Timestamp updateDate;
 	
@@ -106,12 +106,12 @@ public class ConfAccountDTO {
 		this.confType = confType;
 	}
 
-	public Byte getAccoutnType() {
-		return accoutnType;
+	public Byte getAccountType() {
+		return accountType;
 	}
 
-	public void setAccoutnType(Byte accoutnType) {
-		this.accoutnType = accoutnType;
+	public void setAccountType(Byte accountType) {
+		this.accountType = accountType;
 	}
 
 	public Timestamp getUpdateDate() {

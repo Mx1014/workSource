@@ -865,7 +865,7 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 	}
 
 	@Override
-	public List<ConfAccounts> listConfAccountsByEnterpriseId(Long enterpriseId,
+	public List<ConfAccounts> listConfAccountsByEnterpriseId(Long enterpriseId, Byte status,
 			CrossShardListingLocator locator, Integer pageSize) {
 		List<ConfAccounts> accounts = new ArrayList<ConfAccounts>();
 		
@@ -882,6 +882,9 @@ public class VideoConfProviderImpl implements VideoConfProvider {
             
             if(enterpriseId != null)
             	query.addConditions(Tables.EH_CONF_ACCOUNTS.ENTERPRISE_ID.eq(enterpriseId));
+            
+            if(status != null)
+            	query.addConditions(Tables.EH_CONF_ACCOUNTS.STATUS.eq(status));
             
             query.addConditions(Tables.EH_CONF_ACCOUNTS.DELETE_UID.eq(0L));
            
