@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-12-23 17:48:00
+// generated at 2015-12-25 15:49:03
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -233,6 +233,7 @@ public interface ApiConstants {
     public static final String CONF_GETEARLYWARNINGLINE_URL = "/conf/getEarlyWarningLine";
     public static final String CONF_GETMINIMUMACCOUNTS_URL = "/conf/getMinimumAccounts";
     public static final String CONF_GETPREFERENTIALSTATUS_URL = "/conf/getPreferentialStatus";
+    public static final String CONF_GETSOURCEVIDEOCONFACCOUNTSTATISTICS_URL = "/conf/getSourceVideoConfAccountStatistics";
     public static final String CONF_GETVIDEOCONFACCOUNTPREFERENTIALRULE_URL = "/conf/getVideoConfAccountPreferentialRule";
     public static final String CONF_GETVIDEOCONFACCOUNTTRIALRULE_URL = "/conf/getVideoConfAccountTrialRule";
     public static final String CONF_JOINVIDEOCONF_URL = "/conf/joinVideoConf";
