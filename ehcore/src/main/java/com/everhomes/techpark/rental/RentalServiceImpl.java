@@ -1141,18 +1141,18 @@ public class RentalServiceImpl implements RentalService {
 	}
 	@Override
 	public void disableRentalSite(DisableRentalSiteCommand cmd) {
-		// 已有未取消的预定，不能删除
-		Integer billCount = rentalProvider.countRentalSiteBills(
-				cmd.getRentalSiteId(), null, null, null, null);
-		if (billCount > 0) {
-			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-					RentalServiceErrorCode.ERROR_HAVE_BILL,
-					localeStringService.getLocalizedString(String
-							.valueOf(RentalServiceErrorCode.SCOPE), String
-							.valueOf(RentalServiceErrorCode.ERROR_HAVE_BILL),
-							UserContext.current().getUser().getLocale(),
-							"HAS BILL IN YOUR DELETE STUFF"));
-		}
+		// 已有未取消的预定，不能停用
+//		Integer billCount = rentalProvider.countRentalSiteBills(
+//				cmd.getRentalSiteId(), null, null, null, null);
+//		if (billCount > 0) {
+//			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+//					RentalServiceErrorCode.ERROR_HAVE_BILL,
+//					localeStringService.getLocalizedString(String
+//							.valueOf(RentalServiceErrorCode.SCOPE), String
+//							.valueOf(RentalServiceErrorCode.ERROR_HAVE_BILL),
+//							UserContext.current().getUser().getLocale(),
+//							"HAS BILL IN YOUR DELETE STUFF"));
+//		}
 		rentalProvider.updateRentalSiteStatus(cmd.getRentalSiteId(),
 				RentalSiteStatus.DISABLE.getCode());
 	}
