@@ -1538,6 +1538,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		
 		if(order.getInvoiceReqFlag() == 1) {
 			ConfInvoices invoice = ConvertHelper.convert(cmd.getInvoice(), ConfInvoices.class);
+			invoice.setOrderId(order.getId());
 			vcProvider.createInvoice(invoice);
 		}
 		
