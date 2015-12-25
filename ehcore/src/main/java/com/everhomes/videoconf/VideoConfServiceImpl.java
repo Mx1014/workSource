@@ -989,12 +989,18 @@ public class VideoConfServiceImpl implements VideoConfService {
 		
 		
 		ConfAccounts account = vcProvider.findVideoconfAccountById(cmd.getAccountId());
-		if(account == null)
+		if(account == null) {
 			LOGGER.error("account is not exist!");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"account is not exist!");
+		}
 
 		Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
-		if(now.before(addMonth(account.getOwnTime(), 3)))
+		if(now.before(addMonth(account.getOwnTime(), 3))) {
 			LOGGER.error("account has assigned in last 3 month!");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"account has assigned in last 3 month!");
+		}
 		account.setOwnerId(cmd.getUserId());
 		account.setUpdateTime(now);
 		account.setOwnTime(now);
@@ -1416,22 +1422,29 @@ public class VideoConfServiceImpl implements VideoConfService {
 		List<Long> userIds = cmd.getUserIds();
 		if(userIds == null || userIds.isEmpty()){
 			LOGGER.error("user count is null");
-			return ;
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"user count is null");
 		}
 		if(accountIds == null || accountIds.isEmpty()){
 			LOGGER.error("account count is null");
-			return ;
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"account count is null");
 		}
 		if(userIds.size() > accountIds.size()) {
 			LOGGER.error("user count is cannot larger than account count");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"user count is cannot larger than account count");
 		}
 		
 //		accountIds.stream().map(accountId -> {
 		for(Long accountId : accountIds) {	 
 			if(userIds.size() > 0) {
 				ConfAccounts account = vcProvider.findVideoconfAccountById(accountId);
-				if(account == null)
+				if(account == null) {
 					LOGGER.error("account is not exist!");
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+							"account is not exist!");
+				}
 		
 				Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
 	
