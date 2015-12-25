@@ -21,6 +21,9 @@ import java.util.List;
  * <li>CATEGORY_ID_LOST_AND_FOUND(1009): 帖子/失物招领</li>
  * <li>CATEGORY_ID_TOPIC_ACTIVITY(1010): 帖子/活动</li>
  * <li>CATEGORY_ID_TOPIC_POLLING(1011): 帖子/投票</li>
+ * <li>CATEGORY_ID_CONF_CAPACITY(1011):视频会议会议容量（25方or100方）</li>
+ * <li>CATEGORY_ID_CONF_TYPE(1011):视频会议会议类型（仅视频; 支持电话）</li>
+ * <li>CATEGORY_ID_ACCOUNT_TYPE(1011): 视频会议账号模式（单账号or多账号）</li>
  * </ul>
  */
 public interface CategoryConstants {
@@ -61,11 +64,11 @@ public interface CategoryConstants {
     /** 帖子/投票 */
     public static final long CATEGORY_ID_TOPIC_POLLING = 1011L;
     
-   public static final long CATEGORY_ID_CONF_CAPACITY = 200001L;
+   public static final long CATEGORY_ID_CONF_CAPACITY = 500001L;
     
-    public static final long CATEGORY_ID_CONF_TYPE = 300001L;
+    public static final long CATEGORY_ID_CONF_TYPE = 600001L;
     
-    public static final long CATEGORY_ID_ACCOUNT_TYPE = 400001L;
+    public static final long CATEGORY_ID_ACCOUNT_TYPE = 700001L;
     
     
     /** 政府机构相关的类型 */
