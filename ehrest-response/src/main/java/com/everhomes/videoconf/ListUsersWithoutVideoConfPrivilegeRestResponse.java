@@ -4,21 +4,20 @@ package com.everhomes.videoconf;
 
 import com.everhomes.rest.RestResponseBase;
 
-import java.util.List;
-import com.everhomes.videoconf.EnterpriseUsersDTO;
+import com.everhomes.videoconf.ListUsersWithoutVideoConfPrivilegeResponse;
 
 public class ListUsersWithoutVideoConfPrivilegeRestResponse extends RestResponseBase {
 
-    private List<EnterpriseUsersDTO> response;
+    private ListUsersWithoutVideoConfPrivilegeResponse response;
 
     public ListUsersWithoutVideoConfPrivilegeRestResponse () {
     }
 
-    public List<EnterpriseUsersDTO> getResponse() {
+    public ListUsersWithoutVideoConfPrivilegeResponse getResponse() {
         return response;
     }
 
-    public void setResponse(List<EnterpriseUsersDTO> response) {
+    public void setResponse(ListUsersWithoutVideoConfPrivilegeResponse response) {
         this.response = response;
     }
 }

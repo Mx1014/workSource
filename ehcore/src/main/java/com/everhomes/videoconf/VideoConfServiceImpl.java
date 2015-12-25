@@ -518,13 +518,18 @@ public class VideoConfServiceImpl implements VideoConfService {
 			nextPageAnchor = enterprises.get(enterprises.size() -1).getId();
 		}
 		response.setNextPageAnchor(nextPageAnchor);
-		
-	    List<EnterpriseConfAccountDTO> enterpriseDto = enterprises.stream().map(r -> {
+
+		List<EnterpriseConfAccountDTO> enterpriseDto = enterprises.stream().map(r -> {
 
 	    	EnterpriseConfAccountDTO dto = new EnterpriseConfAccountDTO();
 	    	dto.setId(r.getId());
 	    	dto.setEnterpriseId(r.getEnterpriseId());
 	    	Enterprise enterprise = enterpriseProvider.findEnterpriseById(r.getEnterpriseId());
+	    	if(!StringUtils.isNullOrEmpty(cmd.getKeyword())) {
+	    		if(!cmd.getKeyword().equals(enterprise.getName()) && !cmd.getKeyword().equals(enterprise.getDisplayName()) 
+	    				&& !cmd.getKeyword().equals(enterprise.getId().toString()))
+	    			return null;
+	    	}
 	    	dto.setEnterpriseName(enterprise.getName());
 	    	dto.setEnterpriseDisplayName(enterprise.getDisplayName());
 	    	dto.setEnterpriseContactor(r.getContactName());
@@ -544,7 +549,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 	    	dto.setBuyChannel(r.getBuyChannel());
 	    	return dto;
 	    	
-	    }).collect(Collectors.toList());
+	    }).filter(t->t!=null).collect(Collectors.toList());
 	    response.setEnterpriseConfAccounts(enterpriseDto);
 	    
 		return response;
@@ -556,7 +561,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		CrossShardListingLocator locator=new CrossShardListingLocator();
 	    int pageSize = Integer.MAX_VALUE;
 		ConfEnterprises enterprise = vcProvider.findByEnterpriseId(cmd.getEnterpriseId());
-		List<ConfAccounts> accounts = vcProvider.listConfAccountsByEnterpriseId(cmd.getEnterpriseId(), locator, pageSize);
+		List<ConfAccounts> accounts = vcProvider.listConfAccountsByEnterpriseId(cmd.getEnterpriseId(), null, locator, pageSize);
 		
 		if(cmd.getLockStatus() == 2) {
 			enterprise.setStatus((byte) 2);
@@ -612,7 +617,11 @@ public class VideoConfServiceImpl implements VideoConfService {
 
 		ConfAccounts account = vcProvider.findVideoconfAccountById(cmd.getAccountId());
 		account.setExpiredDate(new Timestamp(cmd.getValidDate()));
-		account.setAccountCategoryId(cmd.getAccountCategoryId());
+		
+		ConfAccountCategories category = vcProvider.findAccountCategoriesById(account.getAccountCategoryId());
+		List<ConfAccountCategories> rules = vcProvider.listConfAccountCategories(category.getChannelType(), cmd.getConfType(), 0, Integer.MAX_VALUE);
+		if(rules != null && rules.size() > 0)
+			account.setAccountCategoryId(rules.get(0).getId());
 
 		if(account.getStatus() != 2) {
 			if(account.getExpiredDate().before(new Timestamp(DateHelper.currentGMTTime().getTime()))) {
@@ -622,7 +631,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 	        	account.setStatus((byte) 1);
 	        }
 		}
-		
+		account.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		vcProvider.updateConfAccounts(account);
 
 	}
@@ -902,7 +911,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		CrossShardListingLocator locator=new CrossShardListingLocator();
 	    locator.setAnchor(cmd.getPageAnchor());
 	    int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		List<ConfAccounts> accounts = vcProvider.listConfAccountsByEnterpriseId(cmd.getEnterpriseId(), locator, pageSize+1);
+		List<ConfAccounts> accounts = vcProvider.listConfAccountsByEnterpriseId(cmd.getEnterpriseId(), cmd.getStatus(), locator, pageSize+1);
 		
 		Long nextPageAnchor = null;
 		if(accounts != null && accounts.size() > pageSize) {
@@ -936,7 +945,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 			}
 			ConfAccountCategories category = vcProvider.findAccountCategoriesById(r.getAccountCategoryId());
 			if(category != null) {
-				dto.setAccoutnType(category.getChannelType());
+				dto.setAccountType(category.getChannelType());
 				dto.setConfType(category.getConfType());
 			}
 			
@@ -944,6 +953,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 			dto.setEnterpriseName(enterprise.getName());
 			EnterpriseContact contact = enterpriseContactProvider.queryContactByUserId(r.getEnterpriseId(), r.getOwnerId());
 			if(contact != null) {
+				
 				dto.setDepartment(contact.getStringTag1());
 				dto.setUserName(contact.getName());
 				List<EnterpriseContactEntry> entry = enterpriseContactProvider.queryContactEntryByContactId(contact);
@@ -951,8 +961,13 @@ public class VideoConfServiceImpl implements VideoConfService {
 					dto.setMobile(entry.get(0).getEntryValue());
 				}
 			}
+			if(!StringUtils.isNullOrEmpty(cmd.getKeyword())) {
+	    		if(!cmd.getKeyword().equals(dto.getUserName()) && !cmd.getKeyword().equals(dto.getDepartment()) 
+	    				&& !cmd.getKeyword().equals(dto.getMobile()))
+	    			return null;
+	    	}
 			return dto;
-		}).collect(Collectors.toList());
+		}).filter(r->r!=null).collect(Collectors.toList());
 		response.setConfAccounts(confAccounts);
 		
 		return response;
@@ -1399,7 +1414,14 @@ public class VideoConfServiceImpl implements VideoConfService {
 	public void createAccountOwner(CreateAccountOwnerCommand cmd) {
 		List<Long> accountIds = cmd.getAccountIds();
 		List<Long> userIds = cmd.getUserIds();
-		if(userIds == null || userIds.isEmpty())
+		if(userIds == null || userIds.isEmpty()){
+			LOGGER.error("user count is null");
+			return ;
+		}
+		if(accountIds == null || accountIds.isEmpty()){
+			LOGGER.error("account count is null");
+			return ;
+		}
 		if(userIds.size() > accountIds.size()) {
 			LOGGER.error("user count is cannot larger than account count");
 		}
