@@ -1419,6 +1419,14 @@ public class VideoConfServiceImpl implements VideoConfService {
 				vcProvider.updateConfAccounts(account);
 				userIds.remove(0);
 				
+				List<ConfOrderAccountMap> maps = vcProvider.findOrderAccountByAccountId(accountId);
+				if(maps != null && maps.size() > 0) {
+					for(ConfOrderAccountMap map : maps) {
+						map.setAssigedFlag((byte) 1);
+						vcProvider.updateConfOrderAccountMap(map);
+					}
+				}
+				
 				ConfAccountHistories history = new ConfAccountHistories();
 				history.setEnterpriseId(account.getEnterpriseId());
 				history.setExpiredDate(account.getExpiredDate());

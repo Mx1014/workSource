@@ -1132,6 +1132,39 @@ public class VideoConfProviderImpl implements VideoConfProvider {
         return count[0];
 	}
 
+	@Override
+	public void updateConfOrderAccountMap(ConfOrderAccountMap map) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        
+		EhConfOrderAccountMapDao dao = new EhConfOrderAccountMapDao(context.configuration());
+        dao.update(map);
+		
+	}
+
+	@Override
+	public List<ConfOrderAccountMap> findOrderAccountByAccountId(Long accountId) {
+		List<ConfOrderAccountMap> maps = new ArrayList<ConfOrderAccountMap>();
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhConfAccountCategories.class));
+        SelectQuery<EhConfOrderAccountMapRecord> query = context.selectQuery(Tables.EH_CONF_ORDER_ACCOUNT_MAP);
+        
+        
+        if(accountId != null)
+        	query.addConditions(Tables.EH_CONF_ORDER_ACCOUNT_MAP.CONF_ACCOUNT_ID.eq(accountId));
+        
+        query.addConditions(Tables.EH_CONF_ORDER_ACCOUNT_MAP.ASSIGED_FLAG.eq((byte)0));
+        
+        query.fetch().map((r) -> {
+        	
+        	maps.add(ConvertHelper.convert(r, ConfOrderAccountMap.class));
+            return null;
+        });
+
+        
+
+        return maps;
+	}
+
 
 
 }
