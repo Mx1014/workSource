@@ -616,7 +616,7 @@ public class RentalProviderImpl implements RentalProvider {
 
 	@Override
 	public int countRentalSites(Long ownerId,String ownerType,  String siteType,
-			String keyword) {
+			String keyword,List<Byte> status) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record1<Integer>> step = context.selectCount().from(
 				Tables.EH_RENTAL_SITES);
@@ -636,8 +636,9 @@ public class RentalProviderImpl implements RentalProvider {
 					.or(Tables.EH_RENTAL_SITES.BUILDING_NAME.like("%" + keyword
 							+ "%")));
 		}
-//		condition = condition.and(Tables.EH_RENTAL_SITES.STATUS
-//				.eq(RentalSiteStatus.NORMAL.getCode()));
+		if(null != status)
+			condition = condition.and(Tables.EH_RENTAL_SITES.STATUS
+				.in(status));
 		return step.where(condition).fetchOneInto(Integer.class);
 
 	}
@@ -773,7 +774,7 @@ public class RentalProviderImpl implements RentalProvider {
 	@Override
 	public List<RentalSite> findRentalSites(Long ownerId,String ownerType, 
 			String siteType, String keyword, Integer pageOffset,
-			Integer pageSize) {
+			Integer pageSize,List<Byte>  status) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTAL_SITES);
@@ -791,8 +792,9 @@ public class RentalProviderImpl implements RentalProvider {
 					.or(Tables.EH_RENTAL_SITES.BUILDING_NAME.like("%" + keyword
 							+ "%")));
 		}
-//		condition = condition.and(Tables.EH_RENTAL_SITES.STATUS
-//				.eq(RentalSiteStatus.NORMAL.getCode()));
+		if(null!= status)
+			condition = condition.and(Tables.EH_RENTAL_SITES.STATUS
+					.in(status));
 		step.where(condition);
 		if (null != pageSize) {
 			Integer offset = pageOffset == null ? 1 : (pageOffset - 1)

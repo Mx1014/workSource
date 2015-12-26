@@ -244,7 +244,7 @@ public class RentalServiceImpl implements RentalService {
 		response.setContactNum(rentalRule.getContactNum());
 		// 查sites
 		List<RentalSite> rentalSites = rentalProvider.findRentalSites(
-				cmd.getOwnerId(),cmd.getOwnerType(), cmd.getSiteType(), null, null, null);
+				cmd.getOwnerId(),cmd.getOwnerType(), cmd.getSiteType(), null, null, null,null);
 		for (RentalSite rs : rentalSites) {
 			RentalSiteDTO rsDTO = new RentalSiteDTO();
 			rsDTO.setBuildingName(rs.getBuildingName());
@@ -394,8 +394,12 @@ public class RentalServiceImpl implements RentalService {
 			FindRentalSitesCommand cmd) {
 		FindRentalSitesCommandResponse response = new FindRentalSitesCommandResponse();
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
+		if(null==cmd.getStatus() || cmd.getStatus().size() == 0){
+			cmd.setStatus(new ArrayList<Byte>());
+			cmd.getStatus().add(RentalSiteStatus.NORMAL.getCode());
+		}
 		int totalCount = rentalProvider.countRentalSites(cmd.getOwnerId(),cmd.getOwnerType(),
-				cmd.getSiteType(), cmd.getKeyword());
+				cmd.getSiteType(), cmd.getKeyword(),cmd.getStatus());
 		if (totalCount == 0)
 			return response;
 
@@ -406,7 +410,7 @@ public class RentalServiceImpl implements RentalService {
 		checkEnterpriseCommunityIdIsNull(cmd.getOwnerId());
 		List<RentalSite> rentalSites = rentalProvider.findRentalSites(
 				cmd.getOwnerId(),cmd.getOwnerType(), cmd.getSiteType(), cmd.getKeyword(),
-				cmd.getPageOffset(), pageSize);
+				cmd.getPageOffset(), pageSize,cmd.getStatus());
 
 		response.setRentalSites(new ArrayList<RentalSiteDTO>());
 		for (RentalSite rentalSite : rentalSites) {
@@ -1677,7 +1681,7 @@ public class RentalServiceImpl implements RentalService {
 		ListRentalBillCountCommandResponse response = new ListRentalBillCountCommandResponse(); 
 		response.setRentalBillCounts(new ArrayList<RentalBillCountDTO>());
 		if(cmd.getRentalSiteId() == null ){
-			List<RentalSite>  sites = this.rentalProvider.findRentalSites(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSiteType(),null , null, null);
+			List<RentalSite>  sites = this.rentalProvider.findRentalSites(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getSiteType(),null , null, null,null);
 			for(RentalSite site : sites){
 				response.getRentalBillCounts().add(processRentalBillCountDTO(site,cmd.getBeginDate(),cmd.getEndDate()));
 			}
