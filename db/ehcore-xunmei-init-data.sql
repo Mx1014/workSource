@@ -368,10 +368,10 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 
 -- modify by ysf 20151225
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`)
-VALUES(912, 999999, 0, 0, 0, '/home','GovAgencies','园区入驻','园区入驻','cs://1/image/aW1hZ2UvTVRvNFlXSXdaRGRqTnpKaU56UmtZMll3WlRNeU1XUmxOekU0WXpNNU9HWmpZUQ','2','1','28',NULL,'0','0','1','1','','0',NULL,NULL,NULL);
+VALUES(912, 999999, 0, 0, 0, '/home','GovAgencies','入园服务','入园服务','cs://1/image/aW1hZ2UvTVRvMVltSTBZak5sT0RFMU1EazVNV1EyTm1ZNU56RTVPVEptT0RZNE5tWTJaQQ','2','1','28',NULL,'0','0','1','1','','0',NULL,NULL,NULL);
 
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`) 
-	VALUES(913, 999999, 0, 0, 0, '/home','GovAgencies','产业平台','产业平台','cs://1/image/aW1hZ2UvTVRvMU4yWTBZamRpWXprMVpqQXpZV1k1TVRWbU1qYzNORGRoWXpreU0yTmlNQQ','2','1','15','{"contentCategory":1107,"actionCategory":0,"entityTag":"USER","forumId":178622}','0','0','1','1','','10',NULL,NULL,NULL);
+	VALUES(913, 999999, 0, 0, 0, '/home','GovAgencies','产业平台','产业平台','cs://1/image/aW1hZ2UvTVRveFpEUXpObVE0Tm1Jd056QmpaamhrTUdReFlqSXdNV1EwT1RkbU9UazRaZw','2','1','15','{"contentCategory":1107,"actionCategory":0,"entityTag":"USER","forumId":178622}','0','0','1','1','','10',NULL,NULL,NULL);
 -- INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`) 
 --	VALUES(914, 999999, 0, 0, 0, '/home','GovAgencies','产业服务','产业服务','cs://1/image/aW1hZ2UvTVRveFpEUXpObVE0Tm1Jd056QmpaamhrTUdReFlqSXdNV1EwT1RkbU9UazRaZw','2','1','15','{"contentCategory":1108,"actionCategory":0,"entityTag":"USER","forumId":178622}','0','0','1','1','','10',NULL,NULL,NULL);
 
@@ -379,7 +379,7 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 --INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`) 
 --	VALUES(912, 999999, 0, 0, 0, '/home','GovAgencies','交流大厅','交流大厅','cs://1/image/aW1hZ2UvTVRwaE5HRTBNR1ZtTmpSa1lqVm1NbVJrWVRNNFlURXdZMlppTnpVNE1ESTRaQQ','2','1','29', '{"categoryId":1003}','0','0','1','1','','0',NULL,NULL,NULL);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`) 
-	VALUES(914, 999999, 0, 0, 0, '/home','GovAgencies','服务联盟','服务联盟','cs://1/image/aW1hZ2UvTVRvM016RmpNelJtTURGbU9ETTJZVEJrTWprNE1qbGpZbU0xTTJZMFlqWTFNZw','2','1','33','{"type":2,"parentId":100001}','0','0','1','1','','0',NULL,NULL,NULL);
+	VALUES(914, 999999, 0, 0, 0, '/home','GovAgencies','产业服务','产业服务','cs://1/image/aW1hZ2UvTVRvM016RmpNelJtTURGbU9ETTJZVEJrTWprNE1qbGpZbU0xTTJZMFlqWTFNZw','2','1','33','{"type":2,"parentId":100001}','0','0','1','1','','0',NULL,NULL,NULL);
 
 
 	

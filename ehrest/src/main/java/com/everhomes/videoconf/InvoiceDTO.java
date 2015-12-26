@@ -17,7 +17,7 @@ import com.everhomes.util.StringHelper;
  *  <li>vatBankaccount: 银行账号</li>
  *  <li>address: 地址</li>
  *  <li>zipCode: 邮编</li>
- *  <li>recipients: 收件人姓名</li>
+ *  <li>consignee: 收件人姓名</li>
  *  <li>contact: 联系方式</li>
  *  <li>contractFlag: 是否需要合同 0-不需要 1-需要</li>
  * </ul>
@@ -51,7 +51,7 @@ public class InvoiceDTO {
 	
 	private String zipCode;
 	
-	private String recipients;
+	private String consignee;
 	
 	private String contact;
 	
@@ -170,12 +170,12 @@ public class InvoiceDTO {
 		this.zipCode = zipCode;
 	}
 
-	public String getRecipients() {
-		return recipients;
+	public String getConsignee() {
+		return consignee;
 	}
 
-	public void setRecipients(String recipients) {
-		this.recipients = recipients;
+	public void setConsignee(String consignee) {
+		this.consignee = consignee;
 	}
 
 	public String getContact() {
