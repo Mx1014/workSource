@@ -107,6 +107,7 @@ public class RentalServiceImpl implements RentalService {
 	@Override
 	public UpdateRentalRuleCommandResponse updateRentalRule(
 			UpdateRentalRuleCommand cmd) {
+		UpdateRentalRuleCommandResponse response = new UpdateRentalRuleCommandResponse();
 		Long userId = UserContext.current().getUser().getId();
 		checkEnterpriseCommunityIdIsNull(cmd.getOwnerId());
 //		RentalRule rentalRule = rentalProvider.getRentalRule(
@@ -132,7 +133,7 @@ public class RentalServiceImpl implements RentalService {
 		rentalRule.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		rentalRule.setOperatorUid(userId);
 		rentalProvider.updateRentalRule(rentalRule);
-		return null;
+		return response;
 	}
 
 	@Override
@@ -1168,17 +1169,17 @@ public class RentalServiceImpl implements RentalService {
 	@Override
 	public void enableRentalSite(EnableRentalSiteCommand cmd) {
 		// 已有未取消的预定，不能删除
-		Integer billCount = rentalProvider.countRentalSiteBills(
-				cmd.getRentalSiteId(), null, null, null, null);
-		if (billCount > 0) {
-			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-					RentalServiceErrorCode.ERROR_HAVE_BILL,
-					localeStringService.getLocalizedString(String
-							.valueOf(RentalServiceErrorCode.SCOPE), String
-							.valueOf(RentalServiceErrorCode.ERROR_HAVE_BILL),
-							UserContext.current().getUser().getLocale(),
-							"HAS BILL IN YOUR DELETE STUFF"));
-		}
+//		Integer billCount = rentalProvider.countRentalSiteBills(
+//				cmd.getRentalSiteId(), null, null, null, null);
+//		if (billCount > 0) {
+//			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+//					RentalServiceErrorCode.ERROR_HAVE_BILL,
+//					localeStringService.getLocalizedString(String
+//							.valueOf(RentalServiceErrorCode.SCOPE), String
+//							.valueOf(RentalServiceErrorCode.ERROR_HAVE_BILL),
+//							UserContext.current().getUser().getLocale(),
+//							"HAS BILL IN YOUR DELETE STUFF"));
+//		}
 		rentalProvider.updateRentalSiteStatus(cmd.getRentalSiteId(),
 				RentalSiteStatus.NORMAL.getCode());
 	}
