@@ -59,23 +59,24 @@ public class CancelLockedRentalBillAction implements Runnable {
 		if (rentalBill.getStatus().equals(SiteBillStatus.LOCKED.getCode())) {
 			rentalBill.setStatus(SiteBillStatus.FAIL.getCode());
 			rentalProvider.updateRentalBill(rentalBill);
+			RentalSite site = this.rentalProvider.getRentalSiteById(rentalBill.getRentalSiteId());
+			RentalRule rule = this.rentalProvider.getRentalRule(site.getOwnerId(), site.getOwnerType(), site.getSiteType());
+			StringBuffer sb = new StringBuffer();
+			sb.append("您预定的："); 
+			sb.append(site.getSiteName());
+			sb.append("(时间:");
+			if (rule.getRentalType().equals(RentalType.HOUR)){
+				SimpleDateFormat  datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				sb.append(datetimeSF.format(rentalBill.getStartTime()));
+			}else{
+				SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
+				sb.append(dateSF.format(rentalBill.getRentalDate()));
+			}
+			sb.append(")");
+			sb.append("由于超期被取消了 > <,请重新预订");
+			sendMessageToUser(rentalBill.getRentalUid(),sb.toString());
 		}
-		RentalSite site = this.rentalProvider.getRentalSiteById(rentalBill.getRentalSiteId());
-		RentalRule rule = this.rentalProvider.getRentalRule(site.getOwnerId(), site.getOwnerType(), site.getSiteType());
-		StringBuffer sb = new StringBuffer();
-		sb.append("您预定的："); 
-		sb.append(site.getSiteName());
-		sb.append("(时间:");
-		if (rule.getRentalType().equals(RentalType.HOUR)){
-			SimpleDateFormat  datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			sb.append(datetimeSF.format(rentalBill.getStartTime()));
-		}else{
-			SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
-			sb.append(dateSF.format(rentalBill.getRentalDate()));
-		}
-		sb.append(")");
-		sb.append("由于超期被取消了 > <,请重新预订");
-		sendMessageToUser(rentalBill.getRentalUid(),sb.toString());
+		
 	}
 
 }
