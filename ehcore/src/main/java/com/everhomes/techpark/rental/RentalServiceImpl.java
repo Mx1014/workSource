@@ -1538,25 +1538,25 @@ public class RentalServiceImpl implements RentalService {
 						dto.setStatus(SiteRuleStatus.CLOSE.getCode());
 					}
 					if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
-						if (reserveTime.before(new java.util.Date(rsr
+						if ((null!=rentalRule.getRentalStartTime())&&(reserveTime.before(new java.util.Date(rsr
 								.getBeginTime().getTime()
-								- rentalRule.getRentalStartTime()))) {
+								- rentalRule.getRentalStartTime())))) {
 							dto.setStatus(SiteRuleStatus.EARLY.getCode());
 						}
-						if (reserveTime.after(new java.util.Date(rsr
+						if ((null!=rentalRule.getRentalEndTime())&&(reserveTime.after(new java.util.Date(rsr
 								.getBeginTime().getTime()
-								- rentalRule.getRentalEndTime()))) {
+								- rentalRule.getRentalEndTime())))) {
 							dto.setStatus(SiteRuleStatus.LATE.getCode());
 						}
 					} else {
-						if (reserveTime.before(new java.util.Date(rsr
+						if ((null!=rentalRule.getRentalStartTime())&&(reserveTime.before(new java.util.Date(rsr
 								.getSiteRentalDate().getTime()
-								- rentalRule.getRentalStartTime()))) {
+								- rentalRule.getRentalStartTime())))) {
 							dto.setStatus(SiteRuleStatus.EARLY.getCode());
 						}
-						if (reserveTime.after(new java.util.Date(rsr
+						if ((null!=rentalRule.getRentalEndTime())&&(reserveTime.after(new java.util.Date(rsr
 								.getSiteRentalDate().getTime()
-								- rentalRule.getRentalEndTime()))) {
+								- rentalRule.getRentalEndTime()))) ){
 							dto.setStatus(SiteRuleStatus.LATE.getCode());
 						}
 					}
