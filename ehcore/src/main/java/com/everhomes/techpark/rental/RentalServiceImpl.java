@@ -894,6 +894,9 @@ public class RentalServiceImpl implements RentalService {
 		checkEnterpriseCommunityIdIsNull(cmd.getOwnerId());
 		RentalRule rentalRule = rentalProvider.getRentalRule(
 				cmd.getOwnerId(),cmd.getOwnerType(), cmd.getSiteType());
+		if(null == rentalRule){
+			return new GetRentalTypeRuleCommandResponse();
+		}
 		GetRentalTypeRuleCommandResponse response = ConvertHelper.convert(rentalRule, GetRentalTypeRuleCommandResponse.class);
 		return response;
 	}
