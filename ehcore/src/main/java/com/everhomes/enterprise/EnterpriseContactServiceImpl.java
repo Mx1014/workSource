@@ -1083,7 +1083,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 	public void rejectContact(RejectContactCommand cmd) {
         User operator = UserContext.current().getUser();
         Long operatorUid = operator.getId();
-		EnterpriseContact contact = checkEnterpriseContactParameter(cmd.getContactId(), operatorUid, "rejectContact");
+		EnterpriseContact contact = checkEnterpriseContactParameter(cmd.getEnterpriseId(), cmd.getUserId(), operatorUid, "rejectContact");
 		
 		GroupMemberStatus status = GroupMemberStatus.fromCode(contact.getStatus());
 		if(status == GroupMemberStatus.ACTIVE) {
