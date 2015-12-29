@@ -783,7 +783,10 @@ public class RentalServiceImpl implements RentalService {
 		RentalRule rr=rentalProvider.getRentalRule(bill.getOwnerId(), bill.getOwnerType(), bill.getSiteType());
 		
 		UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(bill.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
-		dto.setUserPhone(userIdentifier.getIdentifierToken());
+		if(null == userIdentifier){
+			LOGGER.debug("userIdentifier is null...userId = " + bill.getRentalUid());
+		}else{
+			dto.setUserPhone(userIdentifier.getIdentifierToken());}
 		User user = this.userProvider.findUserById(bill.getRentalUid());
 		dto.setUserName(user.getNickName());
 		dto.setSiteName(rs.getSiteName());
