@@ -1053,7 +1053,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
                     SelectQuery<? extends Record> query) {
                 query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.ENTERPRISE_ID.eq(enterpriseId));
-                query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.ROLE.eq(RoleConstants.SystemAdmin));
+                query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.ROLE.eq(RoleConstants.ResourceAdmin));
                 query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.STATUS.ne(GroupMemberStatus.INACTIVE.getCode()));
                 return query;
             }

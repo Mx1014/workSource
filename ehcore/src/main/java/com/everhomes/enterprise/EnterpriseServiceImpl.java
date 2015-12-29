@@ -197,8 +197,6 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         locator.setAnchor(cmd.getPageAnchor());
         List<Enterprise> enterprises = this.listEnterpriseByCommunityId(locator, cmd.getEnterpriseName(),cmd.getCommunityId(), cmd.getStatus(), pageSize);
         
-        populateEnterprises(enterprises);
-       
         List<EnterpriseDTO> dtos = new ArrayList<EnterpriseDTO>();
         for(Enterprise enterprise : enterprises) {
              dtos.add(toEnterpriseDto(userId, enterprise));
