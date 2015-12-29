@@ -1037,7 +1037,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		List<Long> users = vcProvider.findUsersByEnterpriseId(cmd.getEnterpriseId());
 
 		List<EnterpriseContact> ec = new ArrayList<EnterpriseContact>();
-		List<EnterpriseContact> contact = enterpriseContactProvider.queryContactByEnterpriseId(cmd.getEnterpriseId());
+		List<EnterpriseContact> contact = enterpriseContactProvider.queryContactByEnterpriseId(cmd.getEnterpriseId(), cmd.getKeyword());
 		if(cmd.getPageAnchor() == null)
 			cmd.setPageAnchor(0L);
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
