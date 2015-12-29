@@ -11,22 +11,25 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhNearbyCommunityMap implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1829242073;
+	private static final long serialVersionUID = 265081723;
 
-	private java.lang.Long id;
-	private java.lang.Long communityId;
-	private java.lang.Long nearbyCommunityId;
+	private java.lang.Long    id;
+	private java.lang.Long    communityId;
+	private java.lang.Long    nearbyCommunityId;
+	private java.lang.Integer namespaceId;
 
 	public EhNearbyCommunityMap() {}
 
 	public EhNearbyCommunityMap(
-		java.lang.Long id,
-		java.lang.Long communityId,
-		java.lang.Long nearbyCommunityId
+		java.lang.Long    id,
+		java.lang.Long    communityId,
+		java.lang.Long    nearbyCommunityId,
+		java.lang.Integer namespaceId
 	) {
 		this.id = id;
 		this.communityId = communityId;
 		this.nearbyCommunityId = nearbyCommunityId;
+		this.namespaceId = namespaceId;
 	}
 
 	public java.lang.Long getId() {
@@ -51,5 +54,13 @@ public class EhNearbyCommunityMap implements java.io.Serializable {
 
 	public void setNearbyCommunityId(java.lang.Long nearbyCommunityId) {
 		this.nearbyCommunityId = nearbyCommunityId;
+	}
+
+	public java.lang.Integer getNamespaceId() {
+		return this.namespaceId;
+	}
+
+	public void setNamespaceId(java.lang.Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 }

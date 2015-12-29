@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunities implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1829360568;
+	private static final long serialVersionUID = -810237882;
 
 	private java.lang.Long     id;
 	private java.lang.String   uuid;
@@ -51,6 +51,7 @@ public class EhCommunities implements java.io.Serializable {
 	private java.lang.Long     defaultForumId;
 	private java.lang.Long     feedbackForumId;
 	private java.sql.Timestamp updateTime;
+	private java.lang.Integer  namespaceId;
 
 	public EhCommunities() {}
 
@@ -92,7 +93,8 @@ public class EhCommunities implements java.io.Serializable {
 		java.lang.Byte     communityType,
 		java.lang.Long     defaultForumId,
 		java.lang.Long     feedbackForumId,
-		java.sql.Timestamp updateTime
+		java.sql.Timestamp updateTime,
+		java.lang.Integer  namespaceId
 	) {
 		this.id = id;
 		this.uuid = uuid;
@@ -132,6 +134,7 @@ public class EhCommunities implements java.io.Serializable {
 		this.defaultForumId = defaultForumId;
 		this.feedbackForumId = feedbackForumId;
 		this.updateTime = updateTime;
+		this.namespaceId = namespaceId;
 	}
 
 	public java.lang.Long getId() {
@@ -436,5 +439,13 @@ public class EhCommunities implements java.io.Serializable {
 
 	public void setUpdateTime(java.sql.Timestamp updateTime) {
 		this.updateTime = updateTime;
+	}
+
+	public java.lang.Integer getNamespaceId() {
+		return this.namespaceId;
+	}
+
+	public void setNamespaceId(java.lang.Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 }
