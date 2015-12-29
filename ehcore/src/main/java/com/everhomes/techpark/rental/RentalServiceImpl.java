@@ -780,8 +780,16 @@ public class RentalServiceImpl implements RentalService {
 	void mappingRentalBillDTO(RentalBillDTO dto, RentalBill bill) {
 		RentalSite rs = rentalProvider
 				.getRentalSiteById(bill.getRentalSiteId());
+		if(null== rs){
+			LOGGER.debug("RentalSite is null...bill id  = " + bill.getId()+",and site id = "+bill.getRentalSiteId());
+			return ;
+		}
 		RentalRule rr=rentalProvider.getRentalRule(bill.getOwnerId(), bill.getOwnerType(), bill.getSiteType());
-		
+
+		if(null== rr){
+			LOGGER.debug("RentalRule is null...getOwnerId  = " + bill.getOwnerId()+",and getOwnerType = "+bill.getOwnerType()+",and getSiteType = "+ bill.getSiteType());
+			return ;
+		}
 		UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(bill.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
 		if(null == userIdentifier){
 			LOGGER.debug("userIdentifier is null...userId = " + bill.getRentalUid());
@@ -789,6 +797,7 @@ public class RentalServiceImpl implements RentalService {
 			dto.setUserPhone(userIdentifier.getIdentifierToken());}
 		User user = this.userProvider.findUserById(bill.getRentalUid());
 		dto.setUserName(user.getNickName());
+		
 		dto.setSiteName(rs.getSiteName());
 		dto.setBuildingName(rs.getBuildingName());
 		if(StringUtils.isEmpty( rs.getAddress())){
@@ -902,6 +911,7 @@ public class RentalServiceImpl implements RentalService {
 			return new GetRentalTypeRuleCommandResponse();
 		}
 		GetRentalTypeRuleCommandResponse response = ConvertHelper.convert(rentalRule, GetRentalTypeRuleCommandResponse.class);
+		response.setPayRatio(rentalRule.getPaymentRatio());
 		return response;
 	}
 
@@ -1147,7 +1157,7 @@ public class RentalServiceImpl implements RentalService {
 							"HAS BILL IN YOUR DELETE STUFF"));
 		}
 		rentalProvider.deleteRentalSiteRules(cmd.getRentalSiteId(), null, null);
-		rentalProvider.deleteRentalBillById(cmd.getRentalSiteId());
+//		rentalProvider.deleteRentalBillBySiteId(cmd.getRentalSiteId());
 		rentalProvider.deleteRentalSite(cmd.getRentalSiteId());
 	}
 	@Override
