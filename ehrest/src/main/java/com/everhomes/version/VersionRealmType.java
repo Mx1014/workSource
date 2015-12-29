@@ -20,6 +20,8 @@ package com.everhomes.version;
  * <li>IOS_JYJY("iOS_JYJY"): 金隅嘉业iOS版APP</li>
  * <li>ANDROID_VIDEOCONF("Android_Videoconf"): 视频会议Android版APP</li>
  * <li>IOS_VIDEOCONF("iOS_Videoconf"): 视频会议iOS版APP</li>
+ * <li>ANDROID_LONGGANG("Android_Longgang"): 龙岗智慧社区Android版APP</li>
+ * <li>IOS_LONGGANG("iOS_Longgang"): 龙岗智慧社区iOS版APP</li>
  * </ul>
  */
 public enum VersionRealmType {
@@ -38,7 +40,9 @@ public enum VersionRealmType {
     ANDROID_JYJY("Android_JYJY"), 
     IOS_JYJY("iOS_JYJY"),
     ANDROID_VIDEOCONF("Android_Videoconf"), 
-    IOS_VIDEOCONF("iOS_Videoconf");
+    IOS_VIDEOCONF("iOS_Videoconf"),
+    ANDROID_LONGGANG("Android_Longgang"), 
+    IOS_LONGGANG("iOS_Longgang");
     
     private String code;
     private VersionRealmType(String code) {

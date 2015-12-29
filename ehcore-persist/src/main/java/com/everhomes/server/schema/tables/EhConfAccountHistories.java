@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfAccountHistories extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhConfAccountHistoriesRecord> {
 
-	private static final long serialVersionUID = -1455040610;
+	private static final long serialVersionUID = 1607321625;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_conf_account_histories</code>
@@ -69,7 +69,7 @@ public class EhConfAccountHistories extends org.jooq.impl.TableImpl<com.everhome
 	/**
 	 * The column <code>ehcore.eh_conf_account_histories.deleter_uid</code>. deleter id
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfAccountHistoriesRecord, java.lang.Long> DELETER_UID = createField("deleter_uid", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "deleter id");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfAccountHistoriesRecord, java.lang.Long> DELETER_UID = createField("deleter_uid", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "deleter id");
 
 	/**
 	 * The column <code>ehcore.eh_conf_account_histories.delete_time</code>.

@@ -107,6 +107,7 @@ public class RentalServiceImpl implements RentalService {
 	@Override
 	public UpdateRentalRuleCommandResponse updateRentalRule(
 			UpdateRentalRuleCommand cmd) {
+		UpdateRentalRuleCommandResponse response = new UpdateRentalRuleCommandResponse();
 		Long userId = UserContext.current().getUser().getId();
 		checkEnterpriseCommunityIdIsNull(cmd.getOwnerId());
 //		RentalRule rentalRule = rentalProvider.getRentalRule(
@@ -132,7 +133,7 @@ public class RentalServiceImpl implements RentalService {
 		rentalRule.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		rentalRule.setOperatorUid(userId);
 		rentalProvider.updateRentalRule(rentalRule);
-		return null;
+		return response;
 	}
 
 	@Override
@@ -779,12 +780,24 @@ public class RentalServiceImpl implements RentalService {
 	void mappingRentalBillDTO(RentalBillDTO dto, RentalBill bill) {
 		RentalSite rs = rentalProvider
 				.getRentalSiteById(bill.getRentalSiteId());
+		if(null== rs){
+			LOGGER.debug("RentalSite is null...bill id  = " + bill.getId()+",and site id = "+bill.getRentalSiteId());
+			return ;
+		}
 		RentalRule rr=rentalProvider.getRentalRule(bill.getOwnerId(), bill.getOwnerType(), bill.getSiteType());
-		
+
+		if(null== rr){
+			LOGGER.debug("RentalRule is null...getOwnerId  = " + bill.getOwnerId()+",and getOwnerType = "+bill.getOwnerType()+",and getSiteType = "+ bill.getSiteType());
+			return ;
+		}
 		UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(bill.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
-		dto.setUserPhone(userIdentifier.getIdentifierToken());
+		if(null == userIdentifier){
+			LOGGER.debug("userIdentifier is null...userId = " + bill.getRentalUid());
+		}else{
+			dto.setUserPhone(userIdentifier.getIdentifierToken());}
 		User user = this.userProvider.findUserById(bill.getRentalUid());
 		dto.setUserName(user.getNickName());
+		
 		dto.setSiteName(rs.getSiteName());
 		dto.setBuildingName(rs.getBuildingName());
 		if(StringUtils.isEmpty( rs.getAddress())){
@@ -898,6 +911,7 @@ public class RentalServiceImpl implements RentalService {
 			return new GetRentalTypeRuleCommandResponse();
 		}
 		GetRentalTypeRuleCommandResponse response = ConvertHelper.convert(rentalRule, GetRentalTypeRuleCommandResponse.class);
+		response.setPayRatio(rentalRule.getPaymentRatio());
 		return response;
 	}
 
@@ -1143,7 +1157,7 @@ public class RentalServiceImpl implements RentalService {
 							"HAS BILL IN YOUR DELETE STUFF"));
 		}
 		rentalProvider.deleteRentalSiteRules(cmd.getRentalSiteId(), null, null);
-		rentalProvider.deleteRentalBillById(cmd.getRentalSiteId());
+//		rentalProvider.deleteRentalBillBySiteId(cmd.getRentalSiteId());
 		rentalProvider.deleteRentalSite(cmd.getRentalSiteId());
 	}
 	@Override
@@ -1168,17 +1182,17 @@ public class RentalServiceImpl implements RentalService {
 	@Override
 	public void enableRentalSite(EnableRentalSiteCommand cmd) {
 		// 已有未取消的预定，不能删除
-		Integer billCount = rentalProvider.countRentalSiteBills(
-				cmd.getRentalSiteId(), null, null, null, null);
-		if (billCount > 0) {
-			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-					RentalServiceErrorCode.ERROR_HAVE_BILL,
-					localeStringService.getLocalizedString(String
-							.valueOf(RentalServiceErrorCode.SCOPE), String
-							.valueOf(RentalServiceErrorCode.ERROR_HAVE_BILL),
-							UserContext.current().getUser().getLocale(),
-							"HAS BILL IN YOUR DELETE STUFF"));
-		}
+//		Integer billCount = rentalProvider.countRentalSiteBills(
+//				cmd.getRentalSiteId(), null, null, null, null);
+//		if (billCount > 0) {
+//			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+//					RentalServiceErrorCode.ERROR_HAVE_BILL,
+//					localeStringService.getLocalizedString(String
+//							.valueOf(RentalServiceErrorCode.SCOPE), String
+//							.valueOf(RentalServiceErrorCode.ERROR_HAVE_BILL),
+//							UserContext.current().getUser().getLocale(),
+//							"HAS BILL IN YOUR DELETE STUFF"));
+//		}
 		rentalProvider.updateRentalSiteStatus(cmd.getRentalSiteId(),
 				RentalSiteStatus.NORMAL.getCode());
 	}
@@ -1537,25 +1551,25 @@ public class RentalServiceImpl implements RentalService {
 						dto.setStatus(SiteRuleStatus.CLOSE.getCode());
 					}
 					if (dto.getRentalType().equals(RentalType.HOUR.getCode())) {
-						if (reserveTime.before(new java.util.Date(rsr
+						if ((null!=rentalRule.getRentalStartTime())&&(reserveTime.before(new java.util.Date(rsr
 								.getBeginTime().getTime()
-								- rentalRule.getRentalStartTime()))) {
+								- rentalRule.getRentalStartTime())))) {
 							dto.setStatus(SiteRuleStatus.EARLY.getCode());
 						}
-						if (reserveTime.after(new java.util.Date(rsr
+						if ((null!=rentalRule.getRentalEndTime())&&(reserveTime.after(new java.util.Date(rsr
 								.getBeginTime().getTime()
-								- rentalRule.getRentalEndTime()))) {
+								- rentalRule.getRentalEndTime())))) {
 							dto.setStatus(SiteRuleStatus.LATE.getCode());
 						}
 					} else {
-						if (reserveTime.before(new java.util.Date(rsr
+						if ((null!=rentalRule.getRentalStartTime())&&(reserveTime.before(new java.util.Date(rsr
 								.getSiteRentalDate().getTime()
-								- rentalRule.getRentalStartTime()))) {
+								- rentalRule.getRentalStartTime())))) {
 							dto.setStatus(SiteRuleStatus.EARLY.getCode());
 						}
-						if (reserveTime.after(new java.util.Date(rsr
+						if ((null!=rentalRule.getRentalEndTime())&&(reserveTime.after(new java.util.Date(rsr
 								.getSiteRentalDate().getTime()
-								- rentalRule.getRentalEndTime()))) {
+								- rentalRule.getRentalEndTime()))) ){
 							dto.setStatus(SiteRuleStatus.LATE.getCode());
 						}
 					}

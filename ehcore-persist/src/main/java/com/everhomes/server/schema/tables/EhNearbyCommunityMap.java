@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhNearbyCommunityMap extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhNearbyCommunityMapRecord> {
 
-	private static final long serialVersionUID = 1143153701;
+	private static final long serialVersionUID = -956536836;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_nearby_community_map</code>
@@ -40,6 +40,11 @@ public class EhNearbyCommunityMap extends org.jooq.impl.TableImpl<com.everhomes.
 	 * The column <code>ehcore.eh_nearby_community_map.nearby_community_id</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNearbyCommunityMapRecord, java.lang.Long> NEARBY_COMMUNITY_ID = createField("nearby_community_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_nearby_community_map.namespace_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNearbyCommunityMapRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_nearby_community_map</code> table reference

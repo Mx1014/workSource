@@ -1109,13 +1109,20 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
 	}
 
 	@Override
-	public List<EnterpriseContact> queryContactByEnterpriseId(Long enterpriseId) {
+	public List<EnterpriseContact> queryContactByEnterpriseId(Long enterpriseId, String keyword) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class, enterpriseId));
 		 
         SelectQuery<EhEnterpriseContactsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CONTACTS);
 
         query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.ENTERPRISE_ID.eq(enterpriseId));
         query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.USER_ID.ne(0L));
+        
+        if(keyword != null) {
+        	Condition con = Tables.EH_ENTERPRISE_CONTACTS.NAME.like(keyword + "%");
+        	con = con.or(Tables.EH_ENTERPRISE_CONTACTS.STRING_TAG1.like(keyword + "%"));
+        	
+        	query.addConditions(con);
+        }
         
         query.addOrderBy(Tables.EH_ENTERPRISE_CONTACTS.USER_ID);
         
