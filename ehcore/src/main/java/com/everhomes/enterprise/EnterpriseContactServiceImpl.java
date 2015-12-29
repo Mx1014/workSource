@@ -1070,10 +1070,12 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 
 	@Override
 	public void approveContact(ApproveContactCommand cmd) {
+//		EnterpriseContact contact = this.enterpriseContactProvider
+//			.queryContactById(cmd.getContactId());
 
-		EnterpriseContact contact = this.enterpriseContactProvider
-			.queryContactById(cmd.getContactId());
-	
+        User operator = UserContext.current().getUser();
+        Long operatorUid = operator.getId();
+        EnterpriseContact contact = checkEnterpriseContactParameter(cmd.getEnterpriseId(), cmd.getUserId(), operatorUid, "rejectContact");
 	 
 		// 添加menber表 
 		this.approveContact(contact);

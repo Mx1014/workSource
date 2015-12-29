@@ -1,16 +1,31 @@
 package com.everhomes.enterprise;
 
-import javax.validation.constraints.NotNull;
+import com.everhomes.util.StringHelper;
 
 public class ApproveContactCommand {
-    @NotNull
-    Long contactId;
+    private Long enterpriseId;
+    
+    private Long userId;
 
-    public Long getContactId() {
-        return contactId;
+    public Long getEnterpriseId() {
+        return enterpriseId;
     }
 
-    public void setContactId(Long contactId) {
-        this.contactId = contactId;
+    public void setEnterpriseId(Long enterpriseId) {
+        this.enterpriseId = enterpriseId;
     }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+
 }
