@@ -1,5 +1,8 @@
 package com.everhomes.videoconf;
 
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -24,7 +27,8 @@ public class CreateVideoConfInvitationCommand {
 	
 	private Byte channel;
 	
-	private String[] invitee;
+	@ItemType(String.class)
+	private List<String> invitee;
 
 	public String getConfName() {
 		return confName;
@@ -66,15 +70,15 @@ public class CreateVideoConfInvitationCommand {
 		this.channel = channel;
 	}
 
-	public String[] getInvitee() {
-		return invitee;
-	}
+	public List<String> getInvitee() {
+        return invitee;
+    }
 
-	public void setInvitee(String[] invitee) {
-		this.invitee = invitee;
-	}
+    public void setInvitee(List<String> invitee) {
+        this.invitee = invitee;
+    }
 
-	@Override
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

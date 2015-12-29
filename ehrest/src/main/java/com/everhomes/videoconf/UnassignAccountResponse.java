@@ -3,6 +3,7 @@ package com.everhomes.videoconf;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -15,7 +16,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class UnassignAccountResponse {
-	
+	@ItemType(Long.class)
 	private List<Long> accountIds;
 	
 	private Integer accountsCount;
