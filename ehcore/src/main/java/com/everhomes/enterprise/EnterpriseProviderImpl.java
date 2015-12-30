@@ -273,7 +273,7 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
         	 contacts.add(ConvertHelper.convert(r, EnterpriseCommunityMap.class));
              return null;
         });
-        
+        locator.setAnchor(null);
         if(contacts.size() >= count) {
         	contacts.remove(contacts.size() - 1);
             locator.setAnchor(contacts.get(contacts.size() - 1).getMemberId());
