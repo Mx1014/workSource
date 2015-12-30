@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,28 +38,36 @@ public class NamespaceResourceServiceImpl implements NamespaceResourceService {
 	    
 	    // TODO: 暂时先不分页查，后面再补
 	    int namespaceId = (cmd.getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
-	    List<NamespaceResource> result = namespaceResourceProvider.listResourceByNamespace(namespaceId, NamespaceResourceType.COMMUNITY);
-	    
+//	    List<NamespaceResource> result = namespaceResourceProvider.listResourceByNamespace(namespaceId, NamespaceResourceType.COMMUNITY);
+//	    
+//	    List<CommunityDTO> communityList = new ArrayList<CommunityDTO>();
+//        if(result != null && result.size() > 0){
+//            CommunityDTO dto = null;
+//            for (NamespaceResource resource : result) {
+//                NamespaceResourceType type = NamespaceResourceType.fromCode(resource.getResourceType());
+//                if(type == NamespaceResourceType.COMMUNITY) {
+//                    Community community = communityProvider.findCommunityById(resource.getResourceId());
+//                    if(community != null) {
+//                        dto = ConvertHelper.convert(community, CommunityDTO.class);
+//                        communityList.add(dto);
+//                    } else {
+//                        LOGGER.error("Community not found, namespaceId=" + resource.getNamespaceId() 
+//                            + ", communityId=" + resource.getResourceId() + ", cmd=" + cmd);
+//                    }
+//                } else {
+//                    LOGGER.error("Unsupported namespace resource type, namespaceId=" + resource.getNamespaceId() 
+//                        + ", type=" + type + ", communityId=" + resource.getResourceId() + ", cmd=" + cmd);
+//                }
+//            }
+//        }
 	    List<CommunityDTO> communityList = new ArrayList<CommunityDTO>();
-        if(result != null && result.size() > 0){
-            CommunityDTO dto = null;
-            for (NamespaceResource resource : result) {
-                NamespaceResourceType type = NamespaceResourceType.fromCode(resource.getResourceType());
-                if(type == NamespaceResourceType.COMMUNITY) {
-                    Community community = communityProvider.findCommunityById(resource.getResourceId());
-                    if(community != null) {
-                        dto = ConvertHelper.convert(community, CommunityDTO.class);
-                        communityList.add(dto);
-                    } else {
-                        LOGGER.error("Community not found, namespaceId=" + resource.getNamespaceId() 
-                            + ", communityId=" + resource.getResourceId() + ", cmd=" + cmd);
-                    }
-                } else {
-                    LOGGER.error("Unsupported namespace resource type, namespaceId=" + resource.getNamespaceId() 
-                        + ", type=" + type + ", communityId=" + resource.getResourceId() + ", cmd=" + cmd);
-                }
-            }
-        }
+	    List<Community> communities = communityProvider.listAllCommunities(0L, Integer.MAX_VALUE);
+	    if(communities != null && communities.size() > 0) {
+	    	communityList = communities.stream().map(r -> {
+	    		CommunityDTO dto = ConvertHelper.convert(r, CommunityDTO.class);
+	    		return dto;
+	    	}).collect(Collectors.toList());
+	    }
         response.setCommunities(communityList);
         
         return response;

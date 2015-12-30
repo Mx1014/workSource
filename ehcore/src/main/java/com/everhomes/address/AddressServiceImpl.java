@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.DSLContext;
@@ -56,6 +57,7 @@ import com.everhomes.family.LeaveFamilyCommand;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupMemberStatus;
 import com.everhomes.group.GroupProvider;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.openapi.UserServiceAddressDTO;
 import com.everhomes.organization.pm.CommunityPmContact;
 import com.everhomes.organization.pm.PropertyMgrProvider;
@@ -238,6 +240,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     
     @Override
     public Tuple<Integer, List<CommunityDTO>> listNearbyCommunities(ListNearbyCommunityCommand cmd) {
+    	int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
         final List<CommunityDTO> results = new ArrayList<>();
 
         if(cmd.getCityId() == null && cmd.getLatigtue() == null && cmd.getLongitude() == null)
@@ -258,6 +261,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             
             context.select().from(Tables.EH_COMMUNITIES)
                 .where(Tables.EH_COMMUNITIES.ID.in(communityIds))
+                .and(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId))
                 .fetch().map((r) -> {
                 CommunityDTO community = ConvertHelper.convert(r, CommunityDTO.class);
                 results.add(community);
@@ -286,6 +290,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
      */
     @Override
     public Tuple<Integer, List<CommunityDTO>> listCommunitiesByKeyword(ListCommunityByKeywordCommand cmd) {
+    	int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
         //
         // TODO, should be integrating with keyword search server
         //
@@ -306,6 +311,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                     Long count = context.selectCount().from(Tables.EH_COMMUNITIES)
                             .where(Tables.EH_COMMUNITIES.NAME.like(cmd.getKeyword() + "%"))
                             .or(Tables.EH_COMMUNITIES.ALIAS_NAME.like(cmd.getKeyword() + "%"))
+                            .and(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId))
                             .fetchOne(0, Long.class);
                     
                     countsInShards.add(count);
@@ -336,6 +342,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                 context.select().from(Tables.EH_COMMUNITIES)
                     .where(Tables.EH_COMMUNITIES.NAME.like(cmd.getKeyword() + "%"))
                     .or(Tables.EH_COMMUNITIES.ALIAS_NAME.like(cmd.getKeyword() + "%"))
+                    .and(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId))
                     .limit((int)pageSize).offset((int)off)
                     .fetch().map((r) -> {
                         CommunityDTO community = ConvertHelper.convert(r, CommunityDTO.class);
@@ -365,6 +372,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             cmd.setKeyword("");;
         List<BuildingDTO> results = new ArrayList<BuildingDTO>();
         long startTime = System.currentTimeMillis();
+        int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
                 (DSLContext context, Object reducingContext)-> {
                     
@@ -372,6 +380,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                     context.selectDistinct(Tables.EH_ADDRESSES.BUILDING_NAME, Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME)
                         .from(Tables.EH_ADDRESSES)
                         .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId())
+                        .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
                         .and(Tables.EH_ADDRESSES.BUILDING_NAME.like(likeVal)
                                 .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.like(likeVal))))
                          .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()))
@@ -400,11 +409,13 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         List<ApartmentDTO> results = new ArrayList<>();
         String likeVal = "%" + cmd.getKeyword() + "%";
         long startTime = System.currentTimeMillis();
+        int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
                 (DSLContext context, Object reducingContext)-> {
                     context.selectDistinct(Tables.EH_ADDRESSES.ID,Tables.EH_ADDRESSES.APARTMENT_NAME,Tables.EH_ADDRESSES.AREA_SIZE)
                         .from(Tables.EH_ADDRESSES)
                         .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId())
+                        .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
                         .and(Tables.EH_ADDRESSES.BUILDING_NAME.equal(cmd.getBuildingName())
                                 .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.equal(cmd.getBuildingName()))))
                         .and(Tables.EH_ADDRESSES.APARTMENT_NAME.like(likeVal))
@@ -438,6 +449,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         long offset = PaginationHelper.offsetFromPageOffset(pageOffset, pageSize);
         Tuple<Integer, Long> targetShard = new Tuple<>(0, offset);
         String likeVal = "%" + cmd.getKeyword() + "%";
+        int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
         if(offset > 0) {
             final List<Long> countsInShards = new ArrayList<>();
             this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
@@ -445,6 +457,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                         
                     Long count = context.selectCount().from(Tables.EH_ADDRESSES)
                             .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId()))
+                            .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
                             .and(Tables.EH_ADDRESSES.APARTMENT_NAME.like(likeVal))
                             .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()))
                             .fetchOne(0, Long.class);
@@ -479,6 +492,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                     context.select().from(Tables.EH_ADDRESSES)
                     .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId()))
                     .and(Tables.EH_ADDRESSES.APARTMENT_NAME.like(likeVal))
+                    .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
                     .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()))
                     .limit((int)pageSize).offset((int)off)
                     .fetch().map((r) -> {
@@ -675,12 +689,13 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         final long pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size", 
                 AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
         long offset = PaginationHelper.offsetFromPageOffset(cmd.getPageOffset(), pageSize);
-        
+        int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
             (DSLContext context, Object reducingContext)-> {
                 
                 context.select().from(Tables.EH_ADDRESSES)
                     .where(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(cmd.getCommunityId()))
+                    .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
                     .limit((int)pageSize).offset((int)offset)
                     .fetch().map((r) -> {
                         results.add(ConvertHelper.convert(r, Address.class)); 
