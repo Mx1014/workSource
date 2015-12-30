@@ -1,15 +1,47 @@
 package com.everhomes.enterprise;
 
-import javax.validation.constraints.NotNull;
+import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>enterpriseId：企业id</li>
+ * <li>userId: 被拒绝加入企业通讯录的用户ID</li>
+ * <li>rejectText: 拒绝用户时填写的说明文本</li>
+ * </ul>
+ */
 public class RejectContactCommand {
-    Long contactId;
+    private Long enterpriseId;
+    
+    private Long userId;
+    
+    private String rejectText;
 
-    public Long getContactId() {
-        return contactId;
+    public Long getEnterpriseId() {
+        return enterpriseId;
     }
 
-    public void setContactId(Long contactId) {
-        this.contactId = contactId;
+    public void setEnterpriseId(Long enterpriseId) {
+        this.enterpriseId = enterpriseId;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public String getRejectText() {
+        return rejectText;
+    }
+
+    public void setRejectText(String rejectText) {
+        this.rejectText = rejectText;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

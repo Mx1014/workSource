@@ -156,7 +156,12 @@ public class VideoConfServiceImpl implements VideoConfService {
             String confTime = getConfTime(cmd.getConfTime(), cmd.getDuration());
             String text = msgSubject + confLink + confTime;
 			try {
-				smsProvider.sendSms(cmd.getInvitee(), text, null);
+			    List<String> inviteeList = cmd.getInvitee();
+			    if(inviteeList != null && inviteeList.size() > 0) {
+			        for(String invitee : inviteeList) {
+			            smsProvider.sendSms(invitee, text, null);
+			        }
+			    }
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
