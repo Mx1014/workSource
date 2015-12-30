@@ -83,3 +83,9 @@ INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'renta
 
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'group.notification', 33, 'zh_CN', '兴趣圈分享', '兴趣圈“${groupName}”推荐');
 INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, 'sms.vcodetest.flag','true','是否可以发送测试验证码短信');
+
+ALTER TABLE `eh_regions` ADD COLUMN `namespace_id` int(11) NOT NULL DEFAULT '0';
+ALTER TABLE `eh_nearby_community_map` ADD COLUMN `namespace_id` int(11) NOT NULL DEFAULT '0';
+ALTER TABLE `eh_communities` ADD COLUMN `namespace_id` int(11) NOT NULL DEFAULT '0';
+ALTER TABLE `eh_buildings` ADD COLUMN `namespace_id` int(11) NOT NULL DEFAULT '0';
+ALTER TABLE `eh_addresses` ADD COLUMN `namespace_id` int(11) NOT NULL DEFAULT '0';
