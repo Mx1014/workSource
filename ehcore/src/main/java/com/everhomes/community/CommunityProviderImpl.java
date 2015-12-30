@@ -446,7 +446,7 @@ public class CommunityProviderImpl implements CommunityProvider {
     @Override
     public List<Community> listAllCommunities(long pageOffset, long pageSize) {
             
-    	int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+ //   	int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
         final List<Community> results = new ArrayList<>();
         
         long offset = PaginationHelper.offsetFromPageOffset(pageOffset, pageSize);
@@ -458,7 +458,7 @@ public class CommunityProviderImpl implements CommunityProvider {
                         
                     Long count = context.selectCount().from(Tables.EH_COMMUNITIES)
                             .where(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()))
-                            .and(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId))
+//                            .and(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId))
                             .fetchOne(0, Long.class);
                     
                     countsInShards.add(count);
@@ -488,7 +488,7 @@ public class CommunityProviderImpl implements CommunityProvider {
                 
                 context.select().from(Tables.EH_COMMUNITIES)
                     .where(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()))
-                    .and(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId))
+//                    .and(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId))
                     .limit((int)pageSize).offset((int)off)
                     .fetch().map((r) -> {
                         Community community = ConvertHelper.convert(r, Community.class);
