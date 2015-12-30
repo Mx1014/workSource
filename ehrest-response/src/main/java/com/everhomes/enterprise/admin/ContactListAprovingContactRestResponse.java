@@ -4,7 +4,7 @@ package com.everhomes.enterprise.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.enterprise.ListEnterpriseContactResponse;
+import com.everhomes.rest.enterprise.ListEnterpriseContactResponse;
 
 public class ContactListAprovingContactRestResponse extends RestResponseBase {
 

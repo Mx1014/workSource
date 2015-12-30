@@ -8,7 +8,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import com.everhomes.junit.CoreServerTestCase;
+import com.everhomes.rest.region.RegionAdminStatus;
+import com.everhomes.rest.region.RegionScope;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
 

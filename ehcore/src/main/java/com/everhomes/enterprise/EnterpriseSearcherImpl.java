@@ -24,10 +24,11 @@ import org.springframework.stereotype.Service;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.rest.enterprise.SearchEnterpriseCommand;
+import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.EnterpriseSearcher;
 import com.everhomes.search.GroupQueryFilter;
-import com.everhomes.search.GroupQueryResult;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
 

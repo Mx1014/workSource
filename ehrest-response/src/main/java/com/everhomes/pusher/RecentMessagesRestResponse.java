@@ -4,7 +4,7 @@ package com.everhomes.pusher;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.messaging.DeviceMessages;
+import com.everhomes.rest.messaging.DeviceMessages;
 
 public class RecentMessagesRestResponse extends RestResponseBase {
 

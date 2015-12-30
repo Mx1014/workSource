@@ -1,0 +1,44 @@
+// @formatter:off
+package com.everhomes.rest.organization;
+
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
+
+/**
+ * <ul>
+ * <li>nextPageOffset：下一页的页码（如果没有则为空）</li>
+ * <li>members：机构成员信息，参考{@link com.everhomes.rest.organization.OrganizationContactDTO}</li>
+ * </ul>
+ */
+public class ListOrganizationContactCommandResponse {
+	
+	private Integer nextPageOffset;
+	
+	@ItemType(OrganizationContactDTO.class)
+    private List<OrganizationContactDTO> members;
+	public ListOrganizationContactCommandResponse() {
+    }
+	
+	public Integer getNextPageOffset() {
+		return nextPageOffset;
+	}
+
+	public void setNextPageOffset(Integer nextPageOffset) {
+		this.nextPageOffset = nextPageOffset;
+	}
+
+	public List<OrganizationContactDTO> getMembers() {
+		return members;
+	}
+
+	public void setMembers(List<OrganizationContactDTO> members) {
+		this.members = members;
+	}
+
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}

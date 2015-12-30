@@ -4,7 +4,7 @@ package com.everhomes.videoconf;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.videoconf.ListConfOrderAccountResponse;
+import com.everhomes.rest.videoconf.ListConfOrderAccountResponse;
 
 public class ListVideoConfAccountByOrderIdRestResponse extends RestResponseBase {
 

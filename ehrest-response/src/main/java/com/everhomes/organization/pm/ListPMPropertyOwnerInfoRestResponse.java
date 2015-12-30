@@ -4,7 +4,7 @@ package com.everhomes.organization.pm;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.organization.pm.ListPropOwnerCommandResponse;
+import com.everhomes.rest.organization.pm.ListPropOwnerCommandResponse;
 
 public class ListPMPropertyOwnerInfoRestResponse extends RestResponseBase {
 

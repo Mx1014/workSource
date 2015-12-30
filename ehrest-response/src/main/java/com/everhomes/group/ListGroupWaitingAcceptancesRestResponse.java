@@ -5,7 +5,7 @@ package com.everhomes.group;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.group.GroupMemberDTO;
+import com.everhomes.rest.group.GroupMemberDTO;
 
 public class ListGroupWaitingAcceptancesRestResponse extends RestResponseBase {
 

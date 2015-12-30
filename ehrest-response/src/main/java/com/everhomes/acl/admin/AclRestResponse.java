@@ -2,9 +2,8 @@
 // generated at 2015-12-04 14:52:02
 package com.everhomes.acl.admin;
 
+import com.everhomes.rest.acl.admin.ListUserRolesAdminCommandResponse;
 import com.everhomes.rest.RestResponseBase;
-
-import com.everhomes.acl.admin.ListUserRolesAdminCommandResponse;
 
 public class AclRestResponse extends RestResponseBase {
 

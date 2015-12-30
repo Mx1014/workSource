@@ -2,9 +2,8 @@
 // generated at 2015-12-04 14:52:02
 package com.everhomes.launchpad.admin;
 
+import com.everhomes.rest.launchpad.LaunchPadLayoutDTO;
 import com.everhomes.rest.RestResponseBase;
-
-import com.everhomes.launchpad.LaunchPadLayoutDTO;
 
 public class LaunchpadRestResponse extends RestResponseBase {
 

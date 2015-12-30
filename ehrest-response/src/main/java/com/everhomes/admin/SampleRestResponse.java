@@ -5,7 +5,7 @@ package com.everhomes.admin;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.admin.SampleObject;
+import com.everhomes.rest.admin.SampleObject;
 
 public class SampleRestResponse extends RestResponseBase {
 

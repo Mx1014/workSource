@@ -4,7 +4,7 @@ package com.everhomes.organization.pm;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.organization.pm.OrganizationOrderDTO;
+import com.everhomes.rest.organization.pm.OrganizationOrderDTO;
 
 public class CreatePmBillOrderRestResponse extends RestResponseBase {
 

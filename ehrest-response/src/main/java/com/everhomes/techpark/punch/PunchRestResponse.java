@@ -3,8 +3,7 @@
 package com.everhomes.techpark.punch;
 
 import com.everhomes.rest.RestResponseBase;
-
-import com.everhomes.techpark.punch.ListYearPunchLogsCommandResponse;
+import com.everhomes.rest.techpark.punch.ListYearPunchLogsCommandResponse;
 
 public class PunchRestResponse extends RestResponseBase {
 

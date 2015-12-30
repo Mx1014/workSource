@@ -5,7 +5,7 @@ package com.everhomes.organization.pm;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.organization.pm.PropFamilyDTO;
+import com.everhomes.rest.organization.pm.PropFamilyDTO;
 
 public class ListPropApartmentsByKeywordRestResponse extends RestResponseBase {
 

@@ -10,8 +10,8 @@ import com.everhomes.acl.ResourceUserRoleResolver;
 import com.everhomes.acl.Role;
 import com.everhomes.entity.EntityType;
 import com.everhomes.group.GroupMember;
-import com.everhomes.group.GroupMemberStatus;
 import com.everhomes.group.GroupProvider;
+import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
 

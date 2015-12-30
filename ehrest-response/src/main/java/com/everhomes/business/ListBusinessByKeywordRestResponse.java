@@ -4,7 +4,7 @@ package com.everhomes.business;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.business.ListBusinessByKeywordCommandResponse;
+import com.everhomes.rest.business.ListBusinessByKeywordCommandResponse;
 
 public class ListBusinessByKeywordRestResponse extends RestResponseBase {
 

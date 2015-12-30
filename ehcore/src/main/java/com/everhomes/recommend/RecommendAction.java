@@ -13,10 +13,11 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
-import com.everhomes.family.FamilyMemberDTO;
 import com.everhomes.family.FamilyService;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.family.FamilyMemberDTO;
+import com.everhomes.rest.recommend.RecommendTargetType;
 import com.everhomes.search.SearchSyncAction;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.util.ConvertHelper;

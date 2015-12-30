@@ -4,7 +4,7 @@ package com.everhomes.user;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.user.InvitationCommandResponse;
+import com.everhomes.rest.user.InvitationCommandResponse;
 
 public class ListRecipientRestResponse extends RestResponseBase {
 

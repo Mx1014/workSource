@@ -5,7 +5,7 @@ package com.everhomes.family;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.family.NeighborUserDTO;
+import com.everhomes.rest.family.NeighborUserDTO;
 
 public class ListNearbyNeighborUsersRestResponse extends RestResponseBase {
 

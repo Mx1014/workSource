@@ -20,6 +20,10 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.banner.BannerDTO;
+import com.everhomes.rest.banner.CreateBannerClickCommand;
+import com.everhomes.rest.banner.GetBannerByIdCommand;
+import com.everhomes.rest.banner.GetBannersCommand;
 import com.everhomes.util.EtagHelper;
 
 @RestDoc(value="Banner controller", site="core")

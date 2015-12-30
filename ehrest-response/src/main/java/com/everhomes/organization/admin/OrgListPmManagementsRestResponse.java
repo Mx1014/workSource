@@ -4,7 +4,7 @@ package com.everhomes.organization.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.organization.pm.PmManagementsResponse;
+import com.everhomes.rest.organization.pm.PmManagementsResponse;
 
 public class OrgListPmManagementsRestResponse extends RestResponseBase {
 

@@ -4,7 +4,7 @@ package com.everhomes.poll;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.poll.PollDTO;
+import com.everhomes.rest.poll.PollDTO;
 
 public class VoteRestResponse extends RestResponseBase {
 

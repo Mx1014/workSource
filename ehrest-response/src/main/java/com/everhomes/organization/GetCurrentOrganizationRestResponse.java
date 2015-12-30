@@ -4,7 +4,7 @@ package com.everhomes.organization;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationDTO;
 
 public class GetCurrentOrganizationRestResponse extends RestResponseBase {
 

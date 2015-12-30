@@ -4,7 +4,7 @@ package com.everhomes.activity;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.activity.ListActivitiesReponse;
+import com.everhomes.rest.activity.ListActivitiesReponse;
 
 public class ListRestResponse extends RestResponseBase {
 

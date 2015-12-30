@@ -4,7 +4,7 @@ package com.everhomes.version;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.version.VersionUrlResponse;
+import com.everhomes.rest.version.VersionUrlResponse;
 
 public class GetVersionUrlsWithoutCurrentVersionRestResponse extends RestResponseBase {
 

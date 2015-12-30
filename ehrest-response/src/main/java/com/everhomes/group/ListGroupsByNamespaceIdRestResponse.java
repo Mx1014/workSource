@@ -4,7 +4,7 @@ package com.everhomes.group;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.group.ListGroupCommandResponse;
+import com.everhomes.rest.group.ListGroupCommandResponse;
 
 public class ListGroupsByNamespaceIdRestResponse extends RestResponseBase {
 

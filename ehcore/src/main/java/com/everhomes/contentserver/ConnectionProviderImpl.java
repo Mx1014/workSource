@@ -30,7 +30,9 @@ import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import com.everhomes.bus.LocalBusOneshotSubscriber;
 import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
 import com.everhomes.contentserver.ConfigResponse;
-import com.everhomes.rpc.PduFrame;
+import com.everhomes.rest.contentserver.ContentServerErrorCode;
+import com.everhomes.rest.contentserver.WebSocketConstant;
+import com.everhomes.rest.rpc.PduFrame;
 import com.everhomes.util.RuntimeErrorException;
 
 @Component

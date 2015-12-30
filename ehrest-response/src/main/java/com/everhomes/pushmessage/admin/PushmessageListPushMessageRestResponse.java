@@ -4,7 +4,7 @@ package com.everhomes.pushmessage.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.pushmessage.ListPushMessageResponse;
+import com.everhomes.rest.pushmessage.ListPushMessageResponse;
 
 public class PushmessageListPushMessageRestResponse extends RestResponseBase {
 

@@ -5,7 +5,7 @@ package com.everhomes.user;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.forum.PostDTO;
+import com.everhomes.rest.forum.PostDTO;
 
 public class ListTopicFavoriteRestResponse extends RestResponseBase {
 

@@ -4,7 +4,7 @@ package com.everhomes.realestate;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.forum.PostDTO;
+import com.everhomes.rest.forum.PostDTO;
 
 public class PostRestResponse extends RestResponseBase {
 

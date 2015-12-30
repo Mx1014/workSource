@@ -4,7 +4,7 @@ package com.everhomes.banner;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.banner.BannerDTO;
+import com.everhomes.rest.banner.BannerDTO;
 
 public class GetBannerByIdCommandRestResponse extends RestResponseBase {
 

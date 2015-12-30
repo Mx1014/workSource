@@ -1,0 +1,240 @@
+// @formatter:off
+package com.everhomes.rest.launchpad.admin;
+
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
+import com.everhomes.util.StringHelper;
+
+/**
+ * <ul>
+ * <li>id: id</li>
+ * <li>namespaceId: 命名空间</li>
+ * <li>appId: 应用Id</li>
+ * <li>scopeType: item可见范围类型 参考{@link com.everhomes.launchpad.LaunchPadScopeType}</li>
+ * <li>scopeId: 看见范围具体Id，全国为0,城市或小区Id</li>
+ * <li>itemLocation: item 的路径</li>
+ * <li>itemGroup: 当前item归属的组，参考{@link com.everhomes.rest.launchpad.ItemGroup}</li>
+ * <li>itemName: 名称</li>
+ * <li>itemLabel: 显示标签</li>
+ * <li>iconUri: 图标uri</li>
+ * <li>iconUrl: 图标url</li>
+ * <li>itemWidth: 图标的宽</li>
+ * <li>itemHeight: 图标的高</li>
+ * <li>actionType: 动作类型，参考{@link com.everhomes.rest.launchpad.ActionType}</li>
+ * <li>actionData: 动作所需要的参数，由actionType决定</li>
+ * <li>defaultOrder: 默认顺序</li>
+ * <li>applyPolicy: 应用策略{@link com.everhomes.rest.launchpad.ApplyPolicy}</li>
+ * <li>minVersion: item 最小版本号</li>
+ * <li>displayFlag: 是否显示{@link com.everhomes.rest.launchpad.ItemDisplayFlag}</li>
+ * <li>displayLayout: 图标尺寸 格式：1x2</li>
+ * <li>bgcolor: item的背景颜色</li>
+ * </ul>
+ */
+public class LaunchPadItemAdminDTO {
+    private Long id;
+    private Integer namespaceId;
+    private Long    appId;
+    private String  scopeType;
+    private Long    scopeId;
+    private String  itemLocation;
+    private String  itemGroup;
+    private String  itemName;
+    private String  itemLabel;
+    private String  iconUri;
+    private String  iconUrl;
+    private Integer itemWidth;
+    private Integer itemHeight;
+    private Byte    actionType;
+    private String  actionData;
+    private Integer defaultOrder;
+    private Byte    applyPolicy;
+    private Long    minVersion;
+    private Byte    displayFlag;
+    private String  displayLayout;
+    private Integer    bgcolor;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
+    }
+
+    public String getScopeType() {
+        return scopeType;
+    }
+
+    public void setScopeType(String scopeType) {
+        this.scopeType = scopeType;
+    }
+
+    public Long getScopeId() {
+        return scopeId;
+    }
+
+    public void setScopeId(Long scopeId) {
+        this.scopeId = scopeId;
+    }
+
+    public String getItemLocation() {
+        return itemLocation;
+    }
+
+    public void setItemLocation(String itemLocation) {
+        this.itemLocation = itemLocation;
+    }
+
+    public String getItemGroup() {
+        return itemGroup;
+    }
+
+    public void setItemGroup(String itemGroup) {
+        this.itemGroup = itemGroup;
+    }
+
+    public String getItemName() {
+        return itemName;
+    }
+
+    public void setItemName(String itemName) {
+        this.itemName = itemName;
+    }
+
+    public String getItemLabel() {
+        return itemLabel;
+    }
+
+    public void setItemLabel(String itemLabel) {
+        this.itemLabel = itemLabel;
+    }
+
+    public String getIconUri() {
+        return iconUri;
+    }
+
+    public void setIconUri(String iconUri) {
+        this.iconUri = iconUri;
+    }
+
+    public String getIconUrl() {
+        return iconUrl;
+    }
+
+    public void setIconUrl(String iconUrl) {
+        this.iconUrl = iconUrl;
+    }
+
+    public Integer getItemWidth() {
+        return itemWidth;
+    }
+
+    public void setItemWidth(Integer itemWidth) {
+        this.itemWidth = itemWidth;
+    }
+
+    public Integer getItemHeight() {
+        return itemHeight;
+    }
+
+    public void setItemHeight(Integer itemHeight) {
+        this.itemHeight = itemHeight;
+    }
+
+    public Byte getActionType() {
+        return actionType;
+    }
+
+    public void setActionType(Byte actionType) {
+        this.actionType = actionType;
+    }
+
+    public String getActionData() {
+        return actionData;
+    }
+
+    public void setActionData(String actionData) {
+        this.actionData = actionData;
+    }
+
+    public Integer getDefaultOrder() {
+        return defaultOrder;
+    }
+
+    public void setDefaultOrder(Integer defaultOrder) {
+        this.defaultOrder = defaultOrder;
+    }
+
+    public Byte getApplyPolicy() {
+        return applyPolicy;
+    }
+
+    public void setApplyPolicy(Byte applyPolicy) {
+        this.applyPolicy = applyPolicy;
+    }
+
+    public Long getMinVersion() {
+        return minVersion;
+    }
+
+    public void setMinVersion(Long minVersion) {
+        this.minVersion = minVersion;
+    }
+
+    public Byte getDisplayFlag() {
+        return displayFlag;
+    }
+
+    public void setDisplayFlag(Byte displayFlag) {
+        this.displayFlag = displayFlag;
+    }
+
+    public String getDisplayLayout() {
+        return displayLayout;
+    }
+
+    public void setDisplayLayout(String displayLayout) {
+        this.displayLayout = displayLayout;
+    }
+
+    public Integer getBgcolor() {
+        return bgcolor;
+    }
+
+    public void setBgcolor(Integer bgcolor) {
+        this.bgcolor = bgcolor;
+    }
+
+    @Override
+    public int hashCode() {
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return EqualsBuilder.reflectionEquals(this, obj);
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+
+}

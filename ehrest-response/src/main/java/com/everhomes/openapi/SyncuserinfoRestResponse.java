@@ -4,7 +4,7 @@ package com.everhomes.openapi;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.openapi.SyncUserResponse;
+import com.everhomes.rest.openapi.SyncUserResponse;
 
 public class SyncuserinfoRestResponse extends RestResponseBase {
 

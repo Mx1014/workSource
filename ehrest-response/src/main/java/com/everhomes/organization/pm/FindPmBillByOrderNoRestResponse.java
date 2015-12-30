@@ -4,7 +4,7 @@ package com.everhomes.organization.pm;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.organization.pm.PmBillForOrderNoDTO;
+import com.everhomes.rest.organization.pm.PmBillForOrderNoDTO;
 
 public class FindPmBillByOrderNoRestResponse extends RestResponseBase {
 

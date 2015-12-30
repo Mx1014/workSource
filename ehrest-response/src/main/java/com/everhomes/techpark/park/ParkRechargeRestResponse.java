@@ -4,7 +4,7 @@ package com.everhomes.techpark.park;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.techpark.park.RechargeOrderDTO;
+import com.everhomes.rest.techpark.park.RechargeOrderDTO;
 
 public class ParkRechargeRestResponse extends RestResponseBase {
 

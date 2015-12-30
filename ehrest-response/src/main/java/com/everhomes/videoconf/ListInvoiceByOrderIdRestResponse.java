@@ -4,7 +4,7 @@ package com.everhomes.videoconf;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.videoconf.InvoiceDTO;
+import com.everhomes.rest.videoconf.InvoiceDTO;
 
 public class ListInvoiceByOrderIdRestResponse extends RestResponseBase {
 

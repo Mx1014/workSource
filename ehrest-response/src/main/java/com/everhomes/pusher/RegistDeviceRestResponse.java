@@ -4,7 +4,7 @@ package com.everhomes.pusher;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.device.DeviceDTO;
+import com.everhomes.rest.device.DeviceDTO;
 
 public class RegistDeviceRestResponse extends RestResponseBase {
 

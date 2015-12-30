@@ -4,7 +4,7 @@ package com.everhomes.group;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.group.ListMemberCommandResponse;
+import com.everhomes.rest.group.ListMemberCommandResponse;
 
 public class ListMembersInStatusRestResponse extends RestResponseBase {
 

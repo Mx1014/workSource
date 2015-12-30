@@ -4,7 +4,7 @@ package com.everhomes.launchpad.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.launchpad.admin.GetLaunchPadItemsByKeywordAdminCommandResponse;
+import com.everhomes.rest.launchpad.admin.GetLaunchPadItemsByKeywordAdminCommandResponse;
 
 public class LaunchpadGetLaunchPadItemsByKeywordRestResponse extends RestResponseBase {
 

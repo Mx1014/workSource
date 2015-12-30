@@ -3,8 +3,7 @@
 package com.everhomes.techpark.onlinePay;
 
 import com.everhomes.rest.RestResponseBase;
-
-import com.everhomes.techpark.park.RechargeInfoDTO;
+import com.everhomes.rest.techpark.park.RechargeInfoDTO;
 
 public class OnlinePayRestResponse extends RestResponseBase {
 

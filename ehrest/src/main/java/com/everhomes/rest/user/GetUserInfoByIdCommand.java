@@ -1,0 +1,15 @@
+package com.everhomes.rest.user;
+
+public class GetUserInfoByIdCommand {
+	private Long id;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+	
+
+}

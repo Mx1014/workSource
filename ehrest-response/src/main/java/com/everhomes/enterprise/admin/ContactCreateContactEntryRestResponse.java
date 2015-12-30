@@ -4,7 +4,7 @@ package com.everhomes.enterprise.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.enterprise.EnterpriseContactEntryDTO;
+import com.everhomes.rest.enterprise.EnterpriseContactEntryDTO;
 
 public class ContactCreateContactEntryRestResponse extends RestResponseBase {
 

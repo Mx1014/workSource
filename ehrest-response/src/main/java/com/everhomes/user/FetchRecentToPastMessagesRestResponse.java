@@ -4,7 +4,7 @@ package com.everhomes.user;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.user.FetchMessageCommandResponse;
+import com.everhomes.rest.user.FetchMessageCommandResponse;
 
 public class FetchRecentToPastMessagesRestResponse extends RestResponseBase {
 

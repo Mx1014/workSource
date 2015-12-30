@@ -5,7 +5,7 @@ package com.everhomes.admin;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.border.BorderDTO;
+import com.everhomes.rest.border.BorderDTO;
 
 public class ListBorderRestResponse extends RestResponseBase {
 

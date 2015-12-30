@@ -4,7 +4,7 @@ package com.everhomes.group;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.group.ListAdminOpRequestCommandResponse;
+import com.everhomes.rest.group.ListAdminOpRequestCommandResponse;
 
 public class ListAdminOpRequestsRestResponse extends RestResponseBase {
 

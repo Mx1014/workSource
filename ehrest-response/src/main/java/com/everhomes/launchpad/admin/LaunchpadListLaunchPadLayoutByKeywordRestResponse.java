@@ -4,7 +4,7 @@ package com.everhomes.launchpad.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.launchpad.LaunchPadLayoutDTO;
+import com.everhomes.rest.launchpad.LaunchPadLayoutDTO;
 
 public class LaunchpadListLaunchPadLayoutByKeywordRestResponse extends RestResponseBase {
 

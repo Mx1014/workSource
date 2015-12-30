@@ -4,7 +4,7 @@ package com.everhomes.qrcode;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.qrcode.QRCodeDTO;
+import com.everhomes.rest.qrcode.QRCodeDTO;
 
 public class NewQRCodeRestResponse extends RestResponseBase {
 

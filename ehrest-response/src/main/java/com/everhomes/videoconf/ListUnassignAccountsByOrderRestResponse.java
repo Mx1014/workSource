@@ -4,7 +4,7 @@ package com.everhomes.videoconf;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.videoconf.UnassignAccountResponse;
+import com.everhomes.rest.videoconf.UnassignAccountResponse;
 
 public class ListUnassignAccountsByOrderRestResponse extends RestResponseBase {
 

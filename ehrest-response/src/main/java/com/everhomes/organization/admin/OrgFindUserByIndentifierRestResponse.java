@@ -4,7 +4,7 @@ package com.everhomes.organization.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.user.UserTokenCommandResponse;
+import com.everhomes.rest.user.UserTokenCommandResponse;
 
 public class OrgFindUserByIndentifierRestResponse extends RestResponseBase {
 

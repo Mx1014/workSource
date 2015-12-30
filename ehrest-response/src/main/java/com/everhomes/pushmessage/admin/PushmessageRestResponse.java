@@ -2,9 +2,8 @@
 // generated at 2015-12-04 14:52:02
 package com.everhomes.pushmessage.admin;
 
+import com.everhomes.rest.pushmessage.ListPushMessageResultResponse;
 import com.everhomes.rest.RestResponseBase;
-
-import com.everhomes.pushmessage.ListPushMessageResultResponse;
 
 public class PushmessageRestResponse extends RestResponseBase {
 

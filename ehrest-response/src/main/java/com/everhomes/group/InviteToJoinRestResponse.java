@@ -5,7 +5,7 @@ package com.everhomes.group;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.group.CommandResult;
+import com.everhomes.rest.group.CommandResult;
 
 public class InviteToJoinRestResponse extends RestResponseBase {
 

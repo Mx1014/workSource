@@ -4,7 +4,7 @@ package com.everhomes.family.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.family.ListAllFamilyMembersCommandResponse;
+import com.everhomes.rest.family.ListAllFamilyMembersCommandResponse;
 
 public class FamilyListAllFamilyMembersRestResponse extends RestResponseBase {
 

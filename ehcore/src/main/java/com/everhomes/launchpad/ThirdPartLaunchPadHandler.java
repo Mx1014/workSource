@@ -7,10 +7,11 @@ import org.json.simple.JSONValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.app.AppConstants;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.launchpad.ActionType;
 
 
 @Component(LaunchPadHandler.LAUNCH_PAD_ITEM_RESOLVER_PREFIX + AppConstants.APPID_THIRD_PART)

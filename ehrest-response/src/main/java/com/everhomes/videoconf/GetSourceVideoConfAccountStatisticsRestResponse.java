@@ -5,7 +5,7 @@ package com.everhomes.videoconf;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.videoconf.SourceVideoConfAccountStatistics;
+import com.everhomes.rest.videoconf.SourceVideoConfAccountStatistics;
 
 public class GetSourceVideoConfAccountStatisticsRestResponse extends RestResponseBase {
 

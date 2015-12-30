@@ -4,7 +4,7 @@ package com.everhomes.organization.pm;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.organization.pm.ListPropTopicStatisticCommandResponse;
+import com.everhomes.rest.organization.pm.ListPropTopicStatisticCommandResponse;
 
 public class GetPMTopicStatisticsRestResponse extends RestResponseBase {
 

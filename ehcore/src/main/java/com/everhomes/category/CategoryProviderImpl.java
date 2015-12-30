@@ -25,6 +25,8 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.jooq.JooqHelper;
+import com.everhomes.rest.category.CategoryAdminStatus;
+import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhCategoriesDao;
 import com.everhomes.server.schema.tables.pojos.EhCategories;

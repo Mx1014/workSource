@@ -4,7 +4,7 @@ package com.everhomes.organization.pm;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.organization.pm.GetPmPayStatisticsCommandResponse;
+import com.everhomes.rest.organization.pm.GetPmPayStatisticsCommandResponse;
 
 public class GetPmPayStatisticsRestResponse extends RestResponseBase {
 

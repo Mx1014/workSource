@@ -4,7 +4,7 @@ package com.everhomes.yellowPage;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.yellowPage.YellowPageListResponse;
+import com.everhomes.rest.yellowPage.YellowPageListResponse;
 
 public class GetYellowPageListRestResponse extends RestResponseBase {
 

@@ -5,7 +5,7 @@ package com.everhomes.community.admin;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.community.admin.CommunityManagerDTO;
+import com.everhomes.rest.community.admin.CommunityManagerDTO;
 
 public class CommunityGetCommunityManagersRestResponse extends RestResponseBase {
 

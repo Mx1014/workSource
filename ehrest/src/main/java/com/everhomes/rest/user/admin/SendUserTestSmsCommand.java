@@ -1,0 +1,30 @@
+package com.everhomes.rest.user.admin;
+
+import com.everhomes.util.StringHelper;
+
+public class SendUserTestSmsCommand {
+	private Integer namespaceId;
+    
+	private String phoneNumber;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}

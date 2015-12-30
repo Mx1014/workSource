@@ -3,8 +3,7 @@
 package com.everhomes.openapi;
 
 import com.everhomes.rest.RestResponseBase;
-
-import com.everhomes.user.SynThridUserCommand;
+import com.everhomes.rest.user.SynThridUserCommand;
 
 public class UserRestResponse extends RestResponseBase {
 

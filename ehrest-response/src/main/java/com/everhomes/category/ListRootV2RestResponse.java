@@ -2,10 +2,10 @@
 // generated file: DO NOT EDIT
 package com.everhomes.category;
 
+import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.category.CategoryDTO;
 
 public class ListRootV2RestResponse extends RestResponseBase {
 

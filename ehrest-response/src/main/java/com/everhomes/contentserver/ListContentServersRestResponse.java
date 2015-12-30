@@ -5,7 +5,7 @@ package com.everhomes.contentserver;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.contentserver.ContentServerDTO;
+import com.everhomes.rest.contentserver.ContentServerDTO;
 
 public class ListContentServersRestResponse extends RestResponseBase {
 

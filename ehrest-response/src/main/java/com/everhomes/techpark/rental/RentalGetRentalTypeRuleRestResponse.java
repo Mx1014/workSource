@@ -4,7 +4,7 @@ package com.everhomes.techpark.rental;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.techpark.rental.GetRentalTypeRuleCommandResponse;
+import com.everhomes.rest.techpark.rental.GetRentalTypeRuleCommandResponse;
 
 public class RentalGetRentalTypeRuleRestResponse extends RestResponseBase {
 

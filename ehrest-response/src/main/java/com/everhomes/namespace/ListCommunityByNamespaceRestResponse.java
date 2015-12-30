@@ -4,7 +4,7 @@ package com.everhomes.namespace;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.namespace.ListCommunityByNamespaceCommandResponse;
+import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 
 public class ListCommunityByNamespaceRestResponse extends RestResponseBase {
 

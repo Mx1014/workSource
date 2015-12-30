@@ -22,12 +22,12 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 
-import com.everhomes.address.ListAllCommunitesCommand;
 import com.everhomes.community.Community;
-import com.everhomes.community.CommunityDoc;
 import com.everhomes.community.CommunityProvider;
-import com.everhomes.enterprise.EnterpriseCommunityType;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.rest.address.ListAllCommunitesCommand;
+import com.everhomes.rest.community.CommunityDoc;
+import com.everhomes.rest.enterprise.EnterpriseCommunityType;
 import com.everhomes.user.UserContext;
 
 @Service

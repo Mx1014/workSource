@@ -4,7 +4,7 @@ package com.everhomes.address;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.openapi.UserServiceAddressDTO;
 
 public class CreateServiceAddressRestResponse extends RestResponseBase {
 

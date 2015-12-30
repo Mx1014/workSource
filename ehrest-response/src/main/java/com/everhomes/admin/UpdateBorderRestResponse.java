@@ -4,7 +4,7 @@ package com.everhomes.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.border.BorderDTO;
+import com.everhomes.rest.border.BorderDTO;
 
 public class UpdateBorderRestResponse extends RestResponseBase {
 

@@ -4,7 +4,7 @@ package com.everhomes.organization;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.organization.SearchTopicsByTypeResponse;
+import com.everhomes.rest.organization.SearchTopicsByTypeResponse;
 
 public class SearchTopicsByTypeRestResponse extends RestResponseBase {
 

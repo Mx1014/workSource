@@ -4,7 +4,7 @@ package com.everhomes.user;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.user.UserInvitationsDTO;
+import com.everhomes.rest.user.UserInvitationsDTO;
 
 public class CreateInvitationCodeRestResponse extends RestResponseBase {
 

@@ -5,7 +5,7 @@ package com.everhomes.admin;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.user.UserLoginDTO;
+import com.everhomes.rest.user.UserLoginDTO;
 
 public class ListLoginRestResponse extends RestResponseBase {
 

@@ -5,7 +5,7 @@ package com.everhomes.organization.pm;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.organization.pm.OweFamilyDTO;
+import com.everhomes.rest.organization.pm.OweFamilyDTO;
 
 public class ListOweFamilysByConditionsRestResponse extends RestResponseBase {
 

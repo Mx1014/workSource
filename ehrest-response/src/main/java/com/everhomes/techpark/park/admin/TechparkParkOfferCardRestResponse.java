@@ -4,7 +4,7 @@ package com.everhomes.techpark.park.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.techpark.park.ApplyParkCardList;
+import com.everhomes.rest.techpark.park.ApplyParkCardList;
 
 public class TechparkParkOfferCardRestResponse extends RestResponseBase {
 

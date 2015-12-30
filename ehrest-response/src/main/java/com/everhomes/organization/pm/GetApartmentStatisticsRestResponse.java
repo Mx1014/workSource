@@ -4,7 +4,7 @@ package com.everhomes.organization.pm;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.organization.pm.PropAptStatisticDTO;
+import com.everhomes.rest.organization.pm.PropAptStatisticDTO;
 
 public class GetApartmentStatisticsRestResponse extends RestResponseBase {
 

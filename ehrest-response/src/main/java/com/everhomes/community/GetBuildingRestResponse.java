@@ -4,7 +4,7 @@ package com.everhomes.community;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.community.BuildingDTO;
+import com.everhomes.rest.community.BuildingDTO;
 
 public class GetBuildingRestResponse extends RestResponseBase {
 

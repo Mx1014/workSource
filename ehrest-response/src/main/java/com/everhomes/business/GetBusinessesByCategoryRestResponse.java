@@ -4,7 +4,7 @@ package com.everhomes.business;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.business.GetBusinessesByCategoryCommandResponse;
+import com.everhomes.rest.business.GetBusinessesByCategoryCommandResponse;
 
 public class GetBusinessesByCategoryRestResponse extends RestResponseBase {
 

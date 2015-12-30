@@ -5,7 +5,7 @@ package com.everhomes.organization.pm;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.family.FamilyBillingTransactionDTO;
+import com.everhomes.rest.family.FamilyBillingTransactionDTO;
 
 public class ListBillTxByAddressIdRestResponse extends RestResponseBase {
 

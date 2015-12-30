@@ -4,7 +4,7 @@ package com.everhomes.forum;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.forum.CheckUserPostDTO;
+import com.everhomes.rest.forum.CheckUserPostDTO;
 
 public class CheckUserPostStatusRestResponse extends RestResponseBase {
 

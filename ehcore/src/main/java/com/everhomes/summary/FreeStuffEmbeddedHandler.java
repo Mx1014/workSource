@@ -6,13 +6,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.app.AppConstants;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.forum.ForumEmbeddedHandler;
 import com.everhomes.forum.ForumProvider;
-import com.everhomes.forum.FreeStuffCommand;
 import com.everhomes.forum.Post;
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.forum.FreeStuffCommand;
 import com.everhomes.util.StringHelper;
 
 @Component(FreeStuffEmbeddedHandler.FORUM_EMBEDED_OBJ_RESOLVER_PREFIX + AppConstants.APPID_FREE_STUFF)

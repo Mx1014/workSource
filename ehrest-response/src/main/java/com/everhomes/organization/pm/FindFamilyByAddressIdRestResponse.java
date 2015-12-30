@@ -4,7 +4,7 @@ package com.everhomes.organization.pm;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.organization.pm.PropFamilyDTO;
+import com.everhomes.rest.organization.pm.PropFamilyDTO;
 
 public class FindFamilyByAddressIdRestResponse extends RestResponseBase {
 

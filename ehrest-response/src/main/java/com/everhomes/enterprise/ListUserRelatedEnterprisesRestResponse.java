@@ -5,7 +5,7 @@ package com.everhomes.enterprise;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.enterprise.EnterpriseDTO;
+import com.everhomes.rest.enterprise.EnterpriseDTO;
 
 public class ListUserRelatedEnterprisesRestResponse extends RestResponseBase {
 

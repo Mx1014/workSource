@@ -4,7 +4,7 @@ package com.everhomes.user;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.user.LogonCommandResponse;
+import com.everhomes.rest.user.LogonCommandResponse;
 
 public class LogonByTokenRestResponse extends RestResponseBase {
 

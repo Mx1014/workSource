@@ -4,7 +4,7 @@ package com.everhomes.group;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.group.GroupMemberSnapshotDTO;
+import com.everhomes.rest.group.GroupMemberSnapshotDTO;
 
 public class GetGroupMemberSnapshotRestResponse extends RestResponseBase {
 

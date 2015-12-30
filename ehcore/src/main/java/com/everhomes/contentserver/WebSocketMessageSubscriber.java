@@ -10,7 +10,8 @@ import org.springframework.web.socket.WebSocketSession;
 import com.everhomes.bus.LocalBusOneshotSubscriber;
 import com.everhomes.contentserver.MessageHandleRequest;
 import com.everhomes.contentserver.MessageHandleResponse;
-import com.everhomes.rpc.PduFrame;
+import com.everhomes.rest.contentserver.WebSocketConstant;
+import com.everhomes.rest.rpc.PduFrame;
 
 public class WebSocketMessageSubscriber implements LocalBusOneshotSubscriber {
 

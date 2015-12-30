@@ -13,6 +13,8 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.link.FindLinkByIdCommand;
+import com.everhomes.rest.link.LinkDTO;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RequireAuthentication;
 

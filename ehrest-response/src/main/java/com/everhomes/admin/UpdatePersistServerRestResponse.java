@@ -4,7 +4,7 @@ package com.everhomes.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.admin.ServerDTO;
+import com.everhomes.rest.admin.ServerDTO;
 
 public class UpdatePersistServerRestResponse extends RestResponseBase {
 

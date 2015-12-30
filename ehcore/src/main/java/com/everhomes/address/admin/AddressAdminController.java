@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.address.AddressService;
-import com.everhomes.address.CorrectAddressCommand;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -20,6 +19,9 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.address.CorrectAddressCommand;
+import com.everhomes.rest.address.admin.CorrectAddressAdminCommand;
+import com.everhomes.rest.address.admin.ImportAddressCommand;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;

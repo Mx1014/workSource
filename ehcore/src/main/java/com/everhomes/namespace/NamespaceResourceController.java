@@ -13,6 +13,8 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
+import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 
 /**
  * Namespace resource REST API controller

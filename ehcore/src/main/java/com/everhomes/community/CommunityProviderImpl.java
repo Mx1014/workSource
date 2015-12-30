@@ -11,6 +11,7 @@ import java.util.UUID;
 
 
 
+
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -26,39 +27,22 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
-
-
 import ch.hsr.geohash.GeoHash;
-
-
-
-
-
-
-import ch.hsr.geohash.GeoHash;
-
-
-
-
-
-
 
 import com.everhomes.address.Address;
-import com.everhomes.address.CommunityAdminStatus;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
-import com.everhomes.enterprise.EnterpriseContactStatus;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
-
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceResource;
-
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.address.CommunityAdminStatus;
+import com.everhomes.rest.enterprise.EnterpriseContactStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhAddresses;
@@ -74,11 +58,8 @@ import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhCommunityGeopoints;
 import com.everhomes.server.schema.tables.pojos.EhForumAttachments;
 import com.everhomes.server.schema.tables.pojos.EhForumPosts;
-
 import com.everhomes.server.schema.tables.pojos.EhUsers;
-
 import com.everhomes.server.schema.tables.pojos.EhGroups;
-
 import com.everhomes.server.schema.tables.records.EhBuildingAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhBuildingsRecord;
 import com.everhomes.server.schema.tables.records.EhCommunitiesRecord;

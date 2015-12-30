@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.favorite.FavoriteDTO;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.favorite.FavoriteDTO;
 
 @RestController
 @RequestMapping("/favorite")

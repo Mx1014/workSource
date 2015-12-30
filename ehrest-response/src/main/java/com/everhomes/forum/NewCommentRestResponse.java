@@ -4,7 +4,7 @@ package com.everhomes.forum;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.forum.PostDTO;
+import com.everhomes.rest.forum.PostDTO;
 
 public class NewCommentRestResponse extends RestResponseBase {
 

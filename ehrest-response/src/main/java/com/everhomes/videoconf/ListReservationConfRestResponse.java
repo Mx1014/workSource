@@ -4,7 +4,7 @@ package com.everhomes.videoconf;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.videoconf.ListReservationConfResponse;
+import com.everhomes.rest.videoconf.ListReservationConfResponse;
 
 public class ListReservationConfRestResponse extends RestResponseBase {
 

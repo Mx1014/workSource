@@ -1,0 +1,8 @@
+// @formatter:off
+package com.everhomes.rest.user;
+
+public interface UserNotificationTemplateCode {
+    static final String SCOPE = "user.notification";
+    
+    static final int USER_REGISTERD = 1; // 新用户注册
+}

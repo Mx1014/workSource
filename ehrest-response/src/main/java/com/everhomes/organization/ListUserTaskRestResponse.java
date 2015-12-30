@@ -4,7 +4,7 @@ package com.everhomes.organization;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.organization.ListTopicsByTypeCommandResponse;
+import com.everhomes.rest.organization.ListTopicsByTypeCommandResponse;
 
 public class ListUserTaskRestResponse extends RestResponseBase {
 

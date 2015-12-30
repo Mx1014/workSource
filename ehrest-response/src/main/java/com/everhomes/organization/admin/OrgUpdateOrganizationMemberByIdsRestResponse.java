@@ -4,7 +4,7 @@ package com.everhomes.organization.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.organization.pm.UpdateOrganizationMemberByIdsCommand;
+import com.everhomes.rest.organization.pm.UpdateOrganizationMemberByIdsCommand;
 
 public class OrgUpdateOrganizationMemberByIdsRestResponse extends RestResponseBase {
 

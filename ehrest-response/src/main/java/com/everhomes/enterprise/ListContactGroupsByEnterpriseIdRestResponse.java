@@ -4,7 +4,7 @@ package com.everhomes.enterprise;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.enterprise.ListContactGroupsByEnterpriseIdCommandResponse;
+import com.everhomes.rest.enterprise.ListContactGroupsByEnterpriseIdCommandResponse;
 
 public class ListContactGroupsByEnterpriseIdRestResponse extends RestResponseBase {
 

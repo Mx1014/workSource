@@ -25,6 +25,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.rest.activity.ActivityServiceErrorCode;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhActivitiesDao;
 import com.everhomes.server.schema.tables.daos.EhActivityRosterDao;

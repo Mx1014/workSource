@@ -4,7 +4,7 @@ package com.everhomes.configuration.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.configuration.admin.ListConfigurationsAdminCommandResponse;
+import com.everhomes.rest.configuration.admin.ListConfigurationsAdminCommandResponse;
 
 public class ConfigurationListConfigurationsRestResponse extends RestResponseBase {
 

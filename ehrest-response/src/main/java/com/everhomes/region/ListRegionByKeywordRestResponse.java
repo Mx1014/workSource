@@ -5,7 +5,7 @@ package com.everhomes.region;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.region.RegionDTO;
+import com.everhomes.rest.region.RegionDTO;
 
 public class ListRegionByKeywordRestResponse extends RestResponseBase {
 

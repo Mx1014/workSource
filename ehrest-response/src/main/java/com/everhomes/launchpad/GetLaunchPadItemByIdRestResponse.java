@@ -4,7 +4,7 @@ package com.everhomes.launchpad;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.launchpad.LaunchPadItemDTO;
+import com.everhomes.rest.launchpad.LaunchPadItemDTO;
 
 public class GetLaunchPadItemByIdRestResponse extends RestResponseBase {
 

@@ -8,10 +8,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.everhomes.banner.admin.CreateBannerAdminCommand;
-import com.everhomes.common.ScopeType;
 import com.everhomes.junit.CoreServerTestCase;
-import com.everhomes.launchpad.ItemGroup;
+import com.everhomes.rest.banner.BannerScope;
+import com.everhomes.rest.banner.BannerStatus;
+import com.everhomes.rest.banner.admin.CreateBannerAdminCommand;
+import com.everhomes.rest.common.ScopeType;
+import com.everhomes.rest.launchpad.ItemGroup;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 

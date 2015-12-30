@@ -4,7 +4,7 @@ package com.everhomes.enterprise;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.enterprise.EnterpriseContactDTO;
+import com.everhomes.rest.enterprise.EnterpriseContactDTO;
 
 public class ListContactsByPhoneRestResponse extends RestResponseBase {
 

@@ -4,7 +4,7 @@ package com.everhomes.organization;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.forum.ListPostCommandResponse;
+import com.everhomes.rest.forum.ListPostCommandResponse;
 
 public class QueryOrgTopicsByCategoryRestResponse extends RestResponseBase {
 

@@ -2,10 +2,10 @@
 // generated at 2015-12-04 14:52:02
 package com.everhomes.family.admin;
 
+import com.everhomes.rest.family.ListWaitApproveFamilyCommandResponse;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.family.ListWaitApproveFamilyCommandResponse;
 
 public class FamilyRestResponse extends RestResponseBase {
 

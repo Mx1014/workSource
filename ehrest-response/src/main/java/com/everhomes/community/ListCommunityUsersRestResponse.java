@@ -4,7 +4,7 @@ package com.everhomes.community;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.community.admin.CommunityUserResponse;
+import com.everhomes.rest.community.admin.CommunityUserResponse;
 
 public class ListCommunityUsersRestResponse extends RestResponseBase {
 

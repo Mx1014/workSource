@@ -4,7 +4,7 @@ package com.everhomes.version;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.version.UpgradeInfoResponse;
+import com.everhomes.rest.version.UpgradeInfoResponse;
 
 public class GetUpgradeInfoRestResponse extends RestResponseBase {
 

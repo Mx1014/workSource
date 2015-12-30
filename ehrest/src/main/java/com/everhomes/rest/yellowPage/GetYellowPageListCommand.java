@@ -1,0 +1,95 @@
+package com.everhomes.rest.yellowPage;
+
+import javax.validation.constraints.NotNull;
+
+import com.everhomes.util.StringHelper;
+
+public class GetYellowPageListCommand {
+
+	 
+	private String ownerType;
+	@NotNull
+	private Long ownerId;
+	@NotNull
+	private Byte type;
+	
+	private String keywords;
+
+	private Long parentId;
+	
+	private Long pageAnchor;
+    
+	private Integer pageSize;
+
+	private java.lang.String   serviceType;
+	
+	public String getOwnerType() {
+		return ownerType;
+	}
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+
+	public Byte getType() {
+		return type;
+	}
+
+	public void setType(Byte type) {
+		this.type = type;
+	}
+
+	public Long getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(Long parentId) {
+		this.parentId = parentId;
+	}
+
+	
+	public String getKeywords() {
+		return keywords;
+	}
+
+	public void setKeywords(String keywords) {
+		this.keywords = keywords;
+	}
+
+	public Long getPageAnchor() {
+		return pageAnchor;
+	}
+
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
+	}
+
+	public Integer getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
+	}
+
+	 @Override
+	    public String toString() {
+	        return StringHelper.toJsonString(this);
+	    }
+
+	public java.lang.String getServiceType() {
+		return serviceType;
+	}
+
+	public void setServiceType(java.lang.String serviceType) {
+		this.serviceType = serviceType;
+	}
+}

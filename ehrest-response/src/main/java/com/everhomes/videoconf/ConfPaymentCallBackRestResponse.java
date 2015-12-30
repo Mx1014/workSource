@@ -3,8 +3,7 @@
 package com.everhomes.videoconf;
 
 import com.everhomes.rest.RestResponseBase;
-
-import com.everhomes.techpark.park.RechargeSuccessResponse;
+import com.everhomes.rest.techpark.park.RechargeSuccessResponse;
 
 public class ConfPaymentCallBackRestResponse extends RestResponseBase {
 

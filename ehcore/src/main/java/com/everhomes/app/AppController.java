@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.app.TrustedAppCommand;
+import com.everhomes.rest.app.VerifyAppUrlBindingCommand;
 
 @RestController
 @RequestMapping("/appkey")

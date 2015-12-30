@@ -4,7 +4,7 @@ package com.everhomes.videoconf;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.videoconf.ListUsersWithoutVideoConfPrivilegeResponse;
+import com.everhomes.rest.videoconf.ListUsersWithoutVideoConfPrivilegeResponse;
 
 public class ListUsersWithoutVideoConfPrivilegeRestResponse extends RestResponseBase {
 

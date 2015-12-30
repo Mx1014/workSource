@@ -4,7 +4,7 @@ package com.everhomes.yellowPage;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.yellowPage.YellowPageDTO;
+import com.everhomes.rest.yellowPage.YellowPageDTO;
 
 public class GetYellowPageTopicRestResponse extends RestResponseBase {
 

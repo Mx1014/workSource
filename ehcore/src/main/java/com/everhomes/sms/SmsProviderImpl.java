@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.namespace.Namespace;
-import com.everhomes.organization.OrganizationNotificationTemplateCode;
+import com.everhomes.rest.organization.OrganizationNotificationTemplateCode;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
 

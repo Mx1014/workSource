@@ -4,7 +4,7 @@ package com.everhomes.enterprise.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.enterprise.EnterpriseDTO;
+import com.everhomes.rest.enterprise.EnterpriseDTO;
 
 public class EnterpriseCreateEnterpriseRestResponse extends RestResponseBase {
 

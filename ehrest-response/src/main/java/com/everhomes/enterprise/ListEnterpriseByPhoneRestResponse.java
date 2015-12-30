@@ -4,7 +4,7 @@ package com.everhomes.enterprise;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.enterprise.QueryEnterpriseByPhoneResponse;
+import com.everhomes.rest.enterprise.QueryEnterpriseByPhoneResponse;
 
 public class ListEnterpriseByPhoneRestResponse extends RestResponseBase {
 

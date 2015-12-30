@@ -4,7 +4,7 @@ package com.everhomes.organization.pm;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.organization.pm.PmBillsDTO;
+import com.everhomes.rest.organization.pm.PmBillsDTO;
 
 public class FindFamilyBillAndPaysByFamilyIdAndTimeRestResponse extends RestResponseBase {
 

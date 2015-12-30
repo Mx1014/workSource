@@ -4,7 +4,7 @@ package com.everhomes.techpark.expansion;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.techpark.expansion.BuildingForRentDTO;
+import com.everhomes.rest.techpark.expansion.BuildingForRentDTO;
 
 public class EntryFindLeasePromotionByIdRestResponse extends RestResponseBase {
 

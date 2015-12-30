@@ -4,7 +4,7 @@ package com.everhomes.user.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.user.UserInfo;
+import com.everhomes.rest.user.UserInfo;
 
 public class UserGetUserByIdentifierRestResponse extends RestResponseBase {
 

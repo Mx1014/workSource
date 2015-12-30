@@ -4,7 +4,7 @@ package com.everhomes.forum.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.forum.admin.SearchTopicAdminCommandResponse;
+import com.everhomes.rest.forum.admin.SearchTopicAdminCommandResponse;
 
 public class ForumSearchCommentsRestResponse extends RestResponseBase {
 

@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.locale.LocaleStringService;
+import com.everhomes.rest.oauth2.AuthorizationCommand;
+import com.everhomes.rest.oauth2.OAuth2ServiceErrorCode;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.WebTokenGenerator;
 

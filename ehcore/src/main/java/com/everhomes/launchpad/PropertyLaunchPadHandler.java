@@ -11,11 +11,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import com.everhomes.app.AppConstants;
-import com.everhomes.organization.pm.ListPropCommunityContactCommand;
-import com.everhomes.organization.pm.PropCommunityContactDTO;
+
 import com.everhomes.organization.pm.PropertyMgrService;
-import com.everhomes.user.IdentifierType;
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.organization.pm.ListPropCommunityContactCommand;
+import com.everhomes.rest.organization.pm.PropCommunityContactDTO;
+import com.everhomes.rest.user.IdentifierType;
 
 
 @Component(LaunchPadHandler.LAUNCH_PAD_ITEM_RESOLVER_PREFIX + AppConstants.APPID_PM)

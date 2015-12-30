@@ -4,7 +4,7 @@ package com.everhomes.techpark.punch;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.techpark.punch.GetPunchNewExceptionCommandResponse;
+import com.everhomes.rest.techpark.punch.GetPunchNewExceptionCommandResponse;
 
 public class PunchGetPunchNewExceptionRestResponse extends RestResponseBase {
 

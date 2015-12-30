@@ -9,10 +9,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import ch.qos.logback.core.joran.action.ActionUtil.Scope;
 
-import com.everhomes.business.admin.PromoteBusinessAdminCommand;
-import com.everhomes.business.admin.RecommendBusinessesAdminCommand;
 import com.everhomes.junit.CoreServerTestCase;
-import com.everhomes.launchpad.ItemScope;
+import com.everhomes.rest.business.BusinessScope;
+import com.everhomes.rest.business.CancelFavoriteBusinessCommand;
+import com.everhomes.rest.business.FavoriteBusinessCommand;
+import com.everhomes.rest.business.GetBusinessesByCategoryCommand;
+import com.everhomes.rest.business.GetBusinessesByCategoryCommandResponse;
+import com.everhomes.rest.business.SyncBusinessCommand;
+import com.everhomes.rest.business.SyncDeleteBusinessCommand;
+import com.everhomes.rest.business.UpdateBusinessCommand;
+import com.everhomes.rest.business.admin.PromoteBusinessAdminCommand;
+import com.everhomes.rest.business.admin.RecommendBusinessesAdminCommand;
+import com.everhomes.rest.launchpad.ItemScope;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 

@@ -4,7 +4,7 @@ package com.everhomes.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.admin.NamespaceDTO;
+import com.everhomes.rest.admin.NamespaceDTO;
 
 public class UpdateNamespaceRestResponse extends RestResponseBase {
 

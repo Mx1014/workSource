@@ -4,7 +4,7 @@ package com.everhomes.address;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.address.ListAddressByKeywordCommandResponse;
+import com.everhomes.rest.address.ListAddressByKeywordCommandResponse;
 
 public class ListAddressByKeywordRestResponse extends RestResponseBase {
 

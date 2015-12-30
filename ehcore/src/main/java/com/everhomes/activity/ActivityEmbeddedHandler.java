@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.app.AppConstants;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.forum.Forum;
@@ -14,6 +13,10 @@ import com.everhomes.forum.ForumEmbeddedHandler;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.Post;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.rest.activity.ActivityDTO;
+import com.everhomes.rest.activity.ActivityListResponse;
+import com.everhomes.rest.activity.ActivityPostCommand;
+import com.everhomes.rest.app.AppConstants;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.StringHelper;

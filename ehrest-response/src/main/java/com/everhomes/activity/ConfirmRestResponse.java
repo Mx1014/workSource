@@ -4,7 +4,7 @@ package com.everhomes.activity;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.activity.ActivityDTO;
+import com.everhomes.rest.activity.ActivityDTO;
 
 public class ConfirmRestResponse extends RestResponseBase {
 

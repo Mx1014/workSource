@@ -4,7 +4,7 @@ package com.everhomes.launchpad;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.launchpad.GetLaunchPadItemsCommandResponse;
+import com.everhomes.rest.launchpad.GetLaunchPadItemsCommandResponse;
 
 public class GetLaunchPadItemsRestResponse extends RestResponseBase {
 

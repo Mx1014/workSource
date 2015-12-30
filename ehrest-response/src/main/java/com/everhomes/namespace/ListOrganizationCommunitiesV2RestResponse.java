@@ -2,9 +2,8 @@
 // generated file: DO NOT EDIT
 package com.everhomes.namespace;
 
+import com.everhomes.rest.organization.ListOrganizationCommunityCommandResponse;
 import com.everhomes.rest.RestResponseBase;
-
-import com.everhomes.organization.ListOrganizationCommunityCommandResponse;
 
 public class ListOrganizationCommunitiesV2RestResponse extends RestResponseBase {
 

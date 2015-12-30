@@ -3,7 +3,7 @@ package com.everhomes.contentserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.everhomes.contentserver.WebSocketConstant;
+import com.everhomes.rest.contentserver.WebSocketConstant;
 
 public abstract class MessageTask implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageTask.class);

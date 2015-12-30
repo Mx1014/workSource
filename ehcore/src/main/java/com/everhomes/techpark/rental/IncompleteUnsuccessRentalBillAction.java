@@ -9,14 +9,15 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
-import com.everhomes.app.AppConstants;
-import com.everhomes.messaging.MessageBodyType;
-import com.everhomes.messaging.MessageChannel;
-import com.everhomes.messaging.MessageDTO;
-import com.everhomes.messaging.MessagingConstants;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.pushmessage.PushMessageProvider;
-import com.everhomes.user.MessageChannelType;
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.techpark.rental.SiteBillStatus;
+import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 @Service

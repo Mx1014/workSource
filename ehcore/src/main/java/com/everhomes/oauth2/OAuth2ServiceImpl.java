@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.rest.oauth2.AuthorizationCommand;
+import com.everhomes.rest.oauth2.OAuth2ServiceErrorCode;
 import com.everhomes.user.User;
 import com.everhomes.user.UserService;
 import com.everhomes.util.DateHelper;

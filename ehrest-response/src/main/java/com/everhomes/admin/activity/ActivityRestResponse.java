@@ -2,9 +2,8 @@
 // generated at 2015-12-04 14:52:02
 package com.everhomes.admin.activity;
 
+import com.everhomes.rest.activity.ListActivitiesReponse;
 import com.everhomes.rest.RestResponseBase;
-
-import com.everhomes.activity.ListActivitiesReponse;
 
 public class ActivityRestResponse extends RestResponseBase {
 

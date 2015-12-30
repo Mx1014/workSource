@@ -5,7 +5,7 @@ package com.everhomes.openapi;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.category.CategoryDTO;
+import com.everhomes.rest.category.CategoryDTO;
 
 public class ListBizCategoriesRestResponse extends RestResponseBase {
 

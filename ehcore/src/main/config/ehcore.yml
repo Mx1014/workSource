@@ -124,8 +124,13 @@ objc.response.base: EvhRestResponseBase
 
 class.name.prefix: Evh
 
+<<<<<<< HEAD
 source.jars: ${EVH_HOME}/ehrest/target/ehrest-0.0.1-SNAPSHOT.jar
 source.excludes: com.everhomes.rpc.*, com.everhomes.rest.RestResponse, com.everhomes.rest.RestResponseBase, com.everhomes.rest.RestVersion
+=======
+source.jars: ${EVH_HOME}/ehrest/target/ehrest-3.2.0-SNAPSHOT.jar
+source.excludes: com.everhomes.rest.rpc.*, com.everhomes.rest.RestResponse, com.everhomes.rest.RestResponseBase, com.everhomes.rest.RestVersion
+>>>>>>> change the com.everhomes to com.everhomes.rest
 destination.dir: ${EVH_IOS_HOME}/API-objects/
 destination.dir.java: ${EVH_HOME}/ehrest-response/src/main/java/
 

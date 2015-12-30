@@ -4,7 +4,7 @@ package com.everhomes.group;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.group.ListGroupWaitingApprovalsCommandResponse;
+import com.everhomes.rest.group.ListGroupWaitingApprovalsCommandResponse;
 
 public class ListGroupWaitingApprovalsRestResponse extends RestResponseBase {
 

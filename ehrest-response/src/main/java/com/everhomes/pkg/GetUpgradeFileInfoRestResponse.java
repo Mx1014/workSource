@@ -5,7 +5,7 @@ package com.everhomes.pkg;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.pkg.ClientPackageFileDTO;
+import com.everhomes.rest.pkg.ClientPackageFileDTO;
 
 public class GetUpgradeFileInfoRestResponse extends RestResponseBase {
 

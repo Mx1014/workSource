@@ -5,7 +5,7 @@ package com.everhomes.favorite;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.favorite.FavoriteDTO;
+import com.everhomes.rest.favorite.FavoriteDTO;
 
 public class ListFavoritesRestResponse extends RestResponseBase {
 

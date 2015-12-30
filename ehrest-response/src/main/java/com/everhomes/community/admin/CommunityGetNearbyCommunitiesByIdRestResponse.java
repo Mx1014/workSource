@@ -5,7 +5,7 @@ package com.everhomes.community.admin;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.address.CommunityDTO;
+import com.everhomes.rest.address.CommunityDTO;
 
 public class CommunityGetNearbyCommunitiesByIdRestResponse extends RestResponseBase {
 

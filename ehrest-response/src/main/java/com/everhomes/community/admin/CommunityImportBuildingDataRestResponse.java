@@ -4,7 +4,7 @@ package com.everhomes.community.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.user.admin.ImportDataResponse;
+import com.everhomes.rest.user.admin.ImportDataResponse;
 
 public class CommunityImportBuildingDataRestResponse extends RestResponseBase {
 

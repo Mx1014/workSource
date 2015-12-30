@@ -4,7 +4,7 @@ package com.everhomes.techpark.expansion;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.techpark.expansion.EnterpriseApplyEntryResponse;
+import com.everhomes.rest.techpark.expansion.EnterpriseApplyEntryResponse;
 
 public class EntryListApplyEntrysRestResponse extends RestResponseBase {
 

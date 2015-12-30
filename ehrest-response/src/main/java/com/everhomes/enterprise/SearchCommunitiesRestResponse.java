@@ -5,7 +5,7 @@ package com.everhomes.enterprise;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.community.CommunityDoc;
+import com.everhomes.rest.community.CommunityDoc;
 
 public class SearchCommunitiesRestResponse extends RestResponseBase {
 

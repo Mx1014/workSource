@@ -4,7 +4,7 @@ package com.everhomes.organization;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.organization.ListOrganizationContactCommandResponse;
+import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
 
 public class ListOrgContactRestResponse extends RestResponseBase {
 

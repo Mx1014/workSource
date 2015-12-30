@@ -5,7 +5,7 @@ package com.everhomes.address;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.address.ApartmentDTO;
+import com.everhomes.rest.address.ApartmentDTO;
 
 public class ListApartmentsByKeywordRestResponse extends RestResponseBase {
 

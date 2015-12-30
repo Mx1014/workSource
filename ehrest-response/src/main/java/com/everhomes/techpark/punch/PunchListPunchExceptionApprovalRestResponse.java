@@ -4,7 +4,7 @@ package com.everhomes.techpark.punch;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.techpark.punch.ListPunchExceptionRequestCommandResponse;
+import com.everhomes.rest.techpark.punch.ListPunchExceptionRequestCommandResponse;
 
 public class PunchListPunchExceptionApprovalRestResponse extends RestResponseBase {
 

@@ -5,7 +5,7 @@ package com.everhomes.user;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.openapi.UserServiceAddressDTO;
 
 public class GetUserRelateServiceAddressRestResponse extends RestResponseBase {
 

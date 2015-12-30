@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
+import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.schema.tables.daos.EhNamespacesDao;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.util.ConvertHelper;

@@ -4,7 +4,7 @@ package com.everhomes.activity;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.activity.ListNearbyActivitiesResponse;
+import com.everhomes.rest.activity.ListNearbyActivitiesResponse;
 
 public class ListNearbyActivitiesV2RestResponse extends RestResponseBase {
 

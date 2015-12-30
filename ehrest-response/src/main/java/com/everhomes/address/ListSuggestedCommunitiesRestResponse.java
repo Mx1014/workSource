@@ -5,7 +5,7 @@ package com.everhomes.address;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.address.CommunitySummaryDTO;
+import com.everhomes.rest.address.CommunitySummaryDTO;
 
 public class ListSuggestedCommunitiesRestResponse extends RestResponseBase {
 

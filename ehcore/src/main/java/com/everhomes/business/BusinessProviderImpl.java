@@ -16,12 +16,13 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.CategoryProvider;
-import com.everhomes.common.ScopeType;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.business.BusinessTargetType;
+import com.everhomes.rest.common.ScopeType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhBusinessVisibleScopes;

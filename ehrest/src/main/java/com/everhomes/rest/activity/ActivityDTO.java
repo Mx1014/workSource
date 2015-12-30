@@ -1,0 +1,295 @@
+// @formatter:off
+package com.everhomes.rest.activity;
+
+import com.everhomes.util.StringHelper;
+/**
+ * 
+ * @author elians
+ *<ul>
+ *<li>activityId:活动ID</li>
+ *<li>categoryId: 类型</li>
+ *<li>startTime:开始时间,格式:YYYY-MM-DD hh:mm:ss<li>
+ *<li>stopTime:结束时间,格式:YYYY-MM-DD hh:mm:ss</li>
+ *<li>location:位置</li>
+ *<li>checkInFlag:报名标签</li>
+ *<li>confirmFlag:确认</li>
+ *<li>enrollUserCount:报名人数</li>
+ *<li>enrollFamilyCount:报名家庭数</li>
+ *<li>checkinUserCount:签到人数</li>
+ *<li>checkinFamilyCount:签到家庭数</li>
+ *<li>confirmUserCount:确认人数</li>
+ *<li>confirmFamilyCount：确认家庭数</li>
+ *<li>familyId:家庭ID</li>
+ *<li>groupId:圈ID</li>
+ *<li>forumId:论坛</li>
+ *<li>postId:帖子ID</li>
+ *<li>posterUrl:海报链接</li>
+ *<li>userActivityStatus:活动登记状态,1 未报名,2 已报名,3 已签到，4 已确认</li>
+ *<li>processStatus：处理状态，0 未知,1 未开始，2 进行中，3 已结束</li>
+ *<li>uuid:活动唯一的标识</li>
+ *</ul>
+ */
+public class ActivityDTO {
+    private Long activityId;
+    private Integer namespaceId;
+    private Long postId;
+    private Long forumId;
+    private Long categoryId;
+    private String startTime;
+    private String stopTime;
+    private String location;
+    private Integer checkinFlag;
+    private Integer confirmFlag;
+    private Integer enrollUserCount;
+    private Integer enrollFamilyCount;
+    private Integer checkinUserCount;
+    private Integer checkinFamilyCount;
+    private Integer confirmUserCount;
+    private Integer confirmFamilyCount;
+    private Long groupId;
+    private Long familyId;
+    private String tag;
+    private Double longitude;
+    private Double latitude;
+    private String subject;
+    private String posterUrl;
+   
+    private Integer userActivityStatus;
+    private Integer processStatus;
+    private String uuid;
+    private String guest;
+    
+    public ActivityDTO() {
+    }
+
+    public Long getActivityId() {
+        return activityId;
+    }
+
+    public void setActivityId(Long activityId) {
+        this.activityId = activityId;
+    }
+    
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    public String getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(String startTime) {
+        this.startTime = startTime;
+    }
+
+    public String getStopTime() {
+        return stopTime;
+    }
+
+    public void setStopTime(String stopTime) {
+        this.stopTime = stopTime;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+
+    public Integer getCheckinFlag() {
+        return checkinFlag;
+    }
+
+    public void setCheckinFlag(Integer checkinFlag) {
+        this.checkinFlag = checkinFlag;
+    }
+
+    public Integer getConfirmFlag() {
+        return confirmFlag;
+    }
+
+    public void setConfirmFlag(Integer confirmFlag) {
+        this.confirmFlag = confirmFlag;
+    }
+
+    public Integer getEnrollUserCount() {
+        return enrollUserCount;
+    }
+
+    public void setEnrollUserCount(Integer enrollUserCount) {
+        this.enrollUserCount = enrollUserCount;
+    }
+
+    public Integer getEnrollFamilyCount() {
+        return enrollFamilyCount;
+    }
+
+    public void setEnrollFamilyCount(Integer enrollFamilyCount) {
+        this.enrollFamilyCount = enrollFamilyCount;
+    }
+
+    public Integer getCheckinUserCount() {
+        return checkinUserCount;
+    }
+
+    public void setCheckinUserCount(Integer checkinUserCount) {
+        this.checkinUserCount = checkinUserCount;
+    }
+
+    public Integer getCheckinFamilyCount() {
+        return checkinFamilyCount;
+    }
+
+    public void setCheckinFamilyCount(Integer checkinFamilyCount) {
+        this.checkinFamilyCount = checkinFamilyCount;
+    }
+
+    public Integer getConfirmUserCount() {
+        return confirmUserCount;
+    }
+
+    public void setConfirmUserCount(Integer confirmUserCount) {
+        this.confirmUserCount = confirmUserCount;
+    }
+
+    public Integer getConfirmFamilyCount() {
+        return confirmFamilyCount;
+    }
+
+    public void setConfirmFamilyCount(Integer confirmFamilyCount) {
+        this.confirmFamilyCount = confirmFamilyCount;
+    }
+
+    public Integer getUserActivityStatus() {
+        return userActivityStatus;
+    }
+
+    public void setUserActivityStatus(Integer userActivityStatus) {
+        this.userActivityStatus = userActivityStatus;
+    }
+
+    public Integer getProcessStatus() {
+        return processStatus;
+    }
+
+    public void setProcessStatus(Integer processStatus) {
+        this.processStatus = processStatus;
+    }
+    
+    
+    
+    public String getPosterUrl() {
+        return posterUrl;
+    }
+
+    public void setPosterUrl(String posterUrl) {
+        this.posterUrl = posterUrl;
+    }
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
+    public Long getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(Long groupId) {
+        this.groupId = groupId;
+    }
+
+    public Long getFamilyId() {
+        return familyId;
+    }
+
+    public void setFamilyId(Long familyId) {
+        this.familyId = familyId;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
+
+
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+
+
+    public Long getPostId() {
+        return postId;
+    }
+
+    public void setPostId(Long postId) {
+        this.postId = postId;
+    }
+
+    
+    public Long getForumId() {
+        return forumId;
+    }
+
+    public void setForumId(Long forumId) {
+        this.forumId = forumId;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public String getGuest() {
+		return guest;
+	}
+
+	public void setGuest(String guest) {
+		this.guest = guest;
+	}
+	
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}

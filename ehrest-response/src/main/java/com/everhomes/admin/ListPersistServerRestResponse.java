@@ -5,7 +5,7 @@ package com.everhomes.admin;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.admin.ServerDTO;
+import com.everhomes.rest.admin.ServerDTO;
 
 public class ListPersistServerRestResponse extends RestResponseBase {
 

@@ -5,7 +5,7 @@ package com.everhomes.organization.pm;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.organization.OrganizationBillingTransactionDTO;
+import com.everhomes.rest.organization.OrganizationBillingTransactionDTO;
 
 public class ListOrgBillingTransactionsByConditionsRestResponse extends RestResponseBase {
 

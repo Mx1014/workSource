@@ -4,7 +4,7 @@ package com.everhomes.address;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.address.ClaimedAddressInfo;
+import com.everhomes.rest.address.ClaimedAddressInfo;
 
 public class ClaimAddressRestResponse extends RestResponseBase {
 

@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.everhomes.junit.CoreServerTestCase;
+import com.everhomes.rest.cooperation.NewCooperationCommand;
 
 public class CooperationTest extends CoreServerTestCase {
 	@Autowired

@@ -2,9 +2,8 @@
 // generated at 2015-12-04 14:52:02
 package com.everhomes.organization.admin;
 
+import com.everhomes.rest.organization.pm.UpdateOrganizationMemberByIdsCommand;
 import com.everhomes.rest.RestResponseBase;
-
-import com.everhomes.organization.pm.UpdateOrganizationMemberByIdsCommand;
 
 public class OrgRestResponse extends RestResponseBase {
 

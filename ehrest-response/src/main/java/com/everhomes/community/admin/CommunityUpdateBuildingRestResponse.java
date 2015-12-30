@@ -4,7 +4,7 @@ package com.everhomes.community.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.community.BuildingDTO;
+import com.everhomes.rest.community.BuildingDTO;
 
 public class CommunityUpdateBuildingRestResponse extends RestResponseBase {
 

@@ -4,7 +4,7 @@ package com.everhomes.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.user.UserLoginDTO;
+import com.everhomes.rest.user.UserLoginDTO;
 
 public class RegisterLoginRestResponse extends RestResponseBase {
 

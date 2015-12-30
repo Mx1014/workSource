@@ -4,7 +4,7 @@ package com.everhomes.coupon;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.coupon.CouponDTO;
+import com.everhomes.rest.coupon.CouponDTO;
 
 public class PostRestResponse extends RestResponseBase {
 

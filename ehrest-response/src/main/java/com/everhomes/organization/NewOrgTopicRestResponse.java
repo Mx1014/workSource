@@ -4,7 +4,7 @@ package com.everhomes.organization;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.forum.PostDTO;
+import com.everhomes.rest.forum.PostDTO;
 
 public class NewOrgTopicRestResponse extends RestResponseBase {
 

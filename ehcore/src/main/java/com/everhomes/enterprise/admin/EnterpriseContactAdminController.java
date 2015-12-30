@@ -13,19 +13,19 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.enterprise.CreateContactCommand;
-import com.everhomes.enterprise.CreateContactEntryCommand;
 import com.everhomes.enterprise.EnterpriseContact;
-import com.everhomes.enterprise.EnterpriseContactDTO;
 import com.everhomes.enterprise.EnterpriseContactDetail;
 import com.everhomes.enterprise.EnterpriseContactEntry;
-import com.everhomes.enterprise.EnterpriseContactEntryDTO;
 import com.everhomes.enterprise.EnterpriseContactService;
-import com.everhomes.enterprise.ListContactCommand;
-import com.everhomes.enterprise.ListEnterpriseContactResponse;
-import com.everhomes.group.GroupMemberStatus;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.enterprise.CreateContactCommand;
+import com.everhomes.rest.enterprise.CreateContactEntryCommand;
+import com.everhomes.rest.enterprise.EnterpriseContactDTO;
+import com.everhomes.rest.enterprise.EnterpriseContactEntryDTO;
+import com.everhomes.rest.enterprise.ListContactCommand;
+import com.everhomes.rest.enterprise.ListEnterpriseContactResponse;
+import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.util.ConvertHelper;
 
 @RestDoc(value="Enterprise contact admin controller", site="core")

@@ -10,6 +10,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.cooperation.NewCooperationCommand;
 import com.everhomes.util.RequireAuthentication;
 
 @RestController

@@ -11,7 +11,7 @@ import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.everhomes.rpc.PduFrame;
+import com.everhomes.rest.rpc.PduFrame;
 import com.everhomes.sequence.LocalSequenceGenerator;
 
 public class Generator {

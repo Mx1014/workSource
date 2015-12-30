@@ -4,7 +4,7 @@ package com.everhomes.videoconf;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.videoconf.MinimumAccountsResponse;
+import com.everhomes.rest.videoconf.MinimumAccountsResponse;
 
 public class GetMinimumAccountsRestResponse extends RestResponseBase {
 

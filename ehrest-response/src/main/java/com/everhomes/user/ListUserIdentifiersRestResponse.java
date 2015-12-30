@@ -5,7 +5,7 @@ package com.everhomes.user;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.user.UserIdentifierDTO;
+import com.everhomes.rest.user.UserIdentifierDTO;
 
 public class ListUserIdentifiersRestResponse extends RestResponseBase {
 

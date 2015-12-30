@@ -5,7 +5,7 @@ package com.everhomes.banner;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.banner.BannerDTO;
+import com.everhomes.rest.banner.BannerDTO;
 
 public class GetBannersRestResponse extends RestResponseBase {
 

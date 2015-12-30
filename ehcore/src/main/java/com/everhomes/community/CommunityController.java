@@ -15,17 +15,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.everhomes.address.CommunityDTO;
-import com.everhomes.app.AppConstants;
-import com.everhomes.community.admin.CommunityUserDto;
-import com.everhomes.community.admin.CommunityUserResponse;
-import com.everhomes.community.admin.ListCommunityUsersCommand;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.community.BuildingDTO;
+import com.everhomes.rest.community.GetBuildingCommand;
+import com.everhomes.rest.community.GetCommunitiesByIdsCommand;
+import com.everhomes.rest.community.GetCommunitiesByNameAndCityIdCommand;
+import com.everhomes.rest.community.GetCommunityByIdCommand;
+import com.everhomes.rest.community.ListBuildingCommand;
+import com.everhomes.rest.community.ListBuildingCommandResponse;
+import com.everhomes.rest.community.UpdateCommunityRequestStatusCommand;
+import com.everhomes.rest.community.admin.CommunityUserDto;
+import com.everhomes.rest.community.admin.CommunityUserResponse;
+import com.everhomes.rest.community.admin.ListCommunityUsersCommand;
 import com.everhomes.util.EtagHelper;
 
 /**

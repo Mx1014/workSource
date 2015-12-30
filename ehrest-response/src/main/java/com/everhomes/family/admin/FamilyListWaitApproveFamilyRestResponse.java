@@ -5,7 +5,7 @@ package com.everhomes.family.admin;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.family.ListWaitApproveFamilyCommandResponse;
+import com.everhomes.rest.family.ListWaitApproveFamilyCommandResponse;
 
 public class FamilyListWaitApproveFamilyRestResponse extends RestResponseBase {
 

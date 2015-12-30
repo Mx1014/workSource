@@ -4,7 +4,7 @@ package com.everhomes.techpark.punch;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.techpark.punch.PunchLogsDay;
+import com.everhomes.rest.techpark.punch.PunchLogsDay;
 
 public class PunchGetDayPunchLogsRestResponse extends RestResponseBase {
 

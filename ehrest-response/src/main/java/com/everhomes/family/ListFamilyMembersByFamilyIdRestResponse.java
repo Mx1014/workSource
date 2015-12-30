@@ -5,7 +5,7 @@ package com.everhomes.family;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.family.FamilyMemberDTO;
+import com.everhomes.rest.family.FamilyMemberDTO;
 
 public class ListFamilyMembersByFamilyIdRestResponse extends RestResponseBase {
 

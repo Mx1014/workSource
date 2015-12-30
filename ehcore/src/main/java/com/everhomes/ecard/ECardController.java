@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.ecard.ECardPostCommand;
-import com.everhomes.forum.PostDTO;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.ecard.ECardPostCommand;
+import com.everhomes.rest.forum.PostDTO;
 
 @RestController
 @RequestMapping("/ecard")

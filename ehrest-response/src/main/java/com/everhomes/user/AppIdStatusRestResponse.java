@@ -4,7 +4,7 @@ package com.everhomes.user;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.user.AppIdStatusResponse;
+import com.everhomes.rest.user.AppIdStatusResponse;
 
 public class AppIdStatusRestResponse extends RestResponseBase {
 

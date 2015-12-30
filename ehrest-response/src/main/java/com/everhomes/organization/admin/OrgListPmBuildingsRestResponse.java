@@ -5,7 +5,7 @@ package com.everhomes.organization.admin;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.organization.pm.PmBuildingDTO;
+import com.everhomes.rest.organization.pm.PmBuildingDTO;
 
 public class OrgListPmBuildingsRestResponse extends RestResponseBase {
 

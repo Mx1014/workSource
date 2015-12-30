@@ -1,0 +1,27 @@
+package com.everhomes.rest.techpark.rental;
+
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
+/**
+ * <ul>
+*场所类型
+ * <li>siteType：场所类型</li>
+ * </ul>
+ */
+public class GetRentalSiteTypeResponse {
+
+    @ItemType(String.class)
+	private List<String> siteTypes;
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+	public List<String> getSiteTypes() {
+		return siteTypes;
+	}
+	public void setSiteTypes(List<String> siteTypes) {
+		this.siteTypes = siteTypes;
+	} 
+}

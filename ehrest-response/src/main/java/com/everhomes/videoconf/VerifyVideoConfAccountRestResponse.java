@@ -4,7 +4,7 @@ package com.everhomes.videoconf;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.videoconf.UserAccountDTO;
+import com.everhomes.rest.videoconf.UserAccountDTO;
 
 public class VerifyVideoConfAccountRestResponse extends RestResponseBase {
 

@@ -4,7 +4,7 @@ package com.everhomes.user.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.user.ListVerfyCodeResponse;
+import com.everhomes.rest.user.ListVerfyCodeResponse;
 
 public class UserListVerifyCodeRestResponse extends RestResponseBase {
 

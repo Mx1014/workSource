@@ -4,7 +4,7 @@ package com.everhomes.videoconf;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.videoconf.VideoConfAccountTrialRuleDTO;
+import com.everhomes.rest.videoconf.VideoConfAccountTrialRuleDTO;
 
 public class SetVideoConfAccountTrialRuleRestResponse extends RestResponseBase {
 

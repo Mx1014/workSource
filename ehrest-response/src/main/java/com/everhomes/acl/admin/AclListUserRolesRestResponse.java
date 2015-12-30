@@ -4,7 +4,7 @@ package com.everhomes.acl.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.acl.admin.ListUserRolesAdminCommandResponse;
+import com.everhomes.rest.acl.admin.ListUserRolesAdminCommandResponse;
 
 public class AclListUserRolesRestResponse extends RestResponseBase {
 

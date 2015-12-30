@@ -9,15 +9,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.junit.CoreServerTestCase;
+import com.everhomes.rest.user.SignupCommand;
+import com.everhomes.rest.user.VerifyAndLogonCommand;
 import com.everhomes.server.schema.tables.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.server.schema.tables.daos.EhUserIdentifiersDao;
 import com.everhomes.server.schema.tables.daos.EhUsersDao;
-import com.everhomes.user.SignupCommand;
 import com.everhomes.user.SignupToken;
 import com.everhomes.user.UserLogin;
 import com.everhomes.user.UserService;
-import com.everhomes.user.VerifyAndLogonCommand;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.WebTokenGenerator;
 

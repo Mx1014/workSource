@@ -4,7 +4,7 @@ package com.everhomes.activity;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.activity.ActivityListResponse;
+import com.everhomes.rest.activity.ActivityListResponse;
 
 public class FindActivityDetailsRestResponse extends RestResponseBase {
 

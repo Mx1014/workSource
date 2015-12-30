@@ -4,7 +4,7 @@ package com.everhomes.community.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.community.ListCommunitiesByKeywordCommandResponse;
+import com.everhomes.rest.community.ListCommunitiesByKeywordCommandResponse;
 
 public class CommunityListCommunitiesByKeywordRestResponse extends RestResponseBase {
 

@@ -18,6 +18,28 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.enterprise.AddContactCommand;
+import com.everhomes.rest.enterprise.AddContactGroupCommand;
+import com.everhomes.rest.enterprise.ApproveContactCommand;
+import com.everhomes.rest.enterprise.CreateContactByPhoneCommand;
+import com.everhomes.rest.enterprise.CreateContactByUserIdCommand;
+import com.everhomes.rest.enterprise.DeleteContactByIdCommand;
+import com.everhomes.rest.enterprise.DeleteContactGroupByIdCommand;
+import com.everhomes.rest.enterprise.EnterpriseContactDTO;
+import com.everhomes.rest.enterprise.GetUserEnterpriseContactCommand;
+import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
+import com.everhomes.rest.enterprise.ListContactGroupNamesByEnterpriseIdCommand;
+import com.everhomes.rest.enterprise.ListContactGroupNamesByEnterpriseIdCommandResponse;
+import com.everhomes.rest.enterprise.ListContactGroupsByEnterpriseIdCommand;
+import com.everhomes.rest.enterprise.ListContactGroupsByEnterpriseIdCommandResponse;
+import com.everhomes.rest.enterprise.ListContactsByEnterpriseIdCommand;
+import com.everhomes.rest.enterprise.ListContactsByPhone;
+import com.everhomes.rest.enterprise.ListContactsRequestByEnterpriseIdCommand;
+import com.everhomes.rest.enterprise.ListContactsRequestByEnterpriseIdCommandResponse;
+import com.everhomes.rest.enterprise.ListEnterpriseContactResponse;
+import com.everhomes.rest.enterprise.RejectContactCommand;
+import com.everhomes.rest.enterprise.UpdateContactCommand;
+import com.everhomes.rest.enterprise.importContactsCommand;
 import com.everhomes.util.ConvertHelper;
 
 /**

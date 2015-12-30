@@ -5,7 +5,7 @@ package com.everhomes.organization.pm;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.address.BuildingDTO;
+import com.everhomes.rest.address.BuildingDTO;
 
 public class ListPropBuildingsByKeywordRestResponse extends RestResponseBase {
 

@@ -3,8 +3,7 @@
 package com.everhomes.openapi;
 
 import com.everhomes.rest.RestResponseBase;
-
-import com.everhomes.user.GetSignatureCommandResponse;
+import com.everhomes.rest.user.GetSignatureCommandResponse;
 
 public class UserGetBizSignatureRestResponse extends RestResponseBase {
 

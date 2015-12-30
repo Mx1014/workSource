@@ -5,7 +5,7 @@ package com.everhomes.openapi;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.user.UserDtoForBiz;
+import com.everhomes.rest.user.UserDtoForBiz;
 
 public class ListUserRestResponse extends RestResponseBase {
 

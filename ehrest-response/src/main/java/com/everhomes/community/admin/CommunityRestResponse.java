@@ -2,9 +2,8 @@
 // generated at 2015-12-04 14:52:02
 package com.everhomes.community.admin;
 
+import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.RestResponseBase;
-
-import com.everhomes.community.BuildingDTO;
 
 public class CommunityRestResponse extends RestResponseBase {
 

@@ -4,7 +4,7 @@ package com.everhomes.videoconf;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.videoconf.ListWarningContactorResponse;
+import com.everhomes.rest.videoconf.ListWarningContactorResponse;
 
 public class ListWarningContactorRestResponse extends RestResponseBase {
 

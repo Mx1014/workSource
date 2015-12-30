@@ -12,8 +12,8 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import com.everhomes.contentserver.ConfigResponse;
-import com.everhomes.contentserver.WebSocketConstant;
-import com.everhomes.rpc.PduFrame;
+import com.everhomes.rest.contentserver.WebSocketConstant;
+import com.everhomes.rest.rpc.PduFrame;
 
 public class ContentServerHandler extends TextWebSocketHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(ContentServerHandler.class);

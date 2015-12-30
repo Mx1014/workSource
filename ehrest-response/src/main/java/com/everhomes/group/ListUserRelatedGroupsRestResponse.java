@@ -5,7 +5,7 @@ package com.everhomes.group;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.group.GroupDTO;
+import com.everhomes.rest.group.GroupDTO;
 
 public class ListUserRelatedGroupsRestResponse extends RestResponseBase {
 

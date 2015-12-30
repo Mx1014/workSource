@@ -4,7 +4,7 @@ package com.everhomes.techpark.park;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.techpark.park.RechargeRecordList;
+import com.everhomes.rest.techpark.park.RechargeRecordList;
 
 public class ParkListRechargeRecordRestResponse extends RestResponseBase {
 

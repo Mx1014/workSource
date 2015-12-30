@@ -1,0 +1,31 @@
+package com.everhomes.rest.techpark.rental;
+
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.techpark.punch.PunchStatisticsDTO;
+import com.everhomes.util.StringHelper;
+
+public class ListRentalBillsCommandResponse {
+	private Integer nextPageOffset;
+    @ItemType(RentalBillDTO.class)
+	private List<RentalBillDTO> rentalBills; 
+	@Override
+    public String toString() {
+
+		
+        return StringHelper.toJsonString(this);
+    }
+	public List<RentalBillDTO> getRentalBills() {
+		return rentalBills;
+	}
+	public void setRentalBills(List<RentalBillDTO> rentalBills) {
+		this.rentalBills = rentalBills;
+	}
+	public Integer getNextPageOffset() {
+		return nextPageOffset;
+	}
+	public void setNextPageOffset(Integer nextPageOffset) {
+		this.nextPageOffset = nextPageOffset;
+	} 
+}

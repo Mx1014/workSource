@@ -4,7 +4,7 @@ package com.everhomes.business;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.business.BusinessDTO;
+import com.everhomes.rest.business.BusinessDTO;
 
 public class FindBusinessByIdRestResponse extends RestResponseBase {
 

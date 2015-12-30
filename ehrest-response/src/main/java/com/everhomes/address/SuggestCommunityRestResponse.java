@@ -4,7 +4,7 @@ package com.everhomes.address;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.address.SuggestCommunityDTO;
+import com.everhomes.rest.address.SuggestCommunityDTO;
 
 public class SuggestCommunityRestResponse extends RestResponseBase {
 

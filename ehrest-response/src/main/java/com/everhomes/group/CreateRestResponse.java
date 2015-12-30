@@ -4,7 +4,7 @@ package com.everhomes.group;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.group.GroupDTO;
+import com.everhomes.rest.group.GroupDTO;
 
 public class CreateRestResponse extends RestResponseBase {
 

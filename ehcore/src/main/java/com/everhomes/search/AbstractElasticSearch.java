@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import com.everhomes.enterprise.SearchEnterpriseCommand;
+import com.everhomes.rest.enterprise.SearchEnterpriseCommand;
 
 public abstract class AbstractElasticSearch {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractElasticSearch.class);

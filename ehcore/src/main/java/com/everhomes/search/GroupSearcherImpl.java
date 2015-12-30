@@ -20,10 +20,11 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupAdminStatus;
 import com.everhomes.group.GroupDiscriminator;
-import com.everhomes.group.GroupPrivacy;
 import com.everhomes.group.GroupProvider;
-import com.everhomes.group.SearchGroupCommand;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.rest.group.GroupPrivacy;
+import com.everhomes.rest.group.SearchGroupCommand;
+import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.settings.PaginationConfigHelper;
 
 @Service

@@ -4,7 +4,7 @@ package com.everhomes.poll;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.poll.PollShowResultResponse;
+import com.everhomes.rest.poll.PollShowResultResponse;
 
 public class ShowResultRestResponse extends RestResponseBase {
 

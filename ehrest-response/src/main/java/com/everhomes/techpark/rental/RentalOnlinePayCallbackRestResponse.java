@@ -4,7 +4,7 @@ package com.everhomes.techpark.rental;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.techpark.rental.OnlinePayCallbackCommandResponse;
+import com.everhomes.rest.techpark.rental.OnlinePayCallbackCommandResponse;
 
 public class RentalOnlinePayCallbackRestResponse extends RestResponseBase {
 

@@ -3,8 +3,7 @@
 package com.everhomes.techpark.park.admin;
 
 import com.everhomes.rest.RestResponseBase;
-
-import com.everhomes.techpark.park.WaitingDaysResponse;
+import com.everhomes.rest.techpark.park.WaitingDaysResponse;
 
 public class TechparkRestResponse extends RestResponseBase {
 

@@ -2,9 +2,8 @@
 // generated at 2015-12-04 14:52:02
 package com.everhomes.recommend.admin;
 
+import com.everhomes.rest.recommend.ListRecommendConfigResponse;
 import com.everhomes.rest.RestResponseBase;
-
-import com.everhomes.recommend.ListRecommendConfigResponse;
 
 public class RecommendRestResponse extends RestResponseBase {
 

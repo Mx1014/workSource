@@ -4,7 +4,7 @@ package com.everhomes.openapi;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.user.UserInfoFroBiz;
+import com.everhomes.rest.user.UserInfoFroBiz;
 
 public class GetUserInfoByIdRestResponse extends RestResponseBase {
 

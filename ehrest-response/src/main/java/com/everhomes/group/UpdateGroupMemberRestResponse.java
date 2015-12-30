@@ -4,7 +4,7 @@ package com.everhomes.group;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.group.GroupMemberDTO;
+import com.everhomes.rest.group.GroupMemberDTO;
 
 public class UpdateGroupMemberRestResponse extends RestResponseBase {
 

@@ -4,7 +4,7 @@ package com.everhomes.techpark.rental;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.techpark.rental.BatchCompleteBillCommandResponse;
+import com.everhomes.rest.techpark.rental.BatchCompleteBillCommandResponse;
 
 public class RentalBatchIncompleteBillRestResponse extends RestResponseBase {
 

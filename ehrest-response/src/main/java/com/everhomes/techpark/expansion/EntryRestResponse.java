@@ -3,8 +3,7 @@
 package com.everhomes.techpark.expansion;
 
 import com.everhomes.rest.RestResponseBase;
-
-import com.everhomes.techpark.expansion.ListBuildingForRentResponse;
+import com.everhomes.rest.techpark.expansion.ListBuildingForRentResponse;
 
 public class EntryRestResponse extends RestResponseBase {
 

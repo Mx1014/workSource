@@ -4,7 +4,7 @@ package com.everhomes.user;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.local.GetAppVersion;
+import com.everhomes.rest.local.GetAppVersion;
 
 public class AppversionRestResponse extends RestResponseBase {
 

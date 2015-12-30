@@ -4,7 +4,7 @@ package com.everhomes.techpark.punch;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.techpark.punch.ListMonthPunchLogsCommandResponse;
+import com.everhomes.rest.techpark.punch.ListMonthPunchLogsCommandResponse;
 
 public class PunchListMonthPunchLogsRestResponse extends RestResponseBase {
 

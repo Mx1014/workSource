@@ -4,7 +4,7 @@ package com.everhomes.recommend;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.recommend.RecommendBannerListResponse;
+import com.everhomes.rest.recommend.RecommendBannerListResponse;
 
 public class RecommendBannersRestResponse extends RestResponseBase {
 

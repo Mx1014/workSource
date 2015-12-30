@@ -4,7 +4,7 @@ package com.everhomes.techpark.punch;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.techpark.punch.ListPunchStatisticsCommandResponse;
+import com.everhomes.rest.techpark.punch.ListPunchStatisticsCommandResponse;
 
 public class PunchListPunchStatisticsRestResponse extends RestResponseBase {
 

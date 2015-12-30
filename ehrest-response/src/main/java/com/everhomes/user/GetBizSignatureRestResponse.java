@@ -4,7 +4,7 @@ package com.everhomes.user;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.user.GetSignatureCommandResponse;
+import com.everhomes.rest.user.GetSignatureCommandResponse;
 
 public class GetBizSignatureRestResponse extends RestResponseBase {
 

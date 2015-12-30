@@ -4,7 +4,7 @@ package com.everhomes.recommend.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.recommend.ListRecommendConfigResponse;
+import com.everhomes.rest.recommend.ListRecommendConfigResponse;
 
 public class RecommendListConfigRestResponse extends RestResponseBase {
 

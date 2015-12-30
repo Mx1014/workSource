@@ -5,7 +5,7 @@ package com.everhomes.organization.admin;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.organization.pm.UnassignedBuildingDTO;
+import com.everhomes.rest.organization.pm.UnassignedBuildingDTO;
 
 public class OrgListUnassignedBuildingRestResponse extends RestResponseBase {
 

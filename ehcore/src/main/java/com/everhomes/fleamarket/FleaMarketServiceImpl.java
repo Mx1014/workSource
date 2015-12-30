@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.acl.AclProvider;
-import com.everhomes.app.AppConstants;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -15,6 +14,10 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.Post;
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.fleamarket.FleaMarketItemDTO;
+import com.everhomes.rest.fleamarket.FleaMarketPostCommand;
+import com.everhomes.rest.fleamarket.FleaMarketUpdateCommand;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 

@@ -4,7 +4,7 @@ package com.everhomes.link;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.link.LinkDTO;
+import com.everhomes.rest.link.LinkDTO;
 
 public class FindLinkByIdRestResponse extends RestResponseBase {
 

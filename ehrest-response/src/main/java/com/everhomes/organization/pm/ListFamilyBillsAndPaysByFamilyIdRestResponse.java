@@ -4,7 +4,7 @@ package com.everhomes.organization.pm;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.organization.pm.ListFamilyBillsAndPaysByFamilyIdCommandResponse;
+import com.everhomes.rest.organization.pm.ListFamilyBillsAndPaysByFamilyIdCommandResponse;
 
 public class ListFamilyBillsAndPaysByFamilyIdRestResponse extends RestResponseBase {
 

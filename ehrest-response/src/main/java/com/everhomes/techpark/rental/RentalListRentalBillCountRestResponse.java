@@ -4,7 +4,7 @@ package com.everhomes.techpark.rental;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.techpark.rental.ListRentalBillCountCommandResponse;
+import com.everhomes.rest.techpark.rental.ListRentalBillCountCommandResponse;
 
 public class RentalListRentalBillCountRestResponse extends RestResponseBase {
 

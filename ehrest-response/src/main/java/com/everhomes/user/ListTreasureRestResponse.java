@@ -4,7 +4,7 @@ package com.everhomes.user;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.user.ListTreasureResponse;
+import com.everhomes.rest.user.ListTreasureResponse;
 
 public class ListTreasureRestResponse extends RestResponseBase {
 

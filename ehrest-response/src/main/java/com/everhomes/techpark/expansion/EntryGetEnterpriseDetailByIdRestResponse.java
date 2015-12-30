@@ -4,7 +4,7 @@ package com.everhomes.techpark.expansion;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.techpark.expansion.GetEnterpriseDetailByIdResponse;
+import com.everhomes.rest.techpark.expansion.GetEnterpriseDetailByIdResponse;
 
 public class EntryGetEnterpriseDetailByIdRestResponse extends RestResponseBase {
 

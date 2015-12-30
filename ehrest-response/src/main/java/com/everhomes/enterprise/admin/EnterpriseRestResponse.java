@@ -2,9 +2,8 @@
 // generated at 2015-12-04 14:52:02
 package com.everhomes.enterprise.admin;
 
+import com.everhomes.rest.enterprise.EnterpriseDTO;
 import com.everhomes.rest.RestResponseBase;
-
-import com.everhomes.enterprise.EnterpriseDTO;
 
 public class EnterpriseRestResponse extends RestResponseBase {
 

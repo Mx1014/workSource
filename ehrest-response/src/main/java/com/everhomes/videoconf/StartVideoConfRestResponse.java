@@ -4,7 +4,7 @@ package com.everhomes.videoconf;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.videoconf.StartVideoConfResponse;
+import com.everhomes.rest.videoconf.StartVideoConfResponse;
 
 public class StartVideoConfRestResponse extends RestResponseBase {
 

@@ -4,7 +4,7 @@ package com.everhomes.address;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.address.ListApartmentByBuildingNameCommandResponse;
+import com.everhomes.rest.address.ListApartmentByBuildingNameCommandResponse;
 
 public class ListApartmentsByBuildingNameRestResponse extends RestResponseBase {
 

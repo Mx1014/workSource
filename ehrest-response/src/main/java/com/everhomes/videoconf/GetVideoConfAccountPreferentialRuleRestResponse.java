@@ -4,7 +4,7 @@ package com.everhomes.videoconf;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.videoconf.VideoConfAccountPreferentialRuleDTO;
+import com.everhomes.rest.videoconf.VideoConfAccountPreferentialRuleDTO;
 
 public class GetVideoConfAccountPreferentialRuleRestResponse extends RestResponseBase {
 

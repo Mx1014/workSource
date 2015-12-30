@@ -4,7 +4,7 @@ package com.everhomes.enterprise;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.enterprise.EnterpriseCommunityResponse;
+import com.everhomes.rest.enterprise.EnterpriseCommunityResponse;
 
 public class EnterpriseCommunitiesRestResponse extends RestResponseBase {
 

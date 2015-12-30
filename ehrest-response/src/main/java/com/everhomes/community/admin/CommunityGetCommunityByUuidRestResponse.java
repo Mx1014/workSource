@@ -4,7 +4,7 @@ package com.everhomes.community.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.address.CommunityDTO;
+import com.everhomes.rest.address.CommunityDTO;
 
 public class CommunityGetCommunityByUuidRestResponse extends RestResponseBase {
 

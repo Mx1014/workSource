@@ -4,7 +4,7 @@ package com.everhomes.user.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.user.admin.ListUsersWithAddrResponse;
+import com.everhomes.rest.user.admin.ListUsersWithAddrResponse;
 
 public class UserListUsersWithAddrRestResponse extends RestResponseBase {
 

@@ -4,7 +4,7 @@ package com.everhomes.techpark.rental;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.techpark.rental.FindRentalSiteItemsCommandResponse;
+import com.everhomes.rest.techpark.rental.FindRentalSiteItemsCommandResponse;
 
 public class RentalFindRentalSiteItemsRestResponse extends RestResponseBase {
 

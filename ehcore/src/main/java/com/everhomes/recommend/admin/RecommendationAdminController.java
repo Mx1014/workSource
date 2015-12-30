@@ -11,12 +11,12 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.recommend.CreateRecommendConfig;
-import com.everhomes.recommend.ListRecommendConfigCommand;
-import com.everhomes.recommend.ListRecommendConfigResponse;
 import com.everhomes.recommend.RecommendationConfig;
 import com.everhomes.recommend.RecommendationService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.recommend.CreateRecommendConfig;
+import com.everhomes.rest.recommend.ListRecommendConfigCommand;
+import com.everhomes.rest.recommend.ListRecommendConfigResponse;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 

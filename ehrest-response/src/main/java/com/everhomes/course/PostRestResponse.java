@@ -4,7 +4,7 @@ package com.everhomes.course;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.course.CourseDTO;
+import com.everhomes.rest.course.CourseDTO;
 
 public class PostRestResponse extends RestResponseBase {
 

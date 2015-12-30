@@ -5,7 +5,7 @@ package com.everhomes.organization;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.organization.OrganizationSimpleDTO;
+import com.everhomes.rest.organization.OrganizationSimpleDTO;
 
 public class ListUserRelatedOrganizationsRestResponse extends RestResponseBase {
 

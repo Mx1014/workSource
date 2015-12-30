@@ -5,7 +5,7 @@ package com.everhomes.organization.pm;
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.organization.pm.PmBillsDTO;
+import com.everhomes.rest.organization.pm.PmBillsDTO;
 
 public class ListPmBillsByConditionsRestResponse extends RestResponseBase {
 

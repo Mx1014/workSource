@@ -4,7 +4,7 @@ package com.everhomes.contentserver;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.contentserver.ContentServerDTO;
+import com.everhomes.rest.contentserver.ContentServerDTO;
 
 public class AddContentServerRestResponse extends RestResponseBase {
 

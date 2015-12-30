@@ -4,7 +4,7 @@ package com.everhomes.techpark.park;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.techpark.park.WaitingLine;
+import com.everhomes.rest.techpark.park.WaitingLine;
 
 public class ParkApplyParkingCardRestResponse extends RestResponseBase {
 
