@@ -39,9 +39,13 @@ import org.springframework.stereotype.Service;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.db.DbProvider;
 import com.everhomes.enterprise.EnterpriseContact;
 import com.everhomes.enterprise.EnterpriseContactProvider;
 import com.everhomes.enterprise.EnterpriseContactService;
+import com.everhomes.group.Group;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.company.ContactType;
 import com.everhomes.user.UserContext;
@@ -65,12 +69,19 @@ public class PunchServiceImpl implements PunchService {
 
 	@Autowired
 	private EnterpriseContactProvider enterpriseContactProvider;
-
+	@Autowired
+	DbProvider dbProvider;
+	
 	@Autowired
 	ConfigurationProvider configurationProvider;
 
 	
-	
+
+    
+    @Autowired
+    private CoordinationProvider coordinationProvider;
+    
+    
 	private void checkCompanyIdIsNull(Long companyId) {
 		if (null == companyId || companyId.equals(0L)) {
 			LOGGER.error("Invalid company Id parameter in the command");
@@ -898,16 +909,22 @@ public class PunchServiceImpl implements PunchService {
 		punchLog.setPunchDate(java.sql.Date.valueOf(dateSF.format(punCalendar
 				.getTime())));
 		punchProvider.createPunchLog(punchLog);
-		try {
-			//刷新这一天的数据
-			refreshPunchDayLog(userId, cmd.getEnterpriseId(), punCalendar);
-		} catch (ParseException e) {
-			LOGGER.error(e.toString());
+		//刷新这一天的数据
+		this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_PUNCH_LOG.getCode()).enter(()-> {
+		    this.dbProvider.execute((status) -> {
+		    	try {
+					refreshPunchDayLog(userId, cmd.getEnterpriseId(), punCalendar);
+				} catch (Exception e) {
+					LOGGER.error(e.toString());
+					throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
+							PunchServiceErrorCode.ERROR_PUNCH_ADD_DAYLOG,
+							"Something wrong with refresh PunchDayLog");
 
-			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
-					PunchServiceErrorCode.ERROR_PUNCH_ADD_DAYLOG,
-					"Something wrong with refresh PunchDayLog");
-		}
+				}
+		        return null;
+		    });
+		    return null;
+		});
 		request.setPunchTime(punchTime);
 
 		return request;
