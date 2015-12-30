@@ -124,7 +124,7 @@ objc.response.base: EvhRestResponseBase
 
 class.name.prefix: Evh
 
-source.jars: ${EVH_HOME}/ehrest/target/ehrest-3.2.0-SNAPSHOT.jar
+source.jars: ${EVH_HOME}/ehrest/target/ehrest-0.0.1-SNAPSHOT.jar
 source.excludes: com.everhomes.rpc.*, com.everhomes.rest.RestResponse, com.everhomes.rest.RestResponseBase, com.everhomes.rest.RestVersion
 destination.dir: ${EVH_IOS_HOME}/API-objects/
 destination.dir.java: ${EVH_HOME}/ehrest-response/src/main/java/

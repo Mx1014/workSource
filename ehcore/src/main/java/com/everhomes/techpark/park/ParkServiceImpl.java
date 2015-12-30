@@ -251,7 +251,7 @@ public class ParkServiceImpl implements ParkService {
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(strToTimestamp(oldPeriod));
-		calendar.add(Calendar.DATE, 1);
+//		calendar.add(Calendar.DATE, 1);
 		calendar.add(Calendar.MONTH, month);
 		Timestamp newPeriod = new Timestamp(calendar.getTimeInMillis());
 		

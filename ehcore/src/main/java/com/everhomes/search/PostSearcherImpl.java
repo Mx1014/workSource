@@ -265,7 +265,10 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
             
             List<GroupDTO> groups = groupService.listUserRelatedGroups();
             List<Long> groupIds = new ArrayList<Long>();
-            groupIds.add(1l);
+            Integer namespaceId = (cmd.getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
+            if(namespaceId == Namespace.DEFAULT_NAMESPACE){
+            	 groupIds.add(1l);
+            }
             for(GroupDTO groupDTO : groups) {
                 groupIds.add(groupDTO.getId());
                 }
@@ -278,10 +281,8 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
                      }
                  }
             
-            Integer namespaceId = (cmd.getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
-            comFilter = FilterBuilders.boolFilter().must(comFilter, FilterBuilders.termFilter("namespaceId", namespaceId));
             
-            
+            comFilter = FilterBuilders.boolFilter().should(comFilter, FilterBuilders.termFilter("namespaceId", namespaceId));
             fb = comFilter;
         } else {
             if(cmd.getForumId() != null) {
