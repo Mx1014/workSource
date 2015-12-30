@@ -38,6 +38,7 @@ public class NamespaceResourceServiceImpl implements NamespaceResourceService {
 	    // TODO: 暂时先不分页查，后面再补
 	    int namespaceId = (cmd.getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
 	    List<NamespaceResource> result = namespaceResourceProvider.listResourceByNamespace(namespaceId, NamespaceResourceType.COMMUNITY);
+<<<<<<< HEAD
 	    
 	    List<CommunityDTO> communityList = new ArrayList<CommunityDTO>();
         if(result != null && result.size() > 0){
@@ -59,6 +60,37 @@ public class NamespaceResourceServiceImpl implements NamespaceResourceService {
                 }
             }
         }
+=======
+//	    
+//	    List<CommunityDTO> communityList = new ArrayList<CommunityDTO>();
+//        if(result != null && result.size() > 0){
+//            CommunityDTO dto = null;
+//            for (NamespaceResource resource : result) {
+//                NamespaceResourceType type = NamespaceResourceType.fromCode(resource.getResourceType());
+//                if(type == NamespaceResourceType.COMMUNITY) {
+//                    Community community = communityProvider.findCommunityById(resource.getResourceId());
+//                    if(community != null) {
+//                        dto = ConvertHelper.convert(community, CommunityDTO.class);
+//                        communityList.add(dto);
+//                    } else {
+//                        LOGGER.error("Community not found, namespaceId=" + resource.getNamespaceId() 
+//                            + ", communityId=" + resource.getResourceId() + ", cmd=" + cmd);
+//                    }
+//                } else {
+//                    LOGGER.error("Unsupported namespace resource type, namespaceId=" + resource.getNamespaceId() 
+//                        + ", type=" + type + ", communityId=" + resource.getResourceId() + ", cmd=" + cmd);
+//                }
+//            }
+//        }
+	    List<CommunityDTO> communityList = new ArrayList<CommunityDTO>();
+	    List<Community> communities = communityProvider.listCommunitiesByNamespaceId(namespaceId);
+	    if(communities != null && communities.size() > 0) {
+	    	communityList = communities.stream().map(r -> {
+	    		CommunityDTO dto = ConvertHelper.convert(r, CommunityDTO.class);
+	    		return dto;
+	    	}).collect(Collectors.toList());
+	    }
+>>>>>>> 78adbe2... add listCommunitiesByNamespaceId
         response.setCommunities(communityList);
         
         return response;
