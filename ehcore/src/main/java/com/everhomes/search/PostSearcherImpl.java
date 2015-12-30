@@ -279,8 +279,7 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
                  }
             
             Integer namespaceId = (cmd.getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
-            comFilter = FilterBuilders.boolFilter().must(comFilter, FilterBuilders.termFilter("namespaceId", namespaceId));
-            
+            comFilter = FilterBuilders.boolFilter().should(comFilter, FilterBuilders.termFilter("namespaceId", namespaceId));
             
             fb = comFilter;
         } else {
