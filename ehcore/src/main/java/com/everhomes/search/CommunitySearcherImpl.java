@@ -27,6 +27,8 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityDoc;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.enterprise.EnterpriseCommunityType;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.user.UserContext;
 
 @Service
 public class CommunitySearcherImpl extends AbstractElasticSearch implements CommunitySearcher {
@@ -49,6 +51,7 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
             b.field("cityName", community.getCityName());
             b.field("regionId", (community.getAreaId() == null ? community.getCityId() : community.getAreaId()));
             b.field("communityType", community.getCommunityType());
+            b.field("namespaceId", community.getNamespaceId());
             b.endObject();
             return b;
         } catch (IOException ex) {
@@ -111,6 +114,7 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
             doc.setName((String)source.get("name"));
             doc.setCityName((String)source.get("cityName"));
             doc.setRegionId(SearchUtils.getLongField(source.get("regionId")));
+            doc.setNamespaceId(SearchUtils.getLongField(source.get("namespaceId")).intValue());
             
             return doc;
         }
@@ -135,6 +139,8 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
                 .field("name.pinyin_gram", 1.0f);
         
         FilterBuilder fb = null;
+        int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+        fb = FilterBuilders.termFilter("namespaceId", namespaceId);
         if((null != cityId) && (cityId > 0)) {
             fb = FilterBuilders.termFilter("cityId", cityId);
         }
