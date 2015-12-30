@@ -450,6 +450,7 @@ public class CommunityProviderImpl implements CommunityProvider {
                         
                     Long count = context.selectCount().from(Tables.EH_COMMUNITIES)
                             .where(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()))
+
                             .fetchOne(0, Long.class);
                     
                     countsInShards.add(count);
