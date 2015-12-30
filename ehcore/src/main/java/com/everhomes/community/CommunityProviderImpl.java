@@ -12,6 +12,8 @@ import java.util.UUID;
 
 
 
+
+
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -30,7 +32,11 @@ import org.springframework.stereotype.Component;
 
 
 
+
+
 import ch.hsr.geohash.GeoHash;
+
+
 
 
 
@@ -47,6 +53,7 @@ import com.everhomes.enterprise.EnterpriseContactStatus;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -1022,5 +1029,19 @@ public class CommunityProviderImpl implements CommunityProvider {
         EhBuildingAttachmentsDao dao = new EhBuildingAttachmentsDao(context.configuration());
         dao.deleteById(id);        
     }
+
+	@Override
+	public List<Community> listCommunitiesByNamespaceId(Integer namespaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        context.select().from(Tables.EH_COMMUNITIES);
+        List<Community> list = context.select().from(Tables.EH_COMMUNITIES)
+            .where(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId))
+            .and(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()))
+            .fetch().map((r) -> {
+                return ConvertHelper.convert(r, Community.class);
+            });
+        
+        return list;
+	}
 
 }

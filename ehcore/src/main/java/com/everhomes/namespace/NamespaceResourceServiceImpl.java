@@ -38,7 +38,7 @@ public class NamespaceResourceServiceImpl implements NamespaceResourceService {
 	    
 	    // TODO: 暂时先不分页查，后面再补
 	    int namespaceId = (cmd.getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
-//	    List<NamespaceResource> result = namespaceResourceProvider.listResourceByNamespace(namespaceId, NamespaceResourceType.COMMUNITY);
+	    List<NamespaceResource> result = namespaceResourceProvider.listResourceByNamespace(namespaceId, NamespaceResourceType.COMMUNITY);
 //	    
 //	    List<CommunityDTO> communityList = new ArrayList<CommunityDTO>();
 //        if(result != null && result.size() > 0){
@@ -61,7 +61,7 @@ public class NamespaceResourceServiceImpl implements NamespaceResourceService {
 //            }
 //        }
 	    List<CommunityDTO> communityList = new ArrayList<CommunityDTO>();
-	    List<Community> communities = communityProvider.listAllCommunities(0L, Integer.MAX_VALUE);
+	    List<Community> communities = communityProvider.listCommunitiesByNamespaceId(namespaceId);
 	    if(communities != null && communities.size() > 0) {
 	    	communityList = communities.stream().map(r -> {
 	    		CommunityDTO dto = ConvertHelper.convert(r, CommunityDTO.class);
