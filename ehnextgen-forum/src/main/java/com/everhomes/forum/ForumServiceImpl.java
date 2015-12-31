@@ -26,6 +26,7 @@ import com.everhomes.acl.Privilege;
 import com.everhomes.acl.PrivilegeConstants;
 import com.everhomes.acl.ResourceUserRoleResolver;
 import com.everhomes.acl.Role;
+import com.everhomes.address.CommunityAdminStatus;
 import com.everhomes.app.AppConstants;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
@@ -1743,7 +1744,7 @@ public class ForumServiceImpl implements ForumService {
         List<Long> cmntyIdList = new ArrayList<Long>();
         cmntyIdList.add(communityId);
         // 对于住宅小区还存在周边社区的概述（商业园区没有此概念），此时如果不指明是“本小区”则添加上周边各小区
-        if(communityType == CommunityType.RESIDENTIAL && scope != VisibilityScope.COMMUNITY) {
+        if(communityType == CommunityType.RESIDENTIAL && scope != VisibilityScope.COMMUNITY && community.getStatus() == CommunityAdminStatus.ACTIVE.getCode()) {
             List<Community> nearbyCmntyList = communityProvider.findNearyByCommunityById(communityId);
             for(Community c : nearbyCmntyList) {
                 cmntyIdList.add(c.getId());
@@ -2260,8 +2261,8 @@ public class ForumServiceImpl implements ForumService {
     }
     
     private Condition buildPostQryConditionBySimpleUser(Community community, VisibilityScope scope) {
-        long communityId = community.getId();
-        
+    	long communityId = community.getId();;
+    	
         Condition c1 = Tables.EH_FORUM_POSTS.CREATOR_TAG.eq(PostEntityTag.USER.getCode());
         c1 = c1.and(Tables.EH_FORUM_POSTS.TARGET_TAG.eq(PostEntityTag.USER.getCode()));
         c1 = c1.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode()));
@@ -2271,7 +2272,10 @@ public class ForumServiceImpl implements ForumService {
             break;
         default: // default to query topics in nearby communities
             List<Long> nearbyCmntyIdList = new ArrayList<Long>();
-            List<Community> nearbyCmntyList = communityProvider.findNearyByCommunityById(communityId);
+            List<Community> nearbyCmntyList = new ArrayList<Community>();
+            if(community.getStatus() == CommunityAdminStatus.ACTIVE.getCode())
+            	nearbyCmntyList = communityProvider.findNearyByCommunityById(communityId);
+            
             for(Community c : nearbyCmntyList) {
                 nearbyCmntyIdList.add(c.getId());
             }

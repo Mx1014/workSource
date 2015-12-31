@@ -157,6 +157,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     
     @Override
     public SuggestCommunityDTO suggestCommunity(SuggestCommunityCommand cmd) {
+    	int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId(); 
         if(cmd.getRegionId() == null || cmd.getName() == null || cmd.getName().isEmpty())
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid parameter, regionId and name should not be null or empty");
@@ -194,6 +195,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         User user = UserContext.current().getUser();
         community.setCreatorUid(user.getId());
         community.setStatus(CommunityAdminStatus.CONFIRMING.getCode());
+        community.setNamespaceId(namespaceId);
 
         this.dbProvider.execute((TransactionStatus status) ->  {
             this.communityProvider.createCommunity(user.getId(), community);
