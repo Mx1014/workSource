@@ -278,7 +278,7 @@ public class CategoryController extends ControllerBase {
 		List<Category> entityResultList = new ArrayList<Category>();
 		//entityResultList.add(category);
 		List<Category> result = this.categoryProvider.listChildCategories(namespaceId, CategoryConstants.CATEGORY_ID_SERVICE,CategoryAdminStatus.ACTIVE, orderBy);
-		if(result==null)
+		if(result==null||result.isEmpty())
 			result = this.categoryProvider.listChildCategories(0, CategoryConstants.CATEGORY_ID_SERVICE,CategoryAdminStatus.ACTIVE, orderBy);
 		
 		if(result != null && !result.isEmpty())
