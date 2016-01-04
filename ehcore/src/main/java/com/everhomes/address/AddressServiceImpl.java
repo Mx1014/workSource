@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.DSLContext;
@@ -56,6 +57,7 @@ import com.everhomes.family.LeaveFamilyCommand;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupMemberStatus;
 import com.everhomes.group.GroupProvider;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.openapi.UserServiceAddressDTO;
 import com.everhomes.organization.pm.CommunityPmContact;
 import com.everhomes.organization.pm.PropertyMgrProvider;
