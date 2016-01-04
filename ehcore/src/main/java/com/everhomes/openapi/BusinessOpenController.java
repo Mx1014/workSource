@@ -363,9 +363,9 @@ public class BusinessOpenController extends ControllerBase {
     }
     
     @RequestMapping("getUserInfoById")
-    @RestReturn(UserInfoFroBiz.class)
+    @RestReturn(UserInfo.class)
     public RestResponse getUserInfoById(@Valid GetUserInfoByIdCommand cmd) {
-    	UserInfoFroBiz user = this.userService.getUserInfoById(cmd);
+    	UserInfo user = this.userService.getUserInfoById(cmd);
     	RestResponse response =  new RestResponse(user);
     	response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
