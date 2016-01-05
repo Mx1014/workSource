@@ -186,6 +186,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		    condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.TAG.isNull().or(Tables.EH_LAUNCH_PAD_ITEMS.TAG.eq("")));
 		}
         condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.NAMESPACE_ID.eq(namespaceId));
+        condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.DISPLAY_FLAG.eq((byte)1));
 		step.where(condition).fetch().map((r) ->{
 			items.add(ConvertHelper.convert(r, LaunchPadItem.class));
 			return null;
