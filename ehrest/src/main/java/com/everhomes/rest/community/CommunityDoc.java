@@ -5,6 +5,7 @@ package com.everhomes.rest.community;
  * <li><p>id: 小区ID</p></li>
  * <li><p>cityId: 城市Id</p></li>
  * <li><p>name: 账单名称</p></li>
+ * <li><p>namespaceId: 域空间</p></li>
  * </ul>
  * @author janson
  *
@@ -15,6 +16,7 @@ public class CommunityDoc {
     private String name;
     private String cityName;
     private Long regionId;
+    private Integer namespaceId;
     
     public Long getId() {
         return id;
@@ -46,5 +48,11 @@ public class CommunityDoc {
     public void setRegionId(Long regionId) {
         this.regionId = regionId;
     }
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
 
 }
