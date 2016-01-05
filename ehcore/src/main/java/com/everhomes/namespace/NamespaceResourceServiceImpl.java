@@ -42,7 +42,6 @@ public class NamespaceResourceServiceImpl implements NamespaceResourceService {
 	    // TODO: 暂时先不分页查，后面再补
 	    int namespaceId = (cmd.getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
 	    List<NamespaceResource> result = namespaceResourceProvider.listResourceByNamespace(namespaceId, NamespaceResourceType.COMMUNITY);
-
 //	    
 //	    List<CommunityDTO> communityList = new ArrayList<CommunityDTO>();
 //        if(result != null && result.size() > 0){

@@ -9,9 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-
-
-
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -28,7 +25,6 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import ch.hsr.geohash.GeoHash;
-
 import com.everhomes.address.Address;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -65,6 +61,7 @@ import com.everhomes.server.schema.tables.records.EhBuildingsRecord;
 import com.everhomes.server.schema.tables.records.EhCommunitiesRecord;
 import com.everhomes.server.schema.tables.records.EhEnterpriseAttachmentsRecord;
 import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
@@ -284,10 +281,12 @@ public class CommunityProviderImpl implements CommunityProvider {
     @Cacheable(value="nearbyCommunityMap", key="#communityId" ,unless="#result.size() == 0")
     @Override
     public List<NearbyCommunityMap> findNearbyCommunityMap(Long communityId) {
+    	int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
         List<NearbyCommunityMap> list = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, communityId));
         context.select().from(Tables.EH_NEARBY_COMMUNITY_MAP)
             .where(Tables.EH_NEARBY_COMMUNITY_MAP.COMMUNITY_ID.equal(communityId))
+            .and(Tables.EH_NEARBY_COMMUNITY_MAP.NAMESPACE_ID.eq(namespaceId))
             .fetch().map((r) -> {
                 list.add(ConvertHelper.convert(r, NearbyCommunityMap.class));
                return null; 
@@ -438,6 +437,7 @@ public class CommunityProviderImpl implements CommunityProvider {
     @Override
     public List<Community> listAllCommunities(long pageOffset, long pageSize) {
             
+ //   	int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
         final List<Community> results = new ArrayList<>();
         
         long offset = PaginationHelper.offsetFromPageOffset(pageOffset, pageSize);
@@ -449,7 +449,7 @@ public class CommunityProviderImpl implements CommunityProvider {
                         
                     Long count = context.selectCount().from(Tables.EH_COMMUNITIES)
                             .where(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()))
-
+//                            .and(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId))
                             .fetchOne(0, Long.class);
                     
                     countsInShards.add(count);
@@ -479,6 +479,7 @@ public class CommunityProviderImpl implements CommunityProvider {
                 
                 context.select().from(Tables.EH_COMMUNITIES)
                     .where(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()))
+//                    .and(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId))
                     .limit((int)pageSize).offset((int)off)
                     .fetch().map((r) -> {
                         Community community = ConvertHelper.convert(r, Community.class);
@@ -501,7 +502,7 @@ public class CommunityProviderImpl implements CommunityProvider {
     @Override
     public List<Community> listCommunitiesByStatus(ListingLocator locator, int count,
             ListingQueryBuilderCallback queryBuilderCallback) {
-        
+    	int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
         
         final List<Community> communities = new ArrayList<Community>();
@@ -512,6 +513,8 @@ public class CommunityProviderImpl implements CommunityProvider {
             
         if(locator.getAnchor() != null)
             query.addConditions(Tables.EH_COMMUNITIES.ID.gt(locator.getAnchor()));
+        
+        query.addConditions(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId));
         query.addOrderBy(Tables.EH_COMMUNITIES.ID.asc());
         query.addLimit(count);
         
@@ -529,12 +532,14 @@ public class CommunityProviderImpl implements CommunityProvider {
     
     @Override
     public Community findCommunityByAreaIdAndName(Long areaId, String name) {
+    	int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
     	 final Community[] result = new Community[1];
 
          this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), result, 
              (DSLContext context, Object reducingContext) -> {
             	 context.select().from(Tables.EH_COMMUNITIES)
         		 .where(Tables.EH_COMMUNITIES.AREA_ID.eq(areaId))
+        		 .and(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId))
         		.and(Tables.EH_COMMUNITIES.NAME.eq(name)).fetch().map(r ->{
         			return result[0] = ConvertHelper.convert(r,Community.class);
         		});
@@ -557,11 +562,13 @@ public class CommunityProviderImpl implements CommunityProvider {
 
     @Override
     public List<Community> findCommunitiesByNameAndCityId(String name, long cityId) {
+    	int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
         List<Community> result = new ArrayList<Community>();
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), result, 
                 (DSLContext context, Object reducingContext) -> {
                     context.select().from(Tables.EH_COMMUNITIES)
                     .where(Tables.EH_COMMUNITIES.CITY_ID.eq(cityId))
+                    .and(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId))
                    .and(Tables.EH_COMMUNITIES.NAME.like("%" + name + "%")).fetch().map(r ->{
                        result.add(ConvertHelper.convert(r,Community.class));
                        return null;
@@ -573,6 +580,7 @@ public class CommunityProviderImpl implements CommunityProvider {
     
     @Override
     public List<Community> findCommunitiesByNameCityIdAreaId(String name, Long cityId,Long areaId) {
+    	int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
         List<Community> result = new ArrayList<Community>();
         LOGGER.info("findCommunitiesByNameCityIdAreaId-areaId="+areaId+",cityId="+cityId+",name="+name);
         
@@ -585,6 +593,7 @@ public class CommunityProviderImpl implements CommunityProvider {
                     if(areaId != null)
                     	condition = condition.and(Tables.EH_COMMUNITIES.AREA_ID.eq(areaId));
                     
+                    condition = condition.and(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId));
                     context.select().from(Tables.EH_COMMUNITIES)
                     .where(condition).fetch().map(r ->{
                     		result.add(ConvertHelper.convert(r,Community.class));
@@ -631,7 +640,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 	@Override
 	public List<Community> listCommunitiesByKeyWord(ListingLocator locator,
 			int count, String keyword) {
-		
+		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
 		final List<Community> communities = new ArrayList<Community>();
 		
 		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
@@ -641,6 +650,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 					.where(
 							Tables.EH_COMMUNITIES.ID.gt(locator.getAnchor())
 							.and(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.CONFIRMING.getCode()))
+							.and(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId))
 							.and(Tables.EH_COMMUNITIES.NAME.like('%'+keyword+'%').or(Tables.EH_COMMUNITIES.ALIAS_NAME.like('%'+keyword+'%'))))
 					.limit(count)
 					.fetch().map((r) -> {
@@ -657,6 +667,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 	@Override
 	public List<Building> ListBuildingsByCommunityId(ListingLocator locator, int count, Long communityId) {
 		assert(locator.getEntityId() != 0);
+		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class, locator.getEntityId()));
 		List<Building> buildings = new ArrayList<Building>();
         SelectQuery<EhBuildingsRecord> query = context.selectQuery(Tables.EH_BUILDINGS);
@@ -666,6 +677,7 @@ public class CommunityProviderImpl implements CommunityProvider {
         }
         
         query.addConditions(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId));
+        query.addConditions(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_BUILDINGS.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
         query.addOrderBy(Tables.EH_BUILDINGS.ID.desc());
         query.addLimit(count);
@@ -697,9 +709,11 @@ public class CommunityProviderImpl implements CommunityProvider {
 	
 	@Override
 	public Building findBuildingByCommunityIdAndName(long communityId, String buildingName) {
+		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBuildings.class));
 		SelectQuery<EhBuildingsRecord> query = context.selectQuery(Tables.EH_BUILDINGS);
 		query.addConditions(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId));
+		query.addConditions(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
 		query.addConditions(Tables.EH_BUILDINGS.NAME.eq(buildingName));
 		
         return ConvertHelper.convert(query.fetchOne(), Building.class);
@@ -804,11 +818,13 @@ public class CommunityProviderImpl implements CommunityProvider {
 
 	@Override
 	public Boolean verifyBuildingName(Long communityId, String buildingName) {
+		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBuildings.class));
 		List<Building> buildings = new ArrayList<Building>();
         SelectQuery<EhBuildingsRecord> query = context.selectQuery(Tables.EH_BUILDINGS);
     
         query.addConditions(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId));
+        query.addConditions(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_BUILDINGS.NAME.eq(buildingName));
        
         
@@ -828,6 +844,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 	public List<Building> listBuildingsByStatus(ListingLocator locator,
 			int count, ListingQueryBuilderCallback queryBuilderCallback) {
 
+		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBuildings.class));
         
         final List<Building> buildings = new ArrayList<Building>();
@@ -838,6 +855,7 @@ public class CommunityProviderImpl implements CommunityProvider {
             
         if(locator.getAnchor() != null)
             query.addConditions(Tables.EH_BUILDINGS.ID.gt(locator.getAnchor()));
+        query.addConditions(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
         query.addOrderBy(Tables.EH_BUILDINGS.ID.asc());
         query.addLimit(count);
         
@@ -855,12 +873,14 @@ public class CommunityProviderImpl implements CommunityProvider {
 
 	@Override
 	public int countBuildingsBycommunityId(Long communityId) {
+		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		List<Building> buildings = new ArrayList<Building>();
         SelectQuery<EhBuildingsRecord> query = context.selectQuery(Tables.EH_BUILDINGS);
     
        
         query.addConditions(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId));
+        query.addConditions(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
         query.addOrderBy(Tables.EH_BUILDINGS.ID.desc());
         
         if(LOGGER.isDebugEnabled()) {
@@ -880,11 +900,12 @@ public class CommunityProviderImpl implements CommunityProvider {
 
 	@Override
 	public List<Long> listBuildingIdByCommunityId(Long communityId) {
+		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		List<Long> buildingIds = new ArrayList<Long>();
         SelectQuery<EhBuildingsRecord> query = context.selectQuery(Tables.EH_BUILDINGS);
     
-       
+        query.addConditions(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId));
         query.addOrderBy(Tables.EH_BUILDINGS.ID.desc());
         

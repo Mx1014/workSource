@@ -29,10 +29,12 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.rest.region.RegionActiveStatus;
 import com.everhomes.rest.region.RegionAdminStatus;
 import com.everhomes.rest.region.RegionScope;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhRegionsDao;
 import com.everhomes.server.schema.tables.pojos.EhRegions;
 import com.everhomes.server.schema.tables.records.EhRegionsRecord;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SortOrder;
@@ -122,6 +124,8 @@ public class RegionProviderImpl implements RegionProvider {
 	@SuppressWarnings({"unchecked", "rawtypes" })
 	@Override
 	public List<Region> listRegions(RegionScope scope, RegionAdminStatus status, Tuple<String, SortOrder>... orderBy) {
+		 
+		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
 		//暂不向客户端开放排序字段指定 20150729
@@ -140,6 +144,7 @@ public class RegionProviderImpl implements RegionProvider {
 		else
 			condition = Tables.EH_REGIONS.STATUS.eq(status.getCode());
 
+		condition = condition.and(Tables.EH_REGIONS.NAMESPACE_ID.eq(namespaceId));
 		if(condition != null) {
 			selectStep.where(condition);
 		}
@@ -165,6 +170,7 @@ public class RegionProviderImpl implements RegionProvider {
 	public List<Region> listChildRegions(Long parentRegionId, RegionScope scope, 
 			RegionAdminStatus status, Tuple<String, SortOrder>... orderBy) {
 
+		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		//暂不向客户端开放排序字段指定 20150729
 		//SortField[] orderByFields = JooqHelper.toJooqFields(Tables.EH_REGIONS, orderBy);
@@ -189,6 +195,7 @@ public class RegionProviderImpl implements RegionProvider {
 		else
 			condition = Tables.EH_REGIONS.STATUS.eq(status.getCode());
 
+		condition = condition.and(Tables.EH_REGIONS.NAMESPACE_ID.eq(namespaceId));
 		if(condition != null) {
 			selectStep.where(condition);
 		}
@@ -214,6 +221,7 @@ public class RegionProviderImpl implements RegionProvider {
 	public List<Region> listDescendantRegions(Long parentRegionId, RegionScope scope, 
 			RegionAdminStatus status, Tuple<String, SortOrder>... orderBy) {
 
+		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
 		List<Region> result = new ArrayList<>();
 
 		String pathLike = "%";
@@ -255,6 +263,7 @@ public class RegionProviderImpl implements RegionProvider {
 		else
 			condition = Tables.EH_REGIONS.STATUS.eq(status.getCode());
 
+		condition = condition.and(Tables.EH_REGIONS.NAMESPACE_ID.eq(namespaceId));
 		if(condition != null) {
 			selectStep.where(condition);
 		}
@@ -278,6 +287,7 @@ public class RegionProviderImpl implements RegionProvider {
 	@Override
 	public List<Region> listRegionByKeyword(Long parentRegionId, RegionScope scope, RegionAdminStatus status,
 			Tuple<String, SortOrder> orderBy, String keyword) {
+		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
 		List<Region> result = new ArrayList<>();
 		if(StringUtils.isEmpty(keyword)){
 			LOGGER.error("Keyword is null or empty" );
@@ -314,7 +324,7 @@ public class RegionProviderImpl implements RegionProvider {
 		if(status != null)
 			condition = condition.and(Tables.EH_REGIONS.STATUS.eq(status.getCode()));
 
-
+		condition = condition.and(Tables.EH_REGIONS.NAMESPACE_ID.eq(namespaceId));
 		if(condition != null) {
 			selectStep.where(condition);
 		}
@@ -338,6 +348,7 @@ public class RegionProviderImpl implements RegionProvider {
 	@Override
 	public List<Region> listRegionByName(Long parentRegionId, RegionScope scope, RegionAdminStatus status,
 			Tuple<String, SortOrder> orderBy, String keyword) {
+		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
 		List<Region> result = new ArrayList<Region>();
 		if(StringUtils.isEmpty(keyword)){
 			LOGGER.error("Keyword is null or empty" );
@@ -372,6 +383,7 @@ public class RegionProviderImpl implements RegionProvider {
 		if(status != null)
 			condition = condition.and(Tables.EH_REGIONS.STATUS.eq(status.getCode()));
 
+		condition = condition.and(Tables.EH_REGIONS.NAMESPACE_ID.eq(namespaceId));
 		if(condition != null) {
 			selectStep.where(condition);
 		}
@@ -387,6 +399,7 @@ public class RegionProviderImpl implements RegionProvider {
 	@Override
 	public List<Region> listActiveRegion(RegionScope scope) {
 
+		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
 		List<Region> result = new ArrayList<>();
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -398,6 +411,7 @@ public class RegionProviderImpl implements RegionProvider {
 		if(scope != null)
 			condition = condition.and(Tables.EH_REGIONS.SCOPE_CODE.eq(scope.getCode()));
 
+		condition = condition.and(Tables.EH_REGIONS.NAMESPACE_ID.eq(namespaceId));
 		if(condition != null) {
 
 			selectStep.where(condition);
@@ -411,10 +425,12 @@ public class RegionProviderImpl implements RegionProvider {
 	
 	@Override
 	public Region findRegionByPath(String path){
+		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
 		SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_REGIONS);
 		Condition condition = Tables.EH_REGIONS.PATH.like("%" +path);
+		condition = condition.and(Tables.EH_REGIONS.NAMESPACE_ID.eq(namespaceId));
 		selectStep.where(condition);
 		Result<Record> r = selectStep.fetch();
 		if(r.size() == 0){

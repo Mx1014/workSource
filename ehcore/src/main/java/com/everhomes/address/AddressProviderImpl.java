@@ -26,6 +26,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.ApartmentDTO;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhAddressesDao;
@@ -33,6 +34,7 @@ import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.records.EhAddressesRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
@@ -129,6 +131,7 @@ public class AddressProviderImpl implements AddressProvider {
     @Cacheable(value="Apartment", key="{#communityId, #buildingName, #apartmentName}" ,unless="#result==null")
     @Override
     public Address findApartmentAddress(long communityId, String buildingName, String apartmentName) {
+    	int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
         final Address[] result = new Address[1];
         
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
@@ -138,6 +141,7 @@ public class AddressProviderImpl implements AddressProvider {
                 .where(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId))
                 .and(Tables.EH_ADDRESSES.BUILDING_NAME.eq(buildingName))
                 .and(Tables.EH_ADDRESSES.APARTMENT_NAME.eq(apartmentName))
+                .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
                 .fetch().map((r) -> {
                    return ConvertHelper.convert(r, Address.class); 
                 });
@@ -155,7 +159,7 @@ public class AddressProviderImpl implements AddressProvider {
     @Override
     public List<Address> queryAddress(CrossShardListingLocator locator, int count, 
             ListingQueryBuilderCallback queryBuilderCallback) {
-        
+    	int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
         final List<Address> addresses = new ArrayList<>();
         
         if(locator.getShardIterator() == null) {
@@ -173,6 +177,8 @@ public class AddressProviderImpl implements AddressProvider {
                 
             if(locator.getAnchor() != null)
                 query.addConditions(Tables.EH_ADDRESSES.ID.gt(locator.getAnchor()));
+            
+            query.addConditions(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId));
             query.addOrderBy(Tables.EH_ADDRESSES.ID.asc());
             query.addLimit(count - addresses.size());
             
@@ -197,7 +203,7 @@ public class AddressProviderImpl implements AddressProvider {
 
     @Override
     public List<ApartmentDTO> listApartmentsByBuildingName(long communityId, String buildingName , int offset , int size) {
-        
+    	int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
         List<ApartmentDTO> results = new ArrayList<>();
         
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
@@ -208,6 +214,7 @@ public class AddressProviderImpl implements AddressProvider {
                         .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(communityId)
                         .and(Tables.EH_ADDRESSES.BUILDING_NAME.equal(buildingName)))
                         .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()))
+                        .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
                         //.limit(size).offset(offset)
                         .fetch().map((r) -> {
                             ApartmentDTO apartment = new ApartmentDTO();
@@ -225,6 +232,7 @@ public class AddressProviderImpl implements AddressProvider {
     
     @Override
     public int countApartmentsByBuildingName(long communityId, String buildingName) {
+    	int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
         final Integer[] count = new Integer[1];
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
                 (DSLContext context, Object reducingContext)-> {
@@ -233,6 +241,7 @@ public class AddressProviderImpl implements AddressProvider {
                             .on(Tables.EH_ADDRESSES.ID.eq(Tables.EH_GROUPS.INTEGRAL_TAG1))
                             .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(communityId))
                                     .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()))
+                                    .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
                                     .and(Tables.EH_GROUPS.MEMBER_COUNT.greaterThan(0L))
                     .fetchOneInto(Integer.class);
                     return true;
@@ -260,13 +269,15 @@ public class AddressProviderImpl implements AddressProvider {
 
     @Override
     public Address findAddressByRegionAndAddress(Long cityId, Long areaId, String address) {
+    	int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
         final Address[] addresses = new Address[1];
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
                 (DSLContext context, Object reducingContext)-> {
                    context.select().from(Tables.EH_ADDRESSES)
                    .where(Tables.EH_ADDRESSES.CITY_ID.eq(cityId)
                            .and(Tables.EH_ADDRESSES.AREA_ID.eq(areaId))
-                           .and(Tables.EH_ADDRESSES.ADDRESS.eq(address)))
+                           .and(Tables.EH_ADDRESSES.ADDRESS.eq(address))
+                           .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId)))
                    .fetch().map(r ->{
                        addresses[0] = ConvertHelper.convert(r, Address.class);
                        return null;
@@ -278,8 +289,10 @@ public class AddressProviderImpl implements AddressProvider {
 
 	@Override
 	public Address findAddressByAddress(String address) {
+		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-		Record r = context.select().from(Tables.EH_ADDRESSES).where(Tables.EH_ADDRESSES.ADDRESS.eq(address)).fetchOne();
+		Record r = context.select().from(Tables.EH_ADDRESSES).where(Tables.EH_ADDRESSES.ADDRESS.eq(address))
+				.and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId)).fetchOne();
 		if(r != null)
 			return ConvertHelper.convert(r, Address.class);
 		return null;
@@ -287,6 +300,7 @@ public class AddressProviderImpl implements AddressProvider {
 	
 	 @Override
 	 public Address findAddressByCommunityAndAddress(Long cityId, Long areaId, Long communityId, String addressName) {
+		 int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
 		 List<Address> addresses = new ArrayList<Address>();
 	        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
 	                (DSLContext context, Object reducingContext)-> {
@@ -295,6 +309,7 @@ public class AddressProviderImpl implements AddressProvider {
 	                           .and(Tables.EH_ADDRESSES.AREA_ID.eq(areaId))
 	                           .and(Tables.EH_ADDRESSES.ADDRESS.eq(addressName))
 	                           .and(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId)))
+	                           .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
 	                   .fetch().map(r ->{
 	                	   addresses.add(ConvertHelper.convert(r, Address.class));
 	                       return null;
