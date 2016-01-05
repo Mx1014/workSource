@@ -13,6 +13,8 @@ public class ListBuildingCommand {
 	
 	@NotNull
 	private Long communityId;
+	
+	private Integer namespaceId;
     
 	private Long pageAnchor;
     
@@ -40,6 +42,14 @@ public class ListBuildingCommand {
 
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 }

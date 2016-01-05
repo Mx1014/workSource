@@ -25,6 +25,7 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import ch.hsr.geohash.GeoHash;
+
 import com.everhomes.address.Address;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -665,9 +666,9 @@ public class CommunityProviderImpl implements CommunityProvider {
 	}
 	
 	@Override
-	public List<Building> ListBuildingsByCommunityId(ListingLocator locator, int count, Long communityId) {
+	public List<Building> ListBuildingsByCommunityId(ListingLocator locator, int count, Long communityId, Integer namespaceId) {
 		assert(locator.getEntityId() != 0);
-		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+		namespaceId = null == namespaceId ? Namespace.DEFAULT_NAMESPACE : namespaceId;
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class, locator.getEntityId()));
 		List<Building> buildings = new ArrayList<Building>();
         SelectQuery<EhBuildingsRecord> query = context.selectQuery(Tables.EH_BUILDINGS);

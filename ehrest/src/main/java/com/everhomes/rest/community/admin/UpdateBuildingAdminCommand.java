@@ -50,6 +50,8 @@ public class UpdateBuildingAdminCommand {
 	
 	private String posterUri;
 	
+	private Integer namespaceId;
+	
 	@ItemType(AttachmentDescriptor.class)
     private List<AttachmentDescriptor> attachments;
 
@@ -147,6 +149,14 @@ public class UpdateBuildingAdminCommand {
 
 	public void setAttachments(List<AttachmentDescriptor> attachments) {
 		this.attachments = attachments;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	

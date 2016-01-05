@@ -38,6 +38,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
@@ -570,7 +571,7 @@ public class CommunityServiceImpl implements CommunityService {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-		List<Building> buildings = communityProvider.ListBuildingsByCommunityId(locator, pageSize + 1,communityId);
+		List<Building> buildings = communityProvider.ListBuildingsByCommunityId(locator, pageSize + 1,communityId, cmd.getNamespaceId());
 		
 		this.communityProvider.populateBuildingAttachments(buildings);
         
@@ -583,12 +584,18 @@ public class CommunityServiceImpl implements CommunityService {
         populateBuildings(buildings);
         
         List<BuildingDTO> dtoList = buildings.stream().map((r) -> {
-          return ConvertHelper.convert(r, BuildingDTO.class);  
+        	
+        	BuildingDTO dto = ConvertHelper.convert(r, BuildingDTO.class);  
+        	
+        	dto.setBuildingName(dto.getName());
+        	
+        	dto.setName(org.springframework.util.StringUtils.isEmpty(dto.getAliasName()) ? dto.getName() : dto.getAliasName());
+        	
+        	populateBuildingDTO(dto);
+        	
+        	return dto;
         }).collect(Collectors.toList());
         
-        for(BuildingDTO buildingDTO : dtoList){
-        	populateBuildingDTO(buildingDTO);
-        }
         
         return new ListBuildingCommandResponse(nextPageAnchor, dtoList);
 	}
@@ -790,6 +797,7 @@ public class CommunityServiceImpl implements CommunityService {
 		building.setName(cmd.getName());
 		building.setPosterUri(cmd.getPosterUri());
 		building.setStatus(CommunityAdminStatus.ACTIVE.getCode());
+		building.setNamespaceId(null == cmd.getNamespaceId() ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId());
 		if(!StringUtils.isNullOrEmpty(cmd.getGeoString())){
 			String[] geoString = cmd.getGeoString().split(",");
 			double longitude = Double.valueOf(geoString[0]);

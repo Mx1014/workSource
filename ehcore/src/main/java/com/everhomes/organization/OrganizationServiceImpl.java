@@ -2814,8 +2814,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"community not found.");
 		}
+		
+		Integer namespaceId = null == cmd.getNamespaceId() ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
         CrossShardListingLocator locator = new CrossShardListingLocator();
-        List<Building> buildings = this.communityProvider.ListBuildingsByCommunityId(locator, AppConstants.PAGINATION_MAX_SIZE + 1, community.getCommunityId());
+        List<Building> buildings = this.communityProvider.ListBuildingsByCommunityId(locator, AppConstants.PAGINATION_MAX_SIZE + 1, community.getCommunityId(), namespaceId);
         List<Building> unassigned = new ArrayList<Building>();
         for(Building building : buildings) {
         	if(!pmBuildingIds.contains(building.getId()))

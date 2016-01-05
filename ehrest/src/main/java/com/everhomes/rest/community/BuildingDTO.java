@@ -46,6 +46,8 @@ public class BuildingDTO {
 	
 	private String name;
 	
+	private String buildingName;
+	
 	private String aliasName;
 	
 	private Long managerUid;
@@ -90,6 +92,8 @@ public class BuildingDTO {
     private String creatorAvatarUrl;
 	
 	private Timestamp createTime;
+	
+	
 	
 	@ItemType(BuildingAttachmentDTO.class)
 	private List<BuildingAttachmentDTO> attachments;
@@ -140,6 +144,16 @@ public class BuildingDTO {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	
+	
+	public String getBuildingName() {
+		return buildingName;
+	}
+
+	public void setBuildingName(String buildingName) {
+		this.buildingName = buildingName;
 	}
 
 	public String getAliasName() {
