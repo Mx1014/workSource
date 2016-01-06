@@ -1,0 +1,285 @@
+package com.everhomes.videoconf;
+
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
+import org.elasticsearch.client.Requests;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.index.query.FilterBuilder;
+import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.enterprise.Enterprise;
+import com.everhomes.enterprise.EnterpriseContact;
+import com.everhomes.enterprise.EnterpriseContactEntry;
+import com.everhomes.enterprise.EnterpriseContactProvider;
+import com.everhomes.enterprise.EnterpriseProvider;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.rest.videoconf.ConfAccountDTO;
+import com.everhomes.rest.videoconf.EnterpriseUsersDTO;
+import com.everhomes.rest.videoconf.ListEnterpriseVideoConfAccountCommand;
+import com.everhomes.rest.videoconf.ListEnterpriseVideoConfAccountResponse;
+import com.everhomes.rest.videoconf.ListUsersWithoutVideoConfPrivilegeResponse;
+import com.everhomes.search.AbstractElasticSearch;
+import com.everhomes.search.ConfAccountSearcher;
+import com.everhomes.search.SearchUtils;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.UserProvider;
+import com.everhomes.util.DateHelper;
+import com.mysql.jdbc.StringUtils;
+
+@Component
+public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
+		ConfAccountSearcher {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(ConfAccountSearcherImpl.class);
+	
+	@Autowired
+    private UserProvider userProvider;
+	
+	@Autowired
+	private EnterpriseContactProvider enterpriseContactProvider;
+	
+	@Autowired
+	private VideoConfProvider vcProvider;
+	
+	@Autowired
+	private EnterpriseProvider enterpriseProvider;
+	
+	@Autowired
+    private ConfigurationProvider configProvider;
+	
+	@Override
+	public void deleteById(Long id) {
+		deleteById(id.toString());
+	}
+
+	@Override
+	public void bulkUpdate(List<ConfAccounts> accounts) {
+		BulkRequestBuilder brb = getClient().prepareBulk();
+        for (ConfAccounts account : accounts) {
+        	
+            XContentBuilder source = createDoc(account);
+            if(null != source) {
+                LOGGER.info("conf account id:" + account.getId());
+                brb.add(Requests.indexRequest(getIndexName()).type(getIndexType())
+                        .id(account.getId().toString()).source(source));    
+                }
+            
+        }
+        if (brb.numberOfActions() > 0) {
+            brb.execute().actionGet();
+        }
+
+	}
+
+	@Override
+	public void feedDoc(ConfAccounts account) {
+		XContentBuilder source = createDoc(account);
+        
+        feedDoc(account.getId().toString(), source);
+
+	}
+
+	@Override
+	public void syncFromDb() {
+		int pageSize = 200;      
+        this.deleteAll();
+        
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        for(;;) {
+            List<ConfAccounts> accounts = vcProvider.listConfAccountsByEnterpriseId(null, null, locator, pageSize);
+            
+            if(accounts.size() > 0) {
+                this.bulkUpdate(accounts);
+            }
+            
+            if(locator.getAnchor() == null) {
+                break;
+            }
+        }
+
+        this.optimize(1);
+        this.refresh();
+        
+        LOGGER.info("sync for conference account ok");
+
+	}
+
+	@Override
+	public ListEnterpriseVideoConfAccountResponse query(ListEnterpriseVideoConfAccountCommand cmd) {
+		SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
+		QueryBuilder qb = null;
+        if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
+            qb = QueryBuilders.matchAllQuery();
+        } else {
+            qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
+                    .field("userName", 5.0f)
+                    .field("enterpriseName", 3.0f)
+                    .field("department", 2.0f)
+                    .field("contact", 1.0f);
+            
+            builder.setHighlighterFragmentSize(60);
+            builder.setHighlighterNumOfFragments(8);
+            builder.addHighlightedField("userName").addHighlightedField("enterpriseName").addHighlightedField("department").addHighlightedField("contact");
+        }
+
+        FilterBuilder fb = null;
+        if(cmd.getEnterpriseId() != null)
+        	fb = FilterBuilders.termFilter("enterpriseId", cmd.getEnterpriseId());
+        if(cmd.getStatus() != null)
+        	fb = FilterBuilders.termFilter("status", cmd.getStatus());
+        
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        Long anchor = 0l;
+        if(cmd.getPageAnchor() != null) {
+            anchor = cmd.getPageAnchor();
+        }
+        
+        qb = QueryBuilders.filteredQuery(qb, fb);
+        builder.setSearchType(SearchType.QUERY_THEN_FETCH);
+        builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
+        builder.setQuery(qb);
+        
+        SearchResponse rsp = builder.execute().actionGet();
+
+        List<Long> ids = getIds(rsp);
+        
+        ListEnterpriseVideoConfAccountResponse response = new ListEnterpriseVideoConfAccountResponse();
+        if(ids.size() > pageSize) {
+        	response.setNextPageAnchor(anchor + 1);
+            ids.remove(ids.size() - 1);
+         } else {
+        	 response.setNextPageAnchor(null);
+            }
+        
+        List<ConfAccountDTO> confAccounts = new ArrayList<ConfAccountDTO>();
+        for(Long id : ids) {
+        	ConfAccountDTO dto = new ConfAccountDTO();
+        	ConfAccounts account = vcProvider.findVideoconfAccountById(id);
+        	dto.setId(account.getId());
+			dto.setUserId(account.getOwnerId());
+			dto.setValidDate(account.getExpiredDate());
+			dto.setUpdateDate(account.getUpdateTime());
+			if(account.getAccountType() == 1)
+				dto.setUserType((byte) 0);
+			else {
+				if(vcProvider.countOrdersByAccountId(account.getId()) == 1)
+					dto.setUserType((byte) 1);
+				else {
+					dto.setUserType((byte) 2);
+				}
+			}
+			dto.setStatus(account.getStatus());
+			if(new Timestamp(DateHelper.currentGMTTime().getTime()).after(account.getExpiredDate()))
+				dto.setValidFlag((byte) 0);
+			else {
+				dto.setValidFlag((byte) 1);
+			}
+			ConfAccountCategories category = vcProvider.findAccountCategoriesById(account.getAccountCategoryId());
+			if(category != null) {
+				dto.setAccountType(category.getChannelType());
+				dto.setConfType(category.getConfType());
+			}
+			
+			Enterprise enterprise = enterpriseProvider.findEnterpriseById(account.getEnterpriseId());
+			if(enterprise != null)
+				dto.setEnterpriseName(enterprise.getName());
+			EnterpriseContact contact = enterpriseContactProvider.queryContactByUserId(account.getEnterpriseId(), account.getOwnerId());
+			if(contact != null) {
+				
+				dto.setDepartment(contact.getStringTag1());
+				dto.setUserName(contact.getName());
+				List<EnterpriseContactEntry> entry = enterpriseContactProvider.queryContactEntryByContactId(contact);
+				if(entry != null && entry.size() >0) {
+					dto.setMobile(entry.get(0).getEntryValue());
+				}
+			}
+			
+			confAccounts.add(dto);
+        }
+        response.setConfAccounts(confAccounts);
+        
+        return response;
+	}
+
+	@Override
+	public String getIndexType() {
+		return SearchUtils.CONFACCOUNTINDEXTYPE;
+	}
+	
+	private XContentBuilder createDoc(ConfAccounts account){
+		try {
+            XContentBuilder b = XContentFactory.jsonBuilder().startObject();
+            b.field("id", account.getId());
+            b.field("updateTime", account.getUpdateTime());
+            b.field("expiredDate", account.getExpiredDate());
+            b.field("status", account.getStatus());
+
+//            b.field("userType", account.getId());
+//            if(account.getAccountType() == 1)
+//            	b.field("userType", 0);
+//			else {
+//				if(vcProvider.countOrdersByAccountId(account.getId()) == 1)
+//					b.field("userType", 1);
+//				else {
+//					b.field("userType", 2);
+//				}
+//			}
+            EnterpriseContact contact = enterpriseContactProvider.queryContactByUserId(account.getEnterpriseId(), account.getOwnerId());
+            if(null != contact) {
+                b.field("userName", contact.getName());
+                b.field("department", contact.getStringTag1());
+                List<EnterpriseContactEntry> entry = enterpriseContactProvider.queryContactEntryByContactId(contact);
+    			if(entry != null && entry.size() >0) {
+                    b.field("contact", entry.get(0).getEntryValue());
+                } else {
+                    b.field("contact", "");
+                }
+    			
+            } else {
+                b.field("userName", "");
+                b.field("department", "");
+                b.field("contact", "");
+            }
+            
+            ConfAccountCategories category = vcProvider.findAccountCategoriesById(account.getAccountCategoryId());
+            if(null != category) {
+                b.field("accountType", category.getChannelType());
+                b.field("confType", category.getConfType());
+            } else {
+                b.field("accountType", "");
+                b.field("confType", "");
+            }
+            
+            Enterprise enterprise = enterpriseProvider.findEnterpriseById(account.getEnterpriseId());
+            if(null != enterprise) {
+                b.field("enterpriseName", enterprise.getName());
+            } else {
+                b.field("enterpriseName", "");
+            }
+            
+            
+            
+            b.endObject();
+            return b;
+        } catch (IOException ex) {
+            LOGGER.error("Create account " + account.getId() + " error");
+            return null;
+        }
+    }
+
+}
