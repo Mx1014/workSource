@@ -571,7 +571,7 @@ public class CommunityServiceImpl implements CommunityService {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-		List<Building> buildings = communityProvider.ListBuildingsByCommunityId(locator, pageSize + 1,communityId, cmd.getNamespaceId());
+		List<Building> buildings = communityProvider.ListBuildingsByCommunityId(locator, pageSize + 1,communityId, UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
 		
 		this.communityProvider.populateBuildingAttachments(buildings);
         
