@@ -57,6 +57,7 @@ import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
+import com.everhomes.videoconf.VideoConfProvider;
 
 @Component
 public class EnterpriseContactProviderImpl implements EnterpriseContactProvider {
@@ -68,6 +69,9 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
     
     @Autowired
     private SequenceProvider sequenceProvider;
+    
+    @Autowired
+    private VideoConfProvider vcProvider;
     
     // TODO for cache. member of eh_groups partition
     @Override
@@ -1136,4 +1140,27 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
 //    public List<EnterpriseContact> queryEnterpriseContactWithJoin() {
 //        EnterpriseContactRecordMapper
 //    }
+
+	@Override
+	public List<EnterpriseContact> queryContact(
+			CrossShardListingLocator locator, int count) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+		
+		List<Long> userIds = vcProvider.findUsersByEnterpriseId(null);
+		 
+        SelectQuery<EhEnterpriseContactsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CONTACTS);
+ 
+        if(locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.ID.gt(locator.getAnchor()));
+        }
+
+        query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.USER_ID.ne(0L));
+        query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.STATUS.eq((byte) 3));
+        query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.USER_ID.notIn(userIds));
+        query.addLimit(count);
+        return query.fetch().map((r) -> {
+            return ConvertHelper.convert(r, EnterpriseContact.class);
+        });
+        
+	}
 }

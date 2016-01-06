@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>enterpriseId: 企业id</li>
  * <li>status: 有效状态</li>
- * <li>keyword: 关键字：姓名 手机号 部门</li>
+ * <li>keyword: 关键字：姓名 手机号 部门 企业名称</li>
  * <li>pageAnchor: 本页开始的锚点</li>
  * <li>pageSize: 每页的数量</li>
  * </ul>

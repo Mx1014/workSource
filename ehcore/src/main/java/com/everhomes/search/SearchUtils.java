@@ -13,6 +13,10 @@ public class SearchUtils {
     //public static final String ENTERPRISEINDEXNAME = "everhomesv3";
     public static final String ENTERPRISEINDEXTYPE = "enterprise";
     
+    public static final String CONFACCOUNTINDEXTYPE = "confaccount";
+    
+    public static final String ENTERPRISECONTACTINDEXTYPE = "enterprisecontact";
+    
     public static Long getLongField(Object o) {
         Long v = -1l;
         String s = "";

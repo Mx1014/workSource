@@ -530,7 +530,8 @@ public class VideoConfProviderImpl implements VideoConfProvider {
  
         SelectQuery<EhConfAccountsRecord> query = context.selectQuery(Tables.EH_CONF_ACCOUNTS);
        
-        query.addConditions(Tables.EH_CONF_ACCOUNTS.ENTERPRISE_ID.eq(enterpriseId));
+        if(enterpriseId != null)
+        	query.addConditions(Tables.EH_CONF_ACCOUNTS.ENTERPRISE_ID.eq(enterpriseId));
         query.addConditions(Tables.EH_CONF_ACCOUNTS.STATUS.ne((byte) 0));
         query.fetch().map((r) -> {
         	userIds.add(r.getOwnerId());

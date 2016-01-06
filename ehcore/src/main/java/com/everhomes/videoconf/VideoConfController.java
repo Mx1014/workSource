@@ -78,6 +78,8 @@ import com.everhomes.rest.videoconf.UserAccountDTO;
 import com.everhomes.rest.videoconf.VerifyVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.VideoConfAccountPreferentialRuleDTO;
 import com.everhomes.rest.videoconf.VideoConfAccountTrialRuleDTO;
+import com.everhomes.search.ConfAccountSearcher;
+import com.everhomes.search.UserWithoutConfAccountSearcher;
 import com.everhomes.util.RequireAuthentication;
 
 @RestDoc(value = "VideoConf controller", site = "core")
@@ -90,6 +92,12 @@ public class VideoConfController  extends ControllerBase{
 	
 	@Autowired
     private ConfigurationProvider configurationProvider;
+	
+	@Autowired
+	private ConfAccountSearcher confAccountSearcher;
+	
+	@Autowired
+	private UserWithoutConfAccountSearcher userWithoutConfAccountSearcher;
 	
 	/**
 	 * <b>URL: /conf/getAppDownloadURL</b>
@@ -903,7 +911,8 @@ public class VideoConfController  extends ControllerBase{
 	@RestReturn(value = ListEnterpriseVideoConfAccountResponse.class)
 	public RestResponse listVideoConfAccountByEnterpriseId(ListEnterpriseVideoConfAccountCommand cmd) {
 
-		ListEnterpriseVideoConfAccountResponse accounts = videoConfService.listVideoConfAccountByEnterpriseId(cmd);
+//		ListEnterpriseVideoConfAccountResponse accounts = videoConfService.listVideoConfAccountByEnterpriseId(cmd);
+		ListEnterpriseVideoConfAccountResponse accounts = confAccountSearcher.query(cmd);
 		RestResponse response = new RestResponse(accounts);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -967,7 +976,8 @@ public class VideoConfController  extends ControllerBase{
 	@RestReturn(value = ListUsersWithoutVideoConfPrivilegeResponse.class)
 	public RestResponse listUsersWithoutVideoConfPrivilege(ListUsersWithoutVideoConfPrivilegeCommand cmd) {
 
-		ListUsersWithoutVideoConfPrivilegeResponse users = videoConfService.listUsersWithoutVideoConfPrivilege(cmd);
+//		ListUsersWithoutVideoConfPrivilegeResponse users = videoConfService.listUsersWithoutVideoConfPrivilege(cmd);
+		ListUsersWithoutVideoConfPrivilegeResponse users = userWithoutConfAccountSearcher.query(cmd);
 		RestResponse response = new RestResponse(users);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -1118,6 +1128,36 @@ public class VideoConfController  extends ControllerBase{
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	/**
+     * <b>URL: /conf/syncAccountIndex</b>
+     * <p>搜索索引同步</p>
+     * @return {String.class}
+     */
+    @RequestMapping("syncAccountIndex")
+    @RestReturn(value=String.class)
+    public RestResponse syncAccountIndex() {
+    	confAccountSearcher.syncFromDb();
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+    
+    /**
+     * <b>URL: /conf/syncUserIndex</b>
+     * <p>搜索索引同步</p>
+     * @return {String.class}
+     */
+    @RequestMapping("syncUserIndex")
+    @RestReturn(value=String.class)
+    public RestResponse syncUserIndex() {
+    	userWithoutConfAccountSearcher.syncFromDb();
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
 	
 	
 	
