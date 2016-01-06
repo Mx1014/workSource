@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfReservations implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1235314426;
+	private static final long serialVersionUID = -2072413492;
 
 	private java.lang.Long     id;
 	private java.lang.Long     enterpriseId;
@@ -28,6 +28,7 @@ public class EhConfReservations implements java.io.Serializable {
 	private java.sql.Timestamp updateTime;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
+	private java.lang.Integer  namespaceId;
 
 	public EhConfReservations() {}
 
@@ -46,7 +47,8 @@ public class EhConfReservations implements java.io.Serializable {
 		java.lang.Byte     status,
 		java.sql.Timestamp updateTime,
 		java.lang.Long     creatorUid,
-		java.sql.Timestamp createTime
+		java.sql.Timestamp createTime,
+		java.lang.Integer  namespaceId
 	) {
 		this.id = id;
 		this.enterpriseId = enterpriseId;
@@ -63,6 +65,7 @@ public class EhConfReservations implements java.io.Serializable {
 		this.updateTime = updateTime;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
+		this.namespaceId = namespaceId;
 	}
 
 	public java.lang.Long getId() {
@@ -183,5 +186,13 @@ public class EhConfReservations implements java.io.Serializable {
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+	public java.lang.Integer getNamespaceId() {
+		return this.namespaceId;
+	}
+
+	public void setNamespaceId(java.lang.Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 }

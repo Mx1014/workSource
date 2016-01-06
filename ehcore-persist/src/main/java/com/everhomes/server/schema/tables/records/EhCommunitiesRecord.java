@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunitiesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhCommunitiesRecord> {
 
-	private static final long serialVersionUID = -984597033;
+	private static final long serialVersionUID = -787575078;
 
 	/**
 	 * Setter for <code>ehcore.eh_communities.id</code>. id of the record
@@ -545,20 +545,6 @@ public class EhCommunitiesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 		return (java.sql.Timestamp) getValue(37);
 	}
 
-	/**
-	 * Setter for <code>ehcore.eh_communities.namespace_id</code>.
-	 */
-	public void setNamespaceId(java.lang.Integer value) {
-		setValue(38, value);
-	}
-
-	/**
-	 * Getter for <code>ehcore.eh_communities.namespace_id</code>.
-	 */
-	public java.lang.Integer getNamespaceId() {
-		return (java.lang.Integer) getValue(38);
-	}
-
 	// -------------------------------------------------------------------------
 	// Primary key information
 	// -------------------------------------------------------------------------
@@ -585,7 +571,7 @@ public class EhCommunitiesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	/**
 	 * Create a detached, initialised EhCommunitiesRecord
 	 */
-	public EhCommunitiesRecord(java.lang.Long id, java.lang.String uuid, java.lang.Long cityId, java.lang.String cityName, java.lang.Long areaId, java.lang.String areaName, java.lang.String name, java.lang.String aliasName, java.lang.String address, java.lang.String zipcode, java.lang.String description, java.lang.String detailDescription, java.lang.String aptSegment1, java.lang.String aptSegment2, java.lang.String aptSegment3, java.lang.String aptSeg1Sample, java.lang.String aptSeg2Sample, java.lang.String aptSeg3Sample, java.lang.Integer aptCount, java.lang.Long creatorUid, java.lang.Long operatorUid, java.lang.Byte status, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.lang.Byte communityType, java.lang.Long defaultForumId, java.lang.Long feedbackForumId, java.sql.Timestamp updateTime, java.lang.Integer namespaceId) {
+	public EhCommunitiesRecord(java.lang.Long id, java.lang.String uuid, java.lang.Long cityId, java.lang.String cityName, java.lang.Long areaId, java.lang.String areaName, java.lang.String name, java.lang.String aliasName, java.lang.String address, java.lang.String zipcode, java.lang.String description, java.lang.String detailDescription, java.lang.String aptSegment1, java.lang.String aptSegment2, java.lang.String aptSegment3, java.lang.String aptSeg1Sample, java.lang.String aptSeg2Sample, java.lang.String aptSeg3Sample, java.lang.Integer aptCount, java.lang.Long creatorUid, java.lang.Long operatorUid, java.lang.Byte status, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.lang.Byte communityType, java.lang.Long defaultForumId, java.lang.Long feedbackForumId, java.sql.Timestamp updateTime) {
 		super(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES);
 
 		setValue(0, id);
@@ -626,6 +612,5 @@ public class EhCommunitiesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 		setValue(35, defaultForumId);
 		setValue(36, feedbackForumId);
 		setValue(37, updateTime);
-		setValue(38, namespaceId);
 	}
 }

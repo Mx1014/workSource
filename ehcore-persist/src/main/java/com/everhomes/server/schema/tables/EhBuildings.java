@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhBuildings extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhBuildingsRecord> {
 
-	private static final long serialVersionUID = -1135328553;
+	private static final long serialVersionUID = -572387256;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_buildings</code>
@@ -170,11 +170,6 @@ public class EhBuildings extends org.jooq.impl.TableImpl<com.everhomes.server.sc
 	 * The column <code>ehcore.eh_buildings.string_tag5</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBuildingsRecord, java.lang.String> STRING_TAG5 = createField("string_tag5", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_buildings.namespace_id</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhBuildingsRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_buildings</code> table reference

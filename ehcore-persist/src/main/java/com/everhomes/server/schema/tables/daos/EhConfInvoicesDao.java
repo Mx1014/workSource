@@ -151,4 +151,11 @@ public class EhConfInvoicesDao extends org.jooq.impl.DAOImpl<com.everhomes.serve
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfInvoices> fetchByContractFlag(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhConfInvoices.EH_CONF_INVOICES.CONTRACT_FLAG, values);
 	}
+
+	/**
+	 * Fetch records that have <code>namespace_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfInvoices> fetchByNamespaceId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhConfInvoices.EH_CONF_INVOICES.NAMESPACE_ID, values);
+	}
 }

@@ -81,4 +81,11 @@ public class EhConfSourceAccountsDao extends org.jooq.impl.DAOImpl<com.everhomes
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfSourceAccounts> fetchByStatus(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhConfSourceAccounts.EH_CONF_SOURCE_ACCOUNTS.STATUS, values);
 	}
+
+	/**
+	 * Fetch records that have <code>namespace_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfSourceAccounts> fetchByNamespaceId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhConfSourceAccounts.EH_CONF_SOURCE_ACCOUNTS.NAMESPACE_ID, values);
+	}
 }

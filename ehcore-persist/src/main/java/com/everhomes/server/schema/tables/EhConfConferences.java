@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfConferences extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhConfConferencesRecord> {
 
-	private static final long serialVersionUID = 1618993686;
+	private static final long serialVersionUID = 1766751716;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_conf_conferences</code>
@@ -125,6 +125,11 @@ public class EhConfConferences extends org.jooq.impl.TableImpl<com.everhomes.ser
 	 * The column <code>ehcore.eh_conf_conferences.status</code>. 0: close, 1: on progress, 2: failed
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfConferencesRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT, this, "0: close, 1: on progress, 2: failed");
+
+	/**
+	 * The column <code>ehcore.eh_conf_conferences.namespace_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfConferencesRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_conf_conferences</code> table reference

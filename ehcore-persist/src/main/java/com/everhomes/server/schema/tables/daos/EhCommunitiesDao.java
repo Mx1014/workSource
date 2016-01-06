@@ -312,11 +312,4 @@ public class EhCommunitiesDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunities> fetchByUpdateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES.UPDATE_TIME, values);
 	}
-
-	/**
-	 * Fetch records that have <code>namespace_id IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunities> fetchByNamespaceId(java.lang.Integer... values) {
-		return fetch(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES.NAMESPACE_ID, values);
-	}
 }

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfConferences implements java.io.Serializable {
 
-	private static final long serialVersionUID = 398230174;
+	private static final long serialVersionUID = -78903178;
 
 	private java.lang.Long     id;
 	private java.lang.Long     confId;
@@ -33,6 +33,7 @@ public class EhConfConferences implements java.io.Serializable {
 	private java.lang.String   startUrl;
 	private java.sql.Timestamp createTime;
 	private java.lang.Byte     status;
+	private java.lang.Integer  namespaceId;
 
 	public EhConfConferences() {}
 
@@ -56,7 +57,8 @@ public class EhConfConferences implements java.io.Serializable {
 		java.lang.String   joinUrl,
 		java.lang.String   startUrl,
 		java.sql.Timestamp createTime,
-		java.lang.Byte     status
+		java.lang.Byte     status,
+		java.lang.Integer  namespaceId
 	) {
 		this.id = id;
 		this.confId = confId;
@@ -78,6 +80,7 @@ public class EhConfConferences implements java.io.Serializable {
 		this.startUrl = startUrl;
 		this.createTime = createTime;
 		this.status = status;
+		this.namespaceId = namespaceId;
 	}
 
 	public java.lang.Long getId() {
@@ -238,5 +241,13 @@ public class EhConfConferences implements java.io.Serializable {
 
 	public void setStatus(java.lang.Byte status) {
 		this.status = status;
+	}
+
+	public java.lang.Integer getNamespaceId() {
+		return this.namespaceId;
+	}
+
+	public void setNamespaceId(java.lang.Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 }

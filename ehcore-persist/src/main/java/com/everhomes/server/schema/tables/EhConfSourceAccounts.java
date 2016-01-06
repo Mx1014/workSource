@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfSourceAccounts extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhConfSourceAccountsRecord> {
 
-	private static final long serialVersionUID = 948694119;
+	private static final long serialVersionUID = 180361230;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_conf_source_accounts</code>
@@ -55,6 +55,11 @@ public class EhConfSourceAccounts extends org.jooq.impl.TableImpl<com.everhomes.
 	 * The column <code>ehcore.eh_conf_source_accounts.status</code>. 0: inactive 1: active
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfSourceAccountsRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT, this, "0: inactive 1: active");
+
+	/**
+	 * The column <code>ehcore.eh_conf_source_accounts.namespace_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfSourceAccountsRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_conf_source_accounts</code> table reference

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAddresses extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhAddressesRecord> {
 
-	private static final long serialVersionUID = -356087319;
+	private static final long serialVersionUID = -1205142126;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_addresses</code>
@@ -195,11 +195,6 @@ public class EhAddresses extends org.jooq.impl.TableImpl<com.everhomes.server.sc
 	 * The column <code>ehcore.eh_addresses.area_size</code>. the area size of the room according to the address
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.Double> AREA_SIZE = createField("area_size", org.jooq.impl.SQLDataType.DOUBLE, this, "the area size of the room according to the address");
-
-	/**
-	 * The column <code>ehcore.eh_addresses.namespace_id</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAddressesRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_addresses</code> table reference

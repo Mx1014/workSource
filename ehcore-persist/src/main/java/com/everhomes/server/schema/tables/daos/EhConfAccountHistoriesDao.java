@@ -151,4 +151,11 @@ public class EhConfAccountHistoriesDao extends org.jooq.impl.DAOImpl<com.everhom
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfAccountHistories> fetchByOperateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhConfAccountHistories.EH_CONF_ACCOUNT_HISTORIES.OPERATE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>namespace_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfAccountHistories> fetchByNamespaceId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhConfAccountHistories.EH_CONF_ACCOUNT_HISTORIES.NAMESPACE_ID, values);
+	}
 }

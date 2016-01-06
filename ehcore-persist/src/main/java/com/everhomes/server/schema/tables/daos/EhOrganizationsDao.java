@@ -102,11 +102,4 @@ public class EhOrganizationsDao extends org.jooq.impl.DAOImpl<com.everhomes.serv
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByStatus(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.STATUS, values);
 	}
-
-	/**
-	 * Fetch records that have <code>department_type IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByDepartmentType(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.DEPARTMENT_TYPE, values);
-	}
 }

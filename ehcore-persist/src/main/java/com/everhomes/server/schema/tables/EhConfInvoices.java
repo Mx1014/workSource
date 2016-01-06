@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfInvoices extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhConfInvoicesRecord> {
 
-	private static final long serialVersionUID = -1980465993;
+	private static final long serialVersionUID = -1667774041;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_conf_invoices</code>
@@ -105,6 +105,11 @@ public class EhConfInvoices extends org.jooq.impl.TableImpl<com.everhomes.server
 	 * The column <code>ehcore.eh_conf_invoices.contract_flag</code>. 0-dont need 1-need
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfInvoicesRecord, java.lang.Byte> CONTRACT_FLAG = createField("contract_flag", org.jooq.impl.SQLDataType.TINYINT, this, "0-dont need 1-need");
+
+	/**
+	 * The column <code>ehcore.eh_conf_invoices.namespace_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfInvoicesRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_conf_invoices</code> table reference

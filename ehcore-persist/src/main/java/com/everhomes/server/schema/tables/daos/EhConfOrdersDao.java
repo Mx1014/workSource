@@ -144,4 +144,11 @@ public class EhConfOrdersDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfOrders> fetchByCreateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhConfOrders.EH_CONF_ORDERS.CREATE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>namespace_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfOrders> fetchByNamespaceId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhConfOrders.EH_CONF_ORDERS.NAMESPACE_ID, values);
+	}
 }

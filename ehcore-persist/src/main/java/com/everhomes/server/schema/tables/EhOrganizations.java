@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizations extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhOrganizationsRecord> {
 
-	private static final long serialVersionUID = -2052498993;
+	private static final long serialVersionUID = 884944789;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_organizations</code>
@@ -70,11 +70,6 @@ public class EhOrganizations extends org.jooq.impl.TableImpl<com.everhomes.serve
 	 * The column <code>ehcore.eh_organizations.status</code>. 1: inactive, 2: active, 3: locked, 4: mark as deleted
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationsRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "1: inactive, 2: active, 3: locked, 4: mark as deleted");
-
-	/**
-	 * The column <code>ehcore.eh_organizations.department_type</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationsRecord, java.lang.String> DEPARTMENT_TYPE = createField("department_type", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_organizations</code> table reference

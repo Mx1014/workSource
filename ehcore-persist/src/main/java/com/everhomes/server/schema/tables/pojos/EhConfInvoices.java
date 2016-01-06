@@ -11,44 +11,46 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfInvoices implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1316164717;
+	private static final long serialVersionUID = 1417627553;
 
-	private java.lang.Long   id;
-	private java.lang.Long   orderId;
-	private java.lang.Byte   taxpayerType;
-	private java.lang.Byte   vatType;
-	private java.lang.Byte   expenseType;
-	private java.lang.String companyName;
-	private java.lang.String vatCode;
-	private java.lang.String vatAddress;
-	private java.lang.String vatPhone;
-	private java.lang.String vatBankName;
-	private java.lang.String vatBankAccount;
-	private java.lang.String address;
-	private java.lang.String zipCode;
-	private java.lang.String consignee;
-	private java.lang.String contact;
-	private java.lang.Byte   contractFlag;
+	private java.lang.Long    id;
+	private java.lang.Long    orderId;
+	private java.lang.Byte    taxpayerType;
+	private java.lang.Byte    vatType;
+	private java.lang.Byte    expenseType;
+	private java.lang.String  companyName;
+	private java.lang.String  vatCode;
+	private java.lang.String  vatAddress;
+	private java.lang.String  vatPhone;
+	private java.lang.String  vatBankName;
+	private java.lang.String  vatBankAccount;
+	private java.lang.String  address;
+	private java.lang.String  zipCode;
+	private java.lang.String  consignee;
+	private java.lang.String  contact;
+	private java.lang.Byte    contractFlag;
+	private java.lang.Integer namespaceId;
 
 	public EhConfInvoices() {}
 
 	public EhConfInvoices(
-		java.lang.Long   id,
-		java.lang.Long   orderId,
-		java.lang.Byte   taxpayerType,
-		java.lang.Byte   vatType,
-		java.lang.Byte   expenseType,
-		java.lang.String companyName,
-		java.lang.String vatCode,
-		java.lang.String vatAddress,
-		java.lang.String vatPhone,
-		java.lang.String vatBankName,
-		java.lang.String vatBankAccount,
-		java.lang.String address,
-		java.lang.String zipCode,
-		java.lang.String consignee,
-		java.lang.String contact,
-		java.lang.Byte   contractFlag
+		java.lang.Long    id,
+		java.lang.Long    orderId,
+		java.lang.Byte    taxpayerType,
+		java.lang.Byte    vatType,
+		java.lang.Byte    expenseType,
+		java.lang.String  companyName,
+		java.lang.String  vatCode,
+		java.lang.String  vatAddress,
+		java.lang.String  vatPhone,
+		java.lang.String  vatBankName,
+		java.lang.String  vatBankAccount,
+		java.lang.String  address,
+		java.lang.String  zipCode,
+		java.lang.String  consignee,
+		java.lang.String  contact,
+		java.lang.Byte    contractFlag,
+		java.lang.Integer namespaceId
 	) {
 		this.id = id;
 		this.orderId = orderId;
@@ -66,6 +68,7 @@ public class EhConfInvoices implements java.io.Serializable {
 		this.consignee = consignee;
 		this.contact = contact;
 		this.contractFlag = contractFlag;
+		this.namespaceId = namespaceId;
 	}
 
 	public java.lang.Long getId() {
@@ -194,5 +197,13 @@ public class EhConfInvoices implements java.io.Serializable {
 
 	public void setContractFlag(java.lang.Byte contractFlag) {
 		this.contractFlag = contractFlag;
+	}
+
+	public java.lang.Integer getNamespaceId() {
+		return this.namespaceId;
+	}
+
+	public void setNamespaceId(java.lang.Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 }

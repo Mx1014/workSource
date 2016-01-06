@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLocaleTemplates implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1554510188;
+	private static final long serialVersionUID = 1090966522;
 
 	private java.lang.Long    id;
 	private java.lang.String  scope;
@@ -19,7 +19,6 @@ public class EhLocaleTemplates implements java.io.Serializable {
 	private java.lang.String  locale;
 	private java.lang.String  description;
 	private java.lang.String  text;
-	private java.lang.Integer namespaceId;
 
 	public EhLocaleTemplates() {}
 
@@ -29,8 +28,7 @@ public class EhLocaleTemplates implements java.io.Serializable {
 		java.lang.Integer code,
 		java.lang.String  locale,
 		java.lang.String  description,
-		java.lang.String  text,
-		java.lang.Integer namespaceId
+		java.lang.String  text
 	) {
 		this.id = id;
 		this.scope = scope;
@@ -38,7 +36,6 @@ public class EhLocaleTemplates implements java.io.Serializable {
 		this.locale = locale;
 		this.description = description;
 		this.text = text;
-		this.namespaceId = namespaceId;
 	}
 
 	public java.lang.Long getId() {
@@ -87,13 +84,5 @@ public class EhLocaleTemplates implements java.io.Serializable {
 
 	public void setText(java.lang.String text) {
 		this.text = text;
-	}
-
-	public java.lang.Integer getNamespaceId() {
-		return this.namespaceId;
-	}
-
-	public void setNamespaceId(java.lang.Integer namespaceId) {
-		this.namespaceId = namespaceId;
 	}
 }

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfAccounts implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1813914991;
+	private static final long serialVersionUID = -1019034389;
 
 	private java.lang.Long     id;
 	private java.lang.Long     enterpriseId;
@@ -30,6 +30,7 @@ public class EhConfAccounts implements java.io.Serializable {
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
 	private java.sql.Timestamp updateTime;
+	private java.lang.Integer  namespaceId;
 
 	public EhConfAccounts() {}
 
@@ -50,7 +51,8 @@ public class EhConfAccounts implements java.io.Serializable {
 		java.sql.Timestamp deleteTime,
 		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime,
-		java.sql.Timestamp updateTime
+		java.sql.Timestamp updateTime,
+		java.lang.Integer  namespaceId
 	) {
 		this.id = id;
 		this.enterpriseId = enterpriseId;
@@ -69,6 +71,7 @@ public class EhConfAccounts implements java.io.Serializable {
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
 		this.updateTime = updateTime;
+		this.namespaceId = namespaceId;
 	}
 
 	public java.lang.Long getId() {
@@ -205,5 +208,13 @@ public class EhConfAccounts implements java.io.Serializable {
 
 	public void setUpdateTime(java.sql.Timestamp updateTime) {
 		this.updateTime = updateTime;
+	}
+
+	public java.lang.Integer getNamespaceId() {
+		return this.namespaceId;
+	}
+
+	public void setNamespaceId(java.lang.Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 }

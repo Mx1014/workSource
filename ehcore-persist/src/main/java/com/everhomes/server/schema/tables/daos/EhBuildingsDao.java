@@ -242,11 +242,4 @@ public class EhBuildingsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.s
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBuildings> fetchByStringTag5(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhBuildings.EH_BUILDINGS.STRING_TAG5, values);
 	}
-
-	/**
-	 * Fetch records that have <code>namespace_id IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhBuildings> fetchByNamespaceId(java.lang.Integer... values) {
-		return fetch(com.everhomes.server.schema.tables.EhBuildings.EH_BUILDINGS.NAMESPACE_ID, values);
-	}
 }

@@ -11,28 +11,34 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfOrderAccountMap implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1505796518;
+	private static final long serialVersionUID = 1482019122;
 
-	private java.lang.Long id;
-	private java.lang.Long orderId;
-	private java.lang.Long enterpriseId;
-	private java.lang.Long confAccountId;
-	private java.lang.Byte assigedFlag;
+	private java.lang.Long    id;
+	private java.lang.Long    orderId;
+	private java.lang.Long    enterpriseId;
+	private java.lang.Long    confAccountId;
+	private java.lang.Byte    assigedFlag;
+	private java.lang.Integer namespaceId;
+	private java.lang.Integer confAccountNamespaceId;
 
 	public EhConfOrderAccountMap() {}
 
 	public EhConfOrderAccountMap(
-		java.lang.Long id,
-		java.lang.Long orderId,
-		java.lang.Long enterpriseId,
-		java.lang.Long confAccountId,
-		java.lang.Byte assigedFlag
+		java.lang.Long    id,
+		java.lang.Long    orderId,
+		java.lang.Long    enterpriseId,
+		java.lang.Long    confAccountId,
+		java.lang.Byte    assigedFlag,
+		java.lang.Integer namespaceId,
+		java.lang.Integer confAccountNamespaceId
 	) {
 		this.id = id;
 		this.orderId = orderId;
 		this.enterpriseId = enterpriseId;
 		this.confAccountId = confAccountId;
 		this.assigedFlag = assigedFlag;
+		this.namespaceId = namespaceId;
+		this.confAccountNamespaceId = confAccountNamespaceId;
 	}
 
 	public java.lang.Long getId() {
@@ -73,5 +79,21 @@ public class EhConfOrderAccountMap implements java.io.Serializable {
 
 	public void setAssigedFlag(java.lang.Byte assigedFlag) {
 		this.assigedFlag = assigedFlag;
+	}
+
+	public java.lang.Integer getNamespaceId() {
+		return this.namespaceId;
+	}
+
+	public void setNamespaceId(java.lang.Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public java.lang.Integer getConfAccountNamespaceId() {
+		return this.confAccountNamespaceId;
+	}
+
+	public void setConfAccountNamespaceId(java.lang.Integer confAccountNamespaceId) {
+		this.confAccountNamespaceId = confAccountNamespaceId;
 	}
 }
