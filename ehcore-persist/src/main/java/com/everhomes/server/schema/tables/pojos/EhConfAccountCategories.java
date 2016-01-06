@@ -11,13 +11,14 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfAccountCategories implements java.io.Serializable {
 
-	private static final long serialVersionUID = 305588704;
+	private static final long serialVersionUID = 635152224;
 
 	private java.lang.Long       id;
 	private java.lang.Byte       channelType;
 	private java.lang.Byte       confType;
 	private java.lang.Integer    minPeriod;
 	private java.math.BigDecimal amount;
+	private java.lang.Integer    namespaceId;
 
 	public EhConfAccountCategories() {}
 
@@ -26,13 +27,15 @@ public class EhConfAccountCategories implements java.io.Serializable {
 		java.lang.Byte       channelType,
 		java.lang.Byte       confType,
 		java.lang.Integer    minPeriod,
-		java.math.BigDecimal amount
+		java.math.BigDecimal amount,
+		java.lang.Integer    namespaceId
 	) {
 		this.id = id;
 		this.channelType = channelType;
 		this.confType = confType;
 		this.minPeriod = minPeriod;
 		this.amount = amount;
+		this.namespaceId = namespaceId;
 	}
 
 	public java.lang.Long getId() {
@@ -73,5 +76,13 @@ public class EhConfAccountCategories implements java.io.Serializable {
 
 	public void setAmount(java.math.BigDecimal amount) {
 		this.amount = amount;
+	}
+
+	public java.lang.Integer getNamespaceId() {
+		return this.namespaceId;
+	}
+
+	public void setNamespaceId(java.lang.Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 }

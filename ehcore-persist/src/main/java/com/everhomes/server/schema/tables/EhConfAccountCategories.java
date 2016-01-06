@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfAccountCategories extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhConfAccountCategoriesRecord> {
 
-	private static final long serialVersionUID = 1802429586;
+	private static final long serialVersionUID = -1160297111;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_conf_account_categories</code>
@@ -50,6 +50,11 @@ public class EhConfAccountCategories extends org.jooq.impl.TableImpl<com.everhom
 	 * The column <code>ehcore.eh_conf_account_categories.amount</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfAccountCategoriesRecord, java.math.BigDecimal> AMOUNT = createField("amount", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_conf_account_categories.namespace_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfAccountCategoriesRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_conf_account_categories</code> table reference

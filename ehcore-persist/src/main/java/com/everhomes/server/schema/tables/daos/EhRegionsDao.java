@@ -123,4 +123,11 @@ public class EhRegionsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sch
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRegions> fetchByHotFlag(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRegions.EH_REGIONS.HOT_FLAG, values);
 	}
+
+	/**
+	 * Fetch records that have <code>namespace_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRegions> fetchByNamespaceId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRegions.EH_REGIONS.NAMESPACE_ID, values);
+	}
 }
