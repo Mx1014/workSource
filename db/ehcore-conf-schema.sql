@@ -9,6 +9,8 @@ CREATE TABLE `eh_conf_account_categories` (
 	`conf_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: 25方仅视频, 2: 25方支持电话, 3: 100方仅视频, 4: 100方支持电话',
 	`min_period` INTEGER NOT NULL DEFAULT 1 COMMENT 'the minimum count of months',
 	`amount` DECIMAL(10,2),
+	`namespace_id` INTEGER NOT NULL DEFAULT 0,
+	
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
  
@@ -30,6 +32,8 @@ CREATE TABLE `eh_conf_invoices` (
 	`consignee` VARCHAR(20),
 	`contact` VARCHAR(20),
 	`contract_flag` TINYINT COMMENT '0-dont need 1-need',
+	`namespace_id` INTEGER NOT NULL DEFAULT 0,
+	
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -50,6 +54,8 @@ CREATE TABLE `eh_conf_orders` (
 	`online_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: offline, 1: online',
 	`creator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'the user id who make the order',
     `create_time` DATETIME,
+	`namespace_id` INTEGER NOT NULL DEFAULT 0,
+	
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -60,6 +66,9 @@ CREATE TABLE `eh_conf_order_account_map` (
 	`enterprise_id` BIGINT NOT NULL DEFAULT 0,
 	`conf_account_id` BIGINT NOT NULL DEFAULT 0,
 	`assiged_flag` TINYINT NOT NULL DEFAULT 0 COMMENT 'whether the account has assiged to user, 0: none, 1: assigned',
+	`namespace_id` INTEGER NOT NULL DEFAULT 0,
+	`conf_account_namespace_id` INT NOT NULL DEFAULT 0,
+	
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -71,6 +80,8 @@ CREATE TABLE `eh_conf_source_accounts` (
 	`account_category_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_conf_account_categories',
 	`expired_date` DATETIME,
 	`status` TINYINT COMMENT '0: inactive 1: active',
+	`namespace_id` INTEGER NOT NULL DEFAULT 0,
+	
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
  
@@ -93,6 +104,8 @@ CREATE TABLE `eh_conf_accounts` (
 	`creator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'the user id who create the account',
 	`create_time` DATETIME,
 	`update_time` DATETIME,
+	`namespace_id` INTEGER NOT NULL DEFAULT 0,
+	
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -114,6 +127,8 @@ CREATE TABLE `eh_conf_account_histories` (
     `operation_type` VARCHAR(32),
     `process_details` TEXT,
 	`operate_time` DATETIME,
+	`namespace_id` INTEGER NOT NULL DEFAULT 0,
+	
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -139,6 +154,8 @@ CREATE TABLE `eh_conf_conferences` (
 	`start_url` VARCHAR(256) COMMENT 'user who start the meeting use this url',
 	`create_time` DATETIME,
 	`status` TINYINT COMMENT '0: close, 1: on progress, 2: failed',
+	`namespace_id` INTEGER NOT NULL DEFAULT 0,
+	
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -159,6 +176,7 @@ CREATE TABLE `eh_conf_enterprises` (
 	`update_time` DATETIME,
 	`creator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'the user id who create the enterrpise',
 	`create_time` DATETIME,
+	
 	UNIQUE `u_eh_enterprise_id`(`enterprise_id`),
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
@@ -189,6 +207,8 @@ CREATE TABLE `eh_conf_reservations` (
 	`update_time` DATETIME,
 	`creator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'the user id who create the reservation',
 	`create_time` DATETIME,
+	`namespace_id` INTEGER NOT NULL DEFAULT 0,
+	
   PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 

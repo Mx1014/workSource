@@ -1074,9 +1074,10 @@ CREATE TABLE `eh_regions` (
 	`tel_code` VARCHAR(32) COMMENT 'primary telephone area code',
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '1: inactive, 2: active, 3: locked, 4: mark as deleted',
 	`hot_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: not hot, 1: hot',
+	`namespace_id` int(11) NOT NULL DEFAULT '0',
     
     PRIMARY KEY(`id`),
-    UNIQUE `u_eh_region_name`(`parent_id`, `name`),
+    UNIQUE `u_eh_region_name`(`namespace_id`, `parent_id`, `name`),
  	INDEX `i_eh_region_name_level`(`name`, `level`),   
     INDEX `i_eh_region_path`(`path`),
  	INDEX `i_eh_region_path_level`(`path`, `level`),   
@@ -1129,6 +1130,7 @@ CREATE TABLE `eh_communities`(
 	`default_forum_id` BIGINT NOT NULL DEFAULT 1 COMMENT 'the default forum for the community, forum-1 is system default forum',
 	`feedback_forum_id` BIGINT NOT NULL DEFAULT 2 COMMENT 'the default forum for the community, forum-2 is system feedback forum',
 	`update_time` DATETIME,
+	`namespace_id` int(11) NOT NULL DEFAULT '0',
     
     PRIMARY KEY (`id`),
 	UNIQUE `u_eh_uuid`(`uuid`),
@@ -1169,6 +1171,7 @@ CREATE TABLE `eh_nearby_community_map` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `community_id` BIGINT NOT NULL DEFAULT 0,
     `nearby_community_id` BIGINT NOT NULL DEFAULT 0,
+	`namespace_id` int(11) NOT NULL DEFAULT '0',
 	
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_community_relation`(`community_id`, `nearby_community_id`),
@@ -1224,6 +1227,7 @@ CREATE TABLE `eh_organizations` (
     `path` VARCHAR(128) COMMENT 'path from the root',
     `level` INTEGER NOT NULL DEFAULT 0,
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '1: inactive, 2: active, 3: locked, 4: mark as deleted',
+	`department_type` VARCHAR(64),
     
     PRIMARY KEY(`id`),
     UNIQUE `u_eh_org_name`(`parent_id`, `name`),
@@ -1516,6 +1520,7 @@ CREATE TABLE `eh_addresses` (
     `string_tag5` VARCHAR(128),
 	
 	`area_size` DOUBLE COMMENT 'the area size of the room according to the address',
+	`namespace_id` int(11) NOT NULL DEFAULT '0',
     
     PRIMARY KEY (`id`),
 	UNIQUE `u_eh_uuid`(`uuid`),
@@ -2889,6 +2894,7 @@ CREATE TABLE `eh_buildings` (
     `string_tag3` VARCHAR(128),
     `string_tag4` VARCHAR(128),
     `string_tag5` VARCHAR(128),
+	`namespace_id` int(11) NOT NULL DEFAULT '0',
     
 	UNIQUE `u_eh_community_id_name`(`community_id`, `name`),
     PRIMARY KEY (`id`)
