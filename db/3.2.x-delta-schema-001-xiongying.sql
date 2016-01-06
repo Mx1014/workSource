@@ -9,5 +9,4 @@ ALTER TABLE `eh_warning_contacts` ADD COLUMN `namespace_id` int(11) NOT NULL DEF
 ALTER TABLE `eh_conf_accounts` ADD COLUMN `namespace_id` int(11) NOT NULL DEFAULT '0';
 ALTER TABLE `eh_conf_account_histories` ADD COLUMN `namespace_id` int(11) NOT NULL DEFAULT '0';
 ALTER TABLE `eh_conf_conferences` ADD COLUMN `namespace_id` int(11) NOT NULL DEFAULT '0';
-ALTER TABLE `eh_conf_enterprises` ADD COLUMN `namespace_id` int(11) NOT NULL DEFAULT '0';
 ALTER TABLE `eh_conf_reservations` ADD COLUMN `namespace_id` int(11) NOT NULL DEFAULT '0';

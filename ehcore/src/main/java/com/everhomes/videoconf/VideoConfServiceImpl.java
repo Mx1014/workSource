@@ -39,6 +39,7 @@ import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.organization.pm.pay.ResultHolder;
 import com.everhomes.rest.category.CategoryAdminStatus;
@@ -585,7 +586,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 	    locator.setAnchor(cmd.getPageAnchor());
 	    int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 	    
-	    List<ConfEnterprises> enterprises = vcProvider.listEnterpriseWithVideoConfAccount(cmd.getNamespaceId(), cmd.getStatus(), locator, pageSize+1);
+	    List<ConfEnterprises> enterprises = vcProvider.listEnterpriseWithVideoConfAccount(null, cmd.getStatus(), locator, pageSize+1);
 	    Long nextPageAnchor = null;
 		if(enterprises != null && enterprises.size() > pageSize) {
 			enterprises.remove(enterprises.size() - 1);
@@ -871,7 +872,6 @@ public class VideoConfServiceImpl implements VideoConfService {
 		
 		ConfOrders order = vcProvider.findOredrById(cmd.getId());
 		
-		//xiongying
 		order.setAmount(cmd.getAmount());
 //		order.setInvoiceReqFlag(cmd.getInvoiceFlag());
 		order.setInvoiceIssueFlag(cmd.getMakeOutFlag());
@@ -977,75 +977,75 @@ public class VideoConfServiceImpl implements VideoConfService {
 		return statistics;
 	}
 
-	@Override
-	public ListEnterpriseVideoConfAccountResponse listVideoConfAccountByEnterpriseId(
-			ListEnterpriseVideoConfAccountCommand cmd) {
-
-		ListEnterpriseVideoConfAccountResponse response = new ListEnterpriseVideoConfAccountResponse();
-		CrossShardListingLocator locator=new CrossShardListingLocator();
-	    locator.setAnchor(cmd.getPageAnchor());
-	    int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		List<ConfAccounts> accounts = vcProvider.listConfAccountsByEnterpriseId(cmd.getEnterpriseId(), cmd.getStatus(), locator, pageSize+1);
-		
-		Long nextPageAnchor = null;
-		if(accounts != null && accounts.size() > pageSize) {
-			accounts.remove(accounts.size() - 1);
-			nextPageAnchor = accounts.get(accounts.size() -1).getId();
-		}
-		response.setNextPageAnchor(nextPageAnchor);
-		
-		List<ConfAccountDTO> confAccounts = accounts.stream().map(r -> {
-			
-			ConfAccountDTO dto = new ConfAccountDTO();
-			
-			dto.setId(r.getId());
-			dto.setUserId(r.getOwnerId());
-			dto.setValidDate(r.getExpiredDate());
-			dto.setUpdateDate(r.getUpdateTime());
-			if(r.getAccountType() == 1)
-				dto.setUserType((byte) 0);
-			else {
-				if(vcProvider.countOrdersByAccountId(r.getId()) == 1)
-					dto.setUserType((byte) 1);
-				else {
-					dto.setUserType((byte) 2);
-				}
-			}
-			dto.setStatus(r.getStatus());
-			if(new Timestamp(DateHelper.currentGMTTime().getTime()).after(r.getExpiredDate()))
-				dto.setValidFlag((byte) 0);
-			else {
-				dto.setValidFlag((byte) 1);
-			}
-			ConfAccountCategories category = vcProvider.findAccountCategoriesById(r.getAccountCategoryId());
-			if(category != null) {
-				dto.setAccountType(category.getChannelType());
-				dto.setConfType(category.getConfType());
-			}
-			
-			Enterprise enterprise = enterpriseProvider.findEnterpriseById(r.getEnterpriseId());
-			dto.setEnterpriseName(enterprise.getName());
-			EnterpriseContact contact = enterpriseContactProvider.queryContactByUserId(r.getEnterpriseId(), r.getOwnerId());
-			if(contact != null) {
-				
-				dto.setDepartment(contact.getStringTag1());
-				dto.setUserName(contact.getName());
-				List<EnterpriseContactEntry> entry = enterpriseContactProvider.queryContactEntryByContactId(contact);
-				if(entry != null && entry.size() >0) {
-					dto.setMobile(entry.get(0).getEntryValue());
-				}
-			}
-			if(!StringUtils.isNullOrEmpty(cmd.getKeyword())) {
-	    		if(!cmd.getKeyword().equals(dto.getUserName()) && !cmd.getKeyword().equals(dto.getDepartment()) 
-	    				&& !cmd.getKeyword().equals(dto.getMobile()))
-	    			return null;
-	    	}
-			return dto;
-		}).filter(r->r!=null).collect(Collectors.toList());
-		response.setConfAccounts(confAccounts);
-		
-		return response;
-	}
+//	@Override
+//	public ListEnterpriseVideoConfAccountResponse listVideoConfAccountByEnterpriseId(
+//			ListEnterpriseVideoConfAccountCommand cmd) {
+//
+//		ListEnterpriseVideoConfAccountResponse response = new ListEnterpriseVideoConfAccountResponse();
+//		CrossShardListingLocator locator=new CrossShardListingLocator();
+//	    locator.setAnchor(cmd.getPageAnchor());
+//	    int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+//		List<ConfAccounts> accounts = vcProvider.listConfAccountsByEnterpriseId(cmd.getEnterpriseId(), cmd.getStatus(), locator, pageSize+1);
+//		
+//		Long nextPageAnchor = null;
+//		if(accounts != null && accounts.size() > pageSize) {
+//			accounts.remove(accounts.size() - 1);
+//			nextPageAnchor = accounts.get(accounts.size() -1).getId();
+//		}
+//		response.setNextPageAnchor(nextPageAnchor);
+//		
+//		List<ConfAccountDTO> confAccounts = accounts.stream().map(r -> {
+//			
+//			ConfAccountDTO dto = new ConfAccountDTO();
+//			
+//			dto.setId(r.getId());
+//			dto.setUserId(r.getOwnerId());
+//			dto.setValidDate(r.getExpiredDate());
+//			dto.setUpdateDate(r.getUpdateTime());
+//			if(r.getAccountType() == 1)
+//				dto.setUserType((byte) 0);
+//			else {
+//				if(vcProvider.countOrdersByAccountId(r.getId()) == 1)
+//					dto.setUserType((byte) 1);
+//				else {
+//					dto.setUserType((byte) 2);
+//				}
+//			}
+//			dto.setStatus(r.getStatus());
+//			if(new Timestamp(DateHelper.currentGMTTime().getTime()).after(r.getExpiredDate()))
+//				dto.setValidFlag((byte) 0);
+//			else {
+//				dto.setValidFlag((byte) 1);
+//			}
+//			ConfAccountCategories category = vcProvider.findAccountCategoriesById(r.getAccountCategoryId());
+//			if(category != null) {
+//				dto.setAccountType(category.getChannelType());
+//				dto.setConfType(category.getConfType());
+//			}
+//			
+//			Enterprise enterprise = enterpriseProvider.findEnterpriseById(r.getEnterpriseId());
+//			dto.setEnterpriseName(enterprise.getName());
+//			EnterpriseContact contact = enterpriseContactProvider.queryContactByUserId(r.getEnterpriseId(), r.getOwnerId());
+//			if(contact != null) {
+//				
+//				dto.setDepartment(contact.getStringTag1());
+//				dto.setUserName(contact.getName());
+//				List<EnterpriseContactEntry> entry = enterpriseContactProvider.queryContactEntryByContactId(contact);
+//				if(entry != null && entry.size() >0) {
+//					dto.setMobile(entry.get(0).getEntryValue());
+//				}
+//			}
+//			if(!StringUtils.isNullOrEmpty(cmd.getKeyword())) {
+//	    		if(!cmd.getKeyword().equals(dto.getUserName()) && !cmd.getKeyword().equals(dto.getDepartment()) 
+//	    				&& !cmd.getKeyword().equals(dto.getMobile()))
+//	    			return null;
+//	    	}
+//			return dto;
+//		}).filter(r->r!=null).collect(Collectors.toList());
+//		response.setConfAccounts(confAccounts);
+//		
+//		return response;
+//	}
 
 	private Timestamp addMonth(Timestamp lastUpdate, int months) {
 		
@@ -1061,7 +1061,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 	public void assignVideoConfAccount(
 			AssignVideoConfAccountCommand cmd) {
 		
-		
+		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
 		ConfAccounts account = vcProvider.findVideoconfAccountById(cmd.getAccountId());
 		if(account == null) {
 			LOGGER.error("account is not exist!");
@@ -1094,6 +1094,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		history.setOperationType("assign account");
 		history.setOperateTime(now);
 		history.setProcessDetails("");
+		history.setNamespaceId(namespaceId);
 		vcProvider.createConfAccountHistories(history);
 		
 	}
@@ -1104,55 +1105,55 @@ public class VideoConfServiceImpl implements VideoConfService {
 //		return null;
 //	}
 
-	@Override
-	public ListUsersWithoutVideoConfPrivilegeResponse listUsersWithoutVideoConfPrivilege(
-			ListUsersWithoutVideoConfPrivilegeCommand cmd) {
-		ListUsersWithoutVideoConfPrivilegeResponse response = new ListUsersWithoutVideoConfPrivilegeResponse();
-		List<Long> users = vcProvider.findUsersByEnterpriseId(cmd.getEnterpriseId());
-
-		List<EnterpriseContact> ec = new ArrayList<EnterpriseContact>();
-		List<EnterpriseContact> contact = enterpriseContactProvider.queryContactByEnterpriseId(cmd.getEnterpriseId(), cmd.getKeyword());
-		if(cmd.getPageAnchor() == null)
-			cmd.setPageAnchor(0L);
-		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		
-		if(contact != null &contact.size() > 0) {
-				for(EnterpriseContact con : contact) {
-					if(!(users != null && users.contains(con.getUserId()))) {
-						if(con.getUserId() > cmd.getPageAnchor())
-							ec.add(con);
-					}
-						
-				}
-		}
-
-		
-		Long nextPageAnchor = null;
-		if(ec != null && ec.size() > pageSize) {
-			ec = ec.subList(0, pageSize);
-			ec.remove(ec.size() - 1);
-			nextPageAnchor = ec.get(ec.size() -1).getUserId();
-		}
-		response.setNextPageAnchor(nextPageAnchor);
-		
-		List<EnterpriseUsersDTO> usersDto = ec.stream().map(r -> {
-			EnterpriseUsersDTO user = new EnterpriseUsersDTO();
-			user.setUserId(r.getUserId());
-			user.setUserName(r.getName());
-			user.setDepartment(r.getStringTag1());
-			user.setContactId(r.getId());
-			user.setEnterpriseId(r.getEnterpriseId());
-			
-			List<EnterpriseContactEntry> entry = enterpriseContactProvider.queryContactEntryByContactId(r);
-			if(entry != null && entry.size() >0)
-				user.setMobile(entry.get(0).getEntryValue());
-			
-			return user;
-		}).collect(Collectors.toList());
-		response.setEnterpriseUsers(usersDto);
-		
-		return response;
-	}
+//	@Override
+//	public ListUsersWithoutVideoConfPrivilegeResponse listUsersWithoutVideoConfPrivilege(
+//			ListUsersWithoutVideoConfPrivilegeCommand cmd) {
+//		ListUsersWithoutVideoConfPrivilegeResponse response = new ListUsersWithoutVideoConfPrivilegeResponse();
+//		List<Long> users = vcProvider.findUsersByEnterpriseId(cmd.getEnterpriseId());
+//
+//		List<EnterpriseContact> ec = new ArrayList<EnterpriseContact>();
+//		List<EnterpriseContact> contact = enterpriseContactProvider.queryContactByEnterpriseId(cmd.getEnterpriseId(), cmd.getKeyword());
+//		if(cmd.getPageAnchor() == null)
+//			cmd.setPageAnchor(0L);
+//		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+//		
+//		if(contact != null &contact.size() > 0) {
+//				for(EnterpriseContact con : contact) {
+//					if(!(users != null && users.contains(con.getUserId()))) {
+//						if(con.getUserId() > cmd.getPageAnchor())
+//							ec.add(con);
+//					}
+//						
+//				}
+//		}
+//
+//		
+//		Long nextPageAnchor = null;
+//		if(ec != null && ec.size() > pageSize) {
+//			ec = ec.subList(0, pageSize);
+//			ec.remove(ec.size() - 1);
+//			nextPageAnchor = ec.get(ec.size() -1).getUserId();
+//		}
+//		response.setNextPageAnchor(nextPageAnchor);
+//		
+//		List<EnterpriseUsersDTO> usersDto = ec.stream().map(r -> {
+//			EnterpriseUsersDTO user = new EnterpriseUsersDTO();
+//			user.setUserId(r.getUserId());
+//			user.setUserName(r.getName());
+//			user.setDepartment(r.getStringTag1());
+//			user.setContactId(r.getId());
+//			user.setEnterpriseId(r.getEnterpriseId());
+//			
+//			List<EnterpriseContactEntry> entry = enterpriseContactProvider.queryContactEntryByContactId(r);
+//			if(entry != null && entry.size() >0)
+//				user.setMobile(entry.get(0).getEntryValue());
+//			
+//			return user;
+//		}).collect(Collectors.toList());
+//		response.setEnterpriseUsers(usersDto);
+//		
+//		return response;
+//	}
 
 	@Override
 	public UserAccountDTO verifyVideoConfAccount(
@@ -1208,6 +1209,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 	public StartVideoConfResponse startVideoConf(StartVideoConfCommand cmd) {
 		StartVideoConfResponse response = new StartVideoConfResponse();
 		
+		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
 		String path = "http://api.confcloud.cn/openapi/confReservation";
 		ConfAccounts account = vcProvider.findVideoconfAccountById(cmd.getAccountId());
 		if(account != null) {
@@ -1284,7 +1286,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 //						conf.setConfHostName(confHostName);
 						conf.setMaxCount((Double.valueOf(String.valueOf(data.get("maxCount")))).intValue());
 						conf.setStatus((byte) 1);
-						
+						conf.setNamespaceId(namespaceId);
 						
 						vcProvider.createConfConferences(conf);
 						
@@ -1364,7 +1366,8 @@ public class VideoConfServiceImpl implements VideoConfService {
 
 	@Override
 	public void reserveVideoConf(ReserveVideoConfCommand cmd) {
-//		private java.lang.Byte     confHostName;
+		
+		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
 		
 		User user = UserContext.current().getUser();
 		List<UserIdentifier> identifiers = this.userProvider.listUserIdentifiersOfUser(user.getId());
@@ -1382,6 +1385,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		reservation.setDescription(cmd.getDescription());
 		reservation.setConfHostKey(cmd.getHostKey());
 		reservation.setStatus((byte) 1);
+		
 		if(phones != null && phones.size() > 0)
 			reservation.setCreatorPhone(phones.get(0));
 		
@@ -1394,6 +1398,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		if(cmd.getId() == null) {
 			reservation.setCreatorUid(user.getId());
 			reservation.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			reservation.setNamespaceId(namespaceId);
 			vcProvider.createReserveVideoConf(reservation);
 			
 		}else {
@@ -1492,6 +1497,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 
 	@Override
 	public void createAccountOwner(CreateAccountOwnerCommand cmd) {
+		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
 		List<Long> accountIds = cmd.getAccountIds();
 		List<Long> userIds = cmd.getUserIds();
 		if(userIds == null || userIds.isEmpty()){
@@ -1550,6 +1556,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 				history.setOperationType("assign account");
 				history.setOperateTime(now);
 				history.setProcessDetails("");
+				history.setNamespaceId(namespaceId);
 				vcProvider.createConfAccountHistories(history);
 			}
 		}	
@@ -1624,10 +1631,9 @@ public class VideoConfServiceImpl implements VideoConfService {
 			confEnterprise.setContact(cmd.getMobile());
 			confEnterprise.setStatus((byte) 1);
 			
-			User user = UserContext.current().getUser();
-	    	Integer namespaceId = user.getNamespaceId();
-	    	namespaceId = ( namespaceId == null ) ? 0 : namespaceId;
-	    	confEnterprise.setNamespaceId(namespaceId);
+			Enterprise enter = enterpriseProvider.findEnterpriseById(cmd.getEnterpriseId());
+			if(enter != null)
+				confEnterprise.setNamespaceId(enter.getNamespaceId());
 			vcProvider.createConfEnterprises(confEnterprise);
 		} else {
 			enterprise.setContactName(cmd.getContactor());
@@ -1741,6 +1747,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 	}
 	
 	private void updateOrderStatus(ConfOrders order, Timestamp payTimeStamp, byte paymentStatus) {
+		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
 		order.setPayerId(UserContext.current().getUser().getId());
 		order.setPaidTime(payTimeStamp);
 		order.setStatus(paymentStatus);
@@ -1754,12 +1761,14 @@ public class VideoConfServiceImpl implements VideoConfService {
 				account.setEnterpriseId(order.getOwnerId());
 				account.setExpiredDate(addMonth(order.getPaidTime(), order.getPeriod()));
 				account.setAccountCategoryId(order.getAccountCategoryId());
+				account.setNamespaceId(namespaceId);
 				vcProvider.createConfAccounts(account);
 				
 				ConfOrderAccountMap map = new ConfOrderAccountMap();
 				map.setOrderId(order.getId());
 				map.setEnterpriseId(order.getOwnerId());
 				map.setConfAccountId(account.getId());
+				map.setConfAccountNamespaceId(namespaceId);
 				vcProvider.createConfOrderAccountMap(map);
 
 			}
