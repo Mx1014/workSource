@@ -17,6 +17,8 @@ public class ListBuildingByKeywordCommand {
   
     private String keyword;
     
+    private Integer namespaceId;
+    
     public ListBuildingByKeywordCommand() {
     }
 
@@ -35,8 +37,18 @@ public class ListBuildingByKeywordCommand {
     public void setKeyword(String keyword) {
         this.keyword = keyword;
     }
+    
+    
 
-    @Override
+    public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

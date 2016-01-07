@@ -401,7 +401,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             cmd.setKeyword("");;
         List<BuildingDTO> results = new ArrayList<BuildingDTO>();
         long startTime = System.currentTimeMillis();
-        int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+        int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
                 (DSLContext context, Object reducingContext)-> {
                     

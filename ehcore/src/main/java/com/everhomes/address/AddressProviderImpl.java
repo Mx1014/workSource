@@ -203,7 +203,7 @@ public class AddressProviderImpl implements AddressProvider {
 
     @Override
     public List<ApartmentDTO> listApartmentsByBuildingName(long communityId, String buildingName , int offset , int size) {
-    	int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+    	int namespaceId = UserContext.getCurrentNamespaceId(null);
         List<ApartmentDTO> results = new ArrayList<>();
         
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
