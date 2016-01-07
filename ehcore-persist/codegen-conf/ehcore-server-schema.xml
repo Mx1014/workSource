@@ -65,7 +65,8 @@
         eh_yellow_pages | eh_yellow_page_attachments | eh_namespace_resources | eh_enterprise_details | eh_enterprise_op_requests |
         eh_lease_promotions | eh_lease_promotion_attachments |
         eh_videoconf_account_rule | eh_order_invoice | eh_videoconf_order | eh_order_account | eh_videoconf_account |
-        eh_enterprise_videoconf_account | eh_videoconf_enterprise | eh_warning_contacts | eh_source_account | eh_account_vedioconf | eh_user_group_histories
+        eh_enterprise_videoconf_account | eh_videoconf_enterprise | eh_warning_contacts | eh_source_account | eh_account_vedioconf | eh_user_group_histories |
+        eh_aclinks | eh_door_access | eh_aes_server_key | eh_aes_user_key | eh_aclink_undo_key | eh_door_auth | eh_owner_doors | eh_owner_door_auth
         </includes>
             <!-- All elements that are excluded from your schema
             (A Java regular expression. Use the pipe to separate several expressions).
