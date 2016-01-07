@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLocaleTemplates extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhLocaleTemplatesRecord> {
 
-	private static final long serialVersionUID = 720093108;
+	private static final long serialVersionUID = -852101917;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_locale_templates</code>
@@ -57,6 +57,11 @@ public class EhLocaleTemplates extends org.jooq.impl.TableImpl<com.everhomes.ser
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLocaleTemplatesRecord, java.lang.String> TEXT = createField("text", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
 
 	/**
+	 * The column <code>ehcore.eh_locale_templates.namespace_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLocaleTemplatesRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
+
+	/**
 	 * Create a <code>ehcore.eh_locale_templates</code> table reference
 	 */
 	public EhLocaleTemplates() {
@@ -99,7 +104,7 @@ public class EhLocaleTemplates extends org.jooq.impl.TableImpl<com.everhomes.ser
 	 */
 	@Override
 	public java.util.List<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhLocaleTemplatesRecord>> getKeys() {
-		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhLocaleTemplatesRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_LOCALE_TEMPLATES_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_LOCALE_TEMPLATES_U_EH_LSTR_IDENTIFIER);
+		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhLocaleTemplatesRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_LOCALE_TEMPLATES_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_LOCALE_TEMPLATES_U_EH_TEMPLATE_IDENTIFIER);
 	}
 
 	/**
