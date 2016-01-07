@@ -301,10 +301,6 @@ public class VideoConfProviderImpl implements VideoConfProvider {
             return AfterAction.next;
         });
 
-        if (enterprises.size() > 0) {
-            locator.setAnchor(enterprises.get(enterprises.size() - 1).getId());
-        }
-		
 		return enterprises;
 	}
 
