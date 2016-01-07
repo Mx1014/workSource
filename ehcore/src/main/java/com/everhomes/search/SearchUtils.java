@@ -17,6 +17,8 @@ public class SearchUtils {
     
     public static final String ENTERPRISECONTACTINDEXTYPE = "enterprisecontact";
     
+    public static final String CONFENTERPRISEINDEXTYPE = "confenterprise";
+    
     public static Long getLongField(Object o) {
         Long v = -1l;
         String s = "";

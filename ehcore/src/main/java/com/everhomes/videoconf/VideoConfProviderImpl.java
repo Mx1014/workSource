@@ -1187,6 +1187,13 @@ public class VideoConfProviderImpl implements VideoConfProvider {
         return maps;
 	}
 
+	@Override
+	public ConfEnterprises findConfEnterpriseById(Long id) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhConfEnterprises.class, id));
+		EhConfEnterprisesDao dao = new EhConfEnterprisesDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), ConfEnterprises.class);
+	}
+
 
 
 }

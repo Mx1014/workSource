@@ -79,6 +79,7 @@ import com.everhomes.rest.videoconf.VerifyVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.VideoConfAccountPreferentialRuleDTO;
 import com.everhomes.rest.videoconf.VideoConfAccountTrialRuleDTO;
 import com.everhomes.search.ConfAccountSearcher;
+import com.everhomes.search.ConfEnterpriseSearcher;
 import com.everhomes.search.UserWithoutConfAccountSearcher;
 import com.everhomes.util.RequireAuthentication;
 
@@ -98,6 +99,9 @@ public class VideoConfController  extends ControllerBase{
 	
 	@Autowired
 	private UserWithoutConfAccountSearcher userWithoutConfAccountSearcher;
+	
+	@Autowired
+	private ConfEnterpriseSearcher confEnterpriseSearcher;
 	
 	/**
 	 * <b>URL: /conf/getAppDownloadURL</b>
@@ -607,7 +611,8 @@ public class VideoConfController  extends ControllerBase{
 	@RestReturn(value = ListEnterpriseWithVideoConfAccountResponse.class)
 	public RestResponse listEnterpriseWithVideoConfAccount(ListEnterpriseWithVideoConfAccountCommand cmd) {
 
-		ListEnterpriseWithVideoConfAccountResponse enterprise = videoConfService.listEnterpriseWithVideoConfAccount(cmd);
+//		ListEnterpriseWithVideoConfAccountResponse enterprise = videoConfService.listEnterpriseWithVideoConfAccount(cmd);
+		ListEnterpriseWithVideoConfAccountResponse enterprise = confEnterpriseSearcher.query(cmd);
 		RestResponse response = new RestResponse(enterprise);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -1153,6 +1158,21 @@ public class VideoConfController  extends ControllerBase{
     @RestReturn(value=String.class)
     public RestResponse syncUserIndex() {
     	userWithoutConfAccountSearcher.syncFromDb();
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+    
+    /**
+     * <b>URL: /conf/syncEnterpriseIndex</b>
+     * <p>搜索索引同步</p>
+     * @return {String.class}
+     */
+    @RequestMapping("syncEnterpriseIndex")
+    @RestReturn(value=String.class)
+    public RestResponse syncEnterpriseIndex() {
+    	confEnterpriseSearcher.syncFromDb();
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
