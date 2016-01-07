@@ -438,7 +438,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         List<ApartmentDTO> results = new ArrayList<>();
         String likeVal = "%" + cmd.getKeyword() + "%";
         long startTime = System.currentTimeMillis();
-        int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+        int namespaceId = UserContext.getCurrentNamespaceId(null);
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
                 (DSLContext context, Object reducingContext)-> {
                     context.selectDistinct(Tables.EH_ADDRESSES.ID,Tables.EH_ADDRESSES.APARTMENT_NAME,Tables.EH_ADDRESSES.AREA_SIZE)
@@ -1521,6 +1521,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 			address.setAreaSize(areaSize);
 			address.setAddress(building.getName() + "-" + arr[1]);
 			address.setStatus(AddressAdminStatus.ACTIVE.getCode());
+			address.setNamespaceId(community.getNamespaceId());
 			
 			Address addr = addressProvider.findAddressByCommunityAndAddress(address.getCityId(), address.getAreaId(), address.getCommunityId(), address.getAddress());
 			
