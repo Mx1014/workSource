@@ -111,9 +111,10 @@ CREATE TABLE `eh_locale_templates`(
     `locale` VARCHAR(16),
 	`description` VARCHAR(2048),
     `text` TEXT,
+	`namespace_id` INTEGER NOT NULL DEFAULT 0,
     
     PRIMARY KEY (`id`),
-    UNIQUE `u_eh_lstr_identifier`(`scope`, `code`, `locale`)
+    UNIQUE `u_eh_template_identifier`(`namespace_id`, `scope`, `code`, `locale`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
  
 DROP TABLE IF EXISTS `eh_categories`;
