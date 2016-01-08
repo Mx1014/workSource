@@ -1285,6 +1285,8 @@ public class VideoConfServiceImpl implements VideoConfService {
 						conf.setConfHostId(String.valueOf(data.get("userId")));
 //						conf.setConfHostName(confHostName);
 						conf.setMaxCount((Double.valueOf(String.valueOf(data.get("maxCount")))).intValue());
+						String joinUrl = "cfcloud://www.confcloud.cn/join?confno={" + conf.getConfId() + "}";
+						conf.setJoinUrl(joinUrl);
 						conf.setStatus((byte) 1);
 						conf.setNamespaceId(namespaceId);
 						
