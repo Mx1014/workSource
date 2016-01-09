@@ -7,6 +7,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+
+
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
@@ -14,13 +17,19 @@ import org.jooq.tools.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+
+
+
 import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.techpark.onlinePay.PayStatus;
+import com.everhomes.rest.techpark.park.ApplyParkingCardStatus;
 import com.everhomes.rest.videoconf.CountAccountOrdersAndMonths;
 import com.everhomes.rest.videoconf.InvoiceDTO;
 import com.everhomes.rest.videoconf.OrderBriefDTO;
@@ -36,6 +45,7 @@ import com.everhomes.server.schema.tables.daos.EhConfOrderAccountMapDao;
 import com.everhomes.server.schema.tables.daos.EhConfOrdersDao;
 import com.everhomes.server.schema.tables.daos.EhConfReservationsDao;
 import com.everhomes.server.schema.tables.daos.EhConfSourceAccountsDao;
+import com.everhomes.server.schema.tables.daos.EhParkApplyCardDao;
 import com.everhomes.server.schema.tables.daos.EhWarningContactsDao;
 import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
@@ -49,6 +59,7 @@ import com.everhomes.server.schema.tables.pojos.EhConfOrderAccountMap;
 import com.everhomes.server.schema.tables.pojos.EhConfOrders;
 import com.everhomes.server.schema.tables.pojos.EhConfReservations;
 import com.everhomes.server.schema.tables.pojos.EhConfSourceAccounts;
+import com.everhomes.server.schema.tables.pojos.EhParkApplyCard;
 import com.everhomes.server.schema.tables.pojos.EhWarningContacts;
 import com.everhomes.server.schema.tables.records.EhConfAccountCategoriesRecord;
 import com.everhomes.server.schema.tables.records.EhConfAccountsRecord;
@@ -56,6 +67,7 @@ import com.everhomes.server.schema.tables.records.EhConfEnterprisesRecord;
 import com.everhomes.server.schema.tables.records.EhConfOrderAccountMapRecord;
 import com.everhomes.server.schema.tables.records.EhConfOrdersRecord;
 import com.everhomes.server.schema.tables.records.EhConfReservationsRecord;
+import com.everhomes.server.schema.tables.records.EhParkApplyCardRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -1190,6 +1202,102 @@ public class VideoConfProviderImpl implements VideoConfProvider {
         return ConvertHelper.convert(dao.findById(id), ConfEnterprises.class);
 	}
 
+	@Override
+	public void updateInvaildAccount() {
+		Timestamp current = new Timestamp(System.currentTimeMillis());
+
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readWriteWith(EhConfAccounts.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+		this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
+			SelectQuery<EhConfAccountsRecord> query = context.selectQuery(Tables.EH_CONF_ACCOUNTS);
+			if (locator.getAnchor() != null && locator.getAnchor() != 0)
+				query.addConditions(Tables.EH_CONF_ACCOUNTS.ID.gt(locator.getAnchor()));
+			
+			query.addConditions(Tables.EH_CONF_ACCOUNTS.EXPIRED_DATE.lt(current));
+			query.addOrderBy(Tables.EH_CONF_ACCOUNTS.ID.asc());
+			
+			query.fetch().map((r) -> {
+				r.setStatus((byte) 0);;
+				EhConfAccounts account = ConvertHelper.convert(r, EhConfAccounts.class);
+				EhConfAccountsDao dao = new EhConfAccountsDao(context.configuration());
+		        dao.update(account);
+		        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhConfAccounts.class, account.getId());
+				return null;
+			});
+			return AfterAction.next;
+		});
+	}
+
+	@Override
+	public void updateEnterpriseAccounts() {
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readWriteWith(EhConfEnterprises.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+		this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
+			SelectQuery<EhConfEnterprisesRecord> query = context.selectQuery(Tables.EH_CONF_ENTERPRISES);
+			if (locator.getAnchor() != null && locator.getAnchor() != 0)
+				query.addConditions(Tables.EH_CONF_ENTERPRISES.ID.gt(locator.getAnchor()));
+			
+			query.addConditions(Tables.EH_CONF_ENTERPRISES.DELETER_UID.eq(0L));
+			query.addOrderBy(Tables.EH_CONF_ENTERPRISES.ID.asc());
+			
+			query.fetch().map((r) -> {
+				int activeCount = countAccountsByEnterprise(r.getEnterpriseId(), null);
+				int trialCount = countAccountsByEnterprise(r.getEnterpriseId(), (byte) 1);
+
+				r.setActiveAccountAmount(activeCount);
+				r.setTrialAccountAmount(trialCount);
+				EhConfEnterprises enterprise = ConvertHelper.convert(r, EhConfEnterprises.class);
+				EhConfEnterprisesDao dao = new EhConfEnterprisesDao(context.configuration());
+		        dao.update(enterprise);
+		        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhConfEnterprises.class, enterprise.getId());
+				return null;
+			});
+			return AfterAction.next;
+		});
+		
+	}
+	
+	@Override
+	public int countAccountsByEnterprise(Long enterpriseId, Byte accountType) {
+	    
+	    final Integer[] count = new Integer[1];
+        
+        if(accountType == null) {
+        	this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhConfAccounts.class), null, 
+                    (DSLContext context, Object reducingContext)-> {
+                        count[0] = context.selectCount().from(Tables.EH_CONF_ACCOUNTS)
+                        		.where(Tables.EH_CONF_ACCOUNTS.ENTERPRISE_ID.eq(enterpriseId))
+                                .and(Tables.EH_CONF_ACCOUNTS.STATUS.ne((byte) 0))
+                                .and(Tables.EH_CONF_ACCOUNTS.DELETE_UID.eq(0L))
+                                .fetchOneInto(Integer.class);
+                        return true;
+                    });
+		}
+		else {
+			this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhConfAccounts.class), null, 
+	                (DSLContext context, Object reducingContext)-> {
+	                    count[0] = context.selectCount().from(Tables.EH_CONF_ACCOUNTS)
+	                    		.where(Tables.EH_CONF_ACCOUNTS.ENTERPRISE_ID.eq(enterpriseId))
+	                            .and(Tables.EH_CONF_ACCOUNTS.ACCOUNT_TYPE.eq(accountType))
+	                            .and(Tables.EH_CONF_ACCOUNTS.STATUS.ne((byte) 0))
+	                            .and(Tables.EH_CONF_ACCOUNTS.DELETE_UID.eq(0L))
+	                            .fetchOneInto(Integer.class);
+	                    return true;
+	                });
+		}
+        
+        return count[0];
+	}
+	
+	
 
 
 }

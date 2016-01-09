@@ -2,7 +2,6 @@ package com.everhomes.videoconf;
 
 import java.io.IOException;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -24,6 +23,7 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.category.Category;
@@ -37,7 +37,7 @@ import com.everhomes.enterprise.EnterpriseContactEntry;
 import com.everhomes.enterprise.EnterpriseContactProvider;
 import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.listing.ListingLocator;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.pm.pay.GsonUtil;
@@ -52,11 +52,11 @@ import com.everhomes.rest.videoconf.AccountType;
 import com.everhomes.rest.videoconf.AddSourceVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.AssignVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.CancelVideoConfCommand;
-import com.everhomes.rest.videoconf.ConfAccountDTO;
 import com.everhomes.rest.videoconf.ConfCapacity;
 import com.everhomes.rest.videoconf.ConfOrderAccountDTO;
 import com.everhomes.rest.videoconf.ConfOrderDTO;
 import com.everhomes.rest.videoconf.ConfReservationsDTO;
+import com.everhomes.rest.videoconf.ConfServiceErrorCode;
 import com.everhomes.rest.videoconf.ConfType;
 import com.everhomes.rest.videoconf.CountAccountOrdersAndMonths;
 import com.everhomes.rest.videoconf.CreateAccountOwnerCommand;
@@ -68,15 +68,12 @@ import com.everhomes.rest.videoconf.DeleteVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.DeleteWarningContactorCommand;
 import com.everhomes.rest.videoconf.EnterpriseConfAccountDTO;
 import com.everhomes.rest.videoconf.EnterpriseLockStatusCommand;
-import com.everhomes.rest.videoconf.EnterpriseUsersDTO;
 import com.everhomes.rest.videoconf.ExtendedSourceAccountPeriodCommand;
 import com.everhomes.rest.videoconf.ExtendedVideoConfAccountPeriodCommand;
 import com.everhomes.rest.videoconf.InvoiceDTO;
 import com.everhomes.rest.videoconf.JoinVideoConfCommand;
 import com.everhomes.rest.videoconf.JoinVideoConfResponse;
 import com.everhomes.rest.videoconf.ListConfOrderAccountResponse;
-import com.everhomes.rest.videoconf.ListEnterpriseVideoConfAccountCommand;
-import com.everhomes.rest.videoconf.ListEnterpriseVideoConfAccountResponse;
 import com.everhomes.rest.videoconf.ListEnterpriseWithVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.ListEnterpriseWithVideoConfAccountResponse;
 import com.everhomes.rest.videoconf.ListInvoiceByOrderIdCommand;
@@ -89,7 +86,6 @@ import com.everhomes.rest.videoconf.ListSourceVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.ListSourceVideoConfAccountResponse;
 import com.everhomes.rest.videoconf.ListUnassignAccountsByOrderCommand;
 import com.everhomes.rest.videoconf.ListUsersWithoutVideoConfPrivilegeCommand;
-import com.everhomes.rest.videoconf.ListUsersWithoutVideoConfPrivilegeResponse;
 import com.everhomes.rest.videoconf.ListVideoConfAccountByOrderIdCommand;
 import com.everhomes.rest.videoconf.ListVideoConfAccountConfRecordCommand;
 import com.everhomes.rest.videoconf.ListVideoConfAccountConfRecordResponse;
@@ -117,7 +113,6 @@ import com.everhomes.rest.videoconf.VerifyVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.VideoConfAccountRuleDTO;
 import com.everhomes.rest.videoconf.VideoconfNotificationTemplateCode;
 import com.everhomes.rest.videoconf.WarningContactorDTO;
-import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
@@ -159,6 +154,9 @@ public class VideoConfServiceImpl implements VideoConfService {
 	
 	@Autowired
 	private UserProvider userProvider;
+	
+	@Autowired
+	private LocaleStringService localeStringService;
 	
 	
 	@Override
@@ -1065,15 +1063,19 @@ public class VideoConfServiceImpl implements VideoConfService {
 		ConfAccounts account = vcProvider.findVideoconfAccountById(cmd.getAccountId());
 		if(account == null) {
 			LOGGER.error("account is not exist!");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"account is not exist!");
+			throw RuntimeErrorException.errorWith(ConfServiceErrorCode.SCOPE, ConfServiceErrorCode.ERROR_INVALID_ACCOUNT,
+					localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
+							String.valueOf(ConfServiceErrorCode.ERROR_INVALID_ACCOUNT),
+							UserContext.current().getUser().getLocale(),"account is not exist."));
 		}
 
 		Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
 		if(now.before(addMonth(account.getOwnTime(), 3))) {
 			LOGGER.error("account has assigned in last 3 month!");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"account has assigned in last 3 month!");
+		throw RuntimeErrorException.errorWith(ConfServiceErrorCode.SCOPE, ConfServiceErrorCode.ERROR_INVALID_ASSIGN,
+				localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
+						String.valueOf(ConfServiceErrorCode.ERROR_INVALID_ASSIGN),
+						UserContext.current().getUser().getLocale(),"account has assigned in last 3 month!"));
 		}
 		account.setOwnerId(cmd.getUserId());
 		account.setUpdateTime(now);
@@ -1212,7 +1214,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
 		String path = "http://api.confcloud.cn/openapi/confReservation";
 		ConfAccounts account = vcProvider.findVideoconfAccountById(cmd.getAccountId());
-		if(account != null) {
+		if(account != null && account.getStatus() == 2) {
 			ConfAccountCategories category = vcProvider.findAccountCategoriesById(account.getAccountCategoryId());
 			List<Long> accountCategories = vcProvider.findAccountCategoriesByConfType(category.getConfType());
 			ConfSourceAccounts sourceAccount = vcProvider.findSpareAccount(accountCategories);
@@ -1311,6 +1313,13 @@ public class VideoConfServiceImpl implements VideoConfService {
 				LOGGER.error("源账号不够");
 			}
 		}
+		else {
+			LOGGER.error("account "+cmd.getAccountId()+ "is invaild");
+			throw RuntimeErrorException.errorWith(ConfServiceErrorCode.SCOPE, ConfServiceErrorCode.ERROR_INVALID_ACCOUNT,
+					localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
+							String.valueOf(ConfServiceErrorCode.ERROR_INVALID_ACCOUNT),
+							UserContext.current().getUser().getLocale(),"account is invaild."));
+		}
 		return response;
 	}
 	 private static NameValuePair[] generatNameValuePair(Map<String, String> properties) {
@@ -1359,6 +1368,10 @@ public class VideoConfServiceImpl implements VideoConfService {
 			
 			else {
 				LOGGER.error("conf id is wrong!");
+				throw RuntimeErrorException.errorWith(ConfServiceErrorCode.SCOPE, ConfServiceErrorCode.ERROR_INVALID_CONF_ID,
+						localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
+								String.valueOf(ConfServiceErrorCode.ERROR_INVALID_CONF_ID),
+								UserContext.current().getUser().getLocale(),"conf id is wrong!"));
 			}
 		}
 		
@@ -1504,18 +1517,24 @@ public class VideoConfServiceImpl implements VideoConfService {
 		List<Long> userIds = cmd.getUserIds();
 		if(userIds == null || userIds.isEmpty()){
 			LOGGER.error("user count is null");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"user count is null");
+			throw RuntimeErrorException.errorWith(ConfServiceErrorCode.SCOPE, ConfServiceErrorCode.ERROR_INVALID_USER_COUNT,
+					localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
+							String.valueOf(ConfServiceErrorCode.ERROR_INVALID_USER_COUNT),
+							UserContext.current().getUser().getLocale(),"user count is null."));
 		}
 		if(accountIds == null || accountIds.isEmpty()){
 			LOGGER.error("account count is null");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"account count is null");
+			throw RuntimeErrorException.errorWith(ConfServiceErrorCode.SCOPE, ConfServiceErrorCode.ERROR_INVALID_ACCOUNT_COUNT,
+					localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
+							String.valueOf(ConfServiceErrorCode.ERROR_INVALID_ACCOUNT_COUNT),
+							UserContext.current().getUser().getLocale(),"account count is null."));
 		}
 		if(userIds.size() > accountIds.size()) {
 			LOGGER.error("user count is cannot larger than account count");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"user count is cannot larger than account count");
+			throw RuntimeErrorException.errorWith(ConfServiceErrorCode.SCOPE, ConfServiceErrorCode.ERROR_INVALID_USER_ACCOUNT,
+					localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
+							String.valueOf(ConfServiceErrorCode.ERROR_INVALID_USER_ACCOUNT),
+							UserContext.current().getUser().getLocale(),"user count is cannot larger than account count."));
 		}
 		
 //		accountIds.stream().map(accountId -> {
@@ -1524,8 +1543,10 @@ public class VideoConfServiceImpl implements VideoConfService {
 				ConfAccounts account = vcProvider.findVideoconfAccountById(accountId);
 				if(account == null) {
 					LOGGER.error("account is not exist!");
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-							"account is not exist!");
+					throw RuntimeErrorException.errorWith(ConfServiceErrorCode.SCOPE, ConfServiceErrorCode.ERROR_INVALID_ACCOUNT,
+							localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
+									String.valueOf(ConfServiceErrorCode.ERROR_INVALID_ACCOUNT),
+									UserContext.current().getUser().getLocale(),"account is invaild."));
 				}
 		
 				Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
@@ -1928,6 +1949,14 @@ public class VideoConfServiceImpl implements VideoConfService {
 		
 		return 0.0000;
 		
+	}
+
+	@Scheduled(cron="0 0 2 * * ? ")
+	@Override
+	public void invalidAccount() {
+		LOGGER.info("update invalid appliers.");
+		vcProvider.updateInvaildAccount();
+		vcProvider.updateEnterpriseAccounts();
 	}
 	
 }

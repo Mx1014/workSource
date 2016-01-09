@@ -1,0 +1,13 @@
+package com.everhomes.rest.videoconf;
+
+public interface ConfServiceErrorCode {
+	static final String SCOPE = "videoConf";
+	
+    static final int ERROR_INVALID_ACCOUNT=10000; 
+    static final int ERROR_INVALID_CONF_ID=10001; 
+    static final int ERROR_INVALID_USER_COUNT=10002; 
+    static final int ERROR_INVALID_ACCOUNT_COUNT=10003; 
+    static final int ERROR_INVALID_USER_ACCOUNT=10004; 
+    static final int ERROR_INVALID_ASSIGN=10005; 
+
+}
