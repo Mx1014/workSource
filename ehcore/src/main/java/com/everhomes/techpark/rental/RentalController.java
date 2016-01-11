@@ -122,12 +122,10 @@ public class RentalController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("updateRentalRule")
-	@RestReturn(value = UpdateRentalRuleCommandResponse.class)
+	@RestReturn(value = String.class)
 	public RestResponse updateRentalRule(@Valid UpdateRentalRuleCommand cmd) {
-		UpdateRentalRuleCommandResponse updateRentalRuleCommandResponse = rentalService
-				.updateRentalRule(cmd);
-		RestResponse response = new RestResponse(
-				updateRentalRuleCommandResponse);
+		rentalService.updateRentalRule(cmd);
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
