@@ -1640,12 +1640,6 @@ public class VideoConfServiceImpl implements VideoConfService {
 		order.setAccountCategoryId(cmd.getAccountCategoryId());
 		vcProvider.createConfOrders(order);
 		
-		if(order.getOnlineFlag() == 0) {
-			OfflinePayBillCommand command = new OfflinePayBillCommand();
-			command.setOrderId(order.getId());
-			offlinePayBill(command);
-		}
-		
 		if(order.getInvoiceReqFlag() == 1) {
 			ConfInvoices invoice = ConvertHelper.convert(cmd.getInvoice(), ConfInvoices.class);
 			invoice.setOrderId(order.getId());
@@ -1668,6 +1662,12 @@ public class VideoConfServiceImpl implements VideoConfService {
 			enterprise.setContactName(cmd.getContactor());
 			enterprise.setContact(cmd.getMobile());
 			vcProvider.updateConfEnterprises(enterprise);
+		}
+		
+		if(order.getOnlineFlag() == 0) {
+			OfflinePayBillCommand command = new OfflinePayBillCommand();
+			command.setOrderId(order.getId());
+			offlinePayBill(command);
 		}
 			
 	}
