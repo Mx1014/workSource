@@ -598,12 +598,18 @@ public class VideoConfProviderImpl implements VideoConfProvider {
         this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
             SelectQuery<EhConfOrdersRecord> query = context.selectQuery(Tables.EH_CONF_ORDERS);
             
-            if(locator.getAnchor() != null)
+            if (locator.getAnchor() == null){
+            	locator.setAnchor(0L);
             	query.addConditions(Tables.EH_CONF_ORDERS.ID.gt(locator.getAnchor()));
+            }
+            if(locator.getAnchor() != 0L){
+            	query.addConditions(Tables.EH_CONF_ORDERS.ID.lt(locator.getAnchor()));
+            }
             
             if(enterpriseId != null)
             	query.addConditions(Tables.EH_CONF_ORDERS.OWNER_ID.eq(enterpriseId));
            
+            query.addOrderBy(Tables.EH_CONF_ORDERS.CREATE_TIME.desc());
             query.addLimit(pageSize - orders.size());
             
             query.fetch().map((r) -> {

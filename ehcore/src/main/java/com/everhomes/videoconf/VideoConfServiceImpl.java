@@ -1819,11 +1819,13 @@ public class VideoConfServiceImpl implements VideoConfService {
 	@Override
 	public void offlinePayBill(OfflinePayBillCommand cmd) {
 
+		LOGGER.info("offlinePayBill.");
 		ConfOrders order = this.checkOrder(cmd.getOrderId());
 		
 		Long payTime = System.currentTimeMillis();
 		Timestamp payTimeStamp = new Timestamp(payTime);
 		this.updateOrderStatus(order, payTimeStamp, PayStatus.PAID.getCode());
+		
 		
 	}
 
