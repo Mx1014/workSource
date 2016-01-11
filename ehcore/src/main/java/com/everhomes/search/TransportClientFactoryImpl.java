@@ -17,12 +17,15 @@ public class TransportClientFactoryImpl implements TransportClientFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(TransportClientFactoryImpl.class);
     
     @Value("${elastic.nodes.hosts}")
-    String nodeHosts;
+    private String nodeHosts;
     
     @Value("${elastic.nodes.ports}")
-    String nodePorts;
+    private String nodePorts;
     
-    Client client = null;
+    @Value("${cluster.name:elasticsearch}")
+    private String clusterName;
+    
+    private Client client = null;
     
     @PostConstruct
     public void setup() {
@@ -49,7 +52,7 @@ public class TransportClientFactoryImpl implements TransportClientFactory {
     
     private Client setupClient() {
         Settings settings = ImmutableSettings.settingsBuilder()
-                .put("cluster.name", "elasticsearch")
+                .put("cluster.name", clusterName)
                 .build();
         
         TransportClient proxyClient = new TransportClient(settings);
