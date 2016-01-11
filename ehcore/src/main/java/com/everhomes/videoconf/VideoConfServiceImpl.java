@@ -1636,9 +1636,15 @@ public class VideoConfServiceImpl implements VideoConfService {
 		order.setStatus(PayStatus.WAITING_FOR_PAY.getCode());
 		order.setInvoiceReqFlag(cmd.getInvoiceFlag());
 		order.setInvoiceIssueFlag(cmd.getMakeOutFlag());
-//		order.setOnlineFlag(cmd.getBuyChannel());
+		order.setOnlineFlag(cmd.getBuyChannel());
 		order.setAccountCategoryId(cmd.getAccountCategoryId());
 		vcProvider.createConfOrders(order);
+		
+		if(order.getOnlineFlag() == 0) {
+			OfflinePayBillCommand command = new OfflinePayBillCommand();
+			command.setOrderId(order.getId());
+			offlinePayBill(command);
+		}
 		
 		if(order.getInvoiceReqFlag() == 1) {
 			ConfInvoices invoice = ConvertHelper.convert(cmd.getInvoice(), ConfInvoices.class);
