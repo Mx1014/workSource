@@ -1,6 +1,5 @@
 package com.everhomes.techpark.rental;
 
-import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -96,7 +95,6 @@ import com.everhomes.rest.techpark.rental.SiteItemDTO;
 import com.everhomes.rest.techpark.rental.SiteRuleStatus;
 import com.everhomes.rest.techpark.rental.TimeInterval;
 import com.everhomes.rest.techpark.rental.UpdateRentalRuleCommand;
-import com.everhomes.rest.techpark.rental.UpdateRentalRuleCommandResponse;
 import com.everhomes.rest.techpark.rental.UpdateRentalSiteCommand;
 import com.everhomes.rest.techpark.rental.VerifyRentalBillCommandResponse;
 import com.everhomes.rest.techpark.rental.VisibleFlag;
@@ -173,9 +171,8 @@ public class RentalServiceImpl implements RentalService {
 	}
 
 	@Override
-	public UpdateRentalRuleCommandResponse updateRentalRule(
-			UpdateRentalRuleCommand cmd) {
-		UpdateRentalRuleCommandResponse response = new UpdateRentalRuleCommandResponse();
+	public void updateRentalRule(UpdateRentalRuleCommand cmd) {
+		
 		Long userId = UserContext.current().getUser().getId();
 		checkEnterpriseCommunityIdIsNull(cmd.getOwnerId());
 //		RentalRule rentalRule = rentalProvider.getRentalRule(
@@ -201,7 +198,7 @@ public class RentalServiceImpl implements RentalService {
 		rentalRule.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		rentalRule.setOperatorUid(userId);
 		rentalProvider.updateRentalRule(rentalRule);
-		return response;
+		
 	}
 
 	@Override
