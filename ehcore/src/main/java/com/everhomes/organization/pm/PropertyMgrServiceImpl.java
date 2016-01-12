@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -14,7 +15,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -38,6 +41,8 @@ import com.everhomes.acl.Role;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.address.AddressService;
+import com.everhomes.app.App;
+import com.everhomes.app.AppProvider;
 import com.everhomes.auditlog.AuditLog;
 import com.everhomes.auditlog.AuditLogProvider;
 import com.everhomes.community.Community;
@@ -231,6 +236,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.DateStatisticHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.excel.handler.ProcessBillModel1;
 import com.everhomes.util.excel.handler.PropMgrBillHandler;
@@ -247,9 +253,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	private static final String PROP_MESSAGE_BILL = "prop.message.bill";
 	@Autowired
 	private PropertyMgrProvider propertyMgrProvider;
-
-	@Autowired
-	private ConfigurationProvider configProvider;
 
 	@Autowired
 	private CommunityProvider communityProvider;
@@ -310,6 +313,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	
 	@Autowired
 	private EnterpriseContactProvider enterpriseContactProvider;
+	
+	@Autowired
+	private AppProvider appProvider;
 
 	@Override
 	public void applyPropertyMember(applyPropertyMemberCommand cmd) {
@@ -433,7 +439,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		int totalCount = propertyMgrProvider.countCommunityPmMembers(organizationId, null);
 		if(totalCount == 0) return commandResponse;
 
-		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		int pageCount = getPageCount(totalCount, pageSize);
 
 		List<CommunityPmMember> entityResultList = propertyMgrProvider.listCommunityPmMembers(organizationId, null, cmd.getPageOffset(),pageSize);
@@ -493,7 +499,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 		int totalCount = propertyMgrProvider.countCommunityAddressMappings(organizationId,null);
 		if(totalCount == 0) return commandResponse;
-		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
 		int pageCount = getPageCount(totalCount, pageSize);
 
@@ -530,7 +536,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		cmd.setCommunityId(organizationId);
 		int totalCount = propertyMgrProvider.countCommunityPmBills(cmd.getCommunityId(), cmd.getDateStr(), cmd.getAddress());
 		if(totalCount == 0) return commandResponse;
-		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
 		int pageCount = getPageCount(totalCount, pageSize);
 		List<CommunityPmBill> entityResultList = propertyMgrProvider.listCommunityPmBills(cmd.getCommunityId(), cmd.getDateStr(), cmd.getAddress(), cmd.getPageOffset(), pageSize);
@@ -563,7 +569,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 		int totalCount = propertyMgrProvider.countCommunityPmOwners(organizationId,cmd.getAddress(),cmd.getContactToken());
 		if(totalCount == 0) return commandResponse;
-		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
 		int pageCount = getPageCount(totalCount, pageSize);
 
@@ -604,7 +610,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		comment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		comment.setCreatorUid(userId);
 		comment.setContentType(PostContentType.TEXT.getCode());
-		String template = configProvider.getValue(ASSIGN_TASK_AUTO_COMMENT, "");
+		String template = configurationProvider.getValue(ASSIGN_TASK_AUTO_COMMENT, "");
 		if(StringUtils.isEmpty(template)){
 			template = "该物业已在处理";
 		}
@@ -624,7 +630,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	 */
 	private void sendMSMToUser(long topicId, long userId, long owerId, long category) {
 		//给维修人员发送短信是否显示业主地址
-//		String template = configProvider.getValue(ASSIGN_TASK_AUTO_SMS, "");
+//		String template = configurationProvider.getValue(ASSIGN_TASK_AUTO_SMS, "");
 		List<UserIdentifier> userList = this.userProvider.listUserIdentifiersOfUser(userId);
 		userList.stream().filter((u) -> {
 			if(u.getIdentifierType() != IdentifierType.MOBILE.getCode())
@@ -892,7 +898,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 		int totalCount = familyProvider.countWaitApproveFamily(cmd.getCommunityId());
 		if(totalCount == 0) return commandResponse;
-		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
 		long offset = PaginationHelper.offsetFromPageOffset(Long.valueOf(cmd.getPageOffset()), pageSize);
 		int pageCount = getPageCount(totalCount, pageSize);
@@ -1164,7 +1170,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 
 	public String buildBillMessage(CommunityPmBill bill) {
-		String template = configProvider.getValue(PROP_MESSAGE_BILL, "");
+		String template = configurationProvider.getValue(PROP_MESSAGE_BILL, "");
 		String content = "\n" + template +"账单时间：" + bill.getDateStr() +"\n";
 		List<CommunityPmBillItem> itemList  = propertyMgrProvider.listCommunityPmBillItems(bill.getId());
 		if(itemList != null && itemList.size() > 0)
@@ -1498,7 +1504,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		cmd.setCommunityId(organizationId);
 		int totalCount = 0; //propertyMgrProvider.countCommunityPmTasks(cmd.getCommunityId(), null, null, null, null, OrganizationTaskType.fromCode(cmd.getActionCategory()).getCode(), cmd.getTaskStatus());
 		if(totalCount == 0) return response;
-		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		int pageCount = getPageCount(totalCount, pageSize);
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
 		List<PropertyPostDTO> results = new ArrayList<PropertyPostDTO>();
@@ -3602,11 +3608,31 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 		OrganizationOrderDTO dto = new OrganizationOrderDTO();
 		String orderNo = this.convertOrderIdToOrderNo(order.getId());
+		dto.setOrderType("wuye");
 		dto.setOrderNo(orderNo);
-		dto.setAmount(cmd.getAmount());
 		dto.setName(bill.getName());
 		dto.setDescription(order.getDescription());
+		this.setSignatureParam(dto,cmd.getAmount());
 		return dto;
+	}
+	
+	private void setSignatureParam(OrganizationOrderDTO dto,BigDecimal amount) {
+		String appKey = configurationProvider.getValue("pay.appKey", "abc");
+		Long timestamp = System.currentTimeMillis();
+		Integer randomNum = (int) (Math.random()*1000);
+		App app = appProvider.findAppByKey(appKey);
+		
+		Map<String,String> map = new HashMap<String, String>();
+		map.put("appKey",appKey);
+		map.put("timestamp",timestamp+"");
+		map.put("randomNum",randomNum+"");
+		map.put("amount",amount+"");
+		String signature = SignatureHelper.computeSignature(map, app.getSecretKey());
+		dto.setAppKey(appKey);
+		dto.setRandomNum(randomNum);
+		dto.setSignature(URLEncoder.encode(signature));
+		dto.setTimestamp(timestamp);
+		dto.setAmount(amount);
 	}
 
 	private String convertToVerdorType(String verdorTypeStr) {

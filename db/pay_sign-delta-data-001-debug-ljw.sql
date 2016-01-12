@@ -1,0 +1,2 @@
+INSERT INTO `eh_configurations`(`name`, `value`, `description`, `namespace_id`) VALUES ('pay.appKey','7bbb5727-9d37-443a-a080-55bbf37dc8e1','pay.appKey',0);
+INSERT INTO `eh_apps` (`creator_uid`,`app_key`,`secret_key`,`name`,`description`,`status`,`create_time`,`update_uid`,`update_time`) VALUES ('1', '7bbb5727-9d37-443a-a080-55bbf37dc8e1', '1k0ty3aZPC8bjMm8V9+pFmsU5B7cImfQXB4GUm4ACSFPP1IhZI5basNbUBXe7p6gJ7OC8J03DW1U8fvvtpim6Q==', 'pay.app', 'pay.app', '1', '2016-01-12 14:52:06', null, null);

@@ -1,0 +1,1 @@
+INSERT INTO `eh_configurations`(`name`, `value`, `description`, `namespace_id`) VALUES ('pay.appKey','7bbb5727-9d37-443a-a080-55bbf37dc8e1','pay.appKey',0);
