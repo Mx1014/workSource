@@ -228,6 +228,7 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
             b.field("updateTime", account.getUpdateTime());
             b.field("expiredDate", account.getExpiredDate());
             b.field("status", account.getStatus());
+            b.field("enterpriseId", account.getEnterpriseId());
 
 //            b.field("userType", account.getId());
 //            if(account.getAccountType() == 1)
