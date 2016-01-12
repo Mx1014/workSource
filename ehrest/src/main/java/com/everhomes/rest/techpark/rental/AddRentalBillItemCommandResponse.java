@@ -8,6 +8,13 @@ public class AddRentalBillItemCommandResponse {
 	private String name;
 	private String description;
 	private String orderType;
+	
+	//签名所需参数
+	private String appKey;
+	private Integer randomNum;
+	private Long timestamp;
+	private String signature;
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -42,5 +49,29 @@ public class AddRentalBillItemCommandResponse {
 	}
 	public void setOrderType(String orderType) {
 		this.orderType = orderType;
+	}
+	public String getAppKey() {
+		return appKey;
+	}
+	public void setAppKey(String appKey) {
+		this.appKey = appKey;
+	}
+	public Integer getRandomNum() {
+		return randomNum;
+	}
+	public void setRandomNum(Integer randomNum) {
+		this.randomNum = randomNum;
+	}
+	public Long getTimestamp() {
+		return timestamp;
+	}
+	public void setTimestamp(Long timestamp) {
+		this.timestamp = timestamp;
+	}
+	public String getSignature() {
+		return signature;
+	}
+	public void setSignature(String signature) {
+		this.signature = signature;
 	} 
 }

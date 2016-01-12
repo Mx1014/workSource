@@ -1,11 +1,14 @@
 package com.everhomes.techpark.rental;
 
+import java.net.URLEncoder;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
@@ -20,6 +23,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.app.App;
+import com.everhomes.app.AppProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
@@ -108,6 +113,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.Tuple;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -150,6 +156,8 @@ public class RentalServiceImpl implements RentalService {
 	RentalProvider rentalProvider;
 	@Autowired
 	private UserProvider userProvider;
+	@Autowired
+	private AppProvider appProvider;
 
 	private int getPageCount(int totalCount, int pageSize) {
 		int pageCount = totalCount / pageSize;
@@ -1439,8 +1447,28 @@ public class RentalServiceImpl implements RentalService {
 			} else {
 			}
 		}
+		//签名
+		this.setSignatureParam(response);
 		// 客户端生成订单
 		return response;
+	}
+
+	private void setSignatureParam(AddRentalBillItemCommandResponse response) {
+		String appKey = configurationProvider.getValue("pay.appKey", "7bbb5727-9d37-443a-a080-55bbf37dc8e1");
+		Long timestamp = System.currentTimeMillis();
+		Integer randomNum = (int) (Math.random()*1000);
+		App app = appProvider.findAppByKey(appKey);
+		
+		Map<String,String> map = new HashMap<String, String>();
+		map.put("appKey",appKey);
+		map.put("timestamp",timestamp+"");
+		map.put("randomNum",randomNum+"");
+		map.put("amount",response.getAmount()+"");
+		String signature = SignatureHelper.computeSignature(map, app.getSecretKey());
+		response.setAppKey(appKey);
+		response.setRandomNum(randomNum);
+		response.setSignature(URLEncoder.encode(signature));
+		response.setTimestamp(timestamp);
 	}
 
 	@Override

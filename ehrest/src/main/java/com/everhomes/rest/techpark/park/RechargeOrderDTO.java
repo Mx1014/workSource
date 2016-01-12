@@ -7,6 +7,10 @@ package com.everhomes.rest.techpark.park;
  *  <li>name : 商品名称</li>
  *	<li>description : 描述</li>
  *  <li>orderType  : 支付类型</li>
+ *  <li>appKey : 公钥</li>
+ *	<li>timestamp : 时间戳</li>
+ *	<li>randomNum : 随机数</li>
+ *	<li>signature : 签名</li>
  * </ul>
  */
 public class RechargeOrderDTO {
@@ -20,6 +24,12 @@ public class RechargeOrderDTO {
 	private String description;
 	
 	private String orderType = "tingche" ;
+	
+	//签名所需参数
+	private String appKey;
+	private Long timestamp;
+	private Integer randomNum;
+	private String signature;
 	
 	public String getOrderType() {
 		return orderType;
@@ -57,5 +67,52 @@ public class RechargeOrderDTO {
 	public void setAmount(Double amount) {
 		this.amount = amount;
 	}
+
+
+	public String getAppKey() {
+		return appKey;
+	}
+
+
+	public void setAppKey(String appKey) {
+		this.appKey = appKey;
+	}
+
+
+	public Long getTimestamp() {
+		return timestamp;
+	}
+
+
+	public void setTimestamp(Long timestamp) {
+		this.timestamp = timestamp;
+	}
+
+
+	public Integer getRandomNum() {
+		return randomNum;
+	}
+
+
+	public void setRandomNum(Integer randomNum) {
+		this.randomNum = randomNum;
+	}
+
+
+	public String getSignature() {
+		return signature;
+	}
+
+
+	public void setSignature(String signature) {
+		this.signature = signature;
+	}
+
+
+	public void setOrderType(String orderType) {
+		this.orderType = orderType;
+	}
+	
+	
 
 }

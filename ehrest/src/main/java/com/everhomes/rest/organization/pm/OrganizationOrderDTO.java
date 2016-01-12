@@ -10,6 +10,10 @@ import com.everhomes.util.StringHelper;
  *	<li>name : 商品名称</li>
  *	<li>description : 描述</li>
  *	<li>orderType : 支付方式</li>
+ *	<li>appKey : 公钥</li>
+ *	<li>timestamp : 时间戳</li>
+ *	<li>randomNum : 随机数</li>
+ *	<li>signature : 签名</li>
  *</ul>
  *
  */
