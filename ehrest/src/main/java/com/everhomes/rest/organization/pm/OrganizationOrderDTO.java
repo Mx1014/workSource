@@ -19,8 +19,12 @@ public class OrganizationOrderDTO {
 	private BigDecimal amount;
 	private String name;
 	private String description;
-	private String orderType  = "wuye";
+	private String orderType;
 	
+	private String appKey;
+	private Long timestamp;
+	private Integer randomNum;
+	private String signature;
 	
 	public String getOrderType() {
 		return orderType ;
@@ -48,6 +52,33 @@ public class OrganizationOrderDTO {
 	}
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	public String getAppKey() {
+		return appKey;
+	}
+	public void setAppKey(String appKey) {
+		this.appKey = appKey;
+	}
+	public Long getTimestamp() {
+		return timestamp;
+	}
+	public void setTimestamp(Long timestamp) {
+		this.timestamp = timestamp;
+	}
+	public Integer getRandomNum() {
+		return randomNum;
+	}
+	public void setRandomNum(Integer randomNum) {
+		this.randomNum = randomNum;
+	}
+	public String getSignature() {
+		return signature;
+	}
+	public void setSignature(String signature) {
+		this.signature = signature;
+	}
+	public void setOrderType(String orderType) {
+		this.orderType = orderType;
 	}
 	@Override
 	public String toString() {
