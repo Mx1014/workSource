@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>userId: 用户ID</li>
  * <li>id: 店铺ID</li>
+ * <li>namespaceId: 命名空间</li>
  * </ul>
  */
 
@@ -17,6 +18,7 @@ public class UserFavoriteCommand{
     private Long userId;
     @NotNull
     private String id;
+    private Integer namespaceId;
 
     public Long getUserId() {
         return userId;
@@ -33,8 +35,16 @@ public class UserFavoriteCommand{
     public void setId(String id) {
         this.id = id;
     }
+    
+    public Integer getNamespaceId() {
+		return namespaceId;
+	}
 
-    @Override
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
