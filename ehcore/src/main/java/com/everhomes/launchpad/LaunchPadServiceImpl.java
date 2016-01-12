@@ -959,10 +959,10 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		Long userId = user.getId();
 		this.checkIdIsNull(cmd.getId());
 		LaunchPadItem item = this.checkLaunchPadItem(cmd.getId(),true);
-		this.deleteLaunchPadItem(item,userId);
+		this.deleteLaunchPadItem(item,userId,user.getNamespaceId());
 	}
 
-	private void deleteLaunchPadItem(LaunchPadItem item,Long userId) {
+	private void deleteLaunchPadItem(LaunchPadItem item,Long userId,Integer namespaceId) {
 		if(item.getScopeCode() == ScopeType.USER.getCode()){
 			if(isExistsUnUserItem(item)){
 				item.setDisplayFlag(ItemDisplayFlag.HIDE.getCode());
@@ -980,6 +980,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			item.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
 			item.setScopeCode(ScopeType.USER.getCode());
 			item.setId(0L);
+			item.setNamespaceId(namespaceId==null?0:namespaceId);
 			this.launchPadProvider.createLaunchPadItem(item);
 		}
 	}

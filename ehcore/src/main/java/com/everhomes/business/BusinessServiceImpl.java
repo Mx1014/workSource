@@ -6,10 +6,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -46,7 +44,6 @@ import com.everhomes.launchpad.LaunchPadItem;
 import com.everhomes.launchpad.LaunchPadProvider;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
-import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.business.BusinessAssignedScopeDTO;
 import com.everhomes.rest.business.BusinessCommand;
 import com.everhomes.rest.business.BusinessDTO;
@@ -946,7 +943,7 @@ public class BusinessServiceImpl implements BusinessService {
 	public void syncUserFavorite(UserFavoriteCommand cmd) {
 		isValiad(cmd);
 		Business business = this.businessProvider.findBusinessByTargetId(cmd.getId());
-		favoriteBusiness(cmd.getUserId(), business.getId(),true);
+		favoriteBusiness(cmd.getUserId(),cmd.getNamespaceId(), business.getId(),true);
 
 	}
 
@@ -976,7 +973,7 @@ public class BusinessServiceImpl implements BusinessService {
 	public void syncUserCancelFavorite(UserFavoriteCommand cmd) {
 		isValiad(cmd);
 		Business business = this.businessProvider.findBusinessByTargetId(cmd.getId()); 
-		cancelFavoriteBusiness(cmd.getUserId(), business.getId(),true);
+		cancelFavoriteBusiness(cmd.getUserId(),cmd.getNamespaceId(), business.getId(),true);
 
 	}
 
@@ -1008,8 +1005,7 @@ public class BusinessServiceImpl implements BusinessService {
 
 		User user = UserContext.current().getUser();
 		long userId = user.getId();
-		favoriteBusiness(userId, cmd.getId(),true);
-
+		favoriteBusiness(userId,user.getNamespaceId(),cmd.getId(),true);
 	}
 
 	@Override
@@ -1031,13 +1027,13 @@ public class BusinessServiceImpl implements BusinessService {
 				continue ;
 			}
 			if(r.getFavoriteFlag() == FavoriteFlagType.FAVORITE.getCode())
-				favoriteBusiness(userId, r.getId(),false);
+				favoriteBusiness(userId,user.getNamespaceId(), r.getId(),false);
 			else if(r.getFavoriteFlag() == FavoriteFlagType.CANCEL_FAVORITE.getCode())
-				cancelFavoriteBusiness(userId, r.getId(),false);
+				cancelFavoriteBusiness(userId,user.getNamespaceId(), r.getId(),false);
 		}
 	}
 
-	private void favoriteBusiness(long userId,long businessId,boolean isException){
+	private void favoriteBusiness(long userId,Integer namespaceId, long businessId, boolean isException){
 		Business business = this.businessProvider.findBusinessById(businessId);
 		if(business == null){
 			LOGGER.error("Business is not exists.id=" + businessId);
@@ -1062,7 +1058,6 @@ public class BusinessServiceImpl implements BusinessService {
 			item.setScopeId(userId);
 			item.setDisplayFlag(ItemDisplayFlag.DISPLAY.getCode());
 			this.launchPadProvider.updateLaunchPadItem(item);
-
 		}else{
 			List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
 			item = new LaunchPadItem();
@@ -1076,7 +1071,7 @@ public class BusinessServiceImpl implements BusinessService {
 			item.setIconUri(business.getLogoUri());
 			item.setItemWidth(1);
 			item.setItemHeight(1);
-			item.setNamespaceId(0);
+			item.setNamespaceId(namespaceId==null?0:namespaceId);
 			item.setScopeCode(ScopeType.USER.getCode());
 			item.setScopeId(userId);
 			item.setDefaultOrder(0);
@@ -1121,10 +1116,10 @@ public class BusinessServiceImpl implements BusinessService {
 					"Invalid paramter id null,categoryId is null");
 		User user = UserContext.current().getUser();
 		long userId = user.getId();
-		cancelFavoriteBusiness(userId, cmd.getId(),true);
+		cancelFavoriteBusiness(userId,user.getNamespaceId(), cmd.getId(),true);
 	}
 
-	private void cancelFavoriteBusiness(long userId, long businessId,boolean isThrowExcept){
+	private void cancelFavoriteBusiness(long userId,Integer namespaceId, long businessId,boolean isThrowExcept){
 		Business business = this.businessProvider.findBusinessById(businessId);
 		if(business == null){
 			LOGGER.error("Business is not exists.id=" + businessId);
@@ -1161,6 +1156,7 @@ public class BusinessServiceImpl implements BusinessService {
 				item.setScopeId(userId);
 				item.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
 				item.setScopeCode(ScopeType.USER.getCode());
+				item.setNamespaceId(namespaceId==null?0:namespaceId);
 				this.launchPadProvider.createLaunchPadItem(item);
 			}
 		}
