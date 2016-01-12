@@ -1,6 +1,7 @@
 package com.everhomes.techpark.park;
 
 import java.net.URL;
+import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -21,46 +22,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import com.bosigao.cxf.Service1;
 import com.bosigao.cxf.Service1Soap;
+import com.everhomes.app.App;
+import com.everhomes.app.AppProvider;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -118,6 +83,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.SignatureHelper;
 
 
 @Component
@@ -151,6 +117,9 @@ public class ParkServiceImpl implements ParkService {
 	
 	@Autowired
 	private LocaleStringService localeStringService;
+	
+	@Autowired
+	private AppProvider appProvider;
 	
 	private static final QName SERVICE_NAME = new QName("http://tempuri.org/", "Service1");
 	
@@ -248,9 +217,29 @@ public class ParkServiceImpl implements ParkService {
 		dto.setAmount(order.getRechargeAmount());
 		dto.setName(order.getRechargeUsername()+"的订单");
 		dto.setDescription("为"+order.getPlateNumber()+"充值"+order.getRechargeMonth()+"个月");
+		//签名
+		this.setSignatureParam(dto);
 		return dto;
 	}
 	
+	private void setSignatureParam(RechargeOrderDTO dto) {
+		String appKey = configurationProvider.getValue("pay.appKey", "7bbb5727-9d37-443a-a080-55bbf37dc8e1");
+		Long timestamp = System.currentTimeMillis();
+		Integer randomNum = (int) (Math.random()*1000);
+		App app = appProvider.findAppByKey(appKey);
+		
+		Map<String,String> map = new HashMap<String, String>();
+		map.put("appKey",appKey);
+		map.put("timestamp",timestamp+"");
+		map.put("randomNum",randomNum+"");
+		map.put("amount",dto.getAmount()+"");
+		String signature = SignatureHelper.computeSignature(map, app.getSecretKey());
+		dto.setAppKey(appKey);
+		dto.setRandomNum(randomNum);
+		dto.setSignature(URLEncoder.encode(signature));
+		dto.setTimestamp(timestamp);
+	}
+
 	private Timestamp strToTimestamp(String str) {
 
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");

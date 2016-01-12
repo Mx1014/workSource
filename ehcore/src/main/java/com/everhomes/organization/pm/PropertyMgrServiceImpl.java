@@ -3612,12 +3612,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		dto.setOrderNo(orderNo);
 		dto.setName(bill.getName());
 		dto.setDescription(order.getDescription());
-		this.setSignatureParam(dto,cmd.getAmount());
+		dto.setAmount(cmd.getAmount());
+		this.setSignatureParam(dto);
 		return dto;
 	}
 	
-	private void setSignatureParam(OrganizationOrderDTO dto,BigDecimal amount) {
-		String appKey = configurationProvider.getValue("pay.appKey", "abc");
+	private void setSignatureParam(OrganizationOrderDTO dto) {
+		String appKey = configurationProvider.getValue("pay.appKey", "7bbb5727-9d37-443a-a080-55bbf37dc8e1");
 		Long timestamp = System.currentTimeMillis();
 		Integer randomNum = (int) (Math.random()*1000);
 		App app = appProvider.findAppByKey(appKey);
@@ -3626,13 +3627,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		map.put("appKey",appKey);
 		map.put("timestamp",timestamp+"");
 		map.put("randomNum",randomNum+"");
-		map.put("amount",amount+"");
+		map.put("amount",dto.getAmount()+"");
 		String signature = SignatureHelper.computeSignature(map, app.getSecretKey());
 		dto.setAppKey(appKey);
 		dto.setRandomNum(randomNum);
 		dto.setSignature(URLEncoder.encode(signature));
 		dto.setTimestamp(timestamp);
-		dto.setAmount(amount);
 	}
 
 	private String convertToVerdorType(String verdorTypeStr) {
