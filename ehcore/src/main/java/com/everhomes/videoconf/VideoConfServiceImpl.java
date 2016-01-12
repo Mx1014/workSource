@@ -1059,7 +1059,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 	public void assignVideoConfAccount(
 			AssignVideoConfAccountCommand cmd) {
 		
-		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+		int namespaceId = (UserContext.current().getUser().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getUser().getNamespaceId();
 		ConfAccounts account = vcProvider.findVideoconfAccountById(cmd.getAccountId());
 		if(account == null) {
 			LOGGER.error("account is not exist!");
@@ -1214,7 +1214,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
 		String path = "http://api.confcloud.cn/openapi/confReservation";
 		ConfAccounts account = vcProvider.findVideoconfAccountById(cmd.getAccountId());
-		if(account != null && account.getStatus() == 2) {
+		if(account != null && account.getStatus() == 1) {
 			ConfAccountCategories category = vcProvider.findAccountCategoriesById(account.getAccountCategoryId());
 			List<Long> accountCategories = vcProvider.findAccountCategoriesByConfType(category.getConfType());
 			ConfSourceAccounts sourceAccount = vcProvider.findSpareAccount(accountCategories);
@@ -1382,7 +1382,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 	@Override
 	public void reserveVideoConf(ReserveVideoConfCommand cmd) {
 		
-		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+		int namespaceId = (UserContext.current().getUser().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getUser().getNamespaceId();
 		
 		User user = UserContext.current().getUser();
 		List<UserIdentifier> identifiers = this.userProvider.listUserIdentifiersOfUser(user.getId());
@@ -1512,7 +1512,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 
 	@Override
 	public void createAccountOwner(CreateAccountOwnerCommand cmd) {
-		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+		int namespaceId = (UserContext.current().getUser().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getUser().getNamespaceId();
 		List<Long> accountIds = cmd.getAccountIds();
 		List<Long> userIds = cmd.getUserIds();
 		if(userIds == null || userIds.isEmpty()){
@@ -1776,7 +1776,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 	}
 	
 	private void updateOrderStatus(ConfOrders order, Timestamp payTimeStamp, byte paymentStatus) {
-		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+		int namespaceId = (UserContext.current().getUser().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getUser().getNamespaceId();
 		order.setPayerId(UserContext.current().getUser().getId());
 		order.setPaidTime(payTimeStamp);
 		order.setStatus(paymentStatus);
