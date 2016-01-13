@@ -43,6 +43,9 @@ public class UserWithoutConfAccountSearcherImpl extends AbstractElasticSearch
 	private EnterpriseContactProvider enterpriseContactProvider;
 	
 	@Autowired
+	private VideoConfProvider vcProvider;
+	
+	@Autowired
     private ConfigurationProvider configProvider;
 	
 	@Override
@@ -103,6 +106,7 @@ public class UserWithoutConfAccountSearcherImpl extends AbstractElasticSearch
 
 	@Override
 	public ListUsersWithoutVideoConfPrivilegeResponse query(ListUsersWithoutVideoConfPrivilegeCommand cmd) {
+		List<Long> userIds = vcProvider.findUsersByEnterpriseId(cmd.getEnterpriseId());
 		SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
 		QueryBuilder qb = null;
         if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
@@ -118,7 +122,10 @@ public class UserWithoutConfAccountSearcherImpl extends AbstractElasticSearch
             builder.addHighlightedField("userName").addHighlightedField("department").addHighlightedField("contact");
         }
 
-        FilterBuilder fb = null;
+        FilterBuilder nfb = FilterBuilders.termsFilter("userId", userIds);
+        
+        FilterBuilder fb = FilterBuilders.notFilter(nfb);
+        
         if(cmd.getEnterpriseId() != null)
         	fb = FilterBuilders.termFilter("enterpriseId", cmd.getEnterpriseId());
         
