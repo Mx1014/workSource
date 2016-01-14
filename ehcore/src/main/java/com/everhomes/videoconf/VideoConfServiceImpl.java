@@ -1780,14 +1780,16 @@ public class VideoConfServiceImpl implements VideoConfService {
 	}
 	
 	private void updateOrderStatus(ConfOrders order, Timestamp payTimeStamp, byte paymentStatus) {
-		int namespaceId = (UserContext.current().getUser().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getUser().getNamespaceId();
+//		int namespaceId = (UserContext.current().getUser().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getUser().getNamespaceId();
 		order.setPayerId(UserContext.current().getUser().getId());
 		order.setPaidTime(payTimeStamp);
 		order.setStatus(paymentStatus);
 		
 		vcProvider.updateConfOrders(order);
-		
+		ConfEnterprises enterprise = vcProvider.findByEnterpriseId(order.getOwnerId());
+		int namespaceId = enterprise.getNamespaceId();
 		if(order.getStatus().byteValue() == PayStatus.PAID.getCode()) {
+			
 			for(int i = 0; i < order.getQuantity(); i++) {
 				ConfAccounts account = new ConfAccounts();
 				account.setStatus((byte) 1);
@@ -1806,7 +1808,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 
 			}
 			
-			ConfEnterprises enterprise = vcProvider.findByEnterpriseId(order.getOwnerId());
+			
 			enterprise.setBuyChannel(order.getOnlineFlag());
 			enterprise.setAccountAmount(enterprise.getAccountAmount()+order.getQuantity());
 			enterprise.setActiveAccountAmount(enterprise.getActiveAccountAmount()+order.getQuantity());
