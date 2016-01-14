@@ -1249,6 +1249,9 @@ public class VideoConfServiceImpl implements VideoConfService {
 				    	sPara.put("duration", "30");
 				    sPara.put("optionJbh", "0");
 				    NameValuePair[] param = generatNameValuePair(sPara);
+				    if(LOGGER.isDebugEnabled())
+						LOGGER.info("startVideoConf-restUrl"+path+",startVideoConf-param"+param);
+				    
 				    HttpClient httpClient = new HttpClient();  
 			          
 			        HttpMethod method = postMethod(path, param);  
