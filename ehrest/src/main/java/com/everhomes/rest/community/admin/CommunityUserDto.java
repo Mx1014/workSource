@@ -29,7 +29,6 @@ public class CommunityUserDto {
 	private String phone;
 	
 	
-	
 
 	public Long getId() {
 		return id;

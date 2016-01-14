@@ -1149,6 +1149,7 @@ public class CommunityServiceImpl implements CommunityService {
 			}
 			dto.setPhone(userIdentifier.getIdentifierToken());
 			EnterpriseContact contact = enterpriseContactProvider.queryContactByUserId(user.getId());
+			dto.setApplyTime(userIdentifier.getCreateTime());
 			if(null == contact){
 				dto.setIsAuth(2);
 			}else{
@@ -1173,14 +1174,8 @@ public class CommunityServiceImpl implements CommunityService {
 			}else{
 				dtos.add(dto);
 			}
-			
-			
-			
-			if(dtos.size() == pageSize){
-				res.setNextPageOffset(user.getId());
-				break;
-			}
 		}
+		res.setNextPageAnchor(locator.getAnchor());
 		res.setUserCommunities(dtos);
 		return res;
 	}
