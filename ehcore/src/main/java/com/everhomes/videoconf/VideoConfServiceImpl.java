@@ -126,6 +126,8 @@ import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
 import com.mysql.jdbc.StringUtils;
 
+import freemarker.template.utility.StringUtil;
+
 @Component
 public class VideoConfServiceImpl implements VideoConfService {
 	
@@ -1216,6 +1218,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		StartVideoConfResponse response = new StartVideoConfResponse();
 		
 		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+		
 		String path = "http://api.confcloud.cn/openapi/confReservation";
 		ConfAccounts account = vcProvider.findVideoconfAccountById(cmd.getAccountId());
 		if(account != null && account.getStatus() == 1) {
@@ -1240,7 +1243,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 				    sPara.put("timeStamp", timestamp.toString());
 				    sPara.put("token", token); 
 				    sPara.put("confName", cmd.getConfName());
-				    if("".equals(cmd.getConfName()))
+				    if(cmd.getConfName() == null || cmd.getConfName().trim().length() == 0)
 				    	sPara.put("confName", "conference");
 				    sPara.put("hostKey", cmd.getPassword());
 				    sPara.put("startTime", sd);
@@ -1250,7 +1253,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 				    sPara.put("optionJbh", "0");
 				    NameValuePair[] param = generatNameValuePair(sPara);
 				    if(LOGGER.isDebugEnabled())
-						LOGGER.info("startVideoConf-restUrl"+path+",startVideoConf-param"+sPara);
+						LOGGER.info("startVideoConf, namespaceId=" + namespaceId + ", cmd=" + cmd + ", restUrl="+path+", param="+sPara);
 				    
 				    HttpClient httpClient = new HttpClient();  
 			          
