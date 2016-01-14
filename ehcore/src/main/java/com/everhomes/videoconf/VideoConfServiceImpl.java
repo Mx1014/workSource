@@ -1311,7 +1311,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 					}
 					
 				} catch (Exception e) {
-					LOGGER.error("startVideoConf-error.sourceAccount="+sourceAccount.getAccountName()+".exception message="+e.getMessage());
+					LOGGER.error("startVideoConf-error.sourceAccount="+sourceAccount.getAccountName(), e);
 				}
 			} else {
 				LOGGER.error("源账号不够");
