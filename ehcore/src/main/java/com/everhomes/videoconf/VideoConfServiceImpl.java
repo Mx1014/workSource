@@ -1166,6 +1166,10 @@ public class VideoConfServiceImpl implements VideoConfService {
 			userAccount.setAccountId(account.getId());
 			userAccount.setStatus(account.getStatus());
 			userAccount.setOccupyFlag(account.getAssignedFlag());
+		} else {
+			userAccount.setAccountId(0L);
+			userAccount.setStatus((byte) 0);
+			userAccount.setOccupyFlag((byte) 2);
 		}
 		return userAccount;
 	}
