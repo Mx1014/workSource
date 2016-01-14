@@ -6,18 +6,19 @@ import com.everhomes.discover.ItemType;
 
 public class CommunityUserResponse {
 	
-	private Long nextPageOffset;
+	private Long nextPageAnchor;
 	
 	@ItemType(CommunityUserDto.class)
 	private List<CommunityUserDto> userCommunities;
 
 
-	public Long getNextPageOffset() {
-		return nextPageOffset;
+
+	public Long getNextPageAnchor() {
+		return nextPageAnchor;
 	}
 
-	public void setNextPageOffset(Long nextPageOffset) {
-		this.nextPageOffset = nextPageOffset;
+	public void setNextPageAnchor(Long nextPageAnchor) {
+		this.nextPageAnchor = nextPageAnchor;
 	}
 
 	public List<CommunityUserDto> getUserCommunities() {
