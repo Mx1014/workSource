@@ -739,11 +739,12 @@ public class VideoConfProviderImpl implements VideoConfProvider {
             query.addConditions(Tables.EH_CONF_RESERVATIONS.STATUS.eq((byte) 1));
             query.addConditions(Tables.EH_CONF_RESERVATIONS.NAMESPACE_ID.eq(namespaceId));
             if(locator.getAnchor() != null)
-            	query.addConditions(Tables.EH_CONF_RESERVATIONS.ID.gt(locator.getAnchor()));
+            	query.addConditions(Tables.EH_CONF_RESERVATIONS.ID.lt(locator.getAnchor()));
             
             if(accountId != null)
             	query.addConditions(Tables.EH_CONF_RESERVATIONS.CONF_ACCOUNT_ID.eq(accountId));
            
+            query.addOrderBy(Tables.EH_CONF_RESERVATIONS.ID.desc());
             query.addLimit(pageSize - reservations.size());
             
             query.fetch().map((r) -> {
