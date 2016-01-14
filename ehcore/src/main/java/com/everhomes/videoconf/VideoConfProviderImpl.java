@@ -511,13 +511,11 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 //
 	@Override
 	public ConfAccounts findAccountByUserId(Long userId) {
-		int namespaceId = (UserContext.current().getUser().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getUser().getNamespaceId();
 		final ConfAccounts[] result = new ConfAccounts[1];
 		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhConfAccounts.class), result, 
 				(DSLContext context, Object reducingContext) -> {
 					List<ConfAccounts> list = context.select().from(Tables.EH_CONF_ACCOUNTS)
 							.where(Tables.EH_CONF_ACCOUNTS.OWNER_ID.eq(userId))
-							.and(Tables.EH_CONF_ACCOUNTS.NAMESPACE_ID.eq(namespaceId))
 							.and(Tables.EH_CONF_ACCOUNTS.STATUS.ne((byte) 0))
 							.fetch().map((r) -> {
 								return ConvertHelper.convert(r, ConfAccounts.class);
