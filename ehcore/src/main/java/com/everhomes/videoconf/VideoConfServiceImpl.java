@@ -1359,8 +1359,12 @@ public class VideoConfServiceImpl implements VideoConfService {
 			LOGGER.error("joinVideoConf, cmd="+cmd+",user="+user);
 		if(user != null) {
 			ConfAccounts account = vcProvider.findAccountByUserId(user.getOwnerUid());
+			if(LOGGER.isDebugEnabled())
+				LOGGER.error("joinVideoConf, account="+account);
 			if(account != null) {
 				ConfConferences conf = vcProvider.findConfConferencesById(account.getAssignedConfId());
+				if(LOGGER.isDebugEnabled())
+					LOGGER.error("joinVideoConf, conf="+conf);
 				if(conf != null) {
 					response.setJoinUrl(conf.getJoinUrl());
 					response.setCondId(conf.getConfId()+"");
