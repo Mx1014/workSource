@@ -96,9 +96,14 @@ public class VersionServiceImpl implements VersionService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid realm parameter in the command");
 
-        if(cmd.getCurrentVersion() == null)
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-                    "Invalid current version parameter in the command");
+        if(cmd.getCurrentVersion() == null) {
+        	
+        	WithoutCurrentVersionRequestCommand command = new WithoutCurrentVersionRequestCommand();
+        	command.setRealm(cmd.getRealm());
+        	command.setLocale(cmd.getLocale());
+        	VersionUrlResponse resp = getVersionUrlsWithoutCurrentVersion(command);
+        	return resp;
+        }
 
         VersionRealm realm = this.versionProvider.findVersionRealmByName(cmd.getRealm());
         if(realm == null)
