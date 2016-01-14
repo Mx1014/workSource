@@ -1250,7 +1250,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 				    sPara.put("optionJbh", "0");
 				    NameValuePair[] param = generatNameValuePair(sPara);
 				    if(LOGGER.isDebugEnabled())
-						LOGGER.info("startVideoConf-restUrl"+path+",startVideoConf-param"+param);
+						LOGGER.info("startVideoConf-restUrl"+path+",startVideoConf-param"+sPara);
 				    
 				    HttpClient httpClient = new HttpClient();  
 			          
