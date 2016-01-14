@@ -1355,6 +1355,8 @@ public class VideoConfServiceImpl implements VideoConfService {
 
 		
 		UserIdentifier user = userProvider.findClaimedIdentifierByToken(cmd.getNamespaceId(), cmd.getConfId());
+		if(LOGGER.isDebugEnabled())
+			LOGGER.error("joinVideoConf, cmd="+cmd+",user="+user);
 		if(user != null) {
 			ConfAccounts account = vcProvider.findAccountByUserId(user.getOwnerUid());
 			if(account != null) {
@@ -1370,6 +1372,8 @@ public class VideoConfServiceImpl implements VideoConfService {
 		if(StringUtils.isNullOrEmpty(response.getCondId())){
 			Long confId = Long.valueOf(cmd.getConfId()); 
 			ConfConferences conf = vcProvider.findConfConferencesByConfId(confId);
+			if(LOGGER.isDebugEnabled())
+				LOGGER.error("joinVideoConf, cmd="+cmd+",conf="+conf);
 			if(conf != null) {
 				response.setJoinUrl(conf.getJoinUrl());
 				response.setCondId(conf.getConfId()+"");
