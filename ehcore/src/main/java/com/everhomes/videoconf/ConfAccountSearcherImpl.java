@@ -25,6 +25,8 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.enterprise.Enterprise;
 import com.everhomes.enterprise.EnterpriseContact;
 import com.everhomes.enterprise.EnterpriseContactEntry;
+import com.everhomes.enterprise.EnterpriseContactGroup;
+import com.everhomes.enterprise.EnterpriseContactGroupMember;
 import com.everhomes.enterprise.EnterpriseContactProvider;
 import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -201,8 +203,15 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
 			EnterpriseContact contact = enterpriseContactProvider.queryContactByUserId(account.getEnterpriseId(), account.getOwnerId());
 			if(contact != null) {
 				
-				dto.setDepartment(contact.getStringTag1());
 				dto.setUserName(contact.getName());
+				EnterpriseContactGroupMember member = enterpriseContactProvider.getContactGroupMemberByContactId(contact.getEnterpriseId(), contact.getId());
+				if (member != null) {
+					EnterpriseContactGroup group = enterpriseContactProvider.getContactGroupById(member.getContactGroupId());
+					if (group != null) {
+						dto.setDepartment(group.getName());
+					}
+				}
+				
 				List<EnterpriseContactEntry> entry = enterpriseContactProvider.queryContactEntryByContactId(contact);
 				if(entry != null && entry.size() >0) {
 					dto.setMobile(entry.get(0).getEntryValue());
@@ -243,7 +252,19 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
             EnterpriseContact contact = enterpriseContactProvider.queryContactByUserId(account.getEnterpriseId(), account.getOwnerId());
             if(null != contact) {
                 b.field("userName", contact.getName());
-                b.field("department", contact.getStringTag1());
+                
+                EnterpriseContactGroupMember member = enterpriseContactProvider.getContactGroupMemberByContactId(contact.getEnterpriseId(), contact.getId());
+				if (member != null) {
+					EnterpriseContactGroup group = enterpriseContactProvider.getContactGroupById(member.getContactGroupId());
+					if (group != null) {
+						b.field("department", group.getName());
+					} else {
+						b.field("department", "");
+					}
+				} else {
+					b.field("department", "");
+				}
+                
                 List<EnterpriseContactEntry> entry = enterpriseContactProvider.queryContactEntryByContactId(contact);
     			if(entry != null && entry.size() >0) {
                     b.field("contact", entry.get(0).getEntryValue());
