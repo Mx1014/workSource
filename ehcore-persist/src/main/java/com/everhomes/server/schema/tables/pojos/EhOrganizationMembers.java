@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationMembers implements java.io.Serializable {
 
-	private static final long serialVersionUID = 983767297;
+	private static final long serialVersionUID = 1705755797;
 
 	private java.lang.Long   id;
 	private java.lang.Long   organizationId;
@@ -23,6 +23,8 @@ public class EhOrganizationMembers implements java.io.Serializable {
 	private java.lang.String contactToken;
 	private java.lang.String contactDescription;
 	private java.lang.Byte   status;
+	private java.lang.Long   groupId;
+	private java.lang.String groupPath;
 
 	public EhOrganizationMembers() {}
 
@@ -36,7 +38,9 @@ public class EhOrganizationMembers implements java.io.Serializable {
 		java.lang.Byte   contactType,
 		java.lang.String contactToken,
 		java.lang.String contactDescription,
-		java.lang.Byte   status
+		java.lang.Byte   status,
+		java.lang.Long   groupId,
+		java.lang.String groupPath
 	) {
 		this.id = id;
 		this.organizationId = organizationId;
@@ -48,6 +52,8 @@ public class EhOrganizationMembers implements java.io.Serializable {
 		this.contactToken = contactToken;
 		this.contactDescription = contactDescription;
 		this.status = status;
+		this.groupId = groupId;
+		this.groupPath = groupPath;
 	}
 
 	public java.lang.Long getId() {
@@ -128,5 +134,21 @@ public class EhOrganizationMembers implements java.io.Serializable {
 
 	public void setStatus(java.lang.Byte status) {
 		this.status = status;
+	}
+
+	public java.lang.Long getGroupId() {
+		return this.groupId;
+	}
+
+	public void setGroupId(java.lang.Long groupId) {
+		this.groupId = groupId;
+	}
+
+	public java.lang.String getGroupPath() {
+		return this.groupPath;
+	}
+
+	public void setGroupPath(java.lang.String groupPath) {
+		this.groupPath = groupPath;
 	}
 }

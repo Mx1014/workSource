@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationMembers extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord> {
 
-	private static final long serialVersionUID = -1424353472;
+	private static final long serialVersionUID = 2030315;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_organization_members</code>
@@ -75,6 +75,16 @@ public class EhOrganizationMembers extends org.jooq.impl.TableImpl<com.everhomes
 	 * The column <code>ehcore.eh_organization_members.status</code>. 0: inactive, 1: confirming, 2: active
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: inactive, 1: confirming, 2: active");
+
+	/**
+	 * The column <code>ehcore.eh_organization_members.group_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord, java.lang.Long> GROUP_ID = createField("group_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_organization_members.group_path</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord, java.lang.String> GROUP_PATH = createField("group_path", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_organization_members</code> table reference

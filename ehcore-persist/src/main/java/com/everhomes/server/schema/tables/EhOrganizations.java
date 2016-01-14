@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizations extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhOrganizationsRecord> {
 
-	private static final long serialVersionUID = -2052498993;
+	private static final long serialVersionUID = -1512154718;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_organizations</code>
@@ -75,6 +75,11 @@ public class EhOrganizations extends org.jooq.impl.TableImpl<com.everhomes.serve
 	 * The column <code>ehcore.eh_organizations.department_type</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationsRecord, java.lang.String> DEPARTMENT_TYPE = createField("department_type", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_organizations.group_type</code>. enterprise, department, group
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationsRecord, java.lang.String> GROUP_TYPE = createField("group_type", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "enterprise, department, group");
 
 	/**
 	 * Create a <code>ehcore.eh_organizations</code> table reference
