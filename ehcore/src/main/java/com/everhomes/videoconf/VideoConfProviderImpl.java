@@ -849,14 +849,12 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 
 	@Override
 	public int countOrderAccounts(Long orderId, Byte assignFlag) {
-		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
 		final Integer[] count = new Integer[1];
 		if(assignFlag == null) {
 			this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
                 (DSLContext context, Object reducingContext)-> {
                     count[0] = context.selectCount().from(Tables.EH_CONF_ORDER_ACCOUNT_MAP)
                             .where(Tables.EH_CONF_ORDER_ACCOUNT_MAP.ORDER_ID.eq(orderId))
-                            .and(Tables.EH_CONF_ORDER_ACCOUNT_MAP.CONF_ACCOUNT_NAMESPACE_ID.eq(namespaceId))
                     .fetchOneInto(Integer.class);
                     return true;
                 });
@@ -867,7 +865,6 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 	                    count[0] = context.selectCount().from(Tables.EH_CONF_ORDER_ACCOUNT_MAP)
 	                            .where(Tables.EH_CONF_ORDER_ACCOUNT_MAP.ORDER_ID.eq(orderId))
 	                            .and(Tables.EH_CONF_ORDER_ACCOUNT_MAP.ASSIGED_FLAG.eq(assignFlag))
-	                            .and(Tables.EH_CONF_ORDER_ACCOUNT_MAP.CONF_ACCOUNT_NAMESPACE_ID.eq(namespaceId))
 	                    .fetchOneInto(Integer.class);
 	                    return true;
 	                });
@@ -878,13 +875,11 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 
 	@Override
 	public List<Long> listUnassignAccountIds(Long orderId) {
-		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
 		List<Long> accountIds = new ArrayList<Long>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhConfOrderAccountMap.class));
  
         SelectQuery<EhConfOrderAccountMapRecord> query = context.selectQuery(Tables.EH_CONF_ORDER_ACCOUNT_MAP);
        
-        query.addConditions(Tables.EH_CONF_ORDER_ACCOUNT_MAP.CONF_ACCOUNT_NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_CONF_ORDER_ACCOUNT_MAP.ORDER_ID.eq(orderId));
         query.addConditions(Tables.EH_CONF_ORDER_ACCOUNT_MAP.ASSIGED_FLAG.eq((byte)0));
         query.fetch().map((r) -> {
