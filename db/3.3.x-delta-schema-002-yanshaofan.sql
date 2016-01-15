@@ -4,7 +4,7 @@
 DROP TABLE IF EXISTS `eh_organization_role_map`;
 CREATE TABLE `eh_organization_role_map`(
     `id` BIGINT NOT NULL AUTO_INCREMENT,
-    `owner_type` varchar(64),
+    `owner_type` VARCHAR(64),
     `owner_id` BIGINT,
     `role_id` BIGINT NOT NULL,
     `private_flag` TINYINT(4) NOT NULL DEFAULT 0 COMMENT '0: public, 1: private',
