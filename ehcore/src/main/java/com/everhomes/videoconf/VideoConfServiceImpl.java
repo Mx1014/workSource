@@ -113,6 +113,9 @@ import com.everhomes.rest.videoconf.VerifyVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.VideoConfAccountRuleDTO;
 import com.everhomes.rest.videoconf.VideoconfNotificationTemplateCode;
 import com.everhomes.rest.videoconf.WarningContactorDTO;
+import com.everhomes.search.ConfAccountSearcher;
+import com.everhomes.search.ConfEnterpriseSearcher;
+import com.everhomes.search.UserWithoutConfAccountSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
@@ -159,6 +162,15 @@ public class VideoConfServiceImpl implements VideoConfService {
 	
 	@Autowired
 	private LocaleStringService localeStringService;
+	
+	@Autowired
+	private ConfAccountSearcher confAccountSearcher;
+	
+	@Autowired
+	private UserWithoutConfAccountSearcher userWithoutConfAccountSearcher;
+	
+	@Autowired
+	private ConfEnterpriseSearcher confEnterpriseSearcher;
 	
 	
 	@Override
@@ -1083,6 +1095,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		account.setUpdateTime(now);
 		account.setOwnTime(now);
 		vcProvider.updateConfAccounts(account);
+		confAccountSearcher.feedDoc(account);
 
 		ConfAccountHistories history = new ConfAccountHistories();
 		history.setEnterpriseId(account.getEnterpriseId());
@@ -1573,6 +1586,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 				account.setUpdateTime(now);
 				account.setOwnTime(now);
 				vcProvider.updateConfAccounts(account);
+				confAccountSearcher.feedDoc(account);
 				userIds.remove(0);
 				
 				List<ConfOrderAccountMap> maps = vcProvider.findOrderAccountByAccountId(accountId);
@@ -1676,6 +1690,8 @@ public class VideoConfServiceImpl implements VideoConfService {
 			if(enter != null)
 				confEnterprise.setNamespaceId(enter.getNamespaceId());
 			vcProvider.createConfEnterprises(confEnterprise);
+
+			confEnterpriseSearcher.feedDoc(confEnterprise);
 		} else {
 			enterprise.setContactName(cmd.getContactor());
 			enterprise.setContact(cmd.getMobile());
@@ -1803,6 +1819,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		ConfEnterprises enterprise = vcProvider.findByEnterpriseId(order.getOwnerId());
 		int namespaceId = enterprise.getNamespaceId();
 		if(order.getStatus().byteValue() == PayStatus.PAID.getCode()) {
+			List<ConfAccounts> accounts = new ArrayList<ConfAccounts>();
 			
 			for(int i = 0; i < order.getQuantity(); i++) {
 				ConfAccounts account = new ConfAccounts();
@@ -1813,15 +1830,18 @@ public class VideoConfServiceImpl implements VideoConfService {
 				account.setNamespaceId(namespaceId);
 				vcProvider.createConfAccounts(account);
 				
+				accounts.add(account);
+				
 				ConfOrderAccountMap map = new ConfOrderAccountMap();
 				map.setOrderId(order.getId());
 				map.setEnterpriseId(order.getOwnerId());
 				map.setConfAccountId(account.getId());
 				map.setConfAccountNamespaceId(namespaceId);
 				vcProvider.createConfOrderAccountMap(map);
-
+				
 			}
 			
+			confAccountSearcher.bulkUpdate(accounts);	
 			
 			enterprise.setBuyChannel(order.getOnlineFlag());
 			enterprise.setAccountAmount(enterprise.getAccountAmount()+order.getQuantity());
