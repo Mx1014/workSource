@@ -60,7 +60,8 @@ public class Clients {
 			if (method.equalsIgnoreCase("POST")
 					|| method.equalsIgnoreCase("PUT")) {
 				HttpPost post = new HttpPost(uri);
-				post.addHeader(name, value);
+				if(name!=null&&!name.equals("")&&value!=null&&!value.equals(""))
+					post.addHeader(name, value);
 				post.addHeader("Content-Type","application/x-www-form-urlencoded; charset=UTF-8");
 				if(params!=null){
 					List<NameValuePair> formparams = new ArrayList<NameValuePair>();
@@ -75,7 +76,8 @@ public class Clients {
 			} else {
 				RequestBuilder builder = RequestBuilder.create(
 						method.toString()).setUri(uri);
-				builder.addHeader(name, value);
+				if(name!=null&&!name.equals("")&&value!=null&&!value.equals(""))
+					builder.addHeader(name, value);
 				builder.addHeader("Content-Type","application/x-www-form-urlencoded; charset=UTF-8");
 				if(params!=null){
 					for (Map.Entry<String, String> entry : params.entrySet()) {

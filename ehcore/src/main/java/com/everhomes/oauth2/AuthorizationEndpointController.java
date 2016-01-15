@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.rest.oauth2.AuthorizationCommand;
-import com.everhomes.rest.oauth2.GetUserInfoResultResponse;
+import com.everhomes.rest.oauth2.CommonRestResponse;
 import com.everhomes.rest.oauth2.OAuth2AccessTokenResponse;
 import com.everhomes.rest.oauth2.OAuth2ServiceErrorCode;
 import com.everhomes.rest.user.DeviceIdentifierType;
@@ -43,8 +44,11 @@ import com.everhomes.user.UserLogin;
 import com.everhomes.user.UserService;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 @RequireOAuth2Authentication(OAuth2AuthenticationType.NO_AUTHENTICATION)
 @Controller
@@ -63,7 +67,7 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 
 	@Autowired
 	private ConfigurationProvider configurationProvider;
-	
+
 	@Autowired
 	private UserService userService;
 
@@ -197,22 +201,43 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 	@RequestMapping("innerlogin")
 	public Object innerlogin(
 			@RequestParam(value="sourceUrl", required = true) String sourceUrl,
+			@RequestParam(value="signature", required = false) String signature,
+			@RequestParam(value="id", required = false) String id,
+			@RequestParam(value="name", required = false) String name,
+			@RequestParam(value="appKey", required = false) String appKey,
+			@RequestParam(value="timeStamp", required = false) String timeStamp,
+			@RequestParam(value="randomNum", required = false) String randomNum,
+			@RequestParam(value="communityId", required = false) String communityId,
 			HttpServletRequest httpRequest, HttpServletResponse httpResponse, Model model) throws URISyntaxException {
 		HttpSession session = httpRequest.getSession();
 		session.setAttribute("sourceUrl", sourceUrl);
-
 		String homeUrl = configurationProvider.getValue("home.url", "https://core.zuolin.com");
-		User user = UserContext.current().getUser();
-		if(user==null||user.getId()==User.ANNONYMOUS_UID){
-			String url =  homeUrl+"/evh/oauth2/oauth";
+
+		if(!StringUtils.isEmpty(signature)){//新授权
+			session.setAttribute("id", id);
+			session.setAttribute("name", name);
+			session.setAttribute("signature", signature);
+			session.setAttribute("appKey", appKey);
+			session.setAttribute("timeStamp", timeStamp);
+			session.setAttribute("randomNum", randomNum);
+			session.setAttribute("communityId", communityId);
+			String url =  homeUrl+"/evh/oauth2/resultBySign";
 			HttpHeaders httpHeaders = new HttpHeaders();
 			httpHeaders.setLocation(new URI(url));
 			return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
-		}else{
-			String url =  homeUrl+"/evh/oauth2/result";
-			HttpHeaders httpHeaders = new HttpHeaders();
-			httpHeaders.setLocation(new URI(url));
-			return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+		}else{//旧授权
+			User user = UserContext.current().getUser();
+			if(user==null||user.getId()==User.ANNONYMOUS_UID){
+				String url =  homeUrl+"/evh/oauth2/oauth";
+				HttpHeaders httpHeaders = new HttpHeaders();
+				httpHeaders.setLocation(new URI(url));
+				return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+			}else{
+				String url =  homeUrl+"/evh/oauth2/result";
+				HttpHeaders httpHeaders = new HttpHeaders();
+				httpHeaders.setLocation(new URI(url));
+				return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+			}
 		}
 	}
 
@@ -263,14 +288,14 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 			LOGGER.error("app nou found.appKey="+appKey);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"app nou found");
 		}
-		
+
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("grant_type", "authorization_code");
 		params.put("code", code);
 		params.put("redirect_uri", gettokenUri);
 		params.put("client_id", appKey);
 		String credential = String.format("%s:%s", appKey, app.getSecretKey());
-		
+
 		Clients client = new Clients();
 		String responseString = client.restCall("POST", tokenUri, params, "Authorization", String.format("Basic %s", Base64.encodeBase64String(credential.getBytes("UTF-8"))));
 		OAuth2AccessTokenResponse tokenResponse = (OAuth2AccessTokenResponse) StringHelper.fromJsonString(responseString, OAuth2AccessTokenResponse.class);
@@ -299,11 +324,12 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 				httpHeaders.setLocation(new URI(gettokenUri));
 				return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
 			}
-			
+
 			Clients client = new Clients();
 			String responseString = client.restCall("GET", uri, null, "Authorization", String.format("Bearer %s", Base64.encodeBase64String(token.getBytes("UTF-8"))));
-			GetUserInfoResultResponse userInfoRestResponse = (GetUserInfoResultResponse) StringHelper.fromJsonString(responseString, GetUserInfoResultResponse.class);
-			UserInfo userInfo = userInfoRestResponse.getResponse();
+			Gson gson = new Gson();
+			CommonRestResponse<UserInfo> userInfoRestResponse = gson.fromJson(responseString, new TypeToken<CommonRestResponse<UserInfo>>(){}.getType());
+			UserInfo userInfo = (UserInfo) userInfoRestResponse.getResponse();
 			if(userInfo!=null){
 				String deviceIdentifier = DeviceIdentifierType.INNER_LOGIN.name();
 				String pusherIdentify = null;
@@ -319,6 +345,94 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 		return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
 	}
 	
+	@RequireAuthentication(false)
+	@RequestMapping("resultBySign")
+	public Object resultBySign(HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
+		HttpSession session = request.getSession();
+		String signature = (String) session.getAttribute("signature");
+		User user = UserContext.current().getUser();
+		if(user==null||user.getId()==User.ANNONYMOUS_UID){
+			if(!StringUtils.isEmpty(signature)){
+				String id = (String) session.getAttribute("id");
+				String name = (String) session.getAttribute("name");
+				String appKey = (String) session.getAttribute("appKey");
+				String timeStamp = (String) session.getAttribute("timeStamp");
+				String randomNum = (String) session.getAttribute("randomNum");
+				
+				App app = appProvider.findAppByKey(appKey);
+				if(app==null){
+					LOGGER.error("app nou found.appKey="+appKey);
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"app nou found");
+				}
+
+				Map<String,String> map = new HashMap<String, String>();
+				map.put("id", id);
+				map.put("name", name);
+				map.put("appKey", appKey);
+				map.put("timeStamp", timeStamp);
+				map.put("randomNum", randomNum);
+				String nsignature = SignatureHelper.computeSignature(map, app.getSecretKey());
+
+				if(nsignature.equals(signature)){
+					UserInfo userInfo = this.getBizUserInfo(id);
+					if(userInfo!=null){
+						String deviceIdentifier = DeviceIdentifierType.INNER_LOGIN.name();
+						String pusherIdentify = null;
+						UserLogin login = this.userService.innerLogin(userInfo.getNamespaceId(), userInfo.getId(), deviceIdentifier, pusherIdentify);
+						LoginToken logintoken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber());
+						String tokenString = WebTokenGenerator.getInstance().toWebToken(logintoken);
+						setCookieInResponse("token", tokenString, request, response);
+					}
+					String sourceUrl = (String) session.getAttribute("sourceUrl");
+					HttpHeaders httpHeaders = new HttpHeaders();
+					httpHeaders.setLocation(new URI(sourceUrl));
+					return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+				}
+				else{
+					LOGGER.error("signature fail.signature="+signature+",nsignature="+nsignature+",id="+id+",name="+name+",appKey="+appKey+",timeStamp="+timeStamp+",randomNum="+randomNum);
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"signature fail");
+				}
+			}
+		}
+		String sourceUrl = (String) session.getAttribute("sourceUrl");
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.setLocation(new URI(sourceUrl));
+		return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+	}
+	
+	private UserInfo getBizUserInfo(String memberNo) {
+		try{
+			String homeUrl = configurationProvider.getValue("home.url", "https://core.zuolin.com");
+			String getUserInfoUri = homeUrl+"/evh/openapi/getUserInfoById";
+			String appKey = configurationProvider.getValue("biz.appKey", "d80e06ca-3766-11e5-b18f-b083fe4e159f");
+			App app = appProvider.findAppByKey(appKey);
+			if(app==null){
+				LOGGER.error("app nou found.appKey="+appKey);
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"app nou found");
+			}
+			
+			Map<String,String> params = new HashMap<String, String>();
+			params.put("appKey", appKey);
+			params.put("id", memberNo);
+			String signature = SignatureHelper.computeSignature(params, app.getSecretKey());
+
+			String param = String.format("%s?id=%s&appKey=%s&signature=%s",getUserInfoUri, memberNo,appKey,URLEncoder.encode(signature));
+			Clients ci = new Clients();
+			String responseString = ci.restCall("GET", param, null, null, null);
+			if(responseString!=null){
+				Gson gson = new Gson();
+				CommonRestResponse<UserInfo> userInfoRestResponse = gson.fromJson(responseString, new TypeToken<CommonRestResponse<UserInfo>>(){}.getType());
+				UserInfo userInfo = (UserInfo) userInfoRestResponse.getResponse();
+				return userInfo;
+			}
+			return null;
+		}
+		catch(Exception e){
+			return null;
+		}
+
+	}
+
 	private static void setCookieInResponse(String name, String value, HttpServletRequest request,
 			HttpServletResponse response) {
 
@@ -333,7 +447,7 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 
 		response.addCookie(cookie);
 	}
-	
+
 	private static Cookie findCookieInRequest(String name, HttpServletRequest request) {
 		List<Cookie> matchedCookies = new ArrayList<>();
 

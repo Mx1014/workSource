@@ -2,23 +2,22 @@
 // generated at 2015-08-10 11:20:28
 package com.everhomes.rest.oauth2;
 
-import com.everhomes.rest.user.UserInfo;
 
-public class GetUserInfoResultResponse {
+public class CommonRestResponse<T> {
 	public String version;
 	public String errorScope;
 	public Integer errorCode;
 	public String errorDescription;
-	public UserInfo response;
+	public T response;
 
-	public GetUserInfoResultResponse() {
+	public CommonRestResponse() {
 	}
 
-	public UserInfo getResponse() {
+	public T getResponse() {
 		return response;
 	}
 
-	public void setResponse(UserInfo response) {
+	public void setResponse(T response) {
 		this.response = response;
 	}
 
