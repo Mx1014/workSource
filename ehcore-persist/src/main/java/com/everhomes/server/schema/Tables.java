@@ -459,6 +459,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhOrganizationOwners EH_ORGANIZATION_OWNERS = com.everhomes.server.schema.tables.EhOrganizationOwners.EH_ORGANIZATION_OWNERS;
 
 	/**
+	 * The table ehcore.eh_organization_role_map
+	 */
+	public static final com.everhomes.server.schema.tables.EhOrganizationRoleMap EH_ORGANIZATION_ROLE_MAP = com.everhomes.server.schema.tables.EhOrganizationRoleMap.EH_ORGANIZATION_ROLE_MAP;
+
+	/**
 	 * The table ehcore.eh_organization_tasks
 	 */
 	public static final com.everhomes.server.schema.tables.EhOrganizationTasks EH_ORGANIZATION_TASKS = com.everhomes.server.schema.tables.EhOrganizationTasks.EH_ORGANIZATION_TASKS;
