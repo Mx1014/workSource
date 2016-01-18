@@ -19,4 +19,4 @@ ALTER TABLE `eh_organization_members` ADD COLUMN `gender` TINYINT DEFAULT '0' CO
 #
 ALTER TABLE `eh_organizations` ADD COLUMN `create_time` DATETIME COMMENT '';
 ALTER TABLE `eh_organizations` ADD COLUMN `update_time` DATETIME COMMENT '';
-ALTER TABLE `eh_organizations` ADD COLUMN `parent_enterprise_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'directly under the company';
+ALTER TABLE `eh_organizations` ADD COLUMN `directly_enterprise_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'directly under the company';
