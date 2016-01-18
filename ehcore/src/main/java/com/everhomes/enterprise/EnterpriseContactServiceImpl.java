@@ -651,10 +651,14 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 				}
 			}
 
-			List<EnterpriseContactEntry> entries = this.enterpriseContactProvider
-					.queryContactEntryByContactId(contact);
-			if (entries != null && entries.size() > 0) {
-				detail.setPhone(entries.get(0).getEntryValue());
+			// 对设置为1的联系人则不显示其手机号 add by lqs 20160118
+			// 由于这部分代码需要重写到organization那边，故在这里不对1进行枚举（1表示私有不显示号码）
+			if(!Long.valueOf(1).equals(contact.getIntegralTag1())) {
+    			List<EnterpriseContactEntry> entries = this.enterpriseContactProvider
+    					.queryContactEntryByContactId(contact);
+    			if (entries != null && entries.size() > 0) {
+    				detail.setPhone(entries.get(0).getEntryValue());
+    			}
 			}
 			
 			if(StringUtils.isEmpty(detail.getAvatar())){
