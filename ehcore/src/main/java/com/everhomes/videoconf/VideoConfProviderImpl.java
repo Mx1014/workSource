@@ -446,7 +446,7 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 	@Override
 	public List<ConfOrderAccountMap> findOrderAccountByOrderId(Long orderId,
 			CrossShardListingLocator locator, Integer pageSize) {
-		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+		int namespaceId = (UserContext.current().getUser().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getUser().getNamespaceId();
 		List<ConfOrderAccountMap> accounts=new ArrayList<ConfOrderAccountMap>();
 		if (locator.getShardIterator() == null) {
             AccessSpec accessSpec = AccessSpec.readOnlyWith(EhConfOrderAccountMap.class);
@@ -511,13 +511,11 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 //
 	@Override
 	public ConfAccounts findAccountByUserId(Long userId) {
-		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
 		final ConfAccounts[] result = new ConfAccounts[1];
 		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhConfAccounts.class), result, 
 				(DSLContext context, Object reducingContext) -> {
 					List<ConfAccounts> list = context.select().from(Tables.EH_CONF_ACCOUNTS)
 							.where(Tables.EH_CONF_ACCOUNTS.OWNER_ID.eq(userId))
-							.and(Tables.EH_CONF_ACCOUNTS.NAMESPACE_ID.eq(namespaceId))
 							.and(Tables.EH_CONF_ACCOUNTS.STATUS.ne((byte) 0))
 							.fetch().map((r) -> {
 								return ConvertHelper.convert(r, ConfAccounts.class);
@@ -726,7 +724,7 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 	@Override
 	public List<ConfReservations> findReservationConfByAccountId(Long accountId, CrossShardListingLocator locator, Integer pageSize) {
 
-		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+		int namespaceId = (UserContext.current().getUser().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getUser().getNamespaceId();
 		List<ConfReservations> reservations = new ArrayList<ConfReservations>();
 		
 		if (locator.getShardIterator() == null) {
@@ -739,11 +737,12 @@ public class VideoConfProviderImpl implements VideoConfProvider {
             query.addConditions(Tables.EH_CONF_RESERVATIONS.STATUS.eq((byte) 1));
             query.addConditions(Tables.EH_CONF_RESERVATIONS.NAMESPACE_ID.eq(namespaceId));
             if(locator.getAnchor() != null)
-            	query.addConditions(Tables.EH_CONF_RESERVATIONS.ID.gt(locator.getAnchor()));
+            	query.addConditions(Tables.EH_CONF_RESERVATIONS.ID.lt(locator.getAnchor()));
             
             if(accountId != null)
             	query.addConditions(Tables.EH_CONF_RESERVATIONS.CONF_ACCOUNT_ID.eq(accountId));
            
+            query.addOrderBy(Tables.EH_CONF_RESERVATIONS.ID.desc());
             query.addLimit(pageSize - reservations.size());
             
             query.fetch().map((r) -> {
@@ -795,7 +794,7 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 	@Override
 	public ConfConferences findConfConferencesByConfId(Long confId) {
 
-		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+		int namespaceId = (UserContext.current().getUser().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getUser().getNamespaceId();
 		final ConfConferences[] result = new ConfConferences[1];
 		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhConfConferences.class), result, 
 				(DSLContext context, Object reducingContext) -> {
@@ -849,14 +848,12 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 
 	@Override
 	public int countOrderAccounts(Long orderId, Byte assignFlag) {
-		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
 		final Integer[] count = new Integer[1];
 		if(assignFlag == null) {
 			this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
                 (DSLContext context, Object reducingContext)-> {
                     count[0] = context.selectCount().from(Tables.EH_CONF_ORDER_ACCOUNT_MAP)
                             .where(Tables.EH_CONF_ORDER_ACCOUNT_MAP.ORDER_ID.eq(orderId))
-                            .and(Tables.EH_CONF_ORDER_ACCOUNT_MAP.CONF_ACCOUNT_NAMESPACE_ID.eq(namespaceId))
                     .fetchOneInto(Integer.class);
                     return true;
                 });
@@ -867,7 +864,6 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 	                    count[0] = context.selectCount().from(Tables.EH_CONF_ORDER_ACCOUNT_MAP)
 	                            .where(Tables.EH_CONF_ORDER_ACCOUNT_MAP.ORDER_ID.eq(orderId))
 	                            .and(Tables.EH_CONF_ORDER_ACCOUNT_MAP.ASSIGED_FLAG.eq(assignFlag))
-	                            .and(Tables.EH_CONF_ORDER_ACCOUNT_MAP.CONF_ACCOUNT_NAMESPACE_ID.eq(namespaceId))
 	                    .fetchOneInto(Integer.class);
 	                    return true;
 	                });
@@ -878,13 +874,11 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 
 	@Override
 	public List<Long> listUnassignAccountIds(Long orderId) {
-		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
 		List<Long> accountIds = new ArrayList<Long>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhConfOrderAccountMap.class));
  
         SelectQuery<EhConfOrderAccountMapRecord> query = context.selectQuery(Tables.EH_CONF_ORDER_ACCOUNT_MAP);
        
-        query.addConditions(Tables.EH_CONF_ORDER_ACCOUNT_MAP.CONF_ACCOUNT_NAMESPACE_ID.eq(namespaceId));
         query.addConditions(Tables.EH_CONF_ORDER_ACCOUNT_MAP.ORDER_ID.eq(orderId));
         query.addConditions(Tables.EH_CONF_ORDER_ACCOUNT_MAP.ASSIGED_FLAG.eq((byte)0));
         query.fetch().map((r) -> {
@@ -1020,7 +1014,7 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 
 	@Override
 	public int countConfByAccount(Long accountId) {
-		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+		int namespaceId = (UserContext.current().getUser().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getUser().getNamespaceId();
 		final Integer[] count = new Integer[1];
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhConfConferences.class), null, 
                 (DSLContext context, Object reducingContext)-> {

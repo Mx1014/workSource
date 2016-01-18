@@ -23,6 +23,8 @@ import org.springframework.stereotype.Component;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.enterprise.EnterpriseContact;
 import com.everhomes.enterprise.EnterpriseContactEntry;
+import com.everhomes.enterprise.EnterpriseContactGroup;
+import com.everhomes.enterprise.EnterpriseContactGroupMember;
 import com.everhomes.enterprise.EnterpriseContactProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.videoconf.EnterpriseUsersDTO;
@@ -41,6 +43,9 @@ public class UserWithoutConfAccountSearcherImpl extends AbstractElasticSearch
 	
 	@Autowired
 	private EnterpriseContactProvider enterpriseContactProvider;
+	
+	@Autowired
+	private VideoConfProvider vcProvider;
 	
 	@Autowired
     private ConfigurationProvider configProvider;
@@ -103,6 +108,7 @@ public class UserWithoutConfAccountSearcherImpl extends AbstractElasticSearch
 
 	@Override
 	public ListUsersWithoutVideoConfPrivilegeResponse query(ListUsersWithoutVideoConfPrivilegeCommand cmd) {
+		List<Long> userIds = vcProvider.findUsersByEnterpriseId(cmd.getEnterpriseId());
 		SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
 		QueryBuilder qb = null;
         if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
@@ -118,7 +124,10 @@ public class UserWithoutConfAccountSearcherImpl extends AbstractElasticSearch
             builder.addHighlightedField("userName").addHighlightedField("department").addHighlightedField("contact");
         }
 
-        FilterBuilder fb = null;
+        FilterBuilder nfb = FilterBuilders.termsFilter("userId", userIds);
+        
+        FilterBuilder fb = FilterBuilders.notFilter(nfb);
+        
         if(cmd.getEnterpriseId() != null)
         	fb = FilterBuilders.termFilter("enterpriseId", cmd.getEnterpriseId());
         
@@ -151,9 +160,16 @@ public class UserWithoutConfAccountSearcherImpl extends AbstractElasticSearch
         	EnterpriseContact contact = enterpriseContactProvider.getContactById(id);
         	user.setUserId(contact.getUserId());
 			user.setUserName(contact.getName());
-			user.setDepartment(contact.getStringTag1());
 			user.setContactId(contact.getId());
 			user.setEnterpriseId(contact.getEnterpriseId());
+			
+			EnterpriseContactGroupMember member = enterpriseContactProvider.getContactGroupMemberByContactId(contact.getEnterpriseId(), contact.getId());
+			if (member != null) {
+				EnterpriseContactGroup group = enterpriseContactProvider.getContactGroupById(member.getContactGroupId());
+				if (group != null) {
+					user.setDepartment(group.getName());
+				}
+			}
 			
 			List<EnterpriseContactEntry> entry = enterpriseContactProvider.queryContactEntryByContactId(contact);
 			if(entry != null && entry.size() >0)
@@ -177,8 +193,19 @@ public class UserWithoutConfAccountSearcherImpl extends AbstractElasticSearch
             b.field("contactId", contact.getId());
             b.field("userId", contact.getUserId());
             b.field("enterpriseId", contact.getEnterpriseId());
-            b.field("department", contact.getStringTag1());
             b.field("userName", contact.getName());
+            
+            EnterpriseContactGroupMember member = enterpriseContactProvider.getContactGroupMemberByContactId(contact.getEnterpriseId(), contact.getId());
+			if (member != null) {
+				EnterpriseContactGroup group = enterpriseContactProvider.getContactGroupById(member.getContactGroupId());
+				if (group != null) {
+					b.field("department", group.getName());
+				} else {
+					b.field("department", "");
+				}
+			} else {
+				b.field("department", "");
+			}
             
             List<EnterpriseContactEntry> entry = enterpriseContactProvider.queryContactEntryByContactId(contact);
 			if(entry != null && entry.size() >0) {

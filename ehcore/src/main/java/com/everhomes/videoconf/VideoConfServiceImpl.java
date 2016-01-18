@@ -113,6 +113,9 @@ import com.everhomes.rest.videoconf.VerifyVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.VideoConfAccountRuleDTO;
 import com.everhomes.rest.videoconf.VideoconfNotificationTemplateCode;
 import com.everhomes.rest.videoconf.WarningContactorDTO;
+import com.everhomes.search.ConfAccountSearcher;
+import com.everhomes.search.ConfEnterpriseSearcher;
+import com.everhomes.search.UserWithoutConfAccountSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
@@ -125,6 +128,8 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
 import com.mysql.jdbc.StringUtils;
+
+import freemarker.template.utility.StringUtil;
 
 @Component
 public class VideoConfServiceImpl implements VideoConfService {
@@ -157,6 +162,15 @@ public class VideoConfServiceImpl implements VideoConfService {
 	
 	@Autowired
 	private LocaleStringService localeStringService;
+	
+	@Autowired
+	private ConfAccountSearcher confAccountSearcher;
+	
+	@Autowired
+	private UserWithoutConfAccountSearcher userWithoutConfAccountSearcher;
+	
+	@Autowired
+	private ConfEnterpriseSearcher confEnterpriseSearcher;
 	
 	
 	@Override
@@ -1081,6 +1095,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		account.setUpdateTime(now);
 		account.setOwnTime(now);
 		vcProvider.updateConfAccounts(account);
+		confAccountSearcher.feedDoc(account);
 
 		ConfAccountHistories history = new ConfAccountHistories();
 		history.setEnterpriseId(account.getEnterpriseId());
@@ -1166,6 +1181,10 @@ public class VideoConfServiceImpl implements VideoConfService {
 			userAccount.setAccountId(account.getId());
 			userAccount.setStatus(account.getStatus());
 			userAccount.setOccupyFlag(account.getAssignedFlag());
+		} else {
+			userAccount.setAccountId(0L);
+			userAccount.setStatus((byte) 0);
+			userAccount.setOccupyFlag((byte) 2);
 		}
 		return userAccount;
 	}
@@ -1212,6 +1231,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		StartVideoConfResponse response = new StartVideoConfResponse();
 		
 		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+		
 		String path = "http://api.confcloud.cn/openapi/confReservation";
 		ConfAccounts account = vcProvider.findVideoconfAccountById(cmd.getAccountId());
 		if(account != null && account.getStatus() == 1) {
@@ -1236,7 +1256,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 				    sPara.put("timeStamp", timestamp.toString());
 				    sPara.put("token", token); 
 				    sPara.put("confName", cmd.getConfName());
-				    if("".equals(cmd.getConfName()))
+				    if(cmd.getConfName() == null || cmd.getConfName().trim().length() == 0)
 				    	sPara.put("confName", "conference");
 				    sPara.put("hostKey", cmd.getPassword());
 				    sPara.put("startTime", sd);
@@ -1245,6 +1265,9 @@ public class VideoConfServiceImpl implements VideoConfService {
 				    	sPara.put("duration", "30");
 				    sPara.put("optionJbh", "0");
 				    NameValuePair[] param = generatNameValuePair(sPara);
+				    if(LOGGER.isDebugEnabled())
+						LOGGER.info("startVideoConf, namespaceId=" + namespaceId + ", cmd=" + cmd + ", restUrl="+path+", param="+sPara);
+				    
 				    HttpClient httpClient = new HttpClient();  
 			          
 			        HttpMethod method = postMethod(path, param);  
@@ -1307,7 +1330,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 					}
 					
 				} catch (Exception e) {
-					LOGGER.error("startVideoConf-error.sourceAccount="+sourceAccount.getAccountName()+".exception message="+e.getMessage());
+					LOGGER.error("startVideoConf-error.sourceAccount="+sourceAccount.getAccountName(), e);
 				}
 			} else {
 				LOGGER.error("源账号不够");
@@ -1345,10 +1368,16 @@ public class VideoConfServiceImpl implements VideoConfService {
 
 		
 		UserIdentifier user = userProvider.findClaimedIdentifierByToken(cmd.getNamespaceId(), cmd.getConfId());
+		if(LOGGER.isDebugEnabled())
+			LOGGER.error("joinVideoConf, cmd="+cmd+",user="+user);
 		if(user != null) {
 			ConfAccounts account = vcProvider.findAccountByUserId(user.getOwnerUid());
+			if(LOGGER.isDebugEnabled())
+				LOGGER.error("joinVideoConf, account="+account);
 			if(account != null) {
 				ConfConferences conf = vcProvider.findConfConferencesById(account.getAssignedConfId());
+				if(LOGGER.isDebugEnabled())
+					LOGGER.error("joinVideoConf, conf="+conf);
 				if(conf != null) {
 					response.setJoinUrl(conf.getJoinUrl());
 					response.setCondId(conf.getConfId()+"");
@@ -1360,6 +1389,8 @@ public class VideoConfServiceImpl implements VideoConfService {
 		if(StringUtils.isNullOrEmpty(response.getCondId())){
 			Long confId = Long.valueOf(cmd.getConfId()); 
 			ConfConferences conf = vcProvider.findConfConferencesByConfId(confId);
+			if(LOGGER.isDebugEnabled())
+				LOGGER.error("joinVideoConf, cmd="+cmd+",conf="+conf);
 			if(conf != null) {
 				response.setJoinUrl(conf.getJoinUrl());
 				response.setCondId(conf.getConfId()+"");
@@ -1555,6 +1586,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 				account.setUpdateTime(now);
 				account.setOwnTime(now);
 				vcProvider.updateConfAccounts(account);
+				confAccountSearcher.feedDoc(account);
 				userIds.remove(0);
 				
 				List<ConfOrderAccountMap> maps = vcProvider.findOrderAccountByAccountId(accountId);
@@ -1658,6 +1690,8 @@ public class VideoConfServiceImpl implements VideoConfService {
 			if(enter != null)
 				confEnterprise.setNamespaceId(enter.getNamespaceId());
 			vcProvider.createConfEnterprises(confEnterprise);
+
+			confEnterpriseSearcher.feedDoc(confEnterprise);
 		} else {
 			enterprise.setContactName(cmd.getContactor());
 			enterprise.setContact(cmd.getMobile());
@@ -1776,14 +1810,17 @@ public class VideoConfServiceImpl implements VideoConfService {
 	}
 	
 	private void updateOrderStatus(ConfOrders order, Timestamp payTimeStamp, byte paymentStatus) {
-		int namespaceId = (UserContext.current().getUser().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getUser().getNamespaceId();
+//		int namespaceId = (UserContext.current().getUser().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getUser().getNamespaceId();
 		order.setPayerId(UserContext.current().getUser().getId());
 		order.setPaidTime(payTimeStamp);
 		order.setStatus(paymentStatus);
 		
 		vcProvider.updateConfOrders(order);
-		
+		ConfEnterprises enterprise = vcProvider.findByEnterpriseId(order.getOwnerId());
+		int namespaceId = enterprise.getNamespaceId();
 		if(order.getStatus().byteValue() == PayStatus.PAID.getCode()) {
+			List<ConfAccounts> accounts = new ArrayList<ConfAccounts>();
+			
 			for(int i = 0; i < order.getQuantity(); i++) {
 				ConfAccounts account = new ConfAccounts();
 				account.setStatus((byte) 1);
@@ -1793,16 +1830,19 @@ public class VideoConfServiceImpl implements VideoConfService {
 				account.setNamespaceId(namespaceId);
 				vcProvider.createConfAccounts(account);
 				
+				accounts.add(account);
+				
 				ConfOrderAccountMap map = new ConfOrderAccountMap();
 				map.setOrderId(order.getId());
 				map.setEnterpriseId(order.getOwnerId());
 				map.setConfAccountId(account.getId());
 				map.setConfAccountNamespaceId(namespaceId);
 				vcProvider.createConfOrderAccountMap(map);
-
+				
 			}
 			
-			ConfEnterprises enterprise = vcProvider.findByEnterpriseId(order.getOwnerId());
+			confAccountSearcher.bulkUpdate(accounts);	
+			
 			enterprise.setBuyChannel(order.getOnlineFlag());
 			enterprise.setAccountAmount(enterprise.getAccountAmount()+order.getQuantity());
 			enterprise.setActiveAccountAmount(enterprise.getActiveAccountAmount()+order.getQuantity());
