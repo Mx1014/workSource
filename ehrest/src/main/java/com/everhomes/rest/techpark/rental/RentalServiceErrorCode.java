@@ -13,6 +13,8 @@ public interface RentalServiceErrorCode {
     static final int ERROR_NOT_SUCCESS = 10008;  //未到预定时间
     static final int ERROR_NOT_COMPLETE = 10009;  //未到预定时间
     static final int ERROR_ORDER_DUPLICATE = 10010;  //预定时间冲突
-//    static final int ERROR_PUNCH_REFRESH_DAYLOG = 10005;  //计算打卡日志有问题
+    
+    static final int ERROR_CREATE_EXCEL = 10011;  //生成预订信息有问题
+    static final int ERROR_DOWNLOAD_EXCEL = 10012;  //下载预订信息有问题
     
 }

@@ -1,6 +1,18 @@
 package com.everhomes.techpark.rental;
 
+
 import java.net.URLEncoder;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -11,10 +23,15 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletResponse;
 
 import net.greghaines.jesque.Job;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -106,6 +123,7 @@ import com.everhomes.rest.techpark.rental.VisibleFlag;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.onlinePay.OnlinePayService;
+import com.everhomes.techpark.punch.PunchServiceImpl;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
@@ -120,6 +138,7 @@ import com.google.gson.reflect.TypeToken;
 
 @Component
 public class RentalServiceImpl implements RentalService {
+	final String downloadDir ="\\download\\";
 
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(RentalServiceImpl.class);
@@ -1841,5 +1860,226 @@ public class RentalServiceImpl implements RentalService {
 		dto.setCompleteCount(completeCount);
 		dto.setOverTimeCount(overTimeCount);
 		dto.setSuccessCount(successCount);
+	}
+
+	@Override
+	public HttpServletResponse exportRentalBills(ListRentalBillsCommand cmd,
+			HttpServletResponse response) {
+		
+		int totalCount = rentalProvider.countRentalBills(cmd.getOwnerId(),cmd.getOwnerType(),
+				cmd.getSiteType(), cmd.getRentalSiteId(), cmd.getBillStatus(),
+				cmd.getStartTime(), cmd.getEndTime(), cmd.getInvoiceFlag(),null);
+		if (totalCount == 0)
+			return response;
+
+		Integer pageSize = Integer.MAX_VALUE;
+		checkEnterpriseCommunityIdIsNull(cmd.getOwnerId());
+		List<RentalBill> bills = rentalProvider.listRentalBills(
+				cmd.getOwnerId(),cmd.getOwnerType(), cmd.getSiteType(), cmd.getRentalSiteId(),
+				cmd.getBillStatus(), null, pageSize,
+				cmd.getStartTime(), cmd.getEndTime(), cmd.getInvoiceFlag(),null);
+		List<RentalBillDTO> dtos = new ArrayList<RentalBillDTO>();
+		for (RentalBill bill : bills) {
+			RentalBillDTO dto = new RentalBillDTO();
+			mappingRentalBillDTO(dto, bill);
+			dto.setSiteItems(new ArrayList<SiteItemDTO>());
+			List<RentalItemsBill> rentalSiteItems = rentalProvider
+					.findRentalItemsBillBySiteBillId(dto.getRentalBillId());
+			for (RentalItemsBill rib : rentalSiteItems) {
+				SiteItemDTO siDTO = new SiteItemDTO();
+				siDTO.setCounts(rib.getRentalCount());
+				RentalSiteItem rsItem = rentalProvider
+						.findRentalSiteItemById(rib.getRentalSiteItemId());
+				siDTO.setItemName(rsItem.getName());
+				siDTO.setItemPrice(rib.getTotalMoney());
+				dto.getSiteItems().add(siDTO);
+			}
+			
+			dtos.add(dto);
+		}
+		
+		URL rootPath = RentalServiceImpl.class.getResource("/");
+		String filePath =rootPath.getPath() + this.downloadDir ;
+		File file = new File(filePath);
+		if(!file.exists())
+			file.mkdirs();
+		filePath = filePath + "RentalBills"+System.currentTimeMillis()+".xlsx";
+		//新建了一个文件
+		this.createRentalBillsBook(filePath, dtos);
+		
+		return download(filePath,response);
+	}
+	
+	public HttpServletResponse download(String path, HttpServletResponse response) {
+        try {
+            // path是指欲下载的文件的路径。
+            File file = new File(path);
+            // 取得文件名。
+            String filename = file.getName();
+            // 取得文件的后缀名。
+            String ext = filename.substring(filename.lastIndexOf(".") + 1).toUpperCase();
+
+            // 以流的形式下载文件。
+            InputStream fis = new BufferedInputStream(new FileInputStream(path));
+            byte[] buffer = new byte[fis.available()];
+            fis.read(buffer);
+            fis.close();
+            // 清空response
+            response.reset();
+            // 设置response的Header
+            response.addHeader("Content-Disposition", "attachment;filename=" + new String(filename.getBytes()));
+            response.addHeader("Content-Length", "" + file.length());
+            OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
+            response.setContentType("application/octet-stream");
+            toClient.write(buffer);
+            toClient.flush();
+            toClient.close();
+            
+            // 读取完成删除文件
+            if (file.isFile() && file.exists()) {  
+                file.delete();  
+            } 
+        } catch (IOException ex) { 
+ 			LOGGER.error(ex.getMessage());
+ 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+ 					RentalServiceErrorCode.ERROR_DOWNLOAD_EXCEL,
+ 					ex.getLocalizedMessage());
+     		 
+        }
+        return response;
+    }
+	
+	public void createRentalBillsBook(String path,List<RentalBillDTO> dtos) {
+		if (null == dtos || dtos.size() == 0)
+			return;
+		Workbook wb = new XSSFWorkbook();
+		Sheet sheet = wb.createSheet("rentalBill");
+		
+		this.createRentalBillsBookSheetHead(sheet);
+		for (RentalBillDTO dto : dtos )
+			this.setNewRentalBillsBookRow(sheet, dto);
+		try {
+			
+			FileOutputStream out = new FileOutputStream(path);
+			wb.write(out);
+			wb.close();
+			out.close();
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+					RentalServiceErrorCode.ERROR_CREATE_EXCEL,
+					e.getLocalizedMessage());
+		}
+	}
+	
+	private void createRentalBillsBookSheetHead(Sheet sheet){
+
+		Row row = sheet.createRow(sheet.getLastRowNum());
+		int i =-1 ;
+		row.createCell(++i).setCellValue("场所名称");
+		row.createCell(++i).setCellValue("预订时间");
+		row.createCell(++i).setCellValue("使用时间");
+		row.createCell(++i).setCellValue("预订数");
+		row.createCell(++i).setCellValue("预订人");
+		row.createCell(++i).setCellValue("电话");
+		row.createCell(++i).setCellValue("物品");
+		row.createCell(++i).setCellValue("备注");
+		row.createCell(++i).setCellValue("总价");
+		row.createCell(++i).setCellValue("状态");
+		row.createCell(++i).setCellValue("开票");
+	}
+	
+	private void setNewRentalBillsBookRow(Sheet sheet ,RentalBillDTO dto){
+		Row row = sheet.createRow(sheet.getLastRowNum()+1);
+		int i = -1;
+		row.createCell(++i).setCellValue(dto.getSiteName());
+		if(null!=dto.getReserveTime())
+			row.createCell(++i).setCellValue(timeSF.format(new java.sql.Time(dto.getReserveTime())));
+		else 
+			row.createCell(++i).setCellValue("");
+		
+		if(null!=dto.getRentalSiteRules()) {
+			StringBuffer sb = new StringBuffer();
+			for(int j = 0; j < dto.getRentalSiteRules().size(); j++) {
+				if(sb.length() != 0) {
+					sb = sb.append(",");
+				}
+				if(dto.getRentalSiteRules().get(j) != null && dto.getRentalSiteRules().get(j).getRuleDate() != null
+						&& dto.getRentalSiteRules().get(j).getRuleDate() != 0L)
+					sb = sb.append(timeSF.format(new java.sql.Time(dto.getRentalSiteRules().get(j).getRuleDate())));
+				else
+					sb = sb.append("");
+			}
+			
+			String str = sb.toString();
+			row.createCell(++i).setCellValue(str);
+		}
+		else 
+			row.createCell(++i).setCellValue("");
+		
+		row.createCell(++i).setCellValue(dto.getRentalCount());
+		row.createCell(++i).setCellValue(dto.getContactName());
+		row.createCell(++i).setCellValue(dto.getContactPhonenum());
+		
+		if(null != dto.getSiteItems()) {
+			StringBuffer sb = new StringBuffer();
+			for(int j = 0; j < dto.getSiteItems().size(); j++) {
+				if(sb.length() != 0) {
+					sb = sb.append(",");
+				}
+				if(null != dto.getSiteItems().get(j))
+					sb = sb.append(dto.getSiteItems().get(j).getItemName());
+				else
+					sb = sb.append("");
+			}
+			
+			String str = sb.toString();
+			row.createCell(++i).setCellValue(str);
+		}
+		else 
+			row.createCell(++i).setCellValue("");
+		
+		if(null != dto.getBillAttachments()) {
+			StringBuffer sb = new StringBuffer();
+			for(int j = 0; j < dto.getBillAttachments().size(); j++) {
+				if(sb.length() != 0) {
+					sb = sb.append(" ");
+				}
+				if(null != dto.getBillAttachments().get(j))
+					sb = sb.append(dto.getBillAttachments().get(j).getContent());
+				else
+					sb = sb.append("");
+			}
+			
+			String str = sb.toString();
+			row.createCell(++i).setCellValue(str);
+		}
+		else 
+			row.createCell(++i).setCellValue("");
+		
+		if(null != dto.getTotalPrice())
+			row.createCell(++i).setCellValue(dto.getTotalPrice().toString());
+		else
+			row.createCell(++i).setCellValue("0");
+		
+		row.createCell(++i).setCellValue(statusToString(dto.getStatus()));
+		
+		String invoice = dto.getInvoiceFlag() == 0 ? "是" : "否";
+		row.createCell(++i).setCellValue(invoice);
+	}
+	
+	private String statusToString(Byte status) {
+		
+		if(status.equals(SiteBillStatus.LOCKED.getCode()))
+			return "待付订金";
+		if(status.equals(SiteBillStatus.RESERVED.getCode()))
+			return "已付定金";
+		if(status.equals(SiteBillStatus.SUCCESS.getCode()))
+			return "已付清";
+		if(status.equals(SiteBillStatus.PAYINGFINAL.getCode()))
+			return "待付全款";
+		if(status.equals(SiteBillStatus.FAIL.getCode()))
+			return "已取消";
+		return "";
 	}
 }

@@ -33,6 +33,8 @@ import com.everhomes.rest.community.ListBuildingCommandResponse;
 import com.everhomes.rest.community.UpdateCommunityRequestStatusCommand;
 import com.everhomes.rest.community.admin.CommunityUserDto;
 import com.everhomes.rest.community.admin.CommunityUserResponse;
+import com.everhomes.rest.community.admin.CountCommunityUserResponse;
+import com.everhomes.rest.community.admin.CountCommunityUsersCommand;
 import com.everhomes.rest.community.admin.ListCommunityUsersCommand;
 import com.everhomes.util.EtagHelper;
 
@@ -173,6 +175,21 @@ public class CommunityController extends ControllerBase {
 	public RestResponse listCommunityUsers(ListCommunityUsersCommand cmd) {
 		CommunityUserResponse res = communityService.listUserCommunities(cmd);
 		RestResponse response =  new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+	}
+	
+	/**
+	 * <b>URL: /community/countCommunityUsers</b>
+	 * <p>统计园区用户列表</p>
+	 */
+	@RequestMapping("countCommunityUsers")
+    @RestReturn(value=CountCommunityUserResponse.class)
+	public RestResponse countCommunityUsers(CountCommunityUsersCommand cmd) {
+		
+		CountCommunityUserResponse resp = communityService.countCommunityUsers(cmd);
+		RestResponse response =  new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

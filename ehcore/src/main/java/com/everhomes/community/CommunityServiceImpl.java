@@ -70,6 +70,8 @@ import com.everhomes.rest.community.admin.ApproveCommunityAdminCommand;
 import com.everhomes.rest.community.admin.CommunityManagerDTO;
 import com.everhomes.rest.community.admin.CommunityUserDto;
 import com.everhomes.rest.community.admin.CommunityUserResponse;
+import com.everhomes.rest.community.admin.CountCommunityUserResponse;
+import com.everhomes.rest.community.admin.CountCommunityUsersCommand;
 import com.everhomes.rest.community.admin.DeleteBuildingAdminCommand;
 import com.everhomes.rest.community.admin.ListBuildingsByStatusCommandResponse;
 import com.everhomes.rest.community.admin.ListCommunityManagersAdminCommand;
@@ -1178,5 +1180,24 @@ public class CommunityServiceImpl implements CommunityService {
 		res.setNextPageAnchor(locator.getAnchor());
 		res.setUserCommunities(dtos);
 		return res;
+	}
+
+
+	@Override
+	public CountCommunityUserResponse countCommunityUsers(
+			CountCommunityUsersCommand cmd) {
+
+		int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+		
+		int communityUsers = userProvider.countUserByNamespaceId(namespaceId, null);
+		int authUsers = userProvider.countUserByNamespaceId(namespaceId, true);
+		int notAuthUsers = communityUsers - authUsers;
+		
+		CountCommunityUserResponse resp = new CountCommunityUserResponse();
+		resp.setCommunityUsers(communityUsers);
+		resp.setAuthUsers(authUsers);
+		resp.setNotAuthUsers(notAuthUsers);
+
+		return resp;
 	}
 }

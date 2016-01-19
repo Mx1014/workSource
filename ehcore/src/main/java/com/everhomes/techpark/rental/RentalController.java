@@ -1,5 +1,6 @@
 package com.everhomes.techpark.rental;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -13,6 +14,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.techpark.punch.ExportPunchStatisticsCommand;
 import com.everhomes.rest.techpark.rental.AddRentalBillCommand;
 import com.everhomes.rest.techpark.rental.AddRentalBillItemCommand;
 import com.everhomes.rest.techpark.rental.AddRentalBillItemCommandResponse;
@@ -637,6 +639,18 @@ public class RentalController extends ControllerBase {
 		return response;
 	}
 	
+	
+	/**
+	 * <b>URL: /techpark/rental/exportRentalBills</b>
+	 * <p>
+	 * 导出预订详情
+	 * </p>
+	 */
+	@RequestMapping("exportRentalBills")
+	public HttpServletResponse exportRentalBills(@Valid ListRentalBillsCommand cmd,HttpServletResponse response) {
+		HttpServletResponse commandResponse = rentalService.exportRentalBills(cmd, response );
+		return commandResponse;
+	}
 	
 	
 }
