@@ -647,9 +647,9 @@ public class RentalController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("exportRentalBills")
-	public HttpServletResponse exportRentalBills(@Valid ListRentalBillsCommand cmd,HttpServletResponse response) {
+	public String exportRentalBills(@Valid ListRentalBillsCommand cmd,HttpServletResponse response) {
 		HttpServletResponse commandResponse = rentalService.exportRentalBills(cmd, response );
-		return commandResponse;
+		return null;
 	}
 	
 	
