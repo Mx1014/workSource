@@ -10,8 +10,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Null;
+
 
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.engine.jdbc.internal.DDLFormatterImpl;
@@ -23,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+
 
 import com.everhomes.business.Business;
 import com.everhomes.business.BusinessProvider;
@@ -52,6 +55,7 @@ import com.everhomes.rest.launchpad.GetLaunchPadLayoutByVersionCodeCommand;
 import com.everhomes.rest.launchpad.GetLaunchPadLayoutCommand;
 import com.everhomes.rest.launchpad.Item;
 import com.everhomes.rest.launchpad.ItemDisplayFlag;
+import com.everhomes.rest.launchpad.ItemGroup;
 import com.everhomes.rest.launchpad.ItemKind;
 import com.everhomes.rest.launchpad.ItemScope;
 import com.everhomes.rest.launchpad.ItemTargetType;
@@ -305,11 +309,17 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			final String prefixUrl = configurationProvider.getValue(PREFIX_URL, "");
 			final String imageUrl = configurationProvider.getValue(BUSINESS_IMAGE_URL, "");
 			allItems.forEach(r ->{
+						
 				LaunchPadItemDTO itemDTO = ConvertHelper.convert(r, LaunchPadItemDTO.class);
+				//是否可删除
+				if(r.getItemGroup().equals(ItemGroup.BIZS.getCode()))
+					itemDTO.setDeleteFlag(DeleteFlagType.YES.getCode());
+				else
+					itemDTO.setDeleteFlag(DeleteFlagType.NO.getCode());
+				
 				itemDTO.setActionData(parserJson(token,userId, community.getId(), r,request));
 				itemDTO.setScaleType(ScaleType.TAILOR.getCode());
 				if(r.getTargetType() != null && r.getTargetType().equalsIgnoreCase(ItemTargetType.BIZ.getCode())){
-					itemDTO.setDeleteFlag(DeleteFlagType.YES.getCode());
 					Business b = this.businessProvider.findBusinessById(r.getTargetId());
 					if(b != null){
 						itemDTO.setIconUrl(processLogoUrl(b,userId,imageUrl));
@@ -323,7 +333,6 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 							itemDTO.setItemLabel(b.getName() == null ? itemDTO.getItemLabel() : b.getName());
 					}
 				}else{
-					itemDTO.setDeleteFlag(DeleteFlagType.NO.getCode());
 					itemDTO.setIconUrl(parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId));
 				}
 				
