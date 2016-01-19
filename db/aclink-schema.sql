@@ -1,15 +1,6 @@
-DROP TABLE IF EXISTS `eh_aclinks`;
-CREATE TABLE `eh_aclinks` (
-    `id` BIGINT NOT NULL COMMENT 'id of the record',
-    `device_name` VARCHAR(32) NOT NULL,
-    `manufacturer` VARCHAR(32) NOT NULL,
-    `firware_ver` VARCHAR(32) NOT NULL,
-    `driver` TINYINT NOT NULL DEFAULT 0 COMMENT 'identify the hardware driver of aclink, not used now',
-    `create_time` DATETIME,
-    `status` TINYINT NOT NULL,
-    PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
+#
+# main partition of eh_door_access
+#
 DROP TABLE IF EXISTS `eh_door_access`;
 CREATE TABLE `eh_door_access` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
@@ -20,10 +11,10 @@ CREATE TABLE `eh_door_access` (
     `address` VARCHAR(128),
     `active_user_id` BIGINT NOT NULL,
     `creator_user_id` BIGINT NOT NULL,
-    `aclink_id` BIGINT COMMENT 'the hardware id of aclink',
     `longitude` DOUBLE,
     `latitude` DOUBLE,
     `geohash` VARCHAR(64),
+    `uuid` VARCHAR(64) NOT NULL DEFAULT '',
 
     `owner_type` TINYINT NOT NULL COMMENT '0:community, 1:enterprise, 2: family',
     `owner_id` BIGINT NOT NULL,
@@ -33,11 +24,30 @@ CREATE TABLE `eh_door_access` (
     `status` TINYINT NOT NULL COMMENT '0:activing, 1: active',
 
     PRIMARY KEY (`id`),
-    FOREIGN KEY `fk_eh_door_access_aclink_id`(`aclink_id`) REFERENCES `eh_aclinks`(`id`) ON DELETE CASCADE,
     INDEX `i_eh_door_access_name`(`name`),
     INDEX `i_eh_door_access_owner`(`owner_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+#
+# Partion of eh_door_access
+#
+DROP TABLE IF EXISTS `eh_aclinks`;
+CREATE TABLE `eh_aclinks` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `door_id` BIGINT NOT NULL,
+    `device_name` VARCHAR(32) NOT NULL,
+    `manufacturer` VARCHAR(32) NOT NULL,
+    `firware_ver` VARCHAR(32) NOT NULL,
+    `driver` TINYINT NOT NULL DEFAULT 0 COMMENT 'identify the hardware driver of aclink, not used now',
+    `create_time` DATETIME,
+    `status` TINYINT NOT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY `fk_eh_aclink_door_id`(`door_id`) REFERENCES `eh_door_access`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+#
+# partition of eh_door_access
+#
 DROP TABLE IF EXISTS `eh_aes_server_key`;
 CREATE TABLE `eh_aes_server_key` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
@@ -50,6 +60,9 @@ CREATE TABLE `eh_aes_server_key` (
     FOREIGN KEY `fk_eh_aes_server_key_door_id`(`door_id`) REFERENCES `eh_door_access`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+#
+# partition of eh_door_access
+#
 DROP TABLE IF EXISTS `eh_aes_user_key`;
 CREATE TABLE `eh_aes_user_key` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
@@ -78,6 +91,9 @@ CREATE TABLE `eh_aclink_undo_key` (
     FOREIGN KEY `fk_eh_aclink_undo_key_door_id`(`door_id`) REFERENCES `eh_door_access`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+#
+# partition of eh_door_access, door_access 1-->n users
+#
 DROP TABLE IF EXISTS `eh_door_auth`;
 CREATE TABLE `eh_door_auth` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
@@ -97,6 +113,9 @@ CREATE TABLE `eh_door_auth` (
     FOREIGN KEY `fk_eh_door_auth_door_id`(`door_id`) REFERENCES `eh_door_access`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+#
+# Global table for relationship of owner 1<-->n door
+#
 DROP TABLE IF EXISTS `eh_owner_doors`;
 CREATE TABLE `eh_owner_doors` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
@@ -106,12 +125,16 @@ CREATE TABLE `eh_owner_doors` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+#
+# Global table for relationship of owner 1<-->n door_auth
+#
 DROP TABLE IF EXISTS `eh_owner_door_auth`;
 CREATE TABLE `eh_owner_door_auth` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `owner_type` TINYINT NOT NULL COMMENT '0:community, 1:enterprise, 2: family',
     `owner_id` BIGINT NOT NULL,
     `door_id` BIGINT NOT NULL,
+    `user_id` BIGINT not NULL,
     `door_auth_id` BIGINT NOT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
