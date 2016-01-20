@@ -2016,8 +2016,8 @@ public class RentalServiceImpl implements RentalService {
 						String amorpm = dto.getRentalSiteRules().get(j).getAmorpm() == 0 ? "上午":"下午";
 						sb = sb.append(dateSF.format(new Timestamp(dto.getRentalSiteRules().get(j).getRuleDate())) + amorpm);
 					}
-					
-					sb = sb.append(dateSF.format(new Timestamp(dto.getRentalSiteRules().get(j).getRuleDate())));
+					else
+						sb = sb.append(dateSF.format(new Timestamp(dto.getRentalSiteRules().get(j).getRuleDate())));
 				}
 				else
 					sb = sb.append("");
