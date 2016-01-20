@@ -40,6 +40,7 @@ ALTER TABLE `eh_organization_members` ADD COLUMN `string_tag5` VARCHAR(128);
 ALTER TABLE `eh_organizations` ADD COLUMN `create_time` DATETIME COMMENT '';
 ALTER TABLE `eh_organizations` ADD COLUMN `update_time` DATETIME COMMENT '';
 ALTER TABLE `eh_organizations` ADD COLUMN `directly_enterprise_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'directly under the company';
+ALTER TABLE `eh_organizations` ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE `eh_organizations` ADD COLUMN `integral_tag1` BIGINT;
 ALTER TABLE `eh_organizations` ADD COLUMN `integral_tag2` BIGINT;
 ALTER TABLE `eh_organizations` ADD COLUMN `integral_tag3` BIGINT;
