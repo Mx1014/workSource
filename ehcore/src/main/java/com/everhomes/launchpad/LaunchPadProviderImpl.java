@@ -247,14 +247,14 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		return list;
 	}
     @Override
-    public List<LaunchPadItem> findLaunchPadItemByTargetAndScope(String targetType, long targetId,Byte scopeCode, long scopeId) {
+    public List<LaunchPadItem> findLaunchPadItemByTargetAndScope(String targetType, long targetId,Byte scopeCode, long scopeId,Integer namesapceId) {
         List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
         SelectJoinStep<Record> step = context.select().from(Tables.EH_LAUNCH_PAD_ITEMS);
 
-        Condition condition = null;
+        Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.NAMESPACE_ID.eq(namesapceId);
         if(scopeCode != null){
-            condition = Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(scopeCode);
+            condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(scopeCode));
             if(scopeId != 0)
                 condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(scopeId));
         }
@@ -262,7 +262,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
         if(targetType != null){
             if(condition != null){
                 condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.TARGET_TYPE.eq(targetType));
-                if(targetId != 0)
+                if(targetId != 0) 
                     condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.TARGET_ID.eq(targetId));
             }else{
                 condition = Tables.EH_LAUNCH_PAD_ITEMS.TARGET_TYPE.eq(targetType);
