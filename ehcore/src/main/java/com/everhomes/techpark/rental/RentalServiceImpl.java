@@ -1021,12 +1021,17 @@ public class RentalServiceImpl implements RentalService {
 				cmd.getRentalSiteId(), cmd.getBeginDate(), cmd.getEndDate());
 		LOGGER.debug("delete count = " + String.valueOf(deleteCount)
 				+ "  from rental site rules  ");
-		for(TimeInterval timeInterval:cmd.getTimeInterval()){
-			if(timeInterval.getBeginTime() == null || timeInterval.getEndTime()==null)
-				continue;
+		if(cmd.getTimeInterval() != null) {
+			for(TimeInterval timeInterval:cmd.getTimeInterval()){
+				if(timeInterval.getBeginTime() == null || timeInterval.getEndTime()==null)
+					continue;
+				AddRentalSiteSingleSimpleRule signleCmd=ConvertHelper.convert(cmd, AddRentalSiteSingleSimpleRule.class );
+				signleCmd.setBeginTime(timeInterval.getBeginTime());
+				signleCmd.setEndTime(timeInterval.getEndTime());
+				addRentalSiteSingleSimpleRule(signleCmd);
+			}
+		} else {
 			AddRentalSiteSingleSimpleRule signleCmd=ConvertHelper.convert(cmd, AddRentalSiteSingleSimpleRule.class );
-			signleCmd.setBeginTime(timeInterval.getBeginTime());
-			signleCmd.setEndTime(timeInterval.getEndTime());
 			addRentalSiteSingleSimpleRule(signleCmd);
 		}
 		
