@@ -2000,7 +2000,7 @@ public class RentalServiceImpl implements RentalService {
 		int i = -1;
 		row.createCell(++i).setCellValue(dto.getSiteName());
 		if(null!=dto.getReserveTime())
-			row.createCell(++i).setCellValue(timeSF.format(new java.sql.Time(dto.getReserveTime())));
+			row.createCell(++i).setCellValue(datetimeSF.format(new Timestamp(dto.getReserveTime())));
 		else 
 			row.createCell(++i).setCellValue("");
 		
@@ -2011,8 +2011,14 @@ public class RentalServiceImpl implements RentalService {
 					sb = sb.append(",");
 				}
 				if(dto.getRentalSiteRules().get(j) != null && dto.getRentalSiteRules().get(j).getRuleDate() != null
-						&& dto.getRentalSiteRules().get(j).getRuleDate() != 0L)
-					sb = sb.append(timeSF.format(new java.sql.Time(dto.getRentalSiteRules().get(j).getRuleDate())));
+						&& dto.getRentalSiteRules().get(j).getRuleDate() != 0L) {
+					if(dto.getRentalSiteRules().get(j).getAmorpm() != null) {
+						String amorpm = dto.getRentalSiteRules().get(j).getAmorpm() == 0 ? "上午":"下午";
+						sb = sb.append(dateSF.format(new Timestamp(dto.getRentalSiteRules().get(j).getRuleDate())) + amorpm);
+					}
+					
+					sb = sb.append(dateSF.format(new Timestamp(dto.getRentalSiteRules().get(j).getRuleDate())));
+				}
 				else
 					sb = sb.append("");
 			}
