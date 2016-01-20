@@ -20,6 +20,8 @@ import org.jooq.Record1;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectOnConditionStep;
 import org.jooq.UpdateConditionStep;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -60,6 +62,7 @@ import com.everhomes.util.ConvertHelper;
 
 @Component
 public class RentalProviderImpl implements RentalProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RentalProviderImpl.class);
 
 	@Autowired
 	private DbProvider dbProvider;
@@ -474,6 +477,10 @@ public class RentalProviderImpl implements RentalProvider {
 					return ConvertHelper.convert(r, RentalItemsBill.class);
 				});
 
+		if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query rental item bills by site bill id, sql=" + step.getSQL());
+            LOGGER.debug("Query rental item bills by site bill id, bindValues=" + step.getBindValues());
+        }
 		return result;
 	}
 
@@ -771,6 +778,11 @@ public class RentalProviderImpl implements RentalProvider {
 				.orderBy(Tables.EH_RENTAL_BILLS.ID.desc()).fetch().map((r) -> {
 					return ConvertHelper.convert(r, RentalBill.class);
 				});
+		
+		if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query rental bills, sql=" + step.getSQL());
+            LOGGER.debug("Query rental bills, bindValues=" + step.getBindValues());
+        }
 
 		return result;
 	}
