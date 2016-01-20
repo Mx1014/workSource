@@ -1958,20 +1958,24 @@ public class RentalServiceImpl implements RentalService {
 		Sheet sheet = wb.createSheet("rentalBill");
 		
 		this.createRentalBillsBookSheetHead(sheet);
-		for (RentalBillDTO dto : dtos )
+		for (RentalBillDTO dto : dtos ) {
 			this.setNewRentalBillsBookRow(sheet, dto);
+		}
+		
 		try {
-			
 			FileOutputStream out = new FileOutputStream(path);
+			
 			wb.write(out);
 			wb.close();
 			out.close();
+			
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage());
 			throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
 					RentalServiceErrorCode.ERROR_CREATE_EXCEL,
 					e.getLocalizedMessage());
 		}
+		
 	}
 	
 	private void createRentalBillsBookSheetHead(Sheet sheet){
@@ -2019,7 +2023,12 @@ public class RentalServiceImpl implements RentalService {
 		else 
 			row.createCell(++i).setCellValue("");
 		
-		row.createCell(++i).setCellValue(dto.getRentalCount());
+		if(dto.getRentalCount() == null) {
+			row.createCell(++i).setCellValue(0.00);
+		} else {
+			row.createCell(++i).setCellValue(dto.getRentalCount());
+		}
+		
 		row.createCell(++i).setCellValue(dto.getContactName());
 		row.createCell(++i).setCellValue(dto.getContactPhonenum());
 		
