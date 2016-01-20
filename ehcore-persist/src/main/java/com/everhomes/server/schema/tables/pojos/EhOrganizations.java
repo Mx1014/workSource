@@ -11,34 +11,60 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizations implements java.io.Serializable {
 
-	private static final long serialVersionUID = 741848477;
+	private static final long serialVersionUID = -2023301843;
 
-	private java.lang.Long    id;
-	private java.lang.Long    parentId;
-	private java.lang.String  organizationType;
-	private java.lang.String  name;
-	private java.lang.Long    addressId;
-	private java.lang.String  description;
-	private java.lang.String  path;
-	private java.lang.Integer level;
-	private java.lang.Byte    status;
-	private java.lang.String  departmentType;
-	private java.lang.String  groupType;
+	private java.lang.Long     id;
+	private java.lang.Long     parentId;
+	private java.lang.String   organizationType;
+	private java.lang.String   name;
+	private java.lang.Long     addressId;
+	private java.lang.String   description;
+	private java.lang.String   path;
+	private java.lang.Integer  level;
+	private java.lang.Byte     status;
+	private java.lang.String   departmentType;
+	private java.lang.String   groupType;
+	private java.sql.Timestamp createTime;
+	private java.sql.Timestamp updateTime;
+	private java.lang.Long     directlyEnterpriseId;
+	private java.lang.Long     integralTag1;
+	private java.lang.Long     integralTag2;
+	private java.lang.Long     integralTag3;
+	private java.lang.Long     integralTag4;
+	private java.lang.Long     integralTag5;
+	private java.lang.String   stringTag1;
+	private java.lang.String   stringTag2;
+	private java.lang.String   stringTag3;
+	private java.lang.String   stringTag4;
+	private java.lang.String   stringTag5;
 
 	public EhOrganizations() {}
 
 	public EhOrganizations(
-		java.lang.Long    id,
-		java.lang.Long    parentId,
-		java.lang.String  organizationType,
-		java.lang.String  name,
-		java.lang.Long    addressId,
-		java.lang.String  description,
-		java.lang.String  path,
-		java.lang.Integer level,
-		java.lang.Byte    status,
-		java.lang.String  departmentType,
-		java.lang.String  groupType
+		java.lang.Long     id,
+		java.lang.Long     parentId,
+		java.lang.String   organizationType,
+		java.lang.String   name,
+		java.lang.Long     addressId,
+		java.lang.String   description,
+		java.lang.String   path,
+		java.lang.Integer  level,
+		java.lang.Byte     status,
+		java.lang.String   departmentType,
+		java.lang.String   groupType,
+		java.sql.Timestamp createTime,
+		java.sql.Timestamp updateTime,
+		java.lang.Long     directlyEnterpriseId,
+		java.lang.Long     integralTag1,
+		java.lang.Long     integralTag2,
+		java.lang.Long     integralTag3,
+		java.lang.Long     integralTag4,
+		java.lang.Long     integralTag5,
+		java.lang.String   stringTag1,
+		java.lang.String   stringTag2,
+		java.lang.String   stringTag3,
+		java.lang.String   stringTag4,
+		java.lang.String   stringTag5
 	) {
 		this.id = id;
 		this.parentId = parentId;
@@ -51,6 +77,19 @@ public class EhOrganizations implements java.io.Serializable {
 		this.status = status;
 		this.departmentType = departmentType;
 		this.groupType = groupType;
+		this.createTime = createTime;
+		this.updateTime = updateTime;
+		this.directlyEnterpriseId = directlyEnterpriseId;
+		this.integralTag1 = integralTag1;
+		this.integralTag2 = integralTag2;
+		this.integralTag3 = integralTag3;
+		this.integralTag4 = integralTag4;
+		this.integralTag5 = integralTag5;
+		this.stringTag1 = stringTag1;
+		this.stringTag2 = stringTag2;
+		this.stringTag3 = stringTag3;
+		this.stringTag4 = stringTag4;
+		this.stringTag5 = stringTag5;
 	}
 
 	public java.lang.Long getId() {
@@ -139,5 +178,109 @@ public class EhOrganizations implements java.io.Serializable {
 
 	public void setGroupType(java.lang.String groupType) {
 		this.groupType = groupType;
+	}
+
+	public java.sql.Timestamp getCreateTime() {
+		return this.createTime;
+	}
+
+	public void setCreateTime(java.sql.Timestamp createTime) {
+		this.createTime = createTime;
+	}
+
+	public java.sql.Timestamp getUpdateTime() {
+		return this.updateTime;
+	}
+
+	public void setUpdateTime(java.sql.Timestamp updateTime) {
+		this.updateTime = updateTime;
+	}
+
+	public java.lang.Long getDirectlyEnterpriseId() {
+		return this.directlyEnterpriseId;
+	}
+
+	public void setDirectlyEnterpriseId(java.lang.Long directlyEnterpriseId) {
+		this.directlyEnterpriseId = directlyEnterpriseId;
+	}
+
+	public java.lang.Long getIntegralTag1() {
+		return this.integralTag1;
+	}
+
+	public void setIntegralTag1(java.lang.Long integralTag1) {
+		this.integralTag1 = integralTag1;
+	}
+
+	public java.lang.Long getIntegralTag2() {
+		return this.integralTag2;
+	}
+
+	public void setIntegralTag2(java.lang.Long integralTag2) {
+		this.integralTag2 = integralTag2;
+	}
+
+	public java.lang.Long getIntegralTag3() {
+		return this.integralTag3;
+	}
+
+	public void setIntegralTag3(java.lang.Long integralTag3) {
+		this.integralTag3 = integralTag3;
+	}
+
+	public java.lang.Long getIntegralTag4() {
+		return this.integralTag4;
+	}
+
+	public void setIntegralTag4(java.lang.Long integralTag4) {
+		this.integralTag4 = integralTag4;
+	}
+
+	public java.lang.Long getIntegralTag5() {
+		return this.integralTag5;
+	}
+
+	public void setIntegralTag5(java.lang.Long integralTag5) {
+		this.integralTag5 = integralTag5;
+	}
+
+	public java.lang.String getStringTag1() {
+		return this.stringTag1;
+	}
+
+	public void setStringTag1(java.lang.String stringTag1) {
+		this.stringTag1 = stringTag1;
+	}
+
+	public java.lang.String getStringTag2() {
+		return this.stringTag2;
+	}
+
+	public void setStringTag2(java.lang.String stringTag2) {
+		this.stringTag2 = stringTag2;
+	}
+
+	public java.lang.String getStringTag3() {
+		return this.stringTag3;
+	}
+
+	public void setStringTag3(java.lang.String stringTag3) {
+		this.stringTag3 = stringTag3;
+	}
+
+	public java.lang.String getStringTag4() {
+		return this.stringTag4;
+	}
+
+	public void setStringTag4(java.lang.String stringTag4) {
+		this.stringTag4 = stringTag4;
+	}
+
+	public java.lang.String getStringTag5() {
+		return this.stringTag5;
+	}
+
+	public void setStringTag5(java.lang.String stringTag5) {
+		this.stringTag5 = stringTag5;
 	}
 }
