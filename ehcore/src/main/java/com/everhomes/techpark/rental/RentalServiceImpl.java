@@ -2072,8 +2072,10 @@ public class RentalServiceImpl implements RentalService {
 			row.createCell(++i).setCellValue(dto.getTotalPrice().toString());
 		else
 			row.createCell(++i).setCellValue("0");
-		
-		row.createCell(++i).setCellValue(statusToString(dto.getStatus()));
+		if(dto.getStatus() != null)
+			row.createCell(++i).setCellValue(statusToString(dto.getStatus()));
+		else
+			row.createCell(++i).setCellValue("");
 		
 		String invoice = dto.getInvoiceFlag() == 0 ? "是" : "否";
 		row.createCell(++i).setCellValue(invoice);
