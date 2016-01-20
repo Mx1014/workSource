@@ -1163,4 +1163,22 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         });
         
 	}
+
+	@Override
+	public List<Long> queryUserIds() {
+		List<Long> userIds = new ArrayList<Long>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+		 
+        SelectQuery<EhEnterpriseContactsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CONTACTS);
+        query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.STATUS.eq(GroupMemberStatus.ACTIVE.getCode()));
+ 
+        
+        query.fetch().map((r) -> {
+        	EnterpriseContact ec = ConvertHelper.convert(r, EnterpriseContact.class);
+        	userIds.add(ec.getUserId());
+        	return null;
+        });
+        
+        return userIds;
+	}
 }
