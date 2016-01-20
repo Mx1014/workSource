@@ -2077,8 +2077,12 @@ public class RentalServiceImpl implements RentalService {
 		else
 			row.createCell(++i).setCellValue("");
 		
-		String invoice = dto.getInvoiceFlag() == 0 ? "是" : "否";
-		row.createCell(++i).setCellValue(invoice);
+		if(dto.getInvoiceFlag() != null) {
+			String invoice = dto.getInvoiceFlag() == 0 ? "是" : "否";
+			row.createCell(++i).setCellValue(invoice);
+		} else {
+			row.createCell(++i).setCellValue("");
+		}
 	}
 	
 	private String statusToString(Byte status) {
