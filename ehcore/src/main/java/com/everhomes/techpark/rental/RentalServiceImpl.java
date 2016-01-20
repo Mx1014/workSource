@@ -1878,7 +1878,7 @@ public class RentalServiceImpl implements RentalService {
 		checkEnterpriseCommunityIdIsNull(cmd.getOwnerId());
 		List<RentalBill> bills = rentalProvider.listRentalBills(
 				cmd.getOwnerId(),cmd.getOwnerType(), cmd.getSiteType(), cmd.getRentalSiteId(),
-				cmd.getBillStatus(), null, pageSize,
+				cmd.getBillStatus(), 1, pageSize,
 				cmd.getStartTime(), cmd.getEndTime(), cmd.getInvoiceFlag(),null);
 		List<RentalBillDTO> dtos = new ArrayList<RentalBillDTO>();
 		for (RentalBill bill : bills) {
