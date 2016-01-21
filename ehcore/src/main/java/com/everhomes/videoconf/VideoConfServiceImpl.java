@@ -115,6 +115,7 @@ import com.everhomes.rest.videoconf.VideoconfNotificationTemplateCode;
 import com.everhomes.rest.videoconf.WarningContactorDTO;
 import com.everhomes.search.ConfAccountSearcher;
 import com.everhomes.search.ConfEnterpriseSearcher;
+import com.everhomes.search.ConfOrderSearcher;
 import com.everhomes.search.UserWithoutConfAccountSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
@@ -129,7 +130,6 @@ import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
 import com.mysql.jdbc.StringUtils;
 
-import freemarker.template.utility.StringUtil;
 
 @Component
 public class VideoConfServiceImpl implements VideoConfService {
@@ -171,6 +171,9 @@ public class VideoConfServiceImpl implements VideoConfService {
 	
 	@Autowired
 	private ConfEnterpriseSearcher confEnterpriseSearcher;
+	
+	@Autowired
+	private ConfOrderSearcher confOrderSearcher;
 	
 	
 	@Override
@@ -1671,6 +1674,8 @@ public class VideoConfServiceImpl implements VideoConfService {
 		order.setOnlineFlag(cmd.getBuyChannel());
 		order.setAccountCategoryId(cmd.getAccountCategoryId());
 		vcProvider.createConfOrders(order);
+
+		confOrderSearcher.feedDoc(order);
 		
 		if(order.getInvoiceReqFlag() == 1) {
 			ConfInvoices invoice = ConvertHelper.convert(cmd.getInvoice(), ConfInvoices.class);
