@@ -573,8 +573,8 @@ public class RentalProviderImpl implements RentalProvider {
 						.eq(Tables.EH_RENTAL_SITES_BILLS.RENTAL_BILL_ID));
 		Condition condition = Tables.EH_RENTAL_SITE_RULES.RENTAL_SITE_ID
 				.equal(rentalSiteId);
-//		condition = condition.and(Tables.EH_RENTAL_BILLS.STATUS
-//				.ne(SiteBillStatus.FAIL.getCode()));
+		condition = condition.and(Tables.EH_RENTAL_BILLS.STATUS
+				.ne(SiteBillStatus.FAIL.getCode()));
 		if (null != beginDate && null != endDate) {
 			condition = condition
 					.and(Tables.EH_RENTAL_SITE_RULES.SITE_RENTAL_DATE.between(
