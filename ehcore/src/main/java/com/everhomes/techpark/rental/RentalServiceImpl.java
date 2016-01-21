@@ -1,6 +1,7 @@
 package com.everhomes.techpark.rental;
 
 
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -1021,6 +1022,14 @@ public class RentalServiceImpl implements RentalService {
 				cmd.getRentalSiteId(), cmd.getBeginDate(), cmd.getEndDate());
 		LOGGER.debug("delete count = " + String.valueOf(deleteCount)
 				+ "  from rental site rules  ");
+		
+		double weekendAMPrice = cmd.getWeekendAMPrice() == null ? 0.00 : cmd.getWeekendAMPrice();
+		double weekendPMPrice = cmd.getWeekendPMPrice() == null ? 0.00 : cmd.getWeekendPMPrice();
+		double weekendPrice = cmd.getWeekendPrice() == null ? 0.00 : cmd.getWeekendPrice();
+		double workdayAMPrice = cmd.getWorkdayAMPrice() == null ? 0.00 : cmd.getWorkdayAMPrice();
+		double workdayPMPrice = cmd.getWorkdayPMPrice() == null ? 0.00 : cmd.getWorkdayPMPrice();
+		double workdayPrice = cmd.getWorkdayPrice() == null ? 0.00 : cmd.getWorkdayPrice();
+		
 		if(cmd.getTimeInterval() != null) {
 			for(TimeInterval timeInterval:cmd.getTimeInterval()){
 				if(timeInterval.getBeginTime() == null || timeInterval.getEndTime()==null)
@@ -1028,10 +1037,23 @@ public class RentalServiceImpl implements RentalService {
 				AddRentalSiteSingleSimpleRule signleCmd=ConvertHelper.convert(cmd, AddRentalSiteSingleSimpleRule.class );
 				signleCmd.setBeginTime(timeInterval.getBeginTime());
 				signleCmd.setEndTime(timeInterval.getEndTime());
+				
+				signleCmd.setWeekendAMPrice(new BigDecimal(weekendAMPrice));
+				signleCmd.setWeekendPMPrice(new BigDecimal(weekendPMPrice));
+				signleCmd.setWeekendPrice(new BigDecimal(weekendPrice));
+				signleCmd.setWorkdayAMPrice(new BigDecimal(workdayAMPrice));
+				signleCmd.setWorkdayPMPrice(new BigDecimal(workdayPMPrice));
+				signleCmd.setWorkdayPrice(new BigDecimal(workdayPrice));
 				addRentalSiteSingleSimpleRule(signleCmd);
 			}
 		} else {
 			AddRentalSiteSingleSimpleRule signleCmd=ConvertHelper.convert(cmd, AddRentalSiteSingleSimpleRule.class );
+			signleCmd.setWeekendAMPrice(new BigDecimal(weekendAMPrice));
+			signleCmd.setWeekendPMPrice(new BigDecimal(weekendPMPrice));
+			signleCmd.setWeekendPrice(new BigDecimal(weekendPrice));
+			signleCmd.setWorkdayAMPrice(new BigDecimal(workdayAMPrice));
+			signleCmd.setWorkdayPMPrice(new BigDecimal(workdayPMPrice));
+			signleCmd.setWorkdayPrice(new BigDecimal(workdayPrice));
 			addRentalSiteSingleSimpleRule(signleCmd);
 		}
 		
