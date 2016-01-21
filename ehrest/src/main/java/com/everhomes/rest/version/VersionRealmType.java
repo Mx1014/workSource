@@ -22,6 +22,8 @@ package com.everhomes.rest.version;
  * <li>IOS_VIDEOCONF("iOS_Videoconf"): 视频会议iOS版APP</li>
  * <li>ANDROID_LONGGANG("Android_Longgang"): 龙岗智慧社区Android版APP</li>
  * <li>IOS_LONGGANG("iOS_Longgang"): 龙岗智慧社区iOS版APP</li>
+ * <li>ANDROID_HAIAN("Android_Haian"): 海岸城Android版APP</li>
+ * <li>IOS_HAIAN("iOS_Haian"): 海岸城iOS版APP</li>
  * </ul>
  */
 public enum VersionRealmType {
@@ -42,7 +44,9 @@ public enum VersionRealmType {
     ANDROID_VIDEOCONF("Android_Videoconf"), 
     IOS_VIDEOCONF("iOS_Videoconf"),
     ANDROID_LONGGANG("Android_Longgang"), 
-    IOS_LONGGANG("iOS_Longgang");
+    IOS_LONGGANG("iOS_Longgang"),
+    ANDROID_HAIAN("Android_Haian"), 
+    IOS_HAIAN("iOS_Haian");
     
     private String code;
     private VersionRealmType(String code) {
