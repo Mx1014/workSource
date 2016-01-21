@@ -80,6 +80,7 @@ import com.everhomes.rest.videoconf.VideoConfAccountPreferentialRuleDTO;
 import com.everhomes.rest.videoconf.VideoConfAccountTrialRuleDTO;
 import com.everhomes.search.ConfAccountSearcher;
 import com.everhomes.search.ConfEnterpriseSearcher;
+import com.everhomes.search.ConfOrderSearcher;
 import com.everhomes.search.UserWithoutConfAccountSearcher;
 import com.everhomes.util.RequireAuthentication;
 
@@ -102,6 +103,9 @@ public class VideoConfController  extends ControllerBase{
 	
 	@Autowired
 	private ConfEnterpriseSearcher confEnterpriseSearcher;
+	
+	@Autowired
+	private ConfOrderSearcher confOrderSearcher;
 	
 	/**
 	 * <b>URL: /conf/getAppDownloadURL</b>
@@ -756,7 +760,7 @@ public class VideoConfController  extends ControllerBase{
 	@RestReturn(value = ListVideoConfAccountOrderResponse.class)
 	public RestResponse listConfOrder(ListVideoConfAccountOrderCommand cmd) {
 
-		ListVideoConfAccountOrderResponse orderRecord = videoConfService.listConfOrder(cmd);
+		ListVideoConfAccountOrderResponse orderRecord = confOrderSearcher.query(cmd);
 		RestResponse response = new RestResponse(orderRecord);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -1179,6 +1183,19 @@ public class VideoConfController  extends ControllerBase{
         return res;
     }
 	
-	
+    /**
+     * <b>URL: /conf/syncConfOrderIndex</b>
+     * <p>搜索索引同步</p>
+     * @return {String.class}
+     */
+    @RequestMapping("syncConfOrderIndex")
+    @RestReturn(value=String.class)
+    public RestResponse syncConfOrderIndex() {
+    	confOrderSearcher.syncFromDb();
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
 	
 }

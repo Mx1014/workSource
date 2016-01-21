@@ -5,6 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>enterpriseId: 企业id</li>
+ * <li>keyword: 关键字 企业名称</li>
  * <li>pageAnchor: 本页开始的锚点</li>
  * <li>pageSize: 每页的数量</li>
  * </ul>
@@ -12,6 +13,8 @@ import com.everhomes.util.StringHelper;
 public class ListVideoConfAccountOrderCommand {
 	
 	private Long enterpriseId;
+	
+	private String keyword;
 	
 	private Long pageAnchor;
 	
@@ -25,6 +28,14 @@ public class ListVideoConfAccountOrderCommand {
 		this.enterpriseId = enterpriseId;
 	}
 	
+	public String getKeyword() {
+		return keyword;
+	}
+
+	public void setKeyword(String keyword) {
+		this.keyword = keyword;
+	}
+
 	public Long getPageAnchor() {
 		return pageAnchor;
 	}
