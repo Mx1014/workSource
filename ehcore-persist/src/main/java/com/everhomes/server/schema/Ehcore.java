@@ -11,7 +11,7 @@ package com.everhomes.server.schema;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Ehcore extends org.jooq.impl.SchemaImpl {
 
-	private static final long serialVersionUID = -1709229590;
+	private static final long serialVersionUID = -1247908027;
 
 	/**
 	 * The singleton instance of <code>ehcore</code>
@@ -112,14 +112,18 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhOauth2Codes.EH_OAUTH2_CODES,
 			com.everhomes.server.schema.tables.EhOauth2Tokens.EH_OAUTH2_TOKENS,
 			com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS,
+			com.everhomes.server.schema.tables.EhOrganizationAddresses.EH_ORGANIZATION_ADDRESSES,
 			com.everhomes.server.schema.tables.EhOrganizationAddressMappings.EH_ORGANIZATION_ADDRESS_MAPPINGS,
 			com.everhomes.server.schema.tables.EhOrganizationAssignedScopes.EH_ORGANIZATION_ASSIGNED_SCOPES,
+			com.everhomes.server.schema.tables.EhOrganizationAttachments.EH_ORGANIZATION_ATTACHMENTS,
 			com.everhomes.server.schema.tables.EhOrganizationBillingAccounts.EH_ORGANIZATION_BILLING_ACCOUNTS,
 			com.everhomes.server.schema.tables.EhOrganizationBillingTransactions.EH_ORGANIZATION_BILLING_TRANSACTIONS,
 			com.everhomes.server.schema.tables.EhOrganizationBills.EH_ORGANIZATION_BILLS,
 			com.everhomes.server.schema.tables.EhOrganizationBillItems.EH_ORGANIZATION_BILL_ITEMS,
 			com.everhomes.server.schema.tables.EhOrganizationCommunities.EH_ORGANIZATION_COMMUNITIES,
+			com.everhomes.server.schema.tables.EhOrganizationCommunityRequests.EH_ORGANIZATION_COMMUNITY_REQUESTS,
 			com.everhomes.server.schema.tables.EhOrganizationContacts.EH_ORGANIZATION_CONTACTS,
+			com.everhomes.server.schema.tables.EhOrganizationDetails.EH_ORGANIZATION_DETAILS,
 			com.everhomes.server.schema.tables.EhOrganizationMembers.EH_ORGANIZATION_MEMBERS,
 			com.everhomes.server.schema.tables.EhOrganizationOrders.EH_ORGANIZATION_ORDERS,
 			com.everhomes.server.schema.tables.EhOrganizationOwners.EH_ORGANIZATION_OWNERS,
