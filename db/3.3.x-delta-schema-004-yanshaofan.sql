@@ -15,7 +15,7 @@ CREATE TABLE `eh_organization_addresses` (
   `building_id` BIGINT NOT NULL DEFAULT '0',
   `building_name` VARCHAR(128) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_organization_attachments`;
 CREATE TABLE `eh_organization_attachments` (
@@ -26,7 +26,7 @@ CREATE TABLE `eh_organization_attachments` (
   `creator_uid` BIGINT NOT NULL,
   `create_time` DATETIME NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `eh_organization_community_requests`;
 CREATE TABLE `eh_organization_community_requests` (
@@ -58,7 +58,7 @@ CREATE TABLE `eh_organization_community_requests` (
   `string_tag4` VARCHAR(128) DEFAULT NULL,
   `string_tag5` VARCHAR(128) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
@@ -90,4 +90,4 @@ CREATE TABLE `eh_organization_details` (
   `string_tag4` VARCHAR(128) DEFAULT NULL,
   `string_tag5` VARCHAR(128) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
