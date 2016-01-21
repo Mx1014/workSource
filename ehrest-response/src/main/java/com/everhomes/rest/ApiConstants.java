@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2015-12-30 09:15:56
+// generated at 2016-01-21 18:16:00
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -206,6 +206,7 @@ public interface ApiConstants {
     public static final String CATEGORY_LISTINTERESTCATEGORIES_URL = "/category/listInterestCategories";
     public static final String CATEGORY_LISTROOT_URL = "/category/listRoot";
     public static final String CATEGORY_UPDATECATEGORYLOGOURI_URL = "/category/updateCategoryLogoUri";
+    public static final String COMMUNITY_COUNTCOMMUNITYUSERS_URL = "/community/countCommunityUsers";
     public static final String COMMUNITY_GET_URL = "/community/get";
     public static final String COMMUNITY_GETBUILDING_URL = "/community/getBuilding";
     public static final String COMMUNITY_GETCOMMUNITIESBYIDS_URL = "/community/getCommunitiesByIds";
@@ -261,6 +262,10 @@ public interface ApiConstants {
     public static final String CONF_SETVIDEOCONFACCOUNTTRIALRULE_URL = "/conf/setVideoConfAccountTrialRule";
     public static final String CONF_SETWARNINGCONTACTOR_URL = "/conf/setWarningContactor";
     public static final String CONF_STARTVIDEOCONF_URL = "/conf/startVideoConf";
+    public static final String CONF_SYNCACCOUNTINDEX_URL = "/conf/syncAccountIndex";
+    public static final String CONF_SYNCCONFORDERINDEX_URL = "/conf/syncConfOrderIndex";
+    public static final String CONF_SYNCENTERPRISEINDEX_URL = "/conf/syncEnterpriseIndex";
+    public static final String CONF_SYNCUSERINDEX_URL = "/conf/syncUserIndex";
     public static final String CONF_UPDATECONFACCOUNTCATEGORIES_URL = "/conf/updateConfAccountCategories";
     public static final String CONF_UPDATECONTACTOR_URL = "/conf/updateContactor";
     public static final String CONF_UPDATEVIDEOCONFACCOUNT_URL = "/conf/updateVideoConfAccount";
@@ -393,6 +398,11 @@ public interface ApiConstants {
     public static final String NAMESPACE_LISTCOMMUNITYBYNAMESPACE_URL = "/namespace/listCommunityByNamespace";
     public static final String OAUTH2_AUTHORIZE_URL = "/oauth2/authorize";
     public static final String OAUTH2_CONFIRM_URL = "/oauth2/confirm";
+    public static final String OAUTH2_GETTOKEN_URL = "/oauth2/gettoken";
+    public static final String OAUTH2_INNERLOGIN_URL = "/oauth2/innerlogin";
+    public static final String OAUTH2_OAUTH_URL = "/oauth2/oauth";
+    public static final String OAUTH2_RESULT_URL = "/oauth2/result";
+    public static final String OAUTH2_RESULTBYSIGN_URL = "/oauth2/resultBySign";
     public static final String OAUTH2_TOKEN_URL = "/oauth2/token";
     public static final String OAUTH2API_GETUSERINFO_URL = "/oauth2api/getUserInfo";
     public static final String OPENAPI_FINDBUSINESSFAVORITESTATUS_URL = "/openapi/findBusinessFavoriteStatus";
@@ -586,6 +596,7 @@ public interface ApiConstants {
     public static final String TECHPARK_RENTAL_DELETERENTALSITERULES_URL = "/techpark/rental/deleteRentalSiteRules";
     public static final String TECHPARK_RENTAL_DISABLERENTALSITE_URL = "/techpark/rental/disableRentalSite";
     public static final String TECHPARK_RENTAL_ENABLERENTALSITE_URL = "/techpark/rental/enableRentalSite";
+    public static final String TECHPARK_RENTAL_EXPORTRENTALBILLS_URL = "/techpark/rental/exportRentalBills";
     public static final String TECHPARK_RENTAL_FINDRENTALBILLS_URL = "/techpark/rental/findRentalBills";
     public static final String TECHPARK_RENTAL_FINDRENTALSITEITEMS_URL = "/techpark/rental/findRentalSiteItems";
     public static final String TECHPARK_RENTAL_FINDRENTALSITERULES_URL = "/techpark/rental/findRentalSiteRules";
