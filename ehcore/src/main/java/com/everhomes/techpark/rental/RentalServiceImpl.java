@@ -1506,7 +1506,7 @@ public class RentalServiceImpl implements RentalService {
 		map.put("appKey",appKey);
 		map.put("timestamp",timestamp+"");
 		map.put("randomNum",randomNum+"");
-		map.put("amount",response.getAmount()+"");
+		map.put("amount",response.getAmount().doubleValue()+"");
 		String signature = SignatureHelper.computeSignature(map, app.getSecretKey());
 		response.setAppKey(appKey);
 		response.setRandomNum(randomNum);

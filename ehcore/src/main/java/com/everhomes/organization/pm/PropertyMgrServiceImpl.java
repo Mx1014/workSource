@@ -3627,7 +3627,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		map.put("appKey",appKey);
 		map.put("timestamp",timestamp+"");
 		map.put("randomNum",randomNum+"");
-		map.put("amount",dto.getAmount()+"");
+		map.put("amount",dto.getAmount().doubleValue()+"");
 		String signature = SignatureHelper.computeSignature(map, app.getSecretKey());
 		dto.setAppKey(appKey);
 		dto.setRandomNum(randomNum);
