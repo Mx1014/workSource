@@ -435,10 +435,10 @@ public class RentalController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("onlinePayCallback")
-	@RestReturn(value =OnlinePayCallbackCommandResponse.class)
+	@RestReturn(value =String.class)
 	public RestResponse onlinePayCallback(@Valid OnlinePayCallbackCommand cmd)  {
-		OnlinePayCallbackCommandResponse resp = rentalService.onlinePayCallback(cmd); 
-		RestResponse response = new RestResponse(resp);
+		rentalService.onlinePayCallback(cmd); 
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
