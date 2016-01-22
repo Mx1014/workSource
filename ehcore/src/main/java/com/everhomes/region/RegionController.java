@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.RestResponse;
@@ -25,6 +26,7 @@ import com.everhomes.rest.region.ListRegionCommand;
 import com.everhomes.rest.region.RegionAdminStatus;
 import com.everhomes.rest.region.RegionDTO;
 import com.everhomes.rest.region.RegionScope;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.EtagHelper;
 import com.everhomes.util.SortOrder;
@@ -58,7 +60,7 @@ public class RegionController extends ControllerBase {
             orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(), SortOrder.fromCode(cmd.getSortOrder()));
         
         @SuppressWarnings("unchecked")
-        List<Region> entityResultList = this.regionProvider.listRegions(RegionScope.fromCode(cmd.getScope()), 
+        List<Region> entityResultList = this.regionProvider.listRegions(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), RegionScope.fromCode(cmd.getScope()), 
             RegionAdminStatus.fromCode(cmd.getStatus()), orderBy);
         
         List<RegionDTO> dtoResultList = entityResultList.stream()

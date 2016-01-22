@@ -123,9 +123,8 @@ public class RegionProviderImpl implements RegionProvider {
 	@Cacheable(value = "listRegion")
 	@SuppressWarnings({"unchecked", "rawtypes" })
 	@Override
-	public List<Region> listRegions(RegionScope scope, RegionAdminStatus status, Tuple<String, SortOrder>... orderBy) {
+	public List<Region> listRegions(Integer namespaceId, RegionScope scope, RegionAdminStatus status, Tuple<String, SortOrder>... orderBy) {
 		 
-		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 
 		//暂不向客户端开放排序字段指定 20150729
