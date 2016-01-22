@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.everhomes.junit.CoreServerTestCase;
 import com.everhomes.rest.region.RegionAdminStatus;
 import com.everhomes.rest.region.RegionScope;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
 
@@ -77,7 +78,7 @@ public class RegionProviderTest extends CoreServerTestCase {
     @SuppressWarnings("unchecked")
     @Test
     public void test() {
-        List<Region> regions = this.regionProvider.listRegions(RegionScope.CITY, null, 
+        List<Region> regions = this.regionProvider.listRegions(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), RegionScope.CITY, null, 
                 new Tuple<String, SortOrder>("name", SortOrder.DESC));
         
         for(Region region: regions) {

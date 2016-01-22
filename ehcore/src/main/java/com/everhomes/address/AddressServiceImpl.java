@@ -1071,8 +1071,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 	public void importCommunityInfos(MultipartFile[] files) {
 		long startTime = System.currentTimeMillis();
 		User user  = UserContext.current().getUser();
-		List<Region> cityList = regionProvider.listRegions(RegionScope.CITY, RegionAdminStatus.ACTIVE, null);
-		List<Region> areaList = regionProvider.listRegions(RegionScope.AREA, RegionAdminStatus.ACTIVE, null);
+		List<Region> cityList = regionProvider.listRegions(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), RegionScope.CITY, RegionAdminStatus.ACTIVE, null);
+		List<Region> areaList = regionProvider.listRegions(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), RegionScope.AREA, RegionAdminStatus.ACTIVE, null);
 		
 		try {
 			String seperator = configurationProvider.getValue(ADMIN_IMPORT_DATA_SEPERATOR, "#@");
@@ -1175,8 +1175,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 		long startTime =  System.currentTimeMillis();
 		
 		User user  = UserContext.current().getUser();
-		List<Region> cityList = regionProvider.listRegions(RegionScope.CITY, RegionAdminStatus.ACTIVE, null);
-		List<Region> areaList = regionProvider.listRegions(RegionScope.AREA, RegionAdminStatus.ACTIVE, null);
+		List<Region> cityList = regionProvider.listRegions(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), RegionScope.CITY, RegionAdminStatus.ACTIVE, null);
+		List<Region> areaList = regionProvider.listRegions(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), RegionScope.AREA, RegionAdminStatus.ACTIVE, null);
 		
 	
 		try {
