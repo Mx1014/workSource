@@ -475,7 +475,7 @@ public class CommunityServiceImpl implements CommunityService {
 			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST, 
 					"Community is not found."); 
 		}
-		List<CommunityDTO> result = this.communityProvider.findNearyByCommunityById(cmd.getId()).stream().map((r) ->{
+		List<CommunityDTO> result = this.communityProvider.findNearyByCommunityById(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), cmd.getId()).stream().map((r) ->{
 			return ConvertHelper.convert(r, CommunityDTO.class);
 		}).collect(Collectors.toList());
 		return result;
