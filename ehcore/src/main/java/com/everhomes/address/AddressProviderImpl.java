@@ -130,8 +130,7 @@ public class AddressProviderImpl implements AddressProvider {
     
     @Cacheable(value="Apartment", key="{#communityId, #buildingName, #apartmentName}" ,unless="#result==null")
     @Override
-    public Address findApartmentAddress(long communityId, String buildingName, String apartmentName) {
-    	int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+    public Address findApartmentAddress(Integer namespaceId, long communityId, String buildingName, String apartmentName) {
         final Address[] result = new Address[1];
         
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 

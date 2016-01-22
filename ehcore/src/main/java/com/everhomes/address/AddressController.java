@@ -42,6 +42,7 @@ import com.everhomes.rest.community.CommunityDoc;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
 import com.everhomes.search.CommunitySearcher;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.EtagHelper;
 import com.everhomes.util.Tuple;
 
@@ -214,7 +215,7 @@ public class AddressController extends ControllerBase {
     @RequestMapping("findNearyCommunityById")
     @RestReturn(value=CommunityDoc.class, collection=true)
     public RestResponse findNearyCommunityById(@Valid ListPropApartmentsByKeywordCommand cmd) {
-        List<Community> results = this.communityProvider.findNearyByCommunityById(cmd.getCommunityId());
+        List<Community> results = this.communityProvider.findNearyByCommunityById(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), cmd.getCommunityId());
         RestResponse response =  new RestResponse(results);
 
         response.setErrorCode(ErrorCodes.SUCCESS);

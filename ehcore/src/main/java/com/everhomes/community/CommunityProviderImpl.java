@@ -235,9 +235,9 @@ public class CommunityProviderImpl implements CommunityProvider {
         return result[0];
     }
     
-    @Cacheable(value="nearbyCommunities", key="#communityId" ,unless="#result.size() == 0")
+    @Cacheable(value="nearbyCommunities", key="{#namespaceId, #communityId}" ,unless="#result.size() == 0")
     @Override
-    public List<Community> findNearyByCommunityById(long communityId){
+    public List<Community> findNearyByCommunityById(Integer namespaceId, long communityId){
         long startTime = System.currentTimeMillis();
 //        CommunityProvider self = PlatformContext.getComponent(CommunityProvider.class);
 //        List<CommunityGeoPoint> pointList = self.listCommunityGeoPoints(communityId);
@@ -270,7 +270,7 @@ public class CommunityProviderImpl implements CommunityProvider {
         // 获取周边社区时分两种情况：1）若数据库有指定则优先使用数据库指定的；2）数据库没有时则进行计算取得；
         // 由于运营的要求，需要能够手工调整周边社区的范围 by lqs 20151022
         CommunityProvider self = PlatformContext.getComponent(CommunityProvider.class);
-        List<Community> results = self.findFixNearbyCommunityById(communityId);
+        List<Community> results = self.findFixNearbyCommunityById(namespaceId, communityId);
         if(results == null || results.size() == 0) {
             results = self.calculateNearbyCommunityByGeoPoints(communityId);
         }
@@ -279,10 +279,9 @@ public class CommunityProviderImpl implements CommunityProvider {
         return results;
     }
     
-    @Cacheable(value="nearbyCommunityMap", key="#communityId" ,unless="#result.size() == 0")
+    @Cacheable(value="nearbyCommunityMap", key="{#namespaceId, #communityId}" ,unless="#result.size() == 0")
     @Override
-    public List<NearbyCommunityMap> findNearbyCommunityMap(Long communityId) {
-    	int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+    public List<NearbyCommunityMap> findNearbyCommunityMap(Integer namespaceId, Long communityId) {
         List<NearbyCommunityMap> list = new ArrayList<>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, communityId));
         context.select().from(Tables.EH_NEARBY_COMMUNITY_MAP)
@@ -296,14 +295,14 @@ public class CommunityProviderImpl implements CommunityProvider {
         return list;
     }
     
-    @Cacheable(value="fixNearbyCommunities", key="#communityId" ,unless="#result.size() == 0")
+    @Cacheable(value="fixNearbyCommunities", key="{#namespaceId, #communityId}" ,unless="#result.size() == 0")
     @Override
-    public List<Community> findFixNearbyCommunityById(Long communityId) {
+    public List<Community> findFixNearbyCommunityById(Integer namespaceId, Long communityId) {
         long startTime = System.currentTimeMillis();
         List<Community> results = new ArrayList<Community>();
 
         CommunityProvider self = PlatformContext.getComponent(CommunityProvider.class);
-        List<NearbyCommunityMap> list = self.findNearbyCommunityMap(communityId);
+        List<NearbyCommunityMap> list = self.findNearbyCommunityMap(namespaceId, communityId);
         
         List<Long> communityIds = new ArrayList<Long>();
         if(list != null) {

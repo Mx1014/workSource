@@ -89,7 +89,7 @@ public class RegionController extends ControllerBase {
             orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(), SortOrder.fromCode(cmd.getSortOrder()));
         
         @SuppressWarnings("unchecked")
-        List<Region> entityResultList = this.regionProvider.listChildRegions(cmd.getParentId(), 
+        List<Region> entityResultList = this.regionProvider.listChildRegions(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), cmd.getParentId(), 
             RegionScope.fromCode(cmd.getScope()), 
             RegionAdminStatus.fromCode(cmd.getStatus()), orderBy);
         
@@ -118,7 +118,7 @@ public class RegionController extends ControllerBase {
             orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(), SortOrder.fromCode(cmd.getSortOrder()));
         
         @SuppressWarnings("unchecked")
-        List<Region> entityResultList = this.regionProvider.listDescendantRegions(cmd.getParentId(), 
+        List<Region> entityResultList = this.regionProvider.listDescendantRegions(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), cmd.getParentId(), 
             RegionScope.fromCode(cmd.getScope()), 
             RegionAdminStatus.fromCode(cmd.getStatus()), orderBy);
         

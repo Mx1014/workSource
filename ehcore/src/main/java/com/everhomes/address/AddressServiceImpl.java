@@ -663,7 +663,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     }
     
     private Address getOrCreateAddress(ClaimAddressCommand cmd) {
-        Address address = this.addressProvider.findApartmentAddress(cmd.getCommunityId(), 
+        Address address = this.addressProvider.findApartmentAddress(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), cmd.getCommunityId(), 
                 cmd.getBuildingName(), cmd.getApartmentName());
         
         Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
@@ -677,7 +677,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             Tuple<Address, Boolean> result = this.coordinationProvider
                      .getNamedLock(CoordinationLocks.CREATE_ADDRESS.getCode()).enter(()-> {
                 long lqStartTime = System.currentTimeMillis();
-                Address addr = this.addressProvider.findApartmentAddress(cmd.getCommunityId(), 
+                Address addr = this.addressProvider.findApartmentAddress(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), cmd.getCommunityId(), 
                                  cmd.getBuildingName(), cmd.getApartmentName());
                 long lqEndTime = System.currentTimeMillis();
                 LOGGER.info("find address ,in the lock,elapse=" + (lqEndTime - lqStartTime));
@@ -775,7 +775,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         User user = UserContext.current().getUser();
         long userId = user.getId();
         long startTime = System.currentTimeMillis();
-        Address addr = this.addressProvider.findApartmentAddress(cmd.getCommunityId(), cmd.getBuildingName(), cmd.getApartmentName());
+        Address addr = this.addressProvider.findApartmentAddress(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), cmd.getCommunityId(), cmd.getBuildingName(), cmd.getApartmentName());
         this.dbProvider.execute((TransactionStatus status) -> {
             Family family = this.familyProvider.findFamilyByAddressId(cmd.getAddressId());
             if(family == null){

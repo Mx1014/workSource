@@ -166,10 +166,9 @@ public class RegionProviderImpl implements RegionProvider {
 	@Cacheable(value = "listChildRegion")
 	@SuppressWarnings({"unchecked", "rawtypes" })
 	@Override
-	public List<Region> listChildRegions(Long parentRegionId, RegionScope scope, 
+	public List<Region> listChildRegions(Integer namespaceId, Long parentRegionId, RegionScope scope, 
 			RegionAdminStatus status, Tuple<String, SortOrder>... orderBy) {
 
-		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		//暂不向客户端开放排序字段指定 20150729
 		//SortField[] orderByFields = JooqHelper.toJooqFields(Tables.EH_REGIONS, orderBy);
@@ -217,10 +216,9 @@ public class RegionProviderImpl implements RegionProvider {
 	@Cacheable(value = "listDescendantRegion")
 	@SuppressWarnings({"unchecked", "rawtypes" })
 	@Override
-	public List<Region> listDescendantRegions(Long parentRegionId, RegionScope scope, 
+	public List<Region> listDescendantRegions(Integer namespaceId, Long parentRegionId, RegionScope scope, 
 			RegionAdminStatus status, Tuple<String, SortOrder>... orderBy) {
 
-		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
 		List<Region> result = new ArrayList<>();
 
 		String pathLike = "%";
