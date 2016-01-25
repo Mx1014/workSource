@@ -292,24 +292,14 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			if(userItems != null && !userItems.isEmpty())
 				allItems = overrideOrRevertItems(allItems, userItems);
 		}
-		//获取用户相关组织，如果用户加入组织，则获取相应的item（如某个item物业人员可见）
-		//目前这个版本不考虑管理员相关的item
-		//        ListUserRelatedOrganizationsCommand c = new ListUserRelatedOrganizationsCommand();
-		//        List<OrganizationSimpleDTO> dtos = organizationService.listUserRelateOrgs(c);
-		//        if(dtos != null && !dtos.isEmpty()){
-		//            List<String> tags = new  ArrayList<String>();
-		//            dtos.forEach(r -> tags.add(r.getOrganizationType()));
-		//            List<LaunchPadItem> adminItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.ALL.getCode(),0L,tags);
-		//            if(adminItems != null && !adminItems.isEmpty())
-		//                allItems.addAll(adminItems);
-		//        }
+		if(allItems!=null&&!allItems.isEmpty())
+			allItems = allItems.stream().filter(r -> r.getDisplayFlag()==ItemDisplayFlag.DISPLAY.getCode()).collect(Collectors.toList());
 		try{ 
 			List<LaunchPadItemDTO> distinctDto = new ArrayList<LaunchPadItemDTO>();
 			final String businessDetailUrl = configurationProvider.getValue(BUSINESS_DETAIL_URL, "");
 			final String prefixUrl = configurationProvider.getValue(PREFIX_URL, "");
 			final String imageUrl = configurationProvider.getValue(BUSINESS_IMAGE_URL, "");
 			allItems.forEach(r ->{
-						
 				LaunchPadItemDTO itemDTO = ConvertHelper.convert(r, LaunchPadItemDTO.class);
 				//是否可删除
 				if(r.getItemGroup().equals(ItemGroup.BIZS.getCode())&&!r.getItemLabel().equals("更多"))
@@ -542,21 +532,18 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			for(LaunchPadItem o : overrideItems){
 				//非覆盖
 				if(o.getApplyPolicy() == ApplyPolicy.DEFAULT.getCode() && !allItems.contains(o)){
-					allItems.add(o);
-				}
-				else if(o.getApplyPolicy()== ApplyPolicy.OVERRIDE.getCode() 
-						&&d.getItemName().equals(o.getItemName()) && d.getItemGroup().equals(o.getItemGroup())){
-					if(o.getDisplayFlag() == ItemDisplayFlag.DISPLAY.getCode() && ((d.getTargetType() == null && o.getTargetType() == null) || (d.getTargetType() != null && o.getTargetType() != null && d.getTargetType().trim().equals(o.getTargetType().trim()) && d.getTargetId().longValue() == o.getTargetId().longValue())))
+					if(o.getDisplayFlag()==ItemDisplayFlag.DISPLAY.getCode())
 						allItems.add(o);
-					//                    if(o.getDisplayFlag() == ItemDisplayFlag.DISPLAY.getCode())
-						//                        allItems.add(o);
+				}
+				else if(!allItems.contains(o)&&o.getApplyPolicy()== ApplyPolicy.OVERRIDE.getCode()&&d.getItemLabel().equals(o.getItemLabel()) && d.getItemGroup().equals(o.getItemGroup())){
+					if(o.getDisplayFlag() == ItemDisplayFlag.DISPLAY.getCode())
+						allItems.add(o);
 					flag = true;
 					break;
 				}
 			}
-			if(!flag)
+			if(!flag&&d.getDisplayFlag()==ItemDisplayFlag.DISPLAY.getCode())
 				allItems.add(d);
-			//reset flag
 			flag = false;
 		}
 		return allItems;
