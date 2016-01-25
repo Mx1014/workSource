@@ -18,6 +18,7 @@ import com.everhomes.enterprise.EnterpriseContactDetail;
 import com.everhomes.enterprise.EnterpriseContactEntry;
 import com.everhomes.enterprise.EnterpriseContactService;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.enterprise.CreateContactCommand;
 import com.everhomes.rest.enterprise.CreateContactEntryCommand;
@@ -33,7 +34,11 @@ import com.everhomes.util.ConvertHelper;
 @RequestMapping("/admin/contact")
 public class EnterpriseContactAdminController extends ControllerBase {
     @Autowired
-    EnterpriseContactService enterpriseContactService;
+    private EnterpriseContactService enterpriseContactService;
+    
+    
+    @Autowired
+    private OrganizationService organizationService;
     
     /**
      * <b>URL: /admin/contact/createContact</b>

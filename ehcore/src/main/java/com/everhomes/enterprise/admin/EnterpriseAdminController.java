@@ -16,7 +16,9 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.enterprise.Enterprise;
 import com.everhomes.enterprise.EnterpriseService;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.enterprise.ApproveContactCommand;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.enterprise.DeleteEnterpriseCommand;
 import com.everhomes.rest.enterprise.EnterpriseApproveCommand;
@@ -24,6 +26,7 @@ import com.everhomes.rest.enterprise.EnterpriseDTO;
 import com.everhomes.rest.enterprise.ImportEnterpriseDataCommand;
 import com.everhomes.rest.enterprise.ListEnterpriseByCommunityIdCommand;
 import com.everhomes.rest.enterprise.ListEnterpriseResponse;
+import com.everhomes.rest.enterprise.RejectContactCommand;
 import com.everhomes.rest.enterprise.UpdateContactorCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
 import com.everhomes.rest.user.UserServiceErrorCode;
@@ -40,7 +43,8 @@ public class EnterpriseAdminController extends ControllerBase {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseAdminController.class);
     @Autowired
-    EnterpriseService enterpriseService;
+    private EnterpriseService enterpriseService;
+
     
     /**
      * <b>URL: /admin/enterprise/approve</b>
@@ -72,29 +76,6 @@ public class EnterpriseAdminController extends ControllerBase {
     public RestResponse revoke(@Valid EnterpriseApproveCommand cmd) {
         this.enterpriseService.revoke(UserContext.current().getUser(), cmd.getEnterpriseId(), cmd.getCommunityId());
         RestResponse res = new RestResponse();
-        res.setErrorCode(ErrorCodes.SUCCESS);
-        res.setErrorDescription("OK");
-        return res;
-    }
-    
-    @RequestMapping("createEnterprise")
-    @RestReturn(value=EnterpriseDTO.class)
-    public RestResponse createEnterpriseCommand(@Valid CreateEnterpriseCommand cmd) {
-//        Enterprise entry = ConvertHelper.convert(cmd, Enterprise.class);
-        
-        EnterpriseDTO dto = this.enterpriseService.createEnterprise(cmd);
-        RestResponse res = new RestResponse(dto);
-        res.setErrorCode(ErrorCodes.SUCCESS);
-        res.setErrorDescription("OK");
-        return res;
-    }
-    
-    @RequestMapping("updateEnterprise")
-    @RestReturn(value=EnterpriseDTO.class)
-    public RestResponse updateEnterprise(@Valid UpdateEnterpriseCommand cmd) {
-        
-        EnterpriseDTO dto = this.enterpriseService.updateEnterprise(cmd);
-        RestResponse res = new RestResponse(dto);
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
         return res;

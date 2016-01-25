@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>nextPageOffset：下一页的页码（如果没有则为空）</li>
- * <li>members：政府机构信息，参考{@link com.everhomes.rest.organization.OrganizationDTO}</li>
+ * <li>dtos：政府机构信息，参考{@link com.everhomes.rest.organization.OrganizationDTO}</li>
  * </ul>
  */
 public class ListOrganizationsCommandResponse {
@@ -17,7 +17,7 @@ public class ListOrganizationsCommandResponse {
 	private Integer nextPageOffset;
 	
 	@ItemType(OrganizationDTO.class)
-    private List<OrganizationDTO> members;
+    private List<OrganizationDTO> dtos;
 	public ListOrganizationsCommandResponse() {
     }
 	
@@ -29,12 +29,14 @@ public class ListOrganizationsCommandResponse {
 		this.nextPageOffset = nextPageOffset;
 	}
 
-	public List<OrganizationDTO> getMembers() {
-		return members;
+	
+
+	public List<OrganizationDTO> getDtos() {
+		return dtos;
 	}
 
-	public void setMembers(List<OrganizationDTO> members) {
-		this.members = members;
+	public void setDtos(List<OrganizationDTO> dtos) {
+		this.dtos = dtos;
 	}
 
 	@Override

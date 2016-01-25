@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.forum.AttachmentDescriptor;
+import com.everhomes.rest.organization.OrganizationAddressDTO;
 
 /**
  * <ul>
@@ -36,29 +37,17 @@ public class UpdateEnterpriseCommand {
     private String contactsPhone;
     private String contactor;
     private String entries;
-    private String enterpriseAddress;
-    private String enterpriseCheckinDate;
+    private String address;
+    private String checkinDate;
     private String postUri;
     private Integer namespaceId;
 	
-	@ItemType(EnterpriseAddressDTO.class)
-	private List<EnterpriseAddressDTO> addressDTOs;
+	@ItemType(OrganizationAddressDTO.class)
+	private List<OrganizationAddressDTO> addressDTOs;
     
     @ItemType(AttachmentDescriptor.class)
     private List<AttachmentDescriptor> attachments;
     
-    public String getEnterpriseCheckinDate() {
-		return enterpriseCheckinDate;
-	}
-	public void setEnterpriseCheckinDate(String enterpriseCheckinDate) {
-		this.enterpriseCheckinDate = enterpriseCheckinDate;
-	}
-	public String getEnterpriseAddress() {
-		return enterpriseAddress;
-	}
-	public void setEnterpriseAddress(String enterpriseAddress) {
-		this.enterpriseAddress = enterpriseAddress;
-	}
 	public Long getMemberCount() {
 		return memberCount;
 	}
@@ -125,13 +114,6 @@ public class UpdateEnterpriseCommand {
     public void setDescription(java.lang.String description) {
         this.description = description;
     }
-	
-	public List<EnterpriseAddressDTO> getAddressDTOs() {
-		return addressDTOs;
-	}
-	public void setAddressDTOs(List<EnterpriseAddressDTO> addressDTOs) {
-		this.addressDTOs = addressDTOs;
-	}
 	public String getPostUri() {
 		return postUri;
 	}
@@ -143,6 +125,24 @@ public class UpdateEnterpriseCommand {
 	}
 	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
+	}
+	public String getAddress() {
+		return address;
+	}
+	public void setAddress(String address) {
+		this.address = address;
+	}
+	public String getCheckinDate() {
+		return checkinDate;
+	}
+	public void setCheckinDate(String checkinDate) {
+		this.checkinDate = checkinDate;
+	}
+	public List<OrganizationAddressDTO> getAddressDTOs() {
+		return addressDTOs;
+	}
+	public void setAddressDTOs(List<OrganizationAddressDTO> addressDTOs) {
+		this.addressDTOs = addressDTOs;
 	}
    
 }

@@ -31,6 +31,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.Organization;
 import com.everhomes.rest.enterprise.EnterpriseAddressStatus;
 import com.everhomes.rest.enterprise.EnterpriseCommunityMapStatus;
 import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
@@ -41,6 +42,7 @@ import com.everhomes.server.schema.tables.daos.EhEnterpriseAddressesDao;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseCommunityMapDao;
 import com.everhomes.server.schema.tables.daos.EhEnterpriseContactsDao;
+import com.everhomes.server.schema.tables.daos.EhEnterpriseDetailsDao;
 import com.everhomes.server.schema.tables.daos.EhGroupsDao;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseAddresses;
@@ -48,12 +50,15 @@ import com.everhomes.server.schema.tables.pojos.EhEnterpriseAttachments;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseCommunityMap;
 import com.everhomes.server.schema.tables.pojos.EhForumPosts;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
+import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.server.schema.tables.records.EhEnterpriseAddressesRecord;
 import com.everhomes.server.schema.tables.records.EhEnterpriseAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhEnterpriseCommunityMapRecord;
+import com.everhomes.server.schema.tables.records.EhEnterpriseDetailsRecord;
 import com.everhomes.server.schema.tables.records.EhGroupsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.techpark.expansion.EnterpriseDetail;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
@@ -83,8 +88,8 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
     public void createEnterprise(Enterprise enterprise) {
         
         //TODO for forum
-        enterprise.setDiscriminator(GroupDiscriminator.ENTERPRISE.getCode());
-        this.groupProvider.createGroup(enterprise);
+//        enterprise.setDiscriminator(GroupDiscriminator.ENTERPRISE.getCode());
+//        this.groupProvider.createGroup(enterprise);
     }
     
     @Override
@@ -96,7 +101,7 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
     
     @Override
     public void updateEnterprise(Enterprise enterprise) {
-        this.groupProvider.updateGroup(enterprise);
+//        this.groupProvider.updateGroup(enterprise);
     }
     
     @Override
@@ -386,7 +391,7 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
 
 		assert(attachment.getEnterpriseId() != null);
         
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, attachment.getEnterpriseId()));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, attachment.getEnterpriseId()));
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseAttachments.class));
         attachment.setId(id);
         
@@ -401,7 +406,7 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
 
 		assert(enterpriseAddr.getEnterpriseId() != null);
         
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhGroups.class, enterpriseAddr.getEnterpriseId()));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, enterpriseAddr.getEnterpriseId()));
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnterpriseAddresses.class));
         enterpriseAddr.setId(id);
         
@@ -562,12 +567,30 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
 	@Override
 	public void deleteEnterpriseAttachmentsByEnterpriseId(long enterpriseId) {
 
-		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class, enterpriseId), null, 
+		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizations.class, enterpriseId), null, 
 				(DSLContext context, Object reducingContext) -> {
 					SelectQuery<EhEnterpriseAttachmentsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_ATTACHMENTS);
 					query.addConditions(Tables.EH_ENTERPRISE_ATTACHMENTS.ENTERPRISE_ID.eq(enterpriseId));
 		            query.fetch().map((EhEnterpriseAttachmentsRecord record) -> {
 		            	deleteEnterpriseAttachmentsById(record.getId());
+		            	return null;
+					});
+
+					return true;
+				});
+
+		
+	}
+	
+	@Override
+	public void deleteEnterpriseAddressByEnterpriseId(long enterpriseId) {
+		
+		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizations.class, enterpriseId), null, 
+				(DSLContext context, Object reducingContext) -> {
+					SelectQuery<EhEnterpriseAddressesRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_ADDRESSES);
+					query.addConditions(Tables.EH_ENTERPRISE_ADDRESSES.ENTERPRISE_ID.eq(enterpriseId));
+		            query.fetch().map((EhEnterpriseAddressesRecord record) -> {
+		            	this.deleteEnterpriseAttachmentsByEnterpriseId(enterpriseId);
 		            	return null;
 					});
 
@@ -610,6 +633,13 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
         EhEnterpriseAddressesDao dao = new EhEnterpriseAddressesDao(context.configuration());
         dao.delete(enterpriseAddr); 		
 	}
+	
+	@Override
+	public void deleteEnterpriseAddressById(Long id) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, id));
+        EhEnterpriseAddressesDao dao = new EhEnterpriseAddressesDao(context.configuration());
+        dao.deleteById(id);		
+	}
 
 	@Override
 	public void updateEnterpriseAddress(EnterpriseAddress ea) {
@@ -638,5 +668,36 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
         
         return result[0];
 	}
+
+	@Override
+	public void createEnterpriseDetail(EnterpriseDetail enterpriseDetail) {
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EnterpriseDetail.class));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, enterpriseDetail.getEnterpriseId()));
+		EhEnterpriseDetailsDao dao = new EhEnterpriseDetailsDao(context.configuration());
+		enterpriseDetail.setId(id);
+		dao.insert(enterpriseDetail);
+	}
 	
+	@Override
+	public void updateEnterpriseDetail(EnterpriseDetail enterpriseDetail) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, enterpriseDetail.getEnterpriseId()));
+		EhEnterpriseDetailsDao dao = new EhEnterpriseDetailsDao(context.configuration());
+		dao.update(enterpriseDetail);
+	}
+	
+	@Override
+	public EnterpriseDetail findEnterpriseDetailByEnterpriseId(Long enterpriseId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhOrganizations.class));
+		SelectQuery<EhEnterpriseDetailsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_DETAILS);
+		query.addConditions(Tables.EH_ENTERPRISE_DETAILS.ENTERPRISE_ID.eq(enterpriseId));
+		List<EnterpriseDetail> enterpriseDetails = new ArrayList<EnterpriseDetail>();
+		query.fetch().map(r ->{
+			enterpriseDetails.add(ConvertHelper.convert(r,EnterpriseDetail.class));
+   			return null;
+   		});
+		if(0 == enterpriseDetails.size()){
+			return null;
+		}
+		return enterpriseDetails.get(0);
+	}
 }

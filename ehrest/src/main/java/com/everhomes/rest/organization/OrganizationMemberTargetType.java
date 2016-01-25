@@ -5,10 +5,11 @@ package com.everhomes.rest.organization;
  * <ul>
  * <li>USER: 已注册成员</li>
  * <li>UNTRACK: 未注册成员</li>
+ * <li>CONTACT: 来自通讯录</li>
  * </ul>
  */
 public enum OrganizationMemberTargetType {
-    USER("USER"), UNTRACK("UNTRACK");
+    USER("USER"), UNTRACK("UNTRACK"), CONTACT("CONTACT");
     
     private String code;
     private OrganizationMemberTargetType(String code) {
@@ -32,6 +33,9 @@ public enum OrganizationMemberTargetType {
         	return UNTRACK;
         }
 
+        if(code.equalsIgnoreCase(CONTACT.getCode())) {
+        	return CONTACT;
+        }
         
         return null;
     }

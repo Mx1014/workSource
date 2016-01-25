@@ -12,11 +12,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.enterprise.AddContactCommand;
 import com.everhomes.rest.enterprise.AddContactGroupCommand;
@@ -40,6 +42,14 @@ import com.everhomes.rest.enterprise.ListEnterpriseContactResponse;
 import com.everhomes.rest.enterprise.RejectContactCommand;
 import com.everhomes.rest.enterprise.UpdateContactCommand;
 import com.everhomes.rest.enterprise.importContactsCommand;
+import com.everhomes.rest.organization.CreateOrganizationMemberCommand;
+import com.everhomes.rest.organization.ListOrganizationContactCommand;
+import com.everhomes.rest.organization.ListOrganizationMemberCommand;
+import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.organization.UpdateOrganizationMemberCommand;
+import com.everhomes.rest.organization.UpdatePersonnelsToDepartment;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 
 /**
@@ -59,7 +69,10 @@ import com.everhomes.util.ConvertHelper;
 public class EnterpriseContactController extends ControllerBase {
 
     @Autowired
-    EnterpriseContactService enterpriseContactService;
+    private EnterpriseContactService enterpriseContactService;
+    
+    @Autowired
+    private OrganizationService organizationService;
     
     /**
      * <b>URL: /contact/createContactByPhoneCommand</b>
@@ -138,19 +151,22 @@ public class EnterpriseContactController extends ControllerBase {
      * <b>URL: /contact/createContactByUserIdCommand</b>
      * <p>注册流程，绑定已有用户到企业：根据已有用户ID创建企业用户，从而成为此企业的一个成员</p>
      * 申请加入企业
-     * @return {@link EnterpriseContactDTO}
+     * @return {@link OrganizationMemberDTO}
      */
     @RequestMapping("createContactByUserIdCommand")
     @RestReturn(value=EnterpriseContactDTO.class)
     public RestResponse createContactByUserIdCommand(@Valid CreateContactByUserIdCommand cmd) {
-        EnterpriseContactDTO contact = this.enterpriseContactService.applyForContact(cmd);
-        
+//        EnterpriseContactDTO contact = this.enterpriseContactService.applyForContact(cmd);
+        CreateOrganizationMemberCommand command = new CreateOrganizationMemberCommand();
+        command.setOrganizationId(cmd.getEnterpriseId());
+        command.setContactName(cmd.getName());
+        OrganizationMemberDTO dto = organizationService.applyForEnterpriseContact(command);
         RestResponse res = new RestResponse();
-        if (null == contact) {
+        if (null == dto) {
             //TODO for error code
             res.setErrorCode(ErrorCodes.ERROR_GENERAL_EXCEPTION); 
         } else {
-            res.setResponseObject(contact);
+            res.setResponseObject(dto);
         }
         
         res.setErrorCode(ErrorCodes.SUCCESS);
@@ -329,7 +345,8 @@ public class EnterpriseContactController extends ControllerBase {
     @RequestMapping("approveContact")
     @RestReturn(value=String.class)
     public RestResponse approveContactCommand(@Valid ApproveContactCommand cmd) {
-    	this.enterpriseContactService.approveContact(cmd);
+//    	this.enterpriseContactService.approveContact(cmd);
+    	organizationService.approveForEnterpriseContact(cmd);
     	 RestResponse res = new RestResponse();
          res.setErrorCode(ErrorCodes.SUCCESS);
          res.setErrorDescription("OK");
@@ -345,7 +362,8 @@ public class EnterpriseContactController extends ControllerBase {
     @RequestMapping("rejectContact")
     @RestReturn(value=String.class)
     public RestResponse rejectContact(@Valid RejectContactCommand cmd) {
-    	this.enterpriseContactService.rejectContact(cmd);
+//    	this.enterpriseContactService.rejectContact(cmd);
+    	organizationService.rejectForEnterpriseContact(cmd);
     	 RestResponse res = new RestResponse();
          res.setErrorCode(ErrorCodes.SUCCESS);
          res.setErrorDescription("OK");
@@ -361,10 +379,14 @@ public class EnterpriseContactController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse leave(@Valid LeaveEnterpriseCommand cmd) {
     
-        this.enterpriseContactService.leaveEnterprise(cmd);
+//        this.enterpriseContactService.leaveEnterprise(cmd);
+        organizationService.leaveForEnterpriseContact(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
+    
+ 
+
 }

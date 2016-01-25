@@ -1,8 +1,12 @@
 // @formatter:off
 package com.everhomes.rest.organization;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -35,6 +39,18 @@ public class OrganizationMemberDTO {
 	private String contactToken;
 	private String contactDescription;
 	private Byte   status;
+	
+	@ItemType(AclRoleAssignmentsDTO.class)
+	private List<AclRoleAssignmentsDTO> aclRoles;
+	
+	private Long groupId;
+	
+	private String groupName;
+	
+	private java.lang.String   nickName;
+	private java.lang.String   avatar;
+	
+	private java.lang.Long creatorUid;
 	
 	public OrganizationMemberDTO() {
     }
@@ -169,6 +185,81 @@ public class OrganizationMemberDTO {
 
 	public void setOrganizationName(String organizationName) {
 		this.organizationName = organizationName;
+	}
+
+
+
+
+
+
+	public Long getGroupId() {
+		return groupId;
+	}
+
+
+
+	public void setGroupId(Long groupId) {
+		this.groupId = groupId;
+	}
+
+
+
+	public String getGroupName() {
+		return groupName;
+	}
+
+
+
+	public void setGroupName(String groupName) {
+		this.groupName = groupName;
+	}
+
+
+
+	public List<AclRoleAssignmentsDTO> getAclRoles() {
+		return aclRoles;
+	}
+
+
+
+	public void setAclRoles(List<AclRoleAssignmentsDTO> aclRoles) {
+		this.aclRoles = aclRoles;
+	}
+
+
+
+	public java.lang.String getNickName() {
+		return nickName;
+	}
+
+
+
+	public void setNickName(java.lang.String nickName) {
+		this.nickName = nickName;
+	}
+
+
+
+	public java.lang.String getAvatar() {
+		return avatar;
+	}
+
+
+
+	public void setAvatar(java.lang.String avatar) {
+		this.avatar = avatar;
+	}
+
+
+
+	public java.lang.Long getCreatorUid() {
+		return creatorUid;
+	}
+
+
+
+	public void setCreatorUid(java.lang.Long creatorUid) {
+		this.creatorUid = creatorUid;
 	}
 
 

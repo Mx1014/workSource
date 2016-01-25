@@ -1,0 +1,46 @@
+// @formatter:off
+package com.everhomes.organization;
+
+import java.util.List;
+
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.SelectQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
+import com.everhomes.rest.organization.PrivateFlag;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.records.EhOrganizationRoleMapRecord;
+import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.util.ConvertHelper;
+@Component
+public class OrganizationRoleMapProviderImpl implements OrganizationRoleMapProvider {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(OrganizationRoleMapProviderImpl.class);
+
+	@Autowired
+	private DbProvider dbProvider;
+	
+	@Autowired
+    private ShardingProvider shardingProvider;
+
+	@Override
+	public List<OrganizationRoleMap> listOrganizationRoleMaps(Long ownerId, EntityType ownerType, PrivateFlag privateFlag) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationRoleMapRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_ROLE_MAP);
+		Condition cond = Tables.EH_ORGANIZATION_ROLE_MAP.OWNER_ID.eq(ownerId);
+		cond = cond.and(Tables.EH_ORGANIZATION_ROLE_MAP.OWNER_TYPE.eq(ownerType.getCode()));
+		cond = cond.or(Tables.EH_ORGANIZATION_ROLE_MAP.PRIVATE_FLAG.eq(privateFlag.getCode()));
+		query.addConditions(cond);
+		return query.fetch().map((r) -> {
+			return ConvertHelper.convert(r, OrganizationRoleMap.class);
+		});
+	}
+	
+}

@@ -6,11 +6,15 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>namespaceId：命名空间id</li>
+ * <li>organizationId：机构id</li>
  * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
  * <li>pageSize: 每页的数量</li>
  * </ul>
  */
 public class ListCommunityByNamespaceCommand {
+	
+	private Long organizationId;
+	
 	private Integer namespaceId;
     
     private Long pageAnchor;
@@ -27,8 +31,18 @@ public class ListCommunityByNamespaceCommand {
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
     }
+    
+    
 
-    public Long getPageAnchor() {
+    public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
+
+	public Long getPageAnchor() {
         return pageAnchor;
     }
 

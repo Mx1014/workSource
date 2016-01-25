@@ -14,6 +14,8 @@ import com.everhomes.util.StringHelper;
  * <li>contactName：成员名称</li>
  * <li>contactType：联系类型：{@link com.everhomes.rest.user.IdentifierType}</li>
  * <li>contactToken：联系信息</li>
+ * <li>gender：性别</li>
+ * <li>employeeNo：工号</li>
  * <li>contactDescription：描述</li>
  * <li>必填：organizationId，targetType。注册用户：targetId，memberGroup。未注册：memberGroup，contactType，contactToken，contactName</li>
  * </ul>
@@ -30,6 +32,10 @@ public class CreateOrganizationMemberCommand {
 	private Byte   contactType;
 	private String contactToken;
 	private String contactDescription;
+	
+	private Long groupId;
+	private Integer gender;
+	private Long employeeNo;
 	
 	public CreateOrganizationMemberCommand() {
     }
@@ -88,6 +94,31 @@ public class CreateOrganizationMemberCommand {
 	}
 	
 	
+	public Long getGroupId() {
+		return groupId;
+	}
+
+	public void setGroupId(Long groupId) {
+		this.groupId = groupId;
+	}
+	
+
+	public Integer getGender() {
+		return gender;
+	}
+
+	public void setGender(Integer gender) {
+		this.gender = gender;
+	}
+
+	public Long getEmployeeNo() {
+		return employeeNo;
+	}
+
+	public void setEmployeeNo(Long employeeNo) {
+		this.employeeNo = employeeNo;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

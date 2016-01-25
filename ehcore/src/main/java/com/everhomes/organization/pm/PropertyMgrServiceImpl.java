@@ -340,7 +340,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		communityPmMember.setOrganizationId(orgId);
 		communityPmMember.setContactName(user.getNickName());
 		communityPmMember.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
-		communityPmMember.setStatus(OrganizationMemberStatus.CONFIRMING.getCode());
+		communityPmMember.setStatus(OrganizationMemberStatus.WAITING_FOR_APPROVAL.getCode());
 		communityPmMember.setTargetType(OrganizationMemberTargetType.USER.getCode());
 		communityPmMember.setTargetId(user.getId());
 		communityPmMember.setContactDescription(description);

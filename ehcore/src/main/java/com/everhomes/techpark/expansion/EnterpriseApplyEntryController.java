@@ -1,5 +1,8 @@
 package com.everhomes.techpark.expansion;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -8,13 +11,18 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.organization.ListEnterprisesCommand;
+import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
+import com.everhomes.rest.organization.OrganizationDetailDTO;
 import com.everhomes.rest.techpark.expansion.BuildingForRentDTO;
 import com.everhomes.rest.techpark.expansion.CreateLeasePromotionCommand;
 import com.everhomes.rest.techpark.expansion.DeleteApplyEntryCommand;
 import com.everhomes.rest.techpark.expansion.DeleteLeasePromotionCommand;
 import com.everhomes.rest.techpark.expansion.EnterpriseApplyEntryCommand;
 import com.everhomes.rest.techpark.expansion.EnterpriseApplyEntryResponse;
+import com.everhomes.rest.techpark.expansion.EnterpriseDetailDTO;
 import com.everhomes.rest.techpark.expansion.FindLeasePromotionByIdCommand;
 import com.everhomes.rest.techpark.expansion.GetEnterpriseDetailByIdCommand;
 import com.everhomes.rest.techpark.expansion.GetEnterpriseDetailByIdResponse;
@@ -27,6 +35,7 @@ import com.everhomes.rest.techpark.expansion.ListEnterpriseDetailResponse;
 import com.everhomes.rest.techpark.expansion.UpdateApplyEntryStatusCommand;
 import com.everhomes.rest.techpark.expansion.UpdateLeasePromotionCommand;
 import com.everhomes.rest.techpark.expansion.UpdateLeasePromotionStatusCommand;
+import com.everhomes.util.ConvertHelper;
 
 @RestDoc(value = "entry controller", site = "ehcore")
 @RestController
@@ -36,6 +45,9 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	@Autowired
 	private EnterpriseApplyEntryService enterpriseApplyEntryService;
 	
+	@Autowired
+	private OrganizationService organizationService;
+	
 	/**
 	 * <b>URL: /techpark/entry/listEnterpriseDetails
 	 * <p>企业列表
@@ -43,8 +55,21 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	@RequestMapping("listEnterpriseDetails")
 	@RestReturn(value=ListEnterpriseDetailResponse.class)
 	public RestResponse listEnterpriseDetails(ListEnterpriseDetailCommand cmd){
-		ListEnterpriseDetailResponse res = enterpriseApplyEntryService.listEnterpriseDetails(cmd);
+		ListEnterprisesCommand command = ConvertHelper.convert(cmd, ListEnterprisesCommand.class);
+		ListEnterprisesCommandResponse r = organizationService.listEnterprises(command);
+		List<OrganizationDetailDTO> dtos = r.getDtos();
+		
+		ListEnterpriseDetailResponse res = new ListEnterpriseDetailResponse();
+		res.setDetails(dtos.stream().map((c) ->{
+			EnterpriseDetailDTO dto = ConvertHelper.convert(c, EnterpriseDetailDTO.class);
+			dto.setEnterpriseId(c.getOrganizationId());
+			dto.setEnterpriseName(c.getAccountName());
+			dto.setContactPhone(c.getAccountPhone());
+			return dto;
+		}).collect(Collectors.toList()));
+		res.setNextPageAnchor(r.getNextPageAnchor());
 		RestResponse response = new RestResponse(res);
+		
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

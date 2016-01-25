@@ -15,6 +15,10 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
+import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
+import com.everhomes.rest.enterprise.SearchEnterpriseCommand;
+import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
 import com.everhomes.rest.forum.CancelLikeTopicCommand;
 import com.everhomes.rest.forum.GetTopicCommand;
 import com.everhomes.rest.forum.LikeTopicCommand;
@@ -25,6 +29,7 @@ import com.everhomes.rest.forum.NewCommentCommand;
 import com.everhomes.rest.forum.NewTopicCommand;
 import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
+import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
 import com.everhomes.rest.organization.ApplyOrganizationMemberCommand;
 import com.everhomes.rest.organization.AssginOrgTopicCommand;
 import com.everhomes.rest.organization.CreateOrganizationCommunityCommand;
@@ -33,6 +38,9 @@ import com.everhomes.rest.organization.CreateOrganizationMemberCommand;
 import com.everhomes.rest.organization.DeleteOrganizationCommunityCommand;
 import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
 import com.everhomes.rest.organization.GetOrgDetailCommand;
+import com.everhomes.rest.organization.GetUserResourcePrivilege;
+import com.everhomes.rest.organization.ListEnterprisesCommand;
+import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
 import com.everhomes.rest.organization.ListOrganizationCommunityCommand;
 import com.everhomes.rest.organization.ListOrganizationCommunityCommandResponse;
 import com.everhomes.rest.organization.ListOrganizationCommunityV2CommandResponse;
@@ -45,7 +53,9 @@ import com.everhomes.rest.organization.ListTopicsByTypeCommandResponse;
 import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
 import com.everhomes.rest.organization.ListUserTaskCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationDetailDTO;
 import com.everhomes.rest.organization.OrganizationMemberCommand;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.OrganizationSimpleDTO;
 import com.everhomes.rest.organization.RejectOrganizationCommand;
 import com.everhomes.rest.organization.SearchTopicsByTypeCommand;
@@ -54,11 +64,13 @@ import com.everhomes.rest.organization.SendOrganizationMessageCommand;
 import com.everhomes.rest.organization.SetCurrentOrganizationCommand;
 import com.everhomes.rest.organization.SetOrgTopicStatusCommand;
 import com.everhomes.rest.organization.UpdateOrganizationContactCommand;
+import com.everhomes.rest.organization.UpdatePersonnelsToDepartment;
 import com.everhomes.rest.organization.UpdateTopicPrivacyCommand;
 import com.everhomes.rest.organization.UserExitOrganizationCommand;
 import com.everhomes.rest.organization.UserJoinOrganizationCommand;
 import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
+import com.everhomes.user.UserContext;
 
 @RestController
 @RequestMapping("/org")
@@ -705,5 +717,80 @@ public class OrganizationController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+    
+    
+    
+    
+    /**
+     * <b>URL: /org/searchEnterprise</b>
+     * <p>搜索企业</p>
+     */
+    @RequestMapping("searchEnterprise")
+    @RestReturn(value=OrganizationDetailDTO.class, collection=true)
+    public RestResponse searchEnterprise(@Valid SearchEnterpriseCommand cmd) {
+    	ListEnterprisesCommandResponse res = organizationService.searchEnterprise(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /org/listEnterprises</b>
+     * <p>企业列表</p>
+     */
+    @RequestMapping("listEnterprises")
+    @RestReturn(value=OrganizationDetailDTO.class, collection=true)
+    public RestResponse listEnterprises(@Valid ListEnterprisesCommand cmd) {
+    	ListEnterprisesCommandResponse  res= organizationService.listEnterprises(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /org/applyForEnterpriseContact</b>
+     * <p>申请加入企业</p>
+     */
+    @RequestMapping("applyForEnterpriseContact")
+    @RestReturn(value=OrganizationMemberDTO.class)
+    public RestResponse applyForEnterpriseContact(@Valid CreateOrganizationMemberCommand cmd) {
+    	OrganizationMemberDTO res = organizationService.applyForEnterpriseContact(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /org/leaveForEnterpriseContact</b>
+     * <p>退出指定企业</p>
+     */
+    @RequestMapping("leaveForEnterpriseContact")
+    @RestReturn(value=String.class)
+    public RestResponse leaveForEnterpriseContact(@Valid LeaveEnterpriseCommand cmd) {
+    
+        this.organizationService.leaveForEnterpriseContact(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /org/listCommunitiesByOrganizationId</b>
+     * <p>机构官署的小区</p>
+     */
+    @RequestMapping("listCommunitiesByOrganizationId")
+    @RestReturn(value=String.class)
+    public RestResponse listCommunitiesByOrganizationId(@Valid ListCommunityByNamespaceCommand cmd) {
+    
+        RestResponse response = new RestResponse(this.organizationService.listCommunityByOrganizationId(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
     
 }

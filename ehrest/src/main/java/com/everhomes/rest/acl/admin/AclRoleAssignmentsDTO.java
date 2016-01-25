@@ -15,6 +15,8 @@ public class AclRoleAssignmentsDTO {
     private Long creatorUid;
     private Timestamp createTime;
     
+    private String roleName;
+    
     public Long getId() {
         return id;
     }
@@ -70,7 +72,14 @@ public class AclRoleAssignmentsDTO {
         this.createTime = createTime;
     }
     
-    @Override
+    
+    public String getRoleName() {
+		return roleName;
+	}
+	public void setRoleName(String roleName) {
+		this.roleName = roleName;
+	}
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

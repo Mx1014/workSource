@@ -1,6 +1,9 @@
 // @formatter:off
 package com.everhomes.rest.organization;
 
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -25,6 +28,7 @@ public class OrganizationDTO {
 	
 	private Long    id;
     private Long    parentId;
+    private String parentName;
 	private String  name;
 	private String  path;
 	private Integer level;
@@ -34,11 +38,17 @@ public class OrganizationDTO {
 	private Byte memberStatus;
 	private String description;
 	
+	private String groupType;
+	
 	//expand 
 	private Long communityId;
 	private String communityName;
 	
+	private List<OrganizationDTO> childrens;
 	
+	private Long roleId;
+	
+	private String roleName;
 	
 	public Long getCommunityId() {
 		return communityId;
@@ -81,6 +91,16 @@ public class OrganizationDTO {
 
 	public void setParentId(java.lang.Long parentId) {
 		this.parentId = parentId;
+	}
+
+
+	public String getParentName() {
+		return parentName;
+	}
+
+
+	public void setParentName(String parentName) {
+		this.parentName = parentName;
 	}
 
 
@@ -158,6 +178,47 @@ public class OrganizationDTO {
 
 	public void setMemberStatus(Byte memberStatus) {
 		this.memberStatus = memberStatus;
+	}
+
+
+	public String getGroupType() {
+		return groupType;
+	}
+
+
+	public void setGroupType(String groupType) {
+		this.groupType = groupType;
+	}
+
+	
+
+	public List<OrganizationDTO> getChildrens() {
+		return childrens;
+	}
+
+
+	public void setChildrens(List<OrganizationDTO> childrens) {
+		this.childrens = childrens;
+	}
+
+
+	public Long getRoleId() {
+		return roleId;
+	}
+
+
+	public void setRoleId(Long roleId) {
+		this.roleId = roleId;
+	}
+
+
+	public String getRoleName() {
+		return roleName;
+	}
+
+
+	public void setRoleName(String roleName) {
+		this.roleName = roleName;
 	}
 
 
