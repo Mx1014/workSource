@@ -312,7 +312,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 						
 				LaunchPadItemDTO itemDTO = ConvertHelper.convert(r, LaunchPadItemDTO.class);
 				//是否可删除
-				if(r.getItemGroup().equals(ItemGroup.BIZS.getCode()))
+				if(r.getItemGroup().equals(ItemGroup.BIZS.getCode())&&!r.getItemLabel().equals("更多"))
 					itemDTO.setDeleteFlag(DeleteFlagType.YES.getCode());
 				else
 					itemDTO.setDeleteFlag(DeleteFlagType.NO.getCode());
@@ -973,11 +973,12 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 	private void deleteLaunchPadItem(LaunchPadItem item,Long userId,Integer namespaceId) {
 		if(item.getScopeCode() == ScopeType.USER.getCode()){
-			if(isExistsUnUserItem(item)){
+			if(isExistsUnUserItem(item,namespaceId)){
 				item.setDisplayFlag(ItemDisplayFlag.HIDE.getCode());
 				item.setScopeId(userId);
 				item.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
 				item.setScopeCode(ScopeType.USER.getCode());
+				item.setNamespaceId(namespaceId==null?0:namespaceId);
 				this.launchPadProvider.updateLaunchPadItem(item);
 			}
 			else{
@@ -994,18 +995,18 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		}
 	}
 
-	private boolean isExistsUnUserItem(LaunchPadItem item) {
-		List<LaunchPadItem> result = this.getUnUserItems(item);
+	private boolean isExistsUnUserItem(LaunchPadItem item,Integer namespaceId) {
+		List<LaunchPadItem> result = this.getUnUserItems(item,namespaceId);
 		if(result != null && !result.isEmpty())
 			return true;
 		return false;
 	}
 
-	private List<LaunchPadItem> getUnUserItems(LaunchPadItem item) {
+	private List<LaunchPadItem> getUnUserItems(LaunchPadItem item,Integer namespaceId) {
 		List<LaunchPadItem> result = new ArrayList<LaunchPadItem>();
-		List<LaunchPadItem> countyItems = this.launchPadProvider.findLaunchPadItem(item.getItemGroup(),item.getItemName(), ScopeType.ALL.getCode(), 0);
-		List<LaunchPadItem> cityItems = this.launchPadProvider.findLaunchPadItem(item.getItemGroup(),item.getItemName(), ScopeType.CITY.getCode(), 0);
-		List<LaunchPadItem> cmmtyItems = this.launchPadProvider.findLaunchPadItem(item.getItemGroup(),item.getItemName(), ScopeType.COMMUNITY.getCode(), 0);
+		List<LaunchPadItem> countyItems = this.launchPadProvider.findLaunchPadItem(namespaceId,item.getItemGroup(),item.getItemName(), ScopeType.ALL.getCode(), 0);
+		List<LaunchPadItem> cityItems = this.launchPadProvider.findLaunchPadItem(namespaceId,item.getItemGroup(),item.getItemName(), ScopeType.CITY.getCode(), 0);
+		List<LaunchPadItem> cmmtyItems = this.launchPadProvider.findLaunchPadItem(namespaceId,item.getItemGroup(),item.getItemName(), ScopeType.COMMUNITY.getCode(), 0);
 		if(countyItems != null && !countyItems.isEmpty())
 			result.addAll(countyItems);
 		if(cityItems != null && !cityItems.isEmpty())
