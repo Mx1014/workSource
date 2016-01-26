@@ -91,3 +91,25 @@ CREATE TABLE `eh_organization_details` (
   `string_tag5` VARCHAR(128) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+#
+# 
+# Park activity rules parameter
+#
+DROP TABLE IF EXISTS `eh_preferential_rules`;
+CREATE TABLE `eh_preferential_rules` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `owner_type` VARCHAR(128) DEFAULT NULL COMMENT 'community',
+  `owner_id` BIGINT NOT NULL ,
+  `start_time` DATETIME COMMENT 'start time',
+  `end_time` DATETIME COMMENT 'end time',
+  `type` VARCHAR(256) DEFAULT NULL COMMENT 'PARKING',
+  `before_nember` BIGINT DEFAULT NULL,
+  `params_json` TEXT,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+
+
