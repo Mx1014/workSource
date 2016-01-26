@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationMembers extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord> {
 
-	private static final long serialVersionUID = 1798304389;
+	private static final long serialVersionUID = -704007018;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_organization_members</code>
@@ -77,11 +77,6 @@ public class EhOrganizationMembers extends org.jooq.impl.TableImpl<com.everhomes
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: inactive, 1: confirming, 2: active");
 
 	/**
-	 * The column <code>ehcore.eh_organization_members.group_id</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord, java.lang.Long> GROUP_ID = createField("group_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
-
-	/**
 	 * The column <code>ehcore.eh_organization_members.group_path</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord, java.lang.String> GROUP_PATH = createField("group_path", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
@@ -145,6 +140,11 @@ public class EhOrganizationMembers extends org.jooq.impl.TableImpl<com.everhomes
 	 * The column <code>ehcore.eh_organization_members.string_tag5</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord, java.lang.String> STRING_TAG5 = createField("string_tag5", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_organization_members.group_id</code>. refer to the organization id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord, java.lang.Long> GROUP_ID = createField("group_id", org.jooq.impl.SQLDataType.BIGINT.defaulted(true), this, "refer to the organization id");
 
 	/**
 	 * Create a <code>ehcore.eh_organization_members</code> table reference

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizations extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhOrganizationsRecord> {
 
-	private static final long serialVersionUID = -2001779820;
+	private static final long serialVersionUID = -1006790243;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_organizations</code>
@@ -95,6 +95,11 @@ public class EhOrganizations extends org.jooq.impl.TableImpl<com.everhomes.serve
 	 * The column <code>ehcore.eh_organizations.directly_enterprise_id</code>. directly under the company
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationsRecord, java.lang.Long> DIRECTLY_ENTERPRISE_ID = createField("directly_enterprise_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "directly under the company");
+
+	/**
+	 * The column <code>ehcore.eh_organizations.namespace_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationsRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_organizations.integral_tag1</code>.

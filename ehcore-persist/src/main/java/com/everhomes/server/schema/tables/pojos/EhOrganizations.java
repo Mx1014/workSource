@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizations implements java.io.Serializable {
 
-	private static final long serialVersionUID = -2023301843;
+	private static final long serialVersionUID = -732358473;
 
 	private java.lang.Long     id;
 	private java.lang.Long     parentId;
@@ -27,6 +27,7 @@ public class EhOrganizations implements java.io.Serializable {
 	private java.sql.Timestamp createTime;
 	private java.sql.Timestamp updateTime;
 	private java.lang.Long     directlyEnterpriseId;
+	private java.lang.Integer  namespaceId;
 	private java.lang.Long     integralTag1;
 	private java.lang.Long     integralTag2;
 	private java.lang.Long     integralTag3;
@@ -55,6 +56,7 @@ public class EhOrganizations implements java.io.Serializable {
 		java.sql.Timestamp createTime,
 		java.sql.Timestamp updateTime,
 		java.lang.Long     directlyEnterpriseId,
+		java.lang.Integer  namespaceId,
 		java.lang.Long     integralTag1,
 		java.lang.Long     integralTag2,
 		java.lang.Long     integralTag3,
@@ -80,6 +82,7 @@ public class EhOrganizations implements java.io.Serializable {
 		this.createTime = createTime;
 		this.updateTime = updateTime;
 		this.directlyEnterpriseId = directlyEnterpriseId;
+		this.namespaceId = namespaceId;
 		this.integralTag1 = integralTag1;
 		this.integralTag2 = integralTag2;
 		this.integralTag3 = integralTag3;
@@ -202,6 +205,14 @@ public class EhOrganizations implements java.io.Serializable {
 
 	public void setDirectlyEnterpriseId(java.lang.Long directlyEnterpriseId) {
 		this.directlyEnterpriseId = directlyEnterpriseId;
+	}
+
+	public java.lang.Integer getNamespaceId() {
+		return this.namespaceId;
+	}
+
+	public void setNamespaceId(java.lang.Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	public java.lang.Long getIntegralTag1() {
