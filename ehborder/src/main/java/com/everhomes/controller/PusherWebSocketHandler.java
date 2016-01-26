@@ -65,7 +65,7 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
     
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        LOGGER.info("Connection establed. session: " + session.getId());
+        LOGGER.info("Connection establed, session=" + session.getId());
         
         //Add to pendingSession, waiting for handshake
         this.pendingSession.put(session, new DeviceInfo(System.currentTimeMillis()));
@@ -91,7 +91,7 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
     
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus arg1) throws Exception {
-        LOGGER.info("Connection closed. session: " + session.getId());
+        LOGGER.info("Connection closed, session=" + session.getId());
         
         removeSession(session);
             
@@ -99,7 +99,7 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void handleTransportError(WebSocketSession session, Throwable arg1) throws Exception {
-        LOGGER.info("Connection error. session: " + session.getId());
+        LOGGER.info("Connection error, session=" + session.getId());
         removeSession(session);
     }
     
@@ -125,9 +125,9 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
                     WebSocketSession session = pair.getKey();
                     try {
                         session.close();
-                        LOGGER.info("timeout in pendingSession, close session: " + session.getId());
+                        LOGGER.info("timeout in pendingSession, session=" + session.getId());
                     } catch (IOException e) {
-                        LOGGER.info("close session error: " + session.getId());
+                        LOGGER.info("close session error, session=" + session.getId(), e);
                     }       
                 }
              
@@ -162,18 +162,29 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
         //Outside synchronized
         invalids.forEach((DeviceInfo dev) -> {
             if(!dev.getDeviceId().isEmpty()) {
+                
                 WebSocketSession session = device2sessionMap.remove(dev.getDeviceId());
                 if (session != null) {
                     session2deviceMap.remove(session);
                     try {
                         session.close();
-                        LOGGER.info("timeout, close session: " + session.getId() + " tick: " + dev.getLastPingTime() + " tick2: " + timeoutTick);
+                        LOGGER.info("Register connection timeout, session=" + session.getId() + ", deviceId=" + dev.getDeviceId() 
+                            + ", tick=" + dev.getLastPingTime() + ", tick2=" + timeoutTick);
                     } catch (Exception e) {
-                        LOGGER.info("close session error: " + session.getId());
+                        LOGGER.info("Register session close error, session=" + session.getId(), e);
                     }
                 }
             }
         });
+    }
+    
+    public Map<String, Object> getOnlineDevices() {
+        Map<String, Object> map = new HashMap<String, Object>();
+        this.device2sessionMap.forEach((String deviceId, WebSocketSession session) -> {
+            map.put(deviceId, session.getId());
+        });
+        
+        return map;
     }
     
     // Client is responsible for sending ping message for managing connection.
@@ -188,13 +199,13 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
                 timeoutList.removeWithNode(dev.node);
                 dev.node = timeoutList.addLastWithNode(dev.Item());
             }
-            LOGGER.info("Receiving ping from client, session: " + session.getId());
+            LOGGER.info("Receiving ping from client, session=" + session.getId());
         }
     }
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        LOGGER.info("Received client message. session: " + session.getId() + ", message: " + message.getPayload());
+        LOGGER.info("Received client message, session=" + session.getId() + ", message=" + message.getPayload());
         if (message.getPayload().equals("Ping")) {
             heartbeat(session);
             return;
@@ -202,12 +213,12 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
         
         PduFrame frame = PduFrame.fromJson((String)message.getPayload());
         if(frame == null) {
-            LOGGER.error("Unrecognized client message: " + message.getPayload());
+            LOGGER.error("Unrecognized client message, session=" + session.getId() + ", message=" + message.getPayload());
             return;
         }
         
         if(frame.getName() == null || frame.getName().isEmpty()) {
-            LOGGER.error("Missing name in frame: " + message.getPayload());
+            LOGGER.error("Missing name in frame, session=" + session.getId() + ", message=" + message.getPayload());
             return;
         }
         
@@ -215,14 +226,14 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
         if(frame.getName().equals("HANDSHAKE")) {
             DeviceInfo dev = this.pendingSession.get(session);
             if(dev == null) {
-                LOGGER.error("Pending session not exists");
+                LOGGER.error("Pending session not exists, session=" + session.getId() + ", message=" + message.getPayload());
                 return;
             }
             
             dev.setLastPingTime(System.currentTimeMillis());
             HandshakeMessage pdu = frame.getPayload(HandshakeMessage.class);
             if(pdu.getDeviceId().isEmpty()) {
-                LOGGER.error("Missing deviceId in frame: " + message.getPayload());
+                LOGGER.error("Missing deviceId in frame, session=" + session.getId() + ", message=" + message.getPayload());
                 return;
             }
             
@@ -268,11 +279,11 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
                         devNode.node = timeoutList.addLastWithNode(dev);
                         }
                     session2deviceMap.put(session, devNode);
-                    LOGGER.info("added deviceId: " + dev.getDeviceId());
+                    LOGGER.info("added deviceId, deviceId=" + dev.getDeviceId() + ", session=" + session.getId());
                 }
                 @Override
                 public void onFailure(Throwable ex) {
-                    LOGGER.error("restCall failed: " + ex.getMessage() + " closing session");
+                    LOGGER.error("RestCall pusher/registDevice failed, session=" + session.getId(), ex);
                   //Remove it from pending session
                     pendingSession.remove(session);
                     dev.setValid(false);
@@ -280,7 +291,7 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
                     try {
                         session.close();
                     } catch (IOException e) {
-                        LOGGER.info("close session error: " + session.getId());
+                        LOGGER.info("close session error, session=" + session.getId(), e);
                     }
                 }
             });
@@ -288,13 +299,13 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
         } else if(frame.getName().equals("REQUEST")) {
             DeviceNode devNode = this.session2deviceMap.get(session);
             if(devNode == null || (!devNode.Item().isValid())) {
-                LOGGER.error("Session not exists");
+                LOGGER.error("Device not exists, session=" + session.getId());
                 return;
             }
             DeviceInfo dev = devNode.Item();
             RecentMessageCommand msgCmd = frame.getPayload(RecentMessageCommand.class);
             if(msgCmd == null) {
-                LOGGER.error("request message error, missing anchor");
+                LOGGER.error("request message error, missing anchor, session=" + session.getId() + ", deviceId=" + dev.getDeviceId());
                 return;
                 }
             
@@ -312,7 +323,7 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
             if(msgCmd.getNamespaceId() != null && !msgCmd.getNamespaceId().equals(0)) {
                 params.put("namespaceId", msgCmd.getNamespaceId().toString());
             }
-           
+                       
             restCall("pusher/recentMessages", params, new ListenableFutureCallback<ResponseEntity<String>> () {
                 @Override
                 public void onSuccess(ResponseEntity<String> result) {
@@ -323,20 +334,21 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
                         synchronized(session) {
                             session.sendMessage(new TextMessage(pdu.getEncodedPayload()));
                         }
+                        LOGGER.info("Restcall pusher/recentMessages, session=" + session.getId() + ", deviceId=" + dev.getDeviceId() + ", param=" + params);
                     } catch (IOException e) {
-                        LOGGER.error("Session send error: " + e.getMessage());
+                        LOGGER.error("Session send error, session=" + session.getId() + ", deviceId=" + dev.getDeviceId(), e);
                     }
                     
                 }
                 @Override
                 public void onFailure(Throwable ex) {
-                    LOGGER.error("restCall failed: " + ex.getMessage());
+                    LOGGER.error("restCall failed, session=" + session.getId() + ", deviceId=" + dev.getDeviceId(), ex);
                 }
             });
             
         } else {
             //Normal message
-            LOGGER.error("frame name: " + frame.getName());
+            LOGGER.error("Unsupported frame name, frameName=" + frame.getName() + ", session=" + session.getId());
         }
     }
 
@@ -379,7 +391,7 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
     }
     
     public void notify(WebSocketSession serverSession, PusherNotifyPdu pduServer) {
-        LOGGER.info("Got notify: " + pduServer.getMessageId());
+        LOGGER.info("Got notify from core server, pdu=" + pduServer);
         
 //        session2deviceMap.forEach((session, devNode)-> {
 //            DeviceInfo dev = devNode.item;
@@ -404,12 +416,12 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
             String deviceId = pduServer.getDeviceId();//already has name space hear.
             WebSocketSession clientSession = device2sessionMap.get(deviceId);
             if (clientSession == null) {
-                LOGGER.warn("unicast deviceId: " + deviceId + " not found");
+                LOGGER.warn("unicast device id not found, deviceId=" + deviceId);
                 return;
             }
             DeviceNode devNode = session2deviceMap.get(clientSession);
             if(devNode == null || !devNode.Item().isValid()) {
-                LOGGER.warn("Got session but deviceId: " + deviceId + " not found");
+                LOGGER.warn("Got session but device id not found, session=" + clientSession.getId() + ", deviceId=" + deviceId);
                 return;
             }
             PusherMessageResp resp = new PusherMessageResp();
@@ -420,8 +432,11 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
                 synchronized(clientSession) {
                   clientSession.sendMessage(new TextMessage(pdu.toJson()));
                 }
+                if(LOGGER.isInfoEnabled()) {
+                    LOGGER.info("Forward unicast message to client sucessfully, session=" + clientSession.getId() + ", deviceId=" + deviceId);
+                }
             } catch (IOException e) {
-                    LOGGER.error("Notify server error: " + e.getMessage());
+                    LOGGER.error("Forward unicast message to client error, session=" + clientSession.getId() + ", deviceId=" + deviceId, e);
                }
         }
         

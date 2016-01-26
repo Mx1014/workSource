@@ -80,17 +80,17 @@ public class ClientWebSocketHandler implements WebSocketHandler {
     
     @Override
     public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
-        //LOGGER.info("Received client message. session: " + session.getId() + ", message: " + message.getPayload());
+        //LOGGER.info("Received client message. session= " + session.getId() + ", message: " + message.getPayload());
         updateSessionReceiveTick(session);
 
         PduFrame frame = PduFrame.fromJson((String)message.getPayload());
         if(frame == null) {
-            LOGGER.error("Unrecognized client message: " + message.getPayload());
+            LOGGER.error("Unrecognized client message, session=" + session.getId() + ", payload=" + message.getPayload());
             return;
         }
         
         if(frame.getName() == null || frame.getName().isEmpty()) {
-            LOGGER.error("Missing name in frame: " + message.getPayload());
+            LOGGER.error("Missing name in frame, session=" + session.getId() + ", payload=" + message.getPayload());
             return;
         }
         
@@ -100,7 +100,7 @@ public class ClientWebSocketHandler implements WebSocketHandler {
     @Override
     public void afterConnectionEstablished(WebSocketSession session)
             throws Exception {
-        LOGGER.info("Connection establed. session: " + session.getId());
+        LOGGER.info("Connection establed, session=" + session.getId());
         this.sessionStatsMap.put(session, new SessionStats());
     }
 
@@ -114,7 +114,7 @@ public class ClientWebSocketHandler implements WebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session,
             CloseStatus closeStatus) throws Exception {
-        LOGGER.info("Connection closed. session: " + session.getId());
+        LOGGER.info("Connection closed, session=" + session.getId());
         unregisterSession(session);
         this.sessionStatsMap.remove(session);
     }
@@ -131,20 +131,33 @@ public class ClientWebSocketHandler implements WebSocketHandler {
        synchronized(this) {
            session = this.tokenToSessionMap.get(token);
        }
-       
+
+       String frameJson = pdu.getEncodedFrame();
        if(session != null) {
-           TextMessage msg = new TextMessage(pdu.getEncodedFrame());
+           TextMessage msg = new TextMessage(frameJson);
            try {
                synchronized(session) {
                    session.sendMessage(msg);
                }
+               if(LOGGER.isDebugEnabled()) {
+                   LOGGER.debug("Forward message, session=" + session.getId() + ", token=" + token + ", json=" + frameJson);
+               }
                this.updateSessionSendTick(session);
            } catch(IOException e) {
-               LOGGER.warn("Unable to send message " + pdu.getEncodedFrame() + " to client", e);
+               LOGGER.warn("Unable to send message to client, session=" + session.getId() + ", json=" + frameJson, e);
            }
        } else {
-           LOGGER.warn("Login: " + token + " no longer exists here");
+           LOGGER.warn("Session is null, loginToken=" + token + ", json=" + frameJson);
        }
+    }
+    
+    public Map<String, Object> getOnlineTokens() {
+        Map<String, Object> map = new HashMap<String, Object>();
+        this.tokenToSessionMap.forEach((String token, WebSocketSession session) -> {
+            map.put(token, session.getId());
+        });
+        
+        return map;
     }
     
     @Scheduled(fixedDelay=5000)
@@ -174,7 +187,7 @@ public class ClientWebSocketHandler implements WebSocketHandler {
     private void handleRegisterConnectionRequestPdu(final WebSocketSession session, PduFrame frame) {
         final RegisterConnectionRequestPdu cmd = frame.getPayload(RegisterConnectionRequestPdu.class);
         
-        LOGGER.info("Handle register connection request. login key: " + cmd.getLoginToken());
+        LOGGER.info("Handle register connection request, session=" + session.getId() + ", loginToken=" + cmd.getLoginToken());
         Map<String, String> params = new HashMap<>();
         params.put("borderId", String.valueOf(this.borderId));
         params.put("loginToken", cmd.getLoginToken());
@@ -182,7 +195,7 @@ public class ClientWebSocketHandler implements WebSocketHandler {
         restCall("/admin/registerLogin", params, new ListenableFutureCallback<ResponseEntity<String>> () {
             @Override
             public void onSuccess(ResponseEntity<String> result) {
-                LOGGER.info("REST call /admin/registerLogin result: " + result.getBody());
+                LOGGER.info("REST call /admin/registerLogin, session=" + session.getId() + ", result=" + result.getBody());
                 JsonParser parser = new JsonParser();
                 JsonElement root = parser.parse(result.getBody());
                 if(root != null) {
@@ -201,17 +214,17 @@ public class ClientWebSocketHandler implements WebSocketHandler {
                             session.sendMessage(new TextMessage(pdu.toJson()));
                         }
                     } catch (IOException e) {
-                        LOGGER.error("Send registedOk message error");
+                        LOGGER.error("Send registedOk message error, session=" + session.getId());
                     }
                     
                 } else {
-                    LOGGER.error("Invalid REST call response");
+                    LOGGER.error("Invalid REST call response, session=" + session.getId());
                 }
             }
 
             @Override
             public void onFailure(Throwable ex) {
-                LOGGER.info("Failed to make REST call /admin/registerLogin. exception: " + ex);
+                LOGGER.info("Failed to make REST call /admin/registerLogin, session=" + session.getId(), ex);
             }
         });
     }
@@ -233,9 +246,9 @@ public class ClientWebSocketHandler implements WebSocketHandler {
         String token = null;
         synchronized(this) {
             token = sessionToTokenMap.get(session);
-            }
+        }
         if(token == null || token.isEmpty()) {
-            LOGGER.info("invalid Session: " + session.getId());
+            LOGGER.info("Invalid token, session=" + session.getId() + ", cmd=" + cmd);
             return;
             }
         params.put("token", token);
@@ -243,7 +256,7 @@ public class ClientWebSocketHandler implements WebSocketHandler {
         restCall("/user/appIdStatus", params, new ListenableFutureCallback<ResponseEntity<String>> () {
             @Override
             public void onSuccess(ResponseEntity<String> result) {
-                LOGGER.info("REST call /user/appIdStatus result: " + result.getBody());
+                LOGGER.info("REST call /user/appIdStatus, session=" + session.getId() + ", result=" + result.getBody());
                 Gson gson = new Gson();
                 AppIdStatusRestResponse resp = gson.fromJson(result.getBody(), AppIdStatusRestResponse.class);
                 //Object respObj = StringHelper.fromJsonString(result.getBody(), AppIdStatusRestResponse.class);
@@ -263,14 +276,14 @@ public class ClientWebSocketHandler implements WebSocketHandler {
                             session.sendMessage(new TextMessage(pdu.toJson()));
                         }
                     } catch (IOException e) {
-                        LOGGER.error("Session send error, appId= " + appId.toString() + ", "  + e.getMessage());
+                        LOGGER.error("Session send error, session=" + session.getId() + ", appId= " + appId.toString(), e);
                     }    
                 }
             }
 
             @Override
             public void onFailure(Throwable ex) {
-                LOGGER.info("Failed to make REST call /user/appIdStatus. exception: " + ex);
+                LOGGER.info("Failed to make REST call /user/appIdStatus, session=" + session.getId(), ex);
             }
         });
     }
@@ -300,12 +313,12 @@ public class ClientWebSocketHandler implements WebSocketHandler {
             restCall("/admin/unregisterLogin", params, new ListenableFutureCallback<ResponseEntity<String>> () {
                 @Override
                 public void onSuccess(ResponseEntity<String> result) {
-                    LOGGER.info("REST call /admin/unregisterLogin result: " + result.getBody());
+                    LOGGER.info("REST call /admin/unregisterLogin, session=" + session.getId() + ", result=" + result.getBody());
                 }
 
                 @Override
                 public void onFailure(Throwable ex) {
-                    LOGGER.info("Failed to make REST call /admin/unregisterLogin");
+                    LOGGER.info("Failed to make REST call /admin/unregisterLogin, session=" + session.getId(), ex);
                 }
             });
         }

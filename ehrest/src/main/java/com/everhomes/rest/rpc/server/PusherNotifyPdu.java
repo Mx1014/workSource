@@ -1,6 +1,7 @@
 package com.everhomes.rest.rpc.server;
 
 import com.everhomes.util.Name;
+import com.everhomes.util.StringHelper;
 
 @Name("client.pusherNotify")
 public class PusherNotifyPdu {
@@ -63,5 +64,8 @@ public class PusherNotifyPdu {
         this.notification = notification;
     }
     
-    
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

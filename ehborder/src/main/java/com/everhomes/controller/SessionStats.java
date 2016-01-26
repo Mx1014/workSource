@@ -4,6 +4,7 @@ package com.everhomes.controller;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.StringHelper;
 
 public class SessionStats {
     private AtomicLong lastPeerReceiveTick = new AtomicLong();
@@ -34,5 +35,10 @@ public class SessionStats {
     
     public void updateSendTick() {
         this.lastSendTick.set(DateHelper.currentGMTTime().getTime());
+    }
+    
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

@@ -24,7 +24,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
     }
 
     @Bean
-    public WebSocketHandler clientHandler() {
+    public ClientWebSocketHandler clientHandler() {
         return new ClientWebSocketHandler();
     }
     
