@@ -9,5 +9,6 @@ public interface ConfServiceErrorCode {
     static final int ERROR_INVALID_ACCOUNT_COUNT=10003; 
     static final int ERROR_INVALID_USER_ACCOUNT=10004; 
     static final int ERROR_INVALID_ASSIGN=10005; 
+    static final int ZUOLIN_NAMESPACE_NAME=10006; 
 
 }
