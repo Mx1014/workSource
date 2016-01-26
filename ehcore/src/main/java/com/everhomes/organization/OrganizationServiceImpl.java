@@ -4136,15 +4136,18 @@ public class OrganizationServiceImpl implements OrganizationService {
 	 * @param member
 	 */
 	private void updateMemberUser(OrganizationMember member){
-		
 		this.dbProvider.execute((TransactionStatus status) -> {
 			member.setTargetType(OrganizationMemberTargetType.USER.getCode());
 			organizationProvider.updateOrganizationMember(member);
 			
 			User user = userProvider.findUserById(member.getTargetId());
-			user.setNickName(member.getNickName());
+			user.setNickName(member.getContactName());
 			if(StringUtils.isEmpty(user.getAvatar())){
 				user.setAvatar(member.getAvatar());
+			}
+			
+			if(StringUtils.isEmpty(user.getAvatar())){
+				user.setAvatar(configurationProvider.getValue("user.avatar.undisclosured.url", ""));
 			}
 			
 			userProvider.updateUser(user);
