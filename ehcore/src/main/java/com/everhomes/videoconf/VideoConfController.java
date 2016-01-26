@@ -127,7 +127,7 @@ public class VideoConfController  extends ControllerBase{
 	}
 	
 	/**
-	 * <b>URL: /conf/getRegisterNamespaceIdList</b>
+	 * <b>URL: /conf/getConferenceNamespaceIdList</b>
 	 * 根据手机号返回该手机号正在开会的域
 	 */
 	@RequestMapping("getConferenceNamespaceIdList")
