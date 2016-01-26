@@ -17,6 +17,7 @@ import com.everhomes.schema.tables.pojos.EhAclRoleAssignments;
 import com.everhomes.schema.tables.pojos.EhAclRoles;
 import com.everhomes.schema.tables.pojos.EhAcls;
 import com.everhomes.schema.tables.pojos.EhContentShardMap;
+import com.everhomes.schema.tables.pojos.EhMessages;
 import com.everhomes.schema.tables.pojos.EhServerShardMap;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
@@ -548,7 +549,11 @@ public class SequenceServiceImpl implements SequenceService {
         });
         
         syncTableSequence(EhOrganizations.class, EhOrganizationAttachments.class, Tables.EH_ORGANIZATION_ATTACHMENTS.getName(), (dbContext) -> { 
-            return dbContext.select(Tables.EH_ORGANIZATION_ATTACHMENTS.ID.max()).from(Tables.EH_ORGANIZATION_ATTACHMENTS).fetchOne().value1(); 
+            return dbContext.select(Tables.EH_ORGANIZATION_ATTACHMENTS.ID.max()).from(Tables.EH_ORGANIZATION_ATTACHMENTS).fetchOne().value1();  
+        });
+        
+        syncTableSequence(EhMessages.class, EhMessages.class, com.everhomes.schema.Tables.EH_MESSAGES.getName(), (dbContext) -> { 
+            return dbContext.select(com.everhomes.schema.Tables.EH_MESSAGES.ID.max()).from(com.everhomes.schema.Tables.EH_MESSAGES).fetchOne().value1(); 
         });
     }
     
