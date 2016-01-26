@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.Name;
+import com.everhomes.util.StringHelper;
 
 @Name("AppIdStatusCommand")
 public class AppIdStatusCommand {
@@ -29,4 +30,8 @@ public class AppIdStatusCommand {
         this.name = name;
     }
     
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }
