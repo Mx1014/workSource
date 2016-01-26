@@ -40,6 +40,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.organization.pm.pay.ResultHolder;
 import com.everhomes.rest.category.CategoryAdminStatus;
@@ -71,6 +72,7 @@ import com.everhomes.rest.videoconf.EnterpriseLockStatusCommand;
 import com.everhomes.rest.videoconf.ExtendedSourceAccountPeriodCommand;
 import com.everhomes.rest.videoconf.ExtendedVideoConfAccountPeriodCommand;
 import com.everhomes.rest.videoconf.GetNamespaceIdListCommand;
+import com.everhomes.rest.videoconf.GetNamespaceListResponse;
 import com.everhomes.rest.videoconf.InvoiceDTO;
 import com.everhomes.rest.videoconf.JoinVideoConfCommand;
 import com.everhomes.rest.videoconf.JoinVideoConfResponse;
@@ -175,6 +177,9 @@ public class VideoConfServiceImpl implements VideoConfService {
 	
 	@Autowired
 	private ConfOrderSearcher confOrderSearcher;
+	
+	@Autowired
+    private NamespaceProvider nsProvider;
 	
 	
 	@Override
@@ -2014,14 +2019,25 @@ public class VideoConfServiceImpl implements VideoConfService {
 	}
 
 	@Override
-	public List<Integer> getRegisterNamespaceIdList(
+	public List<GetNamespaceListResponse> getRegisterNamespaceIdList(
 			GetNamespaceIdListCommand cmd) {
 		
-		List<Integer> namespaceIdList = new ArrayList<Integer>();
+		List<GetNamespaceListResponse> namespaceIdList = new ArrayList<GetNamespaceListResponse>();
 		List<UserIdentifier> userList = userProvider.findClaimedIdentifiersByToken(cmd.getUserIdentifier());
 		if(userList != null && userList.size() > 0) {
 			for(UserIdentifier user : userList) {
-				namespaceIdList.add(user.getNamespaceId());
+				GetNamespaceListResponse namespace = new GetNamespaceListResponse();
+				namespace.setNamespaceId(user.getNamespaceId());
+				if(user.getNamespaceId() == 0) {
+					namespace.setName(localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
+							String.valueOf(ConfServiceErrorCode.ZUOLIN_NAMESPACE_NAME),
+							UserContext.current().getUser().getLocale(),"ZUOLIN"));
+				} else {
+					Namespace ns = nsProvider.findNamespaceById(user.getNamespaceId());
+					if(ns != null)
+						namespace.setName(ns.getName());
+				}
+				namespaceIdList.add(namespace);
 			}
 		}
 		
@@ -2029,10 +2045,10 @@ public class VideoConfServiceImpl implements VideoConfService {
 	}
 
 	@Override
-	public List<Integer> getConferenceNamespaceIdList(
+	public List<GetNamespaceListResponse> getConferenceNamespaceIdList(
 			GetNamespaceIdListCommand cmd) {
 
-		List<Integer> namespaceIdList = new ArrayList<Integer>();
+		List<GetNamespaceListResponse> namespaceIdList = new ArrayList<GetNamespaceListResponse>();
 		List<UserIdentifier> userList = userProvider.findClaimedIdentifiersByToken(cmd.getUserIdentifier());
 		if(userList != null && userList.size() > 0) {
 			for(UserIdentifier user : userList) {
@@ -2044,7 +2060,18 @@ public class VideoConfServiceImpl implements VideoConfService {
 					if(LOGGER.isDebugEnabled())
 						LOGGER.error("getConferenceNamespaceIdList, conf="+conf);
 					if(conf != null) {
-						namespaceIdList.add(user.getNamespaceId());
+						GetNamespaceListResponse namespace = new GetNamespaceListResponse();
+						namespace.setNamespaceId(user.getNamespaceId());
+						if(user.getNamespaceId() == 0) {
+							namespace.setName(localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
+									String.valueOf(ConfServiceErrorCode.ZUOLIN_NAMESPACE_NAME),
+									UserContext.current().getUser().getLocale(),"ZUOLIN"));
+						} else {
+							Namespace ns = nsProvider.findNamespaceById(user.getNamespaceId());
+							if(ns != null)
+								namespace.setName(ns.getName());
+						}
+						namespaceIdList.add(namespace);
 					}
 				}
 			}

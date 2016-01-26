@@ -32,6 +32,7 @@ import com.everhomes.rest.videoconf.ExtendedSourceAccountPeriodCommand;
 import com.everhomes.rest.videoconf.ExtendedVideoConfAccountPeriodCommand;
 import com.everhomes.rest.videoconf.GetEarlyWarningLineCommand;
 import com.everhomes.rest.videoconf.GetNamespaceIdListCommand;
+import com.everhomes.rest.videoconf.GetNamespaceListResponse;
 import com.everhomes.rest.videoconf.InvoiceDTO;
 import com.everhomes.rest.videoconf.JoinVideoConfCommand;
 import com.everhomes.rest.videoconf.JoinVideoConfResponse;
@@ -115,11 +116,11 @@ public class VideoConfController  extends ControllerBase{
 	 */
 	@RequestMapping("getRegisterNamespaceIdList")
 	@RequireAuthentication(false)
-	@RestReturn(value = Integer.class, collection = true)
+	@RestReturn(value = GetNamespaceListResponse.class, collection = true)
 	public RestResponse getRegisterNamespaceIdList(GetNamespaceIdListCommand cmd) {
 		
-		List<Integer> namespaceIdList = videoConfService.getRegisterNamespaceIdList(cmd);
-		RestResponse response = new RestResponse(namespaceIdList);
+		List<GetNamespaceListResponse> namespaceList = videoConfService.getRegisterNamespaceIdList(cmd);
+		RestResponse response = new RestResponse(namespaceList);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -132,11 +133,11 @@ public class VideoConfController  extends ControllerBase{
 	 */
 	@RequestMapping("getConferenceNamespaceIdList")
 	@RequireAuthentication(false)
-	@RestReturn(value = Integer.class, collection = true)
+	@RestReturn(value = GetNamespaceListResponse.class, collection = true)
 	public RestResponse getConferenceNamespaceIdList(GetNamespaceIdListCommand cmd) {
 		
-		List<Integer> namespaceIdList = videoConfService.getConferenceNamespaceIdList(cmd);
-		RestResponse response = new RestResponse(namespaceIdList);
+		List<GetNamespaceListResponse> namespaceList = videoConfService.getConferenceNamespaceIdList(cmd);
+		RestResponse response = new RestResponse(namespaceList);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
