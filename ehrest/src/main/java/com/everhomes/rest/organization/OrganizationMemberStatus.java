@@ -22,9 +22,12 @@ public enum OrganizationMemberStatus {
             return INACTIVE;
             
         case 1:
-            return CONFIRMING;
+            return WAITING_FOR_APPROVAL;
             
         case 2:
+            return WAITING_FOR_ACCEPTANCE;
+            
+        case 3:
             return ACTIVE;
             
         default :

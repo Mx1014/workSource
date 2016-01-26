@@ -69,7 +69,10 @@ import java.util.stream.Collectors;
 
 
 
-import org.jooq.Condition;
+
+
+
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,6 +82,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+
+
+
+
 
 
 
@@ -147,6 +154,7 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.enterprise.Enterprise;
+import com.everhomes.enterprise.EnterpriseContact;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.forum.ForumProvider;
@@ -191,6 +199,7 @@ import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.forum.PostEntityTag;
 import com.everhomes.rest.forum.PostPrivacy;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
+import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.launchpad.ItemKind;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -205,6 +214,7 @@ import com.everhomes.rest.organization.AddOrgAddressCommand;
 import com.everhomes.rest.organization.ApplyOrganizationMemberCommand;
 import com.everhomes.rest.organization.AssginOrgTopicCommand;
 import com.everhomes.rest.organization.CreateDepartmentCommand;
+import com.everhomes.rest.organization.CreateOrganizationAccountCommand;
 import com.everhomes.rest.organization.CreateOrganizationByAdminCommand;
 import com.everhomes.rest.organization.CreateOrganizationCommand;
 import com.everhomes.rest.organization.CreateOrganizationCommunityCommand;
@@ -297,7 +307,9 @@ import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserCurrentEntityType;
+import com.everhomes.rest.user.UserGender;
 import com.everhomes.rest.user.UserInfo;
+import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserStatus;
 import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
@@ -513,6 +525,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		dto.setAttachments(attachments.stream().map(r->{ return ConvertHelper.convert(r,AttachmentDescriptor.class); }).collect(Collectors.toList()));
 		
+//		aclProvider.getResourceRoleAssignments(arg0, arg1)
 		return dto;
 	}
 	
@@ -4013,27 +4026,132 @@ public class OrganizationServiceImpl implements OrganizationService {
 		return res;
 	}
 	
+	@Override
+	public void createOrganizationAccount(CreateOrganizationAccountCommand cmd){
+		
+		int namespaceId = UserContext.getCurrentNamespaceId(null);
+		OrganizationMember member = organizationProvider.findOrganizationPersonnelByPhone(cmd.getOrganizationId(), cmd.getAccountPhone());
+		this.dbProvider.execute((TransactionStatus status) -> {
+			OrganizationMember m = member;
+			
+			if(null == m){
+				CreateOrganizationMemberCommand memberCmd = new CreateOrganizationMemberCommand();
+				memberCmd.setContactName(cmd.getAccountName());
+				memberCmd.setContactToken(cmd.getAccountPhone());
+				memberCmd.setOrganizationId(cmd.getOrganizationId());
+				memberCmd.setGender(UserGender.UNDISCLOSURED.getCode());
+				m =  ConvertHelper.convert(this.createOrganizationPersonnel(memberCmd), OrganizationMember.class);
+			}
+		
+			if(!member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode())){
+			
+				User newuser = new User();
+				newuser.setStatus(UserStatus.ACTIVE.getCode());
+				newuser.setNamespaceId(namespaceId);
+				newuser.setAccountName(cmd.getAccountName());
+				newuser.setNickName(cmd.getAccountName());
+				newuser.setGender(UserGender.UNDISCLOSURED.getCode());
+				String salt=EncryptionUtils.createRandomSalt();
+				newuser.setSalt(salt);
+				try {
+					newuser.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s","8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",salt)));
+				} catch (Exception e) {
+					LOGGER.error("encode password failed");
+					throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Unable to create password hash");
+
+				}
+
+				userProvider.createUser(newuser);
+
+				UserIdentifier newIdentifier = new UserIdentifier();
+				newIdentifier.setOwnerUid(newuser.getId());
+				newIdentifier.setIdentifierType(IdentifierType.MOBILE.getCode());
+				newIdentifier.setIdentifierToken(cmd.getAccountPhone());
+				newIdentifier.setNamespaceId(namespaceId);
+
+				newIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
+				userProvider.createIdentifier(newIdentifier);
+				
+				m.setContactName(cmd.getAccountName());
+				m.setTargetType(OrganizationMemberTargetType.USER.getCode());
+				m.setTargetId(newuser.getId());
+				organizationProvider.updateOrganizationMember(m);
+				
+				if(null != cmd.getAssignmentId())
+					aclProvider.deleteRoleAssignment(cmd.getAssignmentId());
+				
+				SetAclRoleAssignmentCommand roleCmd = new SetAclRoleAssignmentCommand();
+				roleCmd.setRoleId(RoleConstants.ORGANIZATION_GROUP_MEMBER_MGT);
+				roleCmd.setTargetId(m.getTargetId());
+				this.setAclRoleAssignmentRole(roleCmd, EntityType.USER);
+			
+			}
+			
+			return null;
+		});
+	}
+	
+	@Override
+	public OrganizationMemberDTO processUserForMember(UserIdentifier identifier) {
+		try {
+		    User user = userProvider.findUserById(identifier.getOwnerUid());
+	        List<OrganizationMember> members = this.organizationProvider.listOrganizationMembersByPhone(identifier.getIdentifierToken());
+	        Map<Long, Long> ctx = new HashMap<Long, Long>();
+	        for (OrganizationMember member : members) {
+	        	Organization org = organizationProvider.findOrganizationById(member.getOrganizationId());
+	            if(org.getNamespaceId() == null || !org.getNamespaceId().equals(identifier.getNamespaceId())) {
+	                if(LOGGER.isDebugEnabled()) {
+	                    LOGGER.debug("Ignore the enterprise who is dismatched to namespace, enterpriseId=" + org.getId() 
+	                        + ", enterpriseNamespaceId=" + org.getNamespaceId() + ", userId=" + identifier.getOwnerUid() 
+	                        + ", userNamespaceId=" + identifier.getNamespaceId());
+	                }
+	                continue;
+	            }
+	            
+	            if(member.getStatus().equals(OrganizationMemberStatus.ACTIVE.getCode())) {
+                	member.setTargetId(user.getId());
+                	
+                	this.updateMemberUser(member);
+                    sendMessageForContactApproved(member);
+                    if(LOGGER.isInfoEnabled()) {
+                        LOGGER.info("User join the enterprise automatically, userId=" + identifier.getOwnerUid() 
+                            + ", contactId=" + member.getId() + ", enterpriseId=" + member.getOrganizationId());
+                    }
+                } else {
+                    if(LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("Enterprise contact is already authenticated, userId=" + identifier.getOwnerUid() 
+                            + ", contactId=" + member.getId() + ", enterpriseId=" + member.getOrganizationId());
+                    }
+                }
+                return ConvertHelper.convert(member, OrganizationMemberDTO.class);
+	        }
+		} catch(Exception e) {
+		    LOGGER.error("Failed to process the enterprise contact for the user, userId=" + identifier.getOwnerUid(), e);
+		}
+		return null;
+	}
+	
 	/**
-	 * 发消息
-	 * @param operatorUid
+	 * 修改用户 通讯录的对应信息
 	 * @param member
 	 */
-	private void sendMessageForEnterpriseContactReject(Long operatorUid, OrganizationMember member){
+	private void updateMemberUser(OrganizationMember member){
 		
-		User user = userProvider.findUserById(member.getTargetId());
-//		EnterpriseContact contact = new EnterpriseContact();
-//		contact.setEnterpriseId(member.getOrganizationId());
-//		contact.setUserId(member.getTargetId());
-//		contact.setStatus(member.getStatus());
-//		
-//		contact.setCreatorUid(operatorUid);
-//		contact.setName(member.getContactName());
-//		contact.setNickName(user.getNickName());
-//		contact.setAvatar(user.getAvatar());
-		
-//		sendMessageForContactReject(null, contact);
-		
+		this.dbProvider.execute((TransactionStatus status) -> {
+			member.setTargetType(OrganizationMemberTargetType.USER.getCode());
+			organizationProvider.updateOrganizationMember(member);
+			
+			User user = userProvider.findUserById(member.getTargetId());
+			user.setNickName(member.getNickName());
+			if(StringUtils.isEmpty(user.getAvatar())){
+				user.setAvatar(member.getAvatar());
+			}
+			
+			userProvider.updateUser(user);
+			return null;
+		});
 	}
+	
 	
 	/**
 	 * 修改通讯录人员的状态

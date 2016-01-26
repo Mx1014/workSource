@@ -34,7 +34,7 @@ public class CreateOrganizationMemberCommand {
 	private String contactDescription;
 	
 	private Long groupId;
-	private Integer gender;
+	private Byte gender;
 	private Long employeeNo;
 	
 	public CreateOrganizationMemberCommand() {
@@ -103,11 +103,11 @@ public class CreateOrganizationMemberCommand {
 	}
 	
 
-	public Integer getGender() {
+	public Byte getGender() {
 		return gender;
 	}
 
-	public void setGender(Integer gender) {
+	public void setGender(Byte gender) {
 		this.gender = gender;
 	}
 

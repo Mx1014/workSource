@@ -23,6 +23,7 @@ import com.everhomes.util.StringHelper;
  *  <li>avatarUrl: 机构logo url</li>
  *  <li>accountPhone: 公司管理账号电话</li>
  *  <li>accountName: 公司管理账号人名称</li>
+ *  <li>assignmentId: 用户权限id</li>
  *  <li>postUri: 标题图 uri</li>
  *  <li>postUrl: 标题图 url</li>
  *  <li>addresses: 机构入住门牌地址</li>
@@ -52,6 +53,7 @@ public class OrganizationDetailDTO {
     
     private String accountPhone; 
     private String accountName;
+    private Long assignmentId;
     
     private String postUri;
     private String postUrl;
@@ -314,6 +316,18 @@ public class OrganizationDetailDTO {
 
 	public void setAttachments(List<AttachmentDescriptor> attachments) {
 		this.attachments = attachments;
+	}
+
+
+
+	public Long getAssignmentId() {
+		return assignmentId;
+	}
+
+
+
+	public void setAssignmentId(Long assignmentId) {
+		this.assignmentId = assignmentId;
 	}
 
 

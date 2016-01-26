@@ -226,6 +226,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         
         return result;
     }	
+    
+    
 
 	@Override
 	public List<Organization> listOrganizations(String organizationType,String name,Integer pageOffset,Integer pageSize) {
@@ -256,7 +258,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		pageSize = pageSize + 1;
 		List<Organization> result  = new ArrayList<Organization>();
 		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
-//		query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
 		query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
 		query.addConditions(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(0l));
 		query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
@@ -354,6 +356,21 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		if(memberUid != null && memberUid > 0) {
 			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(memberUid));
 		}
+		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, OrganizationMember.class));
+			return null;
+		});
+		return result;
+	}
+	
+	@Override
+	public List<OrganizationMember> listOrganizationMembersByPhone(String phone) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
+		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(phone));
 		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, OrganizationMember.class));

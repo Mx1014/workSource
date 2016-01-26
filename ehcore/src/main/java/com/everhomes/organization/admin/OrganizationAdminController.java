@@ -29,6 +29,7 @@ import com.everhomes.rest.enterprise.RejectContactCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
 import com.everhomes.rest.organization.AddOrgAddressCommand;
 import com.everhomes.rest.organization.CreateDepartmentCommand;
+import com.everhomes.rest.organization.CreateOrganizationAccountCommand;
 import com.everhomes.rest.organization.CreateOrganizationByAdminCommand;
 import com.everhomes.rest.organization.CreateOrganizationCommand;
 import com.everhomes.rest.organization.CreateOrganizationCommunityCommand;
@@ -739,6 +740,23 @@ public class OrganizationAdminController extends ControllerBase {
         //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
 //        organizationService.updateOrganizationPersonnel(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/org/createOrganizationAccount</b>
+     * <p>开通账号</p>
+     */
+    @RequestMapping("createOrganizationAccount")
+    @RestReturn(value=String.class)
+    public RestResponse createOrganizationAccount(@Valid CreateOrganizationAccountCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+        organizationService.createOrganizationAccount(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

@@ -44,6 +44,7 @@ public class OrganizationDTO {
 	private Long communityId;
 	private String communityName;
 	
+//	@ItemType(OrganizationDTO.class)
 	private List<OrganizationDTO> childrens;
 	
 	private Long roleId;
