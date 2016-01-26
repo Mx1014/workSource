@@ -70,6 +70,7 @@ import com.everhomes.rest.videoconf.EnterpriseConfAccountDTO;
 import com.everhomes.rest.videoconf.EnterpriseLockStatusCommand;
 import com.everhomes.rest.videoconf.ExtendedSourceAccountPeriodCommand;
 import com.everhomes.rest.videoconf.ExtendedVideoConfAccountPeriodCommand;
+import com.everhomes.rest.videoconf.GetNamespaceIdListCommand;
 import com.everhomes.rest.videoconf.InvoiceDTO;
 import com.everhomes.rest.videoconf.JoinVideoConfCommand;
 import com.everhomes.rest.videoconf.JoinVideoConfResponse;
@@ -2010,6 +2011,45 @@ public class VideoConfServiceImpl implements VideoConfService {
 		LOGGER.info("update invalid appliers.");
 		vcProvider.updateInvaildAccount();
 		vcProvider.updateEnterpriseAccounts();
+	}
+
+	@Override
+	public List<Integer> getRegisterNamespaceIdList(
+			GetNamespaceIdListCommand cmd) {
+		
+		List<Integer> namespaceIdList = new ArrayList<Integer>();
+		List<UserIdentifier> userList = userProvider.findClaimedIdentifiersByToken(cmd.getUserIdentifier());
+		if(userList != null && userList.size() > 0) {
+			for(UserIdentifier user : userList) {
+				namespaceIdList.add(user.getNamespaceId());
+			}
+		}
+		
+		return namespaceIdList;
+	}
+
+	@Override
+	public List<Integer> getConferenceNamespaceIdList(
+			GetNamespaceIdListCommand cmd) {
+
+		List<Integer> namespaceIdList = new ArrayList<Integer>();
+		List<UserIdentifier> userList = userProvider.findClaimedIdentifiersByToken(cmd.getUserIdentifier());
+		if(userList != null && userList.size() > 0) {
+			for(UserIdentifier user : userList) {
+				ConfAccounts account = vcProvider.findAccountByUserId(user.getOwnerUid());
+				if(LOGGER.isDebugEnabled())
+					LOGGER.error("getConferenceNamespaceIdList, account="+account);
+				if(account != null) {
+					ConfConferences conf = vcProvider.findConfConferencesById(account.getAssignedConfId());
+					if(LOGGER.isDebugEnabled())
+						LOGGER.error("getConferenceNamespaceIdList, conf="+conf);
+					if(conf != null) {
+						namespaceIdList.add(user.getNamespaceId());
+					}
+				}
+			}
+		}
+		return namespaceIdList;
 	}
 	
 }

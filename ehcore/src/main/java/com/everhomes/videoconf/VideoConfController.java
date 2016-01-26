@@ -31,6 +31,7 @@ import com.everhomes.rest.videoconf.EnterpriseLockStatusCommand;
 import com.everhomes.rest.videoconf.ExtendedSourceAccountPeriodCommand;
 import com.everhomes.rest.videoconf.ExtendedVideoConfAccountPeriodCommand;
 import com.everhomes.rest.videoconf.GetEarlyWarningLineCommand;
+import com.everhomes.rest.videoconf.GetNamespaceIdListCommand;
 import com.everhomes.rest.videoconf.InvoiceDTO;
 import com.everhomes.rest.videoconf.JoinVideoConfCommand;
 import com.everhomes.rest.videoconf.JoinVideoConfResponse;
@@ -106,6 +107,41 @@ public class VideoConfController  extends ControllerBase{
 	
 	@Autowired
 	private ConfOrderSearcher confOrderSearcher;
+	
+	
+	/**
+	 * <b>URL: /conf/getRegisterNamespaceIdList</b>
+	 * 根据手机号返回注册的域
+	 */
+	@RequestMapping("getRegisterNamespaceIdList")
+	@RequireAuthentication(false)
+	@RestReturn(value = Integer.class, collection = true)
+	public RestResponse getRegisterNamespaceIdList(GetNamespaceIdListCommand cmd) {
+		
+		List<Integer> namespaceIdList = videoConfService.getRegisterNamespaceIdList(cmd);
+		RestResponse response = new RestResponse(namespaceIdList);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+		
+	}
+	
+	/**
+	 * <b>URL: /conf/getRegisterNamespaceIdList</b>
+	 * 根据手机号返回该手机号正在开会的域
+	 */
+	@RequestMapping("getConferenceNamespaceIdList")
+	@RequireAuthentication(false)
+	@RestReturn(value = Integer.class, collection = true)
+	public RestResponse getConferenceNamespaceIdList(GetNamespaceIdListCommand cmd) {
+		
+		List<Integer> namespaceIdList = videoConfService.getConferenceNamespaceIdList(cmd);
+		RestResponse response = new RestResponse(namespaceIdList);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+		
+	}
 	
 	/**
 	 * <b>URL: /conf/getAppDownloadURL</b>
@@ -1047,7 +1083,6 @@ public class VideoConfController  extends ControllerBase{
 	 * @return
 	 */
 	@RequestMapping("cancelVideoConf")
-	@RequireAuthentication(false)
 	@RestReturn(value = String.class)
 	public RestResponse cancelVideoConf(CancelVideoConfCommand cmd) {
 
