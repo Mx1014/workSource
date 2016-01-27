@@ -304,6 +304,9 @@ public class ParkProviderImpl implements ParkProvider {
 			if(!StringUtils.isEmpty(plateNumber))
 				query.addConditions(Tables.EH_RECHARGE_INFO.PLATE_NUMBER.eq(plateNumber));
 			
+			//linshide yanshouzhixianshichongzhichenggong daishan by xiongying20160127
+			query.addConditions(Tables.EH_RECHARGE_INFO.RECHARGE_STATUS.eq(RechargeStatus.SUCCESS.getCode()));
+			
 			query.addOrderBy(Tables.EH_RECHARGE_INFO.ID.desc());
 			query.addLimit(count);
 
