@@ -593,6 +593,14 @@ public class CommunityServiceImpl implements CommunityService {
         	
         	dto.setName(org.springframework.util.StringUtils.isEmpty(dto.getAliasName()) ? dto.getName() : dto.getAliasName());
         	
+        	if(null != dto.getManagerUid()){
+        		OrganizationMember member = organizationProvider.findOrganizationMemberById(dto.getManagerUid());
+        		if(null != member){
+        			dto.setManagerNickName(member.getContactName());
+        			dto.setContact(member.getContactToken());
+        		}
+        	}
+        	
         	populateBuildingDTO(dto);
         	
         	return dto;
@@ -822,6 +830,7 @@ public class CommunityServiceImpl implements CommunityService {
 			Building b = this.communityProvider.findBuildingById(cmd.getId());
 			building.setCreatorUid(b.getCreatorUid());
 			building.setCreateTime(b.getCreateTime());
+			building.setNamespaceId(b.getNamespaceId());
 			this.communityProvider.updateBuilding(building);
 		}
 		
