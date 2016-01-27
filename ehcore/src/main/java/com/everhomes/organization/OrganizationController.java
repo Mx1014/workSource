@@ -70,6 +70,7 @@ import com.everhomes.rest.organization.UserExitOrganizationCommand;
 import com.everhomes.rest.organization.UserJoinOrganizationCommand;
 import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
+import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.user.UserContext;
 
 @RestController
@@ -79,6 +80,9 @@ public class OrganizationController extends ControllerBase {
 
 	@Autowired
 	private OrganizationService organizationService;
+	
+	@Autowired
+	private OrganizationSearcher organizationSearcher;
 
 	/**
 	 * <b>URL: /org/getUserOwningOrganizations</b>
@@ -790,6 +794,21 @@ public class OrganizationController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
+    }
+    
+    /**
+     * <b>URL: /org/syncIndex</b>
+     * <p>搜索索引同步 TODO: 求敢哥优化</p>
+     * @return {String.class}
+     */
+    @RequestMapping("syncIndex")
+    @RestReturn(value=String.class)
+    public RestResponse syncIndex() {
+    	organizationSearcher.syncFromDb();
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
     }
     
     

@@ -253,12 +253,14 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 	
 	@Override
-	public List<Organization> listEnterpriseByNamespaceIds(int namespaceId,CrossShardListingLocator locator,Integer pageSize) {
+	public List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId,CrossShardListingLocator locator,Integer pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		pageSize = pageSize + 1;
 		List<Organization> result  = new ArrayList<Organization>();
 		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
-		query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
+		if(null != namespaceId){
+			query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
+		}
 		query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
 		query.addConditions(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(0l));
 		query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
@@ -1316,7 +1318,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			result.add(ConvertHelper.convert(r, OrganizationMember.class));
 			return null;
 		});
-		
+		locator.setAnchor(null);
 		if(result.size() >= pageSize){
 			result.remove(result.size() - 1);
 			locator.setAnchor(result.get(result.size() - 1).getId());
