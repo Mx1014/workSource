@@ -1383,6 +1383,15 @@ public class RentalServiceImpl implements RentalService {
 				for (SiteItemDTO siDto : cmd.getRentalItems()) {
 					if (cmd.getRentalItems().get(0).getItemPrice() == null)
 						continue;
+					if(siDto.getId() == null) {
+						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+			                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of siDto id"+ siDto+".");
+					}
+					
+					if(cmd.getRentalBillId() == null) {
+						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+			                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of cmd RentalBillId"+ cmd+".");
+					}
 					RentalItemsBill rib = new RentalItemsBill();
 					rib.setTotalMoney(siDto.getItemPrice().multiply( new java.math.BigDecimal(siDto.getCounts())));
 
