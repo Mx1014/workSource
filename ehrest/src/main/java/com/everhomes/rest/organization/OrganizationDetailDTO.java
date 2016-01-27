@@ -69,7 +69,7 @@ public class OrganizationDetailDTO {
     @ItemType(value = AttachmentDescriptor.class)
     private List<AttachmentDescriptor> attachments = new ArrayList<AttachmentDescriptor>();
     
-    
+    private Long communityId;
     
 	public Long getId() {
 		return id;
@@ -145,6 +145,18 @@ public class OrganizationDetailDTO {
 
 	public String getDisplayName() {
 		return displayName;
+	}
+
+
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
 
 

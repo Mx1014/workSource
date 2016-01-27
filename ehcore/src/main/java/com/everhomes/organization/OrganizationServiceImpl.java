@@ -1712,6 +1712,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			if(OrganizationGroupType.ENTERPRISE.getCode().equals(org.getGroupType())){
 				OrganizationDetailDTO dto= this.toOrganizationDetailDTO(org.getId());
 				dto.setMember(ConvertHelper.convert(member, OrganizationMemberDTO.class));
+				dto.setCommunityId(cmd.getCommunityId());
 				dtos.add(dto);
 			}
 		}
