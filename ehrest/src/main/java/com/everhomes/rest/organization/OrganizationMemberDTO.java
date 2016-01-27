@@ -47,10 +47,13 @@ public class OrganizationMemberDTO {
 	
 	private String groupName;
 	
-	private java.lang.String   nickName;
-	private java.lang.String   avatar;
+	private String   nickName;
+	private String   avatar;
 	
-	private java.lang.Long creatorUid;
+	private Long creatorUid;
+	
+	private Long   employeeNo;
+	private Byte   gender;
 	
 	public OrganizationMemberDTO() {
     }
@@ -228,38 +231,62 @@ public class OrganizationMemberDTO {
 
 
 
-	public java.lang.String getNickName() {
+	public String getNickName() {
 		return nickName;
 	}
 
 
 
-	public void setNickName(java.lang.String nickName) {
+	public void setNickName(String nickName) {
 		this.nickName = nickName;
 	}
 
 
 
-	public java.lang.String getAvatar() {
+	public String getAvatar() {
 		return avatar;
 	}
 
 
 
-	public void setAvatar(java.lang.String avatar) {
+	public void setAvatar(String avatar) {
 		this.avatar = avatar;
 	}
 
 
 
-	public java.lang.Long getCreatorUid() {
+	public Long getCreatorUid() {
 		return creatorUid;
 	}
 
 
 
-	public void setCreatorUid(java.lang.Long creatorUid) {
+	public void setCreatorUid(Long creatorUid) {
 		this.creatorUid = creatorUid;
+	}
+
+
+
+	public Long getEmployeeNo() {
+		return employeeNo;
+	}
+
+
+
+	public void setEmployeeNo(Long employeeNo) {
+		this.employeeNo = employeeNo;
+	}
+
+
+
+	public Byte getGender() {
+		return gender;
+	}
+
+
+
+	public void setGender(Byte gender) {
+		this.gender = gender;
 	}
 
 

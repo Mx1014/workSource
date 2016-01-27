@@ -3,6 +3,7 @@ package com.everhomes.enterprise;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -207,10 +208,28 @@ public class EnterpriseContactController extends ControllerBase {
     public RestResponse listContactsByEnterpriseId(@Valid ListContactsByEnterpriseIdCommand cmd) {
         ListingLocator locator = new ListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        List<EnterpriseContactDetail> details = this.enterpriseContactService.listContactByEnterpriseId(locator, cmd.getEnterpriseId(), cmd.getPageSize(),cmd.getKeyWord());
+        ListOrganizationContactCommand command = ConvertHelper.convert(cmd, ListOrganizationContactCommand.class);
+        command.setKeywords(cmd.getKeyWord());
+        command.setOrganizationId(cmd.getEnterpriseId());
+        ListOrganizationMemberCommandResponse response = this.organizationService.listOrganizationPersonnels(command);
+        
         List<EnterpriseContactDTO> dtos = new ArrayList<EnterpriseContactDTO>();
-        for(EnterpriseContactDetail detail : details) {
-            dtos.add(ConvertHelper.convert(detail, EnterpriseContactDTO.class));
+        if(null != response.getMembers()){
+        	dtos = response.getMembers().stream().map((r) ->{
+        		EnterpriseContactDTO dto = new EnterpriseContactDTO();
+        		dto.setId(r.getId());
+        		dto.setAvatar(r.getAvatar());
+        		dto.setEnterpriseId(r.getOrganizationId());
+        		dto.setEmployeeNo(String.valueOf(r.getEmployeeNo()));
+        		dto.setGroupName(r.getGroupName());
+        		dto.setName(r.getContactName());
+        		dto.setNickName(r.getNickName());
+        		dto.setPhone(r.getContactToken());
+        		dto.setStatus(r.getStatus());
+        		dto.setUserId(r.getTargetId());
+        		dto.setSex(String.valueOf(r.getGender()));
+        		return dto;
+        	}).collect(Collectors.toList());
         }
         
         ListEnterpriseContactResponse resp = new ListEnterpriseContactResponse();

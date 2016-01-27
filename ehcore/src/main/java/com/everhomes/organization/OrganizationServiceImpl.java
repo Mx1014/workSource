@@ -77,6 +77,7 @@ import java.util.stream.Collectors;
 
 
 
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +87,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+
 
 
 
@@ -329,6 +331,7 @@ import com.everhomes.search.EnterpriseSearcher;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
+import com.everhomes.server.schema.tables.EhUserActivities;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.EncryptionUtils;
@@ -4253,6 +4256,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 			Organization group = deptMaps.get(c.getGroupId());
 			if(null != group)
 				dto.setGroupName(group.getName());
+			
+			if(OrganizationMemberTargetType.USER.getCode().equals(dto.getTargetType())){
+				User user = userProvider.findUserById(dto.getTargetId());
+				if(null != user){
+					dto.setAvatar(contentServerService.parserUri(user.getAvatar(), EntityType.USER.getCode(), user.getId()));
+					dto.setNickName(dto.getNickName());
+				}
+			}
 			
 			/**
 			 * 补充用户角色
