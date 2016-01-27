@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.util.StringHelper;
 
@@ -58,10 +59,12 @@ public class OrganizationDetailDTO {
     private String postUri;
     private String postUrl;
     
+    private OrganizationMemberDTO member;
+    
     
 	//TODO address info ?
-    @ItemType(value = OrganizationAddressDTO.class)
-    private List<OrganizationAddressDTO> addresses;
+    @ItemType(value = AddressDTO.class)
+    private List<AddressDTO> addresses;
     
     @ItemType(value = AttachmentDescriptor.class)
     private List<AttachmentDescriptor> attachments = new ArrayList<AttachmentDescriptor>();
@@ -296,13 +299,15 @@ public class OrganizationDetailDTO {
 
 
 
-	public List<OrganizationAddressDTO> getAddresses() {
+
+
+	public List<AddressDTO> getAddresses() {
 		return addresses;
 	}
 
 
 
-	public void setAddresses(List<OrganizationAddressDTO> addresses) {
+	public void setAddresses(List<AddressDTO> addresses) {
 		this.addresses = addresses;
 	}
 
@@ -328,6 +333,20 @@ public class OrganizationDetailDTO {
 
 	public void setAssignmentId(Long assignmentId) {
 		this.assignmentId = assignmentId;
+	}
+
+
+
+
+
+	public OrganizationMemberDTO getMember() {
+		return member;
+	}
+
+
+
+	public void setMember(OrganizationMemberDTO member) {
+		this.member = member;
 	}
 
 

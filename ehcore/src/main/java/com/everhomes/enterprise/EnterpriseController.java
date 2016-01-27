@@ -3,6 +3,7 @@ package com.everhomes.enterprise;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -10,12 +11,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.address.Address;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.community.CommunityDoc;
+import com.everhomes.rest.enterprise.EnterpriseAttachmentDTO;
 import com.everhomes.rest.enterprise.EnterpriseCommunityDTO;
 import com.everhomes.rest.enterprise.EnterpriseCommunityResponse;
 import com.everhomes.rest.enterprise.EnterpriseDTO;
@@ -31,6 +36,10 @@ import com.everhomes.rest.enterprise.SearchEnterpriseCommand;
 import com.everhomes.rest.enterprise.SearchEnterpriseCommunityCommand;
 import com.everhomes.rest.enterprise.SetCurrentEnterpriseCommand;
 import com.everhomes.rest.group.GroupDTO;
+import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
+import com.everhomes.rest.organization.OrganizationAddressDTO;
+import com.everhomes.rest.organization.OrganizationDetailDTO;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.search.EnterpriseSearcher;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -54,10 +63,13 @@ import com.everhomes.util.ConvertHelper;
 public class EnterpriseController extends ControllerBase {
 
     @Autowired
-    EnterpriseService enterpriseService;
+    private EnterpriseService enterpriseService;
+    
+    @Autowired
+    private OrganizationService organizationService;
 
     @Autowired
-    EnterpriseSearcher enterpriseSearcher;
+    private EnterpriseSearcher enterpriseSearcher;
     /**
      * <b>URL: /enterprise/listEnterpriseByCommunityId</b>
      * <p>获取小区下的所有企业 TODO: 放管理后台？</p>
@@ -216,9 +228,22 @@ public class EnterpriseController extends ControllerBase {
   @RequestMapping("listUserRelatedEnterprises")
   @RestReturn(value=EnterpriseDTO.class, collection=true)
   public RestResponse listUserRelatedEnterprises(@Valid ListUserRelatedEnterprisesCommand cmd) {
-     List<EnterpriseDTO> enterprises = this.enterpriseService.listUserRelatedEnterprises(cmd);
-     
-     RestResponse res = new RestResponse(enterprises);
+	 List<EnterpriseDTO> eDtos = new ArrayList<EnterpriseDTO>();
+	 List<OrganizationDetailDTO> oDtos = organizationService.listUserRelateEnterprises(cmd);
+	 for (OrganizationDetailDTO oDto : oDtos) {
+		 EnterpriseDTO eDto = ConvertHelper.convert(oDto, EnterpriseDTO.class);
+		 eDto.setContactNickName(oDto.getMember().getContactName());
+		 eDto.setContactsPhone(oDto.getMember().getContactToken());
+		 eDto.setEnterpriseAddress(oDto.getAddress());
+		 eDto.setId(oDto.getOrganizationId());
+		 if(null != oDto.getAttachments()){
+			 eDto.setAttachments(oDto.getAttachments().stream().map(r->{
+					return ConvertHelper.convert(r,EnterpriseAttachmentDTO.class); 
+			}).collect(Collectors.toList()));
+		 }
+		 eDtos.add(eDto);
+	 }
+     RestResponse res = new RestResponse(eDtos);
      res.setErrorCode(ErrorCodes.SUCCESS);
      res.setErrorDescription("OK");
      

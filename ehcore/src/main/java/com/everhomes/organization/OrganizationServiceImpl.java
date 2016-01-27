@@ -73,6 +73,8 @@ import java.util.stream.Collectors;
 
 
 
+
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,6 +84,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+
+
 
 
 
@@ -173,6 +177,7 @@ import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.address.AddressAdminStatus;
+import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryConstants;
@@ -181,6 +186,7 @@ import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.enterprise.EnterpriseNotifyTemplateCode;
 import com.everhomes.rest.enterprise.EnterpriseServiceErrorCode;
 import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
+import com.everhomes.rest.enterprise.ListUserRelatedEnterprisesCommand;
 import com.everhomes.rest.enterprise.RejectContactCommand;
 import com.everhomes.rest.enterprise.SearchEnterpriseCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
@@ -503,18 +509,25 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 	
 	private OrganizationDetailDTO toOrganizationDetailDTO(Long id){
+		Organization organization = organizationProvider.findOrganizationById(id);
 		OrganizationDetail org = organizationProvider.findOrganizationDetailByOrganizationId(id);
-		
 		OrganizationDetailDTO dto = ConvertHelper.convert(org, OrganizationDetailDTO.class);
+		dto.setName(organization.getName());
 		dto.setAvatarUri(org.getAvatar());
 		if(!StringUtils.isEmpty(org.getAvatar()))
-			contentServerService.parserUri(dto.getAvatarUri(), EntityType.ORGANIZATIONS.getCode(), dto.getOrganizationId());
+			dto.setAvatarUrl(contentServerService.parserUri(dto.getAvatarUri(), EntityType.ORGANIZATIONS.getCode(), dto.getOrganizationId()));
         
 		if(!StringUtils.isEmpty(dto.getPostUri()))
-			contentServerService.parserUri(dto.getPostUri(), EntityType.ORGANIZATIONS.getCode(), dto.getOrganizationId());
+			dto.setPostUrl(contentServerService.parserUri(dto.getPostUri(), EntityType.ORGANIZATIONS.getCode(), dto.getOrganizationId()));
 		
-		List<OrganizationAddress> addresses = organizationProvider.findOrganizationAddressByOrganizationId(dto.getOrganizationId());
-		dto.setAddresses( addresses.stream().map(r->{ return ConvertHelper.convert(r,OrganizationAddressDTO.class); }).collect(Collectors.toList()));
+		List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(dto.getOrganizationId());
+		List<AddressDTO> addresses = organizationAddresses.stream().map(r->{
+			OrganizationAddressDTO address = ConvertHelper.convert(r,OrganizationAddressDTO.class);
+			Address addr = addressProvider.findAddressById(address.getAddressId());
+			return ConvertHelper.convert(addr, AddressDTO.class); 
+			}).collect(Collectors.toList());
+		
+		dto.setAddresses(addresses);
 		List<OrganizationAttachment> attachments = organizationProvider.listOrganizationAttachments(dto.getOrganizationId());
 		
 		if(null == attachments || 0 == attachments.size()) return dto;
@@ -639,12 +652,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 		});
 		List<AttachmentDescriptor> attachments = cmd.getAttachments();
 		
-		if(null != attachments && 0 == attachments.size()){
+		if(null != attachments && 0 != attachments.size()){
 			this.addAttachments(organization.getId(), attachments, user.getId());
 		}
 		
 		List<OrganizationAddressDTO> addressDTOs = cmd.getAddressDTOs();
-		if(null != addressDTOs && 0 == addressDTOs.size()){
+		if(null != addressDTOs && 0 != addressDTOs.size()){
 			this.addAddresses(organization.getId(), addressDTOs, user.getId());
 		}
 		
@@ -735,12 +748,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		List<AttachmentDescriptor> attachments = cmd.getAttachments();
 		
-		if(null != attachments && 0 == attachments.size()){
+		if(null != attachments && 0 != attachments.size()){
 			this.addAttachments(organization.getId(), attachments, user.getId());
 		}
 		
 		List<OrganizationAddressDTO> addressDTOs = cmd.getAddressDTOs();
-		if(null != addressDTOs && 0 == addressDTOs.size()){
+		if(null != addressDTOs && 0 != addressDTOs.size()){
 			this.addAddresses(organization.getId(), addressDTOs, user.getId());
 		}
 	}
@@ -1692,6 +1705,22 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    }
 	    
 	    return path;
+	}
+	
+	@Override
+	public List<OrganizationDetailDTO> listUserRelateEnterprises(ListUserRelatedEnterprisesCommand cmd) {
+		User user = UserContext.current().getUser();
+		List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembers(user.getId());
+		List<OrganizationDetailDTO> dtos = new ArrayList<OrganizationDetailDTO>();
+		for (OrganizationMember member : orgMembers) {
+			Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
+			if(OrganizationGroupType.ENTERPRISE.getCode().equals(org.getGroupType())){
+				OrganizationDetailDTO dto= this.toOrganizationDetailDTO(org.getId());
+				dto.setMember(ConvertHelper.convert(member, OrganizationMemberDTO.class));
+				dtos.add(dto);
+			}
+		}
+		return dtos;
 	}
 
 	@Override

@@ -718,7 +718,7 @@ public class OrganizationAdminController extends ControllerBase {
      * <p>删除机构成员</p>
      */
     @RequestMapping("verifyPersonnelByPhone")
-    @RestReturn(value=String.class)
+    @RestReturn(value=OrganizationMemberDTO.class)
     public RestResponse verifyPersonnelByPhone(@Valid VerifyPersonnelByPhoneCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 //        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);

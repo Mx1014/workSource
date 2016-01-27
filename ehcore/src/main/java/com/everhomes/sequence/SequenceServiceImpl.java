@@ -12,7 +12,6 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
-
 import com.everhomes.schema.tables.pojos.EhAclPrivileges;
 import com.everhomes.schema.tables.pojos.EhAclRoleAssignments;
 import com.everhomes.schema.tables.pojos.EhAclRoles;
@@ -65,6 +64,11 @@ import com.everhomes.server.schema.tables.pojos.EhNamespaceResources;
 import com.everhomes.server.schema.tables.pojos.EhNearbyCommunityMap;
 import com.everhomes.server.schema.tables.pojos.EhOauth2Codes;
 import com.everhomes.server.schema.tables.pojos.EhOauth2Tokens;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationAddresses;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationAttachments;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationCommunities;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationCommunityRequests;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationDetails;
 import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.server.schema.tables.pojos.EhParkApplyCard;
 import com.everhomes.server.schema.tables.pojos.EhParkCharge;
@@ -529,6 +533,22 @@ public class SequenceServiceImpl implements SequenceService {
         
         syncTableSequence(EhGroups.class, EhConfReservations.class, Tables.EH_CONF_RESERVATIONS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_CONF_RESERVATIONS.ID.max()).from(Tables.EH_CONF_RESERVATIONS).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(EhCommunities.class, EhOrganizationCommunityRequests.class, Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.ID.max()).from(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(EhOrganizations.class, EhOrganizationDetails.class, Tables.EH_ORGANIZATION_DETAILS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_ORGANIZATION_DETAILS.ID.max()).from(Tables.EH_ORGANIZATION_DETAILS).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(EhOrganizations.class, EhOrganizationAddresses.class, Tables.EH_ORGANIZATION_ADDRESSES.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_ORGANIZATION_ADDRESSES.ID.max()).from(Tables.EH_ORGANIZATION_ADDRESSES).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(EhOrganizations.class, EhOrganizationAttachments.class, Tables.EH_ORGANIZATION_ATTACHMENTS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_ORGANIZATION_ATTACHMENTS.ID.max()).from(Tables.EH_ORGANIZATION_ATTACHMENTS).fetchOne().value1(); 
         });
     }
     

@@ -16,7 +16,9 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
+import com.everhomes.rest.enterprise.EnterpriseDTO;
 import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
+import com.everhomes.rest.enterprise.ListUserRelatedEnterprisesCommand;
 import com.everhomes.rest.enterprise.SearchEnterpriseCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
 import com.everhomes.rest.forum.CancelLikeTopicCommand;
@@ -811,5 +813,18 @@ public class OrganizationController extends ControllerBase {
         return res;
     }
     
-    
+    /**
+     * <b>URL: /enterprise/listUserRelatedEnterprises</b>
+     * <p>列出个人相关的企业</p>
+     * @return {@link EnterpriseDTO}
+     */
+     @RequestMapping("listUserRelatedEnterprises")
+     @RestReturn(value=OrganizationDetailDTO.class, collection=true)
+     public RestResponse listUserRelatedEnterprises(@Valid ListUserRelatedEnterprisesCommand cmd) {
+        RestResponse res = new RestResponse(organizationService.listUserRelateEnterprises(cmd));
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        
+        return res;
+        }
 }

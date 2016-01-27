@@ -85,7 +85,6 @@ import com.everhomes.rest.community.admin.VerifyBuildingNameAdminCommand;
 import com.everhomes.rest.community.admin.listBuildingsByStatusCommand;
 import com.everhomes.rest.enterprise.EnterpriseContactStatus;
 import com.everhomes.rest.forum.AttachmentDescriptor;
-import com.everhomes.rest.group.GroupDTO;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
