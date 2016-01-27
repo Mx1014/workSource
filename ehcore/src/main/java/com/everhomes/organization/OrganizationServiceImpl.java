@@ -75,6 +75,8 @@ import java.util.stream.Collectors;
 
 
 
+
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,6 +86,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+
+
 
 
 
@@ -278,6 +282,7 @@ import com.everhomes.rest.organization.OrganizationTaskType;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.PrivateFlag;
 import com.everhomes.rest.organization.RejectOrganizationCommand;
+import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.organization.SearchTopicsByTypeCommand;
 import com.everhomes.rest.organization.SearchTopicsByTypeResponse;
 import com.everhomes.rest.organization.SendOrganizationMessageCommand;
@@ -321,6 +326,7 @@ import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
 import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.search.EnterpriseSearcher;
+import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -417,7 +423,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     private OrganizationRoleMapProvider organizationRoleMapProvider;
 	
 	 @Autowired
-	private EnterpriseSearcher enterpriseSearcher;
+	private OrganizationSearcher organizationSearcher;
 	 
 	@Autowired
 	private CoordinationProvider coordinationProvider;
@@ -496,9 +502,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	
 	@Override
-    public ListEnterprisesCommandResponse searchEnterprise(SearchEnterpriseCommand cmd) {
+    public ListEnterprisesCommandResponse searchEnterprise(SearchOrganizationCommand cmd) {
         ListEnterprisesCommandResponse resp = new ListEnterprisesCommandResponse();
-        GroupQueryResult rlt = this.enterpriseSearcher.query(cmd);
+        GroupQueryResult rlt = this.organizationSearcher.query(cmd);
         resp.setNextPageAnchor(rlt.getPageAnchor());
         List<OrganizationDetailDTO> dtos = new ArrayList<OrganizationDetailDTO>();
         for(Long id : rlt.getIds()) {
@@ -557,9 +563,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 		String keywords = cmd.getKeywords();
 		
 		if(!StringUtils.isEmpty(keywords)){
-			SearchEnterpriseCommand searchEnterpriseCommand = ConvertHelper.convert(cmd, SearchEnterpriseCommand.class);
-			searchEnterpriseCommand.setKeyword(keywords);
-			return this.searchEnterprise(searchEnterpriseCommand);
+			SearchOrganizationCommand command = ConvertHelper.convert(cmd, SearchOrganizationCommand.class);
+			command.setKeyword(keywords);
+			return this.searchEnterprise(command);
 		}
 		
 		ListEnterprisesCommandResponse resp = new ListEnterprisesCommandResponse();
@@ -639,15 +645,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 	        
 	        this.organizationProvider.createOrganizationCommunityRequest(organizationCommunityRequest);
 			
-	        Enterprise e = new Enterprise();
-	        e.setId(organization.getId());
-	        e.setNamespaceId(organization.getNamespaceId());
-	        e.setCommunityId(cmd.getCommunityId());
-	        e.setName(organization.getName());
-	        e.setDescription(enterprise.getDescription());
-	        e.setCreateTime(organization.getCreateTime());
+	        organization.setCommunityId(cmd.getCommunityId());
+	        organization.setDescription(enterprise.getDescription());
 	        
-	        enterpriseSearcher.feedDoc(e);
+	        organizationSearcher.feedDoc(organization);
 			return null;
 		});
 		List<AttachmentDescriptor> attachments = cmd.getAttachments();
@@ -734,15 +735,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 			organizationDetail.setPostUri(cmd.getPostUri());
 			organizationProvider.updateOrganizationDetail(organizationDetail);
 			
-			Enterprise e = new Enterprise();
-	        e.setId(organization.getId());
-	        e.setNamespaceId(organization.getNamespaceId());
-	        e.setCommunityId(cmd.getCommunityId());
-	        e.setName(organization.getName());
-	        e.setDescription(organizationDetail.getDescription());
-	        e.setCreateTime(organization.getCreateTime());
-	        
-	        enterpriseSearcher.feedDoc(e);
+			organization.setCommunityId(cmd.getCommunityId());
+	        organization.setDescription(organizationDetail.getDescription());
+	        organizationSearcher.feedDoc(organization);
 			return null;
 		});
 		

@@ -60,6 +60,7 @@ import com.everhomes.rest.organization.OrganizationMemberCommand;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.OrganizationSimpleDTO;
 import com.everhomes.rest.organization.RejectOrganizationCommand;
+import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.organization.SearchTopicsByTypeCommand;
 import com.everhomes.rest.organization.SearchTopicsByTypeResponse;
 import com.everhomes.rest.organization.SendOrganizationMessageCommand;
@@ -733,7 +734,7 @@ public class OrganizationController extends ControllerBase {
      */
     @RequestMapping("searchEnterprise")
     @RestReturn(value=OrganizationDetailDTO.class, collection=true)
-    public RestResponse searchEnterprise(@Valid SearchEnterpriseCommand cmd) {
+    public RestResponse searchEnterprise(@Valid SearchOrganizationCommand cmd) {
     	ListEnterprisesCommandResponse res = organizationService.searchEnterprise(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
