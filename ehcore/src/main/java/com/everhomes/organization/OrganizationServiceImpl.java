@@ -1706,6 +1706,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 	public List<OrganizationDetailDTO> listUserRelateEnterprises(ListUserRelatedEnterprisesCommand cmd) {
 		User user = UserContext.current().getUser();
 		List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembers(user.getId());
+		
+		Community community = null;
+		if(null != cmd.getCommunityId()){
+			community = communityProvider.findCommunityById(cmd.getCommunityId());
+		}
 		List<OrganizationDetailDTO> dtos = new ArrayList<OrganizationDetailDTO>();
 		for (OrganizationMember member : orgMembers) {
 			Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
@@ -1713,6 +1718,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				OrganizationDetailDTO dto= this.toOrganizationDetailDTO(org.getId());
 				dto.setMember(ConvertHelper.convert(member, OrganizationMemberDTO.class));
 				dto.setCommunityId(cmd.getCommunityId());
+				dto.setCommunity(ConvertHelper.convert(community, CommunityDTO.class));
 				dtos.add(dto);
 			}
 		}

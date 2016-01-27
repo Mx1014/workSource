@@ -236,11 +236,26 @@ public class EnterpriseController extends ControllerBase {
 		 eDto.setContactsPhone(oDto.getMember().getContactToken());
 		 eDto.setEnterpriseAddress(oDto.getAddress());
 		 eDto.setId(oDto.getOrganizationId());
+		 eDto.setContactStatus(oDto.getMember().getStatus());
 		 if(null != oDto.getAttachments()){
 			 eDto.setAttachments(oDto.getAttachments().stream().map(r->{
 					return ConvertHelper.convert(r,EnterpriseAttachmentDTO.class); 
 			}).collect(Collectors.toList()));
 		 }
+		 
+		 if(null != oDto.getCommunity()){
+			 eDto.setCommunityId(oDto.getCommunity().getId());
+			 eDto.setCommunityName(oDto.getCommunity().getName());
+			 eDto.setAreaId(oDto.getCommunity().getAreaId());
+			 eDto.setAreaName(oDto.getCommunity().getAreaName());
+			 eDto.setCityId(oDto.getCommunity().getCityId());
+			 eDto.setCityName(oDto.getCommunity().getCityName());
+			 eDto.setCommunityType(oDto.getCommunity().getCommunityType());
+			 eDto.setDefaultForumId(oDto.getCommunity().getDefaultForumId());
+			 eDto.setFeedbackForumId(oDto.getCommunity().getFeedbackForumId());
+			 
+		 }
+		
 		 eDtos.add(eDto);
 	 }
      RestResponse res = new RestResponse(eDtos);

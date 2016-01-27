@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.util.StringHelper;
 
@@ -60,6 +61,8 @@ public class OrganizationDetailDTO {
     private String postUrl;
     
     private OrganizationMemberDTO member;
+    
+    private CommunityDTO community;
     
     
 	//TODO address info ?
@@ -359,6 +362,18 @@ public class OrganizationDetailDTO {
 
 	public void setMember(OrganizationMemberDTO member) {
 		this.member = member;
+	}
+
+
+
+	public CommunityDTO getCommunity() {
+		return community;
+	}
+
+
+
+	public void setCommunity(CommunityDTO community) {
+		this.community = community;
 	}
 
 
