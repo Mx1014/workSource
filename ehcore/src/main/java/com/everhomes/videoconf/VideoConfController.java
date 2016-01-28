@@ -1084,6 +1084,7 @@ public class VideoConfController  extends ControllerBase{
 	 * @return
 	 */
 	@RequestMapping("cancelVideoConf")
+	@RequireAuthentication(false)
 	@RestReturn(value = String.class)
 	public RestResponse cancelVideoConf(CancelVideoConfCommand cmd) {
 
