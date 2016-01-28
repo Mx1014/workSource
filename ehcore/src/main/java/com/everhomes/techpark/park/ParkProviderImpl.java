@@ -280,9 +280,9 @@ public class ParkProviderImpl implements ParkProvider {
 	}
 
 	@Override
-	public List<RechargeInfo> searchRechargeRecord(Long communityId,
-			String ownerName, String rechargePhone, String plateNumber,
-			CrossShardListingLocator locator, int count) {
+	public List<RechargeInfo> searchRechargeRecord(Long startTime, Long endTime, Byte rechargeStatus, Long communityId,
+			String ownerName, String rechargePhone, String plateNumber, CrossShardListingLocator locator, int count) {
+		
 		List<RechargeInfo> rechargeInfo = new ArrayList<RechargeInfo>();
 		if (locator.getShardIterator() == null) {
             AccessSpec accessSpec = AccessSpec.readOnlyWith(EhRechargeInfo.class);

@@ -431,7 +431,8 @@ public class ParkServiceImpl implements ParkService {
 		locator.setAnchor(cmd.getPageAnchor() == null ? 0L : cmd.getPageAnchor());
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		
-		List<RechargeInfo> recordInfo = parkProvider.searchRechargeRecord(cmd.getCommunityId(), cmd.getOwnerName(), cmd.getRechargePhone(), cmd.getPlateNumber(), locator, pageSize + 1);
+		List<RechargeInfo> recordInfo = parkProvider.searchRechargeRecord(cmd.getStartTime(), cmd.getEndTime(), cmd.getRechargeStatus(), cmd.getCommunityId(), 
+																			cmd.getOwnerName(), cmd.getRechargePhone(), cmd.getPlateNumber(), locator, pageSize + 1);
 		List<RechargeRecordDTO> rechargeRecord = new ArrayList<RechargeRecordDTO>();
 		
 		recordInfo.forEach(record -> {
