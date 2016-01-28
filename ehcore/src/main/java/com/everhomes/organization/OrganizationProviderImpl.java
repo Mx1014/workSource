@@ -1754,7 +1754,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 					SelectQuery<EhOrganizationAddressesRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_ADDRESSES);
 					query.addConditions(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID.eq(organizationId));
 		            query.fetch().map((EhOrganizationAddressesRecord record) -> {
-		            	this.deleteOrganizationAddressByOrganizationId(organizationId);
+		            	this.deleteOrganizationAddressById(record.getId());
 		            	return null;
 					});
 

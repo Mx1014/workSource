@@ -749,6 +749,7 @@ public class OrganizationController extends ControllerBase {
     @RequestMapping("listEnterprises")
     @RestReturn(value=OrganizationDetailDTO.class, collection=true)
     public RestResponse listEnterprises(@Valid ListEnterprisesCommand cmd) {
+    	cmd.setQryAdminRoleFlag(false);
     	ListEnterprisesCommandResponse  res= organizationService.listEnterprises(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);

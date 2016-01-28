@@ -526,13 +526,13 @@ public class OrganizationServiceImpl implements OrganizationService {
         resp.setNextPageAnchor(rlt.getPageAnchor());
         List<OrganizationDetailDTO> dtos = new ArrayList<OrganizationDetailDTO>();
         for(Long id : rlt.getIds()) {
-        	dtos.add(toOrganizationDetailDTO(id));
+        	dtos.add(toOrganizationDetailDTO(id, false));
         }
         resp.setDtos(dtos);
         return resp;
     }
 	
-	private OrganizationDetailDTO toOrganizationDetailDTO(Long id){
+	private OrganizationDetailDTO toOrganizationDetailDTO(Long id, Boolean flag){
 		Organization organization = organizationProvider.findOrganizationById(id);
 		OrganizationDetail org = organizationProvider.findOrganizationDetailByOrganizationId(id);
 		OrganizationDetailDTO dto = ConvertHelper.convert(org, OrganizationDetailDTO.class);
@@ -562,10 +562,17 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		dto.setAttachments(attachments.stream().map(r->{ return ConvertHelper.convert(r,AttachmentDescriptor.class); }).collect(Collectors.toList()));
 		
-//		aclProvider.getResourceRoleAssignments(arg0, arg1)
+		List<Long> roles = new ArrayList<Long>();
+		roles.add(RoleConstants.ORGANIZATION_GROUP_MEMBER_MGT);
+		
+		if(flag){
+			List<OrganizationMember> members = this.getOrganizationAdminMemberRole(dto.getOrganizationId(), roles);
+			if(members.size() > 0){
+				dto.setMember(ConvertHelper.convert(members.get(0), OrganizationMemberDTO.class));
+			}
+		}
 		return dto;
 	}
-	
 	
 	
 	@Override
@@ -593,18 +600,19 @@ public class OrganizationServiceImpl implements OrganizationService {
 		if(null != buildingId){
 			List<OrganizationAddress> addresses = organizationProvider.listOrganizationAddressByBuildingId(buildingId, cmd.getPageSize(), locator);
 			for (OrganizationAddress address : addresses) {
-				dtos.add(this.toOrganizationDetailDTO(address.getOrganizationId()));
+				
+				dtos.add(this.toOrganizationDetailDTO(address.getOrganizationId(), cmd.getQryAdminRoleFlag()));
 			}
 		}else if(communityId != buildingId){
 			List<OrganizationCommunityRequest> requests = organizationProvider.queryOrganizationCommunityRequestByCommunityId(locator, communityId, cmd.getPageSize(), null);
 			for (OrganizationCommunityRequest req : requests) {
-				dtos.add(this.toOrganizationDetailDTO(req.getMemberId()));
+				dtos.add(this.toOrganizationDetailDTO(req.getMemberId(), cmd.getQryAdminRoleFlag()));
 			}
 			
 		}else{
 			List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, locator, cmd.getPageSize());
 			for (Organization organization : organizations) {
-				dtos.add(this.toOrganizationDetailDTO(organization.getId()));
+				dtos.add(this.toOrganizationDetailDTO(organization.getId(), cmd.getQryAdminRoleFlag()));
 			}
 		}
 		
@@ -1732,7 +1740,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		for (OrganizationMember member : orgMembers) {
 			Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
 			if(OrganizationGroupType.ENTERPRISE.getCode().equals(org.getGroupType())){
-				OrganizationDetailDTO dto= this.toOrganizationDetailDTO(org.getId());
+				OrganizationDetailDTO dto= this.toOrganizationDetailDTO(org.getId(), false);
 				dto.setMember(ConvertHelper.convert(member, OrganizationMemberDTO.class));
 				dto.setCommunityId(cmd.getCommunityId());
 				dto.setCommunity(ConvertHelper.convert(community, CommunityDTO.class));
@@ -4020,7 +4028,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		organizationMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
 		organizationMember.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
 		organizationMember.setContactType(IdentifierType.MOBILE.getCode());
-		
+		organizationMember.setGroupId(0l);
 		
 		if(org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())){
 			organizationMember.setGroupId(org.getId());
@@ -4091,7 +4099,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				m =  ConvertHelper.convert(this.createOrganizationPersonnel(memberCmd), OrganizationMember.class);
 			}
 		
-			if(!member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode())){
+			if(!m.getTargetType().equals(OrganizationMemberTargetType.USER.getCode())){
 			
 				User newuser = new User();
 				newuser.setStatus(UserStatus.ACTIVE.getCode());
@@ -4685,15 +4693,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 			return org;
 		}
 	    
-	    
-	    private List<Long> getOrganizationAdminIncludeList(Long organizationId, Long operatorId, Long targetId) {
-	    	
-	    	List<Long> memberIds = new ArrayList<Long>();
-	    	
+	    private List<OrganizationMember> getOrganizationAdminMemberRole(Long organizationId, List<Long> roles){
 	    	List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(organizationId);
 	    	
+	    	List<OrganizationMember> roleMembers = new ArrayList<OrganizationMember>();
 	    	if(0 == members.size()){
-	    		return memberIds;
+	    		return roleMembers;
 	    	}
 	    	
 	    	for (OrganizationMember member : members) {
@@ -4702,30 +4707,48 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    			
 	    			if(null != resources && resources.size() > 0){
 	    				for (Long roleId : resources) {
-							if(RoleConstants.ORGANIZATION_GROUP_MEMBER_MGT == roleId || RoleConstants.ORGANIZATION_ADMIN == roleId){
-								memberIds.add(member.getTargetId());
+							if(roles.contains(roleId)){
+								roleMembers.add(member);
 								continue;
 							}
 						}
 	    			}
 	    			
-	    			if(0 != member.getGroupId()){
+	    			if(null != member.getGroupId() && 0 != member.getGroupId()){
 	    				resources = aclProvider.getRolesFromResourceAssignments("system", null, EntityType.ORGANIZATIONS.getCode(), member.getGroupId(), null);
 	    				if(null != resources && resources.size() > 0){
 		    				for (Long roleId : resources) {
-								if(RoleConstants.ORGANIZATION_GROUP_MEMBER_MGT == roleId || RoleConstants.ORGANIZATION_ADMIN == roleId){
-									memberIds.add(member.getTargetId());
+								if(roles.contains(roleId)){
+									roleMembers.add(member);
 								}
 							}
 		    			}
 	    			}
 	    			
 	    		}
-	    		
-			}
+	    	}
 	    	
+	    	return roleMembers;
+		}
+	    
+	    private List<Long> getOrganizationAdminIncludeList(Long organizationId, Long operatorId, Long targetId) {
 	    	
+	    	List<Long> memberIds = new ArrayList<Long>();
+	    	
+	    	List<Long> roles = new ArrayList<Long>();
+	    	roles.add(RoleConstants.ORGANIZATION_GROUP_MEMBER_MGT);
+	    	roles.add(RoleConstants.ORGANIZATION_ADMIN);
+	    	
+	    	List<OrganizationMember> members = this.getOrganizationAdminMemberRole(organizationId, roles);
 	      
+	    	if(members.size() == 0){
+	    		return memberIds;
+	    	}
+	    	
+	    	memberIds = members.stream().map((r)->{
+	    		return r.getTargetId();
+	    	}).collect(Collectors.toList());
+	    	
 	        if(LOGGER.isDebugEnabled()) {
 	            LOGGER.debug("Get organization member admin include list, organizationId=" + organizationId + ", operatorId=" + operatorId 
 	                + ", targetId=" + targetId + ", includeList=" + memberIds);

@@ -21,6 +21,8 @@ public class ListEnterprisesCommand {
     
     private Long bildingName;
     
+    private Boolean qryAdminRoleFlag = false;
+    
     private String keywords;
     
     private Long pageAnchor;
@@ -82,6 +84,14 @@ public class ListEnterprisesCommand {
 
 	public void setKeywords(String keywords) {
 		this.keywords = keywords;
+	}
+
+	public Boolean getQryAdminRoleFlag() {
+		return qryAdminRoleFlag;
+	}
+
+	public void setQryAdminRoleFlag(Boolean qryAdminRoleFlag) {
+		this.qryAdminRoleFlag = qryAdminRoleFlag;
 	}
 
     

@@ -41,12 +41,15 @@ import com.everhomes.rest.organization.GetUserResourcePrivilege;
 import com.everhomes.rest.organization.ListAllChildrenOrganizationsCommand;
 import com.everhomes.rest.organization.ListDepartmentsCommand;
 import com.everhomes.rest.organization.ListDepartmentsCommandResponse;
+import com.everhomes.rest.organization.ListEnterprisesCommand;
+import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
 import com.everhomes.rest.organization.ListOrganizationContactCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.ListOrganizationsCommand;
 import com.everhomes.rest.organization.ListOrganizationsCommandResponse;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationDetailDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.SearchTopicsByTypeCommand;
@@ -763,4 +766,19 @@ public class OrganizationAdminController extends ControllerBase {
         return response;
     }
     
+    
+    /**
+     * <b>URL: /org/listEnterpriseByCommunityId</b>
+     * <p>后台管理 企业列表 和对于的管理员信息</p>
+     */
+    @RequestMapping("listEnterpriseByCommunityId")
+    @RestReturn(value=OrganizationDetailDTO.class, collection=true)
+    public RestResponse listEnterpriseByCommunityId(@Valid ListEnterprisesCommand cmd) {
+    	cmd.setQryAdminRoleFlag(true);
+    	ListEnterprisesCommandResponse  res= organizationService.listEnterprises(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
