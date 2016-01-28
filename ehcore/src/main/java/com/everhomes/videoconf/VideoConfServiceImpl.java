@@ -1190,6 +1190,21 @@ public class VideoConfServiceImpl implements VideoConfService {
 			userAccount.setAccountId(account.getId());
 			userAccount.setStatus(account.getStatus());
 			userAccount.setOccupyFlag(account.getAssignedFlag());
+			
+			if(userAccount.getOccupyFlag() == 1) {
+				ConfConferences conf = vcProvider.findConfConferencesById(account.getAssignedConfId());
+				if(conf != null) {
+					userAccount.setConfId(conf.getConfId());
+				} else {
+					userAccount.setOccupyFlag((byte) 0);
+					
+					account.setAssignedConfId(0L);
+					account.setAssignedFlag((byte) 0);
+					account.setAssignedSourceId(0L);
+					account.setAssignedTime(null);
+					vcProvider.updateConfAccounts(account);
+				}
+			}
 		} else {
 			userAccount.setAccountId(0L);
 			userAccount.setStatus((byte) 0);
