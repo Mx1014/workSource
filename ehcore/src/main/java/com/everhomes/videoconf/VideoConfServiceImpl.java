@@ -1445,11 +1445,17 @@ public class VideoConfServiceImpl implements VideoConfService {
 			reservation.setCreatorPhone(phones.get(0));
 		
 		ConfAccounts account = vcProvider.findAccountByUserId(user.getId());
-		LOGGER.info("reserveVideoConf account = " + account + ", current user = " + user);
-		if(account != null) {
-			reservation.setConfAccountId(account.getId());
-			reservation.setEnterpriseId(account.getEnterpriseId());
+		LOGGER.info("reserveVideoConf account = " + account + ", current user = " + user.getId());
+		if(account == null) {
+			LOGGER.error("account is null");
+			throw RuntimeErrorException.errorWith(ConfServiceErrorCode.SCOPE, ConfServiceErrorCode.ERROR_INVALID_ACCOUNT,
+					localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
+							String.valueOf(ConfServiceErrorCode.ERROR_INVALID_ACCOUNT),
+							UserContext.current().getUser().getLocale(),"account is invaild."));
+			
 		}
+		reservation.setConfAccountId(account.getId());
+		reservation.setEnterpriseId(account.getEnterpriseId());
 		
 		if(cmd.getId() == null) {
 			reservation.setCreatorUid(user.getId());
