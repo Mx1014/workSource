@@ -49,11 +49,11 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
     private XContentBuilder createDoc(Organization organization){
         try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
-//            b.field("namespaceId", organization.getNamespaceId());
+            b.field("namespaceId", organization.getNamespaceId());
             b.field("communityId", organization.getCommunityId());
             b.field("name", organization.getName());
             b.field("description", organization.getDescription());
-//            b.field("createTime", organization.getCreateTime());
+            b.field("createTime", organization.getCreateTime());
             b.endObject();
             return b;
         } catch (IOException ex) {
