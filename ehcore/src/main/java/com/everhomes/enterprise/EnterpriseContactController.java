@@ -162,12 +162,24 @@ public class EnterpriseContactController extends ControllerBase {
         command.setOrganizationId(cmd.getEnterpriseId());
         command.setContactName(cmd.getName());
         OrganizationMemberDTO dto = organizationService.applyForEnterpriseContact(command);
+        EnterpriseContactDTO contact = new EnterpriseContactDTO();
+        contact.setId(dto.getId());
+        contact.setAvatar(dto.getAvatar());
+        contact.setEnterpriseId(dto.getOrganizationId());
+        contact.setEmployeeNo(String.valueOf(dto.getEmployeeNo()));
+        contact.setGroupName(dto.getGroupName());
+        contact.setName(dto.getContactName());
+        contact.setNickName(dto.getNickName());
+        contact.setPhone(dto.getContactToken());
+        contact.setStatus(dto.getStatus());
+        contact.setUserId(dto.getTargetId());
+        contact.setSex(String.valueOf(dto.getGender()));
         RestResponse res = new RestResponse();
-        if (null == dto) {
+        if (null == contact) {
             //TODO for error code
             res.setErrorCode(ErrorCodes.ERROR_GENERAL_EXCEPTION); 
         } else {
-            res.setResponseObject(dto);
+            res.setResponseObject(contact);
         }
         
         res.setErrorCode(ErrorCodes.SUCCESS);
