@@ -4034,7 +4034,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			organizationMember.setGroupId(org.getId());
 			organizationMember.setGroupPath(org.getPath());
 			organizationMember.setOrganizationId(org.getDirectlyEnterpriseId());
-		}else if(null != organizationMember.getGroupId()){
+		}else if(null != organizationMember.getGroupId() && 0 != organizationMember.getGroupId()){
 			Organization group = checkOrganization(organizationMember.getGroupId());
 			organizationMember.setGroupPath(group.getPath());
 		}
@@ -4084,9 +4084,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	@Override
 	public void createOrganizationAccount(CreateOrganizationAccountCommand cmd){
-		
 		int namespaceId = UserContext.getCurrentNamespaceId(null);
 		OrganizationMember member = organizationProvider.findOrganizationPersonnelByPhone(cmd.getOrganizationId(), cmd.getAccountPhone());
+		
 		this.dbProvider.execute((TransactionStatus status) -> {
 			OrganizationMember m = member;
 			
@@ -4100,48 +4100,50 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}
 		
 			if(!m.getTargetType().equals(OrganizationMemberTargetType.USER.getCode())){
-			
-				User newuser = new User();
-				newuser.setStatus(UserStatus.ACTIVE.getCode());
-				newuser.setNamespaceId(namespaceId);
-				newuser.setAccountName(cmd.getAccountName());
-				newuser.setNickName(cmd.getAccountName());
-				newuser.setGender(UserGender.UNDISCLOSURED.getCode());
-				String salt=EncryptionUtils.createRandomSalt();
-				newuser.setSalt(salt);
-				try {
-					newuser.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s","8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",salt)));
-				} catch (Exception e) {
-					LOGGER.error("encode password failed");
-					throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Unable to create password hash");
+				UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, m.getContactToken());
+				
+				if(null == userIdentifier){
+					User newuser = new User();
+					newuser.setStatus(UserStatus.ACTIVE.getCode());
+					newuser.setNamespaceId(namespaceId);
+					newuser.setAccountName(cmd.getAccountName());
+					newuser.setNickName(cmd.getAccountName());
+					newuser.setGender(UserGender.UNDISCLOSURED.getCode());
+					String salt=EncryptionUtils.createRandomSalt();
+					newuser.setSalt(salt);
+					try {
+						newuser.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s","8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",salt)));
+					} catch (Exception e) {
+						LOGGER.error("encode password failed");
+						throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Unable to create password hash");
 
+					}
+
+					userProvider.createUser(newuser);
+
+					UserIdentifier newIdentifier = new UserIdentifier();
+					newIdentifier.setOwnerUid(newuser.getId());
+					newIdentifier.setIdentifierType(IdentifierType.MOBILE.getCode());
+					newIdentifier.setIdentifierToken(cmd.getAccountPhone());
+					newIdentifier.setNamespaceId(namespaceId);
+
+					newIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
+					userProvider.createIdentifier(newIdentifier);
 				}
-
-				userProvider.createUser(newuser);
-
-				UserIdentifier newIdentifier = new UserIdentifier();
-				newIdentifier.setOwnerUid(newuser.getId());
-				newIdentifier.setIdentifierType(IdentifierType.MOBILE.getCode());
-				newIdentifier.setIdentifierToken(cmd.getAccountPhone());
-				newIdentifier.setNamespaceId(namespaceId);
-
-				newIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
-				userProvider.createIdentifier(newIdentifier);
 				
 				m.setContactName(cmd.getAccountName());
 				m.setTargetType(OrganizationMemberTargetType.USER.getCode());
-				m.setTargetId(newuser.getId());
+				m.setTargetId(userIdentifier.getOwnerUid());
 				organizationProvider.updateOrganizationMember(m);
-				
-				if(null != cmd.getAssignmentId())
-					aclProvider.deleteRoleAssignment(cmd.getAssignmentId());
-				
-				SetAclRoleAssignmentCommand roleCmd = new SetAclRoleAssignmentCommand();
-				roleCmd.setRoleId(RoleConstants.ORGANIZATION_GROUP_MEMBER_MGT);
-				roleCmd.setTargetId(m.getTargetId());
-				this.setAclRoleAssignmentRole(roleCmd, EntityType.USER);
-			
 			}
+			
+			if(null != cmd.getAssignmentId())
+				aclProvider.deleteRoleAssignment(cmd.getAssignmentId());
+			
+			SetAclRoleAssignmentCommand roleCmd = new SetAclRoleAssignmentCommand();
+			roleCmd.setRoleId(RoleConstants.ORGANIZATION_GROUP_MEMBER_MGT);
+			roleCmd.setTargetId(m.getTargetId());
+			this.setAclRoleAssignmentRole(roleCmd, EntityType.USER);
 			
 			return null;
 		});
