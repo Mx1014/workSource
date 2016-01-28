@@ -64,6 +64,7 @@ import com.everhomes.rest.business.GetBusinessesByCategoryCommandResponse;
 import com.everhomes.rest.business.GetBusinessesByScopeCommand;
 import com.everhomes.rest.business.ListBusinessByKeywordCommand;
 import com.everhomes.rest.business.ListBusinessByKeywordCommandResponse;
+import com.everhomes.rest.business.ListUserByKeywordCommand;
 import com.everhomes.rest.business.SyncBusinessCommand;
 import com.everhomes.rest.business.SyncDeleteBusinessCommand;
 import com.everhomes.rest.business.UpdateBusinessCommand;
@@ -90,6 +91,7 @@ import com.everhomes.rest.user.GetUserDefaultAddressCommand;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.ListUserCommand;
 import com.everhomes.rest.user.UserDtoForBiz;
+import com.everhomes.rest.user.UserInfo;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.SignupToken;
 import com.everhomes.user.User;
@@ -99,6 +101,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserGroup;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
 import com.everhomes.user.UserServiceAddress;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -149,6 +152,8 @@ public class BusinessServiceImpl implements BusinessService {
 	private GroupProvider groupProvider;
 	@Autowired
 	private AclProvider aclProvider;
+	@Autowired
+	private UserService userService;
 
 	@Override
 	public void syncBusiness(SyncBusinessCommand cmd) {
@@ -1465,4 +1470,14 @@ public class BusinessServiceImpl implements BusinessService {
 		return response;
 	}
 
+	@Override
+	public List<UserInfo> listUserByKeyword(ListUserByKeywordCommand cmd) {
+		if(StringUtils.isEmpty(cmd.getKeyword())){
+			LOGGER.error("Invalid paramter keyword,keyword is null.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid paramter keyword,keyword is null");
+		}
+		List<UserInfo> users = userService.listUserByKeyword(cmd.getKeyword());
+		return users;
+	}
 }

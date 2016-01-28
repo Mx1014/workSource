@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.everhomes.business.BusinessService;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
-import com.everhomes.category.CategoryProviderImpl;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -23,6 +22,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.business.ListUserByKeywordCommand;
 import com.everhomes.rest.business.SyncBusinessCommand;
 import com.everhomes.rest.business.SyncDeleteBusinessCommand;
 import com.everhomes.rest.business.SyncUserAddShopStatusCommand;
@@ -49,7 +49,6 @@ import com.everhomes.rest.user.ListUserCommand;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserDtoForBiz;
 import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.user.UserInfoFroBiz;
 import com.everhomes.user.SignupToken;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityService;
@@ -371,6 +370,16 @@ public class BusinessOpenController extends ControllerBase {
     public RestResponse getUserInfoById(@Valid GetUserInfoByIdCommand cmd) {
     	UserInfo user = this.userService.getUserInfoById(cmd);
     	RestResponse response =  new RestResponse(user);
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+		return response;
+    }
+    
+    @RequestMapping("listUserByKeyword")
+    @RestReturn(value=UserInfo.class,collection=true)
+    public RestResponse listUserByKeyword(@Valid ListUserByKeywordCommand cmd) {
+    	List<UserInfo> users = this.businessService.listUserByKeyword(cmd);
+    	RestResponse response =  new RestResponse(users);
     	response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
 		return response;
