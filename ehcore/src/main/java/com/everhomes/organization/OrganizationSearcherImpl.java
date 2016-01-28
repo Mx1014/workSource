@@ -36,7 +36,7 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
     private static final Logger LOGGER = LoggerFactory.getLogger(OrganizationSearcherImpl.class);
     
     @Autowired
-    private OrganizationProvider organizationProvider;
+    private OrganizationService organizationService;
     
     @Autowired
     private ConfigurationProvider  configProvider;
@@ -95,13 +95,13 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
     
     @Override
     public void syncFromDb() {
-        int pageSize = 200;      
         this.deleteAll();
         
         CrossShardListingLocator locator = new CrossShardListingLocator();
         for(;;) {
-            List<Organization> organizations = this.organizationProvider.listEnterpriseByNamespaceIds(null, locator, pageSize);
             
+        	List<Organization> organizations = organizationService.getSyncDatas();
+        	
             if(organizations.size() > 0) {
                 this.bulkUpdate(organizations);
             }

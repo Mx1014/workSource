@@ -78,6 +78,13 @@ import java.util.stream.Collectors;
 
 
 
+
+
+
+
+
+import org.jooq.Record;
+import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,6 +94,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+
+
+
+
+
 
 
 
@@ -172,6 +184,8 @@ import com.everhomes.forum.ForumService;
 import com.everhomes.forum.Post;
 import com.everhomes.group.Group;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
@@ -331,6 +345,7 @@ import com.everhomes.search.EnterpriseSearcher;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhUserActivities;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
@@ -597,7 +612,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 		resp.setNextPageAnchor(locator.getAnchor());
 		return resp;
 	}
-	
 	
 	
 	@Override
@@ -4331,6 +4345,31 @@ public class OrganizationServiceImpl implements OrganizationService {
 		return res;
 	}
 	
+	@Override
+	public List<Organization> getSyncDatas(){
+		int pageSize = 200; 
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		
+		List<OrganizationCommunityRequest> requests = organizationProvider.queryOrganizationCommunityRequests(locator, pageSize, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+					SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_STATUS.ne(OrganizationCommunityRequestStatus.INACTIVE.getCode()));
+		        query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode()));
+				return query;
+			}
+		});
+		
+		return requests.stream().map((r)->{
+			Organization organization = organizationProvider.findOrganizationById(r.getMemberId());
+			OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
+			
+			organization.setCommunityId(r.getCommunityId());
+			organization.setDescription(detail.getDescription());
+			
+			return organization;
+		}).collect(Collectors.toList());
+	}
 	
 	private List<OrganizationDTO> convertOrgRole(List<Organization> orgs, Organization org){
 		Long orgId = null;
