@@ -301,12 +301,6 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			final String imageUrl = configurationProvider.getValue(BUSINESS_IMAGE_URL, "");
 			allItems.forEach(r ->{
 				LaunchPadItemDTO itemDTO = ConvertHelper.convert(r, LaunchPadItemDTO.class);
-				//是否可删除
-				if(r.getItemGroup().equals(ItemGroup.BIZS.getCode())&&!r.getItemLabel().equals("更多"))
-					itemDTO.setDeleteFlag(DeleteFlagType.YES.getCode());
-				else
-					itemDTO.setDeleteFlag(DeleteFlagType.NO.getCode());
-				
 				itemDTO.setActionData(parserJson(token,userId, community.getId(), r,request));
 				itemDTO.setScaleType(ScaleType.TAILOR.getCode());
 				if(r.getTargetType() != null && r.getTargetType().equalsIgnoreCase(ItemTargetType.BIZ.getCode())){

@@ -1,0 +1,1 @@
+update eh_launch_pad_items set delete_flag=0 where item_group!='Bizs';
