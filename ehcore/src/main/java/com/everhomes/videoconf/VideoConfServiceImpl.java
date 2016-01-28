@@ -1421,7 +1421,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 
 	@Override
 	public void reserveVideoConf(ReserveVideoConfCommand cmd) {
-		
+		LOGGER.info("reserveVideoConf cmd = " + cmd);
 		int namespaceId = (UserContext.current().getUser().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getUser().getNamespaceId();
 		
 		User user = UserContext.current().getUser();
