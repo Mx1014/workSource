@@ -36,10 +36,12 @@ import com.everhomes.rest.enterprise.SearchEnterpriseCommand;
 import com.everhomes.rest.enterprise.SearchEnterpriseCommunityCommand;
 import com.everhomes.rest.enterprise.SetCurrentEnterpriseCommand;
 import com.everhomes.rest.group.GroupDTO;
+import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
 import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
 import com.everhomes.rest.organization.OrganizationAddressDTO;
 import com.everhomes.rest.organization.OrganizationDetailDTO;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.search.EnterpriseSearcher;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -146,8 +148,23 @@ public class EnterpriseController extends ControllerBase {
     @RequestMapping("searchEnterprise")
     @RestReturn(value=ListEnterpriseResponse.class)
     public RestResponse searchEnterprise(@Valid SearchEnterpriseCommand cmd) {
-        ListEnterpriseResponse resp = this.enterpriseService.searchEnterprise(cmd);
-        RestResponse res =  new RestResponse(resp);
+    	SearchOrganizationCommand command = ConvertHelper.convert(cmd, SearchOrganizationCommand.class);
+        ListEnterprisesCommandResponse resp = organizationService.searchEnterprise(command);
+        List<EnterpriseDTO> enterprises = resp.getDtos().stream().map((r) ->{
+        	 EnterpriseDTO eDto = ConvertHelper.convert(r, EnterpriseDTO.class);
+    		 eDto.setEnterpriseAddress(r.getAddress());
+    		 eDto.setId(r.getOrganizationId());
+    		 if(null != r.getAttachments()){
+    			 eDto.setAttachments(r.getAttachments().stream().map(n->{
+    					return ConvertHelper.convert(n,EnterpriseAttachmentDTO.class); 
+    			}).collect(Collectors.toList()));
+    		 }
+        	return eDto;
+        }).collect(Collectors.toList());
+        ListEnterpriseResponse r = new ListEnterpriseResponse();
+        r.setEnterprises(enterprises);
+        r.setNextPageAnchor(resp.getNextPageAnchor());
+        RestResponse res =  new RestResponse(r);
 
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
