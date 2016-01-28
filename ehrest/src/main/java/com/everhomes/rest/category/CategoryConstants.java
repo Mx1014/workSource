@@ -73,18 +73,29 @@ public interface CategoryConstants {
     public static final long CATEGORY_ID_ACCOUNT_TYPE = 200301L;
     
     
+    public static final long CATEGORY_ID_CLEANING = 102021L;
+    public static final long CATEGORY_ID_HOUSE_KEEPING = 102022L;
+    public static final long CATEGORY_ID_MAINTENANCE = 102023L;
+    
+    
     /** 政府机构相关的类型 */
     public static final List<Long> GA_RELATED_CATEGORIES = Arrays.asList(
         CATEGORY_ID_NOTICE, 
         CATEGORY_ID_REPAIRS, 
         CATEGORY_ID_CONSULT_APPEAL, 
-        CATEGORY_ID_COMPLAINT_ADVICE
+        CATEGORY_ID_COMPLAINT_ADVICE,
+        CATEGORY_ID_CLEANING,
+        CATEGORY_ID_HOUSE_KEEPING,
+        CATEGORY_ID_MAINTENANCE
     );
     
     /** 政府机构相关的有隐私的类型，使用这些类型的帖子对政府机关来说需要有权控制是否公开 */
     public static final List<Long> GA_PRIVACY_CATEGORIES = Arrays.asList(
         CATEGORY_ID_REPAIRS, 
         CATEGORY_ID_CONSULT_APPEAL, 
-        CATEGORY_ID_COMPLAINT_ADVICE
+        CATEGORY_ID_COMPLAINT_ADVICE,
+        CATEGORY_ID_CLEANING,
+        CATEGORY_ID_HOUSE_KEEPING,
+        CATEGORY_ID_MAINTENANCE
     );
 }
