@@ -4693,7 +4693,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(organizationId);
 	    	
 	    	if(0 == members.size()){
-	    		return null;
+	    		return memberIds;
 	    	}
 	    	
 	    	for (OrganizationMember member : members) {
