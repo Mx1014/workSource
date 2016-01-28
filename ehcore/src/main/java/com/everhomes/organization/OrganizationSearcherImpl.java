@@ -100,7 +100,7 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         
         CrossShardListingLocator locator = new CrossShardListingLocator();
         for(;;) {
-            List<Organization> organizations = null;//this.organizationProvider.listEnterpriseByNamespaceIds(null, locator, pageSize);
+            List<Organization> organizations = this.organizationProvider.listEnterpriseByNamespaceIds(null, locator, pageSize);
             
             if(organizations.size() > 0) {
                 this.bulkUpdate(organizations);
