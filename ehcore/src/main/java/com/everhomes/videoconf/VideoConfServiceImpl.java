@@ -1445,6 +1445,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 			reservation.setCreatorPhone(phones.get(0));
 		
 		ConfAccounts account = vcProvider.findAccountByUserId(user.getId());
+		LOGGER.info("reserveVideoConf account = " + account);
 		if(account != null) {
 			reservation.setConfAccountId(account.getId());
 			reservation.setEnterpriseId(account.getEnterpriseId());
