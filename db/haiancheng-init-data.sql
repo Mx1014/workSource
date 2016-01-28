@@ -164,7 +164,7 @@ INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,ite
 INSERT INTO `eh_launch_pad_items`(id, namespace_id, app_id, scope_code, scope_id, item_location, item_group, item_name, item_label, icon_uri, item_width, item_height, action_type, action_data, default_order, apply_policy, min_version, display_flag, display_layout, bgcolor,tag) 
 	VALUES (1620, 999993, '0', '0', '0', '/home', 'GovAgencies', 'PUNCH', '停车缴费', 'cs://1/image/aW1hZ2UvTVRwbVkyRTVNR1pqTURJNE1qY3pOVEZqTlRFMVpUZzFZVEU1T0RSak16RTFZUQ', '1', '1', '30', '', '0', '0', '1', '1', '', '0', null);
 INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag,target_type, target_id) 
-	VALUES (1621, 999993, '0', '0', '0', '/home', 'GovAgencies', '园区入驻', '园区入驻', 'cs://1/image/aW1hZ2UvTVRvNFlXSXdaRGRqTnpKaU56UmtZMll3WlRNeU1XUmxOekU0WXpNNU9HWmpZUQ', '1', '1', '28', '', '0', '0', '1', '1', '', '0', null, null, null);
+	VALUES (1621, 999993, '0', '0', '0', '/home', 'GovAgencies', '租售中心', '租售中心', 'cs://1/image/aW1hZ2UvTVRvNFlXSXdaRGRqTnpKaU56UmtZMll3WlRNeU1XUmxOekU0WXpNNU9HWmpZUQ', '1', '1', '28', '', '0', '0', '1', '1', '', '0', null, null, null);
 
 
 INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag) 
