@@ -788,7 +788,7 @@ public class OrganizationAdminController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /org/importEnterpriseData</b>
+     * <b>URL: /admin/org/importEnterpriseData</b>
      * <p>导入企业信息</p>
      */
     @RequestMapping("importEnterpriseData")

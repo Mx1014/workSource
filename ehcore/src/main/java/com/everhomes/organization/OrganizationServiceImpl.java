@@ -4806,7 +4806,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	   List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(org.getId());
 	   List<Long> includeList = new ArrayList<Long>();
 	   for (OrganizationMember member : members) {
-		   if(OrganizationMemberTargetType.USER.getCode().equals(member.getStatus()) && excludeUserId != member.getTargetId()){
+		   if(OrganizationMemberTargetType.USER.getCode().equals(member.getTargetType()) && excludeUserId != member.getTargetId()){
 			   includeList.add(member.getTargetId());
 		   }
 		   
