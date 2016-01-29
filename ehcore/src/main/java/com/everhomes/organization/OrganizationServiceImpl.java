@@ -83,6 +83,9 @@ import java.util.stream.Collectors;
 
 
 
+
+
+
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -94,6 +97,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+
+
+
 
 
 
@@ -198,6 +204,7 @@ import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryConstants;
@@ -205,10 +212,12 @@ import com.everhomes.rest.enterprise.ApproveContactCommand;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.enterprise.EnterpriseNotifyTemplateCode;
 import com.everhomes.rest.enterprise.EnterpriseServiceErrorCode;
+import com.everhomes.rest.enterprise.ImportEnterpriseDataCommand;
 import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
 import com.everhomes.rest.enterprise.ListUserRelatedEnterprisesCommand;
 import com.everhomes.rest.enterprise.RejectContactCommand;
 import com.everhomes.rest.enterprise.SearchEnterpriseCommand;
+import com.everhomes.rest.enterprise.UpdateContactorCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.forum.CancelLikeTopicCommand;
@@ -252,6 +261,8 @@ import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
 import com.everhomes.rest.organization.DepartmentDTO;
 import com.everhomes.rest.organization.DepartmentType;
 import com.everhomes.rest.organization.GetOrgDetailCommand;
+import com.everhomes.rest.organization.ImportOrganizationPersonnelDataCommand;
+import com.everhomes.rest.organization.ListAclRoleByUserIdCommand;
 import com.everhomes.rest.organization.ListDepartmentsCommand;
 import com.everhomes.rest.organization.ListDepartmentsCommandResponse;
 import com.everhomes.rest.organization.ListEnterprisesCommand;
@@ -340,6 +351,7 @@ import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserStatus;
 import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
+import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.search.EnterpriseSearcher;
 import com.everhomes.search.OrganizationSearcher;
@@ -459,7 +471,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 
 	@Override
-	public void createChildrenOrganization(CreateOrganizationCommand cmd) {
+	public OrganizationDTO createChildrenOrganization(CreateOrganizationCommand cmd) {
 		//先判断，后台管理员才能创建。状态直接设为正常
 		if(!StringUtils.isEmpty(cmd.getOrganizationType())){
 			OrganizationType organizationType = OrganizationType.fromCode(cmd.getOrganizationType());
@@ -483,6 +495,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 		organization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		organizationProvider.createOrganization(organization);
+		
+		return ConvertHelper.convert(organization, OrganizationDTO.class);
 	}
 	
 	@Override
@@ -623,7 +637,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	
 	@Override
-	public void createEnterprise(CreateEnterpriseCommand cmd) {
+	public OrganizationDTO createEnterprise(CreateEnterpriseCommand cmd) {
 		
 		User user = UserContext.current().getUser();
 		
@@ -687,6 +701,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			this.addAddresses(organization.getId(), addressDTOs, user.getId());
 		}
 		
+		return ConvertHelper.convert(organization, OrganizationDTO.class);
 	}
 	
 	/**
@@ -3714,7 +3729,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	            	if(EntityType.ORGANIZATIONS.getCode().equals(roleass.getTargetType()))
 	            		roleAssignmentMap.put(roleass.getTargetId(), roleass);
 	            }
-	            Map<Long, Organization> deptMaps = this.convertListToMap(depts);
+	            Map<Long, Organization> deptMaps = this.convertDeptListToMap(depts);
 				response.setDepartments( result.stream().map(r->{ 
 					DepartmentDTO department = new DepartmentDTO();
 					department.setId(r.getId());
@@ -3737,7 +3752,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		return response;
 	}
 	
-	private Map<Long, Organization> convertListToMap(List<Organization> depts){
+	private Map<Long, Organization> convertDeptListToMap(List<Organization> depts){
 		Map<Long, Organization> map = new HashMap<Long, Organization>();
 		if(null == depts){
 			return map;
@@ -4121,14 +4136,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 					userProvider.createUser(newuser);
 
-					UserIdentifier newIdentifier = new UserIdentifier();
-					newIdentifier.setOwnerUid(newuser.getId());
-					newIdentifier.setIdentifierType(IdentifierType.MOBILE.getCode());
-					newIdentifier.setIdentifierToken(cmd.getAccountPhone());
-					newIdentifier.setNamespaceId(namespaceId);
+					userIdentifier = new UserIdentifier();
+					userIdentifier.setOwnerUid(newuser.getId());
+					userIdentifier.setIdentifierType(IdentifierType.MOBILE.getCode());
+					userIdentifier.setIdentifierToken(cmd.getAccountPhone());
+					userIdentifier.setNamespaceId(namespaceId);
 
-					newIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
-					userProvider.createIdentifier(newIdentifier);
+					userIdentifier.setClaimStatus(IdentifierClaimStatus.CLAIMED.getCode());
+					userProvider.createIdentifier(userIdentifier);
 				}
 				
 				m.setContactName(cmd.getAccountName());
@@ -4187,6 +4202,244 @@ public class OrganizationServiceImpl implements OrganizationService {
 		    LOGGER.error("Failed to process the enterprise contact for the user, userId=" + identifier.getOwnerUid(), e);
 		}
 		return null;
+	}
+	
+	
+	@Override
+	public List<AclRoleAssignmentsDTO> listAclRoleByUserId(ListAclRoleByUserIdCommand cmd){
+		if(null == cmd.getUserId()){
+			cmd.setUserId(UserContext.current().getUser().getId());
+		}
+		
+		List<AclRoleAssignmentsDTO> dtos = new ArrayList<AclRoleAssignmentsDTO>();
+		
+		List<Long> resources = aclProvider.getRolesFromResourceAssignments("system", null, EntityType.USER.getCode(), cmd.getUserId(), null);
+	
+		if(null != resources && resources.size() > 0){
+			for (Long roleId : resources) {
+				Role role = aclProvider.getRoleById(roleId);
+				AclRoleAssignmentsDTO dto = new AclRoleAssignmentsDTO();
+				dto.setRoleId(role.getId());
+				dto.setRoleName(role.getName());
+				dtos.add(dto);
+			}
+		}
+		
+		return dtos;
+	}
+	
+	
+	@Override
+	public ImportDataResponse importEnterpriseData(MultipartFile mfile,
+			Long userId, ImportEnterpriseDataCommand cmd) {
+		ImportDataResponse importDataResponse = new ImportDataResponse();
+		try {
+			//解析excel
+			List resultList = PropMrgOwnerHandler.processorExcel(mfile.getInputStream());
+			
+			if(null == resultList || resultList.isEmpty()){
+				LOGGER.error("File content is empty。userId="+userId);
+				throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_FILE_CONTEXT_ISNULL,
+						"File content is empty");
+			}
+			LOGGER.debug("Start import data...,total:" + resultList.size());
+			//导入数据，返回导入错误的日志数据集
+			List<String> errorDataLogs = importEnterprise(convertToStrList(resultList), userId, cmd);
+			LOGGER.debug("End import data...,fail:" + errorDataLogs.size());
+			if(null == errorDataLogs || errorDataLogs.isEmpty()){
+				LOGGER.debug("Data import all success...");
+			}else{
+				//记录导入错误日志
+				for (String log : errorDataLogs) {
+					LOGGER.error(log);
+				}
+			}
+			
+			importDataResponse.setTotalCount((long)resultList.size()-1);
+			importDataResponse.setFailCount((long)errorDataLogs.size());
+			importDataResponse.setLogs(errorDataLogs);
+		} catch (IOException e) {
+			LOGGER.error("File can not be resolved...");
+			e.printStackTrace();
+		}
+		return importDataResponse;
+	}
+	
+	@Override
+	public ImportDataResponse importOrganizationPersonnelData(MultipartFile mfile,
+			Long userId, ImportOrganizationPersonnelDataCommand cmd) {
+		ImportDataResponse importDataResponse = new ImportDataResponse();
+		try {
+			//解析excel
+			List resultList = PropMrgOwnerHandler.processorExcel(mfile.getInputStream());
+			
+			if(null == resultList || resultList.isEmpty()){
+				LOGGER.error("File content is empty。userId="+userId);
+				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_FILE_IS_EMPTY,
+						"File content is empty");
+			}
+			LOGGER.debug("Start import data...,total:" + resultList.size());
+			//导入数据，返回导入错误的日志数据集
+			List<String> errorDataLogs = importOrganizationPersonnel(convertToStrList(resultList), userId, cmd);
+			LOGGER.debug("End import data...,fail:" + errorDataLogs.size());
+			if(null == errorDataLogs || errorDataLogs.isEmpty()){
+				LOGGER.debug("Data import all success...");
+			}else{
+				//记录导入错误日志
+				for (String log : errorDataLogs) {
+					LOGGER.error(log);
+				}
+			}
+			
+			importDataResponse.setTotalCount((long)resultList.size()-1);
+			importDataResponse.setFailCount((long)errorDataLogs.size());
+			importDataResponse.setLogs(errorDataLogs);
+		} catch (IOException e) {
+			LOGGER.error("File can not be resolved...");
+			e.printStackTrace();
+		}
+		return importDataResponse;
+	}
+
+	private List<String> convertToStrList(List list) {
+		List<String> result = new ArrayList<String>();
+		boolean firstRow = true;
+		for (Object o : list) {
+			if(firstRow){
+				firstRow = false;
+				continue;
+			}
+			RowResult r = (RowResult)o;
+			StringBuffer sb = new StringBuffer();
+			sb.append(r.getA()).append("||");
+			sb.append(r.getB()).append("||");
+			sb.append(r.getC()).append("||");
+			sb.append(r.getD()).append("||");
+			sb.append(r.getE()).append("||");
+			sb.append(r.getF()).append("||");
+			sb.append(r.getG()).append("||");
+			sb.append(r.getH());
+			result.add(sb.toString().replace("null", ""));
+		}
+		return result;
+	}
+	
+	private List<String> importEnterprise(List<String> list, Long userId, ImportEnterpriseDataCommand cmd){
+		List<String> errorDataLogs = new ArrayList<String>();
+		
+		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+
+		for (String str : list) {
+			String[] s = str.split("\\|\\|");
+			
+			CreateEnterpriseCommand enterpriseCommand = new CreateEnterpriseCommand();
+			enterpriseCommand.setName(s[0]);
+			enterpriseCommand.setDisplayName(s[1]);
+			enterpriseCommand.setAddress(s[2]);
+			enterpriseCommand.setContactsPhone(s[3]);
+			enterpriseCommand.setDescription(s[7]);
+			enterpriseCommand.setContactor(s[5]);
+			enterpriseCommand.setNamespaceId(namespaceId);
+			enterpriseCommand.setCommunityId(cmd.getCommunityId());
+			OrganizationDTO dto = this.createEnterprise(enterpriseCommand);
+			
+			
+			CreateOrganizationAccountCommand accountCommand = new CreateOrganizationAccountCommand();
+			accountCommand.setOrganizationId(dto.getId());
+			accountCommand.setAccountPhone(s[6]);
+			accountCommand.setAccountName(s[5]);
+			if(!StringUtils.isEmpty(accountCommand.getAccountPhone())){
+				this.createOrganizationAccount(accountCommand);
+			}
+			
+		}
+		return errorDataLogs;
+		
+	}
+	
+	private List<String> importOrganizationPersonnel(List<String> list, Long userId, ImportOrganizationPersonnelDataCommand cmd){
+		List<String> errorDataLogs = new ArrayList<String>();
+		Organization org = checkOrganization(cmd.getOrganizationId());
+		int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+		List<Organization> depts = organizationProvider.listDepartments(org.getPath()+"/%", 1, 1000);
+		for (String str : list) {
+			String[] s = str.split("\\|\\|");
+			
+			if(0 == s.length){
+				LOGGER.debug("Organization member is null. data = " + str);
+				errorDataLogs.add("Organization member is null. data = " + str);
+				continue;
+			}
+			CreateOrganizationMemberCommand memberCommand = new CreateOrganizationMemberCommand();
+			
+			memberCommand.setContactToken(s[4]);
+			memberCommand.setContactName(s[2]);
+			memberCommand.setEmployeeNo(StringUtils.isEmpty(s[0]) ? 0l : Long.parseLong(s[0]));
+			Byte gender = 0;
+			if(s[3].equals("男")){
+				gender = 1;
+			}else if(s[3].equals("女")){
+				gender = 2;
+			}
+			memberCommand.setGender(gender);
+			if(StringUtils.isEmpty(memberCommand.getContactToken())){
+				LOGGER.debug("Organization member contactToken is null. data = " + str);
+				errorDataLogs.add("Organization member contactToken is null. data = " + str);
+				continue;
+			}
+			
+			
+			Map<String, Organization> deptMap = this.convertDeptListToStrMap(depts);
+			
+			Organization dept = deptMap.get(s[1]);
+			if(StringUtils.isEmpty(s[1])){
+				memberCommand.setGroupId(0l);
+			}else{
+				if(null == dept){
+					CreateOrganizationCommand deptCommand = new CreateOrganizationCommand();
+					deptCommand.setName(s[1]);
+					deptCommand.setGroupType(OrganizationGroupType.DEPARTMENT.getCode());
+					deptCommand.setParentId(org.getId());
+					OrganizationDTO deptDto = this.createChildrenOrganization(deptCommand);
+					dept = ConvertHelper.convert(deptDto, Organization.class);
+					deptMap.put(deptDto.getName(), dept);
+				}
+				memberCommand.setGroupId(dept.getId());
+			}
+			memberCommand.setOrganizationId(org.getId());
+			VerifyPersonnelByPhoneCommand verifyCommand = new VerifyPersonnelByPhoneCommand();
+			verifyCommand.setEnterpriseId(org.getId());
+			verifyCommand.setNamespaceId(namespaceId);
+			verifyCommand.setPhone(memberCommand.getContactToken());
+			
+			VerifyPersonnelByPhoneCommandResponse verifyRes = null;
+			try {
+				verifyRes = this.verifyPersonnelByPhone(verifyCommand);
+			} catch (Exception e) {
+				LOGGER.debug(e.getMessage() + ". data = " + str);
+				errorDataLogs.add(e.getMessage() + ". data = " + str);
+				continue;
+			}
+			
+			if(null != verifyRes && null != verifyRes.getDto()){
+				memberCommand.setTargetId(verifyRes.getDto().getTargetId());
+				memberCommand.setTargetType(verifyRes.getDto().getTargetType());
+			}
+			
+			this.createOrganizationPersonnel(memberCommand);
+		}
+		return errorDataLogs;
+	}
+	
+	private Map<String, Organization> convertDeptListToStrMap(List<Organization> depts){
+		Map<String, Organization> map = new HashMap<String, Organization>();
+		if(null == depts){
+			return map;
+		}
+		for (Organization dept : depts) {
+			map.put(dept.getName(), dept);
+		}
+		return map;
 	}
 	
 	/**
@@ -4261,7 +4514,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		Long orgId = null;
 
 		if(org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())){
-			orgId = organizationMembers.get(0).getOrganizationId();
+			orgId = org.getDirectlyEnterpriseId();
 		}else{
 			orgId = org.getId();
 		}
@@ -4270,7 +4523,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 	    Map<Long, OrganizationRoleMap> roleMap =  this.convertOrganizationRoleMap(organizationRoleMaps);
 		
-		Map<Long, Organization> deptMaps = this.convertListToMap(depts);
+		Map<Long, Organization> deptMaps = this.convertDeptListToMap(depts);
 		return organizationMembers.stream().map((c) ->{
 			OrganizationMemberDTO dto =  ConvertHelper.convert(c, OrganizationMemberDTO.class);
 			Organization organization = deptMaps.get(c.getOrganizationId());
@@ -4394,7 +4647,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		List<Organization> depts = organizationProvider.listDepartments(org.getPath()+"/%", 1, 1000);
 		depts.add(org);
 		
-		Map<Long, Organization> deptMaps = this.convertListToMap(depts);
+		Map<Long, Organization> deptMaps = this.convertDeptListToMap(depts);
 
 		List<OrganizationRoleMap> organizationRoleMaps = organizationRoleMapProvider.listOrganizationRoleMaps(orgId, EntityType.ORGANIZATIONS, PrivateFlag.PUBLIC);
 		
@@ -4758,4 +5011,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 	        
 	        return memberIds;
 	    }
+	    
+	    
 }

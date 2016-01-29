@@ -21,8 +21,10 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.entity.EntityType;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.enterprise.ApproveContactCommand;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
+import com.everhomes.rest.enterprise.ImportEnterpriseDataCommand;
 import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
 import com.everhomes.rest.enterprise.ListEnterpriseByCommunityIdCommand;
 import com.everhomes.rest.enterprise.RejectContactCommand;
@@ -38,6 +40,8 @@ import com.everhomes.rest.organization.CreateOrganizationMemberCommand;
 import com.everhomes.rest.organization.CreatePropertyOrganizationCommand;
 import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
 import com.everhomes.rest.organization.GetUserResourcePrivilege;
+import com.everhomes.rest.organization.ImportOrganizationPersonnelDataCommand;
+import com.everhomes.rest.organization.ListAclRoleByUserIdCommand;
 import com.everhomes.rest.organization.ListAllChildrenOrganizationsCommand;
 import com.everhomes.rest.organization.ListDepartmentsCommand;
 import com.everhomes.rest.organization.ListDepartmentsCommandResponse;
@@ -67,10 +71,14 @@ import com.everhomes.rest.organization.pm.PmBuildingDTO;
 import com.everhomes.rest.organization.pm.PmManagementsResponse;
 import com.everhomes.rest.organization.pm.UnassignedBuildingDTO;
 import com.everhomes.rest.organization.pm.UpdateOrganizationMemberByIdsCommand;
+import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
+import com.everhomes.rest.user.admin.ImportDataResponse;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+import com.everhomes.util.RuntimeErrorException;
 
 @RestController
 @RequestMapping("/admin/org")
@@ -732,22 +740,6 @@ public class OrganizationAdminController extends ControllerBase {
         return response;
     }
     
-    /**
-     * <b>URL: /admin/org/importOrganizationPersonnelData</b>
-     * <p>修改机构成员</p>
-     */
-    @RequestMapping("importOrganizationPersonnelData")
-    @RestReturn(value=String.class)
-    public RestResponse importOrganizationPersonnelData(@Valid UpdateOrganizationMemberCommand cmd) {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
-        
-//        organizationService.updateOrganizationPersonnel(cmd);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
     
     /**
      * <b>URL: /admin/org/createOrganizationAccount</b>
@@ -781,4 +773,62 @@ public class OrganizationAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /org/listAclRoleByUserId</b>
+     * <p>获取角色列表</p>
+     */
+    @RequestMapping("listAclRoleByUserId")
+    @RestReturn(value=OrganizationDetailDTO.class, collection=true)
+    public RestResponse listAclRoleByUserId(@Valid ListAclRoleByUserIdCommand cmd) {
+    	List<AclRoleAssignmentsDTO>  dtos = organizationService.listAclRoleByUserId(cmd);
+        RestResponse response = new RestResponse(dtos);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /org/importEnterpriseData</b>
+     * <p>导入企业信息</p>
+     */
+    @RequestMapping("importEnterpriseData")
+    @RestReturn(value=ImportDataResponse.class)
+    public RestResponse importEnterpriseData(@Valid ImportEnterpriseDataCommand cmd, @RequestParam(value = "attachment_file_") MultipartFile[] files){
+    	User manaUser = UserContext.current().getUser();
+		Long userId = manaUser.getId();
+		if(null == files || null == files[0]){
+			LOGGER.error("files is null。userId="+userId);
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
+					"files is null");
+		}
+		ImportDataResponse importDataResponse = this.organizationService.importEnterpriseData(files[0], userId, cmd);
+        RestResponse response = new RestResponse(importDataResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/org/importOrganizationPersonnelData</b>
+     * <p>导入机构成员信息</p>
+     */
+    @RequestMapping("importOrganizationPersonnelData")
+    @RestReturn(value=String.class)
+    public RestResponse importOrganizationPersonnelData(@Valid ImportOrganizationPersonnelDataCommand cmd, @RequestParam(value = "attachment_file_") MultipartFile[] files) {
+//        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        User manaUser = UserContext.current().getUser();
+		Long userId = manaUser.getId();
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+		if(null == files || null == files[0]){
+			LOGGER.error("files is null。userId="+userId);
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
+					"files is null");
+		}
+        RestResponse response = new RestResponse(organizationService.importOrganizationPersonnelData(files[0], userId, cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
 }
