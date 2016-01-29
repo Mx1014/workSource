@@ -307,7 +307,8 @@ public class BusinessServiceImpl implements BusinessService {
 			if(points == null || points.isEmpty()){
 				LOGGER.error("Community is not exists geo points,communityId=" + cmd.getCommunityId());
 			}
-			point = points.get(0);
+			else
+				point = points.get(0);
 		}
 		final double lat = point != null ? point.getLatitude() : 0;
 		final double lon = point != null ? point.getLongitude() : 0;
