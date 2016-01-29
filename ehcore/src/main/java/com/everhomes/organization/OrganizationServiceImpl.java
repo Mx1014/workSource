@@ -4374,7 +4374,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			
 			memberCommand.setContactToken(s[4]);
 			memberCommand.setContactName(s[2]);
-			memberCommand.setEmployeeNo(StringUtils.isEmpty(s[0]) ? 0l : Long.parseLong(s[0]));
+			memberCommand.setEmployeeNo(s[0]);
 			Byte gender = 0;
 			if(s[3].equals("男")){
 				gender = 1;
@@ -4404,9 +4404,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 					dept = ConvertHelper.convert(deptDto, Organization.class);
 					deptMap.put(deptDto.getName(), dept);
 				}
-				memberCommand.setGroupId(dept.getId());
+				memberCommand.setOrganizationId(dept.getId());
 			}
-			memberCommand.setOrganizationId(org.getId());
+			
 			VerifyPersonnelByPhoneCommand verifyCommand = new VerifyPersonnelByPhoneCommand();
 			verifyCommand.setEnterpriseId(org.getId());
 			verifyCommand.setNamespaceId(namespaceId);
@@ -4510,6 +4510,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	 */
 	private List<OrganizationMemberDTO> convertDTO(List<OrganizationMember> organizationMembers, Organization org){
 		List<Organization> depts = organizationProvider.listDepartments(org.getPath()+"/%", 1, 1000);
+		depts.add(org);
 		
 		Long orgId = null;
 

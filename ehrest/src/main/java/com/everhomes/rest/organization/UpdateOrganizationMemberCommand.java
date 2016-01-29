@@ -22,7 +22,7 @@ public class UpdateOrganizationMemberCommand {
 	private String contactName;
 	private Long groupId;
 	private Byte gender;
-	private Long employeeNo;
+	private String employeeNo;
 	
 	public UpdateOrganizationMemberCommand() {
     }
@@ -74,13 +74,19 @@ public class UpdateOrganizationMemberCommand {
 		this.gender = gender;
 	}
 
-	public Long getEmployeeNo() {
+	
+
+	public String getEmployeeNo() {
 		return employeeNo;
 	}
 
-	public void setEmployeeNo(Long employeeNo) {
+
+
+	public void setEmployeeNo(String employeeNo) {
 		this.employeeNo = employeeNo;
 	}
+
+
 
 	@Override
     public String toString() {

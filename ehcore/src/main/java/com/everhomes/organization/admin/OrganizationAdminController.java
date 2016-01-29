@@ -459,8 +459,7 @@ public class OrganizationAdminController extends ControllerBase {
         //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         List<String> groupTypes = new ArrayList<String>();
         groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
-        ListOrganizationsCommandResponse res= organizationService.listChildrenOrganizations(cmd.getParentId(), groupTypes);
-        RestResponse response = new RestResponse(res);
+        RestResponse response = new RestResponse(organizationService.listAllChildrenOrganizations(cmd.getParentId(), groupTypes));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

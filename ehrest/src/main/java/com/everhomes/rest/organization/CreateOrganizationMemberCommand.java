@@ -35,7 +35,7 @@ public class CreateOrganizationMemberCommand {
 	
 	private Long groupId;
 	private Byte gender;
-	private Long employeeNo;
+	private String employeeNo;
 	
 	public CreateOrganizationMemberCommand() {
     }
@@ -111,11 +111,11 @@ public class CreateOrganizationMemberCommand {
 		this.gender = gender;
 	}
 
-	public Long getEmployeeNo() {
+	public String getEmployeeNo() {
 		return employeeNo;
 	}
 
-	public void setEmployeeNo(Long employeeNo) {
+	public void setEmployeeNo(String employeeNo) {
 		this.employeeNo = employeeNo;
 	}
 
