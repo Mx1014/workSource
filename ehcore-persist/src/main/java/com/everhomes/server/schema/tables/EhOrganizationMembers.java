@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationMembers extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord> {
 
-	private static final long serialVersionUID = -704007018;
+	private static final long serialVersionUID = 495026542;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_organization_members</code>
@@ -77,14 +77,14 @@ public class EhOrganizationMembers extends org.jooq.impl.TableImpl<com.everhomes
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: inactive, 1: confirming, 2: active");
 
 	/**
+	 * The column <code>ehcore.eh_organization_members.group_id</code>. refer to the organization id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord, java.lang.Long> GROUP_ID = createField("group_id", org.jooq.impl.SQLDataType.BIGINT.defaulted(true), this, "refer to the organization id");
+
+	/**
 	 * The column <code>ehcore.eh_organization_members.group_path</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord, java.lang.String> GROUP_PATH = createField("group_path", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_organization_members.employee_no</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord, java.lang.Long> EMPLOYEE_NO = createField("employee_no", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_organization_members.gender</code>. 0: undisclosured, 1: male, 2: female
@@ -142,9 +142,24 @@ public class EhOrganizationMembers extends org.jooq.impl.TableImpl<com.everhomes
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord, java.lang.String> STRING_TAG5 = createField("string_tag5", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_organization_members.group_id</code>. refer to the organization id
+	 * The column <code>ehcore.eh_organization_members.employee_no</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord, java.lang.Long> GROUP_ID = createField("group_id", org.jooq.impl.SQLDataType.BIGINT.defaulted(true), this, "refer to the organization id");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord, java.lang.String> EMPLOYEE_NO = createField("employee_no", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_organization_members.avatar</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord, java.lang.String> AVATAR = createField("avatar", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_organization_members.update_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord, java.sql.Timestamp> UPDATE_TIME = createField("update_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_organization_members.create_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_organization_members</code> table reference

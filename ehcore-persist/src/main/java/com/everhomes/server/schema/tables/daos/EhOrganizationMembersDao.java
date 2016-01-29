@@ -111,17 +111,17 @@ public class EhOrganizationMembersDao extends org.jooq.impl.DAOImpl<com.everhome
 	}
 
 	/**
+	 * Fetch records that have <code>group_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationMembers> fetchByGroupId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationMembers.EH_ORGANIZATION_MEMBERS.GROUP_ID, values);
+	}
+
+	/**
 	 * Fetch records that have <code>group_path IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationMembers> fetchByGroupPath(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhOrganizationMembers.EH_ORGANIZATION_MEMBERS.GROUP_PATH, values);
-	}
-
-	/**
-	 * Fetch records that have <code>employee_no IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationMembers> fetchByEmployeeNo(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhOrganizationMembers.EH_ORGANIZATION_MEMBERS.EMPLOYEE_NO, values);
 	}
 
 	/**
@@ -202,9 +202,30 @@ public class EhOrganizationMembersDao extends org.jooq.impl.DAOImpl<com.everhome
 	}
 
 	/**
-	 * Fetch records that have <code>group_id IN (values)</code>
+	 * Fetch records that have <code>employee_no IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationMembers> fetchByGroupId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhOrganizationMembers.EH_ORGANIZATION_MEMBERS.GROUP_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationMembers> fetchByEmployeeNo(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationMembers.EH_ORGANIZATION_MEMBERS.EMPLOYEE_NO, values);
+	}
+
+	/**
+	 * Fetch records that have <code>avatar IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationMembers> fetchByAvatar(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationMembers.EH_ORGANIZATION_MEMBERS.AVATAR, values);
+	}
+
+	/**
+	 * Fetch records that have <code>update_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationMembers> fetchByUpdateTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationMembers.EH_ORGANIZATION_MEMBERS.UPDATE_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>create_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationMembers> fetchByCreateTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationMembers.EH_ORGANIZATION_MEMBERS.CREATE_TIME, values);
 	}
 }

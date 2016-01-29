@@ -11,60 +11,66 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationMembers implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1774698771;
+	private static final long serialVersionUID = 972995935;
 
-	private java.lang.Long   id;
-	private java.lang.Long   organizationId;
-	private java.lang.String targetType;
-	private java.lang.Long   targetId;
-	private java.lang.String memberGroup;
-	private java.lang.String contactName;
-	private java.lang.Byte   contactType;
-	private java.lang.String contactToken;
-	private java.lang.String contactDescription;
-	private java.lang.Byte   status;
-	private java.lang.String groupPath;
-	private java.lang.Long   employeeNo;
-	private java.lang.Byte   gender;
-	private java.lang.Long   integralTag1;
-	private java.lang.Long   integralTag2;
-	private java.lang.Long   integralTag3;
-	private java.lang.Long   integralTag4;
-	private java.lang.Long   integralTag5;
-	private java.lang.String stringTag1;
-	private java.lang.String stringTag2;
-	private java.lang.String stringTag3;
-	private java.lang.String stringTag4;
-	private java.lang.String stringTag5;
-	private java.lang.Long   groupId;
+	private java.lang.Long     id;
+	private java.lang.Long     organizationId;
+	private java.lang.String   targetType;
+	private java.lang.Long     targetId;
+	private java.lang.String   memberGroup;
+	private java.lang.String   contactName;
+	private java.lang.Byte     contactType;
+	private java.lang.String   contactToken;
+	private java.lang.String   contactDescription;
+	private java.lang.Byte     status;
+	private java.lang.Long     groupId;
+	private java.lang.String   groupPath;
+	private java.lang.Byte     gender;
+	private java.lang.Long     integralTag1;
+	private java.lang.Long     integralTag2;
+	private java.lang.Long     integralTag3;
+	private java.lang.Long     integralTag4;
+	private java.lang.Long     integralTag5;
+	private java.lang.String   stringTag1;
+	private java.lang.String   stringTag2;
+	private java.lang.String   stringTag3;
+	private java.lang.String   stringTag4;
+	private java.lang.String   stringTag5;
+	private java.lang.String   employeeNo;
+	private java.lang.String   avatar;
+	private java.sql.Timestamp updateTime;
+	private java.sql.Timestamp createTime;
 
 	public EhOrganizationMembers() {}
 
 	public EhOrganizationMembers(
-		java.lang.Long   id,
-		java.lang.Long   organizationId,
-		java.lang.String targetType,
-		java.lang.Long   targetId,
-		java.lang.String memberGroup,
-		java.lang.String contactName,
-		java.lang.Byte   contactType,
-		java.lang.String contactToken,
-		java.lang.String contactDescription,
-		java.lang.Byte   status,
-		java.lang.String groupPath,
-		java.lang.Long   employeeNo,
-		java.lang.Byte   gender,
-		java.lang.Long   integralTag1,
-		java.lang.Long   integralTag2,
-		java.lang.Long   integralTag3,
-		java.lang.Long   integralTag4,
-		java.lang.Long   integralTag5,
-		java.lang.String stringTag1,
-		java.lang.String stringTag2,
-		java.lang.String stringTag3,
-		java.lang.String stringTag4,
-		java.lang.String stringTag5,
-		java.lang.Long   groupId
+		java.lang.Long     id,
+		java.lang.Long     organizationId,
+		java.lang.String   targetType,
+		java.lang.Long     targetId,
+		java.lang.String   memberGroup,
+		java.lang.String   contactName,
+		java.lang.Byte     contactType,
+		java.lang.String   contactToken,
+		java.lang.String   contactDescription,
+		java.lang.Byte     status,
+		java.lang.Long     groupId,
+		java.lang.String   groupPath,
+		java.lang.Byte     gender,
+		java.lang.Long     integralTag1,
+		java.lang.Long     integralTag2,
+		java.lang.Long     integralTag3,
+		java.lang.Long     integralTag4,
+		java.lang.Long     integralTag5,
+		java.lang.String   stringTag1,
+		java.lang.String   stringTag2,
+		java.lang.String   stringTag3,
+		java.lang.String   stringTag4,
+		java.lang.String   stringTag5,
+		java.lang.String   employeeNo,
+		java.lang.String   avatar,
+		java.sql.Timestamp updateTime,
+		java.sql.Timestamp createTime
 	) {
 		this.id = id;
 		this.organizationId = organizationId;
@@ -76,8 +82,8 @@ public class EhOrganizationMembers implements java.io.Serializable {
 		this.contactToken = contactToken;
 		this.contactDescription = contactDescription;
 		this.status = status;
+		this.groupId = groupId;
 		this.groupPath = groupPath;
-		this.employeeNo = employeeNo;
 		this.gender = gender;
 		this.integralTag1 = integralTag1;
 		this.integralTag2 = integralTag2;
@@ -89,7 +95,10 @@ public class EhOrganizationMembers implements java.io.Serializable {
 		this.stringTag3 = stringTag3;
 		this.stringTag4 = stringTag4;
 		this.stringTag5 = stringTag5;
-		this.groupId = groupId;
+		this.employeeNo = employeeNo;
+		this.avatar = avatar;
+		this.updateTime = updateTime;
+		this.createTime = createTime;
 	}
 
 	public java.lang.Long getId() {
@@ -172,20 +181,20 @@ public class EhOrganizationMembers implements java.io.Serializable {
 		this.status = status;
 	}
 
+	public java.lang.Long getGroupId() {
+		return this.groupId;
+	}
+
+	public void setGroupId(java.lang.Long groupId) {
+		this.groupId = groupId;
+	}
+
 	public java.lang.String getGroupPath() {
 		return this.groupPath;
 	}
 
 	public void setGroupPath(java.lang.String groupPath) {
 		this.groupPath = groupPath;
-	}
-
-	public java.lang.Long getEmployeeNo() {
-		return this.employeeNo;
-	}
-
-	public void setEmployeeNo(java.lang.Long employeeNo) {
-		this.employeeNo = employeeNo;
 	}
 
 	public java.lang.Byte getGender() {
@@ -276,11 +285,35 @@ public class EhOrganizationMembers implements java.io.Serializable {
 		this.stringTag5 = stringTag5;
 	}
 
-	public java.lang.Long getGroupId() {
-		return this.groupId;
+	public java.lang.String getEmployeeNo() {
+		return this.employeeNo;
 	}
 
-	public void setGroupId(java.lang.Long groupId) {
-		this.groupId = groupId;
+	public void setEmployeeNo(java.lang.String employeeNo) {
+		this.employeeNo = employeeNo;
+	}
+
+	public java.lang.String getAvatar() {
+		return this.avatar;
+	}
+
+	public void setAvatar(java.lang.String avatar) {
+		this.avatar = avatar;
+	}
+
+	public java.sql.Timestamp getUpdateTime() {
+		return this.updateTime;
+	}
+
+	public void setUpdateTime(java.sql.Timestamp updateTime) {
+		this.updateTime = updateTime;
+	}
+
+	public java.sql.Timestamp getCreateTime() {
+		return this.createTime;
+	}
+
+	public void setCreateTime(java.sql.Timestamp createTime) {
+		this.createTime = createTime;
 	}
 }

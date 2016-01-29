@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationMembersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord> {
 
-	private static final long serialVersionUID = 1623710531;
+	private static final long serialVersionUID = -1495730188;
 
 	/**
 	 * Setter for <code>ehcore.eh_organization_members.id</code>. id of the record
@@ -154,31 +154,31 @@ public class EhOrganizationMembersRecord extends org.jooq.impl.UpdatableRecordIm
 	}
 
 	/**
+	 * Setter for <code>ehcore.eh_organization_members.group_id</code>. refer to the organization id
+	 */
+	public void setGroupId(java.lang.Long value) {
+		setValue(10, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_organization_members.group_id</code>. refer to the organization id
+	 */
+	public java.lang.Long getGroupId() {
+		return (java.lang.Long) getValue(10);
+	}
+
+	/**
 	 * Setter for <code>ehcore.eh_organization_members.group_path</code>.
 	 */
 	public void setGroupPath(java.lang.String value) {
-		setValue(10, value);
+		setValue(11, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_organization_members.group_path</code>.
 	 */
 	public java.lang.String getGroupPath() {
-		return (java.lang.String) getValue(10);
-	}
-
-	/**
-	 * Setter for <code>ehcore.eh_organization_members.employee_no</code>.
-	 */
-	public void setEmployeeNo(java.lang.Long value) {
-		setValue(11, value);
-	}
-
-	/**
-	 * Getter for <code>ehcore.eh_organization_members.employee_no</code>.
-	 */
-	public java.lang.Long getEmployeeNo() {
-		return (java.lang.Long) getValue(11);
+		return (java.lang.String) getValue(11);
 	}
 
 	/**
@@ -336,17 +336,59 @@ public class EhOrganizationMembersRecord extends org.jooq.impl.UpdatableRecordIm
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_organization_members.group_id</code>. refer to the organization id
+	 * Setter for <code>ehcore.eh_organization_members.employee_no</code>.
 	 */
-	public void setGroupId(java.lang.Long value) {
+	public void setEmployeeNo(java.lang.String value) {
 		setValue(23, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_organization_members.group_id</code>. refer to the organization id
+	 * Getter for <code>ehcore.eh_organization_members.employee_no</code>.
 	 */
-	public java.lang.Long getGroupId() {
-		return (java.lang.Long) getValue(23);
+	public java.lang.String getEmployeeNo() {
+		return (java.lang.String) getValue(23);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_organization_members.avatar</code>.
+	 */
+	public void setAvatar(java.lang.String value) {
+		setValue(24, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_organization_members.avatar</code>.
+	 */
+	public java.lang.String getAvatar() {
+		return (java.lang.String) getValue(24);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_organization_members.update_time</code>.
+	 */
+	public void setUpdateTime(java.sql.Timestamp value) {
+		setValue(25, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_organization_members.update_time</code>.
+	 */
+	public java.sql.Timestamp getUpdateTime() {
+		return (java.sql.Timestamp) getValue(25);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_organization_members.create_time</code>.
+	 */
+	public void setCreateTime(java.sql.Timestamp value) {
+		setValue(26, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_organization_members.create_time</code>.
+	 */
+	public java.sql.Timestamp getCreateTime() {
+		return (java.sql.Timestamp) getValue(26);
 	}
 
 	// -------------------------------------------------------------------------
@@ -375,7 +417,7 @@ public class EhOrganizationMembersRecord extends org.jooq.impl.UpdatableRecordIm
 	/**
 	 * Create a detached, initialised EhOrganizationMembersRecord
 	 */
-	public EhOrganizationMembersRecord(java.lang.Long id, java.lang.Long organizationId, java.lang.String targetType, java.lang.Long targetId, java.lang.String memberGroup, java.lang.String contactName, java.lang.Byte contactType, java.lang.String contactToken, java.lang.String contactDescription, java.lang.Byte status, java.lang.String groupPath, java.lang.Long employeeNo, java.lang.Byte gender, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.lang.Long groupId) {
+	public EhOrganizationMembersRecord(java.lang.Long id, java.lang.Long organizationId, java.lang.String targetType, java.lang.Long targetId, java.lang.String memberGroup, java.lang.String contactName, java.lang.Byte contactType, java.lang.String contactToken, java.lang.String contactDescription, java.lang.Byte status, java.lang.Long groupId, java.lang.String groupPath, java.lang.Byte gender, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.lang.String employeeNo, java.lang.String avatar, java.sql.Timestamp updateTime, java.sql.Timestamp createTime) {
 		super(com.everhomes.server.schema.tables.EhOrganizationMembers.EH_ORGANIZATION_MEMBERS);
 
 		setValue(0, id);
@@ -388,8 +430,8 @@ public class EhOrganizationMembersRecord extends org.jooq.impl.UpdatableRecordIm
 		setValue(7, contactToken);
 		setValue(8, contactDescription);
 		setValue(9, status);
-		setValue(10, groupPath);
-		setValue(11, employeeNo);
+		setValue(10, groupId);
+		setValue(11, groupPath);
 		setValue(12, gender);
 		setValue(13, integralTag1);
 		setValue(14, integralTag2);
@@ -401,6 +443,9 @@ public class EhOrganizationMembersRecord extends org.jooq.impl.UpdatableRecordIm
 		setValue(20, stringTag3);
 		setValue(21, stringTag4);
 		setValue(22, stringTag5);
-		setValue(23, groupId);
+		setValue(23, employeeNo);
+		setValue(24, avatar);
+		setValue(25, updateTime);
+		setValue(26, createTime);
 	}
 }
