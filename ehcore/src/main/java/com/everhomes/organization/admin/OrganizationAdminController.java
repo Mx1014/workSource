@@ -793,7 +793,7 @@ public class OrganizationAdminController extends ControllerBase {
      */
     @RequestMapping("importEnterpriseData")
     @RestReturn(value=ImportDataResponse.class)
-    public RestResponse importEnterpriseData(@Valid ImportEnterpriseDataCommand cmd, @RequestParam(value = "attachment_file_") MultipartFile[] files){
+    public RestResponse importEnterpriseData(@Valid ImportEnterpriseDataCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
     	User manaUser = UserContext.current().getUser();
 		Long userId = manaUser.getId();
 		if(null == files || null == files[0]){
@@ -814,7 +814,7 @@ public class OrganizationAdminController extends ControllerBase {
      */
     @RequestMapping("importOrganizationPersonnelData")
     @RestReturn(value=String.class)
-    public RestResponse importOrganizationPersonnelData(@Valid ImportOrganizationPersonnelDataCommand cmd, @RequestParam(value = "attachment_file_") MultipartFile[] files) {
+    public RestResponse importOrganizationPersonnelData(@Valid ImportOrganizationPersonnelDataCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
 //        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         User manaUser = UserContext.current().getUser();
 		Long userId = manaUser.getId();
