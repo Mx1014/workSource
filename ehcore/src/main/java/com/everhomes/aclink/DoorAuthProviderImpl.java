@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -26,6 +27,7 @@ import com.everhomes.server.schema.tables.pojos.EhDoorAccess;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
@@ -87,14 +89,12 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
     }
 
     @Override
-    public List<DoorAuth> queryDoorAuthByDoorId(ListingLocator locator, Long refId
-            , int count, ListingQueryBuilderCallback queryBuilderCallback) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhDoorAccess.class, refId));
+    public List<DoorAuth> queryDoorAuth(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhDoorAccess.class));
 
         SelectQuery<EhDoorAuthRecord> query = context.selectQuery(Tables.EH_DOOR_AUTH);
         if(queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
-        query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.eq(refId));
 
         if(locator.getAnchor() != null) {
             query.addConditions(Tables.EH_DOOR_AUTH.ID.gt(locator.getAnchor()));
@@ -106,43 +106,90 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         });
     }
 
-    @Override
-    public List<DoorAuth> queryDoorAuths(CrossShardListingLocator locator, int count,
-            ListingQueryBuilderCallback queryBuilderCallback) {
-        final List<DoorAuth> objs = new ArrayList<DoorAuth>();
-        if(locator.getShardIterator() == null) {
-            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhDoorAccess.class);
-            ShardIterator shardIterator = new ShardIterator(accessSpec);
-
-            locator.setShardIterator(shardIterator);
-        }
-
-        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
-            SelectQuery<EhDoorAuthRecord> query = context.selectQuery(Tables.EH_DOOR_AUTH);
-
-            if(queryBuilderCallback != null)
-                queryBuilderCallback.buildCondition(locator, query);
-
-            if(locator.getAnchor() != null)
-                query.addConditions(Tables.EH_DOOR_AUTH.ID.gt(locator.getAnchor()));
-            query.addOrderBy(Tables.EH_DOOR_AUTH.ID.asc());
-            query.addLimit(count - objs.size());
-
-            query.fetch().map((r) -> {
-                objs.add(ConvertHelper.convert(r, DoorAuth.class));
-                return null;
-            });
-
-            if(objs.size() >= count) {
-                locator.setAnchor(objs.get(objs.size() - 1).getId());
-                return AfterAction.done;
-            }
-            return AfterAction.next;
-
-        });
-        return objs;
-    }
+    /* Global table has no map reduce ! */
+//    @Override
+//    public List<DoorAuth> queryDoorAuths(CrossShardListingLocator locator, int count,
+//            ListingQueryBuilderCallback queryBuilderCallback) {
+//        final List<DoorAuth> objs = new ArrayList<DoorAuth>();
+//        if(locator.getShardIterator() == null) {
+//            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhDoorAccess.class);
+//            ShardIterator shardIterator = new ShardIterator(accessSpec);
+//
+//            locator.setShardIterator(shardIterator);
+//        }
+//
+//        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
+//            SelectQuery<EhDoorAuthRecord> query = context.selectQuery(Tables.EH_DOOR_AUTH);
+//
+//            if(queryBuilderCallback != null)
+//                queryBuilderCallback.buildCondition(locator, query);
+//
+//            if(locator.getAnchor() != null)
+//                query.addConditions(Tables.EH_DOOR_AUTH.ID.gt(locator.getAnchor()));
+//            query.addOrderBy(Tables.EH_DOOR_AUTH.ID.asc());
+//            query.addLimit(count - objs.size());
+//
+//            query.fetch().map((r) -> {
+//                objs.add(ConvertHelper.convert(r, DoorAuth.class));
+//                return null;
+//            });
+//
+//            if(objs.size() >= count) {
+//                locator.setAnchor(objs.get(objs.size() - 1).getId());
+//                return AfterAction.done;
+//            }
+//            return AfterAction.next;
+//
+//        });
+//        return objs;
+//    }
 
     private void prepareObj(DoorAuth obj) {
     }
+    
+    //Find by userId
+    public List<DoorAuth> queryDoorAuthByUserId(ListingLocator locator, long userId, int count, ListingQueryBuilderCallback queryBuilderCallback) {
+        return queryDoorAuth(locator, count, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_DOOR_AUTH.USER_ID.eq(userId));
+                return query;
+            }
+            
+        });
+    }
+    
+    public List<DoorAuth> queryDoorAuthByOwner(ListingLocator locator, long ownerId, byte ownerType, int count, ListingQueryBuilderCallback queryBuilderCallback) {
+        return queryDoorAuth(locator, count, new ListingQueryBuilderCallback() {
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_DOOR_AUTH.OWNER_ID.eq(ownerId));
+                query.addConditions(Tables.EH_DOOR_AUTH.OWNER_TYPE.eq(ownerType));
+                return query;
+            }
+            
+        });
+    }
+    
+    public List<DoorAuth> queryValidDoorAuthByUserId(ListingLocator locator, long userId, int count) {
+        
+        long now = DateHelper.currentGMTTime().getTime();
+        
+        return queryDoorAuth(locator, count, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_DOOR_AUTH.USER_ID.eq(userId));
+                query.addConditions(Tables.EH_DOOR_AUTH.VALID_FROM_MS.le(now));
+                query.addConditions(Tables.EH_DOOR_AUTH.VALID_END_MS.ge(now));
+                return query;
+            }
+            
+        });        
+    }
+    
 }

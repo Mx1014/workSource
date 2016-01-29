@@ -11,7 +11,6 @@ public class DoorAccessDTO {
     private Long     activeUserId;
     private String     description;
     private Long     creatorUserId;
-    private Long     aclinkId;
     private Byte     ownerType;
     private Double     longitude;
     private Timestamp     createTime;
@@ -71,18 +70,6 @@ public class DoorAccessDTO {
 
     public void setCreatorUserId(Long creatorUserId) {
         this.creatorUserId = creatorUserId;
-    }
-
-
-
-    public Long getAclinkId() {
-        return aclinkId;
-    }
-
-
-
-    public void setAclinkId(Long aclinkId) {
-        this.aclinkId = aclinkId;
     }
 
 

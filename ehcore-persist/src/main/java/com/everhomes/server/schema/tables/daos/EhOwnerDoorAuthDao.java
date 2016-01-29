@@ -69,6 +69,13 @@ public class EhOwnerDoorAuthDao extends org.jooq.impl.DAOImpl<com.everhomes.serv
 	}
 
 	/**
+	 * Fetch records that have <code>user_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOwnerDoorAuth> fetchByUserId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOwnerDoorAuth.EH_OWNER_DOOR_AUTH.USER_ID, values);
+	}
+
+	/**
 	 * Fetch records that have <code>door_auth_id IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOwnerDoorAuth> fetchByDoorAuthId(java.lang.Long... values) {

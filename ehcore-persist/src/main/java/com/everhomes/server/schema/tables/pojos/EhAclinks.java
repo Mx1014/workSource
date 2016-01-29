@@ -14,6 +14,7 @@ public class EhAclinks implements java.io.Serializable {
 	private static final long serialVersionUID = -413936106;
 
 	private java.lang.Long     id;
+	private java.lang.Long     doorId;
 	private java.lang.String   deviceName;
 	private java.lang.String   manufacturer;
 	private java.lang.String   firwareVer;
@@ -25,6 +26,7 @@ public class EhAclinks implements java.io.Serializable {
 
 	public EhAclinks(
 		java.lang.Long     id,
+		java.lang.Long     doorId,
 		java.lang.String   deviceName,
 		java.lang.String   manufacturer,
 		java.lang.String   firwareVer,
@@ -33,6 +35,7 @@ public class EhAclinks implements java.io.Serializable {
 		java.lang.Byte     status
 	) {
 		this.id = id;
+		this.doorId = doorId;
 		this.deviceName = deviceName;
 		this.manufacturer = manufacturer;
 		this.firwareVer = firwareVer;
@@ -47,6 +50,14 @@ public class EhAclinks implements java.io.Serializable {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
+	}
+
+	public java.lang.Long getDoorId() {
+		return this.doorId;
+	}
+
+	public void setDoorId(java.lang.Long doorId) {
+		this.doorId = doorId;
 	}
 
 	public java.lang.String getDeviceName() {

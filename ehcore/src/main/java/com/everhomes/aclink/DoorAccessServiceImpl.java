@@ -19,6 +19,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     @Autowired
     DoorAccessProvider doorAccessProvider;
     
+    @Autowired
+    DoorAuthProvider doorAuthProvider;
+    
     //列出某园区下的所有锁门禁
     public List<DoorAccess> listDoorAccessByCommunityId(Long communityId, CrossShardListingLocator locator, int count) {
         return doorAccessProvider.listDoorAccessByCommunityId(communityId, locator, count);
@@ -102,9 +105,17 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
     }
     
-    public List<DoorInvite> listDoorAuths() {
+    //Scan the bluetooth, then valify the door key.
+    public List<DoorAuth> listValidDoorAuthByDeviceId(ListValidDoorAuthByDeviceId cmd) {
         return null;
-        
+    }
+    
+    //list all valid auth for one users
+    //TODO what if the aes_user_key?
+    //version controller for all
+    public List<DoorAuth> listValidDoorAuthByUserId(ListValidDoorAuthByUserIdCommand cmd) {
+        //return doorAuthProvider.queryValidDoorAuthByUserId();
+        return null;
     }
     
 //    void syncLogToServer(List<DoorAccessLog> logs) {

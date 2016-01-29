@@ -97,13 +97,6 @@ public class EhDoorAccessDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	}
 
 	/**
-	 * Fetch records that have <code>aclink_id IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAccess> fetchByAclinkId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhDoorAccess.EH_DOOR_ACCESS.ACLINK_ID, values);
-	}
-
-	/**
 	 * Fetch records that have <code>longitude IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAccess> fetchByLongitude(java.lang.Double... values) {
@@ -122,6 +115,13 @@ public class EhDoorAccessDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAccess> fetchByGeohash(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhDoorAccess.EH_DOOR_ACCESS.GEOHASH, values);
+	}
+
+	/**
+	 * Fetch records that have <code>uuid IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAccess> fetchByUuid(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhDoorAccess.EH_DOOR_ACCESS.UUID, values);
 	}
 
 	/**

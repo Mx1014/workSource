@@ -47,6 +47,11 @@ public class EhOwnerDoorAuth extends org.jooq.impl.TableImpl<com.everhomes.serve
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOwnerDoorAuthRecord, java.lang.Long> DOOR_ID = createField("door_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
 
 	/**
+	 * The column <code>ehcore.eh_owner_door_auth.user_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOwnerDoorAuthRecord, java.lang.Long> USER_ID = createField("user_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+
+	/**
 	 * The column <code>ehcore.eh_owner_door_auth.door_auth_id</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOwnerDoorAuthRecord, java.lang.Long> DOOR_AUTH_ID = createField("door_auth_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");

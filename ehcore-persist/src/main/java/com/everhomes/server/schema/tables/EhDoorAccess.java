@@ -67,11 +67,6 @@ public class EhDoorAccess extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorAccessRecord, java.lang.Long> CREATOR_USER_ID = createField("creator_user_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_door_access.aclink_id</code>. the hardware id of aclink
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorAccessRecord, java.lang.Long> ACLINK_ID = createField("aclink_id", org.jooq.impl.SQLDataType.BIGINT, this, "the hardware id of aclink");
-
-	/**
 	 * The column <code>ehcore.eh_door_access.longitude</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorAccessRecord, java.lang.Double> LONGITUDE = createField("longitude", org.jooq.impl.SQLDataType.DOUBLE, this, "");
@@ -85,6 +80,11 @@ public class EhDoorAccess extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	 * The column <code>ehcore.eh_door_access.geohash</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorAccessRecord, java.lang.String> GEOHASH = createField("geohash", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_door_access.uuid</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorAccessRecord, java.lang.String> UUID = createField("uuid", org.jooq.impl.SQLDataType.VARCHAR.length(64).nullable(false).defaulted(true), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_door_access.owner_type</code>. 0:community, 1:enterprise, 2: family
@@ -147,14 +147,6 @@ public class EhDoorAccess extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	@Override
 	public java.util.List<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhDoorAccessRecord>> getKeys() {
 		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhDoorAccessRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_DOOR_ACCESS_PRIMARY);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public java.util.List<org.jooq.ForeignKey<com.everhomes.server.schema.tables.records.EhDoorAccessRecord, ?>> getReferences() {
-		return java.util.Arrays.<org.jooq.ForeignKey<com.everhomes.server.schema.tables.records.EhDoorAccessRecord, ?>>asList(com.everhomes.server.schema.Keys.EH_DOOR_ACCESS_IBFK_1);
 	}
 
 	/**

@@ -15,6 +15,7 @@ public class AclinkDTO {
     private Long     id;
     private Timestamp     createTime;
     private String     manufacturer;
+    private Long doorId;
 
 
     public Byte getStatus() {
@@ -84,6 +85,17 @@ public class AclinkDTO {
 
     public void setManufacturer(String manufacturer) {
         this.manufacturer = manufacturer;
+    }
+
+    
+
+    public Long getDoorId() {
+        return doorId;
+    }
+
+
+    public void setDoorId(Long doorId) {
+        this.doorId = doorId;
     }
 
 

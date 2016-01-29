@@ -48,6 +48,13 @@ public class EhAclinksDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sch
 	}
 
 	/**
+	 * Fetch records that have <code>door_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAclinks> fetchByDoorId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAclinks.EH_ACLINKS.DOOR_ID, values);
+	}
+
+	/**
 	 * Fetch records that have <code>device_name IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAclinks> fetchByDeviceName(java.lang.String... values) {

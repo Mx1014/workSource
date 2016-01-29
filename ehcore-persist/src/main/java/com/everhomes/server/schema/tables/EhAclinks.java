@@ -32,6 +32,11 @@ public class EhAclinks extends org.jooq.impl.TableImpl<com.everhomes.server.sche
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAclinksRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id of the record");
 
 	/**
+	 * The column <code>ehcore.eh_aclinks.door_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAclinksRecord, java.lang.Long> DOOR_ID = createField("door_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+
+	/**
 	 * The column <code>ehcore.eh_aclinks.device_name</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAclinksRecord, java.lang.String> DEVICE_NAME = createField("device_name", org.jooq.impl.SQLDataType.VARCHAR.length(32).nullable(false), this, "");
@@ -97,6 +102,14 @@ public class EhAclinks extends org.jooq.impl.TableImpl<com.everhomes.server.sche
 	@Override
 	public java.util.List<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhAclinksRecord>> getKeys() {
 		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhAclinksRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_ACLINKS_PRIMARY);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public java.util.List<org.jooq.ForeignKey<com.everhomes.server.schema.tables.records.EhAclinksRecord, ?>> getReferences() {
+		return java.util.Arrays.<org.jooq.ForeignKey<com.everhomes.server.schema.tables.records.EhAclinksRecord, ?>>asList(com.everhomes.server.schema.Keys.EH_ACLINKS_IBFK_1);
 	}
 
 	/**

@@ -21,6 +21,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhAclinksDao;
 import com.everhomes.server.schema.tables.pojos.EhAclinks;
+import com.everhomes.server.schema.tables.pojos.EhDoorAccess;
 import com.everhomes.server.schema.tables.records.EhAclinksRecord;
 import com.everhomes.server.schema.tables.pojos.EhAclinks;
 import com.everhomes.sharding.ShardIterator;
@@ -42,7 +43,7 @@ public class AclinkProviderImpl implements AclinkProvider {
     @Override
     public Long createAclink(Aclink obj) {
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAclinks.class));
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAclinks.class, obj.getId()));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhDoorAccess.class, obj.getDoorId()));
         obj.setId(id);
         prepareObj(obj);
         EhAclinksDao dao = new EhAclinksDao(context.configuration());
@@ -52,14 +53,14 @@ public class AclinkProviderImpl implements AclinkProvider {
 
     @Override
     public void updateAclink(Aclink obj) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAclinks.class, obj.getId()));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhDoorAccess.class, obj.getDoorId()));
         EhAclinksDao dao = new EhAclinksDao(context.configuration());
         dao.update(obj);
     }
 
     @Override
     public void deleteAclink(Aclink obj) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAclinks.class, obj.getId()));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhDoorAccess.class, obj.getDoorId()));
         EhAclinksDao dao = new EhAclinksDao(context.configuration());
         dao.deleteById(obj.getId());
     }

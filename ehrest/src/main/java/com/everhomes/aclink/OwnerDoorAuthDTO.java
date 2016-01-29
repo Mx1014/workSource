@@ -12,6 +12,7 @@ public class OwnerDoorAuthDTO {
     private Byte     ownerType;
     private Long     id;
     private Long     doorId;
+    private Long userId;
 
 
     public Long getOwnerId() {
@@ -61,6 +62,17 @@ public class OwnerDoorAuthDTO {
 
     public void setDoorId(Long doorId) {
         this.doorId = doorId;
+    }
+
+    
+
+    public Long getUserId() {
+        return userId;
+    }
+
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
 

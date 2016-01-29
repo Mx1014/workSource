@@ -17,6 +17,7 @@ public class EhOwnerDoorAuth implements java.io.Serializable {
 	private java.lang.Byte ownerType;
 	private java.lang.Long ownerId;
 	private java.lang.Long doorId;
+	private java.lang.Long userId;
 	private java.lang.Long doorAuthId;
 
 	public EhOwnerDoorAuth() {}
@@ -26,12 +27,14 @@ public class EhOwnerDoorAuth implements java.io.Serializable {
 		java.lang.Byte ownerType,
 		java.lang.Long ownerId,
 		java.lang.Long doorId,
+		java.lang.Long userId,
 		java.lang.Long doorAuthId
 	) {
 		this.id = id;
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;
 		this.doorId = doorId;
+		this.userId = userId;
 		this.doorAuthId = doorAuthId;
 	}
 
@@ -65,6 +68,14 @@ public class EhOwnerDoorAuth implements java.io.Serializable {
 
 	public void setDoorId(java.lang.Long doorId) {
 		this.doorId = doorId;
+	}
+
+	public java.lang.Long getUserId() {
+		return this.userId;
+	}
+
+	public void setUserId(java.lang.Long userId) {
+		this.userId = userId;
 	}
 
 	public java.lang.Long getDoorAuthId() {

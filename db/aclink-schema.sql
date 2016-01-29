@@ -138,3 +138,26 @@ CREATE TABLE `eh_owner_door_auth` (
     `door_auth_id` BIGINT NOT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+#
+# Partion of eh_door_command
+# Any action will generate a command, new command maybe override old command
+#
+DROP TABLE IF EXISTS `eh_door_command`;
+CREATE TABLE `eh_door_command` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `door_id` BIGINT NOT NULL,
+    `cmd_seq` BIGINT COMMENT 'sequence',
+    `cmd_id` TINYINT NOT NULL COMMENT 'cmd id for aclink',
+    `cmd_type` TINYINT NOT NULL COMMENT 'cmd type for aclink',
+    `cmd_body` TEXT COMMENT 'json type of cmd body',
+    `cmd_resp` TEXT COMMENT 'json resp of cmd resp body',
+    `server_key_ver` BIGINT NOT NULL COMMENT 'cmd of server key',
+    `aclink_key_ver` TINYINT NOT NULL COMMENT 'cmd of aclink key',
+    `status` TINYINT NOT NULL COMMENT '0: creating, 1: sending, 2: response, 3: process, 4: invalid',
+    `user_id` BIGINT,
+    `owner_id` BIGINT,
+    `owner_type` TINYINT,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY `fk_eh_door_command_id`(`door_id`) REFERENCES `eh_door_access`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

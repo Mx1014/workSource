@@ -21,10 +21,10 @@ public class EhDoorAccess implements java.io.Serializable {
 	private java.lang.String   address;
 	private java.lang.Long     activeUserId;
 	private java.lang.Long     creatorUserId;
-	private java.lang.Long     aclinkId;
 	private java.lang.Double   longitude;
 	private java.lang.Double   latitude;
 	private java.lang.String   geohash;
+	private java.lang.String   uuid;
 	private java.lang.Byte     ownerType;
 	private java.lang.Long     ownerId;
 	private java.lang.Byte     role;
@@ -42,10 +42,10 @@ public class EhDoorAccess implements java.io.Serializable {
 		java.lang.String   address,
 		java.lang.Long     activeUserId,
 		java.lang.Long     creatorUserId,
-		java.lang.Long     aclinkId,
 		java.lang.Double   longitude,
 		java.lang.Double   latitude,
 		java.lang.String   geohash,
+		java.lang.String   uuid,
 		java.lang.Byte     ownerType,
 		java.lang.Long     ownerId,
 		java.lang.Byte     role,
@@ -60,10 +60,10 @@ public class EhDoorAccess implements java.io.Serializable {
 		this.address = address;
 		this.activeUserId = activeUserId;
 		this.creatorUserId = creatorUserId;
-		this.aclinkId = aclinkId;
 		this.longitude = longitude;
 		this.latitude = latitude;
 		this.geohash = geohash;
+		this.uuid = uuid;
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;
 		this.role = role;
@@ -135,14 +135,6 @@ public class EhDoorAccess implements java.io.Serializable {
 		this.creatorUserId = creatorUserId;
 	}
 
-	public java.lang.Long getAclinkId() {
-		return this.aclinkId;
-	}
-
-	public void setAclinkId(java.lang.Long aclinkId) {
-		this.aclinkId = aclinkId;
-	}
-
 	public java.lang.Double getLongitude() {
 		return this.longitude;
 	}
@@ -165,6 +157,14 @@ public class EhDoorAccess implements java.io.Serializable {
 
 	public void setGeohash(java.lang.String geohash) {
 		this.geohash = geohash;
+	}
+
+	public java.lang.String getUuid() {
+		return this.uuid;
+	}
+
+	public void setUuid(java.lang.String uuid) {
+		this.uuid = uuid;
 	}
 
 	public java.lang.Byte getOwnerType() {
