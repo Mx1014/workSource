@@ -80,6 +80,7 @@ import com.everhomes.rest.videoconf.UserAccountDTO;
 import com.everhomes.rest.videoconf.VerifyVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.VideoConfAccountPreferentialRuleDTO;
 import com.everhomes.rest.videoconf.VideoConfAccountTrialRuleDTO;
+import com.everhomes.rest.videoconf.VideoConfInvitationResponse;
 import com.everhomes.search.ConfAccountSearcher;
 import com.everhomes.search.ConfEnterpriseSearcher;
 import com.everhomes.search.ConfOrderSearcher;
@@ -489,11 +490,11 @@ public class VideoConfController  extends ControllerBase{
 	 * @return
 	 */
 	@RequestMapping("createVideoConfInvitation")
-	@RestReturn(value = String.class)
+	@RestReturn(value = VideoConfInvitationResponse.class)
 	public RestResponse createVideoConfInvitation(CreateVideoConfInvitationCommand cmd) {
 
-		videoConfService.createVideoConfInvitation(cmd);
-		RestResponse response = new RestResponse();
+		VideoConfInvitationResponse invitation = videoConfService.createVideoConfInvitation(cmd);
+		RestResponse response = new RestResponse(invitation);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
