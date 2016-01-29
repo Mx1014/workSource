@@ -4169,7 +4169,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 		try {
 		    User user = userProvider.findUserById(identifier.getOwnerUid());
 	        List<OrganizationMember> members = this.organizationProvider.listOrganizationMembersByPhone(identifier.getIdentifierToken());
-	        Map<Long, Long> ctx = new HashMap<Long, Long>();
 	        for (OrganizationMember member : members) {
 	        	Organization org = organizationProvider.findOrganizationById(member.getOrganizationId());
 	            if(org.getNamespaceId() == null || !org.getNamespaceId().equals(identifier.getNamespaceId())) {
