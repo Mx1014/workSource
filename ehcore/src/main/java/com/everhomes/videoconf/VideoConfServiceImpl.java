@@ -114,6 +114,7 @@ import com.everhomes.rest.videoconf.UserAccountDTO;
 import com.everhomes.rest.videoconf.VatType;
 import com.everhomes.rest.videoconf.VerifyVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.VideoConfAccountRuleDTO;
+import com.everhomes.rest.videoconf.VideoConfInvitationResponse;
 import com.everhomes.rest.videoconf.VideoconfNotificationTemplateCode;
 import com.everhomes.rest.videoconf.WarningContactorDTO;
 import com.everhomes.search.ConfAccountSearcher;
@@ -232,53 +233,79 @@ public class VideoConfServiceImpl implements VideoConfService {
         return categoryName;
 	}
 	@Override
-	public void createVideoConfInvitation(CreateVideoConfInvitationCommand cmd) {
+	public VideoConfInvitationResponse createVideoConfInvitation(CreateVideoConfInvitationCommand cmd) {
+		VideoConfInvitationResponse response = new VideoConfInvitationResponse();
 
 		User user = UserContext.current().getUser();
 		String userName = user.getNickName();
-		if(cmd.getChannel() == 0) {
+
+		ConfReservations reserveConf = vcProvider.findReservationConfById(cmd.getReserveConfId());
+		if(reserveConf == null) {
 			
 		}
-		
-		if(cmd.getChannel() == 1) {
-
-            String msgSubject = getMsgSubject(userName, cmd.getConfName());
-            String confLink = getConfLink(cmd.getConfId());
-            String confTime = getConfTime(cmd.getConfTime(), cmd.getDuration());
-            String text = msgSubject + confLink + confTime;
-			try {
-			    List<String> inviteeList = cmd.getInvitee();
-			    if(inviteeList != null && inviteeList.size() > 0) {
-			        for(String invitee : inviteeList) {
-			            smsProvider.sendSms(invitee, text, null);
-			        }
-			    }
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-
-		if(cmd.getChannel() == 2) {
-			
-		}
+        String msgSubject = getMsgSubject(userName, reserveConf.getSubject());
+        String confTime = getConfTime(reserveConf.getStartTime(), reserveConf.getDuration(), reserveConf.getTimeZone());
+        String msgDescribtion = getMsgDescribtion(reserveConf.getCreatorPhone());
+        
+        String subject = utf8Togb2312(msgSubject);
+        String body = utf8Togb2312(confTime + msgDescribtion);
+        
+		response.setSubject(subject);
+		response.setBody(body);
+		return response;
 
 	}
 	
-	private Timestamp addMinutes(Long begin, int minutes) {
+	private String utf8Togb2312(String str){
+
+        StringBuffer sb = new StringBuffer();
+
+        for ( int i=0; i<str.length(); i++) {
+            char c = str.charAt(i);
+            switch (c) {
+               case '+' :
+                   sb.append( ' ' );
+               break ;
+               case '%' :
+                   try {
+                        sb.append(( char )Integer.parseInt (
+                        str.substring(i+1,i+3),16));
+                   }
+                   catch (NumberFormatException e) {
+                       throw new IllegalArgumentException();
+                  }
+                  i += 2;
+                  break ;
+               default :
+                  sb.append(c);
+                  break ;
+             }
+        }
+        String result = sb.toString();
+        String res= null ;
+        try {
+             byte [] inputBytes = result.getBytes( "8859_1" );
+            res= new String(inputBytes, "UTF-8" );
+        }
+        catch (Exception e){}
+        return res;
+	}
+	
+	private Timestamp addMinutes(Timestamp begin, int minutes) {
 		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(new Timestamp(begin));
+		calendar.setTime(begin);
 		calendar.add(Calendar.MINUTE, minutes);
 		Timestamp time = new Timestamp(calendar.getTimeInMillis());
 		
 		return time;
 	}
 
-	private String getConfTime(Long confTime, int duration) {
+	private String getConfTime(Timestamp confTime, int duration, String zone) {
 		
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("begin", new Timestamp(confTime));
+		map.put("begin", confTime);
 		map.put("end", addMinutes(confTime, duration));
+		map.put("zone", zone);
 
 		String scope = VideoconfNotificationTemplateCode.SCOPE;
         int code = VideoconfNotificationTemplateCode.VIDEOCONF_CONFTIME;
@@ -302,17 +329,16 @@ public class VideoConfServiceImpl implements VideoConfService {
         return subject;
 	}
 	
-	private String getConfLink(Integer confId) {
-		
+	private String getMsgDescribtion(String mobile) {
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("confId", confId);
+		map.put("mobile", mobile);
 
 		String scope = VideoconfNotificationTemplateCode.SCOPE;
-        int code = VideoconfNotificationTemplateCode.VIDEOCONF_ADDR_LINK;
+        int code = VideoconfNotificationTemplateCode.VIDEOCONF_CONFDESCRIBTION;
         
-        String confLink = localeTemplateService.getLocaleTemplateString(scope, code, "zh_CN", map, "");
+        String subject = localeTemplateService.getLocaleTemplateString(scope, code, "zh_CN", map, "");
         
-        return confLink;
+        return subject;
 	}
 	
 	@Override
