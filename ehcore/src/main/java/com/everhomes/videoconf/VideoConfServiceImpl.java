@@ -1310,9 +1310,11 @@ public class VideoConfServiceImpl implements VideoConfService {
 				    	sPara.put("confName", "conference");
 				    sPara.put("hostKey", cmd.getPassword());
 				    sPara.put("startTime", sd);
-				    sPara.put("duration", cmd.getDuration().toString());
-				    if(cmd.getDuration() == 0)
+				    if(cmd.getDuration() == null || cmd.getDuration() == 0)
 				    	sPara.put("duration", "30");
+				    else {
+				    	sPara.put("duration", cmd.getDuration().toString());
+				    }
 				    sPara.put("optionJbh", "0");
 				    NameValuePair[] param = generatNameValuePair(sPara);
 				    if(LOGGER.isDebugEnabled())
