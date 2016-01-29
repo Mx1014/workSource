@@ -1552,11 +1552,14 @@ public class RentalServiceImpl implements RentalService {
 			for (RentalItemsBill rib : rentalSiteItems) {
 				SiteItemDTO siDTO = new SiteItemDTO();
 				siDTO.setCounts(rib.getRentalCount());
-				RentalSiteItem rsItem = rentalProvider
-						.findRentalSiteItemById(rib.getRentalSiteItemId());
-				siDTO.setItemName(rsItem.getName());
-				siDTO.setItemPrice(rib.getTotalMoney());
-				dto.getSiteItems().add(siDTO);
+				RentalSiteItem rsItem = rentalProvider.findRentalSiteItemById(rib.getRentalSiteItemId());
+				if(rsItem != null) {
+    				siDTO.setItemName(rsItem.getName());
+    				siDTO.setItemPrice(rib.getTotalMoney());
+    				dto.getSiteItems().add(siDTO);
+				} else {
+				    LOGGER.error("Rental site item not found, rentalSiteItemId=" + rib.getRentalSiteItemId() + ", cmd=" + cmd);
+				}
 			}
 			response.getRentalBills().add(dto);
 		}
