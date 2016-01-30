@@ -19,7 +19,7 @@ INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,ite
 
 UPDATE `eh_launch_pad_items` SET action_data = '{"url":"https://biz.zuolin.com/zl-ec/index.jsp?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fallpromotions#sign_suffix"}' WHERE id=1770;
 
-UPDATE `eh_locale_templates` SET text = 20208 AND description=验证码-海岸城 WHERE id = 121;
-UPDATE `eh_locale_templates` SET text = 20209 AND description=给被分配任务人员发短信-海岸城 WHERE id = 122;
+UPDATE `eh_locale_templates` SET text = 20208 AND description='验证码-海岸城' WHERE id = 121;
+UPDATE `eh_locale_templates` SET text = 20209 AND description='给被分配任务人员发短信-海岸城' WHERE id = 122;
 
 
