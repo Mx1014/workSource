@@ -353,8 +353,14 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
         builder.setQuery(qb);
         
+        if(LOGGER.isDebugEnabled())
+			LOGGER.info("PostSearcherImpl query builder ："+builder);
+        
         SearchResponse rsp = builder.execute().actionGet();
         List<Long> ids = getIds(rsp);
+        
+        if(LOGGER.isDebugEnabled())
+			LOGGER.info("PostSearcherImpl query SearchResponse ids ："+ids);
         
         ListPostCommandResponse listPost = new ListPostCommandResponse();
         if(ids.size() > pageSize) {
