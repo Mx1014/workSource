@@ -1144,6 +1144,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
 	@Override
 	public List<EnterpriseContact> queryContact(
 			CrossShardListingLocator locator, int count) {
+		final List<EnterpriseContact> contacts = new ArrayList<EnterpriseContact>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
 		
 		List<Long> userIds = vcProvider.findUsersByEnterpriseId(null);
@@ -1158,9 +1159,17 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
         query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.STATUS.eq((byte) 3));
         query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.USER_ID.notIn(userIds));
         query.addLimit(count);
-        return query.fetch().map((r) -> {
-            return ConvertHelper.convert(r, EnterpriseContact.class);
+        
+        query.fetch().map((r) -> {
+            contacts.add(ConvertHelper.convert(r, EnterpriseContact.class));
+            return null;
         });
+       
+        if(contacts.size() >= count) {
+            locator.setAnchor(contacts.get(contacts.size() - 1).getId());
+        }
+
+        return contacts;
         
 	}
 
