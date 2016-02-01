@@ -514,6 +514,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhPollVotes EH_POLL_VOTES = com.everhomes.server.schema.tables.EhPollVotes.EH_POLL_VOTES;
 
 	/**
+	 * The table ehcore.eh_preferential_rules
+	 */
+	public static final com.everhomes.server.schema.tables.EhPreferentialRules EH_PREFERENTIAL_RULES = com.everhomes.server.schema.tables.EhPreferentialRules.EH_PREFERENTIAL_RULES;
+
+	/**
 	 * The table ehcore.eh_punch_day_logs
 	 */
 	public static final com.everhomes.server.schema.tables.EhPunchDayLogs EH_PUNCH_DAY_LOGS = com.everhomes.server.schema.tables.EhPunchDayLogs.EH_PUNCH_DAY_LOGS;
