@@ -176,6 +176,15 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 			if(contentCategoryId == CategoryConstants.CATEGORY_ID_COMPLAINT_ADVICE) {
 				return OrganizationTaskType.COMPLAINT_ADVICE;
 			}
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_CLEANING) {
+				return OrganizationTaskType.CLEANING;
+			}
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_HOUSE_KEEPING) {
+				return OrganizationTaskType.HOUSE_KEEPING;
+			}
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_MAINTENANCE) {
+				return OrganizationTaskType.MAINTENANCE;
+			}
 		}
 
 		LOGGER.error("Content category is not matched in organization type, postId=" + post.getId() 
