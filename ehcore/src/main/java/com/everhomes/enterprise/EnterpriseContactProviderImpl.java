@@ -1147,7 +1147,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
 		final List<EnterpriseContact> contacts = new ArrayList<EnterpriseContact>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
 		
-		List<Long> userIds = vcProvider.findUsersByEnterpriseId(null);
+//		List<Long> userIds = vcProvider.findUsersByEnterpriseId(null);
 		 
         SelectQuery<EhEnterpriseContactsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_CONTACTS);
  
@@ -1157,7 +1157,7 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
 
         query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.USER_ID.ne(0L));
         query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.STATUS.eq((byte) 3));
-        query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.USER_ID.notIn(userIds));
+//        query.addConditions(Tables.EH_ENTERPRISE_CONTACTS.USER_ID.notIn(userIds));
         query.addLimit(count);
         
         query.fetch().map((r) -> {
