@@ -44,6 +44,7 @@ import com.everhomes.launchpad.LaunchPadItem;
 import com.everhomes.launchpad.LaunchPadProvider;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
+import com.everhomes.rest.address.AddressType;
 import com.everhomes.rest.business.BusinessAssignedScopeDTO;
 import com.everhomes.rest.business.BusinessCommand;
 import com.everhomes.rest.business.BusinessDTO;
@@ -1232,6 +1233,7 @@ public class BusinessServiceImpl implements BusinessService {
 						if(province != null)
 							dto.setProvince(province.getName());
 					}
+					dto.setAddressType(AddressType.COMMUNITY_ADDRESS.getCode());
 					dto.setId(addr.getId());
 					dto.setCity(addr.getCityName());
 					dto.setArea(addr.getAreaName());
@@ -1270,6 +1272,7 @@ public class BusinessServiceImpl implements BusinessService {
 					if(province != null)
 						dto.setProvince(province.getName());
 				}
+				dto.setAddressType(AddressType.SERVICE_ADDRESS.getCode());
 				dto.setId(addr.getId());
 				dto.setCity(addr.getCityName());
 				dto.setArea(addr.getAreaName());
