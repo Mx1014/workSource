@@ -14,6 +14,7 @@ public class UserServiceAddressDTO {
     private String address;
     private Long communityId;
     private String communityName;
+    private Byte addressType;
    
     public Long getId() {
         return id;
@@ -68,6 +69,12 @@ public class UserServiceAddressDTO {
 	}
 	public void setCommunityName(String communityName) {
 		this.communityName = communityName;
+	}
+	public Byte getAddressType() {
+		return addressType;
+	}
+	public void setAddressType(Byte addressType) {
+		this.addressType = addressType;
 	}
 	@Override
     public String toString(){
