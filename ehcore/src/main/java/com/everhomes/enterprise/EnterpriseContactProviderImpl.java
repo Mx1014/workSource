@@ -1167,6 +1167,8 @@ public class EnterpriseContactProviderImpl implements EnterpriseContactProvider 
        
         if(contacts.size() >= count) {
             locator.setAnchor(contacts.get(contacts.size() - 1).getId());
+        } else {
+            locator.setAnchor(null);
         }
 
         return contacts;

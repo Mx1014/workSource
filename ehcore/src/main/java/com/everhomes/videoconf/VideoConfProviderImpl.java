@@ -309,6 +309,8 @@ public class VideoConfProviderImpl implements VideoConfProvider {
             if (enterprises.size() >= pageSize) {
                 locator.setAnchor(enterprises.get(enterprises.size() - 1).getId());
                 return AfterAction.done;
+            } else {
+                locator.setAnchor(null);
             }
             return AfterAction.next;
         });
@@ -619,6 +621,8 @@ public class VideoConfProviderImpl implements VideoConfProvider {
             if (orders.size() >= pageSize) {
                 locator.setAnchor(orders.get(orders.size() - 1).getId());
                 return AfterAction.done;
+            } else {
+                locator.setAnchor(null);
             }
             return AfterAction.next;
         });
@@ -941,6 +945,8 @@ public class VideoConfProviderImpl implements VideoConfProvider {
             if (accounts.size() >= pageSize) {
                 locator.setAnchor(accounts.get(accounts.size() - 1).getId());
                 return AfterAction.done;
+            } else {
+                locator.setAnchor(null);
             }
             return AfterAction.next;
         });
