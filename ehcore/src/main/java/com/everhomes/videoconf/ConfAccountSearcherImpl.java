@@ -73,7 +73,7 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
 	public void bulkUpdate(List<ConfAccounts> accounts) {
 		BulkRequestBuilder brb = getClient().prepareBulk();
         for (ConfAccounts account : accounts) {
-        	if(account.getOwnerId() != 0) {
+        	if(account.getOwnerId() != null && account.getOwnerId() != 0) {
 	            XContentBuilder source = createDoc(account);
 	            if(null != source) {
 	                LOGGER.info("conf account id:" + account.getId());
