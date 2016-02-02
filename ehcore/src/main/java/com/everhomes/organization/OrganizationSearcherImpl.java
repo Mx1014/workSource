@@ -72,6 +72,9 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
     public void bulkUpdate(List<Organization> organizations) {
         BulkRequestBuilder brb = getClient().prepareBulk();
         for (Organization organization : organizations) {
+        	if(null == organization){
+        		continue;
+        	}
             XContentBuilder source = createDoc(organization);
             if(null != source) {
                 LOGGER.info("id:" + organization.getId());

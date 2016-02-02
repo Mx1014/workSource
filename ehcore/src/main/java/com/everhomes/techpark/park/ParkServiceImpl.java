@@ -6,6 +6,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 import javax.xml.namespace.QName;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.tools.ant.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,11 +61,23 @@ import org.springframework.stereotype.Component;
 
 
 
+
+
+
+
+
+
+
+
+
 import com.bosigao.cxf.Service1;
 import com.bosigao.cxf.Service1Soap;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
@@ -98,6 +112,8 @@ import com.everhomes.rest.techpark.park.ParkingServiceErrorCode;
 import com.everhomes.rest.techpark.park.PaymentRankingCommand;
 import com.everhomes.rest.techpark.park.PlateInfo;
 import com.everhomes.rest.techpark.park.PlateNumberCommand;
+import com.everhomes.rest.techpark.park.PreferentialRulesDTO;
+import com.everhomes.rest.techpark.park.QryPreferentialRuleByCommunityIdCommand;
 import com.everhomes.rest.techpark.park.RechargeInfoDTO;
 import com.everhomes.rest.techpark.park.RechargeOrderDTO;
 import com.everhomes.rest.techpark.park.RechargeRecordDTO;
@@ -106,6 +122,7 @@ import com.everhomes.rest.techpark.park.RechargeRecordListCommand;
 import com.everhomes.rest.techpark.park.RechargeSuccessResponse;
 import com.everhomes.rest.techpark.park.SearchApplyCardCommand;
 import com.everhomes.rest.techpark.park.SearchRechargeRecordCommand;
+import com.everhomes.rest.techpark.park.SetPreferentialRuleCommand;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -151,6 +168,9 @@ public class ParkServiceImpl implements ParkService {
 	
 	@Autowired
 	private LocaleStringService localeStringService;
+	
+	@Autowired
+	private CommunityProvider communityProvider;
 	
 	private static final QName SERVICE_NAME = new QName("http://tempuri.org/", "Service1");
 	
@@ -811,4 +831,58 @@ public class ParkServiceImpl implements ParkService {
 		}
 		return response;
 	}
+	
+	@Override
+	public PreferentialRulesDTO qryPreferentialRuleByCommunityId(QryPreferentialRuleByCommunityIdCommand cmd){
+		if(org.springframework.util.StringUtils.isEmpty(cmd.getOwnerType())){
+			cmd.setOwnerType(EntityType.COMMUNITY.getCode());
+		}
+		
+		int namespaceId = UserContext.getCurrentNamespaceId(null);
+		
+		//兼容
+		if(null == cmd.getOwnerId()){
+			List<Community> communities = communityProvider.listCommunitiesByNamespaceId(namespaceId);
+			if(null != communities && 0 != communities.size()){
+				cmd.setOwnerId(communities.get(0).getId());
+			}
+		}
+		
+		PreferentialRule preferentialRule = parkProvider.findPreferentialRuleByCommunityId(cmd.getOwnerType(), cmd.getOwnerId());
+		PreferentialRulesDTO dto = ConvertHelper.convert(preferentialRule, PreferentialRulesDTO.class);
+		if(null != preferentialRule){
+			dto.setStartTime(null == preferentialRule.getStartTime() ? new Date().getTime() : preferentialRule.getStartTime().getTime());
+			dto.setEndTime(null == preferentialRule.getEndTime() ? new Date().getTime() : preferentialRule.getEndTime().getTime());
+		}
+		return dto;
+	}
+	
+	@Override
+	public void setPreferentialRule(SetPreferentialRuleCommand cmd){
+		if(org.springframework.util.StringUtils.isEmpty(cmd.getOwnerType())){
+			cmd.setOwnerType(EntityType.COMMUNITY.getCode());
+		}
+		
+		int namespaceId = UserContext.getCurrentNamespaceId(null);
+		
+		//兼容
+		if(null == cmd.getOwnerId()){
+			List<Community> communities = communityProvider.listCommunitiesByNamespaceId(namespaceId);
+			if(null != communities && 0 != communities.size()){
+				cmd.setOwnerId(communities.get(0).getId());
+			}
+		}
+		
+		PreferentialRule preferentialRule = parkProvider.findPreferentialRuleByCommunityId(cmd.getOwnerType(), cmd.getOwnerId());
+		
+		if(null != preferentialRule){
+			preferentialRule.setStartTime(new Timestamp(cmd.getStartTime()));
+			preferentialRule.setEndTime(new Timestamp(cmd.getEndTime()));
+			preferentialRule.setBeforeNember(cmd.getBeforeNember());
+			parkProvider.updatePreferentialRuleById(preferentialRule);
+		}
+		
+	}
+	
+
 }

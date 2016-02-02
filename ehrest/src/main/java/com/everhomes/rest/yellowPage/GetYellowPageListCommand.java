@@ -6,7 +6,8 @@ import com.everhomes.util.StringHelper;
 
 public class GetYellowPageListCommand {
 
-	 
+	private Long communityId;
+	
 	private String ownerType;
 	@NotNull
 	private Long ownerId;
@@ -87,6 +88,15 @@ public class GetYellowPageListCommand {
 
 	public java.lang.String getServiceType() {
 		return serviceType;
+	}
+
+	
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
 
 	public void setServiceType(java.lang.String serviceType) {

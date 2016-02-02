@@ -1,7 +1,11 @@
 package com.everhomes.techpark.park;
 
+import java.util.Date;
 import java.util.Set;
 
+import javax.validation.Valid;
+
+import org.apache.tools.ant.util.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,6 +17,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.organization.CreateOrganizationByAdminCommand;
 import com.everhomes.rest.techpark.onlinePay.OnlinePayBillCommand;
 import com.everhomes.rest.techpark.park.CreateRechargeOrderCommand;
 import com.everhomes.rest.techpark.park.ListCardTypeCommand;
@@ -23,12 +28,15 @@ import com.everhomes.rest.techpark.park.ParkingPreferentialRuleDTO;
 import com.everhomes.rest.techpark.park.PaymentRankingCommand;
 import com.everhomes.rest.techpark.park.PlateInfo;
 import com.everhomes.rest.techpark.park.PlateNumberCommand;
+import com.everhomes.rest.techpark.park.PreferentialRulesDTO;
+import com.everhomes.rest.techpark.park.QryPreferentialRuleByCommunityIdCommand;
 import com.everhomes.rest.techpark.park.RechargeOrderDTO;
 import com.everhomes.rest.techpark.park.RechargeRecordList;
 import com.everhomes.rest.techpark.park.RechargeRecordListCommand;
 import com.everhomes.rest.techpark.park.RechargeResultSearchCommand;
 import com.everhomes.rest.techpark.park.RechargeSuccessResponse;
 import com.everhomes.rest.techpark.park.SetParkingPreferentialRuleCommand;
+import com.everhomes.rest.techpark.park.SetPreferentialRuleCommand;
 import com.everhomes.rest.techpark.park.WaitingLine;
 
 
@@ -237,13 +245,16 @@ public class ParkController extends ControllerBase{
         configurationProvider.setValue(ConfigConstants.PARKING_PREFERENTIAL_ENDTIME, cmd.getEndTime());
         configurationProvider.setValue(ConfigConstants.PARKING_PREFERENTIAL_RANGE, cmd.getRange());
         
-        ParkingPreferentialRuleDTO parkingPreferential = new ParkingPreferentialRuleDTO();
-
-        parkingPreferential.setStartTime(configurationProvider.getValue(ConfigConstants.PARKING_PREFERENTIAL_STARTTIME, "0"));
-        parkingPreferential.setEndTime(configurationProvider.getValue(ConfigConstants.PARKING_PREFERENTIAL_ENDTIME, "0"));
-        parkingPreferential.setRange(configurationProvider.getValue(ConfigConstants.PARKING_PREFERENTIAL_RANGE, "0"));
-        
-		RestResponse response = new RestResponse(parkingPreferential);
+        SetPreferentialRuleCommand command = new SetPreferentialRuleCommand();
+        try {
+        	command.setStartTime(DateUtils.parseDateFromHeader(cmd.getStartTime()).getTime());
+            command.setEndTime(DateUtils.parseDateFromHeader(cmd.getEndTime()).getTime());
+            command.setBeforeNember(Long.valueOf(cmd.getRange()));
+            parkService.setPreferentialRule(command);
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -257,17 +268,54 @@ public class ParkController extends ControllerBase{
 	 */
 	@RequestMapping("getParkingPreferentialRule")
 	@RestReturn(value = ParkingPreferentialRuleDTO.class)
-	public RestResponse getParkingPreferentialRule() {
+	public RestResponse getParkingPreferentialRule(@Valid QryPreferentialRuleByCommunityIdCommand cmd) {
 		
 		ParkingPreferentialRuleDTO parkingPreferential = new ParkingPreferentialRuleDTO();
+		PreferentialRulesDTO dto = parkService.qryPreferentialRuleByCommunityId(cmd);
 
-        parkingPreferential.setStartTime(configurationProvider.getValue(ConfigConstants.PARKING_PREFERENTIAL_STARTTIME, "0"));
-        parkingPreferential.setEndTime(configurationProvider.getValue(ConfigConstants.PARKING_PREFERENTIAL_ENDTIME, "0"));
-        parkingPreferential.setRange(configurationProvider.getValue(ConfigConstants.PARKING_PREFERENTIAL_RANGE, "0"));
-        
+		if(null != dto){
+			 parkingPreferential.setStartTime(DateUtils.format(dto.getStartTime(), "YYYY-MM-DD"));
+		     parkingPreferential.setEndTime(DateUtils.format(dto.getEndTime(), "YYYY-MM-DD"));
+		     parkingPreferential.setRange(String.valueOf(dto.getBeforeNember()));
+		}
+       
 		RestResponse response = new RestResponse(parkingPreferential);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	/**
+	 * <b>URL: /techpark/park/qryPreferentialRuleByCommunityId</b>
+	 * 获取车缴费活动规则
+	 * @return
+	 */
+	@RequestMapping("qryPreferentialRuleByCommunityId")
+	@RestReturn(value = PreferentialRulesDTO.class)
+	public RestResponse qryPreferentialRuleByCommunityId(@Valid QryPreferentialRuleByCommunityIdCommand cmd) {
+		
+		PreferentialRulesDTO dto = parkService.qryPreferentialRuleByCommunityId(cmd);
+        
+		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /techpark/park/setPreferentialRule</b>
+	 * 停车缴费活动规则设置
+	 * @return
+	 */
+	@RequestMapping("setPreferentialRule")
+	@RestReturn(value = String.class)
+	public RestResponse setPreferentialRule(SetPreferentialRuleCommand cmd) {
+		parkService.setPreferentialRule(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+		
+	}
+	
 }

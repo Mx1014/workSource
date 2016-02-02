@@ -665,6 +665,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			enterprise.setAddress(cmd.getAddress());
 			enterprise.setDescription(cmd.getDescription());
 			enterprise.setAvatar(cmd.getAvatar());
+			enterprise.setCreateTime(organization.getCreateTime());
 			if(!StringUtils.isEmpty(cmd.getCheckinDate())){
 				enterprise.setCheckinDate(Timestamp.valueOf(cmd.getCheckinDate()));
 			}
@@ -4627,11 +4628,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		return requests.stream().map((r)->{
 			Organization organization = organizationProvider.findOrganizationById(r.getMemberId());
-			OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
-			
-			organization.setCommunityId(r.getCommunityId());
-			organization.setDescription(detail.getDescription());
-			
+			if(null != organization){
+				OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
+				
+				organization.setCommunityId(r.getCommunityId());
+				organization.setDescription(detail.getDescription());
+			}
 			return organization;
 		}).collect(Collectors.toList());
 	}

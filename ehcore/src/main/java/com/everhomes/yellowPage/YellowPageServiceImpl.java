@@ -8,9 +8,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import ch.hsr.geohash.GeoHash;
 
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
@@ -40,6 +43,9 @@ public class YellowPageServiceImpl implements YellowPageService {
 	private ConfigurationProvider configurationProvider;
     @Autowired
     private YellowPageProvider yellowPageProvider;
+    
+    @Autowired
+    private CommunityProvider communityProvider;
 
 	@Autowired
 	private ContentServerService contentServerService;
@@ -126,6 +132,19 @@ public class YellowPageServiceImpl implements YellowPageService {
 	@Override
 	public YellowPageListResponse getYellowPageList(
 			GetYellowPageListCommand cmd) { 
+		//做兼容
+		if(null != cmd.getCommunityId()){
+			cmd.setOwnerId(cmd.getCommunityId());
+		}else if(!StringUtils.isEmpty(cmd.getOwnerType()) && "namespace".equals(cmd.getOwnerType()) && null != cmd.getOwnerId()){
+			List<Community> communities = communityProvider.listCommunitiesByNamespaceId(cmd.getOwnerId().intValue());
+			if(null != communities && 0 != communities.size()){
+				cmd.setOwnerId(communities.get(0).getId());
+				cmd.setOwnerType("community");
+			}
+		}
+		
+		
+		
 		YellowPageListResponse response = new YellowPageListResponse();
 		response.setYellowPages(new ArrayList<YellowPageDTO>());
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
