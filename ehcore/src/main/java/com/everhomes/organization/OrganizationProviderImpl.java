@@ -1871,4 +1871,23 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
         return addresses;
 	}
+	
+	@Override
+	public List<OrganizationAddress> listOrganizationAddressByBuildingName(String buildingName) {
+		List<OrganizationAddress> addresses = new ArrayList<OrganizationAddress>();
+		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOrganizations.class), null, 
+				(DSLContext context, Object reducingContext) -> {
+					Condition cond = Tables.EH_ORGANIZATION_ADDRESSES.BUILDING_NAME.eq(buildingName);
+					cond = cond.and(Tables.EH_ORGANIZATION_ADDRESSES.STATUS.eq(OrganizationAddressStatus.ACTIVE.getCode()));
+					SelectQuery<EhOrganizationAddressesRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_ADDRESSES);
+					query.addConditions(cond);
+					query.fetch().map((EhOrganizationAddressesRecord record) -> {
+						addresses.add(ConvertHelper.convert(record, OrganizationAddress.class));
+		            	return null;
+					});
+					
+					return true;
+				});
+        return addresses;
+	}
 }

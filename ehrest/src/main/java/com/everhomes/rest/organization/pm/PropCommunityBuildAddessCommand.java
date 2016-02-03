@@ -21,6 +21,9 @@ public class PropCommunityBuildAddessCommand {
     private List<String> buildingNames;
     
     @ItemType(Long.class)
+    private List<Long> buildingIds;
+    
+    @ItemType(Long.class)
     private List<Long> addressIds;
     
     private String message;
@@ -66,6 +69,18 @@ public class PropCommunityBuildAddessCommand {
 
 	public void setMessage(String message) {
 		this.message = message;
+	}
+	
+	
+
+
+	public List<Long> getBuildingIds() {
+		return buildingIds;
+	}
+
+
+	public void setBuildingIds(List<Long> buildingIds) {
+		this.buildingIds = buildingIds;
 	}
 
 

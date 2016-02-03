@@ -71,9 +71,11 @@ import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.BillingAccountHelper;
 import com.everhomes.organization.BillingAccountType;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationBillingAccount;
 import com.everhomes.organization.OrganizationBillingTransactions;
 import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationOrder;
 import com.everhomes.organization.OrganizationOwners;
@@ -1213,7 +1215,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		} 
 		
 		else if(community.getCommunityType() == CommunityType.COMMERCIAL.getCode()) {
-			sendNoticeToEnterpriseContactor(cmd);
+			//sendNoticeToEnterpriseContactor(cmd);
+			this.sendNoticeToOrganizationMember(cmd);
 		}
 		
 	}
@@ -1285,6 +1288,71 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		processCommunityEnterpriseContactor(communityId,contacts,cmd.getMessage());
 	}
 	
+	@Override
+	public void sendNoticeToOrganizationMember(PropCommunityBuildAddessCommand cmd) {
+		Long communityId = cmd.getCommunityId();
+		List<String> buildingNames = cmd.getBuildingNames();
+		List<Long> buildingIds = cmd.getBuildingIds();
+		List<Long> addressIds = cmd.getAddressIds();
+		List<Organization> orgs = new ArrayList<Organization>();
+		/** 根据地址获取要推送的企业  **/
+		if(null != addressIds && 0 != addressIds.size()){
+			for (Long addressId : addressIds) {
+				OrganizationAddress orgAddress = organizationProvider.findOrganizationAddressByAddressId(addressId);
+				if(null != orgAddress)
+					orgs.add(organizationProvider.findOrganizationById(orgAddress.getOrganizationId()));
+			}
+		
+		/** 根据楼栋Id获取要推送的企业  **/
+		}else if(null != buildingIds && 0 != buildingIds.size()){
+			for (Long buildingId : buildingIds) {
+				List<OrganizationAddress> orgAddresses = organizationProvider.listOrganizationAddressByBuildingId(buildingId, Integer.MAX_VALUE, null);
+				for (OrganizationAddress organizationAddress : orgAddresses) {
+					if(null != organizationAddress)
+						orgs.add(organizationProvider.findOrganizationById(organizationAddress.getOrganizationId()));
+				}
+			}
+		
+		/** 根据楼栋名称获取要推送的企业**/
+		}else if(null != buildingNames && 0 != buildingNames.size()){
+			for (String buildingName : buildingNames) {
+				List<OrganizationAddress> orgAddresses = organizationProvider.listOrganizationAddressByBuildingName(buildingName);
+				for (OrganizationAddress organizationAddress : orgAddresses) {
+					if(null != organizationAddress)
+						orgs.add(organizationProvider.findOrganizationById(organizationAddress.getOrganizationId()));
+				}
+			}
+		
+		/** 根据小区获取要推送的企业  **/
+		}else if(null != communityId){
+			List<OrganizationCommunityRequest> requests = organizationProvider.queryOrganizationCommunityRequestByCommunityId(null, communityId, Integer.MAX_VALUE, null);
+			for (OrganizationCommunityRequest req : requests) {
+				orgs.add(organizationProvider.findOrganizationById(req.getMemberId()));
+			}
+		}
+		
+		/** 获取全部企业的全部人员 **/
+		List<OrganizationMember> members = this.getOrganizationMembersByAddress(orgs);
+		
+		/** 推送消息 **/
+		this.processSmsByMembers(members, cmd.getMessage());
+	}
+	
+	/**
+	 * 获取企业所以人员
+	 * @param orgs
+	 * @return
+	 */
+	private List<OrganizationMember> getOrganizationMembersByAddress(List<Organization> orgs){
+		List<OrganizationMember> members = new ArrayList<OrganizationMember>();
+		for (Organization organization : orgs) {
+			if(null != organization){
+				members.addAll(organizationProvider.listOrganizationMembersByOrgId(organization.getId()));
+			}
+		}
+		return members;
+	}
+	
 	private void processCommunityEnterpriseContactor(Long communityId,List<EnterpriseContact> contacts,String message) {
 
         List<String> phones = new ArrayList<String>();
@@ -1327,6 +1395,35 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 //			}
 //		}
 
+	}
+	
+	private void processSmsByMembers(List<OrganizationMember> members,String message) {
+
+		List<String> phones = new ArrayList<String>();
+		List<Long> userIds = new ArrayList<Long>();
+		
+		/** 区分是否是平台用户  **/
+		for (OrganizationMember member : members) {
+			if(member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode())){
+				userIds.add(member.getTargetId());
+			}else{
+				phones.add(member.getContactToken());
+			}
+		}
+		
+		/** 平台用户就推送消息  **/
+		for (Long userId : userIds) {
+			sendNoticeToUserById(userId, message);
+		}
+		
+		/** 非平台用户就发短信  **/
+		List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_MSG, message);
+	    String templateScope = SmsTemplateCode.SCOPE;
+	    int templateId = SmsTemplateCode.WY_SEND_MSG_CODE;
+	    String templateLocale = UserContext.current().getUser().getLocale();
+	    String[] phoneArray = new String[phones.size()];  
+	    phones.toArray(phoneArray);  
+	    smsProvider.sendSms(UserContext.current().getUser().getNamespaceId(),phoneArray , templateScope, templateId, templateLocale, variables);
 	}
 	
 	public void sendNoticeToCommunityPmOwner(PropCommunityBuildAddessCommand cmd) {
