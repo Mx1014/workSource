@@ -49,7 +49,7 @@ INSERT INTO `eh_user_groups` (`id`,  `owner_uid`,  `group_discriminator`,  `grou
 INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, `status`, `points`, `level`, `gender`, `locale`, `salt`, `password_hash`, `create_time`, `namespace_id`)
 	VALUES (203600, UUID(), '9200900', '唐玮', 'cs://1/image/aW1hZ2UvTVRvMU1EQTVZVEZrTkdVek9EQXhZbVE0WlRZd1l6UXdOVE0zWVdJNFkyTmlNUQ', 1, 45, '1', '1',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), 0);
 INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`, `create_time`, `namespace_id`)
-	VALUES (215022, 203600,  '0',  '13510551322',  '221616',  3, UTC_TIMESTAMP(), 0);
+	VALUES (215340, 203600,  '0',  '13510551322',  '221616',  3, UTC_TIMESTAMP(), 0);
 
 INSERT INTO `eh_enterprise_contacts` (`id`,  `enterprise_id`,  `name`,  `nick_name`,  `avatar`,  `user_id`,  `role`,  `status`,  `creator_uid`,  `create_time`)
 	VALUES (101105, 180041, '唐玮', '唐玮', NULL, '203600', '5', '3', NULL, UTC_TIMESTAMP());  
