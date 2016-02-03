@@ -22,6 +22,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.business.ListBusinessByCommonityIdCommand;
 import com.everhomes.rest.business.ListUserByKeywordCommand;
 import com.everhomes.rest.business.SyncBusinessCommand;
 import com.everhomes.rest.business.SyncDeleteBusinessCommand;
@@ -380,6 +381,15 @@ public class BusinessOpenController extends ControllerBase {
     public RestResponse listUserByKeyword(@Valid ListUserByKeywordCommand cmd) {
     	List<UserInfo> users = this.businessService.listUserByKeyword(cmd);
     	RestResponse response =  new RestResponse(users);
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+		return response;
+    }
+    @RequestMapping("listBusinessByCommonityId")
+    @RestReturn(value=String.class,collection=true)
+    public RestResponse listBusinessByCommonityId(@Valid ListBusinessByCommonityIdCommand cmd) {
+    	List<String> list = this.businessService.listBusinessByCommonityId(cmd);
+    	RestResponse response =  new RestResponse(list);
     	response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
 		return response;

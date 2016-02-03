@@ -475,4 +475,11 @@ public class BusinessProviderImpl implements BusinessProvider {
         .fetch().stream().map(r ->ConvertHelper.convert(r, BusinessCategory.class)).collect(Collectors.toList());
         return businessCategories;
 	}
+	@Override
+	public List<Business> listBusinessByIds(List<Long> ids) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBusinesses.class));
+		return context.select().from(Tables.EH_BUSINESSES).where(Tables.EH_BUSINESSES.ID.in(ids))
+				.fetch().stream().map(r->ConvertHelper.convert(r, Business.class))
+				.collect(Collectors.toList());
+	}
 }

@@ -65,6 +65,7 @@ import com.everhomes.rest.business.GetBusinessesByCategoryCommandResponse;
 import com.everhomes.rest.business.GetBusinessesByScopeCommand;
 import com.everhomes.rest.business.ListBusinessByKeywordCommand;
 import com.everhomes.rest.business.ListBusinessByKeywordCommandResponse;
+import com.everhomes.rest.business.ListBusinessByCommonityIdCommand;
 import com.everhomes.rest.business.ListUserByKeywordCommand;
 import com.everhomes.rest.business.SyncBusinessCommand;
 import com.everhomes.rest.business.SyncDeleteBusinessCommand;
@@ -400,6 +401,72 @@ public class BusinessServiceImpl implements BusinessService {
 		return response;
 	}
 
+	@Override
+	public List<String> listBusinessByCommonityId(ListBusinessByCommonityIdCommand cmd) {
+		Community community = null;
+		if(cmd.getCommunityId()!=null){
+			community = communityProvider.findCommunityById(cmd.getCommunityId());
+			if(community == null){
+				LOGGER.error("Community is not exists,communityId=" + cmd.getCommunityId());
+				throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST, 
+						"Invalid paramter communityId,communityId is not exists.");
+			}
+		}
+
+		long startTime = System.currentTimeMillis();
+
+		List<String> bizIds = new ArrayList<String>();
+		//CommunityGeoPoint
+		CommunityGeoPoint point = null;
+		if(cmd.getCommunityId()!=null){
+			List<CommunityGeoPoint> points = communityProvider.listCommunityGeoPoints(cmd.getCommunityId());
+			if(points == null || points.isEmpty()){
+				LOGGER.error("Community is not exists geo points,communityId=" + cmd.getCommunityId());
+			}
+			else
+				point = points.get(0);
+		}
+		final double lat = point != null ? point.getLatitude() : 0;
+		final double lon = point != null ? point.getLongitude() : 0;
+		List<String> geoHashList = getGeoHashCodeList(lat, lon);
+		List<Business> businesses = null;
+
+		//recommendBizIds
+		long cityId = community.getCityId()==null?0:community.getCityId();
+		long communityId = cmd.getCommunityId()==null?0:cmd.getCommunityId();
+		List<Long> recommendBizIds = this.businessProvider.findBusinessAssignedScopeByScope(cityId,communityId).stream()
+				.map(r->r.getOwnerId()).collect(Collectors.toList());
+
+		//获取指定类型的服务
+		List<Long> categoryPIds = this.categoryProvider.getBusinessSubCategories(cmd.getCategoryId());
+		List<Long> categoryIds = new ArrayList<Long>();
+		if(categoryPIds!=null&&!categoryPIds.isEmpty()){
+			for(Long catePId:categoryPIds){
+				List<Long> subCateIds = this.categoryProvider.getBusinessSubCategories(catePId);
+				if(subCateIds!=null&&!subCateIds.isEmpty())
+					categoryIds.addAll(subCateIds);
+			}
+		}
+		businesses = this.businessProvider.findBusinessByCategroy(categoryIds,geoHashList);
+		//从算法过滤的范围中再缩小范围
+		businesses = this.filterDistance(businesses,lat,lon,recommendBizIds);
+		if(recommendBizIds!=null&&!recommendBizIds.isEmpty()){
+			List<Business> recombizs = this.businessProvider.listBusinessByIds(recommendBizIds);
+			recombizs.forEach(r->{
+				if(r.getTargetId()!=null)
+					bizIds.add(r.getTargetId());
+			});
+		}
+		businesses.forEach(r ->{
+			if(!bizIds.contains(r.getTargetId()))
+				bizIds.add(r.getTargetId());
+		});
+		long endTime = System.currentTimeMillis();
+		LOGGER.debug("get businesses by communityId,categoryId=" + cmd.getCategoryId() 
+				+ ",communityId=" + cmd.getCommunityId()+ ",elapse=" + (endTime - startTime));
+		return bizIds;
+	}
+
 	private List<BusinessDTO> operatorByPage(List<BusinessDTO> dtos,GetBusinessesByCategoryCommandResponse resposne,Integer cmdPageOffset, Integer cmdPageSize) {
 		if(dtos == null || dtos.size() < 1)
 			return new ArrayList<BusinessDTO>();
@@ -590,7 +657,7 @@ public class BusinessServiceImpl implements BusinessService {
 					removeIds.add(r.getTargetId());
 					return false;
 				}).map(r ->r.getTargetId()).collect(Collectors.toList());
-		
+
 		List<Long> cmmtyBizIds = null;
 		if(cmmtyId!=0){
 			cmmtyBizIds = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
@@ -606,7 +673,7 @@ public class BusinessServiceImpl implements BusinessService {
 		List<Long> countyBizIds = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
 				0, ScopeType.ALL.getCode(), 0,namesapceId).stream()
 				.filter(r -> !removeIds.contains(r.getTargetId())).map(r ->r.getTargetId()).collect(Collectors.toList());
-		
+
 		List<Long> favoriteBizIds = new ArrayList<Long>();
 		if(userBizIds != null && !userBizIds.isEmpty())
 			favoriteBizIds.addAll(userBizIds);
