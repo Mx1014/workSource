@@ -1746,6 +1746,9 @@ public class VideoConfServiceImpl implements VideoConfService {
 			confEnterprise.setContactName(cmd.getContactor());
 			confEnterprise.setContact(cmd.getMobile());
 			confEnterprise.setStatus((byte) 1);
+			confEnterprise.setActiveAccountAmount(0);
+			confEnterprise.setTrialAccountAmount(0);
+					
 			
 			Enterprise enter = enterpriseProvider.findEnterpriseById(cmd.getEnterpriseId());
 			if(enter != null)
