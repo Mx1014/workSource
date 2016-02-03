@@ -580,19 +580,19 @@ public class EnterpriseServiceImpl implements EnterpriseService {
                     if(LOGGER.isDebugEnabled()) {
                     	LOGGER.debug("The enterprise is not exist, userId=" + userId 
                           + ", enterpriseId=" + userGroup.getGroupId());
-                  
                     }
                   continue;
-              }
+                }
                 
                 if(enterprise != null &&  !namespaceId.equals(enterprise.getNamespaceId())) {
-                if(LOGGER.isDebugEnabled()) {
-                	LOGGER.debug("The group is filtered for not in the namespaceId, userId=" + userId 
-                      + ", enterpriseId=" + userGroup.getGroupId() + ", namespaceId=" + namespaceId);
-              
-                }
-              continue;
-          }
+	                if(LOGGER.isDebugEnabled()) {
+	                	LOGGER.debug("The group is filtered for not in the namespaceId, userId=" + userId 
+	                      + ", enterpriseId=" + userGroup.getGroupId() + ", namespaceId=" + namespaceId);
+	              
+	                }
+                
+	                continue;
+                }	
                 this.enterpriseProvider.populateEnterpriseAttachments(enterprise);
                 this.enterpriseProvider.populateEnterpriseAddresses(enterprise);
                 populateEnterprise(enterprise);
