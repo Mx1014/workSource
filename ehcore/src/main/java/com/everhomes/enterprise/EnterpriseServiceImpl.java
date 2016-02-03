@@ -468,8 +468,9 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         User user = UserContext.current().getUser();
         Long userId = user.getId();
         
-        Long communityId = cmd.getCommunityId();
-        List<Long> enterpriseIdList = listEnterpriseIdByCommunityId(communityId);
+        Integer namespaceId = UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId());
+//        Long communityId = cmd.getCommunityId();
+//        List<Long> enterpriseIdList = listEnterpriseIdByCommunityId(communityId);
         
         List<UserGroup> userGroupList = userProvider.listUserGroups(user.getId(), GroupDiscriminator.ENTERPRISE.getCode());
         int size = (userGroupList == null) ? 0 : userGroupList.size();
@@ -488,23 +489,30 @@ public class EnterpriseServiceImpl implements EnterpriseService {
                     continue;
                 }
                 
-                if(communityId != null && !enterpriseIdList.contains(userGroup.getGroupId())) {
-                    if(LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("The group is filtered for not in the community, userId=" + userId 
-                            + ", enterpriseId=" + userGroup.getGroupId() + ", communityId=" + communityId);
-                    }
-                    continue;
-                }
+//                if(communityId != null && !enterpriseIdList.contains(userGroup.getGroupId())) {
+//                    if(LOGGER.isDebugEnabled()) {
+//                        LOGGER.debug("The group is filtered for not in the community, userId=" + userId 
+//                            + ", enterpriseId=" + userGroup.getGroupId() + ", communityId=" + communityId);
+//                    }
+//                    continue;
+//                }
                 
                 enterprise = this.enterpriseProvider.findEnterpriseById(userGroup.getGroupId());
                 
+              if(enterprise != null && enterprise.getNamespaceId() != namespaceId) {
+              if(LOGGER.isDebugEnabled()) {
+                  LOGGER.debug("The group is filtered for not in the namespaceId, userId=" + userId 
+                      + ", enterpriseId=" + userGroup.getGroupId() + ", namespaceId=" + namespaceId);
+              }
+              continue;
+          }
                 this.enterpriseProvider.populateEnterpriseAttachments(enterprise);
                 this.enterpriseProvider.populateEnterpriseAddresses(enterprise);
                 populateEnterprise(enterprise);
                 
                 // 为了使得企业信息里包含园区信息（特别是论坛信息），故需要给企业一个当前使用的园区
                 enterprise.setVisibleRegionType(VisibleRegionType.COMMUNITY.getCode());
-                enterprise.setVisibleRegionId(communityId);
+                enterprise.setVisibleRegionId(enterprise.getVisibleRegionId());
                 dto = toEnterpriseDto(userId, enterprise);
                 if(dto != null) {
                     enterpriseList.add(dto);
