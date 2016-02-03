@@ -200,8 +200,9 @@ public class RentalServiceImpl implements RentalService {
 		
 		Long userId = UserContext.current().getUser().getId();
 		checkEnterpriseCommunityIdIsNull(cmd.getOwnerId());
-//		RentalRule rentalRule = rentalProvider.getRentalRule(
-//				cmd.getOwnerId(),cmd.getOwnerType(), cmd.getSiteType());
+		RentalRule rentalRuleExist = rentalProvider.getRentalRule(
+				cmd.getOwnerId(),cmd.getOwnerType(), cmd.getSiteType());
+		if(rentalRuleExist != null) {
 //		rentalRule.setOwnerId(cmd.getOwnerId());
 //		rentalRule.setOwnerType(cmd.getOwnerType());
 //		rentalRule.setContactNum(cmd.getContactNum());
@@ -219,11 +220,16 @@ public class RentalServiceImpl implements RentalService {
 //		rentalRule.setContactAddress(cmd.getContactAddress());
 //		rentalRule.setContactName(cmd.getContactName());
 //		rentalRule.setOperatorUid(userId);
-		RentalRule rentalRule =ConvertHelper.convert(cmd,RentalRule.class  );
-		rentalRule.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		rentalRule.setOperatorUid(userId);
-		rentalProvider.updateRentalRule(rentalRule);
-		
+			RentalRule rentalRule =ConvertHelper.convert(cmd,RentalRule.class  );
+			rentalRule.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			rentalRule.setOperatorUid(userId);
+			rentalProvider.updateRentalRule(rentalRule);
+		} else {
+			RentalRule rentalRule =ConvertHelper.convert(cmd,RentalRule.class  );
+			rentalRule.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			rentalRule.setOperatorUid(userId);
+			rentalProvider.createRentalRule(rentalRule);
+		}
 	}
 
 	@Override
