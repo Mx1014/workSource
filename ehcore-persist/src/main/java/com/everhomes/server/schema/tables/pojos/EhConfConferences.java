@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfConferences implements java.io.Serializable {
 
-	private static final long serialVersionUID = -141111882;
+	private static final long serialVersionUID = 1879493736;
 
 	private java.lang.Long     id;
 	private java.lang.Long     conferenceId;
@@ -34,7 +34,7 @@ public class EhConfConferences implements java.io.Serializable {
 	private java.sql.Timestamp createTime;
 	private java.lang.Byte     status;
 	private java.lang.Integer  namespaceId;
-	private java.lang.Integer  meetingNo;
+	private java.lang.Long     meetingNo;
 
 	public EhConfConferences() {}
 
@@ -60,7 +60,7 @@ public class EhConfConferences implements java.io.Serializable {
 		java.sql.Timestamp createTime,
 		java.lang.Byte     status,
 		java.lang.Integer  namespaceId,
-		java.lang.Integer  meetingNo
+		java.lang.Long     meetingNo
 	) {
 		this.id = id;
 		this.conferenceId = conferenceId;
@@ -254,11 +254,11 @@ public class EhConfConferences implements java.io.Serializable {
 		this.namespaceId = namespaceId;
 	}
 
-	public java.lang.Integer getMeetingNo() {
+	public java.lang.Long getMeetingNo() {
 		return this.meetingNo;
 	}
 
-	public void setMeetingNo(java.lang.Integer meetingNo) {
+	public void setMeetingNo(java.lang.Long meetingNo) {
 		this.meetingNo = meetingNo;
 	}
 }

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfConferences extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhConfConferencesRecord> {
 
-	private static final long serialVersionUID = -503066138;
+	private static final long serialVersionUID = -60064085;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_conf_conferences</code>
@@ -134,7 +134,7 @@ public class EhConfConferences extends org.jooq.impl.TableImpl<com.everhomes.ser
 	/**
 	 * The column <code>ehcore.eh_conf_conferences.meeting_no</code>. the meeting no from 3rd conference provider
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfConferencesRecord, java.lang.Integer> MEETING_NO = createField("meeting_no", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "the meeting no from 3rd conference provider");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfConferencesRecord, java.lang.Long> MEETING_NO = createField("meeting_no", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "the meeting no from 3rd conference provider");
 
 	/**
 	 * Create a <code>ehcore.eh_conf_conferences</code> table reference

@@ -190,7 +190,7 @@ public class EhConfConferencesDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	/**
 	 * Fetch records that have <code>meeting_no IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfConferences> fetchByMeetingNo(java.lang.Integer... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfConferences> fetchByMeetingNo(java.lang.Long... values) {
 		return fetch(com.everhomes.server.schema.tables.EhConfConferences.EH_CONF_CONFERENCES.MEETING_NO, values);
 	}
 }
