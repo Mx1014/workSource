@@ -48,10 +48,10 @@ public class EhConfConferencesDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	}
 
 	/**
-	 * Fetch records that have <code>conf_id IN (values)</code>
+	 * Fetch records that have <code>conference_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfConferences> fetchByConfId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhConfConferences.EH_CONF_CONFERENCES.CONF_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfConferences> fetchByConferenceId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhConfConferences.EH_CONF_CONFERENCES.CONFERENCE_ID, values);
 	}
 
 	/**
@@ -185,5 +185,12 @@ public class EhConfConferencesDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfConferences> fetchByNamespaceId(java.lang.Integer... values) {
 		return fetch(com.everhomes.server.schema.tables.EhConfConferences.EH_CONF_CONFERENCES.NAMESPACE_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>meeting_no IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfConferences> fetchByMeetingNo(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhConfConferences.EH_CONF_CONFERENCES.MEETING_NO, values);
 	}
 }

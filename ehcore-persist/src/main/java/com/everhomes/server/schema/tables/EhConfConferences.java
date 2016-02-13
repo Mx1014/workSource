@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfConferences extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhConfConferencesRecord> {
 
-	private static final long serialVersionUID = 1766751716;
+	private static final long serialVersionUID = -503066138;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_conf_conferences</code>
@@ -32,9 +32,9 @@ public class EhConfConferences extends org.jooq.impl.TableImpl<com.everhomes.ser
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfConferencesRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id");
 
 	/**
-	 * The column <code>ehcore.eh_conf_conferences.conf_id</code>. the conference id from 3rd conference provider
+	 * The column <code>ehcore.eh_conf_conferences.conference_id</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfConferencesRecord, java.lang.Long> CONF_ID = createField("conf_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "the conference id from 3rd conference provider");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfConferencesRecord, java.lang.Long> CONFERENCE_ID = createField("conference_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_conf_conferences.subject</code>. the conference subject from 3rd conference provider
@@ -130,6 +130,11 @@ public class EhConfConferences extends org.jooq.impl.TableImpl<com.everhomes.ser
 	 * The column <code>ehcore.eh_conf_conferences.namespace_id</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfConferencesRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_conf_conferences.meeting_no</code>. the meeting no from 3rd conference provider
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfConferencesRecord, java.lang.Integer> MEETING_NO = createField("meeting_no", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "the meeting no from 3rd conference provider");
 
 	/**
 	 * Create a <code>ehcore.eh_conf_conferences</code> table reference

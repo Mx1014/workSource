@@ -11,10 +11,10 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfConferences implements java.io.Serializable {
 
-	private static final long serialVersionUID = -78903178;
+	private static final long serialVersionUID = -141111882;
 
 	private java.lang.Long     id;
-	private java.lang.Long     confId;
+	private java.lang.Long     conferenceId;
 	private java.lang.String   subject;
 	private java.lang.String   description;
 	private java.sql.Timestamp startTime;
@@ -34,12 +34,13 @@ public class EhConfConferences implements java.io.Serializable {
 	private java.sql.Timestamp createTime;
 	private java.lang.Byte     status;
 	private java.lang.Integer  namespaceId;
+	private java.lang.Integer  meetingNo;
 
 	public EhConfConferences() {}
 
 	public EhConfConferences(
 		java.lang.Long     id,
-		java.lang.Long     confId,
+		java.lang.Long     conferenceId,
 		java.lang.String   subject,
 		java.lang.String   description,
 		java.sql.Timestamp startTime,
@@ -58,10 +59,11 @@ public class EhConfConferences implements java.io.Serializable {
 		java.lang.String   startUrl,
 		java.sql.Timestamp createTime,
 		java.lang.Byte     status,
-		java.lang.Integer  namespaceId
+		java.lang.Integer  namespaceId,
+		java.lang.Integer  meetingNo
 	) {
 		this.id = id;
-		this.confId = confId;
+		this.conferenceId = conferenceId;
 		this.subject = subject;
 		this.description = description;
 		this.startTime = startTime;
@@ -81,6 +83,7 @@ public class EhConfConferences implements java.io.Serializable {
 		this.createTime = createTime;
 		this.status = status;
 		this.namespaceId = namespaceId;
+		this.meetingNo = meetingNo;
 	}
 
 	public java.lang.Long getId() {
@@ -91,12 +94,12 @@ public class EhConfConferences implements java.io.Serializable {
 		this.id = id;
 	}
 
-	public java.lang.Long getConfId() {
-		return this.confId;
+	public java.lang.Long getConferenceId() {
+		return this.conferenceId;
 	}
 
-	public void setConfId(java.lang.Long confId) {
-		this.confId = confId;
+	public void setConferenceId(java.lang.Long conferenceId) {
+		this.conferenceId = conferenceId;
 	}
 
 	public java.lang.String getSubject() {
@@ -249,5 +252,13 @@ public class EhConfConferences implements java.io.Serializable {
 
 	public void setNamespaceId(java.lang.Integer namespaceId) {
 		this.namespaceId = namespaceId;
+	}
+
+	public java.lang.Integer getMeetingNo() {
+		return this.meetingNo;
+	}
+
+	public void setMeetingNo(java.lang.Integer meetingNo) {
+		this.meetingNo = meetingNo;
 	}
 }
