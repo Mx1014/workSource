@@ -1326,7 +1326,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		
 		/** 根据小区获取要推送的企业  **/
 		}else if(null != communityId){
-			List<OrganizationCommunityRequest> requests = organizationProvider.queryOrganizationCommunityRequestByCommunityId(new CrossShardListingLocator(), communityId, Integer.MAX_VALUE-100, null);
+			List<OrganizationCommunityRequest> requests = organizationProvider.queryOrganizationCommunityRequestByCommunityId(new CrossShardListingLocator(), communityId, 100000, null);
 			for (OrganizationCommunityRequest req : requests) {
 				orgs.add(organizationProvider.findOrganizationById(req.getMemberId()));
 			}
