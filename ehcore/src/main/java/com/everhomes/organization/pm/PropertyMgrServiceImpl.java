@@ -65,6 +65,7 @@ import com.everhomes.group.Group;
 import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
@@ -1325,7 +1326,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		
 		/** 根据小区获取要推送的企业  **/
 		}else if(null != communityId){
-			List<OrganizationCommunityRequest> requests = organizationProvider.queryOrganizationCommunityRequestByCommunityId(null, communityId, Integer.MAX_VALUE, null);
+			List<OrganizationCommunityRequest> requests = organizationProvider.queryOrganizationCommunityRequestByCommunityId(new CrossShardListingLocator(), communityId, Integer.MAX_VALUE, null);
 			for (OrganizationCommunityRequest req : requests) {
 				orgs.add(organizationProvider.findOrganizationById(req.getMemberId()));
 			}
