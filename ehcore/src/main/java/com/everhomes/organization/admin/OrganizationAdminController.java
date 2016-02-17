@@ -658,6 +658,20 @@ public class OrganizationAdminController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /admin/org/ listOrgAuthPersonnels</b>
+     * <p>认证通讯录列表</p>
+     */
+    @RequestMapping("listOrgAuthPersonnels")
+    @RestReturn(value=OrganizationMemberDTO.class, collection=true)
+    public RestResponse listOrgAuthPersonnels(@Valid ListOrganizationContactCommand cmd) {
+    	ListOrganizationMemberCommandResponse res = organizationService.listOrgAuthPersonnels(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
      * <b>URL: /admin/org/listAllOrganizationPersonnels</b>
      * <p>查询园区全部的员工（）</p>
      */
