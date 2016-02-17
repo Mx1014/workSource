@@ -3740,6 +3740,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	}
 
+			
 	@Override
 	public ListDepartmentsCommandResponse listDepartments(
 			ListDepartmentsCommand cmd) {
@@ -4600,7 +4601,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	
 	@Override
-	public OrganizationMenuResponse listAllChildrenOrganizations(Long id,
+	public OrganizationMenuResponse listAllChildrenOrganizationMenus(Long id,
 			List<String> groupTypes) {
 		
 		OrganizationMenuResponse res = new OrganizationMenuResponse();
@@ -4641,6 +4642,20 @@ public class OrganizationServiceImpl implements OrganizationService {
 		res.setDtos(this.convertOrgRole(orgs, org));
 		return res;
 	}
+	
+	@Override
+	public ListOrganizationsCommandResponse listAllChildrenOrganizations(Long id,
+			List<String> groupTypes) {
+		ListOrganizationsCommandResponse res = new ListOrganizationsCommandResponse();
+		Organization org = this.checkOrganization(id);
+		List<Organization> orgs = organizationProvider.listOrganizationByGroupTypes(org.getPath() + "/%", groupTypes);
+		if(0 == orgs.size()){
+			return res;
+		}
+		res.setDtos(this.convertOrgRole(orgs, org));
+		return res;
+	}
+	
 	
 	@Override
 	public List<Organization> getSyncDatas(){
