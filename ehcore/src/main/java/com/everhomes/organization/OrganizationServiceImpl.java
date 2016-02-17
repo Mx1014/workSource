@@ -517,7 +517,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 		dbProvider.execute((TransactionStatus status) -> {
 			if(null != resources && 0 == resources.size()){
 				for (Long res : resources) {
-					aclProvider.deleteRoleAssignment(res);
+					roleAssignment.setRoleId(res);
+					roleAssignment.setOwnerType("system");
+					roleAssignment.setTargetType(entityType.getCode());
+					roleAssignment.setTargetId(cmd.getTargetId());
+					aclProvider.deleteRoleAssignment(roleAssignment);
 				}
 			}
 			roleAssignment.setRoleId(cmd.getRoleId());
