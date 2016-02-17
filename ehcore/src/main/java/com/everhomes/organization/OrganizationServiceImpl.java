@@ -549,6 +549,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 	private OrganizationDetailDTO toOrganizationDetailDTO(Long id, Boolean flag){
 		Organization organization = organizationProvider.findOrganizationById(id);
 		OrganizationDetail org = organizationProvider.findOrganizationDetailByOrganizationId(id);
+		if(null == organization || null == org){
+			LOGGER.debug("organization is null, id = " + id);
+			return new OrganizationDetailDTO();
+		}
+		
 		OrganizationDetailDTO dto = ConvertHelper.convert(org, OrganizationDetailDTO.class);
 		dto.setName(organization.getName());
 		dto.setAvatarUri(org.getAvatar());
