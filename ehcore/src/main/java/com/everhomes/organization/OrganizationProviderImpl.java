@@ -1890,4 +1890,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 				});
         return addresses;
 	}
+	
+	@Override
+	public Organization getOrganizationByGoupId(Long groupId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Record r = context.select().from(Tables.EH_ORGANIZATIONS).where(Tables.EH_ORGANIZATIONS.GROUP_ID.eq(groupId)).fetchOne();
+		if(r != null)
+			return ConvertHelper.convert(r, Organization.class);
+		return null;
+	}
 }

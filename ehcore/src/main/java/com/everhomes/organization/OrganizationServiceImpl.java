@@ -86,6 +86,8 @@ import java.util.stream.Collectors;
 
 
 
+
+
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -97,6 +99,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+
+
 
 
 
@@ -189,6 +193,8 @@ import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.Post;
 import com.everhomes.group.Group;
+import com.everhomes.group.GroupDiscriminator;
+import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -460,6 +466,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	@Autowired
 	private ContentServerService contentServerService;
+	
+	@Autowired
+	private GroupProvider groupProvider;
+	
 
 	private int getPageCount(int totalCount, int pageSize){
 		int pageCount = totalCount/pageSize;
@@ -636,7 +646,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 				dtos.add(this.toOrganizationDetailDTO(organization.getId(), cmd.getQryAdminRoleFlag()));
 			}
 		}
-		
 		resp.setDtos(dtos);
 		resp.setNextPageAnchor(locator.getAnchor());
 		return resp;
@@ -653,6 +662,22 @@ public class OrganizationServiceImpl implements OrganizationService {
 		Organization organization = new Organization();
 		
 		dbProvider.execute((TransactionStatus status) -> {
+			
+			Group group = new Group();
+			group.setName(cmd.getName());
+			group.setDisplayName(cmd.getDisplayName());
+			group.setEnterpriseAddress(cmd.getAddress());
+			
+			group.setDescription(cmd.getContactsPhone());
+			group.setStatus(OrganizationStatus.ACTIVE.getCode());
+			
+			group.setCreatorUid(user.getId());
+			
+			group.setNamespaceId(namespaceId);
+			
+			group.setDiscriminator(GroupDiscriminator.ENTERPRISE.getCode());
+			groupProvider.createGroup(group);
+			
 			organization.setParentId(0L);
 			organization.setLevel(1);
 			organization.setPath("");
@@ -663,6 +688,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			organization.setNamespaceId(namespaceId);
 			organization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			organization.setGroupId(group.getId());
 			organizationProvider.createOrganization(organization);
 			
 			OrganizationDetail enterprise = new OrganizationDetail();
