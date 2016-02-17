@@ -624,7 +624,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				
 				dtos.add(this.toOrganizationDetailDTO(address.getOrganizationId(), cmd.getQryAdminRoleFlag()));
 			}
-		}else if(communityId != buildingId){
+		}else if(null != communityId){
 			List<OrganizationCommunityRequest> requests = organizationProvider.queryOrganizationCommunityRequestByCommunityId(locator, communityId, cmd.getPageSize(), null);
 			for (OrganizationCommunityRequest req : requests) {
 				dtos.add(this.toOrganizationDetailDTO(req.getMemberId(), cmd.getQryAdminRoleFlag()));
