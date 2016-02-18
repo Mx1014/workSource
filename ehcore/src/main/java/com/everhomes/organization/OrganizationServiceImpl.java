@@ -4085,7 +4085,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 		organizationMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
 		organizationMember.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
 		organizationMember.setContactType(IdentifierType.MOBILE.getCode());
-		organizationMember.setGroupId(0l);
 		
 		if(org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())){
 			organizationMember.setGroupId(org.getId());
