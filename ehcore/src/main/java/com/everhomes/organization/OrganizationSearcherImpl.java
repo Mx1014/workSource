@@ -152,9 +152,9 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
 //            qb = QueryBuilders.filteredQuery(qb, fb);
 //        }
         
-//        Integer namespaceId = (cmd.getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
-//        FilterBuilder fb = FilterBuilders.termFilter("namespaceId", namespaceId);
-//        qb = QueryBuilders.filteredQuery(qb, fb);
+        Integer namespaceId = (cmd.getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
+        FilterBuilder fb = FilterBuilders.termFilter("namespaceId", namespaceId);
+        qb = QueryBuilders.filteredQuery(qb, fb);
         
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         
