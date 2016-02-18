@@ -137,7 +137,7 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
             qb = QueryBuilders.matchAllQuery();
         } else {
             qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
-                    .field("name", 5.0f);    
+                    .field("name");    
         }
         
 //        FilterBuilder fb = null;
