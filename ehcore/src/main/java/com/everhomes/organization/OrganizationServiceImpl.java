@@ -1812,6 +1812,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		if(orgMembers != null && !orgMembers.isEmpty()){
 			orgMembers.stream().map(orgMember -> {
+				if(!orgMember.getStatus().equals(OrganizationMemberStatus.ACTIVE.getCode())){
+					return null;
+				}
 				Organization org = this.organizationProvider.findOrganizationById(orgMember.getOrganizationId());
 				if (org != null){
 					if(cmd.getOrganiztionType() != null && !cmd.getOrganiztionType().equals("")){
