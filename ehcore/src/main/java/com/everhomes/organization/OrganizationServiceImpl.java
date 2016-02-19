@@ -3825,12 +3825,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	@Override
 	public List<Long> getUserResourcePrivilege(long uid, long organizationId) {
+		User user = UserContext.current().getUser();
+		List<Long> userRoleIds = aclProvider.getRolesFromResourceAssignments("system", null, EntityType.USER.getCode(), user.getId(), null);
+		
+		if(null != userRoleIds && 0 != userRoleIds.size()) return userRoleIds;
 		
 		List<Long> resources = aclProvider.getRolesFromResourceAssignments("system", null, EntityType.ORGANIZATIONS.getCode(), organizationId, null);
 		
 		if(resources == null || resources.size() ==0 ){
 			resources = new ArrayList<Long>();
-			OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(uid, organizationId);
+			OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), organizationId);
 			if(null == organizationMember){
 				resources.add(RoleConstants.ORGANIZATION_TASK_MGT);
 				return resources;
