@@ -709,7 +709,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 	
 	@Override
 	public Building findBuildingByCommunityIdAndName(long communityId, String buildingName) {
-		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+		int namespaceId = UserContext.getCurrentNamespaceId(null);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBuildings.class));
 		SelectQuery<EhBuildingsRecord> query = context.selectQuery(Tables.EH_BUILDINGS);
 		query.addConditions(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId));
