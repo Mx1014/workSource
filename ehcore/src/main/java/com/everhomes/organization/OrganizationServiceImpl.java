@@ -3491,7 +3491,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	public ListTopicsByTypeCommandResponse listUserTask(ListUserTaskCommand cmd) {
 		
 		User user = UserContext.current().getUser();
-		Long commuId = user.getCommunityId();
+		Long commuId = cmd.getCommunityId();
 
 		if(cmd.getPageOffset() == null)
 			cmd.setPageOffset(1L);
@@ -3510,10 +3510,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}
 			for(OrganizationTask task : orgTaskList){
 				try{
-					PostDTO dto = this.forumService.getTopicById(task.getApplyEntityId(),commuId,false);
-					OrganizationTaskDTO2 taskDto = ConvertHelper.convert(dto, OrganizationTaskDTO2.class);
-					this.convertTaskToDto(task,taskDto);
-					list.add(taskDto);
+					if(task.getOrganizationId() == cmd.getOrganizationId()){
+						PostDTO dto = this.forumService.getTopicById(task.getApplyEntityId(),commuId,false);
+						OrganizationTaskDTO2 taskDto = ConvertHelper.convert(dto, OrganizationTaskDTO2.class);
+						this.convertTaskToDto(task,taskDto);
+						list.add(taskDto);
+					}
 				}
 				catch(Exception e){
 					LOGGER.error("could not found topic by task's applyEntityId.taskId="+task.getId()+",applyEntityId="+task.getApplyEntityId());
