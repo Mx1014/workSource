@@ -3510,7 +3510,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}
 			for(OrganizationTask task : orgTaskList){
 				try{
-					if(task.getOrganizationId() == cmd.getOrganizationId()){
+					if(task.getOrganizationId().equals(cmd.getOrganizationId())){
 						PostDTO dto = this.forumService.getTopicById(task.getApplyEntityId(),commuId,false);
 						OrganizationTaskDTO2 taskDto = ConvertHelper.convert(dto, OrganizationTaskDTO2.class);
 						this.convertTaskToDto(task,taskDto);
