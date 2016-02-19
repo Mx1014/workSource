@@ -22,6 +22,7 @@ public class ListTopicsByTypeCommand {
 	private Long organizationId;
 	private String taskType;
 	private Byte taskStatus;
+	private Long communityId;
 	
 	public Byte getTaskStatus() {
 		return taskStatus;
@@ -52,6 +53,14 @@ public class ListTopicsByTypeCommand {
 	}
 	public void setOrganizationId(Long organizationId) {
 		this.organizationId = organizationId;
+	}
+	
+	
+	public Long getCommunityId() {
+		return communityId;
+	}
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
 	@Override
 	public String toString() {

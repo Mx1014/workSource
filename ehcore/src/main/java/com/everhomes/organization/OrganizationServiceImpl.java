@@ -2082,7 +2082,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public ListTopicsByTypeCommandResponse listTopicsByType(ListTopicsByTypeCommand cmd) {
 		User user = UserContext.current().getUser();
-		Long commuId = user.getCommunityId();
+		Long commuId = cmd.getCommunityId();
+		
+		if(null == cmd.getCommunityId()){
+			commuId = user.getCommunityId();
+		}
+		
+		Community community = communityProvider.findCommunityById(commuId);
 		Organization organization = this.checkOrganization(cmd.getOrganizationId());
 
 		if(cmd.getPageOffset() == null)
@@ -2103,9 +2109,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 			for(OrganizationTask task : orgTaskList){
 				try{
 					PostDTO dto = this.forumService.getTopicById(task.getApplyEntityId(),commuId,false);
-					OrganizationTaskDTO2 taskDto = ConvertHelper.convert(dto, OrganizationTaskDTO2.class);
-					this.convertTaskToDto(task,taskDto);
-					list.add(taskDto);
+					if(dto.getForumId().equals(community.getDefaultForumId())){
+						OrganizationTaskDTO2 taskDto = ConvertHelper.convert(dto, OrganizationTaskDTO2.class);
+						this.convertTaskToDto(task,taskDto);
+						list.add(taskDto);
+					}
+					
 				}
 				catch(Exception e){
 					LOGGER.error("could not found topic by task's applyEntityId.taskId="+task.getId()+",applyEntityId="+task.getApplyEntityId());
@@ -3492,6 +3501,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		User user = UserContext.current().getUser();
 		Long commuId = cmd.getCommunityId();
+		
+		if(null == cmd.getCommunityId()){
+			commuId = user.getCommunityId();
+		}
+		
+		Community community = communityProvider.findCommunityById(commuId);
 
 		if(cmd.getPageOffset() == null)
 			cmd.setPageOffset(1L);
@@ -3512,9 +3527,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 				try{
 					if(task.getOrganizationId().equals(cmd.getOrganizationId())){
 						PostDTO dto = this.forumService.getTopicById(task.getApplyEntityId(),commuId,false);
-						OrganizationTaskDTO2 taskDto = ConvertHelper.convert(dto, OrganizationTaskDTO2.class);
-						this.convertTaskToDto(task,taskDto);
-						list.add(taskDto);
+						if(dto.getForumId().equals(community.getDefaultForumId())){
+							OrganizationTaskDTO2 taskDto = ConvertHelper.convert(dto, OrganizationTaskDTO2.class);
+							this.convertTaskToDto(task,taskDto);
+							list.add(taskDto);
+						}
 					}
 				}
 				catch(Exception e){
