@@ -437,7 +437,7 @@ public class CommunityProviderImpl implements CommunityProvider {
     @Override
     public List<Community> listAllCommunities(long pageOffset, long pageSize) {
             
- //   	int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+ //   	int namespaceId =UserContext.getCurrentNamespaceId(null);
         final List<Community> results = new ArrayList<>();
         
         long offset = PaginationHelper.offsetFromPageOffset(pageOffset, pageSize);
@@ -502,7 +502,7 @@ public class CommunityProviderImpl implements CommunityProvider {
     @Override
     public List<Community> listCommunitiesByStatus(ListingLocator locator, int count,
             ListingQueryBuilderCallback queryBuilderCallback) {
-    	int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+    	int namespaceId =UserContext.getCurrentNamespaceId(null);
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
         
         final List<Community> communities = new ArrayList<Community>();
@@ -532,7 +532,7 @@ public class CommunityProviderImpl implements CommunityProvider {
     
     @Override
     public Community findCommunityByAreaIdAndName(Long areaId, String name) {
-    	int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+    	int namespaceId =UserContext.getCurrentNamespaceId(null);
     	 final Community[] result = new Community[1];
 
          this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), result, 
@@ -562,7 +562,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 
     @Override
     public List<Community> findCommunitiesByNameAndCityId(String name, long cityId) {
-    	int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+    	int namespaceId =UserContext.getCurrentNamespaceId(null);
         List<Community> result = new ArrayList<Community>();
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), result, 
                 (DSLContext context, Object reducingContext) -> {
@@ -580,7 +580,7 @@ public class CommunityProviderImpl implements CommunityProvider {
     
     @Override
     public List<Community> findCommunitiesByNameCityIdAreaId(String name, Long cityId,Long areaId) {
-    	int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+    	int namespaceId =UserContext.getCurrentNamespaceId(null);
         List<Community> result = new ArrayList<Community>();
         LOGGER.info("findCommunitiesByNameCityIdAreaId-areaId="+areaId+",cityId="+cityId+",name="+name);
         
@@ -640,7 +640,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 	@Override
 	public List<Community> listCommunitiesByKeyWord(ListingLocator locator,
 			int count, String keyword) {
-		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+		int namespaceId =UserContext.getCurrentNamespaceId(null);
 		final List<Community> communities = new ArrayList<Community>();
 		
 		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
@@ -667,7 +667,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 	@Override
 	public List<Building> ListBuildingsByCommunityId(ListingLocator locator, int count, Long communityId, Integer namespaceId) {
 		assert(locator.getEntityId() != 0);
-		namespaceId = null == namespaceId ? Namespace.DEFAULT_NAMESPACE : namespaceId;
+		namespaceId = UserContext.getCurrentNamespaceId(namespaceId);
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class, locator.getEntityId()));
 		List<Building> buildings = new ArrayList<Building>();
         SelectQuery<EhBuildingsRecord> query = context.selectQuery(Tables.EH_BUILDINGS);
@@ -818,7 +818,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 
 	@Override
 	public Boolean verifyBuildingName(Long communityId, String buildingName) {
-		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+		int namespaceId = UserContext.getCurrentNamespaceId(null);
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBuildings.class));
 		List<Building> buildings = new ArrayList<Building>();
         SelectQuery<EhBuildingsRecord> query = context.selectQuery(Tables.EH_BUILDINGS);
@@ -844,7 +844,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 	public List<Building> listBuildingsByStatus(ListingLocator locator,
 			int count, ListingQueryBuilderCallback queryBuilderCallback) {
 
-		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+		int namespaceId = UserContext.getCurrentNamespaceId(null);
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBuildings.class));
         
         final List<Building> buildings = new ArrayList<Building>();
@@ -873,7 +873,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 
 	@Override
 	public int countBuildingsBycommunityId(Long communityId) {
-		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+		int namespaceId = UserContext.getCurrentNamespaceId(null);
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		List<Building> buildings = new ArrayList<Building>();
         SelectQuery<EhBuildingsRecord> query = context.selectQuery(Tables.EH_BUILDINGS);
@@ -900,7 +900,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 
 	@Override
 	public List<Long> listBuildingIdByCommunityId(Long communityId) {
-		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+		int namespaceId = UserContext.getCurrentNamespaceId(null);
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		List<Long> buildingIds = new ArrayList<Long>();
         SelectQuery<EhBuildingsRecord> query = context.selectQuery(Tables.EH_BUILDINGS);
