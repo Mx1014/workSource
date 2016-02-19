@@ -1,0 +1,63 @@
+
+set @organization_details_id = 20;
+set @organization_member_id = 2000000;
+set @organization_addresses_id = 100;
+set @organization_attachments_id = 100;
+set @organization_community_requests_id = 1000000;
+
+set @techpark_community_id = 240111044331048623;
+set @xunmei_community_id = 240111044331049963;
+set @organization_role_map_id = 1;
+
+#
+# merge enterprise and organization data
+#
+INSERT INTO `eh_organizations` (`id`,`parent_id`,`organization_type`,`name`,`path`,`level`,`status`,`group_type`,`create_time`,`update_time`,`directly_enterprise_id`,`namespace_id`,`group_id`) 
+select `id`,0,'ENTERPRISE',`name`,concat('/',`id`),1,if(`status` = 0,1,2),'ENTERPRISE',`create_time` ,`update_time`,0,`namespace_id`,`id` FROM `eh_groups` WHERE `discriminator` = 'enterprise';
+
+
+INSERT INTO `eh_organization_details`(`id`,`organization_id`,`description`,`contact`,`address`,`create_time`,`display_name`,`member_count`,`checkin_date`,`avatar`,`post_uri`)
+SELECT  (@organization_details_id := @organization_details_id + 1),`id`,`description`,`string_tag1`,`string_tag2`,`create_time`,`display_name`,`member_count`,`string_tag3`,`avatar`,`string_tag5` FROM `eh_groups` WHERE `discriminator` = 'enterprise';
+
+#
+# merge enterprise member and organization member data
+#
+SET foreign_key_checks = 0;
+INSERT INTO `eh_organization_members` 
+(`id`,`organization_id`,`contact_name`,`string_tag1`,`avatar`,`target_id`,`integral_tag1`,`status`,`integral_tag2`,`create_time`,`string_tag2`,`gender`,`integral_tag3`,`contact_token`,`target_type`,`contact_type`,`member_group`,`group_id`)
+SELECT (@organization_member_id + c.`id`) id, c.`enterprise_id`,c.`name`,c.`nick_name`,c.`avatar`,c.`user_id`,c.`role`,c.`status`,c.`creator_uid`,c.`create_time`,c.`string_tag1`,IF(c.`string_tag2` = '男',1,IF(c.`string_tag2`='女',2,0)),c.`string_tag3`,e.`entry_value`,IF(c.`user_id` = 0,'UNTRACK', 'USER'),0,'manager',0 from `eh_enterprise_contacts` c left join `eh_enterprise_contact_entries` e on c.`id` = e.`contact_id` GROUP BY id; 
+
+
+#
+# move enterprise address information
+#
+INSERT INTO `eh_organization_addresses`
+(`id`,`organization_id`,`address_id`,`status`,`creator_uid`,`create_time`,`operator_uid`,`process_code`,`process_details`,`proof_resource_uri`,`approve_time`,`update_time`,`building_id`,`building_name`)
+SELECT  @organization_addresses_id + `id`, `enterprise_id`,`address_id`,`status`,`creator_uid`,`create_time`,`operator_uid`,`process_code`,`process_details`,`proof_resource_uri`,`approve_time`,`update_time`,`building_id`,`building_name` FROM `eh_enterprise_addresses` ;
+
+#
+# move enterprise attachment information
+#
+INSERT INTO `eh_organization_attachments`
+(`id`,`organization_id`,`content_type`,`content_uri`,`creator_uid`,`create_time`)
+SELECT @organization_attachments_id + `id`,`organization_id`,`content_type`,`content_uri`,`creator_uid`,`create_time`  FROM `eh_organization_attachments`;
+
+#
+# move enterprise community requests information
+#
+INSERT INTO `eh_organization_community_requests`
+(`id`,`community_id`,`member_type`,`member_id`,`member_status`,`creator_uid`,`create_time`,`operator_uid`,`process_code`,`process_details`,`proof_resource_uri`,`approve_time`,`requestor_comment`,`operation_type`,`inviter_uid`,`invite_time`,`update_time`)
+SELECT @organization_community_requests_id + `id`,`community_id`,'organization',`member_id`,`member_status`,`creator_uid`,`create_time`,`operator_uid`,`process_code`,`process_details`,`proof_resource_uri`,`approve_time`,`requestor_comment`,`operation_type`,`inviter_uid`,`invite_time`,`update_time`  FROM `eh_enterprise_community_map`;
+
+
+update `eh_yellow_pages` set `owner_type` = 'community', `owner_id`= @techpark_community_id where `owner_id` = 1000000;
+update `eh_yellow_pages` set `owner_type` = 'community', `owner_id`= @xunmei_community_id where `owner_id` = 999999;
+
+INSERT INTO `eh_preferential_rules` (`id`,`owner_type`,`owner_id`,`start_time`,`end_time`,`type`,`before_nember`) VALUES (1,'EhCommunities',@techpark_community_id,NOW(),NOW(),'parking',0);
+INSERT INTO `eh_preferential_rules` (`id`,`owner_type`,`owner_id`,`start_time`,`end_time`,`type`,`before_nember`) VALUES (2,'EhCommunities',@xunmei_community_id,NOW(),NOW(),'parking',0);
+
+INSERT INTO `eh_organization_role_map` (`id`,`owner_type`,`owner_id`,`role_id`,`private_flag`,`status`,`create_time`)
+SELECT  (@organization_role_map_id := @organization_role_map_id + 1),'EhOrganizations',0,`id`,0,2,now() FROM `eh_acl_roles` WHERE `app_id` = 32;
+
+
+
