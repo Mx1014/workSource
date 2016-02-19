@@ -589,13 +589,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 		dto.setAddresses(addresses);
 		List<OrganizationAttachment> attachments = organizationProvider.listOrganizationAttachments(dto.getOrganizationId());
 		
-		if(null == attachments || 0 == attachments.size()) return dto;
-		
-		for (OrganizationAttachment attachment : attachments) {
-			attachment.setContentUrl(contentServerService.parserUri(attachment.getContentUri(), EntityType.ORGANIZATIONS.getCode(), dto.getOrganizationId()));
+		if(null != attachments && 0 != attachments.size()){
+			for (OrganizationAttachment attachment : attachments) {
+				attachment.setContentUrl(contentServerService.parserUri(attachment.getContentUri(), EntityType.ORGANIZATIONS.getCode(), dto.getOrganizationId()));
+			}
+			
+			dto.setAttachments(attachments.stream().map(r->{ return ConvertHelper.convert(r,AttachmentDescriptor.class); }).collect(Collectors.toList()));
 		}
-		
-		dto.setAttachments(attachments.stream().map(r->{ return ConvertHelper.convert(r,AttachmentDescriptor.class); }).collect(Collectors.toList()));
 		
 		List<Long> roles = new ArrayList<Long>();
 		roles.add(RoleConstants.ORGANIZATION_GROUP_MEMBER_MGT);
@@ -4079,6 +4079,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public OrganizationMemberDTO createOrganizationPersonnel(
 			CreateOrganizationMemberCommand cmd) {
+		User user = UserContext.current().getUser();
+		
 		Organization org = checkOrganization(cmd.getOrganizationId());
 		
 		OrganizationMember organizationMember = ConvertHelper.convert(cmd, OrganizationMember.class);
@@ -4099,6 +4101,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 			organizationMember.setTargetType(OrganizationMemberTargetType.UNTRACK.getCode());
 			organizationMember.setTargetId(0l);
 		}
+		organizationMember.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		organizationMember.setCreatorUid(user.getId());
+		organizationMember.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		organizationProvider.createOrganizationMember(organizationMember);
 		return ConvertHelper.convert(organizationMember, OrganizationMemberDTO.class);
 	}
