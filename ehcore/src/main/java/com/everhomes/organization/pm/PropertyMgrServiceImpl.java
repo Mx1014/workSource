@@ -87,6 +87,7 @@ import com.everhomes.organization.OrganizationOrder;
 import com.everhomes.organization.OrganizationOwners;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.OrganizationTask;
 import com.everhomes.organization.pm.pay.ResultHolder;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.ApartmentDTO;
@@ -1690,30 +1691,27 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		String endStrTime = cmd.getEndStrTime();
 		Organization org = this.checkOrganizationByCommIdAndOrgType(cmd.getCommunityId(), OrganizationType.PM.getCode());
 		long organizationId = org.getId();
-		/** 当天数量列表*/
-		List<Integer> todayList = new ArrayList<Integer>();
-
-		/** z昨天数量列表*/
-		List<Integer> yesterdayList = new ArrayList<Integer>();
-
-		/** 上周数量列表*/
-		List<Integer> weekList = new ArrayList<Integer>(); 
-
-		/** 上月数量列表*/
-		List<Integer> monthList = new ArrayList<Integer>();
-
-		/** 时间点数量列表*/
-		List<Integer> dateList = new ArrayList<Integer>();
 
 		Date date = DateStatisticHelper.getCurrentUTCTime();
 		Date currentStartDate = DateStatisticHelper.getCurrent0Hour();
 		Date weekStartDate = DateStatisticHelper.getStartDateOfLastNDays(date, 7, false);
 		Date yesterdayStartDate = DateStatisticHelper.getStartDateOfLastNDays(date, 1, false);
 		Date monthStartDate = DateStatisticHelper.getStartDateOfLastNDays(date, 30, false);
-		createList(organizationId,taskType,todayList,currentStartDate.getTime(), date.getTime());
-		createList(organizationId,taskType,yesterdayList,yesterdayStartDate.getTime(), currentStartDate.getTime());
-		createList(organizationId,taskType,weekList,weekStartDate.getTime(), date.getTime());
-		createList(organizationId,taskType,monthList,monthStartDate.getTime(), date.getTime());
+
+		/** 当天数量列表*/
+		List<Integer> todayList = this.getTaskCounts(organizationId, cmd.getCommunityId(), taskType,currentStartDate.getTime(), date.getTime());
+		
+		/** 上周数量列表*/
+		List<Integer> weekList = this.getTaskCounts(organizationId, cmd.getCommunityId(), taskType,weekStartDate.getTime(), date.getTime());
+		
+		/** z昨天数量列表*/
+		List<Integer> yesterdayList = this.getTaskCounts(organizationId, cmd.getCommunityId(), taskType,yesterdayStartDate.getTime(), currentStartDate.getTime());
+		
+		/** 上月数量列表*/
+		List<Integer> monthList = this.getTaskCounts(organizationId, cmd.getCommunityId(), taskType,monthStartDate.getTime(), date.getTime());
+
+		/** 时间点数量列表*/
+		List<Integer> dateList = null;
 
 		if(!StringUtils.isEmpty(startStrTime) && !StringUtils.isEmpty(endStrTime))
 		{
@@ -1722,7 +1720,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			try {
 				startTime = DateStatisticHelper.parseDateStrToMin(startStrTime);
 				endTime = DateStatisticHelper.parseDateStrToMax(endStrTime);
-				createList(organizationId,taskType,dateList,startTime.getTime(), endTime.getTime());
+				dateList = this.getTaskCounts(organizationId, cmd.getCommunityId(), taskType,startTime.getTime(), endTime.getTime());
 			} catch (ParseException e) {
 				LOGGER.error("failed to parse date.startStrTime=" + startStrTime +",endStrTime=" + endStrTime);
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
@@ -2283,6 +2281,41 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			int count = propertyMgrProvider.countCommunityPmTasks(organizationId, taskType,(byte)i,String.format("%tF %<tT", startTime), String.format("%tF %<tT", endTime));
 			todayList.add(count);
 		}
+	}
+	
+	private List<Integer> getTaskCounts(Long organizationId, Long communityId, String taskType, long startTime, long endTime){
+		List<Integer> counts = new ArrayList<Integer>();
+		int num = OrganizationTaskStatus.OTHER.getCode();
+		List<OrganizationTask> tasks = propertyMgrProvider.communityPmTaskLists(organizationId, taskType, null, String.format("%tF %<tT", startTime), String.format("%tF %<tT", endTime));
+		if(null != communityId){
+			counts.add(this.getPostByCommunityId(communityId, tasks).size());
+		}else{
+			counts.add(tasks.size());
+		}
+		
+		for (int i = 1; i <= num ; i++)
+		{
+			tasks = propertyMgrProvider.communityPmTaskLists(organizationId, taskType,(byte)i,String.format("%tF %<tT", startTime), String.format("%tF %<tT", endTime));
+			if(null != communityId){
+				counts.add(this.getPostByCommunityId(communityId, tasks).size());
+			}else{
+				counts.add(tasks.size());
+			}
+		}
+		
+		return counts;
+	}
+	
+	private List<Post> getPostByCommunityId(Long communityId, List<OrganizationTask> tasks){
+		Community community = communityProvider.findCommunityById(communityId);
+		List<Post> posts = new ArrayList<Post>();
+		for (OrganizationTask task : tasks) {
+			Post post = forumProvider.findPostById(task.getId());
+			if(null != post && post.getForumId().equals(community.getDefaultForumId())){
+				posts.add(post);
+			}
+		}
+		return posts;
 	}
 
 	private void checkOrganizationIdIsNull(Long organizationId) {

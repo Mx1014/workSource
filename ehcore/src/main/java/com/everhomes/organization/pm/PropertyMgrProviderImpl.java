@@ -31,6 +31,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationTask;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.organization.pm.ListPropInvitedUserCommandResponse;
@@ -1006,6 +1007,29 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 		if(status != null && status >= 0)
 			condition = condition.and(Tables.EH_ORGANIZATION_TASKS.TASK_STATUS.eq(status));
 		return step.where(condition).fetchOneInto(Integer.class);
+	}
+	
+	@Override
+	public List<OrganizationTask> communityPmTaskLists(Long organizationId,String taskType,Byte status,String startTime,String endTime) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		SelectQuery<EhOrganizationTasksRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_TASKS);
+		Condition condition = Tables.EH_ORGANIZATION_TASKS.ORGANIZATION_ID.eq(organizationId);
+		if(!StringUtils.isEmpty(taskType))
+			condition = condition.and(Tables.EH_ORGANIZATION_TASKS.TASK_TYPE.eq(taskType));
+
+		if(!StringUtils.isEmpty(startTime) && !StringUtils.isEmpty(endTime))
+			condition = condition.and(Tables.EH_ORGANIZATION_TASKS.CREATE_TIME.between(Timestamp.valueOf(startTime), Timestamp.valueOf(endTime)));
+		if(status != null && status >= 0)
+			condition = condition.and(Tables.EH_ORGANIZATION_TASKS.TASK_STATUS.eq(status));
+		
+		query.addConditions(condition);
+		
+		List<OrganizationTask> tasks = query.fetch().map(r -> {
+			return ConvertHelper.convert(r, OrganizationTask.class);
+		});
+		
+		return tasks;
 	}
 
 	@Override
