@@ -569,6 +569,36 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhQrcodes EH_QRCODES = com.everhomes.server.schema.tables.EhQrcodes.EH_QRCODES;
 
 	/**
+	 * The table ehcore.eh_quality_inspection_evaluations
+	 */
+	public static final com.everhomes.server.schema.tables.EhQualityInspectionEvaluations EH_QUALITY_INSPECTION_EVALUATIONS = com.everhomes.server.schema.tables.EhQualityInspectionEvaluations.EH_QUALITY_INSPECTION_EVALUATIONS;
+
+	/**
+	 * The table ehcore.eh_quality_inspection_evaluation_factors
+	 */
+	public static final com.everhomes.server.schema.tables.EhQualityInspectionEvaluationFactors EH_QUALITY_INSPECTION_EVALUATION_FACTORS = com.everhomes.server.schema.tables.EhQualityInspectionEvaluationFactors.EH_QUALITY_INSPECTION_EVALUATION_FACTORS;
+
+	/**
+	 * The table ehcore.eh_quality_inspection_standards
+	 */
+	public static final com.everhomes.server.schema.tables.EhQualityInspectionStandards EH_QUALITY_INSPECTION_STANDARDS = com.everhomes.server.schema.tables.EhQualityInspectionStandards.EH_QUALITY_INSPECTION_STANDARDS;
+
+	/**
+	 * The table ehcore.eh_quality_inspection_standard_group_map
+	 */
+	public static final com.everhomes.server.schema.tables.EhQualityInspectionStandardGroupMap EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP = com.everhomes.server.schema.tables.EhQualityInspectionStandardGroupMap.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP;
+
+	/**
+	 * The table ehcore.eh_quality_inspection_tasks
+	 */
+	public static final com.everhomes.server.schema.tables.EhQualityInspectionTasks EH_QUALITY_INSPECTION_TASKS = com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS;
+
+	/**
+	 * The table ehcore.eh_quality_inspection_task_attachments
+	 */
+	public static final com.everhomes.server.schema.tables.EhQualityInspectionTaskAttachments EH_QUALITY_INSPECTION_TASK_ATTACHMENTS = com.everhomes.server.schema.tables.EhQualityInspectionTaskAttachments.EH_QUALITY_INSPECTION_TASK_ATTACHMENTS;
+
+	/**
 	 * The table ehcore.eh_recharge_info
 	 */
 	public static final com.everhomes.server.schema.tables.EhRechargeInfo EH_RECHARGE_INFO = com.everhomes.server.schema.tables.EhRechargeInfo.EH_RECHARGE_INFO;
@@ -632,6 +662,11 @@ public class Tables {
 	 * The table ehcore.eh_rental_site_rules
 	 */
 	public static final com.everhomes.server.schema.tables.EhRentalSiteRules EH_RENTAL_SITE_RULES = com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES;
+
+	/**
+	 * The table ehcore.eh_repeat_settings
+	 */
+	public static final com.everhomes.server.schema.tables.EhRepeatSettings EH_REPEAT_SETTINGS = com.everhomes.server.schema.tables.EhRepeatSettings.EH_REPEAT_SETTINGS;
 
 	/**
 	 * The table ehcore.eh_rtxt_resources
