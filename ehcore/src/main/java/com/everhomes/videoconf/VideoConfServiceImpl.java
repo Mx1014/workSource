@@ -65,6 +65,7 @@ import com.everhomes.rest.videoconf.CreateConfAccountOrderCommand;
 import com.everhomes.rest.videoconf.CreateInvoiceCommand;
 import com.everhomes.rest.videoconf.CreateVideoConfInvitationCommand;
 import com.everhomes.rest.videoconf.DeleteReservationConfCommand;
+import com.everhomes.rest.videoconf.DeleteSourceVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.DeleteVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.DeleteWarningContactorCommand;
 import com.everhomes.rest.videoconf.EnterpriseConfAccountDTO;
@@ -2135,6 +2136,12 @@ public class VideoConfServiceImpl implements VideoConfService {
 			}
 		}
 		return namespaceIdList;
+	}
+
+	@Override
+	public void deleteSourceVideoConfAccount(
+			DeleteSourceVideoConfAccountCommand cmd) {
+		vcProvider.deleteSourceVideoConfAccount(cmd.getSourceAccountId());
 	}
 	
 }

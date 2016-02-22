@@ -1319,6 +1319,13 @@ public class VideoConfProviderImpl implements VideoConfProvider {
         
         return count[0];
 	}
+
+	@Override
+	public void deleteSourceVideoConfAccount(long id) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhConfSourceAccounts.class));
+		EhConfSourceAccountsDao dao = new EhConfSourceAccountsDao(context.configuration());
+		dao.deleteById(id);
+	}
 	
 	
 

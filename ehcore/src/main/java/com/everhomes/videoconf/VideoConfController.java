@@ -24,6 +24,7 @@ import com.everhomes.rest.videoconf.CreateConfAccountOrderCommand;
 import com.everhomes.rest.videoconf.CreateInvoiceCommand;
 import com.everhomes.rest.videoconf.CreateVideoConfInvitationCommand;
 import com.everhomes.rest.videoconf.DeleteReservationConfCommand;
+import com.everhomes.rest.videoconf.DeleteSourceVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.DeleteVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.DeleteWarningContactorCommand;
 import com.everhomes.rest.videoconf.DownloadAppCommand;
@@ -606,6 +607,22 @@ public class VideoConfController  extends ControllerBase{
 	public RestResponse addSourceVideoConfAccount(AddSourceVideoConfAccountCommand cmd) {
 
 		videoConfService.addSourceVideoConfAccount(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /conf/deleteSourceVideoConfAccount</b>
+	 * 删除源账号
+	 * @return
+	 */
+	@RequestMapping("deleteSourceVideoConfAccount")
+	@RestReturn(value = String.class)
+	public RestResponse deleteSourceVideoConfAccount(DeleteSourceVideoConfAccountCommand cmd) {
+
+		videoConfService.deleteSourceVideoConfAccount(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
