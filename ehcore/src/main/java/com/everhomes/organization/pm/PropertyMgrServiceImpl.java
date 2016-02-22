@@ -2310,7 +2310,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		Community community = communityProvider.findCommunityById(communityId);
 		List<Post> posts = new ArrayList<Post>();
 		for (OrganizationTask task : tasks) {
-			Post post = forumProvider.findPostById(task.getId());
+			Post post = forumProvider.findPostById(task.getApplyEntityId());
 			if(null != post && post.getForumId().equals(community.getDefaultForumId())){
 				posts.add(post);
 			}
