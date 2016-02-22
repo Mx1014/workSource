@@ -1347,7 +1347,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 						Map<String,Object> data = (Map<String, Object>) resultHolder.getData();
 						
 						response.setConfHostId(String.valueOf(data.get("userId")));
-						response.setToken(String.valueOf(data.get("zoomToken")));
+						response.setToken(String.valueOf(data.get("token")));
 						response.setConfHostName(UserContext.current().getUser().getNickName());
 						response.setMaxCount((Double.valueOf(String.valueOf(data.get("maxCount")))).intValue());
 						response.setMeetingNo(String.valueOf(data.get("meetingNo")));

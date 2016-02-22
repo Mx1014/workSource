@@ -686,7 +686,7 @@ public class RentalServiceImpl implements RentalService {
 					rentalBill.setEndTime(rentalSiteRule.getEndTime());
 				}
 			}
-			siteTotalMoney.add(  (null == rentalSiteRule.getPrice()?new java.math.BigDecimal(0):rentalSiteRule.getPrice()).multiply(
+			siteTotalMoney = siteTotalMoney.add(  (null == rentalSiteRule.getPrice()?new java.math.BigDecimal(0):rentalSiteRule.getPrice()).multiply(
 				new   java.math.BigDecimal(cmd.getRentalCount() / rentalSiteRule.getUnit())));
 		}
 
@@ -798,7 +798,9 @@ public class RentalServiceImpl implements RentalService {
 			rsb.setCreatorUid(userId);
 
 			rentalProvider.createRentalSiteBill(rsb);
+			
 		}
+		
 		mappingRentalBillDTO(billDTO, rentalBill);
 		return billDTO;
 	}
