@@ -1285,6 +1285,11 @@ public class VideoConfServiceImpl implements VideoConfService {
 		String path = "http://api.confcloud.cn/openapi/confReservation";
 		ConfAccounts account = vcProvider.findVideoconfAccountById(cmd.getAccountId());
 		if(account != null && account.getStatus() == 1) {
+			if(account.getAssignedSourceId() != null && account.getAssignedSourceId() != 0) {
+				CancelVideoConfCommand cancelCmd = new CancelVideoConfCommand();
+				cancelCmd.setConfId(account.getAssignedConfId());
+				cancelVideoConf(cancelCmd);
+			}
 			ConfAccountCategories category = vcProvider.findAccountCategoriesById(account.getAccountCategoryId());
 			List<Long> accountCategories = vcProvider.findAccountCategoriesByConfType(category.getConfType());
 			ConfSourceAccounts sourceAccount = vcProvider.findSpareAccount(accountCategories);
