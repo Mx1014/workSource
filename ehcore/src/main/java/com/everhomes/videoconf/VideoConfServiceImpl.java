@@ -1430,27 +1430,28 @@ public class VideoConfServiceImpl implements VideoConfService {
 	public JoinVideoConfResponse joinVideoConf(JoinVideoConfCommand cmd) {
 		JoinVideoConfResponse response = new JoinVideoConfResponse();
 
-		
-		UserIdentifier user = userProvider.findClaimedIdentifierByToken(cmd.getNamespaceId(), cmd.getConfId());
-		if(LOGGER.isDebugEnabled())
-			LOGGER.error("joinVideoConf, cmd="+cmd+",user="+user);
-		if(user != null) {
-			ConfAccounts account = vcProvider.findAccountByUserId(user.getOwnerUid());
+		if(cmd.getConfId().length() == 11){
+			UserIdentifier user = userProvider.findClaimedIdentifierByToken(cmd.getNamespaceId(), cmd.getConfId());
 			if(LOGGER.isDebugEnabled())
-				LOGGER.error("joinVideoConf, account="+account);
-			if(account != null) {
-				ConfConferences conf = vcProvider.findConfConferencesById(account.getAssignedConfId());
+				LOGGER.error("joinVideoConf, cmd="+cmd+",user="+user);
+			if(user != null) {
+				ConfAccounts account = vcProvider.findAccountByUserId(user.getOwnerUid());
 				if(LOGGER.isDebugEnabled())
-					LOGGER.error("joinVideoConf, conf="+conf);
-				if(conf != null) {
-					response.setJoinUrl(conf.getJoinUrl());
-					response.setCondId(conf.getConfId()+"");
-					response.setPassword(conf.getConfHostKey());
+					LOGGER.error("joinVideoConf, account="+account);
+				if(account != null) {
+					ConfConferences conf = vcProvider.findConfConferencesById(account.getAssignedConfId());
+					if(LOGGER.isDebugEnabled())
+						LOGGER.error("joinVideoConf, conf="+conf);
+					if(conf != null) {
+						response.setJoinUrl(conf.getJoinUrl());
+						response.setCondId(conf.getConfId()+"");
+						response.setPassword(conf.getConfHostKey());
+					}
 				}
 			}
 		}
 		
-		if(StringUtils.isNullOrEmpty(response.getCondId())){
+		else if(cmd.getConfId().length() == 10){
 			Long confId = Long.valueOf(cmd.getConfId()); 
 			ConfConferences conf = vcProvider.findConfConferencesByConfId(confId);
 			if(LOGGER.isDebugEnabled())
@@ -1470,6 +1471,13 @@ public class VideoConfServiceImpl implements VideoConfService {
 			}
 		}
 		
+		else {
+			LOGGER.error("conf id length is 10 or 11!");
+			throw RuntimeErrorException.errorWith(ConfServiceErrorCode.SCOPE, ConfServiceErrorCode.ERROR_INVALID_CONF_ID,
+					localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
+							String.valueOf(ConfServiceErrorCode.ERROR_INVALID_CONF_ID),
+							UserContext.current().getUser().getLocale(),"conf id length is 10 or 11!"));
+		}
 		
 		return response;
 	}
