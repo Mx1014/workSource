@@ -1811,34 +1811,31 @@ public class OrganizationServiceImpl implements OrganizationService {
 		List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembers(user.getId());
 		
 		for (OrganizationMember member : orgMembers) {
-			if(!member.getStatus().equals(OrganizationMemberStatus.ACTIVE.getCode())){
-				return null;
-			}
-			
-			Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
-			if(cmd.getOrganiztionType() != null && !cmd.getOrganiztionType().equals("")){
-				if(org.getOrganizationType().equals(cmd.getOrganiztionType()) && !org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())){
-					OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
-					//物业或业委增加小区Id和小区name信息
-					if(org.getOrganizationType().equals(OrganizationType.GARC.getCode()) || org.getOrganizationType().equals(OrganizationType.PM.getCode())){
-						this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
+			if(member.getStatus().equals(OrganizationMemberStatus.ACTIVE.getCode())){
+				Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
+				if(cmd.getOrganiztionType() != null && !cmd.getOrganiztionType().equals("")){
+					if(org.getOrganizationType().equals(cmd.getOrganiztionType()) && !org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())){
+						OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
+						//物业或业委增加小区Id和小区name信息
+						if(org.getOrganizationType().equals(OrganizationType.GARC.getCode()) || org.getOrganizationType().equals(OrganizationType.PM.getCode())){
+							this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
+						}
+						orgs.add(tempSimpleOrgDTO);
 					}
-					orgs.add(tempSimpleOrgDTO);
 				}
-			}
-			else{
-				if(!org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())){
-					OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
-					//物业或业委增加小区Id和小区name信息
-					if(org.getOrganizationType().equals(OrganizationType.GARC.getCode()) || org.getOrganizationType().equals(OrganizationType.PM.getCode())){
-						this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
+				else{
+					if(!org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())){
+						OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
+						//物业或业委增加小区Id和小区name信息
+						if(org.getOrganizationType().equals(OrganizationType.GARC.getCode()) || org.getOrganizationType().equals(OrganizationType.PM.getCode())){
+							this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
+						}
+						orgs.add(tempSimpleOrgDTO);
 					}
-					orgs.add(tempSimpleOrgDTO);
+					
 				}
-				
 			}
 		}
-
 		return orgs;
 	}
 
