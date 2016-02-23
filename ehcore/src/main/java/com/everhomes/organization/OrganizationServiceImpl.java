@@ -1841,7 +1841,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 				}
 				return null;
-			}).toArray();
+			});
 		}
 
 		return orgs;
