@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAclinks extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhAclinksRecord> {
 
-	private static final long serialVersionUID = 1159868120;
+	private static final long serialVersionUID = 1778198110;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_aclinks</code>

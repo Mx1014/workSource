@@ -804,6 +804,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhDoorAuth EH_DOOR_AUTH = com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH;
 
 	/**
+	 * The table ehcore.eh_door_command
+	 */
+	public static final com.everhomes.server.schema.tables.EhDoorCommand EH_DOOR_COMMAND = com.everhomes.server.schema.tables.EhDoorCommand.EH_DOOR_COMMAND;
+
+	/**
 	 * The table ehcore.eh_owner_doors
 	 */
 	public static final com.everhomes.server.schema.tables.EhOwnerDoors EH_OWNER_DOORS = com.everhomes.server.schema.tables.EhOwnerDoors.EH_OWNER_DOORS;

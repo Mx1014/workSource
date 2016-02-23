@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOwnerDoorAuthRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhOwnerDoorAuthRecord> implements org.jooq.Record6<java.lang.Long, java.lang.Byte, java.lang.Long, java.lang.Long, java.lang.Long, java.lang.Long> {
 
-	private static final long serialVersionUID = 1182715538;
+	private static final long serialVersionUID = 1886770199;
 
 	/**
 	 * Setter for <code>ehcore.eh_owner_door_auth.id</code>. id of the record

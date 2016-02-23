@@ -66,7 +66,7 @@ CREATE TABLE `eh_aes_server_key` (
 DROP TABLE IF EXISTS `eh_aes_user_key`;
 CREATE TABLE `eh_aes_user_key` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
-    `key_id` TINYINT NOT NULL,
+    `key_id` INT NOT NULL COMMENT 'lazy load for aes_user_key'
     `key_type` TINYINT NOT NULL COMMENT '0: aclink normal key',
     `door_id` BIGINT NOT NULL,
     `user_id` BIGINT NOT NULL,
@@ -82,7 +82,7 @@ CREATE TABLE `eh_aes_user_key` (
 DROP TABLE IF EXISTS `eh_aclink_undo_key`;
 CREATE TABLE `eh_aclink_undo_key` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
-    `key_id` TINYINT NOT NULL,
+    `key_id` INT NOT NULL COMMENT 'cancel a key, must notify all users for this key_id to update',
     `door_id` BIGINT NOT NULL,
     `status` TINYINT NOT NULL COMMENT '0: invalid, 1: requesting, 2: confirm',
     `expire_time_ms` BIGINT NOT NULL,

@@ -192,6 +192,7 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhAesUserKey.EH_AES_USER_KEY,
 			com.everhomes.server.schema.tables.EhDoorAccess.EH_DOOR_ACCESS,
 			com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH,
+			com.everhomes.server.schema.tables.EhDoorCommand.EH_DOOR_COMMAND,
 			com.everhomes.server.schema.tables.EhOwnerDoors.EH_OWNER_DOORS,
 			com.everhomes.server.schema.tables.EhOwnerDoorAuth.EH_OWNER_DOOR_AUTH);
 	}

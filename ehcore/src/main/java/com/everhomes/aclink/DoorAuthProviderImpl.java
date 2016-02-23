@@ -174,6 +174,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         });
     }
     
+    @Override
     public List<DoorAuth> queryValidDoorAuthByUserId(ListingLocator locator, long userId, int count) {
         
         long now = DateHelper.currentGMTTime().getTime();

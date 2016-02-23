@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOwnerDoorAuth implements java.io.Serializable {
 
-	private static final long serialVersionUID = -320804462;
+	private static final long serialVersionUID = -2041352630;
 
 	private java.lang.Long id;
 	private java.lang.Byte ownerType;

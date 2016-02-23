@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhDoorAccessRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhDoorAccessRecord> implements org.jooq.Record17<java.lang.Long, java.lang.Byte, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.Long, java.lang.Long, java.lang.Double, java.lang.Double, java.lang.String, java.lang.String, java.lang.Byte, java.lang.Long, java.lang.Byte, java.sql.Timestamp, java.lang.Byte> {
 
-	private static final long serialVersionUID = -94873623;
+	private static final long serialVersionUID = -1400090897;
 
 	/**
 	 * Setter for <code>ehcore.eh_door_access.id</code>. id of the record

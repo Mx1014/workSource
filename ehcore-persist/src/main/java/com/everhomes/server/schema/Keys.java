@@ -285,6 +285,7 @@ public class Keys {
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhAesUserKeyRecord> KEY_EH_AES_USER_KEY_PRIMARY = UniqueKeys0.KEY_EH_AES_USER_KEY_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhDoorAccessRecord> KEY_EH_DOOR_ACCESS_PRIMARY = UniqueKeys0.KEY_EH_DOOR_ACCESS_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhDoorAuthRecord> KEY_EH_DOOR_AUTH_PRIMARY = UniqueKeys0.KEY_EH_DOOR_AUTH_PRIMARY;
+	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhDoorCommandRecord> KEY_EH_DOOR_COMMAND_PRIMARY = UniqueKeys0.KEY_EH_DOOR_COMMAND_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhOwnerDoorsRecord> KEY_EH_OWNER_DOORS_PRIMARY = UniqueKeys0.KEY_EH_OWNER_DOORS_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhOwnerDoorAuthRecord> KEY_EH_OWNER_DOOR_AUTH_PRIMARY = UniqueKeys0.KEY_EH_OWNER_DOOR_AUTH_PRIMARY;
 
@@ -315,6 +316,7 @@ public class Keys {
 	public static final org.jooq.ForeignKey<com.everhomes.server.schema.tables.records.EhAesServerKeyRecord, com.everhomes.server.schema.tables.records.EhDoorAccessRecord> EH_AES_SERVER_KEY_IBFK_1 = ForeignKeys0.EH_AES_SERVER_KEY_IBFK_1;
 	public static final org.jooq.ForeignKey<com.everhomes.server.schema.tables.records.EhAesUserKeyRecord, com.everhomes.server.schema.tables.records.EhDoorAccessRecord> EH_AES_USER_KEY_IBFK_1 = ForeignKeys0.EH_AES_USER_KEY_IBFK_1;
 	public static final org.jooq.ForeignKey<com.everhomes.server.schema.tables.records.EhDoorAuthRecord, com.everhomes.server.schema.tables.records.EhDoorAccessRecord> EH_DOOR_AUTH_IBFK_1 = ForeignKeys0.EH_DOOR_AUTH_IBFK_1;
+	public static final org.jooq.ForeignKey<com.everhomes.server.schema.tables.records.EhDoorCommandRecord, com.everhomes.server.schema.tables.records.EhDoorAccessRecord> EH_DOOR_COMMAND_IBFK_1 = ForeignKeys0.EH_DOOR_COMMAND_IBFK_1;
 
 	// -------------------------------------------------------------------------
 	// [#1459] distribute members to avoid static initialisers > 64kb
@@ -586,6 +588,7 @@ public class Keys {
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhAesUserKeyRecord> KEY_EH_AES_USER_KEY_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhAesUserKey.EH_AES_USER_KEY, com.everhomes.server.schema.tables.EhAesUserKey.EH_AES_USER_KEY.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhDoorAccessRecord> KEY_EH_DOOR_ACCESS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhDoorAccess.EH_DOOR_ACCESS, com.everhomes.server.schema.tables.EhDoorAccess.EH_DOOR_ACCESS.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhDoorAuthRecord> KEY_EH_DOOR_AUTH_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH, com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH.ID);
+		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhDoorCommandRecord> KEY_EH_DOOR_COMMAND_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhDoorCommand.EH_DOOR_COMMAND, com.everhomes.server.schema.tables.EhDoorCommand.EH_DOOR_COMMAND.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhOwnerDoorsRecord> KEY_EH_OWNER_DOORS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhOwnerDoors.EH_OWNER_DOORS, com.everhomes.server.schema.tables.EhOwnerDoors.EH_OWNER_DOORS.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhOwnerDoorAuthRecord> KEY_EH_OWNER_DOOR_AUTH_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhOwnerDoorAuth.EH_OWNER_DOOR_AUTH, com.everhomes.server.schema.tables.EhOwnerDoorAuth.EH_OWNER_DOOR_AUTH.ID);
 	}
@@ -614,5 +617,6 @@ public class Keys {
 		public static final org.jooq.ForeignKey<com.everhomes.server.schema.tables.records.EhAesServerKeyRecord, com.everhomes.server.schema.tables.records.EhDoorAccessRecord> EH_AES_SERVER_KEY_IBFK_1 = createForeignKey(com.everhomes.server.schema.Keys.KEY_EH_DOOR_ACCESS_PRIMARY, com.everhomes.server.schema.tables.EhAesServerKey.EH_AES_SERVER_KEY, com.everhomes.server.schema.tables.EhAesServerKey.EH_AES_SERVER_KEY.DOOR_ID);
 		public static final org.jooq.ForeignKey<com.everhomes.server.schema.tables.records.EhAesUserKeyRecord, com.everhomes.server.schema.tables.records.EhDoorAccessRecord> EH_AES_USER_KEY_IBFK_1 = createForeignKey(com.everhomes.server.schema.Keys.KEY_EH_DOOR_ACCESS_PRIMARY, com.everhomes.server.schema.tables.EhAesUserKey.EH_AES_USER_KEY, com.everhomes.server.schema.tables.EhAesUserKey.EH_AES_USER_KEY.DOOR_ID);
 		public static final org.jooq.ForeignKey<com.everhomes.server.schema.tables.records.EhDoorAuthRecord, com.everhomes.server.schema.tables.records.EhDoorAccessRecord> EH_DOOR_AUTH_IBFK_1 = createForeignKey(com.everhomes.server.schema.Keys.KEY_EH_DOOR_ACCESS_PRIMARY, com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH, com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH.DOOR_ID);
+		public static final org.jooq.ForeignKey<com.everhomes.server.schema.tables.records.EhDoorCommandRecord, com.everhomes.server.schema.tables.records.EhDoorAccessRecord> EH_DOOR_COMMAND_IBFK_1 = createForeignKey(com.everhomes.server.schema.Keys.KEY_EH_DOOR_ACCESS_PRIMARY, com.everhomes.server.schema.tables.EhDoorCommand.EH_DOOR_COMMAND, com.everhomes.server.schema.tables.EhDoorCommand.EH_DOOR_COMMAND.DOOR_ID);
 	}
 }

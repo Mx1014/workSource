@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAclinksRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhAclinksRecord> implements org.jooq.Record8<java.lang.Long, java.lang.Long, java.lang.String, java.lang.String, java.lang.String, java.lang.Byte, java.sql.Timestamp, java.lang.Byte> {
 
-	private static final long serialVersionUID = -1355927751;
+	private static final long serialVersionUID = 1603261871;
 
 	/**
 	 * Setter for <code>ehcore.eh_aclinks.id</code>. id of the record

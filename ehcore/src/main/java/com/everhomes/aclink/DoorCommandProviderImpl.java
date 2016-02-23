@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -20,18 +21,17 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
-import com.everhomes.server.schema.tables.daos.EhAesUserKeyDao;
-import com.everhomes.server.schema.tables.pojos.EhAesUserKey;
-import com.everhomes.server.schema.tables.records.EhAesUserKeyRecord;
+import com.everhomes.server.schema.tables.daos.EhDoorCommandDao;
+import com.everhomes.server.schema.tables.pojos.EhDoorCommand;
+import com.everhomes.server.schema.tables.records.EhDoorCommandRecord;
 import com.everhomes.server.schema.tables.pojos.EhDoorAccess;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
-public class AesUserKeyProviderImpl implements AesUserKeyProvider {
+public class DoorCommandProviderImpl implements DoorCommandProvider {
     @Autowired
     private DbProvider dbProvider;
 
@@ -40,44 +40,42 @@ public class AesUserKeyProviderImpl implements AesUserKeyProvider {
 
     @Autowired
     private SequenceProvider sequenceProvider;
-    
-    private static long MAX_KEY_ID = 1024;
 
     @Override
-    public Long createAesUserKey(AesUserKey obj) {
-        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAesUserKey.class));
+    public Long createDoorCommand(DoorCommand obj) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhDoorCommand.class));
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhDoorAccess.class, obj.getDoorId()));
         obj.setId(id);
         prepareObj(obj);
-        EhAesUserKeyDao dao = new EhAesUserKeyDao(context.configuration());
+        EhDoorCommandDao dao = new EhDoorCommandDao(context.configuration());
         dao.insert(obj);
         return id;
     }
 
     @Override
-    public void updateAesUserKey(AesUserKey obj) {
+    public void updateDoorCommand(DoorCommand obj) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhDoorAccess.class, obj.getDoorId()));
-        EhAesUserKeyDao dao = new EhAesUserKeyDao(context.configuration());
+        EhDoorCommandDao dao = new EhDoorCommandDao(context.configuration());
         dao.update(obj);
     }
 
     @Override
-    public void deleteAesUserKey(AesUserKey obj) {
+    public void deleteDoorCommand(DoorCommand obj) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhDoorAccess.class, obj.getDoorId()));
-        EhAesUserKeyDao dao = new EhAesUserKeyDao(context.configuration());
+        EhDoorCommandDao dao = new EhDoorCommandDao(context.configuration());
         dao.deleteById(obj.getId());
     }
 
     @Override
-    public AesUserKey getAesUserKeyById(Long id) {
-        AesUserKey[] result = new AesUserKey[1];
+    public DoorCommand getDoorCommandById(Long id) {
+        DoorCommand[] result = new DoorCommand[1];
 
         dbProvider.mapReduce(AccessSpec.readOnlyWith(EhDoorAccess.class), null,
             (DSLContext context, Object reducingContext) -> {
-                result[0] = context.select().from(Tables.EH_AES_USER_KEY)
-                    .where(Tables.EH_AES_USER_KEY.ID.eq(id))
+                result[0] = context.select().from(Tables.EH_DOOR_COMMAND)
+                    .where(Tables.EH_DOOR_COMMAND.ID.eq(id))
                     .fetchAny().map((r) -> {
-                        return ConvertHelper.convert(r, AesUserKey.class);
+                        return ConvertHelper.convert(r, DoorCommand.class);
                     });
 
                 if (result[0] != null) {
@@ -91,29 +89,29 @@ public class AesUserKeyProviderImpl implements AesUserKeyProvider {
     }
 
     @Override
-    public List<AesUserKey> queryAesUserKeyByDoorId(ListingLocator locator, Long refId
+    public List<DoorCommand> queryDoorCommandByDoorId(ListingLocator locator, Long refId
             , int count, ListingQueryBuilderCallback queryBuilderCallback) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhDoorAccess.class, refId));
 
-        SelectQuery<EhAesUserKeyRecord> query = context.selectQuery(Tables.EH_AES_USER_KEY);
+        SelectQuery<EhDoorCommandRecord> query = context.selectQuery(Tables.EH_DOOR_COMMAND);
         if(queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
-        query.addConditions(Tables.EH_AES_USER_KEY.DOOR_ID.eq(refId));
+        query.addConditions(Tables.EH_DOOR_COMMAND.DOOR_ID.eq(refId));
 
         if(locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_AES_USER_KEY.ID.gt(locator.getAnchor()));
+            query.addConditions(Tables.EH_DOOR_COMMAND.ID.gt(locator.getAnchor()));
             }
 
         query.addLimit(count);
         return query.fetch().map((r) -> {
-            return ConvertHelper.convert(r, AesUserKey.class);
+            return ConvertHelper.convert(r, DoorCommand.class);
         });
     }
 
     @Override
-    public List<AesUserKey> queryAesUserKeys(CrossShardListingLocator locator, int count,
+    public List<DoorCommand> queryDoorCommands(CrossShardListingLocator locator, int count,
             ListingQueryBuilderCallback queryBuilderCallback) {
-        final List<AesUserKey> objs = new ArrayList<AesUserKey>();
+        final List<DoorCommand> objs = new ArrayList<DoorCommand>();
         if(locator.getShardIterator() == null) {
             AccessSpec accessSpec = AccessSpec.readOnlyWith(EhDoorAccess.class);
             ShardIterator shardIterator = new ShardIterator(accessSpec);
@@ -122,18 +120,18 @@ public class AesUserKeyProviderImpl implements AesUserKeyProvider {
         }
 
         this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
-            SelectQuery<EhAesUserKeyRecord> query = context.selectQuery(Tables.EH_AES_USER_KEY);
+            SelectQuery<EhDoorCommandRecord> query = context.selectQuery(Tables.EH_DOOR_COMMAND);
 
             if(queryBuilderCallback != null)
                 queryBuilderCallback.buildCondition(locator, query);
 
             if(locator.getAnchor() != null)
-                query.addConditions(Tables.EH_AES_USER_KEY.ID.gt(locator.getAnchor()));
-            query.addOrderBy(Tables.EH_AES_USER_KEY.ID.asc());
+                query.addConditions(Tables.EH_DOOR_COMMAND.ID.gt(locator.getAnchor()));
+            query.addOrderBy(Tables.EH_DOOR_COMMAND.ID.asc());
             query.addLimit(count - objs.size());
 
             query.fetch().map((r) -> {
-                objs.add(ConvertHelper.convert(r, AesUserKey.class));
+                objs.add(ConvertHelper.convert(r, DoorCommand.class));
                 return null;
             });
 
@@ -147,35 +145,22 @@ public class AesUserKeyProviderImpl implements AesUserKeyProvider {
         return objs;
     }
 
-    private void prepareObj(AesUserKey obj) {
-        //obj.setKeyId(obj.getId() % MAX_KEY_ID);
+    private void prepareObj(DoorCommand obj) {
     }
     
     @Override
-    public AesUserKey queryAesUserKeyByDoorId(Long doorId, Long userId) {
-        ListingLocator locator = new ListingLocator();
-        
-        long now = DateHelper.currentGMTTime().getTime();
-        
-        List<AesUserKey> aesUserKeys = queryAesUserKeyByDoorId(locator, doorId, 1, new ListingQueryBuilderCallback() {
-
+    public List<DoorCommand> queryValidDoorCommands(ListingLocator locator, Long doorId, int count) {
+        return queryDoorCommandByDoorId(locator, doorId, count, new ListingQueryBuilderCallback() {
+            
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
                     SelectQuery<? extends Record> query) {
-                query.addConditions(Tables.EH_AES_USER_KEY.USER_ID.eq(userId));
-                query.addConditions(Tables.EH_AES_USER_KEY.EXPIRE_TIME_MS.ge(now));
-                query.addConditions(Tables.EH_AES_USER_KEY.STATUS.eq(AesUserKeyStatus.VALID.getCode()));
-                query.addConditions(Tables.EH_AES_USER_KEY.DOOR_ID.eq(doorId));
+                query.addConditions(Tables.EH_DOOR_COMMAND.STATUS.eq(DoorCommandStatus.CREATING.getCode())
+                        .or(Tables.EH_DOOR_COMMAND.STATUS.eq(DoorCommandStatus.SENDING.getCode())));
                 return query;
             }
             
         });
-        
-        if(aesUserKeys.size() > 0) {
-            return aesUserKeys.get(0);
-        }
-        
-        return null;
     }
     
 }
