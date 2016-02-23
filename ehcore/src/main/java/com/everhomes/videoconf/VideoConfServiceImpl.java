@@ -1446,6 +1446,12 @@ public class VideoConfServiceImpl implements VideoConfService {
 						response.setJoinUrl(conf.getJoinUrl());
 						response.setCondId(conf.getConfId()+"");
 						response.setPassword(conf.getConfHostKey());
+					} else {
+						LOGGER.error("conference has not been held yet!");
+						throw RuntimeErrorException.errorWith(ConfServiceErrorCode.SCOPE, ConfServiceErrorCode.CONF_NOT_OPEN,
+								localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
+										String.valueOf(ConfServiceErrorCode.CONF_NOT_OPEN),
+										UserContext.current().getUser().getLocale(),"conference has not been held yet!"));
 					}
 				}
 			}
