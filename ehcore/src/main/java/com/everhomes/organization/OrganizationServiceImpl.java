@@ -1810,38 +1810,33 @@ public class OrganizationServiceImpl implements OrganizationService {
 		List<OrganizationSimpleDTO> orgs = new ArrayList<OrganizationSimpleDTO>();
 		List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembers(user.getId());
 		
-		if(orgMembers != null && !orgMembers.isEmpty()){
-			orgMembers.stream().map(orgMember -> {
-				if(!orgMember.getStatus().equals(OrganizationMemberStatus.ACTIVE.getCode())){
-					return null;
-				}
-				Organization org = this.organizationProvider.findOrganizationById(orgMember.getOrganizationId());
-				if (org != null){
-					if(cmd.getOrganiztionType() != null && !cmd.getOrganiztionType().equals("")){
-						if(org.getOrganizationType().equals(cmd.getOrganiztionType()) && !org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())){
-							OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
-							//物业或业委增加小区Id和小区name信息
-							if(org.getOrganizationType().equals(OrganizationType.GARC.getCode()) || org.getOrganizationType().equals(OrganizationType.PM.getCode())){
-								this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
-							}
-							orgs.add(tempSimpleOrgDTO);
-						}
-					}
-					else{
-						if(!org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())){
-							OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
-							//物业或业委增加小区Id和小区name信息
-							if(org.getOrganizationType().equals(OrganizationType.GARC.getCode()) || org.getOrganizationType().equals(OrganizationType.PM.getCode())){
-								this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
-							}
-							orgs.add(tempSimpleOrgDTO);
-						}
-						
-					}
-
-				}
+		for (OrganizationMember member : orgMembers) {
+			if(!member.getStatus().equals(OrganizationMemberStatus.ACTIVE.getCode())){
 				return null;
-			});
+			}
+			
+			Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
+			if(cmd.getOrganiztionType() != null && !cmd.getOrganiztionType().equals("")){
+				if(org.getOrganizationType().equals(cmd.getOrganiztionType()) && !org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())){
+					OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
+					//物业或业委增加小区Id和小区name信息
+					if(org.getOrganizationType().equals(OrganizationType.GARC.getCode()) || org.getOrganizationType().equals(OrganizationType.PM.getCode())){
+						this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
+					}
+					orgs.add(tempSimpleOrgDTO);
+				}
+			}
+			else{
+				if(!org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())){
+					OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
+					//物业或业委增加小区Id和小区name信息
+					if(org.getOrganizationType().equals(OrganizationType.GARC.getCode()) || org.getOrganizationType().equals(OrganizationType.PM.getCode())){
+						this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
+					}
+					orgs.add(tempSimpleOrgDTO);
+				}
+				
+			}
 		}
 
 		return orgs;
