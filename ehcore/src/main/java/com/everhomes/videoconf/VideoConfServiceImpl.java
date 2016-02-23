@@ -1248,7 +1248,37 @@ public class VideoConfServiceImpl implements VideoConfService {
 
 	@Override
 	public void cancelVideoConf(CancelVideoConfCommand cmd) {
+		
+		String path = "http://api.confcloud.cn/openapi/cancelConf";
+		Long timestamp = DateHelper.currentGMTTime().getTime();
+		String tokenString = cmd.getSourceAccountName() + "|" + configurationProvider.getValue(ConfigConstants.VIDEOCONF_SECRET_KEY, "0") + "|" + timestamp;
+		String token = DigestUtils.md5Hex(tokenString);
+		
+		Map<String, String> sPara = new HashMap<String, String>() ;
+	    sPara.put("loginName", cmd.getSourceAccountName()); 
+	    sPara.put("timeStamp", timestamp.toString());
+	    sPara.put("token", token); 
+	    sPara.put("confId", cmd.getConfId()+"");
+	    
+	    NameValuePair[] param = generatNameValuePair(sPara);
+	    if(LOGGER.isDebugEnabled())
+			LOGGER.info("cancelVideoConf, cmd=" + cmd + ", restUrl="+path+", param="+sPara);
+	    try {
+	    	HttpClient httpClient = new HttpClient();  
+	    	HttpMethod method;
+			method = postMethod(path, param);
+			httpClient.executeMethod(method);  
+	          
+	        String result = method.getResponseBodyAsString();  
+	        System.out.println(result);  
+			String json = strDecode(result);
 
+			if(LOGGER.isDebugEnabled())
+				LOGGER.error("cancelVideoConf,json="+json);
+		} catch (IOException e) {
+			LOGGER.error("cancelVideoConf-error.sourceAccount="+cmd.getSourceAccountName(), e);
+		}  
+          
 		ConfConferences conf = vcProvider.findConfConferencesByConfId(cmd.getConfId());
 		
 		if(conf != null && conf.getStatus() != 0) {
@@ -1295,6 +1325,9 @@ public class VideoConfServiceImpl implements VideoConfService {
 			if(account.getAssignedSourceId() != null && account.getAssignedSourceId() != 0) {
 				CancelVideoConfCommand cancelCmd = new CancelVideoConfCommand();
 				cancelCmd.setConfId(account.getAssignedConfId());
+				ConfSourceAccounts source = vcProvider.findSourceAccountById(account.getAssignedSourceId());
+				if(source != null)
+					cancelCmd.setSourceAccountName(source.getAccountName());
 				cancelVideoConf(cancelCmd);
 			}
 			ConfAccountCategories category = vcProvider.findAccountCategoriesById(account.getAccountCategoryId());
