@@ -27,6 +27,7 @@ INSERT INTO `eh_organization_members`
 (`id`,`organization_id`,`contact_name`,`string_tag1`,`avatar`,`target_id`,`integral_tag1`,`status`,`integral_tag2`,`create_time`,`string_tag2`,`gender`,`integral_tag3`,`contact_token`,`target_type`,`contact_type`,`member_group`,`group_id`)
 SELECT (@organization_member_id + c.`id`) id, c.`enterprise_id`,c.`name`,c.`nick_name`,c.`avatar`,c.`user_id`,c.`role`,c.`status`,c.`creator_uid`,c.`create_time`,c.`string_tag1`,IF(c.`string_tag2` = '男',1,IF(c.`string_tag2`='女',2,0)),c.`string_tag3`,e.`entry_value`,IF(c.`user_id` = 0,'UNTRACK', 'USER'),0,'manager',0 from `eh_enterprise_contacts` c left join `eh_enterprise_contact_entries` e on c.`id` = e.`contact_id` GROUP BY id; 
 
+UPDATE `eh_organization_members` SET `status` = 3 WHERE `status` = 2;
 
 #
 # move enterprise address information
