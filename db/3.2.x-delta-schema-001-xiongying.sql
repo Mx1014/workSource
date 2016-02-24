@@ -19,4 +19,4 @@ INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'video
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'videoConf', '10005', 'zh_CN', '账号在3个月内已分配过用户');
 
 ALTER TABLE `eh_conf_conferences` ADD COLUMN `meeting_no` int(11) NOT NULL DEFAULT '0' COMMENT 'the meeting no from 3rd conference provider';
-ALTER TABLE `eh_conf_conferences` CHANGE `conf_id` `conference_id`;
+ALTER TABLE `eh_conf_conferences` CHANGE `conf_id` `conference_id` bigint(20) NOT NULL DEFAULT '0';
