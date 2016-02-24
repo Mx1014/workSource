@@ -515,7 +515,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		RoleAssignment roleAssignment = new RoleAssignment();
 		List<RoleAssignment> roleAssignments = aclProvider.listRoleAssignmentByTarget(entityType.getCode(), cmd.getTargetId());
 		dbProvider.execute((TransactionStatus status) -> {
-			if(null != roleAssignments && 0 == roleAssignments.size()){
+			if(null != roleAssignments && 0 < roleAssignments.size()){
 				for (RoleAssignment assignment : roleAssignments) {
 					aclProvider.deleteRoleAssignment(assignment.getId());
 				}
