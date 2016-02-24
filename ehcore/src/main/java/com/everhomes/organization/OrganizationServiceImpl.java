@@ -513,15 +513,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 	public void setAclRoleAssignmentRole(
 			SetAclRoleAssignmentCommand cmd, EntityType entityType) {
 		RoleAssignment roleAssignment = new RoleAssignment();
-		List<Long> resources = aclProvider.getRolesFromResourceAssignments("system", null, entityType.getCode(), cmd.getTargetId(), null);
+		List<RoleAssignment> roleAssignments = aclProvider.listRoleAssignmentByTarget(entityType.getCode(), cmd.getTargetId());
 		dbProvider.execute((TransactionStatus status) -> {
-			if(null != resources && 0 == resources.size()){
-				for (Long res : resources) {
-					roleAssignment.setRoleId(res);
-					roleAssignment.setOwnerType("system");
-					roleAssignment.setTargetType(entityType.getCode());
-					roleAssignment.setTargetId(cmd.getTargetId());
-					aclProvider.deleteRoleAssignment(roleAssignment);
+			if(null != roleAssignments && 0 == roleAssignments.size()){
+				for (RoleAssignment assignment : roleAssignments) {
+					aclProvider.deleteRoleAssignment(assignment.getId());
 				}
 			}
 			roleAssignment.setRoleId(cmd.getRoleId());
@@ -565,7 +561,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		OrganizationDetail org = organizationProvider.findOrganizationDetailByOrganizationId(id);
 		if(null == organization || null == org){
 			LOGGER.debug("organization is null, id = " + id);
-			return new OrganizationDetailDTO();
+			return null;
 		}
 		
 		OrganizationDetailDTO dto = ConvertHelper.convert(org, OrganizationDetailDTO.class);
@@ -635,19 +631,24 @@ public class OrganizationServiceImpl implements OrganizationService {
 		if(null != buildingId){
 			List<OrganizationAddress> addresses = organizationProvider.listOrganizationAddressByBuildingId(buildingId, cmd.getPageSize(), locator);
 			for (OrganizationAddress address : addresses) {
-				
-				dtos.add(this.toOrganizationDetailDTO(address.getOrganizationId(), cmd.getQryAdminRoleFlag()));
+				OrganizationDetailDTO dto = this.toOrganizationDetailDTO(address.getOrganizationId(), cmd.getQryAdminRoleFlag());
+				if(null != dto)
+					dtos.add(dto);
 			}
 		}else if(null != communityId){
 			List<OrganizationCommunityRequest> requests = organizationProvider.queryOrganizationCommunityRequestByCommunityId(locator, communityId, cmd.getPageSize(), null);
 			for (OrganizationCommunityRequest req : requests) {
-				dtos.add(this.toOrganizationDetailDTO(req.getMemberId(), cmd.getQryAdminRoleFlag()));
+				OrganizationDetailDTO dto = this.toOrganizationDetailDTO(req.getMemberId(), cmd.getQryAdminRoleFlag());
+				if(null != dto)
+					dtos.add(dto);
 			}
 			
 		}else{
 			List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, locator, cmd.getPageSize());
 			for (Organization organization : organizations) {
-				dtos.add(this.toOrganizationDetailDTO(organization.getId(), cmd.getQryAdminRoleFlag()));
+				OrganizationDetailDTO dto = this.toOrganizationDetailDTO(organization.getId(), cmd.getQryAdminRoleFlag());
+				if(null != dto)
+					dtos.add(dto);
 			}
 		}
 		resp.setDtos(dtos);
