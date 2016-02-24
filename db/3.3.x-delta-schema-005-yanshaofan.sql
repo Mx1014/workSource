@@ -1,4 +1,19 @@
 
+#
+# modify eh_organizations unique
+#
+ALTER TABLE `eh_organizations` DROP INDEX u_eh_org_name;
+ALTER TABLE `eh_organizations` ADD UNIQUE u_eh_org_name(`parent_id`,`name`,`namespace_id`);
+
+#
+# Check whether the repeated data migration
+#
+
+select `name`,count(*),`namespace_id`,`id` FROM `eh_groups` WHERE `discriminator` = 'enterprise' group by name having count(*) > 1;
+
+
+##################################################################################
+
 set @organization_details_id = 20;
 set @organization_member_id = 2000000;
 set @organization_addresses_id = 100;
@@ -12,6 +27,7 @@ set @organization_role_map_id = 1;
 #
 # merge enterprise and organization data
 #
+
 INSERT INTO `eh_organizations` (`id`,`parent_id`,`organization_type`,`name`,`path`,`level`,`status`,`group_type`,`create_time`,`update_time`,`directly_enterprise_id`,`namespace_id`,`group_id`) 
 select `id`,0,'ENTERPRISE',`name`,concat('/',`id`),1,if(`status` = 0,1,2),'ENTERPRISE',`create_time` ,`update_time`,0,`namespace_id`,`id` FROM `eh_groups` WHERE `discriminator` = 'enterprise';
 
