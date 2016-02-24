@@ -187,6 +187,7 @@ CREATE TABLE `eh_warning_contacts` (
 	`contactor` VARCHAR(20),
 	`mobile` VARCHAR(20),
 	`email` VARCHAR(20),
+	`namespace_id` int(11) NOT NULL DEFAULT '0',
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
  
