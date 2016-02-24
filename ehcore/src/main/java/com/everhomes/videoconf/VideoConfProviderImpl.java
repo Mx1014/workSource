@@ -820,7 +820,7 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhConfConferences.class), result, 
 				(DSLContext context, Object reducingContext) -> {
 					List<ConfConferences> list = context.select().from(Tables.EH_CONF_CONFERENCES)
-							.where(Tables.EH_CONF_CONFERENCES.CONF_ID.eq(confId))
+							.where(Tables.EH_CONF_CONFERENCES.MEETING_NO.eq(confId))
 							.and(Tables.EH_CONF_CONFERENCES.NAMESPACE_ID.eq(namespaceId))
 							.fetch().map((r) -> {
 								return ConvertHelper.convert(r, ConfConferences.class);

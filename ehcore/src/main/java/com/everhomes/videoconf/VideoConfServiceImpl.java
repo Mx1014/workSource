@@ -567,7 +567,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 						r.setOccupyFlag((byte) 1);
 						ConfConferences conf = vcProvider.findConfConferencesById(account.getAssignedConfId());
 						if(conf != null)
-							r.setConfId(conf.getConfId());
+							r.setConfId(conf.getMeetingNo());
 					}
 				}
 				
@@ -1227,7 +1227,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 			if(userAccount.getOccupyFlag() == 1) {
 				ConfConferences conf = vcProvider.findConfConferencesById(account.getAssignedConfId());
 				if(conf != null) {
-					userAccount.setConfId(conf.getConfId());
+					userAccount.setConfId(conf.getMeetingNo());
 				} else {
 					userAccount.setOccupyFlag((byte) 0);
 					
@@ -1254,11 +1254,12 @@ public class VideoConfServiceImpl implements VideoConfService {
 		String tokenString = cmd.getSourceAccountName() + "|" + configurationProvider.getValue(ConfigConstants.VIDEOCONF_SECRET_KEY, "0") + "|" + timestamp;
 		String token = DigestUtils.md5Hex(tokenString);
 		
+		ConfConferences conf = vcProvider.findConfConferencesByConfId(cmd.getConfId());
 		Map<String, String> sPara = new HashMap<String, String>() ;
 	    sPara.put("loginName", cmd.getSourceAccountName()); 
 	    sPara.put("timeStamp", timestamp.toString());
 	    sPara.put("token", token); 
-	    sPara.put("confId", cmd.getConfId()+"");
+	    sPara.put("confId", conf.getConferenceId() + "");
 	    
 	    NameValuePair[] param = generatNameValuePair(sPara);
 	    if(LOGGER.isDebugEnabled())
@@ -1279,9 +1280,8 @@ public class VideoConfServiceImpl implements VideoConfService {
 			LOGGER.error("cancelVideoConf-error.sourceAccount="+cmd.getSourceAccountName(), e);
 		}  
           
-		ConfConferences conf = vcProvider.findConfConferencesByConfId(cmd.getConfId());
 		
-		if(conf != null && conf.getStatus() != 0) {
+		if(conf != null && conf.getStatus() != null && conf.getStatus() != 0) {
 			conf.setStatus((byte) 0);
 			conf.setEndTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			
@@ -1392,9 +1392,9 @@ public class VideoConfServiceImpl implements VideoConfService {
 						response.setMaxCount((Double.valueOf(String.valueOf(data.get("maxCount")))).intValue());
 						response.setMeetingNo(String.valueOf(data.get("meetingNo")));
 						
-						Object obj = data.get("meetingNo");
 						ConfConferences conf = new ConfConferences();
-						conf.setConfId(Long.valueOf(String.valueOf(data.get("meetingNo"))));
+						conf.setConferenceId(Long.valueOf(String.valueOf(data.get("id"))));
+						conf.setMeetingNo(Long.valueOf(String.valueOf(data.get("meetingNo"))));
 						conf.setSubject(String.valueOf(data.get("meetingName")));
 						conf.setStartTime(new Timestamp(timestamp));
 						conf.setExpectDuration(cmd.getDuration());
@@ -1407,7 +1407,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 						conf.setConfHostId(String.valueOf(data.get("userId")));
 //						conf.setConfHostName(confHostName);
 						conf.setMaxCount((Double.valueOf(String.valueOf(data.get("maxCount")))).intValue());
-						String joinUrl = "cfcloud://www.confcloud.cn/join?confno={" + conf.getConfId() + "}";
+						String joinUrl = "cfcloud://www.confcloud.cn/join?confno={" + conf.getMeetingNo() + "}";
 						conf.setJoinUrl(joinUrl);
 						conf.setStatus((byte) 1);
 						conf.setNamespaceId(namespaceId);
@@ -1477,7 +1477,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 						LOGGER.error("joinVideoConf, conf="+conf);
 					if(conf != null) {
 						response.setJoinUrl(conf.getJoinUrl());
-						response.setCondId(conf.getConfId()+"");
+						response.setCondId(conf.getMeetingNo()+"");
 						response.setPassword(conf.getConfHostKey());
 					} else {
 						LOGGER.error("conference has not been held yet!");
@@ -1497,7 +1497,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 				LOGGER.error("joinVideoConf, cmd="+cmd+",conf="+conf);
 			if(conf != null) {
 				response.setJoinUrl(conf.getJoinUrl());
-				response.setCondId(conf.getConfId()+"");
+				response.setCondId(conf.getMeetingNo()+"");
 				response.setPassword(conf.getConfHostKey());
 			}
 			
