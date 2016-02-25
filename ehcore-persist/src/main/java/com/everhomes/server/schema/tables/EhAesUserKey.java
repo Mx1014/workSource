@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAesUserKey extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhAesUserKeyRecord> {
 
-	private static final long serialVersionUID = -1640298989;
+	private static final long serialVersionUID = -912331578;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_aes_user_key</code>
@@ -34,7 +34,7 @@ public class EhAesUserKey extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	/**
 	 * The column <code>ehcore.eh_aes_user_key.key_id</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAesUserKeyRecord, java.lang.Byte> KEY_ID = createField("key_id", org.jooq.impl.SQLDataType.TINYINT.nullable(false), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAesUserKeyRecord, java.lang.Integer> KEY_ID = createField("key_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_aes_user_key.key_type</code>. 0: aclink normal key

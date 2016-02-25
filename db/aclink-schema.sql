@@ -23,6 +23,9 @@ CREATE TABLE `eh_door_access` (
     `create_time` DATETIME,
     `status` TINYINT NOT NULL COMMENT '0:activing, 1: active',
 
+    `acking_secret_version` INT NOT NULL,
+    `expect_secret_key` INT NOT NULL,
+
     PRIMARY KEY (`id`),
     INDEX `i_eh_door_access_name`(`name`),
     INDEX `i_eh_door_access_owner`(`owner_id`)

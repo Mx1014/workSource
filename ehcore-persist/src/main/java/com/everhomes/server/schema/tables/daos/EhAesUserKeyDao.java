@@ -50,7 +50,7 @@ public class EhAesUserKeyDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	/**
 	 * Fetch records that have <code>key_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAesUserKey> fetchByKeyId(java.lang.Byte... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAesUserKey> fetchByKeyId(java.lang.Integer... values) {
 		return fetch(com.everhomes.server.schema.tables.EhAesUserKey.EH_AES_USER_KEY.KEY_ID, values);
 	}
 

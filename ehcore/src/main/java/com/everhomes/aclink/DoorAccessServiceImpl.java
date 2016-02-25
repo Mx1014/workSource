@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
@@ -17,7 +20,6 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
-import com.everhomes.user.UserLogin;
 
 
 @Component
@@ -109,9 +111,15 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 aclink.setDoorId(doorAcc.getId());
                 aclinkProvider.createAclink(aclink);
                 
-                //create server key
-                AesServerKey serverKey = new AesServerKey();
-                aesServerKeyProvider.createAesServerKey(serverKey);
+                //initial doorAccess AesUserKey
+                //bigCollectionProvider.setValue(getAesServerKey(doorAcc.getId()), 1);
+                //bigCollectionProvider.setValue(getAesServerDevKey(doorAcc.getId()), 0);
+                AesServerKey aesServerKey = new AesServerKey();
+                aesServerKey.setCreateTimeMs(System.currentTimeMillis());
+                aesServerKey.setDoorId(doorAcc.getId());
+                aesServerKey.setSecret(AclinkUtils.generateAESKey());
+                aesServerKey.setDeviceVer(AclinkDeviceVer.VER0.getCode());
+                aesServerKeyProvider.createAesServerKey(aesServerKey);
                 
                 //create a command event
                 DoorCommand cmd = new DoorCommand();
@@ -120,7 +128,6 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 cmd.setCmdId(AclinkCommandType.CMD_ACTIVE.getCode());
                 return doorAcc;
             }
-            
         });
         
         List<DoorMessage> msgs = generateMessages(doorAccess.getId());
@@ -264,6 +271,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 if(aesUserKey == null) {
                     //create it
                     aesUserKey = new AesUserKey();
+                    aesUserKey.setId(aesUserKeyProvider.prepareForAesUserKeyId());
                     aesUserKey.setUserId(user.getId());
                     aesUserKey.setDoorId(auth.getDoorId());
                     aesUserKey.setCreatorUid(user.getId());
@@ -271,7 +279,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     aesUserKey.setExpireTimeMs(auth.getValidEndMs());
                     
                     //BASE64 encoding
-                    //aesUserKey.setSecret(AclinkUtils.packAesUserKey("", auth.getUserId(), aesUserKey.getKeyId(), auth.getValidEndMs()));
+                    aesUserKey.setSecret(AclinkUtils.packAesUserKey("", auth.getUserId(), aesUserKey.getKeyId(), auth.getValidEndMs()));
                     
                     aesUserKeyProvider.createAesUserKey(aesUserKey);
                     }

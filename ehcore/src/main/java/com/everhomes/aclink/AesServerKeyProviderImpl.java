@@ -1,5 +1,7 @@
 package com.everhomes.aclink;
 
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
@@ -14,7 +16,11 @@ import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.server.schema.Tables;
@@ -30,6 +36,8 @@ import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
 public class AesServerKeyProviderImpl implements AesServerKeyProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AesServerKeyProvider.class);
+    
     @Autowired
     private DbProvider dbProvider;
 
@@ -38,6 +46,11 @@ public class AesServerKeyProviderImpl implements AesServerKeyProvider {
 
     @Autowired
     private SequenceProvider sequenceProvider;
+    
+    @Autowired
+    BigCollectionProvider bigCollectionProvider;
+    
+    final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
     @Override
     public Long createAesServerKey(AesServerKey obj) {
@@ -145,6 +158,41 @@ public class AesServerKeyProviderImpl implements AesServerKeyProvider {
     
     private void prepareObj(AesServerKey obj) {
         
+    }
+    
+    private String getAesServerKey(Long doorAccId) {
+        return "dooraccess:ackingsecret:ver:" + doorAccId;
+    }
+    
+    private String getAesServerDevKey(Long doorAccId) {
+        return "dooraccess:aesserverkey:dev:" + doorAccId;
+    }
+    
+    @Override
+    public Long getAckingSecretVersion(DoorAccess doorAccess) {
+        Long doorAccId = doorAccess.getId();
+        String key = "dooraccess:" + doorAccId + ":acking";
+        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+        
+        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+        String v = (String)redisTemplate.opsForValue().get(key);
+        if(v == null) {
+            //from db
+            //return
+        }
+        
+//        this.bigCollectionProvider.setValue(key, 1l);
+//        acc.getTemplate().opsForValue().setIfAbsent(arg0, arg1);
+//        redisTemplate.opsForValue().set(key, "2");
+//        
+//        l = Long.valueOf((String)redisTemplate.opsForValue().get(key));
+//        LOGGER.info("get value=" + l);
+//        
+//        redisTemplate.opsForValue().increment(key, 2l);
+//        l = Long.valueOf((String)redisTemplate.opsForValue().get(key));
+//        LOGGER.info("get value=" + l);
+        
+        return new Long(0l);
     }
 
 }

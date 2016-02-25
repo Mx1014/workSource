@@ -50,7 +50,7 @@ public class EhAclinkUndoKeyDao extends org.jooq.impl.DAOImpl<com.everhomes.serv
 	/**
 	 * Fetch records that have <code>key_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAclinkUndoKey> fetchByKeyId(java.lang.Byte... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAclinkUndoKey> fetchByKeyId(java.lang.Integer... values) {
 		return fetch(com.everhomes.server.schema.tables.EhAclinkUndoKey.EH_ACLINK_UNDO_KEY.KEY_ID, values);
 	}
 

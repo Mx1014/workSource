@@ -5,11 +5,13 @@ import javax.annotation.PostConstruct;
 import net.greghaines.jesque.Job;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.sequence.SequenceProvider;
 
+@Component
 public class AclinkMessageSequenceImpl implements AclinkMessageSequence {
     @Autowired
     private SequenceProvider sequenceProvider;

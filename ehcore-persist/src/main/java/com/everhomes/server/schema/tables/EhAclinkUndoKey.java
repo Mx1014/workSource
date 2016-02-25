@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAclinkUndoKey extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhAclinkUndoKeyRecord> {
 
-	private static final long serialVersionUID = 2003169335;
+	private static final long serialVersionUID = 1139507078;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_aclink_undo_key</code>
@@ -34,7 +34,7 @@ public class EhAclinkUndoKey extends org.jooq.impl.TableImpl<com.everhomes.serve
 	/**
 	 * The column <code>ehcore.eh_aclink_undo_key.key_id</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAclinkUndoKeyRecord, java.lang.Byte> KEY_ID = createField("key_id", org.jooq.impl.SQLDataType.TINYINT.nullable(false), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAclinkUndoKeyRecord, java.lang.Integer> KEY_ID = createField("key_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_aclink_undo_key.door_id</code>.

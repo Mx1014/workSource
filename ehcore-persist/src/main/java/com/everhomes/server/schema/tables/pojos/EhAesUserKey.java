@@ -13,30 +13,30 @@ public class EhAesUserKey implements java.io.Serializable {
 
 	private static final long serialVersionUID = -536525426;
 
-	private java.lang.Long   id;
-	private java.lang.Byte   keyId;
-	private java.lang.Byte   keyType;
-	private java.lang.Long   doorId;
-	private java.lang.Long   userId;
-	private java.lang.Long   expireTimeMs;
-	private java.lang.Long   createTimeMs;
-	private java.lang.Long   creatorUid;
-	private java.lang.String secret;
-	private java.lang.Byte   status;
+	private java.lang.Long    id;
+	private java.lang.Integer keyId;
+	private java.lang.Byte    keyType;
+	private java.lang.Long    doorId;
+	private java.lang.Long    userId;
+	private java.lang.Long    expireTimeMs;
+	private java.lang.Long    createTimeMs;
+	private java.lang.Long    creatorUid;
+	private java.lang.String  secret;
+	private java.lang.Byte    status;
 
 	public EhAesUserKey() {}
 
 	public EhAesUserKey(
-		java.lang.Long   id,
-		java.lang.Byte   keyId,
-		java.lang.Byte   keyType,
-		java.lang.Long   doorId,
-		java.lang.Long   userId,
-		java.lang.Long   expireTimeMs,
-		java.lang.Long   createTimeMs,
-		java.lang.Long   creatorUid,
-		java.lang.String secret,
-		java.lang.Byte   status
+		java.lang.Long    id,
+		java.lang.Integer keyId,
+		java.lang.Byte    keyType,
+		java.lang.Long    doorId,
+		java.lang.Long    userId,
+		java.lang.Long    expireTimeMs,
+		java.lang.Long    createTimeMs,
+		java.lang.Long    creatorUid,
+		java.lang.String  secret,
+		java.lang.Byte    status
 	) {
 		this.id = id;
 		this.keyId = keyId;
@@ -58,11 +58,11 @@ public class EhAesUserKey implements java.io.Serializable {
 		this.id = id;
 	}
 
-	public java.lang.Byte getKeyId() {
+	public java.lang.Integer getKeyId() {
 		return this.keyId;
 	}
 
-	public void setKeyId(java.lang.Byte keyId) {
+	public void setKeyId(java.lang.Integer keyId) {
 		this.keyId = keyId;
 	}
 

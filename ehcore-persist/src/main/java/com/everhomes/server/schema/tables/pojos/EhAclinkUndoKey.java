@@ -13,22 +13,22 @@ public class EhAclinkUndoKey implements java.io.Serializable {
 
 	private static final long serialVersionUID = -1496593298;
 
-	private java.lang.Long id;
-	private java.lang.Byte keyId;
-	private java.lang.Long doorId;
-	private java.lang.Byte status;
-	private java.lang.Long expireTimeMs;
-	private java.lang.Long createTimeMs;
+	private java.lang.Long    id;
+	private java.lang.Integer keyId;
+	private java.lang.Long    doorId;
+	private java.lang.Byte    status;
+	private java.lang.Long    expireTimeMs;
+	private java.lang.Long    createTimeMs;
 
 	public EhAclinkUndoKey() {}
 
 	public EhAclinkUndoKey(
-		java.lang.Long id,
-		java.lang.Byte keyId,
-		java.lang.Long doorId,
-		java.lang.Byte status,
-		java.lang.Long expireTimeMs,
-		java.lang.Long createTimeMs
+		java.lang.Long    id,
+		java.lang.Integer keyId,
+		java.lang.Long    doorId,
+		java.lang.Byte    status,
+		java.lang.Long    expireTimeMs,
+		java.lang.Long    createTimeMs
 	) {
 		this.id = id;
 		this.keyId = keyId;
@@ -46,11 +46,11 @@ public class EhAclinkUndoKey implements java.io.Serializable {
 		this.id = id;
 	}
 
-	public java.lang.Byte getKeyId() {
+	public java.lang.Integer getKeyId() {
 		return this.keyId;
 	}
 
-	public void setKeyId(java.lang.Byte keyId) {
+	public void setKeyId(java.lang.Integer keyId) {
 		this.keyId = keyId;
 	}
 

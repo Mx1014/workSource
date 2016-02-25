@@ -45,7 +45,10 @@ public class AesUserKeyProviderImpl implements AesUserKeyProvider {
 
     @Override
     public Long createAesUserKey(AesUserKey obj) {
-        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAesUserKey.class));
+        Long id = obj.getId();
+        if(id == null || id <= 0) {
+            id = prepareForAesUserKeyId();
+        }
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhDoorAccess.class, obj.getDoorId()));
         obj.setId(id);
         prepareObj(obj);
@@ -148,7 +151,14 @@ public class AesUserKeyProviderImpl implements AesUserKeyProvider {
     }
 
     private void prepareObj(AesUserKey obj) {
-        //obj.setKeyId(obj.getId() % MAX_KEY_ID);
+//        int keyId = (int) (obj.getId().intValue() % MAX_KEY_ID);
+//        obj.setKeyId(new Integer(keyId));
+//        obj.setSecret(AclinkUtils);
+    }
+    
+    @Override
+    public Long prepareForAesUserKeyId() {
+        return this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAesUserKey.class));
     }
     
     @Override
