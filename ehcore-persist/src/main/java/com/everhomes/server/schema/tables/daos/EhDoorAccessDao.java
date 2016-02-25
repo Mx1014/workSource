@@ -158,4 +158,18 @@ public class EhDoorAccessDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAccess> fetchByStatus(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhDoorAccess.EH_DOOR_ACCESS.STATUS, values);
 	}
+
+	/**
+	 * Fetch records that have <code>acking_secret_version IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAccess> fetchByAckingSecretVersion(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhDoorAccess.EH_DOOR_ACCESS.ACKING_SECRET_VERSION, values);
+	}
+
+	/**
+	 * Fetch records that have <code>expect_secret_key IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAccess> fetchByExpectSecretKey(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhDoorAccess.EH_DOOR_ACCESS.EXPECT_SECRET_KEY, values);
+	}
 }

@@ -9,6 +9,8 @@ import java.util.concurrent.TimeUnit;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
@@ -24,6 +26,8 @@ import com.everhomes.user.UserContext;
 
 @Component
 public class DoorAccessServiceImpl implements DoorAccessService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AesServerKeyProvider.class);
+    
     @Autowired
     BigCollectionProvider bigCollectionProvider;
     
@@ -57,6 +61,12 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     @Autowired
     private AesUserKeyProvider aesUserKeyProvider;
     
+    @Autowired
+    private AesServerKeyService aesServerKeyService;
+    
+    @Autowired
+    private OwnerDoorProvider ownerDoorProvider;
+    
     //列出某园区下的所有锁门禁
     public List<DoorAccess> listDoorAccessByCommunityId(Long communityId, CrossShardListingLocator locator, int count) {
         return doorAccessProvider.listDoorAccessByCommunityId(communityId, locator, count);
@@ -80,46 +90,42 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         } 
     }
     
-    public DoorMessage activatingDoorAccess(DoorAccessActivingCommand cmd) {
-        //bigCollectionProvider.setValue(arg0, arg1, arg2, TimeUnit.SECONDS);
-        
-        //Check auth
-        //lock with doorAccess
-        //create doorAccess, set status to creating
-        //generate a server key, server key version. 
-        //initial ackingSecretVersion expectSecretVersion
-        
-        //Out of lock, create a InitialServer message, add message seq to check message list
-        //return door message
-        
+    public DoorMessage activatingDoorAccess(DoorAccessActivingCommand cmd) {        
         User user = UserContext.current().getUser();
         DoorAccess doorAccess = this.dbProvider.execute(new TransactionCallback<DoorAccess>() {
             @Override
             public DoorAccess doInTransaction(TransactionStatus arg0) {
-                Aclink aclink = new Aclink();
-                aclink.setFirwareVer(cmd.getFirwareVer());
-                aclink.setManufacturer(cmd.getRsaAclinkPub());
-                //aclink.setStatus(status);
-                
                 DoorAccess doorAcc = new DoorAccess();
                 doorAcc.setActiveUserId(user.getId());
                 doorAcc.setOwnerId(cmd.getOwnerId());
                 doorAcc.setOwnerType(cmd.getOwnerType().getCode());
                 doorAcc.setStatus(DoorAccessStatus.ACTIVING.getCode());
+                //cmd.getHardwareId();
                 doorAccessProvider.createDoorAccess(doorAcc);
                 
+                OwnerDoor ownerDoor = new OwnerDoor();
+                ownerDoor.setDoorId(doorAcc.getId());
+                ownerDoor.setOwnerType(cmd.getOwnerType().getCode());
+                ownerDoor.setOwnerId(cmd.getOwnerId());
+                try {
+                    ownerDoorProvider.createOwnerDoor(ownerDoor);    
+                } catch(Exception ex) {
+                    LOGGER.error("createOwnerDoor failed ", ex);
+                    }
+                
+                Aclink aclink = new Aclink();
+                aclink.setFirwareVer(cmd.getFirwareVer());
+                aclink.setManufacturer(cmd.getRsaAclinkPub());
+                aclink.setStatus(DoorAccessStatus.ACTIVING.getCode());
                 aclink.setDoorId(doorAcc.getId());
                 aclinkProvider.createAclink(aclink);
                 
-                //initial doorAccess AesUserKey
-                //bigCollectionProvider.setValue(getAesServerKey(doorAcc.getId()), 1);
-                //bigCollectionProvider.setValue(getAesServerDevKey(doorAcc.getId()), 0);
                 AesServerKey aesServerKey = new AesServerKey();
                 aesServerKey.setCreateTimeMs(System.currentTimeMillis());
                 aesServerKey.setDoorId(doorAcc.getId());
                 aesServerKey.setSecret(AclinkUtils.generateAESKey());
                 aesServerKey.setDeviceVer(AclinkDeviceVer.VER0.getCode());
-                aesServerKeyProvider.createAesServerKey(aesServerKey);
+                aesServerKeyService.createAesServerKey(aesServerKey);
                 
                 //create a command event
                 DoorCommand cmd = new DoorCommand();
@@ -130,8 +136,12 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             }
         });
         
-        List<DoorMessage> msgs = generateMessages(doorAccess.getId());
-        return msgs.get(0);
+        //cmd.getRsaAclinkPub();
+        //List<DoorMessage> msgs = generateMessages(doorAccess.getId());
+        //return msgs.get(0);
+        
+        //Generate a single message
+        return null;
     }
     
     //激活一个新锁

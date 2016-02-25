@@ -46,11 +46,6 @@ public class AesServerKeyProviderImpl implements AesServerKeyProvider {
 
     @Autowired
     private SequenceProvider sequenceProvider;
-    
-    @Autowired
-    BigCollectionProvider bigCollectionProvider;
-    
-    final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
     @Override
     public Long createAesServerKey(AesServerKey obj) {
@@ -158,41 +153,6 @@ public class AesServerKeyProviderImpl implements AesServerKeyProvider {
     
     private void prepareObj(AesServerKey obj) {
         
-    }
-    
-    private String getAesServerKey(Long doorAccId) {
-        return "dooraccess:ackingsecret:ver:" + doorAccId;
-    }
-    
-    private String getAesServerDevKey(Long doorAccId) {
-        return "dooraccess:aesserverkey:dev:" + doorAccId;
-    }
-    
-    @Override
-    public Long getAckingSecretVersion(DoorAccess doorAccess) {
-        Long doorAccId = doorAccess.getId();
-        String key = "dooraccess:" + doorAccId + ":acking";
-        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
-        
-        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-        String v = (String)redisTemplate.opsForValue().get(key);
-        if(v == null) {
-            //from db
-            //return
-        }
-        
-//        this.bigCollectionProvider.setValue(key, 1l);
-//        acc.getTemplate().opsForValue().setIfAbsent(arg0, arg1);
-//        redisTemplate.opsForValue().set(key, "2");
-//        
-//        l = Long.valueOf((String)redisTemplate.opsForValue().get(key));
-//        LOGGER.info("get value=" + l);
-//        
-//        redisTemplate.opsForValue().increment(key, 2l);
-//        l = Long.valueOf((String)redisTemplate.opsForValue().get(key));
-//        LOGGER.info("get value=" + l);
-        
-        return new Long(0l);
     }
 
 }

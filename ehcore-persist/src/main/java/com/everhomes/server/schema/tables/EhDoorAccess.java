@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhDoorAccess extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhDoorAccessRecord> {
 
-	private static final long serialVersionUID = 1009053404;
+	private static final long serialVersionUID = -760256322;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_door_access</code>
@@ -110,6 +110,16 @@ public class EhDoorAccess extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	 * The column <code>ehcore.eh_door_access.status</code>. 0:activing, 1: active
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorAccessRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false), this, "0:activing, 1: active");
+
+	/**
+	 * The column <code>ehcore.eh_door_access.acking_secret_version</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorAccessRecord, java.lang.Integer> ACKING_SECRET_VERSION = createField("acking_secret_version", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_door_access.expect_secret_key</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorAccessRecord, java.lang.Integer> EXPECT_SECRET_KEY = createField("expect_secret_key", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_door_access</code> table reference

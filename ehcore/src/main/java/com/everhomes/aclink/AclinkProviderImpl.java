@@ -126,4 +126,6 @@ public class AclinkProviderImpl implements AclinkProvider {
 
     private void prepareObj(Aclink obj) {
     }
+    
+    //public Aclink queryAclinkBy
 }

@@ -5,6 +5,7 @@ DROP TABLE IF EXISTS `eh_door_access`;
 CREATE TABLE `eh_door_access` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `door_type` TINYINT NOT NULL COMMENT '0: Zuolin aclink',
+    `hardware_id` VARCHAR(64) NOT NULL COMMENT 'mac address of aclink'
     `name` VARCHAR(128) NOT NULL,
     `description` VARCHAR(1024) NOT NULL,
     `avatar` VARCHAR(128),
@@ -23,8 +24,8 @@ CREATE TABLE `eh_door_access` (
     `create_time` DATETIME,
     `status` TINYINT NOT NULL COMMENT '0:activing, 1: active',
 
-    `acking_secret_version` INT NOT NULL,
-    `expect_secret_key` INT NOT NULL,
+    `acking_secret_version` INT NOT NULL DEFAULT 1,
+    `expect_secret_key` INT NOT NULL DEFAULT 1,
 
     PRIMARY KEY (`id`),
     INDEX `i_eh_door_access_name`(`name`),
@@ -125,7 +126,8 @@ CREATE TABLE `eh_owner_doors` (
     `owner_type` TINYINT NOT NULL COMMENT '0:community, 1:enterprise, 2: family',
     `owner_id` BIGINT NOT NULL,
     `door_id` BIGINT NOT NULL,
-    PRIMARY KEY (`id`)
+    PRIMARY KEY (`id`),
+    UNIQUE `i_uq_door_id_owner_id`(`door_id`, `owner_id`, `owner_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #

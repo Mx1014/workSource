@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAclinkUndoKey implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1496593298;
+	private static final long serialVersionUID = -1608226218;
 
 	private java.lang.Long    id;
 	private java.lang.Integer keyId;

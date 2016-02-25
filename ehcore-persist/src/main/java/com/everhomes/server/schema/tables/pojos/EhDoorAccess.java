@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhDoorAccess implements java.io.Serializable {
 
-	private static final long serialVersionUID = 464247747;
+	private static final long serialVersionUID = 1493543083;
 
 	private java.lang.Long     id;
 	private java.lang.Byte     doorType;
@@ -30,6 +30,8 @@ public class EhDoorAccess implements java.io.Serializable {
 	private java.lang.Byte     role;
 	private java.sql.Timestamp createTime;
 	private java.lang.Byte     status;
+	private java.lang.Integer  ackingSecretVersion;
+	private java.lang.Integer  expectSecretKey;
 
 	public EhDoorAccess() {}
 
@@ -50,7 +52,9 @@ public class EhDoorAccess implements java.io.Serializable {
 		java.lang.Long     ownerId,
 		java.lang.Byte     role,
 		java.sql.Timestamp createTime,
-		java.lang.Byte     status
+		java.lang.Byte     status,
+		java.lang.Integer  ackingSecretVersion,
+		java.lang.Integer  expectSecretKey
 	) {
 		this.id = id;
 		this.doorType = doorType;
@@ -69,6 +73,8 @@ public class EhDoorAccess implements java.io.Serializable {
 		this.role = role;
 		this.createTime = createTime;
 		this.status = status;
+		this.ackingSecretVersion = ackingSecretVersion;
+		this.expectSecretKey = expectSecretKey;
 	}
 
 	public java.lang.Long getId() {
@@ -205,5 +211,21 @@ public class EhDoorAccess implements java.io.Serializable {
 
 	public void setStatus(java.lang.Byte status) {
 		this.status = status;
+	}
+
+	public java.lang.Integer getAckingSecretVersion() {
+		return this.ackingSecretVersion;
+	}
+
+	public void setAckingSecretVersion(java.lang.Integer ackingSecretVersion) {
+		this.ackingSecretVersion = ackingSecretVersion;
+	}
+
+	public java.lang.Integer getExpectSecretKey() {
+		return this.expectSecretKey;
+	}
+
+	public void setExpectSecretKey(java.lang.Integer expectSecretKey) {
+		this.expectSecretKey = expectSecretKey;
 	}
 }

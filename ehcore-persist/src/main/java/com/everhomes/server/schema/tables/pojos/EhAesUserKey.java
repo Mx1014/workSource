@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAesUserKey implements java.io.Serializable {
 
-	private static final long serialVersionUID = -536525426;
+	private static final long serialVersionUID = 341427614;
 
 	private java.lang.Long    id;
 	private java.lang.Integer keyId;

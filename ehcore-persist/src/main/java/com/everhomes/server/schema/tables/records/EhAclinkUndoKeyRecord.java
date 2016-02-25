@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAclinkUndoKeyRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhAclinkUndoKeyRecord> implements org.jooq.Record6<java.lang.Long, java.lang.Integer, java.lang.Long, java.lang.Byte, java.lang.Long, java.lang.Long> {
 
-	private static final long serialVersionUID = 1472746836;
+	private static final long serialVersionUID = 744404086;
 
 	/**
 	 * Setter for <code>ehcore.eh_aclink_undo_key.id</code>. id of the record
