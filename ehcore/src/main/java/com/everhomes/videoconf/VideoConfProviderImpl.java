@@ -647,6 +647,8 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 					List<ConfSourceAccounts> list = context.select().from(Tables.EH_CONF_SOURCE_ACCOUNTS)
 							.where(Tables.EH_CONF_SOURCE_ACCOUNTS.ACCOUNT_CATEGORY_ID.in(accountCategory))
 							.and(Tables.EH_CONF_SOURCE_ACCOUNTS.ID.notIn(sourceAccountId))
+							.and(Tables.EH_CONF_SOURCE_ACCOUNTS.STATUS.eq((byte) 1))
+							.and(Tables.EH_CONF_SOURCE_ACCOUNTS.EXPIRED_DATE.ge(new Timestamp(System.currentTimeMillis())))
 							.fetch().map((r) -> {
 								return ConvertHelper.convert(r, ConfSourceAccounts.class);
 							});
