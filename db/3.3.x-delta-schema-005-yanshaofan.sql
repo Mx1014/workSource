@@ -21,6 +21,8 @@ select `name`,count(*),`namespace_id`,`id` FROM `eh_groups` WHERE `discriminator
 
 
 ##################################################################################
+#参数根据实际情况而定
+#
 
 set @organization_details_id = 20;
 set @organization_member_id = 2000000;
@@ -46,18 +48,31 @@ SELECT  (@organization_details_id := @organization_details_id + 1),`id`,`descrip
 
 
 #
-# merge department and organization data
+# update organization data
 #
 
+UPDATE `eh_organizations` SET path = CONCAT('/',id),directly_enterprise_id = id,`update_time`= now(), group_type='ENTERPRISE' WHERE path = CONCAT('/',name);
+
+UPDATE `eh_organizations` SET path = CONCAT('/',parent_id,'/',id),directly_enterprise_id = parent_id,`update_time`= now(),group_type='DEPARTMENT' WHERE path = CONCAT('/',parent_id,'/',name);
+
+UPDATE `eh_organizations` SET directly_enterprise_id = id WHERE path LIKE CONCAT('/',id,'/%');
+
+UPDATE `eh_organizations` SET path = (SELECT b.path1 FROM (SELECT id,a.path,CONCAT('/',a.directly_enterprise_id,'/',(SELECT id FROM `eh_organizations` WHERE name = substring_index(path1,'/',1) AND parent_id = a.directly_enterprise_id limit 1),'/',a.id) path1 FROM (SELECT id,parent_id,directly_enterprise_id,path,substring_index(path, '/', -2) path1 FROM `eh_organizations` WHERE substring_index(path, '/', -1) IN (SELECT name FROM `eh_organizations`)) a
+) b WHERE b.id= id limit 1),`update_time`= now(),group_type='DEPARTMENT' WHERE id IN (SELECT id FROM (WHERE id,parent_id,directly_enterprise_id,path,substring_index(path, '/', -2) path1 FROM `eh_organizations` WHERE substring_index(path, '/', -1) IN (SELECT name FROM `eh_organizations`)) a)
+
+
+#
+# merge department and organization data
+#
 INSERT INTO `eh_organizations` (`id`,`parent_id`,`organization_type`,`name`,`path`,`level`,`status`,`group_type`,`create_time`,`directly_enterprise_id`) 
-select a.`id`,(select @depatement_id_add + id from `eh_enterprise_contact_groups` where name = a.parent_name and enterprise_id = a.enterprise_id) parent_id,
-'ENTERPRISE',a.`name`,concat(path,(select @depatement_id_add + id from `eh_enterprise_contact_groups` where name = a.parent_name and enterprise_id = a.enterprise_id),'/',a.id),1,2,'DEPARTMENT',a.`create_time`,a.enterprise_id from 
-(select @depatement_id_add+`id` id,substring_index(string_tag1,'\\',1) parent_name,
-`name`,concat('/',enterprise_id,'/') path,`create_time`,enterprise_id,string_tag1 from `eh_enterprise_contact_groups` 
-where id in(select id from `eh_enterprise_contact_groups` where string_tag1 like '%\\\\%')) a;
+SELECT a.`id`,(SELECT @depatement_id_add + id FROM `eh_enterprise_contact_groups` WHERE name = a.parent_name AND enterprise_id = a.enterprise_id) parent_id,
+'ENTERPRISE',a.`name`,concat(path,(SELECT @depatement_id_add + id FROM `eh_enterprise_contact_groups` WHERE name = a.parent_name AND enterprise_id = a.enterprise_id),'/',a.id),1,2,'DEPARTMENT',a.`create_time`,a.enterprise_id FROM 
+(SELECT @depatement_id_add+`id` id,substring_index(string_tag1,'\\',1) parent_name,
+`name`,concat('/',enterprise_id,'/') path,`create_time`,enterprise_id,string_tag1 FROM `eh_enterprise_contact_groups` 
+WHERE id IN (SELECT id FROM `eh_enterprise_contact_groups` WHERE string_tag1 LIKE '%\\\\%')) a;
 
 INSERT INTO `eh_organizations` (`id`,`parent_id`,`organization_type`,`name`,`path`,`level`,`status`,`group_type`,`create_time`,`directly_enterprise_id`) 
-select @depatement_id_add + `id`,enterprise_id,'ENTERPRISE',`name`,concat('/',enterprise_id,'/',@depatement_id_add + `id`),1,2,'DEPARTMENT',`create_time`,enterprise_id from `eh_enterprise_contact_groups` where id not in(select id from `eh_enterprise_contact_groups` where string_tag1 like '%\\\\%');
+SELECT @depatement_id_add + `id`,enterprise_id,'ENTERPRISE',`name`,concat('/',enterprise_id,'/',@depatement_id_add + `id`),1,2,'DEPARTMENT',`create_time`,enterprise_id FROM `eh_enterprise_contact_groups` WHERE id NOT IN (SELECT id FROM `eh_enterprise_contact_groups` WHERE string_tag1 LIKE '%\\\\%');
 
 
 #
