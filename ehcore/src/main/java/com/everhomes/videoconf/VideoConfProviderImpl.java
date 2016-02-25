@@ -815,13 +815,11 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 	@Override
 	public ConfConferences findConfConferencesByConfId(Long confId) {
 
-		int namespaceId = (UserContext.current().getUser().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getUser().getNamespaceId();
 		final ConfConferences[] result = new ConfConferences[1];
 		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhConfConferences.class), result, 
 				(DSLContext context, Object reducingContext) -> {
 					List<ConfConferences> list = context.select().from(Tables.EH_CONF_CONFERENCES)
 							.where(Tables.EH_CONF_CONFERENCES.MEETING_NO.eq(confId))
-							.and(Tables.EH_CONF_CONFERENCES.NAMESPACE_ID.eq(namespaceId))
 							.fetch().map((r) -> {
 								return ConvertHelper.convert(r, ConfConferences.class);
 							});
