@@ -599,6 +599,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhQualityInspectionTaskAttachments EH_QUALITY_INSPECTION_TASK_ATTACHMENTS = com.everhomes.server.schema.tables.EhQualityInspectionTaskAttachments.EH_QUALITY_INSPECTION_TASK_ATTACHMENTS;
 
 	/**
+	 * The table ehcore.eh_quality_inspection_task_records
+	 */
+	public static final com.everhomes.server.schema.tables.EhQualityInspectionTaskRecords EH_QUALITY_INSPECTION_TASK_RECORDS = com.everhomes.server.schema.tables.EhQualityInspectionTaskRecords.EH_QUALITY_INSPECTION_TASK_RECORDS;
+
+	/**
 	 * The table ehcore.eh_recharge_info
 	 */
 	public static final com.everhomes.server.schema.tables.EhRechargeInfo EH_RECHARGE_INFO = com.everhomes.server.schema.tables.EhRechargeInfo.EH_RECHARGE_INFO;

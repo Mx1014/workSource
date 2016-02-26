@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhQualityInspectionTasks implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1410452206;
+	private static final long serialVersionUID = 809157220;
 
 	private java.lang.Long     id;
 	private java.lang.String   ownerType;
@@ -24,14 +24,21 @@ public class EhQualityInspectionTasks implements java.io.Serializable {
 	private java.lang.Long     childCount;
 	private java.lang.Long     executiveGroupId;
 	private java.sql.Timestamp executiveStartTime;
-	private java.sql.Timestamp executiveEndTime;
+	private java.sql.Timestamp executiveExpireTime;
+	private java.sql.Timestamp executiveTime;
 	private java.lang.String   executorType;
 	private java.lang.Long     executorId;
-	private java.lang.Byte     executiveStatus;
-	private java.lang.Byte     executiveResult;
-	private java.lang.Byte     reviewResult;
+	private java.lang.String   operatorType;
+	private java.lang.Long     operatorId;
+	private java.sql.Timestamp processExpireTime;
+	private java.lang.Byte     processResult;
+	private java.sql.Timestamp processTime;
+	private java.lang.Byte     status;
+	private java.lang.Byte     result;
 	private java.lang.String   reviewerType;
 	private java.lang.Long     reviewerId;
+	private java.lang.Byte     reviewResult;
+	private java.sql.Timestamp reviewTime;
 	private java.sql.Timestamp createTime;
 
 	public EhQualityInspectionTasks() {}
@@ -48,14 +55,21 @@ public class EhQualityInspectionTasks implements java.io.Serializable {
 		java.lang.Long     childCount,
 		java.lang.Long     executiveGroupId,
 		java.sql.Timestamp executiveStartTime,
-		java.sql.Timestamp executiveEndTime,
+		java.sql.Timestamp executiveExpireTime,
+		java.sql.Timestamp executiveTime,
 		java.lang.String   executorType,
 		java.lang.Long     executorId,
-		java.lang.Byte     executiveStatus,
-		java.lang.Byte     executiveResult,
-		java.lang.Byte     reviewResult,
+		java.lang.String   operatorType,
+		java.lang.Long     operatorId,
+		java.sql.Timestamp processExpireTime,
+		java.lang.Byte     processResult,
+		java.sql.Timestamp processTime,
+		java.lang.Byte     status,
+		java.lang.Byte     result,
 		java.lang.String   reviewerType,
 		java.lang.Long     reviewerId,
+		java.lang.Byte     reviewResult,
+		java.sql.Timestamp reviewTime,
 		java.sql.Timestamp createTime
 	) {
 		this.id = id;
@@ -69,14 +83,21 @@ public class EhQualityInspectionTasks implements java.io.Serializable {
 		this.childCount = childCount;
 		this.executiveGroupId = executiveGroupId;
 		this.executiveStartTime = executiveStartTime;
-		this.executiveEndTime = executiveEndTime;
+		this.executiveExpireTime = executiveExpireTime;
+		this.executiveTime = executiveTime;
 		this.executorType = executorType;
 		this.executorId = executorId;
-		this.executiveStatus = executiveStatus;
-		this.executiveResult = executiveResult;
-		this.reviewResult = reviewResult;
+		this.operatorType = operatorType;
+		this.operatorId = operatorId;
+		this.processExpireTime = processExpireTime;
+		this.processResult = processResult;
+		this.processTime = processTime;
+		this.status = status;
+		this.result = result;
 		this.reviewerType = reviewerType;
 		this.reviewerId = reviewerId;
+		this.reviewResult = reviewResult;
+		this.reviewTime = reviewTime;
 		this.createTime = createTime;
 	}
 
@@ -168,12 +189,20 @@ public class EhQualityInspectionTasks implements java.io.Serializable {
 		this.executiveStartTime = executiveStartTime;
 	}
 
-	public java.sql.Timestamp getExecutiveEndTime() {
-		return this.executiveEndTime;
+	public java.sql.Timestamp getExecutiveExpireTime() {
+		return this.executiveExpireTime;
 	}
 
-	public void setExecutiveEndTime(java.sql.Timestamp executiveEndTime) {
-		this.executiveEndTime = executiveEndTime;
+	public void setExecutiveExpireTime(java.sql.Timestamp executiveExpireTime) {
+		this.executiveExpireTime = executiveExpireTime;
+	}
+
+	public java.sql.Timestamp getExecutiveTime() {
+		return this.executiveTime;
+	}
+
+	public void setExecutiveTime(java.sql.Timestamp executiveTime) {
+		this.executiveTime = executiveTime;
 	}
 
 	public java.lang.String getExecutorType() {
@@ -192,28 +221,60 @@ public class EhQualityInspectionTasks implements java.io.Serializable {
 		this.executorId = executorId;
 	}
 
-	public java.lang.Byte getExecutiveStatus() {
-		return this.executiveStatus;
+	public java.lang.String getOperatorType() {
+		return this.operatorType;
 	}
 
-	public void setExecutiveStatus(java.lang.Byte executiveStatus) {
-		this.executiveStatus = executiveStatus;
+	public void setOperatorType(java.lang.String operatorType) {
+		this.operatorType = operatorType;
 	}
 
-	public java.lang.Byte getExecutiveResult() {
-		return this.executiveResult;
+	public java.lang.Long getOperatorId() {
+		return this.operatorId;
 	}
 
-	public void setExecutiveResult(java.lang.Byte executiveResult) {
-		this.executiveResult = executiveResult;
+	public void setOperatorId(java.lang.Long operatorId) {
+		this.operatorId = operatorId;
 	}
 
-	public java.lang.Byte getReviewResult() {
-		return this.reviewResult;
+	public java.sql.Timestamp getProcessExpireTime() {
+		return this.processExpireTime;
 	}
 
-	public void setReviewResult(java.lang.Byte reviewResult) {
-		this.reviewResult = reviewResult;
+	public void setProcessExpireTime(java.sql.Timestamp processExpireTime) {
+		this.processExpireTime = processExpireTime;
+	}
+
+	public java.lang.Byte getProcessResult() {
+		return this.processResult;
+	}
+
+	public void setProcessResult(java.lang.Byte processResult) {
+		this.processResult = processResult;
+	}
+
+	public java.sql.Timestamp getProcessTime() {
+		return this.processTime;
+	}
+
+	public void setProcessTime(java.sql.Timestamp processTime) {
+		this.processTime = processTime;
+	}
+
+	public java.lang.Byte getStatus() {
+		return this.status;
+	}
+
+	public void setStatus(java.lang.Byte status) {
+		this.status = status;
+	}
+
+	public java.lang.Byte getResult() {
+		return this.result;
+	}
+
+	public void setResult(java.lang.Byte result) {
+		this.result = result;
 	}
 
 	public java.lang.String getReviewerType() {
@@ -230,6 +291,22 @@ public class EhQualityInspectionTasks implements java.io.Serializable {
 
 	public void setReviewerId(java.lang.Long reviewerId) {
 		this.reviewerId = reviewerId;
+	}
+
+	public java.lang.Byte getReviewResult() {
+		return this.reviewResult;
+	}
+
+	public void setReviewResult(java.lang.Byte reviewResult) {
+		this.reviewResult = reviewResult;
+	}
+
+	public java.sql.Timestamp getReviewTime() {
+		return this.reviewTime;
+	}
+
+	public void setReviewTime(java.sql.Timestamp reviewTime) {
+		this.reviewTime = reviewTime;
 	}
 
 	public java.sql.Timestamp getCreateTime() {

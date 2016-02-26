@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhQualityInspectionTasks extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord> {
 
-	private static final long serialVersionUID = 358086012;
+	private static final long serialVersionUID = -1500696790;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_quality_inspection_tasks</code>
@@ -57,9 +57,9 @@ public class EhQualityInspectionTasks extends org.jooq.impl.TableImpl<com.everho
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.lang.String> TASK_NAME = createField("task_name", org.jooq.impl.SQLDataType.VARCHAR.length(1024), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_quality_inspection_tasks.task_type</code>. 0: none, 1: verify task, 1: rectify task
+	 * The column <code>ehcore.eh_quality_inspection_tasks.task_type</code>. 0: none, 1: verify task, 2: rectify task
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.lang.Byte> TASK_TYPE = createField("task_type", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: none, 1: verify task, 1: rectify task");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.lang.Byte> TASK_TYPE = createField("task_type", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: none, 1: verify task, 2: rectify task");
 
 	/**
 	 * The column <code>ehcore.eh_quality_inspection_tasks.parent_id</code>. 0: parent task, others childrean-task
@@ -82,9 +82,14 @@ public class EhQualityInspectionTasks extends org.jooq.impl.TableImpl<com.everho
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.sql.Timestamp> EXECUTIVE_START_TIME = createField("executive_start_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_quality_inspection_tasks.executive_end_time</code>.
+	 * The column <code>ehcore.eh_quality_inspection_tasks.executive_expire_time</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.sql.Timestamp> EXECUTIVE_END_TIME = createField("executive_end_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.sql.Timestamp> EXECUTIVE_EXPIRE_TIME = createField("executive_expire_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_quality_inspection_tasks.executive_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.sql.Timestamp> EXECUTIVE_TIME = createField("executive_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_quality_inspection_tasks.executor_type</code>. the type of who executes the task, organization, etc
@@ -97,19 +102,39 @@ public class EhQualityInspectionTasks extends org.jooq.impl.TableImpl<com.everho
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.lang.Long> EXECUTOR_ID = createField("executor_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_quality_inspection_tasks.executive_status</code>. 0: none, 1: waiting for executing, 2: executed, 3: delayed
+	 * The column <code>ehcore.eh_quality_inspection_tasks.operator_type</code>. the type of who executes the task, organization, etc
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.lang.Byte> EXECUTIVE_STATUS = createField("executive_status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: none, 1: waiting for executing, 2: executed, 3: delayed");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.lang.String> OPERATOR_TYPE = createField("operator_type", org.jooq.impl.SQLDataType.VARCHAR.length(32).nullable(false).defaulted(true), this, "the type of who executes the task, organization, etc");
 
 	/**
-	 * The column <code>ehcore.eh_quality_inspection_tasks.executive_result</code>. 0: none, 1: forward, 2: done 3: closed
+	 * The column <code>ehcore.eh_quality_inspection_tasks.operator_id</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.lang.Byte> EXECUTIVE_RESULT = createField("executive_result", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: none, 1: forward, 2: done 3: closed");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.lang.Long> OPERATOR_ID = createField("operator_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_quality_inspection_tasks.review_result</code>. 0:none, 1: qualified, 2: unqualified
+	 * The column <code>ehcore.eh_quality_inspection_tasks.process_expire_time</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.lang.Byte> REVIEW_RESULT = createField("review_result", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0:none, 1: qualified, 2: unqualified");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.sql.Timestamp> PROCESS_EXPIRE_TIME = createField("process_expire_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_quality_inspection_tasks.process_result</code>. 0:none, 11: rectified ok(waiting approval), 12: rectify closed(waiting approval)
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.lang.Byte> PROCESS_RESULT = createField("process_result", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0:none, 11: rectified ok(waiting approval), 12: rectify closed(waiting approval)");
+
+	/**
+	 * The column <code>ehcore.eh_quality_inspection_tasks.process_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.sql.Timestamp> PROCESS_TIME = createField("process_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_quality_inspection_tasks.status</code>. 0: none, 1: waiting for executing, 2: rectifing, 3: rectified and waiting approval, 4: rectify closed and waiting approval, 5: closed
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: none, 1: waiting for executing, 2: rectifing, 3: rectified and waiting approval, 4: rectify closed and waiting approval, 5: closed");
+
+	/**
+	 * The column <code>ehcore.eh_quality_inspection_tasks.result</code>. 0: none, 1: inspect ok, 2: inspect close, 3: rectified ok, 4: rectify closed, 5: delay
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.lang.Byte> RESULT = createField("result", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: none, 1: inspect ok, 2: inspect close, 3: rectified ok, 4: rectify closed, 5: delay");
 
 	/**
 	 * The column <code>ehcore.eh_quality_inspection_tasks.reviewer_type</code>. the type of who review the task, organization, etc
@@ -120,6 +145,16 @@ public class EhQualityInspectionTasks extends org.jooq.impl.TableImpl<com.everho
 	 * The column <code>ehcore.eh_quality_inspection_tasks.reviewer_id</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.lang.Long> REVIEWER_ID = createField("reviewer_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_quality_inspection_tasks.review_result</code>. 0:none, 1: qualified, 2: unqualified
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.lang.Byte> REVIEW_RESULT = createField("review_result", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0:none, 1: qualified, 2: unqualified");
+
+	/**
+	 * The column <code>ehcore.eh_quality_inspection_tasks.review_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.sql.Timestamp> REVIEW_TIME = createField("review_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_quality_inspection_tasks.create_time</code>.

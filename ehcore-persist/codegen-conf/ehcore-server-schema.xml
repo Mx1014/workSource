@@ -69,6 +69,7 @@
 	eh_organization_role_map | eh_organization_addresses | eh_organization_attachments | eh_organization_community_requests |
 	eh_organization_details  | eh_preferential_rules |  eh_repeat_settings | eh_quality_inspection_standards | eh_quality_inspection_standard_group_map | 
 	eh_quality_inspection_tasks | eh_quality_inspection_task_attachments | eh_quality_inspection_evaluation_factors | eh_quality_inspection_evaluations |
+	eh_quality_inspection_task_records |
         </includes>
             <!-- All elements that are excluded from your schema
             (A Java regular expression. Use the pipe to separate several expressions).

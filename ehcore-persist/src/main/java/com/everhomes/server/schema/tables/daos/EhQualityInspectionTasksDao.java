@@ -118,10 +118,17 @@ public class EhQualityInspectionTasksDao extends org.jooq.impl.DAOImpl<com.everh
 	}
 
 	/**
-	 * Fetch records that have <code>executive_end_time IN (values)</code>
+	 * Fetch records that have <code>executive_expire_time IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks> fetchByExecutiveEndTime(java.sql.Timestamp... values) {
-		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_END_TIME, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks> fetchByExecutiveExpireTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>executive_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks> fetchByExecutiveTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_TIME, values);
 	}
 
 	/**
@@ -139,24 +146,52 @@ public class EhQualityInspectionTasksDao extends org.jooq.impl.DAOImpl<com.everh
 	}
 
 	/**
-	 * Fetch records that have <code>executive_status IN (values)</code>
+	 * Fetch records that have <code>operator_type IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks> fetchByExecutiveStatus(java.lang.Byte... values) {
-		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_STATUS, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks> fetchByOperatorType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS.OPERATOR_TYPE, values);
 	}
 
 	/**
-	 * Fetch records that have <code>executive_result IN (values)</code>
+	 * Fetch records that have <code>operator_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks> fetchByExecutiveResult(java.lang.Byte... values) {
-		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_RESULT, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks> fetchByOperatorId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS.OPERATOR_ID, values);
 	}
 
 	/**
-	 * Fetch records that have <code>review_result IN (values)</code>
+	 * Fetch records that have <code>process_expire_time IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks> fetchByReviewResult(java.lang.Byte... values) {
-		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS.REVIEW_RESULT, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks> fetchByProcessExpireTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS.PROCESS_EXPIRE_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>process_result IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks> fetchByProcessResult(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS.PROCESS_RESULT, values);
+	}
+
+	/**
+	 * Fetch records that have <code>process_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks> fetchByProcessTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS.PROCESS_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>status IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks> fetchByStatus(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS.STATUS, values);
+	}
+
+	/**
+	 * Fetch records that have <code>result IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks> fetchByResult(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS.RESULT, values);
 	}
 
 	/**
@@ -171,6 +206,20 @@ public class EhQualityInspectionTasksDao extends org.jooq.impl.DAOImpl<com.everh
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks> fetchByReviewerId(java.lang.Long... values) {
 		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS.REVIEWER_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>review_result IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks> fetchByReviewResult(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS.REVIEW_RESULT, values);
+	}
+
+	/**
+	 * Fetch records that have <code>review_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks> fetchByReviewTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS.REVIEW_TIME, values);
 	}
 
 	/**
