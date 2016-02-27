@@ -1324,6 +1324,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			return null;
 		});
 		locator.setAnchor(null);
+
 		if(result.size() >= pageSize){
 			result.remove(result.size() - 1);
 			locator.setAnchor(result.get(result.size() - 1).getId());
@@ -1361,6 +1362,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			return null;
 		});
 		locator.setAnchor(null);
+
 		if(result.size() >= pageSize){
 			result.remove(result.size() - 1);
 			locator.setAnchor(result.get(result.size() - 1).getId());

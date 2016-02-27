@@ -184,9 +184,10 @@ CREATE TABLE `eh_conf_enterprises` (
 DROP TABLE IF EXISTS `eh_warning_contacts`;
 CREATE TABLE `eh_warning_contacts` (
 	`id` BIGINT NOT NULL COMMENT 'id',
-	`contactor` VARCHAR(20),
-	`mobile` VARCHAR(20),
-	`email` VARCHAR(20),
+	`contactor` VARCHAR(20) DEFAULT NULL,
+	`mobile` VARCHAR(20) DEFAULT NULL,
+	`email` VARCHAR(20) DEFAULT NULL,
+	`namespace_id` int(11) NOT NULL DEFAULT '0',
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
  

@@ -51,6 +51,7 @@ import com.everhomes.rest.organization.ListOrganizationMemberCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.ListOrganizationsCommand;
 import com.everhomes.rest.organization.ListOrganizationsCommandResponse;
+<<<<<<< HEAD
 
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationDetailDTO;
@@ -64,6 +65,8 @@ import com.everhomes.rest.organization.UpdateOrganizationsCommand;
 import com.everhomes.rest.organization.UpdatePersonnelsToDepartment;
 import com.everhomes.rest.organization.VerifyPersonnelByPhoneCommand;
 
+=======
+>>>>>>> 3.2.x
 import com.everhomes.rest.organization.pm.AddPmBuildingCommand;
 import com.everhomes.rest.organization.pm.CancelPmBuildingCommand;
 import com.everhomes.rest.organization.pm.ListPmBuildingCommand;
