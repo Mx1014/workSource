@@ -221,19 +221,13 @@ public class RentalServiceImpl implements RentalService {
 //		rentalRule.setContactName(cmd.getContactName());
 //		rentalRule.setOperatorUid(userId);
 			RentalRule rentalRule =ConvertHelper.convert(cmd,RentalRule.class  );
-<<<<<<< HEAD
-=======
 			rentalRule.setPaymentRatio(cmd.getPayRatio());
->>>>>>> 3.2.x
 			rentalRule.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			rentalRule.setOperatorUid(userId);
 			rentalProvider.updateRentalRule(rentalRule);
 		} else {
 			RentalRule rentalRule =ConvertHelper.convert(cmd,RentalRule.class  );
-<<<<<<< HEAD
-=======
 			rentalRule.setPaymentRatio(cmd.getPayRatio());
->>>>>>> 3.2.x
 			rentalRule.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			rentalRule.setOperatorUid(userId);
 			rentalProvider.createRentalRule(rentalRule);

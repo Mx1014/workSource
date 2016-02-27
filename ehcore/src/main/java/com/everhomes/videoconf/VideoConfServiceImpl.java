@@ -1227,11 +1227,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 			if(userAccount.getOccupyFlag() == 1) {
 				ConfConferences conf = vcProvider.findConfConferencesById(account.getAssignedConfId());
 				if(conf != null) {
-<<<<<<< HEAD
-					userAccount.setConfId(conf.getConfId());
-=======
 					userAccount.setConfId(conf.getMeetingNo());
->>>>>>> 3.2.x
 				} else {
 					userAccount.setOccupyFlag((byte) 0);
 					
@@ -1467,24 +1463,6 @@ public class VideoConfServiceImpl implements VideoConfService {
 	public JoinVideoConfResponse joinVideoConf(JoinVideoConfCommand cmd) {
 		JoinVideoConfResponse response = new JoinVideoConfResponse();
 
-<<<<<<< HEAD
-		
-		UserIdentifier user = userProvider.findClaimedIdentifierByToken(cmd.getNamespaceId(), cmd.getConfId());
-		if(LOGGER.isDebugEnabled())
-			LOGGER.error("joinVideoConf, cmd="+cmd+",user="+user);
-		if(user != null) {
-			ConfAccounts account = vcProvider.findAccountByUserId(user.getOwnerUid());
-			if(LOGGER.isDebugEnabled())
-				LOGGER.error("joinVideoConf, account="+account);
-			if(account != null) {
-				ConfConferences conf = vcProvider.findConfConferencesById(account.getAssignedConfId());
-				if(LOGGER.isDebugEnabled())
-					LOGGER.error("joinVideoConf, conf="+conf);
-				if(conf != null) {
-					response.setJoinUrl(conf.getJoinUrl());
-					response.setCondId(conf.getConfId()+"");
-					response.setPassword(conf.getConfHostKey());
-=======
 		if(cmd.getConfId().length() == 11){
 			UserIdentifier user = userProvider.findClaimedIdentifierByToken(cmd.getNamespaceId(), cmd.getConfId());
 			if(LOGGER.isDebugEnabled())
@@ -1508,7 +1486,6 @@ public class VideoConfServiceImpl implements VideoConfService {
 										String.valueOf(ConfServiceErrorCode.CONF_NOT_OPEN),
 										UserContext.current().getUser().getLocale(),"conference has not been held yet!"));
 					}
->>>>>>> 3.2.x
 				}
 			}
 		}
