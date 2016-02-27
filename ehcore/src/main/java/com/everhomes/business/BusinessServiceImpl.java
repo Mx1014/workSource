@@ -66,6 +66,7 @@ import com.everhomes.rest.business.GetBusinessesByScopeCommand;
 import com.everhomes.rest.business.ListBusinessByKeywordCommand;
 import com.everhomes.rest.business.ListBusinessByKeywordCommandResponse;
 import com.everhomes.rest.business.ListBusinessByCommonityIdCommand;
+import com.everhomes.rest.business.ListUserByIdentifierCommand;
 import com.everhomes.rest.business.ListUserByKeywordCommand;
 import com.everhomes.rest.business.SyncBusinessCommand;
 import com.everhomes.rest.business.SyncDeleteBusinessCommand;
@@ -1551,4 +1552,15 @@ public class BusinessServiceImpl implements BusinessService {
 		List<UserInfo> users = userService.listUserByKeyword(cmd.getKeyword());
 		return users;
 	}
+
+	@Override
+	public List<UserInfo> listUserByIdentifier(ListUserByIdentifierCommand cmd) {
+		if(StringUtils.isEmpty(cmd.getIdentifier())){
+			LOGGER.error("Invalid paramter identifier,identifier is null.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid paramter identifier,identifier is null");
+		}
+		return userService.listUserInfoByIdentifier(cmd.getIdentifier());
+	}
+	
 }

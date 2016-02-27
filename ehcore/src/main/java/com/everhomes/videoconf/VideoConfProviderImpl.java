@@ -647,6 +647,8 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 					List<ConfSourceAccounts> list = context.select().from(Tables.EH_CONF_SOURCE_ACCOUNTS)
 							.where(Tables.EH_CONF_SOURCE_ACCOUNTS.ACCOUNT_CATEGORY_ID.in(accountCategory))
 							.and(Tables.EH_CONF_SOURCE_ACCOUNTS.ID.notIn(sourceAccountId))
+							.and(Tables.EH_CONF_SOURCE_ACCOUNTS.STATUS.eq((byte) 1))
+							.and(Tables.EH_CONF_SOURCE_ACCOUNTS.EXPIRED_DATE.ge(new Timestamp(System.currentTimeMillis())))
 							.fetch().map((r) -> {
 								return ConvertHelper.convert(r, ConfSourceAccounts.class);
 							});
@@ -815,13 +817,11 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 	@Override
 	public ConfConferences findConfConferencesByConfId(Long confId) {
 
-		int namespaceId = (UserContext.current().getUser().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getUser().getNamespaceId();
 		final ConfConferences[] result = new ConfConferences[1];
 		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhConfConferences.class), result, 
 				(DSLContext context, Object reducingContext) -> {
 					List<ConfConferences> list = context.select().from(Tables.EH_CONF_CONFERENCES)
 							.where(Tables.EH_CONF_CONFERENCES.MEETING_NO.eq(confId))
-							.and(Tables.EH_CONF_CONFERENCES.NAMESPACE_ID.eq(namespaceId))
 							.fetch().map((r) -> {
 								return ConvertHelper.convert(r, ConfConferences.class);
 							});

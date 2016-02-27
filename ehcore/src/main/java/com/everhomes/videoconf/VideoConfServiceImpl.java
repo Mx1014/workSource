@@ -1393,7 +1393,11 @@ public class VideoConfServiceImpl implements VideoConfService {
 						response.setMeetingNo(String.valueOf(data.get("meetingNo")));
 						
 						ConfConferences conf = new ConfConferences();
-						conf.setConferenceId(Long.valueOf(String.valueOf(data.get("id"))));
+						
+						String conferenceId = String.valueOf(data.get("id"));
+						int index = conferenceId.indexOf(".");
+						conferenceId = conferenceId.substring(0, index);
+						conf.setConferenceId(Long.valueOf(conferenceId));
 						conf.setMeetingNo(Long.valueOf(String.valueOf(data.get("meetingNo"))));
 						conf.setSubject(String.valueOf(data.get("meetingName")));
 						conf.setStartTime(new Timestamp(timestamp));
