@@ -1617,12 +1617,14 @@ public class PunchServiceImpl implements PunchService {
 		ListOrganizationMemberCommandResponse resp =  organizationService.listOrganizationPersonnels(orgCmd);
 		List<OrganizationMemberDTO> members = resp.getMembers();
 		List<Long> userIds = new ArrayList<Long>();
-		for (OrganizationMemberDTO member : members) {
-			if(member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode())){
-				userIds.add(member.getTargetId());
+		if(null != members){
+			for (OrganizationMemberDTO member : members) {
+				if(member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode())){
+					userIds.add(member.getTargetId());
+				}
 			}
 		}
-
+		
 		int totalCount = punchProvider.countPunchDayLogs(userIds,
 				cmd.getEnterpriseId(), cmd.getStartDay(), cmd.getEndDay(),
 				cmd.getArriveTimeCompareFlag(), cmd.getArriveTime(),
