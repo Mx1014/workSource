@@ -572,6 +572,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 		
 		OrganizationDetailDTO dto = ConvertHelper.convert(org, OrganizationDetailDTO.class);
+		dto.setOrganizationId(organization.getId());
 		dto.setName(organization.getName());
 		dto.setAvatarUri(org.getAvatar());
 		if(null != org.getCheckinDate())
