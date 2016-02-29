@@ -1264,7 +1264,8 @@ public class VideoConfServiceImpl implements VideoConfService {
 	    sPara.put("loginName", cmd.getSourceAccountName()); 
 	    sPara.put("timeStamp", timestamp.toString());
 	    sPara.put("token", token); 
-	    sPara.put("confId", conf.getConferenceId() + "");
+	    if(conf != null)
+	    	sPara.put("confId", conf.getConferenceId() + "");
 	    
 	    NameValuePair[] param = generatNameValuePair(sPara);
 	    if(LOGGER.isDebugEnabled())
