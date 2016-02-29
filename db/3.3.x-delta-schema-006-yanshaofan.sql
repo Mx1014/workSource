@@ -29,7 +29,7 @@ INSERT INTO `eh_organization_details`(`id`,`organization_id`)values(1000001,1000
 UPDATE `eh_organizations` SET name = CONCAT(name,'(1)') WHERE id = 178395;
 UPDATE `eh_organizations` SET name = '深圳科技工业园（集团）有限公司' WHERE id = 1000001;
 
-DELETE FROM
+DELETE FROM `eh_organization_members` WHERE `organization_id` = 1000001;
 DELETE FROM `eh_organizations` WHERE path LIKE '/1000001/%';
 UPDATE `eh_organization_members` SET `organization_id` = 1000001 WHERE `organization_id` = 178395;
 UPDATE `eh_organizations` SET `parent_id` = replace(parent_id,178395,1000001), path = replace(path,178395,1000001) WHERE path LIKE '/178395/%';
