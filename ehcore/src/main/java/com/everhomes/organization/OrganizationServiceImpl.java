@@ -335,6 +335,35 @@ public class OrganizationServiceImpl implements OrganizationService {
 			LOGGER.error("User is in the organization.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"User is in the organization.");
+		
+		OrganizationDetailDTO dto = ConvertHelper.convert(org, OrganizationDetailDTO.class);
+		dto.setOrganizationId(organization.getId());
+		dto.setName(organization.getName());
+		dto.setAvatarUri(org.getAvatar());
+		if(null != org.getCheckinDate())
+			dto.setCheckinDate(org.getCheckinDate().getTime());
+		if(!StringUtils.isEmpty(org.getAvatar()))
+			dto.setAvatarUrl(contentServerService.parserUri(dto.getAvatarUri(), EntityType.ORGANIZATIONS.getCode(), dto.getOrganizationId()));
+        
+		if(!StringUtils.isEmpty(dto.getPostUri()))
+			dto.setPostUrl(contentServerService.parserUri(dto.getPostUri(), EntityType.ORGANIZATIONS.getCode(), dto.getOrganizationId()));
+		
+		List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(dto.getOrganizationId());
+		List<AddressDTO> addresses = organizationAddresses.stream().map(r->{
+			OrganizationAddressDTO address = ConvertHelper.convert(r,OrganizationAddressDTO.class);
+			Address addr = addressProvider.findAddressById(address.getAddressId());
+			return ConvertHelper.convert(addr, AddressDTO.class); 
+			}).collect(Collectors.toList());
+		
+		dto.setAddresses(addresses);
+		List<OrganizationAttachment> attachments = organizationProvider.listOrganizationAttachments(dto.getOrganizationId());
+		
+		if(null != attachments && 0 != attachments.size()){
+			for (OrganizationAttachment attachment : attachments) {
+				attachment.setContentUrl(contentServerService.parserUri(attachment.getContentUri(), EntityType.ORGANIZATIONS.getCode(), dto.getOrganizationId()));
+			}
+			
+			dto.setAttachments(attachments.stream().map(r->{ return ConvertHelper.convert(r,AttachmentDescriptor.class); }).collect(Collectors.toList()));
 		}
 	}
 
