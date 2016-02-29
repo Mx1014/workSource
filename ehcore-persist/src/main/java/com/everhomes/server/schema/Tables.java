@@ -842,9 +842,4 @@ public class Tables {
 	 * The table ehcore.eh_owner_doors
 	 */
 	public static final com.everhomes.server.schema.tables.EhOwnerDoors EH_OWNER_DOORS = com.everhomes.server.schema.tables.EhOwnerDoors.EH_OWNER_DOORS;
-
-	/**
-	 * The table ehcore.eh_owner_door_auth
-	 */
-	public static final com.everhomes.server.schema.tables.EhOwnerDoorAuth EH_OWNER_DOOR_AUTH = com.everhomes.server.schema.tables.EhOwnerDoorAuth.EH_OWNER_DOOR_AUTH;
 }

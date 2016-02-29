@@ -293,7 +293,7 @@ public class Keys {
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhDoorAuthRecord> KEY_EH_DOOR_AUTH_PRIMARY = UniqueKeys0.KEY_EH_DOOR_AUTH_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhDoorCommandRecord> KEY_EH_DOOR_COMMAND_PRIMARY = UniqueKeys0.KEY_EH_DOOR_COMMAND_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhOwnerDoorsRecord> KEY_EH_OWNER_DOORS_PRIMARY = UniqueKeys0.KEY_EH_OWNER_DOORS_PRIMARY;
-	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhOwnerDoorAuthRecord> KEY_EH_OWNER_DOOR_AUTH_PRIMARY = UniqueKeys0.KEY_EH_OWNER_DOOR_AUTH_PRIMARY;
+	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhOwnerDoorsRecord> KEY_EH_OWNER_DOORS_I_UQ_DOOR_ID_OWNER_ID = UniqueKeys0.KEY_EH_OWNER_DOORS_I_UQ_DOOR_ID_OWNER_ID;
 
 	// -------------------------------------------------------------------------
 	// FOREIGN KEY definitions
@@ -602,7 +602,7 @@ public class Keys {
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhDoorAuthRecord> KEY_EH_DOOR_AUTH_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH, com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhDoorCommandRecord> KEY_EH_DOOR_COMMAND_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhDoorCommand.EH_DOOR_COMMAND, com.everhomes.server.schema.tables.EhDoorCommand.EH_DOOR_COMMAND.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhOwnerDoorsRecord> KEY_EH_OWNER_DOORS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhOwnerDoors.EH_OWNER_DOORS, com.everhomes.server.schema.tables.EhOwnerDoors.EH_OWNER_DOORS.ID);
-		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhOwnerDoorAuthRecord> KEY_EH_OWNER_DOOR_AUTH_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhOwnerDoorAuth.EH_OWNER_DOOR_AUTH, com.everhomes.server.schema.tables.EhOwnerDoorAuth.EH_OWNER_DOOR_AUTH.ID);
+		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhOwnerDoorsRecord> KEY_EH_OWNER_DOORS_I_UQ_DOOR_ID_OWNER_ID = createUniqueKey(com.everhomes.server.schema.tables.EhOwnerDoors.EH_OWNER_DOORS, com.everhomes.server.schema.tables.EhOwnerDoors.EH_OWNER_DOORS.DOOR_ID, com.everhomes.server.schema.tables.EhOwnerDoors.EH_OWNER_DOORS.OWNER_ID, com.everhomes.server.schema.tables.EhOwnerDoors.EH_OWNER_DOORS.OWNER_TYPE);
 	}
 
 	private static class ForeignKeys0 extends org.jooq.impl.AbstractKeys {
