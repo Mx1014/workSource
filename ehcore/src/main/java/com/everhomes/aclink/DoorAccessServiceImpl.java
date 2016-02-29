@@ -12,6 +12,9 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.jooq.Condition;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +28,8 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -105,6 +110,51 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     }
     
     @Override
+    public ListDoorAccessResponse searchDoorAccessByAdmin(QueryDoorAccessAdminCommand cmd) {
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        ListDoorAccessResponse resp = new ListDoorAccessResponse();
+        
+        List<DoorAccess> dacs = doorAccessProvider.queryDoorAccesss(locator, count, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_DOOR_ACCESS.OWNER_ID.eq(cmd.getOwnerId()));
+                query.addConditions(Tables.EH_DOOR_ACCESS.OWNER_TYPE.eq(cmd.getOwnerType()));
+                if(cmd.getSearch() != null) {
+                    Condition c = Tables.EH_DOOR_ACCESS.NAME.like(cmd.getSearch() + "%").
+                            or(Tables.EH_DOOR_ACCESS.HARDWARE_ID.like(cmd.getSearch() + "%"));
+                    query.addConditions(c);
+                }
+//                if(cmd.getLinkStatus() != null) {
+//                    
+//                }
+                
+                if(cmd.getDoorType() != null) {
+                    query.addConditions(Tables.EH_DOOR_ACCESS.DOOR_TYPE.eq(cmd.getDoorType()));
+                }
+                return query;
+            }
+            
+        });
+        
+        List<DoorAccessDTO> dtos = new ArrayList<DoorAccessDTO>();
+        for(DoorAccess da : dacs) {
+            DoorAccessDTO dto = ConvertHelper.convert(da, DoorAccessDTO.class);
+            User user = userProvider.findUserById(da.getCreatorUserId());
+            String nickName = (user.getNickName() == null ? user.getNickName(): user.getAccountName());
+            dto.setCreatorName(nickName);
+            dtos.add(dto);
+        }
+        resp.setDoors(dtos);
+        resp.setNextPageAnchor(locator.getAnchor());
+        
+        return resp;
+    }
+    
+    @Override
     public ListDoorAccessResponse listDoorAccessByOwnerId(ListDoorAccessByOwnerIdCommand cmd) {
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
@@ -166,8 +216,6 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             doorAuthProvider.createDoorAuth(doorAuth);
             return ConvertHelper.convert(doorAuth, DoorAuthDTO.class);
         }
-        
-
     }
     
     //获取最新需要更新的数据，包括用户最新的钥匙DoorUserKey，以前锁与服务器交互的钥匙 DoorServerKey。同时可以对上次更新的消息进行确认。

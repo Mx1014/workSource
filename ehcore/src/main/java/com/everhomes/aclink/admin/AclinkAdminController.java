@@ -15,6 +15,7 @@ import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.aclink.DoorAuthDTO;
 import com.everhomes.aclink.ListDoorAccessByOwnerIdCommand;
 import com.everhomes.aclink.ListDoorAccessResponse;
+import com.everhomes.aclink.QueryDoorAccessAdminCommand;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -36,14 +37,14 @@ public class AclinkAdminController extends ControllerBase {
     DoorAccessProvider doorAccessProvider;
     
     /**
-     * <b>URL: /admin/aclink/listDoorAccessByOwnerId</b>
+     * <b>URL: /admin/aclink/searchDoorAccess</b>
      * <p>获取门禁列表</p>
      * @return 门禁列表
      */
-    @RequestMapping("listDoorAccessByOwnerId")
+    @RequestMapping("searchDoorAccess")
     @RestReturn(value=ListDoorAccessResponse.class)
-    public RestResponse listDoorAccessByOwnerId(@Valid ListDoorAccessByOwnerIdCommand cmd) {
-        RestResponse response = new RestResponse(doorAccessService.listDoorAccessByOwnerId(cmd));
+    public RestResponse listDoorAccessByOwnerId(@Valid QueryDoorAccessAdminCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.searchDoorAccessByAdmin(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -84,7 +85,13 @@ public class AclinkAdminController extends ControllerBase {
         return response;
     }
     
-    @RequestMapping("updateDoorAccess")
+    /**
+     * 
+     * <b>URL: /admin/aclink/createAuth</b>
+     * <p>创建授权</p>
+     * @return OK 成功
+     */
+    @RequestMapping("createAuth")
     @RestReturn(value=DoorAuthDTO.class)
     public RestResponse createDoorAuth(@Valid CreateDoorAuthCommand cmd) {
         RestResponse response = new RestResponse(doorAccessService.createDoorAuth(cmd));

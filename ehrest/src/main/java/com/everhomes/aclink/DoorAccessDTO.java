@@ -38,6 +38,7 @@ public class DoorAccessDTO {
     private String     name;
     private String hardwareId;
     private String creatorName;
+    private Byte linkStatus;
 
     
 
@@ -250,6 +251,16 @@ public class DoorAccessDTO {
 
     public void setCreatorName(String creatorName) {
         this.creatorName = creatorName;
+    }
+
+    public Byte getLinkStatus() {
+        return linkStatus;
+    }
+
+
+
+    public void setLinkStatus(Byte linkStatus) {
+        this.linkStatus = linkStatus;
     }
 
 

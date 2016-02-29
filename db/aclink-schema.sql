@@ -5,7 +5,7 @@ DROP TABLE IF EXISTS `eh_door_access`;
 CREATE TABLE `eh_door_access` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `uuid` VARCHAR(64) NOT NULL,
-    `door_type` TINYINT NOT NULL COMMENT '0: Zuolin aclink',
+    `door_type` TINYINT NOT NULL COMMENT '0: Zuolin aclink with wifi, 1: Zuolink aclink without wifi',
     `hardware_id` VARCHAR(64) NOT NULL COMMENT 'mac address of aclink',
     `name` VARCHAR(128) NOT NULL,
     `description` VARCHAR(1024) NOT NULL,
@@ -17,6 +17,7 @@ CREATE TABLE `eh_door_access` (
     `latitude` DOUBLE,
     `geohash` VARCHAR(64),
     `aes_iv` VARCHAR(64) NOT NULL,
+    `linkStatus` TINYINT NOT NULL COMMENT '0: linked, 1: failed',
 
     `owner_type` TINYINT NOT NULL COMMENT '0:community, 1:enterprise, 2: family',
     `owner_id` BIGINT NOT NULL,
@@ -73,7 +74,7 @@ CREATE TABLE `eh_aes_server_key` (
 DROP TABLE IF EXISTS `eh_aes_user_key`;
 CREATE TABLE `eh_aes_user_key` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
-    `key_id` INT NOT NULL COMMENT 'lazy load for aes_user_key'
+    `key_id` INT NOT NULL COMMENT 'lazy load for aes_user_key',
     `key_type` TINYINT NOT NULL COMMENT '0: aclink normal key',
     `door_id` BIGINT NOT NULL,
     `user_id` BIGINT NOT NULL,
@@ -113,6 +114,12 @@ CREATE TABLE `eh_door_auth` (
 
     `owner_type` TINYINT NOT NULL COMMENT '0:community, 1:enterprise, 2: family, 3: user',
     `owner_id` BIGINT NOT NULL,
+
+    `organization` VARCHAR(128),
+    `description` VARCHAR(1024),
+
+    `nickname` VARCHAR(64),
+    `phone` VARCHAR(64),
 
     `create_time` DATETIME,
     `status` TINYINT NOT NULL,
