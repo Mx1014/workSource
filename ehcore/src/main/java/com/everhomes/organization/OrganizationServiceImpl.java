@@ -546,7 +546,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 		organizationProvider.updateOrganization(parOrg);
 	}
 	
-	
 	@Override
     public ListEnterprisesCommandResponse searchEnterprise(SearchOrganizationCommand cmd) {
         ListEnterprisesCommandResponse resp = new ListEnterprisesCommandResponse();
@@ -573,6 +572,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 		
 		OrganizationDetailDTO dto = ConvertHelper.convert(org, OrganizationDetailDTO.class);
+		dto.setOrganizationId(organization.getId());
 		dto.setName(organization.getName());
 		dto.setAvatarUri(org.getAvatar());
 		if(null != org.getCheckinDate())
@@ -625,8 +625,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		Long communityId = cmd.getCommunityId();
 		
-		Long buildingId = cmd.getBuildingId();
-		
 		String keywords = cmd.getKeywords();
 		
 		if(!StringUtils.isEmpty(keywords)){
@@ -643,6 +641,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 			return resp;
 		}
 		
+		if(!StringUtils.isEmpty(cmd.getBuildingName())){
+			Building building = communityProvider.findBuildingByCommunityIdAndName(communityId, cmd.getBuildingName());
+			if(null != building){
+				cmd.setBuildingId(cmd.getBuildingId());
+			}
+		}
+		
+		Long buildingId = cmd.getBuildingId();
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 		if(null != buildingId){
