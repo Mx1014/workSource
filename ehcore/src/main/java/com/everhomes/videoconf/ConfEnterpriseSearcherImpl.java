@@ -203,6 +203,11 @@ public class ConfEnterpriseSearcherImpl extends AbstractElasticSearch implements
             b.field("enterpriseId", enterprise.getEnterpriseId());
             
             //status: 状态 0-formally use 1-on trial 2-overdue
+            if(enterprise.getActiveAccountAmount() == null)
+            	enterprise.setActiveAccountAmount(0);
+            if(enterprise.getTrialAccountAmount() == null)
+            	enterprise.setTrialAccountAmount(0);
+            
         	if(enterprise.getActiveAccountAmount() > enterprise.getTrialAccountAmount()) {
         		b.field("status", 0);
         	}

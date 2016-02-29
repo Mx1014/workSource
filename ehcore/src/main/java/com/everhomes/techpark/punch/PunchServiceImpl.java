@@ -45,6 +45,15 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.enterprise.EnterpriseContact;
 import com.everhomes.enterprise.EnterpriseContactProvider;
 import com.everhomes.enterprise.EnterpriseContactService;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.organization.ListOrganizationContactCommand;
+import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
+import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.techpark.punch.AddPunchExceptionRequestCommand;
 import com.everhomes.rest.techpark.punch.AddPunchRuleCommand;
@@ -106,17 +115,23 @@ public class PunchServiceImpl implements PunchService {
 	SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 	SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	@Autowired
-	PunchProvider punchProvider;
+	private PunchProvider punchProvider;
 	@Autowired
-	EnterpriseContactService enterpriseContactService;
+	private EnterpriseContactService enterpriseContactService;
 
 	@Autowired
 	private EnterpriseContactProvider enterpriseContactProvider;
 	@Autowired
-	DbProvider dbProvider;
+	private DbProvider dbProvider;
 	
 	@Autowired
-	ConfigurationProvider configurationProvider;
+	private ConfigurationProvider configurationProvider;
+	
+	@Autowired
+	private OrganizationService organizationService;
+	
+	@Autowired
+	private OrganizationProvider organizationProvider;
 
 	
 
@@ -1592,13 +1607,24 @@ public class PunchServiceImpl implements PunchService {
 		checkCompanyIdIsNull(cmd.getEnterpriseId());
 		ListPunchStatisticsCommandResponse response = new ListPunchStatisticsCommandResponse();
 		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
-		List<EnterpriseContact> enterpriseContacts = enterpriseContactProvider
-				.queryEnterpriseContactByKeywordAndGroupId(cmd.getEnterpriseId(), cmd.getKeyword(), cmd.getEnterpriseGroupId());
-		List<Long> userIds = new ArrayList<Long>();
-		for (EnterpriseContact enterpriseContact : enterpriseContacts) {
-			userIds.add(enterpriseContact.getUserId());
+		ListOrganizationContactCommand orgCmd = new ListOrganizationContactCommand();
+		orgCmd.setOrganizationId(cmd.getEnterpriseId());
+		if(null != cmd.getEnterpriseGroupId()){
+			orgCmd.setOrganizationId(cmd.getEnterpriseGroupId());
 		}
-
+		orgCmd.setKeywords(cmd.getKeyword());
+		orgCmd.setPageSize(100000);
+		ListOrganizationMemberCommandResponse resp =  organizationService.listOrganizationPersonnels(orgCmd);
+		List<OrganizationMemberDTO> members = resp.getMembers();
+		List<Long> userIds = new ArrayList<Long>();
+		if(null != members){
+			for (OrganizationMemberDTO member : members) {
+				if(member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode())){
+					userIds.add(member.getTargetId());
+				}
+			}
+		}
+		
 		int totalCount = punchProvider.countPunchDayLogs(userIds,
 				cmd.getEnterpriseId(), cmd.getStartDay(), cmd.getEndDay(),
 				cmd.getArriveTimeCompareFlag(), cmd.getArriveTime(),
@@ -1611,7 +1637,11 @@ public class PunchServiceImpl implements PunchService {
 		Integer pageSize = PaginationConfigHelper.getPageSize(
 				configurationProvider, cmd.getPageSize());
 		int pageCount = getPageCount(totalCount, pageSize);
-
+		Organization organization = organizationProvider.findOrganizationById(cmd.getEnterpriseId());
+		List<String> groupTypes = new ArrayList<String>();
+		groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+		List<Organization> departments = organizationProvider.listOrganizationByGroupTypes(organization.getPath() + "/%", groupTypes);
+		Map<Long, Organization> deptMap = this.convertDeptListToMap(departments);
 		List<PunchDayLog> result = punchProvider.listPunchDayLogs(userIds,
 				cmd.getEnterpriseId(), cmd.getStartDay(), cmd.getEndDay(),
 				cmd.getStatus(), cmd.getArriveTimeCompareFlag(),
@@ -1625,18 +1655,15 @@ public class PunchServiceImpl implements PunchService {
 							PunchStatisticsDTO.class);
 					processPunchStatisticsDTOTime(dto, r);
 					if (dto != null) {
-						EnterpriseContact enterpriseContact = enterpriseContactService
-								.queryContactByUserId(cmd.getEnterpriseId(),
-										dto.getUserId());
-						
-						if (null != enterpriseContact) {
-							dto.setUserEnterpriseGroup(enterpriseContact.getApplyGroup());
-							dto.setUserName(enterpriseContact.getName());
-							dto.setUserPhoneNumber(enterpriseContactProvider
-									.queryContactEntryByContactId(
-											enterpriseContact,
-											ContactType.MOBILE.getCode())
-									.get(0).getEntryValue());
+						OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getUserId(), cmd.getEnterpriseId());
+						if (null != member) {
+							Organization department = deptMap.get(member.getGroupId());
+							if(null != department){
+								dto.setUserEnterpriseGroup(department.getName());
+							}
+							
+							dto.setUserName(member.getContactName());
+							dto.setUserPhoneNumber(member.getContactToken());
 							// dto.setUserDepartment(enterpriseContact.get);
 							PunchExceptionApproval approval = punchProvider
 									.getExceptionApproval(dto.getUserId(),
@@ -1647,12 +1674,9 @@ public class PunchServiceImpl implements PunchService {
 										.getApprovalStatus());
 								dto.setMorningApprovalStatus(approval.getMorningApprovalStatus());
 								dto.setAfternoonApprovalStatus(approval.getAfternoonApprovalStatus());
-								enterpriseContact = enterpriseContactService
-										.queryContactByUserId(
-												cmd.getEnterpriseId(),
-												approval.getOperatorUid());
-								if(null !=enterpriseContact )
-									dto.setOperatorName(enterpriseContact.getName());
+								OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(approval.getOperatorUid(), cmd.getEnterpriseId());
+								if(null != operator )
+									dto.setOperatorName(operator.getContactName());
 							} else {
 								//do nothing
 //								dto.setApprovalStatus((byte) 0);
@@ -1668,6 +1692,17 @@ public class PunchServiceImpl implements PunchService {
 
 	}
 
+	private Map<Long, Organization> convertDeptListToMap(List<Organization> depts){
+		Map<Long, Organization> map = new HashMap<Long, Organization>();
+		if(null == depts){
+			return map;
+		}
+		for (Organization dept : depts) {
+			map.put(dept.getId(), dept);
+		}
+		return map;
+	}
+	
 	private void processPunchStatisticsDTOTime(PunchStatisticsDTO dto,
 			PunchDayLog r) {
 		if(null!= r.getArriveTime())
@@ -1760,20 +1795,18 @@ public class PunchServiceImpl implements PunchService {
 		PunchRule rule = this.punchProvider.getPunchRuleByCompanyId(cmd.getEnterpriseId());
 		Set<Long> userIds = map.keySet();
 		for (Long userId : userIds) {
+			List<PunchStatisticsDTO> list = map.get(userId);
+			
 			PunchCountDTO dto = new PunchCountDTO();
 			dto.setPunchTimesPerDay(rule.getPunchTimesPerDay());
 			dto.setUserId(userId);
-			EnterpriseContact enterpriseContact = enterpriseContactService
-					.queryContactByUserId(cmd.getEnterpriseId(), dto.getUserId());
-			if (null == enterpriseContact)
+			
+			if (null == list || list.size() == 0)
 				continue;
-			dto.setUserName(enterpriseContact.getName());
-			dto.setToken(enterpriseContactProvider
-					.queryContactEntryByContactId(enterpriseContact,
-							ContactType.MOBILE.getCode()).get(0)
-					.getEntryValue());
+			dto.setUserName(list.get(0).getUserName());
+			dto.setToken(list.get(0).getUserPhoneNumber());
 			dto.setWorkDayCount(workDayCount);
-			List<PunchStatisticsDTO> list = map.get(userId);
+			
 			dto.setUserEnterpriseGroup(list.get(0).getUserEnterpriseGroup());
 			if(dto.getPunchTimesPerDay().equals(PunchTimesPerDay.TWICE.getCode())){
 				processTwicePunchListCount(list, dto);

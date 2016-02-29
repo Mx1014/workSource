@@ -1,6 +1,6 @@
 package com.everhomes.rest.organization.pm;
 
-public enum OrganizationScopeCode {
+public enum OrganizationScopeCode { 
 
 	NONE((byte)0), BUILDING((byte)1);
 	

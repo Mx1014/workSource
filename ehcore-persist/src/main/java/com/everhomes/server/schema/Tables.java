@@ -404,6 +404,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhOrganizations EH_ORGANIZATIONS = com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS;
 
 	/**
+	 * The table ehcore.eh_organization_addresses
+	 */
+	public static final com.everhomes.server.schema.tables.EhOrganizationAddresses EH_ORGANIZATION_ADDRESSES = com.everhomes.server.schema.tables.EhOrganizationAddresses.EH_ORGANIZATION_ADDRESSES;
+
+	/**
 	 * The table ehcore.eh_organization_address_mappings
 	 */
 	public static final com.everhomes.server.schema.tables.EhOrganizationAddressMappings EH_ORGANIZATION_ADDRESS_MAPPINGS = com.everhomes.server.schema.tables.EhOrganizationAddressMappings.EH_ORGANIZATION_ADDRESS_MAPPINGS;
@@ -412,6 +417,11 @@ public class Tables {
 	 * The table ehcore.eh_organization_assigned_scopes
 	 */
 	public static final com.everhomes.server.schema.tables.EhOrganizationAssignedScopes EH_ORGANIZATION_ASSIGNED_SCOPES = com.everhomes.server.schema.tables.EhOrganizationAssignedScopes.EH_ORGANIZATION_ASSIGNED_SCOPES;
+
+	/**
+	 * The table ehcore.eh_organization_attachments
+	 */
+	public static final com.everhomes.server.schema.tables.EhOrganizationAttachments EH_ORGANIZATION_ATTACHMENTS = com.everhomes.server.schema.tables.EhOrganizationAttachments.EH_ORGANIZATION_ATTACHMENTS;
 
 	/**
 	 * The table ehcore.eh_organization_billing_accounts
@@ -439,9 +449,19 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhOrganizationCommunities EH_ORGANIZATION_COMMUNITIES = com.everhomes.server.schema.tables.EhOrganizationCommunities.EH_ORGANIZATION_COMMUNITIES;
 
 	/**
+	 * The table ehcore.eh_organization_community_requests
+	 */
+	public static final com.everhomes.server.schema.tables.EhOrganizationCommunityRequests EH_ORGANIZATION_COMMUNITY_REQUESTS = com.everhomes.server.schema.tables.EhOrganizationCommunityRequests.EH_ORGANIZATION_COMMUNITY_REQUESTS;
+
+	/**
 	 * The table ehcore.eh_organization_contacts
 	 */
 	public static final com.everhomes.server.schema.tables.EhOrganizationContacts EH_ORGANIZATION_CONTACTS = com.everhomes.server.schema.tables.EhOrganizationContacts.EH_ORGANIZATION_CONTACTS;
+
+	/**
+	 * The table ehcore.eh_organization_details
+	 */
+	public static final com.everhomes.server.schema.tables.EhOrganizationDetails EH_ORGANIZATION_DETAILS = com.everhomes.server.schema.tables.EhOrganizationDetails.EH_ORGANIZATION_DETAILS;
 
 	/**
 	 * The table ehcore.eh_organization_members
@@ -457,6 +477,11 @@ public class Tables {
 	 * The table ehcore.eh_organization_owners
 	 */
 	public static final com.everhomes.server.schema.tables.EhOrganizationOwners EH_ORGANIZATION_OWNERS = com.everhomes.server.schema.tables.EhOrganizationOwners.EH_ORGANIZATION_OWNERS;
+
+	/**
+	 * The table ehcore.eh_organization_role_map
+	 */
+	public static final com.everhomes.server.schema.tables.EhOrganizationRoleMap EH_ORGANIZATION_ROLE_MAP = com.everhomes.server.schema.tables.EhOrganizationRoleMap.EH_ORGANIZATION_ROLE_MAP;
 
 	/**
 	 * The table ehcore.eh_organization_tasks
@@ -487,6 +512,11 @@ public class Tables {
 	 * The table ehcore.eh_poll_votes
 	 */
 	public static final com.everhomes.server.schema.tables.EhPollVotes EH_POLL_VOTES = com.everhomes.server.schema.tables.EhPollVotes.EH_POLL_VOTES;
+
+	/**
+	 * The table ehcore.eh_preferential_rules
+	 */
+	public static final com.everhomes.server.schema.tables.EhPreferentialRules EH_PREFERENTIAL_RULES = com.everhomes.server.schema.tables.EhPreferentialRules.EH_PREFERENTIAL_RULES;
 
 	/**
 	 * The table ehcore.eh_punch_day_logs

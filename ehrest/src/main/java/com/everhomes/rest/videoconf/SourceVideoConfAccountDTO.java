@@ -15,6 +15,7 @@ import com.everhomes.util.StringHelper;
  *  <li>occupyFlag: 使用状态 0-available 1-occupied</li>
  *  <li>occupyAccountId: 用户账号</li>
  *  <li>confId: 会议id</li>
+ *  <li>occupyIdentifierToken: 占用的手机号</li>
  * </ul>
  *
  */
@@ -37,6 +38,16 @@ public class SourceVideoConfAccountDTO {
 	private Long occupyAccountId;
 	
 	private Long confId;
+	
+	private String occupyIdentifierToken;
+
+	public String getOccupyIdentifierToken() {
+		return occupyIdentifierToken;
+	}
+
+	public void setOccupyIdentifierToken(String occupyIdentifierToken) {
+		this.occupyIdentifierToken = occupyIdentifierToken;
+	}
 
 	public Long getId() {
 		return id;

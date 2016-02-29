@@ -70,20 +70,24 @@ import com.everhomes.group.Group;
 import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.BillingAccountHelper;
 import com.everhomes.organization.BillingAccountType;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationBillingAccount;
 import com.everhomes.organization.OrganizationBillingTransactions;
 import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationOrder;
 import com.everhomes.organization.OrganizationOwners;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.OrganizationTask;
 import com.everhomes.organization.pm.pay.ResultHolder;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.ApartmentDTO;
@@ -346,7 +350,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		communityPmMember.setOrganizationId(orgId);
 		communityPmMember.setContactName(user.getNickName());
 		communityPmMember.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
-		communityPmMember.setStatus(OrganizationMemberStatus.CONFIRMING.getCode());
+		communityPmMember.setStatus(OrganizationMemberStatus.WAITING_FOR_APPROVAL.getCode());
 		communityPmMember.setTargetType(OrganizationMemberTargetType.USER.getCode());
 		communityPmMember.setTargetId(user.getId());
 		communityPmMember.setContactDescription(description);
@@ -1219,7 +1223,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		} 
 		
 		else if(community.getCommunityType() == CommunityType.COMMERCIAL.getCode()) {
-			sendNoticeToEnterpriseContactor(cmd);
+			//sendNoticeToEnterpriseContactor(cmd);
+			this.sendNoticeToOrganizationMember(cmd);
 		}
 		
 	}
@@ -1291,6 +1296,71 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		processCommunityEnterpriseContactor(communityId,contacts,cmd.getMessage());
 	}
 	
+	@Override
+	public void sendNoticeToOrganizationMember(PropCommunityBuildAddessCommand cmd) {
+		Long communityId = cmd.getCommunityId();
+		List<String> buildingNames = cmd.getBuildingNames();
+		List<Long> buildingIds = cmd.getBuildingIds();
+		List<Long> addressIds = cmd.getAddressIds();
+		List<Organization> orgs = new ArrayList<Organization>();
+		/** 根据地址获取要推送的企业  **/
+		if(null != addressIds && 0 != addressIds.size()){
+			for (Long addressId : addressIds) {
+				OrganizationAddress orgAddress = organizationProvider.findOrganizationAddressByAddressId(addressId);
+				if(null != orgAddress)
+					orgs.add(organizationProvider.findOrganizationById(orgAddress.getOrganizationId()));
+			}
+		
+		/** 根据楼栋Id获取要推送的企业  **/
+		}else if(null != buildingIds && 0 != buildingIds.size()){
+			for (Long buildingId : buildingIds) {
+				List<OrganizationAddress> orgAddresses = organizationProvider.listOrganizationAddressByBuildingId(buildingId, Integer.MAX_VALUE, null);
+				for (OrganizationAddress organizationAddress : orgAddresses) {
+					if(null != organizationAddress)
+						orgs.add(organizationProvider.findOrganizationById(organizationAddress.getOrganizationId()));
+				}
+			}
+		
+		/** 根据楼栋名称获取要推送的企业**/
+		}else if(null != buildingNames && 0 != buildingNames.size()){
+			for (String buildingName : buildingNames) {
+				List<OrganizationAddress> orgAddresses = organizationProvider.listOrganizationAddressByBuildingName(buildingName);
+				for (OrganizationAddress organizationAddress : orgAddresses) {
+					if(null != organizationAddress)
+						orgs.add(organizationProvider.findOrganizationById(organizationAddress.getOrganizationId()));
+				}
+			}
+		
+		/** 根据小区获取要推送的企业  **/
+		}else if(null != communityId){
+			List<OrganizationCommunityRequest> requests = organizationProvider.queryOrganizationCommunityRequestByCommunityId(new CrossShardListingLocator(), communityId, 100000, null);
+			for (OrganizationCommunityRequest req : requests) {
+				orgs.add(organizationProvider.findOrganizationById(req.getMemberId()));
+			}
+		}
+		
+		/** 获取全部企业的全部人员 **/
+		List<OrganizationMember> members = this.getOrganizationMembersByAddress(orgs);
+		
+		/** 推送消息 **/
+		this.processSmsByMembers(members, cmd.getMessage());
+	}
+	
+	/**
+	 * 获取企业所以人员
+	 * @param orgs
+	 * @return
+	 */
+	private List<OrganizationMember> getOrganizationMembersByAddress(List<Organization> orgs){
+		List<OrganizationMember> members = new ArrayList<OrganizationMember>();
+		for (Organization organization : orgs) {
+			if(null != organization){
+				members.addAll(organizationProvider.listOrganizationMembersByOrgId(organization.getId()));
+			}
+		}
+		return members;
+	}
+	
 	private void processCommunityEnterpriseContactor(Long communityId,List<EnterpriseContact> contacts,String message) {
 
         List<String> phones = new ArrayList<String>();
@@ -1333,6 +1403,35 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 //			}
 //		}
 
+	}
+	
+	private void processSmsByMembers(List<OrganizationMember> members,String message) {
+
+		List<String> phones = new ArrayList<String>();
+		List<Long> userIds = new ArrayList<Long>();
+		
+		/** 区分是否是平台用户  **/
+		for (OrganizationMember member : members) {
+			if(member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode())){
+				userIds.add(member.getTargetId());
+			}else{
+				phones.add(member.getContactToken());
+			}
+		}
+		
+		/** 平台用户就推送消息  **/
+		for (Long userId : userIds) {
+			sendNoticeToUserById(userId, message);
+		}
+		
+		/** 非平台用户就发短信  **/
+		List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_MSG, message);
+	    String templateScope = SmsTemplateCode.SCOPE;
+	    int templateId = SmsTemplateCode.WY_SEND_MSG_CODE;
+	    String templateLocale = UserContext.current().getUser().getLocale();
+	    String[] phoneArray = new String[phones.size()];  
+	    phones.toArray(phoneArray);  
+	    smsProvider.sendSms(UserContext.current().getUser().getNamespaceId(),phoneArray , templateScope, templateId, templateLocale, variables);
 	}
 	
 	public void sendNoticeToCommunityPmOwner(PropCommunityBuildAddessCommand cmd) {
@@ -1592,30 +1691,27 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		String endStrTime = cmd.getEndStrTime();
 		Organization org = this.checkOrganizationByCommIdAndOrgType(cmd.getCommunityId(), OrganizationType.PM.getCode());
 		long organizationId = org.getId();
-		/** 当天数量列表*/
-		List<Integer> todayList = new ArrayList<Integer>();
-
-		/** z昨天数量列表*/
-		List<Integer> yesterdayList = new ArrayList<Integer>();
-
-		/** 上周数量列表*/
-		List<Integer> weekList = new ArrayList<Integer>(); 
-
-		/** 上月数量列表*/
-		List<Integer> monthList = new ArrayList<Integer>();
-
-		/** 时间点数量列表*/
-		List<Integer> dateList = new ArrayList<Integer>();
 
 		Date date = DateStatisticHelper.getCurrentUTCTime();
 		Date currentStartDate = DateStatisticHelper.getCurrent0Hour();
 		Date weekStartDate = DateStatisticHelper.getStartDateOfLastNDays(date, 7, false);
 		Date yesterdayStartDate = DateStatisticHelper.getStartDateOfLastNDays(date, 1, false);
 		Date monthStartDate = DateStatisticHelper.getStartDateOfLastNDays(date, 30, false);
-		createList(organizationId,taskType,todayList,currentStartDate.getTime(), date.getTime());
-		createList(organizationId,taskType,yesterdayList,yesterdayStartDate.getTime(), currentStartDate.getTime());
-		createList(organizationId,taskType,weekList,weekStartDate.getTime(), date.getTime());
-		createList(organizationId,taskType,monthList,monthStartDate.getTime(), date.getTime());
+
+		/** 当天数量列表*/
+		List<Integer> todayList = this.getTaskCounts(organizationId, cmd.getCommunityId(), taskType,currentStartDate.getTime(), date.getTime());
+		
+		/** 上周数量列表*/
+		List<Integer> weekList = this.getTaskCounts(organizationId, cmd.getCommunityId(), taskType,weekStartDate.getTime(), date.getTime());
+		
+		/** z昨天数量列表*/
+		List<Integer> yesterdayList = this.getTaskCounts(organizationId, cmd.getCommunityId(), taskType,yesterdayStartDate.getTime(), currentStartDate.getTime());
+		
+		/** 上月数量列表*/
+		List<Integer> monthList = this.getTaskCounts(organizationId, cmd.getCommunityId(), taskType,monthStartDate.getTime(), date.getTime());
+
+		/** 时间点数量列表*/
+		List<Integer> dateList = null;
 
 		if(!StringUtils.isEmpty(startStrTime) && !StringUtils.isEmpty(endStrTime))
 		{
@@ -1624,7 +1720,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			try {
 				startTime = DateStatisticHelper.parseDateStrToMin(startStrTime);
 				endTime = DateStatisticHelper.parseDateStrToMax(endStrTime);
-				createList(organizationId,taskType,dateList,startTime.getTime(), endTime.getTime());
+				dateList = this.getTaskCounts(organizationId, cmd.getCommunityId(), taskType,startTime.getTime(), endTime.getTime());
 			} catch (ParseException e) {
 				LOGGER.error("failed to parse date.startStrTime=" + startStrTime +",endStrTime=" + endStrTime);
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
@@ -2185,6 +2281,41 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			int count = propertyMgrProvider.countCommunityPmTasks(organizationId, taskType,(byte)i,String.format("%tF %<tT", startTime), String.format("%tF %<tT", endTime));
 			todayList.add(count);
 		}
+	}
+	
+	private List<Integer> getTaskCounts(Long organizationId, Long communityId, String taskType, long startTime, long endTime){
+		List<Integer> counts = new ArrayList<Integer>();
+		int num = OrganizationTaskStatus.OTHER.getCode();
+		List<OrganizationTask> tasks = propertyMgrProvider.communityPmTaskLists(organizationId, taskType, null, String.format("%tF %<tT", startTime), String.format("%tF %<tT", endTime));
+		if(null != communityId){
+			counts.add(this.getPostByCommunityId(communityId, tasks).size());
+		}else{
+			counts.add(tasks.size());
+		}
+		
+		for (int i = 1; i <= num ; i++)
+		{
+			tasks = propertyMgrProvider.communityPmTaskLists(organizationId, taskType,(byte)i,String.format("%tF %<tT", startTime), String.format("%tF %<tT", endTime));
+			if(null != communityId){
+				counts.add(this.getPostByCommunityId(communityId, tasks).size());
+			}else{
+				counts.add(tasks.size());
+			}
+		}
+		
+		return counts;
+	}
+	
+	private List<Post> getPostByCommunityId(Long communityId, List<OrganizationTask> tasks){
+		Community community = communityProvider.findCommunityById(communityId);
+		List<Post> posts = new ArrayList<Post>();
+		for (OrganizationTask task : tasks) {
+			Post post = forumProvider.findPostById(task.getApplyEntityId());
+			if(null != post && post.getForumId().equals(community.getDefaultForumId())){
+				posts.add(post);
+			}
+		}
+		return posts;
 	}
 
 	private void checkOrganizationIdIsNull(Long organizationId) {

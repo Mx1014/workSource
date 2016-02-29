@@ -15,6 +15,10 @@ public class ListUserTaskCommand {
 	private Integer pageSize;
 	
 	private String taskType;
+	
+	private Long communityId;
+	
+	private Long organizationId;
 
 	public String getTaskType() {
 		return taskType;
@@ -39,5 +43,23 @@ public class ListUserTaskCommand {
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
 	}
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
+	
+	
 	
 }

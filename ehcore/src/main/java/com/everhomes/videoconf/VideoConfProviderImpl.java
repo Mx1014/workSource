@@ -309,6 +309,8 @@ public class VideoConfProviderImpl implements VideoConfProvider {
             if (enterprises.size() >= pageSize) {
                 locator.setAnchor(enterprises.get(enterprises.size() - 1).getId());
                 return AfterAction.done;
+            } else {
+                locator.setAnchor(null);
             }
             return AfterAction.next;
         });
@@ -619,6 +621,8 @@ public class VideoConfProviderImpl implements VideoConfProvider {
             if (orders.size() >= pageSize) {
                 locator.setAnchor(orders.get(orders.size() - 1).getId());
                 return AfterAction.done;
+            } else {
+                locator.setAnchor(null);
             }
             return AfterAction.next;
         });
@@ -637,10 +641,14 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 	@Override
 	public ConfSourceAccounts findSpareAccount(List<Long> accountCategory) {
 		final ConfSourceAccounts[] result = new ConfSourceAccounts[1];
+		Set<Long> sourceAccountId = findAssignedSourceAccount();
 		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhConfSourceAccounts.class), result, 
 				(DSLContext context, Object reducingContext) -> {
 					List<ConfSourceAccounts> list = context.select().from(Tables.EH_CONF_SOURCE_ACCOUNTS)
 							.where(Tables.EH_CONF_SOURCE_ACCOUNTS.ACCOUNT_CATEGORY_ID.in(accountCategory))
+							.and(Tables.EH_CONF_SOURCE_ACCOUNTS.ID.notIn(sourceAccountId))
+							.and(Tables.EH_CONF_SOURCE_ACCOUNTS.STATUS.eq((byte) 1))
+							.and(Tables.EH_CONF_SOURCE_ACCOUNTS.EXPIRED_DATE.ge(new Timestamp(System.currentTimeMillis())))
 							.fetch().map((r) -> {
 								return ConvertHelper.convert(r, ConfSourceAccounts.class);
 							});
@@ -654,6 +662,21 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 				});
 
 		return result[0];
+	}
+	
+	private Set<Long> findAssignedSourceAccount() {
+		Set<Long> sourceAccountId = new HashSet<Long>();
+		sourceAccountId.add(0L);
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhConfAccounts.class));
+		SelectQuery<EhConfAccountsRecord> query = context.selectQuery(Tables.EH_CONF_ACCOUNTS);
+		query.addConditions(Tables.EH_CONF_ACCOUNTS.ASSIGNED_SOURCE_ID.ne(0L));
+        query.fetch().map((r) -> {
+        	sourceAccountId.add(r.getAssignedSourceId());
+            return null;
+        });
+        
+        return sourceAccountId;
+		
 	}
 
 	@Override
@@ -794,13 +817,11 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 	@Override
 	public ConfConferences findConfConferencesByConfId(Long confId) {
 
-		int namespaceId = (UserContext.current().getUser().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getUser().getNamespaceId();
 		final ConfConferences[] result = new ConfConferences[1];
 		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhConfConferences.class), result, 
 				(DSLContext context, Object reducingContext) -> {
 					List<ConfConferences> list = context.select().from(Tables.EH_CONF_CONFERENCES)
-							.where(Tables.EH_CONF_CONFERENCES.CONF_ID.eq(confId))
-							.and(Tables.EH_CONF_CONFERENCES.NAMESPACE_ID.eq(namespaceId))
+							.where(Tables.EH_CONF_CONFERENCES.MEETING_NO.eq(confId))
 							.fetch().map((r) -> {
 								return ConvertHelper.convert(r, ConfConferences.class);
 							});
@@ -924,6 +945,8 @@ public class VideoConfProviderImpl implements VideoConfProvider {
             if (accounts.size() >= pageSize) {
                 locator.setAnchor(accounts.get(accounts.size() - 1).getId());
                 return AfterAction.done;
+            } else {
+                locator.setAnchor(null);
             }
             return AfterAction.next;
         });
@@ -1295,6 +1318,13 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 		}
         
         return count[0];
+	}
+
+	@Override
+	public void deleteSourceVideoConfAccount(long id) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhConfSourceAccounts.class));
+		EhConfSourceAccountsDao dao = new EhConfSourceAccountsDao(context.configuration());
+		dao.deleteById(id);
 	}
 	
 	

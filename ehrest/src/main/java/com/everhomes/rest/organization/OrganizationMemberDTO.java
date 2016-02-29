@@ -1,8 +1,12 @@
 // @formatter:off
 package com.everhomes.rest.organization;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -35,6 +39,21 @@ public class OrganizationMemberDTO {
 	private String contactToken;
 	private String contactDescription;
 	private Byte   status;
+	
+	@ItemType(AclRoleAssignmentsDTO.class)
+	private List<AclRoleAssignmentsDTO> aclRoles;
+	
+	private Long groupId;
+	
+	private String groupName;
+	
+	private String   nickName;
+	private String   avatar;
+	
+	private Long creatorUid;
+	
+	private Long   employeeNo;
+	private Byte   gender;
 	
 	public OrganizationMemberDTO() {
     }
@@ -169,6 +188,105 @@ public class OrganizationMemberDTO {
 
 	public void setOrganizationName(String organizationName) {
 		this.organizationName = organizationName;
+	}
+
+
+
+
+
+
+	public Long getGroupId() {
+		return groupId;
+	}
+
+
+
+	public void setGroupId(Long groupId) {
+		this.groupId = groupId;
+	}
+
+
+
+	public String getGroupName() {
+		return groupName;
+	}
+
+
+
+	public void setGroupName(String groupName) {
+		this.groupName = groupName;
+	}
+
+
+
+	public List<AclRoleAssignmentsDTO> getAclRoles() {
+		return aclRoles;
+	}
+
+
+
+	public void setAclRoles(List<AclRoleAssignmentsDTO> aclRoles) {
+		this.aclRoles = aclRoles;
+	}
+
+
+
+	public String getNickName() {
+		return nickName;
+	}
+
+
+
+	public void setNickName(String nickName) {
+		this.nickName = nickName;
+	}
+
+
+
+	public String getAvatar() {
+		return avatar;
+	}
+
+
+
+	public void setAvatar(String avatar) {
+		this.avatar = avatar;
+	}
+
+
+
+	public Long getCreatorUid() {
+		return creatorUid;
+	}
+
+
+
+	public void setCreatorUid(Long creatorUid) {
+		this.creatorUid = creatorUid;
+	}
+
+
+
+	public Long getEmployeeNo() {
+		return employeeNo;
+	}
+
+
+
+	public void setEmployeeNo(Long employeeNo) {
+		this.employeeNo = employeeNo;
+	}
+
+
+
+	public Byte getGender() {
+		return gender;
+	}
+
+
+
+	public void setGender(Byte gender) {
+		this.gender = gender;
 	}
 
 

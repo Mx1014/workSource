@@ -1348,4 +1348,14 @@ public class PropertyMgrController extends ControllerBase {
         return response;
     }
 	
+	@RequestMapping("sendNoticeToOrganizationMember")
+    @RestReturn(value=String.class)
+    public RestResponse sendNoticeToOrganizationMember(@Valid PropCommunityBuildAddessCommand cmd){
+		propertyMgrService.sendNoticeToOrganizationMember(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+	
 }

@@ -85,7 +85,7 @@ public class RegionProviderTest extends CoreServerTestCase {
             System.out.println("region: " + region.toString());
         }
         
-        regions = this.regionProvider.listDescendantRegions(null, RegionScope.CITY, null, 
+        regions = this.regionProvider.listDescendantRegions(0, null, RegionScope.CITY, null, 
                 new Tuple<String, SortOrder>("name", SortOrder.DESC));
         
         for(Region region: regions) {

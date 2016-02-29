@@ -23,8 +23,11 @@ public class CreateOrganizationCommand {
 	private String  path;
 	private Integer level;
 	private Long    addressId;
-	@NotNull
 	private String   OrganizationType;
+	
+	private String groupType;
+	
+	private Long roleId;
 	
 	public CreateOrganizationCommand() {
     }
@@ -87,6 +90,26 @@ public class CreateOrganizationCommand {
 
 	public void setOrganizationType(String organizationType) {
 		OrganizationType = organizationType;
+	}
+
+
+	public String getGroupType() {
+		return groupType;
+	}
+
+
+	public void setGroupType(String groupType) {
+		this.groupType = groupType;
+	}
+
+
+	public Long getRoleId() {
+		return roleId;
+	}
+
+
+	public void setRoleId(Long roleId) {
+		this.roleId = roleId;
 	}
 
 

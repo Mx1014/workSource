@@ -243,84 +243,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         return enterprise;
     }
     
-    @Override
-    public EnterpriseDTO createEnterprise(CreateEnterpriseCommand cmd) {
-    	
-    	User user = UserContext.current().getUser();
-        Long userId = user.getId();
-        
-    	Enterprise enterprise = new Enterprise();
-        enterprise.setCreatorUid(userId);
-        enterprise.setAvatar(cmd.getAvatar());
-        enterprise.setDescription(cmd.getDescription());
-        enterprise.setDisplayName(cmd.getDisplayName());
-        enterprise.setName(cmd.getName());
-        enterprise.setMemberCount(cmd.getMemberCount());
-        enterprise.setContactsPhone(cmd.getContactsPhone());
-        enterprise.setEnterpriseAddress(cmd.getEnterpriseAddress());
-        enterprise.setEnterpriseCheckinDate(cmd.getEnterpriseCheckinDate());
-        enterprise.setPostUri(cmd.getPostUri());
-        enterprise.setNamespaceId(cmd.getNamespaceId());
-        
-        if(null == cmd.getNamespaceId()){
-        	enterprise.setNamespaceId(0);
-        }
-        this.dbProvider.execute((status) -> {
-	        this.enterpriseProvider.createEnterprise(enterprise);
 
-	        EnterpriseCommunityMap enterpriseCommunityMap = new EnterpriseCommunityMap();
-	        enterpriseCommunityMap.setCommunityId(cmd.getCommunityId());
-	        enterpriseCommunityMap.setMemberType(EnterpriseCommunityMapType.Enterprise.getCode());
-	        enterpriseCommunityMap.setMemberId(enterprise.getId());
-
-	        enterpriseCommunityMap.setMemberStatus(EnterpriseCommunityMapStatus.ACTIVE.getCode());
-	        enterpriseCommunityMap.setCreatorUid(userId);
-	        enterpriseCommunityMap.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-	        enterpriseCommunityMap.setApproveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-	        this.enterpriseProvider.createEnterpriseCommunityMap(enterpriseCommunityMap);
-	        
-	        requestToJoinCommunity(user, enterprise.getId(), cmd.getCommunityId());
-	        
-	        List<EnterpriseAddressDTO> addressDtos = cmd.getAddressDTOs();
-	        if(addressDtos != null && addressDtos.size() > 0) {
-	        	List<Address> address = new ArrayList<Address>();
-	        	for(EnterpriseAddressDTO addressDto :addressDtos) {
-	        		if(addressDto != null) {
-		        		EnterpriseAddress enterpriseAddr = new EnterpriseAddress();
-		                enterpriseAddr.setAddressId(addressDto.getAddressId());
-		                enterpriseAddr.setBuildingId(addressDto.getBuildingId());
-		                enterpriseAddr.setBuildingName(addressDto.getBuildingName());
-		                enterpriseAddr.setEnterpriseId(enterprise.getId());
-		                enterpriseAddr.setCreatorUid(userId);
-		                enterpriseAddr.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		                enterpriseAddr.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		                enterpriseAddr.setStatus(EnterpriseAddressStatus.ACTIVE.getCode());
-		
-		                this.enterpriseProvider.createEnterpriseAddress(enterpriseAddr);
-		                
-		                if(null != addressDto.getAddressId()){
-		                	Address addr = this.addressProvider.findAddressById(addressDto.getAddressId());
-		 	                if(addr != null)
-		 	                	address.add(addr);
-		         		}
-		                }
-		               
-	        	}
-	        	enterprise.setAddress(address);
-	        }
-
-	        enterpriseSearcher.feedDoc(enterprise);
-	        return null;
-        });
-        
-        processEnterpriseAttachments(userId, cmd.getAttachments(), enterprise);
-        
-        EnterpriseDTO enterpriseDto = toEnterpriseDto(userId, enterprise);
-        
-        
-        return enterpriseDto;
-    }
-    
     @Override
     public List<CommunityDoc> searchCommunities(SearchEnterpriseCommunityCommand cmd) {
         if(cmd.getKeyword() == null){
@@ -545,8 +468,9 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         User user = UserContext.current().getUser();
         Long userId = user.getId();
         
-        Long communityId = cmd.getCommunityId();
-        List<Long> enterpriseIdList = listEnterpriseIdByCommunityId(communityId);
+        Integer namespaceId = UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId());
+//        Long communityId = cmd.getCommunityId();
+//        List<Long> enterpriseIdList = listEnterpriseIdByCommunityId(communityId);
         
         List<UserGroup> userGroupList = userProvider.listUserGroups(user.getId(), GroupDiscriminator.ENTERPRISE.getCode());
         int size = (userGroupList == null) ? 0 : userGroupList.size();
@@ -565,23 +489,40 @@ public class EnterpriseServiceImpl implements EnterpriseService {
                     continue;
                 }
                 
-                if(communityId != null && !enterpriseIdList.contains(userGroup.getGroupId())) {
-                    if(LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("The group is filtered for not in the community, userId=" + userId 
-                            + ", enterpriseId=" + userGroup.getGroupId() + ", communityId=" + communityId);
-                    }
-                    continue;
-                }
+//                if(communityId != null && !enterpriseIdList.contains(userGroup.getGroupId())) {
+//                    if(LOGGER.isDebugEnabled()) {
+//                        LOGGER.debug("The group is filtered for not in the community, userId=" + userId 
+//                            + ", enterpriseId=" + userGroup.getGroupId() + ", communityId=" + communityId);
+//                    }
+//                    continue;
+//                }
                 
                 enterprise = this.enterpriseProvider.findEnterpriseById(userGroup.getGroupId());
                 
+                if(enterprise == null) {
+                    if(LOGGER.isDebugEnabled()) {
+                    	LOGGER.debug("The enterprise is not exist, userId=" + userId 
+                          + ", enterpriseId=" + userGroup.getGroupId());
+                    }
+                  continue;
+                }
+                
+                if(enterprise != null &&  !namespaceId.equals(enterprise.getNamespaceId())) {
+	                if(LOGGER.isDebugEnabled()) {
+	                	LOGGER.debug("The group is filtered for not in the namespaceId, userId=" + userId 
+	                      + ", enterpriseId=" + userGroup.getGroupId() + ", namespaceId=" + namespaceId);
+	              
+	                }
+                
+	                continue;
+                }	
                 this.enterpriseProvider.populateEnterpriseAttachments(enterprise);
                 this.enterpriseProvider.populateEnterpriseAddresses(enterprise);
                 populateEnterprise(enterprise);
                 
                 // 为了使得企业信息里包含园区信息（特别是论坛信息），故需要给企业一个当前使用的园区
                 enterprise.setVisibleRegionType(VisibleRegionType.COMMUNITY.getCode());
-                enterprise.setVisibleRegionId(communityId);
+                enterprise.setVisibleRegionId(enterprise.getVisibleRegionId());
                 dto = toEnterpriseDto(userId, enterprise);
                 if(dto != null) {
                     enterpriseList.add(dto);
@@ -821,82 +762,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     
 	 }
 
-	@Override
-	public EnterpriseDTO updateEnterprise(UpdateEnterpriseCommand cmd) {
-		User user = UserContext.current().getUser();
-        Long userId = user.getId();
-        
-    	Enterprise enterprise = new Enterprise();
-    	enterprise.setId(cmd.getId());
-        enterprise.setAvatar(cmd.getAvatar());
-        enterprise.setDescription(cmd.getDescription());
-        enterprise.setDisplayName(cmd.getDisplayName());
-        enterprise.setName(cmd.getName());
-        enterprise.setMemberCount(cmd.getMemberCount());
-        enterprise.setContactsPhone(cmd.getContactsPhone());
-        enterprise.setEnterpriseAddress(cmd.getEnterpriseAddress());
-        enterprise.setEnterpriseCheckinDate(cmd.getEnterpriseCheckinDate());
-        enterprise.setPostUri(cmd.getPostUri());
-        enterprise.setNamespaceId(cmd.getNamespaceId());
-        
-        if(null == cmd.getNamespaceId()){
-        	enterprise.setNamespaceId(0);
-        }
-        this.enterpriseProvider.updateEnterprise(enterprise);
-        
-        List<EnterpriseAddressDTO> addressDtos = cmd.getAddressDTOs();
-        List<Long> addressIds = new ArrayList<Long>();
-        if(addressDtos != null && addressDtos.size() > 0){
-        	for (EnterpriseAddressDTO enterpriseAddressDTO : addressDtos) {
-             	addressIds.add(enterpriseAddressDTO.getAddressId());
-     		}
-        }
-       
-        List<EnterpriseAddress> eas = enterpriseProvider.findEnterpriseAddressByEnterpriseId(cmd.getId());
-        if(eas != null && eas.size() > 0) {
-        	for(EnterpriseAddress ea : eas) {
-        		if(!addressIds.contains(ea.getAddressId())) {
-        			enterpriseProvider.deleteEnterpriseAddress(ea);
-        		}
-        	}
-        }
-        if(addressIds != null && addressIds.size() > 0) {
-        	List<Address> address = new ArrayList<Address>();
-        	for(EnterpriseAddressDTO enterpriseAddressDTO : addressDtos) {
-        		if(enterpriseAddressDTO.getAddressId() != null) {
-        			Boolean isExist = this.enterpriseProvider.isExistInEnterpriseAddresses(cmd.getId(), enterpriseAddressDTO.getAddressId());
-        			if(!isExist) {
-        			
-		        		EnterpriseAddress enterpriseAddr = new EnterpriseAddress();
-		                enterpriseAddr.setAddressId(enterpriseAddressDTO.getAddressId());
-		                enterpriseAddr.setBuildingId(enterpriseAddressDTO.getBuildingId());
-		                enterpriseAddr.setBuildingName(enterpriseAddressDTO.getBuildingName());
-		                enterpriseAddr.setEnterpriseId(enterprise.getId());
-		                enterpriseAddr.setCreatorUid(userId);
-		                enterpriseAddr.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		                enterpriseAddr.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		                enterpriseAddr.setStatus(EnterpriseAddressStatus.ACTIVE.getCode());
-		
-		                this.enterpriseProvider.createEnterpriseAddress(enterpriseAddr);
-        			}
-	                
-	                Address addr = this.addressProvider.findAddressById(enterpriseAddressDTO.getAddressId());
-	                if(addr != null)
-	                	address.add(addr);
-        		}
-        	}
-        	enterprise.setAddress(address);
-        }
-        
-        
-        
-        processEnterpriseAttachments(userId, cmd.getAttachments(), enterprise);
-        
-        EnterpriseDTO enterpriseDto = toEnterpriseDto(userId, enterprise);
-        
-        
-        return enterpriseDto;
-	}
+
 
 	@Override
 	public void setCurrentEnterprise(SetCurrentEnterpriseCommand cmd) { 

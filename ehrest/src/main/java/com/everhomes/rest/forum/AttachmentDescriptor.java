@@ -14,6 +14,8 @@ public class AttachmentDescriptor {
     
     private String contentUri;
     
+    private String contentUrl;
+    
     public AttachmentDescriptor() {
     }
 
@@ -32,8 +34,18 @@ public class AttachmentDescriptor {
     public void setContentUri(String contentUri) {
         this.contentUri = contentUri;
     }
+    
+    
 
-    @Override
+    public String getContentUrl() {
+		return contentUrl;
+	}
+
+	public void setContentUrl(String contentUrl) {
+		this.contentUrl = contentUrl;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

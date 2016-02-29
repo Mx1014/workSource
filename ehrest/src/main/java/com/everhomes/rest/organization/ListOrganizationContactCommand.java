@@ -16,7 +16,10 @@ public class ListOrganizationContactCommand {
 	@NotNull
 	private Long    organizationId;
 	private Integer pageOffset;
+	private Long pageAnchor; 
 	private Integer pageSize;
+	
+	private String keywords;
 	
 	public ListOrganizationContactCommand() {
     }
@@ -47,6 +50,26 @@ public class ListOrganizationContactCommand {
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
 	}
+
+	public Long getPageAnchor() {
+		return pageAnchor;
+	}
+
+
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
+	}
+
+
+	public String getKeywords() {
+		return keywords;
+	}
+
+
+	public void setKeywords(String keywords) {
+		this.keywords = keywords;
+	}
+
 
 	@Override
     public String toString() {

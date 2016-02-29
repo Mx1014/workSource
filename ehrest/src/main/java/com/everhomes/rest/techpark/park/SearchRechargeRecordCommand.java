@@ -6,6 +6,9 @@ package com.everhomes.rest.techpark.park;
  *  <li>rechargePhone: 充值人人手机号</li>
  *  <li>plateNumber: 车牌号</li>
  *  <li>communityId: 园区id</li>
+ *  <li>startTime: 充值开始时间</li>
+ *  <li>endTime: 充值结束时间</li>
+ *  <li>rechargeStatus: 充值状态</li>
  * </ul>
  *
  */
@@ -21,7 +24,13 @@ public class SearchRechargeRecordCommand {
 	
 	private Long pageAnchor;
 	
-	private Integer pageSize; 
+	private Integer pageSize;
+	
+	private Long startTime;
+	
+	private Long endTime;
+	
+	private Byte rechargeStatus;
 
 	public Long getCommunityId() {
 		return communityId;
@@ -69,6 +78,30 @@ public class SearchRechargeRecordCommand {
 
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
+	}
+
+	public Long getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(Long startTime) {
+		this.startTime = startTime;
+	}
+
+	public Long getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(Long endTime) {
+		this.endTime = endTime;
+	}
+
+	public Byte getRechargeStatus() {
+		return rechargeStatus;
+	}
+
+	public void setRechargeStatus(Byte rechargeStatus) {
+		this.rechargeStatus = rechargeStatus;
 	}
 	
 }

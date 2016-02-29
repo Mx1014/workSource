@@ -11,25 +11,28 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhWarningContacts implements java.io.Serializable {
 
-	private static final long serialVersionUID = -2115740706;
+	private static final long serialVersionUID = -1862076776;
 
-	private java.lang.Long   id;
-	private java.lang.String contactor;
-	private java.lang.String mobile;
-	private java.lang.String email;
+	private java.lang.Long    id;
+	private java.lang.String  contactor;
+	private java.lang.String  mobile;
+	private java.lang.String  email;
+	private java.lang.Integer namespaceId;
 
 	public EhWarningContacts() {}
 
 	public EhWarningContacts(
-		java.lang.Long   id,
-		java.lang.String contactor,
-		java.lang.String mobile,
-		java.lang.String email
+		java.lang.Long    id,
+		java.lang.String  contactor,
+		java.lang.String  mobile,
+		java.lang.String  email,
+		java.lang.Integer namespaceId
 	) {
 		this.id = id;
 		this.contactor = contactor;
 		this.mobile = mobile;
 		this.email = email;
+		this.namespaceId = namespaceId;
 	}
 
 	public java.lang.Long getId() {
@@ -62,5 +65,13 @@ public class EhWarningContacts implements java.io.Serializable {
 
 	public void setEmail(java.lang.String email) {
 		this.email = email;
+	}
+
+	public java.lang.Integer getNamespaceId() {
+		return this.namespaceId;
+	}
+
+	public void setNamespaceId(java.lang.Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 }

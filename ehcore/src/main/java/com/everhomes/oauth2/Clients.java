@@ -39,6 +39,7 @@ public class Clients {
 	private CloseableHttpClient openHttpClient() {
 		if (isHttpClientOpen())
 			return this.httpClient;
+		
 
 		HttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
 		this.httpClient = HttpClients.custom().setConnectionManager(cm).build();

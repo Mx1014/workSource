@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
  *  <li>accountId: 视频账号id</li>
  *  <li>status: 状态 0-失效 1-有效 2-被锁定 </li>
  *  <li>occupyFlag: 使用状态 0-空闲 1-占用 </li>
+ *  <li>confId: 账号正在开会时的会议id </li>
  * </ul>
  *
  */
@@ -17,6 +18,8 @@ public class UserAccountDTO {
 	private Byte status;
 	
 	private Byte occupyFlag;
+	
+	private Long confId;
 
 	public Long getAccountId() {
 		return accountId;
@@ -42,6 +45,14 @@ public class UserAccountDTO {
 		this.occupyFlag = occupyFlag;
 	}
 	
+	public Long getConfId() {
+		return confId;
+	}
+
+	public void setConfId(Long confId) {
+		this.confId = confId;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

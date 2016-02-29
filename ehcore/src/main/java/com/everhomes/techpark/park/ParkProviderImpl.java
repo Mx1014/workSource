@@ -26,17 +26,21 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.techpark.onlinePay.PayStatus;
 import com.everhomes.rest.techpark.onlinePay.RechargeStatus;
 import com.everhomes.rest.techpark.park.ApplyParkingCardStatus;
+import com.everhomes.rest.techpark.park.PreferentialRuleType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhParkApplyCardDao;
 import com.everhomes.server.schema.tables.daos.EhParkChargeDao;
+import com.everhomes.server.schema.tables.daos.EhPreferentialRulesDao;
 import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhParkApplyCard;
 import com.everhomes.server.schema.tables.pojos.EhParkCharge;
+import com.everhomes.server.schema.tables.pojos.EhPreferentialRules;
 import com.everhomes.server.schema.tables.pojos.EhRechargeInfo;
 import com.everhomes.server.schema.tables.records.EhParkApplyCardRecord;
 import com.everhomes.server.schema.tables.records.EhParkChargeRecord;
+import com.everhomes.server.schema.tables.records.EhPreferentialRulesRecord;
 import com.everhomes.server.schema.tables.records.EhRechargeInfoRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.util.ConvertHelper;
@@ -280,9 +284,9 @@ public class ParkProviderImpl implements ParkProvider {
 	}
 
 	@Override
-	public List<RechargeInfo> searchRechargeRecord(Long communityId,
-			String ownerName, String rechargePhone, String plateNumber,
-			CrossShardListingLocator locator, int count) {
+	public List<RechargeInfo> searchRechargeRecord(Long startTime, Long endTime, Byte rechargeStatus, Long communityId,
+			String ownerName, String rechargePhone, String plateNumber, CrossShardListingLocator locator, int count) {
+		
 		List<RechargeInfo> rechargeInfo = new ArrayList<RechargeInfo>();
 		if (locator.getShardIterator() == null) {
             AccessSpec accessSpec = AccessSpec.readOnlyWith(EhRechargeInfo.class);
@@ -514,5 +518,35 @@ public class ParkProviderImpl implements ParkProvider {
 		});
 		return rechargeInfo;
 	}
+	
+	@Override
+	public PreferentialRule findPreferentialRuleByCommunityId(String ownerType, Long ownerId){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<PreferentialRule> preferentialRules = new ArrayList<PreferentialRule>();
+		SelectQuery<EhPreferentialRulesRecord> query = context.selectQuery(Tables.EH_PREFERENTIAL_RULES);
+		
+		query.addConditions(Tables.EH_PREFERENTIAL_RULES.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_PREFERENTIAL_RULES.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_PREFERENTIAL_RULES.TYPE.eq(PreferentialRuleType.PARKING.getCode()));
+
+		query.fetch().map((r) -> {
+			preferentialRules.add(ConvertHelper.convert(r, PreferentialRule.class));
+			return null;
+		});
+		
+		if(0 != preferentialRules.size()){
+			return preferentialRules.get(0);
+		}
+		
+		return null;
+	}
+	
+	@Override
+	public void updatePreferentialRuleById(PreferentialRule preferentialRule){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhPreferentialRules.class));
+        EhPreferentialRulesDao dao = new EhPreferentialRulesDao(context.configuration());
+        dao.update(preferentialRule);
+	}
+	
 
 }

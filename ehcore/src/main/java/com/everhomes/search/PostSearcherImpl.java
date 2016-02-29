@@ -29,6 +29,8 @@ import org.springframework.stereotype.Service;
 
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.CommunityService;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.forum.Forum;
@@ -81,6 +83,9 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
     
     @Autowired
     private CommunityService communityService;
+    
+    @Autowired
+    private CommunityProvider communityProvider;
     
     @Autowired
     ForumService forumService;
@@ -249,6 +254,11 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
         if(cmd.getSearchFlag() != null && cmd.getSearchFlag() == 1) {
             GetNearbyCommunitiesByIdCommand nearCmd = new GetNearbyCommunitiesByIdCommand();
             nearCmd.setId(cmd.getCommunityId());
+            Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+            Long forumId = ForumConstants.SYSTEM_FORUM;
+            if(community != null) {
+                forumId = community.getDefaultForumId();
+            }
             List<CommunityDTO> coms = communityService.getNearbyCommunityById(nearCmd);
             List<Long> comIds = new ArrayList<Long>();
             for(CommunityDTO cDTO : coms) {
@@ -259,42 +269,42 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
             if(comIds.size() > 0) {
                 FilterBuilder comIn = boolInFilter("visibleRegionId", comIds);
                 FilterBuilder comType = FilterBuilders.termFilter("visibleRegionType", (long)VisibleRegionType.COMMUNITY.getCode());
-                FilterBuilder comForum = FilterBuilders.termFilter("forumId", ForumConstants.SYSTEM_FORUM);
-                comFilter = FilterBuilders.andFilter(comIn, comType, comForum);
-                }
+                FilterBuilder comForum = FilterBuilders.termFilter("forumId", forumId);
+                comFilter = FilterBuilders.boolFilter().must(comIn, comType, comForum);
+            }
             
             List<GroupDTO> groups = groupService.listUserRelatedGroups();
-            List<Long> groupIds = new ArrayList<Long>();
-            Integer namespaceId = (cmd.getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
-            if(namespaceId == Namespace.DEFAULT_NAMESPACE){
-            	 groupIds.add(1l);
-            }
+            List<Long> groupForumIds = new ArrayList<Long>();
+//            Integer namespaceId = (cmd.getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
+//            if(namespaceId == Namespace.DEFAULT_NAMESPACE){
+//            	 groupForumIds.add(1l);
+//            }
             for(GroupDTO groupDTO : groups) {
-                groupIds.add(groupDTO.getId());
-                }
+                groupForumIds.add(groupDTO.getOwningForumId());
+            }
             
-            if(groupIds.size() > 0) {
+            if(groupForumIds.size() > 0) {
                 if(null == comFilter) {
-                    comFilter = boolInFilter("forumId", groupIds);
+                    comFilter = boolInFilter("forumId", groupForumIds);
                 } else {
-                    comFilter = FilterBuilders.boolFilter().should(comFilter,boolInFilter("forumId", groupIds)); 
+                    comFilter = FilterBuilders.boolFilter().should(comFilter, boolInFilter("forumId", groupForumIds)); 
                      }
                  }
             
             
-            comFilter = FilterBuilders.boolFilter().should(comFilter, FilterBuilders.termFilter("namespaceId", namespaceId));
+//            comFilter = FilterBuilders.boolFilter().should(comFilter, FilterBuilders.termFilter("namespaceId", namespaceId));
             fb = comFilter;
         } else {
             if(cmd.getForumId() != null) {
                 fb = FilterBuilders.termFilter("forumId", cmd.getForumId());    
-                }
+            }
         }
         
         if(null == fb) {
             fb = FilterBuilders.termFilter("parentPostId", 0);
         } else {
             fb = FilterBuilders.boolFilter().must(fb, FilterBuilders.termFilter("parentPostId", 0));
-            }
+        }
         
         return fb;
     }
@@ -353,8 +363,14 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
         builder.setQuery(qb);
         
+        if(LOGGER.isDebugEnabled())
+			LOGGER.info("PostSearcherImpl query builder ："+builder);
+        
         SearchResponse rsp = builder.execute().actionGet();
         List<Long> ids = getIds(rsp);
+        
+        if(LOGGER.isDebugEnabled())
+			LOGGER.info("PostSearcherImpl query SearchResponse ids ："+ids);
         
         ListPostCommandResponse listPost = new ListPostCommandResponse();
         if(ids.size() > pageSize) {

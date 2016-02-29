@@ -30,6 +30,9 @@ import com.everhomes.enterprise.EnterpriseContactGroupMember;
 import com.everhomes.enterprise.EnterpriseContactProvider;
 import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.videoconf.ConfAccountDTO;
 import com.everhomes.rest.videoconf.EnterpriseUsersDTO;
 import com.everhomes.rest.videoconf.ListEnterpriseVideoConfAccountCommand;
@@ -52,17 +55,15 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
 	@Autowired
     private UserProvider userProvider;
 	
-	@Autowired
-	private EnterpriseContactProvider enterpriseContactProvider;
 	
 	@Autowired
 	private VideoConfProvider vcProvider;
 	
 	@Autowired
-	private EnterpriseProvider enterpriseProvider;
+    private ConfigurationProvider configProvider;
 	
 	@Autowired
-    private ConfigurationProvider configProvider;
+    private OrganizationProvider organizationProvider;
 	
 	@Override
 	public void deleteById(Long id) {
@@ -73,13 +74,14 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
 	public void bulkUpdate(List<ConfAccounts> accounts) {
 		BulkRequestBuilder brb = getClient().prepareBulk();
         for (ConfAccounts account : accounts) {
-        	
-            XContentBuilder source = createDoc(account);
-            if(null != source) {
-                LOGGER.info("conf account id:" + account.getId());
-                brb.add(Requests.indexRequest(getIndexName()).type(getIndexType())
-                        .id(account.getId().toString()).source(source));    
-                }
+        	if(account.getOwnerId() != null && account.getOwnerId() != 0) {
+	            XContentBuilder source = createDoc(account);
+	            if(null != source) {
+	                LOGGER.info("conf account id:" + account.getId());
+	                brb.add(Requests.indexRequest(getIndexName()).type(getIndexType())
+	                        .id(account.getId().toString()).source(source));    
+	                }
+        	}
             
         }
         if (brb.numberOfActions() > 0) {
@@ -90,9 +92,11 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
 
 	@Override
 	public void feedDoc(ConfAccounts account) {
-		XContentBuilder source = createDoc(account);
-        
-        feedDoc(account.getId().toString(), source);
+		if(account.getOwnerId() != 0) {
+			XContentBuilder source = createDoc(account);
+	        
+	        feedDoc(account.getId().toString(), source);
+		}
 
 	}
 
@@ -197,27 +201,18 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
 				dto.setConfType(category.getConfType());
 			}
 			
-			Enterprise enterprise = enterpriseProvider.findEnterpriseById(account.getEnterpriseId());
-			if(enterprise != null)
-				dto.setEnterpriseName(enterprise.getName());
-			EnterpriseContact contact = enterpriseContactProvider.queryContactByUserId(account.getEnterpriseId(), account.getOwnerId());
-			if(contact != null) {
-				
-				dto.setUserName(contact.getName());
-				EnterpriseContactGroupMember member = enterpriseContactProvider.getContactGroupMemberByContactId(contact.getEnterpriseId(), contact.getId());
+			Organization org = organizationProvider.findOrganizationById(account.getEnterpriseId());
+			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(account.getOwnerId(), org.getId());
+			if(org != null)
+				dto.setEnterpriseName(org.getName());
+				dto.setUserName(member.getContactName());
 				if (member != null) {
-					EnterpriseContactGroup group = enterpriseContactProvider.getContactGroupById(member.getContactGroupId());
-					if (group != null) {
-						dto.setDepartment(group.getName());
+					Organization dept = organizationProvider.findOrganizationById(member.getGroupId());
+					if (dept != null) {
+						dto.setDepartment(dept.getName());
 					}
 				}
-				
-				List<EnterpriseContactEntry> entry = enterpriseContactProvider.queryContactEntryByContactId(contact);
-				if(entry != null && entry.size() >0) {
-					dto.setMobile(entry.get(0).getEntryValue());
-				}
-			}
-			
+				dto.setMobile(member.getContactToken());
 			confAccounts.add(dto);
         }
         response.setConfAccounts(confAccounts);
@@ -249,28 +244,16 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
 //					b.field("userType", 2);
 //				}
 //			}
-            EnterpriseContact contact = enterpriseContactProvider.queryContactByUserId(account.getEnterpriseId(), account.getOwnerId());
-            if(null != contact) {
-                b.field("userName", contact.getName());
-                
-                EnterpriseContactGroupMember member = enterpriseContactProvider.getContactGroupMemberByContactId(contact.getEnterpriseId(), contact.getId());
-				if (member != null) {
-					EnterpriseContactGroup group = enterpriseContactProvider.getContactGroupById(member.getContactGroupId());
-					if (group != null) {
-						b.field("department", group.getName());
-					} else {
-						b.field("department", "");
-					}
+			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(account.getOwnerId(), account.getEnterpriseId());
+            if(null != member) {
+                b.field("userName", member.getContactName());
+                Organization dept = organizationProvider.findOrganizationById(member.getGroupId());
+                if (null != dept) {
+					b.field("department", dept.getName());
 				} else {
 					b.field("department", "");
 				}
-                
-                List<EnterpriseContactEntry> entry = enterpriseContactProvider.queryContactEntryByContactId(contact);
-    			if(entry != null && entry.size() >0) {
-                    b.field("contact", entry.get(0).getEntryValue());
-                } else {
-                    b.field("contact", "");
-                }
+                b.field("contact", member.getContactToken());
     			
             } else {
                 b.field("userName", "");
@@ -287,9 +270,9 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
                 b.field("confType", "");
             }
             
-            Enterprise enterprise = enterpriseProvider.findEnterpriseById(account.getEnterpriseId());
-            if(null != enterprise) {
-                b.field("enterpriseName", enterprise.getName());
+            Organization org = organizationProvider.findOrganizationById(account.getEnterpriseId());
+            if(null != org) {
+                b.field("enterpriseName", org.getName());
             } else {
                 b.field("enterpriseName", "");
             }

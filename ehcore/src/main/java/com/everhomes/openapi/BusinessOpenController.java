@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.everhomes.business.BusinessService;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
-import com.everhomes.category.CategoryProviderImpl;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -23,6 +22,9 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.business.ListBusinessByCommonityIdCommand;
+import com.everhomes.rest.business.ListUserByIdentifierCommand;
+import com.everhomes.rest.business.ListUserByKeywordCommand;
 import com.everhomes.rest.business.SyncBusinessCommand;
 import com.everhomes.rest.business.SyncDeleteBusinessCommand;
 import com.everhomes.rest.business.SyncUserAddShopStatusCommand;
@@ -49,7 +51,6 @@ import com.everhomes.rest.user.ListUserCommand;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserDtoForBiz;
 import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.user.UserInfoFroBiz;
 import com.everhomes.user.SignupToken;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityService;
@@ -151,6 +152,19 @@ public class BusinessOpenController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    /**
+     * <b>URL: /openapi/syncUserDelShopStatus</b>
+     * <p>同步未开店状态</p>
+     */
+    @RequestMapping("syncUserDelShopStatus")
+    @RestReturn(value=String.class)
+    public RestResponse syncUserDelShopStatus(SyncUserAddShopStatusCommand cmd) {
+        userActivityService.cancelShop(cmd.getUserId());
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
     /**
      * <b>URL: /openapi/syncUserFavorite</b>
@@ -200,8 +214,8 @@ public class BusinessOpenController extends ControllerBase {
         MessageDTO messageDto = new MessageDTO();
         messageDto.setAppId(AppConstants.APPID_MESSAGING);
         messageDto.setSenderUid(User.BIZ_UID);
-        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()));
-        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.BIZ_USER_LOGIN.getUserId())));
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()), 
+            new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.BIZ_USER_LOGIN.getUserId())));
         messageDto.setBodyType(MessageBodyType.TEXT.getCode());
         messageDto.setBody(content);
         messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
@@ -371,6 +385,34 @@ public class BusinessOpenController extends ControllerBase {
     public RestResponse getUserInfoById(@Valid GetUserInfoByIdCommand cmd) {
     	UserInfo user = this.userService.getUserInfoById(cmd);
     	RestResponse response =  new RestResponse(user);
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+		return response;
+    }
+    
+    @RequestMapping("listUserByKeyword")
+    @RestReturn(value=UserInfo.class,collection=true)
+    public RestResponse listUserByKeyword(@Valid ListUserByKeywordCommand cmd) {
+    	List<UserInfo> users = this.businessService.listUserByKeyword(cmd);
+    	RestResponse response =  new RestResponse(users);
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+		return response;
+    }
+    @RequestMapping("listBusinessByCommonityId")
+    @RestReturn(value=String.class,collection=true)
+    public RestResponse listBusinessByCommonityId(@Valid ListBusinessByCommonityIdCommand cmd) {
+    	List<String> list = this.businessService.listBusinessByCommonityId(cmd);
+    	RestResponse response =  new RestResponse(list);
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+		return response;
+    }
+    @RequestMapping("listUserByIdentifier")
+    @RestReturn(value=UserInfo.class,collection=true)
+    public RestResponse listUserByIdentifier(@Valid ListUserByIdentifierCommand cmd) {
+    	List<UserInfo> users = this.businessService.listUserByIdentifier(cmd);
+    	RestResponse response =  new RestResponse(users);
     	response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
 		return response;

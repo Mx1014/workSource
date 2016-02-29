@@ -200,8 +200,9 @@ public class RentalServiceImpl implements RentalService {
 		
 		Long userId = UserContext.current().getUser().getId();
 		checkEnterpriseCommunityIdIsNull(cmd.getOwnerId());
-//		RentalRule rentalRule = rentalProvider.getRentalRule(
-//				cmd.getOwnerId(),cmd.getOwnerType(), cmd.getSiteType());
+		RentalRule rentalRuleExist = rentalProvider.getRentalRule(
+				cmd.getOwnerId(),cmd.getOwnerType(), cmd.getSiteType());
+		if(rentalRuleExist != null) {
 //		rentalRule.setOwnerId(cmd.getOwnerId());
 //		rentalRule.setOwnerType(cmd.getOwnerType());
 //		rentalRule.setContactNum(cmd.getContactNum());
@@ -219,11 +220,18 @@ public class RentalServiceImpl implements RentalService {
 //		rentalRule.setContactAddress(cmd.getContactAddress());
 //		rentalRule.setContactName(cmd.getContactName());
 //		rentalRule.setOperatorUid(userId);
-		RentalRule rentalRule =ConvertHelper.convert(cmd,RentalRule.class  );
-		rentalRule.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		rentalRule.setOperatorUid(userId);
-		rentalProvider.updateRentalRule(rentalRule);
-		
+			RentalRule rentalRule =ConvertHelper.convert(cmd,RentalRule.class  );
+			rentalRule.setPaymentRatio(cmd.getPayRatio());
+			rentalRule.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			rentalRule.setOperatorUid(userId);
+			rentalProvider.updateRentalRule(rentalRule);
+		} else {
+			RentalRule rentalRule =ConvertHelper.convert(cmd,RentalRule.class  );
+			rentalRule.setPaymentRatio(cmd.getPayRatio());
+			rentalRule.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			rentalRule.setOperatorUid(userId);
+			rentalProvider.createRentalRule(rentalRule);
+		}
 	}
 
 	@Override
@@ -680,7 +688,7 @@ public class RentalServiceImpl implements RentalService {
 					rentalBill.setEndTime(rentalSiteRule.getEndTime());
 				}
 			}
-			siteTotalMoney.add(  (null == rentalSiteRule.getPrice()?new java.math.BigDecimal(0):rentalSiteRule.getPrice()).multiply(
+			siteTotalMoney = siteTotalMoney.add(  (null == rentalSiteRule.getPrice()?new java.math.BigDecimal(0):rentalSiteRule.getPrice()).multiply(
 				new   java.math.BigDecimal(cmd.getRentalCount() / rentalSiteRule.getUnit())));
 		}
 
@@ -792,7 +800,9 @@ public class RentalServiceImpl implements RentalService {
 			rsb.setCreatorUid(userId);
 
 			rentalProvider.createRentalSiteBill(rsb);
+			
 		}
+		
 		mappingRentalBillDTO(billDTO, rentalBill);
 		return billDTO;
 	}
@@ -1383,6 +1393,15 @@ public class RentalServiceImpl implements RentalService {
 				for (SiteItemDTO siDto : cmd.getRentalItems()) {
 					if (cmd.getRentalItems().get(0).getItemPrice() == null)
 						continue;
+					if(siDto.getId() == null) {
+						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+			                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of siDto id"+ siDto+".");
+					}
+					
+					if(cmd.getRentalBillId() == null) {
+						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+			                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of cmd RentalBillId"+ cmd+".");
+					}
 					RentalItemsBill rib = new RentalItemsBill();
 					rib.setTotalMoney(siDto.getItemPrice().multiply( new java.math.BigDecimal(siDto.getCounts())));
 
@@ -1543,11 +1562,14 @@ public class RentalServiceImpl implements RentalService {
 			for (RentalItemsBill rib : rentalSiteItems) {
 				SiteItemDTO siDTO = new SiteItemDTO();
 				siDTO.setCounts(rib.getRentalCount());
-				RentalSiteItem rsItem = rentalProvider
-						.findRentalSiteItemById(rib.getRentalSiteItemId());
-				siDTO.setItemName(rsItem.getName());
-				siDTO.setItemPrice(rib.getTotalMoney());
-				dto.getSiteItems().add(siDTO);
+				RentalSiteItem rsItem = rentalProvider.findRentalSiteItemById(rib.getRentalSiteItemId());
+				if(rsItem != null) {
+    				siDTO.setItemName(rsItem.getName());
+    				siDTO.setItemPrice(rib.getTotalMoney());
+    				dto.getSiteItems().add(siDTO);
+				} else {
+				    LOGGER.error("Rental site item not found, rentalSiteItemId=" + rib.getRentalSiteItemId() + ", cmd=" + cmd);
+				}
 			}
 			response.getRentalBills().add(dto);
 		}

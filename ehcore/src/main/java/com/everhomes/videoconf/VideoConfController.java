@@ -24,6 +24,7 @@ import com.everhomes.rest.videoconf.CreateConfAccountOrderCommand;
 import com.everhomes.rest.videoconf.CreateInvoiceCommand;
 import com.everhomes.rest.videoconf.CreateVideoConfInvitationCommand;
 import com.everhomes.rest.videoconf.DeleteReservationConfCommand;
+import com.everhomes.rest.videoconf.DeleteSourceVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.DeleteVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.DeleteWarningContactorCommand;
 import com.everhomes.rest.videoconf.DownloadAppCommand;
@@ -80,6 +81,7 @@ import com.everhomes.rest.videoconf.UserAccountDTO;
 import com.everhomes.rest.videoconf.VerifyVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.VideoConfAccountPreferentialRuleDTO;
 import com.everhomes.rest.videoconf.VideoConfAccountTrialRuleDTO;
+import com.everhomes.rest.videoconf.VideoConfInvitationResponse;
 import com.everhomes.search.ConfAccountSearcher;
 import com.everhomes.search.ConfEnterpriseSearcher;
 import com.everhomes.search.ConfOrderSearcher;
@@ -489,11 +491,11 @@ public class VideoConfController  extends ControllerBase{
 	 * @return
 	 */
 	@RequestMapping("createVideoConfInvitation")
-	@RestReturn(value = String.class)
+	@RestReturn(value = VideoConfInvitationResponse.class)
 	public RestResponse createVideoConfInvitation(CreateVideoConfInvitationCommand cmd) {
 
-		videoConfService.createVideoConfInvitation(cmd);
-		RestResponse response = new RestResponse();
+		VideoConfInvitationResponse invitation = videoConfService.createVideoConfInvitation(cmd);
+		RestResponse response = new RestResponse(invitation);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -605,6 +607,22 @@ public class VideoConfController  extends ControllerBase{
 	public RestResponse addSourceVideoConfAccount(AddSourceVideoConfAccountCommand cmd) {
 
 		videoConfService.addSourceVideoConfAccount(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /conf/deleteSourceVideoConfAccount</b>
+	 * 删除源账号
+	 * @return
+	 */
+	@RequestMapping("deleteSourceVideoConfAccount")
+	@RestReturn(value = String.class)
+	public RestResponse deleteSourceVideoConfAccount(DeleteSourceVideoConfAccountCommand cmd) {
+
+		videoConfService.deleteSourceVideoConfAccount(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -1084,6 +1102,7 @@ public class VideoConfController  extends ControllerBase{
 	 * @return
 	 */
 	@RequestMapping("cancelVideoConf")
+	@RequireAuthentication(false)
 	@RestReturn(value = String.class)
 	public RestResponse cancelVideoConf(CancelVideoConfCommand cmd) {
 

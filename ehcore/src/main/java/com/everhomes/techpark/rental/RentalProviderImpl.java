@@ -54,6 +54,7 @@ import com.everhomes.server.schema.tables.records.EhRentalBillAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhRentalBillPaybillMapRecord;
 import com.everhomes.server.schema.tables.records.EhRentalBillsRecord;
 import com.everhomes.server.schema.tables.records.EhRentalItemsBillsRecord;
+import com.everhomes.server.schema.tables.records.EhRentalRulesRecord;
 import com.everhomes.server.schema.tables.records.EhRentalSiteItemsRecord;
 import com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord;
 import com.everhomes.server.schema.tables.records.EhRentalSitesBillsRecord;
@@ -1004,5 +1005,23 @@ public class RentalProviderImpl implements RentalProvider {
 				});
 
 		return result;
+	}
+
+	@Override
+	public void createRentalRule(RentalRule rentalRule) {
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhRentalRules.class));
+		rentalRule.setId(id);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRentalRulesRecord record = ConvertHelper.convert(rentalRule,
+				EhRentalRulesRecord.class);
+		InsertQuery<EhRentalRulesRecord> query = context
+				.insertQuery(Tables.EH_RENTAL_RULES);
+		query.setRecord(record);
+		query.execute();
+
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalRules.class,
+				null);
+		
 	}
 }

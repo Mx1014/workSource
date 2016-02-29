@@ -1,8 +1,11 @@
 // @formatter:off
 package com.everhomes.rest.organization;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -16,6 +19,9 @@ public class ListOrganizationMemberCommand {
 	@NotNull
 	private Long    organizationId;
 	private Long pageAnchor;
+	
+	@ItemType(String.class)
+	private List<String> groupTypes;
 	
 	private Integer pageOffset;
 	
@@ -59,6 +65,16 @@ public class ListOrganizationMemberCommand {
 
 	public void setPageOffset(Integer pageOffset) {
 		this.pageOffset = pageOffset;
+	}
+
+
+	public List<String> getGroupTypes() {
+		return groupTypes;
+	}
+
+
+	public void setGroupTypes(List<String> groupTypes) {
+		this.groupTypes = groupTypes;
 	}
 
 

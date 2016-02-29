@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -51,10 +52,10 @@ public class EnterpriseSearcherImpl extends AbstractElasticSearch implements Ent
         try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
             b.field("namespaceId", enterprise.getNamespaceId());
+            b.field("communityId", enterprise.getCommunityId());
             b.field("name", enterprise.getName());
             b.field("description", enterprise.getDescription());
             b.field("createTime", enterprise.getCreateTime());
-            
             b.endObject();
             return b;
         } catch (IOException ex) {
@@ -131,7 +132,7 @@ public class EnterpriseSearcherImpl extends AbstractElasticSearch implements Ent
         
         QueryBuilder qb;
         
-        if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
+        if(StringUtils.isEmpty(cmd.getKeyword())) {
             qb = QueryBuilders.matchAllQuery();
         } else {
             qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
