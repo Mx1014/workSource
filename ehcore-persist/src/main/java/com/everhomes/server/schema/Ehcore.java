@@ -191,6 +191,15 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS,
 			com.everhomes.server.schema.tables.EhWarningContacts.EH_WARNING_CONTACTS,
 			com.everhomes.server.schema.tables.EhYellowPages.EH_YELLOW_PAGES,
-			com.everhomes.server.schema.tables.EhYellowPageAttachments.EH_YELLOW_PAGE_ATTACHMENTS);
+			com.everhomes.server.schema.tables.EhYellowPageAttachments.EH_YELLOW_PAGE_ATTACHMENTS,
+			com.everhomes.server.schema.tables.EhAclinks.EH_ACLINKS,
+			com.everhomes.server.schema.tables.EhAclinkUndoKey.EH_ACLINK_UNDO_KEY,
+			com.everhomes.server.schema.tables.EhAesServerKey.EH_AES_SERVER_KEY,
+			com.everhomes.server.schema.tables.EhAesUserKey.EH_AES_USER_KEY,
+			com.everhomes.server.schema.tables.EhDoorAccess.EH_DOOR_ACCESS,
+			com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH,
+			com.everhomes.server.schema.tables.EhDoorCommand.EH_DOOR_COMMAND,
+			com.everhomes.server.schema.tables.EhOwnerDoors.EH_OWNER_DOORS,
+			com.everhomes.server.schema.tables.EhOwnerDoorAuth.EH_OWNER_DOOR_AUTH);
 	}
 }

@@ -1,0 +1,28 @@
+package com.everhomes.aclink;
+
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
+
+public class ListDoorAccessResponse {
+    private Long nextPageAnchor;
+    
+    @ItemType(DoorAccessDTO.class)
+    private List<DoorAccessDTO> doors;
+
+    public Long getNextPageAnchor() {
+        return nextPageAnchor;
+    }
+
+    public void setNextPageAnchor(Long nextPageAnchor) {
+        this.nextPageAnchor = nextPageAnchor;
+    }
+
+    public List<DoorAccessDTO> getDoors() {
+        return doors;
+    }
+
+    public void setDoors(List<DoorAccessDTO> doors) {
+        this.doors = doors;
+    }
+}
