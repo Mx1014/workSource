@@ -625,8 +625,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		Long communityId = cmd.getCommunityId();
 		
-		Long buildingId = cmd.getBuildingId();
-		
 		String keywords = cmd.getKeywords();
 		
 		if(!StringUtils.isEmpty(keywords)){
@@ -643,6 +641,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 			return resp;
 		}
 		
+		if(!StringUtils.isEmpty(cmd.getBuildingName())){
+			Building building = communityProvider.findBuildingByCommunityIdAndName(communityId, cmd.getBuildingName());
+			if(null != building){
+				cmd.setBuildingId(cmd.getBuildingId());
+			}
+		}
+		
+		Long buildingId = cmd.getBuildingId();
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 		if(null != buildingId){
