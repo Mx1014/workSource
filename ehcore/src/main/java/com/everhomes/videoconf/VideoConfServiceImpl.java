@@ -20,6 +20,9 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.jooq.tools.json.JSONObject;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +55,7 @@ import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.videoconf.AccountType;
 import com.everhomes.rest.videoconf.AddSourceVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.AssignVideoConfAccountCommand;
+import com.everhomes.rest.videoconf.BizConfHolder;
 import com.everhomes.rest.videoconf.CancelVideoConfCommand;
 import com.everhomes.rest.videoconf.ConfCapacity;
 import com.everhomes.rest.videoconf.ConfOrderAccountDTO;
@@ -133,6 +137,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
+import com.google.gson.Gson;
 import com.mysql.jdbc.StringUtils;
 
 
@@ -1378,12 +1383,10 @@ public class VideoConfServiceImpl implements VideoConfService {
 					if(LOGGER.isDebugEnabled())
 						LOGGER.error("startVideoConf,json="+json);
 		
-					ResultHolder resultHolder = GsonUtil.fromJson(json, ResultHolder.class);
+					BizConfHolder resultHolder = GsonUtil.fromJson(json, BizConfHolder.class);
 		
-					if(LOGGER.isDebugEnabled())
-						LOGGER.error("resultHolder="+resultHolder.isSuccess());
 		
-					if(resultHolder.getData() != null){
+					if(resultHolder.getStatus() == 100){
 						Map<String,Object> data = (Map<String, Object>) resultHolder.getData();
 						
 						response.setConfHostId(String.valueOf(data.get("userId")));
