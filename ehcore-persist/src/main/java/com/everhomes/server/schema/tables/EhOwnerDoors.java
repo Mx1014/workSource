@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOwnerDoors extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhOwnerDoorsRecord> {
 
-	private static final long serialVersionUID = 1214577630;
+	private static final long serialVersionUID = -2098582414;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_owner_doors</code>
@@ -81,7 +81,7 @@ public class EhOwnerDoors extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	 */
 	@Override
 	public java.util.List<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhOwnerDoorsRecord>> getKeys() {
-		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhOwnerDoorsRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_OWNER_DOORS_PRIMARY);
+		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhOwnerDoorsRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_OWNER_DOORS_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_OWNER_DOORS_I_UQ_DOOR_ID_OWNER_ID);
 	}
 
 	/**

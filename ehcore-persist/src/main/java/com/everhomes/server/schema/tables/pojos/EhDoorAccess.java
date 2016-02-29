@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhDoorAccess implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1493543083;
+	private static final long serialVersionUID = -1218219165;
 
 	private java.lang.Long     id;
 	private java.lang.Byte     doorType;
@@ -32,6 +32,7 @@ public class EhDoorAccess implements java.io.Serializable {
 	private java.lang.Byte     status;
 	private java.lang.Integer  ackingSecretVersion;
 	private java.lang.Integer  expectSecretKey;
+	private java.lang.String   hardwareId;
 
 	public EhDoorAccess() {}
 
@@ -54,7 +55,8 @@ public class EhDoorAccess implements java.io.Serializable {
 		java.sql.Timestamp createTime,
 		java.lang.Byte     status,
 		java.lang.Integer  ackingSecretVersion,
-		java.lang.Integer  expectSecretKey
+		java.lang.Integer  expectSecretKey,
+		java.lang.String   hardwareId
 	) {
 		this.id = id;
 		this.doorType = doorType;
@@ -75,6 +77,7 @@ public class EhDoorAccess implements java.io.Serializable {
 		this.status = status;
 		this.ackingSecretVersion = ackingSecretVersion;
 		this.expectSecretKey = expectSecretKey;
+		this.hardwareId = hardwareId;
 	}
 
 	public java.lang.Long getId() {
@@ -227,5 +230,13 @@ public class EhDoorAccess implements java.io.Serializable {
 
 	public void setExpectSecretKey(java.lang.Integer expectSecretKey) {
 		this.expectSecretKey = expectSecretKey;
+	}
+
+	public java.lang.String getHardwareId() {
+		return this.hardwareId;
+	}
+
+	public void setHardwareId(java.lang.String hardwareId) {
+		this.hardwareId = hardwareId;
 	}
 }

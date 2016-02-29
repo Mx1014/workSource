@@ -1,11 +1,24 @@
 package com.everhomes.aclink;
 
 import com.everhomes.util.StringHelper;
+
 import java.util.List;
 import java.sql.Timestamp;
 
 import com.everhomes.discover.ItemType;
 
+/**
+ * <ul>
+ * <li>name: 门禁名字</li>
+ * <li>hardwareId: 门禁硬件地址</li>
+ * <li>status: 门禁状态， 0 激活中，1 已激活，2 无效</li>
+ * <li>description: 门禁描述</li>
+ * <li>address: 门禁地址</li>
+ * <li>creator: 激活人员名字</li>
+ * </ul>
+ * @author janson
+ *
+ */
 public class DoorAccessDTO {
     private Byte     status;
     private Long     activeUserId;
@@ -23,6 +36,8 @@ public class DoorAccessDTO {
     private Byte     role;
     private Long     id;
     private String     name;
+    private String hardwareId;
+    private String creatorName;
 
     
 
@@ -156,10 +171,19 @@ public class DoorAccessDTO {
         this.address = address;
     }
 
-
-
     public Double getLatitude() {
         return latitude;
+    }
+
+
+    public String getHardwareId() {
+        return hardwareId;
+    }
+
+
+
+    public void setHardwareId(String hardwareId) {
+        this.hardwareId = hardwareId;
     }
 
 
@@ -214,6 +238,18 @@ public class DoorAccessDTO {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+
+
+    public String getCreatorName() {
+        return creatorName;
+    }
+
+
+
+    public void setCreatorName(String creatorName) {
+        this.creatorName = creatorName;
     }
 
 

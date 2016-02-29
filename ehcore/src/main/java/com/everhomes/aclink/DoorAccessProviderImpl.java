@@ -10,6 +10,7 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
@@ -27,6 +28,7 @@ import com.everhomes.server.schema.tables.pojos.EhDoorAccess;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
@@ -125,19 +127,24 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
     }
 
     private void prepareObj(DoorAccess obj) {
+        if(obj.getUuid() != null) {
+            obj.setUuid(UUID.randomUUID().toString());
+        }
+        //TODO all use GMT time
+        obj.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
     }
     
     @Override
-    public List<DoorAccess> listDoorAccessByCommunityId(Long communityId, CrossShardListingLocator locator, int count) {
-        locator.setEntityId(communityId);
+    public List<DoorAccess> listDoorAccessByOwnerId(CrossShardListingLocator locator, Long ownerId, DoorAccessOwnerType ownerType, int count) {
+        locator.setEntityId(ownerId);
         
         return this.queryDoorAccesss(locator, count, new ListingQueryBuilderCallback() {
 
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
                     SelectQuery<? extends Record> query) {
-                query.addConditions(Tables.EH_DOOR_ACCESS.OWNER_ID.eq(communityId));
-                query.addConditions(Tables.EH_DOOR_ACCESS.OWNER_TYPE.eq(DoorAccessOwnerType.COMMUNITY.getCode()));
+                query.addConditions(Tables.EH_DOOR_ACCESS.OWNER_ID.eq(ownerId));
+                query.addConditions(Tables.EH_DOOR_ACCESS.OWNER_TYPE.eq(ownerType.getCode()));
                 return query;
             }
             
@@ -145,19 +152,24 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
     }
     
     @Override
-    public List<DoorAccess> listDoorAccessByEnterpriseId(Long enterpriseId, CrossShardListingLocator locator, int count) {
-        locator.setEntityId(enterpriseId);
-        
-        return this.queryDoorAccesss(locator, count, new ListingQueryBuilderCallback() {
+    public DoorAccess queryDoorAccessByHardwareId(String hardware) {
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        List<DoorAccess> das = queryDoorAccesss(locator, 1, new ListingQueryBuilderCallback() {
 
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
                     SelectQuery<? extends Record> query) {
-                query.addConditions(Tables.EH_DOOR_ACCESS.OWNER_ID.eq(enterpriseId));
-                query.addConditions(Tables.EH_DOOR_ACCESS.OWNER_TYPE.eq(DoorAccessOwnerType.ENTERPRISE.getCode()));
+                query.addConditions(Tables.EH_DOOR_ACCESS.HARDWARE_ID.eq(hardware));
+                query.addConditions(Tables.EH_DOOR_ACCESS.STATUS.ne(DoorAccessStatus.INVALID.getCode()));
                 return query;
             }
             
         });
+        
+        if(das == null || das.size() == 0) {
+            return null;
+        }
+        
+        return das.get(0);
     }
 }

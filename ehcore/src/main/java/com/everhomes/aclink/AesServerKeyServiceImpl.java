@@ -41,7 +41,7 @@ public class AesServerKeyServiceImpl implements AesServerKeyService {
     @Override
     public Integer getAckingSecretVersion(DoorAccess doorAccess) {
         Long doorAccId = doorAccess.getId();
-        String key = "dooraccess:" + doorAccId + ":acking";
+        String key = String.format(ACKING_SECRET, doorAccId);
         Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
         
         RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
@@ -58,7 +58,7 @@ public class AesServerKeyServiceImpl implements AesServerKeyService {
     @Override
     public Integer getExpectSecretKey(DoorAccess doorAccess) {
         Long doorAccId = doorAccess.getId();
-        String key = "dooraccess:" + doorAccId + ":expect";
+        String key = String.format(EXPECT_SECRET, doorAccId);
         Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
         RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
         Object v = redisTemplate.opsForValue().get(key);
@@ -69,5 +69,28 @@ public class AesServerKeyServiceImpl implements AesServerKeyService {
         }
         
         return Integer.valueOf((String)v);
+    }
+    
+    private String getRedisValue(String key) {
+        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+        Object v = redisTemplate.opsForValue().get(key);
+        if(v == null) {
+            return null;
+        }
+        
+        return (String)v;
+    }
+    
+    @Override
+    public AesServerKey getCurrentAesServerKey(Long doorAccId) {
+        String key = String.format(ACKING_SECRET, doorAccId);
+        String ver = getRedisValue(key);
+        if(ver == null) {
+            return null;
+        }
+        
+        Long verId = Long.valueOf(ver);
+        return aesServerKeyProvider.getAesServerKeyById(verId);
     }
 }

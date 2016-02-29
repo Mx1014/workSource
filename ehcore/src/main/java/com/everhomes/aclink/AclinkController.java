@@ -8,9 +8,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 
+@RestDoc(value="Aclink controller", site="core")
 @RestController
 @RequestMapping("/aclink")
 public class AclinkController extends ControllerBase {

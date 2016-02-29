@@ -4,8 +4,9 @@
 DROP TABLE IF EXISTS `eh_door_access`;
 CREATE TABLE `eh_door_access` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `uuid` VARCHAR(64) NOT NULL,
     `door_type` TINYINT NOT NULL COMMENT '0: Zuolin aclink',
-    `hardware_id` VARCHAR(64) NOT NULL COMMENT 'mac address of aclink'
+    `hardware_id` VARCHAR(64) NOT NULL COMMENT 'mac address of aclink',
     `name` VARCHAR(128) NOT NULL,
     `description` VARCHAR(1024) NOT NULL,
     `avatar` VARCHAR(128),
@@ -15,7 +16,7 @@ CREATE TABLE `eh_door_access` (
     `longitude` DOUBLE,
     `latitude` DOUBLE,
     `geohash` VARCHAR(64),
-    `uuid` VARCHAR(64) NOT NULL DEFAULT '',
+    `aes_iv` VARCHAR(64) NOT NULL,
 
     `owner_type` TINYINT NOT NULL COMMENT '0:community, 1:enterprise, 2: family',
     `owner_id` BIGINT NOT NULL,
@@ -28,7 +29,9 @@ CREATE TABLE `eh_door_access` (
     `expect_secret_key` INT NOT NULL DEFAULT 1,
 
     PRIMARY KEY (`id`),
+    UNIQUE `u_eh_door_access_uuid`(`uuid`),
     INDEX `i_eh_door_access_name`(`name`),
+    INDEX `i_eh_door_hardware_id`(`hardware_id`),
     INDEX `i_eh_door_access_owner`(`owner_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -54,10 +57,10 @@ CREATE TABLE `eh_aclinks` (
 #
 DROP TABLE IF EXISTS `eh_aes_server_key`;
 CREATE TABLE `eh_aes_server_key` (
-    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `id` BIGINT NOT NULL COMMENT 'id of the record, also as secret_ver',
     `door_id` BIGINT NOT NULL,
     `device_ver` TINYINT NOT NULL COMMENT 'ver of aclink: 0x0 or 0x1',
-    `secret_ver` BIGINT NOT NULL COMMENT 'server ver of door',
+    `secret_ver` BIGINT NOT NULL COMMENT 'ignore it',
     `secret` VARCHAR(64) NOT NULL COMMENT 'The base64 secret 16B',
     `create_time_ms` BIGINT,
     PRIMARY KEY (`id`),
@@ -96,7 +99,7 @@ CREATE TABLE `eh_aclink_undo_key` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
-# partition of eh_door_access, door_access 1-->n users
+# Global table for relationship of owner 1<-->n door_auth
 #
 DROP TABLE IF EXISTS `eh_door_auth`;
 CREATE TABLE `eh_door_auth` (
@@ -128,20 +131,6 @@ CREATE TABLE `eh_owner_doors` (
     `door_id` BIGINT NOT NULL,
     PRIMARY KEY (`id`),
     UNIQUE `i_uq_door_id_owner_id`(`door_id`, `owner_id`, `owner_type`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-#
-# Global table for relationship of owner 1<-->n door_auth
-#
-DROP TABLE IF EXISTS `eh_owner_door_auth`;
-CREATE TABLE `eh_owner_door_auth` (
-    `id` BIGINT NOT NULL COMMENT 'id of the record',
-    `owner_type` TINYINT NOT NULL COMMENT '0:community, 1:enterprise, 2: family',
-    `owner_id` BIGINT NOT NULL,
-    `door_id` BIGINT NOT NULL,
-    `user_id` BIGINT not NULL,
-    `door_auth_id` BIGINT NOT NULL,
-    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #

@@ -172,4 +172,11 @@ public class EhDoorAccessDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAccess> fetchByExpectSecretKey(java.lang.Integer... values) {
 		return fetch(com.everhomes.server.schema.tables.EhDoorAccess.EH_DOOR_ACCESS.EXPECT_SECRET_KEY, values);
 	}
+
+	/**
+	 * Fetch records that have <code>hardware_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAccess> fetchByHardwareId(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhDoorAccess.EH_DOOR_ACCESS.HARDWARE_ID, values);
+	}
 }

@@ -152,6 +152,7 @@ public class AesServerKeyProviderImpl implements AesServerKeyProvider {
     }
     
     private void prepareObj(AesServerKey obj) {
+        obj.setSecretVer(0l);
         
     }
 

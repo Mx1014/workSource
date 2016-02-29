@@ -29,6 +29,8 @@ import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
 public class OwnerDoorAuthProviderImpl implements OwnerDoorAuthProvider {
+    //This is a global table
+    
     @Autowired
     private DbProvider dbProvider;
 
@@ -41,7 +43,7 @@ public class OwnerDoorAuthProviderImpl implements OwnerDoorAuthProvider {
     @Override
     public Long createOwnerDoorAuth(OwnerDoorAuth obj) {
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOwnerDoorAuth.class));
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOwnerDoorAuth.class, obj.getOwnerId()));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOwnerDoorAuth.class));
         obj.setId(id);
         prepareObj(obj);
         EhOwnerDoorAuthDao dao = new EhOwnerDoorAuthDao(context.configuration());
@@ -51,52 +53,34 @@ public class OwnerDoorAuthProviderImpl implements OwnerDoorAuthProvider {
 
     @Override
     public void updateOwnerDoorAuth(OwnerDoorAuth obj) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOwnerDoorAuth.class, obj.getOwnerId()));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOwnerDoorAuth.class));
         EhOwnerDoorAuthDao dao = new EhOwnerDoorAuthDao(context.configuration());
         dao.update(obj);
     }
 
     @Override
     public void deleteOwnerDoorAuth(OwnerDoorAuth obj) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOwnerDoorAuth.class, obj.getOwnerId()));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOwnerDoorAuth.class));
         EhOwnerDoorAuthDao dao = new EhOwnerDoorAuthDao(context.configuration());
         dao.deleteById(obj.getId());
     }
 
     @Override
     public OwnerDoorAuth getOwnerDoorAuthById(Long id) {
-        OwnerDoorAuth[] result = new OwnerDoorAuth[1];
-
-        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOwnerDoorAuth.class), null,
-            (DSLContext context, Object reducingContext) -> {
-                result[0] = context.select().from(Tables.EH_OWNER_DOOR_AUTH)
-                    .where(Tables.EH_OWNER_DOOR_AUTH.ID.eq(id))
-                    .fetchAny().map((r) -> {
-                        return ConvertHelper.convert(r, OwnerDoorAuth.class);
-                    });
-
-                if (result[0] != null) {
-                    return false;
-                } else {
-                    return true;
-                }
-            });
-
-        return result[0];
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhOwnerDoorAuth.class));
+        
+        return context.select().from(Tables.EH_OWNER_DOOR_AUTH)
+            .where(Tables.EH_OWNER_DOOR_AUTH.ID.eq(id))
+            .fetchAny().map((r) -> {
+                return ConvertHelper.convert(r, OwnerDoorAuth.class);
+           });
     }
 
     @Override
-    public List<OwnerDoorAuth> queryOwnerDoorAuths(CrossShardListingLocator locator, int count,
+    public List<OwnerDoorAuth> queryOwnerDoorAuths(ListingLocator locator, int count,
             ListingQueryBuilderCallback queryBuilderCallback) {
-        final List<OwnerDoorAuth> objs = new ArrayList<OwnerDoorAuth>();
-        if(locator.getShardIterator() == null) {
-            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhOwnerDoorAuth.class);
-            ShardIterator shardIterator = new ShardIterator(accessSpec);
-
-            locator.setShardIterator(shardIterator);
-        }
-
-        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhOwnerDoorAuth.class));
+        
             SelectQuery<EhOwnerDoorAuthRecord> query = context.selectQuery(Tables.EH_OWNER_DOOR_AUTH);
 
             if(queryBuilderCallback != null)
@@ -105,20 +89,16 @@ public class OwnerDoorAuthProviderImpl implements OwnerDoorAuthProvider {
             if(locator.getAnchor() != null)
                 query.addConditions(Tables.EH_OWNER_DOOR_AUTH.ID.gt(locator.getAnchor()));
             query.addOrderBy(Tables.EH_OWNER_DOOR_AUTH.ID.asc());
-            query.addLimit(count - objs.size());
+            query.addLimit(count);
 
-            query.fetch().map((r) -> {
-                objs.add(ConvertHelper.convert(r, OwnerDoorAuth.class));
-                return null;
+            List<OwnerDoorAuth> objs = query.fetch().map((r) -> {
+                return ConvertHelper.convert(r, OwnerDoorAuth.class);
             });
 
             if(objs.size() >= count) {
                 locator.setAnchor(objs.get(objs.size() - 1).getId());
-                return AfterAction.done;
             }
-            return AfterAction.next;
 
-        });
         return objs;
     }
 

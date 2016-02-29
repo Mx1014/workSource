@@ -163,4 +163,8 @@ public class DoorCommandProviderImpl implements DoorCommandProvider {
         });
     }
     
+//    @Override
+//    public DoorCommand queryActiveDoorCommand(Long doorId, Long ownerId, Byte ownerType) {
+//    }
+    
 }

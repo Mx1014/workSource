@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhDoorAccess extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhDoorAccessRecord> {
 
-	private static final long serialVersionUID = -760256322;
+	private static final long serialVersionUID = 347073941;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_door_access</code>
@@ -120,6 +120,11 @@ public class EhDoorAccess extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	 * The column <code>ehcore.eh_door_access.expect_secret_key</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorAccessRecord, java.lang.Integer> EXPECT_SECRET_KEY = createField("expect_secret_key", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_door_access.hardware_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorAccessRecord, java.lang.String> HARDWARE_ID = createField("hardware_id", org.jooq.impl.SQLDataType.VARCHAR.length(64).nullable(false), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_door_access</code> table reference

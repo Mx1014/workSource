@@ -29,7 +29,7 @@ import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
 public class OwnerDoorProviderImpl implements OwnerDoorProvider {
-    //TODO this is a global table 
+    //This is a global table 
     
     @Autowired
     private DbProvider dbProvider;
@@ -43,7 +43,7 @@ public class OwnerDoorProviderImpl implements OwnerDoorProvider {
     @Override
     public Long createOwnerDoor(OwnerDoor obj) {
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOwnerDoors.class));
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOwnerDoors.class, obj.getOwnerId()));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOwnerDoors.class));
         obj.setId(id);
         prepareObj(obj);
         EhOwnerDoorsDao dao = new EhOwnerDoorsDao(context.configuration());
@@ -53,74 +53,50 @@ public class OwnerDoorProviderImpl implements OwnerDoorProvider {
 
     @Override
     public void updateOwnerDoor(OwnerDoor obj) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOwnerDoors.class, obj.getOwnerId()));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOwnerDoors.class));
         EhOwnerDoorsDao dao = new EhOwnerDoorsDao(context.configuration());
         dao.update(obj);
     }
 
     @Override
     public void deleteOwnerDoor(OwnerDoor obj) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOwnerDoors.class, obj.getOwnerId()));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOwnerDoors.class));
         EhOwnerDoorsDao dao = new EhOwnerDoorsDao(context.configuration());
         dao.deleteById(obj.getId());
     }
 
     @Override
     public OwnerDoor getOwnerDoorById(Long id) {
-        OwnerDoor[] result = new OwnerDoor[1];
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhOwnerDoors.class));
 
-        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhOwnerDoors.class), null,
-            (DSLContext context, Object reducingContext) -> {
-                result[0] = context.select().from(Tables.EH_OWNER_DOORS)
-                    .where(Tables.EH_OWNER_DOORS.ID.eq(id))
-                    .fetchAny().map((r) -> {
-                        return ConvertHelper.convert(r, OwnerDoor.class);
-                    });
-
-                if (result[0] != null) {
-                    return false;
-                } else {
-                    return true;
-                }
+        return context.select().from(Tables.EH_OWNER_DOORS)
+            .where(Tables.EH_OWNER_DOORS.ID.eq(id))
+            .fetchAny().map((r) -> {
+                return ConvertHelper.convert(r, OwnerDoor.class);
             });
-
-        return result[0];
     }
 
     @Override
-    public List<OwnerDoor> queryOwnerDoors(CrossShardListingLocator locator, int count,
+    public List<OwnerDoor> queryOwnerDoors(ListingLocator locator, int count,
             ListingQueryBuilderCallback queryBuilderCallback) {
-        final List<OwnerDoor> objs = new ArrayList<OwnerDoor>();
-        if(locator.getShardIterator() == null) {
-            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhOwnerDoors.class);
-            ShardIterator shardIterator = new ShardIterator(accessSpec);
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhOwnerDoors.class));
+        SelectQuery<EhOwnerDoorsRecord> query = context.selectQuery(Tables.EH_OWNER_DOORS);
 
-            locator.setShardIterator(shardIterator);
-        }
+        if(queryBuilderCallback != null)
+            queryBuilderCallback.buildCondition(locator, query);
 
-        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
-            SelectQuery<EhOwnerDoorsRecord> query = context.selectQuery(Tables.EH_OWNER_DOORS);
+        if(locator.getAnchor() != null)
+            query.addConditions(Tables.EH_OWNER_DOORS.ID.gt(locator.getAnchor()));
+        query.addOrderBy(Tables.EH_OWNER_DOORS.ID.asc());
+        query.addLimit(count);
 
-            if(queryBuilderCallback != null)
-                queryBuilderCallback.buildCondition(locator, query);
-
-            if(locator.getAnchor() != null)
-                query.addConditions(Tables.EH_OWNER_DOORS.ID.gt(locator.getAnchor()));
-            query.addOrderBy(Tables.EH_OWNER_DOORS.ID.asc());
-            query.addLimit(count - objs.size());
-
-            query.fetch().map((r) -> {
-                objs.add(ConvertHelper.convert(r, OwnerDoor.class));
-                return null;
-            });
-
-            if(objs.size() >= count) {
-                locator.setAnchor(objs.get(objs.size() - 1).getId());
-                return AfterAction.done;
-            }
-            return AfterAction.next;
-
+        List<OwnerDoor> objs = query.fetch().map((r) -> {
+            return ConvertHelper.convert(r, OwnerDoor.class);
         });
+
+        if(objs.size() >= count) {
+            locator.setAnchor(objs.get(objs.size() - 1).getId());
+        }
         return objs;
     }
 
