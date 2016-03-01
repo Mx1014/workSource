@@ -1330,7 +1330,9 @@ public class VideoConfServiceImpl implements VideoConfService {
 		if(account != null && account.getStatus() == 1) {
 			if(account.getAssignedSourceId() != null && account.getAssignedSourceId() != 0) {
 				CancelVideoConfCommand cancelCmd = new CancelVideoConfCommand();
-				cancelCmd.setConfId(account.getAssignedConfId());
+				ConfConferences conf = vcProvider.findConfConferencesById(account.getAssignedConfId());
+				if(conf != null)
+					cancelCmd.setConfId(conf.getMeetingNo());
 				ConfSourceAccounts source = vcProvider.findSourceAccountById(account.getAssignedSourceId());
 				if(source != null)
 					cancelCmd.setSourceAccountName(source.getAccountName());
