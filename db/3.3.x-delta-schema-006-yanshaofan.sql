@@ -43,7 +43,7 @@ UPDATE `eh_organizations` SET name = '讯美科技' WHERE id = 1000100;
 
 DELETE FROM `eh_organization_members` WHERE `organization_id` = 1000100;
 DELETE FROM `eh_organizations` WHERE path LIKE '/1000100/%';
-UPDATE `eh_organization_members` SET `organization_id` = 1000001 WHERE `organization_id` = 178689;
+UPDATE `eh_organization_members` SET `organization_id` = 1000100 WHERE `organization_id` = 178689;
 UPDATE `eh_organizations` SET `parent_id` = replace(parent_id,178689,1000100), path = replace(path,178689,1000100) WHERE path LIKE '/178689/%';
 
 
@@ -58,4 +58,7 @@ DELETE FROM `eh_organizations` WHERE path LIKE '/1000631/%';
 UPDATE `eh_organization_members` SET `organization_id` = 1000631 WHERE `organization_id` = 180000;
 UPDATE `eh_organizations` SET `parent_id` = replace(parent_id,180000,1000631), path = replace(path,180000,1000631) WHERE path LIKE '/180000/%';
 
-
+#
+# 补充楼栋名称
+#
+update `eh_organization_addresses` eoa set `building_name` = (select `building_name` from `eh_addresses` where `id` = eoa.`address_id` limit 1);

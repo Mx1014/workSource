@@ -4081,8 +4081,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 		OrganizationMember member = organizationProvider.findOrganizationPersonnelByPhone(cmd.getEnterpriseId(), cmd.getPhone());
 		
 		if(member != null){
-			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_PHONE_ALREADY_EXIST,
+			if(member.getStatus().equals(OrganizationMemberStatus.ACTIVE.getCode()))
+				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_PHONE_ALREADY_EXIST,
 					"phone number already exists.");
+			
+			if(member.getStatus().equals(OrganizationMemberStatus.WAITING_FOR_APPROVAL.getCode()))
+				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_PHONE_ALREADY_APPLY,
+						"Mobile phone number has been applied to join the company, please approve.");
 		}
 		
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getPhone());

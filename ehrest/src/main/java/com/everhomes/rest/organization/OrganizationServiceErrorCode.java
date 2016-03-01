@@ -8,6 +8,8 @@ public interface OrganizationServiceErrorCode {
     
     static final int ERROR_INVALID_PARAMETER = 100011;
     
+    static final int ERROR_PHONE_ALREADY_APPLY = 100012;
+    
     static final int ERROR_FILE_IS_EMPTY = 100100;
    
 }
