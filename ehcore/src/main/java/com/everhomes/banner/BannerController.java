@@ -24,6 +24,7 @@ import com.everhomes.rest.banner.BannerDTO;
 import com.everhomes.rest.banner.CreateBannerClickCommand;
 import com.everhomes.rest.banner.GetBannerByIdCommand;
 import com.everhomes.rest.banner.GetBannersCommand;
+import com.everhomes.rest.banner.GetBannersV2Command;
 import com.everhomes.util.EtagHelper;
 
 @RestDoc(value="Banner controller", site="core")
@@ -46,6 +47,26 @@ public class BannerController extends ControllerBase {
     public RestResponse getBanners(@Valid GetBannersCommand cmd,HttpServletRequest request,HttpServletResponse response) {
         
         List<BannerDTO> result = bannerService.getBanners(cmd,request);
+        RestResponse resp =  new RestResponse();
+        int hashCode = configurationProvider.getIntValue(MARKETDATA_ITEM_VERSION, 0);
+        if(EtagHelper.checkHeaderEtagOnly(30,hashCode+"", request, response)) {
+            resp.setResponseObject(result);
+        }
+        
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+    
+    /**
+     * <b>URL: /banner/getBannersV2</b>
+     * <p>获取指定位置、layout组、场景、实体对象相关的banner</p>
+     */
+    @RequestMapping("getBannersV2")
+    @RestReturn(value=BannerDTO.class,collection=true)
+    public RestResponse getBannersV2(@Valid GetBannersV2Command cmd,HttpServletRequest request,HttpServletResponse response) {
+        
+        List<BannerDTO> result = null;//bannerService.getBanners(cmd,request);
         RestResponse resp =  new RestResponse();
         int hashCode = configurationProvider.getIntValue(MARKETDATA_ITEM_VERSION, 0);
         if(EtagHelper.checkHeaderEtagOnly(30,hashCode+"", request, response)) {
