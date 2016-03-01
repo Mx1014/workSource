@@ -1302,8 +1302,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		List<String> buildingNames = cmd.getBuildingNames();
 		List<Long> buildingIds = cmd.getBuildingIds();
 		List<Long> addressIds = cmd.getAddressIds();
+		List<String> phones = cmd.getMobilePhones();
 		List<Organization> orgs = new ArrayList<Organization>();
-		/** 根据地址获取要推送的企业  **/
+		Integer namespaceId = UserContext.getCurrentNamespaceId(null);
+		
+		/** 根据地址获取要推送的企业 **/
 		if(null != addressIds && 0 != addressIds.size()){
 			for (Long addressId : addressIds) {
 				OrganizationAddress orgAddress = organizationProvider.findOrganizationAddressByAddressId(addressId);
@@ -1341,6 +1344,22 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		
 		/** 获取全部企业的全部人员 **/
 		List<OrganizationMember> members = this.getOrganizationMembersByAddress(orgs);
+		
+		/** 根据电话号码推送   **/
+		if(null != phones && 0 != phones.size()){
+			members = new ArrayList<OrganizationMember>();
+			for (String phone : phones) {
+				UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, phone);
+				OrganizationMember member = new OrganizationMember();
+				member.setContactToken(phone);
+				member.setTargetType(OrganizationMemberTargetType.UNTRACK.getCode());
+				if(null != userIdentifier){
+					member.setTargetId(userIdentifier.getOwnerUid());
+					member.setTargetType(OrganizationMemberTargetType.USER.getCode());
+				}
+				members.add(member);
+			}
+		}
 		
 		/** 推送消息 **/
 		this.processSmsByMembers(members, cmd.getMessage());

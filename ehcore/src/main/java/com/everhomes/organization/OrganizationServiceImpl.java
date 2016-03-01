@@ -3865,25 +3865,27 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		if(null != userRoleIds && 0 != userRoleIds.size()) return userRoleIds;
 		
-		List<Long> resources = aclProvider.getRolesFromResourceAssignments("system", null, EntityType.ORGANIZATIONS.getCode(), organizationId, null);
+		userRoleIds = new ArrayList<Long>();
 		
-		if(resources == null || resources.size() ==0 ){
-			resources = new ArrayList<Long>();
-			OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), organizationId);
-			if(null == organizationMember){
-				resources.add(RoleConstants.ORGANIZATION_TASK_MGT);
-				return resources;
-			}
-			
-			if(OrganizationMemberGroupType.MANAGER.getCode().equals(organizationMember.getMemberGroup())){
-				resources.add(RoleConstants.ORGANIZATION_ADMIN);
-				return resources;
-			}else{
-				resources.add(RoleConstants.ORGANIZATION_TASK_MGT);
-			}
+		OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), organizationId);
+		
+		if(null == organizationMember){
+			userRoleIds.add(RoleConstants.ORGANIZATION_TASK_MGT);
+			return userRoleIds;
 		}
 		
-		return resources;
+		if(null != organizationMember.getGroupId()){
+			userRoleIds =  aclProvider.getRolesFromResourceAssignments("system", null, EntityType.ORGANIZATIONS.getCode(), organizationMember.getGroupId(), null);
+			return userRoleIds;
+		}
+		
+		if(OrganizationMemberGroupType.MANAGER.getCode().equals(organizationMember.getMemberGroup())){
+			userRoleIds.add(RoleConstants.ORGANIZATION_ADMIN);
+		}else{
+			userRoleIds.add(RoleConstants.ORGANIZATION_TASK_MGT);
+		}
+		
+		return userRoleIds;
 	}
 	
 	/**
