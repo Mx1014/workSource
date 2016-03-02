@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.aclink.AclinkUserResponse;
 import com.everhomes.aclink.AesServerKeyProvider;
 import com.everhomes.aclink.CreateDoorAuthCommand;
 import com.everhomes.aclink.DoorAccess;
@@ -13,6 +14,7 @@ import com.everhomes.aclink.DoorAccessAdminUpdateCommand;
 import com.everhomes.aclink.DoorAccessProvider;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.aclink.DoorAuthDTO;
+import com.everhomes.aclink.ListAclinkUserCommand;
 import com.everhomes.aclink.ListDoorAccessByOwnerIdCommand;
 import com.everhomes.aclink.ListDoorAccessResponse;
 import com.everhomes.aclink.QueryDoorAccessAdminCommand;
@@ -98,5 +100,20 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;        
+    }
+
+    /**
+     * 
+     * <b>URL: /admin/aclink/listAclinkUsers</b>
+     * <p>创建授权</p>
+     * @return OK 成功
+     */
+    @RequestMapping("listAclinkUsers")
+    @RestReturn(value=AclinkUserResponse.class)
+    public RestResponse listAclinkUsers(@Valid ListAclinkUserCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.listAclinkUsers(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
 }

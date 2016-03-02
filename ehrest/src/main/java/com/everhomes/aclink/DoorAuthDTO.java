@@ -18,6 +18,7 @@ public class DoorAuthDTO {
     private Long     approveUserId;
     private Long     id;
     private Byte     ownerType;
+    private String doorName;
 
 
     public Byte getStatus() {
@@ -127,6 +128,17 @@ public class DoorAuthDTO {
 
     public void setOwnerType(Byte ownerType) {
         this.ownerType = ownerType;
+    }
+
+    
+
+    public String getDoorName() {
+        return doorName;
+    }
+
+
+    public void setDoorName(String doorName) {
+        this.doorName = doorName;
     }
 
 

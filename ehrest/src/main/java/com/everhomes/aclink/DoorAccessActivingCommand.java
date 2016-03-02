@@ -1,21 +1,28 @@
 package com.everhomes.aclink;
 
+import javax.validation.constraints.NotNull;
+
 public class DoorAccessActivingCommand {
-    Long uid;
-    
+    @NotNull
     String hardwareId;
+    
     String firwareVer;
     
+    @NotNull
     String rsaAclinkPub;
-    DoorAccessOwnerType ownerType;
+    
+    @NotNull
+    Byte ownerType;
+    
+    @NotNull
     Long ownerId;
     
-    public Long getUid() {
-        return uid;
-    }
-    public void setUid(Long uid) {
-        this.uid = uid;
-    }
+    @NotNull
+    String name;
+    
+    String description;
+    String address;
+    
     public String getHardwareId() {
         return hardwareId;
     }
@@ -28,10 +35,11 @@ public class DoorAccessActivingCommand {
     public void setRsaAclinkPub(String rsaAclinkPub) {
         this.rsaAclinkPub = rsaAclinkPub;
     }
-    public DoorAccessOwnerType getOwnerType() {
+    
+    public Byte getOwnerType() {
         return ownerType;
     }
-    public void setOwnerType(DoorAccessOwnerType ownerType) {
+    public void setOwnerType(Byte ownerType) {
         this.ownerType = ownerType;
     }
     public Long getOwnerId() {
@@ -46,4 +54,23 @@ public class DoorAccessActivingCommand {
     public void setFirwareVer(String firwareVer) {
         this.firwareVer = firwareVer;
     }
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    public String getDescription() {
+        return description;
+    }
+    public void setDescription(String description) {
+        this.description = description;
+    }
+    public String getAddress() {
+        return address;
+    }
+    public void setAddress(String address) {
+        this.address = address;
+    }
+    
 }

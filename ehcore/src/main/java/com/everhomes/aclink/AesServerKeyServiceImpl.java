@@ -26,16 +26,17 @@ public class AesServerKeyServiceImpl implements AesServerKeyService {
     
     @Override
     public Long createAesServerKey(AesServerKey obj) {
-        Long doorAccId = aesServerKeyProvider.createAesServerKey(obj);
-        String key = String.format(ACKING_SECRET, doorAccId);
+        obj.setSecretVer(1l);
+        Long id = aesServerKeyProvider.createAesServerKey(obj);
+        String key = String.format(ACKING_SECRET, obj.getDoorId());
         Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
         RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
         redisTemplate.opsForValue().set(key, "1");
         
-        key = String.format(EXPECT_SECRET, doorAccId);
+        key = String.format(EXPECT_SECRET, obj.getDoorId());
         redisTemplate.opsForValue().set(key, "1");
         
-        return doorAccId;
+        return id;
     }
     
     @Override
@@ -91,6 +92,6 @@ public class AesServerKeyServiceImpl implements AesServerKeyService {
         }
         
         Long verId = Long.valueOf(ver);
-        return aesServerKeyProvider.getAesServerKeyById(verId);
+        return aesServerKeyProvider.queryAesServerKeyByDoorId(doorAccId, verId);
     }
 }

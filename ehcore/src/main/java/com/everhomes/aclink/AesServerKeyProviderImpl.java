@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -152,9 +153,28 @@ public class AesServerKeyProviderImpl implements AesServerKeyProvider {
     }
     
     private void prepareObj(AesServerKey obj) {
-        obj.setSecretVer(0l);
-        
     }
 
+    @Override
+    public AesServerKey queryAesServerKeyByDoorId(Long doorId, Long ver) {
+        ListingLocator locator = new ListingLocator();
+        List<AesServerKey> serverKeys = this.queryAesServerKeyByDoorId(locator, doorId, 1, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_AES_SERVER_KEY.DOOR_ID.eq(doorId));
+                query.addConditions(Tables.EH_AES_SERVER_KEY.SECRET_VER.eq(ver));
+                return query;
+            }
+            
+        });
+        
+        if( serverKeys == null || serverKeys.size() == 0) {
+        return null;
+        }
+        
+        return serverKeys.get(0);
+    }
 }
 

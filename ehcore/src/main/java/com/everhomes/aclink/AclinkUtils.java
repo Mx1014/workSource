@@ -74,23 +74,40 @@ public class AclinkUtils {
     }
     
     public static String packInitServerKey(String rsaAclinkPub, String aesKey, String aesIv, String devName, Long time, String uuid) {
-        ByteArrayOutputStream b = new ByteArrayOutputStream();
-        DataOutputStream d = new DataOutputStream(b);
-//        d.writeShort(19);
-        byte[] result = b.toByteArray();
+        String pub = StringHelper.toHexString(Base64.decodeBase64(rsaAclinkPub));
+        byte[] result = CmdUtil.initServerKeyCmd((byte)0, pub, devName, (int)(time.longValue()/1000), uuid.getBytes(), Base64.decodeBase64(aesKey), Base64.decodeBase64(aesIv));
         return Base64.encodeBase64String(result);
+    }
+    
+    public static String packUpdateDeviceName(Byte ver, String aesKey, String aesIv, String devName) {
+        byte[] key = Base64.decodeBase64(aesKey);
+        byte[] binaryData = CmdUtil.updateDevName(key, ver.byteValue(), devName);
+        return Base64.encodeBase64String(binaryData);
     }
     
     public static String packAesUserKey(String aesServerKey, Long userId, Integer keyId, Long expireTime) {
         try {
-            SecretKeySpec skeySpec = new SecretKeySpec(aesServerKey.getBytes(), "AES");
+            byte[] serverKey = Base64.decodeBase64(aesServerKey);
+            SecretKeySpec skeySpec = new SecretKeySpec(serverKey, "AES");
             Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding");
 
             cipher.init(Cipher.ENCRYPT_MODE, skeySpec);
-            String data = "aa";
-
-            byte[] original = Base64.encodeBase64(cipher.doFinal(data.getBytes()));
-            return new String(original);    
+            byte[] data = new byte[16];
+            
+            int curTime = (int) Math.ceil((expireTime.longValue() / 1000));
+            byte[] curTimeBytes = DataUtil.intToByteArray(curTime);
+            byte[] uidBytes = DataUtil.intToByteArray(userId.intValue());
+            byte[] uidPadding = {7, 9, 8};
+            System.arraycopy(curTimeBytes, 0, data, 0, curTimeBytes.length);
+            System.arraycopy(uidBytes, 0, data, 4, uidBytes.length);
+            System.arraycopy(uidPadding, 0, data, 8, uidPadding.length);
+            data[11] = 0x3a;
+            byte[] keyIdBytes = DataUtil.shortToByteArray(keyId.shortValue());
+            System.arraycopy(keyIdBytes, 0, data, 12, keyIdBytes.length);
+            byte[] checkSum = DataUtil.shortToByteArray(CmdUtil.getCheckSum(data));
+            System.arraycopy(checkSum, 0, data, 14, checkSum.length);
+            
+            return Base64.encodeBase64String(cipher.doFinal(data));   
         } catch(Exception ex) {
             //TODO log here
             return "";

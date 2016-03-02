@@ -163,8 +163,27 @@ public class DoorCommandProviderImpl implements DoorCommandProvider {
         });
     }
     
-//    @Override
-//    public DoorCommand queryActiveDoorCommand(Long doorId, Long ownerId, Byte ownerType) {
-//    }
+    @Override
+    public DoorCommand queryActiveDoorCommand(Long doorId) {
+        ListingLocator locator = new ListingLocator();
+        List<DoorCommand> cmds = queryDoorCommandByDoorId(locator, doorId, 1, new ListingQueryBuilderCallback() {
+            
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_DOOR_COMMAND.STATUS.eq(DoorCommandStatus.CREATING.getCode())
+                        .or(Tables.EH_DOOR_COMMAND.STATUS.eq(DoorCommandStatus.SENDING.getCode())));
+                query.addConditions(Tables.EH_DOOR_COMMAND.CMD_ID.eq(AclinkCommandType.INIT_SERVER_KEY.getCode()));
+                return query;
+            }
+            
+        });
+        
+        if(cmds == null || cmds.size() == 0) {
+            return null;
+        }
+        
+        return cmds.get(0);
+    }
     
 }

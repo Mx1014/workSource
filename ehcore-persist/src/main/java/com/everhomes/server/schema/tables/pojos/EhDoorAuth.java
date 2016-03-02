@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhDoorAuth implements java.io.Serializable {
 
-	private static final long serialVersionUID = -510072177;
+	private static final long serialVersionUID = 1121798175;
 
 	private java.lang.Long     id;
 	private java.lang.Long     doorId;
@@ -22,6 +22,10 @@ public class EhDoorAuth implements java.io.Serializable {
 	private java.lang.Long     validEndMs;
 	private java.lang.Byte     ownerType;
 	private java.lang.Long     ownerId;
+	private java.lang.String   organization;
+	private java.lang.String   description;
+	private java.lang.String   nickname;
+	private java.lang.String   phone;
 	private java.sql.Timestamp createTime;
 	private java.lang.Byte     status;
 
@@ -37,6 +41,10 @@ public class EhDoorAuth implements java.io.Serializable {
 		java.lang.Long     validEndMs,
 		java.lang.Byte     ownerType,
 		java.lang.Long     ownerId,
+		java.lang.String   organization,
+		java.lang.String   description,
+		java.lang.String   nickname,
+		java.lang.String   phone,
 		java.sql.Timestamp createTime,
 		java.lang.Byte     status
 	) {
@@ -49,6 +57,10 @@ public class EhDoorAuth implements java.io.Serializable {
 		this.validEndMs = validEndMs;
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;
+		this.organization = organization;
+		this.description = description;
+		this.nickname = nickname;
+		this.phone = phone;
 		this.createTime = createTime;
 		this.status = status;
 	}
@@ -123,6 +135,38 @@ public class EhDoorAuth implements java.io.Serializable {
 
 	public void setOwnerId(java.lang.Long ownerId) {
 		this.ownerId = ownerId;
+	}
+
+	public java.lang.String getOrganization() {
+		return this.organization;
+	}
+
+	public void setOrganization(java.lang.String organization) {
+		this.organization = organization;
+	}
+
+	public java.lang.String getDescription() {
+		return this.description;
+	}
+
+	public void setDescription(java.lang.String description) {
+		this.description = description;
+	}
+
+	public java.lang.String getNickname() {
+		return this.nickname;
+	}
+
+	public void setNickname(java.lang.String nickname) {
+		this.nickname = nickname;
+	}
+
+	public java.lang.String getPhone() {
+		return this.phone;
+	}
+
+	public void setPhone(java.lang.String phone) {
+		this.phone = phone;
 	}
 
 	public java.sql.Timestamp getCreateTime() {

@@ -45,6 +45,7 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
     @Override
     public Long createDoorAccess(DoorAccess obj) {
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhDoorAccess.class));
+        obj.setId(id);
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhDoorAccess.class, obj.getId()));
         obj.setId(id);
         prepareObj(obj);
@@ -71,23 +72,28 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
     public DoorAccess getDoorAccessById(Long id) {
         DoorAccess[] result = new DoorAccess[1];
 
-        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhDoorAccess.class), null,
-            (DSLContext context, Object reducingContext) -> {
-                result[0] = context.select().from(Tables.EH_DOOR_ACCESS)
-                    .where(Tables.EH_DOOR_ACCESS.ID.eq(id))
-                    .fetchAny().map((r) -> {
-                        return ConvertHelper.convert(r, DoorAccess.class);
+        try {
+            dbProvider.mapReduce(AccessSpec.readOnlyWith(EhDoorAccess.class), null,
+                    (DSLContext context, Object reducingContext) -> {
+                        result[0] = context.select().from(Tables.EH_DOOR_ACCESS)
+                            .where(Tables.EH_DOOR_ACCESS.ID.eq(id))
+                            .fetchAny().map((r) -> {
+                                return ConvertHelper.convert(r, DoorAccess.class);
+                            });
+
+                        if (result[0] != null) {
+                            return false;
+                        } else {
+                            return true;
+                        }
                     });
 
-                if (result[0] != null) {
-                    return false;
-                } else {
-                    return true;
-                }
-            });
-
-        return result[0];
-    }
+                return result[0];
+    
+        } catch(Exception ex) {
+            return null;
+        }
+      }
 
     @Override
     public List<DoorAccess> queryDoorAccesss(CrossShardListingLocator locator, int count,
@@ -127,11 +133,14 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
     }
 
     private void prepareObj(DoorAccess obj) {
-        if(obj.getUuid() != null) {
-            obj.setUuid(UUID.randomUUID().toString());
+        if(obj.getUuid() == null) {
+            String uuid = UUID.randomUUID().toString();
+            obj.setUuid(uuid.replace("-", ""));
         }
         //TODO all use GMT time
-        obj.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        //Long l1 = System.currentTimeMillis();
+        Long l2 = DateHelper.currentGMTTime().getTime();
+        obj.setCreateTime(new Timestamp(l2));
     }
     
     @Override

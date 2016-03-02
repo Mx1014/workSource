@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhDoorAccess implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1375712565;
+	private static final long serialVersionUID = 1408684933;
 
 	private java.lang.Long     id;
 	private java.lang.Byte     doorType;
@@ -34,6 +34,7 @@ public class EhDoorAccess implements java.io.Serializable {
 	private java.lang.Integer  expectSecretKey;
 	private java.lang.String   hardwareId;
 	private java.lang.String   aesIv;
+	private java.lang.Byte     linkStatus;
 
 	public EhDoorAccess() {}
 
@@ -58,7 +59,8 @@ public class EhDoorAccess implements java.io.Serializable {
 		java.lang.Integer  ackingSecretVersion,
 		java.lang.Integer  expectSecretKey,
 		java.lang.String   hardwareId,
-		java.lang.String   aesIv
+		java.lang.String   aesIv,
+		java.lang.Byte     linkStatus
 	) {
 		this.id = id;
 		this.doorType = doorType;
@@ -81,6 +83,7 @@ public class EhDoorAccess implements java.io.Serializable {
 		this.expectSecretKey = expectSecretKey;
 		this.hardwareId = hardwareId;
 		this.aesIv = aesIv;
+		this.linkStatus = linkStatus;
 	}
 
 	public java.lang.Long getId() {
@@ -249,5 +252,13 @@ public class EhDoorAccess implements java.io.Serializable {
 
 	public void setAesIv(java.lang.String aesIv) {
 		this.aesIv = aesIv;
+	}
+
+	public java.lang.Byte getLinkStatus() {
+		return this.linkStatus;
+	}
+
+	public void setLinkStatus(java.lang.Byte linkStatus) {
+		this.linkStatus = linkStatus;
 	}
 }

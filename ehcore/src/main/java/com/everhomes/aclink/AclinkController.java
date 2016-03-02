@@ -22,10 +22,30 @@ public class AclinkController extends ControllerBase {
     @Autowired
     private AesServerKeyProvider aesServerKeyProvider;
     
-    @RequestMapping("create")
-    @RestReturn(value=String.class)
+    /**
+     * <b>URL: /aclink/activing</b>
+     * <p>激活门禁</p>
+     * @return 激活门禁消息
+     */
+    @RequestMapping("activing")
+    @RestReturn(value=DoorMessage.class)
     public RestResponse create(@Valid DoorAccessActivingCommand cmd) {
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(doorAccessService.activatingDoorAccess(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        
+        return response;
+    }
+    
+    /**
+     * <b>URL: /aclink/active</b>
+     * <p>激活门禁</p>
+     * @return 激活门禁消息
+     */
+    @RequestMapping("active")
+    @RestReturn(value=DoorMessage.class)
+    public RestResponse active(@Valid DoorAccessActivedCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.activateDoorAccess(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         

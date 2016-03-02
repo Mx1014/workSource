@@ -3,14 +3,10 @@ package com.everhomes.aclink;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -24,12 +20,9 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhDoorAuthDao;
 import com.everhomes.server.schema.tables.pojos.EhDoorAuth;
 import com.everhomes.server.schema.tables.records.EhDoorAuthRecord;
-import com.everhomes.server.schema.tables.pojos.EhDoorAccess;
-import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
 public class DoorAuthProviderImpl implements DoorAuthProvider {
@@ -47,7 +40,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
     @Override
     public Long createDoorAuth(DoorAuth obj) {
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhDoorAuth.class));
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhDoorAccess.class, obj.getDoorId()));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhDoorAuth.class));
         obj.setId(id);
         prepareObj(obj);
         EhDoorAuthDao dao = new EhDoorAuthDao(context.configuration());
@@ -57,14 +50,14 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
 
     @Override
     public void updateDoorAuth(DoorAuth obj) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhDoorAccess.class, obj.getDoorId()));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhDoorAuth.class));
         EhDoorAuthDao dao = new EhDoorAuthDao(context.configuration());
         dao.update(obj);
     }
 
     @Override
     public void deleteDoorAuth(DoorAuth obj) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhDoorAccess.class, obj.getDoorId()));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhDoorAuth.class));
         EhDoorAuthDao dao = new EhDoorAuthDao(context.configuration());
         dao.deleteById(obj.getId());
     }
@@ -72,20 +65,12 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
     @Override
     public DoorAuth getDoorAuthById(Long id) {
         DoorAuth[] result = new DoorAuth[1];
-
-        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhDoorAccess.class), null,
-            (DSLContext context, Object reducingContext) -> {
-                result[0] = context.select().from(Tables.EH_DOOR_AUTH)
-                    .where(Tables.EH_DOOR_AUTH.ID.eq(id))
-                    .fetchAny().map((r) -> {
-                        return ConvertHelper.convert(r, DoorAuth.class);
-                    });
-
-                if (result[0] != null) {
-                    return false;
-                } else {
-                    return true;
-                }
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhDoorAuth.class));
+        
+        result[0] = context.select().from(Tables.EH_DOOR_AUTH)
+            .where(Tables.EH_DOOR_AUTH.ID.eq(id))
+            .fetchAny().map((r) -> {
+                return ConvertHelper.convert(r, DoorAuth.class);
             });
 
         return result[0];
@@ -93,7 +78,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
 
     @Override
     public List<DoorAuth> queryDoorAuth(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhDoorAccess.class));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhDoorAuth.class));
 
         SelectQuery<EhDoorAuthRecord> query = context.selectQuery(Tables.EH_DOOR_AUTH);
         if(queryBuilderCallback != null)

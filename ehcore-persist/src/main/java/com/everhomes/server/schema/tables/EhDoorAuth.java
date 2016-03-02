@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhDoorAuth extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhDoorAuthRecord> {
 
-	private static final long serialVersionUID = 2013252321;
+	private static final long serialVersionUID = 799437132;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_door_auth</code>
@@ -70,6 +70,26 @@ public class EhDoorAuth extends org.jooq.impl.TableImpl<com.everhomes.server.sch
 	 * The column <code>ehcore.eh_door_auth.owner_id</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorAuthRecord, java.lang.Long> OWNER_ID = createField("owner_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_door_auth.organization</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorAuthRecord, java.lang.String> ORGANIZATION = createField("organization", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_door_auth.description</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorAuthRecord, java.lang.String> DESCRIPTION = createField("description", org.jooq.impl.SQLDataType.VARCHAR.length(1024), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_door_auth.nickname</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorAuthRecord, java.lang.String> NICKNAME = createField("nickname", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_door_auth.phone</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorAuthRecord, java.lang.String> PHONE = createField("phone", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_door_auth.create_time</code>.

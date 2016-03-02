@@ -29,11 +29,14 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.user.UserInfo;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
@@ -85,9 +88,14 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     private UserProvider userProvider;
     
     @Autowired
+    private UserService userService;
+    
+    @Autowired
     private ConfigurationProvider  configProvider;
     
     public static String Manufacturer = "zuolin001";
+    
+    private static long MAX_KEY_ID = 1024;
     
     @PostConstruct
     public void setup() {
@@ -167,55 +175,99 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     }
     
     @Override
-    public DoorAuthDTO createDoorAuthForever(User approveUser, DoorAccess doorAcc, User user) {
-        DoorAuth doorAuthResult = this.dbProvider.execute(new TransactionCallback<DoorAuth>() {
-            @Override
-            public DoorAuth doInTransaction(TransactionStatus arg0) {
-                DoorAuth doorAuth = doorAuthProvider.queryValidDoorAuthForever(doorAcc.getId(), user.getId());
+    public AclinkUserResponse listAclinkUsers(ListAclinkUserCommand cmd) {
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        
+        List<User> users = null;
+        if(cmd.getKeyword() == null){
+            users = userProvider.findUserByNamespaceId(cmd.getNamespaceId(), locator, pageSize);
+        } else {
+            users = userProvider.listUserByKeywords(locator, cmd.getKeyword(), pageSize);
+        }
+        
+        List<AclinkUserDTO> userDTOs = new ArrayList<AclinkUserDTO>();
+        for(User u : users) {
+            AclinkUserDTO dto = ConvertHelper.convert(u, AclinkUserDTO.class);
+            UserIdentifier ui = userProvider.findIdentifierById(u.getId());
+            if(ui != null) {
+                dto.setPhone(ui.getIdentifierToken());    
+                //dto.setStatus(status);
+                DoorAuth doorAuth = doorAuthProvider.queryValidDoorAuthForever(cmd.getDoorId(), dto.getId());
                 if(doorAuth != null) {
-                    return doorAuth;
+                    dto.setStatus(DoorAuthStatus.VALID.getCode());
+                } else {
+                    dto.setStatus(DoorAuthStatus.INVALID.getCode());
                     }
-                
-                doorAuth = new DoorAuth();
-                doorAuth.setDoorId(doorAcc.getId());
-                doorAuth.setAuthType(DoorAuthType.FOREVER.getCode());
-                doorAuth.setOwnerId(doorAcc.getOwnerId());
-                doorAuth.setOwnerType(doorAcc.getOwnerType());
-                doorAuth.setApproveUserId(approveUser.getId());
-                doorAuth.setUserId(user.getId());
-                doorAuth.setStatus(DoorAuthStatus.VALID.getCode());
-                doorAuthProvider.createDoorAuth(doorAuth);
-                return doorAuth;
                 }
-            });
-        return ConvertHelper.convert(doorAuthResult, DoorAuthDTO.class);
+            userDTOs.add(dto);
+        }
+        
+        AclinkUserResponse resp = new AclinkUserResponse();
+        resp.setUsers(userDTOs);
+        resp.setUsers(userDTOs);
+        return resp;
     }
     
     @Override
     public DoorAuthDTO createDoorAuth(CreateDoorAuthCommand cmd) {
         //TODO notify a message to client
         
-        User approveUser = UserContext.current().getUser();
         DoorAccess doorAcc = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
-        User user = userProvider.findUserById(cmd.getUserId());
+        UserInfo user = userService.getUserSnapshotInfoWithPhone(cmd.getUserId());
         
         DoorAuth doorAuth = ConvertHelper.convert(cmd, DoorAuth.class);
+        DoorAuthDTO rlt = null;
         
         if(doorAuth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
-            return createDoorAuthForever(approveUser, doorAcc, user);
+            DoorAuth doorAuthResult = this.dbProvider.execute(new TransactionCallback<DoorAuth>() {
+                @Override
+                public DoorAuth doInTransaction(TransactionStatus arg0) {
+                    DoorAuth doorAuth = doorAuthProvider.queryValidDoorAuthForever(doorAcc.getId(), user.getId());
+                    if(doorAuth != null) {
+                        return doorAuth;
+                        }
+                    
+                    doorAuth = new DoorAuth();
+                    doorAuth.setDoorId(doorAcc.getId());
+                    doorAuth.setAuthType(DoorAuthType.FOREVER.getCode());
+                    doorAuth.setOwnerId(doorAcc.getOwnerId());
+                    doorAuth.setOwnerType(doorAcc.getOwnerType());
+                    doorAuth.setApproveUserId(cmd.getApproveUserId());
+                    doorAuth.setUserId(user.getId());
+                    doorAuth.setStatus(DoorAuthStatus.VALID.getCode());
+                    doorAuth.setOrganization(cmd.getOrganization());
+                    doorAuth.setDescription(cmd.getDescription());
+                    if(user.getPhones() != null && user.getPhones().size() > 0) {
+                        doorAuth.setPhone(user.getPhones().get(0));    
+                        }
+                    
+                    doorAuthProvider.createDoorAuth(doorAuth);
+                    return doorAuth;
+                    }
+                });
+            rlt = ConvertHelper.convert(doorAuthResult, DoorAuthDTO.class);
+            rlt.setDoorName(doorAcc.getName());
         } else {
             if(cmd.getValidEndMs() == null || cmd.getValidFromMs() == null) {
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                         "invalid param for DoorAuth");                
             }
             
-            //TODO from APP ?
-            doorAuth.setApproveUserId(approveUser.getId());
+            doorAuth.setApproveUserId(cmd.getApproveUserId());
             doorAuth.setOwnerId(doorAcc.getOwnerId());
             doorAuth.setOwnerType(doorAcc.getOwnerType());
+            doorAuth.setOrganization(cmd.getOrganization());
+            doorAuth.setDescription(cmd.getDescription());
+            doorAuth.setStatus(DoorAuthStatus.VALID.getCode());
             doorAuthProvider.createDoorAuth(doorAuth);
-            return ConvertHelper.convert(doorAuth, DoorAuthDTO.class);
+            rlt = ConvertHelper.convert(doorAuth, DoorAuthDTO.class);
+            rlt.setDoorName(doorAcc.getName());
         }
+        
+        return rlt;
     }
     
     //获取最新需要更新的数据，包括用户最新的钥匙DoorUserKey，以前锁与服务器交互的钥匙 DoorServerKey。同时可以对上次更新的消息进行确认。
@@ -231,11 +283,12 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         } 
     }
     
+    @Override
     public DoorMessage activatingDoorAccess(DoorAccessActivingCommand cmd) {        
         User user = UserContext.current().getUser();
         
         DoorAccess doorAccess = doorAccessProvider.queryDoorAccessByHardwareId(cmd.getHardwareId());
-        if(doorAccess != null) {
+        if(doorAccess != null && !doorAccess.getStatus().equals(DoorAccessStatus.ACTIVING.getCode())) {
             //TODO error code
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "DoorAccess exists");
@@ -249,17 +302,26 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     return doorAcc;
                     }
                 
+                String aesKey = AclinkUtils.generateAESKey();
+                String aesIv = AclinkUtils.generateAESIV(aesKey);
+                
                 doorAcc = new DoorAccess();
                 doorAcc.setActiveUserId(user.getId());
                 doorAcc.setOwnerId(cmd.getOwnerId());
-                doorAcc.setOwnerType(cmd.getOwnerType().getCode());
+                doorAcc.setOwnerType(cmd.getOwnerType());
                 doorAcc.setStatus(DoorAccessStatus.ACTIVING.getCode());
-                cmd.setHardwareId(cmd.getHardwareId());
+                doorAcc.setDoorType(DoorAccessType.ZLACLINK_WIFI.getCode());
+                doorAcc.setHardwareId(cmd.getHardwareId());
+                doorAcc.setName(cmd.getName());
+                doorAcc.setDescription(cmd.getDescription());
+                doorAcc.setAddress(cmd.getAddress());
+                doorAcc.setCreatorUserId(user.getId());
+                doorAcc.setAesIv(aesIv);
                 doorAccessProvider.createDoorAccess(doorAcc);
                 
                 OwnerDoor ownerDoor = new OwnerDoor();
                 ownerDoor.setDoorId(doorAcc.getId());
-                ownerDoor.setOwnerType(cmd.getOwnerType().getCode());
+                ownerDoor.setOwnerType(cmd.getOwnerType());
                 ownerDoor.setOwnerId(cmd.getOwnerId());
                 try {
                     ownerDoorProvider.createOwnerDoor(ownerDoor);
@@ -270,14 +332,16 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 Aclink aclink = new Aclink();
                 aclink.setFirwareVer(cmd.getFirwareVer());
                 aclink.setManufacturer(Manufacturer);
-                aclink.setStatus(DoorAccessStatus.ACTIVING.getCode());
+                //TODO set active as default
+                aclink.setStatus(DoorAccessStatus.ACTIVE.getCode());
                 aclink.setDoorId(doorAcc.getId());
+                aclink.setDeviceName("ZLACLINK-TODO");
                 aclinkProvider.createAclink(aclink);
                 
                 AesServerKey aesServerKey = new AesServerKey();
                 aesServerKey.setCreateTimeMs(System.currentTimeMillis());
                 aesServerKey.setDoorId(doorAcc.getId());
-                aesServerKey.setSecret(AclinkUtils.generateAESKey());
+                aesServerKey.setSecret(aesKey);
                 aesServerKey.setDeviceVer(AclinkDeviceVer.VER0.getCode());
                 aesServerKeyService.createAesServerKey(aesServerKey);
                 
@@ -287,10 +351,19 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 cmd.setOwnerId(cmd.getOwnerId());
                 cmd.setOwnerType(cmd.getOwnerType());
                 cmd.setCmdId(AclinkCommandType.CMD_ACTIVE.getCode());
+                cmd.setCmdType((byte)0);//TODO use enum
+                cmd.setServerKeyVer(1l);//Default for AesServerKey
+                cmd.setAclinkKeyVer(AclinkDeviceVer.VER0.getCode());
+                cmd.setStatus(DoorCommandStatus.SENDING.getCode());
                 doorCommandProvider.createDoorCommand(cmd);
                 return doorAcc;
             }
         });
+        
+        if(!doorAccess.getStatus().equals(DoorAccessStatus.ACTIVING.getCode())) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "DoorAccess is invalid");
+        }
         
         //cmd.getRsaAclinkPub();
         //List<DoorMessage> msgs = generateMessages(doorAccess.getId());
@@ -298,7 +371,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         //Generate a single message
         AesServerKey aesServerKey = aesServerKeyService.getCurrentAesServerKey(doorAccess.getId());
-        String message = AclinkUtils.packInitServerKey(cmd.getRsaAclinkPub(), aesServerKey.getSecret(), "", doorAccess.getName(),
+        String message = AclinkUtils.packInitServerKey(cmd.getRsaAclinkPub(), aesServerKey.getSecret(), doorAccess.getAesIv(), "ZLACLINK-TODO",
                 doorAccess.getCreateTime().getTime(), doorAccess.getUuid());
         
         DoorMessage doorMessage = new DoorMessage();
@@ -310,25 +383,85 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         acMsg.setSecretVersion(aesServerKey.getDeviceVer());
         doorMessage.setBody(acMsg);
         
+        //TODO pending messages
+        
         return doorMessage;
     }
     
     //激活一个新锁
-    public List<DoorMessage> activateDoorAccess(String hardwareId, String hardwareAddr) {
-        //check exists message
-        //lock doorAccess
-        //update status to created
-        
-        //out of lock, create a template auth for current activing user.
-        
-        //generate some message for current door access
-        
-        
+    @Override
+    public List<DoorMessage> activateDoorAccess(DoorAccessActivedCommand cmd) {
         User user = UserContext.current().getUser();
+        DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
+        if(doorAccess != null && doorAccess.getStatus().equals(DoorAccessStatus.ACTIVING.getCode())
+                && doorAccess.getCreatorUserId().equals(user.getId())
+                && cmd.getHardwareId().equals(doorAccess.getHardwareId())) {
+            
+            DoorCommand dcmd = this.dbProvider.execute(new TransactionCallback<DoorCommand>() {
+                @Override
+                public DoorCommand doInTransaction(TransactionStatus arg0) {
+                    doorAccess.setStatus(DoorAccessStatus.ACTIVE.getCode());
+                    doorAccessProvider.updateDoorAccess(doorAccess);
+                    DoorCommand doorCommand = doorCommandProvider.queryActiveDoorCommand(cmd.getDoorId());
+                    doorCommand.setStatus(DoorCommandStatus.PROCESS.getCode());
+                    
+                    //Create auth
+                    DoorAuth doorAuth = new DoorAuth();
+                    doorAuth.setApproveUserId(user.getId());
+                    doorAuth.setAuthType(DoorAuthType.TEMPERATE.getCode());
+                    doorAuth.setDoorId(cmd.getDoorId());
+                    doorAuth.setDescription("auto generate");
+                    doorAuth.setNickname(user.getNickName());
+                    doorAuth.setOwnerId(doorAccess.getOwnerId());
+                    doorAuth.setOwnerType(doorAccess.getOwnerType());
+                    doorAuth.setValidFromMs(System.currentTimeMillis() -  60*1000);
+                    doorAuth.setValidEndMs(System.currentTimeMillis()+ 10*60*1000);//TODO
+                    doorAuth.setUserId(user.getId());
+                    UserIdentifier ui = userProvider.findIdentifierById(user.getId());
+                    if(ui != null) {
+                        doorAuth.setPhone(ui.getIdentifierToken());
+                        }
+                    doorAuthProvider.createDoorAuth(doorAuth);
+                    
+                    AesServerKey aesServerKey = aesServerKeyService.getCurrentAesServerKey(doorAccess.getId());
+                    
+                    //TODO send a message to client
+                    AesUserKey aesUserKey = new AesUserKey();
+                    aesUserKey.setId(aesUserKeyProvider.prepareForAesUserKeyId());
+                    aesUserKey.setKeyId(new Integer((int) (aesUserKey.getId().intValue() % MAX_KEY_ID)));
+                    aesUserKey.setCreatorUid(user.getId());
+                    aesUserKey.setDoorId(doorAccess.getId());
+                    aesUserKey.setExpireTimeMs(doorAuth.getValidEndMs());
+                    aesUserKey.setStatus(AesUserKeyStatus.VALID.getCode());
+                    aesUserKey.setKeyType(AesUserKeyType.NORMAL.getCode());
+                    aesUserKey.setSecret(AclinkUtils.packAesUserKey(aesServerKey.getSecret(), doorAuth.getUserId(), aesUserKey.getKeyId(), doorAuth.getValidEndMs()));
+                    aesUserKeyProvider.createAesUserKey(aesUserKey);
+                    
+                    //create device name command
+                    doorCommand = new DoorCommand();
+                    doorCommand.setDoorId(doorAccess.getId());
+                    doorCommand.setOwnerId(doorAccess.getOwnerId());
+                    doorCommand.setOwnerType(doorAccess.getOwnerType());
+                    doorCommand.setCmdId(AclinkCommandType.CMD_UPDATE_DEVNAME.getCode());
+                    doorCommand.setCmdType((byte)0);
+                    doorCommand.setServerKeyVer(aesServerKey.getSecretVer());
+                    doorCommand.setAclinkKeyVer(aesServerKey.getDeviceVer());
+                    doorCommand.setStatus(DoorCommandStatus.CREATING.getCode());
+                    
+                    //Generate a message body for command
+                    doorCommand.setCmdBody(AclinkUtils.packUpdateDeviceName(aesServerKey.getDeviceVer(), aesServerKey.getSecret(), doorAccess.getAesIv(), doorAccess.getName()));
+                    
+                    doorCommandProvider.createDoorCommand(doorCommand);
+                    return doorCommand;
+                }
+            });
+            
+        } else {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "DoorAccess exists");
+        }
         
-        
-        return null;
-        
+        return generateMessages(cmd.getDoorId());
     }
     
     //更新锁的详细信息
@@ -433,8 +566,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         return newAuths;
     }
     
-    private AesUserKey generateAesUserKey(User user, DoorAuth auth) {
-        DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
+    private AesUserKey generateAesUserKey(User user, DoorAuth doorAuth) {
+        DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(doorAuth.getDoorId());
         if(!doorAccess.getStatus().equals(DoorAccessStatus.ACTIVE.getCode())) {
             //Check if the door is active
             return null;
@@ -446,20 +579,17 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             public AesUserKey doInTransaction(TransactionStatus arg0) {
                 
                 //Find it if it's already created
-                AesUserKey aesUserKey = aesUserKeyProvider.queryAesUserKeyByDoorId(auth.getDoorId(), auth.getUserId());
+                AesUserKey aesUserKey = aesUserKeyProvider.queryAesUserKeyByDoorId(doorAuth.getDoorId(), doorAuth.getUserId());
                 if(aesUserKey == null) {
-                    //create it
+                    AesServerKey aesServerKey = aesServerKeyService.getCurrentAesServerKey(doorAccess.getId());
                     aesUserKey = new AesUserKey();
-                    aesUserKey.setId(aesUserKeyProvider.prepareForAesUserKeyId());
-                    aesUserKey.setUserId(user.getId());
-                    aesUserKey.setDoorId(auth.getDoorId());
+                    aesUserKey.setKeyId(new Integer((int) (aesUserKey.getId().intValue() % MAX_KEY_ID)));
                     aesUserKey.setCreatorUid(user.getId());
+                    aesUserKey.setDoorId(doorAccess.getId());
+                    aesUserKey.setExpireTimeMs(doorAuth.getValidEndMs());
+                    aesUserKey.setStatus(AesUserKeyStatus.VALID.getCode());
                     aesUserKey.setKeyType(AesUserKeyType.NORMAL.getCode());
-                    aesUserKey.setExpireTimeMs(auth.getValidEndMs());
-                    
-                    //BASE64 encoding
-                    aesUserKey.setSecret(AclinkUtils.packAesUserKey("", auth.getUserId(), aesUserKey.getKeyId(), auth.getValidEndMs()));
-                    
+                    aesUserKey.setSecret(AclinkUtils.packAesUserKey(aesServerKey.getSecret(), doorAuth.getUserId(), aesUserKey.getKeyId(), doorAuth.getValidEndMs()));
                     aesUserKeyProvider.createAesUserKey(aesUserKey);
                     }
                 return aesUserKey;

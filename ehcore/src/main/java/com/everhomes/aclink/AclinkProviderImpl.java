@@ -21,9 +21,8 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhAclinksDao;
 import com.everhomes.server.schema.tables.pojos.EhAclinks;
-import com.everhomes.server.schema.tables.pojos.EhDoorAccess;
 import com.everhomes.server.schema.tables.records.EhAclinksRecord;
-import com.everhomes.server.schema.tables.pojos.EhAclinks;
+import com.everhomes.server.schema.tables.pojos.EhDoorAccess;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
@@ -69,7 +68,7 @@ public class AclinkProviderImpl implements AclinkProvider {
     public Aclink getAclinkById(Long id) {
         Aclink[] result = new Aclink[1];
 
-        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAclinks.class), null,
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhDoorAccess.class), null,
             (DSLContext context, Object reducingContext) -> {
                 result[0] = context.select().from(Tables.EH_ACLINKS)
                     .where(Tables.EH_ACLINKS.ID.eq(id))
@@ -88,11 +87,31 @@ public class AclinkProviderImpl implements AclinkProvider {
     }
 
     @Override
+    public List<Aclink> queryAclinkByDoorId(ListingLocator locator, Long refId
+            , int count, ListingQueryBuilderCallback queryBuilderCallback) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhDoorAccess.class, refId));
+
+        SelectQuery<EhAclinksRecord> query = context.selectQuery(Tables.EH_ACLINKS);
+        if(queryBuilderCallback != null)
+            queryBuilderCallback.buildCondition(locator, query);
+        query.addConditions(Tables.EH_ACLINKS.DOOR_ID.eq(refId));
+
+        if(locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_ACLINKS.ID.gt(locator.getAnchor()));
+            }
+
+        query.addLimit(count);
+        return query.fetch().map((r) -> {
+            return ConvertHelper.convert(r, Aclink.class);
+        });
+    }
+
+    @Override
     public List<Aclink> queryAclinks(CrossShardListingLocator locator, int count,
             ListingQueryBuilderCallback queryBuilderCallback) {
         final List<Aclink> objs = new ArrayList<Aclink>();
         if(locator.getShardIterator() == null) {
-            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhAclinks.class);
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhDoorAccess.class);
             ShardIterator shardIterator = new ShardIterator(accessSpec);
 
             locator.setShardIterator(shardIterator);
@@ -126,6 +145,4 @@ public class AclinkProviderImpl implements AclinkProvider {
 
     private void prepareObj(Aclink obj) {
     }
-    
-    //public Aclink queryAclinkBy
 }

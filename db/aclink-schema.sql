@@ -8,7 +8,7 @@ CREATE TABLE `eh_door_access` (
     `door_type` TINYINT NOT NULL COMMENT '0: Zuolin aclink with wifi, 1: Zuolink aclink without wifi',
     `hardware_id` VARCHAR(64) NOT NULL COMMENT 'mac address of aclink',
     `name` VARCHAR(128) NOT NULL,
-    `description` VARCHAR(1024) NOT NULL,
+    `description` VARCHAR(1024),
     `avatar` VARCHAR(128),
     `address` VARCHAR(128),
     `active_user_id` BIGINT NOT NULL,
@@ -17,7 +17,7 @@ CREATE TABLE `eh_door_access` (
     `latitude` DOUBLE,
     `geohash` VARCHAR(64),
     `aes_iv` VARCHAR(64) NOT NULL,
-    `linkStatus` TINYINT NOT NULL COMMENT '0: linked, 1: failed',
+    `link_status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: linked, 1: failed',
 
     `owner_type` TINYINT NOT NULL COMMENT '0:community, 1:enterprise, 2: family',
     `owner_id` BIGINT NOT NULL,
@@ -148,7 +148,6 @@ DROP TABLE IF EXISTS `eh_door_command`;
 CREATE TABLE `eh_door_command` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `door_id` BIGINT NOT NULL,
-    `cmd_seq` BIGINT COMMENT 'sequence',
     `cmd_id` TINYINT NOT NULL COMMENT 'cmd id for aclink',
     `cmd_type` TINYINT NOT NULL COMMENT 'cmd type for aclink',
     `cmd_body` TEXT COMMENT 'json type of cmd body',

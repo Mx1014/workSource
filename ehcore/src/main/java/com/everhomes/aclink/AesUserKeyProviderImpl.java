@@ -40,8 +40,6 @@ public class AesUserKeyProviderImpl implements AesUserKeyProvider {
 
     @Autowired
     private SequenceProvider sequenceProvider;
-    
-    private static long MAX_KEY_ID = 1024;
 
     @Override
     public Long createAesUserKey(AesUserKey obj) {

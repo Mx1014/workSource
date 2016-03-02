@@ -104,6 +104,34 @@ public class EhDoorAuthDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sc
 	}
 
 	/**
+	 * Fetch records that have <code>organization IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAuth> fetchByOrganization(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH.ORGANIZATION, values);
+	}
+
+	/**
+	 * Fetch records that have <code>description IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAuth> fetchByDescription(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH.DESCRIPTION, values);
+	}
+
+	/**
+	 * Fetch records that have <code>nickname IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAuth> fetchByNickname(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH.NICKNAME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>phone IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAuth> fetchByPhone(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH.PHONE, values);
+	}
+
+	/**
 	 * Fetch records that have <code>create_time IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAuth> fetchByCreateTime(java.sql.Timestamp... values) {

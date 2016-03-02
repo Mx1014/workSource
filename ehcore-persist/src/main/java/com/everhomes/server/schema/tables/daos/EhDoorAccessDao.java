@@ -186,4 +186,11 @@ public class EhDoorAccessDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAccess> fetchByAesIv(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhDoorAccess.EH_DOOR_ACCESS.AES_IV, values);
 	}
+
+	/**
+	 * Fetch records that have <code>link_status IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAccess> fetchByLinkStatus(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhDoorAccess.EH_DOOR_ACCESS.LINK_STATUS, values);
+	}
 }
