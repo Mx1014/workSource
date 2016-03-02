@@ -3,7 +3,6 @@
 # modify eh_organizations unique
 #
 ALTER TABLE `eh_organizations` DROP INDEX u_eh_org_name;
-ALTER TABLE `eh_organizations` ADD UNIQUE u_eh_org_name(`parent_id`,`name`,`namespace_id`);
 
 #
 # Check whether the repeated data migration

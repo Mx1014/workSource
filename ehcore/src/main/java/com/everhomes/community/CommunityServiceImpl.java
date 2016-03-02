@@ -1150,14 +1150,9 @@ public class CommunityServiceImpl implements CommunityService {
 			CommunityUserDto dto = new CommunityUserDto();
 			dto.setUserId(user.getId());
 			dto.setUserName(user.getNickName());
-			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-			if(null == userIdentifier){
-				LOGGER.debug("userIdentifier is null...userId = " + user.getId());
-				continue;
-			}
-			dto.setPhone(userIdentifier.getIdentifierToken());
+			dto.setPhone(user.getIdentifierToken());
 			List<OrganizationMember> members = organizationProvider.listOrganizationMembers(user.getId());
-			dto.setApplyTime(userIdentifier.getCreateTime());
+			dto.setApplyTime(user.getCreateTime());
 			dto.setIsAuth(2);
 			if(null != members){
 				OrganizationMember m = null;
