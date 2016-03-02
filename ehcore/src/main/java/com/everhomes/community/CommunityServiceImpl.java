@@ -1138,7 +1138,13 @@ public class CommunityServiceImpl implements CommunityService {
 		
 		List<User> users = null;
 		
-		users = userProvider.listUserByKeyword(cmd.getKeywords(), namespaceId, locator, 100);
+		int index = 100;
+		
+		if(cmd.getIsAuth() == 1){
+			index = 10000;
+		}
+		
+		users = userProvider.listUserByKeyword(cmd.getKeywords(), namespaceId, locator, index);
 		
 		
 		List<CommunityUserDto> dtos = new ArrayList<CommunityUserDto>();
@@ -1187,6 +1193,7 @@ public class CommunityServiceImpl implements CommunityService {
 			}
 		}
 		
+		res.setNextPageAnchor(null);
 		if(dtos.size() > pageSize){
 			dtos = dtos.subList(0, pageSize);
 			res.setNextPageAnchor(dtos.get(pageSize-1).getUserId());
