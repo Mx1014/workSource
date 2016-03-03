@@ -62,3 +62,13 @@ UPDATE `eh_organizations` SET `parent_id` = replace(parent_id,180000,1000631), p
 # 补充楼栋名称
 #
 update `eh_organization_addresses` eoa set `building_name` = (select `building_name` from `eh_addresses` where `id` = eoa.`address_id` limit 1);
+
+
+
+
+
+
+UPDATE `eh_organizations` SET namespace_id = 1000000 WHERE id = 1000001;
+UPDATE `eh_organizations` SET namespace_id = 999999 WHERE id = 1000100;
+UPDATE `eh_organizations` SET namespace_id = 999994 WHERE id = 1000531;
+UPDATE `eh_organizations` SET namespace_id = 999993 WHERE id = 1000631;
