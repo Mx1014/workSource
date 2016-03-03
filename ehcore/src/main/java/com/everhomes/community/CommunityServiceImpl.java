@@ -1196,7 +1196,7 @@ public class CommunityServiceImpl implements CommunityService {
 		res.setNextPageAnchor(null);
 		if(dtos.size() > pageSize){
 			dtos = dtos.subList(0, pageSize);
-			res.setNextPageAnchor(dtos.get(pageSize-1).getUserId());
+			res.setNextPageAnchor(dtos.get(pageSize-1).getApplyTime().getTime());
 		}
 		res.setUserCommunities(dtos);
 		return res;
