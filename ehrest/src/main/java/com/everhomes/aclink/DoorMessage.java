@@ -1,5 +1,15 @@
 package com.everhomes.aclink;
 
+/**
+ * <ul>
+ * <li>seq: 消息序号</li>
+ * <li>doorId: 门禁ID</li>
+ * <li>messageType: 消息类型，目前都为 0</li>
+ * <li>body: 消息实体信息</li>
+ * </ul>
+ * @author janson
+ *
+ */
 public class DoorMessage {
     //DoorCommand Id as sequence
     Long seq;

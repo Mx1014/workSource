@@ -2,6 +2,20 @@ package com.everhomes.aclink;
 
 import javax.validation.constraints.NotNull;
 
+/**
+ * <ul>
+ * <li>hardwareId: 门禁设备的 MAC 地址</li>
+ * <li>firwareVer: 门禁设备固件的版本号，比如 0.01 </li>
+ * <li>rsaAclinkPub: 门禁激活的公钥 </li>
+ * <li>ownerType: 门禁属于的小区或者企业， 0 : 小区， 1: 企业</li>
+ * <li>ownerId: 门禁属于的对象ID</li>
+ * <li>name: 门禁名字， 16字节以内英文</li>
+ * <li>description: 描述</li>
+ * <li>address: 地址信息</li>
+ * </ul>
+ * @author janson
+ *
+ */
 public class DoorAccessActivingCommand {
     @NotNull
     String hardwareId;

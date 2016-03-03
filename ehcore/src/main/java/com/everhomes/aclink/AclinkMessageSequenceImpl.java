@@ -44,7 +44,13 @@ public class AclinkMessageSequenceImpl implements AclinkMessageSequence {
         //DoorCommandAction daction = new DoorCommandAction(String.valueOf(seq), );
     }
     
+    
+    @Override
     public void ackMessage(Long seq) {
+        if(seq <= 0) {
+            return;
+        }
+        
         final Job job = new Job(DoorCommandAction.class.getName(),
                 new Object[]{String.valueOf(seq)});
         

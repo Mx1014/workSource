@@ -6,6 +6,15 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.discover.ItemType;
 
+/**
+ * <ul> 查询转发的消息
+ * <li>doorId: 门禁ID</li>
+ * <li>urgent: 是否紧急消息， 1表示紧急</li>
+ * <li>inputs: 之前的返回消息 {@link com.everhomes.aclink.DoorMessageResp}</li>
+ * </ul>
+ * @author janson
+ *
+ */
 public class QueryDoorMessageCommand {
     @NotNull
     Long doorId;

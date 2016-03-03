@@ -311,7 +311,12 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         }
         
         for (DoorMessageResp resp : inputs) {
-            //DoorMessage origin = bigCollectionProvider.getMapAccessor("", "");
+            aclinkMessageSequence.ackMessage(resp.getSeq());
+            DoorCommand doorCommand = doorCommandProvider.getDoorCommandById(resp.getSeq());
+            doorCommand.setStatus(DoorCommandStatus.RESPONSE.getCode());
+            doorCommandProvider.updateDoorCommand(doorCommand);
+            
+            //doorCommand.getCmdId()
         } 
     }
     
@@ -466,7 +471,12 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     aesUserKey.setUserId(doorAuth.getUserId());
                     aesUserKey.setCreatorUid(user.getId());
                     aesUserKey.setDoorId(doorAccess.getId());
-                    aesUserKey.setExpireTimeMs(doorAuth.getValidEndMs());
+                    if(doorAuth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
+                        //7 Days
+                        aesUserKey.setExpireTimeMs(System.currentTimeMillis() + 60*1000*24*7);
+                    } else {
+                        aesUserKey.setExpireTimeMs(doorAuth.getValidEndMs());    
+                            }
                     aesUserKey.setStatus(AesUserKeyStatus.VALID.getCode());
                     aesUserKey.setKeyType(AesUserKeyType.NORMAL.getCode());
                     aesUserKey.setSecret(AclinkUtils.packAesUserKey(aesServerKey.getSecret(), doorAuth.getUserId(), aesUserKey.getKeyId(), doorAuth.getValidEndMs()));
@@ -528,27 +538,6 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
     }
     
-    public void createDoorAuth(DoorAuth doorAuth) {
-        
-    }
-    
-    public void removeDoorAuth(DoorAuth doorAuth) {
-        
-    }
-    
-    //Scan the bluetooth, then valify the door key.
-    public List<DoorAuth> listValidDoorAuthByDeviceId(ListValidDoorAuthByDeviceId cmd) {
-        return null;
-    }
-    
-    //list all valid auth for one users
-    //TODO what if the aes_user_key?
-    //version controller for all
-    public List<DoorAuth> listValidDoorAuthByUserId(ListValidDoorAuthByUserIdCommand cmd) {
-        //return doorAuthProvider.queryValidDoorAuthByUserId();
-        return null;
-    }
-    
     public List<DoorMessage> generateMessages(Long doorId) {
         List<DoorMessage> msgs = msgGenerator.generateMessages(doorId);
         for(DoorMessage dm : msgs) {
@@ -565,6 +554,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     }
     
     //list all AesUserKeys for current login user
+    @Override
     public List<AesUserKey> listAesUserKeyByUser() {
         //TODO cache AesUserKey
         
@@ -616,17 +606,23 @@ public class DoorAccessServiceImpl implements DoorAccessService {
 
             @Override
             public AesUserKey doInTransaction(TransactionStatus arg0) {
-                
                 //Find it if it's already created
                 AesUserKey aesUserKey = aesUserKeyProvider.queryAesUserKeyByDoorId(doorAuth.getDoorId(), doorAuth.getUserId());
                 if(aesUserKey == null) {
                     AesServerKey aesServerKey = aesServerKeyService.getCurrentAesServerKey(doorAccess.getId());
                     aesUserKey = new AesUserKey();
+                    aesUserKey.setId(aesUserKeyProvider.prepareForAesUserKeyId());
                     aesUserKey.setKeyId(new Integer((int) (aesUserKey.getId().intValue() % MAX_KEY_ID)));
                     aesUserKey.setCreatorUid(user.getId());
                     aesUserKey.setUserId(doorAuth.getUserId());
                     aesUserKey.setDoorId(doorAccess.getId());
-                    aesUserKey.setExpireTimeMs(doorAuth.getValidEndMs());
+                    if(doorAuth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
+                        //7 Days
+                        aesUserKey.setExpireTimeMs(System.currentTimeMillis() + 60*1000*24*7);
+                    } else {
+                        aesUserKey.setExpireTimeMs(doorAuth.getValidEndMs());    
+                        }
+                    
                     aesUserKey.setStatus(AesUserKeyStatus.VALID.getCode());
                     aesUserKey.setKeyType(AesUserKeyType.NORMAL.getCode());
                     aesUserKey.setSecret(AclinkUtils.packAesUserKey(aesServerKey.getSecret(), doorAuth.getUserId(), aesUserKey.getKeyId(), doorAuth.getValidEndMs()));
