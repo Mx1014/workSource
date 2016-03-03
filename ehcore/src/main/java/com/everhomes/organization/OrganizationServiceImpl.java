@@ -667,7 +667,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}
 			
 		}else{
-			List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, locator, cmd.getPageSize());
+			List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, OrganizationType.ENTERPRISE.getCode(), locator, cmd.getPageSize());
 			for (Organization organization : organizations) {
 				OrganizationDetailDTO dto = this.toOrganizationDetailDTO(organization.getId(), cmd.getQryAdminRoleFlag());
 				if(null != dto)
@@ -4736,7 +4736,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 				OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
 				
 				organization.setCommunityId(r.getCommunityId());
-				organization.setDescription(detail.getDescription());
+				if(null != detail)
+					organization.setDescription(detail.getDescription());
 			}
 			return organization;
 		}).collect(Collectors.toList());

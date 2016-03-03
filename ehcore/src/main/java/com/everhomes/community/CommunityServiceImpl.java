@@ -97,6 +97,7 @@ import com.everhomes.rest.messaging.MetaObjectType;
 import com.everhomes.rest.messaging.QuestionMetaObject;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
+import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.region.RegionServiceErrorCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.UserServiceErrorCode;
@@ -1211,7 +1212,7 @@ public class CommunityServiceImpl implements CommunityService {
 		
 		int communityUserCount = userProvider.countUserByNamespaceId(namespaceId, null);
 		
-		List<Organization> orgs = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, new CrossShardListingLocator(), 1000000);
+		List<Organization> orgs = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, null ,new CrossShardListingLocator(), 1000000);
 		List<Long> orgIds  = new ArrayList<Long>();
 		for (Organization organization : orgs) {
 			orgIds.add(organization.getId());
