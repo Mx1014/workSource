@@ -1218,8 +1218,15 @@ public class CommunityServiceImpl implements CommunityService {
 			orgIds.add(organization.getId());
 		}
 		List<OrganizationMember> members = organizationProvider.getOrganizationMemberByOrgIds(orgIds, OrganizationMemberStatus.ACTIVE);
+		List<Long> userIds = new ArrayList<Long>();
+		if(null != members){
+			for (OrganizationMember member : members) {
+				userIds.add(member.getTargetId());
+			}
+		}
 		
-		int authUserCount = members.size();
+		
+		int authUserCount = userIds.size();
 		int notAuthUsers = communityUserCount - authUserCount;
 		
 		CountCommunityUserResponse resp = new CountCommunityUserResponse();
