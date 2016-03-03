@@ -78,6 +78,7 @@ CREATE TABLE `eh_aes_user_key` (
     `key_type` TINYINT NOT NULL COMMENT '0: aclink normal key',
     `door_id` BIGINT NOT NULL,
     `user_id` BIGINT NOT NULL,
+    `auth_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'auth id of user key',
     `expire_time_ms` BIGINT NOT NULL,
     `create_time_ms` BIGINT NOT NULL,
     `creator_uid` BIGINT NOT NULL,

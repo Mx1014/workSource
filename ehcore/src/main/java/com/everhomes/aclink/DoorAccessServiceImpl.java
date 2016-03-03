@@ -34,7 +34,9 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessageMetaConstant;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.messaging.MetaObjectType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.server.schema.Tables;
@@ -46,6 +48,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 
 
 @Component
@@ -126,6 +129,13 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             }
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
                 uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+    }
+    
+    private void sendMessageToUser(Long uid, Long doorId) {
+        Map<String, String> meta = new HashMap<String, String>();
+        meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.ACLINK_AUTH_CHANGED.getCode());
+        meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(new AclinkMessageMeta(uid, doorId)));
+        sendMessageToUser(uid, "You have new auth", meta);
     }
     
     //列出某园区下的所有锁门禁
@@ -289,19 +299,32 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             rlt.setDoorName(doorAcc.getName());
         }
         
+        sendMessageToUser(user.getId(), doorAcc.getId());
+        
         return rlt;
     }
     
     @Override
     public Long deleteDoorAccess(Long doorAccessId) {
-        DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(doorAccessId);
-        if(doorAccess != null) {
-            doorAccess.setStatus(DoorAccessStatus.INVALID.getCode());
-            doorAccessProvider.updateDoorAccess(doorAccess);
-            return doorAccess.getId();
+        DoorAccess doorAccess = this.dbProvider.execute(new TransactionCallback<DoorAccess>() {
+            @Override
+            public DoorAccess doInTransaction(TransactionStatus arg0) {
+                DoorAccess doorAcc = doorAccessProvider.getDoorAccessById(doorAccessId);
+                if(doorAcc != null) {
+                    doorAcc.setStatus(DoorAccessStatus.INVALID.getCode());
+                    doorAccessProvider.updateDoorAccess(doorAcc);
+                    return doorAcc;
+                }
+                
+                return null;
+            }
+        });
+        
+        if(doorAccess == null) {
+            return null;
         }
         
-        return null;
+        return doorAccess.getId();
     }
     
     @Override
@@ -310,6 +333,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         if(doorAuth != null) {
             doorAuth.setStatus(DoorAuthStatus.INVALID.getCode());
             doorAuthProvider.updateDoorAuth(doorAuth);
+            
+            //generate a DoorCommand
             return doorAuth.getId();
             }
         
