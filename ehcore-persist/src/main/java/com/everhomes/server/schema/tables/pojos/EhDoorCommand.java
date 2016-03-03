@@ -11,11 +11,10 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhDoorCommand implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1927859954;
+	private static final long serialVersionUID = -1276309674;
 
 	private java.lang.Long   id;
 	private java.lang.Long   doorId;
-	private java.lang.Long   cmdSeq;
 	private java.lang.Byte   cmdId;
 	private java.lang.Byte   cmdType;
 	private java.lang.String cmdBody;
@@ -32,7 +31,6 @@ public class EhDoorCommand implements java.io.Serializable {
 	public EhDoorCommand(
 		java.lang.Long   id,
 		java.lang.Long   doorId,
-		java.lang.Long   cmdSeq,
 		java.lang.Byte   cmdId,
 		java.lang.Byte   cmdType,
 		java.lang.String cmdBody,
@@ -46,7 +44,6 @@ public class EhDoorCommand implements java.io.Serializable {
 	) {
 		this.id = id;
 		this.doorId = doorId;
-		this.cmdSeq = cmdSeq;
 		this.cmdId = cmdId;
 		this.cmdType = cmdType;
 		this.cmdBody = cmdBody;
@@ -73,14 +70,6 @@ public class EhDoorCommand implements java.io.Serializable {
 
 	public void setDoorId(java.lang.Long doorId) {
 		this.doorId = doorId;
-	}
-
-	public java.lang.Long getCmdSeq() {
-		return this.cmdSeq;
-	}
-
-	public void setCmdSeq(java.lang.Long cmdSeq) {
-		this.cmdSeq = cmdSeq;
 	}
 
 	public java.lang.Byte getCmdId() {

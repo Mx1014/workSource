@@ -28,7 +28,7 @@
             (A Java regular expression. Use the pipe to separate several expressions)
             Watch out for case-sensitivity. Depending on your database, this might be important! -->
         <includes>
-	eh_aclinks | eh_door_access | eh_aes_server_key | eh_aes_user_key | eh_aclink_undo_key | eh_door_auth | eh_door_command | eh_owner_doors
+    eh_door_command
         </includes>
             <!-- All elements that are excluded from your schema
             (A Java regular expression. Use the pipe to separate several expressions).

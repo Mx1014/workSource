@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.aclink.AclinkDeleteByIdCommand;
 import com.everhomes.aclink.AclinkUserResponse;
 import com.everhomes.aclink.AesServerKeyProvider;
 import com.everhomes.aclink.CreateDoorAuthCommand;
@@ -105,8 +106,8 @@ public class AclinkAdminController extends ControllerBase {
     /**
      * 
      * <b>URL: /admin/aclink/listAclinkUsers</b>
-     * <p>创建授权</p>
-     * @return OK 成功
+     * <p>显示用户授权列表</p>
+     * @return
      */
     @RequestMapping("listAclinkUsers")
     @RestReturn(value=AclinkUserResponse.class)
@@ -116,4 +117,37 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * 
+     * <b>URL: /admin/aclink/deleteDoorAccess</b>
+     * <p>删除门禁</p>
+     * @return
+     */
+    @RequestMapping("deleteDoorAccess")
+    @RestReturn(value=String.class)
+    public RestResponse deleteDoorAccess(@Valid AclinkDeleteByIdCommand cmd) {
+        doorAccessService.deleteDoorAccess(cmd.getObjId());
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;        
+    }
+    
+    /**
+     * 
+     * <b>URL: /admin/aclink/deleteDoorAuth</b>
+     * <p>删除授权</p>
+     * @return
+     */
+    @RequestMapping("deleteDoorAuth")
+    @RestReturn(value=String.class)
+    public RestResponse deleteDoorAuth(@Valid AclinkDeleteByIdCommand cmd) {
+        doorAccessService.deleteDoorAuth(cmd.getObjId());
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    //TODO delete auth
 }

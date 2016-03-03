@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhDoorCommand extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhDoorCommandRecord> {
 
-	private static final long serialVersionUID = 1176082285;
+	private static final long serialVersionUID = 1603771440;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_door_command</code>
@@ -35,11 +35,6 @@ public class EhDoorCommand extends org.jooq.impl.TableImpl<com.everhomes.server.
 	 * The column <code>ehcore.eh_door_command.door_id</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorCommandRecord, java.lang.Long> DOOR_ID = createField("door_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_door_command.cmd_seq</code>. sequence
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorCommandRecord, java.lang.Long> CMD_SEQ = createField("cmd_seq", org.jooq.impl.SQLDataType.BIGINT, this, "sequence");
 
 	/**
 	 * The column <code>ehcore.eh_door_command.cmd_id</code>. cmd id for aclink
@@ -127,14 +122,6 @@ public class EhDoorCommand extends org.jooq.impl.TableImpl<com.everhomes.server.
 	@Override
 	public java.util.List<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhDoorCommandRecord>> getKeys() {
 		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhDoorCommandRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_DOOR_COMMAND_PRIMARY);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public java.util.List<org.jooq.ForeignKey<com.everhomes.server.schema.tables.records.EhDoorCommandRecord, ?>> getReferences() {
-		return java.util.Arrays.<org.jooq.ForeignKey<com.everhomes.server.schema.tables.records.EhDoorCommandRecord, ?>>asList(com.everhomes.server.schema.Keys.EH_DOOR_COMMAND_IBFK_1);
 	}
 
 	/**

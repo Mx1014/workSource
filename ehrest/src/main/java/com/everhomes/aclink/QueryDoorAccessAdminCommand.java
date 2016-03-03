@@ -1,5 +1,7 @@
 package com.everhomes.aclink;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * <ul>
  * <li>ownerId: 属于的上级ID</li>
@@ -12,8 +14,12 @@ package com.everhomes.aclink;
  *
  */
 public class QueryDoorAccessAdminCommand {
+    @NotNull
     private Long ownerId;
+    
+    @NotNull
     private Byte ownerType;
+    
     private String search;
     private Byte linkStatus;
     private Byte doorType;

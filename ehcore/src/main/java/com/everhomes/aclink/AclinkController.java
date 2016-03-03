@@ -43,9 +43,24 @@ public class AclinkController extends ControllerBase {
      * @return 激活门禁消息
      */
     @RequestMapping("active")
-    @RestReturn(value=DoorMessage.class)
+    @RestReturn(value=QueryDoorMessageResponse.class)
     public RestResponse active(@Valid DoorAccessActivedCommand cmd) {
         RestResponse response = new RestResponse(doorAccessService.activateDoorAccess(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        
+        return response;
+    }
+    
+    /**
+     * <b>URL: /aclink/queryMessages</b>
+     * <p>激活门禁</p>
+     * @return 激活门禁消息
+     */
+    @RequestMapping("queryMessages")
+    @RestReturn(value=QueryDoorMessageResponse.class)
+    public RestResponse queryMessages(@Valid QueryDoorMessageCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.queryDoorMessageByDoorId(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         

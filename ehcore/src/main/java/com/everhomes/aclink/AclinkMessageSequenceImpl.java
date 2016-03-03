@@ -31,7 +31,10 @@ public class AclinkMessageSequenceImpl implements AclinkMessageSequence {
 
     @Override
     public void pendingMessage(DoorMessage msg) {
-
+        if(msg.getSeq() <= 0) {
+        return;    
+        }
+        
         final Job job = new Job(DoorCommandAction.class.getName(),
                 new Object[]{String.valueOf(msg.getSeq())});
         

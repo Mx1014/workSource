@@ -152,6 +152,7 @@ public class AesUserKeyProviderImpl implements AesUserKeyProvider {
 //        int keyId = (int) (obj.getId().intValue() % MAX_KEY_ID);
 //        obj.setKeyId(new Integer(keyId));
 //        obj.setSecret(AclinkUtils);
+        obj.setCreateTimeMs(System.currentTimeMillis());
     }
     
     @Override

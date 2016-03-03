@@ -55,13 +55,6 @@ public class EhDoorCommandDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	}
 
 	/**
-	 * Fetch records that have <code>cmd_seq IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorCommand> fetchByCmdSeq(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhDoorCommand.EH_DOOR_COMMAND.CMD_SEQ, values);
-	}
-
-	/**
 	 * Fetch records that have <code>cmd_id IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorCommand> fetchByCmdId(java.lang.Byte... values) {

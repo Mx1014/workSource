@@ -4,6 +4,8 @@ import javax.validation.constraints.NotNull;
 
 public class ListAclinkUserCommand {
     private Long pageAnchor;
+    
+    @NotNull
     private Long doorId;
     
     private Integer pageSize;

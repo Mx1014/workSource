@@ -70,6 +70,11 @@ public class AclinkMsgGeneratorImpl implements AclinkMsgGenerator {
             for(DoorCommand cmd : cmds) {
                 ctx.putMessage(cmd);
                 }
+            
+            //Check anchor
+            if(locator.getAnchor() == null) {
+                break;
+                }
         }
         
         List<DoorCommand> cmds = ctx.getOrderMessages();

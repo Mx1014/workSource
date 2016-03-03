@@ -182,7 +182,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         locator.setAnchor(cmd.getPageAnchor());
         
         List<User> users = null;
-        if(cmd.getKeyword() == null){
+        if(cmd.getKeyword() == null) {
             users = userProvider.findUserByNamespaceId(cmd.getNamespaceId(), locator, pageSize);
         } else {
             users = userProvider.listUserByKeywords(locator, cmd.getKeyword(), pageSize);
@@ -270,14 +270,46 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         return rlt;
     }
     
+    @Override
+    public Long deleteDoorAccess(Long doorAccessId) {
+        DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(doorAccessId);
+        if(doorAccess != null) {
+            doorAccess.setStatus(DoorAccessStatus.INVALID.getCode());
+            doorAccessProvider.updateDoorAccess(doorAccess);
+            return doorAccess.getId();
+        }
+        
+        return null;
+    }
+    
+    @Override
+    public Long deleteDoorAuth(Long doorAuthId) {
+        DoorAuth doorAuth = doorAuthProvider.getDoorAuthById(doorAuthId);
+        if(doorAuth != null) {
+            doorAuth.setStatus(DoorAuthStatus.INVALID.getCode());
+            doorAuthProvider.updateDoorAuth(doorAuth);
+            return doorAuth.getId();
+            }
+        
+        return null;
+    }
+    
     //获取最新需要更新的数据，包括用户最新的钥匙DoorUserKey，以前锁与服务器交互的钥匙 DoorServerKey。同时可以对上次更新的消息进行确认。
     //urgent 为 true, 则拿最紧急的消息列表。更新到设备之后再尝试开门或其它事情。
-    public List<DoorMessage> queryDoorMessageByDoorId(Boolean urgent, Long doorId, List<DoorMessageResp> inputs) {
-        processIncomeMessageResp(inputs);
-        return generateMessages(doorId);
+    @Override
+    public QueryDoorMessageResponse queryDoorMessageByDoorId(QueryDoorMessageCommand cmd) {
+        processIncomeMessageResp(cmd.getInputs());
+        QueryDoorMessageResponse resp = new QueryDoorMessageResponse();
+        resp.setDoorId(cmd.getDoorId());
+        resp.setOutputs(generateMessages(cmd.getDoorId()));
+        return resp;
     }
     
     public void processIncomeMessageResp(List<DoorMessageResp> inputs) {
+        if(inputs == null) {
+            return;
+        }
+        
         for (DoorMessageResp resp : inputs) {
             //DoorMessage origin = bigCollectionProvider.getMapAccessor("", "");
         } 
@@ -350,7 +382,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 cmd.setDoorId(doorAcc.getId());
                 cmd.setOwnerId(cmd.getOwnerId());
                 cmd.setOwnerType(cmd.getOwnerType());
-                cmd.setCmdId(AclinkCommandType.CMD_ACTIVE.getCode());
+                cmd.setCmdId(AclinkCommandType.INIT_SERVER_KEY.getCode());
                 cmd.setCmdType((byte)0);//TODO use enum
                 cmd.setServerKeyVer(1l);//Default for AesServerKey
                 cmd.setAclinkKeyVer(AclinkDeviceVer.VER0.getCode());
@@ -390,7 +422,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     
     //激活一个新锁
     @Override
-    public List<DoorMessage> activateDoorAccess(DoorAccessActivedCommand cmd) {
+    public QueryDoorMessageResponse activateDoorAccess(DoorAccessActivedCommand cmd) {
         User user = UserContext.current().getUser();
         DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
         if(doorAccess != null && doorAccess.getStatus().equals(DoorAccessStatus.ACTIVING.getCode())
@@ -404,6 +436,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     doorAccessProvider.updateDoorAccess(doorAccess);
                     DoorCommand doorCommand = doorCommandProvider.queryActiveDoorCommand(cmd.getDoorId());
                     doorCommand.setStatus(DoorCommandStatus.PROCESS.getCode());
+                    doorCommandProvider.updateDoorCommand(doorCommand);
                     
                     //Create auth
                     DoorAuth doorAuth = new DoorAuth();
@@ -417,6 +450,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     doorAuth.setValidFromMs(System.currentTimeMillis() -  60*1000);
                     doorAuth.setValidEndMs(System.currentTimeMillis()+ 10*60*1000);//TODO
                     doorAuth.setUserId(user.getId());
+                    doorAuth.setStatus(DoorAuthStatus.VALID.getCode());
                     UserIdentifier ui = userProvider.findIdentifierById(user.getId());
                     if(ui != null) {
                         doorAuth.setPhone(ui.getIdentifierToken());
@@ -429,6 +463,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     AesUserKey aesUserKey = new AesUserKey();
                     aesUserKey.setId(aesUserKeyProvider.prepareForAesUserKeyId());
                     aesUserKey.setKeyId(new Integer((int) (aesUserKey.getId().intValue() % MAX_KEY_ID)));
+                    aesUserKey.setUserId(doorAuth.getUserId());
                     aesUserKey.setCreatorUid(user.getId());
                     aesUserKey.setDoorId(doorAccess.getId());
                     aesUserKey.setExpireTimeMs(doorAuth.getValidEndMs());
@@ -461,7 +496,10 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     "DoorAccess exists");
         }
         
-        return generateMessages(cmd.getDoorId());
+        QueryDoorMessageResponse resp = new QueryDoorMessageResponse();
+        resp.setDoorId(cmd.getDoorId());
+        resp.setOutputs(generateMessages(cmd.getDoorId()));
+        return resp;
     }
     
     //更新锁的详细信息
@@ -523,6 +561,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     @Override
     public void onDoorMessageTimeout(Long cmdId) {
         //message timeout here
+        LOGGER.info("timeout for cmdId=", cmdId);
     }
     
     //list all AesUserKeys for current login user
@@ -585,6 +624,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     aesUserKey = new AesUserKey();
                     aesUserKey.setKeyId(new Integer((int) (aesUserKey.getId().intValue() % MAX_KEY_ID)));
                     aesUserKey.setCreatorUid(user.getId());
+                    aesUserKey.setUserId(doorAuth.getUserId());
                     aesUserKey.setDoorId(doorAccess.getId());
                     aesUserKey.setExpireTimeMs(doorAuth.getValidEndMs());
                     aesUserKey.setStatus(AesUserKeyStatus.VALID.getCode());
