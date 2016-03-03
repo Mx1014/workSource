@@ -1221,7 +1221,9 @@ public class CommunityServiceImpl implements CommunityService {
 		List<Long> userIds = new ArrayList<Long>();
 		if(null != members){
 			for (OrganizationMember member : members) {
-				userIds.add(member.getTargetId());
+				if(!userIds.contains(member.getTargetId())){
+					userIds.add(member.getTargetId());
+				}
 			}
 		}
 		
