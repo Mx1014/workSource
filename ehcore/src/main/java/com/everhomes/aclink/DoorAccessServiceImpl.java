@@ -313,6 +313,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 if(doorAcc != null) {
                     doorAcc.setStatus(DoorAccessStatus.INVALID.getCode());
                     doorAccessProvider.updateDoorAccess(doorAcc);
+                    
+                    
+                    
                     return doorAcc;
                 }
                 
@@ -334,7 +337,21 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             doorAuth.setStatus(DoorAuthStatus.INVALID.getCode());
             doorAuthProvider.updateDoorAuth(doorAuth);
             
+            AesUserKey aesUserKey1 = aesUserKeyProvider.queryAesUserKeyByDoorId(doorAuth.getDoorId(), doorAuth.getUserId(), doorAuthId);
+            
+            
             //generate a DoorCommand
+            DoorCommand cmd = new DoorCommand();
+            cmd.setDoorId(doorAuth.getDoorId());
+            cmd.setOwnerId(cmd.getOwnerId());
+            cmd.setOwnerType(cmd.getOwnerType());
+            cmd.setCmdId(AclinkCommandType.ADD_UNDO_LIST.getCode());
+            cmd.setCmdType((byte)0);
+            cmd.setServerKeyVer(1l);
+            cmd.setAclinkKeyVer(AclinkDeviceVer.VER0.getCode());
+            cmd.setStatus(DoorCommandStatus.SENDING.getCode());
+            doorCommandProvider.createDoorCommand(cmd);
+            
             return doorAuth.getId();
             }
         
@@ -511,10 +528,10 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     
                     AesServerKey aesServerKey = aesServerKeyService.getCurrentAesServerKey(doorAccess.getId());
                     
-                    //TODO send a message to client
                     AesUserKey aesUserKey = new AesUserKey();
                     aesUserKey.setId(aesUserKeyProvider.prepareForAesUserKeyId());
                     aesUserKey.setKeyId(new Integer((int) (aesUserKey.getId().intValue() % MAX_KEY_ID)));
+                    aesUserKey.setAuthId(doorAuth.getId());
                     aesUserKey.setUserId(doorAuth.getUserId());
                     aesUserKey.setCreatorUid(user.getId());
                     aesUserKey.setDoorId(doorAccess.getId());
@@ -668,6 +685,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     aesUserKey.setCreatorUid(user.getId());
                     aesUserKey.setUserId(doorAuth.getUserId());
                     aesUserKey.setDoorId(doorAccess.getId());
+                    aesUserKey.setAuthId(doorAuth.getId());
                     if(doorAuth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
                         //7 Days
                         aesUserKey.setExpireTimeMs(System.currentTimeMillis() + 60*1000*24*7);

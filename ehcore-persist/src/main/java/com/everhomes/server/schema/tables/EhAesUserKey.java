@@ -77,6 +77,11 @@ public class EhAesUserKey extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAesUserKeyRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false), this, "");
 
 	/**
+	 * The column <code>ehcore.eh_aes_user_key.auth_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAesUserKeyRecord, java.lang.Long> AUTH_ID = createField("auth_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
+
+	/**
 	 * Create a <code>ehcore.eh_aes_user_key</code> table reference
 	 */
 	public EhAesUserKey() {

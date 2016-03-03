@@ -109,4 +109,11 @@ public class EhAesUserKeyDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAesUserKey> fetchByStatus(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhAesUserKey.EH_AES_USER_KEY.STATUS, values);
 	}
+
+	/**
+	 * Fetch records that have <code>auth_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAesUserKey> fetchByAuthId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAesUserKey.EH_AES_USER_KEY.AUTH_ID, values);
+	}
 }

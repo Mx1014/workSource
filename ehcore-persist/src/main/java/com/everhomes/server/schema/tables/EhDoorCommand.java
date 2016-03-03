@@ -128,6 +128,14 @@ public class EhDoorCommand extends org.jooq.impl.TableImpl<com.everhomes.server.
 	 * {@inheritDoc}
 	 */
 	@Override
+	public java.util.List<org.jooq.ForeignKey<com.everhomes.server.schema.tables.records.EhDoorCommandRecord, ?>> getReferences() {
+		return java.util.Arrays.<org.jooq.ForeignKey<com.everhomes.server.schema.tables.records.EhDoorCommandRecord, ?>>asList(com.everhomes.server.schema.Keys.EH_DOOR_COMMAND_IBFK_1);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public com.everhomes.server.schema.tables.EhDoorCommand as(java.lang.String alias) {
 		return new com.everhomes.server.schema.tables.EhDoorCommand(alias, this);
 	}

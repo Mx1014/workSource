@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAesUserKey implements java.io.Serializable {
 
-	private static final long serialVersionUID = 341427614;
+	private static final long serialVersionUID = -591865460;
 
 	private java.lang.Long    id;
 	private java.lang.Integer keyId;
@@ -23,6 +23,7 @@ public class EhAesUserKey implements java.io.Serializable {
 	private java.lang.Long    creatorUid;
 	private java.lang.String  secret;
 	private java.lang.Byte    status;
+	private java.lang.Long    authId;
 
 	public EhAesUserKey() {}
 
@@ -36,7 +37,8 @@ public class EhAesUserKey implements java.io.Serializable {
 		java.lang.Long    createTimeMs,
 		java.lang.Long    creatorUid,
 		java.lang.String  secret,
-		java.lang.Byte    status
+		java.lang.Byte    status,
+		java.lang.Long    authId
 	) {
 		this.id = id;
 		this.keyId = keyId;
@@ -48,6 +50,7 @@ public class EhAesUserKey implements java.io.Serializable {
 		this.creatorUid = creatorUid;
 		this.secret = secret;
 		this.status = status;
+		this.authId = authId;
 	}
 
 	public java.lang.Long getId() {
@@ -128,5 +131,13 @@ public class EhAesUserKey implements java.io.Serializable {
 
 	public void setStatus(java.lang.Byte status) {
 		this.status = status;
+	}
+
+	public java.lang.Long getAuthId() {
+		return this.authId;
+	}
+
+	public void setAuthId(java.lang.Long authId) {
+		this.authId = authId;
 	}
 }

@@ -162,6 +162,11 @@ public class AesUserKeyProviderImpl implements AesUserKeyProvider {
     
     @Override
     public AesUserKey queryAesUserKeyByDoorId(Long doorId, Long userId) {
+        return queryAesUserKeyByDoorId(doorId, userId, -1l);
+    }
+    
+    @Override
+    public AesUserKey queryAesUserKeyByDoorId(Long doorId, Long userId, Long ignoreAuthId) {
         ListingLocator locator = new ListingLocator();
         
         long now = DateHelper.currentGMTTime().getTime();
@@ -175,6 +180,7 @@ public class AesUserKeyProviderImpl implements AesUserKeyProvider {
                 query.addConditions(Tables.EH_AES_USER_KEY.EXPIRE_TIME_MS.ge(now));
                 query.addConditions(Tables.EH_AES_USER_KEY.STATUS.eq(AesUserKeyStatus.VALID.getCode()));
                 query.addConditions(Tables.EH_AES_USER_KEY.DOOR_ID.eq(doorId));
+                query.addConditions(Tables.EH_AES_USER_KEY.AUTH_ID.ne(ignoreAuthId));
                 return query;
             }
             
@@ -184,6 +190,11 @@ public class AesUserKeyProviderImpl implements AesUserKeyProvider {
             return aesUserKeys.get(0);
         }
         
+        return null;
+    }
+    
+    @Override
+    public AesUserKey queryAesUserKeyByAuthId(Long authId) {
         return null;
     }
     
