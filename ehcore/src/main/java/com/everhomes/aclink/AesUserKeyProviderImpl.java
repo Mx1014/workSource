@@ -194,7 +194,27 @@ public class AesUserKeyProviderImpl implements AesUserKeyProvider {
     }
     
     @Override
-    public AesUserKey queryAesUserKeyByAuthId(Long authId) {
+    public AesUserKey queryAesUserKeyByAuthId(Long doorId, Long authId) {
+        ListingLocator locator = new ListingLocator();
+        
+        long now = DateHelper.currentGMTTime().getTime();
+        
+        List<AesUserKey> aesUserKeys = queryAesUserKeyByDoorId(locator, doorId, 1, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_AES_USER_KEY.DOOR_ID.eq(doorId));
+                query.addConditions(Tables.EH_AES_USER_KEY.AUTH_ID.eq(authId));
+                return query;
+            }
+            
+        });
+        
+        if(aesUserKeys.size() > 0) {
+            return aesUserKeys.get(0);
+        }
+        
         return null;
     }
     

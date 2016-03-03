@@ -332,28 +332,51 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     
     @Override
     public Long deleteDoorAuth(Long doorAuthId) {
-        DoorAuth doorAuth = doorAuthProvider.getDoorAuthById(doorAuthId);
-        if(doorAuth != null) {
-            doorAuth.setStatus(DoorAuthStatus.INVALID.getCode());
-            doorAuthProvider.updateDoorAuth(doorAuth);
-            
-            AesUserKey aesUserKey1 = aesUserKeyProvider.queryAesUserKeyByDoorId(doorAuth.getDoorId(), doorAuth.getUserId(), doorAuthId);
-            
-            
-            //generate a DoorCommand
-            DoorCommand cmd = new DoorCommand();
-            cmd.setDoorId(doorAuth.getDoorId());
-            cmd.setOwnerId(cmd.getOwnerId());
-            cmd.setOwnerType(cmd.getOwnerType());
-            cmd.setCmdId(AclinkCommandType.ADD_UNDO_LIST.getCode());
-            cmd.setCmdType((byte)0);
-            cmd.setServerKeyVer(1l);
-            cmd.setAclinkKeyVer(AclinkDeviceVer.VER0.getCode());
-            cmd.setStatus(DoorCommandStatus.SENDING.getCode());
-            doorCommandProvider.createDoorCommand(cmd);
-            
-            return doorAuth.getId();
+        this.dbProvider.execute(new TransactionCallback<DoorCommand>() {
+            @Override
+            public DoorCommand doInTransaction(TransactionStatus arg0) {
+                DoorAuth doorAuth = doorAuthProvider.getDoorAuthById(doorAuthId);
+                if(doorAuth != null) {
+                    doorAuth.setStatus(DoorAuthStatus.INVALID.getCode());
+                    doorAuthProvider.updateDoorAuth(doorAuth);
+                    
+                    AesUserKey aesUserKey1 = aesUserKeyProvider.queryAesUserKeyByAuthId(doorAuth.getDoorId(), doorAuth.getId());
+                    if(aesUserKey1 == null) {
+                        return null;
+                    }
+                    
+                    AesUserKey aesUserKey2 = aesUserKeyProvider.queryAesUserKeyByDoorId(doorAuth.getDoorId(), doorAuth.getUserId(), doorAuthId);
+                    if(aesUserKey2 != null) {
+                        //TODO still has rights, ok?
+                        return null;
+                    }
+                    
+                    AesServerKey aesServerKey = aesServerKeyService.getCurrentAesServerKey(doorAuth.getDoorId());
+                    if(aesServerKey == null) {
+                        return null;
+                    }
+                    
+                    //generate a DoorCommand
+                    DoorCommand cmd = new DoorCommand();
+                    cmd.setUserId(doorAuth.getUserId());
+                    cmd.setDoorId(doorAuth.getDoorId());
+                    cmd.setOwnerId(cmd.getOwnerId());
+                    cmd.setOwnerType(cmd.getOwnerType());
+                    cmd.setCmdId(AclinkCommandType.ADD_UNDO_LIST.getCode());
+                    cmd.setCmdType((byte)0);
+                    cmd.setServerKeyVer(aesServerKey.getSecretVer());
+                    cmd.setAclinkKeyVer(aesServerKey.getDeviceVer());
+                    cmd.setStatus(DoorCommandStatus.CREATING.getCode());
+                    //TODO
+                    cmd.setCmdBody("");
+                    doorCommandProvider.createDoorCommand(cmd);
+                    
+                    return cmd;
+                    }
+                
+                return null;
             }
+        });
         
         return null;
     }
