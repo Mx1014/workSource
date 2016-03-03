@@ -23,9 +23,6 @@ public class ListCommunityUsersCommand {
 
 
 	public Long getPageAnchor() {
-		if(null == pageAnchor){
-			return 0l;
-		}
 		return pageAnchor;
 	}
 
