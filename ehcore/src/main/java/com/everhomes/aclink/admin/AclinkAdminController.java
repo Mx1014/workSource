@@ -1,5 +1,8 @@
 package com.everhomes.aclink.admin;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.everhomes.aclink.AclinkDeleteByIdCommand;
 import com.everhomes.aclink.AclinkUserResponse;
 import com.everhomes.aclink.AesServerKeyProvider;
+import com.everhomes.aclink.AesUserKey;
+import com.everhomes.aclink.AesUserKeyDTO;
 import com.everhomes.aclink.CreateDoorAuthCommand;
 import com.everhomes.aclink.DoorAccess;
 import com.everhomes.aclink.DoorAccessAdminUpdateCommand;
@@ -16,14 +21,18 @@ import com.everhomes.aclink.DoorAccessProvider;
 import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.aclink.DoorAuthDTO;
 import com.everhomes.aclink.ListAclinkUserCommand;
+import com.everhomes.aclink.ListAesUserKeyByUserIdCommand;
+import com.everhomes.aclink.ListAesUserKeyByUserResponse;
 import com.everhomes.aclink.ListDoorAccessByOwnerIdCommand;
 import com.everhomes.aclink.ListDoorAccessResponse;
 import com.everhomes.aclink.QueryDoorAccessAdminCommand;
+import com.everhomes.aclink.QueryDoorMessageResponse;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 @RestDoc(value="Aclink Admin controller", site="core")
@@ -149,5 +158,28 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    //TODO delete auth
+    
+    /**
+     * <b>URL: /admin/aclink/listUserKey</b>
+     * <p>获取用户授权信息</p>
+     * @return
+     */
+    @RequestMapping("listUserKey")
+    @RestReturn(value=ListAesUserKeyByUserResponse.class)
+    public RestResponse listUserKey(ListAesUserKeyByUserIdCommand cmd) {
+        ListAesUserKeyByUserResponse resp = new ListAesUserKeyByUserResponse();
+        List<AesUserKey> aesUserKeys = doorAccessService.listAesUserKeyByUserId(cmd.getUserId());
+        List<AesUserKeyDTO> dtos = new ArrayList<AesUserKeyDTO>();
+        for(AesUserKey key : aesUserKeys) {
+            AesUserKeyDTO dto = ConvertHelper.convert(key, AesUserKeyDTO.class);
+            dtos.add(dto);
+        }
+        
+        resp.setAesUserKeys(dtos);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        
+        return response;
+    }
 }

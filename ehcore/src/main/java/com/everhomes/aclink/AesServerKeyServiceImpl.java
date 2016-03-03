@@ -88,7 +88,20 @@ public class AesServerKeyServiceImpl implements AesServerKeyService {
         String key = String.format(ACKING_SECRET, doorAccId);
         String ver = getRedisValue(key);
         if(ver == null) {
-            return null;
+            DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(doorAccId);
+            if(doorAccess == null) {
+                return null;
+            }
+            Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+            RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+            
+            key = String.format(EXPECT_SECRET, doorAccId);
+            redisTemplate.opsForValue().set(key, doorAccess.getExpectSecretKey().toString());
+            
+            key = String.format(ACKING_SECRET, doorAccId);
+            redisTemplate.opsForValue().set(key, doorAccess.getAckingSecretVersion().toString());
+            
+            ver = doorAccess.getAckingSecretVersion().toString();
         }
         
         Long verId = Long.valueOf(ver);

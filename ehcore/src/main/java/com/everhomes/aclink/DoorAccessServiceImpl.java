@@ -550,16 +550,6 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         return null;
     }
     
-    //创建门禁的一个新的用户授权
-    public void createDoorUserKey(User user, AesUserKey userKey) {
-        
-    }
-    
-    List<AesUserKey> listAesUserKeyByUserId(Long userId) {
-        return null;
-        
-    }
-    
     public List<DoorMessage> generateMessages(Long doorId) {
         List<DoorMessage> msgs = msgGenerator.generateMessages(doorId);
         for(DoorMessage dm : msgs) {
@@ -575,12 +565,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         LOGGER.info("timeout for cmdId=", cmdId);
     }
     
-    //list all AesUserKeys for current login user
-    @Override
-    public List<AesUserKey> listAesUserKeyByUser() {
+    List<AesUserKey> listAesUserKeyByUser(User user) {
         //TODO cache AesUserKey
         
-        User user = UserContext.current().getUser();
         ListingLocator locator = new ListingLocator();
         List<DoorAuth> auths = uniqueAuths(doorAuthProvider.queryValidDoorAuthByUserId(locator, user.getId(), 60));
         
@@ -594,7 +581,25 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 }
             }
         
-        return aesUserKeys;
+        return aesUserKeys;        
+    }
+    
+    @Override
+    public  List<AesUserKey> listAesUserKeyByUserId(Long userId) {
+        User user = userProvider.findUserById(userId);
+        if(user != null) {
+            return listAesUserKeyByUser(user);
+        }
+        
+        return new ArrayList<AesUserKey>();
+        
+    }
+    
+    //list all AesUserKeys for current login user
+    @Override
+    public List<AesUserKey> listAesUserKeyByUser() {
+        User user = UserContext.current().getUser();
+        return listAesUserKeyByUser(user);
     }
     
     private List<DoorAuth> uniqueAuths(List<DoorAuth> auths) {

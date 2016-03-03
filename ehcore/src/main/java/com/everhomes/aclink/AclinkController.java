@@ -77,7 +77,7 @@ public class AclinkController extends ControllerBase {
      * @return
      */
     @RequestMapping("listAesUserKey")
-    @RestReturn(value=QueryDoorMessageResponse.class)
+    @RestReturn(value=ListAesUserKeyByUserResponse.class)
     public RestResponse listAesUserKey() {
         ListAesUserKeyByUserResponse resp = new ListAesUserKeyByUserResponse();
         List<AesUserKey> aesUserKeys = doorAccessService.listAesUserKeyByUser();
