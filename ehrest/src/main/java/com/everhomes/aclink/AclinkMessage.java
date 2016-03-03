@@ -1,5 +1,7 @@
 package com.everhomes.aclink;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * <li>cmd: 消息命令字</li>
@@ -31,5 +33,9 @@ public class AclinkMessage {
     }
     public void setEncrypted(String encrypted) {
         this.encrypted = encrypted;
+    }
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

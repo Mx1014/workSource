@@ -29,6 +29,13 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.messaging.MessagingService;
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -93,6 +100,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     @Autowired
     private ConfigurationProvider  configProvider;
     
+    @Autowired
+    private MessagingService messagingService;
+    
     public static String Manufacturer = "zuolin001";
     
     private static long MAX_KEY_ID = 1024;
@@ -100,6 +110,22 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     @PostConstruct
     public void setup() {
         Security.addProvider(new BouncyCastleProvider());
+    }
+    
+    private void sendMessageToUser(Long uid, String content, Map<String, String> meta) {
+        MessageDTO messageDto = new MessageDTO();
+        messageDto.setAppId(AppConstants.APPID_MESSAGING);
+        messageDto.setSenderUid(User.SYSTEM_UID);
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid.toString()));
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+        messageDto.setBody(content);
+        messageDto.setMetaAppId(AppConstants.APPID_ACLINK);
+        if(null != meta && meta.size() > 0) {
+            messageDto.getMeta().putAll(meta);
+            }
+        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
+                uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
     }
     
     //列出某园区下的所有锁门禁
@@ -183,24 +209,20 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         List<User> users = null;
         if(cmd.getKeyword() == null) {
-            users = userProvider.findUserByNamespaceId(cmd.getNamespaceId(), locator, pageSize);
+            users = userProvider.listUserByKeyword("", cmd.getNamespaceId(), locator, pageSize);
         } else {
-            users = userProvider.listUserByKeywords(locator, cmd.getKeyword(), pageSize);
+            users = userProvider.listUserByKeyword(cmd.getKeyword(), cmd.getNamespaceId(), locator, pageSize);
         }
         
         List<AclinkUserDTO> userDTOs = new ArrayList<AclinkUserDTO>();
         for(User u : users) {
             AclinkUserDTO dto = ConvertHelper.convert(u, AclinkUserDTO.class);
-            UserIdentifier ui = userProvider.findIdentifierById(u.getId());
-            if(ui != null) {
-                dto.setPhone(ui.getIdentifierToken());    
-                //dto.setStatus(status);
-                DoorAuth doorAuth = doorAuthProvider.queryValidDoorAuthForever(cmd.getDoorId(), dto.getId());
-                if(doorAuth != null) {
-                    dto.setStatus(DoorAuthStatus.VALID.getCode());
-                } else {
-                    dto.setStatus(DoorAuthStatus.INVALID.getCode());
-                    }
+            dto.setPhone(u.getIdentifierToken());
+            DoorAuth doorAuth = doorAuthProvider.queryValidDoorAuthForever(cmd.getDoorId(), dto.getId());
+            if(doorAuth != null) {
+                dto.setStatus(DoorAuthStatus.VALID.getCode());
+            } else {
+                dto.setStatus(DoorAuthStatus.INVALID.getCode());
                 }
             userDTOs.add(dto);
         }

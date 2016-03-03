@@ -5,6 +5,7 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 public class QueryDoorMessageResponse {
     @NotNull
@@ -27,5 +28,9 @@ public class QueryDoorMessageResponse {
 
     public void setOutputs(List<DoorMessage> outputs) {
         this.outputs = outputs;
+    }
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

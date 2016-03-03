@@ -5,6 +5,7 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 /**
  * <ul> 查询转发的消息
@@ -48,5 +49,9 @@ public class QueryDoorMessageCommand {
         this.urgent = urgent;
     }
     
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
     
 }

@@ -1,5 +1,7 @@
 package com.everhomes.aclink;
 
+import com.everhomes.util.StringHelper;
+
 public class AclinkUserDTO {
     private Long id;
     private String userName;
@@ -36,5 +38,9 @@ public class AclinkUserDTO {
     }
     public void setStatus(Byte status) {
         this.status = status;
+    }
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

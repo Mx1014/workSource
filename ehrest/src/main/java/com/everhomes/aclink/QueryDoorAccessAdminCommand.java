@@ -2,6 +2,8 @@ package com.everhomes.aclink;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * <li>ownerId: 属于的上级ID</li>
@@ -68,6 +70,10 @@ public class QueryDoorAccessAdminCommand {
     }
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
     
 }

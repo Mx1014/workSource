@@ -2,6 +2,8 @@ package com.everhomes.aclink;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * <li>doorId: 门禁 ID</li>
@@ -43,5 +45,9 @@ public class DoorAccessActivedCommand {
 
     public void setTime(Long time) {
         this.time = time;
+    }
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

@@ -2,6 +2,8 @@ package com.everhomes.aclink;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.util.StringHelper;
+
 public class DoorAccessAdminUpdateCommand {
     @NotNull
     private Long     id;
@@ -48,6 +50,9 @@ public class DoorAccessAdminUpdateCommand {
     public void setLatitude(Double latitude) {
         this.latitude = latitude;
     }
-    
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
     
 }

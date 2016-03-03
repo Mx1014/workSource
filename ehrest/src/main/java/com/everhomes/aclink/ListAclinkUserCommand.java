@@ -2,6 +2,8 @@ package com.everhomes.aclink;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.util.StringHelper;
+
 public class ListAclinkUserCommand {
     private Long pageAnchor;
     
@@ -54,6 +56,9 @@ public class ListAclinkUserCommand {
     public void setDoorId(Long doorId) {
         this.doorId = doorId;
     }
-    
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
     
 }

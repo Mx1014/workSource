@@ -3,6 +3,7 @@ package com.everhomes.aclink;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 public class ListDoorAccessResponse {
     private Long nextPageAnchor;
@@ -24,5 +25,9 @@ public class ListDoorAccessResponse {
 
     public void setDoors(List<DoorAccessDTO> doors) {
         this.doors = doors;
+    }
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

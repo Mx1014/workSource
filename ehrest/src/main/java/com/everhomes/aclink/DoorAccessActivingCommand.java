@@ -2,6 +2,8 @@ package com.everhomes.aclink;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * <li>hardwareId: 门禁设备的 MAC 地址</li>
@@ -86,5 +88,8 @@ public class DoorAccessActivingCommand {
     public void setAddress(String address) {
         this.address = address;
     }
-    
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

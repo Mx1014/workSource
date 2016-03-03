@@ -1,5 +1,7 @@
 package com.everhomes.aclink;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * <li>seq: 消息序号</li>
@@ -41,5 +43,9 @@ public class DoorMessage {
     }
     public void setBody(AclinkMessage body) {
         this.body = body;
+    }
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

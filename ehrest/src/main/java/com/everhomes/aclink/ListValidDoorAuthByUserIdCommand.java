@@ -1,5 +1,7 @@
 package com.everhomes.aclink;
 
+import com.everhomes.util.StringHelper;
+
 public class ListValidDoorAuthByUserIdCommand {
     Long userId;
 
@@ -10,6 +12,9 @@ public class ListValidDoorAuthByUserIdCommand {
     public void setUserId(Long userId) {
         this.userId = userId;
     }
-    
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
     
 }

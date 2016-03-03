@@ -2,6 +2,8 @@ package com.everhomes.aclink;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.util.StringHelper;
+
 public class CreateDoorAuthCommand {
     @NotNull
     private Long     userId;
@@ -70,4 +72,8 @@ public class CreateDoorAuthCommand {
         this.approveUserId = approveUserId;
     }
     
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }
