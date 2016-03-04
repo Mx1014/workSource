@@ -231,6 +231,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             DoorAuth doorAuth = doorAuthProvider.queryValidDoorAuthForever(cmd.getDoorId(), dto.getId());
             if(doorAuth != null) {
                 dto.setStatus(DoorAuthStatus.VALID.getCode());
+                dto.setAuth_id(doorAuth.getId());
             } else {
                 dto.setStatus(DoorAuthStatus.INVALID.getCode());
                 }

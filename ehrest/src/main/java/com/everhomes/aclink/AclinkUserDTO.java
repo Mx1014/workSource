@@ -8,6 +8,7 @@ public class AclinkUserDTO {
     private String phone;
     private String nickName;
     private Byte status;
+    private Long auth_id;
     
     public Long getId() {
         return id;
@@ -38,6 +39,13 @@ public class AclinkUserDTO {
     }
     public void setStatus(Byte status) {
         this.status = status;
+    }
+    
+    public Long getAuth_id() {
+        return auth_id;
+    }
+    public void setAuth_id(Long auth_id) {
+        this.auth_id = auth_id;
     }
     @Override
     public String toString() {
