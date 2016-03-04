@@ -338,9 +338,6 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             public DoorCommand doInTransaction(TransactionStatus arg0) {
                 DoorAuth doorAuth = doorAuthProvider.getDoorAuthById(doorAuthId);
                 if(doorAuth != null) {
-                    doorAuth.setStatus(DoorAuthStatus.INVALID.getCode());
-                    doorAuthProvider.updateDoorAuth(doorAuth);
-                    
                     AesUserKey aesUserKey1 = aesUserKeyProvider.queryAesUserKeyByAuthId(doorAuth.getDoorId(), doorAuth.getId());
                     if(aesUserKey1 == null) {
                         return null;
@@ -351,6 +348,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                         //TODO still has rights, ok?
                         return null;
                     }
+                    
+                    doorAuth.setStatus(DoorAuthStatus.INVALID.getCode());
+                    doorAuthProvider.updateDoorAuth(doorAuth);
                     
                     AesServerKey aesServerKey = aesServerKeyService.getCurrentAesServerKey(doorAuth.getDoorId());
                     if(aesServerKey == null) {

@@ -118,6 +118,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                     SelectQuery<? extends Record> query) {
                 query.addConditions(Tables.EH_DOOR_AUTH.OWNER_ID.eq(ownerId));
                 query.addConditions(Tables.EH_DOOR_AUTH.OWNER_TYPE.eq(ownerType));
+                query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
                 return query;
             }
             
@@ -139,6 +140,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                         and(Tables.EH_DOOR_AUTH.VALID_END_MS.ge(now)));
                 Condition c2 = Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode());
                 query.addConditions(Tables.EH_DOOR_AUTH.USER_ID.eq(userId));
+                query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
                 query.addConditions(c1.or(c2));
                 return query;
             }
@@ -158,6 +160,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                 query.addConditions(Tables.EH_DOOR_AUTH.USER_ID.eq(userId));
                 query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.eq(doorId));
                 query.addConditions(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode()));
+                query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
                 return query;
             }
         }); 
@@ -184,6 +187,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                 Condition c2 = Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode());
                 query.addConditions(Tables.EH_DOOR_AUTH.USER_ID.eq(userId));
                 query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.eq(doorId));
+                query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
                 query.addConditions(c1.or(c2));
                 return query;
             }
