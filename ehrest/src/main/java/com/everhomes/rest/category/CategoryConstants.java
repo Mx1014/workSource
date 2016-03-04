@@ -24,6 +24,7 @@ import java.util.List;
  * <li>CATEGORY_ID_CONF_CAPACITY(1011):视频会议会议容量（25方or100方）</li>
  * <li>CATEGORY_ID_CONF_TYPE(1011):视频会议会议类型（仅视频; 支持电话）</li>
  * <li>CATEGORY_ID_ACCOUNT_TYPE(1011): 视频会议账号模式（单账号or多账号）</li>
+ * <li>CATEGORY_ID_QUALITY_INSPECTION(6): 品质核查根类型</li>
  * </ul>
  */
 public interface CategoryConstants {
@@ -38,6 +39,9 @@ public interface CategoryConstants {
     
     /** 科技园活动 */
     public static final long CATEGORY_ID_TECH_ACTIVITY = 5L;
+    
+    /** 品质核查类型 */
+    public static final long CATEGORY_ID_QUALITY_INSPECTION = 6L;
 
     /** 帖子/普通 */
     public static final long CATEGORY_ID_TOPIC_COMMON = 1001L;
