@@ -72,3 +72,13 @@ UPDATE `eh_organizations` SET namespace_id = 1000000 WHERE id = 1000001;
 UPDATE `eh_organizations` SET namespace_id = 999999 WHERE id = 1000100;
 UPDATE `eh_organizations` SET namespace_id = 999994 WHERE id = 1000531;
 UPDATE `eh_organizations` SET namespace_id = 999993 WHERE id = 1000631;
+
+
+
+#
+#add enterprise admin privilege
+#
+set @assignment_id = 10000;
+INSERT INTO `eh_acl_role_assignments`(`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`role_id`,`creator_uid`,`create_time`)
+select (@assignment_id := @assignment_id + 1),'system',null,'EhUsers',user_id,1005,null,now() from `eh_enterprise_contacts` where `role` = 5 and `status` = 3
+
