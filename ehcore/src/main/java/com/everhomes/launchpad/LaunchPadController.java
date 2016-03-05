@@ -1,7 +1,5 @@
 package com.everhomes.launchpad;
 
-
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -22,9 +20,7 @@ import com.everhomes.rest.launchpad.DeleteLaunchPadByIdCommand;
 import com.everhomes.rest.launchpad.GetLaunchPadItemByIdCommand;
 import com.everhomes.rest.launchpad.GetLaunchPadItemsCommand;
 import com.everhomes.rest.launchpad.GetLaunchPadItemsCommandResponse;
-import com.everhomes.rest.launchpad.GetLaunchPadItemsV2Command;
 import com.everhomes.rest.launchpad.GetLaunchPadLayoutByVersionCodeCommand;
-import com.everhomes.rest.launchpad.GetLaunchPadLayoutByVersionCodeV2Command;
 import com.everhomes.rest.launchpad.GetLaunchPadLayoutCommand;
 import com.everhomes.rest.launchpad.LaunchPadItemDTO;
 import com.everhomes.rest.launchpad.LaunchPadLayoutDTO;
@@ -52,30 +48,6 @@ public class LaunchPadController extends ControllerBase {
     public RestResponse getLaunchPadItems(@Valid GetLaunchPadItemsCommand cmd,HttpServletRequest request,HttpServletResponse response) {
         
         GetLaunchPadItemsCommandResponse commandResponse = launchPadService.getLaunchPadItems(cmd,request);
-        RestResponse resp =  new RestResponse(commandResponse);
-//        if(commandResponse.getLaunchPadItems() != null && !commandResponse.getLaunchPadItems().isEmpty()){
-//            //int hashCode = configurationProvider.getIntValue(MARKETDATA_ITEM_VERSION, 0);
-//            int resultCode = commandResponse.hashCode();
-//            LOGGER.info("result code : " + resultCode);
-//            if(EtagHelper.checkHeaderEtagOnly(30,resultCode+"", request, response)) {
-//                resp.setResponseObject(commandResponse);
-//            }
-//        }
-       
-        resp.setErrorCode(ErrorCodes.SUCCESS);
-        resp.setErrorDescription("OK");
-        return resp;
-    }
-    
-    /**
-     * <b>URL: /launchpad/getLaunchPadItemsV2</b>
-     * <p>根据位置、layout组、指定场景和相应的实体对象获取item列表</p>
-     */
-    @RequestMapping("getLaunchPadItemsV2")
-    @RestReturn(value=GetLaunchPadItemsCommandResponse.class)
-    public RestResponse getLaunchPadItemsV2(@Valid GetLaunchPadItemsV2Command cmd,HttpServletRequest request,HttpServletResponse response) {
-        
-        GetLaunchPadItemsCommandResponse commandResponse = null;//launchPadService.getLaunchPadItems(cmd,request);
         RestResponse resp =  new RestResponse(commandResponse);
 //        if(commandResponse.getLaunchPadItems() != null && !commandResponse.getLaunchPadItems().isEmpty()){
 //            //int hashCode = configurationProvider.getIntValue(MARKETDATA_ITEM_VERSION, 0);
@@ -131,27 +103,6 @@ public class LaunchPadController extends ControllerBase {
     public RestResponse getLastLaunchPadLayoutByVersionCode(@Valid GetLaunchPadLayoutByVersionCodeCommand cmd, HttpServletRequest request,HttpServletResponse response) {
         
         LaunchPadLayoutDTO launchPadLayoutDTO = this.launchPadService.getLastLaunchPadLayoutByVersionCode(cmd);
-        RestResponse resp =  new RestResponse();
-        if(launchPadLayoutDTO != null){
-            long hashCode = launchPadLayoutDTO.getVersionCode();
-            if(EtagHelper.checkHeaderEtagOnly(30,hashCode+"", request, response)) {
-                resp.setResponseObject(launchPadLayoutDTO);
-            }
-        }
-        resp.setErrorCode(ErrorCodes.SUCCESS);
-        resp.setErrorDescription("OK");
-        return resp;
-    }
-    
-    /**
-     * <b>URL: /launchpad/getLastLaunchPadLayoutByVersionCodeV2</b>
-     * <p>根据版本号获取可兼容的最新layout信息</p>
-     */
-    @RequestMapping("getLastLaunchPadLayoutByVersionCodeV2")
-    @RestReturn(value=LaunchPadLayoutDTO.class)
-    public RestResponse getLastLaunchPadLayoutByVersionCodeV2(@Valid GetLaunchPadLayoutByVersionCodeV2Command cmd, HttpServletRequest request,HttpServletResponse response) {
-        
-        LaunchPadLayoutDTO launchPadLayoutDTO = null;//this.launchPadService.getLastLaunchPadLayoutByVersionCode(cmd);
         RestResponse resp =  new RestResponse();
         if(launchPadLayoutDTO != null){
             long hashCode = launchPadLayoutDTO.getVersionCode();

@@ -34,7 +34,6 @@ import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.forum.QueryTopicByCategoryCommand;
 import com.everhomes.rest.forum.QueryTopicByEntityAndCategoryCommand;
 import com.everhomes.rest.forum.SearchTopicCommand;
-import com.everhomes.rest.forum.SearchTopicV2Command;
 import com.everhomes.rest.forum.UsedAndRentalCommand;
 import com.everhomes.search.PostSearcher;
 import com.everhomes.search.SearchSyncManager;
@@ -255,22 +254,6 @@ public class ForumController extends ControllerBase {
     @RestReturn(value=ListPostCommandResponse.class)
     public RestResponse search(SearchTopicCommand cmd) {
         ListPostCommandResponse cmdResponse = postSearcher.query(cmd);
-        
-        RestResponse response = new RestResponse();
-        response.setResponseObject(cmdResponse);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
-    /**
-     * <b>URL: /forum/searchV2</b>
-     * <p>按指定条件查询符合条件的帖子列表</p>
-     */
-    @RequestMapping("searchV2")
-    @RestReturn(value=ListPostCommandResponse.class)
-    public RestResponse searchV2(SearchTopicV2Command cmd) {
-        ListPostCommandResponse cmdResponse = null;//postSearcher.query(cmd);
         
         RestResponse response = new RestResponse();
         response.setResponseObject(cmdResponse);
