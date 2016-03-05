@@ -14,8 +14,14 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.forum.PostDTO;
+import com.everhomes.rest.organization.ListOrganizationContactCommand;
+import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.ui.organization.ListOrganizationPersonnelsCommand;
+import com.everhomes.rest.ui.organization.ListOrganizationPersonnelsResponse;
 import com.everhomes.rest.ui.organization.ListTaskPostsCommand;
 import com.everhomes.rest.ui.organization.ListTaskPostsResponse;
 
@@ -32,6 +38,9 @@ public class OrganizationUiController extends ControllerBase {
     
     @Autowired
     private ConfigurationProvider configurationProvider;
+    
+    @Autowired
+    private OrganizationService organizationService;
    
     /**
      * <b>URL: /ui/org/listMyTaskPostsByScene</b>
@@ -63,5 +72,19 @@ public class OrganizationUiController extends ControllerBase {
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
         return resp;
+    }
+    
+    
+    /**
+     * <b>URL: /ui/org/listOrganizationPersonnels</b>
+     * <p>通讯录列表</p>
+     */
+    @RequestMapping("listOrganizationPersonnels")
+    @RestReturn(value=ListOrganizationPersonnelsResponse.class)
+    public RestResponse listOrganizationPersonnels(@Valid ListOrganizationPersonnelsCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
 }
