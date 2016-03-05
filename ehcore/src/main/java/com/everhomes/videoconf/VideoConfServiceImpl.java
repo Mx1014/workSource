@@ -65,6 +65,7 @@ import com.everhomes.rest.videoconf.CreateConfAccountOrderCommand;
 import com.everhomes.rest.videoconf.CreateInvoiceCommand;
 import com.everhomes.rest.videoconf.CreateVideoConfInvitationCommand;
 import com.everhomes.rest.videoconf.DeleteReservationConfCommand;
+import com.everhomes.rest.videoconf.DeleteSourceVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.DeleteVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.DeleteWarningContactorCommand;
 import com.everhomes.rest.videoconf.EnterpriseConfAccountDTO;
@@ -566,7 +567,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 						r.setOccupyFlag((byte) 1);
 						ConfConferences conf = vcProvider.findConfConferencesById(account.getAssignedConfId());
 						if(conf != null)
-							r.setConfId(conf.getConfId());
+							r.setConfId(conf.getMeetingNo());
 					}
 				}
 				
@@ -598,6 +599,12 @@ public class VideoConfServiceImpl implements VideoConfService {
 		if(account.getOccupyAccountId() != null) {
 			accountDto.setOccupyFlag((byte) 1);
 			accountDto.setConfId(account.getConfId());
+			ConfAccounts occupyAccount = vcProvider.findAccountByAssignedSourceId(account.getOccupyAccountId());
+			if(occupyAccount != null && occupyAccount.getOwnerId() != null && occupyAccount.getOwnerId() != 0) {
+				UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(occupyAccount.getOwnerId(), IdentifierType.MOBILE.getCode());
+				if(identifier != null)
+					accountDto.setOccupyIdentifierToken(identifier.getIdentifierToken());
+			}
 		} else {
 			accountDto.setOccupyFlag((byte) 0);
 		}
@@ -1220,7 +1227,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 			if(userAccount.getOccupyFlag() == 1) {
 				ConfConferences conf = vcProvider.findConfConferencesById(account.getAssignedConfId());
 				if(conf != null) {
-					userAccount.setConfId(conf.getConfId());
+					userAccount.setConfId(conf.getMeetingNo());
 				} else {
 					userAccount.setOccupyFlag((byte) 0);
 					
@@ -1241,10 +1248,40 @@ public class VideoConfServiceImpl implements VideoConfService {
 
 	@Override
 	public void cancelVideoConf(CancelVideoConfCommand cmd) {
-
-		ConfConferences conf = vcProvider.findConfConferencesByConfId(cmd.getConfId());
 		
-		if(conf != null && conf.getStatus() != 0) {
+		String path = "http://api.confcloud.cn/openapi/cancelConf";
+		Long timestamp = DateHelper.currentGMTTime().getTime();
+		String tokenString = cmd.getSourceAccountName() + "|" + configurationProvider.getValue(ConfigConstants.VIDEOCONF_SECRET_KEY, "0") + "|" + timestamp;
+		String token = DigestUtils.md5Hex(tokenString);
+		
+		ConfConferences conf = vcProvider.findConfConferencesByConfId(cmd.getConfId());
+		Map<String, String> sPara = new HashMap<String, String>() ;
+	    sPara.put("loginName", cmd.getSourceAccountName()); 
+	    sPara.put("timeStamp", timestamp.toString());
+	    sPara.put("token", token); 
+	    sPara.put("confId", conf.getConferenceId() + "");
+	    
+	    NameValuePair[] param = generatNameValuePair(sPara);
+	    if(LOGGER.isDebugEnabled())
+			LOGGER.info("cancelVideoConf, cmd=" + cmd + ", restUrl="+path+", param="+sPara);
+	    try {
+	    	HttpClient httpClient = new HttpClient();  
+	    	HttpMethod method;
+			method = postMethod(path, param);
+			httpClient.executeMethod(method);  
+	          
+	        String result = method.getResponseBodyAsString();  
+	        System.out.println(result);  
+			String json = strDecode(result);
+
+			if(LOGGER.isDebugEnabled())
+				LOGGER.error("cancelVideoConf,json="+json);
+		} catch (IOException e) {
+			LOGGER.error("cancelVideoConf-error.sourceAccount="+cmd.getSourceAccountName(), e);
+		}  
+          
+		
+		if(conf != null && conf.getStatus() != null && conf.getStatus() != 0) {
 			conf.setStatus((byte) 0);
 			conf.setEndTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			
@@ -1285,6 +1322,14 @@ public class VideoConfServiceImpl implements VideoConfService {
 		String path = "http://api.confcloud.cn/openapi/confReservation";
 		ConfAccounts account = vcProvider.findVideoconfAccountById(cmd.getAccountId());
 		if(account != null && account.getStatus() == 1) {
+			if(account.getAssignedSourceId() != null && account.getAssignedSourceId() != 0) {
+				CancelVideoConfCommand cancelCmd = new CancelVideoConfCommand();
+				cancelCmd.setConfId(account.getAssignedConfId());
+				ConfSourceAccounts source = vcProvider.findSourceAccountById(account.getAssignedSourceId());
+				if(source != null)
+					cancelCmd.setSourceAccountName(source.getAccountName());
+				cancelVideoConf(cancelCmd);
+			}
 			ConfAccountCategories category = vcProvider.findAccountCategoriesById(account.getAccountCategoryId());
 			List<Long> accountCategories = vcProvider.findAccountCategoriesByConfType(category.getConfType());
 			ConfSourceAccounts sourceAccount = vcProvider.findSpareAccount(accountCategories);
@@ -1342,14 +1387,18 @@ public class VideoConfServiceImpl implements VideoConfService {
 						Map<String,Object> data = (Map<String, Object>) resultHolder.getData();
 						
 						response.setConfHostId(String.valueOf(data.get("userId")));
-						response.setToken(String.valueOf(data.get("zoomToken")));
+						response.setToken(String.valueOf(data.get("token")));
 						response.setConfHostName(UserContext.current().getUser().getNickName());
 						response.setMaxCount((Double.valueOf(String.valueOf(data.get("maxCount")))).intValue());
 						response.setMeetingNo(String.valueOf(data.get("meetingNo")));
 						
-						Object obj = data.get("meetingNo");
 						ConfConferences conf = new ConfConferences();
-						conf.setConfId(Long.valueOf(String.valueOf(data.get("meetingNo"))));
+						
+						String conferenceId = String.valueOf(data.get("id"));
+						int index = conferenceId.indexOf(".");
+						conferenceId = conferenceId.substring(0, index);
+						conf.setConferenceId(Long.valueOf(conferenceId));
+						conf.setMeetingNo(Long.valueOf(String.valueOf(data.get("meetingNo"))));
 						conf.setSubject(String.valueOf(data.get("meetingName")));
 						conf.setStartTime(new Timestamp(timestamp));
 						conf.setExpectDuration(cmd.getDuration());
@@ -1362,7 +1411,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 						conf.setConfHostId(String.valueOf(data.get("userId")));
 //						conf.setConfHostName(confHostName);
 						conf.setMaxCount((Double.valueOf(String.valueOf(data.get("maxCount")))).intValue());
-						String joinUrl = "cfcloud://www.confcloud.cn/join?confno={" + conf.getConfId() + "}";
+						String joinUrl = "cfcloud://www.confcloud.cn/join?confno={" + conf.getMeetingNo() + "}";
 						conf.setJoinUrl(joinUrl);
 						conf.setStatus((byte) 1);
 						conf.setNamespaceId(namespaceId);
@@ -1418,34 +1467,41 @@ public class VideoConfServiceImpl implements VideoConfService {
 	public JoinVideoConfResponse joinVideoConf(JoinVideoConfCommand cmd) {
 		JoinVideoConfResponse response = new JoinVideoConfResponse();
 
-		
-		UserIdentifier user = userProvider.findClaimedIdentifierByToken(cmd.getNamespaceId(), cmd.getConfId());
-		if(LOGGER.isDebugEnabled())
-			LOGGER.error("joinVideoConf, cmd="+cmd+",user="+user);
-		if(user != null) {
-			ConfAccounts account = vcProvider.findAccountByUserId(user.getOwnerUid());
+		if(cmd.getConfId().length() == 11){
+			UserIdentifier user = userProvider.findClaimedIdentifierByToken(cmd.getNamespaceId(), cmd.getConfId());
 			if(LOGGER.isDebugEnabled())
-				LOGGER.error("joinVideoConf, account="+account);
-			if(account != null) {
-				ConfConferences conf = vcProvider.findConfConferencesById(account.getAssignedConfId());
+				LOGGER.error("joinVideoConf, cmd="+cmd+",user="+user);
+			if(user != null) {
+				ConfAccounts account = vcProvider.findAccountByUserId(user.getOwnerUid());
 				if(LOGGER.isDebugEnabled())
-					LOGGER.error("joinVideoConf, conf="+conf);
-				if(conf != null) {
-					response.setJoinUrl(conf.getJoinUrl());
-					response.setCondId(conf.getConfId()+"");
-					response.setPassword(conf.getConfHostKey());
+					LOGGER.error("joinVideoConf, account="+account);
+				if(account != null) {
+					ConfConferences conf = vcProvider.findConfConferencesById(account.getAssignedConfId());
+					if(LOGGER.isDebugEnabled())
+						LOGGER.error("joinVideoConf, conf="+conf);
+					if(conf != null) {
+						response.setJoinUrl(conf.getJoinUrl());
+						response.setCondId(conf.getMeetingNo()+"");
+						response.setPassword(conf.getConfHostKey());
+					} else {
+						LOGGER.error("conference has not been held yet!");
+						throw RuntimeErrorException.errorWith(ConfServiceErrorCode.SCOPE, ConfServiceErrorCode.CONF_NOT_OPEN,
+								localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
+										String.valueOf(ConfServiceErrorCode.CONF_NOT_OPEN),
+										UserContext.current().getUser().getLocale(),"conference has not been held yet!"));
+					}
 				}
 			}
 		}
 		
-		if(StringUtils.isNullOrEmpty(response.getCondId())){
+		else if(cmd.getConfId().length() == 10){
 			Long confId = Long.valueOf(cmd.getConfId()); 
 			ConfConferences conf = vcProvider.findConfConferencesByConfId(confId);
 			if(LOGGER.isDebugEnabled())
 				LOGGER.error("joinVideoConf, cmd="+cmd+",conf="+conf);
 			if(conf != null) {
 				response.setJoinUrl(conf.getJoinUrl());
-				response.setCondId(conf.getConfId()+"");
+				response.setCondId(conf.getMeetingNo()+"");
 				response.setPassword(conf.getConfHostKey());
 			}
 			
@@ -1458,6 +1514,13 @@ public class VideoConfServiceImpl implements VideoConfService {
 			}
 		}
 		
+		else {
+			LOGGER.error("conf id length is 10 or 11!");
+			throw RuntimeErrorException.errorWith(ConfServiceErrorCode.SCOPE, ConfServiceErrorCode.ERROR_INVALID_CONF_ID,
+					localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
+							String.valueOf(ConfServiceErrorCode.ERROR_INVALID_CONF_ID),
+							UserContext.current().getUser().getLocale(),"conf id length is 10 or 11!"));
+		}
 		
 		return response;
 	}
@@ -2130,6 +2193,12 @@ public class VideoConfServiceImpl implements VideoConfService {
 			}
 		}
 		return namespaceIdList;
+	}
+
+	@Override
+	public void deleteSourceVideoConfAccount(
+			DeleteSourceVideoConfAccountCommand cmd) {
+		vcProvider.deleteSourceVideoConfAccount(cmd.getSourceAccountId());
 	}
 	
 }

@@ -221,11 +221,13 @@ public class RentalServiceImpl implements RentalService {
 //		rentalRule.setContactName(cmd.getContactName());
 //		rentalRule.setOperatorUid(userId);
 			RentalRule rentalRule =ConvertHelper.convert(cmd,RentalRule.class  );
+			rentalRule.setPaymentRatio(cmd.getPayRatio());
 			rentalRule.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			rentalRule.setOperatorUid(userId);
 			rentalProvider.updateRentalRule(rentalRule);
 		} else {
 			RentalRule rentalRule =ConvertHelper.convert(cmd,RentalRule.class  );
+			rentalRule.setPaymentRatio(cmd.getPayRatio());
 			rentalRule.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			rentalRule.setOperatorUid(userId);
 			rentalProvider.createRentalRule(rentalRule);
@@ -686,7 +688,7 @@ public class RentalServiceImpl implements RentalService {
 					rentalBill.setEndTime(rentalSiteRule.getEndTime());
 				}
 			}
-			siteTotalMoney.add(  (null == rentalSiteRule.getPrice()?new java.math.BigDecimal(0):rentalSiteRule.getPrice()).multiply(
+			siteTotalMoney = siteTotalMoney.add(  (null == rentalSiteRule.getPrice()?new java.math.BigDecimal(0):rentalSiteRule.getPrice()).multiply(
 				new   java.math.BigDecimal(cmd.getRentalCount() / rentalSiteRule.getUnit())));
 		}
 
@@ -798,7 +800,9 @@ public class RentalServiceImpl implements RentalService {
 			rsb.setCreatorUid(userId);
 
 			rentalProvider.createRentalSiteBill(rsb);
+			
 		}
+		
 		mappingRentalBillDTO(billDTO, rentalBill);
 		return billDTO;
 	}

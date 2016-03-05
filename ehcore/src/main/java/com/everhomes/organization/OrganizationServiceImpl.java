@@ -563,9 +563,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 	private OrganizationDetailDTO toOrganizationDetailDTO(Long id, Boolean flag){
 		Organization organization = organizationProvider.findOrganizationById(id);
 		OrganizationDetail org = organizationProvider.findOrganizationDetailByOrganizationId(id);
-		if(null == organization || null == org){
+		if(null == organization){
 			LOGGER.debug("organization is null, id = " + id);
 			return null;
+		}
+		
+		if(null == org){
+			org = new OrganizationDetail();
 		}
 		
 		OrganizationDetailDTO dto = ConvertHelper.convert(org, OrganizationDetailDTO.class);
@@ -613,6 +617,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public ListEnterprisesCommandResponse listEnterprises(
 			ListEnterprisesCommand cmd) {
+		ListEnterprisesCommandResponse resp = new ListEnterprisesCommandResponse();
+		
+		List<OrganizationDetailDTO> dtos = new ArrayList<OrganizationDetailDTO>();
 		
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		
@@ -625,11 +632,17 @@ public class OrganizationServiceImpl implements OrganizationService {
 		if(!StringUtils.isEmpty(keywords)){
 			SearchOrganizationCommand command = ConvertHelper.convert(cmd, SearchOrganizationCommand.class);
 			command.setKeyword(keywords);
-			return this.searchEnterprise(command);
+			GroupQueryResult rlt = this.organizationSearcher.query(command);
+	        resp.setNextPageAnchor(rlt.getPageAnchor());
+	        for(Long id : rlt.getIds()) {
+	        	OrganizationDetailDTO dto = this.toOrganizationDetailDTO(id, cmd.getQryAdminRoleFlag());
+	        	if(null != dto)
+	        		dtos.add(dto);
+	        }
+	        resp.setDtos(dtos);
+			return resp;
 		}
 		
-		ListEnterprisesCommandResponse resp = new ListEnterprisesCommandResponse();
-		List<OrganizationDetailDTO> dtos = new ArrayList<OrganizationDetailDTO>();
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 		if(null != buildingId){
