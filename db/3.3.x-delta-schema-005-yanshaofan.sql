@@ -3,7 +3,6 @@
 # modify eh_organizations unique
 #
 ALTER TABLE `eh_organizations` DROP INDEX u_eh_org_name;
-ALTER TABLE `eh_organizations` ADD UNIQUE u_eh_org_name(`parent_id`,`name`,`namespace_id`);
 
 #
 # Check whether the repeated data migration
@@ -47,7 +46,7 @@ select `id`,0,'ENTERPRISE',`name`,concat('/',`id`),1,if(`status` = 0,1,2),'ENTER
 
 
 INSERT INTO `eh_organization_details`(`id`,`organization_id`,`description`,`contact`,`address`,`create_time`,`display_name`,`member_count`,`checkin_date`,`avatar`,`post_uri`)
-SELECT  (@organization_details_id := @organization_details_id + 1),`id`,`description`,`string_tag1`,`string_tag2`,`create_time`,`display_name`,`member_count`,`string_tag3`,`avatar`,`string_tag5` FROM `eh_groups` WHERE `discriminator` = 'enterprise';
+SELECT  (@organization_details_id := @organization_details_id + 1),`id`,`description`,`string_tag1`,`string_tag2`,`create_time`,IF(IFNULL(`display_name`,`name`) = '',name,IFNULL(`display_name`,`name`)),`member_count`,`string_tag3`,`avatar`,`string_tag5` FROM `eh_groups` WHERE `discriminator` = 'enterprise';
 
 
 #

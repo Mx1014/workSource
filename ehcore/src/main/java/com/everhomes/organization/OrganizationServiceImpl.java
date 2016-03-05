@@ -546,7 +546,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 		organizationProvider.updateOrganization(parOrg);
 	}
 	
-	
 	@Override
     public ListEnterprisesCommandResponse searchEnterprise(SearchOrganizationCommand cmd) {
         ListEnterprisesCommandResponse resp = new ListEnterprisesCommandResponse();
@@ -573,6 +572,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 		
 		OrganizationDetailDTO dto = ConvertHelper.convert(org, OrganizationDetailDTO.class);
+		dto.setOrganizationId(organization.getId());
 		dto.setName(organization.getName());
 		dto.setAvatarUri(org.getAvatar());
 		if(null != org.getCheckinDate())
@@ -625,8 +625,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		Long communityId = cmd.getCommunityId();
 		
-		Long buildingId = cmd.getBuildingId();
-		
 		String keywords = cmd.getKeywords();
 		
 		if(!StringUtils.isEmpty(keywords)){
@@ -643,6 +641,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 			return resp;
 		}
 		
+		if(!StringUtils.isEmpty(cmd.getBuildingName())){
+			Building building = communityProvider.findBuildingByCommunityIdAndName(communityId, cmd.getBuildingName());
+			if(null != building){
+				cmd.setBuildingId(cmd.getBuildingId());
+			}
+		}
+		
+		Long buildingId = cmd.getBuildingId();
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 		if(null != buildingId){
@@ -661,7 +667,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}
 			
 		}else{
-			List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, locator, cmd.getPageSize());
+			List<Organization> organizations = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, OrganizationType.ENTERPRISE.getCode(), locator, cmd.getPageSize());
 			for (Organization organization : organizations) {
 				OrganizationDetailDTO dto = this.toOrganizationDetailDTO(organization.getId(), cmd.getQryAdminRoleFlag());
 				if(null != dto)
@@ -3859,25 +3865,27 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		if(null != userRoleIds && 0 != userRoleIds.size()) return userRoleIds;
 		
-		List<Long> resources = aclProvider.getRolesFromResourceAssignments("system", null, EntityType.ORGANIZATIONS.getCode(), organizationId, null);
+		userRoleIds = new ArrayList<Long>();
 		
-		if(resources == null || resources.size() ==0 ){
-			resources = new ArrayList<Long>();
-			OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), organizationId);
-			if(null == organizationMember){
-				resources.add(RoleConstants.ORGANIZATION_TASK_MGT);
-				return resources;
-			}
-			
-			if(OrganizationMemberGroupType.MANAGER.getCode().equals(organizationMember.getMemberGroup())){
-				resources.add(RoleConstants.ORGANIZATION_ADMIN);
-				return resources;
-			}else{
-				resources.add(RoleConstants.ORGANIZATION_TASK_MGT);
-			}
+		OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), organizationId);
+		
+		if(null == organizationMember){
+			userRoleIds.add(RoleConstants.ORGANIZATION_TASK_MGT);
+			return userRoleIds;
 		}
 		
-		return resources;
+		if(null != organizationMember.getGroupId()){
+			userRoleIds =  aclProvider.getRolesFromResourceAssignments("system", null, EntityType.ORGANIZATIONS.getCode(), organizationMember.getGroupId(), null);
+			return userRoleIds;
+		}
+		
+		if(OrganizationMemberGroupType.MANAGER.getCode().equals(organizationMember.getMemberGroup())){
+			userRoleIds.add(RoleConstants.ORGANIZATION_ADMIN);
+		}else{
+			userRoleIds.add(RoleConstants.ORGANIZATION_TASK_MGT);
+		}
+		
+		return userRoleIds;
 	}
 	
 	/**
@@ -4075,8 +4083,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 		OrganizationMember member = organizationProvider.findOrganizationPersonnelByPhone(cmd.getEnterpriseId(), cmd.getPhone());
 		
 		if(member != null){
-			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_PHONE_ALREADY_EXIST,
+			if(member.getStatus().equals(OrganizationMemberStatus.ACTIVE.getCode()))
+				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_PHONE_ALREADY_EXIST,
 					"phone number already exists.");
+			
+			if(member.getStatus().equals(OrganizationMemberStatus.WAITING_FOR_APPROVAL.getCode()))
+				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_PHONE_ALREADY_APPLY,
+						"Mobile phone number has been applied to join the company, please approve.");
 		}
 		
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getPhone());
@@ -4723,7 +4736,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 				OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
 				
 				organization.setCommunityId(r.getCommunityId());
-				organization.setDescription(detail.getDescription());
+				if(null != detail)
+					organization.setDescription(detail.getDescription());
 			}
 			return organization;
 		}).collect(Collectors.toList());
