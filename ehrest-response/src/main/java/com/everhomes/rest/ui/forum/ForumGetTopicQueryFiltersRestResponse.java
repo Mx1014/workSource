@@ -1,17 +1,17 @@
 // @formatter:off
 // generated file: DO NOT EDIT
-package com.everhomes.rest.ui;
+package com.everhomes.rest.ui.forum;
 
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.rest.ui.TopicFilterDTO;
+import com.everhomes.rest.ui.forum.TopicFilterDTO;
 
-public class GetTopicQueryFiltersRestResponse extends RestResponseBase {
+public class ForumGetTopicQueryFiltersRestResponse extends RestResponseBase {
 
     private List<TopicFilterDTO> response;
 
-    public GetTopicQueryFiltersRestResponse () {
+    public ForumGetTopicQueryFiltersRestResponse () {
     }
 
     public List<TopicFilterDTO> getResponse() {

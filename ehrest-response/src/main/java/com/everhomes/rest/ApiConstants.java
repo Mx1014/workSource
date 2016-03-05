@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-03-01 16:31:38
+// generated at 2016-03-05 18:37:52
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -191,6 +191,7 @@ public interface ApiConstants {
     public static final String ADMIN_UPDATEBORDER_URL = "/admin/updateBorder";
     public static final String ADMIN_UPDATENAMESPACE_URL = "/admin/updateNamespace";
     public static final String ADMIN_UPDATEPERSISTSERVER_URL = "/admin/updatePersistServer";
+    public static final String ADMIN_USER_ENCRYPTPLAINTEXT_URL = "/admin/user/encryptPlainText";
     public static final String ADMIN_USER_GETUSERBYIDENTIFIER_URL = "/admin/user/getUserByIdentifier";
     public static final String ADMIN_USER_IMPORTUSERDATA_URL = "/admin/user/importUserData";
     public static final String ADMIN_USER_LISTINVITATEDUSER_URL = "/admin/user/listInvitatedUser";
@@ -206,7 +207,6 @@ public interface ApiConstants {
     public static final String BANNER_CLICKBANNER_URL = "/banner/clickBanner";
     public static final String BANNER_GETBANNERBYIDCOMMAND_URL = "/banner/getBannerByIdCommand";
     public static final String BANNER_GETBANNERS_URL = "/banner/getBanners";
-    public static final String BANNER_GETBANNERSV2_URL = "/banner/getBannersV2";
     public static final String BULLETIN_GETADMINROLESTATUS_URL = "/bulletin/getAdminRoleStatus";
     public static final String BULLETIN_REQUESTADMINROLE_URL = "/bulletin/requestAdminRole";
     public static final String BULLETIN_RESIGNADMINROLE_URL = "/bulletin/resignAdminRole";
@@ -246,6 +246,7 @@ public interface ApiConstants {
     public static final String CONF_CREATEINVOICE_URL = "/conf/createInvoice";
     public static final String CONF_CREATEVIDEOCONFINVITATION_URL = "/conf/createVideoConfInvitation";
     public static final String CONF_DELETERESERVATIONCONF_URL = "/conf/deleteReservationConf";
+    public static final String CONF_DELETESOURCEVIDEOCONFACCOUNT_URL = "/conf/deleteSourceVideoConfAccount";
     public static final String CONF_DELETEVIDEOCONFACCOUNT_URL = "/conf/deleteVideoConfAccount";
     public static final String CONF_DELETEWARNINGCONTACTOR_URL = "/conf/deleteWarningContactor";
     public static final String CONF_EXTENDEDSOURCEACCOUNTPERIOD_URL = "/conf/extendedSourceAccountPeriod";
@@ -373,7 +374,6 @@ public interface ApiConstants {
     public static final String FORUM_QUERYTOPICSBYCATEGORY_URL = "/forum/queryTopicsByCategory";
     public static final String FORUM_QUERYTOPICSBYENTITYANDCATEGORY_URL = "/forum/queryTopicsByEntityAndCategory";
     public static final String FORUM_SEARCH_URL = "/forum/search";
-    public static final String FORUM_SEARCHV2_URL = "/forum/searchV2";
     public static final String FORUM_SYNCTEST_URL = "/forum/syncTest";
     public static final String FORUM_UPDATEFREESTUFF_URL = "/forum/updateFreeStuff";
     public static final String FORUM_UPDATELOSTANDFOUND_URL = "/forum/updateLostAndFound";
@@ -415,10 +415,8 @@ public interface ApiConstants {
     public static final String GROUP_UPDATEGROUPMEMBER_URL = "/group/updateGroupMember";
     public static final String LAUNCHPAD_DELETELAUNCHPADBYID_URL = "/launchpad/deleteLaunchPadById";
     public static final String LAUNCHPAD_GETLASTLAUNCHPADLAYOUTBYVERSIONCODE_URL = "/launchpad/getLastLaunchPadLayoutByVersionCode";
-    public static final String LAUNCHPAD_GETLASTLAUNCHPADLAYOUTBYVERSIONCODEV2_URL = "/launchpad/getLastLaunchPadLayoutByVersionCodeV2";
     public static final String LAUNCHPAD_GETLAUNCHPADITEMBYID_URL = "/launchpad/getLaunchPadItemById";
     public static final String LAUNCHPAD_GETLAUNCHPADITEMS_URL = "/launchpad/getLaunchPadItems";
-    public static final String LAUNCHPAD_GETLAUNCHPADITEMSV2_URL = "/launchpad/getLaunchPadItemsV2";
     public static final String LAUNCHPAD_GETLAUNCHPADLAYOUT_URL = "/launchpad/getLaunchPadLayout";
     public static final String LAUNCHPAD_USERDEFINEDLAUNCHPAD_URL = "/launchpad/userDefinedLaunchPad";
     public static final String LINK_FINDLINKBYID_URL = "/link/findLinkById";
@@ -444,6 +442,7 @@ public interface ApiConstants {
     public static final String OPENAPI_LISTBIZCATEGORIES_URL = "/openapi/listBizCategories";
     public static final String OPENAPI_LISTBUSINESSBYCOMMONITYID_URL = "/openapi/listBusinessByCommonityId";
     public static final String OPENAPI_LISTUSER_URL = "/openapi/listUser";
+    public static final String OPENAPI_LISTUSERBYIDENTIFIER_URL = "/openapi/listUserByIdentifier";
     public static final String OPENAPI_LISTUSERBYKEYWORD_URL = "/openapi/listUserByKeyword";
     public static final String OPENAPI_NOTIFYDOORLOCK_URL = "/openapi/notifyDoorLock";
     public static final String OPENAPI_NOTIFYMESSAGE_URL = "/openapi/notifyMessage";
@@ -453,6 +452,7 @@ public interface ApiConstants {
     public static final String OPENAPI_SYNCDELETEBUSINESS_URL = "/openapi/syncDeleteBusiness";
     public static final String OPENAPI_SYNCUSERADDSHOPSTATUS_URL = "/openapi/syncUserAddShopStatus";
     public static final String OPENAPI_SYNCUSERCANCELFAVORITE_URL = "/openapi/syncUserCancelFavorite";
+    public static final String OPENAPI_SYNCUSERDELSHOPSTATUS_URL = "/openapi/syncUserDelShopStatus";
     public static final String OPENAPI_SYNCUSERFAVORITE_URL = "/openapi/syncUserFavorite";
     public static final String OPENAPI_SYNCUSERINFO_URL = "/openapi/syncuserinfo";
     public static final String OPENAPI_USER_INITCOUPON_URL = "/openapi/user/initCoupon";
@@ -653,9 +653,21 @@ public interface ApiConstants {
     public static final String TECHPARK_RENTAL_UPDATERENTALRULE_URL = "/techpark/rental/updateRentalRule";
     public static final String TECHPARK_RENTAL_UPDATERENTALSITE_URL = "/techpark/rental/updateRentalSite";
     public static final String TECHPARK_RENTAL_VERIFYSERVICERENTALBILL_URL = "/techpark/rental/verifyServiceRentalBill";
-    public static final String UI_GETTOPICQUERYFILTERS_URL = "/ui/getTopicQueryFilters";
-    public static final String UI_GETTOPICSENTSCOPES_URL = "/ui/getTopicSentScopes";
-    public static final String UI_LISTUSERRELATEDSCENES_URL = "/ui/listUserRelatedScenes";
+    public static final String UI_BANNER_GETBANNERSBYSCENE_URL = "/ui/banner/getBannersByScene";
+    public static final String UI_FORUM_GETTOPICQUERYFILTERS_URL = "/ui/forum/getTopicQueryFilters";
+    public static final String UI_FORUM_GETTOPICSENTSCOPES_URL = "/ui/forum/getTopicSentScopes";
+    public static final String UI_FORUM_NEWTOPICBYSCENE_URL = "/ui/forum/newTopicByScene";
+    public static final String UI_FORUM_SEARCHBYSCENE_URL = "/ui/forum/searchByScene";
+    public static final String UI_LAUNCHPAD_GETLASTLAUNCHPADLAYOUTBYSCENE_URL = "/ui/launchpad/getLastLaunchPadLayoutByScene";
+    public static final String UI_LAUNCHPAD_GETLAUNCHPADITEMSBYSCENE_URL = "/ui/launchpad/getLaunchPadItemsByScene";
+    public static final String UI_ORG_LISTMYTASKPOSTSBYSCENE_URL = "/ui/org/listMyTaskPostsByScene";
+    public static final String UI_ORG_LISTORGANIZATIONPERSONNELS_URL = "/ui/org/listOrganizationPersonnels";
+    public static final String UI_ORG_LISTTASKPOSTSBYSCENE_URL = "/ui/org/listTaskPostsByScene";
+    public static final String UI_USER_GETUSEROPPROMOTIONSBYSCENE_URL = "/ui/user/getUserOpPromotionsByScene";
+    public static final String UI_USER_GETUSERRELATEDADDRESSES_URL = "/ui/user/getUserRelatedAddresses";
+    public static final String UI_USER_LISTCONTACTSBYSCENE_URL = "/ui/user/listContactsByScene";
+    public static final String UI_USER_LISTUSERRELATEDSCENES_URL = "/ui/user/listUserRelatedScenes";
+    public static final String UI_USER_SETUSERCURRENTSCENE_URL = "/ui/user/setUserCurrentScene";
     public static final String USER_ADMINLOGON_URL = "/user/adminLogon";
     public static final String USER_APPAGREEMENTS_URL = "/user/appAgreements";
     public static final String USER_APPIDSTATUS_URL = "/user/appIdStatus";
@@ -673,10 +685,8 @@ public interface ApiConstants {
     public static final String USER_GETFAMILYMEMBERINFO_URL = "/user/getFamilyMemberInfo";
     public static final String USER_GETUSERINFO_URL = "/user/getUserInfo";
     public static final String USER_GETUSERRELATESERVICEADDRESS_URL = "/user/getUserRelateServiceAddress";
-    public static final String USER_GETUSERRELATEDADDRESSES_URL = "/user/getUserRelatedAddresses";
     public static final String USER_GETUSERSNAPSHOTINFO_URL = "/user/getUserSnapshotInfo";
     public static final String USER_LISTCONTACTS_URL = "/user/listContacts";
-    public static final String USER_LISTCONTACTSV2_URL = "/user/listContactsV2";
     public static final String USER_LISTPOSTEDTOPICS_URL = "/user/listPostedTopics";
     public static final String USER_LISTRECIPIENT_URL = "/user/listRecipient";
     public static final String USER_LISTTOPICFAVORITE_URL = "/user/listTopicFavorite";

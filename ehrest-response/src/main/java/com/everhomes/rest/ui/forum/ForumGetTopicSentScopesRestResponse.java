@@ -1,16 +1,16 @@
 // @formatter:off
 // generated file: DO NOT EDIT
-package com.everhomes.rest.ui;
+package com.everhomes.rest.ui.forum;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.rest.ui.TopicScopeDTO;
+import com.everhomes.rest.ui.forum.TopicScopeDTO;
 
-public class GetTopicSentScopesRestResponse extends RestResponseBase {
+public class ForumGetTopicSentScopesRestResponse extends RestResponseBase {
 
     private TopicScopeDTO response;
 
-    public GetTopicSentScopesRestResponse () {
+    public ForumGetTopicSentScopesRestResponse () {
     }
 
     public TopicScopeDTO getResponse() {

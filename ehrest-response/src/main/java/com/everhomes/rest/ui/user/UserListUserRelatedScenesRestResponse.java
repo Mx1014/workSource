@@ -1,17 +1,17 @@
 // @formatter:off
 // generated file: DO NOT EDIT
-package com.everhomes.rest.ui;
+package com.everhomes.rest.ui.user;
 
 import com.everhomes.rest.RestResponseBase;
 
 import java.util.List;
-import com.everhomes.rest.ui.SceneDTO;
+import com.everhomes.rest.ui.user.SceneDTO;
 
-public class ListUserRelatedScenesRestResponse extends RestResponseBase {
+public class UserListUserRelatedScenesRestResponse extends RestResponseBase {
 
     private List<SceneDTO> response;
 
-    public ListUserRelatedScenesRestResponse () {
+    public UserListUserRelatedScenesRestResponse () {
     }
 
     public List<SceneDTO> getResponse() {

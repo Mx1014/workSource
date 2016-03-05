@@ -1,16 +1,16 @@
 // @formatter:off
 // generated file: DO NOT EDIT
-package com.everhomes.rest.user;
+package com.everhomes.rest.ui.user;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.rest.user.GetUserRelatedAddressResponse;
+import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
 
-public class GetUserRelatedAddressesRestResponse extends RestResponseBase {
+public class UserGetUserRelatedAddressesRestResponse extends RestResponseBase {
 
     private GetUserRelatedAddressResponse response;
 
-    public GetUserRelatedAddressesRestResponse () {
+    public UserGetUserRelatedAddressesRestResponse () {
     }
 
     public GetUserRelatedAddressResponse getResponse() {
