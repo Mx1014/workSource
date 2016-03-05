@@ -48,10 +48,9 @@ public class OrganizationUiController extends ControllerBase {
     @RestReturn(value=PostDTO.class,collection=true)
     public RestResponse listMyTaskPostsByScene(@Valid ListTaskPostsCommand cmd) {
         
-        List<BannerDTO> result = null;
         RestResponse resp =  new RestResponse();
         
-        ListTaskPostsResponse response = null;
+//        ListTaskPostsResponse response = null;
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
         return resp;
@@ -65,10 +64,9 @@ public class OrganizationUiController extends ControllerBase {
     @RestReturn(value=PostDTO.class,collection=true)
     public RestResponse listTaskPostsByScene(@Valid ListTaskPostsCommand cmd) {
         
-        List<BannerDTO> result = null;
         RestResponse resp =  new RestResponse();
         
-        ListTaskPostsResponse response = null;
+//        ListTaskPostsResponse response = null;
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
         return resp;
