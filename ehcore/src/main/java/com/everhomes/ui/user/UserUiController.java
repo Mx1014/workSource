@@ -23,6 +23,7 @@ import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
 import com.everhomes.rest.ui.user.ListContactBySceneRespose;
 import com.everhomes.rest.ui.user.ListContactsBySceneCommand;
 import com.everhomes.rest.ui.user.SceneDTO;
+import com.everhomes.rest.ui.user.SetUserCurrentSceneCommand;
 import com.everhomes.rest.user.ListUserOpPromotionsRespose;
 import com.everhomes.rest.user.OpPromotionDTO;
 import com.everhomes.rest.user.SyncActivityCommand;
@@ -97,6 +98,21 @@ public class UserUiController extends ControllerBase {
     @RequestMapping(value = "getUserOpPromotionsByScene")
     @RestReturn(ListUserOpPromotionsRespose.class)
     public RestResponse getUserOpPromotionsByScene(GetUserOpPromotionCommand cmd) throws Exception {
+        ListUserOpPromotionsRespose cmdResponse = null;
+        
+        RestResponse response = new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /ui/user/setUserCurrentScene</b>
+     * <p>设置当前的scene信息，服务器端不使用此信息，会在userInfo里还给客户端做选中上一次的场景使用</p>
+     */
+    @RequestMapping(value = "setUserCurrentScene")
+    @RestReturn(ListUserOpPromotionsRespose.class)
+    public RestResponse setUserCurrentScene(SetUserCurrentSceneCommand cmd) throws Exception {
         ListUserOpPromotionsRespose cmdResponse = null;
         
         RestResponse response = new RestResponse(cmdResponse);
