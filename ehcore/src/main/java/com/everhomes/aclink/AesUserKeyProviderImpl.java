@@ -197,8 +197,6 @@ public class AesUserKeyProviderImpl implements AesUserKeyProvider {
     public AesUserKey queryAesUserKeyByAuthId(Long doorId, Long authId) {
         ListingLocator locator = new ListingLocator();
         
-        long now = DateHelper.currentGMTTime().getTime();
-        
         List<AesUserKey> aesUserKeys = queryAesUserKeyByDoorId(locator, doorId, 1, new ListingQueryBuilderCallback() {
 
             @Override

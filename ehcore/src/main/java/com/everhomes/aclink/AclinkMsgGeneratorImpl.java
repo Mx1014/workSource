@@ -42,6 +42,21 @@ public class AclinkMsgGeneratorImpl implements AclinkMsgGenerator {
     }
     
     private void genAddUndoMessage(AclinkGeneratorContext ctx, DoorCommand cmd) {
+        if(!cmd.getStatus().equals(DoorCommandStatus.SENDING.getCode())) {
+            cmd.setStatus(DoorCommandStatus.SENDING.getCode());
+            doorCommandProvider.updateDoorCommand(cmd);
+        }
+        
+        AclinkMessage aclinkMessage = new AclinkMessage();
+        aclinkMessage.setCmd(cmd.getCmdId());
+        aclinkMessage.setEncrypted(cmd.getCmdBody());
+        aclinkMessage.setSecretVersion(cmd.getAclinkKeyVer());
+        DoorMessage doorMessage = new DoorMessage();
+        doorMessage.setBody(aclinkMessage);
+        doorMessage.setSeq(cmd.getId());
+        doorMessage.setDoorId(cmd.getDoorId());
+        doorMessage.setMessageType(DoorMessageType.NORMAL.getCode());
+        ctx.getDoorMessages().add(doorMessage);
     }
     
     private void genMessage(AclinkGeneratorContext ctx, DoorCommand cmd) {

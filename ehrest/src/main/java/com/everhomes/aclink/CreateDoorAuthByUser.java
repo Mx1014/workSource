@@ -2,14 +2,10 @@ package com.everhomes.aclink;
 
 import javax.validation.constraints.NotNull;
 
-import com.everhomes.util.StringHelper;
-
 /**
  * <ul>
  * <li>userId: 授权给的用户</li>
  * <li>doorId: 门禁 ID</li>
- * <li>approveUserId: 谁授权的用户ID</li>
- * <li>AuthType: 0 永久授权， 1 临时授权</li>
  * <li>validFromMs: 授权开始有效时间</li>
  * <li>validEndMs: 授权失效时间</li>
  * <li>organization: 用户来自于</li>
@@ -18,30 +14,22 @@ import com.everhomes.util.StringHelper;
  * @author janson
  *
  */
-public class CreateDoorAuthCommand {
-    @NotNull
-    private Long     userId;
-    
+public class CreateDoorAuthByUser {
     @NotNull
     private Long     doorId;
-    
-    private Long approveUserId;
     
     @NotNull
     private Byte     authType;
     
+    @NotNull
     private Long     validFromMs;
+    
+    @NotNull
     private Long     validEndMs;
+
     private String organization;
     private String description;
     
-    
-    public Long getUserId() {
-        return userId;
-    }
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
     public Long getDoorId() {
         return doorId;
     }
@@ -78,15 +66,6 @@ public class CreateDoorAuthCommand {
     public void setDescription(String description) {
         this.description = description;
     }
-    public Long getApproveUserId() {
-        return approveUserId;
-    }
-    public void setApproveUserId(Long approveUserId) {
-        this.approveUserId = approveUserId;
-    }
     
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
+    
 }

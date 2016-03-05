@@ -153,15 +153,13 @@ public class CmdUtil {
         return null;
     }
 
-    public static byte[] addUndoListCmd(byte[] aesRandomKey) {
+    public static byte[] addUndoListCmd(byte[] curServerKey, byte ver, int availableTime, short id) {
         byte cmd = 0x6;
-        byte ver = 0x0;
         int curTime = (int) Math.ceil((System.currentTimeMillis() / 1000));
-        int availableTime = curTime + 3600;
         int expireTime = curTime + 60;
         byte[] extTimeBytes = DataUtil.intToByteArray(expireTime);
         byte[] availableTimeBytes = DataUtil.intToByteArray(availableTime);
-        byte[] keyId = {0xa, 0xa};
+        byte[] keyId = DataUtil.shortToByteArray(id);
         byte[] dataArr = new byte[extTimeBytes.length + keyId.length + availableTimeBytes.length];
 
         System.arraycopy(extTimeBytes, 0, dataArr, 0, extTimeBytes.length);
@@ -170,9 +168,7 @@ public class CmdUtil {
         dataArr = addPaddingTo16Bytes(dataArr);
 
         try {
-            byte[] curServerKey = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
-            byte[] serverkeyEncryptResult = AESUtil.encrypt(dataArr, curServerKey);
-            byte[] aeskeyEncryptResult = AESUtil.encrypt(serverkeyEncryptResult, aesRandomKey);
+            byte[] aeskeyEncryptResult = AESUtil.encrypt(dataArr, curServerKey);
             byte[] resultArr = new byte[2 + aeskeyEncryptResult.length];
             resultArr[0] = cmd;
             resultArr[1] = ver;

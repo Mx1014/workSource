@@ -2,13 +2,24 @@ package com.everhomes.aclink;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>id: 用户ID</li>
+ * <li>userName: 用户名</li>
+ * <li>phone: 用户手机号</li>
+ * <li>status: 0 未授权， 1 授权</li>
+ * <li>authId: 授权对应的授权ID</li>
+ * </ul>
+ * @author janson
+ *
+ */
 public class AclinkUserDTO {
     private Long id;
     private String userName;
     private String phone;
     private String nickName;
     private Byte status;
-    private Long auth_id;
+    private Long authId;
     
     public Long getId() {
         return id;
@@ -41,11 +52,11 @@ public class AclinkUserDTO {
         this.status = status;
     }
     
-    public Long getAuth_id() {
-        return auth_id;
+    public Long getAuthId() {
+        return authId;
     }
-    public void setAuth_id(Long auth_id) {
-        this.auth_id = auth_id;
+    public void setAuthId(Long authId) {
+        this.authId = authId;
     }
     @Override
     public String toString() {

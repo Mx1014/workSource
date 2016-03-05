@@ -94,4 +94,19 @@ public class AclinkController extends ControllerBase {
         
         return response;
     }
+    
+    /**
+     * 
+     * <b>URL: /aclink/createAuth</b>
+     * <p>给其它用户授权</p>
+     * @return OK 成功
+     */
+    @RequestMapping("createAuth")
+    @RestReturn(value=DoorAuthDTO.class)
+    public RestResponse createDoorAuth(@Valid CreateDoorAuthByUser cmd) {
+        RestResponse response = new RestResponse(doorAccessService.createDoorAuth(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;        
+    }
 }

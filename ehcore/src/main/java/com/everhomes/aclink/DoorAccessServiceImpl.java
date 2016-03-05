@@ -231,7 +231,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             DoorAuth doorAuth = doorAuthProvider.queryValidDoorAuthForever(cmd.getDoorId(), dto.getId());
             if(doorAuth != null) {
                 dto.setStatus(DoorAuthStatus.VALID.getCode());
-                dto.setAuth_id(doorAuth.getId());
+                dto.setAuthId(doorAuth.getId());
             } else {
                 dto.setStatus(DoorAuthStatus.INVALID.getCode());
                 }
@@ -247,6 +247,11 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     @Override
     public DoorAuthDTO createDoorAuth(CreateDoorAuthCommand cmd) {
         //TODO notify a message to client
+        
+        if(cmd.getApproveUserId() == null) {
+            User user = UserContext.current().getUser();
+            cmd.setApproveUserId(user.getId());
+        }
         
         DoorAccess doorAcc = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
         UserInfo user = userService.getUserSnapshotInfoWithPhone(cmd.getUserId());
@@ -306,6 +311,22 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     }
     
     @Override
+    public DoorAuthDTO createDoorAuth(CreateDoorAuthByUser cmd2) {
+        User user = UserContext.current().getUser();
+        CreateDoorAuthCommand cmd = ConvertHelper.convert(cmd2, CreateDoorAuthCommand.class);
+        cmd.setApproveUserId(user.getId());
+        DoorAuth auth = doorAuthProvider.queryValidDoorAuthForever(cmd.getDoorId(), user.getId());
+        if(auth == null) {
+            //TODO auth failed
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Auth failed");   
+        }
+        
+        cmd.setAuthType(DoorAuthType.TEMPERATE.getCode());
+        return createDoorAuth(cmd);
+    }
+    
+    @Override
     public Long deleteDoorAccess(Long doorAccessId) {
         DoorAccess doorAccess = this.dbProvider.execute(new TransactionCallback<DoorAccess>() {
             @Override
@@ -339,25 +360,26 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 DoorAuth doorAuth = doorAuthProvider.getDoorAuthById(doorAuthId);
                 if(doorAuth != null) {
                     AesUserKey aesUserKey1 = aesUserKeyProvider.queryAesUserKeyByAuthId(doorAuth.getDoorId(), doorAuth.getId());
-                    if(aesUserKey1 == null) {
-                        return null;
-                    }
                     
                     AesUserKey aesUserKey2 = aesUserKeyProvider.queryAesUserKeyByDoorId(doorAuth.getDoorId(), doorAuth.getUserId(), doorAuthId);
-                    if(aesUserKey2 != null) {
-                        //TODO still has rights, ok?
-                        return null;
-                    }
                     
                     doorAuth.setStatus(DoorAuthStatus.INVALID.getCode());
                     doorAuthProvider.updateDoorAuth(doorAuth);
+                    
+                    if(aesUserKey1 == null || aesUserKey2 != null) {
+                        return null;
+                    }
                     
                     AesServerKey aesServerKey = aesServerKeyService.getCurrentAesServerKey(doorAuth.getDoorId());
                     if(aesServerKey == null) {
                         return null;
                     }
                     
-                    //generate a DoorCommand
+                    if(aesUserKey1.getExpireTimeMs() < System.currentTimeMillis()) {
+                    return null;
+                    }
+                    
+                    //generate a DoorCommand, and will send to Device next time
                     DoorCommand cmd = new DoorCommand();
                     cmd.setUserId(doorAuth.getUserId());
                     cmd.setDoorId(doorAuth.getDoorId());
@@ -368,8 +390,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     cmd.setServerKeyVer(aesServerKey.getSecretVer());
                     cmd.setAclinkKeyVer(aesServerKey.getDeviceVer());
                     cmd.setStatus(DoorCommandStatus.CREATING.getCode());
-                    //TODO
-                    cmd.setCmdBody("");
+                    cmd.setCmdBody(AclinkUtils.packAddUndoList(aesServerKey.getDeviceVer(), aesServerKey.getSecret()
+                            , (int)(aesUserKey1.getCreateTimeMs().longValue()/1000), aesUserKey1.getKeyId().shortValue()));
                     doorCommandProvider.createDoorCommand(cmd);
                     
                     return cmd;

@@ -113,4 +113,10 @@ public class AclinkUtils {
             return "";
         }
     }
+    
+    public static String packAddUndoList(Byte ver, String aesKey, int availableTime, short keyId) {
+        byte[] key = Base64.decodeBase64(aesKey);
+        byte[] binaryData = CmdUtil.addUndoListCmd(key, ver, availableTime, keyId);
+        return Base64.encodeBase64String(binaryData);
+    }
 }
