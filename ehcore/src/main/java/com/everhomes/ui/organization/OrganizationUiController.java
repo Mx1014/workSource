@@ -1,10 +1,6 @@
 // @formatter:off
 package com.everhomes.ui.organization;
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -19,12 +15,9 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.banner.BannerDTO;
 import com.everhomes.rest.forum.PostDTO;
-import com.everhomes.rest.ui.banner.GetBannersBySceneCommand;
 import com.everhomes.rest.ui.organization.ListTaskPostsCommand;
 import com.everhomes.rest.ui.organization.ListTaskPostsResponse;
-import com.everhomes.util.EtagHelper;
 
 /**
  * <ul>
@@ -45,7 +38,7 @@ public class OrganizationUiController extends ControllerBase {
      * <p>获取我的任务贴</p>
      */
     @RequestMapping("listMyTaskPostsByScene")
-    @RestReturn(value=PostDTO.class,collection=true)
+    @RestReturn(value=ListTaskPostsResponse.class)
     public RestResponse listMyTaskPostsByScene(@Valid ListTaskPostsCommand cmd) {
         
         RestResponse resp =  new RestResponse();
@@ -61,7 +54,7 @@ public class OrganizationUiController extends ControllerBase {
      * <p>任务贴列表</p>
      */
     @RequestMapping("listTaskPostsByScene")
-    @RestReturn(value=PostDTO.class,collection=true)
+    @RestReturn(value=ListTaskPostsResponse.class)
     public RestResponse listTaskPostsByScene(@Valid ListTaskPostsCommand cmd) {
         
         RestResponse resp =  new RestResponse();
