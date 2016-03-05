@@ -22,7 +22,8 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.banner.BannerDTO;
 import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.ui.banner.GetBannersBySceneCommand;
-import com.everhomes.rest.ui.organization.TaskPostsCommand;
+import com.everhomes.rest.ui.organization.ListTaskPostsCommand;
+import com.everhomes.rest.ui.organization.ListTaskPostsResponse;
 import com.everhomes.util.EtagHelper;
 
 /**
@@ -40,32 +41,34 @@ public class OrganizationUiController extends ControllerBase {
     private ConfigurationProvider configurationProvider;
    
     /**
-     * <b>URL: /ui/banner/myTaskPosts</b>
+     * <b>URL: /ui/organization/listMyTaskPostsByScene</b>
      * <p>获取我的任务贴</p>
      */
-    @RequestMapping("myTaskPosts")
+    @RequestMapping("listMyTaskPostsByScene")
     @RestReturn(value=PostDTO.class,collection=true)
-    public RestResponse myTaskPosts(@Valid TaskPostsCommand cmd) {
+    public RestResponse listMyTaskPostsByScene(@Valid ListTaskPostsCommand cmd) {
         
         List<BannerDTO> result = null;
         RestResponse resp =  new RestResponse();
         
+        ListTaskPostsResponse response = null;
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
         return resp;
     }
     
     /**
-     * <b>URL: /ui/banner/listTaskPosts</b>
-     * <p>获取我的任务贴</p>
+     * <b>URL: /ui/organization/listTaskPostsByScene</b>
+     * <p>任务贴列表</p>
      */
-    @RequestMapping("listTaskPosts")
+    @RequestMapping("listTaskPostsByScene")
     @RestReturn(value=PostDTO.class,collection=true)
-    public RestResponse listTaskPosts(@Valid TaskPostsCommand cmd) {
+    public RestResponse listTaskPostsByScene(@Valid ListTaskPostsCommand cmd) {
         
         List<BannerDTO> result = null;
         RestResponse resp =  new RestResponse();
         
+        ListTaskPostsResponse response = null;
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
         return resp;
