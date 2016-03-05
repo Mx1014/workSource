@@ -28,6 +28,7 @@ CREATE TABLE `eh_promotion_activity_triggers`(
     `id` BIGINT NOT NULL,
     `namespace_id` INTEGER NOT NULL DEFAULT 0,
     `title` VARCHAR(512) NOT NULL DEFAULT 0 COMMENT 'the title of the activity',
+	`description` TEXT,
 	`trigger_type` TINYINT NOT NULL DEFAULT 1 COMMENT '0: none, 1: trigger at start time, 2: trigger by register, 3: trigger by biz cost',
 	`trigger_data` VARCHAR(1024) COMMENT 'json format, the parameters which help trigger type to decine when to start the activity',
 	`start_time` DATETIME,
@@ -53,12 +54,15 @@ CREATE TABLE `eh_promotion_activities`(
     `namespace_id` INTEGER NOT NULL DEFAULT 0,
 	`trigger_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refer to the id of eh_promotion_activity_triggers',
     `title` VARCHAR(512) NOT NULL DEFAULT 0 COMMENT 'the title of the activity',
+	`description` TEXT,
 	`scope_code` TINYINT NOT NULL DEFAULT 0 COMMENT '0: all, 1: community, 2: city, 3: user',
     `scope_id` BIGINT,
 	`action_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'according to document',
     `action_data` TEXT COMMENT 'the parameters depend on item_type, json format',    
 	`valid_count` INTEGER NOT NULL DEFAULT 0 COMMENT '0: unlimit, 1: only once, others',
+	`status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: waiting for approval, 2: active',
     `create_time` DATETIME,
     
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
