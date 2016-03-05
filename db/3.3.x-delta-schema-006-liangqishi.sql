@@ -2,11 +2,11 @@
 # member of global parition
 # shared among namespaces, no application module specific information
 #
-DROP TABLE IF EXISTS `eh_scenes`;
-CREATE TABLE `eh_scenes`(
+DROP TABLE IF EXISTS `eh_scene_types`;
+CREATE TABLE `eh_scene_types`(
     `id` BIGINT NOT NULL AUTO_INCREMENT,
     `namespace_id` INTEGER NOT NULL DEFAULT 0,
-    `name` VARCHAR(64) NOT NULL COMMENT 'the identifier of the scene',
+    `name` VARCHAR(64) NOT NULL COMMENT 'the identifier of the scene type',
 	`display_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the name used to display',
     `create_time` DATETIME,
     
@@ -15,22 +15,39 @@ CREATE TABLE `eh_scenes`(
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
-ALTER TABLE `eh_launch_pad_layouts` ADD COLUMN `scene` VARCHAR(64) NOT NULL DEFAULT 'default';
-ALTER TABLE `eh_launch_pad_items` ADD COLUMN `scene` VARCHAR(64) NOT NULL DEFAULT 'default';
-ALTER TABLE `eh_banners` ADD COLUMN `scene` VARCHAR(64) NOT NULL DEFAULT 'default';
+ALTER TABLE `eh_launch_pad_layouts` ADD COLUMN `scene_type` VARCHAR(64) NOT NULL DEFAULT 'default';
+ALTER TABLE `eh_launch_pad_items` ADD COLUMN `scene_type` VARCHAR(64) NOT NULL DEFAULT 'default';
+ALTER TABLE `eh_banners` ADD COLUMN `scene_type` VARCHAR(64) NOT NULL DEFAULT 'default';
 
 #
 # member of global parition
 # shared among namespaces, no application module specific information
 #
-DROP TABLE IF EXISTS `eh_promotion_activity_triggers`;
-CREATE TABLE `eh_promotion_activity_triggers`(
+DROP TABLE IF EXISTS `eh_op_promotion_policies`;
+CREATE TABLE `eh_op_promotion_policies`(
     `id` BIGINT NOT NULL,
     `namespace_id` INTEGER NOT NULL DEFAULT 0,
-    `title` VARCHAR(512) NOT NULL DEFAULT 0 COMMENT 'the title of the activity',
+    `name` VARCHAR(512) NOT NULL DEFAULT '' COMMENT 'the title of the activity',
+	`class_name` VARCHAR(512) DEFAULT '' COMMENT 'the name of class which implement how to execute the policy',
 	`description` TEXT,
-	`trigger_type` TINYINT NOT NULL DEFAULT 1 COMMENT '0: none, 1: trigger at start time, 2: trigger by register, 3: trigger by biz cost',
-	`trigger_data` VARCHAR(1024) COMMENT 'json format, the parameters which help trigger type to decine when to start the activity',
+    `create_time` DATETIME,
+    
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+#
+# member of global parition
+# shared among namespaces, no application module specific information
+#
+DROP TABLE IF EXISTS `eh_op_promotion_settings`;
+CREATE TABLE `eh_op_promotion_settings`(
+    `id` BIGINT NOT NULL,
+    `namespace_id` INTEGER NOT NULL DEFAULT 0,
+	`scene_type` VARCHAR(64) NOT NULL DEFAULT 'default'
+    `title` VARCHAR(512) NOT NULL DEFAULT '' COMMENT 'the title of the activity',
+	`description` TEXT,
+	`policy_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refer to the id of eh_op_promotion_policies',
+	`policy_data` VARCHAR(1024) COMMENT 'json format, the parameters which help executing the policy',
 	`start_time` DATETIME,
     `end_time` DATETIME,
 	`scope_code` TINYINT NOT NULL DEFAULT 0 COMMENT '0: all, 1: community, 2: city, 3: user',
@@ -44,14 +61,18 @@ CREATE TABLE `eh_promotion_activity_triggers`(
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+    `apply_policy` TINYINT NOT NULL DEFAULT 0 COMMENT '0: default, 1: override, 2: revert',
+    `apply_policy` TINYINT NOT NULL DEFAULT 0 COMMENT '0: default, 1: override, 2: revert',
 #
 # member of global parition
 # shared among namespaces, no application module specific information
+# Give user some operation promotions planed by zl market department
 #
-DROP TABLE IF EXISTS `eh_promotion_activities`;
-CREATE TABLE `eh_promotion_activities`(
+DROP TABLE IF EXISTS `eh_op_promotions`;
+CREATE TABLE `eh_op_promotions`(
     `id` BIGINT NOT NULL,
     `namespace_id` INTEGER NOT NULL DEFAULT 0,
+	`scene_type` VARCHAR(64) NOT NULL DEFAULT 'default'
 	`trigger_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refer to the id of eh_promotion_activity_triggers',
     `title` VARCHAR(512) NOT NULL DEFAULT 0 COMMENT 'the title of the activity',
 	`description` TEXT,
