@@ -33,7 +33,7 @@ import com.everhomes.util.EtagHelper;
  */
 @RestDoc(value="OrganizationUi controller", site="organizationUi")
 @RestController
-@RequestMapping("/ui/organization")
+@RequestMapping("/ui/org")
 public class OrganizationUiController extends ControllerBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(OrganizationUiController.class);
     
@@ -41,7 +41,7 @@ public class OrganizationUiController extends ControllerBase {
     private ConfigurationProvider configurationProvider;
    
     /**
-     * <b>URL: /ui/organization/listMyTaskPostsByScene</b>
+     * <b>URL: /ui/org/listMyTaskPostsByScene</b>
      * <p>获取我的任务贴</p>
      */
     @RequestMapping("listMyTaskPostsByScene")
@@ -58,7 +58,7 @@ public class OrganizationUiController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /ui/organization/listTaskPostsByScene</b>
+     * <b>URL: /ui/org/listTaskPostsByScene</b>
      * <p>任务贴列表</p>
      */
     @RequestMapping("listTaskPostsByScene")
