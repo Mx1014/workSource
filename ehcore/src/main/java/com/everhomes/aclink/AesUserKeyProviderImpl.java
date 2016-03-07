@@ -216,4 +216,22 @@ public class AesUserKeyProviderImpl implements AesUserKeyProvider {
         return null;
     }
     
+    @Override
+    public List<AesUserKey> queryAdminAesUserKeyByUserId(Long userId, int maxCount) {
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        List<AesUserKey> keys = queryAesUserKeys(locator, maxCount,
+                new ListingQueryBuilderCallback() {
+
+                    @Override
+                    public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                            SelectQuery<? extends Record> query) {
+                        query.addConditions(Tables.EH_AES_USER_KEY.KEY_TYPE.ne(AesUserKeyType.TEMP.getCode()));
+                        return query;
+                    }
+            
+        });
+        
+        return keys;
+    }
+    
 }

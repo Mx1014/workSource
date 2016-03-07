@@ -86,6 +86,16 @@ public class AclinkController extends ControllerBase {
         return response;
     }
     
+    @RequestMapping("listAdminAesUserKey")
+    @RestReturn(value=ListAesUserKeyByUserResponse.class)
+    public RestResponse listAdminAesUserKey() {
+        RestResponse response = new RestResponse(doorAccessService.listAdminAesUserKeyByUser());
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        
+        return response;
+    }
+    
     /**
      * 
      * <b>URL: /aclink/createAuth</b>
@@ -100,4 +110,20 @@ public class AclinkController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;        
     }
+    
+    /**
+     * 
+     * <b>URL: /aclink/listAuthHistory</b>
+     * <p>获取授权历史信息</p>
+     * @return 授权历史列表
+     */
+    @RequestMapping("listAuthHistory")
+    @RestReturn(value=ListDoorAuthResponse.class)
+    public RestResponse listAuthHistory(@Valid ListDoorAuthCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.queryDoorAuthByApproveId(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;        
+    }    
+    
 }

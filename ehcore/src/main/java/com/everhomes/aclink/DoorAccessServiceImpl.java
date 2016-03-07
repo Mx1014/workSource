@@ -303,6 +303,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             doorAuthProvider.createDoorAuth(doorAuth);
             rlt = ConvertHelper.convert(doorAuth, DoorAuthDTO.class);
             rlt.setDoorName(doorAcc.getName());
+            rlt.setHardwareId(doorAcc.getHardwareId());
         }
         
         sendMessageToUser(user.getId(), doorAcc.getId());
@@ -705,6 +706,28 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         return resp;
     }
     
+    @Override
+    public ListAesUserKeyByUserResponse listAdminAesUserKeyByUser() {
+        User user = UserContext.current().getUser();
+        
+        ListAesUserKeyByUserResponse resp = new ListAesUserKeyByUserResponse();
+        List<AesUserKey> aesUserKeys = aesUserKeyProvider.queryAdminAesUserKeyByUserId(user.getId(), 20);
+        List<AesUserKeyDTO> dtos = new ArrayList<AesUserKeyDTO>();
+        for(AesUserKey key : aesUserKeys) {
+            AesUserKeyDTO dto = ConvertHelper.convert(key, AesUserKeyDTO.class);
+            DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(dto.getDoorId());
+            if(doorAccess != null) {
+                dto.setHardwareId(doorAccess.getHardwareId());
+                dtos.add(dto);    
+            }
+        }
+        
+        resp.setAesUserKeys(dtos);
+        
+        return resp;
+        
+    }
+    
     private List<DoorAuth> uniqueAuths(List<DoorAuth> auths) {
         Map<String, DoorAuth> map = new HashMap<String, DoorAuth>();
         for(int i = auths.size()-1; i >= 0; i--) {
@@ -750,8 +773,10 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     if(doorAuth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
                         //7 Days
                         aesUserKey.setExpireTimeMs(System.currentTimeMillis() + 60*1000*24*7);
+                        aesUserKey.setKeyType(AesUserKeyType.NORMAL.getCode());
                     } else {
-                        aesUserKey.setExpireTimeMs(doorAuth.getValidEndMs());    
+                        aesUserKey.setExpireTimeMs(doorAuth.getValidEndMs());
+                        aesUserKey.setKeyType(AesUserKeyType.TEMP.getCode());
                         }
                     
                     aesUserKey.setStatus(AesUserKeyStatus.VALID.getCode());
@@ -770,6 +795,30 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         }
         
         return aesUserKey;
+    }
+    
+    @Override
+    public ListDoorAuthResponse queryDoorAuthByApproveId(ListDoorAuthCommand cmd) {
+        User user = UserContext.current().getUser();
+        
+        ListingLocator locator = new ListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        ListDoorAuthResponse resp = new ListDoorAuthResponse();
+        
+        List<DoorAuth> auths = doorAuthProvider.queryDoorAuthByApproveId(locator, user.getId(), count);
+        List<DoorAuthDTO> dtos = new ArrayList<DoorAuthDTO>();
+        for(DoorAuth auth : auths) {
+            DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
+            DoorAuthDTO dto = ConvertHelper.convert(auth, DoorAuthDTO.class);
+            dto.setHardwareId(doorAccess.getHardwareId());
+            dto.setDoorName(doorAccess.getName());
+            dtos.add(dto);
+        }
+        
+        resp.setDtos(dtos);
+        resp.setNextPageAnchor(locator.getAnchor());
+        return resp;
     }
     
 //    void syncLogToServer(List<DoorAccessLog> logs) {

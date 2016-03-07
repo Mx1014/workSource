@@ -1,7 +1,7 @@
 package com.everhomes.aclink;
 
 public enum AesUserKeyType {
-    NORMAL((byte)0);
+    NORMAL((byte)0), TEMP((byte)1), ADMIN((byte)1);
     
     private byte code;
     
@@ -20,6 +20,10 @@ public enum AesUserKeyType {
         switch(code.byteValue()) {
         case 0 :
             return NORMAL;
+        case 1 :
+            return TEMP;
+        case 2 :
+            return ADMIN;
         default :
             break;
         }

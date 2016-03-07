@@ -199,4 +199,22 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         return auths.get(0);
     }
     
+    @Override
+    public List<DoorAuth> queryDoorAuthByApproveId(ListingLocator locator, Long approveId, int count) {
+        
+        long now = DateHelper.currentGMTTime().getTime();
+        
+        return queryDoorAuth(locator, count, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_DOOR_AUTH.APPROVE_USER_ID.eq(approveId));
+                Condition c2 = Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.TEMPERATE.getCode());
+                return query;
+            }
+            
+        });        
+    }
+    
 }

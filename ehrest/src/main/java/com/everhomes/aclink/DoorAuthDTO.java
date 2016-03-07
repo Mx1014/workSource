@@ -19,6 +19,7 @@ public class DoorAuthDTO {
     private Long     id;
     private Byte     ownerType;
     private String doorName;
+    private String hardwareId;
 
 
     public Byte getStatus() {
@@ -139,6 +140,16 @@ public class DoorAuthDTO {
 
     public void setDoorName(String doorName) {
         this.doorName = doorName;
+    }
+
+
+    public String getHardwareId() {
+        return hardwareId;
+    }
+
+
+    public void setHardwareId(String hardwareId) {
+        this.hardwareId = hardwareId;
     }
 
 
