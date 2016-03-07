@@ -79,16 +79,7 @@ public class AclinkController extends ControllerBase {
     @RequestMapping("listAesUserKey")
     @RestReturn(value=ListAesUserKeyByUserResponse.class)
     public RestResponse listAesUserKey() {
-        ListAesUserKeyByUserResponse resp = new ListAesUserKeyByUserResponse();
-        List<AesUserKey> aesUserKeys = doorAccessService.listAesUserKeyByUser();
-        List<AesUserKeyDTO> dtos = new ArrayList<AesUserKeyDTO>();
-        for(AesUserKey key : aesUserKeys) {
-            AesUserKeyDTO dto = ConvertHelper.convert(key, AesUserKeyDTO.class);
-            dtos.add(dto);
-        }
-        
-        resp.setAesUserKeys(dtos);
-        RestResponse response = new RestResponse(resp);
+        RestResponse response = new RestResponse(doorAccessService.listAesUserKeyByUser());
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         

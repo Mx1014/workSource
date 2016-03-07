@@ -229,7 +229,7 @@ public class CmdUtil {
     public static short getCheckSum(byte[] data) {
         short sum = 0;
         for (int i = 0; i < data.length; i++) {
-            sum += data[i] & 0xFF;
+            sum += (data[i] & 0xFF);
         }
         return sum;
     }

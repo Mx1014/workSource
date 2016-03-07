@@ -17,6 +17,7 @@ public class AesUserKeyDTO {
     private Long     expireTimeMs;
     private Long     doorId;
     private Long     id;
+    private String hardwareId;
 
     
 
@@ -136,6 +137,18 @@ public class AesUserKeyDTO {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+
+
+    public String getHardwareId() {
+        return hardwareId;
+    }
+
+
+
+    public void setHardwareId(String hardwareId) {
+        this.hardwareId = hardwareId;
     }
 
 

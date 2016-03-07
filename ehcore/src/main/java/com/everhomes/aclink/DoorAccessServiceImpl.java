@@ -685,9 +685,24 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     
     //list all AesUserKeys for current login user
     @Override
-    public List<AesUserKey> listAesUserKeyByUser() {
+    public ListAesUserKeyByUserResponse listAesUserKeyByUser() {
         User user = UserContext.current().getUser();
-        return listAesUserKeyByUser(user);
+        
+        ListAesUserKeyByUserResponse resp = new ListAesUserKeyByUserResponse();
+        List<AesUserKey> aesUserKeys = this.listAesUserKeyByUser(user);
+        List<AesUserKeyDTO> dtos = new ArrayList<AesUserKeyDTO>();
+        for(AesUserKey key : aesUserKeys) {
+            AesUserKeyDTO dto = ConvertHelper.convert(key, AesUserKeyDTO.class);
+            DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(dto.getDoorId());
+            if(doorAccess != null) {
+                dto.setHardwareId(doorAccess.getHardwareId());
+                dtos.add(dto);    
+            }
+        }
+        
+        resp.setAesUserKeys(dtos);
+        
+        return resp;
     }
     
     private List<DoorAuth> uniqueAuths(List<DoorAuth> auths) {
