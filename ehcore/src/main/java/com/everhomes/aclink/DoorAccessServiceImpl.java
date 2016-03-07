@@ -756,7 +756,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     
                     aesUserKey.setStatus(AesUserKeyStatus.VALID.getCode());
                     aesUserKey.setKeyType(AesUserKeyType.NORMAL.getCode());
-                    aesUserKey.setSecret(AclinkUtils.packAesUserKey(aesServerKey.getSecret(), doorAuth.getUserId(), aesUserKey.getKeyId(), doorAuth.getValidEndMs()));
+                    aesUserKey.setSecret(AclinkUtils.packAesUserKey(aesServerKey.getSecret(), doorAuth.getUserId(), aesUserKey.getKeyId(), aesUserKey.getExpireTimeMs()));
                     aesUserKeyProvider.createAesUserKey(aesUserKey);
                     }
                 return aesUserKey;
