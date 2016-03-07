@@ -226,6 +226,7 @@ public class AesUserKeyProviderImpl implements AesUserKeyProvider {
                     public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
                             SelectQuery<? extends Record> query) {
                         query.addConditions(Tables.EH_AES_USER_KEY.KEY_TYPE.ne(AesUserKeyType.TEMP.getCode()));
+                        query.addConditions(Tables.EH_AES_USER_KEY.USER_ID.eq(userId));
                         return query;
                     }
             
