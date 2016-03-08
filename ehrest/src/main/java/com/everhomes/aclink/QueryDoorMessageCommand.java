@@ -18,19 +18,20 @@ import com.everhomes.util.StringHelper;
  */
 public class QueryDoorMessageCommand {
     @NotNull
-    Long doorId;
+    String hardwareId;
     
     Byte urgent;
     
     @ItemType(DoorMessageResp.class)
     List<DoorMessageResp> inputs;
 
-    public Long getDoorId() {
-        return doorId;
+
+    public String getHardwareId() {
+        return hardwareId;
     }
 
-    public void setDoorId(Long doorId) {
-        this.doorId = doorId;
+    public void setHardwareId(String hardwareId) {
+        this.hardwareId = hardwareId;
     }
 
     public List<DoorMessageResp> getInputs() {

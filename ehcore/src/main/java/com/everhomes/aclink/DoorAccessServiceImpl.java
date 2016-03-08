@@ -411,8 +411,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     public QueryDoorMessageResponse queryDoorMessageByDoorId(QueryDoorMessageCommand cmd) {
         processIncomeMessageResp(cmd.getInputs());
         QueryDoorMessageResponse resp = new QueryDoorMessageResponse();
-        resp.setDoorId(cmd.getDoorId());
-        resp.setOutputs(generateMessages(cmd.getDoorId()));
+        DoorAccess doorAccess = doorAccessProvider.queryDoorAccessByHardwareId(cmd.getHardwareId());
+        resp.setDoorId(doorAccess.getId());
+        resp.setOutputs(generateMessages(doorAccess.getId()));
         return resp;
     }
     
