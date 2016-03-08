@@ -300,6 +300,16 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             doorAuth.setOrganization(cmd.getOrganization());
             doorAuth.setDescription(cmd.getDescription());
             doorAuth.setStatus(DoorAuthStatus.VALID.getCode());
+            
+            if(user.getPhones() != null && user.getPhones().size() > 0) {
+                doorAuth.setPhone(user.getPhones().get(0));    
+                }
+            if(user.getNickName() != null) {
+                doorAuth.setNickname(user.getNickName());
+            } else {
+                doorAuth.setNickname(user.getAccountName());
+            }
+            
             doorAuthProvider.createDoorAuth(doorAuth);
             rlt = ConvertHelper.convert(doorAuth, DoorAuthDTO.class);
             rlt.setDoorName(doorAcc.getName());
@@ -417,12 +427,12 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         return resp;
     }
     
-    public void processIncomeMessageResp(List<DoorMessageResp> inputs) {
+    public void processIncomeMessageResp(List<DoorMessage> inputs) {
         if(inputs == null) {
             return;
         }
         
-        for (DoorMessageResp resp : inputs) {
+        for (DoorMessage resp : inputs) {
             aclinkMessageSequence.ackMessage(resp.getSeq());
             DoorCommand doorCommand = doorCommandProvider.getDoorCommandById(resp.getSeq());
             doorCommand.setStatus(DoorCommandStatus.RESPONSE.getCode());
@@ -814,12 +824,50 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             DoorAuthDTO dto = ConvertHelper.convert(auth, DoorAuthDTO.class);
             dto.setHardwareId(doorAccess.getHardwareId());
             dto.setDoorName(doorAccess.getName());
+//            User u = userProvider.findUserById(auth.getUserId());
+//            if(u != null) {
+//                if(u.getNickName() != null) {
+//                    dto.setUserNickName(u.getNickName());
+//                } else {
+//                    dto.setUserNickName(u.getAccountName());
+//                }
+//            }
             dtos.add(dto);
         }
         
         resp.setDtos(dtos);
         resp.setNextPageAnchor(locator.getAnchor());
         return resp;
+    }
+    
+    @Override
+    public ListDoorAuthResponse searchDoorAuth(SearchDoorAuthCommand cmd) {
+        ListingLocator locator = new ListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        ListDoorAuthResponse resp = new ListDoorAuthResponse();
+        
+        List<DoorAuth> auths = doorAuthProvider.searchDoorAuthByAdmin(locator, cmd.getKeyword(), cmd.getStatus(), count);
+        List<DoorAuthDTO> dtos = new ArrayList<DoorAuthDTO>();
+        for(DoorAuth auth : auths) {
+            DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
+            DoorAuthDTO dto = ConvertHelper.convert(auth, DoorAuthDTO.class);
+            dto.setHardwareId(doorAccess.getHardwareId());
+            dto.setDoorName(doorAccess.getName());
+            User u = userProvider.findUserById(auth.getApproveUserId());
+            if(u != null) {
+                if(u.getNickName() != null) {
+                    dto.setApproveUserName(u.getNickName());
+                } else {
+                    dto.setApproveUserName(u.getAccountName());
+                }
+            }
+            dtos.add(dto);
+        }
+        
+        resp.setDtos(dtos);
+        resp.setNextPageAnchor(locator.getAnchor());
+        return resp;        
     }
     
 //    void syncLogToServer(List<DoorAccessLog> logs) {

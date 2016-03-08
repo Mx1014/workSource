@@ -25,8 +25,10 @@ import com.everhomes.aclink.ListAesUserKeyByUserIdCommand;
 import com.everhomes.aclink.ListAesUserKeyByUserResponse;
 import com.everhomes.aclink.ListDoorAccessByOwnerIdCommand;
 import com.everhomes.aclink.ListDoorAccessResponse;
+import com.everhomes.aclink.ListDoorAuthResponse;
 import com.everhomes.aclink.QueryDoorAccessAdminCommand;
 import com.everhomes.aclink.QueryDoorMessageResponse;
+import com.everhomes.aclink.SearchDoorAuthCommand;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -180,6 +182,20 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/aclink/searchDoorAuth</b>
+     * <p>获取门禁列表</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("searchDoorAuth")
+    @RestReturn(value=ListDoorAuthResponse.class)
+    public RestResponse searchDoorAuthByAdmin(@Valid SearchDoorAuthCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.searchDoorAuth(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
         return response;
     }
 }

@@ -22,8 +22,8 @@ public class QueryDoorMessageCommand {
     
     Byte urgent;
     
-    @ItemType(DoorMessageResp.class)
-    List<DoorMessageResp> inputs;
+    @ItemType(DoorMessage.class)
+    List<DoorMessage> inputs;
 
 
     public String getHardwareId() {
@@ -34,11 +34,11 @@ public class QueryDoorMessageCommand {
         this.hardwareId = hardwareId;
     }
 
-    public List<DoorMessageResp> getInputs() {
+    public List<DoorMessage> getInputs() {
         return inputs;
     }
 
-    public void setInputs(List<DoorMessageResp> inputs) {
+    public void setInputs(List<DoorMessage> inputs) {
         this.inputs = inputs;
     }
 

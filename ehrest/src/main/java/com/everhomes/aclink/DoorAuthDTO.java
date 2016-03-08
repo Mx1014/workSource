@@ -20,6 +20,9 @@ public class DoorAuthDTO {
     private Byte     ownerType;
     private String doorName;
     private String hardwareId;
+    private String   nickname;
+    private String   phone;
+    private String approveUserName;
 
 
     public Byte getStatus() {
@@ -150,6 +153,37 @@ public class DoorAuthDTO {
 
     public void setHardwareId(String hardwareId) {
         this.hardwareId = hardwareId;
+    }
+    
+    
+
+    public String getNickname() {
+        return nickname;
+    }
+
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+
+    public String getPhone() {
+        return phone;
+    }
+
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+
+    public String getApproveUserName() {
+        return approveUserName;
+    }
+
+
+    public void setApproveUserName(String approveUserName) {
+        this.approveUserName = approveUserName;
     }
 
 
