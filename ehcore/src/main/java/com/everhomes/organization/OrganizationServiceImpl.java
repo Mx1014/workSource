@@ -90,6 +90,12 @@ import java.util.stream.Collectors;
 
 
 
+
+
+
+
+
+
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -101,6 +107,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+
+
+
+
+
+
+
 
 
 
@@ -193,6 +206,7 @@ import com.everhomes.enterprise.Enterprise;
 import com.everhomes.enterprise.EnterpriseContact;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
+import com.everhomes.forum.ForumEmbeddedHandler;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.Post;
@@ -239,10 +253,12 @@ import com.everhomes.rest.forum.ListTopicCommand;
 import com.everhomes.rest.forum.ListTopicCommentCommand;
 import com.everhomes.rest.forum.NewCommentCommand;
 import com.everhomes.rest.forum.NewTopicCommand;
+import com.everhomes.rest.forum.PostAssignedFlag;
 import com.everhomes.rest.forum.PostContentType;
 import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.forum.PostEntityTag;
 import com.everhomes.rest.forum.PostPrivacy;
+import com.everhomes.rest.forum.PostStatus;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.launchpad.ItemKind;
@@ -315,9 +331,11 @@ import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.organization.OrganizationTaskApplyEnityType;
 import com.everhomes.rest.organization.OrganizationTaskDTO2;
 import com.everhomes.rest.organization.OrganizationTaskStatus;
+import com.everhomes.rest.organization.OrganizationTaskTargetType;
 import com.everhomes.rest.organization.OrganizationTaskType;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.PrivateFlag;
+import com.everhomes.rest.organization.ProcessingTaskCommand;
 import com.everhomes.rest.organization.RejectOrganizationCommand;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.organization.SearchTopicsByTypeCommand;
@@ -372,6 +390,7 @@ import com.everhomes.server.schema.tables.EhUserActivities;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.EncryptionUtils;
+import com.everhomes.user.TargetType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
@@ -486,12 +505,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Override
 	public OrganizationDTO createChildrenOrganization(CreateOrganizationCommand cmd) {
-		//先判断，后台管理员才能创建。状态直接设为正常
-		if(!StringUtils.isEmpty(cmd.getOrganizationType())){
-			OrganizationType organizationType = OrganizationType.fromCode(cmd.getOrganizationType());
-			cmd.setOrganizationType(organizationType.getCode());
-		}
-		
+
 		Organization organization  = ConvertHelper.convert(cmd, Organization.class);
 		
 		Organization parOrg = this.checkOrganization(cmd.getParentId());
@@ -501,13 +515,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 		organization.setOrganizationType(parOrg.getOrganizationType());
 		organization.setStatus(OrganizationStatus.ACTIVE.getCode());
 		organization.setNamespaceId(parOrg.getNamespaceId());
+		organization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		if(OrganizationGroupType.ENTERPRISE.getCode().equals(parOrg.getGroupType())){
 			organization.setDirectlyEnterpriseId(parOrg.getId());
+			
 		}else{
 			organization.setDirectlyEnterpriseId(parOrg.getDirectlyEnterpriseId());
 		}
-		organization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		
 		organizationProvider.createOrganization(organization);
 		
 		return ConvertHelper.convert(organization, OrganizationDTO.class);
@@ -5122,4 +5138,235 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    }
 	    
 	    
+	    @Override
+	    public void acceptTask(ProcessingTaskCommand cmd) {
+	    	// TODO Auto-generated method stub
+	    	
+	    	User user = UserContext.current().getUser();
+	    	Long taskId = cmd.getTaskId();
+	    	OrganizationTask task = organizationProvider.findOrganizationTaskById(taskId);
+	    	
+	    	if(task.getTaskStatus().equals(OrganizationTaskStatus.UNPROCESSED.getCode()) 
+	    			&& (task.getTargetId().equals(user.getId())
+	    			|| ((StringUtils.isEmpty(task.getTargetId()) || task.getTargetId().equals(0))))){
+	    		task.setTaskStatus(OrganizationTaskStatus.PROCESSING.getCode());
+	    		task.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	    		task.setOperatorUid(user.getId());
+	    		task.setProcessingTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	    		
+	    		organizationProvider.updateOrganizationTask(task);
+	    		
+	    		NewCommentCommand command = new NewCommentCommand();
+	    		command.setTopicId(task.getApplyEntityId());
+	    		command.setContentType(PostContentType.TEXT.getCode());
+	    		Map<String,Object> map = new HashMap<String, Object>();
+	    		map.put("targetUName", user.getNickName());
+	    		map.put("targetUToken", user.getIdentifierToken());
+	    		String content = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_ACCEPT_COMMENT, user.getLocale(), map, "");
+	    		command.setContent(content);
+	    		this.createComment(command);
+	    	}else{
+	    		LOGGER.error("Tasks have been processed, status="+task.getTaskStatus() + ", targetId=" + task.getTargetId());
+				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_TASK_ALREADY_PROCESSED,
+						"Tasks have been processed.");
+	    	}
+	    }
+	    
+	    @Override
+	    public void grabTask(ProcessingTaskCommand cmd) {
+	    	// TODO Auto-generated method stub
+	    	User user = UserContext.current().getUser();
+	    	Long taskId = cmd.getTaskId();
+	    	OrganizationTask task = organizationProvider.findOrganizationTaskById(taskId);
+	    	
+	    	if(task.getTaskStatus().equals(OrganizationTaskStatus.UNPROCESSED.getCode()) 
+	    			&& (StringUtils.isEmpty(task.getTargetId()) || task.getTargetId().equals(0))){
+	    		task.setTaskStatus(OrganizationTaskStatus.PROCESSING.getCode());
+	    		task.setTargetId(user.getId());
+	    		task.setTargetType(OrganizationTaskTargetType.USER.getCode());
+	    		task.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	    		task.setOperatorUid(user.getId());
+	    		task.setProcessingTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	    		
+	    		organizationProvider.updateOrganizationTask(task);
+	    		
+	    		NewCommentCommand command = new NewCommentCommand();
+	    		command.setTopicId(task.getApplyEntityId());
+	    		command.setContentType(PostContentType.TEXT.getCode());
+	    		Map<String,Object> map = new HashMap<String, Object>();
+	    		map.put("targetUName", user.getNickName());
+	    		map.put("targetUToken", user.getIdentifierToken());
+	    		String content = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_ACCEPT_COMMENT, user.getLocale(), map, "");
+	    		command.setContent(content);
+	    		this.createComment(command);
+	    	}else{
+	    		LOGGER.error("Tasks have been processed, status="+task.getTaskStatus() + ", targetId=" + task.getTargetId());
+				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_TASK_ALREADY_PROCESSED,
+						"Tasks have been processed.");
+	    	}
+	    }
+	    
+	    @Override
+	    public void processingTask(ProcessingTaskCommand cmd) {
+	    	// TODO Auto-generated method stub
+	    	
+	    	User user = UserContext.current().getUser();
+	    	Long taskId = cmd.getTaskId();
+	    	OrganizationTask task = organizationProvider.findOrganizationTaskById(taskId);
+	    	
+	    	if(null == task){
+	    		LOGGER.error("Task does not exist, taskId="+taskId);
+				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_TASK_NOT_EXIST,
+						"Task does not exist.");
+	    	}
+	    	
+	    	Post post = forumProvider.findPostById(task.getApplyEntityId());
+	    	
+	    	Map<String,Object> map = new HashMap<String, Object>();
+	    	
+	    	if(taskId == 1){
+	    		if(null != cmd.getUserId()){
+	    			if(cmd.getUserId() == user.getId() && cmd.getTaskStatus().equals(OrganizationTaskStatus.UNPROCESSED.getCode())){
+	    				cmd.setTaskStatus(OrganizationTaskStatus.PROCESSING.getCode());
+	    			}
+	    		}else if(!StringUtils.isEmpty(task.getTargetId()) && !task.getTargetId().equals(0)){
+	    			cmd.setUserId(task.getTargetId());
+	    		}else{
+	    			if(cmd.getTaskStatus().equals(OrganizationTaskStatus.UNPROCESSED.getCode()) || cmd.getTaskStatus().equals(OrganizationTaskStatus.PROCESSING.getCode())){
+	    				//异常
+	    				LOGGER.error("This task is not assigned to any personnel, targetId="+task.getTargetId());
+	    				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_TASK_NOT_ASSIGNED_PERSONNEL,
+	    						"This task is not assigned to any personnel.");
+			    	}
+	    			cmd.setUserId(0l);
+	    		}
+	    		
+	    		
+	    		task.setTargetId(cmd.getUserId());
+	    		task.setTargetType(OrganizationTaskTargetType.USER.getCode());
+	    		
+    			task.setTaskStatus(cmd.getTaskStatus());
+    			
+    			
+	    		task.setUnprocessedTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//	    		cmd.getPrivateFlag();
+//	    		cmd.getTaskCategory();
+//	    		task.set
+	    		task.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	    		task.setOperatorUid(user.getId());
+	    		
+	    		organizationProvider.updateOrganizationTask(task);
+	    		User target = userProvider.findUserById(cmd.getUserId());
+	    		map.put("operatorUName", user.getNickName());
+	    		map.put("operatorUToken", user.getIdentifierToken());
+	    		map.put("targetUName", null != target ? target.getNickName() : "");
+	    		User create = userProvider.findUserById(task.getCreatorUid());
+	    		map.put("createUName", null != create ? create.getNickName() : "");
+	    		
+	    		this.sendTaskMsg(map, task, user);
+	    		
+	    	}else if(taskId == 2){
+	    		if(user.getId().equals(task.getTargetId())){
+	    			if(cmd.getTaskStatus().equals(OrganizationTaskStatus.PROCESSED.getCode())){
+	    				task.setProcessedTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	    			}else if(cmd.getTaskStatus().equals(OrganizationTaskStatus.UNPROCESSED.getCode()) && null != cmd.getUserId()){
+	    				if(cmd.getUserId().equals(task.getTargetId())){
+	    					cmd.setTaskStatus(OrganizationTaskStatus.PROCESSING.getCode());
+	    				}else{
+	    					task.setUnprocessedTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		    				task.setTargetId(cmd.getUserId());
+		    	    		task.setTargetType(OrganizationTaskTargetType.USER.getCode());
+	    				}
+	    			}else{
+	    				//异常
+	    			}
+	    			
+	    			task.setTaskStatus(cmd.getTaskStatus());
+	    			task.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		    		task.setOperatorUid(user.getId());
+		    		
+		    		organizationProvider.updateOrganizationTask(task);
+		    		
+		    		User target = userProvider.findUserById(cmd.getUserId());
+		    		
+		    		map.put("operatorUName", user.getNickName());
+		    		map.put("operatorUToken", user.getIdentifierToken());
+		    		map.put("targetUName", null != target ? target.getNickName() : "");
+		    		map.put("createUName", user.getIdentifierToken());
+		    		
+	    		}else{
+    				//异常
+    			}
+	    		
+	    		if(null != post){
+	    			if(!post.getPrivateFlag().equals(cmd.getPrivateFlag())){
+	    				post.setPrivateFlag(cmd.getPrivateFlag());
+	    				post.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	    				post.setEmbeddedJson(StringHelper.toJsonString(task));
+	    				forumProvider.updatePost(post);
+	    			}
+	    		}
+	    		
+	    		this.sendTaskMsg(map, task, user);
+	    	}
+	    }
+	    
+	    
+	    @Override
+	    public void refuseTask(ProcessingTaskCommand cmd) {
+	    	// TODO Auto-generated method stub
+	    	
+	    	User user = UserContext.current().getUser();
+	    	Long taskId = cmd.getTaskId();
+	    	OrganizationTask task = organizationProvider.findOrganizationTaskById(taskId);
+	    	
+	    	if(task.getTaskStatus().equals(OrganizationTaskStatus.UNPROCESSED.getCode()) 
+	    			&&  (task.getTargetId().equals(user.getId())
+	    	    	|| ((StringUtils.isEmpty(task.getTargetId()) || task.getTargetId().equals(0))))){
+	    		task.setTaskStatus(OrganizationTaskStatus.UNPROCESSED.getCode());
+	    		task.setTargetId(0l);
+	    		task.setTargetType(null);
+	    		task.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	    		task.setOperatorUid(user.getId());
+	    		task.setUnprocessedTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	    		
+	    		organizationProvider.updateOrganizationTask(task);
+	    		
+	    		Map<String,Object> map = new HashMap<String, Object>();
+	    		map.put("targetUName", user.getNickName());
+	    		map.put("targetUToken", user.getIdentifierToken());
+	    		sendOrganizationNotificationToUser(null,localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_REFUSE, user.getLocale(), map, ""));
+	    	}else{
+	    		LOGGER.error("Tasks have been processed, status="+task.getTaskStatus() + ", targetId=" + task.getTargetId());
+				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_TASK_ALREADY_PROCESSED,
+						"Tasks have been processed.");
+	    	}
+	    }
+	    
+	    
+	    private void sendTaskMsg(Map<String,Object> map, OrganizationTask task, User user){
+	    	
+	    	NewCommentCommand command = new NewCommentCommand();
+    		command.setTopicId(task.getApplyEntityId());
+    		command.setContentType(PostContentType.TEXT.getCode());
+    		
+    		String contentMsg = "";
+    		String contentComment = "";
+    		if(task.getTaskStatus().equals(OrganizationTaskStatus.PROCESSED.getCode())){
+    			contentMsg = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_FINISH, user.getLocale(), map, "");
+    			contentComment = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_FINISH_COMMENT, user.getLocale(), map, "");
+    			sendOrganizationNotificationToUser(null,contentMsg);
+    		}else if(task.getTaskStatus().equals(OrganizationTaskStatus.UNPROCESSED.getCode()) || task.getTaskStatus().equals(OrganizationTaskStatus.PROCESSING.getCode())){
+    			contentMsg = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_PROCESSING_COMMENT, user.getLocale(), map, "");
+	    		contentComment = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_PROCESSING, user.getLocale(), map, "");
+	    		//发送短信
+    		}else{
+    			//关闭 不要发任何消息
+    			return;
+    		}
+    		command.setContent(contentComment);
+    		this.createComment(command);
+	    }
+	    
+	
 }

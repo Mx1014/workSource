@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * 	<li>sceneToken: 场景标识，用一个标识代替原来用多个字段共同表示的标识，以使传参数简单一些（只需要传一个参数）</li>
  *  <li>taskType : 任务类型 ，详情{@link com.everhomes.rest.organization.OrganizationTaskType}</li>
- *  <li>taskStatus : 任务状态 ，详情{@link com.everhomes.rest.organization.OrganizationTaskStatus}</li>
+ *  <li>taskStatus : 任务状态,查询全部就不要传参 ，详情{@link com.everhomes.rest.organization.OrganizationTaskStatus}</li>
  * 	<li>pageAnchor : 页码</li>
  *	<li>pageSize : 页大小</li>
  * </ul>
@@ -17,7 +17,7 @@ public class ListTaskPostsCommand {
 	
 	private String sceneToken;
 	
-	private String taskType;
+	private String taskType; 
 	
 	private Long taskStatus;
 	

@@ -11,5 +11,11 @@ public interface OrganizationServiceErrorCode {
     static final int ERROR_PHONE_ALREADY_APPLY = 100012;
     
     static final int ERROR_FILE_IS_EMPTY = 100100;
+    
+    static final int ERROR_ORG_TASK_NOT_EXIST = 100201; //任务不存在
+    
+    static final int ERROR_ORG_TASK_ALREADY_PROCESSED = 100201; //任务已经被处理
+    
+    static final int ERROR_ORG_TASK_NOT_ASSIGNED_PERSONNEL = 100201; //未分配人员，需要指定人员
    
 }

@@ -18,7 +18,7 @@ import com.everhomes.util.StringHelper;
  * <li>status：状态：参考{@link com.everhomes.rest.organization.OrganizationStatus}</li>
  * <li>memberStatus：成员状态：参考{@link com.everhomes.rest.organization.OrganizationMemberStatus}</li>
  * <li>description：组织描述</li>
- * 
+ * <li>childrens：子集参考{@link com.everhomes.rest.organization.OrganizationDTO}</li>
  * <li>communityId：i小区id</li>
  * <li>communityName：小区名称</li>
  * <li>

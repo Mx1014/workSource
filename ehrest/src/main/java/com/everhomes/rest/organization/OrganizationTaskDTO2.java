@@ -37,6 +37,7 @@ public class OrganizationTaskDTO2 {
 	private java.sql.Timestamp unprocessedTime;
 	private java.sql.Timestamp processingTime;
 	private java.sql.Timestamp processedTime;
+	private Long taskCategory;
 
 	//PostDTO
 	private Long id;
@@ -563,6 +564,16 @@ public class OrganizationTaskDTO2 {
 
 	public void setProcessedTime(java.sql.Timestamp processedTime) {
 		this.processedTime = processedTime;
+	}
+	
+	
+
+	public Long getTaskCategory() {
+		return taskCategory;
+	}
+
+	public void setTaskCategory(Long taskCategory) {
+		this.taskCategory = taskCategory;
 	}
 
 	@Override
