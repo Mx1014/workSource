@@ -53,6 +53,7 @@ import com.everhomes.rest.business.BusinessRecommendStatus;
 import com.everhomes.rest.business.BusinessScope;
 import com.everhomes.rest.business.BusinessServiceErrorCode;
 import com.everhomes.rest.business.BusinessTargetType;
+import com.everhomes.rest.business.BusinessVisibleCommand;
 import com.everhomes.rest.business.CancelFavoriteBusinessCommand;
 import com.everhomes.rest.business.DeleteBusinessCommand;
 import com.everhomes.rest.business.FavoriteBusinessCommand;
@@ -1561,6 +1562,16 @@ public class BusinessServiceImpl implements BusinessService {
 					"Invalid paramter identifier,identifier is null");
 		}
 		return userService.listUserInfoByIdentifier(cmd.getIdentifier());
+	}
+
+	@Override
+	public void addBusinessVisible(BusinessVisibleCommand cmd) {
+		
+	}
+
+	@Override
+	public void delBusinessVisible(BusinessVisibleCommand cmd) {
+		
 	}
 	
 }
