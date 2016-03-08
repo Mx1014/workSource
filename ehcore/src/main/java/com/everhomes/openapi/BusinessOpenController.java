@@ -418,7 +418,7 @@ public class BusinessOpenController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	@RequestMapping("addBusinessVisible")
+	@RequestMapping("addBizNamespaceVisible")
 	@RestReturn(String.class)
 	public RestResponse addBusinessVisible(@Valid BusinessVisibleCommand cmd) {
 		businessService.addBusinessVisible(cmd);
@@ -427,7 +427,7 @@ public class BusinessOpenController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	@RequestMapping("delBusinessVisible")
+	@RequestMapping("delBizNamespaceVisible")
 	@RestReturn(String.class)
 	public RestResponse delBusinessVisible(@Valid BusinessVisibleCommand cmd) {
 		businessService.delBusinessVisible(cmd);
