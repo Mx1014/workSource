@@ -66,6 +66,7 @@ public class AclinkUndoKeyProviderImpl implements AclinkUndoKeyProvider {
 
     @Override
     public AclinkUndoKey getAclinkUndoKeyById(Long id) {
+        try {
         AclinkUndoKey[] result = new AclinkUndoKey[1];
 
         dbProvider.mapReduce(AccessSpec.readOnlyWith(EhDoorAccess.class), null,
@@ -84,6 +85,10 @@ public class AclinkUndoKeyProviderImpl implements AclinkUndoKeyProvider {
             });
 
         return result[0];
+    } catch (Exception ex) {
+        //TODO fetchAny() maybe return null
+        return null;
+    }
     }
 
     @Override

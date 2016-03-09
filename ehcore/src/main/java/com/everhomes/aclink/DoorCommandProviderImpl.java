@@ -68,24 +68,30 @@ public class DoorCommandProviderImpl implements DoorCommandProvider {
 
     @Override
     public DoorCommand getDoorCommandById(Long id) {
-        DoorCommand[] result = new DoorCommand[1];
+        try {
+            DoorCommand[] result = new DoorCommand[1];
 
-        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhDoorAccess.class), null,
-            (DSLContext context, Object reducingContext) -> {
-                result[0] = context.select().from(Tables.EH_DOOR_COMMAND)
-                    .where(Tables.EH_DOOR_COMMAND.ID.eq(id))
-                    .fetchAny().map((r) -> {
-                        return ConvertHelper.convert(r, DoorCommand.class);
-                    });
+            dbProvider.mapReduce(AccessSpec.readOnlyWith(EhDoorAccess.class), null,
+                (DSLContext context, Object reducingContext) -> {
+                    result[0] = context.select().from(Tables.EH_DOOR_COMMAND)
+                        .where(Tables.EH_DOOR_COMMAND.ID.eq(id))
+                        .fetchAny().map((r) -> {
+                            return ConvertHelper.convert(r, DoorCommand.class);
+                        });
 
-                if (result[0] != null) {
-                    return false;
-                } else {
-                    return true;
-                }
-            });
+                    if (result[0] != null) {
+                        return false;
+                    } else {
+                        return true;
+                    }
+                });
 
-        return result[0];
+            return result[0];            
+        } catch (Exception ex) {
+            //TODO fetchAny() maybe return null
+            return null;
+        }
+
     }
 
     @Override

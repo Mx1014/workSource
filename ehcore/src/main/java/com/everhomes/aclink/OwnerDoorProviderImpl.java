@@ -67,6 +67,7 @@ public class OwnerDoorProviderImpl implements OwnerDoorProvider {
 
     @Override
     public OwnerDoor getOwnerDoorById(Long id) {
+        try {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhOwnerDoors.class));
 
         return context.select().from(Tables.EH_OWNER_DOORS)
@@ -74,6 +75,10 @@ public class OwnerDoorProviderImpl implements OwnerDoorProvider {
             .fetchAny().map((r) -> {
                 return ConvertHelper.convert(r, OwnerDoor.class);
             });
+        } catch (Exception ex) {
+            //TODO fetchAny() maybe return null
+            return null;
+        }
     }
 
     @Override

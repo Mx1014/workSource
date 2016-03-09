@@ -75,6 +75,7 @@ public class AesServerKeyProviderImpl implements AesServerKeyProvider {
 
     @Override
     public AesServerKey getAesServerKeyById(Long id) {
+        try {
         AesServerKey[] result = new AesServerKey[1];
 
         dbProvider.mapReduce(AccessSpec.readOnlyWith(EhDoorAccess.class), null,
@@ -93,6 +94,10 @@ public class AesServerKeyProviderImpl implements AesServerKeyProvider {
             });
 
         return result[0];
+    } catch (Exception ex) {
+        //TODO fetchAny() maybe return null
+        return null;
+    }
     }
 
     @Override

@@ -421,6 +421,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     //urgent 为 true, 则拿最紧急的消息列表。更新到设备之后再尝试开门或其它事情。
     @Override
     public QueryDoorMessageResponse queryDoorMessageByDoorId(QueryDoorMessageCommand cmd) {
+doorCommandProvider.getDoorCommandById(0l);
         DoorAccess doorAccess = doorAccessProvider.queryDoorAccessByHardwareId(cmd.getHardwareId());
         if(doorAccess == null) {
             //TODO error code
@@ -441,6 +442,10 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         }
         
         for (DoorMessage resp : inputs) {
+            if(resp.getSeq() <= 0) {
+                continue;
+                }
+            
             aclinkMessageSequence.ackMessage(resp.getSeq());
             DoorCommand doorCommand = doorCommandProvider.getDoorCommandById(resp.getSeq());
             doorCommand.setStatus(DoorCommandStatus.RESPONSE.getCode());

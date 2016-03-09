@@ -71,6 +71,7 @@ public class AesUserKeyProviderImpl implements AesUserKeyProvider {
 
     @Override
     public AesUserKey getAesUserKeyById(Long id) {
+        try {
         AesUserKey[] result = new AesUserKey[1];
 
         dbProvider.mapReduce(AccessSpec.readOnlyWith(EhDoorAccess.class), null,
@@ -89,6 +90,10 @@ public class AesUserKeyProviderImpl implements AesUserKeyProvider {
             });
 
         return result[0];
+        } catch (Exception ex) {
+            //TODO fetchAny() maybe return null
+            return null;
+        }
     }
 
     @Override

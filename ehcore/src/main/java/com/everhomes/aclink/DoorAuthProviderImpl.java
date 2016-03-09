@@ -65,6 +65,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
 
     @Override
     public DoorAuth getDoorAuthById(Long id) {
+        try {
         DoorAuth[] result = new DoorAuth[1];
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhDoorAuth.class));
         
@@ -75,6 +76,10 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
             });
 
         return result[0];
+        } catch (Exception ex) {
+            //TODO fetchAny() maybe return null
+            return null;
+        }
     }
 
     @Override
