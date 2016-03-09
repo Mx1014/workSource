@@ -23,6 +23,8 @@ public class DoorAuthDTO {
     private String   nickname;
     private String   phone;
     private String approveUserName;
+    private String   organization;
+    private String   description;
 
 
     public Byte getStatus() {
@@ -184,6 +186,28 @@ public class DoorAuthDTO {
 
     public void setApproveUserName(String approveUserName) {
         this.approveUserName = approveUserName;
+    }
+    
+    
+
+
+    public String getOrganization() {
+        return organization;
+    }
+
+
+    public void setOrganization(String organization) {
+        this.organization = organization;
+    }
+
+
+    public String getDescription() {
+        return description;
+    }
+
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
 

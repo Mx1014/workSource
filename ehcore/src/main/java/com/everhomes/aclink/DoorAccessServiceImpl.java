@@ -172,6 +172,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                             or(Tables.EH_DOOR_ACCESS.HARDWARE_ID.like(cmd.getSearch() + "%"));
                     query.addConditions(c);
                 }
+                
+                query.addConditions(Tables.EH_DOOR_ACCESS.STATUS.ne(DoorAccessStatus.INVALID.getCode()));
 //                if(cmd.getLinkStatus() != null) {
 //                    
 //                }
@@ -419,9 +421,15 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     //urgent 为 true, 则拿最紧急的消息列表。更新到设备之后再尝试开门或其它事情。
     @Override
     public QueryDoorMessageResponse queryDoorMessageByDoorId(QueryDoorMessageCommand cmd) {
+        DoorAccess doorAccess = doorAccessProvider.queryDoorAccessByHardwareId(cmd.getHardwareId());
+        if(doorAccess == null) {
+            //TODO error code
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "DoorAccess not found");
+        }
+        
         processIncomeMessageResp(cmd.getInputs());
         QueryDoorMessageResponse resp = new QueryDoorMessageResponse();
-        DoorAccess doorAccess = doorAccessProvider.queryDoorAccessByHardwareId(cmd.getHardwareId());
         resp.setDoorId(doorAccess.getId());
         resp.setOutputs(generateMessages(doorAccess.getId()));
         return resp;
