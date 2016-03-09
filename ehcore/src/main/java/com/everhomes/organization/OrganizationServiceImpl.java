@@ -381,16 +381,13 @@ import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.rest.visibility.VisibleRegionType;
-import com.everhomes.search.EnterpriseSearcher;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.EhUserActivities;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.EncryptionUtils;
-import com.everhomes.user.TargetType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
@@ -2111,6 +2108,42 @@ public class OrganizationServiceImpl implements OrganizationService {
 		return template;
 	}
 
+	@Override
+	public ListPostCommandResponse listTaskTopicsByType(ListTopicsByTypeCommand cmd){
+		User user = UserContext.current().getUser();
+		Long commuId = cmd.getCommunityId();
+		
+		if(null == cmd.getCommunityId()){
+			commuId = user.getCommunityId();
+		}
+		
+		/* 根据用户不同 查询不同的任务类型贴*/
+		if(commuId == 1){
+			cmd.setTaskType("");
+		}
+		
+		Community community = communityProvider.findCommunityById(commuId);
+		Organization organization = this.checkOrganization(cmd.getOrganizationId());
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageOffset());
+		List<OrganizationTask> orgTasks = organizationProvider.listOrganizationTasksByTypeOrStatus(locator, organization.getId(),null, cmd.getTaskType(), cmd.getTaskStatus(), pageSize);
+		List<PostDTO> dtos = new ArrayList<PostDTO>();
+		for (OrganizationTask task : orgTasks) {
+			PostDTO dto = this.forumService.getTopicById(task.getApplyEntityId(),commuId,false);
+			if(dto.getForumId().equals(community.getDefaultForumId())){
+				dtos.add(dto);
+			}
+		}
+		
+		ListPostCommandResponse res = new ListPostCommandResponse();
+		res.setNextPageAnchor(locator.getAnchor());
+		res.setPosts(dtos);
+		
+		return res;
+	}
+	
+	
 	@Override
 	public ListTopicsByTypeCommandResponse listTopicsByType(ListTopicsByTypeCommand cmd) {
 		User user = UserContext.current().getUser();
@@ -5224,6 +5257,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	
 	    	Map<String,Object> map = new HashMap<String, Object>();
 	    	
+	    	//当可以查询全部的任务类型时
 	    	if(taskId == 1){
 	    		if(null != cmd.getUserId()){
 	    			if(cmd.getUserId() == user.getId() && cmd.getTaskStatus().equals(OrganizationTaskStatus.UNPROCESSED.getCode())){
@@ -5249,9 +5283,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     			
     			
 	    		task.setUnprocessedTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-//	    		cmd.getPrivateFlag();
-//	    		cmd.getTaskCategory();
-//	    		task.set
+	    		task.setTaskCategory(cmd.getTaskCategory());
 	    		task.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 	    		task.setOperatorUid(user.getId());
 	    		
@@ -5265,6 +5297,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    		
 	    		this.sendTaskMsg(map, task, user);
 	    		
+	    	//当智能处理部分类型时
 	    	}else if(taskId == 2){
 	    		if(user.getId().equals(task.getTargetId())){
 	    			if(cmd.getTaskStatus().equals(OrganizationTaskStatus.PROCESSED.getCode())){
@@ -5279,6 +5312,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    				}
 	    			}else{
 	    				//异常
+	    				LOGGER.error("Cannot perform this operation on a task, status="+cmd.getTaskStatus());
+	    				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_TASK_CANNOT_OPERATE,
+	    						"Cannot perform this operation on a task.");
 	    			}
 	    			
 	    			task.setTaskStatus(cmd.getTaskStatus());
@@ -5296,15 +5332,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 		    		
 	    		}else{
     				//异常
+	    			LOGGER.error("Tasks have been processed, status="+task.getTaskStatus() + ", targetId=" + task.getTargetId());
+					throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_TASK_ALREADY_PROCESSED,
+							"Tasks have been processed.");
     			}
 	    		
 	    		if(null != post){
-	    			if(!post.getPrivateFlag().equals(cmd.getPrivateFlag())){
-	    				post.setPrivateFlag(cmd.getPrivateFlag());
-	    				post.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-	    				post.setEmbeddedJson(StringHelper.toJsonString(task));
-	    				forumProvider.updatePost(post);
-	    			}
+	    			post.setPrivateFlag(cmd.getPrivateFlag());
+    				post.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+    				post.setEmbeddedJson(StringHelper.toJsonString(task));
+    				forumProvider.updatePost(post);
 	    		}
 	    		
 	    		this.sendTaskMsg(map, task, user);

@@ -13,15 +13,12 @@ public class ListContactBySceneRespose {
     @ItemType(SceneContactDTO.class)
     private List<SceneContactDTO> contacts;
 
-    private Long nextPageAnchor;
-
     public ListContactBySceneRespose() {
     }
 
     public ListContactBySceneRespose(List<SceneContactDTO> contacts, Long nextPageAnchor) {
         super();
         this.contacts = contacts;
-        this.nextPageAnchor = nextPageAnchor;
     }
 
     public List<SceneContactDTO> getContacts() {
@@ -32,11 +29,4 @@ public class ListContactBySceneRespose {
         this.contacts = contacts;
     }
 
-	public Long getNextPageAnchor() {
-		return nextPageAnchor;
-	}
-
-	public void setNextPageAnchor(Long nextPageAnchor) {
-		this.nextPageAnchor = nextPageAnchor;
-	}
 }

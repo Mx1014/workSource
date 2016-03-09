@@ -20,7 +20,7 @@ public class ProcessingTaskCommand {
 	
 	private Byte taskStatus;
 	
-	private Byte taskCategory;
+	private String taskCategory;
 	
 	private Byte privateFlag;
 
@@ -48,11 +48,11 @@ public class ProcessingTaskCommand {
 		this.taskStatus = taskStatus;
 	}
 
-	public Byte getTaskCategory() {
+	public String getTaskCategory() {
 		return taskCategory;
 	}
 
-	public void setTaskCategory(Byte taskCategory) {
+	public void setTaskCategory(String taskCategory) {
 		this.taskCategory = taskCategory;
 	}
 

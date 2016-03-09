@@ -998,6 +998,44 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 		return list;
 	}
+	
+	@Override
+	public List<OrganizationTask> listOrganizationTasksByTypeOrStatus(CrossShardListingLocator locator,Long organizationId,Long targetId, String taskType, Byte taskStatus, int pageSize) {
+		List<OrganizationTask> list = new ArrayList<OrganizationTask>();
+		Condition condition = Tables.EH_ORGANIZATION_TASKS.ORGANIZATION_ID.eq(organizationId);
+		if(!StringUtils.isEmpty(taskType))
+			condition = condition.and(Tables.EH_ORGANIZATION_TASKS.TASK_TYPE.eq(taskType));
+		if(taskStatus != null)
+			condition = condition.and(Tables.EH_ORGANIZATION_TASKS.TASK_STATUS.eq(taskStatus));
+
+		if(null != targetId){
+			condition = condition.and(Tables.EH_ORGANIZATION_TASKS.TARGET_ID.eq(targetId));
+		}
+		
+		if(null != locator.getAnchor()){
+			condition = condition.and(Tables.EH_ORGANIZATION_TASKS.CREATE_TIME.lt(new Timestamp(locator.getAnchor())));
+		}
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_TASKS)
+				.where(condition)
+				.orderBy(Tables.EH_ORGANIZATION_TASKS.CREATE_TIME.desc())
+				.limit(pageSize + 1)
+				.fetch();
+		if(records != null && !records.isEmpty()){
+			for(Record r : records){
+				list.add(ConvertHelper.convert(r, OrganizationTask.class));
+			}
+		}
+		
+		locator.setAnchor(null);
+		if(list.size() > pageSize){
+			list.remove(list.size() - 1);
+			locator.setAnchor(list.get(list.size() - 1).getCreateTime().getTime());
+		}
+		
+		return list;
+	}
 
 	@Override
 	public OrganizationMember findOrganizationMemberByOrgIdAndUId(Long userId,
@@ -1268,7 +1306,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 		return list;
 	}
-
+	
 
 	@Override
 	public List<Organization> listDepartments(String superiorPath,
