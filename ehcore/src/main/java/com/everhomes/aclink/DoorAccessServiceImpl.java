@@ -396,15 +396,15 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     DoorCommand cmd = new DoorCommand();
                     cmd.setUserId(doorAuth.getUserId());
                     cmd.setDoorId(doorAuth.getDoorId());
-                    cmd.setOwnerId(cmd.getOwnerId());
-                    cmd.setOwnerType(cmd.getOwnerType());
+                    cmd.setOwnerId(doorAuth.getOwnerId());
+                    cmd.setOwnerType(doorAuth.getOwnerType());
                     cmd.setCmdId(AclinkCommandType.ADD_UNDO_LIST.getCode());
                     cmd.setCmdType((byte)0);
                     cmd.setServerKeyVer(aesServerKey.getSecretVer());
                     cmd.setAclinkKeyVer(aesServerKey.getDeviceVer());
                     cmd.setStatus(DoorCommandStatus.CREATING.getCode());
                     cmd.setCmdBody(AclinkUtils.packAddUndoList(aesServerKey.getDeviceVer(), aesServerKey.getSecret()
-                            , (int)(aesUserKey1.getCreateTimeMs().longValue()/1000), aesUserKey1.getKeyId().shortValue()));
+                            , (int)(aesUserKey1.getExpireTimeMs().longValue()/1000), aesUserKey1.getKeyId().shortValue()));
                     doorCommandProvider.createDoorCommand(cmd);
                     
                     return cmd;

@@ -2,6 +2,9 @@ package com.everhomes.aclink;
 
 import java.util.Random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class CmdUtil {
     public final static int CMD_ACTIVE = 0x01;
 
@@ -9,6 +12,9 @@ public class CmdUtil {
     private final static int SINGLE_PACKAGE_DATA_LENGTH = 18;
     private final static int MULTI_PACKAGE_HEAD_DATA_LENGTH = 16;
     private final static int MULTI_PACKAGE_OTHER_DATA_LENGTH = 19;
+    private final static int EXPIRE_TIME = 3600;
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(CmdUtil.class);
 
     /**
      * 获取激活指令
@@ -112,7 +118,7 @@ public class CmdUtil {
 
     public static byte[] updateDevName(byte[] curServerKey, byte ver, String newDevName) {
         byte cmd = 0x4;
-        int expireTime = (int) Math.ceil((System.currentTimeMillis() / 1000)) + 60;
+        int expireTime = (int) Math.ceil((System.currentTimeMillis() / 1000)) + EXPIRE_TIME;
         byte[] timeBytes = DataUtil.intToByteArray(expireTime);
         byte[] newNameBytes = DataUtil.getByte(newDevName);
         byte[] dataArr = new byte[timeBytes.length + newNameBytes.length];
@@ -134,7 +140,7 @@ public class CmdUtil {
     public static byte[] updateTime(byte[] curServerKey, byte ver) {
         byte cmd = 0x5;
         int curTime = (int) Math.ceil((System.currentTimeMillis() / 1000));
-        int expireTime = curTime + 60;
+        int expireTime = curTime + EXPIRE_TIME;
         byte[] extTimeBytes = DataUtil.intToByteArray(expireTime);
         byte[] curTimeBytes = DataUtil.intToByteArray(curTime);
         byte[] dataArr = new byte[extTimeBytes.length + curTimeBytes.length];
@@ -154,12 +160,15 @@ public class CmdUtil {
     }
 
     public static byte[] addUndoListCmd(byte[] curServerKey, byte ver, int availableTime, short id) {
+        
+        //id = 0xa;
+        
         byte cmd = 0x6;
-        int curTime = (int) Math.ceil((System.currentTimeMillis() / 1000));
-        int expireTime = curTime + 60;
+        int expireTime = (int) Math.ceil((System.currentTimeMillis() / 1000)) + EXPIRE_TIME;
         byte[] extTimeBytes = DataUtil.intToByteArray(expireTime);
         byte[] availableTimeBytes = DataUtil.intToByteArray(availableTime);
         byte[] keyId = DataUtil.shortToByteArray(id);
+        //byte[] keyId = {0xa, 0xa};
         byte[] dataArr = new byte[extTimeBytes.length + keyId.length + availableTimeBytes.length];
 
         System.arraycopy(extTimeBytes, 0, dataArr, 0, extTimeBytes.length);
@@ -167,6 +176,8 @@ public class CmdUtil {
         System.arraycopy(availableTimeBytes, 0, dataArr, extTimeBytes.length + keyId.length, availableTimeBytes.length);
         dataArr = addPaddingTo16Bytes(dataArr);
 
+        printArray(dataArr);
+        
         try {
             byte[] aeskeyEncryptResult = AESUtil.encrypt(dataArr, curServerKey);
             byte[] resultArr = new byte[2 + aeskeyEncryptResult.length];
@@ -261,5 +272,17 @@ public class CmdUtil {
             resultArr[source.length + j] = padding[j];
         }
         return resultArr;
+    }
+    
+    public static void printArray(byte[] arr) {
+
+        StringBuffer sb = new StringBuffer();
+        if (null != arr) {
+            for (int i = 0; i < arr.length; i++) {
+                sb.append(Integer.toHexString((arr[i] & 0xFF)) + "  ");
+            }
+        }
+        String sbStr = sb.toString(); 
+        LOGGER.info(sbStr);
     }
 }
