@@ -5,6 +5,7 @@ package com.everhomes.rest.user;
  * <ul>用户当前切换的实体
  * <li>COMMUNITY_RESIDENTIAL(community_residential): 住宅类型小区</li>
  * <li>COMMUNITY_COMMERCIAL(community_commercial): 商用类型园区</li>
+ * <li>COMMUNITY(community_commercial): 小区/园区，在使用场景之后合起来客户端操作更方便</li>
  * <li>FAMILY(family): 家庭</li>
  * <li>ORGANIZATION(organization): 机构</li>
  * <li>ENTERPRISE(enterprise): 企业</li>
@@ -13,6 +14,7 @@ package com.everhomes.rest.user;
 public enum UserCurrentEntityType {
     COMMUNITY_RESIDENTIAL("community_residential"), 
     COMMUNITY_COMMERCIAL("community_commercial"), 
+    COMMUNITY("community"), 
     FAMILY("family"), 
     ORGANIZATION("organization"),
     ENTERPRISE("enterprise");
