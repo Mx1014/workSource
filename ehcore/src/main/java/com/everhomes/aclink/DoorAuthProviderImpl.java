@@ -6,6 +6,7 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.Condition;
@@ -95,6 +96,8 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
     }
 
     private void prepareObj(DoorAuth obj) {
+        Long l2 = DateHelper.currentGMTTime().getTime();
+        obj.setCreateTime(new Timestamp(l2));
     }
     
     //Find by userId

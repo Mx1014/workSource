@@ -502,7 +502,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 //TODO set active as default
                 aclink.setStatus(DoorAccessStatus.ACTIVE.getCode());
                 aclink.setDoorId(doorAcc.getId());
-                aclink.setDeviceName("ZLACLINK-TODO");
+                aclink.setDeviceName("ZLTODO");
                 aclinkProvider.createAclink(aclink);
                 
                 AesServerKey aesServerKey = new AesServerKey();
@@ -538,7 +538,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         //Generate a single message
         AesServerKey aesServerKey = aesServerKeyService.getCurrentAesServerKey(doorAccess.getId());
-        String message = AclinkUtils.packInitServerKey(cmd.getRsaAclinkPub(), aesServerKey.getSecret(), doorAccess.getAesIv(), "ZLACLINK-TODO",
+        String message = AclinkUtils.packInitServerKey(cmd.getRsaAclinkPub(), aesServerKey.getSecret(), doorAccess.getAesIv(), "ZLTODO",
                 doorAccess.getCreateTime().getTime(), doorAccess.getUuid());
         
         DoorMessage doorMessage = new DoorMessage();
@@ -624,7 +624,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     doorCommand.setStatus(DoorCommandStatus.CREATING.getCode());
                     
                     //Generate a message body for command
-                    doorCommand.setCmdBody(AclinkUtils.packUpdateDeviceName(aesServerKey.getDeviceVer(), aesServerKey.getSecret(), doorAccess.getAesIv(), doorAccess.getName()));
+                    doorCommand.setCmdBody(AclinkUtils.packUpdateDeviceName(aesServerKey.getDeviceVer(), aesServerKey.getSecret()
+                            , doorAccess.getAesIv(), doorAccess.getName().substring(0, 6)));
                     
                     doorCommandProvider.createDoorCommand(doorCommand);
                     return doorCommand;
