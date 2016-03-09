@@ -158,4 +158,11 @@ public class EhOrganizationTasksDao extends org.jooq.impl.DAOImpl<com.everhomes.
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationTasks> fetchByCreateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhOrganizationTasks.EH_ORGANIZATION_TASKS.CREATE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>task_category IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationTasks> fetchByTaskCategory(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationTasks.EH_ORGANIZATION_TASKS.TASK_CATEGORY, values);
+	}
 }
