@@ -145,3 +145,25 @@ CREATE TABLE `eh_quality_inspection_task_attachments` (
   
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_quality_inspection_categories`;
+CREATE TABLE `eh_quality_inspection_categories`(
+    `id` BIGINT NOT NULL,
+	`owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the category, enterprise, etc',
+	`owner_id` BIGINT NOT NULL DEFAULT 0,
+    `parent_id` BIGINT NOT NULL DEFAULT 0,
+    `name` VARCHAR(64) NOT NULL,
+    `path` VARCHAR(128),
+    `default_order` INTEGER,
+    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: disabled, 1: waiting for confirmation, 2: active',
+	`creator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'record creator user id',
+    `create_time` DATETIME,
+    
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+ 
+
+
+
+
+
