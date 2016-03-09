@@ -138,7 +138,7 @@ public class AclinkAdminController extends ControllerBase {
     @RequestMapping("deleteDoorAccess")
     @RestReturn(value=String.class)
     public RestResponse deleteDoorAccess(@Valid AclinkDeleteByIdCommand cmd) {
-        doorAccessService.deleteDoorAccess(cmd.getObjId());
+        doorAccessService.deleteDoorAccess(cmd.getId());
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -154,7 +154,7 @@ public class AclinkAdminController extends ControllerBase {
     @RequestMapping("deleteDoorAuth")
     @RestReturn(value=String.class)
     public RestResponse deleteDoorAuth(@Valid AclinkDeleteByIdCommand cmd) {
-        doorAccessService.deleteDoorAuth(cmd.getObjId());
+        doorAccessService.deleteDoorAuth(cmd.getId());
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
