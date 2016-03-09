@@ -27,7 +27,7 @@ DROP TABLE IF EXISTS `eh_op_promotion_policies`;
 CREATE TABLE `eh_op_promotion_policies`(
     `id` BIGINT NOT NULL,
     `namespace_id` INTEGER NOT NULL DEFAULT 0,
-    `name` VARCHAR(512) NOT NULL DEFAULT '' COMMENT 'the title of the activity',
+    `name` VARCHAR(512) NOT NULL DEFAULT '' COMMENT 'the identifer of the policy',
 	`class_name` VARCHAR(512) DEFAULT '' COMMENT 'the name of class which implement how to execute the policy',
 	`description` TEXT,
     `create_time` DATETIME,
@@ -61,8 +61,6 @@ CREATE TABLE `eh_op_promotion_settings`(
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-    `apply_policy` TINYINT NOT NULL DEFAULT 0 COMMENT '0: default, 1: override, 2: revert',
-    `apply_policy` TINYINT NOT NULL DEFAULT 0 COMMENT '0: default, 1: override, 2: revert',
 #
 # member of global parition
 # shared among namespaces, no application module specific information
