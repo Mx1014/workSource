@@ -45,15 +45,16 @@ import com.everhomes.launchpad.LaunchPadProvider;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.address.AddressType;
+import com.everhomes.rest.business.BusinessAssignedNamespaceVisibleFlagType;
 import com.everhomes.rest.business.BusinessAssignedScopeDTO;
 import com.everhomes.rest.business.BusinessCommand;
 import com.everhomes.rest.business.BusinessDTO;
 import com.everhomes.rest.business.BusinessFavoriteStatus;
+import com.everhomes.rest.business.BusinessNamespaceVisibleCommand;
 import com.everhomes.rest.business.BusinessRecommendStatus;
 import com.everhomes.rest.business.BusinessScope;
 import com.everhomes.rest.business.BusinessServiceErrorCode;
 import com.everhomes.rest.business.BusinessTargetType;
-import com.everhomes.rest.business.BusinessVisibleCommand;
 import com.everhomes.rest.business.CancelFavoriteBusinessCommand;
 import com.everhomes.rest.business.DeleteBusinessCommand;
 import com.everhomes.rest.business.FavoriteBusinessCommand;
@@ -64,9 +65,9 @@ import com.everhomes.rest.business.FindBusinessByIdCommand;
 import com.everhomes.rest.business.GetBusinessesByCategoryCommand;
 import com.everhomes.rest.business.GetBusinessesByCategoryCommandResponse;
 import com.everhomes.rest.business.GetBusinessesByScopeCommand;
+import com.everhomes.rest.business.ListBusinessByCommonityIdCommand;
 import com.everhomes.rest.business.ListBusinessByKeywordCommand;
 import com.everhomes.rest.business.ListBusinessByKeywordCommandResponse;
-import com.everhomes.rest.business.ListBusinessByCommonityIdCommand;
 import com.everhomes.rest.business.ListUserByIdentifierCommand;
 import com.everhomes.rest.business.ListUserByKeywordCommand;
 import com.everhomes.rest.business.SyncBusinessCommand;
@@ -1565,13 +1566,57 @@ public class BusinessServiceImpl implements BusinessService {
 	}
 
 	@Override
-	public void addBusinessVisible(BusinessVisibleCommand cmd) {
-		
+	public void openBizNamespaceVisible(BusinessNamespaceVisibleCommand cmd) {
+		if(cmd.getNamespaceId()==null||StringUtils.isBlank(cmd.getTargetId())){
+			LOGGER.error("namespaceId or targetId is null.namespaceId="+cmd.getNamespaceId()+",targetId="+cmd.getTargetId());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"namespaceId or targetId is null.");
+		}
+		Business business = businessProvider.findBusinessByTargetId(cmd.getTargetId());
+		if(business==null){
+			LOGGER.error("business not found.targetId="+cmd.getTargetId());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"business not found.");
+		}
+		BusinessAssignedNamespace bizNamespace = businessProvider.findBusinessAssignedNamespaceByOwnerId(business.getId(),cmd.getNamespaceId());
+		if(bizNamespace!=null){
+			bizNamespace.setVisibleFlag(BusinessAssignedNamespaceVisibleFlagType.VISIBLE.getCode());
+			businessProvider.updateBusinessAssignedNamespace(bizNamespace);
+		}else{
+			bizNamespace = new BusinessAssignedNamespace();
+			bizNamespace.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			bizNamespace.setNamespaceId(cmd.getNamespaceId());
+			bizNamespace.setOwnerId(business.getId());
+			bizNamespace.setVisibleFlag(BusinessAssignedNamespaceVisibleFlagType.VISIBLE.getCode());
+			businessProvider.addBusinessAssignedNamespace(bizNamespace);
+		}
 	}
 
 	@Override
-	public void delBusinessVisible(BusinessVisibleCommand cmd) {
-		
+	public void closeBizNamespaceVisible(BusinessNamespaceVisibleCommand cmd) {
+		if(cmd.getNamespaceId()==null||StringUtils.isBlank(cmd.getTargetId())){
+			LOGGER.error("namespaceId or targetId is null.namespaceId="+cmd.getNamespaceId()+",targetId="+cmd.getTargetId());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"namespaceId or targetId is null.");
+		}
+		Business business = businessProvider.findBusinessByTargetId(cmd.getTargetId());
+		if(business==null){
+			LOGGER.error("business not found.targetId="+cmd.getTargetId());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"business not found.");
+		}
+		BusinessAssignedNamespace bizNamespace = businessProvider.findBusinessAssignedNamespaceByOwnerId(business.getId(),cmd.getNamespaceId());
+		if(bizNamespace!=null){
+			bizNamespace.setVisibleFlag(BusinessAssignedNamespaceVisibleFlagType.HIDE.getCode());
+			businessProvider.updateBusinessAssignedNamespace(bizNamespace);
+		}else{
+			bizNamespace = new BusinessAssignedNamespace();
+			bizNamespace.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			bizNamespace.setNamespaceId(cmd.getNamespaceId());
+			bizNamespace.setOwnerId(business.getId());
+			bizNamespace.setVisibleFlag(BusinessAssignedNamespaceVisibleFlagType.HIDE.getCode());
+			businessProvider.addBusinessAssignedNamespace(bizNamespace);
+		}
 	}
 	
 }

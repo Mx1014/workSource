@@ -25,7 +25,9 @@ import com.everhomes.rest.business.BusinessTargetType;
 import com.everhomes.rest.common.ScopeType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhBusinessAssignedNamespaces;
 import com.everhomes.server.schema.tables.EhBusinessVisibleScopes;
+import com.everhomes.server.schema.tables.daos.EhBusinessAssignedNamespacesDao;
 import com.everhomes.server.schema.tables.daos.EhBusinessAssignedScopesDao;
 import com.everhomes.server.schema.tables.daos.EhBusinessCategoriesDao;
 import com.everhomes.server.schema.tables.daos.EhBusinessVisibleScopesDao;
@@ -481,5 +483,40 @@ public class BusinessProviderImpl implements BusinessProvider {
 		return context.select().from(Tables.EH_BUSINESSES).where(Tables.EH_BUSINESSES.ID.in(ids))
 				.fetch().stream().map(r->ConvertHelper.convert(r, Business.class))
 				.collect(Collectors.toList());
+	}
+	@Override
+	public BusinessAssignedNamespace findBusinessAssignedNamespaceByOwnerId(Long ownerId, Integer namespaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBusinessAssignedNamespaces.class));
+		List<BusinessAssignedNamespace> list = context.select().from(Tables.EH_BUSINESS_ASSIGNED_NAMESPACES)
+				.where(Tables.EH_BUSINESS_ASSIGNED_NAMESPACES.OWNER_ID.eq(ownerId).and(Tables.EH_BUSINESS_ASSIGNED_NAMESPACES.NAMESPACE_ID.eq(namespaceId)))
+				.fetch().map(r->{return ConvertHelper.convert(r, BusinessAssignedNamespace.class);});
+		if(list==null||list.isEmpty())
+			return null;
+		return list.get(0);
+	}
+	@Override
+	public void updateBusinessAssignedNamespace(BusinessAssignedNamespace businessAssignedNamespace) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhBusinessAssignedNamespacesDao dao = new EhBusinessAssignedNamespacesDao(context.configuration()); 
+        dao.update(businessAssignedNamespace);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhBusinessAssignedNamespaces.class, null);
+	}
+	
+	@Override
+	public void addBusinessAssignedNamespace(BusinessAssignedNamespace businessAssignedNamespace) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhBusinessAssignedNamespacesDao dao = new EhBusinessAssignedNamespacesDao(context.configuration()); 
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhBusinessAssignedNamespaces.class));
+        businessAssignedNamespace.setId(id);
+        dao.insert(businessAssignedNamespace);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhBusinessAssignedNamespaces.class, null);
+		
+	}
+	@Override
+	public void delBusinessAssignedNamespace(BusinessAssignedNamespace businessAssignedNamespace) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhBusinessAssignedNamespacesDao dao = new EhBusinessAssignedNamespacesDao(context.configuration()); 
+        dao.delete(businessAssignedNamespace);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhBusinessAssignedNamespaces.class, null);
 	}
 }
