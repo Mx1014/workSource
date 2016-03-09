@@ -569,6 +569,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhQrcodes EH_QRCODES = com.everhomes.server.schema.tables.EhQrcodes.EH_QRCODES;
 
 	/**
+	 * The table ehcore.eh_quality_inspection_categories
+	 */
+	public static final com.everhomes.server.schema.tables.EhQualityInspectionCategories EH_QUALITY_INSPECTION_CATEGORIES = com.everhomes.server.schema.tables.EhQualityInspectionCategories.EH_QUALITY_INSPECTION_CATEGORIES;
+
+	/**
 	 * The table ehcore.eh_quality_inspection_evaluations
 	 */
 	public static final com.everhomes.server.schema.tables.EhQualityInspectionEvaluations EH_QUALITY_INSPECTION_EVALUATIONS = com.everhomes.server.schema.tables.EhQualityInspectionEvaluations.EH_QUALITY_INSPECTION_EVALUATIONS;
