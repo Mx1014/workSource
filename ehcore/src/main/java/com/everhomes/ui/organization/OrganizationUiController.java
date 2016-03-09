@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.ui.organization;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -20,10 +22,13 @@ import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.organization.ListOrganizationContactCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.ui.organization.ListCommunitiesBySceneCommand;
 import com.everhomes.rest.ui.organization.ListOrganizationPersonnelsCommand;
 import com.everhomes.rest.ui.organization.ListOrganizationPersonnelsResponse;
+import com.everhomes.rest.ui.organization.ListScenesByCummunityIdCommand;
 import com.everhomes.rest.ui.organization.ListTaskPostsCommand;
 import com.everhomes.rest.ui.organization.ListTaskPostsResponse;
+import com.everhomes.rest.ui.user.SceneDTO;
 
 /**
  * <ul>
@@ -74,7 +79,18 @@ public class OrganizationUiController extends ControllerBase {
         return resp;
     }
 
-    
+    /**
+     * <b>URL: /ui/org/listCommunitiesByScene</b>
+     * <p>获取小区列表</p>
+     */
+    @RequestMapping("listCommunitiesByScene")
+    @RestReturn(value=ListOrganizationPersonnelsResponse.class)
+    public RestResponse listCommunitiesByScene(@Valid ListCommunitiesBySceneCommand cmd) {
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
     /**
      * <b>URL: /ui/org/listOrganizationPersonnels</b>
@@ -84,6 +100,21 @@ public class OrganizationUiController extends ControllerBase {
     @RestReturn(value=ListOrganizationPersonnelsResponse.class)
     public RestResponse listOrganizationPersonnels(@Valid ListOrganizationPersonnelsCommand cmd) {
         RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /ui/user/listScenesByCummunityId</b>
+     * <p>列出小区当前相关场景。</p>
+     */
+    @RequestMapping("listScenesByCummunityId")
+    @RestReturn(value=SceneDTO.class, collection=true)
+    public RestResponse listScenesByCummunityId(ListScenesByCummunityIdCommand cmd) {
+        List<SceneDTO> sceneDtoList = null;
+        
+        RestResponse response = new RestResponse(sceneDtoList);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

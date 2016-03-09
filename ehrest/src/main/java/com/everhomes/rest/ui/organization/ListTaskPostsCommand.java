@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  *  <li>taskStatus : 任务状态,查询全部就不要传参 ，详情{@link com.everhomes.rest.organization.OrganizationTaskStatus}</li>
  * 	<li>pageAnchor : 页码</li>
  *	<li>pageSize : 页大小</li>
+ *	<li>option :  process（处理） 和 grab（抢单） none（无操作）</li>
  * </ul>
  *
  */
@@ -24,6 +25,8 @@ public class ListTaskPostsCommand {
 	private Long pageAnchor;
 	
 	private Integer pageSize;
+	
+	private String option;
 
 	public String getSceneToken() {
 		return sceneToken;
@@ -63,6 +66,15 @@ public class ListTaskPostsCommand {
 
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
+	}
+
+	
+	public String getOption() {
+		return option;
+	}
+
+	public void setOption(String option) {
+		this.option = option;
 	}
 
 	@Override
