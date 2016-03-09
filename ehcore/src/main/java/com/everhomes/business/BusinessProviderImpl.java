@@ -485,7 +485,7 @@ public class BusinessProviderImpl implements BusinessProvider {
 				.collect(Collectors.toList());
 	}
 	@Override
-	public BusinessAssignedNamespace findBusinessAssignedNamespaceByOwnerId(Long ownerId, Integer namespaceId) {
+	public BusinessAssignedNamespace findBusinessAssignedNamespaceByNamespace(Long ownerId, Integer namespaceId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBusinessAssignedNamespaces.class));
 		List<BusinessAssignedNamespace> list = context.select().from(Tables.EH_BUSINESS_ASSIGNED_NAMESPACES)
 				.where(Tables.EH_BUSINESS_ASSIGNED_NAMESPACES.OWNER_ID.eq(ownerId).and(Tables.EH_BUSINESS_ASSIGNED_NAMESPACES.NAMESPACE_ID.eq(namespaceId)))
@@ -503,7 +503,7 @@ public class BusinessProviderImpl implements BusinessProvider {
 	}
 	
 	@Override
-	public void addBusinessAssignedNamespace(BusinessAssignedNamespace businessAssignedNamespace) {
+	public void createBusinessAssignedNamespace(BusinessAssignedNamespace businessAssignedNamespace) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhBusinessAssignedNamespacesDao dao = new EhBusinessAssignedNamespacesDao(context.configuration()); 
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhBusinessAssignedNamespaces.class));
@@ -513,10 +513,44 @@ public class BusinessProviderImpl implements BusinessProvider {
 		
 	}
 	@Override
-	public void delBusinessAssignedNamespace(BusinessAssignedNamespace businessAssignedNamespace) {
+	public void deleteBusinessAssignedNamespace(BusinessAssignedNamespace businessAssignedNamespace) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhBusinessAssignedNamespacesDao dao = new EhBusinessAssignedNamespacesDao(context.configuration()); 
         dao.delete(businessAssignedNamespace);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhBusinessAssignedNamespaces.class, null);
+	}
+	@Override
+	public BusinessAssignedScope findBusinessAssignedScopeByScope(Long ownerId, Byte scopeCode, Long scopeId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<BusinessAssignedScope> list = context.select().from(Tables.EH_BUSINESS_ASSIGNED_SCOPES)
+		.where(Tables.EH_BUSINESS_ASSIGNED_SCOPES.OWNER_ID.eq(ownerId)
+				.and(Tables.EH_BUSINESS_ASSIGNED_SCOPES.SCOPE_CODE.eq(scopeCode))
+				.and(Tables.EH_BUSINESS_ASSIGNED_SCOPES.SCOPE_ID.eq(scopeId)))
+				.fetch().stream().map(r ->{
+					return ConvertHelper.convert(r, BusinessAssignedScope.class);
+				}).collect(Collectors.toList());
+		if(list==null||list.isEmpty())
+			return null;
+		return list.get(0);
+	}
+	@Override
+	public List<BusinessAssignedScope> listBusinessAssignedScopeByOwnerId(Long ownerId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<BusinessAssignedScope> list = context.select().from(Tables.EH_BUSINESS_ASSIGNED_SCOPES)
+		.where(Tables.EH_BUSINESS_ASSIGNED_SCOPES.OWNER_ID.eq(ownerId))
+		.fetch().stream().map(r->{
+			return ConvertHelper.convert(r, BusinessAssignedScope.class);
+		}).collect(Collectors.toList());
+		return list;
+	}
+	@Override
+	public List<BusinessAssignedNamespace> listBusinessAssignedNamespaceByOwnerId(Long ownerId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<BusinessAssignedNamespace> list = context.select().from(Tables.EH_BUSINESS_ASSIGNED_NAMESPACES)
+		.where(Tables.EH_BUSINESS_ASSIGNED_NAMESPACES.OWNER_ID.eq(ownerId))
+		.fetch().stream().map(r->{
+			return ConvertHelper.convert(r, BusinessAssignedNamespace.class);
+		}).collect(Collectors.toList());
+		return list;
 	}
 }

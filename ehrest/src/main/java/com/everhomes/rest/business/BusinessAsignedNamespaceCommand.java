@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  *
  */
-public class BusinessNamespaceVisibleCommand {
+public class BusinessAsignedNamespaceCommand {
 	@NotNull
 	private String targetId;
 	@NotNull

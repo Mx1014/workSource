@@ -42,15 +42,17 @@ import com.everhomes.group.GroupProvider;
 import com.everhomes.launchpad.LaunchPadConstants;
 import com.everhomes.launchpad.LaunchPadItem;
 import com.everhomes.launchpad.LaunchPadProvider;
+import com.everhomes.oauth2.Clients;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.address.AddressType;
+import com.everhomes.rest.business.BaiduGeocoderResponse;
+import com.everhomes.rest.business.BusinessAsignedNamespaceCommand;
 import com.everhomes.rest.business.BusinessAssignedNamespaceVisibleFlagType;
 import com.everhomes.rest.business.BusinessAssignedScopeDTO;
 import com.everhomes.rest.business.BusinessCommand;
 import com.everhomes.rest.business.BusinessDTO;
 import com.everhomes.rest.business.BusinessFavoriteStatus;
-import com.everhomes.rest.business.BusinessNamespaceVisibleCommand;
 import com.everhomes.rest.business.BusinessRecommendStatus;
 import com.everhomes.rest.business.BusinessScope;
 import com.everhomes.rest.business.BusinessServiceErrorCode;
@@ -162,40 +164,97 @@ public class BusinessServiceImpl implements BusinessService {
 
 	@Override
 	public void syncBusiness(SyncBusinessCommand cmd) {
-		if(cmd.getUserId() == null)
+		if(cmd.getNamespaceId()==null||cmd.getScopeType()==null){
+			LOGGER.error("Invalid paramter.namespaceId or scopeType is null.namespaceId="+cmd.getNamespaceId()+",scopreType="+cmd.getScopeType());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid paramter.namespaceId or scopeType is null.");
+		}
+		if(cmd.getUserId() == null){
+			LOGGER.error("Invalid paramter userId,userId is null");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"Invalid paramter userId,userId is null");
-
+		}
+		if(StringUtils.isBlank(cmd.getTargetId())){
+			LOGGER.error("Invalid paramter targetId,targetId is null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid paramter targetId,targetId is null");
+		}
 		User user = userProvider.findUserById(cmd.getUserId());
 		if(user == null){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"Invalid paramter userId,userId is not found");
 		}
-		if(cmd.getTargetId() == null || cmd.getTargetId().trim().equals("")){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Invalid paramter targetId,targetId is null");
-		}
 		long userId = user.getId();
 		this.dbProvider.execute((TransactionStatus status) -> {
 			Business business = this.businessProvider.findBusinessByTargetId(cmd.getTargetId());
-			if(LOGGER.isDebugEnabled()){
-				if(business == null)
-					LOGGER.info("syncBusiness-business=null");
-				else
-					LOGGER.info("syncBusiness-business="+StringHelper.toJsonString(business));
-			}
-
 			if(business == null){
 				business = createBusiness(cmd, userId);
 			}else{
 				updateBusiness(cmd, business);
 			}
-
 			if(cmd.getCategroies() != null && !cmd.getCategroies().isEmpty()){
 				createBusinessCategories(business, cmd.getCategroies());
 			}
+			createBusinessAssignedNamespaceOnDelOther(business.getId(),cmd.getNamespaceId());
+			if(cmd.getScopeType()!=null){
+				if(cmd.getScopeType().byteValue()==ScopeType.ALL.getCode()){
+					createBusinessAssignedScopeOnDelOther(business.getId(),ScopeType.ALL.getCode(),0L);
+				}
+				if(cmd.getScopeType().byteValue()==ScopeType.CITY.getCode()){
+					Clients client = new Clients();
+					String uri = String.format("http://api.map.baidu.com/geocoder/v2/?ak=9E2825184e77d546b768bbfbf63050f8&location=%s,%s&output=json&pois=0",cmd.getLatitude(),cmd.getLongitude());
+					String jsonResponse = client.restCall("GET", uri, null, null, null);
+					BaiduGeocoderResponse response = (BaiduGeocoderResponse) StringHelper.fromJsonString(jsonResponse, BaiduGeocoderResponse.class);
+					String province = response.getResult().getAddressComponent().getProvince();
+					String city = response.getResult().getAddressComponent().getCity();
+					Region region = regionProvider.findRegionByPath("/"+province.subSequence(0, province.length()-1)+"/"+city);
+					createBusinessAssignedScopeOnDelOther(business.getId(),ScopeType.CITY.getCode(),region.getId());
+				}
+			}
 			return true;
 		});
+	}
+
+	private void createBusinessAssignedNamespaceOnDelOther(Long ownerId,Integer namespaceId) {
+		List<BusinessAssignedNamespace> list = businessProvider.listBusinessAssignedNamespaceByOwnerId(ownerId);
+		if(list!=null&&!list.isEmpty())
+			for(BusinessAssignedNamespace r:list)
+				businessProvider.deleteBusinessAssignedNamespace(r);
+		createBusinessAssignedNamespace(ownerId,namespaceId);
+	}
+
+	private void createBusinessAssignedScopeOnDelOther(Long ownerId, Byte scopeCode, Long scopeId) {
+		List<BusinessAssignedScope> list = businessProvider.listBusinessAssignedScopeByOwnerId(ownerId);
+		if(list!=null&&!list.isEmpty())
+			for(BusinessAssignedScope r:list)
+				businessProvider.deleteBusinessAssignedScope(r.getId());
+		createBusinessAssignedScope(ownerId,scopeCode,scopeId);
+	}
+
+	private void createBusinessAssignedScope(Long ownerId, Byte scopeCode, Long scopeId) {
+		BusinessAssignedScope scope = new BusinessAssignedScope();
+		scope = new BusinessAssignedScope();
+		scope.setOwnerId(ownerId);
+		scope.setScopeCode(ScopeType.CITY.getCode());
+		scope.setScopeId(scopeId);
+		businessProvider.createBusinessAssignedScope(scope);
+	}
+
+	private void createBusinessAssignedNamespace(Long businessId, Integer namespaceId) {
+		BusinessAssignedNamespace bizNamespace = businessProvider.findBusinessAssignedNamespaceByNamespace(businessId,namespaceId);
+		if(bizNamespace!=null){
+			if(bizNamespace.getVisibleFlag().byteValue()!=BusinessAssignedNamespaceVisibleFlagType.VISIBLE.getCode()){
+				bizNamespace.setVisibleFlag(BusinessAssignedNamespaceVisibleFlagType.VISIBLE.getCode());
+				businessProvider.updateBusinessAssignedNamespace(bizNamespace);
+			}
+		}else{
+			bizNamespace = new BusinessAssignedNamespace();
+			bizNamespace.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			bizNamespace.setNamespaceId(namespaceId);
+			bizNamespace.setOwnerId(businessId);
+			bizNamespace.setVisibleFlag(BusinessAssignedNamespaceVisibleFlagType.VISIBLE.getCode());
+			businessProvider.createBusinessAssignedNamespace(bizNamespace);
+		}
 	}
 
 	private Business createBusiness(BusinessCommand cmd, long userId){
@@ -918,7 +977,6 @@ public class BusinessServiceImpl implements BusinessService {
 			}
 			return true;
 		});
-
 	}
 
 	@Override
@@ -943,11 +1001,15 @@ public class BusinessServiceImpl implements BusinessService {
 				this.businessProvider.deleteBusiness(business.getId());
 				//删除服务市场item
 				this.launchPadProvider.deleteLaunchPadItemByTargetTypeAndTargetId(ItemTargetType.BIZ.getCode(),business.getId());
+				//删除商家namespace
+				List<BusinessAssignedNamespace> bizNamespacelist = businessProvider.listBusinessAssignedNamespaceByOwnerId(business.getId());
+				if(bizNamespacelist!=null&&!bizNamespacelist.isEmpty()){
+					for(BusinessAssignedNamespace r:bizNamespacelist)
+						businessProvider.deleteBusinessAssignedNamespace(r);
+				}
 			}
 			return true;
 		});
-
-
 	}
 
 	@Override
@@ -1566,7 +1628,7 @@ public class BusinessServiceImpl implements BusinessService {
 	}
 
 	@Override
-	public void openBizNamespaceVisible(BusinessNamespaceVisibleCommand cmd) {
+	public void openBusinessAssignedNamespace(BusinessAsignedNamespaceCommand cmd) {
 		if(cmd.getNamespaceId()==null||StringUtils.isBlank(cmd.getTargetId())){
 			LOGGER.error("namespaceId or targetId is null.namespaceId="+cmd.getNamespaceId()+",targetId="+cmd.getTargetId());
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
@@ -1578,22 +1640,11 @@ public class BusinessServiceImpl implements BusinessService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"business not found.");
 		}
-		BusinessAssignedNamespace bizNamespace = businessProvider.findBusinessAssignedNamespaceByOwnerId(business.getId(),cmd.getNamespaceId());
-		if(bizNamespace!=null){
-			bizNamespace.setVisibleFlag(BusinessAssignedNamespaceVisibleFlagType.VISIBLE.getCode());
-			businessProvider.updateBusinessAssignedNamespace(bizNamespace);
-		}else{
-			bizNamespace = new BusinessAssignedNamespace();
-			bizNamespace.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			bizNamespace.setNamespaceId(cmd.getNamespaceId());
-			bizNamespace.setOwnerId(business.getId());
-			bizNamespace.setVisibleFlag(BusinessAssignedNamespaceVisibleFlagType.VISIBLE.getCode());
-			businessProvider.addBusinessAssignedNamespace(bizNamespace);
-		}
+		createBusinessAssignedNamespace(business.getId(),cmd.getNamespaceId());
 	}
 
 	@Override
-	public void closeBizNamespaceVisible(BusinessNamespaceVisibleCommand cmd) {
+	public void closeBusinessAssignedNamespace(BusinessAsignedNamespaceCommand cmd) {
 		if(cmd.getNamespaceId()==null||StringUtils.isBlank(cmd.getTargetId())){
 			LOGGER.error("namespaceId or targetId is null.namespaceId="+cmd.getNamespaceId()+",targetId="+cmd.getTargetId());
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
@@ -1605,18 +1656,25 @@ public class BusinessServiceImpl implements BusinessService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"business not found.");
 		}
-		BusinessAssignedNamespace bizNamespace = businessProvider.findBusinessAssignedNamespaceByOwnerId(business.getId(),cmd.getNamespaceId());
+		deleteBusinessAssignedNamespace(business.getId(),cmd.getNamespaceId());
+	}
+
+	private void deleteBusinessAssignedNamespace(Long businessId, Integer namespaceId) {
+		BusinessAssignedNamespace bizNamespace = businessProvider.findBusinessAssignedNamespaceByNamespace(businessId,namespaceId);
 		if(bizNamespace!=null){
-			bizNamespace.setVisibleFlag(BusinessAssignedNamespaceVisibleFlagType.HIDE.getCode());
-			businessProvider.updateBusinessAssignedNamespace(bizNamespace);
+			if(bizNamespace.getVisibleFlag().byteValue()!=BusinessAssignedNamespaceVisibleFlagType.HIDE.getCode()){
+				bizNamespace.setVisibleFlag(BusinessAssignedNamespaceVisibleFlagType.HIDE.getCode());
+				businessProvider.updateBusinessAssignedNamespace(bizNamespace);
+			}
 		}else{
 			bizNamespace = new BusinessAssignedNamespace();
 			bizNamespace.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			bizNamespace.setNamespaceId(cmd.getNamespaceId());
-			bizNamespace.setOwnerId(business.getId());
+			bizNamespace.setNamespaceId(namespaceId);
+			bizNamespace.setOwnerId(businessId);
 			bizNamespace.setVisibleFlag(BusinessAssignedNamespaceVisibleFlagType.HIDE.getCode());
-			businessProvider.addBusinessAssignedNamespace(bizNamespace);
+			businessProvider.createBusinessAssignedNamespace(bizNamespace);
 		}
+
 	}
-	
+
 }

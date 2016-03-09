@@ -22,7 +22,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.business.BusinessNamespaceVisibleCommand;
+import com.everhomes.rest.business.BusinessAsignedNamespaceCommand;
 import com.everhomes.rest.business.ListBusinessByCommonityIdCommand;
 import com.everhomes.rest.business.ListUserByIdentifierCommand;
 import com.everhomes.rest.business.ListUserByKeywordCommand;
@@ -420,8 +420,8 @@ public class BusinessOpenController extends ControllerBase {
 	}
 	@RequestMapping("openBizNamespaceVisible")
 	@RestReturn(String.class)
-	public RestResponse openBizNamespaceVisible(@Valid BusinessNamespaceVisibleCommand cmd) {
-		businessService.openBizNamespaceVisible(cmd);
+	public RestResponse openBizNamespaceVisible(@Valid BusinessAsignedNamespaceCommand cmd) {
+		businessService.openBusinessAssignedNamespace(cmd);
 		RestResponse response =  new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -429,8 +429,8 @@ public class BusinessOpenController extends ControllerBase {
 	}
 	@RequestMapping("closeBizNamespaceVisible")
 	@RestReturn(String.class)
-	public RestResponse closeBizNamespaceVisible(@Valid BusinessNamespaceVisibleCommand cmd) {
-		businessService.closeBizNamespaceVisible(cmd);
+	public RestResponse closeBizNamespaceVisible(@Valid BusinessAsignedNamespaceCommand cmd) {
+		businessService.closeBusinessAssignedNamespace(cmd);
 		RestResponse response =  new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
