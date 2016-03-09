@@ -18,9 +18,11 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.forum.ListPostCommandResponse;
 import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.organization.ListOrganizationContactCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
+import com.everhomes.rest.organization.ListTopicsByTypeCommand;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.ui.organization.ListCommunitiesBySceneCommand;
 import com.everhomes.rest.ui.organization.ListOrganizationPersonnelsCommand;
@@ -29,6 +31,12 @@ import com.everhomes.rest.ui.organization.ListScenesByCummunityIdCommand;
 import com.everhomes.rest.ui.organization.ListTaskPostsCommand;
 import com.everhomes.rest.ui.organization.ListTaskPostsResponse;
 import com.everhomes.rest.ui.user.SceneDTO;
+import com.everhomes.rest.ui.user.SceneTokenDTO;
+import com.everhomes.rest.user.UserCurrentEntityType;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.WebTokenGenerator;
 
 /**
  * <ul>
@@ -54,10 +62,31 @@ public class OrganizationUiController extends ControllerBase {
     @RequestMapping("listMyTaskPostsByScene")
     @RestReturn(value=ListTaskPostsResponse.class)
     public RestResponse listMyTaskPostsByScene(@Valid ListTaskPostsCommand cmd) {
+        User user = UserContext.current().getUser();
+        WebTokenGenerator webToken = WebTokenGenerator.getInstance();
+        SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+		ListTopicsByTypeCommand command = ConvertHelper.convert(cmd, ListTopicsByTypeCommand.class);
+		if(sceneToken.getEntityType().equals(UserCurrentEntityType.COMMUNITY_COMMERCIAL.getCode())){
+			command.setCommunityId(sceneToken.getEntityId());
+		}
+		
+		if(sceneToken.getEntityType().equals(UserCurrentEntityType.ORGANIZATION.getCode())){
+			command.setOrganizationId(sceneToken.getEntityId());
+		}
+		
+		command.setPageOffset(cmd.getPageAnchor());
+		/* 根据用户不同 查询不同的任务类型贴*/
+		if(true){
+			cmd.setTaskType("");
+			command.setTargetId(user.getId());
+			
+		}
+		ListPostCommandResponse res = organizationService.listTaskTopicsByType(command);
+        ListTaskPostsResponse response = new ListTaskPostsResponse();
+        response.setDtos(res.getPosts());
+        response.setNextPageAnchor(res.getNextPageAnchor());
         
-        RestResponse resp =  new RestResponse();
-        
-//        ListTaskPostsResponse response = null;
+        RestResponse resp =  new RestResponse(response);
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
         return resp;
@@ -70,10 +99,28 @@ public class OrganizationUiController extends ControllerBase {
     @RequestMapping("listTaskPostsByScene")
     @RestReturn(value=ListTaskPostsResponse.class)
     public RestResponse listTaskPostsByScene(@Valid ListTaskPostsCommand cmd) {
+    	User user = UserContext.current().getUser();
+		ListTopicsByTypeCommand command = ConvertHelper.convert(cmd, ListTopicsByTypeCommand.class);
+	    WebTokenGenerator webToken = WebTokenGenerator.getInstance();
+	    SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+		if(sceneToken.getEntityType().equals(UserCurrentEntityType.COMMUNITY_COMMERCIAL.getCode())){
+			command.setCommunityId(sceneToken.getEntityId());
+		}
+			
+		if(sceneToken.getEntityType().equals(UserCurrentEntityType.ORGANIZATION.getCode())){
+			command.setOrganizationId(sceneToken.getEntityId());
+		}
+		command.setPageOffset(cmd.getPageAnchor());
+		/* 根据用户不同 查询不同的任务类型贴*/
+		if(true){
+			cmd.setTaskType("");
+		}
+		ListPostCommandResponse res = organizationService.listTaskTopicsByType(command);
+        ListTaskPostsResponse response = new ListTaskPostsResponse();
+        response.setDtos(res.getPosts());
+        response.setNextPageAnchor(res.getNextPageAnchor());
         
-        RestResponse resp =  new RestResponse();
-        
-//        ListTaskPostsResponse response = null;
+        RestResponse resp =  new RestResponse(response);
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
         return resp;
@@ -119,4 +166,6 @@ public class OrganizationUiController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    
 }

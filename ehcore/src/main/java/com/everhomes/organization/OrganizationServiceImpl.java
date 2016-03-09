@@ -2109,42 +2109,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 
 	@Override
-	public ListPostCommandResponse listTaskTopicsByType(ListTopicsByTypeCommand cmd){
-		User user = UserContext.current().getUser();
-		Long commuId = cmd.getCommunityId();
-		
-		if(null == cmd.getCommunityId()){
-			commuId = user.getCommunityId();
-		}
-		
-		/* 根据用户不同 查询不同的任务类型贴*/
-		if(commuId == 1){
-			cmd.setTaskType("");
-		}
-		
-		Community community = communityProvider.findCommunityById(commuId);
-		Organization organization = this.checkOrganization(cmd.getOrganizationId());
-		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		CrossShardListingLocator locator = new CrossShardListingLocator();
-		locator.setAnchor(cmd.getPageOffset());
-		List<OrganizationTask> orgTasks = organizationProvider.listOrganizationTasksByTypeOrStatus(locator, organization.getId(),null, cmd.getTaskType(), cmd.getTaskStatus(), pageSize);
-		List<PostDTO> dtos = new ArrayList<PostDTO>();
-		for (OrganizationTask task : orgTasks) {
-			PostDTO dto = this.forumService.getTopicById(task.getApplyEntityId(),commuId,false);
-			if(dto.getForumId().equals(community.getDefaultForumId())){
-				dtos.add(dto);
-			}
-		}
-		
-		ListPostCommandResponse res = new ListPostCommandResponse();
-		res.setNextPageAnchor(locator.getAnchor());
-		res.setPosts(dtos);
-		
-		return res;
-	}
-	
-	
-	@Override
 	public ListTopicsByTypeCommandResponse listTopicsByType(ListTopicsByTypeCommand cmd) {
 		User user = UserContext.current().getUser();
 		Long commuId = cmd.getCommunityId();
@@ -5379,6 +5343,37 @@ public class OrganizationServiceImpl implements OrganizationService {
 						"Tasks have been processed.");
 	    	}
 	    }
+	    
+	    
+	    @Override
+		public ListPostCommandResponse listTaskTopicsByType(ListTopicsByTypeCommand cmd){
+			User user = UserContext.current().getUser();
+			Long commuId = cmd.getCommunityId();
+			
+			if(null == cmd.getCommunityId()){
+				commuId = user.getCommunityId();
+			}
+			
+			Community community = communityProvider.findCommunityById(commuId);
+			Organization organization = this.checkOrganization(cmd.getOrganizationId());
+			int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+			CrossShardListingLocator locator = new CrossShardListingLocator();
+			locator.setAnchor(cmd.getPageOffset());
+			List<OrganizationTask> orgTasks = organizationProvider.listOrganizationTasksByTypeOrStatus(locator, organization.getId(),cmd.getTargetId(), cmd.getTaskType(), cmd.getTaskStatus(), pageSize);
+			List<PostDTO> dtos = new ArrayList<PostDTO>();
+			for (OrganizationTask task : orgTasks) {
+				PostDTO dto = this.forumService.getTopicById(task.getApplyEntityId(),commuId,false);
+				if(dto.getForumId().equals(community.getDefaultForumId())){
+					dtos.add(dto);
+				}
+			}
+			
+			ListPostCommandResponse res = new ListPostCommandResponse();
+			res.setNextPageAnchor(locator.getAnchor());
+			res.setPosts(dtos);
+			
+			return res;
+		}
 	    
 	    
 	    private void sendTaskMsg(Map<String,Object> map, OrganizationTask task, User user){

@@ -1002,7 +1002,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	@Override
 	public List<OrganizationTask> listOrganizationTasksByTypeOrStatus(CrossShardListingLocator locator,Long organizationId,Long targetId, String taskType, Byte taskStatus, int pageSize) {
 		List<OrganizationTask> list = new ArrayList<OrganizationTask>();
-		Condition condition = Tables.EH_ORGANIZATION_TASKS.ORGANIZATION_ID.eq(organizationId);
+		Condition condition = Tables.EH_ORGANIZATION_TASKS.ORGANIZATION_ID.notEqual(-1l) ;
+		if(null != organizationId)
+			condition = Tables.EH_ORGANIZATION_TASKS.ORGANIZATION_ID.eq(organizationId);
 		if(!StringUtils.isEmpty(taskType))
 			condition = condition.and(Tables.EH_ORGANIZATION_TASKS.TASK_TYPE.eq(taskType));
 		if(taskStatus != null)
