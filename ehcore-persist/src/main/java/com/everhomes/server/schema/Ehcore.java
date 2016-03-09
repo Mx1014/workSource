@@ -11,7 +11,7 @@ package com.everhomes.server.schema;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Ehcore extends org.jooq.impl.SchemaImpl {
 
-	private static final long serialVersionUID = -220721480;
+	private static final long serialVersionUID = 267787428;
 
 	/**
 	 * The singleton instance of <code>ehcore</code>
@@ -111,6 +111,9 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhNearbyCommunityMap.EH_NEARBY_COMMUNITY_MAP,
 			com.everhomes.server.schema.tables.EhOauth2Codes.EH_OAUTH2_CODES,
 			com.everhomes.server.schema.tables.EhOauth2Tokens.EH_OAUTH2_TOKENS,
+			com.everhomes.server.schema.tables.EhOpPromotions.EH_OP_PROMOTIONS,
+			com.everhomes.server.schema.tables.EhOpPromotionPolicies.EH_OP_PROMOTION_POLICIES,
+			com.everhomes.server.schema.tables.EhOpPromotionSettings.EH_OP_PROMOTION_SETTINGS,
 			com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS,
 			com.everhomes.server.schema.tables.EhOrganizationAddresses.EH_ORGANIZATION_ADDRESSES,
 			com.everhomes.server.schema.tables.EhOrganizationAddressMappings.EH_ORGANIZATION_ADDRESS_MAPPINGS,
@@ -159,6 +162,7 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhRentalSiteItems.EH_RENTAL_SITE_ITEMS,
 			com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES,
 			com.everhomes.server.schema.tables.EhRtxtResources.EH_RTXT_RESOURCES,
+			com.everhomes.server.schema.tables.EhSceneTypes.EH_SCENE_TYPES,
 			com.everhomes.server.schema.tables.EhScopedConfigurations.EH_SCOPED_CONFIGURATIONS,
 			com.everhomes.server.schema.tables.EhSearchKeywords.EH_SEARCH_KEYWORDS,
 			com.everhomes.server.schema.tables.EhStateTriggers.EH_STATE_TRIGGERS,
