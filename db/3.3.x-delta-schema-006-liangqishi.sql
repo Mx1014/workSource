@@ -43,7 +43,7 @@ DROP TABLE IF EXISTS `eh_op_promotion_settings`;
 CREATE TABLE `eh_op_promotion_settings`(
     `id` BIGINT NOT NULL,
     `namespace_id` INTEGER NOT NULL DEFAULT 0,
-	`scene_type` VARCHAR(64) NOT NULL DEFAULT 'default'
+	`scene_type` VARCHAR(64) NOT NULL DEFAULT 'default',
     `title` VARCHAR(512) NOT NULL DEFAULT '' COMMENT 'the title of the activity',
 	`description` TEXT,
 	`policy_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refer to the id of eh_op_promotion_policies',
@@ -70,7 +70,7 @@ DROP TABLE IF EXISTS `eh_op_promotions`;
 CREATE TABLE `eh_op_promotions`(
     `id` BIGINT NOT NULL,
     `namespace_id` INTEGER NOT NULL DEFAULT 0,
-	`scene_type` VARCHAR(64) NOT NULL DEFAULT 'default'
+	`scene_type` VARCHAR(64) NOT NULL DEFAULT 'default',
 	`trigger_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refer to the id of eh_promotion_activity_triggers',
     `title` VARCHAR(512) NOT NULL DEFAULT 0 COMMENT 'the title of the activity',
 	`description` TEXT,
