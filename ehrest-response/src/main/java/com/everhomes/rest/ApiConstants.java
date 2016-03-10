@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-03-09 21:20:40
+// generated at 2016-03-10 10:11:49
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -658,20 +658,19 @@ public interface ApiConstants {
     public static final String TECHPARK_RENTAL_UPDATERENTALSITE_URL = "/techpark/rental/updateRentalSite";
     public static final String TECHPARK_RENTAL_VERIFYSERVICERENTALBILL_URL = "/techpark/rental/verifyServiceRentalBill";
     public static final String UI_BANNER_GETBANNERSBYSCENE_URL = "/ui/banner/getBannersByScene";
+    public static final String UI_COMMUNITY_LISTCOMMUNITIESBYSCENE_URL = "/ui/community/listCommunitiesByScene";
     public static final String UI_FORUM_GETTOPICQUERYFILTERS_URL = "/ui/forum/getTopicQueryFilters";
     public static final String UI_FORUM_GETTOPICSENTSCOPES_URL = "/ui/forum/getTopicSentScopes";
     public static final String UI_FORUM_NEWTOPICBYSCENE_URL = "/ui/forum/newTopicByScene";
     public static final String UI_FORUM_SEARCHBYSCENE_URL = "/ui/forum/searchByScene";
     public static final String UI_LAUNCHPAD_GETLASTLAUNCHPADLAYOUTBYSCENE_URL = "/ui/launchpad/getLastLaunchPadLayoutByScene";
     public static final String UI_LAUNCHPAD_GETLAUNCHPADITEMSBYSCENE_URL = "/ui/launchpad/getLaunchPadItemsByScene";
-    public static final String UI_ORG_LISTCOMMUNITIESBYSCENE_URL = "/ui/org/listCommunitiesByScene";
     public static final String UI_ORG_LISTMYTASKPOSTSBYSCENE_URL = "/ui/org/listMyTaskPostsByScene";
-    public static final String UI_ORG_LISTORGANIZATIONPERSONNELS_URL = "/ui/org/listOrganizationPersonnels";
-    public static final String UI_ORG_LISTSCENESBYCUMMUNITYID_URL = "/ui/org/listScenesByCummunityId";
     public static final String UI_ORG_LISTTASKPOSTSBYSCENE_URL = "/ui/org/listTaskPostsByScene";
     public static final String UI_USER_GETUSEROPPROMOTIONSBYSCENE_URL = "/ui/user/getUserOpPromotionsByScene";
     public static final String UI_USER_GETUSERRELATEDADDRESSES_URL = "/ui/user/getUserRelatedAddresses";
     public static final String UI_USER_LISTCONTACTSBYSCENE_URL = "/ui/user/listContactsByScene";
+    public static final String UI_USER_LISTSCENESBYCUMMUNITYID_URL = "/ui/user/listScenesByCummunityId";
     public static final String UI_USER_LISTUSERRELATEDSCENES_URL = "/ui/user/listUserRelatedScenes";
     public static final String UI_USER_SETUSERCURRENTSCENE_URL = "/ui/user/setUserCurrentScene";
     public static final String USER_ADMINLOGON_URL = "/user/adminLogon";
