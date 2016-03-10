@@ -202,17 +202,18 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
 			}
 			
 			Organization org = organizationProvider.findOrganizationById(account.getEnterpriseId());
-			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(account.getOwnerId(), org.getId());
-			if(org != null)
+			if(org != null) {
+				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(account.getOwnerId(), org.getId());
 				dto.setEnterpriseName(org.getName());
-				dto.setUserName(member.getContactName());
 				if (member != null) {
+					dto.setUserName(member.getContactName());
 					Organization dept = organizationProvider.findOrganizationById(member.getGroupId());
 					if (dept != null) {
 						dto.setDepartment(dept.getName());
 					}
 				}
 				dto.setMobile(member.getContactToken());
+			}
 			confAccounts.add(dto);
         }
         response.setConfAccounts(confAccounts);
