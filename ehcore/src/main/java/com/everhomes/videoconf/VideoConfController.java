@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -86,6 +87,8 @@ import com.everhomes.search.ConfAccountSearcher;
 import com.everhomes.search.ConfEnterpriseSearcher;
 import com.everhomes.search.ConfOrderSearcher;
 import com.everhomes.search.UserWithoutConfAccountSearcher;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.RequireAuthentication;
 
 @RestDoc(value = "VideoConf controller", site = "core")
@@ -1202,6 +1205,9 @@ public class VideoConfController  extends ControllerBase{
     @RequestMapping("syncAccountIndex")
     @RestReturn(value=String.class)
     public RestResponse syncAccountIndex() {
+    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
     	confAccountSearcher.syncFromDb();
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
@@ -1217,6 +1223,9 @@ public class VideoConfController  extends ControllerBase{
     @RequestMapping("syncUserIndex")
     @RestReturn(value=String.class)
     public RestResponse syncUserIndex() {
+    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
     	userWithoutConfAccountSearcher.syncFromDb();
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
@@ -1232,6 +1241,9 @@ public class VideoConfController  extends ControllerBase{
     @RequestMapping("syncEnterpriseIndex")
     @RestReturn(value=String.class)
     public RestResponse syncEnterpriseIndex() {
+    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
     	confEnterpriseSearcher.syncFromDb();
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
@@ -1247,6 +1259,9 @@ public class VideoConfController  extends ControllerBase{
     @RequestMapping("syncConfOrderIndex")
     @RestReturn(value=String.class)
     public RestResponse syncConfOrderIndex() {
+    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
     	confOrderSearcher.syncFromDb();
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);

@@ -27,6 +27,9 @@ import com.everhomes.enterprise.EnterpriseContactGroup;
 import com.everhomes.enterprise.EnterpriseContactGroupMember;
 import com.everhomes.enterprise.EnterpriseContactProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.videoconf.EnterpriseUsersDTO;
 import com.everhomes.rest.videoconf.ListUsersWithoutVideoConfPrivilegeCommand;
 import com.everhomes.rest.videoconf.ListUsersWithoutVideoConfPrivilegeResponse;
@@ -50,21 +53,24 @@ public class UserWithoutConfAccountSearcherImpl extends AbstractElasticSearch
 	@Autowired
     private ConfigurationProvider configProvider;
 	
+	@Autowired
+    private OrganizationProvider organizationProvider;
+	
 	@Override
 	public void deleteById(Long id) {
 		deleteById(id.toString());
 	}
 
 	@Override
-	public void bulkUpdate(List<EnterpriseContact> contacts) {
+	public void bulkUpdate(List<OrganizationMember> members) {
 		BulkRequestBuilder brb = getClient().prepareBulk();
-        for (EnterpriseContact contact : contacts) {
+        for (OrganizationMember member : members) {
         	
-            XContentBuilder source = createDoc(contact);
+            XContentBuilder source = createDoc(member);
             if(null != source) {
-                LOGGER.info("id:" + contact.getId());
+                LOGGER.info("id:" + member.getId());
                 brb.add(Requests.indexRequest(getIndexName()).type(getIndexType())
-                        .id(contact.getId().toString()).source(source));    
+                        .id(member.getId().toString()).source(source));    
                 }
             
         }
@@ -75,10 +81,10 @@ public class UserWithoutConfAccountSearcherImpl extends AbstractElasticSearch
 	}
 
 	@Override
-	public void feedDoc(EnterpriseContact contact) {
-		XContentBuilder source = createDoc(contact);
+	public void feedDoc(OrganizationMember member) {
+		XContentBuilder source = createDoc(member);
         
-        feedDoc(contact.getId().toString(), source);
+        feedDoc(member.getId().toString(), source);
 	}
 
 	@Override
@@ -88,10 +94,10 @@ public class UserWithoutConfAccountSearcherImpl extends AbstractElasticSearch
         
         CrossShardListingLocator locator = new CrossShardListingLocator();
         for(;;) {
-            List<EnterpriseContact> contacts = enterpriseContactProvider.queryContact(locator, pageSize);
+            List<OrganizationMember> members = organizationProvider.listOrganizationMembersTargetIdExist();
             
-            if(contacts.size() > 0) {
-                this.bulkUpdate(contacts);
+            if(members.size() > 0) {
+                this.bulkUpdate(members);
             }
             
             if(locator.getAnchor() == null) {
@@ -102,7 +108,7 @@ public class UserWithoutConfAccountSearcherImpl extends AbstractElasticSearch
         this.optimize(1);
         this.refresh();
         
-        LOGGER.info("sync for enterprise contact ok");
+        LOGGER.info("sync for organization member ok");
 
 	}
 
@@ -157,23 +163,35 @@ public class UserWithoutConfAccountSearcherImpl extends AbstractElasticSearch
         List<EnterpriseUsersDTO> enterpriseUsers = new ArrayList<EnterpriseUsersDTO>();
         for(Long id : ids) {
         	EnterpriseUsersDTO user = new EnterpriseUsersDTO();
-        	EnterpriseContact contact = enterpriseContactProvider.getContactById(id);
-        	user.setUserId(contact.getUserId());
-			user.setUserName(contact.getName());
-			user.setContactId(contact.getId());
-			user.setEnterpriseId(contact.getEnterpriseId());
-			
-			EnterpriseContactGroupMember member = enterpriseContactProvider.getContactGroupMemberByContactId(contact.getEnterpriseId(), contact.getId());
-			if (member != null) {
-				EnterpriseContactGroup group = enterpriseContactProvider.getContactGroupById(member.getContactGroupId());
-				if (group != null) {
+        	OrganizationMember member = organizationProvider.findOrganizationMemberById(id);
+        	user.setUserId(member.getTargetId());
+			user.setUserName(member.getContactName());
+			user.setEnterpriseId(member.getOrganizationId());
+			user.setMobile(member.getContactToken());
+			if(member.getGroupId() != 0) {
+				Organization group = organizationProvider.findOrganizationById(member.getGroupId());
+				if(group != null) {
 					user.setDepartment(group.getName());
-				}
-			}
-			
-			List<EnterpriseContactEntry> entry = enterpriseContactProvider.queryContactEntryByContactId(contact);
-			if(entry != null && entry.size() >0)
-				user.setMobile(entry.get(0).getEntryValue());
+				} 
+				
+			} 
+//        	EnterpriseContact contact = enterpriseContactProvider.getContactById(id);
+//        	user.setUserId(contact.getUserId());
+//			user.setUserName(contact.getName());
+//			user.setContactId(contact.getId());
+//			user.setEnterpriseId(contact.getEnterpriseId());
+//			
+//			EnterpriseContactGroupMember member = enterpriseContactProvider.getContactGroupMemberByContactId(contact.getEnterpriseId(), contact.getId());
+//			if (member != null) {
+//				EnterpriseContactGroup group = enterpriseContactProvider.getContactGroupById(member.getContactGroupId());
+//				if (group != null) {
+//					user.setDepartment(group.getName());
+//				}
+//			}
+//			
+//			List<EnterpriseContactEntry> entry = enterpriseContactProvider.queryContactEntryByContactId(contact);
+//			if(entry != null && entry.size() >0)
+//				user.setMobile(entry.get(0).getEntryValue());
 			
 			enterpriseUsers.add(user);
         }
@@ -187,37 +205,31 @@ public class UserWithoutConfAccountSearcherImpl extends AbstractElasticSearch
 		return SearchUtils.ENTERPRISECONTACTINDEXTYPE;
 	}
 	
-	private XContentBuilder createDoc(EnterpriseContact contact){
+	private XContentBuilder createDoc(OrganizationMember member){
 		try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
-            b.field("contactId", contact.getId());
-            b.field("userId", contact.getUserId());
-            b.field("enterpriseId", contact.getEnterpriseId());
-            b.field("userName", contact.getName());
-            
-            EnterpriseContactGroupMember member = enterpriseContactProvider.getContactGroupMemberByContactId(contact.getEnterpriseId(), contact.getId());
-			if (member != null) {
-				EnterpriseContactGroup group = enterpriseContactProvider.getContactGroupById(member.getContactGroupId());
-				if (group != null) {
+            b.field("id", member.getId());
+            b.field("userId", member.getTargetId());
+            b.field("enterpriseId", member.getOrganizationId());
+            b.field("userName", member.getContactName());
+            b.field("contact", member.getContactToken());
+            if(member.getGroupId() != 0) {
+				Organization group = organizationProvider.findOrganizationById(member.getGroupId());
+				if(group != null) {
 					b.field("department", group.getName());
 				} else {
 					b.field("department", "");
 				}
+				
 			} else {
 				b.field("department", "");
 			}
             
-            List<EnterpriseContactEntry> entry = enterpriseContactProvider.queryContactEntryByContactId(contact);
-			if(entry != null && entry.size() >0) {
-                b.field("contact", entry.get(0).getEntryValue());
-            } else {
-                b.field("contact", "");
-            }
-          
+            
             b.endObject();
             return b;
         } catch (IOException ex) {
-            LOGGER.error("Create contact " + contact.getId() + " error");
+            LOGGER.error("Create member " + member.getId() + " error");
             return null;
         }
     }
