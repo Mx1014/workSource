@@ -22,7 +22,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.business.BusinessVisibleCommand;
+import com.everhomes.rest.business.BusinessNamespaceVisibleCommand;
 import com.everhomes.rest.business.ListBusinessByCommonityIdCommand;
 import com.everhomes.rest.business.ListUserByIdentifierCommand;
 import com.everhomes.rest.business.ListUserByKeywordCommand;
@@ -418,19 +418,19 @@ public class BusinessOpenController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	@RequestMapping("addBusinessVisible")
+	@RequestMapping("openBizNamespaceVisible")
 	@RestReturn(String.class)
-	public RestResponse addBusinessVisible(@Valid BusinessVisibleCommand cmd) {
-		businessService.addBusinessVisible(cmd);
+	public RestResponse openBizNamespaceVisible(@Valid BusinessNamespaceVisibleCommand cmd) {
+		businessService.openBizNamespaceVisible(cmd);
 		RestResponse response =  new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
-	@RequestMapping("delBusinessVisible")
+	@RequestMapping("closeBizNamespaceVisible")
 	@RestReturn(String.class)
-	public RestResponse delBusinessVisible(@Valid BusinessVisibleCommand cmd) {
-		businessService.delBusinessVisible(cmd);
+	public RestResponse closeBizNamespaceVisible(@Valid BusinessNamespaceVisibleCommand cmd) {
+		businessService.closeBizNamespaceVisible(cmd);
 		RestResponse response =  new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
