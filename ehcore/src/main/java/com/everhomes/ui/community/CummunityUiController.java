@@ -16,7 +16,6 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.ui.organization.ListCommunitiesBySceneCommand;
 import com.everhomes.rest.ui.organization.ListCommunitiesBySceneResponse;
@@ -28,18 +27,15 @@ import com.everhomes.rest.ui.organization.ListCommunitiesBySceneResponse;
  */
 @RestDoc(value="CommunityUi controller", site="communityUi")
 @RestController
-@RequestMapping("/ui/org")
+@RequestMapping("/ui/community")
 public class CummunityUiController extends ControllerBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(CummunityUiController.class);
     
     @Autowired
     private ConfigurationProvider configurationProvider;
     
-    @Autowired
-    private OrganizationService organizationService;
-
     /**
-     * <b>URL: /ui/org/listCommunitiesByScene</b>
+     * <b>URL: /ui/community/listCommunitiesByScene</b>
      * <p>获取小区列表</p>
      */
     @RequestMapping("listCommunitiesByScene")

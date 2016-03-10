@@ -126,18 +126,4 @@ public class OrganizationUiController extends ControllerBase {
         resp.setErrorDescription("OK");
         return resp;
     }
-
-    /**
-     * <b>URL: /ui/org/listCommunitiesByScene</b>
-     * <p>获取小区列表</p>
-     */
-    @RequestMapping("listCommunitiesByScene")
-    @RestReturn(value=ListCommunitiesBySceneResponse.class)
-    public RestResponse listCommunitiesByScene(@Valid ListCommunitiesBySceneCommand cmd) {
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
 }

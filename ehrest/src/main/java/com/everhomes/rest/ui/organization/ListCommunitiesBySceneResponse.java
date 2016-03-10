@@ -19,6 +19,17 @@ public class ListCommunitiesBySceneResponse {
     @ItemType(CommunityDTO.class)
     private List<CommunityDTO> dtos;
 	
+    
+	public List<CommunityDTO> getDtos() {
+		return dtos;
+	}
+
+
+	public void setDtos(List<CommunityDTO> dtos) {
+		this.dtos = dtos;
+	}
+
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
