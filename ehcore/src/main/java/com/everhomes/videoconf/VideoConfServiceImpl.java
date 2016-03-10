@@ -796,6 +796,13 @@ public class VideoConfServiceImpl implements VideoConfService {
 		}
 		
 		vcProvider.updateConfAccounts(account);
+		
+		ConfEnterprises confEnterprise = vcProvider.findByEnterpriseId(account.getEnterpriseId());
+		int activeCount = vcProvider.countAccountsByEnterprise(account.getEnterpriseId(), null);
+		int trialCount = vcProvider.countAccountsByEnterprise(account.getEnterpriseId(), (byte) 1);
+		confEnterprise.setActiveAccountAmount(activeCount);
+		confEnterprise.setTrialAccountAmount(trialCount);
+		confEnterpriseSearcher.feedDoc(confEnterprise);
 
 	}
 
