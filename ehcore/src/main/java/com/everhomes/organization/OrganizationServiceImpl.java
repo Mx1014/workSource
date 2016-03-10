@@ -90,6 +90,7 @@ import java.util.stream.Collectors;
 
 
 
+
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -101,6 +102,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+
 
 
 
@@ -367,6 +369,7 @@ import com.everhomes.search.EnterpriseSearcher;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
+import com.everhomes.search.UserWithoutConfAccountSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhUserActivities;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -473,6 +476,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	@Autowired
 	private GroupProvider groupProvider;
+	
+	@Autowired
+	private UserWithoutConfAccountSearcher userSearcher;
 	
 
 	private int getPageCount(int totalCount, int pageSize){
@@ -4151,6 +4157,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		organizationMember.setCreatorUid(user.getId());
 		organizationMember.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		organizationProvider.createOrganizationMember(organizationMember);
+		userSearcher.feedDoc(organizationMember);
 		return ConvertHelper.convert(organizationMember, OrganizationMemberDTO.class);
 	}
 	
@@ -4242,6 +4249,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 				m.setTargetType(OrganizationMemberTargetType.USER.getCode());
 				m.setTargetId(userIdentifier.getOwnerUid());
 				organizationProvider.updateOrganizationMember(m);
+				
+				userSearcher.feedDoc(m);
 			}
 			
 			if(null != cmd.getAssignmentId())
@@ -4277,6 +4286,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                 	
                 	this.updateMemberUser(member);
                     sendMessageForContactApproved(member);
+                    		
+                    userSearcher.feedDoc(member);
                     if(LOGGER.isInfoEnabled()) {
                         LOGGER.info("User join the enterprise automatically, userId=" + identifier.getOwnerUid() 
                             + ", contactId=" + member.getId() + ", enterpriseId=" + member.getOrganizationId());
@@ -4569,7 +4580,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			 this.organizationProvider.updateOrganizationMember(member);
 	            return null;
 	        });
-	        
+		 userSearcher.feedDoc(member);
 	        if(LOGGER.isInfoEnabled()) {
 	            LOGGER.info("Enterprise contact is deleted(active), operatorUid=" + operatorUid + ", contactId=" + member.getTargetId() 
 	                + ", enterpriseId=" + member.getOrganizationId() + ", status=" + member.getStatus() + ", removeFromDb=" + member.getStatus());

@@ -30,6 +30,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.videoconf.EnterpriseUsersDTO;
 import com.everhomes.rest.videoconf.ListUsersWithoutVideoConfPrivilegeCommand;
 import com.everhomes.rest.videoconf.ListUsersWithoutVideoConfPrivilegeResponse;
@@ -208,22 +209,24 @@ public class UserWithoutConfAccountSearcherImpl extends AbstractElasticSearch
 	private XContentBuilder createDoc(OrganizationMember member){
 		try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
-            b.field("id", member.getId());
-            b.field("userId", member.getTargetId());
-            b.field("enterpriseId", member.getOrganizationId());
-            b.field("userName", member.getContactName());
-            b.field("contact", member.getContactToken());
-            if(member.getGroupId() != 0) {
-				Organization group = organizationProvider.findOrganizationById(member.getGroupId());
-				if(group != null) {
-					b.field("department", group.getName());
+            if(OrganizationMemberStatus.ACTIVE.equals(member.getStatus())) {
+	            b.field("id", member.getId());
+	            b.field("userId", member.getTargetId());
+	            b.field("enterpriseId", member.getOrganizationId());
+	            b.field("userName", member.getContactName());
+	            b.field("contact", member.getContactToken());
+	            if(member.getGroupId() != 0) {
+					Organization group = organizationProvider.findOrganizationById(member.getGroupId());
+					if(group != null) {
+						b.field("department", group.getName());
+					} else {
+						b.field("department", "");
+					}
+					
 				} else {
 					b.field("department", "");
 				}
-				
-			} else {
-				b.field("department", "");
-			}
+            }
             
             
             b.endObject();
