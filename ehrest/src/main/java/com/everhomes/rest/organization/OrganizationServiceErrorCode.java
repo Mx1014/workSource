@@ -4,6 +4,8 @@ package com.everhomes.rest.organization;
 public interface OrganizationServiceErrorCode {
     static final String SCOPE = "organization";
     
+    static final int ERROR_NO_PRIVILEGED = 100001; //没有权限
+    
     static final int ERROR_PHONE_ALREADY_EXIST = 100010;
     
     static final int ERROR_INVALID_PARAMETER = 100011;

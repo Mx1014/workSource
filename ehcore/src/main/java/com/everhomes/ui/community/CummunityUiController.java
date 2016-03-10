@@ -1,8 +1,6 @@
 // @formatter:off
 package com.everhomes.ui.community;
 
-import java.util.List;
-
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -16,9 +14,15 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.organization.ListOrganizationCommunityCommand;
+import com.everhomes.rest.organization.ListOrganizationCommunityV2CommandResponse;
 import com.everhomes.rest.ui.organization.ListCommunitiesBySceneCommand;
 import com.everhomes.rest.ui.organization.ListCommunitiesBySceneResponse;
+import com.everhomes.rest.ui.user.SceneTokenDTO;
+import com.everhomes.rest.user.UserCurrentEntityType;
+import com.everhomes.util.WebTokenGenerator;
 
 /**
  * <ul>
@@ -34,14 +38,26 @@ public class CummunityUiController extends ControllerBase {
     @Autowired
     private ConfigurationProvider configurationProvider;
     
+    @Autowired
+    private OrganizationService organizationService;
+
     /**
-     * <b>URL: /ui/community/listCommunitiesByScene</b>
+     * <b>URL: /ui/org/listCommunitiesByScene</b>
      * <p>获取小区列表</p>
      */
     @RequestMapping("listCommunitiesByScene")
     @RestReturn(value=ListCommunitiesBySceneResponse.class)
     public RestResponse listCommunitiesByScene(@Valid ListCommunitiesBySceneCommand cmd) {
-        RestResponse response = new RestResponse();
+    	ListOrganizationCommunityCommand command = new ListOrganizationCommunityCommand();
+    	ListCommunitiesBySceneResponse resp = new ListCommunitiesBySceneResponse();
+    	WebTokenGenerator webToken = WebTokenGenerator.getInstance();
+ 	    SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+ 		if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
+ 			ListOrganizationCommunityV2CommandResponse res = organizationService.listOrganizationCommunitiesV2(command);
+ 			command.setOrganizationId(sceneToken.getEntityId());
+ 			resp.setDtos(res.getCommunities());
+ 		}
+        RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

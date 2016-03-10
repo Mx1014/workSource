@@ -18,6 +18,8 @@ public class ListTaskPostsCommand {
 	
 	private String sceneToken;
 	
+	private Long communityId;
+	
 	private String taskType; 
 	
 	private Long taskStatus;
@@ -50,6 +52,15 @@ public class ListTaskPostsCommand {
 
 	public void setTaskStatus(Long taskStatus) {
 		this.taskStatus = taskStatus;
+	}
+
+	
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
 
 	public Long getPageAnchor() {

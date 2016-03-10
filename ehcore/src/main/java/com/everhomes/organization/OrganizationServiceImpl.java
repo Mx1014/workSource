@@ -96,6 +96,12 @@ import java.util.stream.Collectors;
 
 
 
+
+
+
+
+
+
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -107,6 +113,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+
+
+
+
+
+
 
 
 
@@ -224,6 +236,7 @@ import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.address.AddressAdminStatus;
@@ -369,6 +382,9 @@ import com.everhomes.rest.organization.pm.UpdateOrganizationMemberByIdsCommand;
 import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.rest.sms.SmsTemplateCode;
+import com.everhomes.rest.ui.privilege.EntrancePrivilege;
+import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeCommand;
+import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeResponse;
 import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
@@ -5377,6 +5393,103 @@ public class OrganizationServiceImpl implements OrganizationService {
 			return res;
 		}
 	    
+	    @Override
+	    public ListPostCommandResponse listAllTaskTopics(ListTopicsByTypeCommand cmd){
+	    	User user = UserContext.current().getUser();
+	    	/* 根据用户不同 查询不同的任务类型贴*/
+			List<Long> privileges = new ArrayList<Long>();
+			
+			List<RoleAssignment> userRoles = aclProvider.listRoleAssignmentByTarget(EntityType.USER.getCode(), user.getId());
+	    	
+	    	List<RoleAssignment> userOrgRoles = aclProvider.listRoleAssignmentByTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId());
+	    	userRoles.addAll(userOrgRoles);
+			privileges.add(PrivilegeConstants.TaskAllListPosts);
+			if(privileges.contains(PrivilegeConstants.TaskAllListPosts)){
+				cmd.setTaskType("");
+			}else if(privileges.contains(PrivilegeConstants.TaskGuaranteeListPosts)){
+				cmd.setTaskType(OrganizationTaskType.REPAIRS.getCode());
+				cmd.setTargetId(user.getId());
+			}else if(privileges.contains(PrivilegeConstants.TaskSeekHelpListPosts)){
+				cmd.setTaskType(OrganizationTaskType.EMERGENCY_HELP.getCode());
+				cmd.setTargetId(user.getId());
+			}else{
+				returnNoPrivileged(privileges, user);
+			}
+			
+			return this.listTaskTopicsByType(cmd);
+	    }
+	    
+	    @Override
+	    public ListPostCommandResponse listMyTaskTopics(ListTopicsByTypeCommand cmd){
+	    	User user = UserContext.current().getUser();
+	    	cmd.setTargetId(user.getId());
+	    	List<Long> privileges = new ArrayList<Long>();
+	    	List<RoleAssignment> userRoles = aclProvider.listRoleAssignmentByTarget(EntityType.USER.getCode(), user.getId());
+	    	
+	    	List<RoleAssignment> userOrgRoles = aclProvider.listRoleAssignmentByTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId());
+	    	
+	    	userRoles.addAll(userOrgRoles);
+			privileges.add(PrivilegeConstants.TaskAllListPosts);
+			/* 根据用户不同 查询不同的任务类型贴*/
+			if(privileges.contains(PrivilegeConstants.TaskAllListPosts)){
+				cmd.setTaskType("");
+			}else if(privileges.contains(PrivilegeConstants.TaskGuaranteeListPosts)){
+				cmd.setTaskType(OrganizationTaskType.REPAIRS.getCode());
+			}else if(privileges.contains(PrivilegeConstants.TaskSeekHelpListPosts)){
+				cmd.setTaskType(OrganizationTaskType.EMERGENCY_HELP.getCode());
+			}else{
+				returnNoPrivileged(privileges, user);
+			}
+			
+			return this.listTaskTopicsByType(cmd);
+	    }
+	    
+	    @Override
+	    public ListPostCommandResponse listGrabTaskTopics(ListTopicsByTypeCommand cmd){
+	    	User user = UserContext.current().getUser();
+	    	List<RoleAssignment> userRoles = aclProvider.listRoleAssignmentByTarget(EntityType.USER.getCode(), user.getId());
+	    	
+	    	List<RoleAssignment> userOrgRoles = aclProvider.listRoleAssignmentByTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId());
+	    	
+	    	userRoles.addAll(userOrgRoles);
+	    	
+	    	List<Long> privileges = new ArrayList<Long>();
+			privileges.add(PrivilegeConstants.TaskAllListPosts);
+			/* 根据用户不同 查询不同的任务类型贴*/
+			if(privileges.contains(PrivilegeConstants.TaskAllListPosts)){
+				cmd.setTaskType("");
+			}else if(privileges.contains(PrivilegeConstants.TaskGuaranteeListPosts)){
+				cmd.setTaskType(OrganizationTaskType.REPAIRS.getCode());
+			}else if(privileges.contains(PrivilegeConstants.TaskSeekHelpListPosts)){
+				cmd.setTaskType(OrganizationTaskType.EMERGENCY_HELP.getCode());
+			}else{
+				returnNoPrivileged(privileges, user);
+			}
+			
+			return this.listTaskTopicsByType(cmd);
+	    }
+	    
+	    @Override
+	    public GetEntranceByPrivilegeResponse getEntranceByPrivilege(GetEntranceByPrivilegeCommand cmd){
+	    	User user = UserContext.current().getUser();
+	    	GetEntranceByPrivilegeResponse res = new GetEntranceByPrivilegeResponse();
+	    	
+	    	List<Long> privileges = new ArrayList<Long>();
+			privileges.add(PrivilegeConstants.TaskAllListPosts);
+			/* 根据用户不同 查询不同的任务类型贴*/
+			if(privileges.contains(PrivilegeConstants.TaskAllListPosts)){
+				res.setEntrancePrivilege(EntrancePrivilege.TASK_ALL_LIST.getCode());
+			}else if(privileges.contains(PrivilegeConstants.TaskGuaranteeListPosts)){
+				res.setEntrancePrivilege(EntrancePrivilege.TASK_GUARANTEE_LIST.getCode());
+			}else if(privileges.contains(PrivilegeConstants.TaskSeekHelpListPosts)){
+				res.setEntrancePrivilege(EntrancePrivilege.TASK_SEEK_HELP_LIST.getCode());
+			}else{
+				returnNoPrivileged(privileges, user);
+			}
+			
+			return res;
+	    }
+	    
 	    
 	    private void sendTaskMsg(Map<String,Object> map, OrganizationTask task, User user){
 	    	
@@ -5402,5 +5515,13 @@ public class OrganizationServiceImpl implements OrganizationService {
     		this.createComment(command);
 	    }
 	    
+	    /**
+	     * 抛出无权限 
+	     */
+	    private void returnNoPrivileged(List<Long> privileges, User user){
+	    	LOGGER.error("non-privileged, privileges="+privileges + ", userId=" + user.getId());
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_PRIVILEGED,
+					"non-privileged.");
+	    }
 	
 }

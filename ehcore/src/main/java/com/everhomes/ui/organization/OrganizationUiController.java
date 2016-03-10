@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.ui.organization;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -18,25 +19,19 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.forum.ListPostCommandResponse;
-import com.everhomes.rest.forum.PostDTO;
-import com.everhomes.rest.organization.ListOrganizationContactCommand;
-import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.ListTopicsByTypeCommand;
-import com.everhomes.rest.organization.OrganizationMemberDTO;
-import com.everhomes.rest.ui.organization.ListCommunitiesBySceneCommand;
-import com.everhomes.rest.ui.organization.ListCommunitiesBySceneResponse;
-import com.everhomes.rest.ui.organization.ListOrganizationPersonnelsCommand;
-import com.everhomes.rest.ui.organization.ListOrganizationPersonnelsResponse;
-import com.everhomes.rest.ui.organization.ListScenesByCummunityIdCommand;
+import com.everhomes.rest.organization.OrganizationServiceErrorCode;
+import com.everhomes.rest.organization.OrganizationTaskType;
 import com.everhomes.rest.ui.organization.ListTaskPostsCommand;
 import com.everhomes.rest.ui.organization.ListTaskPostsResponse;
-import com.everhomes.rest.ui.user.SceneDTO;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.WebTokenGenerator;
 
 /**
@@ -63,25 +58,15 @@ public class OrganizationUiController extends ControllerBase {
     @RequestMapping("listMyTaskPostsByScene")
     @RestReturn(value=ListTaskPostsResponse.class)
     public RestResponse listMyTaskPostsByScene(@Valid ListTaskPostsCommand cmd) {
-        User user = UserContext.current().getUser();
-        WebTokenGenerator webToken = WebTokenGenerator.getInstance();
-        SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
-		ListTopicsByTypeCommand command = ConvertHelper.convert(cmd, ListTopicsByTypeCommand.class);
-		if(sceneToken.getEntityType().equals(UserCurrentEntityType.COMMUNITY.getCode())){
-			command.setCommunityId(sceneToken.getEntityId());
-		}
-		
-		if(sceneToken.getEntityType().equals(UserCurrentEntityType.ORGANIZATION.getCode())){
-			command.setOrganizationId(sceneToken.getEntityId());
-		}
-		
+        ListTopicsByTypeCommand command = ConvertHelper.convert(cmd, ListTopicsByTypeCommand.class);
+//        WebTokenGenerator webToken = WebTokenGenerator.getInstance();
+//        SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+//		if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
+//			command.setOrganizationId(sceneToken.getEntityId());
+//		}
+		command.setCommunityId(cmd.getCommunityId());
 		command.setPageOffset(cmd.getPageAnchor());
-		/* 根据用户不同 查询不同的任务类型贴*/
-		if(true){
-			cmd.setTaskType("");
-			command.setTargetId(user.getId());
-			
-		}
+		command.setOrganizationId(1000001l);
 		ListPostCommandResponse res = organizationService.listTaskTopicsByType(command);
         ListTaskPostsResponse response = new ListTaskPostsResponse();
         response.setDtos(res.getPosts());
@@ -100,22 +85,17 @@ public class OrganizationUiController extends ControllerBase {
     @RequestMapping("listTaskPostsByScene")
     @RestReturn(value=ListTaskPostsResponse.class)
     public RestResponse listTaskPostsByScene(@Valid ListTaskPostsCommand cmd) {
-    	User user = UserContext.current().getUser();
 		ListTopicsByTypeCommand command = ConvertHelper.convert(cmd, ListTopicsByTypeCommand.class);
-	    WebTokenGenerator webToken = WebTokenGenerator.getInstance();
-	    SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
-		if(sceneToken.getEntityType().equals(UserCurrentEntityType.COMMUNITY.getCode())){
-			command.setCommunityId(sceneToken.getEntityId());
-		}
-			
-		if(sceneToken.getEntityType().equals(UserCurrentEntityType.ORGANIZATION.getCode())){
-			command.setOrganizationId(sceneToken.getEntityId());
-		}
-		command.setPageOffset(cmd.getPageAnchor());
-		/* 根据用户不同 查询不同的任务类型贴*/
-		if(true){
-			cmd.setTaskType("");
-		}
+//	    WebTokenGenerator webToken = WebTokenGenerator.getInstance();
+//	    SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+//		if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
+//			command.setOrganizationId(sceneToken.getEntityId());
+//		}
+		
+		
+		command.setCommunityId(cmd.getCommunityId());
+		command.setOrganizationId(1000001l);
+
 		ListPostCommandResponse res = organizationService.listTaskTopicsByType(command);
         ListTaskPostsResponse response = new ListTaskPostsResponse();
         response.setDtos(res.getPosts());
@@ -126,4 +106,36 @@ public class OrganizationUiController extends ControllerBase {
         resp.setErrorDescription("OK");
         return resp;
     }
+    
+    
+    /**
+     * <b>URL: /ui/org/listGrabTaskTopics</b>
+     * <p>抢单任务贴列表</p>
+     */
+    @RequestMapping("listGrabTaskTopics")
+    @RestReturn(value=ListTaskPostsResponse.class)
+    public RestResponse listGrabTaskTopics(@Valid ListTaskPostsCommand cmd) {
+		ListTopicsByTypeCommand command = ConvertHelper.convert(cmd, ListTopicsByTypeCommand.class);
+//	    WebTokenGenerator webToken = WebTokenGenerator.getInstance();
+//	    SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+//		if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
+//			command.setOrganizationId(sceneToken.getEntityId());
+//		}
+		
+		
+		command.setCommunityId(cmd.getCommunityId());
+		command.setOrganizationId(1000001l);
+
+		ListPostCommandResponse res = organizationService.listGrabTaskTopics(command);
+        ListTaskPostsResponse response = new ListTaskPostsResponse();
+        response.setDtos(res.getPosts());
+        response.setNextPageAnchor(res.getNextPageAnchor());
+        
+        RestResponse resp =  new RestResponse(response);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+    
+   
 }
