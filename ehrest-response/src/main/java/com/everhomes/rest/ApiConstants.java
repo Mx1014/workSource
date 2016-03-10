@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-03-05 18:37:52
+// generated at 2016-03-10 21:46:01
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -457,6 +457,7 @@ public interface ApiConstants {
     public static final String OPENAPI_SYNCUSERINFO_URL = "/openapi/syncuserinfo";
     public static final String OPENAPI_USER_INITCOUPON_URL = "/openapi/user/initCoupon";
     public static final String OPENAPI_USER_TESTGETTHIRDSIGNATURE_URL = "/openapi/user/testGetThirdSignature";
+    public static final String ORG_ACCEPTTASK_URL = "/org/acceptTask";
     public static final String ORG_ADDORGMEMBERBYPHONE_URL = "/org/addOrgMemberByPhone";
     public static final String ORG_APPLYFORENTERPRISECONTACT_URL = "/org/applyForEnterpriseContact";
     public static final String ORG_APPLYORGANIZATIONMEMBER_URL = "/org/applyOrganizationMember";
@@ -474,6 +475,7 @@ public interface ApiConstants {
     public static final String ORG_GETORGTOPIC_URL = "/org/getOrgTopic";
     public static final String ORG_GETORGANIZATIONDETAILS_URL = "/org/getOrganizationDetails";
     public static final String ORG_GETUSEROWNINGORGANIZATIONS_URL = "/org/getUserOwningOrganizations";
+    public static final String ORG_GRABTASK_URL = "/org/grabTask";
     public static final String ORG_LEAVEFORENTERPRISECONTACT_URL = "/org/leaveForEnterpriseContact";
     public static final String ORG_LIKEORGTOPIC_URL = "/org/likeOrgTopic";
     public static final String ORG_LISTCOMMUNITIESBYORGANIZATIONID_URL = "/org/listCommunitiesByOrganizationId";
@@ -491,7 +493,9 @@ public interface ApiConstants {
     public static final String ORG_NEWCOOPERATION_URL = "/org/newCooperation";
     public static final String ORG_NEWORGCOMMENT_URL = "/org/newOrgComment";
     public static final String ORG_NEWORGTOPIC_URL = "/org/newOrgTopic";
+    public static final String ORG_PROCESSINGTASK_URL = "/org/processingTask";
     public static final String ORG_QUERYORGTOPICSBYCATEGORY_URL = "/org/queryOrgTopicsByCategory";
+    public static final String ORG_REFUSETASK_URL = "/org/refuseTask";
     public static final String ORG_REJECTORGANIZATION_URL = "/org/rejectOrganization";
     public static final String ORG_REJECTORGANIZATIONMEMBER_URL = "/org/rejectOrganizationMember";
     public static final String ORG_SEARCHENTERPRISE_URL = "/org/searchEnterprise";
@@ -654,18 +658,21 @@ public interface ApiConstants {
     public static final String TECHPARK_RENTAL_UPDATERENTALSITE_URL = "/techpark/rental/updateRentalSite";
     public static final String TECHPARK_RENTAL_VERIFYSERVICERENTALBILL_URL = "/techpark/rental/verifyServiceRentalBill";
     public static final String UI_BANNER_GETBANNERSBYSCENE_URL = "/ui/banner/getBannersByScene";
+    public static final String UI_COMMUNITY_LISTCOMMUNITIESBYSCENE_URL = "/ui/community/listCommunitiesByScene";
     public static final String UI_FORUM_GETTOPICQUERYFILTERS_URL = "/ui/forum/getTopicQueryFilters";
     public static final String UI_FORUM_GETTOPICSENTSCOPES_URL = "/ui/forum/getTopicSentScopes";
     public static final String UI_FORUM_NEWTOPICBYSCENE_URL = "/ui/forum/newTopicByScene";
     public static final String UI_FORUM_SEARCHBYSCENE_URL = "/ui/forum/searchByScene";
     public static final String UI_LAUNCHPAD_GETLASTLAUNCHPADLAYOUTBYSCENE_URL = "/ui/launchpad/getLastLaunchPadLayoutByScene";
     public static final String UI_LAUNCHPAD_GETLAUNCHPADITEMSBYSCENE_URL = "/ui/launchpad/getLaunchPadItemsByScene";
+    public static final String UI_ORG_LISTGRABTASKTOPICS_URL = "/ui/org/listGrabTaskTopics";
     public static final String UI_ORG_LISTMYTASKPOSTSBYSCENE_URL = "/ui/org/listMyTaskPostsByScene";
-    public static final String UI_ORG_LISTORGANIZATIONPERSONNELS_URL = "/ui/org/listOrganizationPersonnels";
     public static final String UI_ORG_LISTTASKPOSTSBYSCENE_URL = "/ui/org/listTaskPostsByScene";
+    public static final String UI_PRIVILEGE_GETENTRANCEBYPRIVILEGE_URL = "/ui/privilege/getEntranceByPrivilege";
     public static final String UI_USER_GETUSEROPPROMOTIONSBYSCENE_URL = "/ui/user/getUserOpPromotionsByScene";
     public static final String UI_USER_GETUSERRELATEDADDRESSES_URL = "/ui/user/getUserRelatedAddresses";
     public static final String UI_USER_LISTCONTACTSBYSCENE_URL = "/ui/user/listContactsByScene";
+    public static final String UI_USER_LISTSCENESBYCUMMUNITYID_URL = "/ui/user/listScenesByCummunityId";
     public static final String UI_USER_LISTUSERRELATEDSCENES_URL = "/ui/user/listUserRelatedScenes";
     public static final String UI_USER_SETUSERCURRENTSCENE_URL = "/ui/user/setUserCurrentScene";
     public static final String USER_ADMINLOGON_URL = "/user/adminLogon";
