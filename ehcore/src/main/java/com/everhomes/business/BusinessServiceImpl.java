@@ -164,11 +164,6 @@ public class BusinessServiceImpl implements BusinessService {
 
 	@Override
 	public void syncBusiness(SyncBusinessCommand cmd) {
-		if(cmd.getNamespaceId()==null||cmd.getScopeType()==null){
-			LOGGER.error("Invalid paramter.namespaceId or scopeType is null.namespaceId="+cmd.getNamespaceId()+",scopreType="+cmd.getScopeType());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Invalid paramter.namespaceId or scopeType is null.");
-		}
 		if(cmd.getUserId() == null){
 			LOGGER.error("Invalid paramter userId,userId is null");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
@@ -195,7 +190,8 @@ public class BusinessServiceImpl implements BusinessService {
 			if(cmd.getCategroies() != null && !cmd.getCategroies().isEmpty()){
 				createBusinessCategories(business, cmd.getCategroies());
 			}
-			createBusinessAssignedNamespaceOnDelOther(business.getId(),cmd.getNamespaceId());
+			if(cmd.getNamespaceId()!=null)
+				createBusinessAssignedNamespaceOnDelOther(business.getId(),cmd.getNamespaceId());
 			if(cmd.getScopeType()!=null){
 				if(cmd.getScopeType().byteValue()==ScopeType.ALL.getCode()){
 					createBusinessAssignedScopeOnDelOther(business.getId(),ScopeType.ALL.getCode(),0L);
@@ -209,6 +205,12 @@ public class BusinessServiceImpl implements BusinessService {
 					String city = response.getResult().getAddressComponent().getCity();
 					Region region = regionProvider.findRegionByPath("/"+province.subSequence(0, province.length()-1)+"/"+city);
 					createBusinessAssignedScopeOnDelOther(business.getId(),ScopeType.CITY.getCode(),region.getId());
+				}
+				else{
+					List<BusinessAssignedScope> list = businessProvider.listBusinessAssignedScopeByOwnerId(business.getId());
+					if(list!=null&&!list.isEmpty())
+						for(BusinessAssignedScope r:list)
+							businessProvider.deleteBusinessAssignedScope(r.getId());
 				}
 			}
 			return true;
