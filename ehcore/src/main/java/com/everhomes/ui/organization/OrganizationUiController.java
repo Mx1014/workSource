@@ -140,33 +140,4 @@ public class OrganizationUiController extends ControllerBase {
         return response;
     }
     
-    /**
-     * <b>URL: /ui/org/listOrganizationPersonnels</b>
-     * <p>通讯录列表</p>
-     */
-    @RequestMapping("listOrganizationPersonnels")
-    @RestReturn(value=ListOrganizationPersonnelsResponse.class)
-    public RestResponse listOrganizationPersonnels(@Valid ListOrganizationPersonnelsCommand cmd) {
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
-    /**
-     * <b>URL: /ui/user/listScenesByCummunityId</b>
-     * <p>列出小区当前相关场景。</p>
-     */
-    @RequestMapping("listScenesByCummunityId")
-    @RestReturn(value=SceneDTO.class, collection=true)
-    public RestResponse listScenesByCummunityId(ListScenesByCummunityIdCommand cmd) {
-        List<SceneDTO> sceneDtoList = null;
-        
-        RestResponse response = new RestResponse(sceneDtoList);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
-    
 }

@@ -22,6 +22,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.organization.ListOrganizationContactCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.ui.organization.ListScenesByCummunityIdCommand;
 import com.everhomes.rest.ui.user.GetUserOpPromotionCommand;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
@@ -151,6 +152,21 @@ public class UserUiController extends ControllerBase {
         ListUserOpPromotionsRespose cmdResponse = null;
         
         RestResponse response = new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /ui/user/listScenesByCummunityId</b>
+     * <p>列出小区当前相关场景。</p>
+     */
+    @RequestMapping("listScenesByCummunityId")
+    @RestReturn(value=SceneDTO.class, collection=true)
+    public RestResponse listScenesByCummunityId(ListScenesByCummunityIdCommand cmd) {
+        List<SceneDTO> sceneDtoList = null;
+        
+        RestResponse response = new RestResponse(sceneDtoList);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
