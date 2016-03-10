@@ -12,10 +12,14 @@ package com.everhomes.rest.user;
  */
 public enum UserCurrentEntityType {
     COMMUNITY_RESIDENTIAL("community_residential"), 
-    COMMUNITY_COMMERCIAL("community_commercial"), 
+    COMMUNITY_COMMERCIAL("community_commercial"),
+    ENTERPRISE("enterprise"), 
+    
+    
+    /*以后要用的实体*/
     FAMILY("family"), 
     ORGANIZATION("organization"),
-    ENTERPRISE("enterprise");
+    COMMUNITY("community");
 
     private String code;
     

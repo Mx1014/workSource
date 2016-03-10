@@ -2,6 +2,7 @@
 package com.everhomes.ui.user;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -16,18 +17,26 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.organization.ListOrganizationContactCommand;
+import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.ui.user.GetUserOpPromotionCommand;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
 import com.everhomes.rest.ui.user.ListContactBySceneRespose;
 import com.everhomes.rest.ui.user.ListContactsBySceneCommand;
+import com.everhomes.rest.ui.user.SceneContactDTO;
 import com.everhomes.rest.ui.user.SceneDTO;
+import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SetUserCurrentSceneCommand;
 import com.everhomes.rest.user.ListUserOpPromotionsRespose;
 import com.everhomes.rest.user.OpPromotionDTO;
 import com.everhomes.rest.user.SyncActivityCommand;
+import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.util.StringHelper;
+import com.everhomes.util.WebTokenGenerator;
 
 /**
  * <ul>
@@ -43,6 +52,9 @@ public class UserUiController extends ControllerBase {
     
     @Autowired
     private ConfigurationProvider configurationProvider;
+    
+    @Autowired
+    private OrganizationService organizationService;
     
     /**
      * <b>URL: /ui/user/listUserRelatedScenes</b>
@@ -68,9 +80,32 @@ public class UserUiController extends ControllerBase {
     @RequestMapping(value = "listContactsByScene")
     @RestReturn(value = ListContactBySceneRespose.class)
     public RestResponse listContactsByScene(@Valid ListContactsBySceneCommand cmd) throws Exception {
-//        Tuple<Long, List<ContactDTO>> result = userActivityService.listUserContacts(cmd.getAnchor());
-//        ListContactRespose rsp = new ListContactRespose(result.second(), result.first());
-//        return new RestResponse(rsp);
+    	WebTokenGenerator webToken = WebTokenGenerator.getInstance();
+ 	    SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+ 	   List<SceneContactDTO> dtos = null;
+ 	    if(sceneToken.getEntityType().equals(UserCurrentEntityType.COMMUNITY.getCode())){
+ 	    	
+		}
+			
+		if(sceneToken.getEntityType().equals(UserCurrentEntityType.ORGANIZATION.getCode())){
+			ListOrganizationContactCommand command = new ListOrganizationContactCommand();
+			command.setOrganizationId(sceneToken.getEntityId());
+			command.setPageSize(100000);
+			ListOrganizationMemberCommandResponse res = organizationService.listOrganizationPersonnels(command);
+			List<OrganizationMemberDTO> members = res.getMembers();
+			 dtos = members.stream().map(r->{
+				SceneContactDTO dto = new SceneContactDTO();
+				dto.setContactId(r.getId());
+				dto.setContactName(r.getContactName());
+				dto.setContactPhone(r.getContactToken());
+				dto.setContactAvatar(r.getAvatar());
+				dto.setUserId(r.getTargetId());
+				return dto;
+			}).collect(Collectors.toList());
+		}
+		
+		ListContactBySceneRespose res = new ListContactBySceneRespose();
+		res.setContacts(dtos);
         return null;
     }
     

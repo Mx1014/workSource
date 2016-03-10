@@ -25,6 +25,7 @@ import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.ListTopicsByTypeCommand;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.ui.organization.ListCommunitiesBySceneCommand;
+import com.everhomes.rest.ui.organization.ListCommunitiesBySceneResponse;
 import com.everhomes.rest.ui.organization.ListOrganizationPersonnelsCommand;
 import com.everhomes.rest.ui.organization.ListOrganizationPersonnelsResponse;
 import com.everhomes.rest.ui.organization.ListScenesByCummunityIdCommand;
@@ -66,7 +67,7 @@ public class OrganizationUiController extends ControllerBase {
         WebTokenGenerator webToken = WebTokenGenerator.getInstance();
         SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
 		ListTopicsByTypeCommand command = ConvertHelper.convert(cmd, ListTopicsByTypeCommand.class);
-		if(sceneToken.getEntityType().equals(UserCurrentEntityType.COMMUNITY_COMMERCIAL.getCode())){
+		if(sceneToken.getEntityType().equals(UserCurrentEntityType.COMMUNITY.getCode())){
 			command.setCommunityId(sceneToken.getEntityId());
 		}
 		
@@ -103,7 +104,7 @@ public class OrganizationUiController extends ControllerBase {
 		ListTopicsByTypeCommand command = ConvertHelper.convert(cmd, ListTopicsByTypeCommand.class);
 	    WebTokenGenerator webToken = WebTokenGenerator.getInstance();
 	    SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
-		if(sceneToken.getEntityType().equals(UserCurrentEntityType.COMMUNITY_COMMERCIAL.getCode())){
+		if(sceneToken.getEntityType().equals(UserCurrentEntityType.COMMUNITY.getCode())){
 			command.setCommunityId(sceneToken.getEntityId());
 		}
 			
@@ -131,7 +132,7 @@ public class OrganizationUiController extends ControllerBase {
      * <p>获取小区列表</p>
      */
     @RequestMapping("listCommunitiesByScene")
-    @RestReturn(value=ListOrganizationPersonnelsResponse.class)
+    @RestReturn(value=ListCommunitiesBySceneResponse.class)
     public RestResponse listCommunitiesByScene(@Valid ListCommunitiesBySceneCommand cmd) {
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

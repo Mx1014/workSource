@@ -26,6 +26,8 @@ public class ListTopicsByTypeCommand {
 	
 	private Long targetId;
 	
+	private String option;
+	
 	public Byte getTaskStatus() {
 		return taskStatus;
 	}
@@ -71,6 +73,14 @@ public class ListTopicsByTypeCommand {
 	}
 	public void setTargetId(Long targetId) {
 		this.targetId = targetId;
+	}
+	
+	
+	public String getOption() {
+		return option;
+	}
+	public void setOption(String option) {
+		this.option = option;
 	}
 	@Override
 	public String toString() {

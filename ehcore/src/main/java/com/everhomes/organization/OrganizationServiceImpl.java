@@ -5364,6 +5364,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 			for (OrganizationTask task : orgTasks) {
 				PostDTO dto = this.forumService.getTopicById(task.getApplyEntityId(),commuId,false);
 				if(dto.getForumId().equals(community.getDefaultForumId())){
+					task.setOption(cmd.getOption());
+					dto.setEmbeddedJson(StringHelper.toJsonString(task));
 					dtos.add(dto);
 				}
 			}
