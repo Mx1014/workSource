@@ -59,15 +59,13 @@ public class OrganizationUiController extends ControllerBase {
     @RestReturn(value=ListTaskPostsResponse.class)
     public RestResponse listMyTaskPostsByScene(@Valid ListTaskPostsCommand cmd) {
         ListTopicsByTypeCommand command = ConvertHelper.convert(cmd, ListTopicsByTypeCommand.class);
-//        WebTokenGenerator webToken = WebTokenGenerator.getInstance();
-//        SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
-//		if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
-//			command.setOrganizationId(sceneToken.getEntityId());
-//		}
-		command.setCommunityId(cmd.getCommunityId());
+        WebTokenGenerator webToken = WebTokenGenerator.getInstance();
+        SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+		if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
+			command.setOrganizationId(sceneToken.getEntityId());
+		}
 		command.setPageOffset(cmd.getPageAnchor());
-		command.setOrganizationId(1000001l);
-		ListPostCommandResponse res = organizationService.listTaskTopicsByType(command);
+		ListPostCommandResponse res = organizationService.listMyTaskTopics(command);
         ListTaskPostsResponse response = new ListTaskPostsResponse();
         response.setDtos(res.getPosts());
         response.setNextPageAnchor(res.getNextPageAnchor());
@@ -86,17 +84,13 @@ public class OrganizationUiController extends ControllerBase {
     @RestReturn(value=ListTaskPostsResponse.class)
     public RestResponse listTaskPostsByScene(@Valid ListTaskPostsCommand cmd) {
 		ListTopicsByTypeCommand command = ConvertHelper.convert(cmd, ListTopicsByTypeCommand.class);
-//	    WebTokenGenerator webToken = WebTokenGenerator.getInstance();
-//	    SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
-//		if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
-//			command.setOrganizationId(sceneToken.getEntityId());
-//		}
-		
-		
-		command.setCommunityId(cmd.getCommunityId());
-		command.setOrganizationId(1000001l);
-
-		ListPostCommandResponse res = organizationService.listTaskTopicsByType(command);
+	    WebTokenGenerator webToken = WebTokenGenerator.getInstance();
+	    SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+		if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
+			command.setOrganizationId(sceneToken.getEntityId());
+		}
+		command.setPageOffset(cmd.getPageAnchor());
+		ListPostCommandResponse res = organizationService.listAllTaskTopics(command);
         ListTaskPostsResponse response = new ListTaskPostsResponse();
         response.setDtos(res.getPosts());
         response.setNextPageAnchor(res.getNextPageAnchor());
@@ -116,16 +110,12 @@ public class OrganizationUiController extends ControllerBase {
     @RestReturn(value=ListTaskPostsResponse.class)
     public RestResponse listGrabTaskTopics(@Valid ListTaskPostsCommand cmd) {
 		ListTopicsByTypeCommand command = ConvertHelper.convert(cmd, ListTopicsByTypeCommand.class);
-//	    WebTokenGenerator webToken = WebTokenGenerator.getInstance();
-//	    SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
-//		if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
-//			command.setOrganizationId(sceneToken.getEntityId());
-//		}
-		
-		
-		command.setCommunityId(cmd.getCommunityId());
-		command.setOrganizationId(1000001l);
-
+	    WebTokenGenerator webToken = WebTokenGenerator.getInstance();
+	    SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+		if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
+			command.setOrganizationId(sceneToken.getEntityId());
+		}
+		command.setPageOffset(cmd.getPageAnchor());
 		ListPostCommandResponse res = organizationService.listGrabTaskTopics(command);
         ListTaskPostsResponse response = new ListTaskPostsResponse();
         response.setDtos(res.getPosts());

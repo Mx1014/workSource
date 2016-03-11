@@ -5159,9 +5159,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	Long taskId = cmd.getTaskId();
 	    	OrganizationTask task = organizationProvider.findOrganizationTaskById(taskId);
 	    	
-	    	if(task.getTaskStatus().equals(OrganizationTaskStatus.UNPROCESSED.getCode()) 
+	    	if(OrganizationTaskStatus.fromCode(task.getTaskStatus()) == OrganizationTaskStatus.UNPROCESSED
 	    			&& (task.getTargetId().equals(user.getId())
-	    			|| ((StringUtils.isEmpty(task.getTargetId()) || task.getTargetId().equals(0))))){
+	    			|| ((StringUtils.isEmpty(task.getTargetId()) || task.getTargetId() == 0)))){
 	    		task.setTaskStatus(OrganizationTaskStatus.PROCESSING.getCode());
 	    		task.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 	    		task.setOperatorUid(user.getId());
@@ -5170,6 +5170,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    		organizationProvider.updateOrganizationTask(task);
 	    		
 	    		NewCommentCommand command = new NewCommentCommand();
+	    		command.setForumId(1l);
 	    		command.setTopicId(task.getApplyEntityId());
 	    		command.setContentType(PostContentType.TEXT.getCode());
 	    		Map<String,Object> map = new HashMap<String, Object>();
@@ -5192,8 +5193,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	Long taskId = cmd.getTaskId();
 	    	OrganizationTask task = organizationProvider.findOrganizationTaskById(taskId);
 	    	
-	    	if(task.getTaskStatus().equals(OrganizationTaskStatus.UNPROCESSED.getCode()) 
-	    			&& (StringUtils.isEmpty(task.getTargetId()) || task.getTargetId().equals(0))){
+	    	if(OrganizationTaskStatus.fromCode(task.getTaskStatus()) == OrganizationTaskStatus.UNPROCESSED
+	    			&& (StringUtils.isEmpty(task.getTargetId()) || task.getTargetId() == 0)){
 	    		task.setTaskStatus(OrganizationTaskStatus.PROCESSING.getCode());
 	    		task.setTargetId(user.getId());
 	    		task.setTargetType(OrganizationTaskTargetType.USER.getCode());
@@ -5204,6 +5205,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    		organizationProvider.updateOrganizationTask(task);
 	    		
 	    		NewCommentCommand command = new NewCommentCommand();
+	    		command.setForumId(1l);
 	    		command.setTopicId(task.getApplyEntityId());
 	    		command.setContentType(PostContentType.TEXT.getCode());
 	    		Map<String,Object> map = new HashMap<String, Object>();
@@ -5237,16 +5239,19 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	
 	    	Map<String,Object> map = new HashMap<String, Object>();
 	    	
+	    	/* 根据用户不同 查询不同的任务类型贴*/
+			List<Long> privileges = new ArrayList<Long>();
+			privileges.add(PrivilegeConstants.TaskAllListPosts);
 	    	//当可以查询全部的任务类型时
-	    	if(taskId == 1){
+	    	if(privileges.contains(PrivilegeConstants.TaskAllListPosts)){
 	    		if(null != cmd.getUserId()){
-	    			if(cmd.getUserId() == user.getId() && cmd.getTaskStatus().equals(OrganizationTaskStatus.UNPROCESSED.getCode())){
+	    			if(cmd.getUserId().equals(user.getId()) && OrganizationTaskStatus.fromCode(cmd.getTaskStatus()) == OrganizationTaskStatus.UNPROCESSED ){
 	    				cmd.setTaskStatus(OrganizationTaskStatus.PROCESSING.getCode());
 	    			}
-	    		}else if(!StringUtils.isEmpty(task.getTargetId()) && !task.getTargetId().equals(0)){
+	    		}else if(!StringUtils.isEmpty(task.getTargetId()) && task.getTargetId() != 0){
 	    			cmd.setUserId(task.getTargetId());
 	    		}else{
-	    			if(cmd.getTaskStatus().equals(OrganizationTaskStatus.UNPROCESSED.getCode()) || cmd.getTaskStatus().equals(OrganizationTaskStatus.PROCESSING.getCode())){
+	    			if(OrganizationTaskStatus.fromCode(cmd.getTaskStatus()) == OrganizationTaskStatus.UNPROCESSED || OrganizationTaskStatus.fromCode(cmd.getTaskStatus()) == OrganizationTaskStatus.PROCESSING){
 	    				//异常
 	    				LOGGER.error("This task is not assigned to any personnel, targetId="+task.getTargetId());
 	    				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_TASK_NOT_ASSIGNED_PERSONNEL,
@@ -5258,16 +5263,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    		
 	    		task.setTargetId(cmd.getUserId());
 	    		task.setTargetType(OrganizationTaskTargetType.USER.getCode());
-	    		
     			task.setTaskStatus(cmd.getTaskStatus());
     			
-    			
 	    		task.setUnprocessedTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-	    		task.setTaskCategory(cmd.getTaskCategory());
-	    		task.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-	    		task.setOperatorUid(user.getId());
 	    		
-	    		organizationProvider.updateOrganizationTask(task);
 	    		User target = userProvider.findUserById(cmd.getUserId());
 	    		map.put("operatorUName", user.getNickName());
 	    		map.put("operatorUToken", user.getIdentifierToken());
@@ -5275,14 +5274,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    		User create = userProvider.findUserById(task.getCreatorUid());
 	    		map.put("createUName", null != create ? create.getNickName() : "");
 	    		
-	    		this.sendTaskMsg(map, task, user);
-	    		
 	    	//当智能处理部分类型时
-	    	}else if(taskId == 2){
+	    	}else if(privileges.contains(PrivilegeConstants.TaskGuaranteeListPosts)){
 	    		if(user.getId().equals(task.getTargetId())){
-	    			if(cmd.getTaskStatus().equals(OrganizationTaskStatus.PROCESSED.getCode())){
+	    			if(OrganizationTaskStatus.fromCode(cmd.getTaskStatus()) == OrganizationTaskStatus.PROCESSED){
 	    				task.setProcessedTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-	    			}else if(cmd.getTaskStatus().equals(OrganizationTaskStatus.UNPROCESSED.getCode()) && null != cmd.getUserId()){
+	    			}else if(OrganizationTaskStatus.fromCode(cmd.getTaskStatus()) == OrganizationTaskStatus.UNPROCESSED && null != cmd.getUserId()){
 	    				if(cmd.getUserId().equals(task.getTargetId())){
 	    					cmd.setTaskStatus(OrganizationTaskStatus.PROCESSING.getCode());
 	    				}else{
@@ -5298,10 +5295,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    			}
 	    			
 	    			task.setTaskStatus(cmd.getTaskStatus());
-	    			task.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		    		task.setOperatorUid(user.getId());
-		    		
-		    		organizationProvider.updateOrganizationTask(task);
 		    		
 		    		User target = userProvider.findUserById(cmd.getUserId());
 		    		
@@ -5317,15 +5310,48 @@ public class OrganizationServiceImpl implements OrganizationService {
 							"Tasks have been processed.");
     			}
 	    		
-	    		if(null != post){
-	    			post.setPrivateFlag(cmd.getPrivateFlag());
-    				post.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-    				post.setEmbeddedJson(StringHelper.toJsonString(task));
-    				forumProvider.updatePost(post);
-	    		}
-	    		
-	    		this.sendTaskMsg(map, task, user);
-	    	}
+	    	}else if(privileges.contains(PrivilegeConstants.TaskSeekHelpListPosts)){
+	    		if(user.getId().equals(task.getTargetId()) || task.getTargetId() == 0 || StringUtils.isEmpty(task.getTargetId())){
+	    			if(OrganizationTaskStatus.fromCode(cmd.getTaskStatus()) == OrganizationTaskStatus.OTHER){
+	    				//异常
+	    				LOGGER.error("Cannot perform this operation on a task, status="+cmd.getTaskStatus());
+	    				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_TASK_CANNOT_OPERATE,
+	    						"Cannot perform this operation on a task.");
+	    			}
+	    			
+	    			task.setTargetId(user.getId());
+	    			task.setTaskStatus(cmd.getTaskStatus());
+		    		
+		    		User target = userProvider.findUserById(cmd.getUserId());
+		    		
+		    		map.put("operatorUName", user.getNickName());
+		    		map.put("operatorUToken", user.getIdentifierToken());
+		    		map.put("targetUName", null != target ? target.getNickName() : "");
+		    		map.put("createUName", user.getIdentifierToken());
+		    		
+	    		}else{
+    				//异常
+	    			LOGGER.error("Tasks have been processed, status="+task.getTaskStatus() + ", targetId=" + task.getTargetId());
+					throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_TASK_ALREADY_PROCESSED,
+							"Tasks have been processed.");
+    			}
+	    	}else{
+				returnNoPrivileged(privileges, user);
+			}
+	    	
+	    	task.setTaskCategory(cmd.getTaskCategory());
+			task.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+    		task.setOperatorUid(user.getId());
+    		
+    		organizationProvider.updateOrganizationTask(task);
+    		
+	    	if(null != post){
+    			post.setPrivateFlag(cmd.getPrivateFlag());
+				post.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				post.setEmbeddedJson(StringHelper.toJsonString(task));
+				forumProvider.updatePost(post);
+    		}
+	    	this.sendTaskMsg(map, task, user);
 	    }
 	    
 	    
@@ -5337,9 +5363,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	Long taskId = cmd.getTaskId();
 	    	OrganizationTask task = organizationProvider.findOrganizationTaskById(taskId);
 	    	
-	    	if(task.getTaskStatus().equals(OrganizationTaskStatus.UNPROCESSED.getCode()) 
+	    	if(OrganizationTaskStatus.fromCode(task.getTaskStatus()) == OrganizationTaskStatus.UNPROCESSED
 	    			&&  (task.getTargetId().equals(user.getId())
-	    	    	|| ((StringUtils.isEmpty(task.getTargetId()) || task.getTargetId().equals(0))))){
+	    	    	|| ((StringUtils.isEmpty(task.getTargetId()) || task.getTargetId() == 0)))){
 	    		task.setTaskStatus(OrganizationTaskStatus.UNPROCESSED.getCode());
 	    		task.setTargetId(0l);
 	    		task.setTargetType(null);
@@ -5372,7 +5398,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			
 			Community community = communityProvider.findCommunityById(commuId);
 			Organization organization = this.checkOrganization(cmd.getOrganizationId());
-			int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+			int pageSize = PaginationConfigHelper.getPageSize(configurationProvider,  cmd.getPageSize());
 			CrossShardListingLocator locator = new CrossShardListingLocator();
 			locator.setAnchor(cmd.getPageOffset());
 			List<OrganizationTask> orgTasks = organizationProvider.listOrganizationTasksByTypeOrStatus(locator, organization.getId(),cmd.getTargetId(), cmd.getTaskType(), cmd.getTaskStatus(), pageSize);
@@ -5403,7 +5429,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	
 	    	List<RoleAssignment> userOrgRoles = aclProvider.listRoleAssignmentByTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId());
 	    	userRoles.addAll(userOrgRoles);
-			privileges.add(PrivilegeConstants.TaskAllListPosts);
+			privileges.add(PrivilegeConstants.TaskSeekHelpListPosts);
 			if(privileges.contains(PrivilegeConstants.TaskAllListPosts)){
 				cmd.setTaskType("");
 			}else if(privileges.contains(PrivilegeConstants.TaskGuaranteeListPosts)){
@@ -5422,15 +5448,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    @Override
 	    public ListPostCommandResponse listMyTaskTopics(ListTopicsByTypeCommand cmd){
 	    	User user = UserContext.current().getUser();
-	    	cmd.setTargetId(user.getId());
+	    	
 	    	List<Long> privileges = new ArrayList<Long>();
 	    	List<RoleAssignment> userRoles = aclProvider.listRoleAssignmentByTarget(EntityType.USER.getCode(), user.getId());
 	    	
 	    	List<RoleAssignment> userOrgRoles = aclProvider.listRoleAssignmentByTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId());
-	    	
 	    	userRoles.addAll(userOrgRoles);
 			privileges.add(PrivilegeConstants.TaskAllListPosts);
 			/* 根据用户不同 查询不同的任务类型贴*/
+			
+			cmd.setTargetId(user.getId());
 			if(privileges.contains(PrivilegeConstants.TaskAllListPosts)){
 				cmd.setTaskType("");
 			}else if(privileges.contains(PrivilegeConstants.TaskGuaranteeListPosts)){
@@ -5496,14 +5523,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	NewCommentCommand command = new NewCommentCommand();
     		command.setTopicId(task.getApplyEntityId());
     		command.setContentType(PostContentType.TEXT.getCode());
-    		
+    		command.setForumId(1l);
     		String contentMsg = "";
     		String contentComment = "";
-    		if(task.getTaskStatus().equals(OrganizationTaskStatus.PROCESSED.getCode())){
+    		if(OrganizationTaskStatus.fromCode(task.getTaskStatus()) == OrganizationTaskStatus.PROCESSED){
     			contentMsg = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_FINISH, user.getLocale(), map, "");
     			contentComment = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_FINISH_COMMENT, user.getLocale(), map, "");
     			sendOrganizationNotificationToUser(null,contentMsg);
-    		}else if(task.getTaskStatus().equals(OrganizationTaskStatus.UNPROCESSED.getCode()) || task.getTaskStatus().equals(OrganizationTaskStatus.PROCESSING.getCode())){
+    		}else if(OrganizationTaskStatus.fromCode(task.getTaskStatus()) == OrganizationTaskStatus.UNPROCESSED || OrganizationTaskStatus.fromCode(task.getTaskStatus()) == OrganizationTaskStatus.PROCESSING){
     			contentMsg = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_PROCESSING_COMMENT, user.getLocale(), map, "");
 	    		contentComment = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_PROCESSING, user.getLocale(), map, "");
 	    		//发送短信

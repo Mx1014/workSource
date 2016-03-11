@@ -839,6 +839,7 @@ public class OrganizationController extends ControllerBase {
       @RequestMapping("acceptTask")
       @RestReturn(value=String.class)
       public RestResponse acceptTask(@Valid ProcessingTaskCommand cmd) {
+    	 organizationService.acceptTask(cmd);
          RestResponse res = new RestResponse();
          res.setErrorCode(ErrorCodes.SUCCESS);
          res.setErrorDescription("OK");
@@ -853,6 +854,7 @@ public class OrganizationController extends ControllerBase {
        @RequestMapping("refuseTask")
        @RestReturn(value=String.class)
        public RestResponse refuseTask(@Valid ProcessingTaskCommand cmd) {
+    	  organizationService.refuseTask(cmd);
           RestResponse res = new RestResponse();
           res.setErrorCode(ErrorCodes.SUCCESS);
           res.setErrorDescription("OK");
@@ -867,6 +869,7 @@ public class OrganizationController extends ControllerBase {
         @RequestMapping("grabTask")
         @RestReturn(value=String.class)
         public RestResponse grabTask(@Valid ProcessingTaskCommand cmd) {
+           organizationService.grabTask(cmd);
            RestResponse res = new RestResponse();
            res.setErrorCode(ErrorCodes.SUCCESS);
            res.setErrorDescription("OK");
@@ -881,6 +884,7 @@ public class OrganizationController extends ControllerBase {
          @RequestMapping("processingTask")
          @RestReturn(value=String.class)
          public RestResponse processingTask(@Valid ProcessingTaskCommand cmd) {
+        	organizationService.processingTask(cmd);
             RestResponse res = new RestResponse();
             res.setErrorCode(ErrorCodes.SUCCESS);
             res.setErrorDescription("OK");

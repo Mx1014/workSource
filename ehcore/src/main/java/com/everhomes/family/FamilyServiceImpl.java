@@ -1755,7 +1755,6 @@ public class FamilyServiceImpl implements FamilyService {
         }
         if(type == ParamType.COMMUNITY.getCode()){
             //TODO
-            
         }
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                 "Invalid id or type parameter");
