@@ -45,6 +45,7 @@ public class OrganizationTaskDTO {
 	private java.sql.Timestamp processingTime;
 	private java.sql.Timestamp processedTime;
 	private Long taskCategory;
+	private String option;
 	
     public java.lang.Long getId() {
 		return id;
@@ -190,6 +191,16 @@ public class OrganizationTaskDTO {
 
 	public void setTaskCategory(Long taskCategory) {
 		this.taskCategory = taskCategory;
+	}
+	
+	
+
+	public String getOption() {
+		return option;
+	}
+
+	public void setOption(String option) {
+		this.option = option;
 	}
 
 	@Override

@@ -1,8 +1,6 @@
 // @formatter:off
 package com.everhomes.ui.organization;
 
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.validation.Valid;
 
@@ -19,20 +17,14 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.forum.ListPostCommandResponse;
 import com.everhomes.rest.organization.ListTopicsByTypeCommand;
-import com.everhomes.rest.organization.OrganizationServiceErrorCode;
-import com.everhomes.rest.organization.OrganizationTaskType;
 import com.everhomes.rest.ui.organization.ListTaskPostsCommand;
 import com.everhomes.rest.ui.organization.ListTaskPostsResponse;
 import com.everhomes.rest.ui.organization.ProcessingTaskCommand;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.user.UserCurrentEntityType;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.WebTokenGenerator;
 
 /**
