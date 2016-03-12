@@ -59,7 +59,6 @@ import com.everhomes.rest.organization.OrganizationDetailDTO;
 import com.everhomes.rest.organization.OrganizationMemberCommand;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.OrganizationSimpleDTO;
-import com.everhomes.rest.organization.ProcessingTaskCommand;
 import com.everhomes.rest.organization.RejectOrganizationCommand;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.organization.SearchTopicsByTypeCommand;
@@ -72,6 +71,7 @@ import com.everhomes.rest.organization.UpdatePersonnelsToDepartment;
 import com.everhomes.rest.organization.UpdateTopicPrivacyCommand;
 import com.everhomes.rest.organization.UserExitOrganizationCommand;
 import com.everhomes.rest.organization.UserJoinOrganizationCommand;
+import com.everhomes.rest.ui.organization.ProcessingTaskCommand;
 import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
 import com.everhomes.search.OrganizationSearcher;
@@ -830,65 +830,5 @@ public class OrganizationController extends ControllerBase {
         
         return res;
       }
-     
-     
-     /**
-      * <b>URL: /org/acceptTask</b>
-      * <p>接受任务</p>
-      */
-      @RequestMapping("acceptTask")
-      @RestReturn(value=String.class)
-      public RestResponse acceptTask(@Valid ProcessingTaskCommand cmd) {
-    	 organizationService.acceptTask(cmd);
-         RestResponse res = new RestResponse();
-         res.setErrorCode(ErrorCodes.SUCCESS);
-         res.setErrorDescription("OK");
-         
-         return res;
-      }
-      
-      /**
-       * <b>URL: /org/refuseTask</b>
-       * <p>拒绝任务</p>
-       */
-       @RequestMapping("refuseTask")
-       @RestReturn(value=String.class)
-       public RestResponse refuseTask(@Valid ProcessingTaskCommand cmd) {
-    	  organizationService.refuseTask(cmd);
-          RestResponse res = new RestResponse();
-          res.setErrorCode(ErrorCodes.SUCCESS);
-          res.setErrorDescription("OK");
-          
-          return res;
-       }
-       
-       /**
-        * <b>URL: /org/grabTask</b>
-        * <p>抢单</p>
-        */
-        @RequestMapping("grabTask")
-        @RestReturn(value=String.class)
-        public RestResponse grabTask(@Valid ProcessingTaskCommand cmd) {
-           organizationService.grabTask(cmd);
-           RestResponse res = new RestResponse();
-           res.setErrorCode(ErrorCodes.SUCCESS);
-           res.setErrorDescription("OK");
-           
-           return res;
-        }
-        
-        /**
-         * <b>URL: /org/processingTask</b>
-         * <p>处理</p>
-         */
-         @RequestMapping("processingTask")
-         @RestReturn(value=String.class)
-         public RestResponse processingTask(@Valid ProcessingTaskCommand cmd) {
-        	organizationService.processingTask(cmd);
-            RestResponse res = new RestResponse();
-            res.setErrorCode(ErrorCodes.SUCCESS);
-            res.setErrorDescription("OK");
-            
-            return res;
-         }
+    
 }

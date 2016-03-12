@@ -102,6 +102,7 @@ import java.util.stream.Collectors;
 
 
 
+
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -113,6 +114,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+
 
 
 
@@ -348,7 +350,6 @@ import com.everhomes.rest.organization.OrganizationTaskTargetType;
 import com.everhomes.rest.organization.OrganizationTaskType;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.PrivateFlag;
-import com.everhomes.rest.organization.ProcessingTaskCommand;
 import com.everhomes.rest.organization.RejectOrganizationCommand;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.organization.SearchTopicsByTypeCommand;
@@ -382,6 +383,7 @@ import com.everhomes.rest.organization.pm.UpdateOrganizationMemberByIdsCommand;
 import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.rest.sms.SmsTemplateCode;
+import com.everhomes.rest.ui.organization.ProcessingTaskCommand;
 import com.everhomes.rest.ui.privilege.EntrancePrivilege;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeCommand;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeResponse;
@@ -5152,7 +5154,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    
 	    
 	    @Override
-	    public void acceptTask(ProcessingTaskCommand cmd) {
+	    public void acceptTask(ProcessingTaskCommand cmd, Long organizationId) {
 	    	// TODO Auto-generated method stub
 	    	
 	    	User user = UserContext.current().getUser();
@@ -5187,7 +5189,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    }
 	    
 	    @Override
-	    public void grabTask(ProcessingTaskCommand cmd) {
+	    public void grabTask(ProcessingTaskCommand cmd, Long organizationId) {
 	    	// TODO Auto-generated method stub
 	    	User user = UserContext.current().getUser();
 	    	Long taskId = cmd.getTaskId();
@@ -5222,7 +5224,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    }
 	    
 	    @Override
-	    public void processingTask(ProcessingTaskCommand cmd) {
+	    public void processingTask(ProcessingTaskCommand cmd, Long organizationId) {
 	    	// TODO Auto-generated method stub
 	    	
 	    	User user = UserContext.current().getUser();
@@ -5240,8 +5242,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	Map<String,Object> map = new HashMap<String, Object>();
 	    	
 	    	/* 根据用户不同 查询不同的任务类型贴*/
-			List<Long> privileges = new ArrayList<Long>();
-			privileges.add(PrivilegeConstants.TaskAllListPosts);
+	    	List<Long> privileges = this.getUserPrivileges(null , organizationId, user.getId());
+	    	
 	    	//当可以查询全部的任务类型时
 	    	if(privileges.contains(PrivilegeConstants.TaskAllListPosts)){
 	    		if(null != cmd.getUserId()){
@@ -5356,7 +5358,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    
 	    
 	    @Override
-	    public void refuseTask(ProcessingTaskCommand cmd) {
+	    public void refuseTask(ProcessingTaskCommand cmd, Long organizationId) {
 	    	// TODO Auto-generated method stub
 	    	
 	    	User user = UserContext.current().getUser();
@@ -5422,14 +5424,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    @Override
 	    public ListPostCommandResponse listAllTaskTopics(ListTopicsByTypeCommand cmd){
 	    	User user = UserContext.current().getUser();
-	    	/* 根据用户不同 查询不同的任务类型贴*/
-			List<Long> privileges = new ArrayList<Long>();
-			
-			List<RoleAssignment> userRoles = aclProvider.listRoleAssignmentByTarget(EntityType.USER.getCode(), user.getId());
 	    	
-	    	List<RoleAssignment> userOrgRoles = aclProvider.listRoleAssignmentByTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId());
-	    	userRoles.addAll(userOrgRoles);
-			privileges.add(PrivilegeConstants.TaskSeekHelpListPosts);
+	    	List<Long> privileges = this.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
+	    	
 			if(privileges.contains(PrivilegeConstants.TaskAllListPosts)){
 				cmd.setTaskType("");
 			}else if(privileges.contains(PrivilegeConstants.TaskGuaranteeListPosts)){
@@ -5449,12 +5446,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    public ListPostCommandResponse listMyTaskTopics(ListTopicsByTypeCommand cmd){
 	    	User user = UserContext.current().getUser();
 	    	
-	    	List<Long> privileges = new ArrayList<Long>();
-	    	List<RoleAssignment> userRoles = aclProvider.listRoleAssignmentByTarget(EntityType.USER.getCode(), user.getId());
+	    	List<Long> privileges = this.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
 	    	
-	    	List<RoleAssignment> userOrgRoles = aclProvider.listRoleAssignmentByTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId());
-	    	userRoles.addAll(userOrgRoles);
-			privileges.add(PrivilegeConstants.TaskAllListPosts);
 			/* 根据用户不同 查询不同的任务类型贴*/
 			
 			cmd.setTargetId(user.getId());
@@ -5474,14 +5467,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    @Override
 	    public ListPostCommandResponse listGrabTaskTopics(ListTopicsByTypeCommand cmd){
 	    	User user = UserContext.current().getUser();
-	    	List<RoleAssignment> userRoles = aclProvider.listRoleAssignmentByTarget(EntityType.USER.getCode(), user.getId());
 	    	
-	    	List<RoleAssignment> userOrgRoles = aclProvider.listRoleAssignmentByTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId());
+	    	List<Long> privileges = this.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
 	    	
-	    	userRoles.addAll(userOrgRoles);
-	    	
-	    	List<Long> privileges = new ArrayList<Long>();
-			privileges.add(PrivilegeConstants.TaskAllListPosts);
 			/* 根据用户不同 查询不同的任务类型贴*/
 			if(privileges.contains(PrivilegeConstants.TaskAllListPosts)){
 				cmd.setTaskType("");
@@ -5497,12 +5485,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    }
 	    
 	    @Override
-	    public GetEntranceByPrivilegeResponse getEntranceByPrivilege(GetEntranceByPrivilegeCommand cmd){
+	    public GetEntranceByPrivilegeResponse getEntranceByPrivilege(GetEntranceByPrivilegeCommand cmd, Long organizationId){
 	    	User user = UserContext.current().getUser();
 	    	GetEntranceByPrivilegeResponse res = new GetEntranceByPrivilegeResponse();
 	    	
-	    	List<Long> privileges = new ArrayList<Long>();
-			privileges.add(PrivilegeConstants.TaskAllListPosts);
+	    	List<Long> privileges = this.getUserPrivileges(cmd.getModule(), organizationId, user.getId());
+	    	
 			/* 根据用户不同 查询不同的任务类型贴*/
 			if(privileges.contains(PrivilegeConstants.TaskAllListPosts)){
 				res.setEntrancePrivilege(EntrancePrivilege.TASK_ALL_LIST.getCode());
@@ -5540,6 +5528,29 @@ public class OrganizationServiceImpl implements OrganizationService {
     		}
     		command.setContent(contentComment);
     		this.createComment(command);
+	    }
+	    
+	    /**
+	     * 获取用户的权限列表
+	     * @param module
+	     * @param organizationId
+	     * @param userId
+	     * @return
+	     */
+	    private List<Long> getUserPrivileges(String module ,Long organizationId, Long userId){
+	    	List<RoleAssignment> userRoles = aclProvider.listRoleAssignmentByTarget(EntityType.USER.getCode(),userId);
+	    	
+	    	List<RoleAssignment> userOrgRoles = aclProvider.listRoleAssignmentByTarget(EntityType.ORGANIZATIONS.getCode(), organizationId);
+	    	
+	    	userRoles.addAll(userOrgRoles);
+	    	List<Long> privileges = null;
+	    	if(!StringUtils.isEmpty(module)){
+	    		privileges = null; //aclProvider 调平台根据角色list+模块 获取权限list接口
+	    	}else{
+	    		privileges = null; //aclProvider 调平台根据角色list获取权限list的接口
+	    	}
+	    	
+	    	return privileges;
 	    }
 	    
 	    /**

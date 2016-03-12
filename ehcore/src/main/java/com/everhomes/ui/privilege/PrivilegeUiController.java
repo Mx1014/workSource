@@ -19,6 +19,9 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeCommand;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeResponse;
+import com.everhomes.rest.ui.user.SceneTokenDTO;
+import com.everhomes.rest.user.UserCurrentEntityType;
+import com.everhomes.util.WebTokenGenerator;
 
 /**
  * <ul>
@@ -44,7 +47,12 @@ public class PrivilegeUiController extends ControllerBase {
     @RequestMapping("getEntranceByPrivilege")
     @RestReturn(value=GetEntranceByPrivilegeResponse.class)
     public RestResponse getEntranceByPrivilege(@Valid GetEntranceByPrivilegeCommand cmd) {
-    	GetEntranceByPrivilegeResponse res = organizationService.getEntranceByPrivilege(cmd);
+    	WebTokenGenerator webToken = WebTokenGenerator.getInstance();
+ 	    SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+ 	    GetEntranceByPrivilegeResponse res = null;
+ 		if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
+ 			res = organizationService.getEntranceByPrivilege(cmd, sceneToken.getEntityId());
+ 		}
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

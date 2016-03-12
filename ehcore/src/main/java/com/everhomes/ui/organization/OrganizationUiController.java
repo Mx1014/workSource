@@ -26,6 +26,7 @@ import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.organization.OrganizationTaskType;
 import com.everhomes.rest.ui.organization.ListTaskPostsCommand;
 import com.everhomes.rest.ui.organization.ListTaskPostsResponse;
+import com.everhomes.rest.ui.organization.ProcessingTaskCommand;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.user.User;
@@ -128,4 +129,79 @@ public class OrganizationUiController extends ControllerBase {
     }
     
    
+    /**
+     * <b>URL: /ui/org/acceptTask</b>
+     * <p>接受任务</p>
+     */
+     @RequestMapping("acceptTask")
+     @RestReturn(value=String.class)
+     public RestResponse acceptTask(@Valid ProcessingTaskCommand cmd) {
+    	WebTokenGenerator webToken = WebTokenGenerator.getInstance();
+ 	    SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+ 		if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
+ 			organizationService.acceptTask(cmd, sceneToken.getEntityId());
+ 		}
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        
+        return res;
+     }
+     
+     /**
+      * <b>URL: /ui/org/refuseTask</b>
+      * <p>拒绝任务</p>
+      */
+      @RequestMapping("refuseTask")
+      @RestReturn(value=String.class)
+      public RestResponse refuseTask(@Valid ProcessingTaskCommand cmd) {
+    	  WebTokenGenerator webToken = WebTokenGenerator.getInstance();
+   	      SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+   	      if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
+   			organizationService.refuseTask(cmd, sceneToken.getEntityId());
+   	      }
+    	  RestResponse res = new RestResponse();
+    	  res.setErrorCode(ErrorCodes.SUCCESS);
+    	  res.setErrorDescription("OK");
+         
+         return res;
+      }
+      
+      /**
+       * <b>URL: /ui/org/grabTask</b>
+       * <p>抢单</p>
+       */
+       @RequestMapping("grabTask")
+       @RestReturn(value=String.class)
+       public RestResponse grabTask(@Valid ProcessingTaskCommand cmd) {
+    	   WebTokenGenerator webToken = WebTokenGenerator.getInstance();
+    	   SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+    	   if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
+    		   organizationService.grabTask(cmd, sceneToken.getEntityId());
+    	   }
+    	   RestResponse res = new RestResponse();
+    	   res.setErrorCode(ErrorCodes.SUCCESS);
+           res.setErrorDescription("OK");
+          
+          return res;
+       }
+       
+       /**
+        * <b>URL: /ui/org/processingTask</b>
+        * <p>处理</p>
+        */
+        @RequestMapping("processingTask")
+        @RestReturn(value=String.class)
+        public RestResponse processingTask(@Valid ProcessingTaskCommand cmd) {
+           WebTokenGenerator webToken = WebTokenGenerator.getInstance();
+      	   SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+      	   if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
+      		   organizationService.processingTask(cmd, sceneToken.getEntityId());
+      	   }
+           RestResponse res = new RestResponse();
+           res.setErrorCode(ErrorCodes.SUCCESS);
+           res.setErrorDescription("OK");
+           
+           return res;
+        }
 }
