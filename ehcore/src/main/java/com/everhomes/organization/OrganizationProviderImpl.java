@@ -57,6 +57,7 @@ import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.organization.OrganizationTaskStatus;
+import com.everhomes.rest.organization.OrganizationTaskType;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.pm.OrganizationScopeCode;
 import com.everhomes.sequence.SequenceProvider;
@@ -1011,7 +1012,11 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			condition = condition.and(Tables.EH_ORGANIZATION_TASKS.TASK_STATUS.eq(taskStatus));
 
 		if(null != targetId){
-			condition = condition.and(Tables.EH_ORGANIZATION_TASKS.TARGET_ID.eq(targetId));
+			Condition cond = Tables.EH_ORGANIZATION_TASKS.TARGET_ID.eq(targetId);
+			if(OrganizationTaskType.EMERGENCY_HELP == OrganizationTaskType.fromCode(taskType)){
+				cond = cond.or(Tables.EH_ORGANIZATION_TASKS.TARGET_ID.eq(0l));
+			}
+			condition.and(cond);
 		}
 		
 		if(null != locator.getAnchor()){

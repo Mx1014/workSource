@@ -1,5 +1,6 @@
 // @formatter:off
-package com.everhomes.ui.community;
+package com.everhomes.ui.privilege;
+
 
 import javax.validation.Valid;
 
@@ -16,48 +17,43 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.organization.ListOrganizationCommunityCommand;
-import com.everhomes.rest.organization.ListOrganizationCommunityV2CommandResponse;
-import com.everhomes.rest.ui.organization.ListCommunitiesBySceneCommand;
-import com.everhomes.rest.ui.organization.ListCommunitiesBySceneResponse;
+import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeCommand;
+import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeResponse;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.util.WebTokenGenerator;
 
 /**
  * <ul>
- * <li>客户端的小区相关api</li>
+ * <li>客户端的权限入口相关api</li>
  * </ul>
  */
-@RestDoc(value="CommunityUi controller", site="communityUi")
+@RestDoc(value="privilege controller", site="privilegeUi")
 @RestController
-@RequestMapping("/ui/community")
-public class CummunityUiController extends ControllerBase {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CummunityUiController.class);
+@RequestMapping("/ui/privilege")
+public class PrivilegeUiController extends ControllerBase {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PrivilegeUiController.class);
     
     @Autowired
     private ConfigurationProvider configurationProvider;
     
     @Autowired
     private OrganizationService organizationService;
-
+    
     /**
-     * <b>URL: /ui/org/listCommunitiesByScene</b>
-     * <p>获取小区列表</p>
+     * <b>URL: /ui/privilege/getEntranceByPrivilege</b>
+     * <p>根据权限获取不同的入口</p>
      */
-    @RequestMapping("listCommunitiesByScene")
-    @RestReturn(value=ListCommunitiesBySceneResponse.class)
-    public RestResponse listCommunitiesByScene(@Valid ListCommunitiesBySceneCommand cmd) {
-    	ListOrganizationCommunityCommand command = new ListOrganizationCommunityCommand();
-    	ListCommunitiesBySceneResponse resp = new ListCommunitiesBySceneResponse();
+    @RequestMapping("getEntranceByPrivilege")
+    @RestReturn(value=GetEntranceByPrivilegeResponse.class)
+    public RestResponse getEntranceByPrivilege(@Valid GetEntranceByPrivilegeCommand cmd) {
     	WebTokenGenerator webToken = WebTokenGenerator.getInstance();
  	    SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+ 	    GetEntranceByPrivilegeResponse res = null;
  		if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
- 			command.setOrganizationId(sceneToken.getEntityId());
- 			ListOrganizationCommunityV2CommandResponse res = organizationService.listOrganizationCommunitiesV2(command);
- 			resp.setDtos(res.getCommunities());
+ 			res = organizationService.getEntranceByPrivilege(cmd, sceneToken.getEntityId());
  		}
-        RestResponse response = new RestResponse(resp);
+        RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

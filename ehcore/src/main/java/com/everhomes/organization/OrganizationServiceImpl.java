@@ -96,6 +96,13 @@ import java.util.stream.Collectors;
 
 
 
+
+
+
+
+
+
+
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -107,6 +114,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+
+
+
+
+
+
+
 
 
 
@@ -224,6 +238,7 @@ import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.address.AddressAdminStatus;
@@ -335,7 +350,6 @@ import com.everhomes.rest.organization.OrganizationTaskTargetType;
 import com.everhomes.rest.organization.OrganizationTaskType;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.PrivateFlag;
-import com.everhomes.rest.organization.ProcessingTaskCommand;
 import com.everhomes.rest.organization.RejectOrganizationCommand;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.organization.SearchTopicsByTypeCommand;
@@ -369,6 +383,10 @@ import com.everhomes.rest.organization.pm.UpdateOrganizationMemberByIdsCommand;
 import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.rest.sms.SmsTemplateCode;
+import com.everhomes.rest.ui.organization.ProcessingTaskCommand;
+import com.everhomes.rest.ui.privilege.EntrancePrivilege;
+import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeCommand;
+import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeResponse;
 import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
@@ -5136,16 +5154,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    
 	    
 	    @Override
-	    public void acceptTask(ProcessingTaskCommand cmd) {
+	    public void acceptTask(ProcessingTaskCommand cmd, Long organizationId) {
 	    	// TODO Auto-generated method stub
 	    	
 	    	User user = UserContext.current().getUser();
 	    	Long taskId = cmd.getTaskId();
 	    	OrganizationTask task = organizationProvider.findOrganizationTaskById(taskId);
 	    	
-	    	if(task.getTaskStatus().equals(OrganizationTaskStatus.UNPROCESSED.getCode()) 
+	    	if(OrganizationTaskStatus.fromCode(task.getTaskStatus()) == OrganizationTaskStatus.UNPROCESSED
 	    			&& (task.getTargetId().equals(user.getId())
-	    			|| ((StringUtils.isEmpty(task.getTargetId()) || task.getTargetId().equals(0))))){
+	    			|| ((StringUtils.isEmpty(task.getTargetId()) || task.getTargetId() == 0)))){
 	    		task.setTaskStatus(OrganizationTaskStatus.PROCESSING.getCode());
 	    		task.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 	    		task.setOperatorUid(user.getId());
@@ -5154,6 +5172,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    		organizationProvider.updateOrganizationTask(task);
 	    		
 	    		NewCommentCommand command = new NewCommentCommand();
+	    		command.setForumId(1l);
 	    		command.setTopicId(task.getApplyEntityId());
 	    		command.setContentType(PostContentType.TEXT.getCode());
 	    		Map<String,Object> map = new HashMap<String, Object>();
@@ -5170,14 +5189,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    }
 	    
 	    @Override
-	    public void grabTask(ProcessingTaskCommand cmd) {
+	    public void grabTask(ProcessingTaskCommand cmd, Long organizationId) {
 	    	// TODO Auto-generated method stub
 	    	User user = UserContext.current().getUser();
 	    	Long taskId = cmd.getTaskId();
 	    	OrganizationTask task = organizationProvider.findOrganizationTaskById(taskId);
 	    	
-	    	if(task.getTaskStatus().equals(OrganizationTaskStatus.UNPROCESSED.getCode()) 
-	    			&& (StringUtils.isEmpty(task.getTargetId()) || task.getTargetId().equals(0))){
+	    	if(OrganizationTaskStatus.fromCode(task.getTaskStatus()) == OrganizationTaskStatus.UNPROCESSED
+	    			&& (StringUtils.isEmpty(task.getTargetId()) || task.getTargetId() == 0)){
 	    		task.setTaskStatus(OrganizationTaskStatus.PROCESSING.getCode());
 	    		task.setTargetId(user.getId());
 	    		task.setTargetType(OrganizationTaskTargetType.USER.getCode());
@@ -5188,6 +5207,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    		organizationProvider.updateOrganizationTask(task);
 	    		
 	    		NewCommentCommand command = new NewCommentCommand();
+	    		command.setForumId(1l);
 	    		command.setTopicId(task.getApplyEntityId());
 	    		command.setContentType(PostContentType.TEXT.getCode());
 	    		Map<String,Object> map = new HashMap<String, Object>();
@@ -5204,7 +5224,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    }
 	    
 	    @Override
-	    public void processingTask(ProcessingTaskCommand cmd) {
+	    public void processingTask(ProcessingTaskCommand cmd, Long organizationId) {
 	    	// TODO Auto-generated method stub
 	    	
 	    	User user = UserContext.current().getUser();
@@ -5221,16 +5241,19 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	
 	    	Map<String,Object> map = new HashMap<String, Object>();
 	    	
+	    	/* 根据用户不同 查询不同的任务类型贴*/
+	    	List<Long> privileges = this.getUserPrivileges(null , organizationId, user.getId());
+	    	
 	    	//当可以查询全部的任务类型时
-	    	if(taskId == 1){
+	    	if(privileges.contains(PrivilegeConstants.TaskAllListPosts)){
 	    		if(null != cmd.getUserId()){
-	    			if(cmd.getUserId() == user.getId() && cmd.getTaskStatus().equals(OrganizationTaskStatus.UNPROCESSED.getCode())){
+	    			if(cmd.getUserId().equals(user.getId()) && OrganizationTaskStatus.fromCode(cmd.getTaskStatus()) == OrganizationTaskStatus.UNPROCESSED ){
 	    				cmd.setTaskStatus(OrganizationTaskStatus.PROCESSING.getCode());
 	    			}
-	    		}else if(!StringUtils.isEmpty(task.getTargetId()) && !task.getTargetId().equals(0)){
+	    		}else if(!StringUtils.isEmpty(task.getTargetId()) && task.getTargetId() != 0){
 	    			cmd.setUserId(task.getTargetId());
 	    		}else{
-	    			if(cmd.getTaskStatus().equals(OrganizationTaskStatus.UNPROCESSED.getCode()) || cmd.getTaskStatus().equals(OrganizationTaskStatus.PROCESSING.getCode())){
+	    			if(OrganizationTaskStatus.fromCode(cmd.getTaskStatus()) == OrganizationTaskStatus.UNPROCESSED || OrganizationTaskStatus.fromCode(cmd.getTaskStatus()) == OrganizationTaskStatus.PROCESSING){
 	    				//异常
 	    				LOGGER.error("This task is not assigned to any personnel, targetId="+task.getTargetId());
 	    				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_TASK_NOT_ASSIGNED_PERSONNEL,
@@ -5242,16 +5265,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    		
 	    		task.setTargetId(cmd.getUserId());
 	    		task.setTargetType(OrganizationTaskTargetType.USER.getCode());
-	    		
     			task.setTaskStatus(cmd.getTaskStatus());
     			
-    			
 	    		task.setUnprocessedTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-	    		task.setTaskCategory(cmd.getTaskCategory());
-	    		task.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-	    		task.setOperatorUid(user.getId());
 	    		
-	    		organizationProvider.updateOrganizationTask(task);
 	    		User target = userProvider.findUserById(cmd.getUserId());
 	    		map.put("operatorUName", user.getNickName());
 	    		map.put("operatorUToken", user.getIdentifierToken());
@@ -5259,14 +5276,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    		User create = userProvider.findUserById(task.getCreatorUid());
 	    		map.put("createUName", null != create ? create.getNickName() : "");
 	    		
-	    		this.sendTaskMsg(map, task, user);
-	    		
 	    	//当智能处理部分类型时
-	    	}else if(taskId == 2){
+	    	}else if(privileges.contains(PrivilegeConstants.TaskGuaranteeListPosts)){
 	    		if(user.getId().equals(task.getTargetId())){
-	    			if(cmd.getTaskStatus().equals(OrganizationTaskStatus.PROCESSED.getCode())){
+	    			if(OrganizationTaskStatus.fromCode(cmd.getTaskStatus()) == OrganizationTaskStatus.PROCESSED){
 	    				task.setProcessedTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-	    			}else if(cmd.getTaskStatus().equals(OrganizationTaskStatus.UNPROCESSED.getCode()) && null != cmd.getUserId()){
+	    			}else if(OrganizationTaskStatus.fromCode(cmd.getTaskStatus()) == OrganizationTaskStatus.UNPROCESSED && null != cmd.getUserId()){
 	    				if(cmd.getUserId().equals(task.getTargetId())){
 	    					cmd.setTaskStatus(OrganizationTaskStatus.PROCESSING.getCode());
 	    				}else{
@@ -5282,10 +5297,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    			}
 	    			
 	    			task.setTaskStatus(cmd.getTaskStatus());
-	    			task.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		    		task.setOperatorUid(user.getId());
-		    		
-		    		organizationProvider.updateOrganizationTask(task);
 		    		
 		    		User target = userProvider.findUserById(cmd.getUserId());
 		    		
@@ -5301,29 +5312,62 @@ public class OrganizationServiceImpl implements OrganizationService {
 							"Tasks have been processed.");
     			}
 	    		
-	    		if(null != post){
-	    			post.setPrivateFlag(cmd.getPrivateFlag());
-    				post.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-    				post.setEmbeddedJson(StringHelper.toJsonString(task));
-    				forumProvider.updatePost(post);
-	    		}
-	    		
-	    		this.sendTaskMsg(map, task, user);
-	    	}
+	    	}else if(privileges.contains(PrivilegeConstants.TaskSeekHelpListPosts)){
+	    		if(user.getId().equals(task.getTargetId()) || task.getTargetId() == 0 || StringUtils.isEmpty(task.getTargetId())){
+	    			if(OrganizationTaskStatus.fromCode(cmd.getTaskStatus()) == OrganizationTaskStatus.OTHER){
+	    				//异常
+	    				LOGGER.error("Cannot perform this operation on a task, status="+cmd.getTaskStatus());
+	    				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_TASK_CANNOT_OPERATE,
+	    						"Cannot perform this operation on a task.");
+	    			}
+	    			
+	    			task.setTargetId(user.getId());
+	    			task.setTaskStatus(cmd.getTaskStatus());
+		    		
+		    		User target = userProvider.findUserById(cmd.getUserId());
+		    		
+		    		map.put("operatorUName", user.getNickName());
+		    		map.put("operatorUToken", user.getIdentifierToken());
+		    		map.put("targetUName", null != target ? target.getNickName() : "");
+		    		map.put("createUName", user.getIdentifierToken());
+		    		
+	    		}else{
+    				//异常
+	    			LOGGER.error("Tasks have been processed, status="+task.getTaskStatus() + ", targetId=" + task.getTargetId());
+					throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_TASK_ALREADY_PROCESSED,
+							"Tasks have been processed.");
+    			}
+	    	}else{
+				returnNoPrivileged(privileges, user);
+			}
+	    	
+	    	task.setTaskCategory(cmd.getTaskCategory());
+			task.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+    		task.setOperatorUid(user.getId());
+    		
+    		organizationProvider.updateOrganizationTask(task);
+    		
+	    	if(null != post){
+    			post.setPrivateFlag(cmd.getPrivateFlag());
+				post.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				post.setEmbeddedJson(StringHelper.toJsonString(task));
+				forumProvider.updatePost(post);
+    		}
+	    	this.sendTaskMsg(map, task, user);
 	    }
 	    
 	    
 	    @Override
-	    public void refuseTask(ProcessingTaskCommand cmd) {
+	    public void refuseTask(ProcessingTaskCommand cmd, Long organizationId) {
 	    	// TODO Auto-generated method stub
 	    	
 	    	User user = UserContext.current().getUser();
 	    	Long taskId = cmd.getTaskId();
 	    	OrganizationTask task = organizationProvider.findOrganizationTaskById(taskId);
 	    	
-	    	if(task.getTaskStatus().equals(OrganizationTaskStatus.UNPROCESSED.getCode()) 
+	    	if(OrganizationTaskStatus.fromCode(task.getTaskStatus()) == OrganizationTaskStatus.UNPROCESSED
 	    			&&  (task.getTargetId().equals(user.getId())
-	    	    	|| ((StringUtils.isEmpty(task.getTargetId()) || task.getTargetId().equals(0))))){
+	    	    	|| ((StringUtils.isEmpty(task.getTargetId()) || task.getTargetId() == 0)))){
 	    		task.setTaskStatus(OrganizationTaskStatus.UNPROCESSED.getCode());
 	    		task.setTargetId(0l);
 	    		task.setTargetType(null);
@@ -5356,7 +5400,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			
 			Community community = communityProvider.findCommunityById(commuId);
 			Organization organization = this.checkOrganization(cmd.getOrganizationId());
-			int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+			int pageSize = PaginationConfigHelper.getPageSize(configurationProvider,  cmd.getPageSize());
 			CrossShardListingLocator locator = new CrossShardListingLocator();
 			locator.setAnchor(cmd.getPageOffset());
 			List<OrganizationTask> orgTasks = organizationProvider.listOrganizationTasksByTypeOrStatus(locator, organization.getId(),cmd.getTargetId(), cmd.getTaskType(), cmd.getTaskStatus(), pageSize);
@@ -5377,20 +5421,104 @@ public class OrganizationServiceImpl implements OrganizationService {
 			return res;
 		}
 	    
+	    @Override
+	    public ListPostCommandResponse listAllTaskTopics(ListTopicsByTypeCommand cmd){
+	    	User user = UserContext.current().getUser();
+	    	
+	    	List<Long> privileges = this.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
+	    	
+			if(privileges.contains(PrivilegeConstants.TaskAllListPosts)){
+				cmd.setTaskType("");
+			}else if(privileges.contains(PrivilegeConstants.TaskGuaranteeListPosts)){
+				cmd.setTaskType(OrganizationTaskType.REPAIRS.getCode());
+				cmd.setTargetId(user.getId());
+			}else if(privileges.contains(PrivilegeConstants.TaskSeekHelpListPosts)){
+				cmd.setTaskType(OrganizationTaskType.EMERGENCY_HELP.getCode());
+				cmd.setTargetId(user.getId());
+			}else{
+				returnNoPrivileged(privileges, user);
+			}
+			
+			return this.listTaskTopicsByType(cmd);
+	    }
+	    
+	    @Override
+	    public ListPostCommandResponse listMyTaskTopics(ListTopicsByTypeCommand cmd){
+	    	User user = UserContext.current().getUser();
+	    	
+	    	List<Long> privileges = this.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
+	    	
+			/* 根据用户不同 查询不同的任务类型贴*/
+			
+			cmd.setTargetId(user.getId());
+			if(privileges.contains(PrivilegeConstants.TaskAllListPosts)){
+				cmd.setTaskType("");
+			}else if(privileges.contains(PrivilegeConstants.TaskGuaranteeListPosts)){
+				cmd.setTaskType(OrganizationTaskType.REPAIRS.getCode());
+			}else if(privileges.contains(PrivilegeConstants.TaskSeekHelpListPosts)){
+				cmd.setTaskType(OrganizationTaskType.EMERGENCY_HELP.getCode());
+			}else{
+				returnNoPrivileged(privileges, user);
+			}
+			
+			return this.listTaskTopicsByType(cmd);
+	    }
+	    
+	    @Override
+	    public ListPostCommandResponse listGrabTaskTopics(ListTopicsByTypeCommand cmd){
+	    	User user = UserContext.current().getUser();
+	    	
+	    	List<Long> privileges = this.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
+	    	
+			/* 根据用户不同 查询不同的任务类型贴*/
+			if(privileges.contains(PrivilegeConstants.TaskAllListPosts)){
+				cmd.setTaskType("");
+			}else if(privileges.contains(PrivilegeConstants.TaskGuaranteeListPosts)){
+				cmd.setTaskType(OrganizationTaskType.REPAIRS.getCode());
+			}else if(privileges.contains(PrivilegeConstants.TaskSeekHelpListPosts)){
+				cmd.setTaskType(OrganizationTaskType.EMERGENCY_HELP.getCode());
+			}else{
+				returnNoPrivileged(privileges, user);
+			}
+			
+			return this.listTaskTopicsByType(cmd);
+	    }
+	    
+	    @Override
+	    public GetEntranceByPrivilegeResponse getEntranceByPrivilege(GetEntranceByPrivilegeCommand cmd, Long organizationId){
+	    	User user = UserContext.current().getUser();
+	    	GetEntranceByPrivilegeResponse res = new GetEntranceByPrivilegeResponse();
+	    	
+	    	List<Long> privileges = this.getUserPrivileges(cmd.getModule(), organizationId, user.getId());
+	    	
+			/* 根据用户不同 查询不同的任务类型贴*/
+			if(privileges.contains(PrivilegeConstants.TaskAllListPosts)){
+				res.setEntrancePrivilege(EntrancePrivilege.TASK_ALL_LIST.getCode());
+			}else if(privileges.contains(PrivilegeConstants.TaskGuaranteeListPosts)){
+				res.setEntrancePrivilege(EntrancePrivilege.TASK_GUARANTEE_LIST.getCode());
+			}else if(privileges.contains(PrivilegeConstants.TaskSeekHelpListPosts)){
+				res.setEntrancePrivilege(EntrancePrivilege.TASK_SEEK_HELP_LIST.getCode());
+			}else{
+				returnNoPrivileged(privileges, user);
+			}
+			
+			return res;
+	    }
+	    
 	    
 	    private void sendTaskMsg(Map<String,Object> map, OrganizationTask task, User user){
 	    	
 	    	NewCommentCommand command = new NewCommentCommand();
     		command.setTopicId(task.getApplyEntityId());
     		command.setContentType(PostContentType.TEXT.getCode());
-    		
+    		command.setForumId(1l);
     		String contentMsg = "";
     		String contentComment = "";
-    		if(task.getTaskStatus().equals(OrganizationTaskStatus.PROCESSED.getCode())){
+    		if(OrganizationTaskStatus.fromCode(task.getTaskStatus()) == OrganizationTaskStatus.PROCESSED){
     			contentMsg = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_FINISH, user.getLocale(), map, "");
     			contentComment = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_FINISH_COMMENT, user.getLocale(), map, "");
     			sendOrganizationNotificationToUser(null,contentMsg);
-    		}else if(task.getTaskStatus().equals(OrganizationTaskStatus.UNPROCESSED.getCode()) || task.getTaskStatus().equals(OrganizationTaskStatus.PROCESSING.getCode())){
+    		}else if(OrganizationTaskStatus.fromCode(task.getTaskStatus()) == OrganizationTaskStatus.UNPROCESSED || OrganizationTaskStatus.fromCode(task.getTaskStatus()) == OrganizationTaskStatus.PROCESSING){
     			contentMsg = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_PROCESSING_COMMENT, user.getLocale(), map, "");
 	    		contentComment = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_PROCESSING, user.getLocale(), map, "");
 	    		//发送短信
@@ -5402,5 +5530,36 @@ public class OrganizationServiceImpl implements OrganizationService {
     		this.createComment(command);
 	    }
 	    
+	    /**
+	     * 获取用户的权限列表
+	     * @param module
+	     * @param organizationId
+	     * @param userId
+	     * @return
+	     */
+	    private List<Long> getUserPrivileges(String module ,Long organizationId, Long userId){
+	    	List<RoleAssignment> userRoles = aclProvider.listRoleAssignmentByTarget(EntityType.USER.getCode(),userId);
+	    	
+	    	List<RoleAssignment> userOrgRoles = aclProvider.listRoleAssignmentByTarget(EntityType.ORGANIZATIONS.getCode(), organizationId);
+	    	
+	    	userRoles.addAll(userOrgRoles);
+	    	List<Long> privileges = null;
+	    	if(!StringUtils.isEmpty(module)){
+	    		privileges = null; //aclProvider 调平台根据角色list+模块 获取权限list接口
+	    	}else{
+	    		privileges = null; //aclProvider 调平台根据角色list获取权限list的接口
+	    	}
+	    	
+	    	return privileges;
+	    }
+	    
+	    /**
+	     * 抛出无权限 
+	     */
+	    private void returnNoPrivileged(List<Long> privileges, User user){
+	    	LOGGER.error("non-privileged, privileges="+privileges + ", userId=" + user.getId());
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_PRIVILEGED,
+					"non-privileged.");
+	    }
 	
 }

@@ -1931,12 +1931,6 @@ public class ForumServiceImpl implements ForumService {
                 ForumServiceErrorCode.ERROR_FORUM_NOT_FOUND, "Topic not found");
         }
         
-        if(!forumId.equals(topic.getForumId())) {
-            LOGGER.error("Topic is not in the forum, userId=" + userId + ", forumId=" + forumId + ", topicId=" + topicId);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid forum id");
-        }
-        
         commentPost.setForumId(cmd.getForumId());
         commentPost.setParentPostId(topic.getId());
         commentPost.setCreatorUid(userId);

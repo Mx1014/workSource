@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-03-10 10:11:49
+// generated at 2016-03-10 21:46:01
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -665,8 +665,10 @@ public interface ApiConstants {
     public static final String UI_FORUM_SEARCHBYSCENE_URL = "/ui/forum/searchByScene";
     public static final String UI_LAUNCHPAD_GETLASTLAUNCHPADLAYOUTBYSCENE_URL = "/ui/launchpad/getLastLaunchPadLayoutByScene";
     public static final String UI_LAUNCHPAD_GETLAUNCHPADITEMSBYSCENE_URL = "/ui/launchpad/getLaunchPadItemsByScene";
+    public static final String UI_ORG_LISTGRABTASKTOPICS_URL = "/ui/org/listGrabTaskTopics";
     public static final String UI_ORG_LISTMYTASKPOSTSBYSCENE_URL = "/ui/org/listMyTaskPostsByScene";
     public static final String UI_ORG_LISTTASKPOSTSBYSCENE_URL = "/ui/org/listTaskPostsByScene";
+    public static final String UI_PRIVILEGE_GETENTRANCEBYPRIVILEGE_URL = "/ui/privilege/getEntranceByPrivilege";
     public static final String UI_USER_GETUSEROPPROMOTIONSBYSCENE_URL = "/ui/user/getUserOpPromotionsByScene";
     public static final String UI_USER_GETUSERRELATEDADDRESSES_URL = "/ui/user/getUserRelatedAddresses";
     public static final String UI_USER_LISTCONTACTSBYSCENE_URL = "/ui/user/listContactsByScene";

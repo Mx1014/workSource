@@ -17,8 +17,12 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.family.FamilyService;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.family.ListNeighborUsersCommand;
+import com.everhomes.rest.family.ListNeighborUsersCommandResponse;
+import com.everhomes.rest.family.ParamType;
 import com.everhomes.rest.organization.ListOrganizationContactCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
@@ -57,6 +61,9 @@ public class UserUiController extends ControllerBase {
     @Autowired
     private OrganizationService organizationService;
     
+    @Autowired
+    private FamilyService familyService;
+    
     /**
      * <b>URL: /ui/user/listUserRelatedScenes</b>
      * <p>列出用户当前域空间下的相关场景。</p>
@@ -83,31 +90,58 @@ public class UserUiController extends ControllerBase {
     public RestResponse listContactsByScene(@Valid ListContactsBySceneCommand cmd) throws Exception {
     	WebTokenGenerator webToken = WebTokenGenerator.getInstance();
  	    SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
- 	   List<SceneContactDTO> dtos = null;
- 	    if(sceneToken.getEntityType().equals(UserCurrentEntityType.COMMUNITY.getCode())){
- 	    	
-		}
-			
-		if(sceneToken.getEntityType().equals(UserCurrentEntityType.ORGANIZATION.getCode())){
+ 	    List<SceneContactDTO> dtos = null;
+		if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
 			ListOrganizationContactCommand command = new ListOrganizationContactCommand();
 			command.setOrganizationId(sceneToken.getEntityId());
 			command.setPageSize(100000);
 			ListOrganizationMemberCommandResponse res = organizationService.listOrganizationPersonnels(command);
 			List<OrganizationMemberDTO> members = res.getMembers();
-			 dtos = members.stream().map(r->{
-				SceneContactDTO dto = new SceneContactDTO();
-				dto.setContactId(r.getId());
-				dto.setContactName(r.getContactName());
-				dto.setContactPhone(r.getContactToken());
-				dto.setContactAvatar(r.getAvatar());
-				dto.setUserId(r.getTargetId());
-				return dto;
-			}).collect(Collectors.toList());
+			if(null != members){
+				dtos = members.stream().map(r->{
+					SceneContactDTO dto = new SceneContactDTO();
+					dto.setContactId(r.getId());
+					dto.setContactName(r.getContactName());
+					dto.setContactPhone(r.getContactToken());
+					dto.setContactAvatar(r.getAvatar());
+					dto.setUserId(r.getTargetId());
+					return dto;
+				}).collect(Collectors.toList());
+			}
+			 
 		}
 		
+		ListNeighborUsersCommandResponse resp = null;
+ 	    if(UserCurrentEntityType.COMMUNITY == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
+ 	    	ListNeighborUsersCommand command = new ListNeighborUsersCommand();
+ 	    	command.setType(ParamType.COMMUNITY.getCode());
+ 	    	command.setId(sceneToken.getEntityId());
+ 	    	resp= familyService.listNeighborUsers(command);
+		}else if(UserCurrentEntityType.FAMILY == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
+ 	    	ListNeighborUsersCommand command = new ListNeighborUsersCommand();
+ 	    	command.setType(ParamType.FAMILY.getCode());
+ 	    	command.setId(sceneToken.getEntityId());
+ 	    	resp = familyService.listNeighborUsers(command);
+		}
+ 	    
+ 	    if(null != resp && null != resp.getNeighborUserList() &&  0 != resp.getNeighborUserList().size()){
+ 	    	dtos = resp.getNeighborUserList().stream().map(r->{
+				SceneContactDTO dto = new SceneContactDTO();
+				dto.setContactId(r.getUserId());
+				dto.setContactName(r.getUserName());
+//				dto.setContactPhone(r.get);
+				dto.setContactAvatar(r.getUserAvatarUrl());
+				dto.setUserId(r.getUserId());
+				return dto;
+			}).collect(Collectors.toList());
+ 	    }
+ 	    
 		ListContactBySceneRespose res = new ListContactBySceneRespose();
 		res.setContacts(dtos);
-        return null;
+		RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
     
     /**

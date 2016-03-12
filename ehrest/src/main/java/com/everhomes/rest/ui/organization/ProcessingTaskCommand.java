@@ -1,9 +1,11 @@
-package com.everhomes.rest.organization;
+package com.everhomes.rest.ui.organization;
 
 import javax.validation.constraints.NotNull;
 
+
 /**
  * <ul>
+ * <li>sceneToken: 场景标识，用一个标识代替原来用多个字段共同表示的标识，以使传参数简单一些（只需要传一个参数）</li>
  * <li>taskId: 任务ID</li>
  * <li>userId: 用户ID </li>
  * <li>taskStatus: 处理状态，参考{@link com.everhomes.rest.organization.OrganizationTaskStatus}</li>
@@ -12,6 +14,8 @@ import javax.validation.constraints.NotNull;
  * </ul>
  */
 public class ProcessingTaskCommand {
+	
+	private String sceneToken;
 	
 	@NotNull
 	private Long taskId;
@@ -23,6 +27,16 @@ public class ProcessingTaskCommand {
 	private String taskCategory;
 	
 	private Byte privateFlag;
+	
+	
+
+	public String getSceneToken() {
+		return sceneToken;
+	}
+
+	public void setSceneToken(String sceneToken) {
+		this.sceneToken = sceneToken;
+	}
 
 	public Long getTaskId() {
 		return taskId;
