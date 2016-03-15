@@ -40,6 +40,7 @@ import com.everhomes.rest.user.ListUserOpPromotionsRespose;
 import com.everhomes.rest.user.OpPromotionDTO;
 import com.everhomes.rest.user.SyncActivityCommand;
 import com.everhomes.rest.user.UserCurrentEntityType;
+import com.everhomes.user.UserService;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
 
@@ -63,6 +64,9 @@ public class UserUiController extends ControllerBase {
     
     @Autowired
     private FamilyService familyService;
+
+    @Autowired
+    private UserService userService;
     
     /**
      * <b>URL: /ui/user/listUserRelatedScenes</b>
@@ -72,7 +76,7 @@ public class UserUiController extends ControllerBase {
     @RequestMapping("listUserRelatedScenes")
     @RestReturn(value=SceneDTO.class, collection=true)
     public RestResponse listUserRelatedScenes() {
-        List<SceneDTO> sceneDtoList = null;
+        List<SceneDTO> sceneDtoList = userService.listUserRelatedScenes();
         
         RestResponse response = new RestResponse(sceneDtoList);
         response.setErrorCode(ErrorCodes.SUCCESS);

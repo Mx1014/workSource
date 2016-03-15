@@ -1838,24 +1838,71 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public List<OrganizationDetailDTO> listUserRelateEnterprises(ListUserRelatedEnterprisesCommand cmd) {
 		User user = UserContext.current().getUser();
-		List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembers(user.getId());
+		// 下面逻辑移到一个方法中以供共用 by lqs 20160310
+//		List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembers(user.getId());
+//		
+//		Community community = null;
+//		if(null != cmd.getCommunityId()){
+//			community = communityProvider.findCommunityById(cmd.getCommunityId());
+//		}
+//		List<OrganizationDetailDTO> dtos = new ArrayList<OrganizationDetailDTO>();
+//		for (OrganizationMember member : orgMembers) {
+//			Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
+//			if(OrganizationGroupType.ENTERPRISE.getCode().equals(org.getGroupType())){
+//				OrganizationDetailDTO dto= this.toOrganizationDetailDTO(org.getId(), false);
+//				dto.setMember(ConvertHelper.convert(member, OrganizationMemberDTO.class));
+//				dto.setCommunityId(cmd.getCommunityId());
+//				dto.setCommunity(ConvertHelper.convert(community, CommunityDTO.class));
+//				dtos.add(dto);
+//			}
+//		}
+//		return dtos;OrganizationGroupType.ENTERPRISE
 		
-		Community community = null;
-		if(null != cmd.getCommunityId()){
-			community = communityProvider.findCommunityById(cmd.getCommunityId());
-		}
-		List<OrganizationDetailDTO> dtos = new ArrayList<OrganizationDetailDTO>();
-		for (OrganizationMember member : orgMembers) {
-			Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
-			if(OrganizationGroupType.ENTERPRISE.getCode().equals(org.getGroupType())){
-				OrganizationDetailDTO dto= this.toOrganizationDetailDTO(org.getId(), false);
-				dto.setMember(ConvertHelper.convert(member, OrganizationMemberDTO.class));
-				dto.setCommunityId(cmd.getCommunityId());
-				dto.setCommunity(ConvertHelper.convert(community, CommunityDTO.class));
-				dtos.add(dto);
-			}
-		}
-		return dtos;
+		Integer namespaceId = cmd.getNamespaceId();
+		Long communityId = cmd.getCommunityId();
+		return listUserRelateEnterprises(namespaceId, user.getId(), null, communityId);
+	}
+	
+	@Override
+	public List<OrganizationDetailDTO> listUserRelateEnterprises(Integer namespaceId, Long userId, OrganizationGroupType groupType, 
+	    Long communityId) {
+	    List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembers(userId);
+        
+	    // 如果指定了具体的小区，则在返回结果当中给相应的小区信息
+        Community community = null;
+        if(communityId != null){
+            community = communityProvider.findCommunityById(communityId);
+        }
+        
+        OrganizationGroupType tempGroupType = null;
+        List<OrganizationDetailDTO> dtos = new ArrayList<OrganizationDetailDTO>();
+        for (OrganizationMember member : orgMembers) {
+            // 如果机构不存在，则丢弃该成员对应的机构
+            Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
+            if(org == null) {
+                LOGGER.error("The member is ignored for organization not found, userId=" + userId  
+                    + ", organizationId=" + member.getOrganizationId() + ", orgMemberId=" + member.getId() 
+                    + ", namespaceId=" + namespaceId + ", groupType=" + groupType);
+                continue;
+            }
+            
+            // 如果指定的机构的类型，则把不符合指定机构类型的机构都丢弃
+            tempGroupType = OrganizationGroupType.fromCode(org.getGroupType());
+            if(groupType != null && groupType != tempGroupType){
+                LOGGER.error("The member is ignored for organization group type not matched, userId=" + userId  
+                    + ", organizationId=" + member.getOrganizationId() + ", orgMemberId=" + member.getId() 
+                    + ", namespaceId=" + namespaceId + ", groupType=" + groupType + ", currGroupType" + tempGroupType);
+                continue;
+            }
+            
+            OrganizationDetailDTO dto= this.toOrganizationDetailDTO(org.getId(), false);
+            dto.setMember(ConvertHelper.convert(member, OrganizationMemberDTO.class));
+            dto.setCommunityId(communityId);
+            dto.setCommunity(ConvertHelper.convert(community, CommunityDTO.class));
+            dtos.add(dto);
+        }
+        
+        return dtos;
 	}
 
 	@Override
