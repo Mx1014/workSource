@@ -4727,9 +4727,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	
 	@Override
-	public List<Organization> getSyncDatas(){
+	public List<Organization> getSyncDatas(CrossShardListingLocator locator){
 		int pageSize = 200; 
-		CrossShardListingLocator locator = new CrossShardListingLocator();
 		
 		List<OrganizationCommunityRequest> requests = organizationProvider.queryOrganizationCommunityRequests(locator, pageSize, new ListingQueryBuilderCallback() {
 			@Override
