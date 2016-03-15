@@ -95,4 +95,11 @@ public class EhLaunchPadLayoutsDao extends org.jooq.impl.DAOImpl<com.everhomes.s
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadLayouts> fetchByCreateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhLaunchPadLayouts.EH_LAUNCH_PAD_LAYOUTS.CREATE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>scene_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadLayouts> fetchBySceneType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLaunchPadLayouts.EH_LAUNCH_PAD_LAYOUTS.SCENE_TYPE, values);
+	}
 }

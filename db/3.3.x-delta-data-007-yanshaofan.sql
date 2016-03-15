@@ -1,0 +1,18 @@
+
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'organization.notification', 11, 'zh_CN','接受任务时回复的帖子消息', '该任务已由{targetUName}（{targetUToken}）确认，将会很快联系您。');
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'organization.notification', 12, 'zh_CN', '新发布一条任务短信消息','您有一个新的任务，请尽快处理。');
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'organization.notification', 13, 'zh_CN', '处理任务时发送的短信消息','{operatorUName}已分配给你一个物业任务，请尽快联系业主（{createUName}）处理。');
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'organization.notification', 14, 'zh_CN', '处理任务时回复的帖子消息','{operatorUName}（{operatorUToken}）已将该任务指派给{targetUName}处理，请等待。');
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'organization.notification', 15, 'zh_CN', '任务被拒绝收到的短信消息','该任务已被{targetUName}（{targetUToken}）拒绝，请重新分配');
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'organization.notification', 16, 'zh_CN', '任务已完成后的短信消息','您的服务已完成，滑动去查看详情');
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'organization.notification', 17, 'zh_CN', '任务已完成后回复的帖子消息','该服务已由{operatorUName}完成，稍后我们会将进行回访');
+
+INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag)  
+	VALUES (1900, 1000000, 0, '0', '0', '/home', 'GovAgencies', '任务管理', '任务管理', 'cs://1/image/aW1hZ2UvTVRwaU9EWTFObVJpTmpCallUSTFOams1T0RJNFpHWTJNV1E1T1dOaE1UWmtOdw', '1', '1', '39',null, '0', '0', '1', '1', '', '0', null);
+	
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`) 
+	VALUES(1901, 1000000, 0, 0, 0, '/home','GovAgencies','NoticeManager','公告管理','cs://1/image/aW1hZ2UvTVRveU5tSXhOMlV6TmpSak5qQmpOMlk1T1RVMFpqSTNPR0U1TXpNMll6QmlNdw',1,1,2, '{"itemLocation":"/home/NoticeManager","layoutName":"SceneNoticeLayout","title":"公告管理","entityTag":"PM"}', '0','0','1','1','','0',NULL,NULL,NULL);
+
+INSERT INTO `eh_launch_pad_layouts`(id, namespace_id, name, layout_json, version_code, min_version_code, status, create_time) VALUES ('2', '0', 'SceneNoticeLayout', '{"versionCode":"2015072815","versionName":"3.0.0","displayName":"公告管理","layoutName":"SceneNoticeLayout","groups":[{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GaActions"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"ScenePosts","instanceConfig":{},"style":"Default","defaultOrder":3,"separatorFlag":0,"separatorHeight":0}]}', '2015082914', '2015061701', '2', '2015-06-27 14:04:57');
+
+INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag) VALUES (1902, 0, 0, 0, 0, '/home/NoticeManager', 'GaActions', 'PUBLIC_NOTICE', '发布公告', 'cs://1/image/aW1hZ2UvTVRwall6VTVOV1U0WkdRMk56aGxPRFV3TVRBMk5qVXlNVFkzWVRZek56aGpOdw', 1, 1, 19, '{"contentCategory":1003,"actionCategory":0,"targetEntityTag":"PM","visibleRegionType":0}', 0, 0, 1, 1, '', 0,NULL);

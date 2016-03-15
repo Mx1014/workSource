@@ -19,7 +19,7 @@ public class ListEnterprisesCommand {
     
     private Long buildingId;
     
-    private Long bildingName;
+    private String buildingName;
     
     private Boolean qryAdminRoleFlag = false;
     
@@ -69,13 +69,14 @@ public class ListEnterprisesCommand {
 		this.buildingId = buildingId;
 	}
 
-	
-	public Long getBildingName() {
-		return bildingName;
+
+
+	public String getBuildingName() {
+		return buildingName;
 	}
 
-	public void setBildingName(Long bildingName) {
-		this.bildingName = bildingName;
+	public void setBuildingName(String buildingName) {
+		this.buildingName = buildingName;
 	}
 
 	public String getKeywords() {

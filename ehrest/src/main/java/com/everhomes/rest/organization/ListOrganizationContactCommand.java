@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>organizationId：政府机构id</li>
- * <li>pageOffset: 页码</li>
+ * <li>pageAnchor: 页码</li>
  * <li>pageSize: 每页大小</li>
  * </ul>
  */

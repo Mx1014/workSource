@@ -1,7 +1,5 @@
 package com.everhomes.banner;
 
-
-
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;

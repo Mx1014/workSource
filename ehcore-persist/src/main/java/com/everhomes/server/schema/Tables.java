@@ -399,6 +399,21 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhOauth2Tokens EH_OAUTH2_TOKENS = com.everhomes.server.schema.tables.EhOauth2Tokens.EH_OAUTH2_TOKENS;
 
 	/**
+	 * The table ehcore.eh_op_promotions
+	 */
+	public static final com.everhomes.server.schema.tables.EhOpPromotions EH_OP_PROMOTIONS = com.everhomes.server.schema.tables.EhOpPromotions.EH_OP_PROMOTIONS;
+
+	/**
+	 * The table ehcore.eh_op_promotion_policies
+	 */
+	public static final com.everhomes.server.schema.tables.EhOpPromotionPolicies EH_OP_PROMOTION_POLICIES = com.everhomes.server.schema.tables.EhOpPromotionPolicies.EH_OP_PROMOTION_POLICIES;
+
+	/**
+	 * The table ehcore.eh_op_promotion_settings
+	 */
+	public static final com.everhomes.server.schema.tables.EhOpPromotionSettings EH_OP_PROMOTION_SETTINGS = com.everhomes.server.schema.tables.EhOpPromotionSettings.EH_OP_PROMOTION_SETTINGS;
+
+	/**
 	 * The table ehcore.eh_organizations
 	 */
 	public static final com.everhomes.server.schema.tables.EhOrganizations EH_ORGANIZATIONS = com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS;
@@ -682,6 +697,11 @@ public class Tables {
 	 * The table ehcore.eh_rtxt_resources
 	 */
 	public static final com.everhomes.server.schema.tables.EhRtxtResources EH_RTXT_RESOURCES = com.everhomes.server.schema.tables.EhRtxtResources.EH_RTXT_RESOURCES;
+
+	/**
+	 * The table ehcore.eh_scene_types
+	 */
+	public static final com.everhomes.server.schema.tables.EhSceneTypes EH_SCENE_TYPES = com.everhomes.server.schema.tables.EhSceneTypes.EH_SCENE_TYPES;
 
 	/**
 	 * The table ehcore.eh_scoped_configurations

@@ -71,6 +71,7 @@ import com.everhomes.rest.organization.UpdatePersonnelsToDepartment;
 import com.everhomes.rest.organization.UpdateTopicPrivacyCommand;
 import com.everhomes.rest.organization.UserExitOrganizationCommand;
 import com.everhomes.rest.organization.UserJoinOrganizationCommand;
+import com.everhomes.rest.ui.organization.ProcessingTaskCommand;
 import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
 import com.everhomes.search.OrganizationSearcher;
@@ -828,5 +829,6 @@ public class OrganizationController extends ControllerBase {
         res.setErrorDescription("OK");
         
         return res;
-        }
+      }
+    
 }

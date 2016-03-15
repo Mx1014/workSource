@@ -223,6 +223,7 @@ public class EnterpriseContactController extends ControllerBase {
         ListOrganizationContactCommand command = ConvertHelper.convert(cmd, ListOrganizationContactCommand.class);
         command.setKeywords(cmd.getKeyWord());
         command.setOrganizationId(cmd.getEnterpriseId());
+        command.setPageSize(100000);
         ListOrganizationMemberCommandResponse response = this.organizationService.listOrganizationPersonnels(command);
         
         List<EnterpriseContactDTO> dtos = new ArrayList<EnterpriseContactDTO>();

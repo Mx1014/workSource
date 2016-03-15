@@ -19,13 +19,10 @@ public class ListCommunityUsersCommand {
 	
 	private String keywords;
 	
-	
+	private String communityId;
 
 
 	public Long getPageAnchor() {
-		if(null == pageAnchor){
-			return 0l;
-		}
 		return pageAnchor;
 	}
 
@@ -68,6 +65,14 @@ public class ListCommunityUsersCommand {
 
 	public void setKeywords(String keywords) {
 		this.keywords = keywords;
+	}
+
+	public String getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(String communityId) {
+		this.communityId = communityId;
 	}
 	
 	

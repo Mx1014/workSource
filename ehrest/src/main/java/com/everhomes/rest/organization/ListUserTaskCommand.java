@@ -5,6 +5,7 @@ package com.everhomes.rest.organization;
  * 	<li>pageOffset : 页码</li>
  *	<li>pageSize : 页大小</li>
  *  <li>taskType : 任务类型 ，详情{@link com.everhomes.rest.organization.OrganizationTaskType}</li>
+ *  <li>taskStatus : 任务状态 ，详情{@link com.everhomes.rest.organization.OrganizationTaskStatus}</li>
  * </ul>
  *
  */
@@ -19,6 +20,8 @@ public class ListUserTaskCommand {
 	private Long communityId;
 	
 	private Long organizationId;
+	
+	private Long taskStatus;
 
 	public String getTaskType() {
 		return taskType;
@@ -58,6 +61,14 @@ public class ListUserTaskCommand {
 
 	public void setOrganizationId(Long organizationId) {
 		this.organizationId = organizationId;
+	}
+
+	public Long getTaskStatus() {
+		return taskStatus;
+	}
+
+	public void setTaskStatus(Long taskStatus) {
+		this.taskStatus = taskStatus;
 	}
 	
 	

@@ -1917,17 +1917,6 @@ public class ForumServiceImpl implements ForumService {
         Post commentPost = new Post();
 
         Long forumId = cmd.getForumId();
-        if(forumId == null) {
-            LOGGER.error("Forum id is null, userId=" + userId + ", forumId=" + forumId);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid forum id");
-        }
-        Forum forum = this.forumProvider.findForumById(forumId);
-        if(forum == null) {
-            LOGGER.error("Forum not found, userId=" + userId + ", forumId=" + forumId);
-            throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
-                ForumServiceErrorCode.ERROR_FORUM_NOT_FOUND, "forum not found");
-        }
         
         Long topicId = cmd.getTopicId();
         if(topicId == null) {
@@ -1940,12 +1929,6 @@ public class ForumServiceImpl implements ForumService {
             LOGGER.error("Topic not found, userId=" + userId + ", forumId=" + forumId + ", topicId=" + topicId);
             throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
                 ForumServiceErrorCode.ERROR_FORUM_NOT_FOUND, "Topic not found");
-        }
-        
-        if(!forumId.equals(topic.getForumId())) {
-            LOGGER.error("Topic is not in the forum, userId=" + userId + ", forumId=" + forumId + ", topicId=" + topicId);
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-                ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid forum id");
         }
         
         commentPost.setForumId(cmd.getForumId());
