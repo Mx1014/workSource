@@ -18,6 +18,10 @@ public class ListFactorsResponse {
 	
 	private Long nextPageAnchor;
 	
+	public ListFactorsResponse(Long nextPageAnchor, List<FactorsDTO> factorsdto) {
+        this.nextPageAnchor = nextPageAnchor;
+        this.factorsdto = factorsdto;
+    }
 
 	public List<FactorsDTO> getFactorsdto() {
 		return factorsdto;

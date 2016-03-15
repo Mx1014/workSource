@@ -17,6 +17,11 @@ public class ListEvaluationsResponse {
 	private List<EvaluationDTO> performances;
 
 	private Long nextPageAnchor;
+	
+	public ListEvaluationsResponse(Long nextPageAnchor, List<EvaluationDTO> performances) {
+        this.nextPageAnchor = nextPageAnchor;
+        this.performances = performances;
+    }
 
 	public List<EvaluationDTO> getPerformances() {
 		return performances;

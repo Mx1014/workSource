@@ -40,6 +40,8 @@ import com.everhomes.rest.quality.CreatQualityStandardCommand;
 import com.everhomes.rest.quality.DeleteQualityCategoryCommand;
 import com.everhomes.rest.quality.DeleteQualityStandardCommand;
 import com.everhomes.rest.quality.DeleteFactorCommand;
+import com.everhomes.rest.quality.EvaluationDTO;
+import com.everhomes.rest.quality.FactorsDTO;
 import com.everhomes.rest.quality.ListEvaluationsCommand;
 import com.everhomes.rest.quality.ListEvaluationsResponse;
 import com.everhomes.rest.quality.ListQualityCategoriesCommand;
@@ -52,6 +54,7 @@ import com.everhomes.rest.quality.ListFactorsCommand;
 import com.everhomes.rest.quality.ListFactorsResponse;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.quality.ProcessType;
+import com.everhomes.rest.quality.QualityCategoriesDTO;
 import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.rest.quality.QualityInspectionCategoryStatus;
 import com.everhomes.rest.quality.QualityInspectionTaskDTO;
@@ -316,8 +319,28 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public ListFactorsResponse listFactors(ListFactorsCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		Long ownerId = cmd.getOwnerId();
+		String ownerType = cmd.getOwnerType();
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        
+        List<QualityInspectionEvaluationFactors> factors = qualityProvider.listQualityInspectionEvaluationFactors(locator, pageSize+1, ownerId, ownerType);
+		
+        Long nextPageAnchor = null;
+        if(factors.size() > pageSize) {
+        	factors.remove(factors.size() - 1);
+            nextPageAnchor = factors.get(factors.size() - 1).getId();
+        }
+        
+        List<FactorsDTO> factorsDto = factors.stream().map((r) -> {
+        	
+        	FactorsDTO dto = ConvertHelper.convert(r, FactorsDTO.class);  
+        	return dto;
+        }).collect(Collectors.toList());
+        
+        
+        return new ListFactorsResponse(nextPageAnchor, factorsDto);
 	}
 
 	@Override
@@ -374,8 +397,40 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public ListEvaluationsResponse listEvaluations(ListEvaluationsCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		Long ownerId = cmd.getOwnerId();
+		String ownerType = cmd.getOwnerType();
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        Timestamp startTime = null;
+        Timestamp endTime = null;
+        if(cmd.getStartTime() != null) {
+        	startTime = new Timestamp(cmd.getStartTime());
+        }
+        if(cmd.getEndTime() != null) {
+        	endTime = new Timestamp(cmd.getEndTime());
+        }
+        
+        List<QualityInspectionEvaluations> evaluations = qualityProvider.listQualityInspectionEvaluations(locator, pageSize + 1,
+        		ownerId, ownerType, startTime, endTime);
+		
+        
+        Long nextPageAnchor = null;
+        if(evaluations.size() > pageSize) {
+        	evaluations.remove(evaluations.size() - 1);
+            nextPageAnchor = evaluations.get(evaluations.size() - 1).getId();
+        }
+        
+        
+        List<EvaluationDTO> dtoList = evaluations.stream().map((r) -> {
+        	
+        	EvaluationDTO dto = ConvertHelper.convert(r, EvaluationDTO.class);  
+        	
+        	return dto;
+        }).collect(Collectors.toList());
+        
+        
+        return new ListEvaluationsResponse(nextPageAnchor, dtoList);
 	}
 
 	@Override
@@ -785,8 +840,29 @@ public class QualityServiceImpl implements QualityService {
 	@Override
 	public ListQualityCategoriesResponse listQualityCategories(
 			ListQualityCategoriesCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		Long ownerId = cmd.getOwnerId();
+		String ownerType = cmd.getOwnerType();
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        
+        List<QualityInspectionCategories> qaCategories = qualityProvider.listQualityInspectionCategories(locator, pageSize+1, ownerId, ownerType);
+		
+        Long nextPageAnchor = null;
+        if(qaCategories.size() > pageSize) {
+        	qaCategories.remove(qaCategories.size() - 1);
+            nextPageAnchor = qaCategories.get(qaCategories.size() - 1).getId();
+        }
+        
+        List<QualityCategoriesDTO> categories = qaCategories.stream().map((r) -> {
+        	
+        	QualityCategoriesDTO dto = ConvertHelper.convert(r, QualityCategoriesDTO.class);  
+        	return dto;
+        }).collect(Collectors.toList());
+        
+        
+        return new ListQualityCategoriesResponse(nextPageAnchor, categories);
 	}
 
 }

@@ -43,6 +43,7 @@ import com.everhomes.server.schema.tables.pojos.EhBuildings;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionCategories;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionEvaluationFactors;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionEvaluations;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandardGroupMap;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandards;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTaskAttachments;
@@ -53,6 +54,7 @@ import com.everhomes.server.schema.tables.records.EhBuildingsRecord;
 import com.everhomes.server.schema.tables.records.EhParkChargeRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionCategoriesRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionEvaluationFactorsRecord;
+import com.everhomes.server.schema.tables.records.EhQualityInspectionEvaluationsRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionStandardGroupMapRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionStandardsRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionTaskAttachmentsRecord;
@@ -287,9 +289,42 @@ public class QualityProviderImpl implements QualityProvider {
 	}
 
 	@Override
-	public List<QualityInspectionEvaluationFactors> listQualityInspectionEvaluationFactors() {
-		// TODO Auto-generated method stub
-		return null;
+	public List<QualityInspectionEvaluationFactors> listQualityInspectionEvaluationFactors(
+			ListingLocator locator, int count, Long ownerId, String ownerType) {
+		assert(locator.getEntityId() != 0);
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhQualityInspectionEvaluationFactors.class, locator.getEntityId()));
+		List<QualityInspectionEvaluationFactors> factors = new ArrayList<QualityInspectionEvaluationFactors>();
+        SelectQuery<EhQualityInspectionEvaluationFactorsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_EVALUATION_FACTORS);
+    
+        if(locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_QUALITY_INSPECTION_EVALUATION_FACTORS.ID.lt(locator.getAnchor()));
+        }
+        if(ownerId != null && ownerId != 0) {
+        	query.addConditions(Tables.EH_QUALITY_INSPECTION_EVALUATION_FACTORS.OWNER_ID.eq(ownerId));
+        }
+		if(!StringUtils.isNullOrEmpty(ownerType)) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_EVALUATION_FACTORS.OWNER_TYPE.eq(ownerType));    	
+		}
+		
+
+        query.addOrderBy(Tables.EH_QUALITY_INSPECTION_EVALUATION_FACTORS.ID.desc());
+        query.addLimit(count);
+        
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query factors by count, sql=" + query.getSQL());
+            LOGGER.debug("Query factors by count, bindValues=" + query.getBindValues());
+        }
+        
+        query.fetch().map((EhQualityInspectionEvaluationFactorsRecord record) -> {
+        	factors.add(ConvertHelper.convert(record, QualityInspectionEvaluationFactors.class));
+        	return null;
+        });
+        
+        if(factors.size() > 0) {
+            locator.setAnchor(factors.get(factors.size() -1).getId());
+        }
+        
+		return factors;
 	}
 
 	@Override
@@ -362,9 +397,50 @@ public class QualityProviderImpl implements QualityProvider {
 	}
 
 	@Override
-	public List<QualityInspectionEvaluations> listQualityInspectionEvaluations() {
-		// TODO Auto-generated method stub
-		return null;
+	public List<QualityInspectionEvaluations> listQualityInspectionEvaluations(ListingLocator locator, int count,
+			Long ownerId, String ownerType, Timestamp startDate, Timestamp endDate) {
+
+		assert(locator.getEntityId() != 0);
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhQualityInspectionEvaluations.class, locator.getEntityId()));
+		List<QualityInspectionEvaluations> evaluations = new ArrayList<QualityInspectionEvaluations>();
+        SelectQuery<EhQualityInspectionEvaluationsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_EVALUATIONS);
+    
+        if(locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_QUALITY_INSPECTION_EVALUATIONS.ID.lt(locator.getAnchor()));
+        }
+        if(ownerId != null && ownerId != 0) {
+        	query.addConditions(Tables.EH_QUALITY_INSPECTION_EVALUATIONS.OWNER_ID.eq(ownerId));
+        }
+		if(!StringUtils.isNullOrEmpty(ownerType)) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_EVALUATIONS.OWNER_TYPE.eq(ownerType));    	
+		}
+		
+		if(startDate != null && !"".equals(startDate)) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_EVALUATIONS.CREATE_TIME.ge(startDate));
+		}
+		
+		if(endDate != null && !"".equals(endDate)) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_EVALUATIONS.CREATE_TIME.le(endDate));
+		}
+		
+        query.addOrderBy(Tables.EH_QUALITY_INSPECTION_EVALUATIONS.ID.desc());
+        query.addLimit(count);
+        
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query evaluations by count, sql=" + query.getSQL());
+            LOGGER.debug("Query evaluations by count, bindValues=" + query.getBindValues());
+        }
+        
+        query.fetch().map((EhQualityInspectionEvaluationsRecord record) -> {
+        	evaluations.add(ConvertHelper.convert(record, QualityInspectionEvaluations.class));
+        	return null;
+        });
+        
+        if(evaluations.size() > 0) {
+            locator.setAnchor(evaluations.get(evaluations.size() -1).getId());
+        }
+        
+		return evaluations;
 	}
 
 	@Override

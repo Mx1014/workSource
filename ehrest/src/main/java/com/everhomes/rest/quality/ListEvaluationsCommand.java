@@ -8,8 +8,8 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *  <li>ownerId: 任务所属组织等的id</li>
  *  <li>ownerType: 任务所属组织类型，如enterprise</li>
- *  <li>startTime: 起始月份  字符串格式：yyyyMM00</li>
- *  <li>endTime: 截止月份  字符串格式： yyyyMM00</li>
+ *  <li>startTime: 起始月份  </li>
+ *  <li>endTime: 截止月份  </li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
  * </ul>
@@ -22,9 +22,9 @@ public class ListEvaluationsCommand {
 	@NotNull
 	private String ownerType;
 	
-	private String startTime;
+	private Long startTime;
 	
-	private String endTime;
+	private Long endTime;
 	
 	private Long pageAnchor;
 	
@@ -42,19 +42,19 @@ public class ListEvaluationsCommand {
 		return ownerType;
 	}
 
-	public String getStartTime() {
+	public Long getStartTime() {
 		return startTime;
 	}
 
-	public void setStartTime(String startTime) {
+	public void setStartTime(Long startTime) {
 		this.startTime = startTime;
 	}
 
-	public String getEndTime() {
+	public Long getEndTime() {
 		return endTime;
 	}
 
-	public void setEndTime(String endTime) {
+	public void setEndTime(Long endTime) {
 		this.endTime = endTime;
 	}
 

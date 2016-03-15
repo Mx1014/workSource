@@ -18,6 +18,11 @@ public class ListQualityCategoriesResponse {
 	private List<QualityCategoriesDTO> categories;
 	
 	private Long nextPageAnchor;
+	
+	public ListQualityCategoriesResponse(Long nextPageAnchor, List<QualityCategoriesDTO> categories) {
+        this.nextPageAnchor = nextPageAnchor;
+        this.categories = categories;
+    }
 
 	public List<QualityCategoriesDTO> getCategories() {
 		return categories;
