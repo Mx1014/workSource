@@ -18,6 +18,7 @@ public class AesUserKeyDTO {
     private Long     doorId;
     private Long     id;
     private String hardwareId;
+    private String doorName;
 
     
 
@@ -149,6 +150,18 @@ public class AesUserKeyDTO {
 
     public void setHardwareId(String hardwareId) {
         this.hardwareId = hardwareId;
+    }
+
+
+
+    public String getDoorName() {
+        return doorName;
+    }
+
+
+
+    public void setDoorName(String doorName) {
+        this.doorName = doorName;
     }
 
 

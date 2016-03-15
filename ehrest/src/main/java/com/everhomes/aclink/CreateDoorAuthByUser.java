@@ -2,6 +2,8 @@ package com.everhomes.aclink;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * <li>userId: 授权给的用户</li>
@@ -16,10 +18,16 @@ import javax.validation.constraints.NotNull;
  */
 public class CreateDoorAuthByUser {
     @NotNull
+    private String phone;
+    
+    @NotNull
     private Long     doorId;
     
     @NotNull
     private Byte     authType;
+    
+    @NotNull
+    private Integer namespaceId;
     
     @NotNull
     private Long     validFromMs;
@@ -66,6 +74,22 @@ public class CreateDoorAuthByUser {
     public void setDescription(String description) {
         this.description = description;
     }
+    public String getPhone() {
+        return phone;
+    }
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
     
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
     
 }

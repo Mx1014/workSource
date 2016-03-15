@@ -326,8 +326,18 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     @Override
     public DoorAuthDTO createDoorAuth(CreateDoorAuthByUser cmd2) {
         User user = UserContext.current().getUser();
+        
+        User targetUser = userService.findUserByIndentifier(cmd2.getNamespaceId(), cmd2.getPhone());
+        if (targetUser == null) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Target user not found");
+        }
+        cmd2.setPhone(null);
+        cmd2.setNamespaceId(null);
+        
         CreateDoorAuthCommand cmd = ConvertHelper.convert(cmd2, CreateDoorAuthCommand.class);
         cmd.setApproveUserId(user.getId());
+        cmd.setUserId(targetUser.getId());
         DoorAuth auth = doorAuthProvider.queryValidDoorAuthForever(cmd.getDoorId(), user.getId());
         if(auth == null) {
             //TODO auth failed
@@ -378,6 +388,12 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     
                     doorAuth.setStatus(DoorAuthStatus.INVALID.getCode());
                     doorAuthProvider.updateDoorAuth(doorAuth);
+                    
+                    if(aesUserKey1 != null) {
+                        aesUserKey1.setStatus(AesUserKeyStatus.INVALID.getCode());
+                        aesUserKeyProvider.updateAesUserKey(aesUserKey1);    
+                    }
+                    
                     
                     if(aesUserKey1 == null || aesUserKey2 != null) {
                         return null;
@@ -609,11 +625,12 @@ doorCommandProvider.getDoorCommandById(0l);
                     if(doorAuth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
                         //7 Days
                         aesUserKey.setExpireTimeMs(System.currentTimeMillis() + 60*1000*24*7);
+                        aesUserKey.setKeyType(AesUserKeyType.NORMAL.getCode());
                     } else {
-                        aesUserKey.setExpireTimeMs(doorAuth.getValidEndMs());    
+                        aesUserKey.setExpireTimeMs(doorAuth.getValidEndMs());
+                        aesUserKey.setKeyType(AesUserKeyType.TEMP.getCode());
                             }
                     aesUserKey.setStatus(AesUserKeyStatus.VALID.getCode());
-                    aesUserKey.setKeyType(AesUserKeyType.NORMAL.getCode());
                     aesUserKey.setSecret(AclinkUtils.packAesUserKey(aesServerKey.getSecret(), doorAuth.getUserId(), aesUserKey.getKeyId(), doorAuth.getValidEndMs()));
                     aesUserKeyProvider.createAesUserKey(aesUserKey);
                     
@@ -722,6 +739,7 @@ doorCommandProvider.getDoorCommandById(0l);
             DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(dto.getDoorId());
             if(doorAccess != null) {
                 dto.setHardwareId(doorAccess.getHardwareId());
+                dto.setDoorName(doorAccess.getName());
                 dtos.add(dto);    
             }
         }
@@ -741,8 +759,9 @@ doorCommandProvider.getDoorCommandById(0l);
         for(AesUserKey key : aesUserKeys) {
             AesUserKeyDTO dto = ConvertHelper.convert(key, AesUserKeyDTO.class);
             DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(dto.getDoorId());
-            if(doorAccess != null) {
+            if(doorAccess != null && (!doorAccess.getStatus().equals(DoorAccessStatus.INVALID.getCode()))) {
                 dto.setHardwareId(doorAccess.getHardwareId());
+                dto.setDoorName(doorAccess.getName());
                 dtos.add(dto);    
             }
         }
@@ -776,6 +795,9 @@ doorCommandProvider.getDoorCommandById(0l);
     private AesUserKey generateAesUserKey(User user, DoorAuth doorAuth) {
         DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(doorAuth.getDoorId());
         if(!doorAccess.getStatus().equals(DoorAccessStatus.ACTIVE.getCode())) {
+            //The door is delete, set it to invalid
+            doorAuth.setStatus(DoorAuthStatus.INVALID.getCode());
+            doorAuthProvider.updateDoorAuth(doorAuth);
             //Check if the door is active
             return null;
         }
