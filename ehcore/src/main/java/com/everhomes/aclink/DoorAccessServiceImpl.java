@@ -604,7 +604,7 @@ doorCommandProvider.getDoorCommandById(0l);
                     doorAuth.setOwnerId(doorAccess.getOwnerId());
                     doorAuth.setOwnerType(doorAccess.getOwnerType());
                     doorAuth.setValidFromMs(System.currentTimeMillis() -  60*1000);
-                    doorAuth.setValidEndMs(System.currentTimeMillis()+ 10*60*1000);//TODO
+                    doorAuth.setValidEndMs(System.currentTimeMillis()+ 7*24*60*60*1000);//TODO 7 Days
                     doorAuth.setUserId(user.getId());
                     doorAuth.setStatus(DoorAuthStatus.VALID.getCode());
                     UserIdentifier ui = userProvider.findIdentifierById(user.getId());
@@ -624,7 +624,7 @@ doorCommandProvider.getDoorCommandById(0l);
                     aesUserKey.setDoorId(doorAccess.getId());
                     if(doorAuth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
                         //7 Days
-                        aesUserKey.setExpireTimeMs(System.currentTimeMillis() + 60*1000*24*7);
+                        aesUserKey.setExpireTimeMs(System.currentTimeMillis() + 60*60*1000*24*7);
                         aesUserKey.setKeyType(AesUserKeyType.NORMAL.getCode());
                     } else {
                         aesUserKey.setExpireTimeMs(doorAuth.getValidEndMs());
