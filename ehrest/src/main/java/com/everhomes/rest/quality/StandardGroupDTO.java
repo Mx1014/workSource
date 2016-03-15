@@ -1,0 +1,59 @@
+package com.everhomes.rest.quality;
+
+import com.everhomes.util.StringHelper;
+
+/**
+ * <ul>
+ *  <li>id: 主键id</li>
+ *  <li>standardId: 标准id</li>
+ *  <li>groupType: 业务组类型 com.everhomes.rest.quality.QualityGroupType</li>
+ *  <li>groupId: 业务组id</li>
+ * </ul>
+ */
+public class StandardGroupDTO {
+	
+	private Long id;
+	
+	private Byte groupType;
+	
+	private Long groupId;
+	
+	private Long standardId;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public Byte getGroupType() {
+		return groupType;
+	}
+
+	public void setGroupType(Byte groupType) {
+		this.groupType = groupType;
+	}
+
+	public Long getGroupId() {
+		return groupId;
+	}
+
+	public void setGroupId(Long groupId) {
+		this.groupId = groupId;
+	}
+
+	public Long getStandardId() {
+		return standardId;
+	}
+
+	public void setStandardId(Long standardId) {
+		this.standardId = standardId;
+	}
+
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}
