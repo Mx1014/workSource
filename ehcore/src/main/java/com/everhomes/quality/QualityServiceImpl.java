@@ -322,13 +322,53 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public void updateFactor(UpdateFactorCommand cmd) {
-		// TODO Auto-generated method stub
 		
+		User user = UserContext.current().getUser();
+		
+		if(cmd.getId() == null) {
+			QualityInspectionEvaluationFactors factor = new QualityInspectionEvaluationFactors();
+			factor.setOwnerId(cmd.getOwnerId());
+			factor.setOwnerType(cmd.getOwnerType());
+			factor.setCategoryId(cmd.getCategoryId());
+			factor.setGroupId(cmd.getGroupId());
+			factor.setWeight(cmd.getWeight());
+			factor.setCreatorUid(user.getId());
+			
+			
+			qualityProvider.createQualityInspectionEvaluationFactors(factor);
+		} else {
+			QualityInspectionEvaluationFactors factor = verifiedFactorById(cmd.getId());
+			factor.setOwnerId(cmd.getOwnerId());
+			factor.setOwnerType(cmd.getOwnerType());
+			factor.setCategoryId(cmd.getCategoryId());
+			factor.setGroupId(cmd.getGroupId());
+			factor.setWeight(cmd.getWeight());
+			
+			qualityProvider.updateQualityInspectionEvaluationFactors(factor);
+		}
+		
+	}
+	
+	private QualityInspectionEvaluationFactors verifiedFactorById(Long factorId) {
+		QualityInspectionEvaluationFactors factor = qualityProvider.findQualityInspectionFactorById(factorId);
+		if(factor == null) {
+			LOGGER.error("the factor which id="+factorId+" don't exist!");
+			throw RuntimeErrorException
+					.errorWith(
+							QualityServiceErrorCode.SCOPE,
+							QualityServiceErrorCode.ERROR_FACTOR_NOT_EXIST,
+							localeStringService.getLocalizedString(
+									String.valueOf(QualityServiceErrorCode.SCOPE),
+									String.valueOf(QualityServiceErrorCode.ERROR_FACTOR_NOT_EXIST),
+									UserContext.current().getUser().getLocale(),
+									"the factor don't exist!"));
+		}
+		return factor;
 	}
 
 	@Override
 	public void deleteFactor(DeleteFactorCommand cmd) {
-		// TODO Auto-generated method stub
+		qualityProvider.deleteQualityInspectionEvaluationFactors(cmd.getId());
 		
 	}
 

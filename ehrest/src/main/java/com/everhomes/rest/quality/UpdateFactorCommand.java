@@ -28,7 +28,7 @@ public class UpdateFactorCommand {
 	private Long groupId;
 	
 	@NotNull
-	private String categoryId;
+	private Long categoryId;
 	
 	@NotNull
 	private Double weight;
@@ -65,11 +65,11 @@ public class UpdateFactorCommand {
 		this.groupId = groupId;
 	}
 
-	public String getCategoryId() {
+	public Long getCategoryId() {
 		return categoryId;
 	}
 
-	public void setCategoryId(String categoryId) {
+	public void setCategoryId(Long categoryId) {
 		this.categoryId = categoryId;
 	}
 

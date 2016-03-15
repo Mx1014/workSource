@@ -32,6 +32,7 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhBuildingAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionCategoriesDao;
+import com.everhomes.server.schema.tables.daos.EhQualityInspectionEvaluationFactorsDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionStandardGroupMapDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionStandardsDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionTaskAttachmentsDao;
@@ -41,6 +42,7 @@ import com.everhomes.server.schema.tables.pojos.EhBuildingAttachments;
 import com.everhomes.server.schema.tables.pojos.EhBuildings;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionCategories;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionEvaluationFactors;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandardGroupMap;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandards;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTaskAttachments;
@@ -50,6 +52,7 @@ import com.everhomes.server.schema.tables.records.EhBuildingAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhBuildingsRecord;
 import com.everhomes.server.schema.tables.records.EhParkChargeRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionCategoriesRecord;
+import com.everhomes.server.schema.tables.records.EhQualityInspectionEvaluationFactorsRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionStandardGroupMapRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionStandardsRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionTaskAttachmentsRecord;
@@ -251,21 +254,36 @@ public class QualityProviderImpl implements QualityProvider {
 	@Override
 	public void createQualityInspectionEvaluationFactors(
 			QualityInspectionEvaluationFactors factor) {
-		// TODO Auto-generated method stub
+
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhQualityInspectionEvaluationFactors.class));
+		
+		factor.setId(id);
+		factor.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhQualityInspectionEvaluationFactors.class, id));
+        EhQualityInspectionEvaluationFactorsDao dao = new EhQualityInspectionEvaluationFactorsDao(context.configuration());
+        dao.insert(factor);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhQualityInspectionEvaluationFactors.class, null);
 		
 	}
 
 	@Override
 	public void updateQualityInspectionEvaluationFactors(
 			QualityInspectionEvaluationFactors factor) {
-		// TODO Auto-generated method stub
-		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhQualityInspectionEvaluationFactors.class, factor.getId()));
+		EhQualityInspectionEvaluationFactorsDao dao = new EhQualityInspectionEvaluationFactorsDao(context.configuration());
+        dao.update(factor);
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhQualityInspectionEvaluationFactors.class, factor.getId());
 	}
 
 	@Override
 	public void deleteQualityInspectionEvaluationFactors(Long factorId) {
-		// TODO Auto-generated method stub
-		
+		 
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhQualityInspectionEvaluationFactors.class));
+		 EhQualityInspectionEvaluationFactorsDao dao = new EhQualityInspectionEvaluationFactorsDao(context.configuration());
+		 dao.deleteById(factorId);
 	}
 
 	@Override
@@ -610,6 +628,24 @@ public class QualityProviderImpl implements QualityProvider {
         }
         
 		return categories;
+	}
+
+	@Override
+	public QualityInspectionEvaluationFactors findQualityInspectionFactorById(
+			Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionEvaluationFactorsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_EVALUATION_FACTORS);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_EVALUATION_FACTORS.ID.eq(id));
+		 
+		List<QualityInspectionEvaluationFactors> result = new ArrayList<QualityInspectionEvaluationFactors>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, QualityInspectionEvaluationFactors.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+		
+		return result.get(0);
 	}
 
 
