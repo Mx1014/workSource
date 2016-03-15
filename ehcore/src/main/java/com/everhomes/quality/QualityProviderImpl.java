@@ -6,12 +6,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 
 import com.everhomes.community.Building;
 import com.everhomes.community.BuildingAttachment;
@@ -28,6 +30,7 @@ import com.everhomes.rest.quality.ListQualityInspectionTasksCommand;
 import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.rest.quality.QualityInspectionTaskReviewResult;
 import com.everhomes.rest.quality.QualityInspectionTaskReviewStatus;
+import com.everhomes.rest.quality.QualityStandardStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhBuildingAttachmentsDao;
@@ -64,6 +67,7 @@ import com.everhomes.techpark.park.ParkCharge;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.mysql.fabric.xmlrpc.base.Array;
 import com.mysql.jdbc.StringUtils;
 
 
@@ -191,6 +195,7 @@ public class QualityProviderImpl implements QualityProvider {
 		standard.setId(id);
 		standard.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		standard.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		standard.setStatus(QualityStandardStatus.ACTIVE.getCode());
         
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhQualityInspectionStandards.class, id));
         EhQualityInspectionStandardsDao dao = new EhQualityInspectionStandardsDao(context.configuration());
@@ -586,6 +591,8 @@ public class QualityProviderImpl implements QualityProvider {
         
         for(QualityInspectionStandards standard: standards) {
         	standardIds.add(standard.getId());
+        	standard.setExecutiveGroup(new ArrayList<QualityInspectionStandardGroupMap>());
+        	standard.setReviewGroup(new ArrayList<QualityInspectionStandardGroupMap>());
         	mapStandards.put(standard.getId(), standard);
         }
         
@@ -595,14 +602,15 @@ public class QualityProviderImpl implements QualityProvider {
             query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP.STANDARD_ID.in(standardIds));
             query.fetch().map((EhQualityInspectionStandardGroupMapRecord record) -> {
             	QualityInspectionStandards standard = mapStandards.get(record.getStandardId());
+            	
                 assert(standard != null);
-                if(QualityGroupType.EXECUTIVE_GROUP.equals(record.getGroupType())) {
+                if(QualityGroupType.EXECUTIVE_GROUP.getCode()==record.getGroupType()) {
                 	standard.getExecutiveGroup().add(ConvertHelper.convert(record, QualityInspectionStandardGroupMap.class));
 				 }
-				 if(QualityGroupType.REVIEW_GROUP.equals(record.getGroupType())) {
+				 if(record.getGroupType()==QualityGroupType.REVIEW_GROUP.getCode()) {
 					 standard.getReviewGroup().add(ConvertHelper.convert(record, QualityInspectionStandardGroupMap.class));
 				 }
-            
+				 
                 return null;
             });
             return true;

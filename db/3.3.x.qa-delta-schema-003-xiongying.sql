@@ -134,10 +134,10 @@ CREATE TABLE `eh_quality_inspection_task_records` (
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
-DROP TABLE IF EXISTS `eh_quality_inspection_record_attachments`;
+DROP TABLE IF EXISTS `eh_quality_inspection_task_attachments`;
 CREATE TABLE `eh_quality_inspection_task_attachments` (
 	`id` BIGINT NOT NULL COMMENT 'id of the record',
-	`record_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_quality_inspection_tasks',
+	`task_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_quality_inspection_tasks',
 	`content_type` VARCHAR(32) DEFAULT NULL COMMENT 'attachment object content type',
 	`content_uri` VARCHAR(1024) DEFAULT NULL COMMENT 'attachment object link info on storage',
 	`creator_uid` BIGINT NOT NULL DEFAULT 0,

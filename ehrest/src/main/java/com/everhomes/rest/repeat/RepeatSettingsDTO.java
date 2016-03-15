@@ -20,7 +20,7 @@ import com.everhomes.util.StringHelper;
  *  <li>status: 重复状态</li>
  * </ul>
  */
-public class RepeatSettingDTO {
+public class RepeatSettingsDTO {
 	
 	@NotNull
 	private Long ownerId;

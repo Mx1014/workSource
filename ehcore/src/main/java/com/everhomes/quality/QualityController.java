@@ -295,5 +295,21 @@ public class QualityController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	/**
+	 * <b>URL: /quality/createTaskByStandard</b>
+	 * <p>创建品质核查标准</p>
+	 */
+	@RequestMapping("createTaskByStandard")
+	@RestReturn(value = String.class)
+	public RestResponse createTaskByStandard(DeleteQualityStandardCommand cmd) {
+		
+		qualityService.createTaskByStandardId(cmd.getStandardId());
+		
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 }

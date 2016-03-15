@@ -1,4 +1,4 @@
-package com.everhomes.rest.quality;
+package com.everhomes.rest.repeat;
 
 import com.everhomes.util.StringHelper;
 

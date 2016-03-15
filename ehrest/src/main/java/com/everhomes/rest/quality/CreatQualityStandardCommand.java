@@ -5,7 +5,7 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.repeat.RepeatSettingDTO;
+import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -36,7 +36,7 @@ public class CreatQualityStandardCommand {
 	
 	private Long categoryId;
 	
-	private RepeatSettingDTO repeat;
+	private RepeatSettingsDTO repeat;
 	
 	@ItemType(StandardGroupDTO.class)
 	private List<StandardGroupDTO> group;
@@ -89,11 +89,11 @@ public class CreatQualityStandardCommand {
 		this.categoryId = categoryId;
 	}
 
-	public RepeatSettingDTO getRepeat() {
+	public RepeatSettingsDTO getRepeat() {
 		return repeat;
 	}
 
-	public void setRepeat(RepeatSettingDTO repeat) {
+	public void setRepeat(RepeatSettingsDTO repeat) {
 		this.repeat = repeat;
 	}
 

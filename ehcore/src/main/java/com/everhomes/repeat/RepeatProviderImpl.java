@@ -1,8 +1,11 @@
 package com.everhomes.repeat;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +17,12 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.rest.repeat.RepeatSettingStatus;
 import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhRepeatSettingsDao;
 import com.everhomes.server.schema.tables.pojos.EhRepeatSettings;
+import com.everhomes.server.schema.tables.records.EhRepeatSettingsRecord;
 import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 
 @Component
@@ -53,6 +59,23 @@ private static final Logger LOGGER = LoggerFactory.getLogger(RepeatProviderImpl.
 	public void deleteRepeatSettingsById(Long id) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public RepeatSettings findRepeatSettingById(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhRepeatSettingsRecord> query = context.selectQuery(Tables.EH_REPEAT_SETTINGS);
+		query.addConditions(Tables.EH_REPEAT_SETTINGS.ID.eq(id));
+		 
+		List<RepeatSettings> result = new ArrayList<RepeatSettings>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, RepeatSettings.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+		
+		return result.get(0);
 	}
 
 }

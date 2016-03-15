@@ -67,10 +67,11 @@ import com.everhomes.rest.quality.ReportRectifyResultCommand;
 import com.everhomes.rest.quality.ReportVerificationResultCommand;
 import com.everhomes.rest.quality.ReviewVerificationResultCommand;
 import com.everhomes.rest.quality.StandardGroupDTO;
-import com.everhomes.rest.quality.TimeRangeDTO;
 import com.everhomes.rest.quality.UpdateQualityCategoryCommand;
 import com.everhomes.rest.quality.UpdateQualityStandardCommand;
 import com.everhomes.rest.quality.UpdateFactorCommand;
+import com.everhomes.rest.repeat.RepeatSettingsDTO;
+import com.everhomes.rest.repeat.TimeRangeDTO;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
@@ -135,7 +136,7 @@ public class QualityServiceImpl implements QualityService {
 		
 		List<StandardGroupDTO> groupList = cmd.getGroup();
 		processStandardGroups(groupList, standard);
-		
+		processRepeatSetting(standard);
 		QualityStandardsDTO dto = ConvertHelper.convert(standard, QualityStandardsDTO.class);
 		return dto;
 		
@@ -157,11 +158,15 @@ public class QualityServiceImpl implements QualityService {
 		
 		List<StandardGroupDTO> groupList = cmd.getGroup();
 		processStandardGroups(groupList, standard);
-		
+		processRepeatSetting(standard);
 		QualityStandardsDTO dto = ConvertHelper.convert(standard, QualityStandardsDTO.class);
 		return dto;
 	}
 	
+	private void processRepeatSetting(QualityInspectionStandards standard) {
+		RepeatSettings repeat = repeatService.findRepeatSettingById(standard.getRepeatSettingId());
+		standard.setRepeat(repeat);
+	}
 	private void processStandardGroups(List<StandardGroupDTO> groupList, QualityInspectionStandards standard) {
         
         List<QualityInspectionStandardGroupMap> executiveGroup = null;
@@ -174,7 +179,7 @@ public class QualityServiceImpl implements QualityService {
     		
 			for(StandardGroupDTO group : groupList) {
 				QualityInspectionStandardGroupMap map = new QualityInspectionStandardGroupMap();
-				 map.setStandardId(group.getStandardId());
+				 map.setStandardId(standard.getId());
 				 map.setGroupType(group.getGroupType());
 				 map.setGroupId(group.getGroupId());
 				 qualityProvider.createQualityInspectionStandardGroupMap(map);
@@ -236,6 +241,10 @@ public class QualityServiceImpl implements QualityService {
         List<QualityInspectionStandards> standards = qualityProvider.listQualityInspectionStandards(locator, pageSize+1, ownerId, ownerType);
 		
 		this.qualityProvider.populateStandardsGroups(standards);
+		
+//		for(QualityInspectionStandards standard : standards) {
+//			processRepeatSetting(standard);
+//		}
         
         Long nextPageAnchor = null;
         if(standards.size() > pageSize) {
@@ -246,7 +255,7 @@ public class QualityServiceImpl implements QualityService {
         
         List<QualityStandardsDTO> qaStandards = standards.stream().map((r) -> {
         	
-        	QualityStandardsDTO dto = ConvertHelper.convert(r, QualityStandardsDTO.class);  
+        	QualityStandardsDTO dto = converStandardToDto(r);
         	
         	return dto;
         }).collect(Collectors.toList());
@@ -863,6 +872,40 @@ public class QualityServiceImpl implements QualityService {
         
         
         return new ListQualityCategoriesResponse(nextPageAnchor, categories);
+	}
+
+	@Override
+	public void createTaskByStandardId(Long id) {
+		QualityInspectionStandards standard = verifiedStandardById(id);
+		this.qualityProvider.populateStandardGroups(standard);
+		
+		QualityStandardsDTO standardDto = converStandardToDto(standard);
+		createTaskByStandard(standardDto);
+		
+	}
+	
+	private QualityStandardsDTO converStandardToDto(QualityInspectionStandards standard) {
+		processRepeatSetting(standard);
+		QualityStandardsDTO standardDto = ConvertHelper.convert(standard, QualityStandardsDTO.class);
+		RepeatSettingsDTO repeatDto = ConvertHelper.convert(standard.getRepeat(), RepeatSettingsDTO.class);
+		
+		List<StandardGroupDTO> executiveGroup = standard.getExecutiveGroup().stream().map((r) -> {
+        	
+			StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);  
+        	
+        	return dto;
+        }).collect(Collectors.toList());
+
+		List<StandardGroupDTO> reviewGroup = standard.getReviewGroup().stream().map((r) -> {
+        	
+			StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);  
+        	
+        	return dto;
+        }).collect(Collectors.toList());
+		standardDto.setRepeat(repeatDto);
+		standardDto.setExecutiveGroup(executiveGroup);
+		standardDto.setReviewGroup(reviewGroup);
+		return standardDto;
 	}
 
 }
