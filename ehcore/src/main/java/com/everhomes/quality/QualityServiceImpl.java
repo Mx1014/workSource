@@ -658,9 +658,6 @@ public class QualityServiceImpl implements QualityService {
 			task.setOwnerType(standard.getOwnerType());
 			task.setOwnerId(standard.getOwnerId());
 			task.setStandardId(standard.getId());
-			long now = System.currentTimeMillis();
-			String taskNum = timestampToStr(new Timestamp(now)) + now;
-			task.setTaskNumber(taskNum);
 			task.setTaskName(standard.getName());
 			task.setTaskType((byte) 1);
 			
@@ -684,6 +681,9 @@ public class QualityServiceImpl implements QualityService {
 							Timestamp expiredTime = repeatService.getEndTimeByAnalyzeDuration(startTime, duration);
 							task.setExecutiveStartTime(startTime);
 							task.setExecutiveExpireTime(expiredTime);
+							long now = System.currentTimeMillis();
+							String taskNum = timestampToStr(new Timestamp(now)) + now;
+							task.setTaskNumber(taskNum);
 							qualityProvider.createVerificationTasks(task);
 							
 							Map<String, Object> map = new HashMap<String, Object>();

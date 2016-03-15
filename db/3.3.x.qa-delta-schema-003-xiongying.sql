@@ -116,7 +116,7 @@ CREATE TABLE `eh_quality_inspection_evaluations` (
 	PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
-DROP TABLE IF EXISTS `eh_quality_inspection_records`;
+DROP TABLE IF EXISTS `eh_quality_inspection_task_records`;
 CREATE TABLE `eh_quality_inspection_task_records` (
 	`id` BIGINT NOT NULL COMMENT 'id',
 	`task_id` BIGINT NOT NULL DEFAULT 0,
