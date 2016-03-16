@@ -2164,6 +2164,7 @@ public class ForumServiceImpl implements ForumService {
         if(contentCategoryId != null && contentCategoryId.longValue() > 0) {
         	contentCategoryIds.add(contentCategoryId);
         }else{
+        	// 為0或者null的情況下，默認查詢全部的任務貼
         	contentCategoryIds =  CategoryConstants.GA_RELATED_CATEGORIES;
         }
         
