@@ -659,8 +659,48 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     }
     
     //更新锁的详细信息
-    public void updateDoorAccess(DoorAccess door){
-        //only update some information.
+    @Override
+    public void updateDoorAccess(DoorAccessAdminUpdateCommand cmd){
+        DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getId());
+        if(doorAccess == null) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "DoorAccess not found");
+        }
+        
+        DoorCommand doorCommand = null;
+        if(cmd.getName() != null || (!cmd.getName().equals(doorAccess.getName()))) {
+            doorAccess.setName(cmd.getName());
+            
+            //create device name command
+            AesServerKey aesServerKey = aesServerKeyService.getCurrentAesServerKey(doorAccess.getId());
+            doorCommand = new DoorCommand();
+            doorCommand.setDoorId(doorAccess.getId());
+            doorCommand.setOwnerId(doorAccess.getOwnerId());
+            doorCommand.setOwnerType(doorAccess.getOwnerType());
+            doorCommand.setCmdId(AclinkCommandType.CMD_UPDATE_DEVNAME.getCode());
+            doorCommand.setCmdType((byte)0);
+            doorCommand.setServerKeyVer(aesServerKey.getSecretVer());
+            doorCommand.setAclinkKeyVer(aesServerKey.getDeviceVer());
+            doorCommand.setStatus(DoorCommandStatus.CREATING.getCode());
+            
+            //Generate a message body for command
+            doorCommand.setCmdBody(AclinkUtils.packUpdateDeviceName(aesServerKey.getDeviceVer(), aesServerKey.getSecret()
+                    , doorAccess.getAesIv(), doorAccess.getName()));
+        }
+        if(cmd.getAddress() != null) {
+            doorAccess.setAddress(cmd.getAddress());
+        }
+        if(cmd.getDescription() != null) {
+            doorAccess.setDescription(cmd.getDescription());
+        }
+        
+        doorAccess.setLatitude(cmd.getLatitude());
+        doorAccess.setLongitude(cmd.getLongitude());
+        
+        
+        doorAccessProvider.updateDoorAccess(doorAccess);
+        if(doorCommand != null) {
+            doorCommandProvider.updateDoorCommand(doorCommand);
+        }
     }
     
     //刷新并返回一个新的 DoorServerKey
