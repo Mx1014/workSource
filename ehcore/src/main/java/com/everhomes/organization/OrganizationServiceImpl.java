@@ -4646,6 +4646,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 				}
 			}
 			
+			if(c.getIntegralTag4() != null && c.getIntegralTag4() == 1){
+				dto.setContactToken(null);
+			}
+			
 			/**
 			 * 补充用户角色
 			 */

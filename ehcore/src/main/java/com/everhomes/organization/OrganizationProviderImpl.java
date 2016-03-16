@@ -103,6 +103,7 @@ import com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
@@ -289,6 +290,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 	@Override
 	public void createOrganizationMember(OrganizationMember departmentMember) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId(null);
+		departmentMember.setNamespaceId(namespaceId);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOrganizationMembersRecord record = ConvertHelper.convert(departmentMember, EhOrganizationMembersRecord.class);
 		InsertQuery<EhOrganizationMembersRecord> query = context.insertQuery(Tables.EH_ORGANIZATION_MEMBERS);
