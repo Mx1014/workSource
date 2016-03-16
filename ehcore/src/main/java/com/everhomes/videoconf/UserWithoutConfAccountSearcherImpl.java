@@ -209,8 +209,8 @@ public class UserWithoutConfAccountSearcherImpl extends AbstractElasticSearch
 	private XContentBuilder createDoc(OrganizationMember member){
 		try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
-            if(OrganizationMemberStatus.ACTIVE.equals(member.getStatus())) {
-	            b.field("id", member.getId());
+            if(OrganizationMemberStatus.ACTIVE.getCode()==member.getStatus()) {
+//	            b.field("id", member.getId());
 	            b.field("userId", member.getTargetId());
 	            b.field("enterpriseId", member.getOrganizationId());
 	            b.field("userName", member.getContactName());

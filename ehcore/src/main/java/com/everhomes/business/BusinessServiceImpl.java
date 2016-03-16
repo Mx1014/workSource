@@ -389,7 +389,7 @@ public class BusinessServiceImpl implements BusinessService {
 		//获取指定类型的服务
 		List<Long> categoryIds = categoryProvider.getBusinessSubCategories(cmd.getCategoryId());
 		List<Business> scopeBusinesses = filterBusinessByCategorysAndBizIds(recommendBizIds,categoryIds);
-		List<Business> geoBusinesses = businessProvider.listBusinessByCategroys(categoryIds,geoHashList);
+		List<Business> geoBusinesses = businessProvider.listBusinessByCategroys(categoryIds,geoHashList,businessNamespaceOwnerIds);
 		List<Business> businesses = filterBusinessByDistance(scopeBusinesses,geoBusinesses,lat,lon);
 		//组装
 		final String businessDetailUrl = configurationProvider.getValue(BUSINESS_DETAIL_URL, "");
@@ -458,8 +458,13 @@ public class BusinessServiceImpl implements BusinessService {
 
 	private List<Business> filterBusinessByScope(List<Business> scopeBusinesses, List<Business> geoBusinesses,double lantitude,double longitude) {
 		if(scopeBusinesses==null||scopeBusinesses.isEmpty()){
-			LOGGER.error("filterBusinessByScope-scopeBusinesses could not be empty.");
-			return null;
+			List<Business> list = new ArrayList<Business>();
+			for(Business r:geoBusinesses){
+				double distance = calculateDistance(r.getLatitude(),r.getLongitude(),lantitude, longitude);
+				if(distance <= r.getVisibleDistance().doubleValue())
+					list.add(r);
+			}
+			return list;
 		}
 		List<Business> list = new ArrayList<Business>();
 		for(Business r:geoBusinesses){
@@ -539,7 +544,7 @@ public class BusinessServiceImpl implements BusinessService {
 					categoryIds.addAll(subCateIds);
 			}
 		}
-		businesses = this.businessProvider.listBusinessByCategroys(categoryIds,geoHashList);
+		businesses = this.businessProvider.listBusinessByCategroys(categoryIds,geoHashList,null);
 		//从算法过滤的范围中再缩小范围
 		businesses = this.filterDistance(businesses,lat,lon,recommendBizIds);
 		if(recommendBizIds!=null&&!recommendBizIds.isEmpty()){

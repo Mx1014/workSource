@@ -286,7 +286,7 @@ public class BusinessProviderImpl implements BusinessProvider {
 		return businesses.get(0);
 	}
 	@Override
-	public List<Business> listBusinessByCategroys(List<Long> categoryIds, List<String> geoHashList) {
+	public List<Business> listBusinessByCategroys(List<Long> categoryIds, List<String> geoHashList,List<Long> businessNamespaceOwnerIds) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhBusinesses.class));
 		Condition c = null;
 		for(String geoHashStr : geoHashList){
@@ -297,6 +297,8 @@ public class BusinessProviderImpl implements BusinessProvider {
 			}
 		}
 		c=c.and(Tables.EH_BUSINESS_CATEGORIES.CATEGORY_ID.in(categoryIds));
+		if(businessNamespaceOwnerIds!=null&&!businessNamespaceOwnerIds.isEmpty())
+			c=c.and(Tables.EH_BUSINESSES.ID.in(businessNamespaceOwnerIds));
 		return context.select(Tables.EH_BUSINESSES.fields()).from(Tables.EH_BUSINESSES)
 				.rightOuterJoin(Tables.EH_BUSINESS_CATEGORIES).on(Tables.EH_BUSINESSES.ID.eq(Tables.EH_BUSINESS_CATEGORIES.OWNER_ID))
 				.where(c)
