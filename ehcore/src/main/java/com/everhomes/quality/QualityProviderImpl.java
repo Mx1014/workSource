@@ -359,12 +359,6 @@ public class QualityProviderImpl implements QualityProvider {
 	}
 
 	@Override
-	public List<QualityInspectionStandardGroupMap> listQualityInspectionStandardGroupMap() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public void createQualityInspectionTaskAttachments(
 			QualityInspectionTaskAttachments attachment) {
 
@@ -386,12 +380,6 @@ public class QualityProviderImpl implements QualityProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhQualityInspectionTasks.class));
         EhQualityInspectionTaskAttachmentsDao dao = new EhQualityInspectionTaskAttachmentsDao(context.configuration());
         dao.deleteById(attachmentId);
-	}
-
-	@Override
-	public List<QualityInspectionTaskAttachments> listQualityInspectionTaskAttachments() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override
