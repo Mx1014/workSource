@@ -472,7 +472,7 @@ public class QualityServiceImpl implements QualityService {
         		cmd.getGroupId(), cmd.getExecuteStatus(), cmd.getReviewStatus());
 		
 		this.qualityProvider.populateTaskAttachments(tasks);
-        
+		
         Long nextPageAnchor = null;
         if(tasks.size() > pageSize) {
         	tasks.remove(tasks.size() - 1);
@@ -483,6 +483,9 @@ public class QualityServiceImpl implements QualityService {
         List<QualityInspectionTaskDTO> dtoList = tasks.stream().map((r) -> {
         	
         	populateTaskAttachements(r, r.getAttachments());
+        	QualityInspectionStandards standard = verifiedStandardById(r.getStandardId());
+        	QualityInspectionCategories category = verifiedCategoryById(standard.getCategoryId());
+        	r.setCategoryName(category.getName());
         	QualityInspectionTaskDTO dto = ConvertHelper.convert(r, QualityInspectionTaskDTO.class);  
         	
         	return dto;

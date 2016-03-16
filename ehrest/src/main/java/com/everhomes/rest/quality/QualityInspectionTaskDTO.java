@@ -58,6 +58,8 @@ public class QualityInspectionTaskDTO {
 	
 	private String categoryName;
 	
+	private Long executiveGroupId;
+	
 	private Long executorId;
 	
 	private String executorName;
@@ -280,6 +282,16 @@ public class QualityInspectionTaskDTO {
 		this.attachments = attachments;
 	}
 	
+	
+	
+	public Long getExecutiveGroupId() {
+		return executiveGroupId;
+	}
+
+	public void setExecutiveGroupId(Long executiveGroupId) {
+		this.executiveGroupId = executiveGroupId;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
