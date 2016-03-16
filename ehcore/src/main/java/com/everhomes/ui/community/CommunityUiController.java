@@ -32,8 +32,8 @@ import com.everhomes.util.WebTokenGenerator;
 @RestDoc(value="CommunityUi controller", site="communityUi")
 @RestController
 @RequestMapping("/ui/community")
-public class CummunityUiController extends ControllerBase {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CummunityUiController.class);
+public class CommunityUiController extends ControllerBase {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommunityUiController.class);
     
     @Autowired
     private ConfigurationProvider configurationProvider;
