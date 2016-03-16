@@ -292,8 +292,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             rlt.setDoorName(doorAcc.getName());
         } else {
             if(cmd.getValidEndMs() == null || cmd.getValidFromMs() == null) {
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                        "invalid param for DoorAuth");                
+                throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_PARAM_ERROR, "Invalid param error");        
             }
             
             doorAuth.setApproveUserId(cmd.getApproveUserId());
@@ -329,8 +328,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         User targetUser = userService.findUserByIndentifier(cmd2.getNamespaceId(), cmd2.getPhone());
         if (targetUser == null) {
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "Target user not found");
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_NOT_FOUND, "User not found");
         }
         cmd2.setPhone(null);
         cmd2.setNamespaceId(null);
@@ -340,9 +338,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         cmd.setUserId(targetUser.getId());
         DoorAuth auth = doorAuthProvider.queryValidDoorAuthForever(cmd.getDoorId(), user.getId());
         if(auth == null) {
-            //TODO auth failed
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "Auth failed");   
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "User not auth");   
         }
         
         cmd.setAuthType(DoorAuthType.TEMPERATE.getCode());
@@ -369,7 +365,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         });
         
         if(doorAccess == null) {
-            return null;
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
         }
         
         return doorAccess.getId();
@@ -437,12 +433,10 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     //urgent 为 true, 则拿最紧急的消息列表。更新到设备之后再尝试开门或其它事情。
     @Override
     public QueryDoorMessageResponse queryDoorMessageByDoorId(QueryDoorMessageCommand cmd) {
-doorCommandProvider.getDoorCommandById(0l);
+        doorCommandProvider.getDoorCommandById(0l);
         DoorAccess doorAccess = doorAccessProvider.queryDoorAccessByHardwareId(cmd.getHardwareId());
         if(doorAccess == null) {
-            //TODO error code
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "DoorAccess not found");
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
         }
         
         processIncomeMessageResp(cmd.getInputs());
@@ -477,9 +471,7 @@ doorCommandProvider.getDoorCommandById(0l);
         
         DoorAccess doorAccess = doorAccessProvider.queryDoorAccessByHardwareId(cmd.getHardwareId());
         if(doorAccess != null && !doorAccess.getStatus().equals(DoorAccessStatus.ACTIVING.getCode())) {
-            //TODO error code
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "DoorAccess exists");
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_EXISTS, "DoorAccess exists");
         }
         
         doorAccess = this.dbProvider.execute(new TransactionCallback<DoorAccess>() {
@@ -515,6 +507,7 @@ doorCommandProvider.getDoorCommandById(0l);
                     ownerDoorProvider.createOwnerDoor(ownerDoor);
                 } catch(Exception ex) {
                     LOGGER.error("createOwnerDoor failed ", ex);
+                    return null;
                     }
                 
                 Aclink aclink = new Aclink();
@@ -548,14 +541,9 @@ doorCommandProvider.getDoorCommandById(0l);
             }
         });
         
-        if(!doorAccess.getStatus().equals(DoorAccessStatus.ACTIVING.getCode())) {
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "DoorAccess is invalid");
+        if(doorAccess == null || (!doorAccess.getStatus().equals(DoorAccessStatus.ACTIVING.getCode()))) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_ACTIVING_FAILED, "Door Activing failed");
         }
-        
-        //cmd.getRsaAclinkPub();
-        //List<DoorMessage> msgs = generateMessages(doorAccess.getId());
-        //return msgs.get(0);
         
         //Generate a single message
         AesServerKey aesServerKey = aesServerKeyService.getCurrentAesServerKey(doorAccess.getId());
@@ -571,8 +559,6 @@ doorCommandProvider.getDoorCommandById(0l);
         acMsg.setSecretVersion(aesServerKey.getDeviceVer());
         doorMessage.setBody(acMsg);
         
-        //TODO pending messages
-        
         return doorMessage;
     }
     
@@ -585,7 +571,7 @@ doorCommandProvider.getDoorCommandById(0l);
                 && doorAccess.getCreatorUserId().equals(user.getId())
                 && cmd.getHardwareId().equals(doorAccess.getHardwareId())) {
             
-            DoorCommand dcmd = this.dbProvider.execute(new TransactionCallback<DoorCommand>() {
+            this.dbProvider.execute(new TransactionCallback<DoorCommand>() {
                 @Override
                 public DoorCommand doInTransaction(TransactionStatus arg0) {
                     doorAccess.setStatus(DoorAccessStatus.ACTIVE.getCode());
@@ -655,8 +641,15 @@ doorCommandProvider.getDoorCommandById(0l);
             });
             
         } else {
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "DoorAccess exists");
+            if(doorAccess == null) {
+                throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door Activing failed");    
+            }
+            
+            if(!doorAccess.getStatus().equals(DoorAccessStatus.ACTIVING.getCode())){
+                throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_STATE_ERROR, "State error");
+            }
+            
+           throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_PARAM_ERROR, "Invalid param error");
         }
         
         QueryDoorMessageResponse resp = new QueryDoorMessageResponse();
@@ -668,12 +661,6 @@ doorCommandProvider.getDoorCommandById(0l);
     //更新锁的详细信息
     public void updateDoorAccess(DoorAccess door){
         //only update some information.
-    }
-    
-    //销毁一个门禁。要求管理员手动销毁，同时 reset 设备。
-    public void destroyDoorAccess(DoorAccess door) {
-        //lock
-        //set status to deleted
     }
     
     //刷新并返回一个新的 DoorServerKey
@@ -798,8 +785,8 @@ doorCommandProvider.getDoorCommandById(0l);
             //The door is delete, set it to invalid
             doorAuth.setStatus(DoorAuthStatus.INVALID.getCode());
             doorAuthProvider.updateDoorAuth(doorAuth);
-            //Check if the door is active
-            return null;
+            
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "DoorAccess not found");
         }
         
         AesUserKey aesUserKey = this.dbProvider.execute(new TransactionCallback<AesUserKey>() {
