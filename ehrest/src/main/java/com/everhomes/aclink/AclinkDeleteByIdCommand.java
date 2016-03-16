@@ -3,20 +3,17 @@ package com.everhomes.aclink;
 import com.everhomes.util.StringHelper;
 
 public class AclinkDeleteByIdCommand {
-    private Long Id;
+    private Long id;
 
-    
     
     public Long getId() {
-        return Id;
+        return id;
     }
-
 
 
     public void setId(Long id) {
-        Id = id;
+        this.id = id;
     }
-
 
 
     @Override
