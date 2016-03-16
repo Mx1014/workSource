@@ -1639,8 +1639,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             if(contacts.size() >= count) {
                 locator.setAnchor(contacts.get(contacts.size() - 1).getId());
                 return AfterAction.done;
+            } else {
+            	locator.setAnchor(null);
+            	return AfterAction.next;
             }
-            return AfterAction.next;
  
         });
         return contacts;
