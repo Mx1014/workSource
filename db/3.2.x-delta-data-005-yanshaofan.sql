@@ -1,8 +1,4 @@
 
-#
-# modify eh_organizations unique
-#
-ALTER TABLE `eh_organizations` DROP INDEX u_eh_org_name;
 
 #
 # Check whether the repeated data migration
