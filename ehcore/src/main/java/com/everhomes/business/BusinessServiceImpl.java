@@ -131,6 +131,8 @@ public class BusinessServiceImpl implements BusinessService {
 	private static final String BUSINESS_IMAGE_URL = "business.image.url";
 	private static final long CATEOGRY_RECOMMEND = 9999L;
 	private static final String CATEOGRY_RECOMMEND_NAME = "推荐";
+	private static final String BAIDU_MAP_URI = "baidu.map.uri";
+	private static final String BAIDU_MAP_ACCESS_KEY = "baidu.map.access.key";
 	@Autowired
 	private BusinessProvider businessProvider;
 	@Autowired
@@ -198,7 +200,9 @@ public class BusinessServiceImpl implements BusinessService {
 				}
 				else if(cmd.getScopeType().byteValue()==ScopeType.CITY.getCode()){
 					Clients client = new Clients();
-					String uri = String.format("http://api.map.baidu.com/geocoder/v2/?ak=9E2825184e77d546b768bbfbf63050f8&location=%s,%s&output=json&pois=0",cmd.getLatitude(),cmd.getLongitude());
+					String baiduMapUri = configurationProvider.getValue(BAIDU_MAP_URI, "http://api.map.baidu.com");
+					String baiduMapAccessKey = configurationProvider.getValue(BAIDU_MAP_ACCESS_KEY, "9E2825184e77d546b768bbfbf63050f8");
+					String uri = String.format("%s/geocoder/v2/?ak=%s&location=%s,%s&output=json&pois=0",baiduMapUri,baiduMapAccessKey,cmd.getLatitude(),cmd.getLongitude());
 					String jsonResponse = client.restCall("GET", uri, null, null, null);
 					BaiduGeocoderResponse response = (BaiduGeocoderResponse) StringHelper.fromJsonString(jsonResponse, BaiduGeocoderResponse.class);
 					String province = response.getResult().getAddressComponent().getProvince();
