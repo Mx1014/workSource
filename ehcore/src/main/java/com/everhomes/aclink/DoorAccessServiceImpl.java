@@ -415,8 +415,11 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     cmd.setServerKeyVer(aesServerKey.getSecretVer());
                     cmd.setAclinkKeyVer(aesServerKey.getDeviceVer());
                     cmd.setStatus(DoorCommandStatus.CREATING.getCode());
-                    cmd.setCmdBody(AclinkUtils.packAddUndoList(aesServerKey.getDeviceVer(), aesServerKey.getSecret()
-                            , (int)(aesUserKey1.getExpireTimeMs().longValue()/1000), aesUserKey1.getKeyId().shortValue()));
+                    
+//                    cmd.setCmdBody(AclinkUtils.packAddUndoList(aesServerKey.getDeviceVer(), aesServerKey.getSecret()
+//                            , (int)(aesUserKey1.getExpireTimeMs().longValue()/1000), aesUserKey1.getKeyId().shortValue()));
+                    cmd.setCmdBody(aesUserKey1.getId().toString());
+                    
                     doorCommandProvider.createDoorCommand(cmd);
                     
                     return cmd;
@@ -632,8 +635,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     doorCommand.setStatus(DoorCommandStatus.CREATING.getCode());
                     
                     //Generate a message body for command
-                    doorCommand.setCmdBody(AclinkUtils.packUpdateDeviceName(aesServerKey.getDeviceVer(), aesServerKey.getSecret()
-                            , doorAccess.getAesIv(), doorAccess.getName()));
+//                    doorCommand.setCmdBody(AclinkUtils.packUpdateDeviceName(aesServerKey.getDeviceVer(), aesServerKey.getSecret()
+//                            , doorAccess.getAesIv(), doorAccess.getName()));
                     
                     doorCommandProvider.createDoorCommand(doorCommand);
                     return doorCommand;
