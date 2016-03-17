@@ -35,6 +35,7 @@ import com.everhomes.rest.ui.user.ListContactsBySceneCommand;
 import com.everhomes.rest.ui.user.SceneContactDTO;
 import com.everhomes.rest.ui.user.SceneDTO;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
+import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.ui.user.SetUserCurrentSceneCommand;
 import com.everhomes.rest.user.ListUserOpPromotionsRespose;
 import com.everhomes.rest.user.OpPromotionDTO;
@@ -94,6 +95,13 @@ public class UserUiController extends ControllerBase {
     public RestResponse listContactsByScene(@Valid ListContactsBySceneCommand cmd) throws Exception {
     	WebTokenGenerator webToken = WebTokenGenerator.getInstance();
  	    SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+ 	    
+// 	   sceneToken = new SceneTokenDTO();
+// 	   sceneToken.setEntityType(UserCurrentEntityType.ORGANIZATION.getCode());
+// 	   sceneToken.setEntityId(1000001l);
+// 	   sceneToken.setScene(SceneType.PM_ADMIN.getCode());
+// 	   System.out.println(webToken.toWebToken(sceneToken));
+ 	    
  	    List<SceneContactDTO> dtos = null;
 		if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
 			ListOrganizationContactCommand command = new ListOrganizationContactCommand();
@@ -210,4 +218,5 @@ public class UserUiController extends ControllerBase {
         return response;
     }
     
+
 }

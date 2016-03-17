@@ -52,6 +52,11 @@ public class CommunityUiController extends ControllerBase {
     	ListCommunitiesBySceneResponse resp = new ListCommunitiesBySceneResponse();
     	WebTokenGenerator webToken = WebTokenGenerator.getInstance();
  	    SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+
+// 	   sceneToken = new SceneTokenDTO();
+// 	   sceneToken.setEntityType(UserCurrentEntityType.ORGANIZATION.getCode());
+// 	   sceneToken.setEntityId(1000001l);
+ 	    
  		if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
  			command.setOrganizationId(sceneToken.getEntityId());
  			ListOrganizationCommunityV2CommandResponse res = organizationService.listOrganizationCommunitiesV2(command);

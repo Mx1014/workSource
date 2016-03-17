@@ -103,6 +103,7 @@ import java.util.stream.Collectors;
 
 
 
+
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -198,7 +199,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 
+
 import com.everhomes.acl.AclProvider;
+import com.everhomes.acl.Privilege;
 import com.everhomes.acl.ResourceUserRoleResolver;
 import com.everhomes.acl.Role;
 import com.everhomes.acl.RoleAssignment;
@@ -5592,7 +5595,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	userRoles.addAll(userOrgRoles);
 	    	List<Long> privileges = null;
 	    	if(!StringUtils.isEmpty(module)){
-	    		privileges = null; //aclProvider 调平台根据角色list+模块 获取权限list接口
+	    		List<Privilege> s = aclProvider.getPrivilegesByTag(module); //aclProvider 调平台根据角色list+模块 获取权限list接口
+//	    		aclProvider.getPrivilegesOfTargetOnResource(arg0, arg1, arg2, arg3, arg4)
 	    	}else{
 	    		privileges = null; //aclProvider 调平台根据角色list获取权限list的接口
 	    	}
