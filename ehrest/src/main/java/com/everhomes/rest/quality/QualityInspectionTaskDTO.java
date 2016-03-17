@@ -16,7 +16,7 @@ import com.everhomes.util.StringHelper;
  *  <li>childCount: 子任务数量</li>
  *  <li>ownerType: 任务所属机构类型 com.everhomes.rest.quality.OwnerType</li>
  *  <li>ownerId: 任务所属机构id</li>
- *  <li>taskdName: 任务名称</li>
+ *  <li>taskName: 任务名称</li>
  *  <li>taskNumber: 任务编号</li>
  *  <li>groupName: 业务组名称</li>
  *  <li>categoryName: 所属类型名</li>
@@ -50,7 +50,7 @@ public class QualityInspectionTaskDTO {
 	
 	private Long ownerId;
 	
-	private String taskdName;
+	private String taskName;
 	
 	private String taskNumber;
 	
@@ -162,12 +162,12 @@ public class QualityInspectionTaskDTO {
 		this.ownerId = ownerId;
 	}
 
-	public String getTaskdName() {
-		return taskdName;
+	public String getTaskName() {
+		return taskName;
 	}
 
-	public void setTaskdName(String taskdName) {
-		this.taskdName = taskdName;
+	public void setTaskName(String taskName) {
+		this.taskName = taskName;
 	}
 
 	public String getTaskNumber() {
