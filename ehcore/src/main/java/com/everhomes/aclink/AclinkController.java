@@ -156,4 +156,20 @@ public class AclinkController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;        
     }
+    
+    /**
+     * 
+     * <b>URL: /aclink/deleteDoorAuth</b>
+     * <p>删除授权</p>
+     * @return
+     */
+    @RequestMapping("deleteDoorAuth")
+    @RestReturn(value=String.class)
+    public RestResponse deleteDoorAuth(@Valid AclinkDeleteByIdCommand cmd) {
+        doorAccessService.deleteDoorAuth(cmd.getId());
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

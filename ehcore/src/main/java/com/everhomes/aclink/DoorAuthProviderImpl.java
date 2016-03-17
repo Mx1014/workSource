@@ -24,6 +24,7 @@ import com.everhomes.server.schema.tables.records.EhDoorAuthRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
 public class DoorAuthProviderImpl implements DoorAuthProvider {
@@ -95,9 +96,15 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
             }
 
         query.addLimit(count);
-        return query.fetch().map((r) -> {
+        List<DoorAuth> objs = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, DoorAuth.class);
         });
+        
+        if(objs.size() >= count) {
+            locator.setAnchor(objs.get(objs.size() - 1).getId());
+        }
+        
+        return objs;
     }
 
     private void prepareObj(DoorAuth obj) {

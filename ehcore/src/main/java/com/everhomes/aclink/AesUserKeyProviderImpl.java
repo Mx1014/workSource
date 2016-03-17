@@ -111,9 +111,15 @@ public class AesUserKeyProviderImpl implements AesUserKeyProvider {
             }
 
         query.addLimit(count);
-        return query.fetch().map((r) -> {
+        List<AesUserKey> objs = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, AesUserKey.class);
         });
+        
+        if(objs.size() >= count) {
+            locator.setAnchor(objs.get(objs.size() - 1).getId());
+        }
+        
+        return objs;
     }
 
     @Override
