@@ -868,7 +868,9 @@ public class RentalServiceImpl implements RentalService {
 				siDTO.setCounts(rib.getRentalCount());
 				RentalSiteItem rsItem = rentalProvider
 						.findRentalSiteItemById(rib.getRentalSiteItemId());
-				siDTO.setItemName(rsItem.getName());
+				if(rsItem != null) {
+					siDTO.setItemName(rsItem.getName());
+				}
 				siDTO.setItemPrice(rib.getTotalMoney());
 				dto.getSiteItems().add(siDTO);
 			}
