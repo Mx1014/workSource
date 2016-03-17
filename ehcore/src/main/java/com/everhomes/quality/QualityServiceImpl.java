@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.aspectj.weaver.Member;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,12 +37,14 @@ import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.organization.OrganizationMemberGroupType;
+import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.quality.CreatQualityStandardCommand;
 import com.everhomes.rest.quality.DeleteQualityCategoryCommand;
 import com.everhomes.rest.quality.DeleteQualityStandardCommand;
 import com.everhomes.rest.quality.DeleteFactorCommand;
 import com.everhomes.rest.quality.EvaluationDTO;
 import com.everhomes.rest.quality.FactorsDTO;
+import com.everhomes.rest.quality.GroupUserDTO;
 import com.everhomes.rest.quality.ListEvaluationsCommand;
 import com.everhomes.rest.quality.ListEvaluationsResponse;
 import com.everhomes.rest.quality.ListQualityCategoriesCommand;
@@ -491,8 +494,23 @@ public class QualityServiceImpl implements QualityService {
         	return dto;
         }).collect(Collectors.toList());
         
+        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(cmd.getGroupId());
         
-        return new ListQualityInspectionTasksResponse(nextPageAnchor, dtoList);
+        List<GroupUserDTO> groupUsers = members.stream().map((r) -> {
+        	if(OrganizationMemberTargetType.USER.getCode().equals(r.getTargetType()) 
+        			&& r.getTargetId() != null && r.getTargetId() != 0) {
+        		GroupUserDTO dto = new GroupUserDTO();
+            	dto.setUserId(r.getTargetId());
+            	dto.setUserName(r.getContactName());
+            	dto.setContact(r.getContactToken());
+            	dto.setEmployeeNo(r.getEmployeeNo());
+            	return dto;
+        	} else {
+        		return null;
+        	}
+        }).filter(member->member!=null).collect(Collectors.toList());
+        
+        return new ListQualityInspectionTasksResponse(nextPageAnchor, dtoList, groupUsers);
 	}
 	
 	@Override
