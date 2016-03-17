@@ -104,6 +104,7 @@ import java.util.stream.Collectors;
 
 
 
+
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -115,6 +116,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+
 
 
 
@@ -353,6 +355,7 @@ import com.everhomes.rest.organization.OrganizationTaskTargetType;
 import com.everhomes.rest.organization.OrganizationTaskType;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.PrivateFlag;
+import com.everhomes.rest.organization.ProcessTaskCommand;
 import com.everhomes.rest.organization.RejectOrganizationCommand;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.organization.SearchTopicsByTypeCommand;
@@ -386,7 +389,6 @@ import com.everhomes.rest.organization.pm.UpdateOrganizationMemberByIdsCommand;
 import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.rest.sms.SmsTemplateCode;
-import com.everhomes.rest.ui.organization.ProcessingTaskCommand;
 import com.everhomes.rest.ui.privilege.EntrancePrivilege;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeCommand;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeResponse;
@@ -5204,12 +5206,17 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    
 	    
 	    @Override
-	    public void acceptTask(ProcessingTaskCommand cmd, Long organizationId) {
+	    public void acceptTask(ProcessTaskCommand cmd) {
 	    	// TODO Auto-generated method stub
 	    	
 	    	User user = UserContext.current().getUser();
 	    	Long taskId = cmd.getTaskId();
 	    	OrganizationTask task = organizationProvider.findOrganizationTaskById(taskId);
+	    	
+	    	/* 根据用户不同 查询不同的任务类型贴*/
+	    	List<Long> privileges = this.getUserPrivileges(null , cmd.getOrganizationId(), user.getId());
+	    	
+	    	this.checkPrivileged(privileges, user, task);
 	    	
 	    	if(OrganizationTaskStatus.fromCode(task.getTaskStatus()) == OrganizationTaskStatus.UNPROCESSED
 	    			&& (task.getTargetId().equals(user.getId())
@@ -5239,11 +5246,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    }
 	    
 	    @Override
-	    public void grabTask(ProcessingTaskCommand cmd, Long organizationId) {
+	    public void grabTask(ProcessTaskCommand cmd) {
 	    	// TODO Auto-generated method stub
 	    	User user = UserContext.current().getUser();
 	    	Long taskId = cmd.getTaskId();
 	    	OrganizationTask task = organizationProvider.findOrganizationTaskById(taskId);
+	    	
+	    	/* 根据用户不同 查询不同的任务类型贴*/
+	    	List<Long> privileges = this.getUserPrivileges(null , cmd.getOrganizationId(), user.getId());
+	    	
+	    	this.checkPrivileged(privileges, user, task);
 	    	
 	    	if(OrganizationTaskStatus.fromCode(task.getTaskStatus()) == OrganizationTaskStatus.UNPROCESSED
 	    			&& (StringUtils.isEmpty(task.getTargetId()) || task.getTargetId() == 0)){
@@ -5274,7 +5286,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    }
 	    
 	    @Override
-	    public void processingTask(ProcessingTaskCommand cmd, Long organizationId) {
+	    public void processingTask(ProcessTaskCommand cmd) {
 	    	// TODO Auto-generated method stub
 	    	
 	    	User user = UserContext.current().getUser();
@@ -5292,7 +5304,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	Map<String,Object> map = new HashMap<String, Object>();
 	    	
 	    	/* 根据用户不同 查询不同的任务类型贴*/
-	    	List<Long> privileges = this.getUserPrivileges(null , organizationId, user.getId());
+	    	List<Long> privileges = this.getUserPrivileges(null , cmd.getOrganizationId(), user.getId());
 	    	
 	    	//当可以查询全部的任务类型时
 	    	if(privileges.contains(PrivilegeConstants.TaskAllListPosts)){
@@ -5328,6 +5340,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    		
 	    	//当智能处理部分类型时
 	    	}else if(privileges.contains(PrivilegeConstants.TaskGuaranteeListPosts)){
+	    		/*根据权限仅限操作保修贴*/
+	    		if(OrganizationTaskType.fromCode(task.getTaskType()) != OrganizationTaskType.REPAIRS){
+	    			returnNoPrivileged(privileges, user);
+	    		}
+	    		
 	    		if(user.getId().equals(task.getTargetId())){
 	    			if(OrganizationTaskStatus.fromCode(cmd.getTaskStatus()) == OrganizationTaskStatus.PROCESSED){
 	    				task.setProcessedTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -5363,6 +5380,12 @@ public class OrganizationServiceImpl implements OrganizationService {
     			}
 	    		
 	    	}else if(privileges.contains(PrivilegeConstants.TaskSeekHelpListPosts)){
+	    		
+	    		/*根据权限仅限操作紧急求助帖*/
+	    		if(OrganizationTaskType.fromCode(task.getTaskType()) != OrganizationTaskType.EMERGENCY_HELP){
+	    			returnNoPrivileged(privileges, user);
+	    		}
+	    		
 	    		if(user.getId().equals(task.getTargetId()) || task.getTargetId() == 0 || StringUtils.isEmpty(task.getTargetId())){
 	    			if(OrganizationTaskStatus.fromCode(cmd.getTaskStatus()) == OrganizationTaskStatus.OTHER){
 	    				//异常
@@ -5408,12 +5431,17 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    
 	    
 	    @Override
-	    public void refuseTask(ProcessingTaskCommand cmd, Long organizationId) {
+	    public void refuseTask(ProcessTaskCommand cmd) {
 	    	// TODO Auto-generated method stub
 	    	
 	    	User user = UserContext.current().getUser();
 	    	Long taskId = cmd.getTaskId();
 	    	OrganizationTask task = organizationProvider.findOrganizationTaskById(taskId);
+	    	
+	    	/* 根据用户不同 查询不同的任务类型贴*/
+	    	List<Long> privileges = this.getUserPrivileges(null , cmd.getOrganizationId(), user.getId());
+	    	
+	    	this.checkPrivileged(privileges, user, task);
 	    	
 	    	if(OrganizationTaskStatus.fromCode(task.getTaskStatus()) == OrganizationTaskStatus.UNPROCESSED
 	    			&&  (task.getTargetId().equals(user.getId())
@@ -5478,11 +5506,17 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	List<Long> privileges = this.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
 	    	
 			if(privileges.contains(PrivilegeConstants.TaskAllListPosts)){
-				cmd.setTaskType("");
+				
 			}else if(privileges.contains(PrivilegeConstants.TaskGuaranteeListPosts)){
+				if(!StringUtils.isEmpty(cmd.getTaskType()) && OrganizationTaskType.fromCode(cmd.getTaskType()) != OrganizationTaskType.REPAIRS ){
+					returnNoPrivileged(privileges, user);
+				}
 				cmd.setTaskType(OrganizationTaskType.REPAIRS.getCode());
 				cmd.setTargetId(user.getId());
 			}else if(privileges.contains(PrivilegeConstants.TaskSeekHelpListPosts)){
+				if(!StringUtils.isEmpty(cmd.getTaskType()) && OrganizationTaskType.fromCode(cmd.getTaskType()) != OrganizationTaskType.EMERGENCY_HELP ){
+					returnNoPrivileged(privileges, user);
+				}
 				cmd.setTaskType(OrganizationTaskType.EMERGENCY_HELP.getCode());
 				cmd.setTargetId(user.getId());
 			}else{
@@ -5502,10 +5536,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 			
 			cmd.setTargetId(user.getId());
 			if(privileges.contains(PrivilegeConstants.TaskAllListPosts)){
-				cmd.setTaskType("");
 			}else if(privileges.contains(PrivilegeConstants.TaskGuaranteeListPosts)){
+				if(!StringUtils.isEmpty(cmd.getTaskType()) && OrganizationTaskType.fromCode(cmd.getTaskType()) != OrganizationTaskType.REPAIRS ){
+					returnNoPrivileged(privileges, user);
+				}
 				cmd.setTaskType(OrganizationTaskType.REPAIRS.getCode());
 			}else if(privileges.contains(PrivilegeConstants.TaskSeekHelpListPosts)){
+				if(!StringUtils.isEmpty(cmd.getTaskType()) && OrganizationTaskType.fromCode(cmd.getTaskType()) != OrganizationTaskType.EMERGENCY_HELP ){
+					returnNoPrivileged(privileges, user);
+				}
 				cmd.setTaskType(OrganizationTaskType.EMERGENCY_HELP.getCode());
 			}else{
 				returnNoPrivileged(privileges, user);
@@ -5611,6 +5650,28 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	LOGGER.error("non-privileged, privileges="+privileges + ", userId=" + user.getId());
 			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_PRIVILEGED,
 					"non-privileged.");
+	    }
+	    
+	    /**
+	     * 校验权限
+	     * @param privileges
+	     */
+	    private void checkPrivileged(List<Long> privileges, User user, OrganizationTask task){
+	    	if(privileges.contains(PrivilegeConstants.TaskAllListPosts)){
+				
+			}else if(privileges.contains(PrivilegeConstants.TaskGuaranteeListPosts)){
+				/*根据权限仅限操作保修贴*/
+	    		if(OrganizationTaskType.fromCode(task.getTaskType()) != OrganizationTaskType.REPAIRS){
+	    			returnNoPrivileged(privileges, user);
+	    		}
+			}else if(privileges.contains(PrivilegeConstants.TaskSeekHelpListPosts)){
+				/*根据权限仅限操作紧急求助帖*/
+	    		if(OrganizationTaskType.fromCode(task.getTaskType()) != OrganizationTaskType.EMERGENCY_HELP){
+	    			returnNoPrivileged(privileges, user);
+	    		}
+			}else{
+				returnNoPrivileged(privileges, user);
+			}
 	    }
 	
 }

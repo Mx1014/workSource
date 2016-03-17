@@ -19,6 +19,7 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.forum.ListPostCommandResponse;
 import com.everhomes.rest.organization.ListTopicsByTypeCommand;
+import com.everhomes.rest.organization.ProcessTaskCommand;
 import com.everhomes.rest.ui.organization.ListTaskPostsCommand;
 import com.everhomes.rest.ui.organization.ListTaskPostsResponse;
 import com.everhomes.rest.ui.organization.ProcessingTaskCommand;
@@ -131,7 +132,9 @@ public class OrganizationUiController extends ControllerBase {
     	WebTokenGenerator webToken = WebTokenGenerator.getInstance();
  	    SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
  		if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
- 			organizationService.acceptTask(cmd, sceneToken.getEntityId());
+ 			ProcessTaskCommand command = ConvertHelper.convert(cmd, ProcessTaskCommand.class);
+   	    	command.setOrganizationId(sceneToken.getEntityId());
+   			organizationService.acceptTask(command);
  		}
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
@@ -150,7 +153,9 @@ public class OrganizationUiController extends ControllerBase {
     	  WebTokenGenerator webToken = WebTokenGenerator.getInstance();
    	      SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
    	      if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
-   			organizationService.refuseTask(cmd, sceneToken.getEntityId());
+   	    	ProcessTaskCommand command = ConvertHelper.convert(cmd, ProcessTaskCommand.class);
+   	    	command.setOrganizationId(sceneToken.getEntityId());
+   			organizationService.refuseTask(command);
    	      }
     	  RestResponse res = new RestResponse();
     	  res.setErrorCode(ErrorCodes.SUCCESS);
@@ -169,7 +174,9 @@ public class OrganizationUiController extends ControllerBase {
     	   WebTokenGenerator webToken = WebTokenGenerator.getInstance();
     	   SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
     	   if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
-    		   organizationService.grabTask(cmd, sceneToken.getEntityId());
+    		   ProcessTaskCommand command = ConvertHelper.convert(cmd, ProcessTaskCommand.class);
+      	    	command.setOrganizationId(sceneToken.getEntityId());
+    		   organizationService.grabTask(command);
     	   }
     	   RestResponse res = new RestResponse();
     	   res.setErrorCode(ErrorCodes.SUCCESS);
@@ -188,7 +195,9 @@ public class OrganizationUiController extends ControllerBase {
            WebTokenGenerator webToken = WebTokenGenerator.getInstance();
       	   SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
       	   if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
-      		   organizationService.processingTask(cmd, sceneToken.getEntityId());
+      		   ProcessTaskCommand command = ConvertHelper.convert(cmd, ProcessTaskCommand.class);
+    	       command.setOrganizationId(sceneToken.getEntityId());
+      		   organizationService.processingTask(command);
       	   }
            RestResponse res = new RestResponse();
            res.setErrorCode(ErrorCodes.SUCCESS);
