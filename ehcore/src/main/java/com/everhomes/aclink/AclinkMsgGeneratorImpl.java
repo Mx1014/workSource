@@ -118,8 +118,10 @@ public class AclinkMsgGeneratorImpl implements AclinkMsgGenerator {
         switch(cmdType) {
         case ADD_UNDO_LIST:
             genAddUndoMessage(ctx, cmd);
+            break;
         case CMD_UPDATE_DEVNAME:
             genDeviceNameMessage(ctx, cmd);
+            break;
         default:
            genDefaultMessage(ctx, cmd);     
         }

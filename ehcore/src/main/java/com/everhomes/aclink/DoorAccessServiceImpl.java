@@ -686,8 +686,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             doorCommand.setStatus(DoorCommandStatus.CREATING.getCode());
             
             //Generate a message body for command
-            doorCommand.setCmdBody(AclinkUtils.packUpdateDeviceName(aesServerKey.getDeviceVer(), aesServerKey.getSecret()
-                    , doorAccess.getAesIv(), doorAccess.getName()));
+//            doorCommand.setCmdBody(AclinkUtils.packUpdateDeviceName(aesServerKey.getDeviceVer(), aesServerKey.getSecret()
+//                    , doorAccess.getAesIv(), doorAccess.getName()));
         }
         if(cmd.getAddress() != null) {
             doorAccess.setAddress(cmd.getAddress());
