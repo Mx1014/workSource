@@ -1425,7 +1425,9 @@ public class RentalServiceImpl implements RentalService {
 
 			}
 		}
-		if (bill.getPayTotalMoney().equals(0.0)) {
+		int compare = bill.getPayTotalMoney().compareTo(BigDecimal.ZERO);
+		
+		if (compare == 0) {
 			// 总金额为0，直接预订成功状态
 			bill.setStatus(SiteBillStatus.SUCCESS.getCode());
 		} else if ( bill.getStatus().equals(
