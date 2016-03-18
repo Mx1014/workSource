@@ -136,7 +136,7 @@ public class UserWithoutConfAccountSearcherImpl extends AbstractElasticSearch
         FilterBuilder fb = FilterBuilders.notFilter(nfb);
         
         if(cmd.getEnterpriseId() != null)
-        	fb = FilterBuilders.termFilter("enterpriseId", cmd.getEnterpriseId());
+        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("enterpriseId", cmd.getEnterpriseId()));
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
