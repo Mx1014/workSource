@@ -702,7 +702,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         doorAccessProvider.updateDoorAccess(doorAccess);
         if(doorCommand != null) {
-            doorCommandProvider.updateDoorCommand(doorCommand);
+            doorCommandProvider.createDoorCommand(doorCommand);
         }
     }
     

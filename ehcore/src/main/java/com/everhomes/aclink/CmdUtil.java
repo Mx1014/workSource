@@ -1,5 +1,6 @@
 package com.everhomes.aclink;
 
+import java.util.Arrays;
 import java.util.Random;
 
 import org.slf4j.Logger;
@@ -120,7 +121,14 @@ public class CmdUtil {
         byte cmd = 0x4;
         int expireTime = (int) Math.ceil((System.currentTimeMillis() / 1000)) + EXPIRE_TIME;
         byte[] timeBytes = DataUtil.intToByteArray(expireTime);
-        byte[] newNameBytes = DataUtil.getByte(newDevName);
+        byte[] newNameBytes = new byte[12];
+        if(newNameBytes.length >= 12) {
+            System.arraycopy(newDevName.getBytes(), 0, newNameBytes, 0, 12);
+        } else {
+            byte[] b = newDevName.getBytes();
+            System.arraycopy(b, 0, newNameBytes, 0, b.length);
+            newNameBytes[b.length] = '\0';
+        }
         byte[] dataArr = new byte[timeBytes.length + newNameBytes.length];
         System.arraycopy(timeBytes, 0, dataArr, 0, timeBytes.length);
         System.arraycopy(newNameBytes, 0, dataArr, timeBytes.length, newNameBytes.length);

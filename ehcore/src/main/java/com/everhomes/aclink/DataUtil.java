@@ -67,19 +67,19 @@ public class DataUtil {
         return null;
     }
 
-    public static byte[] getByte(String data) {
-        int len = data.length();
-        byte[] cmd = new byte[len / 2];
-
-        try {
-            for (int i = 0; i < len / 2; i++) {
-                String sub = data.substring(2 * i, 2 * (i + 1));
-                cmd[i] = (byte) (Integer.valueOf(sub, 16) & 0xFF);
-
-            }
-        } catch (NumberFormatException e) {
-                //TODO
-        }
-        return cmd;
-    }
+//    public static byte[] getByte(String data) {
+//        int len = data.length();
+//        byte[] cmd = new byte[len / 2];
+//
+//        try {
+//            for (int i = 0; i < len / 2; i++) {
+//                String sub = data.substring(2 * i, 2 * (i + 1));
+//                cmd[i] = (byte) (Integer.valueOf(sub, 16) & 0xFF);
+//
+//            }
+//        } catch (NumberFormatException e) {
+//                //TODO
+//        }
+//        return cmd;
+//    }
 }
