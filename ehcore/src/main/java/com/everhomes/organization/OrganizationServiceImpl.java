@@ -355,7 +355,7 @@ import com.everhomes.rest.organization.OrganizationTaskTargetType;
 import com.everhomes.rest.organization.OrganizationTaskType;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.PrivateFlag;
-import com.everhomes.rest.organization.ProcessTaskCommand;
+import com.everhomes.rest.organization.ProcessOrganizationTaskCommand;
 import com.everhomes.rest.organization.RejectOrganizationCommand;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.organization.SearchTopicsByTypeCommand;
@@ -539,13 +539,19 @@ public class OrganizationServiceImpl implements OrganizationService {
 		organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		if(OrganizationGroupType.ENTERPRISE.getCode().equals(parOrg.getGroupType())){
 			organization.setDirectlyEnterpriseId(parOrg.getId());
-			
 		}else{
 			organization.setDirectlyEnterpriseId(parOrg.getDirectlyEnterpriseId());
 		}
 		
 		organizationProvider.createOrganization(organization);
-		
+		if(OrganizationGroupType.fromCode(organization.getGroupType()) == OrganizationGroupType.ENTERPRISE){
+			OrganizationDetail enterprise = new OrganizationDetail();
+			enterprise.setOrganizationId(organization.getId());
+			enterprise.setAddress(cmd.getAddress());
+			enterprise.setCreateTime(organization.getCreateTime());
+			organizationProvider.createOrganizationDetail(enterprise);
+			
+		}
 		return ConvertHelper.convert(organization, OrganizationDTO.class);
 	}
 	
@@ -579,6 +585,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		parOrg.setName(cmd.getName());
 		
+		if(OrganizationGroupType.fromCode(parOrg.getGroupType()) == OrganizationGroupType.ENTERPRISE){
+			OrganizationDetail enterprise = organizationProvider.findOrganizationDetailByOrganizationId(parOrg.getId());
+			if(null != enterprise){
+				enterprise.setAddress(cmd.getAddress());
+				organizationProvider.updateOrganizationDetail(enterprise);
+			}
+			
+		}
 		organizationProvider.updateOrganization(parOrg);
 	}
 	
@@ -4846,10 +4860,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    Map<Long, OrganizationRoleMap> roleMap =  this.convertOrganizationRoleMap(organizationRoleMaps);
 	    
 		List<OrganizationDTO> rganizationDTOs = orgs.stream().map(r->{ 
-			List<Long> resources = aclProvider.getRolesFromResourceAssignments("system", null, EntityType.ORGANIZATIONS.getCode(), r.getId(), null);
 			OrganizationDTO dto = ConvertHelper.convert(r, OrganizationDTO.class);
-			
+			if(OrganizationGroupType.fromCode(dto.getGroupType()) == OrganizationGroupType.ENTERPRISE){
+				OrganizationDetail enterprise = organizationProvider.findOrganizationDetailByOrganizationId(dto.getId());
+				if(null != enterprise){
+					dto.setAddress(enterprise.getAddress());
+				}
+				return dto;
+			}
 			Organization depart = deptMaps.get(dto.getParentId());
+			List<Long> resources = aclProvider.getRolesFromResourceAssignments("system", null, EntityType.ORGANIZATIONS.getCode(), dto.getId(), null);
 			if(null != depart) dto.setParentName(depart.getName());
 			if(null != resources && resources.size() > 0){
 				OrganizationRoleMap role = roleMap.get(resources.get(0));
@@ -5206,7 +5226,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    
 	    
 	    @Override
-	    public void acceptTask(ProcessTaskCommand cmd) {
+	    public void acceptTask(ProcessOrganizationTaskCommand cmd) {
 	    	// TODO Auto-generated method stub
 	    	
 	    	User user = UserContext.current().getUser();
@@ -5246,7 +5266,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    }
 	    
 	    @Override
-	    public void grabTask(ProcessTaskCommand cmd) {
+	    public void grabTask(ProcessOrganizationTaskCommand cmd) {
 	    	// TODO Auto-generated method stub
 	    	User user = UserContext.current().getUser();
 	    	Long taskId = cmd.getTaskId();
@@ -5286,7 +5306,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    }
 	    
 	    @Override
-	    public void processingTask(ProcessTaskCommand cmd) {
+	    public void processingTask(ProcessOrganizationTaskCommand cmd) {
 	    	// TODO Auto-generated method stub
 	    	
 	    	User user = UserContext.current().getUser();
@@ -5431,7 +5451,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    
 	    
 	    @Override
-	    public void refuseTask(ProcessTaskCommand cmd) {
+	    public void refuseTask(ProcessOrganizationTaskCommand cmd) {
 	    	// TODO Auto-generated method stub
 	    	
 	    	User user = UserContext.current().getUser();

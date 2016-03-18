@@ -13,7 +13,7 @@ import javax.validation.constraints.NotNull;
  * <li>privateFlag: 可见性，参考{@link com.everhomes.rest.organization.PrivateFlag}</li>
  * </ul>
  */
-public class ProcessTaskCommand {
+public class ProcessOrganizationTaskCommand {
 	
 	private Long organizationId;
 	

@@ -37,7 +37,7 @@ public class OrganizationDTO {
 	private Byte    status;
 	private Byte memberStatus;
 	private String description;
-	
+	private String address;
 	private String groupType;
 	
 	//expand 
@@ -220,6 +220,17 @@ public class OrganizationDTO {
 
 	public void setRoleName(String roleName) {
 		this.roleName = roleName;
+	}
+
+
+	
+	public String getAddress() {
+		return address;
+	}
+
+
+	public void setAddress(String address) {
+		this.address = address;
 	}
 
 

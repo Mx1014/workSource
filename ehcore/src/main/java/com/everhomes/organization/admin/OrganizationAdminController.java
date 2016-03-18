@@ -57,7 +57,7 @@ import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationDetailDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
-import com.everhomes.rest.organization.ProcessTaskCommand;
+import com.everhomes.rest.organization.ProcessOrganizationTaskCommand;
 import com.everhomes.rest.organization.SearchTopicsByTypeCommand;
 import com.everhomes.rest.organization.SearchTopicsByTypeResponse;
 import com.everhomes.rest.organization.SetAclRoleAssignmentCommand;
@@ -883,7 +883,7 @@ public class OrganizationAdminController extends ControllerBase {
      */
      @RequestMapping("acceptTask")
      @RestReturn(value=String.class)
-     public RestResponse acceptTask(@Valid ProcessTaskCommand cmd) {
+     public RestResponse acceptTask(@Valid ProcessOrganizationTaskCommand cmd) {
  		organizationService.acceptTask(cmd);
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
@@ -898,7 +898,7 @@ public class OrganizationAdminController extends ControllerBase {
       */
       @RequestMapping("refuseTask")
       @RestReturn(value=String.class)
-      public RestResponse refuseTask(@Valid ProcessTaskCommand cmd) {
+      public RestResponse refuseTask(@Valid ProcessOrganizationTaskCommand cmd) {
    	      organizationService.refuseTask(cmd);
     	  RestResponse res = new RestResponse();
     	  res.setErrorCode(ErrorCodes.SUCCESS);
@@ -913,7 +913,7 @@ public class OrganizationAdminController extends ControllerBase {
        */
        @RequestMapping("grabTask")
        @RestReturn(value=String.class)
-       public RestResponse grabTask(@Valid ProcessTaskCommand cmd) {
+       public RestResponse grabTask(@Valid ProcessOrganizationTaskCommand cmd) {
     	   organizationService.grabTask(cmd);
     	   RestResponse res = new RestResponse();
     	   res.setErrorCode(ErrorCodes.SUCCESS);
@@ -928,7 +928,7 @@ public class OrganizationAdminController extends ControllerBase {
         */
         @RequestMapping("processingTask")
         @RestReturn(value=String.class)
-        public RestResponse processingTask(@Valid ProcessTaskCommand cmd) {
+        public RestResponse processingTask(@Valid ProcessOrganizationTaskCommand cmd) {
       	   organizationService.processingTask(cmd);
            RestResponse res = new RestResponse();
            res.setErrorCode(ErrorCodes.SUCCESS);
