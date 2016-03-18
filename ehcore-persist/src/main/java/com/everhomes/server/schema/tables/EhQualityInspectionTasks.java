@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhQualityInspectionTasks extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord> {
 
-	private static final long serialVersionUID = -1500696790;
+	private static final long serialVersionUID = -475862818;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_quality_inspection_tasks</code>
@@ -160,6 +160,11 @@ public class EhQualityInspectionTasks extends org.jooq.impl.TableImpl<com.everho
 	 * The column <code>ehcore.eh_quality_inspection_tasks.create_time</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_quality_inspection_tasks.inspection_text</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.lang.String> INSPECTION_TEXT = createField("inspection_text", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_quality_inspection_tasks</code> table reference
