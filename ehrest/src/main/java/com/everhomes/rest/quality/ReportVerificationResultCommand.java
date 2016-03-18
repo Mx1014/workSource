@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *  <li>taskId: 任务id</li>
- *  <li>attachments: 核查上报内容，图片和文字</li>
+ *  <li>attachments: 核查上报内容图片</li>
  *  <li>verificationResult: 核查结果   com.everhomes.rest.quality.QualityInspectionTaskResult</li>
  *  <li>endTime: 整改截止时间</li>
  *  <li>operatorType: 整改执行人类型</li>

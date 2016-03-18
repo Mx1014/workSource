@@ -37,6 +37,7 @@ import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.organization.OrganizationMemberGroupType;
+import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.quality.CreatQualityStandardCommand;
 import com.everhomes.rest.quality.DeleteQualityCategoryCommand;
@@ -494,7 +495,13 @@ public class QualityServiceImpl implements QualityService {
         	return dto;
         }).collect(Collectors.toList());
         
-        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(cmd.getGroupId());
+        List<Long> groupIds = tasks.stream().map((r) -> {
+        	
+        	return r.getExecutiveGroupId();
+        }).collect(Collectors.toList());
+        
+        List<OrganizationMember> members = organizationProvider.getOrganizationMemberByOrgIds(groupIds, OrganizationMemberStatus.ACTIVE);
+//        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(cmd.getGroupId());
         
         List<GroupUserDTO> groupUsers = members.stream().map((r) -> {
         	if(OrganizationMemberTargetType.USER.getCode().equals(r.getTargetType()) 
