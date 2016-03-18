@@ -1,0 +1,1 @@
+ALTER TABLE `eh_quality_inspection_tasks` ADD COLUMN `inspection_text` TEXT;
