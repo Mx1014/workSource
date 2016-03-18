@@ -61,7 +61,7 @@ public class ForumUiController extends ControllerBase {
      * <p>获取全局帖子发送范围。</p>
      */
     @RequestMapping("getTopicSentScopes")
-    @RestReturn(value=TopicScopeDTO.class)
+    @RestReturn(value=TopicScopeDTO.class, collection=true)
     public RestResponse getTopicQueryScopes(GetTopicSentScopeCommand cmd) {
         List<TopicScopeDTO> filterDtoList = null;
         

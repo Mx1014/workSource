@@ -57,241 +57,160 @@ public class OrganizationMemberDTO {
 	
 	public OrganizationMemberDTO() {
     }
-	
-	
-
-	public Long getOrganizationId() {
-		return organizationId;
-	}
-
-
-
-	public void setOrganizationId(Long organizationId) {
-		this.organizationId = organizationId;
-	}
-
-
-
-	public String getTargetType() {
-		return targetType;
-	}
-
-
-
-	public void setTargetType(String targetType) {
-		this.targetType = targetType;
-	}
-
-
-
-	public Long getTargetId() {
-		return targetId;
-	}
-
-
-
-	public void setTargetId(Long targetId) {
-		this.targetId = targetId;
-	}
-
-
-
-	public String getMemberGroup() {
-		return memberGroup;
-	}
-
-
-
-	public void setMemberGroup(String memberGroup) {
-		this.memberGroup = memberGroup;
-	}
-
-
-
-	public String getContactName() {
-		return contactName;
-	}
-
-
-
-	public void setContactName(String contactName) {
-		this.contactName = contactName;
-	}
-
-
-
-	public Byte getContactType() {
-		return contactType;
-	}
-
-
-
-	public void setContactType(Byte contactType) {
-		this.contactType = contactType;
-	}
-
-
-
-	public String getContactToken() {
-		return contactToken;
-	}
-
-
-
-	public void setContactToken(String contactToken) {
-		this.contactToken = contactToken;
-	}
-
-
-
-	public String getContactDescription() {
-		return contactDescription;
-	}
-
-
-
-	public void setContactDescription(String contactDescription) {
-		this.contactDescription = contactDescription;
-	}
-
-
-
-	public Byte getStatus() {
-		return status;
-	}
-
-
-
-	public void setStatus(Byte status) {
-		this.status = status;
-	}
-
-
 
 	public Long getId() {
-		return id;
-	}
+        return id;
+    }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
 
+    public Long getOrganizationId() {
+        return organizationId;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
 
+    public String getOrganizationName() {
+        return organizationName;
+    }
 
+    public void setOrganizationName(String organizationName) {
+        this.organizationName = organizationName;
+    }
 
-	public String getOrganizationName() {
-		return organizationName;
-	}
+    public String getTargetType() {
+        return targetType;
+    }
 
+    public void setTargetType(String targetType) {
+        this.targetType = targetType;
+    }
 
+    public Long getTargetId() {
+        return targetId;
+    }
 
-	public void setOrganizationName(String organizationName) {
-		this.organizationName = organizationName;
-	}
+    public void setTargetId(Long targetId) {
+        this.targetId = targetId;
+    }
 
+    public String getMemberGroup() {
+        return memberGroup;
+    }
 
+    public void setMemberGroup(String memberGroup) {
+        this.memberGroup = memberGroup;
+    }
 
+    public String getContactName() {
+        return contactName;
+    }
 
+    public void setContactName(String contactName) {
+        this.contactName = contactName;
+    }
 
+    public Byte getContactType() {
+        return contactType;
+    }
 
-	public Long getGroupId() {
-		return groupId;
-	}
+    public void setContactType(Byte contactType) {
+        this.contactType = contactType;
+    }
 
+    public String getContactToken() {
+        return contactToken;
+    }
 
+    public void setContactToken(String contactToken) {
+        this.contactToken = contactToken;
+    }
 
-	public void setGroupId(Long groupId) {
-		this.groupId = groupId;
-	}
+    public String getContactDescription() {
+        return contactDescription;
+    }
 
+    public void setContactDescription(String contactDescription) {
+        this.contactDescription = contactDescription;
+    }
 
+    public Byte getStatus() {
+        return status;
+    }
 
-	public String getGroupName() {
-		return groupName;
-	}
+    public void setStatus(Byte status) {
+        this.status = status;
+    }
 
+    public List<AclRoleAssignmentsDTO> getAclRoles() {
+        return aclRoles;
+    }
 
+    public void setAclRoles(List<AclRoleAssignmentsDTO> aclRoles) {
+        this.aclRoles = aclRoles;
+    }
 
-	public void setGroupName(String groupName) {
-		this.groupName = groupName;
-	}
+    public Long getGroupId() {
+        return groupId;
+    }
 
+    public void setGroupId(Long groupId) {
+        this.groupId = groupId;
+    }
 
+    public String getGroupName() {
+        return groupName;
+    }
 
-	public List<AclRoleAssignmentsDTO> getAclRoles() {
-		return aclRoles;
-	}
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
+    }
 
+    public String getNickName() {
+        return nickName;
+    }
 
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
+    }
 
-	public void setAclRoles(List<AclRoleAssignmentsDTO> aclRoles) {
-		this.aclRoles = aclRoles;
-	}
+    public String getAvatar() {
+        return avatar;
+    }
 
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
 
+    public Long getCreatorUid() {
+        return creatorUid;
+    }
 
-	public String getNickName() {
-		return nickName;
-	}
+    public void setCreatorUid(Long creatorUid) {
+        this.creatorUid = creatorUid;
+    }
 
+    public Long getEmployeeNo() {
+        return employeeNo;
+    }
 
+    public void setEmployeeNo(Long employeeNo) {
+        this.employeeNo = employeeNo;
+    }
 
-	public void setNickName(String nickName) {
-		this.nickName = nickName;
-	}
+    public Byte getGender() {
+        return gender;
+    }
 
+    public void setGender(Byte gender) {
+        this.gender = gender;
+    }
 
-
-	public String getAvatar() {
-		return avatar;
-	}
-
-
-
-	public void setAvatar(String avatar) {
-		this.avatar = avatar;
-	}
-
-
-
-	public Long getCreatorUid() {
-		return creatorUid;
-	}
-
-
-
-	public void setCreatorUid(Long creatorUid) {
-		this.creatorUid = creatorUid;
-	}
-
-
-
-	public Long getEmployeeNo() {
-		return employeeNo;
-	}
-
-
-
-	public void setEmployeeNo(Long employeeNo) {
-		this.employeeNo = employeeNo;
-	}
-
-
-
-	public Byte getGender() {
-		return gender;
-	}
-
-
-
-	public void setGender(Byte gender) {
-		this.gender = gender;
-	}
-
-
-
-	@Override
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
