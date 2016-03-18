@@ -584,6 +584,10 @@ public class QualityServiceImpl implements QualityService {
 			sendMessageToUser(user.getId(), notifyTextForApplicant);
 			record.setProcessMessage(notifyTextForApplicant);
 		}
+		
+		if(!StringUtils.isNullOrEmpty(cmd.getInspectionText())) {
+			task.setInspectionText(cmd.getInspectionText());
+		}
 		processTaskAttachments(user.getId(),  cmd.getAttachments(), task);
 		QualityInspectionTaskDTO dto = updateVerificationTasks(task, record);
 		return dto;
@@ -815,7 +819,6 @@ public class QualityServiceImpl implements QualityService {
         
         if(attachmentList != null) {
             results = new ArrayList<QualityInspectionTaskAttachments>();
-            
         	
             QualityInspectionTaskAttachments attachment = null;
             for(AttachmentDescriptor descriptor : attachmentList) {

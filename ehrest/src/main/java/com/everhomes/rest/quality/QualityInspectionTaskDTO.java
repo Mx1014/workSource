@@ -5,6 +5,7 @@ import java.util.List;
 
 
 
+
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
@@ -34,6 +35,8 @@ import com.everhomes.util.StringHelper;
  *  <li>processResult: 整改执行结果com.everhomes.rest.quality.QualityInspectionTaskResult</li>
  *  <li>reviewResult: 审阅结果com.everhomes.rest.quality.QualityInspectionTaskReviewResult</li>
  *  <li>attachments: 附件 com.everhomes.rest.forum.AttachmentDescriptor</li>
+ *  <li>executiveGroupId: 执行业务组id</li>
+ *  <li>inspectionText: 核查上报文字内容</li>
  * </ul>
  */
 public class QualityInspectionTaskDTO {
@@ -88,6 +91,8 @@ public class QualityInspectionTaskDTO {
 	
 	@ItemType(QualityInspectionTaskAttachmentDTO.class)
     private List<QualityInspectionTaskAttachmentDTO> attachments;
+	
+	private String inspectionText;
 
 	public Long getId() {
 		return id;
@@ -282,8 +287,14 @@ public class QualityInspectionTaskDTO {
 		this.attachments = attachments;
 	}
 	
-	
-	
+	public String getInspectionText() {
+		return inspectionText;
+	}
+
+	public void setInspectionText(String inspectionText) {
+		this.inspectionText = inspectionText;
+	}
+
 	public Long getExecutiveGroupId() {
 		return executiveGroupId;
 	}
