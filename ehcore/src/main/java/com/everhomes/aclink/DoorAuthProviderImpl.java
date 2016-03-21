@@ -102,6 +102,34 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         
         if(objs.size() >= count) {
             locator.setAnchor(objs.get(objs.size() - 1).getId());
+        } else {
+            locator.setAnchor(null);
+        }
+        
+        return objs;
+    }
+    
+    public List<DoorAuth> queryDoorAuthByTime(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhDoorAuth.class));
+
+        SelectQuery<EhDoorAuthRecord> query = context.selectQuery(Tables.EH_DOOR_AUTH);
+        if(queryBuilderCallback != null)
+            queryBuilderCallback.buildCondition(locator, query);
+
+        query.addOrderBy(Tables.EH_DOOR_AUTH.CREATE_TIME.desc());
+        if(locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_DOOR_AUTH.ID.lt(locator.getAnchor()));
+            }
+
+        query.addLimit(count);
+        List<DoorAuth> objs = query.fetch().map((r) -> {
+            return ConvertHelper.convert(r, DoorAuth.class);
+        });
+        
+        if(objs.size() >= count) {
+            locator.setAnchor(objs.get(objs.size() - 1).getId());
+        } else {
+            locator.setAnchor(null);
         }
         
         return objs;
@@ -217,7 +245,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
     @Override
     public List<DoorAuth> queryDoorAuthByApproveId(ListingLocator locator, Long approveId, int count) {
         
-        return queryDoorAuth(locator, count, new ListingQueryBuilderCallback() {
+        return queryDoorAuthByTime(locator, count, new ListingQueryBuilderCallback() {
 
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,

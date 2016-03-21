@@ -117,6 +117,8 @@ public class AesUserKeyProviderImpl implements AesUserKeyProvider {
         
         if(objs.size() >= count) {
             locator.setAnchor(objs.get(objs.size() - 1).getId());
+        } else {
+            locator.setAnchor(null);
         }
         
         return objs;
