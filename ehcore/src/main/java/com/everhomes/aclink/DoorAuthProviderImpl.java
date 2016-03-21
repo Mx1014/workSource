@@ -118,7 +118,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
 
         query.addOrderBy(Tables.EH_DOOR_AUTH.CREATE_TIME.desc());
         if(locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_DOOR_AUTH.ID.lt(locator.getAnchor()));
+            query.addConditions(Tables.EH_DOOR_AUTH.CREATE_TIME.lt(new Timestamp(locator.getAnchor())));
             }
 
         query.addLimit(count);
@@ -127,7 +127,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         });
         
         if(objs.size() >= count) {
-            locator.setAnchor(objs.get(objs.size() - 1).getId());
+            locator.setAnchor(objs.get(objs.size() - 1).getCreateTime().getTime());
         } else {
             locator.setAnchor(null);
         }
