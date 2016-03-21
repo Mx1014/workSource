@@ -7,12 +7,18 @@ import java.util.List;
 import java.util.Map;
 
 
+
+
+
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+
+
 
 
 import com.everhomes.community.Building;
@@ -30,12 +36,14 @@ import com.everhomes.rest.quality.ListQualityInspectionTasksCommand;
 import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.rest.quality.QualityInspectionTaskReviewResult;
 import com.everhomes.rest.quality.QualityInspectionTaskReviewStatus;
+import com.everhomes.rest.quality.QualityInspectionTaskStatus;
 import com.everhomes.rest.quality.QualityStandardStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhBuildingAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionCategoriesDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionEvaluationFactorsDao;
+import com.everhomes.server.schema.tables.daos.EhQualityInspectionEvaluationsDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionStandardGroupMapDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionStandardsDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionTaskAttachmentsDao;
@@ -44,6 +52,7 @@ import com.everhomes.server.schema.tables.daos.EhQualityInspectionTasksDao;
 import com.everhomes.server.schema.tables.pojos.EhBuildingAttachments;
 import com.everhomes.server.schema.tables.pojos.EhBuildings;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
+import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionCategories;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionEvaluationFactors;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionEvaluations;
@@ -384,9 +393,17 @@ public class QualityProviderImpl implements QualityProvider {
 
 	@Override
 	public void createQualityInspectionEvaluations(
-			QualityInspectionEvaluations standardGroup) {
-		// TODO Auto-generated method stub
-		
+			QualityInspectionEvaluations evaluation) {
+		 
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class));
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhQualityInspectionEvaluations.class));
+        evaluation.setId(id);
+        evaluation.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        
+        EhQualityInspectionEvaluationsDao dao = new EhQualityInspectionEvaluationsDao(context.configuration());
+        dao.insert(evaluation);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhQualityInspectionEvaluations.class, null);
 	}
 
 	@Override
@@ -718,6 +735,27 @@ public class QualityProviderImpl implements QualityProvider {
 			return null;
 		
 		return result.get(0);
+	}
+
+	@Override
+	public List<QualityInspectionTasks> listClosedTask() {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhQualityInspectionTasks.class));
+		List<QualityInspectionTasks> tasks = new ArrayList<QualityInspectionTasks>();
+        SelectQuery<EhQualityInspectionTasksRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_TASKS);
+        
+        query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(QualityInspectionTaskStatus.CLOSED.getCode()));
+        query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASKS.ID.desc());
+        
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query tasks by count, sql=" + query.getSQL());
+            LOGGER.debug("Query tasks by count, bindValues=" + query.getBindValues());
+        }
+        
+        query.fetch().map((EhQualityInspectionTasksRecord record) -> {
+        	tasks.add(ConvertHelper.convert(record, QualityInspectionTasks.class));
+        	return null;
+        });
+		return tasks;
 	}
 
 

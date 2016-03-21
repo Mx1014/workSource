@@ -15,6 +15,7 @@ import org.aspectj.weaver.Member;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
@@ -491,6 +492,23 @@ public class QualityServiceImpl implements QualityService {
         	QualityInspectionCategories category = verifiedCategoryById(standard.getCategoryId());
         	r.setCategoryName(category.getName());
         	QualityInspectionTaskDTO dto = ConvertHelper.convert(r, QualityInspectionTaskDTO.class);  
+        	List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(r.getExecutiveGroupId());
+        	
+        	 List<GroupUserDTO> groupUsers = members.stream().map((mem) -> {
+             	if(OrganizationMemberTargetType.USER.getCode().equals(mem.getTargetType()) 
+             			&& mem.getTargetId() != null && mem.getTargetId() != 0) {
+             		GroupUserDTO user = new GroupUserDTO();
+             		user.setUserId(mem.getTargetId());
+                 	user.setUserName(mem.getContactName());
+                 	user.setContact(mem.getContactToken());
+                 	user.setEmployeeNo(mem.getEmployeeNo());
+                 	return user;
+             	} else {
+             		return null;
+             	}
+             }).filter(member->member!=null).collect(Collectors.toList());
+        	 
+        	 dto.setGroupUsers(groupUsers);
         	
         	return dto;
         }).collect(Collectors.toList());
@@ -517,7 +535,7 @@ public class QualityServiceImpl implements QualityService {
         	}
         }).filter(member->member!=null).collect(Collectors.toList());
         
-        return new ListQualityInspectionTasksResponse(nextPageAnchor, dtoList, groupUsers);
+        return new ListQualityInspectionTasksResponse(nextPageAnchor, dtoList);
 	}
 	
 	@Override
@@ -937,6 +955,28 @@ public class QualityServiceImpl implements QualityService {
 		standardDto.setExecutiveGroup(executiveGroup);
 		standardDto.setReviewGroup(reviewGroup);
 		return standardDto;
+	}
+
+	@Scheduled(cron="0 0 3 1 * ?" )
+	@Override
+	public void createEvaluations() {
+		
+//		`owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, enterprise, etc',
+//		`owner_id` BIGINT NOT NULL DEFAULT 0,
+//		`date_str` VARCHAR(32) NOT NULL DEFAULT '',
+//		`group_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_organizations',
+//		`group_name` VARCHAR(64),
+//		`score` DOUBLE NOT NULL DEFAULT 0,
+		
+		
+		List<QualityInspectionTasks> closedTask = qualityProvider.listClosedTask();
+		
+		closedTask.stream().map((r) -> {
+			QualityInspectionEvaluations evaluation = new QualityInspectionEvaluations();
+			qualityProvider.createQualityInspectionEvaluations(evaluation);
+			return r;
+		});
+		
 	}
 
 }
