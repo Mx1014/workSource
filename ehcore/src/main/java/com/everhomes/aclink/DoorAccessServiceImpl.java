@@ -835,7 +835,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             doorAuth.setStatus(DoorAuthStatus.INVALID.getCode());
             doorAuthProvider.updateDoorAuth(doorAuth);
             
-            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "DoorAccess not found");
+            //throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "DoorAccess not found");
+            return null;
         }
         
         AesUserKey aesUserKey = this.dbProvider.execute(new TransactionCallback<AesUserKey>() {
