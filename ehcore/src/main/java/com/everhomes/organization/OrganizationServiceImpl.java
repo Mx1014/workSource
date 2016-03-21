@@ -5487,6 +5487,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    private List<Long> getUserPrivileges(String module ,Long organizationId, Long userId){
 	    	List<RoleAssignment> userRoles = aclProvider.listRoleAssignmentByTarget(EntityType.USER.getCode(),userId);
 	    	
+	    	Organization org = this.checkOrganization(organizationId);
+	    	
+	    	if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE){
+	    		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, org.getId());
+	    		if(null != member && null != member.getGroupId() && 0 != member.getGroupId()){
+	    			organizationId = member.getGroupId();
+	    		}
+	    	}
+	    	
 	    	List<RoleAssignment> userOrgRoles = aclProvider.listRoleAssignmentByTarget(EntityType.ORGANIZATIONS.getCode(), organizationId);
 	    	
 	    	userRoles.addAll(userOrgRoles);
