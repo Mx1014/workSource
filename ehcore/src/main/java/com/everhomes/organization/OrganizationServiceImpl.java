@@ -91,6 +91,8 @@ import java.util.stream.Collectors;
 
 
 
+
+
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -102,6 +104,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+
+
 
 
 
@@ -4732,29 +4736,46 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	@Override
 	public List<Organization> getSyncDatas(CrossShardListingLocator locator){
-		int pageSize = 200; 
+//		int pageSize = 200; 
 		
-		List<OrganizationCommunityRequest> requests = organizationProvider.queryOrganizationCommunityRequests(locator, pageSize, new ListingQueryBuilderCallback() {
-			@Override
-			public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
-					SelectQuery<? extends Record> query) {
-				query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_STATUS.ne(OrganizationCommunityRequestStatus.INACTIVE.getCode()));
-		        query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode()));
-				return query;
-			}
-		});
+//		List<OrganizationCommunityRequest> requests = organizationProvider.queryOrganizationCommunityRequests(locator, pageSize, new ListingQueryBuilderCallback() {
+//			@Override
+//			public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+//					SelectQuery<? extends Record> query) {
+//				query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_STATUS.ne(OrganizationCommunityRequestStatus.INACTIVE.getCode()));
+//		        query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode()));
+//				return query;
+//			}
+//		});
+//		
+//		return requests.stream().map((r)->{
+//			Organization organization = organizationProvider.findOrganizationById(r.getMemberId());
+//			if(null != organization){
+//				OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
+//				
+//				organization.setCommunityId(r.getCommunityId());
+//				if(null != detail)
+//					organization.setDescription(detail.getDescription());
+//			}
+//			return organization;
+//		}).collect(Collectors.toList());
+		List<String> groupTypes = new ArrayList<String>();
+		groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+		List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes(0L, groupTypes);
 		
-		return requests.stream().map((r)->{
-			Organization organization = organizationProvider.findOrganizationById(r.getMemberId());
-			if(null != organization){
-				OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
-				
-				organization.setCommunityId(r.getCommunityId());
-				if(null != detail)
-					organization.setDescription(detail.getDescription());
-			}
-			return organization;
+		List<Organization> orgs = organizations.stream().map((r) ->{
+			OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(r.getId());
+			if(null != detail)
+				r.setDescription(detail.getDescription());
+			
+			OrganizationCommunityRequest request = organizationProvider.getOrganizationCommunityRequestByOrganizationId(r.getId());
+			if(request != null)
+				r.setCommunityId(request.getCommunityId());
+			return r;
 		}).collect(Collectors.toList());
+		
+		return orgs;
+		
 	}
 	
 	private List<OrganizationDTO> convertOrgRole(List<Organization> orgs, Organization org){

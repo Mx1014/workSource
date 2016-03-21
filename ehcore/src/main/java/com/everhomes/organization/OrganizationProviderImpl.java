@@ -1534,26 +1534,41 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     
     @Override
     public OrganizationCommunityRequest getOrganizationCommunityRequestByOrganizationId(Long organizationId) {
-    	OrganizationCommunityRequest[] result = new OrganizationCommunityRequest[1];
-        
-        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
-            (DSLContext context, Object reducingContext) -> {
-                result[0] = context.select().from(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS)
-                    .where(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID.eq(organizationId))
-                    .and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode()))
-                    .and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_STATUS.ne(OrganizationCommunityRequestStatus.INACTIVE.getCode()))
-                    .fetchAny().map((r) -> {
-                        return ConvertHelper.convert(r, OrganizationCommunityRequest.class);
-                    });
-
-                if (result[0] != null) {
-                    return false;
-                } else {
-                    return true;
-                }
-            });
-        
-        return result[0];
+//    	OrganizationCommunityRequest[] result = new OrganizationCommunityRequest[1];
+//        
+//        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
+//            (DSLContext context, Object reducingContext) -> {
+//                result[0] = context.select().from(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS)
+//                    .where(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID.eq(organizationId))
+//                    .and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode()))
+//                    .and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_STATUS.ne(OrganizationCommunityRequestStatus.INACTIVE.getCode()))
+//                    .fetchAny().map((r) -> {
+//                        return ConvertHelper.convert(r, OrganizationCommunityRequest.class);
+//                    });
+//
+//                if (result[0] != null) {
+//                    return false;
+//                } else {
+//                    return true;
+//                }
+//            });
+//        
+//        return result[0];
+    	
+    	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+		SelectQuery<EhOrganizationCommunityRequestsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS);
+		query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID.eq(organizationId));
+		query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode()));
+		query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_STATUS.ne(OrganizationCommunityRequestStatus.INACTIVE.getCode()));
+		List<OrganizationCommunityRequest> request = new ArrayList<OrganizationCommunityRequest>();
+		query.fetch().map(r ->{
+			request.add(ConvertHelper.convert(r,OrganizationCommunityRequest.class));
+   			return null;
+   		});
+		if(0 == request.size()){
+			return null;
+		}
+		return request.get(0);
     }
     
     @Override

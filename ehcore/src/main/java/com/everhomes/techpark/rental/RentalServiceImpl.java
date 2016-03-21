@@ -868,7 +868,9 @@ public class RentalServiceImpl implements RentalService {
 				siDTO.setCounts(rib.getRentalCount());
 				RentalSiteItem rsItem = rentalProvider
 						.findRentalSiteItemById(rib.getRentalSiteItemId());
-				siDTO.setItemName(rsItem.getName());
+				if(rsItem != null) {
+					siDTO.setItemName(rsItem.getName());
+				}
 				siDTO.setItemPrice(rib.getTotalMoney());
 				dto.getSiteItems().add(siDTO);
 			}
@@ -1423,7 +1425,9 @@ public class RentalServiceImpl implements RentalService {
 
 			}
 		}
-		if (bill.getPayTotalMoney().equals(0.0)) {
+		int compare = bill.getPayTotalMoney().compareTo(BigDecimal.ZERO);
+		
+		if (compare == 0) {
 			// 总金额为0，直接预订成功状态
 			bill.setStatus(SiteBillStatus.SUCCESS.getCode());
 		} else if ( bill.getStatus().equals(

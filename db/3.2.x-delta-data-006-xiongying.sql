@@ -1,0 +1,2 @@
+	update eh_yellow_pages set owner_type='community'  where id in(200020,200021,200022,200023,200024,200025);
+	update eh_yellow_pages set owner_id='240111044331050812' where id in(200020,200021,200022,200023,200024,200025);

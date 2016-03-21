@@ -441,7 +441,7 @@ public class BusinessProviderImpl implements BusinessProvider {
 		}
 		if(ownerIds!=null&&!ownerIds.isEmpty()){
 			Condition conOwnerIds = Tables.EH_BUSINESS_ASSIGNED_SCOPES.OWNER_ID.in(ownerIds);
-			condition = condition.or(conOwnerIds);
+			condition = condition.and(conOwnerIds);
 		}
 		selectStep.where(condition);
 		@SuppressWarnings({ "unchecked", "rawtypes" })

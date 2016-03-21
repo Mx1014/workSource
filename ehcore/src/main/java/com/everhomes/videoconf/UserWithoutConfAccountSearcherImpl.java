@@ -136,7 +136,7 @@ public class UserWithoutConfAccountSearcherImpl extends AbstractElasticSearch
         FilterBuilder fb = FilterBuilders.notFilter(nfb);
         
         if(cmd.getEnterpriseId() != null)
-        	fb = FilterBuilders.termFilter("enterpriseId", cmd.getEnterpriseId());
+        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("enterpriseId", cmd.getEnterpriseId()));
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
@@ -215,7 +215,7 @@ public class UserWithoutConfAccountSearcherImpl extends AbstractElasticSearch
 	            b.field("enterpriseId", member.getOrganizationId());
 	            b.field("userName", member.getContactName());
 	            b.field("contact", member.getContactToken());
-	            if(member.getGroupId() != 0) {
+	            if(member.getGroupId() != null && member.getGroupId() != 0) {
 					Organization group = organizationProvider.findOrganizationById(member.getGroupId());
 					if(group != null) {
 						b.field("department", group.getName());
