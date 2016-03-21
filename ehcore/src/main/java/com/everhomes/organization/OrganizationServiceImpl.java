@@ -5369,17 +5369,19 @@ public class OrganizationServiceImpl implements OrganizationService {
 			if(privileges.contains(PrivilegeConstants.TaskAllListPosts)){
 				
 			}else if(privileges.contains(PrivilegeConstants.TaskGuaranteeListPosts)){
-				if(!StringUtils.isEmpty(cmd.getTaskType()) && OrganizationTaskType.fromCode(cmd.getTaskType()) != OrganizationTaskType.REPAIRS ){
+				if(StringUtils.isEmpty(cmd.getTaskType())){
+					cmd.setTargetId(user.getId());
+				}else if(!StringUtils.isEmpty(cmd.getTaskType()) && OrganizationTaskType.fromCode(cmd.getTaskType()) != OrganizationTaskType.REPAIRS ){
 					returnNoPrivileged(privileges, user);
 				}
 				cmd.setTaskType(OrganizationTaskType.REPAIRS.getCode());
-				cmd.setTargetId(user.getId());
 			}else if(privileges.contains(PrivilegeConstants.TaskSeekHelpListPosts)){
-				if(!StringUtils.isEmpty(cmd.getTaskType()) && OrganizationTaskType.fromCode(cmd.getTaskType()) != OrganizationTaskType.EMERGENCY_HELP ){
+				if(StringUtils.isEmpty(cmd.getTaskType())){
+					cmd.setTargetId(user.getId());
+				}else if(!StringUtils.isEmpty(cmd.getTaskType()) && OrganizationTaskType.fromCode(cmd.getTaskType()) != OrganizationTaskType.EMERGENCY_HELP ){
 					returnNoPrivileged(privileges, user);
 				}
 				cmd.setTaskType(OrganizationTaskType.EMERGENCY_HELP.getCode());
-				cmd.setTargetId(user.getId());
 			}else{
 				returnNoPrivileged(privileges, user);
 			}
