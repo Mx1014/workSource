@@ -148,7 +148,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		Community community = communityProvider.findCommunityById(communityId);
 		if(community == null){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-					ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid communityId paramter.");
+					ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid communityId paramter.communityId="+communityId);
 		}
 		long startTime = System.currentTimeMillis();
 		GetLaunchPadItemsCommandResponse response = new GetLaunchPadItemsCommandResponse();
