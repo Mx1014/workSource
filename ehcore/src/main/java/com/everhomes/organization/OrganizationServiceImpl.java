@@ -5670,6 +5670,23 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	userRoles.addAll(userOrgRoles);
 	    	List<Long> privileges = new ArrayList<Long>();
 	    	if(!StringUtils.isEmpty(module)){
+	    		List<Privilege> s = aclProvider.getPrivilegesByTag(module); //aclProvider 调平台根据角色list+模块 获取权限list接口
+	    		for (RoleAssignment role : userRoles) {
+	    			List<Acl> acls = aclProvider.getResourceAclByRole(null, null, role.getRoleId());
+	    			for (Acl acl : acls) {
+	    				if(!privileges.contains(acl.getPrivilegeId())){
+	    					for (Privilege privilege : s) {
+	    						if(privilege.getId().equals(acl.getPrivilegeId())){
+	    							privileges.add(acl.getPrivilegeId());
+	    						}
+							}
+	    					
+	    				}
+					}
+	    			
+				}
+	    		
+	    	}else{
 	    		for (RoleAssignment role : userRoles) {
 	    			List<Acl> acls = aclProvider.getResourceAclByRole(null, null, role.getRoleId());
 	    			for (Acl acl : acls) {
@@ -5679,12 +5696,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 					}
 	    			
 				}
-	    		
-	    		
-	    		List<Privilege> s = aclProvider.getPrivilegesByTag(module); //aclProvider 调平台根据角色list+模块 获取权限list接口
-//	    		aclProvider.getPrivilegesOfTargetOnResource(arg0, arg1, arg2, arg3, arg4)
-	    	}else{
-	    		privileges = null; //aclProvider 调平台根据角色list获取权限list的接口
 	    	}
 	    	
 	    	return privileges;
