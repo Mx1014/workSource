@@ -1016,7 +1016,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			if(OrganizationTaskType.EMERGENCY_HELP == OrganizationTaskType.fromCode(taskType)){
 				cond = cond.or(Tables.EH_ORGANIZATION_TASKS.TARGET_ID.eq(0l));
 			}
-			condition.and(cond);
+			condition = condition.and(cond);
 		}
 		
 		if(null != locator.getAnchor()){
