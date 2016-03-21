@@ -5519,7 +5519,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    		
 	    	}else{
 	    		for (RoleAssignment role : userRoles) {
-	    			List<Acl> acls = aclProvider.getResourceAclByRole(null, null, role.getRoleId());
+	    			List<Acl> acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), null, role.getRoleId());
 	    			for (Acl acl : acls) {
 	    				if(!privileges.contains(acl.getPrivilegeId())){
 	    					privileges.add(acl.getPrivilegeId());
