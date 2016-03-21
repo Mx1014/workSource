@@ -1924,6 +1924,9 @@ public class RentalServiceImpl implements RentalService {
 				cmd.getOwnerId(),cmd.getOwnerType(), cmd.getSiteType(), cmd.getRentalSiteId(),
 				cmd.getBillStatus(), 1, pageSize,
 				cmd.getStartTime(), cmd.getEndTime(), cmd.getInvoiceFlag(),null);
+		if(null == bills){
+			bills = new ArrayList<RentalBill>();
+		}
 		List<RentalBillDTO> dtos = new ArrayList<RentalBillDTO>();
 		for (RentalBill bill : bills) {
 			RentalBillDTO dto = new RentalBillDTO();
@@ -1931,12 +1934,17 @@ public class RentalServiceImpl implements RentalService {
 			dto.setSiteItems(new ArrayList<SiteItemDTO>());
 			List<RentalItemsBill> rentalSiteItems = rentalProvider
 					.findRentalItemsBillBySiteBillId(dto.getRentalBillId());
+			if(null == rentalSiteItems){
+				continue;
+			}
 			for (RentalItemsBill rib : rentalSiteItems) {
 				SiteItemDTO siDTO = new SiteItemDTO();
 				siDTO.setCounts(rib.getRentalCount());
 				RentalSiteItem rsItem = rentalProvider
 						.findRentalSiteItemById(rib.getRentalSiteItemId());
-				siDTO.setItemName(rsItem.getName());
+				if(null != rsItem){
+					siDTO.setItemName(rsItem.getName());
+				}
 				siDTO.setItemPrice(rib.getTotalMoney());
 				dto.getSiteItems().add(siDTO);
 			}
