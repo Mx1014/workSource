@@ -363,8 +363,9 @@ public class ForumServiceImpl implements ForumService {
                 if( (!(getByOwnerId && post.getCreatorUid().equals(userId)))
                         && (post.getCreatorUid().equals(post.getDeleterUid()) || post.getCreatorUid() != userId.longValue()) ){
             		LOGGER.error("Forum post already deleted, userId=" + userId + ", topicId=" + topicId);
-            		throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
-            				ForumServiceErrorCode.ERROR_FORUM_TOPIC_DELETED, "Forum post already deleted");
+//            		throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
+//            				ForumServiceErrorCode.ERROR_FORUM_TOPIC_DELETED, "Forum post already deleted");
+            		return null;
             	}
             }
             
