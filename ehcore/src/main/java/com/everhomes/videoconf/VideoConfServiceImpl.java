@@ -1070,7 +1070,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		
 		List<SourceVideoConfAccountStatistics> statistics = new ArrayList<SourceVideoConfAccountStatistics>();
 
-		for(Byte i = 0; i < 10; i++){
+		for(Byte i = 0; i < 16; i++){
 			SourceVideoConfAccountStatistics monitor = new SourceVideoConfAccountStatistics();
 			monitor.setMonitoringPoints(i);
 			monitor.setWarningLine(getEarlyWarningLine(i));
