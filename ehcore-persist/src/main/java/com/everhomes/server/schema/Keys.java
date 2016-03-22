@@ -289,6 +289,8 @@ public class Keys {
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhVersionUrlsRecord> KEY_EH_VERSION_URLS_PRIMARY = UniqueKeys0.KEY_EH_VERSION_URLS_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhVersionUrlsRecord> KEY_EH_VERSION_URLS_U_EH_VER_URL = UniqueKeys0.KEY_EH_VERSION_URLS_U_EH_VER_URL;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhWarningContactsRecord> KEY_EH_WARNING_CONTACTS_PRIMARY = UniqueKeys0.KEY_EH_WARNING_CONTACTS_PRIMARY;
+	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhWebMenusRecord> KEY_EH_WEB_MENUS_PRIMARY = UniqueKeys0.KEY_EH_WEB_MENUS_PRIMARY;
+	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhWebMenuPrivilegesRecord> KEY_EH_WEB_MENU_PRIVILEGES_PRIMARY = UniqueKeys0.KEY_EH_WEB_MENU_PRIVILEGES_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhYellowPagesRecord> KEY_EH_YELLOW_PAGES_PRIMARY = UniqueKeys0.KEY_EH_YELLOW_PAGES_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhYellowPageAttachmentsRecord> KEY_EH_YELLOW_PAGE_ATTACHMENTS_PRIMARY = UniqueKeys0.KEY_EH_YELLOW_PAGE_ATTACHMENTS_PRIMARY;
 
@@ -589,6 +591,8 @@ public class Keys {
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhVersionUrlsRecord> KEY_EH_VERSION_URLS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS, com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhVersionUrlsRecord> KEY_EH_VERSION_URLS_U_EH_VER_URL = createUniqueKey(com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS, com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS.REALM_ID, com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS.TARGET_VERSION);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhWarningContactsRecord> KEY_EH_WARNING_CONTACTS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhWarningContacts.EH_WARNING_CONTACTS, com.everhomes.server.schema.tables.EhWarningContacts.EH_WARNING_CONTACTS.ID);
+		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhWebMenusRecord> KEY_EH_WEB_MENUS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhWebMenus.EH_WEB_MENUS, com.everhomes.server.schema.tables.EhWebMenus.EH_WEB_MENUS.ID);
+		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhWebMenuPrivilegesRecord> KEY_EH_WEB_MENU_PRIVILEGES_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhWebMenuPrivileges.EH_WEB_MENU_PRIVILEGES, com.everhomes.server.schema.tables.EhWebMenuPrivileges.EH_WEB_MENU_PRIVILEGES.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhYellowPagesRecord> KEY_EH_YELLOW_PAGES_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhYellowPages.EH_YELLOW_PAGES, com.everhomes.server.schema.tables.EhYellowPages.EH_YELLOW_PAGES.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhYellowPageAttachmentsRecord> KEY_EH_YELLOW_PAGE_ATTACHMENTS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhYellowPageAttachments.EH_YELLOW_PAGE_ATTACHMENTS, com.everhomes.server.schema.tables.EhYellowPageAttachments.EH_YELLOW_PAGE_ATTACHMENTS.ID);
 	}
