@@ -20,6 +20,8 @@ CREATE TABLE `eh_web_menus`(
 `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 2: active', 
 `path` VARCHAR(64), 
 `type` VARCHAR(64) NOT NULL DEFAULT 'zuolin' COMMENT 'zuolin, park', 
+`sort_num` INT COMMENT 'sort number', 
+
 PRIMARY KEY (`id`) 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4; 
 
@@ -35,5 +37,6 @@ CREATE TABLE `eh_web_menu_privileges`(
 `show_flag` TINYINT NOT NULL DEFAULT 1 COMMENT '0: Not related menu display, 1: Associated menu display', 
 `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive, 1: active', 
 `discription` VARCHAR(128), 
+`sort_num` INT COMMENT 'sort number',
 PRIMARY KEY (`id`) 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4; 
