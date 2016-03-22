@@ -624,12 +624,11 @@ public class VideoConfServiceImpl implements VideoConfService {
 		accountDto.setStatus(account.getStatus());
 		accountDto.setValidDate(account.getExpiredDate());
 		
-
 		accountDto.setOccupyAccountId(account.getOccupyAccountId());
-		if(account.getOccupyAccountId() != null) {
+		if(account.getOccupyAccountId() != null && account.getOccupyFlag() == 1) {
 			accountDto.setOccupyFlag((byte) 1);
 			accountDto.setConfId(account.getConfId());
-			ConfAccounts occupyAccount = vcProvider.findAccountByAssignedSourceId(account.getOccupyAccountId());
+			ConfAccounts occupyAccount = vcProvider.findVideoconfAccountById(account.getOccupyAccountId());
 			if(occupyAccount != null && occupyAccount.getOwnerId() != null && occupyAccount.getOwnerId() != 0) {
 				UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(occupyAccount.getOwnerId(), IdentifierType.MOBILE.getCode());
 				if(identifier != null)
