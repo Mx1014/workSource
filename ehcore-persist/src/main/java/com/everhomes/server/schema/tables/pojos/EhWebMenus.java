@@ -11,30 +11,32 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhWebMenus implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1333532565;
+	private static final long serialVersionUID = 393407001;
 
-	private java.lang.Long   id;
-	private java.lang.String name;
-	private java.lang.Long   parentId;
-	private java.lang.String iconUrl;
-	private java.lang.String dataType;
-	private java.lang.Byte   leafFlag;
-	private java.lang.Byte   status;
-	private java.lang.String path;
-	private java.lang.String type;
+	private java.lang.Long    id;
+	private java.lang.String  name;
+	private java.lang.Long    parentId;
+	private java.lang.String  iconUrl;
+	private java.lang.String  dataType;
+	private java.lang.Byte    leafFlag;
+	private java.lang.Byte    status;
+	private java.lang.String  path;
+	private java.lang.String  type;
+	private java.lang.Integer sortNum;
 
 	public EhWebMenus() {}
 
 	public EhWebMenus(
-		java.lang.Long   id,
-		java.lang.String name,
-		java.lang.Long   parentId,
-		java.lang.String iconUrl,
-		java.lang.String dataType,
-		java.lang.Byte   leafFlag,
-		java.lang.Byte   status,
-		java.lang.String path,
-		java.lang.String type
+		java.lang.Long    id,
+		java.lang.String  name,
+		java.lang.Long    parentId,
+		java.lang.String  iconUrl,
+		java.lang.String  dataType,
+		java.lang.Byte    leafFlag,
+		java.lang.Byte    status,
+		java.lang.String  path,
+		java.lang.String  type,
+		java.lang.Integer sortNum
 	) {
 		this.id = id;
 		this.name = name;
@@ -45,6 +47,7 @@ public class EhWebMenus implements java.io.Serializable {
 		this.status = status;
 		this.path = path;
 		this.type = type;
+		this.sortNum = sortNum;
 	}
 
 	public java.lang.Long getId() {
@@ -117,5 +120,13 @@ public class EhWebMenus implements java.io.Serializable {
 
 	public void setType(java.lang.String type) {
 		this.type = type;
+	}
+
+	public java.lang.Integer getSortNum() {
+		return this.sortNum;
+	}
+
+	public void setSortNum(java.lang.Integer sortNum) {
+		this.sortNum = sortNum;
 	}
 }

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhWebMenus extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhWebMenusRecord> {
 
-	private static final long serialVersionUID = 2034687589;
+	private static final long serialVersionUID = -1408270587;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_web_menus</code>
@@ -70,6 +70,11 @@ public class EhWebMenus extends org.jooq.impl.TableImpl<com.everhomes.server.sch
 	 * The column <code>ehcore.eh_web_menus.type</code>. zuolin, park
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhWebMenusRecord, java.lang.String> TYPE = createField("type", org.jooq.impl.SQLDataType.VARCHAR.length(64).nullable(false).defaulted(true), this, "zuolin, park");
+
+	/**
+	 * The column <code>ehcore.eh_web_menus.sort_num</code>. sort number
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhWebMenusRecord, java.lang.Integer> SORT_NUM = createField("sort_num", org.jooq.impl.SQLDataType.INTEGER, this, "sort number");
 
 	/**
 	 * Create a <code>ehcore.eh_web_menus</code> table reference

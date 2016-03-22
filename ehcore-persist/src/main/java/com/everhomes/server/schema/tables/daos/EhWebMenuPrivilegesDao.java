@@ -88,4 +88,11 @@ public class EhWebMenuPrivilegesDao extends org.jooq.impl.DAOImpl<com.everhomes.
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhWebMenuPrivileges> fetchByDiscription(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhWebMenuPrivileges.EH_WEB_MENU_PRIVILEGES.DISCRIPTION, values);
 	}
+
+	/**
+	 * Fetch records that have <code>sort_num IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhWebMenuPrivileges> fetchBySortNum(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhWebMenuPrivileges.EH_WEB_MENU_PRIVILEGES.SORT_NUM, values);
+	}
 }

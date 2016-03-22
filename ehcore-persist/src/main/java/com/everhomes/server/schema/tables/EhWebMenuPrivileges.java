@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhWebMenuPrivileges extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhWebMenuPrivilegesRecord> {
 
-	private static final long serialVersionUID = -1663815629;
+	private static final long serialVersionUID = 1061665456;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_web_menu_privileges</code>
@@ -60,6 +60,11 @@ public class EhWebMenuPrivileges extends org.jooq.impl.TableImpl<com.everhomes.s
 	 * The column <code>ehcore.eh_web_menu_privileges.discription</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhWebMenuPrivilegesRecord, java.lang.String> DISCRIPTION = createField("discription", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_web_menu_privileges.sort_num</code>. sort number
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhWebMenuPrivilegesRecord, java.lang.Integer> SORT_NUM = createField("sort_num", org.jooq.impl.SQLDataType.INTEGER, this, "sort number");
 
 	/**
 	 * Create a <code>ehcore.eh_web_menu_privileges</code> table reference

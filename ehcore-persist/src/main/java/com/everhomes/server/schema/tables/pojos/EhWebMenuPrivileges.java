@@ -11,26 +11,28 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhWebMenuPrivileges implements java.io.Serializable {
 
-	private static final long serialVersionUID = 824928208;
+	private static final long serialVersionUID = 1209539530;
 
-	private java.lang.Long   id;
-	private java.lang.Long   privilegeId;
-	private java.lang.Long   menuId;
-	private java.lang.String name;
-	private java.lang.Byte   showFlag;
-	private java.lang.Byte   status;
-	private java.lang.String discription;
+	private java.lang.Long    id;
+	private java.lang.Long    privilegeId;
+	private java.lang.Long    menuId;
+	private java.lang.String  name;
+	private java.lang.Byte    showFlag;
+	private java.lang.Byte    status;
+	private java.lang.String  discription;
+	private java.lang.Integer sortNum;
 
 	public EhWebMenuPrivileges() {}
 
 	public EhWebMenuPrivileges(
-		java.lang.Long   id,
-		java.lang.Long   privilegeId,
-		java.lang.Long   menuId,
-		java.lang.String name,
-		java.lang.Byte   showFlag,
-		java.lang.Byte   status,
-		java.lang.String discription
+		java.lang.Long    id,
+		java.lang.Long    privilegeId,
+		java.lang.Long    menuId,
+		java.lang.String  name,
+		java.lang.Byte    showFlag,
+		java.lang.Byte    status,
+		java.lang.String  discription,
+		java.lang.Integer sortNum
 	) {
 		this.id = id;
 		this.privilegeId = privilegeId;
@@ -39,6 +41,7 @@ public class EhWebMenuPrivileges implements java.io.Serializable {
 		this.showFlag = showFlag;
 		this.status = status;
 		this.discription = discription;
+		this.sortNum = sortNum;
 	}
 
 	public java.lang.Long getId() {
@@ -95,5 +98,13 @@ public class EhWebMenuPrivileges implements java.io.Serializable {
 
 	public void setDiscription(java.lang.String discription) {
 		this.discription = discription;
+	}
+
+	public java.lang.Integer getSortNum() {
+		return this.sortNum;
+	}
+
+	public void setSortNum(java.lang.Integer sortNum) {
+		this.sortNum = sortNum;
 	}
 }

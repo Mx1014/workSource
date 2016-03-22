@@ -102,4 +102,11 @@ public class EhWebMenusDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sc
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhWebMenus> fetchByType(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhWebMenus.EH_WEB_MENUS.TYPE, values);
 	}
+
+	/**
+	 * Fetch records that have <code>sort_num IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhWebMenus> fetchBySortNum(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhWebMenus.EH_WEB_MENUS.SORT_NUM, values);
+	}
 }
