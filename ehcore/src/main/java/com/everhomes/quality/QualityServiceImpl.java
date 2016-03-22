@@ -968,14 +968,19 @@ public class QualityServiceImpl implements QualityService {
 //		`group_name` VARCHAR(64),
 //		`score` DOUBLE NOT NULL DEFAULT 0,
 		
-		
 		List<QualityInspectionTasks> closedTask = qualityProvider.listClosedTask();
 		
-		closedTask.stream().map((r) -> {
-			QualityInspectionEvaluations evaluation = new QualityInspectionEvaluations();
-			qualityProvider.createQualityInspectionEvaluations(evaluation);
-			return r;
-		});
+//		Map<Long, QualityInspectionEvaluations> map = closedTask.stream().map((r) -> {
+//			QualityInspectionEvaluations evaluation = new QualityInspectionEvaluations();
+//			evaluation.setOwnerType(ownerType);
+//			evaluation.setOwnerId(ownerId);
+//			evaluation.setDateStr(dateStr);
+//			evaluation.setGroupId(groupId);
+//			evaluation.setGroupName(groupName);
+//			evaluation.setScore(score);
+//			qualityProvider.createQualityInspectionEvaluations(evaluation);
+//			return r;
+//		}).collect(Collectors.toMap(Long, QualityInspectionEvaluations));
 		
 	}
 
