@@ -606,7 +606,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 			
 			if(accounts != null && accounts.size() > pageSize) {
 				accounts.remove(accounts.size() - 1);
-				response.setNextPageOffset(cmd.getPageOffset() + 1);
+				response.setNextPageOffset(offset + 1);
 			}
 			
 			response.setSourceAccounts(accounts);
