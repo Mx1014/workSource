@@ -2,8 +2,6 @@
 package com.everhomes.business;
 
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -617,18 +615,14 @@ public class BusinessServiceImpl implements BusinessService {
 			LOGGER.error("Buiness detail url  is empty.");
 		if(business.getTargetType() == BusinessTargetType.ZUOLIN.getCode()){
 			String businessDetailUrl = null;
-			try {
-				if(detailUrl.contains("#sign_suffix")){
-					detailUrl = detailUrl.trim();
-					String prefix = detailUrl.substring(0,detailUrl.indexOf("#sign_suffix"));
-					String suffix = detailUrl.substring(detailUrl.indexOf("#sign_suffix"));
-					businessDetailUrl = URLEncoder.encode(prefix+business.getTargetId(), "utf-8")+suffix;
-				}
-				else
-					businessDetailUrl = URLEncoder.encode(detailUrl.trim() + business.getTargetId(), "utf-8");
-			} catch (UnsupportedEncodingException e) {
-				LOGGER.error("unsported encoding.");
+			if(detailUrl.contains("#sign_suffix")){
+				detailUrl = detailUrl.trim();
+				String prefix = detailUrl.substring(0,detailUrl.indexOf("#sign_suffix"));
+				String suffix = detailUrl.substring(detailUrl.indexOf("#sign_suffix"));
+				businessDetailUrl = prefix+business.getTargetId()+suffix;
 			}
+			else
+				businessDetailUrl = detailUrl.trim() + business.getTargetId();
 			return authenticatePrefix.trim() + businessDetailUrl;
 		}
 

@@ -2,6 +2,7 @@ package com.everhomes.openapi;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
@@ -59,6 +60,7 @@ import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
@@ -435,6 +437,11 @@ public class BusinessOpenController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
+	}
+	
+	public static void main(String[] args) {
+		System.out.println(UUID.randomUUID());
+		System.out.println(SignatureHelper.generateSecretKey());
 	}
 
 }

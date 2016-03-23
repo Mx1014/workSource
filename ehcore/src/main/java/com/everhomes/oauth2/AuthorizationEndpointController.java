@@ -55,15 +55,13 @@ import com.google.gson.reflect.TypeToken;
 @RequestMapping("/oauth2")
 public class AuthorizationEndpointController extends OAuth2ControllerBase {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AuthorizationEndpointController.class);
+	private static final String ZUOLIN_APP_KEY = "zuolin.appKey";
 
 	@Autowired
 	private AppProvider appProvider;
 
 	@Autowired
 	private LocaleStringService localeStringService;
-
-	@Autowired
-	private AccessTokenManager accessTokenManager;
 
 	@Autowired
 	private ConfigurationProvider configurationProvider;
@@ -198,225 +196,142 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 	}
 
 	@RequireAuthentication(false)
-	@RequestMapping("innerlogin")
-	public Object innerlogin(
+	@RequestMapping("signLogon")
+	public Object signLogon(
 			@RequestParam(value="sourceUrl", required = true) String sourceUrl,
 			@RequestParam(value="signature", required = false) String signature,
-			@RequestParam(value="id", required = false) String id,
+			@RequestParam(value="id", required = false) Long id,
 			@RequestParam(value="name", required = false) String name,
 			@RequestParam(value="appKey", required = false) String appKey,
-			@RequestParam(value="timeStamp", required = false) String timeStamp,
-			@RequestParam(value="randomNum", required = false) String randomNum,
-			@RequestParam(value="communityId", required = false) String communityId,
-			HttpServletRequest httpRequest, HttpServletResponse httpResponse, Model model) throws URISyntaxException {
-		HttpSession session = httpRequest.getSession();
-		session.setAttribute("sourceUrl", sourceUrl);
-		String homeUrl = configurationProvider.getValue("home.url", "https://core.zuolin.com");
-
-		if(!StringUtils.isEmpty(signature)){//新授权
-			session.setAttribute("id", id);
-			session.setAttribute("name", name);
-			session.setAttribute("signature", signature);
-			session.setAttribute("appKey", appKey);
-			session.setAttribute("timeStamp", timeStamp);
-			session.setAttribute("randomNum", randomNum);
-			session.setAttribute("communityId", communityId);
-			String url =  homeUrl+"/evh/oauth2/resultBySign";
-			HttpHeaders httpHeaders = new HttpHeaders();
-			httpHeaders.setLocation(new URI(url));
-			return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
-		}else{//旧授权
-			User user = UserContext.current().getUser();
-			if(user==null||user.getId()==User.ANNONYMOUS_UID){
-				String url =  homeUrl+"/evh/oauth2/oauth";
-				HttpHeaders httpHeaders = new HttpHeaders();
-				httpHeaders.setLocation(new URI(url));
-				return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
-			}else{
-				String url =  homeUrl+"/evh/oauth2/result";
-				HttpHeaders httpHeaders = new HttpHeaders();
-				httpHeaders.setLocation(new URI(url));
-				return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+			@RequestParam(value="timeStamp", required = false) Long timeStamp,
+			@RequestParam(value="randomNum", required = false) Integer randomNum,
+			@RequestParam(value="communityId", required = false) Long communityId,
+			HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws Exception {
+		User user = UserContext.current().getUser();
+		if(user==null||user.getId()==User.ANNONYMOUS_UID){
+			UserInfo userInfo = getBizUserInfo(signature,appKey,String.valueOf(id),name,String.valueOf(randomNum),String.valueOf(timeStamp));
+			if(userInfo==null){
+				LOGGER.error("userInfo don't get.id="+id);
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "userInfo don't get");
 			}
+			String deviceIdentifier = DeviceIdentifierType.INNER_LOGIN.name();
+			String pusherIdentify = null;
+			UserLogin login = this.userService.innerLogin(userInfo.getNamespaceId(), userInfo.getId(), deviceIdentifier, pusherIdentify);
+			LoginToken logintoken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber());
+			String tokenString = WebTokenGenerator.getInstance().toWebToken(logintoken);
+			setCookieInResponse("token", tokenString, httpRequest, httpResponse);
 		}
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.setLocation(new URI(sourceUrl));
+		return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
 	}
 
 	@RequireAuthentication(false)
-	@RequestMapping("oauth")
-	public Object oauth(HttpServletRequest httpRequest,HttpServletRequest request,HttpServletResponse httpResponse, Model model) throws Exception {
-		String state = request.getSession().getId();
-		HttpSession session = request.getSession();
-		String sourceUrl = (String) session.getAttribute("sourceUrl");
-		if(sourceUrl!=null&&!sourceUrl.equals("")){
-			request.getSession().setAttribute("sourceUrl", sourceUrl);
-		}
-
-		String homeUrl = configurationProvider.getValue("home.url", "https://core.zuolin.com");
-		String appKey = configurationProvider.getValue("biz.appKey", "d80e06ca-3766-11e5-b18f-b083fe4e159f");
-
-		if(accessTokenManager.getAccessToken(state) == null) {
+	@RequestMapping("oauth2Logon")
+	public Object oauth2Logon(@RequestParam(value="sourceUrl", required = true) String sourceUrl,
+			HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws Exception {
+		User user = UserContext.current().getUser();
+		if(user==null||user.getId()==User.ANNONYMOUS_UID){
+			HttpSession session = httpRequest.getSession();
+			String state = session.getId();
+			if(sourceUrl!=null&&!sourceUrl.equals("")){
+				session.setAttribute("sourceUrl", sourceUrl);
+			}
+			String homeUrl = configurationProvider.getValue("home.url", "https://core.zuolin.com");
+			String appKey = configurationProvider.getValue(ZUOLIN_APP_KEY, "f9392ce2-341b-40c1-9c2c-99c702215535");
 			String oauthUri = homeUrl+"/evh/oauth2/authorize";
-			String gettokenUri = homeUrl+"/evh/oauth2/gettoken";
-			String uri;
-			uri = String.format("%s?response_type=code&client_id=%s&redirect_uri=%s&scope=basic&state=%s#oauth2_redirect",
+			String redirectUri = homeUrl+"/evh/oauth2/redirectUri";
+			String uri = String.format("%s?response_type=code&client_id=%s&redirect_uri=%s&scope=basic&state=%s#oauth2_redirect",
 					oauthUri,
 					appKey,
-					URLEncoder.encode(gettokenUri, "UTF-8"),
+					URLEncoder.encode(redirectUri, "UTF-8"),
 					state
 					);
 			HttpHeaders httpHeaders = new HttpHeaders();
 			httpHeaders.setLocation(new URI(uri));
 			return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
-		}else{
-			String resultUri = homeUrl+"/evh/oauth2/result";
-			HttpHeaders httpHeaders = new HttpHeaders();
-			httpHeaders.setLocation(new URI(resultUri));
-			return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
-		}	
+		}
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.setLocation(new URI(sourceUrl));
+		return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
 	}
+
 	@RequireAuthentication(false)
-	@RequestMapping("gettoken")
-	public Object gettoken(HttpServletRequest request, HttpServletResponse httpResponse, Model model) throws Exception {
-		String code = request.getParameter("code");
-		String state = request.getParameter("state");
+	@RequestMapping("redirectUri")
+	public Object redirectUri(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws Exception {
+		String code = httpRequest.getParameter("code");
+		String state = httpRequest.getParameter("state");
 		String homeUrl = configurationProvider.getValue("home.url", "https://core.zuolin.com");
+		String redirectUri = homeUrl+"/evh/oauth2/redirectUri";
 		String tokenUri = homeUrl+"/evh/oauth2/token";
-		String gettokenUri = homeUrl+"/evh/oauth2/gettoken";
-		String appKey = configurationProvider.getValue("biz.appKey", "d80e06ca-3766-11e5-b18f-b083fe4e159f");
+		String userInfoUri = homeUrl+"/evh/oauth2api/getUserInfo";
+		String appKey = configurationProvider.getValue(ZUOLIN_APP_KEY, "f9392ce2-341b-40c1-9c2c-99c702215535");
 		App app = appProvider.findAppByKey(appKey);
 		if(app==null){
 			LOGGER.error("app nou found.appKey="+appKey);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"app nou found");
 		}
-
+		//get token
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("grant_type", "authorization_code");
 		params.put("code", code);
-		params.put("redirect_uri", gettokenUri);
+		params.put("redirect_uri", redirectUri);
 		params.put("client_id", appKey);
 		String credential = String.format("%s:%s", appKey, app.getSecretKey());
-
 		Clients client = new Clients();
-		String responseString = client.restCall("POST", tokenUri, params, "Authorization", String.format("Basic %s", Base64.encodeBase64String(credential.getBytes("UTF-8"))));
-		OAuth2AccessTokenResponse tokenResponse = (OAuth2AccessTokenResponse) StringHelper.fromJsonString(responseString, OAuth2AccessTokenResponse.class);
-		accessTokenManager.setAccessToken(state, tokenResponse.getAccess_token());
-
-		String url =  homeUrl+"/evh/oauth2/result";
-		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.setLocation(new URI(url));
-		return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
-	}
-
-	@RequireAuthentication(false)
-	@RequestMapping("result")
-	public Object result(HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
-		HttpSession session = request.getSession();
-
-		User user = UserContext.current().getUser();
-		if(user==null||user.getId()==User.ANNONYMOUS_UID){
-			String sessionId = request.getSession().getId();
-			String token = this.accessTokenManager.getAccessToken(sessionId);
-			String homeUrl = configurationProvider.getValue("home.url", "https://core.zuolin.com");
-			String uri = homeUrl+"/evh/oauth2api/getUserInfo";
-			String gettokenUri = homeUrl+"/evh/oauth2/gettoken";
-			if(token==null){
-				HttpHeaders httpHeaders = new HttpHeaders();
-				httpHeaders.setLocation(new URI(gettokenUri));
-				return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
-			}
-
-			Clients client = new Clients();
-			String responseString = client.restCall("GET", uri, null, "Authorization", String.format("Bearer %s", Base64.encodeBase64String(token.getBytes("UTF-8"))));
-			Gson gson = new Gson();
-			CommonRestResponse<UserInfo> userInfoRestResponse = gson.fromJson(responseString, new TypeToken<CommonRestResponse<UserInfo>>(){}.getType());
-			UserInfo userInfo = (UserInfo) userInfoRestResponse.getResponse();
-			if(userInfo!=null){
-				String deviceIdentifier = DeviceIdentifierType.INNER_LOGIN.name();
-				String pusherIdentify = null;
-				UserLogin login = this.userService.innerLogin(userInfo.getNamespaceId(), userInfo.getId(), deviceIdentifier, pusherIdentify);
-				LoginToken logintoken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber());
-				String tokenString = WebTokenGenerator.getInstance().toWebToken(logintoken);
-				setCookieInResponse("token", tokenString, request, response);
-			}
+		String tokenResponseString = client.restCall("POST", tokenUri, params, "Authorization", String.format("Basic %s", Base64.encodeBase64String(credential.getBytes("UTF-8"))));
+		OAuth2AccessTokenResponse tokenResponse = (OAuth2AccessTokenResponse) StringHelper.fromJsonString(tokenResponseString, OAuth2AccessTokenResponse.class);
+		String token = tokenResponse.getAccess_token();
+		//get user info
+		String userInfoResponseString = client.restCall("GET", userInfoUri, null, "Authorization", String.format("Bearer %s", Base64.encodeBase64String(token.getBytes("UTF-8"))));
+		Gson gson = new Gson();
+		CommonRestResponse<UserInfo> userInfoRestResponse = gson.fromJson(userInfoResponseString, new TypeToken<CommonRestResponse<UserInfo>>(){}.getType());
+		UserInfo userInfo = (UserInfo) userInfoRestResponse.getResponse();
+		if(userInfo==null){
+			LOGGER.error("get user info error.token="+token);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"get user info error.");
 		}
+		String deviceIdentifier = DeviceIdentifierType.INNER_LOGIN.name();
+		String pusherIdentify = null;
+		UserLogin login = this.userService.innerLogin(userInfo.getNamespaceId(), userInfo.getId(), deviceIdentifier, pusherIdentify);
+		LoginToken logintoken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber());
+		String tokenString = WebTokenGenerator.getInstance().toWebToken(logintoken);
+		setCookieInResponse("token", tokenString, httpRequest, httpResponse);
+		//返回sourceUrl
+		HttpSession session = httpRequest.getSession();
 		String sourceUrl = (String) session.getAttribute("sourceUrl");
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.setLocation(new URI(sourceUrl));
 		return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
 	}
-	
-	@RequireAuthentication(false)
-	@RequestMapping("resultBySign")
-	public Object resultBySign(HttpServletRequest request, HttpServletResponse response, Model model) throws Exception {
-		HttpSession session = request.getSession();
-		String signature = (String) session.getAttribute("signature");
-		User user = UserContext.current().getUser();
-		if(user==null||user.getId()==User.ANNONYMOUS_UID){
-			if(!StringUtils.isEmpty(signature)){
-				String id = (String) session.getAttribute("id");
-				String name = (String) session.getAttribute("name");
-				String appKey = (String) session.getAttribute("appKey");
-				String timeStamp = (String) session.getAttribute("timeStamp");
-				String randomNum = (String) session.getAttribute("randomNum");
-				
-				App app = appProvider.findAppByKey(appKey);
-				if(app==null){
-					LOGGER.error("app nou found.appKey="+appKey);
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"app nou found");
-				}
 
-				Map<String,String> map = new HashMap<String, String>();
-				map.put("id", id);
-				map.put("name", name);
-				map.put("appKey", appKey);
-				map.put("timeStamp", timeStamp);
-				map.put("randomNum", randomNum);
-				String nsignature = SignatureHelper.computeSignature(map, app.getSecretKey());
-
-				if(nsignature.equals(signature)){
-					UserInfo userInfo = this.getBizUserInfo(id);
-					if(userInfo!=null){
-						String deviceIdentifier = DeviceIdentifierType.INNER_LOGIN.name();
-						String pusherIdentify = null;
-						UserLogin login = this.userService.innerLogin(userInfo.getNamespaceId(), userInfo.getId(), deviceIdentifier, pusherIdentify);
-						LoginToken logintoken = new LoginToken(login.getUserId(), login.getLoginId(), login.getLoginInstanceNumber());
-						String tokenString = WebTokenGenerator.getInstance().toWebToken(logintoken);
-						setCookieInResponse("token", tokenString, request, response);
-					}
-					String sourceUrl = (String) session.getAttribute("sourceUrl");
-					HttpHeaders httpHeaders = new HttpHeaders();
-					httpHeaders.setLocation(new URI(sourceUrl));
-					return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
-				}
-				else{
-					LOGGER.error("signature fail.signature="+signature+",nsignature="+nsignature+",id="+id+",name="+name+",appKey="+appKey+",timeStamp="+timeStamp+",randomNum="+randomNum);
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"signature fail");
-				}
-			}
-		}
-		String sourceUrl = (String) session.getAttribute("sourceUrl");
-		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.setLocation(new URI(sourceUrl));
-		return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
-	}
-	
-	private UserInfo getBizUserInfo(String memberNo) {
+	private UserInfo getBizUserInfo(String zlSignature,String zlAppKey,String id,String name,String randomNum,String timeStamp) {
 		try{
 			String homeUrl = configurationProvider.getValue("home.url", "https://core.zuolin.com");
 			String getUserInfoUri = homeUrl+"/evh/openapi/getUserInfoById";
-			String appKey = configurationProvider.getValue("biz.appKey", "d80e06ca-3766-11e5-b18f-b083fe4e159f");
+			String appKey = configurationProvider.getValue(ZUOLIN_APP_KEY, "f9392ce2-341b-40c1-9c2c-99c702215535");
 			App app = appProvider.findAppByKey(appKey);
 			if(app==null){
 				LOGGER.error("app nou found.appKey="+appKey);
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,"app nou found");
 			}
-			
+
 			Map<String,String> params = new HashMap<String, String>();
 			params.put("appKey", appKey);
-			params.put("id", memberNo);
-			String signature = SignatureHelper.computeSignature(params, app.getSecretKey());
+			params.put("zlAppKey", zlAppKey);
+			params.put("zlSignature", zlSignature);
+			params.put("id", id);
+			params.put("name", name);
+			params.put("randomNum", randomNum);
+			params.put("timeStamp", timeStamp);
+			String nsignature = SignatureHelper.computeSignature(params, app.getSecretKey());
 
-			String param = String.format("%s?id=%s&appKey=%s&signature=%s",getUserInfoUri, memberNo,appKey,URLEncoder.encode(signature));
+			String param = String.format("%s?zlSignature=%s&zlAppKey=%s&id=%s&name=%s&randomNum=%s&timeStamp=%s&appKey=%s&signature=%s",
+					getUserInfoUri,
+					URLEncoder.encode(zlSignature,"UTF-8"),zlAppKey,
+					id,URLEncoder.encode(name,"UTF-8"),
+					randomNum,timeStamp,
+					appKey,URLEncoder.encode(nsignature,"UTF-8"));
 			Clients ci = new Clients();
 			String responseString = ci.restCall("GET", param, null, null, null);
 			if(responseString!=null){
@@ -428,9 +343,9 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 			return null;
 		}
 		catch(Exception e){
+			LOGGER.error("getUserInfo method error.e="+e.getMessage());
 			return null;
 		}
-
 	}
 
 	private static void setCookieInResponse(String name, String value, HttpServletRequest request,
