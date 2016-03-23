@@ -76,9 +76,10 @@ public class AclinkUtils {
         return cipherData;
     }
     
-    public static String packInitServerKey(String rsaAclinkPub, String aesKey, String aesIv, String devName, Long time, String uuid) {
+    //DoorMessage is just for debug!!!, and should be removed later.
+    public static String packInitServerKey(String rsaAclinkPub, String aesKey, String aesIv, String devName, Long time, String uuid, DoorMessage doorMessage) {
         String pub = StringHelper.toHexString(Base64.decodeBase64(rsaAclinkPub));
-        byte[] result = CmdUtil.initServerKeyCmd((byte)0, pub, devName, (int)(time.longValue()/1000), uuid.getBytes(), Base64.decodeBase64(aesKey), Base64.decodeBase64(aesIv));
+        byte[] result = CmdUtil.initServerKeyCmd((byte)0, pub, devName, (int)(time.longValue()/1000), uuid.getBytes(), Base64.decodeBase64(aesKey), Base64.decodeBase64(aesIv), doorMessage);
         return Base64.encodeBase64String(result);
     }
     

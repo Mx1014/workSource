@@ -3,6 +3,7 @@ package com.everhomes.aclink;
 import java.util.Arrays;
 import java.util.Random;
 
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +53,7 @@ public class CmdUtil {
         return resultArray;
     }
 
-    public static byte[] initServerKeyCmd(byte ver, String pubKey, String devName, int time, byte[] uuidBytes, byte[] serverKeyBytes, byte[] aesIvBytes) {
+    public static byte[] initServerKeyCmd(byte ver, String pubKey, String devName, int time, byte[] uuidBytes, byte[] serverKeyBytes, byte[] aesIvBytes, DoorMessage doorMessage) {
         /**
          * serverKey:16B
          * devName:6B
@@ -89,6 +90,9 @@ public class CmdUtil {
             resultArray[startPosition + i] = uuidBytes[i];
         }
         try {
+            //Just for debug info
+            doorMessage.setExtra(Base64.encodeBase64String(resultArray));
+            
             byte[] encryptData = RSAUtil.encryptByRawPublicKey(resultArray, pubKey);
             byte[] headArr = {cmd, ver};
             resultArray = DataUtil.mergeArray(headArr, encryptData);

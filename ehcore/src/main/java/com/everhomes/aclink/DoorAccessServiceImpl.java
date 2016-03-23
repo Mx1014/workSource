@@ -491,6 +491,14 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             public DoorAccess doInTransaction(TransactionStatus arg0) {
                 DoorAccess doorAcc = doorAccessProvider.queryDoorAccessByHardwareId(cmd.getHardwareId());
                 if(doorAcc != null) {
+                    doorAcc.setName(cmd.getName());
+                    doorAcc.setDescription(cmd.getDescription());
+                    doorAcc.setAddress(cmd.getAddress());
+                    doorAcc.setCreatorUserId(user.getId());
+                    doorAcc.setActiveUserId(user.getId());
+                    doorAcc.setOwnerId(cmd.getOwnerId());
+                    doorAcc.setOwnerType(cmd.getOwnerType());
+                    doorAccessProvider.updateDoorAccess(doorAcc);
                     return doorAcc;
                     }
                 
@@ -557,12 +565,13 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_ACTIVING_FAILED, "Door Activing failed");
         }
         
+        DoorMessage doorMessage = new DoorMessage();
+        
         //Generate a single message
         AesServerKey aesServerKey = aesServerKeyService.getCurrentAesServerKey(doorAccess.getId());
         String message = AclinkUtils.packInitServerKey(cmd.getRsaAclinkPub(), aesServerKey.getSecret(), doorAccess.getAesIv(), "ZLTODO",
-                doorAccess.getCreateTime().getTime(), doorAccess.getUuid());
+                doorAccess.getCreateTime().getTime(), doorAccess.getUuid(), doorMessage);
         
-        DoorMessage doorMessage = new DoorMessage();
         doorMessage.setDoorId(doorAccess.getId());
         doorMessage.setMessageType(DoorMessageType.NORMAL.getCode());
         AclinkMessage acMsg = new AclinkMessage();
