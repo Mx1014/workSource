@@ -11,9 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.validation.Valid;
-
-import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -44,7 +41,6 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.family.Family;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupDiscriminator;
@@ -59,7 +55,6 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
-import com.everhomes.rest.point.PointType;
 import com.everhomes.point.UserPointService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
@@ -89,6 +84,7 @@ import com.everhomes.rest.forum.LikeTopicCommand;
 import com.everhomes.rest.forum.ListActivityTopicByCategoryAndTagCommand;
 import com.everhomes.rest.forum.ListPostCommandResponse;
 import com.everhomes.rest.forum.ListTopicAssignedScopeCommand;
+import com.everhomes.rest.forum.ListTopicByForumCommand;
 import com.everhomes.rest.forum.ListTopicCommand;
 import com.everhomes.rest.forum.ListTopicCommentCommand;
 import com.everhomes.rest.forum.ListUserRelatedTopicCommand;
@@ -111,7 +107,6 @@ import com.everhomes.rest.forum.admin.PostAdminDTO;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommand;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommandResponse;
 import com.everhomes.rest.group.GroupDTO;
-import com.everhomes.rest.group.GroupNotificationTemplateCode;
 import com.everhomes.rest.group.GroupPrivacy;
 import com.everhomes.rest.group.ListPublicGroupCommand;
 import com.everhomes.rest.messaging.MessageBodyType;
@@ -121,6 +116,7 @@ import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.point.AddUserPointCommand;
+import com.everhomes.rest.point.PointType;
 import com.everhomes.rest.ui.forum.GetTopicQueryFilterCommand;
 import com.everhomes.rest.ui.forum.GetTopicSentScopeCommand;
 import com.everhomes.rest.ui.forum.NewTopicBySceneCommand;
@@ -140,7 +136,6 @@ import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhUsers;
-import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
@@ -155,7 +150,6 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
-import com.everhomes.util.Tuple;
 import com.everhomes.util.WebTokenGenerator;
 
 @Component
@@ -3524,8 +3518,7 @@ public class ForumServiceImpl implements ForumService {
             String sceneToken = WebTokenGenerator.getInstance().toWebToken(sceneTokenDto);
             String menuName = null;
             String scope = ForumLocalStringCode.SCOPE;
-            String code = "";
-            String actionUrl = null;            
+            String code = "";      
             long menuId = 1;
             
             // 菜单：公司圈
@@ -3606,5 +3599,50 @@ public class ForumServiceImpl implements ForumService {
         }
         
         return sentScopeList;
+    }    
+    
+    @Override
+    public ListPostCommandResponse listTopicsByForums(ListTopicByForumCommand cmd) {
+        User user = UserContext.current().getUser();
+        Long userId = user.getId();
+        Long communityId = cmd.getCommunityId();
+        
+        List<Long> forumIdList = cmd.getForumIdList();
+        if(forumIdList.size() > 0) {
+            CrossShardListingLocator[] locators = new CrossShardListingLocator[forumIdList.size()];
+            for(int i = 0; i < forumIdList.size(); i++) {
+                Long forumId = forumIdList.get(i);
+                locators[i] = new CrossShardListingLocator(forumId);
+                locators[i].setAnchor(cmd.getPageAnchor());
+            }
+            
+            List<Post> posts = forumProvider.queryPosts(locators, 10000, cmd.getPageSize(), (loc, query) -> {
+                query.addJoin(Tables.EH_FORUM_ASSIGNED_SCOPES, JoinType.LEFT_OUTER_JOIN, 
+                    Tables.EH_FORUM_ASSIGNED_SCOPES.OWNER_ID.eq(Tables.EH_FORUM_POSTS.ID));
+                query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
+                query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+                
+                return query;
+            }, new PostCreateTimeDescComparator());
+            
+            this.forumProvider.populatePostAttachments(posts);
+            
+            Long nextPageAnchor = null;
+            if(posts.size() > cmd.getPageSize()) {
+                posts.remove(posts.size() - 1);
+                nextPageAnchor = posts.get(posts.size() - 1).getId();
+            }
+            
+            populatePosts(userId, posts, communityId, false);
+            
+            List<PostDTO> postDtoList = posts.stream().map((r) -> {
+              return ConvertHelper.convert(r, PostDTO.class);  
+            }).collect(Collectors.toList());
+            
+            
+            return new ListPostCommandResponse(nextPageAnchor, postDtoList);
+        }
+        
+        return null;
     }
 }
