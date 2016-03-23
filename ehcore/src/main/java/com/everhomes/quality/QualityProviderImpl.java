@@ -10,12 +10,14 @@ import java.util.Map;
 
 
 
+
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 
 
 
@@ -756,6 +758,25 @@ public class QualityProviderImpl implements QualityProvider {
         	return null;
         });
 		return tasks;
+	}
+
+	@Override
+	public QualityInspectionEvaluationFactors findQualityInspectionFactorByGroupIdAndCategoryId(
+			Long groupId, Long categoryId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionEvaluationFactorsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_EVALUATION_FACTORS);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_EVALUATION_FACTORS.CATEGORY_ID.eq(categoryId));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_EVALUATION_FACTORS.GROUP_ID.eq(groupId));
+		 
+		List<QualityInspectionEvaluationFactors> result = new ArrayList<QualityInspectionEvaluationFactors>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, QualityInspectionEvaluationFactors.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+		
+		return result.get(0);
 	}
 
 

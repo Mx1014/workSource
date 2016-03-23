@@ -5,8 +5,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
@@ -26,6 +28,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.quality.QualityService;
@@ -962,27 +965,58 @@ public class QualityServiceImpl implements QualityService {
 	@Override
 	public void createEvaluations() {
 		
-//		`owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, enterprise, etc',
-//		`owner_id` BIGINT NOT NULL DEFAULT 0,
-//		`date_str` VARCHAR(32) NOT NULL DEFAULT '',
-//		`group_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_organizations',
-//		`group_name` VARCHAR(64),
-//		`score` DOUBLE NOT NULL DEFAULT 0,
+		List<QualityInspectionTasks> closedTasks = qualityProvider.listClosedTask();
+		Map<Long, QualityInspectionEvaluations> map = new HashMap<Long, QualityInspectionEvaluations>();
 		
-		List<QualityInspectionTasks> closedTask = qualityProvider.listClosedTask();
+		for (QualityInspectionTasks task :  closedTasks) {
+			QualityInspectionEvaluations eva = map.get(task.getExecutiveGroupId());
+			if(eva == null) {
+				QualityInspectionEvaluations evaluation = new QualityInspectionEvaluations();
+				evaluation.setOwnerType(task.getOwnerType());
+				evaluation.setOwnerId(task.getOwnerId());
+				String dateStr = timestampToStr(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				evaluation.setDateStr(dateStr);
+				evaluation.setGroupId(task.getExecutiveGroupId());
+				Organization org = organizationProvider.findOrganizationById(task.getExecutiveGroupId());
+				if(org != null) {
+					evaluation.setGroupName(org.getName());
+				}
+				Double score = (double) 100;
+				score = calculateScore(task, score);
+				evaluation.setScore(score);
+				
+				map.put(task.getExecutiveGroupId(), evaluation);
+			} else {
+				Double score = eva.getScore();
+				score = calculateScore(task, score);
+				eva.setScore(score);
+				
+				map.put(task.getExecutiveGroupId(), eva);
+			}
+		}
 		
-//		Map<Long, QualityInspectionEvaluations> map = closedTask.stream().map((r) -> {
-//			QualityInspectionEvaluations evaluation = new QualityInspectionEvaluations();
-//			evaluation.setOwnerType(ownerType);
-//			evaluation.setOwnerId(ownerId);
-//			evaluation.setDateStr(dateStr);
-//			evaluation.setGroupId(groupId);
-//			evaluation.setGroupName(groupName);
-//			evaluation.setScore(score);
-//			qualityProvider.createQualityInspectionEvaluations(evaluation);
-//			return r;
-//		}).collect(Collectors.toMap(Long, QualityInspectionEvaluations));
+		Set<Long> set = map.keySet(); 
+		for (Long s:set) {
+			QualityInspectionEvaluations ev = map.get(s);
+			
+			qualityProvider.createQualityInspectionEvaluations(ev);
+		}
 		
+	}
+	
+	private Double calculateScore(QualityInspectionTasks task, Double score) {
+		
+		if(task.getStatus() == QualityInspectionTaskResult.INSPECT_DELAY.getCode() 
+				|| task.getStatus() == QualityInspectionTaskResult.RECTIFY_DELAY.getCode()) {
+			QualityInspectionStandards standard = verifiedStandardById(task.getStandardId());
+			QualityInspectionEvaluationFactors factor = qualityProvider.findQualityInspectionFactorByGroupIdAndCategoryId(
+					task.getExecutiveGroupId(), standard.getCategoryId());
+			if(factor != null) {
+				score = score - factor.getWeight();
+			}
+		}
+		
+		return score;
 	}
 
 }
