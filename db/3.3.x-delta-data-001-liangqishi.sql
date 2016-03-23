@@ -1,0 +1,22 @@
+INSERT INTO `eh_scene_types`(`id`, `namespace_id`, `name`, `display_name`, `create_time`) VALUES(1, 0, 'default', '默认场景', '2016-03-06 10:50:32');
+INSERT INTO `eh_scene_types`(`id`, `namespace_id`, `name`, `display_name`, `create_time`) VALUES(2, 0, 'pm_admin', '物业管理员场景', '2016-03-06 10:50:32');
+
+INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'forum', '101', 'zh_CN', '小区圈');
+INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'forum', '102', 'zh_CN', '周边小区');
+INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'forum', '103', 'zh_CN', '本小区');
+INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'forum', '104', 'zh_CN', '兴趣圈');
+INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'forum', '105', 'zh_CN', '公司圈');
+INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'forum', '106', 'zh_CN', '全部');
+
+INSERT INTO `eh_launch_pad_layouts`(`id`, `namespace_id`, `scene`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`) 
+	VALUES (28, 0, 'default', 'DiscoveryLayout', '{"versionCode":"2016031201","versionName":"3.3.0","layoutName":"DiscoveryLayout","displayName":"发现","groups":[{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"NeighborLifes"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21,"columnCount":2},{"groupName":"","widget":"ScenePosts","instanceConfig":{"itemGroup":"default"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21}]}', '2016031201', '0', 2, '2016-03-12 19:16:25');
+INSERT INTO `eh_launch_pad_layouts`(`id`, `namespace_id`, `scene`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`) 
+	VALUES (29, 0, 'pm_admin', 'DiscoveryLayout', '{"versionCode":"2016031201","versionName":"3.3.0","layoutName":"DiscoveryLayout","displayName":"发现","groups":[{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"NeighborLifes"},"style":"Default","defaultOrder":1,"separatorFlag":1,"separatorHeight":21,"columnCount":2},{"groupName":"","widget":"ScenePosts","instanceConfig":{"itemGroup":"default"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21}]}', '2016031201', '0', 2, '2016-03-12 19:16:25');
+INSERT INTO `eh_launch_pad_layouts`(`id`, `namespace_id`, `scene`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`) 
+	VALUES (30, 0, 'pm_admin', 'ServiceMarketLayout', '{"versionCode":"2016031201","versionName":"3.3.0","layoutName":"ServiceMarketLayout","displayName":"服务市场","groups":[{"groupName":"","widget":"Banners","instanceConfig":{"itemGroup":"Default"},"style":"Default","defaultOrder":1,"separatorFlag":0,"separatorHeight":0},{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GovAgencies"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"Coupons","instanceConfig":{"itemGroup":"Coupons"},"style":"Default","defaultOrder":3,"separatorFlag":1,"separatorHeight":21},{"groupName":"商家服务","widget":"Navigator","instanceConfig":{"itemGroup":"Bizs"},"style":"Default","defaultOrder":5,"separatorFlag":0,"separatorHeight":0}]}', '2016031201', '0', 2, '2016-03-12 19:16:25');
+	
+INSERT INTO `eh_launch_pad_items`(`id`, `scene`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`) 
+	VALUES (62, 'default', 0, 0, 0, 0, '/discovery', 'NeighborLifes', 'NeighborActivities', '周边活动', 'cs://1/image/aW1hZ2UvTVRvNFlXSXdaRGRqTnpKaU56UmtZMll3WlRNeU1XUmxOekU0WXpNNU9HWmpZUQ', '1', '1', '41', '', '0', '0', '1', '1', '', '0', null, null, null);
+INSERT INTO `eh_launch_pad_items`(`id`, `scene`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`) 
+	VALUES (63, 'default', 0, 0, 0, 0, '/discovery', 'NeighborLifes', 'NeighborClubs', '周边俱乐部', 'cs://1/image/aW1hZ2UvTVRvNFlXSXdaRGRqTnpKaU56UmtZMll3WlRNeU1XUmxOekU0WXpNNU9HWmpZUQ', '1', '1', '42', '', '0', '0', '1', '1', '', '0', null, null, null);
+
