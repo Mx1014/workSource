@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *  <li>taskId: 任务id</li>
  *  <li>attachments: 核查上报内容图片</li>
- *  <li>inspectionText: 核查上报内容文字</li>
+ *  <li>message: 核查上报内容文字</li>
  *  <li>verificationResult: 核查结果   com.everhomes.rest.quality.QualityInspectionTaskResult</li>
  *  <li>endTime: 整改截止时间</li>
  *  <li>operatorType: 整改执行人类型</li>
@@ -31,13 +31,21 @@ public class ReportVerificationResultCommand {
 	@ItemType(AttachmentDescriptor.class)
     private List<AttachmentDescriptor> attachments;
 	
-	private String inspectionText;
-	
 	private Long endTime;
 	
 	private String operatorType;
 	
 	private Long operatorId;
+	
+	private String message;
+	
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
 
 	public Long getTaskId() {
 		return taskId;
@@ -53,14 +61,6 @@ public class ReportVerificationResultCommand {
 
 	public void setVerificationResult(Byte verificationResult) {
 		this.verificationResult = verificationResult;
-	}
-
-	public String getInspectionText() {
-		return inspectionText;
-	}
-
-	public void setInspectionText(String inspectionText) {
-		this.inspectionText = inspectionText;
 	}
 
 	public List<AttachmentDescriptor> getAttachments() {

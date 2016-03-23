@@ -36,6 +36,7 @@ import com.everhomes.repeat.RepeatService;
 import com.everhomes.repeat.RepeatSettings;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.forum.AttachmentDescriptor;
+import com.everhomes.rest.forum.PostContentType;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -71,6 +72,7 @@ import com.everhomes.rest.quality.QualityNotificationTemplateCode;
 import com.everhomes.rest.quality.QualityStandardStatus;
 import com.everhomes.rest.quality.QualityStandardsDTO;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
+import com.everhomes.rest.quality.QualityTaskType;
 import com.everhomes.rest.quality.ReportRectifyResultCommand;
 import com.everhomes.rest.quality.ReportVerificationResultCommand;
 import com.everhomes.rest.quality.ReviewVerificationResultCommand;
@@ -581,6 +583,7 @@ public class QualityServiceImpl implements QualityService {
 			
 			record.setProcessResult(QualityInspectionTaskResult.INSPECT_OK.getCode());
 			record.setProcessType(ProcessType.INSPECT.getCode());
+			
 		}
 		else if(QualityInspectionTaskResult.INSPECT_CLOSE.equals(cmd.getVerificationResult())) {
 			task.setResult(QualityInspectionTaskResult.INSPECT_CLOSE.getCode());
@@ -593,6 +596,7 @@ public class QualityServiceImpl implements QualityService {
 			record.setProcessType(ProcessType.ASSIGN.getCode());
 		}
 		
+		record.setProcessMessage(cmd.getMessage());
 		if(!StringUtils.isNullOrEmpty(cmd.getOperatorType()) && cmd.getOperatorId() != null
 				 && cmd.getEndTime() != null) {
 			Map<String, Object> map = new HashMap<String, Object>();
@@ -607,10 +611,8 @@ public class QualityServiceImpl implements QualityService {
 			record.setProcessMessage(notifyTextForApplicant);
 		}
 		
-		if(!StringUtils.isNullOrEmpty(cmd.getInspectionText())) {
-			task.setInspectionText(cmd.getInspectionText());
-		}
-		processTaskAttachments(user.getId(),  cmd.getAttachments(), task);
+		
+		processTaskAttachments(user.getId(),  cmd.getAttachments(), task, QualityTaskType.VERIFY_TASK.getCode());
 		QualityInspectionTaskDTO dto = updateVerificationTasks(task, record);
 		return dto;
 		
@@ -678,6 +680,8 @@ public class QualityServiceImpl implements QualityService {
 			record.setProcessEndTime(task.getProcessExpireTime());
 		}
 		
+		record.setProcessMessage(cmd.getMessage());
+		
 		if(!StringUtils.isNullOrEmpty(cmd.getOperatorType()) && cmd.getOperatorId() != null
 				 && cmd.getEndTime() != null) {
 			Map<String, Object> map = new HashMap<String, Object>();
@@ -694,7 +698,8 @@ public class QualityServiceImpl implements QualityService {
 		
 		task.setProcessTime(new Timestamp(System.currentTimeMillis()));
 
-		qualityProvider.populateTaskAttachment(task);
+		processTaskAttachments(user.getId(),  cmd.getAttachments(), task, QualityTaskType.RECTIFY_TASK.getCode());
+//		qualityProvider.populateTaskAttachment(task);
 		QualityInspectionTaskDTO dto = updateVerificationTasks(task, record);
 		return dto;
 	}
@@ -834,7 +839,7 @@ public class QualityServiceImpl implements QualityService {
 		return dto;
 	}
 	
-	private void processTaskAttachments(long userId, List<AttachmentDescriptor> attachmentList, QualityInspectionTasks task) {
+	private void processTaskAttachments(long userId, List<AttachmentDescriptor> attachmentList, QualityInspectionTasks task, byte taskType) {
         List<QualityInspectionTaskAttachments> results = null;
         
         this.qualityProvider.deleteTaskAttachmentsByTaskId(task.getId());
@@ -847,6 +852,7 @@ public class QualityServiceImpl implements QualityService {
                 attachment = new QualityInspectionTaskAttachments();
                 attachment.setCreatorUid(userId);
                 attachment.setTaskId(task.getId());
+                attachment.setTaskType(taskType);
                 attachment.setContentType(descriptor.getContentType());
                 attachment.setContentUri(descriptor.getContentUri());
                 attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -883,6 +889,7 @@ public class QualityServiceImpl implements QualityService {
 				 LOGGER.info("The task attachment is null, taskId=" + task.getId());
 			 }
 		 } else {
+			 
 			 String contentUri = attachment.getContentUri();
 			 if(contentUri != null && contentUri.length() > 0) {
 				 try{

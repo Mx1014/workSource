@@ -1,7 +1,11 @@
 package com.everhomes.rest.quality;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -11,6 +15,8 @@ import com.everhomes.util.StringHelper;
  *  <li>endTime: 整改截止时间</li>
  *  <li>operatorType: 整改执行人类型</li>
  *  <li>operatorId: 整改执行人id</li>
+ *  <li>attachments: 整改上报内容图片</li>
+ *  <li>message: 整改上报内容文字</li>
  * </ul>
  */
 public class ReportRectifyResultCommand {
@@ -26,6 +32,20 @@ public class ReportRectifyResultCommand {
 	
 	private Long operatorId;
 	
+	@NotNull
+	@ItemType(AttachmentDescriptor.class)
+    private List<AttachmentDescriptor> attachments;
+	
+	private String message;
+	
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
 	public Long getTaskId() {
 		return taskId;
 	}
@@ -64,6 +84,14 @@ public class ReportRectifyResultCommand {
 
 	public void setOperatorId(Long operatorId) {
 		this.operatorId = operatorId;
+	}
+
+	public List<AttachmentDescriptor> getAttachments() {
+		return attachments;
+	}
+
+	public void setAttachments(List<AttachmentDescriptor> attachments) {
+		this.attachments = attachments;
 	}
 
 	@Override
