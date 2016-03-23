@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhQualityInspectionTaskAttachments implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1849307189;
+	private static final long serialVersionUID = -439152405;
 
 	private java.lang.Long     id;
 	private java.lang.Long     taskId;
@@ -19,6 +19,7 @@ public class EhQualityInspectionTaskAttachments implements java.io.Serializable 
 	private java.lang.String   contentUri;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
+	private java.lang.Byte     taskType;
 
 	public EhQualityInspectionTaskAttachments() {}
 
@@ -28,7 +29,8 @@ public class EhQualityInspectionTaskAttachments implements java.io.Serializable 
 		java.lang.String   contentType,
 		java.lang.String   contentUri,
 		java.lang.Long     creatorUid,
-		java.sql.Timestamp createTime
+		java.sql.Timestamp createTime,
+		java.lang.Byte     taskType
 	) {
 		this.id = id;
 		this.taskId = taskId;
@@ -36,6 +38,7 @@ public class EhQualityInspectionTaskAttachments implements java.io.Serializable 
 		this.contentUri = contentUri;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
+		this.taskType = taskType;
 	}
 
 	public java.lang.Long getId() {
@@ -84,5 +87,13 @@ public class EhQualityInspectionTaskAttachments implements java.io.Serializable 
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+	public java.lang.Byte getTaskType() {
+		return this.taskType;
+	}
+
+	public void setTaskType(java.lang.Byte taskType) {
+		this.taskType = taskType;
 	}
 }

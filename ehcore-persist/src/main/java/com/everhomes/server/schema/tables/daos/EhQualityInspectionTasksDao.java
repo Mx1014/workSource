@@ -228,11 +228,4 @@ public class EhQualityInspectionTasksDao extends org.jooq.impl.DAOImpl<com.everh
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks> fetchByCreateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS.CREATE_TIME, values);
 	}
-
-	/**
-	 * Fetch records that have <code>inspection_text IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks> fetchByInspectionText(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS.INSPECTION_TEXT, values);
-	}
 }

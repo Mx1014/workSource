@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhQualityInspectionTasks implements java.io.Serializable {
 
-	private static final long serialVersionUID = 32965824;
+	private static final long serialVersionUID = 809157220;
 
 	private java.lang.Long     id;
 	private java.lang.String   ownerType;
@@ -40,7 +40,6 @@ public class EhQualityInspectionTasks implements java.io.Serializable {
 	private java.lang.Byte     reviewResult;
 	private java.sql.Timestamp reviewTime;
 	private java.sql.Timestamp createTime;
-	private java.lang.String   inspectionText;
 
 	public EhQualityInspectionTasks() {}
 
@@ -71,8 +70,7 @@ public class EhQualityInspectionTasks implements java.io.Serializable {
 		java.lang.Long     reviewerId,
 		java.lang.Byte     reviewResult,
 		java.sql.Timestamp reviewTime,
-		java.sql.Timestamp createTime,
-		java.lang.String   inspectionText
+		java.sql.Timestamp createTime
 	) {
 		this.id = id;
 		this.ownerType = ownerType;
@@ -101,7 +99,6 @@ public class EhQualityInspectionTasks implements java.io.Serializable {
 		this.reviewResult = reviewResult;
 		this.reviewTime = reviewTime;
 		this.createTime = createTime;
-		this.inspectionText = inspectionText;
 	}
 
 	public java.lang.Long getId() {
@@ -318,13 +315,5 @@ public class EhQualityInspectionTasks implements java.io.Serializable {
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
-	}
-
-	public java.lang.String getInspectionText() {
-		return this.inspectionText;
-	}
-
-	public void setInspectionText(java.lang.String inspectionText) {
-		this.inspectionText = inspectionText;
 	}
 }
