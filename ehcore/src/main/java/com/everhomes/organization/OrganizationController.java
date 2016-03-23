@@ -24,6 +24,7 @@ import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
 import com.everhomes.rest.forum.CancelLikeTopicCommand;
 import com.everhomes.rest.forum.GetTopicCommand;
 import com.everhomes.rest.forum.LikeTopicCommand;
+import com.everhomes.rest.forum.ListOrgMixTopicCommand;
 import com.everhomes.rest.forum.ListPostCommandResponse;
 import com.everhomes.rest.forum.ListTopicCommand;
 import com.everhomes.rest.forum.ListTopicCommentCommand;
@@ -285,6 +286,21 @@ public class OrganizationController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+    /**
+     * <b>URL: /org/listOrgMixTopics</b>
+     * <p>查询指定机构的所有帖子列表</p>
+     */
+    //checked
+    @RequestMapping("listOrgMixTopics")
+    @RestReturn(value=ListPostCommandResponse.class)
+    public RestResponse listOrgMixTopics(ListOrgMixTopicCommand cmd) {
+        ListPostCommandResponse cmdResponse = organizationService.listOrgMixTopics(cmd);
+        RestResponse response = new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 	/**
 	 * <b>URL: /org/deleteOrgTopic</b>

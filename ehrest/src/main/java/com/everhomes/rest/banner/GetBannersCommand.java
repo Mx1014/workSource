@@ -3,6 +3,7 @@ package com.everhomes.rest.banner;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -10,6 +11,8 @@ import com.everhomes.util.StringHelper;
  * <li>communityId: 小区Id</li>
  * <li>bannerLocation: banner所在路径，如/home，/home/Pm</li>
  * <li>bannerGroup: banner归属的组，参考{@link com.everhomes.rest.launchpad.ItemGroup}</li>
+ *  <li>namespaceId: 域空间</li>
+ *  <li>sceneType: 场景类型，{@link com.everhomes.rest.ui.user.SceneType}</li>
  * </ul>
  */
 public class GetBannersCommand {
@@ -19,6 +22,8 @@ public class GetBannersCommand {
     private String bannerGroup;
     @NotNull
     private Integer namespaceId;
+    
+    private String sceneType;
 
     public GetBannersCommand() {
     }
@@ -47,11 +52,6 @@ public class GetBannersCommand {
         this.bannerGroup = bannerGroup;
     }
 
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
-
     public Integer getNamespaceId() {
         return namespaceId;
     }
@@ -60,4 +60,20 @@ public class GetBannersCommand {
         this.namespaceId = namespaceId;
     }
 
+    public String getSceneType() {
+        return sceneType;
+    }
+
+    public void setSceneType(String sceneType) {
+        this.sceneType = sceneType;
+    }
+    
+    public String getCurrentSceneType() {
+        return (sceneType == null) ? SceneType.DEFAULT.getCode() : sceneType;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

@@ -94,6 +94,7 @@ import com.everhomes.rest.forum.CancelLikeTopicCommand;
 import com.everhomes.rest.forum.ForumConstants;
 import com.everhomes.rest.forum.GetTopicCommand;
 import com.everhomes.rest.forum.LikeTopicCommand;
+import com.everhomes.rest.forum.ListOrgMixTopicCommand;
 import com.everhomes.rest.forum.ListPostCommandResponse;
 import com.everhomes.rest.forum.ListTopicCommand;
 import com.everhomes.rest.forum.ListTopicCommentCommand;
@@ -1213,6 +1214,22 @@ public class OrganizationServiceImpl implements OrganizationService {
 		this.checkCommunityIdIsNull(communityId);
 		this.checkCommunity(communityId);
 		return forumService.listTopics(cmd);
+	}
+	
+	@Override
+    public ListPostCommandResponse listOrgMixTopics(ListOrgMixTopicCommand cmd) {
+	    List<Long> forumIdList = new ArrayList<Long>();
+	    
+	    Long organizationId = cmd.getOrganizationId();
+	    Organization organization = organizationProvider.findOrganizationById(organizationId);
+	    if(organization == null) {
+	        LOGGER.error("Organization not found, cmd=" + cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Organization not found");
+	    }
+	    //List<Organization> orgs = organizationProvider.listOrganizationByGroupTypes(org.getPath() + "/%", groupTypes);
+	    
+	    return null;
 	}
 
 	@Override

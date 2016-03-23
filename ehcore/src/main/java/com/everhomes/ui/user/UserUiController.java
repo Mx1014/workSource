@@ -191,17 +191,18 @@ public class UserUiController extends ControllerBase {
     /**
      * <b>URL: /ui/user/setUserCurrentScene</b>
      * <p>设置当前的scene信息，服务器端不使用此信息，会在userInfo里还给客户端做选中上一次的场景使用</p>
+     * <p>废弃，使用listScenesByCummunityId代替</p>
      */
-    @RequestMapping(value = "setUserCurrentScene")
-    @RestReturn(ListUserOpPromotionsRespose.class)
-    public RestResponse setUserCurrentScene(SetUserCurrentSceneCommand cmd) throws Exception {
-        ListUserOpPromotionsRespose cmdResponse = null;
-        
-        RestResponse response = new RestResponse(cmdResponse);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
+//    @RequestMapping(value = "setUserCurrentScene")
+//    @RestReturn(ListUserOpPromotionsRespose.class)
+//    public RestResponse setUserCurrentScene(SetUserCurrentSceneCommand cmd) throws Exception {
+//        ListUserOpPromotionsRespose cmdResponse = null;
+//        
+//        RestResponse response = new RestResponse(cmdResponse);
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
     
     /**
      * <b>URL: /ui/user/listScenesByCummunityId</b>
@@ -210,7 +211,7 @@ public class UserUiController extends ControllerBase {
     @RequestMapping("listScenesByCummunityId")
     @RestReturn(value=SceneDTO.class, collection=true)
     public RestResponse listScenesByCummunityId(ListScenesByCummunityIdCommand cmd) {
-        List<SceneDTO> sceneDtoList = null;
+        List<SceneDTO> sceneDtoList = userService.listScenesByCummunityId(cmd);
         
         RestResponse response = new RestResponse(sceneDtoList);
         response.setErrorCode(ErrorCodes.SUCCESS);

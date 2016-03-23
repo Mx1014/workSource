@@ -145,7 +145,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 	}
 
 	@Override
-	public List<LaunchPadLayout> findLaunchPadItemsByVersionCode(Integer namespaceId, String name,long versionCode) {
+	public List<LaunchPadLayout> findLaunchPadItemsByVersionCode(Integer namespaceId, String sceneType, String name,long versionCode) {
 		List<LaunchPadLayout> layouts = new ArrayList<LaunchPadLayout>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadLayouts.class));
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_LAUNCH_PAD_LAYOUTS);
@@ -155,6 +155,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		}
 
         condition = condition.and(Tables.EH_LAUNCH_PAD_LAYOUTS.NAMESPACE_ID.eq(namespaceId));
+        condition = condition.and(Tables.EH_LAUNCH_PAD_LAYOUTS.SCENE_TYPE.eq(sceneType));
 		condition = condition.and(Tables.EH_LAUNCH_PAD_LAYOUTS.STATUS.eq(LaunchPadLayoutStatus.ACTIVE.getCode()));
 
         
@@ -171,7 +172,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		return layouts;
 	}
 	@Override
-	public List<LaunchPadItem> findLaunchPadItemsByTagAndScope(Integer namespaceId,String itemLocation,String itemGroup,Byte scopeCode,long scopeId,List<String> tags){
+	public List<LaunchPadItem> findLaunchPadItemsByTagAndScope(Integer namespaceId, String sceneType, String itemLocation,String itemGroup,Byte scopeCode,long scopeId,List<String> tags){
 		List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_LAUNCH_PAD_ITEMS);
@@ -188,6 +189,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		    condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.TAG.isNull().or(Tables.EH_LAUNCH_PAD_ITEMS.TAG.eq("")));
 		}
         condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.NAMESPACE_ID.eq(namespaceId));
+        condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCENE_TYPE.eq(sceneType));
 		step.where(condition).fetch().map((r) ->{
 			items.add(ConvertHelper.convert(r, LaunchPadItem.class));
 			return null;

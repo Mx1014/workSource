@@ -24,13 +24,13 @@ import com.everhomes.util.StringHelper;
  * </ul>
  * <ul>字段：
  * <li>forumId: 论坛ID</li>
- * <li>sceneToken: 场景标识，用一个标识代替原来用多个字段共同表示的标识，以使传参数简单一些（只需要传一个参数），服务器端通过该标识填充下面4个参数（客户端不用填该4个参数）</li>
+ * <li>sceneToken: 场景标识，用一个标识代替原来用多个字段共同表示的标识，以使传参数简单一些（只需要传一个参数），服务器端通过该标识填充下面3个参数（客户端不用填该3个参数）</li>
  *      <ul>
  *          <li>creatorTag: 创建者标签，参考{@link com.everhomes.rest.forum.PostEntityTag}</li>
- *          <li>targetTag: 创建者标签，参考{@link com.everhomes.rest.forum.PostEntityTag}</li>
  *          <li>visibleRegionType: 区域范围类型，{@link com.everhomes.rest.visibility.VisibleRegionType}</li>
  *          <li>visibleRegionId: 区域范围类型对应的ID</li>
  *      </ul>
+ * <li>targetTag: 帖子接收者标签，该标签仍然需要客户端填写，参考{@link com.everhomes.rest.forum.PostEntityTag}</li>
  * <li>contentCategory: 内容类型ID，含类和子类</li>
  * <li>actionCategory: 操作类型ID，如拼车中的“我搭车”、“我开车”</li>
  * <li>longitude: 帖子内容涉及到的经度如活动</li>
@@ -51,6 +51,8 @@ public class NewTopicBySceneCommand {
     
     @NotNull
     private Long forumId;
+    
+    private String targetTag;
     
     private Long contentCategory;
     
@@ -101,6 +103,14 @@ public class NewTopicBySceneCommand {
 	public void setForumId(Long forumId) {
 		this.forumId = forumId;
 	}
+
+    public String getTargetTag() {
+        return targetTag;
+    }
+
+    public void setTargetTag(String targetTag) {
+        this.targetTag = targetTag;
+    }
 
     public Long getContentCategory() {
         return contentCategory;

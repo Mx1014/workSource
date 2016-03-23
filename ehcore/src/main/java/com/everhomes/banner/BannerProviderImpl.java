@@ -102,7 +102,7 @@ public class BannerProviderImpl implements BannerProvider {
     
 //    @Cacheable(value="BannerList", key="{#scopeType,#scopeId}", unless="#result.size() == 0")
     @Override
-    public List<Banner> findBannersByTagAndScope(Integer namespaceId,String bannerLocation,String bannerGroup,byte scopeCode, long scopeId){
+    public List<Banner> findBannersByTagAndScope(Integer namespaceId, String sceneType, String bannerLocation,String bannerGroup,byte scopeCode, long scopeId){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectJoinStep<Record> step = context.select().from(Tables.EH_BANNERS);
         Condition condition = Tables.EH_BANNERS.STATUS.eq(BannerStatus.ACTIVE.getCode());
@@ -113,6 +113,7 @@ public class BannerProviderImpl implements BannerProvider {
             condition = condition.and(Tables.EH_BANNERS.BANNER_GROUP.eq(bannerGroup));
         }
         condition = condition.and(Tables.EH_BANNERS.NAMESPACE_ID.eq(namespaceId));
+        condition = condition.and(Tables.EH_BANNERS.SCENE_TYPE.eq(sceneType));
         
         condition = condition.and(Tables.EH_BANNERS.SCOPE_CODE.eq(scopeCode));
         condition = condition.and(Tables.EH_BANNERS.SCOPE_ID.eq(scopeId));
