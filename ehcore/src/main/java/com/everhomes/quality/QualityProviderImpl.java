@@ -11,12 +11,16 @@ import java.util.Map;
 
 
 
+
+
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+
 
 
 
@@ -72,6 +76,7 @@ import com.everhomes.server.schema.tables.records.EhQualityInspectionEvaluations
 import com.everhomes.server.schema.tables.records.EhQualityInspectionStandardGroupMapRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionStandardsRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionTaskAttachmentsRecord;
+import com.everhomes.server.schema.tables.records.EhQualityInspectionTaskRecordsRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.techpark.park.ParkCharge;
@@ -373,9 +378,9 @@ public class QualityProviderImpl implements QualityProvider {
 	public void createQualityInspectionTaskAttachments(
 			QualityInspectionTaskAttachments attachment) {
 
-		assert(attachment.getTaskId() != null);
+		assert(attachment.getRecordId() != null);
         
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhQualityInspectionTasks.class, attachment.getTaskId()));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhQualityInspectionTaskRecords.class, attachment.getRecordId()));
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhQualityInspectionTaskAttachments.class));
         attachment.setId(id);
         
@@ -491,48 +496,43 @@ public class QualityProviderImpl implements QualityProvider {
 
 	@Override
 	public List<QualityInspectionTaskRecords> listRecordsByTaskId(Long taskId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void deleteTaskAttachmentsByTaskId(Long taskId) {
-		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhQualityInspectionTasks.class), null, 
-				(DSLContext context, Object reducingContext) -> {
-					SelectQuery<EhQualityInspectionTaskAttachmentsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_TASK_ATTACHMENTS);
-					query.addConditions(Tables.EH_QUALITY_INSPECTION_TASK_ATTACHMENTS.TASK_ID.eq(taskId));
-		            query.fetch().map((EhQualityInspectionTaskAttachmentsRecord record) -> {
-		            	deleteQualityInspectionTaskAttachments(record.getId());
-		            	return null;
-					});
-
-					return true;
-				});
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionTaskRecordsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS.TASK_ID.eq(taskId));
+		query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS.CREATE_TIME.desc());
+		 
+		List<QualityInspectionTaskRecords> result = new ArrayList<QualityInspectionTaskRecords>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, QualityInspectionTaskRecords.class));
+			return null;
+		});
 		
+		return result;
 	}
 
+
 	@Override
-	public void populateTaskAttachments(final List<QualityInspectionTasks> tasks) {
-        if(tasks == null || tasks.size() == 0) {
+	public void populateRecordAttachments(final List<QualityInspectionTaskRecords> records) {
+        if(records == null || records.size() == 0) {
             return;
         }
             
-        final List<Long> taskIds = new ArrayList<Long>();
-        final Map<Long, QualityInspectionTasks> mapTasks = new HashMap<Long, QualityInspectionTasks>();
+        final List<Long> recordIds = new ArrayList<Long>();
+        final Map<Long, QualityInspectionTaskRecords> mapRecords = new HashMap<Long, QualityInspectionTaskRecords>();
         
-        for(QualityInspectionTasks task: tasks) {
-        	taskIds.add(task.getId());
-        	mapTasks.put(task.getId(), task);
+        for(QualityInspectionTaskRecords record: records) {
+        	recordIds.add(record.getId());
+        	mapRecords.put(record.getId(), record);
         }
         
-        List<Integer> shards = this.shardingProvider.getContentShards(EhQualityInspectionTasks.class, taskIds);
-        this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhQualityInspectionTasks.class), null, (DSLContext context, Object reducingContext) -> {
+        List<Integer> shards = this.shardingProvider.getContentShards(EhQualityInspectionTaskRecords.class, recordIds);
+        this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhQualityInspectionTaskRecords.class), null, (DSLContext context, Object reducingContext) -> {
             SelectQuery<EhQualityInspectionTaskAttachmentsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_TASK_ATTACHMENTS);
-            query.addConditions(Tables.EH_QUALITY_INSPECTION_TASK_ATTACHMENTS.TASK_ID.in(taskIds));
+            query.addConditions(Tables.EH_QUALITY_INSPECTION_TASK_ATTACHMENTS.RECORD_ID.in(recordIds));
             query.fetch().map((EhQualityInspectionTaskAttachmentsRecord record) -> {
-            	QualityInspectionTasks task = mapTasks.get(record.getTaskId());
-                assert(task != null);
-                task.getAttachments().add(ConvertHelper.convert(record, QualityInspectionTaskAttachments.class));
+            	QualityInspectionTaskRecords r = mapRecords.get(record.getRecordId());
+                assert(r != null);
+                r.getAttachments().add(ConvertHelper.convert(record, QualityInspectionTaskAttachments.class));
             
                 return null;
             });
@@ -541,14 +541,14 @@ public class QualityProviderImpl implements QualityProvider {
     }
 
 	@Override
-	public void populateTaskAttachment(QualityInspectionTasks task) {
-		if(task == null) {
+	public void populateRecordAttachment(QualityInspectionTaskRecords record) {
+		if(record == null) {
             return;
         } else {
-            List<QualityInspectionTasks> tasks = new ArrayList<QualityInspectionTasks>();
-            tasks.add(task);
+            List<QualityInspectionTaskRecords> records = new ArrayList<QualityInspectionTaskRecords>();
+            records.add(record);
             
-            populateTaskAttachments(tasks);
+            populateRecordAttachments(records);
         }
 		
 	}
@@ -777,6 +777,67 @@ public class QualityProviderImpl implements QualityProvider {
 			return null;
 		
 		return result.get(0);
+	}
+
+	@Override
+	public QualityInspectionTaskRecords listLastRecordByTaskId(Long taskId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionTaskRecordsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS.TASK_ID.eq(taskId));
+		query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS.CREATE_TIME.desc());
+		 
+		List<QualityInspectionTaskRecords> result = new ArrayList<QualityInspectionTaskRecords>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, QualityInspectionTaskRecords.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+		
+		return result.get(0);
+	}
+
+	@Override
+	public void populateTaskRecords(QualityInspectionTasks task) {
+		if(task == null) {
+            return;
+        } else {
+            List<QualityInspectionTasks> tasks = new ArrayList<QualityInspectionTasks>();
+            tasks.add(task);
+            
+            populateTasksRecords(tasks);
+        }
+		
+	}
+
+	@Override
+	public void populateTasksRecords(List<QualityInspectionTasks> tasks) {
+		if(tasks == null || tasks.size() == 0) {
+            return;
+        }
+            
+        final List<Long> taskIds = new ArrayList<Long>();
+        final Map<Long, QualityInspectionTasks> mapTasks = new HashMap<Long, QualityInspectionTasks>();
+        
+        for(QualityInspectionTasks task: tasks) {
+        	taskIds.add(task.getId());
+        	mapTasks.put(task.getId(), task);
+        }
+        
+        List<Integer> shards = this.shardingProvider.getContentShards(EhQualityInspectionTasks.class, taskIds);
+        this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhQualityInspectionTasks.class), null, (DSLContext context, Object reducingContext) -> {
+            SelectQuery<EhQualityInspectionTaskRecordsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS);
+            query.addConditions(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS.TASK_ID.in(taskIds));
+            query.fetch().map((EhQualityInspectionTaskRecordsRecord record) -> {
+            	QualityInspectionTasks task = mapTasks.get(record.getTaskId());
+                assert(task != null);
+                task.getRecords().add(ConvertHelper.convert(record, QualityInspectionTaskRecords.class));
+            
+                return null;
+            });
+            return true;
+        });
+		
 	}
 
 

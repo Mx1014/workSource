@@ -480,8 +480,22 @@ public class QualityServiceImpl implements QualityService {
         List<QualityInspectionTasks> tasks = qualityProvider.listVerificationTasks(locator, pageSize + 1, ownerId, ownerType, 
         		cmd.getTaskType(), cmd.getExecuteUid(), startDate, endDate, 
         		cmd.getGroupId(), cmd.getExecuteStatus(), cmd.getReviewStatus());
+        
+        
+        this.qualityProvider.populateTasksRecords(tasks);
+        
+        List<QualityInspectionTaskRecords> records = new ArrayList<QualityInspectionTaskRecords>();
+        for(QualityInspectionTasks task : tasks) {
+        	records.addAll(task.getRecords());
+       
+        }
+
+		this.qualityProvider.populateRecordAttachments(records);
 		
-		this.qualityProvider.populateTaskAttachments(tasks);
+		records.stream().map((r) -> {
+			populateRecordAttachements(r, r.getAttachments());
+			return r;
+		});
 		
         Long nextPageAnchor = null;
         if(tasks.size() > pageSize) {
@@ -492,7 +506,6 @@ public class QualityServiceImpl implements QualityService {
         
         List<QualityInspectionTaskDTO> dtoList = tasks.stream().map((r) -> {
         	
-        	populateTaskAttachements(r, r.getAttachments());
         	QualityInspectionStandards standard = verifiedStandardById(r.getStandardId());
         	QualityInspectionCategories category = verifiedCategoryById(standard.getCategoryId());
         	r.setCategoryName(category.getName());
@@ -836,13 +849,16 @@ public class QualityServiceImpl implements QualityService {
 		populateTaskAttachements(task, task.getAttachments());
 		
 		QualityInspectionTaskDTO dto = ConvertHelper.convert(task, QualityInspectionTaskDTO.class);
+		
+		
+		dto.setInspectionText(inspectionText);
 		return dto;
 	}
 	
-	private void processTaskAttachments(long userId, List<AttachmentDescriptor> attachmentList, QualityInspectionTasks task, byte taskType) {
+	private void processTaskAttachments(long userId, List<AttachmentDescriptor> attachmentList, QualityInspectionTaskRecords record, byte taskType) {
         List<QualityInspectionTaskAttachments> results = null;
         
-        this.qualityProvider.deleteTaskAttachmentsByTaskId(task.getId());
+//        this.qualityProvider.deleteTaskAttachmentsByTaskId(task.getId());
         
         if(attachmentList != null) {
             results = new ArrayList<QualityInspectionTaskAttachments>();
@@ -851,8 +867,7 @@ public class QualityServiceImpl implements QualityService {
             for(AttachmentDescriptor descriptor : attachmentList) {
                 attachment = new QualityInspectionTaskAttachments();
                 attachment.setCreatorUid(userId);
-                attachment.setTaskId(task.getId());
-                attachment.setTaskType(taskType);
+                attachment.setRecordId(record.getId());
                 attachment.setContentType(descriptor.getContentType());
                 attachment.setContentUri(descriptor.getContentUri());
                 attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -865,28 +880,28 @@ public class QualityServiceImpl implements QualityService {
                         + ", attachment=" + attachment, e);
                 }
             }
-            task.setAttachments(results);
+            record.setAttachments(results);
         }
     }
 	
-	private void populateTaskAttachements(QualityInspectionTasks task, List<QualityInspectionTaskAttachments> attachmentList) {
+	private void populateRecordAttachements(QualityInspectionTaskRecords record, List<QualityInspectionTaskAttachments> attachmentList) {
 		 
 		 if(attachmentList == null || attachmentList.size() == 0) {
 	            if(LOGGER.isInfoEnabled()) {
-	                LOGGER.info("The task attachment list is empty, taskId=" + task.getId());
+	                LOGGER.info("The record attachment list is empty, recordId=" + record.getId());
 	            }
 		 } else {
 	            for(QualityInspectionTaskAttachments attachment : attachmentList) {
-	            	populateTaskAttachement(task, attachment);
+	            	populateRecordAttachement(record, attachment);
 	            }
 		 }
 	 }
 	 
-	 private void populateTaskAttachement(QualityInspectionTasks task, QualityInspectionTaskAttachments attachment) {
+	 private void populateRecordAttachement(QualityInspectionTaskRecords record, QualityInspectionTaskAttachments attachment) {
        
 		 if(attachment == null) {
 			 if(LOGGER.isInfoEnabled()) {
-				 LOGGER.info("The task attachment is null, taskId=" + task.getId());
+				 LOGGER.info("The record attachment is null, recordId=" + record.getId());
 			 }
 		 } else {
 			 
@@ -896,7 +911,7 @@ public class QualityServiceImpl implements QualityService {
 					 String url = contentServerService.parserUri(contentUri, EntityType.USER.getCode(), UserContext.current().getUser().getId());
 					 attachment.setContentUrl(url);
 				 }catch(Exception e){
-					 LOGGER.error("Failed to parse attachment uri, taskId=" + task.getId() + ", attachmentId=" + attachment.getId(), e);
+					 LOGGER.error("Failed to parse attachment uri, recordId=" + record.getId() + ", attachmentId=" + attachment.getId(), e);
 				 }
 			 } else {
 				 if(LOGGER.isWarnEnabled()) {
