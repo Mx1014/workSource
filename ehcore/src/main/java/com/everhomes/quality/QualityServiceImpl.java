@@ -498,6 +498,7 @@ public class QualityServiceImpl implements QualityService {
              	if(OrganizationMemberTargetType.USER.getCode().equals(mem.getTargetType()) 
              			&& mem.getTargetId() != null && mem.getTargetId() != 0) {
              		GroupUserDTO user = new GroupUserDTO();
+             		user.setOperatorType(mem.getTargetType());
              		user.setUserId(mem.getTargetId());
                  	user.setUserName(mem.getContactName());
                  	user.setContact(mem.getContactToken());

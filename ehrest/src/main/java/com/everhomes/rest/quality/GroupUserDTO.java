@@ -5,6 +5,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ *  <li>operatorType: 整改人类型</li>
  *  <li>userId: 用户id</li>
  *  <li>userName: 用户名</li>
  *  <li>contact: 手机号</li>
@@ -13,6 +14,8 @@ import com.everhomes.util.StringHelper;
  */
 public class GroupUserDTO {
 	
+	private String operatorType;
+	
 	private Long userId;
 	
 	private String userName;
@@ -20,6 +23,14 @@ public class GroupUserDTO {
 	private String contact;
 	
 	private String employeeNo;
+	
+	public String getOperatorType() {
+		return operatorType;
+	}
+
+	public void setOperatorType(String operatorType) {
+		this.operatorType = operatorType;
+	}
 
 	public Long getUserId() {
 		return userId;
