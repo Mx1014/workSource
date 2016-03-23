@@ -11,34 +11,31 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhQualityInspectionTaskAttachments implements java.io.Serializable {
 
-	private static final long serialVersionUID = -439152405;
+	private static final long serialVersionUID = 1826584989;
 
 	private java.lang.Long     id;
-	private java.lang.Long     taskId;
+	private java.lang.Long     recordId;
 	private java.lang.String   contentType;
 	private java.lang.String   contentUri;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
-	private java.lang.Byte     taskType;
 
 	public EhQualityInspectionTaskAttachments() {}
 
 	public EhQualityInspectionTaskAttachments(
 		java.lang.Long     id,
-		java.lang.Long     taskId,
+		java.lang.Long     recordId,
 		java.lang.String   contentType,
 		java.lang.String   contentUri,
 		java.lang.Long     creatorUid,
-		java.sql.Timestamp createTime,
-		java.lang.Byte     taskType
+		java.sql.Timestamp createTime
 	) {
 		this.id = id;
-		this.taskId = taskId;
+		this.recordId = recordId;
 		this.contentType = contentType;
 		this.contentUri = contentUri;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
-		this.taskType = taskType;
 	}
 
 	public java.lang.Long getId() {
@@ -49,12 +46,12 @@ public class EhQualityInspectionTaskAttachments implements java.io.Serializable 
 		this.id = id;
 	}
 
-	public java.lang.Long getTaskId() {
-		return this.taskId;
+	public java.lang.Long getRecordId() {
+		return this.recordId;
 	}
 
-	public void setTaskId(java.lang.Long taskId) {
-		this.taskId = taskId;
+	public void setRecordId(java.lang.Long recordId) {
+		this.recordId = recordId;
 	}
 
 	public java.lang.String getContentType() {
@@ -87,13 +84,5 @@ public class EhQualityInspectionTaskAttachments implements java.io.Serializable 
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
-	}
-
-	public java.lang.Byte getTaskType() {
-		return this.taskType;
-	}
-
-	public void setTaskType(java.lang.Byte taskType) {
-		this.taskType = taskType;
 	}
 }

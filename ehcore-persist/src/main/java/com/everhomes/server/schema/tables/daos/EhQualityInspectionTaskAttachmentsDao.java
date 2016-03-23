@@ -48,10 +48,10 @@ public class EhQualityInspectionTaskAttachmentsDao extends org.jooq.impl.DAOImpl
 	}
 
 	/**
-	 * Fetch records that have <code>task_id IN (values)</code>
+	 * Fetch records that have <code>record_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTaskAttachments> fetchByTaskId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTaskAttachments.EH_QUALITY_INSPECTION_TASK_ATTACHMENTS.TASK_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTaskAttachments> fetchByRecordId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTaskAttachments.EH_QUALITY_INSPECTION_TASK_ATTACHMENTS.RECORD_ID, values);
 	}
 
 	/**
@@ -80,12 +80,5 @@ public class EhQualityInspectionTaskAttachmentsDao extends org.jooq.impl.DAOImpl
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTaskAttachments> fetchByCreateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTaskAttachments.EH_QUALITY_INSPECTION_TASK_ATTACHMENTS.CREATE_TIME, values);
-	}
-
-	/**
-	 * Fetch records that have <code>task_type IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTaskAttachments> fetchByTaskType(java.lang.Byte... values) {
-		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTaskAttachments.EH_QUALITY_INSPECTION_TASK_ATTACHMENTS.TASK_TYPE, values);
 	}
 }
