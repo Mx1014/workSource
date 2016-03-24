@@ -15,12 +15,16 @@ import java.util.stream.Collectors;
 
 
 
+
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
+
+
 
 
 
@@ -38,8 +42,10 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationRoleMap;
 import com.everhomes.organization.OrganizationRoleMapProvider;
 import com.everhomes.organization.OrganizationServiceImpl;
+import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.acl.WebMenuDTO;
 import com.everhomes.rest.acl.WebMenuPrivilegeDTO;
+import com.everhomes.rest.acl.WebMenuPrivilegeShowFlag;
 import com.everhomes.rest.acl.WebMenuType;
 import com.everhomes.rest.acl.admin.CreateRolePrivilegeCommand;
 import com.everhomes.rest.acl.admin.ListAclRolesCommand;
@@ -85,8 +91,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	public ListWebMenuResponse ListWebMenu(ListWebMenuCommand cmd) {
 		User user = UserContext.current().getUser();
 		ListWebMenuResponse res = new ListWebMenuResponse();
+		
+		
 		List<Long> privilegeIds = this.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
-		List<WebMenuPrivilege> webMenuPrivileges = webMenuPrivilegeProvider.ListWebMenuByPrivilegeIds(privilegeIds);
+		List<WebMenuPrivilege> webMenuPrivileges = webMenuPrivilegeProvider.ListWebMenuByPrivilegeIds(privilegeIds, WebMenuPrivilegeShowFlag.MENU_SHOW);
 		if(null == webMenuPrivileges){
 			res.setMenus(new ArrayList<WebMenuDTO>());
 			return res;
@@ -116,7 +124,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	public List<ListWebMenuPrivilegeDTO> ListWebMenuPrivilege(ListWebMenuPrivilegeCommand cmd) {
 		User user = UserContext.current().getUser();
 		List<Long> privilegeIds = this.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
-		List<WebMenuPrivilege> webMenuPrivileges = webMenuPrivilegeProvider.ListWebMenuByPrivilegeIds(privilegeIds);
+		List<WebMenuPrivilege> webMenuPrivileges = webMenuPrivilegeProvider.ListWebMenuByPrivilegeIds(privilegeIds, null);
 		return this.getListWebMenuPrivilege(webMenuPrivileges);
 	}
 	
@@ -206,7 +214,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			privilegeIds.add(acl.getPrivilegeId());
 		}
 		
-		List<WebMenuPrivilege> webMenuPrivileges = webMenuPrivilegeProvider.ListWebMenuByPrivilegeIds(privilegeIds);
+		List<WebMenuPrivilege> webMenuPrivileges = webMenuPrivilegeProvider.ListWebMenuByPrivilegeIds(privilegeIds, null);
 		
 		return this.getListWebMenuPrivilege(webMenuPrivileges);
 	}
@@ -284,6 +292,16 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     	
     	userRoles.addAll(userOrgRoles);
     	List<Long> privileges = new ArrayList<Long>();
+    	
+    	if(userRoles.contains(RoleConstants.ORGANIZATION_ADMIN)){
+    		List<Privilege> privilegeList = aclProvider.getPrivilegesByApp(AppConstants.APPID_DEFAULT);
+    		
+    		for (Privilege privilege : privilegeList) {
+    			privileges.add(privilege.getId());
+			}
+    		return privileges;
+    	}
+    	
     	if(!StringUtils.isEmpty(module)){
     		List<Privilege> s = aclProvider.getPrivilegesByTag(module); //aclProvider 调平台根据角色list+模块 获取权限list接口
     		for (RoleAssignment role : userRoles) {
