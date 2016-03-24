@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-03-10 21:46:01
+// generated at 2016-03-24 16:34:31
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -33,10 +33,16 @@ public interface ApiConstants {
     public static final String ADDRESS_LISTUNASSIGNEDAPARTMENTSBYBUILDINGNAME_URL = "/address/listUnassignedApartmentsByBuildingName";
     public static final String ADDRESS_SEARCHCOMMUNITIES_URL = "/address/searchCommunities";
     public static final String ADDRESS_SUGGESTCOMMUNITY_URL = "/address/suggestCommunity";
+    public static final String ADMIN_ACL_LISTWEBMENU_URL = "/admin/acl/ListWebMenu";
+    public static final String ADMIN_ACL_LISTWEBMENUPRIVILEGE_URL = "/admin/acl/ListWebMenuPrivilege";
     public static final String ADMIN_ACL_ASSIGNUSERROLE_URL = "/admin/acl/assignUserRole";
+    public static final String ADMIN_ACL_CREATEROLEPRIVILEGE_URL = "/admin/acl/createRolePrivilege";
     public static final String ADMIN_ACL_DELETEUSERROLE_URL = "/admin/acl/deleteUserRole";
+    public static final String ADMIN_ACL_LISTACLROLEBYORGANIZATIONIDS_URL = "/admin/acl/listAclRoleByOrganizationIds";
     public static final String ADMIN_ACL_LISTACLROLES_URL = "/admin/acl/listAclRoles";
     public static final String ADMIN_ACL_LISTUSERROLES_URL = "/admin/acl/listUserRoles";
+    public static final String ADMIN_ACL_QRYROLEPRIVILEGES_URL = "/admin/acl/qryRolePrivileges";
+    public static final String ADMIN_ACL_UPDATEROLEPRIVILEGE_URL = "/admin/acl/updateRolePrivilege";
     public static final String ADMIN_ACTIVITY_LIST_URL = "/admin/activity/list";
     public static final String ADMIN_ADDBORDER_URL = "/admin/addBorder";
     public static final String ADMIN_ADDNAMESPACE_URL = "/admin/addNamespace";
@@ -84,6 +90,8 @@ public interface ApiConstants {
     public static final String ADMIN_CONTACT_LISTAPROVINGCONTACT_URL = "/admin/contact/listAprovingContact";
     public static final String ADMIN_CONTACT_SYNCCONTACT_URL = "/admin/contact/syncContact";
     public static final String ADMIN_CREATEAPP_URL = "/admin/createApp";
+    public static final String ADMIN_DECODECONTENTPATH_URL = "/admin/decodeContentPath";
+    public static final String ADMIN_DECODEWEBTOKEN_URL = "/admin/decodeWebToken";
     public static final String ADMIN_ENTERPRISE_APPROVE_URL = "/admin/enterprise/approve";
     public static final String ADMIN_ENTERPRISE_DELETEENTERPRISE_URL = "/admin/enterprise/deleteEnterprise";
     public static final String ADMIN_ENTERPRISE_IMPORTENTERPRISEDATA_URL = "/admin/enterprise/importEnterpriseData";
@@ -120,6 +128,7 @@ public interface ApiConstants {
     public static final String ADMIN_LISTLOGIN_URL = "/admin/listLogin";
     public static final String ADMIN_LISTNAMESPACE_URL = "/admin/listNamespace";
     public static final String ADMIN_LISTPERSISTSERVER_URL = "/admin/listPersistServer";
+    public static final String ADMIN_ORG_ACCEPTTASK_URL = "/admin/org/acceptTask";
     public static final String ADMIN_ORG_ADDORGADDRESS_URL = "/admin/org/addOrgAddress";
     public static final String ADMIN_ORG_ADDORGCONTACT_URL = "/admin/org/addOrgContact";
     public static final String ADMIN_ORG_ADDPMBUILDING_URL = "/admin/org/addPmBuilding";
@@ -142,6 +151,7 @@ public interface ApiConstants {
     public static final String ADMIN_ORG_DELETEORGANIZATIONPERSONNEL_URL = "/admin/org/deleteOrganizationPersonnel";
     public static final String ADMIN_ORG_FINDUSERBYINDENTIFIER_URL = "/admin/org/findUserByIndentifier";
     public static final String ADMIN_ORG_GETUSERRESOURCEPRIVILEGE_URL = "/admin/org/getUserResourcePrivilege";
+    public static final String ADMIN_ORG_GRABTASK_URL = "/admin/org/grabTask";
     public static final String ADMIN_ORG_IMPORTENTERPRISEDATA_URL = "/admin/org/importEnterpriseData";
     public static final String ADMIN_ORG_IMPORTORGPOST_URL = "/admin/org/importOrgPost";
     public static final String ADMIN_ORG_IMPORTORGANIZATION_URL = "/admin/org/importOrganization";
@@ -149,9 +159,11 @@ public interface ApiConstants {
     public static final String ADMIN_ORG_LISTACLROLEBYUSERID_URL = "/admin/org/listAclRoleByUserId";
     public static final String ADMIN_ORG_LISTALLCHILDRENORGANIZATIONS_URL = "/admin/org/listAllChildrenOrganizations";
     public static final String ADMIN_ORG_LISTALLORGANIZATIONPERSONNELS_URL = "/admin/org/listAllOrganizationPersonnels";
+    public static final String ADMIN_ORG_LISTALLTASKTOPICS_URL = "/admin/org/listAllTaskTopics";
     public static final String ADMIN_ORG_LISTCHILDRENORGANIZATIONS_URL = "/admin/org/listChildrenOrganizations";
     public static final String ADMIN_ORG_LISTDEPARTMENTS_URL = "/admin/org/listDepartments";
     public static final String ADMIN_ORG_LISTENTERPRISEBYCOMMUNITYID_URL = "/admin/org/listEnterpriseByCommunityId";
+    public static final String ADMIN_ORG_LISTMYTASKTOPICS_URL = "/admin/org/listMyTaskTopics";
     public static final String ADMIN_ORG_LISTORGAUTHPERSONNELS_URL = "/admin/org/listOrgAuthPersonnels";
     public static final String ADMIN_ORG_LISTORGMEMBERS_URL = "/admin/org/listOrgMembers";
     public static final String ADMIN_ORG_LISTORGANIZATIONPERSONNELS_URL = "/admin/org/listOrganizationPersonnels";
@@ -159,6 +171,8 @@ public interface ApiConstants {
     public static final String ADMIN_ORG_LISTPMBUILDINGS_URL = "/admin/org/listPmBuildings";
     public static final String ADMIN_ORG_LISTPMMANAGEMENTS_URL = "/admin/org/listPmManagements";
     public static final String ADMIN_ORG_LISTUNASSIGNEDBUILDING_URL = "/admin/org/listUnassignedBuilding";
+    public static final String ADMIN_ORG_PROCESSINGTASK_URL = "/admin/org/processingTask";
+    public static final String ADMIN_ORG_REFUSETASK_URL = "/admin/org/refuseTask";
     public static final String ADMIN_ORG_REJECTFORENTERPRISECONTACT_URL = "/admin/org/rejectForEnterpriseContact";
     public static final String ADMIN_ORG_SETORGANIZATIONPERSONNELROLE_URL = "/admin/org/setOrganizationPersonnelRole";
     public static final String ADMIN_ORG_SETORGANIZATIONROLE_URL = "/admin/org/setOrganizationRole";
@@ -457,7 +471,6 @@ public interface ApiConstants {
     public static final String OPENAPI_SYNCUSERINFO_URL = "/openapi/syncuserinfo";
     public static final String OPENAPI_USER_INITCOUPON_URL = "/openapi/user/initCoupon";
     public static final String OPENAPI_USER_TESTGETTHIRDSIGNATURE_URL = "/openapi/user/testGetThirdSignature";
-    public static final String ORG_ACCEPTTASK_URL = "/org/acceptTask";
     public static final String ORG_ADDORGMEMBERBYPHONE_URL = "/org/addOrgMemberByPhone";
     public static final String ORG_APPLYFORENTERPRISECONTACT_URL = "/org/applyForEnterpriseContact";
     public static final String ORG_APPLYORGANIZATIONMEMBER_URL = "/org/applyOrganizationMember";
@@ -475,13 +488,13 @@ public interface ApiConstants {
     public static final String ORG_GETORGTOPIC_URL = "/org/getOrgTopic";
     public static final String ORG_GETORGANIZATIONDETAILS_URL = "/org/getOrganizationDetails";
     public static final String ORG_GETUSEROWNINGORGANIZATIONS_URL = "/org/getUserOwningOrganizations";
-    public static final String ORG_GRABTASK_URL = "/org/grabTask";
     public static final String ORG_LEAVEFORENTERPRISECONTACT_URL = "/org/leaveForEnterpriseContact";
     public static final String ORG_LIKEORGTOPIC_URL = "/org/likeOrgTopic";
     public static final String ORG_LISTCOMMUNITIESBYORGANIZATIONID_URL = "/org/listCommunitiesByOrganizationId";
     public static final String ORG_LISTENTERPRISES_URL = "/org/listEnterprises";
     public static final String ORG_LISTORGCONTACT_URL = "/org/listOrgContact";
     public static final String ORG_LISTORGMEMBERS_URL = "/org/listOrgMembers";
+    public static final String ORG_LISTORGMIXTOPICS_URL = "/org/listOrgMixTopics";
     public static final String ORG_LISTORGTOPICCOMMENTS_URL = "/org/listOrgTopicComments";
     public static final String ORG_LISTORGTOPICS_URL = "/org/listOrgTopics";
     public static final String ORG_LISTORGANIZATIONCOMMUNITIES_URL = "/org/listOrganizationCommunities";
@@ -493,9 +506,7 @@ public interface ApiConstants {
     public static final String ORG_NEWCOOPERATION_URL = "/org/newCooperation";
     public static final String ORG_NEWORGCOMMENT_URL = "/org/newOrgComment";
     public static final String ORG_NEWORGTOPIC_URL = "/org/newOrgTopic";
-    public static final String ORG_PROCESSINGTASK_URL = "/org/processingTask";
     public static final String ORG_QUERYORGTOPICSBYCATEGORY_URL = "/org/queryOrgTopicsByCategory";
-    public static final String ORG_REFUSETASK_URL = "/org/refuseTask";
     public static final String ORG_REJECTORGANIZATION_URL = "/org/rejectOrganization";
     public static final String ORG_REJECTORGANIZATIONMEMBER_URL = "/org/rejectOrganizationMember";
     public static final String ORG_SEARCHENTERPRISE_URL = "/org/searchEnterprise";
@@ -665,16 +676,19 @@ public interface ApiConstants {
     public static final String UI_FORUM_SEARCHBYSCENE_URL = "/ui/forum/searchByScene";
     public static final String UI_LAUNCHPAD_GETLASTLAUNCHPADLAYOUTBYSCENE_URL = "/ui/launchpad/getLastLaunchPadLayoutByScene";
     public static final String UI_LAUNCHPAD_GETLAUNCHPADITEMSBYSCENE_URL = "/ui/launchpad/getLaunchPadItemsByScene";
+    public static final String UI_ORG_ACCEPTTASK_URL = "/ui/org/acceptTask";
+    public static final String UI_ORG_GRABTASK_URL = "/ui/org/grabTask";
     public static final String UI_ORG_LISTGRABTASKTOPICS_URL = "/ui/org/listGrabTaskTopics";
     public static final String UI_ORG_LISTMYTASKPOSTSBYSCENE_URL = "/ui/org/listMyTaskPostsByScene";
     public static final String UI_ORG_LISTTASKPOSTSBYSCENE_URL = "/ui/org/listTaskPostsByScene";
+    public static final String UI_ORG_PROCESSINGTASK_URL = "/ui/org/processingTask";
+    public static final String UI_ORG_REFUSETASK_URL = "/ui/org/refuseTask";
     public static final String UI_PRIVILEGE_GETENTRANCEBYPRIVILEGE_URL = "/ui/privilege/getEntranceByPrivilege";
     public static final String UI_USER_GETUSEROPPROMOTIONSBYSCENE_URL = "/ui/user/getUserOpPromotionsByScene";
     public static final String UI_USER_GETUSERRELATEDADDRESSES_URL = "/ui/user/getUserRelatedAddresses";
     public static final String UI_USER_LISTCONTACTSBYSCENE_URL = "/ui/user/listContactsByScene";
     public static final String UI_USER_LISTSCENESBYCUMMUNITYID_URL = "/ui/user/listScenesByCummunityId";
     public static final String UI_USER_LISTUSERRELATEDSCENES_URL = "/ui/user/listUserRelatedScenes";
-    public static final String UI_USER_SETUSERCURRENTSCENE_URL = "/ui/user/setUserCurrentScene";
     public static final String USER_ADMINLOGON_URL = "/user/adminLogon";
     public static final String USER_APPAGREEMENTS_URL = "/user/appAgreements";
     public static final String USER_APPIDSTATUS_URL = "/user/appIdStatus";
