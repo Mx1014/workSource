@@ -38,7 +38,7 @@ public class WebMenuPrivilegeProviderImpl implements WebMenuPrivilegeProvider {
 
 	
 	@Override
-	@Caching(evict={@CacheEvict(value="listWebMenuByType", key="'webMenu'")})
+	//@Caching(evict={@CacheEvict(value="listWebMenuByType", key="'webMenu'")})
 	public List<WebMenu> listWebMenuByType(String type) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhWebMenusRecord> query = context.selectQuery(Tables.EH_WEB_MENUS);
@@ -52,7 +52,7 @@ public class WebMenuPrivilegeProviderImpl implements WebMenuPrivilegeProvider {
 	}
 	
 	@Override
-	@Caching(evict={@CacheEvict(value="ListWebMenuByPrivilegeIds", key="webMenuByPrivilegeIds")})
+	//@Caching(evict={@CacheEvict(value="ListWebMenuByPrivilegeIds", key="webMenuByPrivilegeIds")})
 	public List<WebMenuPrivilege> ListWebMenuByPrivilegeIds(
 			List<Long> privilegeIds, WebMenuPrivilegeShowFlag showFlag) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -77,7 +77,7 @@ public class WebMenuPrivilegeProviderImpl implements WebMenuPrivilegeProvider {
 	}
 	
 	@Override
-	@Caching(evict = {@CacheEvict(value="listWebMenuByType", key="'webMenuByMenuIds'")})
+	//@Caching(evict = {@CacheEvict(value="listWebMenuByType", key="'webMenuByMenuIds'")})
 	public List<WebMenu> ListWebMenuByMenuIds(
 			List<Long> menuIds) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
