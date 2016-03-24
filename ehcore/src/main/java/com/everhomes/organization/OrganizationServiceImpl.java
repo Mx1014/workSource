@@ -60,6 +60,7 @@ import com.everhomes.family.FamilyProvider;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.Post;
+import com.everhomes.forum.PostCreateTimeDescComparator;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupProvider;
@@ -96,11 +97,14 @@ import com.everhomes.rest.forum.CancelLikeTopicCommand;
 import com.everhomes.rest.forum.ForumConstants;
 import com.everhomes.rest.forum.GetTopicCommand;
 import com.everhomes.rest.forum.LikeTopicCommand;
+import com.everhomes.rest.forum.ListOrgMixTopicCommand;
 import com.everhomes.rest.forum.ListPostCommandResponse;
+import com.everhomes.rest.forum.ListTopicByForumCommand;
 import com.everhomes.rest.forum.ListTopicCommand;
 import com.everhomes.rest.forum.ListTopicCommentCommand;
 import com.everhomes.rest.forum.NewCommentCommand;
 import com.everhomes.rest.forum.NewTopicCommand;
+import com.everhomes.rest.forum.OrganizationTopicMixType;
 import com.everhomes.rest.forum.PostContentType;
 import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.forum.PostEntityTag;
@@ -1218,6 +1222,62 @@ public class OrganizationServiceImpl implements OrganizationService {
 		this.checkCommunityIdIsNull(communityId);
 		this.checkCommunity(communityId);
 		return forumService.listTopics(cmd);
+	}
+	
+	@Override
+    public ListPostCommandResponse listOrgMixTopics(ListOrgMixTopicCommand cmd) {
+	    
+	    OrganizationTopicMixType mixType = OrganizationTopicMixType.fromCode(cmd.getMixType());
+	    if(mixType == null) {
+	        LOGGER.error("Invalid mix type, cmd=" + cmd);
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid mix type");
+	    }
+	    
+        List<Long> forumIdList = new ArrayList<Long>();
+	    
+        Group groupDto = null;
+        Long organizationId = cmd.getOrganizationId();
+	    switch(mixType) {
+	    case CHILDREN_ALL:
+	        Organization organization = organizationProvider.findOrganizationById(organizationId);
+	        if(organization == null) {
+	            LOGGER.error("Organization not found, cmd=" + cmd);
+	            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+	                    "Organization not found");
+	        } else {
+	            groupDto = groupProvider.findGroupById(organization.getGroupId());
+                if(groupDto != null) {
+                    forumIdList.add(groupDto.getOwningForumId());
+                }
+	        }
+	        
+	        List<String> groupTypes = new ArrayList<String>();
+            groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+            List<Organization> subOrgList = organizationProvider.listOrganizationByGroupTypes(organization.getPath() + "/%", groupTypes);
+            for(Organization subOrg : subOrgList) {
+                groupDto = groupProvider.findGroupById(subOrg.getGroupId());
+                if(groupDto != null) {
+                    forumIdList.add(groupDto.getOwningForumId());
+                }
+            }
+	        break;
+	    case COMMUNITY_ALL:
+	        List<OrganizationCommunity> organizationCommunitys = organizationProvider.listOrganizationCommunities(organizationId);
+            for(OrganizationCommunity orgCmnty : organizationCommunitys) {
+                Community community = communityProvider.findCommunityById(orgCmnty.getCommunityId());
+                if(community != null) {
+                    forumIdList.add(community.getDefaultForumId());
+                }
+            }
+	        break;
+	    }
+
+	    ListTopicByForumCommand forumCmd = new ListTopicByForumCommand();
+	    forumCmd.setForumIdList(forumIdList);
+	    forumCmd.setPageAnchor(cmd.getPageAnchor());
+	    forumCmd.setPageSize(cmd.getPageSize());
+	    return forumService.listTopicsByForums(forumCmd);
 	}
 
 	@Override

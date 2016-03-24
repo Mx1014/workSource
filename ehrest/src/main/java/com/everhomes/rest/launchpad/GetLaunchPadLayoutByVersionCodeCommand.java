@@ -5,6 +5,7 @@ package com.everhomes.rest.launchpad;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -12,6 +13,8 @@ import com.everhomes.util.StringHelper;
  * <li>name: layout的名称</li>
  * <li>versionCode: 当前版本号</li>
  * <li>siteUri: 链接</li>
+ * <li>namespaceId: 域空间</li>
+ * <li>sceneType: 场景类型，{@link com.everhomes.rest.ui.user.SceneType}</li>
  * </ul>
  */
 public class GetLaunchPadLayoutByVersionCodeCommand {
@@ -21,6 +24,8 @@ public class GetLaunchPadLayoutByVersionCodeCommand {
     private String   name;
     @NotNull
     private Integer namespaceId;
+    
+    private String sceneType;
 
     public GetLaunchPadLayoutByVersionCodeCommand() {
     }
@@ -47,6 +52,18 @@ public class GetLaunchPadLayoutByVersionCodeCommand {
 
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
+    }
+
+    public String getSceneType() {
+        return sceneType;
+    }
+
+    public void setSceneType(String sceneType) {
+        this.sceneType = sceneType;
+    }
+    
+    public String getCurrentSceneType() {
+        return (sceneType == null) ? SceneType.DEFAULT.getCode() : sceneType;
     }
 
     @Override
