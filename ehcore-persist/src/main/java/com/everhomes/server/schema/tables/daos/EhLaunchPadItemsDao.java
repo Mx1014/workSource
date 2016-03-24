@@ -214,5 +214,4 @@ public class EhLaunchPadItemsDao extends org.jooq.impl.DAOImpl<com.everhomes.ser
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadItems> fetchBySceneType(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhLaunchPadItems.EH_LAUNCH_PAD_ITEMS.SCENE_TYPE, values);
 	}
-
 }

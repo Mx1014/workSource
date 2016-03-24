@@ -11,9 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLaunchPadItems extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord> {
 
-
 	private static final long serialVersionUID = -1458984807;
-
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_launch_pad_items</code>
@@ -144,8 +142,6 @@ public class EhLaunchPadItems extends org.jooq.impl.TableImpl<com.everhomes.serv
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.Long> TARGET_ID = createField("target_id", org.jooq.impl.SQLDataType.BIGINT, this, "the entity id linked back to the orginal resource");
 
 	/**
-<<<<<<< HEAD
-=======
 	 * The column <code>ehcore.eh_launch_pad_items.delete_flag</code>. whether the item can be deleted from desk, 0: no, 1: yes
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.Byte> DELETE_FLAG = createField("delete_flag", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "whether the item can be deleted from desk, 0: no, 1: yes");
@@ -156,7 +152,6 @@ public class EhLaunchPadItems extends org.jooq.impl.TableImpl<com.everhomes.serv
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord, java.lang.String> SCENE_TYPE = createField("scene_type", org.jooq.impl.SQLDataType.VARCHAR.length(64).nullable(false).defaulted(true), this, "");
 
 	/**
->>>>>>> 3.3.x
 	 * Create a <code>ehcore.eh_launch_pad_items</code> table reference
 	 */
 	public EhLaunchPadItems() {

@@ -11,9 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLaunchPadItemsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhLaunchPadItemsRecord> {
 
-
 	private static final long serialVersionUID = 434300707;
-
 
 	/**
 	 * Setter for <code>ehcore.eh_launch_pad_items.id</code>.
@@ -337,7 +335,6 @@ public class EhLaunchPadItemsRecord extends org.jooq.impl.UpdatableRecordImpl<co
 		return (java.lang.Long) getValue(22);
 	}
 
-
 	/**
 	 * Setter for <code>ehcore.eh_launch_pad_items.delete_flag</code>. whether the item can be deleted from desk, 0: no, 1: yes
 	 */
@@ -392,9 +389,7 @@ public class EhLaunchPadItemsRecord extends org.jooq.impl.UpdatableRecordImpl<co
 	/**
 	 * Create a detached, initialised EhLaunchPadItemsRecord
 	 */
-
 	public EhLaunchPadItemsRecord(java.lang.Long id, java.lang.Integer namespaceId, java.lang.Long appId, java.lang.Byte scopeCode, java.lang.Long scopeId, java.lang.String itemLocation, java.lang.String itemGroup, java.lang.String itemName, java.lang.String itemLabel, java.lang.String iconUri, java.lang.Integer itemWidth, java.lang.Integer itemHeight, java.lang.Byte actionType, java.lang.String actionData, java.lang.Integer defaultOrder, java.lang.Byte applyPolicy, java.lang.Long minVersion, java.lang.Byte displayFlag, java.lang.String displayLayout, java.lang.Integer bgcolor, java.lang.String tag, java.lang.String targetType, java.lang.Long targetId, java.lang.Byte deleteFlag, java.lang.String sceneType) {
-
 		super(com.everhomes.server.schema.tables.EhLaunchPadItems.EH_LAUNCH_PAD_ITEMS);
 
 		setValue(0, id);

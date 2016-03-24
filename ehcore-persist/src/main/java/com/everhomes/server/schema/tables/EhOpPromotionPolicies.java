@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOpPromotionPolicies extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhOpPromotionPoliciesRecord> {
 
-	private static final long serialVersionUID = -1438174306;
+	private static final long serialVersionUID = -1897292396;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_op_promotion_policies</code>
@@ -37,9 +37,9 @@ public class EhOpPromotionPolicies extends org.jooq.impl.TableImpl<com.everhomes
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOpPromotionPoliciesRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_op_promotion_policies.name</code>. the title of the activity
+	 * The column <code>ehcore.eh_op_promotion_policies.name</code>. the identifer of the policy
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOpPromotionPoliciesRecord, java.lang.String> NAME = createField("name", org.jooq.impl.SQLDataType.VARCHAR.length(512).nullable(false).defaulted(true), this, "the title of the activity");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOpPromotionPoliciesRecord, java.lang.String> NAME = createField("name", org.jooq.impl.SQLDataType.VARCHAR.length(512).nullable(false).defaulted(true), this, "the identifer of the policy");
 
 	/**
 	 * The column <code>ehcore.eh_op_promotion_policies.class_name</code>. the name of class which implement how to execute the policy
