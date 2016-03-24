@@ -21,6 +21,7 @@ import com.everhomes.util.StringHelper;
  * <li>contactToken：成员标识</li>
  * <li>contactDescription：描述</li>
  * <li>status：状态</li>
+ * <li>initial：首字母</li>
  * </ul>
  */
 public class OrganizationMemberDTO {
@@ -39,6 +40,7 @@ public class OrganizationMemberDTO {
 	private String contactToken;
 	private String contactDescription;
 	private Byte   status;
+	private String initial;
 	
 	@ItemType(AclRoleAssignmentsDTO.class)
 	private List<AclRoleAssignmentsDTO> aclRoles;
@@ -210,7 +212,16 @@ public class OrganizationMemberDTO {
         this.gender = gender;
     }
 
-    @Override
+    
+    public String getInitial() {
+		return initial;
+	}
+
+	public void setInitial(String initial) {
+		this.initial = initial;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

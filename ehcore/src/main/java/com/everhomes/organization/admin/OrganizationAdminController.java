@@ -653,7 +653,7 @@ public class OrganizationAdminController extends ControllerBase {
     @RequestMapping("listOrganizationPersonnels")
     @RestReturn(value=OrganizationMemberDTO.class, collection=true)
     public RestResponse listOrganizationPersonnels(@Valid ListOrganizationContactCommand cmd) {
-    	ListOrganizationMemberCommandResponse res = organizationService.listOrganizationPersonnels(cmd);
+    	ListOrganizationMemberCommandResponse res = organizationService.listOrganizationPersonnels(cmd,false);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

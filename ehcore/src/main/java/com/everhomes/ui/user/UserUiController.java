@@ -107,7 +107,7 @@ public class UserUiController extends ControllerBase {
 			ListOrganizationContactCommand command = new ListOrganizationContactCommand();
 			command.setOrganizationId(sceneToken.getEntityId());
 			command.setPageSize(100000);
-			ListOrganizationMemberCommandResponse res = organizationService.listOrganizationPersonnels(command);
+			ListOrganizationMemberCommandResponse res = organizationService.listOrganizationPersonnels(command, true);
 			List<OrganizationMemberDTO> members = res.getMembers();
 			if(null != members){
 				dtos = members.stream().map(r->{
@@ -126,11 +126,13 @@ public class UserUiController extends ControllerBase {
 		ListNeighborUsersCommandResponse resp = null;
  	    if(UserCurrentEntityType.COMMUNITY == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
  	    	ListNeighborUsersCommand command = new ListNeighborUsersCommand();
+ 	    	command.setIsPinyin(1);
  	    	command.setType(ParamType.COMMUNITY.getCode());
  	    	command.setId(sceneToken.getEntityId());
  	    	resp= familyService.listNeighborUsers(command);
 		}else if(UserCurrentEntityType.FAMILY == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
  	    	ListNeighborUsersCommand command = new ListNeighborUsersCommand();
+ 	    	command.setIsPinyin(1);
  	    	command.setType(ParamType.FAMILY.getCode());
  	    	command.setId(sceneToken.getEntityId());
  	    	resp = familyService.listNeighborUsers(command);
@@ -141,7 +143,8 @@ public class UserUiController extends ControllerBase {
 				SceneContactDTO dto = new SceneContactDTO();
 				dto.setContactId(r.getUserId());
 				dto.setContactName(r.getUserName());
-//				dto.setContactPhone(r.get);
+				dto.setStatusLine(r.getUserStatusLine());
+				dto.setOccupation(r.getOccupation());
 				dto.setContactAvatar(r.getUserAvatarUrl());
 				dto.setUserId(r.getUserId());
 				return dto;

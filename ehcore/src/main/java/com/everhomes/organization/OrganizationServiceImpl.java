@@ -12,6 +12,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +40,7 @@ import com.everhomes.acl.Privilege;
 import com.everhomes.acl.ResourceUserRoleResolver;
 import com.everhomes.acl.Role;
 import com.everhomes.acl.RoleAssignment;
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.bootstrap.PlatformContext;
@@ -244,6 +246,7 @@ import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
+import com.everhomes.util.PinYinHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
@@ -336,6 +339,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Autowired
 	private GroupProvider groupProvider;
 	
+	@Autowired
+	private RolePrivilegeService rolePrivilegeService;
 
 	private int getPageCount(int totalCount, int pageSize){
 		int pageCount = totalCount/pageSize;
@@ -3927,7 +3932,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 	
 	@Override
-	public ListOrganizationMemberCommandResponse listOrganizationPersonnels(ListOrganizationContactCommand cmd) {
+	public ListOrganizationMemberCommandResponse listOrganizationPersonnels(ListOrganizationContactCommand cmd, boolean pinyinFlag) {
 		ListOrganizationMemberCommandResponse response = new ListOrganizationMemberCommandResponse();
 		Organization org = this.checkOrganization(cmd.getOrganizationId());
 		if(null == org)
@@ -3944,6 +3949,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 		orgCommoand.setGroupType(org.getGroupType());
 		
 		List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getKeywords(),orgCommoand, locator, pageSize);
+		
+		if(pinyinFlag){
+			organizationMembers = convertPinyin(organizationMembers);
+		}
+		
 		
 		if(0 == organizationMembers.size()){
 			return response;
@@ -4553,6 +4563,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		Map<Long, Organization> deptMaps = this.convertDeptListToMap(depts);
 		return organizationMembers.stream().map((c) ->{
+			
 			OrganizationMemberDTO dto =  ConvertHelper.convert(c, OrganizationMemberDTO.class);
 			Organization organization = deptMaps.get(c.getOrganizationId());
 			if(null != organization)
@@ -5072,7 +5083,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	OrganizationTask task = organizationProvider.findOrganizationTaskById(taskId);
 	    	
 	    	/* 根据用户不同 查询不同的任务类型贴*/
-	    	List<Long> privileges = this.getUserPrivileges(null , cmd.getOrganizationId(), user.getId());
+	    	List<Long> privileges = rolePrivilegeService.getUserPrivileges(null , cmd.getOrganizationId(), user.getId());
 	    	
 	    	this.checkPrivileged(privileges, user, task);
 	    	
@@ -5111,7 +5122,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	OrganizationTask task = organizationProvider.findOrganizationTaskById(taskId);
 	    	
 	    	/* 根据用户不同 查询不同的任务类型贴*/
-	    	List<Long> privileges = this.getUserPrivileges(null , cmd.getOrganizationId(), user.getId());
+	    	List<Long> privileges = rolePrivilegeService.getUserPrivileges(null , cmd.getOrganizationId(), user.getId());
 	    	
 	    	this.checkPrivileged(privileges, user, task);
 	    	
@@ -5144,7 +5155,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    }
 	    
 	    @Override
-	    public void processingTask(ProcessOrganizationTaskCommand cmd) {
+	    public PostDTO processingTask(ProcessOrganizationTaskCommand cmd) {
 	    	// TODO Auto-generated method stub
 	    	
 	    	User user = UserContext.current().getUser();
@@ -5162,7 +5173,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	Map<String,Object> map = new HashMap<String, Object>();
 	    	
 	    	/* 根据用户不同 查询不同的任务类型贴*/
-	    	List<Long> privileges = this.getUserPrivileges(null , cmd.getOrganizationId(), user.getId());
+	    	List<Long> privileges = rolePrivilegeService.getUserPrivileges(null , cmd.getOrganizationId(), user.getId());
 	    	
 	    	//当可以查询全部的任务类型时
 	    	if(privileges.contains(PrivilegeConstants.TaskAllListPosts)){
@@ -5285,6 +5296,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 				forumProvider.updatePost(post);
     		}
 	    	this.sendTaskMsg(map, task, user);
+	    	
+	    	return ConvertHelper.convert(post, PostDTO.class);
 	    }
 	    
 	    
@@ -5297,7 +5310,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	OrganizationTask task = organizationProvider.findOrganizationTaskById(taskId);
 	    	
 	    	/* 根据用户不同 查询不同的任务类型贴*/
-	    	List<Long> privileges = this.getUserPrivileges(null , cmd.getOrganizationId(), user.getId());
+	    	List<Long> privileges = rolePrivilegeService.getUserPrivileges(null , cmd.getOrganizationId(), user.getId());
 	    	
 	    	this.checkPrivileged(privileges, user, task);
 	    	
@@ -5364,7 +5377,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    public ListPostCommandResponse listAllTaskTopics(ListTopicsByTypeCommand cmd){
 	    	User user = UserContext.current().getUser();
 	    	
-	    	List<Long> privileges = this.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
+	    	List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
 	    	
 			if(privileges.contains(PrivilegeConstants.TaskAllListPosts)){
 				
@@ -5393,7 +5406,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    public ListPostCommandResponse listMyTaskTopics(ListTopicsByTypeCommand cmd){
 	    	User user = UserContext.current().getUser();
 	    	
-	    	List<Long> privileges = this.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
+	    	List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
 	    	
 			/* 根据用户不同 查询不同的任务类型贴*/
 			
@@ -5420,7 +5433,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    public ListPostCommandResponse listGrabTaskTopics(ListTopicsByTypeCommand cmd){
 	    	User user = UserContext.current().getUser();
 	    	
-	    	List<Long> privileges = this.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
+	    	List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
 	    	
 			/* 根据用户不同 查询不同的任务类型贴*/
 			if(privileges.contains(PrivilegeConstants.TaskAllListPosts)){
@@ -5441,7 +5454,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	User user = UserContext.current().getUser();
 	    	GetEntranceByPrivilegeResponse res = new GetEntranceByPrivilegeResponse();
 	    	
-	    	List<Long> privileges = this.getUserPrivileges(cmd.getModule(), organizationId, user.getId());
+	    	List<Long> privileges = rolePrivilegeService.getUserPrivileges(cmd.getModule(), organizationId, user.getId());
 	    	
 			/* 根据用户不同 查询不同的任务类型贴*/
 			if(privileges.contains(PrivilegeConstants.TaskAllListPosts)){
@@ -5483,61 +5496,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    }
 	    
 	    /**
-	     * 获取用户的权限列表
-	     * @param module
-	     * @param organizationId
-	     * @param userId
-	     * @return
-	     */
-	    private List<Long> getUserPrivileges(String module ,Long organizationId, Long userId){
-	    	List<RoleAssignment> userRoles = aclProvider.listRoleAssignmentByTarget(EntityType.USER.getCode(),userId);
-	    	
-	    	Organization org = this.checkOrganization(organizationId);
-	    	
-	    	if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE){
-	    		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, org.getId());
-	    		if(null != member && null != member.getGroupId() && 0 != member.getGroupId()){
-	    			organizationId = member.getGroupId();
-	    		}
-	    	}
-	    	
-	    	List<RoleAssignment> userOrgRoles = aclProvider.listRoleAssignmentByTarget(EntityType.ORGANIZATIONS.getCode(), organizationId);
-	    	
-	    	userRoles.addAll(userOrgRoles);
-	    	List<Long> privileges = new ArrayList<Long>();
-	    	if(!StringUtils.isEmpty(module)){
-	    		List<Privilege> s = aclProvider.getPrivilegesByTag(module); //aclProvider 调平台根据角色list+模块 获取权限list接口
-	    		for (RoleAssignment role : userRoles) {
-	    			List<Acl> acls = aclProvider.getResourceAclByRole(null, null, role.getRoleId());
-	    			for (Acl acl : acls) {
-	    				if(!privileges.contains(acl.getPrivilegeId())){
-	    					for (Privilege privilege : s) {
-	    						if(privilege.getId().equals(acl.getPrivilegeId())){
-	    							privileges.add(acl.getPrivilegeId());
-	    						}
-							}
-	    					
-	    				}
-					}
-	    			
-				}
-	    		
-	    	}else{
-	    		for (RoleAssignment role : userRoles) {
-	    			List<Acl> acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), null, role.getRoleId());
-	    			for (Acl acl : acls) {
-	    				if(!privileges.contains(acl.getPrivilegeId())){
-	    					privileges.add(acl.getPrivilegeId());
-	    				}
-					}
-	    			
-				}
-	    	}
-	    	
-	    	return privileges;
-	    }
-	    
-	    /**
 	     * 抛出无权限 
 	     */
 	    private void returnNoPrivileged(List<Long> privileges, User user){
@@ -5567,5 +5525,18 @@ public class OrganizationServiceImpl implements OrganizationService {
 				returnNoPrivileged(privileges, user);
 			}
 	    }
-	
+	    
+	    private List<OrganizationMember> convertPinyin(List<OrganizationMember> organizationMembers){
+			
+			organizationMembers = organizationMembers.stream().map((c) ->{
+				c.setInitial(PinYinHelper.getCapitalInitial(c.getContactName()));
+				return c;
+			}).collect(Collectors.toList());
+			
+			Collections.sort(organizationMembers);
+			
+			return organizationMembers;
+		}
+
+	  
 }

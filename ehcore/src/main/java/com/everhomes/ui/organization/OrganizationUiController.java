@@ -18,6 +18,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.forum.ListPostCommandResponse;
+import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.organization.ListTopicsByTypeCommand;
 import com.everhomes.rest.organization.ProcessOrganizationTaskCommand;
 import com.everhomes.rest.ui.organization.ListTaskPostsCommand;
@@ -175,7 +176,7 @@ public class OrganizationUiController extends ControllerBase {
     	   SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
     	   if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
     		   ProcessOrganizationTaskCommand command = ConvertHelper.convert(cmd, ProcessOrganizationTaskCommand.class);
-      	    	command.setOrganizationId(sceneToken.getEntityId());
+      	       command.setOrganizationId(sceneToken.getEntityId());
     		   organizationService.grabTask(command);
     	   }
     	   RestResponse res = new RestResponse();
@@ -194,12 +195,13 @@ public class OrganizationUiController extends ControllerBase {
         public RestResponse processingTask(@Valid ProcessingTaskCommand cmd) {
            WebTokenGenerator webToken = WebTokenGenerator.getInstance();
       	   SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+      	   PostDTO dto = null;
       	   if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
       		   ProcessOrganizationTaskCommand command = ConvertHelper.convert(cmd, ProcessOrganizationTaskCommand.class);
     	       command.setOrganizationId(sceneToken.getEntityId());
-      		   organizationService.processingTask(command);
+    	       dto = organizationService.processingTask(command);
       	   }
-           RestResponse res = new RestResponse();
+           RestResponse res = new RestResponse(dto);
            res.setErrorCode(ErrorCodes.SUCCESS);
            res.setErrorDescription("OK");
            

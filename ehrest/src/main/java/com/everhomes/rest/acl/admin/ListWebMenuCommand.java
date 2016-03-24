@@ -1,25 +1,17 @@
 package com.everhomes.rest.acl.admin;
 
+
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
- * <li>appId:园区app的标示id</li>
  * <li>organizationId: 机构id</li>
  * </ul>
  */
-public class ListAclRolesCommand {
-	
-	private Long appId;
+public class ListWebMenuCommand {
 	
 	private Long organizationId;
-
-	public Long getAppId() {
-		return appId;
-	}
-
-	public void setAppId(Long appId) {
-		this.appId = appId;
-	}
-
+	
 	public Long getOrganizationId() {
 		return organizationId;
 	}
@@ -27,6 +19,10 @@ public class ListAclRolesCommand {
 	public void setOrganizationId(Long organizationId) {
 		this.organizationId = organizationId;
 	}
-	
-	
+
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+
 }

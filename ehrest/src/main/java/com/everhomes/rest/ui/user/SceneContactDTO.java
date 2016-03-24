@@ -13,6 +13,8 @@ import com.everhomes.util.StringHelper;
  * <li>contactAvatar:头像</li>
  * <li>userId:通讯录关联的用户ID</li>
  * <li>createTime:创建通讯录时间</li>
+ * <li>statusLine:个性签名</li>
+ * <li>occupation:职业</li>
  * </ul>
  */
 public class SceneContactDTO {
@@ -25,6 +27,9 @@ public class SceneContactDTO {
     private String contactAvatar;
     private Long userId;
     private Long createTime;
+    
+    private String statusLine;
+    private String occupation; 
 
     public String getSceneType() {
         return sceneType;
@@ -98,7 +103,24 @@ public class SceneContactDTO {
         this.userId = userId;
     }
 
-    @Override
+    
+    public String getStatusLine() {
+		return statusLine;
+	}
+
+	public void setStatusLine(String statusLine) {
+		this.statusLine = statusLine;
+	}
+
+	public String getOccupation() {
+		return occupation;
+	}
+
+	public void setOccupation(String occupation) {
+		this.occupation = occupation;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

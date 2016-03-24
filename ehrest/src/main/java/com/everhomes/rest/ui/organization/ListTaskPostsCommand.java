@@ -30,6 +30,8 @@ public class ListTaskPostsCommand {
 	private Integer pageSize;
 	
 	private String option;
+	
+	private String entrancePrivilege;
 
 	public String getSceneToken() {
 		return sceneToken;
@@ -87,6 +89,15 @@ public class ListTaskPostsCommand {
 
 	public void setOption(String option) {
 		this.option = option;
+	}
+
+	
+	public String getEntrancePrivilege() {
+		return entrancePrivilege;
+	}
+
+	public void setEntrancePrivilege(String entrancePrivilege) {
+		this.entrancePrivilege = entrancePrivilege;
 	}
 
 	@Override
