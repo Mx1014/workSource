@@ -421,7 +421,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		
 		Map<Long, List<WebMenuPrivilegeDTO>> dtosMap = new HashMap<Long, List<WebMenuPrivilegeDTO>>();
 		
-		webMenuPrivileges.stream().map(r->{
+		
+		for (WebMenuPrivilege r : webMenuPrivileges) {
 			WebMenuPrivilegeDTO webMenuPrivilegeDTO = ConvertHelper.convert(r, WebMenuPrivilegeDTO.class);
 			if(null == dtosMap.get(r.getMenuId())){
 				List<WebMenuPrivilegeDTO> webMenuPrivilegeDTOs= new ArrayList<WebMenuPrivilegeDTO>();
@@ -430,8 +431,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			}else{
 				dtosMap.get(r.getMenuId()).add(webMenuPrivilegeDTO);
 			}
-			return null;
-		});
+		}
 		
 		Map<Long, WebMenu> menuMap = this.getWebMenuMap(WebMenuType.PARK.getCode());
 		
