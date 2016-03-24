@@ -4,11 +4,11 @@ package com.everhomes.rest.ui.forum;
 /**
  * <ul>
  * <li>DISCOVERY("discovery"): 用于发现界面的通用帖子查询列表</li>
- * <li>GA("ga"): 政府相关，用于物业、公安等界面的帖子查询列表</li>
+ * <li>GA_NOTICE("ga_notice"): 政府相关的公告，用于物业、公安等界面的帖子查询列表</li>
  * </ul>
  */
 public enum PostFilterType {
-	DISCOVERY("discovery"), GA("ga");
+	DISCOVERY("discovery"), GA_NOTICE("ga_notice");
     
     private String code;
     private PostFilterType(String code) {

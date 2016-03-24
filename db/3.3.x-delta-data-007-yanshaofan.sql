@@ -24,14 +24,3 @@ INSERT INTO `eh_acls` (`id`,`owner_type`,`owner_id`,`grant_type`,`privilege_id`,
 INSERT INTO `eh_acls` (`id`,`owner_type`,`owner_id`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`) values (317,'EhOrganizations',null,1,173,1003,0,1,now());
 
 
-
-
-INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag)  
-	VALUES (1900, 1000000, 0, '0', '0', '/home', 'GovAgencies', '任务管理', '任务管理', 'cs://1/image/aW1hZ2UvTVRwaU9EWTFObVJpTmpCallUSTFOams1T0RJNFpHWTJNV1E1T1dOaE1UWmtOdw', '1', '1', '39',null, '0', '0', '1', '1', '', '0', null);
-	
-INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`) 
-	VALUES(1901, 1000000, 0, 0, 0, '/home','GovAgencies','NoticeManager','公告管理','cs://1/image/aW1hZ2UvTVRveU5tSXhOMlV6TmpSak5qQmpOMlk1T1RVMFpqSTNPR0U1TXpNMll6QmlNdw',1,1,2, '{"itemLocation":"/home/NoticeManager","layoutName":"SceneNoticeLayout","title":"公告管理","entityTag":"PM"}', '0','0','1','1','','0',NULL,NULL,NULL);
-
-INSERT INTO `eh_launch_pad_layouts`(id, namespace_id, name, layout_json, version_code, min_version_code, status, create_time) VALUES ('2', '0', 'SceneNoticeLayout', '{"versionCode":"2015072815","versionName":"3.0.0","displayName":"公告管理","layoutName":"SceneNoticeLayout","groups":[{"groupName":"","widget":"Navigator","instanceConfig":{"itemGroup":"GaActions"},"style":"Default","defaultOrder":2,"separatorFlag":1,"separatorHeight":21,"columnCount":4},{"groupName":"","widget":"ScenePosts","instanceConfig":{},"style":"Default","defaultOrder":3,"separatorFlag":0,"separatorHeight":0}]}', '2015082914', '2015061701', '2', '2015-06-27 14:04:57');
-
-INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag) VALUES (1902, 0, 0, 0, 0, '/home/NoticeManager', 'GaActions', 'PUBLIC_NOTICE', '发布公告', 'cs://1/image/aW1hZ2UvTVRwall6VTVOV1U0WkdRMk56aGxPRFV3TVRBMk5qVXlNVFkzWVRZek56aGpOdw', 1, 1, 19, '{"contentCategory":1003,"actionCategory":0,"targetEntityTag":"PM","visibleRegionType":0}', 0, 0, 1, 1, '', 0,NULL);

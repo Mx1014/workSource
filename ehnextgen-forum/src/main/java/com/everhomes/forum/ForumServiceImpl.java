@@ -3051,7 +3051,7 @@ public class ForumServiceImpl implements ForumService {
             case DISCOVERY:
                 filterList = getDiscoveryTopicQueryFilters(user, sceneToken);
                 break;
-            case GA:
+            case GA_NOTICE:
                 break;
             default:
                 LOGGER.error("Unsupported post filter type, cmd=" + cmd + ", sceneToken=" + sceneToken);
