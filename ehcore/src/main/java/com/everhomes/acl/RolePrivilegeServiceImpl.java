@@ -359,6 +359,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
      */
     private List<Long> getAllMenuIds(List<Long> Ids){
     	Map<Long, WebMenu> menuMap = this.getWebMenuMap(WebMenuType.PARK.getCode());
+    	
+    	List<Long> addIds = new ArrayList<Long>();
     	for (Long id : Ids) {
     		WebMenu menu= menuMap.get(id);
     		if(null != menu){
@@ -367,8 +369,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     				for (String idStr : idStrs) {
 						if(!StringUtils.isEmpty(idStr)){
 							Long menuId = Long.valueOf(idStr);
-							if(!Ids.contains(menuId)){
-								Ids.add(menuId);
+							if(!addIds.contains(menuId)){
+								addIds.add(menuId);
 							}
 						}
 					}
@@ -376,7 +378,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     		}
 		}
     	
-    	return Ids;
+    	addIds.addAll(Ids);
+    	return addIds;
     }
     
     /**
