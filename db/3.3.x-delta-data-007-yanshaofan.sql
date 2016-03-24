@@ -7,6 +7,25 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'organization.notification', 16, 'zh_CN', '任务已完成后的短信消息','您的服务已完成，滑动去查看详情');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'organization.notification', 17, 'zh_CN', '任务已完成后回复的帖子消息','该服务已由{operatorUName}完成，稍后我们会将进行回访');
 
+
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`) values (171,0,'all.task.posts.list',null,'MANAGER_TASK');
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`) values (172,0,'guarantee.task.posts.list',null,'MANAGER_TASK');
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`) values (173,0,'seekHelp.task.posts.list',null,'MANAGER_TASK');
+
+
+
+INSERT INTO `eh_acls` (`id`,`owner_type`,`owner_id`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`) values (313,'EhOrganizations',null,1,171,1001,0,1,now());
+INSERT INTO `eh_acls` (`id`,`owner_type`,`owner_id`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`) values (314,'EhOrganizations',null,1,172,1001,0,1,now());
+INSERT INTO `eh_acls` (`id`,`owner_type`,`owner_id`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`) values (315,'EhOrganizations',null,1,173,1001,0,1,now());
+
+INSERT INTO `eh_acl_role_assignments` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`role_id`,`creator_uid`,`create_time`) values (20000,'system',null,'EhUsers',202608,1002,1,now());
+INSERT INTO `eh_acl_role_assignments` (`id`,`owner_type`,`owner_id`,`target_type`,`target_id`,`role_id`,`creator_uid`,`create_time`) values (20001,'system',null,'EhUsers',196607,1003,1,now());
+INSERT INTO `eh_acls` (`id`,`owner_type`,`owner_id`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`) values (316,'EhOrganizations',null,1,172,1002,0,1,now());
+INSERT INTO `eh_acls` (`id`,`owner_type`,`owner_id`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`) values (317,'EhOrganizations',null,1,173,1003,0,1,now());
+
+
+
+
 INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag)  
 	VALUES (1900, 1000000, 0, '0', '0', '/home', 'GovAgencies', '任务管理', '任务管理', 'cs://1/image/aW1hZ2UvTVRwaU9EWTFObVJpTmpCallUSTFOams1T0RJNFpHWTJNV1E1T1dOaE1UWmtOdw', '1', '1', '39',null, '0', '0', '1', '1', '', '0', null);
 	
