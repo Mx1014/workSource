@@ -117,6 +117,7 @@ public class UserUiController extends ControllerBase {
 					dto.setContactPhone(r.getContactToken());
 					dto.setContactAvatar(r.getAvatar());
 					dto.setUserId(r.getTargetId());
+					dto.setInitial(r.getInitial());
 					return dto;
 				}).collect(Collectors.toList());
 			}
@@ -147,6 +148,7 @@ public class UserUiController extends ControllerBase {
 				dto.setOccupation(r.getOccupation());
 				dto.setContactAvatar(r.getUserAvatarUrl());
 				dto.setUserId(r.getUserId());
+				dto.setInitial(r.getInitial());
 				return dto;
 			}).collect(Collectors.toList());
  	    }

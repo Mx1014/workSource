@@ -30,6 +30,7 @@ public class SceneContactDTO {
     
     private String statusLine;
     private String occupation; 
+    private String initial;
 
     public String getSceneType() {
         return sceneType;
@@ -118,6 +119,15 @@ public class SceneContactDTO {
 
 	public void setOccupation(String occupation) {
 		this.occupation = occupation;
+	}
+
+	
+	public String getInitial() {
+		return initial;
+	}
+
+	public void setInitial(String initial) {
+		this.initial = initial;
 	}
 
 	@Override
