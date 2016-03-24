@@ -167,7 +167,7 @@ public class UserUiController extends ControllerBase {
     @RestReturn(value=GetUserRelatedAddressResponse.class)
     public RestResponse getUserRelatedAddresses(GetUserRelatedAddressCommand cmd) {
         //List<UserServiceAddressDTO> result = this.userActivityService.getUserRelateServiceAddress();
-        GetUserRelatedAddressResponse cmdResponse = null;
+        GetUserRelatedAddressResponse cmdResponse = userService.getUserRelatedAddresses(cmd);
         
         RestResponse response = new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
