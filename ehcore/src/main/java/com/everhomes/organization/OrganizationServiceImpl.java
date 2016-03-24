@@ -4630,7 +4630,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				dto.setOrganizationName(organization.getName());
 			
 			Organization group = deptMaps.get(c.getGroupId());
-			if(null != group)
+			if(null != group && !c.getGroupId().equals(org.getId()))
 				dto.setGroupName(group.getName());
 			
 			if(OrganizationMemberTargetType.USER.getCode().equals(dto.getTargetType())){

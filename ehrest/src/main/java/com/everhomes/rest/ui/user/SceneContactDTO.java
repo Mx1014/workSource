@@ -15,6 +15,8 @@ import com.everhomes.util.StringHelper;
  * <li>createTime:创建通讯录时间</li>
  * <li>statusLine:个性签名</li>
  * <li>occupation:职业</li>
+ * <li>departmentName:部门名称</li>
+ * <li>neighborhoodRelation: 邻居关系参考，{@link com.everhomes.rest.family.NeighborhoodRelation}</li>
  * </ul>
  */
 public class SceneContactDTO {
@@ -28,9 +30,13 @@ public class SceneContactDTO {
     private Long userId;
     private Long createTime;
     
+    private String departmentName;
+    
     private String statusLine;
     private String occupation; 
     private String initial;
+    
+    private Byte neighborhoodRelation;
 
     public String getSceneType() {
         return sceneType;
@@ -128,6 +134,26 @@ public class SceneContactDTO {
 
 	public void setInitial(String initial) {
 		this.initial = initial;
+	}
+	
+	
+
+	public String getDepartmentName() {
+		return departmentName;
+	}
+
+	public void setDepartmentName(String departmentName) {
+		this.departmentName = departmentName;
+	}
+	
+	
+	
+	public Byte getNeighborhoodRelation() {
+		return neighborhoodRelation;
+	}
+
+	public void setNeighborhoodRelation(Byte neighborhoodRelation) {
+		this.neighborhoodRelation = neighborhoodRelation;
 	}
 
 	@Override

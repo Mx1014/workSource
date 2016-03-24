@@ -51,8 +51,7 @@ public class OrganizationRoleMapProviderImpl implements OrganizationRoleMapProvi
 	public List<OrganizationRoleMap> listOrganizationRoleMapsByOwnerIds(List<Long> ownerIds, EntityType ownerType, PrivateFlag privateFlag) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhOrganizationRoleMapRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_ROLE_MAP);
-		Condition cond = Tables.EH_ORGANIZATION_ROLE_MAP.PRIVATE_FLAG.eq(privateFlag.getCode());
-		cond = cond.and(Tables.EH_ORGANIZATION_ROLE_MAP.OWNER_TYPE.eq(ownerType.getCode()));
+		Condition cond = Tables.EH_ORGANIZATION_ROLE_MAP.OWNER_TYPE.eq(ownerType.getCode());
 		if(null != ownerIds && 0 != ownerIds.size()){
 			Condition c = null;
 			for (Long ownerId : ownerIds) {
@@ -62,6 +61,7 @@ public class OrganizationRoleMapProviderImpl implements OrganizationRoleMapProvi
 					c = c.or(Tables.EH_ORGANIZATION_ROLE_MAP.OWNER_ID.eq(ownerId));
 				}
 			}
+			c = c.or(Tables.EH_ORGANIZATION_ROLE_MAP.PRIVATE_FLAG.eq(privateFlag.getCode()));
 			cond = cond.and(c);
 		}
 		query.addConditions(cond);

@@ -203,15 +203,23 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	public List<ListWebMenuPrivilegeDTO> qryRolePrivileges(
 			QryRolePrivilegesCommand cmd) {
 		
-		List<Acl> acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), null, cmd.getRoleId());
-		
 		List<Long> privilegeIds = new ArrayList<Long>();
 		
-		if(null == acls){
-			return new ArrayList<ListWebMenuPrivilegeDTO>();
-		}
-		for (Acl acl : acls) {
-			privilegeIds.add(acl.getPrivilegeId());
+		if(cmd.getRoleId() == RoleConstants.ORGANIZATION_ADMIN){
+			List<Privilege> privilegeList = aclProvider.getPrivilegesByApp(AppConstants.APPID_DEFAULT);
+    		
+    		for (Privilege privilege : privilegeList) {
+    			privilegeIds.add(privilege.getId());
+			}
+		}else{
+			List<Acl> acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), null, cmd.getRoleId());
+			
+			if(null == acls){
+				return new ArrayList<ListWebMenuPrivilegeDTO>();
+			}
+			for (Acl acl : acls) {
+				privilegeIds.add(acl.getPrivilegeId());
+			}
 		}
 		
 		List<WebMenuPrivilege> webMenuPrivileges = webMenuPrivilegeProvider.ListWebMenuByPrivilegeIds(privilegeIds, null);
