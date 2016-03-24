@@ -293,7 +293,12 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     	userRoles.addAll(userOrgRoles);
     	List<Long> privileges = new ArrayList<Long>();
     	
-    	if(userRoles.contains(RoleConstants.ORGANIZATION_ADMIN)){
+    	List<Long> roleIds = new ArrayList<Long>();
+    	for (RoleAssignment role : userOrgRoles) {
+    		roleIds.add(role.getRoleId());
+		}
+    	
+    	if(roleIds.contains(RoleConstants.ORGANIZATION_ADMIN)){
     		List<Privilege> privilegeList = aclProvider.getPrivilegesByApp(AppConstants.APPID_DEFAULT);
     		
     		for (Privilege privilege : privilegeList) {
@@ -304,8 +309,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     	
     	if(!StringUtils.isEmpty(module)){
     		List<Privilege> s = aclProvider.getPrivilegesByTag(module); //aclProvider 调平台根据角色list+模块 获取权限list接口
-    		for (RoleAssignment role : userRoles) {
-    			List<Acl> acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), null, role.getRoleId());
+    		for (Long roleId : roleIds) {
+    			List<Acl> acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), null, roleId);
     			for (Acl acl : acls) {
     				if(!privileges.contains(acl.getPrivilegeId())){
     					for (Privilege privilege : s) {
@@ -320,8 +325,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			}
     		
     	}else{
-    		for (RoleAssignment role : userRoles) {
-    			List<Acl> acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), null, role.getRoleId());
+    		for (Long roleId : roleIds) {
+    			List<Acl> acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), null, roleId);
     			for (Acl acl : acls) {
     				if(!privileges.contains(acl.getPrivilegeId())){
     					privileges.add(acl.getPrivilegeId());
