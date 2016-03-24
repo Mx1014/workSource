@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
@@ -61,6 +62,7 @@ import com.everhomes.rest.quality.ListQualityInspectionTasksCommand;
 import com.everhomes.rest.quality.ListQualityInspectionTasksResponse;
 import com.everhomes.rest.quality.ListFactorsCommand;
 import com.everhomes.rest.quality.ListFactorsResponse;
+import com.everhomes.rest.quality.ListRecordsByTaskIdCommand;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.quality.ProcessType;
 import com.everhomes.rest.quality.QualityCategoriesDTO;
@@ -599,13 +601,13 @@ public class QualityServiceImpl implements QualityService {
 			record.setProcessEndTime(task.getProcessExpireTime());
 		}
 			
-		if(QualityInspectionTaskResult.INSPECT_OK.equals(cmd.getVerificationResult())) {
-			if(QualityInspectionTaskResult.RECTIFIED_OK_AND_WAITING_APPROVAL.equals(task.getProcessResult())) {
+		if(QualityInspectionTaskResult.INSPECT_OK.getCode() == cmd.getVerificationResult()) {
+			if(QualityInspectionTaskResult.RECTIFIED_OK_AND_WAITING_APPROVAL.getCode() == task.getProcessResult()) {
 				
 				task.setResult(QualityInspectionTaskResult.RECTIFIED_OK.getCode());
 			}
 			
-			if(QualityInspectionTaskResult.RECTIFY_CLOSED_AND_WAITING_APPROVAL.equals(task.getProcessResult())) {
+			if(QualityInspectionTaskResult.RECTIFY_CLOSED_AND_WAITING_APPROVAL.getCode() == task.getProcessResult()) {
 				task.setResult(QualityInspectionTaskResult.RECTIFY_CLOSED.getCode());
 			}
 			else {
@@ -617,7 +619,7 @@ public class QualityServiceImpl implements QualityService {
 			record.setProcessType(ProcessType.INSPECT.getCode());
 			
 		}
-		else if(QualityInspectionTaskResult.INSPECT_CLOSE.equals(cmd.getVerificationResult())) {
+		else if(QualityInspectionTaskResult.INSPECT_CLOSE.getCode() == cmd.getVerificationResult()) {
 			task.setResult(QualityInspectionTaskResult.INSPECT_CLOSE.getCode());
 			task.setStatus(QualityInspectionTaskStatus.CLOSED.getCode());
 			record.setProcessResult(QualityInspectionTaskResult.INSPECT_CLOSE.getCode());
@@ -695,13 +697,13 @@ public class QualityServiceImpl implements QualityService {
 		record.setOperatorType(OwnerType.USER.getCode());
 		record.setOperatorId(user.getId());
 		
-		if(QualityInspectionTaskResult.RECTIFIED_OK_AND_WAITING_APPROVAL.equals(cmd.getRectifyResult())) {
+		if(QualityInspectionTaskResult.RECTIFIED_OK_AND_WAITING_APPROVAL.getCode() == cmd.getRectifyResult()) {
 			task.setProcessResult(QualityInspectionTaskResult.RECTIFIED_OK_AND_WAITING_APPROVAL.getCode());
 			task.setStatus(QualityInspectionTaskStatus.RECTIFIED_AND_WAITING_APPROVAL.getCode());
 			record.setProcessResult(QualityInspectionTaskResult.RECTIFIED_OK_AND_WAITING_APPROVAL.getCode());
 			record.setProcessType(ProcessType.RETIFY.getCode());
 		}
-		else if(QualityInspectionTaskResult.RECTIFY_CLOSED_AND_WAITING_APPROVAL.equals(cmd.getRectifyResult())) {
+		else if(QualityInspectionTaskResult.RECTIFY_CLOSED_AND_WAITING_APPROVAL.getCode() == cmd.getRectifyResult()) {
 			task.setProcessResult(QualityInspectionTaskResult.RECTIFY_CLOSED_AND_WAITING_APPROVAL.getCode());
 			task.setStatus(QualityInspectionTaskStatus.RECTIFY_CLOSED_AND_WAITING_APPROVAL.getCode());
 			record.setProcessResult(QualityInspectionTaskResult.RECTIFY_CLOSED_AND_WAITING_APPROVAL.getCode());
@@ -1093,6 +1095,30 @@ public class QualityServiceImpl implements QualityService {
 		}
 		
 		return score;
+	}
+
+	@Override
+	public List<QualityInspectionTaskRecordsDTO> listRecordsByTaskId(
+			ListRecordsByTaskIdCommand cmd) {
+		
+		List<QualityInspectionTaskRecords> records = qualityProvider.listRecordsByTaskId(cmd.getTaskId());
+		if(records == null || records.size() == 0) {
+			return null;
+		}
+		this.qualityProvider.populateRecordAttachments(records);
+		
+		records.stream().map((r) -> {
+			populateRecordAttachements(r, r.getAttachments());
+			return r;
+		});
+		
+		List<QualityInspectionTaskRecordsDTO> dtos = records.stream().map((r) -> {
+			
+			QualityInspectionTaskRecordsDTO dto = ConvertHelper.convert(r, QualityInspectionTaskRecordsDTO.class);
+			return dto;
+		}).collect(Collectors.toList());
+		
+		return dtos;
 	}
 
 }

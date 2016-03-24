@@ -1,5 +1,7 @@
 package com.everhomes.quality;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -27,7 +29,9 @@ import com.everhomes.rest.quality.ListQualityInspectionTasksCommand;
 import com.everhomes.rest.quality.ListQualityInspectionTasksResponse;
 import com.everhomes.rest.quality.ListFactorsCommand;
 import com.everhomes.rest.quality.ListFactorsResponse;
+import com.everhomes.rest.quality.ListRecordsByTaskIdCommand;
 import com.everhomes.rest.quality.QualityInspectionTaskDTO;
+import com.everhomes.rest.quality.QualityInspectionTaskRecordsDTO;
 import com.everhomes.rest.quality.QualityStandardsDTO;
 import com.everhomes.rest.quality.ReportRectifyResultCommand;
 import com.everhomes.rest.quality.ReportVerificationResultCommand;
@@ -307,6 +311,22 @@ public class QualityController extends ControllerBase {
 		qualityService.createTaskByStandardId(cmd.getStandardId());
 		
 		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /quality/listRecordsByTaskId</b>
+	 * <p>创建品质核查标准</p>
+	 */
+	@RequestMapping("listRecordsByTaskId")
+	@RestReturn(value = QualityInspectionTaskRecordsDTO.class, collection = true)
+	public RestResponse listRecordsByTaskId(ListRecordsByTaskIdCommand cmd) {
+		
+		List<QualityInspectionTaskRecordsDTO> records = qualityService.listRecordsByTaskId(cmd);
+		
+		RestResponse response = new RestResponse(records);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
