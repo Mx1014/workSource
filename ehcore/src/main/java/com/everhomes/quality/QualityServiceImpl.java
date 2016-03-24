@@ -509,6 +509,14 @@ public class QualityServiceImpl implements QualityService {
         	QualityInspectionStandards standard = verifiedStandardById(r.getStandardId());
         	QualityInspectionCategories category = verifiedCategoryById(standard.getCategoryId());
         	r.setCategoryName(category.getName());
+        	
+        	if(cmd.getExecuteUid() != null) {
+        		if(r.getExecutorId() != null && r.getExecutorId() == cmd.getExecuteUid()) {
+        			r.setTaskFlag(QualityTaskType.VERIFY_TASK.getCode());
+        		}if(r.getOperatorId() != null && r.getOperatorId() == cmd.getExecuteUid()) {
+        			r.setTaskFlag(QualityTaskType.RECTIFY_TASK.getCode());
+        		}
+        	}
         	QualityInspectionTaskDTO dto = ConvertHelper.convert(r, QualityInspectionTaskDTO.class);  
         	List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(r.getExecutiveGroupId());
         	
@@ -625,8 +633,7 @@ public class QualityServiceImpl implements QualityService {
 		}
 		
 		
-		processTaskAttachments(user.getId(),  cmd.getAttachments(), task, QualityTaskType.VERIFY_TASK.getCode());
-		QualityInspectionTaskDTO dto = updateVerificationTasks(task, record);
+		QualityInspectionTaskDTO dto = updateVerificationTasks(task, record, cmd.getAttachments());
 		return dto;
 		
 	}
@@ -649,7 +656,7 @@ public class QualityServiceImpl implements QualityService {
 		record.setProcessType(ProcessType.REVIEW.getCode());
 		record.setProcessResult(cmd.getReviewResult());
 
-		updateVerificationTasks(task, record);
+		updateVerificationTasks(task, record, null);
 
 		
 	}
@@ -711,9 +718,9 @@ public class QualityServiceImpl implements QualityService {
 		
 		task.setProcessTime(new Timestamp(System.currentTimeMillis()));
 
-		processTaskAttachments(user.getId(),  cmd.getAttachments(), task, QualityTaskType.RECTIFY_TASK.getCode());
+//		processTaskAttachments(user.getId(),  cmd.getAttachments(), task, QualityTaskType.RECTIFY_TASK.getCode());
 //		qualityProvider.populateTaskAttachment(task);
-		QualityInspectionTaskDTO dto = updateVerificationTasks(task, record);
+		QualityInspectionTaskDTO dto = updateVerificationTasks(task, record, cmd.getAttachments());
 		return dto;
 	}
 
@@ -841,24 +848,31 @@ public class QualityServiceImpl implements QualityService {
 		return task;
 	}
 	
-	private QualityInspectionTaskDTO updateVerificationTasks(QualityInspectionTasks task, QualityInspectionTaskRecords record) {
+	private QualityInspectionTaskDTO updateVerificationTasks(QualityInspectionTasks task, 
+			QualityInspectionTaskRecords record, List<AttachmentDescriptor> attachmentList) {
 		
 		qualityProvider.updateVerificationTasks(task);
 		qualityProvider.createQualityInspectionTaskRecords(record);
 		
-		populateTaskAttachements(task, task.getAttachments());
+		User user = UserContext.current().getUser();
+		processRecordAttachments(user.getId(), attachmentList, record);
+		
+		populateRecordAttachements(record, record.getAttachments());
+		
+		qualityProvider.populateTaskRecords(task);
+		
+		List<QualityInspectionTaskRecords> records = new ArrayList<QualityInspectionTaskRecords>();
+        records.addAll(task.getRecords());
+
+		this.qualityProvider.populateRecordAttachments(records);
 		
 		QualityInspectionTaskDTO dto = ConvertHelper.convert(task, QualityInspectionTaskDTO.class);
 		
-		
-		dto.setInspectionText(inspectionText);
 		return dto;
 	}
 	
-	private void processTaskAttachments(long userId, List<AttachmentDescriptor> attachmentList, QualityInspectionTaskRecords record, byte taskType) {
+	private void processRecordAttachments(long userId, List<AttachmentDescriptor> attachmentList, QualityInspectionTaskRecords record) {
         List<QualityInspectionTaskAttachments> results = null;
-        
-//        this.qualityProvider.deleteTaskAttachmentsByTaskId(task.getId());
         
         if(attachmentList != null) {
             results = new ArrayList<QualityInspectionTaskAttachments>();

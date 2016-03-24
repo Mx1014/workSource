@@ -7,6 +7,7 @@ import java.util.List;
 
 
 
+
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
@@ -35,9 +36,8 @@ import com.everhomes.util.StringHelper;
  *  <li>result: 核查执行结果 com.everhomes.rest.quality.QualityInspectionTaskResult</li>
  *  <li>processResult: 整改执行结果com.everhomes.rest.quality.QualityInspectionTaskResult</li>
  *  <li>reviewResult: 审阅结果com.everhomes.rest.quality.QualityInspectionTaskReviewResult</li>
- *  <li>attachments: 附件 com.everhomes.rest.forum.AttachmentDescriptor</li>
+ *  <li>records: 操作记录列表 com.everhomes.rest.quality.QualityInspectionTaskRecordsDTO</li>
  *  <li>executiveGroupId: 执行业务组id</li>
- *  <li>inspectionText: 核查上报文字内容</li>
  *  <li>groupUsers: 参考com.everhomes.rest.quality.GroupUserDTO</li>
  * </ul>
  */
@@ -91,13 +91,13 @@ public class QualityInspectionTaskDTO {
 	
 	private String reviewerName;
 	
-	@ItemType(QualityInspectionTaskAttachmentDTO.class)
-    private List<QualityInspectionTaskAttachmentDTO> attachments;
-	
-	private String inspectionText;
+	@ItemType(QualityInspectionTaskRecordsDTO.class)
+    private List<QualityInspectionTaskRecordsDTO> records;
 	
 	@ItemType(GroupUserDTO.class)
 	private List<GroupUserDTO> groupUsers;
+	
+	private Byte taskFlag;
 
 	public Long getId() {
 		return id;
@@ -106,7 +106,6 @@ public class QualityInspectionTaskDTO {
 	public void setId(Long id) {
 		this.id = id;
 	}
-
 
 	public String getGroupName() {
 		return groupName;
@@ -284,20 +283,12 @@ public class QualityInspectionTaskDTO {
 		this.reviewerName = reviewerName;
 	}
 
-	public List<QualityInspectionTaskAttachmentDTO> getAttachments() {
-		return attachments;
+	public List<QualityInspectionTaskRecordsDTO> getRecords() {
+		return records;
 	}
 
-	public void setAttachments(List<QualityInspectionTaskAttachmentDTO> attachments) {
-		this.attachments = attachments;
-	}
-	
-	public String getInspectionText() {
-		return inspectionText;
-	}
-
-	public void setInspectionText(String inspectionText) {
-		this.inspectionText = inspectionText;
+	public void setRecords(List<QualityInspectionTaskRecordsDTO> records) {
+		this.records = records;
 	}
 
 	public Long getExecutiveGroupId() {
@@ -314,6 +305,14 @@ public class QualityInspectionTaskDTO {
 
 	public void setGroupUsers(List<GroupUserDTO> groupUsers) {
 		this.groupUsers = groupUsers;
+	}
+
+	public Byte getTaskFlag() {
+		return taskFlag;
+	}
+
+	public void setTaskFlag(Byte taskFlag) {
+		this.taskFlag = taskFlag;
 	}
 
 	@Override
