@@ -67,7 +67,9 @@ import com.everhomes.rest.quality.QualityCategoriesDTO;
 import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.rest.quality.QualityInspectionCategoryStatus;
 import com.everhomes.rest.quality.QualityInspectionTaskDTO;
+import com.everhomes.rest.quality.QualityInspectionTaskRecordsDTO;
 import com.everhomes.rest.quality.QualityInspectionTaskResult;
+import com.everhomes.rest.quality.QualityInspectionTaskStatus;
 import com.everhomes.rest.quality.QualityNotificationTemplateCode;
 import com.everhomes.rest.quality.QualityStandardStatus;
 import com.everhomes.rest.quality.QualityStandardsDTO;
@@ -86,6 +88,7 @@ import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -120,7 +123,7 @@ public class QualityServiceImpl implements QualityService {
 	
 	@Autowired
 	private ConfigurationProvider configurationProvider;
-
+	
 	@Override
 	public QualityStandardsDTO creatQualityStandard(CreatQualityStandardCommand cmd) {
 		
@@ -481,13 +484,14 @@ public class QualityServiceImpl implements QualityService {
         		cmd.getTaskType(), cmd.getExecuteUid(), startDate, endDate, 
         		cmd.getGroupId(), cmd.getExecuteStatus(), cmd.getReviewStatus());
         
-        
-        this.qualityProvider.populateTasksRecords(tasks);
-        
         List<QualityInspectionTaskRecords> records = new ArrayList<QualityInspectionTaskRecords>();
         for(QualityInspectionTasks task : tasks) {
-        	records.addAll(task.getRecords());
-       
+        	QualityInspectionTaskRecords record = qualityProvider.listLastRecordByTaskId(task.getId());
+        	if(record != null) {
+        		task.setRecord(record);
+            	records.add(task.getRecord());
+        	}
+        	
         }
 
 		this.qualityProvider.populateRecordAttachments(records);
@@ -511,12 +515,13 @@ public class QualityServiceImpl implements QualityService {
         	r.setCategoryName(category.getName());
         	
         	if(cmd.getExecuteUid() != null) {
-        		if(r.getExecutorId() != null && r.getExecutorId() == cmd.getExecuteUid()) {
+        		if(r.getExecutorId() != null && r.getExecutorId().equals(cmd.getExecuteUid())) {
         			r.setTaskFlag(QualityTaskType.VERIFY_TASK.getCode());
-        		}if(r.getOperatorId() != null && r.getOperatorId() == cmd.getExecuteUid()) {
+        		}else if(r.getOperatorId() != null && r.getOperatorId().equals(cmd.getExecuteUid())) {
         			r.setTaskFlag(QualityTaskType.RECTIFY_TASK.getCode());
         		}
         	}
+        	
         	QualityInspectionTaskDTO dto = ConvertHelper.convert(r, QualityInspectionTaskDTO.class);  
         	List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(r.getExecutiveGroupId());
         	
@@ -536,6 +541,9 @@ public class QualityServiceImpl implements QualityService {
              }).filter(member->member!=null).collect(Collectors.toList());
         	 
         	 dto.setGroupUsers(groupUsers);
+        	 
+        	 QualityInspectionTaskRecordsDTO recordDto = ConvertHelper.convert(r.getRecord(), QualityInspectionTaskRecordsDTO.class);
+        	 dto.setRecord(recordDto);
         	
         	return dto;
         }).collect(Collectors.toList());
@@ -593,8 +601,10 @@ public class QualityServiceImpl implements QualityService {
 			
 		if(QualityInspectionTaskResult.INSPECT_OK.equals(cmd.getVerificationResult())) {
 			if(QualityInspectionTaskResult.RECTIFIED_OK_AND_WAITING_APPROVAL.equals(task.getProcessResult())) {
+				
 				task.setResult(QualityInspectionTaskResult.RECTIFIED_OK.getCode());
 			}
+			
 			if(QualityInspectionTaskResult.RECTIFY_CLOSED_AND_WAITING_APPROVAL.equals(task.getProcessResult())) {
 				task.setResult(QualityInspectionTaskResult.RECTIFY_CLOSED.getCode());
 			}
@@ -602,36 +612,51 @@ public class QualityServiceImpl implements QualityService {
 				task.setResult(QualityInspectionTaskResult.INSPECT_OK.getCode());
 			}
 			
+			task.setStatus(QualityInspectionTaskStatus.CLOSED.getCode());
 			record.setProcessResult(QualityInspectionTaskResult.INSPECT_OK.getCode());
 			record.setProcessType(ProcessType.INSPECT.getCode());
 			
 		}
 		else if(QualityInspectionTaskResult.INSPECT_CLOSE.equals(cmd.getVerificationResult())) {
 			task.setResult(QualityInspectionTaskResult.INSPECT_CLOSE.getCode());
-			
+			task.setStatus(QualityInspectionTaskStatus.CLOSED.getCode());
 			record.setProcessResult(QualityInspectionTaskResult.INSPECT_CLOSE.getCode());
 			record.setProcessType(ProcessType.INSPECT.getCode());
 		}
 		else {
 			record.setProcessResult(QualityInspectionTaskResult.NONE.getCode());
 			record.setProcessType(ProcessType.ASSIGN.getCode());
+			task.setStatus(QualityInspectionTaskStatus.RECTIFING.getCode());
 		}
 		
-		record.setProcessMessage(cmd.getMessage());
 		if(!StringUtils.isNullOrEmpty(cmd.getOperatorType()) && cmd.getOperatorId() != null
 				 && cmd.getEndTime() != null) {
+			OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), task.getExecutiveGroupId());
 			Map<String, Object> map = new HashMap<String, Object>();
-		    map.put("userName", user.getNickName());
+		    map.put("userName", operator.getContactName());
 		    map.put("taskName", task.getTaskName());
 		    map.put("deadline", cmd.getEndTime());
 			String scope = QualityNotificationTemplateCode.SCOPE;
 			int code = QualityNotificationTemplateCode.ASSIGN_TASK_NOTIFY_OPERATOR;
 			String locale = "zh_CN";
 			String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-			sendMessageToUser(user.getId(), notifyTextForApplicant);
-			record.setProcessMessage(notifyTextForApplicant);
+			sendMessageToUser(cmd.getOperatorId(), notifyTextForApplicant);
+			
+			OrganizationMember target = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getOperatorId(), task.getExecutiveGroupId());
+			Map<String, Object> msgMap = new HashMap<String, Object>();
+		    map.put("operator", operator.getContactName());
+		    map.put("target", target.getContactName());
+		    map.put("taskName", task.getTaskName());
+		    map.put("deadline", cmd.getEndTime());
+			int msgCode = QualityNotificationTemplateCode.ASSIGN_TASK_MSG;
+			String msg = localeTemplateService.getLocaleTemplateString(scope, msgCode, locale, msgMap, "");
+			record.setProcessMessage(msg);
 		}
 		
+		if(cmd.getMessage() != null) {
+			String msg = record.getProcessMessage()+cmd.getMessage();
+			record.setProcessMessage(msg);
+		}
 		
 		QualityInspectionTaskDTO dto = updateVerificationTasks(task, record, cmd.getAttachments());
 		return dto;
@@ -672,11 +697,13 @@ public class QualityServiceImpl implements QualityService {
 		
 		if(QualityInspectionTaskResult.RECTIFIED_OK_AND_WAITING_APPROVAL.equals(cmd.getRectifyResult())) {
 			task.setProcessResult(QualityInspectionTaskResult.RECTIFIED_OK_AND_WAITING_APPROVAL.getCode());
+			task.setStatus(QualityInspectionTaskStatus.RECTIFIED_AND_WAITING_APPROVAL.getCode());
 			record.setProcessResult(QualityInspectionTaskResult.RECTIFIED_OK_AND_WAITING_APPROVAL.getCode());
 			record.setProcessType(ProcessType.RETIFY.getCode());
 		}
 		else if(QualityInspectionTaskResult.RECTIFY_CLOSED_AND_WAITING_APPROVAL.equals(cmd.getRectifyResult())) {
 			task.setProcessResult(QualityInspectionTaskResult.RECTIFY_CLOSED_AND_WAITING_APPROVAL.getCode());
+			task.setStatus(QualityInspectionTaskStatus.RECTIFY_CLOSED_AND_WAITING_APPROVAL.getCode());
 			record.setProcessResult(QualityInspectionTaskResult.RECTIFY_CLOSED_AND_WAITING_APPROVAL.getCode());
 			record.setProcessType(ProcessType.RETIFY.getCode());
 		}
@@ -700,20 +727,32 @@ public class QualityServiceImpl implements QualityService {
 			record.setProcessEndTime(task.getProcessExpireTime());
 		}
 		
-		record.setProcessMessage(cmd.getMessage());
-		
 		if(!StringUtils.isNullOrEmpty(cmd.getOperatorType()) && cmd.getOperatorId() != null
 				 && cmd.getEndTime() != null) {
+			OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), task.getExecutiveGroupId());
 			Map<String, Object> map = new HashMap<String, Object>();
-		    map.put("userName", user.getNickName());
+		    map.put("userName", operator.getContactName());
 		    map.put("taskName", task.getTaskName());
 		    map.put("deadline", cmd.getEndTime());
 			String scope = QualityNotificationTemplateCode.SCOPE;
 			int code = QualityNotificationTemplateCode.ASSIGN_TASK_NOTIFY_OPERATOR;
 			String locale = "zh_CN";
 			String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-			sendMessageToUser(user.getId(), notifyTextForApplicant);
-			record.setProcessMessage(notifyTextForApplicant);
+			sendMessageToUser(cmd.getOperatorId(), notifyTextForApplicant);
+			
+			OrganizationMember target = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getOperatorId(), task.getExecutiveGroupId());
+			Map<String, Object> msgMap = new HashMap<String, Object>();
+		    map.put("operator", operator.getContactName());
+		    map.put("target", target.getContactName());
+		    map.put("taskName", task.getTaskName());
+		    map.put("deadline", cmd.getEndTime());
+			int msgCode = QualityNotificationTemplateCode.ASSIGN_TASK_MSG;
+			String msg = localeTemplateService.getLocaleTemplateString(scope, msgCode, locale, msgMap, "");
+			record.setProcessMessage(msg);
+		}
+		if(cmd.getMessage() != null) {
+			String msg = record.getProcessMessage()+cmd.getMessage();
+			record.setProcessMessage(msg);
 		}
 		
 		task.setProcessTime(new Timestamp(System.currentTimeMillis()));
@@ -723,7 +762,7 @@ public class QualityServiceImpl implements QualityService {
 		QualityInspectionTaskDTO dto = updateVerificationTasks(task, record, cmd.getAttachments());
 		return dto;
 	}
-
+	
 	@Override
 	public void createTaskByStandard(QualityStandardsDTO standard) {
 		if(standard.getExecutiveGroup() != null && standard.getExecutiveGroup().size() > 0) {
@@ -739,7 +778,7 @@ public class QualityServiceImpl implements QualityService {
 			task.setStandardId(standard.getId());
 			task.setTaskName(standard.getName());
 			task.setTaskType((byte) 1);
-			
+			task.setStatus(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode());
 			for(StandardGroupDTO executiveGroup : standard.getExecutiveGroup()) {
 				
 				task.setExecutiveGroupId(executiveGroup.getGroupId());
@@ -859,15 +898,16 @@ public class QualityServiceImpl implements QualityService {
 		
 		populateRecordAttachements(record, record.getAttachments());
 		
-		qualityProvider.populateTaskRecords(task);
-		
-		List<QualityInspectionTaskRecords> records = new ArrayList<QualityInspectionTaskRecords>();
-        records.addAll(task.getRecords());
+		QualityInspectionTaskRecords lastRecord = qualityProvider.listLastRecordByTaskId(task.getId());
+    	if(lastRecord != null) {
+    		task.setRecord(lastRecord);
+    	}
 
-		this.qualityProvider.populateRecordAttachments(records);
+		this.qualityProvider.populateRecordAttachment(lastRecord);
 		
 		QualityInspectionTaskDTO dto = ConvertHelper.convert(task, QualityInspectionTaskDTO.class);
-		
+		QualityInspectionTaskRecordsDTO recordDto = ConvertHelper.convert(task.getRecord(), QualityInspectionTaskRecordsDTO.class);
+   	 	dto.setRecord(recordDto);
 		return dto;
 	}
 	

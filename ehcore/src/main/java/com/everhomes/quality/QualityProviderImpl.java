@@ -13,12 +13,15 @@ import java.util.Map;
 
 
 
+
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 
 
 
@@ -159,7 +162,9 @@ public class QualityProviderImpl implements QualityProvider {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.TASK_TYPE.eq(taskType));
 		}
 		if(executeUid != null && executeUid != 0) {
-			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTOR_ID.eq(executeUid));
+			Condition con = Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTOR_ID.eq(executeUid);
+			con.or(Tables.EH_QUALITY_INSPECTION_TASKS.OPERATOR_ID.eq(executeUid));
+			query.addConditions(con);
 		}
 		
 		if(startDate != null && !"".equals(startDate)) {
@@ -826,12 +831,13 @@ public class QualityProviderImpl implements QualityProvider {
         
         List<Integer> shards = this.shardingProvider.getContentShards(EhQualityInspectionTasks.class, taskIds);
         this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhQualityInspectionTasks.class), null, (DSLContext context, Object reducingContext) -> {
-            SelectQuery<EhQualityInspectionTaskRecordsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS);
+            
+        	SelectQuery<EhQualityInspectionTaskRecordsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS);
             query.addConditions(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS.TASK_ID.in(taskIds));
             query.fetch().map((EhQualityInspectionTaskRecordsRecord record) -> {
             	QualityInspectionTasks task = mapTasks.get(record.getTaskId());
                 assert(task != null);
-                task.getRecords().add(ConvertHelper.convert(record, QualityInspectionTaskRecords.class));
+ //               task.getRecords().add(ConvertHelper.convert(record, QualityInspectionTaskRecords.class));
             
                 return null;
             });

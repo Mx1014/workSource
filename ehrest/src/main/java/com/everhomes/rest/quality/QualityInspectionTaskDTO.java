@@ -36,7 +36,7 @@ import com.everhomes.util.StringHelper;
  *  <li>result: 核查执行结果 com.everhomes.rest.quality.QualityInspectionTaskResult</li>
  *  <li>processResult: 整改执行结果com.everhomes.rest.quality.QualityInspectionTaskResult</li>
  *  <li>reviewResult: 审阅结果com.everhomes.rest.quality.QualityInspectionTaskReviewResult</li>
- *  <li>records: 操作记录列表 com.everhomes.rest.quality.QualityInspectionTaskRecordsDTO</li>
+ *  <li>record: 操作记录列表 com.everhomes.rest.quality.QualityInspectionTaskRecordsDTO</li>
  *  <li>executiveGroupId: 执行业务组id</li>
  *  <li>groupUsers: 参考com.everhomes.rest.quality.GroupUserDTO</li>
  * </ul>
@@ -92,7 +92,7 @@ public class QualityInspectionTaskDTO {
 	private String reviewerName;
 	
 	@ItemType(QualityInspectionTaskRecordsDTO.class)
-    private List<QualityInspectionTaskRecordsDTO> records;
+    private QualityInspectionTaskRecordsDTO record;
 	
 	@ItemType(GroupUserDTO.class)
 	private List<GroupUserDTO> groupUsers;
@@ -283,12 +283,12 @@ public class QualityInspectionTaskDTO {
 		this.reviewerName = reviewerName;
 	}
 
-	public List<QualityInspectionTaskRecordsDTO> getRecords() {
-		return records;
+	public QualityInspectionTaskRecordsDTO getRecord() {
+		return record;
 	}
 
-	public void setRecords(List<QualityInspectionTaskRecordsDTO> records) {
-		this.records = records;
+	public void setRecord(QualityInspectionTaskRecordsDTO record) {
+		this.record = record;
 	}
 
 	public Long getExecutiveGroupId() {
