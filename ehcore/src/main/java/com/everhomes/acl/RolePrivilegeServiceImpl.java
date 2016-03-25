@@ -142,6 +142,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			organizationRoleMap.setOwnerType(EntityType.ORGANIZATIONS.getCode());
 			organizationRoleMap.setOwnerId(cmd.getOrganizationId());
 			organizationRoleMap.setRoleId(role.getId());
+			organizationRoleMap.setRoleName(cmd.getRoleName());
 			organizationRoleMap.setPrivateFlag(PrivateFlag.PRIVATE.getCode());
 			organizationRoleMap.setCreateTime(time);
 			organizationRoleMap.setStatus(OrganizationRoleMapStatus.ACTIVE.getCode());
@@ -173,10 +174,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		User user = UserContext.current().getUser();
 		dbProvider.execute((TransactionStatus status) -> {
 			Timestamp time = new Timestamp(DateHelper.currentGMTTime().getTime());
-			Role role = aclProvider.getRoleById(cmd.getRoleId());
-			role.setName(cmd.getRoleName());
-//			aclProvider.updateRole(role);
 			
+			OrganizationRoleMap organizationRoleMap = organizationRoleMapProvider.getOrganizationRoleMap(cmd.getRoleId());
+			organizationRoleMap.setRoleName(cmd.getRoleName());
+			organizationRoleMapProvider.updateOrganizationRoleMap(organizationRoleMap);
 			List<Long> privilegeIds = cmd.getPrivilegeIds();
 			if(null != privilegeIds && 0 != privilegeIds.size()){
 //				aclProvider.deleteAcl(arg0);
@@ -186,7 +187,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				acl.setOwnerType(EntityType.ORGANIZATIONS.getCode());
 //				acl.setOwnerId(cmd.getOrganizationId());
 				acl.setOrderSeq(0);
-				acl.setRoleId(role.getId());
+				acl.setRoleId(cmd.getRoleId());
 				acl.setCreatorUid(user.getId());
 				acl.setCreateTime(time);
 				for (Long privilegeId : privilegeIds) {

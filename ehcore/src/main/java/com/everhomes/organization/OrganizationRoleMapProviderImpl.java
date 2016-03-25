@@ -78,6 +78,25 @@ public class OrganizationRoleMapProviderImpl implements OrganizationRoleMapProvi
 		EhOrganizationRoleMapDao dao = new EhOrganizationRoleMapDao(context.configuration());
 		dao.insert(organizationRoleMap);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationRoleMap.class, null); 
+		
 	}
 	
+	
+	@Override
+	public OrganizationRoleMap getOrganizationRoleMap(Long roleId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationRoleMapRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_ROLE_MAP);
+		Condition cond = Tables.EH_ORGANIZATION_ROLE_MAP.ROLE_ID.eq(roleId);
+		query.addConditions(cond);
+		return ConvertHelper.convert(query.fetchAny(), OrganizationRoleMap.class);
+	}
+	
+	@Override
+	public void updateOrganizationRoleMap(
+			OrganizationRoleMap organizationRoleMap) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOrganizationRoleMapDao dao = new EhOrganizationRoleMapDao(context.configuration());
+		dao.update(organizationRoleMap);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationRoleMap.class, organizationRoleMap.getId());
+	}
 }
