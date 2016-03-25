@@ -1,6 +1,6 @@
 //
 // EvhCommunityDTO.h
-// generated at 2016-03-25 15:57:23 
+// generated at 2016-03-25 17:08:12 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -68,6 +68,8 @@
 @property(nonatomic, copy) NSNumber* feedbackForumId;
 
 @property(nonatomic, copy) NSNumber* updateTime;
+
+@property(nonatomic, copy) NSNumber* areaSize;
 
 // item type EvhCommunityGeoPointDTO*
 @property(nonatomic, strong) NSMutableArray* geoPointList;

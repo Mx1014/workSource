@@ -1,16 +1,16 @@
 //
 // EvhAdminOrgListOrganizationPersonnelsRestResponse.h
-// generated at 2016-03-25 11:43:34 
+// generated at 2016-03-25 17:08:12 
 //
 #import "RestResponseBase.h"
+#import "EvhListOrganizationMemberCommandResponse.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhAdminOrgListOrganizationPersonnelsRestResponse
 //
 @interface EvhAdminOrgListOrganizationPersonnelsRestResponse : EvhRestResponseBase
 
-// array of EvhOrganizationMemberDTO* objects
-@property(nonatomic, strong) NSMutableArray* response;
+@property(nonatomic, strong) EvhListOrganizationMemberCommandResponse* response;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

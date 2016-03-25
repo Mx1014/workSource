@@ -1,8 +1,9 @@
 //
 // EvhListWebMenuResponse.m
-// generated at 2016-03-25 15:57:23 
+// generated at 2016-03-25 17:08:11 
 //
 #import "EvhListWebMenuResponse.h"
+#import "EvhWebMenuDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhListWebMenuResponse
@@ -34,3 +35,33 @@
 {
     if(self.menus) {
         NSMutableArray* jsonArray = [NSMutableArray new];
+        for(EvhWebMenuDTO* item in self.menus) {
+            NSMutableDictionary* dic = [NSMutableDictionary new];
+            [item toJson:dic];
+            [jsonArray addObject:dic];
+        }
+        [jsonObject setObject: jsonArray forKey: @"menus"];
+    }
+}
+
+-(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
+{
+    if([jsonObject isKindOfClass:[NSDictionary class]]) {
+        {
+            NSArray* jsonArray = [jsonObject objectForKey: @"menus"];
+            for(id itemJson in jsonArray) {
+                EvhWebMenuDTO* item = [EvhWebMenuDTO new];
+                
+                [item fromJson: itemJson];
+                [self.menus addObject: item];
+            }
+        }
+        return self;
+    }
+    
+    return nil;
+}
+
+@end
+
+///////////////////////////////////////////////////////////////////////////////

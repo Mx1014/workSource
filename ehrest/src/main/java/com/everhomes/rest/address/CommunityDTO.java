@@ -32,6 +32,7 @@ import com.everhomes.util.StringHelper;
  * <li>communityType: 园区类型，参考{@link com.everhomes.rest.community.CommunityType}</li>
  * <li>defaultForumId: 默认论坛ID，每个园区都有一个自己的默认论坛用于放园区整体的帖子（如公告）</li>
  * <li>feedbackForumId: 意见论坛ID，每个园区都有一个自己的意见反馈论坛用于放园区意见反馈帖子</li>
+ * <li>areaSize: 面积</li>
  * <li>updateTime: 更新时间</li>
  * </ul>
  */
@@ -64,6 +65,7 @@ public class CommunityDTO {
     private Long defaultForumId;
     private Long feedbackForumId;
     private Timestamp updateTime;
+    private Double areaSize;
     
     @ItemType(CommunityGeoPointDTO.class)
     private List<CommunityGeoPointDTO> geoPointList;
@@ -303,7 +305,15 @@ public class CommunityDTO {
         this.updateTime = updateTime;
     }
 
-    @Override
+    public Double getAreaSize() {
+		return areaSize;
+	}
+
+	public void setAreaSize(Double areaSize) {
+		this.areaSize = areaSize;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

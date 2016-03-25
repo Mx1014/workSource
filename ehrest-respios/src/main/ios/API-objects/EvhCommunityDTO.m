@@ -1,6 +1,6 @@
 //
 // EvhCommunityDTO.m
-// generated at 2016-03-25 15:57:23 
+// generated at 2016-03-25 17:08:12 
 //
 #import "EvhCommunityDTO.h"
 #import "EvhCommunityGeoPointDTO.h"
@@ -89,6 +89,8 @@
         [jsonObject setObject: self.feedbackForumId forKey: @"feedbackForumId"];
     if(self.updateTime)
         [jsonObject setObject: self.updateTime forKey: @"updateTime"];
+    if(self.areaSize)
+        [jsonObject setObject: self.areaSize forKey: @"areaSize"];
     if(self.geoPointList) {
         NSMutableArray* jsonArray = [NSMutableArray new];
         for(EvhCommunityGeoPointDTO* item in self.geoPointList) {
@@ -214,6 +216,10 @@
         self.updateTime = [jsonObject objectForKey: @"updateTime"];
         if(self.updateTime && [self.updateTime isEqual:[NSNull null]])
             self.updateTime = nil;
+
+        self.areaSize = [jsonObject objectForKey: @"areaSize"];
+        if(self.areaSize && [self.areaSize isEqual:[NSNull null]])
+            self.areaSize = nil;
 
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"geoPointList"];

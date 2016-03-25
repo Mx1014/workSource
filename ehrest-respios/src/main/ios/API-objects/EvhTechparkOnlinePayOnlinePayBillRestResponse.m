@@ -1,6 +1,6 @@
 //
 // EvhTechparkOnlinePayOnlinePayBillRestResponse.m
-// generated at 2016-03-25 15:57:24 
+// generated at 2016-03-25 17:08:13 
 //
 #import "EvhTechparkOnlinePayOnlinePayBillRestResponse.h"
 #import "EvhRechargeInfoDTO.h"

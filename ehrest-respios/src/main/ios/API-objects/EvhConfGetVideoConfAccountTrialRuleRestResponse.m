@@ -1,6 +1,6 @@
 //
 // EvhConfGetVideoConfAccountTrialRuleRestResponse.m
-// generated at 2016-03-25 15:57:24 
+// generated at 2016-03-25 17:08:12 
 //
 #import "EvhConfGetVideoConfAccountTrialRuleRestResponse.h"
 #import "EvhVideoConfAccountTrialRuleDTO.h"

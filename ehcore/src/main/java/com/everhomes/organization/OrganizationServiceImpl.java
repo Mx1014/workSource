@@ -121,6 +121,7 @@ import com.everhomes.rest.messaging.QuestionMetaObject;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.organization.AddOrgAddressCommand;
+import com.everhomes.rest.organization.AddPersonnelsToGroup;
 import com.everhomes.rest.organization.ApplyOrganizationMemberCommand;
 import com.everhomes.rest.organization.AssginOrgTopicCommand;
 import com.everhomes.rest.organization.CreateDepartmentCommand;
@@ -142,6 +143,7 @@ import com.everhomes.rest.organization.ListDepartmentsCommand;
 import com.everhomes.rest.organization.ListDepartmentsCommandResponse;
 import com.everhomes.rest.organization.ListEnterprisesCommand;
 import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
+import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
 import com.everhomes.rest.organization.ListOrganizationCommunityCommand;
 import com.everhomes.rest.organization.ListOrganizationCommunityCommandResponse;
 import com.everhomes.rest.organization.ListOrganizationCommunityV2CommandResponse;
@@ -4027,6 +4029,36 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 	
 	@Override
+	public ListOrganizationMemberCommandResponse listOrganizationPersonnelsByRoleIds(ListOrganizationAdministratorCommand cmd){
+		ListOrganizationContactCommand command = new ListOrganizationContactCommand();
+		command.setOrganizationId(cmd.getOrganizationId());
+		command.setPageSize(100000);
+		ListOrganizationMemberCommandResponse response = this.listOrganizationPersonnels(command, false);
+		
+		List<OrganizationMemberDTO> roleMembers = new ArrayList<OrganizationMemberDTO>();
+		
+		List<OrganizationMemberDTO> members = response.getMembers();
+		
+		if(null != members && 0 != members.size()){
+			for (OrganizationMemberDTO organizationMemberDTO : members) {
+				List<AclRoleAssignmentsDTO> roleIds = organizationMemberDTO.getAclRoles();
+				
+				for (AclRoleAssignmentsDTO aclRoleAssignmentsDTO : roleIds) {
+					if(cmd.getRoleIds().contains(aclRoleAssignmentsDTO.getId())){
+						roleMembers.add(organizationMemberDTO);
+						break;
+					}
+				}
+			}
+		}
+		
+		response.setMembers(roleMembers);
+		
+		return response;
+		
+	}
+	
+	@Override
 	public ListOrganizationMemberCommandResponse listOrgAuthPersonnels(ListOrganizationContactCommand cmd) {
 		ListOrganizationMemberCommandResponse response = new ListOrganizationMemberCommandResponse();
 		Organization org = this.checkOrganization(cmd.getOrganizationId());
@@ -4172,6 +4204,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 					"ids Invalid parameter.");
 		}
 		organizationProvider.updateOrganizationMemberByIds(ids, org);
+	}
+	
+	@Override
+	public void addPersonnelsToGroup(AddPersonnelsToGroup cmd) {
+		
+		List<Long> ids = new ArrayList<Long>();
+		for (Long id : ids) {
+//			organizationProvider.find
+		}
+		
 	}
 	
 	@Override
@@ -4623,6 +4665,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		Map<Long, Organization> deptMaps = this.convertDeptListToMap(depts);
 		return organizationMembers.stream().map((c) ->{
+			if(!StringUtils.isEmpty(c.getInitial())){
+				c.setInitial(c.getInitial().replace("~", "#"));
+			}
 			
 			OrganizationMemberDTO dto =  ConvertHelper.convert(c, OrganizationMemberDTO.class);
 			Organization organization = deptMaps.get(c.getOrganizationId());
@@ -5216,7 +5261,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    
 	    @Override
 	    public PostDTO processingTask(ProcessOrganizationTaskCommand cmd) {
-	    	// TODO Auto-generated method stub
 	    	
 	    	User user = UserContext.current().getUser();
 	    	Long taskId = cmd.getTaskId();
@@ -5598,5 +5642,5 @@ public class OrganizationServiceImpl implements OrganizationService {
 			return organizationMembers;
 		}
 
-	  
+	
 }

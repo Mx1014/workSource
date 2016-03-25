@@ -3,6 +3,7 @@ package com.everhomes.rest.acl.admin;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.rest.acl.WebMenuPrivilegeDTO;
 import com.everhomes.util.StringHelper;
 
@@ -19,6 +20,7 @@ public class ListWebMenuPrivilegeDTO {
 	
 	private String moduleName;
 
+	@ItemType(WebMenuPrivilegeDTO.class)
 	private List<WebMenuPrivilegeDTO> dtos;
 	
 	public Long getModuleId() {

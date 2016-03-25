@@ -1,6 +1,6 @@
 //
 // EvhBannerServiceErrorCode.h
-// generated at 2016-03-25 11:43:32 
+// generated at 2016-03-25 17:08:11 
 //
 
 #define EvhBannerServiceErrorCode_SCOPE @"banner"

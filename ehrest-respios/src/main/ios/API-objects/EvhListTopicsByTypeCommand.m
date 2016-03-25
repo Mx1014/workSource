@@ -1,6 +1,6 @@
 //
 // EvhListTopicsByTypeCommand.m
-// generated at 2016-03-25 15:57:22 
+// generated at 2016-03-25 17:08:10 
 //
 #import "EvhListTopicsByTypeCommand.h"
 
@@ -47,6 +47,8 @@
         [jsonObject setObject: self.targetId forKey: @"targetId"];
     if(self.option)
         [jsonObject setObject: self.option forKey: @"option"];
+    if(self.entrancePrivilege)
+        [jsonObject setObject: self.entrancePrivilege forKey: @"entrancePrivilege"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -83,6 +85,10 @@
         self.option = [jsonObject objectForKey: @"option"];
         if(self.option && [self.option isEqual:[NSNull null]])
             self.option = nil;
+
+        self.entrancePrivilege = [jsonObject objectForKey: @"entrancePrivilege"];
+        if(self.entrancePrivilege && [self.entrancePrivilege isEqual:[NSNull null]])
+            self.entrancePrivilege = nil;
 
         return self;
     }

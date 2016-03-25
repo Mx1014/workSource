@@ -1,9 +1,9 @@
 //
 // EvhAdminOrgListOrgAuthPersonnelsRestResponse.m
-// generated at 2016-03-25 11:43:34 
+// generated at 2016-03-25 17:08:12 
 //
 #import "EvhAdminOrgListOrgAuthPersonnelsRestResponse.h"
-#import "EvhOrganizationMemberDTO.h"
+#import "EvhListOrganizationMemberCommandResponse.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhAdminOrgListOrgAuthPersonnelsRestResponse
@@ -25,7 +25,6 @@
 {
     self = [super init];
     if(self) {
-        _response = [NSMutableArray new];
         return self;
     }
     return nil;
@@ -36,13 +35,9 @@
     [super toJson: jsonObject];
     
     if(self.response) {
-        NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhOrganizationMemberDTO* item in self.response) {
-            NSMutableDictionary* dic = [NSMutableDictionary new];
-            [item toJson:dic];
-            [jsonArray addObject:dic];
-        }
-        [jsonObject setObject: jsonArray forKey: @"response"];
+        NSMutableDictionary* dic = [NSMutableDictionary new];
+        [self.response toJson: dic];
+        [jsonObject setObject: dic forKey: @"response"];
     }
 }
 
@@ -50,12 +45,9 @@
 {
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
         [super fromJson: jsonObject];
-        NSArray* jsonArray = [jsonObject objectForKey: @"response"];
-        for(NSMutableDictionary* dic in jsonArray) {
-            EvhOrganizationMemberDTO* item = [EvhOrganizationMemberDTO new];
-            [item fromJson:dic];
-            [self.response addObject: item];
-        }
+        NSMutableDictionary* dic =  (NSMutableDictionary*)[jsonObject objectForKey: @"response"];
+        self.response = [EvhListOrganizationMemberCommandResponse new];
+        self.response = [self.response fromJson: dic];
         return self;
     }
     
