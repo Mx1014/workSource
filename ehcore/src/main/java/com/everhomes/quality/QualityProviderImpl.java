@@ -163,7 +163,7 @@ public class QualityProviderImpl implements QualityProvider {
 		}
 		if(executeUid != null && executeUid != 0) {
 			Condition con = Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTOR_ID.eq(executeUid);
-			con.or(Tables.EH_QUALITY_INSPECTION_TASKS.OPERATOR_ID.eq(executeUid));
+			con = con.or(Tables.EH_QUALITY_INSPECTION_TASKS.OPERATOR_ID.eq(executeUid));
 			query.addConditions(con);
 		}
 		

@@ -302,7 +302,7 @@ public class QualityController extends ControllerBase {
 	
 	/**
 	 * <b>URL: /quality/createTaskByStandard</b>
-	 * <p>创建品质核查标准</p>
+	 * <p>根据品质核查标准创建任务</p>
 	 */
 	@RequestMapping("createTaskByStandard")
 	@RestReturn(value = String.class)
@@ -318,7 +318,7 @@ public class QualityController extends ControllerBase {
 	
 	/**
 	 * <b>URL: /quality/listRecordsByTaskId</b>
-	 * <p>创建品质核查标准</p>
+	 * <p>查看任务的操作记录</p>
 	 */
 	@RequestMapping("listRecordsByTaskId")
 	@RestReturn(value = QualityInspectionTaskRecordsDTO.class, collection = true)

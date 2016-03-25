@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>entityType: 实体类型，参考{@link  com.everhomes.rest.user.UserCurrentEntityType}</li>
  * <li>entityId: 实体对应的ID</li>
  * <li>timestamp: 切换的时间</li>
- * <li></li>
+ * <li>directlyEnterpriseId:群组的所属公司</li>
  * </ul>
  */
 public class UserCurrentEntity {
@@ -22,6 +22,8 @@ public class UserCurrentEntity {
     private String entityName;
     
     private Long timestamp;
+    
+    private Long directlyEnterpriseId;
     
     public UserCurrentEntity() {
     }
@@ -66,7 +68,15 @@ public class UserCurrentEntity {
         this.timestamp = timestamp;
     }
 
-    @Override
+    public Long getDirectlyEnterpriseId() {
+		return directlyEnterpriseId;
+	}
+
+	public void setDirectlyEnterpriseId(Long directlyEnterpriseId) {
+		this.directlyEnterpriseId = directlyEnterpriseId;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
