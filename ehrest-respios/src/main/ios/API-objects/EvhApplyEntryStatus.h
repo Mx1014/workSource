@@ -1,0 +1,19 @@
+//
+// EvhApplyEntryStatus.h
+// generated at 2016-03-25 11:43:32 
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhApplyEntryStatus
+//
+typedef enum {
+
+    EvhApplyEntryStatus_PROCESSING = 1, 
+    EvhApplyEntryStatus_RESIDED_IN = 2, 
+    EvhApplyEntryStatus_INVALID = 3
+
+} EvhApplyEntryStatus;
+
+///////////////////////////////////////////////////////////////////////////////
+

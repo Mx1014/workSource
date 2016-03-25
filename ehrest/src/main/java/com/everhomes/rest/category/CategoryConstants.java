@@ -64,6 +64,9 @@ public interface CategoryConstants {
     /** 帖子/投票 */
     public static final long CATEGORY_ID_TOPIC_POLLING = 1011L;
     
+    /** 帖子/经济求助 */
+    public static final long CATEGORY_ID_EMERGENCY_HELP = 1012L;
+    
     public static final long CATEGORY_ID_CONF = 200001L;
     
     public static final long CATEGORY_ID_CONF_CAPACITY = 200101L;

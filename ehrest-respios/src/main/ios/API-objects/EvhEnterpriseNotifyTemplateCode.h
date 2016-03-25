@@ -1,0 +1,13 @@
+//
+// EvhEnterpriseNotifyTemplateCode.h
+// generated at 2016-03-25 11:43:33 
+//
+
+#define EvhEnterpriseNotifyTemplateCode_SCOPE @"enterprise.notification"
+#define EvhEnterpriseNotifyTemplateCode_ENTERPRISE_USER_SUCCESS_MYSELF 1
+#define EvhEnterpriseNotifyTemplateCode_ENTERPRISE_USER_SUCCESS_OTHER 2
+#define EvhEnterpriseNotifyTemplateCode_ENTERPRISE_USER_REJECT_JOIN 3
+#define EvhEnterpriseNotifyTemplateCode_ENTERPRISE_CONTACT_LEAVE_FOR_APPLICANT 4
+#define EvhEnterpriseNotifyTemplateCode_ENTERPRISE_CONTACT_LEAVE_FOR_OTHER 5
+#define EvhEnterpriseNotifyTemplateCode_ENTERPRISE_CONTACT_REQUEST_TO_JOIN_FOR_APPLICANT 6
+#define EvhEnterpriseNotifyTemplateCode_ENTERPRISE_CONTACT_REQUEST_TO_JOIN_FOR_OPERATOR 7

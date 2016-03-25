@@ -5,6 +5,7 @@ package com.everhomes.rest.organization;
  * <ul>
  * <li>id：organizationid</li>
  * <li>parentId：父机构id。没有填科技园的organizationid</li>
+ * <li>address：地址</li>
  * <li>name：名称</li>
  * </ul>
  */
@@ -13,6 +14,8 @@ public class UpdateOrganizationsCommand {
 	private Long id;
 
 	private String name;
+	
+	private String address;
 	
 	private Long parentId;
 
@@ -39,6 +42,14 @@ public class UpdateOrganizationsCommand {
 
 	public void setParentId(Long parentId) {
 		this.parentId = parentId;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
 	}
 
 

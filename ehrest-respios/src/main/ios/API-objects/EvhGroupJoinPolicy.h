@@ -1,0 +1,19 @@
+//
+// EvhGroupJoinPolicy.h
+// generated at 2016-03-25 11:43:33 
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhGroupJoinPolicy
+//
+typedef enum {
+
+    EvhGroupJoinPolicy_FREE = 0, 
+    EvhGroupJoinPolicy_NEED_APPROVE = 1, 
+    EvhGroupJoinPolicy_INVITE_ONLY = 2
+
+} EvhGroupJoinPolicy;
+
+///////////////////////////////////////////////////////////////////////////////
+

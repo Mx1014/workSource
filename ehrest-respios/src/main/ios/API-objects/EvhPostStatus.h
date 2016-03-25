@@ -1,0 +1,19 @@
+//
+// EvhPostStatus.h
+// generated at 2016-03-25 11:43:34 
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhPostStatus
+//
+typedef enum {
+
+    EvhPostStatus_INACTIVE = 0, 
+    EvhPostStatus_WAITING_FOR_CONFIRMATION = 1, 
+    EvhPostStatus_ACTIVE = 2
+
+} EvhPostStatus;
+
+///////////////////////////////////////////////////////////////////////////////
+

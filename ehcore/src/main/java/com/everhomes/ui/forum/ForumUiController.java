@@ -1,0 +1,112 @@
+// @formatter:off
+package com.everhomes.ui.forum;
+
+import java.util.List;
+
+import javax.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestDoc;
+import com.everhomes.discover.RestReturn;
+import com.everhomes.forum.ForumService;
+import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.forum.ListPostCommandResponse;
+import com.everhomes.rest.forum.PostDTO;
+import com.everhomes.rest.ui.forum.GetTopicQueryFilterCommand;
+import com.everhomes.rest.ui.forum.GetTopicSentScopeCommand;
+import com.everhomes.rest.ui.forum.NewTopicBySceneCommand;
+import com.everhomes.rest.ui.forum.SearchTopicBySceneCommand;
+import com.everhomes.rest.ui.forum.TopicFilterDTO;
+import com.everhomes.rest.ui.forum.TopicScopeDTO;
+import com.everhomes.search.PostSearcher;
+
+/**
+ * <ul>
+ * <li>在客户端组件化的过程中，有一些与界面有关的逻辑会放到服务器端</li>
+ * <li>专门提供客户端逻辑的API都放到该Controller中，这类API属于比较高层的API，专门服务于界面</li>
+ * </ul>
+ */
+@RestDoc(value="ForumUi controller", site="forumui")
+@RestController
+@RequestMapping("/ui/forum")
+public class ForumUiController extends ControllerBase {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ForumUiController.class);
+    
+    @Autowired
+    private ConfigurationProvider configurationProvider;
+    
+    @Autowired
+    private ForumService forumService;
+    
+    @Autowired
+    private PostSearcher postSearcher;
+        
+    /**
+     * <b>URL: /ui/forum/getTopicQueryFilters</b>
+     * <p>获取指定条件对应的论坛帖子查询过滤条件列表。</p>
+     */
+    @RequestMapping("getTopicQueryFilters")
+    @RestReturn(value=TopicFilterDTO.class, collection=true)
+    public RestResponse getTopicQueryFilters(GetTopicQueryFilterCommand cmd) {
+        List<TopicFilterDTO> filterDtoList = forumService.getTopicQueryFilters(cmd);
+        
+        RestResponse response = new RestResponse(filterDtoList);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    } 
+    
+    /**
+     * <b>URL: /ui/forum/getTopicSentScopes</b>
+     * <p>获取全局帖子发送范围。</p>
+     */
+    @RequestMapping("getTopicSentScopes")
+    @RestReturn(value=TopicScopeDTO.class, collection=true)
+    public RestResponse getTopicSentScopes(GetTopicSentScopeCommand cmd) {
+        List<TopicScopeDTO> filterDtoList = forumService.getTopicSentScopes(cmd);
+        
+        RestResponse response = new RestResponse(filterDtoList);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }  
+    
+    /**
+     * <b>URL: /ui/forum/newTopicByScene</b>
+     * <p>根据场景创建新帖</p>
+     */
+    @RequestMapping("newTopicByScene")
+    @RestReturn(value=PostDTO.class)
+    public RestResponse newTopicByScene(@Valid NewTopicBySceneCommand cmd) {
+        PostDTO postDto = this.forumService.createTopicByScene(cmd);
+        
+        RestResponse response = new RestResponse(postDto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /ui/forum/searchByScene</b>
+     * <p>按指定条件查询符合条件的帖子列表</p>
+     */
+    @RequestMapping("searchByScene")
+    @RestReturn(value=ListPostCommandResponse.class)
+    public RestResponse searchByScene(SearchTopicBySceneCommand cmd) {
+        ListPostCommandResponse cmdResponse = postSearcher.queryByScene(cmd);
+        
+        RestResponse response = new RestResponse();
+        response.setResponseObject(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+}

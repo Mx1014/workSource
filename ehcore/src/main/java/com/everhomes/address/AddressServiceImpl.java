@@ -478,7 +478,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         long offset = PaginationHelper.offsetFromPageOffset(pageOffset, pageSize);
         Tuple<Integer, Long> targetShard = new Tuple<>(0, offset);
         String likeVal = "%" + cmd.getKeyword() + "%";
-        int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+        int namespaceId = UserContext.getCurrentNamespaceId(null);
         if(offset > 0) {
             final List<Long> countsInShards = new ArrayList<>();
             this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 

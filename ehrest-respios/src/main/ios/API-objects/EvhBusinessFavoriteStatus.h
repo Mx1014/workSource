@@ -1,0 +1,18 @@
+//
+// EvhBusinessFavoriteStatus.h
+// generated at 2016-03-25 11:43:33 
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhBusinessFavoriteStatus
+//
+typedef enum {
+
+    EvhBusinessFavoriteStatus_NONE = 0, 
+    EvhBusinessFavoriteStatus_FAVORITE = 1
+
+} EvhBusinessFavoriteStatus;
+
+///////////////////////////////////////////////////////////////////////////////
+

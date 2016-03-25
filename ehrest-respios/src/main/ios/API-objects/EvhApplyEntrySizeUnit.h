@@ -1,0 +1,18 @@
+//
+// EvhApplyEntrySizeUnit.h
+// generated at 2016-03-25 11:43:34 
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhApplyEntrySizeUnit
+//
+typedef enum {
+
+    EvhApplyEntrySizeUnit_SINGLETON = 1, 
+    EvhApplyEntrySizeUnit_SQUARE_METERS = 2
+
+} EvhApplyEntrySizeUnit;
+
+///////////////////////////////////////////////////////////////////////////////
+

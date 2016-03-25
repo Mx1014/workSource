@@ -135,16 +135,13 @@ public class YellowPageServiceImpl implements YellowPageService {
 		//做兼容
 		if(null != cmd.getCommunityId()){
 			cmd.setOwnerId(cmd.getCommunityId());
-		}else if(!StringUtils.isEmpty(cmd.getOwnerType()) && "namespace".equals(cmd.getOwnerType()) && null != cmd.getOwnerId()){
+		}else if(null != cmd.getOwnerId()){
 			List<Community> communities = communityProvider.listCommunitiesByNamespaceId(cmd.getOwnerId().intValue());
 			if(null != communities && 0 != communities.size()){
 				cmd.setOwnerId(communities.get(0).getId());
 				cmd.setOwnerType("community");
 			}
 		}
-		
-		
-		
 		YellowPageListResponse response = new YellowPageListResponse();
 		response.setYellowPages(new ArrayList<YellowPageDTO>());
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());

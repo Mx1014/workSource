@@ -57,6 +57,7 @@ import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.organization.OrganizationTaskStatus;
+import com.everhomes.rest.organization.OrganizationTaskType;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.pm.OrganizationScopeCode;
 import com.everhomes.sequence.SequenceProvider;
@@ -253,7 +254,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 	
 	@Override
-	public List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId,CrossShardListingLocator locator,Integer pageSize) {
+	public List<Organization> listEnterpriseByNamespaceIds(Integer namespaceId,String organizationType,CrossShardListingLocator locator,Integer pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		pageSize = pageSize + 1;
 		List<Organization> result  = new ArrayList<Organization>();
@@ -264,7 +265,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
 		query.addConditions(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(0l));
 		query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()));
-		query.addConditions(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE.eq(OrganizationType.ENTERPRISE.getCode()));
+		if(!StringUtils.isEmpty(organizationType)){
+			query.addConditions(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE.eq(organizationType));
+		}
+		
 		if(null != locator.getAnchor()){
 			query.addConditions(Tables.EH_ORGANIZATIONS.ID.lt(locator.getAnchor()));
 		}
@@ -995,6 +999,50 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 		return list;
 	}
+	
+	@Override
+	public List<OrganizationTask> listOrganizationTasksByTypeOrStatus(CrossShardListingLocator locator,Long organizationId,Long targetId, String taskType, Byte taskStatus, int pageSize) {
+		List<OrganizationTask> list = new ArrayList<OrganizationTask>();
+		Condition condition = Tables.EH_ORGANIZATION_TASKS.ORGANIZATION_ID.notEqual(-1l) ;
+		if(null != organizationId)
+			condition = Tables.EH_ORGANIZATION_TASKS.ORGANIZATION_ID.eq(organizationId);
+		if(!StringUtils.isEmpty(taskType))
+			condition = condition.and(Tables.EH_ORGANIZATION_TASKS.TASK_TYPE.eq(taskType));
+		if(taskStatus != null)
+			condition = condition.and(Tables.EH_ORGANIZATION_TASKS.TASK_STATUS.eq(taskStatus));
+
+		if(null != targetId){
+			Condition cond = Tables.EH_ORGANIZATION_TASKS.TARGET_ID.eq(targetId);
+			if(OrganizationTaskType.EMERGENCY_HELP == OrganizationTaskType.fromCode(taskType)){
+				cond = cond.or(Tables.EH_ORGANIZATION_TASKS.TARGET_ID.eq(0l));
+			}
+			condition = condition.and(cond);
+		}
+		
+		if(null != locator.getAnchor()){
+			condition = condition.and(Tables.EH_ORGANIZATION_TASKS.CREATE_TIME.lt(new Timestamp(locator.getAnchor())));
+		}
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_TASKS)
+				.where(condition)
+				.orderBy(Tables.EH_ORGANIZATION_TASKS.CREATE_TIME.desc())
+				.limit(pageSize + 1)
+				.fetch();
+		if(records != null && !records.isEmpty()){
+			for(Record r : records){
+				list.add(ConvertHelper.convert(r, OrganizationTask.class));
+			}
+		}
+		
+		locator.setAnchor(null);
+		if(list.size() > pageSize){
+			list.remove(list.size() - 1);
+			locator.setAnchor(list.get(list.size() - 1).getCreateTime().getTime());
+		}
+		
+		return list;
+	}
 
 	@Override
 	public OrganizationMember findOrganizationMemberByOrgIdAndUId(Long userId,
@@ -1265,7 +1313,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 		return list;
 	}
-
+	
 
 	@Override
 	public List<Organization> listDepartments(String superiorPath,
@@ -1900,5 +1948,19 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		if(r != null)
 			return ConvertHelper.convert(r, Organization.class);
 		return null;
+	}
+	
+	@Override
+	public List<OrganizationMember> getOrganizationMemberByOrgIds(List<Long> ids, OrganizationMemberStatus status) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
+		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.in(ids));
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(status.getCode()));
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, OrganizationMember.class));
+			return null;
+		});
+		return result;
 	}
 }

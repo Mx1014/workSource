@@ -319,4 +319,11 @@ public class EhCommunitiesDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunities> fetchByNamespaceId(java.lang.Integer... values) {
 		return fetch(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES.NAMESPACE_ID, values);
 	}
+
+	/**
+	 * Fetch records that have <code>area_size IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunities> fetchByAreaSize(java.lang.Double... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES.AREA_SIZE, values);
+	}
 }

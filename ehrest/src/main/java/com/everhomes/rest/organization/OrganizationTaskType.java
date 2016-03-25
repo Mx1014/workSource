@@ -10,6 +10,7 @@ package com.everhomes.rest.organization;
  * <li>CLEANING: 保洁</li>
  * <li>HOUSE_KEEPING: 家政</li>
  * <li>MAINTENANCE: 综合维修</li>
+ * <li>EMERGENCY_HELP: 紧急求助</li>
  * <li>OTHER: 其他</li>
  * </ul>
  */
@@ -17,6 +18,7 @@ public enum OrganizationTaskType {
 	NOTICE("NOTICE","公告"), REPAIRS("REPAIRS","报修"), CONSULT_APPEAL("CONSULT_APPEAL","咨询与求助"), 
 	COMPLAINT_ADVICE("COMPLAINT_ADVICE","投诉与建议"),
 	CLEANING("CLEANING", "保洁"), HOUSE_KEEPING("HOUSE_KEEPING", "家政"), MAINTENANCE("MAINTENANCE", "综合维修"),
+	EMERGENCY_HELP("EMERGENCY_HELP", "紧急求助"),
 	OTHER("OTHER","其他");
     
     private String code;

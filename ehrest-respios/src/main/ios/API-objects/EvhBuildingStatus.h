@@ -1,0 +1,19 @@
+//
+// EvhBuildingStatus.h
+// generated at 2016-03-25 11:43:33 
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhBuildingStatus
+//
+typedef enum {
+
+    EvhBuildingStatus_INACTIVE = 0, 
+    EvhBuildingStatus_WAITING_FOR_CONFIRMATION = 1, 
+    EvhBuildingStatus_ACTIVE = 2
+
+} EvhBuildingStatus;
+
+///////////////////////////////////////////////////////////////////////////////
+

@@ -4,6 +4,17 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 
+
+/**
+ * <ul>
+ * <li>type: 黄页类型，{@link com.everhomes.rest.yellowPage.YellowPageType}</li>
+ * <li>latitude: 请求人所在位置对应的纬度</li>
+ * <li>conditionJson: 搜索条件</li>
+ * <li>globalFlag: 是否全局搜索</li>
+ * <li>pageOffset: 偏移量</li>
+ * <li>pageSize: 每页的数量</li>
+ * </ul>
+ */
 public class GetYellowPageListCommand {
 
 	private Long communityId;

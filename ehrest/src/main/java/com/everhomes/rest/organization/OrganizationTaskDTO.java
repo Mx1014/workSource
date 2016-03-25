@@ -3,6 +3,7 @@ package com.everhomes.rest.organization;
 
 import com.everhomes.util.StringHelper;
 
+
 /**
  * <ul>
  * <li>id: 任务ID</li>
@@ -43,6 +44,9 @@ public class OrganizationTaskDTO {
 	private java.sql.Timestamp unprocessedTime;
 	private java.sql.Timestamp processingTime;
 	private java.sql.Timestamp processedTime;
+	private String taskCategory;
+	private String option;
+	private String entrancePrivilege;
 	
     public java.lang.Long getId() {
 		return id;
@@ -179,6 +183,32 @@ public class OrganizationTaskDTO {
 
 	public void setProcessedTime(java.sql.Timestamp processedTime) {
 		this.processedTime = processedTime;
+	}
+
+	
+	public String getTaskCategory() {
+		return taskCategory;
+	}
+
+	public void setTaskCategory(String taskCategory) {
+		this.taskCategory = taskCategory;
+	}
+	
+	public String getOption() {
+		return option;
+	}
+
+	public void setOption(String option) {
+		this.option = option;
+	}
+
+	
+	public String getEntrancePrivilege() {
+		return entrancePrivilege;
+	}
+
+	public void setEntrancePrivilege(String entrancePrivilege) {
+		this.entrancePrivilege = entrancePrivilege;
 	}
 
 	@Override

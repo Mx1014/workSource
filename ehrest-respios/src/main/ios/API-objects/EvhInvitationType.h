@@ -1,0 +1,19 @@
+//
+// EvhInvitationType.h
+// generated at 2016-03-25 11:43:33 
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhInvitationType
+//
+typedef enum {
+
+    EvhInvitationType_EMAIL = 0, 
+    EvhInvitationType_MESSAGE = 1, 
+    EvhInvitationType_WECHAT = 2
+
+} EvhInvitationType;
+
+///////////////////////////////////////////////////////////////////////////////
+
