@@ -1,0 +1,27 @@
+//
+// EvhPrivilegeConstants.h
+// generated at 2016-03-25 09:26:41 
+//
+
+#define EvhPrivilegeConstants_All 1
+#define EvhPrivilegeConstants_Visible 2
+#define EvhPrivilegeConstants_Read 3
+#define EvhPrivilegeConstants_Create 4
+#define EvhPrivilegeConstants_Write 5
+#define EvhPrivilegeConstants_Delete 6
+#define EvhPrivilegeConstants_ForumNewTopic 100
+#define EvhPrivilegeConstants_ForumDeleteTopic 101
+#define EvhPrivilegeConstants_ForumNewReply 102
+#define EvhPrivilegeConstants_ForumDeleteReply 103
+#define EvhPrivilegeConstants_GroupListMember 151
+#define EvhPrivilegeConstants_GroupAdminOps 152
+#define EvhPrivilegeConstants_GroupInviteJoin 153
+#define EvhPrivilegeConstants_GroupUpdateMember 154
+#define EvhPrivilegeConstants_GroupApproveMember 155
+#define EvhPrivilegeConstants_GroupRejectMember 156
+#define EvhPrivilegeConstants_GroupRevokeMember 157
+#define EvhPrivilegeConstants_GroupRequestAdminRole 161
+#define EvhPrivilegeConstants_GroupInviteAdminRole 162
+#define EvhPrivilegeConstants_TaskAllListPosts 171
+#define EvhPrivilegeConstants_TaskGuaranteeListPosts 172
+#define EvhPrivilegeConstants_TaskSeekHelpListPosts 173

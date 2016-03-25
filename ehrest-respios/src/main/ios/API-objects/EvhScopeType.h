@@ -1,0 +1,20 @@
+//
+// EvhScopeType.h
+// generated at 2016-03-25 09:26:38 
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhScopeType
+//
+typedef enum {
+
+    EvhScopeType_ALL = 0, 
+    EvhScopeType_COMMUNITY = 1, 
+    EvhScopeType_CITY = 2, 
+    EvhScopeType_USER = 3
+
+} EvhScopeType;
+
+///////////////////////////////////////////////////////////////////////////////
+

@@ -1,0 +1,18 @@
+//
+// EvhEnterpriseCommunityType.h
+// generated at 2016-03-25 09:26:39 
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhEnterpriseCommunityType
+//
+typedef enum {
+
+    EvhEnterpriseCommunityType_Enterprise = 1, 
+    EvhEnterpriseCommunityType_Normal = 0
+
+} EvhEnterpriseCommunityType;
+
+///////////////////////////////////////////////////////////////////////////////
+

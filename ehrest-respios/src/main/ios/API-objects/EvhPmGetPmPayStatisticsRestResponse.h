@@ -1,0 +1,20 @@
+//
+// EvhPmGetPmPayStatisticsRestResponse.h
+// generated at 2016-03-25 09:26:44 
+//
+#import "RestResponseBase.h"
+#import "EvhGetPmPayStatisticsCommandResponse.h"
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhPmGetPmPayStatisticsRestResponse
+//
+@interface EvhPmGetPmPayStatisticsRestResponse : EvhRestResponseBase
+
+@property(nonatomic, strong) EvhGetPmPayStatisticsCommandResponse* response;
+
+-(id) init;
++(id) withJsonString: (NSString*) jsonString;
+
+@end
+
+///////////////////////////////////////////////////////////////////////////////

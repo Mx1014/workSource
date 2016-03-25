@@ -1,0 +1,14 @@
+//
+// EvhConfServiceErrorCode.h
+// generated at 2016-03-25 09:26:41 
+//
+
+#define EvhConfServiceErrorCode_SCOPE @"videoConf"
+#define EvhConfServiceErrorCode_ERROR_INVALID_ACCOUNT 10000
+#define EvhConfServiceErrorCode_ERROR_INVALID_CONF_ID 10001
+#define EvhConfServiceErrorCode_ERROR_INVALID_USER_COUNT 10002
+#define EvhConfServiceErrorCode_ERROR_INVALID_ACCOUNT_COUNT 10003
+#define EvhConfServiceErrorCode_ERROR_INVALID_USER_ACCOUNT 10004
+#define EvhConfServiceErrorCode_ERROR_INVALID_ASSIGN 10005
+#define EvhConfServiceErrorCode_ZUOLIN_NAMESPACE_NAME 10006
+#define EvhConfServiceErrorCode_CONF_NOT_OPEN 10007

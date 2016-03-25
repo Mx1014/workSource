@@ -1,0 +1,20 @@
+//
+// EvhAdminGroupSearchGroupTopicsRestResponse.h
+// generated at 2016-03-25 09:26:43 
+//
+#import "RestResponseBase.h"
+#import "EvhSearchTopicAdminCommandResponse.h"
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhAdminGroupSearchGroupTopicsRestResponse
+//
+@interface EvhAdminGroupSearchGroupTopicsRestResponse : EvhRestResponseBase
+
+@property(nonatomic, strong) EvhSearchTopicAdminCommandResponse* response;
+
+-(id) init;
++(id) withJsonString: (NSString*) jsonString;
+
+@end
+
+///////////////////////////////////////////////////////////////////////////////

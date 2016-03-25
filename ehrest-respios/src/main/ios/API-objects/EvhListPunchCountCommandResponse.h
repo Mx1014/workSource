@@ -1,0 +1,25 @@
+//
+// EvhListPunchCountCommandResponse.h
+// generated at 2016-03-25 09:26:41 
+//
+#import <Foundation/Foundation.h>
+#import "JsonSerializable.h"
+#import "EvhPunchCountDTO.h"
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhListPunchCountCommandResponse
+//
+@interface EvhListPunchCountCommandResponse
+    : NSObject<EvhJsonSerializable>
+
+
+// item type EvhPunchCountDTO*
+@property(nonatomic, strong) NSMutableArray* punchCountList;
+
+-(id) init;
++(id) withJsonString: (NSString*) jsonString;
+
+@end
+
+///////////////////////////////////////////////////////////////////////////////
+

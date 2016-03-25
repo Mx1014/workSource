@@ -1,0 +1,19 @@
+//
+// EvhBannerStatus.h
+// generated at 2016-03-25 09:26:41 
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhBannerStatus
+//
+typedef enum {
+
+    EvhBannerStatus_CLOSE = 0, 
+    EvhBannerStatus_WAITINGCONFIRM = 1, 
+    EvhBannerStatus_ACTIVE = 2
+
+} EvhBannerStatus;
+
+///////////////////////////////////////////////////////////////////////////////
+

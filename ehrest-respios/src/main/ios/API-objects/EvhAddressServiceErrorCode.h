@@ -1,0 +1,7 @@
+//
+// EvhAddressServiceErrorCode.h
+// generated at 2016-03-25 09:26:38 
+//
+
+#define EvhAddressServiceErrorCode_SCOPE @"address"
+#define EvhAddressServiceErrorCode_ERROR_ADDRESS_NOT_EXIST 10001

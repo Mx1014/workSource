@@ -1,0 +1,19 @@
+//
+// EvhAttachmentType.h
+// generated at 2016-03-25 09:26:39 
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhAttachmentType
+//
+typedef enum {
+
+    EvhAttachmentType_STRING = 0, 
+    EvhAttachmentType_EMAIL = 1, 
+    EvhAttachmentType_FILE = 2
+
+} EvhAttachmentType;
+
+///////////////////////////////////////////////////////////////////////////////
+

@@ -1,0 +1,35 @@
+//
+// EvhRegistDeviceCommand.h
+// generated at 2016-03-25 09:26:43 
+//
+#import <Foundation/Foundation.h>
+#import "JsonSerializable.h"
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhRegistDeviceCommand
+//
+@interface EvhRegistDeviceCommand
+    : NSObject<EvhJsonSerializable>
+
+
+@property(nonatomic, copy) NSString* deviceId;
+
+@property(nonatomic, copy) NSString* platform;
+
+@property(nonatomic, copy) NSString* product;
+
+@property(nonatomic, copy) NSString* brand;
+
+@property(nonatomic, copy) NSString* deviceModel;
+
+@property(nonatomic, copy) NSString* systemVersion;
+
+@property(nonatomic, copy) NSString* meta;
+
+-(id) init;
++(id) withJsonString: (NSString*) jsonString;
+
+@end
+
+///////////////////////////////////////////////////////////////////////////////
+

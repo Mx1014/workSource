@@ -1,0 +1,19 @@
+//
+// EvhPmMemberStatus.h
+// generated at 2016-03-25 09:26:39 
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhPmMemberStatus
+//
+typedef enum {
+
+    EvhPmMemberStatus_INACTIVE = 0, 
+    EvhPmMemberStatus_CONFIRMING = 1, 
+    EvhPmMemberStatus_ACTIVE = 2
+
+} EvhPmMemberStatus;
+
+///////////////////////////////////////////////////////////////////////////////
+

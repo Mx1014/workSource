@@ -1,0 +1,14 @@
+//
+// EvhForumLocalStringCode.h
+// generated at 2016-03-25 09:26:43 
+//
+
+#define EvhForumLocalStringCode_SCOPE @"forum"
+#define EvhForumLocalStringCode_FORUM_TOPIC_DELETED 1
+#define EvhForumLocalStringCode_FORUM_COMMENT_DELETED 2
+#define EvhForumLocalStringCode_POST_MEMU_COMMUNITY_GROUP 101
+#define EvhForumLocalStringCode_POST_MEMU_COMMUNITY_NEARBY 102
+#define EvhForumLocalStringCode_POST_MEMU_COMMUNITY_ONLY 103
+#define EvhForumLocalStringCode_POST_MEMU_INTEREST_GROUP 104
+#define EvhForumLocalStringCode_POST_MEMU_ORGANIZATION_GROUP 105
+#define EvhForumLocalStringCode_POST_MEMU_ALL 106

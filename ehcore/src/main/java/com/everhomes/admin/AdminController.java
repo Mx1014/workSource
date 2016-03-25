@@ -245,14 +245,15 @@ public class AdminController extends ControllerBase {
             // generate API constants
             generator.generateApiConstants(apiMethods, context);
             
-            File srcDir = new File(this.destinationDir);
-            File dstFile = srcDir.getParentFile();
-            if(!dstFile.exists()) {
-                dstFile.mkdirs();
-            }
-            dstFile = new File(dstFile, "ehng-ios.zip");
-            
-            ZipHelper.compress(this.destinationDir, dstFile.getAbsolutePath());
+            // 改为使用标准maven打包方式，不再在此生成 by lqs 20160325
+//            File srcDir = new File(this.destinationDir);
+//            File dstFile = srcDir.getParentFile();
+//            if(!dstFile.exists()) {
+//                dstFile.mkdirs();
+//            }
+//            dstFile = new File(dstFile, "ehng-ios.zip");
+//            
+//            ZipHelper.compress(this.destinationDir, dstFile.getAbsolutePath());
         } else {
             JavaGenerator generator = new JavaGenerator();
 

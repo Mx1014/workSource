@@ -1,0 +1,18 @@
+//
+// EvhAddressLivingStatus.h
+// generated at 2016-03-25 09:26:41 
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhAddressLivingStatus
+//
+typedef enum {
+
+    EvhAddressLivingStatus_INACTIVE = 0, 
+    EvhAddressLivingStatus_ACTIVE = 1
+
+} EvhAddressLivingStatus;
+
+///////////////////////////////////////////////////////////////////////////////
+
