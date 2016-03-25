@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-03-25 11:43:46
+// generated at 2016-03-25 17:07:55
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -131,6 +131,7 @@ public interface ApiConstants {
     public static final String ADMIN_ORG_ACCEPTTASK_URL = "/admin/org/acceptTask";
     public static final String ADMIN_ORG_ADDORGADDRESS_URL = "/admin/org/addOrgAddress";
     public static final String ADMIN_ORG_ADDORGCONTACT_URL = "/admin/org/addOrgContact";
+    public static final String ADMIN_ORG_ADDPERSONNELSTOGROUP_URL = "/admin/org/addPersonnelsToGroup";
     public static final String ADMIN_ORG_ADDPMBUILDING_URL = "/admin/org/addPmBuilding";
     public static final String ADMIN_ORG_APPROVEFORENTERPRISECONTACT_URL = "/admin/org/approveForEnterpriseContact";
     public static final String ADMIN_ORG_CANCELPMBUILDING_URL = "/admin/org/cancelPmBuilding";
@@ -166,6 +167,7 @@ public interface ApiConstants {
     public static final String ADMIN_ORG_LISTMYTASKTOPICS_URL = "/admin/org/listMyTaskTopics";
     public static final String ADMIN_ORG_LISTORGAUTHPERSONNELS_URL = "/admin/org/listOrgAuthPersonnels";
     public static final String ADMIN_ORG_LISTORGMEMBERS_URL = "/admin/org/listOrgMembers";
+    public static final String ADMIN_ORG_LISTORGANIZATIONADMINISTRATORS_URL = "/admin/org/listOrganizationAdministrators";
     public static final String ADMIN_ORG_LISTORGANIZATIONPERSONNELS_URL = "/admin/org/listOrganizationPersonnels";
     public static final String ADMIN_ORG_LISTORGANIZATIONS_URL = "/admin/org/listOrganizations";
     public static final String ADMIN_ORG_LISTPMBUILDINGS_URL = "/admin/org/listPmBuildings";

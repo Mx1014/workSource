@@ -1,6 +1,6 @@
 //
 // EvhApiConstants.h
-// generated at 2016-03-25 11:43:35
+// generated at 2016-03-25 17:08:13
 //
 #define EVH_ACTIVITY_CANCELSIGNUP_URL @"/activity/cancelSignup"
 #define EVH_ACTIVITY_CHECKIN_URL @"/activity/checkin"
@@ -129,6 +129,7 @@
 #define EVH_ADMIN_ORG_ACCEPTTASK_URL @"/admin/org/acceptTask"
 #define EVH_ADMIN_ORG_ADDORGADDRESS_URL @"/admin/org/addOrgAddress"
 #define EVH_ADMIN_ORG_ADDORGCONTACT_URL @"/admin/org/addOrgContact"
+#define EVH_ADMIN_ORG_ADDPERSONNELSTOGROUP_URL @"/admin/org/addPersonnelsToGroup"
 #define EVH_ADMIN_ORG_ADDPMBUILDING_URL @"/admin/org/addPmBuilding"
 #define EVH_ADMIN_ORG_APPROVEFORENTERPRISECONTACT_URL @"/admin/org/approveForEnterpriseContact"
 #define EVH_ADMIN_ORG_CANCELPMBUILDING_URL @"/admin/org/cancelPmBuilding"
@@ -164,6 +165,7 @@
 #define EVH_ADMIN_ORG_LISTMYTASKTOPICS_URL @"/admin/org/listMyTaskTopics"
 #define EVH_ADMIN_ORG_LISTORGAUTHPERSONNELS_URL @"/admin/org/listOrgAuthPersonnels"
 #define EVH_ADMIN_ORG_LISTORGMEMBERS_URL @"/admin/org/listOrgMembers"
+#define EVH_ADMIN_ORG_LISTORGANIZATIONADMINISTRATORS_URL @"/admin/org/listOrganizationAdministrators"
 #define EVH_ADMIN_ORG_LISTORGANIZATIONPERSONNELS_URL @"/admin/org/listOrganizationPersonnels"
 #define EVH_ADMIN_ORG_LISTORGANIZATIONS_URL @"/admin/org/listOrganizations"
 #define EVH_ADMIN_ORG_LISTPMBUILDINGS_URL @"/admin/org/listPmBuildings"

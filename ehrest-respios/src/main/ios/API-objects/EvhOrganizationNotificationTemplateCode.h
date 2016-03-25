@@ -1,6 +1,6 @@
 //
 // EvhOrganizationNotificationTemplateCode.h
-// generated at 2016-03-25 11:43:33 
+// generated at 2016-03-25 17:08:11 
 //
 
 #define EvhOrganizationNotificationTemplateCode_SCOPE @"organization.notification"

@@ -1,9 +1,10 @@
 //
 // EvhListWebMenuPrivilegeDTO.h
-// generated at 2016-03-25 11:43:34 
+// generated at 2016-03-25 17:08:11 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
+#import "EvhWebMenuPrivilegeDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhListWebMenuPrivilegeDTO
@@ -16,4 +17,13 @@
 
 @property(nonatomic, copy) NSString* moduleName;
 
-// item type 
+// item type EvhWebMenuPrivilegeDTO*
+@property(nonatomic, strong) NSMutableArray* dtos;
+
+-(id) init;
++(id) withJsonString: (NSString*) jsonString;
+
+@end
+
+///////////////////////////////////////////////////////////////////////////////
+

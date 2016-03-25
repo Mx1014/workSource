@@ -1,6 +1,6 @@
 //
 // EvhConfSetMinimumAccountsRestResponse.m
-// generated at 2016-03-25 11:43:35 
+// generated at 2016-03-25 17:08:12 
 //
 #import "EvhConfSetMinimumAccountsRestResponse.h"
 #import "EvhMinimumAccountsResponse.h"
