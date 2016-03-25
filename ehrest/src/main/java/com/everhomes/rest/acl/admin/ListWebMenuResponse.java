@@ -3,6 +3,7 @@ package com.everhomes.rest.acl.admin;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.rest.acl.WebMenuDTO;
 import com.everhomes.util.StringHelper;
 
@@ -13,6 +14,7 @@ import com.everhomes.util.StringHelper;
  */
 public class ListWebMenuResponse {
 	
+	@ItemType(WebMenuDTO.class)
 	private List<WebMenuDTO> menus;
 	
 	

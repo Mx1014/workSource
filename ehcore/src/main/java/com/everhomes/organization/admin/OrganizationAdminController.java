@@ -20,6 +20,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.entity.EntityType;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.enterprise.ApproveContactCommand;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
@@ -45,6 +46,7 @@ import com.everhomes.rest.organization.ListDepartmentsCommand;
 import com.everhomes.rest.organization.ListDepartmentsCommandResponse;
 import com.everhomes.rest.organization.ListEnterprisesCommand;
 import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
+import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
 import com.everhomes.rest.organization.ListOrganizationContactCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
@@ -654,6 +656,22 @@ public class OrganizationAdminController extends ControllerBase {
     @RestReturn(value=OrganizationMemberDTO.class, collection=true)
     public RestResponse listOrganizationPersonnels(@Valid ListOrganizationContactCommand cmd) {
     	ListOrganizationMemberCommandResponse res = organizationService.listOrganizationPersonnels(cmd,false);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/org/listOrganizationAdministrators</b>
+     * <p>通讯录列表</p>
+     */
+    @RequestMapping("listOrganizationAdministrators")
+    @RestReturn(value=OrganizationMemberDTO.class, collection=true)
+    public RestResponse listOrganizationAdministrators(@Valid ListOrganizationAdministratorCommand cmd) {
+    	List<Long> roleIds = new ArrayList<Long>();
+    	roleIds.add(RoleConstants.ORGANIZATION_ADMIN);
+    	ListOrganizationMemberCommandResponse res = organizationService.listOrganizationPersonnelsByRoleIds(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

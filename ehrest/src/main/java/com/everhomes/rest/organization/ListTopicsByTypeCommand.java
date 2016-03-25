@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  *	<li>organizationId : 组织id</li>
  *	<li>taskType : 任务类型 ，详情{@link com.everhomes.rest.organization.OrganizationTaskType}</li>
  *	<li>taskStatus : 任务状态，详情 {@link com.everhomes.rest.organization.OrganizationTaskStatus}</li>
+ *	<li>entrancePrivilege : 任务状态，详情 {@link com.everhomes.rest.ui.privilege.EntrancePrivilege}</li>
  *</ul>
  *
  */
@@ -27,6 +28,8 @@ public class ListTopicsByTypeCommand {
 	private Long targetId;
 	
 	private String option;
+	
+	private String entrancePrivilege;
 	
 	public Byte getTaskStatus() {
 		return taskStatus;
@@ -81,6 +84,14 @@ public class ListTopicsByTypeCommand {
 	}
 	public void setOption(String option) {
 		this.option = option;
+	}
+	
+	
+	public String getEntrancePrivilege() {
+		return entrancePrivilege;
+	}
+	public void setEntrancePrivilege(String entrancePrivilege) {
+		this.entrancePrivilege = entrancePrivilege;
 	}
 	@Override
 	public String toString() {

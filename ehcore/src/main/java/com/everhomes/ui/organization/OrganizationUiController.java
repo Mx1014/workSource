@@ -191,7 +191,7 @@ public class OrganizationUiController extends ControllerBase {
         * <p>处理</p>
         */
         @RequestMapping("processingTask")
-        @RestReturn(value=String.class)
+        @RestReturn(value=PostDTO.class)
         public RestResponse processingTask(@Valid ProcessingTaskCommand cmd) {
            WebTokenGenerator webToken = WebTokenGenerator.getInstance();
       	   SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
