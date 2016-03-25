@@ -220,7 +220,7 @@
 		<dependency>
 			<groupId>com.everhomes</groupId>
 			<artifactId>ehrest</artifactId>
-			<version>3.2.0-SNAPSHOT</version>
+			<version>3.3.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.everhomes</groupId>
@@ -235,7 +235,7 @@
 		<dependency>
 			<groupId>com.everhomes</groupId>
 			<artifactId>ehplatform</artifactId>
-			<version>0.0.6-SNAPSHOT</version>
+			<version>0.0.7-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.everhomes</groupId>
@@ -271,6 +271,12 @@
 			<groupId>dom4j</groupId>
 			<artifactId>dom4j</artifactId>
 			<version>1.6</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>net.sourceforge.pinyin4j</groupId>
+		    <artifactId>pinyin4j</artifactId>
+		    <version>2.5.0</version>
 		</dependency>
 	</dependencies>
 

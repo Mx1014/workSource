@@ -39,6 +39,8 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
@@ -94,6 +96,8 @@ import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.messaging.MetaObjectType;
 import com.everhomes.rest.messaging.QuestionMetaObject;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationMemberStatus;
+import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.region.RegionServiceErrorCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.UserServiceErrorCode;
@@ -1129,19 +1133,20 @@ public class CommunityServiceImpl implements CommunityService {
 			ListCommunityUsersCommand cmd) {
 		CommunityUserResponse res = new CommunityUserResponse();
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		
+		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 		
 		List<User> users = null;
 		
-		if(org.springframework.util.StringUtils.isEmpty(cmd.getKeywords()) && 0 == cmd.getIsAuth()){
-			users = userProvider.findUserByNamespaceId(cmd.getNamespaceId(), locator, pageSize + 1);
-		}else if(!org.springframework.util.StringUtils.isEmpty(cmd.getKeywords())){
-			users = userProvider.listUserByKeywords(cmd.getKeywords());
-		}else{
-			users = userProvider.findUserByNamespaceId(cmd.getNamespaceId(), locator, 10000);
+		int index = 100;
+		
+		if(cmd.getIsAuth() == 1){
+			index = 10000;
 		}
+		
+		users = userProvider.listUserByKeyword(cmd.getKeywords(), namespaceId, locator, index);
+		
 		
 		List<CommunityUserDto> dtos = new ArrayList<CommunityUserDto>();
 		
@@ -1152,28 +1157,31 @@ public class CommunityServiceImpl implements CommunityService {
 			CommunityUserDto dto = new CommunityUserDto();
 			dto.setUserId(user.getId());
 			dto.setUserName(user.getNickName());
-			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-			if(null == userIdentifier){
-				LOGGER.debug("userIdentifier is null...userId = " + user.getId());
-				continue;
-			}
-			dto.setPhone(userIdentifier.getIdentifierToken());
-			EnterpriseContact contact = enterpriseContactProvider.queryContactByUserId(user.getId());
-			dto.setApplyTime(userIdentifier.getCreateTime());
-			if(null == contact){
-				dto.setIsAuth(2);
-			}else{
-				dto.setIsAuth(EnterpriseContactStatus.ACTIVE.getCode() == contact.getStatus() ? 1 : 2);
-				Group group = groupProvider.findGroupById(contact.getEnterpriseId());
-				if(null != group)
-					dto.setEnterpriseName(group.getName());
-				
-				List<EnterpriseAddress> addresses = enterpriseProvider.findEnterpriseAddressByEnterpriseId(contact.getEnterpriseId());
-				if(addresses.size() > 0){
-					Address address = addressProvider.findAddressById(addresses.get(0).getAddressId());
-					dto.setAddressName(address.getAddress());
-					dto.setAddressId(address.getId());
-					dto.setBuildingName(address.getBuildingName());
+			dto.setPhone(user.getIdentifierToken());
+			List<OrganizationMember> members = organizationProvider.listOrganizationMembers(user.getId());
+			dto.setApplyTime(user.getCreateTime());
+			dto.setIsAuth(2);
+			if(null != members){
+				OrganizationMember m = null;
+				for (OrganizationMember member : members) {
+					m = member;
+					if(OrganizationMemberStatus.ACTIVE.getCode() == member.getStatus()){
+						dto.setIsAuth(1);
+						break;
+					}
+				}
+				if(null != m){
+					Organization org = organizationProvider.findOrganizationById(m.getOrganizationId());
+					if(null != org)
+						dto.setEnterpriseName(org.getName());
+					
+					List<OrganizationAddress> addresses = organizationProvider.findOrganizationAddressByOrganizationId(m.getOrganizationId());
+					if(null != addresses && addresses.size() > 0){
+						Address address = addressProvider.findAddressById(addresses.get(0).getAddressId());
+						dto.setAddressName(address.getAddress());
+						dto.setAddressId(address.getId());
+						dto.setBuildingName(address.getBuildingName());
+					}
 				}
 			}
 			
@@ -1185,7 +1193,12 @@ public class CommunityServiceImpl implements CommunityService {
 				dtos.add(dto);
 			}
 		}
-		res.setNextPageAnchor(locator.getAnchor());
+		
+		res.setNextPageAnchor(null);
+		if(dtos.size() > pageSize){
+			dtos = dtos.subList(0, pageSize);
+			res.setNextPageAnchor(dtos.get(pageSize-1).getApplyTime().getTime());
+		}
 		res.setUserCommunities(dtos);
 		return res;
 	}
@@ -1194,18 +1207,37 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public CountCommunityUserResponse countCommunityUsers(
 			CountCommunityUsersCommand cmd) {
-
+		
 		int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		
-		int communityUsers = userProvider.countUserByNamespaceId(namespaceId, null);
-		int authUsers = userProvider.countUserByNamespaceId(namespaceId, true);
-		int notAuthUsers = communityUsers - authUsers;
+		int communityUserCount = userProvider.countUserByNamespaceId(namespaceId, null);
+		
+		List<Organization> orgs = organizationProvider.listEnterpriseByNamespaceIds(namespaceId, null ,new CrossShardListingLocator(), 1000000);
+		List<Long> orgIds  = new ArrayList<Long>();
+		for (Organization organization : orgs) {
+			orgIds.add(organization.getId());
+		}
+		List<OrganizationMember> members = organizationProvider.getOrganizationMemberByOrgIds(orgIds, OrganizationMemberStatus.ACTIVE);
+		List<Long> userIds = new ArrayList<Long>();
+		if(null != members){
+			for (OrganizationMember member : members) {
+				if(!userIds.contains(member.getTargetId())){
+					userIds.add(member.getTargetId());
+				}
+			}
+		}
+		
+		
+		int authUserCount = userIds.size();
+		int notAuthUsers = communityUserCount - authUserCount;
 		
 		CountCommunityUserResponse resp = new CountCommunityUserResponse();
-		resp.setCommunityUsers(communityUsers);
-		resp.setAuthUsers(authUsers);
+		resp.setCommunityUsers(communityUserCount);
+		resp.setAuthUsers(authUserCount);
 		resp.setNotAuthUsers(notAuthUsers);
 
 		return resp;
 	}
+	
+
 }

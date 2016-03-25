@@ -1,0 +1,20 @@
+//
+// EvhAccountType.h
+// generated at 2016-03-25 11:43:33 
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhAccountType
+//
+typedef enum {
+
+    EvhAccountType_NONE = 0, 
+    EvhAccountType_USER = 1, 
+    EvhAccountType_FAMILY = 2, 
+    EvhAccountType_ORGANIZATION = 3
+
+} EvhAccountType;
+
+///////////////////////////////////////////////////////////////////////////////
+

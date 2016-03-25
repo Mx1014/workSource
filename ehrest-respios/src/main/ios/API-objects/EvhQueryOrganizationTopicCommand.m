@@ -1,0 +1,89 @@
+//
+// EvhQueryOrganizationTopicCommand.m
+// generated at 2016-03-25 11:43:33 
+//
+#import "EvhQueryOrganizationTopicCommand.h"
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhQueryOrganizationTopicCommand
+//
+
+@implementation EvhQueryOrganizationTopicCommand
+
++(id) withJsonString: (NSString*) jsonString
+{
+    id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
+    if(jsonObject != nil) {
+        EvhQueryOrganizationTopicCommand* obj = [EvhQueryOrganizationTopicCommand new];
+        return [obj fromJson:jsonObject];
+    }
+    return nil;
+}
+
+-(id) init 
+{
+    self = [super init];
+    if(self) {
+        return self;
+    }
+    return nil;
+}
+
+-(void) toJson: (NSMutableDictionary*) jsonObject 
+{
+    if(self.organizationId)
+        [jsonObject setObject: self.organizationId forKey: @"organizationId"];
+    if(self.communityId)
+        [jsonObject setObject: self.communityId forKey: @"communityId"];
+    if(self.forumId)
+        [jsonObject setObject: self.forumId forKey: @"forumId"];
+    if(self.contentCategory)
+        [jsonObject setObject: self.contentCategory forKey: @"contentCategory"];
+    if(self.actionCategory)
+        [jsonObject setObject: self.actionCategory forKey: @"actionCategory"];
+    if(self.pageAnchor)
+        [jsonObject setObject: self.pageAnchor forKey: @"pageAnchor"];
+    if(self.pageSize)
+        [jsonObject setObject: self.pageSize forKey: @"pageSize"];
+}
+
+-(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
+{
+    if([jsonObject isKindOfClass:[NSDictionary class]]) {
+        self.organizationId = [jsonObject objectForKey: @"organizationId"];
+        if(self.organizationId && [self.organizationId isEqual:[NSNull null]])
+            self.organizationId = nil;
+
+        self.communityId = [jsonObject objectForKey: @"communityId"];
+        if(self.communityId && [self.communityId isEqual:[NSNull null]])
+            self.communityId = nil;
+
+        self.forumId = [jsonObject objectForKey: @"forumId"];
+        if(self.forumId && [self.forumId isEqual:[NSNull null]])
+            self.forumId = nil;
+
+        self.contentCategory = [jsonObject objectForKey: @"contentCategory"];
+        if(self.contentCategory && [self.contentCategory isEqual:[NSNull null]])
+            self.contentCategory = nil;
+
+        self.actionCategory = [jsonObject objectForKey: @"actionCategory"];
+        if(self.actionCategory && [self.actionCategory isEqual:[NSNull null]])
+            self.actionCategory = nil;
+
+        self.pageAnchor = [jsonObject objectForKey: @"pageAnchor"];
+        if(self.pageAnchor && [self.pageAnchor isEqual:[NSNull null]])
+            self.pageAnchor = nil;
+
+        self.pageSize = [jsonObject objectForKey: @"pageSize"];
+        if(self.pageSize && [self.pageSize isEqual:[NSNull null]])
+            self.pageSize = nil;
+
+        return self;
+    }
+    
+    return nil;
+}
+
+@end
+
+///////////////////////////////////////////////////////////////////////////////

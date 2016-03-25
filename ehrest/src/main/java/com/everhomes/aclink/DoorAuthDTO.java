@@ -25,6 +25,17 @@ public class DoorAuthDTO {
     private String approveUserName;
     private String   organization;
     private String   description;
+    private String address;
+
+
+    public String getAddress() {
+        return address;
+    }
+
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
 
     public Byte getStatus() {

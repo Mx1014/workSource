@@ -1,0 +1,18 @@
+//
+// EvhOrganizationScopeCode.h
+// generated at 2016-03-25 11:43:33 
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhOrganizationScopeCode
+//
+typedef enum {
+
+    EvhOrganizationScopeCode_NONE = 0, 
+    EvhOrganizationScopeCode_BUILDING = 1
+
+} EvhOrganizationScopeCode;
+
+///////////////////////////////////////////////////////////////////////////////
+

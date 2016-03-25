@@ -101,9 +101,15 @@ public class AclinkProviderImpl implements AclinkProvider {
             }
 
         query.addLimit(count);
-        return query.fetch().map((r) -> {
+        List<Aclink> objs = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, Aclink.class);
         });
+        
+        if(objs.size() >= count) {
+            locator.setAnchor(objs.get(objs.size() - 1).getId());
+        }
+        
+        return objs;
     }
 
     @Override

@@ -73,25 +73,7 @@ public class AclinkAdminController extends ControllerBase {
     @RequestMapping("updateDoorAccess")
     @RestReturn(value=String.class)
     public RestResponse updateDoorAccess(@Valid DoorAccessAdminUpdateCommand cmd) {
-        DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getId());
-        if(doorAccess == null) {
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "DoorAccess Id not found. ");
-        }
-        
-        if(cmd.getName() != null) {
-            doorAccess.setName(cmd.getName());    
-        }
-        if(cmd.getAddress() != null) {
-            doorAccess.setAddress(cmd.getAddress());
-        }
-        if(cmd.getDescription() != null) {
-            doorAccess.setDescription(cmd.getDescription());
-        }
-        
-        doorAccess.setLatitude(cmd.getLatitude());
-        doorAccess.setLongitude(cmd.getLongitude());
-        doorAccessProvider.updateDoorAccess(doorAccess);
+        doorAccessService.updateDoorAccess(cmd);
                 
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

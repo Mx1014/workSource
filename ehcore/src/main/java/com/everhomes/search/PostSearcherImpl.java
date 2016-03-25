@@ -33,32 +33,46 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.CommunityService;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.family.FamilyProvider;
 import com.everhomes.forum.Forum;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.IteratePostCallback;
 import com.everhomes.forum.Post;
+import com.everhomes.group.Group;
+import com.everhomes.group.GroupProvider;
 import com.everhomes.group.GroupService;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.community.GetNearbyCommunitiesByIdCommand;
+import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.ForumConstants;
 import com.everhomes.rest.forum.ListPostCommandResponse;
+import com.everhomes.rest.forum.NewTopicCommand;
 import com.everhomes.rest.forum.PostDTO;
+import com.everhomes.rest.forum.PostEntityTag;
 import com.everhomes.rest.forum.PostQueryResult;
 import com.everhomes.rest.forum.PostStatus;
 import com.everhomes.rest.forum.SearchTopicCommand;
 import com.everhomes.rest.group.GroupDTO;
+import com.everhomes.rest.organization.OrganizationType;
+import com.everhomes.rest.ui.forum.SearchTopicBySceneCommand;
+import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 
@@ -76,7 +90,13 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
     UserProvider userProvider;
     
     @Autowired
+    UserService userService;
+    
+    @Autowired
     CategoryProvider categoryProvider;
+    
+    @Autowired
+    GroupProvider groupProvider;
     
     @Autowired
     GroupService groupService;
@@ -89,6 +109,12 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
     
     @Autowired
     ForumService forumService;
+    
+    @Autowired
+    FamilyProvider familyProvider;
+    
+    @Autowired
+    OrganizationProvider organizationProvider;
     
     private final String contentcategory = "contentcategory";
     private final String actioncategory = "actioncategory";
@@ -419,4 +445,72 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
        
        return listPost;
    }
+    
+    @Override
+    public ListPostCommandResponse queryByScene(SearchTopicBySceneCommand cmd) {
+        User user = UserContext.current().getUser();
+        Long userId = user.getId();
+        SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+        
+        SearchTopicCommand topicCmd = ConvertHelper.convert(cmd, SearchTopicCommand.class);
+        
+        Integer namespaceId = sceneToken.getNamespaceId();
+        Long forumId = 0L;
+        UserCurrentEntityType entityType = UserCurrentEntityType.fromCode(sceneToken.getEntityType());
+        switch(entityType) {
+        case COMMUNITY_RESIDENTIAL:
+        case COMMUNITY_COMMERCIAL:
+        case COMMUNITY:
+            Community community = communityProvider.findCommunityById(sceneToken.getEntityId());
+            if(community != null) {
+                forumId = community.getDefaultForumId();
+            } else {
+                if(LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("Community not found, userId=" + userId + ", namespaceId=" + namespaceId + ", sceneToken=" + sceneToken);
+                }
+            }
+            break;
+        case FAMILY:
+            FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
+            if(family != null) {
+                community = communityProvider.findCommunityById(family.getCommunityId());
+                if(community != null) {
+                    forumId = community.getDefaultForumId();
+                } else {
+                    if(LOGGER.isWarnEnabled()) {
+                        LOGGER.warn("Community not found, sceneToken=" + sceneToken + ", communityId=" + family.getCommunityId());
+                    }
+                }
+            } else {
+                if(LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("Family not found, sceneToken=" + sceneToken);
+                }
+            }
+            break;
+        case ORGANIZATION:
+            Organization org = this.organizationProvider.findOrganizationById(sceneToken.getEntityId());
+            if(org != null) {
+                Group group = groupProvider.findGroupById(org.getGroupId());
+                if(group != null) {
+                    forumId = group.getOwningForumId();
+                } else {
+                    if(LOGGER.isWarnEnabled()) {
+                        LOGGER.warn("Organization group not found, sceneToken=" + sceneToken + ", groupId=" + org.getGroupId());
+                    }
+                }
+            } else {
+                if(LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("Organization not found, sceneToken=" + sceneToken);
+                }
+            }
+            break;
+        default:
+            break;
+        }
+        
+        topicCmd.setNamespaceId(namespaceId);
+        topicCmd.setForumId(forumId);
+        
+        return query(topicCmd);
+    }
 }

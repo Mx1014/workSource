@@ -20,6 +20,12 @@ public class AclinkMsgGeneratorImpl implements AclinkMsgGenerator {
     @Autowired
     AesServerKeyService aesServerKeyService;
     
+    @Autowired
+    DoorAccessProvider doorAccessProvider;
+    
+    @Autowired
+    AesUserKeyProvider aesUserKeyProvider;
+    
     private void genDefaultMessage(AclinkGeneratorContext ctx, DoorCommand cmd) {
         if(!cmd.getStatus().equals(DoorCommandStatus.SENDING.getCode())) {
             //Mark as sending
@@ -41,15 +47,63 @@ public class AclinkMsgGeneratorImpl implements AclinkMsgGenerator {
         ctx.getDoorMessages().add(doorMessage);
     }
     
-    private void genAddUndoMessage(AclinkGeneratorContext ctx, DoorCommand cmd) {
+    private void genDeviceNameMessage(AclinkGeneratorContext ctx, DoorCommand cmd) {
+        //Convert DoorCommand to DoorMessage
+        DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
+        AesServerKey aesServerKey = aesServerKeyProvider.queryAesServerKeyByDoorId(cmd.getDoorId(), cmd.getServerKeyVer());
+        if(doorAccess == null || aesServerKey == null) {
+            return;
+        }
+        
+        String body = AclinkUtils.packUpdateDeviceName(aesServerKey.getDeviceVer(), aesServerKey.getSecret()
+                , doorAccess.getAesIv(), doorAccess.getName());
+        
         if(!cmd.getStatus().equals(DoorCommandStatus.SENDING.getCode())) {
+            //Mark as sending
             cmd.setStatus(DoorCommandStatus.SENDING.getCode());
             doorCommandProvider.updateDoorCommand(cmd);
         }
         
         AclinkMessage aclinkMessage = new AclinkMessage();
         aclinkMessage.setCmd(cmd.getCmdId());
-        aclinkMessage.setEncrypted(cmd.getCmdBody());
+        aclinkMessage.setEncrypted(body);
+        aclinkMessage.setSecretVersion(cmd.getAclinkKeyVer());
+        DoorMessage doorMessage = new DoorMessage();
+        doorMessage.setBody(aclinkMessage);
+        doorMessage.setSeq(cmd.getId());
+        doorMessage.setDoorId(cmd.getDoorId());
+        doorMessage.setMessageType(DoorMessageType.NORMAL.getCode());
+        ctx.getDoorMessages().add(doorMessage);
+    }
+    
+    private void genAddUndoMessage(AclinkGeneratorContext ctx, DoorCommand cmd) {
+        if(!cmd.getStatus().equals(DoorCommandStatus.SENDING.getCode())) {
+            cmd.setStatus(DoorCommandStatus.SENDING.getCode());
+            doorCommandProvider.updateDoorCommand(cmd);
+        }
+        
+        DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
+        AesServerKey aesServerKey = aesServerKeyProvider.queryAesServerKeyByDoorId(cmd.getDoorId(), cmd.getServerKeyVer());
+        if(doorAccess == null || aesServerKey == null) {
+            return;
+        }
+        
+        Long aesUserKeyId = Long.getLong(cmd.getCmdBody());
+        if(aesUserKeyId == null) {
+            return;
+        }
+        
+        AesUserKey aesUserKey1 = aesUserKeyProvider.getAesUserKeyById(aesUserKeyId);
+        if(aesUserKey1 == null) {
+            return;    
+        }
+        
+        String body = AclinkUtils.packAddUndoList(aesServerKey.getDeviceVer(), aesServerKey.getSecret()
+                , (int)(aesUserKey1.getExpireTimeMs().longValue()/1000), aesUserKey1.getKeyId().shortValue());
+        
+        AclinkMessage aclinkMessage = new AclinkMessage();
+        aclinkMessage.setCmd(cmd.getCmdId());
+        aclinkMessage.setEncrypted(body);
         aclinkMessage.setSecretVersion(cmd.getAclinkKeyVer());
         DoorMessage doorMessage = new DoorMessage();
         doorMessage.setBody(aclinkMessage);
@@ -64,6 +118,10 @@ public class AclinkMsgGeneratorImpl implements AclinkMsgGenerator {
         switch(cmdType) {
         case ADD_UNDO_LIST:
             genAddUndoMessage(ctx, cmd);
+            break;
+        case CMD_UPDATE_DEVNAME:
+            genDeviceNameMessage(ctx, cmd);
+            break;
         default:
            genDefaultMessage(ctx, cmd);     
         }

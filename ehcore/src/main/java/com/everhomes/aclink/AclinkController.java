@@ -26,6 +26,9 @@ public class AclinkController extends ControllerBase {
     @Autowired
     private AesServerKeyProvider aesServerKeyProvider;
     
+    @Autowired
+    private DoorAccessProvider doorAccessProvider;
+    
     /**
      * <b>URL: /aclink/activing</b>
      * <p>激活门禁</p>
@@ -126,4 +129,47 @@ public class AclinkController extends ControllerBase {
         return response;        
     }    
     
+    /**
+     * 
+     * <b>URL: /aclink/getDoorAccessByHardwareId</b>
+     * <p>获取门禁信息</p>
+     * @return 获取门禁信息
+     */
+    @RequestMapping("getDoorAccessByHardwareId")
+    @RestReturn(value=ListDoorAccessResponse.class)
+    public RestResponse listAuthHistory(@Valid GetDoorAccessByHardwareIdCommand cmd) {
+        ListDoorAccessResponse resp = new ListDoorAccessResponse();
+        RestResponse response = new RestResponse(resp);
+        List<DoorAccessDTO> dtos = new ArrayList<DoorAccessDTO>();
+        resp.setDoors(dtos);
+        
+        for(String hardwareId : cmd.getHardwareIds()) {
+            DoorAccess doorAccess = doorAccessProvider.queryDoorAccessByHardwareId(hardwareId);
+
+            if(doorAccess != null) {
+                dtos.add(ConvertHelper.convert(doorAccess, DoorAccessDTO.class));
+            }            
+        }
+
+        
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;        
+    }
+    
+    /**
+     * 
+     * <b>URL: /aclink/deleteDoorAuth</b>
+     * <p>删除授权</p>
+     * @return
+     */
+    @RequestMapping("deleteDoorAuth")
+    @RestReturn(value=String.class)
+    public RestResponse deleteDoorAuth(@Valid AclinkDeleteByIdCommand cmd) {
+        doorAccessService.deleteDoorAuth(cmd.getId());
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

@@ -106,9 +106,17 @@ public class AclinkUndoKeyProviderImpl implements AclinkUndoKeyProvider {
             }
 
         query.addLimit(count);
-        return query.fetch().map((r) -> {
+        List<AclinkUndoKey> objs = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, AclinkUndoKey.class);
         });
+        
+        if(objs.size() >= count) {
+            locator.setAnchor(objs.get(objs.size() - 1).getId());
+        } else {
+            locator.setAnchor(null);
+        }
+        
+        return objs;
     }
 
     @Override

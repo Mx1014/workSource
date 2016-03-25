@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  * <li>address: 小区地址</li>
  * <li>cityId: 小区所在城市IdId</li>
  * <li>areaId: 小区所在城市区县Id</li>
+ * <li>areaSize: 面积</li>
  * <li>geoPointList: 小区经纬度列表,参考{@link com.everhomes.rest.community.CommunityGeoPointDTO}</li>
  * </ul>
  */
@@ -28,6 +29,8 @@ public class UpdateCommunityAdminCommand {
     private Long cityId;
     @NotNull
     private Long areaId;
+    
+    private Double areaSize;
     
     @NotNull
     @ItemType(CommunityGeoPointDTO.class)
@@ -75,6 +78,16 @@ public class UpdateCommunityAdminCommand {
 
 	public void setGeoPointList(List<CommunityGeoPointDTO> geoPointList) {
 		this.geoPointList = geoPointList;
+	}
+	
+	
+
+	public Double getAreaSize() {
+		return areaSize;
+	}
+
+	public void setAreaSize(Double areaSize) {
+		this.areaSize = areaSize;
 	}
 
 	@Override

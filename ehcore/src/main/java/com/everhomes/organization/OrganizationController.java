@@ -15,15 +15,13 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.enterprise.EnterpriseDTO;
 import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
 import com.everhomes.rest.enterprise.ListUserRelatedEnterprisesCommand;
-import com.everhomes.rest.enterprise.SearchEnterpriseCommand;
-import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
 import com.everhomes.rest.forum.CancelLikeTopicCommand;
 import com.everhomes.rest.forum.GetTopicCommand;
 import com.everhomes.rest.forum.LikeTopicCommand;
+import com.everhomes.rest.forum.ListOrgMixTopicCommand;
 import com.everhomes.rest.forum.ListPostCommandResponse;
 import com.everhomes.rest.forum.ListTopicCommand;
 import com.everhomes.rest.forum.ListTopicCommentCommand;
@@ -71,6 +69,7 @@ import com.everhomes.rest.organization.UpdatePersonnelsToDepartment;
 import com.everhomes.rest.organization.UpdateTopicPrivacyCommand;
 import com.everhomes.rest.organization.UserExitOrganizationCommand;
 import com.everhomes.rest.organization.UserJoinOrganizationCommand;
+import com.everhomes.rest.ui.organization.ProcessingTaskCommand;
 import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
 import com.everhomes.search.OrganizationSearcher;
@@ -284,6 +283,21 @@ public class OrganizationController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+    /**
+     * <b>URL: /org/listOrgMixTopics</b>
+     * <p>查询指定机构的所有帖子列表</p>
+     */
+    //checked
+    @RequestMapping("listOrgMixTopics")
+    @RestReturn(value=ListPostCommandResponse.class)
+    public RestResponse listOrgMixTopics(ListOrgMixTopicCommand cmd) {
+        ListPostCommandResponse cmdResponse = organizationService.listOrgMixTopics(cmd);
+        RestResponse response = new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 	/**
 	 * <b>URL: /org/deleteOrgTopic</b>
@@ -828,5 +842,6 @@ public class OrganizationController extends ControllerBase {
         res.setErrorDescription("OK");
         
         return res;
-        }
+      }
+    
 }

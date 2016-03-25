@@ -1,0 +1,37 @@
+//
+// EvhUpdateBorderCommand.h
+// generated at 2016-03-25 11:43:33 
+//
+#import <Foundation/Foundation.h>
+#import "JsonSerializable.h"
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhUpdateBorderCommand
+//
+@interface EvhUpdateBorderCommand
+    : NSObject<EvhJsonSerializable>
+
+
+@property(nonatomic, copy) NSNumber* id;
+
+@property(nonatomic, copy) NSString* privateAddress;
+
+@property(nonatomic, copy) NSNumber* privatePort;
+
+@property(nonatomic, copy) NSString* publicAddress;
+
+@property(nonatomic, copy) NSNumber* publicPort;
+
+@property(nonatomic, copy) NSNumber* status;
+
+@property(nonatomic, copy) NSString* configTag;
+
+@property(nonatomic, copy) NSString* description_;
+
+-(id) init;
++(id) withJsonString: (NSString*) jsonString;
+
+@end
+
+///////////////////////////////////////////////////////////////////////////////
+

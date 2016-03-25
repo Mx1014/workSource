@@ -125,6 +125,8 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
             if(objs.size() >= count) {
                 locator.setAnchor(objs.get(objs.size() - 1).getId());
                 return AfterAction.done;
+            } else {
+                locator.setAnchor(null);
             }
             return AfterAction.next;
 

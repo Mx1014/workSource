@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationRoleMap implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1852784266;
+	private static final long serialVersionUID = 739209906;
 
 	private java.lang.Long     id;
 	private java.lang.String   ownerType;
@@ -20,6 +20,7 @@ public class EhOrganizationRoleMap implements java.io.Serializable {
 	private java.lang.Byte     privateFlag;
 	private java.lang.Byte     status;
 	private java.sql.Timestamp createTime;
+	private java.lang.String   roleName;
 
 	public EhOrganizationRoleMap() {}
 
@@ -30,7 +31,8 @@ public class EhOrganizationRoleMap implements java.io.Serializable {
 		java.lang.Long     roleId,
 		java.lang.Byte     privateFlag,
 		java.lang.Byte     status,
-		java.sql.Timestamp createTime
+		java.sql.Timestamp createTime,
+		java.lang.String   roleName
 	) {
 		this.id = id;
 		this.ownerType = ownerType;
@@ -39,6 +41,7 @@ public class EhOrganizationRoleMap implements java.io.Serializable {
 		this.privateFlag = privateFlag;
 		this.status = status;
 		this.createTime = createTime;
+		this.roleName = roleName;
 	}
 
 	public java.lang.Long getId() {
@@ -95,5 +98,13 @@ public class EhOrganizationRoleMap implements java.io.Serializable {
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+	public java.lang.String getRoleName() {
+		return this.roleName;
+	}
+
+	public void setRoleName(java.lang.String roleName) {
+		this.roleName = roleName;
 	}
 }

@@ -30,13 +30,16 @@ public class AclinkUtils {
     public static byte AES_USER_KEY_TYPE = 0x3a;
     
     public static String generateAESKey() {
-        try {
-            KeyGenerator generator = KeyGenerator.getInstance("AES");
-            SecretKey key = generator.generateKey();
-            return Base64.encodeBase64String(key.getEncoded());
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("NoSuchAlgorithmException for AES", e);
-        }
+//        try {
+//            KeyGenerator generator = KeyGenerator.getInstance("AES");
+//            SecretKey key = generator.generateKey();
+//            return Base64.encodeBase64String(key.getEncoded());
+//        } catch (NoSuchAlgorithmException e) {
+//            throw new RuntimeException("NoSuchAlgorithmException for AES", e);
+//        }
+        
+        //TODO now use static server key for test
+        return "s87SHk+R/IOw6dV7QkX/pA==";
     }
     
     public static String generateAESIV(String base64Key) {
@@ -73,15 +76,16 @@ public class AclinkUtils {
         return cipherData;
     }
     
-    public static String packInitServerKey(String rsaAclinkPub, String aesKey, String aesIv, String devName, Long time, String uuid) {
+    //DoorMessage is just for debug!!!, and should be removed later.
+    public static String packInitServerKey(String rsaAclinkPub, String aesKey, String aesIv, String devName, Long time, String uuid, DoorMessage doorMessage) {
         String pub = StringHelper.toHexString(Base64.decodeBase64(rsaAclinkPub));
-        byte[] result = CmdUtil.initServerKeyCmd((byte)0, pub, devName, (int)(time.longValue()/1000), uuid.getBytes(), Base64.decodeBase64(aesKey), Base64.decodeBase64(aesIv));
+        byte[] result = CmdUtil.initServerKeyCmd((byte)0, pub, devName, (int)(time.longValue()/1000), uuid.getBytes(), Base64.decodeBase64(aesKey), Base64.decodeBase64(aesIv), doorMessage);
         return Base64.encodeBase64String(result);
     }
     
     public static String packUpdateDeviceName(Byte ver, String aesKey, String aesIv, String devName) {
         byte[] key = Base64.decodeBase64(aesKey);
-        byte[] binaryData = CmdUtil.updateDevName(key, ver.byteValue(), (devName+"ZZZZZZ").substring(0, 6));
+        byte[] binaryData = CmdUtil.updateDevName(key, ver.byteValue(), (devName+"            ").substring(0, 12));
         return Base64.encodeBase64String(binaryData);
     }
     

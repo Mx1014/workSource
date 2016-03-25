@@ -24,6 +24,7 @@ import com.everhomes.server.schema.tables.records.EhDoorAuthRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
 public class DoorAuthProviderImpl implements DoorAuthProvider {
@@ -95,9 +96,43 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
             }
 
         query.addLimit(count);
-        return query.fetch().map((r) -> {
+        List<DoorAuth> objs = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, DoorAuth.class);
         });
+        
+        if(objs.size() >= count) {
+            locator.setAnchor(objs.get(objs.size() - 1).getId());
+        } else {
+            locator.setAnchor(null);
+        }
+        
+        return objs;
+    }
+    
+    public List<DoorAuth> queryDoorAuthByTime(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhDoorAuth.class));
+
+        SelectQuery<EhDoorAuthRecord> query = context.selectQuery(Tables.EH_DOOR_AUTH);
+        if(queryBuilderCallback != null)
+            queryBuilderCallback.buildCondition(locator, query);
+
+        query.addOrderBy(Tables.EH_DOOR_AUTH.CREATE_TIME.desc());
+        if(locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_DOOR_AUTH.CREATE_TIME.lt(new Timestamp(locator.getAnchor())));
+            }
+
+        query.addLimit(count);
+        List<DoorAuth> objs = query.fetch().map((r) -> {
+            return ConvertHelper.convert(r, DoorAuth.class);
+        });
+        
+        if(objs.size() >= count) {
+            locator.setAnchor(objs.get(objs.size() - 1).getCreateTime().getTime());
+        } else {
+            locator.setAnchor(null);
+        }
+        
+        return objs;
     }
 
     private void prepareObj(DoorAuth obj) {
@@ -210,7 +245,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
     @Override
     public List<DoorAuth> queryDoorAuthByApproveId(ListingLocator locator, Long approveId, int count) {
         
-        return queryDoorAuth(locator, count, new ListingQueryBuilderCallback() {
+        return queryDoorAuthByTime(locator, count, new ListingQueryBuilderCallback() {
 
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,

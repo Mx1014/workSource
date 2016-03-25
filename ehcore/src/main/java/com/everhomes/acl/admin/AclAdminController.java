@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Role;
 import com.everhomes.acl.RoleAssignment;
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -28,10 +29,17 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.acl.admin.AssignUserRoleAdminCommand;
+import com.everhomes.rest.acl.admin.CreateRolePrivilegeCommand;
 import com.everhomes.rest.acl.admin.DeleteUserRoleAdminCommand;
 import com.everhomes.rest.acl.admin.ListAclRolesCommand;
 import com.everhomes.rest.acl.admin.ListUserRolesAdminCommandResponse;
+import com.everhomes.rest.acl.admin.ListWebMenuCommand;
+import com.everhomes.rest.acl.admin.ListWebMenuPrivilegeCommand;
+import com.everhomes.rest.acl.admin.ListWebMenuPrivilegeDTO;
+import com.everhomes.rest.acl.admin.ListWebMenuResponse;
+import com.everhomes.rest.acl.admin.QryRolePrivilegesCommand;
 import com.everhomes.rest.acl.admin.RoleDTO;
+import com.everhomes.rest.acl.admin.UpdateRolePrivilegeCommand;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -55,6 +63,10 @@ public class AclAdminController extends ControllerBase {
     private ConfigurationProvider configurationProvider;
     @Autowired
     private UserProvider userProvider;
+    
+    @Autowired
+    private RolePrivilegeService rolePrivilegeService;
+    
     /**
      * <b>URL: /admin/acl/assignUserRole</b>
      * <p>分配用户角色</p>
@@ -161,4 +173,87 @@ public class AclAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    
+    /**
+     * <b>URL: /admin/acl/ListWebMenu</b>
+     * <p>查询系统菜单</p>
+     */
+    @RequestMapping("ListWebMenu")
+    @RestReturn(value=ListWebMenuResponse.class)
+    public RestResponse ListWebMenu(@Valid ListWebMenuCommand cmd) {
+    	RestResponse response =  new RestResponse(rolePrivilegeService.ListWebMenu(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/acl/ListWebMenuPrivilege</b>
+     * <p>查询权限集</p>
+     */
+    @RequestMapping("ListWebMenuPrivilege")
+    @RestReturn(value=ListWebMenuPrivilegeDTO.class, collection = true)
+    public RestResponse ListWebMenuPrivilege(@Valid ListWebMenuPrivilegeCommand cmd) {
+    	RestResponse response =  new RestResponse(rolePrivilegeService.ListWebMenuPrivilege(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    
+    /**
+     * <b>URL: /admin/acl/createRolePrivilege</b>
+     * <p>创建角色权限</p>
+     */
+    @RequestMapping("createRolePrivilege")
+    @RestReturn(value=String.class)
+    public RestResponse createRolePrivilege(@Valid CreateRolePrivilegeCommand cmd) {
+    	rolePrivilegeService.createRolePrivilege(cmd);
+    	RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/acl/updateRolePrivilege</b>
+     * <p>修改角色权限</p>
+     */
+    @RequestMapping("updateRolePrivilege")
+    @RestReturn(value=String.class)
+    public RestResponse updateRolePrivilege(@Valid UpdateRolePrivilegeCommand cmd) {
+    	rolePrivilegeService.updateRolePrivilege(cmd);
+    	RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/acl/qryRolePrivileges</b>
+     * <p>查看角色权限</p>
+     */
+    @RequestMapping("qryRolePrivileges")
+    @RestReturn(value=ListWebMenuPrivilegeDTO.class, collection = true)
+    public RestResponse qryRolePrivileges(@Valid QryRolePrivilegesCommand cmd) {
+    	RestResponse response =  new RestResponse(rolePrivilegeService.qryRolePrivileges(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/acl/listAclRoleByOrganizationIds</b>
+     * <p>根据机构获取角色列表</p>
+     */
+    @RequestMapping("listAclRoleByOrganizationIds")
+    @RestReturn(value=RoleDTO.class, collection = true)
+    public RestResponse listAclRoleByOrganizationIds(@Valid ListAclRolesCommand cmd) {
+    	RestResponse response =  new RestResponse(rolePrivilegeService.listAclRoleByOrganizationIds(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
 }

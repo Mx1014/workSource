@@ -115,9 +115,17 @@ public class AesServerKeyProviderImpl implements AesServerKeyProvider {
             }
 
         query.addLimit(count);
-        return query.fetch().map((r) -> {
+        List<AesServerKey> objs = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, AesServerKey.class);
         });
+        
+        if(objs.size() >= count) {
+            locator.setAnchor(objs.get(objs.size() - 1).getId());
+        } else {
+            locator.setAnchor(null);
+        }
+        
+        return objs;
     }
 
     @Override

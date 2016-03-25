@@ -1,0 +1,18 @@
+//
+// EvhGroupMemberPhonePrivacy.h
+// generated at 2016-03-25 11:43:34 
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhGroupMemberPhonePrivacy
+//
+typedef enum {
+
+    EvhGroupMemberPhonePrivacy_PUBLIC = 0, 
+    EvhGroupMemberPhonePrivacy_PRIVATE = 1
+
+} EvhGroupMemberPhonePrivacy;
+
+///////////////////////////////////////////////////////////////////////////////
+

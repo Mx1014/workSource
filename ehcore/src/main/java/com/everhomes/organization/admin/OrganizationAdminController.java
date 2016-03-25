@@ -24,10 +24,9 @@ import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.enterprise.ApproveContactCommand;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.enterprise.ImportEnterpriseDataCommand;
-import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
-import com.everhomes.rest.enterprise.ListEnterpriseByCommunityIdCommand;
 import com.everhomes.rest.enterprise.RejectContactCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
+import com.everhomes.rest.forum.ListPostCommandResponse;
 import com.everhomes.rest.organization.AddOrgAddressCommand;
 import com.everhomes.rest.organization.CreateDepartmentCommand;
 import com.everhomes.rest.organization.CreateOrganizationAccountCommand;
@@ -51,11 +50,12 @@ import com.everhomes.rest.organization.ListOrganizationMemberCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.ListOrganizationsCommand;
 import com.everhomes.rest.organization.ListOrganizationsCommandResponse;
-
+import com.everhomes.rest.organization.ListTopicsByTypeCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationDetailDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.organization.ProcessOrganizationTaskCommand;
 import com.everhomes.rest.organization.SearchTopicsByTypeCommand;
 import com.everhomes.rest.organization.SearchTopicsByTypeResponse;
 import com.everhomes.rest.organization.SetAclRoleAssignmentCommand;
@@ -63,7 +63,6 @@ import com.everhomes.rest.organization.UpdateOrganizationMemberCommand;
 import com.everhomes.rest.organization.UpdateOrganizationsCommand;
 import com.everhomes.rest.organization.UpdatePersonnelsToDepartment;
 import com.everhomes.rest.organization.VerifyPersonnelByPhoneCommand;
-
 import com.everhomes.rest.organization.pm.AddPmBuildingCommand;
 import com.everhomes.rest.organization.pm.CancelPmBuildingCommand;
 import com.everhomes.rest.organization.pm.ListPmBuildingCommand;
@@ -72,6 +71,8 @@ import com.everhomes.rest.organization.pm.PmBuildingDTO;
 import com.everhomes.rest.organization.pm.PmManagementsResponse;
 import com.everhomes.rest.organization.pm.UnassignedBuildingDTO;
 import com.everhomes.rest.organization.pm.UpdateOrganizationMemberByIdsCommand;
+import com.everhomes.rest.ui.user.SceneTokenDTO;
+import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
@@ -80,6 +81,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.WebTokenGenerator;
 
 @RestController
 @RequestMapping("/admin/org")
@@ -651,7 +653,7 @@ public class OrganizationAdminController extends ControllerBase {
     @RequestMapping("listOrganizationPersonnels")
     @RestReturn(value=OrganizationMemberDTO.class, collection=true)
     public RestResponse listOrganizationPersonnels(@Valid ListOrganizationContactCommand cmd) {
-    	ListOrganizationMemberCommandResponse res = organizationService.listOrganizationPersonnels(cmd);
+    	ListOrganizationMemberCommandResponse res = organizationService.listOrganizationPersonnels(cmd,false);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -845,4 +847,91 @@ public class OrganizationAdminController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /admin/org/listMyTaskTopics</b>
+     * <p>我的任务</p>
+     */
+    @RequestMapping("listMyTaskTopics")
+    @RestReturn(value=ListPostCommandResponse.class)
+    public RestResponse listMyTaskTopics(@Valid ListTopicsByTypeCommand cmd) {
+    	ListPostCommandResponse  res = organizationService.listMyTaskTopics(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/org/listAllTaskTopics</b>
+     * <p>全部任务</p>
+     */
+    @RequestMapping("listAllTaskTopics")
+    @RestReturn(value=ListPostCommandResponse.class)
+    public RestResponse listAllTaskTopics(@Valid ListTopicsByTypeCommand cmd) {
+    	ListPostCommandResponse  res = organizationService.listAllTaskTopics(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/org/acceptTask</b>
+     * <p>接受任务</p>
+     */
+     @RequestMapping("acceptTask")
+     @RestReturn(value=String.class)
+     public RestResponse acceptTask(@Valid ProcessOrganizationTaskCommand cmd) {
+ 		organizationService.acceptTask(cmd);
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        
+        return res;
+     }
+     
+     /**
+      * <b>URL: /admin/org/refuseTask</b>
+      * <p>拒绝任务</p>
+      */
+      @RequestMapping("refuseTask")
+      @RestReturn(value=String.class)
+      public RestResponse refuseTask(@Valid ProcessOrganizationTaskCommand cmd) {
+   	      organizationService.refuseTask(cmd);
+    	  RestResponse res = new RestResponse();
+    	  res.setErrorCode(ErrorCodes.SUCCESS);
+    	  res.setErrorDescription("OK");
+         
+         return res;
+      }
+      
+      /**
+       * <b>URL: /admin/org/grabTask</b>
+       * <p>抢单</p>
+       */
+       @RequestMapping("grabTask")
+       @RestReturn(value=String.class)
+       public RestResponse grabTask(@Valid ProcessOrganizationTaskCommand cmd) {
+    	   organizationService.grabTask(cmd);
+    	   RestResponse res = new RestResponse();
+    	   res.setErrorCode(ErrorCodes.SUCCESS);
+           res.setErrorDescription("OK");
+          
+          return res;
+       }
+       
+       /**
+        * <b>URL: /admin/org/processingTask</b>
+        * <p>处理</p>
+        */
+        @RequestMapping("processingTask")
+        @RestReturn(value=String.class)
+        public RestResponse processingTask(@Valid ProcessOrganizationTaskCommand cmd) {
+      	   organizationService.processingTask(cmd);
+           RestResponse res = new RestResponse();
+           res.setErrorCode(ErrorCodes.SUCCESS);
+           res.setErrorDescription("OK");
+           
+           return res;
+        }
 }

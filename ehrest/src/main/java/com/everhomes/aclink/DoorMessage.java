@@ -18,6 +18,7 @@ public class DoorMessage {
     Long doorId;
     Byte messageType;
     AclinkMessage body;
+    String extra;
     
     public Long getSeq() {
         return seq;
@@ -43,6 +44,13 @@ public class DoorMessage {
     }
     public void setBody(AclinkMessage body) {
         this.body = body;
+    }
+    
+    public String getExtra() {
+        return extra;
+    }
+    public void setExtra(String extra) {
+        this.extra = extra;
     }
     @Override
     public String toString() {

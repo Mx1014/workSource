@@ -19,6 +19,8 @@ package com.everhomes.rest.launchpad;
  * <li>SERVICEALLIANCE(33): 服务联盟 </li> 
  * <li>PARKENTERPRISE(34): 园区企业</li> 
  * <li>PARKENTERPRISE(36): 俱乐部</li> 
+ * <li>MANAGER_TASK(39): 任务管理</li> 
+ * <li>ACLINK(40): 门禁</li> 
  * </ul>
  */
 public enum ActionType {
@@ -28,7 +30,8 @@ public enum ActionType {
       THIRDPART_URL((byte)14),POST_BY_CATEGORY((byte)15),QRCODE_SCAN((byte)16),PHONE_CALL((byte)17),LAUNCH_APP((byte)18),
       POST_NEW((byte)19),PM_DETAILS((byte)20),OPEN_DOOR((byte)21),PAY((byte)22),PUNCH((byte)23),MEETINGROOM((byte)24),VIPPARKING((byte)25),
       ELECSCREEN((byte)26) ,VIDEO_MEETING((byte)27),ENTER_PARK((byte)28),EXCHANGE_HALL((byte)29),PARKING_RECHARGE((byte)30),TOPIC_BY_FORUM((byte)31),
-      MAKERZONE((byte)32),SERVICEALLIANCE((byte)33),PARKENTERPRISE((byte)34), USER_GROUPS((byte)35), LIST_GROUPS((byte)36), SERVICE_ORDER((byte)37);
+      MAKERZONE((byte)32),SERVICEALLIANCE((byte)33),PARKENTERPRISE((byte)34), USER_GROUPS((byte)35), LIST_GROUPS((byte)36), SERVICE_ORDER((byte)37), 
+      MANAGER_TASK((byte)39), ACLINK((byte)40);
     
     private byte code;
     

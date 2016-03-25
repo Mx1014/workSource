@@ -88,4 +88,11 @@ public class EhOrganizationRoleMapDao extends org.jooq.impl.DAOImpl<com.everhome
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationRoleMap> fetchByCreateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhOrganizationRoleMap.EH_ORGANIZATION_ROLE_MAP.CREATE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>role_name IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationRoleMap> fetchByRoleName(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationRoleMap.EH_ORGANIZATION_ROLE_MAP.ROLE_NAME, values);
+	}
 }

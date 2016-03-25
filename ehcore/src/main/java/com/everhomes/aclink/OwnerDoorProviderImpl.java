@@ -101,6 +101,8 @@ public class OwnerDoorProviderImpl implements OwnerDoorProvider {
 
         if(objs.size() >= count) {
             locator.setAnchor(objs.get(objs.size() - 1).getId());
+        } else {
+            locator.setAnchor(null);
         }
         return objs;
     }

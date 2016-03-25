@@ -27,6 +27,7 @@ public class NeighborUserDTO {
     private Byte neighborhoodRelation;
     private Double distance;
     private String occupation;
+    private String initial;
 
     public NeighborUserDTO() {
     }
@@ -95,7 +96,16 @@ public class NeighborUserDTO {
         this.occupation = occupation;
     }
     
-    @Override
+    
+    public String getInitial() {
+		return initial;
+	}
+
+	public void setInitial(String initial) {
+		this.initial = initial;
+	}
+
+	@Override
     public int hashCode() {
         return HashCodeBuilder.reflectionHashCode(this);
     }

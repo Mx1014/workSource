@@ -22,6 +22,9 @@ public class DoorAccessActivedCommand {
     
     @NotNull
     Long time;
+    
+    //The response message from INIT_SERVER_KEY command, base64 encode
+    String content;
 
     public Long getDoorId() {
         return doorId;
@@ -46,6 +49,15 @@ public class DoorAccessActivedCommand {
     public void setTime(Long time) {
         this.time = time;
     }
+    
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

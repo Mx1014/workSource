@@ -13,6 +13,8 @@ import com.everhomes.util.StringHelper;
 public class ListNeighborUsersCommand extends BaseCommand{
 
     private Long pageOffset;
+    
+    private Integer isPinyin;
 
     public ListNeighborUsersCommand() {
     }
@@ -25,7 +27,16 @@ public class ListNeighborUsersCommand extends BaseCommand{
         this.pageOffset = pageOffset;
     }
 
-    @Override
+    
+    public Integer getIsPinyin() {
+		return isPinyin;
+	}
+
+	public void setIsPinyin(Integer isPinyin) {
+		this.isPinyin = isPinyin;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

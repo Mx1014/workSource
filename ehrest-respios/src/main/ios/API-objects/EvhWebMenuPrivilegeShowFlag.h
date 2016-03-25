@@ -1,0 +1,18 @@
+//
+// EvhWebMenuPrivilegeShowFlag.h
+// generated at 2016-03-25 11:43:33 
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhWebMenuPrivilegeShowFlag
+//
+typedef enum {
+
+    EvhWebMenuPrivilegeShowFlag_MENU_HIDE = 0, 
+    EvhWebMenuPrivilegeShowFlag_MENU_SHOW = 1
+
+} EvhWebMenuPrivilegeShowFlag;
+
+///////////////////////////////////////////////////////////////////////////////
+
