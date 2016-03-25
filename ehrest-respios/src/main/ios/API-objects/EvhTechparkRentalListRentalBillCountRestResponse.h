@@ -1,6 +1,6 @@
 //
 // EvhTechparkRentalListRentalBillCountRestResponse.h
-// generated at 2016-03-25 11:43:35 
+// generated at 2016-03-25 15:57:24 
 //
 #import "RestResponseBase.h"
 #import "EvhListRentalBillCountCommandResponse.h"

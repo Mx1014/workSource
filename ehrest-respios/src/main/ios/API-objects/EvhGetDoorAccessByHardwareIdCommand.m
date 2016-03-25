@@ -1,0 +1,61 @@
+//
+// EvhGetDoorAccessByHardwareIdCommand.m
+// generated at 2016-03-25 15:57:23 
+//
+#import "EvhGetDoorAccessByHardwareIdCommand.h"
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhGetDoorAccessByHardwareIdCommand
+//
+
+@implementation EvhGetDoorAccessByHardwareIdCommand
+
++(id) withJsonString: (NSString*) jsonString
+{
+    id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
+    if(jsonObject != nil) {
+        EvhGetDoorAccessByHardwareIdCommand* obj = [EvhGetDoorAccessByHardwareIdCommand new];
+        return [obj fromJson:jsonObject];
+    }
+    return nil;
+}
+
+-(id) init 
+{
+    self = [super init];
+    if(self) {
+        _hardwareIds = [NSMutableArray new];
+        return self;
+    }
+    return nil;
+}
+
+-(void) toJson: (NSMutableDictionary*) jsonObject 
+{
+    if(self.hardwareIds) {
+        NSMutableArray* jsonArray = [NSMutableArray new];
+        for(NSString* item in self.hardwareIds) {
+            [jsonArray addObject:item];
+        }
+        [jsonObject setObject: jsonArray forKey: @"hardwareIds"];
+    }
+}
+
+-(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
+{
+    if([jsonObject isKindOfClass:[NSDictionary class]]) {
+        {
+            NSArray* jsonArray = [jsonObject objectForKey: @"hardwareIds"];
+            for(id itemJson in jsonArray) {
+                [self.hardwareIds addObject: itemJson];
+            }
+        }
+        return self;
+    }
+    
+    return nil;
+}
+
+@end
+
+///////////////////////////////////////////////////////////////////////////////

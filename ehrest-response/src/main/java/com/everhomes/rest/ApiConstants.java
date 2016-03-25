@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-03-25 11:43:46
+// generated at 2016-03-25 15:54:43
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -7,6 +7,8 @@ public interface ApiConstants {
     public static final String ACLINK_ACTIVE_URL = "/aclink/active";
     public static final String ACLINK_ACTIVING_URL = "/aclink/activing";
     public static final String ACLINK_CREATEAUTH_URL = "/aclink/createAuth";
+    public static final String ACLINK_DELETEDOORAUTH_URL = "/aclink/deleteDoorAuth";
+    public static final String ACLINK_GETDOORACCESSBYHARDWAREID_URL = "/aclink/getDoorAccessByHardwareId";
     public static final String ACLINK_LISTADMINAESUSERKEY_URL = "/aclink/listAdminAesUserKey";
     public static final String ACLINK_LISTAESUSERKEY_URL = "/aclink/listAesUserKey";
     public static final String ACLINK_LISTAUTHHISTORY_URL = "/aclink/listAuthHistory";
@@ -48,6 +50,8 @@ public interface ApiConstants {
     public static final String ADMIN_ACL_LISTACLROLEBYORGANIZATIONIDS_URL = "/admin/acl/listAclRoleByOrganizationIds";
     public static final String ADMIN_ACL_LISTACLROLES_URL = "/admin/acl/listAclRoles";
     public static final String ADMIN_ACL_LISTUSERROLES_URL = "/admin/acl/listUserRoles";
+    public static final String ADMIN_ACL_QRYROLEPRIVILEGES_URL = "/admin/acl/qryRolePrivileges";
+    public static final String ADMIN_ACL_UPDATEROLEPRIVILEGE_URL = "/admin/acl/updateRolePrivilege";
     public static final String ADMIN_ACLINK_CREATEAUTH_URL = "/admin/aclink/createAuth";
     public static final String ADMIN_ACLINK_DELETEDOORACCESS_URL = "/admin/aclink/deleteDoorAccess";
     public static final String ADMIN_ACLINK_DELETEDOORAUTH_URL = "/admin/aclink/deleteDoorAuth";
@@ -56,8 +60,6 @@ public interface ApiConstants {
     public static final String ADMIN_ACLINK_SEARCHDOORACCESS_URL = "/admin/aclink/searchDoorAccess";
     public static final String ADMIN_ACLINK_SEARCHDOORAUTH_URL = "/admin/aclink/searchDoorAuth";
     public static final String ADMIN_ACLINK_UPDATEDOORACCESS_URL = "/admin/aclink/updateDoorAccess";
-    public static final String ADMIN_ACL_QRYROLEPRIVILEGES_URL = "/admin/acl/qryRolePrivileges";
-    public static final String ADMIN_ACL_UPDATEROLEPRIVILEGE_URL = "/admin/acl/updateRolePrivilege";
     public static final String ADMIN_ACTIVITY_LIST_URL = "/admin/activity/list";
     public static final String ADMIN_ADDBORDER_URL = "/admin/addBorder";
     public static final String ADMIN_ADDNAMESPACE_URL = "/admin/addNamespace";
@@ -174,10 +176,10 @@ public interface ApiConstants {
     public static final String ADMIN_ORG_LISTACLROLEBYUSERID_URL = "/admin/org/listAclRoleByUserId";
     public static final String ADMIN_ORG_LISTALLCHILDRENORGANIZATIONS_URL = "/admin/org/listAllChildrenOrganizations";
     public static final String ADMIN_ORG_LISTALLORGANIZATIONPERSONNELS_URL = "/admin/org/listAllOrganizationPersonnels";
+    public static final String ADMIN_ORG_LISTALLTASKTOPICS_URL = "/admin/org/listAllTaskTopics";
     public static final String ADMIN_ORG_LISTCHILDRENORGANIZATIONS_URL = "/admin/org/listChildrenOrganizations";
     public static final String ADMIN_ORG_LISTDEPARTMENTS_URL = "/admin/org/listDepartments";
     public static final String ADMIN_ORG_LISTENTERPRISEBYCOMMUNITYID_URL = "/admin/org/listEnterpriseByCommunityId";
-    public static final String ADMIN_ORG_LISTALLTASKTOPICS_URL = "/admin/org/listAllTaskTopics";
     public static final String ADMIN_ORG_LISTMYTASKTOPICS_URL = "/admin/org/listMyTaskTopics";
     public static final String ADMIN_ORG_LISTORGAUTHPERSONNELS_URL = "/admin/org/listOrgAuthPersonnels";
     public static final String ADMIN_ORG_LISTORGMEMBERS_URL = "/admin/org/listOrgMembers";

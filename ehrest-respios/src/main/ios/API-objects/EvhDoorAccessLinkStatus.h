@@ -1,0 +1,18 @@
+//
+// EvhDoorAccessLinkStatus.h
+// generated at 2016-03-25 15:57:22 
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhDoorAccessLinkStatus
+//
+typedef enum {
+
+    EvhDoorAccessLinkStatus_SUCCESS = 0, 
+    EvhDoorAccessLinkStatus_FAILED = 1
+
+} EvhDoorAccessLinkStatus;
+
+///////////////////////////////////////////////////////////////////////////////
+
