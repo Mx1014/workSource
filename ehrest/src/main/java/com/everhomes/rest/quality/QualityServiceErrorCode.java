@@ -9,4 +9,6 @@ public interface QualityServiceErrorCode {
     static final int ERROR_STANDARD_NOT_EXIST = 10003;  //标准为空
     static final int ERROR_CATEGORY_NOT_EXIST = 10004;  //category为空
     static final int ERROR_FACTOR_NOT_EXIST = 10005;  //factor为空
+    
+    static final int ATTACHMENT_TEXT = 10006;  //附件文字
 }

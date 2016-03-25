@@ -6,6 +6,20 @@ import java.util.List;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ *  <li>id: record主键id</li>
+ *  <li>taskId: 任务id</li>
+ *  <li>operatorId: 操作人id</li>
+ *  <li>targetId: 目标id（不一定有）</li>
+ *  <li>processType: 操作类型 0: none, 1: inspect核查, 2: retify整改, 3: review审阅, 4: assgin分配, 5: forward转发</li>
+ *  <li>processEndTime: 操作截止时间</li>
+ *  <li>processResult: 操作结果</li>
+ *  <li>processMessage: 操作内容</li>
+ *  <li>createTime: 创建时间</li>
+ *  <li>attachments: 附件， 参考com.everhomes.rest.quality.QualityInspectionTaskAttachmentDTO</li>
+ * </ul>
+ */
 public class QualityInspectionTaskRecordsDTO {
 	
 	private Long id;

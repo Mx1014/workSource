@@ -4,11 +4,22 @@ import java.sql.Timestamp;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ *  <li>id: 任务主键id</li>
+ *  <li>recordId: 记录id</li>
+ *  <li>contentType: 附件类型IMAGE("image"): 图片 AUDIO("audio"): 音频 VIDEO("video"): 视频 </li>
+ *  <li>contentUri: 附件访问URI</li>
+ *  <li>contentUrl: 附件访问URL</li>
+ *  <li>creatorUid: 创建人id</li>
+ *  <li>createTime: 创建时间</li>
+ * </ul>
+ */
 public class QualityInspectionTaskAttachmentDTO {
 
 	private Long id;
 	
-	private Long taskId;
+	private Long recordId;
 	
 	private String contentType;
 	
@@ -28,12 +39,12 @@ public class QualityInspectionTaskAttachmentDTO {
 		this.id = id;
 	}
 
-	public Long getTaskId() {
-		return taskId;
+	public Long getRecordId() {
+		return recordId;
 	}
 
-	public void setTaskId(Long taskId) {
-		this.taskId = taskId;
+	public void setRecordId(Long recordId) {
+		this.recordId = recordId;
 	}
 
 	public String getContentType() {

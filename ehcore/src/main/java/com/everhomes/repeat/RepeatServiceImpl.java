@@ -10,8 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.locale.LocaleStringService;
+import com.everhomes.rest.repeat.ExpressionDTO;
 import com.everhomes.rest.repeat.RangeDTO;
 import com.everhomes.rest.repeat.RepeatDurationUnit;
+import com.everhomes.rest.repeat.RepeatExpressionDTO;
 import com.everhomes.rest.repeat.RepeatServiceErrorCode;
 import com.everhomes.rest.repeat.TimeRangeDTO;
 import com.everhomes.user.UserContext;
@@ -103,4 +105,21 @@ public class RepeatServiceImpl implements RepeatService {
 		}
 		return repeat;
 	}
+
+	@Override
+	public List<RepeatExpressionDTO> analyzeExpression(String expression) {
+		
+		Gson gson = new Gson();
+		ExpressionDTO repeat = gson.fromJson(expression, new TypeToken<ExpressionDTO>() {}.getType());
+		List<RepeatExpressionDTO> expressions = repeat.getExpression();
+		return expressions;
+	}
+
+	@Override
+	public List<RepeatExpressionDTO> test() {
+		RepeatSettings repeat = findRepeatSettingById(4L);
+		List<RepeatExpressionDTO> ex = analyzeExpression(repeat.getExpression());
+		return ex;
+	}
+	
 }

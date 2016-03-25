@@ -39,6 +39,7 @@ public class OrganizationDTO {
 	private String description;
 	
 	private String groupType;
+	private Long directlyEnterpriseId;
 	
 	//expand 
 	private Long communityId;
@@ -220,6 +221,16 @@ public class OrganizationDTO {
 
 	public void setRoleName(String roleName) {
 		this.roleName = roleName;
+	}
+
+
+	public Long getDirectlyEnterpriseId() {
+		return directlyEnterpriseId;
+	}
+
+
+	public void setDirectlyEnterpriseId(Long directlyEnterpriseId) {
+		this.directlyEnterpriseId = directlyEnterpriseId;
 	}
 
 

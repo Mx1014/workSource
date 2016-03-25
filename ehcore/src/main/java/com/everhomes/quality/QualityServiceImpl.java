@@ -637,7 +637,7 @@ public class QualityServiceImpl implements QualityService {
 			Map<String, Object> map = new HashMap<String, Object>();
 		    map.put("userName", operator.getContactName());
 		    map.put("taskName", task.getTaskName());
-		    map.put("deadline", cmd.getEndTime());
+		    map.put("deadline", new Timestamp(cmd.getEndTime()));
 			String scope = QualityNotificationTemplateCode.SCOPE;
 			int code = QualityNotificationTemplateCode.ASSIGN_TASK_NOTIFY_OPERATOR;
 			String locale = "zh_CN";
@@ -646,17 +646,22 @@ public class QualityServiceImpl implements QualityService {
 			
 			OrganizationMember target = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getOperatorId(), task.getExecutiveGroupId());
 			Map<String, Object> msgMap = new HashMap<String, Object>();
-		    map.put("operator", operator.getContactName());
-		    map.put("target", target.getContactName());
-		    map.put("taskName", task.getTaskName());
-		    map.put("deadline", cmd.getEndTime());
+			msgMap.put("operator", operator.getContactName());
+			msgMap.put("target", target.getContactName());
+			msgMap.put("taskName", task.getTaskName());
+			msgMap.put("deadline", new Timestamp(cmd.getEndTime()));
 			int msgCode = QualityNotificationTemplateCode.ASSIGN_TASK_MSG;
 			String msg = localeTemplateService.getLocaleTemplateString(scope, msgCode, locale, msgMap, "");
 			record.setProcessMessage(msg);
 		}
 		
 		if(cmd.getMessage() != null) {
-			String msg = record.getProcessMessage()+cmd.getMessage();
+			String attText = localeStringService.getLocalizedString(
+					String.valueOf(QualityServiceErrorCode.SCOPE),
+					String.valueOf(QualityServiceErrorCode.ATTACHMENT_TEXT),
+					UserContext.current().getUser().getLocale(),
+					"text:");
+			String msg = record.getProcessMessage()+attText+cmd.getMessage();
 			record.setProcessMessage(msg);
 		}
 		
