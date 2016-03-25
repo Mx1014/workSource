@@ -2,9 +2,11 @@ package com.everhomes.aclink;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 public class ListAesUserKeyByUserResponse {
+    @ItemType(AesUserKeyDTO.class)
     List<AesUserKeyDTO> aesUserKeys;
 
     public List<AesUserKeyDTO> getAesUserKeys() {
