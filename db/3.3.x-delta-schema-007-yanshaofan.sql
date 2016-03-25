@@ -6,6 +6,8 @@ ALTER TABLE `eh_forum_posts` ADD COLUMN `end_time` DATETIME COMMENT 'publish end
 
 ALTER TABLE `eh_communities` ADD COLUMN `area_size` DOUBLE COMMENT 'area size';
 
+ALTER TABLE `eh_organization_role_map` ADD COLUMN `role_name` VARCHAR(128) COMMENT 'role name';
+
 # 
 # web menu 
 # 
