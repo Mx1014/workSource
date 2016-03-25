@@ -29,6 +29,7 @@ import com.everhomes.rest.enterprise.RejectContactCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
 import com.everhomes.rest.forum.ListPostCommandResponse;
 import com.everhomes.rest.organization.AddOrgAddressCommand;
+import com.everhomes.rest.organization.AddPersonnelsToGroup;
 import com.everhomes.rest.organization.CreateDepartmentCommand;
 import com.everhomes.rest.organization.CreateOrganizationAccountCommand;
 import com.everhomes.rest.organization.CreateOrganizationByAdminCommand;
@@ -649,11 +650,25 @@ public class OrganizationAdminController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /admin/org/addPersonnelsToGroup</b>
+     * <p>批量添加员工到部门</p>
+     */
+    @RequestMapping("addPersonnelsToGroup")
+    @RestReturn(value=String.class, collection=true)
+    public RestResponse addPersonnelsToGroup(@Valid AddPersonnelsToGroup cmd) {
+    	organizationService.addPersonnelsToGroup(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
      * <b>URL: /admin/org/listOrganizationPersonnels</b>
      * <p>通讯录列表</p>
      */
     @RequestMapping("listOrganizationPersonnels")
-    @RestReturn(value=OrganizationMemberDTO.class, collection=true)
+    @RestReturn(value=ListOrganizationMemberCommandResponse.class)
     public RestResponse listOrganizationPersonnels(@Valid ListOrganizationContactCommand cmd) {
     	ListOrganizationMemberCommandResponse res = organizationService.listOrganizationPersonnels(cmd,false);
         RestResponse response = new RestResponse(res);
@@ -667,7 +682,7 @@ public class OrganizationAdminController extends ControllerBase {
      * <p>通讯录列表</p>
      */
     @RequestMapping("listOrganizationAdministrators")
-    @RestReturn(value=OrganizationMemberDTO.class, collection=true)
+    @RestReturn(value=ListOrganizationMemberCommandResponse.class)
     public RestResponse listOrganizationAdministrators(@Valid ListOrganizationAdministratorCommand cmd) {
     	List<Long> roleIds = new ArrayList<Long>();
     	roleIds.add(RoleConstants.ORGANIZATION_ADMIN);
@@ -683,7 +698,7 @@ public class OrganizationAdminController extends ControllerBase {
      * <p>认证通讯录列表</p>
      */
     @RequestMapping("listOrgAuthPersonnels")
-    @RestReturn(value=OrganizationMemberDTO.class, collection=true)
+    @RestReturn(value=ListOrganizationMemberCommandResponse.class)
     public RestResponse listOrgAuthPersonnels(@Valid ListOrganizationContactCommand cmd) {
     	ListOrganizationMemberCommandResponse res = organizationService.listOrgAuthPersonnels(cmd);
         RestResponse response = new RestResponse(res);

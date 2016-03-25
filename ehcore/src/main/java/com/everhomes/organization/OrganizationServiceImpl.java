@@ -121,6 +121,7 @@ import com.everhomes.rest.messaging.QuestionMetaObject;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.organization.AddOrgAddressCommand;
+import com.everhomes.rest.organization.AddPersonnelsToGroup;
 import com.everhomes.rest.organization.ApplyOrganizationMemberCommand;
 import com.everhomes.rest.organization.AssginOrgTopicCommand;
 import com.everhomes.rest.organization.CreateDepartmentCommand;
@@ -4203,6 +4204,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 					"ids Invalid parameter.");
 		}
 		organizationProvider.updateOrganizationMemberByIds(ids, org);
+	}
+	
+	@Override
+	public void addPersonnelsToGroup(AddPersonnelsToGroup cmd) {
+		
+		List<Long> ids = new ArrayList<Long>();
+		for (Long id : ids) {
+//			organizationProvider.find
+		}
+		
 	}
 	
 	@Override
