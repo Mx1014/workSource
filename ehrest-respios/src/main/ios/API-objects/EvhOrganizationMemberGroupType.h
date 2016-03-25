@@ -1,6 +1,6 @@
 //
 // EvhOrganizationMemberGroupType.h
-// generated at 2016-03-25 09:26:39 
+// generated at 2016-03-25 11:43:33 
 //
 
 #define EvhOrganizationMemberGroupType_MANAGER @"manager"

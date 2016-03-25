@@ -1,6 +1,6 @@
 //
 // EvhApiConstants.h
-// generated at 2016-03-25 09:26:45
+// generated at 2016-03-25 11:43:35
 //
 #define EVH_ACTIVITY_CANCELSIGNUP_URL @"/activity/cancelSignup"
 #define EVH_ACTIVITY_CHECKIN_URL @"/activity/checkin"

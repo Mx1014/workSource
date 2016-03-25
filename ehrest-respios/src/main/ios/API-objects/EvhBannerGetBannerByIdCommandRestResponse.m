@@ -1,6 +1,6 @@
 //
 // EvhBannerGetBannerByIdCommandRestResponse.m
-// generated at 2016-03-25 09:26:43 
+// generated at 2016-03-25 11:43:35 
 //
 #import "EvhBannerGetBannerByIdCommandRestResponse.h"
 #import "EvhBannerDTO.h"

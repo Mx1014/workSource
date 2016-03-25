@@ -1,6 +1,6 @@
 //
 // EvhDeviceMessage.m
-// generated at 2016-03-25 09:26:42 
+// generated at 2016-03-25 11:43:32 
 //
 #import "EvhDeviceMessage.h"
 

@@ -1,6 +1,6 @@
 //
 // EvhPrivilegeConstants.h
-// generated at 2016-03-25 09:26:41 
+// generated at 2016-03-25 11:43:33 
 //
 
 #define EvhPrivilegeConstants_All 1
@@ -22,6 +22,6 @@
 #define EvhPrivilegeConstants_GroupRevokeMember 157
 #define EvhPrivilegeConstants_GroupRequestAdminRole 161
 #define EvhPrivilegeConstants_GroupInviteAdminRole 162
-#define EvhPrivilegeConstants_TaskAllListPosts 171
-#define EvhPrivilegeConstants_TaskGuaranteeListPosts 172
-#define EvhPrivilegeConstants_TaskSeekHelpListPosts 173
+#define EvhPrivilegeConstants_TaskAllListPosts 305
+#define EvhPrivilegeConstants_TaskGuaranteeListPosts 303
+#define EvhPrivilegeConstants_TaskSeekHelpListPosts 304

@@ -1,6 +1,6 @@
 //
 // EvhActivityLocalStringCode.h
-// generated at 2016-03-25 09:26:39 
+// generated at 2016-03-25 11:43:33 
 //
 
 #define EvhActivityLocalStringCode_SCOPE @"activity"

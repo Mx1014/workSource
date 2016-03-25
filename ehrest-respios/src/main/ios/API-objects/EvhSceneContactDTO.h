@@ -1,6 +1,6 @@
 //
 // EvhSceneContactDTO.h
-// generated at 2016-03-25 09:26:41 
+// generated at 2016-03-25 11:43:33 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -30,11 +30,15 @@
 
 @property(nonatomic, copy) NSNumber* createTime;
 
+@property(nonatomic, copy) NSString* departmentName;
+
 @property(nonatomic, copy) NSString* statusLine;
 
 @property(nonatomic, copy) NSString* occupation;
 
 @property(nonatomic, copy) NSString* initial;
+
+@property(nonatomic, copy) NSNumber* neighborhoodRelation;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

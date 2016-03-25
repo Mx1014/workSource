@@ -1,6 +1,6 @@
 //
 // EvhSceneContactDTO.m
-// generated at 2016-03-25 09:26:41 
+// generated at 2016-03-25 11:43:33 
 //
 #import "EvhSceneContactDTO.h"
 
@@ -49,12 +49,16 @@
         [jsonObject setObject: self.userId forKey: @"userId"];
     if(self.createTime)
         [jsonObject setObject: self.createTime forKey: @"createTime"];
+    if(self.departmentName)
+        [jsonObject setObject: self.departmentName forKey: @"departmentName"];
     if(self.statusLine)
         [jsonObject setObject: self.statusLine forKey: @"statusLine"];
     if(self.occupation)
         [jsonObject setObject: self.occupation forKey: @"occupation"];
     if(self.initial)
         [jsonObject setObject: self.initial forKey: @"initial"];
+    if(self.neighborhoodRelation)
+        [jsonObject setObject: self.neighborhoodRelation forKey: @"neighborhoodRelation"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -96,6 +100,10 @@
         if(self.createTime && [self.createTime isEqual:[NSNull null]])
             self.createTime = nil;
 
+        self.departmentName = [jsonObject objectForKey: @"departmentName"];
+        if(self.departmentName && [self.departmentName isEqual:[NSNull null]])
+            self.departmentName = nil;
+
         self.statusLine = [jsonObject objectForKey: @"statusLine"];
         if(self.statusLine && [self.statusLine isEqual:[NSNull null]])
             self.statusLine = nil;
@@ -107,6 +115,10 @@
         self.initial = [jsonObject objectForKey: @"initial"];
         if(self.initial && [self.initial isEqual:[NSNull null]])
             self.initial = nil;
+
+        self.neighborhoodRelation = [jsonObject objectForKey: @"neighborhoodRelation"];
+        if(self.neighborhoodRelation && [self.neighborhoodRelation isEqual:[NSNull null]])
+            self.neighborhoodRelation = nil;
 
         return self;
     }

@@ -1,6 +1,6 @@
 //
 // EvhAdminTechparkParkOfferCardRestResponse.m
-// generated at 2016-03-25 09:26:43 
+// generated at 2016-03-25 11:43:34 
 //
 #import "EvhAdminTechparkParkOfferCardRestResponse.h"
 #import "EvhApplyParkCardList.h"
