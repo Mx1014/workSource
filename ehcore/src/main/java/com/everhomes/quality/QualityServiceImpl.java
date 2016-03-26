@@ -320,6 +320,19 @@ public class QualityServiceImpl implements QualityService {
 	@Override
 	public void deleteQualityCategory(DeleteQualityCategoryCommand cmd) {
 		QualityInspectionCategories category = verifiedCategoryById(cmd.getCategoryId());
+		List<QualityInspectionStandards> standards = qualityProvider.findStandardsByCategoryId(cmd.getCategoryId());
+		if(standards != null && standards.size() > 0) {
+			LOGGER.error("the category which id="+cmd.getCategoryId()+" has active standard!");
+			throw RuntimeErrorException
+					.errorWith(
+							QualityServiceErrorCode.SCOPE,
+							QualityServiceErrorCode.ERROR_CATEGORY_HAS_STANDARD,
+							localeStringService.getLocalizedString(
+									String.valueOf(QualityServiceErrorCode.SCOPE),
+									String.valueOf(QualityServiceErrorCode.ERROR_CATEGORY_HAS_STANDARD),
+									UserContext.current().getUser().getLocale(),
+									"the category has active standard!"));
+		}
 		category.setStatus(QualityInspectionCategoryStatus.DISABLED.getCode());
 		qualityProvider.updateQualityInspectionCategories(category);
 	}
@@ -1028,6 +1041,9 @@ public class QualityServiceImpl implements QualityService {
 		List<StandardGroupDTO> executiveGroup = standard.getExecutiveGroup().stream().map((r) -> {
         	
 			StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);  
+			Organization group = organizationProvider.findOrganizationById(r.getGroupId());
+			if(group != null)
+				dto.setGroupName(group.getName());
         	
         	return dto;
         }).collect(Collectors.toList());
@@ -1035,12 +1051,18 @@ public class QualityServiceImpl implements QualityService {
 		List<StandardGroupDTO> reviewGroup = standard.getReviewGroup().stream().map((r) -> {
         	
 			StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);  
-        	
+			Organization group = organizationProvider.findOrganizationById(r.getGroupId());
+			if(group != null)
+				dto.setGroupName(group.getName());
+			
         	return dto;
         }).collect(Collectors.toList());
 		standardDto.setRepeat(repeatDto);
 		standardDto.setExecutiveGroup(executiveGroup);
 		standardDto.setReviewGroup(reviewGroup);
+		
+		QualityInspectionCategories category = verifiedCategoryById(standard.getCategoryId());
+		standardDto.setCategoryName(category.getName());
 		return standardDto;
 	}
 

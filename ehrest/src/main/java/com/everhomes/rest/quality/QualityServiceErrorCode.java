@@ -11,4 +11,5 @@ public interface QualityServiceErrorCode {
     static final int ERROR_FACTOR_NOT_EXIST = 10005;  //factor为空
     
     static final int ATTACHMENT_TEXT = 10006;  //附件文字
+    static final int ERROR_CATEGORY_HAS_STANDARD = 10007;  //类型包含active的标准
 }

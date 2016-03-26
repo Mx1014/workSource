@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  *  <li>standardNumber: 标准编号</li>
  *  <li>description: 具体内容</li>
  *  <li>categoryId: category表的id</li>
+ *  <li>categoryName: 所属类型名称</li>
  *  <li>repeat: 执行周期 com.everhomes.rest.quality.RepeatSettingDTO</li>
  *  <li>executiveGroup: 执行业务组信息 com.everhomes.rest.quality.StandardGroupDTO</li>
  *  <li>reviewGroup: 审阅业务组信息 com.everhomes.rest.quality.StandardGroupDTO</li>
@@ -44,6 +45,8 @@ public class QualityStandardsDTO {
 	private String description;
 	
 	private Long categoryId;
+	
+	private String categoryName;
 	
 	@ItemType(RepeatSettingsDTO.class)
 	private RepeatSettingsDTO repeat;
@@ -122,6 +125,14 @@ public class QualityStandardsDTO {
 
 	public void setCategoryId(Long categoryId) {
 		this.categoryId = categoryId;
+	}
+
+	public String getCategoryName() {
+		return categoryName;
+	}
+
+	public void setCategoryName(String categoryName) {
+		this.categoryName = categoryName;
 	}
 
 	public RepeatSettingsDTO getRepeat() {

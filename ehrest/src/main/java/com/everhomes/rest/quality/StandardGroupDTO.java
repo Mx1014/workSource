@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  *  <li>standardId: 标准id</li>
  *  <li>groupType: 业务组类型 com.everhomes.rest.quality.QualityGroupType</li>
  *  <li>groupId: 业务组id</li>
+ *  <li>groupName: 业务组组名</li>
  * </ul>
  */
 public class StandardGroupDTO {
@@ -17,6 +18,8 @@ public class StandardGroupDTO {
 	private Byte groupType;
 	
 	private Long groupId;
+	
+	private String groupName;
 	
 	private Long standardId;
 
@@ -42,6 +45,14 @@ public class StandardGroupDTO {
 
 	public void setGroupId(Long groupId) {
 		this.groupId = groupId;
+	}
+
+	public String getGroupName() {
+		return groupName;
+	}
+
+	public void setGroupName(String groupName) {
+		this.groupName = groupName;
 	}
 
 	public Long getStandardId() {
