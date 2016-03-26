@@ -494,9 +494,16 @@ public class QualityServiceImpl implements QualityService {
         if(cmd.getEndDate() != null) {
         	endDate = new Timestamp(cmd.getEndDate());
         }
+
+        Long currentUid = null;
+        if(cmd.getExecuteFlag() != null && cmd.getExecuteFlag() == 1) {
+        	User user = UserContext.current().getUser();
+        	currentUid = user.getId();
+        }
         
+        final Long executeUid = currentUid;
         List<QualityInspectionTasks> tasks = qualityProvider.listVerificationTasks(locator, pageSize + 1, ownerId, ownerType, 
-        		cmd.getTaskType(), cmd.getExecuteUid(), startDate, endDate, 
+        		cmd.getTaskType(), executeUid, startDate, endDate, 
         		cmd.getGroupId(), cmd.getExecuteStatus(), cmd.getReviewStatus());
         
         List<QualityInspectionTaskRecords> records = new ArrayList<QualityInspectionTaskRecords>();
@@ -529,10 +536,10 @@ public class QualityServiceImpl implements QualityService {
         	QualityInspectionCategories category = verifiedCategoryById(standard.getCategoryId());
         	r.setCategoryName(category.getName());
         	
-        	if(cmd.getExecuteUid() != null) {
-        		if(r.getExecutorId() != null && r.getExecutorId().equals(cmd.getExecuteUid())) {
+        	if(executeUid != null) {
+        		if(r.getExecutorId() != null && r.getExecutorId().equals(executeUid)) {
         			r.setTaskFlag(QualityTaskType.VERIFY_TASK.getCode());
-        		}else if(r.getOperatorId() != null && r.getOperatorId().equals(cmd.getExecuteUid())) {
+        		}else if(r.getOperatorId() != null && r.getOperatorId().equals(executeUid)) {
         			r.setTaskFlag(QualityTaskType.RECTIFY_TASK.getCode());
         		}
         	}

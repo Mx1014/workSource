@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  *  <li>ownerId: 任务所属组织等的id</li>
  *  <li>ownerType: 任务所属组织类型，如enterprise</li>
  *  <li>taskType: 任务类型</li>
- *  <li>executeUid: 执行人id</li>
+ *  <li>executeFlag: 是否按任务执行人查询任务 0-否 1-是</li>
  *  <li>startDate: 任务开始日期</li>
  *  <li>endDate: 任务结束日期</li>
  *  <li>groupId: 执行任务组id</li>
@@ -30,7 +30,7 @@ public class ListQualityInspectionTasksCommand {
 	@NotNull
 	private Byte taskType;
 	
-	private Long executeUid;
+	private Byte executeFlag;
 	
 	private Long startDate;
 	
@@ -70,12 +70,12 @@ public class ListQualityInspectionTasksCommand {
 		this.taskType = taskType;
 	}
 
-	public Long getExecuteUid() {
-		return executeUid;
+	public Byte getExecuteFlag() {
+		return executeFlag;
 	}
 
-	public void setExecuteUid(Long executeUid) {
-		this.executeUid = executeUid;
+	public void setExecuteFlag(Byte executeFlag) {
+		this.executeFlag = executeFlag;
 	}
 
 	public Byte getExecuteStatus() {
