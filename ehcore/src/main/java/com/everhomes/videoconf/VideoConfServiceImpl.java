@@ -81,6 +81,7 @@ import com.everhomes.rest.videoconf.GetNamespaceListResponse;
 import com.everhomes.rest.videoconf.InvoiceDTO;
 import com.everhomes.rest.videoconf.JoinVideoConfCommand;
 import com.everhomes.rest.videoconf.JoinVideoConfResponse;
+import com.everhomes.rest.videoconf.ListConfCapacityResponse;
 import com.everhomes.rest.videoconf.ListConfOrderAccountResponse;
 import com.everhomes.rest.videoconf.ListEnterpriseWithVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.ListEnterpriseWithVideoConfAccountResponse;
@@ -2205,6 +2206,19 @@ public class VideoConfServiceImpl implements VideoConfService {
 	public void deleteSourceVideoConfAccount(
 			DeleteSourceVideoConfAccountCommand cmd) {
 		vcProvider.deleteSourceVideoConfAccount(cmd.getSourceAccountId());
+	}
+
+	@Override
+	public InvoiceDTO updateInvoiceByOrderId(InvoiceDTO cmd) {
+		ConfInvoices invoice = ConvertHelper.convert(cmd, ConfInvoices.class);
+//		vcProvider.updateInvoice(invoice);
+		return null;
+	}
+
+	@Override
+	public ListConfCapacityResponse listConfCapacity() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }
