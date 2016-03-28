@@ -547,7 +547,7 @@ public class QualityServiceImpl implements QualityService {
         	QualityInspectionTaskDTO dto = ConvertHelper.convert(r, QualityInspectionTaskDTO.class);  
         	List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(r.getExecutiveGroupId());
         	
-        	 List<GroupUserDTO> groupUsers = members.stream().map((mem) -> {
+        	List<GroupUserDTO> groupUsers = members.stream().map((mem) -> {
              	if(OrganizationMemberTargetType.USER.getCode().equals(mem.getTargetType()) 
              			&& mem.getTargetId() != null && mem.getTargetId() != 0) {
              		GroupUserDTO user = new GroupUserDTO();
@@ -562,10 +562,22 @@ public class QualityServiceImpl implements QualityService {
              	}
              }).filter(member->member!=null).collect(Collectors.toList());
         	 
-        	 dto.setGroupUsers(groupUsers);
+        	dto.setGroupUsers(groupUsers);
+        	
+        	QualityInspectionTaskRecordsDTO recordDto = ConvertHelper.convert(r.getRecord(), QualityInspectionTaskRecordsDTO.class);
+        	dto.setRecord(recordDto);
         	 
-        	 QualityInspectionTaskRecordsDTO recordDto = ConvertHelper.convert(r.getRecord(), QualityInspectionTaskRecordsDTO.class);
-        	 dto.setRecord(recordDto);
+        	OrganizationMember executor = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getExecutorId(), r.getExecutiveGroupId());
+        	if(executor != null) {
+        		dto.setExecutorName(executor.getContactName());
+        	}
+        	
+        	if(r.getOperatorId() != null && r.getOperatorId() != 0) {
+        		OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getOperatorId(), r.getExecutiveGroupId());
+            	if(operator != null) {
+            		dto.setOperatorName(operator.getContactName());
+            	}
+        	}
         	
         	return dto;
         }).collect(Collectors.toList());
