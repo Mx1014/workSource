@@ -1173,4 +1173,11 @@ public class QualityServiceImpl implements QualityService {
 		return dtos;
 	}
 
+	@Override
+	public HttpServletResponse exportInspectionTasks(
+			ListQualityInspectionTasksCommand cmd, HttpServletResponse response) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

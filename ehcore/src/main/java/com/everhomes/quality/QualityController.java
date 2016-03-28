@@ -237,6 +237,18 @@ public class QualityController extends ControllerBase {
 	}
 	
 	/**
+	 * <b>URL: /quality/exportInspectionTasks</b>
+	 * <p>导出核查任务</p>
+	 */
+	@RequestMapping("exportInspectionTasks")
+	public HttpServletResponse exportInspectionTasks(@Valid ListQualityInspectionTasksCommand cmd,HttpServletResponse response) {
+		
+		HttpServletResponse commandResponse = qualityService.exportInspectionTasks(cmd, response);
+		
+		return commandResponse;
+	}
+	
+	/**
 	 * <b>URL: /quality/listQualityInspectionTasks</b>
 	 * <p>查看核查任务列表</p>
 	 */
