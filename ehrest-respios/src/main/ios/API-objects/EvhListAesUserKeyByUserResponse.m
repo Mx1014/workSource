@@ -1,8 +1,9 @@
 //
 // EvhListAesUserKeyByUserResponse.m
-// generated at 2016-03-25 19:05:20 
+// generated at 2016-03-28 15:56:07 
 //
 #import "EvhListAesUserKeyByUserResponse.h"
+#import "EvhAesUserKeyDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhListAesUserKeyByUserResponse
@@ -34,3 +35,33 @@
 {
     if(self.aesUserKeys) {
         NSMutableArray* jsonArray = [NSMutableArray new];
+        for(EvhAesUserKeyDTO* item in self.aesUserKeys) {
+            NSMutableDictionary* dic = [NSMutableDictionary new];
+            [item toJson:dic];
+            [jsonArray addObject:dic];
+        }
+        [jsonObject setObject: jsonArray forKey: @"aesUserKeys"];
+    }
+}
+
+-(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
+{
+    if([jsonObject isKindOfClass:[NSDictionary class]]) {
+        {
+            NSArray* jsonArray = [jsonObject objectForKey: @"aesUserKeys"];
+            for(id itemJson in jsonArray) {
+                EvhAesUserKeyDTO* item = [EvhAesUserKeyDTO new];
+                
+                [item fromJson: itemJson];
+                [self.aesUserKeys addObject: item];
+            }
+        }
+        return self;
+    }
+    
+    return nil;
+}
+
+@end
+
+///////////////////////////////////////////////////////////////////////////////

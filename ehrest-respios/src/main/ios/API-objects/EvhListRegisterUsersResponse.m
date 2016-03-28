@@ -1,6 +1,6 @@
 //
 // EvhListRegisterUsersResponse.m
-// generated at 2016-03-25 19:05:20 
+// generated at 2016-03-28 15:56:09 
 //
 #import "EvhListRegisterUsersResponse.h"
 #import "EvhUserInfo.h"

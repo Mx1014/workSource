@@ -1,9 +1,9 @@
 //
 // EvhAddressListBuildingsByKeywordRestResponse.m
-// generated at 2016-03-25 19:05:21 
+// generated at 2016-03-28 15:56:09 
 //
 #import "EvhAddressListBuildingsByKeywordRestResponse.h"
-#import "EvhAddressBuildingDTO.h"
+#import "EvhBuildingDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhAddressListBuildingsByKeywordRestResponse
@@ -37,7 +37,7 @@
     
     if(self.response) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhAddressBuildingDTO* item in self.response) {
+        for(EvhBuildingDTO* item in self.response) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -52,7 +52,7 @@
         [super fromJson: jsonObject];
         NSArray* jsonArray = [jsonObject objectForKey: @"response"];
         for(NSMutableDictionary* dic in jsonArray) {
-            EvhAddressBuildingDTO* item = [EvhAddressBuildingDTO new];
+            EvhBuildingDTO* item = [EvhBuildingDTO new];
             [item fromJson:dic];
             [self.response addObject: item];
         }
