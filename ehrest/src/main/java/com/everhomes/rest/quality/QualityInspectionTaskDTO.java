@@ -39,6 +39,7 @@ import com.everhomes.util.StringHelper;
  *  <li>record: 操作记录列表 com.everhomes.rest.quality.QualityInspectionTaskRecordsDTO</li>
  *  <li>executiveGroupId: 执行业务组id</li>
  *  <li>groupUsers: 参考com.everhomes.rest.quality.GroupUserDTO</li>
+ *  <li>standardDescription: 标准内容</li>
  * </ul>
  */
 public class QualityInspectionTaskDTO {
@@ -98,6 +99,8 @@ public class QualityInspectionTaskDTO {
 	private List<GroupUserDTO> groupUsers;
 	
 	private Byte taskFlag;
+	
+	private String standardDescription;
 
 	public Long getId() {
 		return id;
@@ -313,6 +316,14 @@ public class QualityInspectionTaskDTO {
 
 	public void setTaskFlag(Byte taskFlag) {
 		this.taskFlag = taskFlag;
+	}
+
+	public String getStandardDescription() {
+		return standardDescription;
+	}
+
+	public void setStandardDescription(String standardDescription) {
+		this.standardDescription = standardDescription;
 	}
 
 	@Override

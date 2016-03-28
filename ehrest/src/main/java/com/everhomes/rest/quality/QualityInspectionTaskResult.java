@@ -11,13 +11,14 @@ import com.everhomes.util.StringHelper;
  *	<li>RECTIFY_CLOSED : 4</li>
  *	<li>INSPECT_DELAY : 5</li>
  *	<li>RECTIFY_DELAY : 6</li>
+ *	<li>CORRECT_DELAY : 7</li>
  *	<li>RECTIFIED_OK_AND_WAITING_APPROVAL : 11</li>
  *	<li>RECTIFY_CLOSED_AND_WAITING_APPROVAL : 12</li>
  * </ul>
  */
 public enum QualityInspectionTaskResult {
 	NONE((byte)0), INSPECT_OK((byte)1), INSPECT_CLOSE((byte)2), RECTIFIED_OK((byte)3),
-	RECTIFY_CLOSED((byte)4), INSPECT_DELAY((byte)5), RECTIFY_DELAY((byte)6),  
+	RECTIFY_CLOSED((byte)4), INSPECT_DELAY((byte)5), RECTIFY_DELAY((byte)6),  CORRECT_DELAY((byte)7), 
 	RECTIFIED_OK_AND_WAITING_APPROVAL((byte)11), RECTIFY_CLOSED_AND_WAITING_APPROVAL((byte)12);
 	
 	private byte code;

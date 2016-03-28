@@ -16,13 +16,23 @@ import java.util.Map;
 
 
 
+
+
+
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.Record1;
+import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+
+
+
 
 
 
@@ -866,6 +876,70 @@ public class QualityProviderImpl implements QualityProvider {
 		});
 		
 		return result;
+	}
+
+	@Override
+	public int countInspectionEvaluations(Long ownerId, String ownerType, Timestamp startDate,Timestamp endDate) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record1<Integer>> step = context.selectCount().from(Tables.EH_QUALITY_INSPECTION_EVALUATIONS);
+    
+        Condition condition = Tables.EH_QUALITY_INSPECTION_EVALUATIONS.OWNER_ID.equal(ownerId);
+		condition = condition.and(Tables.EH_QUALITY_INSPECTION_EVALUATIONS.OWNER_TYPE.equal(ownerType));
+		
+		if(startDate != null && !"".equals(startDate)) {
+			condition = condition.and(Tables.EH_QUALITY_INSPECTION_EVALUATIONS.CREATE_TIME.ge(startDate));
+		}
+		
+		if(endDate != null && !"".equals(endDate)) {
+			condition = condition.and(Tables.EH_QUALITY_INSPECTION_EVALUATIONS.CREATE_TIME.le(endDate));
+		}
+		
+       return step.where(condition).fetchOneInto(Integer.class);
+	}
+
+	@Override
+	public int countVerificationTasks(Long ownerId, String ownerType,
+			Byte taskType, Long executeUid, Timestamp startDate,
+			Timestamp endDate, Long groupId, Byte executeStatus,
+			Byte reviewStatus) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectJoinStep<Record1<Integer>> step = context.selectCount().from(Tables.EH_QUALITY_INSPECTION_TASKS);
+    
+        Condition condition = Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_ID.equal(ownerId);
+		condition = condition.and(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_TYPE.equal(ownerType));
+		
+		if(taskType != null) {
+			condition = condition.and(Tables.EH_QUALITY_INSPECTION_TASKS.TASK_TYPE.eq(taskType));
+		}
+		if(executeUid != null && executeUid != 0) {
+			Condition con = Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTOR_ID.eq(executeUid);
+			con = con.or(Tables.EH_QUALITY_INSPECTION_TASKS.OPERATOR_ID.eq(executeUid));
+			condition = condition.and(con);
+		}
+		
+		if(startDate != null && !"".equals(startDate)) {
+			condition = condition.and(Tables.EH_QUALITY_INSPECTION_TASKS.CREATE_TIME.ge(startDate));
+		}
+		
+		if(endDate != null && !"".equals(endDate)) {
+			condition = condition.and(Tables.EH_QUALITY_INSPECTION_TASKS.CREATE_TIME.le(endDate));
+		}
+		
+		if(groupId != null && groupId != 0) {
+			condition = condition.and(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_GROUP_ID.eq(groupId));
+		}
+		if(executeStatus != null) {
+			condition = condition.and(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(executeStatus));
+		}
+		if(reviewStatus != null) {
+			if(QualityInspectionTaskReviewStatus.NONE.equals(reviewStatus))
+				condition = condition.and(Tables.EH_QUALITY_INSPECTION_TASKS.REVIEW_RESULT.eq(QualityInspectionTaskReviewResult.NONE.getCode()));
+			if(QualityInspectionTaskReviewStatus.REVIEWED.equals(reviewStatus))
+				condition = condition.and(Tables.EH_QUALITY_INSPECTION_TASKS.REVIEW_RESULT.ne(QualityInspectionTaskReviewResult.NONE.getCode()));
+		}
+
+        
+		return step.where(condition).fetchOneInto(Integer.class);
 	}
 
 

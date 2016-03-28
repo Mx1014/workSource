@@ -1,5 +1,14 @@
 package com.everhomes.quality;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -14,6 +23,10 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.aspectj.weaver.Member;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,6 +84,7 @@ import com.everhomes.rest.quality.QualityInspectionCategoryStatus;
 import com.everhomes.rest.quality.QualityInspectionTaskDTO;
 import com.everhomes.rest.quality.QualityInspectionTaskRecordsDTO;
 import com.everhomes.rest.quality.QualityInspectionTaskResult;
+import com.everhomes.rest.quality.QualityInspectionTaskReviewResult;
 import com.everhomes.rest.quality.QualityInspectionTaskStatus;
 import com.everhomes.rest.quality.QualityNotificationTemplateCode;
 import com.everhomes.rest.quality.QualityStandardStatus;
@@ -86,8 +100,16 @@ import com.everhomes.rest.quality.UpdateQualityStandardCommand;
 import com.everhomes.rest.quality.UpdateFactorCommand;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.rest.repeat.TimeRangeDTO;
+import com.everhomes.rest.techpark.rental.RentalBillDTO;
+import com.everhomes.rest.techpark.rental.RentalServiceErrorCode;
+import com.everhomes.rest.techpark.rental.SiteBillStatus;
+import com.everhomes.rest.techpark.rental.SiteItemDTO;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.techpark.rental.RentalBill;
+import com.everhomes.techpark.rental.RentalItemsBill;
+import com.everhomes.techpark.rental.RentalServiceImpl;
+import com.everhomes.techpark.rental.RentalSiteItem;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -99,6 +121,8 @@ import com.mysql.jdbc.StringUtils;
 
 @Component
 public class QualityServiceImpl implements QualityService {
+	
+	final String downloadDir ="\\download\\";
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(QualityServiceImpl.class);
 	
@@ -479,8 +503,123 @@ public class QualityServiceImpl implements QualityService {
 	@Override
 	public HttpServletResponse exportEvaluations(ListEvaluationsCommand cmd,
 			HttpServletResponse response) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		Timestamp startTime = null;
+        Timestamp endTime = null;
+        if(cmd.getStartTime() != null) {
+        	startTime = new Timestamp(cmd.getStartTime());
+        }
+        if(cmd.getEndTime() != null) {
+        	endTime = new Timestamp(cmd.getEndTime());
+        }
+		int totalCount = qualityProvider.countInspectionEvaluations(cmd.getOwnerId(), cmd.getOwnerType(), startTime, endTime);
+		if (totalCount == 0)
+			return response;
+
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		Integer pageSize = Integer.MAX_VALUE;
+		List<QualityInspectionEvaluations> evaluations = qualityProvider.listQualityInspectionEvaluations(locator, pageSize + 1,
+				cmd.getOwnerId(), cmd.getOwnerType(), startTime, endTime);
+
+		List<EvaluationDTO> dtoList = evaluations.stream().map((r) -> {
+        	
+        	EvaluationDTO dto = ConvertHelper.convert(r, EvaluationDTO.class);  
+        	
+        	return dto;
+        }).collect(Collectors.toList());
+		
+		URL rootPath = RentalServiceImpl.class.getResource("/");
+		String filePath =rootPath.getPath() + this.downloadDir ;
+		File file = new File(filePath);
+		if(!file.exists())
+			file.mkdirs();
+		filePath = filePath + "RentalBills"+System.currentTimeMillis()+".xlsx";
+		//新建了一个文件
+		this.createEvaluationsBook(filePath, dtoList);
+		
+		return download(filePath,response);
+	}
+	
+	public HttpServletResponse download(String path, HttpServletResponse response) {
+        try {
+            // path是指欲下载的文件的路径。
+            File file = new File(path);
+            // 取得文件名。
+            String filename = file.getName();
+            // 取得文件的后缀名。
+            String ext = filename.substring(filename.lastIndexOf(".") + 1).toUpperCase();
+
+            // 以流的形式下载文件。
+            InputStream fis = new BufferedInputStream(new FileInputStream(path));
+            byte[] buffer = new byte[fis.available()];
+            fis.read(buffer);
+            fis.close();
+            // 清空response
+            response.reset();
+            // 设置response的Header
+            response.addHeader("Content-Disposition", "attachment;filename=" + new String(filename.getBytes()));
+            response.addHeader("Content-Length", "" + file.length());
+            OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
+            response.setContentType("application/octet-stream");
+            toClient.write(buffer);
+            toClient.flush();
+            toClient.close();
+            
+            // 读取完成删除文件
+            if (file.isFile() && file.exists()) {  
+                file.delete();  
+            } 
+        } catch (IOException ex) { 
+ 			LOGGER.error(ex.getMessage());
+ 			throw RuntimeErrorException.errorWith(QualityServiceErrorCode.SCOPE,
+ 					QualityServiceErrorCode.ERROR_DOWNLOAD_EXCEL,
+ 					ex.getLocalizedMessage());
+     		 
+        }
+        return response;
+    }
+	
+	public void createEvaluationsBook(String path,List<EvaluationDTO> dtos) {
+		if (null == dtos || dtos.size() == 0)
+			return;
+		Workbook wb = new XSSFWorkbook();
+		Sheet sheet = wb.createSheet("evaluations");
+		
+		this.createEvaluationsBookSheetHead(sheet);
+		for (EvaluationDTO dto : dtos ) {
+			this.setNewEvaluationsBookRow(sheet, dto);
+		}
+		
+		try {
+			FileOutputStream out = new FileOutputStream(path);
+			
+			wb.write(out);
+			wb.close();
+			out.close();
+			
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			throw RuntimeErrorException.errorWith(QualityServiceErrorCode.SCOPE,
+					QualityServiceErrorCode.ERROR_CREATE_EXCEL,
+					e.getLocalizedMessage());
+		}
+		
+	}
+	
+	private void createEvaluationsBookSheetHead(Sheet sheet){
+
+		Row row = sheet.createRow(sheet.getLastRowNum());
+		int i =-1 ;
+		row.createCell(++i).setCellValue("业务组名称");
+		row.createCell(++i).setCellValue("绩效得分");
+	}
+	
+	private void setNewEvaluationsBookRow(Sheet sheet ,EvaluationDTO dto){
+		Row row = sheet.createRow(sheet.getLastRowNum()+1);
+		int i = -1;
+		row.createCell(++i).setCellValue(dto.getGroupName());
+		row.createCell(++i).setCellValue(dto.getScore());
+		
 	}
 
 	@Override
@@ -509,8 +648,13 @@ public class QualityServiceImpl implements QualityService {
         
         final Long executeUid = currentUid;
         List<QualityInspectionTasks> tasks = qualityProvider.listVerificationTasks(locator, pageSize + 1, ownerId, ownerType, 
-        		cmd.getTaskType(), executeUid, startDate, endDate, 
-        		cmd.getGroupId(), cmd.getExecuteStatus(), cmd.getReviewStatus());
+        		cmd.getTaskType(), executeUid, startDate, endDate, cmd.getGroupId(), cmd.getExecuteStatus(), cmd.getReviewStatus());
+        
+        Long nextPageAnchor = null;
+        if(tasks.size() > pageSize) {
+        	tasks.remove(tasks.size() - 1);
+            nextPageAnchor = tasks.get(tasks.size() - 1).getId();
+        }
         
         List<QualityInspectionTaskRecords> records = new ArrayList<QualityInspectionTaskRecords>();
         for(QualityInspectionTasks task : tasks) {
@@ -528,15 +672,15 @@ public class QualityServiceImpl implements QualityService {
 			populateRecordAttachements(r, r.getAttachments());
 			return r;
 		});
+        
+		List<QualityInspectionTaskDTO> dtoList = convertQualityInspectionTaskToDTO(tasks, executeUid);
+        
+        return new ListQualityInspectionTasksResponse(nextPageAnchor, dtoList);
+	}
+	
+	private List<QualityInspectionTaskDTO> convertQualityInspectionTaskToDTO(List<QualityInspectionTasks> tasks, final Long executeUid) {
 		
-        Long nextPageAnchor = null;
-        if(tasks.size() > pageSize) {
-        	tasks.remove(tasks.size() - 1);
-            nextPageAnchor = tasks.get(tasks.size() - 1).getId();
-        }
-        
-        
-        List<QualityInspectionTaskDTO> dtoList = tasks.stream().map((r) -> {
+		List<QualityInspectionTaskDTO> dtoList = tasks.stream().map((r) -> {
         	
         	QualityInspectionStandards standard = verifiedStandardById(r.getStandardId());
         	QualityInspectionCategories category = verifiedCategoryById(standard.getCategoryId());
@@ -551,8 +695,9 @@ public class QualityServiceImpl implements QualityService {
         	}
         	
         	QualityInspectionTaskDTO dto = ConvertHelper.convert(r, QualityInspectionTaskDTO.class);  
-        	List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(r.getExecutiveGroupId());
+        	dto.setStandardDescription(standard.getDescription());
         	
+        	List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(r.getExecutiveGroupId());
         	List<GroupUserDTO> groupUsers = members.stream().map((mem) -> {
              	if(OrganizationMemberTargetType.USER.getCode().equals(mem.getTargetType()) 
              			&& mem.getTargetId() != null && mem.getTargetId() != 0) {
@@ -587,30 +732,7 @@ public class QualityServiceImpl implements QualityService {
         	
         	return dto;
         }).collect(Collectors.toList());
-        
-        List<Long> groupIds = tasks.stream().map((r) -> {
-        	
-        	return r.getExecutiveGroupId();
-        }).collect(Collectors.toList());
-        
-        List<OrganizationMember> members = organizationProvider.getOrganizationMemberByOrgIds(groupIds, OrganizationMemberStatus.ACTIVE);
-//        List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(cmd.getGroupId());
-        
-        List<GroupUserDTO> groupUsers = members.stream().map((r) -> {
-        	if(OrganizationMemberTargetType.USER.getCode().equals(r.getTargetType()) 
-        			&& r.getTargetId() != null && r.getTargetId() != 0) {
-        		GroupUserDTO dto = new GroupUserDTO();
-            	dto.setUserId(r.getTargetId());
-            	dto.setUserName(r.getContactName());
-            	dto.setContact(r.getContactToken());
-            	dto.setEmployeeNo(r.getEmployeeNo());
-            	return dto;
-        	} else {
-        		return null;
-        	}
-        }).filter(member->member!=null).collect(Collectors.toList());
-        
-        return new ListQualityInspectionTasksResponse(nextPageAnchor, dtoList);
+		return dtoList;
 	}
 	
 	@Override
@@ -1176,8 +1298,186 @@ public class QualityServiceImpl implements QualityService {
 	@Override
 	public HttpServletResponse exportInspectionTasks(
 			ListQualityInspectionTasksCommand cmd, HttpServletResponse response) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		Long ownerId = cmd.getOwnerId();
+		String ownerType = cmd.getOwnerType();
+        Timestamp startDate = null;
+        Timestamp endDate = null;
+        if(cmd.getStartDate() != null) {
+        	startDate = new Timestamp(cmd.getStartDate());
+        }
+        if(cmd.getEndDate() != null) {
+        	endDate = new Timestamp(cmd.getEndDate());
+        }
+		
+		int totalCount = qualityProvider.countVerificationTasks(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTaskType(), null, 
+				startDate, endDate, cmd.getGroupId(), cmd.getExecuteStatus(), cmd.getReviewStatus());
+		if (totalCount == 0)
+			return response;
+
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		Integer pageSize = Integer.MAX_VALUE;
+		
+		List<QualityInspectionTasks> tasks = qualityProvider.listVerificationTasks(locator, pageSize + 1, cmd.getOwnerId(), cmd.getOwnerType(), 
+				cmd.getTaskType(), null, startDate, endDate, cmd.getGroupId(), cmd.getExecuteStatus(), cmd.getReviewStatus());
+
+		List<QualityInspectionTaskRecords> records = new ArrayList<QualityInspectionTaskRecords>();
+        for(QualityInspectionTasks task : tasks) {
+        	QualityInspectionTaskRecords record = qualityProvider.listLastRecordByTaskId(task.getId());
+        	if(record != null) {
+        		task.setRecord(record);
+            	records.add(task.getRecord());
+        	}
+        }
+
+		this.qualityProvider.populateRecordAttachments(records);
+		
+		records.stream().map((r) -> {
+			populateRecordAttachements(r, r.getAttachments());
+			return r;
+		});
+        
+		List<QualityInspectionTaskDTO> dtoList = convertQualityInspectionTaskToDTO(tasks, null);
+		
+		URL rootPath = RentalServiceImpl.class.getResource("/");
+		String filePath =rootPath.getPath() + this.downloadDir ;
+		File file = new File(filePath);
+		if(!file.exists())
+			file.mkdirs();
+		filePath = filePath + "RentalBills"+System.currentTimeMillis()+".xlsx";
+		//新建了一个文件
+		this.createInspectionTasksBook(filePath, dtoList);
+		
+		return download(filePath,response);
+	}
+	
+	public void createInspectionTasksBook(String path,List<QualityInspectionTaskDTO> dtos) {
+		if (null == dtos || dtos.size() == 0)
+			return;
+		Workbook wb = new XSSFWorkbook();
+		Sheet sheet = wb.createSheet("inspectionTask");
+		
+		this.createInspectionTasksBookSheetHead(sheet);
+		for (QualityInspectionTaskDTO dto : dtos ) {
+			this.setNewInspectionTasksBookRow(sheet, dto);
+		}
+		
+		try {
+			FileOutputStream out = new FileOutputStream(path);
+			
+			wb.write(out);
+			wb.close();
+			out.close();
+			
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage());
+			throw RuntimeErrorException.errorWith(QualityServiceErrorCode.SCOPE,
+					QualityServiceErrorCode.ERROR_CREATE_EXCEL,
+					e.getLocalizedMessage());
+		}
+		
+	}
+	
+	private void createInspectionTasksBookSheetHead(Sheet sheet){
+		            
+		Row row = sheet.createRow(sheet.getLastRowNum());
+		int i =-1 ;
+		row.createCell(++i).setCellValue("任务编号");
+		row.createCell(++i).setCellValue("任务名称");
+		row.createCell(++i).setCellValue("所属业务组");
+		row.createCell(++i).setCellValue("所属类型");
+		row.createCell(++i).setCellValue("核查人员");
+		row.createCell(++i).setCellValue("跟进人");
+		row.createCell(++i).setCellValue("执行时间");
+		row.createCell(++i).setCellValue("截止时间");
+		row.createCell(++i).setCellValue("执行状态");
+		row.createCell(++i).setCellValue("最终结果");
+		row.createCell(++i).setCellValue("审阅状态");
+		row.createCell(++i).setCellValue("审阅结果");
+		row.createCell(++i).setCellValue("审阅人");
+	}
+	
+	private void setNewInspectionTasksBookRow(Sheet sheet ,QualityInspectionTaskDTO dto){
+		Row row = sheet.createRow(sheet.getLastRowNum()+1);
+		int i = -1;
+		row.createCell(++i).setCellValue(dto.getTaskNumber());
+		row.createCell(++i).setCellValue(dto.getTaskName());
+		row.createCell(++i).setCellValue(dto.getGroupName());
+		row.createCell(++i).setCellValue(dto.getCategoryName());
+		row.createCell(++i).setCellValue(dto.getExecutorName());
+		row.createCell(++i).setCellValue(dto.getOperatorName());
+		row.createCell(++i).setCellValue(dto.getExecutiveStartTime());
+		row.createCell(++i).setCellValue(dto.getExecutiveExpireTime());
+		
+		if(dto.getStatus() != null)
+			row.createCell(++i).setCellValue(statusToString(dto.getStatus()));
+		else
+			row.createCell(++i).setCellValue("");
+		
+		if(dto.getResult() != null)
+			row.createCell(++i).setCellValue(resultToString(dto.getResult()));
+		else
+			row.createCell(++i).setCellValue("");
+		
+		if(dto.getReviewResult() != null) {
+			if(dto.getReviewResult().equals(QualityInspectionTaskReviewResult.NONE.getCode())) {
+				row.createCell(++i).setCellValue("待审阅");
+				row.createCell(++i).setCellValue("无");
+			}
+			if(dto.getReviewResult().equals(QualityInspectionTaskReviewResult.QUALIFIED.getCode())) {
+				row.createCell(++i).setCellValue("已审阅");
+				row.createCell(++i).setCellValue("合格");
+			}
+			if(dto.getReviewResult().equals(QualityInspectionTaskReviewResult.UNQUALIFIED.getCode())) {
+				row.createCell(++i).setCellValue("已审阅");
+				row.createCell(++i).setCellValue("不合格");
+			}
+		}
+		else {
+			row.createCell(++i).setCellValue("");
+			row.createCell(++i).setCellValue("");
+		}
+		
+		row.createCell(++i).setCellValue(dto.getReviewerName());
+		
+	}
+	
+	private String statusToString(Byte status) {
+		
+		if(status.equals(QualityInspectionTaskStatus.NONE.getCode()))
+			return "无";
+		if(status.equals(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode()))
+			return "待执行";
+		if(status.equals(QualityInspectionTaskStatus.RECTIFING))
+			return "整改中";
+		if(status.equals(QualityInspectionTaskStatus.RECTIFIED_AND_WAITING_APPROVAL))
+			return "整改完成";
+		if(status.equals(QualityInspectionTaskStatus.RECTIFY_CLOSED_AND_WAITING_APPROVAL))
+			return "整改关闭";
+		if(status.equals(QualityInspectionTaskStatus.CLOSED.getCode()))
+			return "已结束";
+		return "";
+	}
+	
+	private String resultToString(Byte result) {
+
+		if(result.equals(QualityInspectionTaskResult.NONE.getCode()))
+			return "无";
+		if(result.equals(QualityInspectionTaskResult.INSPECT_OK.getCode()))
+			return "核查合格";
+		if(result.equals(QualityInspectionTaskResult.INSPECT_CLOSE.getCode()))
+			return "核查关闭";
+		if(result.equals(QualityInspectionTaskResult.INSPECT_DELAY.getCode()))
+			return "核查延期";
+		if(result.equals(QualityInspectionTaskResult.RECTIFIED_OK.getCode()))
+			return "复查合格";
+		if(result.equals(QualityInspectionTaskResult.RECTIFY_CLOSED.getCode()))
+			return "复查关闭";
+		if(result.equals(QualityInspectionTaskResult.RECTIFY_DELAY.getCode()))
+			return "复查延期";
+		if(result.equals(QualityInspectionTaskResult.CORRECT_DELAY.getCode()))
+			return "整改延期";
+		return "";
 	}
 
 }

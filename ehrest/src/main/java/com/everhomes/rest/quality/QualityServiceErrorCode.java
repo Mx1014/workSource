@@ -12,4 +12,7 @@ public interface QualityServiceErrorCode {
     
     static final int ATTACHMENT_TEXT = 10006;  //附件文字
     static final int ERROR_CATEGORY_HAS_STANDARD = 10007;  //类型包含active的标准
+    
+    static final int ERROR_CREATE_EXCEL = 10011;  //生成excel信息有问题
+    static final int ERROR_DOWNLOAD_EXCEL = 10012;  //下载excel信息有问题
 }
