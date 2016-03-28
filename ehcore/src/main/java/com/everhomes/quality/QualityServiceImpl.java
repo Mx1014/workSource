@@ -373,6 +373,12 @@ public class QualityServiceImpl implements QualityService {
         List<FactorsDTO> factorsDto = factors.stream().map((r) -> {
         	
         	FactorsDTO dto = ConvertHelper.convert(r, FactorsDTO.class);  
+        	Organization org = organizationProvider.findOrganizationById(r.getGroupId());
+        	if(org != null) {
+        		dto.setGroupName(org.getName());
+        	}
+        	QualityInspectionCategories category = verifiedCategoryById(r.getCategoryId());
+        	dto.setCategoryName(category.getName());
         	return dto;
         }).collect(Collectors.toList());
         
