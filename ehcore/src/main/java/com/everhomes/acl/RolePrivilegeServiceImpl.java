@@ -303,7 +303,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     	List<Long> privileges = new ArrayList<Long>();
     	
     	List<Long> roleIds = new ArrayList<Long>();
-    	for (RoleAssignment role : userOrgRoles) {
+    	for (RoleAssignment role : userRoles) {
     		roleIds.add(role.getRoleId());
 		}
     	
