@@ -1,9 +1,18 @@
 // @formatter:off
-// generated at 2016-03-25 17:07:55
+// generated at 2016-03-25 19:04:59
 package com.everhomes.rest;
 
 public interface ApiConstants {
 
+    public static final String ACLINK_ACTIVE_URL = "/aclink/active";
+    public static final String ACLINK_ACTIVING_URL = "/aclink/activing";
+    public static final String ACLINK_CREATEAUTH_URL = "/aclink/createAuth";
+    public static final String ACLINK_DELETEDOORAUTH_URL = "/aclink/deleteDoorAuth";
+    public static final String ACLINK_GETDOORACCESSBYHARDWAREID_URL = "/aclink/getDoorAccessByHardwareId";
+    public static final String ACLINK_LISTADMINAESUSERKEY_URL = "/aclink/listAdminAesUserKey";
+    public static final String ACLINK_LISTAESUSERKEY_URL = "/aclink/listAesUserKey";
+    public static final String ACLINK_LISTAUTHHISTORY_URL = "/aclink/listAuthHistory";
+    public static final String ACLINK_QUERYMESSAGES_URL = "/aclink/queryMessages";
     public static final String ACTIVITY_CANCELSIGNUP_URL = "/activity/cancelSignup";
     public static final String ACTIVITY_CHECKIN_URL = "/activity/checkin";
     public static final String ACTIVITY_CONFIRM_URL = "/activity/confirm";
@@ -43,6 +52,14 @@ public interface ApiConstants {
     public static final String ADMIN_ACL_LISTUSERROLES_URL = "/admin/acl/listUserRoles";
     public static final String ADMIN_ACL_QRYROLEPRIVILEGES_URL = "/admin/acl/qryRolePrivileges";
     public static final String ADMIN_ACL_UPDATEROLEPRIVILEGE_URL = "/admin/acl/updateRolePrivilege";
+    public static final String ADMIN_ACLINK_CREATEAUTH_URL = "/admin/aclink/createAuth";
+    public static final String ADMIN_ACLINK_DELETEDOORACCESS_URL = "/admin/aclink/deleteDoorAccess";
+    public static final String ADMIN_ACLINK_DELETEDOORAUTH_URL = "/admin/aclink/deleteDoorAuth";
+    public static final String ADMIN_ACLINK_LISTACLINKUSERS_URL = "/admin/aclink/listAclinkUsers";
+    public static final String ADMIN_ACLINK_LISTUSERKEY_URL = "/admin/aclink/listUserKey";
+    public static final String ADMIN_ACLINK_SEARCHDOORACCESS_URL = "/admin/aclink/searchDoorAccess";
+    public static final String ADMIN_ACLINK_SEARCHDOORAUTH_URL = "/admin/aclink/searchDoorAuth";
+    public static final String ADMIN_ACLINK_UPDATEDOORACCESS_URL = "/admin/aclink/updateDoorAccess";
     public static final String ADMIN_ACTIVITY_LIST_URL = "/admin/activity/list";
     public static final String ADMIN_ADDBORDER_URL = "/admin/addBorder";
     public static final String ADMIN_ADDNAMESPACE_URL = "/admin/addNamespace";

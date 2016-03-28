@@ -1,6 +1,6 @@
 //
 // EvhRecommendBannerListResponse.m
-// generated at 2016-03-25 17:08:10 
+// generated at 2016-03-25 19:05:18 
 //
 #import "EvhRecommendBannerListResponse.h"
 #import "EvhRecommendBannerInfo.h"

@@ -1,7 +1,16 @@
 //
 // EvhApiConstants.h
-// generated at 2016-03-25 17:08:13
+// generated at 2016-03-25 19:05:21
 //
+#define EVH_ACLINK_ACTIVE_URL @"/aclink/active"
+#define EVH_ACLINK_ACTIVING_URL @"/aclink/activing"
+#define EVH_ACLINK_CREATEAUTH_URL @"/aclink/createAuth"
+#define EVH_ACLINK_DELETEDOORAUTH_URL @"/aclink/deleteDoorAuth"
+#define EVH_ACLINK_GETDOORACCESSBYHARDWAREID_URL @"/aclink/getDoorAccessByHardwareId"
+#define EVH_ACLINK_LISTADMINAESUSERKEY_URL @"/aclink/listAdminAesUserKey"
+#define EVH_ACLINK_LISTAESUSERKEY_URL @"/aclink/listAesUserKey"
+#define EVH_ACLINK_LISTAUTHHISTORY_URL @"/aclink/listAuthHistory"
+#define EVH_ACLINK_QUERYMESSAGES_URL @"/aclink/queryMessages"
 #define EVH_ACTIVITY_CANCELSIGNUP_URL @"/activity/cancelSignup"
 #define EVH_ACTIVITY_CHECKIN_URL @"/activity/checkin"
 #define EVH_ACTIVITY_CONFIRM_URL @"/activity/confirm"
@@ -41,6 +50,14 @@
 #define EVH_ADMIN_ACL_LISTUSERROLES_URL @"/admin/acl/listUserRoles"
 #define EVH_ADMIN_ACL_QRYROLEPRIVILEGES_URL @"/admin/acl/qryRolePrivileges"
 #define EVH_ADMIN_ACL_UPDATEROLEPRIVILEGE_URL @"/admin/acl/updateRolePrivilege"
+#define EVH_ADMIN_ACLINK_CREATEAUTH_URL @"/admin/aclink/createAuth"
+#define EVH_ADMIN_ACLINK_DELETEDOORACCESS_URL @"/admin/aclink/deleteDoorAccess"
+#define EVH_ADMIN_ACLINK_DELETEDOORAUTH_URL @"/admin/aclink/deleteDoorAuth"
+#define EVH_ADMIN_ACLINK_LISTACLINKUSERS_URL @"/admin/aclink/listAclinkUsers"
+#define EVH_ADMIN_ACLINK_LISTUSERKEY_URL @"/admin/aclink/listUserKey"
+#define EVH_ADMIN_ACLINK_SEARCHDOORACCESS_URL @"/admin/aclink/searchDoorAccess"
+#define EVH_ADMIN_ACLINK_SEARCHDOORAUTH_URL @"/admin/aclink/searchDoorAuth"
+#define EVH_ADMIN_ACLINK_UPDATEDOORACCESS_URL @"/admin/aclink/updateDoorAccess"
 #define EVH_ADMIN_ACTIVITY_LIST_URL @"/admin/activity/list"
 #define EVH_ADMIN_ADDBORDER_URL @"/admin/addBorder"
 #define EVH_ADMIN_ADDNAMESPACE_URL @"/admin/addNamespace"
