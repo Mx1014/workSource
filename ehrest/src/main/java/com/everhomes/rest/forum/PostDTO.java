@@ -48,6 +48,9 @@ import com.everhomes.util.StringHelper;
  * <li>favoriteFlag: 是否收藏标记，参见{@link com.everhomes.rest.forum.PostFavoriteFlag}</li>
  * <li>shareUrl: 分享链接</li>
  * <li>floorNumber: 楼层（仅用于评论）</li>
+ * <li>publishStatus: 帖子发布状态，{@link com.everhomes.rest.forum.TopicPublishStatus}</li>
+ * <li>startTime:开始时间</li>
+ * <li>endTime:结束时间</li>
  * <li>privateFlag: 帖子是否公开标记，应用场景：发给物业、政府相关部门的帖子默认不公开，由物业、政府相关部门决定是否公开；参考{@link com.everhomes.rest.forum.PostPrivacy}</li>
  * </ul>
  */
@@ -133,6 +136,12 @@ public class PostDTO {
     private Byte privateFlag;
     
     private Long floorNumber;
+    
+    private String publishStatus;
+    
+    private Long startTime;
+    
+    private Long endTime;
 
 	public Long getId() {
         return id;
@@ -454,7 +463,30 @@ public class PostDTO {
         this.floorNumber = floorNumber;
     }
 
-    @Override
+    public String getPublishStatus() {
+		return publishStatus;
+	}
+
+	public void setPublishStatus(String publishStatus) {
+		this.publishStatus = publishStatus;
+	}
+	public Long getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(Long startTime) {
+		this.startTime = startTime;
+	}
+
+	public Long getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(Long endTime) {
+		this.endTime = endTime;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

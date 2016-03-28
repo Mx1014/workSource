@@ -53,29 +53,27 @@ import com.everhomes.rest.organization.ListOrganizationMemberCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.ListOrganizationsCommand;
 import com.everhomes.rest.organization.ListOrganizationsCommandResponse;
+import com.everhomes.rest.organization.ListPersonnelNotJoinGroupCommand;
+import com.everhomes.rest.organization.ListPmManagementComunitesCommand;
 import com.everhomes.rest.organization.ListTopicsByTypeCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationDetailDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.organization.PmManagementCommunityDTO;
 import com.everhomes.rest.organization.ProcessOrganizationTaskCommand;
-import com.everhomes.rest.organization.SearchTopicsByTypeCommand;
-import com.everhomes.rest.organization.SearchTopicsByTypeResponse;
 import com.everhomes.rest.organization.SetAclRoleAssignmentCommand;
 import com.everhomes.rest.organization.UpdateOrganizationMemberCommand;
 import com.everhomes.rest.organization.UpdateOrganizationsCommand;
 import com.everhomes.rest.organization.UpdatePersonnelsToDepartment;
 import com.everhomes.rest.organization.VerifyPersonnelByPhoneCommand;
 import com.everhomes.rest.organization.pm.AddPmBuildingCommand;
-import com.everhomes.rest.organization.pm.CancelPmBuildingCommand;
+import com.everhomes.rest.organization.pm.DeletePmCommunityCommand;
 import com.everhomes.rest.organization.pm.ListPmBuildingCommand;
 import com.everhomes.rest.organization.pm.ListPmManagementsCommand;
 import com.everhomes.rest.organization.pm.PmBuildingDTO;
 import com.everhomes.rest.organization.pm.PmManagementsResponse;
 import com.everhomes.rest.organization.pm.UnassignedBuildingDTO;
-import com.everhomes.rest.organization.pm.UpdateOrganizationMemberByIdsCommand;
-import com.everhomes.rest.ui.user.SceneTokenDTO;
-import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
@@ -84,7 +82,6 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.WebTokenGenerator;
 
 @RestController
 @RequestMapping("/admin/org")
@@ -287,8 +284,8 @@ public class OrganizationAdminController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /org/addPmBuilding</b>
-     * <p>增加物业楼栋</p>
+     * <b>URL: /admin/org/addPmBuilding</b>
+     * <p>增加物业管辖小区楼栋</p>
      */
     @RequestMapping("addPmBuilding")
     @RestReturn(value=String.class)
@@ -305,17 +302,17 @@ public class OrganizationAdminController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /org/cancelPmBuilding</b>
-     * <p>删除物业楼栋</p>
+     * <b>URL: /admin/org/deletePmCommunity</b>
+     * <p>删除物业管辖小区</p>
      */
-    @RequestMapping("cancelPmBuilding")
+    @RequestMapping("deletePmCommunity")
     @RestReturn(value=String.class)
-    public RestResponse cancelPmBuilding(CancelPmBuildingCommand cmd) {
+    public RestResponse deletePmCommunity(DeletePmCommunityCommand cmd) {
     	
     	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
-    	this.organizationService.cancelPmBuilding(cmd);
+    	this.organizationService.deletePmCommunity(cmd);
     	RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -372,6 +369,25 @@ public class OrganizationAdminController extends ControllerBase {
         
         PmManagementsResponse list = this.organizationService.listPmManagements(cmd);
     	RestResponse response = new RestResponse(list);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/org/listPmManagements</b>
+     * <p>查询物业管理小区列表</p>
+     */
+    
+    @RequestMapping("listPmManagementComunites")
+    @RestReturn(value=PmManagementCommunityDTO.class, collection = true)
+    public RestResponse listPmManagementComunites(ListPmManagementComunitesCommand cmd) {
+    	
+    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+       // resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+    	List<PmManagementCommunityDTO> dtos = this.organizationService.listPmManagementComunites(cmd);
+    	RestResponse response = new RestResponse(dtos);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -651,13 +667,26 @@ public class OrganizationAdminController extends ControllerBase {
     
     /**
      * <b>URL: /admin/org/addPersonnelsToGroup</b>
-     * <p>批量添加员工到部门</p>
+     * <p>批量添加的组</p>
      */
     @RequestMapping("addPersonnelsToGroup")
     @RestReturn(value=String.class, collection=true)
     public RestResponse addPersonnelsToGroup(@Valid AddPersonnelsToGroup cmd) {
     	organizationService.addPersonnelsToGroup(cmd);
         RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/org/listPersonnelNotJoinGroups</b>
+     * <p>查询未加入组的人员</p>
+     */
+    @RequestMapping("listPersonnelNotJoinGroups")
+    @RestReturn(value=ListOrganizationMemberCommandResponse.class)
+    public RestResponse listPersonnelNotJoinGroups(@Valid ListPersonnelNotJoinGroupCommand cmd) {
+        RestResponse response = new RestResponse(organizationService.listPersonnelNotJoinGroups(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -679,7 +708,7 @@ public class OrganizationAdminController extends ControllerBase {
     
     /**
      * <b>URL: /admin/org/listOrganizationAdministrators</b>
-     * <p>通讯录列表</p>
+     * <p>管理员列表</p>
      */
     @RequestMapping("listOrganizationAdministrators")
     @RestReturn(value=ListOrganizationMemberCommandResponse.class)

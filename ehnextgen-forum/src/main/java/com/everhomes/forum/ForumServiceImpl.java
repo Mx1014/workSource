@@ -101,6 +101,7 @@ import com.everhomes.rest.forum.PostStatus;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.rest.forum.QueryTopicByCategoryCommand;
 import com.everhomes.rest.forum.QueryTopicByEntityAndCategoryCommand;
+import com.everhomes.rest.forum.TopicPublishStatus;
 import com.everhomes.rest.forum.UsedAndRentalCommand;
 import com.everhomes.rest.forum.UsedAndRentalStatus;
 import com.everhomes.rest.forum.admin.PostAdminDTO;
@@ -900,6 +901,9 @@ public class ForumServiceImpl implements ForumService {
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator(ForumConstants.SYSTEM_FORUM);
         locator.setAnchor(cmd.getPageAnchor());
+        
+        Timestamp timestemp = new Timestamp(DateHelper.currentGMTTime().getTime());
+        
         List<Post> posts = this.forumProvider.queryPosts(locator, pageSize + 1, (loc, query) -> {
             query.addJoin(Tables.EH_FORUM_ASSIGNED_SCOPES, JoinType.LEFT_OUTER_JOIN, 
                 Tables.EH_FORUM_ASSIGNED_SCOPES.OWNER_ID.eq(Tables.EH_FORUM_POSTS.ID));
@@ -910,6 +914,21 @@ public class ForumServiceImpl implements ForumService {
             }
             query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
             query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+            
+            if(TopicPublishStatus.fromCode(cmd.getPublishStatus()) == TopicPublishStatus.UNPUBLISHED){
+            	query.addConditions(Tables.EH_FORUM_POSTS.START_TIME.lt(timestemp));
+            }
+            
+            if(TopicPublishStatus.fromCode(cmd.getPublishStatus()) == TopicPublishStatus.PUBLISHED){
+            	query.addConditions(Tables.EH_FORUM_POSTS.START_TIME.gt(timestemp));
+            	query.addConditions(Tables.EH_FORUM_POSTS.END_TIME.lt(timestemp));
+            }
+            
+            if(TopicPublishStatus.fromCode(cmd.getPublishStatus()) == TopicPublishStatus.EXPIRED){
+            	query.addConditions(Tables.EH_FORUM_POSTS.END_TIME.gt(timestemp));
+            }
+            
+            
             if(visibilityCondition != null) {
                 query.addConditions(visibilityCondition);
             }
@@ -930,7 +949,24 @@ public class ForumServiceImpl implements ForumService {
         populatePosts(operatorId, posts, null, false);
         
         List<PostDTO> postDtoList = posts.stream().map((r) -> {
-          return ConvertHelper.convert(r, PostDTO.class);  
+        	Timestamp s = r.getStartTime();
+        	Timestamp e = r.getEndTime();
+        	PostDTO dto= ConvertHelper.convert(r, PostDTO.class);
+        	if(null != s && null != e){
+        		if(s.getTime() < timestemp.getTime()){
+        			dto.setPublishStatus(TopicPublishStatus.UNPUBLISHED.getCode());
+        		}
+        		
+        		if(s.getTime() > timestemp.getTime() && e.getTime() < timestemp.getTime()){
+        			dto.setPublishStatus(TopicPublishStatus.PUBLISHED.getCode());
+        		}
+        		
+        		if(e.getTime() > timestemp.getTime()){
+        			dto.setPublishStatus(TopicPublishStatus.EXPIRED.getCode());
+        		}
+        	}
+        	
+          return dto;  
         }).collect(Collectors.toList());
         
         if(LOGGER.isInfoEnabled()) {
@@ -1922,6 +1958,11 @@ public class ForumServiceImpl implements ForumService {
         post.setEmbeddedId(cmd.getEmbeddedId());
         post.setEmbeddedJson(cmd.getEmbeddedJson());
         post.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        
+        if(null != cmd.getStartTime() && null != cmd.getEndTime()){
+        	post.setStartTime(new Timestamp(cmd.getStartTime()));
+        	post.setEndTime(new Timestamp(cmd.getEndTime()));
+        }
         
         PostPrivacy privateFlag = PostPrivacy.fromCode(cmd.getPrivateFlag());
         if(privateFlag == null) {
