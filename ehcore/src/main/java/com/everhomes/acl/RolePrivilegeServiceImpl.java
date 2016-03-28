@@ -303,7 +303,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     	List<Long> privileges = new ArrayList<Long>();
     	
     	List<Long> roleIds = new ArrayList<Long>();
-    	for (RoleAssignment role : userOrgRoles) {
+    	for (RoleAssignment role : userRoles) {
     		roleIds.add(role.getRoleId());
 		}
     	
@@ -318,8 +318,14 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     	
     	if(!StringUtils.isEmpty(module)){
     		List<Privilege> s = aclProvider.getPrivilegesByTag(module); //aclProvider 调平台根据角色list+模块 获取权限list接口
+    		if(null == s){
+    			return privileges;
+    		}
     		for (Long roleId : roleIds) {
     			List<Acl> acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), null, roleId);
+    			if(null == acls){
+    				return privileges;
+    			}
     			for (Acl acl : acls) {
     				if(!privileges.contains(acl.getPrivilegeId())){
     					for (Privilege privilege : s) {

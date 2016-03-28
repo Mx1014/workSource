@@ -176,12 +176,12 @@ public class AclAdminController extends ControllerBase {
     
     
     /**
-     * <b>URL: /admin/acl/ListWebMenu</b>
+     * <b>URL: /admin/acl/listWebMenu</b>
      * <p>查询系统菜单</p>
      */
-    @RequestMapping("ListWebMenu")
+    @RequestMapping("listWebMenu")
     @RestReturn(value=ListWebMenuResponse.class)
-    public RestResponse ListWebMenu(@Valid ListWebMenuCommand cmd) {
+    public RestResponse listWebMenu(@Valid ListWebMenuCommand cmd) {
     	RestResponse response =  new RestResponse(rolePrivilegeService.ListWebMenu(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -189,12 +189,12 @@ public class AclAdminController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /admin/acl/ListWebMenuPrivilege</b>
+     * <b>URL: /admin/acl/listWebMenuPrivilege</b>
      * <p>查询权限集</p>
      */
-    @RequestMapping("ListWebMenuPrivilege")
+    @RequestMapping("listWebMenuPrivilege")
     @RestReturn(value=ListWebMenuPrivilegeDTO.class, collection = true)
-    public RestResponse ListWebMenuPrivilege(@Valid ListWebMenuPrivilegeCommand cmd) {
+    public RestResponse listWebMenuPrivilege(@Valid ListWebMenuPrivilegeCommand cmd) {
     	RestResponse response =  new RestResponse(rolePrivilegeService.ListWebMenuPrivilege(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -255,5 +255,8 @@ public class AclAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    
+    
     
 }

@@ -387,6 +387,25 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		});
 		return result;
 	}
+	
+	@Override
+	public List<OrganizationMember> listOrganizationMembersByPhones(List<String> phones, Long departmentId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
+		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_ID.eq(departmentId));
+		if(null != phones && 0 != phones.size()){
+			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.notIn(phones));
+		}
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
+		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, OrganizationMember.class));
+			return null;
+		});
+		return result;
+	}
 
 	@Override
 	public void createOrganizationCommunity(OrganizationCommunity departmentCommunity) {
@@ -1063,7 +1082,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	public List<OrganizationMember> listOrganizationMembersByOrgId(Long orgId) {
 		List<OrganizationMember> list = new ArrayList<OrganizationMember>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(orgId)).and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode())).fetch();
+		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_MEMBERS).where(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(orgId)).and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode())).fetch();
 
 		if(records != null && !records.isEmpty()){
 			for(Record r : records)
