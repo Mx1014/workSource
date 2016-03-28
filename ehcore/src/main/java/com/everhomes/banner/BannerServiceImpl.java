@@ -35,6 +35,7 @@ import com.everhomes.rest.banner.BannerScope;
 import com.everhomes.rest.banner.BannerServiceErrorCode;
 import com.everhomes.rest.banner.CreateBannerClickCommand;
 import com.everhomes.rest.banner.GetBannerByIdCommand;
+import com.everhomes.rest.banner.GetBannersByOrgCommand;
 import com.everhomes.rest.banner.GetBannersCommand;
 import com.everhomes.rest.banner.admin.CreateBannerAdminCommand;
 import com.everhomes.rest.banner.admin.DeleteBannerAdminCommand;
@@ -131,6 +132,46 @@ public class BannerServiceImpl implements BannerService {
         return result;
     }
     
+    public List<BannerDTO> getBannersByOrg(GetBannersByOrgCommand cmd, HttpServletRequest request){
+        Long organizationId = cmd.getOrganizationId();
+//        Community community = communityProvider.findCommunityById(communityId);
+//        if(community == null){
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+//                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid communityId paramter.");
+//        }
+        long startTime = System.currentTimeMillis();
+        User user = UserContext.current().getUser();
+        long userId = user.getId();
+        Integer namespaceId = (user.getNamespaceId() == null) ? 0 : user.getNamespaceId();
+        String sceneType = cmd.getCurrentSceneType();
+        //String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
+        //query user relate banners
+        List<Banner> countryBanners = bannerProvider.findBannersByTagAndScope(namespaceId, sceneType, cmd.getBannerLocation(), cmd.getBannerGroup(),
+                ScopeType.ALL.getCode(), 0L);
+        List<Banner> orgBanners = bannerProvider.findBannersByTagAndScope(namespaceId, sceneType, cmd.getBannerLocation(), cmd.getBannerGroup(), ScopeType.ORGANIZATION.getCode(), organizationId);
+        List<Banner> allBanners = new ArrayList<Banner>();
+        if(countryBanners != null)
+            allBanners.addAll(countryBanners);
+        if(orgBanners != null)
+            allBanners.addAll(orgBanners);
+        List<BannerDTO> result = allBanners.stream().map((Banner r) ->{
+           BannerDTO dto = ConvertHelper.convert(r, BannerDTO.class);
+           //third url add user token
+//           if(dto.getActionType().byteValue() == ActionType.THIRDPART_URL.getCode()){
+//               dto.setActionData(parserJson(communityId,dto));
+//           }
+           dto.setActionData(parserJson(userId, null,dto,request));
+           dto.setPosterPath(parserUri(dto.getPosterPath(),EntityType.USER.getCode(),userId));
+           return dto;
+        }).collect(Collectors.toList());
+        if(result != null && !result.isEmpty())
+            sortBanner(result);
+        long endTime = System.currentTimeMillis();
+        int size = result == null ? 0 : result.size();
+        LOGGER.info("Query banner by communityId complete,cmd=" + cmd + ",size=" + size + ",esplse=" + (endTime - startTime));
+        return result;
+    }
+    
     @Override
     public List<BannerDTO> getBannersByScene(GetBannersBySceneCommand cmd, HttpServletRequest request) {
         User user = UserContext.current().getUser();
@@ -143,12 +184,18 @@ public class BannerServiceImpl implements BannerService {
         getCmd.setSceneType(sceneToken.getScene());
         
         Community community = null;
+        List<BannerDTO> bannerList = null;
         UserCurrentEntityType entityType = UserCurrentEntityType.fromCode(sceneToken.getEntityType());
         switch(entityType) {
         case COMMUNITY_RESIDENTIAL:
         case COMMUNITY_COMMERCIAL:
         case COMMUNITY:
             community = communityProvider.findCommunityById(sceneToken.getEntityId());
+            if(community != null) {
+                getCmd.setCommunityId(community.getId());
+            }
+            
+            bannerList = getBanners(getCmd, request);
             break;
         case FAMILY:
             FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
@@ -159,23 +206,32 @@ public class BannerServiceImpl implements BannerService {
                     LOGGER.warn("Family not found, sceneToken=" + sceneToken);
                 }
             }
+            if(community != null) {
+                getCmd.setCommunityId(community.getId());
+            }
+            
+            bannerList = getBanners(getCmd, request);
+            
             break;
         case ORGANIZATION:// 无小区ID
+            GetBannersByOrgCommand orgCmd = new GetBannersByOrgCommand();
+            getCmd.setBannerGroup(cmd.getBannerGroup());
+            getCmd.setBannerLocation(cmd.getBannerLocation());
+            getCmd.setNamespaceId(sceneToken.getNamespaceId());
+            getCmd.setSceneType(sceneToken.getScene());
+            orgCmd.setOrganizationId(sceneToken.getEntityId());
+            bannerList = getBannersByOrg(orgCmd, request);
             break;
         default:
             LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
             break;
         }
         
-        if(community != null) {
-            getCmd.setCommunityId(community.getId());
-        }
-        
-        return getBanners(getCmd, request);
+        return bannerList;
     }
     
     @SuppressWarnings("unchecked")
-    private String parserJson(long userId, long communityId,BannerDTO banner, HttpServletRequest request) {
+    private String parserJson(long userId, Long communityId,BannerDTO banner, HttpServletRequest request) {
         JSONObject jsonObject = new JSONObject();
         try{
             //use handler instead of??
@@ -211,7 +267,7 @@ public class BannerServiceImpl implements BannerService {
     }
 
     @SuppressWarnings("unchecked")
-    private JSONObject processPhoneCall(long communityId, JSONObject actionDataJson, BannerDTO banner){
+    private JSONObject processPhoneCall(Long communityId, JSONObject actionDataJson, BannerDTO banner){
         if(actionDataJson.get(LaunchPadConstants.CALLPHONES) != null ){
             
             String location = banner.getBannerLocation();
@@ -252,7 +308,7 @@ public class BannerServiceImpl implements BannerService {
     }
     
     @SuppressWarnings("unchecked")
-    private JSONObject processPostByCategory(long communityId, JSONObject actionDataJson,BannerDTO banner) {
+    private JSONObject processPostByCategory(Long communityId, JSONObject actionDataJson,BannerDTO banner) {
         actionDataJson.put(LaunchPadConstants.DISPLAY_NAME, banner.getName());
         actionDataJson.put(LaunchPadConstants.COMMUNITY_ID, communityId);
         return actionDataJson;
