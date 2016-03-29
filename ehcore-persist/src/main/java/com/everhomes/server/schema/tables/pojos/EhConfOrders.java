@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfOrders implements java.io.Serializable {
 
-	private static final long serialVersionUID = -298820136;
+	private static final long serialVersionUID = -1831162476;
 
 	private java.lang.Long       id;
 	private java.lang.Long       ownerId;
@@ -29,6 +29,10 @@ public class EhConfOrders implements java.io.Serializable {
 	private java.lang.Long       creatorUid;
 	private java.sql.Timestamp   createTime;
 	private java.lang.Integer    namespaceId;
+	private java.lang.String     buyerName;
+	private java.lang.String     buyerContact;
+	private java.lang.Byte       extendFlag;
+	private java.lang.Byte       vendorType;
 
 	public EhConfOrders() {}
 
@@ -48,7 +52,11 @@ public class EhConfOrders implements java.io.Serializable {
 		java.lang.Byte       onlineFlag,
 		java.lang.Long       creatorUid,
 		java.sql.Timestamp   createTime,
-		java.lang.Integer    namespaceId
+		java.lang.Integer    namespaceId,
+		java.lang.String     buyerName,
+		java.lang.String     buyerContact,
+		java.lang.Byte       extendFlag,
+		java.lang.Byte       vendorType
 	) {
 		this.id = id;
 		this.ownerId = ownerId;
@@ -66,6 +74,10 @@ public class EhConfOrders implements java.io.Serializable {
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
 		this.namespaceId = namespaceId;
+		this.buyerName = buyerName;
+		this.buyerContact = buyerContact;
+		this.extendFlag = extendFlag;
+		this.vendorType = vendorType;
 	}
 
 	public java.lang.Long getId() {
@@ -194,5 +206,37 @@ public class EhConfOrders implements java.io.Serializable {
 
 	public void setNamespaceId(java.lang.Integer namespaceId) {
 		this.namespaceId = namespaceId;
+	}
+
+	public java.lang.String getBuyerName() {
+		return this.buyerName;
+	}
+
+	public void setBuyerName(java.lang.String buyerName) {
+		this.buyerName = buyerName;
+	}
+
+	public java.lang.String getBuyerContact() {
+		return this.buyerContact;
+	}
+
+	public void setBuyerContact(java.lang.String buyerContact) {
+		this.buyerContact = buyerContact;
+	}
+
+	public java.lang.Byte getExtendFlag() {
+		return this.extendFlag;
+	}
+
+	public void setExtendFlag(java.lang.Byte extendFlag) {
+		this.extendFlag = extendFlag;
+	}
+
+	public java.lang.Byte getVendorType() {
+		return this.vendorType;
+	}
+
+	public void setVendorType(java.lang.Byte vendorType) {
+		this.vendorType = vendorType;
 	}
 }

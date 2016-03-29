@@ -81,4 +81,11 @@ public class EhConfAccountCategoriesDao extends org.jooq.impl.DAOImpl<com.everho
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfAccountCategories> fetchByNamespaceId(java.lang.Integer... values) {
 		return fetch(com.everhomes.server.schema.tables.EhConfAccountCategories.EH_CONF_ACCOUNT_CATEGORIES.NAMESPACE_ID, values);
 	}
+
+	/**
+	 * Fetch records that have <code>online_flag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfAccountCategories> fetchByOnlineFlag(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhConfAccountCategories.EH_CONF_ACCOUNT_CATEGORIES.ONLINE_FLAG, values);
+	}
 }

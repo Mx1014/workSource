@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfAccountCategories implements java.io.Serializable {
 
-	private static final long serialVersionUID = 635152224;
+	private static final long serialVersionUID = -224511690;
 
 	private java.lang.Long       id;
 	private java.lang.Byte       channelType;
@@ -19,6 +19,7 @@ public class EhConfAccountCategories implements java.io.Serializable {
 	private java.lang.Integer    minPeriod;
 	private java.math.BigDecimal amount;
 	private java.lang.Integer    namespaceId;
+	private java.lang.Byte       onlineFlag;
 
 	public EhConfAccountCategories() {}
 
@@ -28,7 +29,8 @@ public class EhConfAccountCategories implements java.io.Serializable {
 		java.lang.Byte       confType,
 		java.lang.Integer    minPeriod,
 		java.math.BigDecimal amount,
-		java.lang.Integer    namespaceId
+		java.lang.Integer    namespaceId,
+		java.lang.Byte       onlineFlag
 	) {
 		this.id = id;
 		this.channelType = channelType;
@@ -36,6 +38,7 @@ public class EhConfAccountCategories implements java.io.Serializable {
 		this.minPeriod = minPeriod;
 		this.amount = amount;
 		this.namespaceId = namespaceId;
+		this.onlineFlag = onlineFlag;
 	}
 
 	public java.lang.Long getId() {
@@ -84,5 +87,13 @@ public class EhConfAccountCategories implements java.io.Serializable {
 
 	public void setNamespaceId(java.lang.Integer namespaceId) {
 		this.namespaceId = namespaceId;
+	}
+
+	public java.lang.Byte getOnlineFlag() {
+		return this.onlineFlag;
+	}
+
+	public void setOnlineFlag(java.lang.Byte onlineFlag) {
+		this.onlineFlag = onlineFlag;
 	}
 }
