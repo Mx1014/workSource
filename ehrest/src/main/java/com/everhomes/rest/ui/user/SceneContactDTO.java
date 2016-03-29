@@ -17,6 +17,9 @@ import com.everhomes.util.StringHelper;
  * <li>occupation:职业</li>
  * <li>departmentName:部门名称</li>
  * <li>neighborhoodRelation: 邻居关系参考，{@link com.everhomes.rest.family.NeighborhoodRelation}</li>
+ * <li>fullPinyin: 名字全拼</li>
+ * <li>fullInitial: 名字全首字母</li>
+ * <li>initial: 首字母</li>
  * </ul>
  */
 public class SceneContactDTO {
@@ -35,6 +38,8 @@ public class SceneContactDTO {
     private String statusLine;
     private String occupation; 
     private String initial;
+    private String fullPinyin;
+    private String fullInitial;
     
     private Byte neighborhoodRelation;
 
@@ -154,6 +159,23 @@ public class SceneContactDTO {
 
 	public void setNeighborhoodRelation(Byte neighborhoodRelation) {
 		this.neighborhoodRelation = neighborhoodRelation;
+	}
+
+	
+	public String getFullPinyin() {
+		return fullPinyin;
+	}
+
+	public void setFullPinyin(String fullPinyin) {
+		this.fullPinyin = fullPinyin;
+	}
+
+	public String getFullInitial() {
+		return fullInitial;
+	}
+
+	public void setFullInitial(String fullInitial) {
+		this.fullInitial = fullInitial;
 	}
 
 	@Override

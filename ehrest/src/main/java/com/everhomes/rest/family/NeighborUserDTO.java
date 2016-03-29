@@ -16,9 +16,12 @@ import com.everhomes.util.StringHelper;
  * <li>neighborhoodRelation: 邻居关系参考，{@link com.everhomes.rest.family.NeighborhoodRelation}</li>
  * <li>distance: 邻居用户与自己的距离</li>
  * <li>occupation: 邻居用户职业</li>
+ * <li>fullPinyin: 名字全拼</li>
+ * <li>fullInitial: 名字全首字母</li>
+ * <li>initial: 首字母</li>
  * </ul>
  */
-public class NeighborUserDTO {
+public class NeighborUserDTO implements Comparable<NeighborUserDTO>{
     private Long userId;
     private String userName;
     private String userAvatarUri;
@@ -28,6 +31,8 @@ public class NeighborUserDTO {
     private Double distance;
     private String occupation;
     private String initial;
+    private String fullPinyin;
+    private String fullInitial;
 
     public NeighborUserDTO() {
     }
@@ -105,6 +110,27 @@ public class NeighborUserDTO {
 		this.initial = initial;
 	}
 
+	
+	public String getFullPinyin() {
+		return fullPinyin;
+	}
+
+	public void setFullPinyin(String fullPinyin) {
+		this.fullPinyin = fullPinyin;
+	}
+
+	public String getFullInitial() {
+		return fullInitial;
+	}
+
+	public void setFullInitial(String fullInitial) {
+		this.fullInitial = fullInitial;
+	}
+
+	public int compareTo(NeighborUserDTO neighborUserDTO) {
+	    return this.initial.compareTo(neighborUserDTO.getInitial());
+	}
+	
 	@Override
     public int hashCode() {
         return HashCodeBuilder.reflectionHashCode(this);

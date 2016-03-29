@@ -41,6 +41,8 @@ public class OrganizationMemberDTO {
 	private String contactDescription;
 	private Byte   status;
 	private String initial;
+    private String fullPinyin;
+    private String fullInitial;
 	
 	@ItemType(AclRoleAssignmentsDTO.class)
 	private List<AclRoleAssignmentsDTO> aclRoles;
@@ -56,6 +58,8 @@ public class OrganizationMemberDTO {
 	
 	private Long   employeeNo;
 	private Byte   gender;
+	
+	
 	
 	public OrganizationMemberDTO() {
     }
@@ -219,6 +223,23 @@ public class OrganizationMemberDTO {
 
 	public void setInitial(String initial) {
 		this.initial = initial;
+	}
+
+	
+	public String getFullPinyin() {
+		return fullPinyin;
+	}
+
+	public void setFullPinyin(String fullPinyin) {
+		this.fullPinyin = fullPinyin;
+	}
+
+	public String getFullInitial() {
+		return fullInitial;
+	}
+
+	public void setFullInitial(String fullInitial) {
+		this.fullInitial = fullInitial;
 	}
 
 	@Override

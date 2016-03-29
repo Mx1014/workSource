@@ -5686,10 +5686,15 @@ public class OrganizationServiceImpl implements OrganizationService {
     		if(OrganizationTaskStatus.fromCode(task.getTaskStatus()) == OrganizationTaskStatus.PROCESSED){
     			contentMsg = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_FINISH, user.getLocale(), map, "");
     			contentComment = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_FINISH_COMMENT, user.getLocale(), map, "");
-    			sendOrganizationNotificationToUser(null,contentMsg);
+    			sendOrganizationNotificationToUser(task.getCreatorUid(),contentMsg);
     		}else if(OrganizationTaskStatus.fromCode(task.getTaskStatus()) == OrganizationTaskStatus.UNPROCESSED || OrganizationTaskStatus.fromCode(task.getTaskStatus()) == OrganizationTaskStatus.PROCESSING){
     			contentMsg = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_PROCESSING_COMMENT, user.getLocale(), map, "");
 	    		contentComment = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_PROCESSING, user.getLocale(), map, "");
+	    		User target = userProvider.findUserById(task.getTargetId());
+	    		if(null != target){
+	    			smsProvider.sendSms(target.getIdentifierToken(), contentMsg);
+	    		}
+	    		
 	    		//发送短信
     		}else{
     			//关闭 不要发任何消息
@@ -5733,7 +5738,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    private List<OrganizationMember> convertPinyin(List<OrganizationMember> organizationMembers){
 			
 			organizationMembers = organizationMembers.stream().map((c) ->{
-				c.setInitial(PinYinHelper.getCapitalInitial(c.getContactName()));
+				String pinyin = PinYinHelper.getPinYin(c.getContactName());
+				c.setFullInitial(PinYinHelper.getFullCapitalInitial(pinyin));
+				c.setFullPinyin(pinyin.replaceAll(" ", ""));
+				c.setInitial(PinYinHelper.getCapitalInitial(c.getFullPinyin()));
 				return c;
 			}).collect(Collectors.toList());
 			
