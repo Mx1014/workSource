@@ -66,11 +66,11 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 			task.setOrganizationType(organization.getOrganizationType());
 			task.setApplyEntityType(OrganizationTaskApplyEnityType.TOPIC.getCode());
 			task.setApplyEntityId(0L); // 还没有帖子ID
-			task.setTargetType(post.getTargetTag());
-			if(post.getTargetTag().equals(PostEntityTag.USER.getCode()))
-				task.setTargetId(post.getCreatorUid() == null ? 0L:post.getCreatorUid());
-			else
-				task.setTargetId(organization.getId());
+			task.setTargetType(null);
+//			if(post.getTargetTag().equals(PostEntityTag.USER.getCode()))
+//				task.setTargetId(post.getCreatorUid() == null ? 0L:post.getCreatorUid());
+//			else
+				task.setTargetId(0l);
 			task.setCreatorUid(post.getCreatorUid() == null ? 0L:post.getCreatorUid());
 			task.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			task.setUnprocessedTime(new Timestamp(DateHelper.currentGMTTime().getTime()));

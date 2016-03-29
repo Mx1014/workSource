@@ -375,7 +375,7 @@ public class OrganizationAdminController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /admin/org/listPmManagements</b>
+     * <b>URL: /admin/org/listPmManagementComunites</b>
      * <p>查询物业管理小区列表</p>
      */
     

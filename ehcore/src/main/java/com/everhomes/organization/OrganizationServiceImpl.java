@@ -5564,6 +5564,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				}
 				if(dto.getForumId().equals(community.getDefaultForumId())){
 					task.setOption(cmd.getOption());
+					task.setEntrancePrivilege(cmd.getEntrancePrivilege());
 					dto.setEmbeddedJson(StringHelper.toJsonString(task));
 					dtos.add(dto);
 				}
