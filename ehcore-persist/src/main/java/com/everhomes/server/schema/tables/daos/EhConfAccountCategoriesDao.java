@@ -48,10 +48,10 @@ public class EhConfAccountCategoriesDao extends org.jooq.impl.DAOImpl<com.everho
 	}
 
 	/**
-	 * Fetch records that have <code>channel_type IN (values)</code>
+	 * Fetch records that have <code>mutiple_num IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfAccountCategories> fetchByChannelType(java.lang.Byte... values) {
-		return fetch(com.everhomes.server.schema.tables.EhConfAccountCategories.EH_CONF_ACCOUNT_CATEGORIES.CHANNEL_TYPE, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfAccountCategories> fetchByMutipleNum(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhConfAccountCategories.EH_CONF_ACCOUNT_CATEGORIES.MUTIPLE_NUM, values);
 	}
 
 	/**

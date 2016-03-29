@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfOrders implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1831162476;
+	private static final long serialVersionUID = 51076982;
 
 	private java.lang.Long       id;
 	private java.lang.Long       ownerId;
@@ -31,7 +31,6 @@ public class EhConfOrders implements java.io.Serializable {
 	private java.lang.Integer    namespaceId;
 	private java.lang.String     buyerName;
 	private java.lang.String     buyerContact;
-	private java.lang.Byte       extendFlag;
 	private java.lang.Byte       vendorType;
 
 	public EhConfOrders() {}
@@ -55,7 +54,6 @@ public class EhConfOrders implements java.io.Serializable {
 		java.lang.Integer    namespaceId,
 		java.lang.String     buyerName,
 		java.lang.String     buyerContact,
-		java.lang.Byte       extendFlag,
 		java.lang.Byte       vendorType
 	) {
 		this.id = id;
@@ -76,7 +74,6 @@ public class EhConfOrders implements java.io.Serializable {
 		this.namespaceId = namespaceId;
 		this.buyerName = buyerName;
 		this.buyerContact = buyerContact;
-		this.extendFlag = extendFlag;
 		this.vendorType = vendorType;
 	}
 
@@ -222,14 +219,6 @@ public class EhConfOrders implements java.io.Serializable {
 
 	public void setBuyerContact(java.lang.String buyerContact) {
 		this.buyerContact = buyerContact;
-	}
-
-	public java.lang.Byte getExtendFlag() {
-		return this.extendFlag;
-	}
-
-	public void setExtendFlag(java.lang.Byte extendFlag) {
-		this.extendFlag = extendFlag;
 	}
 
 	public java.lang.Byte getVendorType() {

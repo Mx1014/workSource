@@ -167,13 +167,6 @@ public class EhConfOrdersDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	}
 
 	/**
-	 * Fetch records that have <code>extend_flag IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfOrders> fetchByExtendFlag(java.lang.Byte... values) {
-		return fetch(com.everhomes.server.schema.tables.EhConfOrders.EH_CONF_ORDERS.EXTEND_FLAG, values);
-	}
-
-	/**
 	 * Fetch records that have <code>vendor_type IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfOrders> fetchByVendorType(java.lang.Byte... values) {

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfAccountCategories extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhConfAccountCategoriesRecord> {
 
-	private static final long serialVersionUID = 1093980512;
+	private static final long serialVersionUID = 1434668866;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_conf_account_categories</code>
@@ -32,9 +32,9 @@ public class EhConfAccountCategories extends org.jooq.impl.TableImpl<com.everhom
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfAccountCategoriesRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id");
 
 	/**
-	 * The column <code>ehcore.eh_conf_account_categories.channel_type</code>. 0: single, 1: multiple
+	 * The column <code>ehcore.eh_conf_account_categories.mutiple_num</code>. the limit value of mutiple buy channel
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfAccountCategoriesRecord, java.lang.Byte> CHANNEL_TYPE = createField("channel_type", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: single, 1: multiple");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfAccountCategoriesRecord, java.lang.Integer> MUTIPLE_NUM = createField("mutiple_num", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "the limit value of mutiple buy channel");
 
 	/**
 	 * The column <code>ehcore.eh_conf_account_categories.conf_type</code>. 0: none, 1: 25方仅视频, 2: 25方支持电话, 3: 100方仅视频, 4: 100方支持电话

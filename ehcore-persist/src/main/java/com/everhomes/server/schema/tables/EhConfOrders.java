@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfOrders extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhConfOrdersRecord> {
 
-	private static final long serialVersionUID = 1799975861;
+	private static final long serialVersionUID = -1090506110;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_conf_orders</code>
@@ -115,11 +115,6 @@ public class EhConfOrders extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	 * The column <code>ehcore.eh_conf_orders.buyer_contact</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfOrdersRecord, java.lang.String> BUYER_CONTACT = createField("buyer_contact", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_conf_orders.extend_flag</code>. buy new accounts or extend accounts 0: new accounts, 1: extend account
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfOrdersRecord, java.lang.Byte> EXTEND_FLAG = createField("extend_flag", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "buy new accounts or extend accounts 0: new accounts, 1: extend account");
 
 	/**
 	 * The column <code>ehcore.eh_conf_orders.vendor_type</code>. vendor type 0: none, 1: Alipay, 2: Wechat

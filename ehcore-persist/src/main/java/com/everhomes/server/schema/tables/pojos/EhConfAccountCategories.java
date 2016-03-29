@@ -11,10 +11,10 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfAccountCategories implements java.io.Serializable {
 
-	private static final long serialVersionUID = -224511690;
+	private static final long serialVersionUID = -1019097832;
 
 	private java.lang.Long       id;
-	private java.lang.Byte       channelType;
+	private java.lang.Integer    mutipleNum;
 	private java.lang.Byte       confType;
 	private java.lang.Integer    minPeriod;
 	private java.math.BigDecimal amount;
@@ -25,7 +25,7 @@ public class EhConfAccountCategories implements java.io.Serializable {
 
 	public EhConfAccountCategories(
 		java.lang.Long       id,
-		java.lang.Byte       channelType,
+		java.lang.Integer    mutipleNum,
 		java.lang.Byte       confType,
 		java.lang.Integer    minPeriod,
 		java.math.BigDecimal amount,
@@ -33,7 +33,7 @@ public class EhConfAccountCategories implements java.io.Serializable {
 		java.lang.Byte       onlineFlag
 	) {
 		this.id = id;
-		this.channelType = channelType;
+		this.mutipleNum = mutipleNum;
 		this.confType = confType;
 		this.minPeriod = minPeriod;
 		this.amount = amount;
@@ -49,12 +49,12 @@ public class EhConfAccountCategories implements java.io.Serializable {
 		this.id = id;
 	}
 
-	public java.lang.Byte getChannelType() {
-		return this.channelType;
+	public java.lang.Integer getMutipleNum() {
+		return this.mutipleNum;
 	}
 
-	public void setChannelType(java.lang.Byte channelType) {
-		this.channelType = channelType;
+	public void setMutipleNum(java.lang.Integer mutipleNum) {
+		this.mutipleNum = mutipleNum;
 	}
 
 	public java.lang.Byte getConfType() {
