@@ -697,6 +697,10 @@ public class QualityServiceImpl implements QualityService {
         	QualityInspectionTaskDTO dto = ConvertHelper.convert(r, QualityInspectionTaskDTO.class);  
         	dto.setStandardDescription(standard.getDescription());
         	
+        	Organization group = organizationProvider.findOrganizationById(r.getExecutiveGroupId());
+			if(group != null)
+				dto.setGroupName(group.getName());
+        	
         	List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(r.getExecutiveGroupId());
         	List<GroupUserDTO> groupUsers = members.stream().map((mem) -> {
              	if(OrganizationMemberTargetType.USER.getCode().equals(mem.getTargetType()) 
