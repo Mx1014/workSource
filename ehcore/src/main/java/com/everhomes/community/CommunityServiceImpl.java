@@ -1234,10 +1234,9 @@ public class CommunityServiceImpl implements CommunityService {
 		CountCommunityUserResponse resp = new CountCommunityUserResponse();
 		resp.setCommunityUsers(communityUserCount);
 		resp.setAuthUsers(authUserCount);
+
 		resp.setNotAuthUsers(notAuthUsers);
 
 		return resp;
 	}
-	
-
 }
