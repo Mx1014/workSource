@@ -29,6 +29,7 @@ import com.everhomes.rest.videoconf.DeleteVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.DeleteWarningContactorCommand;
 import com.everhomes.rest.videoconf.DownloadAppCommand;
 import com.everhomes.rest.videoconf.EnterpriseLockStatusCommand;
+import com.everhomes.rest.videoconf.ExtendedConfAccountPeriodCommand;
 import com.everhomes.rest.videoconf.ExtendedSourceAccountPeriodCommand;
 import com.everhomes.rest.videoconf.ExtendedVideoConfAccountPeriodCommand;
 import com.everhomes.rest.videoconf.GetEarlyWarningLineCommand;
@@ -37,6 +38,7 @@ import com.everhomes.rest.videoconf.GetNamespaceListResponse;
 import com.everhomes.rest.videoconf.InvoiceDTO;
 import com.everhomes.rest.videoconf.JoinVideoConfCommand;
 import com.everhomes.rest.videoconf.JoinVideoConfResponse;
+import com.everhomes.rest.videoconf.ListConfCapacityResponse;
 import com.everhomes.rest.videoconf.ListConfOrderAccountResponse;
 import com.everhomes.rest.videoconf.ListEnterpriseVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.ListEnterpriseVideoConfAccountResponse;
@@ -1253,5 +1255,54 @@ public class VideoConfController  extends ControllerBase{
         res.setErrorDescription("OK");
         return res;
     }
+	
+    /**
+	 * <b>URL: /conf/updateInvoiceByOrderId</b>
+	 * 修改开票信息
+	 * @return
+	 */
+	@RequestMapping("updateInvoiceByOrderId")
+	@RestReturn(value = InvoiceDTO.class)
+	public RestResponse updateInvoiceByOrderId(InvoiceDTO cmd) {
+
+		InvoiceDTO invoice = videoConfService.updateInvoiceByOrderId(cmd);
+		RestResponse response = new RestResponse(invoice);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /conf/extendedConfAccountPeriod</b>
+	 * 账号延期
+	 * @return
+	 */
+	@RequestMapping("extendedConfAccountPeriod")
+	@RestReturn(value = String.class)
+	public RestResponse extendedConfAccountPeriod(ExtendedConfAccountPeriodCommand cmd) {
+
+		videoConfService.extendedConfAccountPeriod(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /conf/listConfCapacity</b>
+	 * 客户端查看会议容量
+	 * @return
+	 */
+	@RequestMapping("listConfCapacity")
+	@RestReturn(value = ListConfCapacityResponse.class)
+	public RestResponse listConfCapacity() {
+		
+		ListConfCapacityResponse capacity = videoConfService.listConfCapacity();
+		RestResponse response = new RestResponse(capacity);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 	
 }

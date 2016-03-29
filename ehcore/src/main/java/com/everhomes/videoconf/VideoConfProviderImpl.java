@@ -1326,6 +1326,15 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 		EhConfSourceAccountsDao dao = new EhConfSourceAccountsDao(context.configuration());
 		dao.deleteById(id);
 	}
+
+	@Override
+	public void updateInvoice(ConfInvoices invoice) {
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        
+		EhConfInvoicesDao dao = new EhConfInvoicesDao(context.configuration());
+        dao.update(invoice);
+	}
 	
 	
 

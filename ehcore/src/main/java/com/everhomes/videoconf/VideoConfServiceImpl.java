@@ -74,6 +74,7 @@ import com.everhomes.rest.videoconf.DeleteVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.DeleteWarningContactorCommand;
 import com.everhomes.rest.videoconf.EnterpriseConfAccountDTO;
 import com.everhomes.rest.videoconf.EnterpriseLockStatusCommand;
+import com.everhomes.rest.videoconf.ExtendedConfAccountPeriodCommand;
 import com.everhomes.rest.videoconf.ExtendedSourceAccountPeriodCommand;
 import com.everhomes.rest.videoconf.ExtendedVideoConfAccountPeriodCommand;
 import com.everhomes.rest.videoconf.GetNamespaceIdListCommand;
@@ -81,6 +82,7 @@ import com.everhomes.rest.videoconf.GetNamespaceListResponse;
 import com.everhomes.rest.videoconf.InvoiceDTO;
 import com.everhomes.rest.videoconf.JoinVideoConfCommand;
 import com.everhomes.rest.videoconf.JoinVideoConfResponse;
+import com.everhomes.rest.videoconf.ListConfCapacityResponse;
 import com.everhomes.rest.videoconf.ListConfOrderAccountResponse;
 import com.everhomes.rest.videoconf.ListEnterpriseWithVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.ListEnterpriseWithVideoConfAccountResponse;
@@ -2205,6 +2207,43 @@ public class VideoConfServiceImpl implements VideoConfService {
 	public void deleteSourceVideoConfAccount(
 			DeleteSourceVideoConfAccountCommand cmd) {
 		vcProvider.deleteSourceVideoConfAccount(cmd.getSourceAccountId());
+	}
+
+	@Override
+	public InvoiceDTO updateInvoiceByOrderId(InvoiceDTO cmd) {
+		ConfInvoices invoice = ConvertHelper.convert(cmd, ConfInvoices.class);
+		vcProvider.updateInvoice(invoice);
+		
+		InvoiceDTO dto = vcProvider.getInvoiceByOrderId(invoice.getOrderId());
+		return dto;
+	}
+
+	@Override
+	public ListConfCapacityResponse listConfCapacity() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void extendedConfAccountPeriod(ExtendedConfAccountPeriodCommand cmd) {
+		
+		CreateConfAccountOrderCommand order = new CreateConfAccountOrderCommand();
+//		createConfAccountOrder(order);
+//		
+//		ConfAccounts account = vcProvider.findVideoconfAccountById(cmd.getAccountId());
+//		account.setExpiredDate(new Timestamp(cmd.getValidDate()));
+//		
+//		if(account.getStatus() != 2) {
+//			if(account.getExpiredDate().before(new Timestamp(DateHelper.currentGMTTime().getTime()))) {
+//	        	account.setStatus((byte) 0);
+//	        }
+//	        else {
+//	        	account.setStatus((byte) 1);
+//	        }
+//		}
+//		
+//		vcProvider.updateConfAccounts(account);
+		
 	}
 	
 }
