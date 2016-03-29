@@ -92,7 +92,7 @@ public class AclinkController extends ControllerBase {
     @RequestMapping("listAdminAesUserKey")
     @RestReturn(value=ListAesUserKeyByUserResponse.class)
     public RestResponse listAdminAesUserKey() {
-        RestResponse response = new RestResponse(doorAccessService.listAdminAesUserKeyByUser());
+        RestResponse response = new RestResponse(doorAccessService.listAdminAesUserKeyByUserAuth());
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         

@@ -798,6 +798,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     }
     
     @Override
+    //Not used
     public ListAesUserKeyByUserResponse listAdminAesUserKeyByUser() {
         User user = UserContext.current().getUser();
         
@@ -818,6 +819,37 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         return resp;
         
+    }
+    
+    @Override
+    public ListAesUserKeyByUserResponse listAdminAesUserKeyByUserAuth() {
+        User user = UserContext.current().getUser();
+        
+        ListAesUserKeyByUserResponse resp = new ListAesUserKeyByUserResponse();
+        List<DoorAuth> auths = doorAuthProvider.queryDoorAuthForeverByUserId(new ListingLocator(), user.getId(), 20);
+
+        List<AesUserKeyDTO> dtos = new ArrayList<AesUserKeyDTO>();
+        for(DoorAuth auth : auths) {
+            AesUserKeyDTO dto = new AesUserKeyDTO();
+            dto.setCreateTimeMs(auth.getCreateTime().getTime());
+            dto.setCreatorUid(user.getId());
+            dto.setDoorId(auth.getDoorId());
+            dto.setUserId(auth.getUserId());
+            dto.setStatus(AesUserKeyStatus.VALID.getCode());
+            dto.setKeyType(AesUserKeyType.ADMIN.getCode());
+            dto.setId(auth.getId());
+            
+            DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(dto.getDoorId());
+            if(doorAccess != null && (!doorAccess.getStatus().equals(DoorAccessStatus.INVALID.getCode()))) {
+                dto.setHardwareId(doorAccess.getHardwareId());
+                dto.setDoorName(doorAccess.getName());
+                dtos.add(dto);    
+            }
+        }
+        
+        resp.setAesUserKeys(dtos);
+        
+        return resp;        
     }
     
     private List<DoorAuth> uniqueAuths(List<DoorAuth> auths) {
