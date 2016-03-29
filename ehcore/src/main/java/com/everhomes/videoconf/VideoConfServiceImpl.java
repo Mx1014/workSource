@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -58,6 +59,7 @@ import com.everhomes.rest.videoconf.AssignVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.BizConfHolder;
 import com.everhomes.rest.videoconf.CancelVideoConfCommand;
 import com.everhomes.rest.videoconf.ConfCapacity;
+import com.everhomes.rest.videoconf.ConfCategoryDTO;
 import com.everhomes.rest.videoconf.ConfOrderAccountDTO;
 import com.everhomes.rest.videoconf.ConfOrderDTO;
 import com.everhomes.rest.videoconf.ConfReservationsDTO;
@@ -82,7 +84,8 @@ import com.everhomes.rest.videoconf.GetNamespaceListResponse;
 import com.everhomes.rest.videoconf.InvoiceDTO;
 import com.everhomes.rest.videoconf.JoinVideoConfCommand;
 import com.everhomes.rest.videoconf.JoinVideoConfResponse;
-import com.everhomes.rest.videoconf.ListConfCapacityResponse;
+import com.everhomes.rest.videoconf.ListConfCategoryCommand;
+import com.everhomes.rest.videoconf.ListConfCategoryResponse;
 import com.everhomes.rest.videoconf.ListConfOrderAccountResponse;
 import com.everhomes.rest.videoconf.ListEnterpriseWithVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.ListEnterpriseWithVideoConfAccountResponse;
@@ -388,12 +391,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		rule.setAmount(cmd.getPackagePrice());
 		rule.setMinPeriod(cmd.getMinimumMonths());
 		
-		if(AccountType.ACCOUNT_TYPE_SINGLE.getCode().equals(cmd.getAccountType())) {
-			rule.setChannelType((byte) 0);
-		}
-		if(AccountType.ACCOUNT_TYPE_MULTIPLE.getCode().equals(cmd.getAccountType())) {
-			rule.setChannelType((byte) 1);
-		}
+		rule.setMutipleNum(cmd.getMutipleNum());
 		
 		//0-25方仅视频 1-25方支持电话 2-100方仅视频 3-100方支持电话
 		if(ConfCapacity.CONF_CAPACITY_25.getCode().equals(cmd.getConfCapacity())) {
@@ -431,7 +429,8 @@ public class VideoConfServiceImpl implements VideoConfService {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		Integer offset = cmd.getPageOffset() == null ? 0 : (cmd.getPageOffset() - 1 ) * pageSize;
 		
-		List<VideoConfAccountRuleDTO> rules = vcProvider.listConfAccountCategories(cmd.getChannelType(), cmd.getConfType(), offset, pageSize + 1).stream().map(r -> {
+		List<VideoConfAccountRuleDTO> rules = vcProvider.listConfAccountCategories(cmd.getConfType(), 
+				cmd.getIsOnline(), offset, pageSize + 1).stream().map(r -> {
 			
 			return toRuleDto(r);
 		}).collect(Collectors.toList());
@@ -454,13 +453,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 			ruleDto.setId(rule.getId());
 			ruleDto.setMinimumMonths(rule.getMinPeriod());
 			ruleDto.setPackagePrice(rule.getAmount());
-			if(rule.getChannelType() == 0) {
-				ruleDto.setAccountType(AccountType.ACCOUNT_TYPE_SINGLE.getCode());
-			}
-			
-			if(rule.getChannelType() == 1) {
-				ruleDto.setAccountType(AccountType.ACCOUNT_TYPE_MULTIPLE.getCode());
-			}
+			ruleDto.setMutipleNum(rule.getMutipleNum());
 			
 			if(rule.getConfType() == 0) {
 				ruleDto.setConfCapacity(ConfCapacity.CONF_CAPACITY_25.getCode());
@@ -754,8 +747,8 @@ public class VideoConfServiceImpl implements VideoConfService {
 		ConfAccounts account = vcProvider.findVideoconfAccountById(cmd.getAccountId());
 		account.setExpiredDate(new Timestamp(cmd.getValidDate()));
 		
-		ConfAccountCategories category = vcProvider.findAccountCategoriesById(account.getAccountCategoryId());
-		List<ConfAccountCategories> rules = vcProvider.listConfAccountCategories(category.getChannelType(), cmd.getConfType(), 0, Integer.MAX_VALUE);
+//		ConfAccountCategories category = vcProvider.findAccountCategoriesById(account.getAccountCategoryId());
+		List<ConfAccountCategories> rules = vcProvider.listConfAccountCategories(cmd.getConfType(), (byte) 0, 0, Integer.MAX_VALUE);
 		if(rules != null && rules.size() > 0)
 			account.setAccountCategoryId(rules.get(0).getId());
 
@@ -849,9 +842,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 			dto.setMobile(enterpriseContact.getContact());
 		}
 		
-		ConfAccountCategories category = vcProvider.findAccountCategoriesById(order.getAccountCategoryId());
-		if(category != null)
-			dto.setAccountChannelType(category.getChannelType());
+//		ConfAccountCategories category = vcProvider.findAccountCategoriesById(order.getAccountCategoryId());
 		dto.setCreateTime(order.getCreateTime());
 		dto.setQuantity(order.getQuantity());
 		dto.setPeriod(order.getPeriod());
@@ -1990,10 +1981,32 @@ public class VideoConfServiceImpl implements VideoConfService {
 				&& (order.getAccountCategoryId() == null || order.getAccountCategoryId() == 0)) {
 			CrossShardListingLocator locator = new CrossShardListingLocator();
 			List<ConfOrderAccountMap> maps = vcProvider.findOrderAccountByOrderId(order.getId(), locator, Integer.MAX_VALUE);
-//			if(maps != null && maps.size() > 0) {
-//				for(ConfOrderAccountMap)
-//				
-//			}
+			if(maps != null && maps.size() > 0) {
+				Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+				int toActive = 0;
+				for(ConfOrderAccountMap map : maps) {
+					
+					ConfAccounts account = vcProvider.findVideoconfAccountById(map.getConfAccountId());
+					
+					//0-inactive 1-active 2-locked
+					if(account.getStatus() == 0) {
+						account.setExpiredDate(addMonth(now, order.getPeriod()));
+						account.setStatus((byte) 1);
+						
+						toActive++;
+					}
+					else {
+						account.setExpiredDate(addMonth(account.getExpiredDate(), order.getPeriod()));
+					}
+					
+					vcProvider.updateConfAccounts(account);
+				}
+				
+				enterprise.setBuyChannel(order.getOnlineFlag());
+				enterprise.setActiveAccountAmount(enterprise.getActiveAccountAmount()+toActive);
+				vcProvider.updateConfEnterprises(enterprise);
+				
+			}
 		}
 		
 	}
@@ -2231,9 +2244,71 @@ public class VideoConfServiceImpl implements VideoConfService {
 	}
 
 	@Override
-	public ListConfCapacityResponse listConfCapacity() {
-		// TODO Auto-generated method stub
-		return null;
+	public ListConfCategoryResponse listConfCategory(ListConfCategoryCommand cmd) {
+		List<ConfAccountCategories> categories = vcProvider.listConfAccountCategories(null, (byte) 1, 0, Integer.MAX_VALUE);
+		ListConfCategoryResponse response = new ListConfCategoryResponse();
+		
+		List<ConfCategoryDTO> categoryDtos = new ArrayList<ConfCategoryDTO>();
+		Map<Integer, ConfCategoryDTO> categoryMap = new HashMap<Integer, ConfCategoryDTO>();
+		for(ConfAccountCategories category : categories) {
+			//0-25方仅视频 1-25方支持电话 2-100方仅视频 3-100方支持电话 
+			if(category.getConfType() == 0 || category.getConfType() == 1) {
+				ConfCategoryDTO dto = categoryMap.get(0);
+				if(dto == null) {
+					dto = new ConfCategoryDTO();
+					dto.setConfCapacity((byte) 0);
+					if(category.getMutipleNum() == 0) {
+						dto.setPrice(category.getAmount());
+					} else {
+						dto.setMutipleNum(category.getMutipleNum());
+						dto.setMutiplePrice(category.getAmount());
+					}
+				}
+				else {
+					if(category.getMutipleNum() == 0) {
+						dto.setPrice(category.getAmount());
+					} else {
+						dto.setMutipleNum(category.getMutipleNum());
+						dto.setMutiplePrice(category.getAmount());
+					}
+					
+				}
+				categoryMap.put(0, dto);
+			}
+			
+			if(category.getConfType() == 2 || category.getConfType() == 3) {
+				ConfCategoryDTO dto = categoryMap.get(2);
+				if(dto == null) {
+					dto = new ConfCategoryDTO();
+					dto.setConfCapacity((byte) 2);
+					if(category.getMutipleNum() == 0) {
+						dto.setPrice(category.getAmount());
+					} else {
+						dto.setMutipleNum(category.getMutipleNum());
+						dto.setMutiplePrice(category.getAmount());
+					}
+				}
+				else {
+					if(category.getMutipleNum() == 0) {
+						dto.setPrice(category.getAmount());
+					} else {
+						dto.setMutipleNum(category.getMutipleNum());
+						dto.setMutiplePrice(category.getAmount());
+					}
+					
+				}
+				categoryMap.put(2, dto);
+			}
+		}
+		for (Entry<Integer, ConfCategoryDTO> entry : categoryMap.entrySet()) {
+			categoryDtos.add(entry.getValue());
+		}
+		response.setCategories(categoryDtos);
+		
+		int enterpriseVaildAccounts = vcProvider.countAccountsByEnterprise(cmd.getEnterpriseId(), null);
+		response.setEnterpriseVaildAccounts(enterpriseVaildAccounts);
+		
+		return response;
 	}
 
 	@Override

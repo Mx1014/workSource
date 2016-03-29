@@ -10,12 +10,14 @@ import java.util.Set;
 
 
 
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.jooq.tools.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 
 
 
@@ -104,16 +106,17 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 	}
 
 	@Override
-	public List<ConfAccountCategories> listConfAccountCategories(Byte channelType, Byte confType, int pageOffset,int pageSize) {
+	public List<ConfAccountCategories> listConfAccountCategories(Byte confType, Byte isOnline, int pageOffset,int pageSize) {
 		
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhConfAccountCategories.class));
 		List<ConfAccountCategories> rules = new ArrayList<ConfAccountCategories>();
 		SelectQuery<EhConfAccountCategoriesRecord> query = context.selectQuery(Tables.EH_CONF_ACCOUNT_CATEGORIES);
-		if(channelType != null)
-			query.addConditions(Tables.EH_CONF_ACCOUNT_CATEGORIES.CHANNEL_TYPE.eq(channelType));
 
 		if(confType != null)
 			query.addConditions(Tables.EH_CONF_ACCOUNT_CATEGORIES.CONF_TYPE.eq(confType));
+		
+		if(isOnline != null)
+			query.addConditions(Tables.EH_CONF_ACCOUNT_CATEGORIES.ONLINE_FLAG.eq(isOnline));
 		
 		query.addLimit(pageOffset, pageSize);
 
@@ -121,7 +124,7 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 
 			ConfAccountCategories rule = new ConfAccountCategories();
 			rule.setId(r.getValue(Tables.EH_CONF_ACCOUNT_CATEGORIES.ID));
-			rule.setChannelType(r.getValue(Tables.EH_CONF_ACCOUNT_CATEGORIES.CHANNEL_TYPE));
+			rule.setMutipleNum(r.getValue(Tables.EH_CONF_ACCOUNT_CATEGORIES.MUTIPLE_NUM));
 			rule.setConfType(r.getValue(Tables.EH_CONF_ACCOUNT_CATEGORIES.CONF_TYPE));
 			rule.setMinPeriod(r.getValue(Tables.EH_CONF_ACCOUNT_CATEGORIES.MIN_PERIOD));
 			rule.setAmount(r.getValue(Tables.EH_CONF_ACCOUNT_CATEGORIES.AMOUNT));
@@ -922,7 +925,7 @@ public class VideoConfProviderImpl implements VideoConfProvider {
         }
         this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
             SelectQuery<EhConfAccountsRecord> query = context.selectQuery(Tables.EH_CONF_ACCOUNTS);
-            query.addConditions(Tables.EH_CONF_ACCOUNTS.OWNER_ID.ne(0L));
+ //           query.addConditions(Tables.EH_CONF_ACCOUNTS.OWNER_ID.ne(0L));
             if(locator.getAnchor() != null)
             	query.addConditions(Tables.EH_CONF_ACCOUNTS.ID.gt(locator.getAnchor()));
             

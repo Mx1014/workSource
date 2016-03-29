@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *  <li>id: 主键id</li>
- *  <li>accountType: 账号类型  </li>
+ *  <li>mutipleNum: 多账号起售数量  </li>
  *  <li>confCapacity: 会议容量</li>
  *  <li>confType: 开会方式</li>
  *  <li>minimumMonths: 起售月份</li>
@@ -19,7 +19,7 @@ public class VideoConfAccountRuleDTO {
 	
 	private Long id;
 	
-	private String accountType;
+	private int mutipleNum;
 	
 	private String confCapacity;
 	
@@ -37,12 +37,12 @@ public class VideoConfAccountRuleDTO {
 		this.id = id;
 	}
 
-	public String getAccountType() {
-		return accountType;
+	public int getMutipleNum() {
+		return mutipleNum;
 	}
 
-	public void setAccountType(String accountType) {
-		this.accountType = accountType;
+	public void setMutipleNum(int mutipleNum) {
+		this.mutipleNum = mutipleNum;
 	}
 
 	public String getConfCapacity() {

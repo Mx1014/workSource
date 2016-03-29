@@ -38,7 +38,8 @@ import com.everhomes.rest.videoconf.GetNamespaceListResponse;
 import com.everhomes.rest.videoconf.InvoiceDTO;
 import com.everhomes.rest.videoconf.JoinVideoConfCommand;
 import com.everhomes.rest.videoconf.JoinVideoConfResponse;
-import com.everhomes.rest.videoconf.ListConfCapacityResponse;
+import com.everhomes.rest.videoconf.ListConfCategoryCommand;
+import com.everhomes.rest.videoconf.ListConfCategoryResponse;
 import com.everhomes.rest.videoconf.ListConfOrderAccountResponse;
 import com.everhomes.rest.videoconf.ListEnterpriseVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.ListEnterpriseVideoConfAccountResponse;
@@ -1289,15 +1290,15 @@ public class VideoConfController  extends ControllerBase{
 	}
 	
 	/**
-	 * <b>URL: /conf/listConfCapacity</b>
-	 * 客户端查看会议容量
+	 * <b>URL: /conf/listConfCategory</b>
+	 * 客户端查看可购买账号类型信息
 	 * @return
 	 */
-	@RequestMapping("listConfCapacity")
-	@RestReturn(value = ListConfCapacityResponse.class)
-	public RestResponse listConfCapacity() {
+	@RequestMapping("listConfCategory")
+	@RestReturn(value = ListConfCategoryResponse.class)
+	public RestResponse listConfCategory(ListConfCategoryCommand cmd) {
 		
-		ListConfCapacityResponse capacity = videoConfService.listConfCapacity();
+		ListConfCategoryResponse capacity = videoConfService.listConfCategory(cmd);
 		RestResponse response = new RestResponse(capacity);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

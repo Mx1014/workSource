@@ -13,8 +13,6 @@ import com.everhomes.util.StringHelper;
  */
 public class ListRuleCommand {
 	
-	private Byte channelType;
-	
 	private Byte confType;
 	
 	private Byte isOnline;
@@ -22,14 +20,6 @@ public class ListRuleCommand {
 	private Integer pageOffset;
     
     private Integer pageSize;
-
-	public Byte getChannelType() {
-		return channelType;
-	}
-
-	public void setChannelType(Byte channelType) {
-		this.channelType = channelType;
-	}
 
 	public Byte getConfType() {
 		return confType;

@@ -75,14 +75,14 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
 	public void bulkUpdate(List<ConfAccounts> accounts) {
 		BulkRequestBuilder brb = getClient().prepareBulk();
         for (ConfAccounts account : accounts) {
-        	if(account.getOwnerId() != null && account.getOwnerId() != 0) {
+//        	if(account.getOwnerId() != null && account.getOwnerId() != 0) {
 	            XContentBuilder source = createDoc(account);
 	            if(null != source) {
 	                LOGGER.info("conf account id:" + account.getId());
 	                brb.add(Requests.indexRequest(getIndexName()).type(getIndexType())
 	                        .id(account.getId().toString()).source(source));    
 	                }
-        	}
+ //       	}
             
         }
         if (brb.numberOfActions() > 0) {
@@ -93,11 +93,11 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
 
 	@Override
 	public void feedDoc(ConfAccounts account) {
-		if(account.getOwnerId() != 0) {
+//		if(account.getOwnerId() != 0) {
 			XContentBuilder source = createDoc(account);
 	        
 	        feedDoc(account.getId().toString(), source);
-		}
+//		}
 
 	}
 
