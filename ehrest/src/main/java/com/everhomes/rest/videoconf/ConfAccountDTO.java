@@ -17,7 +17,7 @@ import com.everhomes.util.StringHelper;
  *  <li>updateDate: 更新时间</li>
  *  <li>validDate: 有效期</li>
  *  <li>userType: 用户类型  0-试用用户  1-新增用户  2-续约用户</li>
- *  <li>validFlag: 有效状态  0-过期  1-有效 </li>
+ *  <li>validFlag: 有效状态  0-过期  1-有效 2-即将过期（1个月内） </li>
  *  <li>status: 状态 0-invalid 1-valid 2-locked</li>
  * </ul>
  *

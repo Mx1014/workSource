@@ -1788,7 +1788,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 	}
 
 	@Override
-	public void createConfAccountOrder(CreateConfAccountOrderCommand cmd) {
+	public Long createConfAccountOrder(CreateConfAccountOrderCommand cmd) {
 		ConfOrders order = new ConfOrders();
 		 
 		order.setOwnerId(cmd.getEnterpriseId());
@@ -1827,17 +1827,20 @@ public class VideoConfServiceImpl implements VideoConfService {
 			vcProvider.createConfEnterprises(confEnterprise);
 
 			confEnterpriseSearcher.feedDoc(confEnterprise);
-		} else {
-			enterprise.setContactName(cmd.getContactor());
-			enterprise.setContact(cmd.getMobile());
-			vcProvider.updateConfEnterprises(enterprise);
 		}
+//		} else {
+//			enterprise.setContactName(cmd.getContactor());
+//			enterprise.setContact(cmd.getMobile());
+//			vcProvider.updateConfEnterprises(enterprise);
+//		}
 		
 		if(order.getOnlineFlag() == 0) {
 			OfflinePayBillCommand command = new OfflinePayBillCommand();
 			command.setOrderId(order.getId());
 			offlinePayBill(command);
 		}
+		
+		return order.getId();
 			
 	}
 
@@ -1953,7 +1956,8 @@ public class VideoConfServiceImpl implements VideoConfService {
 		vcProvider.updateConfOrders(order);
 		ConfEnterprises enterprise = vcProvider.findByEnterpriseId(order.getOwnerId());
 		int namespaceId = enterprise.getNamespaceId();
-		if(order.getStatus().byteValue() == PayStatus.PAID.getCode()) {
+		if(order.getStatus().byteValue() == PayStatus.PAID.getCode() 
+				&& order.getAccountCategoryId() != null && order.getAccountCategoryId() != 0) {
 			List<ConfAccounts> accounts = new ArrayList<ConfAccounts>();
 			
 			for(int i = 0; i < order.getQuantity(); i++) {
@@ -1982,6 +1986,14 @@ public class VideoConfServiceImpl implements VideoConfService {
 			enterprise.setAccountAmount(enterprise.getAccountAmount()+order.getQuantity());
 			enterprise.setActiveAccountAmount(enterprise.getActiveAccountAmount()+order.getQuantity());
 			vcProvider.updateConfEnterprises(enterprise);
+		} else if(order.getStatus().byteValue() == PayStatus.PAID.getCode() 
+				&& (order.getAccountCategoryId() == null || order.getAccountCategoryId() == 0)) {
+			CrossShardListingLocator locator = new CrossShardListingLocator();
+			List<ConfOrderAccountMap> maps = vcProvider.findOrderAccountByOrderId(order.getId(), locator, Integer.MAX_VALUE);
+//			if(maps != null && maps.size() > 0) {
+//				for(ConfOrderAccountMap)
+//				
+//			}
 		}
 		
 	}
@@ -2227,9 +2239,34 @@ public class VideoConfServiceImpl implements VideoConfService {
 	@Override
 	public void extendedConfAccountPeriod(ExtendedConfAccountPeriodCommand cmd) {
 		
+		int quantity = cmd.getAccountIds().size();
 		CreateConfAccountOrderCommand order = new CreateConfAccountOrderCommand();
-//		createConfAccountOrder(order);
-//		
+		order.setEnterpriseId(cmd.getEnterpriseId());
+		order.setEnterpriseName(cmd.getEnterpriseName());
+		order.setContactor(cmd.getContactor());
+		order.setMobile(cmd.getMobile());
+		order.setQuantity(quantity);
+		order.setPeriod(cmd.getMonths());
+		order.setAmount(cmd.getAmount());
+		order.setInvoiceFlag(cmd.getInvoiceFlag());
+		order.setBuyChannel(cmd.getBuyChannel());
+		order.setAccountCategoryId(0L);
+		order.setMakeOutFlag((byte) 0);
+		Long orderId = createConfAccountOrder(order);
+		
+		ConfEnterprises enterprise = vcProvider.findByEnterpriseId(cmd.getEnterpriseId());
+		int namespaceId = enterprise.getNamespaceId();
+		for(Long accountId : cmd.getAccountIds()) {
+			
+			ConfOrderAccountMap map = new ConfOrderAccountMap();
+			map.setOrderId(orderId);
+			map.setEnterpriseId(cmd.getEnterpriseId());
+			map.setConfAccountId(accountId);
+			map.setConfAccountNamespaceId(namespaceId);
+			vcProvider.createConfOrderAccountMap(map);
+		}
+		
+		
 //		ConfAccounts account = vcProvider.findVideoconfAccountById(cmd.getAccountId());
 //		account.setExpiredDate(new Timestamp(cmd.getValidDate()));
 //		

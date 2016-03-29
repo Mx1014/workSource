@@ -3,6 +3,9 @@ package com.everhomes.rest.videoconf;
 import java.math.BigDecimal;
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -15,15 +18,17 @@ import com.everhomes.util.StringHelper;
  *  <li>mobile: 手机号</li>
  *  <li>amount: 金额</li>
  *  <li>invoiceFlag: 是否需要发票 0-dont need 1-need</li>
- *  <li>makeOutFlag: 是否已开票 0-uninvoice 1-invoiced</li>
  *  <li>buyChannel: 购买渠道0-offline 1-online</li>
  * </ul>
  *
  */
 public class ExtendedConfAccountPeriodCommand {
 	
+	@NotNull
+	@ItemType(Long.class)
 	private List<Long> accountIds;
 	
+	@NotNull
 	private int months;
 	
 	private Long enterpriseId;
@@ -40,8 +45,6 @@ public class ExtendedConfAccountPeriodCommand {
 	
 	private Byte invoiceFlag;
 	
-	private Byte makeOutFlag;
-
 	public List<Long> getAccountIds() {
 		return accountIds;
 	}
@@ -112,14 +115,6 @@ public class ExtendedConfAccountPeriodCommand {
 
 	public void setInvoiceFlag(Byte invoiceFlag) {
 		this.invoiceFlag = invoiceFlag;
-	}
-
-	public Byte getMakeOutFlag() {
-		return makeOutFlag;
-	}
-
-	public void setMakeOutFlag(Byte makeOutFlag) {
-		this.makeOutFlag = makeOutFlag;
 	}
 
 	@Override
