@@ -1281,7 +1281,7 @@ public class VideoConfController  extends ControllerBase{
 	@RestReturn(value = String.class)
 	public RestResponse extendedConfAccountPeriod(ExtendedConfAccountPeriodCommand cmd) {
 
-//		videoConfService.extendedConfAccountPeriod(cmd);
+		videoConfService.extendedConfAccountPeriod(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
