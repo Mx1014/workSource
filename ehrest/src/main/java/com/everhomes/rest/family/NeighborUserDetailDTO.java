@@ -11,7 +11,7 @@ package com.everhomes.rest.family;
  * <li>initial: 首字母</li>
  * </ul>
  */
-public class NeighborUserDetailDTO extends NeighborUserDTO implements Comparable<NeighborUserDetailDTO>{
+public class NeighborUserDetailDTO extends NeighborUserDTO{
     private Long longitude;
     private Long latitude;
     private String buildingName;
@@ -59,10 +59,6 @@ public class NeighborUserDetailDTO extends NeighborUserDTO implements Comparable
 
 	public void setInitial(String initial) {
 		this.initial = initial;
-	}
-	
-	public int compareTo(NeighborUserDetailDTO neighborUserDetailDTO) {
-	    return this.initial.compareTo(neighborUserDetailDTO.getInitial());
 	}
     
 }

@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  * 	<li>pageAnchor : 页码</li>
  *	<li>pageSize : 页大小</li>
  *	<li>option :  process（处理） 和 grab（抢单） none（无操作）</li>
+ *	<li>entrancePrivilege标识 :  权限标识</li>
  * </ul>
  *
  */
@@ -23,7 +24,7 @@ public class ListTaskPostsCommand {
 	
 	private String taskType; 
 	
-	private Long taskStatus;
+	private Byte taskStatus;
 	
 	private Long pageAnchor;
 	
@@ -49,11 +50,11 @@ public class ListTaskPostsCommand {
 		this.taskType = taskType;
 	}
 
-	public Long getTaskStatus() {
+	public Byte getTaskStatus() {
 		return taskStatus;
 	}
 
-	public void setTaskStatus(Long taskStatus) {
+	public void setTaskStatus(Byte taskStatus) {
 		this.taskStatus = taskStatus;
 	}
 

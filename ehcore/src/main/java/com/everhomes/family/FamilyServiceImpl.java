@@ -1378,14 +1378,14 @@ public class FamilyServiceImpl implements FamilyService {
             
         });
         
-        List<NeighborUserDetailDTO> dtos = userDetailList;
-        if(cmd.getIsPinyin() == 1){
-        	dtos = this.convertPinyin(dtos);
-        }
-        
         Long pageOffset = cmd.getPageOffset();
         pageOffset = pageOffset == null ? 1 : pageOffset;
-        List<NeighborUserDTO> results = processNeighborUserInfo(dtos,myaddress,pageOffset);
+        List<NeighborUserDTO> results = processNeighborUserInfo(userDetailList,myaddress,pageOffset);
+        
+        if(cmd.getIsPinyin().equals(1)){
+        	results = this.convertPinyin(results);
+        }
+        
         long endTime = System.currentTimeMillis();
         LOGGER.info("Query neighbor user of community,elapse=" + (endTime - startTime));
         ListNeighborUsersCommandResponse response = new ListNeighborUsersCommandResponse();
@@ -1394,16 +1394,19 @@ public class FamilyServiceImpl implements FamilyService {
         return response;
     }
 
-    private List<NeighborUserDetailDTO> convertPinyin(List<NeighborUserDetailDTO> neighborUserDetailDTOs){
+    private List<NeighborUserDTO> convertPinyin(List<NeighborUserDTO> neighborUserDTOs){
 		
-    	neighborUserDetailDTOs = neighborUserDetailDTOs.stream().map((c) ->{
-			c.setInitial(PinYinHelper.getCapitalInitial(c.getUserName()));
+    	neighborUserDTOs = neighborUserDTOs.stream().map((c) ->{
+    		String pinyin = PinYinHelper.getPinYin(c.getUserName());
+			c.setFullInitial(PinYinHelper.getFullCapitalInitial(pinyin));
+			c.setFullPinyin(pinyin.replaceAll(" ", ""));
+			c.setInitial(PinYinHelper.getCapitalInitial(c.getFullPinyin()));
 			return c;
 		}).collect(Collectors.toList());
 		
-		Collections.sort(neighborUserDetailDTOs);
+		Collections.sort(neighborUserDTOs);
 		
-		return neighborUserDetailDTOs;
+		return neighborUserDTOs;
 	}
     
     private List<NeighborUserDTO> processNeighborUserInfo(List<NeighborUserDetailDTO> userDetailList,
