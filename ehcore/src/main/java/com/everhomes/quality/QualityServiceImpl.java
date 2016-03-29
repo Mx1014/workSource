@@ -734,6 +734,13 @@ public class QualityServiceImpl implements QualityService {
             	}
         	}
         	
+        	if(r.getReviewerId() != null && r.getReviewerId() != 0) {
+        		List<OrganizationMember> reviewers = organizationProvider.listOrganizationMembersByUId(r.getReviewerId());
+            	if(reviewers != null && reviewers.size() > 0) {
+            		dto.setOperatorName(reviewers.get(0).getContactName());
+            	}
+        	}
+        	
         	return dto;
         }).collect(Collectors.toList());
 		return dtoList;
@@ -847,6 +854,7 @@ public class QualityServiceImpl implements QualityService {
 		record.setOperatorId(user.getId());
 		
 		task.setReviewResult(cmd.getReviewResult());
+		task.setReviewerId(user.getId());
 		task.setReviewTime(new Timestamp(System.currentTimeMillis()));
 		
 		record.setProcessType(ProcessType.REVIEW.getCode());
@@ -1482,6 +1490,13 @@ public class QualityServiceImpl implements QualityService {
 		if(result.equals(QualityInspectionTaskResult.CORRECT_DELAY.getCode()))
 			return "整改延期";
 		return "";
+	}
+	
+	@Scheduled(cron="0 0 2 * * ? ")
+	@Override
+	public void closeDelayTasks() {
+		LOGGER.info("close delay tasks.");
+		qualityProvider.closeDelayTasks();
 	}
 
 }

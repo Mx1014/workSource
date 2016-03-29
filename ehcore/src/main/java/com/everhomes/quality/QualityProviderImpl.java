@@ -20,6 +20,8 @@ import java.util.Map;
 
 
 
+
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record1;
@@ -44,6 +46,8 @@ import org.springframework.stereotype.Component;
 
 
 
+
+
 import com.everhomes.community.Building;
 import com.everhomes.community.BuildingAttachment;
 import com.everhomes.community.CommunityProviderImpl;
@@ -51,6 +55,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.quality.QualityProvider;
@@ -58,6 +63,7 @@ import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.quality.ListQualityInspectionTasksCommand;
 import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.rest.quality.QualityInspectionCategoryStatus;
+import com.everhomes.rest.quality.QualityInspectionTaskResult;
 import com.everhomes.rest.quality.QualityInspectionTaskReviewResult;
 import com.everhomes.rest.quality.QualityInspectionTaskReviewStatus;
 import com.everhomes.rest.quality.QualityInspectionTaskStatus;
@@ -65,6 +71,7 @@ import com.everhomes.rest.quality.QualityStandardStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhBuildingAttachmentsDao;
+import com.everhomes.server.schema.tables.daos.EhConfAccountsDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionCategoriesDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionEvaluationFactorsDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionEvaluationsDao;
@@ -76,6 +83,7 @@ import com.everhomes.server.schema.tables.daos.EhQualityInspectionTasksDao;
 import com.everhomes.server.schema.tables.pojos.EhBuildingAttachments;
 import com.everhomes.server.schema.tables.pojos.EhBuildings;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
+import com.everhomes.server.schema.tables.pojos.EhConfAccounts;
 import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionCategories;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionEvaluationFactors;
@@ -87,6 +95,7 @@ import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTaskRecords;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks;
 import com.everhomes.server.schema.tables.records.EhBuildingAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhBuildingsRecord;
+import com.everhomes.server.schema.tables.records.EhConfAccountsRecord;
 import com.everhomes.server.schema.tables.records.EhParkChargeRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionCategoriesRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionEvaluationFactorsRecord;
@@ -96,11 +105,13 @@ import com.everhomes.server.schema.tables.records.EhQualityInspectionStandardsRe
 import com.everhomes.server.schema.tables.records.EhQualityInspectionTaskAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionTaskRecordsRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord;
+import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.techpark.park.ParkCharge;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.mysql.fabric.xmlrpc.base.Array;
 import com.mysql.jdbc.StringUtils;
 
@@ -940,6 +951,48 @@ public class QualityProviderImpl implements QualityProvider {
 
         
 		return step.where(condition).fetchOneInto(Integer.class);
+	}
+
+	@Override
+	public void closeDelayTasks() {
+		Timestamp current = new Timestamp(System.currentTimeMillis());
+
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readWriteWith(EhQualityInspectionTasks.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+		this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
+			SelectQuery<EhQualityInspectionTasksRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_TASKS);
+			if (locator.getAnchor() != null && locator.getAnchor() != 0)
+				query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.ID.gt(locator.getAnchor()));
+			
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.lt(current));
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.ne(QualityInspectionTaskStatus.CLOSED.getCode()));
+			
+			query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASKS.ID.asc());
+			
+			query.fetch().map((r) -> {
+				
+				if(r.getStatus().equals(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode()))
+					r.setResult(QualityInspectionTaskResult.INSPECT_DELAY.getCode());
+				if(r.getStatus().equals(QualityInspectionTaskStatus.RECTIFING.getCode()))
+					r.setResult(QualityInspectionTaskResult.CORRECT_DELAY.getCode());
+				if(r.getStatus().equals(QualityInspectionTaskStatus.RECTIFIED_AND_WAITING_APPROVAL.getCode())
+						|| r.getStatus().equals(QualityInspectionTaskStatus.RECTIFY_CLOSED_AND_WAITING_APPROVAL.getCode()))
+					r.setResult(QualityInspectionTaskResult.RECTIFY_DELAY.getCode());
+				
+				r.setStatus(QualityInspectionTaskStatus.CLOSED.getCode());;
+				EhQualityInspectionTasks task = ConvertHelper.convert(r, EhQualityInspectionTasks.class);
+				EhQualityInspectionTasksDao dao = new EhQualityInspectionTasksDao(context.configuration());
+		        dao.update(task);
+		        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhQualityInspectionTasks.class, task.getId());
+				return null;
+			});
+			return AfterAction.next;
+		});
+		
 	}
 
 

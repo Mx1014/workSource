@@ -1985,4 +1985,20 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return result;
 
 	}
+
+
+	@Override
+	public List<OrganizationMember> listOrganizationMembersByUId(Long uId) {
+		List<OrganizationMember> list = new ArrayList<OrganizationMember>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
+				.where(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(uId))
+				.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode())).fetch();
+
+		if(records != null && !records.isEmpty()){
+			for(Record r : records)
+				list.add(ConvertHelper.convert(r, OrganizationMember.class));
+		}
+		return list;
+	}
 }
