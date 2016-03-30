@@ -22,7 +22,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  *
  */
-public class ExtendedConfAccountPeriodCommand {
+public class UpdateConfAccountPeriodCommand {
 	
 	@NotNull
 	@ItemType(Long.class)

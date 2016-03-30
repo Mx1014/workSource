@@ -5,6 +5,13 @@ import java.util.List;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ *  <li>enterpriseVaildAccounts: 企业有效账号数 </li>
+ *  <li>categories: 参考com.everhomes.rest.videoconf.ConfCategoryDTO</li>
+ * </ul>
+ *
+ */
 public class ListConfCategoryResponse {
 
 	private int enterpriseVaildAccounts;

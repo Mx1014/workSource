@@ -77,7 +77,7 @@ import com.everhomes.rest.videoconf.DeleteVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.DeleteWarningContactorCommand;
 import com.everhomes.rest.videoconf.EnterpriseConfAccountDTO;
 import com.everhomes.rest.videoconf.EnterpriseLockStatusCommand;
-import com.everhomes.rest.videoconf.ExtendedConfAccountPeriodCommand;
+import com.everhomes.rest.videoconf.UpdateConfAccountPeriodCommand;
 import com.everhomes.rest.videoconf.ExtendedSourceAccountPeriodCommand;
 import com.everhomes.rest.videoconf.ExtendedVideoConfAccountPeriodCommand;
 import com.everhomes.rest.videoconf.GetNamespaceIdListCommand;
@@ -2298,7 +2298,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 	}
 
 	@Override
-	public void extendedConfAccountPeriod(ExtendedConfAccountPeriodCommand cmd) {
+	public void updateConfAccountPeriod(UpdateConfAccountPeriodCommand cmd) {
 		
 		int quantity = cmd.getAccountIds().size();
 		CreateConfAccountOrderCommand order = new CreateConfAccountOrderCommand();
@@ -2366,11 +2366,12 @@ public class VideoConfServiceImpl implements VideoConfService {
 		order.setQuantity(cmd.getQuantity());
 		order.setPeriod(cmd.getPeriod());
 		order.setAmount(cmd.getAmount());
-		order.setInvoiceFlag(cmd.getInvoiceFlag());
+		order.setInvoiceFlag(cmd.getInvoiceReqFlag());
 		order.setBuyChannel(cmd.getBuyChannel());
 		if(categories != null && categories.size() > 0)
 			order.setAccountCategoryId(categories.get(0).getId());
 		order.setMakeOutFlag((byte) 0);
+		order.setInvoice(new InvoiceDTO());
 		createConfAccountOrder(order);
 		
 	}

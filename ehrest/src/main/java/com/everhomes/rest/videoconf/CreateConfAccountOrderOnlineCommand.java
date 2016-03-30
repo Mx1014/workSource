@@ -13,10 +13,8 @@ import com.everhomes.util.StringHelper;
  *  <li>quantity: 账号数量</li>
  *  <li>period: 每个账号可使用几个月</li>
  *  <li>amount: 金额</li>
- *  <li>invoiceFlag: 是否需要发票 0-dont need 1-need</li>
- *  <li>makeOutFlag: 是否已开票 0-uninvoice 1-invoiced</li>
+ *  <li>invoiceReqFlag: 是否需要发票 0-dont need 1-need</li>
  *  <li>buyChannel: 购买渠道0-offline 1-online</li>
- *  <li>invoice: 发票信息，参考{@link com.everhomes.rest.videoconf.InvoiceDTO}</li>
  *  <li>confCapacity: 会议容量 0-25方 1-100方 2-6方 3-50方 </li>
  *  <li>confType: 是否支持电话 0-否 1-是</li>
  * </ul>
@@ -40,11 +38,7 @@ public class CreateConfAccountOrderOnlineCommand {
 	
 	private BigDecimal amount;
 	
-	private Byte invoiceFlag;
-	
-	private Byte makeOutFlag;
-	
-	private InvoiceDTO invoice;
+	private Byte invoiceReqFlag;
 	
 	private Byte confCapacity;
 	
@@ -114,28 +108,12 @@ public class CreateConfAccountOrderOnlineCommand {
 		this.amount = amount;
 	}
 
-	public Byte getInvoiceFlag() {
-		return invoiceFlag;
+	public Byte getInvoiceReqFlag() {
+		return invoiceReqFlag;
 	}
 
-	public void setInvoiceFlag(Byte invoiceFlag) {
-		this.invoiceFlag = invoiceFlag;
-	}
-
-	public Byte getMakeOutFlag() {
-		return makeOutFlag;
-	}
-
-	public void setMakeOutFlag(Byte makeOutFlag) {
-		this.makeOutFlag = makeOutFlag;
-	}
-
-	public InvoiceDTO getInvoice() {
-		return invoice;
-	}
-
-	public void setInvoice(InvoiceDTO invoice) {
-		this.invoice = invoice;
+	public void setInvoiceReqFlag(Byte invoiceReqFlag) {
+		this.invoiceReqFlag = invoiceReqFlag;
 	}
 
 	public Byte getConfCapacity() {

@@ -30,7 +30,7 @@ import com.everhomes.rest.videoconf.DeleteVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.DeleteWarningContactorCommand;
 import com.everhomes.rest.videoconf.DownloadAppCommand;
 import com.everhomes.rest.videoconf.EnterpriseLockStatusCommand;
-import com.everhomes.rest.videoconf.ExtendedConfAccountPeriodCommand;
+import com.everhomes.rest.videoconf.UpdateConfAccountPeriodCommand;
 import com.everhomes.rest.videoconf.ExtendedSourceAccountPeriodCommand;
 import com.everhomes.rest.videoconf.ExtendedVideoConfAccountPeriodCommand;
 import com.everhomes.rest.videoconf.GetEarlyWarningLineCommand;
@@ -1276,15 +1276,15 @@ public class VideoConfController  extends ControllerBase{
 	}
 	
 	/**
-	 * <b>URL: /conf/extendedConfAccountPeriod</b>
+	 * <b>URL: /conf/updateConfAccountPeriod</b>
 	 * 账号延期
 	 * @return
 	 */
-	@RequestMapping("extendedConfAccountPeriod")
+	@RequestMapping("updateConfAccountPeriod")
 	@RestReturn(value = String.class)
-	public RestResponse extendedConfAccountPeriod(ExtendedConfAccountPeriodCommand cmd) {
+	public RestResponse updateConfAccountPeriod(UpdateConfAccountPeriodCommand cmd) {
 
-		videoConfService.extendedConfAccountPeriod(cmd);
+		videoConfService.updateConfAccountPeriod(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
