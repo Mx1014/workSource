@@ -401,8 +401,9 @@ public class ForumServiceImpl implements ForumService {
             return ConvertHelper.convert(post, PostDTO.class);
         } else {
             LOGGER.error("Forum post not found, userId=" + userId + ", topicId=" + topicId);
-            throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
-                ForumServiceErrorCode.ERROR_FORUM_TOPIC_NOT_FOUND, "Forum post not found");
+            return null;
+//            throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
+//                ForumServiceErrorCode.ERROR_FORUM_TOPIC_NOT_FOUND, "Forum post not found");
         }
     }
     

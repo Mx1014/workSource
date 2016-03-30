@@ -1384,6 +1384,10 @@ public class FamilyServiceImpl implements FamilyService {
         
         if(cmd.getIsPinyin().equals(1)){
         	results = this.convertPinyin(results);
+        	results = results.stream().map(r->{
+        		r.setInitial(r.getInitial().replace("~", "#"));
+        		return r;
+        	}).collect(Collectors.toList());
         }
         
         long endTime = System.currentTimeMillis();
