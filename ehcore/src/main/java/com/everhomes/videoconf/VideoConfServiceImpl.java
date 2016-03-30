@@ -119,6 +119,7 @@ import com.everhomes.rest.videoconf.UnassignAccountResponse;
 import com.everhomes.rest.videoconf.UpdateAccountOrderCommand;
 import com.everhomes.rest.videoconf.UpdateConfAccountCategoriesCommand;
 import com.everhomes.rest.videoconf.UpdateContactorCommand;
+import com.everhomes.rest.videoconf.UpdateInvoiceCommand;
 import com.everhomes.rest.videoconf.UpdateVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.UserAccountDTO;
 import com.everhomes.rest.videoconf.VatType;
@@ -2235,11 +2236,26 @@ public class VideoConfServiceImpl implements VideoConfService {
 	}
 
 	@Override
-	public InvoiceDTO updateInvoiceByOrderId(InvoiceDTO cmd) {
-		ConfInvoices invoice = ConvertHelper.convert(cmd, ConfInvoices.class);
+	public InvoiceDTO updateInvoiceByOrderId(UpdateInvoiceCommand cmd) {
+		InvoiceDTO dto = vcProvider.getInvoiceByOrderId(cmd.getOrderId());
+		dto.setTaxpayerType(cmd.getTaxpayerType());
+		dto.setVatType(cmd.getVatType());
+		dto.setExpenseType(cmd.getExpenseType());
+		dto.setCompanyName(cmd.getCompanyName());
+		dto.setVatCode(cmd.getVatCode());
+		dto.setVatAddress(cmd.getVatAddress());
+		dto.setVatPhone(cmd.getVatPhone());
+		dto.setVatBankname(cmd.getVatBankname());
+		dto.setVatBankaccount(cmd.getVatBankaccount());
+		dto.setAddress(cmd.getAddress());
+		dto.setZipCode(cmd.getZipCode());
+		dto.setConsignee(cmd.getConsignee());
+		dto.setContact(cmd.getContact());
+		dto.setContractFlag(cmd.getContractFlag());
+		
+		ConfInvoices invoice = ConvertHelper.convert(dto, ConfInvoices.class);
 		vcProvider.updateInvoice(invoice);
 		
-		InvoiceDTO dto = vcProvider.getInvoiceByOrderId(invoice.getOrderId());
 		return dto;
 	}
 
