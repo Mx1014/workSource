@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  *  <li>ownerType: 任务所属组织类型，如enterprise</li>
  *  <li>taskType: 任务类型</li>
  *  <li>executeFlag: 是否按任务执行人查询任务 0-否 1-是</li>
+ *  <li>isReview: 是否是审阅</li>
  *  <li>startDate: 任务开始日期</li>
  *  <li>endDate: 任务结束日期</li>
  *  <li>groupId: 执行任务组id</li>
@@ -31,6 +32,8 @@ public class ListQualityInspectionTasksCommand {
 	private Byte taskType;
 	
 	private Byte executeFlag;
+	
+	private Byte isReview;
 	
 	private Long startDate;
 	
@@ -76,6 +79,14 @@ public class ListQualityInspectionTasksCommand {
 
 	public void setExecuteFlag(Byte executeFlag) {
 		this.executeFlag = executeFlag;
+	}
+
+	public Byte getIsReview() {
+		return isReview;
+	}
+
+	public void setIsReview(Byte isReview) {
+		this.isReview = isReview;
 	}
 
 	public Byte getExecuteStatus() {
