@@ -210,7 +210,7 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
 			}
 			ConfAccountCategories category = vcProvider.findAccountCategoriesById(account.getAccountCategoryId());
 			if(category != null) {
-				dto.setAccountType(category.getChannelType());
+//				dto.setAccountType(category.getChannelType());
 				dto.setConfType(category.getConfType());
 			}
 			
@@ -292,7 +292,7 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
             
             ConfAccountCategories category = vcProvider.findAccountCategoriesById(account.getAccountCategoryId());
             if(null != category) {
-                b.field("accountType", category.getChannelType());
+//                b.field("accountType", category.getChannelType());
                 b.field("confType", category.getConfType());
             } else {
                 b.field("accountType", "");
