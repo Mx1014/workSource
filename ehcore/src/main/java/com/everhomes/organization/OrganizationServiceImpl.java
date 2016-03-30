@@ -5640,6 +5640,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
 	    	
 			/* 根据用户不同 查询不同的任务类型贴*/
+	    	cmd.setTargetId(0l);
 			if(privileges.contains(PrivilegeConstants.TaskAllListPosts)){
 				cmd.setTaskType("");
 			}else if(privileges.contains(PrivilegeConstants.TaskGuaranteeListPosts)){
