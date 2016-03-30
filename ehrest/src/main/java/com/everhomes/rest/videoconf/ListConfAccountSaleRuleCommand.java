@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>pageSize: 每页的数量</li>
  * </ul>
  */
-public class ListRuleCommand {
+public class ListConfAccountSaleRuleCommand {
 	
 	private Byte confType;
 	

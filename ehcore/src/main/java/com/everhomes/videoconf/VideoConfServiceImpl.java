@@ -95,7 +95,7 @@ import com.everhomes.rest.videoconf.ListOrderByAccountCommand;
 import com.everhomes.rest.videoconf.ListOrderByAccountResponse;
 import com.everhomes.rest.videoconf.ListReservationConfCommand;
 import com.everhomes.rest.videoconf.ListReservationConfResponse;
-import com.everhomes.rest.videoconf.ListRuleCommand;
+import com.everhomes.rest.videoconf.ListConfAccountSaleRuleCommand;
 import com.everhomes.rest.videoconf.ListSourceVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.ListSourceVideoConfAccountResponse;
 import com.everhomes.rest.videoconf.ListUnassignAccountsByOrderCommand;
@@ -426,7 +426,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 
 	@Override
 	public ListVideoConfAccountRuleResponse listConfAccountCategories(
-			ListRuleCommand cmd) {
+			ListConfAccountSaleRuleCommand cmd) {
 		ListVideoConfAccountRuleResponse response = new ListVideoConfAccountRuleResponse();
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
@@ -508,7 +508,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 	}
 
 	@Override
-	public ListWarningContactorResponse listWarningContactor(ListRuleCommand cmd) {
+	public ListWarningContactorResponse listWarningContactor(ListConfAccountSaleRuleCommand cmd) {
 
 		ListWarningContactorResponse response = new ListWarningContactorResponse();
 		
@@ -2239,7 +2239,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 	}
 
 	@Override
-	public InvoiceDTO updateInvoiceByOrderId(UpdateInvoiceCommand cmd) {
+	public InvoiceDTO updateInvoice(UpdateInvoiceCommand cmd) {
 		InvoiceDTO dto = vcProvider.getInvoiceByOrderId(cmd.getOrderId());
 		dto.setTaxpayerType(cmd.getTaxpayerType());
 		dto.setVatType(cmd.getVatType());
