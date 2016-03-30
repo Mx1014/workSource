@@ -208,9 +208,9 @@ public class QualityProviderImpl implements QualityProvider {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(executeStatus));
 		}
 		if(reviewStatus != null) {
-			if(QualityInspectionTaskReviewStatus.NONE.equals(reviewStatus))
+			if(QualityInspectionTaskReviewStatus.NONE.getCode() == reviewStatus)
 				query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.REVIEW_RESULT.eq(QualityInspectionTaskReviewResult.NONE.getCode()));
-			if(QualityInspectionTaskReviewStatus.REVIEWED.equals(reviewStatus))
+			if(QualityInspectionTaskReviewStatus.REVIEWED.getCode() == reviewStatus)
 				query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.REVIEW_RESULT.ne(QualityInspectionTaskReviewResult.NONE.getCode()));
 		}
 
