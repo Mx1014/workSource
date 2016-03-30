@@ -157,7 +157,7 @@ public class ParkAdminController extends ControllerBase{
 	
 	/**
 	 * <b>URL: /admin/techpark/park/offerCard</b>
-	 * 
+	 * <p>发放月卡，主要是设置一下发放多少张卡，并修改排除队列里人的领卡通知状态及领取期限</p>
 	 * @return
 	 */
 	@RequestMapping("offerCard")
@@ -175,7 +175,7 @@ public class ParkAdminController extends ControllerBase{
 	
 	/**
 	 * <b>URL: /admin/techpark/park/fetchCard</b>
-	 * 
+	 * <p>在线下发卡后，在后台管理中设置领卡状态</p>
 	 * @return
 	 */
 	@RequestMapping("fetchCard")
