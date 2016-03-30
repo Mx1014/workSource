@@ -5,5 +5,5 @@ ALTER TABLE `eh_conf_orders` ADD COLUMN `vendor_type` TINYINT NOT NULL DEFAULT 0
 
 ALTER TABLE `eh_conf_account_categories` CHANGE `mutiple_num` `multiple_account_threshold` INTEGER NOT NULL DEFAULT 0 COMMENT 'the limit value of mutiple buy channel';
 ALTER TABLE `eh_conf_account_categories` CHANGE `online_flag` `display_flag` TINYINT NOT NULL DEFAULT 0 COMMENT 'display when online or offline, 0: all, 1: online, 2: offline';
-ALTER TABLE `eh_conf_account_categories` CHANGE `amount` `single_account_price` ;
+ALTER TABLE `eh_conf_account_categories` CHANGE `amount` `single_account_price` DECIMAL(10,2);
 ALTER TABLE `eh_conf_account_categories` ADD COLUMN `multiple_account_price` DECIMAL(10,2);
