@@ -1,6 +1,6 @@
 //
 // EvhSceneContactDTO.m
-// generated at 2016-03-25 17:08:10 
+// generated at 2016-03-30 10:13:09 
 //
 #import "EvhSceneContactDTO.h"
 
@@ -57,6 +57,10 @@
         [jsonObject setObject: self.occupation forKey: @"occupation"];
     if(self.initial)
         [jsonObject setObject: self.initial forKey: @"initial"];
+    if(self.fullPinyin)
+        [jsonObject setObject: self.fullPinyin forKey: @"fullPinyin"];
+    if(self.fullInitial)
+        [jsonObject setObject: self.fullInitial forKey: @"fullInitial"];
     if(self.neighborhoodRelation)
         [jsonObject setObject: self.neighborhoodRelation forKey: @"neighborhoodRelation"];
 }
@@ -115,6 +119,14 @@
         self.initial = [jsonObject objectForKey: @"initial"];
         if(self.initial && [self.initial isEqual:[NSNull null]])
             self.initial = nil;
+
+        self.fullPinyin = [jsonObject objectForKey: @"fullPinyin"];
+        if(self.fullPinyin && [self.fullPinyin isEqual:[NSNull null]])
+            self.fullPinyin = nil;
+
+        self.fullInitial = [jsonObject objectForKey: @"fullInitial"];
+        if(self.fullInitial && [self.fullInitial isEqual:[NSNull null]])
+            self.fullInitial = nil;
 
         self.neighborhoodRelation = [jsonObject objectForKey: @"neighborhoodRelation"];
         if(self.neighborhoodRelation && [self.neighborhoodRelation isEqual:[NSNull null]])

@@ -1,6 +1,6 @@
 //
 // EvhVideoConfAccountRuleDTO.m
-// generated at 2016-03-25 17:08:10 
+// generated at 2016-03-30 10:13:09 
 //
 #import "EvhVideoConfAccountRuleDTO.h"
 
@@ -33,8 +33,8 @@
 {
     if(self.id)
         [jsonObject setObject: self.id forKey: @"id"];
-    if(self.accountType)
-        [jsonObject setObject: self.accountType forKey: @"accountType"];
+    if(self.mutipleNum)
+        [jsonObject setObject: self.mutipleNum forKey: @"mutipleNum"];
     if(self.confCapacity)
         [jsonObject setObject: self.confCapacity forKey: @"confCapacity"];
     if(self.confType)
@@ -52,9 +52,9 @@
         if(self.id && [self.id isEqual:[NSNull null]])
             self.id = nil;
 
-        self.accountType = [jsonObject objectForKey: @"accountType"];
-        if(self.accountType && [self.accountType isEqual:[NSNull null]])
-            self.accountType = nil;
+        self.mutipleNum = [jsonObject objectForKey: @"mutipleNum"];
+        if(self.mutipleNum && [self.mutipleNum isEqual:[NSNull null]])
+            self.mutipleNum = nil;
 
         self.confCapacity = [jsonObject objectForKey: @"confCapacity"];
         if(self.confCapacity && [self.confCapacity isEqual:[NSNull null]])

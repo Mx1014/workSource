@@ -1,6 +1,6 @@
 //
 // EvhGetTopicCommand.h
-// generated at 2016-03-25 17:08:11 
+// generated at 2016-03-30 10:13:09 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -17,6 +17,10 @@
 @property(nonatomic, copy) NSNumber* topicId;
 
 @property(nonatomic, copy) NSNumber* communityId;
+
+@property(nonatomic, copy) NSString* option;
+
+@property(nonatomic, copy) NSString* entrancePrivilege;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
