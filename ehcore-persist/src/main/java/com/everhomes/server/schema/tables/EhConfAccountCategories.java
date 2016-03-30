@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfAccountCategories extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhConfAccountCategoriesRecord> {
 
-	private static final long serialVersionUID = 1434668866;
+	private static final long serialVersionUID = 493224792;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_conf_account_categories</code>
@@ -32,9 +32,9 @@ public class EhConfAccountCategories extends org.jooq.impl.TableImpl<com.everhom
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfAccountCategoriesRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id");
 
 	/**
-	 * The column <code>ehcore.eh_conf_account_categories.mutiple_num</code>. the limit value of mutiple buy channel
+	 * The column <code>ehcore.eh_conf_account_categories.multiple_account_threshold</code>. the limit value of mutiple buy channel
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfAccountCategoriesRecord, java.lang.Integer> MUTIPLE_NUM = createField("mutiple_num", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "the limit value of mutiple buy channel");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfAccountCategoriesRecord, java.lang.Integer> MULTIPLE_ACCOUNT_THRESHOLD = createField("multiple_account_threshold", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "the limit value of mutiple buy channel");
 
 	/**
 	 * The column <code>ehcore.eh_conf_account_categories.conf_type</code>. 0: none, 1: 25方仅视频, 2: 25方支持电话, 3: 100方仅视频, 4: 100方支持电话
@@ -47,9 +47,9 @@ public class EhConfAccountCategories extends org.jooq.impl.TableImpl<com.everhom
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfAccountCategoriesRecord, java.lang.Integer> MIN_PERIOD = createField("min_period", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "the minimum count of months");
 
 	/**
-	 * The column <code>ehcore.eh_conf_account_categories.amount</code>.
+	 * The column <code>ehcore.eh_conf_account_categories.single_account_price</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfAccountCategoriesRecord, java.math.BigDecimal> AMOUNT = createField("amount", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfAccountCategoriesRecord, java.math.BigDecimal> SINGLE_ACCOUNT_PRICE = createField("single_account_price", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_conf_account_categories.namespace_id</code>.
@@ -57,9 +57,14 @@ public class EhConfAccountCategories extends org.jooq.impl.TableImpl<com.everhom
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfAccountCategoriesRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_conf_account_categories.online_flag</code>. is visible online 0: no, 1: yes
+	 * The column <code>ehcore.eh_conf_account_categories.display_flag</code>. display when online or offline, 0: all, 1: online, 2: offline
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfAccountCategoriesRecord, java.lang.Byte> ONLINE_FLAG = createField("online_flag", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "is visible online 0: no, 1: yes");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfAccountCategoriesRecord, java.lang.Byte> DISPLAY_FLAG = createField("display_flag", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "display when online or offline, 0: all, 1: online, 2: offline");
+
+	/**
+	 * The column <code>ehcore.eh_conf_account_categories.multiple_account_price</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfAccountCategoriesRecord, java.math.BigDecimal> MULTIPLE_ACCOUNT_PRICE = createField("multiple_account_price", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_conf_account_categories</code> table reference
