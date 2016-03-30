@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  *  <li>taskId: 任务id</li>
  *  <li>operatorId: 操作人id</li>
  *  <li>targetId: 目标id（不一定有）</li>
+ *  <li>targetName: 目标名字（不一定有）</li>
  *  <li>processType: 操作类型 0: none, 1: inspect核查, 2: retify整改, 3: review审阅, 4: assgin分配, 5: forward转发</li>
  *  <li>processEndTime: 操作截止时间</li>
  *  <li>processResult: 操作结果</li>
@@ -26,6 +27,7 @@ public class QualityInspectionTaskRecordsDTO {
 	private Long taskId;
 	private Long operatorId;
 	private Long targetId;
+	private String targetName;
 	private Byte processType;
 	private Timestamp processEndTime;
 	private Byte processResult;
@@ -65,6 +67,14 @@ public class QualityInspectionTaskRecordsDTO {
 
 	public void setTargetId(Long targetId) {
 		this.targetId = targetId;
+	}
+
+	public String getTargetName() {
+		return targetName;
+	}
+
+	public void setTargetName(String targetName) {
+		this.targetName = targetName;
 	}
 
 	public Byte getProcessType() {

@@ -533,7 +533,7 @@ public class QualityServiceImpl implements QualityService {
 		File file = new File(filePath);
 		if(!file.exists())
 			file.mkdirs();
-		filePath = filePath + "RentalBills"+System.currentTimeMillis()+".xlsx";
+		filePath = filePath + "Evaluations"+System.currentTimeMillis()+".xlsx";
 		//新建了一个文件
 		this.createEvaluationsBook(filePath, dtoList);
 		
@@ -720,6 +720,14 @@ public class QualityServiceImpl implements QualityService {
         	dto.setGroupUsers(groupUsers);
         	
         	QualityInspectionTaskRecordsDTO recordDto = ConvertHelper.convert(r.getRecord(), QualityInspectionTaskRecordsDTO.class);
+        	if(recordDto != null) {
+	        	if(recordDto.getTargetId() != null && recordDto.getTargetId() != 0) {
+	        		List<OrganizationMember> target = organizationProvider.listOrganizationMembersByUId(recordDto.getTargetId());
+	        		if(target != null && target.size() > 0) {
+	        			recordDto.setTargetName(target.get(0).getContactName());
+	        		}
+	        	}
+        	}
         	dto.setRecord(recordDto);
         	 
         	OrganizationMember executor = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getExecutorId(), r.getExecutiveGroupId());
@@ -737,7 +745,7 @@ public class QualityServiceImpl implements QualityService {
         	if(r.getReviewerId() != null && r.getReviewerId() != 0) {
         		List<OrganizationMember> reviewers = organizationProvider.listOrganizationMembersByUId(r.getReviewerId());
             	if(reviewers != null && reviewers.size() > 0) {
-            		dto.setOperatorName(reviewers.get(0).getContactName());
+            		dto.setReviewerName(reviewers.get(0).getContactName());
             	}
         	}
         	
@@ -1380,7 +1388,7 @@ public class QualityServiceImpl implements QualityService {
 		File file = new File(filePath);
 		if(!file.exists())
 			file.mkdirs();
-		filePath = filePath + "RentalBills"+System.currentTimeMillis()+".xlsx";
+		filePath = filePath + "InspectionTasks"+System.currentTimeMillis()+".xlsx";
 		//新建了一个文件
 		this.createInspectionTasksBook(filePath, dtoList);
 		
