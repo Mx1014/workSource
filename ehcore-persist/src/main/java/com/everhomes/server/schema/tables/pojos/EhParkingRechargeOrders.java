@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkingRechargeOrders implements java.io.Serializable {
 
-	private static final long serialVersionUID = -526686927;
+	private static final long serialVersionUID = -1130494997;
 
 	private java.lang.Long       id;
 	private java.lang.String     ownerType;
@@ -22,13 +22,17 @@ public class EhParkingRechargeOrders implements java.io.Serializable {
 	private java.lang.String     plateOwnerPhone;
 	private java.lang.Long       payerEnterpriseId;
 	private java.lang.Long       payerUid;
+	private java.lang.String     payerPhone;
 	private java.sql.Timestamp   paidTime;
-	private java.lang.Long       vendorId;
+	private java.lang.String     vendorName;
+	private java.lang.String     cardNumber;
 	private java.lang.String     rateToken;
 	private java.lang.String     rateName;
+	private java.math.BigDecimal monthCount;
 	private java.math.BigDecimal price;
 	private java.lang.Byte       status;
 	private java.lang.Byte       rechargeStatus;
+	private java.sql.Timestamp   rechargeTime;
 	private java.lang.Long       creatorUid;
 	private java.sql.Timestamp   createTime;
 
@@ -44,13 +48,17 @@ public class EhParkingRechargeOrders implements java.io.Serializable {
 		java.lang.String     plateOwnerPhone,
 		java.lang.Long       payerEnterpriseId,
 		java.lang.Long       payerUid,
+		java.lang.String     payerPhone,
 		java.sql.Timestamp   paidTime,
-		java.lang.Long       vendorId,
+		java.lang.String     vendorName,
+		java.lang.String     cardNumber,
 		java.lang.String     rateToken,
 		java.lang.String     rateName,
+		java.math.BigDecimal monthCount,
 		java.math.BigDecimal price,
 		java.lang.Byte       status,
 		java.lang.Byte       rechargeStatus,
+		java.sql.Timestamp   rechargeTime,
 		java.lang.Long       creatorUid,
 		java.sql.Timestamp   createTime
 	) {
@@ -63,13 +71,17 @@ public class EhParkingRechargeOrders implements java.io.Serializable {
 		this.plateOwnerPhone = plateOwnerPhone;
 		this.payerEnterpriseId = payerEnterpriseId;
 		this.payerUid = payerUid;
+		this.payerPhone = payerPhone;
 		this.paidTime = paidTime;
-		this.vendorId = vendorId;
+		this.vendorName = vendorName;
+		this.cardNumber = cardNumber;
 		this.rateToken = rateToken;
 		this.rateName = rateName;
+		this.monthCount = monthCount;
 		this.price = price;
 		this.status = status;
 		this.rechargeStatus = rechargeStatus;
+		this.rechargeTime = rechargeTime;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
 	}
@@ -146,6 +158,14 @@ public class EhParkingRechargeOrders implements java.io.Serializable {
 		this.payerUid = payerUid;
 	}
 
+	public java.lang.String getPayerPhone() {
+		return this.payerPhone;
+	}
+
+	public void setPayerPhone(java.lang.String payerPhone) {
+		this.payerPhone = payerPhone;
+	}
+
 	public java.sql.Timestamp getPaidTime() {
 		return this.paidTime;
 	}
@@ -154,12 +174,20 @@ public class EhParkingRechargeOrders implements java.io.Serializable {
 		this.paidTime = paidTime;
 	}
 
-	public java.lang.Long getVendorId() {
-		return this.vendorId;
+	public java.lang.String getVendorName() {
+		return this.vendorName;
 	}
 
-	public void setVendorId(java.lang.Long vendorId) {
-		this.vendorId = vendorId;
+	public void setVendorName(java.lang.String vendorName) {
+		this.vendorName = vendorName;
+	}
+
+	public java.lang.String getCardNumber() {
+		return this.cardNumber;
+	}
+
+	public void setCardNumber(java.lang.String cardNumber) {
+		this.cardNumber = cardNumber;
 	}
 
 	public java.lang.String getRateToken() {
@@ -176,6 +204,14 @@ public class EhParkingRechargeOrders implements java.io.Serializable {
 
 	public void setRateName(java.lang.String rateName) {
 		this.rateName = rateName;
+	}
+
+	public java.math.BigDecimal getMonthCount() {
+		return this.monthCount;
+	}
+
+	public void setMonthCount(java.math.BigDecimal monthCount) {
+		this.monthCount = monthCount;
 	}
 
 	public java.math.BigDecimal getPrice() {
@@ -200,6 +236,14 @@ public class EhParkingRechargeOrders implements java.io.Serializable {
 
 	public void setRechargeStatus(java.lang.Byte rechargeStatus) {
 		this.rechargeStatus = rechargeStatus;
+	}
+
+	public java.sql.Timestamp getRechargeTime() {
+		return this.rechargeTime;
+	}
+
+	public void setRechargeTime(java.sql.Timestamp rechargeTime) {
+		this.rechargeTime = rechargeTime;
 	}
 
 	public java.lang.Long getCreatorUid() {

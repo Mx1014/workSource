@@ -69,10 +69,10 @@ public class EhParkingLotsDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	}
 
 	/**
-	 * Fetch records that have <code>vendor_id IN (values)</code>
+	 * Fetch records that have <code>vendor_name IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingLots> fetchByVendorId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhParkingLots.EH_PARKING_LOTS.VENDOR_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingLots> fetchByVendorName(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingLots.EH_PARKING_LOTS.VENDOR_NAME, values);
 	}
 
 	/**

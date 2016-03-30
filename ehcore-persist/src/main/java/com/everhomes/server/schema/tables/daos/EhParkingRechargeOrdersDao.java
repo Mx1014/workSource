@@ -104,6 +104,13 @@ public class EhParkingRechargeOrdersDao extends org.jooq.impl.DAOImpl<com.everho
 	}
 
 	/**
+	 * Fetch records that have <code>payer_phone IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders> fetchByPayerPhone(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingRechargeOrders.EH_PARKING_RECHARGE_ORDERS.PAYER_PHONE, values);
+	}
+
+	/**
 	 * Fetch records that have <code>paid_time IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders> fetchByPaidTime(java.sql.Timestamp... values) {
@@ -111,10 +118,17 @@ public class EhParkingRechargeOrdersDao extends org.jooq.impl.DAOImpl<com.everho
 	}
 
 	/**
-	 * Fetch records that have <code>vendor_id IN (values)</code>
+	 * Fetch records that have <code>vendor_name IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders> fetchByVendorId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhParkingRechargeOrders.EH_PARKING_RECHARGE_ORDERS.VENDOR_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders> fetchByVendorName(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingRechargeOrders.EH_PARKING_RECHARGE_ORDERS.VENDOR_NAME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>card_number IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders> fetchByCardNumber(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingRechargeOrders.EH_PARKING_RECHARGE_ORDERS.CARD_NUMBER, values);
 	}
 
 	/**
@@ -129,6 +143,13 @@ public class EhParkingRechargeOrdersDao extends org.jooq.impl.DAOImpl<com.everho
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders> fetchByRateName(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhParkingRechargeOrders.EH_PARKING_RECHARGE_ORDERS.RATE_NAME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>month_count IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders> fetchByMonthCount(java.math.BigDecimal... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingRechargeOrders.EH_PARKING_RECHARGE_ORDERS.MONTH_COUNT, values);
 	}
 
 	/**
@@ -150,6 +171,13 @@ public class EhParkingRechargeOrdersDao extends org.jooq.impl.DAOImpl<com.everho
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders> fetchByRechargeStatus(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhParkingRechargeOrders.EH_PARKING_RECHARGE_ORDERS.RECHARGE_STATUS, values);
+	}
+
+	/**
+	 * Fetch records that have <code>recharge_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders> fetchByRechargeTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingRechargeOrders.EH_PARKING_RECHARGE_ORDERS.RECHARGE_TIME, values);
 	}
 
 	/**

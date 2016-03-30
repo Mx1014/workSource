@@ -11,13 +11,13 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkingCardRequests implements java.io.Serializable {
 
-	private static final long serialVersionUID = 645272717;
+	private static final long serialVersionUID = 2123306765;
 
 	private java.lang.Long     id;
 	private java.lang.String   ownerType;
 	private java.lang.Long     ownerId;
 	private java.lang.Long     parkingLotId;
-	private java.lang.String   requestorEnterpriseId;
+	private java.lang.Long     requestorEnterpriseId;
 	private java.lang.Long     requestorUid;
 	private java.lang.String   plateNumber;
 	private java.lang.String   plateOwnerEntperiseName;
@@ -36,7 +36,7 @@ public class EhParkingCardRequests implements java.io.Serializable {
 		java.lang.String   ownerType,
 		java.lang.Long     ownerId,
 		java.lang.Long     parkingLotId,
-		java.lang.String   requestorEnterpriseId,
+		java.lang.Long     requestorEnterpriseId,
 		java.lang.Long     requestorUid,
 		java.lang.String   plateNumber,
 		java.lang.String   plateOwnerEntperiseName,
@@ -97,11 +97,11 @@ public class EhParkingCardRequests implements java.io.Serializable {
 		this.parkingLotId = parkingLotId;
 	}
 
-	public java.lang.String getRequestorEnterpriseId() {
+	public java.lang.Long getRequestorEnterpriseId() {
 		return this.requestorEnterpriseId;
 	}
 
-	public void setRequestorEnterpriseId(java.lang.String requestorEnterpriseId) {
+	public void setRequestorEnterpriseId(java.lang.Long requestorEnterpriseId) {
 		this.requestorEnterpriseId = requestorEnterpriseId;
 	}
 

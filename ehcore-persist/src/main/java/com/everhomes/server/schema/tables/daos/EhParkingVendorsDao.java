@@ -55,6 +55,13 @@ public class EhParkingVendorsDao extends org.jooq.impl.DAOImpl<com.everhomes.ser
 	}
 
 	/**
+	 * Fetch a unique record that has <code>name = value</code>
+	 */
+	public com.everhomes.server.schema.tables.pojos.EhParkingVendors fetchOneByName(java.lang.String value) {
+		return fetchOne(com.everhomes.server.schema.tables.EhParkingVendors.EH_PARKING_VENDORS.NAME, value);
+	}
+
+	/**
 	 * Fetch records that have <code>display_name IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingVendors> fetchByDisplayName(java.lang.String... values) {

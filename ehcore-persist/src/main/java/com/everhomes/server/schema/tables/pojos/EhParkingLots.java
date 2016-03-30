@@ -11,13 +11,13 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkingLots implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1067023397;
+	private static final long serialVersionUID = 1021369243;
 
 	private java.lang.Long     id;
 	private java.lang.String   ownerType;
 	private java.lang.Long     ownerId;
 	private java.lang.String   name;
-	private java.lang.Long     vendorId;
+	private java.lang.String   vendorName;
 	private java.lang.String   vendorLotToken;
 	private java.lang.Integer  cardReserveDays;
 	private java.lang.Byte     status;
@@ -31,7 +31,7 @@ public class EhParkingLots implements java.io.Serializable {
 		java.lang.String   ownerType,
 		java.lang.Long     ownerId,
 		java.lang.String   name,
-		java.lang.Long     vendorId,
+		java.lang.String   vendorName,
 		java.lang.String   vendorLotToken,
 		java.lang.Integer  cardReserveDays,
 		java.lang.Byte     status,
@@ -42,7 +42,7 @@ public class EhParkingLots implements java.io.Serializable {
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;
 		this.name = name;
-		this.vendorId = vendorId;
+		this.vendorName = vendorName;
 		this.vendorLotToken = vendorLotToken;
 		this.cardReserveDays = cardReserveDays;
 		this.status = status;
@@ -82,12 +82,12 @@ public class EhParkingLots implements java.io.Serializable {
 		this.name = name;
 	}
 
-	public java.lang.Long getVendorId() {
-		return this.vendorId;
+	public java.lang.String getVendorName() {
+		return this.vendorName;
 	}
 
-	public void setVendorId(java.lang.Long vendorId) {
-		this.vendorId = vendorId;
+	public void setVendorName(java.lang.String vendorName) {
+		this.vendorName = vendorName;
 	}
 
 	public java.lang.String getVendorLotToken() {

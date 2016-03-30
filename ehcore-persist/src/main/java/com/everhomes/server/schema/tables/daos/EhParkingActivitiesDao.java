@@ -48,6 +48,20 @@ public class EhParkingActivitiesDao extends org.jooq.impl.DAOImpl<com.everhomes.
 	}
 
 	/**
+	 * Fetch records that have <code>owner_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingActivities> fetchByOwnerType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingActivities.EH_PARKING_ACTIVITIES.OWNER_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>owner_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingActivities> fetchByOwnerId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingActivities.EH_PARKING_ACTIVITIES.OWNER_ID, values);
+	}
+
+	/**
 	 * Fetch records that have <code>parking_lot_id IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingActivities> fetchByParkingLotId(java.lang.Long... values) {

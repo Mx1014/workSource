@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkingLots extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhParkingLotsRecord> {
 
-	private static final long serialVersionUID = 870453200;
+	private static final long serialVersionUID = 1527594262;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_parking_lots</code>
@@ -47,9 +47,9 @@ public class EhParkingLots extends org.jooq.impl.TableImpl<com.everhomes.server.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingLotsRecord, java.lang.String> NAME = createField("name", org.jooq.impl.SQLDataType.VARCHAR.length(64).nullable(false).defaulted(true), this, "used to display");
 
 	/**
-	 * The column <code>ehcore.eh_parking_lots.vendor_id</code>. reference to id of eh_parking_vendors
+	 * The column <code>ehcore.eh_parking_lots.vendor_name</code>. reference to name of eh_parking_vendors
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingLotsRecord, java.lang.Long> VENDOR_ID = createField("vendor_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "reference to id of eh_parking_vendors");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingLotsRecord, java.lang.String> VENDOR_NAME = createField("vendor_name", org.jooq.impl.SQLDataType.VARCHAR.length(64).nullable(false).defaulted(true), this, "reference to name of eh_parking_vendors");
 
 	/**
 	 * The column <code>ehcore.eh_parking_lots.vendor_lot_token</code>. parking lot id from vendor

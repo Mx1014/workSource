@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkingCardRequests extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhParkingCardRequestsRecord> {
 
-	private static final long serialVersionUID = 1063043495;
+	private static final long serialVersionUID = 1589787989;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_parking_card_requests</code>
@@ -47,9 +47,9 @@ public class EhParkingCardRequests extends org.jooq.impl.TableImpl<com.everhomes
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingCardRequestsRecord, java.lang.Long> PARKING_LOT_ID = createField("parking_lot_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "reference to id of eh_parking_lots");
 
 	/**
-	 * The column <code>ehcore.eh_parking_card_requests.requestor_enterprise_id</code>. the source of the requestor id, organization_contact, .etc
+	 * The column <code>ehcore.eh_parking_card_requests.requestor_enterprise_id</code>. the id of organization where the requestor is in
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingCardRequestsRecord, java.lang.String> REQUESTOR_ENTERPRISE_ID = createField("requestor_enterprise_id", org.jooq.impl.SQLDataType.VARCHAR.length(64).nullable(false).defaulted(true), this, "the source of the requestor id, organization_contact, .etc");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingCardRequestsRecord, java.lang.Long> REQUESTOR_ENTERPRISE_ID = createField("requestor_enterprise_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "the id of organization where the requestor is in");
 
 	/**
 	 * The column <code>ehcore.eh_parking_card_requests.requestor_uid</code>. requestor id
@@ -82,9 +82,9 @@ public class EhParkingCardRequests extends org.jooq.impl.TableImpl<com.everhomes
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingCardRequestsRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT, this, "0: inactive, 1: queueing, 2: notified, 3: issued");
 
 	/**
-	 * The column <code>ehcore.eh_parking_card_requests.issue_flag</code>. whether the applier fetch the card or not, 0: no, 1: yes
+	 * The column <code>ehcore.eh_parking_card_requests.issue_flag</code>. whether the applier fetch the card or not, 0: unissued, 1: issued
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingCardRequestsRecord, java.lang.Byte> ISSUE_FLAG = createField("issue_flag", org.jooq.impl.SQLDataType.TINYINT, this, "whether the applier fetch the card or not, 0: no, 1: yes");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingCardRequestsRecord, java.lang.Byte> ISSUE_FLAG = createField("issue_flag", org.jooq.impl.SQLDataType.TINYINT, this, "whether the applier fetch the card or not, 0: unissued, 1: issued");
 
 	/**
 	 * The column <code>ehcore.eh_parking_card_requests.issue_time</code>.

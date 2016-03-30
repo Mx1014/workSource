@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkingRechargeOrders extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord> {
 
-	private static final long serialVersionUID = -1922063415;
+	private static final long serialVersionUID = 1421156311;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_parking_recharge_orders</code>
@@ -72,19 +72,29 @@ public class EhParkingRechargeOrders extends org.jooq.impl.TableImpl<com.everhom
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.lang.Long> PAYER_UID = createField("payer_uid", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "the user id of payer");
 
 	/**
+	 * The column <code>ehcore.eh_parking_recharge_orders.payer_phone</code>. the phone of payer
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.lang.String> PAYER_PHONE = createField("payer_phone", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "the phone of payer");
+
+	/**
 	 * The column <code>ehcore.eh_parking_recharge_orders.paid_time</code>. the pay time
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.sql.Timestamp> PAID_TIME = createField("paid_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "the pay time");
 
 	/**
-	 * The column <code>ehcore.eh_parking_recharge_orders.vendor_id</code>. reference to id of eh_parking_vendors
+	 * The column <code>ehcore.eh_parking_recharge_orders.vendor_name</code>. reference to name of eh_parking_vendors
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.lang.Long> VENDOR_ID = createField("vendor_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "reference to id of eh_parking_vendors");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.lang.String> VENDOR_NAME = createField("vendor_name", org.jooq.impl.SQLDataType.VARCHAR.length(64).nullable(false).defaulted(true), this, "reference to name of eh_parking_vendors");
 
 	/**
-	 * The column <code>ehcore.eh_parking_recharge_orders.rate_token</code>. it may be from eh_parking_recharge_rates or 3rd system, according to vendor_id
+	 * The column <code>ehcore.eh_parking_recharge_orders.card_number</code>. it may be number of virtual card or location number
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.lang.String> RATE_TOKEN = createField("rate_token", org.jooq.impl.SQLDataType.VARCHAR.length(128).nullable(false).defaulted(true), this, "it may be from eh_parking_recharge_rates or 3rd system, according to vendor_id");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.lang.String> CARD_NUMBER = createField("card_number", org.jooq.impl.SQLDataType.VARCHAR.length(128).nullable(false).defaulted(true), this, "it may be number of virtual card or location number");
+
+	/**
+	 * The column <code>ehcore.eh_parking_recharge_orders.rate_token</code>. it may be from eh_parking_recharge_rates or 3rd system, according to vendor_name
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.lang.String> RATE_TOKEN = createField("rate_token", org.jooq.impl.SQLDataType.VARCHAR.length(128).nullable(false).defaulted(true), this, "it may be from eh_parking_recharge_rates or 3rd system, according to vendor_name");
 
 	/**
 	 * The column <code>ehcore.eh_parking_recharge_orders.rate_name</code>. rate name for recharging the parking card
@@ -92,19 +102,29 @@ public class EhParkingRechargeOrders extends org.jooq.impl.TableImpl<com.everhom
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.lang.String> RATE_NAME = createField("rate_name", org.jooq.impl.SQLDataType.VARCHAR.length(128).nullable(false).defaulted(true), this, "rate name for recharging the parking card");
 
 	/**
+	 * The column <code>ehcore.eh_parking_recharge_orders.month_count</code>. how many months in the rate for recharging the parking card
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.math.BigDecimal> MONTH_COUNT = createField("month_count", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "how many months in the rate for recharging the parking card");
+
+	/**
 	 * The column <code>ehcore.eh_parking_recharge_orders.price</code>. the total price in the item for recharging the parking card
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.math.BigDecimal> PRICE = createField("price", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "the total price in the item for recharging the parking card");
 
 	/**
-	 * The column <code>ehcore.eh_parking_recharge_orders.status</code>. the status of the order, 0: inactive, 1: waiting for pay, 2: paid
+	 * The column <code>ehcore.eh_parking_recharge_orders.status</code>. the status of the order, 0: inactive, 1: unpaid, 2: paid
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "the status of the order, 0: inactive, 1: waiting for pay, 2: paid");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "the status of the order, 0: inactive, 1: unpaid, 2: paid");
 
 	/**
-	 * The column <code>ehcore.eh_parking_recharge_orders.recharge_status</code>. 0: inactive 1: waiting paying 2: refreshing data 3: success
+	 * The column <code>ehcore.eh_parking_recharge_orders.recharge_status</code>. 0: none, 1: unrecharged 1: recharged
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.lang.Byte> RECHARGE_STATUS = createField("recharge_status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: inactive 1: waiting paying 2: refreshing data 3: success");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.lang.Byte> RECHARGE_STATUS = createField("recharge_status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: none, 1: unrecharged 1: recharged");
+
+	/**
+	 * The column <code>ehcore.eh_parking_recharge_orders.recharge_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.sql.Timestamp> RECHARGE_TIME = createField("recharge_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_parking_recharge_orders.creator_uid</code>.

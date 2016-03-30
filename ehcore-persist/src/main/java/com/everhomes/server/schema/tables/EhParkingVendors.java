@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkingVendors extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhParkingVendorsRecord> {
 
-	private static final long serialVersionUID = -2048807892;
+	private static final long serialVersionUID = -2106150474;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_parking_vendors</code>
@@ -86,7 +86,7 @@ public class EhParkingVendors extends org.jooq.impl.TableImpl<com.everhomes.serv
 	 */
 	@Override
 	public java.util.List<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhParkingVendorsRecord>> getKeys() {
-		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhParkingVendorsRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_PARKING_VENDORS_PRIMARY);
+		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhParkingVendorsRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_PARKING_VENDORS_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_PARKING_VENDORS_U_VENDER_NAME);
 	}
 
 	/**

@@ -11,9 +11,11 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkingActivities implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1882823556;
+	private static final long serialVersionUID = 1143708786;
 
 	private java.lang.Long     id;
+	private java.lang.String   ownerType;
+	private java.lang.Long     ownerId;
 	private java.lang.Long     parkingLotId;
 	private java.sql.Timestamp startTime;
 	private java.sql.Timestamp endTime;
@@ -26,6 +28,8 @@ public class EhParkingActivities implements java.io.Serializable {
 
 	public EhParkingActivities(
 		java.lang.Long     id,
+		java.lang.String   ownerType,
+		java.lang.Long     ownerId,
 		java.lang.Long     parkingLotId,
 		java.sql.Timestamp startTime,
 		java.sql.Timestamp endTime,
@@ -35,6 +39,8 @@ public class EhParkingActivities implements java.io.Serializable {
 		java.sql.Timestamp createTime
 	) {
 		this.id = id;
+		this.ownerType = ownerType;
+		this.ownerId = ownerId;
 		this.parkingLotId = parkingLotId;
 		this.startTime = startTime;
 		this.endTime = endTime;
@@ -50,6 +56,22 @@ public class EhParkingActivities implements java.io.Serializable {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
+	}
+
+	public java.lang.String getOwnerType() {
+		return this.ownerType;
+	}
+
+	public void setOwnerType(java.lang.String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+	public java.lang.Long getOwnerId() {
+		return this.ownerId;
+	}
+
+	public void setOwnerId(java.lang.Long ownerId) {
+		this.ownerId = ownerId;
 	}
 
 	public java.lang.Long getParkingLotId() {

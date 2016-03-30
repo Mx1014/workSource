@@ -71,7 +71,7 @@ public class EhParkingCardRequestsDao extends org.jooq.impl.DAOImpl<com.everhome
 	/**
 	 * Fetch records that have <code>requestor_enterprise_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingCardRequests> fetchByRequestorEnterpriseId(java.lang.String... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingCardRequests> fetchByRequestorEnterpriseId(java.lang.Long... values) {
 		return fetch(com.everhomes.server.schema.tables.EhParkingCardRequests.EH_PARKING_CARD_REQUESTS.REQUESTOR_ENTERPRISE_ID, values);
 	}
 

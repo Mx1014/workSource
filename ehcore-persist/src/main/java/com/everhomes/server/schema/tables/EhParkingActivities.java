@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkingActivities extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhParkingActivitiesRecord> {
 
-	private static final long serialVersionUID = -1856286241;
+	private static final long serialVersionUID = -170338911;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_parking_activities</code>
@@ -30,6 +30,16 @@ public class EhParkingActivities extends org.jooq.impl.TableImpl<com.everhomes.s
 	 * The column <code>ehcore.eh_parking_activities.id</code>. id of the record
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingActivitiesRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id of the record");
+
+	/**
+	 * The column <code>ehcore.eh_parking_activities.owner_type</code>. the type of who own the standard, community, etc
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingActivitiesRecord, java.lang.String> OWNER_TYPE = createField("owner_type", org.jooq.impl.SQLDataType.VARCHAR.length(32).nullable(false).defaulted(true), this, "the type of who own the standard, community, etc");
+
+	/**
+	 * The column <code>ehcore.eh_parking_activities.owner_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingActivitiesRecord, java.lang.Long> OWNER_ID = createField("owner_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_parking_activities.parking_lot_id</code>. reference to id of eh_parking_lots
