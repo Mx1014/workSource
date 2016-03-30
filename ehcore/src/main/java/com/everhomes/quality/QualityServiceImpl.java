@@ -518,7 +518,7 @@ public class QualityServiceImpl implements QualityService {
 
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		Integer pageSize = Integer.MAX_VALUE;
-		List<QualityInspectionEvaluations> evaluations = qualityProvider.listQualityInspectionEvaluations(locator, pageSize + 1,
+		List<QualityInspectionEvaluations> evaluations = qualityProvider.listQualityInspectionEvaluations(locator, pageSize,
 				cmd.getOwnerId(), cmd.getOwnerType(), startTime, endTime);
 
 		List<EvaluationDTO> dtoList = evaluations.stream().map((r) -> {
@@ -750,6 +750,18 @@ public class QualityServiceImpl implements QualityService {
 	public QualityInspectionTaskDTO reportVerificationResult(ReportVerificationResultCommand cmd) {
 		User user = UserContext.current().getUser();
 		QualityInspectionTasks task = verifiedTaskById(cmd.getTaskId());
+		if(task.getStatus() == QualityInspectionTaskStatus.CLOSED.getCode()) {
+			LOGGER.error("the task which id="+task.getId()+" is closed!");
+			throw RuntimeErrorException
+					.errorWith(
+							QualityServiceErrorCode.SCOPE,
+							QualityServiceErrorCode.ERROR_TASK_IS_CLOSED,
+							localeStringService.getLocalizedString(
+									String.valueOf(QualityServiceErrorCode.SCOPE),
+									String.valueOf(QualityServiceErrorCode.ERROR_TASK_IS_CLOSED),
+									UserContext.current().getUser().getLocale(),
+									"the task is closed!"));
+		}
 		QualityInspectionTaskRecords record = new QualityInspectionTaskRecords();
 		record.setTaskId(task.getId());
 		record.setOperatorType(OwnerType.USER.getCode());
@@ -869,6 +881,18 @@ public class QualityServiceImpl implements QualityService {
 	public QualityInspectionTaskDTO reportRectifyResult(ReportRectifyResultCommand cmd) {
 		User user = UserContext.current().getUser();
 		QualityInspectionTasks task = verifiedTaskById(cmd.getTaskId());
+		if(task.getStatus() == QualityInspectionTaskStatus.CLOSED.getCode()) {
+			LOGGER.error("the task which id="+task.getId()+" is closed!");
+			throw RuntimeErrorException
+					.errorWith(
+							QualityServiceErrorCode.SCOPE,
+							QualityServiceErrorCode.ERROR_TASK_IS_CLOSED,
+							localeStringService.getLocalizedString(
+									String.valueOf(QualityServiceErrorCode.SCOPE),
+									String.valueOf(QualityServiceErrorCode.ERROR_TASK_IS_CLOSED),
+									UserContext.current().getUser().getLocale(),
+									"the task is closed!"));
+		}
 		QualityInspectionTaskRecords record = new QualityInspectionTaskRecords();
 		record.setTaskId(task.getId());
 		record.setOperatorType(OwnerType.USER.getCode());
@@ -1330,7 +1354,7 @@ public class QualityServiceImpl implements QualityService {
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		Integer pageSize = Integer.MAX_VALUE;
 		
-		List<QualityInspectionTasks> tasks = qualityProvider.listVerificationTasks(locator, pageSize + 1, cmd.getOwnerId(), cmd.getOwnerType(), 
+		List<QualityInspectionTasks> tasks = qualityProvider.listVerificationTasks(locator, pageSize, cmd.getOwnerId(), cmd.getOwnerType(), 
 				cmd.getTaskType(), null, startDate, endDate, cmd.getGroupId(), cmd.getExecuteStatus(), cmd.getReviewStatus());
 
 		List<QualityInspectionTaskRecords> records = new ArrayList<QualityInspectionTaskRecords>();
