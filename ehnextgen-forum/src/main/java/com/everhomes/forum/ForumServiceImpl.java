@@ -952,7 +952,10 @@ public class ForumServiceImpl implements ForumService {
         	Timestamp s = r.getStartTime();
         	Timestamp e = r.getEndTime();
         	PostDTO dto= ConvertHelper.convert(r, PostDTO.class);
+        	
         	if(null != s && null != e){
+        		dto.setStartTime(s.getTime());
+            	dto.setEndTime(e.getTime());
         		if(s.getTime() < timestemp.getTime()){
         			dto.setPublishStatus(TopicPublishStatus.UNPUBLISHED.getCode());
         		}
