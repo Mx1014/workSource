@@ -1,6 +1,6 @@
 //
 // EvhQueryOrganizationTopicCommand.m
-// generated at 2016-03-25 17:08:10 
+// generated at 2016-03-30 10:13:08 
 //
 #import "EvhQueryOrganizationTopicCommand.h"
 
@@ -41,6 +41,8 @@
         [jsonObject setObject: self.contentCategory forKey: @"contentCategory"];
     if(self.actionCategory)
         [jsonObject setObject: self.actionCategory forKey: @"actionCategory"];
+    if(self.publishStatus)
+        [jsonObject setObject: self.publishStatus forKey: @"publishStatus"];
     if(self.pageAnchor)
         [jsonObject setObject: self.pageAnchor forKey: @"pageAnchor"];
     if(self.pageSize)
@@ -69,6 +71,10 @@
         self.actionCategory = [jsonObject objectForKey: @"actionCategory"];
         if(self.actionCategory && [self.actionCategory isEqual:[NSNull null]])
             self.actionCategory = nil;
+
+        self.publishStatus = [jsonObject objectForKey: @"publishStatus"];
+        if(self.publishStatus && [self.publishStatus isEqual:[NSNull null]])
+            self.publishStatus = nil;
 
         self.pageAnchor = [jsonObject objectForKey: @"pageAnchor"];
         if(self.pageAnchor && [self.pageAnchor isEqual:[NSNull null]])

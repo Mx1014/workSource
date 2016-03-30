@@ -1,6 +1,6 @@
 //
 // EvhConfType.h
-// generated at 2016-03-25 17:08:11 
+// generated at 2016-03-30 10:13:08 
 //
 
 #define EvhConfType_CONF_TYPE_VIDEO_ONLY @"仅视频"

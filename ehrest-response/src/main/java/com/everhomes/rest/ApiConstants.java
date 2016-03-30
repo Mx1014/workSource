@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-03-25 17:07:55
+// generated at 2016-03-30 10:12:53
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -33,14 +33,14 @@ public interface ApiConstants {
     public static final String ADDRESS_LISTUNASSIGNEDAPARTMENTSBYBUILDINGNAME_URL = "/address/listUnassignedApartmentsByBuildingName";
     public static final String ADDRESS_SEARCHCOMMUNITIES_URL = "/address/searchCommunities";
     public static final String ADDRESS_SUGGESTCOMMUNITY_URL = "/address/suggestCommunity";
-    public static final String ADMIN_ACL_LISTWEBMENU_URL = "/admin/acl/ListWebMenu";
-    public static final String ADMIN_ACL_LISTWEBMENUPRIVILEGE_URL = "/admin/acl/ListWebMenuPrivilege";
     public static final String ADMIN_ACL_ASSIGNUSERROLE_URL = "/admin/acl/assignUserRole";
     public static final String ADMIN_ACL_CREATEROLEPRIVILEGE_URL = "/admin/acl/createRolePrivilege";
     public static final String ADMIN_ACL_DELETEUSERROLE_URL = "/admin/acl/deleteUserRole";
     public static final String ADMIN_ACL_LISTACLROLEBYORGANIZATIONIDS_URL = "/admin/acl/listAclRoleByOrganizationIds";
     public static final String ADMIN_ACL_LISTACLROLES_URL = "/admin/acl/listAclRoles";
     public static final String ADMIN_ACL_LISTUSERROLES_URL = "/admin/acl/listUserRoles";
+    public static final String ADMIN_ACL_LISTWEBMENU_URL = "/admin/acl/listWebMenu";
+    public static final String ADMIN_ACL_LISTWEBMENUPRIVILEGE_URL = "/admin/acl/listWebMenuPrivilege";
     public static final String ADMIN_ACL_QRYROLEPRIVILEGES_URL = "/admin/acl/qryRolePrivileges";
     public static final String ADMIN_ACL_UPDATEROLEPRIVILEGE_URL = "/admin/acl/updateRolePrivilege";
     public static final String ADMIN_ACTIVITY_LIST_URL = "/admin/activity/list";
@@ -134,7 +134,6 @@ public interface ApiConstants {
     public static final String ADMIN_ORG_ADDPERSONNELSTOGROUP_URL = "/admin/org/addPersonnelsToGroup";
     public static final String ADMIN_ORG_ADDPMBUILDING_URL = "/admin/org/addPmBuilding";
     public static final String ADMIN_ORG_APPROVEFORENTERPRISECONTACT_URL = "/admin/org/approveForEnterpriseContact";
-    public static final String ADMIN_ORG_CANCELPMBUILDING_URL = "/admin/org/cancelPmBuilding";
     public static final String ADMIN_ORG_CREATECHILDRENDEPARTMENT_URL = "/admin/org/createChildrenDepartment";
     public static final String ADMIN_ORG_CREATECHILDRENENTERPRISE_URL = "/admin/org/createChildrenEnterprise";
     public static final String ADMIN_ORG_CREATECHILDRENGROUP_URL = "/admin/org/createChildrenGroup";
@@ -150,6 +149,7 @@ public interface ApiConstants {
     public static final String ADMIN_ORG_DELETEORGANIZATIONBYID_URL = "/admin/org/deleteOrganizationById";
     public static final String ADMIN_ORG_DELETEORGANIZATIONMEMBER_URL = "/admin/org/deleteOrganizationMember";
     public static final String ADMIN_ORG_DELETEORGANIZATIONPERSONNEL_URL = "/admin/org/deleteOrganizationPersonnel";
+    public static final String ADMIN_ORG_DELETEPMCOMMUNITY_URL = "/admin/org/deletePmCommunity";
     public static final String ADMIN_ORG_FINDUSERBYINDENTIFIER_URL = "/admin/org/findUserByIndentifier";
     public static final String ADMIN_ORG_GETUSERRESOURCEPRIVILEGE_URL = "/admin/org/getUserResourcePrivilege";
     public static final String ADMIN_ORG_GRABTASK_URL = "/admin/org/grabTask";
@@ -170,7 +170,9 @@ public interface ApiConstants {
     public static final String ADMIN_ORG_LISTORGANIZATIONADMINISTRATORS_URL = "/admin/org/listOrganizationAdministrators";
     public static final String ADMIN_ORG_LISTORGANIZATIONPERSONNELS_URL = "/admin/org/listOrganizationPersonnels";
     public static final String ADMIN_ORG_LISTORGANIZATIONS_URL = "/admin/org/listOrganizations";
+    public static final String ADMIN_ORG_LISTPERSONNELNOTJOINGROUPS_URL = "/admin/org/listPersonnelNotJoinGroups";
     public static final String ADMIN_ORG_LISTPMBUILDINGS_URL = "/admin/org/listPmBuildings";
+    public static final String ADMIN_ORG_LISTPMMANAGEMENTCOMUNITES_URL = "/admin/org/listPmManagementComunites";
     public static final String ADMIN_ORG_LISTPMMANAGEMENTS_URL = "/admin/org/listPmManagements";
     public static final String ADMIN_ORG_LISTUNASSIGNEDBUILDING_URL = "/admin/org/listUnassignedBuilding";
     public static final String ADMIN_ORG_PROCESSINGTASK_URL = "/admin/org/processingTask";
@@ -265,6 +267,7 @@ public interface ApiConstants {
     public static final String CONF_DELETESOURCEVIDEOCONFACCOUNT_URL = "/conf/deleteSourceVideoConfAccount";
     public static final String CONF_DELETEVIDEOCONFACCOUNT_URL = "/conf/deleteVideoConfAccount";
     public static final String CONF_DELETEWARNINGCONTACTOR_URL = "/conf/deleteWarningContactor";
+    public static final String CONF_EXTENDEDCONFACCOUNTPERIOD_URL = "/conf/extendedConfAccountPeriod";
     public static final String CONF_EXTENDEDSOURCEACCOUNTPERIOD_URL = "/conf/extendedSourceAccountPeriod";
     public static final String CONF_EXTENDEDVIDEOCONFACCOUNTPERIOD_URL = "/conf/extendedVideoConfAccountPeriod";
     public static final String CONF_GETACCOUNTTYPE_URL = "/conf/getAccountType";
@@ -281,6 +284,7 @@ public interface ApiConstants {
     public static final String CONF_GETVIDEOCONFACCOUNTTRIALRULE_URL = "/conf/getVideoConfAccountTrialRule";
     public static final String CONF_JOINVIDEOCONF_URL = "/conf/joinVideoConf";
     public static final String CONF_LISTCONFACCOUNTCATEGORIES_URL = "/conf/listConfAccountCategories";
+    public static final String CONF_LISTCONFCATEGORY_URL = "/conf/listConfCategory";
     public static final String CONF_LISTCONFORDER_URL = "/conf/listConfOrder";
     public static final String CONF_LISTENTERPRISEWITHVIDEOCONFACCOUNT_URL = "/conf/listEnterpriseWithVideoConfAccount";
     public static final String CONF_LISTINVOICEBYORDERID_URL = "/conf/listInvoiceByOrderId";
@@ -310,6 +314,7 @@ public interface ApiConstants {
     public static final String CONF_SYNCUSERINDEX_URL = "/conf/syncUserIndex";
     public static final String CONF_UPDATECONFACCOUNTCATEGORIES_URL = "/conf/updateConfAccountCategories";
     public static final String CONF_UPDATECONTACTOR_URL = "/conf/updateContactor";
+    public static final String CONF_UPDATEINVOICEBYORDERID_URL = "/conf/updateInvoiceByOrderId";
     public static final String CONF_UPDATEVIDEOCONFACCOUNT_URL = "/conf/updateVideoConfAccount";
     public static final String CONF_UPDATEVIDEOCONFACCOUNTORDERINFO_URL = "/conf/updateVideoConfAccountOrderInfo";
     public static final String CONF_VERIFYVIDEOCONFACCOUNT_URL = "/conf/verifyVideoConfAccount";
