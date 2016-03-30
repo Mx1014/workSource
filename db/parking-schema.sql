@@ -11,7 +11,8 @@ CREATE TABLE `eh_parking_vendors` (
 	`description` VARCHAR(2048) COMMENT 'the description of the vendor',
     `create_time` DATETIME,
 	
-    PRIMARY KEY (`id`)
+    PRIMARY KEY (`id`),
+    UNIQUE `u_vender_name`(`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
@@ -23,7 +24,7 @@ CREATE TABLE `eh_parking_lots` (
 	`owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
 	`owner_id` BIGINT NOT NULL DEFAULT 0,
     `name` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'used to display',
-	`vendor_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to id of eh_parking_vendors',
+	`vendor_name` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'reference to name of eh_parking_vendors',
 	`vendor_lot_token`  VARCHAR(128) COMMENT 'parking lot id from vendor',
 	`card_reserve_days` INTEGER NOT NULL DEFAULT 0 COMMENT 'how may days the parking card is reserved for the applicant',
     `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: waitingForApproval, 2: active',
@@ -67,13 +68,17 @@ CREATE TABLE `eh_parking_recharge_orders` (
 	`plate_owner_phone` VARCHAR(64) COMMENT 'the phone of plate owner',
 	`payer_enterprise_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the id of organization where the payer is in',
 	`payer_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'the user id of payer',
+	`payer_phone` VARCHAR(64) COMMENT 'the phone of payer',
 	`paid_time` DATETIME COMMENT 'the pay time',
-	`vendor_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to id of eh_parking_vendors',
-	`rate_token` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'it may be from eh_parking_recharge_rates or 3rd system, according to vendor_id',
+	`vendor_name` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'reference to name of eh_parking_vendors',
+	`card_number` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'it may be number of virtual card or location number',
+	`rate_token` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'it may be from eh_parking_recharge_rates or 3rd system, according to vendor_name',
 	`rate_name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'rate name for recharging the parking card',
+	`month_count` DECIMAL(10,2) COMMENT 'how many months in the rate for recharging the parking card',
 	`price` DECIMAL(10,2) COMMENT 'the total price in the item for recharging the parking card',
-	`status` TINYINT NOT NULL DEFAULT 1 COMMENT 'the status of the order, 0: inactive, 1: waiting for pay, 2: paid',
-	`recharge_status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive 1: waiting paying 2: refreshing data 3: success',
+	`status` TINYINT NOT NULL DEFAULT 1 COMMENT 'the status of the order, 0: inactive, 1: unpaid, 2: paid',
+	`recharge_status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: none, 1: unrecharged 1: recharged',
+	`recharge_time` DATETIME,
 	`creator_uid` BIGINT NOT NULL DEFAULT 0,
     `create_time` DATETIME,
 	
@@ -89,14 +94,14 @@ CREATE TABLE `eh_parking_card_requests` (
 	`owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
 	`owner_id` BIGINT NOT NULL DEFAULT 0,
 	`parking_lot_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to id of eh_parking_lots',
-	`requestor_enterprise_id` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'the source of the requestor id, organization_contact, .etc',
+	`requestor_enterprise_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the id of organization where the requestor is in',
 	`requestor_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'requestor id',
 	`plate_number` VARCHAR(64),
 	`plate_owner_entperise_name` VARCHAR(64) COMMENT 'the enterprise name of plate owner',
 	`plate_owner_name` VARCHAR(64) COMMENT 'the name of plate owner',
 	`plate_owner_phone` VARCHAR(64) COMMENT 'the phone of plate owner',
 	`status` TINYINT COMMENT '0: inactive, 1: queueing, 2: notified, 3: issued',
-	`issue_flag` TINYINT COMMENT 'whether the applier fetch the card or not, 0: no, 1: yes',
+	`issue_flag` TINYINT COMMENT 'whether the applier fetch the card or not, 0: unissued, 1: issued',
     `issue_time` DATETIME,
 	`creator_uid` BIGINT NOT NULL DEFAULT 0,
     `create_time` DATETIME,
@@ -109,7 +114,9 @@ CREATE TABLE `eh_parking_card_requests` (
 #
 DROP TABLE IF EXISTS `eh_parking_activities`;
 CREATE TABLE `eh_parking_activities` (
-	`id` BIGINT NOT NULL COMMENT 'id of the record',
+	`id` BIGINT NOT NULL COMMENT 'id of the record',	
+	`owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
+	`owner_id` BIGINT NOT NULL DEFAULT 0,
 	`parking_lot_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to id of eh_parking_lots',
 	`start_time` DATETIME COMMENT 'start time',
 	`end_time` DATETIME COMMENT 'end time',
