@@ -11,7 +11,7 @@ package com.everhomes.server.schema;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Ehcore extends org.jooq.impl.SchemaImpl {
 
-	private static final long serialVersionUID = 902250609;
+	private static final long serialVersionUID = 734265836;
 
 	/**
 	 * The singleton instance of <code>ehcore</code>
@@ -132,6 +132,12 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhOrganizationOwners.EH_ORGANIZATION_OWNERS,
 			com.everhomes.server.schema.tables.EhOrganizationRoleMap.EH_ORGANIZATION_ROLE_MAP,
 			com.everhomes.server.schema.tables.EhOrganizationTasks.EH_ORGANIZATION_TASKS,
+			com.everhomes.server.schema.tables.EhParkingActivities.EH_PARKING_ACTIVITIES,
+			com.everhomes.server.schema.tables.EhParkingCardRequests.EH_PARKING_CARD_REQUESTS,
+			com.everhomes.server.schema.tables.EhParkingLots.EH_PARKING_LOTS,
+			com.everhomes.server.schema.tables.EhParkingRechargeOrders.EH_PARKING_RECHARGE_ORDERS,
+			com.everhomes.server.schema.tables.EhParkingRechargeRates.EH_PARKING_RECHARGE_RATES,
+			com.everhomes.server.schema.tables.EhParkingVendors.EH_PARKING_VENDORS,
 			com.everhomes.server.schema.tables.EhParkApplyCard.EH_PARK_APPLY_CARD,
 			com.everhomes.server.schema.tables.EhParkCharge.EH_PARK_CHARGE,
 			com.everhomes.server.schema.tables.EhPolls.EH_POLLS,

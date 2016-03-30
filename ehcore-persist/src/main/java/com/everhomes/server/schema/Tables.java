@@ -504,6 +504,36 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhOrganizationTasks EH_ORGANIZATION_TASKS = com.everhomes.server.schema.tables.EhOrganizationTasks.EH_ORGANIZATION_TASKS;
 
 	/**
+	 * The table ehcore.eh_parking_activities
+	 */
+	public static final com.everhomes.server.schema.tables.EhParkingActivities EH_PARKING_ACTIVITIES = com.everhomes.server.schema.tables.EhParkingActivities.EH_PARKING_ACTIVITIES;
+
+	/**
+	 * The table ehcore.eh_parking_card_requests
+	 */
+	public static final com.everhomes.server.schema.tables.EhParkingCardRequests EH_PARKING_CARD_REQUESTS = com.everhomes.server.schema.tables.EhParkingCardRequests.EH_PARKING_CARD_REQUESTS;
+
+	/**
+	 * The table ehcore.eh_parking_lots
+	 */
+	public static final com.everhomes.server.schema.tables.EhParkingLots EH_PARKING_LOTS = com.everhomes.server.schema.tables.EhParkingLots.EH_PARKING_LOTS;
+
+	/**
+	 * The table ehcore.eh_parking_recharge_orders
+	 */
+	public static final com.everhomes.server.schema.tables.EhParkingRechargeOrders EH_PARKING_RECHARGE_ORDERS = com.everhomes.server.schema.tables.EhParkingRechargeOrders.EH_PARKING_RECHARGE_ORDERS;
+
+	/**
+	 * The table ehcore.eh_parking_recharge_rates
+	 */
+	public static final com.everhomes.server.schema.tables.EhParkingRechargeRates EH_PARKING_RECHARGE_RATES = com.everhomes.server.schema.tables.EhParkingRechargeRates.EH_PARKING_RECHARGE_RATES;
+
+	/**
+	 * The table ehcore.eh_parking_vendors
+	 */
+	public static final com.everhomes.server.schema.tables.EhParkingVendors EH_PARKING_VENDORS = com.everhomes.server.schema.tables.EhParkingVendors.EH_PARKING_VENDORS;
+
+	/**
 	 * The table ehcore.eh_park_apply_card
 	 */
 	public static final com.everhomes.server.schema.tables.EhParkApplyCard EH_PARK_APPLY_CARD = com.everhomes.server.schema.tables.EhParkApplyCard.EH_PARK_APPLY_CARD;
