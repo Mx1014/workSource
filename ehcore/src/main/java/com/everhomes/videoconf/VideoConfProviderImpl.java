@@ -116,7 +116,7 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 			query.addConditions(Tables.EH_CONF_ACCOUNT_CATEGORIES.CONF_TYPE.eq(confType));
 		
 		if(isOnline != null)
-			query.addConditions(Tables.EH_CONF_ACCOUNT_CATEGORIES.ONLINE_FLAG.eq(isOnline));
+			query.addConditions(Tables.EH_CONF_ACCOUNT_CATEGORIES.DISPLAY_FLAG.eq(isOnline));
 		
 		query.addLimit(pageOffset, pageSize);
 
@@ -124,10 +124,11 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 
 			ConfAccountCategories rule = new ConfAccountCategories();
 			rule.setId(r.getValue(Tables.EH_CONF_ACCOUNT_CATEGORIES.ID));
-			rule.setMutipleNum(r.getValue(Tables.EH_CONF_ACCOUNT_CATEGORIES.MUTIPLE_NUM));
+			rule.setMultipleAccountThreshold(r.getValue(Tables.EH_CONF_ACCOUNT_CATEGORIES.MULTIPLE_ACCOUNT_THRESHOLD));
 			rule.setConfType(r.getValue(Tables.EH_CONF_ACCOUNT_CATEGORIES.CONF_TYPE));
 			rule.setMinPeriod(r.getValue(Tables.EH_CONF_ACCOUNT_CATEGORIES.MIN_PERIOD));
-			rule.setAmount(r.getValue(Tables.EH_CONF_ACCOUNT_CATEGORIES.AMOUNT));
+			rule.setMultipleAccountPrice(r.getValue(Tables.EH_CONF_ACCOUNT_CATEGORIES.MULTIPLE_ACCOUNT_PRICE));
+			rule.setSingleAccountPrice(r.getValue(Tables.EH_CONF_ACCOUNT_CATEGORIES.SINGLE_ACCOUNT_PRICE));
 			
 			rules.add(rule);
 			return null;

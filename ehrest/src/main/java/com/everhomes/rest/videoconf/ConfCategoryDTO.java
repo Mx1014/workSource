@@ -7,10 +7,10 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *  <li>confCapacity: 账号类型 0-25方 1-50方 2-100方</li>
- *  <li>price: 正常价格</li>
- *  <li>mutipleNum: 多账号临界个数 </li>
- *  <li>mutiplePrice: 多账号购买价格 </li>
+ *  <li>confCapacity: 账号类型 0-25方 1-100方 2-6方 3-50方 </li>
+ *  <li>singleAccountPrice: 正常价格</li>
+ *  <li>multipleAccountThreshold: 多账号起售数量 </li>
+ *  <li>multipleAccountPrice: 多账号购买价格 </li>
  * </ul>
  *
  */
@@ -18,11 +18,11 @@ public class ConfCategoryDTO {
 	
 	private Byte confCapacity;
 	
-	private BigDecimal price;
+	private BigDecimal singleAccountPrice;
 	
-	private int mutipleNum;
+	private int multipleAccountThreshold;
 	
-	private BigDecimal mutiplePrice;
+	private BigDecimal multipleAccountPrice;
 	
 	public Byte getConfCapacity() {
 		return confCapacity;
@@ -31,30 +31,29 @@ public class ConfCategoryDTO {
 	public void setConfCapacity(Byte confCapacity) {
 		this.confCapacity = confCapacity;
 	}
-	
 
-	public int getMutipleNum() {
-		return mutipleNum;
+	public BigDecimal getSingleAccountPrice() {
+		return singleAccountPrice;
 	}
 
-	public void setMutipleNum(int mutipleNum) {
-		this.mutipleNum = mutipleNum;
+	public void setSingleAccountPrice(BigDecimal singleAccountPrice) {
+		this.singleAccountPrice = singleAccountPrice;
 	}
 
-	public BigDecimal getPrice() {
-		return price;
+	public int getMultipleAccountThreshold() {
+		return multipleAccountThreshold;
 	}
 
-	public void setPrice(BigDecimal price) {
-		this.price = price;
+	public void setMultipleAccountThreshold(int multipleAccountThreshold) {
+		this.multipleAccountThreshold = multipleAccountThreshold;
 	}
 
-	public BigDecimal getMutiplePrice() {
-		return mutiplePrice;
+	public BigDecimal getMultipleAccountPrice() {
+		return multipleAccountPrice;
 	}
 
-	public void setMutiplePrice(BigDecimal mutiplePrice) {
-		this.mutiplePrice = mutiplePrice;
+	public void setMultipleAccountPrice(BigDecimal multipleAccountPrice) {
+		this.multipleAccountPrice = multipleAccountPrice;
 	}
 
 	@Override

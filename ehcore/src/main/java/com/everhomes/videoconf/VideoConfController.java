@@ -21,6 +21,7 @@ import com.everhomes.rest.videoconf.AssignVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.CancelVideoConfCommand;
 import com.everhomes.rest.videoconf.CreateAccountOwnerCommand;
 import com.everhomes.rest.videoconf.CreateConfAccountOrderCommand;
+import com.everhomes.rest.videoconf.CreateConfAccountOrderOnlineCommand;
 import com.everhomes.rest.videoconf.CreateInvoiceCommand;
 import com.everhomes.rest.videoconf.CreateVideoConfInvitationCommand;
 import com.everhomes.rest.videoconf.DeleteReservationConfCommand;
@@ -1301,6 +1302,22 @@ public class VideoConfController  extends ControllerBase{
 		
 		ListConfCategoryResponse capacity = videoConfService.listConfCategory(cmd);
 		RestResponse response = new RestResponse(capacity);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /conf/createConfAccountOrderOnline</b>
+	 * 客户端增加订单
+	 * @return
+	 */
+	@RequestMapping("createConfAccountOrderOnline")
+	@RestReturn(value = String.class)
+	public RestResponse createConfAccountOrderOnline(CreateConfAccountOrderOnlineCommand cmd) {
+
+		videoConfService.createConfAccountOrderOnline(cmd);
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
