@@ -48,10 +48,10 @@ public class EhConfAccountCategoriesDao extends org.jooq.impl.DAOImpl<com.everho
 	}
 
 	/**
-	 * Fetch records that have <code>mutiple_num IN (values)</code>
+	 * Fetch records that have <code>multiple_account_threshold IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfAccountCategories> fetchByMutipleNum(java.lang.Integer... values) {
-		return fetch(com.everhomes.server.schema.tables.EhConfAccountCategories.EH_CONF_ACCOUNT_CATEGORIES.MUTIPLE_NUM, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfAccountCategories> fetchByMultipleAccountThreshold(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhConfAccountCategories.EH_CONF_ACCOUNT_CATEGORIES.MULTIPLE_ACCOUNT_THRESHOLD, values);
 	}
 
 	/**
@@ -69,10 +69,10 @@ public class EhConfAccountCategoriesDao extends org.jooq.impl.DAOImpl<com.everho
 	}
 
 	/**
-	 * Fetch records that have <code>amount IN (values)</code>
+	 * Fetch records that have <code>single_account_price IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfAccountCategories> fetchByAmount(java.math.BigDecimal... values) {
-		return fetch(com.everhomes.server.schema.tables.EhConfAccountCategories.EH_CONF_ACCOUNT_CATEGORIES.AMOUNT, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfAccountCategories> fetchBySingleAccountPrice(java.math.BigDecimal... values) {
+		return fetch(com.everhomes.server.schema.tables.EhConfAccountCategories.EH_CONF_ACCOUNT_CATEGORIES.SINGLE_ACCOUNT_PRICE, values);
 	}
 
 	/**
@@ -83,9 +83,16 @@ public class EhConfAccountCategoriesDao extends org.jooq.impl.DAOImpl<com.everho
 	}
 
 	/**
-	 * Fetch records that have <code>online_flag IN (values)</code>
+	 * Fetch records that have <code>display_flag IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfAccountCategories> fetchByOnlineFlag(java.lang.Byte... values) {
-		return fetch(com.everhomes.server.schema.tables.EhConfAccountCategories.EH_CONF_ACCOUNT_CATEGORIES.ONLINE_FLAG, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfAccountCategories> fetchByDisplayFlag(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhConfAccountCategories.EH_CONF_ACCOUNT_CATEGORIES.DISPLAY_FLAG, values);
+	}
+
+	/**
+	 * Fetch records that have <code>multiple_account_price IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfAccountCategories> fetchByMultipleAccountPrice(java.math.BigDecimal... values) {
+		return fetch(com.everhomes.server.schema.tables.EhConfAccountCategories.EH_CONF_ACCOUNT_CATEGORIES.MULTIPLE_ACCOUNT_PRICE, values);
 	}
 }

@@ -1,6 +1,6 @@
 //
 // EvhListApartmentByBuildingNameCommandResponse.m
-// generated at 2016-03-25 17:08:11 
+// generated at 2016-03-30 10:13:08 
 //
 #import "EvhListApartmentByBuildingNameCommandResponse.h"
 #import "EvhApartmentDTO.h"

@@ -1,6 +1,6 @@
 //
 // EvhOrganizationMemberDTO.m
-// generated at 2016-03-25 17:08:12 
+// generated at 2016-03-30 10:13:07 
 //
 #import "EvhOrganizationMemberDTO.h"
 #import "EvhAclRoleAssignmentsDTO.h"
@@ -57,6 +57,10 @@
         [jsonObject setObject: self.status forKey: @"status"];
     if(self.initial)
         [jsonObject setObject: self.initial forKey: @"initial"];
+    if(self.fullPinyin)
+        [jsonObject setObject: self.fullPinyin forKey: @"fullPinyin"];
+    if(self.fullInitial)
+        [jsonObject setObject: self.fullInitial forKey: @"fullInitial"];
     if(self.aclRoles) {
         NSMutableArray* jsonArray = [NSMutableArray new];
         for(EvhAclRoleAssignmentsDTO* item in self.aclRoles) {
@@ -132,6 +136,14 @@
         self.initial = [jsonObject objectForKey: @"initial"];
         if(self.initial && [self.initial isEqual:[NSNull null]])
             self.initial = nil;
+
+        self.fullPinyin = [jsonObject objectForKey: @"fullPinyin"];
+        if(self.fullPinyin && [self.fullPinyin isEqual:[NSNull null]])
+            self.fullPinyin = nil;
+
+        self.fullInitial = [jsonObject objectForKey: @"fullInitial"];
+        if(self.fullInitial && [self.fullInitial isEqual:[NSNull null]])
+            self.fullInitial = nil;
 
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"aclRoles"];

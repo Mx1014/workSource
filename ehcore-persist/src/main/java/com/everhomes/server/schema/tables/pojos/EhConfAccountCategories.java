@@ -11,34 +11,37 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfAccountCategories implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1019097832;
+	private static final long serialVersionUID = 604153178;
 
 	private java.lang.Long       id;
-	private java.lang.Integer    mutipleNum;
+	private java.lang.Integer    multipleAccountThreshold;
 	private java.lang.Byte       confType;
 	private java.lang.Integer    minPeriod;
-	private java.math.BigDecimal amount;
+	private java.math.BigDecimal singleAccountPrice;
 	private java.lang.Integer    namespaceId;
-	private java.lang.Byte       onlineFlag;
+	private java.lang.Byte       displayFlag;
+	private java.math.BigDecimal multipleAccountPrice;
 
 	public EhConfAccountCategories() {}
 
 	public EhConfAccountCategories(
 		java.lang.Long       id,
-		java.lang.Integer    mutipleNum,
+		java.lang.Integer    multipleAccountThreshold,
 		java.lang.Byte       confType,
 		java.lang.Integer    minPeriod,
-		java.math.BigDecimal amount,
+		java.math.BigDecimal singleAccountPrice,
 		java.lang.Integer    namespaceId,
-		java.lang.Byte       onlineFlag
+		java.lang.Byte       displayFlag,
+		java.math.BigDecimal multipleAccountPrice
 	) {
 		this.id = id;
-		this.mutipleNum = mutipleNum;
+		this.multipleAccountThreshold = multipleAccountThreshold;
 		this.confType = confType;
 		this.minPeriod = minPeriod;
-		this.amount = amount;
+		this.singleAccountPrice = singleAccountPrice;
 		this.namespaceId = namespaceId;
-		this.onlineFlag = onlineFlag;
+		this.displayFlag = displayFlag;
+		this.multipleAccountPrice = multipleAccountPrice;
 	}
 
 	public java.lang.Long getId() {
@@ -49,12 +52,12 @@ public class EhConfAccountCategories implements java.io.Serializable {
 		this.id = id;
 	}
 
-	public java.lang.Integer getMutipleNum() {
-		return this.mutipleNum;
+	public java.lang.Integer getMultipleAccountThreshold() {
+		return this.multipleAccountThreshold;
 	}
 
-	public void setMutipleNum(java.lang.Integer mutipleNum) {
-		this.mutipleNum = mutipleNum;
+	public void setMultipleAccountThreshold(java.lang.Integer multipleAccountThreshold) {
+		this.multipleAccountThreshold = multipleAccountThreshold;
 	}
 
 	public java.lang.Byte getConfType() {
@@ -73,12 +76,12 @@ public class EhConfAccountCategories implements java.io.Serializable {
 		this.minPeriod = minPeriod;
 	}
 
-	public java.math.BigDecimal getAmount() {
-		return this.amount;
+	public java.math.BigDecimal getSingleAccountPrice() {
+		return this.singleAccountPrice;
 	}
 
-	public void setAmount(java.math.BigDecimal amount) {
-		this.amount = amount;
+	public void setSingleAccountPrice(java.math.BigDecimal singleAccountPrice) {
+		this.singleAccountPrice = singleAccountPrice;
 	}
 
 	public java.lang.Integer getNamespaceId() {
@@ -89,11 +92,19 @@ public class EhConfAccountCategories implements java.io.Serializable {
 		this.namespaceId = namespaceId;
 	}
 
-	public java.lang.Byte getOnlineFlag() {
-		return this.onlineFlag;
+	public java.lang.Byte getDisplayFlag() {
+		return this.displayFlag;
 	}
 
-	public void setOnlineFlag(java.lang.Byte onlineFlag) {
-		this.onlineFlag = onlineFlag;
+	public void setDisplayFlag(java.lang.Byte displayFlag) {
+		this.displayFlag = displayFlag;
+	}
+
+	public java.math.BigDecimal getMultipleAccountPrice() {
+		return this.multipleAccountPrice;
+	}
+
+	public void setMultipleAccountPrice(java.math.BigDecimal multipleAccountPrice) {
+		this.multipleAccountPrice = multipleAccountPrice;
 	}
 }

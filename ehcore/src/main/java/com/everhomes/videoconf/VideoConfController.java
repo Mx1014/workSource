@@ -21,6 +21,7 @@ import com.everhomes.rest.videoconf.AssignVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.CancelVideoConfCommand;
 import com.everhomes.rest.videoconf.CreateAccountOwnerCommand;
 import com.everhomes.rest.videoconf.CreateConfAccountOrderCommand;
+import com.everhomes.rest.videoconf.CreateConfAccountOrderOnlineCommand;
 import com.everhomes.rest.videoconf.CreateInvoiceCommand;
 import com.everhomes.rest.videoconf.CreateVideoConfInvitationCommand;
 import com.everhomes.rest.videoconf.DeleteReservationConfCommand;
@@ -79,6 +80,7 @@ import com.everhomes.rest.videoconf.UnassignAccountResponse;
 import com.everhomes.rest.videoconf.UpdateAccountOrderCommand;
 import com.everhomes.rest.videoconf.UpdateConfAccountCategoriesCommand;
 import com.everhomes.rest.videoconf.UpdateContactorCommand;
+import com.everhomes.rest.videoconf.UpdateInvoiceCommand;
 import com.everhomes.rest.videoconf.UpdateVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.UserAccountDTO;
 import com.everhomes.rest.videoconf.VerifyVideoConfAccountCommand;
@@ -1264,7 +1266,7 @@ public class VideoConfController  extends ControllerBase{
 	 */
 	@RequestMapping("updateInvoiceByOrderId")
 	@RestReturn(value = InvoiceDTO.class)
-	public RestResponse updateInvoiceByOrderId(InvoiceDTO cmd) {
+	public RestResponse updateInvoiceByOrderId(UpdateInvoiceCommand cmd) {
 
 		InvoiceDTO invoice = videoConfService.updateInvoiceByOrderId(cmd);
 		RestResponse response = new RestResponse(invoice);
@@ -1300,6 +1302,22 @@ public class VideoConfController  extends ControllerBase{
 		
 		ListConfCategoryResponse capacity = videoConfService.listConfCategory(cmd);
 		RestResponse response = new RestResponse(capacity);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /conf/createConfAccountOrderOnline</b>
+	 * 客户端增加订单
+	 * @return
+	 */
+	@RequestMapping("createConfAccountOrderOnline")
+	@RestReturn(value = String.class)
+	public RestResponse createConfAccountOrderOnline(CreateConfAccountOrderOnlineCommand cmd) {
+
+		videoConfService.createConfAccountOrderOnline(cmd);
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

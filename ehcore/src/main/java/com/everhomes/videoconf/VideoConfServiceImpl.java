@@ -68,6 +68,7 @@ import com.everhomes.rest.videoconf.ConfType;
 import com.everhomes.rest.videoconf.CountAccountOrdersAndMonths;
 import com.everhomes.rest.videoconf.CreateAccountOwnerCommand;
 import com.everhomes.rest.videoconf.CreateConfAccountOrderCommand;
+import com.everhomes.rest.videoconf.CreateConfAccountOrderOnlineCommand;
 import com.everhomes.rest.videoconf.CreateInvoiceCommand;
 import com.everhomes.rest.videoconf.CreateVideoConfInvitationCommand;
 import com.everhomes.rest.videoconf.DeleteReservationConfCommand;
@@ -119,6 +120,7 @@ import com.everhomes.rest.videoconf.UnassignAccountResponse;
 import com.everhomes.rest.videoconf.UpdateAccountOrderCommand;
 import com.everhomes.rest.videoconf.UpdateConfAccountCategoriesCommand;
 import com.everhomes.rest.videoconf.UpdateContactorCommand;
+import com.everhomes.rest.videoconf.UpdateInvoiceCommand;
 import com.everhomes.rest.videoconf.UpdateVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.UserAccountDTO;
 import com.everhomes.rest.videoconf.VatType;
@@ -387,11 +389,12 @@ public class VideoConfServiceImpl implements VideoConfService {
 	public void updateConfAccountCategories(UpdateConfAccountCategoriesCommand cmd) {
 
 		ConfAccountCategories rule = new ConfAccountCategories();
+		rule.setSingleAccountPrice(cmd.getSingleAccountPrice());
+		rule.setMultipleAccountPrice(cmd.getMultipleAccountPrice());
+		rule.setMinPeriod(cmd.getMinPeriod());
+		rule.setDisplayFlag(cmd.getDisplayFlag());
 		
-		rule.setAmount(cmd.getPackagePrice());
-		rule.setMinPeriod(cmd.getMinimumMonths());
-		
-		rule.setMutipleNum(cmd.getMutipleNum());
+		rule.setMultipleAccountThreshold(cmd.getMultipleAccountThreshold());;
 		
 		//0-25方仅视频 1-25方支持电话 2-100方仅视频 3-100方支持电话
 		if(ConfCapacity.CONF_CAPACITY_25.getCode().equals(cmd.getConfCapacity())) {
@@ -448,12 +451,13 @@ public class VideoConfServiceImpl implements VideoConfService {
 	private VideoConfAccountRuleDTO toRuleDto(ConfAccountCategories rule) {
 		
 		VideoConfAccountRuleDTO ruleDto = new VideoConfAccountRuleDTO();
-		
+
 		if(rule != null) {
 			ruleDto.setId(rule.getId());
-			ruleDto.setMinimumMonths(rule.getMinPeriod());
-			ruleDto.setPackagePrice(rule.getAmount());
-			ruleDto.setMutipleNum(rule.getMutipleNum());
+			ruleDto.setMinPeriod(rule.getMinPeriod());
+			ruleDto.setMultipleAccountThreshold(rule.getMultipleAccountThreshold());
+			ruleDto.setMultipleAccountPrice(rule.getMultipleAccountPrice());
+			ruleDto.setSingleAccountPrice(rule.getSingleAccountPrice());
 			
 			if(rule.getConfType() == 0) {
 				ruleDto.setConfCapacity(ConfCapacity.CONF_CAPACITY_25.getCode());
@@ -2235,11 +2239,26 @@ public class VideoConfServiceImpl implements VideoConfService {
 	}
 
 	@Override
-	public InvoiceDTO updateInvoiceByOrderId(InvoiceDTO cmd) {
-		ConfInvoices invoice = ConvertHelper.convert(cmd, ConfInvoices.class);
+	public InvoiceDTO updateInvoiceByOrderId(UpdateInvoiceCommand cmd) {
+		InvoiceDTO dto = vcProvider.getInvoiceByOrderId(cmd.getOrderId());
+		dto.setTaxpayerType(cmd.getTaxpayerType());
+		dto.setVatType(cmd.getVatType());
+		dto.setExpenseType(cmd.getExpenseType());
+		dto.setCompanyName(cmd.getCompanyName());
+		dto.setVatCode(cmd.getVatCode());
+		dto.setVatAddress(cmd.getVatAddress());
+		dto.setVatPhone(cmd.getVatPhone());
+		dto.setVatBankname(cmd.getVatBankname());
+		dto.setVatBankaccount(cmd.getVatBankaccount());
+		dto.setAddress(cmd.getAddress());
+		dto.setZipCode(cmd.getZipCode());
+		dto.setConsignee(cmd.getConsignee());
+		dto.setContact(cmd.getContact());
+		dto.setContractFlag(cmd.getContractFlag());
+		
+		ConfInvoices invoice = ConvertHelper.convert(dto, ConfInvoices.class);
 		vcProvider.updateInvoice(invoice);
 		
-		InvoiceDTO dto = vcProvider.getInvoiceByOrderId(invoice.getOrderId());
 		return dto;
 	}
 
@@ -2249,60 +2268,27 @@ public class VideoConfServiceImpl implements VideoConfService {
 		ListConfCategoryResponse response = new ListConfCategoryResponse();
 		
 		List<ConfCategoryDTO> categoryDtos = new ArrayList<ConfCategoryDTO>();
-		Map<Integer, ConfCategoryDTO> categoryMap = new HashMap<Integer, ConfCategoryDTO>();
 		for(ConfAccountCategories category : categories) {
-			//0-25方仅视频 1-25方支持电话 2-100方仅视频 3-100方支持电话 
-			if(category.getConfType() == 0 || category.getConfType() == 1) {
-				ConfCategoryDTO dto = categoryMap.get(0);
-				if(dto == null) {
-					dto = new ConfCategoryDTO();
-					dto.setConfCapacity((byte) 0);
-					if(category.getMutipleNum() == 0) {
-						dto.setPrice(category.getAmount());
-					} else {
-						dto.setMutipleNum(category.getMutipleNum());
-						dto.setMutiplePrice(category.getAmount());
-					}
-				}
-				else {
-					if(category.getMutipleNum() == 0) {
-						dto.setPrice(category.getAmount());
-					} else {
-						dto.setMutipleNum(category.getMutipleNum());
-						dto.setMutiplePrice(category.getAmount());
-					}
-					
-				}
-				categoryMap.put(0, dto);
-			}
+			//0: 25方仅视频, 1: 25方支持电话, 2: 100方仅视频, 3: 100方支持电话, 4: 6方仅视频, 5: 50方仅视频, 6: 50方支持电话
+			ConfCategoryDTO dto = new ConfCategoryDTO();
+			dto.setSingleAccountPrice(category.getSingleAccountPrice());
+			dto.setMultipleAccountThreshold(category.getMultipleAccountThreshold());
+			dto.setMultipleAccountPrice(category.getMultipleAccountPrice());
 			
+			if(category.getConfType() == 0 || category.getConfType() == 1) {
+				dto.setConfCapacity((byte) 0);
+			}
 			if(category.getConfType() == 2 || category.getConfType() == 3) {
-				ConfCategoryDTO dto = categoryMap.get(2);
-				if(dto == null) {
-					dto = new ConfCategoryDTO();
-					dto.setConfCapacity((byte) 2);
-					if(category.getMutipleNum() == 0) {
-						dto.setPrice(category.getAmount());
-					} else {
-						dto.setMutipleNum(category.getMutipleNum());
-						dto.setMutiplePrice(category.getAmount());
-					}
-				}
-				else {
-					if(category.getMutipleNum() == 0) {
-						dto.setPrice(category.getAmount());
-					} else {
-						dto.setMutipleNum(category.getMutipleNum());
-						dto.setMutiplePrice(category.getAmount());
-					}
-					
-				}
-				categoryMap.put(2, dto);
+				dto.setConfCapacity((byte) 1);
+			}
+			if(category.getConfType() == 4) {
+				dto.setConfCapacity((byte) 2);
+			}
+			if(category.getConfType() == 5 || category.getConfType() == 6) {
+				dto.setConfCapacity((byte) 3);
 			}
 		}
-		for (Entry<Integer, ConfCategoryDTO> entry : categoryMap.entrySet()) {
-			categoryDtos.add(entry.getValue());
-		}
+		
 		response.setCategories(categoryDtos);
 		
 		int enterpriseVaildAccounts = vcProvider.countAccountsByEnterprise(cmd.getEnterpriseId(), null);
@@ -2342,19 +2328,50 @@ public class VideoConfServiceImpl implements VideoConfService {
 		}
 		
 		
-//		ConfAccounts account = vcProvider.findVideoconfAccountById(cmd.getAccountId());
-//		account.setExpiredDate(new Timestamp(cmd.getValidDate()));
-//		
-//		if(account.getStatus() != 2) {
-//			if(account.getExpiredDate().before(new Timestamp(DateHelper.currentGMTTime().getTime()))) {
-//	        	account.setStatus((byte) 0);
-//	        }
-//	        else {
-//	        	account.setStatus((byte) 1);
-//	        }
-//		}
-//		
-//		vcProvider.updateConfAccounts(account);
+	}
+
+	@Override
+	public void createConfAccountOrderOnline(
+			CreateConfAccountOrderOnlineCommand cmd) {
+		//0: 25方仅视频, 1: 25方支持电话, 2: 100方仅视频, 3: 100方支持电话, 4: 6方仅视频, 5: 50方仅视频, 6: 50方支持电话
+		//账号类型 0-25方 1-100方 2-6方 3-50方 
+		Byte confType = null;
+		if(cmd.getConfCapacity() == 0 && cmd.getConfType() == 0) {
+			confType = 0;
+		}
+		if(cmd.getConfCapacity() == 0 && cmd.getConfType() == 1) {
+			confType = 1;
+		}
+		if(cmd.getConfCapacity() == 1 && cmd.getConfType() == 0) {
+			confType = 2;
+		}
+		if(cmd.getConfCapacity() == 1 && cmd.getConfType() == 1) {
+			confType = 3;
+		}
+		if(cmd.getConfCapacity() == 2 && cmd.getConfType() == 0) {
+			confType = 4;
+		}
+		if(cmd.getConfCapacity() == 3 && cmd.getConfType() == 0) {
+			confType = 5;
+		}
+		if(cmd.getConfCapacity() == 3 && cmd.getConfType() == 1) {
+			confType = 6;
+		}
+		List<ConfAccountCategories> categories = vcProvider.listConfAccountCategories(confType, cmd.getBuyChannel(), 0, Integer.MAX_VALUE); 
+		CreateConfAccountOrderCommand order = new CreateConfAccountOrderCommand();
+		order.setEnterpriseId(cmd.getEnterpriseId());
+		order.setEnterpriseName(cmd.getEnterpriseName());
+		order.setContactor(cmd.getContactor());
+		order.setMobile(cmd.getMobile());
+		order.setQuantity(cmd.getQuantity());
+		order.setPeriod(cmd.getPeriod());
+		order.setAmount(cmd.getAmount());
+		order.setInvoiceFlag(cmd.getInvoiceFlag());
+		order.setBuyChannel(cmd.getBuyChannel());
+		if(categories != null && categories.size() > 0)
+			order.setAccountCategoryId(categories.get(0).getId());
+		order.setMakeOutFlag((byte) 0);
+		createConfAccountOrder(order);
 		
 	}
 	
