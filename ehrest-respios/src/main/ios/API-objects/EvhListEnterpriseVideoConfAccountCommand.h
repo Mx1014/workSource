@@ -1,6 +1,6 @@
 //
 // EvhListEnterpriseVideoConfAccountCommand.h
-// generated at 2016-03-31 13:49:14 
+// generated at 2016-03-28 15:56:07 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -17,8 +17,6 @@
 @property(nonatomic, copy) NSNumber* status;
 
 @property(nonatomic, copy) NSString* keyword;
-
-@property(nonatomic, copy) NSNumber* isAssigned;
 
 @property(nonatomic, copy) NSNumber* pageAnchor;
 

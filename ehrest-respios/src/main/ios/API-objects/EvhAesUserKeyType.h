@@ -1,0 +1,19 @@
+//
+// EvhAesUserKeyType.h
+// generated at 2016-03-28 15:56:08 
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhAesUserKeyType
+//
+typedef enum {
+
+    EvhAesUserKeyType_NORMAL = 0, 
+    EvhAesUserKeyType_TEMP = 1, 
+    EvhAesUserKeyType_ADMIN = 1
+
+} EvhAesUserKeyType;
+
+///////////////////////////////////////////////////////////////////////////////
+

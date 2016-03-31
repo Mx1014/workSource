@@ -1,6 +1,6 @@
 //
 // EvhPostDTO.m
-// generated at 2016-03-31 13:49:13 
+// generated at 2016-03-28 15:56:08 
 //
 #import "EvhPostDTO.h"
 #import "EvhAttachmentDTO.h"
@@ -120,12 +120,6 @@
         [jsonObject setObject: self.privateFlag forKey: @"privateFlag"];
     if(self.floorNumber)
         [jsonObject setObject: self.floorNumber forKey: @"floorNumber"];
-    if(self.publishStatus)
-        [jsonObject setObject: self.publishStatus forKey: @"publishStatus"];
-    if(self.startTime)
-        [jsonObject setObject: self.startTime forKey: @"startTime"];
-    if(self.endTime)
-        [jsonObject setObject: self.endTime forKey: @"endTime"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -295,18 +289,6 @@
         self.floorNumber = [jsonObject objectForKey: @"floorNumber"];
         if(self.floorNumber && [self.floorNumber isEqual:[NSNull null]])
             self.floorNumber = nil;
-
-        self.publishStatus = [jsonObject objectForKey: @"publishStatus"];
-        if(self.publishStatus && [self.publishStatus isEqual:[NSNull null]])
-            self.publishStatus = nil;
-
-        self.startTime = [jsonObject objectForKey: @"startTime"];
-        if(self.startTime && [self.startTime isEqual:[NSNull null]])
-            self.startTime = nil;
-
-        self.endTime = [jsonObject objectForKey: @"endTime"];
-        if(self.endTime && [self.endTime isEqual:[NSNull null]])
-            self.endTime = nil;
 
         return self;
     }

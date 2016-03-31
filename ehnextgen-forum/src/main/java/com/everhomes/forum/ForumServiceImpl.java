@@ -919,11 +919,6 @@ public class ForumServiceImpl implements ForumService {
         List<Post> posts = this.forumProvider.queryPosts(locator, pageSize + 1, (loc, query) -> {
             query.addJoin(Tables.EH_FORUM_ASSIGNED_SCOPES, JoinType.LEFT_OUTER_JOIN, 
                 Tables.EH_FORUM_ASSIGNED_SCOPES.OWNER_ID.eq(Tables.EH_FORUM_POSTS.ID));
-            if(null == forumId){
-            	query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ID.eq(ForumConstants.SYSTEM_FORUM));
-            }else{
-            	query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ID.eq(forumId));
-            }
             query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
             query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
             
@@ -2509,13 +2504,27 @@ public class ForumServiceImpl implements ForumService {
             LOGGER.error("Unsupported organization type, userId=" + userId + ", organization=" + organization);
             return null;
         }
+        List<Long> forumIds = new ArrayList<Long>();
+        for (Long commnityId : communityIdList) {
+        	 Community community = communityProvider.findCommunityById(commnityId);
+        	 forumIds.add(community.getDefaultForumId());
+		}
+       
         
         // 普通用户发给该机构的（物业/业委/居委/公安/社区工作站等），该机构都能看得到（不管是否公开）
         Condition userCondition1 = Tables.EH_FORUM_POSTS.TARGET_TAG.eq(orgType.getCode());
-        Condition userCondition3 = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
-        userCondition3 = userCondition3.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.in(communityIdList));
+        Condition userConditionCommnity = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
+        userConditionCommnity = userConditionCommnity.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.in(communityIdList));
+        Condition userConditionOrg = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.REGION.getCode());
+        userConditionOrg = userConditionOrg.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.eq(organization.getId()));
+        Condition userCondition3 = userConditionCommnity.or(userConditionOrg);
+       
         Condition userCondition = userCondition1.and(userCondition3);
-                
+        if(0 == forumIds.size()){
+        	userCondition = userCondition.and(Tables.EH_FORUM_POSTS.FORUM_ID.eq(ForumConstants.SYSTEM_FORUM));
+        }else{
+        	userCondition = userCondition.and(Tables.EH_FORUM_POSTS.FORUM_ID.in(forumIds));
+        }
         // 机构（物业/业委/居委/公安/社区工作站等）自己发的，该机构都能看得到
         Condition gaCondition = Tables.EH_FORUM_POSTS.CREATOR_TAG.eq(orgType.getCode());
         Condition regionCondition = null;
@@ -3065,13 +3074,22 @@ public class ForumServiceImpl implements ForumService {
             }
 	        break;
 	    case ORGANIZATION:
+	    	
             Organization org = this.organizationProvider.findOrganizationById(sceneToken.getEntityId());
             if(org != null) {
-                String orgType = org.getOrganizationType();
+            	String orgType = org.getOrganizationType();
+                
                 if(OrganizationType.isGovAgencyOrganization(orgType)) {
-                    creatorTag = PostEntityTag.fromCode(orgType);
-                    visibleRegionType = VisibleRegionType.REGION;
-                    visibleRegionId = sceneToken.getEntityId();
+                	if(VisibleRegionType.fromCode(cmd.getVisibleRegionType()) == VisibleRegionType.COMMUNITY){
+        	    		creatorTag = PostEntityTag.fromCode(orgType);
+            			visibleRegionType = VisibleRegionType.COMMUNITY;
+                        visibleRegionId = cmd.getVisibleRegionId();
+            		}else{
+            			creatorTag = PostEntityTag.fromCode(orgType);
+                        visibleRegionType = VisibleRegionType.REGION;
+                        visibleRegionId = sceneToken.getEntityId();
+            		}
+                    
                 }
             } else {
                 if(LOGGER.isWarnEnabled()) {
