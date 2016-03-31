@@ -55,6 +55,7 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.OrganizationTask;
 import com.everhomes.point.UserPointService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
@@ -62,6 +63,7 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryConstants;
+import com.everhomes.rest.category.CategoryType;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.AssignTopicScopeCommand;
@@ -331,6 +333,16 @@ public class ForumServiceImpl implements ForumService {
             }
             PostDTO postDto =  getTopicById(postId, cmd.getCommunityId(), true, true);
             
+            /*根据客户端的要求 控制任务操作*/
+            if(postDto.getEmbeddedAppId().equals(AppConstants.APPID_ORGTASK)){
+            	OrganizationTask task = organizationProvider.findOrganizationTaskById(postDto.getEmbeddedId());
+            	if(null != task){
+            		task.setOption(cmd.getOption());
+            		task.setEntrancePrivilege(cmd.getEntrancePrivilege());
+            		postDto.setEmbeddedJson(StringHelper.toJsonString(task));
+            	}
+            }
+            
             long endTime = System.currentTimeMillis();
             if(LOGGER.isInfoEnabled()) {
                 LOGGER.info("Get topic details, userId=" + userId + ", postId=" + postId 
@@ -397,7 +409,6 @@ public class ForumServiceImpl implements ForumService {
             
             this.forumProvider.populatePostAttachments(post);
             populatePost(userId, post, communityId, isDetail, getByOwnerId);
-            
             return ConvertHelper.convert(post, PostDTO.class);
         } else {
             LOGGER.error("Forum post not found, userId=" + userId + ", topicId=" + topicId);
