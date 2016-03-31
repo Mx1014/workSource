@@ -9,11 +9,13 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *  <li>id: 主键id</li>
- *  <li>mutipleNum: 多账号起售数量  </li>
+ *  <li>multipleAccountThreshold: 多账号起售数量  </li>
  *  <li>confCapacity: 会议容量</li>
  *  <li>confType: 开会方式</li>
- *  <li>minimumMonths: 起售月份</li>
- *  <li>packagePrice: 价格</li>
+ *  <li>minPeriod: 起售月份</li>
+ *  <li>singleAccountPrice: 普通价格</li>
+ *  <li>multipleAccountPrice: 多账号购买价格</li>
+ *  <li>displayFlag: 线上是否可购买</li>
  * </ul>
  *
  */
@@ -22,15 +24,19 @@ public class UpdateConfAccountCategoriesCommand {
 	private Long id;
 	
 	@NotNull
-	private int mutipleNum;
+	private int multipleAccountThreshold;
 	@NotNull
 	private String confCapacity;
 	@NotNull
 	private String confType;
 	@NotNull
-	private Integer minimumMonths;
+	private Integer minPeriod;
 	@NotNull
-	private BigDecimal packagePrice;
+	private BigDecimal singleAccountPrice;
+	@NotNull
+	private BigDecimal multipleAccountPrice;
+	
+	private Byte displayFlag;
 
 	public Long getId() {
 		return id;
@@ -38,14 +44,6 @@ public class UpdateConfAccountCategoriesCommand {
 
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	public int getMutipleNum() {
-		return mutipleNum;
-	}
-
-	public void setMutipleNum(int mutipleNum) {
-		this.mutipleNum = mutipleNum;
 	}
 
 	public String getConfCapacity() {
@@ -64,20 +62,44 @@ public class UpdateConfAccountCategoriesCommand {
 		this.confType = confType;
 	}
 
-	public Integer getMinimumMonths() {
-		return minimumMonths;
+	public Integer getMinPeriod() {
+		return minPeriod;
 	}
 
-	public void setMinimumMonths(Integer minimumMonths) {
-		this.minimumMonths = minimumMonths;
+	public void setMinPeriod(Integer minPeriod) {
+		this.minPeriod = minPeriod;
 	}
 
-	public BigDecimal getPackagePrice() {
-		return packagePrice;
+	public int getMultipleAccountThreshold() {
+		return multipleAccountThreshold;
 	}
 
-	public void setPackagePrice(BigDecimal packagePrice) {
-		this.packagePrice = packagePrice;
+	public void setMultipleAccountThreshold(int multipleAccountThreshold) {
+		this.multipleAccountThreshold = multipleAccountThreshold;
+	}
+
+	public BigDecimal getSingleAccountPrice() {
+		return singleAccountPrice;
+	}
+
+	public void setSingleAccountPrice(BigDecimal singleAccountPrice) {
+		this.singleAccountPrice = singleAccountPrice;
+	}
+
+	public BigDecimal getMultipleAccountPrice() {
+		return multipleAccountPrice;
+	}
+
+	public void setMultipleAccountPrice(BigDecimal multipleAccountPrice) {
+		this.multipleAccountPrice = multipleAccountPrice;
+	}
+
+	public Byte getDisplayFlag() {
+		return displayFlag;
+	}
+
+	public void setDisplayFlag(Byte displayFlag) {
+		this.displayFlag = displayFlag;
 	}
 
 	@Override

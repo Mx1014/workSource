@@ -401,8 +401,9 @@ public class ForumServiceImpl implements ForumService {
             return ConvertHelper.convert(post, PostDTO.class);
         } else {
             LOGGER.error("Forum post not found, userId=" + userId + ", topicId=" + topicId);
-            throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
-                ForumServiceErrorCode.ERROR_FORUM_TOPIC_NOT_FOUND, "Forum post not found");
+            return null;
+//            throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
+//                ForumServiceErrorCode.ERROR_FORUM_TOPIC_NOT_FOUND, "Forum post not found");
         }
     }
     
@@ -952,7 +953,10 @@ public class ForumServiceImpl implements ForumService {
         	Timestamp s = r.getStartTime();
         	Timestamp e = r.getEndTime();
         	PostDTO dto= ConvertHelper.convert(r, PostDTO.class);
+        	
         	if(null != s && null != e){
+        		dto.setStartTime(s.getTime());
+            	dto.setEndTime(e.getTime());
         		if(s.getTime() < timestemp.getTime()){
         			dto.setPublishStatus(TopicPublishStatus.UNPUBLISHED.getCode());
         		}
