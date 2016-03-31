@@ -1,9 +1,9 @@
 //
 // EvhCommunityGetBuildingRestResponse.m
-// generated at 2016-03-30 10:13:09 
+// generated at 2016-03-31 11:07:27 
 //
 #import "EvhCommunityGetBuildingRestResponse.h"
-#import "EvhBuildingDTO.h"
+#import "EvhCommunityBuildingDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhCommunityGetBuildingRestResponse
@@ -46,7 +46,7 @@
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
         [super fromJson: jsonObject];
         NSMutableDictionary* dic =  (NSMutableDictionary*)[jsonObject objectForKey: @"response"];
-        self.response = [EvhBuildingDTO new];
+        self.response = [EvhCommunityBuildingDTO new];
         self.response = [self.response fromJson: dic];
         return self;
     }
