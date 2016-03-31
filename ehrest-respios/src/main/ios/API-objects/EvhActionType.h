@@ -1,6 +1,6 @@
 //
 // EvhActionType.h
-// generated at 2016-03-30 10:13:08 
+// generated at 2016-03-31 13:49:14 
 //
 
 
@@ -47,7 +47,8 @@ typedef enum {
     EvhActionType_USER_GROUPS = 35, 
     EvhActionType_LIST_GROUPS = 36, 
     EvhActionType_SERVICE_ORDER = 37, 
-    EvhActionType_MANAGER_TASK = 39
+    EvhActionType_ORG_TASK_MANAGERMENT = 39, 
+    EvhActionType_NOTICE_MANAGERMENT = 43
 
 } EvhActionType;
 

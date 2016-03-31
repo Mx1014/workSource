@@ -1,6 +1,6 @@
 //
 // EvhConfCategoryDTO.m
-// generated at 2016-03-30 10:13:09 
+// generated at 2016-03-31 13:49:14 
 //
 #import "EvhConfCategoryDTO.h"
 
@@ -33,12 +33,12 @@
 {
     if(self.confCapacity)
         [jsonObject setObject: self.confCapacity forKey: @"confCapacity"];
-    if(self.price)
-        [jsonObject setObject: self.price forKey: @"price"];
-    if(self.mutipleNum)
-        [jsonObject setObject: self.mutipleNum forKey: @"mutipleNum"];
-    if(self.mutiplePrice)
-        [jsonObject setObject: self.mutiplePrice forKey: @"mutiplePrice"];
+    if(self.singleAccountPrice)
+        [jsonObject setObject: self.singleAccountPrice forKey: @"singleAccountPrice"];
+    if(self.multipleAccountThreshold)
+        [jsonObject setObject: self.multipleAccountThreshold forKey: @"multipleAccountThreshold"];
+    if(self.multipleAccountPrice)
+        [jsonObject setObject: self.multipleAccountPrice forKey: @"multipleAccountPrice"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -48,17 +48,17 @@
         if(self.confCapacity && [self.confCapacity isEqual:[NSNull null]])
             self.confCapacity = nil;
 
-        self.price = [jsonObject objectForKey: @"price"];
-        if(self.price && [self.price isEqual:[NSNull null]])
-            self.price = nil;
+        self.singleAccountPrice = [jsonObject objectForKey: @"singleAccountPrice"];
+        if(self.singleAccountPrice && [self.singleAccountPrice isEqual:[NSNull null]])
+            self.singleAccountPrice = nil;
 
-        self.mutipleNum = [jsonObject objectForKey: @"mutipleNum"];
-        if(self.mutipleNum && [self.mutipleNum isEqual:[NSNull null]])
-            self.mutipleNum = nil;
+        self.multipleAccountThreshold = [jsonObject objectForKey: @"multipleAccountThreshold"];
+        if(self.multipleAccountThreshold && [self.multipleAccountThreshold isEqual:[NSNull null]])
+            self.multipleAccountThreshold = nil;
 
-        self.mutiplePrice = [jsonObject objectForKey: @"mutiplePrice"];
-        if(self.mutiplePrice && [self.mutiplePrice isEqual:[NSNull null]])
-            self.mutiplePrice = nil;
+        self.multipleAccountPrice = [jsonObject objectForKey: @"multipleAccountPrice"];
+        if(self.multipleAccountPrice && [self.multipleAccountPrice isEqual:[NSNull null]])
+            self.multipleAccountPrice = nil;
 
         return self;
     }

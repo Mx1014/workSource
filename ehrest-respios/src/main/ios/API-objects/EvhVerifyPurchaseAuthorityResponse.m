@@ -1,0 +1,59 @@
+//
+// EvhVerifyPurchaseAuthorityResponse.m
+// generated at 2016-03-31 13:49:14 
+//
+#import "EvhVerifyPurchaseAuthorityResponse.h"
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhVerifyPurchaseAuthorityResponse
+//
+
+@implementation EvhVerifyPurchaseAuthorityResponse
+
++(id) withJsonString: (NSString*) jsonString
+{
+    id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
+    if(jsonObject != nil) {
+        EvhVerifyPurchaseAuthorityResponse* obj = [EvhVerifyPurchaseAuthorityResponse new];
+        return [obj fromJson:jsonObject];
+    }
+    return nil;
+}
+
+-(id) init 
+{
+    self = [super init];
+    if(self) {
+        return self;
+    }
+    return nil;
+}
+
+-(void) toJson: (NSMutableDictionary*) jsonObject 
+{
+    if(self.purchaseAuthority)
+        [jsonObject setObject: self.purchaseAuthority forKey: @"purchaseAuthority"];
+    if(self.enterpriseActiveAccountCount)
+        [jsonObject setObject: self.enterpriseActiveAccountCount forKey: @"enterpriseActiveAccountCount"];
+}
+
+-(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
+{
+    if([jsonObject isKindOfClass:[NSDictionary class]]) {
+        self.purchaseAuthority = [jsonObject objectForKey: @"purchaseAuthority"];
+        if(self.purchaseAuthority && [self.purchaseAuthority isEqual:[NSNull null]])
+            self.purchaseAuthority = nil;
+
+        self.enterpriseActiveAccountCount = [jsonObject objectForKey: @"enterpriseActiveAccountCount"];
+        if(self.enterpriseActiveAccountCount && [self.enterpriseActiveAccountCount isEqual:[NSNull null]])
+            self.enterpriseActiveAccountCount = nil;
+
+        return self;
+    }
+    
+    return nil;
+}
+
+@end
+
+///////////////////////////////////////////////////////////////////////////////

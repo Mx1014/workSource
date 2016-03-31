@@ -1,6 +1,6 @@
 //
 // EvhVideoConfAccountRuleDTO.m
-// generated at 2016-03-30 10:13:09 
+// generated at 2016-03-31 13:49:14 
 //
 #import "EvhVideoConfAccountRuleDTO.h"
 
@@ -33,16 +33,18 @@
 {
     if(self.id)
         [jsonObject setObject: self.id forKey: @"id"];
-    if(self.mutipleNum)
-        [jsonObject setObject: self.mutipleNum forKey: @"mutipleNum"];
+    if(self.multipleAccountThreshold)
+        [jsonObject setObject: self.multipleAccountThreshold forKey: @"multipleAccountThreshold"];
     if(self.confCapacity)
         [jsonObject setObject: self.confCapacity forKey: @"confCapacity"];
     if(self.confType)
         [jsonObject setObject: self.confType forKey: @"confType"];
-    if(self.minimumMonths)
-        [jsonObject setObject: self.minimumMonths forKey: @"minimumMonths"];
-    if(self.packagePrice)
-        [jsonObject setObject: self.packagePrice forKey: @"packagePrice"];
+    if(self.minPeriod)
+        [jsonObject setObject: self.minPeriod forKey: @"minPeriod"];
+    if(self.singleAccountPrice)
+        [jsonObject setObject: self.singleAccountPrice forKey: @"singleAccountPrice"];
+    if(self.multipleAccountPrice)
+        [jsonObject setObject: self.multipleAccountPrice forKey: @"multipleAccountPrice"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -52,9 +54,9 @@
         if(self.id && [self.id isEqual:[NSNull null]])
             self.id = nil;
 
-        self.mutipleNum = [jsonObject objectForKey: @"mutipleNum"];
-        if(self.mutipleNum && [self.mutipleNum isEqual:[NSNull null]])
-            self.mutipleNum = nil;
+        self.multipleAccountThreshold = [jsonObject objectForKey: @"multipleAccountThreshold"];
+        if(self.multipleAccountThreshold && [self.multipleAccountThreshold isEqual:[NSNull null]])
+            self.multipleAccountThreshold = nil;
 
         self.confCapacity = [jsonObject objectForKey: @"confCapacity"];
         if(self.confCapacity && [self.confCapacity isEqual:[NSNull null]])
@@ -64,13 +66,17 @@
         if(self.confType && [self.confType isEqual:[NSNull null]])
             self.confType = nil;
 
-        self.minimumMonths = [jsonObject objectForKey: @"minimumMonths"];
-        if(self.minimumMonths && [self.minimumMonths isEqual:[NSNull null]])
-            self.minimumMonths = nil;
+        self.minPeriod = [jsonObject objectForKey: @"minPeriod"];
+        if(self.minPeriod && [self.minPeriod isEqual:[NSNull null]])
+            self.minPeriod = nil;
 
-        self.packagePrice = [jsonObject objectForKey: @"packagePrice"];
-        if(self.packagePrice && [self.packagePrice isEqual:[NSNull null]])
-            self.packagePrice = nil;
+        self.singleAccountPrice = [jsonObject objectForKey: @"singleAccountPrice"];
+        if(self.singleAccountPrice && [self.singleAccountPrice isEqual:[NSNull null]])
+            self.singleAccountPrice = nil;
+
+        self.multipleAccountPrice = [jsonObject objectForKey: @"multipleAccountPrice"];
+        if(self.multipleAccountPrice && [self.multipleAccountPrice isEqual:[NSNull null]])
+            self.multipleAccountPrice = nil;
 
         return self;
     }

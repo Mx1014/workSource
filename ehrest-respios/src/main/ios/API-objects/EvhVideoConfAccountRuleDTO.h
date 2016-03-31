@@ -1,6 +1,6 @@
 //
 // EvhVideoConfAccountRuleDTO.h
-// generated at 2016-03-30 10:13:09 
+// generated at 2016-03-31 13:49:14 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -14,15 +14,17 @@
 
 @property(nonatomic, copy) NSNumber* id;
 
-@property(nonatomic, copy) NSNumber* mutipleNum;
+@property(nonatomic, copy) NSNumber* multipleAccountThreshold;
 
 @property(nonatomic, copy) NSString* confCapacity;
 
 @property(nonatomic, copy) NSString* confType;
 
-@property(nonatomic, copy) NSNumber* minimumMonths;
+@property(nonatomic, copy) NSNumber* minPeriod;
 
-@property(nonatomic, copy) NSNumber* packagePrice;
+@property(nonatomic, copy) NSNumber* singleAccountPrice;
+
+@property(nonatomic, copy) NSNumber* multipleAccountPrice;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
