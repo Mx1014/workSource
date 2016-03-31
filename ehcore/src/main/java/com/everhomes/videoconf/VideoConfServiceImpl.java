@@ -124,6 +124,8 @@ import com.everhomes.rest.videoconf.UpdateInvoiceCommand;
 import com.everhomes.rest.videoconf.UpdateVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.UserAccountDTO;
 import com.everhomes.rest.videoconf.VatType;
+import com.everhomes.rest.videoconf.VerifyPurchaseAuthorityCommand;
+import com.everhomes.rest.videoconf.VerifyPurchaseAuthorityResponse;
 import com.everhomes.rest.videoconf.VerifyVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.VideoConfAccountRuleDTO;
 import com.everhomes.rest.videoconf.VideoConfInvitationResponse;
@@ -2377,6 +2379,13 @@ public class VideoConfServiceImpl implements VideoConfService {
 		order.setInvoice(new InvoiceDTO());
 		createConfAccountOrder(order);
 		
+	}
+
+	@Override
+	public VerifyPurchaseAuthorityResponse verifyPurchaseAuthority(
+			VerifyPurchaseAuthorityCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

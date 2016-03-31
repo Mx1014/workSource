@@ -83,6 +83,8 @@ import com.everhomes.rest.videoconf.UpdateContactorCommand;
 import com.everhomes.rest.videoconf.UpdateInvoiceCommand;
 import com.everhomes.rest.videoconf.UpdateVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.UserAccountDTO;
+import com.everhomes.rest.videoconf.VerifyPurchaseAuthorityCommand;
+import com.everhomes.rest.videoconf.VerifyPurchaseAuthorityResponse;
 import com.everhomes.rest.videoconf.VerifyVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.VideoConfAccountPreferentialRuleDTO;
 import com.everhomes.rest.videoconf.VideoConfAccountTrialRuleDTO;
@@ -1317,6 +1319,22 @@ public class VideoConfController  extends ControllerBase{
 	public RestResponse createConfAccountOrderOnline(CreateConfAccountOrderOnlineCommand cmd) {
 
 		videoConfService.createConfAccountOrderOnline(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /conf/verifyPurchaseAuthority</b>
+	 * 客户端判断是否是管理员 所属公司是否有空闲账号
+	 * @return
+	 */
+	@RequestMapping("verifyPurchaseAuthority")
+	@RestReturn(value = VerifyPurchaseAuthorityResponse.class)
+	public RestResponse verifyPurchaseAuthority(VerifyPurchaseAuthorityCommand cmd) {
+
+		videoConfService.verifyPurchaseAuthority(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
