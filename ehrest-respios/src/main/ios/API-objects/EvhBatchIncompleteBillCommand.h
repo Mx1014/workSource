@@ -1,6 +1,6 @@
 //
 // EvhBatchIncompleteBillCommand.h
-// generated at 2016-03-31 13:49:15 
+// generated at 2016-03-28 15:56:08 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"

@@ -1,6 +1,6 @@
 //
 // EvhConfJoinVideoConfRestResponse.m
-// generated at 2016-03-31 13:49:15 
+// generated at 2016-03-28 15:56:09 
 //
 #import "EvhConfJoinVideoConfRestResponse.h"
 #import "EvhJoinVideoConfResponse.h"

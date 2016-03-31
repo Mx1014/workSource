@@ -1,6 +1,6 @@
 //
 // EvhGetTopicCommand.m
-// generated at 2016-03-31 13:49:13 
+// generated at 2016-03-28 15:56:07 
 //
 #import "EvhGetTopicCommand.h"
 
@@ -37,10 +37,6 @@
         [jsonObject setObject: self.topicId forKey: @"topicId"];
     if(self.communityId)
         [jsonObject setObject: self.communityId forKey: @"communityId"];
-    if(self.option)
-        [jsonObject setObject: self.option forKey: @"option"];
-    if(self.entrancePrivilege)
-        [jsonObject setObject: self.entrancePrivilege forKey: @"entrancePrivilege"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -57,14 +53,6 @@
         self.communityId = [jsonObject objectForKey: @"communityId"];
         if(self.communityId && [self.communityId isEqual:[NSNull null]])
             self.communityId = nil;
-
-        self.option = [jsonObject objectForKey: @"option"];
-        if(self.option && [self.option isEqual:[NSNull null]])
-            self.option = nil;
-
-        self.entrancePrivilege = [jsonObject objectForKey: @"entrancePrivilege"];
-        if(self.entrancePrivilege && [self.entrancePrivilege isEqual:[NSNull null]])
-            self.entrancePrivilege = nil;
 
         return self;
     }
