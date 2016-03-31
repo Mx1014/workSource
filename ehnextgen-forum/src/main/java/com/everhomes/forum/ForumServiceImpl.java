@@ -2513,11 +2513,8 @@ public class ForumServiceImpl implements ForumService {
         
         // 普通用户发给该机构的（物业/业委/居委/公安/社区工作站等），该机构都能看得到（不管是否公开）
         Condition userCondition1 = Tables.EH_FORUM_POSTS.TARGET_TAG.eq(orgType.getCode());
-        Condition userConditionCommnity = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
-        userConditionCommnity = userConditionCommnity.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.in(communityIdList));
-        Condition userConditionOrg = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.REGION.getCode());
-        userConditionOrg = userConditionOrg.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.eq(organization.getId()));
-        Condition userCondition3 = userConditionCommnity.or(userConditionOrg);
+        Condition userCondition3 = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
+        userCondition3 = userCondition3.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.in(communityIdList));
        
         Condition userCondition = userCondition1.and(userCondition3);
         if(0 == forumIds.size()){
@@ -2531,10 +2528,12 @@ public class ForumServiceImpl implements ForumService {
         switch(orgType) {
         case PM:
         case GARC:
-            regionCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
-            if(communityIdList.size() > 0) {
-                regionCondition = regionCondition.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.eq(communityIdList.get(0)));
-            }
+            Condition conditionCommnity = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
+            conditionCommnity = conditionCommnity.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.in(communityIdList));
+            Condition conditionOrg = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.REGION.getCode());
+            conditionOrg = conditionOrg.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.eq(organization.getId()));
+            regionCondition = conditionCommnity.or(conditionOrg);
+            
             gaCondition = gaCondition.and(regionCondition);
             break;
         case GANC:
