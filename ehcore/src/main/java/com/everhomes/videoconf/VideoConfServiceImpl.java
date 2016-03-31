@@ -2302,6 +2302,8 @@ public class VideoConfServiceImpl implements VideoConfService {
 			if(category.getConfType() == 5 || category.getConfType() == 6) {
 				dto.setConfCapacity((byte) 3);
 			}
+			
+			categoryDtos.add(dto);
 		}
 		
 		response.setCategories(categoryDtos);
