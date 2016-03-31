@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-03-30 10:12:53
+// generated at 2016-03-31 10:18:06
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -258,16 +258,15 @@ public interface ApiConstants {
     public static final String CONF_ADDSOURCEVIDEOCONFACCOUNT_URL = "/conf/addSourceVideoConfAccount";
     public static final String CONF_ASSIGNVIDEOCONFACCOUNT_URL = "/conf/assignVideoConfAccount";
     public static final String CONF_CANCELVIDEOCONF_URL = "/conf/cancelVideoConf";
-    public static final String CONF_CONFPAYMENTCALLBACK_URL = "/conf/confPaymentCallBack";
     public static final String CONF_CREATEACCOUNTOWNER_URL = "/conf/createAccountOwner";
     public static final String CONF_CREATECONFACCOUNTORDER_URL = "/conf/createConfAccountOrder";
+    public static final String CONF_CREATECONFACCOUNTORDERONLINE_URL = "/conf/createConfAccountOrderOnline";
     public static final String CONF_CREATEINVOICE_URL = "/conf/createInvoice";
     public static final String CONF_CREATEVIDEOCONFINVITATION_URL = "/conf/createVideoConfInvitation";
     public static final String CONF_DELETERESERVATIONCONF_URL = "/conf/deleteReservationConf";
     public static final String CONF_DELETESOURCEVIDEOCONFACCOUNT_URL = "/conf/deleteSourceVideoConfAccount";
     public static final String CONF_DELETEVIDEOCONFACCOUNT_URL = "/conf/deleteVideoConfAccount";
     public static final String CONF_DELETEWARNINGCONTACTOR_URL = "/conf/deleteWarningContactor";
-    public static final String CONF_EXTENDEDCONFACCOUNTPERIOD_URL = "/conf/extendedConfAccountPeriod";
     public static final String CONF_EXTENDEDSOURCEACCOUNTPERIOD_URL = "/conf/extendedSourceAccountPeriod";
     public static final String CONF_EXTENDEDVIDEOCONFACCOUNTPERIOD_URL = "/conf/extendedVideoConfAccountPeriod";
     public static final String CONF_GETACCOUNTTYPE_URL = "/conf/getAccountType";
@@ -283,7 +282,7 @@ public interface ApiConstants {
     public static final String CONF_GETVIDEOCONFACCOUNTPREFERENTIALRULE_URL = "/conf/getVideoConfAccountPreferentialRule";
     public static final String CONF_GETVIDEOCONFACCOUNTTRIALRULE_URL = "/conf/getVideoConfAccountTrialRule";
     public static final String CONF_JOINVIDEOCONF_URL = "/conf/joinVideoConf";
-    public static final String CONF_LISTCONFACCOUNTCATEGORIES_URL = "/conf/listConfAccountCategories";
+    public static final String CONF_LISTCONFACCOUNTSALERULES_URL = "/conf/listConfAccountSaleRules";
     public static final String CONF_LISTCONFCATEGORY_URL = "/conf/listConfCategory";
     public static final String CONF_LISTCONFORDER_URL = "/conf/listConfOrder";
     public static final String CONF_LISTENTERPRISEWITHVIDEOCONFACCOUNT_URL = "/conf/listEnterpriseWithVideoConfAccount";
@@ -298,6 +297,7 @@ public interface ApiConstants {
     public static final String CONF_LISTVIDEOCONFACCOUNTBYORDERID_URL = "/conf/listVideoConfAccountByOrderId";
     public static final String CONF_LISTVIDEOCONFACCOUNTCONFRECORD_URL = "/conf/listVideoConfAccountConfRecord";
     public static final String CONF_LISTWARNINGCONTACTOR_URL = "/conf/listWarningContactor";
+    public static final String CONF_NOTIFYCONFACCOUNTORDERPAYMENT_URL = "/conf/notifyConfAccountOrderPayment";
     public static final String CONF_OFFLINEPAYBILL_URL = "/conf/offlinePayBill";
     public static final String CONF_RESERVEVIDEOCONF_URL = "/conf/reserveVideoConf";
     public static final String CONF_SETEARLYWARNINGLINE_URL = "/conf/setEarlyWarningLine";
@@ -313,8 +313,9 @@ public interface ApiConstants {
     public static final String CONF_SYNCENTERPRISEINDEX_URL = "/conf/syncEnterpriseIndex";
     public static final String CONF_SYNCUSERINDEX_URL = "/conf/syncUserIndex";
     public static final String CONF_UPDATECONFACCOUNTCATEGORIES_URL = "/conf/updateConfAccountCategories";
+    public static final String CONF_UPDATECONFACCOUNTPERIOD_URL = "/conf/updateConfAccountPeriod";
     public static final String CONF_UPDATECONTACTOR_URL = "/conf/updateContactor";
-    public static final String CONF_UPDATEINVOICEBYORDERID_URL = "/conf/updateInvoiceByOrderId";
+    public static final String CONF_UPDATEINVOICE_URL = "/conf/updateInvoice";
     public static final String CONF_UPDATEVIDEOCONFACCOUNT_URL = "/conf/updateVideoConfAccount";
     public static final String CONF_UPDATEVIDEOCONFACCOUNTORDERINFO_URL = "/conf/updateVideoConfAccountOrderInfo";
     public static final String CONF_VERIFYVIDEOCONFACCOUNT_URL = "/conf/verifyVideoConfAccount";
@@ -526,6 +527,23 @@ public interface ApiConstants {
     public static final String ORG_UPDATETOPICPRIVACY_URL = "/org/updateTopicPrivacy";
     public static final String ORG_USEREXITORGANIZATION_URL = "/org/userExitOrganization";
     public static final String ORG_USERJOINORGANIZATION_URL = "/org/userJoinOrganization";
+    public static final String PARKING_CREATEPARKINGRECHARGEORDER_URL = "/parking/createParkingRechargeOrder";
+    public static final String PARKING_CREATEPARKINGRECHARGERATE_URL = "/parking/createParkingRechargeRate";
+    public static final String PARKING_DELETEPARKINGRECHARGERATE_URL = "/parking/deleteParkingRechargeRate";
+    public static final String PARKING_GETPARKINGACTIVITY_URL = "/parking/getParkingActivity";
+    public static final String PARKING_ISSUEPARKINGCARDS_URL = "/parking/issueParkingCards";
+    public static final String PARKING_LISTPARKINGCARDREQUESTS_URL = "/parking/listParkingCardRequests";
+    public static final String PARKING_LISTPARKINGCARDS_URL = "/parking/listParkingCards";
+    public static final String PARKING_LISTPARKINGLOTS_URL = "/parking/listParkingLots";
+    public static final String PARKING_LISTPARKINGRECHARGEORDERS_URL = "/parking/listParkingRechargeOrders";
+    public static final String PARKING_LISTPARKINGRECHARGERATES_URL = "/parking/listParkingRechargeRates";
+    public static final String PARKING_NOTIFYPARKINGRECHARGEORDERPAYMENT_URL = "/parking/notifyParkingRechargeOrderPayment";
+    public static final String PARKING_REQUESTPARKINGCARD_URL = "/parking/requestParkingCard";
+    public static final String PARKING_SEARCHPARKINGCARDREQUESTS_URL = "/parking/searchParkingCardRequests";
+    public static final String PARKING_SEARCHPARKINGRECHARGEORDERS_URL = "/parking/searchParkingRechargeOrders";
+    public static final String PARKING_SETPARKINGACTIVITY_URL = "/parking/setParkingActivity";
+    public static final String PARKING_SETPARKINGCARDISSUEFLAG_URL = "/parking/setParkingCardIssueFlag";
+    public static final String PARKING_SETPARKINGCARDRESERVEDAYS_URL = "/parking/setParkingCardReserveDays";
     public static final String PKG_ADD_URL = "/pkg/add";
     public static final String PKG_DOWNLOAD_URL = "/pkg/download";
     public static final String PKG_GETUPGRADEFILEINFO_URL = "/pkg/getUpgradeFileInfo";

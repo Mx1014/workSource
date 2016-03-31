@@ -1,0 +1,18 @@
+//
+// EvhParkingCardIssueFlag.h
+// generated at 2016-03-31 10:18:19 
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhParkingCardIssueFlag
+//
+typedef enum {
+
+    EvhParkingCardIssueFlag_UNISSUED = 0, 
+    EvhParkingCardIssueFlag_ISSUED = 1
+
+} EvhParkingCardIssueFlag;
+
+///////////////////////////////////////////////////////////////////////////////
+
