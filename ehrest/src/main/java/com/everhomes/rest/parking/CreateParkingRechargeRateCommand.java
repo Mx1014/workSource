@@ -3,6 +3,8 @@ package com.everhomes.rest.parking;
 
 import java.math.BigDecimal;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -16,11 +18,17 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class CreateParkingRechargeRateCommand {
+	@NotNull
     private String ownerType;
+	@NotNull
     private Long ownerId;
+	@NotNull
     private Long parkingLotId;
+	@NotNull
     private String rateName;
+	@NotNull
     private BigDecimal monthCount;
+	@NotNull
     private BigDecimal price;
     
     public CreateParkingRechargeRateCommand() {

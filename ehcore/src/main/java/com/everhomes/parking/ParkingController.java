@@ -44,7 +44,7 @@ import com.everhomes.rest.techpark.onlinePay.OnlinePayBillCommand;
 public class ParkingController extends ControllerBase {
     
     @Autowired
-    private ParkingService forumService;
+    private ParkingService parkingService;
     
     /**
      * <b>URL: /parking/listParkingLots</b>
@@ -55,6 +55,7 @@ public class ParkingController extends ControllerBase {
     public RestResponse listParkingLots(ListParkingLotsCommand cmd) {
         List<ParkingLotDTO> parkingLotList = null;
         
+        parkingLotList = parkingService.listParkingLots(cmd);
         RestResponse response = new RestResponse(parkingLotList);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -70,6 +71,7 @@ public class ParkingController extends ControllerBase {
     public RestResponse listParkingCards(ListParkingCardsCommand cmd) {
         List<ParkingCardDTO> parkingCardList = null;
         
+        parkingCardList = parkingService.listParkingCards(cmd);
         RestResponse response = new RestResponse(parkingCardList);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -85,6 +87,7 @@ public class ParkingController extends ControllerBase {
     public RestResponse listParkingRechargeRates(ListParkingRechargeRatesCommand cmd) {
         List<ParkingRechargeRateDTO> rateList = null;
         
+        rateList = parkingService.listParkingRechargeRates(cmd);
         RestResponse response = new RestResponse(rateList);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

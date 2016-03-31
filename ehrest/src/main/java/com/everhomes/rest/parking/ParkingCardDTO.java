@@ -30,6 +30,7 @@ public class ParkingCardDTO {
 	private String cardNumber;
 	private Timestamp startTime;
 	private Timestamp endTime;
+	private boolean isValid;
 	
 	public ParkingCardDTO() {
 	    
@@ -119,4 +120,12 @@ public class ParkingCardDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public boolean getIsValid() {
+		return isValid;
+	}
+
+	public void setIsValid(boolean isValid) {
+		this.isValid = isValid;
+	}
 }
