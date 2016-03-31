@@ -34,7 +34,7 @@ public class CreateDoorAuthCommand {
     private Long     validEndMs;
     private String organization;
     private String description;
-    private String namespaceId;
+    private Long namespaceId;
     private String phone;
     
     
@@ -86,10 +86,11 @@ public class CreateDoorAuthCommand {
     public void setApproveUserId(Long approveUserId) {
         this.approveUserId = approveUserId;
     }
-    public String getNamespaceId() {
+    
+    public Long getNamespaceId() {
         return namespaceId;
     }
-    public void setNamespaceId(String namespaceId) {
+    public void setNamespaceId(Long namespaceId) {
         this.namespaceId = namespaceId;
     }
     public String getPhone() {
