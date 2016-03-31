@@ -1,6 +1,6 @@
 //
 // EvhNeighborUserDTO.h
-// generated at 2016-03-28 15:56:07 
+// generated at 2016-03-31 15:43:23 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -29,6 +29,10 @@
 @property(nonatomic, copy) NSString* occupation;
 
 @property(nonatomic, copy) NSString* initial;
+
+@property(nonatomic, copy) NSString* fullPinyin;
+
+@property(nonatomic, copy) NSString* fullInitial;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

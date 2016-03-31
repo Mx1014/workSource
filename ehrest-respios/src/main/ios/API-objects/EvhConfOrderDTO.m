@@ -1,6 +1,6 @@
 //
 // EvhConfOrderDTO.m
-// generated at 2016-03-28 15:56:07 
+// generated at 2016-03-31 15:43:21 
 //
 #import "EvhConfOrderDTO.h"
 
@@ -55,8 +55,6 @@
         [jsonObject setObject: self.amount forKey: @"amount"];
     if(self.accountCategoryId)
         [jsonObject setObject: self.accountCategoryId forKey: @"accountCategoryId"];
-    if(self.accountChannelType)
-        [jsonObject setObject: self.accountChannelType forKey: @"accountChannelType"];
     if(self.invoiceFlag)
         [jsonObject setObject: self.invoiceFlag forKey: @"invoiceFlag"];
     if(self.makeOutFlag)
@@ -113,10 +111,6 @@
         self.accountCategoryId = [jsonObject objectForKey: @"accountCategoryId"];
         if(self.accountCategoryId && [self.accountCategoryId isEqual:[NSNull null]])
             self.accountCategoryId = nil;
-
-        self.accountChannelType = [jsonObject objectForKey: @"accountChannelType"];
-        if(self.accountChannelType && [self.accountChannelType isEqual:[NSNull null]])
-            self.accountChannelType = nil;
 
         self.invoiceFlag = [jsonObject objectForKey: @"invoiceFlag"];
         if(self.invoiceFlag && [self.invoiceFlag isEqual:[NSNull null]])

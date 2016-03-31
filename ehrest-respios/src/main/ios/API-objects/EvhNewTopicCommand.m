@@ -1,6 +1,6 @@
 //
 // EvhNewTopicCommand.m
-// generated at 2016-03-28 15:56:07 
+// generated at 2016-03-31 15:43:21 
 //
 #import "EvhNewTopicCommand.h"
 #import "EvhAttachmentDescriptor.h"
@@ -76,6 +76,10 @@
     }
     if(self.privateFlag)
         [jsonObject setObject: self.privateFlag forKey: @"privateFlag"];
+    if(self.startTime)
+        [jsonObject setObject: self.startTime forKey: @"startTime"];
+    if(self.endTime)
+        [jsonObject setObject: self.endTime forKey: @"endTime"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -157,6 +161,14 @@
         self.privateFlag = [jsonObject objectForKey: @"privateFlag"];
         if(self.privateFlag && [self.privateFlag isEqual:[NSNull null]])
             self.privateFlag = nil;
+
+        self.startTime = [jsonObject objectForKey: @"startTime"];
+        if(self.startTime && [self.startTime isEqual:[NSNull null]])
+            self.startTime = nil;
+
+        self.endTime = [jsonObject objectForKey: @"endTime"];
+        if(self.endTime && [self.endTime isEqual:[NSNull null]])
+            self.endTime = nil;
 
         return self;
     }
