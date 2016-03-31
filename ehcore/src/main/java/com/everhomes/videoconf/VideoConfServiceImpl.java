@@ -2384,7 +2384,10 @@ public class VideoConfServiceImpl implements VideoConfService {
 	@Override
 	public VerifyPurchaseAuthorityResponse verifyPurchaseAuthority(
 			VerifyPurchaseAuthorityCommand cmd) {
-		// TODO Auto-generated method stub
+		
+		VerifyPurchaseAuthorityResponse response = new VerifyPurchaseAuthorityResponse();
+		int enterpriseVaildAccounts = vcProvider.countAccountsByEnterprise(cmd.getEnterpriseId(), null);
+		response.setEnterpriseActiveAccountCount(enterpriseVaildAccounts);
 		return null;
 	}
 	
