@@ -2,6 +2,7 @@ package com.everhomes.videoconf;
 
 import java.io.IOException;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -30,6 +31,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.app.App;
+import com.everhomes.app.AppProvider;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.configuration.ConfigConstants;
@@ -52,12 +55,14 @@ import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.techpark.onlinePay.OnlinePayBillCommand;
 import com.everhomes.rest.techpark.onlinePay.PayStatus;
+import com.everhomes.rest.techpark.park.RechargeOrderDTO;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.videoconf.AccountType;
 import com.everhomes.rest.videoconf.AddSourceVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.AssignVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.BizConfHolder;
 import com.everhomes.rest.videoconf.CancelVideoConfCommand;
+import com.everhomes.rest.videoconf.ConfAccountOrderDTO;
 import com.everhomes.rest.videoconf.ConfCapacity;
 import com.everhomes.rest.videoconf.ConfCategoryDTO;
 import com.everhomes.rest.videoconf.ConfOrderAccountDTO;
@@ -144,6 +149,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
 import com.google.gson.Gson;
@@ -196,6 +202,9 @@ public class VideoConfServiceImpl implements VideoConfService {
 	
 	@Autowired
     private NamespaceProvider nsProvider;
+	
+	@Autowired
+	private AppProvider appProvider;
 	
 	
 	@Override
@@ -2279,6 +2288,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 			dto.setSingleAccountPrice(category.getSingleAccountPrice());
 			dto.setMultipleAccountThreshold(category.getMultipleAccountThreshold());
 			dto.setMultipleAccountPrice(category.getMultipleAccountPrice());
+			dto.setMinPeriod(category.getMinPeriod());
 			
 			if(category.getConfType() == 0 || category.getConfType() == 1) {
 				dto.setConfCapacity((byte) 0);
@@ -2303,7 +2313,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 	}
 
 	@Override
-	public void updateConfAccountPeriod(UpdateConfAccountPeriodCommand cmd) {
+	public ConfAccountOrderDTO updateConfAccountPeriod(UpdateConfAccountPeriodCommand cmd) {
 		
 		int quantity = cmd.getAccountIds().size();
 		CreateConfAccountOrderCommand order = new CreateConfAccountOrderCommand();
@@ -2320,6 +2330,15 @@ public class VideoConfServiceImpl implements VideoConfService {
 		order.setMakeOutFlag((byte) 0);
 		Long orderId = createConfAccountOrder(order);
 		
+		ConfAccountOrderDTO dto = new ConfAccountOrderDTO();
+		dto.setBillId(orderId);
+		dto.setAmount(order.getAmount().doubleValue());
+		dto.setName(cmd.getContactor() + " order");
+		dto.setDescription(cmd.getContactor() + " extend " + quantity + " accounts " + cmd.getMonths() + " months for " + cmd.getEnterpriseName());
+		
+		this.setSignatureParam(dto);
+		
+		
 		ConfEnterprises enterprise = vcProvider.findByEnterpriseId(cmd.getEnterpriseId());
 		int namespaceId = enterprise.getNamespaceId();
 		for(Long accountId : cmd.getAccountIds()) {
@@ -2332,11 +2351,11 @@ public class VideoConfServiceImpl implements VideoConfService {
 			vcProvider.createConfOrderAccountMap(map);
 		}
 		
-		
+		return dto;
 	}
 
 	@Override
-	public void createConfAccountOrderOnline(
+	public ConfAccountOrderDTO createConfAccountOrderOnline(
 			CreateConfAccountOrderOnlineCommand cmd) {
 		//0: 25方仅视频, 1: 25方支持电话, 2: 100方仅视频, 3: 100方支持电话, 4: 6方仅视频, 5: 50方仅视频, 6: 50方支持电话
 		//账号类型 0-25方 1-100方 2-6方 3-50方 
@@ -2377,8 +2396,36 @@ public class VideoConfServiceImpl implements VideoConfService {
 			order.setAccountCategoryId(categories.get(0).getId());
 		order.setMakeOutFlag((byte) 0);
 		order.setInvoice(new InvoiceDTO());
-		createConfAccountOrder(order);
 		
+		Long orderId = createConfAccountOrder(order);
+		
+		ConfAccountOrderDTO dto = new ConfAccountOrderDTO();
+		dto.setBillId(orderId);
+		dto.setAmount(order.getAmount().doubleValue());
+		dto.setName(cmd.getContactor() + " order");
+		dto.setDescription(cmd.getContactor() + " buy " + cmd.getQuantity() + " accounts " + cmd.getPeriod() + " months for " + cmd.getEnterpriseName());
+		
+		this.setSignatureParam(dto);
+		return dto;
+		
+	}
+	
+	private void setSignatureParam(ConfAccountOrderDTO dto) {
+		String appKey = configurationProvider.getValue("pay.appKey", "7bbb5727-9d37-443a-a080-55bbf37dc8e1");
+		Long timestamp = System.currentTimeMillis();
+		Integer randomNum = (int) (Math.random()*1000);
+		App app = appProvider.findAppByKey(appKey);
+		
+		Map<String,String> map = new HashMap<String, String>();
+		map.put("appKey",appKey);
+		map.put("timestamp",timestamp+"");
+		map.put("randomNum",randomNum+"");
+		map.put("amount",dto.getAmount().doubleValue()+"");
+		String signature = SignatureHelper.computeSignature(map, app.getSecretKey());
+		dto.setAppKey(appKey);
+		dto.setRandomNum(randomNum);
+		dto.setSignature(URLEncoder.encode(signature));
+		dto.setTimestamp(timestamp);
 	}
 
 	@Override
@@ -2388,7 +2435,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		VerifyPurchaseAuthorityResponse response = new VerifyPurchaseAuthorityResponse();
 		int enterpriseVaildAccounts = vcProvider.countAccountsByEnterprise(cmd.getEnterpriseId(), null);
 		response.setEnterpriseActiveAccountCount(enterpriseVaildAccounts);
-		return null;
+		return response;
 	}
 	
 }
