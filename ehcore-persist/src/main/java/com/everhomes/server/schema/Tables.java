@@ -832,4 +832,44 @@ public class Tables {
 	 * The table ehcore.eh_yellow_page_attachments
 	 */
 	public static final com.everhomes.server.schema.tables.EhYellowPageAttachments EH_YELLOW_PAGE_ATTACHMENTS = com.everhomes.server.schema.tables.EhYellowPageAttachments.EH_YELLOW_PAGE_ATTACHMENTS;
+
+	/**
+	 * The table ehcore.eh_aclinks
+	 */
+	public static final com.everhomes.server.schema.tables.EhAclinks EH_ACLINKS = com.everhomes.server.schema.tables.EhAclinks.EH_ACLINKS;
+
+	/**
+	 * The table ehcore.eh_aclink_undo_key
+	 */
+	public static final com.everhomes.server.schema.tables.EhAclinkUndoKey EH_ACLINK_UNDO_KEY = com.everhomes.server.schema.tables.EhAclinkUndoKey.EH_ACLINK_UNDO_KEY;
+
+	/**
+	 * The table ehcore.eh_aes_server_key
+	 */
+	public static final com.everhomes.server.schema.tables.EhAesServerKey EH_AES_SERVER_KEY = com.everhomes.server.schema.tables.EhAesServerKey.EH_AES_SERVER_KEY;
+
+	/**
+	 * The table ehcore.eh_aes_user_key
+	 */
+	public static final com.everhomes.server.schema.tables.EhAesUserKey EH_AES_USER_KEY = com.everhomes.server.schema.tables.EhAesUserKey.EH_AES_USER_KEY;
+
+	/**
+	 * The table ehcore.eh_door_access
+	 */
+	public static final com.everhomes.server.schema.tables.EhDoorAccess EH_DOOR_ACCESS = com.everhomes.server.schema.tables.EhDoorAccess.EH_DOOR_ACCESS;
+
+	/**
+	 * The table ehcore.eh_door_auth
+	 */
+	public static final com.everhomes.server.schema.tables.EhDoorAuth EH_DOOR_AUTH = com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH;
+
+	/**
+	 * The table ehcore.eh_door_command
+	 */
+	public static final com.everhomes.server.schema.tables.EhDoorCommand EH_DOOR_COMMAND = com.everhomes.server.schema.tables.EhDoorCommand.EH_DOOR_COMMAND;
+
+	/**
+	 * The table ehcore.eh_owner_doors
+	 */
+	public static final com.everhomes.server.schema.tables.EhOwnerDoors EH_OWNER_DOORS = com.everhomes.server.schema.tables.EhOwnerDoors.EH_OWNER_DOORS;
 }

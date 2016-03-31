@@ -19,6 +19,7 @@ import com.everhomes.rest.techpark.park.RechargeSuccessResponse;
 import com.everhomes.rest.videoconf.AddSourceVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.AssignVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.CancelVideoConfCommand;
+import com.everhomes.rest.videoconf.ConfAccountOrderDTO;
 import com.everhomes.rest.videoconf.CreateAccountOwnerCommand;
 import com.everhomes.rest.videoconf.CreateConfAccountOrderCommand;
 import com.everhomes.rest.videoconf.CreateConfAccountOrderOnlineCommand;
@@ -1283,11 +1284,11 @@ public class VideoConfController  extends ControllerBase{
 	 * @return
 	 */
 	@RequestMapping("updateConfAccountPeriod")
-	@RestReturn(value = String.class)
+	@RestReturn(value = ConfAccountOrderDTO.class)
 	public RestResponse updateConfAccountPeriod(UpdateConfAccountPeriodCommand cmd) {
 
-		videoConfService.updateConfAccountPeriod(cmd);
-		RestResponse response = new RestResponse();
+		ConfAccountOrderDTO dto = videoConfService.updateConfAccountPeriod(cmd);
+		RestResponse response = new RestResponse(dto);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -1315,11 +1316,11 @@ public class VideoConfController  extends ControllerBase{
 	 * @return
 	 */
 	@RequestMapping("createConfAccountOrderOnline")
-	@RestReturn(value = String.class)
+	@RestReturn(value = ConfAccountOrderDTO.class)
 	public RestResponse createConfAccountOrderOnline(CreateConfAccountOrderOnlineCommand cmd) {
 
-		videoConfService.createConfAccountOrderOnline(cmd);
-		RestResponse response = new RestResponse();
+		ConfAccountOrderDTO dto = videoConfService.createConfAccountOrderOnline(cmd);
+		RestResponse response = new RestResponse(dto);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

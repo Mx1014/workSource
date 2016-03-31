@@ -1,6 +1,6 @@
 //
 // EvhListEnterpriseVideoConfAccountCommand.m
-// generated at 2016-03-31 11:07:27 
+// generated at 2016-03-28 15:56:07 
 //
 #import "EvhListEnterpriseVideoConfAccountCommand.h"
 
@@ -37,8 +37,6 @@
         [jsonObject setObject: self.status forKey: @"status"];
     if(self.keyword)
         [jsonObject setObject: self.keyword forKey: @"keyword"];
-    if(self.isAssigned)
-        [jsonObject setObject: self.isAssigned forKey: @"isAssigned"];
     if(self.pageAnchor)
         [jsonObject setObject: self.pageAnchor forKey: @"pageAnchor"];
     if(self.pageSize)
@@ -59,10 +57,6 @@
         self.keyword = [jsonObject objectForKey: @"keyword"];
         if(self.keyword && [self.keyword isEqual:[NSNull null]])
             self.keyword = nil;
-
-        self.isAssigned = [jsonObject objectForKey: @"isAssigned"];
-        if(self.isAssigned && [self.isAssigned isEqual:[NSNull null]])
-            self.isAssigned = nil;
 
         self.pageAnchor = [jsonObject objectForKey: @"pageAnchor"];
         if(self.pageAnchor && [self.pageAnchor isEqual:[NSNull null]])

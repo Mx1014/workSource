@@ -1,6 +1,6 @@
 //
 // EvhPollVoteRestResponse.m
-// generated at 2016-03-31 11:07:27 
+// generated at 2016-03-28 15:56:09 
 //
 #import "EvhPollVoteRestResponse.h"
 #import "EvhPollDTO.h"
