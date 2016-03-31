@@ -1,6 +1,6 @@
 //
 // EvhOrgGetOrganizationDetailsRestResponse.m
-// generated at 2016-03-31 15:43:24 
+// generated at 2016-03-31 19:08:54 
 //
 #import "EvhOrgGetOrganizationDetailsRestResponse.h"
 #import "EvhOrganizationDTO.h"

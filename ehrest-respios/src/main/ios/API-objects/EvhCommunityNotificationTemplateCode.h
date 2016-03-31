@@ -1,6 +1,6 @@
 //
 // EvhCommunityNotificationTemplateCode.h
-// generated at 2016-03-31 15:43:22 
+// generated at 2016-03-31 19:08:53 
 //
 
 #define EvhCommunityNotificationTemplateCode_SCOPE @"community.notification"
