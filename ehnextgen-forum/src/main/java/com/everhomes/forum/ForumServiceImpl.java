@@ -334,7 +334,7 @@ public class ForumServiceImpl implements ForumService {
             PostDTO postDto =  getTopicById(postId, cmd.getCommunityId(), true, true);
             
             /*根据客户端的要求 控制任务操作*/
-            if(postDto.getEmbeddedAppId().equals(AppConstants.APPID_ORGTASK)){
+            if(null != postDto && null != postDto.getEmbeddedAppId() && postDto.getEmbeddedAppId().equals(AppConstants.APPID_ORGTASK)){
             	OrganizationTask task = organizationProvider.findOrganizationTaskById(postDto.getEmbeddedId());
             	if(null != task){
             		task.setOption(cmd.getOption());
