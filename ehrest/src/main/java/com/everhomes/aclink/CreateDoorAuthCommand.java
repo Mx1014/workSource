@@ -34,6 +34,8 @@ public class CreateDoorAuthCommand {
     private Long     validEndMs;
     private String organization;
     private String description;
+    private String namespaceId;
+    private String phone;
     
     
     public Long getUserId() {
@@ -84,7 +86,18 @@ public class CreateDoorAuthCommand {
     public void setApproveUserId(Long approveUserId) {
         this.approveUserId = approveUserId;
     }
-    
+    public String getNamespaceId() {
+        return namespaceId;
+    }
+    public void setNamespaceId(String namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+    public String getPhone() {
+        return phone;
+    }
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
