@@ -1,6 +1,6 @@
 //
 // EvhGetUserDetailByUuidResponse.m
-// generated at 2016-03-28 15:56:07 
+// generated at 2016-03-31 15:43:22 
 //
 #import "EvhGetUserDetailByUuidResponse.h"
 #import "EvhUserServiceAddressDTO.h"

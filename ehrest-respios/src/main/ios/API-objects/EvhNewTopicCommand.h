@@ -1,6 +1,6 @@
 //
 // EvhNewTopicCommand.h
-// generated at 2016-03-28 15:56:06 
+// generated at 2016-03-31 15:43:21 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -49,6 +49,10 @@
 @property(nonatomic, strong) NSMutableArray* attachments;
 
 @property(nonatomic, copy) NSNumber* privateFlag;
+
+@property(nonatomic, copy) NSNumber* startTime;
+
+@property(nonatomic, copy) NSNumber* endTime;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

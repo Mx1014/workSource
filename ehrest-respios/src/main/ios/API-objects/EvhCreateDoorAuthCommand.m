@@ -1,6 +1,6 @@
 //
 // EvhCreateDoorAuthCommand.m
-// generated at 2016-03-28 15:56:07 
+// generated at 2016-03-31 15:43:23 
 //
 #import "EvhCreateDoorAuthCommand.h"
 
@@ -47,6 +47,10 @@
         [jsonObject setObject: self.organization forKey: @"organization"];
     if(self.description_)
         [jsonObject setObject: self.description_ forKey: @"description"];
+    if(self.namespaceId)
+        [jsonObject setObject: self.namespaceId forKey: @"namespaceId"];
+    if(self.phone)
+        [jsonObject setObject: self.phone forKey: @"phone"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -83,6 +87,14 @@
         self.description_ = [jsonObject objectForKey: @"description"];
         if(self.description_ && [self.description_ isEqual:[NSNull null]])
             self.description_ = nil;
+
+        self.namespaceId = [jsonObject objectForKey: @"namespaceId"];
+        if(self.namespaceId && [self.namespaceId isEqual:[NSNull null]])
+            self.namespaceId = nil;
+
+        self.phone = [jsonObject objectForKey: @"phone"];
+        if(self.phone && [self.phone isEqual:[NSNull null]])
+            self.phone = nil;
 
         return self;
     }

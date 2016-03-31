@@ -1,6 +1,6 @@
 //
 // EvhListPropApartmentCommandResponse.h
-// generated at 2016-03-28 15:56:08 
+// generated at 2016-03-31 15:43:20 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"

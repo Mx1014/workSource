@@ -1,6 +1,6 @@
 //
 // EvhConfCategoryDTO.h
-// generated at 2016-03-31 13:49:14 
+// generated at 2016-03-31 15:43:21 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -19,6 +19,8 @@
 @property(nonatomic, copy) NSNumber* multipleAccountThreshold;
 
 @property(nonatomic, copy) NSNumber* multipleAccountPrice;
+
+@property(nonatomic, copy) NSNumber* minPeriod;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

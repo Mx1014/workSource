@@ -1,6 +1,6 @@
 //
 // EvhOrganizationMemberDTO.h
-// generated at 2016-03-28 15:56:07 
+// generated at 2016-03-31 15:43:22 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -36,6 +36,10 @@
 @property(nonatomic, copy) NSNumber* status;
 
 @property(nonatomic, copy) NSString* initial;
+
+@property(nonatomic, copy) NSString* fullPinyin;
+
+@property(nonatomic, copy) NSString* fullInitial;
 
 // item type EvhAclRoleAssignmentsDTO*
 @property(nonatomic, strong) NSMutableArray* aclRoles;
