@@ -1,17 +1,22 @@
 // @formatter:off
 package com.everhomes.parking;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.acl.AclProvider;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.parking.ListParkingCardsCommand;
+import com.everhomes.rest.parking.ParkingCardDTO;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 
@@ -45,4 +50,32 @@ public class ParkingServiceImpl implements ParkingService {
     
     @Autowired
     private OrganizationProvider organizationProvider;
+    
+    public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
+        Long parkingLotId = cmd.getParkingLotId();
+        // TODO: 检查停车场ID是否为null
+        
+        List<ParkingCardDTO> cardList = null; 
+        ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotId);
+        if(parkingLot != null) {
+            // TODO: 检查参数里的ownerType和ownerId是否与查出来停车场里的匹配
+            
+            String venderName = parkingLot.getName();
+            ParkingVendorHandler handler = getParkingVendorHandler(venderName);
+            cardList = handler.getParkingCardsByPlate(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId, cmd.getPlateNumber());
+        }
+        
+        return cardList;
+    }
+    
+    private ParkingVendorHandler getParkingVendorHandler(String vendorName) {
+        ParkingVendorHandler handler = null;
+        
+        if(vendorName != null && vendorName.length() > 0) {
+            String handlerPrefix = ParkingVendorHandler.PARKING_VENDOR_PREFIX;
+            handler = PlatformContext.getComponent(handlerPrefix + vendorName);
+        }
+        
+        return handler;
+    }
 }
