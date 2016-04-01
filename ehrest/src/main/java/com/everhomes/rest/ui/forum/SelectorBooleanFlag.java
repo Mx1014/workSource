@@ -7,12 +7,12 @@ package com.everhomes.rest.ui.forum;
  * <li>TRUE(1): 是</li>
  * </ul>
  */
-public enum SelecterBooleanFlag {
+public enum SelectorBooleanFlag {
     FALSE((byte)0), TRUE((byte)1);
     
     private byte code;
     
-    private SelecterBooleanFlag(byte code) {
+    private SelectorBooleanFlag(byte code) {
         this.code = code;
     }
     
@@ -20,10 +20,10 @@ public enum SelecterBooleanFlag {
         return this.code;
     }
     
-    public static SelecterBooleanFlag fromCode(Byte code) {
+    public static SelectorBooleanFlag fromCode(Byte code) {
         if(code != null) {
-            SelecterBooleanFlag[] values = SelecterBooleanFlag.values();
-            for(SelecterBooleanFlag value : values) {
+            SelectorBooleanFlag[] values = SelectorBooleanFlag.values();
+            for(SelectorBooleanFlag value : values) {
                 if(value.code == code.byteValue()) {
                     return value;
                 }

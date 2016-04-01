@@ -1,6 +1,6 @@
 //
 // EvhAdminOrgListPersonnelNotJoinGroupsRestResponse.m
-// generated at 2016-03-31 20:15:33 
+// generated at 2016-04-01 15:40:24 
 //
 #import "EvhAdminOrgListPersonnelNotJoinGroupsRestResponse.h"
 #import "EvhListOrganizationMemberCommandResponse.h"

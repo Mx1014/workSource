@@ -1,6 +1,6 @@
 //
 // EvhOpPromotionDTO.m
-// generated at 2016-03-31 20:15:31 
+// generated at 2016-04-01 15:40:23 
 //
 #import "EvhOpPromotionDTO.h"
 
@@ -45,10 +45,12 @@
         [jsonObject setObject: self.actionData forKey: @"actionData"];
     if(self.validCount)
         [jsonObject setObject: self.validCount forKey: @"validCount"];
+    if(self.startTime)
+        [jsonObject setObject: self.startTime forKey: @"startTime"];
+    if(self.endTime)
+        [jsonObject setObject: self.endTime forKey: @"endTime"];
     if(self.status)
         [jsonObject setObject: self.status forKey: @"status"];
-    if(self.createTime)
-        [jsonObject setObject: self.createTime forKey: @"createTime"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -82,13 +84,17 @@
         if(self.validCount && [self.validCount isEqual:[NSNull null]])
             self.validCount = nil;
 
+        self.startTime = [jsonObject objectForKey: @"startTime"];
+        if(self.startTime && [self.startTime isEqual:[NSNull null]])
+            self.startTime = nil;
+
+        self.endTime = [jsonObject objectForKey: @"endTime"];
+        if(self.endTime && [self.endTime isEqual:[NSNull null]])
+            self.endTime = nil;
+
         self.status = [jsonObject objectForKey: @"status"];
         if(self.status && [self.status isEqual:[NSNull null]])
             self.status = nil;
-
-        self.createTime = [jsonObject objectForKey: @"createTime"];
-        if(self.createTime && [self.createTime isEqual:[NSNull null]])
-            self.createTime = nil;
 
         return self;
     }
