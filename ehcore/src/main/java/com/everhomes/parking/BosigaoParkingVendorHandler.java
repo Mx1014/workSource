@@ -84,11 +84,6 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 				parkingCardDTO.setCardNumber(cardNumber);
 				parkingCardDTO.setPlateOwnerPhone(plateOwnerPhone);
 				parkingCardDTO.setIsValid(true);
-//				List<ParkCharge> parkCharge = parkProvider.listParkingChargeByEnterpriseCommunityId(cmd.getCommunityId(),cardType, null, null);
-//				response.setParkingCharge(parkCharge.stream().map(r->{
-//					ParkingChargeDTO dto = ConvertHelper.convert(r, ParkingChargeDTO.class);
-//					return dto;
-//				}).collect(Collectors.toList()));
 				
 				if(LOGGER.isDebugEnabled())
 					LOGGER.error("successcommand="+parkingCardDTO.toString());
