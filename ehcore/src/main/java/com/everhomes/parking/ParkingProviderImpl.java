@@ -23,17 +23,21 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.parking.ListParkingCardRequestResponse;
 import com.everhomes.rest.parking.ListParkingCardRequestsCommand;
 import com.everhomes.rest.parking.ParkingCardRequestStatus;
+import com.everhomes.rest.parking.ParkingRechargeOrderDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhParkingLotsDao;
 import com.everhomes.server.schema.tables.daos.EhParkingVendorsDao;
 import com.everhomes.server.schema.tables.pojos.EhParkingCardRequests;
 import com.everhomes.server.schema.tables.pojos.EhParkingLots;
+import com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders;
 import com.everhomes.server.schema.tables.pojos.EhParkingRechargeRates;
+import com.everhomes.server.schema.tables.pojos.EhRechargeInfo;
 import com.everhomes.server.schema.tables.records.EhParkingCardRequestsRecord;
 import com.everhomes.server.schema.tables.records.EhParkingLotsRecord;
 import com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord;
 import com.everhomes.server.schema.tables.records.EhParkingRechargeRatesRecord;
+import com.everhomes.server.schema.tables.records.EhRechargeInfoRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.techpark.park.ParkApplyCard;
 import com.everhomes.user.UserProvider;
@@ -219,6 +223,23 @@ public class ParkingProviderImpl implements ParkingProvider {
         
     	return resultList;
     	
+    }
+    
+    @Override
+    public int createParkingRechargeOrder(ParkingRechargeOrder parkingRechargeOrder){
+    	long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhParkingRechargeOrders.class));
+    	parkingRechargeOrder.setId(id);
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		EhParkingRechargeOrdersRecord record = ConvertHelper.convert(parkingRechargeOrder, EhParkingRechargeOrdersRecord.class);
+		InsertQuery<EhParkingRechargeOrdersRecord> query = context.insertQuery(Tables.EH_PARKING_RECHARGE_ORDERS);
+		query.setRecord(record);
+		int result = query.execute();
+		
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhParkingRechargeOrders.class, null);
+		
+		return result;
     }
     
  }

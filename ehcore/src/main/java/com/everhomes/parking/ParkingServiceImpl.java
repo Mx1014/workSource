@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.parking;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,6 +38,8 @@ import com.everhomes.rest.parking.ParkingCardRequestDTO;
 import com.everhomes.rest.parking.ParkingCardRequestStatus;
 import com.everhomes.rest.parking.ParkingLotDTO;
 import com.everhomes.rest.parking.ParkingRechargeOrderDTO;
+import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
+import com.everhomes.rest.parking.ParkingRechargeOrderStatus;
 import com.everhomes.rest.parking.ParkingRechargeRateDTO;
 import com.everhomes.rest.parking.RequestParkingCardCommand;
 import com.everhomes.rest.techpark.park.ParkingServiceErrorCode;
@@ -270,14 +273,14 @@ public class ParkingServiceImpl implements ParkingService {
 	
 	@Override
 	public ParkingRechargeOrderDTO createParkingRechargeOrder(CreateParkingRechargeOrderCommand cmd){
-		ParkingRechargeOrderDTO parkingRechargeOrderDTO = null;	
+		ParkingRechargeOrderDTO parkingRechargeOrderDTO = new ParkingRechargeOrderDTO();	
 		ParkingRechargeOrder parkingRechargeOrder = new ParkingRechargeOrder();
 		
 		User user = UserContext.current().getUser();
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 		
 		ParkingLot parkingLot = parkingProvider.findParkingLotById(cmd.getParkingLotId());
-		
+		try{
 		parkingRechargeOrder.setOwnerType(cmd.getOwnerType());
 		parkingRechargeOrder.setOwnerId(cmd.getOwnerId());
 		parkingRechargeOrder.setParkingLotId(cmd.getParkingLotId());
@@ -291,9 +294,23 @@ public class ParkingServiceImpl implements ParkingService {
 		parkingRechargeOrder.setCardNumber(cmd.getCardNumber());
 		parkingRechargeOrder.setRateToken(cmd.getRateToken());
 		parkingRechargeOrder.setRateName(cmd.getRateName());
+		parkingRechargeOrder.setMonthCount(new BigDecimal(cmd.getMonthCount()));
+		parkingRechargeOrder.setPrice(cmd.getPrice());
+		parkingRechargeOrder.setStatus(ParkingRechargeOrderStatus.UNPAID.getCode());
+		parkingRechargeOrder.setRechargeStatus(ParkingRechargeOrderRechargeStatus.UNRECHARGED.getCode());
+		parkingRechargeOrder.setCreatorUid(user.getId());
+		parkingRechargeOrder.setCreateTime(new Timestamp(System.currentTimeMillis()));
 		
+		int result = parkingProvider.createParkingRechargeOrder(parkingRechargeOrder);
+		}catch(Exception e) {
+			throw RuntimeErrorException.errorWith(ParkingServiceErrorCode.SCOPE, ParkingServiceErrorCode.ERROR_PLATE_APPLIED_SERVER,
+					localeStringService.getLocalizedString(String.valueOf(ParkingServiceErrorCode.SCOPE), 
+							String.valueOf(ParkingServiceErrorCode.ERROR_PLATE_APPLIED_SERVER),
+							UserContext.current().getUser().getLocale(),"the server is busy."));
+		}
 		
-		
+		parkingRechargeOrderDTO = ConvertHelper.convert(parkingRechargeOrder, ParkingRechargeOrderDTO.class);
+		parkingRechargeOrderDTO.setPayerName(user.getNickName());
 		return parkingRechargeOrderDTO;
 	}
 	
