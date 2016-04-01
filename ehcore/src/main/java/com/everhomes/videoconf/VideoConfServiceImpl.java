@@ -2337,7 +2337,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		dto.setAmount(order.getAmount().doubleValue());
 		dto.setName(cmd.getContactor() + " order");
 		dto.setDescription(cmd.getContactor() + " extend " + quantity + " accounts " + cmd.getMonths() + " months for " + cmd.getEnterpriseName());
-		
+		dto.setOrderType("videoConf");
 		this.setSignatureParam(dto);
 		
 		
@@ -2406,7 +2406,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		dto.setAmount(order.getAmount().doubleValue());
 		dto.setName(cmd.getContactor() + " order");
 		dto.setDescription(cmd.getContactor() + " buy " + cmd.getQuantity() + " accounts " + cmd.getPeriod() + " months for " + cmd.getEnterpriseName());
-		
+		dto.setOrderType("videoConf");
 		this.setSignatureParam(dto);
 		return dto;
 		
