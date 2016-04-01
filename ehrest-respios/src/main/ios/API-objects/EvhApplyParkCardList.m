@@ -1,6 +1,6 @@
 //
 // EvhApplyParkCardList.m
-// generated at 2016-03-31 19:08:53 
+// generated at 2016-03-31 20:15:32 
 //
 #import "EvhApplyParkCardList.h"
 #import "EvhApplyParkCardDTO.h"
