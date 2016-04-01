@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>sceneToken: 场景token</li>
  * <li>forumId: 论坛ID</li>
  * <li>targetTag: 帖子接收者标签，该标签仍然需要客户端填写，参考{@link com.everhomes.rest.forum.PostEntityTag}</li>
- * <li>isLeaf: 是否叶子节点，非叶子节点则可折叠</li>
+ * <li>leafFlag: 是否叶子节点，非叶子节点则可折叠，{@link com.everhomes.rest.ui.forum.SelecterBooleanFlag}</li>
  * </ul>
  */
 public class TopicScopeDTO {
@@ -27,7 +27,7 @@ public class TopicScopeDTO {
     private String sceneToken;
     private Long forumId;
     private String targetTag;
-    private boolean isLeaf;
+    private Byte leafFlag;
 
     public Long getId() {
         return id;
@@ -101,12 +101,12 @@ public class TopicScopeDTO {
         this.targetTag = targetTag;
     }
 
-    public boolean isLeaf() {
-        return isLeaf;
+    public Byte getLeafFlag() {
+        return leafFlag;
     }
 
-    public void setLeaf(boolean isLeaf) {
-        this.isLeaf = isLeaf;
+    public void setLeafFlag(Byte leafFlag) {
+        this.leafFlag = leafFlag;
     }
 
     @Override
