@@ -26,6 +26,7 @@ import com.everhomes.rest.parking.ParkingCardRequestStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhParkingLotsDao;
+import com.everhomes.server.schema.tables.daos.EhParkingVendorsDao;
 import com.everhomes.server.schema.tables.pojos.EhParkingCardRequests;
 import com.everhomes.server.schema.tables.pojos.EhParkingLots;
 import com.everhomes.server.schema.tables.pojos.EhParkingRechargeRates;
@@ -58,6 +59,13 @@ public class ParkingProviderImpl implements ParkingProvider {
     
     @Autowired
     private CoordinationProvider coordinationProvider;
+    
+    @Override
+    public ParkingVendor findParkingVendorByName(String name) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(ParkingVendor.class));
+        EhParkingVendorsDao dao = new EhParkingVendorsDao(context.configuration());
+        return ConvertHelper.convert(dao.fetchOneByName(name), ParkingVendor.class);
+    }
     
     @Override
     public ParkingLot findParkingLotById(Long id) {

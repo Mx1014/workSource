@@ -28,6 +28,8 @@ import com.everhomes.rest.parking.ListParkingCardRequestResponse;
 import com.everhomes.rest.parking.ListParkingCardRequestsCommand;
 import com.everhomes.rest.parking.ListParkingCardsCommand;
 import com.everhomes.rest.parking.ListParkingLotsCommand;
+import com.everhomes.rest.parking.ListParkingRechargeOrdersCommand;
+import com.everhomes.rest.parking.ListParkingRechargeOrdersResponse;
 import com.everhomes.rest.parking.ListParkingRechargeRatesCommand;
 import com.everhomes.rest.parking.ParkingCardDTO;
 import com.everhomes.rest.parking.ParkingCardIssueFlag;
@@ -274,6 +276,8 @@ public class ParkingServiceImpl implements ParkingService {
 		User user = UserContext.current().getUser();
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 		
+		ParkingLot parkingLot = parkingProvider.findParkingLotById(cmd.getParkingLotId());
+		
 		parkingRechargeOrder.setOwnerType(cmd.getOwnerType());
 		parkingRechargeOrder.setOwnerId(cmd.getOwnerId());
 		parkingRechargeOrder.setParkingLotId(cmd.getParkingLotId());
@@ -283,8 +287,21 @@ public class ParkingServiceImpl implements ParkingService {
 		parkingRechargeOrder.setPayerEnterpriseId(cmd.getPayerEnterpriseId());
 		parkingRechargeOrder.setPayerUid(user.getId());
 		parkingRechargeOrder.setPayerPhone(userIdentifier.getIdentifierToken());
+		parkingRechargeOrder.setVendorName(parkingLot.getVendorName());
+		parkingRechargeOrder.setCardNumber(cmd.getCardNumber());
+		parkingRechargeOrder.setRateToken(cmd.getRateToken());
+		parkingRechargeOrder.setRateName(cmd.getRateName());
+		
 		
 		
 		return parkingRechargeOrderDTO;
+	}
+	
+	@Override
+	public ListParkingRechargeOrdersResponse listParkingRechargeOrders(ListParkingRechargeOrdersCommand cmd){
+		ListParkingRechargeOrdersResponse response = new ListParkingRechargeOrdersResponse();
+		
+		
+		return response;
 	}
 }
