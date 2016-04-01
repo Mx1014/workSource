@@ -164,6 +164,7 @@ public class ParkingController extends ControllerBase {
     public RestResponse createParkingRechargeOrder(CreateParkingRechargeOrderCommand cmd) {
         ParkingRechargeOrderDTO rechargeOrder = null;
         
+        rechargeOrder = parkingService.createParkingRechargeOrder(cmd);
         RestResponse response = new RestResponse(rechargeOrder);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -179,6 +180,7 @@ public class ParkingController extends ControllerBase {
     public RestResponse listParkingCardRequests(ListParkingCardRequestsCommand cmd) {
         ListParkingCardRequestResponse cmdResponse = null;
         
+        cmdResponse = parkingService.listParkingCardRequests(cmd);
         RestResponse response = new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

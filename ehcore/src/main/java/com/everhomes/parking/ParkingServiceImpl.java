@@ -17,26 +17,31 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.parking.CreateParkingRechargeOrderCommand;
 import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
+import com.everhomes.rest.parking.ListParkingCardRequestResponse;
+import com.everhomes.rest.parking.ListParkingCardRequestsCommand;
 import com.everhomes.rest.parking.ListParkingCardsCommand;
 import com.everhomes.rest.parking.ListParkingLotsCommand;
 import com.everhomes.rest.parking.ListParkingRechargeRatesCommand;
 import com.everhomes.rest.parking.ParkingCardDTO;
+import com.everhomes.rest.parking.ParkingCardIssueFlag;
+import com.everhomes.rest.parking.ParkingCardRequestDTO;
+import com.everhomes.rest.parking.ParkingCardRequestStatus;
 import com.everhomes.rest.parking.ParkingLotDTO;
+import com.everhomes.rest.parking.ParkingRechargeOrderDTO;
 import com.everhomes.rest.parking.ParkingRechargeRateDTO;
 import com.everhomes.rest.parking.RequestParkingCardCommand;
-import com.everhomes.rest.techpark.park.ApplyParkingCardStatus;
-import com.everhomes.rest.techpark.park.FetchStatus;
 import com.everhomes.rest.techpark.park.ParkingServiceErrorCode;
-import com.everhomes.rest.techpark.park.PlateInfo;
-import com.everhomes.rest.techpark.park.PlateNumberCommand;
-import com.everhomes.techpark.park.ParkApplyCard;
+import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
@@ -213,11 +218,6 @@ public class ParkingServiceImpl implements ParkingService {
 							UserContext.current().getUser().getLocale(),"the plateNumber is already applied."));
 		}
 			
-//		User user = UserContext.current().getUser();
-//		List<UserIdentifier> identifiers = this.userProvider.listUserIdentifiersOfUser(user.getId());
-//        List<String> phones = identifiers.stream().filter((r)-> { return IdentifierType.fromCode(r.getIdentifierType()) == IdentifierType.MOBILE; })
-//            .map((r) -> { return r.getIdentifierToken(); })
-//            .collect(Collectors.toList());
 		try {
 			ParkingCardRequest parkingCardRequest = new ParkingCardRequest();
 			parkingCardRequest.setOwnerId(cmd.getOwnerId());
@@ -228,6 +228,12 @@ public class ParkingServiceImpl implements ParkingService {
 			parkingCardRequest.setPlateOwnerEntperiseName(cmd.getPlateOwnerEntperiseName());
 			parkingCardRequest.setPlateOwnerName(cmd.getPlateOwnerName());
 			parkingCardRequest.setPlateOwnerPhone(cmd.getPlateOwnerPhone());
+			parkingCardRequest.setRequestorUid(UserContext.current().getLogin().getUserId());
+			//设置一些初始状态
+			parkingCardRequest.setIssueFlag(ParkingCardIssueFlag.UNISSUED.getCode());
+			parkingCardRequest.setStatus(ParkingCardRequestStatus.QUEUEING.getCode());
+			parkingCardRequest.setCreatorUid(UserContext.current().getLogin().getUserId());
+			parkingCardRequest.setCreateTime(new Timestamp(System.currentTimeMillis()));
 			
 			parkingProvider.requestParkingCard(parkingCardRequest);
 //			String count = parkProvider.waitingCardCount(cmd.getCommunityId()) - 1 + "";
@@ -239,5 +245,46 @@ public class ParkingServiceImpl implements ParkingService {
 							UserContext.current().getUser().getLocale(),"the server is busy."));
 		}
 		return null;
+	}
+    
+	@Override
+    public ListParkingCardRequestResponse listParkingCardRequests(ListParkingCardRequestsCommand cmd){
+    	ListParkingCardRequestResponse response = new ListParkingCardRequestResponse();
+    	List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests
+    			(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId(), 
+    					cmd.getPlateNumber(), cmd.getPageAnchor(), cmd.getPageSize());
+    					
+    	if(list.size() > 0){
+    		response.setRequests(list.stream().map(r -> ConvertHelper.convert(r, ParkingCardRequestDTO.class))
+    				.collect(Collectors.toList()));
+    		response.setNextPageAnchor(list.get(list.size()-1).getId());
+    	}
+    	if(list.size() != cmd.getPageSize()){
+    		response.setNextPageAnchor(null);
+    	}
+    	
+    	return response;
+    }
+	
+	@Override
+	public ParkingRechargeOrderDTO createParkingRechargeOrder(CreateParkingRechargeOrderCommand cmd){
+		ParkingRechargeOrderDTO parkingRechargeOrderDTO = null;	
+		ParkingRechargeOrder parkingRechargeOrder = new ParkingRechargeOrder();
+		
+		User user = UserContext.current().getUser();
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+		
+		parkingRechargeOrder.setOwnerType(cmd.getOwnerType());
+		parkingRechargeOrder.setOwnerId(cmd.getOwnerId());
+		parkingRechargeOrder.setParkingLotId(cmd.getParkingLotId());
+		parkingRechargeOrder.setPlateNumber(cmd.getPlateNumber());
+		parkingRechargeOrder.setPlateOwnerName(cmd.getPlateOwnerName());
+		parkingRechargeOrder.setPlateOwnerPhone(cmd.getPlateOwnerPhone());
+		parkingRechargeOrder.setPayerEnterpriseId(cmd.getPayerEnterpriseId());
+		parkingRechargeOrder.setPayerUid(user.getId());
+		parkingRechargeOrder.setPayerPhone(userIdentifier.getIdentifierToken());
+		
+		
+		return parkingRechargeOrderDTO;
 	}
 }

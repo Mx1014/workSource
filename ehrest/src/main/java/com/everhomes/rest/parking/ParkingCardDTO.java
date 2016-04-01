@@ -27,7 +27,9 @@ public class ParkingCardDTO {
 	private String plateNumber;
 	private String plateOwnerName;
 	private String plateOwnerPhone;
+	private String cardType;
 	private String cardNumber;
+	private String cardName;
 	private Timestamp startTime;
 	private Timestamp endTime;
 	private boolean isValid;
@@ -127,5 +129,21 @@ public class ParkingCardDTO {
 
 	public void setIsValid(boolean isValid) {
 		this.isValid = isValid;
+	}
+
+	public String getCardType() {
+		return cardType;
+	}
+
+	public void setCardType(String cardType) {
+		this.cardType = cardType;
+	}
+
+	public String getCardName() {
+		return cardName;
+	}
+
+	public void setCardName(String cardName) {
+		this.cardName = cardName;
 	}
 }

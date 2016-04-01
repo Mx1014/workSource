@@ -21,6 +21,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.organization.pm.pay.ResultHolder;
 import com.everhomes.rest.parking.ParkingCardDTO;
+import com.everhomes.rest.parking.ParkingOwnerType;
 import com.everhomes.rest.parking.ParkingRechargeRateDTO;
 import com.everhomes.rest.techpark.onlinePay.OnlinePayBillCommand;
 import com.everhomes.util.ConvertHelper;
@@ -76,11 +77,15 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 				String cardType = (String) card.get("cardDescript");
 				String plateOwnerPhone = (String) card.get("mobile");
 				Timestamp endTime = strToTimestamp(validEnd);
-
+				
+				parkingCardDTO.setOwnerType(ParkingOwnerType.COMMUNITY.getCode());
+				parkingCardDTO.setOwnerId(ownerId);
+				parkingCardDTO.setParkingLotId(parkingLotId);
 				parkingCardDTO.setPlateOwnerName(plateOwnerName);
 				parkingCardDTO.setPlateNumber(carNumber);
+				//parkingCardDTO.setStartTime(startTime);
 				parkingCardDTO.setEndTime(endTime);
-				//parkingCardDTO.setCardType(cardType);
+				parkingCardDTO.setCardType(cardType);
 				parkingCardDTO.setCardNumber(cardNumber);
 				parkingCardDTO.setPlateOwnerPhone(plateOwnerPhone);
 				parkingCardDTO.setIsValid(true);
@@ -88,6 +93,15 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 				if(LOGGER.isDebugEnabled())
 					LOGGER.error("successcommand="+parkingCardDTO.toString());
 				resultList.add(parkingCardDTO);
+				
+				/** ---------以下为假数据 start -------------**/
+				ParkingCardDTO test = new ParkingCardDTO();
+				test = ConvertHelper.convert(parkingCardDTO, ParkingCardDTO.class);
+				test.setPlateOwnerName("测试卡");
+				test.setCardNumber("2133");
+				resultList.add(test);
+				/**---------- 以下为假数据 end  --------------**/
+				
 				return resultList;
 			}
 		}

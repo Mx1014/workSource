@@ -20,25 +20,20 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
-import com.everhomes.rest.parking.ListParkingCardsCommand;
-import com.everhomes.rest.parking.ListParkingLotsCommand;
-import com.everhomes.rest.parking.ParkingCardDTO;
-import com.everhomes.rest.parking.ParkingRechargeRateDTO;
-import com.everhomes.rest.techpark.park.ApplyParkingCardStatus;
+import com.everhomes.rest.parking.ListParkingCardRequestResponse;
+import com.everhomes.rest.parking.ListParkingCardRequestsCommand;
+import com.everhomes.rest.parking.ParkingCardRequestStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhParkingLotsDao;
-import com.everhomes.server.schema.tables.pojos.EhAddresses;
-import com.everhomes.server.schema.tables.pojos.EhParkCharge;
 import com.everhomes.server.schema.tables.pojos.EhParkingCardRequests;
 import com.everhomes.server.schema.tables.pojos.EhParkingLots;
 import com.everhomes.server.schema.tables.pojos.EhParkingRechargeRates;
-import com.everhomes.server.schema.tables.records.EhParkChargeRecord;
 import com.everhomes.server.schema.tables.records.EhParkingCardRequestsRecord;
 import com.everhomes.server.schema.tables.records.EhParkingLotsRecord;
 import com.everhomes.server.schema.tables.records.EhParkingRechargeRatesRecord;
 import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.techpark.park.ParkApplyCard;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 
@@ -148,13 +143,14 @@ public class ParkingProviderImpl implements ParkingProvider {
 	public boolean isApplied(String plateNumber,Long parkingLotId) {
 		
 		final Integer[] count = new Integer[1];
-		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
+		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhParkingCardRequests.class), null, 
                 (DSLContext context, Object reducingContext)-> {
-                	Condition condition = Tables.EH_PARK_APPLY_CARD.APPLY_STATUS.equal(ApplyParkingCardStatus.WAITING.getCode());
-                	condition = condition.or(Tables.EH_PARK_APPLY_CARD.APPLY_STATUS.equal(ApplyParkingCardStatus.NOTIFIED.getCode()));
-                    count[0] = context.selectCount().from(Tables.EH_PARK_APPLY_CARD)
+                	Condition condition = Tables.EH_PARKING_CARD_REQUESTS.STATUS.notEqual(ParkingCardRequestStatus.INACTIVE.getCode());
+                	//condition = condition.or(Tables.EH_PARKING_CARD_REQUESTS.STATUS.equal(ApplyParkingCardStatus.NOTIFIED.getCode()));
+                    count[0] = context.selectCount().from(Tables.EH_PARKING_CARD_REQUESTS)
                             .where(condition)
-                            .and(Tables.EH_PARK_APPLY_CARD.PLATE_NUMBER.equal(plateNumber))
+                            .and(Tables.EH_PARKING_CARD_REQUESTS.PLATE_NUMBER.equal(plateNumber))
+                            .and(Tables.EH_PARKING_CARD_REQUESTS.PARKING_LOT_ID.eq(parkingLotId))
                     .fetchOneInto(Integer.class);
                     return true;
                 });
@@ -163,5 +159,31 @@ public class ParkingProviderImpl implements ParkingProvider {
 		}
 		return false;
 	}
+    
+    @Override
+    public List<ParkingCardRequest> listParkingCardRequests(String ownerType,Long ownerId
+    		,Long parkingLotId,String plateNumber,Long pageAnchor,Integer pageSize){
+    	List<ParkingCardRequest> resultList = null;
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        SelectQuery<EhParkingCardRequestsRecord> query = context.selectQuery(Tables.EH_PARKING_CARD_REQUESTS);
+        
+        if (pageAnchor != null && pageAnchor != 0)
+			query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.ID.gt(pageAnchor));
+        if(StringUtils.isNotBlank(ownerType))
+        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.OWNER_TYPE.eq(ownerType));
+        if(ownerId != null)
+        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.OWNER_ID.eq(ownerId));
+        if(parkingLotId != null)
+        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PARKING_LOT_ID.eq(parkingLotId));
+        if(StringUtils.isNotBlank(plateNumber))
+        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PLATE_NUMBER.eq(plateNumber));
+        query.addOrderBy(Tables.EH_PARKING_CARD_REQUESTS.ID.asc());
+        query.addLimit(pageSize);
+        
+        resultList = query.fetch().map(r -> 
+			ConvertHelper.convert(r, ParkingCardRequest.class));
+        
+    	return resultList;
+    }
     
  }
