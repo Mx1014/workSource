@@ -1,6 +1,6 @@
 //
 // EvhUpdateContactorCommand.h
-// generated at 2016-03-31 20:15:31 
+// generated at 2016-04-01 15:40:23 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -12,15 +12,11 @@
     : NSObject<EvhJsonSerializable>
 
 
-@property(nonatomic, copy) NSString* contactName;
+@property(nonatomic, copy) NSString* contactorName;
 
-@property(nonatomic, copy) NSString* entryValue;
+@property(nonatomic, copy) NSString* contactor;
 
 @property(nonatomic, copy) NSNumber* enterpriseId;
-
-@property(nonatomic, copy) NSNumber* communityId;
-
-@property(nonatomic, copy) NSNumber* namespaceId;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

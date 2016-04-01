@@ -1,6 +1,6 @@
 //
 // EvhUpdateRolePrivilegeCommand.h
-// generated at 2016-03-31 20:15:30 
+// generated at 2016-04-01 15:40:22 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -12,9 +12,13 @@
     : NSObject<EvhJsonSerializable>
 
 
+@property(nonatomic, copy) NSNumber* organizationId;
+
 @property(nonatomic, copy) NSNumber* roleId;
 
 @property(nonatomic, copy) NSString* roleName;
+
+@property(nonatomic, copy) NSString* description_;
 
 // item type NSNumber*
 @property(nonatomic, strong) NSMutableArray* privilegeIds;

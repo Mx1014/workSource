@@ -1,6 +1,6 @@
 //
 // EvhTopicFilterDTO.m
-// generated at 2016-03-31 20:15:32 
+// generated at 2016-04-01 15:40:23 
 //
 #import "EvhTopicFilterDTO.h"
 
@@ -45,10 +45,10 @@
         [jsonObject setObject: self.avatarUrl forKey: @"avatarUrl"];
     if(self.actionUrl)
         [jsonObject setObject: self.actionUrl forKey: @"actionUrl"];
-    if(self.isDefault)
-        [jsonObject setObject: self.isDefault forKey: @"isDefault"];
-    if(self.isLeaf)
-        [jsonObject setObject: self.isLeaf forKey: @"isLeaf"];
+    if(self.defaultFlag)
+        [jsonObject setObject: self.defaultFlag forKey: @"defaultFlag"];
+    if(self.leafFlag)
+        [jsonObject setObject: self.leafFlag forKey: @"leafFlag"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -82,13 +82,13 @@
         if(self.actionUrl && [self.actionUrl isEqual:[NSNull null]])
             self.actionUrl = nil;
 
-        self.isDefault = [jsonObject objectForKey: @"isDefault"];
-        if(self.isDefault && [self.isDefault isEqual:[NSNull null]])
-            self.isDefault = nil;
+        self.defaultFlag = [jsonObject objectForKey: @"defaultFlag"];
+        if(self.defaultFlag && [self.defaultFlag isEqual:[NSNull null]])
+            self.defaultFlag = nil;
 
-        self.isLeaf = [jsonObject objectForKey: @"isLeaf"];
-        if(self.isLeaf && [self.isLeaf isEqual:[NSNull null]])
-            self.isLeaf = nil;
+        self.leafFlag = [jsonObject objectForKey: @"leafFlag"];
+        if(self.leafFlag && [self.leafFlag isEqual:[NSNull null]])
+            self.leafFlag = nil;
 
         return self;
     }

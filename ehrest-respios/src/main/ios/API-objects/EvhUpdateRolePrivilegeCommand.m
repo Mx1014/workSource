@@ -1,6 +1,6 @@
 //
 // EvhUpdateRolePrivilegeCommand.m
-// generated at 2016-03-31 20:15:30 
+// generated at 2016-04-01 15:40:22 
 //
 #import "EvhUpdateRolePrivilegeCommand.h"
 
@@ -32,10 +32,14 @@
 
 -(void) toJson: (NSMutableDictionary*) jsonObject 
 {
+    if(self.organizationId)
+        [jsonObject setObject: self.organizationId forKey: @"organizationId"];
     if(self.roleId)
         [jsonObject setObject: self.roleId forKey: @"roleId"];
     if(self.roleName)
         [jsonObject setObject: self.roleName forKey: @"roleName"];
+    if(self.description_)
+        [jsonObject setObject: self.description_ forKey: @"description"];
     if(self.privilegeIds) {
         NSMutableArray* jsonArray = [NSMutableArray new];
         for(NSNumber* item in self.privilegeIds) {
@@ -48,6 +52,10 @@
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
 {
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
+        self.organizationId = [jsonObject objectForKey: @"organizationId"];
+        if(self.organizationId && [self.organizationId isEqual:[NSNull null]])
+            self.organizationId = nil;
+
         self.roleId = [jsonObject objectForKey: @"roleId"];
         if(self.roleId && [self.roleId isEqual:[NSNull null]])
             self.roleId = nil;
@@ -55,6 +63,10 @@
         self.roleName = [jsonObject objectForKey: @"roleName"];
         if(self.roleName && [self.roleName isEqual:[NSNull null]])
             self.roleName = nil;
+
+        self.description_ = [jsonObject objectForKey: @"description"];
+        if(self.description_ && [self.description_ isEqual:[NSNull null]])
+            self.description_ = nil;
 
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"privilegeIds"];

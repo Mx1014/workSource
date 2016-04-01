@@ -1,16 +1,16 @@
 //
 // EvhAdminCommunityUpdateBuildingRestResponse.h
-// generated at 2016-03-31 20:15:33 
+// generated at 2016-04-01 15:40:24 
 //
 #import "RestResponseBase.h"
-#import "EvhBuildingDTO.h"
+#import "EvhCommunityBuildingDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhAdminCommunityUpdateBuildingRestResponse
 //
 @interface EvhAdminCommunityUpdateBuildingRestResponse : EvhRestResponseBase
 
-@property(nonatomic, strong) EvhBuildingDTO* response;
+@property(nonatomic, strong) EvhCommunityBuildingDTO* response;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
