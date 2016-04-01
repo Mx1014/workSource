@@ -235,12 +235,12 @@
 		<dependency>
 			<groupId>com.everhomes</groupId>
 			<artifactId>ehplatform</artifactId>
-			<version>0.0.7-SNAPSHOT</version>
+			<version>0.0.8-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.everhomes</groupId>
 			<artifactId>ehplatform-persist</artifactId>
-			<version>0.0.3-SNAPSHOT</version>
+			<version>0.0.4-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.everhomes</groupId>
