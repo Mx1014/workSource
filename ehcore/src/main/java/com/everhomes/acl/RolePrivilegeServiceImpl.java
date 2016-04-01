@@ -305,12 +305,27 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     		roleIds.add(role.getRoleId());
 		}
     	
+    	
+    	
     	if(!StringUtils.isEmpty(module)){
     		List<Privilege> s = aclProvider.getPrivilegesByTag(module); //aclProvider 调平台根据角色list+模块 获取权限list接口
     		if(null == s){
     			return privileges;
     		}
-    		List<Long> privilegeIds = aclProvider.getRolesFromResourceAssignments(EntityType.ORGANIZATIONS.getCode(), organizationId, roleIds);
+    		
+    		List<Long> privilegeIds = new ArrayList<Long>();
+    		for (Long roleId : roleIds) {
+    			List<Acl> acls = null;
+    			if(RoleConstants.PLATFORM_PM_ROLES.contains(roleId) || RoleConstants.PLATFORM_ENTERPRISE_ROLES.contains(roleId)){
+    				acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), null, roleId);
+    			}else{
+    				acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), organizationId, roleId);
+    			}
+    			for (Acl acl : acls) {
+    				privilegeIds.add(acl.getPrivilegeId());
+				}
+    			
+			}
     		
     		for (Privilege privilege : s) {
 				if(privilegeIds.contains(privilege.getId())){
@@ -318,21 +333,24 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				}
 			}
     		
-    		return privileges;
-    		
     	}else{
-//    		for (Long roleId : roleIds) {
-//    			List<Acl> acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), organizationId, roleId);
-//    			for (Acl acl : acls) {
-//    				if(!privileges.contains(acl.getPrivilegeId())){
-//    					privileges.add(acl.getPrivilegeId());
-//    				}
-//				}
-//    			
-//			}
+    		List<Long> privilegeIds = new ArrayList<Long>();
+    		for (Long roleId : roleIds) {
+    			List<Acl> acls = null;
+    			if(RoleConstants.PLATFORM_PM_ROLES.contains(roleId) || RoleConstants.PLATFORM_ENTERPRISE_ROLES.contains(roleId)){
+    				acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), null, roleId);
+    			}else{
+    				acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), organizationId, roleId);
+    			}
+    			for (Acl acl : acls) {
+    				privilegeIds.add(acl.getPrivilegeId());
+				}
+    			
+			}
+    		privileges = privilegeIds;
     	}
     	
-    	return aclProvider.getRolesFromResourceAssignments(EntityType.ORGANIZATIONS.getCode(), organizationId, roleIds);
+    	return privileges;
     }
     
     

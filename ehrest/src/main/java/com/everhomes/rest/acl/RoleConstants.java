@@ -1,5 +1,8 @@
 package com.everhomes.rest.acl;
 
+import java.util.Arrays;
+import java.util.List;
+
 public interface RoleConstants {
     // system defined roles
     public static final long Anonymous = 1L;
@@ -31,5 +34,20 @@ public interface RoleConstants {
     
     
     /** 机构管理： 客服管理 */
-    public static final long ORGANIZATION_KEFU = 1007L;
+    public static final long PM_KEFU = 1007L;
+    
+    
+    
+    /** 平台定义的物业角色 */
+    public static final List<Long> PLATFORM_PM_ROLES = Arrays.asList(
+    		PM_SUPER_ADMIN, 
+    		PM_ORDINARY_ADMIN,
+    		PM_KEFU
+    );
+    
+    /** 平台定义的企业角色 */
+    public static final List<Long> PLATFORM_ENTERPRISE_ROLES = Arrays.asList(
+    		ENTERPRISE_SUPER_ADMIN, 
+    		ENTERPRISE_ORDINARY_ADMIN
+    );
 }
