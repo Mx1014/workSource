@@ -1,6 +1,6 @@
 //
 // EvhOpPromotionDTO.h
-// generated at 2016-03-31 15:43:21 
+// generated at 2016-04-01 15:40:23 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -26,9 +26,11 @@
 
 @property(nonatomic, copy) NSNumber* validCount;
 
-@property(nonatomic, copy) NSNumber* status;
+@property(nonatomic, copy) NSNumber* startTime;
 
-@property(nonatomic, copy) NSNumber* createTime;
+@property(nonatomic, copy) NSNumber* endTime;
+
+@property(nonatomic, copy) NSNumber* status;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

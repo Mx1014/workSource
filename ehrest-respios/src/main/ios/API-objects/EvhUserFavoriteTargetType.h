@@ -1,6 +1,6 @@
 //
 // EvhUserFavoriteTargetType.h
-// generated at 2016-03-31 15:43:23 
+// generated at 2016-04-01 15:40:23 
 //
 
 #define EvhUserFavoriteTargetType_TOPIC @"topic"

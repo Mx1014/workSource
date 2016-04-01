@@ -1,6 +1,6 @@
 //
 // EvhTopicScopeDTO.m
-// generated at 2016-03-31 15:43:22 
+// generated at 2016-04-01 15:40:23 
 //
 #import "EvhTopicScopeDTO.h"
 
@@ -49,8 +49,8 @@
         [jsonObject setObject: self.forumId forKey: @"forumId"];
     if(self.targetTag)
         [jsonObject setObject: self.targetTag forKey: @"targetTag"];
-    if(self.isLeaf)
-        [jsonObject setObject: self.isLeaf forKey: @"isLeaf"];
+    if(self.leafFlag)
+        [jsonObject setObject: self.leafFlag forKey: @"leafFlag"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -92,9 +92,9 @@
         if(self.targetTag && [self.targetTag isEqual:[NSNull null]])
             self.targetTag = nil;
 
-        self.isLeaf = [jsonObject objectForKey: @"isLeaf"];
-        if(self.isLeaf && [self.isLeaf isEqual:[NSNull null]])
-            self.isLeaf = nil;
+        self.leafFlag = [jsonObject objectForKey: @"leafFlag"];
+        if(self.leafFlag && [self.leafFlag isEqual:[NSNull null]])
+            self.leafFlag = nil;
 
         return self;
     }

@@ -125,6 +125,7 @@ import com.everhomes.rest.ui.forum.GetTopicSentScopeCommand;
 import com.everhomes.rest.ui.forum.NewTopicBySceneCommand;
 import com.everhomes.rest.ui.forum.PostFilterType;
 import com.everhomes.rest.ui.forum.PostSentScopeType;
+import com.everhomes.rest.ui.forum.SelectorBooleanFlag;
 import com.everhomes.rest.ui.forum.TopicFilterDTO;
 import com.everhomes.rest.ui.forum.TopicScopeDTO;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
@@ -3212,8 +3213,8 @@ public class ForumServiceImpl implements ForumService {
             code = String.valueOf(ForumLocalStringCode.POST_MEMU_COMMUNITY_GROUP);
             menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
             filterDto.setName(menuName);
-            filterDto.setLeaf(false);
-            filterDto.setDefault(false);
+            filterDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());
+            filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());;
             filterList.add(filterDto);
 
             // 菜单：周边小区
@@ -3223,8 +3224,8 @@ public class ForumServiceImpl implements ForumService {
             code = String.valueOf(ForumLocalStringCode.POST_MEMU_COMMUNITY_NEARBY);
             menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
             filterDto.setName(menuName);
-            filterDto.setLeaf(true);
-            filterDto.setDefault(true); // 整组菜单只有一个是默认的
+            filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
+            filterDto.setDefaultFlag(SelectorBooleanFlag.TRUE.getCode());; // 整组菜单只有一个是默认的
             actionUrl = String.format("%s%s?forumId=%s&visibilityScope=%s&communityId=%d", serverContectPath, 
                 "/forum/listTopics", community.getDefaultForumId(), VisibilityScope.NEARBY_COMMUNITIES.getCode(), community.getId());
             filterDto.setActionUrl(actionUrl);
@@ -3237,8 +3238,8 @@ public class ForumServiceImpl implements ForumService {
             code = String.valueOf(ForumLocalStringCode.POST_MEMU_COMMUNITY_ONLY);
             menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
             filterDto.setName(menuName);
-            filterDto.setLeaf(true);
-            filterDto.setDefault(false);
+            filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());
+            filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());
             actionUrl = String.format("%s%s?forumId=%s&visibilityScope=%s&communityId=%d", serverContectPath, 
                 "/forum/listTopics", community.getDefaultForumId(), VisibilityScope.COMMUNITY.getCode(), community.getId());
             filterDto.setActionUrl(actionUrl);
@@ -3253,8 +3254,8 @@ public class ForumServiceImpl implements ForumService {
             code = String.valueOf(ForumLocalStringCode.POST_MEMU_INTEREST_GROUP);
             menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
             filterDto.setName(menuName);
-            filterDto.setLeaf(false);
-            filterDto.setDefault(false);
+            filterDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());;
+            filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());;
             filterList.add(filterDto);
             
             ListPublicGroupCommand groupCmd = new ListPublicGroupCommand();
@@ -3266,8 +3267,8 @@ public class ForumServiceImpl implements ForumService {
                     filterDto.setId(menuId++);
                     filterDto.setParentId(group2Id);
                     filterDto.setName(groupDto.getName());
-                    filterDto.setLeaf(true);
-                    filterDto.setDefault(false);
+                    filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
+                    filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());;
                     actionUrl = String.format("%s%s?forumId=%s&communityId=%d", serverContectPath, 
                         "/forum/listTopics", groupDto.getOwningForumId(), community.getId());
                     filterDto.setActionUrl(actionUrl);
@@ -3309,8 +3310,8 @@ public class ForumServiceImpl implements ForumService {
             code = String.valueOf(ForumLocalStringCode.POST_MEMU_ORGANIZATION_GROUP);
             menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
             filterDto.setName(menuName);
-            filterDto.setLeaf(false);
-            filterDto.setDefault(false);
+            filterDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());;
+            filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());;
             filterList.add(filterDto);
             
             // 公司全部
@@ -3320,8 +3321,8 @@ public class ForumServiceImpl implements ForumService {
             code = String.valueOf(ForumLocalStringCode.POST_MEMU_ALL);
             menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
             filterDto.setName(menuName);
-            filterDto.setLeaf(true);
-            filterDto.setDefault(true); // 整组菜单只有一个是默认的
+            filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
+            filterDto.setDefaultFlag(SelectorBooleanFlag.TRUE.getCode());; // 整组菜单只有一个是默认的
             actionUrl = String.format("%s%s?organizationId=%d&mixType=%d", serverContectPath, 
                 "/org/listOrgMixTopics", organization.getId(), OrganizationTopicMixType.CHILDREN_ALL.getCode());
             filterDto.setActionUrl(actionUrl);
@@ -3332,8 +3333,8 @@ public class ForumServiceImpl implements ForumService {
             filterDto.setId(menuId++);
             filterDto.setParentId(group1Id);
             filterDto.setName(organization.getName());
-            filterDto.setLeaf(true);
-            filterDto.setDefault(false);
+            filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
+            filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());;
             Group group = groupProvider.findGroupById(organization.getGroupId());
             if(group != null) {
                 actionUrl = String.format("%s%s?forumId=%d", serverContectPath, 
@@ -3352,8 +3353,8 @@ public class ForumServiceImpl implements ForumService {
                     filterDto.setId(menuId++);
                     filterDto.setParentId(group1Id);
                     filterDto.setName(subOrg.getName());
-                    filterDto.setLeaf(true);
-                    filterDto.setDefault(false);
+                    filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
+                    filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());;
                     group = groupProvider.findGroupById(subOrg.getGroupId());
                     if(group != null) {
                         actionUrl = String.format("%s%s?forumId=%d", serverContectPath, 
@@ -3372,8 +3373,8 @@ public class ForumServiceImpl implements ForumService {
             code = String.valueOf(ForumLocalStringCode.POST_MEMU_COMMUNITY_GROUP);
             menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
             filterDto.setName(menuName);
-            filterDto.setLeaf(false);
-            filterDto.setDefault(false);
+            filterDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());;
+            filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());;
             filterList.add(filterDto);
             
             // 公司管理的全部小区
@@ -3383,8 +3384,8 @@ public class ForumServiceImpl implements ForumService {
             code = String.valueOf(ForumLocalStringCode.POST_MEMU_ALL);
             menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
             filterDto.setName(menuName);
-            filterDto.setLeaf(true);
-            filterDto.setDefault(false);
+            filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
+            filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());;
             actionUrl = String.format("%s%s?organizationId=%d&mixType=%d", serverContectPath, 
                 "/org/listOrgMixTopics", organization.getId(), OrganizationTopicMixType.COMMUNITY_ALL.getCode());
             filterDto.setActionUrl(actionUrl);
@@ -3399,8 +3400,8 @@ public class ForumServiceImpl implements ForumService {
                     filterDto.setId(menuId++);
                     filterDto.setParentId(group2Id);
                     filterDto.setName(community.getName());
-                    filterDto.setLeaf(true);
-                    filterDto.setDefault(false); 
+                    filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
+                    filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());; 
                     actionUrl = String.format("%s%s?forumId=%d", serverContectPath, 
                         "/forum/listTopics", community.getDefaultForumId());
                     filterDto.setActionUrl(actionUrl);
@@ -3513,7 +3514,7 @@ public class ForumServiceImpl implements ForumService {
             code = String.valueOf(ForumLocalStringCode.POST_MEMU_COMMUNITY_GROUP);
             menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
             sentScopeDto.setName(menuName);
-            sentScopeDto.setLeaf(false);
+            sentScopeDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());;
             filterList.add(sentScopeDto);
 
             // 菜单：周边小区
@@ -3523,7 +3524,7 @@ public class ForumServiceImpl implements ForumService {
             code = String.valueOf(ForumLocalStringCode.POST_MEMU_COMMUNITY_NEARBY);
             menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
             sentScopeDto.setName(menuName);
-            sentScopeDto.setLeaf(true);
+            sentScopeDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
             sentScopeDto.setForumId(community.getDefaultForumId());
             sentScopeDto.setSceneToken(sceneToken);
             sentScopeDto.setTargetTag(PostEntityTag.USER.getCode());
@@ -3536,7 +3537,7 @@ public class ForumServiceImpl implements ForumService {
             code = String.valueOf(ForumLocalStringCode.POST_MEMU_COMMUNITY_ONLY);
             menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
             sentScopeDto.setName(menuName);
-            sentScopeDto.setLeaf(true);
+            sentScopeDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
             sentScopeDto.setForumId(community.getDefaultForumId());
             sentScopeDto.setSceneToken(sceneToken);
             sentScopeDto.setTargetTag(PostEntityTag.USER.getCode());
@@ -3551,7 +3552,7 @@ public class ForumServiceImpl implements ForumService {
             code = String.valueOf(ForumLocalStringCode.POST_MEMU_INTEREST_GROUP);
             menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
             sentScopeDto.setName(menuName);
-            sentScopeDto.setLeaf(false);
+            sentScopeDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());;
             filterList.add(sentScopeDto);
             
             ListPublicGroupCommand groupCmd = new ListPublicGroupCommand();
@@ -3563,7 +3564,7 @@ public class ForumServiceImpl implements ForumService {
                     sentScopeDto.setId(menuId++);
                     sentScopeDto.setParentId(group2Id);
                     sentScopeDto.setName(groupDto.getName());
-                    sentScopeDto.setLeaf(true);
+                    sentScopeDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
                     sentScopeDto.setForumId(groupDto.getOwningForumId());
                     sentScopeDto.setSceneToken(sceneToken);
                     sentScopeDto.setTargetTag(PostEntityTag.USER.getCode());
@@ -3605,7 +3606,7 @@ public class ForumServiceImpl implements ForumService {
             code = String.valueOf(ForumLocalStringCode.POST_MEMU_ORGANIZATION_GROUP);
             menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
             sentScopeDto.setName(menuName);
-            sentScopeDto.setLeaf(false);
+            sentScopeDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());;
             sentScopeList.add(sentScopeDto);
             
             // 本公司
@@ -3613,7 +3614,7 @@ public class ForumServiceImpl implements ForumService {
             sentScopeDto.setId(menuId++);
             sentScopeDto.setParentId(group1Id);
             sentScopeDto.setName(organization.getName());
-            sentScopeDto.setLeaf(true);
+            sentScopeDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
             Group groupDto = groupProvider.findGroupById(organization.getGroupId());
             if(groupDto != null) {
                 sentScopeDto.setForumId(groupDto.getOwningForumId());
@@ -3632,7 +3633,7 @@ public class ForumServiceImpl implements ForumService {
                     sentScopeDto.setId(menuId++);
                     sentScopeDto.setParentId(group1Id);
                     sentScopeDto.setName(subOrg.getName());
-                    sentScopeDto.setLeaf(true);
+                    sentScopeDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
                     groupDto = groupProvider.findGroupById(subOrg.getGroupId());
                     if(groupDto != null) {
                         sentScopeDto.setForumId(groupDto.getOwningForumId());
@@ -3651,7 +3652,7 @@ public class ForumServiceImpl implements ForumService {
             code = String.valueOf(ForumLocalStringCode.POST_MEMU_COMMUNITY_GROUP);
             menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
             sentScopeDto.setName(menuName);
-            sentScopeDto.setLeaf(false);
+            sentScopeDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());;
             sentScopeList.add(sentScopeDto);
             
             // 公司管理的单个小区
@@ -3663,7 +3664,7 @@ public class ForumServiceImpl implements ForumService {
                     sentScopeDto.setId(menuId++);
                     sentScopeDto.setParentId(group2Id);
                     sentScopeDto.setName(community.getName());
-                    sentScopeDto.setLeaf(true);
+                    sentScopeDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
                     sentScopeDto.setForumId(groupDto.getOwningForumId());
                     sentScopeDto.setSceneToken(sceneToken);
                     sentScopeDto.setTargetTag(PostEntityTag.USER.getCode());

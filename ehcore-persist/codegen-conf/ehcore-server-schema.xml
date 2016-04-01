@@ -6,7 +6,7 @@
     <driver>com.mysql.jdbc.Driver</driver>
     <url>jdbc:mysql://db-master:3306/ehcore</url>
     <user>ehcore</user>
-    <password>123456</password>
+    <password>ehcore</password>
 </jdbc>
 
 <generator>

@@ -1,6 +1,6 @@
 //
 // EvhTopicFilterDTO.h
-// generated at 2016-03-31 15:43:22 
+// generated at 2016-04-01 15:40:23 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -26,9 +26,9 @@
 
 @property(nonatomic, copy) NSString* actionUrl;
 
-@property(nonatomic, copy) NSNumber* isDefault;
+@property(nonatomic, copy) NSNumber* defaultFlag;
 
-@property(nonatomic, copy) NSNumber* isLeaf;
+@property(nonatomic, copy) NSNumber* leafFlag;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
