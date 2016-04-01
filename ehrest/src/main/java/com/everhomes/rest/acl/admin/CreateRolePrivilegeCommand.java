@@ -18,6 +18,8 @@ public class CreateRolePrivilegeCommand {
 	
     private String roleName;
     
+    private String description;
+    
     @ItemType(Long.class)
     private List<Long> privilegeIds;
     
@@ -35,6 +37,15 @@ public class CreateRolePrivilegeCommand {
 
 	public void setRoleName(String roleName) {
 		this.roleName = roleName;
+	}
+
+	
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	public List<Long> getPrivilegeIds() {
