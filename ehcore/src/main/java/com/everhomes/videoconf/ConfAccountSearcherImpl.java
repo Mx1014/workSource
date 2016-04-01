@@ -149,10 +149,20 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
         	FilterBuilder nfb = FilterBuilders.termFilter("ownerId", 0);
         	fb = FilterBuilders.notFilter(nfb);
         }
-        if(cmd.getEnterpriseId() != null)
-        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("enterpriseId", cmd.getEnterpriseId()));
-        if(cmd.getStatus() != null)
-        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
+        if(cmd.getEnterpriseId() != null) {
+        	if(fb == null) {
+        		fb = FilterBuilders.termFilter("enterpriseId", cmd.getEnterpriseId());
+        	} else {
+        		fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("enterpriseId", cmd.getEnterpriseId()));
+        	}
+        }
+        if(cmd.getStatus() != null) {
+        	if(fb == null) {
+        		fb = FilterBuilders.termFilter("status", cmd.getStatus());
+        	} else {
+        		fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
+        	}
+        }
         
         
         
