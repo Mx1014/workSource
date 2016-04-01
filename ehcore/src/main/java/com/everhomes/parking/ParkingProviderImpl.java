@@ -32,6 +32,7 @@ import com.everhomes.server.schema.tables.pojos.EhParkingLots;
 import com.everhomes.server.schema.tables.pojos.EhParkingRechargeRates;
 import com.everhomes.server.schema.tables.records.EhParkingCardRequestsRecord;
 import com.everhomes.server.schema.tables.records.EhParkingLotsRecord;
+import com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord;
 import com.everhomes.server.schema.tables.records.EhParkingRechargeRatesRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.techpark.park.ParkApplyCard;
@@ -192,6 +193,32 @@ public class ParkingProviderImpl implements ParkingProvider {
 			ConvertHelper.convert(r, ParkingCardRequest.class));
         
     	return resultList;
+    }
+    
+    public List<ParkingRechargeOrder> listParkingRechargeOrders(String ownerType,Long ownerId
+    		,Long parkingLotId,String plateNumber,Long pageAnchor,Integer pageSize){
+    	List<ParkingRechargeOrder> resultList = null;
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        SelectQuery<EhParkingRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_ORDERS);
+        
+        if (pageAnchor != null && pageAnchor != 0)
+			query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.ID.gt(pageAnchor));
+        if(StringUtils.isNotBlank(ownerType))
+        	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.OWNER_TYPE.eq(ownerType));
+        if(ownerId != null)
+        	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.OWNER_ID.eq(ownerId));
+        if(parkingLotId != null)
+        	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PARKING_LOT_ID.eq(parkingLotId));
+        if(StringUtils.isNotBlank(plateNumber))
+        	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PLATE_NUMBER.eq(plateNumber));
+        query.addOrderBy(Tables.EH_PARKING_RECHARGE_ORDERS.ID.asc());
+        query.addLimit(pageSize);
+        
+        resultList = query.fetch().map(r -> 
+			ConvertHelper.convert(r, ParkingRechargeOrder.class));
+        
+    	return resultList;
+    	
     }
     
  }

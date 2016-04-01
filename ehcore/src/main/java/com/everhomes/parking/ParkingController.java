@@ -134,6 +134,7 @@ public class ParkingController extends ControllerBase {
     public RestResponse listParkingRechargeOrders(ListParkingRechargeOrdersCommand cmd) {
         ListParkingRechargeOrdersResponse cmdResponse = null;
         
+        cmdResponse = parkingService.listParkingRechargeOrders(cmd);
         RestResponse response = new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

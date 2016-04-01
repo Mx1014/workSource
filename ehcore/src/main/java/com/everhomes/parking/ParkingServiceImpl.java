@@ -301,6 +301,18 @@ public class ParkingServiceImpl implements ParkingService {
 	public ListParkingRechargeOrdersResponse listParkingRechargeOrders(ListParkingRechargeOrdersCommand cmd){
 		ListParkingRechargeOrdersResponse response = new ListParkingRechargeOrdersResponse();
 		
+		List<ParkingRechargeOrder> list = parkingProvider.listParkingRechargeOrders
+    			(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId(), 
+    					cmd.getPlateNumber(), cmd.getPageAnchor(), cmd.getPageSize());
+    					
+    	if(list.size() > 0){
+    		response.setOrders(list.stream().map(r -> ConvertHelper.convert(r, ParkingRechargeOrderDTO.class))
+    				.collect(Collectors.toList()));
+    		response.setNextPageAnchor(list.get(list.size()-1).getId());
+    	}
+    	if(list.size() != cmd.getPageSize()){
+    		response.setNextPageAnchor(null);
+    	}
 		
 		return response;
 	}
