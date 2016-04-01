@@ -14,6 +14,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.MimeUtility;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +68,7 @@ public class JMailHandler implements MailHandler {
         msg.setRecipient(Message.RecipientType.TO, new InternetAddress(to));  
         
         subject = (subject == null) ? "" : subject;
-        msg.setSubject(subject);
+        msg.setSubject(MimeUtility.decodeText(subject));
  
         // 将邮件中各个部分组合到一个"mixed"型的 MimeMultipart 对象  
         MimeMultipart multiPart = new MimeMultipart("mixed");  
@@ -107,7 +108,8 @@ public class JMailHandler implements MailHandler {
  
         // 正文的文本部分  
         MimeBodyPart textBody = new MimeBodyPart();  
-        textBody.setContent(content, "text/html;charset=utf8");  
+        //textBody.setContent(content, "text/html;charset=utf8");  
+        textBody.setText(content);
         contentMulti.addBodyPart(textBody);  
  
         // 将上面"related"型的 MimeMultipart 对象作为邮件的正文  
