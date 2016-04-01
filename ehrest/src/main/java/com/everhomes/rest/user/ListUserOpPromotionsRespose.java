@@ -18,7 +18,7 @@ public class ListUserOpPromotionsRespose {
     public ListUserOpPromotionsRespose() {
     }
 
-    public ListUserOpPromotionsRespose(List<OpPromotionDTO> contacts, Long nextPageAnchor) {
+    public ListUserOpPromotionsRespose(List<OpPromotionDTO> promotions, Long nextPageAnchor) {
         super();
         this.promotions = promotions;
         this.nextPageAnchor = nextPageAnchor;
