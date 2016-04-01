@@ -28,7 +28,7 @@ CREATE TABLE `eh_op_promotion_policies`(
     `id` BIGINT NOT NULL,
     `namespace_id` INTEGER NOT NULL DEFAULT 0,
     `name` VARCHAR(512) NOT NULL DEFAULT '' COMMENT 'the identifer of the policy',
-	`class_name` VARCHAR(512) DEFAULT '' COMMENT 'the name of class which implement how to execute the policy',
+	`display_name` VARCHAR(512) DEFAULT '' COMMENT 'the name to display',
 	`description` TEXT,
     `create_time` DATETIME,
     
@@ -74,6 +74,8 @@ CREATE TABLE `eh_op_promotions`(
 	`trigger_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refer to the id of eh_promotion_activity_triggers',
     `title` VARCHAR(512) NOT NULL DEFAULT 0 COMMENT 'the title of the activity',
 	`description` TEXT,
+	`start_time` DATETIME,
+    `end_time` DATETIME,
 	`scope_code` TINYINT NOT NULL DEFAULT 0 COMMENT '0: all, 1: community, 2: city, 3: user',
     `scope_id` BIGINT,
 	`action_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'according to document',
