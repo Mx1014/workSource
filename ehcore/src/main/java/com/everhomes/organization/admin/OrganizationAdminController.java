@@ -714,7 +714,7 @@ public class OrganizationAdminController extends ControllerBase {
     @RestReturn(value=ListOrganizationMemberCommandResponse.class)
     public RestResponse listOrganizationAdministrators(@Valid ListOrganizationAdministratorCommand cmd) {
     	List<Long> roleIds = new ArrayList<Long>();
-    	roleIds.add(RoleConstants.ORGANIZATION_ADMIN);
+//    	roleIds.add(RoleConstants.ORGANIZATION_ADMIN);
     	ListOrganizationMemberCommandResponse res = organizationService.listOrganizationPersonnelsByRoleIds(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);

@@ -19,12 +19,14 @@ import java.util.stream.Collectors;
 
 
 
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
+
 
 
 
@@ -63,7 +65,6 @@ import com.everhomes.rest.acl.admin.RoleDTO;
 import com.everhomes.rest.acl.admin.UpdateRolePrivilegeCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationRoleMapStatus;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.PrivateFlag;
 import com.everhomes.user.User;
@@ -177,7 +178,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			Role role = aclProvider.getRoleById(cmd.getRoleId());
 			role.setName(cmd.getRoleName());
 			role.setDescription(cmd.getDescription());
-//			aclProvider.
+			aclProvider.updateRole(role);
 			
 			List<Acl> acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getRoleId());
 			for (Acl acl : acls) {
@@ -237,6 +238,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		return this.getListWebMenuPrivilege(webMenuPrivileges);
 	}
 	
+	
+	
+	
 	@Override
 	public List<RoleDTO> listAclRoleByOrganizationIds(ListAclRolesCommand cmd) {
 		
@@ -291,24 +295,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
      * @return
      */
     public List<Long> getUserPrivileges(String module ,Long organizationId, Long userId){
-    	Organization org = organizationProvider.findOrganizationById(organizationId);
     	
-    	List<RoleAssignment> userRoles = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), userId);
+    	List<RoleAssignment> userRoles = this.getUserRoles(organizationId, userId);
     	
-    	if(null == org){
-    		return new ArrayList<Long>();
-    	}
-    	
-    	if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE){
-    		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, org.getId());
-    		if(null != member && null != member.getGroupId() && 0 != member.getGroupId()){
-    			organizationId = member.getGroupId();
-    		}
-    	}
-    	
-    	List<RoleAssignment> userOrgRoles = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.ORGANIZATIONS.getCode(), organizationId);
-    	
-    	userRoles.addAll(userOrgRoles);
     	List<Long> privileges = new ArrayList<Long>();
     	
     	List<Long> roleIds = new ArrayList<Long>();
@@ -345,6 +334,62 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     	
     	return aclProvider.getRolesFromResourceAssignments(EntityType.ORGANIZATIONS.getCode(), organizationId, roleIds);
     }
+    
+    
+    @Override
+    public boolean checkAdministrators(Long organizationId) {
+    	User user = UserContext.current().getUser();
+    	
+    	Organization org = organizationProvider.findOrganizationById(organizationId);
+    	
+    	if(null == org){
+    		return false;
+    	}
+    	
+    	List<RoleAssignment> userRoles = this.getUserRoles(organizationId, user.getId());
+    	
+    	List<Long> roleIds = new ArrayList<Long>();
+    	for (RoleAssignment role : userRoles) {
+    		roleIds.add(role.getRoleId());
+		}
+    	
+    	if(OrganizationType.fromCode(org.getOrganizationType()) == OrganizationType.ENTERPRISE){
+    		if(roleIds.contains(RoleConstants.ENTERPRISE_SUPER_ADMIN) || roleIds.contains(RoleConstants.ENTERPRISE_ORDINARY_ADMIN)){
+    			return true;
+    		}
+    	}else{
+    		if(roleIds.contains(RoleConstants.PM_SUPER_ADMIN) || roleIds.contains(RoleConstants.PM_ORDINARY_ADMIN)){
+    			return true;
+    		}
+    	}
+    	
+    	return false;
+    }
+    
+    private List<RoleAssignment> getUserRoles(Long organizationId, Long userId){
+    	
+    	Organization org = organizationProvider.findOrganizationById(organizationId);
+    	
+    	List<RoleAssignment> userRoles = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), userId);
+    	
+    	if(null == org){
+    		return new ArrayList<RoleAssignment>();
+    	}
+    	
+    	if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE){
+    		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, org.getId());
+    		if(null != member && null != member.getGroupId() && 0 != member.getGroupId()){
+    			organizationId = member.getGroupId();
+    		}
+    	}
+    	
+    	List<RoleAssignment> userOrgRoles = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.ORGANIZATIONS.getCode(), organizationId);
+    	
+    	userRoles.addAll(userOrgRoles);
+    	
+    	return userRoles;
+    }
+    
     
     /**
      * 获取菜单 map

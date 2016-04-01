@@ -12,11 +12,10 @@ public interface RoleConstants {
     public static final long SystemExtension = 8L;
 
     /** 机构管理，超级管理员，拥有 所有权限 */
-    public static final long ORGANIZATION_ADMIN = 1001L;
-    
+    public static final long PM_SUPER_ADMIN = 1001L;
     
     /** 机构管理: 普通管理员，相对于超级管理员，少了对管理员的操作 */
-    public static final long ORGANIZATION_TASK_MGT = 1002L;
+    public static final long PM_ORDINARY_ADMIN = 1002L;
     
     /** 机构管理: 财务管理 */
     public static final long ORGANIZATION_ACCOUNTING = 1003L;
@@ -25,9 +24,9 @@ public interface RoleConstants {
     
     
     /** 企业管理:企业超级管理员  拥有内部管理的全部权限 */
-    public static final long ORGANIZATION_GROUP_MEMBER_MGT = 1005L;
+    public static final long ENTERPRISE_SUPER_ADMIN = 1005L;
     /** 企业管理:企业普通管理员，相对于超级管理员，少了对管理员的操作 */
-    public static final long ORGANIZATION_SERVICE_OPERATOR = 1006L;
+    public static final long ENTERPRISE_ORDINARY_ADMIN = 1006L;
     
     
     

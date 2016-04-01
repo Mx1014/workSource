@@ -491,7 +491,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 		
 		List<Long> roles = new ArrayList<Long>();
-		roles.add(RoleConstants.ORGANIZATION_GROUP_MEMBER_MGT);
+		roles.add(RoleConstants.ENTERPRISE_SUPER_ADMIN);
 		
 		if(flag){
 			List<OrganizationMember> members = this.getOrganizationAdminMemberRole(dto.getOrganizationId(), roles);
@@ -3914,23 +3914,23 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		userRoleIds = new ArrayList<Long>();
 		
-		OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), organizationId);
-		
-		if(null == organizationMember){
-			userRoleIds.add(RoleConstants.ORGANIZATION_TASK_MGT);
-			return userRoleIds;
-		}
-		
-		if(null != organizationMember.getGroupId()){
-			userRoleIds =  aclProvider.getRolesFromResourceAssignments("system", null, EntityType.ORGANIZATIONS.getCode(), organizationMember.getGroupId(), null);
-			return userRoleIds;
-		}
-		
-		if(OrganizationMemberGroupType.MANAGER.getCode().equals(organizationMember.getMemberGroup())){
-			userRoleIds.add(RoleConstants.ORGANIZATION_ADMIN);
-		}else{
-			userRoleIds.add(RoleConstants.ORGANIZATION_TASK_MGT);
-		}
+//		OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), organizationId);
+//		
+//		if(null == organizationMember){
+//			userRoleIds.add(RoleConstants.ORGANIZATION_TASK_MGT);
+//			return userRoleIds;
+//		}
+//		
+//		if(null != organizationMember.getGroupId()){
+//			userRoleIds =  aclProvider.getRolesFromResourceAssignments("system", null, EntityType.ORGANIZATIONS.getCode(), organizationMember.getGroupId(), null);
+//			return userRoleIds;
+//		}
+//		
+//		if(OrganizationMemberGroupType.MANAGER.getCode().equals(organizationMember.getMemberGroup())){
+//			userRoleIds.add(RoleConstants.ORGANIZATION_ADMIN);
+//		}else{
+//			userRoleIds.add(RoleConstants.ORGANIZATION_TASK_MGT);
+//		}
 		
 		return userRoleIds;
 	}
@@ -4394,7 +4394,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				aclProvider.deleteRoleAssignment(cmd.getAssignmentId());
 			
 			SetAclRoleAssignmentCommand roleCmd = new SetAclRoleAssignmentCommand();
-			roleCmd.setRoleId(RoleConstants.ORGANIZATION_GROUP_MEMBER_MGT);
+			roleCmd.setRoleId(RoleConstants.ENTERPRISE_SUPER_ADMIN);
 			roleCmd.setTargetId(m.getTargetId());
 			this.setAclRoleAssignmentRole(roleCmd, EntityType.USER);
 			
@@ -5256,8 +5256,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	List<Long> memberIds = new ArrayList<Long>();
 	    	
 	    	List<Long> roles = new ArrayList<Long>();
-	    	roles.add(RoleConstants.ORGANIZATION_GROUP_MEMBER_MGT);
-	    	roles.add(RoleConstants.ORGANIZATION_ADMIN);
+	    	roles.add(RoleConstants.PM_ORDINARY_ADMIN);
+	    	roles.add(RoleConstants.PM_SUPER_ADMIN);
 	    	
 	    	List<OrganizationMember> members = this.getOrganizationAdminMemberRole(organizationId, roles);
 	      
@@ -5641,6 +5641,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	
 			/* 根据用户不同 查询不同的任务类型贴*/
 	    	cmd.setTargetId(0l);
+	    	cmd.setTaskStatus(OrganizationTaskStatus.UNPROCESSED.getCode());
 			if(privileges.contains(PrivilegeConstants.TaskAllListPosts)){
 				cmd.setTaskType("");
 			}else if(privileges.contains(PrivilegeConstants.TaskGuaranteeListPosts)){
