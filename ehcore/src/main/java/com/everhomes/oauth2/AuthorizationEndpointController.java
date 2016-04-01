@@ -14,7 +14,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,7 +69,7 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 	private UserService userService;
 
 	@RequestMapping("authorize")
-	public String authorize(
+	public Object authorize(
 			@RequestParam(value="response_type", required = true) String responseType,
 			@RequestParam(value="client_id", required = true) String clientId,
 			@RequestParam(value="redirect_uri", required = false) String redirectUri,
@@ -109,7 +108,17 @@ public class AuthorizationEndpointController extends OAuth2ControllerBase {
 		cmd.setredirect_uri(redirectUri);
 		cmd.setScope(scope);
 		cmd.setState(state);
-
+		//has logon
+		User user = UserContext.current().getUser();
+		if(user!=null&&user.getId()!=User.ANNONYMOUS_UID){
+			URI uri = oAuth2Service.confirmAuthorization(user, cmd);
+			if (uri != null) {
+				HttpHeaders httpHeaders = new HttpHeaders();
+				httpHeaders.setLocation(uri);
+				return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+			} 
+		}
+		//no logon
 		model.addAttribute("viewState", WebTokenGenerator.getInstance().toWebToken(cmd));
 		return "oauth2-authorize";
 	}

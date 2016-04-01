@@ -311,13 +311,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Autowired
 	private AuditLogProvider auditLogProvider;
-	
+
 	@Autowired
 	private EnterpriseProvider enterpriseProvider;
-	
+
 	@Autowired
 	private EnterpriseContactProvider enterpriseContactProvider;
-	
+
 	@Autowired
 	private AppProvider appProvider;
 
@@ -634,7 +634,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	 */
 	private void sendMSMToUser(long topicId, long userId, long owerId, long category) {
 		//给维修人员发送短信是否显示业主地址
-//		String template = configurationProvider.getValue(ASSIGN_TASK_AUTO_SMS, "");
+		//		String template = configurationProvider.getValue(ASSIGN_TASK_AUTO_SMS, "");
 		List<UserIdentifier> userList = this.userProvider.listUserIdentifiersOfUser(userId);
 		userList.stream().filter((u) -> {
 			if(u.getIdentifierType() != IdentifierType.MOBILE.getCode())
@@ -643,16 +643,16 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		});
 		if(userList == null || userList.isEmpty()) return ;
 		String cellPhone = userList.get(0).getIdentifierToken();
-//		if(StringUtils.isEmpty(template)){
-//			template = "该物业已在处理";
-//		}
-//		if (!StringUtils.isEmpty(template)) {
-//			this.smsProvider.sendSms(cellPhone, template);
-//		}
-	    String templateScope = SmsTemplateCode.SCOPE;
-	    int templateId = SmsTemplateCode.VERIFICATION_CODE;
-	    String templateLocale = UserContext.current().getUser().getLocale();
-	    smsProvider.sendSms( userList.get(0).getNamespaceId(), cellPhone, templateScope, templateId, templateLocale, null);
+		//		if(StringUtils.isEmpty(template)){
+		//			template = "该物业已在处理";
+		//		}
+		//		if (!StringUtils.isEmpty(template)) {
+		//			this.smsProvider.sendSms(cellPhone, template);
+		//		}
+		String templateScope = SmsTemplateCode.SCOPE;
+		int templateId = SmsTemplateCode.VERIFICATION_CODE;
+		String templateLocale = UserContext.current().getUser().getLocale();
+		smsProvider.sendSms( userList.get(0).getNamespaceId(), cellPhone, templateScope, templateId, templateLocale, null);
 	}
 
 	@Override
@@ -870,12 +870,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Override
 	public UserTokenCommandResponse findUserByIndentifier(UserTokenCommand cmd) {
-        User operator = UserContext.current().getUser();
-        Integer namespaceId = Namespace.DEFAULT_NAMESPACE;
-        if(operator != null) {
-            namespaceId = operator.getNamespaceId();
-        }
-        
+		User operator = UserContext.current().getUser();
+		Integer namespaceId = Namespace.DEFAULT_NAMESPACE;
+		if(operator != null) {
+			namespaceId = operator.getNamespaceId();
+		}
+
 		UserTokenCommandResponse commandResponse = new UserTokenCommandResponse();
 		User user = userService.findUserByIndentifier(namespaceId, cmd.getUserIdentifier());
 		if(user != null)
@@ -1215,37 +1215,37 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Override
 	public void sendNoticeToFamily(PropCommunityBuildAddessCommand cmd) {
-		
+
 		this.checkCommunityIdIsNull(cmd.getCommunityId());
 		Community community = this.checkCommunity(cmd.getCommunityId());
 		if(community.getCommunityType() == CommunityType.RESIDENTIAL.getCode()) {
 			sendNoticeToCommunityPmOwner(cmd);
 		} 
-		
+
 		else if(community.getCommunityType() == CommunityType.COMMERCIAL.getCode()) {
 			//sendNoticeToEnterpriseContactor(cmd);
 			this.sendNoticeToOrganizationMember(cmd);
 		}
-		
+
 	}
-	
+
 	public void sendNoticeToEnterpriseContactor(PropCommunityBuildAddessCommand cmd) {
-		
+
 		Long communityId = cmd.getCommunityId();
 		List<String> buildingNames = cmd.getBuildingNames();
 		List<Long> addressIds = cmd.getAddressIds();
-		
+
 		List<Long> enterpriseIds = new ArrayList<Long>();
 		List<EnterpriseContact> contacts = new ArrayList<EnterpriseContact>();
-		
+
 		//按园区发送: buildingNames 和 addressIds 为空。
 		if((buildingNames == null || buildingNames.size() == 0) && (addressIds == null || addressIds.size() == 0)){
 			List<EnterpriseCommunityMap> enterpriseMapList = enterpriseProvider.queryEnterpriseMapByCommunityId(new ListingLocator(), 
-		            communityId, Integer.MAX_VALUE - 1, (loc, query) -> {
-		                query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.COMMUNITY_ID.eq(communityId));
-		                query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_TYPE.eq(EnterpriseCommunityMapType.Enterprise.getCode()));
-		                return null;
-		            });
+					communityId, Integer.MAX_VALUE - 1, (loc, query) -> {
+						query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.COMMUNITY_ID.eq(communityId));
+						query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_TYPE.eq(EnterpriseCommunityMapType.Enterprise.getCode()));
+						return null;
+					});
 			if(enterpriseMapList != null && enterpriseMapList.size() > 0) {
 				for(EnterpriseCommunityMap enterpriseMap : enterpriseMapList) {
 					enterpriseIds.add(enterpriseMap.getMemberId());
@@ -1255,7 +1255,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				}
 			}
 		}
-		
+
 		//按地址发送：
 		else if(addressIds != null && addressIds.size()  > 0){
 			for (Long addressId : addressIds) {
@@ -1268,7 +1268,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				}
 			}
 		}
-		
+
 		//按楼栋发送：
 		else if((addressIds == null || addressIds.size()  == 0 )  && (buildingNames != null && buildingNames.size() > 0)){
 			for (String buildingName : buildingNames) {
@@ -1286,16 +1286,16 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				}
 			}
 		}
-		
-//		if(enterpriseIds != null && enterpriseIds.size() > 0){
-//			for (Long enterpriseId : enterpriseIds) {
-//				sendNoticeToFamilyById(enterpriseId, cmd.getMessage());
-//			}
-//		}
+
+		//		if(enterpriseIds != null && enterpriseIds.size() > 0){
+		//			for (Long enterpriseId : enterpriseIds) {
+		//				sendNoticeToFamilyById(enterpriseId, cmd.getMessage());
+		//			}
+		//		}
 
 		processCommunityEnterpriseContactor(communityId,contacts,cmd.getMessage());
 	}
-	
+
 	@Override
 	public void sendNoticeToOrganizationMember(PropCommunityBuildAddessCommand cmd) {
 		Long communityId = cmd.getCommunityId();
@@ -1305,7 +1305,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		List<String> phones = cmd.getMobilePhones();
 		List<Organization> orgs = new ArrayList<Organization>();
 		Integer namespaceId = UserContext.getCurrentNamespaceId(null);
-		
+
 		/** 根据地址获取要推送的企业 **/
 		if(null != addressIds && 0 != addressIds.size()){
 			for (Long addressId : addressIds) {
@@ -1313,8 +1313,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				if(null != orgAddress)
 					orgs.add(organizationProvider.findOrganizationById(orgAddress.getOrganizationId()));
 			}
-		
-		/** 根据楼栋Id获取要推送的企业  **/
+
+			/** 根据楼栋Id获取要推送的企业  **/
 		}else if(null != buildingIds && 0 != buildingIds.size()){
 			for (Long buildingId : buildingIds) {
 				List<OrganizationAddress> orgAddresses = organizationProvider.listOrganizationAddressByBuildingId(buildingId, Integer.MAX_VALUE, null);
@@ -1323,8 +1323,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 						orgs.add(organizationProvider.findOrganizationById(organizationAddress.getOrganizationId()));
 				}
 			}
-		
-		/** 根据楼栋名称获取要推送的企业**/
+
+			/** 根据楼栋名称获取要推送的企业**/
 		}else if(null != buildingNames && 0 != buildingNames.size()){
 			for (String buildingName : buildingNames) {
 				List<OrganizationAddress> orgAddresses = organizationProvider.listOrganizationAddressByBuildingName(buildingName);
@@ -1333,18 +1333,18 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 						orgs.add(organizationProvider.findOrganizationById(organizationAddress.getOrganizationId()));
 				}
 			}
-		
-		/** 根据小区获取要推送的企业  **/
+
+			/** 根据小区获取要推送的企业  **/
 		}else if(null != communityId){
 			List<OrganizationCommunityRequest> requests = organizationProvider.queryOrganizationCommunityRequestByCommunityId(new CrossShardListingLocator(), communityId, 100000, null);
 			for (OrganizationCommunityRequest req : requests) {
 				orgs.add(organizationProvider.findOrganizationById(req.getMemberId()));
 			}
 		}
-		
+
 		/** 获取全部企业的全部人员 **/
 		List<OrganizationMember> members = this.getOrganizationMembersByAddress(orgs);
-		
+
 		/** 根据电话号码推送   **/
 		if(null != phones && 0 != phones.size()){
 			members = new ArrayList<OrganizationMember>();
@@ -1360,11 +1360,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				members.add(member);
 			}
 		}
-		
+
 		/** 推送消息 **/
 		this.processSmsByMembers(members, cmd.getMessage());
 	}
-	
+
 	/**
 	 * 获取企业所以人员
 	 * @param orgs
@@ -1379,10 +1379,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		}
 		return members;
 	}
-	
+
 	private void processCommunityEnterpriseContactor(Long communityId,List<EnterpriseContact> contacts,String message) {
 
-        List<String> phones = new ArrayList<String>();
+		List<String> phones = new ArrayList<String>();
 		List<Long> userIds = new ArrayList<Long>();
 		if(contacts != null && contacts.size() > 0){
 			for (EnterpriseContact contact : contacts) {
@@ -1392,11 +1392,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 					if(entries != null && entries.size() > 0) {
 						phones.add(entries.get(0).getEntryValue());
 					}
-					
+
 				}
 				else{//是user，发个人消息
 					userIds.add(contact.getUserId());
-					
+
 				}
 			}
 		}
@@ -1408,27 +1408,27 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			}
 		}
 
-	    List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_MSG, message);
-	    String templateScope = SmsTemplateCode.SCOPE;
-	    int templateId = SmsTemplateCode.WY_SEND_MSG_CODE;
-	    String templateLocale = UserContext.current().getUser().getLocale();
-	    String[] phoneArray = new String[phones.size()];  
-	    phones.toArray(phoneArray);  
-	    smsProvider.sendSms(UserContext.current().getUser().getNamespaceId(),phoneArray , templateScope, templateId, templateLocale, variables);
-//		//不是user，发短信。
-//		if(phones != null && phones.size() > 0 ){
-//			for (String phone : phones) {
-//				smsProvider.sendSms(phone, message);
-//			}
-//		}
+		List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_MSG, message);
+		String templateScope = SmsTemplateCode.SCOPE;
+		int templateId = SmsTemplateCode.WY_SEND_MSG_CODE;
+		String templateLocale = UserContext.current().getUser().getLocale();
+		String[] phoneArray = new String[phones.size()];  
+		phones.toArray(phoneArray);  
+		smsProvider.sendSms(UserContext.current().getUser().getNamespaceId(),phoneArray , templateScope, templateId, templateLocale, variables);
+		//		//不是user，发短信。
+		//		if(phones != null && phones.size() > 0 ){
+		//			for (String phone : phones) {
+		//				smsProvider.sendSms(phone, message);
+		//			}
+		//		}
 
 	}
-	
+
 	private void processSmsByMembers(List<OrganizationMember> members,String message) {
 
 		List<String> phones = new ArrayList<String>();
 		List<Long> userIds = new ArrayList<Long>();
-		
+
 		/** 区分是否是平台用户  **/
 		for (OrganizationMember member : members) {
 			if(member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode())){
@@ -1437,24 +1437,24 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				phones.add(member.getContactToken());
 			}
 		}
-		
+
 		/** 平台用户就推送消息  **/
 		for (Long userId : userIds) {
 			sendNoticeToUserById(userId, message);
 		}
-		
+
 		/** 非平台用户就发短信  **/
 		List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_MSG, message);
-	    String templateScope = SmsTemplateCode.SCOPE;
-	    int templateId = SmsTemplateCode.WY_SEND_MSG_CODE;
-	    String templateLocale = UserContext.current().getUser().getLocale();
-	    String[] phoneArray = new String[phones.size()];  
-	    phones.toArray(phoneArray);  
-	    smsProvider.sendSms(UserContext.current().getUser().getNamespaceId(),phoneArray , templateScope, templateId, templateLocale, variables);
+		String templateScope = SmsTemplateCode.SCOPE;
+		int templateId = SmsTemplateCode.WY_SEND_MSG_CODE;
+		String templateLocale = UserContext.current().getUser().getLocale();
+		String[] phoneArray = new String[phones.size()];  
+		phones.toArray(phoneArray);  
+		smsProvider.sendSms(UserContext.current().getUser().getNamespaceId(),phoneArray , templateScope, templateId, templateLocale, variables);
 	}
-	
+
 	public void sendNoticeToCommunityPmOwner(PropCommunityBuildAddessCommand cmd) {
-		
+
 		Long communityId = cmd.getCommunityId();
 		Organization org = this.checkOrganizationByCommIdAndOrgType(communityId, OrganizationType.PM.getCode());
 		Long orgId = org.getId();
@@ -1719,13 +1719,13 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 		/** 当天数量列表*/
 		List<Integer> todayList = this.getTaskCounts(organizationId, cmd.getCommunityId(), taskType,currentStartDate.getTime(), date.getTime());
-		
+
 		/** 上周数量列表*/
 		List<Integer> weekList = this.getTaskCounts(organizationId, cmd.getCommunityId(), taskType,weekStartDate.getTime(), date.getTime());
-		
+
 		/** z昨天数量列表*/
 		List<Integer> yesterdayList = this.getTaskCounts(organizationId, cmd.getCommunityId(), taskType,yesterdayStartDate.getTime(), currentStartDate.getTime());
-		
+
 		/** 上月数量列表*/
 		List<Integer> monthList = this.getTaskCounts(organizationId, cmd.getCommunityId(), taskType,monthStartDate.getTime(), date.getTime());
 
@@ -1754,8 +1754,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		response.setYesterdayList(yesterdayList);
 		return response;
 	}
-	
-	
+
+
 	private OrganizationTaskType convertContentCategoryToTaskType(Long contentCategoryId) {
 		if(contentCategoryId != null) {
 			if(contentCategoryId == CategoryConstants.CATEGORY_ID_NOTICE) {
@@ -1906,7 +1906,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			}
 			cmd.setCommunityId(orgCom.getCommunityId());
 		}
-		
+
 
 		//权限控制
 		Tuple<Integer,List<ApartmentDTO>> apts = addressService.listApartmentsByKeyword(cmd);
@@ -2235,12 +2235,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 
 	private void processCommunityPmOwner(Long communityId,List<CommunityPmOwner> owners,String message) {
-        User operator = UserContext.current().getUser();
-        Integer namespaceId = Namespace.DEFAULT_NAMESPACE;
-        if(operator != null) {
-            namespaceId = operator.getNamespaceId();
-        }
-        
+		User operator = UserContext.current().getUser();
+		Integer namespaceId = Namespace.DEFAULT_NAMESPACE;
+		if(operator != null) {
+			namespaceId = operator.getNamespaceId();
+		}
+
 		List<String> phones = new ArrayList<String>();
 		List<Long> userIds = new ArrayList<Long>();
 		if(owners != null && owners.size() > 0){
@@ -2274,19 +2274,19 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		}
 
 		//不是user，发短信。
-	
-	    List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_MSG, message);
-	    String templateScope = SmsTemplateCode.SCOPE;
-	    int templateId = SmsTemplateCode.WY_SEND_MSG_CODE;
-	    String templateLocale = UserContext.current().getUser().getLocale();
-	    String[] phoneArray = new String[phones.size()];  
-	    phones.toArray(phoneArray);  
-	    smsProvider.sendSms(namespaceId,phoneArray , templateScope, templateId, templateLocale, variables);
-//		if(phones != null && phones.size() > 0 ){
-//			for (String phone : phones) {
-//				smsProvider.sendSms(phone, message);
-//			}
-//		}
+
+		List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_MSG, message);
+		String templateScope = SmsTemplateCode.SCOPE;
+		int templateId = SmsTemplateCode.WY_SEND_MSG_CODE;
+		String templateLocale = UserContext.current().getUser().getLocale();
+		String[] phoneArray = new String[phones.size()];  
+		phones.toArray(phoneArray);  
+		smsProvider.sendSms(namespaceId,phoneArray , templateScope, templateId, templateLocale, variables);
+		//		if(phones != null && phones.size() > 0 ){
+		//			for (String phone : phones) {
+		//				smsProvider.sendSms(phone, message);
+		//			}
+		//		}
 
 	}
 
@@ -2301,7 +2301,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			todayList.add(count);
 		}
 	}
-	
+
 	private List<Integer> getTaskCounts(Long organizationId, Long communityId, String taskType, long startTime, long endTime){
 		List<Integer> counts = new ArrayList<Integer>();
 		int num = OrganizationTaskStatus.OTHER.getCode();
@@ -2311,7 +2311,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		}else{
 			counts.add(tasks.size());
 		}
-		
+
 		for (int i = 1; i <= num ; i++)
 		{
 			tasks = propertyMgrProvider.communityPmTaskLists(organizationId, taskType,(byte)i,String.format("%tF %<tT", startTime), String.format("%tF %<tT", endTime));
@@ -2321,10 +2321,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				counts.add(tasks.size());
 			}
 		}
-		
+
 		return counts;
 	}
-	
+
 	private List<Post> getPostByCommunityId(Long communityId, List<OrganizationTask> tasks){
 		Community community = communityProvider.findCommunityById(communityId);
 		List<Post> posts = new ArrayList<Post>();
@@ -3249,9 +3249,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			for(OrganizationOwners orgOwner : orgOwnerList){
 				if(orgOwner.getContactToken() != null){
 					String templateScope = SmsTemplateCode.SCOPE;
-				    int templateId = SmsTemplateCode.WY_BILL_CODE;
-				    String templateLocale = UserContext.current().getUser().getLocale();
-				    smsProvider.sendSms(UserContext.current().getUser().getNamespaceId(), orgOwner.getContactToken(), templateScope, templateId, templateLocale, variables);
+					int templateId = SmsTemplateCode.WY_BILL_CODE;
+					String templateLocale = UserContext.current().getUser().getLocale();
+					smsProvider.sendSms(UserContext.current().getUser().getNamespaceId(), orgOwner.getContactToken(), templateScope, templateId, templateLocale, variables);
 				} 
 			}
 		}
@@ -3305,7 +3305,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		smsProvider.addToTupleList(variables, SmsTemplateCode.KEY_DESCRIPTION, "" ); 
 	} 
 	return variables;
-		 
+
 	}
 	private String getPmPayMessage(CommunityPmBill bill, BigDecimal balance, BigDecimal payAmount){
 		//String str = "您2015年07月物业账单为，本月金额：300.00,往期欠款：200.00，本月实付金额：100.00，应付金额：400.00 ，+ 账单说明。 请尽快使用左邻缴纳物业费。";
@@ -3337,7 +3337,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		return builder.toString();
 	}
 
-	
+
 	@Override
 	public GetFamilyStatisticCommandResponse getFamilyStatistic(GetFamilyStatisticCommand cmd) {
 		this.checkFamilyIdIsNull(cmd.getFamilyId());
@@ -3478,7 +3478,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			orgTx.setTxType(TxType.ONLINE.getCode());
 			orgTx.setVendor(cmd.getVendorType());
 			orgTx.setPayAccount(cmd.getPayAccount());
-			
+
 			Tuple<OrganizationOrder, Boolean> result = this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_PM_ORDER.getCode()).enter(() -> {
 				long lqStartTime = System.currentTimeMillis();
 				OrganizationOrder order2 = this.organizationProvider.findOrganizationOrderById(orderId);
@@ -3497,7 +3497,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 						FamilyBillingAccount fAccount = this.findOrNewFBillAcountNoLock(bill.getEntityId(),currentTimestamp);
 						OrganizationBillingAccount oAccount = this.findOrNewOBillAccountNoLock(bill.getOrganizationId(),currentTimestamp);
-						
+
 						familyTx.setOrderId(order2.getId());
 						familyTx.setOwnerAccountId(fAccount.getId());
 						familyTx.setTargetAccountId(oAccount.getId());
@@ -3725,54 +3725,59 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 
 	@Override
-	public OrganizationOrderDTO createPmBillOrder(CreatePmBillOrderCommand cmd) {
-		if(cmd.getBillId() == null || cmd.getAmount() == null){
-			LOGGER.error("billId or amount is null.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"billId or amount is null.");
-		}
-		CommunityPmBill bill = this.organizationProvider.findOranizationBillById(cmd.getBillId());
-		if(bill == null){
-			LOGGER.error("the bill not found.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"the bill not found.");
-		}
-		CommunityPmBill nowBill = this.propertyMgrProvider.findNewestBillByAddressId(bill.getEntityId());
-		if(nowBill == null || nowBill.getId().compareTo(bill.getId()) != 0){
-			LOGGER.error("the bill is invalid.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"the bill is invalid.");
-		}
+	public OrganizationOrderDTO createPmBillOrder(CreatePmBillOrderCommand cmd){
+		try{
+			if(cmd.getBillId() == null || cmd.getAmount() == null){
+				LOGGER.error("billId or amount is null.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"billId or amount is null.");
+			}
+			CommunityPmBill bill = this.organizationProvider.findOranizationBillById(cmd.getBillId());
+			if(bill == null){
+				LOGGER.error("the bill not found.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"the bill not found.");
+			}
+			CommunityPmBill nowBill = this.propertyMgrProvider.findNewestBillByAddressId(bill.getEntityId());
+			if(nowBill == null || nowBill.getId().compareTo(bill.getId()) != 0){
+				LOGGER.error("the bill is invalid.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"the bill is invalid.");
+			}
 
-		User user = UserContext.current().getUser();
-		OrganizationOrder order = new OrganizationOrder();
-		order.setAmount(cmd.getAmount());
-		order.setBillId(bill.getId());
-		order.setCreateTime(new Timestamp(System.currentTimeMillis()));
-		if(cmd.getDescription() != null && !cmd.getDescription().equals(""))
-			order.setDescription(cmd.getDescription());
-		order.setOwnerId(user.getId());
-		order.setPayerId(user.getId());
-		order.setStatus(OrganizationOrderStatus.WAITING_FOR_PAY.getCode());
-		this.organizationProvider.createOrganizationOrder(order);
+			User user = UserContext.current().getUser();
+			OrganizationOrder order = new OrganizationOrder();
+			order.setAmount(cmd.getAmount());
+			order.setBillId(bill.getId());
+			order.setCreateTime(new Timestamp(System.currentTimeMillis()));
+			if(cmd.getDescription() != null && !cmd.getDescription().equals(""))
+				order.setDescription(cmd.getDescription());
+			order.setOwnerId(user.getId());
+			order.setPayerId(user.getId());
+			order.setStatus(OrganizationOrderStatus.WAITING_FOR_PAY.getCode());
+			this.organizationProvider.createOrganizationOrder(order);
 
-		OrganizationOrderDTO dto = new OrganizationOrderDTO();
-		String orderNo = this.convertOrderIdToOrderNo(order.getId());
-		dto.setOrderType("wuye");
-		dto.setOrderNo(orderNo);
-		dto.setName(bill.getName());
-		dto.setDescription(order.getDescription());
-		dto.setAmount(cmd.getAmount());
-		this.setSignatureParam(dto);
-		return dto;
+			OrganizationOrderDTO dto = new OrganizationOrderDTO();
+			String orderNo = this.convertOrderIdToOrderNo(order.getId());
+			dto.setOrderType("wuye");
+			dto.setOrderNo(orderNo);
+			dto.setName(bill.getName());
+			dto.setDescription(order.getDescription());
+			dto.setAmount(cmd.getAmount());
+			this.setSignatureParam(dto);
+			return dto;
+		}catch (Exception e){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					e.getMessage());
+		}
 	}
-	
-	private void setSignatureParam(OrganizationOrderDTO dto) {
+
+	private void setSignatureParam(OrganizationOrderDTO dto)throws Exception {
 		String appKey = configurationProvider.getValue("pay.appKey", "7bbb5727-9d37-443a-a080-55bbf37dc8e1");
 		Long timestamp = System.currentTimeMillis();
 		Integer randomNum = (int) (Math.random()*1000);
 		App app = appProvider.findAppByKey(appKey);
-		
+
 		Map<String,String> map = new HashMap<String, String>();
 		map.put("appKey",appKey);
 		map.put("timestamp",timestamp+"");
@@ -3781,7 +3786,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		String signature = SignatureHelper.computeSignature(map, app.getSecretKey());
 		dto.setAppKey(appKey);
 		dto.setRandomNum(randomNum);
-		dto.setSignature(URLEncoder.encode(signature));
+		dto.setSignature(URLEncoder.encode(signature,"UTF-8"));
 		dto.setTimestamp(timestamp);
 	}
 
