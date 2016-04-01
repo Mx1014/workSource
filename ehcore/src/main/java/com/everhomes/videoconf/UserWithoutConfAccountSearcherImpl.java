@@ -169,7 +169,7 @@ public class UserWithoutConfAccountSearcherImpl extends AbstractElasticSearch
 			user.setUserName(member.getContactName());
 			user.setEnterpriseId(member.getOrganizationId());
 			user.setMobile(member.getContactToken());
-			if(member.getGroupId() != 0) {
+			if(member.getGroupId() != null && member.getGroupId() != 0) {
 				Organization group = organizationProvider.findOrganizationById(member.getGroupId());
 				if(group != null) {
 					user.setDepartment(group.getName());
