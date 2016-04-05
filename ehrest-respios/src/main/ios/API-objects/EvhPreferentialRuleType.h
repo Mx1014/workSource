@@ -1,6 +1,6 @@
 //
 // EvhPreferentialRuleType.h
-// generated at 2016-04-01 15:40:22 
+// generated at 2016-04-05 13:45:25 
 //
 
 #define EvhPreferentialRuleType_PARKING @"parking"

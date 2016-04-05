@@ -1,6 +1,6 @@
 //
 // EvhAccountType.h
-// generated at 2016-04-01 15:40:22 
+// generated at 2016-04-05 13:45:24 
 //
 
 #define EvhAccountType_ACCOUNT_TYPE_SINGLE @"单账号"

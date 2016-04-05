@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-04-01 15:40:13
+// generated at 2016-04-05 13:45:14
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -236,6 +236,7 @@ public interface ApiConstants {
     public static final String ADMIN_USER_LISTVEST_URL = "/admin/user/listVest";
     public static final String ADMIN_USER_SEARCHINVITATEDUSER_URL = "/admin/user/searchInvitatedUser";
     public static final String ADMIN_USER_SEARCHUSERSWITHADDR_URL = "/admin/user/searchUsersWithAddr";
+    public static final String ADMIN_USER_SENDUSERTESTMAIL_URL = "/admin/user/sendUserTestMail";
     public static final String ADMIN_USER_SENDUSERTESTSMS_URL = "/admin/user/sendUserTestSms";
     public static final String APPKEY_ISTRUSTEDAPP_URL = "/appkey/isTrustedApp";
     public static final String APPKEY_ISVALIDAPPURLBINDING_URL = "/appkey/isValidAppUrlBinding";
