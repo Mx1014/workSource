@@ -143,8 +143,8 @@ public class JMailHandler implements MailHandler {
     }
     
     private void sendMessage(Integer namespaceId, Session session, MimeMessage msg) throws Exception {
-        String smtpServerAddr = configurationProvider.getValue(namespaceId, "mail.smtp.address", "smtp.mxhichina.com");
-        int smtpServerPort = configurationProvider.getIntValue(namespaceId, "mail.smtp.address", 25);
+        String smtpServerAddr = configurationProvider.getValue(namespaceId, "mail.smtp.address", "");
+        int smtpServerPort = configurationProvider.getIntValue(namespaceId, "mail.smtp.port", 25);
         String mailAccountName = configurationProvider.getValue(namespaceId, "mail.smtp.account", "");
         String mailPassword = configurationProvider.getValue(namespaceId, "mail.smtp.passwod", "");
         if(mailAccountName.trim().length() > 0 && mailPassword.trim().length() > 0) {
