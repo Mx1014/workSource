@@ -242,47 +242,36 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	
 	
 	@Override
-	public List<RoleDTO> listAclRoleByOrganizationIds(ListAclRolesCommand cmd) {
+	public List<RoleDTO> listAclRoleByOrganizationId(ListAclRolesCommand cmd) {
 		
 		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
+		
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
 		List<RoleDTO> dtos = new ArrayList<RoleDTO>();
 		if(null == org){
 			return dtos;
 		}
 		
-		List<String> groupTypes = new ArrayList<String>();
-		groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
-		groupTypes.add(OrganizationGroupType.GROUP.getCode());
+//		List<String> groupTypes = new ArrayList<String>();
+//		groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+//		groupTypes.add(OrganizationGroupType.GROUP.getCode());
 	
 //		List<Organization> orgs = organizationProvider.listOrganizationByGroupTypes(org.getPath() + "/%", groupTypes);
 		
-		List<Long> ownerIds = new ArrayList<Long>();
-		ownerIds.add(org.getId());
+//		List<Long> ownerIds = new ArrayList<Long>();
+//		ownerIds.add(org.getId());
 //		if(null != orgs && 0 != orgs.size()){
 //			for (Organization organization : orgs) {
 //				ownerIds.add(organization.getId());
 //			}
 //		}
-		PrivateFlag privateFlag = PrivateFlag.PUBLIC;
 		
-		if(OrganizationType.fromCode(org.getOrganizationType()) == OrganizationType.ENTERPRISE){
-			privateFlag = PrivateFlag.PRIVATE;
-		}
+		List<Role> roles = aclProvider.getRolesByOwner(namespaceId, cmd.getAppId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId());
 		
-		List<OrganizationRoleMap> organizationRoleMaps = organizationRoleMapProvider.listOrganizationRoleMapsByOwnerIds(ownerIds, EntityType.ORGANIZATIONS, privateFlag);
-		
-		if(null == organizationRoleMaps){
-			return dtos;
-		}
-		
-		for (OrganizationRoleMap organizationRoleMap : organizationRoleMaps) {
-			Role role = aclProvider.getRoleById(organizationRoleMap.getRoleId());
-			if(null != role){
-				dtos.add(ConvertHelper.convert(role, RoleDTO.class));
-			}
-			
-		}
+		dtos = roles.stream().map(r->{
+			return ConvertHelper.convert(r, RoleDTO.class);
+		}).collect(Collectors.toList());
 		
 		return dtos;
 	}

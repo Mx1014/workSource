@@ -244,19 +244,17 @@ public class AclAdminController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /admin/acl/listAclRoleByOrganizationIds</b>
+     * <b>URL: /admin/acl/listAclRoleByOrganizationId</b>
      * <p>根据机构获取角色列表</p>
      */
-    @RequestMapping("listAclRoleByOrganizationIds")
+    @RequestMapping("listAclRoleByOrganizationId")
     @RestReturn(value=RoleDTO.class, collection = true)
-    public RestResponse listAclRoleByOrganizationIds(@Valid ListAclRolesCommand cmd) {
-    	RestResponse response =  new RestResponse(rolePrivilegeService.listAclRoleByOrganizationIds(cmd));
+    public RestResponse listAclRoleByOrganizationId(@Valid ListAclRolesCommand cmd) {
+    	RestResponse response =  new RestResponse(rolePrivilegeService.listAclRoleByOrganizationId(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
-    
-    
     
     
 }
