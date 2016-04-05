@@ -34,6 +34,7 @@ import org.springframework.stereotype.Component;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.configuration.ConfigConstants;
@@ -47,6 +48,7 @@ import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.mail.MailHandler;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.organization.pm.pay.GsonUtil;
@@ -1962,7 +1964,8 @@ public class VideoConfServiceImpl implements VideoConfService {
 	
 	private void updateOrderStatus(ConfOrders order, Timestamp payTimeStamp, byte paymentStatus) {
 //		int namespaceId = (UserContext.current().getUser().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getUser().getNamespaceId();
-		order.setPayerId(UserContext.current().getUser().getId());
+		User user = UserContext.current().getUser();
+		order.setPayerId(user.getId());
 		order.setPaidTime(payTimeStamp);
 		order.setStatus(paymentStatus);
 		
@@ -2031,6 +2034,16 @@ public class VideoConfServiceImpl implements VideoConfService {
 				vcProvider.updateConfEnterprises(enterprise);
 				
 				//给线上支付成功的用户发邮件
+				String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
+		        MailHandler handler = PlatformContext.getComponent(handlerName);
+				String subject = localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
+						String.valueOf(ConfServiceErrorCode.CONF_INVOICE_SUBJECT),
+						UserContext.current().getUser().getLocale(),"zuolin video conference invoce");
+				
+				String body = localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
+						String.valueOf(ConfServiceErrorCode.CONF_INVOICE_BODY),
+						UserContext.current().getUser().getLocale(),"zuolin video conference invoce");
+		        handler.sendMail(user.getNamespaceId(), null, order.getEmail(), subject, body, null);
 				
 			}
 		}

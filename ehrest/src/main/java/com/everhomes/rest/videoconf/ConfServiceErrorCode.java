@@ -11,4 +11,6 @@ public interface ConfServiceErrorCode {
     static final int ERROR_INVALID_ASSIGN=10005; 
     static final int ZUOLIN_NAMESPACE_NAME=10006;
     static final int CONF_NOT_OPEN=10007; 
+    static final int CONF_INVOICE_SUBJECT=10008; 
+    static final int CONF_INVOICE_BODY=10009; 
 }
