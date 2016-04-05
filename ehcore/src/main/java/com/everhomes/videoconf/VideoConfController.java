@@ -1335,8 +1335,8 @@ public class VideoConfController  extends ControllerBase{
 	@RestReturn(value = VerifyPurchaseAuthorityResponse.class)
 	public RestResponse verifyPurchaseAuthority(VerifyPurchaseAuthorityCommand cmd) {
 
-		videoConfService.verifyPurchaseAuthority(cmd);
-		RestResponse response = new RestResponse();
+		VerifyPurchaseAuthorityResponse authority = videoConfService.verifyPurchaseAuthority(cmd);
+		RestResponse response = new RestResponse(authority);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
