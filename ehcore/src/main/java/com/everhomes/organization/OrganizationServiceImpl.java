@@ -78,6 +78,7 @@ import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
+import com.everhomes.rest.acl.admin.RoleDTO;
 import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
@@ -410,7 +411,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		dbProvider.execute((TransactionStatus status) -> {
 			roleAssignment.setRoleId(cmd.getRoleId());
-			roleAssignment.setOwnerType("system");
+			roleAssignment.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+			roleAssignment.setOwnerId(cmd.getOrganizationId());
 			roleAssignment.setTargetType(entityType.getCode());
 			roleAssignment.setTargetId(cmd.getTargetId());
 			roleAssignment.setCreatorUid(UserContext.current().getUser().getId());
@@ -4090,13 +4092,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		if(null != members && 0 != members.size()){
 			for (OrganizationMemberDTO organizationMemberDTO : members) {
-				List<AclRoleAssignmentsDTO> roleIds = organizationMemberDTO.getAclRoles();
-				if(null == roleIds){
+				List<RoleDTO> RoleDTOs = organizationMemberDTO.getRoles();
+				if(null == RoleDTOs){
 					continue;
 				}
 				
-				for (AclRoleAssignmentsDTO aclRoleAssignmentsDTO : roleIds) {
-					if(cmd.getRoleIds().contains(aclRoleAssignmentsDTO.getId())){
+				for (RoleDTO dto : RoleDTOs) {
+					if(cmd.getRoleIds().contains(dto.getId())){
 						roleMembers.add(organizationMemberDTO);
 						break;
 					}
@@ -4457,7 +4459,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		List<AclRoleAssignmentsDTO> dtos = new ArrayList<AclRoleAssignmentsDTO>();
 		
-		List<Long> resources = aclProvider.getRolesFromResourceAssignments("system", null, EntityType.USER.getCode(), cmd.getUserId(), null);
+		List<Long> resources = aclProvider.getRolesFromResourceAssignments(EntityType.ORGANIZATIONS.getCode(), null, EntityType.USER.getCode(), cmd.getUserId(), null);
 	
 		if(null != resources && resources.size() > 0){
 			for (Long roleId : resources) {
@@ -4754,10 +4756,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 	 * @return
 	 */
 	private List<OrganizationMemberDTO> convertDTO(List<OrganizationMember> organizationMembers, Organization org){
+		
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		
 		List<Organization> depts = organizationProvider.listDepartments(org.getPath()+"/%", 1, 1000);
 		depts.add(org);
 		
 		Long orgId = null;
+		
 
 		if(org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())){
 			orgId = org.getDirectlyEnterpriseId();
@@ -4765,10 +4771,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 			orgId = org.getId();
 		}
 		
-		List<OrganizationRoleMap> organizationRoleMaps = organizationRoleMapProvider.listOrganizationRoleMaps(orgId, EntityType.ORGANIZATIONS, PrivateFlag.PUBLIC);
+		List<Role> roles = aclProvider.getRolesByOwner(Namespace.DEFAULT_NAMESPACE, AppConstants.APPID_PARK_ADMIN, EntityType.ORGANIZATIONS.getCode(), null);
 		
-	    Map<Long, OrganizationRoleMap> roleMap =  this.convertOrganizationRoleMap(organizationRoleMaps);
+		roles.addAll(aclProvider.getRolesByOwner(namespaceId, AppConstants.APPID_PARK_ADMIN, EntityType.ORGANIZATIONS.getCode(), orgId));
 		
+	    Map<Long, Role> roleMap =  this.convertOrganizationRoleMap(roles);
+	    
+		Long ownerId = orgId;
+	    
 		Map<Long, Organization> deptMaps = this.convertDeptListToMap(depts);
 		return organizationMembers.stream().map((c) ->{
 			if(!StringUtils.isEmpty(c.getInitial())){
@@ -4796,17 +4806,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 			 * 补充用户角色
 			 */
 			if(c.getTargetType().equals(OrganizationMemberTargetType.USER.getCode())){
-				List<Long> resources = aclProvider.getRolesFromResourceAssignments("system", null, EntityType.USER.getCode(), c.getTargetId(), null);
+				List<RoleAssignment> resources = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), ownerId, EntityType.USER.getCode(), c.getTargetId());
 				if(null != resources && 0 != resources.size()){
-					List<AclRoleAssignmentsDTO> aclRoles = new ArrayList<AclRoleAssignmentsDTO>();
-					for (Long roleId : resources) {
-						AclRoleAssignmentsDTO aclRoleAssignmentsDTO = new AclRoleAssignmentsDTO();
-						aclRoleAssignmentsDTO.setRoleId(roleId);
-						OrganizationRoleMap role = roleMap.get(roleId);
-						aclRoleAssignmentsDTO.setRoleName(null == role ? "" : role.getRoleName());
-						aclRoles.add(aclRoleAssignmentsDTO);
+					List<RoleDTO> roleDTOs = new ArrayList<RoleDTO>();
+					for (RoleAssignment resource : resources) {
+						roleDTOs.add(ConvertHelper.convert(roleMap.get(resource.getRoleId()), RoleDTO.class));
 					}
-					dto.setAclRoles(aclRoles);
+					dto.setRoles(roleDTOs);
 				}
 			}
 			return dto;
@@ -4902,7 +4908,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	private List<OrganizationDTO> convertOrgRole(List<Organization> orgs, Organization org){
 		Long orgId = null;
-		
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		if(org.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())){
 			orgId = org.getId();
 		}else{
@@ -4915,10 +4921,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		Map<Long, Organization> deptMaps = this.convertDeptListToMap(depts);
 
-		List<OrganizationRoleMap> organizationRoleMaps = organizationRoleMapProvider.listOrganizationRoleMaps(orgId, EntityType.ORGANIZATIONS, PrivateFlag.PUBLIC);
+		List<Role> roles = aclProvider.getRolesByOwner(Namespace.DEFAULT_NAMESPACE, AppConstants.APPID_PARK_ADMIN, EntityType.ORGANIZATIONS.getCode(), null);
 		
-	    Map<Long, OrganizationRoleMap> roleMap =  this.convertOrganizationRoleMap(organizationRoleMaps);
+		roles.addAll(aclProvider.getRolesByOwner(namespaceId, AppConstants.APPID_PARK_ADMIN, EntityType.ORGANIZATIONS.getCode(), orgId));
+		
+	    Map<Long, Role> roleMap =  this.convertOrganizationRoleMap(roles);
 	    
+	    Long ownerId = orgId;
+	    Long targetId = org.getId();
 		List<OrganizationDTO> rganizationDTOs = orgs.stream().map(r->{ 
 			OrganizationDTO dto = ConvertHelper.convert(r, OrganizationDTO.class);
 			if(OrganizationGroupType.fromCode(dto.getGroupType()) == OrganizationGroupType.ENTERPRISE){
@@ -4929,14 +4939,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 				return dto;
 			}
 			Organization depart = deptMaps.get(dto.getParentId());
-			List<Long> resources = aclProvider.getRolesFromResourceAssignments("system", null, EntityType.ORGANIZATIONS.getCode(), dto.getId(), null);
+			List<RoleAssignment> resources = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), ownerId, EntityType.ORGANIZATIONS.getCode(), targetId);
 			if(null != depart) dto.setParentName(depart.getName());
 			if(null != resources && resources.size() > 0){
-				OrganizationRoleMap role = roleMap.get(resources.get(0));
-				if(null != role){
-					dto.setRoleName(role.getRoleName());
-					dto.setRoleId(role.getRoleId());
+				List<RoleDTO> roleDTOs = new ArrayList<RoleDTO>();
+				for (RoleAssignment resource : resources) {
+					roleDTOs.add(ConvertHelper.convert(roleMap.get(resource.getRoleId()), RoleDTO.class));
 				}
+				dto.setRoles(roleDTOs);
 			}
 			return dto;
 		}).collect(Collectors.toList());
@@ -4946,18 +4956,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	/**
 	 * 转换map
-	 * @param organizationRoleMaps
+	 * @param roles
 	 * @return
 	 */
-	private Map<Long, OrganizationRoleMap> convertOrganizationRoleMap(List<OrganizationRoleMap> organizationRoleMaps){
-		Map<Long, OrganizationRoleMap> map = new HashMap<Long, OrganizationRoleMap>();
-		if(null == organizationRoleMaps){
+	private Map<Long, Role> convertOrganizationRoleMap(List<Role> roles){
+		Map<Long, Role> map = new HashMap<Long, Role>();
+		if(null == roles){
 			return map;
 		}
-		for (OrganizationRoleMap organizationRoleMap : organizationRoleMaps) {
-			Role role = aclProvider.getRoleById(organizationRoleMap.getRoleId());
-			organizationRoleMap.setRoleName(role.getName());
-			map.put(organizationRoleMap.getRoleId(), organizationRoleMap);
+		for (Role role : roles) {
+			map.put(role.getId(), role);
 		}
 		return map;
 	}
@@ -5230,7 +5238,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	
 	    	for (OrganizationMember member : members) {
 	    		if(member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode())){
-	    			List<Long> resources = aclProvider.getRolesFromResourceAssignments("system", null, EntityType.USER.getCode(), member.getTargetId(), null);
+	    			List<Long> resources = aclProvider.getRolesFromResourceAssignments(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), member.getTargetId(), null);
 	    			
 	    			if(null != resources && resources.size() > 0){
 	    				for (Long roleId : resources) {
