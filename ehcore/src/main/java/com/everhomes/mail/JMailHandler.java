@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
 
-@Component("JMailHandler")
+@Component(MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP)
 public class JMailHandler implements MailHandler {
     public final static Logger LOGGER = LoggerFactory.getLogger(JMailHandler.class);
     
@@ -47,12 +47,25 @@ public class JMailHandler implements MailHandler {
     }
     
     public void sendMail(Integer namespaceId, String from, String to, String subject, String body, List<String> attachmentList) {
+        int attachSize = (attachmentList == null) ? 0 : attachmentList.size();
+        boolean isBodyEmpty = (body == null || body.trim().length() == 0) ? true : false;
+        
         try {
+            if(from == null || from.trim().length() == 0) {
+                String mailAccountName = configurationProvider.getValue(namespaceId, "mail.smtp.account", "");
+                if(mailAccountName != null && mailAccountName.trim().length() > 0) {
+                    from = mailAccountName;
+                } else {
+                    LOGGER.warn("Mail account name is empty, namespaceId=" + namespaceId + ", from=" + from 
+                        + ", to=" + to + ", subject=" + subject + ", isBodyEmpty=" + isBodyEmpty + ", attachSize=" + attachSize);
+                }
+            } else {
+                LOGGER.warn("From address is empty, it will use mail account name, namespaceId=" + namespaceId + ", from=" + from 
+                    + ", to=" + to + ", subject=" + subject + ", isBodyEmpty=" + isBodyEmpty + ", attachSize=" + attachSize);
+            }
             MimeMessage message = createMessage(session, from, to, subject, body, attachmentList);
             sendMessage(namespaceId, session, message);
         } catch (Exception e) {
-            int attachSize = (attachmentList == null) ? 0 : attachmentList.size();
-            boolean isBodyEmpty = (body == null || body.trim().length() == 0) ? true : false;
             LOGGER.error("Failed to send mail, namespaceId=" + namespaceId + ", from=" + from 
                 + ", to=" + to + ", subject=" + subject + ", isBodyEmpty=" + isBodyEmpty + ", attachSize=" + attachSize, e);
         }
@@ -63,8 +76,8 @@ public class JMailHandler implements MailHandler {
      * 根据传入的 Seesion 对象创建混合型的 MIME消息  
      */ 
     private MimeMessage createMessage(Session session, String from, String to, String subject, String body, List<String> attachmentList) throws Exception {  
-        MimeMessage msg = new MimeMessage(session);  
-        msg.setFrom(new InternetAddress(from));  
+        MimeMessage msg = new MimeMessage(session); 
+        msg.setFrom(new InternetAddress(from));
         msg.setRecipient(Message.RecipientType.TO, new InternetAddress(to));  
         
         subject = (subject == null) ? "" : subject;
@@ -132,10 +145,14 @@ public class JMailHandler implements MailHandler {
     private void sendMessage(Integer namespaceId, Session session, MimeMessage msg) throws Exception {
         String smtpServerAddr = configurationProvider.getValue(namespaceId, "mail.smtp.address", "smtp.mxhichina.com");
         int smtpServerPort = configurationProvider.getIntValue(namespaceId, "mail.smtp.address", 25);
-        String mailAccountName = configurationProvider.getValue(namespaceId, "mail.smtp.account", "meeting@zuolin.com");
-        String mailPassword = configurationProvider.getValue(namespaceId, "mail.smtp.passwod", "abc123!@#");
-        Transport trans = session.getTransport();
-        trans.connect(smtpServerAddr, smtpServerPort, mailAccountName, mailPassword);
-        trans.sendMessage(msg, msg.getAllRecipients());
+        String mailAccountName = configurationProvider.getValue(namespaceId, "mail.smtp.account", "");
+        String mailPassword = configurationProvider.getValue(namespaceId, "mail.smtp.passwod", "");
+        if(mailAccountName.trim().length() > 0 && mailPassword.trim().length() > 0) {
+            Transport trans = session.getTransport();
+            trans.connect(smtpServerAddr, smtpServerPort, mailAccountName, mailPassword);
+            trans.sendMessage(msg, msg.getAllRecipients());
+        } else {
+            LOGGER.error("Ignore to send mail for the mail account name or password is empty, namespaceId=" + namespaceId);
+        }
     }
 }
