@@ -398,13 +398,17 @@ public class OrganizationServiceImpl implements OrganizationService {
 	public void setAclRoleAssignmentRole(
 			SetAclRoleAssignmentCommand cmd, EntityType entityType) {
 		RoleAssignment roleAssignment = new RoleAssignment();
-		List<RoleAssignment> roleAssignments = aclProvider.listRoleAssignmentByTarget(entityType.getCode(), cmd.getTargetId());
-		dbProvider.execute((TransactionStatus status) -> {
-			if(null != roleAssignments && 0 < roleAssignments.size()){
-				for (RoleAssignment assignment : roleAssignments) {
-					aclProvider.deleteRoleAssignment(assignment.getId());
+		List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), entityType.getCode(), cmd.getTargetId());
+		
+		if(null != roleAssignments && 0 < roleAssignments.size()){
+			for (RoleAssignment assignment : roleAssignments) {
+				if(assignment.getRoleId().equals(cmd.getRoleId())){
+					return;
 				}
 			}
+		}
+		
+		dbProvider.execute((TransactionStatus status) -> {
 			roleAssignment.setRoleId(cmd.getRoleId());
 			roleAssignment.setOwnerType("system");
 			roleAssignment.setTargetType(entityType.getCode());
@@ -4336,7 +4340,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 	
 	@Override
-	public void createOrganizationAccount(CreateOrganizationAccountCommand cmd){
+	public void createOrganizationAccount(CreateOrganizationAccountCommand cmd, Long roleId){
 		int namespaceId = UserContext.getCurrentNamespaceId(null);
 		OrganizationMember member = organizationProvider.findOrganizationPersonnelByPhone(cmd.getOrganizationId(), cmd.getAccountPhone());
 		
@@ -4393,9 +4397,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 			if(null != cmd.getAssignmentId())
 				aclProvider.deleteRoleAssignment(cmd.getAssignmentId());
 			
+			
+			
 			SetAclRoleAssignmentCommand roleCmd = new SetAclRoleAssignmentCommand();
-			roleCmd.setRoleId(RoleConstants.ENTERPRISE_SUPER_ADMIN);
+			roleCmd.setRoleId(roleId);
 			roleCmd.setTargetId(m.getTargetId());
+			roleCmd.setOrganizationId(cmd.getOrganizationId());
 			this.setAclRoleAssignmentRole(roleCmd, EntityType.USER);
 			
 			return null;
@@ -4587,7 +4594,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			accountCommand.setAccountPhone(s[6]);
 			accountCommand.setAccountName(s[5]);
 			if(!StringUtils.isEmpty(accountCommand.getAccountPhone())){
-				this.createOrganizationAccount(accountCommand);
+				this.createOrganizationAccount(accountCommand, RoleConstants.ENTERPRISE_SUPER_ADMIN);
 			}
 			
 		}

@@ -32,7 +32,6 @@ public class UpdateCommunityAdminCommand {
     
     private Double areaSize;
     
-    @NotNull
     @ItemType(CommunityGeoPointDTO.class)
     private List<CommunityGeoPointDTO> geoPointList;
     
