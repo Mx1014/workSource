@@ -1238,6 +1238,10 @@ public class VideoConfServiceImpl implements VideoConfService {
 			VerifyVideoConfAccountCommand cmd) {
 		UserAccountDTO userAccount = new UserAccountDTO();
 		ConfAccounts account = vcProvider.findAccountByUserId(cmd.getUserId());
+		
+		boolean privilege = rolePrivilegeService.checkAdministrators(cmd.getEnterpriseId());
+		userAccount.setPurchaseAuthority(privilege);
+		
 		if(account != null) {
 			userAccount.setAccountId(account.getId());
 			userAccount.setStatus(account.getStatus());
