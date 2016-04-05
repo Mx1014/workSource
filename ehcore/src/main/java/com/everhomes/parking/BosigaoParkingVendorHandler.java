@@ -20,10 +20,14 @@ import com.bosigao.cxf.Service1Soap;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.organization.pm.pay.ResultHolder;
+import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
+import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
 import com.everhomes.rest.parking.ParkingCardDTO;
 import com.everhomes.rest.parking.ParkingOwnerType;
 import com.everhomes.rest.parking.ParkingRechargeRateDTO;
 import com.everhomes.rest.techpark.onlinePay.OnlinePayBillCommand;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
@@ -125,6 +129,38 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
     public void notifyParkingRechargeOrderPayment(OnlinePayBillCommand cmd) {
         // TODO Auto-generated method stub
         
+    }
+    
+    @Override
+    public ParkingRechargeRateDTO createParkingRechargeRate(CreateParkingRechargeRateCommand cmd){
+    	User user = UserContext.current().getUser();
+    	
+    	ParkingRechargeRate parkingRechargeRate = new ParkingRechargeRate();
+    	parkingRechargeRate.setOwnerType(cmd.getOwnerType());
+    	parkingRechargeRate.setOwnerId(cmd.getOwnerId());
+    	parkingRechargeRate.setParkingLotId(cmd.getParkingLotId());
+    	parkingRechargeRate.setRateName(cmd.getRateName());
+    	parkingRechargeRate.setMonthCount(cmd.getMonthCount());
+    	parkingRechargeRate.setPrice(cmd.getPrice());
+    	parkingRechargeRate.setCreatorUid(user.getId());
+    	if(parkingProvider.createParkingRechargeRate(parkingRechargeRate) > 0)
+    		return ConvertHelper.convert(parkingRechargeRate, ParkingRechargeRateDTO.class);
+    	else {
+    		LOGGER.error("insert parkingRechargeRate fail.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_SQL_EXCEPTION,
+    				"insert parkingRechargeRate fail.");
+    	}
+    }
+    
+    @Override
+    public void deleteParkingRechargeRate(DeleteParkingRechargeRateCommand cmd){
+    	try {
+    		parkingProvider.findParkingRechargeRatesById(Long.parseLong(cmd.getRateToken()));
+		} catch (Exception e) {
+			LOGGER.error("delete parkingRechargeRate fail."+cmd.getRateToken());
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_SQL_EXCEPTION,
+    				"delete parkingRechargeRate fail."+cmd.getRateToken());
+		}
     }
     
     private void checkResultHolderIsNull(ResultHolder resultHolder,String plateNo) {

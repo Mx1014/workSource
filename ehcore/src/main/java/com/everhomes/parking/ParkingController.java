@@ -117,8 +117,7 @@ public class ParkingController extends ControllerBase {
     @RequestMapping("deleteParkingRechargeRate")
     @RestReturn(value=String.class)
     public RestResponse deleteParkingRechargeRate(DeleteParkingRechargeRateCommand cmd) {
-        // TODO: delete the rate
-        
+        parkingService.deleteParkingRechargeRate(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -150,6 +149,7 @@ public class ParkingController extends ControllerBase {
     public RestResponse searchParkingRechargeOrders(SearchParkingRechargeOrdersCommand cmd) {
         ListParkingRechargeOrdersResponse cmdResponse = null;
         
+        cmdResponse = parkingService.searchParkingRechargeOrders(cmd);
         RestResponse response = new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -197,6 +197,7 @@ public class ParkingController extends ControllerBase {
     public RestResponse searchParkingCardRequests(SearchParkingCardRequestsCommand cmd) {
         ListParkingCardRequestResponse cmdResponse = null;
         
+        cmdResponse = parkingService.searchParkingCardRequests(cmd);
         RestResponse response = new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -212,7 +213,7 @@ public class ParkingController extends ControllerBase {
     public RestResponse requestParkingCard(RequestParkingCardCommand cmd) {
         List<ParkingCardRequestDTO> requestList = null;
         
-        parkingService.requestParkingCard(cmd);
+        requestList = parkingService.requestParkingCard(cmd);
         RestResponse response = new RestResponse(requestList);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -226,8 +227,9 @@ public class ParkingController extends ControllerBase {
     @RequestMapping("setParkingCardReserveDays")
     @RestReturn(value=String.class)
     public RestResponse setParkingCardReserveDays(SetParkingCardReserveDaysCommand cmd) {
-        // TODO: set parking card reserve days, according to the card_reserve_days of eh_parking_lots
+        // set parking card reserve days, according to the card_reserve_days of eh_parking_lots
         
+    	parkingService.setParkingCardReserveDays(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -241,8 +243,9 @@ public class ParkingController extends ControllerBase {
     @RequestMapping("issueParkingCards")
     @RestReturn(value=String.class)
     public RestResponse issueParkingCards(IssueParkingCardsCommand cmd) {
-        // TODO: 发放卡，需要从eh_parking_card_requests表中取出在排队中的的申请记录（按时间从小大到排），然后把它们的状态置为“已通知”
+        //发放卡，需要从eh_parking_card_requests表中取出在排队中的的申请记录（按时间从小大到排），然后把它们的状态置为“已通知”
         
+    	parkingService.issueParkingCards(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -251,13 +254,14 @@ public class ParkingController extends ControllerBase {
     
     /**
      * <b>URL: /parking/setParkingCardIssueFlag</b>
-     * <p>设置充值卡保留多少天（在发卡后到领卡之间的天数）</p>
+     * <p>在线下发卡后，在后台管理中更新月卡领取状态</p>
      */
     @RequestMapping("setParkingCardIssueFlag")
     @RestReturn(value=String.class)
     public RestResponse setParkingCardIssueFlag(SetParkingCardIssueFlagCommand cmd) {
-        // TODO: 设置eh_parking_card_requests表的issue_flag字段
+        //设置eh_parking_card_requests表的issue_flag字段
         
+    	parkingService.setParkingCardIssueFlag(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -301,8 +305,8 @@ public class ParkingController extends ControllerBase {
     @RequestMapping("notifyParkingRechargeOrderPayment")
     @RestReturn(value = String.class)
     public RestResponse notifyParkingRechargeOrderPayment(OnlinePayBillCommand cmd) {
-        // TODO: 通知其它厂商支付结果
         
+    	parkingService.notifyParkingRechargeOrderPayment(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

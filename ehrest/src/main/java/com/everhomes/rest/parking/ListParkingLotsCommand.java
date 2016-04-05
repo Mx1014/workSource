@@ -10,7 +10,13 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class ListParkingLotsCommand {
+	/**
+	 * 小区类型
+	 */
     private String ownerType;
+    /**
+     * 小区id
+     */
     private Long ownerId;
     
     public ListParkingLotsCommand() {

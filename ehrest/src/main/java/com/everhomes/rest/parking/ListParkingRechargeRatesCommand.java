@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.rest.parking;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -11,8 +13,11 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class ListParkingRechargeRatesCommand {
+	@NotNull
     private String ownerType;
+	@NotNull
     private Long ownerId;
+	@NotNull
     private Long parkingLotId;
     
     public ListParkingRechargeRatesCommand() {

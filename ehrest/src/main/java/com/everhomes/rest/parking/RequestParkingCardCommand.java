@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.rest.parking;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -16,10 +18,14 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class RequestParkingCardCommand {
+	@NotNull
     private String ownerType;
+	@NotNull
     private Long ownerId;
+	@NotNull
     private Long parkingLotId;
     private Long requestorEnterpriseId;
+    @NotNull
     private String plateNumber;
     private String plateOwnerEntperiseName;
     private String plateOwnerName;

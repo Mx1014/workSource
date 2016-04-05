@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.rest.parking;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -12,9 +14,15 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class SetParkingCardIssueFlagCommand {
+	@NotNull
     private String ownerType;
+	@NotNull
     private Long ownerId;
+	@NotNull
     private Long parkingLotId;
+	@NotNull
+	private Long  id;
+	@NotNull
     private Byte issueFlag;
     
     public SetParkingCardIssueFlagCommand() {
@@ -52,7 +60,15 @@ public class SetParkingCardIssueFlagCommand {
         this.issueFlag = issueFlag;
     }
 
-    @Override
+    public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
