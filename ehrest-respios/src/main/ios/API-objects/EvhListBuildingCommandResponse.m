@@ -1,9 +1,9 @@
 //
 // EvhListBuildingCommandResponse.m
-// generated at 2016-04-01 15:40:23 
+// generated at 2016-04-05 13:45:26 
 //
 #import "EvhListBuildingCommandResponse.h"
-#import "EvhCommunityBuildingDTO.h"
+#import "EvhBuildingDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhListBuildingCommandResponse
@@ -37,7 +37,7 @@
         [jsonObject setObject: self.nextPageAnchor forKey: @"nextPageAnchor"];
     if(self.buildings) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhCommunityBuildingDTO* item in self.buildings) {
+        for(EvhBuildingDTO* item in self.buildings) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -56,7 +56,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"buildings"];
             for(id itemJson in jsonArray) {
-                EvhCommunityBuildingDTO* item = [EvhCommunityBuildingDTO new];
+                EvhBuildingDTO* item = [EvhBuildingDTO new];
                 
                 [item fromJson: itemJson];
                 [self.buildings addObject: item];

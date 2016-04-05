@@ -1,6 +1,6 @@
 //
 // EvhCreateConfAccountOrderOnlineCommand.h
-// generated at 2016-04-01 15:40:23 
+// generated at 2016-04-05 13:45:25 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -33,6 +33,8 @@
 @property(nonatomic, copy) NSNumber* confCapacity;
 
 @property(nonatomic, copy) NSNumber* confType;
+
+@property(nonatomic, copy) NSString* mailAddress;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

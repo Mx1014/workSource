@@ -1,6 +1,6 @@
 //
 // EvhApiConstants.h
-// generated at 2016-04-01 15:40:24
+// generated at 2016-04-05 13:45:27
 //
 #define EVH_ACLINK_ACTIVE_URL @"/aclink/active"
 #define EVH_ACLINK_ACTIVING_URL @"/aclink/activing"
@@ -234,6 +234,7 @@
 #define EVH_ADMIN_USER_LISTVEST_URL @"/admin/user/listVest"
 #define EVH_ADMIN_USER_SEARCHINVITATEDUSER_URL @"/admin/user/searchInvitatedUser"
 #define EVH_ADMIN_USER_SEARCHUSERSWITHADDR_URL @"/admin/user/searchUsersWithAddr"
+#define EVH_ADMIN_USER_SENDUSERTESTMAIL_URL @"/admin/user/sendUserTestMail"
 #define EVH_ADMIN_USER_SENDUSERTESTSMS_URL @"/admin/user/sendUserTestSms"
 #define EVH_APPKEY_ISTRUSTEDAPP_URL @"/appkey/isTrustedApp"
 #define EVH_APPKEY_ISVALIDAPPURLBINDING_URL @"/appkey/isValidAppUrlBinding"

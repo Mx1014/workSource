@@ -1,6 +1,6 @@
 //
 // EvhAdminCommunityGetNearbyCommunitiesByIdRestResponse.m
-// generated at 2016-04-01 15:40:24 
+// generated at 2016-04-05 13:45:26 
 //
 #import "EvhAdminCommunityGetNearbyCommunitiesByIdRestResponse.h"
 #import "EvhCommunityDTO.h"
