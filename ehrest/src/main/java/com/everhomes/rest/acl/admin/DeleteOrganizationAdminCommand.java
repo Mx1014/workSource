@@ -40,18 +40,6 @@ public class DeleteOrganizationAdminCommand {
 
 
 
-	public String getContactName() {
-		return contactName;
-	}
-
-
-
-	public void setContactName(String contactName) {
-		this.contactName = contactName;
-	}
-
-
-
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
