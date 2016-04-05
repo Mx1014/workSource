@@ -29,6 +29,7 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.acl.admin.AssignUserRoleAdminCommand;
+import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.CreateRolePrivilegeCommand;
 import com.everhomes.rest.acl.admin.DeleteUserRoleAdminCommand;
 import com.everhomes.rest.acl.admin.ListAclRolesCommand;
@@ -40,6 +41,8 @@ import com.everhomes.rest.acl.admin.ListWebMenuResponse;
 import com.everhomes.rest.acl.admin.QryRolePrivilegesCommand;
 import com.everhomes.rest.acl.admin.RoleDTO;
 import com.everhomes.rest.acl.admin.UpdateRolePrivilegeCommand;
+import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
+import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -256,5 +259,45 @@ public class AclAdminController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /admin/acl/createOrganizationSuperAdmin </b>
+     * <p>创建超级管理员</p>
+     */
+    @RequestMapping("createOrganizationSuperAdmin")
+    @RestReturn(value=String.class)
+    public RestResponse createOrganizationSuperAdmin(@Valid CreateOrganizationAdminCommand cmd) {
+    	rolePrivilegeService.createOrganizationSuperAdmin(cmd);
+    	RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
+    /**
+     * <b>URL: /admin/acl/createOrganizationOrdinaryAdmin  </b>
+     * <p>创建普通管理员</p>
+     */
+    @RequestMapping("createOrganizationOrdinaryAdmin")
+    @RestReturn(value=String.class)
+    public RestResponse createOrganizationOrdinaryAdmin(@Valid CreateOrganizationAdminCommand cmd) {
+    	rolePrivilegeService.createOrganizationOrdinaryAdmin(cmd);
+    	RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/acl/listOrganizationAdministrators</b>
+     * <p>管理员列表</p>
+     */
+    @RequestMapping("listOrganizationAdministrators")
+    @RestReturn(value=ListOrganizationMemberCommandResponse.class)
+    public RestResponse listOrganizationAdministrators(@Valid ListOrganizationAdministratorCommand cmd) {
+    	ListOrganizationMemberCommandResponse res = rolePrivilegeService.listOrganizationAdministrators(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

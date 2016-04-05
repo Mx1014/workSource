@@ -20,12 +20,26 @@ import java.util.stream.Collectors;
 
 
 
+
+
+
+
+
+
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
+
+
+
+
+
+
+
 
 
 
@@ -47,12 +61,14 @@ import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationRoleMap;
 import com.everhomes.organization.OrganizationRoleMapProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.OrganizationServiceImpl;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.acl.WebMenuDTO;
 import com.everhomes.rest.acl.WebMenuPrivilegeDTO;
 import com.everhomes.rest.acl.WebMenuPrivilegeShowFlag;
 import com.everhomes.rest.acl.WebMenuType;
+import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.CreateRolePrivilegeCommand;
 import com.everhomes.rest.acl.admin.DeleteRolePrivilegeCommand;
 import com.everhomes.rest.acl.admin.ListAclRolesCommand;
@@ -64,7 +80,11 @@ import com.everhomes.rest.acl.admin.QryRolePrivilegesCommand;
 import com.everhomes.rest.acl.admin.RoleDTO;
 import com.everhomes.rest.acl.admin.UpdateRolePrivilegeCommand;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.organization.CreateOrganizationAccountCommand;
+import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
+import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.PrivateFlag;
 import com.everhomes.user.User;
@@ -91,6 +111,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	
 	@Autowired
 	private OrganizationProvider organizationProvider;
+	
+	@Autowired
+	private OrganizationService organizationService;
 	
 	
 	@Override
@@ -276,6 +299,55 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		return dtos;
 	}
 	
+	@Override
+	public void createOrganizationSuperAdmin(CreateOrganizationAdminCommand cmd){
+		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
+		Long roleId = RoleConstants.PM_SUPER_ADMIN;
+		if(OrganizationType.fromCode(org.getOrganizationType()) == OrganizationType.ENTERPRISE){
+			roleId = RoleConstants.ENTERPRISE_SUPER_ADMIN;
+		}
+		
+		CreateOrganizationAccountCommand command = new CreateOrganizationAccountCommand();
+		command.setOrganizationId(org.getId());
+		command.setAccountName(cmd.getContactName());
+		command.setAccountPhone(cmd.getContactToken());
+		organizationService.createOrganizationAccount(command, roleId);
+	}
+	
+	@Override
+	public void createOrganizationOrdinaryAdmin(CreateOrganizationAdminCommand cmd){
+		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
+		
+		Long roleId = RoleConstants.PM_ORDINARY_ADMIN;
+		if(OrganizationType.fromCode(org.getOrganizationType()) == OrganizationType.ENTERPRISE){
+			roleId = RoleConstants.ENTERPRISE_ORDINARY_ADMIN;
+		}
+		
+		CreateOrganizationAccountCommand command = new CreateOrganizationAccountCommand();
+		command.setOrganizationId(org.getId());
+		command.setAccountName(cmd.getContactName());
+		command.setAccountPhone(cmd.getContactToken());
+		organizationService.createOrganizationAccount(command, roleId);
+	}
+	
+	
+	@Override
+	public ListOrganizationMemberCommandResponse listOrganizationAdministrators(ListOrganizationAdministratorCommand cmd){
+		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
+		List<Long> roles = new ArrayList<Long>();
+		if(OrganizationType.fromCode(org.getOrganizationType()) == OrganizationType.ENTERPRISE){
+			roles.add(RoleConstants.ENTERPRISE_ORDINARY_ADMIN);
+			roles.add(RoleConstants.ENTERPRISE_SUPER_ADMIN);
+		}else{
+			roles.add(RoleConstants.PM_ORDINARY_ADMIN);
+			roles.add(RoleConstants.PM_SUPER_ADMIN);
+		}
+		
+		cmd.setRoleIds(roles);
+		
+		return organizationService.listOrganizationPersonnelsByRoleIds(cmd);
+	}
+	
 	 /**
      * 获取用户的权限列表
      * @param module
@@ -293,8 +365,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     	for (RoleAssignment role : userRoles) {
     		roleIds.add(role.getRoleId());
 		}
-    	
-    	
     	
     	if(!StringUtils.isEmpty(module)){
     		List<Privilege> s = aclProvider.getPrivilegesByTag(module); //aclProvider 调平台根据角色list+模块 获取权限list接口

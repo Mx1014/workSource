@@ -707,22 +707,6 @@ public class OrganizationAdminController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /admin/org/listOrganizationAdministrators</b>
-     * <p>管理员列表</p>
-     */
-    @RequestMapping("listOrganizationAdministrators")
-    @RestReturn(value=ListOrganizationMemberCommandResponse.class)
-    public RestResponse listOrganizationAdministrators(@Valid ListOrganizationAdministratorCommand cmd) {
-    	List<Long> roleIds = new ArrayList<Long>();
-//    	roleIds.add(RoleConstants.ORGANIZATION_ADMIN);
-    	ListOrganizationMemberCommandResponse res = organizationService.listOrganizationPersonnelsByRoleIds(cmd);
-        RestResponse response = new RestResponse(res);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
-    /**
      * <b>URL: /admin/org/ listOrgAuthPersonnels</b>
      * <p>认证通讯录列表</p>
      */
@@ -829,7 +813,7 @@ public class OrganizationAdminController extends ControllerBase {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
-        organizationService.createOrganizationAccount(cmd);
+        organizationService.createOrganizationAccount(cmd, RoleConstants.ENTERPRISE_SUPER_ADMIN);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
