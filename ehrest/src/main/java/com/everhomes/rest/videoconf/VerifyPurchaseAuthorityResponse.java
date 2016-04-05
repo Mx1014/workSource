@@ -4,22 +4,22 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *  <li>purchaseAuthority: 是否具有购买权限 0-无 1-有</li>
+ *  <li>purchaseAuthority: 是否具有购买权限 </li>
  *  <li>enterpriseActiveAccountCount: 企业有效账号数</li>
  * </ul>
  *
  */
 public class VerifyPurchaseAuthorityResponse {
 	
-	private Byte purchaseAuthority;
+	private boolean purchaseAuthority;
 	
 	private int enterpriseActiveAccountCount;
 
-	public Byte getPurchaseAuthority() {
+	public boolean isPurchaseAuthority() {
 		return purchaseAuthority;
 	}
 
-	public void setPurchaseAuthority(Byte purchaseAuthority) {
+	public void setPurchaseAuthority(boolean purchaseAuthority) {
 		this.purchaseAuthority = purchaseAuthority;
 	}
 

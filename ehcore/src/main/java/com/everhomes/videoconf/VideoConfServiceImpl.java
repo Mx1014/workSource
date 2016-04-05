@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.category.Category;
@@ -205,6 +206,9 @@ public class VideoConfServiceImpl implements VideoConfService {
 	
 	@Autowired
 	private AppProvider appProvider;
+	
+	@Autowired
+	private RolePrivilegeService rolePrivilegeService;
 	
 	
 	@Override
@@ -2018,11 +2022,15 @@ public class VideoConfServiceImpl implements VideoConfService {
 					}
 					
 					vcProvider.updateConfAccounts(account);
+					
+					confAccountSearcher.feedDoc(account);
 				}
 				
 				enterprise.setBuyChannel(order.getOnlineFlag());
 				enterprise.setActiveAccountAmount(enterprise.getActiveAccountAmount()+toActive);
 				vcProvider.updateConfEnterprises(enterprise);
+				
+				//给线上支付成功的用户发邮件
 				
 			}
 		}
@@ -2331,6 +2339,9 @@ public class VideoConfServiceImpl implements VideoConfService {
 		order.setAccountCategoryId(0L);
 		order.setMakeOutFlag((byte) 0);
 		Long orderId = createConfAccountOrder(order);
+		ConfOrders confOrder = vcProvider.findOredrById(orderId);
+		confOrder.setEmail(cmd.getMailAddress());
+		vcProvider.updateConfOrders(confOrder);
 		
 		ConfAccountOrderDTO dto = new ConfAccountOrderDTO();
 		dto.setBillId(orderId);
@@ -2400,6 +2411,9 @@ public class VideoConfServiceImpl implements VideoConfService {
 		order.setInvoice(new InvoiceDTO());
 		
 		Long orderId = createConfAccountOrder(order);
+		ConfOrders confOrder = vcProvider.findOredrById(orderId);
+		confOrder.setEmail(cmd.getMailAddress());
+		vcProvider.updateConfOrders(confOrder);
 		
 		ConfAccountOrderDTO dto = new ConfAccountOrderDTO();
 		dto.setBillId(orderId);
@@ -2437,6 +2451,10 @@ public class VideoConfServiceImpl implements VideoConfService {
 		VerifyPurchaseAuthorityResponse response = new VerifyPurchaseAuthorityResponse();
 		int enterpriseVaildAccounts = vcProvider.countAccountsByEnterprise(cmd.getEnterpriseId(), null);
 		response.setEnterpriseActiveAccountCount(enterpriseVaildAccounts);
+		
+		boolean privilege = rolePrivilegeService.checkAdministrators(cmd.getEnterpriseId());
+
+		response.setPurchaseAuthority(privilege);
 		return response;
 	}
 	
