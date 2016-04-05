@@ -169,7 +169,7 @@ public class QualityProviderImpl implements QualityProvider {
 	@Override
 	public List<QualityInspectionTasks> listVerificationTasks(ListingLocator locator, int count, Long ownerId, String ownerType, 
     		Byte taskType, Long executeUid, Timestamp startDate, Timestamp endDate, Long groupId, 
-    		Byte executeStatus, Byte reviewStatus) {
+    		Byte executeStatus, Byte reviewStatus, boolean timeCompared) {
 		assert(locator.getEntityId() != 0);
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhQualityInspectionTasks.class, locator.getEntityId()));
 		List<QualityInspectionTasks> tasks = new ArrayList<QualityInspectionTasks>();
@@ -212,6 +212,10 @@ public class QualityProviderImpl implements QualityProvider {
 				query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.REVIEW_RESULT.eq(QualityInspectionTaskReviewResult.NONE.getCode()));
 			if(QualityInspectionTaskReviewStatus.REVIEWED.getCode() == reviewStatus)
 				query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.REVIEW_RESULT.ne(QualityInspectionTaskReviewResult.NONE.getCode()));
+		}
+		
+		if(timeCompared) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime())));
 		}
 
         query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASKS.ID.desc());

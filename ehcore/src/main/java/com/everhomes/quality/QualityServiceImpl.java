@@ -641,14 +641,18 @@ public class QualityServiceImpl implements QualityService {
         }
 
         Long currentUid = null;
-        if(cmd.getExecuteFlag() != null && cmd.getExecuteFlag() == 1) {
-        	User user = UserContext.current().getUser();
-        	currentUid = user.getId();
+        boolean timeCompared = false;
+        if(cmd.getExecuteFlag() != null) {
+        	timeCompared = true;
+        	if(cmd.getExecuteFlag() == 1) {
+	        	User user = UserContext.current().getUser();
+	        	currentUid = user.getId();
+        	}
         }
         
         final Long executeUid = currentUid;
         List<QualityInspectionTasks> tasks = qualityProvider.listVerificationTasks(locator, pageSize + 1, ownerId, ownerType, 
-        		cmd.getTaskType(), executeUid, startDate, endDate, cmd.getGroupId(), cmd.getExecuteStatus(), cmd.getReviewStatus());
+        		cmd.getTaskType(), executeUid, startDate, endDate, cmd.getGroupId(), cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared);
         
         Long nextPageAnchor = null;
         if(tasks.size() > pageSize) {
@@ -1363,7 +1367,7 @@ public class QualityServiceImpl implements QualityService {
 		Integer pageSize = Integer.MAX_VALUE;
 		
 		List<QualityInspectionTasks> tasks = qualityProvider.listVerificationTasks(locator, pageSize, cmd.getOwnerId(), cmd.getOwnerType(), 
-				cmd.getTaskType(), null, startDate, endDate, cmd.getGroupId(), cmd.getExecuteStatus(), cmd.getReviewStatus());
+				cmd.getTaskType(), null, startDate, endDate, cmd.getGroupId(), cmd.getExecuteStatus(), cmd.getReviewStatus(), false);
 
 		List<QualityInspectionTaskRecords> records = new ArrayList<QualityInspectionTaskRecords>();
         for(QualityInspectionTasks task : tasks) {
