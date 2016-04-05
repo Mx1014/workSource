@@ -31,6 +31,7 @@ import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.acl.admin.AssignUserRoleAdminCommand;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.CreateRolePrivilegeCommand;
+import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.DeleteUserRoleAdminCommand;
 import com.everhomes.rest.acl.admin.ListAclRolesCommand;
 import com.everhomes.rest.acl.admin.ListUserRolesAdminCommandResponse;
@@ -40,6 +41,7 @@ import com.everhomes.rest.acl.admin.ListWebMenuPrivilegeDTO;
 import com.everhomes.rest.acl.admin.ListWebMenuResponse;
 import com.everhomes.rest.acl.admin.QryRolePrivilegesCommand;
 import com.everhomes.rest.acl.admin.RoleDTO;
+import com.everhomes.rest.acl.admin.UpdateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.UpdateRolePrivilegeCommand;
 import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
@@ -281,6 +283,48 @@ public class AclAdminController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse createOrganizationOrdinaryAdmin(@Valid CreateOrganizationAdminCommand cmd) {
     	rolePrivilegeService.createOrganizationOrdinaryAdmin(cmd);
+    	RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/acl/updateOrganizationSuperAdmin </b>
+     * <p>修改超级管理员</p>
+     */
+    @RequestMapping("updateOrganizationSuperAdmin")
+    @RestReturn(value=String.class)
+    public RestResponse updateOrganizationSuperAdmin(@Valid UpdateOrganizationAdminCommand cmd) {
+    	rolePrivilegeService.updateOrganizationSuperAdmin(cmd);
+    	RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/acl/updateOrganizationOrdinaryAdmin  </b>
+     * <p>修改普通管理员</p>
+     */
+    @RequestMapping("updateOrganizationOrdinaryAdmin")
+    @RestReturn(value=String.class)
+    public RestResponse updateOrganizationOrdinaryAdmin(@Valid UpdateOrganizationAdminCommand cmd) {
+    	rolePrivilegeService.updateOrganizationOrdinaryAdmin(cmd);
+    	RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/acl/deleteOrganizationAdmin  </b>
+     * <p>删除管理员</p>
+     */
+    @RequestMapping("deleteOrganizationAdmin")
+    @RestReturn(value=String.class)
+    public RestResponse deleteOrganizationAdmin(@Valid DeleteOrganizationAdminCommand cmd) {
+    	rolePrivilegeService.deleteOrganizationAdmin(cmd);
     	RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

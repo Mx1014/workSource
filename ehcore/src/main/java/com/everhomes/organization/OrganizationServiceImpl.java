@@ -4928,7 +4928,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    Map<Long, Role> roleMap =  this.convertOrganizationRoleMap(roles);
 	    
 	    Long ownerId = orgId;
-	    Long targetId = org.getId();
 		List<OrganizationDTO> rganizationDTOs = orgs.stream().map(r->{ 
 			OrganizationDTO dto = ConvertHelper.convert(r, OrganizationDTO.class);
 			if(OrganizationGroupType.fromCode(dto.getGroupType()) == OrganizationGroupType.ENTERPRISE){
@@ -4939,7 +4938,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				return dto;
 			}
 			Organization depart = deptMaps.get(dto.getParentId());
-			List<RoleAssignment> resources = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), ownerId, EntityType.ORGANIZATIONS.getCode(), targetId);
+			List<RoleAssignment> resources = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), ownerId, EntityType.ORGANIZATIONS.getCode(), dto.getId());
 			if(null != depart) dto.setParentName(depart.getName());
 			if(null != resources && resources.size() > 0){
 				List<RoleDTO> roleDTOs = new ArrayList<RoleDTO>();

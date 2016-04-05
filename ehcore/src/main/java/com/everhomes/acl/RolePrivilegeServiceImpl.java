@@ -27,12 +27,18 @@ import java.util.stream.Collectors;
 
 
 
+
+
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
+
+
+
 
 
 
@@ -70,6 +76,7 @@ import com.everhomes.rest.acl.WebMenuPrivilegeShowFlag;
 import com.everhomes.rest.acl.WebMenuType;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.CreateRolePrivilegeCommand;
+import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.DeleteRolePrivilegeCommand;
 import com.everhomes.rest.acl.admin.ListAclRolesCommand;
 import com.everhomes.rest.acl.admin.ListWebMenuCommand;
@@ -78,6 +85,7 @@ import com.everhomes.rest.acl.admin.ListWebMenuPrivilegeDTO;
 import com.everhomes.rest.acl.admin.ListWebMenuResponse;
 import com.everhomes.rest.acl.admin.QryRolePrivilegesCommand;
 import com.everhomes.rest.acl.admin.RoleDTO;
+import com.everhomes.rest.acl.admin.UpdateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.UpdateRolePrivilegeCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.organization.CreateOrganizationAccountCommand;
@@ -87,6 +95,7 @@ import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.PrivateFlag;
+import com.everhomes.rest.organization.SetAclRoleAssignmentCommand;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -328,6 +337,113 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		command.setAccountName(cmd.getContactName());
 		command.setAccountPhone(cmd.getContactToken());
 		organizationService.createOrganizationAccount(command, roleId);
+	}
+	
+	@Override
+	public void updateOrganizationOrdinaryAdmin(
+			UpdateOrganizationAdminCommand cmd) {
+		
+		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
+		
+		Long ordinaryAdminRoleId = RoleConstants.PM_ORDINARY_ADMIN;
+		Long superAdminRoleId = RoleConstants.PM_SUPER_ADMIN;
+		if(OrganizationType.fromCode(org.getOrganizationType()) == OrganizationType.ENTERPRISE){
+			ordinaryAdminRoleId = RoleConstants.ENTERPRISE_ORDINARY_ADMIN;
+			superAdminRoleId = RoleConstants.ENTERPRISE_SUPER_ADMIN;
+		}
+		
+		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getUserId(), cmd.getOrganizationId());
+		if(null != member){
+			member.setContactName(cmd.getContactName());
+			member.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			organizationProvider.updateOrganizationMember(member);
+		}
+		
+		List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), EntityType.USER.getCode(), cmd.getUserId());
+		
+		boolean isAdminFlag = false;
+		
+		for (RoleAssignment roleAssignment : roleAssignments) {
+			if(roleAssignment.getRoleId().equals(superAdminRoleId)){
+				aclProvider.deleteRoleAssignment(roleAssignment.getId());
+			}else if(roleAssignment.getRoleId().equals(ordinaryAdminRoleId)){
+				isAdminFlag = true;
+			}
+		}
+		
+		if(!isAdminFlag){
+			SetAclRoleAssignmentCommand command = new SetAclRoleAssignmentCommand();
+			command.setOrganizationId(cmd.getOrganizationId());
+			command.setRoleId(ordinaryAdminRoleId);
+			command.setTargetId(cmd.getUserId());
+			organizationService.setAclRoleAssignmentRole(command, EntityType.USER);
+		}
+		
+	}
+	
+	@Override
+	public void updateOrganizationSuperAdmin(UpdateOrganizationAdminCommand cmd) {
+		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
+		
+		Long ordinaryAdminRoleId = RoleConstants.PM_ORDINARY_ADMIN;
+		Long superAdminRoleId = RoleConstants.PM_SUPER_ADMIN;
+		if(OrganizationType.fromCode(org.getOrganizationType()) == OrganizationType.ENTERPRISE){
+			ordinaryAdminRoleId = RoleConstants.ENTERPRISE_ORDINARY_ADMIN;
+			superAdminRoleId = RoleConstants.ENTERPRISE_SUPER_ADMIN;
+		}
+		
+		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getUserId(), cmd.getOrganizationId());
+		if(null != member){
+			member.setContactName(cmd.getContactName());
+			member.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			organizationProvider.updateOrganizationMember(member);
+		}
+		
+		List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), EntityType.USER.getCode(), cmd.getUserId());
+		
+		boolean isAdminFlag = false;
+		
+		for (RoleAssignment roleAssignment : roleAssignments) {
+			if(roleAssignment.getRoleId().equals(ordinaryAdminRoleId)){
+				aclProvider.deleteRoleAssignment(roleAssignment.getId());
+			}else if(roleAssignment.getRoleId().equals(superAdminRoleId)){
+				isAdminFlag = true;
+			}
+		}
+		
+		if(!isAdminFlag){
+			SetAclRoleAssignmentCommand command = new SetAclRoleAssignmentCommand();
+			command.setOrganizationId(cmd.getOrganizationId());
+			command.setRoleId(superAdminRoleId);
+			command.setTargetId(cmd.getUserId());
+			organizationService.setAclRoleAssignmentRole(command, EntityType.USER);
+		}
+	}
+	
+	@Override
+	public void deleteOrganizationAdmin(DeleteOrganizationAdminCommand cmd) {
+		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
+		
+		List<Long> roles = new ArrayList<Long>();
+		if(OrganizationType.fromCode(org.getOrganizationType()) == OrganizationType.ENTERPRISE){
+			roles.add(RoleConstants.ENTERPRISE_ORDINARY_ADMIN);
+			roles.add(RoleConstants.ENTERPRISE_SUPER_ADMIN);
+		}else{
+			roles.add(RoleConstants.PM_ORDINARY_ADMIN);
+			roles.add(RoleConstants.PM_SUPER_ADMIN);
+		}
+		
+		List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), EntityType.USER.getCode(), cmd.getUserId());
+		
+		/**
+		 * 只删除admin这个角色权限
+		 */
+		for (RoleAssignment roleAssignment : roleAssignments) {
+			if(roles.contains(roleAssignment.getRoleId())){
+				aclProvider.deleteRoleAssignment(roleAssignment.getId());
+			}
+		}
+		
 	}
 	
 	
