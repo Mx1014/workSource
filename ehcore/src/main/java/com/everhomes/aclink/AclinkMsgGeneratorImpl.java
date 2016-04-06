@@ -174,4 +174,35 @@ public class AclinkMsgGeneratorImpl implements AclinkMsgGenerator {
         
         return ctx.getDoorMessages();
     }
+    
+    /**
+     * Generate message one by one
+     */
+    @Override
+    public AclinkWebSocketMessage generateWebSocketMessage(Long doorId) {
+        ListingLocator locator = new ListingLocator();
+        int count = 1;
+        AclinkGeneratorContext ctx = new AclinkGeneratorContext();
+        
+        List<DoorCommand> cmds = doorCommandProvider.queryValidDoorCommands(locator, doorId, count);
+        if(cmds == null || cmds.size() == 0) {
+            return null;
+            }
+        
+        ctx.putMessage(cmds.get(0));
+        genMessage(ctx, cmds.get(0));
+        
+        List<DoorMessage> results = ctx.getDoorMessages();
+        
+        if(results == null || results.size() == 0) {
+            return null;
+            }
+        
+        AclinkWebSocketMessage smsg = new AclinkWebSocketMessage();
+        smsg.setId(doorId);
+        smsg.setPayload(results.get(0).getBody().getEncrypted());
+        smsg.setSeq(results.get(0).getSeq());
+        
+        return smsg;
+    }
 }

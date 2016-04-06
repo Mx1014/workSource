@@ -172,4 +172,53 @@ public class AclinkController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+
+    /**
+     * 
+     * <b>URL: /aclink/connecting</b>
+     * <p>删除授权</p>
+     * @return
+     */
+    @RequestMapping("connecting")
+    @RestReturn(value=DoorAccessDTO.class)
+    public RestResponse connecting(@Valid AclinkConnectingCommand cmd) {
+        doorAccessService.onDoorAccessConnecting(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /aclink/disConnected</b>
+     * <p>删除授权</p>
+     * @return
+     */
+    @RequestMapping("disConnected")
+    @RestReturn(value=String.class)
+    public RestResponse disConnected(@Valid AclinkDisconnectedCommand cmd) {
+        doorAccessService.onDoorAcessDisconnected(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /aclink/syncDoorMessages</b>
+     * <p>删除授权</p>
+     * @return
+     */
+    @RequestMapping("syncWebsocketMessages")
+    @RestReturn(value=String.class)
+    public RestResponse syncDoorMessages(@Valid AclinkDisconnectedCommand cmd) {
+        doorAccessService.onDoorAcessDisconnected(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

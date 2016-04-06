@@ -183,4 +183,26 @@ public class DoorAccessProviderImpl implements DoorAccessProvider {
         
         return das.get(0);
     }
+    
+    @Override
+    public DoorAccess queryDoorAccessByUuid(String uuid) {
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        List<DoorAccess> das = queryDoorAccesss(locator, 1, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_DOOR_ACCESS.UUID.eq(uuid));
+                query.addConditions(Tables.EH_DOOR_ACCESS.STATUS.ne(DoorAccessStatus.INVALID.getCode()));
+                return query;
+            }
+            
+        });
+        
+        if(das == null || das.size() == 0) {
+            return null;
+        }
+        
+        return das.get(0);
+    }
 }
