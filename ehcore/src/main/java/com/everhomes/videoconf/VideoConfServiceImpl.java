@@ -2009,6 +2009,9 @@ public class VideoConfServiceImpl implements VideoConfService {
 			enterprise.setAccountAmount(enterprise.getAccountAmount()+order.getQuantity());
 			enterprise.setActiveAccountAmount(enterprise.getActiveAccountAmount()+order.getQuantity());
 			vcProvider.updateConfEnterprises(enterprise);
+			
+			sendConfInvoiceEmail(order.getEmail());
+	        
 		} else if(order.getStatus().byteValue() == PayStatus.PAID.getCode() 
 				&& (order.getAccountCategoryId() == null || order.getAccountCategoryId() == 0)) {
 			CrossShardListingLocator locator = new CrossShardListingLocator();
@@ -2040,21 +2043,26 @@ public class VideoConfServiceImpl implements VideoConfService {
 				enterprise.setActiveAccountAmount(enterprise.getActiveAccountAmount()+toActive);
 				vcProvider.updateConfEnterprises(enterprise);
 				
-				//给线上支付成功的用户发邮件
-				String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
-		        MailHandler handler = PlatformContext.getComponent(handlerName);
-				String subject = localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
-						String.valueOf(ConfServiceErrorCode.CONF_INVOICE_SUBJECT),
-						UserContext.current().getUser().getLocale(),"zuolin video conference invoce");
-				
-				String body = localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
-						String.valueOf(ConfServiceErrorCode.CONF_INVOICE_BODY),
-						UserContext.current().getUser().getLocale(),"zuolin video conference invoce");
-		        handler.sendMail(user.getNamespaceId(), null, order.getEmail(), subject, body, null);
+				sendConfInvoiceEmail(order.getEmail());
 				
 			}
 		}
 		
+	}
+	
+	private void sendConfInvoiceEmail(String emailAddress) {
+		if(!StringUtils.isNullOrEmpty(emailAddress)) {
+			String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
+	        MailHandler handler = PlatformContext.getComponent(handlerName);
+			String subject = localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
+					String.valueOf(ConfServiceErrorCode.CONF_INVOICE_SUBJECT),
+					UserContext.current().getUser().getLocale(),"zuolin video conference invoce");
+			
+			String body = localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
+					String.valueOf(ConfServiceErrorCode.CONF_INVOICE_BODY),
+					UserContext.current().getUser().getLocale(),"zuolin video conference invoce");
+	        handler.sendMail(Namespace.DEFAULT_NAMESPACE, null,emailAddress, subject, body, null);
+		}
 	}
 	
 	private Long convertOrderNoToOrderId(String orderNo) {
