@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.rest.parking;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -13,10 +15,12 @@ public class ListParkingLotsCommand {
 	/**
 	 * 小区类型
 	 */
+	@NotNull
     private String ownerType;
     /**
      * 小区id
      */
+	@NotNull
     private Long ownerId;
     
     public ListParkingLotsCommand() {

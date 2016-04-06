@@ -2,17 +2,13 @@
 package com.everhomes.parking;
 
 import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
-import org.jooq.InsertQuery;
 import org.jooq.SelectQuery;
 import org.jooq.SortField;
 import org.slf4j.Logger;
@@ -20,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
@@ -28,12 +23,11 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.parking.ParkingCardRequestStatus;
-import com.everhomes.rest.parking.SearchParkingCardRequestsCommand;
-import com.everhomes.rest.parking.SearchParkingRechargeOrdersCommand;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhParkingCardRequestsDao;
 import com.everhomes.server.schema.tables.daos.EhParkingLotsDao;
+import com.everhomes.server.schema.tables.daos.EhParkingRechargeOrdersDao;
 import com.everhomes.server.schema.tables.daos.EhParkingRechargeRatesDao;
 import com.everhomes.server.schema.tables.daos.EhParkingVendorsDao;
 import com.everhomes.server.schema.tables.pojos.EhParkingCardRequests;
@@ -47,7 +41,6 @@ import com.everhomes.server.schema.tables.records.EhParkingRechargeRatesRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RuntimeErrorException;
 
 @Component
 public class ParkingProviderImpl implements ParkingProvider {
@@ -123,39 +116,30 @@ public class ParkingProviderImpl implements ParkingProvider {
     }
     
     @Override
-    public int createParkingRechargeRate(ParkingRechargeRate parkingRechargeRate){
+    public void createParkingRechargeRate(ParkingRechargeRate parkingRechargeRate){
     	
     	long id = sequenceProvider.getNextSequence(NameMapper
 				.getSequenceDomainFromTablePojo(EhParkingRechargeRates.class));
     	parkingRechargeRate.setId(id);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		EhParkingRechargeRatesRecord record = ConvertHelper.convert(parkingRechargeRate, EhParkingRechargeRatesRecord.class);
-		InsertQuery<EhParkingRechargeRatesRecord> query =  context.insertQuery(Tables.EH_PARKING_RECHARGE_RATES);
-		
-		query.setRecord(record);
-		int result = query.execute();
+		EhParkingRechargeRatesDao dao = new EhParkingRechargeRatesDao(context.configuration());
+		dao.insert(parkingRechargeRate);
 		
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhParkingRechargeRates.class, null);
     	
-    	return result;
     }
     
     @Override
-    public int requestParkingCard(ParkingCardRequest parkingCardRequest){
+    public void requestParkingCard(ParkingCardRequest parkingCardRequest){
     	
     	long id = sequenceProvider.getNextSequence(NameMapper
 				.getSequenceDomainFromTablePojo(EhParkingCardRequests.class));
     	parkingCardRequest.setId(id);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		EhParkingCardRequestsRecord record = ConvertHelper.convert(parkingCardRequest, EhParkingCardRequestsRecord.class);
-		InsertQuery<EhParkingCardRequestsRecord> query =  context.insertQuery(Tables.EH_PARKING_CARD_REQUESTS);
-		
-		query.setRecord(record);
-		int result = query.execute();
-		
+		EhParkingCardRequestsDao dao = new EhParkingCardRequestsDao(context.configuration());
+		dao.insert(parkingCardRequest);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhParkingCardRequests.class, null);
     	
-    	return result;
     }
     
     @Override
@@ -238,37 +222,38 @@ public class ParkingProviderImpl implements ParkingProvider {
     }
     
     @Override
-    public List<ParkingRechargeOrder> listParkingRechargeOrders(SearchParkingRechargeOrdersCommand cmd){
+    public List<ParkingRechargeOrder> searchParkingRechargeOrders(String ownerType,Long ownerId,
+    		Long parkingLotId, String plateNumber,String plateOwnerName,String plateOwnerPhone
+    		,String payerName,String payerPhone,Long pageAnchor,Integer pageSize){
     	List<ParkingRechargeOrder> resultList = null;
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         SelectQuery<EhParkingRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_ORDERS);
         
-        if (cmd.getPageAnchor() != null && cmd.getPageAnchor() != 0)
-			query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.ID.gt(cmd.getPageAnchor()));
-        if(StringUtils.isNotBlank(cmd.getOwnerType()))
-        	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.OWNER_TYPE.eq(cmd.getOwnerType()));
-        if(cmd.getOwnerId() != null)
-        	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.OWNER_ID.eq(cmd.getOwnerId()));
-        if(cmd.getParkingLotId() != null)
-        	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PARKING_LOT_ID.eq(cmd.getParkingLotId()));
-        if(StringUtils.isNotBlank(cmd.getPlateNumber()))
-        	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PLATE_NUMBER.eq(cmd.getPlateNumber()));
-        if(StringUtils.isNotBlank(cmd.getPlateOwnerName()))
-        	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PLATE_OWNER_NAME.eq(cmd.getPlateOwnerName()));
-        if(StringUtils.isNotBlank(cmd.getPlateOwnerPhone()))
-        	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PLATE_OWNER_PHONE.eq(cmd.getPlateOwnerPhone()));
-        if(StringUtils.isNotBlank(cmd.getPayerPhone()))
-        	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PAYER_PHONE.eq(cmd.getPayerPhone()));
+        if (pageAnchor != null && pageAnchor != 0)
+			query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.ID.gt(pageAnchor));
+        if(StringUtils.isNotBlank(ownerType))
+        	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.OWNER_TYPE.eq(ownerType));
+        if(ownerId != null)
+        	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.OWNER_ID.eq(ownerId));
+        if(parkingLotId != null)
+        	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PARKING_LOT_ID.eq(parkingLotId));
+        if(StringUtils.isNotBlank(plateNumber))
+        	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PLATE_NUMBER.eq(plateNumber));
+        if(StringUtils.isNotBlank(plateOwnerName))
+        	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PLATE_OWNER_NAME.eq(plateOwnerName));
+        if(StringUtils.isNotBlank(plateOwnerPhone))
+        	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PLATE_OWNER_PHONE.eq(plateOwnerPhone));
+        if(StringUtils.isNotBlank(payerPhone))
+        	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PAYER_PHONE.eq(payerPhone));
         
-        if(StringUtils.isNotBlank(cmd.getPayerName())){
+        if(StringUtils.isNotBlank(payerName)){
         	query.addJoin(Tables.EH_USERS, Tables.EH_USERS.ID.eq(Tables.EH_PARKING_RECHARGE_ORDERS.PAYER_UID));
-        	query.addConditions(Tables.EH_USERS.NICK_NAME.eq(cmd.getPayerName()));
+        	query.addConditions(Tables.EH_USERS.NICK_NAME.eq(payerName));
         }
-        	
         
         query.addOrderBy(Tables.EH_PARKING_RECHARGE_ORDERS.ID.asc());
-        if(cmd.getPageSize() != null)
-        	query.addLimit(cmd.getPageSize());
+        if(pageSize != null)
+        	query.addLimit(pageSize);
         
         resultList = query.fetch().map(r -> 
 			ConvertHelper.convert(r, ParkingRechargeOrder.class));
@@ -278,29 +263,25 @@ public class ParkingProviderImpl implements ParkingProvider {
     }
     
     @Override
-    public int createParkingRechargeOrder(ParkingRechargeOrder parkingRechargeOrder){
+    public void createParkingRechargeOrder(ParkingRechargeOrder parkingRechargeOrder){
     	long id = sequenceProvider.getNextSequence(NameMapper
 				.getSequenceDomainFromTablePojo(EhParkingRechargeOrders.class));
     	parkingRechargeOrder.setId(id);
 
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-		EhParkingRechargeOrdersRecord record = ConvertHelper.convert(parkingRechargeOrder, EhParkingRechargeOrdersRecord.class);
-		InsertQuery<EhParkingRechargeOrdersRecord> query = context.insertQuery(Tables.EH_PARKING_RECHARGE_ORDERS);
-		query.setRecord(record);
-		int result = query.execute();
+		EhParkingRechargeOrdersDao dao = new EhParkingRechargeOrdersDao(context.configuration());
+		dao.insert(parkingRechargeOrder);
 		
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhParkingRechargeOrders.class, null);
-		
-		return result;
     }
     
     @Override
-    public void deleteParkingRechargeRate(EhParkingRechargeRates ehParkingRechargeRates){
+    public void deleteParkingRechargeRate(ParkingRechargeRate parkingRechargeRate){
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
     	EhParkingRechargeRatesDao dao = new EhParkingRechargeRatesDao(context.configuration());
-    	dao.delete(ehParkingRechargeRates);
+    	dao.delete(parkingRechargeRate);
     	
-    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhParkingRechargeRates.class, ehParkingRechargeRates.getId());
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhParkingRechargeRates.class, parkingRechargeRate.getId());
     }
     
     @Override
@@ -312,37 +293,38 @@ public class ParkingProviderImpl implements ParkingProvider {
     }
     
     @Override
-    public List<ParkingCardRequest> searchParkingCardRequests(
-			SearchParkingCardRequestsCommand cmd){
+    public List<ParkingCardRequest> searchParkingCardRequests(String ownerType,Long ownerId,
+			Long parkingLotId,String plateNumber,String plateOwnerName,String plateOwnerPhone,
+			Timestamp startDate,Timestamp endDate,Byte status,Long pageAnchor,Integer pageSize){
     	List<ParkingCardRequest> resultList = null;
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         SelectQuery<EhParkingCardRequestsRecord> query = context.selectQuery(Tables.EH_PARKING_CARD_REQUESTS);
         
-        if (cmd.getPageAnchor() != null && cmd.getPageAnchor() != 0)
-			query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.ID.gt(cmd.getPageAnchor()));
-        if(StringUtils.isNotBlank(cmd.getOwnerType()))
-        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.OWNER_TYPE.eq(cmd.getOwnerType()));
-        if(cmd.getOwnerId() != null)
-        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.OWNER_ID.eq(cmd.getOwnerId()));
-        if(cmd.getParkingLotId() != null)
-        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PARKING_LOT_ID.eq(cmd.getParkingLotId()));
-        if(StringUtils.isNotBlank(cmd.getPlateNumber()))
-        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PLATE_NUMBER.eq(cmd.getPlateNumber()));
-        if(StringUtils.isNotBlank(cmd.getPlateOwnerName()))
-        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PLATE_OWNER_NAME.eq(cmd.getPlateOwnerName()));
-        if(StringUtils.isNotBlank(cmd.getPlateOwnerPhone()))
-        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PLATE_OWNER_PHONE.eq(cmd.getPlateOwnerPhone()));
-        if(cmd.getStatus() != null)
-        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.STATUS.eq(cmd.getStatus()));
-        if(StringUtils.isNotBlank(cmd.getStartDate())){
-        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.ge(strToTimestamp(cmd.getStartDate())));
+        if (pageAnchor != null && pageAnchor != 0)
+			query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.ID.gt(pageAnchor));
+        if(StringUtils.isNotBlank(ownerType))
+        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.OWNER_TYPE.eq(ownerType));
+        if(ownerId != null)
+        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.OWNER_ID.eq(ownerId));
+        if(parkingLotId != null)
+        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PARKING_LOT_ID.eq(parkingLotId));
+        if(StringUtils.isNotBlank(plateNumber))
+        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PLATE_NUMBER.eq(plateNumber));
+        if(StringUtils.isNotBlank(plateOwnerName))
+        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PLATE_OWNER_NAME.eq(plateOwnerName));
+        if(StringUtils.isNotBlank(plateOwnerPhone))
+        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PLATE_OWNER_PHONE.eq(plateOwnerPhone));
+        if(status != null)
+        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.STATUS.eq(status));
+        if(startDate != null){
+        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.ge(startDate));
         }
-        if(StringUtils.isNotBlank(cmd.getEndDate()))
-        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.le(strToTimestamp(cmd.getEndDate())));
+        if(endDate != null)
+        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.le(endDate));
 
         query.addOrderBy(Tables.EH_PARKING_CARD_REQUESTS.ID.asc());
-        if(cmd.getPageSize() != null)
-        	query.addLimit(cmd.getPageSize());
+        if(pageSize != null)
+        	query.addLimit(pageSize);
         
         resultList = query.fetch().map(r -> 
 			ConvertHelper.convert(r, ParkingCardRequest.class));
@@ -350,22 +332,6 @@ public class ParkingProviderImpl implements ParkingProvider {
     	return resultList;
     }
     
-    private Timestamp strToTimestamp(String str) {
-
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-		
-		Timestamp ts = null;
-		try {
-			ts = new Timestamp(sdf.parse(str).getTime());
-		} catch (ParseException e) {
-			LOGGER.error("validityPeriod data format is not yyyymmdd.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"validityPeriod data format is not yyyymmdd.");
-		}
-		
-		return ts;
-	}
-
 	@Override
 	public void setParkingCardReserveDays(ParkingLot parkingLot) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());

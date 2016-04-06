@@ -3,6 +3,8 @@ package com.everhomes.parking;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -68,7 +70,7 @@ public class ParkingController extends ControllerBase {
      */
     @RequestMapping("listParkingCards")
     @RestReturn(value=ParkingCardDTO.class, collection=true)
-    public RestResponse listParkingCards(ListParkingCardsCommand cmd) {
+    public RestResponse listParkingCards(@Valid ListParkingCardsCommand cmd) {
         List<ParkingCardDTO> parkingCardList = null;
         
         parkingCardList = parkingService.listParkingCards(cmd);

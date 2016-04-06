@@ -143,13 +143,8 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
     	parkingRechargeRate.setMonthCount(cmd.getMonthCount());
     	parkingRechargeRate.setPrice(cmd.getPrice());
     	parkingRechargeRate.setCreatorUid(user.getId());
-    	if(parkingProvider.createParkingRechargeRate(parkingRechargeRate) > 0)
-    		return ConvertHelper.convert(parkingRechargeRate, ParkingRechargeRateDTO.class);
-    	else {
-    		LOGGER.error("insert parkingRechargeRate fail.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_SQL_EXCEPTION,
-    				"insert parkingRechargeRate fail.");
-    	}
+    	parkingProvider.createParkingRechargeRate(parkingRechargeRate);
+    	return ConvertHelper.convert(parkingRechargeRate, ParkingRechargeRateDTO.class);
     }
     
     @Override

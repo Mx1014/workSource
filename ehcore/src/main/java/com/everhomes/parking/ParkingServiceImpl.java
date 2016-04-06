@@ -3,6 +3,8 @@ package com.everhomes.parking;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,6 +40,7 @@ import com.everhomes.rest.parking.ParkingCardIssueFlag;
 import com.everhomes.rest.parking.ParkingCardRequestDTO;
 import com.everhomes.rest.parking.ParkingCardRequestStatus;
 import com.everhomes.rest.parking.ParkingLotDTO;
+import com.everhomes.rest.parking.ParkingOwnerType;
 import com.everhomes.rest.parking.ParkingRechargeOrderDTO;
 import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
 import com.everhomes.rest.parking.ParkingRechargeOrderStatus;
@@ -96,21 +99,11 @@ public class ParkingServiceImpl implements ParkingService {
     @Override
     public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
         Long parkingLotId = cmd.getParkingLotId();
-           
-        List<ParkingCardDTO> cardList = null; 
-        ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotId);
-        if(parkingLot != null) {
-            if(cmd.getOwnerId().longValue() != parkingLot.getOwnerId().longValue() 
-            		|| !parkingLot.getOwnerType().equalsIgnoreCase(cmd.getOwnerType())){
-            	LOGGER.error("ownerId or ownertype is not match with parking ownerId.");
-    			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-    					"ownerId or ownertype is not match with parking ownerId.");
-            }
-            
-            String venderName = parkingLot.getVendorName();
-            ParkingVendorHandler handler = getParkingVendorHandler(venderName);
-            cardList = handler.getParkingCardsByPlate(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId, cmd.getPlateNumber());
-        }
+        ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId);
+
+        String venderName = parkingLot.getVendorName();
+        ParkingVendorHandler handler = getParkingVendorHandler(venderName);
+        List<ParkingCardDTO> cardList = handler.getParkingCardsByPlate(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId, cmd.getPlateNumber());
         
         return cardList;
     }
@@ -119,19 +112,7 @@ public class ParkingServiceImpl implements ParkingService {
     public List<ParkingRechargeRateDTO> listParkingRechargeRates(ListParkingRechargeRatesCommand cmd){
     	Long parkingLotId = cmd.getParkingLotId();
            
-        ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotId);
-        if(parkingLot == null) {
-        	LOGGER.error("parkingLot is not exist.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-    			"parkingLot is not exist.");
-        }
-        // 检查参数里的ownerType和ownerId是否与查出来停车场里的匹配
-        if(cmd.getOwnerId().longValue() != parkingLot.getOwnerId().longValue() 
-            	|| !parkingLot.getOwnerType().equalsIgnoreCase(cmd.getOwnerType())){
-            LOGGER.error("ownerId or ownertype is not match with parking ownerId.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-    				"ownerId or ownertype is not match with parking ownerId.");
-        }
+        ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId);
         
         List<ParkingRechargeRateDTO> parkingRechargeRateList = null;
         String venderName = parkingLot.getVendorName();
@@ -171,19 +152,7 @@ public class ParkingServiceImpl implements ParkingService {
     @Override
 	public List<ParkingCardRequestDTO> requestParkingCard(RequestParkingCardCommand cmd) {
 		
-    	ParkingLot parkingLot = parkingProvider.findParkingLotById(cmd.getParkingLotId());
-        if(parkingLot == null) {
-        	LOGGER.error("parkingLot is not exist.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-    			"parkingLot is not exist.");
-        }
-        // 检查参数里的ownerType和ownerId是否与查出来停车场里的匹配
-        if(cmd.getOwnerId().longValue() != parkingLot.getOwnerId().longValue() 
-            	|| !parkingLot.getOwnerType().equalsIgnoreCase(cmd.getOwnerType())){
-            LOGGER.error("ownerId or ownertype is not match with parking ownerId.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-    				"ownerId or ownertype is not match with parking ownerId.");
-        } 
+        checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 		
 		if(cmd.getPlateNumber().length() != 7) {
 			LOGGER.error("the length of plateNumber is wrong.");
@@ -212,7 +181,6 @@ public class ParkingServiceImpl implements ParkingService {
 			
 			list = parkingProvider.listParkingCardRequests(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId(), 
 					cmd.getPlateNumber(),null,Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.asc(), null, null);
-				//PaginationConfigHelper.getPageSize(configProvider, null)
 		} catch(Exception e) {
 			LOGGER.error("requestParkingCard is fail.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_SQL_EXCEPTION,
@@ -225,19 +193,7 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
     public ListParkingCardRequestResponse listParkingCardRequests(ListParkingCardRequestsCommand cmd){
 		
-		ParkingLot parkingLot = parkingProvider.findParkingLotById(cmd.getParkingLotId());
-        if(parkingLot == null) {
-        	LOGGER.error("parkingLot is not exist.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-    			"parkingLot is not exist.");
-        }
-        // 检查参数里的ownerType和ownerId是否与查出来停车场里的匹配
-        if(cmd.getOwnerId().longValue() != parkingLot.getOwnerId().longValue() 
-            	|| !parkingLot.getOwnerType().equalsIgnoreCase(cmd.getOwnerType())){
-            LOGGER.error("ownerId or ownertype is not match with parking ownerId.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-    				"ownerId or ownertype is not match with parking ownerId.");
-        } 
+        checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 		
     	ListParkingCardRequestResponse response = new ListParkingCardRequestResponse();
     	cmd.setPageSize(PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize()));
@@ -288,7 +244,7 @@ public class ParkingServiceImpl implements ParkingService {
 		parkingRechargeOrder.setCreatorUid(user.getId());
 		parkingRechargeOrder.setCreateTime(new Timestamp(System.currentTimeMillis()));
 		
-		int result = parkingProvider.createParkingRechargeOrder(parkingRechargeOrder);
+		parkingProvider.createParkingRechargeOrder(parkingRechargeOrder);
 		}catch(Exception e) {
 			LOGGER.error("createParkingRechargeOrder is fail.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
@@ -303,19 +259,7 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public ListParkingRechargeOrdersResponse listParkingRechargeOrders(ListParkingRechargeOrdersCommand cmd){
 		
-		ParkingLot parkingLot = parkingProvider.findParkingLotById(cmd.getParkingLotId());
-        if(parkingLot == null) {
-        	LOGGER.error("parkingLot is not exist.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-    			"parkingLot is not exist.");
-        }
-        // 检查参数里的ownerType和ownerId是否与查出来停车场里的匹配
-        if(cmd.getOwnerId().longValue() != parkingLot.getOwnerId().longValue() 
-            	|| !parkingLot.getOwnerType().equalsIgnoreCase(cmd.getOwnerType())){
-            LOGGER.error("ownerId or ownertype is not match with parking ownerId.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-    				"ownerId or ownertype is not match with parking ownerId.");
-        } 
+        checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 		
 		ListParkingRechargeOrdersResponse response = new ListParkingRechargeOrdersResponse();
 		//设置分页
@@ -339,19 +283,8 @@ public class ParkingServiceImpl implements ParkingService {
 	
 	@Override
     public ParkingRechargeRateDTO createParkingRechargeRate(CreateParkingRechargeRateCommand cmd){
-		ParkingLot parkingLot = parkingProvider.findParkingLotById(cmd.getParkingLotId());
-        if(parkingLot == null) {
-        	LOGGER.error("parkingLot is not exist.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-    			"parkingLot is not exist.");
-        }
-        // 检查参数里的ownerType和ownerId是否与查出来停车场里的匹配
-        if(cmd.getOwnerId().longValue() != parkingLot.getOwnerId().longValue() 
-            	|| !parkingLot.getOwnerType().equalsIgnoreCase(cmd.getOwnerType())){
-            LOGGER.error("ownerId or ownertype is not match with parking ownerId.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-    				"ownerId or ownertype is not match with parking ownerId.");
-        }   
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+ 
         String venderName = parkingLot.getVendorName();
         ParkingVendorHandler handler = getParkingVendorHandler(venderName);
         
@@ -360,19 +293,8 @@ public class ParkingServiceImpl implements ParkingService {
 	
 	@Override
 	public boolean deleteParkingRechargeRate(DeleteParkingRechargeRateCommand cmd){
-		ParkingLot parkingLot = parkingProvider.findParkingLotById(cmd.getParkingLotId());
-        if(parkingLot == null) {
-        	LOGGER.error("parkingLot is not exist.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-    			"parkingLot is not exist.");
-        }
-        // 检查参数里的ownerType和ownerId是否与查出来停车场里的匹配
-        if(cmd.getOwnerId().longValue() != parkingLot.getOwnerId().longValue() 
-            	|| !parkingLot.getOwnerType().equalsIgnoreCase(cmd.getOwnerType())){
-            LOGGER.error("ownerId or ownertype is not match with parking ownerId.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-    				"ownerId or ownertype is not match with parking ownerId.");
-        }   
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+ 
         String venderName = parkingLot.getVendorName();
         ParkingVendorHandler handler = getParkingVendorHandler(venderName);
         handler.deleteParkingRechargeRate(cmd);
@@ -383,8 +305,10 @@ public class ParkingServiceImpl implements ParkingService {
 	public ListParkingRechargeOrdersResponse searchParkingRechargeOrders(SearchParkingRechargeOrdersCommand cmd){
 		ListParkingRechargeOrdersResponse response = new ListParkingRechargeOrdersResponse();
 		
-		cmd.setPageSize(PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize()));
-		List<ParkingRechargeOrder> list = parkingProvider.listParkingRechargeOrders(cmd);
+		List<ParkingRechargeOrder> list = parkingProvider.searchParkingRechargeOrders(cmd.getOwnerType(),
+				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
+				cmd.getPlateOwnerPhone(), cmd.getPayerName(), cmd.getPayerPhone(), cmd.getPageAnchor(), 
+				PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize()));
     					
     	if(list.size() > 0){
     		response.setOrders(list.stream().map(r -> ConvertHelper.convert(r, ParkingRechargeOrderDTO.class))
@@ -403,8 +327,10 @@ public class ParkingServiceImpl implements ParkingService {
 	public ListParkingCardRequestResponse searchParkingCardRequests(SearchParkingCardRequestsCommand cmd) {
 		ListParkingCardRequestResponse response = new ListParkingCardRequestResponse();
 		
-		cmd.setPageSize(PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize()));
-    	List<ParkingCardRequest> list = parkingProvider.searchParkingCardRequests(cmd);
+    	List<ParkingCardRequest> list = parkingProvider.searchParkingCardRequests(cmd.getOwnerType(), 
+    			cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(), 
+    			cmd.getPlateOwnerPhone(), strToTimestamp(cmd.getStartDate()), strToTimestamp(cmd.getEndDate()), 
+    			cmd.getStatus(),cmd.getPageAnchor(), PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize()));
     	if(list.size() > 0){
     		response.setRequests(list.stream().map(r -> ConvertHelper.convert(r, ParkingCardRequestDTO.class))
     				.collect(Collectors.toList()));
@@ -420,46 +346,24 @@ public class ParkingServiceImpl implements ParkingService {
 	
 	@Override
 	public void setParkingCardReserveDays(SetParkingCardReserveDaysCommand cmd){
-		ParkingLot parkingLot = parkingProvider.findParkingLotById(cmd.getParkingLotId());
-        if(parkingLot == null) {
-        	LOGGER.error("parkingLot is not exist.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-    			"parkingLot is not exist.");
-        }
-        // 检查参数里的ownerType和ownerId是否与查出来停车场里的匹配
-        if(cmd.getOwnerId().longValue() != parkingLot.getOwnerId().longValue() 
-            	|| !parkingLot.getOwnerType().equalsIgnoreCase(cmd.getOwnerType())){
-            LOGGER.error("ownerId or ownertype is not match with parking ownerId.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-    				"ownerId or ownertype is not match with parking ownerId.");
-        }
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+
         parkingLot.setCardReserveDays(cmd.getCount());
         parkingProvider.setParkingCardReserveDays(parkingLot);
 	}
 	
 	@Override
 	public void setParkingCardIssueFlag(SetParkingCardIssueFlagCommand cmd){
-		ParkingLot parkingLot = parkingProvider.findParkingLotById(cmd.getParkingLotId());
-        if(parkingLot == null) {
-        	LOGGER.error("parkingLot is not exist.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-    			"parkingLot is not exist.");
-        }
-        // 检查参数里的ownerType和ownerId是否与查出来停车场里的匹配
-        if(cmd.getOwnerId().longValue() != parkingLot.getOwnerId().longValue() 
-            	|| !parkingLot.getOwnerType().equalsIgnoreCase(cmd.getOwnerType())){
-            LOGGER.error("ownerId or ownertype is not match with parking ownerId.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-    				"ownerId or ownertype is not match with parking ownerId.");
-        }
+        checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+
         ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(cmd.getId());
         if(parkingCardRequest == null){
-        	LOGGER.error("parkingCardRequest is not exist.");
+        	LOGGER.error("parkingCardRequest {} is not exist.",cmd.getId());
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 				"parkingCardRequest is not exist.");
         }
         if(parkingCardRequest.getStatus() != ParkingCardRequestStatus.NOTIFIED.getCode()){
-        	LOGGER.error("parkingCardRequest status is not notified.");
+        	LOGGER.error("parkingCardRequest {} status is not notified.",cmd.getId());
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 				"parkingCardRequest status is not notified.");
         }
@@ -469,19 +373,7 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public void issueParkingCards(IssueParkingCardsCommand cmd) {
-		ParkingLot parkingLot = parkingProvider.findParkingLotById(cmd.getParkingLotId());
-        if(parkingLot == null) {
-        	LOGGER.error("parkingLot is not exist.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-    			"parkingLot is not exist.");
-        }
-        // 检查参数里的ownerType和ownerId是否与查出来停车场里的匹配
-        if(cmd.getOwnerId().longValue() != parkingLot.getOwnerId().longValue() 
-            	|| !parkingLot.getOwnerType().equalsIgnoreCase(cmd.getOwnerType())){
-            LOGGER.error("ownerId or ownertype is not match with parking ownerId.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
-    				"ownerId or ownertype is not match with parking ownerId.");
-        }
+        checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
         
     	List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(null, 
     			null, null, null,ParkingCardRequestStatus.QUEUEING,
@@ -498,4 +390,41 @@ public class ParkingServiceImpl implements ParkingService {
 	public void notifyParkingRechargeOrderPayment(OnlinePayBillCommand cmd) {
 		
 	}
+	
+    private Timestamp strToTimestamp(String str) {
+
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+		
+		Timestamp ts = null;
+		try {
+			ts = new Timestamp(sdf.parse(str).getTime());
+		} catch (ParseException e) {
+			LOGGER.error("validityPeriod data format is not yyyymmdd.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"validityPeriod data format is not yyyymmdd.");
+		}
+		
+		return ts;
+	}
+    
+    private ParkingLot checkParkingLot(String ownerType,Long ownerId,Long parkingLotId){
+    	ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotId);
+        if(parkingLot == null) {
+        	LOGGER.error("parkingLot is not exist {}.",parkingLotId);
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    			"parkingLot is not exist.");
+        }
+        // 检查参数里的ownerType和ownerId是否与查出来停车场里的匹配
+        if(ownerId != null && ownerId.longValue() != parkingLot.getOwnerId().longValue()) {
+        	LOGGER.error("ownerId {} is not match with parkingLot ownerId.",ownerId);
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+    				"ownerId is not match with parkingLot ownerId.");
+        }
+        if(ParkingOwnerType.fromCode(parkingLot.getOwnerType()) != ParkingOwnerType.fromCode(ownerType)){
+            LOGGER.error("ownertype {} is not match with parkingLot ownertype.",ownerType);
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+    				"ownertype is not match with parkingLot ownertype.");
+        }
+        return parkingLot;
+    }
 }

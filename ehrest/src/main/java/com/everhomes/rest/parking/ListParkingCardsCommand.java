@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.rest.parking;
 
+
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
