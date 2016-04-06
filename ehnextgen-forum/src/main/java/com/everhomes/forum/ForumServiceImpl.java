@@ -2619,7 +2619,6 @@ public class ForumServiceImpl implements ForumService {
         	}else{
         		categoryCondition = contentCategoryCondition;
         	}
-        	
         }
         
         return categoryCondition;
