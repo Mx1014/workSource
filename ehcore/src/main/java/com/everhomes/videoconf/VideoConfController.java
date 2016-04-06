@@ -13,9 +13,11 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.techpark.onlinePay.OnlinePayBillCommand;
 import com.everhomes.rest.techpark.park.RechargeSuccessResponse;
+import com.everhomes.rest.user.GetAppAgreementCommand;
 import com.everhomes.rest.videoconf.AddSourceVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.AssignVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.CancelVideoConfCommand;
@@ -1342,5 +1344,20 @@ public class VideoConfController  extends ControllerBase{
 		return response;
 	}
 	
+	/**
+	 * <b>URL: /conf/getConfTelPrice</b>
+	 * 左邻电话会议服务价格表
+	 */
+	@RequestMapping("getConfTelPrice")
+	@RestReturn(String.class)
+	public RestResponse getConfTelPrice(){
+		
+		String result = configurationProvider.getValue(Namespace.DEFAULT_NAMESPACE, ConfigConstants.VIDEOCONF_TEL_PRICE, "");
+
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	
 }
