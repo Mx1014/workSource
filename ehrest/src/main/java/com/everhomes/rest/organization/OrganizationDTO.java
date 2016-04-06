@@ -54,6 +54,7 @@ public class OrganizationDTO {
 	@ItemType(OrganizationDTO.class)
 	private List<OrganizationDTO> childrens;
 	
+	@ItemType(RoleDTO.class)
 	private List<RoleDTO> roles;
 	public Long getCommunityId() {
 		return communityId;
