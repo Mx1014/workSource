@@ -239,9 +239,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public void deleteRolePrivilege(DeleteRolePrivilegeCommand cmd) {
 		dbProvider.execute((TransactionStatus status) -> {
-			Role role = new Role();
-			role.setId(cmd.getRoleId());
-			aclProvider.deleteRole(role);
+			
+			aclProvider.deleteRole(cmd.getRoleId());
 			List<Acl> acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getRoleId());
 			for (Acl acl : acls) {
 				aclProvider.deleteAcl(acl.getId());
