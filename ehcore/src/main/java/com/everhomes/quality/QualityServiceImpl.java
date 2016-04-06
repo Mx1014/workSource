@@ -671,11 +671,14 @@ public class QualityServiceImpl implements QualityService {
         }
 
 		this.qualityProvider.populateRecordAttachments(records);
-		
-		records.stream().map((r) -> {
-			populateRecordAttachements(r, r.getAttachments());
-			return r;
-		});
+
+		for(QualityInspectionTaskRecords record : records) {
+			populateRecordAttachements(record, record.getAttachments());
+		}
+//		records.stream().map((r) -> {
+//			populateRecordAttachements(r, r.getAttachments());
+//			return r;
+//		});
         
 		List<QualityInspectionTaskDTO> dtoList = convertQualityInspectionTaskToDTO(tasks, executeUid);
         
