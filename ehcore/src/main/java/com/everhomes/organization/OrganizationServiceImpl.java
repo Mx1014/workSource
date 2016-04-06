@@ -4098,7 +4098,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				}
 				
 				for (RoleDTO dto : RoleDTOs) {
-					if(cmd.getRoleIds().contains(dto.getId())){
+					if(null != dto && cmd.getRoleIds().contains(dto.getId())){
 						roleMembers.add(organizationMemberDTO);
 						break;
 					}
