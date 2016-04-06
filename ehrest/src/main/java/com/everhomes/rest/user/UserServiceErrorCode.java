@@ -25,4 +25,6 @@ public interface UserServiceErrorCode {
     static final int ERROR_UNAUTHENTITICATION=401;
     static final int ERROR_FORBIDDEN=403;
     static final int ERROR_FILE_CONTEXT_ISNULL=200001;
+    
+    static final int ERROR_INVALID_SCENE_TOKEN = 100101;
 }
