@@ -1272,18 +1272,28 @@ public class VideoConfServiceImpl implements VideoConfService {
 	@Override
 	public void cancelVideoConf(CancelVideoConfCommand cmd) {
 		
+		ConfConferences conf = vcProvider.findConfConferencesByConfId(cmd.getConfId());
+		if(conf == null) {
+			LOGGER.info("cancelVideoConf, cmd=" + cmd + ", conf is not exist!");
+			return ;
+		}
+		ConfSourceAccounts source = vcProvider.findSourceAccountById(conf.getSourceAccountId());
+		if(source == null) {
+			LOGGER.info("cancelVideoConf, cmd=" + cmd + ", source account is not exist!");
+			return ;
+		}
+		
 		String path = "http://api.confcloud.cn/openapi/cancelConf";
 		Long timestamp = DateHelper.currentGMTTime().getTime();
-		String tokenString = cmd.getSourceAccountName() + "|" + configurationProvider.getValue(ConfigConstants.VIDEOCONF_SECRET_KEY, "0") + "|" + timestamp;
+		String tokenString = source.getAccountName() + "|" + configurationProvider.getValue(ConfigConstants.VIDEOCONF_SECRET_KEY, "0") + "|" + timestamp;
 		String token = DigestUtils.md5Hex(tokenString);
 		
-		ConfConferences conf = vcProvider.findConfConferencesByConfId(cmd.getConfId());
+		
 		Map<String, String> sPara = new HashMap<String, String>() ;
-	    sPara.put("loginName", cmd.getSourceAccountName()); 
+	    sPara.put("loginName", source.getAccountName()); 
 	    sPara.put("timeStamp", timestamp.toString());
 	    sPara.put("token", token); 
-	    if(conf != null)
-	    	sPara.put("confId", conf.getConferenceId() + "");
+	    sPara.put("confId", conf.getConferenceId() + "");
 	    
 	    NameValuePair[] param = generatNameValuePair(sPara);
 	    if(LOGGER.isDebugEnabled())
@@ -1301,7 +1311,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 			if(LOGGER.isDebugEnabled())
 				LOGGER.error("cancelVideoConf,json="+json);
 		} catch (IOException e) {
-			LOGGER.error("cancelVideoConf-error.sourceAccount="+cmd.getSourceAccountName(), e);
+			LOGGER.error("cancelVideoConf-error.sourceAccount="+source.getAccountName(), e);
 		}  
           
 		
@@ -1351,9 +1361,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 				ConfConferences conf = vcProvider.findConfConferencesById(account.getAssignedConfId());
 				if(conf != null)
 					cancelCmd.setConfId(conf.getMeetingNo());
-				ConfSourceAccounts source = vcProvider.findSourceAccountById(account.getAssignedSourceId());
-				if(source != null)
-					cancelCmd.setSourceAccountName(source.getAccountName());
+				
 				cancelVideoConf(cancelCmd);
 			}
 			ConfAccountCategories category = vcProvider.findAccountCategoriesById(account.getAccountCategoryId());
@@ -2009,6 +2017,9 @@ public class VideoConfServiceImpl implements VideoConfService {
 			enterprise.setAccountAmount(enterprise.getAccountAmount()+order.getQuantity());
 			enterprise.setActiveAccountAmount(enterprise.getActiveAccountAmount()+order.getQuantity());
 			vcProvider.updateConfEnterprises(enterprise);
+			
+			sendConfInvoiceEmail(order.getEmail());
+	        
 		} else if(order.getStatus().byteValue() == PayStatus.PAID.getCode() 
 				&& (order.getAccountCategoryId() == null || order.getAccountCategoryId() == 0)) {
 			CrossShardListingLocator locator = new CrossShardListingLocator();
@@ -2040,21 +2051,26 @@ public class VideoConfServiceImpl implements VideoConfService {
 				enterprise.setActiveAccountAmount(enterprise.getActiveAccountAmount()+toActive);
 				vcProvider.updateConfEnterprises(enterprise);
 				
-				//给线上支付成功的用户发邮件
-				String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
-		        MailHandler handler = PlatformContext.getComponent(handlerName);
-				String subject = localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
-						String.valueOf(ConfServiceErrorCode.CONF_INVOICE_SUBJECT),
-						UserContext.current().getUser().getLocale(),"zuolin video conference invoce");
-				
-				String body = localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
-						String.valueOf(ConfServiceErrorCode.CONF_INVOICE_BODY),
-						UserContext.current().getUser().getLocale(),"zuolin video conference invoce");
-		        handler.sendMail(user.getNamespaceId(), null, order.getEmail(), subject, body, null);
+				sendConfInvoiceEmail(order.getEmail());
 				
 			}
 		}
 		
+	}
+	
+	private void sendConfInvoiceEmail(String emailAddress) {
+		if(!StringUtils.isNullOrEmpty(emailAddress)) {
+			String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
+	        MailHandler handler = PlatformContext.getComponent(handlerName);
+			String subject = localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
+					String.valueOf(ConfServiceErrorCode.CONF_INVOICE_SUBJECT),
+					UserContext.current().getUser().getLocale(),"zuolin video conference invoce");
+			
+			String body = localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
+					String.valueOf(ConfServiceErrorCode.CONF_INVOICE_BODY),
+					UserContext.current().getUser().getLocale(),"zuolin video conference invoce");
+	        handler.sendMail(Namespace.DEFAULT_NAMESPACE, null,emailAddress, subject, body, null);
+		}
 	}
 	
 	private Long convertOrderNoToOrderId(String orderNo) {
