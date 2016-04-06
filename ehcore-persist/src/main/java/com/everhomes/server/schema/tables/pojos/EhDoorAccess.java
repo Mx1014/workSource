@@ -11,10 +11,12 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhDoorAccess implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1408684933;
+	private static final long serialVersionUID = 833535291;
 
 	private java.lang.Long     id;
+	private java.lang.String   uuid;
 	private java.lang.Byte     doorType;
+	private java.lang.String   hardwareId;
 	private java.lang.String   name;
 	private java.lang.String   description;
 	private java.lang.String   avatar;
@@ -24,7 +26,8 @@ public class EhDoorAccess implements java.io.Serializable {
 	private java.lang.Double   longitude;
 	private java.lang.Double   latitude;
 	private java.lang.String   geohash;
-	private java.lang.String   uuid;
+	private java.lang.String   aesIv;
+	private java.lang.Byte     linkStatus;
 	private java.lang.Byte     ownerType;
 	private java.lang.Long     ownerId;
 	private java.lang.Byte     role;
@@ -32,15 +35,14 @@ public class EhDoorAccess implements java.io.Serializable {
 	private java.lang.Byte     status;
 	private java.lang.Integer  ackingSecretVersion;
 	private java.lang.Integer  expectSecretKey;
-	private java.lang.String   hardwareId;
-	private java.lang.String   aesIv;
-	private java.lang.Byte     linkStatus;
 
 	public EhDoorAccess() {}
 
 	public EhDoorAccess(
 		java.lang.Long     id,
+		java.lang.String   uuid,
 		java.lang.Byte     doorType,
+		java.lang.String   hardwareId,
 		java.lang.String   name,
 		java.lang.String   description,
 		java.lang.String   avatar,
@@ -50,20 +52,20 @@ public class EhDoorAccess implements java.io.Serializable {
 		java.lang.Double   longitude,
 		java.lang.Double   latitude,
 		java.lang.String   geohash,
-		java.lang.String   uuid,
+		java.lang.String   aesIv,
+		java.lang.Byte     linkStatus,
 		java.lang.Byte     ownerType,
 		java.lang.Long     ownerId,
 		java.lang.Byte     role,
 		java.sql.Timestamp createTime,
 		java.lang.Byte     status,
 		java.lang.Integer  ackingSecretVersion,
-		java.lang.Integer  expectSecretKey,
-		java.lang.String   hardwareId,
-		java.lang.String   aesIv,
-		java.lang.Byte     linkStatus
+		java.lang.Integer  expectSecretKey
 	) {
 		this.id = id;
+		this.uuid = uuid;
 		this.doorType = doorType;
+		this.hardwareId = hardwareId;
 		this.name = name;
 		this.description = description;
 		this.avatar = avatar;
@@ -73,7 +75,8 @@ public class EhDoorAccess implements java.io.Serializable {
 		this.longitude = longitude;
 		this.latitude = latitude;
 		this.geohash = geohash;
-		this.uuid = uuid;
+		this.aesIv = aesIv;
+		this.linkStatus = linkStatus;
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;
 		this.role = role;
@@ -81,9 +84,6 @@ public class EhDoorAccess implements java.io.Serializable {
 		this.status = status;
 		this.ackingSecretVersion = ackingSecretVersion;
 		this.expectSecretKey = expectSecretKey;
-		this.hardwareId = hardwareId;
-		this.aesIv = aesIv;
-		this.linkStatus = linkStatus;
 	}
 
 	public java.lang.Long getId() {
@@ -94,12 +94,28 @@ public class EhDoorAccess implements java.io.Serializable {
 		this.id = id;
 	}
 
+	public java.lang.String getUuid() {
+		return this.uuid;
+	}
+
+	public void setUuid(java.lang.String uuid) {
+		this.uuid = uuid;
+	}
+
 	public java.lang.Byte getDoorType() {
 		return this.doorType;
 	}
 
 	public void setDoorType(java.lang.Byte doorType) {
 		this.doorType = doorType;
+	}
+
+	public java.lang.String getHardwareId() {
+		return this.hardwareId;
+	}
+
+	public void setHardwareId(java.lang.String hardwareId) {
+		this.hardwareId = hardwareId;
 	}
 
 	public java.lang.String getName() {
@@ -174,12 +190,20 @@ public class EhDoorAccess implements java.io.Serializable {
 		this.geohash = geohash;
 	}
 
-	public java.lang.String getUuid() {
-		return this.uuid;
+	public java.lang.String getAesIv() {
+		return this.aesIv;
 	}
 
-	public void setUuid(java.lang.String uuid) {
-		this.uuid = uuid;
+	public void setAesIv(java.lang.String aesIv) {
+		this.aesIv = aesIv;
+	}
+
+	public java.lang.Byte getLinkStatus() {
+		return this.linkStatus;
+	}
+
+	public void setLinkStatus(java.lang.Byte linkStatus) {
+		this.linkStatus = linkStatus;
 	}
 
 	public java.lang.Byte getOwnerType() {
@@ -236,29 +260,5 @@ public class EhDoorAccess implements java.io.Serializable {
 
 	public void setExpectSecretKey(java.lang.Integer expectSecretKey) {
 		this.expectSecretKey = expectSecretKey;
-	}
-
-	public java.lang.String getHardwareId() {
-		return this.hardwareId;
-	}
-
-	public void setHardwareId(java.lang.String hardwareId) {
-		this.hardwareId = hardwareId;
-	}
-
-	public java.lang.String getAesIv() {
-		return this.aesIv;
-	}
-
-	public void setAesIv(java.lang.String aesIv) {
-		this.aesIv = aesIv;
-	}
-
-	public java.lang.Byte getLinkStatus() {
-		return this.linkStatus;
-	}
-
-	public void setLinkStatus(java.lang.Byte linkStatus) {
-		this.linkStatus = linkStatus;
 	}
 }

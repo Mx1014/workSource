@@ -11,17 +11,17 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAesServerKeyRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhAesServerKeyRecord> implements org.jooq.Record6<java.lang.Long, java.lang.Long, java.lang.Byte, java.lang.Long, java.lang.String, java.lang.Long> {
 
-	private static final long serialVersionUID = -1927502942;
+	private static final long serialVersionUID = 318320204;
 
 	/**
-	 * Setter for <code>ehcore.eh_aes_server_key.id</code>. id of the record
+	 * Setter for <code>ehcore.eh_aes_server_key.id</code>. id of the record, also as secret_ver
 	 */
 	public void setId(java.lang.Long value) {
 		setValue(0, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_aes_server_key.id</code>. id of the record
+	 * Getter for <code>ehcore.eh_aes_server_key.id</code>. id of the record, also as secret_ver
 	 */
 	public java.lang.Long getId() {
 		return (java.lang.Long) getValue(0);
@@ -56,14 +56,14 @@ public class EhAesServerKeyRecord extends org.jooq.impl.UpdatableRecordImpl<com.
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_aes_server_key.secret_ver</code>. server ver of door
+	 * Setter for <code>ehcore.eh_aes_server_key.secret_ver</code>. ignore it
 	 */
 	public void setSecretVer(java.lang.Long value) {
 		setValue(3, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_aes_server_key.secret_ver</code>. server ver of door
+	 * Getter for <code>ehcore.eh_aes_server_key.secret_ver</code>. ignore it
 	 */
 	public java.lang.Long getSecretVer() {
 		return (java.lang.Long) getValue(3);

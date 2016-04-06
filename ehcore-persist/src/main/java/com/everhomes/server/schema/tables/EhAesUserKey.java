@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAesUserKey extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhAesUserKeyRecord> {
 
-	private static final long serialVersionUID = -912331578;
+	private static final long serialVersionUID = 144370619;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_aes_user_key</code>
@@ -32,9 +32,9 @@ public class EhAesUserKey extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAesUserKeyRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id of the record");
 
 	/**
-	 * The column <code>ehcore.eh_aes_user_key.key_id</code>.
+	 * The column <code>ehcore.eh_aes_user_key.key_id</code>. lazy load for aes_user_key
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAesUserKeyRecord, java.lang.Integer> KEY_ID = createField("key_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAesUserKeyRecord, java.lang.Integer> KEY_ID = createField("key_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "lazy load for aes_user_key");
 
 	/**
 	 * The column <code>ehcore.eh_aes_user_key.key_type</code>. 0: aclink normal key
@@ -50,6 +50,11 @@ public class EhAesUserKey extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	 * The column <code>ehcore.eh_aes_user_key.user_id</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAesUserKeyRecord, java.lang.Long> USER_ID = createField("user_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_aes_user_key.auth_id</code>. auth id of user key
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAesUserKeyRecord, java.lang.Long> AUTH_ID = createField("auth_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "auth id of user key");
 
 	/**
 	 * The column <code>ehcore.eh_aes_user_key.expire_time_ms</code>.
@@ -75,11 +80,6 @@ public class EhAesUserKey extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	 * The column <code>ehcore.eh_aes_user_key.status</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAesUserKeyRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_aes_user_key.auth_id</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAesUserKeyRecord, java.lang.Long> AUTH_ID = createField("auth_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_aes_user_key</code> table reference

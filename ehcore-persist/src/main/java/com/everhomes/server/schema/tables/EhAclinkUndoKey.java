@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAclinkUndoKey extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhAclinkUndoKeyRecord> {
 
-	private static final long serialVersionUID = 1139507078;
+	private static final long serialVersionUID = 1820205956;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_aclink_undo_key</code>
@@ -32,9 +32,9 @@ public class EhAclinkUndoKey extends org.jooq.impl.TableImpl<com.everhomes.serve
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAclinkUndoKeyRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id of the record");
 
 	/**
-	 * The column <code>ehcore.eh_aclink_undo_key.key_id</code>.
+	 * The column <code>ehcore.eh_aclink_undo_key.key_id</code>. cancel a key, must notify all users for this key_id to update
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAclinkUndoKeyRecord, java.lang.Integer> KEY_ID = createField("key_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAclinkUndoKeyRecord, java.lang.Integer> KEY_ID = createField("key_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "cancel a key, must notify all users for this key_id to update");
 
 	/**
 	 * The column <code>ehcore.eh_aclink_undo_key.door_id</code>.

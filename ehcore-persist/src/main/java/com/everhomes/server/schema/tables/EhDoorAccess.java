@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhDoorAccess extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhDoorAccessRecord> {
 
-	private static final long serialVersionUID = -265386155;
+	private static final long serialVersionUID = -360475835;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_door_access</code>
@@ -32,9 +32,19 @@ public class EhDoorAccess extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorAccessRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id of the record");
 
 	/**
-	 * The column <code>ehcore.eh_door_access.door_type</code>. 0: Zuolin aclink
+	 * The column <code>ehcore.eh_door_access.uuid</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorAccessRecord, java.lang.Byte> DOOR_TYPE = createField("door_type", org.jooq.impl.SQLDataType.TINYINT.nullable(false), this, "0: Zuolin aclink");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorAccessRecord, java.lang.String> UUID = createField("uuid", org.jooq.impl.SQLDataType.VARCHAR.length(64).nullable(false), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_door_access.door_type</code>. 0: Zuolin aclink with wifi, 1: Zuolink aclink without wifi
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorAccessRecord, java.lang.Byte> DOOR_TYPE = createField("door_type", org.jooq.impl.SQLDataType.TINYINT.nullable(false), this, "0: Zuolin aclink with wifi, 1: Zuolink aclink without wifi");
+
+	/**
+	 * The column <code>ehcore.eh_door_access.hardware_id</code>. mac address of aclink
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorAccessRecord, java.lang.String> HARDWARE_ID = createField("hardware_id", org.jooq.impl.SQLDataType.VARCHAR.length(64).nullable(false), this, "mac address of aclink");
 
 	/**
 	 * The column <code>ehcore.eh_door_access.name</code>.
@@ -44,7 +54,7 @@ public class EhDoorAccess extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	/**
 	 * The column <code>ehcore.eh_door_access.description</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorAccessRecord, java.lang.String> DESCRIPTION = createField("description", org.jooq.impl.SQLDataType.VARCHAR.length(1024).nullable(false), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorAccessRecord, java.lang.String> DESCRIPTION = createField("description", org.jooq.impl.SQLDataType.VARCHAR.length(1024), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_door_access.avatar</code>.
@@ -82,9 +92,14 @@ public class EhDoorAccess extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorAccessRecord, java.lang.String> GEOHASH = createField("geohash", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_door_access.uuid</code>.
+	 * The column <code>ehcore.eh_door_access.aes_iv</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorAccessRecord, java.lang.String> UUID = createField("uuid", org.jooq.impl.SQLDataType.VARCHAR.length(64).nullable(false).defaulted(true), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorAccessRecord, java.lang.String> AES_IV = createField("aes_iv", org.jooq.impl.SQLDataType.VARCHAR.length(64).nullable(false), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_door_access.link_status</code>. 0: linked, 1: failed
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorAccessRecord, java.lang.Byte> LINK_STATUS = createField("link_status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: linked, 1: failed");
 
 	/**
 	 * The column <code>ehcore.eh_door_access.owner_type</code>. 0:community, 1:enterprise, 2: family
@@ -119,22 +134,7 @@ public class EhDoorAccess extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	/**
 	 * The column <code>ehcore.eh_door_access.expect_secret_key</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorAccessRecord, java.lang.Integer> EXPECT_SECRET_KEY = createField("expect_secret_key", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_door_access.hardware_id</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorAccessRecord, java.lang.String> HARDWARE_ID = createField("hardware_id", org.jooq.impl.SQLDataType.VARCHAR.length(64).nullable(false), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_door_access.aes_iv</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorAccessRecord, java.lang.String> AES_IV = createField("aes_iv", org.jooq.impl.SQLDataType.VARCHAR.length(64).nullable(false), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_door_access.link_status</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorAccessRecord, java.lang.Byte> LINK_STATUS = createField("link_status", org.jooq.impl.SQLDataType.TINYINT.nullable(false), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorAccessRecord, java.lang.Integer> EXPECT_SECRET_KEY = createField("expect_secret_key", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_door_access</code> table reference
@@ -171,7 +171,7 @@ public class EhDoorAccess extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	 */
 	@Override
 	public java.util.List<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhDoorAccessRecord>> getKeys() {
-		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhDoorAccessRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_DOOR_ACCESS_PRIMARY);
+		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhDoorAccessRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_DOOR_ACCESS_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_DOOR_ACCESS_U_EH_DOOR_ACCESS_UUID);
 	}
 
 	/**
