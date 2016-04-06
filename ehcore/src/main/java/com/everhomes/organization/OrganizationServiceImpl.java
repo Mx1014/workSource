@@ -3320,8 +3320,52 @@ public class OrganizationServiceImpl implements OrganizationService {
 			if(contentCategoryId == CategoryConstants.CATEGORY_ID_COMPLAINT_ADVICE) {
 				return OrganizationTaskType.COMPLAINT_ADVICE;
 			}
+			
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_CLEANING) {
+				return OrganizationTaskType.CLEANING;
+			}
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_HOUSE_KEEPING) {
+				return OrganizationTaskType.HOUSE_KEEPING;
+			}
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_MAINTENANCE) {
+				return OrganizationTaskType.MAINTENANCE;
+			}
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_EMERGENCY_HELP) {
+				return OrganizationTaskType.EMERGENCY_HELP;
+			}
 		}
 		LOGGER.error("Content category is not matched in organization type.contentCategoryId=" + contentCategoryId);
+		return null;
+	}
+	
+	private Long getTaskContentCategory(OrganizationTaskType taskType) {
+		if(taskType != null) {
+			if(taskType == OrganizationTaskType.NOTICE) {
+				return CategoryConstants.CATEGORY_ID_NOTICE;
+			}
+			if(taskType == OrganizationTaskType.REPAIRS) {
+				return CategoryConstants.CATEGORY_ID_REPAIRS;
+			}
+			if(taskType == OrganizationTaskType.CONSULT_APPEAL) {
+				return CategoryConstants.CATEGORY_ID_CONSULT_APPEAL;
+			}
+			if(taskType == OrganizationTaskType.COMPLAINT_ADVICE) {
+				return CategoryConstants.CATEGORY_ID_COMPLAINT_ADVICE;
+			}
+			if(taskType == OrganizationTaskType.CLEANING) {
+				return CategoryConstants.CATEGORY_ID_CLEANING;
+			}
+			if(taskType == OrganizationTaskType.HOUSE_KEEPING) {
+				return CategoryConstants.CATEGORY_ID_HOUSE_KEEPING;
+			}
+			if(taskType == OrganizationTaskType.MAINTENANCE) {
+				return CategoryConstants.CATEGORY_ID_MAINTENANCE;
+			}
+			if(taskType == OrganizationTaskType.EMERGENCY_HELP) {
+				return CategoryConstants.CATEGORY_ID_EMERGENCY_HELP;
+			}
+		}
+		LOGGER.error("Content category is not matched in organization type.OrganizationTaskType=" + taskType);
 		return null;
 	}
 
@@ -3496,7 +3540,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		for (OrganizationCommunity organizationCommunity : orgCommunities) {
 			Community community = communityProvider.findCommunityById(organizationCommunity.getCommunityId());
-			if(null == community){
+			if(null != community){
 				PmManagementCommunityDTO dto = ConvertHelper.convert(community, PmManagementCommunityDTO.class);
 				//一期默认全部，二期做具体业务判断是否全部还是部分
 				dto.setIsAll(PmManagementIsAll.ALL.getCode());
@@ -5543,6 +5587,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    		task.setTargetId(0l);
 	    		task.setTargetType(null);
 	    		task.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	    		Long operatorUid = task.getCreatorUid();
 	    		task.setOperatorUid(user.getId());
 	    		task.setUnprocessedTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 	    		
@@ -5551,7 +5596,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    		Map<String,Object> map = new HashMap<String, Object>();
 	    		map.put("targetUName", user.getNickName());
 	    		map.put("targetUToken", userIdentifier.getIdentifierToken());
-	    		sendOrganizationNotificationToUser(task.getOperatorUid(),localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_REFUSE, user.getLocale(), map, ""));
+	    		sendOrganizationNotificationToUser(operatorUid,localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_REFUSE, user.getLocale(), map, ""));
 	    	}else{
 	    		LOGGER.error("Tasks have been processed, status="+task.getTaskStatus() + ", targetId=" + task.getTargetId());
 				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_TASK_ALREADY_PROCESSED,
@@ -5560,7 +5605,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    }
 	    
 	    
-	    @Override
+	     @Override
 		public ListPostCommandResponse listTaskTopicsByType(ListTopicsByTypeCommand cmd){
 			User user = UserContext.current().getUser();
 			Long commuId = cmd.getCommunityId();

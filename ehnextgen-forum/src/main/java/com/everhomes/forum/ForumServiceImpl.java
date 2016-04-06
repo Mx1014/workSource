@@ -908,11 +908,21 @@ public class ForumServiceImpl implements ForumService {
                 ForumServiceErrorCode.ERROR_FORUM_ORGANIZATION_COMMUNITY_NOT_FOUND, "Organization community not found");
         }
         
+        List<Long> categorys = new ArrayList<Long>();
+        
+        categorys.add(cmd.getContentCategory());
+        
+        if(null != cmd.getEmbeddedAppId()){
+        	if(AppConstants.APPID_ORGTASK == cmd.getEmbeddedAppId() && null == cmd.getContentCategory()){
+        		categorys = CategoryConstants.GA_RELATED_CATEGORIES;
+        	}
+        	
+        }
+        
         Condition visibilityCondition = buildGaRelatedPostQryConditionByOrganization(operatorId, organization, communityIdList);
 
-        Long contentCategoryId = cmd.getContentCategory();
         Long actionCategoryId = cmd.getActionCategory();
-        Condition categoryCondition = buildPostCategoryCondition(contentCategoryId, actionCategoryId);
+        Condition categoryCondition = buildPostCategoryCondition(categorys, actionCategoryId);
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator(ForumConstants.SYSTEM_FORUM);
@@ -947,6 +957,9 @@ public class ForumServiceImpl implements ForumService {
                 query.addConditions(categoryCondition);
             }
             
+            if(null != cmd.getEmbeddedAppId()){
+            	query.addConditions(Tables.EH_FORUM_POSTS.EMBEDDED_APP_ID.eq(cmd.getEmbeddedAppId()));
+            }
             return query;
         });
         this.forumProvider.populatePostAttachments(posts);
@@ -2571,26 +2584,37 @@ public class ForumServiceImpl implements ForumService {
         return c1.or(c2).or(c3);
     }
     
-    private Condition buildPostCategoryCondition(Long contentCategoryId, Long actionCategoryId) {
-        Condition categoryCondition = null;
+    private Condition buildPostCategoryCondition(List<Long> categorys, Long actionCategoryId) {
+        Condition contentCategoryCondition = null;
         // contentCategoryId为0表示全部查，此时也不需要给category条件
-        if(contentCategoryId != null && contentCategoryId.longValue() > 0) {
-            Category contentCatogry = this.categoryProvider.findCategoryById(contentCategoryId);
-            if(contentCatogry != null) {
-                categoryCondition = Tables.EH_FORUM_POSTS.CATEGORY_PATH.like(contentCatogry.getPath() + "%");
-            }
+        if(categorys != null && categorys.size() > 0) {
+        	for (Long categoryId : categorys) {
+        		 Category contentCatogry = this.categoryProvider.findCategoryById(categoryId);
+                 if(contentCatogry != null) {
+                	 if(null == contentCategoryCondition){
+                		 contentCategoryCondition = Tables.EH_FORUM_POSTS.CATEGORY_PATH.like(contentCatogry.getPath() + "%");
+                	 }else{
+                		 contentCategoryCondition = contentCategoryCondition.or(Tables.EH_FORUM_POSTS.CATEGORY_PATH.like(contentCatogry.getPath() + "%"));
+                	 }
+                	 
+                 }
+                 
+                 
+			}
+           
         }
         
+        Condition actionCategoryCondition = null;
         if(actionCategoryId != null && actionCategoryId.longValue() > 0) {
             Category actionCategory = this.categoryProvider.findCategoryById(actionCategoryId);
             if(actionCategory != null) {
-                Condition tempCondition = ForumPostCustomField.ACTION_CATEGORY_PATH.getField().like(actionCategory.getPath() + "%");
-                if(categoryCondition != null) {
-                    categoryCondition = categoryCondition.and(tempCondition);
-                } else {
-                    categoryCondition = tempCondition;
-                }
+            	actionCategoryCondition = ForumPostCustomField.ACTION_CATEGORY_PATH.getField().like(actionCategory.getPath() + "%");
             }
+        }
+        
+        Condition categoryCondition = null;
+        if(null != contentCategoryCondition){
+        	categoryCondition = contentCategoryCondition.and(actionCategoryCondition);
         }
         
         return categoryCondition;
