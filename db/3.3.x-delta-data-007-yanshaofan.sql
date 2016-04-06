@@ -7,6 +7,10 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'organization.notification', 15, 'zh_CN', '任务已完成后的短信消息','您的服务已完成，滑动去查看详情');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'organization.notification', 16, 'zh_CN', '任务已完成后回复的帖子消息','该服务已由${operatorUName}完成，稍后我们会将进行回访');
 
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
+    VALUES(1012, 1, 0, '紧急求助', '帖子/紧急求助', 0, 2, UTC_TIMESTAMP());
+
+
 delete from eh_launch_pad_items where id = 10006; 
 INSERT INTO `eh_launch_pad_items`(`id`, `scene_type`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`) 
 	VALUES (10006, 'pm_admin', 0, 0, 0, 0, '/home','GovAgencies','NoticeManagerment','公告管理','cs://1/image/aW1hZ2UvTVRveU5tSXhOMlV6TmpSak5qQmpOMlk1T1RVMFpqSTNPR0U1TXpNMll6QmlNdw',1,1,43, '{}', 0, 0, 1, 1, '', '0', NULL, NULL, NULL);
