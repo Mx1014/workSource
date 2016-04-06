@@ -5551,7 +5551,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    		Map<String,Object> map = new HashMap<String, Object>();
 	    		map.put("targetUName", user.getNickName());
 	    		map.put("targetUToken", userIdentifier.getIdentifierToken());
-	    		sendOrganizationNotificationToUser(null,localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_REFUSE, user.getLocale(), map, ""));
+	    		sendOrganizationNotificationToUser(task.getOperatorUid(),localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_REFUSE, user.getLocale(), map, ""));
 	    	}else{
 	    		LOGGER.error("Tasks have been processed, status="+task.getTaskStatus() + ", targetId=" + task.getTargetId());
 				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_TASK_ALREADY_PROCESSED,
