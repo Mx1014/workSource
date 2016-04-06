@@ -1,3 +1,16 @@
+#
+#区分小区任务
+#
+UPDATE `eh_organization_tasks` eot SET `visible_region_type` = (SELECT `visible_region_type` FROM `eh_forum_posts` WHERE `embedded_id` = eot.id limit 0,1), `visible_region_id` = (SELECT `visible_region_id` FROM `eh_forum_posts` WHERE `embedded_id` = eot.id limit 0,1);
+
+
+#
+#directly under the company 修改
+#
+UPDATE `eh_organizations` SET directly_enterprise_id = 1000001 WHERE directly_enterprise_id = 178395;
+UPDATE `eh_organizations` SET directly_enterprise_id = 1000100 WHERE directly_enterprise_id = 178689;
+UPDATE `eh_organizations` SET directly_enterprise_id = 1000631 WHERE directly_enterprise_id = 180000; 
+
 
 #
 # 查询用户拥有2个同样的角色数据
