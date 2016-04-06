@@ -1,7 +1,7 @@
 #
 #区分小区任务
 #
-UPDATE `eh_organization_tasks` eot SET `visible_region_type` = (SELECT `visible_region_type` FROM `eh_forum_posts` WHERE `embedded_id` = eot.id limit 0,1), `visible_region_id` = (SELECT `visible_region_id` FROM `eh_forum_posts` WHERE `embedded_id` = eot.id limit 0,1);
+UPDATE `eh_organization_tasks` eot SET `visible_region_type` = (SELECT `visible_region_type` FROM `eh_forum_posts` WHERE `embedded_id` = eot.id and embedded_app_id =27 limit 0,1), `visible_region_id` = (SELECT `visible_region_id` FROM `eh_forum_posts` WHERE `embedded_id` = eot.id and embedded_app_id =27 limit 0,1);
 
 
 #
