@@ -48,10 +48,31 @@ public class EhDoorAccessDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	}
 
 	/**
+	 * Fetch records that have <code>uuid IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAccess> fetchByUuid(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhDoorAccess.EH_DOOR_ACCESS.UUID, values);
+	}
+
+	/**
+	 * Fetch a unique record that has <code>uuid = value</code>
+	 */
+	public com.everhomes.server.schema.tables.pojos.EhDoorAccess fetchOneByUuid(java.lang.String value) {
+		return fetchOne(com.everhomes.server.schema.tables.EhDoorAccess.EH_DOOR_ACCESS.UUID, value);
+	}
+
+	/**
 	 * Fetch records that have <code>door_type IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAccess> fetchByDoorType(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhDoorAccess.EH_DOOR_ACCESS.DOOR_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>hardware_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAccess> fetchByHardwareId(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhDoorAccess.EH_DOOR_ACCESS.HARDWARE_ID, values);
 	}
 
 	/**
@@ -118,10 +139,17 @@ public class EhDoorAccessDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	}
 
 	/**
-	 * Fetch records that have <code>uuid IN (values)</code>
+	 * Fetch records that have <code>aes_iv IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAccess> fetchByUuid(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhDoorAccess.EH_DOOR_ACCESS.UUID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAccess> fetchByAesIv(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhDoorAccess.EH_DOOR_ACCESS.AES_IV, values);
+	}
+
+	/**
+	 * Fetch records that have <code>link_status IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAccess> fetchByLinkStatus(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhDoorAccess.EH_DOOR_ACCESS.LINK_STATUS, values);
 	}
 
 	/**
@@ -171,26 +199,5 @@ public class EhDoorAccessDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAccess> fetchByExpectSecretKey(java.lang.Integer... values) {
 		return fetch(com.everhomes.server.schema.tables.EhDoorAccess.EH_DOOR_ACCESS.EXPECT_SECRET_KEY, values);
-	}
-
-	/**
-	 * Fetch records that have <code>hardware_id IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAccess> fetchByHardwareId(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhDoorAccess.EH_DOOR_ACCESS.HARDWARE_ID, values);
-	}
-
-	/**
-	 * Fetch records that have <code>aes_iv IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAccess> fetchByAesIv(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhDoorAccess.EH_DOOR_ACCESS.AES_IV, values);
-	}
-
-	/**
-	 * Fetch records that have <code>link_status IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAccess> fetchByLinkStatus(java.lang.Byte... values) {
-		return fetch(com.everhomes.server.schema.tables.EhDoorAccess.EH_DOOR_ACCESS.LINK_STATUS, values);
 	}
 }

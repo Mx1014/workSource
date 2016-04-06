@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhDoorCommand extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhDoorCommandRecord> {
 
-	private static final long serialVersionUID = 1603771440;
+	private static final long serialVersionUID = 48465085;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_door_command</code>

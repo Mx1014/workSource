@@ -11,19 +11,19 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAesUserKey implements java.io.Serializable {
 
-	private static final long serialVersionUID = -591865460;
+	private static final long serialVersionUID = 725979562;
 
 	private java.lang.Long    id;
 	private java.lang.Integer keyId;
 	private java.lang.Byte    keyType;
 	private java.lang.Long    doorId;
 	private java.lang.Long    userId;
+	private java.lang.Long    authId;
 	private java.lang.Long    expireTimeMs;
 	private java.lang.Long    createTimeMs;
 	private java.lang.Long    creatorUid;
 	private java.lang.String  secret;
 	private java.lang.Byte    status;
-	private java.lang.Long    authId;
 
 	public EhAesUserKey() {}
 
@@ -33,24 +33,24 @@ public class EhAesUserKey implements java.io.Serializable {
 		java.lang.Byte    keyType,
 		java.lang.Long    doorId,
 		java.lang.Long    userId,
+		java.lang.Long    authId,
 		java.lang.Long    expireTimeMs,
 		java.lang.Long    createTimeMs,
 		java.lang.Long    creatorUid,
 		java.lang.String  secret,
-		java.lang.Byte    status,
-		java.lang.Long    authId
+		java.lang.Byte    status
 	) {
 		this.id = id;
 		this.keyId = keyId;
 		this.keyType = keyType;
 		this.doorId = doorId;
 		this.userId = userId;
+		this.authId = authId;
 		this.expireTimeMs = expireTimeMs;
 		this.createTimeMs = createTimeMs;
 		this.creatorUid = creatorUid;
 		this.secret = secret;
 		this.status = status;
-		this.authId = authId;
 	}
 
 	public java.lang.Long getId() {
@@ -93,6 +93,14 @@ public class EhAesUserKey implements java.io.Serializable {
 		this.userId = userId;
 	}
 
+	public java.lang.Long getAuthId() {
+		return this.authId;
+	}
+
+	public void setAuthId(java.lang.Long authId) {
+		this.authId = authId;
+	}
+
 	public java.lang.Long getExpireTimeMs() {
 		return this.expireTimeMs;
 	}
@@ -131,13 +139,5 @@ public class EhAesUserKey implements java.io.Serializable {
 
 	public void setStatus(java.lang.Byte status) {
 		this.status = status;
-	}
-
-	public java.lang.Long getAuthId() {
-		return this.authId;
-	}
-
-	public void setAuthId(java.lang.Long authId) {
-		this.authId = authId;
 	}
 }

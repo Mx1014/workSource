@@ -32,6 +32,7 @@ import com.everhomes.rest.acl.admin.AssignUserRoleAdminCommand;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.CreateRolePrivilegeCommand;
 import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
+import com.everhomes.rest.acl.admin.DeleteRolePrivilegeCommand;
 import com.everhomes.rest.acl.admin.DeleteUserRoleAdminCommand;
 import com.everhomes.rest.acl.admin.ListAclRolesCommand;
 import com.everhomes.rest.acl.admin.ListUserRolesAdminCommandResponse;
@@ -243,6 +244,20 @@ public class AclAdminController extends ControllerBase {
     @RestReturn(value=ListWebMenuPrivilegeDTO.class, collection = true)
     public RestResponse qryRolePrivileges(@Valid QryRolePrivilegesCommand cmd) {
     	RestResponse response =  new RestResponse(rolePrivilegeService.qryRolePrivileges(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/acl/deleteRolePrivilege</b>
+     * <p>删除角色权限</p>
+     */
+    @RequestMapping("deleteRolePrivilege")
+    @RestReturn(value=String.class)
+    public RestResponse deleteRolePrivilege(@Valid DeleteRolePrivilegeCommand cmd) {
+    	rolePrivilegeService.deleteRolePrivilege(cmd);
+    	RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

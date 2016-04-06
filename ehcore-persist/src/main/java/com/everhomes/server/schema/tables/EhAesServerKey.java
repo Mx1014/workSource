@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAesServerKey extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhAesServerKeyRecord> {
 
-	private static final long serialVersionUID = -1473646485;
+	private static final long serialVersionUID = -687370347;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_aes_server_key</code>
@@ -27,9 +27,9 @@ public class EhAesServerKey extends org.jooq.impl.TableImpl<com.everhomes.server
 	}
 
 	/**
-	 * The column <code>ehcore.eh_aes_server_key.id</code>. id of the record
+	 * The column <code>ehcore.eh_aes_server_key.id</code>. id of the record, also as secret_ver
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAesServerKeyRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id of the record");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAesServerKeyRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id of the record, also as secret_ver");
 
 	/**
 	 * The column <code>ehcore.eh_aes_server_key.door_id</code>.
@@ -42,9 +42,9 @@ public class EhAesServerKey extends org.jooq.impl.TableImpl<com.everhomes.server
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAesServerKeyRecord, java.lang.Byte> DEVICE_VER = createField("device_ver", org.jooq.impl.SQLDataType.TINYINT.nullable(false), this, "ver of aclink: 0x0 or 0x1");
 
 	/**
-	 * The column <code>ehcore.eh_aes_server_key.secret_ver</code>. server ver of door
+	 * The column <code>ehcore.eh_aes_server_key.secret_ver</code>. ignore it
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAesServerKeyRecord, java.lang.Long> SECRET_VER = createField("secret_ver", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "server ver of door");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAesServerKeyRecord, java.lang.Long> SECRET_VER = createField("secret_ver", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "ignore it");
 
 	/**
 	 * The column <code>ehcore.eh_aes_server_key.secret</code>. The base64 secret 16B

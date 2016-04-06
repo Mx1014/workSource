@@ -4365,7 +4365,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 					User newuser = new User();
 					newuser.setStatus(UserStatus.ACTIVE.getCode());
 					newuser.setNamespaceId(namespaceId);
-					newuser.setAccountName(cmd.getAccountName());
 					newuser.setNickName(cmd.getAccountName());
 					newuser.setGender(UserGender.UNDISCLOSURED.getCode());
 					String salt=EncryptionUtils.createRandomSalt();
@@ -5320,8 +5319,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    		command.setTopicId(task.getApplyEntityId());
 	    		command.setContentType(PostContentType.TEXT.getCode());
 	    		Map<String,Object> map = new HashMap<String, Object>();
+	    		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 	    		map.put("targetUName", user.getNickName());
-	    		map.put("targetUToken", user.getIdentifierToken());
+	    		map.put("targetUToken", userIdentifier.getIdentifierToken());
 	    		String content = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_ACCEPT_COMMENT, user.getLocale(), map, "");
 	    		command.setContent(content);
 	    		this.createComment(command);
@@ -5360,8 +5360,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    		command.setTopicId(task.getApplyEntityId());
 	    		command.setContentType(PostContentType.TEXT.getCode());
 	    		Map<String,Object> map = new HashMap<String, Object>();
+	    		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 	    		map.put("targetUName", user.getNickName());
-	    		map.put("targetUToken", user.getIdentifierToken());
+	    		map.put("targetUToken", userIdentifier.getIdentifierToken());
 	    		String content = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_ACCEPT_COMMENT, user.getLocale(), map, "");
 	    		command.setContent(content);
 	    		this.createComment(command);
@@ -5391,7 +5392,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	
 	    	/* 根据用户不同 查询不同的任务类型贴*/
 	    	List<Long> privileges = rolePrivilegeService.getUserPrivileges(null , cmd.getOrganizationId(), user.getId());
-	    	
+	    	UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 	    	//当可以查询全部的任务类型时
 	    	if(privileges.contains(PrivilegeConstants.TaskAllListPosts)){
 	    		if(null != cmd.getUserId()){
@@ -5418,8 +5419,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    		task.setUnprocessedTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 	    		
 	    		User target = userProvider.findUserById(cmd.getUserId());
+	    		
 	    		map.put("operatorUName", user.getNickName());
-	    		map.put("operatorUToken", user.getIdentifierToken());
+	    		map.put("operatorUToken", userIdentifier.getIdentifierToken());
+	       		
 	    		map.put("targetUName", null != target ? target.getNickName() : "");
 	    		User create = userProvider.findUserById(task.getCreatorUid());
 	    		map.put("createUName", null != create ? create.getNickName() : "");
@@ -5454,9 +5457,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 		    		User target = userProvider.findUserById(cmd.getUserId());
 		    		
 		    		map.put("operatorUName", user.getNickName());
-		    		map.put("operatorUToken", user.getIdentifierToken());
+		    		map.put("operatorUToken", userIdentifier.getIdentifierToken());
 		    		map.put("targetUName", null != target ? target.getNickName() : "");
-		    		map.put("createUName", user.getIdentifierToken());
+		    		User create = userProvider.findUserById(task.getCreatorUid());
+		    		map.put("createUName", null != create ? create.getNickName() : "");
 		    		
 	    		}else{
     				//异常
@@ -5486,9 +5490,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 		    		User target = userProvider.findUserById(cmd.getUserId());
 		    		
 		    		map.put("operatorUName", user.getNickName());
-		    		map.put("operatorUToken", user.getIdentifierToken());
+		    		map.put("operatorUToken", userIdentifier.getIdentifierToken());
 		    		map.put("targetUName", null != target ? target.getNickName() : "");
-		    		map.put("createUName", user.getIdentifierToken());
+		    		User create = userProvider.findUserById(task.getCreatorUid());
+		    		map.put("createUName", null != create ? create.getNickName() : "");
 		    		
 	    		}else{
     				//异常
@@ -5542,11 +5547,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    		task.setUnprocessedTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 	    		
 	    		organizationProvider.updateOrganizationTask(task);
-	    		
+	    		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 	    		Map<String,Object> map = new HashMap<String, Object>();
 	    		map.put("targetUName", user.getNickName());
-	    		map.put("targetUToken", user.getIdentifierToken());
-	    		sendOrganizationNotificationToUser(null,localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_REFUSE, user.getLocale(), map, ""));
+	    		map.put("targetUToken", userIdentifier.getIdentifierToken());
+	    		sendOrganizationNotificationToUser(task.getOperatorUid(),localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_REFUSE, user.getLocale(), map, ""));
 	    	}else{
 	    		LOGGER.error("Tasks have been processed, status="+task.getTaskStatus() + ", targetId=" + task.getTargetId());
 				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_TASK_ALREADY_PROCESSED,
@@ -5704,8 +5709,8 @@ public class OrganizationServiceImpl implements OrganizationService {
     			contentComment = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_FINISH_COMMENT, user.getLocale(), map, "");
     			sendOrganizationNotificationToUser(task.getCreatorUid(),contentMsg);
     		}else if(OrganizationTaskStatus.fromCode(task.getTaskStatus()) == OrganizationTaskStatus.UNPROCESSED || OrganizationTaskStatus.fromCode(task.getTaskStatus()) == OrganizationTaskStatus.PROCESSING){
-    			contentMsg = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_PROCESSING_COMMENT, user.getLocale(), map, "");
-	    		contentComment = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_PROCESSING, user.getLocale(), map, "");
+    			contentMsg = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_PROCESSING, user.getLocale(), map, "");
+	    		contentComment = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_PROCESSING_COMMENT, user.getLocale(), map, "");
 	    		User target = userProvider.findUserById(task.getTargetId());
 	    		if(null != target){
 	    			smsProvider.sendSms(target.getIdentifierToken(), contentMsg);
