@@ -2614,7 +2614,12 @@ public class ForumServiceImpl implements ForumService {
         
         Condition categoryCondition = null;
         if(null != contentCategoryCondition){
-        	categoryCondition = contentCategoryCondition.and(actionCategoryCondition);
+        	if(null !=  actionCategoryCondition){
+        		categoryCondition = contentCategoryCondition.and(actionCategoryCondition);
+        	}else{
+        		categoryCondition = contentCategoryCondition;
+        	}
+        	
         }
         
         return categoryCondition;
