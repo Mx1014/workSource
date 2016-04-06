@@ -5619,7 +5619,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			int pageSize = PaginationConfigHelper.getPageSize(configurationProvider,  cmd.getPageSize());
 			CrossShardListingLocator locator = new CrossShardListingLocator();
 			locator.setAnchor(cmd.getPageOffset());
-			List<OrganizationTask> orgTasks = organizationProvider.listOrganizationTasksByTypeOrStatus(locator, organization.getId(),cmd.getTargetId(), cmd.getTaskType(), cmd.getTaskStatus(), pageSize);
+			List<OrganizationTask> orgTasks = organizationProvider.listOrganizationTasksByTypeOrStatus(locator, organization.getId(),cmd.getTargetId(), cmd.getTaskType(), cmd.getTaskStatus(),VisibleRegionType.COMMUNITY.getCode(),commuId, pageSize);
 			List<PostDTO> dtos = new ArrayList<PostDTO>();
 			for (OrganizationTask task : orgTasks) {
 				PostDTO dto = this.forumService.getTopicById(task.getApplyEntityId(),commuId,false);

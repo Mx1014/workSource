@@ -1020,7 +1020,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 	
 	@Override
-	public List<OrganizationTask> listOrganizationTasksByTypeOrStatus(CrossShardListingLocator locator,Long organizationId,Long targetId, String taskType, Byte taskStatus, int pageSize) {
+	public List<OrganizationTask> listOrganizationTasksByTypeOrStatus(CrossShardListingLocator locator,Long organizationId,Long targetId, String taskType, Byte taskStatus,Byte visibleRegionType, Long visibleRegionId, int pageSize) {
 		List<OrganizationTask> list = new ArrayList<OrganizationTask>();
 		Condition condition = Tables.EH_ORGANIZATION_TASKS.ORGANIZATION_ID.notEqual(-1l) ;
 		if(null != organizationId)
@@ -1036,6 +1036,11 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 				cond = cond.or(Tables.EH_ORGANIZATION_TASKS.TARGET_ID.eq(0l));
 			}
 			condition = condition.and(cond);
+		}
+		
+		if(null != visibleRegionType && null != visibleRegionId){
+			condition = condition.and(Tables.EH_ORGANIZATION_TASKS.VISIBLE_REGION_TYPE.eq(visibleRegionType));
+			condition = condition.and(Tables.EH_ORGANIZATION_TASKS.VISIBLE_REGION_ID.eq(visibleRegionId));
 		}
 		
 		if(null != locator.getAnchor()){
