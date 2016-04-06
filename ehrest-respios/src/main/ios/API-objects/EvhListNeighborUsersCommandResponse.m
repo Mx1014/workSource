@@ -1,6 +1,6 @@
 //
 // EvhListNeighborUsersCommandResponse.m
-// generated at 2016-03-31 10:18:19 
+// generated at 2016-04-06 19:59:46 
 //
 #import "EvhListNeighborUsersCommandResponse.h"
 #import "EvhNeighborUserDTO.h"

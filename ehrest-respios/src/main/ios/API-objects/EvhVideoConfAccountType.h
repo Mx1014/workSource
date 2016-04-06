@@ -1,20 +1,10 @@
 //
-// EvhVideoConfAccountType.h
-// generated at 2016-03-31 10:18:18 
+// EvhVideoconfAccountType.h
+// generated at 2016-04-06 19:59:46 
 //
 
-
-///////////////////////////////////////////////////////////////////////////////
-// EvhVideoConfAccountType
-//
-typedef enum {
-
-    EvhVideoConfAccountType_VIDEO_ONLY_25 = 0, 
-    EvhVideoConfAccountType_PHONE_SUPPORT_25 = 1, 
-    EvhVideoConfAccountType_VIDEO_ONLY_100 = 2, 
-    EvhVideoConfAccountType_PHONE_SUPPORT_100 = 3
-
-} EvhVideoConfAccountType;
+#define EvhVideoconfAccountType_ACCOUNT_TYPE_SINGLE @"单账号"
+#define EvhVideoconfAccountType_ACCOUNT_TYPE_MULTIPLE @"多账号"
 
 ///////////////////////////////////////////////////////////////////////////////
 

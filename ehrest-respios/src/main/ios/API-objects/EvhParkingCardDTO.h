@@ -1,6 +1,6 @@
 //
 // EvhParkingCardDTO.h
-// generated at 2016-03-31 10:18:19 
+// generated at 2016-04-06 19:59:44 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -26,11 +26,17 @@
 
 @property(nonatomic, copy) NSString* plateOwnerPhone;
 
+@property(nonatomic, copy) NSString* cardType;
+
 @property(nonatomic, copy) NSString* cardNumber;
+
+@property(nonatomic, copy) NSString* cardName;
 
 @property(nonatomic, copy) NSNumber* startTime;
 
 @property(nonatomic, copy) NSNumber* endTime;
+
+@property(nonatomic, copy) NSNumber* isValid;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

@@ -1,6 +1,6 @@
 //
 // EvhSetParkingCardIssueFlagCommand.m
-// generated at 2016-03-31 10:18:19 
+// generated at 2016-04-06 19:59:46 
 //
 #import "EvhSetParkingCardIssueFlagCommand.h"
 
@@ -37,6 +37,8 @@
         [jsonObject setObject: self.ownerId forKey: @"ownerId"];
     if(self.parkingLotId)
         [jsonObject setObject: self.parkingLotId forKey: @"parkingLotId"];
+    if(self.id)
+        [jsonObject setObject: self.id forKey: @"id"];
     if(self.issueFlag)
         [jsonObject setObject: self.issueFlag forKey: @"issueFlag"];
 }
@@ -55,6 +57,10 @@
         self.parkingLotId = [jsonObject objectForKey: @"parkingLotId"];
         if(self.parkingLotId && [self.parkingLotId isEqual:[NSNull null]])
             self.parkingLotId = nil;
+
+        self.id = [jsonObject objectForKey: @"id"];
+        if(self.id && [self.id isEqual:[NSNull null]])
+            self.id = nil;
 
         self.issueFlag = [jsonObject objectForKey: @"issueFlag"];
         if(self.issueFlag && [self.issueFlag isEqual:[NSNull null]])

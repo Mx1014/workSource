@@ -1,6 +1,6 @@
 //
 // EvhParkingCardDTO.m
-// generated at 2016-03-31 10:18:19 
+// generated at 2016-04-06 19:59:44 
 //
 #import "EvhParkingCardDTO.h"
 
@@ -45,12 +45,18 @@
         [jsonObject setObject: self.plateOwnerName forKey: @"plateOwnerName"];
     if(self.plateOwnerPhone)
         [jsonObject setObject: self.plateOwnerPhone forKey: @"plateOwnerPhone"];
+    if(self.cardType)
+        [jsonObject setObject: self.cardType forKey: @"cardType"];
     if(self.cardNumber)
         [jsonObject setObject: self.cardNumber forKey: @"cardNumber"];
+    if(self.cardName)
+        [jsonObject setObject: self.cardName forKey: @"cardName"];
     if(self.startTime)
         [jsonObject setObject: self.startTime forKey: @"startTime"];
     if(self.endTime)
         [jsonObject setObject: self.endTime forKey: @"endTime"];
+    if(self.isValid)
+        [jsonObject setObject: self.isValid forKey: @"isValid"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -84,9 +90,17 @@
         if(self.plateOwnerPhone && [self.plateOwnerPhone isEqual:[NSNull null]])
             self.plateOwnerPhone = nil;
 
+        self.cardType = [jsonObject objectForKey: @"cardType"];
+        if(self.cardType && [self.cardType isEqual:[NSNull null]])
+            self.cardType = nil;
+
         self.cardNumber = [jsonObject objectForKey: @"cardNumber"];
         if(self.cardNumber && [self.cardNumber isEqual:[NSNull null]])
             self.cardNumber = nil;
+
+        self.cardName = [jsonObject objectForKey: @"cardName"];
+        if(self.cardName && [self.cardName isEqual:[NSNull null]])
+            self.cardName = nil;
 
         self.startTime = [jsonObject objectForKey: @"startTime"];
         if(self.startTime && [self.startTime isEqual:[NSNull null]])
@@ -95,6 +109,10 @@
         self.endTime = [jsonObject objectForKey: @"endTime"];
         if(self.endTime && [self.endTime isEqual:[NSNull null]])
             self.endTime = nil;
+
+        self.isValid = [jsonObject objectForKey: @"isValid"];
+        if(self.isValid && [self.isValid isEqual:[NSNull null]])
+            self.isValid = nil;
 
         return self;
     }

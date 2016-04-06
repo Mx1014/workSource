@@ -1,6 +1,6 @@
 //
 // EvhTechparkRentalFindRentalSiteWeekStatusRestResponse.m
-// generated at 2016-03-31 10:18:21 
+// generated at 2016-04-06 19:59:47 
 //
 #import "EvhTechparkRentalFindRentalSiteWeekStatusRestResponse.h"
 #import "EvhFindRentalSiteWeekStatusCommandResponse.h"
