@@ -1,6 +1,6 @@
 //
 // EvhUserSetCurrentCommunityRestResponse.m
-// generated at 2016-04-05 13:45:27 
+// generated at 2016-04-06 19:10:44 
 //
 #import "EvhUserSetCurrentCommunityRestResponse.h"
 #import "EvhCommunityDTO.h"

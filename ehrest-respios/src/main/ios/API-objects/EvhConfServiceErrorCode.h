@@ -1,6 +1,6 @@
 //
 // EvhConfServiceErrorCode.h
-// generated at 2016-04-05 13:45:26 
+// generated at 2016-04-06 19:10:43 
 //
 
 #define EvhConfServiceErrorCode_SCOPE @"videoConf"
@@ -12,3 +12,5 @@
 #define EvhConfServiceErrorCode_ERROR_INVALID_ASSIGN 10005
 #define EvhConfServiceErrorCode_ZUOLIN_NAMESPACE_NAME 10006
 #define EvhConfServiceErrorCode_CONF_NOT_OPEN 10007
+#define EvhConfServiceErrorCode_CONF_INVOICE_SUBJECT 10008
+#define EvhConfServiceErrorCode_CONF_INVOICE_BODY 10009

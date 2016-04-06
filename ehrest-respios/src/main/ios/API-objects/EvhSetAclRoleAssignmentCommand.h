@@ -1,6 +1,6 @@
 //
 // EvhSetAclRoleAssignmentCommand.h
-// generated at 2016-04-05 13:45:25 
+// generated at 2016-04-06 19:10:41 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -15,6 +15,8 @@
 @property(nonatomic, copy) NSNumber* targetId;
 
 @property(nonatomic, copy) NSNumber* roleId;
+
+@property(nonatomic, copy) NSNumber* organizationId;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

@@ -1,9 +1,10 @@
 //
 // EvhConfAccountDTO.h
-// generated at 2016-04-05 13:45:24 
+// generated at 2016-04-06 19:10:42 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
+#import "EvhConfCategoryDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhConfAccountDTO
@@ -37,6 +38,8 @@
 @property(nonatomic, copy) NSNumber* validFlag;
 
 @property(nonatomic, copy) NSNumber* status;
+
+@property(nonatomic, strong) EvhConfCategoryDTO* category;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
