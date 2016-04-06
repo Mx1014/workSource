@@ -1,6 +1,6 @@
 //
 // EvhGetUserOpPromotionCommand.m
-// generated at 2016-04-05 13:45:26 
+// generated at 2016-04-06 19:10:43 
 //
 #import "EvhGetUserOpPromotionCommand.h"
 
@@ -33,6 +33,10 @@
 {
     if(self.sceneToken)
         [jsonObject setObject: self.sceneToken forKey: @"sceneToken"];
+    if(self.pageAnchor)
+        [jsonObject setObject: self.pageAnchor forKey: @"pageAnchor"];
+    if(self.pageSize)
+        [jsonObject setObject: self.pageSize forKey: @"pageSize"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -41,6 +45,14 @@
         self.sceneToken = [jsonObject objectForKey: @"sceneToken"];
         if(self.sceneToken && [self.sceneToken isEqual:[NSNull null]])
             self.sceneToken = nil;
+
+        self.pageAnchor = [jsonObject objectForKey: @"pageAnchor"];
+        if(self.pageAnchor && [self.pageAnchor isEqual:[NSNull null]])
+            self.pageAnchor = nil;
+
+        self.pageSize = [jsonObject objectForKey: @"pageSize"];
+        if(self.pageSize && [self.pageSize isEqual:[NSNull null]])
+            self.pageSize = nil;
 
         return self;
     }

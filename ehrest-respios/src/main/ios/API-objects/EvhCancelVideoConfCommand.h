@@ -1,6 +1,6 @@
 //
 // EvhCancelVideoConfCommand.h
-// generated at 2016-04-05 13:45:25 
+// generated at 2016-04-06 19:10:43 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -13,8 +13,6 @@
 
 
 @property(nonatomic, copy) NSNumber* confId;
-
-@property(nonatomic, copy) NSString* sourceAccountName;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

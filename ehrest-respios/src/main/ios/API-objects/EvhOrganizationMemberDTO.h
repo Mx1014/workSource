@@ -1,10 +1,10 @@
 //
 // EvhOrganizationMemberDTO.h
-// generated at 2016-04-05 13:45:26 
+// generated at 2016-04-06 19:10:43 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
-#import "EvhAclRoleAssignmentsDTO.h"
+#import "EvhRoleDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhOrganizationMemberDTO
@@ -41,8 +41,8 @@
 
 @property(nonatomic, copy) NSString* fullInitial;
 
-// item type EvhAclRoleAssignmentsDTO*
-@property(nonatomic, strong) NSMutableArray* aclRoles;
+// item type EvhRoleDTO*
+@property(nonatomic, strong) NSMutableArray* roles;
 
 @property(nonatomic, copy) NSNumber* groupId;
 

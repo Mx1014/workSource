@@ -1,6 +1,6 @@
 //
 // EvhActionType.h
-// generated at 2016-04-05 13:45:26 
+// generated at 2016-04-06 19:10:42 
 //
 
 
@@ -49,7 +49,8 @@ typedef enum {
     EvhActionType_SERVICE_ORDER = 37, 
     EvhActionType_ORG_TASK_MANAGERMENT = 39, 
     EvhActionType_ACLINK = 40, 
-    EvhActionType_NOTICE_MANAGERMENT = 43
+    EvhActionType_NOTICE_MANAGERMENT = 43, 
+    EvhActionType_OFFLINE_WEBAPP = 44
 
 } EvhActionType;
 

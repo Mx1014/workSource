@@ -1,6 +1,6 @@
 //
 // EvhGetUserOpPromotionCommand.h
-// generated at 2016-04-05 13:45:26 
+// generated at 2016-04-06 19:10:43 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -13,6 +13,10 @@
 
 
 @property(nonatomic, copy) NSString* sceneToken;
+
+@property(nonatomic, copy) NSNumber* pageAnchor;
+
+@property(nonatomic, copy) NSNumber* pageSize;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

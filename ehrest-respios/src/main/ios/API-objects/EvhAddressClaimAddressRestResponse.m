@@ -1,6 +1,6 @@
 //
 // EvhAddressClaimAddressRestResponse.m
-// generated at 2016-04-05 13:45:26 
+// generated at 2016-04-06 19:10:43 
 //
 #import "EvhAddressClaimAddressRestResponse.h"
 #import "EvhClaimedAddressInfo.h"

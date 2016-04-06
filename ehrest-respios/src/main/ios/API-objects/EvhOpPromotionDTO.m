@@ -1,6 +1,6 @@
 //
 // EvhOpPromotionDTO.m
-// generated at 2016-04-05 13:45:26 
+// generated at 2016-04-06 19:10:42 
 //
 #import "EvhOpPromotionDTO.h"
 
@@ -51,6 +51,8 @@
         [jsonObject setObject: self.endTime forKey: @"endTime"];
     if(self.status)
         [jsonObject setObject: self.status forKey: @"status"];
+    if(self.createTime)
+        [jsonObject setObject: self.createTime forKey: @"createTime"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -95,6 +97,10 @@
         self.status = [jsonObject objectForKey: @"status"];
         if(self.status && [self.status isEqual:[NSNull null]])
             self.status = nil;
+
+        self.createTime = [jsonObject objectForKey: @"createTime"];
+        if(self.createTime && [self.createTime isEqual:[NSNull null]])
+            self.createTime = nil;
 
         return self;
     }

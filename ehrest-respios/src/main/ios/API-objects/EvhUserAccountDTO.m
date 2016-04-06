@@ -1,6 +1,6 @@
 //
 // EvhUserAccountDTO.m
-// generated at 2016-04-05 13:45:24 
+// generated at 2016-04-06 19:10:43 
 //
 #import "EvhUserAccountDTO.h"
 
@@ -39,6 +39,8 @@
         [jsonObject setObject: self.occupyFlag forKey: @"occupyFlag"];
     if(self.confId)
         [jsonObject setObject: self.confId forKey: @"confId"];
+    if(self.purchaseAuthority)
+        [jsonObject setObject: self.purchaseAuthority forKey: @"purchaseAuthority"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -59,6 +61,10 @@
         self.confId = [jsonObject objectForKey: @"confId"];
         if(self.confId && [self.confId isEqual:[NSNull null]])
             self.confId = nil;
+
+        self.purchaseAuthority = [jsonObject objectForKey: @"purchaseAuthority"];
+        if(self.purchaseAuthority && [self.purchaseAuthority isEqual:[NSNull null]])
+            self.purchaseAuthority = nil;
 
         return self;
     }
