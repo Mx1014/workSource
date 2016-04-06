@@ -18,10 +18,13 @@ import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 
+import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -106,6 +109,10 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     @Autowired
     private MessagingService messagingService;
     
+    final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+    
+    final String LAST_TICK = "dooraccess:%d:lasttick";
+    final long TASK_TICK_TIMEOUT = 5*60*1000;
     public static String Manufacturer = "zuolin001";
     
     private static long MAX_KEY_ID = 1024;
@@ -188,6 +195,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         List<DoorAccessDTO> dtos = new ArrayList<DoorAccessDTO>();
         for(DoorAccess da : dacs) {
+            getDoorAccessLastTick(da);
+            
             DoorAccessDTO dto = ConvertHelper.convert(da, DoorAccessDTO.class);
             //User user = userProvider.findUserById(da.getCreatorUserId());
             UserInfo user = userService.getUserSnapshotInfoWithPhone(da.getCreatorUserId());
@@ -198,7 +207,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 if(user.getPhones() != null && user.getPhones().size() > 0) {
                     phone = user.getPhones().get(0);
                     }
-                dto.setCreatorPhone(phone);    
+                dto.setCreatorPhone(phone);
                 }
             
             dtos.add(dto);
@@ -987,6 +996,65 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         return resp;        
     }
     
-//    void syncLogToServer(List<DoorAccessLog> logs) {
-//    }
+    private Long getDoorAccessLastTick(DoorAccess doorAccess) {
+        Long doorAccId = doorAccess.getId();
+        String key = String.format(LAST_TICK, doorAccId);
+        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+        
+        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+        Object v = redisTemplate.opsForValue().get(key);
+        
+        Long rv ;
+        if(v == null) {
+            rv = 0l;
+        } else {
+            rv = Long.valueOf((String)v);    
+        }
+        
+        if((rv.longValue()+TASK_TICK_TIMEOUT) > System.currentTimeMillis()) {
+            doorAccess.setLinkStatus(DoorAccessLinkStatus.SUCCESS.getCode());
+        } else {
+            doorAccess.setLinkStatus(DoorAccessLinkStatus.FAILED.getCode());
+            }
+        
+        return rv;
+    }
+    
+    private void updateDoorAccessLastTick(Long doorAccId) {
+        String key = String.format(LAST_TICK, doorAccId);
+        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+        redisTemplate.opsForValue().set(key, String.valueOf(System.currentTimeMillis()));
+    }
+    
+    @Override
+    public DoorAccess onDoorAccessConnecting(AclinkConnectingCommand cmd) {
+        DoorAccess doorAccess = doorAccessProvider.queryDoorAccessByUuid(cmd.getUuid());
+        if(doorAccess == null) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
+        }
+        
+        updateDoorAccessLastTick(doorAccess.getId());
+        doorAccess.setLinkStatus(DoorAccessLinkStatus.SUCCESS.getCode());
+        return doorAccess;
+    }
+    
+    @Override
+    public void onDoorAcessDisconnected(AclinkDisconnectedCommand cmd) {
+        
+    }
+    
+    @Override
+    public AclinkWebSocketMessage syncWebSocketMessages(AclinkWebSocketMessage resp) {
+        if(resp.getSeq() != null) {
+            aclinkMessageSequence.ackMessage(resp.getSeq());
+            DoorCommand doorCommand = doorCommandProvider.getDoorCommandById(resp.getSeq());
+            doorCommand.setStatus(DoorCommandStatus.RESPONSE.getCode());
+            doorCommandProvider.updateDoorCommand(doorCommand);    
+        }
+        
+        updateDoorAccessLastTick(resp.getId());
+        
+        return msgGenerator.generateWebSocketMessage(resp.getId());
+    }
 }

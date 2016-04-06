@@ -81,6 +81,11 @@
             <artifactId>ehutil</artifactId>
             <version>0.0.7-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>com.everhomes</groupId>
+            <artifactId>ehutil-common</artifactId>
+            <version>0.0.2-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
     <build>
