@@ -1226,6 +1226,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Override
 	public ListPostCommandResponse  queryTopicsByCategory(QueryOrganizationTopicCommand cmd) {
+		
 		return this.forumService.queryOrganizationTopics(cmd);
 	}
 
@@ -5530,7 +5531,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    						"Cannot perform this operation on a task.");
 	    			}
 	    			
-	    			if(null != cmd.getUserId()){
+	    			if(OrganizationTaskStatus.fromCode(cmd.getTaskStatus()) != OrganizationTaskStatus.PROCESSED && null != cmd.getUserId()){
 	    				task.setTargetId(cmd.getUserId());
 	    				task.setTargetType(OrganizationTaskTargetType.USER.getCode());
 	    			}
@@ -5593,7 +5594,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    		task.setTargetId(0l);
 	    		task.setTargetType(null);
 	    		task.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-	    		Long operatorUid = task.getCreatorUid();
+	    		Long operatorUid = task.getOperatorUid();
 	    		task.setOperatorUid(user.getId());
 	    		task.setUnprocessedTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 	    		
