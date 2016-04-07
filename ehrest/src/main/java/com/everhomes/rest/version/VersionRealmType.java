@@ -48,7 +48,7 @@ public enum VersionRealmType {
     IOS_LONGGANG("iOS_Longgang"),
     ANDROID_HAIAN("Android_Haian"), 
     IOS_HAIAN("iOS_Haian"),
-    H5_QUALITY("H5_Quality");
+    H5_QUALITY("quality");
     
     private String code;
     private VersionRealmType(String code) {
