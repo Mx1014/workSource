@@ -183,8 +183,10 @@ public class AclinkController extends ControllerBase {
     @RequestMapping("connecting")
     @RestReturn(value=DoorAccessDTO.class)
     public RestResponse connecting(@Valid AclinkConnectingCommand cmd) {
-        doorAccessService.onDoorAccessConnecting(cmd);
         RestResponse response = new RestResponse();
+        
+        response.setResponseObject(doorAccessService.onDoorAccessConnecting(cmd));
+        
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

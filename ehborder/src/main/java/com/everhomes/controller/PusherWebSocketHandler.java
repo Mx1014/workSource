@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -43,14 +44,8 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
     @Value("${core.service.uri}")
     private String coreServiceUri;
     
-    @Value("${border.app.key}")
-    private String appKey;
-    
-    @Value("${border.app.secret}")
-    private String secretKey;
-    
-    //@Value("${heartbeat.interval}")
-    //private long heartbeatInterval;
+    @Autowired
+    private HttpRestCallProvider httpRestCallProvider;
     
     private final long TIMEOUT_TICK = 1000*60*2;    //2 min
     private final long PENDING_TICK = 1000*10;      //10 sec
@@ -256,7 +251,7 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
             params.put("systemVersion", "");
             params.put("meta", "{}");
             
-            restCall("pusher/registDevice", params, new ListenableFutureCallback<ResponseEntity<String>> () {
+            httpRestCallProvider.restCall("pusher/registDevice", params, new ListenableFutureCallback<ResponseEntity<String>> () {
                 @Override
                 public void onSuccess(ResponseEntity<String> result) {
                   //Remove it from pending session
@@ -323,7 +318,7 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
                 params.put("namespaceId", msgCmd.getNamespaceId().toString());
             }
                        
-            restCall("pusher/recentMessages", params, new ListenableFutureCallback<ResponseEntity<String>> () {
+            httpRestCallProvider.restCall("pusher/recentMessages", params, new ListenableFutureCallback<ResponseEntity<String>> () {
                 @Override
                 public void onSuccess(ResponseEntity<String> result) {
                     PduFrame pdu = new PduFrame();
@@ -367,26 +362,6 @@ public class PusherWebSocketHandler extends TextWebSocketHandler {
             sb.append(relativeUri);
         
         return sb.toString();
-    }    
-    
-    private void restCall(String cmd, Map<String, String> params, ListenableFutureCallback<ResponseEntity<String>> responseCallback) {
-        AsyncRestTemplate template = new AsyncRestTemplate();
-        String url = getRestUri(cmd);
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        
-        params.put("appKey", this.appKey);
-        String signature = SignatureHelper.computeSignature(params, this.secretKey);
-        params.put("signature", signature);
-        
-        MultiValueMap<String, String> paramMap = new LinkedMultiValueMap<>();
-        for(Map.Entry<String, String> entry: params.entrySet()) {
-            paramMap.add(entry.getKey(), entry.getValue());
-        }
-        
-        HttpEntity<MultiValueMap<String,String>> requestEntity= new HttpEntity<MultiValueMap<String,String>>(paramMap,headers);
-        ListenableFuture<ResponseEntity<String>> future = template.exchange(url, HttpMethod.POST, requestEntity, String.class);
-        future.addCallback(responseCallback);
     }
     
     public void notify(WebSocketSession serverSession, PusherNotifyPdu pduServer) {
