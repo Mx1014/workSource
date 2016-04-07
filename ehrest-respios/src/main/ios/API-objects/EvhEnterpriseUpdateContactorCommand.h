@@ -1,6 +1,6 @@
 //
 // EvhEnterpriseUpdateContactorCommand.h
-// generated at 2016-03-31 10:18:19 
+// generated at 2016-04-07 10:47:32 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"

@@ -1,10 +1,10 @@
 //
 // EvhListBuildingCommandResponse.h
-// generated at 2016-04-06 19:59:46 
+// generated at 2016-04-07 10:47:31 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
-#import "EvhCommunityBuildingDTO.h"
+#import "EvhBuildingDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhListBuildingCommandResponse
@@ -15,7 +15,7 @@
 
 @property(nonatomic, copy) NSNumber* nextPageAnchor;
 
-// item type EvhCommunityBuildingDTO*
+// item type EvhBuildingDTO*
 @property(nonatomic, strong) NSMutableArray* buildings;
 
 -(id) init;
