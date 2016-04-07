@@ -53,8 +53,8 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 	
     @SuppressWarnings("unchecked")
 	@Override
-    public List<ParkingCardDTO> getParkingCardsByPlate(String ownerType, Long ownerId, Long parkingLotId,
-        String plateNumber) {
+    public List<ParkingCardDTO> getParkingCardsByPlate(String ownerType, Long ownerId,
+    		Long parkingLotId, String plateNumber) {
         
     	List<ParkingCardDTO> resultList = new ArrayList<ParkingCardDTO>();
     	URL wsdlURL = Service1.WSDL_LOCATION;
@@ -171,7 +171,7 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 //			}
 //		}
 //		RechargeSuccessResponse rechargeResponse = getRechargeStatus(Long.valueOf(cmd.getOrderNo()));
-//		return rechargeResponse;        
+//		return rechargeResponse;   
     }
     
     @Override
