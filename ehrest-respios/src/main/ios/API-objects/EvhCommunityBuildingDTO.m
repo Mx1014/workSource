@@ -1,6 +1,6 @@
 //
 // EvhCommunityBuildingDTO.m
-// generated at 2016-04-06 17:22:35 
+// generated at 2016-04-07 17:33:49 
 //
 #import "EvhCommunityBuildingDTO.h"
 #import "EvhBuildingAttachmentDTO.h"

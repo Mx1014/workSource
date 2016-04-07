@@ -1,6 +1,6 @@
 //
 // EvhVerifyPurchaseAuthorityResponse.m
-// generated at 2016-04-06 19:10:42 
+// generated at 2016-04-07 17:33:48 
 //
 #import "EvhVerifyPurchaseAuthorityResponse.h"
 
@@ -35,6 +35,8 @@
         [jsonObject setObject: self.purchaseAuthority forKey: @"purchaseAuthority"];
     if(self.enterpriseActiveAccountCount)
         [jsonObject setObject: self.enterpriseActiveAccountCount forKey: @"enterpriseActiveAccountCount"];
+    if(self.enterpriseAccountCount)
+        [jsonObject setObject: self.enterpriseAccountCount forKey: @"enterpriseAccountCount"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -47,6 +49,10 @@
         self.enterpriseActiveAccountCount = [jsonObject objectForKey: @"enterpriseActiveAccountCount"];
         if(self.enterpriseActiveAccountCount && [self.enterpriseActiveAccountCount isEqual:[NSNull null]])
             self.enterpriseActiveAccountCount = nil;
+
+        self.enterpriseAccountCount = [jsonObject objectForKey: @"enterpriseAccountCount"];
+        if(self.enterpriseAccountCount && [self.enterpriseAccountCount isEqual:[NSNull null]])
+            self.enterpriseAccountCount = nil;
 
         return self;
     }
