@@ -2,6 +2,7 @@ package com.everhomes.aclink;
 
 import java.security.Security;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +53,7 @@ import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import org.apache.commons.codec.binary.Base64;
 
 
 @Component
@@ -1032,6 +1034,27 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         DoorAccess doorAccess = doorAccessProvider.queryDoorAccessByUuid(cmd.getUuid());
         if(doorAccess == null) {
             throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
+        }
+        
+        AesServerKey aesServerKey = aesServerKeyService.getCurrentAesServerKey(doorAccess.getId());
+        if(aesServerKey == null) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_PARAM_ERROR, "AesServerKey error");
+        }
+        
+        String base64 = cmd.getEncryptBase64().replace("_", "/").replace("-", "+");
+        byte[] key = Base64.decodeBase64(aesServerKey.getSecret());
+        byte[] data = Base64.decodeBase64(base64);
+        String decodeResult = "";
+        try {
+            byte[] rb = AESUtil.decrypt(data, key);
+            byte[] newArray = Arrays.copyOfRange(rb, 16, 32);
+            decodeResult = new String(newArray);
+        } catch (Exception e) {
+            LOGGER.error("decrypt error", e);
+        }
+        
+        if( (decodeResult == "") || (doorAccess.getUuid().indexOf(decodeResult) != 0) ) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "Auth error");
         }
         
         updateDoorAccessLastTick(doorAccess.getId());
