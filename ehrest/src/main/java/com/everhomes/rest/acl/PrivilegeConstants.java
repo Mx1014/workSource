@@ -33,4 +33,8 @@ public interface PrivilegeConstants {
     public static final long TaskSeekHelpListPosts = 304L;
     
     
+    // privileges defined by Notice module
+    public static final long NoticeManagementPost = 200L;
+    
+    
 }

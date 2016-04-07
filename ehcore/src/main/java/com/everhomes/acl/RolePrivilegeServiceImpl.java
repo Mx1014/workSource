@@ -30,12 +30,14 @@ import java.util.stream.Collectors;
 
 
 
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
+
 
 
 
@@ -93,6 +95,7 @@ import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.PrivateFlag;
 import com.everhomes.rest.organization.SetAclRoleAssignmentCommand;
@@ -100,6 +103,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.RuntimeErrorException;
 
 @Component
 public class RolePrivilegeServiceImpl implements RolePrivilegeService {
@@ -463,6 +467,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		return organizationService.listOrganizationPersonnelsByRoleIds(cmd);
 	}
 	
+	
+	
 	 /**
      * 获取用户的权限列表
      * @param module
@@ -556,6 +562,19 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     	}
     	
     	return false;
+    }
+    
+    @Override
+    public boolean checkAuthority(String ownerType, Long ownerId, Long privilegeId){
+    	User user = UserContext.current().getUser();
+    	
+    	List<Long> privileges = this.getUserPrivileges(null, ownerId, user.getId());
+    	
+    	if(!privileges.contains(privilegeId)){
+    		this.returnNoPrivileged(privileges, user);
+    	}
+    	
+    	return true;
     }
     
     private List<RoleAssignment> getUserRoles(Long organizationId, Long userId){
@@ -691,5 +710,13 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		return dtos;
 	}
 
+	/**
+     * 抛出无权限 
+     */
+    private void returnNoPrivileged(List<Long> privileges, User user){
+    	LOGGER.error("non-privileged, privileges="+privileges + ", userId=" + user.getId());
+		throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_PRIVILEGED,
+				"non-privileged.");
+    }
 	
 }
