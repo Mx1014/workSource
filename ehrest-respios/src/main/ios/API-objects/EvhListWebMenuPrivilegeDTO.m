@@ -1,6 +1,6 @@
 //
 // EvhListWebMenuPrivilegeDTO.m
-// generated at 2016-04-07 15:16:52 
+// generated at 2016-04-07 17:03:16 
 //
 #import "EvhListWebMenuPrivilegeDTO.h"
 #import "EvhWebMenuPrivilegeDTO.h"
