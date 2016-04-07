@@ -25,3 +25,4 @@ ehcore/output
 ehcore/statistics
 /bin/
 ehcore/src/main/config/ehcore_custom.yml
+ehcore/logs

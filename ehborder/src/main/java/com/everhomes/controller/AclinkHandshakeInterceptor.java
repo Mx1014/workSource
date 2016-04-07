@@ -15,9 +15,7 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
 import com.everhomes.rest.aclink.ConnectingRestResponse;
-import com.everhomes.rest.user.AppIdStatusRestResponse;
 import com.everhomes.util.StringHelper;
-import com.google.gson.Gson;
 
 public class AclinkHandshakeInterceptor implements HandshakeInterceptor {
     private static final Logger LOGGER = LoggerFactory.getLogger(AclinkHandshakeInterceptor.class);
@@ -64,8 +62,10 @@ public class AclinkHandshakeInterceptor implements HandshakeInterceptor {
                 return false;
             }
             
-            //AclinkWebSocketHandler handler = (AclinkWebSocketHandler)wsHandler;
-            aclinkWebSocketHandler.beforeHandshake(vs[0], resp.getResponse());
+            if(!aclinkWebSocketHandler.checkAndSet(vs[0], resp.getResponse())) {
+                response.setStatusCode(HttpStatus.CONFLICT);
+                return false;
+            }
         }
         
         return true;
