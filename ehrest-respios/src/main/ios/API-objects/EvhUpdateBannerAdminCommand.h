@@ -1,6 +1,6 @@
 //
 // EvhUpdateBannerAdminCommand.h
-// generated at 2016-04-06 19:10:42 
+// generated at 2016-04-07 14:16:29 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"

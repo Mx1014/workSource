@@ -1,6 +1,6 @@
 //
 // EvhContactCreateContactByUserIdCommandRestResponse.m
-// generated at 2016-04-06 19:10:43 
+// generated at 2016-04-07 14:16:31 
 //
 #import "EvhContactCreateContactByUserIdCommandRestResponse.h"
 #import "EvhEnterpriseContactDTO.h"
