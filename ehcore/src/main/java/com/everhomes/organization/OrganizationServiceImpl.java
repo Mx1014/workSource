@@ -5528,7 +5528,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    						"Cannot perform this operation on a task.");
 	    			}
 	    			
-	    			task.setTargetId(user.getId());
+	    			if(null != cmd.getUserId()){
+	    				task.setTargetId(cmd.getUserId());
+	    			}
+	    			
 	    			task.setTaskStatus(cmd.getTaskStatus());
 		    		
 		    		User target = userProvider.findUserById(cmd.getUserId());

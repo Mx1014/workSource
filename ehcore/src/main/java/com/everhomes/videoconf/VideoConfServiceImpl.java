@@ -2486,7 +2486,9 @@ public class VideoConfServiceImpl implements VideoConfService {
 		
 		VerifyPurchaseAuthorityResponse response = new VerifyPurchaseAuthorityResponse();
 		int enterpriseVaildAccounts = vcProvider.countAccountsByEnterprise(cmd.getEnterpriseId(), null);
+		int enterpriseAccounts = vcProvider.countEnterpriseAccounts(cmd.getEnterpriseId());
 		response.setEnterpriseActiveAccountCount(enterpriseVaildAccounts);
+		response.setEnterpriseAccountCount(enterpriseAccounts);
 		
 		boolean privilege = rolePrivilegeService.checkAdministrators(cmd.getEnterpriseId());
 
