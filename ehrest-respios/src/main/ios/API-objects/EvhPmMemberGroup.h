@@ -1,6 +1,6 @@
 //
 // EvhPmMemberGroup.h
-// generated at 2016-04-07 17:33:48 
+// generated at 2016-04-07 17:57:42 
 //
 
 #define EvhPmMemberGroup_MANAGER @"manager"

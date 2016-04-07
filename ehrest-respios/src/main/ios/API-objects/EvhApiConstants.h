@@ -1,6 +1,6 @@
 //
 // EvhApiConstants.h
-// generated at 2016-04-07 17:33:50
+// generated at 2016-04-07 17:57:44
 //
 #define EVH_ACLINK_ACTIVE_URL @"/aclink/active"
 #define EVH_ACLINK_ACTIVING_URL @"/aclink/activing"
@@ -220,6 +220,10 @@
 #define EVH_ADMIN_REGISTERLOGIN_URL @"/admin/registerLogin"
 #define EVH_ADMIN_REMOVEBORDER_URL @"/admin/removeBorder"
 #define EVH_ADMIN_SAMPLE_URL @"/admin/sample"
+#define EVH_ADMIN_SCHEDULE_LISTJOBINFOS_URL @"/admin/schedule/listJobInfos"
+#define EVH_ADMIN_SCHEDULE_SCHEDULEATTIME_URL @"/admin/schedule/scheduleAtTime"
+#define EVH_ADMIN_SCHEDULE_SCHEDULECRONJOB_URL @"/admin/schedule/scheduleCronJob"
+#define EVH_ADMIN_SCHEDULE_SCHEDULEREPEATJOB_URL @"/admin/schedule/scheduleRepeatJob"
 #define EVH_ADMIN_SYNCSEQUENCE_URL @"/admin/syncSequence"
 #define EVH_ADMIN_TECHPARK_PARK_ADDPARKINGCHARGE_URL @"/admin/techpark/park/addParkingCharge"
 #define EVH_ADMIN_TECHPARK_PARK_DELETEPARKINGCHARGE_URL @"/admin/techpark/park/deleteParkingCharge"

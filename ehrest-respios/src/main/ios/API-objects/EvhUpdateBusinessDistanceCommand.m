@@ -1,6 +1,6 @@
 //
 // EvhUpdateBusinessDistanceCommand.m
-// generated at 2016-04-07 17:33:49 
+// generated at 2016-04-07 17:57:43 
 //
 #import "EvhUpdateBusinessDistanceCommand.h"
 
