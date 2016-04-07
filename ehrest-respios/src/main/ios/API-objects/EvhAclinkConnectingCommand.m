@@ -1,6 +1,6 @@
 //
 // EvhAclinkConnectingCommand.m
-// generated at 2016-04-06 19:10:43 
+// generated at 2016-04-07 14:16:31 
 //
 #import "EvhAclinkConnectingCommand.h"
 
@@ -33,8 +33,8 @@
 {
     if(self.uuid)
         [jsonObject setObject: self.uuid forKey: @"uuid"];
-    if(self.encrypt_base64)
-        [jsonObject setObject: self.encrypt_base64 forKey: @"encrypt_base64"];
+    if(self.encryptBase64)
+        [jsonObject setObject: self.encryptBase64 forKey: @"encryptBase64"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -44,9 +44,9 @@
         if(self.uuid && [self.uuid isEqual:[NSNull null]])
             self.uuid = nil;
 
-        self.encrypt_base64 = [jsonObject objectForKey: @"encrypt_base64"];
-        if(self.encrypt_base64 && [self.encrypt_base64 isEqual:[NSNull null]])
-            self.encrypt_base64 = nil;
+        self.encryptBase64 = [jsonObject objectForKey: @"encryptBase64"];
+        if(self.encryptBase64 && [self.encryptBase64 isEqual:[NSNull null]])
+            self.encryptBase64 = nil;
 
         return self;
     }

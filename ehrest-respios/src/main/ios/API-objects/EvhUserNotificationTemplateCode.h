@@ -1,6 +1,6 @@
 //
 // EvhUserNotificationTemplateCode.h
-// generated at 2016-04-06 19:10:42 
+// generated at 2016-04-07 14:16:31 
 //
 
 #define EvhUserNotificationTemplateCode_SCOPE @"user.notification"

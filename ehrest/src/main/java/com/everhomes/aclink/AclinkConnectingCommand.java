@@ -4,7 +4,7 @@ import com.everhomes.util.StringHelper;
 
 public class AclinkConnectingCommand {
     private String uuid;
-    private String encrypt_base64;
+    private String encryptBase64;
     
     public String getUuid() {
         return uuid;
@@ -14,12 +14,12 @@ public class AclinkConnectingCommand {
         this.uuid = uuid;
     }
 
-    public String getEncrypt_base64() {
-        return encrypt_base64;
+    public String getEncryptBase64() {
+        return encryptBase64;
     }
 
-    public void setEncrypt_base64(String encrypt_base64) {
-        this.encrypt_base64 = encrypt_base64;
+    public void setEncryptBase64(String encryptBase64) {
+        this.encryptBase64 = encryptBase64;
     }
 
     @Override

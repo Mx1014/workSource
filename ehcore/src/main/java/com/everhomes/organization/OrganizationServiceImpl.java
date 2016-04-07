@@ -5351,6 +5351,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	if(OrganizationTaskStatus.fromCode(task.getTaskStatus()) == OrganizationTaskStatus.UNPROCESSED
 	    			&& (task.getTargetId().equals(user.getId())
 	    			|| ((StringUtils.isEmpty(task.getTargetId()) || task.getTargetId() == 0)))){
+	    		task.setTargetId(user.getId());
 	    		task.setTaskStatus(OrganizationTaskStatus.PROCESSING.getCode());
 	    		task.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 	    		task.setOperatorUid(user.getId());
@@ -5528,7 +5529,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    						"Cannot perform this operation on a task.");
 	    			}
 	    			
-	    			task.setTargetId(user.getId());
+	    			if(null != cmd.getUserId()){
+	    				task.setTargetId(cmd.getUserId());
+	    			}
+	    			
 	    			task.setTaskStatus(cmd.getTaskStatus());
 		    		
 		    		User target = userProvider.findUserById(cmd.getUserId());

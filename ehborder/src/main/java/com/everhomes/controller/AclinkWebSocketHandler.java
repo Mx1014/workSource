@@ -13,12 +13,19 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.BinaryWebSocketHandler;
 
+import com.everhomes.aclink.DoorAccessDTO;
+
 public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(AclinkWebSocketHandler.class);
     
-    private Map<String, WebSocketSession> uuidToSession = new ConcurrentHashMap<>();
+    private Map<String, WebSocketSession> uuid2Session = new ConcurrentHashMap<>();
+    private Map<String, DoorAccessDTO> uuid2DTO = new ConcurrentHashMap<>();
     private Map<WebSocketSession, AclinkWebSocketState> session2State = new ConcurrentHashMap<>();
 
+    public void beforeHandshake(String uuid, DoorAccessDTO dto) {
+        uuid2DTO.put(uuid, dto);
+    }
+    
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         LOGGER.info("headers is " + session.getHandshakeHeaders());
