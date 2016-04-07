@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkingRechargeOrders implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1130494997;
+	private static final long serialVersionUID = 655872565;
 
 	private java.lang.Long       id;
 	private java.lang.String     ownerType;
@@ -35,6 +35,9 @@ public class EhParkingRechargeOrders implements java.io.Serializable {
 	private java.sql.Timestamp   rechargeTime;
 	private java.lang.Long       creatorUid;
 	private java.sql.Timestamp   createTime;
+	private java.sql.Timestamp   oldExpiredTime;
+	private java.sql.Timestamp   newExpiredTime;
+	private java.lang.Long       orderNo;
 
 	public EhParkingRechargeOrders() {}
 
@@ -60,7 +63,10 @@ public class EhParkingRechargeOrders implements java.io.Serializable {
 		java.lang.Byte       rechargeStatus,
 		java.sql.Timestamp   rechargeTime,
 		java.lang.Long       creatorUid,
-		java.sql.Timestamp   createTime
+		java.sql.Timestamp   createTime,
+		java.sql.Timestamp   oldExpiredTime,
+		java.sql.Timestamp   newExpiredTime,
+		java.lang.Long       orderNo
 	) {
 		this.id = id;
 		this.ownerType = ownerType;
@@ -84,6 +90,9 @@ public class EhParkingRechargeOrders implements java.io.Serializable {
 		this.rechargeTime = rechargeTime;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
+		this.oldExpiredTime = oldExpiredTime;
+		this.newExpiredTime = newExpiredTime;
+		this.orderNo = orderNo;
 	}
 
 	public java.lang.Long getId() {
@@ -260,5 +269,29 @@ public class EhParkingRechargeOrders implements java.io.Serializable {
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+	public java.sql.Timestamp getOldExpiredTime() {
+		return this.oldExpiredTime;
+	}
+
+	public void setOldExpiredTime(java.sql.Timestamp oldExpiredTime) {
+		this.oldExpiredTime = oldExpiredTime;
+	}
+
+	public java.sql.Timestamp getNewExpiredTime() {
+		return this.newExpiredTime;
+	}
+
+	public void setNewExpiredTime(java.sql.Timestamp newExpiredTime) {
+		this.newExpiredTime = newExpiredTime;
+	}
+
+	public java.lang.Long getOrderNo() {
+		return this.orderNo;
+	}
+
+	public void setOrderNo(java.lang.Long orderNo) {
+		this.orderNo = orderNo;
 	}
 }
