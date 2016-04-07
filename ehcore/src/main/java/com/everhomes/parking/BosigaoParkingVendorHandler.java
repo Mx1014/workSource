@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.parking;
 
+import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -22,11 +23,14 @@ import com.bosigao.cxf.Service1Soap;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.organization.pm.pay.ResultHolder;
+import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
 import com.everhomes.rest.parking.ParkingCardDTO;
 import com.everhomes.rest.parking.ParkingLotVendor;
 import com.everhomes.rest.parking.ParkingOwnerType;
+import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
+import com.everhomes.rest.parking.ParkingRechargeOrderStatus;
 import com.everhomes.rest.parking.ParkingRechargeRateDTO;
 import com.everhomes.rest.techpark.onlinePay.OnlinePayBillCommand;
 import com.everhomes.rest.techpark.onlinePay.PayStatus;
@@ -135,32 +139,33 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 
     @Override
     public void notifyParkingRechargeOrderPayment(OnlinePayBillCommand cmd) {
-//    	ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(Long.parseLong(cmd.getOrderNo()));
-//		if(info.getRechargeStatus() != RechargeStatus.SUCCESS.getCode()) {
+//    	ParkingRechargeOrder order = onlinePayBill(cmd);
+//    	if(order.getRechargeStatus() != ParkingRechargeOrderRechargeStatus.RECHARGED.getCode()) {
 //			if(cmd.getPayStatus().toLowerCase().equals("fail")) {
 //				LOGGER.error("pay failed.orderNo ="+cmd.getOrderNo());
 //			}
 //			else {
-//				String carNumber = info.getPlateNumber();
-//				String cost = (int)(info.getRechargeAmount()*100) +"";
+//				String carNumber = order.getPlateNumber();
+//				String cost = order.getPrice().intValue() + "";
 //				String flag = "2"; //停车场系统接口的传入参数，2表示是车牌号
-//				String payTime = info.getRechargeTime().toString();
+//				String payTime = order.getPaidTime().toString();
 //				String validStart = timestampToStr(info.getOldValidityperiod());
 //				String validEnd = timestampToStr(info.getNewValidityperiod());
 //				
 //				URL wsdlURL = Service1.WSDL_LOCATION;
 //				
-//				Service1 ss = new Service1(wsdlURL, SERVICE_NAME);
+//				Service1 ss = new Service1(wsdlURL, Service1.SERVICE);
 //		        Service1Soap port = ss.getService1Soap12();
 //		        LOGGER.info("refreshParkingSystem");
 //		        
 //		        String json = port.cardPayMoney("", carNumber, flag, cost, validStart, validEnd, payTime, "sign");
 //				
 //				ResultHolder resultHolder = GsonUtil.fromJson(json, ResultHolder.class);
-//				this.checkResultHolderIsNull(resultHolder,carNumber);
+//				checkResultHolderIsNull(resultHolder,carNumber);
 //				
 //				if(resultHolder.isSuccess()){
-//					updateRechargeOrder(Long.valueOf(cmd.getOrderNo()));
+//					order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode());
+//					parkingProvider.updateParkingRechargeOrder(order);
 //				}
 //			}
 //		}
@@ -227,61 +232,66 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 		return ts;
 	}
     
-//    private RechargeInfoDTO onlinePayBill(OnlinePayBillCommand cmd) {
-//		
-//		RechargeInfo order = new RechargeInfo();
-//		//fail
-//		if(cmd.getPayStatus().toLowerCase().equals("fail"))
-//			order = this.onlinePayBillFail(cmd);
-//		//success
-//		if(cmd.getPayStatus().toLowerCase().equals("success"))
-//			order = this.onlinePayBillSuccess(cmd);
-//
-//		RechargeInfoDTO info = ConvertHelper.convert(order, RechargeInfoDTO.class);
-//		return info;
-//	}
+    private ParkingRechargeOrder onlinePayBill(OnlinePayBillCommand cmd) {
+		
+    	ParkingRechargeOrder order = new ParkingRechargeOrder();
+		//fail
+		if(cmd.getPayStatus().toLowerCase().equals("fail"))
+			order = this.onlinePayBillFail(cmd);
+		//success
+		if(cmd.getPayStatus().toLowerCase().equals("success"))
+			order = this.onlinePayBillSuccess(cmd);
+
+		return order;
+	}
     
-//    private ParkingRechargeOrder onlinePayBillFail(OnlinePayBillCommand cmd) {
-//		
-//		if(LOGGER.isDebugEnabled())
-//			LOGGER.error("onlinePayBillFail");
-//		this.checkOrderNoIsNull(cmd.getOrderNo());
-//		Long orderId = Long.parseLong(cmd.getOrderNo());
-//		
-//		ParkingRechargeOrder order = checkOrder(orderId);
-//				
-//		Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
-//		updateOrderStatus(order, currentTimestamp, PayStatus.INACTIVE.getCode(), RechargeStatus.INACTIVE.getCode());
-//		order.setPaidTime(cmd.getPayTime());
-//		return order;
-//	}
+    private ParkingRechargeOrder onlinePayBillFail(OnlinePayBillCommand cmd) {
+		
+		if(LOGGER.isDebugEnabled())
+			LOGGER.error("onlinePayBillFail");
+		this.checkOrderNoIsNull(cmd.getOrderNo());
+		Long orderId = Long.parseLong(cmd.getOrderNo());
+		
+		ParkingRechargeOrder order = checkOrder(orderId);
+				
+		Timestamp payTimeStamp = new Timestamp(System.currentTimeMillis());
+		order.setStatus(ParkingRechargeOrderStatus.INACTIVE.getCode());
+		order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.NONE.getCode());
+		order.setPaidTime(payTimeStamp);
+		//order.setPaidTime(cmd.getPayTime());
+		parkingProvider.updateParkingRechargeOrder(order);
+		
+		return order;
+	}
 	
-//	private RechargeInfo onlinePayBillSuccess(OnlinePayBillCommand cmd) {
-//		
-//		if(LOGGER.isDebugEnabled())
-//			LOGGER.error("onlinePayBillSuccess");
-//		this.checkOrderNoIsNull(cmd.getOrderNo());
-//		this.checkVendorTypeIsNull(cmd.getVendorType());
-//		this.checkPayAmountIsNull(cmd.getPayAmount());
-//		
-//		Long orderId = this.convertOrderNoToOrderId(cmd.getOrderNo());
-//		RechargeInfo order = this.checkOrder(orderId);
-//		
-//		double payAmount = new Double(cmd.getPayAmount());
-//		
-//		Long payTime = System.currentTimeMillis();
-//		Timestamp payTimeStamp = new Timestamp(payTime);
-//		
-//		this.checkVendorTypeFormat(cmd.getVendorType());
-//		
-//		if(order.getPaymentStatus().byteValue() == PayStatus.WAITING_FOR_PAY.getCode()) {
-//			order.setRechargeAmount(payAmount);
-//			this.updateOrderStatus(order, payTimeStamp, PayStatus.PAID.getCode(), RechargeStatus.UPDATING.getCode());
-//			
-//		}
-//		
-//		return order;
-//	}
+	private ParkingRechargeOrder onlinePayBillSuccess(OnlinePayBillCommand cmd) {
+		
+		if(LOGGER.isDebugEnabled())
+			LOGGER.error("onlinePayBillSuccess");
+		this.checkOrderNoIsNull(cmd.getOrderNo());
+		this.checkVendorTypeIsNull(cmd.getVendorType());
+		this.checkPayAmountIsNull(cmd.getPayAmount());
+		
+		Long orderId = Long.parseLong(cmd.getOrderNo());
+		ParkingRechargeOrder order = checkOrder(orderId);
+		
+		BigDecimal payAmount = new BigDecimal(cmd.getPayAmount());
+		
+		Long payTime = System.currentTimeMillis();
+		Timestamp payTimeStamp = new Timestamp(payTime);
+		
+		this.checkVendorTypeFormat(cmd.getVendorType());
+		
+		if(order.getStatus().byteValue() == ParkingRechargeOrderStatus.UNPAID.getCode()) {
+			order.setPrice(payAmount);
+			order.setStatus(ParkingRechargeOrderStatus.PAID.getCode());
+			order.setPaidTime(payTimeStamp);
+			//order.setPaidTime(cmd.getPayTime());
+			parkingProvider.updateParkingRechargeOrder(order);
+		}
+		
+		return order;
+	}
 	
 	private void checkOrderNoIsNull(String orderNo) {
 		
@@ -303,5 +313,40 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 					"the order not found.");
 		}
 		return order;
+	}
+	
+	private void checkPayAmountIsNull(String payAmount) {
+		
+		if(payAmount == null || payAmount.trim().equals("")){
+			LOGGER.error("payAmount is null or empty.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"payAmount or is null or empty.");
+		}
+
+	}
+
+	private void checkVendorTypeIsNull(String vendorType) {
+		
+		if(vendorType == null || vendorType.trim().equals("")){
+			LOGGER.error("vendorType is null or empty.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"vendorType is null or empty.");
+		}
+
+	}
+	
+	private void checkVendorTypeFormat(String vendorType) {
+		if(VendorType.fromCode(vendorType) == null){
+			LOGGER.error("vendor type is wrong.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"vendor type is wrong.");
+		}
+	}
+	
+	private String timestampToStr(Timestamp time) {
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+		String str = sdf.format(time);
+		return str;
 	}
 }

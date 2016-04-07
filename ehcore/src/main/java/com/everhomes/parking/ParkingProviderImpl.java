@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.Record1;
+import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
 import org.jooq.SortField;
 import org.slf4j.Logger;
@@ -205,14 +207,14 @@ public class ParkingProviderImpl implements ParkingProvider {
     public Integer waitingCardCount(String ownerType,Long ownerId
     		,Long parkingLotId,Timestamp createTime){
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        SelectQuery<EhParkingCardRequestsRecord> query = context.selectQuery(Tables.EH_PARKING_CARD_REQUESTS);
+    	SelectJoinStep<Record1<Integer>> query = context.selectCount().from(Tables.EH_PARKING_CARD_REQUESTS);
         
-        query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.OWNER_TYPE.eq(ownerType));
-        query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.OWNER_ID.eq(ownerId));
-        query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PARKING_LOT_ID.eq(parkingLotId));
-        query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.lt(createTime));
+        Condition condition = Tables.EH_PARKING_CARD_REQUESTS.OWNER_TYPE.eq(ownerType);
+        condition = condition.and(Tables.EH_PARKING_CARD_REQUESTS.OWNER_ID.eq(ownerId));
+        condition = condition.and(Tables.EH_PARKING_CARD_REQUESTS.PARKING_LOT_ID.eq(parkingLotId));
+        condition = condition.and(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.lt(createTime));
         
-    	return query.fetchOneInto(Integer.class);
+    	return query.where(condition).fetchOneInto(Integer.class);
     }
     
     @Override

@@ -162,7 +162,6 @@ public class ParkingServiceImpl implements ParkingService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"the length of plateNumber is wrong.");
 		}
-		List<ParkingCardRequest> list = null;
 		ParkingCardRequestDTO parkingCardRequestDTO = new ParkingCardRequestDTO();
 		try {
 			ParkingCardRequest parkingCardRequest = new ParkingCardRequest();
@@ -183,7 +182,7 @@ public class ParkingServiceImpl implements ParkingService {
 			
 			parkingProvider.requestParkingCard(parkingCardRequest);
 			
-			parkingCardRequestDTO = ConvertHelper.convert(parkingProvider, ParkingCardRequestDTO.class);
+			parkingCardRequestDTO = ConvertHelper.convert(parkingCardRequest, ParkingCardRequestDTO.class);
 			
 			Integer count = parkingProvider.waitingCardCount(cmd.getOwnerType(), 
 					cmd.getOwnerId(), cmd.getParkingLotId(), parkingCardRequest.getCreateTime());
