@@ -6,6 +6,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.bosigao.cxf.Service1;
@@ -23,9 +25,15 @@ import com.everhomes.organization.pm.pay.ResultHolder;
 import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
 import com.everhomes.rest.parking.ParkingCardDTO;
+import com.everhomes.rest.parking.ParkingLotVendor;
 import com.everhomes.rest.parking.ParkingOwnerType;
 import com.everhomes.rest.parking.ParkingRechargeRateDTO;
 import com.everhomes.rest.techpark.onlinePay.OnlinePayBillCommand;
+import com.everhomes.rest.techpark.onlinePay.PayStatus;
+import com.everhomes.rest.techpark.onlinePay.RechargeStatus;
+import com.everhomes.rest.techpark.park.RechargeInfoDTO;
+import com.everhomes.rest.techpark.park.RechargeSuccessResponse;
+import com.everhomes.techpark.park.RechargeInfo;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -127,8 +135,37 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 
     @Override
     public void notifyParkingRechargeOrderPayment(OnlinePayBillCommand cmd) {
-        // TODO Auto-generated method stub
-        
+//    	ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(Long.parseLong(cmd.getOrderNo()));
+//		if(info.getRechargeStatus() != RechargeStatus.SUCCESS.getCode()) {
+//			if(cmd.getPayStatus().toLowerCase().equals("fail")) {
+//				LOGGER.error("pay failed.orderNo ="+cmd.getOrderNo());
+//			}
+//			else {
+//				String carNumber = info.getPlateNumber();
+//				String cost = (int)(info.getRechargeAmount()*100) +"";
+//				String flag = "2"; //停车场系统接口的传入参数，2表示是车牌号
+//				String payTime = info.getRechargeTime().toString();
+//				String validStart = timestampToStr(info.getOldValidityperiod());
+//				String validEnd = timestampToStr(info.getNewValidityperiod());
+//				
+//				URL wsdlURL = Service1.WSDL_LOCATION;
+//				
+//				Service1 ss = new Service1(wsdlURL, SERVICE_NAME);
+//		        Service1Soap port = ss.getService1Soap12();
+//		        LOGGER.info("refreshParkingSystem");
+//		        
+//		        String json = port.cardPayMoney("", carNumber, flag, cost, validStart, validEnd, payTime, "sign");
+//				
+//				ResultHolder resultHolder = GsonUtil.fromJson(json, ResultHolder.class);
+//				this.checkResultHolderIsNull(resultHolder,carNumber);
+//				
+//				if(resultHolder.isSuccess()){
+//					updateRechargeOrder(Long.valueOf(cmd.getOrderNo()));
+//				}
+//			}
+//		}
+//		RechargeSuccessResponse rechargeResponse = getRechargeStatus(Long.valueOf(cmd.getOrderNo()));
+//		return rechargeResponse;        
     }
     
     @Override
@@ -188,5 +225,83 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 		}
 		
 		return ts;
+	}
+    
+//    private RechargeInfoDTO onlinePayBill(OnlinePayBillCommand cmd) {
+//		
+//		RechargeInfo order = new RechargeInfo();
+//		//fail
+//		if(cmd.getPayStatus().toLowerCase().equals("fail"))
+//			order = this.onlinePayBillFail(cmd);
+//		//success
+//		if(cmd.getPayStatus().toLowerCase().equals("success"))
+//			order = this.onlinePayBillSuccess(cmd);
+//
+//		RechargeInfoDTO info = ConvertHelper.convert(order, RechargeInfoDTO.class);
+//		return info;
+//	}
+    
+//    private ParkingRechargeOrder onlinePayBillFail(OnlinePayBillCommand cmd) {
+//		
+//		if(LOGGER.isDebugEnabled())
+//			LOGGER.error("onlinePayBillFail");
+//		this.checkOrderNoIsNull(cmd.getOrderNo());
+//		Long orderId = Long.parseLong(cmd.getOrderNo());
+//		
+//		ParkingRechargeOrder order = checkOrder(orderId);
+//				
+//		Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
+//		updateOrderStatus(order, currentTimestamp, PayStatus.INACTIVE.getCode(), RechargeStatus.INACTIVE.getCode());
+//		order.setPaidTime(cmd.getPayTime());
+//		return order;
+//	}
+	
+//	private RechargeInfo onlinePayBillSuccess(OnlinePayBillCommand cmd) {
+//		
+//		if(LOGGER.isDebugEnabled())
+//			LOGGER.error("onlinePayBillSuccess");
+//		this.checkOrderNoIsNull(cmd.getOrderNo());
+//		this.checkVendorTypeIsNull(cmd.getVendorType());
+//		this.checkPayAmountIsNull(cmd.getPayAmount());
+//		
+//		Long orderId = this.convertOrderNoToOrderId(cmd.getOrderNo());
+//		RechargeInfo order = this.checkOrder(orderId);
+//		
+//		double payAmount = new Double(cmd.getPayAmount());
+//		
+//		Long payTime = System.currentTimeMillis();
+//		Timestamp payTimeStamp = new Timestamp(payTime);
+//		
+//		this.checkVendorTypeFormat(cmd.getVendorType());
+//		
+//		if(order.getPaymentStatus().byteValue() == PayStatus.WAITING_FOR_PAY.getCode()) {
+//			order.setRechargeAmount(payAmount);
+//			this.updateOrderStatus(order, payTimeStamp, PayStatus.PAID.getCode(), RechargeStatus.UPDATING.getCode());
+//			
+//		}
+//		
+//		return order;
+//	}
+	
+	private void checkOrderNoIsNull(String orderNo) {
+		
+		if(orderNo == null || orderNo.trim().equals("")){
+			LOGGER.error("orderNo is null or empty.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"orderNo is null or empty.");
+		}
+
+	}
+	
+	private ParkingRechargeOrder checkOrder(Long orderId) {
+		
+    	ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(orderId);
+		
+		if(order == null){
+			LOGGER.error("the order {} not found.",orderId);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"the order not found.");
+		}
+		return order;
 	}
 }

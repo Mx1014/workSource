@@ -27,6 +27,7 @@ public class EtcpParkingVendorHandler implements ParkingVendorHandler {
     @Override
     public List<ParkingCardDTO> getParkingCardsByPlate(String ownerType, Long ownerId, Long parkingLotId,
         String plateNumber) {
+    	
         return null;
     }
 

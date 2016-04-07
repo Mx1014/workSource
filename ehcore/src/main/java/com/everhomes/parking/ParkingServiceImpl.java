@@ -13,6 +13,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.acl.AclProvider;
@@ -98,6 +99,7 @@ public class ParkingServiceImpl implements ParkingService {
     
     @Override
     public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
+    	checkPlateNumber(cmd.getPlateNumber());
         Long parkingLotId = cmd.getParkingLotId();
         ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId);
 
@@ -150,8 +152,9 @@ public class ParkingServiceImpl implements ParkingService {
     }
     
     @Override
-	public List<ParkingCardRequestDTO> requestParkingCard(RequestParkingCardCommand cmd) {
+	public ParkingCardRequestDTO requestParkingCard(RequestParkingCardCommand cmd) {
 		
+    	checkPlateNumber(cmd.getPlateNumber());
         checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 		
 		if(cmd.getPlateNumber().length() != 7) {
@@ -160,6 +163,7 @@ public class ParkingServiceImpl implements ParkingService {
 					"the length of plateNumber is wrong.");
 		}
 		List<ParkingCardRequest> list = null;
+		ParkingCardRequestDTO parkingCardRequestDTO = new ParkingCardRequestDTO();
 		try {
 			ParkingCardRequest parkingCardRequest = new ParkingCardRequest();
 			parkingCardRequest.setOwnerId(cmd.getOwnerId());
@@ -179,20 +183,23 @@ public class ParkingServiceImpl implements ParkingService {
 			
 			parkingProvider.requestParkingCard(parkingCardRequest);
 			
-			list = parkingProvider.listParkingCardRequests(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId(), 
-					cmd.getPlateNumber(),null,Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.asc(), null, null);
+			parkingCardRequestDTO = ConvertHelper.convert(parkingProvider, ParkingCardRequestDTO.class);
+			
+			Integer count = parkingProvider.waitingCardCount(cmd.getOwnerType(), 
+					cmd.getOwnerId(), cmd.getParkingLotId(), parkingCardRequest.getCreateTime());
+			parkingCardRequestDTO.setRanking(count);
 		} catch(Exception e) {
 			LOGGER.error("requestParkingCard is fail.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_SQL_EXCEPTION,
 					"requestParkingCard is fail." + e.toString());
 		}
-		return list.stream().map(r -> ConvertHelper.convert(r, 
-				ParkingCardRequestDTO.class)).collect(Collectors.toList());
+		return parkingCardRequestDTO;
 	}
     
 	@Override
     public ListParkingCardRequestResponse listParkingCardRequests(ListParkingCardRequestsCommand cmd){
 		
+		checkPlateNumber(cmd.getPlateNumber());
         checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 		
     	ListParkingCardRequestResponse response = new ListParkingCardRequestResponse();
@@ -216,6 +223,10 @@ public class ParkingServiceImpl implements ParkingService {
 	
 	@Override
 	public ParkingRechargeOrderDTO createParkingRechargeOrder(CreateParkingRechargeOrderCommand cmd){
+		
+		checkPlateNumber(cmd.getPlateNumber());
+        checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+
 		ParkingRechargeOrderDTO parkingRechargeOrderDTO = new ParkingRechargeOrderDTO();	
 		ParkingRechargeOrder parkingRechargeOrder = new ParkingRechargeOrder();
 		
@@ -347,15 +358,22 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public void setParkingCardReserveDays(SetParkingCardReserveDaysCommand cmd){
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
-
+		
+		//设置厂商月卡 保留时间 各个厂商 可能不一样
         parkingLot.setCardReserveDays(cmd.getCount());
         parkingProvider.setParkingCardReserveDays(parkingLot);
 	}
 	
 	@Override
 	public void setParkingCardIssueFlag(SetParkingCardIssueFlagCommand cmd){
+		
         checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
-
+        if(cmd.getId() == null){
+        	LOGGER.error("id is not null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"id is not null.");
+        }
+        
         ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(cmd.getId());
         if(parkingCardRequest == null){
         	LOGGER.error("parkingCardRequest {} is not exist.",cmd.getId());
@@ -367,12 +385,20 @@ public class ParkingServiceImpl implements ParkingService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 				"parkingCardRequest status is not notified.");
         }
+        //设置已领取状态和 领取时间
         parkingCardRequest.setIssueFlag(ParkingCardIssueFlag.ISSUED.getCode());
+        parkingCardRequest.setIssueTime(new Timestamp(System.currentTimeMillis()));
         parkingProvider.updateParkingCardRequest(Collections.singletonList(parkingCardRequest));
 	}
 
 	@Override
 	public void issueParkingCards(IssueParkingCardsCommand cmd) {
+		
+		if(cmd.getCount() == null) {
+        	LOGGER.error("count is not null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"count is not null.");
+        }
         checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
         
     	List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(null, 
@@ -408,6 +434,24 @@ public class ParkingServiceImpl implements ParkingService {
 	}
     
     private ParkingLot checkParkingLot(String ownerType,Long ownerId,Long parkingLotId){
+    	if(ownerId == null ) {
+        	LOGGER.error("ownerId is not null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"ownerId is not null.");
+        }
+    	
+    	if(StringUtils.isBlank(ownerType)) {
+        	LOGGER.error("ownerType is not null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"ownerType is not null.");
+        }
+    	
+    	if(parkingLotId == null ) {
+        	LOGGER.error("parkingLotId is not null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"parkingLotId is not null.");
+        }
+    	
     	ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotId);
         if(parkingLot == null) {
         	LOGGER.error("parkingLot is not exist {}.",parkingLotId);
@@ -427,4 +471,25 @@ public class ParkingServiceImpl implements ParkingService {
         }
         return parkingLot;
     }
+    
+    private void checkPlateNumber(String plateNumber){
+    	if(StringUtils.isBlank(plateNumber)) {
+        	LOGGER.error("plateNumber is not null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"plateNumber is not null.");
+        }
+    }
+    
+    @Scheduled(cron="0 0 2 * * ? ")
+   	@Override
+   	public void invalidApplier() {
+   		LOGGER.info("update invalid appliers.");
+   		List<ParkingLot> list = parkingProvider.listParkingLots(null, null);
+   		for(ParkingLot parkingLot:list){
+   			Integer days = parkingLot.getCardReserveDays();
+   			long time = System.currentTimeMillis() - days * 24 * 60 * 60 * 1000;
+   			parkingProvider.updateInvalidAppliers(new Timestamp(time),parkingLot.getId());
+   		}
+   		
+   	}
 }

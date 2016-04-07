@@ -213,10 +213,9 @@ public class ParkingController extends ControllerBase {
     @RequestMapping("requestParkingCard")
     @RestReturn(value=ParkingRechargeOrderDTO.class)
     public RestResponse requestParkingCard(RequestParkingCardCommand cmd) {
-        List<ParkingCardRequestDTO> requestList = null;
         
-        requestList = parkingService.requestParkingCard(cmd);
-        RestResponse response = new RestResponse(requestList);
+    	ParkingCardRequestDTO dto = parkingService.requestParkingCard(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

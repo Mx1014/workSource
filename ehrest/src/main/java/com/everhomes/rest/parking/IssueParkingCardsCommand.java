@@ -20,6 +20,7 @@ public class IssueParkingCardsCommand {
     private Long ownerId;
 	@NotNull
     private Long parkingLotId;
+	@NotNull
     private Integer count;
     
     public IssueParkingCardsCommand() {
