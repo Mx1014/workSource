@@ -60,6 +60,7 @@ CREATE TABLE `eh_parking_recharge_rates` (
 DROP TABLE IF EXISTS `eh_parking_recharge_orders`;
 CREATE TABLE `eh_parking_recharge_orders` (
 	`id` BIGINT NOT NULL COMMENT 'id of the record',	
+	`order_no` BIGINT(20) DEFAULT NULL,
 	`owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
 	`owner_id` BIGINT NOT NULL DEFAULT 0,
 	`parking_lot_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to id of eh_parking_lots',
@@ -81,6 +82,9 @@ CREATE TABLE `eh_parking_recharge_orders` (
 	`recharge_time` DATETIME,
 	`creator_uid` BIGINT NOT NULL DEFAULT 0,
     `create_time` DATETIME,
+    `old_expired_time` DATETIME,
+    `new_expired_time` DATETIME,
+
 	
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -90,7 +94,8 @@ CREATE TABLE `eh_parking_recharge_orders` (
 #
 DROP TABLE IF EXISTS `eh_parking_card_requests`;
 CREATE TABLE `eh_parking_card_requests` (
-	`id` BIGINT NOT NULL COMMENT 'id of the record',	
+	`id` BIGINT NOT NULL COMMENT 'id of the record',
+
 	`owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
 	`owner_id` BIGINT NOT NULL DEFAULT 0,
 	`parking_lot_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to id of eh_parking_lots',
@@ -127,3 +132,6 @@ CREATE TABLE `eh_parking_activities` (
 	
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+ALTER TABLE `eh_forum_posts` ADD COLUMN `start_time` DATETIME COMMENT 'publish start time';
