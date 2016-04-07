@@ -24,7 +24,7 @@ package com.everhomes.rest.version;
  * <li>IOS_LONGGANG("iOS_Longgang"): 龙岗智慧社区iOS版APP</li>
  * <li>ANDROID_HAIAN("Android_Haian"): 海岸城Android版APP</li>
  * <li>IOS_HAIAN("iOS_Haian"): 海岸城iOS版APP</li>
- * <li>H5_QUALITY("H5_Quality"): 品质核查H5</li>
+ * <li>H5_QUALITY("quality"): 品质核查H5</li>
  * </ul>
  */
 public enum VersionRealmType {
