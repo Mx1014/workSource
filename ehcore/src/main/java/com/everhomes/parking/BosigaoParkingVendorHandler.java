@@ -51,7 +51,8 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 	@Autowired
 	private ParkingProvider parkingProvider;
 	
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public List<ParkingCardDTO> getParkingCardsByPlate(String ownerType, Long ownerId, Long parkingLotId,
         String plateNumber) {
         

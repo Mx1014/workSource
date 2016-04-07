@@ -211,7 +211,7 @@ public class ParkingController extends ControllerBase {
      * <p>申请月卡</p>
      */
     @RequestMapping("requestParkingCard")
-    @RestReturn(value=ParkingRechargeOrderDTO.class)
+    @RestReturn(value=ParkingCardRequestDTO.class)
     public RestResponse requestParkingCard(RequestParkingCardCommand cmd) {
         
     	ParkingCardRequestDTO dto = parkingService.requestParkingCard(cmd);
