@@ -5352,6 +5352,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    			&& (task.getTargetId().equals(user.getId())
 	    			|| ((StringUtils.isEmpty(task.getTargetId()) || task.getTargetId() == 0)))){
 	    		task.setTargetId(user.getId());
+	    		task.setTargetType(OrganizationTaskTargetType.USER.getCode());
 	    		task.setTaskStatus(OrganizationTaskStatus.PROCESSING.getCode());
 	    		task.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 	    		task.setOperatorUid(user.getId());
@@ -5531,6 +5532,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    			
 	    			if(null != cmd.getUserId()){
 	    				task.setTargetId(cmd.getUserId());
+	    				task.setTargetType(OrganizationTaskTargetType.USER.getCode());
 	    			}
 	    			
 	    			task.setTaskStatus(cmd.getTaskStatus());
