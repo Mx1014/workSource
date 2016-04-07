@@ -4,20 +4,20 @@ package com.everhomes.rest.parking;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.rest.parking.ParkingRechargeOrderDTO;
+import com.everhomes.rest.parking.ParkingCardRequestDTO;
 
 public class RequestParkingCardRestResponse extends RestResponseBase {
 
-    private ParkingRechargeOrderDTO response;
+    private ParkingCardRequestDTO response;
 
     public RequestParkingCardRestResponse () {
     }
 
-    public ParkingRechargeOrderDTO getResponse() {
+    public ParkingCardRequestDTO getResponse() {
         return response;
     }
 
-    public void setResponse(ParkingRechargeOrderDTO response) {
+    public void setResponse(ParkingCardRequestDTO response) {
         this.response = response;
     }
 }

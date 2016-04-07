@@ -1,9 +1,9 @@
 //
 // EvhParkingRequestParkingCardRestResponse.m
-// generated at 2016-04-07 10:47:33 
+// generated at 2016-04-07 15:16:54 
 //
 #import "EvhParkingRequestParkingCardRestResponse.h"
-#import "EvhParkingRechargeOrderDTO.h"
+#import "EvhParkingCardRequestDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhParkingRequestParkingCardRestResponse
@@ -46,7 +46,7 @@
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
         [super fromJson: jsonObject];
         NSMutableDictionary* dic =  (NSMutableDictionary*)[jsonObject objectForKey: @"response"];
-        self.response = [EvhParkingRechargeOrderDTO new];
+        self.response = [EvhParkingCardRequestDTO new];
         self.response = [self.response fromJson: dic];
         return self;
     }

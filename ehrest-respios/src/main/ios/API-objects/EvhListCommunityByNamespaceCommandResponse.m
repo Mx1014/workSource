@@ -1,6 +1,6 @@
 //
 // EvhListCommunityByNamespaceCommandResponse.m
-// generated at 2016-04-07 10:47:32 
+// generated at 2016-04-07 15:16:53 
 //
 #import "EvhListCommunityByNamespaceCommandResponse.h"
 #import "EvhCommunityDTO.h"
