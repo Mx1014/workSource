@@ -58,7 +58,8 @@ public class ScheduleProviderImpl implements ScheduleProvider {
 	}
 
     @Override
-    public void scheduleAtTime(String triggerName, String jobName, Date startTime, Class<ScheduleJob> jobClass, Map<String, Object> parameters) {
+    @SuppressWarnings("rawtypes")
+    public void scheduleAtTime(String triggerName, String jobName, Date startTime, Class jobClass, Map<String, Object> parameters) {
         if(triggerName == null || triggerName.length() == 0) {
             LOGGER.error("The trigger name may not be empty, triggerName={}", triggerName);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 
@@ -110,8 +111,9 @@ public class ScheduleProviderImpl implements ScheduleProvider {
     }
     
     @Override
+    @SuppressWarnings("rawtypes")
     public void scheduleWithRepeat(String triggerName, String jobName, Date startTime, long msInterval, int repeatCount, 
-        Class<ScheduleJob> jobClass, Map<String, Object> parameters) {
+        Class jobClass, Map<String, Object> parameters) {
         if(triggerName == null || triggerName.length() == 0) {
             LOGGER.error("The trigger name may not be empty, triggerName={}", triggerName);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 
@@ -175,7 +177,8 @@ public class ScheduleProviderImpl implements ScheduleProvider {
     }
     
     @Override
-    public void scheduleWithCron(String triggerName, String jobName, String cronExpression, Class<ScheduleJob> jobClass, Map<String, Object> parameters) {
+    @SuppressWarnings("rawtypes")
+    public void scheduleWithCron(String triggerName, String jobName, String cronExpression, Class jobClass, Map<String, Object> parameters) {
         if(triggerName == null || triggerName.length() == 0) {
             LOGGER.error("The trigger name may not be empty, triggerName={}", triggerName);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 
