@@ -3,9 +3,11 @@ package com.everhomes.acl;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 
 
 
@@ -37,6 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
+
 
 
 
@@ -682,7 +685,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		
 		List<ListWebMenuPrivilegeDTO> dtos = new ArrayList<ListWebMenuPrivilegeDTO>();
 		
-		Map<Long, List<WebMenuPrivilegeDTO>> dtosMap = new HashMap<Long, List<WebMenuPrivilegeDTO>>();
+		Map<Long, List<WebMenuPrivilegeDTO>> dtosMap = new LinkedHashMap<Long, List<WebMenuPrivilegeDTO>>();
 		
 		
 		for (WebMenuPrivilege r : webMenuPrivileges) {
@@ -718,5 +721,15 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_PRIVILEGED,
 				"non-privileged.");
     }
+    
+    
+    
+    public static void main(String[] args) {
+		Map<Integer, String> map = new HashMap<Integer, String>();
+		map.put(10001, "12");
+		map.put(12000, "45");
+		map.put(21000, "56");
+		System.out.println(map.toString());
+	}
 	
 }

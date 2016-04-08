@@ -391,7 +391,7 @@ VALUES (73,309,23000,'任务统计',1,1,'任务统计',88);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
 VALUES (76,390,31000,'楼栋列表',1,1,'楼栋列表',90);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
-VALUES (72,391,33000,'楼栋的增删改',0,1,'楼栋的增删改',91);
+VALUES (72,391,31000,'楼栋的增删改',0,1,'楼栋的增删改',91);
 
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
 VALUES (10,408,32000,'门牌管理',1,1,'门牌管理操作',100);

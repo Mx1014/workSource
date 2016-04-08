@@ -27,6 +27,7 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.entity.EntityType;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.acl.admin.AssignUserRoleAdminCommand;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
@@ -188,6 +189,7 @@ public class AclAdminController extends ControllerBase {
     @RequestMapping("listWebMenu")
     @RestReturn(value=ListWebMenuResponse.class)
     public RestResponse listWebMenu(@Valid ListWebMenuCommand cmd) {
+    	
     	RestResponse response =  new RestResponse(rolePrivilegeService.ListWebMenu(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -215,6 +217,7 @@ public class AclAdminController extends ControllerBase {
     @RequestMapping("createRolePrivilege")
     @RestReturn(value=String.class)
     public RestResponse createRolePrivilege(@Valid CreateRolePrivilegeCommand cmd) {
+    	rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.RolePrivilegeUpdate);
     	rolePrivilegeService.createRolePrivilege(cmd);
     	RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -229,6 +232,8 @@ public class AclAdminController extends ControllerBase {
     @RequestMapping("updateRolePrivilege")
     @RestReturn(value=String.class)
     public RestResponse updateRolePrivilege(@Valid UpdateRolePrivilegeCommand cmd) {
+    	rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.RolePrivilegeUpdate);
+    	rolePrivilegeService.checkAdministrators(cmd.getOrganizationId());
     	rolePrivilegeService.updateRolePrivilege(cmd);
     	RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -243,6 +248,8 @@ public class AclAdminController extends ControllerBase {
     @RequestMapping("qryRolePrivileges")
     @RestReturn(value=ListWebMenuPrivilegeDTO.class, collection = true)
     public RestResponse qryRolePrivileges(@Valid QryRolePrivilegesCommand cmd) {
+    	rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.RolePrivilegeUpdate);
+    	rolePrivilegeService.checkAdministrators(cmd.getOrganizationId());
     	RestResponse response =  new RestResponse(rolePrivilegeService.qryRolePrivileges(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -256,6 +263,8 @@ public class AclAdminController extends ControllerBase {
     @RequestMapping("deleteRolePrivilege")
     @RestReturn(value=String.class)
     public RestResponse deleteRolePrivilege(@Valid DeleteRolePrivilegeCommand cmd) {
+    	rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.RolePrivilegeUpdate);
+    	rolePrivilegeService.checkAdministrators(cmd.getOrganizationId());
     	rolePrivilegeService.deleteRolePrivilege(cmd);
     	RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -270,6 +279,8 @@ public class AclAdminController extends ControllerBase {
     @RequestMapping("listAclRoleByOrganizationId")
     @RestReturn(value=RoleDTO.class, collection = true)
     public RestResponse listAclRoleByOrganizationId(@Valid ListAclRolesCommand cmd) {
+    	rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.RolePrivilegeList);
+    	rolePrivilegeService.checkAdministrators(cmd.getOrganizationId());
     	RestResponse response =  new RestResponse(rolePrivilegeService.listAclRoleByOrganizationId(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -283,6 +294,8 @@ public class AclAdminController extends ControllerBase {
     @RequestMapping("createOrganizationSuperAdmin")
     @RestReturn(value=String.class)
     public RestResponse createOrganizationSuperAdmin(@Valid CreateOrganizationAdminCommand cmd) {
+    	rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.OrgAdminUpdate);
+    	rolePrivilegeService.checkAdministrators(cmd.getOrganizationId());
     	rolePrivilegeService.createOrganizationSuperAdmin(cmd);
     	RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -297,6 +310,7 @@ public class AclAdminController extends ControllerBase {
     @RequestMapping("createOrganizationOrdinaryAdmin")
     @RestReturn(value=String.class)
     public RestResponse createOrganizationOrdinaryAdmin(@Valid CreateOrganizationAdminCommand cmd) {
+    	rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.OrgAdminUpdate);
     	rolePrivilegeService.createOrganizationOrdinaryAdmin(cmd);
     	RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -311,6 +325,7 @@ public class AclAdminController extends ControllerBase {
     @RequestMapping("updateOrganizationSuperAdmin")
     @RestReturn(value=String.class)
     public RestResponse updateOrganizationSuperAdmin(@Valid UpdateOrganizationAdminCommand cmd) {
+    	rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.OrgAdminUpdate);
     	rolePrivilegeService.updateOrganizationSuperAdmin(cmd);
     	RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -325,6 +340,7 @@ public class AclAdminController extends ControllerBase {
     @RequestMapping("updateOrganizationOrdinaryAdmin")
     @RestReturn(value=String.class)
     public RestResponse updateOrganizationOrdinaryAdmin(@Valid UpdateOrganizationAdminCommand cmd) {
+    	rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.OrgAdminUpdate);
     	rolePrivilegeService.updateOrganizationOrdinaryAdmin(cmd);
     	RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -339,6 +355,7 @@ public class AclAdminController extends ControllerBase {
     @RequestMapping("deleteOrganizationAdmin")
     @RestReturn(value=String.class)
     public RestResponse deleteOrganizationAdmin(@Valid DeleteOrganizationAdminCommand cmd) {
+    	rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.OrgAdminUpdate);
     	rolePrivilegeService.deleteOrganizationAdmin(cmd);
     	RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -353,6 +370,7 @@ public class AclAdminController extends ControllerBase {
     @RequestMapping("listOrganizationAdministrators")
     @RestReturn(value=ListOrganizationMemberCommandResponse.class)
     public RestResponse listOrganizationAdministrators(@Valid ListOrganizationAdministratorCommand cmd) {
+    	rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.OrgAdminList);
     	ListOrganizationMemberCommandResponse res = rolePrivilegeService.listOrganizationAdministrators(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
