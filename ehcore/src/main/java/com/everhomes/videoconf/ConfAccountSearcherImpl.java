@@ -3,6 +3,7 @@ package com.everhomes.videoconf;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
@@ -34,6 +35,7 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.videoconf.ConfAccountDTO;
+import com.everhomes.rest.videoconf.ConfCategoryDTO;
 import com.everhomes.rest.videoconf.EnterpriseUsersDTO;
 import com.everhomes.rest.videoconf.ListEnterpriseVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.ListEnterpriseVideoConfAccountResponse;
@@ -74,14 +76,14 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
 	public void bulkUpdate(List<ConfAccounts> accounts) {
 		BulkRequestBuilder brb = getClient().prepareBulk();
         for (ConfAccounts account : accounts) {
-        	if(account.getOwnerId() != null && account.getOwnerId() != 0) {
+//        	if(account.getOwnerId() != null && account.getOwnerId() != 0) {
 	            XContentBuilder source = createDoc(account);
 	            if(null != source) {
 	                LOGGER.info("conf account id:" + account.getId());
 	                brb.add(Requests.indexRequest(getIndexName()).type(getIndexType())
 	                        .id(account.getId().toString()).source(source));    
 	                }
-        	}
+ //       	}
             
         }
         if (brb.numberOfActions() > 0) {
@@ -92,11 +94,11 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
 
 	@Override
 	public void feedDoc(ConfAccounts account) {
-		if(account.getOwnerId() != 0) {
+//		if(account.getOwnerId() != 0) {
 			XContentBuilder source = createDoc(account);
 	        
 	        feedDoc(account.getId().toString(), source);
-		}
+//		}
 
 	}
 
@@ -144,10 +146,26 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
         }
 
         FilterBuilder fb = null;
-        if(cmd.getEnterpriseId() != null)
-        	fb = FilterBuilders.termFilter("enterpriseId", cmd.getEnterpriseId());
-        if(cmd.getStatus() != null)
-        	fb = FilterBuilders.termFilter("status", cmd.getStatus());
+        if(cmd.getIsAssigned() == null || cmd.getIsAssigned() == 0) {
+        	FilterBuilder nfb = FilterBuilders.termFilter("ownerId", 0);
+        	fb = FilterBuilders.notFilter(nfb);
+        }
+        if(cmd.getEnterpriseId() != null) {
+        	if(fb == null) {
+        		fb = FilterBuilders.termFilter("enterpriseId", cmd.getEnterpriseId());
+        	} else {
+        		fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("enterpriseId", cmd.getEnterpriseId()));
+        	}
+        }
+        if(cmd.getStatus() != null) {
+        	if(fb == null) {
+        		fb = FilterBuilders.termFilter("status", cmd.getStatus());
+        	} else {
+        		fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
+        	}
+        }
+        
+        
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
@@ -173,6 +191,7 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
             }
         
         List<ConfAccountDTO> confAccounts = new ArrayList<ConfAccountDTO>();
+        Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
         for(Long id : ids) {
         	ConfAccountDTO dto = new ConfAccountDTO();
         	ConfAccounts account = vcProvider.findVideoconfAccountById(id);
@@ -190,34 +209,70 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
 				}
 			}
 			dto.setStatus(account.getStatus());
-			if(new Timestamp(DateHelper.currentGMTTime().getTime()).after(account.getExpiredDate()))
+			
+			if(now.after(account.getExpiredDate())) {
 				dto.setValidFlag((byte) 0);
-			else {
+			}
+			else if(addMonth(now, 1).after(account.getExpiredDate())) {
 				dto.setValidFlag((byte) 1);
+			}
+			else {
+				dto.setValidFlag((byte) 2);
 			}
 			ConfAccountCategories category = vcProvider.findAccountCategoriesById(account.getAccountCategoryId());
 			if(category != null) {
-				dto.setAccountType(category.getChannelType());
 				dto.setConfType(category.getConfType());
+				
+				ConfCategoryDTO confCategorydto = new ConfCategoryDTO();
+				confCategorydto.setSingleAccountPrice(category.getSingleAccountPrice());
+				confCategorydto.setMultipleAccountThreshold(category.getMultipleAccountThreshold());
+				confCategorydto.setMultipleAccountPrice(category.getMultipleAccountPrice());
+				confCategorydto.setMinPeriod(category.getMinPeriod());
+				
+				if(category.getConfType() == 0 || category.getConfType() == 1) {
+					confCategorydto.setConfCapacity((byte) 0);
+				}
+				if(category.getConfType() == 2 || category.getConfType() == 3) {
+					confCategorydto.setConfCapacity((byte) 1);
+				}
+				if(category.getConfType() == 4) {
+					confCategorydto.setConfCapacity((byte) 2);
+				}
+				if(category.getConfType() == 5 || category.getConfType() == 6) {
+					confCategorydto.setConfCapacity((byte) 3);
+				}
+				
+				dto.setCategory(confCategorydto);
 			}
 			
 			Organization org = organizationProvider.findOrganizationById(account.getEnterpriseId());
-			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(account.getOwnerId(), org.getId());
-			if(org != null)
+			if(org != null) {
+				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(account.getOwnerId(), org.getId());
 				dto.setEnterpriseName(org.getName());
-				dto.setUserName(member.getContactName());
 				if (member != null) {
+					dto.setUserName(member.getContactName());
+					dto.setMobile(member.getContactToken());
 					Organization dept = organizationProvider.findOrganizationById(member.getGroupId());
 					if (dept != null) {
 						dto.setDepartment(dept.getName());
 					}
 				}
-				dto.setMobile(member.getContactToken());
+			}
 			confAccounts.add(dto);
         }
         response.setConfAccounts(confAccounts);
         
         return response;
+	}
+	
+	private Timestamp addMonth(Timestamp now, int months) {
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(now);
+		calendar.add(Calendar.MONTH, months);
+		Timestamp newPeriod = new Timestamp(calendar.getTimeInMillis());
+		
+		return newPeriod;
 	}
 
 	@Override
@@ -234,6 +289,11 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
             b.field("status", account.getStatus());
             b.field("enterpriseId", account.getEnterpriseId());
 
+            if(account.getOwnerId() != null)
+            	b.field("ownerId", account.getOwnerId());
+            else {
+            	b.field("ownerId", 0);
+            }
 //            b.field("userType", account.getId());
 //            if(account.getAccountType() == 1)
 //            	b.field("userType", 0);
@@ -263,7 +323,7 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
             
             ConfAccountCategories category = vcProvider.findAccountCategoriesById(account.getAccountCategoryId());
             if(null != category) {
-                b.field("accountType", category.getChannelType());
+//                b.field("accountType", category.getChannelType());
                 b.field("confType", category.getConfType());
             } else {
                 b.field("accountType", "");

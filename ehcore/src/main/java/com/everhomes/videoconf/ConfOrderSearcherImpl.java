@@ -204,9 +204,9 @@ public class ConfOrderSearcherImpl extends AbstractElasticSearch implements
 			dto.setMobile(enterpriseContact.getContact());
 		}
 		
-		ConfAccountCategories category = vcProvider.findAccountCategoriesById(order.getAccountCategoryId());
-		if(category != null)
-			dto.setAccountChannelType(category.getChannelType());
+//		ConfAccountCategories category = vcProvider.findAccountCategoriesById(order.getAccountCategoryId());
+//		if(category != null)
+//			dto.setAccountChannelType(category.getChannelType());
 		dto.setCreateTime(order.getCreateTime());
 		dto.setQuantity(order.getQuantity());
 		dto.setPeriod(order.getPeriod());

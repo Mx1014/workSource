@@ -7,10 +7,11 @@ package com.everhomes.rest.common;
  * <li>CITY(2): 城市</li>
  * <li>COMMUNITY(1): 小区</li>
  * <li>USER(3): 用户</li>
+ * <li>ORGANIZATION(4): 机构/公司</li>
  * </ul>
  */
 public enum ScopeType {
-    ALL((byte)0), COMMUNITY((byte)1), CITY((byte)2),USER((byte)3);
+    ALL((byte)0), COMMUNITY((byte)1), CITY((byte)2),USER((byte)3),ORGANIZATION((byte)4);
     
     private byte code;
     

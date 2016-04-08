@@ -1,7 +1,9 @@
 package com.everhomes.rest.videoconf;
 
 import java.sql.Timestamp;
+import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -17,8 +19,9 @@ import com.everhomes.util.StringHelper;
  *  <li>updateDate: 更新时间</li>
  *  <li>validDate: 有效期</li>
  *  <li>userType: 用户类型  0-试用用户  1-新增用户  2-续约用户</li>
- *  <li>validFlag: 有效状态  0-过期  1-有效 </li>
+ *  <li>validFlag: 有效状态  0-过期  1-有效 2-即将过期（1个月内） </li>
  *  <li>status: 状态 0-invalid 1-valid 2-locked</li>
+ *  <li>category: 参考com.everhomes.rest.videoconf.ConfCategoryDTO</li>
  * </ul>
  *
  */
@@ -49,6 +52,9 @@ public class ConfAccountDTO {
 	private Byte validFlag;
 	
 	private Byte status;
+	
+	@ItemType(ConfCategoryDTO.class)
+	private ConfCategoryDTO category;
 
 	public Long getId() {
 		return id;
@@ -152,6 +158,14 @@ public class ConfAccountDTO {
 
 	public void setStatus(Byte status) {
 		this.status = status;
+	}
+
+	public ConfCategoryDTO getCategory() {
+		return category;
+	}
+
+	public void setCategory(ConfCategoryDTO category) {
+		this.category = category;
 	}
 
 	@Override

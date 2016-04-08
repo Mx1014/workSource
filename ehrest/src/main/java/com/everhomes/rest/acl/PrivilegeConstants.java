@@ -28,9 +28,21 @@ public interface PrivilegeConstants {
     public static final long GroupInviteAdminRole = 162L;
     
     // privileges defined by Task module
-    public static final long TaskAllListPosts = 171L;
-    public static final long TaskGuaranteeListPosts = 172L; 
-    public static final long TaskSeekHelpListPosts = 173L;
+    public static final long TaskAllListPosts = 305L;
+    public static final long TaskGuaranteeListPosts = 303L; 
+    public static final long TaskSeekHelpListPosts = 304L;
+    
+    
+    // privileges defined by Notice module
+    public static final long NoticeManagementPost = 200L;
+    
+    // privileges defined by Role module
+    public static final long RolePrivilegeList = 602L;
+    public static final long RolePrivilegeUpdate = 603L;
+    
+    // privileges defined by Admin module
+    public static final long OrgAdminList = 604L;
+    public static final long OrgAdminUpdate = 605L;
     
     
 }

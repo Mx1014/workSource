@@ -18,7 +18,9 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.forum.ListPostCommandResponse;
+import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.organization.ListTopicsByTypeCommand;
+import com.everhomes.rest.organization.ProcessOrganizationTaskCommand;
 import com.everhomes.rest.ui.organization.ListTaskPostsCommand;
 import com.everhomes.rest.ui.organization.ListTaskPostsResponse;
 import com.everhomes.rest.ui.organization.ProcessingTaskCommand;
@@ -130,10 +132,13 @@ public class OrganizationUiController extends ControllerBase {
      public RestResponse acceptTask(@Valid ProcessingTaskCommand cmd) {
     	WebTokenGenerator webToken = WebTokenGenerator.getInstance();
  	    SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
- 		if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
- 			organizationService.acceptTask(cmd, sceneToken.getEntityId());
+ 	   PostDTO dto = null;
+ 	    if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
+ 			ProcessOrganizationTaskCommand command = ConvertHelper.convert(cmd, ProcessOrganizationTaskCommand.class);
+   	    	command.setOrganizationId(sceneToken.getEntityId());
+   	    	dto = organizationService.acceptTask(command);
  		}
-        RestResponse res = new RestResponse();
+        RestResponse res = new RestResponse(dto);
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
         
@@ -149,10 +154,13 @@ public class OrganizationUiController extends ControllerBase {
       public RestResponse refuseTask(@Valid ProcessingTaskCommand cmd) {
     	  WebTokenGenerator webToken = WebTokenGenerator.getInstance();
    	      SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+   	      PostDTO dto = null;
    	      if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
-   			organizationService.refuseTask(cmd, sceneToken.getEntityId());
+   	    	ProcessOrganizationTaskCommand command = ConvertHelper.convert(cmd, ProcessOrganizationTaskCommand.class);
+   	    	command.setOrganizationId(sceneToken.getEntityId());
+   	    	dto = organizationService.refuseTask(command);
    	      }
-    	  RestResponse res = new RestResponse();
+    	  RestResponse res = new RestResponse(dto);
     	  res.setErrorCode(ErrorCodes.SUCCESS);
     	  res.setErrorDescription("OK");
          
@@ -168,10 +176,13 @@ public class OrganizationUiController extends ControllerBase {
        public RestResponse grabTask(@Valid ProcessingTaskCommand cmd) {
     	   WebTokenGenerator webToken = WebTokenGenerator.getInstance();
     	   SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+    	   PostDTO dto = null;
     	   if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
-    		   organizationService.grabTask(cmd, sceneToken.getEntityId());
+    		   ProcessOrganizationTaskCommand command = ConvertHelper.convert(cmd, ProcessOrganizationTaskCommand.class);
+      	       command.setOrganizationId(sceneToken.getEntityId());
+      	       dto = organizationService.grabTask(command);
     	   }
-    	   RestResponse res = new RestResponse();
+    	   RestResponse res = new RestResponse(dto);
     	   res.setErrorCode(ErrorCodes.SUCCESS);
            res.setErrorDescription("OK");
           
@@ -183,14 +194,17 @@ public class OrganizationUiController extends ControllerBase {
         * <p>处理</p>
         */
         @RequestMapping("processingTask")
-        @RestReturn(value=String.class)
+        @RestReturn(value=PostDTO.class)
         public RestResponse processingTask(@Valid ProcessingTaskCommand cmd) {
            WebTokenGenerator webToken = WebTokenGenerator.getInstance();
       	   SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+      	   PostDTO dto = null;
       	   if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
-      		   organizationService.processingTask(cmd, sceneToken.getEntityId());
+      		   ProcessOrganizationTaskCommand command = ConvertHelper.convert(cmd, ProcessOrganizationTaskCommand.class);
+    	       command.setOrganizationId(sceneToken.getEntityId());
+    	       dto = organizationService.processingTask(command);
       	   }
-           RestResponse res = new RestResponse();
+           RestResponse res = new RestResponse(dto);
            res.setErrorCode(ErrorCodes.SUCCESS);
            res.setErrorDescription("OK");
            

@@ -13,14 +13,18 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.techpark.onlinePay.OnlinePayBillCommand;
 import com.everhomes.rest.techpark.park.RechargeSuccessResponse;
+import com.everhomes.rest.user.GetAppAgreementCommand;
 import com.everhomes.rest.videoconf.AddSourceVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.AssignVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.CancelVideoConfCommand;
+import com.everhomes.rest.videoconf.ConfAccountOrderDTO;
 import com.everhomes.rest.videoconf.CreateAccountOwnerCommand;
 import com.everhomes.rest.videoconf.CreateConfAccountOrderCommand;
+import com.everhomes.rest.videoconf.CreateConfAccountOrderOnlineCommand;
 import com.everhomes.rest.videoconf.CreateInvoiceCommand;
 import com.everhomes.rest.videoconf.CreateVideoConfInvitationCommand;
 import com.everhomes.rest.videoconf.DeleteReservationConfCommand;
@@ -29,6 +33,7 @@ import com.everhomes.rest.videoconf.DeleteVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.DeleteWarningContactorCommand;
 import com.everhomes.rest.videoconf.DownloadAppCommand;
 import com.everhomes.rest.videoconf.EnterpriseLockStatusCommand;
+import com.everhomes.rest.videoconf.UpdateConfAccountPeriodCommand;
 import com.everhomes.rest.videoconf.ExtendedSourceAccountPeriodCommand;
 import com.everhomes.rest.videoconf.ExtendedVideoConfAccountPeriodCommand;
 import com.everhomes.rest.videoconf.GetEarlyWarningLineCommand;
@@ -37,6 +42,8 @@ import com.everhomes.rest.videoconf.GetNamespaceListResponse;
 import com.everhomes.rest.videoconf.InvoiceDTO;
 import com.everhomes.rest.videoconf.JoinVideoConfCommand;
 import com.everhomes.rest.videoconf.JoinVideoConfResponse;
+import com.everhomes.rest.videoconf.ListConfCategoryCommand;
+import com.everhomes.rest.videoconf.ListConfCategoryResponse;
 import com.everhomes.rest.videoconf.ListConfOrderAccountResponse;
 import com.everhomes.rest.videoconf.ListEnterpriseVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.ListEnterpriseVideoConfAccountResponse;
@@ -47,7 +54,7 @@ import com.everhomes.rest.videoconf.ListOrderByAccountCommand;
 import com.everhomes.rest.videoconf.ListOrderByAccountResponse;
 import com.everhomes.rest.videoconf.ListReservationConfCommand;
 import com.everhomes.rest.videoconf.ListReservationConfResponse;
-import com.everhomes.rest.videoconf.ListRuleCommand;
+import com.everhomes.rest.videoconf.ListConfAccountSaleRuleCommand;
 import com.everhomes.rest.videoconf.ListSourceVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.ListSourceVideoConfAccountResponse;
 import com.everhomes.rest.videoconf.ListUnassignAccountsByOrderCommand;
@@ -76,8 +83,11 @@ import com.everhomes.rest.videoconf.UnassignAccountResponse;
 import com.everhomes.rest.videoconf.UpdateAccountOrderCommand;
 import com.everhomes.rest.videoconf.UpdateConfAccountCategoriesCommand;
 import com.everhomes.rest.videoconf.UpdateContactorCommand;
+import com.everhomes.rest.videoconf.UpdateInvoiceCommand;
 import com.everhomes.rest.videoconf.UpdateVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.UserAccountDTO;
+import com.everhomes.rest.videoconf.VerifyPurchaseAuthorityCommand;
+import com.everhomes.rest.videoconf.VerifyPurchaseAuthorityResponse;
 import com.everhomes.rest.videoconf.VerifyVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.VideoConfAccountPreferentialRuleDTO;
 import com.everhomes.rest.videoconf.VideoConfAccountTrialRuleDTO;
@@ -534,13 +544,13 @@ public class VideoConfController  extends ControllerBase{
 	}
 	
 	/**
-	 * <b>URL: /conf/listConfAccountCategories</b>
+	 * <b>URL: /conf/listConfAccountSaleRules</b>
 	 * 查看销售规则
 	 * @return
 	 */
-	@RequestMapping("listConfAccountCategories")
+	@RequestMapping("listConfAccountSaleRules")
 	@RestReturn(value = ListVideoConfAccountRuleResponse.class)
-	public RestResponse listConfAccountCategories(ListRuleCommand cmd) {
+	public RestResponse listConfAccountSaleRules(ListConfAccountSaleRuleCommand cmd) {
 
 		ListVideoConfAccountRuleResponse rule = videoConfService.listConfAccountCategories(cmd);
 		RestResponse response = new RestResponse(rule);
@@ -572,7 +582,7 @@ public class VideoConfController  extends ControllerBase{
 	 */
 	@RequestMapping("listWarningContactor")
 	@RestReturn(value = ListWarningContactorResponse.class)
-	public RestResponse listWarningContactor(ListRuleCommand cmd) {
+	public RestResponse listWarningContactor(ListConfAccountSaleRuleCommand cmd) {
 
 		ListWarningContactorResponse contactor = videoConfService.listWarningContactor(cmd);
 		RestResponse response = new RestResponse(contactor);
@@ -871,13 +881,13 @@ public class VideoConfController  extends ControllerBase{
 	}
 	
 	/**
-	 * <b>URL: /conf/confPaymentCallBack</b>
+	 * <b>URL: /conf/notifyConfAccountOrderPayment</b>
 	 * 订单支付回调函数
 	 * @return
 	 */
-	@RequestMapping("confPaymentCallBack")
+	@RequestMapping("notifyConfAccountOrderPayment")
 	@RestReturn(value = String.class)
-	public RestResponse confPaymentCallBack(OnlinePayBillCommand cmd) {
+	public RestResponse notifyConfAccountOrderPayment(OnlinePayBillCommand cmd) {
 		
 		videoConfService.confPaymentCallBack(cmd);
 		RestResponse response = new RestResponse();
@@ -1253,5 +1263,101 @@ public class VideoConfController  extends ControllerBase{
         res.setErrorDescription("OK");
         return res;
     }
+	
+    /**
+	 * <b>URL: /conf/updateInvoice</b>
+	 * 修改开票信息
+	 * @return
+	 */
+	@RequestMapping("updateInvoice")
+	@RestReturn(value = InvoiceDTO.class)
+	public RestResponse updateInvoice(UpdateInvoiceCommand cmd) {
+
+		InvoiceDTO invoice = videoConfService.updateInvoice(cmd);
+		RestResponse response = new RestResponse(invoice);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /conf/updateConfAccountPeriod</b>
+	 * 账号延期
+	 * @return
+	 */
+	@RequestMapping("updateConfAccountPeriod")
+	@RestReturn(value = ConfAccountOrderDTO.class)
+	public RestResponse updateConfAccountPeriod(UpdateConfAccountPeriodCommand cmd) {
+
+		ConfAccountOrderDTO dto = videoConfService.updateConfAccountPeriod(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /conf/listConfCategory</b>
+	 * 客户端查看可购买账号类型信息
+	 * @return
+	 */
+	@RequestMapping("listConfCategory")
+	@RestReturn(value = ListConfCategoryResponse.class)
+	public RestResponse listConfCategory(ListConfCategoryCommand cmd) {
+		
+		ListConfCategoryResponse capacity = videoConfService.listConfCategory(cmd);
+		RestResponse response = new RestResponse(capacity);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /conf/createConfAccountOrderOnline</b>
+	 * 客户端增加订单
+	 * @return
+	 */
+	@RequestMapping("createConfAccountOrderOnline")
+	@RestReturn(value = ConfAccountOrderDTO.class)
+	public RestResponse createConfAccountOrderOnline(CreateConfAccountOrderOnlineCommand cmd) {
+
+		ConfAccountOrderDTO dto = videoConfService.createConfAccountOrderOnline(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /conf/verifyPurchaseAuthority</b>
+	 * 客户端判断是否是管理员 所属公司是否有空闲账号
+	 * @return
+	 */
+	@RequestMapping("verifyPurchaseAuthority")
+	@RestReturn(value = VerifyPurchaseAuthorityResponse.class)
+	public RestResponse verifyPurchaseAuthority(VerifyPurchaseAuthorityCommand cmd) {
+
+		VerifyPurchaseAuthorityResponse authority = videoConfService.verifyPurchaseAuthority(cmd);
+		RestResponse response = new RestResponse(authority);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /conf/getConfTelPrice</b>
+	 * 左邻电话会议服务价格表
+	 */
+	@RequestMapping("getConfTelPrice")
+	@RestReturn(String.class)
+	public RestResponse getConfTelPrice(){
+		
+		String result = configurationProvider.getValue(Namespace.DEFAULT_NAMESPACE, ConfigConstants.VIDEOCONF_TEL_PRICE, "");
+
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	
 }

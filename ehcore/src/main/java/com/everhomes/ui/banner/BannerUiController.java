@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.banner.BannerService;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
@@ -39,15 +40,17 @@ public class BannerUiController extends ControllerBase {
     @Autowired
     private ConfigurationProvider configurationProvider;
    
+    @Autowired
+    private BannerService bannerService;
     /**
      * <b>URL: /ui/banner/getBannersByScene</b>
      * <p>获取指定位置、layout组、场景、实体对象相关的banner</p>
      */
     @RequestMapping("getBannersByScene")
     @RestReturn(value=BannerDTO.class,collection=true)
-    public RestResponse getBannersV2(@Valid GetBannersBySceneCommand cmd,HttpServletRequest request,HttpServletResponse response) {
+    public RestResponse getBannersByScene(@Valid GetBannersBySceneCommand cmd,HttpServletRequest request,HttpServletResponse response) {
         
-        List<BannerDTO> result = null;//bannerService.getBanners(cmd,request);
+        List<BannerDTO> result = bannerService.getBannersByScene(cmd, request);
         RestResponse resp =  new RestResponse();
         int hashCode = configurationProvider.getIntValue(MARKETDATA_ITEM_VERSION, 0);
         if(EtagHelper.checkHeaderEtagOnly(30,hashCode+"", request, response)) {

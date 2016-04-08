@@ -3,10 +3,12 @@ package com.everhomes.rest.organization;
 
 import java.util.List;
 
+import javax.management.relation.Role;
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
+import com.everhomes.rest.acl.admin.RoleDTO;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -21,6 +23,7 @@ import com.everhomes.util.StringHelper;
  * <li>contactToken：成员标识</li>
  * <li>contactDescription：描述</li>
  * <li>status：状态</li>
+ * <li>initial：首字母</li>
  * </ul>
  */
 public class OrganizationMemberDTO {
@@ -39,9 +42,12 @@ public class OrganizationMemberDTO {
 	private String contactToken;
 	private String contactDescription;
 	private Byte   status;
+	private String initial;
+    private String fullPinyin;
+    private String fullInitial;
 	
-	@ItemType(AclRoleAssignmentsDTO.class)
-	private List<AclRoleAssignmentsDTO> aclRoles;
+	@ItemType(RoleDTO.class)
+	private List<RoleDTO> roles;
 	
 	private Long groupId;
 	
@@ -55,241 +61,189 @@ public class OrganizationMemberDTO {
 	private Long   employeeNo;
 	private Byte   gender;
 	
+	
+	
 	public OrganizationMemberDTO() {
     }
-	
-	
-
-	public Long getOrganizationId() {
-		return organizationId;
-	}
-
-
-
-	public void setOrganizationId(Long organizationId) {
-		this.organizationId = organizationId;
-	}
-
-
-
-	public String getTargetType() {
-		return targetType;
-	}
-
-
-
-	public void setTargetType(String targetType) {
-		this.targetType = targetType;
-	}
-
-
-
-	public Long getTargetId() {
-		return targetId;
-	}
-
-
-
-	public void setTargetId(Long targetId) {
-		this.targetId = targetId;
-	}
-
-
-
-	public String getMemberGroup() {
-		return memberGroup;
-	}
-
-
-
-	public void setMemberGroup(String memberGroup) {
-		this.memberGroup = memberGroup;
-	}
-
-
-
-	public String getContactName() {
-		return contactName;
-	}
-
-
-
-	public void setContactName(String contactName) {
-		this.contactName = contactName;
-	}
-
-
-
-	public Byte getContactType() {
-		return contactType;
-	}
-
-
-
-	public void setContactType(Byte contactType) {
-		this.contactType = contactType;
-	}
-
-
-
-	public String getContactToken() {
-		return contactToken;
-	}
-
-
-
-	public void setContactToken(String contactToken) {
-		this.contactToken = contactToken;
-	}
-
-
-
-	public String getContactDescription() {
-		return contactDescription;
-	}
-
-
-
-	public void setContactDescription(String contactDescription) {
-		this.contactDescription = contactDescription;
-	}
-
-
-
-	public Byte getStatus() {
-		return status;
-	}
-
-
-
-	public void setStatus(Byte status) {
-		this.status = status;
-	}
-
-
 
 	public Long getId() {
-		return id;
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
+
+    public String getOrganizationName() {
+        return organizationName;
+    }
+
+    public void setOrganizationName(String organizationName) {
+        this.organizationName = organizationName;
+    }
+
+    public String getTargetType() {
+        return targetType;
+    }
+
+    public void setTargetType(String targetType) {
+        this.targetType = targetType;
+    }
+
+    public Long getTargetId() {
+        return targetId;
+    }
+
+    public void setTargetId(Long targetId) {
+        this.targetId = targetId;
+    }
+
+    public String getMemberGroup() {
+        return memberGroup;
+    }
+
+    public void setMemberGroup(String memberGroup) {
+        this.memberGroup = memberGroup;
+    }
+
+    public String getContactName() {
+        return contactName;
+    }
+
+    public void setContactName(String contactName) {
+        this.contactName = contactName;
+    }
+
+    public Byte getContactType() {
+        return contactType;
+    }
+
+    public void setContactType(Byte contactType) {
+        this.contactType = contactType;
+    }
+
+    public String getContactToken() {
+        return contactToken;
+    }
+
+    public void setContactToken(String contactToken) {
+        this.contactToken = contactToken;
+    }
+
+    public String getContactDescription() {
+        return contactDescription;
+    }
+
+    public void setContactDescription(String contactDescription) {
+        this.contactDescription = contactDescription;
+    }
+
+    public Byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(Byte status) {
+        this.status = status;
+    }
+
+
+    public List<RoleDTO> getRoles() {
+		return roles;
 	}
 
-
-
-	public void setId(Long id) {
-		this.id = id;
+	public void setRoles(List<RoleDTO> roles) {
+		this.roles = roles;
 	}
-
-
-
-	public String getOrganizationName() {
-		return organizationName;
-	}
-
-
-
-	public void setOrganizationName(String organizationName) {
-		this.organizationName = organizationName;
-	}
-
-
-
-
-
 
 	public Long getGroupId() {
-		return groupId;
+        return groupId;
+    }
+
+    public void setGroupId(Long groupId) {
+        this.groupId = groupId;
+    }
+
+    public String getGroupName() {
+        return groupName;
+    }
+
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
+    }
+
+    public String getNickName() {
+        return nickName;
+    }
+
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
+    public Long getCreatorUid() {
+        return creatorUid;
+    }
+
+    public void setCreatorUid(Long creatorUid) {
+        this.creatorUid = creatorUid;
+    }
+
+    public Long getEmployeeNo() {
+        return employeeNo;
+    }
+
+    public void setEmployeeNo(Long employeeNo) {
+        this.employeeNo = employeeNo;
+    }
+
+    public Byte getGender() {
+        return gender;
+    }
+
+    public void setGender(Byte gender) {
+        this.gender = gender;
+    }
+
+    
+    public String getInitial() {
+		return initial;
 	}
 
-
-
-	public void setGroupId(Long groupId) {
-		this.groupId = groupId;
+	public void setInitial(String initial) {
+		this.initial = initial;
 	}
 
-
-
-	public String getGroupName() {
-		return groupName;
+	
+	public String getFullPinyin() {
+		return fullPinyin;
 	}
 
-
-
-	public void setGroupName(String groupName) {
-		this.groupName = groupName;
+	public void setFullPinyin(String fullPinyin) {
+		this.fullPinyin = fullPinyin;
 	}
 
-
-
-	public List<AclRoleAssignmentsDTO> getAclRoles() {
-		return aclRoles;
+	public String getFullInitial() {
+		return fullInitial;
 	}
 
-
-
-	public void setAclRoles(List<AclRoleAssignmentsDTO> aclRoles) {
-		this.aclRoles = aclRoles;
+	public void setFullInitial(String fullInitial) {
+		this.fullInitial = fullInitial;
 	}
-
-
-
-	public String getNickName() {
-		return nickName;
-	}
-
-
-
-	public void setNickName(String nickName) {
-		this.nickName = nickName;
-	}
-
-
-
-	public String getAvatar() {
-		return avatar;
-	}
-
-
-
-	public void setAvatar(String avatar) {
-		this.avatar = avatar;
-	}
-
-
-
-	public Long getCreatorUid() {
-		return creatorUid;
-	}
-
-
-
-	public void setCreatorUid(Long creatorUid) {
-		this.creatorUid = creatorUid;
-	}
-
-
-
-	public Long getEmployeeNo() {
-		return employeeNo;
-	}
-
-
-
-	public void setEmployeeNo(Long employeeNo) {
-		this.employeeNo = employeeNo;
-	}
-
-
-
-	public Byte getGender() {
-		return gender;
-	}
-
-
-
-	public void setGender(Byte gender) {
-		this.gender = gender;
-	}
-
-
 
 	@Override
     public String toString() {

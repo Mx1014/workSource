@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfOrders extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhConfOrdersRecord> {
 
-	private static final long serialVersionUID = 754537400;
+	private static final long serialVersionUID = 826688429;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_conf_orders</code>
@@ -105,6 +105,26 @@ public class EhConfOrders extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	 * The column <code>ehcore.eh_conf_orders.namespace_id</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfOrdersRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_conf_orders.buyer_name</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfOrdersRecord, java.lang.String> BUYER_NAME = createField("buyer_name", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_conf_orders.buyer_contact</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfOrdersRecord, java.lang.String> BUYER_CONTACT = createField("buyer_contact", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_conf_orders.vendor_type</code>. vendor type 0: none, 1: Alipay, 2: Wechat
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfOrdersRecord, java.lang.Byte> VENDOR_TYPE = createField("vendor_type", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "vendor type 0: none, 1: Alipay, 2: Wechat");
+
+	/**
+	 * The column <code>ehcore.eh_conf_orders.email</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfOrdersRecord, java.lang.String> EMAIL = createField("email", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_conf_orders</code> table reference

@@ -1,0 +1,18 @@
+//
+// EvhBillTransactionResult.h
+// generated at 2016-04-07 17:57:43 
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhBillTransactionResult
+//
+typedef enum {
+
+    EvhBillTransactionResult_FAIL = 1, 
+    EvhBillTransactionResult_SUCCESS = 2
+
+} EvhBillTransactionResult;
+
+///////////////////////////////////////////////////////////////////////////////
+

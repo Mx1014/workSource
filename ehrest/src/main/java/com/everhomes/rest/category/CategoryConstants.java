@@ -1,8 +1,6 @@
 package com.everhomes.rest.category;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -68,7 +66,7 @@ public interface CategoryConstants {
     /** 帖子/投票 */
     public static final long CATEGORY_ID_TOPIC_POLLING = 1011L;
     
-    /** 帖子/经济求助 */
+    /** 帖子/紧急求助 */
     public static final long CATEGORY_ID_EMERGENCY_HELP = 1012L;
     
     public static final long CATEGORY_ID_CONF = 200001L;
@@ -93,7 +91,8 @@ public interface CategoryConstants {
         CATEGORY_ID_COMPLAINT_ADVICE,
         CATEGORY_ID_CLEANING,
         CATEGORY_ID_HOUSE_KEEPING,
-        CATEGORY_ID_MAINTENANCE
+        CATEGORY_ID_MAINTENANCE,
+        CATEGORY_ID_EMERGENCY_HELP
     );
     
     /** 政府机构相关的有隐私的类型，使用这些类型的帖子对政府机关来说需要有权控制是否公开 */

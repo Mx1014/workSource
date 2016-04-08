@@ -1,0 +1,18 @@
+//
+// EvhCheckUserPostStatus.h
+// generated at 2016-04-07 17:57:43 
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhCheckUserPostStatus
+//
+typedef enum {
+
+    EvhCheckUserPostStatus_NONE = 0, 
+    EvhCheckUserPostStatus_NEW_POST = 1
+
+} EvhCheckUserPostStatus;
+
+///////////////////////////////////////////////////////////////////////////////
+

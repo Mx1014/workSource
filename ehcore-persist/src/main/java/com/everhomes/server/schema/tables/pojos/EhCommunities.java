@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunities implements java.io.Serializable {
 
-	private static final long serialVersionUID = -810237882;
+	private static final long serialVersionUID = -567747500;
 
 	private java.lang.Long     id;
 	private java.lang.String   uuid;
@@ -52,6 +52,7 @@ public class EhCommunities implements java.io.Serializable {
 	private java.lang.Long     feedbackForumId;
 	private java.sql.Timestamp updateTime;
 	private java.lang.Integer  namespaceId;
+	private java.lang.Double   areaSize;
 
 	public EhCommunities() {}
 
@@ -94,7 +95,8 @@ public class EhCommunities implements java.io.Serializable {
 		java.lang.Long     defaultForumId,
 		java.lang.Long     feedbackForumId,
 		java.sql.Timestamp updateTime,
-		java.lang.Integer  namespaceId
+		java.lang.Integer  namespaceId,
+		java.lang.Double   areaSize
 	) {
 		this.id = id;
 		this.uuid = uuid;
@@ -135,6 +137,7 @@ public class EhCommunities implements java.io.Serializable {
 		this.feedbackForumId = feedbackForumId;
 		this.updateTime = updateTime;
 		this.namespaceId = namespaceId;
+		this.areaSize = areaSize;
 	}
 
 	public java.lang.Long getId() {
@@ -447,5 +450,13 @@ public class EhCommunities implements java.io.Serializable {
 
 	public void setNamespaceId(java.lang.Integer namespaceId) {
 		this.namespaceId = namespaceId;
+	}
+
+	public java.lang.Double getAreaSize() {
+		return this.areaSize;
+	}
+
+	public void setAreaSize(java.lang.Double areaSize) {
+		this.areaSize = areaSize;
 	}
 }

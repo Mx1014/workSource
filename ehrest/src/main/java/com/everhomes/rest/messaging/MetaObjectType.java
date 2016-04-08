@@ -18,7 +18,8 @@ public enum MetaObjectType {
     GROUP_REQUEST_TO_BE_ADMIN("group.requestToBeAdmin"), 
     GROUP_INVITE_TO_BE_ADMIN("group.inviteToBeAdmin"),
     ENTERPRISE_REQUEST_TO_JOIN("enterprise.requestToJoin"), 
-    ENTERPRISE_INVITE_TO_JOIN("enterprise.inviteToJoin");
+    ENTERPRISE_INVITE_TO_JOIN("enterprise.inviteToJoin"),
+    ACLINK_AUTH_CHANGED("aclink.authChanged");
     
     private String code;
     private MetaObjectType(String code) {

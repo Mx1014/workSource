@@ -1,0 +1,18 @@
+//
+// EvhBusinessRecommendStatus.h
+// generated at 2016-04-07 17:57:42 
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhBusinessRecommendStatus
+//
+typedef enum {
+
+    EvhBusinessRecommendStatus_NONE = 0, 
+    EvhBusinessRecommendStatus_RECOMMEND = 1
+
+} EvhBusinessRecommendStatus;
+
+///////////////////////////////////////////////////////////////////////////////
+

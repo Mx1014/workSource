@@ -133,7 +133,7 @@ public class CommunityAdminController extends ControllerBase {
     public RestResponse updateCommunity(@Valid UpdateCommunityAdminCommand cmd) {
         
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         this.communityService.updateCommunity(cmd);
         

@@ -18,6 +18,7 @@ import org.jooq.JoinType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -40,20 +41,21 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.family.Family;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
+import com.everhomes.group.GroupService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
-import com.everhomes.rest.point.PointType;
+import com.everhomes.organization.OrganizationTask;
 import com.everhomes.point.UserPointService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
@@ -61,6 +63,7 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryConstants;
+import com.everhomes.rest.category.CategoryType;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.AssignTopicScopeCommand;
@@ -83,6 +86,7 @@ import com.everhomes.rest.forum.LikeTopicCommand;
 import com.everhomes.rest.forum.ListActivityTopicByCategoryAndTagCommand;
 import com.everhomes.rest.forum.ListPostCommandResponse;
 import com.everhomes.rest.forum.ListTopicAssignedScopeCommand;
+import com.everhomes.rest.forum.ListTopicByForumCommand;
 import com.everhomes.rest.forum.ListTopicCommand;
 import com.everhomes.rest.forum.ListTopicCommentCommand;
 import com.everhomes.rest.forum.ListUserRelatedTopicCommand;
@@ -90,6 +94,7 @@ import com.everhomes.rest.forum.LostAndFoundCommand;
 import com.everhomes.rest.forum.LostAndFoundStatus;
 import com.everhomes.rest.forum.NewCommentCommand;
 import com.everhomes.rest.forum.NewTopicCommand;
+import com.everhomes.rest.forum.OrganizationTopicMixType;
 import com.everhomes.rest.forum.PostAssignedFlag;
 import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.forum.PostEntityTag;
@@ -98,21 +103,36 @@ import com.everhomes.rest.forum.PostStatus;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.rest.forum.QueryTopicByCategoryCommand;
 import com.everhomes.rest.forum.QueryTopicByEntityAndCategoryCommand;
+import com.everhomes.rest.forum.TopicPublishStatus;
 import com.everhomes.rest.forum.UsedAndRentalCommand;
 import com.everhomes.rest.forum.UsedAndRentalStatus;
 import com.everhomes.rest.forum.admin.PostAdminDTO;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommand;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommandResponse;
-import com.everhomes.rest.group.GroupNotificationTemplateCode;
+import com.everhomes.rest.group.GroupDTO;
 import com.everhomes.rest.group.GroupPrivacy;
+import com.everhomes.rest.group.ListPublicGroupCommand;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.point.AddUserPointCommand;
+import com.everhomes.rest.point.PointType;
+import com.everhomes.rest.ui.forum.GetTopicQueryFilterCommand;
+import com.everhomes.rest.ui.forum.GetTopicSentScopeCommand;
+import com.everhomes.rest.ui.forum.NewTopicBySceneCommand;
+import com.everhomes.rest.ui.forum.PostFilterType;
+import com.everhomes.rest.ui.forum.PostSentScopeType;
+import com.everhomes.rest.ui.forum.SelectorBooleanFlag;
+import com.everhomes.rest.ui.forum.TopicFilterDTO;
+import com.everhomes.rest.ui.forum.TopicScopeDTO;
+import com.everhomes.rest.ui.user.SceneTokenDTO;
+import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.rest.user.UserLikeType;
 import com.everhomes.rest.visibility.VisibilityScope;
 import com.everhomes.rest.visibility.VisibleRegionType;
@@ -120,7 +140,6 @@ import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhUsers;
-import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
@@ -130,11 +149,12 @@ import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserLike;
 import com.everhomes.user.UserProfileContstant;
 import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
-import com.everhomes.util.Tuple;
+import com.everhomes.util.WebTokenGenerator;
 
 @Component
 public class ForumServiceImpl implements ForumService {
@@ -154,6 +174,9 @@ public class ForumServiceImpl implements ForumService {
     
     @Autowired
     private CategoryProvider categoryProvider;
+    
+    @Autowired
+    private UserService userService;
     
     @Autowired
     private UserProvider userProvider;
@@ -203,11 +226,17 @@ public class ForumServiceImpl implements ForumService {
     @Autowired
     private LocaleTemplateService localeTemplateService;
     
+    @Autowired
+    private GroupService groupService;
+
+    @Value("${server.contextPath:}")
+    private String serverContectPath;
+    
     @Override
     public boolean isSystemForum(long forumId) {
         return forumId == ForumConstants.SYSTEM_FORUM;
     }
-
+    
     @Override
     public PostDTO createTopic(NewTopicCommand cmd) {
         //checkForumPostPrivilege(cmd.getForumId());
@@ -305,6 +334,19 @@ public class ForumServiceImpl implements ForumService {
             }
             PostDTO postDto =  getTopicById(postId, cmd.getCommunityId(), true, true);
             
+            /*根据客户端的要求 控制任务操作*/
+            if(null != postDto && null != postDto.getEmbeddedAppId()){
+            	if(postDto.getEmbeddedAppId().equals(AppConstants.APPID_ORGTASK)){
+            		OrganizationTask task = organizationProvider.findOrganizationTaskById(postDto.getEmbeddedId());
+                	if(null != task){
+                		task.setOption(cmd.getOption());
+                		task.setEntrancePrivilege(cmd.getEntrancePrivilege());
+                		postDto.setEmbeddedJson(StringHelper.toJsonString(task));
+                	}
+            	}
+            	
+            }
+            
             long endTime = System.currentTimeMillis();
             if(LOGGER.isInfoEnabled()) {
                 LOGGER.info("Get topic details, userId=" + userId + ", postId=" + postId 
@@ -363,19 +405,20 @@ public class ForumServiceImpl implements ForumService {
                 if( (!(getByOwnerId && post.getCreatorUid().equals(userId)))
                         && (post.getCreatorUid().equals(post.getDeleterUid()) || post.getCreatorUid() != userId.longValue()) ){
             		LOGGER.error("Forum post already deleted, userId=" + userId + ", topicId=" + topicId);
-            		throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
-            				ForumServiceErrorCode.ERROR_FORUM_TOPIC_DELETED, "Forum post already deleted");
+//            		throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
+//            				ForumServiceErrorCode.ERROR_FORUM_TOPIC_DELETED, "Forum post already deleted");
+            		return null;
             	}
             }
             
             this.forumProvider.populatePostAttachments(post);
             populatePost(userId, post, communityId, isDetail, getByOwnerId);
-            
             return ConvertHelper.convert(post, PostDTO.class);
         } else {
             LOGGER.error("Forum post not found, userId=" + userId + ", topicId=" + topicId);
-            throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
-                ForumServiceErrorCode.ERROR_FORUM_TOPIC_NOT_FOUND, "Forum post not found");
+            return null;
+//            throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
+//                ForumServiceErrorCode.ERROR_FORUM_TOPIC_NOT_FOUND, "Forum post not found");
         }
     }
     
@@ -865,25 +908,48 @@ public class ForumServiceImpl implements ForumService {
                 ForumServiceErrorCode.ERROR_FORUM_ORGANIZATION_COMMUNITY_NOT_FOUND, "Organization community not found");
         }
         
+        List<Long> categorys = new ArrayList<Long>();
+        
+        categorys.add(cmd.getContentCategory());
+        
+        if(null != cmd.getEmbeddedAppId()){
+        	if(AppConstants.APPID_ORGTASK == cmd.getEmbeddedAppId() && null == cmd.getContentCategory()){
+        		categorys = CategoryConstants.GA_RELATED_CATEGORIES;
+        	}
+        	
+        }
+        
         Condition visibilityCondition = buildGaRelatedPostQryConditionByOrganization(operatorId, organization, communityIdList);
 
-        Long contentCategoryId = cmd.getContentCategory();
         Long actionCategoryId = cmd.getActionCategory();
-        Condition categoryCondition = buildPostCategoryCondition(contentCategoryId, actionCategoryId);
+        Condition categoryCondition = buildPostCategoryCondition(categorys, actionCategoryId);
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator(ForumConstants.SYSTEM_FORUM);
         locator.setAnchor(cmd.getPageAnchor());
+        
+        Timestamp timestemp = new Timestamp(DateHelper.currentGMTTime().getTime());
+        
         List<Post> posts = this.forumProvider.queryPosts(locator, pageSize + 1, (loc, query) -> {
             query.addJoin(Tables.EH_FORUM_ASSIGNED_SCOPES, JoinType.LEFT_OUTER_JOIN, 
                 Tables.EH_FORUM_ASSIGNED_SCOPES.OWNER_ID.eq(Tables.EH_FORUM_POSTS.ID));
-            if(null == forumId){
-            	query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ID.eq(ForumConstants.SYSTEM_FORUM));
-            }else{
-            	query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ID.eq(forumId));
-            }
             query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
             query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+            
+            if(TopicPublishStatus.fromCode(cmd.getPublishStatus()) == TopicPublishStatus.UNPUBLISHED){
+            	query.addConditions(Tables.EH_FORUM_POSTS.START_TIME.lt(timestemp));
+            }
+            
+            if(TopicPublishStatus.fromCode(cmd.getPublishStatus()) == TopicPublishStatus.PUBLISHED){
+            	query.addConditions(Tables.EH_FORUM_POSTS.START_TIME.gt(timestemp));
+            	query.addConditions(Tables.EH_FORUM_POSTS.END_TIME.lt(timestemp));
+            }
+            
+            if(TopicPublishStatus.fromCode(cmd.getPublishStatus()) == TopicPublishStatus.EXPIRED){
+            	query.addConditions(Tables.EH_FORUM_POSTS.END_TIME.gt(timestemp));
+            }
+            
+            
             if(visibilityCondition != null) {
                 query.addConditions(visibilityCondition);
             }
@@ -891,6 +957,9 @@ public class ForumServiceImpl implements ForumService {
                 query.addConditions(categoryCondition);
             }
             
+            if(null != cmd.getEmbeddedAppId()){
+            	query.addConditions(Tables.EH_FORUM_POSTS.EMBEDDED_APP_ID.eq(cmd.getEmbeddedAppId()));
+            }
             return query;
         });
         this.forumProvider.populatePostAttachments(posts);
@@ -904,7 +973,27 @@ public class ForumServiceImpl implements ForumService {
         populatePosts(operatorId, posts, null, false);
         
         List<PostDTO> postDtoList = posts.stream().map((r) -> {
-          return ConvertHelper.convert(r, PostDTO.class);  
+        	Timestamp s = r.getStartTime();
+        	Timestamp e = r.getEndTime();
+        	PostDTO dto= ConvertHelper.convert(r, PostDTO.class);
+        	
+        	if(null != s && null != e){
+        		dto.setStartTime(s.getTime());
+            	dto.setEndTime(e.getTime());
+        		if(s.getTime() < timestemp.getTime()){
+        			dto.setPublishStatus(TopicPublishStatus.UNPUBLISHED.getCode());
+        		}
+        		
+        		if(s.getTime() > timestemp.getTime() && e.getTime() < timestemp.getTime()){
+        			dto.setPublishStatus(TopicPublishStatus.PUBLISHED.getCode());
+        		}
+        		
+        		if(e.getTime() > timestemp.getTime()){
+        			dto.setPublishStatus(TopicPublishStatus.EXPIRED.getCode());
+        		}
+        	}
+        	
+          return dto;  
         }).collect(Collectors.toList());
         
         if(LOGGER.isInfoEnabled()) {
@@ -1897,6 +1986,11 @@ public class ForumServiceImpl implements ForumService {
         post.setEmbeddedJson(cmd.getEmbeddedJson());
         post.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         
+        if(null != cmd.getStartTime() && null != cmd.getEndTime()){
+        	post.setStartTime(new Timestamp(cmd.getStartTime()));
+        	post.setEndTime(new Timestamp(cmd.getEndTime()));
+        }
+        
         PostPrivacy privateFlag = PostPrivacy.fromCode(cmd.getPrivateFlag());
         if(privateFlag == null) {
             // 政府机构发的维修之类的帖，默认不公开
@@ -2427,23 +2521,36 @@ public class ForumServiceImpl implements ForumService {
             LOGGER.error("Unsupported organization type, userId=" + userId + ", organization=" + organization);
             return null;
         }
+        List<Long> forumIds = new ArrayList<Long>();
+        for (Long commnityId : communityIdList) {
+        	 Community community = communityProvider.findCommunityById(commnityId);
+        	 forumIds.add(community.getDefaultForumId());
+		}
+       
         
         // 普通用户发给该机构的（物业/业委/居委/公安/社区工作站等），该机构都能看得到（不管是否公开）
         Condition userCondition1 = Tables.EH_FORUM_POSTS.TARGET_TAG.eq(orgType.getCode());
         Condition userCondition3 = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
         userCondition3 = userCondition3.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.in(communityIdList));
+       
         Condition userCondition = userCondition1.and(userCondition3);
-                
+        if(0 == forumIds.size()){
+        	userCondition = userCondition.and(Tables.EH_FORUM_POSTS.FORUM_ID.eq(ForumConstants.SYSTEM_FORUM));
+        }else{
+        	userCondition = userCondition.and(Tables.EH_FORUM_POSTS.FORUM_ID.in(forumIds));
+        }
         // 机构（物业/业委/居委/公安/社区工作站等）自己发的，该机构都能看得到
         Condition gaCondition = Tables.EH_FORUM_POSTS.CREATOR_TAG.eq(orgType.getCode());
         Condition regionCondition = null;
         switch(orgType) {
         case PM:
         case GARC:
-            regionCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
-            if(communityIdList.size() > 0) {
-                regionCondition = regionCondition.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.eq(communityIdList.get(0)));
-            }
+            Condition conditionCommnity = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
+            conditionCommnity = conditionCommnity.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.in(communityIdList));
+            Condition conditionOrg = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.REGION.getCode());
+            conditionOrg = conditionOrg.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.eq(organization.getId()));
+            regionCondition = conditionCommnity.or(conditionOrg);
+            
             gaCondition = gaCondition.and(regionCondition);
             break;
         case GANC:
@@ -2477,26 +2584,41 @@ public class ForumServiceImpl implements ForumService {
         return c1.or(c2).or(c3);
     }
     
-    private Condition buildPostCategoryCondition(Long contentCategoryId, Long actionCategoryId) {
-        Condition categoryCondition = null;
+    private Condition buildPostCategoryCondition(List<Long> categorys, Long actionCategoryId) {
+        Condition contentCategoryCondition = null;
         // contentCategoryId为0表示全部查，此时也不需要给category条件
-        if(contentCategoryId != null && contentCategoryId.longValue() > 0) {
-            Category contentCatogry = this.categoryProvider.findCategoryById(contentCategoryId);
-            if(contentCatogry != null) {
-                categoryCondition = Tables.EH_FORUM_POSTS.CATEGORY_PATH.like(contentCatogry.getPath() + "%");
-            }
+        if(categorys != null && categorys.size() > 0) {
+        	for (Long categoryId : categorys) {
+        		 Category contentCatogry = this.categoryProvider.findCategoryById(categoryId);
+                 if(contentCatogry != null) {
+                	 if(null == contentCategoryCondition){
+                		 contentCategoryCondition = Tables.EH_FORUM_POSTS.CATEGORY_PATH.like(contentCatogry.getPath() + "%");
+                	 }else{
+                		 contentCategoryCondition = contentCategoryCondition.or(Tables.EH_FORUM_POSTS.CATEGORY_PATH.like(contentCatogry.getPath() + "%"));
+                	 }
+                	 
+                 }
+                 
+                 
+			}
+           
         }
         
+        Condition actionCategoryCondition = null;
         if(actionCategoryId != null && actionCategoryId.longValue() > 0) {
             Category actionCategory = this.categoryProvider.findCategoryById(actionCategoryId);
             if(actionCategory != null) {
-                Condition tempCondition = ForumPostCustomField.ACTION_CATEGORY_PATH.getField().like(actionCategory.getPath() + "%");
-                if(categoryCondition != null) {
-                    categoryCondition = categoryCondition.and(tempCondition);
-                } else {
-                    categoryCondition = tempCondition;
-                }
+            	actionCategoryCondition = ForumPostCustomField.ACTION_CATEGORY_PATH.getField().like(actionCategory.getPath() + "%");
             }
+        }
+        
+        Condition categoryCondition = null;
+        if(null != contentCategoryCondition){
+        	if(null !=  actionCategoryCondition){
+        		categoryCondition = contentCategoryCondition.and(actionCategoryCondition);
+        	}else{
+        		categoryCondition = contentCategoryCondition;
+        	}
         }
         
         return categoryCondition;
@@ -2951,4 +3073,681 @@ public class ForumServiceImpl implements ForumService {
         response.setPosts(adminPostList);
         return response;
 	}
+
+    @Override
+	public PostDTO createTopicByScene(NewTopicBySceneCommand cmd) {
+	    User user = UserContext.current().getUser();
+	    Long userId = user.getId();
+	    SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+	    
+	    NewTopicCommand topicCmd = ConvertHelper.convert(cmd, NewTopicCommand.class);
+	    
+	    PostEntityTag creatorTag = PostEntityTag.USER;
+	    VisibleRegionType visibleRegionType = null;
+	    Long visibleRegionId = null;
+	    UserCurrentEntityType entityType = UserCurrentEntityType.fromCode(sceneToken.getEntityType());
+	    switch(entityType) {
+	    case COMMUNITY_RESIDENTIAL:
+	    case COMMUNITY_COMMERCIAL:
+	    case COMMUNITY:
+	        visibleRegionType = VisibleRegionType.COMMUNITY;
+	        visibleRegionId = sceneToken.getEntityId();
+	        break;
+	    case FAMILY:
+	        FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
+	        if(family != null) {
+	            visibleRegionType = VisibleRegionType.COMMUNITY;
+	            visibleRegionId = family.getCommunityId();
+	        } else {
+                if(LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("Family not found, sceneToken=" + sceneToken);
+                }
+            }
+	        break;
+	    case ORGANIZATION:
+	    	
+            Organization org = this.organizationProvider.findOrganizationById(sceneToken.getEntityId());
+            if(org != null) {
+            	String orgType = org.getOrganizationType();
+                
+                if(OrganizationType.isGovAgencyOrganization(orgType)) {
+                	if(VisibleRegionType.fromCode(cmd.getVisibleRegionType()) == VisibleRegionType.COMMUNITY){
+        	    		creatorTag = PostEntityTag.fromCode(orgType);
+            			visibleRegionType = VisibleRegionType.COMMUNITY;
+                        visibleRegionId = cmd.getVisibleRegionId();
+            		}else{
+            			creatorTag = PostEntityTag.fromCode(orgType);
+                        visibleRegionType = VisibleRegionType.REGION;
+                        visibleRegionId = sceneToken.getEntityId();
+            		}
+                    
+                }
+            } else {
+                if(LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("Organization not found, sceneToken=" + sceneToken);
+                }
+            }
+	        break;
+	    default:
+	        break;
+	    }
+	    
+	    if(creatorTag != null) {
+	        topicCmd.setCreatorTag(creatorTag.getCode());
+	    }
+	    if(visibleRegionType != null) {
+	        topicCmd.setVisibleRegionType(visibleRegionType.getCode());
+	    }
+	    topicCmd.setVisibleRegionId(visibleRegionId);
+	    
+	    return this.createTopic(topicCmd);
+	}
+    
+    @Override
+    public List<TopicFilterDTO> getTopicQueryFilters(GetTopicQueryFilterCommand cmd) {
+        User user = UserContext.current().getUser();
+        Long userId = user.getId();
+        SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+        
+        List<TopicFilterDTO> filterList = null;
+        PostFilterType filterType = PostFilterType.fromCode(cmd.getFilterType());
+        if(filterType != null) {
+            switch(filterType) {
+            case DISCOVERY:
+                filterList = getDiscoveryTopicQueryFilters(user, sceneToken);
+                break;
+            case GA_NOTICE:
+                break;
+            default:
+                LOGGER.error("Unsupported post filter type, cmd=" + cmd + ", sceneToken=" + sceneToken);
+                break;
+            }
+        } else {
+            LOGGER.error("Post filter type is null, cmd=" + cmd + ", sceneToken=" + sceneToken);
+        }
+        
+        return filterList;
+    }
+    
+    /**
+     * 对于发现界面的帖子组件（不管是否是普通人还是物业管理员），通过场景信息构建查帖过滤器
+     * @param sceneToken
+     * @return
+     */
+    private List<TopicFilterDTO> getDiscoveryTopicQueryFilters(User user, SceneTokenDTO sceneToken) {
+        List<TopicFilterDTO> filterList = null;
+        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
+        switch(sceneType) {
+        case DEFAULT: // 普通用户
+            filterList = getDiscoveryTopicQueryFiltersForUser(user, sceneToken);
+            break;
+        case PM_ADMIN: // 物业公司管理员
+            filterList = getDiscoveryTopicQueryFiltersForPmAdmin(user, sceneToken);
+            break;
+        default:
+            LOGGER.error("Unsupported scene type, sceneType=" + sceneType);
+            break;
+        }
+        
+        return filterList;
+    }
+    
+    /**
+     * 组装界面菜单（帖子列表过滤器）：对于发现界面的帖子组件和普通人场景，通过场景信息构建查帖过滤器
+     * @param user 用户信息
+     * @param sceneToken 场景信息
+     * @return 过滤器菜单列表
+     */
+    private List<TopicFilterDTO> getDiscoveryTopicQueryFiltersForUser(User user, SceneTokenDTO sceneToken) {
+        Community community = null;
+        UserCurrentEntityType entityType = UserCurrentEntityType.fromCode(sceneToken.getEntityType());
+        switch(entityType) {
+        case COMMUNITY_RESIDENTIAL:
+        case COMMUNITY_COMMERCIAL:
+        case COMMUNITY:
+            community = communityProvider.findCommunityById(sceneToken.getEntityId());
+            break;
+        case FAMILY:
+            FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
+            if(family != null) {
+                community = communityProvider.findCommunityById(family.getCommunityId());
+            } else {
+                if(LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("Family not found, sceneToken=" + sceneToken);
+                }
+            }
+            break;
+        case ORGANIZATION:
+            LOGGER.error("Unsupported scene of organization for simple user, sceneToken=" + sceneToken);
+            break;
+        default:
+            LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
+            break;
+        }
+        
+        String menuName = null;
+        String scope = ForumLocalStringCode.SCOPE;
+        String code = "";
+        String actionUrl = null;
+        List<TopicFilterDTO> filterList = new ArrayList<TopicFilterDTO>();
+        if(community != null) {
+            long menuId = 1;
+            
+            // 菜单：小区圈
+            long group1Id = menuId++;
+            TopicFilterDTO filterDto = new TopicFilterDTO();
+            filterDto.setId(group1Id);
+            filterDto.setParentId(0L);
+            code = String.valueOf(ForumLocalStringCode.POST_MEMU_COMMUNITY_GROUP);
+            menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
+            filterDto.setName(menuName);
+            filterDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());
+            filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());;
+            filterList.add(filterDto);
+
+            // 菜单：周边小区
+            filterDto = new TopicFilterDTO();
+            filterDto.setId(menuId++);
+            filterDto.setParentId(group1Id);
+            code = String.valueOf(ForumLocalStringCode.POST_MEMU_COMMUNITY_NEARBY);
+            menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
+            filterDto.setName(menuName);
+            filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
+            filterDto.setDefaultFlag(SelectorBooleanFlag.TRUE.getCode());; // 整组菜单只有一个是默认的
+            actionUrl = String.format("%s%s?forumId=%s&visibilityScope=%s&communityId=%d", serverContectPath, 
+                "/forum/listTopics", community.getDefaultForumId(), VisibilityScope.NEARBY_COMMUNITIES.getCode(), community.getId());
+            filterDto.setActionUrl(actionUrl);
+            filterList.add(filterDto);
+
+            // 菜单：本小区
+            filterDto = new TopicFilterDTO();
+            filterDto.setId(menuId++);
+            filterDto.setParentId(group1Id);
+            code = String.valueOf(ForumLocalStringCode.POST_MEMU_COMMUNITY_ONLY);
+            menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
+            filterDto.setName(menuName);
+            filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());
+            filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());
+            actionUrl = String.format("%s%s?forumId=%s&visibilityScope=%s&communityId=%d", serverContectPath, 
+                "/forum/listTopics", community.getDefaultForumId(), VisibilityScope.COMMUNITY.getCode(), community.getId());
+            filterDto.setActionUrl(actionUrl);
+            filterList.add(filterDto);
+
+            
+            // 菜单：兴趣圈
+            long group2Id = menuId++;
+            filterDto = new TopicFilterDTO();
+            filterDto.setId(group2Id);
+            filterDto.setParentId(0L);
+            code = String.valueOf(ForumLocalStringCode.POST_MEMU_INTEREST_GROUP);
+            menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
+            filterDto.setName(menuName);
+            filterDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());;
+            filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());;
+            filterList.add(filterDto);
+            
+            ListPublicGroupCommand groupCmd = new ListPublicGroupCommand();
+            groupCmd.setUserId(user.getId());
+            List<GroupDTO> groupList = groupService.listPublicGroups(groupCmd);
+            if(groupList != null && groupList.size() > 0) {
+                for(GroupDTO groupDto : groupList) {
+                    filterDto = new TopicFilterDTO();
+                    filterDto.setId(menuId++);
+                    filterDto.setParentId(group2Id);
+                    filterDto.setName(groupDto.getName());
+                    filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
+                    filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());;
+                    actionUrl = String.format("%s%s?forumId=%s&communityId=%d", serverContectPath, 
+                        "/forum/listTopics", groupDto.getOwningForumId(), community.getId());
+                    filterDto.setActionUrl(actionUrl);
+                    filterList.add(filterDto);
+                }
+            }
+        }
+        
+        return filterList;
+    }
+    
+    /**
+     * 组装界面菜单（帖子列表过滤器）：对于发现界面的帖子组件和物业管理员场景，通过场景信息构建查帖过滤器
+     * @param user 用户信息
+     * @param sceneToken 场景信息
+     * @return 过滤器菜单列表
+     */
+    private List<TopicFilterDTO> getDiscoveryTopicQueryFiltersForPmAdmin(User user, SceneTokenDTO sceneToken) {
+        List<TopicFilterDTO> filterList = new ArrayList<TopicFilterDTO>();
+        UserCurrentEntityType entityType = UserCurrentEntityType.fromCode(sceneToken.getEntityType());
+        if(entityType != UserCurrentEntityType.ORGANIZATION) {
+            LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
+            return filterList;
+        }
+
+        Organization organization = organizationProvider.findOrganizationById(sceneToken.getEntityId());
+        if(organization != null) {
+            String menuName = null;
+            String scope = ForumLocalStringCode.SCOPE;
+            String code = "";
+            String actionUrl = null;            
+            long menuId = 1;
+            
+            // 菜单：公司圈
+            long group1Id = menuId++;
+            TopicFilterDTO filterDto = new TopicFilterDTO();
+            filterDto.setId(group1Id);
+            filterDto.setParentId(0L);
+            code = String.valueOf(ForumLocalStringCode.POST_MEMU_ORGANIZATION_GROUP);
+            menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
+            filterDto.setName(menuName);
+            filterDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());;
+            filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());;
+            filterList.add(filterDto);
+            
+            // 公司全部
+            filterDto = new TopicFilterDTO();
+            filterDto.setId(menuId++);
+            filterDto.setParentId(group1Id);
+            code = String.valueOf(ForumLocalStringCode.POST_MEMU_ALL);
+            menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
+            filterDto.setName(menuName);
+            filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
+            filterDto.setDefaultFlag(SelectorBooleanFlag.TRUE.getCode());; // 整组菜单只有一个是默认的
+            actionUrl = String.format("%s%s?organizationId=%d&mixType=%d", serverContectPath, 
+                "/org/listOrgMixTopics", organization.getId(), OrganizationTopicMixType.CHILDREN_ALL.getCode());
+            filterDto.setActionUrl(actionUrl);
+            filterList.add(filterDto);
+            
+            // 本公司
+            filterDto = new TopicFilterDTO();
+            filterDto.setId(menuId++);
+            filterDto.setParentId(group1Id);
+            filterDto.setName(organization.getName());
+            filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
+            filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());;
+            Group group = groupProvider.findGroupById(organization.getGroupId());
+            if(group != null) {
+                actionUrl = String.format("%s%s?forumId=%d", serverContectPath, 
+                    "/forum/listTopics", group.getOwningForumId());
+                filterDto.setActionUrl(actionUrl);
+            }
+            filterList.add(filterDto);
+
+            // 子公司
+            List<String> groupTypes = new ArrayList<String>();
+            groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+            List<Organization> subOrgList = organizationProvider.listOrganizationByGroupTypes(organization.getPath() + "/%", groupTypes);
+            if(subOrgList != null && subOrgList.size() > 0) {
+                for(Organization subOrg : subOrgList) {
+                    filterDto = new TopicFilterDTO();
+                    filterDto.setId(menuId++);
+                    filterDto.setParentId(group1Id);
+                    filterDto.setName(subOrg.getName());
+                    filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
+                    filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());;
+                    group = groupProvider.findGroupById(subOrg.getGroupId());
+                    if(group != null) {
+                        actionUrl = String.format("%s%s?forumId=%d", serverContectPath, 
+                            "/forum/listTopics", group.getOwningForumId());
+                        filterDto.setActionUrl(actionUrl);
+                    }
+                    filterList.add(filterDto);
+                }
+            }
+            
+            // 所管理的小区
+            long group2Id = menuId++;
+            filterDto = new TopicFilterDTO();
+            filterDto.setId(group2Id);
+            filterDto.setParentId(0L);
+            code = String.valueOf(ForumLocalStringCode.POST_MEMU_COMMUNITY_GROUP);
+            menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
+            filterDto.setName(menuName);
+            filterDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());;
+            filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());;
+            filterList.add(filterDto);
+            
+            // 公司管理的全部小区
+            filterDto = new TopicFilterDTO();
+            filterDto.setId(menuId++);
+            filterDto.setParentId(group1Id);
+            code = String.valueOf(ForumLocalStringCode.POST_MEMU_ALL);
+            menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
+            filterDto.setName(menuName);
+            filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
+            filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());;
+            actionUrl = String.format("%s%s?organizationId=%d&mixType=%d", serverContectPath, 
+                "/org/listOrgMixTopics", organization.getId(), OrganizationTopicMixType.COMMUNITY_ALL.getCode());
+            filterDto.setActionUrl(actionUrl);
+            filterList.add(filterDto);
+            
+            // 公司管理的单个小区
+            List<OrganizationCommunity> organizationCommunitys = organizationProvider.listOrganizationCommunities(organization.getId());
+            for(OrganizationCommunity orgCmnty : organizationCommunitys) {
+                Community community = communityProvider.findCommunityById(orgCmnty.getCommunityId());
+                if(community != null) {
+                    filterDto = new TopicFilterDTO();
+                    filterDto.setId(menuId++);
+                    filterDto.setParentId(group2Id);
+                    filterDto.setName(community.getName());
+                    filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
+                    filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());; 
+                    actionUrl = String.format("%s%s?forumId=%d", serverContectPath, 
+                        "/forum/listTopics", community.getDefaultForumId());
+                    filterDto.setActionUrl(actionUrl);
+                    filterList.add(filterDto);
+                } else {
+                    LOGGER.warn("Community not found, sceneToken=" + sceneToken + ", organizationId=" + organization.getId());
+                }
+            }
+        }
+        
+        return filterList;
+    }
+    
+    @Override
+    public List<TopicScopeDTO> getTopicSentScopes(GetTopicSentScopeCommand cmd) {
+        User user = UserContext.current().getUser();
+        Long userId = user.getId();
+        SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+        
+        List<TopicScopeDTO> sentScopeList = null;
+        PostSentScopeType sentScopeType = PostSentScopeType.fromCode(cmd.getScopeType());
+        if(sentScopeType != null) {
+            switch(sentScopeType) {
+            case DISCOVERY:
+                sentScopeList = getDiscoveryTopicSentScopes(user, sceneToken);
+                break;
+            case GA:
+                break;
+            default:
+                LOGGER.error("Unsupported post filter type, cmd=" + cmd + ", sceneToken=" + sceneToken);
+                break;
+            }
+        } else {
+            LOGGER.error("Post filter type is null, cmd=" + cmd + ", sceneToken=" + sceneToken);
+        }
+        
+        return sentScopeList;
+    }
+    
+    /**
+     * 对于发现界面的帖子组件（不管是否是普通人还是物业管理员），通过场景信息构建发帖范围
+     * @param sceneToken
+     * @return
+     */
+    private List<TopicScopeDTO> getDiscoveryTopicSentScopes(User user, SceneTokenDTO sceneToken) {
+        List<TopicScopeDTO> sentScopeList = null;
+        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
+        switch(sceneType) {
+        case DEFAULT: // 普通用户
+            sentScopeList = getDiscoveryTopicSentScopeForUser(user, sceneToken);
+            break;
+        case PM_ADMIN: // 物业公司管理员
+            sentScopeList = getDiscoveryTopicSentScopesForPmAdmin(user, sceneToken);
+            break;
+        default:
+            LOGGER.error("Unsupported scene type, sceneType=" + sceneType);
+            break;
+        }
+        
+        return sentScopeList;
+    }
+
+    
+    /**
+     * 组装界面菜单（帖子发送范围）：对于发现界面的帖子组件和普通人场景，通过场景信息构建发送范围
+     * @param user 用户信息
+     * @param sceneTokenDto 场景信息
+     * @return 发送范围菜单列表
+     */
+    private List<TopicScopeDTO> getDiscoveryTopicSentScopeForUser(User user, SceneTokenDTO sceneTokenDto) {
+        Community community = null;
+        UserCurrentEntityType entityType = UserCurrentEntityType.fromCode(sceneTokenDto.getEntityType());
+        switch(entityType) {
+        case COMMUNITY_RESIDENTIAL:
+        case COMMUNITY_COMMERCIAL:
+        case COMMUNITY:
+            community = communityProvider.findCommunityById(sceneTokenDto.getEntityId());
+            break;
+        case FAMILY:
+            FamilyDTO family = familyProvider.getFamilyById(sceneTokenDto.getEntityId());
+            if(family != null) {
+                community = communityProvider.findCommunityById(family.getCommunityId());
+            } else {
+                if(LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("Family not found, sceneToken=" + sceneTokenDto);
+                }
+            }
+            break;
+        case ORGANIZATION:
+            LOGGER.error("Unsupported scene of organization for simple user, sceneToken=" + sceneTokenDto);
+            break;
+        default:
+            LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneTokenDto);
+            break;
+        }
+        
+        String menuName = null;
+        String scope = ForumLocalStringCode.SCOPE;
+        String code = "";
+        List<TopicScopeDTO> filterList = new ArrayList<TopicScopeDTO>();
+        if(community != null) {
+            String sceneToken = WebTokenGenerator.getInstance().toWebToken(sceneTokenDto);
+            long menuId = 1;
+            
+            // 菜单：小区圈
+            long group1Id = menuId++;
+            TopicScopeDTO sentScopeDto = new TopicScopeDTO();
+            sentScopeDto.setId(group1Id);
+            sentScopeDto.setParentId(0L);
+            code = String.valueOf(ForumLocalStringCode.POST_MEMU_COMMUNITY_GROUP);
+            menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
+            sentScopeDto.setName(menuName);
+            sentScopeDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());;
+            filterList.add(sentScopeDto);
+
+            // 菜单：周边小区
+            sentScopeDto = new TopicScopeDTO();
+            sentScopeDto.setId(menuId++);
+            sentScopeDto.setParentId(group1Id);
+            code = String.valueOf(ForumLocalStringCode.POST_MEMU_COMMUNITY_NEARBY);
+            menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
+            sentScopeDto.setName(menuName);
+            sentScopeDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
+            sentScopeDto.setForumId(community.getDefaultForumId());
+            sentScopeDto.setSceneToken(sceneToken);
+            sentScopeDto.setTargetTag(PostEntityTag.USER.getCode());
+            filterList.add(sentScopeDto);
+
+            // 菜单：本小区
+            sentScopeDto = new TopicScopeDTO();
+            sentScopeDto.setId(menuId++);
+            sentScopeDto.setParentId(group1Id);
+            code = String.valueOf(ForumLocalStringCode.POST_MEMU_COMMUNITY_ONLY);
+            menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
+            sentScopeDto.setName(menuName);
+            sentScopeDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
+            sentScopeDto.setForumId(community.getDefaultForumId());
+            sentScopeDto.setSceneToken(sceneToken);
+            sentScopeDto.setTargetTag(PostEntityTag.USER.getCode());
+            filterList.add(sentScopeDto);
+
+            
+            // 菜单：兴趣圈
+            long group2Id = menuId++;
+            sentScopeDto = new TopicScopeDTO();
+            sentScopeDto.setId(group2Id);
+            sentScopeDto.setParentId(0L);
+            code = String.valueOf(ForumLocalStringCode.POST_MEMU_INTEREST_GROUP);
+            menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
+            sentScopeDto.setName(menuName);
+            sentScopeDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());;
+            filterList.add(sentScopeDto);
+            
+            ListPublicGroupCommand groupCmd = new ListPublicGroupCommand();
+            groupCmd.setUserId(user.getId());
+            List<GroupDTO> groupList = groupService.listPublicGroups(groupCmd);
+            if(groupList != null && groupList.size() > 0) {
+                for(GroupDTO groupDto : groupList) {
+                    sentScopeDto = new TopicScopeDTO();
+                    sentScopeDto.setId(menuId++);
+                    sentScopeDto.setParentId(group2Id);
+                    sentScopeDto.setName(groupDto.getName());
+                    sentScopeDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
+                    sentScopeDto.setForumId(groupDto.getOwningForumId());
+                    sentScopeDto.setSceneToken(sceneToken);
+                    sentScopeDto.setTargetTag(PostEntityTag.USER.getCode());
+                    filterList.add(sentScopeDto);
+                }
+            }
+        }
+        
+        return filterList;
+    }
+    
+    /**
+     * 组装界面菜单（帖子发送范围列表）：对于发现界面的帖子组件和物业管理员场景，通过场景信息构建发送范围
+     * @param user 用户信息
+     * @param sceneTokenDto 场景信息
+     * @return 发送范围菜单列表
+     */
+    private List<TopicScopeDTO> getDiscoveryTopicSentScopesForPmAdmin(User user, SceneTokenDTO sceneTokenDto) {
+        List<TopicScopeDTO> sentScopeList = new ArrayList<TopicScopeDTO>();
+        UserCurrentEntityType entityType = UserCurrentEntityType.fromCode(sceneTokenDto.getEntityType());
+        if(entityType != UserCurrentEntityType.ORGANIZATION) {
+            LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneTokenDto);
+            return sentScopeList;
+        }
+
+        Organization organization = organizationProvider.findOrganizationById(sceneTokenDto.getEntityId());
+        if(organization != null) {
+            String sceneToken = WebTokenGenerator.getInstance().toWebToken(sceneTokenDto);
+            String menuName = null;
+            String scope = ForumLocalStringCode.SCOPE;
+            String code = "";      
+            long menuId = 1;
+            
+            // 菜单：公司圈
+            long group1Id = menuId++;
+            TopicScopeDTO sentScopeDto = new TopicScopeDTO();
+            sentScopeDto.setId(group1Id);
+            sentScopeDto.setParentId(0L);
+            code = String.valueOf(ForumLocalStringCode.POST_MEMU_ORGANIZATION_GROUP);
+            menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
+            sentScopeDto.setName(menuName);
+            sentScopeDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());;
+            sentScopeList.add(sentScopeDto);
+            
+            // 本公司
+            sentScopeDto = new TopicScopeDTO();
+            sentScopeDto.setId(menuId++);
+            sentScopeDto.setParentId(group1Id);
+            sentScopeDto.setName(organization.getName());
+            sentScopeDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
+            Group groupDto = groupProvider.findGroupById(organization.getGroupId());
+            if(groupDto != null) {
+                sentScopeDto.setForumId(groupDto.getOwningForumId());
+                sentScopeDto.setSceneToken(sceneToken);
+                sentScopeDto.setTargetTag(PostEntityTag.USER.getCode());
+            }
+            sentScopeList.add(sentScopeDto);
+
+            // 子公司
+            List<String> groupTypes = new ArrayList<String>();
+            groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+            List<Organization> subOrgList = organizationProvider.listOrganizationByGroupTypes(organization.getPath() + "/%", groupTypes);
+            if(subOrgList != null && subOrgList.size() > 0) {
+                for(Organization subOrg : subOrgList) {
+                    sentScopeDto = new TopicScopeDTO();
+                    sentScopeDto.setId(menuId++);
+                    sentScopeDto.setParentId(group1Id);
+                    sentScopeDto.setName(subOrg.getName());
+                    sentScopeDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
+                    groupDto = groupProvider.findGroupById(subOrg.getGroupId());
+                    if(groupDto != null) {
+                        sentScopeDto.setForumId(groupDto.getOwningForumId());
+                        sentScopeDto.setSceneToken(sceneToken);
+                        sentScopeDto.setTargetTag(PostEntityTag.USER.getCode());
+                    }
+                    sentScopeList.add(sentScopeDto);
+                }
+            }
+            
+            // 所管理的小区
+            long group2Id = menuId++;
+            sentScopeDto = new TopicScopeDTO();
+            sentScopeDto.setId(group2Id);
+            sentScopeDto.setParentId(0L);
+            code = String.valueOf(ForumLocalStringCode.POST_MEMU_COMMUNITY_GROUP);
+            menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
+            sentScopeDto.setName(menuName);
+            sentScopeDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());;
+            sentScopeList.add(sentScopeDto);
+            
+            // 公司管理的单个小区
+            List<OrganizationCommunity> organizationCommunitys = organizationProvider.listOrganizationCommunities(organization.getId());
+            for(OrganizationCommunity orgCmnty : organizationCommunitys) {
+                Community community = communityProvider.findCommunityById(orgCmnty.getCommunityId());
+                if(community != null) {
+                    sentScopeDto = new TopicScopeDTO();
+                    sentScopeDto.setId(menuId++);
+                    sentScopeDto.setParentId(group2Id);
+                    sentScopeDto.setName(community.getName());
+                    sentScopeDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
+                    sentScopeDto.setForumId(groupDto.getOwningForumId());
+                    sentScopeDto.setSceneToken(sceneToken);
+                    sentScopeDto.setTargetTag(PostEntityTag.USER.getCode());
+                    sentScopeList.add(sentScopeDto);
+                } else {
+                    LOGGER.warn("Community not found, sceneToken=" + sceneToken + ", organizationId=" + organization.getId());
+                }
+            }
+        }
+        
+        return sentScopeList;
+    }    
+    
+    @Override
+    public ListPostCommandResponse listTopicsByForums(ListTopicByForumCommand cmd) {
+        User user = UserContext.current().getUser();
+        Long userId = user.getId();
+        Long communityId = cmd.getCommunityId();
+        
+        List<Long> forumIdList = cmd.getForumIdList();
+        if(forumIdList.size() > 0) {
+            CrossShardListingLocator[] locators = new CrossShardListingLocator[forumIdList.size()];
+            for(int i = 0; i < forumIdList.size(); i++) {
+                Long forumId = forumIdList.get(i);
+                locators[i] = new CrossShardListingLocator(forumId);
+                locators[i].setAnchor(cmd.getPageAnchor());
+            }
+            
+            List<Post> posts = forumProvider.queryPosts(locators, 10000, cmd.getPageSize(), (loc, query) -> {
+                query.addJoin(Tables.EH_FORUM_ASSIGNED_SCOPES, JoinType.LEFT_OUTER_JOIN, 
+                    Tables.EH_FORUM_ASSIGNED_SCOPES.OWNER_ID.eq(Tables.EH_FORUM_POSTS.ID));
+                query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
+                query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+                
+                return query;
+            }, new PostCreateTimeDescComparator());
+            
+            this.forumProvider.populatePostAttachments(posts);
+            
+            Long nextPageAnchor = null;
+            if(posts.size() > cmd.getPageSize()) {
+                posts.remove(posts.size() - 1);
+                nextPageAnchor = posts.get(posts.size() - 1).getId();
+            }
+            
+            populatePosts(userId, posts, communityId, false);
+            
+            List<PostDTO> postDtoList = posts.stream().map((r) -> {
+              return ConvertHelper.convert(r, PostDTO.class);  
+            }).collect(Collectors.toList());
+            
+            
+            return new ListPostCommandResponse(nextPageAnchor, postDtoList);
+        }
+        
+        return null;
+    }
 }

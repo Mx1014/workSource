@@ -1,0 +1,19 @@
+//
+// EvhRecommendStatus.h
+// generated at 2016-04-07 17:57:43 
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhRecommendStatus
+//
+typedef enum {
+
+    EvhRecommendStatus_TIMEOUT = 2, 
+    EvhRecommendStatus_IGNORE = 1, 
+    EvhRecommendStatus_OK = 0
+
+} EvhRecommendStatus;
+
+///////////////////////////////////////////////////////////////////////////////
+

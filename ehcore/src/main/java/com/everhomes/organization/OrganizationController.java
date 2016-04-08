@@ -11,19 +11,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.entity.EntityType;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.enterprise.EnterpriseDTO;
 import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
 import com.everhomes.rest.enterprise.ListUserRelatedEnterprisesCommand;
-import com.everhomes.rest.enterprise.SearchEnterpriseCommand;
-import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
 import com.everhomes.rest.forum.CancelLikeTopicCommand;
 import com.everhomes.rest.forum.GetTopicCommand;
 import com.everhomes.rest.forum.LikeTopicCommand;
+import com.everhomes.rest.forum.ListOrgMixTopicCommand;
 import com.everhomes.rest.forum.ListPostCommandResponse;
 import com.everhomes.rest.forum.ListTopicCommand;
 import com.everhomes.rest.forum.ListTopicCommentCommand;
@@ -87,6 +88,9 @@ public class OrganizationController extends ControllerBase {
 	
 	@Autowired
 	private OrganizationSearcher organizationSearcher;
+	
+	@Autowired
+	private RolePrivilegeService rolePrivilegeService;
 
 	/**
 	 * <b>URL: /org/getUserOwningOrganizations</b>
@@ -264,6 +268,14 @@ public class OrganizationController extends ControllerBase {
 	@RequestMapping("queryOrgTopicsByCategory")
 	@RestReturn(value=ListPostCommandResponse.class)
 	public RestResponse queryOrgTopicsByCategory(QueryOrganizationTopicCommand cmd) {
+		
+		/*是PM_ADMIN的场景下*/
+		if(null != cmd.getOrganizationId()){
+			/**
+			 * 校验权限
+			 */
+			rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.NoticeManagementPost);
+		}
 		ListPostCommandResponse  cmdResponse = organizationService.queryTopicsByCategory(cmd);
 		RestResponse response = new RestResponse(cmdResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -285,6 +297,21 @@ public class OrganizationController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+    /**
+     * <b>URL: /org/listOrgMixTopics</b>
+     * <p>查询指定机构的所有帖子列表</p>
+     */
+    //checked
+    @RequestMapping("listOrgMixTopics")
+    @RestReturn(value=ListPostCommandResponse.class)
+    public RestResponse listOrgMixTopics(ListOrgMixTopicCommand cmd) {
+        ListPostCommandResponse cmdResponse = organizationService.listOrgMixTopics(cmd);
+        RestResponse response = new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 	/**
 	 * <b>URL: /org/deleteOrgTopic</b>

@@ -16,6 +16,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.launchpad.LaunchPadService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.launchpad.GetLaunchPadItemsCommandResponse;
 import com.everhomes.rest.launchpad.LaunchPadLayoutDTO;
@@ -35,8 +36,13 @@ import com.everhomes.util.EtagHelper;
 public class LauchPadUiController extends ControllerBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(LauchPadUiController.class);
     
+    private static final String MARKETDATA_ITEM_VERSION = "marketdata.item.version";
+    
     @Autowired
     private ConfigurationProvider configurationProvider;
+    
+    @Autowired
+    private LaunchPadService launchPadService;
  
     /**
      * <b>URL: /ui/launchpad/getLaunchPadItemsByScene</b>
@@ -46,10 +52,10 @@ public class LauchPadUiController extends ControllerBase {
     @RestReturn(value=GetLaunchPadItemsCommandResponse.class)
     public RestResponse getLaunchPadItemsByScene(@Valid GetLaunchPadItemsBySceneCommand cmd,HttpServletRequest request,HttpServletResponse response) {
         
-        GetLaunchPadItemsCommandResponse commandResponse = null;//launchPadService.getLaunchPadItems(cmd,request);
+        GetLaunchPadItemsCommandResponse commandResponse = launchPadService.getLaunchPadItemsByScene(cmd, request);
         RestResponse resp =  new RestResponse(commandResponse);
 //        if(commandResponse.getLaunchPadItems() != null && !commandResponse.getLaunchPadItems().isEmpty()){
-//            //int hashCode = configurationProvider.getIntValue(MARKETDATA_ITEM_VERSION, 0);
+//            int hashCode = configurationProvider.getIntValue(MARKETDATA_ITEM_VERSION, 0);
 //            int resultCode = commandResponse.hashCode();
 //            LOGGER.info("result code : " + resultCode);
 //            if(EtagHelper.checkHeaderEtagOnly(30,resultCode+"", request, response)) {
@@ -70,7 +76,7 @@ public class LauchPadUiController extends ControllerBase {
     @RestReturn(value=LaunchPadLayoutDTO.class)
     public RestResponse getLastLaunchPadLayoutByScene(@Valid GetLaunchPadLayoutBySceneCommand cmd, HttpServletRequest request,HttpServletResponse response) {
         
-        LaunchPadLayoutDTO launchPadLayoutDTO = null;//this.launchPadService.getLastLaunchPadLayoutByVersionCode(cmd);
+        LaunchPadLayoutDTO launchPadLayoutDTO = this.launchPadService.getLastLaunchPadLayoutByScene(cmd);
         RestResponse resp =  new RestResponse();
         if(launchPadLayoutDTO != null){
             long hashCode = launchPadLayoutDTO.getVersionCode();

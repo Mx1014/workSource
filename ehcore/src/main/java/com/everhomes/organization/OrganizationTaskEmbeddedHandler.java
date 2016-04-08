@@ -66,11 +66,11 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 			task.setOrganizationType(organization.getOrganizationType());
 			task.setApplyEntityType(OrganizationTaskApplyEnityType.TOPIC.getCode());
 			task.setApplyEntityId(0L); // 还没有帖子ID
-			task.setTargetType(post.getTargetTag());
-			if(post.getTargetTag().equals(PostEntityTag.USER.getCode()))
-				task.setTargetId(post.getCreatorUid() == null ? 0L:post.getCreatorUid());
-			else
-				task.setTargetId(organization.getId());
+			task.setTargetType(null);
+//			if(post.getTargetTag().equals(PostEntityTag.USER.getCode()))
+//				task.setTargetId(post.getCreatorUid() == null ? 0L:post.getCreatorUid());
+//			else
+				task.setTargetId(0l);
 			task.setCreatorUid(post.getCreatorUid() == null ? 0L:post.getCreatorUid());
 			task.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			task.setUnprocessedTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -82,6 +82,8 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 
 			task.setTaskStatus(OrganizationTaskStatus.UNPROCESSED.getCode());
 			task.setOperatorUid(0L);
+			task.setVisibleRegionId(post.getVisibleRegionId());
+			task.setVisibleRegionType(post.getVisibleRegionType());
 			this.organizationProvider.createOrganizationTask(task);
 			post.setEmbeddedId(task.getId());
 			/*if(LOGGER.isDebugEnabled()) {
@@ -184,6 +186,9 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 			}
 			if(contentCategoryId == CategoryConstants.CATEGORY_ID_MAINTENANCE) {
 				return OrganizationTaskType.MAINTENANCE;
+			}
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_EMERGENCY_HELP){
+				return OrganizationTaskType.EMERGENCY_HELP;
 			}
 		}
 

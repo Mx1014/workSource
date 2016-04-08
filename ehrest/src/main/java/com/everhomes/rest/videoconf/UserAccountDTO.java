@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  *  <li>status: 状态 0-失效 1-有效 2-被锁定 </li>
  *  <li>occupyFlag: 使用状态 0-空闲 1-占用 </li>
  *  <li>confId: 账号正在开会时的会议id </li>
+ *  <li>purchaseAuthority: 是否具有购买权限 </li>
  * </ul>
  *
  */
@@ -20,6 +21,8 @@ public class UserAccountDTO {
 	private Byte occupyFlag;
 	
 	private Long confId;
+	
+	private boolean purchaseAuthority;
 
 	public Long getAccountId() {
 		return accountId;
@@ -51,6 +54,14 @@ public class UserAccountDTO {
 
 	public void setConfId(Long confId) {
 		this.confId = confId;
+	}
+
+	public boolean isPurchaseAuthority() {
+		return purchaseAuthority;
+	}
+
+	public void setPurchaseAuthority(boolean purchaseAuthority) {
+		this.purchaseAuthority = purchaseAuthority;
 	}
 
 	@Override

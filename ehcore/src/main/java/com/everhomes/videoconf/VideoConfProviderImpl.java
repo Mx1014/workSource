@@ -10,12 +10,16 @@ import java.util.Set;
 
 
 
+
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.jooq.tools.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+
 
 
 
@@ -104,16 +108,17 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 	}
 
 	@Override
-	public List<ConfAccountCategories> listConfAccountCategories(Byte channelType, Byte confType, int pageOffset,int pageSize) {
+	public List<ConfAccountCategories> listConfAccountCategories(Byte confType, Byte isOnline, int pageOffset,int pageSize) {
 		
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhConfAccountCategories.class));
 		List<ConfAccountCategories> rules = new ArrayList<ConfAccountCategories>();
 		SelectQuery<EhConfAccountCategoriesRecord> query = context.selectQuery(Tables.EH_CONF_ACCOUNT_CATEGORIES);
-		if(channelType != null)
-			query.addConditions(Tables.EH_CONF_ACCOUNT_CATEGORIES.CHANNEL_TYPE.eq(channelType));
 
 		if(confType != null)
 			query.addConditions(Tables.EH_CONF_ACCOUNT_CATEGORIES.CONF_TYPE.eq(confType));
+		
+		if(isOnline != null)
+			query.addConditions(Tables.EH_CONF_ACCOUNT_CATEGORIES.DISPLAY_FLAG.eq(isOnline));
 		
 		query.addLimit(pageOffset, pageSize);
 
@@ -121,10 +126,11 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 
 			ConfAccountCategories rule = new ConfAccountCategories();
 			rule.setId(r.getValue(Tables.EH_CONF_ACCOUNT_CATEGORIES.ID));
-			rule.setChannelType(r.getValue(Tables.EH_CONF_ACCOUNT_CATEGORIES.CHANNEL_TYPE));
+			rule.setMultipleAccountThreshold(r.getValue(Tables.EH_CONF_ACCOUNT_CATEGORIES.MULTIPLE_ACCOUNT_THRESHOLD));
 			rule.setConfType(r.getValue(Tables.EH_CONF_ACCOUNT_CATEGORIES.CONF_TYPE));
 			rule.setMinPeriod(r.getValue(Tables.EH_CONF_ACCOUNT_CATEGORIES.MIN_PERIOD));
-			rule.setAmount(r.getValue(Tables.EH_CONF_ACCOUNT_CATEGORIES.AMOUNT));
+			rule.setMultipleAccountPrice(r.getValue(Tables.EH_CONF_ACCOUNT_CATEGORIES.MULTIPLE_ACCOUNT_PRICE));
+			rule.setSingleAccountPrice(r.getValue(Tables.EH_CONF_ACCOUNT_CATEGORIES.SINGLE_ACCOUNT_PRICE));
 			
 			rules.add(rule);
 			return null;
@@ -922,7 +928,7 @@ public class VideoConfProviderImpl implements VideoConfProvider {
         }
         this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
             SelectQuery<EhConfAccountsRecord> query = context.selectQuery(Tables.EH_CONF_ACCOUNTS);
-            query.addConditions(Tables.EH_CONF_ACCOUNTS.OWNER_ID.ne(0L));
+ //           query.addConditions(Tables.EH_CONF_ACCOUNTS.OWNER_ID.ne(0L));
             if(locator.getAnchor() != null)
             	query.addConditions(Tables.EH_CONF_ACCOUNTS.ID.gt(locator.getAnchor()));
             
@@ -1325,6 +1331,30 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhConfSourceAccounts.class));
 		EhConfSourceAccountsDao dao = new EhConfSourceAccountsDao(context.configuration());
 		dao.deleteById(id);
+	}
+
+	@Override
+	public void updateInvoice(ConfInvoices invoice) {
+
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        
+		EhConfInvoicesDao dao = new EhConfInvoicesDao(context.configuration());
+        dao.update(invoice);
+	}
+
+	@Override
+	public int countEnterpriseAccounts(Long enterpriseId) {
+
+		final Integer[] count = new Integer[1];
+		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhConfAccounts.class), null, 
+                (DSLContext context, Object reducingContext)-> {
+                    count[0] = context.selectCount().from(Tables.EH_CONF_ACCOUNTS)
+                    		.where(Tables.EH_CONF_ACCOUNTS.ENTERPRISE_ID.eq(enterpriseId))
+                            .and(Tables.EH_CONF_ACCOUNTS.DELETE_UID.eq(0L))
+                            .fetchOneInto(Integer.class);
+                    return true;
+                });
+		return count[0];
 	}
 	
 	

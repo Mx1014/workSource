@@ -248,6 +248,7 @@ public class CommunityServiceImpl implements CommunityService {
 			this.communityProvider.updateCommunity(community);
 
 			List<CommunityGeoPointDTO> geoList = cmd.getGeoPointList();
+			
 			if(geoList != null && geoList.size() > 0){
 
 				List<CommunityGeoPoint> geoPointList = this.communityProvider.listCommunityGeoPoints(cmd.getCommunityId());
@@ -1234,10 +1235,9 @@ public class CommunityServiceImpl implements CommunityService {
 		CountCommunityUserResponse resp = new CountCommunityUserResponse();
 		resp.setCommunityUsers(communityUserCount);
 		resp.setAuthUsers(authUserCount);
+
 		resp.setNotAuthUsers(notAuthUsers);
 
 		return resp;
 	}
-	
-
 }

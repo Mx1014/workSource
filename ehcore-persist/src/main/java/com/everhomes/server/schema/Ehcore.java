@@ -11,7 +11,11 @@ package com.everhomes.server.schema;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Ehcore extends org.jooq.impl.SchemaImpl {
 
+<<<<<<< HEAD
 	private static final long serialVersionUID = 130374630;
+=======
+	private static final long serialVersionUID = -1774897763;
+>>>>>>> 3.3.x
 
 	/**
 	 * The singleton instance of <code>ehcore</code>
@@ -34,10 +38,14 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 
 	private final java.util.List<org.jooq.Table<?>> getTables0() {
 		return java.util.Arrays.<org.jooq.Table<?>>asList(
+			com.everhomes.server.schema.tables.EhAclinks.EH_ACLINKS,
+			com.everhomes.server.schema.tables.EhAclinkUndoKey.EH_ACLINK_UNDO_KEY,
 			com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES,
 			com.everhomes.server.schema.tables.EhActivityRoster.EH_ACTIVITY_ROSTER,
 			com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES,
 			com.everhomes.server.schema.tables.EhAddressMessages.EH_ADDRESS_MESSAGES,
+			com.everhomes.server.schema.tables.EhAesServerKey.EH_AES_SERVER_KEY,
+			com.everhomes.server.schema.tables.EhAesUserKey.EH_AES_USER_KEY,
 			com.everhomes.server.schema.tables.EhAppPromotions.EH_APP_PROMOTIONS,
 			com.everhomes.server.schema.tables.EhAuditLogs.EH_AUDIT_LOGS,
 			com.everhomes.server.schema.tables.EhBanners.EH_BANNERS,
@@ -72,6 +80,9 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhContentServerResources.EH_CONTENT_SERVER_RESOURCES,
 			com.everhomes.server.schema.tables.EhCooperationRequests.EH_COOPERATION_REQUESTS,
 			com.everhomes.server.schema.tables.EhDevices.EH_DEVICES,
+			com.everhomes.server.schema.tables.EhDoorAccess.EH_DOOR_ACCESS,
+			com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH,
+			com.everhomes.server.schema.tables.EhDoorCommand.EH_DOOR_COMMAND,
 			com.everhomes.server.schema.tables.EhEnterpriseAddresses.EH_ENTERPRISE_ADDRESSES,
 			com.everhomes.server.schema.tables.EhEnterpriseAttachments.EH_ENTERPRISE_ATTACHMENTS,
 			com.everhomes.server.schema.tables.EhEnterpriseCommunityMap.EH_ENTERPRISE_COMMUNITY_MAP,
@@ -132,6 +143,7 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhOrganizationOwners.EH_ORGANIZATION_OWNERS,
 			com.everhomes.server.schema.tables.EhOrganizationRoleMap.EH_ORGANIZATION_ROLE_MAP,
 			com.everhomes.server.schema.tables.EhOrganizationTasks.EH_ORGANIZATION_TASKS,
+			com.everhomes.server.schema.tables.EhOwnerDoors.EH_OWNER_DOORS,
 			com.everhomes.server.schema.tables.EhParkApplyCard.EH_PARK_APPLY_CARD,
 			com.everhomes.server.schema.tables.EhParkCharge.EH_PARK_CHARGE,
 			com.everhomes.server.schema.tables.EhPolls.EH_POLLS,
@@ -203,6 +215,8 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhVersionUpgradeRules.EH_VERSION_UPGRADE_RULES,
 			com.everhomes.server.schema.tables.EhVersionUrls.EH_VERSION_URLS,
 			com.everhomes.server.schema.tables.EhWarningContacts.EH_WARNING_CONTACTS,
+			com.everhomes.server.schema.tables.EhWebMenus.EH_WEB_MENUS,
+			com.everhomes.server.schema.tables.EhWebMenuPrivileges.EH_WEB_MENU_PRIVILEGES,
 			com.everhomes.server.schema.tables.EhYellowPages.EH_YELLOW_PAGES,
 			com.everhomes.server.schema.tables.EhYellowPageAttachments.EH_YELLOW_PAGE_ATTACHMENTS);
 	}

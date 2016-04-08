@@ -1,0 +1,18 @@
+//
+// EvhRecommendUserSourceType.h
+// generated at 2016-04-07 17:57:43 
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhRecommendUserSourceType
+//
+typedef enum {
+
+    EvhRecommendUserSourceType_COMMUNITY_USER = 0, 
+    EvhRecommendUserSourceType_CONTACT_USER = 1
+
+} EvhRecommendUserSourceType;
+
+///////////////////////////////////////////////////////////////////////////////
+

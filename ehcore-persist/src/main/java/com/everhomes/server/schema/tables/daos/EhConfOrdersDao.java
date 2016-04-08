@@ -151,4 +151,32 @@ public class EhConfOrdersDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfOrders> fetchByNamespaceId(java.lang.Integer... values) {
 		return fetch(com.everhomes.server.schema.tables.EhConfOrders.EH_CONF_ORDERS.NAMESPACE_ID, values);
 	}
+
+	/**
+	 * Fetch records that have <code>buyer_name IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfOrders> fetchByBuyerName(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhConfOrders.EH_CONF_ORDERS.BUYER_NAME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>buyer_contact IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfOrders> fetchByBuyerContact(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhConfOrders.EH_CONF_ORDERS.BUYER_CONTACT, values);
+	}
+
+	/**
+	 * Fetch records that have <code>vendor_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfOrders> fetchByVendorType(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhConfOrders.EH_CONF_ORDERS.VENDOR_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>email IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfOrders> fetchByEmail(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhConfOrders.EH_CONF_ORDERS.EMAIL, values);
+	}
 }

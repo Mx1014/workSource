@@ -1,0 +1,19 @@
+//
+// EvhQRCodeStatus.h
+// generated at 2016-04-07 17:57:43 
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhQRCodeStatus
+//
+typedef enum {
+
+    EvhQRCodeStatus_INACTIVE = 0, 
+    EvhQRCodeStatus_WAITING_FOR_CONFIRMATION = 1, 
+    EvhQRCodeStatus_ACTIVE = 2
+
+} EvhQRCodeStatus;
+
+///////////////////////////////////////////////////////////////////////////////
+

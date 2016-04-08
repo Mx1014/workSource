@@ -1,0 +1,33 @@
+//
+// EvhCreateLaunchPadLayoutCommand.h
+// generated at 2016-04-07 17:57:41 
+//
+#import <Foundation/Foundation.h>
+#import "JsonSerializable.h"
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhCreateLaunchPadLayoutCommand
+//
+@interface EvhCreateLaunchPadLayoutCommand
+    : NSObject<EvhJsonSerializable>
+
+
+@property(nonatomic, copy) NSNumber* namespaceId;
+
+@property(nonatomic, copy) NSString* name;
+
+@property(nonatomic, copy) NSString* layoutJson;
+
+@property(nonatomic, copy) NSNumber* versionCode;
+
+@property(nonatomic, copy) NSNumber* minVersionCode;
+
+@property(nonatomic, copy) NSNumber* status;
+
+-(id) init;
++(id) withJsonString: (NSString*) jsonString;
+
+@end
+
+///////////////////////////////////////////////////////////////////////////////
+

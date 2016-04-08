@@ -7,8 +7,8 @@ package com.everhomes.rest.user;
  * <li>COMMUNITY_COMMERCIAL(community_commercial): 商用类型园区</li>
  * <li>COMMUNITY(community): 小区/园区，在使用场景之后合起来客户端操作更方便</li>
  * <li>FAMILY(family): 家庭</li>
- * <li>ORGANIZATION(organization): 机构</li>
- * <li>ENTERPRISE(enterprise): 企业</li>
+ * <li>ORGANIZATION(organization): 机构，在3.3版本以后机构已经与企业合并，不使用ENTERPRISE而使用ORGANIZATION</li>
+ * <li>ENTERPRISE(enterprise): 企业，在3.3版本以后机构已经与企业合并，不使用ENTERPRISE而使用ORGANIZATION</li>
  * </ul>
  */
 public enum UserCurrentEntityType {

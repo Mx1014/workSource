@@ -126,7 +126,7 @@ class.name.prefix: Evh
 
 source.jars: ${EVH_HOME}/ehrest/target/ehrest-3.3.0-SNAPSHOT.jar
 source.excludes: com.everhomes.rest.rpc.*, com.everhomes.rest.RestResponse, com.everhomes.rest.RestResponseBase, com.everhomes.rest.RestVersion
-destination.dir: ${EVH_IOS_HOME}/API-objects/
+destination.dir: ${EVH_IOS_HOME}/ehrest-respios/src/main/ios/API-objects
 destination.dir.java: ${EVH_HOME}/ehrest-response/src/main/java/
 
         

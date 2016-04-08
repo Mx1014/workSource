@@ -16,6 +16,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.forum.ForumService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.forum.ListPostCommandResponse;
 import com.everhomes.rest.forum.PostDTO;
@@ -25,6 +26,7 @@ import com.everhomes.rest.ui.forum.NewTopicBySceneCommand;
 import com.everhomes.rest.ui.forum.SearchTopicBySceneCommand;
 import com.everhomes.rest.ui.forum.TopicFilterDTO;
 import com.everhomes.rest.ui.forum.TopicScopeDTO;
+import com.everhomes.search.PostSearcher;
 
 /**
  * <ul>
@@ -40,6 +42,12 @@ public class ForumUiController extends ControllerBase {
     
     @Autowired
     private ConfigurationProvider configurationProvider;
+    
+    @Autowired
+    private ForumService forumService;
+    
+    @Autowired
+    private PostSearcher postSearcher;
         
     /**
      * <b>URL: /ui/forum/getTopicQueryFilters</b>
@@ -48,7 +56,7 @@ public class ForumUiController extends ControllerBase {
     @RequestMapping("getTopicQueryFilters")
     @RestReturn(value=TopicFilterDTO.class, collection=true)
     public RestResponse getTopicQueryFilters(GetTopicQueryFilterCommand cmd) {
-        List<TopicFilterDTO> filterDtoList = null;
+        List<TopicFilterDTO> filterDtoList = forumService.getTopicQueryFilters(cmd);
         
         RestResponse response = new RestResponse(filterDtoList);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -61,9 +69,9 @@ public class ForumUiController extends ControllerBase {
      * <p>获取全局帖子发送范围。</p>
      */
     @RequestMapping("getTopicSentScopes")
-    @RestReturn(value=TopicScopeDTO.class)
-    public RestResponse getTopicQueryScopes(GetTopicSentScopeCommand cmd) {
-        List<TopicScopeDTO> filterDtoList = null;
+    @RestReturn(value=TopicScopeDTO.class, collection=true)
+    public RestResponse getTopicSentScopes(GetTopicSentScopeCommand cmd) {
+        List<TopicScopeDTO> filterDtoList = forumService.getTopicSentScopes(cmd);
         
         RestResponse response = new RestResponse(filterDtoList);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -78,7 +86,7 @@ public class ForumUiController extends ControllerBase {
     @RequestMapping("newTopicByScene")
     @RestReturn(value=PostDTO.class)
     public RestResponse newTopicByScene(@Valid NewTopicBySceneCommand cmd) {
-        PostDTO postDto = null; //this.forumService.createTopic(cmd);
+        PostDTO postDto = this.forumService.createTopicByScene(cmd);
         
         RestResponse response = new RestResponse(postDto);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -93,7 +101,7 @@ public class ForumUiController extends ControllerBase {
     @RequestMapping("searchByScene")
     @RestReturn(value=ListPostCommandResponse.class)
     public RestResponse searchByScene(SearchTopicBySceneCommand cmd) {
-        ListPostCommandResponse cmdResponse = null;//postSearcher.query(cmd);
+        ListPostCommandResponse cmdResponse = postSearcher.queryByScene(cmd);
         
         RestResponse response = new RestResponse();
         response.setResponseObject(cmdResponse);

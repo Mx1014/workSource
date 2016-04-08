@@ -20,15 +20,16 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.entity.EntityType;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.enterprise.ApproveContactCommand;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.enterprise.ImportEnterpriseDataCommand;
-import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
-import com.everhomes.rest.enterprise.ListEnterpriseByCommunityIdCommand;
 import com.everhomes.rest.enterprise.RejectContactCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
+import com.everhomes.rest.forum.ListPostCommandResponse;
 import com.everhomes.rest.organization.AddOrgAddressCommand;
+import com.everhomes.rest.organization.AddPersonnelsToGroup;
 import com.everhomes.rest.organization.CreateDepartmentCommand;
 import com.everhomes.rest.organization.CreateOrganizationAccountCommand;
 import com.everhomes.rest.organization.CreateOrganizationByAdminCommand;
@@ -46,32 +47,33 @@ import com.everhomes.rest.organization.ListDepartmentsCommand;
 import com.everhomes.rest.organization.ListDepartmentsCommandResponse;
 import com.everhomes.rest.organization.ListEnterprisesCommand;
 import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
+import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
 import com.everhomes.rest.organization.ListOrganizationContactCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.ListOrganizationsCommand;
 import com.everhomes.rest.organization.ListOrganizationsCommandResponse;
-
+import com.everhomes.rest.organization.ListPersonnelNotJoinGroupCommand;
+import com.everhomes.rest.organization.ListPmManagementComunitesCommand;
+import com.everhomes.rest.organization.ListTopicsByTypeCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationDetailDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
-import com.everhomes.rest.organization.SearchTopicsByTypeCommand;
-import com.everhomes.rest.organization.SearchTopicsByTypeResponse;
+import com.everhomes.rest.organization.PmManagementCommunityDTO;
+import com.everhomes.rest.organization.ProcessOrganizationTaskCommand;
 import com.everhomes.rest.organization.SetAclRoleAssignmentCommand;
 import com.everhomes.rest.organization.UpdateOrganizationMemberCommand;
 import com.everhomes.rest.organization.UpdateOrganizationsCommand;
 import com.everhomes.rest.organization.UpdatePersonnelsToDepartment;
 import com.everhomes.rest.organization.VerifyPersonnelByPhoneCommand;
-
 import com.everhomes.rest.organization.pm.AddPmBuildingCommand;
-import com.everhomes.rest.organization.pm.CancelPmBuildingCommand;
+import com.everhomes.rest.organization.pm.DeletePmCommunityCommand;
 import com.everhomes.rest.organization.pm.ListPmBuildingCommand;
 import com.everhomes.rest.organization.pm.ListPmManagementsCommand;
 import com.everhomes.rest.organization.pm.PmBuildingDTO;
 import com.everhomes.rest.organization.pm.PmManagementsResponse;
 import com.everhomes.rest.organization.pm.UnassignedBuildingDTO;
-import com.everhomes.rest.organization.pm.UpdateOrganizationMemberByIdsCommand;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
@@ -282,8 +284,8 @@ public class OrganizationAdminController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /org/addPmBuilding</b>
-     * <p>增加物业楼栋</p>
+     * <b>URL: /admin/org/addPmBuilding</b>
+     * <p>增加物业管辖小区楼栋</p>
      */
     @RequestMapping("addPmBuilding")
     @RestReturn(value=String.class)
@@ -300,17 +302,17 @@ public class OrganizationAdminController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /org/cancelPmBuilding</b>
-     * <p>删除物业楼栋</p>
+     * <b>URL: /admin/org/deletePmCommunity</b>
+     * <p>删除物业管辖小区</p>
      */
-    @RequestMapping("cancelPmBuilding")
+    @RequestMapping("deletePmCommunity")
     @RestReturn(value=String.class)
-    public RestResponse cancelPmBuilding(CancelPmBuildingCommand cmd) {
+    public RestResponse deletePmCommunity(DeletePmCommunityCommand cmd) {
     	
     	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
-    	this.organizationService.cancelPmBuilding(cmd);
+    	this.organizationService.deletePmCommunity(cmd);
     	RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -367,6 +369,25 @@ public class OrganizationAdminController extends ControllerBase {
         
         PmManagementsResponse list = this.organizationService.listPmManagements(cmd);
     	RestResponse response = new RestResponse(list);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/org/listPmManagementComunites</b>
+     * <p>查询物业管理小区列表</p>
+     */
+    
+    @RequestMapping("listPmManagementComunites")
+    @RestReturn(value=PmManagementCommunityDTO.class, collection = true)
+    public RestResponse listPmManagementComunites(ListPmManagementComunitesCommand cmd) {
+    	
+    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+       // resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+    	List<PmManagementCommunityDTO> dtos = this.organizationService.listPmManagementComunites(cmd);
+    	RestResponse response = new RestResponse(dtos);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -645,13 +666,40 @@ public class OrganizationAdminController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /admin/org/addPersonnelsToGroup</b>
+     * <p>批量添加的组</p>
+     */
+    @RequestMapping("addPersonnelsToGroup")
+    @RestReturn(value=String.class, collection=true)
+    public RestResponse addPersonnelsToGroup(@Valid AddPersonnelsToGroup cmd) {
+    	organizationService.addPersonnelsToGroup(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/org/listPersonnelNotJoinGroups</b>
+     * <p>查询未加入组的人员</p>
+     */
+    @RequestMapping("listPersonnelNotJoinGroups")
+    @RestReturn(value=ListOrganizationMemberCommandResponse.class)
+    public RestResponse listPersonnelNotJoinGroups(@Valid ListPersonnelNotJoinGroupCommand cmd) {
+        RestResponse response = new RestResponse(organizationService.listPersonnelNotJoinGroups(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
      * <b>URL: /admin/org/listOrganizationPersonnels</b>
      * <p>通讯录列表</p>
      */
     @RequestMapping("listOrganizationPersonnels")
-    @RestReturn(value=OrganizationMemberDTO.class, collection=true)
+    @RestReturn(value=ListOrganizationMemberCommandResponse.class)
     public RestResponse listOrganizationPersonnels(@Valid ListOrganizationContactCommand cmd) {
-    	ListOrganizationMemberCommandResponse res = organizationService.listOrganizationPersonnels(cmd);
+    	ListOrganizationMemberCommandResponse res = organizationService.listOrganizationPersonnels(cmd,false);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -663,7 +711,7 @@ public class OrganizationAdminController extends ControllerBase {
      * <p>认证通讯录列表</p>
      */
     @RequestMapping("listOrgAuthPersonnels")
-    @RestReturn(value=OrganizationMemberDTO.class, collection=true)
+    @RestReturn(value=ListOrganizationMemberCommandResponse.class)
     public RestResponse listOrgAuthPersonnels(@Valid ListOrganizationContactCommand cmd) {
     	ListOrganizationMemberCommandResponse res = organizationService.listOrgAuthPersonnels(cmd);
         RestResponse response = new RestResponse(res);
@@ -765,7 +813,7 @@ public class OrganizationAdminController extends ControllerBase {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
-        organizationService.createOrganizationAccount(cmd);
+        organizationService.createOrganizationAccount(cmd, RoleConstants.ENTERPRISE_SUPER_ADMIN);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -845,4 +893,91 @@ public class OrganizationAdminController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /admin/org/listMyTaskTopics</b>
+     * <p>我的任务</p>
+     */
+    @RequestMapping("listMyTaskTopics")
+    @RestReturn(value=ListPostCommandResponse.class)
+    public RestResponse listMyTaskTopics(@Valid ListTopicsByTypeCommand cmd) {
+    	ListPostCommandResponse  res = organizationService.listMyTaskTopics(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/org/listAllTaskTopics</b>
+     * <p>全部任务</p>
+     */
+    @RequestMapping("listAllTaskTopics")
+    @RestReturn(value=ListPostCommandResponse.class)
+    public RestResponse listAllTaskTopics(@Valid ListTopicsByTypeCommand cmd) {
+    	ListPostCommandResponse  res = organizationService.listAllTaskTopics(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/org/acceptTask</b>
+     * <p>接受任务</p>
+     */
+     @RequestMapping("acceptTask")
+     @RestReturn(value=String.class)
+     public RestResponse acceptTask(@Valid ProcessOrganizationTaskCommand cmd) {
+ 		organizationService.acceptTask(cmd);
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        
+        return res;
+     }
+     
+     /**
+      * <b>URL: /admin/org/refuseTask</b>
+      * <p>拒绝任务</p>
+      */
+      @RequestMapping("refuseTask")
+      @RestReturn(value=String.class)
+      public RestResponse refuseTask(@Valid ProcessOrganizationTaskCommand cmd) {
+   	      organizationService.refuseTask(cmd);
+    	  RestResponse res = new RestResponse();
+    	  res.setErrorCode(ErrorCodes.SUCCESS);
+    	  res.setErrorDescription("OK");
+         
+         return res;
+      }
+      
+      /**
+       * <b>URL: /admin/org/grabTask</b>
+       * <p>抢单</p>
+       */
+       @RequestMapping("grabTask")
+       @RestReturn(value=String.class)
+       public RestResponse grabTask(@Valid ProcessOrganizationTaskCommand cmd) {
+    	   organizationService.grabTask(cmd);
+    	   RestResponse res = new RestResponse();
+    	   res.setErrorCode(ErrorCodes.SUCCESS);
+           res.setErrorDescription("OK");
+          
+          return res;
+       }
+       
+       /**
+        * <b>URL: /admin/org/processingTask</b>
+        * <p>处理</p>
+        */
+        @RequestMapping("processingTask")
+        @RestReturn(value=String.class)
+        public RestResponse processingTask(@Valid ProcessOrganizationTaskCommand cmd) {
+      	   organizationService.processingTask(cmd);
+           RestResponse res = new RestResponse();
+           res.setErrorCode(ErrorCodes.SUCCESS);
+           res.setErrorDescription("OK");
+           
+           return res;
+        }
 }

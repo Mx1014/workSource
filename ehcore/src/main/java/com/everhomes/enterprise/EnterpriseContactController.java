@@ -224,7 +224,7 @@ public class EnterpriseContactController extends ControllerBase {
         command.setKeywords(cmd.getKeyWord());
         command.setOrganizationId(cmd.getEnterpriseId());
         command.setPageSize(100000);
-        ListOrganizationMemberCommandResponse response = this.organizationService.listOrganizationPersonnels(command);
+        ListOrganizationMemberCommandResponse response = this.organizationService.listOrganizationPersonnels(command,false);
         
         List<EnterpriseContactDTO> dtos = new ArrayList<EnterpriseContactDTO>();
         if(null != response.getMembers()){

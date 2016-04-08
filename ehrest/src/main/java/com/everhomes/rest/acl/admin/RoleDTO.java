@@ -1,5 +1,13 @@
 package com.everhomes.rest.acl.admin;
 
+/**
+ * <ul>
+ * <li>id: 角色id</li>
+ * <li>appId: 应用id</li>
+ * <li>name: 权限名称 </li>
+ * <li>description: 描述 </li>
+ * </ul>
+ */
 public class RoleDTO {
 
 	private Long id;

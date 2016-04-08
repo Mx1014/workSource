@@ -50,6 +50,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.rest.point.PointType;
 import com.everhomes.point.UserPointService;
 import com.everhomes.recommend.RecommendationService;
@@ -121,6 +122,7 @@ import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
+import com.everhomes.util.PinYinHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
@@ -1305,6 +1307,10 @@ public class FamilyServiceImpl implements FamilyService {
     public ListNeighborUsersCommandResponse listNeighborUsers(ListNeighborUsersCommand cmd) {
         User user = UserContext.current().getUser();
         
+        if(null == cmd.getIsPinyin()){
+        	cmd.setIsPinyin(0);
+        }
+        
         checkParamIsValid(ParamType.fromCode(cmd.getType()).getCode() , cmd.getId());
         Long familyId = cmd.getId();
         Group group = this.groupProvider.findGroupById(familyId);
@@ -1361,6 +1367,7 @@ public class FamilyServiceImpl implements FamilyService {
                             n.setUserAvatarUrl(parserUri(u.getAvatar(),EntityType.USER.getCode(),u.getId()));
                             n.setUserAvatarUri(u.getAvatar());
                             n.setUserStatusLine(u.getStatusLine());
+                            n.setOccupation(u.getOccupation());
                             n.setBuildingName(address.getBuildingName());
                             n.setApartmentFloor(address.getApartmentFloor());
                             userDetailList.add(n);
@@ -1370,9 +1377,19 @@ public class FamilyServiceImpl implements FamilyService {
             }
             
         });
+        
         Long pageOffset = cmd.getPageOffset();
         pageOffset = pageOffset == null ? 1 : pageOffset;
         List<NeighborUserDTO> results = processNeighborUserInfo(userDetailList,myaddress,pageOffset);
+        
+        if(cmd.getIsPinyin().equals(1)){
+        	results = this.convertPinyin(results);
+        	results = results.stream().map(r->{
+        		r.setInitial(r.getInitial().replace("~", "#"));
+        		return r;
+        	}).collect(Collectors.toList());
+        }
+        
         long endTime = System.currentTimeMillis();
         LOGGER.info("Query neighbor user of community,elapse=" + (endTime - startTime));
         ListNeighborUsersCommandResponse response = new ListNeighborUsersCommandResponse();
@@ -1381,6 +1398,21 @@ public class FamilyServiceImpl implements FamilyService {
         return response;
     }
 
+    private List<NeighborUserDTO> convertPinyin(List<NeighborUserDTO> neighborUserDTOs){
+		
+    	neighborUserDTOs = neighborUserDTOs.stream().map((c) ->{
+    		String pinyin = PinYinHelper.getPinYin(c.getUserName());
+			c.setFullInitial(PinYinHelper.getFullCapitalInitial(pinyin));
+			c.setFullPinyin(pinyin.replaceAll(" ", ""));
+			c.setInitial(PinYinHelper.getCapitalInitial(c.getFullPinyin()));
+			return c;
+		}).collect(Collectors.toList());
+		
+		Collections.sort(neighborUserDTOs);
+		
+		return neighborUserDTOs;
+	}
+    
     private List<NeighborUserDTO> processNeighborUserInfo(List<NeighborUserDetailDTO> userDetailList,
             Address myaddress,long pageOffset) {
         

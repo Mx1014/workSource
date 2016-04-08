@@ -2,6 +2,7 @@ package com.everhomes.videoconf;
 
 import java.io.IOException;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -11,6 +12,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -29,6 +31,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.app.App;
+import com.everhomes.app.AppProvider;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.configuration.ConfigConstants;
@@ -42,6 +48,7 @@ import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.mail.MailHandler;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.organization.pm.pay.GsonUtil;
@@ -51,13 +58,16 @@ import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.techpark.onlinePay.OnlinePayBillCommand;
 import com.everhomes.rest.techpark.onlinePay.PayStatus;
+import com.everhomes.rest.techpark.park.RechargeOrderDTO;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.videoconf.AccountType;
 import com.everhomes.rest.videoconf.AddSourceVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.AssignVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.BizConfHolder;
 import com.everhomes.rest.videoconf.CancelVideoConfCommand;
+import com.everhomes.rest.videoconf.ConfAccountOrderDTO;
 import com.everhomes.rest.videoconf.ConfCapacity;
+import com.everhomes.rest.videoconf.ConfCategoryDTO;
 import com.everhomes.rest.videoconf.ConfOrderAccountDTO;
 import com.everhomes.rest.videoconf.ConfOrderDTO;
 import com.everhomes.rest.videoconf.ConfReservationsDTO;
@@ -66,6 +76,7 @@ import com.everhomes.rest.videoconf.ConfType;
 import com.everhomes.rest.videoconf.CountAccountOrdersAndMonths;
 import com.everhomes.rest.videoconf.CreateAccountOwnerCommand;
 import com.everhomes.rest.videoconf.CreateConfAccountOrderCommand;
+import com.everhomes.rest.videoconf.CreateConfAccountOrderOnlineCommand;
 import com.everhomes.rest.videoconf.CreateInvoiceCommand;
 import com.everhomes.rest.videoconf.CreateVideoConfInvitationCommand;
 import com.everhomes.rest.videoconf.DeleteReservationConfCommand;
@@ -74,6 +85,7 @@ import com.everhomes.rest.videoconf.DeleteVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.DeleteWarningContactorCommand;
 import com.everhomes.rest.videoconf.EnterpriseConfAccountDTO;
 import com.everhomes.rest.videoconf.EnterpriseLockStatusCommand;
+import com.everhomes.rest.videoconf.UpdateConfAccountPeriodCommand;
 import com.everhomes.rest.videoconf.ExtendedSourceAccountPeriodCommand;
 import com.everhomes.rest.videoconf.ExtendedVideoConfAccountPeriodCommand;
 import com.everhomes.rest.videoconf.GetNamespaceIdListCommand;
@@ -81,6 +93,8 @@ import com.everhomes.rest.videoconf.GetNamespaceListResponse;
 import com.everhomes.rest.videoconf.InvoiceDTO;
 import com.everhomes.rest.videoconf.JoinVideoConfCommand;
 import com.everhomes.rest.videoconf.JoinVideoConfResponse;
+import com.everhomes.rest.videoconf.ListConfCategoryCommand;
+import com.everhomes.rest.videoconf.ListConfCategoryResponse;
 import com.everhomes.rest.videoconf.ListConfOrderAccountResponse;
 import com.everhomes.rest.videoconf.ListEnterpriseWithVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.ListEnterpriseWithVideoConfAccountResponse;
@@ -89,7 +103,7 @@ import com.everhomes.rest.videoconf.ListOrderByAccountCommand;
 import com.everhomes.rest.videoconf.ListOrderByAccountResponse;
 import com.everhomes.rest.videoconf.ListReservationConfCommand;
 import com.everhomes.rest.videoconf.ListReservationConfResponse;
-import com.everhomes.rest.videoconf.ListRuleCommand;
+import com.everhomes.rest.videoconf.ListConfAccountSaleRuleCommand;
 import com.everhomes.rest.videoconf.ListSourceVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.ListSourceVideoConfAccountResponse;
 import com.everhomes.rest.videoconf.ListUnassignAccountsByOrderCommand;
@@ -114,9 +128,12 @@ import com.everhomes.rest.videoconf.UnassignAccountResponse;
 import com.everhomes.rest.videoconf.UpdateAccountOrderCommand;
 import com.everhomes.rest.videoconf.UpdateConfAccountCategoriesCommand;
 import com.everhomes.rest.videoconf.UpdateContactorCommand;
+import com.everhomes.rest.videoconf.UpdateInvoiceCommand;
 import com.everhomes.rest.videoconf.UpdateVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.UserAccountDTO;
 import com.everhomes.rest.videoconf.VatType;
+import com.everhomes.rest.videoconf.VerifyPurchaseAuthorityCommand;
+import com.everhomes.rest.videoconf.VerifyPurchaseAuthorityResponse;
 import com.everhomes.rest.videoconf.VerifyVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.VideoConfAccountRuleDTO;
 import com.everhomes.rest.videoconf.VideoConfInvitationResponse;
@@ -135,6 +152,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
 import com.google.gson.Gson;
@@ -187,6 +205,12 @@ public class VideoConfServiceImpl implements VideoConfService {
 	
 	@Autowired
     private NamespaceProvider nsProvider;
+	
+	@Autowired
+	private AppProvider appProvider;
+	
+	@Autowired
+	private RolePrivilegeService rolePrivilegeService;
 	
 	
 	@Override
@@ -382,16 +406,12 @@ public class VideoConfServiceImpl implements VideoConfService {
 	public void updateConfAccountCategories(UpdateConfAccountCategoriesCommand cmd) {
 
 		ConfAccountCategories rule = new ConfAccountCategories();
+		rule.setSingleAccountPrice(cmd.getSingleAccountPrice());
+		rule.setMultipleAccountPrice(cmd.getMultipleAccountPrice());
+		rule.setMinPeriod(cmd.getMinPeriod());
+		rule.setDisplayFlag(cmd.getDisplayFlag());
 		
-		rule.setAmount(cmd.getPackagePrice());
-		rule.setMinPeriod(cmd.getMinimumMonths());
-		
-		if(AccountType.ACCOUNT_TYPE_SINGLE.getCode().equals(cmd.getAccountType())) {
-			rule.setChannelType((byte) 0);
-		}
-		if(AccountType.ACCOUNT_TYPE_MULTIPLE.getCode().equals(cmd.getAccountType())) {
-			rule.setChannelType((byte) 1);
-		}
+		rule.setMultipleAccountThreshold(cmd.getMultipleAccountThreshold());;
 		
 		//0-25方仅视频 1-25方支持电话 2-100方仅视频 3-100方支持电话
 		if(ConfCapacity.CONF_CAPACITY_25.getCode().equals(cmd.getConfCapacity())) {
@@ -423,13 +443,14 @@ public class VideoConfServiceImpl implements VideoConfService {
 
 	@Override
 	public ListVideoConfAccountRuleResponse listConfAccountCategories(
-			ListRuleCommand cmd) {
+			ListConfAccountSaleRuleCommand cmd) {
 		ListVideoConfAccountRuleResponse response = new ListVideoConfAccountRuleResponse();
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		Integer offset = cmd.getPageOffset() == null ? 0 : (cmd.getPageOffset() - 1 ) * pageSize;
 		
-		List<VideoConfAccountRuleDTO> rules = vcProvider.listConfAccountCategories(cmd.getChannelType(), cmd.getConfType(), offset, pageSize + 1).stream().map(r -> {
+		List<VideoConfAccountRuleDTO> rules = vcProvider.listConfAccountCategories(cmd.getConfType(), 
+				cmd.getIsOnline(), offset, pageSize + 1).stream().map(r -> {
 			
 			return toRuleDto(r);
 		}).collect(Collectors.toList());
@@ -447,18 +468,13 @@ public class VideoConfServiceImpl implements VideoConfService {
 	private VideoConfAccountRuleDTO toRuleDto(ConfAccountCategories rule) {
 		
 		VideoConfAccountRuleDTO ruleDto = new VideoConfAccountRuleDTO();
-		
+
 		if(rule != null) {
 			ruleDto.setId(rule.getId());
-			ruleDto.setMinimumMonths(rule.getMinPeriod());
-			ruleDto.setPackagePrice(rule.getAmount());
-			if(rule.getChannelType() == 0) {
-				ruleDto.setAccountType(AccountType.ACCOUNT_TYPE_SINGLE.getCode());
-			}
-			
-			if(rule.getChannelType() == 1) {
-				ruleDto.setAccountType(AccountType.ACCOUNT_TYPE_MULTIPLE.getCode());
-			}
+			ruleDto.setMinPeriod(rule.getMinPeriod());
+			ruleDto.setMultipleAccountThreshold(rule.getMultipleAccountThreshold());
+			ruleDto.setMultipleAccountPrice(rule.getMultipleAccountPrice());
+			ruleDto.setSingleAccountPrice(rule.getSingleAccountPrice());
 			
 			if(rule.getConfType() == 0) {
 				ruleDto.setConfCapacity(ConfCapacity.CONF_CAPACITY_25.getCode());
@@ -509,7 +525,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 	}
 
 	@Override
-	public ListWarningContactorResponse listWarningContactor(ListRuleCommand cmd) {
+	public ListWarningContactorResponse listWarningContactor(ListConfAccountSaleRuleCommand cmd) {
 
 		ListWarningContactorResponse response = new ListWarningContactorResponse();
 		
@@ -752,8 +768,8 @@ public class VideoConfServiceImpl implements VideoConfService {
 		ConfAccounts account = vcProvider.findVideoconfAccountById(cmd.getAccountId());
 		account.setExpiredDate(new Timestamp(cmd.getValidDate()));
 		
-		ConfAccountCategories category = vcProvider.findAccountCategoriesById(account.getAccountCategoryId());
-		List<ConfAccountCategories> rules = vcProvider.listConfAccountCategories(category.getChannelType(), cmd.getConfType(), 0, Integer.MAX_VALUE);
+//		ConfAccountCategories category = vcProvider.findAccountCategoriesById(account.getAccountCategoryId());
+		List<ConfAccountCategories> rules = vcProvider.listConfAccountCategories(cmd.getConfType(), (byte) 0, 0, Integer.MAX_VALUE);
 		if(rules != null && rules.size() > 0)
 			account.setAccountCategoryId(rules.get(0).getId());
 
@@ -847,9 +863,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 			dto.setMobile(enterpriseContact.getContact());
 		}
 		
-		ConfAccountCategories category = vcProvider.findAccountCategoriesById(order.getAccountCategoryId());
-		if(category != null)
-			dto.setAccountChannelType(category.getChannelType());
+//		ConfAccountCategories category = vcProvider.findAccountCategoriesById(order.getAccountCategoryId());
 		dto.setCreateTime(order.getCreateTime());
 		dto.setQuantity(order.getQuantity());
 		dto.setPeriod(order.getPeriod());
@@ -1224,6 +1238,10 @@ public class VideoConfServiceImpl implements VideoConfService {
 			VerifyVideoConfAccountCommand cmd) {
 		UserAccountDTO userAccount = new UserAccountDTO();
 		ConfAccounts account = vcProvider.findAccountByUserId(cmd.getUserId());
+		
+		boolean privilege = rolePrivilegeService.checkAdministrators(cmd.getEnterpriseId());
+		userAccount.setPurchaseAuthority(privilege);
+		
 		if(account != null) {
 			userAccount.setAccountId(account.getId());
 			userAccount.setStatus(account.getStatus());
@@ -1254,18 +1272,28 @@ public class VideoConfServiceImpl implements VideoConfService {
 	@Override
 	public void cancelVideoConf(CancelVideoConfCommand cmd) {
 		
+		ConfConferences conf = vcProvider.findConfConferencesByConfId(cmd.getConfId());
+		if(conf == null) {
+			LOGGER.info("cancelVideoConf, cmd=" + cmd + ", conf is not exist!");
+			return ;
+		}
+		ConfSourceAccounts source = vcProvider.findSourceAccountById(conf.getSourceAccountId());
+		if(source == null) {
+			LOGGER.info("cancelVideoConf, cmd=" + cmd + ", source account is not exist!");
+			return ;
+		}
+		
 		String path = "http://api.confcloud.cn/openapi/cancelConf";
 		Long timestamp = DateHelper.currentGMTTime().getTime();
-		String tokenString = cmd.getSourceAccountName() + "|" + configurationProvider.getValue(ConfigConstants.VIDEOCONF_SECRET_KEY, "0") + "|" + timestamp;
+		String tokenString = source.getAccountName() + "|" + configurationProvider.getValue(ConfigConstants.VIDEOCONF_SECRET_KEY, "0") + "|" + timestamp;
 		String token = DigestUtils.md5Hex(tokenString);
 		
-		ConfConferences conf = vcProvider.findConfConferencesByConfId(cmd.getConfId());
+		
 		Map<String, String> sPara = new HashMap<String, String>() ;
-	    sPara.put("loginName", cmd.getSourceAccountName()); 
+	    sPara.put("loginName", source.getAccountName()); 
 	    sPara.put("timeStamp", timestamp.toString());
 	    sPara.put("token", token); 
-	    if(conf != null)
-	    	sPara.put("confId", conf.getConferenceId() + "");
+	    sPara.put("confId", conf.getConferenceId() + "");
 	    
 	    NameValuePair[] param = generatNameValuePair(sPara);
 	    if(LOGGER.isDebugEnabled())
@@ -1283,7 +1311,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 			if(LOGGER.isDebugEnabled())
 				LOGGER.error("cancelVideoConf,json="+json);
 		} catch (IOException e) {
-			LOGGER.error("cancelVideoConf-error.sourceAccount="+cmd.getSourceAccountName(), e);
+			LOGGER.error("cancelVideoConf-error.sourceAccount="+source.getAccountName(), e);
 		}  
           
 		
@@ -1333,9 +1361,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 				ConfConferences conf = vcProvider.findConfConferencesById(account.getAssignedConfId());
 				if(conf != null)
 					cancelCmd.setConfId(conf.getMeetingNo());
-				ConfSourceAccounts source = vcProvider.findSourceAccountById(account.getAssignedSourceId());
-				if(source != null)
-					cancelCmd.setSourceAccountName(source.getAccountName());
+				
 				cancelVideoConf(cancelCmd);
 			}
 			ConfAccountCategories category = vcProvider.findAccountCategoriesById(account.getAccountCategoryId());
@@ -1786,7 +1812,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 	}
 
 	@Override
-	public void createConfAccountOrder(CreateConfAccountOrderCommand cmd) {
+	public Long createConfAccountOrder(CreateConfAccountOrderCommand cmd) {
 		ConfOrders order = new ConfOrders();
 		 
 		order.setOwnerId(cmd.getEnterpriseId());
@@ -1798,12 +1824,18 @@ public class VideoConfServiceImpl implements VideoConfService {
 		order.setInvoiceIssueFlag(cmd.getMakeOutFlag());
 		order.setOnlineFlag(cmd.getBuyChannel());
 		order.setAccountCategoryId(cmd.getAccountCategoryId());
+		
+		order.setBuyerName(cmd.getContactor());
+		order.setBuyerContact(cmd.getMobile());
 		vcProvider.createConfOrders(order);
 
 		confOrderSearcher.feedDoc(order);
 		
 		if(order.getInvoiceReqFlag() == 1) {
 			ConfInvoices invoice = ConvertHelper.convert(cmd.getInvoice(), ConfInvoices.class);
+			if(invoice == null) {
+				invoice = new ConfInvoices();
+			}
 			invoice.setOrderId(order.getId());
 			vcProvider.createInvoice(invoice);
 		}
@@ -1825,17 +1857,20 @@ public class VideoConfServiceImpl implements VideoConfService {
 			vcProvider.createConfEnterprises(confEnterprise);
 
 			confEnterpriseSearcher.feedDoc(confEnterprise);
-		} else {
-			enterprise.setContactName(cmd.getContactor());
-			enterprise.setContact(cmd.getMobile());
-			vcProvider.updateConfEnterprises(enterprise);
 		}
+//		} else {
+//			enterprise.setContactName(cmd.getContactor());
+//			enterprise.setContact(cmd.getMobile());
+//			vcProvider.updateConfEnterprises(enterprise);
+//		}
 		
 		if(order.getOnlineFlag() == 0) {
 			OfflinePayBillCommand command = new OfflinePayBillCommand();
 			command.setOrderId(order.getId());
 			offlinePayBill(command);
 		}
+		
+		return order.getId();
 			
 	}
 
@@ -1944,14 +1979,16 @@ public class VideoConfServiceImpl implements VideoConfService {
 	
 	private void updateOrderStatus(ConfOrders order, Timestamp payTimeStamp, byte paymentStatus) {
 //		int namespaceId = (UserContext.current().getUser().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getUser().getNamespaceId();
-		order.setPayerId(UserContext.current().getUser().getId());
+		User user = UserContext.current().getUser();
+		order.setPayerId(user.getId());
 		order.setPaidTime(payTimeStamp);
 		order.setStatus(paymentStatus);
 		
 		vcProvider.updateConfOrders(order);
 		ConfEnterprises enterprise = vcProvider.findByEnterpriseId(order.getOwnerId());
 		int namespaceId = enterprise.getNamespaceId();
-		if(order.getStatus().byteValue() == PayStatus.PAID.getCode()) {
+		if(order.getStatus().byteValue() == PayStatus.PAID.getCode() 
+				&& order.getAccountCategoryId() != null && order.getAccountCategoryId() != 0) {
 			List<ConfAccounts> accounts = new ArrayList<ConfAccounts>();
 			
 			for(int i = 0; i < order.getQuantity(); i++) {
@@ -1980,8 +2017,60 @@ public class VideoConfServiceImpl implements VideoConfService {
 			enterprise.setAccountAmount(enterprise.getAccountAmount()+order.getQuantity());
 			enterprise.setActiveAccountAmount(enterprise.getActiveAccountAmount()+order.getQuantity());
 			vcProvider.updateConfEnterprises(enterprise);
+			
+			sendConfInvoiceEmail(order.getEmail());
+	        
+		} else if(order.getStatus().byteValue() == PayStatus.PAID.getCode() 
+				&& (order.getAccountCategoryId() == null || order.getAccountCategoryId() == 0)) {
+			CrossShardListingLocator locator = new CrossShardListingLocator();
+			List<ConfOrderAccountMap> maps = vcProvider.findOrderAccountByOrderId(order.getId(), locator, Integer.MAX_VALUE);
+			if(maps != null && maps.size() > 0) {
+				Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+				int toActive = 0;
+				for(ConfOrderAccountMap map : maps) {
+					
+					ConfAccounts account = vcProvider.findVideoconfAccountById(map.getConfAccountId());
+					
+					//0-inactive 1-active 2-locked
+					if(account.getStatus() == 0) {
+						account.setExpiredDate(addMonth(now, order.getPeriod()));
+						account.setStatus((byte) 1);
+						
+						toActive++;
+					}
+					else {
+						account.setExpiredDate(addMonth(account.getExpiredDate(), order.getPeriod()));
+					}
+					
+					vcProvider.updateConfAccounts(account);
+					
+					confAccountSearcher.feedDoc(account);
+				}
+				
+				enterprise.setBuyChannel(order.getOnlineFlag());
+				enterprise.setActiveAccountAmount(enterprise.getActiveAccountAmount()+toActive);
+				vcProvider.updateConfEnterprises(enterprise);
+				
+				sendConfInvoiceEmail(order.getEmail());
+				
+			}
 		}
 		
+	}
+	
+	private void sendConfInvoiceEmail(String emailAddress) {
+		if(!StringUtils.isNullOrEmpty(emailAddress)) {
+			String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
+	        MailHandler handler = PlatformContext.getComponent(handlerName);
+			String subject = localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
+					String.valueOf(ConfServiceErrorCode.CONF_INVOICE_SUBJECT),
+					UserContext.current().getUser().getLocale(),"zuolin video conference invoce");
+			
+			String body = localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
+					String.valueOf(ConfServiceErrorCode.CONF_INVOICE_BODY),
+					UserContext.current().getUser().getLocale(),"zuolin video conference invoce");
+	        handler.sendMail(Namespace.DEFAULT_NAMESPACE, null,emailAddress, subject, body, null);
+		}
 	}
 	
 	private Long convertOrderNoToOrderId(String orderNo) {
@@ -2205,6 +2294,206 @@ public class VideoConfServiceImpl implements VideoConfService {
 	public void deleteSourceVideoConfAccount(
 			DeleteSourceVideoConfAccountCommand cmd) {
 		vcProvider.deleteSourceVideoConfAccount(cmd.getSourceAccountId());
+	}
+
+	@Override
+	public InvoiceDTO updateInvoice(UpdateInvoiceCommand cmd) {
+		InvoiceDTO dto = vcProvider.getInvoiceByOrderId(cmd.getOrderId());
+		dto.setTaxpayerType(cmd.getTaxpayerType());
+		dto.setVatType(cmd.getVatType());
+		dto.setExpenseType(cmd.getExpenseType());
+		dto.setCompanyName(cmd.getCompanyName());
+		dto.setVatCode(cmd.getVatCode());
+		dto.setVatAddress(cmd.getVatAddress());
+		dto.setVatPhone(cmd.getVatPhone());
+		dto.setVatBankname(cmd.getVatBankname());
+		dto.setVatBankaccount(cmd.getVatBankaccount());
+		dto.setAddress(cmd.getAddress());
+		dto.setZipCode(cmd.getZipCode());
+		dto.setConsignee(cmd.getConsignee());
+		dto.setContact(cmd.getContact());
+		dto.setContractFlag(cmd.getContractFlag());
+		
+		ConfInvoices invoice = ConvertHelper.convert(dto, ConfInvoices.class);
+		vcProvider.updateInvoice(invoice);
+		
+		return dto;
+	}
+
+	@Override
+	public ListConfCategoryResponse listConfCategory(ListConfCategoryCommand cmd) {
+		List<ConfAccountCategories> categories = vcProvider.listConfAccountCategories(null, (byte) 1, 0, Integer.MAX_VALUE);
+		ListConfCategoryResponse response = new ListConfCategoryResponse();
+		
+		List<ConfCategoryDTO> categoryDtos = new ArrayList<ConfCategoryDTO>();
+		for(ConfAccountCategories category : categories) {
+			//0: 25方仅视频, 1: 25方支持电话, 2: 100方仅视频, 3: 100方支持电话, 4: 6方仅视频, 5: 50方仅视频, 6: 50方支持电话
+			ConfCategoryDTO dto = new ConfCategoryDTO();
+			dto.setSingleAccountPrice(category.getSingleAccountPrice());
+			dto.setMultipleAccountThreshold(category.getMultipleAccountThreshold());
+			dto.setMultipleAccountPrice(category.getMultipleAccountPrice());
+			dto.setMinPeriod(category.getMinPeriod());
+			
+			if(category.getConfType() == 0 || category.getConfType() == 1) {
+				dto.setConfCapacity((byte) 0);
+			}
+			if(category.getConfType() == 2 || category.getConfType() == 3) {
+				dto.setConfCapacity((byte) 1);
+			}
+			if(category.getConfType() == 4) {
+				dto.setConfCapacity((byte) 2);
+			}
+			if(category.getConfType() == 5 || category.getConfType() == 6) {
+				dto.setConfCapacity((byte) 3);
+			}
+			
+			categoryDtos.add(dto);
+		}
+		
+		response.setCategories(categoryDtos);
+		
+		int enterpriseVaildAccounts = vcProvider.countAccountsByEnterprise(cmd.getEnterpriseId(), null);
+		response.setEnterpriseVaildAccounts(enterpriseVaildAccounts);
+		
+		return response;
+	}
+
+	@Override
+	public ConfAccountOrderDTO updateConfAccountPeriod(UpdateConfAccountPeriodCommand cmd) {
+		
+		int quantity = cmd.getAccountIds().size();
+		CreateConfAccountOrderCommand order = new CreateConfAccountOrderCommand();
+		order.setEnterpriseId(cmd.getEnterpriseId());
+		order.setEnterpriseName(cmd.getEnterpriseName());
+		order.setContactor(cmd.getContactor());
+		order.setMobile(cmd.getMobile());
+		order.setQuantity(quantity);
+		order.setPeriod(cmd.getMonths());
+		order.setAmount(cmd.getAmount());
+		order.setInvoiceFlag(cmd.getInvoiceFlag());
+		order.setBuyChannel(cmd.getBuyChannel());
+		order.setAccountCategoryId(0L);
+		order.setMakeOutFlag((byte) 0);
+		Long orderId = createConfAccountOrder(order);
+		ConfOrders confOrder = vcProvider.findOredrById(orderId);
+		confOrder.setEmail(cmd.getMailAddress());
+		vcProvider.updateConfOrders(confOrder);
+		
+		ConfAccountOrderDTO dto = new ConfAccountOrderDTO();
+		dto.setBillId(orderId);
+		dto.setAmount(order.getAmount().doubleValue());
+		dto.setName(cmd.getContactor() + " order");
+		dto.setDescription(cmd.getContactor() + " extend " + quantity + " accounts " + cmd.getMonths() + " months for " + cmd.getEnterpriseName());
+		dto.setOrderType("videoConf");
+		this.setSignatureParam(dto);
+		
+		
+		ConfEnterprises enterprise = vcProvider.findByEnterpriseId(cmd.getEnterpriseId());
+		int namespaceId = enterprise.getNamespaceId();
+		for(Long accountId : cmd.getAccountIds()) {
+			
+			ConfOrderAccountMap map = new ConfOrderAccountMap();
+			map.setOrderId(orderId);
+			map.setEnterpriseId(cmd.getEnterpriseId());
+			map.setConfAccountId(accountId);
+			map.setConfAccountNamespaceId(namespaceId);
+			vcProvider.createConfOrderAccountMap(map);
+		}
+		
+		return dto;
+	}
+
+	@Override
+	public ConfAccountOrderDTO createConfAccountOrderOnline(
+			CreateConfAccountOrderOnlineCommand cmd) {
+		//0: 25方仅视频, 1: 25方支持电话, 2: 100方仅视频, 3: 100方支持电话, 4: 6方仅视频, 5: 50方仅视频, 6: 50方支持电话
+		//账号类型 0-25方 1-100方 2-6方 3-50方 
+		Byte confType = null;
+		if(cmd.getConfCapacity() == 0 && cmd.getConfType() == 0) {
+			confType = 0;
+		}
+		if(cmd.getConfCapacity() == 0 && cmd.getConfType() == 1) {
+			confType = 1;
+		}
+		if(cmd.getConfCapacity() == 1 && cmd.getConfType() == 0) {
+			confType = 2;
+		}
+		if(cmd.getConfCapacity() == 1 && cmd.getConfType() == 1) {
+			confType = 3;
+		}
+		if(cmd.getConfCapacity() == 2 && cmd.getConfType() == 0) {
+			confType = 4;
+		}
+		if(cmd.getConfCapacity() == 3 && cmd.getConfType() == 0) {
+			confType = 5;
+		}
+		if(cmd.getConfCapacity() == 3 && cmd.getConfType() == 1) {
+			confType = 6;
+		}
+		List<ConfAccountCategories> categories = vcProvider.listConfAccountCategories(confType, cmd.getBuyChannel(), 0, Integer.MAX_VALUE); 
+		CreateConfAccountOrderCommand order = new CreateConfAccountOrderCommand();
+		order.setEnterpriseId(cmd.getEnterpriseId());
+		order.setEnterpriseName(cmd.getEnterpriseName());
+		order.setContactor(cmd.getContactor());
+		order.setMobile(cmd.getMobile());
+		order.setQuantity(cmd.getQuantity());
+		order.setPeriod(cmd.getPeriod());
+		order.setAmount(cmd.getAmount());
+		order.setInvoiceFlag(cmd.getInvoiceReqFlag());
+		order.setBuyChannel(cmd.getBuyChannel());
+		if(categories != null && categories.size() > 0)
+			order.setAccountCategoryId(categories.get(0).getId());
+		order.setMakeOutFlag((byte) 0);
+		order.setInvoice(new InvoiceDTO());
+		
+		Long orderId = createConfAccountOrder(order);
+		ConfOrders confOrder = vcProvider.findOredrById(orderId);
+		confOrder.setEmail(cmd.getMailAddress());
+		vcProvider.updateConfOrders(confOrder);
+		
+		ConfAccountOrderDTO dto = new ConfAccountOrderDTO();
+		dto.setBillId(orderId);
+		dto.setAmount(order.getAmount().doubleValue());
+		dto.setName(cmd.getContactor() + " order");
+		dto.setDescription(cmd.getContactor() + " buy " + cmd.getQuantity() + " accounts " + cmd.getPeriod() + " months for " + cmd.getEnterpriseName());
+		dto.setOrderType("videoConf");
+		this.setSignatureParam(dto);
+		return dto;
+		
+	}
+	
+	private void setSignatureParam(ConfAccountOrderDTO dto) {
+		String appKey = configurationProvider.getValue("pay.appKey", "7bbb5727-9d37-443a-a080-55bbf37dc8e1");
+		Long timestamp = System.currentTimeMillis();
+		Integer randomNum = (int) (Math.random()*1000);
+		App app = appProvider.findAppByKey(appKey);
+		
+		Map<String,String> map = new HashMap<String, String>();
+		map.put("appKey",appKey);
+		map.put("timestamp",timestamp+"");
+		map.put("randomNum",randomNum+"");
+		map.put("amount",dto.getAmount().doubleValue()+"");
+		String signature = SignatureHelper.computeSignature(map, app.getSecretKey());
+		dto.setAppKey(appKey);
+		dto.setRandomNum(randomNum);
+		dto.setSignature(URLEncoder.encode(signature));
+		dto.setTimestamp(timestamp);
+	}
+
+	@Override
+	public VerifyPurchaseAuthorityResponse verifyPurchaseAuthority(
+			VerifyPurchaseAuthorityCommand cmd) {
+		
+		VerifyPurchaseAuthorityResponse response = new VerifyPurchaseAuthorityResponse();
+		int enterpriseVaildAccounts = vcProvider.countAccountsByEnterprise(cmd.getEnterpriseId(), null);
+		int enterpriseAccounts = vcProvider.countEnterpriseAccounts(cmd.getEnterpriseId());
+		response.setEnterpriseActiveAccountCount(enterpriseVaildAccounts);
+		response.setEnterpriseAccountCount(enterpriseAccounts);
+		
+		boolean privilege = rolePrivilegeService.checkAdministrators(cmd.getEnterpriseId());
+
+		response.setPurchaseAuthority(privilege);
+		return response;
 	}
 	
 }

@@ -13,6 +13,13 @@ import com.everhomes.util.StringHelper;
  * <li>contactAvatar:头像</li>
  * <li>userId:通讯录关联的用户ID</li>
  * <li>createTime:创建通讯录时间</li>
+ * <li>statusLine:个性签名</li>
+ * <li>occupation:职业</li>
+ * <li>departmentName:部门名称</li>
+ * <li>neighborhoodRelation: 邻居关系参考，{@link com.everhomes.rest.family.NeighborhoodRelation}</li>
+ * <li>fullPinyin: 名字全拼</li>
+ * <li>fullInitial: 名字全首字母</li>
+ * <li>initial: 首字母</li>
  * </ul>
  */
 public class SceneContactDTO {
@@ -25,6 +32,16 @@ public class SceneContactDTO {
     private String contactAvatar;
     private Long userId;
     private Long createTime;
+    
+    private String departmentName;
+    
+    private String statusLine;
+    private String occupation; 
+    private String initial;
+    private String fullPinyin;
+    private String fullInitial;
+    
+    private Byte neighborhoodRelation;
 
     public String getSceneType() {
         return sceneType;
@@ -98,7 +115,70 @@ public class SceneContactDTO {
         this.userId = userId;
     }
 
-    @Override
+    
+    public String getStatusLine() {
+		return statusLine;
+	}
+
+	public void setStatusLine(String statusLine) {
+		this.statusLine = statusLine;
+	}
+
+	public String getOccupation() {
+		return occupation;
+	}
+
+	public void setOccupation(String occupation) {
+		this.occupation = occupation;
+	}
+
+	
+	public String getInitial() {
+		return initial;
+	}
+
+	public void setInitial(String initial) {
+		this.initial = initial;
+	}
+	
+	
+
+	public String getDepartmentName() {
+		return departmentName;
+	}
+
+	public void setDepartmentName(String departmentName) {
+		this.departmentName = departmentName;
+	}
+	
+	
+	
+	public Byte getNeighborhoodRelation() {
+		return neighborhoodRelation;
+	}
+
+	public void setNeighborhoodRelation(Byte neighborhoodRelation) {
+		this.neighborhoodRelation = neighborhoodRelation;
+	}
+
+	
+	public String getFullPinyin() {
+		return fullPinyin;
+	}
+
+	public void setFullPinyin(String fullPinyin) {
+		this.fullPinyin = fullPinyin;
+	}
+
+	public String getFullInitial() {
+		return fullInitial;
+	}
+
+	public void setFullInitial(String fullInitial) {
+		this.fullInitial = fullInitial;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

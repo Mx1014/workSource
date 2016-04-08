@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
  * <li>enterpriseId: 企业id</li>
  * <li>status: 有效状态</li>
  * <li>keyword: 关键字：姓名 手机号 部门 企业名称</li>
+ * <li>isAssigned: 是否只显示已分配的账号 0-是 1-否</li>
  * <li>pageAnchor: 本页开始的锚点</li>
  * <li>pageSize: 每页的数量</li>
  * </ul>
@@ -18,6 +19,8 @@ public class ListEnterpriseVideoConfAccountCommand {
 	private Byte status;
 	
 	private String keyword;
+	
+	private Byte isAssigned;
 	
 	private Long pageAnchor;
 	
@@ -45,6 +48,14 @@ public class ListEnterpriseVideoConfAccountCommand {
 
 	public void setKeyword(String keyword) {
 		this.keyword = keyword;
+	}
+
+	public Byte getIsAssigned() {
+		return isAssigned;
+	}
+
+	public void setIsAssigned(Byte isAssigned) {
+		this.isAssigned = isAssigned;
 	}
 
 	public Long getPageAnchor() {

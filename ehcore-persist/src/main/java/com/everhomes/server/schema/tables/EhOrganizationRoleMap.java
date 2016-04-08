@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationRoleMap extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhOrganizationRoleMapRecord> {
 
-	private static final long serialVersionUID = -12770333;
+	private static final long serialVersionUID = 2040140731;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_organization_role_map</code>
@@ -60,6 +60,11 @@ public class EhOrganizationRoleMap extends org.jooq.impl.TableImpl<com.everhomes
 	 * The column <code>ehcore.eh_organization_role_map.create_time</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationRoleMapRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_organization_role_map.role_name</code>. role name
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationRoleMapRecord, java.lang.String> ROLE_NAME = createField("role_name", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "role name");
 
 	/**
 	 * Create a <code>ehcore.eh_organization_role_map</code> table reference

@@ -10,6 +10,8 @@ import com.everhomes.util.StringHelper;
  * <li>forumId: 论坛ID</li>
  * <li>contentCategory: 内容类型ID，{@link com.everhomes.rest.category.CategoryConstants}</li>
  * <li>actionCategory: 动作类型ID，对应以前的serviceType</li>
+ * <li>publishStatus: 帖子发布状态，{@link com.everhomes.rest.forum.TopicPublishStatus}</li>
+ * <li>embeddedAppId: appid，{@link com.everhomes.rest.app.AppConstants}</li>
  * <li>pageAnchor: 本页开始的锚点</li>
  * <li>pageSize: 每页的数量</li>
  * </ul>
@@ -20,8 +22,10 @@ public class QueryOrganizationTopicCommand {
     private Long forumId;
     private Long contentCategory;
     private Long actionCategory;
+    private String publishStatus;
     private Long pageAnchor;
     private Integer pageSize;
+    private Long embeddedAppId; 
     
     public QueryOrganizationTopicCommand() {
     }
@@ -76,6 +80,19 @@ public class QueryOrganizationTopicCommand {
 		this.forumId = forumId;
 	}
 
+	
+
+
+	public String getPublishStatus() {
+		return publishStatus;
+	}
+
+
+
+	public void setPublishStatus(String publishStatus) {
+		this.publishStatus = publishStatus;
+	}
+
 
 
 	public Long getPageAnchor() {
@@ -94,7 +111,20 @@ public class QueryOrganizationTopicCommand {
         this.pageSize = pageSize;
     }
 
-    @Override
+    
+    public Long getEmbeddedAppId() {
+		return embeddedAppId;
+	}
+
+
+
+	public void setEmbeddedAppId(Long embeddedAppId) {
+		this.embeddedAppId = embeddedAppId;
+	}
+
+
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

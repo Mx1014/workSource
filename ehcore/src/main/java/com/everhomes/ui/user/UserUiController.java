@@ -37,6 +37,7 @@ import com.everhomes.rest.ui.user.SceneContactDTO;
 import com.everhomes.rest.ui.user.SceneDTO;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 
+
 import com.everhomes.rest.ui.user.SetUserCurrentSceneCommand;
 
 import com.everhomes.rest.user.ListUserOpPromotionsRespose;
@@ -45,6 +46,7 @@ import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.util.StringHelper;
 
 import com.everhomes.user.UserService;
+
 
 import com.everhomes.util.WebTokenGenerator;
 
@@ -68,6 +70,9 @@ public class UserUiController extends ControllerBase {
     
     @Autowired
     private FamilyService familyService;
+
+    @Autowired
+    private UserService userService;
     
     @Autowired
     private OpPromotionService opPromotionService;
@@ -80,7 +85,7 @@ public class UserUiController extends ControllerBase {
     @RequestMapping("listUserRelatedScenes")
     @RestReturn(value=SceneDTO.class, collection=true)
     public RestResponse listUserRelatedScenes() {
-        List<SceneDTO> sceneDtoList = null;
+        List<SceneDTO> sceneDtoList = userService.listUserRelatedScenes();
         
         RestResponse response = new RestResponse(sceneDtoList);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -98,12 +103,19 @@ public class UserUiController extends ControllerBase {
     public RestResponse listContactsByScene(@Valid ListContactsBySceneCommand cmd) throws Exception {
     	WebTokenGenerator webToken = WebTokenGenerator.getInstance();
  	    SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+ 	    
+// 	   sceneToken = new SceneTokenDTO();
+// 	   sceneToken.setEntityType(UserCurrentEntityType.ORGANIZATION.getCode());
+// 	   sceneToken.setEntityId(1000001l);
+// 	   sceneToken.setScene(SceneType.PM_ADMIN.getCode());
+// 	   System.out.println(webToken.toWebToken(sceneToken));
+ 	    
  	    List<SceneContactDTO> dtos = null;
 		if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
 			ListOrganizationContactCommand command = new ListOrganizationContactCommand();
 			command.setOrganizationId(sceneToken.getEntityId());
 			command.setPageSize(100000);
-			ListOrganizationMemberCommandResponse res = organizationService.listOrganizationPersonnels(command);
+			ListOrganizationMemberCommandResponse res = organizationService.listOrganizationPersonnels(command, true);
 			List<OrganizationMemberDTO> members = res.getMembers();
 			if(null != members){
 				dtos = members.stream().map(r->{
@@ -113,6 +125,10 @@ public class UserUiController extends ControllerBase {
 					dto.setContactPhone(r.getContactToken());
 					dto.setContactAvatar(r.getAvatar());
 					dto.setUserId(r.getTargetId());
+					dto.setInitial(r.getInitial());
+					dto.setFullInitial(r.getFullInitial());
+					dto.setFullPinyin(r.getFullPinyin());
+					dto.setDepartmentName(r.getGroupName());
 					return dto;
 				}).collect(Collectors.toList());
 			}
@@ -122,11 +138,13 @@ public class UserUiController extends ControllerBase {
 		ListNeighborUsersCommandResponse resp = null;
  	    if(UserCurrentEntityType.COMMUNITY == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
  	    	ListNeighborUsersCommand command = new ListNeighborUsersCommand();
+ 	    	command.setIsPinyin(1);
  	    	command.setType(ParamType.COMMUNITY.getCode());
  	    	command.setId(sceneToken.getEntityId());
  	    	resp= familyService.listNeighborUsers(command);
 		}else if(UserCurrentEntityType.FAMILY == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
  	    	ListNeighborUsersCommand command = new ListNeighborUsersCommand();
+ 	    	command.setIsPinyin(1);
  	    	command.setType(ParamType.FAMILY.getCode());
  	    	command.setId(sceneToken.getEntityId());
  	    	resp = familyService.listNeighborUsers(command);
@@ -137,9 +155,14 @@ public class UserUiController extends ControllerBase {
 				SceneContactDTO dto = new SceneContactDTO();
 				dto.setContactId(r.getUserId());
 				dto.setContactName(r.getUserName());
-//				dto.setContactPhone(r.get);
+				dto.setStatusLine(r.getUserStatusLine());
+				dto.setOccupation(r.getOccupation());
 				dto.setContactAvatar(r.getUserAvatarUrl());
 				dto.setUserId(r.getUserId());
+				dto.setInitial(r.getInitial());
+				dto.setFullInitial(r.getFullInitial());
+				dto.setFullPinyin(r.getFullPinyin());
+				dto.setNeighborhoodRelation(r.getNeighborhoodRelation());
 				return dto;
 			}).collect(Collectors.toList());
  	    }
@@ -160,7 +183,7 @@ public class UserUiController extends ControllerBase {
     @RestReturn(value=GetUserRelatedAddressResponse.class)
     public RestResponse getUserRelatedAddresses(GetUserRelatedAddressCommand cmd) {
         //List<UserServiceAddressDTO> result = this.userActivityService.getUserRelateServiceAddress();
-        GetUserRelatedAddressResponse cmdResponse = null;
+        GetUserRelatedAddressResponse cmdResponse = userService.getUserRelatedAddresses(cmd);
         
         RestResponse response = new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -187,17 +210,18 @@ public class UserUiController extends ControllerBase {
     /**
      * <b>URL: /ui/user/setUserCurrentScene</b>
      * <p>设置当前的scene信息，服务器端不使用此信息，会在userInfo里还给客户端做选中上一次的场景使用</p>
+     * <p>废弃，使用listScenesByCummunityId代替</p>
      */
-    @RequestMapping(value = "setUserCurrentScene")
-    @RestReturn(ListUserOpPromotionsRespose.class)
-    public RestResponse setUserCurrentScene(SetUserCurrentSceneCommand cmd) throws Exception {
-        ListUserOpPromotionsRespose cmdResponse = null;
-        
-        RestResponse response = new RestResponse(cmdResponse);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
+//    @RequestMapping(value = "setUserCurrentScene")
+//    @RestReturn(ListUserOpPromotionsRespose.class)
+//    public RestResponse setUserCurrentScene(SetUserCurrentSceneCommand cmd) throws Exception {
+//        ListUserOpPromotionsRespose cmdResponse = null;
+//        
+//        RestResponse response = new RestResponse(cmdResponse);
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
     
     /**
      * <b>URL: /ui/user/listScenesByCummunityId</b>
@@ -206,7 +230,7 @@ public class UserUiController extends ControllerBase {
     @RequestMapping("listScenesByCummunityId")
     @RestReturn(value=SceneDTO.class, collection=true)
     public RestResponse listScenesByCummunityId(ListScenesByCummunityIdCommand cmd) {
-        List<SceneDTO> sceneDtoList = null;
+        List<SceneDTO> sceneDtoList = userService.listScenesByCummunityId(cmd);
         
         RestResponse response = new RestResponse(sceneDtoList);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -214,4 +238,5 @@ public class UserUiController extends ControllerBase {
         return response;
     }
     
+
 }

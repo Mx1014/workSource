@@ -21,7 +21,6 @@ public class SearchTopicBySceneCommand {
     private Double latitude;
     
     private String queryString;
-    private Long forumId;
     private Long contentCategory;
     private Long actionCategory;
     
@@ -71,14 +70,6 @@ public class SearchTopicBySceneCommand {
 
     public void setQueryString(String queryString) {
         this.queryString = queryString;
-    }
-
-    public Long getForumId() {
-        return forumId;
-    }
-
-    public void setForumId(Long forumId) {
-        this.forumId = forumId;
     }
 
     public Long getContentCategory() {

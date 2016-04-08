@@ -1,0 +1,18 @@
+//
+// EvhOrganizationOrderType.h
+// generated at 2016-04-07 17:57:42 
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhOrganizationOrderType
+//
+typedef enum {
+
+    EvhOrganizationOrderType_NONE = 0, 
+    EvhOrganizationOrderType_ORGANIZATION_ORDERS = 1
+
+} EvhOrganizationOrderType;
+
+///////////////////////////////////////////////////////////////////////////////
+

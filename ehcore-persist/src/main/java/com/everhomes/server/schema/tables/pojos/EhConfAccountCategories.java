@@ -11,31 +11,37 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfAccountCategories implements java.io.Serializable {
 
-	private static final long serialVersionUID = 635152224;
+	private static final long serialVersionUID = -154954066;
 
 	private java.lang.Long       id;
-	private java.lang.Byte       channelType;
+	private java.lang.Integer    multipleAccountThreshold;
 	private java.lang.Byte       confType;
 	private java.lang.Integer    minPeriod;
-	private java.math.BigDecimal amount;
+	private java.math.BigDecimal singleAccountPrice;
 	private java.lang.Integer    namespaceId;
+	private java.math.BigDecimal multipleAccountPrice;
+	private java.lang.Byte       displayFlag;
 
 	public EhConfAccountCategories() {}
 
 	public EhConfAccountCategories(
 		java.lang.Long       id,
-		java.lang.Byte       channelType,
+		java.lang.Integer    multipleAccountThreshold,
 		java.lang.Byte       confType,
 		java.lang.Integer    minPeriod,
-		java.math.BigDecimal amount,
-		java.lang.Integer    namespaceId
+		java.math.BigDecimal singleAccountPrice,
+		java.lang.Integer    namespaceId,
+		java.math.BigDecimal multipleAccountPrice,
+		java.lang.Byte       displayFlag
 	) {
 		this.id = id;
-		this.channelType = channelType;
+		this.multipleAccountThreshold = multipleAccountThreshold;
 		this.confType = confType;
 		this.minPeriod = minPeriod;
-		this.amount = amount;
+		this.singleAccountPrice = singleAccountPrice;
 		this.namespaceId = namespaceId;
+		this.multipleAccountPrice = multipleAccountPrice;
+		this.displayFlag = displayFlag;
 	}
 
 	public java.lang.Long getId() {
@@ -46,12 +52,12 @@ public class EhConfAccountCategories implements java.io.Serializable {
 		this.id = id;
 	}
 
-	public java.lang.Byte getChannelType() {
-		return this.channelType;
+	public java.lang.Integer getMultipleAccountThreshold() {
+		return this.multipleAccountThreshold;
 	}
 
-	public void setChannelType(java.lang.Byte channelType) {
-		this.channelType = channelType;
+	public void setMultipleAccountThreshold(java.lang.Integer multipleAccountThreshold) {
+		this.multipleAccountThreshold = multipleAccountThreshold;
 	}
 
 	public java.lang.Byte getConfType() {
@@ -70,12 +76,12 @@ public class EhConfAccountCategories implements java.io.Serializable {
 		this.minPeriod = minPeriod;
 	}
 
-	public java.math.BigDecimal getAmount() {
-		return this.amount;
+	public java.math.BigDecimal getSingleAccountPrice() {
+		return this.singleAccountPrice;
 	}
 
-	public void setAmount(java.math.BigDecimal amount) {
-		this.amount = amount;
+	public void setSingleAccountPrice(java.math.BigDecimal singleAccountPrice) {
+		this.singleAccountPrice = singleAccountPrice;
 	}
 
 	public java.lang.Integer getNamespaceId() {
@@ -84,5 +90,21 @@ public class EhConfAccountCategories implements java.io.Serializable {
 
 	public void setNamespaceId(java.lang.Integer namespaceId) {
 		this.namespaceId = namespaceId;
+	}
+
+	public java.math.BigDecimal getMultipleAccountPrice() {
+		return this.multipleAccountPrice;
+	}
+
+	public void setMultipleAccountPrice(java.math.BigDecimal multipleAccountPrice) {
+		this.multipleAccountPrice = multipleAccountPrice;
+	}
+
+	public java.lang.Byte getDisplayFlag() {
+		return this.displayFlag;
+	}
+
+	public void setDisplayFlag(java.lang.Byte displayFlag) {
+		this.displayFlag = displayFlag;
 	}
 }

@@ -1,0 +1,9 @@
+//
+// EvhNamespaceResourceType.h
+// generated at 2016-04-07 17:57:41 
+//
+
+#define EvhNamespaceResourceType_COMMUNITY @"COMMUNITY"
+
+///////////////////////////////////////////////////////////////////////////////
+
