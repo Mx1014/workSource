@@ -1,6 +1,7 @@
 package com.everhomes.repeat;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -15,8 +16,10 @@ import com.everhomes.rest.repeat.RangeDTO;
 import com.everhomes.rest.repeat.RepeatDurationUnit;
 import com.everhomes.rest.repeat.RepeatExpressionDTO;
 import com.everhomes.rest.repeat.RepeatServiceErrorCode;
+import com.everhomes.rest.repeat.RepeatSettingStatus;
 import com.everhomes.rest.repeat.TimeRangeDTO;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -61,10 +64,15 @@ public class RepeatServiceImpl implements RepeatService {
 		else if(RepeatDurationUnit.DAY.getCode().equals(unit)) {
 			calendar.add(Calendar.DATE, period);
 		}
+		else if(RepeatDurationUnit.WEEK.getCode().equals(unit)) {
+			calendar.add(Calendar.DAY_OF_WEEK, period);
+		}
 		else if(RepeatDurationUnit.MONTH.getCode().equals(unit)) {
 			calendar.add(Calendar.MONTH, period);
 		}
-		
+		else if(RepeatDurationUnit.YEAR.getCode().equals(unit)) {
+			calendar.add(Calendar.YEAR, period);
+		}
 		Timestamp time = new Timestamp(calendar.getTimeInMillis());
 		
 		return time;
@@ -120,6 +128,167 @@ public class RepeatServiceImpl implements RepeatService {
 		RepeatSettings repeat = findRepeatSettingById(4L);
 		List<RepeatExpressionDTO> ex = analyzeExpression(repeat.getExpression());
 		return ex;
+	}
+
+	@Override
+	public boolean isRepeatSettingActive(Long repeatSettingId) {
+
+		Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+		RepeatSettings repeat = findRepeatSettingById(repeatSettingId);
+		if(repeat.getStatus() == RepeatSettingStatus.ACTIVE.getCode()) {
+			if(repeat.getForeverFlag() == 1) {
+				return true;
+			} else if(repeat.getForeverFlag() == 0) {
+				if(repeat.getRepeatInterval() == null || repeat.getRepeatInterval() == 0 || repeat.getStartDate() == null) {
+					return false;
+				}
+				if(repeat.getRepeatCount() == 0) {
+					if(repeat.getEndDate() == null) {
+						return false;
+					} else {
+						Timestamp expiredDate = addPeriod(new Timestamp(repeat.getEndDate().getTime()), 1, "d");
+						if(expiredDate.after(now)) {
+							List<Integer> differences = getDateDifference(now, new Timestamp(repeat.getStartDate().getTime()),
+									repeat, repeat.getRepeatType());
+							for(Integer difference : differences) {
+								if(difference % repeat.getRepeatInterval() == 0) {
+									return true;
+								}
+							}
+							return false;
+						} else {
+							return false;
+						}
+					}
+					
+				} else {
+					if(repeat.getRepeatType() == 0) {
+						return false;
+					} else {
+						Timestamp expiredDate = addPeriod(new Timestamp(repeat.getEndDate().getTime()), 1, "d");
+						Timestamp repeatEndDate = addPeriod(new Timestamp(repeat.getStartDate().getTime()), 
+								repeat.getRepeatCount()*repeat.getRepeatInterval()+1, getRepeatType(repeat.getRepeatType()));
+						Timestamp endDate = getEarlyTime(expiredDate, repeatEndDate);
+						if(endDate.after(now)) {
+							List<Integer> differences = getDateDifference(now, new Timestamp(repeat.getStartDate().getTime()),
+									repeat, repeat.getRepeatType());
+							for(Integer difference : differences) {
+								if(difference % repeat.getRepeatInterval() == 0) {
+									return true;
+								}
+							}
+						}
+					}
+				}
+			} else {
+				return false;
+			}
+		}
+		return false;
+	}
+	
+	private Timestamp getEarlyTime(Timestamp time1, Timestamp time2) {
+		
+		Timestamp early = time1;
+		if(early.after(time2)) {
+			early = time2;
+		}
+		return early;
+	}
+	
+	private List<Integer> getDateDifference(Timestamp now, Timestamp compareValue, RepeatSettings repeat, int field) {
+		Calendar c = Calendar.getInstance();
+		c.setTime(now);
+		int yearNow = c.get(Calendar.YEAR);
+		int monthNow = c.get(Calendar.MONTH);
+		int dayWeekNow = c.get(Calendar.DAY_OF_WEEK);
+		int dayNow = c.get(Calendar.DATE);
+		
+		c.setTime(compareValue);
+		int yearCompare = c.get(Calendar.YEAR);
+		int monthCompare = c.get(Calendar.MONTH);
+		
+		List<Integer> results = new ArrayList<Integer>();
+		
+		if(repeat != null && repeat.getExpression() != null) {
+			List<RepeatExpressionDTO> expressionDto =  analyzeExpression(repeat.getExpression());
+			
+			if(expressionDto != null && expressionDto.size() > 0) {
+				for(RepeatExpressionDTO exp : expressionDto) {
+					int result = -1;
+					
+					if(field == 0) {
+						if(yearNow == exp.getYear() && monthNow == exp.getMonth() && dayNow == exp.getDay()) {
+							result = 0;
+						}
+					}
+					if(field == 1) {
+						if(repeat.getEveryWorkdayFlag() != null && repeat.getEveryWorkdayFlag() == 1
+								&& (dayWeekNow == Calendar.SUNDAY || dayWeekNow == Calendar.SATURDAY)) {
+							result = -1;
+						} else {
+							result = (int)((now.getTime() - compareValue.getTime())/86400000);
+						}
+						
+					}
+
+					if(field == 2) {
+						if(dayWeekNow == exp.getDay()) {
+							result = (int)((now.getTime() - compareValue.getTime())/604800000);
+						} else {
+							result = -1;
+						}
+					}
+					
+					if(field == 3) {
+						if(dayNow == exp.getDay()) {
+							if(yearNow == yearCompare) {
+								result = monthNow - monthCompare;
+							} else {
+								result = 12*(yearNow - yearCompare) + monthNow - monthCompare;
+							}
+							
+						} else {
+							result = -1;
+						}
+					}
+
+					if(field == 4) {
+						if(dayNow == exp.getDay() && monthNow == exp.getMonth()) {
+							result = yearNow - yearCompare;
+						} else {
+							result = -1;
+						}
+					}
+					
+					results.add(result);
+				}
+			}
+		}
+		
+		return results;
+	}
+	
+	private String getRepeatType(Byte repeatType) {
+		
+		String repeat = "";
+		
+		switch(repeatType) {
+		case 1:
+			repeat = "d";
+			break; 
+		case 2:
+			repeat = "W";
+			break;
+		case 3:
+			repeat = "M";
+			break;
+		case 4:
+			repeat = "Y";
+			break;
+		}
+		
+		return repeat;
 	}
 	
 }

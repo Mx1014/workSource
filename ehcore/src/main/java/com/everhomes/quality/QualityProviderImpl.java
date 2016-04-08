@@ -999,5 +999,20 @@ public class QualityProviderImpl implements QualityProvider {
 		
 	}
 
+	@Override
+	public List<QualityInspectionStandards> listActiveStandards() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionStandardsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_STANDARDS);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.STATUS.eq(QualityStandardStatus.ACTIVE.getCode()));
+		
+		List<QualityInspectionStandards> result = new ArrayList<QualityInspectionStandards>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, QualityInspectionStandards.class));
+			return null;
+		});
+		
+		return result;
+	}
+
 
 }

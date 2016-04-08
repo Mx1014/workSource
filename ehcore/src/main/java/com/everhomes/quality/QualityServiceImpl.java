@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -154,10 +155,18 @@ public class QualityServiceImpl implements QualityService {
 	public QualityStandardsDTO creatQualityStandard(CreatQualityStandardCommand cmd) {
 		
 		User user = UserContext.current().getUser();
+		RepeatSettings repeat = null;
+		if(cmd.getRepeat() !=null) {
+			repeat = ConvertHelper.convert(cmd.getRepeat(), RepeatSettings.class);
+			if(cmd.getRepeat().getStartDate() != null)
+				repeat.setStartDate(new Date(cmd.getRepeat().getStartDate()));
+			if(cmd.getRepeat().getEndDate() != null)
+				repeat.setEndDate(new Date(cmd.getRepeat().getEndDate()));
+			
+			repeat.setCreatorUid(user.getId());
+			repeatService.createRepeatSettings(repeat);
+		}
 		
-		RepeatSettings repeat = ConvertHelper.convert(cmd.getRepeat(), RepeatSettings.class);
-		repeat.setCreatorUid(user.getId());
-		repeatService.createRepeatSettings(repeat);
 
 		 
 		QualityInspectionStandards standard = new QualityInspectionStandards();
@@ -169,8 +178,12 @@ public class QualityServiceImpl implements QualityService {
 		standard.setDescription(cmd.getDescription());
 		standard.setCreatorUid(user.getId());
 		standard.setOperatorUid(user.getId());
-		standard.setRepeatSettingId(repeat.getId());
-		 
+		if(repeat == null) {
+			standard.setRepeatSettingId(0L);
+		} else {
+			standard.setRepeatSettingId(repeat.getId());
+		}
+			
 		qualityProvider.createQualityInspectionStandards(standard);
 		
 		List<StandardGroupDTO> groupList = cmd.getGroup();

@@ -7,13 +7,15 @@ import com.everhomes.util.StringHelper;
  * 	<li>MINUTE : m</li>
  *	<li>HOUR : h</li>
  *	<li>DAY : d</li>
+ *	<li>WEEK : W</li>
  *	<li>MONTH : M</li>
+ *	<li>YEAR : Y</li>
  * </ul>
  */
 public enum RepeatDurationUnit {
 
 
-	MINUTE("m"), HOUR("h"), DAY("d"), MONTH("M");
+	MINUTE("m"), HOUR("h"), DAY("d"), WEEK("W"), MONTH("M"), YEAR("Y");
 	
 	private String code;
 	
