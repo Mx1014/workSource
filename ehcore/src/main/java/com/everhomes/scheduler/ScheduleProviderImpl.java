@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
-
 import org.quartz.CalendarIntervalTrigger;
 import org.quartz.CronTrigger;
 import org.quartz.JobDetail;
@@ -23,17 +21,16 @@ import org.quartz.JobKey;
 import org.quartz.ObjectAlreadyExistsException;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import org.quartz.SchedulerFactory;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
 import org.quartz.Trigger.TriggerState;
 import org.quartz.TriggerKey;
-import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.constants.ErrorCodes;
@@ -43,27 +40,36 @@ import com.everhomes.rest.scheduler.ScheduleServiceErrorCode;
 import com.everhomes.util.RuntimeErrorException;
 
 @Component
+//public class ScheduleProviderImpl extends SchedulerFactoryBean implements ScheduleProvider {
 public class ScheduleProviderImpl implements ScheduleProvider {
 	private static final Logger LOGGER = LoggerFactory.getLogger("schedulelog");
 
 	@Autowired
 	private DbProvider dbProvider;
 	
-	/** 调度器 */
-	private Scheduler scheduler;
+	@Autowired
+	private SchedulerFactoryBean schedulerFactory;
+	
+	/** 调度器 
+	 * @return */
+	//private Scheduler scheduler;
 
-    @PostConstruct
-	protected void initialize() throws Exception {
-        long startTime = System.currentTimeMillis();
-        
-	    SchedulerFactory sf = new StdSchedulerFactory();
-	    scheduler = sf.getScheduler();
-	    scheduler.start();
-	    
-	    long endTime = System.currentTimeMillis();
-	    if(LOGGER.isInfoEnabled()) {
-	        LOGGER.info("Scheduler startd, elapse={}", (endTime - startTime));
-	    }
+//    @PostConstruct
+//	protected void initialize() throws Exception {
+//        long startTime = System.currentTimeMillis();
+//        
+//	    SchedulerFactory sf = new StdSchedulerFactory();
+//	    scheduler = sf.getScheduler();
+//	    scheduler.start();
+//	    
+//	    long endTime = System.currentTimeMillis();
+//	    if(LOGGER.isInfoEnabled()) {
+//	        LOGGER.info("Scheduler startd, elapse={}", (endTime - startTime));
+//	    }
+//	}
+	
+	private Scheduler getScheduler() {
+	    return schedulerFactory.getScheduler();
 	}
 
     @Override
@@ -101,14 +107,14 @@ public class ScheduleProviderImpl implements ScheduleProvider {
         }
         
         try {
+            @SuppressWarnings("unchecked")
             JobDetail job = newJob(jobClass).withIdentity(jobName, DEFAULT_GROUP).build();
             Trigger trigger = newTrigger().withIdentity(triggerName, DEFAULT_GROUP).startAt(startTime).build();
             
             if(parameters != null) {
                 job.getJobDataMap().putAll(parameters);
             }
-            scheduler.scheduleJob(job, trigger);
-            scheduler.scheduleJob(job, trigger);
+            getScheduler().scheduleJob(job, trigger);
             if(LOGGER.isInfoEnabled()) {
                 LOGGER.info("Schedule a new job(repeat), triggerName={}, jobName={}, groupName={}, startTime={}, jobClass={}, parameters={}", 
                     triggerName, jobName, DEFAULT_GROUP, startTimeStr, jobClass.getName(), parameters);
@@ -125,7 +131,6 @@ public class ScheduleProviderImpl implements ScheduleProvider {
     }
     
     @Override
-    @SuppressWarnings("rawtypes")
     public void scheduleRepeatJob(String triggerName, String jobName, Date startTime, long msInterval, int repeatCount, 
         String jobClassName, Map<String, Object> parameters) {
         scheduleRepeatJob(triggerName, jobName, startTime, msInterval, repeatCount, createJobClass(jobClassName), parameters);
@@ -168,6 +173,7 @@ public class ScheduleProviderImpl implements ScheduleProvider {
         }
         
         try {
+            @SuppressWarnings("unchecked")
             JobDetail job = newJob(jobClass).withIdentity(jobName, DEFAULT_GROUP).build();
             SimpleScheduleBuilder builder = null;
             if(repeatCount <= 0) {
@@ -181,7 +187,7 @@ public class ScheduleProviderImpl implements ScheduleProvider {
             if(parameters != null) {
                 job.getJobDataMap().putAll(parameters);
             }
-            scheduler.scheduleJob(job, trigger);
+            getScheduler().scheduleJob(job, trigger);
             if(LOGGER.isInfoEnabled()) {
                 LOGGER.info("Schedule a new job(repeat), triggerName={}, jobName={}, groupName={}, startTime={}, msInterval={}, repeatCount={}, jobClass={}, parameters={}", 
                 triggerName, jobName, DEFAULT_GROUP, startTimeStr, msInterval, repeatCount, jobClass.getName(), parameters);
@@ -224,6 +230,7 @@ public class ScheduleProviderImpl implements ScheduleProvider {
         }
         
         try {
+            @SuppressWarnings("unchecked")
             JobDetail job = newJob(jobClass).withIdentity(triggerName, DEFAULT_GROUP).build();
             Trigger trigger = newTrigger().withIdentity(triggerName, DEFAULT_GROUP).withSchedule(cronSchedule(cronExpression)).build();
             
@@ -231,7 +238,7 @@ public class ScheduleProviderImpl implements ScheduleProvider {
                 job.getJobDataMap().putAll(parameters);
             }
             
-            scheduler.scheduleJob(job, trigger);
+            getScheduler().scheduleJob(job, trigger);
             if(LOGGER.isInfoEnabled()) {
                 LOGGER.info("Schedule a new job(cron), triggerName={}, jobName={}, groupName={}, cronExpression={}, jobClass={}, parameters={}", 
                 triggerName, jobName, DEFAULT_GROUP, cronExpression, jobClass.getName(), parameters);
@@ -250,8 +257,8 @@ public class ScheduleProviderImpl implements ScheduleProvider {
     @Override
     public boolean checkExist(String triggerName, String jobName) {
         try {
-            boolean isJobExist = scheduler.checkExists(JobKey.jobKey(jobName, DEFAULT_GROUP));
-            boolean isTriggerExist = scheduler.checkExists(TriggerKey.triggerKey(triggerName, DEFAULT_GROUP));
+            boolean isJobExist = getScheduler().checkExists(JobKey.jobKey(jobName, DEFAULT_GROUP));
+            boolean isTriggerExist = getScheduler().checkExists(TriggerKey.triggerKey(triggerName, DEFAULT_GROUP));
             if(isJobExist && isTriggerExist) {
                 return true;
             }
@@ -273,7 +280,7 @@ public class ScheduleProviderImpl implements ScheduleProvider {
     public boolean unscheduleJob(String triggerName) {
         boolean result = false;
         try {
-            result = scheduler.unscheduleJob(TriggerKey.triggerKey(triggerName, DEFAULT_GROUP));
+            result = getScheduler().unscheduleJob(TriggerKey.triggerKey(triggerName, DEFAULT_GROUP));
             if(LOGGER.isInfoEnabled()) {
                 LOGGER.info("Unschedule the job, triggerName={}, groupName={}, result={}", triggerName, DEFAULT_GROUP, result);
             }
@@ -291,12 +298,12 @@ public class ScheduleProviderImpl implements ScheduleProvider {
     public List<ScheduleJobInfoDTO> listScheduleJobs() {
         List<ScheduleJobInfoDTO> jobInfoList = new ArrayList<ScheduleJobInfoDTO>();
         try {
-            List<String> groupNameList = scheduler.getJobGroupNames();
+            List<String> groupNameList = getScheduler().getJobGroupNames();
             for(String groupName : groupNameList) {
-                Set<JobKey> jobSet = scheduler.getJobKeys(GroupMatcher.jobGroupEquals(groupName));
+                Set<JobKey> jobSet = getScheduler().getJobKeys(GroupMatcher.jobGroupEquals(groupName));
                 for(JobKey jobKey : jobSet) {
                     @SuppressWarnings("rawtypes")
-                    List triggers = scheduler.getTriggersOfJob(jobKey);
+                    List triggers = getScheduler().getTriggersOfJob(jobKey);
                     for(Object trigger : triggers) {
                         ScheduleJobInfoDTO jobInfo = new ScheduleJobInfoDTO();
                         jobInfoList.add(jobInfo);
@@ -309,7 +316,7 @@ public class ScheduleProviderImpl implements ScheduleProvider {
                         jobInfo.setTriggerType("Trigger");
                         jobInfo.setTriggerGroupName(defaultTrigger.getKey().getGroup());
                         jobInfo.setTriggerName(defaultTrigger.getKey().getName());
-                        jobInfo.setTriggerState(convertTriggerState(scheduler.getTriggerState(defaultTrigger.getKey())));
+                        jobInfo.setTriggerState(convertTriggerState(getScheduler().getTriggerState(defaultTrigger.getKey())));
                         if(defaultTrigger.getStartTime() != null) {
                             jobInfo.setStartTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(defaultTrigger.getStartTime()));
                         }
