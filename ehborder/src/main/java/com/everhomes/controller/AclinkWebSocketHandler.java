@@ -7,8 +7,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.concurrent.ListenableFutureCallback;
@@ -22,6 +24,7 @@ import org.springframework.web.socket.handler.BinaryWebSocketHandler;
 import com.everhomes.aclink.AclinkWebSocketMessage;
 import com.everhomes.aclink.DataUtil;
 import com.everhomes.aclink.DoorAccessDTO;
+import com.everhomes.rest.aclink.SyncWebsocketMessagesRestResponse;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
 
@@ -115,11 +118,39 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
     public void nextMessage(AclinkWebSocketMessage cmd, WebSocketSession session, AclinkWebSocketState state) {
         Map<String, String> params = new HashMap<String, String>();
         StringHelper.toStringMap(null, cmd, params);
+        final AclinkWebSocketHandler handler = this;
+        
         httpRestCallProvider.restCall("/aclink/syncWebsocketMessages", params, new ListenableFutureCallback<ResponseEntity<String>> () {
 
         @Override
         public void onSuccess(ResponseEntity<String> result) {
-            //TODO for response
+            if(result.getStatusCode() == HttpStatus.OK) {
+                SyncWebsocketMessagesRestResponse resp = (SyncWebsocketMessagesRestResponse)StringHelper.fromJsonString(result.getBody()
+                        , SyncWebsocketMessagesRestResponse.class);
+                if(resp.getErrorCode().equals(200) && resp.getResponse() != null) {
+                    
+                    AclinkWebSocketMessage respCmd = resp.getResponse();
+                    state.onServerMessage(resp.getResponse(), session, handler);
+                    
+                    byte[] bPayload = Base64.decodeBase64(respCmd.getPayload());
+                    byte[] bSeq = DataUtil.intToByteArray(respCmd.getSeq().intValue());
+                    byte[] bLen = DataUtil.intToByteArray(bPayload.length + 6);
+                    byte[] mBuf = new byte[bPayload.length + 10];
+                    
+                    System.arraycopy(bLen, 0, mBuf, 0, bLen.length);
+                    System.arraycopy(bSeq, 0, mBuf, 6, bSeq.length);
+                    System.arraycopy(bPayload, 0, mBuf, 10, bPayload.length);
+                    
+                    BinaryMessage wsMessage = new BinaryMessage(mBuf);
+                    try {
+                        session.sendMessage(wsMessage);
+                    } catch (IOException e) {
+                        LOGGER.error("sendMessage error", e);
+                    }
+                }
+                
+            }
+            
         }
 
         @Override

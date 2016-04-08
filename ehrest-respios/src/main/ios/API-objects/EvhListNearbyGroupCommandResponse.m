@@ -1,6 +1,6 @@
 //
 // EvhListNearbyGroupCommandResponse.m
-// generated at 2016-04-07 17:33:49 
+// generated at 2016-04-07 17:57:42 
 //
 #import "EvhListNearbyGroupCommandResponse.h"
 #import "EvhGroupDTO.h"

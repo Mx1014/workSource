@@ -1,6 +1,6 @@
 //
 // EvhLeasePromotionType.h
-// generated at 2016-04-07 17:33:48 
+// generated at 2016-04-07 17:57:43 
 //
 
 #define EvhLeasePromotionType_ORDINARY @"building"
