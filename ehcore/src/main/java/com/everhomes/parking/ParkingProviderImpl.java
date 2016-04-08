@@ -25,6 +25,9 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.parking.ParkingCardRequestStatus;
+import com.everhomes.rest.parking.ParkingLotVendor;
+import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
+import com.everhomes.rest.parking.ParkingRechargeOrderStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhParkingCardRequestsDao;
@@ -173,13 +176,15 @@ public class ParkingProviderImpl implements ParkingProvider {
 	}
     
     @Override
-    public List<ParkingCardRequest> listParkingCardRequests(String ownerType,Long ownerId
+    public List<ParkingCardRequest> listParkingCardRequests(Long id,String ownerType,Long ownerId
     		,Long parkingLotId,String plateNumber,ParkingCardRequestStatus status,SortField<?> order,
     		Long pageAnchor,Integer pageSize){
     	List<ParkingCardRequest> resultList = null;
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         SelectQuery<EhParkingCardRequestsRecord> query = context.selectQuery(Tables.EH_PARKING_CARD_REQUESTS);
         
+        if(id != null)
+        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.REQUESTOR_UID.eq(id));
         if (pageAnchor != null && pageAnchor != 0)
 			query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.ID.gt(pageAnchor));
         if(StringUtils.isNotBlank(ownerType))
@@ -237,6 +242,24 @@ public class ParkingProviderImpl implements ParkingProvider {
         query.addOrderBy(Tables.EH_PARKING_RECHARGE_ORDERS.ID.desc());
         if(pageSize != null)
         	query.addLimit(pageSize);
+        
+        resultList = query.fetch().map(r -> 
+			ConvertHelper.convert(r, ParkingRechargeOrder.class));
+        
+    	return resultList;
+    	
+    }
+    
+    @Override
+    public List<ParkingRechargeOrder> findWaitingParkingRechargeOrders(ParkingLotVendor vendor){
+    	List<ParkingRechargeOrder> resultList = null;
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        SelectQuery<EhParkingRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_ORDERS);
+		
+        query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.VENDOR_NAME.eq(vendor.getCode()));
+
+		query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.RECHARGE_STATUS.notEqual(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode()));
+		query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.STATUS.eq(ParkingRechargeOrderStatus.PAID.getCode()));
         
         resultList = query.fetch().map(r -> 
 			ConvertHelper.convert(r, ParkingRechargeOrder.class));

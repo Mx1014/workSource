@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,6 +26,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.CreateParkingRechargeOrderCommand;
 import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
@@ -155,55 +157,24 @@ public class ParkingServiceImpl implements ParkingService {
 	public ParkingCardRequestDTO requestParkingCard(RequestParkingCardCommand cmd) {
 		
     	checkPlateNumber(cmd.getPlateNumber());
-        checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+    	ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 		
-		if(cmd.getPlateNumber().length() != 7) {
-			LOGGER.error("the length of plateNumber is wrong.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"the length of plateNumber is wrong.");
-		}
-		ParkingCardRequestDTO parkingCardRequestDTO = new ParkingCardRequestDTO();
-		try {
-			ParkingCardRequest parkingCardRequest = new ParkingCardRequest();
-			parkingCardRequest.setOwnerId(cmd.getOwnerId());
-			parkingCardRequest.setOwnerType(cmd.getOwnerType());
-			parkingCardRequest.setParkingLotId(cmd.getParkingLotId());
-			parkingCardRequest.setRequestorEnterpriseId(cmd.getRequestorEnterpriseId());
-			parkingCardRequest.setPlateNumber(cmd.getPlateNumber());
-			parkingCardRequest.setPlateOwnerEntperiseName(cmd.getPlateOwnerEntperiseName());
-			parkingCardRequest.setPlateOwnerName(cmd.getPlateOwnerName());
-			parkingCardRequest.setPlateOwnerPhone(cmd.getPlateOwnerPhone());
-			parkingCardRequest.setRequestorUid(UserContext.current().getLogin().getUserId());
-			//设置一些初始状态
-			parkingCardRequest.setIssueFlag(ParkingCardIssueFlag.UNISSUED.getCode());
-			parkingCardRequest.setStatus(ParkingCardRequestStatus.QUEUEING.getCode());
-			parkingCardRequest.setCreatorUid(UserContext.current().getLogin().getUserId());
-			parkingCardRequest.setCreateTime(new Timestamp(System.currentTimeMillis()));
-			
-			parkingProvider.requestParkingCard(parkingCardRequest);
-			
-			parkingCardRequestDTO = ConvertHelper.convert(parkingCardRequest, ParkingCardRequestDTO.class);
-			
-			Integer count = parkingProvider.waitingCardCount(cmd.getOwnerType(), 
-					cmd.getOwnerId(), cmd.getParkingLotId(), parkingCardRequest.getCreateTime());
-			parkingCardRequestDTO.setRanking(count);
-		} catch(Exception e) {
-			LOGGER.error("requestParkingCard is fail.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_SQL_EXCEPTION,
-					"requestParkingCard is fail." + e.toString());
-		}
-		return parkingCardRequestDTO;
+    	String vendor = parkingLot.getVendorName();
+    	ParkingVendorHandler handler = getParkingVendorHandler(vendor);
+    	
+		return handler.getRequestParkingCard(cmd);
 	}
     
 	@Override
     public ListParkingCardRequestResponse listParkingCardRequests(ListParkingCardRequestsCommand cmd){
 		
-		checkPlateNumber(cmd.getPlateNumber());
         checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 		
     	ListParkingCardRequestResponse response = new ListParkingCardRequestResponse();
     	cmd.setPageSize(PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize()));
-    	List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(cmd.getOwnerType(), 
+    	User user = UserContext.current().getUser();
+    	
+    	List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(user.getId(),cmd.getOwnerType(), 
     			cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(),null,
     			Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.asc(), cmd.getPageAnchor(), cmd.getPageSize());
     					
@@ -253,6 +224,9 @@ public class ParkingServiceImpl implements ParkingService {
 		parkingRechargeOrder.setRechargeStatus(ParkingRechargeOrderRechargeStatus.UNRECHARGED.getCode());
 		parkingRechargeOrder.setCreatorUid(user.getId());
 		parkingRechargeOrder.setCreateTime(new Timestamp(System.currentTimeMillis()));
+		parkingRechargeOrder.setOrderNo(createOrderNo(System.currentTimeMillis()));
+		parkingRechargeOrder.setNewExpiredTime(addMonth(cmd.getExpiredTime(), cmd.getMonthCount()));
+		parkingRechargeOrder.setOldExpiredTime(addDays(cmd.getExpiredTime(), 1));
 		
 		parkingProvider.createParkingRechargeOrder(parkingRechargeOrder);
 		}catch(Exception e) {
@@ -400,7 +374,7 @@ public class ParkingServiceImpl implements ParkingService {
         }
         checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
         
-    	List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(null, 
+    	List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(null,null, 
     			null, null, null,ParkingCardRequestStatus.QUEUEING,
     			Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.asc(), null, cmd.getCount())
     			.stream().map(r -> {
@@ -413,7 +387,10 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public void notifyParkingRechargeOrderPayment(OnlinePayBillCommand cmd) {
-		
+    	ParkingRechargeOrder order = onlinePayBill(cmd);
+    	String venderName = parkingProvider.findParkingLotById(order.getParkingLotId()).getVendorName();
+    	ParkingVendorHandler handler = getParkingVendorHandler(venderName);
+    	handler.notifyParkingRechargeOrderPayment(order,cmd.getPayStatus());
 	}
 	
     private Timestamp strToTimestamp(String str) {
@@ -491,4 +468,145 @@ public class ParkingServiceImpl implements ParkingService {
    		}
    		
    	}
+    
+    private Long createOrderNo(Long time) {
+		String bill = String.valueOf(time) + (int) (Math.random()*1000);
+		return Long.valueOf(bill);
+	}
+    
+	private Timestamp addDays(String oldPeriod, int days) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(strToTimestamp(oldPeriod));
+		calendar.add(Calendar.DATE, days);
+		Timestamp time = new Timestamp(calendar.getTimeInMillis());
+		
+		return time;
+	}
+	
+	private Timestamp addMonth(String oldPeriod, int month) {
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(strToTimestamp(oldPeriod));
+		calendar.add(Calendar.MONTH, month);
+		Timestamp newPeriod = new Timestamp(calendar.getTimeInMillis());
+		
+		return newPeriod;
+	}
+	
+	   private ParkingRechargeOrder onlinePayBill(OnlinePayBillCommand cmd) {
+			
+		   if(StringUtils.isBlank(cmd.getPayStatus())){
+				LOGGER.error("payStatus is null or empty.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"payStatus is null or empty.");
+			}
+		   
+	    	ParkingRechargeOrder order = new ParkingRechargeOrder();
+			//fail
+			if(cmd.getPayStatus().toLowerCase().equals("fail"))
+				order = this.onlinePayBillFail(cmd);
+			//success
+			if(cmd.getPayStatus().toLowerCase().equals("success"))
+				order = this.onlinePayBillSuccess(cmd);
+
+			return order;
+		}
+	    
+	    private ParkingRechargeOrder onlinePayBillFail(OnlinePayBillCommand cmd) {
+			
+			if(LOGGER.isDebugEnabled())
+				LOGGER.error("onlinePayBillFail");
+			this.checkOrderNoIsNull(cmd.getOrderNo());
+			Long orderId = Long.parseLong(cmd.getOrderNo());
+			
+			ParkingRechargeOrder order = checkOrder(orderId);
+					
+			Timestamp payTimeStamp = new Timestamp(System.currentTimeMillis());
+			order.setStatus(ParkingRechargeOrderStatus.INACTIVE.getCode());
+			order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.NONE.getCode());
+			order.setPaidTime(payTimeStamp);
+			//order.setPaidTime(cmd.getPayTime());
+			parkingProvider.updateParkingRechargeOrder(order);
+			
+			return order;
+		}
+		
+		private ParkingRechargeOrder onlinePayBillSuccess(OnlinePayBillCommand cmd) {
+			
+			if(LOGGER.isDebugEnabled())
+				LOGGER.error("onlinePayBillSuccess");
+			this.checkOrderNoIsNull(cmd.getOrderNo());
+			this.checkVendorTypeIsNull(cmd.getVendorType());
+			this.checkPayAmountIsNull(cmd.getPayAmount());
+			
+			Long orderId = Long.parseLong(cmd.getOrderNo());
+			ParkingRechargeOrder order = checkOrder(orderId);
+			
+			BigDecimal payAmount = new BigDecimal(cmd.getPayAmount());
+			
+			Long payTime = System.currentTimeMillis();
+			Timestamp payTimeStamp = new Timestamp(payTime);
+			
+			this.checkVendorTypeFormat(cmd.getVendorType());
+			
+			if(order.getStatus().byteValue() == ParkingRechargeOrderStatus.UNPAID.getCode()) {
+				order.setPrice(payAmount);
+				order.setStatus(ParkingRechargeOrderStatus.PAID.getCode());
+				order.setPaidTime(payTimeStamp);
+				//order.setPaidTime(cmd.getPayTime());
+				parkingProvider.updateParkingRechargeOrder(order);
+			}
+			
+			return order;
+		}
+		
+		private void checkOrderNoIsNull(String orderNo) {
+			
+			if(StringUtils.isBlank(orderNo)){
+				LOGGER.error("orderNo is null or empty.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"orderNo is null or empty.");
+			}
+
+		}
+		
+		private ParkingRechargeOrder checkOrder(Long orderId) {
+			
+	    	ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(orderId);
+			
+			if(order == null){
+				LOGGER.error("the order {} not found.",orderId);
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"the order not found.");
+			}
+			return order;
+		}
+		
+		private void checkPayAmountIsNull(String payAmount) {
+			
+			if(StringUtils.isBlank(payAmount)){
+				LOGGER.error("payAmount is null or empty.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"payAmount or is null or empty.");
+			}
+
+		}
+
+		private void checkVendorTypeIsNull(String vendorType) {
+			
+			if(StringUtils.isBlank(vendorType)){
+				LOGGER.error("vendorType is null or empty.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"vendorType is null or empty.");
+			}
+
+		}
+		
+		private void checkVendorTypeFormat(String vendorType) {
+			if(VendorType.fromCode(vendorType) == null){
+				LOGGER.error("vendor type is wrong.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"vendor type is wrong.");
+			}
+		}
 }
