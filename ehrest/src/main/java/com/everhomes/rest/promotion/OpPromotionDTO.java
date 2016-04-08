@@ -13,10 +13,14 @@ import com.everhomes.util.StringHelper;
  * <li>actionType: 联系人名字</li>
  * <li>actionData:头像</li>
  * <li>validCount: 运营推广活动有效次数，0时表示没有次数限制，1次表示看一次后不再显示（服务器端只记录此配置，客户端需要根据该字段来决定展示次数）</li>
+<<<<<<< HEAD:ehrest/src/main/java/com/everhomes/rest/user/OpPromotionDTO.java
+ * <li>createTime:创建时间</li>
+=======
  * <li>startTime: 活动开始时间</li>
  * <li>endTime: 活动结束时间</li>
  * <li>status: 活动状态，{@link com.everhomes.rest.promotion.OpPromotionStatus}</li>
  * <li>createTime: 活动创建时间</li>
+>>>>>>> c721792... implement getUserOpPromotionsByScene:ehrest/src/main/java/com/everhomes/rest/promotion/OpPromotionDTO.java
  * </ul>
  */
 public class OpPromotionDTO {
@@ -27,10 +31,10 @@ public class OpPromotionDTO {
     private String actionType;
     private String actionData;
     private Integer validCount;
-    private Timestamp startTime;
-    private Timestamp endTime;
     private Byte status;
+
     private Timestamp createTime;
+
 
     public Long getId() {
         return id;
@@ -88,22 +92,6 @@ public class OpPromotionDTO {
         this.validCount = validCount;
     }
 
-    public Timestamp getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(Timestamp startTime) {
-        this.startTime = startTime;
-    }
-
-    public Timestamp getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(Timestamp endTime) {
-        this.endTime = endTime;
-    }
-
     public Byte getStatus() {
         return status;
     }
@@ -112,11 +100,13 @@ public class OpPromotionDTO {
         this.status = status;
     }
 
+
     public Timestamp getCreateTime() {
         return createTime;
     }
 
     public void setCreateTime(Timestamp createTime) {
+
         this.createTime = createTime;
     }
 

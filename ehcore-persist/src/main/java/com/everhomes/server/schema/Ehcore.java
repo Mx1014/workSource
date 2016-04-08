@@ -11,7 +11,9 @@ package com.everhomes.server.schema;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Ehcore extends org.jooq.impl.SchemaImpl {
 
+
 	private static final long serialVersionUID = -1774897763;
+
 
 	/**
 	 * The singleton instance of <code>ehcore</code>
@@ -156,6 +158,14 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhPushMessages.EH_PUSH_MESSAGES,
 			com.everhomes.server.schema.tables.EhPushMessageResults.EH_PUSH_MESSAGE_RESULTS,
 			com.everhomes.server.schema.tables.EhQrcodes.EH_QRCODES,
+			com.everhomes.server.schema.tables.EhQualityInspectionCategories.EH_QUALITY_INSPECTION_CATEGORIES,
+			com.everhomes.server.schema.tables.EhQualityInspectionEvaluations.EH_QUALITY_INSPECTION_EVALUATIONS,
+			com.everhomes.server.schema.tables.EhQualityInspectionEvaluationFactors.EH_QUALITY_INSPECTION_EVALUATION_FACTORS,
+			com.everhomes.server.schema.tables.EhQualityInspectionStandards.EH_QUALITY_INSPECTION_STANDARDS,
+			com.everhomes.server.schema.tables.EhQualityInspectionStandardGroupMap.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP,
+			com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS,
+			com.everhomes.server.schema.tables.EhQualityInspectionTaskAttachments.EH_QUALITY_INSPECTION_TASK_ATTACHMENTS,
+			com.everhomes.server.schema.tables.EhQualityInspectionTaskRecords.EH_QUALITY_INSPECTION_TASK_RECORDS,
 			com.everhomes.server.schema.tables.EhRechargeInfo.EH_RECHARGE_INFO,
 			com.everhomes.server.schema.tables.EhRecommendations.EH_RECOMMENDATIONS,
 			com.everhomes.server.schema.tables.EhRecommendationConfigs.EH_RECOMMENDATION_CONFIGS,
@@ -169,6 +179,7 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhRentalSitesBills.EH_RENTAL_SITES_BILLS,
 			com.everhomes.server.schema.tables.EhRentalSiteItems.EH_RENTAL_SITE_ITEMS,
 			com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES,
+			com.everhomes.server.schema.tables.EhRepeatSettings.EH_REPEAT_SETTINGS,
 			com.everhomes.server.schema.tables.EhRtxtResources.EH_RTXT_RESOURCES,
 			com.everhomes.server.schema.tables.EhSceneTypes.EH_SCENE_TYPES,
 			com.everhomes.server.schema.tables.EhScopedConfigurations.EH_SCOPED_CONFIGURATIONS,

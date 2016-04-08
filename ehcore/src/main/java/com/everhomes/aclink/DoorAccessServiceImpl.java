@@ -1022,11 +1022,22 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         return rv;
     }
     
-    private void updateDoorAccessLastTick(Long doorAccId) {
+    private Long updateDoorAccessLastTick(Long doorAccId) {
         String key = String.format(LAST_TICK, doorAccId);
         Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
         RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+      
+        Object v = redisTemplate.opsForValue().get(key);
+        
+        Long rv ;
+        if(v == null) {
+            rv = 0l;
+        } else {
+            rv = Long.valueOf((String)v);    
+        }
+        
         redisTemplate.opsForValue().set(key, String.valueOf(System.currentTimeMillis()));
+        return rv;
     }
     
     @Override
@@ -1072,12 +1083,18 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         if(resp.getSeq() != null) {
             aclinkMessageSequence.ackMessage(resp.getSeq());
             DoorCommand doorCommand = doorCommandProvider.getDoorCommandById(resp.getSeq());
-            doorCommand.setStatus(DoorCommandStatus.RESPONSE.getCode());
-            doorCommandProvider.updateDoorCommand(doorCommand);    
+            if(doorCommand != null) {
+                doorCommand.setStatus(DoorCommandStatus.RESPONSE.getCode());
+                doorCommandProvider.updateDoorCommand(doorCommand);    
+            }
         }
         
-        updateDoorAccessLastTick(resp.getId());
+        Long lastTick = updateDoorAccessLastTick(resp.getId());
+        //generate a time message
+        //if( (lastTick+5*60*1000) < System.currentTimeMillis() ) {
+            return msgGenerator.generateTimeMessage(resp.getId());
+        //}
         
-        return msgGenerator.generateWebSocketMessage(resp.getId());
+        //return msgGenerator.generateWebSocketMessage(resp.getId());
     }
 }

@@ -217,8 +217,10 @@ public class AclinkController extends ControllerBase {
     @RequestMapping("syncWebsocketMessages")
     @RestReturn(value=AclinkWebSocketMessage.class)
     public RestResponse syncWebsocketMessages(@Valid AclinkWebSocketMessage cmd) {
-        doorAccessService.syncWebSocketMessages(cmd);
         RestResponse response = new RestResponse();
+        
+        response.setResponseObject(doorAccessService.syncWebSocketMessages(cmd));
+        
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

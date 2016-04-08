@@ -54,6 +54,7 @@ import com.everhomes.rest.organization.OrganizationCommunityRequestStatus;
 import com.everhomes.rest.organization.OrganizationCommunityRequestType;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationMemberGroupType;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.organization.OrganizationTaskStatus;
@@ -1973,6 +1974,26 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			return ConvertHelper.convert(r, Organization.class);
 		return null;
 	}
+
+
+
+	@Override
+	public List<OrganizationMember> listOrganizationMembersByOrgIdAndMemberGroup(
+			Long orgId, String memberGroup) {
+		List<OrganizationMember> list = new ArrayList<OrganizationMember>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
+				.where(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(orgId))
+				.and(Tables.EH_ORGANIZATION_MEMBERS.MEMBER_GROUP.eq(memberGroup))
+				.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode())).fetch();
+
+		if(records != null && !records.isEmpty()){
+			for(Record r : records)
+				list.add(ConvertHelper.convert(r, OrganizationMember.class));
+		}
+		return list;
+	}
+
 	
 	@Override
 	public List<OrganizationMember> getOrganizationMemberByOrgIds(List<Long> ids, OrganizationMemberStatus status) {
@@ -1986,5 +2007,23 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			return null;
 		});
 		return result;
+
 	}
+
+
+	@Override
+	public List<OrganizationMember> listOrganizationMembersByUId(Long uId) {
+		List<OrganizationMember> list = new ArrayList<OrganizationMember>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
+				.where(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(uId))
+				.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode())).fetch();
+
+		if(records != null && !records.isEmpty()){
+			for(Record r : records)
+				list.add(ConvertHelper.convert(r, OrganizationMember.class));
+		}
+		return list;
+	}
+
 }

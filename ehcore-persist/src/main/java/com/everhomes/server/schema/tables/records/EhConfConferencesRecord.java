@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfConferencesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhConfConferencesRecord> implements org.jooq.Record22<java.lang.Long, java.lang.Long, java.lang.String, java.lang.String, java.sql.Timestamp, java.sql.Timestamp, java.lang.Integer, java.lang.Integer, java.lang.String, java.lang.String, java.lang.Integer, java.lang.String, java.lang.Integer, java.lang.Long, java.lang.Long, java.lang.Long, java.lang.String, java.lang.String, java.sql.Timestamp, java.lang.Byte, java.lang.Integer, java.lang.Long> {
 
-	private static final long serialVersionUID = 1233025263;
+	private static final long serialVersionUID = 1880983269;
 
 	/**
 	 * Setter for <code>ehcore.eh_conf_conferences.id</code>. id
@@ -28,16 +28,16 @@ public class EhConfConferencesRecord extends org.jooq.impl.UpdatableRecordImpl<c
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_conf_conferences.conference_id</code>.
+	 * Setter for <code>ehcore.eh_conf_conferences.meeting_no</code>. the meeting no from 3rd conference provider
 	 */
-	public void setConferenceId(java.lang.Long value) {
+	public void setMeetingNo(java.lang.Long value) {
 		setValue(1, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_conf_conferences.conference_id</code>.
+	 * Getter for <code>ehcore.eh_conf_conferences.meeting_no</code>. the meeting no from 3rd conference provider
 	 */
-	public java.lang.Long getConferenceId() {
+	public java.lang.Long getMeetingNo() {
 		return (java.lang.Long) getValue(1);
 	}
 
@@ -308,16 +308,16 @@ public class EhConfConferencesRecord extends org.jooq.impl.UpdatableRecordImpl<c
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_conf_conferences.meeting_no</code>. the meeting no from 3rd conference provider
+	 * Setter for <code>ehcore.eh_conf_conferences.conference_id</code>. the conference id from 3rd conference provider
 	 */
-	public void setMeetingNo(java.lang.Long value) {
+	public void setConferenceId(java.lang.Long value) {
 		setValue(21, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_conf_conferences.meeting_no</code>. the meeting no from 3rd conference provider
+	 * Getter for <code>ehcore.eh_conf_conferences.conference_id</code>. the conference id from 3rd conference provider
 	 */
-	public java.lang.Long getMeetingNo() {
+	public java.lang.Long getConferenceId() {
 		return (java.lang.Long) getValue(21);
 	}
 
@@ -366,7 +366,7 @@ public class EhConfConferencesRecord extends org.jooq.impl.UpdatableRecordImpl<c
 	 */
 	@Override
 	public org.jooq.Field<java.lang.Long> field2() {
-		return com.everhomes.server.schema.tables.EhConfConferences.EH_CONF_CONFERENCES.CONFERENCE_ID;
+		return com.everhomes.server.schema.tables.EhConfConferences.EH_CONF_CONFERENCES.MEETING_NO;
 	}
 
 	/**
@@ -526,7 +526,7 @@ public class EhConfConferencesRecord extends org.jooq.impl.UpdatableRecordImpl<c
 	 */
 	@Override
 	public org.jooq.Field<java.lang.Long> field22() {
-		return com.everhomes.server.schema.tables.EhConfConferences.EH_CONF_CONFERENCES.MEETING_NO;
+		return com.everhomes.server.schema.tables.EhConfConferences.EH_CONF_CONFERENCES.CONFERENCE_ID;
 	}
 
 	/**
@@ -542,7 +542,7 @@ public class EhConfConferencesRecord extends org.jooq.impl.UpdatableRecordImpl<c
 	 */
 	@Override
 	public java.lang.Long value2() {
-		return getConferenceId();
+		return getMeetingNo();
 	}
 
 	/**
@@ -702,7 +702,7 @@ public class EhConfConferencesRecord extends org.jooq.impl.UpdatableRecordImpl<c
 	 */
 	@Override
 	public java.lang.Long value22() {
-		return getMeetingNo();
+		return getConferenceId();
 	}
 
 	/**
@@ -719,7 +719,7 @@ public class EhConfConferencesRecord extends org.jooq.impl.UpdatableRecordImpl<c
 	 */
 	@Override
 	public EhConfConferencesRecord value2(java.lang.Long value) {
-		setConferenceId(value);
+		setMeetingNo(value);
 		return this;
 	}
 
@@ -899,7 +899,7 @@ public class EhConfConferencesRecord extends org.jooq.impl.UpdatableRecordImpl<c
 	 */
 	@Override
 	public EhConfConferencesRecord value22(java.lang.Long value) {
-		setMeetingNo(value);
+		setConferenceId(value);
 		return this;
 	}
 
@@ -925,11 +925,11 @@ public class EhConfConferencesRecord extends org.jooq.impl.UpdatableRecordImpl<c
 	/**
 	 * Create a detached, initialised EhConfConferencesRecord
 	 */
-	public EhConfConferencesRecord(java.lang.Long id, java.lang.Long conferenceId, java.lang.String subject, java.lang.String description, java.sql.Timestamp startTime, java.sql.Timestamp endTime, java.lang.Integer expectDuration, java.lang.Integer realDuration, java.lang.String confHostId, java.lang.String confHostName, java.lang.Integer maxCount, java.lang.String confHostKey, java.lang.Integer joinPolicy, java.lang.Long sourceAccountId, java.lang.Long confAccountId, java.lang.Long creatorUid, java.lang.String joinUrl, java.lang.String startUrl, java.sql.Timestamp createTime, java.lang.Byte status, java.lang.Integer namespaceId, java.lang.Long meetingNo) {
+	public EhConfConferencesRecord(java.lang.Long id, java.lang.Long meetingNo, java.lang.String subject, java.lang.String description, java.sql.Timestamp startTime, java.sql.Timestamp endTime, java.lang.Integer expectDuration, java.lang.Integer realDuration, java.lang.String confHostId, java.lang.String confHostName, java.lang.Integer maxCount, java.lang.String confHostKey, java.lang.Integer joinPolicy, java.lang.Long sourceAccountId, java.lang.Long confAccountId, java.lang.Long creatorUid, java.lang.String joinUrl, java.lang.String startUrl, java.sql.Timestamp createTime, java.lang.Byte status, java.lang.Integer namespaceId, java.lang.Long conferenceId) {
 		super(com.everhomes.server.schema.tables.EhConfConferences.EH_CONF_CONFERENCES);
 
 		setValue(0, id);
-		setValue(1, conferenceId);
+		setValue(1, meetingNo);
 		setValue(2, subject);
 		setValue(3, description);
 		setValue(4, startTime);
@@ -949,6 +949,6 @@ public class EhConfConferencesRecord extends org.jooq.impl.UpdatableRecordImpl<c
 		setValue(18, createTime);
 		setValue(19, status);
 		setValue(20, namespaceId);
-		setValue(21, meetingNo);
+		setValue(21, conferenceId);
 	}
 }

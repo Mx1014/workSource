@@ -40,6 +40,7 @@ public class OrganizationDTO {
 	private String description;
 	private String address;
 	private String groupType;
+	private Long directlyEnterpriseId;
 	
     private String avatarUri;
     private String avatarUrl;
@@ -228,6 +229,19 @@ public class OrganizationDTO {
 	public void setAddress(String address) {
 		this.address = address;
 	}
+
+
+
+	public Long getDirectlyEnterpriseId() {
+		return directlyEnterpriseId;
+	}
+
+
+	public void setDirectlyEnterpriseId(Long directlyEnterpriseId) {
+		this.directlyEnterpriseId = directlyEnterpriseId;
+	}
+
+
 
 	@Override
     public String toString() {

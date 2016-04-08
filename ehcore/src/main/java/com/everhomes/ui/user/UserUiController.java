@@ -36,9 +36,18 @@ import com.everhomes.rest.ui.user.ListContactsBySceneCommand;
 import com.everhomes.rest.ui.user.SceneContactDTO;
 import com.everhomes.rest.ui.user.SceneDTO;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
+
+
+import com.everhomes.rest.ui.user.SetUserCurrentSceneCommand;
+
 import com.everhomes.rest.user.ListUserOpPromotionsRespose;
 import com.everhomes.rest.user.UserCurrentEntityType;
+
+import com.everhomes.util.StringHelper;
+
 import com.everhomes.user.UserService;
+
+
 import com.everhomes.util.WebTokenGenerator;
 
 /**

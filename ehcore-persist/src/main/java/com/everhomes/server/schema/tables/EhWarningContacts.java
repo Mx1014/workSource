@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhWarningContacts extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhWarningContactsRecord> {
 
-	private static final long serialVersionUID = 1376204741;
+	private static final long serialVersionUID = -1838820647;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_warning_contacts</code>
@@ -45,11 +45,6 @@ public class EhWarningContacts extends org.jooq.impl.TableImpl<com.everhomes.ser
 	 * The column <code>ehcore.eh_warning_contacts.email</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhWarningContactsRecord, java.lang.String> EMAIL = createField("email", org.jooq.impl.SQLDataType.VARCHAR.length(20), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_warning_contacts.namespace_id</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhWarningContactsRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_warning_contacts</code> table reference

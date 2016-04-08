@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOpPromotionPoliciesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhOpPromotionPoliciesRecord> implements org.jooq.Record6<java.lang.Long, java.lang.Integer, java.lang.String, java.lang.String, java.lang.String, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = -1818459328;
+	private static final long serialVersionUID = 763321504;
 
 	/**
 	 * Setter for <code>ehcore.eh_op_promotion_policies.id</code>.
@@ -42,14 +42,14 @@ public class EhOpPromotionPoliciesRecord extends org.jooq.impl.UpdatableRecordIm
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_op_promotion_policies.name</code>. the title of the activity
+	 * Setter for <code>ehcore.eh_op_promotion_policies.name</code>. the identifer of the policy
 	 */
 	public void setName(java.lang.String value) {
 		setValue(2, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_op_promotion_policies.name</code>. the title of the activity
+	 * Getter for <code>ehcore.eh_op_promotion_policies.name</code>. the identifer of the policy
 	 */
 	public java.lang.String getName() {
 		return (java.lang.String) getValue(2);

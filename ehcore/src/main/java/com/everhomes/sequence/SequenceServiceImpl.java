@@ -468,7 +468,35 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(com.everhomes.schema.Tables.EH_MESSAGE_BOXS.ID.max()).from(com.everhomes.schema.Tables.EH_MESSAGE_BOXS).fetchOne().value1(); 
         });
         
-        //Aclink
+        
+        syncTableSequence(EhRepeatSettings.class, EhRepeatSettings.class, Tables.EH_REPEAT_SETTINGS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_REPEAT_SETTINGS.ID.max()).from(Tables.EH_REPEAT_SETTINGS).fetchOne().value1(); 
+        });
+        syncTableSequence(EhQualityInspectionStandards.class, EhQualityInspectionStandards.class, Tables.EH_QUALITY_INSPECTION_STANDARDS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_QUALITY_INSPECTION_STANDARDS.ID.max()).from(Tables.EH_QUALITY_INSPECTION_STANDARDS).fetchOne().value1(); 
+        });
+        syncTableSequence(EhQualityInspectionStandardGroupMap.class, EhQualityInspectionStandardGroupMap.class, Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP.ID.max()).from(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP).fetchOne().value1(); 
+        });
+        syncTableSequence(EhQualityInspectionTasks.class, EhQualityInspectionTasks.class, Tables.EH_QUALITY_INSPECTION_TASKS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_QUALITY_INSPECTION_TASKS.ID.max()).from(Tables.EH_QUALITY_INSPECTION_TASKS).fetchOne().value1(); 
+        });
+        syncTableSequence(EhQualityInspectionEvaluationFactors.class, EhQualityInspectionEvaluationFactors.class, Tables.EH_QUALITY_INSPECTION_EVALUATION_FACTORS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_QUALITY_INSPECTION_EVALUATION_FACTORS.ID.max()).from(Tables.EH_QUALITY_INSPECTION_EVALUATION_FACTORS).fetchOne().value1(); 
+        });
+        syncTableSequence(EhQualityInspectionEvaluations.class, EhQualityInspectionEvaluations.class, Tables.EH_QUALITY_INSPECTION_EVALUATIONS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_QUALITY_INSPECTION_EVALUATIONS.ID.max()).from(Tables.EH_QUALITY_INSPECTION_EVALUATIONS).fetchOne().value1(); 
+        });
+        syncTableSequence(EhQualityInspectionTaskRecords.class, EhQualityInspectionTaskRecords.class, Tables.EH_QUALITY_INSPECTION_TASK_RECORDS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS.ID.max()).from(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS).fetchOne().value1(); 
+        });
+        syncTableSequence(EhQualityInspectionTaskAttachments.class, EhQualityInspectionTaskAttachments.class, Tables.EH_QUALITY_INSPECTION_TASK_ATTACHMENTS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_QUALITY_INSPECTION_TASK_ATTACHMENTS.ID.max()).from(Tables.EH_QUALITY_INSPECTION_TASK_ATTACHMENTS).fetchOne().value1(); 
+        });
+        syncTableSequence(EhQualityInspectionCategories.class, EhQualityInspectionCategories.class, Tables.EH_QUALITY_INSPECTION_CATEGORIES.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_QUALITY_INSPECTION_CATEGORIES.ID.max()).from(Tables.EH_QUALITY_INSPECTION_CATEGORIES).fetchOne().value1(); 
+        });
+ 
         syncTableSequence(null, EhDoorAccess.class, Tables.EH_DOOR_ACCESS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_DOOR_ACCESS.ID.max()).from(Tables.EH_DOOR_ACCESS).fetchOne().value1(); 
         });
