@@ -36,5 +36,13 @@ public interface PrivilegeConstants {
     // privileges defined by Notice module
     public static final long NoticeManagementPost = 200L;
     
+    // privileges defined by Role module
+    public static final long RolePrivilegeList = 602L;
+    public static final long RolePrivilegeUpdate = 603L;
+    
+    // privileges defined by Admin module
+    public static final long OrgAdminList = 604L;
+    public static final long OrgAdminUpdate = 605L;
+    
     
 }

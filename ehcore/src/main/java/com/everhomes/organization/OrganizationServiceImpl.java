@@ -5474,8 +5474,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    		task.setTargetType(OrganizationTaskTargetType.USER.getCode());
     			task.setTaskStatus(cmd.getTaskStatus());
     			
-	    		task.setUnprocessedTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-	    		
 	    		User target = userProvider.findUserById(cmd.getUserId());
 	    		
 	    		map.put("operatorUName", user.getNickName());
@@ -5494,12 +5492,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    		
 	    		if(user.getId().equals(task.getTargetId())){
 	    			if(OrganizationTaskStatus.fromCode(cmd.getTaskStatus()) == OrganizationTaskStatus.PROCESSED){
-	    				task.setProcessedTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 	    			}else if(OrganizationTaskStatus.fromCode(cmd.getTaskStatus()) == OrganizationTaskStatus.UNPROCESSED && null != cmd.getUserId()){
 	    				if(cmd.getUserId().equals(task.getTargetId())){
 	    					cmd.setTaskStatus(OrganizationTaskStatus.PROCESSING.getCode());
 	    				}else{
-	    					task.setUnprocessedTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		    				task.setTargetId(cmd.getUserId());
 		    	    		task.setTargetType(OrganizationTaskTargetType.USER.getCode());
 	    				}
@@ -5570,7 +5566,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	task.setTaskCategory(cmd.getTaskCategory());
 			task.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
     		task.setOperatorUid(user.getId());
-    		
+    		if(OrganizationTaskStatus.fromCode(cmd.getTaskStatus()) == OrganizationTaskStatus.UNPROCESSED){
+    			task.setUnprocessedTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+    		}else if(OrganizationTaskStatus.fromCode(cmd.getTaskStatus()) == OrganizationTaskStatus.PROCESSING){
+    			task.setProcessingTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+    		}else if(OrganizationTaskStatus.fromCode(cmd.getTaskStatus()) == OrganizationTaskStatus.PROCESSED){
+    			task.setProcessedTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+    		}
     		organizationProvider.updateOrganizationTask(task);
     		
 	    	if(null != post){

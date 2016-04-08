@@ -44,14 +44,16 @@ PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4; 
 
 # 
-# 机构管辖的楼栋 
+# 任务处理人员组 
 # 
-DROP TABLE IF EXISTS `eh_organization_buildings`; 
-CREATE TABLE `eh_organization_buildings`( 
+DROP TABLE IF EXISTS `eh_organization_task_targets`; 
+CREATE TABLE `eh_organization_task_targets`( 
 `id` BIGINT NOT NULL, 
-`organization_id` BIGINT NOT NULL, 
-`community_id` BIGINT NOT NULL, 
-`building_id` BIGINT NOT NULL
+`owner_type` VARCHAR NOT NULL,
+`owner_id` BIGINT DEFAULT NULL,
+`target_type` VARCHAR NOT NULL COMMENT 'target object(user/group) type',
+`target_id` BIGINT DEFAULT NULL COMMENT 'target object(user/group) id',
+`task_type` VARCHAR NOT NULL,
 PRIMARY KEY (`id`) 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4; 
 
