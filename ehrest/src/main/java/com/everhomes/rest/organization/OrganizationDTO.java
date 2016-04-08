@@ -230,7 +230,7 @@ public class OrganizationDTO {
 		this.address = address;
 	}
 
-<<<<<<< HEAD
+
 
 	public Long getDirectlyEnterpriseId() {
 		return directlyEnterpriseId;
@@ -242,8 +242,7 @@ public class OrganizationDTO {
 	}
 
 
-=======
->>>>>>> 3.3.x
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
