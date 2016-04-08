@@ -5337,7 +5337,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    
 	    
 	    @Override
-	    public void acceptTask(ProcessOrganizationTaskCommand cmd) {
+	    public PostDTO acceptTask(ProcessOrganizationTaskCommand cmd) {
 	    	// TODO Auto-generated method stub
 	    	
 	    	User user = UserContext.current().getUser();
@@ -5377,10 +5377,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_TASK_ALREADY_PROCESSED,
 						"Tasks have been processed.");
 	    	}
+	    	Post post = forumProvider.findPostById(task.getApplyEntityId());
+	    	if(null != post){
+	    		post.setEmbeddedJson(StringHelper.toJsonString(task));
+	    	}
+	    	return ConvertHelper.convert(post, PostDTO.class);
 	    }
 	    
 	    @Override
-	    public void grabTask(ProcessOrganizationTaskCommand cmd) {
+	    public PostDTO grabTask(ProcessOrganizationTaskCommand cmd) {
 	    	// TODO Auto-generated method stub
 	    	User user = UserContext.current().getUser();
 	    	Long taskId = cmd.getTaskId();
@@ -5418,6 +5423,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_TASK_ALREADY_PROCESSED,
 						"Tasks have been processed.");
 	    	}
+	    	
+	    	Post post = forumProvider.findPostById(task.getApplyEntityId());
+	    	if(null != post){
+	    		post.setEmbeddedJson(StringHelper.toJsonString(task));
+	    	}
+	    	return ConvertHelper.convert(post, PostDTO.class);
 	    }
 	    
 	    @Override
@@ -5575,7 +5586,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    
 	    
 	    @Override
-	    public void refuseTask(ProcessOrganizationTaskCommand cmd) {
+	    public PostDTO refuseTask(ProcessOrganizationTaskCommand cmd) {
 	    	// TODO Auto-generated method stub
 	    	
 	    	User user = UserContext.current().getUser();
@@ -5609,6 +5620,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_TASK_ALREADY_PROCESSED,
 						"Tasks have been processed.");
 	    	}
+	    	
+	    	Post post = forumProvider.findPostById(task.getApplyEntityId());
+	    	if(null != post){
+	    		post.setEmbeddedJson(StringHelper.toJsonString(task));
+	    	}
+	    	return ConvertHelper.convert(post, PostDTO.class);
 	    }
 	    
 	    
