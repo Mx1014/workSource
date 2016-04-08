@@ -1,6 +1,6 @@
 //
 // EvhActivityListResponse.m
-// generated at 2016-04-07 17:57:42 
+// generated at 2016-04-08 20:09:23 
 //
 #import "EvhActivityListResponse.h"
 #import "EvhActivityDTO.h"

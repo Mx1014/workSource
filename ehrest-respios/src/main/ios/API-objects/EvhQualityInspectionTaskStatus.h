@@ -1,0 +1,22 @@
+//
+// EvhQualityInspectionTaskStatus.h
+// generated at 2016-04-08 20:09:21 
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhQualityInspectionTaskStatus
+//
+typedef enum {
+
+    EvhQualityInspectionTaskStatus_NONE = 0, 
+    EvhQualityInspectionTaskStatus_WAITING_FOR_EXECUTING = 1, 
+    EvhQualityInspectionTaskStatus_RECTIFING = 2, 
+    EvhQualityInspectionTaskStatus_RECTIFIED_AND_WAITING_APPROVAL = 3, 
+    EvhQualityInspectionTaskStatus_RECTIFY_CLOSED_AND_WAITING_APPROVAL = 4, 
+    EvhQualityInspectionTaskStatus_CLOSED = 5
+
+} EvhQualityInspectionTaskStatus;
+
+///////////////////////////////////////////////////////////////////////////////
+
