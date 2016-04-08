@@ -2,6 +2,7 @@ package com.everhomes.aclink;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -202,6 +203,22 @@ public class AclinkMsgGeneratorImpl implements AclinkMsgGenerator {
         smsg.setId(doorId);
         smsg.setPayload(results.get(0).getBody().getEncrypted());
         smsg.setSeq(results.get(0).getSeq());
+        
+        return smsg;
+    }
+    
+    @Override
+    public AclinkWebSocketMessage generateTimeMessage(Long doorId) {
+        AesServerKey aesServerKey = aesServerKeyService.getCurrentAesServerKey(doorId);
+        byte[] serverKey = Base64.decodeBase64(aesServerKey.getSecret());
+        byte[] timeMessage = CmdUtil.updateTime(serverKey, aesServerKey.getDeviceVer().byteValue());
+        
+        AclinkWebSocketMessage smsg = new AclinkWebSocketMessage();
+        smsg.setId(doorId);
+        smsg.setPayload(Base64.encodeBase64String(timeMessage));
+        
+        Random r = new Random();
+        smsg.setSeq(new Long(r.nextInt(300)));
         
         return smsg;
     }

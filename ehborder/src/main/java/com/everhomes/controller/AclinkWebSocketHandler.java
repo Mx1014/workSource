@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -31,6 +32,7 @@ import com.everhomes.util.StringHelper;
 public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(AclinkWebSocketHandler.class);
     
+    @Autowired
     private HttpRestCallProvider httpRestCallProvider;
     
     private ConcurrentHashMap<String, AclinkSessionInfo> uuid2Session = new ConcurrentHashMap<>();
@@ -90,25 +92,41 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
         LOGGER.info("Aclink connected: id= " + sInfo.getDto().getId() + ", uuid=" + uuid);
     }
     
-    @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus arg1) throws Exception {
+    private void disConnected(WebSocketSession session) throws Exception {
         String uuid = uuidFromSession(session);
-        session2State.remove(session);
+        AclinkWebSocketState state = session2State.remove(session);
         uuid2Session.remove(uuid);
         
         LOGGER.info("Aclink disConnected: uuid= " + uuid);
+        
+        if(state != null) {
+            Map<String, String> params = new HashMap<String, String>();
+            params.put("id", state.getId().toString());
+            httpRestCallProvider.restCall("/aclink/disConnected", params, new ListenableFutureCallback<ResponseEntity<String>> () {
+                @Override
+                public void onSuccess(ResponseEntity<String> result) {
+                }
+
+                @Override
+                public void onFailure(Throwable ex) {
+                }
+            });
+        }
+        
+        
+    }
+    
+    @Override
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus arg1) throws Exception {
+        disConnected(session);
     }
     
     @Override
     public void handleTransportError(WebSocketSession session, Throwable arg1) throws Exception {
-        String uuid = uuidFromSession(session);
-        session2State.remove(session);
-        uuid2Session.remove(uuid);
-        
-        LOGGER.info("Aclink disConnected by transportError: uuid= " + uuid);
+        disConnected(session);
     }
     
-    @Scheduled(fixedDelay=30000, initialDelay=60000)
+    @Scheduled(fixedDelay=20000, initialDelay=5000)
     public void tickCheck() {
         this.session2State.forEach((WebSocketSession session, AclinkWebSocketState state) -> {
             state.onTick(session, this);
