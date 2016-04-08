@@ -35,6 +35,12 @@
                 </property>
             </bean>
         </mvc:message-converters>
-    </mvc:annotation-driven> 
+    </mvc:annotation-driven>
 
+	<bean id="schedulerFactory" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		
+		<property name="autoStartup" value="true"/>
+		<property name="applicationContextSchedulerContextKey" value="applicationContext"/>
+		<property name="jobFactory" ref="jobFactory" />
+	</bean>
 </beans>
