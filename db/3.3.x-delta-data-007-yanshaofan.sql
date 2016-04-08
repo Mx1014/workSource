@@ -239,8 +239,9 @@ VALUES (23000,'统计',20000,null,'statistics',0,2,'/20000/23000','park',230);
 
 
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (30000,'园区/小区管理',0,'fa fa-building',null,1,2,'/30000','park',300);
-
+VALUES (30500,'园区管理',30000,null,'community_list',0,2,'/30000/30500','park',305);
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (31000,'楼栋管理',30000,null,'building_management',0,2,'/30000/31000','park',310);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
 VALUES (31000,'楼栋管理',30000,null,'building_management',0,2,'/30000/31000','park',310);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
@@ -305,6 +306,8 @@ INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf
 VALUES (52200,'部门通讯录',52000,null,'#',0,2,'/50000/52000/52200','park',522);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
 VALUES (52300,'群组通讯录',52000,null,'#',0,2,'/50000/52000/52300','park',523);
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (52400,'认证管理',52000,null,'#',0,2,'/50000/52000/52400','park',524);
 
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
 VALUES (53000,'管辖范围',50000,null,null,1,2,'/50000/53000','park',530);
@@ -344,6 +347,29 @@ INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf
 VALUES (56210,'账号管理',56200,null,'#',0,2,'/50000/56000/56200/56210','park',568);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
 VALUES (56220,'我的订单',56200,null,'#',0,2,'/50000/56000/56200/56220','park',569);
+
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (58000,'物业服务',50000,null,null,1,2,'/50000/58000','park',600);
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (58100,'品质核查',57000,null,null,1,2,'/50000/58000/58100','park',610);
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (58110,'作业标准',58100,null,null,1,2,'/50000/58000/58100/58110','park',611);
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (58111,'参考标准',58110,null,'reference_standard',0,2,'/50000/58000/58100/58110/58111','park',612);
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (58112,'类型管理',58110,null,'type_management',0,2,'/50000/58000/58100/58110/58112','park',613);
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (58113,'任务列表',58110,null,'task_list',0,2,'/50000/58000/58100/58110/58113','park',614);
+
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (58120,'品质分析',58100,null,null,1,2,'/50000/58000/58100/58120','park',614);
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (58121,'任务审阅',58120,null,'task_review',0,2,'/50000/58000/58100/58120/58121','park',615);
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (58122,'权重管理',58120,null,'weighting_management',0,2,'/50000/58000/58100/58120/58122','park',616);
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (58123,'绩效统计',58120,null,'performance_statistics',0,2,'/50000/58000/58100/58120/58123','park',617);
+
 
 
 #
