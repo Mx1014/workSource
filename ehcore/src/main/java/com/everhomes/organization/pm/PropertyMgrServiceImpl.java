@@ -74,6 +74,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.order.OrderUtil;
 import com.everhomes.organization.BillingAccountHelper;
 import com.everhomes.organization.BillingAccountType;
 import com.everhomes.organization.Organization;
@@ -122,6 +123,9 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.order.CommonOrderCommand;
+import com.everhomes.rest.order.CommonOrderDTO;
+import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.organization.AccountType;
 import com.everhomes.rest.organization.BillTransactionResult;
 import com.everhomes.rest.organization.GetOrgDetailCommand;
@@ -320,6 +324,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Autowired
 	private AppProvider appProvider;
+	
+	@Autowired
+	private OrderUtil commonOrderUtil;
 
 	@Override
 	public void applyPropertyMember(applyPropertyMemberCommand cmd) {
@@ -3809,6 +3816,55 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			LOGGER.error("remote search pay order return null.orderNo="+orderNo);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"remote search pay order return null.");
+		}
+	}
+
+	@Override
+	public CommonOrderDTO createPmBillOrderDemo(CreatePmBillOrderCommand cmd) {
+		try{
+			//自定义接口处理
+			if(cmd.getBillId() == null || cmd.getAmount() == null){
+				LOGGER.error("billId or amount is null.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"billId or amount is null.");
+			}
+			CommunityPmBill bill = this.organizationProvider.findOranizationBillById(cmd.getBillId());
+			if(bill == null){
+				LOGGER.error("the bill not found.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"the bill not found.");
+			}
+			CommunityPmBill nowBill = this.propertyMgrProvider.findNewestBillByAddressId(bill.getEntityId());
+			if(nowBill == null || nowBill.getId().compareTo(bill.getId()) != 0){
+				LOGGER.error("the bill is invalid.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"the bill is invalid.");
+			}
+
+			User user = UserContext.current().getUser();
+			OrganizationOrder order = new OrganizationOrder();
+			order.setAmount(cmd.getAmount());
+			order.setBillId(bill.getId());
+			order.setCreateTime(new Timestamp(System.currentTimeMillis()));
+			if(cmd.getDescription() != null && !cmd.getDescription().equals(""))
+				order.setDescription(cmd.getDescription());
+			order.setOwnerId(user.getId());
+			order.setPayerId(user.getId());
+			order.setStatus(OrganizationOrderStatus.WAITING_FOR_PAY.getCode());
+			this.organizationProvider.createOrganizationOrder(order);
+			String orderNo = this.convertOrderIdToOrderNo(order.getId());
+			//调用统一处理订单接口，返回统一订单格式
+			CommonOrderCommand orderCmd = new CommonOrderCommand();
+			orderCmd.setBody(bill.getName());
+			orderCmd.setOrderNo(orderNo);
+			orderCmd.setOrderType(OrderType.OrderTypeEnum.WUYETEST.getPycode());
+			orderCmd.setSubject("物业订单简要描述");
+			orderCmd.setTotalFee(cmd.getAmount());
+			CommonOrderDTO dto = commonOrderUtil.convertToCommonOrderTemplate(orderCmd);
+			return dto;
+		}catch (Exception e){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					e.getMessage());
 		}
 	}
 
