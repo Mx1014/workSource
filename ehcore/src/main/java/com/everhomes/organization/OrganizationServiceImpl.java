@@ -4324,11 +4324,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 				OrganizationMember orgMember = new OrganizationMember();
 				member.setId(null);
 				orgMember.setOrganizationId(cmd.getGroupId());
-				orgMember.setTargetType(OrganizationMemberTargetType.CONTACT.getCode());
+				orgMember.setTargetType(member.getTargetType());
 				orgMember.setContactName(member.getContactName());
 				orgMember.setContactToken(member.getContactToken());
 				orgMember.setContactType(ContactType.MOBILE.getCode());
-				orgMember.setTargetId(id);
+				orgMember.setTargetId(member.getTargetId());
 				orgMember.setCreatorUid(user.getId());
 				orgMember.setCreateTime(time);
 				orgMember.setUpdateTime(time);
