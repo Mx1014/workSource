@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhQualityInspectionTaskRecordsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhQualityInspectionTaskRecordsRecord> implements org.jooq.Record12<java.lang.Long, java.lang.Long, java.lang.String, java.lang.Long, java.lang.String, java.lang.Long, java.lang.Byte, java.sql.Timestamp, java.lang.Byte, java.lang.String, java.sql.Timestamp, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = 90320044;
+	private static final long serialVersionUID = 1911762124;
 
 	/**
 	 * Setter for <code>ehcore.eh_quality_inspection_task_records.id</code>. id
@@ -126,14 +126,14 @@ public class EhQualityInspectionTaskRecordsRecord extends org.jooq.impl.Updatabl
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_quality_inspection_task_records.process_result</code>. 0: none, 1: inspect ok, 2: inspect close, 3: rectified ok, 4: rectify closed, 5: delay, 11: rectified ok(waiting approval), 12: rectify closed(waiting approval)
+	 * Setter for <code>ehcore.eh_quality_inspection_task_records.process_result</code>. 0: none, 1: inspect ok, 2: inspect close, 3: rectified ok, 4: rectify closed, 5: inspect delay, 6: rectify delay, 11: rectified ok(waiting approval), 12: rectify closed(waiting approval)
 	 */
 	public void setProcessResult(java.lang.Byte value) {
 		setValue(8, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_quality_inspection_task_records.process_result</code>. 0: none, 1: inspect ok, 2: inspect close, 3: rectified ok, 4: rectify closed, 5: delay, 11: rectified ok(waiting approval), 12: rectify closed(waiting approval)
+	 * Getter for <code>ehcore.eh_quality_inspection_task_records.process_result</code>. 0: none, 1: inspect ok, 2: inspect close, 3: rectified ok, 4: rectify closed, 5: inspect delay, 6: rectify delay, 11: rectified ok(waiting approval), 12: rectify closed(waiting approval)
 	 */
 	public java.lang.Byte getProcessResult() {
 		return (java.lang.Byte) getValue(8);

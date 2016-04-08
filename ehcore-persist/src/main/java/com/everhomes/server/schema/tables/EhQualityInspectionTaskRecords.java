@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhQualityInspectionTaskRecords extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhQualityInspectionTaskRecordsRecord> {
 
-	private static final long serialVersionUID = 1975790503;
+	private static final long serialVersionUID = 1380872217;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_quality_inspection_task_records</code>
@@ -67,9 +67,9 @@ public class EhQualityInspectionTaskRecords extends org.jooq.impl.TableImpl<com.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTaskRecordsRecord, java.sql.Timestamp> PROCESS_END_TIME = createField("process_end_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_quality_inspection_task_records.process_result</code>. 0: none, 1: inspect ok, 2: inspect close, 3: rectified ok, 4: rectify closed, 5: delay, 11: rectified ok(waiting approval), 12: rectify closed(waiting approval)
+	 * The column <code>ehcore.eh_quality_inspection_task_records.process_result</code>. 0: none, 1: inspect ok, 2: inspect close, 3: rectified ok, 4: rectify closed, 5: inspect delay, 6: rectify delay, 11: rectified ok(waiting approval), 12: rectify closed(waiting approval)
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTaskRecordsRecord, java.lang.Byte> PROCESS_RESULT = createField("process_result", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: none, 1: inspect ok, 2: inspect close, 3: rectified ok, 4: rectify closed, 5: delay, 11: rectified ok(waiting approval), 12: rectify closed(waiting approval)");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTaskRecordsRecord, java.lang.Byte> PROCESS_RESULT = createField("process_result", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: none, 1: inspect ok, 2: inspect close, 3: rectified ok, 4: rectify closed, 5: inspect delay, 6: rectify delay, 11: rectified ok(waiting approval), 12: rectify closed(waiting approval)");
 
 	/**
 	 * The column <code>ehcore.eh_quality_inspection_task_records.process_message</code>.

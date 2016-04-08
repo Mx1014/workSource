@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhQualityInspectionTasks extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord> {
 
-	private static final long serialVersionUID = -1500696790;
+	private static final long serialVersionUID = 1727681592;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_quality_inspection_tasks</code>
@@ -132,9 +132,9 @@ public class EhQualityInspectionTasks extends org.jooq.impl.TableImpl<com.everho
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: none, 1: waiting for executing, 2: rectifing, 3: rectified and waiting approval, 4: rectify closed and waiting approval, 5: closed");
 
 	/**
-	 * The column <code>ehcore.eh_quality_inspection_tasks.result</code>. 0: none, 1: inspect ok, 2: inspect close, 3: rectified ok, 4: rectify closed, 5: delay
+	 * The column <code>ehcore.eh_quality_inspection_tasks.result</code>. 0: none, 1: inspect ok, 2: inspect close, 3: rectified ok, 4: rectify closed, 5: inspect delay, 6: rectify delay
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.lang.Byte> RESULT = createField("result", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: none, 1: inspect ok, 2: inspect close, 3: rectified ok, 4: rectify closed, 5: delay");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.lang.Byte> RESULT = createField("result", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: none, 1: inspect ok, 2: inspect close, 3: rectified ok, 4: rectify closed, 5: inspect delay, 6: rectify delay");
 
 	/**
 	 * The column <code>ehcore.eh_quality_inspection_tasks.reviewer_type</code>. the type of who review the task, organization, etc

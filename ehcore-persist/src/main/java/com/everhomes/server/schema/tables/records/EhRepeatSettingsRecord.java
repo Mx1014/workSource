@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRepeatSettingsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhRepeatSettingsRecord> implements org.jooq.Record15<java.lang.Long, java.lang.String, java.lang.Long, java.lang.Byte, java.lang.Integer, java.sql.Date, java.sql.Date, java.lang.String, java.lang.Byte, java.lang.Integer, java.lang.Byte, java.lang.String, java.lang.Byte, java.lang.Long, java.sql.Timestamp> {
 
-	private static final long serialVersionUID = 890978727;
+	private static final long serialVersionUID = -2133450073;
 
 	/**
 	 * Setter for <code>ehcore.eh_repeat_settings.id</code>.
@@ -112,14 +112,14 @@ public class EhRepeatSettingsRecord extends org.jooq.impl.UpdatableRecordImpl<co
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_repeat_settings.time_ranges</code>. multiple time ranges in a day, json format, {"ranges":[{"startTime":"08:00:00","endTime":"09:30:00"},{"startTime":"18:30:00","endTime":"19:30:00"}]}
+	 * Setter for <code>ehcore.eh_repeat_settings.time_ranges</code>. multiple time ranges in a day, json format, {"ranges":[{"startTime":"08:00:00","endTime":"09:30:00","duration":"3m"},{"startTime":"18:30:00","endTime":"19:30:00","duration":"2d"}]}
 	 */
 	public void setTimeRanges(java.lang.String value) {
 		setValue(7, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_repeat_settings.time_ranges</code>. multiple time ranges in a day, json format, {"ranges":[{"startTime":"08:00:00","endTime":"09:30:00"},{"startTime":"18:30:00","endTime":"19:30:00"}]}
+	 * Getter for <code>ehcore.eh_repeat_settings.time_ranges</code>. multiple time ranges in a day, json format, {"ranges":[{"startTime":"08:00:00","endTime":"09:30:00","duration":"3m"},{"startTime":"18:30:00","endTime":"19:30:00","duration":"2d"}]}
 	 */
 	public java.lang.String getTimeRanges() {
 		return (java.lang.String) getValue(7);
