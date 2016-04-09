@@ -234,6 +234,8 @@ public class QualityServiceImpl implements QualityService {
 				 map.setStandardId(standard.getId());
 				 map.setGroupType(group.getGroupType());
 				 map.setGroupId(group.getGroupId());
+				 if(group.getInspectorUid() != null)
+					 map.setInspectorUid(group.getInspectorUid());
 				 qualityProvider.createQualityInspectionStandardGroupMap(map);
 				 if(QualityGroupType.EXECUTIVE_GROUP.equals(map.getGroupType())) {
 					 executiveGroup.add(map);
@@ -698,6 +700,27 @@ public class QualityServiceImpl implements QualityService {
         return new ListQualityInspectionTasksResponse(nextPageAnchor, dtoList);
 	}
 	
+	@Override
+	public List<GroupUserDTO> getGroupMembers(Long groupId) {
+		List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(groupId);
+    	List<GroupUserDTO> groupUsers = members.stream().map((mem) -> {
+         	if(OrganizationMemberTargetType.USER.getCode().equals(mem.getTargetType()) 
+         			&& mem.getTargetId() != null && mem.getTargetId() != 0) {
+         		GroupUserDTO user = new GroupUserDTO();
+         		user.setOperatorType(mem.getTargetType());
+         		user.setUserId(mem.getTargetId());
+             	user.setUserName(mem.getContactName());
+             	user.setContact(mem.getContactToken());
+             	user.setEmployeeNo(mem.getEmployeeNo());
+             	return user;
+         	} else {
+         		return null;
+         	}
+         }).filter(member->member!=null).collect(Collectors.toList());
+    	
+    	return groupUsers;
+	}
+	
 	private List<QualityInspectionTaskDTO> convertQualityInspectionTaskToDTO(List<QualityInspectionTasks> tasks, final Long executeUid) {
 		
 		List<QualityInspectionTaskDTO> dtoList = tasks.stream().map((r) -> {
@@ -721,21 +744,22 @@ public class QualityServiceImpl implements QualityService {
 			if(group != null)
 				dto.setGroupName(group.getName());
         	
-        	List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(r.getExecutiveGroupId());
-        	List<GroupUserDTO> groupUsers = members.stream().map((mem) -> {
-             	if(OrganizationMemberTargetType.USER.getCode().equals(mem.getTargetType()) 
-             			&& mem.getTargetId() != null && mem.getTargetId() != 0) {
-             		GroupUserDTO user = new GroupUserDTO();
-             		user.setOperatorType(mem.getTargetType());
-             		user.setUserId(mem.getTargetId());
-                 	user.setUserName(mem.getContactName());
-                 	user.setContact(mem.getContactToken());
-                 	user.setEmployeeNo(mem.getEmployeeNo());
-                 	return user;
-             	} else {
-             		return null;
-             	}
-             }).filter(member->member!=null).collect(Collectors.toList());
+			List<GroupUserDTO> groupUsers = getGroupMembers(r.getExecutiveGroupId());
+//        	List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(r.getExecutiveGroupId());
+//        	List<GroupUserDTO> groupUsers = members.stream().map((mem) -> {
+//             	if(OrganizationMemberTargetType.USER.getCode().equals(mem.getTargetType()) 
+//             			&& mem.getTargetId() != null && mem.getTargetId() != 0) {
+//             		GroupUserDTO user = new GroupUserDTO();
+//             		user.setOperatorType(mem.getTargetType());
+//             		user.setUserId(mem.getTargetId());
+//                 	user.setUserName(mem.getContactName());
+//                 	user.setContact(mem.getContactToken());
+//                 	user.setEmployeeNo(mem.getEmployeeNo());
+//                 	return user;
+//             	} else {
+//             		return null;
+//             	}
+//             }).filter(member->member!=null).collect(Collectors.toList());
         	 
         	dto.setGroupUsers(groupUsers);
         	
@@ -1014,11 +1038,13 @@ public class QualityServiceImpl implements QualityService {
 				
 				task.setExecutiveGroupId(executiveGroup.getGroupId());
 				
-				List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgIdAndMemberGroup(
-														executiveGroup.getGroupId(), OrganizationMemberGroupType.HECHA.getCode());
-				if(members != null) {
-					task.setExecutorType(members.get(0).getTargetType());
-					task.setExecutorId(members.get(0).getTargetId());
+				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(executiveGroup.getInspectorUid()
+																	, executiveGroup.getGroupId());
+//				List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgIdAndMemberGroup(
+//														executiveGroup.getGroupId(), OrganizationMemberGroupType.HECHA.getCode());
+				if(member != null) {
+					task.setExecutorType(member.getTargetType());
+					task.setExecutorId(member.getTargetId());
 					List<TimeRangeDTO> timeRanges = repeatService.analyzeTimeRange(standard.getRepeat().getTimeRanges());
 					
 					if(timeRanges != null && timeRanges.size() > 0) {
@@ -1042,7 +1068,7 @@ public class QualityServiceImpl implements QualityService {
 							int code = QualityNotificationTemplateCode.GENERATE_QUALITY_TASK_NOTIFY_EXECUTOR;
 							String locale = "zh_CN";
 							String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-							sendMessageToUser(members.get(0).getTargetId(), notifyTextForApplicant);
+							sendMessageToUser(member.getTargetId(), notifyTextForApplicant);
 						}
 					}
 					

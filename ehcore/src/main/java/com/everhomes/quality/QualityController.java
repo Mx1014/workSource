@@ -19,6 +19,8 @@ import com.everhomes.rest.quality.CreatQualityStandardCommand;
 import com.everhomes.rest.quality.DeleteQualityCategoryCommand;
 import com.everhomes.rest.quality.DeleteQualityStandardCommand;
 import com.everhomes.rest.quality.DeleteFactorCommand;
+import com.everhomes.rest.quality.GetGroupMembersCommand;
+import com.everhomes.rest.quality.GroupUserDTO;
 import com.everhomes.rest.quality.ListEvaluationsCommand;
 import com.everhomes.rest.quality.ListEvaluationsResponse;
 import com.everhomes.rest.quality.ListQualityCategoriesCommand;
@@ -337,6 +339,22 @@ public class QualityController extends ControllerBase {
 	public RestResponse listRecordsByTaskId(ListRecordsByTaskIdCommand cmd) {
 		
 		List<QualityInspectionTaskRecordsDTO> records = qualityService.listRecordsByTaskId(cmd);
+		
+		RestResponse response = new RestResponse(records);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /quality/getGroupMembers</b>
+	 * <p>查看业务组成员</p>
+	 */
+	@RequestMapping("getGroupMembers")
+	@RestReturn(value = GroupUserDTO.class, collection = true)
+	public RestResponse getGroupMembers(GetGroupMembersCommand cmd) {
+		
+		List<GroupUserDTO> records = qualityService.getGroupMembers(cmd.getGroupId());
 		
 		RestResponse response = new RestResponse(records);
 		response.setErrorCode(ErrorCodes.SUCCESS);

@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *  <li>operatorType: 整改人类型</li>
+ *  <li>operatorType:用户类型</li>
  *  <li>userId: 用户id</li>
  *  <li>userName: 用户名</li>
  *  <li>contact: 手机号</li>
