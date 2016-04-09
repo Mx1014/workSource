@@ -4,7 +4,7 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'organization.notification', 12, 'zh_CN', '处理任务时发送的短信消息','${operatorUName}已分配给你一个物业任务，请尽快联系业主（${createUName}）处理。');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'organization.notification', 13, 'zh_CN', '处理任务时回复的帖子消息','${operatorUName}（${operatorUToken}）已将该任务指派给${targetUName}处理，请等待。');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'organization.notification', 14, 'zh_CN', '任务被拒绝收到的短信消息','该任务已被${targetUName}（${targetUToken}）拒绝，请重新分配');
-INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'organization.notification', 15, 'zh_CN', '任务已完成后的短信消息','您的服务已完成，滑动去查看详情');
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'organization.notification', 15, 'zh_CN', '任务已完成后的短信消息','您的服务已完成');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'organization.notification', 16, 'zh_CN', '任务已完成后回复的帖子消息','该服务已由${operatorUName}完成，稍后我们会将进行回访');
 
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`)
@@ -26,7 +26,7 @@ VALUES (201,0,'推送消息','推送消息',null);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
 VALUES (301,0,'分配人员','分配任务',null);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
-VALUES (302,0,'修改任务状态','修改任务状态',null);
+VALUES (302,0,'修改任务可见性','可将任务修改为可见或不可见',null);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
 VALUES (303,0,'查询报修任务帖子','查看报修任务贴','ORG_TASK_MANAGEMENT');
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
@@ -36,7 +36,7 @@ VALUES (305,0,'查询所有任务帖子','查看所有任务帖子','ORG_TASK_MA
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
 VALUES (306,0,'接受／拒绝任务','接受／拒绝任务',null);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
-VALUES (307,0,'修改任务可见性','可将任务修改为可见或不可见',null);
+VALUES (307,0,'处理任务状态','处理任务状态',null);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
 VALUES (308,0,'设置任务的分类','设置任务的分类',null);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
@@ -201,6 +201,8 @@ VALUES (608,0,'查看通讯录','查看通讯录',null);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
 VALUES (609,0,'通讯录人员的增删改','通讯录人员的增删改',null);
 
+
+
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
 VALUES (610,0,'设置角色','设置角色',null);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
@@ -213,6 +215,8 @@ INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
 VALUES (614,0,'组成员的修改和删除','组成员的修改和删除',null);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
 VALUES (615,0,'组成员权限设置','组成员权限设置',null);
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
+VALUES (616,0,'管辖范围','管辖范围，包括查询管辖小区楼栋，添加删除小区楼栋',null);
 
 
 #
@@ -569,6 +573,8 @@ VALUES (70,552,56220,'查看账号信息',0,1,'查看账号信息',650);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
 VALUES (71,553,56220,'查看开票信息',0,1,'查看开票信息',660);
 
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+VALUES (72,616,53100,'管辖范围管理',0,1,'管辖范围管理，包括管辖的小区楼栋查询，添加，删除',545);
 
 UPDATE `eh_acl_roles` SET `namespace_id` = 0, `owner_type` = 'EhOrganizations', `name` = '物业超级管理员',description='所有权限（All rights）'  where `id` = 1001;
 UPDATE `eh_acl_roles` SET `namespace_id` = 0, `owner_type` = 'EhOrganizations', `name` = '物业普通管理员',description='不能添加修改删除管理员，其他权限都有' where `id` = 1002;
