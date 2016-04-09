@@ -5377,11 +5377,17 @@ public class OrganizationServiceImpl implements OrganizationService {
 				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_TASK_ALREADY_PROCESSED,
 						"Tasks have been processed.");
 	    	}
-	    	Post post = forumProvider.findPostById(task.getApplyEntityId());
-	    	if(null != post){
-	    		post.setEmbeddedJson(StringHelper.toJsonString(task));
+	    	
+	    	Long communityId = null;
+	    	if(VisibleRegionType.fromCode(task.getVisibleRegionType()) == VisibleRegionType.COMMUNITY){
+	    		communityId = task.getVisibleRegionId();
 	    	}
-	    	return ConvertHelper.convert(post, PostDTO.class);
+	    	
+	    	PostDTO dto = this.forumService.getTopicById(task.getApplyEntityId(),communityId,false);
+	    	if(null != dto){
+				dto.setEmbeddedJson(StringHelper.toJsonString(task));
+	    	}
+	    	return dto;
 	    }
 	    
 	    @Override
@@ -5424,11 +5430,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 						"Tasks have been processed.");
 	    	}
 	    	
-	    	Post post = forumProvider.findPostById(task.getApplyEntityId());
-	    	if(null != post){
-	    		post.setEmbeddedJson(StringHelper.toJsonString(task));
+	    	Long communityId = null;
+	    	if(VisibleRegionType.fromCode(task.getVisibleRegionType()) == VisibleRegionType.COMMUNITY){
+	    		communityId = task.getVisibleRegionId();
 	    	}
-	    	return ConvertHelper.convert(post, PostDTO.class);
+	    	
+	    	PostDTO dto = this.forumService.getTopicById(task.getApplyEntityId(),communityId,false);
+	    	if(null != dto){
+				dto.setEmbeddedJson(StringHelper.toJsonString(task));
+	    	}
+	    	return dto;
 	    }
 	    
 	    @Override
@@ -5623,11 +5634,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 						"Tasks have been processed.");
 	    	}
 	    	
-	    	Post post = forumProvider.findPostById(task.getApplyEntityId());
-	    	if(null != post){
-	    		post.setEmbeddedJson(StringHelper.toJsonString(task));
+	    	Long communityId = null;
+	    	if(VisibleRegionType.fromCode(task.getVisibleRegionType()) == VisibleRegionType.COMMUNITY){
+	    		communityId = task.getVisibleRegionId();
 	    	}
-	    	return ConvertHelper.convert(post, PostDTO.class);
+	    	
+	    	PostDTO dto = this.forumService.getTopicById(task.getApplyEntityId(),communityId,false);
+	    	if(null != dto){
+				dto.setEmbeddedJson(StringHelper.toJsonString(task));
+	    	}
+	    	return dto;
 	    }
 	    
 	    
