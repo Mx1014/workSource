@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  *  <li>groupType: 业务组类型 com.everhomes.rest.quality.QualityGroupType</li>
  *  <li>groupId: 业务组id</li>
  *  <li>groupName: 业务组组名</li>
+ *  <li>inspectorUid: 业务组核查人uid</li>
  * </ul>
  */
 public class StandardGroupDTO {
@@ -22,6 +23,8 @@ public class StandardGroupDTO {
 	private String groupName;
 	
 	private Long standardId;
+	
+	private Long inspectorUid;
 
 	public Long getId() {
 		return id;
@@ -61,6 +64,14 @@ public class StandardGroupDTO {
 
 	public void setStandardId(Long standardId) {
 		this.standardId = standardId;
+	}
+
+	public Long getInspectorUid() {
+		return inspectorUid;
+	}
+
+	public void setInspectorUid(Long inspectorUid) {
+		this.inspectorUid = inspectorUid;
 	}
 
 	@Override
