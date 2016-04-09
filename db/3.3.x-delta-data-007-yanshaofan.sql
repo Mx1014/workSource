@@ -26,7 +26,7 @@ VALUES (201,0,'推送消息','推送消息',null);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
 VALUES (301,0,'分配人员','分配任务',null);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
-VALUES (302,0,'修改任务状态','修改任务状态',null);
+VALUES (302,0,'修改任务可见性','可将任务修改为可见或不可见',null);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
 VALUES (303,0,'查询报修任务帖子','查看报修任务贴','ORG_TASK_MANAGEMENT');
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
@@ -36,7 +36,7 @@ VALUES (305,0,'查询所有任务帖子','查看所有任务帖子','ORG_TASK_MA
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
 VALUES (306,0,'接受／拒绝任务','接受／拒绝任务',null);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
-VALUES (307,0,'修改任务可见性','可将任务修改为可见或不可见',null);
+VALUES (307,0,'处理任务状态','处理任务状态',null);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
 VALUES (308,0,'设置任务的分类','设置任务的分类',null);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
