@@ -1,6 +1,6 @@
 //
 // EvhApiConstants.h
-// generated at 2016-04-07 17:57:44
+// generated at 2016-04-08 20:09:24
 //
 #define EVH_ACLINK_ACTIVE_URL @"/aclink/active"
 #define EVH_ACLINK_ACTIVING_URL @"/aclink/activing"
@@ -621,6 +621,25 @@
 #define EVH_QRCODE_GETQRCODEIMAGE_URL @"/qrcode/getQRCodeImage"
 #define EVH_QRCODE_GETQRCODEINFO_URL @"/qrcode/getQRCodeInfo"
 #define EVH_QRCODE_NEWQRCODE_URL @"/qrcode/newQRCode"
+#define EVH_QUALITY_CREATQUALITYSTANDARD_URL @"/quality/creatQualityStandard"
+#define EVH_QUALITY_CREATETASKBYSTANDARD_URL @"/quality/createTaskByStandard"
+#define EVH_QUALITY_DELETEFACTOR_URL @"/quality/deleteFactor"
+#define EVH_QUALITY_DELETEQUALITYCATEGORY_URL @"/quality/deleteQualityCategory"
+#define EVH_QUALITY_DELETEQUALITYSTANDARD_URL @"/quality/deleteQualityStandard"
+#define EVH_QUALITY_EXPORTEVALUATIONS_URL @"/quality/exportEvaluations"
+#define EVH_QUALITY_EXPORTINSPECTIONTASKS_URL @"/quality/exportInspectionTasks"
+#define EVH_QUALITY_LISTEVALUATIONS_URL @"/quality/listEvaluations"
+#define EVH_QUALITY_LISTFACTORS_URL @"/quality/listFactors"
+#define EVH_QUALITY_LISTQUALITYCATEGORIES_URL @"/quality/listQualityCategories"
+#define EVH_QUALITY_LISTQUALITYINSPECTIONTASKS_URL @"/quality/listQualityInspectionTasks"
+#define EVH_QUALITY_LISTQUALITYSTANDARDS_URL @"/quality/listQualityStandards"
+#define EVH_QUALITY_LISTRECORDSBYTASKID_URL @"/quality/listRecordsByTaskId"
+#define EVH_QUALITY_REPORTRECTIFYRESULT_URL @"/quality/reportRectifyResult"
+#define EVH_QUALITY_REPORTVERIFICATIONRESULT_URL @"/quality/reportVerificationResult"
+#define EVH_QUALITY_REVIEWVERIFICATIONRESULT_URL @"/quality/reviewVerificationResult"
+#define EVH_QUALITY_UPDATEFACTOR_URL @"/quality/updateFactor"
+#define EVH_QUALITY_UPDATEQUALITYCATEGORY_URL @"/quality/updateQualityCategory"
+#define EVH_QUALITY_UPDATEQUALITYSTANDARD_URL @"/quality/updateQualityStandard"
 #define EVH_REALESTATE_POST_URL @"/realestate/post"
 #define EVH_RECOMMEND_IGNORERECOMMEND_URL @"/recommend/ignoreRecommend"
 #define EVH_RECOMMEND_RECOMMENDBANNERS_URL @"/recommend/recommendBanners"
@@ -630,6 +649,7 @@
 #define EVH_REGION_LISTCHILDREN_URL @"/region/listChildren"
 #define EVH_REGION_LISTDESCENDANTS_URL @"/region/listDescendants"
 #define EVH_REGION_LISTREGIONBYKEYWORD_URL @"/region/listRegionByKeyword"
+#define EVH_REPEAT_TESTEXPRESSIONANALYZE_URL @"/repeat/testExpressionAnalyze"
 #define EVH_TECHPARK_ENTRY_APPLYENTRY_URL @"/techpark/entry/applyEntry"
 #define EVH_TECHPARK_ENTRY_CREATELEASEPROMOTION_URL @"/techpark/entry/createLeasePromotion"
 #define EVH_TECHPARK_ENTRY_DELETEAPPLYENTRY_URL @"/techpark/entry/deleteApplyEntry"

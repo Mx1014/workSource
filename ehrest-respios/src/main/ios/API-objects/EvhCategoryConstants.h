@@ -1,6 +1,6 @@
 //
 // EvhCategoryConstants.h
-// generated at 2016-04-07 17:57:42 
+// generated at 2016-04-08 20:09:22 
 //
 
 #define EvhCategoryConstants_CATEGORY_ID_TOPIC 1
@@ -8,6 +8,7 @@
 #define EvhCategoryConstants_CATEGORY_ID_SERVICE 3
 #define EvhCategoryConstants_CATEGORY_ID_ACTIVITY 4
 #define EvhCategoryConstants_CATEGORY_ID_TECH_ACTIVITY 5
+#define EvhCategoryConstants_CATEGORY_ID_QUALITY_INSPECTION 6
 #define EvhCategoryConstants_CATEGORY_ID_TOPIC_COMMON 1001
 #define EvhCategoryConstants_CATEGORY_ID_URGENT_NOTICE 1002
 #define EvhCategoryConstants_CATEGORY_ID_NOTICE 1003

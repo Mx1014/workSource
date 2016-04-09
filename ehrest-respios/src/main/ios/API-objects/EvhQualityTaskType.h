@@ -1,0 +1,19 @@
+//
+// EvhQualityTaskType.h
+// generated at 2016-04-08 20:09:23 
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhQualityTaskType
+//
+typedef enum {
+
+    EvhQualityTaskType_NONE = 0, 
+    EvhQualityTaskType_VERIFY_TASK = 1, 
+    EvhQualityTaskType_RECTIFY_TASK = 2
+
+} EvhQualityTaskType;
+
+///////////////////////////////////////////////////////////////////////////////
+

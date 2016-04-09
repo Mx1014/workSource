@@ -1,6 +1,6 @@
 //
 // EvhRecommendUserResponse.m
-// generated at 2016-04-07 17:57:42 
+// generated at 2016-04-08 20:09:21 
 //
 #import "EvhRecommendUserResponse.h"
 #import "EvhRecommendUserInfo.h"

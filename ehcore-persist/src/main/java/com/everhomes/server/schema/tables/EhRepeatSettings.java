@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRepeatSettings extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRepeatSettingsRecord> {
 
-	private static final long serialVersionUID = 1223570515;
+	private static final long serialVersionUID = 581372571;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_repeat_settings</code>
@@ -62,9 +62,9 @@ public class EhRepeatSettings extends org.jooq.impl.TableImpl<com.everhomes.serv
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRepeatSettingsRecord, java.sql.Date> END_DATE = createField("end_date", org.jooq.impl.SQLDataType.DATE, this, "ineffective if forever_flag is set true, forever_flag/repeat_count/end_date are exclusive, only one is used");
 
 	/**
-	 * The column <code>ehcore.eh_repeat_settings.time_ranges</code>. multiple time ranges in a day, json format, {"ranges":[{"startTime":"08:00:00","endTime":"09:30:00"},{"startTime":"18:30:00","endTime":"19:30:00"}]}
+	 * The column <code>ehcore.eh_repeat_settings.time_ranges</code>. multiple time ranges in a day, json format, {"ranges":[{"startTime":"08:00:00","endTime":"09:30:00","duration":"3m"},{"startTime":"18:30:00","endTime":"19:30:00","duration":"2d"}]}
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRepeatSettingsRecord, java.lang.String> TIME_RANGES = createField("time_ranges", org.jooq.impl.SQLDataType.VARCHAR.length(2048), this, "multiple time ranges in a day, json format, {\"ranges\":[{\"startTime\":\"08:00:00\",\"endTime\":\"09:30:00\"},{\"startTime\":\"18:30:00\",\"endTime\":\"19:30:00\"}]}");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRepeatSettingsRecord, java.lang.String> TIME_RANGES = createField("time_ranges", org.jooq.impl.SQLDataType.VARCHAR.length(2048), this, "multiple time ranges in a day, json format, {\"ranges\":[{\"startTime\":\"08:00:00\",\"endTime\":\"09:30:00\",\"duration\":\"3m\"},{\"startTime\":\"18:30:00\",\"endTime\":\"19:30:00\",\"duration\":\"2d\"}]}");
 
 	/**
 	 * The column <code>ehcore.eh_repeat_settings.repeat_type</code>. 0: no repeat, 1: by day, 2: by week, 3: by month, 4: by year

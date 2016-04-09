@@ -2025,5 +2025,22 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 		return list;
 	}
+	
+	@Override
+	public List<OrganizationTaskTarget> listOrganizationTaskTargetsByOwner(String ownerType, Long ownerId, String taskType) {
+		List<OrganizationTaskTarget> list = new ArrayList<OrganizationTaskTarget>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		Condition cond = Tables.EH_ORGANIZATION_TASK_TARGETS.OWNER_TYPE.eq(ownerType);
+		cond = cond.and(Tables.EH_ORGANIZATION_TASK_TARGETS.OWNER_ID.eq(ownerId));
+		cond = cond.and(Tables.EH_ORGANIZATION_TASK_TARGETS.TASK_TYPE.eq(taskType));
+		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_TASK_TARGETS)
+				.where(cond).fetch();
+		if(records != null && !records.isEmpty()){
+			for(Record r : records)
+				list.add(ConvertHelper.convert(r, OrganizationTaskTarget.class));
+		}
+		return list;
+	}
 
 }

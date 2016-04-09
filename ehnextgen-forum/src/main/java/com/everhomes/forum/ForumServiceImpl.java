@@ -53,9 +53,11 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.OrganizationTask;
+import com.everhomes.organization.OrganizationTaskTarget;
 import com.everhomes.point.UserPointService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
@@ -117,6 +119,11 @@ import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationMemberStatus;
+import com.everhomes.rest.organization.OrganizationMemberTargetType;
+import com.everhomes.rest.organization.OrganizationNotificationTemplateCode;
+import com.everhomes.rest.organization.OrganizationStatus;
+import com.everhomes.rest.organization.OrganizationTaskType;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.point.AddUserPointCommand;
 import com.everhomes.rest.point.PointType;
@@ -256,6 +263,7 @@ public class ForumServiceImpl implements ForumService {
         } else {
             forumProvider.createPost(post);
         }
+        
 
         // Save the attachments after the post is saved
         processPostAttachments(userId, cmd.getAttachments(), post);
@@ -277,6 +285,21 @@ public class ForumServiceImpl implements ForumService {
             LOGGER.error("Failed to add post to search engine, userId=" + userId + ", postId=" + post.getId(), e);
         }
         
+        /**
+         * 发任务贴的时候 指定发给收消息的人
+         */
+        if(null != cmd.getEmbeddedAppId() && AppConstants.APPID_ORGTASK == cmd.getEmbeddedAppId()){
+        	if(VisibleRegionType.COMMUNITY == VisibleRegionType.fromCode(cmd.getVisibleRegionType())) {
+        		List<Organization> orgs = organizationProvider.findOrganizationByCommunityId(communityId);
+        		for (Organization org : orgs) {
+					this.sendTaskMsgToMembers(this.getOrganizationTaskType(cmd.getContentCategory()).getCode(), EntityType.ORGANIZATIONS.getCode(), org.getId());
+				}
+            }else if(VisibleRegionType.REGION == VisibleRegionType.fromCode(cmd.getVisibleRegionType())){
+            	this.sendTaskMsgToMembers(this.getOrganizationTaskType(cmd.getContentCategory()).getCode(), EntityType.ORGANIZATIONS.getCode(), cmd.getVisibleRegionId());
+            }
+        	
+        }
+        
         PostDTO postDto = ConvertHelper.convert(post, PostDTO.class);
         
         long endTime = System.currentTimeMillis();
@@ -286,6 +309,85 @@ public class ForumServiceImpl implements ForumService {
         }
         
         return postDto;
+    }
+    
+    private OrganizationTaskType getOrganizationTaskType(Long contentCategoryId) {
+		if(contentCategoryId != null) {
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_NOTICE) {
+				return OrganizationTaskType.NOTICE;
+			}
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_REPAIRS) {
+				return OrganizationTaskType.REPAIRS;
+			}
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_CONSULT_APPEAL) {
+				return OrganizationTaskType.CONSULT_APPEAL;
+			}
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_COMPLAINT_ADVICE) {
+				return OrganizationTaskType.COMPLAINT_ADVICE;
+			}
+			
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_CLEANING) {
+				return OrganizationTaskType.CLEANING;
+			}
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_HOUSE_KEEPING) {
+				return OrganizationTaskType.HOUSE_KEEPING;
+			}
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_MAINTENANCE) {
+				return OrganizationTaskType.MAINTENANCE;
+			}
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_EMERGENCY_HELP) {
+				return OrganizationTaskType.EMERGENCY_HELP;
+			}
+		}
+		LOGGER.error("Content category is not matched in organization type.contentCategoryId=" + contentCategoryId);
+		return null;
+	}
+    
+    private void sendTaskMsgToMembers(String taskType, String ownerType, Long ownerId){
+    	
+    	User user = UserContext.current().getUser();
+    	
+    	Map<String,Object> map = new HashMap<String, Object>();
+    	
+    	String msg = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_NEW, user.getLocale(), map, "");
+    	
+    	if(!StringUtils.isEmpty(msg)) {
+			String channelType = MessageChannelType.USER.getCode();
+			MessageDTO messageDto = new MessageDTO();
+			messageDto.setAppId(AppConstants.APPID_MESSAGING);
+			messageDto.setSenderUid(User.SYSTEM_UID);
+			messageDto.setBodyType(MessageBodyType.NOTIFY.getCode());
+			messageDto.setBody(msg);
+			messageDto.setMetaAppId(AppConstants.APPID_DEFAULT);
+			List<Long> userIds = new ArrayList<Long>();
+			
+			List<OrganizationTaskTarget> targets = organizationProvider.listOrganizationTaskTargetsByOwner(ownerType, ownerId, taskType);
+			for (OrganizationTaskTarget target : targets) {
+				if(EntityType.fromCode(target.getTargetType()) == EntityType.ORGANIZATIONS){
+					Organization org =  organizationProvider.findOrganizationById(target.getId());
+					org.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+					List<OrganizationMember> members = organizationProvider.listOrganizationPersonnels(null, org, new CrossShardListingLocator(), 10000);
+					for (OrganizationMember member : members) {
+						if(OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER){
+							userIds.add(member.getTargetId());
+						}
+					}
+				}
+				
+				if(EntityType.fromCode(target.getTargetType()) == EntityType.USER){
+					userIds.add(target.getTargetId());
+				}
+				
+			}
+			
+			for (Long userId : userIds) {
+				String channelToken = String.valueOf(userId);
+				messageDto.setChannels(new MessageChannel(channelType, channelToken));
+				messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, channelType,
+						channelToken, messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
+			}
+			
+		}
     }
     
     @Override

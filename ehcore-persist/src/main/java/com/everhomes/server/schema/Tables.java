@@ -539,6 +539,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhOrganizationTasks EH_ORGANIZATION_TASKS = com.everhomes.server.schema.tables.EhOrganizationTasks.EH_ORGANIZATION_TASKS;
 
 	/**
+	 * The table ehcore.eh_organization_task_targets
+	 */
+	public static final com.everhomes.server.schema.tables.EhOrganizationTaskTargets EH_ORGANIZATION_TASK_TARGETS = com.everhomes.server.schema.tables.EhOrganizationTaskTargets.EH_ORGANIZATION_TASK_TARGETS;
+
+	/**
 	 * The table ehcore.eh_owner_doors
 	 */
 	public static final com.everhomes.server.schema.tables.EhOwnerDoors EH_OWNER_DOORS = com.everhomes.server.schema.tables.EhOwnerDoors.EH_OWNER_DOORS;

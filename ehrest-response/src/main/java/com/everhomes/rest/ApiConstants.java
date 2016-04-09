@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-04-07 17:57:35
+// generated at 2016-04-08 20:08:47
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -623,6 +623,25 @@ public interface ApiConstants {
     public static final String QRCODE_GETQRCODEIMAGE_URL = "/qrcode/getQRCodeImage";
     public static final String QRCODE_GETQRCODEINFO_URL = "/qrcode/getQRCodeInfo";
     public static final String QRCODE_NEWQRCODE_URL = "/qrcode/newQRCode";
+    public static final String QUALITY_CREATQUALITYSTANDARD_URL = "/quality/creatQualityStandard";
+    public static final String QUALITY_CREATETASKBYSTANDARD_URL = "/quality/createTaskByStandard";
+    public static final String QUALITY_DELETEFACTOR_URL = "/quality/deleteFactor";
+    public static final String QUALITY_DELETEQUALITYCATEGORY_URL = "/quality/deleteQualityCategory";
+    public static final String QUALITY_DELETEQUALITYSTANDARD_URL = "/quality/deleteQualityStandard";
+    public static final String QUALITY_EXPORTEVALUATIONS_URL = "/quality/exportEvaluations";
+    public static final String QUALITY_EXPORTINSPECTIONTASKS_URL = "/quality/exportInspectionTasks";
+    public static final String QUALITY_LISTEVALUATIONS_URL = "/quality/listEvaluations";
+    public static final String QUALITY_LISTFACTORS_URL = "/quality/listFactors";
+    public static final String QUALITY_LISTQUALITYCATEGORIES_URL = "/quality/listQualityCategories";
+    public static final String QUALITY_LISTQUALITYINSPECTIONTASKS_URL = "/quality/listQualityInspectionTasks";
+    public static final String QUALITY_LISTQUALITYSTANDARDS_URL = "/quality/listQualityStandards";
+    public static final String QUALITY_LISTRECORDSBYTASKID_URL = "/quality/listRecordsByTaskId";
+    public static final String QUALITY_REPORTRECTIFYRESULT_URL = "/quality/reportRectifyResult";
+    public static final String QUALITY_REPORTVERIFICATIONRESULT_URL = "/quality/reportVerificationResult";
+    public static final String QUALITY_REVIEWVERIFICATIONRESULT_URL = "/quality/reviewVerificationResult";
+    public static final String QUALITY_UPDATEFACTOR_URL = "/quality/updateFactor";
+    public static final String QUALITY_UPDATEQUALITYCATEGORY_URL = "/quality/updateQualityCategory";
+    public static final String QUALITY_UPDATEQUALITYSTANDARD_URL = "/quality/updateQualityStandard";
     public static final String REALESTATE_POST_URL = "/realestate/post";
     public static final String RECOMMEND_IGNORERECOMMEND_URL = "/recommend/ignoreRecommend";
     public static final String RECOMMEND_RECOMMENDBANNERS_URL = "/recommend/recommendBanners";
@@ -632,6 +651,7 @@ public interface ApiConstants {
     public static final String REGION_LISTCHILDREN_URL = "/region/listChildren";
     public static final String REGION_LISTDESCENDANTS_URL = "/region/listDescendants";
     public static final String REGION_LISTREGIONBYKEYWORD_URL = "/region/listRegionByKeyword";
+    public static final String REPEAT_TESTEXPRESSIONANALYZE_URL = "/repeat/testExpressionAnalyze";
     public static final String TECHPARK_ENTRY_APPLYENTRY_URL = "/techpark/entry/applyEntry";
     public static final String TECHPARK_ENTRY_CREATELEASEPROMOTION_URL = "/techpark/entry/createLeasePromotion";
     public static final String TECHPARK_ENTRY_DELETEAPPLYENTRY_URL = "/techpark/entry/deleteApplyEntry";

@@ -1,6 +1,6 @@
 //
 // EvhOrganizationDTO.h
-// generated at 2016-04-07 17:57:42 
+// generated at 2016-04-08 20:09:21 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -39,6 +39,8 @@
 @property(nonatomic, copy) NSString* address;
 
 @property(nonatomic, copy) NSString* groupType;
+
+@property(nonatomic, copy) NSNumber* directlyEnterpriseId;
 
 @property(nonatomic, copy) NSString* avatarUri;
 

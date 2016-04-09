@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhQualityInspectionTasksRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord> {
 
-	private static final long serialVersionUID = 1014695346;
+	private static final long serialVersionUID = -1927350848;
 
 	/**
 	 * Setter for <code>ehcore.eh_quality_inspection_tasks.id</code>. id
@@ -308,14 +308,14 @@ public class EhQualityInspectionTasksRecord extends org.jooq.impl.UpdatableRecor
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_quality_inspection_tasks.result</code>. 0: none, 1: inspect ok, 2: inspect close, 3: rectified ok, 4: rectify closed, 5: delay
+	 * Setter for <code>ehcore.eh_quality_inspection_tasks.result</code>. 0: none, 1: inspect ok, 2: inspect close, 3: rectified ok, 4: rectify closed, 5: inspect delay, 6: rectify delay
 	 */
 	public void setResult(java.lang.Byte value) {
 		setValue(21, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_quality_inspection_tasks.result</code>. 0: none, 1: inspect ok, 2: inspect close, 3: rectified ok, 4: rectify closed, 5: delay
+	 * Getter for <code>ehcore.eh_quality_inspection_tasks.result</code>. 0: none, 1: inspect ok, 2: inspect close, 3: rectified ok, 4: rectify closed, 5: inspect delay, 6: rectify delay
 	 */
 	public java.lang.Byte getResult() {
 		return (java.lang.Byte) getValue(21);
