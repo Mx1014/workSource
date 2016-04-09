@@ -11,13 +11,14 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhQualityInspectionStandardGroupMap implements java.io.Serializable {
 
-	private static final long serialVersionUID = 581461464;
+	private static final long serialVersionUID = 145982602;
 
 	private java.lang.Long     id;
 	private java.lang.Byte     groupType;
 	private java.lang.Long     standardId;
 	private java.lang.Long     groupId;
 	private java.sql.Timestamp createTime;
+	private java.lang.Long     inspectorUid;
 
 	public EhQualityInspectionStandardGroupMap() {}
 
@@ -26,13 +27,15 @@ public class EhQualityInspectionStandardGroupMap implements java.io.Serializable
 		java.lang.Byte     groupType,
 		java.lang.Long     standardId,
 		java.lang.Long     groupId,
-		java.sql.Timestamp createTime
+		java.sql.Timestamp createTime,
+		java.lang.Long     inspectorUid
 	) {
 		this.id = id;
 		this.groupType = groupType;
 		this.standardId = standardId;
 		this.groupId = groupId;
 		this.createTime = createTime;
+		this.inspectorUid = inspectorUid;
 	}
 
 	public java.lang.Long getId() {
@@ -73,5 +76,13 @@ public class EhQualityInspectionStandardGroupMap implements java.io.Serializable
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+	public java.lang.Long getInspectorUid() {
+		return this.inspectorUid;
+	}
+
+	public void setInspectorUid(java.lang.Long inspectorUid) {
+		this.inspectorUid = inspectorUid;
 	}
 }
