@@ -3453,7 +3453,7 @@ public class ForumServiceImpl implements ForumService {
             filterDto.setName(menuName);
             filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
             filterDto.setDefaultFlag(SelectorBooleanFlag.TRUE.getCode());; // 整组菜单只有一个是默认的
-            actionUrl = String.format("%s%s?organizationId=%d&mixType=%d", serverContectPath, 
+            actionUrl = String.format("%s%s?organizationId=%d&mixType=%s", serverContectPath, 
                 "/org/listOrgMixTopics", organization.getId(), OrganizationTopicMixType.CHILDREN_ALL.getCode());
             filterDto.setActionUrl(actionUrl);
             filterList.add(filterDto);
