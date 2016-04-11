@@ -76,6 +76,7 @@
 	eh_organization_details  | eh_preferential_rules | eh_scene_types | eh_op_promotion_policies | eh_op_promotion_settings |
 	eh_op_promotions | eh_web_menus | eh_web_menu_privileges |
 	eh_aclinks | eh_door_access | eh_aes_server_key | eh_aes_user_key | eh_aclink_undo_key | eh_door_auth | eh_owner_doors | eh_door_command |
+	eh_aclink_firmware |
 
 	eh_organization_task_targets |
 

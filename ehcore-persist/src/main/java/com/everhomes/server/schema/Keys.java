@@ -74,6 +74,7 @@ public class Keys {
 	// -------------------------------------------------------------------------
 
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhAclinksRecord> KEY_EH_ACLINKS_PRIMARY = UniqueKeys0.KEY_EH_ACLINKS_PRIMARY;
+	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhAclinkFirmwareRecord> KEY_EH_ACLINK_FIRMWARE_PRIMARY = UniqueKeys0.KEY_EH_ACLINK_FIRMWARE_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhAclinkUndoKeyRecord> KEY_EH_ACLINK_UNDO_KEY_PRIMARY = UniqueKeys0.KEY_EH_ACLINK_UNDO_KEY_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhActivitiesRecord> KEY_EH_ACTIVITIES_PRIMARY = UniqueKeys0.KEY_EH_ACTIVITIES_PRIMARY;
 	public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhActivitiesRecord> KEY_EH_ACTIVITIES_U_EH_UUID = UniqueKeys0.KEY_EH_ACTIVITIES_U_EH_UUID;
@@ -402,6 +403,7 @@ public class Keys {
 
 	private static class UniqueKeys0 extends org.jooq.impl.AbstractKeys {
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhAclinksRecord> KEY_EH_ACLINKS_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhAclinks.EH_ACLINKS, com.everhomes.server.schema.tables.EhAclinks.EH_ACLINKS.ID);
+		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhAclinkFirmwareRecord> KEY_EH_ACLINK_FIRMWARE_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhAclinkFirmware.EH_ACLINK_FIRMWARE, com.everhomes.server.schema.tables.EhAclinkFirmware.EH_ACLINK_FIRMWARE.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhAclinkUndoKeyRecord> KEY_EH_ACLINK_UNDO_KEY_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhAclinkUndoKey.EH_ACLINK_UNDO_KEY, com.everhomes.server.schema.tables.EhAclinkUndoKey.EH_ACLINK_UNDO_KEY.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhActivitiesRecord> KEY_EH_ACTIVITIES_PRIMARY = createUniqueKey(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES, com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.ID);
 		public static final org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhActivitiesRecord> KEY_EH_ACTIVITIES_U_EH_UUID = createUniqueKey(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES, com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.UUID);
