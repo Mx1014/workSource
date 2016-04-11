@@ -46,6 +46,7 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.quality.QualityService;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.repeat.RepeatSettings;
@@ -56,6 +57,7 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationMemberGroupType;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
@@ -150,6 +152,9 @@ public class QualityServiceImpl implements QualityService {
 	
 	@Autowired
 	private ConfigurationProvider configurationProvider;
+	
+	@Autowired
+	private OrganizationService organizationService;
 	
 	@Override
 	public QualityStandardsDTO creatQualityStandard(CreatQualityStandardCommand cmd) {
@@ -641,6 +646,7 @@ public class QualityServiceImpl implements QualityService {
 	public ListQualityInspectionTasksResponse listQualityInspectionTasks(
 			ListQualityInspectionTasksCommand cmd) {
 		
+		User user = UserContext.current().getUser();
 		Long ownerId = cmd.getOwnerId();
 		String ownerType = cmd.getOwnerType();
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
@@ -660,14 +666,32 @@ public class QualityServiceImpl implements QualityService {
         if(cmd.getExecuteFlag() != null) {
         	timeCompared = true;
         	if(cmd.getExecuteFlag() == 1) {
-	        	User user = UserContext.current().getUser();
 	        	currentUid = user.getId();
         	}
         }
-        
         final Long executeUid = currentUid;
-        List<QualityInspectionTasks> tasks = qualityProvider.listVerificationTasks(locator, pageSize + 1, ownerId, ownerType, 
-        		cmd.getTaskType(), executeUid, startDate, endDate, cmd.getGroupId(), cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared);
+        List<QualityInspectionTasks> tasks = new ArrayList<QualityInspectionTasks>();
+        
+        if(cmd.getIsReview() != null && cmd.getIsReview() == 1) {
+        	List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(user.getId());
+        	
+        	List<Long>  orgIds = members.stream().map((r) -> {
+        		return r.getOrganizationId();
+        	}).collect(Collectors.toList());
+        	
+        	List<Long> standardIds = qualityProvider.listQualityInspectionStandardGroupMapByGroup(
+        			orgIds, QualityGroupType.REVIEW_GROUP.getCode());
+        	
+        	tasks = qualityProvider.listVerificationTasks(locator, pageSize + 1, ownerId, ownerType, 
+            		cmd.getTaskType(), executeUid, startDate, endDate, cmd.getGroupId(),
+            		cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared, standardIds);
+
+        	
+        } else {
+        	tasks = qualityProvider.listVerificationTasks(locator, pageSize + 1, ownerId, ownerType, 
+        		cmd.getTaskType(), executeUid, startDate, endDate, cmd.getGroupId(),
+        		cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared, null);
+        }
         
         Long nextPageAnchor = null;
         if(tasks.size() > pageSize) {
@@ -1388,7 +1412,7 @@ public class QualityServiceImpl implements QualityService {
 	@Override
 	public HttpServletResponse exportInspectionTasks(
 			ListQualityInspectionTasksCommand cmd, HttpServletResponse response) {
-		
+		User user = UserContext.current().getUser();
 		Long ownerId = cmd.getOwnerId();
 		String ownerType = cmd.getOwnerType();
         Timestamp startDate = null;
@@ -1408,8 +1432,29 @@ public class QualityServiceImpl implements QualityService {
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		Integer pageSize = Integer.MAX_VALUE;
 		
-		List<QualityInspectionTasks> tasks = qualityProvider.listVerificationTasks(locator, pageSize, cmd.getOwnerId(), cmd.getOwnerType(), 
-				cmd.getTaskType(), null, startDate, endDate, cmd.getGroupId(), cmd.getExecuteStatus(), cmd.getReviewStatus(), false);
+		
+		List<QualityInspectionTasks> tasks = new ArrayList<QualityInspectionTasks>();
+        
+        if(cmd.getIsReview() != null && cmd.getIsReview() == 1) {
+        	List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(user.getId());
+        	
+        	List<Long>  orgIds = members.stream().map((r) -> {
+        		return r.getOrganizationId();
+        	}).collect(Collectors.toList());
+        	
+        	List<Long> standardIds = qualityProvider.listQualityInspectionStandardGroupMapByGroup(
+        			orgIds, QualityGroupType.REVIEW_GROUP.getCode());
+        	
+        	tasks = qualityProvider.listVerificationTasks(locator, pageSize + 1, ownerId, ownerType, 
+            		cmd.getTaskType(), null, startDate, endDate, cmd.getGroupId(),
+            		cmd.getExecuteStatus(), cmd.getReviewStatus(), false, standardIds);
+
+        	
+        } else {
+        	tasks = qualityProvider.listVerificationTasks(locator, pageSize + 1, ownerId, ownerType, 
+        		cmd.getTaskType(), null, startDate, endDate, cmd.getGroupId(),
+        		cmd.getExecuteStatus(), cmd.getReviewStatus(), false, null);
+        }
 
 		List<QualityInspectionTaskRecords> records = new ArrayList<QualityInspectionTaskRecords>();
         for(QualityInspectionTasks task : tasks) {
