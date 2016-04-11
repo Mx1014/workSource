@@ -2422,6 +2422,11 @@ public class VideoConfServiceImpl implements VideoConfService {
 		ConfInvoices invoice = ConvertHelper.convert(dto, ConfInvoices.class);
 		vcProvider.updateInvoice(invoice);
 		
+		ConfOrders order = vcProvider.findOredrById(cmd.getOrderId());
+		order.setInvoiceReqFlag((byte) 1);
+		order.setInvoiceIssueFlag((byte) 1);
+		vcProvider.updateConfOrders(order);
+		
 		return dto;
 	}
 
