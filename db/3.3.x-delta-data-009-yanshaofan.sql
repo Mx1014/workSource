@@ -369,7 +369,7 @@ VALUES (56220,'我的订单',56200,null,'#',0,2,'/50000/56000/56200/56220','park
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
 VALUES (58000,'物业服务',50000,null,null,1,2,'/50000/58000','park',600);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (58100,'品质核查',57000,null,null,1,2,'/50000/58000/58100','park',610);
+VALUES (58100,'品质核查',58000,null,null,1,2,'/50000/58000/58100','park',610);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
 VALUES (58110,'作业标准',58100,null,null,1,2,'/50000/58000/58100/58110','park',611);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
