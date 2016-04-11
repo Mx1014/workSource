@@ -1,3 +1,9 @@
+#
+#检查目前最大的id，然后设置@acl_id
+#SELECT MAX(id) FROM `eh_acls`;
+#
+set @acl_id = 350;
+
 
 DELETE FROM `eh_acl_privileges` WHERE `id` > 199;
 
@@ -600,8 +606,6 @@ VALUES (85,711,58122,'权重管理',1,1,'权重管理 全部权限',740);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
 VALUES (86,712,58123,'绩效统计',1,1,'绩效统计 全部权限',750);
 
-
-set @acl_id = 350;
 
 INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
 SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, id, 1001,0,1,now() FROM `eh_acl_privileges`;
