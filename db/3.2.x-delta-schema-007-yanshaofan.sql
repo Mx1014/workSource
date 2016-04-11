@@ -4,7 +4,7 @@
 #
 ALTER TABLE `eh_organization_members` ADD COLUMN `employee_no` VARCHAR(128) COMMENT '';
 ALTER TABLE `eh_organization_members` ADD COLUMN `gender` TINYINT DEFAULT '0' COMMENT '0: undisclosured, 1: male, 2: female';
-ALTER TABLE `eh_organization_members` ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE `eh_organization_members` ADD COLUMN `namespace_id` INTEGER DEFAULT 0;
 ALTER TABLE `eh_organization_members` ADD COLUMN `integral_tag1` BIGINT;
 ALTER TABLE `eh_organization_members` ADD COLUMN `integral_tag2` BIGINT;
 ALTER TABLE `eh_organization_members` ADD COLUMN `integral_tag3` BIGINT;
@@ -46,4 +46,9 @@ ALTER TABLE `eh_organization_members` MODIFY COLUMN `update_time` DATETIME COMME
 ALTER TABLE `eh_organization_members` MODIFY COLUMN `create_time` DATETIME COMMENT '' AFTER update_time;
 ALTER TABLE `eh_organization_members` MODIFY COLUMN `avatar` VARCHAR(128) COMMENT '' AFTER employee_no;
 ALTER TABLE `eh_organization_members` MODIFY COLUMN `group_id` BIGINT DEFAULT 0 COMMENT 'refer to the organization id' AFTER status;
+
+#
+# modify eh_organizations unique
+#
+ALTER TABLE `eh_organizations` DROP INDEX u_eh_org_name;
 

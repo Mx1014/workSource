@@ -12,10 +12,10 @@ public class DataSourcePropertyOverrideConfigurer extends PropertyOverrideConfig
     public static final String KEY_USERNAME = "username";
     public static final String KEY_PASSWORD = "password";
     
-    @Value("${db.driver}")
+    @Value("${db.driver:}")
     private String driverName;
     
-    @Value("${db.master}")
+    @Value("${db.master:}")
     private String dbUrl;
     
     //db.driver: com.mysql.jdbc.Driver

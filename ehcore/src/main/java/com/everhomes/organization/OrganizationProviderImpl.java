@@ -56,6 +56,7 @@ import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberGroupType;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
+import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.organization.OrganizationTaskStatus;
 import com.everhomes.rest.organization.OrganizationTaskType;
@@ -104,6 +105,7 @@ import com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
@@ -290,6 +292,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 	@Override
 	public void createOrganizationMember(OrganizationMember departmentMember) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId(null);
+		departmentMember.setNamespaceId(namespaceId);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOrganizationMembersRecord record = ConvertHelper.convert(departmentMember, EhOrganizationMembersRecord.class);
 		InsertQuery<EhOrganizationMembersRecord> query = context.insertQuery(Tables.EH_ORGANIZATION_MEMBERS);
@@ -1600,26 +1604,41 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     
     @Override
     public OrganizationCommunityRequest getOrganizationCommunityRequestByOrganizationId(Long organizationId) {
-    	OrganizationCommunityRequest[] result = new OrganizationCommunityRequest[1];
-        
-        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
-            (DSLContext context, Object reducingContext) -> {
-                result[0] = context.select().from(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS)
-                    .where(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID.eq(organizationId))
-                    .and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode()))
-                    .and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_STATUS.ne(OrganizationCommunityRequestStatus.INACTIVE.getCode()))
-                    .fetchAny().map((r) -> {
-                        return ConvertHelper.convert(r, OrganizationCommunityRequest.class);
-                    });
-
-                if (result[0] != null) {
-                    return false;
-                } else {
-                    return true;
-                }
-            });
-        
-        return result[0];
+//    	OrganizationCommunityRequest[] result = new OrganizationCommunityRequest[1];
+//        
+//        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
+//            (DSLContext context, Object reducingContext) -> {
+//                result[0] = context.select().from(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS)
+//                    .where(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID.eq(organizationId))
+//                    .and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode()))
+//                    .and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_STATUS.ne(OrganizationCommunityRequestStatus.INACTIVE.getCode()))
+//                    .fetchAny().map((r) -> {
+//                        return ConvertHelper.convert(r, OrganizationCommunityRequest.class);
+//                    });
+//
+//                if (result[0] != null) {
+//                    return false;
+//                } else {
+//                    return true;
+//                }
+//            });
+//        
+//        return result[0];
+    	
+    	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+		SelectQuery<EhOrganizationCommunityRequestsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS);
+		query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID.eq(organizationId));
+		query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode()));
+		query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_STATUS.ne(OrganizationCommunityRequestStatus.INACTIVE.getCode()));
+		List<OrganizationCommunityRequest> request = new ArrayList<OrganizationCommunityRequest>();
+		query.fetch().map(r ->{
+			request.add(ConvertHelper.convert(r,OrganizationCommunityRequest.class));
+   			return null;
+   		});
+		if(0 == request.size()){
+			return null;
+		}
+		return request.get(0);
     }
     
     @Override
@@ -1708,8 +1727,10 @@ public class OrganizationProviderImpl implements OrganizationProvider {
             if(contacts.size() >= count) {
                 locator.setAnchor(contacts.get(contacts.size() - 1).getId());
                 return AfterAction.done;
+            } else {
+            	locator.setAnchor(null);
+            	return AfterAction.next;
             }
-            return AfterAction.next;
  
         });
         return contacts;
@@ -2043,4 +2064,18 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return list;
 	}
 
+	@Override
+	public List<OrganizationMember> listOrganizationMembersTargetIdExist() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
+		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.ne(0L));
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()));
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, OrganizationMember.class));
+			return null;
+		});
+		return result;
+	}
 }
