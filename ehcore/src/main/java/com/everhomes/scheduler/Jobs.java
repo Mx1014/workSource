@@ -1,10 +1,15 @@
 package com.everhomes.scheduler;
 
-import javax.annotation.PostConstruct;
-
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.scheduling.quartz.QuartzJobBean;
+import org.springframework.stereotype.Component;
 
-public class Jobs {
+@Component
+@Scope("prototype")
+public class Jobs  extends QuartzJobBean{
 	
 	@Autowired
 	private ScheduleProvider scheduleProvider;
@@ -13,10 +18,13 @@ public class Jobs {
 	
 	private QualityInspectionScheduleJob qualityInspectionScheduleJob = new QualityInspectionScheduleJob();
 	
-	@PostConstruct
-	public void doScheduleJob() {
+
+	@Override
+	protected void executeInternal(JobExecutionContext context)
+			throws JobExecutionException {
 		scheduleProvider.scheduleCronJob(QUALITY_INSPECTION_TRIGGER_NAME, QUALITY_INSPECTION_TRIGGER_NAME,
-											"0 0 3 * * ? ", qualityInspectionScheduleJob.getClass(), null);
+				"0 0 3 * * ? ", qualityInspectionScheduleJob.getClass(), null);
+		
 	}
 
 }
