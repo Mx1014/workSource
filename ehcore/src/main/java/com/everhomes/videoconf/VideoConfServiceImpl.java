@@ -22,9 +22,6 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.PostMethod;
-import org.jooq.tools.json.JSONObject;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +49,6 @@ import com.everhomes.mail.MailHandler;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.organization.pm.pay.GsonUtil;
-import com.everhomes.organization.pm.pay.ResultHolder;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.organization.VendorType;
@@ -155,7 +151,6 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
-import com.google.gson.Gson;
 import com.mysql.jdbc.StringUtils;
 
 
@@ -413,7 +408,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		
 		rule.setMultipleAccountThreshold(cmd.getMultipleAccountThreshold());;
 		
-		//0-25方仅视频 1-25方支持电话 2-100方仅视频 3-100方支持电话
+		//0-25方仅视频 1-25方支持电话 2-100方仅视频 3-100方支持电话, 4: 6方仅视频, 5: 50方仅视频, 6: 50方支持电话
 		if(ConfCapacity.CONF_CAPACITY_25.getCode().equals(cmd.getConfCapacity())) {
 			
 			if(ConfType.CONF_TYPE_VIDEO_ONLY.getCode().equals(cmd.getConfType())) {
@@ -430,6 +425,21 @@ public class VideoConfServiceImpl implements VideoConfService {
 			}
 			if(ConfType.CONF_TYPE_PHONE_SUPPORT.getCode().equals(cmd.getConfType())) {
 				rule.setConfType((byte) 3);
+			}
+		}
+		if(ConfCapacity.CONF_CAPACITY_6.getCode().equals(cmd.getConfCapacity())) {
+			
+			if(ConfType.CONF_TYPE_VIDEO_ONLY.getCode().equals(cmd.getConfType())) {
+				rule.setConfType((byte) 4);
+			}
+		}
+		if(ConfCapacity.CONF_CAPACITY_50.getCode().equals(cmd.getConfCapacity())) {
+
+			if(ConfType.CONF_TYPE_VIDEO_ONLY.getCode().equals(cmd.getConfType())) {
+				rule.setConfType((byte) 5);
+			}
+			if(ConfType.CONF_TYPE_PHONE_SUPPORT.getCode().equals(cmd.getConfType())) {
+				rule.setConfType((byte) 6);
 			}
 		}
 		if(cmd.getId() != null) {
@@ -493,6 +503,21 @@ public class VideoConfServiceImpl implements VideoConfService {
 
 			if(rule.getConfType() == 3) {
 				ruleDto.setConfCapacity(ConfCapacity.CONF_CAPACITY_100.getCode());
+				ruleDto.setConfType(ConfType.CONF_TYPE_PHONE_SUPPORT.getCode());
+			}
+			
+			if(rule.getConfType() == 4) {
+				ruleDto.setConfCapacity(ConfCapacity.CONF_CAPACITY_6.getCode());
+				ruleDto.setConfType(ConfType.CONF_TYPE_VIDEO_ONLY.getCode());
+			}
+			
+			if(rule.getConfType() == 5) {
+				ruleDto.setConfCapacity(ConfCapacity.CONF_CAPACITY_50.getCode());
+				ruleDto.setConfType(ConfType.CONF_TYPE_VIDEO_ONLY.getCode());
+			}
+			
+			if(rule.getConfType() == 6) {
+				ruleDto.setConfCapacity(ConfCapacity.CONF_CAPACITY_50.getCode());
 				ruleDto.setConfType(ConfType.CONF_TYPE_PHONE_SUPPORT.getCode());
 			}
 			
@@ -597,7 +622,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 			
 			if(accounts != null && accounts.size() > pageSize) {
 				accounts.remove(accounts.size() - 1);
-				response.setNextPageOffset(cmd.getPageOffset() + 1);
+				response.setNextPageOffset(offset + 1);
 			}
 			
 			response.setSourceAccounts(accounts);
@@ -615,12 +640,11 @@ public class VideoConfServiceImpl implements VideoConfService {
 		accountDto.setStatus(account.getStatus());
 		accountDto.setValidDate(account.getExpiredDate());
 		
-
 		accountDto.setOccupyAccountId(account.getOccupyAccountId());
-		if(account.getOccupyAccountId() != null) {
+		if(account.getOccupyAccountId() != null && account.getOccupyFlag() == 1) {
 			accountDto.setOccupyFlag((byte) 1);
 			accountDto.setConfId(account.getConfId());
-			ConfAccounts occupyAccount = vcProvider.findAccountByAssignedSourceId(account.getOccupyAccountId());
+			ConfAccounts occupyAccount = vcProvider.findVideoconfAccountById(account.getOccupyAccountId());
 			if(occupyAccount != null && occupyAccount.getOwnerId() != null && occupyAccount.getOwnerId() != 0) {
 				UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(occupyAccount.getOwnerId(), IdentifierType.MOBILE.getCode());
 				if(identifier != null)
@@ -645,6 +669,18 @@ public class VideoConfServiceImpl implements VideoConfService {
 
 		if(category.getConfType() == 3) {
 			accountDto.setConfType(ConfCapacity.CONF_CAPACITY_100.getCode()+ConfType.CONF_TYPE_PHONE_SUPPORT.getCode());
+		}
+		
+		if(category.getConfType() == 4) {
+			accountDto.setConfType(ConfCapacity.CONF_CAPACITY_6.getCode()+ConfType.CONF_TYPE_VIDEO_ONLY.getCode());
+		}
+
+		if(category.getConfType() == 5) {
+			accountDto.setConfType(ConfCapacity.CONF_CAPACITY_50.getCode()+ConfType.CONF_TYPE_VIDEO_ONLY.getCode());
+		}
+
+		if(category.getConfType() == 6) {
+			accountDto.setConfType(ConfCapacity.CONF_CAPACITY_50.getCode()+ConfType.CONF_TYPE_PHONE_SUPPORT.getCode());
 		}
 		
 		return accountDto;
@@ -812,6 +848,13 @@ public class VideoConfServiceImpl implements VideoConfService {
 		}
 		
 		vcProvider.updateConfAccounts(account);
+		
+		ConfEnterprises confEnterprise = vcProvider.findByEnterpriseId(account.getEnterpriseId());
+		int activeCount = vcProvider.countAccountsByEnterprise(account.getEnterpriseId(), null);
+		int trialCount = vcProvider.countAccountsByEnterprise(account.getEnterpriseId(), (byte) 1);
+		confEnterprise.setActiveAccountAmount(activeCount);
+		confEnterprise.setTrialAccountAmount(trialCount);
+		confEnterpriseSearcher.feedDoc(confEnterprise);
 
 	}
 
@@ -1040,7 +1083,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		
 		List<SourceVideoConfAccountStatistics> statistics = new ArrayList<SourceVideoConfAccountStatistics>();
 
-		for(Byte i = 0; i < 10; i++){
+		for(Byte i = 0; i < 16; i++){
 			SourceVideoConfAccountStatistics monitor = new SourceVideoConfAccountStatistics();
 			monitor.setMonitoringPoints(i);
 			monitor.setWarningLine(getEarlyWarningLine(i));
@@ -1823,6 +1866,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		order.setInvoiceReqFlag(cmd.getInvoiceFlag());
 		order.setInvoiceIssueFlag(cmd.getMakeOutFlag());
 		order.setOnlineFlag(cmd.getBuyChannel());
+		
 		order.setAccountCategoryId(cmd.getAccountCategoryId());
 		
 		order.setBuyerName(cmd.getContactor());
@@ -2144,6 +2188,36 @@ public class VideoConfServiceImpl implements VideoConfService {
 	        warningLine = Double.valueOf(line);
 		}
 		
+		if(warningLineType == 10) {
+	        String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_RADIO_WARNING_LINE_6VIDEO, "0.0000");
+	        warningLine = Double.valueOf(line);
+		}
+		
+		if(warningLineType == 11) {
+	        String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_RADIO_WARNING_LINE_50VIDEO, "0.0000");
+	        warningLine = Double.valueOf(line);
+		}
+		
+		if(warningLineType == 12) {
+	        String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_RADIO_WARNING_LINE_50PHONE, "0.0000");
+	        warningLine = Double.valueOf(line);
+		}
+		
+		if(warningLineType == 13) {
+	        String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_OCCUPANCY_WARNING_LINE_6VIDEO, "0.0000");
+	        warningLine = Double.valueOf(line);
+		}
+		
+		if(warningLineType == 14) {
+	        String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_OCCUPANCY_WARNING_LINE_50VIDEO, "0.0000");
+	        warningLine = Double.valueOf(line);
+		}
+		
+		if(warningLineType == 15) {
+	        String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_OCCUPANCY_WARNING_LINE_50PHONE, "0.0000");
+	        warningLine = Double.valueOf(line);
+		}
+		
 		return warningLine;
 	}
 	
@@ -2215,6 +2289,30 @@ public class VideoConfServiceImpl implements VideoConfService {
 		
 		if(monitorType == 9) {
 			return getOccupiedAccountRadio((byte) 3);
+		}
+		
+		if(monitorType == 10) {
+			return getActiveAccountRadio((byte) 4);
+		}
+		
+		if(monitorType == 11) {
+			return getActiveAccountRadio((byte) 5);
+		}
+		
+		if(monitorType == 12) {
+			return getActiveAccountRadio((byte) 6);
+		}
+		
+		if(monitorType == 13) {
+			return getOccupiedAccountRadio((byte) 4);
+		}
+		
+		if(monitorType == 14) {
+			return getOccupiedAccountRadio((byte) 5);
+		}
+		
+		if(monitorType == 15) {
+			return getOccupiedAccountRadio((byte) 6);
 		}
 		
 		return 0.0000;
@@ -2299,6 +2397,13 @@ public class VideoConfServiceImpl implements VideoConfService {
 	@Override
 	public InvoiceDTO updateInvoice(UpdateInvoiceCommand cmd) {
 		InvoiceDTO dto = vcProvider.getInvoiceByOrderId(cmd.getOrderId());
+		if(dto == null) {
+			ConfInvoices invoice = new ConfInvoices();
+			invoice.setOrderId(cmd.getOrderId());
+			vcProvider.createInvoice(invoice);
+			
+			dto = vcProvider.getInvoiceByOrderId(cmd.getOrderId());
+		}
 		dto.setTaxpayerType(cmd.getTaxpayerType());
 		dto.setVatType(cmd.getVatType());
 		dto.setExpenseType(cmd.getExpenseType());

@@ -21,7 +21,6 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
-
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -244,6 +243,7 @@ import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
+import com.everhomes.search.UserWithoutConfAccountSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
@@ -353,6 +353,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	@Autowired
 	private RolePrivilegeService rolePrivilegeService;
+
+	private UserWithoutConfAccountSearcher userSearcher;
 
 	private int getPageCount(int totalCount, int pageSize){
 		int pageCount = totalCount/pageSize;
@@ -4287,6 +4289,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		organizationMember.setCreatorUid(user.getId());
 		organizationMember.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		organizationProvider.createOrganizationMember(organizationMember);
+		userSearcher.feedDoc(organizationMember);
 		return ConvertHelper.convert(organizationMember, OrganizationMemberDTO.class);
 	}
 	
@@ -4438,6 +4441,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 				m.setTargetType(OrganizationMemberTargetType.USER.getCode());
 				m.setTargetId(userIdentifier.getOwnerUid());
 				organizationProvider.updateOrganizationMember(m);
+				
+				userSearcher.feedDoc(m);
 			}
 			
 			if(null != cmd.getAssignmentId())
@@ -4476,6 +4481,8 @@ public class OrganizationServiceImpl implements OrganizationService {
                 	
                 	this.updateMemberUser(member);
                     sendMessageForContactApproved(member);
+                    		
+                    userSearcher.feedDoc(member);
                     if(LOGGER.isInfoEnabled()) {
                         LOGGER.info("User join the enterprise automatically, userId=" + identifier.getOwnerUid() 
                             + ", contactId=" + member.getId() + ", enterpriseId=" + member.getOrganizationId());
@@ -4768,7 +4775,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			 this.organizationProvider.updateOrganizationMember(member);
 	            return null;
 	        });
-	        
+		 userSearcher.feedDoc(member);
 	        if(LOGGER.isInfoEnabled()) {
 	            LOGGER.info("Enterprise contact is deleted(active), operatorUid=" + operatorUid + ", contactId=" + member.getTargetId() 
 	                + ", enterpriseId=" + member.getOrganizationId() + ", status=" + member.getStatus() + ", removeFromDb=" + member.getStatus());
@@ -4844,6 +4851,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 					dto.setAvatar(contentServerService.parserUri(user.getAvatar(), EntityType.USER.getCode(), user.getId()));
 					dto.setNickName(dto.getNickName());
 				}
+			}
+			
+			if(c.getIntegralTag4() != null && c.getIntegralTag4() == 1){
+				dto.setContactToken(null);
 			}
 			
 			/**
@@ -4923,31 +4934,47 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	
 	@Override
-	public List<Organization> getSyncDatas(){
-		int pageSize = 200; 
-		CrossShardListingLocator locator = new CrossShardListingLocator();
+	public List<Organization> getSyncDatas(CrossShardListingLocator locator){
+//		int pageSize = 200; 
 		
-		List<OrganizationCommunityRequest> requests = organizationProvider.queryOrganizationCommunityRequests(locator, pageSize, new ListingQueryBuilderCallback() {
-			@Override
-			public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
-					SelectQuery<? extends Record> query) {
-				query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_STATUS.ne(OrganizationCommunityRequestStatus.INACTIVE.getCode()));
-		        query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode()));
-				return query;
-			}
-		});
+//		List<OrganizationCommunityRequest> requests = organizationProvider.queryOrganizationCommunityRequests(locator, pageSize, new ListingQueryBuilderCallback() {
+//			@Override
+//			public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+//					SelectQuery<? extends Record> query) {
+//				query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_STATUS.ne(OrganizationCommunityRequestStatus.INACTIVE.getCode()));
+//		        query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode()));
+//				return query;
+//			}
+//		});
+//		
+//		return requests.stream().map((r)->{
+//			Organization organization = organizationProvider.findOrganizationById(r.getMemberId());
+//			if(null != organization){
+//				OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
+//				
+//				organization.setCommunityId(r.getCommunityId());
+//				if(null != detail)
+//					organization.setDescription(detail.getDescription());
+//			}
+//			return organization;
+//		}).collect(Collectors.toList());
+		List<String> groupTypes = new ArrayList<String>();
+		groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+		List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes(0L, groupTypes);
 		
-		return requests.stream().map((r)->{
-			Organization organization = organizationProvider.findOrganizationById(r.getMemberId());
-			if(null != organization){
-				OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
-				
-				organization.setCommunityId(r.getCommunityId());
-				if(null != detail)
-					organization.setDescription(detail.getDescription());
-			}
-			return organization;
+		List<Organization> orgs = organizations.stream().map((r) ->{
+			OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(r.getId());
+			if(null != detail)
+				r.setDescription(detail.getDescription());
+			
+			OrganizationCommunityRequest request = organizationProvider.getOrganizationCommunityRequestByOrganizationId(r.getId());
+			if(request != null)
+				r.setCommunityId(request.getCommunityId());
+			return r;
 		}).collect(Collectors.toList());
+		
+		return orgs;
+		
 	}
 	
 	private List<OrganizationDTO> convertOrgRole(List<Organization> orgs, Organization org){
@@ -5377,11 +5404,17 @@ public class OrganizationServiceImpl implements OrganizationService {
 				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_TASK_ALREADY_PROCESSED,
 						"Tasks have been processed.");
 	    	}
-	    	Post post = forumProvider.findPostById(task.getApplyEntityId());
-	    	if(null != post){
-	    		post.setEmbeddedJson(StringHelper.toJsonString(task));
+	    	
+	    	Long communityId = null;
+	    	if(VisibleRegionType.fromCode(task.getVisibleRegionType()) == VisibleRegionType.COMMUNITY){
+	    		communityId = task.getVisibleRegionId();
 	    	}
-	    	return ConvertHelper.convert(post, PostDTO.class);
+	    	
+	    	PostDTO dto = this.forumService.getTopicById(task.getApplyEntityId(),communityId,false);
+	    	if(null != dto){
+				dto.setEmbeddedJson(StringHelper.toJsonString(task));
+	    	}
+	    	return dto;
 	    }
 	    
 	    @Override
@@ -5424,11 +5457,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 						"Tasks have been processed.");
 	    	}
 	    	
-	    	Post post = forumProvider.findPostById(task.getApplyEntityId());
-	    	if(null != post){
-	    		post.setEmbeddedJson(StringHelper.toJsonString(task));
+	    	Long communityId = null;
+	    	if(VisibleRegionType.fromCode(task.getVisibleRegionType()) == VisibleRegionType.COMMUNITY){
+	    		communityId = task.getVisibleRegionId();
 	    	}
-	    	return ConvertHelper.convert(post, PostDTO.class);
+	    	
+	    	PostDTO dto = this.forumService.getTopicById(task.getApplyEntityId(),communityId,false);
+	    	if(null != dto){
+				dto.setEmbeddedJson(StringHelper.toJsonString(task));
+	    	}
+	    	return dto;
 	    }
 	    
 	    @Override
@@ -5623,11 +5661,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 						"Tasks have been processed.");
 	    	}
 	    	
-	    	Post post = forumProvider.findPostById(task.getApplyEntityId());
-	    	if(null != post){
-	    		post.setEmbeddedJson(StringHelper.toJsonString(task));
+	    	Long communityId = null;
+	    	if(VisibleRegionType.fromCode(task.getVisibleRegionType()) == VisibleRegionType.COMMUNITY){
+	    		communityId = task.getVisibleRegionId();
 	    	}
-	    	return ConvertHelper.convert(post, PostDTO.class);
+	    	
+	    	PostDTO dto = this.forumService.getTopicById(task.getApplyEntityId(),communityId,false);
+	    	if(null != dto){
+				dto.setEmbeddedJson(StringHelper.toJsonString(task));
+	    	}
+	    	return dto;
 	    }
 	    
 	    

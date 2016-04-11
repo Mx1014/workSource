@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationMembers implements java.io.Serializable {
 
-	private static final long serialVersionUID = 972995935;
+	private static final long serialVersionUID = 722851749;
 
 	private java.lang.Long     id;
 	private java.lang.Long     organizationId;
@@ -24,8 +24,13 @@ public class EhOrganizationMembers implements java.io.Serializable {
 	private java.lang.String   contactDescription;
 	private java.lang.Byte     status;
 	private java.lang.Long     groupId;
+	private java.lang.String   employeeNo;
+	private java.lang.String   avatar;
 	private java.lang.String   groupPath;
 	private java.lang.Byte     gender;
+	private java.lang.Integer  namespaceId;
+	private java.sql.Timestamp updateTime;
+	private java.sql.Timestamp createTime;
 	private java.lang.Long     integralTag1;
 	private java.lang.Long     integralTag2;
 	private java.lang.Long     integralTag3;
@@ -36,10 +41,6 @@ public class EhOrganizationMembers implements java.io.Serializable {
 	private java.lang.String   stringTag3;
 	private java.lang.String   stringTag4;
 	private java.lang.String   stringTag5;
-	private java.lang.String   employeeNo;
-	private java.lang.String   avatar;
-	private java.sql.Timestamp updateTime;
-	private java.sql.Timestamp createTime;
 
 	public EhOrganizationMembers() {}
 
@@ -55,8 +56,13 @@ public class EhOrganizationMembers implements java.io.Serializable {
 		java.lang.String   contactDescription,
 		java.lang.Byte     status,
 		java.lang.Long     groupId,
+		java.lang.String   employeeNo,
+		java.lang.String   avatar,
 		java.lang.String   groupPath,
 		java.lang.Byte     gender,
+		java.lang.Integer  namespaceId,
+		java.sql.Timestamp updateTime,
+		java.sql.Timestamp createTime,
 		java.lang.Long     integralTag1,
 		java.lang.Long     integralTag2,
 		java.lang.Long     integralTag3,
@@ -66,11 +72,7 @@ public class EhOrganizationMembers implements java.io.Serializable {
 		java.lang.String   stringTag2,
 		java.lang.String   stringTag3,
 		java.lang.String   stringTag4,
-		java.lang.String   stringTag5,
-		java.lang.String   employeeNo,
-		java.lang.String   avatar,
-		java.sql.Timestamp updateTime,
-		java.sql.Timestamp createTime
+		java.lang.String   stringTag5
 	) {
 		this.id = id;
 		this.organizationId = organizationId;
@@ -83,8 +85,13 @@ public class EhOrganizationMembers implements java.io.Serializable {
 		this.contactDescription = contactDescription;
 		this.status = status;
 		this.groupId = groupId;
+		this.employeeNo = employeeNo;
+		this.avatar = avatar;
 		this.groupPath = groupPath;
 		this.gender = gender;
+		this.namespaceId = namespaceId;
+		this.updateTime = updateTime;
+		this.createTime = createTime;
 		this.integralTag1 = integralTag1;
 		this.integralTag2 = integralTag2;
 		this.integralTag3 = integralTag3;
@@ -95,10 +102,6 @@ public class EhOrganizationMembers implements java.io.Serializable {
 		this.stringTag3 = stringTag3;
 		this.stringTag4 = stringTag4;
 		this.stringTag5 = stringTag5;
-		this.employeeNo = employeeNo;
-		this.avatar = avatar;
-		this.updateTime = updateTime;
-		this.createTime = createTime;
 	}
 
 	public java.lang.Long getId() {
@@ -189,6 +192,22 @@ public class EhOrganizationMembers implements java.io.Serializable {
 		this.groupId = groupId;
 	}
 
+	public java.lang.String getEmployeeNo() {
+		return this.employeeNo;
+	}
+
+	public void setEmployeeNo(java.lang.String employeeNo) {
+		this.employeeNo = employeeNo;
+	}
+
+	public java.lang.String getAvatar() {
+		return this.avatar;
+	}
+
+	public void setAvatar(java.lang.String avatar) {
+		this.avatar = avatar;
+	}
+
 	public java.lang.String getGroupPath() {
 		return this.groupPath;
 	}
@@ -203,6 +222,30 @@ public class EhOrganizationMembers implements java.io.Serializable {
 
 	public void setGender(java.lang.Byte gender) {
 		this.gender = gender;
+	}
+
+	public java.lang.Integer getNamespaceId() {
+		return this.namespaceId;
+	}
+
+	public void setNamespaceId(java.lang.Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public java.sql.Timestamp getUpdateTime() {
+		return this.updateTime;
+	}
+
+	public void setUpdateTime(java.sql.Timestamp updateTime) {
+		this.updateTime = updateTime;
+	}
+
+	public java.sql.Timestamp getCreateTime() {
+		return this.createTime;
+	}
+
+	public void setCreateTime(java.sql.Timestamp createTime) {
+		this.createTime = createTime;
 	}
 
 	public java.lang.Long getIntegralTag1() {
@@ -283,37 +326,5 @@ public class EhOrganizationMembers implements java.io.Serializable {
 
 	public void setStringTag5(java.lang.String stringTag5) {
 		this.stringTag5 = stringTag5;
-	}
-
-	public java.lang.String getEmployeeNo() {
-		return this.employeeNo;
-	}
-
-	public void setEmployeeNo(java.lang.String employeeNo) {
-		this.employeeNo = employeeNo;
-	}
-
-	public java.lang.String getAvatar() {
-		return this.avatar;
-	}
-
-	public void setAvatar(java.lang.String avatar) {
-		this.avatar = avatar;
-	}
-
-	public java.sql.Timestamp getUpdateTime() {
-		return this.updateTime;
-	}
-
-	public void setUpdateTime(java.sql.Timestamp updateTime) {
-		this.updateTime = updateTime;
-	}
-
-	public java.sql.Timestamp getCreateTime() {
-		return this.createTime;
-	}
-
-	public void setCreateTime(java.sql.Timestamp createTime) {
-		this.createTime = createTime;
 	}
 }

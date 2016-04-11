@@ -19,6 +19,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhAclinks EH_ACLINKS = com.everhomes.server.schema.tables.EhAclinks.EH_ACLINKS;
 
 	/**
+	 * The table ehcore.eh_aclink_firmware
+	 */
+	public static final com.everhomes.server.schema.tables.EhAclinkFirmware EH_ACLINK_FIRMWARE = com.everhomes.server.schema.tables.EhAclinkFirmware.EH_ACLINK_FIRMWARE;
+
+	/**
 	 * The table ehcore.eh_aclink_undo_key
 	 */
 	public static final com.everhomes.server.schema.tables.EhAclinkUndoKey EH_ACLINK_UNDO_KEY = com.everhomes.server.schema.tables.EhAclinkUndoKey.EH_ACLINK_UNDO_KEY;
@@ -102,6 +107,11 @@ public class Tables {
 	 * The table ehcore.eh_businesses
 	 */
 	public static final com.everhomes.server.schema.tables.EhBusinesses EH_BUSINESSES = com.everhomes.server.schema.tables.EhBusinesses.EH_BUSINESSES;
+
+	/**
+	 * The table ehcore.eh_business_assigned_namespaces
+	 */
+	public static final com.everhomes.server.schema.tables.EhBusinessAssignedNamespaces EH_BUSINESS_ASSIGNED_NAMESPACES = com.everhomes.server.schema.tables.EhBusinessAssignedNamespaces.EH_BUSINESS_ASSIGNED_NAMESPACES;
 
 	/**
 	 * The table ehcore.eh_business_assigned_scopes
