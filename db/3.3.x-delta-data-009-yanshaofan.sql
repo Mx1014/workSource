@@ -262,7 +262,7 @@ INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf
 VALUES (23000,'统计',20000,null,'statistics',0,2,'/20000/23000','park',230);
 
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (30000,'园区管理',0,null,'community_list',1,2,'/30000','park',300);
+VALUES (30000,'园区管理',0,'fa fa-building',null,1,2,'/30000','park',300);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
 VALUES (30500,'园区管理',30000,null,'community_list',0,2,'/30000/30500','park',305);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
