@@ -2299,6 +2299,13 @@ public class VideoConfServiceImpl implements VideoConfService {
 	@Override
 	public InvoiceDTO updateInvoice(UpdateInvoiceCommand cmd) {
 		InvoiceDTO dto = vcProvider.getInvoiceByOrderId(cmd.getOrderId());
+		if(dto == null) {
+			ConfInvoices invoice = new ConfInvoices();
+			invoice.setOrderId(cmd.getOrderId());
+			vcProvider.createInvoice(invoice);
+			
+			dto = vcProvider.getInvoiceByOrderId(cmd.getOrderId());
+		}
 		dto.setTaxpayerType(cmd.getTaxpayerType());
 		dto.setVatType(cmd.getVatType());
 		dto.setExpenseType(cmd.getExpenseType());
