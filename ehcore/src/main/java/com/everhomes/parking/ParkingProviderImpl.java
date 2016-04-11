@@ -177,33 +177,59 @@ public class ParkingProviderImpl implements ParkingProvider {
     
     @Override
     public List<ParkingCardRequest> listParkingCardRequests(Long id,String ownerType,Long ownerId
-    		,Long parkingLotId,String plateNumber,ParkingCardRequestStatus status,SortField<?> order,
+    		,Long parkingLotId,String plateNumber,ParkingCardRequestStatus status,String order,
     		Long pageAnchor,Integer pageSize){
     	List<ParkingCardRequest> resultList = null;
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        SelectQuery<EhParkingCardRequestsRecord> query = context.selectQuery(Tables.EH_PARKING_CARD_REQUESTS);
+        
+        StringBuilder sb = new StringBuilder("");
+        StringBuilder conditionSb = new StringBuilder("");
+        sb.append("select count(*)-1 as ranking,e1.* from eh_parking_card_requests e1 join eh_parking_card_requests e2 on e1.create_time >= e2.create_time ");
         
         if(id != null)
-        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.REQUESTOR_UID.eq(id));
+        	conditionSb.append(" and e1.REQUESTOR_UID = ").append(id);
         if (pageAnchor != null && pageAnchor != 0)
-			query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.ID.gt(pageAnchor));
+        	conditionSb.append(" and e1.ID > ").append(pageAnchor);
         if(StringUtils.isNotBlank(ownerType))
-        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.OWNER_TYPE.eq(ownerType));
+        	conditionSb.append(" and e1.OWNER_TYPE = '").append(ownerType).append("'");
         if(ownerId != null)
-        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.OWNER_ID.eq(ownerId));
+        	conditionSb.append(" and e1.OWNER_ID = ").append(ownerId);
         if(parkingLotId != null)
-        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PARKING_LOT_ID.eq(parkingLotId));
+        	conditionSb.append(" and e1.PARKING_LOT_ID = ").append(parkingLotId);
         if(StringUtils.isNotBlank(plateNumber))
-        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PLATE_NUMBER.eq(plateNumber));
+        	conditionSb.append(" and e1.PLATE_NUMBER = '").append(plateNumber).append("'");
         if(status != null)
-        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.STATUS.eq(status.getCode()));
-        if(order != null)
-        	query.addOrderBy(order);
-        if(pageSize != null)
-        	query.addLimit(pageSize);
+        	conditionSb.append(" and e1.STATUS = ").append(status.getCode());
         
-        resultList = query.fetch().map(r -> 
-			ConvertHelper.convert(r, ParkingCardRequest.class));
+        if(!conditionSb.toString().equals("")){
+        	sb.append(" where ").append(conditionSb.replace(0, 4, "").toString());
+        }
+        sb.append(" group by e1.id ");
+        if(order != null)
+        	sb.append(" order by ").append(order);
+        if(pageSize != null)
+        	sb.append(" limit ").append(pageSize);
+        resultList = context.fetch(sb.toString()).stream().map(r -> {
+        	ParkingCardRequest p = new ParkingCardRequest();
+        	p.setId(r.getValue(Tables.EH_PARKING_CARD_REQUESTS.ID));
+        	p.setCreateTime(r.getValue(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME));
+        	p.setCreatorUid(r.getValue(Tables.EH_PARKING_CARD_REQUESTS.CREATOR_UID));
+        	p.setIssueFlag(r.getValue(Tables.EH_PARKING_CARD_REQUESTS.ISSUE_FLAG));
+        	p.setIssueTime(r.getValue(Tables.EH_PARKING_CARD_REQUESTS.ISSUE_TIME));
+        	p.setOwnerId(r.getValue(Tables.EH_PARKING_CARD_REQUESTS.OWNER_ID));
+        	p.setOwnerType(r.getValue(Tables.EH_PARKING_CARD_REQUESTS.OWNER_TYPE));
+        	p.setParkingLotId(r.getValue(Tables.EH_PARKING_CARD_REQUESTS.PARKING_LOT_ID));
+        	p.setPlateNumber(r.getValue(Tables.EH_PARKING_CARD_REQUESTS.PLATE_NUMBER));
+        	p.setPlateOwnerEntperiseName(r.getValue(Tables.EH_PARKING_CARD_REQUESTS.PLATE_OWNER_ENTPERISE_NAME));
+        	p.setPlateOwnerName(r.getValue(Tables.EH_PARKING_CARD_REQUESTS.PLATE_OWNER_NAME));
+        	p.setPlateOwnerPhone(r.getValue(Tables.EH_PARKING_CARD_REQUESTS.PLATE_OWNER_PHONE));
+        	p.setRanking(((Long) r.getValue("ranking")).intValue());
+        	p.setRequestorEnterpriseId(r.getValue(Tables.EH_PARKING_CARD_REQUESTS.REQUESTOR_ENTERPRISE_ID));
+        	p.setRequestorUid(r.getValue(Tables.EH_PARKING_CARD_REQUESTS.REQUESTOR_UID));
+        	p.setStatus(r.getValue(Tables.EH_PARKING_CARD_REQUESTS.STATUS));
+        	
+        	return p;
+        }).collect(Collectors.toList());
         
     	return resultList;
     }
