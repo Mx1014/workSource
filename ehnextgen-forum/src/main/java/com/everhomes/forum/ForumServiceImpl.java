@@ -2337,12 +2337,29 @@ public class ForumServiceImpl implements ForumService {
         
         Category contentCatogry = null;
         // contentCategoryId为0表示全部查，此时也不需要给category条件
+        
+        List<Long> contentCategoryIds = new ArrayList<Long>();
+        
         if(contentCategoryId != null && contentCategoryId.longValue() > 0) {
-            contentCatogry = this.categoryProvider.findCategoryById(contentCategoryId);
+        	contentCategoryIds.add(contentCategoryId);
+        }else{
+        	// 為0或者null的情況下，默認查詢全部的任務貼
+        	contentCategoryIds =  CategoryConstants.GA_RELATED_CATEGORIES;
         }
-        if(contentCatogry != null) {
-            categoryCondition = Tables.EH_FORUM_POSTS.CATEGORY_PATH.like(contentCatogry.getPath() + "%");
-        }
+        
+        Condition cond = null;
+        for (Long categoryId : contentCategoryIds) {
+        	contentCatogry = this.categoryProvider.findCategoryById(categoryId);
+        	if(contentCatogry != null) {
+        		if(null == cond){
+        			cond = Tables.EH_FORUM_POSTS.CATEGORY_PATH.like(contentCatogry.getPath() + "%");
+        		}else{
+        			cond = cond.or(Tables.EH_FORUM_POSTS.CATEGORY_PATH.like(contentCatogry.getPath() + "%"));
+        		}
+            }
+		}
+        
+        categoryCondition = cond;
         
         Category actionCategory = null;
         if(actionCategoryId != null && actionCategoryId.longValue() > 0) {
