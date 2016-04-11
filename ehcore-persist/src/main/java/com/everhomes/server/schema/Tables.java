@@ -14,6 +14,16 @@ package com.everhomes.server.schema;
 public class Tables {
 
 	/**
+	 * The table ehcore.eh_aclinks
+	 */
+	public static final com.everhomes.server.schema.tables.EhAclinks EH_ACLINKS = com.everhomes.server.schema.tables.EhAclinks.EH_ACLINKS;
+
+	/**
+	 * The table ehcore.eh_aclink_undo_key
+	 */
+	public static final com.everhomes.server.schema.tables.EhAclinkUndoKey EH_ACLINK_UNDO_KEY = com.everhomes.server.schema.tables.EhAclinkUndoKey.EH_ACLINK_UNDO_KEY;
+
+	/**
 	 * The table ehcore.eh_activities
 	 */
 	public static final com.everhomes.server.schema.tables.EhActivities EH_ACTIVITIES = com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES;
@@ -32,6 +42,16 @@ public class Tables {
 	 * The table ehcore.eh_address_messages
 	 */
 	public static final com.everhomes.server.schema.tables.EhAddressMessages EH_ADDRESS_MESSAGES = com.everhomes.server.schema.tables.EhAddressMessages.EH_ADDRESS_MESSAGES;
+
+	/**
+	 * The table ehcore.eh_aes_server_key
+	 */
+	public static final com.everhomes.server.schema.tables.EhAesServerKey EH_AES_SERVER_KEY = com.everhomes.server.schema.tables.EhAesServerKey.EH_AES_SERVER_KEY;
+
+	/**
+	 * The table ehcore.eh_aes_user_key
+	 */
+	public static final com.everhomes.server.schema.tables.EhAesUserKey EH_AES_USER_KEY = com.everhomes.server.schema.tables.EhAesUserKey.EH_AES_USER_KEY;
 
 	/**
 	 * The table ehcore.eh_app_promotions
@@ -202,6 +222,21 @@ public class Tables {
 	 * The table ehcore.eh_devices
 	 */
 	public static final com.everhomes.server.schema.tables.EhDevices EH_DEVICES = com.everhomes.server.schema.tables.EhDevices.EH_DEVICES;
+
+	/**
+	 * The table ehcore.eh_door_access
+	 */
+	public static final com.everhomes.server.schema.tables.EhDoorAccess EH_DOOR_ACCESS = com.everhomes.server.schema.tables.EhDoorAccess.EH_DOOR_ACCESS;
+
+	/**
+	 * The table ehcore.eh_door_auth
+	 */
+	public static final com.everhomes.server.schema.tables.EhDoorAuth EH_DOOR_AUTH = com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH;
+
+	/**
+	 * The table ehcore.eh_door_command
+	 */
+	public static final com.everhomes.server.schema.tables.EhDoorCommand EH_DOOR_COMMAND = com.everhomes.server.schema.tables.EhDoorCommand.EH_DOOR_COMMAND;
 
 	/**
 	 * The table ehcore.eh_enterprise_addresses
@@ -504,6 +539,7 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhOrganizationTasks EH_ORGANIZATION_TASKS = com.everhomes.server.schema.tables.EhOrganizationTasks.EH_ORGANIZATION_TASKS;
 
 	/**
+<<<<<<< HEAD
 	 * The table ehcore.eh_parking_activities
 	 */
 	public static final com.everhomes.server.schema.tables.EhParkingActivities EH_PARKING_ACTIVITIES = com.everhomes.server.schema.tables.EhParkingActivities.EH_PARKING_ACTIVITIES;
@@ -532,6 +568,11 @@ public class Tables {
 	 * The table ehcore.eh_parking_vendors
 	 */
 	public static final com.everhomes.server.schema.tables.EhParkingVendors EH_PARKING_VENDORS = com.everhomes.server.schema.tables.EhParkingVendors.EH_PARKING_VENDORS;
+	
+	/**
+	 * The table ehcore.eh_owner_doors
+	 */
+	public static final com.everhomes.server.schema.tables.EhOwnerDoors EH_OWNER_DOORS = com.everhomes.server.schema.tables.EhOwnerDoors.EH_OWNER_DOORS;
 
 	/**
 	 * The table ehcore.eh_park_apply_card

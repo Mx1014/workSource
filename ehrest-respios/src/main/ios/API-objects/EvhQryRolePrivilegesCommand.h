@@ -1,6 +1,6 @@
 //
 // EvhQryRolePrivilegesCommand.h
-// generated at 2016-04-07 17:03:16 
+// generated at 2016-04-07 17:57:41 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -13,6 +13,8 @@
 
 
 @property(nonatomic, copy) NSNumber* roleId;
+
+@property(nonatomic, copy) NSNumber* organizationId;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

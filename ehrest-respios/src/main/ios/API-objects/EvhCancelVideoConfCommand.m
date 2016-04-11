@@ -1,6 +1,6 @@
 //
 // EvhCancelVideoConfCommand.m
-// generated at 2016-04-07 17:03:17 
+// generated at 2016-04-07 17:57:42 
 //
 #import "EvhCancelVideoConfCommand.h"
 
@@ -33,8 +33,6 @@
 {
     if(self.confId)
         [jsonObject setObject: self.confId forKey: @"confId"];
-    if(self.sourceAccountName)
-        [jsonObject setObject: self.sourceAccountName forKey: @"sourceAccountName"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -43,10 +41,6 @@
         self.confId = [jsonObject objectForKey: @"confId"];
         if(self.confId && [self.confId isEqual:[NSNull null]])
             self.confId = nil;
-
-        self.sourceAccountName = [jsonObject objectForKey: @"sourceAccountName"];
-        if(self.sourceAccountName && [self.sourceAccountName isEqual:[NSNull null]])
-            self.sourceAccountName = nil;
 
         return self;
     }

@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  *  <li>singleAccountPrice: 正常价格</li>
  *  <li>multipleAccountThreshold: 多账号起售数量 </li>
  *  <li>multipleAccountPrice: 多账号购买价格 </li>
+ *  <li>minPeriod: 最少购买月份 </li>
  * </ul>
  *
  */
@@ -23,6 +24,8 @@ public class ConfCategoryDTO {
 	private int multipleAccountThreshold;
 	
 	private BigDecimal multipleAccountPrice;
+	
+	private int minPeriod;
 	
 	public Byte getConfCapacity() {
 		return confCapacity;
@@ -54,6 +57,14 @@ public class ConfCategoryDTO {
 
 	public void setMultipleAccountPrice(BigDecimal multipleAccountPrice) {
 		this.multipleAccountPrice = multipleAccountPrice;
+	}
+
+	public int getMinPeriod() {
+		return minPeriod;
+	}
+
+	public void setMinPeriod(int minPeriod) {
+		this.minPeriod = minPeriod;
 	}
 
 	@Override

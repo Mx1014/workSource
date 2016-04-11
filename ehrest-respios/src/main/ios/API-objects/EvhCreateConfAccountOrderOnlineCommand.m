@@ -1,6 +1,6 @@
 //
 // EvhCreateConfAccountOrderOnlineCommand.m
-// generated at 2016-04-07 17:03:16 
+// generated at 2016-04-07 17:57:42 
 //
 #import "EvhCreateConfAccountOrderOnlineCommand.h"
 
@@ -53,6 +53,8 @@
         [jsonObject setObject: self.confCapacity forKey: @"confCapacity"];
     if(self.confType)
         [jsonObject setObject: self.confType forKey: @"confType"];
+    if(self.mailAddress)
+        [jsonObject setObject: self.mailAddress forKey: @"mailAddress"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -101,6 +103,10 @@
         self.confType = [jsonObject objectForKey: @"confType"];
         if(self.confType && [self.confType isEqual:[NSNull null]])
             self.confType = nil;
+
+        self.mailAddress = [jsonObject objectForKey: @"mailAddress"];
+        if(self.mailAddress && [self.mailAddress isEqual:[NSNull null]])
+            self.mailAddress = nil;
 
         return self;
     }

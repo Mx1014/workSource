@@ -4,6 +4,7 @@ package com.everhomes.rest.organization;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.acl.admin.RoleDTO;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -53,10 +54,8 @@ public class OrganizationDTO {
 	@ItemType(OrganizationDTO.class)
 	private List<OrganizationDTO> childrens;
 	
-	private Long roleId;
-	
-	private String roleName;
-	
+	@ItemType(RoleDTO.class)
+	private List<RoleDTO> roles;
 	public Long getCommunityId() {
 		return communityId;
 	}
@@ -212,22 +211,15 @@ public class OrganizationDTO {
 		this.childrens = childrens;
 	}
 
-	public Long getRoleId() {
-		return roleId;
-	}
-
-	public void setRoleId(Long roleId) {
-		this.roleId = roleId;
-	}
-
-	public String getRoleName() {
-		return roleName;
-	}
-
-	public void setRoleName(String roleName) {
-		this.roleName = roleName;
-	}
 	
+	public List<RoleDTO> getRoles() {
+		return roles;
+	}
+
+	public void setRoles(List<RoleDTO> roles) {
+		this.roles = roles;
+	}
+
 	public String getAddress() {
 		return address;
 	}

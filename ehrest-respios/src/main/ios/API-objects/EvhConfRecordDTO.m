@@ -1,6 +1,6 @@
 //
 // EvhConfRecordDTO.m
-// generated at 2016-04-07 17:03:16 
+// generated at 2016-04-07 17:57:43 
 //
 #import "EvhConfRecordDTO.h"
 

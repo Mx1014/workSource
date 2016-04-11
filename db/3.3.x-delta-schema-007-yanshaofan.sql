@@ -54,3 +54,8 @@ CREATE TABLE `eh_organization_buildings`(
 `building_id` BIGINT NOT NULL
 PRIMARY KEY (`id`) 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4; 
+
+
+
+ALTER TABLE `eh_organization_tasks` ADD COLUMN `visible_region_type` TINYINT DEFAULT NULL COMMENT 'define the visible region type';
+ALTER TABLE `eh_organization_tasks` ADD COLUMN `visible_region_id` BIGINT DEFAULT NULL COMMENT 'visible region id';

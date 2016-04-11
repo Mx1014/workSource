@@ -82,6 +82,8 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 
 			task.setTaskStatus(OrganizationTaskStatus.UNPROCESSED.getCode());
 			task.setOperatorUid(0L);
+			task.setVisibleRegionId(post.getVisibleRegionId());
+			task.setVisibleRegionType(post.getVisibleRegionType());
 			this.organizationProvider.createOrganizationTask(task);
 			post.setEmbeddedId(task.getId());
 			/*if(LOGGER.isDebugEnabled()) {

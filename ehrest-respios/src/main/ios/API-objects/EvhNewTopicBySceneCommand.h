@@ -1,6 +1,6 @@
 //
 // EvhNewTopicBySceneCommand.h
-// generated at 2016-04-07 17:03:17 
+// generated at 2016-04-07 17:57:42 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -45,6 +45,10 @@
 @property(nonatomic, strong) NSMutableArray* attachments;
 
 @property(nonatomic, copy) NSNumber* privateFlag;
+
+@property(nonatomic, copy) NSNumber* visibleRegionId;
+
+@property(nonatomic, copy) NSNumber* visibleRegionType;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

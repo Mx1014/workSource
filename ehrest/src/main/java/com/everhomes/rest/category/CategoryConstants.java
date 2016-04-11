@@ -87,7 +87,8 @@ public interface CategoryConstants {
         CATEGORY_ID_COMPLAINT_ADVICE,
         CATEGORY_ID_CLEANING,
         CATEGORY_ID_HOUSE_KEEPING,
-        CATEGORY_ID_MAINTENANCE
+        CATEGORY_ID_MAINTENANCE,
+        CATEGORY_ID_EMERGENCY_HELP
     );
     
     /** 政府机构相关的有隐私的类型，使用这些类型的帖子对政府机关来说需要有权控制是否公开 */

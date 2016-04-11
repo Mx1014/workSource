@@ -1,6 +1,6 @@
 //
 // EvhQueryOrganizationTopicCommand.h
-// generated at 2016-04-07 17:03:17 
+// generated at 2016-04-07 17:57:43 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -27,6 +27,8 @@
 @property(nonatomic, copy) NSNumber* pageAnchor;
 
 @property(nonatomic, copy) NSNumber* pageSize;
+
+@property(nonatomic, copy) NSNumber* embeddedAppId;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

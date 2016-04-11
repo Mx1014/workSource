@@ -1,0 +1,158 @@
+package com.everhomes.mail;
+
+import java.io.File;
+import java.util.List;
+import java.util.Properties;
+
+import javax.activation.DataHandler;
+import javax.activation.FileDataSource;
+import javax.annotation.PostConstruct;
+import javax.mail.Message;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.MimeUtility;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.everhomes.configuration.ConfigurationProvider;
+
+@Component(MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP)
+public class JMailHandler implements MailHandler {
+    public final static Logger LOGGER = LoggerFactory.getLogger(JMailHandler.class);
+    
+    @Autowired
+    private ConfigurationProvider configurationProvider;
+    
+    private Session session;
+    
+    @PostConstruct
+    public void init() {        
+        Properties props = new Properties();
+        props.setProperty("mail.smtp.auth", "true");
+        props.setProperty("mail.transport.protocol", "smtp");
+        
+        session = Session.getInstance(props);
+        session.setDebug(true);
+    }
+    
+    public void sendMail(Integer namespaceId, String from, String to, String subject, String body) {
+        sendMail(namespaceId, from, to, subject, body, null);
+    }
+    
+    public void sendMail(Integer namespaceId, String from, String to, String subject, String body, List<String> attachmentList) {
+        int attachSize = (attachmentList == null) ? 0 : attachmentList.size();
+        boolean isBodyEmpty = (body == null || body.trim().length() == 0) ? true : false;
+        
+        try {
+            if(from == null || from.trim().length() == 0) {
+                String mailAccountName = configurationProvider.getValue(namespaceId, "mail.smtp.account", "");
+                if(mailAccountName != null && mailAccountName.trim().length() > 0) {
+                    from = mailAccountName;
+                } else {
+                    LOGGER.warn("Mail account name is empty, namespaceId=" + namespaceId + ", from=" + from 
+                        + ", to=" + to + ", subject=" + subject + ", isBodyEmpty=" + isBodyEmpty + ", attachSize=" + attachSize);
+                }
+            } else {
+                LOGGER.warn("From address is empty, it will use mail account name, namespaceId=" + namespaceId + ", from=" + from 
+                    + ", to=" + to + ", subject=" + subject + ", isBodyEmpty=" + isBodyEmpty + ", attachSize=" + attachSize);
+            }
+            MimeMessage message = createMessage(session, from, to, subject, body, attachmentList);
+            sendMessage(namespaceId, session, message);
+        } catch (Exception e) {
+            LOGGER.error("Failed to send mail, namespaceId=" + namespaceId + ", from=" + from 
+                + ", to=" + to + ", subject=" + subject + ", isBodyEmpty=" + isBodyEmpty + ", attachSize=" + attachSize, e);
+        }
+    }
+
+    
+    /**  
+     * 根据传入的 Seesion 对象创建混合型的 MIME消息  
+     */ 
+    private MimeMessage createMessage(Session session, String from, String to, String subject, String body, List<String> attachmentList) throws Exception {  
+        MimeMessage msg = new MimeMessage(session); 
+        msg.setFrom(new InternetAddress(from));
+        msg.setRecipient(Message.RecipientType.TO, new InternetAddress(to));  
+        
+        subject = (subject == null) ? "" : subject;
+        msg.setSubject(MimeUtility.decodeText(subject));
+ 
+        // 将邮件中各个部分组合到一个"mixed"型的 MimeMultipart 对象  
+        MimeMultipart multiPart = new MimeMultipart("mixed");  
+        
+        body = (body == null) ? "" : body;
+        MimeBodyPart bodyPart = createContent(body);
+        multiPart.addBodyPart(bodyPart);  
+          
+        // 创建邮件的各个 MimeBodyPart 部分  
+        if(attachmentList != null) {
+            for(String filePath : attachmentList) {
+                File file = new File(filePath);
+                if(!file.exists()) {
+                    LOGGER.error("File not found, from=" + from  + ", to=" + to + ", filePath=" + filePath);
+                    continue;
+                }
+                MimeBodyPart attachmentPart = createAttachment(filePath);
+                multiPart.addBodyPart(attachmentPart);
+            }
+        }
+ 
+        // 将上面混合型的 MimeMultipart 对象作为邮件内容并保存  
+        msg.setContent(multiPart);  
+        //msg.saveChanges();
+        
+        return msg;  
+    }
+    
+    /**  
+     * 根据传入的邮件正文body和文件路径创建图文并茂的正文部分  
+     */ 
+    private MimeBodyPart createContent(String content) throws Exception {
+        // 用于保存最终正文部分  
+        MimeBodyPart contentBody = new MimeBodyPart();  
+        // 用于组合文本和图片，"related"型的MimeMultipart对象  
+        MimeMultipart contentMulti = new MimeMultipart("related");  
+ 
+        // 正文的文本部分  
+        MimeBodyPart textBody = new MimeBodyPart();  
+        //textBody.setContent(content, "text/html;charset=utf8");  
+        textBody.setText(content);
+        contentMulti.addBodyPart(textBody);  
+ 
+        // 将上面"related"型的 MimeMultipart 对象作为邮件的正文  
+        contentBody.setContent(contentMulti);  
+        return contentBody;  
+    }  
+    
+    /**  
+     * 根据传入的文件路径创建附件并返回  
+     */ 
+    public MimeBodyPart createAttachment(String filePath) throws Exception {  
+        MimeBodyPart attachmentPart = new MimeBodyPart();  
+        FileDataSource fds = new FileDataSource(filePath);  
+        attachmentPart.setDataHandler(new DataHandler(fds));  
+        attachmentPart.setFileName(fds.getName());  
+        
+        return attachmentPart;  
+    }
+    
+    private void sendMessage(Integer namespaceId, Session session, MimeMessage msg) throws Exception {
+        String smtpServerAddr = configurationProvider.getValue(namespaceId, "mail.smtp.address", "");
+        int smtpServerPort = configurationProvider.getIntValue(namespaceId, "mail.smtp.port", 25);
+        String mailAccountName = configurationProvider.getValue(namespaceId, "mail.smtp.account", "");
+        String mailPassword = configurationProvider.getValue(namespaceId, "mail.smtp.passwod", "");
+        if(mailAccountName.trim().length() > 0 && mailPassword.trim().length() > 0) {
+            Transport trans = session.getTransport();
+            trans.connect(smtpServerAddr, smtpServerPort, mailAccountName, mailPassword);
+            trans.sendMessage(msg, msg.getAllRecipients());
+        } else {
+            LOGGER.error("Ignore to send mail for the mail account name or password is empty, namespaceId=" + namespaceId);
+        }
+    }
+}

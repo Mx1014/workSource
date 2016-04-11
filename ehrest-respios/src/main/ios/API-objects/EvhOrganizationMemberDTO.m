@@ -1,9 +1,9 @@
 //
 // EvhOrganizationMemberDTO.m
-// generated at 2016-04-07 17:03:17 
+// generated at 2016-04-07 17:57:42 
 //
 #import "EvhOrganizationMemberDTO.h"
-#import "EvhAclRoleAssignmentsDTO.h"
+#import "EvhRoleDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhOrganizationMemberDTO
@@ -25,7 +25,7 @@
 {
     self = [super init];
     if(self) {
-        _aclRoles = [NSMutableArray new];
+        _roles = [NSMutableArray new];
         return self;
     }
     return nil;
@@ -61,14 +61,14 @@
         [jsonObject setObject: self.fullPinyin forKey: @"fullPinyin"];
     if(self.fullInitial)
         [jsonObject setObject: self.fullInitial forKey: @"fullInitial"];
-    if(self.aclRoles) {
+    if(self.roles) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhAclRoleAssignmentsDTO* item in self.aclRoles) {
+        for(EvhRoleDTO* item in self.roles) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
         }
-        [jsonObject setObject: jsonArray forKey: @"aclRoles"];
+        [jsonObject setObject: jsonArray forKey: @"roles"];
     }
     if(self.groupId)
         [jsonObject setObject: self.groupId forKey: @"groupId"];
@@ -146,12 +146,12 @@
             self.fullInitial = nil;
 
         {
-            NSArray* jsonArray = [jsonObject objectForKey: @"aclRoles"];
+            NSArray* jsonArray = [jsonObject objectForKey: @"roles"];
             for(id itemJson in jsonArray) {
-                EvhAclRoleAssignmentsDTO* item = [EvhAclRoleAssignmentsDTO new];
+                EvhRoleDTO* item = [EvhRoleDTO new];
                 
                 [item fromJson: itemJson];
-                [self.aclRoles addObject: item];
+                [self.roles addObject: item];
             }
         }
         self.groupId = [jsonObject objectForKey: @"groupId"];

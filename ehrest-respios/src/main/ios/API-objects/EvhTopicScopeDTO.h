@@ -1,6 +1,6 @@
 //
 // EvhTopicScopeDTO.h
-// generated at 2016-04-07 17:03:17 
+// generated at 2016-04-07 17:57:41 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -30,7 +30,7 @@
 
 @property(nonatomic, copy) NSString* targetTag;
 
-@property(nonatomic, copy) NSNumber* isLeaf;
+@property(nonatomic, copy) NSNumber* leafFlag;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

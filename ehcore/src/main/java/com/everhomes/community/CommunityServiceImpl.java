@@ -248,6 +248,7 @@ public class CommunityServiceImpl implements CommunityService {
 			this.communityProvider.updateCommunity(community);
 
 			List<CommunityGeoPointDTO> geoList = cmd.getGeoPointList();
+			
 			if(geoList != null && geoList.size() > 0){
 
 				List<CommunityGeoPoint> geoPointList = this.communityProvider.listCommunityGeoPoints(cmd.getCommunityId());

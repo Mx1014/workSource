@@ -1,6 +1,6 @@
 //
 // EvhOpenapiGetUserInfoByIdRestResponse.m
-// generated at 2016-04-07 17:03:18 
+// generated at 2016-04-07 17:57:44 
 //
 #import "EvhOpenapiGetUserInfoByIdRestResponse.h"
 #import "EvhUserInfo.h"

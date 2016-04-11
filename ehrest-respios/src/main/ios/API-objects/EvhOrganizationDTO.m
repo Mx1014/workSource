@@ -1,9 +1,10 @@
 //
 // EvhOrganizationDTO.m
-// generated at 2016-04-07 17:03:17 
+// generated at 2016-04-07 17:57:42 
 //
 #import "EvhOrganizationDTO.h"
 #import "EvhOrganizationDTO.h"
+#import "EvhRoleDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhOrganizationDTO
@@ -26,6 +27,7 @@
     self = [super init];
     if(self) {
         _childrens = [NSMutableArray new];
+        _roles = [NSMutableArray new];
         return self;
     }
     return nil;
@@ -80,10 +82,15 @@
         }
         [jsonObject setObject: jsonArray forKey: @"childrens"];
     }
-    if(self.roleId)
-        [jsonObject setObject: self.roleId forKey: @"roleId"];
-    if(self.roleName)
-        [jsonObject setObject: self.roleName forKey: @"roleName"];
+    if(self.roles) {
+        NSMutableArray* jsonArray = [NSMutableArray new];
+        for(EvhRoleDTO* item in self.roles) {
+            NSMutableDictionary* dic = [NSMutableDictionary new];
+            [item toJson:dic];
+            [jsonArray addObject:dic];
+        }
+        [jsonObject setObject: jsonArray forKey: @"roles"];
+    }
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -174,14 +181,15 @@
                 [self.childrens addObject: item];
             }
         }
-        self.roleId = [jsonObject objectForKey: @"roleId"];
-        if(self.roleId && [self.roleId isEqual:[NSNull null]])
-            self.roleId = nil;
-
-        self.roleName = [jsonObject objectForKey: @"roleName"];
-        if(self.roleName && [self.roleName isEqual:[NSNull null]])
-            self.roleName = nil;
-
+        {
+            NSArray* jsonArray = [jsonObject objectForKey: @"roles"];
+            for(id itemJson in jsonArray) {
+                EvhRoleDTO* item = [EvhRoleDTO new];
+                
+                [item fromJson: itemJson];
+                [self.roles addObject: item];
+            }
+        }
         return self;
     }
     

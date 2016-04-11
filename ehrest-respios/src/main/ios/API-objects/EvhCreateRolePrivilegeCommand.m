@@ -1,6 +1,6 @@
 //
 // EvhCreateRolePrivilegeCommand.m
-// generated at 2016-04-07 17:03:16 
+// generated at 2016-04-07 17:57:42 
 //
 #import "EvhCreateRolePrivilegeCommand.h"
 
@@ -36,6 +36,8 @@
         [jsonObject setObject: self.organizationId forKey: @"organizationId"];
     if(self.roleName)
         [jsonObject setObject: self.roleName forKey: @"roleName"];
+    if(self.description_)
+        [jsonObject setObject: self.description_ forKey: @"description"];
     if(self.privilegeIds) {
         NSMutableArray* jsonArray = [NSMutableArray new];
         for(NSNumber* item in self.privilegeIds) {
@@ -55,6 +57,10 @@
         self.roleName = [jsonObject objectForKey: @"roleName"];
         if(self.roleName && [self.roleName isEqual:[NSNull null]])
             self.roleName = nil;
+
+        self.description_ = [jsonObject objectForKey: @"description"];
+        if(self.description_ && [self.description_ isEqual:[NSNull null]])
+            self.description_ = nil;
 
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"privilegeIds"];

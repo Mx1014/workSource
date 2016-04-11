@@ -1,6 +1,6 @@
 //
 // EvhQueryOrganizationTopicCommand.m
-// generated at 2016-04-07 17:03:17 
+// generated at 2016-04-07 17:57:43 
 //
 #import "EvhQueryOrganizationTopicCommand.h"
 
@@ -47,6 +47,8 @@
         [jsonObject setObject: self.pageAnchor forKey: @"pageAnchor"];
     if(self.pageSize)
         [jsonObject setObject: self.pageSize forKey: @"pageSize"];
+    if(self.embeddedAppId)
+        [jsonObject setObject: self.embeddedAppId forKey: @"embeddedAppId"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -83,6 +85,10 @@
         self.pageSize = [jsonObject objectForKey: @"pageSize"];
         if(self.pageSize && [self.pageSize isEqual:[NSNull null]])
             self.pageSize = nil;
+
+        self.embeddedAppId = [jsonObject objectForKey: @"embeddedAppId"];
+        if(self.embeddedAppId && [self.embeddedAppId isEqual:[NSNull null]])
+            self.embeddedAppId = nil;
 
         return self;
     }

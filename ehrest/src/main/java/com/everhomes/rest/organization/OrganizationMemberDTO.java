@@ -3,10 +3,12 @@ package com.everhomes.rest.organization;
 
 import java.util.List;
 
+import javax.management.relation.Role;
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
+import com.everhomes.rest.acl.admin.RoleDTO;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -44,8 +46,8 @@ public class OrganizationMemberDTO {
     private String fullPinyin;
     private String fullInitial;
 	
-	@ItemType(AclRoleAssignmentsDTO.class)
-	private List<AclRoleAssignmentsDTO> aclRoles;
+	@ItemType(RoleDTO.class)
+	private List<RoleDTO> roles;
 	
 	private Long groupId;
 	
@@ -152,15 +154,16 @@ public class OrganizationMemberDTO {
         this.status = status;
     }
 
-    public List<AclRoleAssignmentsDTO> getAclRoles() {
-        return aclRoles;
-    }
 
-    public void setAclRoles(List<AclRoleAssignmentsDTO> aclRoles) {
-        this.aclRoles = aclRoles;
-    }
+    public List<RoleDTO> getRoles() {
+		return roles;
+	}
 
-    public Long getGroupId() {
+	public void setRoles(List<RoleDTO> roles) {
+		this.roles = roles;
+	}
+
+	public Long getGroupId() {
         return groupId;
     }
 

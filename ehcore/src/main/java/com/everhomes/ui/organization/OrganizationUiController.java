@@ -132,12 +132,13 @@ public class OrganizationUiController extends ControllerBase {
      public RestResponse acceptTask(@Valid ProcessingTaskCommand cmd) {
     	WebTokenGenerator webToken = WebTokenGenerator.getInstance();
  	    SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
- 		if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
+ 	   PostDTO dto = null;
+ 	    if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
  			ProcessOrganizationTaskCommand command = ConvertHelper.convert(cmd, ProcessOrganizationTaskCommand.class);
    	    	command.setOrganizationId(sceneToken.getEntityId());
-   			organizationService.acceptTask(command);
+   	    	dto = organizationService.acceptTask(command);
  		}
-        RestResponse res = new RestResponse();
+        RestResponse res = new RestResponse(dto);
         res.setErrorCode(ErrorCodes.SUCCESS);
         res.setErrorDescription("OK");
         
@@ -153,12 +154,13 @@ public class OrganizationUiController extends ControllerBase {
       public RestResponse refuseTask(@Valid ProcessingTaskCommand cmd) {
     	  WebTokenGenerator webToken = WebTokenGenerator.getInstance();
    	      SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+   	      PostDTO dto = null;
    	      if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
    	    	ProcessOrganizationTaskCommand command = ConvertHelper.convert(cmd, ProcessOrganizationTaskCommand.class);
    	    	command.setOrganizationId(sceneToken.getEntityId());
-   			organizationService.refuseTask(command);
+   	    	dto = organizationService.refuseTask(command);
    	      }
-    	  RestResponse res = new RestResponse();
+    	  RestResponse res = new RestResponse(dto);
     	  res.setErrorCode(ErrorCodes.SUCCESS);
     	  res.setErrorDescription("OK");
          
@@ -174,12 +176,13 @@ public class OrganizationUiController extends ControllerBase {
        public RestResponse grabTask(@Valid ProcessingTaskCommand cmd) {
     	   WebTokenGenerator webToken = WebTokenGenerator.getInstance();
     	   SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
+    	   PostDTO dto = null;
     	   if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
     		   ProcessOrganizationTaskCommand command = ConvertHelper.convert(cmd, ProcessOrganizationTaskCommand.class);
       	       command.setOrganizationId(sceneToken.getEntityId());
-    		   organizationService.grabTask(command);
+      	       dto = organizationService.grabTask(command);
     	   }
-    	   RestResponse res = new RestResponse();
+    	   RestResponse res = new RestResponse(dto);
     	   res.setErrorCode(ErrorCodes.SUCCESS);
            res.setErrorDescription("OK");
           

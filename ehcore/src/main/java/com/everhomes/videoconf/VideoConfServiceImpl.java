@@ -2,6 +2,7 @@ package com.everhomes.videoconf;
 
 import java.io.IOException;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -30,6 +31,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.app.App;
+import com.everhomes.app.AppProvider;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.configuration.ConfigConstants;
@@ -43,6 +48,7 @@ import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.mail.MailHandler;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.organization.pm.pay.GsonUtil;
@@ -52,12 +58,14 @@ import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.techpark.onlinePay.OnlinePayBillCommand;
 import com.everhomes.rest.techpark.onlinePay.PayStatus;
+import com.everhomes.rest.techpark.park.RechargeOrderDTO;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.videoconf.AccountType;
 import com.everhomes.rest.videoconf.AddSourceVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.AssignVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.BizConfHolder;
 import com.everhomes.rest.videoconf.CancelVideoConfCommand;
+import com.everhomes.rest.videoconf.ConfAccountOrderDTO;
 import com.everhomes.rest.videoconf.ConfCapacity;
 import com.everhomes.rest.videoconf.ConfCategoryDTO;
 import com.everhomes.rest.videoconf.ConfOrderAccountDTO;
@@ -124,6 +132,8 @@ import com.everhomes.rest.videoconf.UpdateInvoiceCommand;
 import com.everhomes.rest.videoconf.UpdateVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.UserAccountDTO;
 import com.everhomes.rest.videoconf.VatType;
+import com.everhomes.rest.videoconf.VerifyPurchaseAuthorityCommand;
+import com.everhomes.rest.videoconf.VerifyPurchaseAuthorityResponse;
 import com.everhomes.rest.videoconf.VerifyVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.VideoConfAccountRuleDTO;
 import com.everhomes.rest.videoconf.VideoConfInvitationResponse;
@@ -142,6 +152,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
 import com.google.gson.Gson;
@@ -194,6 +205,12 @@ public class VideoConfServiceImpl implements VideoConfService {
 	
 	@Autowired
     private NamespaceProvider nsProvider;
+	
+	@Autowired
+	private AppProvider appProvider;
+	
+	@Autowired
+	private RolePrivilegeService rolePrivilegeService;
 	
 	
 	@Override
@@ -1221,6 +1238,10 @@ public class VideoConfServiceImpl implements VideoConfService {
 			VerifyVideoConfAccountCommand cmd) {
 		UserAccountDTO userAccount = new UserAccountDTO();
 		ConfAccounts account = vcProvider.findAccountByUserId(cmd.getUserId());
+		
+		boolean privilege = rolePrivilegeService.checkAdministrators(cmd.getEnterpriseId());
+		userAccount.setPurchaseAuthority(privilege);
+		
 		if(account != null) {
 			userAccount.setAccountId(account.getId());
 			userAccount.setStatus(account.getStatus());
@@ -1251,18 +1272,28 @@ public class VideoConfServiceImpl implements VideoConfService {
 	@Override
 	public void cancelVideoConf(CancelVideoConfCommand cmd) {
 		
+		ConfConferences conf = vcProvider.findConfConferencesByConfId(cmd.getConfId());
+		if(conf == null) {
+			LOGGER.info("cancelVideoConf, cmd=" + cmd + ", conf is not exist!");
+			return ;
+		}
+		ConfSourceAccounts source = vcProvider.findSourceAccountById(conf.getSourceAccountId());
+		if(source == null) {
+			LOGGER.info("cancelVideoConf, cmd=" + cmd + ", source account is not exist!");
+			return ;
+		}
+		
 		String path = "http://api.confcloud.cn/openapi/cancelConf";
 		Long timestamp = DateHelper.currentGMTTime().getTime();
-		String tokenString = cmd.getSourceAccountName() + "|" + configurationProvider.getValue(ConfigConstants.VIDEOCONF_SECRET_KEY, "0") + "|" + timestamp;
+		String tokenString = source.getAccountName() + "|" + configurationProvider.getValue(ConfigConstants.VIDEOCONF_SECRET_KEY, "0") + "|" + timestamp;
 		String token = DigestUtils.md5Hex(tokenString);
 		
-		ConfConferences conf = vcProvider.findConfConferencesByConfId(cmd.getConfId());
+		
 		Map<String, String> sPara = new HashMap<String, String>() ;
-	    sPara.put("loginName", cmd.getSourceAccountName()); 
+	    sPara.put("loginName", source.getAccountName()); 
 	    sPara.put("timeStamp", timestamp.toString());
 	    sPara.put("token", token); 
-	    if(conf != null)
-	    	sPara.put("confId", conf.getConferenceId() + "");
+	    sPara.put("confId", conf.getConferenceId() + "");
 	    
 	    NameValuePair[] param = generatNameValuePair(sPara);
 	    if(LOGGER.isDebugEnabled())
@@ -1280,7 +1311,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 			if(LOGGER.isDebugEnabled())
 				LOGGER.error("cancelVideoConf,json="+json);
 		} catch (IOException e) {
-			LOGGER.error("cancelVideoConf-error.sourceAccount="+cmd.getSourceAccountName(), e);
+			LOGGER.error("cancelVideoConf-error.sourceAccount="+source.getAccountName(), e);
 		}  
           
 		
@@ -1330,9 +1361,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 				ConfConferences conf = vcProvider.findConfConferencesById(account.getAssignedConfId());
 				if(conf != null)
 					cancelCmd.setConfId(conf.getMeetingNo());
-				ConfSourceAccounts source = vcProvider.findSourceAccountById(account.getAssignedSourceId());
-				if(source != null)
-					cancelCmd.setSourceAccountName(source.getAccountName());
+				
 				cancelVideoConf(cancelCmd);
 			}
 			ConfAccountCategories category = vcProvider.findAccountCategoriesById(account.getAccountCategoryId());
@@ -1795,12 +1824,18 @@ public class VideoConfServiceImpl implements VideoConfService {
 		order.setInvoiceIssueFlag(cmd.getMakeOutFlag());
 		order.setOnlineFlag(cmd.getBuyChannel());
 		order.setAccountCategoryId(cmd.getAccountCategoryId());
+		
+		order.setBuyerName(cmd.getContactor());
+		order.setBuyerContact(cmd.getMobile());
 		vcProvider.createConfOrders(order);
 
 		confOrderSearcher.feedDoc(order);
 		
 		if(order.getInvoiceReqFlag() == 1) {
 			ConfInvoices invoice = ConvertHelper.convert(cmd.getInvoice(), ConfInvoices.class);
+			if(invoice == null) {
+				invoice = new ConfInvoices();
+			}
 			invoice.setOrderId(order.getId());
 			vcProvider.createInvoice(invoice);
 		}
@@ -1944,7 +1979,8 @@ public class VideoConfServiceImpl implements VideoConfService {
 	
 	private void updateOrderStatus(ConfOrders order, Timestamp payTimeStamp, byte paymentStatus) {
 //		int namespaceId = (UserContext.current().getUser().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getUser().getNamespaceId();
-		order.setPayerId(UserContext.current().getUser().getId());
+		User user = UserContext.current().getUser();
+		order.setPayerId(user.getId());
 		order.setPaidTime(payTimeStamp);
 		order.setStatus(paymentStatus);
 		
@@ -1981,6 +2017,9 @@ public class VideoConfServiceImpl implements VideoConfService {
 			enterprise.setAccountAmount(enterprise.getAccountAmount()+order.getQuantity());
 			enterprise.setActiveAccountAmount(enterprise.getActiveAccountAmount()+order.getQuantity());
 			vcProvider.updateConfEnterprises(enterprise);
+			
+			sendConfInvoiceEmail(order.getEmail());
+	        
 		} else if(order.getStatus().byteValue() == PayStatus.PAID.getCode() 
 				&& (order.getAccountCategoryId() == null || order.getAccountCategoryId() == 0)) {
 			CrossShardListingLocator locator = new CrossShardListingLocator();
@@ -2004,15 +2043,34 @@ public class VideoConfServiceImpl implements VideoConfService {
 					}
 					
 					vcProvider.updateConfAccounts(account);
+					
+					confAccountSearcher.feedDoc(account);
 				}
 				
 				enterprise.setBuyChannel(order.getOnlineFlag());
 				enterprise.setActiveAccountAmount(enterprise.getActiveAccountAmount()+toActive);
 				vcProvider.updateConfEnterprises(enterprise);
 				
+				sendConfInvoiceEmail(order.getEmail());
+				
 			}
 		}
 		
+	}
+	
+	private void sendConfInvoiceEmail(String emailAddress) {
+		if(!StringUtils.isNullOrEmpty(emailAddress)) {
+			String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
+	        MailHandler handler = PlatformContext.getComponent(handlerName);
+			String subject = localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
+					String.valueOf(ConfServiceErrorCode.CONF_INVOICE_SUBJECT),
+					UserContext.current().getUser().getLocale(),"zuolin video conference invoce");
+			
+			String body = localeStringService.getLocalizedString(String.valueOf(ConfServiceErrorCode.SCOPE), 
+					String.valueOf(ConfServiceErrorCode.CONF_INVOICE_BODY),
+					UserContext.current().getUser().getLocale(),"zuolin video conference invoce");
+	        handler.sendMail(Namespace.DEFAULT_NAMESPACE, null,emailAddress, subject, body, null);
+		}
 	}
 	
 	private Long convertOrderNoToOrderId(String orderNo) {
@@ -2274,6 +2332,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 			dto.setSingleAccountPrice(category.getSingleAccountPrice());
 			dto.setMultipleAccountThreshold(category.getMultipleAccountThreshold());
 			dto.setMultipleAccountPrice(category.getMultipleAccountPrice());
+			dto.setMinPeriod(category.getMinPeriod());
 			
 			if(category.getConfType() == 0 || category.getConfType() == 1) {
 				dto.setConfCapacity((byte) 0);
@@ -2287,6 +2346,8 @@ public class VideoConfServiceImpl implements VideoConfService {
 			if(category.getConfType() == 5 || category.getConfType() == 6) {
 				dto.setConfCapacity((byte) 3);
 			}
+			
+			categoryDtos.add(dto);
 		}
 		
 		response.setCategories(categoryDtos);
@@ -2298,7 +2359,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 	}
 
 	@Override
-	public void updateConfAccountPeriod(UpdateConfAccountPeriodCommand cmd) {
+	public ConfAccountOrderDTO updateConfAccountPeriod(UpdateConfAccountPeriodCommand cmd) {
 		
 		int quantity = cmd.getAccountIds().size();
 		CreateConfAccountOrderCommand order = new CreateConfAccountOrderCommand();
@@ -2314,6 +2375,18 @@ public class VideoConfServiceImpl implements VideoConfService {
 		order.setAccountCategoryId(0L);
 		order.setMakeOutFlag((byte) 0);
 		Long orderId = createConfAccountOrder(order);
+		ConfOrders confOrder = vcProvider.findOredrById(orderId);
+		confOrder.setEmail(cmd.getMailAddress());
+		vcProvider.updateConfOrders(confOrder);
+		
+		ConfAccountOrderDTO dto = new ConfAccountOrderDTO();
+		dto.setBillId(orderId);
+		dto.setAmount(order.getAmount().doubleValue());
+		dto.setName(cmd.getContactor() + " order");
+		dto.setDescription(cmd.getContactor() + " extend " + quantity + " accounts " + cmd.getMonths() + " months for " + cmd.getEnterpriseName());
+		dto.setOrderType("videoConf");
+		this.setSignatureParam(dto);
+		
 		
 		ConfEnterprises enterprise = vcProvider.findByEnterpriseId(cmd.getEnterpriseId());
 		int namespaceId = enterprise.getNamespaceId();
@@ -2327,11 +2400,11 @@ public class VideoConfServiceImpl implements VideoConfService {
 			vcProvider.createConfOrderAccountMap(map);
 		}
 		
-		
+		return dto;
 	}
 
 	@Override
-	public void createConfAccountOrderOnline(
+	public ConfAccountOrderDTO createConfAccountOrderOnline(
 			CreateConfAccountOrderOnlineCommand cmd) {
 		//0: 25方仅视频, 1: 25方支持电话, 2: 100方仅视频, 3: 100方支持电话, 4: 6方仅视频, 5: 50方仅视频, 6: 50方支持电话
 		//账号类型 0-25方 1-100方 2-6方 3-50方 
@@ -2372,8 +2445,55 @@ public class VideoConfServiceImpl implements VideoConfService {
 			order.setAccountCategoryId(categories.get(0).getId());
 		order.setMakeOutFlag((byte) 0);
 		order.setInvoice(new InvoiceDTO());
-		createConfAccountOrder(order);
 		
+		Long orderId = createConfAccountOrder(order);
+		ConfOrders confOrder = vcProvider.findOredrById(orderId);
+		confOrder.setEmail(cmd.getMailAddress());
+		vcProvider.updateConfOrders(confOrder);
+		
+		ConfAccountOrderDTO dto = new ConfAccountOrderDTO();
+		dto.setBillId(orderId);
+		dto.setAmount(order.getAmount().doubleValue());
+		dto.setName(cmd.getContactor() + " order");
+		dto.setDescription(cmd.getContactor() + " buy " + cmd.getQuantity() + " accounts " + cmd.getPeriod() + " months for " + cmd.getEnterpriseName());
+		dto.setOrderType("videoConf");
+		this.setSignatureParam(dto);
+		return dto;
+		
+	}
+	
+	private void setSignatureParam(ConfAccountOrderDTO dto) {
+		String appKey = configurationProvider.getValue("pay.appKey", "7bbb5727-9d37-443a-a080-55bbf37dc8e1");
+		Long timestamp = System.currentTimeMillis();
+		Integer randomNum = (int) (Math.random()*1000);
+		App app = appProvider.findAppByKey(appKey);
+		
+		Map<String,String> map = new HashMap<String, String>();
+		map.put("appKey",appKey);
+		map.put("timestamp",timestamp+"");
+		map.put("randomNum",randomNum+"");
+		map.put("amount",dto.getAmount().doubleValue()+"");
+		String signature = SignatureHelper.computeSignature(map, app.getSecretKey());
+		dto.setAppKey(appKey);
+		dto.setRandomNum(randomNum);
+		dto.setSignature(URLEncoder.encode(signature));
+		dto.setTimestamp(timestamp);
+	}
+
+	@Override
+	public VerifyPurchaseAuthorityResponse verifyPurchaseAuthority(
+			VerifyPurchaseAuthorityCommand cmd) {
+		
+		VerifyPurchaseAuthorityResponse response = new VerifyPurchaseAuthorityResponse();
+		int enterpriseVaildAccounts = vcProvider.countAccountsByEnterprise(cmd.getEnterpriseId(), null);
+		int enterpriseAccounts = vcProvider.countEnterpriseAccounts(cmd.getEnterpriseId());
+		response.setEnterpriseActiveAccountCount(enterpriseVaildAccounts);
+		response.setEnterpriseAccountCount(enterpriseAccounts);
+		
+		boolean privilege = rolePrivilegeService.checkAdministrators(cmd.getEnterpriseId());
+
+		response.setPurchaseAuthority(privilege);
+		return response;
 	}
 	
 }

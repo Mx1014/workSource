@@ -1,6 +1,6 @@
 //
 // EvhConfCategoryDTO.m
-// generated at 2016-04-07 17:03:17 
+// generated at 2016-04-07 17:57:42 
 //
 #import "EvhConfCategoryDTO.h"
 
@@ -39,6 +39,8 @@
         [jsonObject setObject: self.multipleAccountThreshold forKey: @"multipleAccountThreshold"];
     if(self.multipleAccountPrice)
         [jsonObject setObject: self.multipleAccountPrice forKey: @"multipleAccountPrice"];
+    if(self.minPeriod)
+        [jsonObject setObject: self.minPeriod forKey: @"minPeriod"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -59,6 +61,10 @@
         self.multipleAccountPrice = [jsonObject objectForKey: @"multipleAccountPrice"];
         if(self.multipleAccountPrice && [self.multipleAccountPrice isEqual:[NSNull null]])
             self.multipleAccountPrice = nil;
+
+        self.minPeriod = [jsonObject objectForKey: @"minPeriod"];
+        if(self.minPeriod && [self.minPeriod isEqual:[NSNull null]])
+            self.minPeriod = nil;
 
         return self;
     }

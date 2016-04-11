@@ -66,11 +66,15 @@
         eh_lease_promotions | eh_lease_promotion_attachments | eh_user_group_histories |
         eh_conf_account_categories | eh_conf_invoices | eh_conf_orders | eh_conf_order_account_map | eh_conf_source_accounts |
         eh_conf_accounts | eh_conf_account_histories | eh_conf_conferences | eh_conf_enterprises | eh_warning_contacts | eh_conf_reservations |	
-	eh_organization_role_map | eh_organization_addresses | eh_organization_attachments | eh_organization_community_requests |
-	eh_organization_details  | eh_preferential_rules | eh_scene_types | eh_op_promotion_policies | eh_op_promotion_settings |
-	eh_op_promotions | eh_web_menus | eh_web_menu_privileges |
-	eh_parking_vendors | eh_parking_lots | eh_parking_recharge_rates | eh_parking_recharge_orders | eh_parking_card_requests |
-	eh_parking_activities |
+		eh_organization_role_map | eh_organization_addresses | eh_organization_attachments | eh_organization_community_requests |
+		eh_organization_details  | eh_preferential_rules | eh_scene_types | eh_op_promotion_policies | eh_op_promotion_settings |
+		eh_op_promotions | eh_web_menus | eh_web_menu_privileges |
+		eh_parking_vendors | eh_parking_lots | eh_parking_recharge_rates | eh_parking_recharge_orders | eh_parking_card_requests |
+		eh_parking_activities |
+		eh_organization_role_map | eh_organization_addresses | eh_organization_attachments | eh_organization_community_requests |
+		eh_organization_details  | eh_preferential_rules | eh_scene_types | eh_op_promotion_policies | eh_op_promotion_settings |
+		eh_op_promotions | eh_web_menus | eh_web_menu_privileges |
+		eh_aclinks | eh_door_access | eh_aes_server_key | eh_aes_user_key | eh_aclink_undo_key | eh_door_auth | eh_owner_doors | eh_door_command |
         </includes>
             <!-- All elements that are excluded from your schema
             (A Java regular expression. Use the pipe to separate several expressions).

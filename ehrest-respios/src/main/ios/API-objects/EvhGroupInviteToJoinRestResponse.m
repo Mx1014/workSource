@@ -1,6 +1,6 @@
 //
 // EvhGroupInviteToJoinRestResponse.m
-// generated at 2016-04-07 17:03:18 
+// generated at 2016-04-07 17:57:43 
 //
 #import "EvhGroupInviteToJoinRestResponse.h"
 #import "EvhCommandResult.h"

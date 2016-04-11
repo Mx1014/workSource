@@ -1,6 +1,6 @@
 //
 // EvhNewTopicBySceneCommand.m
-// generated at 2016-04-07 17:03:17 
+// generated at 2016-04-07 17:57:42 
 //
 #import "EvhNewTopicBySceneCommand.h"
 #import "EvhAttachmentDescriptor.h"
@@ -72,6 +72,10 @@
     }
     if(self.privateFlag)
         [jsonObject setObject: self.privateFlag forKey: @"privateFlag"];
+    if(self.visibleRegionId)
+        [jsonObject setObject: self.visibleRegionId forKey: @"visibleRegionId"];
+    if(self.visibleRegionType)
+        [jsonObject setObject: self.visibleRegionType forKey: @"visibleRegionType"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -145,6 +149,14 @@
         self.privateFlag = [jsonObject objectForKey: @"privateFlag"];
         if(self.privateFlag && [self.privateFlag isEqual:[NSNull null]])
             self.privateFlag = nil;
+
+        self.visibleRegionId = [jsonObject objectForKey: @"visibleRegionId"];
+        if(self.visibleRegionId && [self.visibleRegionId isEqual:[NSNull null]])
+            self.visibleRegionId = nil;
+
+        self.visibleRegionType = [jsonObject objectForKey: @"visibleRegionType"];
+        if(self.visibleRegionType && [self.visibleRegionType isEqual:[NSNull null]])
+            self.visibleRegionType = nil;
 
         return self;
     }

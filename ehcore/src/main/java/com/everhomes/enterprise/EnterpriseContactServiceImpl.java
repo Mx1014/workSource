@@ -2180,7 +2180,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 						aclRoleAssignmentsDTO.setRoleName(null == role ? "" : role.getRoleName());
 						aclRoles.add(aclRoleAssignmentsDTO);
 					}
-					dto.setAclRoles(aclRoles);
+//					dto.setAclRoles(aclRoles);
 				}
 			}
 			return dto;

@@ -19,6 +19,7 @@ import com.everhomes.util.StringHelper;
  *  <li>amount: 金额</li>
  *  <li>invoiceFlag: 是否需要发票 0-dont need 1-need</li>
  *  <li>buyChannel: 购买渠道0-offline 1-online</li>
+ *  <li>mailAddress: 邮箱地址</li>
  * </ul>
  *
  */
@@ -44,6 +45,8 @@ public class UpdateConfAccountPeriodCommand {
 	private BigDecimal amount;
 	
 	private Byte invoiceFlag;
+	
+	private String mailAddress;
 	
 	public List<Long> getAccountIds() {
 		return accountIds;
@@ -115,6 +118,14 @@ public class UpdateConfAccountPeriodCommand {
 
 	public void setInvoiceFlag(Byte invoiceFlag) {
 		this.invoiceFlag = invoiceFlag;
+	}
+
+	public String getMailAddress() {
+		return mailAddress;
+	}
+
+	public void setMailAddress(String mailAddress) {
+		this.mailAddress = mailAddress;
 	}
 
 	@Override

@@ -1,6 +1,6 @@
 //
 // EvhUpdateConfAccountPeriodCommand.h
-// generated at 2016-04-07 17:03:16 
+// generated at 2016-04-07 17:57:42 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -30,6 +30,8 @@
 @property(nonatomic, copy) NSNumber* amount;
 
 @property(nonatomic, copy) NSNumber* invoiceFlag;
+
+@property(nonatomic, copy) NSString* mailAddress;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
