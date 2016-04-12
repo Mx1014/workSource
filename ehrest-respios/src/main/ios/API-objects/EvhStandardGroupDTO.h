@@ -1,6 +1,6 @@
 //
 // EvhStandardGroupDTO.h
-// generated at 2016-04-08 20:09:22 
+// generated at 2016-04-12 19:00:51 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -21,6 +21,8 @@
 @property(nonatomic, copy) NSString* groupName;
 
 @property(nonatomic, copy) NSNumber* standardId;
+
+@property(nonatomic, copy) NSNumber* inspectorUid;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

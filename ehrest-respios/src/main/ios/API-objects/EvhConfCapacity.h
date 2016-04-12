@@ -1,10 +1,12 @@
 //
 // EvhConfCapacity.h
-// generated at 2016-04-08 20:09:21 
+// generated at 2016-04-12 19:00:51 
 //
 
 #define EvhConfCapacity_CONF_CAPACITY_25 @"25方"
 #define EvhConfCapacity_CONF_CAPACITY_100 @"100方"
+#define EvhConfCapacity_CONF_CAPACITY_50 @"50方"
+#define EvhConfCapacity_CONF_CAPACITY_6 @"6方"
 
 ///////////////////////////////////////////////////////////////////////////////
 

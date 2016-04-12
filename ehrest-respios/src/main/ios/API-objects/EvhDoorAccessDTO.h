@@ -1,6 +1,6 @@
 //
 // EvhDoorAccessDTO.h
-// generated at 2016-04-08 20:09:22 
+// generated at 2016-04-12 19:00:52 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -51,6 +51,8 @@
 @property(nonatomic, copy) NSString* creatorPhone;
 
 @property(nonatomic, copy) NSNumber* linkStatus;
+
+@property(nonatomic, copy) NSString* version;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

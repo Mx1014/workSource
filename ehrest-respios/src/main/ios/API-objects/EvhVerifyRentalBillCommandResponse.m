@@ -1,6 +1,6 @@
 //
 // EvhVerifyRentalBillCommandResponse.m
-// generated at 2016-04-08 20:09:22 
+// generated at 2016-04-12 19:00:53 
 //
 #import "EvhVerifyRentalBillCommandResponse.h"
 #import "EvhRentalBillDTO.h"

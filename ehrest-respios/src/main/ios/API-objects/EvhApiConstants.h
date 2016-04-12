@@ -1,6 +1,6 @@
 //
 // EvhApiConstants.h
-// generated at 2016-04-08 20:09:24
+// generated at 2016-04-12 19:00:53
 //
 #define EVH_ACLINK_ACTIVE_URL @"/aclink/active"
 #define EVH_ACLINK_ACTIVING_URL @"/aclink/activing"
@@ -60,6 +60,7 @@
 #define EVH_ADMIN_ACL_UPDATEORGANIZATIONORDINARYADMIN_URL @"/admin/acl/updateOrganizationOrdinaryAdmin"
 #define EVH_ADMIN_ACL_UPDATEORGANIZATIONSUPERADMIN_URL @"/admin/acl/updateOrganizationSuperAdmin"
 #define EVH_ADMIN_ACL_UPDATEROLEPRIVILEGE_URL @"/admin/acl/updateRolePrivilege"
+#define EVH_ADMIN_ACLINK_CREATEACLINKFIRMWARE_URL @"/admin/aclink/createAclinkFirmware"
 #define EVH_ADMIN_ACLINK_CREATEAUTH_URL @"/admin/aclink/createAuth"
 #define EVH_ADMIN_ACLINK_DELETEDOORACCESS_URL @"/admin/aclink/deleteDoorAccess"
 #define EVH_ADMIN_ACLINK_DELETEDOORAUTH_URL @"/admin/aclink/deleteDoorAuth"
@@ -477,13 +478,12 @@
 #define EVH_NAMESPACE_LISTCOMMUNITYBYNAMESPACE_URL @"/namespace/listCommunityByNamespace"
 #define EVH_OAUTH2_AUTHORIZE_URL @"/oauth2/authorize"
 #define EVH_OAUTH2_CONFIRM_URL @"/oauth2/confirm"
-#define EVH_OAUTH2_GETTOKEN_URL @"/oauth2/gettoken"
-#define EVH_OAUTH2_INNERLOGIN_URL @"/oauth2/innerlogin"
-#define EVH_OAUTH2_OAUTH_URL @"/oauth2/oauth"
-#define EVH_OAUTH2_RESULT_URL @"/oauth2/result"
-#define EVH_OAUTH2_RESULTBYSIGN_URL @"/oauth2/resultBySign"
+#define EVH_OAUTH2_OAUTH2LOGON_URL @"/oauth2/oauth2Logon"
+#define EVH_OAUTH2_REDIRECTURI_URL @"/oauth2/redirectUri"
+#define EVH_OAUTH2_SIGNLOGON_URL @"/oauth2/signLogon"
 #define EVH_OAUTH2_TOKEN_URL @"/oauth2/token"
 #define EVH_OAUTH2API_GETUSERINFO_URL @"/oauth2api/getUserInfo"
+#define EVH_OPENAPI_CLOSEBIZNAMESPACEVISIBLE_URL @"/openapi/closeBizNamespaceVisible"
 #define EVH_OPENAPI_FINDBUSINESSFAVORITESTATUS_URL @"/openapi/findBusinessFavoriteStatus"
 #define EVH_OPENAPI_FINDTOKENBYUSERID_URL @"/openapi/findTokenByUserId"
 #define EVH_OPENAPI_GETUSERDEFAULTADDRESS_URL @"/openapi/getUserDefaultAddress"
@@ -499,6 +499,7 @@
 #define EVH_OPENAPI_LISTUSERBYKEYWORD_URL @"/openapi/listUserByKeyword"
 #define EVH_OPENAPI_NOTIFYDOORLOCK_URL @"/openapi/notifyDoorLock"
 #define EVH_OPENAPI_NOTIFYMESSAGE_URL @"/openapi/notifyMessage"
+#define EVH_OPENAPI_OPENBIZNAMESPACEVISIBLE_URL @"/openapi/openBizNamespaceVisible"
 #define EVH_OPENAPI_RECEIVECOUPON_URL @"/openapi/receiveCoupon"
 #define EVH_OPENAPI_SENDMESSAGETOUSER_URL @"/openapi/sendMessageToUser"
 #define EVH_OPENAPI_SYNCBUSINESS_URL @"/openapi/syncBusiness"
@@ -566,6 +567,7 @@
 #define EVH_PM_APPLYPROPERTYMEMBER_URL @"/pm/applyPropertyMember"
 #define EVH_PM_APPROVEPROPFAMILYMEMBER_URL @"/pm/approvePropFamilyMember"
 #define EVH_PM_CREATEPMBILLORDER_URL @"/pm/createPmBillOrder"
+#define EVH_PM_CREATEPMBILLORDERDEMO_URL @"/pm/createPmBillOrderDemo"
 #define EVH_PM_DELETEPMBILL_URL @"/pm/deletePmBill"
 #define EVH_PM_DELETEPMBILLS_URL @"/pm/deletePmBills"
 #define EVH_PM_FINDBILLBYADDRESSIDANDTIME_URL @"/pm/findBillByAddressIdAndTime"
@@ -628,6 +630,7 @@
 #define EVH_QUALITY_DELETEQUALITYSTANDARD_URL @"/quality/deleteQualityStandard"
 #define EVH_QUALITY_EXPORTEVALUATIONS_URL @"/quality/exportEvaluations"
 #define EVH_QUALITY_EXPORTINSPECTIONTASKS_URL @"/quality/exportInspectionTasks"
+#define EVH_QUALITY_GETGROUPMEMBERS_URL @"/quality/getGroupMembers"
 #define EVH_QUALITY_LISTEVALUATIONS_URL @"/quality/listEvaluations"
 #define EVH_QUALITY_LISTFACTORS_URL @"/quality/listFactors"
 #define EVH_QUALITY_LISTQUALITYCATEGORIES_URL @"/quality/listQualityCategories"
