@@ -103,7 +103,7 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         CrossShardListingLocator locator = new CrossShardListingLocator();
         for(;;) {
             
-        	List<Organization> organizations = organizationService.getSyncDatas();
+        	List<Organization> organizations = organizationService.getSyncDatas(locator);
         	
             if(organizations.size() > 0) {
                 this.bulkUpdate(organizations);
@@ -136,8 +136,10 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         if(StringUtils.isEmpty(cmd.getKeyword())) {
             qb = QueryBuilders.matchAllQuery();
         } else {
-            qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
-                    .field("name");    
+        	qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
+                    .field("name", 5.0f)
+                    .field("name.pinyin_prefix", 2.0f)
+                    .field("name.pinyin_gram", 1.0f);      
         }
         
 //        FilterBuilder fb = null;

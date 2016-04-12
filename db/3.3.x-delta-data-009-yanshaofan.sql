@@ -216,6 +216,11 @@ INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
 VALUES (616,0,'管辖范围','管辖范围，包括查询管辖小区楼栋，添加删除小区楼栋',null);
 
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
+VALUES (620,0,'审批列表','审批的通讯录列表',null);
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
+VALUES (621,0,'审批认证','同意，拒绝审批',null);
+
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
 VALUES (700,0,'参考标准','参考标准 全部功能',null);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
 VALUES (701,0,'类型管理','类型管理 全部功能',null);
@@ -257,7 +262,7 @@ INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf
 VALUES (23000,'统计',20000,null,'statistics',0,2,'/20000/23000','park',230);
 
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (30000,'园区管理',0,null,'community_list',1,2,'/30000','park',300);
+VALUES (30000,'园区管理',0,'fa fa-building',null,1,2,'/30000','park',300);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
 VALUES (30500,'园区管理',30000,null,'community_list',0,2,'/30000/30500','park',305);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
@@ -605,6 +610,11 @@ INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show
 VALUES (85,711,58122,'权重管理',1,1,'权重管理 全部权限',740);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
 VALUES (86,712,58123,'绩效统计',1,1,'绩效统计 全部权限',750);
+
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+VALUES (87,620,52400,'审批列表',1,1,'绩效统计 全部权限',760);
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+VALUES (88,621,52400,'审批认证',0,1,'审批同意，拒绝',770);
 
 
 INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)

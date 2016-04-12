@@ -24,6 +24,7 @@ import com.everhomes.rest.address.ListBuildingByKeywordCommand;
 import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.family.FamilyBillingTransactionDTO;
 import com.everhomes.rest.family.FamilyMemberDTO;
+import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.organization.OrganizationBillingTransactionDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.pm.CommunityPropFamilyMemberCommand;
@@ -1357,5 +1358,15 @@ public class PropertyMgrController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+	
+	@RequestMapping("createPmBillOrderDemo")
+	@RestReturn(value=CommonOrderDTO.class)
+	public RestResponse createPmBillOrderDemo(@Valid CreatePmBillOrderCommand cmd) {
+		CommonOrderDTO order = propertyMgrService.createPmBillOrderDemo(cmd);
+		RestResponse response = new RestResponse(order);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	
 }

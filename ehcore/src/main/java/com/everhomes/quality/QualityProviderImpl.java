@@ -22,6 +22,13 @@ import java.util.Map;
 
 
 
+
+
+
+
+
+
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record1;
@@ -31,6 +38,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+
+
+
+
+
+
 
 
 
@@ -169,7 +183,7 @@ public class QualityProviderImpl implements QualityProvider {
 	@Override
 	public List<QualityInspectionTasks> listVerificationTasks(ListingLocator locator, int count, Long ownerId, String ownerType, 
     		Byte taskType, Long executeUid, Timestamp startDate, Timestamp endDate, Long groupId, 
-    		Byte executeStatus, Byte reviewStatus, boolean timeCompared) {
+    		Byte executeStatus, Byte reviewStatus, boolean timeCompared, List<Long> standardIds) {
 		assert(locator.getEntityId() != 0);
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhQualityInspectionTasks.class, locator.getEntityId()));
 		List<QualityInspectionTasks> tasks = new ArrayList<QualityInspectionTasks>();
@@ -216,6 +230,10 @@ public class QualityProviderImpl implements QualityProvider {
 		
 		if(timeCompared) {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime())));
+		}
+		
+		if(standardIds != null) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.STANDARD_ID.in(standardIds));
 		}
 
         query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASKS.ID.desc());
@@ -1012,6 +1030,28 @@ public class QualityProviderImpl implements QualityProvider {
 		});
 		
 		return result;
+	}
+
+	@Override
+	public List<Long> listQualityInspectionStandardGroupMapByGroup(
+			List<Long> groupIds, Byte groupType) {
+		final List<Long> standardIds = new ArrayList<Long>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhQualityInspectionStandardGroupMap.class));
+ 
+        SelectQuery<EhQualityInspectionStandardGroupMapRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP);
+       
+        if(groupIds != null)
+        	query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP.GROUP_ID.in(groupIds));
+        if(groupType != null)
+        	query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP.GROUP_TYPE.eq(groupType));
+        
+        query.fetch().map((r) -> {
+        	standardIds.add(r.getStandardId());
+             return null;
+        });
+        
+       
+        return standardIds;
 	}
 
 
