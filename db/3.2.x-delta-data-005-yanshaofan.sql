@@ -1,8 +1,4 @@
 
-#
-# modify eh_organizations unique
-#
-ALTER TABLE `eh_organizations` DROP INDEX u_eh_org_name;
 
 #
 # Check whether the repeated data migration
@@ -123,8 +119,4 @@ INSERT INTO `eh_preferential_rules` (`id`,`owner_type`,`owner_id`,`start_time`,`
 INSERT INTO `eh_organization_role_map` (`id`,`owner_type`,`owner_id`,`role_id`,`private_flag`,`status`,`create_time`)
 SELECT  (@organization_role_map_id := @organization_role_map_id + 1),'EhOrganizations',0,`id`,0,2,now() FROM `eh_acl_roles` WHERE `app_id` = 32;
 
-update `eh_buildings` set namespace_id = 1000000 where id in (176121,176123,176124);
-update `eh_yellow_pages` set id = 10000000 where name = '深圳仲裁委员会科技园工作站';
-update `eh_yellow_pages` set id = 10005 where id = 5;
-update `eh_yellow_pages` set id = 5 where id = 10000000;
 

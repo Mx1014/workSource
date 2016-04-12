@@ -40,7 +40,7 @@ public class DoorAccessDTO {
     private String creatorName;
     private String creatorPhone;
     private Byte linkStatus;
-
+    private String  version;
     
 
     public Byte getStatus() {
@@ -272,6 +272,18 @@ public class DoorAccessDTO {
 
     public void setCreatorPhone(String creatorPhone) {
         this.creatorPhone = creatorPhone;
+    }
+
+
+
+    public String getVersion() {
+        return version;
+    }
+
+
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 
 

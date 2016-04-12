@@ -109,6 +109,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhBusinesses EH_BUSINESSES = com.everhomes.server.schema.tables.EhBusinesses.EH_BUSINESSES;
 
 	/**
+	 * The table ehcore.eh_business_assigned_namespaces
+	 */
+	public static final com.everhomes.server.schema.tables.EhBusinessAssignedNamespaces EH_BUSINESS_ASSIGNED_NAMESPACES = com.everhomes.server.schema.tables.EhBusinessAssignedNamespaces.EH_BUSINESS_ASSIGNED_NAMESPACES;
+
+	/**
 	 * The table ehcore.eh_business_assigned_scopes
 	 */
 	public static final com.everhomes.server.schema.tables.EhBusinessAssignedScopes EH_BUSINESS_ASSIGNED_SCOPES = com.everhomes.server.schema.tables.EhBusinessAssignedScopes.EH_BUSINESS_ASSIGNED_SCOPES;

@@ -160,6 +160,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 //			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 //					ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid communityId paramter.");
 //		}
+
 		long startTime = System.currentTimeMillis();
 		GetLaunchPadItemsCommandResponse response = new GetLaunchPadItemsCommandResponse();
 		List<LaunchPadItemDTO> result = null;
@@ -339,18 +340,14 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			LOGGER.error("Buiness authenticate prefix url is empty.");
 		if(business.getTargetType() == BusinessTargetType.ZUOLIN.getCode()){
 			String businessDetailUrl = null;
-			try {
-				if(detailUrl.contains("#sign_suffix")){
-					detailUrl = detailUrl.trim();
-					String prefix = detailUrl.substring(0,detailUrl.indexOf("#sign_suffix"));
-					String suffix = detailUrl.substring(detailUrl.indexOf("#sign_suffix"));
-					businessDetailUrl = URLEncoder.encode(prefix+business.getTargetId(), "utf-8")+suffix;
-				}
-				else
-					businessDetailUrl = URLEncoder.encode(detailUrl.trim() + business.getTargetId(), "utf-8");
-			} catch (UnsupportedEncodingException e) {
-				LOGGER.error("unsported encoding.");
+			if(detailUrl.contains("#sign_suffix")){
+				detailUrl = detailUrl.trim();
+				String prefix = detailUrl.substring(0,detailUrl.indexOf("#sign_suffix"));
+				String suffix = detailUrl.substring(detailUrl.indexOf("#sign_suffix"));
+				businessDetailUrl = prefix+business.getTargetId()+suffix;
 			}
+			else
+				businessDetailUrl = detailUrl.trim() + business.getTargetId();
 			return authenticatePrefix.trim() + businessDetailUrl;
 		}
 		return business.getUrl();
@@ -395,6 +392,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		}
 		if(allItems!=null&&!allItems.isEmpty())
 			allItems = allItems.stream().filter(r -> r.getDisplayFlag()==ItemDisplayFlag.DISPLAY.getCode()).collect(Collectors.toList());
+
 		// 把对item的处理独立成一个新的方法，供公共调用 by lqs 20160324
 //		try{ 
 //			List<LaunchPadItemDTO> distinctDto = new ArrayList<LaunchPadItemDTO>();
@@ -743,7 +741,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 		}
 		//        userProfiles.forEach((userProfile) ->{
-			//            if(userProfile.getItemKind() == ItemKind.JSON.getCode()){
+		//            if(userProfile.getItemKind() == ItemKind.JSON.getCode()){
 		//                String jsonString = userProfile.getItemValue();
 		//                userItems.add((LaunchPadItem) StringHelper.fromJsonString(jsonString, LaunchPadItem.class));
 		//            }
@@ -995,7 +993,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid versionCode paramter.versionCode is null");
 		}
-		
+
 		User user = UserContext.current().getUser();
 		Integer namespaceId = (cmd.getNamespaceId() == null) ? 0 : cmd.getNamespaceId(); 
 		String sceneType = cmd.getCurrentSceneType();

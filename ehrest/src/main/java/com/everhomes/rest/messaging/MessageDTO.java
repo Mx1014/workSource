@@ -101,9 +101,11 @@ public class MessageDTO implements Cloneable {
     }
     
     public void setChannels(MessageChannel... channelArray) {
-        if(channelArray != null) {
+        if(this.channels == null) {
             this.channels = new ArrayList<MessageChannel>();
-            
+        }
+        
+        if(channelArray != null) {
             for(MessageChannel channel : channelArray)
                 this.channels.add(channel);
         }

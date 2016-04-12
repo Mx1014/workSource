@@ -10,10 +10,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.aclink.AclinkDeleteByIdCommand;
+import com.everhomes.aclink.AclinkFirmwareDTO;
 import com.everhomes.aclink.AclinkUserResponse;
 import com.everhomes.aclink.AesServerKeyProvider;
 import com.everhomes.aclink.AesUserKey;
 import com.everhomes.aclink.AesUserKeyDTO;
+import com.everhomes.aclink.CreateAclinkFirmwareCommand;
 import com.everhomes.aclink.CreateDoorAuthCommand;
 import com.everhomes.aclink.DoorAccess;
 import com.everhomes.aclink.DoorAccessAdminUpdateCommand;
@@ -176,6 +178,24 @@ public class AclinkAdminController extends ControllerBase {
     @RestReturn(value=ListDoorAuthResponse.class)
     public RestResponse searchDoorAuthByAdmin(@Valid SearchDoorAuthCommand cmd) {
         RestResponse response = new RestResponse(doorAccessService.searchDoorAuth(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /admin/aclink/syncDoorMessages</b>
+     * <p>删除授权</p>
+     * @return
+     */
+    @RequestMapping("createAclinkFirmware")
+    @RestReturn(value=AclinkFirmwareDTO.class)
+    public RestResponse createAlinkFireware(@Valid CreateAclinkFirmwareCommand cmd) {
+        RestResponse response = new RestResponse();
+        
+        response.setResponseObject(doorAccessService.createAclinkFirmware(cmd));
+        
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
