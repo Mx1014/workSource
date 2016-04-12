@@ -125,8 +125,13 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
         
 		List<ParkingRechargeRate> parkingRechargeRateList = parkingProvider.listParkingRechargeRates(ownerType, ownerId, parkingLotId);
 		
-		List<ParkingRechargeRateDTO> result = parkingRechargeRateList.stream().map(r->
-			ConvertHelper.convert(r, ParkingRechargeRateDTO.class)
+		List<ParkingRechargeRateDTO> result = parkingRechargeRateList.stream().map(r->{
+			ParkingRechargeRateDTO dto = new ParkingRechargeRateDTO();
+			dto = ConvertHelper.convert(r, ParkingRechargeRateDTO.class);
+			dto.setRateToken(r.getId().toString());
+			dto.setVendorName(ParkingLotVendor.BOSIGAO.getCode());
+			return dto;
+		}
 		).collect(Collectors.toList());
 		
 		return result;

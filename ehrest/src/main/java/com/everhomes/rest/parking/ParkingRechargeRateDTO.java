@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>parkingLotId: 停车场ID</li>
  * <li>areaId: 停车场  区域ID 博思高没有区域，ETCP有的停车场有区域</li>
- * <li>vendorName: 费率ID，不同厂商有不同类型的ID</li>
+ * <li>vendorName: com.everhomes.rest.parking.ParkingLotVendor: 停车场厂商</li>
  * <li>rateToken: 费率ID，不同厂商有不同类型的ID</li>
  * <li>rateName: 费率名称</li>
  * <li>monthCount: 多少个月，半个月用0.5表示，博思高厂商有值，ETCP厂商无值</li>

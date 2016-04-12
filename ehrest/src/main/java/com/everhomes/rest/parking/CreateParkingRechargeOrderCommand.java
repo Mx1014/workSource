@@ -42,6 +42,7 @@ public class CreateParkingRechargeOrderCommand {
     private String cardNumber;
     @NotNull
     private String rateToken;
+    @NotNull
     private String rateName;
     @NotNull
     private Integer monthCount;
