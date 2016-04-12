@@ -279,6 +279,7 @@ public class ParkingController extends ControllerBase {
     public RestResponse setParkingActivity(SetParkingActivityCommand cmd) {
         ParkingActivityDTO activity = null;
         
+        activity = parkingService.setParkingActivity(cmd);
         RestResponse response = new RestResponse(activity);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -294,6 +295,7 @@ public class ParkingController extends ControllerBase {
     public RestResponse getParkingActivity(GetParkingActivityCommand cmd) {
         ParkingActivityDTO activity = null;
         
+        activity = parkingService.getParkingActivity(cmd);
         RestResponse response = new RestResponse(activity);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
