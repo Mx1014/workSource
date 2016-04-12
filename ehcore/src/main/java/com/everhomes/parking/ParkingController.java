@@ -164,7 +164,7 @@ public class ParkingController extends ControllerBase {
      * <p>创建充值订单</p>
      */
     @RequestMapping("createParkingRechargeOrder")
-    @RestReturn(value=ParkingRechargeOrderDTO.class)
+    @RestReturn(value=CommonOrderDTO.class)
     public RestResponse createParkingRechargeOrder(CreateParkingRechargeOrderCommand cmd) {
         CommonOrderDTO dto = null;
         
