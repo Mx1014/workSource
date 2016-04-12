@@ -7,16 +7,19 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.order.OrderEmbeddedHandler;
+import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
 import com.everhomes.rest.parking.ParkingRechargeOrderStatus;
 import com.everhomes.util.RuntimeErrorException;
 
+@Component(OrderEmbeddedHandler.ORDER_EMBEDED_OBJ_RESOLVER_PREFIX + OrderType.PARKING_CODE )
 public class ParkingOrderEmbeddedHandler implements OrderEmbeddedHandler{
 	
     private static final Logger LOGGER = LoggerFactory.getLogger(ParkingOrderEmbeddedHandler.class);
