@@ -4,20 +4,20 @@ package com.everhomes.rest.parking;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.rest.parking.ParkingRechargeOrderDTO;
+import com.everhomes.rest.order.CommonOrderDTO;
 
 public class CreateParkingRechargeOrderRestResponse extends RestResponseBase {
 
-    private ParkingRechargeOrderDTO response;
+    private CommonOrderDTO response;
 
     public CreateParkingRechargeOrderRestResponse () {
     }
 
-    public ParkingRechargeOrderDTO getResponse() {
+    public CommonOrderDTO getResponse() {
         return response;
     }
 
-    public void setResponse(ParkingRechargeOrderDTO response) {
+    public void setResponse(CommonOrderDTO response) {
         this.response = response;
     }
 }
