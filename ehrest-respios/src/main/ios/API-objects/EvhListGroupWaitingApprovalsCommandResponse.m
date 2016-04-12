@@ -1,6 +1,6 @@
 //
 // EvhListGroupWaitingApprovalsCommandResponse.m
-// generated at 2016-04-08 20:09:22 
+// generated at 2016-04-12 15:02:20 
 //
 #import "EvhListGroupWaitingApprovalsCommandResponse.h"
 #import "EvhGroupMemberDTO.h"

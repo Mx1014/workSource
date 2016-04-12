@@ -1,6 +1,6 @@
 //
 // EvhStandardGroupDTO.m
-// generated at 2016-04-08 20:09:22 
+// generated at 2016-04-12 15:02:18 
 //
 #import "EvhStandardGroupDTO.h"
 
@@ -41,6 +41,8 @@
         [jsonObject setObject: self.groupName forKey: @"groupName"];
     if(self.standardId)
         [jsonObject setObject: self.standardId forKey: @"standardId"];
+    if(self.inspectorUid)
+        [jsonObject setObject: self.inspectorUid forKey: @"inspectorUid"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -65,6 +67,10 @@
         self.standardId = [jsonObject objectForKey: @"standardId"];
         if(self.standardId && [self.standardId isEqual:[NSNull null]])
             self.standardId = nil;
+
+        self.inspectorUid = [jsonObject objectForKey: @"inspectorUid"];
+        if(self.inspectorUid && [self.inspectorUid isEqual:[NSNull null]])
+            self.inspectorUid = nil;
 
         return self;
     }

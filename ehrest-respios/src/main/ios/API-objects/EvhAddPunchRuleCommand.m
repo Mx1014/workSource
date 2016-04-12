@@ -1,6 +1,6 @@
 //
 // EvhAddPunchRuleCommand.m
-// generated at 2016-04-08 20:09:21 
+// generated at 2016-04-12 15:02:19 
 //
 #import "EvhAddPunchRuleCommand.h"
 #import "EvhPunchGeoPointDTO.h"

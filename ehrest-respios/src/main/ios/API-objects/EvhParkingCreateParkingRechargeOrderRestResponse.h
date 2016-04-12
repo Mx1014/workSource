@@ -1,6 +1,6 @@
 //
 // EvhParkingCreateParkingRechargeOrderRestResponse.h
-// generated at 2016-04-07 17:03:18 
+// generated at 2016-04-12 15:02:21 
 //
 #import "RestResponseBase.h"
 #import "EvhParkingRechargeOrderDTO.h"

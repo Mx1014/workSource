@@ -1,6 +1,6 @@
 //
 // EvhCreateParkingRechargeOrderCommand.m
-// generated at 2016-04-07 17:03:17 
+// generated at 2016-04-12 15:02:19 
 //
 #import "EvhCreateParkingRechargeOrderCommand.h"
 
@@ -57,6 +57,8 @@
         [jsonObject setObject: self.monthCount forKey: @"monthCount"];
     if(self.price)
         [jsonObject setObject: self.price forKey: @"price"];
+    if(self.expiredTime)
+        [jsonObject setObject: self.expiredTime forKey: @"expiredTime"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -113,6 +115,10 @@
         self.price = [jsonObject objectForKey: @"price"];
         if(self.price && [self.price isEqual:[NSNull null]])
             self.price = nil;
+
+        self.expiredTime = [jsonObject objectForKey: @"expiredTime"];
+        if(self.expiredTime && [self.expiredTime isEqual:[NSNull null]])
+            self.expiredTime = nil;
 
         return self;
     }

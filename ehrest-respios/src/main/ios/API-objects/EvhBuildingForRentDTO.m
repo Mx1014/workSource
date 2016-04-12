@@ -1,6 +1,6 @@
 //
 // EvhBuildingForRentDTO.m
-// generated at 2016-04-08 20:09:23 
+// generated at 2016-04-12 15:02:18 
 //
 #import "EvhBuildingForRentDTO.h"
 #import "EvhBuildingForRentAttachmentDTO.h"

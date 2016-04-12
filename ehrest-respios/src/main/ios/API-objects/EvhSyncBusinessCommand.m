@@ -1,6 +1,6 @@
 //
 // EvhSyncBusinessCommand.m
-// generated at 2016-04-08 20:09:23 
+// generated at 2016-04-12 15:02:19 
 //
 #import "EvhSyncBusinessCommand.h"
 
@@ -34,6 +34,10 @@
     [super toJson: jsonObject];
     if(self.userId)
         [jsonObject setObject: self.userId forKey: @"userId"];
+    if(self.namespaceId)
+        [jsonObject setObject: self.namespaceId forKey: @"namespaceId"];
+    if(self.scopeType)
+        [jsonObject setObject: self.scopeType forKey: @"scopeType"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -43,6 +47,14 @@
         self.userId = [jsonObject objectForKey: @"userId"];
         if(self.userId && [self.userId isEqual:[NSNull null]])
             self.userId = nil;
+
+        self.namespaceId = [jsonObject objectForKey: @"namespaceId"];
+        if(self.namespaceId && [self.namespaceId isEqual:[NSNull null]])
+            self.namespaceId = nil;
+
+        self.scopeType = [jsonObject objectForKey: @"scopeType"];
+        if(self.scopeType && [self.scopeType isEqual:[NSNull null]])
+            self.scopeType = nil;
 
         return self;
     }

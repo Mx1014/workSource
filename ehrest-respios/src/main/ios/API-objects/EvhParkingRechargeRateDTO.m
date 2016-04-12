@@ -1,6 +1,6 @@
 //
 // EvhParkingRechargeRateDTO.m
-// generated at 2016-04-07 17:03:17 
+// generated at 2016-04-12 15:02:20 
 //
 #import "EvhParkingRechargeRateDTO.h"
 
@@ -37,6 +37,8 @@
         [jsonObject setObject: self.ownerId forKey: @"ownerId"];
     if(self.parkingLotId)
         [jsonObject setObject: self.parkingLotId forKey: @"parkingLotId"];
+    if(self.areaId)
+        [jsonObject setObject: self.areaId forKey: @"areaId"];
     if(self.vendorName)
         [jsonObject setObject: self.vendorName forKey: @"vendorName"];
     if(self.rateToken)
@@ -65,6 +67,10 @@
         self.parkingLotId = [jsonObject objectForKey: @"parkingLotId"];
         if(self.parkingLotId && [self.parkingLotId isEqual:[NSNull null]])
             self.parkingLotId = nil;
+
+        self.areaId = [jsonObject objectForKey: @"areaId"];
+        if(self.areaId && [self.areaId isEqual:[NSNull null]])
+            self.areaId = nil;
 
         self.vendorName = [jsonObject objectForKey: @"vendorName"];
         if(self.vendorName && [self.vendorName isEqual:[NSNull null]])
