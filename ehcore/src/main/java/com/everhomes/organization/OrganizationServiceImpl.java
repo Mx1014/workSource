@@ -5711,6 +5711,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 				if(null == dto){
 					continue;
 				}
+				
+				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getTargetId(), cmd.getOrganizationId());
+				if(null != member){
+		    		task.setTargetName(member.getContactName());
+		    		task.setTargetToken(member.getContactToken());
+				}
+				
 				if(dto.getForumId().equals(community.getDefaultForumId())){
 					task.setOption(cmd.getOption());
 					task.setEntrancePrivilege(cmd.getEntrancePrivilege());
