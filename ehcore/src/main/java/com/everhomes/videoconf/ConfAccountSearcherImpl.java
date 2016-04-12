@@ -146,8 +146,14 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
         FilterBuilder fb = null;
         if(cmd.getEnterpriseId() != null)
         	fb = FilterBuilders.termFilter("enterpriseId", cmd.getEnterpriseId());
-        if(cmd.getStatus() != null)
-        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
+        if(cmd.getStatus() != null) {
+        	if(fb == null) {
+        		fb = FilterBuilders.termFilter("status", cmd.getStatus());
+        	} else {
+        		fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
+        	}
+        }
+        	
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
