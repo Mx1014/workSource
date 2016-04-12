@@ -1,6 +1,6 @@
 //
 // EvhUserCurrentEntity.m
-// generated at 2016-04-07 17:57:42 
+// generated at 2016-04-08 20:09:21 
 //
 #import "EvhUserCurrentEntity.h"
 
@@ -41,6 +41,8 @@
         [jsonObject setObject: self.entityName forKey: @"entityName"];
     if(self.timestamp)
         [jsonObject setObject: self.timestamp forKey: @"timestamp"];
+    if(self.directlyEnterpriseId)
+        [jsonObject setObject: self.directlyEnterpriseId forKey: @"directlyEnterpriseId"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -65,6 +67,10 @@
         self.timestamp = [jsonObject objectForKey: @"timestamp"];
         if(self.timestamp && [self.timestamp isEqual:[NSNull null]])
             self.timestamp = nil;
+
+        self.directlyEnterpriseId = [jsonObject objectForKey: @"directlyEnterpriseId"];
+        if(self.directlyEnterpriseId && [self.directlyEnterpriseId isEqual:[NSNull null]])
+            self.directlyEnterpriseId = nil;
 
         return self;
     }

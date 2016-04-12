@@ -1,0 +1,6 @@
+INSERT INTO `eh_configurations`(`name`, `value`, `description`, `namespace_id`) VALUES ('sign.appKey','44952417-b120-4f41-885f-0c1110c6aece','sign.appKey',0);
+INSERT INTO `eh_configurations`(`name`, `value`, `description`, `namespace_id`) VALUES ('zuolin.appKey','f9392ce2-341b-40c1-9c2c-99c702215535','zuolin.appKey',0);
+update `eh_configurations` set value='%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F#sign_suffix' where name='business.detail.url';
+-- eh_apps id column is auto_increment,so id should modity to more than current max id value
+INSERT INTO `eh_apps` (`id`,`creator_uid`,`app_key`,`secret_key`,`name`,`description`,`status`,`create_time`) VALUES (1,1,'44952417-b120-4f41-885f-0c1110c6aece','gPVzYlvWb1z7zPZkQTFX1W92xqnKgBL3yy5aL/foPRdOuGmXeKvQ5lH1zEV8XqeN5zEACaOCeoWh6ezPv31kaw==','sign app','getBizsignature interface use it',1,'2016-03-23 00:00:00');
+INSERT INTO `eh_apps` (`id`,`creator_uid`,`app_key`,`secret_key`,`name`,`description`,`status`,`create_time`) VALUES (2,1,'f9392ce2-341b-40c1-9c2c-99c702215535','COTFiIlZ8mZ3b8w3AS84c6b4XE3yx+raanCIJHClxjRTBqpFoyqYrP9VukWclmqI7Qk3WH36IWfN3Xdps3I4rQ==','zuolin app','signLogon or oauth2Logon interface use it',1,'2016-03-23 00:00:00');

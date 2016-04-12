@@ -7,10 +7,11 @@ package com.everhomes.rest.organization;
  * <li>REPAIR: 维修人员</li>
  * <li>CLEANING: 保洁人员</li>
  * <li>KEFU: 客服人员</li>
+ * <li>HECHA: 核查人员</li>
  * </ul>
  */
 public enum OrganizationMemberGroupType {
-	MANAGER("manager"), REPAIR("repair"), CLEANING("cleaning"), KEFU("kefu");
+	MANAGER("manager"), REPAIR("repair"), CLEANING("cleaning"), KEFU("kefu"), HECHA("hecha");
 	
 	private String code;
     private OrganizationMemberGroupType(String code) {

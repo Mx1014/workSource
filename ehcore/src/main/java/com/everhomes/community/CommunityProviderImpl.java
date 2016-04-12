@@ -158,7 +158,7 @@ public class CommunityProviderImpl implements CommunityProvider {
     public List<CommunityGeoPoint> listCommunityGeoPoints(long id) {
         List<CommunityGeoPoint> l = new ArrayList<>();
         
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class, id));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class, id));
         context.select().from(Tables.EH_COMMUNITY_GEOPOINTS)
             .where(Tables.EH_COMMUNITY_GEOPOINTS.COMMUNITY_ID.equal(id))
             .fetch().map((r) -> {

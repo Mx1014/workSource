@@ -4,13 +4,15 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>ACCOUNT_TYPE_SINGLE: 25方</li>
- * <li>ACCOUNT_TYPE_MULTIPLE: 100方</li>
+ * <li>CONF_CAPACITY_25: 25方</li>
+ * <li>CONF_CAPACITY_100: 100方</li>
+ * <li>CONF_CAPACITY_50: 50方</li>
+ * <li>CONF_CAPACITY_6: 6方</li>
  * </ul>
  */
 public enum ConfCapacity {
 
-	CONF_CAPACITY_25("25方"), CONF_CAPACITY_100("100方");
+	CONF_CAPACITY_25("25方"), CONF_CAPACITY_100("100方"), CONF_CAPACITY_50("50方"), CONF_CAPACITY_6("6方");
     
     private String code;
     private ConfCapacity(String code) {

@@ -1,6 +1,6 @@
 //
 // EvhOrganizationDTO.m
-// generated at 2016-04-07 17:57:42 
+// generated at 2016-04-08 20:09:21 
 //
 #import "EvhOrganizationDTO.h"
 #import "EvhOrganizationDTO.h"
@@ -61,6 +61,8 @@
         [jsonObject setObject: self.address forKey: @"address"];
     if(self.groupType)
         [jsonObject setObject: self.groupType forKey: @"groupType"];
+    if(self.directlyEnterpriseId)
+        [jsonObject setObject: self.directlyEnterpriseId forKey: @"directlyEnterpriseId"];
     if(self.avatarUri)
         [jsonObject setObject: self.avatarUri forKey: @"avatarUri"];
     if(self.avatarUrl)
@@ -147,6 +149,10 @@
         self.groupType = [jsonObject objectForKey: @"groupType"];
         if(self.groupType && [self.groupType isEqual:[NSNull null]])
             self.groupType = nil;
+
+        self.directlyEnterpriseId = [jsonObject objectForKey: @"directlyEnterpriseId"];
+        if(self.directlyEnterpriseId && [self.directlyEnterpriseId isEqual:[NSNull null]])
+            self.directlyEnterpriseId = nil;
 
         self.avatarUri = [jsonObject objectForKey: @"avatarUri"];
         if(self.avatarUri && [self.avatarUri isEqual:[NSNull null]])

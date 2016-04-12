@@ -43,17 +43,6 @@ CREATE TABLE `eh_web_menu_privileges`(
 PRIMARY KEY (`id`) 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4; 
 
-# 
-# 机构管辖的楼栋 
-# 
-DROP TABLE IF EXISTS `eh_organization_buildings`; 
-CREATE TABLE `eh_organization_buildings`( 
-`id` BIGINT NOT NULL, 
-`organization_id` BIGINT NOT NULL, 
-`community_id` BIGINT NOT NULL, 
-`building_id` BIGINT NOT NULL
-PRIMARY KEY (`id`) 
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4; 
 
 
 

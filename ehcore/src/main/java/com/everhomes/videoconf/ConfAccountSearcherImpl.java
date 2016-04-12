@@ -165,8 +165,6 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
         	}
         }
         
-        
-        
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
         if(cmd.getPageAnchor() != null) {
