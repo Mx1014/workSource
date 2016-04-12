@@ -1356,6 +1356,27 @@ public class VideoConfProviderImpl implements VideoConfProvider {
                 });
 		return count[0];
 	}
+
+	@Override
+	public List<ConfAccounts> listOccupiedConfAccounts(Timestamp assignedTime) {
+		List<ConfAccounts> accounts = new ArrayList<ConfAccounts>();
+		CrossShardListingLocator locator=new CrossShardListingLocator();
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+            SelectQuery<EhConfAccountsRecord> query = context.selectQuery(Tables.EH_CONF_ACCOUNTS);
+            query.addConditions(Tables.EH_CONF_ACCOUNTS.ASSIGNED_FLAG.eq((byte) 1));
+            query.addConditions(Tables.EH_CONF_ACCOUNTS.ASSIGNED_TIME.le(assignedTime));
+            
+            query.fetch().map((r) -> {
+            	
+            	accounts.add(ConvertHelper.convert(r, ConfAccounts.class));
+                return null;
+            });
+
+            return AfterAction.next;
+        });
+
+        return accounts;
+	}
 	
 	
 
