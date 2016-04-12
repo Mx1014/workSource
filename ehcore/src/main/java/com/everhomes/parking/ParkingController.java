@@ -14,6 +14,8 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.order.CommonOrderDTO;
+import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.parking.CreateParkingRechargeOrderCommand;
 import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
@@ -38,7 +40,6 @@ import com.everhomes.rest.parking.SearchParkingRechargeOrdersCommand;
 import com.everhomes.rest.parking.SetParkingActivityCommand;
 import com.everhomes.rest.parking.SetParkingCardIssueFlagCommand;
 import com.everhomes.rest.parking.SetParkingCardReserveDaysCommand;
-import com.everhomes.rest.techpark.onlinePay.OnlinePayBillCommand;
 
 @RestDoc(value="Parking controller", site="parking")
 @RestController
@@ -165,10 +166,10 @@ public class ParkingController extends ControllerBase {
     @RequestMapping("createParkingRechargeOrder")
     @RestReturn(value=ParkingRechargeOrderDTO.class)
     public RestResponse createParkingRechargeOrder(CreateParkingRechargeOrderCommand cmd) {
-        ParkingRechargeOrderDTO rechargeOrder = null;
+        CommonOrderDTO dto = null;
         
-        rechargeOrder = parkingService.createParkingRechargeOrder(cmd);
-        RestResponse response = new RestResponse(rechargeOrder);
+        dto = parkingService.createParkingRechargeOrder(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -305,7 +306,7 @@ public class ParkingController extends ControllerBase {
      */
     @RequestMapping("notifyParkingRechargeOrderPayment")
     @RestReturn(value = String.class)
-    public RestResponse notifyParkingRechargeOrderPayment(OnlinePayBillCommand cmd) {
+    public RestResponse notifyParkingRechargeOrderPayment(PayCallbackCommand cmd) {
         
     	parkingService.notifyParkingRechargeOrderPayment(cmd);
         RestResponse response = new RestResponse();

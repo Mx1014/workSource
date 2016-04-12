@@ -12,7 +12,6 @@ import org.jooq.DSLContext;
 import org.jooq.Record1;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
-import org.jooq.SortField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,15 +29,18 @@ import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
 import com.everhomes.rest.parking.ParkingRechargeOrderStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhParkingActivitiesDao;
 import com.everhomes.server.schema.tables.daos.EhParkingCardRequestsDao;
 import com.everhomes.server.schema.tables.daos.EhParkingLotsDao;
 import com.everhomes.server.schema.tables.daos.EhParkingRechargeOrdersDao;
 import com.everhomes.server.schema.tables.daos.EhParkingRechargeRatesDao;
 import com.everhomes.server.schema.tables.daos.EhParkingVendorsDao;
+import com.everhomes.server.schema.tables.pojos.EhParkingActivities;
 import com.everhomes.server.schema.tables.pojos.EhParkingCardRequests;
 import com.everhomes.server.schema.tables.pojos.EhParkingLots;
 import com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders;
 import com.everhomes.server.schema.tables.pojos.EhParkingRechargeRates;
+import com.everhomes.server.schema.tables.records.EhParkingActivitiesRecord;
 import com.everhomes.server.schema.tables.records.EhParkingCardRequestsRecord;
 import com.everhomes.server.schema.tables.records.EhParkingLotsRecord;
 import com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord;
@@ -410,6 +412,8 @@ public class ParkingProviderImpl implements ParkingProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhParkingLotsDao dao = new EhParkingLotsDao(context.configuration());
 		dao.update(parkingLot);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhParkingLots.class, parkingLot.getId());
+
 	}
 	
 	@Override
@@ -452,5 +456,37 @@ public class ParkingProviderImpl implements ParkingProvider {
         EhParkingRechargeOrdersDao dao = new EhParkingRechargeOrdersDao(context.configuration());
         
         dao.update(order);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhParkingRechargeOrders.class, order.getId());
+
     }
+
+	@Override
+	public ParkingActivity setParkingActivity(ParkingActivity parkingActivity) {
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhParkingActivities.class));
+		parkingActivity.setId(id);
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		EhParkingActivitiesDao dao = new EhParkingActivitiesDao(context.configuration());
+		dao.insert(parkingActivity);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhParkingActivities.class, parkingActivity.getId());
+
+		return parkingActivity;
+	}
+
+	@Override
+	public ParkingActivity getParkingActivity(Long id, String ownerType,
+			Long ownerId, Long parkingLotId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        SelectQuery<EhParkingActivitiesRecord> query = context.selectQuery(Tables.EH_PARKING_ACTIVITIES);
+		
+		if(StringUtils.isNotBlank(ownerType))
+        	query.addConditions(Tables.EH_PARKING_ACTIVITIES.OWNER_TYPE.eq(ownerType));
+        if(ownerId != null)
+        	query.addConditions(Tables.EH_PARKING_ACTIVITIES.OWNER_ID.eq(ownerId));
+        if(parkingLotId != null)
+        	query.addConditions(Tables.EH_PARKING_ACTIVITIES.PARKING_LOT_ID.eq(parkingLotId));
+        //ConvertHelper.convert(query.f, ParkingActivity.class);
+		return null;
+	}
  }

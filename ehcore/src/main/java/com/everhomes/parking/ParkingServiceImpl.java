@@ -24,12 +24,18 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.locale.LocaleStringService;
+import com.everhomes.order.OrderEmbeddedHandler;
+import com.everhomes.order.OrderUtil;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
-import com.everhomes.rest.organization.VendorType;
+import com.everhomes.rest.order.CommonOrderCommand;
+import com.everhomes.rest.order.CommonOrderDTO;
+import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.parking.CreateParkingRechargeOrderCommand;
 import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
+import com.everhomes.rest.parking.GetParkingActivityCommand;
 import com.everhomes.rest.parking.IssueParkingCardsCommand;
 import com.everhomes.rest.parking.ListParkingCardRequestResponse;
 import com.everhomes.rest.parking.ListParkingCardRequestsCommand;
@@ -38,6 +44,7 @@ import com.everhomes.rest.parking.ListParkingLotsCommand;
 import com.everhomes.rest.parking.ListParkingRechargeOrdersCommand;
 import com.everhomes.rest.parking.ListParkingRechargeOrdersResponse;
 import com.everhomes.rest.parking.ListParkingRechargeRatesCommand;
+import com.everhomes.rest.parking.ParkingActivityDTO;
 import com.everhomes.rest.parking.ParkingCardDTO;
 import com.everhomes.rest.parking.ParkingCardIssueFlag;
 import com.everhomes.rest.parking.ParkingCardRequestDTO;
@@ -51,11 +58,10 @@ import com.everhomes.rest.parking.ParkingRechargeRateDTO;
 import com.everhomes.rest.parking.RequestParkingCardCommand;
 import com.everhomes.rest.parking.SearchParkingCardRequestsCommand;
 import com.everhomes.rest.parking.SearchParkingRechargeOrdersCommand;
+import com.everhomes.rest.parking.SetParkingActivityCommand;
 import com.everhomes.rest.parking.SetParkingCardIssueFlagCommand;
 import com.everhomes.rest.parking.SetParkingCardReserveDaysCommand;
-import com.everhomes.rest.techpark.onlinePay.OnlinePayBillCommand;
 import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -98,6 +104,9 @@ public class ParkingServiceImpl implements ParkingService {
     
     @Autowired
 	private LocaleStringService localeStringService;
+    
+    @Autowired
+	private OrderUtil commonOrderUtil;
     
     @Override
     public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
@@ -192,12 +201,11 @@ public class ParkingServiceImpl implements ParkingService {
     }
 	
 	@Override
-	public ParkingRechargeOrderDTO createParkingRechargeOrder(CreateParkingRechargeOrderCommand cmd){
+	public CommonOrderDTO createParkingRechargeOrder(CreateParkingRechargeOrderCommand cmd){
 		
 		checkPlateNumber(cmd.getPlateNumber());
         checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
-		ParkingRechargeOrderDTO parkingRechargeOrderDTO = new ParkingRechargeOrderDTO();	
 		ParkingRechargeOrder parkingRechargeOrder = new ParkingRechargeOrder();
 		
 		User user = UserContext.current().getUser();
@@ -235,9 +243,26 @@ public class ParkingServiceImpl implements ParkingService {
 					"createParkingRechargeOrder is fail.");
 		}
 		
-		parkingRechargeOrderDTO = ConvertHelper.convert(parkingRechargeOrder, ParkingRechargeOrderDTO.class);
-		parkingRechargeOrderDTO.setPayerName(user.getNickName());
-		return parkingRechargeOrderDTO;
+		
+		//调用统一处理订单接口，返回统一订单格式
+		CommonOrderCommand orderCmd = new CommonOrderCommand();
+		orderCmd.setBody(parkingRechargeOrder.getRateName());
+		orderCmd.setOrderNo(parkingRechargeOrder.getId().toString());
+		orderCmd.setOrderType(OrderType.OrderTypeEnum.Parking.getPycode());
+		orderCmd.setSubject("停车充值订单简要描述");
+		orderCmd.setTotalFee(parkingRechargeOrder.getPrice());
+		CommonOrderDTO dto = null;
+		try {
+			dto = commonOrderUtil.convertToCommonOrderTemplate(orderCmd);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return dto;
+		
+//		parkingRechargeOrderDTO = ConvertHelper.convert(parkingRechargeOrder, ParkingRechargeOrderDTO.class);
+//		parkingRechargeOrderDTO.setPayerName(user.getNickName());
+//		return parkingRechargeOrderDTO;
 	}
 	
 	@Override
@@ -386,11 +411,39 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 
 	@Override
-	public void notifyParkingRechargeOrderPayment(OnlinePayBillCommand cmd) {
-    	ParkingRechargeOrder order = onlinePayBill(cmd);
-    	String venderName = parkingProvider.findParkingLotById(order.getParkingLotId()).getVendorName();
-    	ParkingVendorHandler handler = getParkingVendorHandler(venderName);
-    	handler.notifyParkingRechargeOrderPayment(order,cmd.getPayStatus());
+	public void notifyParkingRechargeOrderPayment(PayCallbackCommand cmd) {
+		
+		OrderEmbeddedHandler orderEmbeddedHandler = this.getOrderHandler(cmd.getOrderType());
+		LOGGER.debug("OrderEmbeddedHandler="+orderEmbeddedHandler.getClass().getName());
+		if(cmd.getPayStatus().equalsIgnoreCase("success"))
+			orderEmbeddedHandler.paySuccess(cmd);
+		if(cmd.getPayStatus().equalsIgnoreCase("fail"))
+			orderEmbeddedHandler.payFail(cmd);
+		
+	}
+	
+	@Override
+	public ParkingActivityDTO setParkingActivity(SetParkingActivityCommand cmd){
+		ParkingActivity parkingActivity = new ParkingActivity();
+		
+		User user = UserContext.current().getUser();
+		
+		parkingActivity.setCreateTime(cmd.getStartTime());
+		parkingActivity.setEndTime(cmd.getEndTime());
+		parkingActivity.setOwnerId(cmd.getOwnerId());
+		parkingActivity.setOwnerType(cmd.getOwnerType());
+		parkingActivity.setParkingLotId(cmd.getParkingLotId());
+		parkingActivity.setTopCount(cmd.getTopCount());
+		parkingActivity.setCreatorUid(user.getId());
+		parkingProvider.setParkingActivity(parkingActivity);
+		
+		return ConvertHelper.convert(parkingActivity, ParkingActivityDTO.class);
+	}
+	
+	@Override
+	public ParkingActivityDTO getParkingActivity(GetParkingActivityCommand cmd) {
+		
+		return null;
 	}
 	
     private Timestamp strToTimestamp(String str) {
@@ -493,120 +546,18 @@ public class ParkingServiceImpl implements ParkingService {
 		return newPeriod;
 	}
 	
-	   private ParkingRechargeOrder onlinePayBill(OnlinePayBillCommand cmd) {
-			
-		   if(StringUtils.isBlank(cmd.getPayStatus())){
-				LOGGER.error("payStatus is null or empty.");
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"payStatus is null or empty.");
-			}
-		   
-	    	ParkingRechargeOrder order = new ParkingRechargeOrder();
-			//fail
-			if(cmd.getPayStatus().toLowerCase().equals("fail"))
-				order = this.onlinePayBillFail(cmd);
-			//success
-			if(cmd.getPayStatus().toLowerCase().equals("success"))
-				order = this.onlinePayBillSuccess(cmd);
-
-			return order;
+	private OrderEmbeddedHandler getOrderHandler(String orderType) {
+		return PlatformContext.getComponent(OrderEmbeddedHandler.ORDER_EMBEDED_OBJ_RESOLVER_PREFIX+this.getOrderTypeCode(orderType));
+	}
+	
+	private String getOrderTypeCode(String orderType) {
+		Integer code = OrderType.OrderTypeEnum.getCodeByPyCode(orderType);
+		if(code==null){
+			LOGGER.error("Invalid parameter,orderType not found in OrderType.orderType="+orderType);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameter,orderType not found in OrderType");
 		}
-	    
-	    private ParkingRechargeOrder onlinePayBillFail(OnlinePayBillCommand cmd) {
-			
-			if(LOGGER.isDebugEnabled())
-				LOGGER.error("onlinePayBillFail");
-			this.checkOrderNoIsNull(cmd.getOrderNo());
-			Long orderId = Long.parseLong(cmd.getOrderNo());
-			
-			ParkingRechargeOrder order = checkOrder(orderId);
-					
-			Timestamp payTimeStamp = new Timestamp(System.currentTimeMillis());
-			order.setStatus(ParkingRechargeOrderStatus.INACTIVE.getCode());
-			order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.NONE.getCode());
-			order.setPaidTime(payTimeStamp);
-			//order.setPaidTime(cmd.getPayTime());
-			parkingProvider.updateParkingRechargeOrder(order);
-			
-			return order;
-		}
-		
-		private ParkingRechargeOrder onlinePayBillSuccess(OnlinePayBillCommand cmd) {
-			
-			if(LOGGER.isDebugEnabled())
-				LOGGER.error("onlinePayBillSuccess");
-			this.checkOrderNoIsNull(cmd.getOrderNo());
-			this.checkVendorTypeIsNull(cmd.getVendorType());
-			this.checkPayAmountIsNull(cmd.getPayAmount());
-			
-			Long orderId = Long.parseLong(cmd.getOrderNo());
-			ParkingRechargeOrder order = checkOrder(orderId);
-			
-			BigDecimal payAmount = new BigDecimal(cmd.getPayAmount());
-			
-			Long payTime = System.currentTimeMillis();
-			Timestamp payTimeStamp = new Timestamp(payTime);
-			
-			this.checkVendorTypeFormat(cmd.getVendorType());
-			
-			if(order.getStatus().byteValue() == ParkingRechargeOrderStatus.UNPAID.getCode()) {
-				order.setPrice(payAmount);
-				order.setStatus(ParkingRechargeOrderStatus.PAID.getCode());
-				order.setPaidTime(payTimeStamp);
-				//order.setPaidTime(cmd.getPayTime());
-				parkingProvider.updateParkingRechargeOrder(order);
-			}
-			
-			return order;
-		}
-		
-		private void checkOrderNoIsNull(String orderNo) {
-			
-			if(StringUtils.isBlank(orderNo)){
-				LOGGER.error("orderNo is null or empty.");
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"orderNo is null or empty.");
-			}
-
-		}
-		
-		private ParkingRechargeOrder checkOrder(Long orderId) {
-			
-	    	ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(orderId);
-			
-			if(order == null){
-				LOGGER.error("the order {} not found.",orderId);
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"the order not found.");
-			}
-			return order;
-		}
-		
-		private void checkPayAmountIsNull(String payAmount) {
-			
-			if(StringUtils.isBlank(payAmount)){
-				LOGGER.error("payAmount is null or empty.");
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"payAmount or is null or empty.");
-			}
-
-		}
-
-		private void checkVendorTypeIsNull(String vendorType) {
-			
-			if(StringUtils.isBlank(vendorType)){
-				LOGGER.error("vendorType is null or empty.");
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"vendorType is null or empty.");
-			}
-
-		}
-		
-		private void checkVendorTypeFormat(String vendorType) {
-			if(VendorType.fromCode(vendorType) == null){
-				LOGGER.error("vendor type is wrong.");
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"vendor type is wrong.");
-			}
-		}
+		LOGGER.debug("orderTypeCode="+code);
+		return String.valueOf(code);
+	}
 }
