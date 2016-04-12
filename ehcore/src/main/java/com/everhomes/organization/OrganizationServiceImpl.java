@@ -22,6 +22,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
+import org.hibernate.jpa.internal.metamodel.SingularAttributeImpl.Identifier;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -4265,6 +4266,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		Organization org = checkOrganization(cmd.getOrganizationId());
 		
+		OrganizationMember desOrgMember = this.organizationProvider.findOrganizationMemberByOrgIdAndToken(cmd.getContactToken(), org.getId());
+		if(null != desOrgMember){
+			LOGGER.error("phone number already exists.");
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, 
+					"phone number already exists.");
+		}
+		
 		OrganizationMember organizationMember = ConvertHelper.convert(cmd, OrganizationMember.class);
 		organizationMember.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
 		organizationMember.setMemberGroup(OrganizationMemberGroupType.MANAGER.getCode());
@@ -5369,6 +5377,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 	    		map.put("targetUName", user.getNickName());
 	    		map.put("targetUToken", userIdentifier.getIdentifierToken());
+	    		task.setTargetToken(userIdentifier.getIdentifierToken());
+	    		task.setTargetName(user.getNickName());
 	    		String content = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_ACCEPT_COMMENT, user.getLocale(), map, "");
 	    		command.setContent(content);
 	    		this.createComment(command);
@@ -5418,12 +5428,17 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    		command.setTopicId(task.getApplyEntityId());
 	    		command.setContentType(PostContentType.TEXT.getCode());
 	    		Map<String,Object> map = new HashMap<String, Object>();
-	    		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-	    		map.put("targetUName", user.getNickName());
-	    		map.put("targetUToken", userIdentifier.getIdentifierToken());
-	    		String content = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_ACCEPT_COMMENT, user.getLocale(), map, "");
-	    		command.setContent(content);
-	    		this.createComment(command);
+	    		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getTargetId(), cmd.getOrganizationId());
+	    		if(null != member){
+	    			map.put("targetUName", member.getContactName());
+		    		map.put("targetUToken", member.getContactToken());
+		    		String content = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_ACCEPT_COMMENT, user.getLocale(), map, "");
+		    		task.setTargetToken(member.getContactToken());
+		    		task.setTargetName(member.getContactName());
+		    		command.setContent(content);
+		    		this.createComment(command);
+	    		}
+	    		
 	    	}else{
 	    		LOGGER.error("Tasks have been processed, status="+task.getTaskStatus() + ", targetId=" + task.getTargetId());
 				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_TASK_ALREADY_PROCESSED,
@@ -5484,16 +5499,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    		task.setTargetId(cmd.getUserId());
 	    		task.setTargetType(OrganizationTaskTargetType.USER.getCode());
     			task.setTaskStatus(cmd.getTaskStatus());
-    			
-	    		User target = userProvider.findUserById(cmd.getUserId());
-	    		
-	    		map.put("operatorUName", user.getNickName());
-	    		map.put("operatorUToken", userIdentifier.getIdentifierToken());
-	       		
-	    		map.put("targetUName", null != target ? target.getNickName() : "");
-	    		User create = userProvider.findUserById(task.getCreatorUid());
-	    		map.put("createUName", null != create ? create.getNickName() : "");
-	    		
 	    	//当智能处理部分类型时
 	    	}else if(privileges.contains(PrivilegeConstants.TaskGuaranteeListPosts)){
 	    		/*根据权限仅限操作保修贴*/
@@ -5518,15 +5523,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    			}
 	    			
 	    			task.setTaskStatus(cmd.getTaskStatus());
-		    		
-		    		User target = userProvider.findUserById(cmd.getUserId());
-		    		
-		    		map.put("operatorUName", user.getNickName());
-		    		map.put("operatorUToken", userIdentifier.getIdentifierToken());
-		    		map.put("targetUName", null != target ? target.getNickName() : "");
-		    		User create = userProvider.findUserById(task.getCreatorUid());
-		    		map.put("createUName", null != create ? create.getNickName() : "");
-		    		
 	    		}else{
     				//异常
 	    			LOGGER.error("Tasks have been processed, status="+task.getTaskStatus() + ", targetId=" + task.getTargetId());
@@ -5556,14 +5552,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    			
 	    			task.setTaskStatus(cmd.getTaskStatus());
 		    		
-		    		User target = userProvider.findUserById(cmd.getUserId());
-		    		
-		    		map.put("operatorUName", user.getNickName());
-		    		map.put("operatorUToken", userIdentifier.getIdentifierToken());
-		    		map.put("targetUName", null != target ? target.getNickName() : "");
-		    		User create = userProvider.findUserById(task.getCreatorUid());
-		    		map.put("createUName", null != create ? create.getNickName() : "");
-		    		
 	    		}else{
     				//异常
 	    			LOGGER.error("Tasks have been processed, status="+task.getTaskStatus() + ", targetId=" + task.getTargetId());
@@ -5572,6 +5560,23 @@ public class OrganizationServiceImpl implements OrganizationService {
     			}
 	    	}else{
 				returnNoPrivileged(privileges, user);
+			}
+	    	OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getTargetId(), cmd.getOrganizationId());
+	    	if(null != member){
+				map.put("operatorUName", user.getNickName());
+	    		map.put("operatorUToken", userIdentifier.getIdentifierToken());
+	       		
+	    		map.put("targetUName", member.getContactName());
+	    		map.put("targetUToken", member.getContactToken());
+	    		User create = userProvider.findUserById(task.getCreatorUid());
+	    		UserIdentifier createIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(task.getCreatorUid(), IdentifierType.MOBILE.getCode());
+	    		if(null == createIdentifier){
+	    			map.put("createUName", null != create ? create.getNickName() : "");
+		    		map.put("createUToken", null != create ? create.getNickName() : "");
+	    		}
+	    		
+	    		task.setTargetName(member.getContactName());
+	    		task.setTargetToken(member.getContactToken());
 			}
 	    	
 	    	task.setTaskCategory(cmd.getTaskCategory());
@@ -5594,7 +5599,16 @@ public class OrganizationServiceImpl implements OrganizationService {
     		}
 	    	this.sendTaskMsg(map, task, user);
 	    	
-	    	return ConvertHelper.convert(post, PostDTO.class);
+	    	Long communityId = null;
+	    	if(VisibleRegionType.fromCode(task.getVisibleRegionType()) == VisibleRegionType.COMMUNITY){
+	    		communityId = task.getVisibleRegionId();
+	    	}
+	    	
+	    	PostDTO dto = this.forumService.getTopicById(task.getApplyEntityId(),communityId,false);
+	    	if(null != dto){
+				dto.setEmbeddedJson(StringHelper.toJsonString(task));
+	    	}
+	    	return dto;
 	    }
 	    
 	    
@@ -5665,6 +5679,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			List<PostDTO> dtos = new ArrayList<PostDTO>();
 			for (OrganizationTask task : orgTasks) {
 				PostDTO dto = this.forumService.getTopicById(task.getApplyEntityId(),commuId,false);
+				
 				if(null == dto){
 					continue;
 				}
