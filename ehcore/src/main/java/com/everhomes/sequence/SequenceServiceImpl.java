@@ -506,6 +506,9 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhDoorAuth.class, Tables.EH_DOOR_AUTH.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_DOOR_AUTH.ID.max()).from(Tables.EH_DOOR_AUTH).fetchOne().value1(); 
         });
+        syncTableSequence(null, EhAclinkFirmware.class, Tables.EH_ACLINK_FIRMWARE.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_ACLINK_FIRMWARE.ID.max()).from(Tables.EH_ACLINK_FIRMWARE).fetchOne().value1(); 
+        });
         syncTableSequence(EhDoorAccess.class, EhAclinks.class, Tables.EH_ACLINKS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_ACLINKS.ID.max()).from(Tables.EH_ACLINKS).fetchOne().value1(); 
         });

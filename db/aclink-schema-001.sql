@@ -5,9 +5,9 @@ DROP TABLE IF EXISTS `eh_aclink_firmware`;
 CREATE TABLE `eh_aclink_firmware` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `firmware_type` TINYINT NOT NULL COMMENT 'firmware type',
-    `major` TINYINT NOT NULL,
-    `minor` TINYINT NOT NULL,
-    `revision` TINYINT NOT NULL,
+    `major` INT NOT NULL DEFAULT 0,
+    `minor` INT NOT NULL DEFAULT 0,
+    `revision` INT NOT NULL DEFAULT 0,
     `checksum` BIGINT NOT NULL,
     `md5sum` VARCHAR(64),
     `download_url` VARCHAR(128),
