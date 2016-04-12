@@ -1265,8 +1265,12 @@ public class VideoConfServiceImpl implements VideoConfService {
 	@Override
 	public UserAccountDTO verifyVideoConfAccount(
 			VerifyVideoConfAccountCommand cmd) {
+		User user = UserContext.current().getUser();
 		UserAccountDTO userAccount = new UserAccountDTO();
-		ConfAccounts account = vcProvider.findAccountByUserId(cmd.getUserId());
+
+		ConfAccounts account = vcProvider.findAccountByUserId(user.getId());
+		
+		
 		if(account != null) {
 			userAccount.setAccountId(account.getId());
 			userAccount.setStatus(account.getStatus());
