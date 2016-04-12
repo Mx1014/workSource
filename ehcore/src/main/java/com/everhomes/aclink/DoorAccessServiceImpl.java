@@ -53,6 +53,7 @@ import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+
 import org.apache.commons.codec.binary.Base64;
 
 
@@ -110,6 +111,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     
     @Autowired
     private MessagingService messagingService;
+    
+    @Autowired
+    private AclinkFirmwareProvider aclinkFirmwareProvider;
     
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
     
@@ -937,6 +941,25 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     }
     
     @Override
+    public DoorAccessDTO getDoorAccessDetail(String hardware) {
+        DoorAccess da = doorAccessProvider.queryDoorAccessByHardwareId(hardware);
+        if(da == null) {
+            return  null;
+            }
+        
+        getDoorAccessLastTick(da);
+        DoorAccessDTO dto = (DoorAccessDTO)ConvertHelper.convert(da, DoorAccessDTO.class);
+        
+        AclinkFirmware firm = aclinkFirmwareProvider.queryAclinkFirmwareMax();
+        if(firm != null) {
+            String version = String.format("%d.%d.%d", firm.getMajor(), firm.getMinor(), firm.getRevision());
+            dto.setVersion(version);
+        }
+        
+        return dto;
+    }
+    
+    @Override
     public ListDoorAuthResponse queryDoorAuthByApproveId(ListDoorAuthCommand cmd) {
         User user = UserContext.current().getUser();
         
@@ -1096,5 +1119,15 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         //}
         
         //return msgGenerator.generateWebSocketMessage(resp.getId());
+    }
+    
+    @Override
+    public AclinkFirmwareDTO createAclinkFirmware(CreateAclinkFirmwareCommand cmd) {
+        AclinkFirmware firmware = (AclinkFirmware)ConvertHelper.convert(cmd, AclinkFirmware.class);
+        firmware.setFirmwareType(new Byte((byte)0));
+        firmware.setStatus(new Byte((byte)1));
+        firmware.setCreatorId(UserContext.current().getUser().getId());
+        aclinkFirmwareProvider.createAclinkFirmware(firmware);
+        return (AclinkFirmwareDTO)ConvertHelper.convert(firmware, AclinkFirmwareDTO.class);
     }
 }

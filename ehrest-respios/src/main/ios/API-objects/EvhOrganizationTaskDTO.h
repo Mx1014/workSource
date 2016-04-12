@@ -1,6 +1,6 @@
 //
 // EvhOrganizationTaskDTO.h
-// generated at 2016-04-08 20:09:23 
+// generated at 2016-04-12 19:00:52 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -51,6 +51,10 @@
 @property(nonatomic, copy) NSString* option;
 
 @property(nonatomic, copy) NSString* entrancePrivilege;
+
+@property(nonatomic, copy) NSString* targetName;
+
+@property(nonatomic, copy) NSString* targetToken;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

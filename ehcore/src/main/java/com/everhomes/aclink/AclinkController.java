@@ -144,10 +144,10 @@ public class AclinkController extends ControllerBase {
         resp.setDoors(dtos);
         
         for(String hardwareId : cmd.getHardwareIds()) {
-            DoorAccess doorAccess = doorAccessProvider.queryDoorAccessByHardwareId(hardwareId);
+            DoorAccessDTO doorAccess = doorAccessService.getDoorAccessDetail(hardwareId);
 
             if(doorAccess != null) {
-                dtos.add(ConvertHelper.convert(doorAccess, DoorAccessDTO.class));
+                dtos.add(doorAccess);
             }            
         }
 
@@ -225,4 +225,5 @@ public class AclinkController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
 }
