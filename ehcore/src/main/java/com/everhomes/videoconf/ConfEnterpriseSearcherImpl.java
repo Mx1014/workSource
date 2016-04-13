@@ -27,6 +27,8 @@ import com.everhomes.enterprise.EnterpriseContact;
 import com.everhomes.enterprise.EnterpriseContactEntry;
 import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.videoconf.ConfAccountDTO;
 import com.everhomes.rest.videoconf.EnterpriseConfAccountDTO;
 import com.everhomes.rest.videoconf.ListEnterpriseVideoConfAccountResponse;
@@ -52,8 +54,11 @@ public class ConfEnterpriseSearcherImpl extends AbstractElasticSearch implements
 	@Autowired
     private ConfigurationProvider configProvider;
 	
+//	@Autowired
+//	private EnterpriseProvider enterpriseProvider;
+	
 	@Autowired
-	private EnterpriseProvider enterpriseProvider;
+	private OrganizationProvider organizationProvider;
 	
 	@Override
 	public void deleteById(Long id) {
@@ -165,10 +170,14 @@ public class ConfEnterpriseSearcherImpl extends AbstractElasticSearch implements
         	ConfEnterprises confEnterprise = vcProvider.findConfEnterpriseById(id);
         	dto.setId(confEnterprise.getId());
 	    	dto.setEnterpriseId(confEnterprise.getEnterpriseId());
-	    	Enterprise enterprise = enterpriseProvider.findEnterpriseById(confEnterprise.getEnterpriseId());
+//	    	Enterprise enterprise = enterpriseProvider.findEnterpriseById(confEnterprise.getEnterpriseId());
 	    	
-	    	dto.setEnterpriseName(enterprise.getName());
-	    	dto.setEnterpriseDisplayName(enterprise.getDisplayName());
+	    	Organization org = organizationProvider.findOrganizationById(confEnterprise.getEnterpriseId());
+	    	
+	    	if(org != null) {
+	    		dto.setEnterpriseName(org.getName());
+		    	dto.setEnterpriseDisplayName(org.getName());
+	    	}
 	    	dto.setEnterpriseContactor(confEnterprise.getContactName());
 	    	dto.setMobile(confEnterprise.getContact());
 	    	if(confEnterprise.getActiveAccountAmount() > 0)
@@ -218,10 +227,11 @@ public class ConfEnterpriseSearcherImpl extends AbstractElasticSearch implements
 				b.field("status", 2);
 			}
             
-            Enterprise enter = enterpriseProvider.findEnterpriseById(enterprise.getEnterpriseId());
-            if(null != enter) {
-                b.field("enterpriseName", enter.getName());
-                b.field("enterpriseDisplayName", enter.getDisplayName());
+			Organization org = organizationProvider.findOrganizationById(enterprise.getEnterpriseId());
+//            Enterprise enter = enterpriseProvider.findEnterpriseById(enterprise.getEnterpriseId());
+            if(null != org) {
+                b.field("enterpriseName", org.getName());
+                b.field("enterpriseDisplayName", org.getName());
             } else {
                 b.field("enterpriseName", "");
                 b.field("enterpriseDisplayName", "");

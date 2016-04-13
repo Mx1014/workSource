@@ -41,6 +41,9 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
@@ -182,6 +185,9 @@ public class VideoConfServiceImpl implements VideoConfService {
 	
 	@Autowired
     private NamespaceProvider nsProvider;
+	
+	@Autowired
+    private OrganizationProvider organizationProvider;
 	
 	
 	@Override
@@ -939,16 +945,28 @@ public class VideoConfServiceImpl implements VideoConfService {
 			accountDto.setId(r.getId());
 			
 			accountDto.setUserId(r.getOwnerId());
-			EnterpriseContact contact = enterpriseContactProvider.queryContactByUserId(r.getEnterpriseId(), r.getOwnerId());
-			if(contact != null) {
-				accountDto.setDepartment(contact.getStringTag1());
-				accountDto.setUserName(contact.getName());
-				
-				List<EnterpriseContactEntry> entry = enterpriseContactProvider.queryContactEntryByContactId(contact);
-				if(entry != null && entry.size() > 0) {
-					accountDto.setMobile(entry.get(0).getEntryValue());
+			Organization org = organizationProvider.findOrganizationById(r.getEnterpriseId());
+			if(org != null) {
+				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getOwnerId(), org.getId());
+				if (member != null) {
+					accountDto.setUserName(member.getContactName());
+					accountDto.setMobile(member.getContactToken());
+					Organization dept = organizationProvider.findOrganizationById(member.getGroupId());
+					if (dept != null) {
+						accountDto.setDepartment(dept.getName());
+					}
 				}
 			}
+//			EnterpriseContact contact = enterpriseContactProvider.queryContactByUserId(r.getEnterpriseId(), r.getOwnerId());
+//			if(contact != null) {
+//				accountDto.setDepartment(contact.getStringTag1());
+//				accountDto.setUserName(contact.getName());
+//				
+//				List<EnterpriseContactEntry> entry = enterpriseContactProvider.queryContactEntryByContactId(contact);
+//				if(entry != null && entry.size() > 0) {
+//					accountDto.setMobile(entry.get(0).getEntryValue());
+//				}
+//			}
 			ConfAccountCategories category = vcProvider.findAccountCategoriesById(r.getAccountCategoryId());
 			accountDto.setConfType(category.getConfType());
 			return accountDto;
