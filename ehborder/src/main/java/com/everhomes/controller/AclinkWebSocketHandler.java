@@ -52,6 +52,9 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
     private String uuidFromSession(WebSocketSession session) {
         String path = session.getUri().getPath();
         String[] vs = path.split("/");
+        if(vs.length <= 2) {
+            return "";
+        }
         return vs[2];
     }
     
@@ -138,6 +141,8 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
         StringHelper.toStringMap(null, cmd, params);
         final AclinkWebSocketHandler handler = this;
         
+        LOGGER.info("Got reply=", cmd);
+        
         httpRestCallProvider.restCall("/aclink/syncWebsocketMessages", params, new ListenableFutureCallback<ResponseEntity<String>> () {
 
         @Override
@@ -173,6 +178,7 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
 
         @Override
         public void onFailure(Throwable ex) {
+            LOGGER.error("call core server error=", ex);
         }
       });
     }
@@ -210,6 +216,6 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
     
     @Override
     protected void handlePongMessage(WebSocketSession session, PongMessage message) throws Exception {
-        
+        LOGGER.info("Got pong message from " + uuidFromSession(session));
     }
 }
