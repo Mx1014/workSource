@@ -190,8 +190,15 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
     @Override
     public void deleteParkingRechargeRate(DeleteParkingRechargeRateCommand cmd){
     	try {
-    		parkingProvider.findParkingRechargeRatesById(Long.parseLong(cmd.getRateToken()));
-		} catch (Exception e) {
+    		ParkingRechargeRate rate = parkingProvider.findParkingRechargeRatesById(Long.parseLong(cmd.getRateToken()));
+    		if(rate == null){
+    			LOGGER.error("remote search pay order return null.rateId="+cmd.getRateToken());
+    			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    					"remote search pay order return null.");
+    		}else{
+    			parkingProvider.deleteParkingRechargeRate(rate);
+    		}
+    	} catch (Exception e) {
 			LOGGER.error("delete parkingRechargeRate fail."+cmd.getRateToken());
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_SQL_EXCEPTION,
     				"delete parkingRechargeRate fail."+cmd.getRateToken());

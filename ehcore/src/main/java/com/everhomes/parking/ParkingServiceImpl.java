@@ -314,15 +314,17 @@ public class ParkingServiceImpl implements ParkingService {
 	public ListParkingRechargeOrdersResponse searchParkingRechargeOrders(SearchParkingRechargeOrdersCommand cmd){
 		ListParkingRechargeOrdersResponse response = new ListParkingRechargeOrdersResponse();
 		
+		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+
 		List<ParkingRechargeOrder> list = parkingProvider.searchParkingRechargeOrders(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
 				cmd.getPlateOwnerPhone(), cmd.getPayerName(), cmd.getPayerPhone(), cmd.getPageAnchor(), 
-				PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize()));
+				pageSize);
     					
     	if(list.size() > 0){
     		response.setOrders(list.stream().map(r -> ConvertHelper.convert(r, ParkingRechargeOrderDTO.class))
     				.collect(Collectors.toList()));
-    		if(list.size() != cmd.getPageSize()){
+    		if(pageSize != null && list.size() != pageSize){
         		response.setNextPageAnchor(null);
         	}else{
         		response.setNextPageAnchor(list.get(list.size()-1).getId());
@@ -336,14 +338,15 @@ public class ParkingServiceImpl implements ParkingService {
 	public ListParkingCardRequestResponse searchParkingCardRequests(SearchParkingCardRequestsCommand cmd) {
 		ListParkingCardRequestResponse response = new ListParkingCardRequestResponse();
 		
+		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
     	List<ParkingCardRequest> list = parkingProvider.searchParkingCardRequests(cmd.getOwnerType(), 
     			cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(), 
     			cmd.getPlateOwnerPhone(), strToTimestamp(cmd.getStartDate()), strToTimestamp(cmd.getEndDate()), 
-    			cmd.getStatus(),cmd.getPageAnchor(), PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize()));
+    			cmd.getStatus(),cmd.getPageAnchor(), pageSize);
     	if(list.size() > 0){
     		response.setRequests(list.stream().map(r -> ConvertHelper.convert(r, ParkingCardRequestDTO.class))
     				.collect(Collectors.toList()));
-    		if(list.size() != cmd.getPageSize()){
+    		if( pageSize != null && list.size() != pageSize){
         		response.setNextPageAnchor(null);
         	}else{
         		response.setNextPageAnchor(list.get(list.size()-1).getId());
@@ -428,8 +431,8 @@ public class ParkingServiceImpl implements ParkingService {
 		
 		User user = UserContext.current().getUser();
 		
-		parkingActivity.setCreateTime(cmd.getStartTime());
-		parkingActivity.setEndTime(cmd.getEndTime());
+		parkingActivity.setCreateTime(strToTimestamp(cmd.getStartTime()));
+		parkingActivity.setEndTime(strToTimestamp(cmd.getEndTime()));
 		parkingActivity.setOwnerId(cmd.getOwnerId());
 		parkingActivity.setOwnerType(cmd.getOwnerType());
 		parkingActivity.setParkingLotId(cmd.getParkingLotId());
@@ -442,12 +445,18 @@ public class ParkingServiceImpl implements ParkingService {
 	
 	@Override
 	public ParkingActivityDTO getParkingActivity(GetParkingActivityCommand cmd) {
+		ParkingActivityDTO dto = null;
 		
-		return null;
+		ParkingActivity activity = parkingProvider.getParkingActivity(cmd.getOwnerType(),
+				cmd.getOwnerId(), cmd.getParkingLotId());
+		if(activity != null)
+			dto = ConvertHelper.convert(activity, ParkingActivityDTO.class);
+		return dto;
 	}
 	
     private Timestamp strToTimestamp(String str) {
-
+    	if(StringUtils.isBlank(str))
+    		return null;
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 		
 		Timestamp ts = null;

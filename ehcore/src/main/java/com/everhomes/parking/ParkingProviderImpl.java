@@ -10,6 +10,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record1;
+import org.jooq.Result;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -475,9 +476,9 @@ public class ParkingProviderImpl implements ParkingProvider {
 	}
 
 	@Override
-	public ParkingActivity getParkingActivity(Long id, String ownerType,
+	public ParkingActivity getParkingActivity(String ownerType,
 			Long ownerId, Long parkingLotId) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(ParkingActivity.class));
         SelectQuery<EhParkingActivitiesRecord> query = context.selectQuery(Tables.EH_PARKING_ACTIVITIES);
 		
 		if(StringUtils.isNotBlank(ownerType))
@@ -486,7 +487,11 @@ public class ParkingProviderImpl implements ParkingProvider {
         	query.addConditions(Tables.EH_PARKING_ACTIVITIES.OWNER_ID.eq(ownerId));
         if(parkingLotId != null)
         	query.addConditions(Tables.EH_PARKING_ACTIVITIES.PARKING_LOT_ID.eq(parkingLotId));
-        //ConvertHelper.convert(query.f, ParkingActivity.class);
-		return null;
+        query.addOrderBy(Tables.EH_PARKING_ACTIVITIES.CREATE_TIME.desc());
+        Result<EhParkingActivitiesRecord> result = query.fetch();
+        if(result.size() > 0)
+        	return ConvertHelper.convert(result.get(0), ParkingActivity.class);
+        else 
+        	return null;
 	}
  }
