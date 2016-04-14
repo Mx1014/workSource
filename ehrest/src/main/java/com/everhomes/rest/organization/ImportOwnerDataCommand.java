@@ -1,35 +1,41 @@
-package com.everhomes.rest.community.admin;
+package com.everhomes.rest.organization;
+
 
 import com.everhomes.util.StringHelper;
 
 /**
- * 
- * namespaceId: 命名空间
+ * <ul>
+ * </ul>
  *
  */
-public class CountCommunityUsersCommand {
+public class ImportOwnerDataCommand {
 	
-	private Integer namespaceId;
+	private Long organizationId;
 	
 	private Long communityId;
-
-	public Integer getNamespaceId() {
-		return namespaceId;
+	
+	public Long getOrganizationId() {
+		return organizationId;
 	}
 
-	public void setNamespaceId(Integer namespaceId) {
-		this.namespaceId = namespaceId;
+
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
-	
-	
-	
+
+
+
 	public Long getCommunityId() {
 		return communityId;
 	}
 
+
+
 	public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
 	}
+
 
 	@Override
     public String toString() {

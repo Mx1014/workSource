@@ -192,8 +192,14 @@ public class FamilyServiceImpl implements FamilyService {
     private UserGroupHistoryProvider userGroupHistoryProvider;
     
     @Override
-    public Family getOrCreatefamily(Address address)      {
-        final User user = UserContext.current().getUser();
+    public Family getOrCreatefamily(Address address, User u)      {
+    	
+    	
+    	if(null == u){
+    		u = UserContext.current().getUser();
+    	}
+    	
+    	final User user = u;
         long uid = user.getId();
         Community community = this.communityProvider.findCommunityById(address.getCommunityId());
         Region region;
@@ -602,7 +608,7 @@ public class FamilyServiceImpl implements FamilyService {
     }
 
     @Override
-    public void leave(LeaveFamilyCommand cmd) {
+    public void leave(LeaveFamilyCommand cmd, User u) {
         User user = UserContext.current().getUser();
         Long userId = user.getId();
         long familyId = cmd.getId();

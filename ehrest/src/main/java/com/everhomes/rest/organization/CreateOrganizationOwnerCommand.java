@@ -19,7 +19,11 @@ public class CreateOrganizationOwnerCommand {
 	private String   contactDescription;
 	private Long     addressId;
 	
+	private Long communityId;
 	
+	private String buildingName;
+	
+	private String apartmentName;
 
 	public Long getId() {
 		return id;
@@ -93,15 +97,44 @@ public class CreateOrganizationOwnerCommand {
 
 
 
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
+
+
+
 	public Long getAddressId() {
 		return addressId;
 	}
 
-
-
 	public void setAddressId(Long addressId) {
 		this.addressId = addressId;
 	}
+	
+	public String getBuildingName() {
+		return buildingName;
+	}
+
+	public void setBuildingName(String buildingName) {
+		this.buildingName = buildingName;
+	}
+
+	public String getApartmentName() {
+		return apartmentName;
+	}
+
+
+
+	public void setApartmentName(String apartmentName) {
+		this.apartmentName = apartmentName;
+	}
+
 
 
 	@Override
