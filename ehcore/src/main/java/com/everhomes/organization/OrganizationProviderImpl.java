@@ -75,6 +75,7 @@ import com.everhomes.server.schema.tables.daos.EhOrganizationCommunityRequestsDa
 import com.everhomes.server.schema.tables.daos.EhOrganizationDetailsDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationMembersDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationOrdersDao;
+import com.everhomes.server.schema.tables.daos.EhOrganizationOwnersDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationTasksDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationsDao;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
@@ -90,6 +91,7 @@ import com.everhomes.server.schema.tables.pojos.EhOrganizationCommunityRequests;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationDetails;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationOrders;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationOwners;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationTasks;
 import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.server.schema.tables.records.EhOrganizationAddressesRecord;
@@ -101,6 +103,7 @@ import com.everhomes.server.schema.tables.records.EhOrganizationCommunityRequest
 import com.everhomes.server.schema.tables.records.EhOrganizationDetailsRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationOrdersRecord;
+import com.everhomes.server.schema.tables.records.EhOrganizationOwnersRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
 import com.everhomes.sharding.ShardIterator;
@@ -2077,5 +2080,37 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			return null;
 		});
 		return result;
+	}
+	
+	@Override
+	public void createOrganizationOwner(OrganizationOwners owner) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+		InsertQuery<EhOrganizationOwnersRecord> query = context.insertQuery(Tables.EH_ORGANIZATION_OWNERS);
+		query.setRecord(ConvertHelper.convert(owner, EhOrganizationOwnersRecord.class));
+		query.setReturning(Tables.EH_ORGANIZATION_OWNERS.ID);
+		query.execute();
+		owner.setId(query.getReturnedRecord().value1());
+
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationTasks.class, null); 
+	}
+	
+	@Override
+	public OrganizationOwners getOrganizationOwnerByTokenOraddressId(String contactToken, Long addressId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+		SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
+		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TOKEN.eq(contactToken));
+		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ADDRESS_ID.eq(addressId));
+		return ConvertHelper.convert(query.fetchAny(), OrganizationOwners.class);
+	}
+	
+	@Override
+	public void deleteOrganizationOwnerById(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOrganizationOwnersDao dao = new EhOrganizationOwnersDao(context.configuration());
+		dao.deleteById(id);
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationOwners.class, id);
 	}
 }

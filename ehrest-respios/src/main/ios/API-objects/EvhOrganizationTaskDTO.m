@@ -1,6 +1,6 @@
 //
 // EvhOrganizationTaskDTO.m
-// generated at 2016-04-08 20:09:23 
+// generated at 2016-04-12 19:00:52 
 //
 #import "EvhOrganizationTaskDTO.h"
 
@@ -71,6 +71,10 @@
         [jsonObject setObject: self.option forKey: @"option"];
     if(self.entrancePrivilege)
         [jsonObject setObject: self.entrancePrivilege forKey: @"entrancePrivilege"];
+    if(self.targetName)
+        [jsonObject setObject: self.targetName forKey: @"targetName"];
+    if(self.targetToken)
+        [jsonObject setObject: self.targetToken forKey: @"targetToken"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -155,6 +159,14 @@
         self.entrancePrivilege = [jsonObject objectForKey: @"entrancePrivilege"];
         if(self.entrancePrivilege && [self.entrancePrivilege isEqual:[NSNull null]])
             self.entrancePrivilege = nil;
+
+        self.targetName = [jsonObject objectForKey: @"targetName"];
+        if(self.targetName && [self.targetName isEqual:[NSNull null]])
+            self.targetName = nil;
+
+        self.targetToken = [jsonObject objectForKey: @"targetToken"];
+        if(self.targetToken && [self.targetToken isEqual:[NSNull null]])
+            self.targetToken = nil;
 
         return self;
     }

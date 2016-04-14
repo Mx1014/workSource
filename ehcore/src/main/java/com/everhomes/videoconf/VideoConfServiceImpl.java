@@ -1279,8 +1279,9 @@ public class VideoConfServiceImpl implements VideoConfService {
 	@Override
 	public UserAccountDTO verifyVideoConfAccount(
 			VerifyVideoConfAccountCommand cmd) {
+		User user = UserContext.current().getUser();
 		UserAccountDTO userAccount = new UserAccountDTO();
-		ConfAccounts account = vcProvider.findAccountByUserId(cmd.getUserId());
+		ConfAccounts account = vcProvider.findAccountByUserId(user.getId());
 		
 		boolean privilege = rolePrivilegeService.checkAdministrators(cmd.getEnterpriseId());
 		userAccount.setPurchaseAuthority(privilege);
@@ -1312,6 +1313,36 @@ public class VideoConfServiceImpl implements VideoConfService {
 		return userAccount;
 	}
 
+	@Scheduled(cron="0 0 2 * * ? ")
+	@Override
+	public void invalidConf() {
+		LOGGER.info("update invalid conference which longer than 24 hours.");
+		Timestamp oneDayBefore = addHours(new Timestamp(DateHelper.currentGMTTime().getTime()), -24);
+		List<ConfAccounts> occupiedAccounts = vcProvider.listOccupiedConfAccounts(oneDayBefore);
+		if(occupiedAccounts != null && occupiedAccounts.size() > 0) {
+			for(ConfAccounts account : occupiedAccounts) {
+				if(account.getAssignedConfId() != null && account.getAssignedSourceId() != null) {
+					CancelVideoConfCommand cancelCmd = new CancelVideoConfCommand();
+					ConfConferences conf = vcProvider.findConfConferencesById(account.getAssignedConfId());
+					if(conf != null)
+						cancelCmd.setConfId(conf.getMeetingNo());
+					
+					cancelVideoConf(cancelCmd);
+				}
+			}
+		}
+		
+	}
+	
+	private Timestamp addHours(Timestamp begin, int hours) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(begin);
+		calendar.add(Calendar.HOUR_OF_DAY, hours);
+		Timestamp time = new Timestamp(calendar.getTimeInMillis());
+		
+		return time;
+	}
+	
 	@Override
 	public void cancelVideoConf(CancelVideoConfCommand cmd) {
 		
@@ -2421,6 +2452,11 @@ public class VideoConfServiceImpl implements VideoConfService {
 		
 		ConfInvoices invoice = ConvertHelper.convert(dto, ConfInvoices.class);
 		vcProvider.updateInvoice(invoice);
+		
+		ConfOrders order = vcProvider.findOredrById(cmd.getOrderId());
+		order.setInvoiceReqFlag((byte) 1);
+		order.setInvoiceIssueFlag((byte) 1);
+		vcProvider.updateConfOrders(order);
 		
 		return dto;
 	}

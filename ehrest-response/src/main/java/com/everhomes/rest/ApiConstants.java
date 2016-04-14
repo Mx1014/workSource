@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-04-08 20:08:47
+// generated at 2016-04-12 19:00:44
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -62,6 +62,7 @@ public interface ApiConstants {
     public static final String ADMIN_ACL_UPDATEORGANIZATIONORDINARYADMIN_URL = "/admin/acl/updateOrganizationOrdinaryAdmin";
     public static final String ADMIN_ACL_UPDATEORGANIZATIONSUPERADMIN_URL = "/admin/acl/updateOrganizationSuperAdmin";
     public static final String ADMIN_ACL_UPDATEROLEPRIVILEGE_URL = "/admin/acl/updateRolePrivilege";
+    public static final String ADMIN_ACLINK_CREATEACLINKFIRMWARE_URL = "/admin/aclink/createAclinkFirmware";
     public static final String ADMIN_ACLINK_CREATEAUTH_URL = "/admin/aclink/createAuth";
     public static final String ADMIN_ACLINK_DELETEDOORACCESS_URL = "/admin/aclink/deleteDoorAccess";
     public static final String ADMIN_ACLINK_DELETEDOORAUTH_URL = "/admin/aclink/deleteDoorAuth";
@@ -479,13 +480,12 @@ public interface ApiConstants {
     public static final String NAMESPACE_LISTCOMMUNITYBYNAMESPACE_URL = "/namespace/listCommunityByNamespace";
     public static final String OAUTH2_AUTHORIZE_URL = "/oauth2/authorize";
     public static final String OAUTH2_CONFIRM_URL = "/oauth2/confirm";
-    public static final String OAUTH2_GETTOKEN_URL = "/oauth2/gettoken";
-    public static final String OAUTH2_INNERLOGIN_URL = "/oauth2/innerlogin";
-    public static final String OAUTH2_OAUTH_URL = "/oauth2/oauth";
-    public static final String OAUTH2_RESULT_URL = "/oauth2/result";
-    public static final String OAUTH2_RESULTBYSIGN_URL = "/oauth2/resultBySign";
+    public static final String OAUTH2_OAUTH2LOGON_URL = "/oauth2/oauth2Logon";
+    public static final String OAUTH2_REDIRECTURI_URL = "/oauth2/redirectUri";
+    public static final String OAUTH2_SIGNLOGON_URL = "/oauth2/signLogon";
     public static final String OAUTH2_TOKEN_URL = "/oauth2/token";
     public static final String OAUTH2API_GETUSERINFO_URL = "/oauth2api/getUserInfo";
+    public static final String OPENAPI_CLOSEBIZNAMESPACEVISIBLE_URL = "/openapi/closeBizNamespaceVisible";
     public static final String OPENAPI_FINDBUSINESSFAVORITESTATUS_URL = "/openapi/findBusinessFavoriteStatus";
     public static final String OPENAPI_FINDTOKENBYUSERID_URL = "/openapi/findTokenByUserId";
     public static final String OPENAPI_GETUSERDEFAULTADDRESS_URL = "/openapi/getUserDefaultAddress";
@@ -501,6 +501,7 @@ public interface ApiConstants {
     public static final String OPENAPI_LISTUSERBYKEYWORD_URL = "/openapi/listUserByKeyword";
     public static final String OPENAPI_NOTIFYDOORLOCK_URL = "/openapi/notifyDoorLock";
     public static final String OPENAPI_NOTIFYMESSAGE_URL = "/openapi/notifyMessage";
+    public static final String OPENAPI_OPENBIZNAMESPACEVISIBLE_URL = "/openapi/openBizNamespaceVisible";
     public static final String OPENAPI_RECEIVECOUPON_URL = "/openapi/receiveCoupon";
     public static final String OPENAPI_SENDMESSAGETOUSER_URL = "/openapi/sendMessageToUser";
     public static final String OPENAPI_SYNCBUSINESS_URL = "/openapi/syncBusiness";
@@ -568,6 +569,7 @@ public interface ApiConstants {
     public static final String PM_APPLYPROPERTYMEMBER_URL = "/pm/applyPropertyMember";
     public static final String PM_APPROVEPROPFAMILYMEMBER_URL = "/pm/approvePropFamilyMember";
     public static final String PM_CREATEPMBILLORDER_URL = "/pm/createPmBillOrder";
+    public static final String PM_CREATEPMBILLORDERDEMO_URL = "/pm/createPmBillOrderDemo";
     public static final String PM_DELETEPMBILL_URL = "/pm/deletePmBill";
     public static final String PM_DELETEPMBILLS_URL = "/pm/deletePmBills";
     public static final String PM_FINDBILLBYADDRESSIDANDTIME_URL = "/pm/findBillByAddressIdAndTime";
@@ -630,6 +632,7 @@ public interface ApiConstants {
     public static final String QUALITY_DELETEQUALITYSTANDARD_URL = "/quality/deleteQualityStandard";
     public static final String QUALITY_EXPORTEVALUATIONS_URL = "/quality/exportEvaluations";
     public static final String QUALITY_EXPORTINSPECTIONTASKS_URL = "/quality/exportInspectionTasks";
+    public static final String QUALITY_GETGROUPMEMBERS_URL = "/quality/getGroupMembers";
     public static final String QUALITY_LISTEVALUATIONS_URL = "/quality/listEvaluations";
     public static final String QUALITY_LISTFACTORS_URL = "/quality/listFactors";
     public static final String QUALITY_LISTQUALITYCATEGORIES_URL = "/quality/listQualityCategories";

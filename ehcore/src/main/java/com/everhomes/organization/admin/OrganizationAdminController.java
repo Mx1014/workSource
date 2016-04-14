@@ -37,8 +37,10 @@ import com.everhomes.rest.organization.CreateOrganizationCommand;
 import com.everhomes.rest.organization.CreateOrganizationCommunityCommand;
 import com.everhomes.rest.organization.CreateOrganizationContactCommand;
 import com.everhomes.rest.organization.CreateOrganizationMemberCommand;
+import com.everhomes.rest.organization.CreateOrganizationOwnerCommand;
 import com.everhomes.rest.organization.CreatePropertyOrganizationCommand;
 import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
+import com.everhomes.rest.organization.DeleteOrganizationOwnerCommand;
 import com.everhomes.rest.organization.GetUserResourcePrivilege;
 import com.everhomes.rest.organization.ImportOrganizationPersonnelDataCommand;
 import com.everhomes.rest.organization.ListAclRoleByUserIdCommand;
@@ -973,11 +975,43 @@ public class OrganizationAdminController extends ControllerBase {
         @RequestMapping("processingTask")
         @RestReturn(value=String.class)
         public RestResponse processingTask(@Valid ProcessOrganizationTaskCommand cmd) {
-      	   organizationService.processingTask(cmd);
            RestResponse res = new RestResponse();
+           organizationService.processingTask(cmd);
            res.setErrorCode(ErrorCodes.SUCCESS);
            res.setErrorDescription("OK");
            
            return res;
         }
+        
+        /**
+         * <b>URL: /admin/org/deleteOrganizationOwner</b>
+         * <p>删除用户门牌</p>
+         */
+         @RequestMapping("deleteOrganizationOwner")
+         @RestReturn(value=String.class)
+         public RestResponse deleteOrganizationOwner(@Valid DeleteOrganizationOwnerCommand cmd) {
+        	 organizationService.deleteOrganizationOwner(cmd);
+      	   RestResponse res = new RestResponse();
+      	   res.setErrorCode(ErrorCodes.SUCCESS);
+             res.setErrorDescription("OK");
+            
+            return res;
+         }
+         
+         /**
+          * <b>URL: /admin/org/createOrganizationOwner</b>
+          * <p>创建用户门牌</p>
+          */
+          @RequestMapping("createOrganizationOwner")
+          @RestReturn(value=String.class)
+          public RestResponse createOrganizationOwner(@Valid CreateOrganizationOwnerCommand cmd) {
+        	  organizationService.createOrganizationOwner(cmd);
+             RestResponse res = new RestResponse();
+             res.setErrorCode(ErrorCodes.SUCCESS);
+             res.setErrorDescription("OK");
+             
+             return res;
+          }
+          
+          
 }

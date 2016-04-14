@@ -1,6 +1,6 @@
 //
 // EvhAddressSuggestCommunityRestResponse.m
-// generated at 2016-04-08 20:09:23 
+// generated at 2016-04-12 19:00:53 
 //
 #import "EvhAddressSuggestCommunityRestResponse.h"
 #import "EvhSuggestCommunityDTO.h"
