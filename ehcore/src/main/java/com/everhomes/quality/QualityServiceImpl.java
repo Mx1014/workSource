@@ -1337,6 +1337,9 @@ public class QualityServiceImpl implements QualityService {
 	@Scheduled(cron="0 0 3 1 * ?" )
 	@Override
 	public void createEvaluations() {
+		if(LOGGER.isInfoEnabled()) {
+			LOGGER.info("createEvaluations" + new Timestamp(DateHelper.currentGMTTime().getTime()));
+		}
 		
 		List<QualityInspectionTasks> closedTasks = qualityProvider.listClosedTask();
 		Map<Long, QualityInspectionEvaluations> map = new HashMap<Long, QualityInspectionEvaluations>();
@@ -1622,7 +1625,6 @@ public class QualityServiceImpl implements QualityService {
 		return "";
 	}
 	
-	@Scheduled(cron="0 0 2 * * ? ")
 	@Override
 	public void closeDelayTasks() {
 		LOGGER.info("close delay tasks.");

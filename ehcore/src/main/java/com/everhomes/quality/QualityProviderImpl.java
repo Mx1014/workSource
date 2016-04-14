@@ -29,6 +29,13 @@ import java.util.Map;
 
 
 
+
+
+
+
+
+import javax.annotation.PostConstruct;
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record1;
@@ -62,9 +69,16 @@ import org.springframework.stereotype.Component;
 
 
 
+
+
+
+
+
 import com.everhomes.community.Building;
 import com.everhomes.community.BuildingAttachment;
 import com.everhomes.community.CommunityProviderImpl;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -82,6 +96,8 @@ import com.everhomes.rest.quality.QualityInspectionTaskReviewResult;
 import com.everhomes.rest.quality.QualityInspectionTaskReviewStatus;
 import com.everhomes.rest.quality.QualityInspectionTaskStatus;
 import com.everhomes.rest.quality.QualityStandardStatus;
+import com.everhomes.scheduler.QualityInspectionScheduleJob;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhBuildingAttachmentsDao;
@@ -144,6 +160,23 @@ public class QualityProviderImpl implements QualityProvider {
 	
 	@Autowired
 	private SequenceProvider sequenceProvider;
+	
+	@Autowired
+	private ScheduleProvider scheduleProvider;
+	
+	@Autowired
+	private CoordinationProvider coordinationProvider;
+	
+	@PostConstruct
+	public void init() {
+		this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_TASK.getCode()).tryEnter(()-> {
+			String QUALITY_INSPECTION_TRIGGER_NAME = "QualityInspection";
+			QualityInspectionScheduleJob qualityInspectionScheduleJob = new QualityInspectionScheduleJob();
+			scheduleProvider.scheduleCronJob(QUALITY_INSPECTION_TRIGGER_NAME, QUALITY_INSPECTION_TRIGGER_NAME,
+					"0 0 3 * * ? ", qualityInspectionScheduleJob.getClass(), null);
+        });
+		
+	}
 
 	@Override
 	public void createVerificationTasks(QualityInspectionTasks task) {
