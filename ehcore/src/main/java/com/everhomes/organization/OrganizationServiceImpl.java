@@ -5859,7 +5859,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     		}else if(OrganizationTaskStatus.fromCode(task.getTaskStatus()) == OrganizationTaskStatus.UNPROCESSED || OrganizationTaskStatus.fromCode(task.getTaskStatus()) == OrganizationTaskStatus.PROCESSING){
     			contentMsg = localeTemplateService.getLocaleTemplateString(SmsTemplateCode.SCOPE, SmsTemplateCode.PM_TASK_PROCESS_MSG_CODE, user.getLocale(), map, "");
 	    		contentComment = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_PROCESSING_COMMENT, user.getLocale(), map, "");
-	    		User target = userProvider.findUserById(task.getTargetId());
+	    		UserIdentifier target = userProvider.findClaimedIdentifierByOwnerAndType(task.getTargetId(), IdentifierType.MOBILE.getCode());
 	    		if(null != target){
 	    			List<Tuple<String, Object>> variables = null;
     				for (String key : map.keySet()) {
