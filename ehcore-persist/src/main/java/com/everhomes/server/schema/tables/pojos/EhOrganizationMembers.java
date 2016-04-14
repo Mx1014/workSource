@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationMembers implements java.io.Serializable {
 
-	private static final long serialVersionUID = 722851749;
+	private static final long serialVersionUID = -1170682851;
 
 	private java.lang.Long     id;
 	private java.lang.Long     organizationId;
@@ -28,9 +28,6 @@ public class EhOrganizationMembers implements java.io.Serializable {
 	private java.lang.String   avatar;
 	private java.lang.String   groupPath;
 	private java.lang.Byte     gender;
-	private java.lang.Integer  namespaceId;
-	private java.sql.Timestamp updateTime;
-	private java.sql.Timestamp createTime;
 	private java.lang.Long     integralTag1;
 	private java.lang.Long     integralTag2;
 	private java.lang.Long     integralTag3;
@@ -41,6 +38,9 @@ public class EhOrganizationMembers implements java.io.Serializable {
 	private java.lang.String   stringTag3;
 	private java.lang.String   stringTag4;
 	private java.lang.String   stringTag5;
+	private java.lang.Integer  namespaceId;
+	private java.sql.Timestamp updateTime;
+	private java.sql.Timestamp createTime;
 
 	public EhOrganizationMembers() {}
 
@@ -60,9 +60,6 @@ public class EhOrganizationMembers implements java.io.Serializable {
 		java.lang.String   avatar,
 		java.lang.String   groupPath,
 		java.lang.Byte     gender,
-		java.lang.Integer  namespaceId,
-		java.sql.Timestamp updateTime,
-		java.sql.Timestamp createTime,
 		java.lang.Long     integralTag1,
 		java.lang.Long     integralTag2,
 		java.lang.Long     integralTag3,
@@ -72,7 +69,10 @@ public class EhOrganizationMembers implements java.io.Serializable {
 		java.lang.String   stringTag2,
 		java.lang.String   stringTag3,
 		java.lang.String   stringTag4,
-		java.lang.String   stringTag5
+		java.lang.String   stringTag5,
+		java.lang.Integer  namespaceId,
+		java.sql.Timestamp updateTime,
+		java.sql.Timestamp createTime
 	) {
 		this.id = id;
 		this.organizationId = organizationId;
@@ -89,9 +89,6 @@ public class EhOrganizationMembers implements java.io.Serializable {
 		this.avatar = avatar;
 		this.groupPath = groupPath;
 		this.gender = gender;
-		this.namespaceId = namespaceId;
-		this.updateTime = updateTime;
-		this.createTime = createTime;
 		this.integralTag1 = integralTag1;
 		this.integralTag2 = integralTag2;
 		this.integralTag3 = integralTag3;
@@ -102,6 +99,9 @@ public class EhOrganizationMembers implements java.io.Serializable {
 		this.stringTag3 = stringTag3;
 		this.stringTag4 = stringTag4;
 		this.stringTag5 = stringTag5;
+		this.namespaceId = namespaceId;
+		this.updateTime = updateTime;
+		this.createTime = createTime;
 	}
 
 	public java.lang.Long getId() {
@@ -224,30 +224,6 @@ public class EhOrganizationMembers implements java.io.Serializable {
 		this.gender = gender;
 	}
 
-	public java.lang.Integer getNamespaceId() {
-		return this.namespaceId;
-	}
-
-	public void setNamespaceId(java.lang.Integer namespaceId) {
-		this.namespaceId = namespaceId;
-	}
-
-	public java.sql.Timestamp getUpdateTime() {
-		return this.updateTime;
-	}
-
-	public void setUpdateTime(java.sql.Timestamp updateTime) {
-		this.updateTime = updateTime;
-	}
-
-	public java.sql.Timestamp getCreateTime() {
-		return this.createTime;
-	}
-
-	public void setCreateTime(java.sql.Timestamp createTime) {
-		this.createTime = createTime;
-	}
-
 	public java.lang.Long getIntegralTag1() {
 		return this.integralTag1;
 	}
@@ -326,5 +302,29 @@ public class EhOrganizationMembers implements java.io.Serializable {
 
 	public void setStringTag5(java.lang.String stringTag5) {
 		this.stringTag5 = stringTag5;
+	}
+
+	public java.lang.Integer getNamespaceId() {
+		return this.namespaceId;
+	}
+
+	public void setNamespaceId(java.lang.Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public java.sql.Timestamp getUpdateTime() {
+		return this.updateTime;
+	}
+
+	public void setUpdateTime(java.sql.Timestamp updateTime) {
+		this.updateTime = updateTime;
+	}
+
+	public java.sql.Timestamp getCreateTime() {
+		return this.createTime;
+	}
+
+	public void setCreateTime(java.sql.Timestamp createTime) {
+		this.createTime = createTime;
 	}
 }
