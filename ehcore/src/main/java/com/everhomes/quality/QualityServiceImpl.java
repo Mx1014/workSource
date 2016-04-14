@@ -14,6 +14,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -896,7 +897,7 @@ public class QualityServiceImpl implements QualityService {
 			Map<String, Object> map = new HashMap<String, Object>();
 		    map.put("userName", operator.getContactName());
 		    map.put("taskName", task.getTaskName());
-		    map.put("deadline", new Timestamp(cmd.getEndTime()));
+		    map.put("deadline", timeToStr(new Timestamp(cmd.getEndTime())));
 			String scope = QualityNotificationTemplateCode.SCOPE;
 			int code = QualityNotificationTemplateCode.ASSIGN_TASK_NOTIFY_OPERATOR;
 			String locale = "zh_CN";
@@ -1012,7 +1013,7 @@ public class QualityServiceImpl implements QualityService {
 			Map<String, Object> map = new HashMap<String, Object>();
 		    map.put("userName", operator.getContactName());
 		    map.put("taskName", task.getTaskName());
-		    map.put("deadline", cmd.getEndTime());
+		    map.put("deadline", timeToStr(new Timestamp(cmd.getEndTime())));
 			String scope = QualityNotificationTemplateCode.SCOPE;
 			int code = QualityNotificationTemplateCode.ASSIGN_TASK_NOTIFY_OPERATOR;
 			String locale = "zh_CN";
@@ -1087,7 +1088,7 @@ public class QualityServiceImpl implements QualityService {
 							
 							Map<String, Object> map = new HashMap<String, Object>();
 						    map.put("taskName", task.getTaskName());
-						    map.put("deadline", expiredTime);
+						    map.put("deadline", timeToStr(expiredTime));
 							String scope = QualityNotificationTemplateCode.SCOPE;
 							int code = QualityNotificationTemplateCode.GENERATE_QUALITY_TASK_NOTIFY_EXECUTOR;
 							String locale = "zh_CN";
@@ -1112,6 +1113,12 @@ public class QualityServiceImpl implements QualityService {
 				
 			}
 		} 
+	}
+	
+	private String timeToStr(Timestamp time) {
+
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		return sdf.format(time);
 	}
 	
 	private String timestampToStr(Timestamp time) {
