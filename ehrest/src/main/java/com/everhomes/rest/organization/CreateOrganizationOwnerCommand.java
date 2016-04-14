@@ -104,43 +104,6 @@ public class CreateOrganizationOwnerCommand {
 	}
 
 
-
-	public String getAddress() {
-		return address;
-	}
-
-
-
-	public void setAddress(String address) {
-		this.address = address;
-	}
-
-
-
-	public Long getCreatorUid() {
-		return creatorUid;
-	}
-
-
-
-	public void setCreatorUid(Long creatorUid) {
-		this.creatorUid = creatorUid;
-	}
-
-
-
-	public Timestamp getCreateTime() {
-		return createTime;
-	}
-
-
-
-	public void setCreateTime(Timestamp createTime) {
-		this.createTime = createTime;
-	}
-
-
-
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
