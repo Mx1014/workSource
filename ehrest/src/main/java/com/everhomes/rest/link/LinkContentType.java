@@ -1,5 +1,12 @@
+// @formatter:off
 package com.everhomes.rest.link;
 
+/**
+ * <ul>
+ * <li>FORWARD("forward"): 转发</li>
+ * <li>CREATE("create"): 新创建</li>
+ * </ul>
+ */
 public enum LinkContentType {
     FORWARD("forward"), CREATE("create");
     
