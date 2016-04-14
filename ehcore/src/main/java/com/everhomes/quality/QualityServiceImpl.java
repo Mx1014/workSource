@@ -258,7 +258,7 @@ public class QualityServiceImpl implements QualityService {
 	
 	private QualityInspectionStandards verifiedStandardById(Long id) {
 		QualityInspectionStandards standard = qualityProvider.findStandardById(id);
-		if(standard == null) {
+		if(standard == null || standard.getStatus() == null || standard.getStatus() == QualityStandardStatus.INACTIVE.getCode()) {
 			LOGGER.error("the standard which id="+id+" don't exist!");
 			throw RuntimeErrorException
 					.errorWith(
@@ -1098,15 +1098,15 @@ public class QualityServiceImpl implements QualityService {
 					
 				} else {
 					LOGGER.error("the group which id="+executiveGroup.getGroupId()+" don't have any hecha member!");
-					throw RuntimeErrorException
-							.errorWith(
-									QualityServiceErrorCode.SCOPE,
-									QualityServiceErrorCode.ERROR_HECHA_MEMBER_EMPTY,
-									localeStringService.getLocalizedString(
-											String.valueOf(QualityServiceErrorCode.SCOPE),
-											String.valueOf(QualityServiceErrorCode.ERROR_HECHA_MEMBER_EMPTY),
-											UserContext.current().getUser().getLocale(),
-											"the group don't have any hecha member!"));
+//					throw RuntimeErrorException
+//							.errorWith(
+//									QualityServiceErrorCode.SCOPE,
+//									QualityServiceErrorCode.ERROR_HECHA_MEMBER_EMPTY,
+//									localeStringService.getLocalizedString(
+//											String.valueOf(QualityServiceErrorCode.SCOPE),
+//											String.valueOf(QualityServiceErrorCode.ERROR_HECHA_MEMBER_EMPTY),
+//											UserContext.current().getUser().getLocale(),
+//											"the group don't have any hecha member!"));
 				
 				}
 				
@@ -1152,6 +1152,7 @@ public class QualityServiceImpl implements QualityService {
 	}
 	
 	private QualityInspectionTasks verifiedTaskById(Long taskId) {
+		Timestamp current = new Timestamp(DateHelper.currentGMTTime().getTime());
 		QualityInspectionTasks task = qualityProvider.findVerificationTaskById(taskId);
 		if(task == null) {
 			LOGGER.error("the task which id="+taskId+" don't exist!");
@@ -1164,6 +1165,10 @@ public class QualityServiceImpl implements QualityService {
 									String.valueOf(QualityServiceErrorCode.ERROR_TASK_NOT_EXIST),
 									UserContext.current().getUser().getLocale(),
 									"the task don't exist!"));
+		} else {
+			if(task.getExecutiveExpireTime().before(current)) {
+				qualityProvider.closeTask(task);
+			}
 		}
 		return task;
 	}
@@ -1286,11 +1291,13 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public void createTaskByStandardId(Long id) {
-		QualityInspectionStandards standard = verifiedStandardById(id);
-		this.qualityProvider.populateStandardGroups(standard);
-		
-		QualityStandardsDTO standardDto = converStandardToDto(standard);
-		createTaskByStandard(standardDto);
+		QualityInspectionStandards standard = qualityProvider.findStandardById(id);
+		if(standard != null &&standard.getStatus() != null || standard.getStatus() == QualityStandardStatus.ACTIVE.getCode()) {
+			this.qualityProvider.populateStandardGroups(standard);
+			
+			QualityStandardsDTO standardDto = converStandardToDto(standard);
+			createTaskByStandard(standardDto);
+		}
 		
 	}
 	
@@ -1330,6 +1337,9 @@ public class QualityServiceImpl implements QualityService {
 	@Scheduled(cron="0 0 3 1 * ?" )
 	@Override
 	public void createEvaluations() {
+		if(LOGGER.isInfoEnabled()) {
+			LOGGER.info("createEvaluations" + new Timestamp(DateHelper.currentGMTTime().getTime()));
+		}
 		
 		List<QualityInspectionTasks> closedTasks = qualityProvider.listClosedTask();
 		Map<Long, QualityInspectionEvaluations> map = new HashMap<Long, QualityInspectionEvaluations>();
@@ -1615,11 +1625,23 @@ public class QualityServiceImpl implements QualityService {
 		return "";
 	}
 	
-	@Scheduled(cron="0 0 2 * * ? ")
 	@Override
 	public void closeDelayTasks() {
 		LOGGER.info("close delay tasks.");
 		qualityProvider.closeDelayTasks();
+	}
+	
+	@Override
+	public void createTasks() {
+		List<QualityInspectionStandards> activeStandards = qualityProvider.listActiveStandards();
+		
+		for(QualityInspectionStandards standard : activeStandards) {
+			boolean isRepeat = repeatService.isRepeatSettingActive(standard.getRepeatSettingId());
+			if(isRepeat) {
+				createTaskByStandardId(standard.getId());
+			}
+				
+		}
 	}
 
 }
