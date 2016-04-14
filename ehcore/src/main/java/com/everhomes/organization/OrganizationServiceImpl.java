@@ -133,9 +133,11 @@ import com.everhomes.rest.organization.CreateOrganizationCommand;
 import com.everhomes.rest.organization.CreateOrganizationCommunityCommand;
 import com.everhomes.rest.organization.CreateOrganizationContactCommand;
 import com.everhomes.rest.organization.CreateOrganizationMemberCommand;
+import com.everhomes.rest.organization.CreateOrganizationOwnerCommand;
 import com.everhomes.rest.organization.CreatePropertyOrganizationCommand;
 import com.everhomes.rest.organization.DeleteOrganizationCommunityCommand;
 import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
+import com.everhomes.rest.organization.DeleteOrganizationOwnerCommand;
 import com.everhomes.rest.organization.DepartmentDTO;
 import com.everhomes.rest.organization.DepartmentType;
 import com.everhomes.rest.organization.GetOrgDetailCommand;
@@ -5835,6 +5837,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    
 	    private void sendTaskMsg(Map<String,Object> map, OrganizationTask task, User user){
 	    	
+	    	Integer namespaceId = UserContext.getCurrentNamespaceId();
+	    	
 	    	NewCommentCommand command = new NewCommentCommand();
     		command.setTopicId(task.getApplyEntityId());
     		command.setContentType(PostContentType.TEXT.getCode());
@@ -5846,14 +5850,24 @@ public class OrganizationServiceImpl implements OrganizationService {
     			contentComment = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_FINISH_COMMENT, user.getLocale(), map, "");
     			sendOrganizationNotificationToUser(task.getCreatorUid(),contentMsg);
     		}else if(OrganizationTaskStatus.fromCode(task.getTaskStatus()) == OrganizationTaskStatus.UNPROCESSED || OrganizationTaskStatus.fromCode(task.getTaskStatus()) == OrganizationTaskStatus.PROCESSING){
-    			contentMsg = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_PROCESSING, user.getLocale(), map, "");
+    			contentMsg = localeTemplateService.getLocaleTemplateString(SmsTemplateCode.SCOPE, SmsTemplateCode.PM_TASK_PROCESS_MSG_CODE, user.getLocale(), map, "");
+    			String templateId = localeTemplateService.getLocaleTemplateString(namespaceId, SmsTemplateCode.SCOPE_YZX, SmsTemplateCode.PM_TASK_PROCESS_MSG_CODE, user.getLocale(), map, "");
 	    		contentComment = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_PROCESSING_COMMENT, user.getLocale(), map, "");
 	    		User target = userProvider.findUserById(task.getTargetId());
 	    		if(null != target){
-	    			smsProvider.sendSms(target.getIdentifierToken(), contentMsg);
+	    			if(!"".equals(templateId)){
+	    				List<Tuple<String, Object>> variables = null;
+	    				for (String key : map.keySet()) {
+	    					if(null == variables){
+	    						variables = smsProvider.toTupleList(key, map.get(key));
+	    					}else{
+	    						smsProvider.addToTupleList(variables, key, map.get(key));
+	    					}
+	    				}
+	    				//发送短信
+		    			smsProvider.sendSms(namespaceId, target.getIdentifierToken(), SmsTemplateCode.SCOPE_YZX, Integer.valueOf(templateId), user.getLocale(), variables);
+	    			}
 	    		}
-	    		
-	    		//发送短信
     		}else{
     			//关闭 不要发任何消息
     			return;
@@ -5907,6 +5921,32 @@ public class OrganizationServiceImpl implements OrganizationService {
 			
 			return organizationMembers;
 		}
+	    
+	    @Override
+	    public void createOrganizationOwner(CreateOrganizationOwnerCommand cmd) {
+	    	Integer namespaceId = UserContext.getCurrentNamespaceId();
+	    	UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getContactToken());
+	    	if(null == userIdentifier){
+	    		OrganizationOwners owner = organizationProvider.getOrganizationOwnerByTokenOraddressId(cmd.getContactToken(), cmd.getAddressId());
+	    		if(null == owner){
+	    			owner = ConvertHelper.convert(owner, OrganizationOwners.class);
+	    			organizationProvider.createOrganizationOwner(owner);
+	    		}
+	    	}else{
+	    		
+	    	}
+	    }
+	    
+	    @Override
+	    public void deleteOrganizationOwner(DeleteOrganizationOwnerCommand cmd) {
+	    	
+	    	OrganizationOwners owner = organizationProvider.getOrganizationOwnerByTokenOraddressId(cmd.getContactToken(), cmd.getAddressId());
+	    	
+	    	if(null != owner){
+	    		organizationProvider.deleteOrganizationOwnerById(owner.getId());
+	    	}
+	    	
+	    }
 
 	
 }

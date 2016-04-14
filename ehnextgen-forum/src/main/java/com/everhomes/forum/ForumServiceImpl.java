@@ -441,6 +441,11 @@ public class ForumServiceImpl implements ForumService {
             	if(postDto.getEmbeddedAppId().equals(AppConstants.APPID_ORGTASK)){
             		OrganizationTask task = organizationProvider.findOrganizationTaskById(postDto.getEmbeddedId());
                 	if(null != task){
+                		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getTargetId(), task.getOrganizationId());
+        				if(null != member){
+        		    		task.setTargetName(member.getContactName());
+        		    		task.setTargetToken(member.getContactToken());
+        				}
                 		task.setOption(cmd.getOption());
                 		task.setEntrancePrivilege(cmd.getEntrancePrivilege());
                 		postDto.setEmbeddedJson(StringHelper.toJsonString(task));
