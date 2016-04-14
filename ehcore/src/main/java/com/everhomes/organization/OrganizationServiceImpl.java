@@ -5858,22 +5858,19 @@ public class OrganizationServiceImpl implements OrganizationService {
     			sendOrganizationNotificationToUser(task.getCreatorUid(),contentMsg);
     		}else if(OrganizationTaskStatus.fromCode(task.getTaskStatus()) == OrganizationTaskStatus.UNPROCESSED || OrganizationTaskStatus.fromCode(task.getTaskStatus()) == OrganizationTaskStatus.PROCESSING){
     			contentMsg = localeTemplateService.getLocaleTemplateString(SmsTemplateCode.SCOPE, SmsTemplateCode.PM_TASK_PROCESS_MSG_CODE, user.getLocale(), map, "");
-    			String templateId = localeTemplateService.getLocaleTemplateString(namespaceId, SmsTemplateCode.SCOPE_YZX, SmsTemplateCode.PM_TASK_PROCESS_MSG_CODE, user.getLocale(), map, "");
 	    		contentComment = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_PROCESSING_COMMENT, user.getLocale(), map, "");
 	    		User target = userProvider.findUserById(task.getTargetId());
 	    		if(null != target){
-	    			if(!"".equals(templateId)){
-	    				List<Tuple<String, Object>> variables = null;
-	    				for (String key : map.keySet()) {
-	    					if(null == variables){
-	    						variables = smsProvider.toTupleList(key, map.get(key));
-	    					}else{
-	    						smsProvider.addToTupleList(variables, key, map.get(key));
-	    					}
-	    				}
-	    				//发送短信
-		    			smsProvider.sendSms(namespaceId, target.getIdentifierToken(), SmsTemplateCode.SCOPE, Integer.valueOf(templateId), user.getLocale(), variables);
-	    			}
+	    			List<Tuple<String, Object>> variables = null;
+    				for (String key : map.keySet()) {
+    					if(null == variables){
+    						variables = smsProvider.toTupleList(key, map.get(key));
+    					}else{
+    						smsProvider.addToTupleList(variables, key, map.get(key));
+    					}
+    				}
+    				//发送短信
+	    			smsProvider.sendSms(namespaceId, target.getIdentifierToken(), SmsTemplateCode.SCOPE, SmsTemplateCode.PM_TASK_PROCESS_MSG_CODE, user.getLocale(), variables);
 	    		}
     		}else{
     			//关闭 不要发任何消息
