@@ -365,6 +365,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Autowired
 	private FamilyService familyService;
 
+	@Autowired
 	private UserWithoutConfAccountSearcher userSearcher;
 
 	private int getPageCount(int totalCount, int pageSize){
