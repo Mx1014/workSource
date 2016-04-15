@@ -7,6 +7,8 @@ import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.everhomes.util.StringHelper;
+
 public class CmdUtil {
     public final static int CMD_ACTIVE = 0x01;
 
@@ -160,6 +162,9 @@ public class CmdUtil {
         System.arraycopy(curTimeBytes, 0, dataArr, extTimeBytes.length, curTimeBytes.length);
         try {
             dataArr = addPaddingTo16Bytes(dataArr);
+            
+            LOGGER.info("updateTime dataArr = " + StringHelper.toHexString(dataArr));
+            
             byte[] aeskeyEncryptResult = AESUtil.encrypt(dataArr, curServerKey);
             byte[] resultArr = new byte[2 + aeskeyEncryptResult.length];
             resultArr[0] = cmd;
