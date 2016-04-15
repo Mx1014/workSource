@@ -426,7 +426,7 @@ public class FamilyServiceImpl implements FamilyService {
         ListingLocator locator = new ListingLocator(familyId);
         List<GroupMember> members = this.groupProvider.listGroupMembers(locator, 1000);
         for(GroupMember gm : members) {
-            if(exclude.get(gm.getMemberId()) == null) {
+            if(exclude.get(gm.getMemberId()) == null && gm.getMemberStatus() == GroupMemberStatus.ACTIVE.getCode()) {
                 sendMessageToUser(gm.getMemberId(), message, meta);
             }
         }
