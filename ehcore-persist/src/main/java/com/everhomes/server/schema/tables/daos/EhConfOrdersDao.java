@@ -172,4 +172,11 @@ public class EhConfOrdersDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfOrders> fetchByVendorType(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhConfOrders.EH_CONF_ORDERS.VENDOR_TYPE, values);
 	}
+
+	/**
+	 * Fetch records that have <code>email IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfOrders> fetchByEmail(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhConfOrders.EH_CONF_ORDERS.EMAIL, values);
+	}
 }

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfOrders implements java.io.Serializable {
 
-	private static final long serialVersionUID = 51076982;
+	private static final long serialVersionUID = -1221713428;
 
 	private java.lang.Long       id;
 	private java.lang.Long       ownerId;
@@ -32,6 +32,7 @@ public class EhConfOrders implements java.io.Serializable {
 	private java.lang.String     buyerName;
 	private java.lang.String     buyerContact;
 	private java.lang.Byte       vendorType;
+	private java.lang.String     email;
 
 	public EhConfOrders() {}
 
@@ -54,7 +55,8 @@ public class EhConfOrders implements java.io.Serializable {
 		java.lang.Integer    namespaceId,
 		java.lang.String     buyerName,
 		java.lang.String     buyerContact,
-		java.lang.Byte       vendorType
+		java.lang.Byte       vendorType,
+		java.lang.String     email
 	) {
 		this.id = id;
 		this.ownerId = ownerId;
@@ -75,6 +77,7 @@ public class EhConfOrders implements java.io.Serializable {
 		this.buyerName = buyerName;
 		this.buyerContact = buyerContact;
 		this.vendorType = vendorType;
+		this.email = email;
 	}
 
 	public java.lang.Long getId() {
@@ -227,5 +230,13 @@ public class EhConfOrders implements java.io.Serializable {
 
 	public void setVendorType(java.lang.Byte vendorType) {
 		this.vendorType = vendorType;
+	}
+
+	public java.lang.String getEmail() {
+		return this.email;
+	}
+
+	public void setEmail(java.lang.String email) {
+		this.email = email;
 	}
 }

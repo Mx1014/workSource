@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkingRechargeOrdersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord> {
 
-	private static final long serialVersionUID = 991502341;
+	private static final long serialVersionUID = -156995490;
 
 	/**
 	 * Setter for <code>ehcore.eh_parking_recharge_orders.id</code>. id of the record
@@ -363,6 +363,20 @@ public class EhParkingRechargeOrdersRecord extends org.jooq.impl.UpdatableRecord
 		return (java.lang.Long) getValue(24);
 	}
 
+	/**
+	 * Setter for <code>ehcore.eh_parking_recharge_orders.paid_type</code>. the type of payer
+	 */
+	public void setPaidType(java.lang.String value) {
+		setValue(25, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_parking_recharge_orders.paid_type</code>. the type of payer
+	 */
+	public java.lang.String getPaidType() {
+		return (java.lang.String) getValue(25);
+	}
+
 	// -------------------------------------------------------------------------
 	// Primary key information
 	// -------------------------------------------------------------------------
@@ -389,7 +403,7 @@ public class EhParkingRechargeOrdersRecord extends org.jooq.impl.UpdatableRecord
 	/**
 	 * Create a detached, initialised EhParkingRechargeOrdersRecord
 	 */
-	public EhParkingRechargeOrdersRecord(java.lang.Long id, java.lang.String ownerType, java.lang.Long ownerId, java.lang.Long parkingLotId, java.lang.String plateNumber, java.lang.String plateOwnerName, java.lang.String plateOwnerPhone, java.lang.Long payerEnterpriseId, java.lang.Long payerUid, java.lang.String payerPhone, java.sql.Timestamp paidTime, java.lang.String vendorName, java.lang.String cardNumber, java.lang.String rateToken, java.lang.String rateName, java.math.BigDecimal monthCount, java.math.BigDecimal price, java.lang.Byte status, java.lang.Byte rechargeStatus, java.sql.Timestamp rechargeTime, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.sql.Timestamp oldExpiredTime, java.sql.Timestamp newExpiredTime, java.lang.Long orderNo) {
+	public EhParkingRechargeOrdersRecord(java.lang.Long id, java.lang.String ownerType, java.lang.Long ownerId, java.lang.Long parkingLotId, java.lang.String plateNumber, java.lang.String plateOwnerName, java.lang.String plateOwnerPhone, java.lang.Long payerEnterpriseId, java.lang.Long payerUid, java.lang.String payerPhone, java.sql.Timestamp paidTime, java.lang.String vendorName, java.lang.String cardNumber, java.lang.String rateToken, java.lang.String rateName, java.math.BigDecimal monthCount, java.math.BigDecimal price, java.lang.Byte status, java.lang.Byte rechargeStatus, java.sql.Timestamp rechargeTime, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.sql.Timestamp oldExpiredTime, java.sql.Timestamp newExpiredTime, java.lang.Long orderNo, java.lang.String paidType) {
 		super(com.everhomes.server.schema.tables.EhParkingRechargeOrders.EH_PARKING_RECHARGE_ORDERS);
 
 		setValue(0, id);
@@ -417,5 +431,6 @@ public class EhParkingRechargeOrdersRecord extends org.jooq.impl.UpdatableRecord
 		setValue(22, oldExpiredTime);
 		setValue(23, newExpiredTime);
 		setValue(24, orderNo);
+		setValue(25, paidType);
 	}
 }

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkingRechargeOrders implements java.io.Serializable {
 
-	private static final long serialVersionUID = 655872565;
+	private static final long serialVersionUID = -1936780445;
 
 	private java.lang.Long       id;
 	private java.lang.String     ownerType;
@@ -38,6 +38,7 @@ public class EhParkingRechargeOrders implements java.io.Serializable {
 	private java.sql.Timestamp   oldExpiredTime;
 	private java.sql.Timestamp   newExpiredTime;
 	private java.lang.Long       orderNo;
+	private java.lang.String     paidType;
 
 	public EhParkingRechargeOrders() {}
 
@@ -66,7 +67,8 @@ public class EhParkingRechargeOrders implements java.io.Serializable {
 		java.sql.Timestamp   createTime,
 		java.sql.Timestamp   oldExpiredTime,
 		java.sql.Timestamp   newExpiredTime,
-		java.lang.Long       orderNo
+		java.lang.Long       orderNo,
+		java.lang.String     paidType
 	) {
 		this.id = id;
 		this.ownerType = ownerType;
@@ -93,6 +95,7 @@ public class EhParkingRechargeOrders implements java.io.Serializable {
 		this.oldExpiredTime = oldExpiredTime;
 		this.newExpiredTime = newExpiredTime;
 		this.orderNo = orderNo;
+		this.paidType = paidType;
 	}
 
 	public java.lang.Long getId() {
@@ -293,5 +296,13 @@ public class EhParkingRechargeOrders implements java.io.Serializable {
 
 	public void setOrderNo(java.lang.Long orderNo) {
 		this.orderNo = orderNo;
+	}
+
+	public java.lang.String getPaidType() {
+		return this.paidType;
+	}
+
+	public void setPaidType(java.lang.String paidType) {
+		this.paidType = paidType;
 	}
 }
