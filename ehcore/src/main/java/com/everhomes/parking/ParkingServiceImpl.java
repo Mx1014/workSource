@@ -315,11 +315,12 @@ public class ParkingServiceImpl implements ParkingService {
 		ListParkingRechargeOrdersResponse response = new ListParkingRechargeOrdersResponse();
 		
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-
+		
 		List<ParkingRechargeOrder> list = parkingProvider.searchParkingRechargeOrders(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
 				cmd.getPlateOwnerPhone(), cmd.getPayerName(), cmd.getPayerPhone(), cmd.getPageAnchor(), 
-				pageSize);
+				pageSize,strToTimestamp(cmd.getStartDate()),strToTimestamp(cmd.getEndDate()),cmd.getRechargeStatus()
+				);
     					
     	if(list.size() > 0){
     		response.setOrders(list.stream().map(r -> ConvertHelper.convert(r, ParkingRechargeOrderDTO.class))

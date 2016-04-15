@@ -13,6 +13,9 @@ import com.everhomes.util.StringHelper;
  * <li>plateOwnerPhone: 车主手机号</li>
  * <li>payerName: 付款人名称</li>
  * <li>payerPhone: 付款人手机号</li>
+ * <li>rechargeStatus: 充值状态  0:无效 1：未充值 2:已充值   com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus</li>
+ * <li>startDate: 开始充值时间</li>
+ * <li>endDate: 结束充值时间</li>
  * <li>pageAnchor: 本页开始的锚点</li>
  * <li>pageSize: 每页的数量</li>
  * </ul>
@@ -26,13 +29,32 @@ public class SearchParkingRechargeOrdersCommand {
     private String plateOwnerPhone;
     private String payerName;
     private String payerPhone;
+    private Byte rechargeStatus;
+    private String startDate;
+    private String endDate;
     private Long pageAnchor;
     private Integer pageSize;
     
     public SearchParkingRechargeOrdersCommand() {
     }
 
-    public String getOwnerType() {
+    public String getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(String startDate) {
+		this.startDate = startDate;
+	}
+
+	public String getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(String endDate) {
+		this.endDate = endDate;
+	}
+
+	public String getOwnerType() {
         return ownerType;
     }
 
@@ -112,8 +134,17 @@ public class SearchParkingRechargeOrdersCommand {
         this.pageSize = pageSize;
     }
 
-    @Override
+    public Byte getRechargeStatus() {
+		return rechargeStatus;
+	}
+
+	public void setRechargeStatus(Byte rechargeStatus) {
+		this.rechargeStatus = rechargeStatus;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
 }

@@ -50,6 +50,7 @@ public class ParkingOrderEmbeddedHandler implements OrderEmbeddedHandler{
 		order.setStatus(ParkingRechargeOrderStatus.INACTIVE.getCode());
 		order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.NONE.getCode());
 		order.setPaidTime(payTimeStamp);
+		order.setPaidType(cmd.getVendorType());
 		//order.setPaidTime(cmd.getPayTime());
 		parkingProvider.updateParkingRechargeOrder(order);
 	}
@@ -129,6 +130,7 @@ public class ParkingOrderEmbeddedHandler implements OrderEmbeddedHandler{
 			order.setPrice(payAmount);
 			order.setStatus(ParkingRechargeOrderStatus.PAID.getCode());
 			order.setPaidTime(payTimeStamp);
+			order.setPaidType(cmd.getVendorType());
 			//order.setPaidTime(cmd.getPayTime());
 			parkingProvider.updateParkingRechargeOrder(order);
 		}

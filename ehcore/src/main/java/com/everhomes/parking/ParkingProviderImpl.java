@@ -300,7 +300,8 @@ public class ParkingProviderImpl implements ParkingProvider {
     @Override
     public List<ParkingRechargeOrder> searchParkingRechargeOrders(String ownerType,Long ownerId,
     		Long parkingLotId, String plateNumber,String plateOwnerName,String plateOwnerPhone
-    		,String payerName,String payerPhone,Long pageAnchor,Integer pageSize){
+    		,String payerName,String payerPhone,Long pageAnchor,Integer pageSize,Timestamp startDate,
+    		Timestamp endDate,Byte rechargeStatus){
     	List<ParkingRechargeOrder> resultList = null;
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         SelectQuery<EhParkingRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_ORDERS);
@@ -321,6 +322,13 @@ public class ParkingProviderImpl implements ParkingProvider {
         	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PLATE_OWNER_PHONE.eq(plateOwnerPhone));
         if(StringUtils.isNotBlank(payerPhone))
         	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PAYER_PHONE.eq(payerPhone));
+        
+        if(startDate != null)
+        	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.RECHARGE_TIME.gt(startDate));
+        if(endDate != null)
+        	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.RECHARGE_TIME.lt(endDate));
+        if(rechargeStatus != null)
+        	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.RECHARGE_STATUS.eq(rechargeStatus));
         
         if(StringUtils.isNotBlank(payerName)){
         	query.addJoin(Tables.EH_USERS, Tables.EH_USERS.ID.eq(Tables.EH_PARKING_RECHARGE_ORDERS.PAYER_UID));

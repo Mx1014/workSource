@@ -19,6 +19,7 @@ import com.everhomes.util.StringHelper;
  * <li>payerUid: 付款人用户ID</li>
  * <li>payerName: 付款人名称</li>
  * <li>payerPhone: 付款人手机</li>
+ * <li>paidType: 支付方式,10001-支付宝，10002-微信</li>
  * <li>paidTime: 付款时间</li>
  * <li>vendorName: 厂商名称（用于作逻辑，不用于显示），{@link com.everhomes.rest.parking.ParkingLotVendor}</li>
  * <li>cardNumber: 卡号</li>
@@ -44,6 +45,7 @@ public class ParkingRechargeOrderDTO {
     private Long payerUid;
     private String payerName;
     private String payerPhone;
+    private String paidType;
     private Timestamp paidTime;
     private String vendorName;
     private String cardNumber;
@@ -239,4 +241,12 @@ public class ParkingRechargeOrderDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public String getPaidType() {
+		return paidType;
+	}
+
+	public void setPaidType(String paidType) {
+		this.paidType = paidType;
+	}
 }
