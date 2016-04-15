@@ -1549,6 +1549,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 		else{
 			organizationProvider.deleteOrganizationMemberById(cmd.getId());
+			if(OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER){
+				List<RoleAssignment> userRoles = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), member.getOrganizationId(), EntityType.USER.getCode(), member.getTargetId());
+				for (RoleAssignment roleAssignment : userRoles) {
+					aclProvider.deleteRoleAssignment(roleAssignment.getId());
+				}
+			}
 		}
 
 	}
@@ -5362,6 +5368,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	List<Long> roles = new ArrayList<Long>();
 	    	roles.add(RoleConstants.PM_ORDINARY_ADMIN);
 	    	roles.add(RoleConstants.PM_SUPER_ADMIN);
+	    	roles.add(RoleConstants.ENTERPRISE_ORDINARY_ADMIN);
+	    	roles.add(RoleConstants.ENTERPRISE_SUPER_ADMIN);
 	    	
 	    	List<OrganizationMember> members = this.getOrganizationAdminMemberRole(organizationId, roles);
 	      
@@ -5862,14 +5870,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    		contentComment = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_PROCESSING_COMMENT, user.getLocale(), map, "");
 	    		UserIdentifier target = userProvider.findClaimedIdentifierByOwnerAndType(task.getTargetId(), IdentifierType.MOBILE.getCode());
 	    		if(null != target){
-	    			List<Tuple<String, Object>> variables = null;
-    				for (String key : map.keySet()) {
-    					if(null == variables){
-    						variables = smsProvider.toTupleList(key, map.get(key));
-    					}else{
-    						smsProvider.addToTupleList(variables, key, map.get(key));
-    					}
-    				}
+	    			List<Tuple<String, Object>> variables = smsProvider.toTupleList("operatorUName", map.get("operatorUName"));
+	    			smsProvider.addToTupleList(variables, "targetUName", map.get("targetUName"));
+	    			smsProvider.addToTupleList(variables, "targetUToken", map.get("targetUToken"));
     				//发送短信
 	    			smsProvider.sendSms(namespaceId, target.getIdentifierToken(), SmsTemplateCode.SCOPE, SmsTemplateCode.PM_TASK_PROCESS_MSG_CODE, user.getLocale(), variables);
 	    		}
