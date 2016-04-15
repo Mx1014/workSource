@@ -1,7 +1,5 @@
 package com.everhomes.rest.parking;
 
-import java.sql.Timestamp;
-
 import com.everhomes.util.StringHelper;
 
 /**
@@ -30,15 +28,15 @@ public class ParkingCardDTO {
 	private String cardType;
 	private String cardNumber;
 	private String cardName;
-	private Timestamp startTime;
-	private Timestamp endTime;
+	private String startTime;
+	private String endTime;
 	private boolean isValid;
 	
 	public ParkingCardDTO() {
 	    
 	}
 	
-    public String getOwnerType() {
+	public String getOwnerType() {
         return ownerType;
     }
 
@@ -102,23 +100,23 @@ public class ParkingCardDTO {
         this.cardNumber = cardNumber;
     }
 
-    public Timestamp getStartTime() {
-        return startTime;
-    }
+    public String getStartTime() {
+		return startTime;
+	}
 
-    public void setStartTime(Timestamp startTime) {
-        this.startTime = startTime;
-    }
+	public void setStartTime(String startTime) {
+		this.startTime = startTime;
+	}
 
-    public Timestamp getEndTime() {
-        return endTime;
-    }
+	public String getEndTime() {
+		return endTime;
+	}
 
-    public void setEndTime(Timestamp endTime) {
-        this.endTime = endTime;
-    }
+	public void setEndTime(String endTime) {
+		this.endTime = endTime;
+	}
 
-    @Override
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

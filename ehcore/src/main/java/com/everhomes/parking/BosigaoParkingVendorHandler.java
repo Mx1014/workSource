@@ -95,7 +95,7 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 				parkingCardDTO.setPlateOwnerName(plateOwnerName);
 				parkingCardDTO.setPlateNumber(carNumber);
 				//parkingCardDTO.setStartTime(startTime);
-				parkingCardDTO.setEndTime(endTime);
+				parkingCardDTO.setEndTime(timestampToStr(endTime));
 				parkingCardDTO.setCardType(cardType);
 				parkingCardDTO.setCardNumber(cardNumber);
 				parkingCardDTO.setPlateOwnerPhone(plateOwnerPhone);

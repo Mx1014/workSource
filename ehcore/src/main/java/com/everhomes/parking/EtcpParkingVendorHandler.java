@@ -85,9 +85,9 @@ public class EtcpParkingVendorHandler implements ParkingVendorHandler {
 				dto.setOwnerType(ownerType);
 				dto.setOwnerId(ownerId);
 				dto.setCardNumber(locationNumber);
-				dto.setStartTime(strToTimeStamp(startTime));
+				dto.setStartTime(startTime);
 				Timestamp expiredTime = strToTimeStamp(endTime);
-				dto.setEndTime(expiredTime);
+				dto.setEndTime(endTime);
 				dto.setPlateNumber(plateNumber);
 				dto.setPlateOwnerName(realName);
 				dto.setPlateOwnerPhone(plateOwnerPhone);
@@ -169,7 +169,7 @@ public class EtcpParkingVendorHandler implements ParkingVendorHandler {
 	}
 	
 	private Timestamp strToTimeStamp(String s){
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 		Timestamp time = null;
 		try {
 			time = new Timestamp(sdf.parse(s).getTime());
