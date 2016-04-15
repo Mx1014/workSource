@@ -636,11 +636,6 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     
     private FamilyDTO processNewAddressClaimV2(ClaimAddressCommand cmd) {
     	
-    	 if(null == cmd.getReplacedAddressId() || (StringUtils.isEmpty(cmd.getBuildingName()) && StringUtils.isEmpty(cmd.getApartmentName()))) {
-    	            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-    	                    "Invalid replacedAddressId, buildingName or appartmentName parameter");
-    	 }
-    	
         Address address = this.getOrCreateAddress(cmd);
         Family family = this.familyService.getOrCreatefamily(address, null);
         FamilyDTO familyDTO = ConvertHelper.convert(family, FamilyDTO.class);
