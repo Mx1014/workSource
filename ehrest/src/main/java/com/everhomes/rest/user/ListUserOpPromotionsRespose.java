@@ -3,9 +3,10 @@ package com.everhomes.rest.user;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.promotion.OpPromotionDTO;
 /**
  * <ul>
- * <li>promotions : 运营推广信息列表，{@link com.everhomes.rest.user.OpPromotionDTO}</li>
+ * <li>promotions : 运营推广信息列表，{@link com.everhomes.rest.promotion.OpPromotionDTO}</li>
  * <li>nextPageAnchor : 下一页页码</li>
  * </ul>
  */
@@ -18,7 +19,7 @@ public class ListUserOpPromotionsRespose {
     public ListUserOpPromotionsRespose() {
     }
 
-    public ListUserOpPromotionsRespose(List<OpPromotionDTO> contacts, Long nextPageAnchor) {
+    public ListUserOpPromotionsRespose(List<OpPromotionDTO> promotions, Long nextPageAnchor) {
         super();
         this.promotions = promotions;
         this.nextPageAnchor = nextPageAnchor;

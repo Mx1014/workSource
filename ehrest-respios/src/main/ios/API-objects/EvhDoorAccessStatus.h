@@ -1,0 +1,19 @@
+//
+// EvhDoorAccessStatus.h
+// generated at 2016-04-12 15:02:19 
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhDoorAccessStatus
+//
+typedef enum {
+
+    EvhDoorAccessStatus_ACTIVING = 0, 
+    EvhDoorAccessStatus_ACTIVE = 1, 
+    EvhDoorAccessStatus_INVALID = 2
+
+} EvhDoorAccessStatus;
+
+///////////////////////////////////////////////////////////////////////////////
+

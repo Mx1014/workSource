@@ -1,10 +1,11 @@
 //
 // EvhOrganizationDTO.h
-// generated at 2016-04-07 15:16:53 
+// generated at 2016-04-12 15:02:20 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
 #import "EvhOrganizationDTO.h"
+#import "EvhRoleDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhOrganizationDTO
@@ -39,6 +40,8 @@
 
 @property(nonatomic, copy) NSString* groupType;
 
+@property(nonatomic, copy) NSNumber* directlyEnterpriseId;
+
 @property(nonatomic, copy) NSString* avatarUri;
 
 @property(nonatomic, copy) NSString* avatarUrl;
@@ -54,9 +57,8 @@
 // item type EvhOrganizationDTO*
 @property(nonatomic, strong) NSMutableArray* childrens;
 
-@property(nonatomic, copy) NSNumber* roleId;
-
-@property(nonatomic, copy) NSString* roleName;
+// item type EvhRoleDTO*
+@property(nonatomic, strong) NSMutableArray* roles;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

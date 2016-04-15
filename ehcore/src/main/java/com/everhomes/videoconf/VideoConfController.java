@@ -7,18 +7,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.techpark.onlinePay.OnlinePayBillCommand;
 import com.everhomes.rest.techpark.park.RechargeSuccessResponse;
+import com.everhomes.rest.user.GetAppAgreementCommand;
 import com.everhomes.rest.videoconf.AddSourceVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.AssignVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.CancelVideoConfCommand;
+import com.everhomes.rest.videoconf.ConfAccountOrderDTO;
 import com.everhomes.rest.videoconf.CreateAccountOwnerCommand;
 import com.everhomes.rest.videoconf.CreateConfAccountOrderCommand;
 import com.everhomes.rest.videoconf.CreateConfAccountOrderOnlineCommand;
@@ -83,6 +87,8 @@ import com.everhomes.rest.videoconf.UpdateContactorCommand;
 import com.everhomes.rest.videoconf.UpdateInvoiceCommand;
 import com.everhomes.rest.videoconf.UpdateVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.UserAccountDTO;
+import com.everhomes.rest.videoconf.VerifyPurchaseAuthorityCommand;
+import com.everhomes.rest.videoconf.VerifyPurchaseAuthorityResponse;
 import com.everhomes.rest.videoconf.VerifyVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.VideoConfAccountPreferentialRuleDTO;
 import com.everhomes.rest.videoconf.VideoConfAccountTrialRuleDTO;
@@ -91,6 +97,8 @@ import com.everhomes.search.ConfAccountSearcher;
 import com.everhomes.search.ConfEnterpriseSearcher;
 import com.everhomes.search.ConfOrderSearcher;
 import com.everhomes.search.UserWithoutConfAccountSearcher;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.RequireAuthentication;
 
 @RestDoc(value = "VideoConf controller", site = "core")
@@ -379,6 +387,41 @@ public class VideoConfController  extends ControllerBase{
 	        warningLine = Double.valueOf(line);
 		}
 		
+		if(cmd.getWarningLineType() == 10) {
+	        configurationProvider.setValue(ConfigConstants.VIDEOCONF_ACCOUNT_RADIO_WARNING_LINE_6VIDEO, cmd.getWarningLine());
+	        String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_RADIO_WARNING_LINE_6VIDEO, "0.0000");
+	        warningLine = Double.valueOf(line);
+		}
+		
+		if(cmd.getWarningLineType() == 11) {
+	        configurationProvider.setValue(ConfigConstants.VIDEOCONF_ACCOUNT_RADIO_WARNING_LINE_50VIDEO, cmd.getWarningLine());
+	        String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_RADIO_WARNING_LINE_50VIDEO, "0.0000");
+	        warningLine = Double.valueOf(line);
+		}
+		
+		if(cmd.getWarningLineType() == 12) {
+	        configurationProvider.setValue(ConfigConstants.VIDEOCONF_ACCOUNT_RADIO_WARNING_LINE_50PHONE, cmd.getWarningLine());
+	        String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_RADIO_WARNING_LINE_50PHONE, "0.0000");
+	        warningLine = Double.valueOf(line);
+		}
+		
+		if(cmd.getWarningLineType() == 13) {
+	        configurationProvider.setValue(ConfigConstants.VIDEOCONF_ACCOUNT_OCCUPANCY_WARNING_LINE_6VIDEO, cmd.getWarningLine());
+	        String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_OCCUPANCY_WARNING_LINE_6VIDEO, "0.0000");
+	        warningLine = Double.valueOf(line);
+		}
+		
+		if(cmd.getWarningLineType() == 14) {
+	        configurationProvider.setValue(ConfigConstants.VIDEOCONF_ACCOUNT_OCCUPANCY_WARNING_LINE_50VIDEO, cmd.getWarningLine());
+	        String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_OCCUPANCY_WARNING_LINE_50VIDEO, "0.0000");
+	        warningLine = Double.valueOf(line);
+		}
+		
+		if(cmd.getWarningLineType() == 15) {
+	        configurationProvider.setValue(ConfigConstants.VIDEOCONF_ACCOUNT_OCCUPANCY_WARNING_LINE_50PHONE, cmd.getWarningLine());
+	        String line = configurationProvider.getValue(ConfigConstants.VIDEOCONF_ACCOUNT_OCCUPANCY_WARNING_LINE_50PHONE, "0.0000");
+	        warningLine = Double.valueOf(line);
+		}
 		RestResponse response = new RestResponse(warningLine);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -1207,6 +1250,9 @@ public class VideoConfController  extends ControllerBase{
     @RequestMapping("syncAccountIndex")
     @RestReturn(value=String.class)
     public RestResponse syncAccountIndex() {
+    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
     	confAccountSearcher.syncFromDb();
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
@@ -1222,6 +1268,9 @@ public class VideoConfController  extends ControllerBase{
     @RequestMapping("syncUserIndex")
     @RestReturn(value=String.class)
     public RestResponse syncUserIndex() {
+    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
     	userWithoutConfAccountSearcher.syncFromDb();
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
@@ -1237,6 +1286,9 @@ public class VideoConfController  extends ControllerBase{
     @RequestMapping("syncEnterpriseIndex")
     @RestReturn(value=String.class)
     public RestResponse syncEnterpriseIndex() {
+    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
     	confEnterpriseSearcher.syncFromDb();
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
@@ -1252,6 +1304,9 @@ public class VideoConfController  extends ControllerBase{
     @RequestMapping("syncConfOrderIndex")
     @RestReturn(value=String.class)
     public RestResponse syncConfOrderIndex() {
+    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
     	confOrderSearcher.syncFromDb();
         RestResponse res = new RestResponse();
         res.setErrorCode(ErrorCodes.SUCCESS);
@@ -1281,11 +1336,11 @@ public class VideoConfController  extends ControllerBase{
 	 * @return
 	 */
 	@RequestMapping("updateConfAccountPeriod")
-	@RestReturn(value = String.class)
+	@RestReturn(value = ConfAccountOrderDTO.class)
 	public RestResponse updateConfAccountPeriod(UpdateConfAccountPeriodCommand cmd) {
 
-		videoConfService.updateConfAccountPeriod(cmd);
-		RestResponse response = new RestResponse();
+		ConfAccountOrderDTO dto = videoConfService.updateConfAccountPeriod(cmd);
+		RestResponse response = new RestResponse(dto);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -1313,15 +1368,46 @@ public class VideoConfController  extends ControllerBase{
 	 * @return
 	 */
 	@RequestMapping("createConfAccountOrderOnline")
-	@RestReturn(value = String.class)
+	@RestReturn(value = ConfAccountOrderDTO.class)
 	public RestResponse createConfAccountOrderOnline(CreateConfAccountOrderOnlineCommand cmd) {
 
-		videoConfService.createConfAccountOrderOnline(cmd);
-		RestResponse response = new RestResponse();
+		ConfAccountOrderDTO dto = videoConfService.createConfAccountOrderOnline(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /conf/verifyPurchaseAuthority</b>
+	 * 客户端判断是否是管理员 所属公司是否有空闲账号
+	 * @return
+	 */
+	@RequestMapping("verifyPurchaseAuthority")
+	@RestReturn(value = VerifyPurchaseAuthorityResponse.class)
+	public RestResponse verifyPurchaseAuthority(VerifyPurchaseAuthorityCommand cmd) {
+
+		VerifyPurchaseAuthorityResponse authority = videoConfService.verifyPurchaseAuthority(cmd);
+		RestResponse response = new RestResponse(authority);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
 	
+	/**
+	 * <b>URL: /conf/getConfTelPrice</b>
+	 * 左邻电话会议服务价格表
+	 */
+	@RequestMapping("getConfTelPrice")
+	@RestReturn(String.class)
+	public RestResponse getConfTelPrice(){
+		
+		String result = configurationProvider.getValue(Namespace.DEFAULT_NAMESPACE, ConfigConstants.VIDEOCONF_TEL_PRICE, "");
+
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	
 }

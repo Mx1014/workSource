@@ -85,6 +85,10 @@ public class NewTopicBySceneCommand {
     
     private Byte privateFlag;
     
+    private Long visibleRegionId;
+    
+    private Byte visibleRegionType;
+    
     public NewTopicBySceneCommand() {
     }
     
@@ -215,8 +219,26 @@ public class NewTopicBySceneCommand {
     public void setPrivateFlag(Byte privateFlag) {
         this.privateFlag = privateFlag;
     }
+    
+    
 
-    @Override
+    public Long getVisibleRegionId() {
+		return visibleRegionId;
+	}
+
+	public void setVisibleRegionId(Long visibleRegionId) {
+		this.visibleRegionId = visibleRegionId;
+	}
+
+	public Byte getVisibleRegionType() {
+		return visibleRegionType;
+	}
+
+	public void setVisibleRegionType(Byte visibleRegionType) {
+		this.visibleRegionType = visibleRegionType;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

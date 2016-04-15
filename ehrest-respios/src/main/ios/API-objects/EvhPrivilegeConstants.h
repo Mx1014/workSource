@@ -1,6 +1,6 @@
 //
 // EvhPrivilegeConstants.h
-// generated at 2016-04-07 15:16:52 
+// generated at 2016-04-12 15:02:20 
 //
 
 #define EvhPrivilegeConstants_All 1
@@ -25,3 +25,10 @@
 #define EvhPrivilegeConstants_TaskAllListPosts 305
 #define EvhPrivilegeConstants_TaskGuaranteeListPosts 303
 #define EvhPrivilegeConstants_TaskSeekHelpListPosts 304
+#define EvhPrivilegeConstants_TaskAcceptAndRefuse 306
+#define EvhPrivilegeConstants_TaskProcessingAndGrab 307
+#define EvhPrivilegeConstants_NoticeManagementPost 200
+#define EvhPrivilegeConstants_RolePrivilegeList 602
+#define EvhPrivilegeConstants_RolePrivilegeUpdate 603
+#define EvhPrivilegeConstants_OrgAdminList 604
+#define EvhPrivilegeConstants_OrgAdminUpdate 605

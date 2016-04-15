@@ -84,7 +84,7 @@ CREATE TABLE `eh_parking_recharge_orders` (
     `create_time` DATETIME,
     `old_expired_time` DATETIME,
     `new_expired_time` DATETIME,
-
+	`paid_type` VARCHAR(32) COMMENT 'the type of payer',
 	
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

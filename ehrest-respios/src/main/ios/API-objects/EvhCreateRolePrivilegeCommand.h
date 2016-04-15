@@ -1,6 +1,6 @@
 //
 // EvhCreateRolePrivilegeCommand.h
-// generated at 2016-04-07 15:16:52 
+// generated at 2016-04-12 15:02:19 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -15,6 +15,8 @@
 @property(nonatomic, copy) NSNumber* organizationId;
 
 @property(nonatomic, copy) NSString* roleName;
+
+@property(nonatomic, copy) NSString* description_;
 
 // item type NSNumber*
 @property(nonatomic, strong) NSMutableArray* privilegeIds;

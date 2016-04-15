@@ -18,13 +18,15 @@ public interface UserServiceErrorCode {
     static final int ERROR_IDENTIFIER_ALREADY_CLAIMED = 10011;
     static final int ERROR_ACCOUNT_NAME_ALREADY_EXISTS = 10012;
     static final int ERROR_ACCOUNT_PASSWORD_NOT_SET = 10013;
-    static final int ERROR_INVALID_INVITATION_CODE = 10014;
-    static final int ERROR_INVITATION_CODE = 100015;
-    static final int ERROR_INVALID_PARAMS = 100016;
-    static final int ERROR_INVALID_PERMISSION = 100017;
-    static final int ERROR_UNAUTHENTITICATION = 401;
-    static final int ERROR_FORBIDDEN = 403;
-    static final int ERROR_FILE_CONTEXT_ISNULL = 200001;
+
+    static final int ERROR_INVALID_INVITATION_CODE=10014;
+    static final int ERROR_INVITATION_CODE=100015;
+    static final int ERROR_INVALID_PARAMS=100016;
+    static final int ERROR_INVALID_PERMISSION=100017;
+    static final int ERROR_UNAUTHENTITICATION=401;
+    static final int ERROR_FORBIDDEN=403;
+    static final int ERROR_FILE_CONTEXT_ISNULL=200001;
+
     
     static final int ERROR_INVALID_SCENE_TOKEN = 100101;
 }

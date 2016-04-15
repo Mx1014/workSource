@@ -1,8 +1,6 @@
 // @formatter:off
 package com.everhomes.rest.parking;
 
-import java.sql.Timestamp;
-
 import com.everhomes.util.StringHelper;
 
 /**
@@ -21,8 +19,8 @@ public class SetParkingActivityCommand {
     private String ownerType;
     private Long ownerId;
     private Long parkingLotId;
-    private Timestamp startTime;
-    private Timestamp endTime;
+    private String startTime;
+    private String endTime;
     private Integer topCount;
     
     public SetParkingActivityCommand() {
@@ -60,21 +58,6 @@ public class SetParkingActivityCommand {
         this.parkingLotId = parkingLotId;
     }
 
-    public Timestamp getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(Timestamp startTime) {
-        this.startTime = startTime;
-    }
-
-    public Timestamp getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(Timestamp endTime) {
-        this.endTime = endTime;
-    }
 
     public Integer getTopCount() {
         return topCount;
@@ -83,8 +66,25 @@ public class SetParkingActivityCommand {
     public void setTopCount(Integer topCount) {
         this.topCount = topCount;
     }
+    
+    
+    public String getStartTime() {
+		return startTime;
+	}
 
-    @Override
+	public void setStartTime(String startTime) {
+		this.startTime = startTime;
+	}
+
+	public String getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(String endTime) {
+		this.endTime = endTime;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

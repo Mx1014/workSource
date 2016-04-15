@@ -2,15 +2,20 @@ package com.everhomes.rest.videoconf;
 
 import com.everhomes.util.StringHelper;
 
+
 /**
- * 
- * userId：用户id
+ * <ul>
+ *  <li>userId：用户id</li>
+ *  <li>enterpriseId: 企业id </li>
+ * </ul>
  *
  */
 public class VerifyVideoConfAccountCommand {
 	
 	private Long userId;
 
+	private Long enterpriseId;
+	
 	public Long getUserId() {
 		return userId;
 	}
@@ -19,6 +24,14 @@ public class VerifyVideoConfAccountCommand {
 		this.userId = userId;
 	}
 	
+	public Long getEnterpriseId() {
+		return enterpriseId;
+	}
+
+	public void setEnterpriseId(Long enterpriseId) {
+		this.enterpriseId = enterpriseId;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

@@ -35,6 +35,7 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.videoconf.ConfAccountDTO;
+import com.everhomes.rest.videoconf.ConfCategoryDTO;
 import com.everhomes.rest.videoconf.EnterpriseUsersDTO;
 import com.everhomes.rest.videoconf.ListEnterpriseVideoConfAccountCommand;
 import com.everhomes.rest.videoconf.ListEnterpriseVideoConfAccountResponse;
@@ -149,12 +150,20 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
         	FilterBuilder nfb = FilterBuilders.termFilter("ownerId", 0);
         	fb = FilterBuilders.notFilter(nfb);
         }
-        if(cmd.getEnterpriseId() != null)
-        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("enterpriseId", cmd.getEnterpriseId()));
-        if(cmd.getStatus() != null)
-        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
-        
-        
+        if(cmd.getEnterpriseId() != null) {
+        	if(fb == null) {
+        		fb = FilterBuilders.termFilter("enterpriseId", cmd.getEnterpriseId());
+        	} else {
+        		fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("enterpriseId", cmd.getEnterpriseId()));
+        	}
+        }
+        if(cmd.getStatus() != null) {
+        	if(fb == null) {
+        		fb = FilterBuilders.termFilter("status", cmd.getStatus());
+        	} else {
+        		fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("status", cmd.getStatus()));
+        	}
+        }
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
@@ -210,8 +219,28 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
 			}
 			ConfAccountCategories category = vcProvider.findAccountCategoriesById(account.getAccountCategoryId());
 			if(category != null) {
-//				dto.setAccountType(category.getChannelType());
 				dto.setConfType(category.getConfType());
+				
+				ConfCategoryDTO confCategorydto = new ConfCategoryDTO();
+				confCategorydto.setSingleAccountPrice(category.getSingleAccountPrice());
+				confCategorydto.setMultipleAccountThreshold(category.getMultipleAccountThreshold());
+				confCategorydto.setMultipleAccountPrice(category.getMultipleAccountPrice());
+				confCategorydto.setMinPeriod(category.getMinPeriod());
+				
+				if(category.getConfType() == 0 || category.getConfType() == 1) {
+					confCategorydto.setConfCapacity((byte) 0);
+				}
+				if(category.getConfType() == 2 || category.getConfType() == 3) {
+					confCategorydto.setConfCapacity((byte) 1);
+				}
+				if(category.getConfType() == 4) {
+					confCategorydto.setConfCapacity((byte) 2);
+				}
+				if(category.getConfType() == 5 || category.getConfType() == 6) {
+					confCategorydto.setConfCapacity((byte) 3);
+				}
+				
+				dto.setCategory(confCategorydto);
 			}
 			
 			Organization org = organizationProvider.findOrganizationById(account.getEnterpriseId());

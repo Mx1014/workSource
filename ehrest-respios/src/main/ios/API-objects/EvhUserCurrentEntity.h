@@ -1,6 +1,6 @@
 //
 // EvhUserCurrentEntity.h
-// generated at 2016-04-07 15:16:51 
+// generated at 2016-04-12 15:02:20 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -21,6 +21,8 @@
 @property(nonatomic, copy) NSString* entityName;
 
 @property(nonatomic, copy) NSNumber* timestamp;
+
+@property(nonatomic, copy) NSNumber* directlyEnterpriseId;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

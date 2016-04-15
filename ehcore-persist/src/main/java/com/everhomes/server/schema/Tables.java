@@ -14,6 +14,21 @@ package com.everhomes.server.schema;
 public class Tables {
 
 	/**
+	 * The table ehcore.eh_aclinks
+	 */
+	public static final com.everhomes.server.schema.tables.EhAclinks EH_ACLINKS = com.everhomes.server.schema.tables.EhAclinks.EH_ACLINKS;
+
+	/**
+	 * The table ehcore.eh_aclink_firmware
+	 */
+	public static final com.everhomes.server.schema.tables.EhAclinkFirmware EH_ACLINK_FIRMWARE = com.everhomes.server.schema.tables.EhAclinkFirmware.EH_ACLINK_FIRMWARE;
+
+	/**
+	 * The table ehcore.eh_aclink_undo_key
+	 */
+	public static final com.everhomes.server.schema.tables.EhAclinkUndoKey EH_ACLINK_UNDO_KEY = com.everhomes.server.schema.tables.EhAclinkUndoKey.EH_ACLINK_UNDO_KEY;
+
+	/**
 	 * The table ehcore.eh_activities
 	 */
 	public static final com.everhomes.server.schema.tables.EhActivities EH_ACTIVITIES = com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES;
@@ -32,6 +47,16 @@ public class Tables {
 	 * The table ehcore.eh_address_messages
 	 */
 	public static final com.everhomes.server.schema.tables.EhAddressMessages EH_ADDRESS_MESSAGES = com.everhomes.server.schema.tables.EhAddressMessages.EH_ADDRESS_MESSAGES;
+
+	/**
+	 * The table ehcore.eh_aes_server_key
+	 */
+	public static final com.everhomes.server.schema.tables.EhAesServerKey EH_AES_SERVER_KEY = com.everhomes.server.schema.tables.EhAesServerKey.EH_AES_SERVER_KEY;
+
+	/**
+	 * The table ehcore.eh_aes_user_key
+	 */
+	public static final com.everhomes.server.schema.tables.EhAesUserKey EH_AES_USER_KEY = com.everhomes.server.schema.tables.EhAesUserKey.EH_AES_USER_KEY;
 
 	/**
 	 * The table ehcore.eh_app_promotions
@@ -82,6 +107,11 @@ public class Tables {
 	 * The table ehcore.eh_businesses
 	 */
 	public static final com.everhomes.server.schema.tables.EhBusinesses EH_BUSINESSES = com.everhomes.server.schema.tables.EhBusinesses.EH_BUSINESSES;
+
+	/**
+	 * The table ehcore.eh_business_assigned_namespaces
+	 */
+	public static final com.everhomes.server.schema.tables.EhBusinessAssignedNamespaces EH_BUSINESS_ASSIGNED_NAMESPACES = com.everhomes.server.schema.tables.EhBusinessAssignedNamespaces.EH_BUSINESS_ASSIGNED_NAMESPACES;
 
 	/**
 	 * The table ehcore.eh_business_assigned_scopes
@@ -202,6 +232,21 @@ public class Tables {
 	 * The table ehcore.eh_devices
 	 */
 	public static final com.everhomes.server.schema.tables.EhDevices EH_DEVICES = com.everhomes.server.schema.tables.EhDevices.EH_DEVICES;
+
+	/**
+	 * The table ehcore.eh_door_access
+	 */
+	public static final com.everhomes.server.schema.tables.EhDoorAccess EH_DOOR_ACCESS = com.everhomes.server.schema.tables.EhDoorAccess.EH_DOOR_ACCESS;
+
+	/**
+	 * The table ehcore.eh_door_auth
+	 */
+	public static final com.everhomes.server.schema.tables.EhDoorAuth EH_DOOR_AUTH = com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH;
+
+	/**
+	 * The table ehcore.eh_door_command
+	 */
+	public static final com.everhomes.server.schema.tables.EhDoorCommand EH_DOOR_COMMAND = com.everhomes.server.schema.tables.EhDoorCommand.EH_DOOR_COMMAND;
 
 	/**
 	 * The table ehcore.eh_enterprise_addresses
@@ -504,6 +549,8 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhOrganizationTasks EH_ORGANIZATION_TASKS = com.everhomes.server.schema.tables.EhOrganizationTasks.EH_ORGANIZATION_TASKS;
 
 	/**
+<<<<<<< HEAD
+<<<<<<< HEAD
 	 * The table ehcore.eh_parking_activities
 	 */
 	public static final com.everhomes.server.schema.tables.EhParkingActivities EH_PARKING_ACTIVITIES = com.everhomes.server.schema.tables.EhParkingActivities.EH_PARKING_ACTIVITIES;
@@ -532,6 +579,18 @@ public class Tables {
 	 * The table ehcore.eh_parking_vendors
 	 */
 	public static final com.everhomes.server.schema.tables.EhParkingVendors EH_PARKING_VENDORS = com.everhomes.server.schema.tables.EhParkingVendors.EH_PARKING_VENDORS;
+	
+	/**
+=======
+	 * The table ehcore.eh_organization_task_targets
+	 */
+	public static final com.everhomes.server.schema.tables.EhOrganizationTaskTargets EH_ORGANIZATION_TASK_TARGETS = com.everhomes.server.schema.tables.EhOrganizationTaskTargets.EH_ORGANIZATION_TASK_TARGETS;
+
+	/**
+>>>>>>> 3.3.x
+	 * The table ehcore.eh_owner_doors
+	 */
+	public static final com.everhomes.server.schema.tables.EhOwnerDoors EH_OWNER_DOORS = com.everhomes.server.schema.tables.EhOwnerDoors.EH_OWNER_DOORS;
 
 	/**
 	 * The table ehcore.eh_park_apply_card
@@ -614,6 +673,46 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhQrcodes EH_QRCODES = com.everhomes.server.schema.tables.EhQrcodes.EH_QRCODES;
 
 	/**
+	 * The table ehcore.eh_quality_inspection_categories
+	 */
+	public static final com.everhomes.server.schema.tables.EhQualityInspectionCategories EH_QUALITY_INSPECTION_CATEGORIES = com.everhomes.server.schema.tables.EhQualityInspectionCategories.EH_QUALITY_INSPECTION_CATEGORIES;
+
+	/**
+	 * The table ehcore.eh_quality_inspection_evaluations
+	 */
+	public static final com.everhomes.server.schema.tables.EhQualityInspectionEvaluations EH_QUALITY_INSPECTION_EVALUATIONS = com.everhomes.server.schema.tables.EhQualityInspectionEvaluations.EH_QUALITY_INSPECTION_EVALUATIONS;
+
+	/**
+	 * The table ehcore.eh_quality_inspection_evaluation_factors
+	 */
+	public static final com.everhomes.server.schema.tables.EhQualityInspectionEvaluationFactors EH_QUALITY_INSPECTION_EVALUATION_FACTORS = com.everhomes.server.schema.tables.EhQualityInspectionEvaluationFactors.EH_QUALITY_INSPECTION_EVALUATION_FACTORS;
+
+	/**
+	 * The table ehcore.eh_quality_inspection_standards
+	 */
+	public static final com.everhomes.server.schema.tables.EhQualityInspectionStandards EH_QUALITY_INSPECTION_STANDARDS = com.everhomes.server.schema.tables.EhQualityInspectionStandards.EH_QUALITY_INSPECTION_STANDARDS;
+
+	/**
+	 * The table ehcore.eh_quality_inspection_standard_group_map
+	 */
+	public static final com.everhomes.server.schema.tables.EhQualityInspectionStandardGroupMap EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP = com.everhomes.server.schema.tables.EhQualityInspectionStandardGroupMap.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP;
+
+	/**
+	 * The table ehcore.eh_quality_inspection_tasks
+	 */
+	public static final com.everhomes.server.schema.tables.EhQualityInspectionTasks EH_QUALITY_INSPECTION_TASKS = com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS;
+
+	/**
+	 * The table ehcore.eh_quality_inspection_task_attachments
+	 */
+	public static final com.everhomes.server.schema.tables.EhQualityInspectionTaskAttachments EH_QUALITY_INSPECTION_TASK_ATTACHMENTS = com.everhomes.server.schema.tables.EhQualityInspectionTaskAttachments.EH_QUALITY_INSPECTION_TASK_ATTACHMENTS;
+
+	/**
+	 * The table ehcore.eh_quality_inspection_task_records
+	 */
+	public static final com.everhomes.server.schema.tables.EhQualityInspectionTaskRecords EH_QUALITY_INSPECTION_TASK_RECORDS = com.everhomes.server.schema.tables.EhQualityInspectionTaskRecords.EH_QUALITY_INSPECTION_TASK_RECORDS;
+
+	/**
 	 * The table ehcore.eh_recharge_info
 	 */
 	public static final com.everhomes.server.schema.tables.EhRechargeInfo EH_RECHARGE_INFO = com.everhomes.server.schema.tables.EhRechargeInfo.EH_RECHARGE_INFO;
@@ -677,6 +776,11 @@ public class Tables {
 	 * The table ehcore.eh_rental_site_rules
 	 */
 	public static final com.everhomes.server.schema.tables.EhRentalSiteRules EH_RENTAL_SITE_RULES = com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES;
+
+	/**
+	 * The table ehcore.eh_repeat_settings
+	 */
+	public static final com.everhomes.server.schema.tables.EhRepeatSettings EH_REPEAT_SETTINGS = com.everhomes.server.schema.tables.EhRepeatSettings.EH_REPEAT_SETTINGS;
 
 	/**
 	 * The table ehcore.eh_rtxt_resources

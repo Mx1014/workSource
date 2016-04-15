@@ -11,10 +11,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.entity.EntityType;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.enterprise.EnterpriseDTO;
 import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
 import com.everhomes.rest.enterprise.ListUserRelatedEnterprisesCommand;
@@ -85,6 +88,9 @@ public class OrganizationController extends ControllerBase {
 	
 	@Autowired
 	private OrganizationSearcher organizationSearcher;
+	
+	@Autowired
+	private RolePrivilegeService rolePrivilegeService;
 
 	/**
 	 * <b>URL: /org/getUserOwningOrganizations</b>
@@ -262,6 +268,14 @@ public class OrganizationController extends ControllerBase {
 	@RequestMapping("queryOrgTopicsByCategory")
 	@RestReturn(value=ListPostCommandResponse.class)
 	public RestResponse queryOrgTopicsByCategory(QueryOrganizationTopicCommand cmd) {
+		
+		/*是PM_ADMIN的场景下*/
+		if(null != cmd.getOrganizationId()){
+			/**
+			 * 校验权限
+			 */
+			rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.NoticeManagementPost);
+		}
 		ListPostCommandResponse  cmdResponse = organizationService.queryTopicsByCategory(cmd);
 		RestResponse response = new RestResponse(cmdResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);

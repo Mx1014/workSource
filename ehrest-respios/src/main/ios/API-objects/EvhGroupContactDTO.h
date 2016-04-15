@@ -1,6 +1,6 @@
 //
 // EvhGroupContactDTO.h
-// generated at 2016-04-07 15:16:51 
+// generated at 2016-04-12 15:02:19 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"

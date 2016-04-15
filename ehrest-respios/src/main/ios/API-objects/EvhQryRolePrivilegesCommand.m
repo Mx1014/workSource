@@ -1,6 +1,6 @@
 //
 // EvhQryRolePrivilegesCommand.m
-// generated at 2016-04-07 15:16:52 
+// generated at 2016-04-12 15:02:20 
 //
 #import "EvhQryRolePrivilegesCommand.h"
 
@@ -33,6 +33,8 @@
 {
     if(self.roleId)
         [jsonObject setObject: self.roleId forKey: @"roleId"];
+    if(self.organizationId)
+        [jsonObject setObject: self.organizationId forKey: @"organizationId"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -41,6 +43,10 @@
         self.roleId = [jsonObject objectForKey: @"roleId"];
         if(self.roleId && [self.roleId isEqual:[NSNull null]])
             self.roleId = nil;
+
+        self.organizationId = [jsonObject objectForKey: @"organizationId"];
+        if(self.organizationId && [self.organizationId isEqual:[NSNull null]])
+            self.organizationId = nil;
 
         return self;
     }

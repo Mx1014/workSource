@@ -4,6 +4,7 @@ package com.everhomes.business;
 
 
 import java.util.List;
+import java.util.UUID;
 
 import javax.validation.Valid;
 
@@ -28,6 +29,7 @@ import com.everhomes.rest.business.ListBusinessByKeywordCommand;
 import com.everhomes.rest.business.ListBusinessByKeywordCommandResponse;
 import com.everhomes.rest.business.UpdateBusinessCommand;
 import com.everhomes.rest.business.UpdateBusinessDistanceCommand;
+import com.everhomes.util.SignatureHelper;
 
 @RestDoc(value="Business controller", site="core")
 @RestController

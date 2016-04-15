@@ -11,12 +11,14 @@ import java.util.Set;
 
 
 
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.jooq.tools.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 
 
 
@@ -1338,6 +1340,21 @@ public class VideoConfProviderImpl implements VideoConfProvider {
         
 		EhConfInvoicesDao dao = new EhConfInvoicesDao(context.configuration());
         dao.update(invoice);
+	}
+
+	@Override
+	public int countEnterpriseAccounts(Long enterpriseId) {
+
+		final Integer[] count = new Integer[1];
+		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhConfAccounts.class), null, 
+                (DSLContext context, Object reducingContext)-> {
+                    count[0] = context.selectCount().from(Tables.EH_CONF_ACCOUNTS)
+                    		.where(Tables.EH_CONF_ACCOUNTS.ENTERPRISE_ID.eq(enterpriseId))
+                            .and(Tables.EH_CONF_ACCOUNTS.DELETE_UID.eq(0L))
+                            .fetchOneInto(Integer.class);
+                    return true;
+                });
+		return count[0];
 	}
 	
 	

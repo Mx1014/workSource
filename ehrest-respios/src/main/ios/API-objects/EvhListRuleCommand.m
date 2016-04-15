@@ -1,6 +1,6 @@
 //
 // EvhListRuleCommand.m
-// generated at 2016-03-30 10:13:07 
+// generated at 2016-03-28 15:56:07 
 //
 #import "EvhListRuleCommand.h"
 
@@ -31,10 +31,10 @@
 
 -(void) toJson: (NSMutableDictionary*) jsonObject 
 {
+    if(self.channelType)
+        [jsonObject setObject: self.channelType forKey: @"channelType"];
     if(self.confType)
         [jsonObject setObject: self.confType forKey: @"confType"];
-    if(self.isOnline)
-        [jsonObject setObject: self.isOnline forKey: @"isOnline"];
     if(self.pageOffset)
         [jsonObject setObject: self.pageOffset forKey: @"pageOffset"];
     if(self.pageSize)
@@ -44,13 +44,13 @@
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
 {
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
+        self.channelType = [jsonObject objectForKey: @"channelType"];
+        if(self.channelType && [self.channelType isEqual:[NSNull null]])
+            self.channelType = nil;
+
         self.confType = [jsonObject objectForKey: @"confType"];
         if(self.confType && [self.confType isEqual:[NSNull null]])
             self.confType = nil;
-
-        self.isOnline = [jsonObject objectForKey: @"isOnline"];
-        if(self.isOnline && [self.isOnline isEqual:[NSNull null]])
-            self.isOnline = nil;
 
         self.pageOffset = [jsonObject objectForKey: @"pageOffset"];
         if(self.pageOffset && [self.pageOffset isEqual:[NSNull null]])

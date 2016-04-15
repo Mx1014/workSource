@@ -1,6 +1,6 @@
 //
 // EvhVideoconfUpdateContactorCommand.h
-// generated at 2016-04-06 19:59:46 
+// generated at 2016-04-12 15:02:20 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"

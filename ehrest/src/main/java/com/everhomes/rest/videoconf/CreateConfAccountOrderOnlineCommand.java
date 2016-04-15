@@ -17,6 +17,7 @@ import com.everhomes.util.StringHelper;
  *  <li>buyChannel: 购买渠道0-offline 1-online</li>
  *  <li>confCapacity: 会议容量 0-25方 1-100方 2-6方 3-50方 </li>
  *  <li>confType: 是否支持电话 0-否 1-是</li>
+ *  <li>mailAddress: 邮箱地址</li>
  * </ul>
  *
  */
@@ -43,6 +44,8 @@ public class CreateConfAccountOrderOnlineCommand {
 	private Byte confCapacity;
 	
 	private Byte confType;
+	
+	private String mailAddress;
 
 	public Long getEnterpriseId() {
 		return enterpriseId;
@@ -132,6 +135,14 @@ public class CreateConfAccountOrderOnlineCommand {
 		this.confType = confType;
 	}
 	
+	public String getMailAddress() {
+		return mailAddress;
+	}
+
+	public void setMailAddress(String mailAddress) {
+		this.mailAddress = mailAddress;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

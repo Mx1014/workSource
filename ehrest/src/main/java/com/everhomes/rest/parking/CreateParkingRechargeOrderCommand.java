@@ -21,6 +21,7 @@ import com.everhomes.util.StringHelper;
  * <li>rateName: 费率名称</li>
  * <li>monthCount: 充值月数，不一定每个厂商都有</li>
  * <li>price: 价格</li>
+ * <li>expiredTime: 有效期</li>
  * </ul>
  */
 public class CreateParkingRechargeOrderCommand {
@@ -32,9 +33,7 @@ public class CreateParkingRechargeOrderCommand {
     private Long parkingLotId;
 	@NotNull
     private String plateNumber;
-	@NotNull
     private String plateOwnerName;
-	@NotNull
     private String plateOwnerPhone;
 	@NotNull
     private Long payerEnterpriseId;
@@ -43,13 +42,24 @@ public class CreateParkingRechargeOrderCommand {
     private String cardNumber;
     @NotNull
     private String rateToken;
+    @NotNull
     private String rateName;
     @NotNull
     private Integer monthCount;
     @NotNull
     private BigDecimal price;
+    @NotNull
+	private String expiredTime; 
     
-    public CreateParkingRechargeOrderCommand() {
+    public String getExpiredTime() {
+		return expiredTime;
+	}
+
+	public void setExpiredTime(String expiredTime) {
+		this.expiredTime = expiredTime;
+	}
+
+	public CreateParkingRechargeOrderCommand() {
     }
 
     public String getOwnerType() {

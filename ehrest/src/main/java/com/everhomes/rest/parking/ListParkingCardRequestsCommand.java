@@ -22,7 +22,6 @@ public class ListParkingCardRequestsCommand {
     private Long ownerId;
 	@NotNull
     private Long parkingLotId;
-	@NotNull
     private String plateNumber;
     private Long pageAnchor;
     private Integer pageSize;

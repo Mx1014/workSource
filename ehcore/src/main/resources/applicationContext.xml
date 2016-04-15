@@ -35,6 +35,30 @@
                 </property>
             </bean>
         </mvc:message-converters>
-    </mvc:annotation-driven> 
+    </mvc:annotation-driven>
 
+	<!-- 
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="" />
+		<property name="url" value="${db.url}" />
+		<property name="username" value="${db.username}" />
+		<property name="password" value="${db.password}" />
+
+		<property name="maxActive" value="100" />
+		<property name="minIdle" value="3" />
+		<property name="maxIdle" value="10" />
+		<property name="initialSize" value="5" />
+	</bean>
+
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	 -->
+
+	<bean id="schedulerFactory" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">		
+		<property name="autoStartup" value="true"/>
+		<property name="applicationContextSchedulerContextKey" value="applicationContext"/>
+		<property name="jobFactory" ref="jobFactory" />
+	</bean>
 </beans>

@@ -1,6 +1,6 @@
 //
 // EvhVerifyVideoConfAccountCommand.m
-// generated at 2016-04-07 15:16:52 
+// generated at 2016-04-12 15:02:18 
 //
 #import "EvhVerifyVideoConfAccountCommand.h"
 
@@ -33,6 +33,8 @@
 {
     if(self.userId)
         [jsonObject setObject: self.userId forKey: @"userId"];
+    if(self.enterpriseId)
+        [jsonObject setObject: self.enterpriseId forKey: @"enterpriseId"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -41,6 +43,10 @@
         self.userId = [jsonObject objectForKey: @"userId"];
         if(self.userId && [self.userId isEqual:[NSNull null]])
             self.userId = nil;
+
+        self.enterpriseId = [jsonObject objectForKey: @"enterpriseId"];
+        if(self.enterpriseId && [self.enterpriseId isEqual:[NSNull null]])
+            self.enterpriseId = nil;
 
         return self;
     }

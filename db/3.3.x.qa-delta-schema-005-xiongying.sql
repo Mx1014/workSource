@@ -1,0 +1,1 @@
+ALTER TABLE `eh_quality_inspection_standard_group_map` ADD COLUMN `inspector_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_organizations';

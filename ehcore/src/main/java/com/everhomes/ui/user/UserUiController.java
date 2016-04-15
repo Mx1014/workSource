@@ -19,6 +19,7 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.family.FamilyService;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.promotion.OpPromotionService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.family.ListNeighborUsersCommand;
 import com.everhomes.rest.family.ListNeighborUsersCommandResponse;
@@ -35,14 +36,18 @@ import com.everhomes.rest.ui.user.ListContactsBySceneCommand;
 import com.everhomes.rest.ui.user.SceneContactDTO;
 import com.everhomes.rest.ui.user.SceneDTO;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
-import com.everhomes.rest.ui.user.SceneType;
+
+
 import com.everhomes.rest.ui.user.SetUserCurrentSceneCommand;
+
 import com.everhomes.rest.user.ListUserOpPromotionsRespose;
-import com.everhomes.rest.user.OpPromotionDTO;
-import com.everhomes.rest.user.SyncActivityCommand;
 import com.everhomes.rest.user.UserCurrentEntityType;
-import com.everhomes.user.UserService;
+
 import com.everhomes.util.StringHelper;
+
+import com.everhomes.user.UserService;
+
+
 import com.everhomes.util.WebTokenGenerator;
 
 /**
@@ -68,6 +73,9 @@ public class UserUiController extends ControllerBase {
 
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private OpPromotionService opPromotionService;
     
     /**
      * <b>URL: /ui/user/listUserRelatedScenes</b>
@@ -191,7 +199,7 @@ public class UserUiController extends ControllerBase {
     @RequestMapping(value = "getUserOpPromotionsByScene")
     @RestReturn(ListUserOpPromotionsRespose.class)
     public RestResponse getUserOpPromotionsByScene(GetUserOpPromotionCommand cmd) throws Exception {
-        ListUserOpPromotionsRespose cmdResponse = null;
+        ListUserOpPromotionsRespose cmdResponse = opPromotionService.getUserOpPromotionsByScene(cmd);
         
         RestResponse response = new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);

@@ -1,6 +1,6 @@
 //
 // EvhParkingRechargeRateDTO.h
-// generated at 2016-04-07 15:16:53 
+// generated at 2016-04-12 15:02:20 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -17,6 +17,8 @@
 @property(nonatomic, copy) NSNumber* ownerId;
 
 @property(nonatomic, copy) NSNumber* parkingLotId;
+
+@property(nonatomic, copy) NSNumber* areaId;
 
 @property(nonatomic, copy) NSString* vendorName;
 

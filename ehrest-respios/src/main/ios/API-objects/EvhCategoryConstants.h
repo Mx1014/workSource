@@ -1,6 +1,6 @@
 //
 // EvhCategoryConstants.h
-// generated at 2016-04-07 15:16:53 
+// generated at 2016-04-12 15:02:20 
 //
 
 #define EvhCategoryConstants_CATEGORY_ID_TOPIC 1
@@ -8,6 +8,7 @@
 #define EvhCategoryConstants_CATEGORY_ID_SERVICE 3
 #define EvhCategoryConstants_CATEGORY_ID_ACTIVITY 4
 #define EvhCategoryConstants_CATEGORY_ID_TECH_ACTIVITY 5
+#define EvhCategoryConstants_CATEGORY_ID_QUALITY_INSPECTION 6
 #define EvhCategoryConstants_CATEGORY_ID_TOPIC_COMMON 1001
 #define EvhCategoryConstants_CATEGORY_ID_URGENT_NOTICE 1002
 #define EvhCategoryConstants_CATEGORY_ID_NOTICE 1003
@@ -27,5 +28,5 @@
 #define EvhCategoryConstants_CATEGORY_ID_CLEANING 102021
 #define EvhCategoryConstants_CATEGORY_ID_HOUSE_KEEPING 102022
 #define EvhCategoryConstants_CATEGORY_ID_MAINTENANCE 102023
-#define EvhCategoryConstants_GA_RELATED_CATEGORIES [1003, 1004, 1005, 1006, 102021, 102022, 102023]
+#define EvhCategoryConstants_GA_RELATED_CATEGORIES [1003, 1004, 1005, 1006, 102021, 102022, 102023, 1012]
 #define EvhCategoryConstants_GA_PRIVACY_CATEGORIES [1004, 1005, 1006, 102021, 102022, 102023]

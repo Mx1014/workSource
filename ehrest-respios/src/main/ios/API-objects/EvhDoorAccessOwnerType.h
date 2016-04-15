@@ -1,0 +1,18 @@
+//
+// EvhDoorAccessOwnerType.h
+// generated at 2016-04-12 15:02:20 
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhDoorAccessOwnerType
+//
+typedef enum {
+
+    EvhDoorAccessOwnerType_COMMUNITY = 0, 
+    EvhDoorAccessOwnerType_ENTERPRISE = 1
+
+} EvhDoorAccessOwnerType;
+
+///////////////////////////////////////////////////////////////////////////////
+

@@ -1,8 +1,9 @@
 //
 // EvhConfAccountDTO.m
-// generated at 2016-04-07 15:16:53 
+// generated at 2016-04-12 15:02:19 
 //
 #import "EvhConfAccountDTO.h"
+#import "EvhConfCategoryDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhConfAccountDTO
@@ -57,6 +58,12 @@
         [jsonObject setObject: self.validFlag forKey: @"validFlag"];
     if(self.status)
         [jsonObject setObject: self.status forKey: @"status"];
+    if(self.category) {
+        NSMutableDictionary* dic = [NSMutableDictionary new];
+        [self.category toJson: dic];
+        
+        [jsonObject setObject: dic forKey: @"category"];
+    }
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -114,6 +121,10 @@
         if(self.status && [self.status isEqual:[NSNull null]])
             self.status = nil;
 
+        NSMutableDictionary* itemJson =  (NSMutableDictionary*)[jsonObject objectForKey: @"category"];
+
+        self.category = [EvhConfCategoryDTO new];
+        self.category = [self.category fromJson: itemJson];
         return self;
     }
     

@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
 
  * <li>targetId：对象ID</li>
  * <li>roleId：角色ID</li>
+ * <li>organizationId：机构ID</li>
  * </ul>
  */
 public class SetAclRoleAssignmentCommand {
@@ -16,6 +17,8 @@ public class SetAclRoleAssignmentCommand {
 	private Long targetId;
 	
 	private Long roleId;
+	
+	private Long organizationId;
 	
 	public SetAclRoleAssignmentCommand() {
     }
@@ -43,6 +46,14 @@ public class SetAclRoleAssignmentCommand {
 	}
 
 
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
 
 	@Override
     public String toString() {
