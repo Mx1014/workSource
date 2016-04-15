@@ -85,9 +85,9 @@ public class EtcpParkingVendorHandler implements ParkingVendorHandler {
 				dto.setOwnerType(ownerType);
 				dto.setOwnerId(ownerId);
 				dto.setCardNumber(locationNumber);
-				dto.setStartTime(startTime);
+//				dto.setStartTime(startTime);
 				Timestamp expiredTime = strToTimeStamp(endTime);
-				dto.setEndTime(endTime);
+//				dto.setEndTime(endTime);
 				dto.setPlateNumber(plateNumber);
 				dto.setPlateOwnerName(realName);
 				dto.setPlateOwnerPhone(plateOwnerPhone);

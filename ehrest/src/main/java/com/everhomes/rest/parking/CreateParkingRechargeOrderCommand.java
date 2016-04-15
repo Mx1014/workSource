@@ -49,13 +49,13 @@ public class CreateParkingRechargeOrderCommand {
     @NotNull
     private BigDecimal price;
     @NotNull
-	private String expiredTime; 
+	private Long expiredTime; 
     
-    public String getExpiredTime() {
+	public Long getExpiredTime() {
 		return expiredTime;
 	}
 
-	public void setExpiredTime(String expiredTime) {
+	public void setExpiredTime(Long expiredTime) {
 		this.expiredTime = expiredTime;
 	}
 

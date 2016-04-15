@@ -19,8 +19,8 @@ public class SetParkingActivityCommand {
     private String ownerType;
     private Long ownerId;
     private Long parkingLotId;
-    private String startTime;
-    private String endTime;
+    private Long startTime;
+    private Long endTime;
     private Integer topCount;
     
     public SetParkingActivityCommand() {
@@ -67,20 +67,19 @@ public class SetParkingActivityCommand {
         this.topCount = topCount;
     }
     
-    
-    public String getStartTime() {
+	public Long getStartTime() {
 		return startTime;
 	}
 
-	public void setStartTime(String startTime) {
+	public void setStartTime(Long startTime) {
 		this.startTime = startTime;
 	}
 
-	public String getEndTime() {
+	public Long getEndTime() {
 		return endTime;
 	}
 
-	public void setEndTime(String endTime) {
+	public void setEndTime(Long endTime) {
 		this.endTime = endTime;
 	}
 

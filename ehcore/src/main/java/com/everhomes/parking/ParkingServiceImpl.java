@@ -10,6 +10,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -319,7 +321,7 @@ public class ParkingServiceImpl implements ParkingService {
 		List<ParkingRechargeOrder> list = parkingProvider.searchParkingRechargeOrders(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
 				cmd.getPlateOwnerPhone(), cmd.getPayerName(), cmd.getPayerPhone(), cmd.getPageAnchor(), 
-				pageSize,strToTimestamp(cmd.getStartDate()),strToTimestamp(cmd.getEndDate()),cmd.getRechargeStatus()
+				pageSize,new Timestamp(cmd.getStartDate()),new Timestamp(cmd.getEndDate()),cmd.getRechargeStatus()
 				);
     					
     	if(list.size() > 0){
@@ -342,7 +344,7 @@ public class ParkingServiceImpl implements ParkingService {
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
     	List<ParkingCardRequest> list = parkingProvider.searchParkingCardRequests(cmd.getOwnerType(), 
     			cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(), 
-    			cmd.getPlateOwnerPhone(), strToTimestamp(cmd.getStartDate()), strToTimestamp(cmd.getEndDate()), 
+    			cmd.getPlateOwnerPhone(), new Timestamp(cmd.getStartDate()), new Timestamp(cmd.getEndDate()), 
     			cmd.getStatus(),cmd.getPageAnchor(), pageSize);
     	if(list.size() > 0){
     		response.setRequests(list.stream().map(r -> ConvertHelper.convert(r, ParkingCardRequestDTO.class))
@@ -432,8 +434,8 @@ public class ParkingServiceImpl implements ParkingService {
 		
 		User user = UserContext.current().getUser();
 		
-		parkingActivity.setCreateTime(strToTimestamp(cmd.getStartTime()));
-		parkingActivity.setEndTime(strToTimestamp(cmd.getEndTime()));
+		parkingActivity.setCreateTime(new Timestamp(cmd.getStartTime()));
+		parkingActivity.setEndTime(new Timestamp(cmd.getEndTime()));
 		parkingActivity.setOwnerId(cmd.getOwnerId());
 		parkingActivity.setOwnerType(cmd.getOwnerType());
 		parkingActivity.setParkingLotId(cmd.getParkingLotId());
@@ -537,19 +539,19 @@ public class ParkingServiceImpl implements ParkingService {
 		return Long.valueOf(bill);
 	}
     
-	private Timestamp addDays(String oldPeriod, int days) {
+	private Timestamp addDays(Long oldPeriod, int days) {
 		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(strToTimestamp(oldPeriod));
+		calendar.setTime(new Timestamp(oldPeriod));
 		calendar.add(Calendar.DATE, days);
 		Timestamp time = new Timestamp(calendar.getTimeInMillis());
 		
 		return time;
 	}
 	
-	private Timestamp addMonth(String oldPeriod, int month) {
+	private Timestamp addMonth(Long oldPeriod, int month) {
 		
 		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(strToTimestamp(oldPeriod));
+		calendar.setTime(new Timestamp(oldPeriod));
 		calendar.add(Calendar.MONTH, month);
 		Timestamp newPeriod = new Timestamp(calendar.getTimeInMillis());
 		
@@ -569,5 +571,18 @@ public class ParkingServiceImpl implements ParkingService {
 		}
 		LOGGER.debug("orderTypeCode="+code);
 		return String.valueOf(code);
+	}
+	
+	public HttpServletResponse exportParkingRechageOrders(SearchParkingRechargeOrdersCommand cmd){
+		HttpServletResponse response = null;    
+		
+		List<ParkingRechargeOrder> list = parkingProvider.searchParkingRechargeOrders(cmd.getOwnerType(),
+				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
+				cmd.getPlateOwnerPhone(), cmd.getPayerName(), cmd.getPayerPhone(), cmd.getPageAnchor(), 
+				null,new Timestamp(cmd.getStartDate()),new Timestamp(cmd.getEndDate()),cmd.getRechargeStatus()
+				);
+		//Workbook ab 
+		
+		return response;
 	}
 }
