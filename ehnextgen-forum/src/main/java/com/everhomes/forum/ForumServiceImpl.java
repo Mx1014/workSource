@@ -1044,16 +1044,16 @@ public class ForumServiceImpl implements ForumService {
             query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
             
             if(TopicPublishStatus.fromCode(cmd.getPublishStatus()) == TopicPublishStatus.UNPUBLISHED){
-            	query.addConditions(Tables.EH_FORUM_POSTS.START_TIME.lt(timestemp));
+            	query.addConditions(Tables.EH_FORUM_POSTS.START_TIME.gt(timestemp));
             }
             
             if(TopicPublishStatus.fromCode(cmd.getPublishStatus()) == TopicPublishStatus.PUBLISHED){
-            	query.addConditions(Tables.EH_FORUM_POSTS.START_TIME.gt(timestemp));
-            	query.addConditions(Tables.EH_FORUM_POSTS.END_TIME.lt(timestemp));
+            	query.addConditions(Tables.EH_FORUM_POSTS.START_TIME.lt(timestemp));
+            	query.addConditions(Tables.EH_FORUM_POSTS.END_TIME.gt(timestemp));
             }
             
             if(TopicPublishStatus.fromCode(cmd.getPublishStatus()) == TopicPublishStatus.EXPIRED){
-            	query.addConditions(Tables.EH_FORUM_POSTS.END_TIME.gt(timestemp));
+            	query.addConditions(Tables.EH_FORUM_POSTS.END_TIME.lt(timestemp));
             }
             
             
@@ -1087,15 +1087,15 @@ public class ForumServiceImpl implements ForumService {
         	if(null != s && null != e){
         		dto.setStartTime(s.getTime());
             	dto.setEndTime(e.getTime());
-        		if(s.getTime() < timestemp.getTime()){
+        		if(s.getTime() > timestemp.getTime()){
         			dto.setPublishStatus(TopicPublishStatus.UNPUBLISHED.getCode());
         		}
         		
-        		if(s.getTime() > timestemp.getTime() && e.getTime() < timestemp.getTime()){
+        		if(s.getTime() < timestemp.getTime() && e.getTime() > timestemp.getTime()){
         			dto.setPublishStatus(TopicPublishStatus.PUBLISHED.getCode());
         		}
         		
-        		if(e.getTime() > timestemp.getTime()){
+        		if(e.getTime() < timestemp.getTime()){
         			dto.setPublishStatus(TopicPublishStatus.EXPIRED.getCode());
         		}
         	}
