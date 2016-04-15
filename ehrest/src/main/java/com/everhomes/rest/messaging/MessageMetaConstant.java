@@ -8,4 +8,5 @@ public interface MessageMetaConstant {
     public static final String INCLUDE = "include";
     public static final String EXCLUDE = "exclude";
     public static final String SENDER_NAME = "sender-name";
+    public static final String POPUP_FLAG = "popup-flag";
 }

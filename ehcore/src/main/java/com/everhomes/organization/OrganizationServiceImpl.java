@@ -1274,7 +1274,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 	            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 	                    "Organization not found");
 	        } else {
-	            groupDto = groupProvider.findGroupById(organization.getGroupId());
+	            if(organization.getGroupId() != null) {
+	                groupDto = groupProvider.findGroupById(organization.getGroupId());
+	            }
                 if(groupDto != null) {
                     forumIdList.add(groupDto.getOwningForumId());
                 }
@@ -1284,7 +1286,9 @@ public class OrganizationServiceImpl implements OrganizationService {
             groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
             List<Organization> subOrgList = organizationProvider.listOrganizationByGroupTypes(organization.getPath() + "/%", groupTypes);
             for(Organization subOrg : subOrgList) {
-                groupDto = groupProvider.findGroupById(subOrg.getGroupId());
+                if(subOrg.getGroupId() != null) {
+                    groupDto = groupProvider.findGroupById(subOrg.getGroupId());
+                }
                 if(groupDto != null) {
                     forumIdList.add(groupDto.getOwningForumId());
                 }
@@ -4068,12 +4072,23 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         User operator = UserContext.current().getUser();
         Long operatorUid = operator.getId();
-        OrganizationMember member = checkEnterpriseContactParameter(cmd.getEnterpriseId(), cmd.getUserId(), operatorUid, "approveForEnterpriseContact");
-       
-        member.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-        updateEnterpriseContactStatus(operator.getId(), member);
+        // 如果有人先把申请拒绝了，那就找不到此人了，此时也让它成功以便客户端不报错 by lqs 20160415
+        // OrganizationMember member = checkEnterpriseContactParameter(cmd.getEnterpriseId(), cmd.getUserId(), operatorUid, "approveForEnterpriseContact");
+        OrganizationMember member = null;
+        if(cmd.getEnterpriseId() != null && cmd.getUserId() != null) {
+            member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getUserId(), cmd.getEnterpriseId());
+        } else {
+            LOGGER.error("Invalid enterprise id or target user id, operatorUid=" + operatorUid + ", cmd=" + cmd);
+        }
         
-        sendMessageForContactApproved(member);
+        if(member != null) {
+            member.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+            updateEnterpriseContactStatus(operator.getId(), member);
+            
+            sendMessageForContactApproved(member);
+        } else {
+            LOGGER.warn("Enterprise contact not found, maybe it has been rejected, operatorUid=" + operatorUid + ", cmd=" + cmd);
+        }
 	}
 
 	/**
