@@ -136,12 +136,13 @@ public class UserUiController extends ControllerBase {
 		}
 		
 		ListNeighborUsersCommandResponse resp = null;
+		// 仅有小区信息看不到邻居 listNeighborUsers方法里示支持小区 by lqs 20160416
  	    if(UserCurrentEntityType.COMMUNITY == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
- 	    	ListNeighborUsersCommand command = new ListNeighborUsersCommand();
- 	    	command.setIsPinyin(1);
- 	    	command.setType(ParamType.COMMUNITY.getCode());
- 	    	command.setId(sceneToken.getEntityId());
- 	    	resp= familyService.listNeighborUsers(command);
+// 	    	ListNeighborUsersCommand command = new ListNeighborUsersCommand();
+// 	    	command.setIsPinyin(1);
+// 	    	command.setType(ParamType.COMMUNITY.getCode());
+// 	    	command.setId(sceneToken.getEntityId());
+// 	    	resp= familyService.listNeighborUsers(command);
 		}else if(UserCurrentEntityType.FAMILY == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
  	    	ListNeighborUsersCommand command = new ListNeighborUsersCommand();
  	    	command.setIsPinyin(1);
