@@ -308,7 +308,9 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
 //            	 groupForumIds.add(1l);
 //            }
             for(GroupDTO groupDTO : groups) {
-                groupForumIds.add(groupDTO.getOwningForumId());
+                if(groupDTO.getOwningForumId() != null) {
+                    groupForumIds.add(groupDTO.getOwningForumId());
+                }
             }
             
             if(groupForumIds.size() > 0) {
