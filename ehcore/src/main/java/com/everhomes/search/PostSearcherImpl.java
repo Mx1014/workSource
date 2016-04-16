@@ -493,7 +493,7 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
             break;
         case ORGANIZATION:
             Organization org = this.organizationProvider.findOrganizationById(sceneToken.getEntityId());
-            if(org != null) {
+            if(org != null && org.getGroupId() != null) {
                 Group group = groupProvider.findGroupById(org.getGroupId());
                 if(group != null) {
                     forumId = group.getOwningForumId();
