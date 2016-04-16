@@ -44,7 +44,7 @@ public class ContentServerHandler extends TextWebSocketHandler {
             LOGGER.error("subscriber error");
             return;
         }
-        LOGGER.info("handle text message from content server.payload={}", message.getPayload());
+        //LOGGER.info("handle text message from content server.payload={}", message.getPayload());
         PduFrame frame = PduFrame.fromJson(message.getPayload());
         if (StringUtils.isEmpty(frame.getName())) {
             LOGGER.info("unknown message type.frame name is empty");
