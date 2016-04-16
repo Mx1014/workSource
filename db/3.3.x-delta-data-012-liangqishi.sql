@@ -1,4 +1,5 @@
 -- change the interest group to club, change private group to group-chat
+UPDATE eh_locale_templates SET `text`='您已加入群聊“${groupName}”。' WHERE id=1;
 UPDATE eh_locale_templates SET `text`='${userName}已加入群聊“${groupName}”。' WHERE id=2;
 UPDATE eh_locale_templates SET `text`='您已成功提交加入群聊“${groupName}”的申请，请耐心等待审核通过。' WHERE id=3;
 UPDATE eh_locale_templates SET `text`='${userName}正在申请加入群聊“${groupName}”，您同意此申请吗？' WHERE id=4;
