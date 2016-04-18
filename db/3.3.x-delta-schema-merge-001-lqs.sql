@@ -1,9 +1,24 @@
-# merge the following sql files
-# 3.3.x-delta-schema-001-xiongying.sql
-# 3.3.x-delta-schema-006-liangqishi.sql
-# 3.3.x-delta-schema-007-yanshaofan.sql
-# 3.3.x-delta-schema-008-yanshaofan.sql
+-- merge the following sql files
+-- 3.3.x-delta-schema-001-xiongying.sql
+-- 3.3.x-delta-schema-006-liangqishi.sql
+-- 3.3.x-delta-schema-007-yanshaofan.sql
+-- 3.3.x-delta-schema-008-yanshaofan.sql
 
+-- merge from platform
+ALTER TABLE `eh_acl_privileges` ADD COLUMN `tag` VARCHAR(32);
+ALTER TABLE `eh_acl_privileges` ADD INDEX `u_eh_acl_priv_tag`(`tag`);
+ALTER TABLE `eh_acl_roles` ADD COLUMN `tag` VARCHAR(32);
+ALTER TABLE `eh_acl_roles` ADD INDEX `u_eh_acl_role_tag`(`tag`);
+
+ALTER TABLE `eh_acl_roles` ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE `eh_acl_roles` ADD COLUMN `owner_type` VARCHAR(32);
+ALTER TABLE `eh_acl_roles` ADD COLUMN `owner_id` BIGINT;
+
+ALTER TABLE `eh_acl_roles` DROP INDEX `u_eh_acl_role_app_id_name`;
+ALTER TABLE `eh_acl_roles` ADD UNIQUE `u_eh_acl_role_name`(`namespace_id`, `app_id`, `name`, `owner_type`, `owner_id`);
+ALTER TABLE `eh_acl_roles` ADD INDEX `i_eh_ach_role_owner`(`namespace_id`, `app_id`, `owner_type`, `owner_id`);
+
+-- merge from ehcore
 ALTER TABLE `eh_conf_orders` ADD COLUMN `buyer_name` VARCHAR(128);
 ALTER TABLE `eh_conf_orders` ADD COLUMN `buyer_contact` VARCHAR(128);
 ALTER TABLE `eh_conf_orders` ADD COLUMN `vendor_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'vendor type 0: none, 1: Alipay, 2: Wechat';
@@ -93,73 +108,7 @@ CREATE TABLE `eh_scene_types`(
     UNIQUE `u_eh_ns_scene`(`namespace_id`, `name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-#
-# member of global parition
-# shared among namespaces, no application module specific information
-#
-DROP TABLE IF EXISTS `eh_op_promotion_policies`;
-CREATE TABLE `eh_op_promotion_policies`(
-    `id` BIGINT NOT NULL,
-    `namespace_id` INTEGER NOT NULL DEFAULT 0,
-    `name` VARCHAR(512) NOT NULL DEFAULT '' COMMENT 'the identifer of the policy',
-	`display_name` VARCHAR(512) DEFAULT '' COMMENT 'the name to display',
-	`description` TEXT,
-    `create_time` DATETIME,
-    
-    PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-#
-# member of global parition
-# shared among namespaces, no application module specific information
-#
-DROP TABLE IF EXISTS `eh_op_promotion_settings`;
-CREATE TABLE `eh_op_promotion_settings`(
-    `id` BIGINT NOT NULL,
-    `namespace_id` INTEGER NOT NULL DEFAULT 0,
-	`scene_type` VARCHAR(64) NOT NULL DEFAULT 'default',
-    `title` VARCHAR(512) NOT NULL DEFAULT '' COMMENT 'the title of the activity',
-	`description` TEXT,
-	`policy_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refer to the id of eh_op_promotion_policies',
-	`policy_data` VARCHAR(1024) COMMENT 'json format, the parameters which help executing the policy',
-	`start_time` DATETIME,
-    `end_time` DATETIME,
-	`scope_code` TINYINT NOT NULL DEFAULT 0 COMMENT '0: all, 1: community, 2: city, 3: user',
-    `scope_id` BIGINT,
-	`action_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'according to document',
-    `action_data` TEXT COMMENT 'the parameters depend on item_type, json format',
-	`valid_count` INTEGER NOT NULL DEFAULT 0 COMMENT '0: unlimit, 1: only once, others',
-    `creator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'record creator user id',
-    `create_time` DATETIME,
-    
-    PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-#
-# member of global parition
-# shared among namespaces, no application module specific information
-# Give user some operation promotions planed by zl market department
-#
-DROP TABLE IF EXISTS `eh_op_promotions`;
-CREATE TABLE `eh_op_promotions`(
-    `id` BIGINT NOT NULL,
-    `namespace_id` INTEGER NOT NULL DEFAULT 0,
-	`scene_type` VARCHAR(64) NOT NULL DEFAULT 'default',
-	`trigger_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refer to the id of eh_promotion_activity_triggers',
-    `title` VARCHAR(512) NOT NULL DEFAULT 0 COMMENT 'the title of the activity',
-	`description` TEXT,
-	`start_time` DATETIME,
-    `end_time` DATETIME,
-	`scope_code` TINYINT NOT NULL DEFAULT 0 COMMENT '0: all, 1: community, 2: city, 3: user',
-    `scope_id` BIGINT,
-	`action_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'according to document',
-    `action_data` TEXT COMMENT 'the parameters depend on item_type, json format',    
-	`valid_count` INTEGER NOT NULL DEFAULT 0 COMMENT '0: unlimit, 1: only once, others',
-	`status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: waiting for approval, 2: active',
-    `create_time` DATETIME,
-    
-    PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 
