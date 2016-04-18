@@ -666,10 +666,6 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     private Address getOrCreateAddress(ClaimAddressCommand cmd) {
     	Address address = null;
     	
-    	if(null != cmd.getReplacedAddressId()){
-    		address = addressProvider.findAddressById(cmd.getReplacedAddressId());
-    	}
-    	
     	if(null == address){
     		address = this.addressProvider.findApartmentAddress(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), cmd.getCommunityId(), 
                     cmd.getBuildingName(), cmd.getApartmentName());
