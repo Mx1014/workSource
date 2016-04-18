@@ -221,4 +221,11 @@ public class EhParkingRechargeOrdersDao extends org.jooq.impl.DAOImpl<com.everho
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders> fetchByPaidType(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhParkingRechargeOrders.EH_PARKING_RECHARGE_ORDERS.PAID_TYPE, values);
 	}
+
+	/**
+	 * Fetch records that have <code>is_delete IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders> fetchByIsDelete(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingRechargeOrders.EH_PARKING_RECHARGE_ORDERS.IS_DELETE, values);
+	}
 }

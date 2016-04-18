@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkingRechargeOrders implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1936780445;
+	private static final long serialVersionUID = -1814332203;
 
 	private java.lang.Long       id;
 	private java.lang.String     ownerType;
@@ -39,6 +39,7 @@ public class EhParkingRechargeOrders implements java.io.Serializable {
 	private java.sql.Timestamp   newExpiredTime;
 	private java.lang.Long       orderNo;
 	private java.lang.String     paidType;
+	private java.lang.Byte       isDelete;
 
 	public EhParkingRechargeOrders() {}
 
@@ -68,7 +69,8 @@ public class EhParkingRechargeOrders implements java.io.Serializable {
 		java.sql.Timestamp   oldExpiredTime,
 		java.sql.Timestamp   newExpiredTime,
 		java.lang.Long       orderNo,
-		java.lang.String     paidType
+		java.lang.String     paidType,
+		java.lang.Byte       isDelete
 	) {
 		this.id = id;
 		this.ownerType = ownerType;
@@ -96,6 +98,7 @@ public class EhParkingRechargeOrders implements java.io.Serializable {
 		this.newExpiredTime = newExpiredTime;
 		this.orderNo = orderNo;
 		this.paidType = paidType;
+		this.isDelete = isDelete;
 	}
 
 	public java.lang.Long getId() {
@@ -304,5 +307,13 @@ public class EhParkingRechargeOrders implements java.io.Serializable {
 
 	public void setPaidType(java.lang.String paidType) {
 		this.paidType = paidType;
+	}
+
+	public java.lang.Byte getIsDelete() {
+		return this.isDelete;
+	}
+
+	public void setIsDelete(java.lang.Byte isDelete) {
+		this.isDelete = isDelete;
 	}
 }

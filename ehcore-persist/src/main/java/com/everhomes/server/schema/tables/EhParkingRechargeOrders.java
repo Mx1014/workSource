@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkingRechargeOrders extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord> {
 
-	private static final long serialVersionUID = 340433954;
+	private static final long serialVersionUID = 431200349;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_parking_recharge_orders</code>
@@ -155,6 +155,11 @@ public class EhParkingRechargeOrders extends org.jooq.impl.TableImpl<com.everhom
 	 * The column <code>ehcore.eh_parking_recharge_orders.paid_type</code>. the type of payer
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.lang.String> PAID_TYPE = createField("paid_type", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "the type of payer");
+
+	/**
+	 * The column <code>ehcore.eh_parking_recharge_orders.is_delete</code>. the order is delete, 0 : is not deleted, 1: deleted
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.lang.Byte> IS_DELETE = createField("is_delete", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "the order is delete, 0 : is not deleted, 1: deleted");
 
 	/**
 	 * Create a <code>ehcore.eh_parking_recharge_orders</code> table reference
