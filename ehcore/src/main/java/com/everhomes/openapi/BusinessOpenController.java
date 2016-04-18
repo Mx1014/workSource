@@ -24,12 +24,14 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.business.BusinessAsignedNamespaceCommand;
+import com.everhomes.rest.business.GetReceivedCouponCountCommand;
 import com.everhomes.rest.business.ListBusinessByCommonityIdCommand;
 import com.everhomes.rest.business.ListUserByIdentifierCommand;
 import com.everhomes.rest.business.ListUserByKeywordCommand;
 import com.everhomes.rest.business.SyncBusinessCommand;
 import com.everhomes.rest.business.SyncDeleteBusinessCommand;
 import com.everhomes.rest.business.SyncUserAddShopStatusCommand;
+import com.everhomes.rest.business.UpdateReceivedCouponCountCommand;
 import com.everhomes.rest.business.UserFavoriteCommand;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
@@ -57,6 +59,7 @@ import com.everhomes.user.SignupToken;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityService;
 import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProfileDTO;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
@@ -420,6 +423,7 @@ public class BusinessOpenController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
 	@RequestMapping("openBizNamespaceVisible")
 	@RestReturn(String.class)
 	public RestResponse openBizNamespaceVisible(@Valid BusinessAsignedNamespaceCommand cmd) {
@@ -429,11 +433,32 @@ public class BusinessOpenController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
 	@RequestMapping("closeBizNamespaceVisible")
 	@RestReturn(String.class)
 	public RestResponse closeBizNamespaceVisible(@Valid BusinessAsignedNamespaceCommand cmd) {
 		businessService.closeBusinessAssignedNamespace(cmd);
 		RestResponse response =  new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	@RequestMapping("updateReceivedCouponCount")
+	@RestReturn(String.class)
+	public RestResponse updateReceivedCouponCount(@Valid UpdateReceivedCouponCountCommand cmd) {
+		businessService.updateReceivedCouponCount(cmd);
+		RestResponse response =  new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	@RequestMapping("getReceivedCouponCount")
+	@RestReturn(UserProfileDTO.class)
+	public RestResponse getReceivedCouponCount(@Valid GetReceivedCouponCountCommand cmd) {
+		UserProfileDTO userProfile = businessService.getReceivedCouponCount(cmd);
+		RestResponse response =  new RestResponse(userProfile);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
