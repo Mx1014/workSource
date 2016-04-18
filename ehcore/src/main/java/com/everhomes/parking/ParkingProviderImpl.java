@@ -88,8 +88,9 @@ public class ParkingProviderImpl implements ParkingProvider {
     
     @Override
     public ParkingRechargeOrder findParkingRechargeOrderById(Long id) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingLots.class));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(ParkingRechargeOrder.class));
         EhParkingRechargeOrdersDao dao = new EhParkingRechargeOrdersDao(context.configuration());
+        
         return ConvertHelper.convert(dao.findById(id), ParkingRechargeOrder.class);
     }
     
@@ -183,7 +184,7 @@ public class ParkingProviderImpl implements ParkingProvider {
     		,Long parkingLotId,String plateNumber,ParkingCardRequestStatus status,String order,
     		Long pageAnchor,Integer pageSize){
     	List<ParkingCardRequest> resultList = null;
-    	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(ParkingCardRequest.class));
         
         StringBuilder sb = new StringBuilder("");
         StringBuilder conditionSb = new StringBuilder("");
@@ -240,7 +241,7 @@ public class ParkingProviderImpl implements ParkingProvider {
     @Override
     public Integer waitingCardCount(String ownerType,Long ownerId
     		,Long parkingLotId,Timestamp createTime){
-    	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(ParkingCardRequest.class));
     	SelectJoinStep<Record1<Integer>> query = context.selectCount().from(Tables.EH_PARKING_CARD_REQUESTS);
         
         Condition condition = Tables.EH_PARKING_CARD_REQUESTS.OWNER_TYPE.eq(ownerType);
@@ -255,7 +256,7 @@ public class ParkingProviderImpl implements ParkingProvider {
     public List<ParkingRechargeOrder> listParkingRechargeOrders(String ownerType,Long ownerId
     		,Long parkingLotId,String plateNumber,Long pageAnchor,Integer pageSize){
     	List<ParkingRechargeOrder> resultList = null;
-    	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(ParkingRechargeOrder.class));
         SelectQuery<EhParkingRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_ORDERS);
         
         if (pageAnchor != null && pageAnchor != 0)
@@ -282,7 +283,7 @@ public class ParkingProviderImpl implements ParkingProvider {
     @Override
     public List<ParkingRechargeOrder> findWaitingParkingRechargeOrders(ParkingLotVendor vendor){
     	List<ParkingRechargeOrder> resultList = null;
-    	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(ParkingRechargeOrder.class));
         SelectQuery<EhParkingRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_ORDERS);
 		
         query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.VENDOR_NAME.eq(vendor.getCode()));
@@ -303,7 +304,7 @@ public class ParkingProviderImpl implements ParkingProvider {
     		,String payerName,String payerPhone,Long pageAnchor,Integer pageSize,Timestamp startDate,
     		Timestamp endDate,Byte rechargeStatus){
     	List<ParkingRechargeOrder> resultList = null;
-    	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(ParkingRechargeOrder.class));
         SelectQuery<EhParkingRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_ORDERS);
         
         if (pageAnchor != null && pageAnchor != 0)
@@ -366,6 +367,15 @@ public class ParkingProviderImpl implements ParkingProvider {
     	dao.delete(parkingRechargeRate);
     	
     	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhParkingRechargeRates.class, parkingRechargeRate.getId());
+    }
+    
+    @Override
+    public void deleteParkingRechargeOrder(ParkingRechargeOrder parkingRechargeOrder){
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhParkingRechargeOrdersDao dao = new EhParkingRechargeOrdersDao(context.configuration());
+        
+        dao.delete(parkingRechargeOrder);	
+    	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhParkingRechargeOrders.class, parkingRechargeOrder.getId());
     }
     
     @Override
@@ -496,6 +506,7 @@ public class ParkingProviderImpl implements ParkingProvider {
         if(parkingLotId != null)
         	query.addConditions(Tables.EH_PARKING_ACTIVITIES.PARKING_LOT_ID.eq(parkingLotId));
         query.addOrderBy(Tables.EH_PARKING_ACTIVITIES.CREATE_TIME.desc());
+        query.addLimit(1);
         Result<EhParkingActivitiesRecord> result = query.fetch();
         if(result.size() > 0)
         	return ConvertHelper.convert(result.get(0), ParkingActivity.class);

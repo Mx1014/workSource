@@ -1,6 +1,10 @@
 // @formatter:off
 package com.everhomes.parking;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -13,6 +17,12 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,8 +44,10 @@ import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayCallbackCommand;
+import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.CreateParkingRechargeOrderCommand;
 import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
+import com.everhomes.rest.parking.DeleteParkingRechargeOrderCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
 import com.everhomes.rest.parking.GetParkingActivityCommand;
 import com.everhomes.rest.parking.IssueParkingCardsCommand;
@@ -63,6 +75,8 @@ import com.everhomes.rest.parking.SearchParkingRechargeOrdersCommand;
 import com.everhomes.rest.parking.SetParkingActivityCommand;
 import com.everhomes.rest.parking.SetParkingCardIssueFlagCommand;
 import com.everhomes.rest.parking.SetParkingCardReserveDaysCommand;
+import com.everhomes.rest.techpark.park.ParkingServiceErrorCode;
+import com.everhomes.rest.techpark.punch.PunchServiceErrorCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
@@ -77,6 +91,7 @@ import com.everhomes.util.RuntimeErrorException;
 public class ParkingServiceImpl implements ParkingService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ParkingServiceImpl.class);
 
+    SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     @Autowired
     private AclProvider aclProvider;
     
@@ -257,14 +272,11 @@ public class ParkingServiceImpl implements ParkingService {
 		try {
 			dto = commonOrderUtil.convertToCommonOrderTemplate(orderCmd);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error("convertToCommonOrder is fail.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"convertToCommonOrder is fail.");
 		}
 		return dto;
-		
-//		parkingRechargeOrderDTO = ConvertHelper.convert(parkingRechargeOrder, ParkingRechargeOrderDTO.class);
-//		parkingRechargeOrderDTO.setPayerName(user.getNickName());
-//		return parkingRechargeOrderDTO;
 	}
 	
 	@Override
@@ -315,13 +327,18 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public ListParkingRechargeOrdersResponse searchParkingRechargeOrders(SearchParkingRechargeOrdersCommand cmd){
 		ListParkingRechargeOrdersResponse response = new ListParkingRechargeOrdersResponse();
-		
+		Timestamp startDate = null;
+		Timestamp endDate = null;
+		if(cmd.getStartDate() != null)
+			startDate = new Timestamp(cmd.getStartDate());
+		if(cmd.getEndDate() != null)
+			new Timestamp(cmd.getEndDate());
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		
 		List<ParkingRechargeOrder> list = parkingProvider.searchParkingRechargeOrders(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
 				cmd.getPlateOwnerPhone(), cmd.getPayerName(), cmd.getPayerPhone(), cmd.getPageAnchor(), 
-				pageSize,new Timestamp(cmd.getStartDate()),new Timestamp(cmd.getEndDate()),cmd.getRechargeStatus()
+				pageSize,startDate,endDate,cmd.getRechargeStatus()
 				);
     					
     	if(list.size() > 0){
@@ -340,11 +357,16 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public ListParkingCardRequestResponse searchParkingCardRequests(SearchParkingCardRequestsCommand cmd) {
 		ListParkingCardRequestResponse response = new ListParkingCardRequestResponse();
-		
+		Timestamp startDate = null;
+		Timestamp endDate = null;
+		if(cmd.getStartDate() != null)
+			startDate = new Timestamp(cmd.getStartDate());
+		if(cmd.getEndDate() != null)
+			new Timestamp(cmd.getEndDate());
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
     	List<ParkingCardRequest> list = parkingProvider.searchParkingCardRequests(cmd.getOwnerType(), 
     			cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(), 
-    			cmd.getPlateOwnerPhone(), new Timestamp(cmd.getStartDate()), new Timestamp(cmd.getEndDate()), 
+    			cmd.getPlateOwnerPhone(), startDate, endDate, 
     			cmd.getStatus(),cmd.getPageAnchor(), pageSize);
     	if(list.size() > 0){
     		response.setRequests(list.stream().map(r -> ConvertHelper.convert(r, ParkingCardRequestDTO.class))
@@ -457,23 +479,6 @@ public class ParkingServiceImpl implements ParkingService {
 		return dto;
 	}
 	
-    private Timestamp strToTimestamp(String str) {
-    	if(StringUtils.isBlank(str))
-    		return null;
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-		
-		Timestamp ts = null;
-		try {
-			ts = new Timestamp(sdf.parse(str).getTime());
-		} catch (ParseException e) {
-			LOGGER.error("validityPeriod data format is not yyyymmdd.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"validityPeriod data format is not yyyymmdd.");
-		}
-		
-		return ts;
-	}
-    
     private ParkingLot checkParkingLot(String ownerType,Long ownerId,Long parkingLotId){
     	if(ownerId == null ) {
         	LOGGER.error("ownerId is not null.");
@@ -573,16 +578,94 @@ public class ParkingServiceImpl implements ParkingService {
 		return String.valueOf(code);
 	}
 	
-	public HttpServletResponse exportParkingRechageOrders(SearchParkingRechargeOrdersCommand cmd){
-		HttpServletResponse response = null;    
-		
+	public HttpServletResponse exportParkingRechageOrders(SearchParkingRechargeOrdersCommand cmd,
+			HttpServletResponse response){
+		Timestamp startDate = null;
+		Timestamp endDate = null;
+		if(cmd.getStartDate() != null)
+			startDate = new Timestamp(cmd.getStartDate());
+		if(cmd.getEndDate() != null)
+			new Timestamp(cmd.getEndDate());
 		List<ParkingRechargeOrder> list = parkingProvider.searchParkingRechargeOrders(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
 				cmd.getPlateOwnerPhone(), cmd.getPayerName(), cmd.getPayerPhone(), cmd.getPageAnchor(), 
-				null,new Timestamp(cmd.getStartDate()),new Timestamp(cmd.getEndDate()),cmd.getRechargeStatus()
+				null,startDate,endDate,cmd.getRechargeStatus()
 				);
-		//Workbook ab 
+		Workbook wb = new XSSFWorkbook();
+		
+		Font font = wb.createFont();   
+		font.setFontName("黑体");   
+		font.setFontHeightInPoints((short) 16);
+		CellStyle style = wb.createCellStyle();
+		style.setFont(font);
+		
+		Sheet sheet = wb.createSheet("parkingRechargeOrders");
+		sheet.setDefaultColumnWidth(20);  
+		sheet.setDefaultRowHeightInPoints(20); 
+		Row row = sheet.createRow(0);
+		row.createCell(0).setCellValue("订单号");
+		row.createCell(1).setCellValue("车牌号");
+		row.createCell(2).setCellValue("车主名称");
+		row.createCell(3).setCellValue("付款人手机号");
+		row.createCell(4).setCellValue("充值时间");
+		row.createCell(5).setCellValue("充值月数");
+		row.createCell(6).setCellValue("充值价格");
+		row.createCell(7).setCellValue("付款方式");
+		row.createCell(8).setCellValue("充值状态");     
+		for(int i=0;i<list.size();i++){
+			Row tempRow = sheet.createRow(i + 1);
+			ParkingRechargeOrder order = list.get(i);
+			tempRow.createCell(0).setCellValue(order.getOrderNo());
+			tempRow.createCell(1).setCellValue(order.getPlateNumber());
+			tempRow.createCell(2).setCellValue(order.getPlateOwnerName());
+			tempRow.createCell(3).setCellValue(order.getPayerPhone());
+			tempRow.createCell(4).setCellValue(order.getRechargeTime()==null?"":datetimeSF.format(order.getRechargeTime()));
+			tempRow.createCell(5).setCellValue(order.getMonthCount().intValue());
+			tempRow.createCell(6).setCellValue(order.getPrice().doubleValue());
+			tempRow.createCell(7).setCellValue(VendorType.fromCode(order.getPaidType()).toString());
+			tempRow.createCell(8).setCellValue(ParkingRechargeOrderRechargeStatus.fromCode(order.getRechargeStatus()).toString());
+			
+		}
+		ByteArrayOutputStream out = null;
+		try {
+			out = new ByteArrayOutputStream();
+			wb.write(out);
+			download(out, response);
+		} catch (IOException e) {
+			LOGGER.error("exportParkingRechageOrders is fail.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"exportParkingRechageOrders is fail.");
+		}
 		
 		return response;
+	}
+	
+	public HttpServletResponse download(ByteArrayOutputStream out, HttpServletResponse response) {
+        try {
+
+            // 清空response
+            //response.reset();
+            // 设置response的Header
+            response.addHeader("Content-Disposition", "attachment;filename=" + System.currentTimeMillis()+".xlsx");
+            //response.addHeader("Content-Length", "" + out.);
+            OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
+            response.setContentType("application/octet-stream");
+            toClient.write(out.toByteArray());
+            toClient.flush();
+            toClient.close();
+            
+        } catch (IOException ex) { 
+ 			LOGGER.error(ex.getMessage());
+ 			throw RuntimeErrorException.errorWith(ParkingServiceErrorCode.SCOPE,
+ 					PunchServiceErrorCode.ERROR_PUNCH_ADD_DAYLOG,
+ 					ex.getLocalizedMessage());
+     		 
+        }
+        return response;
+    }
+
+	@Override
+	public void deleteParkingRechargeOrder(DeleteParkingRechargeOrderCommand cmd) {
+		
 	}
 }

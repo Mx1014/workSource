@@ -3,6 +3,7 @@ package com.everhomes.parking;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.parking.CreateParkingRechargeOrderCommand;
 import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
+import com.everhomes.rest.parking.DeleteParkingRechargeOrderCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
 import com.everhomes.rest.parking.GetParkingActivityCommand;
 import com.everhomes.rest.parking.IssueParkingCardsCommand;
@@ -315,4 +317,34 @@ public class ParkingController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /parking/deleteParkingRechargeOrder</b>
+     * <p>支付后，由统一支付调用此接口来通知各厂商支付结果</p>
+     */
+    @RequestMapping("deleteParkingRechargeOrder")
+    @RestReturn(value = String.class)
+    public RestResponse deleteParkingRechargeOrder(DeleteParkingRechargeOrderCommand cmd) {
+        
+    	parkingService.deleteParkingRechargeOrder(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+	 * <b>URL: /parking/exportParkingRechageOrders</b>
+	 * <p>
+	 * 导出停车充值订单列表
+	 * </p>
+	 */
+	@RequestMapping("exportParkingRechageOrders")
+	public  void exportParkingRechageOrders(SearchParkingRechargeOrdersCommand cmd,HttpServletResponse response ) {
+		HttpServletResponse commandResponse = parkingService.exportParkingRechageOrders(cmd, response );
+//		RestResponse response = new RestResponse(commandResponse);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+		//return commandResponse;
+	}
 }
