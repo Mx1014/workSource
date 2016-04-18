@@ -62,6 +62,7 @@ import com.everhomes.rest.organization.OrganizationTaskStatus;
 import com.everhomes.rest.organization.OrganizationTaskType;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.pm.OrganizationScopeCode;
+import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhOrganizationAddressesDao;
@@ -2101,6 +2102,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 		SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
 		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TOKEN.eq(contactToken));
+		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TYPE.eq(ContactType.MOBILE.getCode()));
 		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ADDRESS_ID.eq(addressId));
 		return ConvertHelper.convert(query.fetchAny(), OrganizationOwners.class);
 	}
@@ -2112,5 +2114,15 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		dao.deleteById(id);
 
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationOwners.class, id);
+	}
+	
+	@Override
+	public void updateOrganizationOwner(OrganizationOwners organizationOwner){
+		assert(organizationOwner.getId() == null);
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOrganizationOwnersDao dao = new EhOrganizationOwnersDao(context.configuration());
+		dao.update(organizationOwner);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationOwners.class, organizationOwner.getId());
 	}
 }

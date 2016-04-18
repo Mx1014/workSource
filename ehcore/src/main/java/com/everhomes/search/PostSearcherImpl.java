@@ -278,25 +278,27 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
     private FilterBuilder getForumFilter(SearchTopicCommand cmd) {
         FilterBuilder fb = null;
         if(cmd.getSearchFlag() != null && cmd.getSearchFlag() == 1) {
-            GetNearbyCommunitiesByIdCommand nearCmd = new GetNearbyCommunitiesByIdCommand();
-            nearCmd.setId(cmd.getCommunityId());
-            Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-            Long forumId = ForumConstants.SYSTEM_FORUM;
-            if(community != null) {
-                forumId = community.getDefaultForumId();
-            }
-            List<CommunityDTO> coms = communityService.getNearbyCommunityById(nearCmd);
-            List<Long> comIds = new ArrayList<Long>();
-            for(CommunityDTO cDTO : coms) {
-                comIds.add(cDTO.getId());
-                }
-            
             FilterBuilder comFilter = null;
-            if(comIds.size() > 0) {
-                FilterBuilder comIn = boolInFilter("visibleRegionId", comIds);
-                FilterBuilder comType = FilterBuilders.termFilter("visibleRegionType", (long)VisibleRegionType.COMMUNITY.getCode());
-                FilterBuilder comForum = FilterBuilders.termFilter("forumId", forumId);
-                comFilter = FilterBuilders.boolFilter().must(comIn, comType, comForum);
+            if(cmd.getCommunityId() != null) {
+                GetNearbyCommunitiesByIdCommand nearCmd = new GetNearbyCommunitiesByIdCommand();
+                nearCmd.setId(cmd.getCommunityId());
+                Community community = communityProvider.findCommunityById(cmd.getCommunityId());
+                Long forumId = ForumConstants.SYSTEM_FORUM;
+                if(community != null) {
+                    forumId = community.getDefaultForumId();
+                }
+                List<CommunityDTO> coms = communityService.getNearbyCommunityById(nearCmd);
+                List<Long> comIds = new ArrayList<Long>();
+                for(CommunityDTO cDTO : coms) {
+                    comIds.add(cDTO.getId());
+                    }
+                
+                if(comIds.size() > 0) {
+                    FilterBuilder comIn = boolInFilter("visibleRegionId", comIds);
+                    FilterBuilder comType = FilterBuilders.termFilter("visibleRegionType", (long)VisibleRegionType.COMMUNITY.getCode());
+                    FilterBuilder comForum = FilterBuilders.termFilter("forumId", forumId);
+                    comFilter = FilterBuilders.boolFilter().must(comIn, comType, comForum);
+                }
             }
             
             List<GroupDTO> groups = groupService.listUserRelatedGroups();
@@ -306,7 +308,9 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
 //            	 groupForumIds.add(1l);
 //            }
             for(GroupDTO groupDTO : groups) {
-                groupForumIds.add(groupDTO.getOwningForumId());
+                if(groupDTO.getOwningForumId() != null) {
+                    groupForumIds.add(groupDTO.getOwningForumId());
+                }
             }
             
             if(groupForumIds.size() > 0) {
@@ -489,7 +493,7 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
             break;
         case ORGANIZATION:
             Organization org = this.organizationProvider.findOrganizationById(sceneToken.getEntityId());
-            if(org != null) {
+            if(org != null && org.getGroupId() != null) {
                 Group group = groupProvider.findGroupById(org.getGroupId());
                 if(group != null) {
                     forumId = group.getOwningForumId();

@@ -134,7 +134,7 @@ public class WebSocketMessageSubscriber implements LocalBusOneshotSubscriber {
         rsp.setErrMsg(errMsg);
         rsp.setObjectId(request.getObjectId());
 
-        LOGGER.info("content url(before createPduFrame), url=" + rsp.getUrl());
+        //LOGGER.info("content url(before createPduFrame), url=" + rsp.getUrl());
 
         //if (LOGGER.isDebugEnabled())
         //    LOGGER.debug("send response message to content server responese={}", rsp);

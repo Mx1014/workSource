@@ -157,7 +157,7 @@ public class FamilyController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse leave(@Valid LeaveFamilyCommand cmd) {
         
-        familyService.leave(cmd);
+        familyService.leave(cmd, null);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

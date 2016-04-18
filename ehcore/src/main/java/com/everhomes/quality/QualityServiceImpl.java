@@ -14,6 +14,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -749,7 +750,12 @@ public class QualityServiceImpl implements QualityService {
 		
 		List<QualityInspectionTaskDTO> dtoList = tasks.stream().map((r) -> {
         	
-        	QualityInspectionStandards standard = verifiedStandardById(r.getStandardId());
+//        	QualityInspectionStandards standard = verifiedStandardById(r.getStandardId());
+			QualityInspectionStandards standard = qualityProvider.findStandardById(r.getStandardId());
+			if(standard == null) {
+				LOGGER.error("the standard which id="+r.getStandardId()+" don't exist!");
+				return null;
+			}
         	QualityInspectionCategories category = verifiedCategoryById(standard.getCategoryId());
         	r.setCategoryName(category.getName());
         	
@@ -769,21 +775,6 @@ public class QualityServiceImpl implements QualityService {
 				dto.setGroupName(group.getName());
         	
 			List<GroupUserDTO> groupUsers = getGroupMembers(r.getExecutiveGroupId());
-//        	List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(r.getExecutiveGroupId());
-//        	List<GroupUserDTO> groupUsers = members.stream().map((mem) -> {
-//             	if(OrganizationMemberTargetType.USER.getCode().equals(mem.getTargetType()) 
-//             			&& mem.getTargetId() != null && mem.getTargetId() != 0) {
-//             		GroupUserDTO user = new GroupUserDTO();
-//             		user.setOperatorType(mem.getTargetType());
-//             		user.setUserId(mem.getTargetId());
-//                 	user.setUserName(mem.getContactName());
-//                 	user.setContact(mem.getContactToken());
-//                 	user.setEmployeeNo(mem.getEmployeeNo());
-//                 	return user;
-//             	} else {
-//             		return null;
-//             	}
-//             }).filter(member->member!=null).collect(Collectors.toList());
         	 
         	dto.setGroupUsers(groupUsers);
         	
@@ -818,7 +809,7 @@ public class QualityServiceImpl implements QualityService {
         	}
         	
         	return dto;
-        }).collect(Collectors.toList());
+        }).filter(task->task!=null).collect(Collectors.toList());
 		return dtoList;
 	}
 	
@@ -896,7 +887,7 @@ public class QualityServiceImpl implements QualityService {
 			Map<String, Object> map = new HashMap<String, Object>();
 		    map.put("userName", operator.getContactName());
 		    map.put("taskName", task.getTaskName());
-		    map.put("deadline", new Timestamp(cmd.getEndTime()));
+		    map.put("deadline", timeToStr(new Timestamp(cmd.getEndTime())));
 			String scope = QualityNotificationTemplateCode.SCOPE;
 			int code = QualityNotificationTemplateCode.ASSIGN_TASK_NOTIFY_OPERATOR;
 			String locale = "zh_CN";
@@ -1012,7 +1003,7 @@ public class QualityServiceImpl implements QualityService {
 			Map<String, Object> map = new HashMap<String, Object>();
 		    map.put("userName", operator.getContactName());
 		    map.put("taskName", task.getTaskName());
-		    map.put("deadline", cmd.getEndTime());
+		    map.put("deadline", timeToStr(new Timestamp(cmd.getEndTime())));
 			String scope = QualityNotificationTemplateCode.SCOPE;
 			int code = QualityNotificationTemplateCode.ASSIGN_TASK_NOTIFY_OPERATOR;
 			String locale = "zh_CN";
@@ -1087,7 +1078,7 @@ public class QualityServiceImpl implements QualityService {
 							
 							Map<String, Object> map = new HashMap<String, Object>();
 						    map.put("taskName", task.getTaskName());
-						    map.put("deadline", expiredTime);
+						    map.put("deadline", timeToStr(expiredTime));
 							String scope = QualityNotificationTemplateCode.SCOPE;
 							int code = QualityNotificationTemplateCode.GENERATE_QUALITY_TASK_NOTIFY_EXECUTOR;
 							String locale = "zh_CN";
@@ -1112,6 +1103,12 @@ public class QualityServiceImpl implements QualityService {
 				
 			}
 		} 
+	}
+	
+	private String timeToStr(Timestamp time) {
+
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		return sdf.format(time);
 	}
 	
 	private String timestampToStr(Timestamp time) {
@@ -1384,7 +1381,12 @@ public class QualityServiceImpl implements QualityService {
 		
 		if(task.getStatus() == QualityInspectionTaskResult.INSPECT_DELAY.getCode() 
 				|| task.getStatus() == QualityInspectionTaskResult.RECTIFY_DELAY.getCode()) {
-			QualityInspectionStandards standard = verifiedStandardById(task.getStandardId());
+//			QualityInspectionStandards standard = verifiedStandardById(task.getStandardId());
+			QualityInspectionStandards standard = qualityProvider.findStandardById(task.getStandardId());
+			if(standard == null) {
+				LOGGER.error("the standard which id="+task.getStandardId()+" don't exist!");
+				return null;
+			}
 			QualityInspectionEvaluationFactors factor = qualityProvider.findQualityInspectionFactorByGroupIdAndCategoryId(
 					task.getExecutiveGroupId(), standard.getCategoryId());
 			if(factor != null) {

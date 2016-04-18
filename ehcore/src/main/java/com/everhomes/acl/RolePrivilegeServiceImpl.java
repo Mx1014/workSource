@@ -742,13 +742,4 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     }
     
     
-    
-    public static void main(String[] args) {
-		Map<Integer, String> map = new HashMap<Integer, String>();
-		map.put(10001, "12");
-		map.put(12000, "45");
-		map.put(21000, "56");
-		System.out.println(map.toString());
-	}
-	
 }

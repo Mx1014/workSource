@@ -4,32 +4,40 @@ import com.everhomes.util.StringHelper;
 
 /**
  * 
- * namespaceId: 命名空间
+ * userId: 用户ID
  *
  */
-public class CountCommunityUsersCommand {
+public class QryCommunityUserAddressByUserIdCommand {
 	
-	private Integer namespaceId;
-	
+	private Long userId;
+
 	private Long communityId;
-
-	public Integer getNamespaceId() {
-		return namespaceId;
+	
+	
+	public Long getUserId() {
+		return userId;
 	}
 
-	public void setNamespaceId(Integer namespaceId) {
-		this.namespaceId = namespaceId;
+
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
 	}
+
 	
-	
-	
+
+
 	public Long getCommunityId() {
 		return communityId;
 	}
 
+
+
 	public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
 	}
+
+
 
 	@Override
     public String toString() {

@@ -342,10 +342,14 @@ public class PollServiceImpl implements PollService {
         }
         User user=UserContext.current().getUser();
         PollVote votes = pollProvider.findPollVoteByUidAndPollId(user.getId(), poll.getId());
-        dto.setStartTime(fommat.format(new Date(poll.getStartTime().getTime())).toString());
-        dto.setStopTime(fommat.format(new Date(poll.getEndTime().getTime())).toString());
-        dto.setAnonymousFlag(poll.getAnonymousFlag()==null?0:poll.getAnonymousFlag().intValue());
-        dto.setMultiChoiceFlag(poll.getMultiSelectFlag()==null?0:poll.getMultiSelectFlag().intValue());
+        if(poll.getStartTime() != null) {
+            dto.setStartTime(fommat.format(new Date(poll.getStartTime().getTime())).toString());
+        }
+        if(poll.getEndTime() != null) {
+            dto.setStopTime(fommat.format(new Date(poll.getEndTime().getTime())).toString());
+        }
+        dto.setAnonymousFlag(poll.getAnonymousFlag() == null ? 0 : poll.getAnonymousFlag().intValue());
+        dto.setMultiChoiceFlag(poll.getMultiSelectFlag() == null ? 0 : poll.getMultiSelectFlag().intValue());
         dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
         dto.setPollId(poll.getId());
         if(votes==null){

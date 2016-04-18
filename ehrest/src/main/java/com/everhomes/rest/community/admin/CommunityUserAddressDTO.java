@@ -1,8 +1,12 @@
 package com.everhomes.rest.community.admin;
 
 import java.sql.Timestamp;
+import java.util.List;
 
-public class CommunityUserDto {
+import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.rest.organization.OrganizationDetailDTO;
+
+public class CommunityUserAddressDTO {
 
 	private Long     id;
 	
@@ -16,20 +20,15 @@ public class CommunityUserDto {
 	
 	private Integer isAuth;
 	
-	private String enterpriseName;
-	
-	private String buildingId;
-	
-	private String buildingName;
-	
-	private Long addressId;
-	
-	private String addressName;
-	
 	private Timestamp applyTime;
 	
 	private String phone;
 	
+	private Byte gender;
+	
+	private List<OrganizationDetailDTO> orgDtos;
+	
+	private List<AddressDTO> addressDtos;
 	
 	public Long getId() {
 		return id;
@@ -71,46 +70,6 @@ public class CommunityUserDto {
 		this.isAuth = isAuth;
 	}
 
-	public String getEnterpriseName() {
-		return enterpriseName;
-	}
-
-	public void setEnterpriseName(String enterpriseName) {
-		this.enterpriseName = enterpriseName;
-	}
-
-	public String getBuildingId() {
-		return buildingId;
-	}
-
-	public void setBuildingId(String buildingId) {
-		this.buildingId = buildingId;
-	}
-
-	public String getBuildingName() {
-		return buildingName;
-	}
-
-	public void setBuildingName(String buildingName) {
-		this.buildingName = buildingName;
-	}
-
-	public Long getAddressId() {
-		return addressId;
-	}
-
-	public void setAddressId(Long addressId) {
-		this.addressId = addressId;
-	}
-
-	public String getAddressName() {
-		return addressName;
-	}
-
-	public void setAddressName(String addressName) {
-		this.addressName = addressName;
-	}
-
 	public Timestamp getApplyTime() {
 		return applyTime;
 	}
@@ -133,6 +92,32 @@ public class CommunityUserDto {
 
 	public void setNikeName(String nikeName) {
 		this.nikeName = nikeName;
+	}
+	
+	
+
+	public Byte getGender() {
+		return gender;
+	}
+
+	public void setGender(Byte gender) {
+		this.gender = gender;
+	}
+
+	public List<OrganizationDetailDTO> getOrgDtos() {
+		return orgDtos;
+	}
+
+	public void setOrgDtos(List<OrganizationDetailDTO> orgDtos) {
+		this.orgDtos = orgDtos;
+	}
+
+	public List<AddressDTO> getAddressDtos() {
+		return addressDtos;
+	}
+
+	public void setAddressDtos(List<AddressDTO> addressDtos) {
+		this.addressDtos = addressDtos;
 	}
 
 	

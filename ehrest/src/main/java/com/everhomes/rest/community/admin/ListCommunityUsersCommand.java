@@ -19,7 +19,7 @@ public class ListCommunityUsersCommand {
 	
 	private String keywords;
 	
-	private String communityId;
+	private Long communityId;
 
 
 	public Long getPageAnchor() {
@@ -67,11 +67,11 @@ public class ListCommunityUsersCommand {
 		this.keywords = keywords;
 	}
 
-	public String getCommunityId() {
+	public Long getCommunityId() {
 		return communityId;
 	}
 
-	public void setCommunityId(String communityId) {
+	public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
 	}
 	

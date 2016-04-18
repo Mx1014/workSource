@@ -34,6 +34,7 @@ import java.util.Map;
 
 
 
+
 import javax.annotation.PostConstruct;
 
 import org.jooq.Condition;
@@ -45,6 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 
 
 
@@ -170,10 +172,9 @@ public class QualityProviderImpl implements QualityProvider {
 	@PostConstruct
 	public void init() {
 		this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_TASK.getCode()).tryEnter(()-> {
-			String QUALITY_INSPECTION_TRIGGER_NAME = "QualityInspection";
-			QualityInspectionScheduleJob qualityInspectionScheduleJob = new QualityInspectionScheduleJob();
+			String QUALITY_INSPECTION_TRIGGER_NAME = "QualityInspection " + System.currentTimeMillis();
 			scheduleProvider.scheduleCronJob(QUALITY_INSPECTION_TRIGGER_NAME, QUALITY_INSPECTION_TRIGGER_NAME,
-					"0 0 3 * * ? ", qualityInspectionScheduleJob.getClass(), null);
+					"0 0 3 * * ? ", QualityInspectionScheduleJob.class, null);
         });
 		
 	}

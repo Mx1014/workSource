@@ -21,13 +21,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.enterprise.Enterprise;
-import com.everhomes.enterprise.EnterpriseContact;
-import com.everhomes.enterprise.EnterpriseContactEntry;
 import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.rest.videoconf.ConfAccountDTO;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
+import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.videoconf.EnterpriseConfAccountDTO;
 import com.everhomes.rest.videoconf.ListEnterpriseVideoConfAccountResponse;
 import com.everhomes.rest.videoconf.ListEnterpriseWithVideoConfAccountCommand;
@@ -54,6 +57,12 @@ public class ConfEnterpriseSearcherImpl extends AbstractElasticSearch implements
 	
 	@Autowired
 	private EnterpriseProvider enterpriseProvider;
+	
+	@Autowired
+	private OrganizationProvider organizationProvider;
+	
+	@Autowired
+    private RolePrivilegeService rolePrivilegeService;
 	
 	@Override
 	public void deleteById(Long id) {
@@ -165,12 +174,24 @@ public class ConfEnterpriseSearcherImpl extends AbstractElasticSearch implements
         	ConfEnterprises confEnterprise = vcProvider.findConfEnterpriseById(id);
         	dto.setId(confEnterprise.getId());
 	    	dto.setEnterpriseId(confEnterprise.getEnterpriseId());
-	    	Enterprise enterprise = enterpriseProvider.findEnterpriseById(confEnterprise.getEnterpriseId());
+//	    	Enterprise enterprise = enterpriseProvider.findEnterpriseById(confEnterprise.getEnterpriseId());
+	    	Organization org = organizationProvider.findOrganizationById(confEnterprise.getEnterpriseId());
 	    	
-	    	dto.setEnterpriseName(enterprise.getName());
-	    	dto.setEnterpriseDisplayName(enterprise.getDisplayName());
-	    	dto.setEnterpriseContactor(confEnterprise.getContactName());
-	    	dto.setMobile(confEnterprise.getContact());
+	    	if(org != null) {
+	    		dto.setEnterpriseName(org.getName());
+		    	dto.setEnterpriseDisplayName(org.getName());
+		    	
+		    	ListOrganizationAdministratorCommand orgAdminCmd = new ListOrganizationAdministratorCommand();
+		    	orgAdminCmd.setOrganizationId(org.getId());
+		    	ListOrganizationMemberCommandResponse res = rolePrivilegeService.listOrganizationAdministrators(orgAdminCmd);
+		    	if(res != null && res.getMembers() != null && res.getMembers().size() > 0) {
+		    		OrganizationMemberDTO member = res.getMembers().get(0);
+		    		dto.setEnterpriseContactor(member.getContactName());
+			    	dto.setMobile(member.getContactToken());
+		    	}
+		    	
+	    	}
+	    	
 	    	if(confEnterprise.getActiveAccountAmount() > 0)
 	    		dto.setUseStatus((byte) 0);
 	    	if(confEnterprise.getActiveAccountAmount() == 0 && confEnterprise.getTrialAccountAmount() > 0) {
@@ -217,11 +238,14 @@ public class ConfEnterpriseSearcherImpl extends AbstractElasticSearch implements
 			if(enterprise.getActiveAccountAmount() == 0) {
 				b.field("status", 2);
 			}
+			
+			Organization org = organizationProvider.findOrganizationById(enterprise.getEnterpriseId());
+//          Enterprise enter = enterpriseProvider.findEnterpriseById(enterprise.getEnterpriseId());
+          
+			if(null != org) {
+              b.field("enterpriseName", org.getName());
+              b.field("enterpriseDisplayName", org.getName());
             
-            Enterprise enter = enterpriseProvider.findEnterpriseById(enterprise.getEnterpriseId());
-            if(null != enter) {
-                b.field("enterpriseName", enter.getName());
-                b.field("enterpriseDisplayName", enter.getDisplayName());
             } else {
                 b.field("enterpriseName", "");
                 b.field("enterpriseDisplayName", "");
