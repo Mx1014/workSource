@@ -1,6 +1,6 @@
 //
 // EvhParkingRechargeOrderDTO.m
-// generated at 2016-04-12 15:02:19 
+// generated at 2016-04-18 14:48:51 
 //
 #import "EvhParkingRechargeOrderDTO.h"
 
@@ -53,6 +53,8 @@
         [jsonObject setObject: self.payerName forKey: @"payerName"];
     if(self.payerPhone)
         [jsonObject setObject: self.payerPhone forKey: @"payerPhone"];
+    if(self.paidType)
+        [jsonObject setObject: self.paidType forKey: @"paidType"];
     if(self.paidTime)
         [jsonObject setObject: self.paidTime forKey: @"paidTime"];
     if(self.vendorName)
@@ -123,6 +125,10 @@
         self.payerPhone = [jsonObject objectForKey: @"payerPhone"];
         if(self.payerPhone && [self.payerPhone isEqual:[NSNull null]])
             self.payerPhone = nil;
+
+        self.paidType = [jsonObject objectForKey: @"paidType"];
+        if(self.paidType && [self.paidType isEqual:[NSNull null]])
+            self.paidType = nil;
 
         self.paidTime = [jsonObject objectForKey: @"paidTime"];
         if(self.paidTime && [self.paidTime isEqual:[NSNull null]])

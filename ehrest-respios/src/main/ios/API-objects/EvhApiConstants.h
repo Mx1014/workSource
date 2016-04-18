@@ -1,6 +1,6 @@
 //
 // EvhApiConstants.h
-// generated at 2016-04-12 15:02:21
+// generated at 2016-04-18 14:48:53
 //
 #define EVH_ACLINK_ACTIVE_URL @"/aclink/active"
 #define EVH_ACLINK_ACTIVING_URL @"/aclink/activing"
@@ -560,7 +560,9 @@
 #define EVH_ORG_USERJOINORGANIZATION_URL @"/org/userJoinOrganization"
 #define EVH_PARKING_CREATEPARKINGRECHARGEORDER_URL @"/parking/createParkingRechargeOrder"
 #define EVH_PARKING_CREATEPARKINGRECHARGERATE_URL @"/parking/createParkingRechargeRate"
+#define EVH_PARKING_DELETEPARKINGRECHARGEORDER_URL @"/parking/deleteParkingRechargeOrder"
 #define EVH_PARKING_DELETEPARKINGRECHARGERATE_URL @"/parking/deleteParkingRechargeRate"
+#define EVH_PARKING_EXPORTPARKINGRECHAGEORDERS_URL @"/parking/exportParkingRechageOrders"
 #define EVH_PARKING_GETPARKINGACTIVITY_URL @"/parking/getParkingActivity"
 #define EVH_PARKING_ISSUEPARKINGCARDS_URL @"/parking/issueParkingCards"
 #define EVH_PARKING_LISTPARKINGCARDREQUESTS_URL @"/parking/listParkingCardRequests"

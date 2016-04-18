@@ -1,6 +1,6 @@
 //
 // EvhSearchParkingRechargeOrdersCommand.h
-// generated at 2016-04-12 15:02:20 
+// generated at 2016-04-18 14:48:52 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -27,6 +27,12 @@
 @property(nonatomic, copy) NSString* payerName;
 
 @property(nonatomic, copy) NSString* payerPhone;
+
+@property(nonatomic, copy) NSNumber* rechargeStatus;
+
+@property(nonatomic, copy) NSNumber* startDate;
+
+@property(nonatomic, copy) NSNumber* endDate;
 
 @property(nonatomic, copy) NSNumber* pageAnchor;
 

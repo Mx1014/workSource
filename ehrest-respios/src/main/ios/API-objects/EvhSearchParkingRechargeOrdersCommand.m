@@ -1,6 +1,6 @@
 //
 // EvhSearchParkingRechargeOrdersCommand.m
-// generated at 2016-04-12 15:02:20 
+// generated at 2016-04-18 14:48:52 
 //
 #import "EvhSearchParkingRechargeOrdersCommand.h"
 
@@ -47,6 +47,12 @@
         [jsonObject setObject: self.payerName forKey: @"payerName"];
     if(self.payerPhone)
         [jsonObject setObject: self.payerPhone forKey: @"payerPhone"];
+    if(self.rechargeStatus)
+        [jsonObject setObject: self.rechargeStatus forKey: @"rechargeStatus"];
+    if(self.startDate)
+        [jsonObject setObject: self.startDate forKey: @"startDate"];
+    if(self.endDate)
+        [jsonObject setObject: self.endDate forKey: @"endDate"];
     if(self.pageAnchor)
         [jsonObject setObject: self.pageAnchor forKey: @"pageAnchor"];
     if(self.pageSize)
@@ -87,6 +93,18 @@
         self.payerPhone = [jsonObject objectForKey: @"payerPhone"];
         if(self.payerPhone && [self.payerPhone isEqual:[NSNull null]])
             self.payerPhone = nil;
+
+        self.rechargeStatus = [jsonObject objectForKey: @"rechargeStatus"];
+        if(self.rechargeStatus && [self.rechargeStatus isEqual:[NSNull null]])
+            self.rechargeStatus = nil;
+
+        self.startDate = [jsonObject objectForKey: @"startDate"];
+        if(self.startDate && [self.startDate isEqual:[NSNull null]])
+            self.startDate = nil;
+
+        self.endDate = [jsonObject objectForKey: @"endDate"];
+        if(self.endDate && [self.endDate isEqual:[NSNull null]])
+            self.endDate = nil;
 
         self.pageAnchor = [jsonObject objectForKey: @"pageAnchor"];
         if(self.pageAnchor && [self.pageAnchor isEqual:[NSNull null]])

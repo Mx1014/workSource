@@ -1,6 +1,6 @@
 //
 // EvhSearchParkingCardRequestsCommand.h
-// generated at 2016-04-12 15:02:19 
+// generated at 2016-04-18 14:48:51 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -24,9 +24,9 @@
 
 @property(nonatomic, copy) NSString* plateOwnerPhone;
 
-@property(nonatomic, copy) NSString* startDate;
+@property(nonatomic, copy) NSNumber* startDate;
 
-@property(nonatomic, copy) NSString* endDate;
+@property(nonatomic, copy) NSNumber* endDate;
 
 @property(nonatomic, copy) NSNumber* status;
 

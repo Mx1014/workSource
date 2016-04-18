@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-04-12 15:57:36
+// generated at 2016-04-18 14:43:56
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -562,7 +562,9 @@ public interface ApiConstants {
     public static final String ORG_USERJOINORGANIZATION_URL = "/org/userJoinOrganization";
     public static final String PARKING_CREATEPARKINGRECHARGEORDER_URL = "/parking/createParkingRechargeOrder";
     public static final String PARKING_CREATEPARKINGRECHARGERATE_URL = "/parking/createParkingRechargeRate";
+    public static final String PARKING_DELETEPARKINGRECHARGEORDER_URL = "/parking/deleteParkingRechargeOrder";
     public static final String PARKING_DELETEPARKINGRECHARGERATE_URL = "/parking/deleteParkingRechargeRate";
+    public static final String PARKING_EXPORTPARKINGRECHAGEORDERS_URL = "/parking/exportParkingRechageOrders";
     public static final String PARKING_GETPARKINGACTIVITY_URL = "/parking/getParkingActivity";
     public static final String PARKING_ISSUEPARKINGCARDS_URL = "/parking/issueParkingCards";
     public static final String PARKING_LISTPARKINGCARDREQUESTS_URL = "/parking/listParkingCardRequests";

@@ -1,6 +1,6 @@
 //
 // EvhUserAppversionRestResponse.m
-// generated at 2016-04-12 15:02:21 
+// generated at 2016-04-18 14:48:53 
 //
 #import "EvhUserAppversionRestResponse.h"
 #import "EvhGetAppVersion.h"
