@@ -48,6 +48,9 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.mail.MailHandler;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
@@ -206,6 +209,9 @@ public class VideoConfServiceImpl implements VideoConfService {
 	
 	@Autowired
 	private RolePrivilegeService rolePrivilegeService;
+	
+	@Autowired
+    private OrganizationProvider organizationProvider;
 	
 	
 	@Override
@@ -953,16 +959,28 @@ public class VideoConfServiceImpl implements VideoConfService {
 			accountDto.setId(r.getId());
 			
 			accountDto.setUserId(r.getOwnerId());
-			EnterpriseContact contact = enterpriseContactProvider.queryContactByUserId(r.getEnterpriseId(), r.getOwnerId());
-			if(contact != null) {
-				accountDto.setDepartment(contact.getStringTag1());
-				accountDto.setUserName(contact.getName());
-				
-				List<EnterpriseContactEntry> entry = enterpriseContactProvider.queryContactEntryByContactId(contact);
-				if(entry != null && entry.size() > 0) {
-					accountDto.setMobile(entry.get(0).getEntryValue());
+			Organization org = organizationProvider.findOrganizationById(r.getEnterpriseId());
+			if(org != null) {
+				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getOwnerId(), org.getId());
+				if (member != null) {
+					accountDto.setUserName(member.getContactName());
+					accountDto.setMobile(member.getContactToken());
+					Organization dept = organizationProvider.findOrganizationById(member.getGroupId());
+					if (dept != null) {
+						accountDto.setDepartment(dept.getName());
+					}
 				}
 			}
+//			EnterpriseContact contact = enterpriseContactProvider.queryContactByUserId(r.getEnterpriseId(), r.getOwnerId());
+//			if(contact != null) {
+//				accountDto.setDepartment(contact.getStringTag1());
+//				accountDto.setUserName(contact.getName());
+//				
+//				List<EnterpriseContactEntry> entry = enterpriseContactProvider.queryContactEntryByContactId(contact);
+//				if(entry != null && entry.size() > 0) {
+//					accountDto.setMobile(entry.get(0).getEntryValue());
+//				}
+//			}
 			ConfAccountCategories category = vcProvider.findAccountCategoriesById(r.getAccountCategoryId());
 			accountDto.setConfType(category.getConfType());
 			return accountDto;
@@ -1311,6 +1329,38 @@ public class VideoConfServiceImpl implements VideoConfService {
 			userAccount.setOccupyFlag((byte) 2);
 		}
 		return userAccount;
+	}
+	
+	@Scheduled(cron="0 0 2 * * ? ")
+	@Override
+	public void invalidConf() {
+		LOGGER.info("update invalid conference which longer than 24 hours.");
+		Timestamp oneDayBefore = addHours(new Timestamp(DateHelper.currentGMTTime().getTime()), -24);
+		List<ConfAccounts> occupiedAccounts = vcProvider.listOccupiedConfAccounts(oneDayBefore);
+		if(occupiedAccounts != null && occupiedAccounts.size() > 0) {
+			for(ConfAccounts account : occupiedAccounts) {
+				if(account.getAssignedConfId() != null && account.getAssignedSourceId() != null) {
+					CancelVideoConfCommand cancelCmd = new CancelVideoConfCommand();
+					ConfConferences conf = vcProvider.findConfConferencesById(account.getAssignedConfId());
+					if(conf != null)
+						cancelCmd.setConfId(conf.getMeetingNo());
+					ConfSourceAccounts source = vcProvider.findSourceAccountById(account.getAssignedSourceId());
+					if(source != null)
+						cancelCmd.setSourceAccountName(source.getAccountName());
+					cancelVideoConf(cancelCmd);
+				}
+			}
+		}
+		
+	}
+	
+	private Timestamp addHours(Timestamp begin, int hours) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(begin);
+		calendar.add(Calendar.HOUR_OF_DAY, hours);
+		Timestamp time = new Timestamp(calendar.getTimeInMillis());
+		
+		return time;
 	}
 
 	@Scheduled(cron="0 0 2 * * ? ")

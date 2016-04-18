@@ -340,11 +340,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			LOGGER.error("Buiness authenticate prefix url is empty.");
 		if(business.getTargetType() == BusinessTargetType.ZUOLIN.getCode()){
 			String businessDetailUrl = null;
-			if(detailUrl.contains("#sign_suffix")){
-				detailUrl = detailUrl.trim();
-				String prefix = detailUrl.substring(0,detailUrl.indexOf("#sign_suffix"));
-				String suffix = detailUrl.substring(detailUrl.indexOf("#sign_suffix"));
-				businessDetailUrl = prefix+business.getTargetId()+suffix;
+			if(detailUrl.contains("spoint")){
+				businessDetailUrl = detailUrl.replace("spoint", business.getTargetId()).trim();
 			}
 			else
 				businessDetailUrl = detailUrl.trim() + business.getTargetId();
