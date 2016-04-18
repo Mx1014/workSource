@@ -18,9 +18,9 @@ public interface OrganizationServiceErrorCode {
     
     static final int ERROR_ORG_TASK_ALREADY_PROCESSED = 100201; //任务已经被处理
     
-    static final int ERROR_ORG_TASK_NOT_ASSIGNED_PERSONNEL = 100201; //未分配人员，需要指定人员
+    static final int ERROR_ORG_TASK_NOT_ASSIGNED_PERSONNEL = 100202; //未分配人员，需要指定人员
     
-    static final int ERROR_ORG_TASK_CANNOT_OPERATE = 100201; //不能进行此操作
+    static final int ERROR_ORG_TASK_CANNOT_OPERATE = 100203; //不能进行此操作
     
     static final int ERROR_FILE_CONTEXT_ISNULL=200001; //文件为空
    
