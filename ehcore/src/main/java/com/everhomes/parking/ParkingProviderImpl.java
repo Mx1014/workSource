@@ -24,6 +24,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.parking.IsOrderDelete;
 import com.everhomes.rest.parking.ParkingCardRequestStatus;
 import com.everhomes.rest.parking.ParkingLotVendor;
 import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
@@ -258,7 +259,9 @@ public class ParkingProviderImpl implements ParkingProvider {
     	List<ParkingRechargeOrder> resultList = null;
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(ParkingRechargeOrder.class));
         SelectQuery<EhParkingRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_ORDERS);
-        
+        //带上逻辑删除条件
+        query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.IS_DELETE.eq(IsOrderDelete.NOTDELETED.getCode()));
+
         if (pageAnchor != null && pageAnchor != 0)
 			query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.ID.gt(pageAnchor));
         if(StringUtils.isNotBlank(ownerType))
@@ -301,12 +304,13 @@ public class ParkingProviderImpl implements ParkingProvider {
     @Override
     public List<ParkingRechargeOrder> searchParkingRechargeOrders(String ownerType,Long ownerId,
     		Long parkingLotId, String plateNumber,String plateOwnerName,String plateOwnerPhone
-    		,String payerName,String payerPhone,Long pageAnchor,Integer pageSize,Timestamp startDate,
+    		,String paidType ,String payerName,String payerPhone,Long pageAnchor,Integer pageSize,Timestamp startDate,
     		Timestamp endDate,Byte rechargeStatus){
     	List<ParkingRechargeOrder> resultList = null;
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(ParkingRechargeOrder.class));
         SelectQuery<EhParkingRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_ORDERS);
-        
+        query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.IS_DELETE.eq(IsOrderDelete.NOTDELETED.getCode()));
+
         if (pageAnchor != null && pageAnchor != 0)
 			query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.ID.gt(pageAnchor));
         if(StringUtils.isNotBlank(ownerType))
@@ -323,6 +327,8 @@ public class ParkingProviderImpl implements ParkingProvider {
         	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PLATE_OWNER_PHONE.eq(plateOwnerPhone));
         if(StringUtils.isNotBlank(payerPhone))
         	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PAYER_PHONE.eq(payerPhone));
+        if(StringUtils.isNotBlank(paidType))
+        	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.PAID_TYPE.eq(paidType));
         
         if(startDate != null)
         	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.RECHARGE_TIME.gt(startDate));
@@ -374,7 +380,7 @@ public class ParkingProviderImpl implements ParkingProvider {
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhParkingRechargeOrdersDao dao = new EhParkingRechargeOrdersDao(context.configuration());
         
-        dao.delete(parkingRechargeOrder);	
+        dao.update(parkingRechargeOrder);	
     	DaoHelper.publishDaoAction(DaoAction.MODIFY, EhParkingRechargeOrders.class, parkingRechargeOrder.getId());
     }
     
