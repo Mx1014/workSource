@@ -146,13 +146,6 @@ public class EhOrganizationsDao extends org.jooq.impl.DAOImpl<com.everhomes.serv
 	}
 
 	/**
-	 * Fetch records that have <code>group_id IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByGroupId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.GROUP_ID, values);
-	}
-
-	/**
 	 * Fetch records that have <code>integral_tag1 IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByIntegralTag1(java.lang.Long... values) {
@@ -220,5 +213,12 @@ public class EhOrganizationsDao extends org.jooq.impl.DAOImpl<com.everhomes.serv
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByStringTag5(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.STRING_TAG5, values);
+	}
+
+	/**
+	 * Fetch records that have <code>group_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByGroupId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.GROUP_ID, values);
 	}
 }

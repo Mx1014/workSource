@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfAccountCategories implements java.io.Serializable {
 
-	private static final long serialVersionUID = -154954066;
+	private static final long serialVersionUID = 604153178;
 
 	private java.lang.Long       id;
 	private java.lang.Integer    multipleAccountThreshold;
@@ -19,8 +19,8 @@ public class EhConfAccountCategories implements java.io.Serializable {
 	private java.lang.Integer    minPeriod;
 	private java.math.BigDecimal singleAccountPrice;
 	private java.lang.Integer    namespaceId;
-	private java.math.BigDecimal multipleAccountPrice;
 	private java.lang.Byte       displayFlag;
+	private java.math.BigDecimal multipleAccountPrice;
 
 	public EhConfAccountCategories() {}
 
@@ -31,8 +31,8 @@ public class EhConfAccountCategories implements java.io.Serializable {
 		java.lang.Integer    minPeriod,
 		java.math.BigDecimal singleAccountPrice,
 		java.lang.Integer    namespaceId,
-		java.math.BigDecimal multipleAccountPrice,
-		java.lang.Byte       displayFlag
+		java.lang.Byte       displayFlag,
+		java.math.BigDecimal multipleAccountPrice
 	) {
 		this.id = id;
 		this.multipleAccountThreshold = multipleAccountThreshold;
@@ -40,8 +40,8 @@ public class EhConfAccountCategories implements java.io.Serializable {
 		this.minPeriod = minPeriod;
 		this.singleAccountPrice = singleAccountPrice;
 		this.namespaceId = namespaceId;
-		this.multipleAccountPrice = multipleAccountPrice;
 		this.displayFlag = displayFlag;
+		this.multipleAccountPrice = multipleAccountPrice;
 	}
 
 	public java.lang.Long getId() {
@@ -92,19 +92,19 @@ public class EhConfAccountCategories implements java.io.Serializable {
 		this.namespaceId = namespaceId;
 	}
 
-	public java.math.BigDecimal getMultipleAccountPrice() {
-		return this.multipleAccountPrice;
-	}
-
-	public void setMultipleAccountPrice(java.math.BigDecimal multipleAccountPrice) {
-		this.multipleAccountPrice = multipleAccountPrice;
-	}
-
 	public java.lang.Byte getDisplayFlag() {
 		return this.displayFlag;
 	}
 
 	public void setDisplayFlag(java.lang.Byte displayFlag) {
 		this.displayFlag = displayFlag;
+	}
+
+	public java.math.BigDecimal getMultipleAccountPrice() {
+		return this.multipleAccountPrice;
+	}
+
+	public void setMultipleAccountPrice(java.math.BigDecimal multipleAccountPrice) {
+		this.multipleAccountPrice = multipleAccountPrice;
 	}
 }

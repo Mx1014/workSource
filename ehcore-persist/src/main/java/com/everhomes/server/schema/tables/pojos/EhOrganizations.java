@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizations implements java.io.Serializable {
 
-	private static final long serialVersionUID = -406401625;
+	private static final long serialVersionUID = 1910566239;
 
 	private java.lang.Long     id;
 	private java.lang.Long     parentId;
@@ -28,7 +28,6 @@ public class EhOrganizations implements java.io.Serializable {
 	private java.sql.Timestamp updateTime;
 	private java.lang.Long     directlyEnterpriseId;
 	private java.lang.Integer  namespaceId;
-	private java.lang.Long     groupId;
 	private java.lang.Long     integralTag1;
 	private java.lang.Long     integralTag2;
 	private java.lang.Long     integralTag3;
@@ -39,6 +38,7 @@ public class EhOrganizations implements java.io.Serializable {
 	private java.lang.String   stringTag3;
 	private java.lang.String   stringTag4;
 	private java.lang.String   stringTag5;
+	private java.lang.Long     groupId;
 
 	public EhOrganizations() {}
 
@@ -58,7 +58,6 @@ public class EhOrganizations implements java.io.Serializable {
 		java.sql.Timestamp updateTime,
 		java.lang.Long     directlyEnterpriseId,
 		java.lang.Integer  namespaceId,
-		java.lang.Long     groupId,
 		java.lang.Long     integralTag1,
 		java.lang.Long     integralTag2,
 		java.lang.Long     integralTag3,
@@ -68,7 +67,8 @@ public class EhOrganizations implements java.io.Serializable {
 		java.lang.String   stringTag2,
 		java.lang.String   stringTag3,
 		java.lang.String   stringTag4,
-		java.lang.String   stringTag5
+		java.lang.String   stringTag5,
+		java.lang.Long     groupId
 	) {
 		this.id = id;
 		this.parentId = parentId;
@@ -85,7 +85,6 @@ public class EhOrganizations implements java.io.Serializable {
 		this.updateTime = updateTime;
 		this.directlyEnterpriseId = directlyEnterpriseId;
 		this.namespaceId = namespaceId;
-		this.groupId = groupId;
 		this.integralTag1 = integralTag1;
 		this.integralTag2 = integralTag2;
 		this.integralTag3 = integralTag3;
@@ -96,6 +95,7 @@ public class EhOrganizations implements java.io.Serializable {
 		this.stringTag3 = stringTag3;
 		this.stringTag4 = stringTag4;
 		this.stringTag5 = stringTag5;
+		this.groupId = groupId;
 	}
 
 	public java.lang.Long getId() {
@@ -218,14 +218,6 @@ public class EhOrganizations implements java.io.Serializable {
 		this.namespaceId = namespaceId;
 	}
 
-	public java.lang.Long getGroupId() {
-		return this.groupId;
-	}
-
-	public void setGroupId(java.lang.Long groupId) {
-		this.groupId = groupId;
-	}
-
 	public java.lang.Long getIntegralTag1() {
 		return this.integralTag1;
 	}
@@ -304,5 +296,13 @@ public class EhOrganizations implements java.io.Serializable {
 
 	public void setStringTag5(java.lang.String stringTag5) {
 		this.stringTag5 = stringTag5;
+	}
+
+	public java.lang.Long getGroupId() {
+		return this.groupId;
+	}
+
+	public void setGroupId(java.lang.Long groupId) {
+		this.groupId = groupId;
 	}
 }

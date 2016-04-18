@@ -549,8 +549,16 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhOrganizationTasks EH_ORGANIZATION_TASKS = com.everhomes.server.schema.tables.EhOrganizationTasks.EH_ORGANIZATION_TASKS;
 
 	/**
-<<<<<<< HEAD
-<<<<<<< HEAD
+	 * The table ehcore.eh_organization_task_targets
+	 */
+	public static final com.everhomes.server.schema.tables.EhOrganizationTaskTargets EH_ORGANIZATION_TASK_TARGETS = com.everhomes.server.schema.tables.EhOrganizationTaskTargets.EH_ORGANIZATION_TASK_TARGETS;
+
+	/**
+	 * The table ehcore.eh_owner_doors
+	 */
+	public static final com.everhomes.server.schema.tables.EhOwnerDoors EH_OWNER_DOORS = com.everhomes.server.schema.tables.EhOwnerDoors.EH_OWNER_DOORS;
+
+	/**
 	 * The table ehcore.eh_parking_activities
 	 */
 	public static final com.everhomes.server.schema.tables.EhParkingActivities EH_PARKING_ACTIVITIES = com.everhomes.server.schema.tables.EhParkingActivities.EH_PARKING_ACTIVITIES;
@@ -579,18 +587,6 @@ public class Tables {
 	 * The table ehcore.eh_parking_vendors
 	 */
 	public static final com.everhomes.server.schema.tables.EhParkingVendors EH_PARKING_VENDORS = com.everhomes.server.schema.tables.EhParkingVendors.EH_PARKING_VENDORS;
-	
-	/**
-=======
-	 * The table ehcore.eh_organization_task_targets
-	 */
-	public static final com.everhomes.server.schema.tables.EhOrganizationTaskTargets EH_ORGANIZATION_TASK_TARGETS = com.everhomes.server.schema.tables.EhOrganizationTaskTargets.EH_ORGANIZATION_TASK_TARGETS;
-
-	/**
->>>>>>> 3.3.x
-	 * The table ehcore.eh_owner_doors
-	 */
-	public static final com.everhomes.server.schema.tables.EhOwnerDoors EH_OWNER_DOORS = com.everhomes.server.schema.tables.EhOwnerDoors.EH_OWNER_DOORS;
 
 	/**
 	 * The table ehcore.eh_park_apply_card
