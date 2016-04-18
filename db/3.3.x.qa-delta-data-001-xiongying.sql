@@ -1,5 +1,5 @@
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
-	VALUES(9, 0, 0, '品质核查类别', '品质核查类别', 0, 2, UTC_TIMESTAMP(), 0);
+	VALUES(200501, 0, 0, '品质核查类别', '品质核查类别', 0, 2, UTC_TIMESTAMP(), 0);
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'quality', '10001', 'zh_CN', '该业务组没有执行核查的成员');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'quality', '10002', 'zh_CN', '任务不存在');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'quality', '10003', 'zh_CN', '标准不存在');
