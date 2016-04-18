@@ -50,6 +50,7 @@ import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeOrderCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
 import com.everhomes.rest.parking.GetParkingActivityCommand;
+import com.everhomes.rest.parking.IsOrderDelete;
 import com.everhomes.rest.parking.IssueParkingCardsCommand;
 import com.everhomes.rest.parking.ListParkingCardRequestResponse;
 import com.everhomes.rest.parking.ListParkingCardRequestsCommand;
@@ -337,7 +338,7 @@ public class ParkingServiceImpl implements ParkingService {
 		
 		List<ParkingRechargeOrder> list = parkingProvider.searchParkingRechargeOrders(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
-				cmd.getPlateOwnerPhone(), cmd.getPayerName(), cmd.getPayerPhone(), cmd.getPageAnchor(), 
+				cmd.getPlateOwnerPhone(),cmd.getPaidType(), cmd.getPayerName(), cmd.getPayerPhone(), cmd.getPageAnchor(), 
 				pageSize,startDate,endDate,cmd.getRechargeStatus()
 				);
     					
@@ -456,7 +457,8 @@ public class ParkingServiceImpl implements ParkingService {
 		
 		User user = UserContext.current().getUser();
 		
-		parkingActivity.setCreateTime(new Timestamp(cmd.getStartTime()));
+		parkingActivity.setCreateTime(new Timestamp(System.currentTimeMillis()));
+		parkingActivity.setStartTime(new Timestamp(cmd.getStartTime()));
 		parkingActivity.setEndTime(new Timestamp(cmd.getEndTime()));
 		parkingActivity.setOwnerId(cmd.getOwnerId());
 		parkingActivity.setOwnerType(cmd.getOwnerType());
@@ -588,7 +590,7 @@ public class ParkingServiceImpl implements ParkingService {
 			new Timestamp(cmd.getEndDate());
 		List<ParkingRechargeOrder> list = parkingProvider.searchParkingRechargeOrders(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
-				cmd.getPlateOwnerPhone(), cmd.getPayerName(), cmd.getPayerPhone(), cmd.getPageAnchor(), 
+				cmd.getPlateOwnerPhone(),cmd.getPaidType(), cmd.getPayerName(), cmd.getPayerPhone(), cmd.getPageAnchor(), 
 				null,startDate,endDate,cmd.getRechargeStatus()
 				);
 		Workbook wb = new XSSFWorkbook();
@@ -666,6 +668,14 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public void deleteParkingRechargeOrder(DeleteParkingRechargeOrderCommand cmd) {
-		
+		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(cmd.getId());
+		if(order == null){
+			LOGGER.error("order {} is not exist",cmd.getId());
+ 			throw RuntimeErrorException.errorWith(ParkingServiceErrorCode.SCOPE,
+ 					ErrorCodes.ERROR_GENERAL_EXCEPTION,
+ 					"order is not exist");
+		}
+		order.setIsDelete(IsOrderDelete.DELETED.getCode());
+		parkingProvider.deleteParkingRechargeOrder(order);
 	}
 }
