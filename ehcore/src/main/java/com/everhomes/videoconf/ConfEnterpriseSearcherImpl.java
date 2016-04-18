@@ -63,9 +63,6 @@ public class ConfEnterpriseSearcherImpl extends AbstractElasticSearch implements
 	private OrganizationProvider organizationProvider;
 	
 	@Autowired
-	private OrganizationProvider organizationProvider;
-	
-	@Autowired
     private RolePrivilegeService rolePrivilegeService;
 	
 	@Override
