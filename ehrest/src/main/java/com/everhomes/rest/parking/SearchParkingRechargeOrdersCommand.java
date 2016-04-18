@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>plateOwnerPhone: 车主手机号</li>
  * <li>payerName: 付款人名称</li>
  * <li>payerPhone: 付款人手机号</li>
+ * <li>paidType: 支付方式  com.everhomes.rest.organization.VendorType  支付宝 : 10001  微信 : 10002</li>
  * <li>rechargeStatus: 充值状态  0:无效 1：未充值 2:已充值   com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus</li>
  * <li>startDate: 开始充值时间</li>
  * <li>endDate: 结束充值时间</li>
@@ -29,6 +30,7 @@ public class SearchParkingRechargeOrdersCommand {
     private String plateOwnerPhone;
     private String payerName;
     private String payerPhone;
+    private String paidType;
     private Byte rechargeStatus;
     private Long startDate;
     private Long endDate;
@@ -146,5 +148,13 @@ public class SearchParkingRechargeOrdersCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public String getPaidType() {
+		return paidType;
+	}
+
+	public void setPaidType(String paidType) {
+		this.paidType = paidType;
+	}
 
 }
