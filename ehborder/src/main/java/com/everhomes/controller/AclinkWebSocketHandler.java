@@ -141,7 +141,9 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
         StringHelper.toStringMap(null, cmd, params);
         final AclinkWebSocketHandler handler = this;
         
-        LOGGER.info("Got reply=", cmd);
+        if(cmd.getPayload() != null) {
+            LOGGER.info("Got reply=" + cmd);    
+        }
         
         httpRestCallProvider.restCall("/aclink/syncWebsocketMessages", params, new ListenableFutureCallback<ResponseEntity<String>> () {
 

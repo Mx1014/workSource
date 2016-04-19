@@ -226,4 +226,39 @@ public class AclinkController extends ControllerBase {
         return response;
     }
     
+    /**
+     * 
+     * <b>URL: /aclink/upgrateAuth</b>
+     * <p>删除授权</p>
+     * @return
+     */
+    @RequestMapping("upgrateAuth")
+    @RestReturn(value=AclinkUpgradeResponse.class)
+    public RestResponse upgrateAuth(@Valid AclinkUpgradeCommand cmd) {
+        RestResponse response = new RestResponse();
+        
+        response.setResponseObject(doorAccessService.upgradeFirmware(cmd));
+        
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /aclink/upgrateAuth</b>
+     * <p>删除授权</p>
+     * @return
+     */
+    @RequestMapping("upgrateVerify")
+    @RestReturn(value=String.class)
+    public RestResponse upgrateVerify(@Valid AclinkUpgradeCommand cmd) {
+        RestResponse response = new RestResponse();
+        
+        response.setResponseObject(doorAccessService.upgradeVerify(cmd));
+        
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

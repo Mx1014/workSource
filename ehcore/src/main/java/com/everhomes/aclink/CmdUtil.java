@@ -7,6 +7,8 @@ import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.everhomes.util.StringHelper;
+
 public class CmdUtil {
     public final static int CMD_ACTIVE = 0x01;
 
@@ -160,6 +162,9 @@ public class CmdUtil {
         System.arraycopy(curTimeBytes, 0, dataArr, extTimeBytes.length, curTimeBytes.length);
         try {
             dataArr = addPaddingTo16Bytes(dataArr);
+            
+            LOGGER.info("updateTime dataArr = " + StringHelper.toHexString(dataArr));
+            
             byte[] aeskeyEncryptResult = AESUtil.encrypt(dataArr, curServerKey);
             byte[] resultArr = new byte[2 + aeskeyEncryptResult.length];
             resultArr[0] = cmd;
@@ -190,6 +195,32 @@ public class CmdUtil {
 
         printArray(dataArr);
         
+        try {
+            byte[] aeskeyEncryptResult = AESUtil.encrypt(dataArr, curServerKey);
+            byte[] resultArr = new byte[2 + aeskeyEncryptResult.length];
+            resultArr[0] = cmd;
+            resultArr[1] = ver;
+            System.arraycopy(aeskeyEncryptResult, 0, resultArr, 2, aeskeyEncryptResult.length);
+            return resultArr;
+        } catch (Exception e) {
+        }
+        return null;
+    }
+    
+    public static byte[] upgrade(byte[] curServerKey, byte ver, int firmVersion, short checksum, String uuid) {
+        byte cmd = 0xD;
+        int expireTime = (int) Math.ceil((System.currentTimeMillis() / 1000)) + EXPIRE_TIME;
+        byte[] extTimeBytes = DataUtil.intToByteArray(expireTime);
+        byte[] firmVersionBytes = DataUtil.intToByteArray(firmVersion);
+        byte[] chkBytes = DataUtil.shortToByteArray(checksum);
+        byte[] dataArr = new byte[extTimeBytes.length + firmVersionBytes.length + chkBytes.length + 2];
+
+        System.arraycopy(extTimeBytes, 0, dataArr, 0, extTimeBytes.length);
+        System.arraycopy(firmVersionBytes, 0, dataArr, extTimeBytes.length, firmVersionBytes.length);
+        System.arraycopy(chkBytes, 0, dataArr, extTimeBytes.length + firmVersionBytes.length, chkBytes.length);
+        System.arraycopy(uuid.getBytes(), 0, dataArr, extTimeBytes.length + firmVersionBytes.length + chkBytes.length, 2);
+        dataArr = addPaddingTo16Bytes(dataArr);
+
         try {
             byte[] aeskeyEncryptResult = AESUtil.encrypt(dataArr, curServerKey);
             byte[] resultArr = new byte[2 + aeskeyEncryptResult.length];

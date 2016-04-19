@@ -58,6 +58,7 @@ import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.forum.PostEntityTag;
 import com.everhomes.rest.forum.PostQueryResult;
 import com.everhomes.rest.forum.PostStatus;
+import com.everhomes.rest.forum.SearchByPMCommand;
 import com.everhomes.rest.forum.SearchTopicCommand;
 import com.everhomes.rest.group.GroupDTO;
 import com.everhomes.rest.organization.OrganizationType;
@@ -517,4 +518,86 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
         
         return query(topicCmd);
     }
+
+	@Override
+	public ListPostCommandResponse queryByPM(SearchByPMCommand cmd) {
+		SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
+        
+        QueryBuilder qb = null;
+        if(cmd.getQueryString() == null || cmd.getQueryString().isEmpty()) {
+            qb = QueryBuilders.matchAllQuery();
+        } else {
+            qb = QueryBuilders.multiMatchQuery(cmd.getQueryString())
+                    .field("subject", 1.2f)
+                    .field("content", 1.0f).prefixLength(2);
+            
+            builder.setHighlighterFragmentSize(60);
+            builder.setHighlighterNumOfFragments(8);
+            builder.addHighlightedField("subject").addHighlightedField("content");
+            
+        }
+        
+        FilterBuilder fb = null;
+        FilterBuilder comFilter = null;
+//        forumIds和communityids先should 然后和namespaceId must
+        if(cmd.getCommunityIds() != null && cmd.getCommunityIds().size() > 0) {
+            FilterBuilder comIn = boolInFilter("visibleRegionId", cmd.getCommunityIds());
+            FilterBuilder comType = FilterBuilders.termFilter("visibleRegionType", (long)VisibleRegionType.COMMUNITY.getCode());
+            comFilter = FilterBuilders.boolFilter().must(comIn, comType);
+        }
+        if(cmd.getForumIds() != null && cmd.getForumIds().size() > 0) {
+            if(null == comFilter) {
+                comFilter = boolInFilter("forumId", cmd.getForumIds());
+            } else {
+                comFilter = FilterBuilders.boolFilter().should(comFilter, boolInFilter("forumId", cmd.getForumIds())); 
+            }
+        }
+        
+        fb = comFilter;
+        
+        if(null == fb) {
+            fb = FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId());
+        } else {
+            fb = FilterBuilders.boolFilter().must(fb, FilterBuilders.termFilter("namespaceId", cmd.getNamespaceId()));
+        }
+        
+        
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        Long anchor = 0l;
+        if(cmd.getPageAnchor() != null) {
+            anchor = cmd.getPageAnchor();
+        }
+        
+        qb = QueryBuilders.filteredQuery(qb, fb);
+        builder.setSearchType(SearchType.QUERY_THEN_FETCH);
+        builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
+        builder.setQuery(qb);
+        
+        if(LOGGER.isDebugEnabled())
+			LOGGER.info("PostSearcherImpl query builder ："+builder);
+        
+        SearchResponse rsp = builder.execute().actionGet();
+        List<Long> ids = getIds(rsp);
+        
+        if(LOGGER.isDebugEnabled())
+			LOGGER.info("PostSearcherImpl query SearchResponse ids ："+ids);
+        
+        ListPostCommandResponse listPost = new ListPostCommandResponse();
+        if(ids.size() > pageSize) {
+            listPost.setNextPageAnchor(anchor + 1);
+            ids.remove(ids.size() - 1);
+         } else {
+            listPost.setNextPageAnchor(null);
+            }
+        
+        List<PostDTO> posts = this.forumService.getTopicById(ids, cmd.getCommunityIds(), false);
+        if(null != cmd.getQueryString() && !cmd.getQueryString().isEmpty()) {
+            List<String> ss = this.analyze("ansj_query", cmd.getQueryString());
+            listPost.setKeywords(String.join(" ", ss));
+            }
+        
+        listPost.setPosts(posts);
+        
+        return listPost;
+	}
 }
