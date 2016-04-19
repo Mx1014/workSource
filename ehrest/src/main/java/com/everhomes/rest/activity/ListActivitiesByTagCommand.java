@@ -4,10 +4,11 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  *<ul>
- *<li>tag:活动标签</li>
- *<li>community_id:小区id</li>
- *<li>anchor:分页</li>
- *<li>range:范围,周边活动传入6；同城活动传入4</li>
+ * <li>tag:活动标签</li>
+ * <li>community_id:小区id</li>
+ * <li>anchor:分页</li>
+ * <li>range:范围,周边活动传入6；同城活动传入4</li>
+ * <li>pageSize: 每页的数量</li>
  *</ul>
  */
 public class ListActivitiesByTagCommand {
@@ -18,6 +19,8 @@ public class ListActivitiesByTagCommand {
     private Long anchor;
     
     private int range;
+    
+    private Integer pageSize;
     
     public Long getCommunity_id() {
 		return community_id;
@@ -49,6 +52,14 @@ public class ListActivitiesByTagCommand {
 
     public void setAnchor(Long anchor) {
         this.anchor = anchor;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
     }
 
     @Override

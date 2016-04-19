@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.activity.ActivityService;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
@@ -69,6 +70,9 @@ public class UserUiController extends ControllerBase {
     
     @Autowired
     private OpPromotionService opPromotionService;
+    
+    @Autowired
+    private ActivityService activityService;
     
     /**
      * <b>URL: /ui/user/listUserRelatedScenes</b>
@@ -239,8 +243,7 @@ public class UserUiController extends ControllerBase {
     @RequestMapping("listNearbyActivitiesByScene")
     @RestReturn(value=ListActivitiesReponse.class)
     public RestResponse listNearbyActivitiesByScene(ListNearbyActivitiesBySceneCommand cmd){
-        // Tuple<Long, List<ActivityDTO>> tuple = activityService.listActivitiesByTag(cmd);
-        ListActivitiesReponse rsp = null; //new ListActivitiesReponse(tuple.first(),tuple.second());
+        ListActivitiesReponse rsp = activityService.listNearbyActivitiesByScene(cmd);
         RestResponse response = new RestResponse(rsp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

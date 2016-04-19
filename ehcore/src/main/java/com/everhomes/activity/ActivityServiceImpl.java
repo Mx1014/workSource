@@ -25,6 +25,7 @@ import ch.hsr.geohash.GeoHash;
 
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
+import com.everhomes.community.Community;
 import com.everhomes.community.CommunityGeoPoint;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -43,6 +44,10 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationDetail;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.rest.activity.ActivityCancelSignupCommand;
 import com.everhomes.rest.activity.ActivityCheckinCommand;
@@ -57,6 +62,8 @@ import com.everhomes.rest.activity.ActivityPostCommand;
 import com.everhomes.rest.activity.ActivityRejectCommand;
 import com.everhomes.rest.activity.ActivityServiceErrorCode;
 import com.everhomes.rest.activity.ActivitySignupCommand;
+import com.everhomes.rest.activity.GeoLocation;
+import com.everhomes.rest.activity.ListActivitiesByLocationCommand;
 import com.everhomes.rest.activity.ListActivitiesByNamespaceIdAndTagCommand;
 import com.everhomes.rest.activity.ListActivitiesByTagCommand;
 import com.everhomes.rest.activity.ListActivitiesCommand;
@@ -64,6 +71,7 @@ import com.everhomes.rest.activity.ListActivitiesReponse;
 import com.everhomes.rest.activity.ListActivityCategoriesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
+import com.everhomes.rest.activity.ListOrgNearbyActivitiesCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
@@ -74,14 +82,21 @@ import com.everhomes.rest.forum.ListPostCommandResponse;
 import com.everhomes.rest.forum.PostContentType;
 import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.group.LeaveGroupCommand;
+import com.everhomes.rest.group.ListNearbyGroupCommand;
+import com.everhomes.rest.group.ListNearbyGroupCommandResponse;
 import com.everhomes.rest.group.RejectJoinGroupRequestCommand;
 import com.everhomes.rest.group.RequestToJoinGroupCommand;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.ui.user.ActivityLocationScope;
+import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
+import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -160,6 +175,9 @@ public class ActivityServiceImpl implements ActivityService {
     
     @Autowired
     private LocaleTemplateService localeTemplateService;
+    
+    @Autowired
+    private OrganizationProvider organizationProvider;
 
     @Override
     public void createPost(ActivityPostCommand cmd, Long postId) {
@@ -928,29 +946,48 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public Tuple<Long,List<ActivityDTO>>  listActivities(ListActivitiesCommand cmd) {
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         CrossShardListingLocator locator=new CrossShardListingLocator();
         if(cmd.getAnchor()!=null){
             locator.setAnchor(cmd.getAnchor());
         }
-        Condition condtion=null;
-        if(!StringUtils.isEmpty(cmd.getTag())){
-            condtion= Tables.EH_ACTIVITIES.TAG.eq(cmd.getTag());
-        }
-        List<Condition> conditions =new ArrayList<Condition>();
+        
+        // 修改查询活动接口，把参数改为一个Condition对象，以便调用者方便构造条件 by lqs 20160419
+//        Condition condtion=null;
+//        if(!StringUtils.isEmpty(cmd.getTag())){
+//            condtion= Tables.EH_ACTIVITIES.TAG.eq(cmd.getTag());
+//        }
+//        List<Condition> conditions =new ArrayList<Condition>();
+//        if(cmd.getLatitude()!=null&&cmd.getLongitude()!=null){     
+//            double latitude= cmd.getLatitude();
+//            double longitude=cmd.getLongitude();
+//            GeoHash geo = GeoHash.withCharacterPrecision(latitude, longitude, 6);
+//            GeoHash[] adjacents = geo.getAdjacent();
+//            List<String> geoHashCodes = new ArrayList<String>();
+//            geoHashCodes.add(geo.toBase32());
+//            for(GeoHash g : adjacents) {
+//                geoHashCodes.add(g.toBase32());
+//            }
+//            conditions = geoHashCodes.stream().map(r->Tables.EH_ACTIVITIES.GEOHASH.like(r+"%")).collect(Collectors.toList());
+//        }
+
+        List<String> geoHashCodes = new ArrayList<String>();
         if(cmd.getLatitude()!=null&&cmd.getLongitude()!=null){     
             double latitude= cmd.getLatitude();
             double longitude=cmd.getLongitude();
             GeoHash geo = GeoHash.withCharacterPrecision(latitude, longitude, 6);
             GeoHash[] adjacents = geo.getAdjacent();
-            List<String> geoHashCodes = new ArrayList<String>();
             geoHashCodes.add(geo.toBase32());
             for(GeoHash g : adjacents) {
                 geoHashCodes.add(g.toBase32());
             }
-            conditions = geoHashCodes.stream().map(r->Tables.EH_ACTIVITIES.GEOHASH.like(r+"%")).collect(Collectors.toList());
         }
+        
+        Condition condtion = buildNearbyActivityCondition(namespaceId, geoHashCodes, cmd.getTag());
+        
         int value=configurationProvider.getIntValue("pagination.page.size", AppConstants.PAGINATION_DEFAULT_SIZE);
-        List<Activity> ret = activityProvider.listActivities(locator, value+1,condtion,Operator.OR, conditions.toArray(new Condition[conditions.size()]));
+        //List<Activity> ret = activityProvider.listActivities(locator, value+1,condtion,Operator.OR, conditions.toArray(new Condition[conditions.size()]));
+        List<Activity> ret = activityProvider.listActivities(locator, value+1, condtion);
         List<ActivityDTO> activityDtos = ret.stream().map(activity->{
             Post post = forumProvider.findPostById(activity.getPostId());
             if(post==null){
@@ -990,7 +1027,8 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public Tuple<Long, List<ActivityDTO>> listNearByActivities(ListNearByActivitiesCommand cmd) {
-       double latitude= cmd.getLatitude();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        double latitude= cmd.getLatitude();
        double longitude=cmd.getLongitude();
        GeoHash geo = GeoHash.withCharacterPrecision(latitude, longitude, 6);
        GeoHash[] adjacents = geo.getAdjacent();
@@ -1002,8 +1040,11 @@ public class ActivityServiceImpl implements ActivityService {
        CrossShardListingLocator locator=new CrossShardListingLocator();
        locator.setAnchor(cmd.getAnchor());
        int pageSize=configurationProvider.getIntValue("pagination.page.size", 20);
-       List<Condition> conditions = geoHashCodes.stream().map(r->Tables.EH_ACTIVITIES.GEOHASH.like(r+"%")).collect(Collectors.toList());
-       List<ActivityDTO> result = activityProvider.listActivities(locator, pageSize+1,null,Operator.OR,conditions.toArray(new Condition[conditions.size()])).stream().map(activity->{
+       // 修改查询活动接口，把参数改为一个Condition对象，以便调用者方便构造条件 by lqs 20160419
+       //List<Condition> conditions = geoHashCodes.stream().map(r->Tables.EH_ACTIVITIES.GEOHASH.like(r+"%")).collect(Collectors.toList());
+       //List<ActivityDTO> result = activityProvider.listActivities(locator, pageSize+1,null,Operator.OR,conditions.toArray(new Condition[conditions.size()])).stream().map(activity->{
+       Condition condition = buildNearbyActivityCondition(namespaceId, geoHashCodes, null);
+       List<ActivityDTO> result = activityProvider.listActivities(locator, pageSize+1, condition).stream().map(activity->{
           ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
           dto.setActivityId(activity.getId());
           Post post = forumProvider.findPostById(activity.getPostId());
@@ -1062,9 +1103,8 @@ public class ActivityServiceImpl implements ActivityService {
 	}
 
 	@Override
-	public  Tuple<Long, List<ActivityDTO>> listNearByActivitiesV2(
-			ListNearByActivitiesCommandV2 cmdV2) {
-		
+	public  Tuple<Long, List<ActivityDTO>> listNearByActivitiesV2(ListNearByActivitiesCommandV2 cmdV2) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		List<CommunityGeoPoint> geoPoints = communityProvider.listCommunityGeoPoints(cmdV2.getCommunity_id());
 		
 		List<String> geoHashCodes = new ArrayList<String>();
@@ -1086,8 +1126,11 @@ public class ActivityServiceImpl implements ActivityService {
 		CrossShardListingLocator locator=new CrossShardListingLocator();
 		locator.setAnchor(cmdV2.getAnchor());
 		int pageSize=configurationProvider.getIntValue("pagination.page.size", 20);
-		List<Condition> conditions = geoHashCodes.stream().map(r->Tables.EH_ACTIVITIES.GEOHASH.like(r+"%")).collect(Collectors.toList());
-		List<ActivityDTO> result = activityProvider.listActivities(locator, pageSize+1,null,Operator.OR,conditions.toArray(new Condition[conditions.size()])).stream().map(activity->{
+		// 修改查询活动接口，把参数改为一个Condition对象，以便调用者方便构造条件 by lqs 20160419
+		// List<Condition> conditions = geoHashCodes.stream().map(r->Tables.EH_ACTIVITIES.GEOHASH.like(r+"%")).collect(Collectors.toList());
+		// List<ActivityDTO> result = activityProvider.listActivities(locator, pageSize+1,null,Operator.OR,conditions.toArray(new Condition[conditions.size()])).stream().map(activity->{
+		Condition condition = buildNearbyActivityCondition(namespaceId, geoHashCodes, null);
+		List<ActivityDTO> result = activityProvider.listActivities(locator, pageSize+1, condition).stream().map(activity->{
 			ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
 			dto.setActivityId(activity.getId());
 			Post post = forumProvider.findPostById(activity.getPostId());
@@ -1128,9 +1171,8 @@ public class ActivityServiceImpl implements ActivityService {
 	}
 
 	@Override
-	public Tuple<Long, List<ActivityDTO>> listCityActivities(
-			ListNearByActivitiesCommandV2 cmdV2) {
-
+	public Tuple<Long, List<ActivityDTO>> listCityActivities(ListNearByActivitiesCommandV2 cmdV2) {
+	    Integer namespaceId = UserContext.getCurrentNamespaceId();
 		List<CommunityGeoPoint> geoPoints = communityProvider.listCommunityGeoPoints(cmdV2.getCommunity_id());
 		
 		List<String> geoHashCodes = new ArrayList<String>();
@@ -1153,8 +1195,11 @@ public class ActivityServiceImpl implements ActivityService {
 		CrossShardListingLocator locator=new CrossShardListingLocator();
 		locator.setAnchor(cmdV2.getAnchor());
 		int pageSize=configurationProvider.getIntValue("pagination.page.size", 20);
-		List<Condition> conditions = geoHashCodes.stream().map(r->Tables.EH_ACTIVITIES.GEOHASH.like(r+"%")).collect(Collectors.toList());
-		List<ActivityDTO> result = activityProvider.listActivities(locator, pageSize+1,null,Operator.OR,conditions.toArray(new Condition[conditions.size()])).stream().map(activity->{
+		// 修改查询活动接口，把参数改为一个Condition对象，以便调用者方便构造条件 by lqs 20160419
+		// List<Condition> conditions = geoHashCodes.stream().map(r->Tables.EH_ACTIVITIES.GEOHASH.like(r+"%")).collect(Collectors.toList());
+		// List<ActivityDTO> result = activityProvider.listActivities(locator, pageSize+1,null,Operator.OR,conditions.toArray(new Condition[conditions.size()])).stream().map(activity->{
+		Condition condition = buildNearbyActivityCondition(namespaceId, geoHashCodes, null);
+		List<ActivityDTO> result = activityProvider.listActivities(locator, pageSize+1, condition).stream().map(activity->{
 			ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
 			dto.setActivityId(activity.getId());
 			Post post = forumProvider.findPostById(activity.getPostId());
@@ -1195,66 +1240,162 @@ public class ActivityServiceImpl implements ActivityService {
 	}
 
 	@Override
-	public Tuple<Long, List<ActivityDTO>> listActivitiesByTag(
-			ListActivitiesByTagCommand cmd) {
-		 
-		CrossShardListingLocator locator=new CrossShardListingLocator();
-        if(cmd.getAnchor()!=null){
-            locator.setAnchor(cmd.getAnchor());
-        }
-        Condition condtion=null;
-        if(!StringUtils.isEmpty(cmd.getTag())){
-            condtion= Tables.EH_ACTIVITIES.TAG.eq(cmd.getTag());
-        }
-        
+	public ListActivitiesReponse listActivitiesByTag(ListActivitiesByTagCommand cmd) {
         List<CommunityGeoPoint> geoPoints = communityProvider.listCommunityGeoPoints(cmd.getCommunity_id());
-        int range = cmd.getRange();
-        range = (range <= 0) ? 6 : range;
-		
-		List<String> geoHashCodes = new ArrayList<String>();
-		
-		StringBuilder strBuilder = new StringBuilder();
-		for(CommunityGeoPoint geoPoint : geoPoints){
-			
-			double latitude = geoPoint.getLatitude();
-			double longitude = geoPoint.getLongitude();
-			
-			GeoHash geo = GeoHash.withCharacterPrecision(latitude, longitude, range);
-			
-			GeoHash[] adjacents = geo.getAdjacent();
-			geoHashCodes.add(geo.toBase32());
-	        for(GeoHash g : adjacents) {
-	           geoHashCodes.add(g.toBase32());
-	        }
-	        
-	        if(strBuilder.length() > 0) {
-	            strBuilder.append(",");
-	        } else {
-	            strBuilder.append(geoPoint.getCommunityId());
-	        }
-		}
-		if(LOGGER.isDebugEnabled()) {
-		    LOGGER.debug("Query activities by geohash, communityId=" + cmd.getCommunity_id() + ", communities=" + strBuilder);
-		}
-		List<Condition> conditions = geoHashCodes.stream().map(r->Tables.EH_ACTIVITIES.GEOHASH.like(r+"%")).collect(Collectors.toList());
         
-        int value=configurationProvider.getIntValue("pagination.page.size", AppConstants.PAGINATION_DEFAULT_SIZE);
-        List<Activity> ret = activityProvider.listActivities(locator, value+1,condtion,Operator.OR, conditions.toArray(new Condition[conditions.size()]));
+		StringBuilder strBuilder = new StringBuilder();
+		List<GeoLocation> geoLocationList = new ArrayList<GeoLocation>();
+		for(CommunityGeoPoint geoPoint : geoPoints){
+		    if(geoPoint.getLatitude() != null && geoPoint.getLongitude() != null) {
+    		    GeoLocation geoLocation = new GeoLocation();
+    		    geoLocation.setLatitude(geoPoint.getLatitude());
+    		    geoLocation.setLongitude(geoPoint.getLongitude());
+    		    geoLocationList.add(geoLocation);
+		    } else {
+		        if(LOGGER.isWarnEnabled()) {
+		            LOGGER.warn("Invalid latitude or longitude, geoPoint={}", geoPoint);
+		        }
+		    }
+		    
+            if (strBuilder.length() > 0) {
+                strBuilder.append(",");
+            } else {
+                strBuilder.append(geoPoint.getCommunityId());
+            }
+		}
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query activities by geohash, communityId=" + cmd.getCommunity_id() + ", communities="
+                + strBuilder);
+        }
+        
+        ActivityLocationScope scope = ActivityLocationScope.NEARBY;
+        if(cmd.getRange() == 4) {
+            scope = ActivityLocationScope.SAME_CITY;
+        }
+        
+        ListActivitiesByLocationCommand execCmd = new ListActivitiesByLocationCommand();
+        execCmd.setLocationPointList(geoLocationList);
+        execCmd.setPageAnchor(cmd.getAnchor());
+        execCmd.setScope(scope.getCode());
+        execCmd.setTag(cmd.getTag());
+        execCmd.setPageSize(cmd.getPageSize());
+        execCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        return listActivitiesByLocation(execCmd);
+		
+        // 把公用的代码转移到listActivitiesByLocation()中，公司场景和小区场景获取经纬度的方式不一样 by lqs 20160419
+//        CrossShardListingLocator locator=new CrossShardListingLocator();
+//        if(cmd.getAnchor()!=null){
+//            locator.setAnchor(cmd.getAnchor());
+//        }
+//        Condition condtion=null;
+//        if(!StringUtils.isEmpty(cmd.getTag())){
+//            condtion= Tables.EH_ACTIVITIES.TAG.eq(cmd.getTag());
+//        }
+//        
+//        int range = cmd.getRange();
+//        range = (range <= 0) ? 6 : range;
+//        
+//        List<String> geoHashCodes = new ArrayList<String>();
+//		StringBuilder strBuilder = new StringBuilder();
+//		for(CommunityGeoPoint geoPoint : geoPoints){
+//			
+//			double latitude = geoPoint.getLatitude();
+//			double longitude = geoPoint.getLongitude();
+//			
+//			GeoHash geo = GeoHash.withCharacterPrecision(latitude, longitude, range);
+//			
+//			GeoHash[] adjacents = geo.getAdjacent();
+//			geoHashCodes.add(geo.toBase32());
+//	        for(GeoHash g : adjacents) {
+//	           geoHashCodes.add(g.toBase32());
+//	        }
+//	        
+//	        if(strBuilder.length() > 0) {
+//	            strBuilder.append(",");
+//	        } else {
+//	            strBuilder.append(geoPoint.getCommunityId());
+//	        }
+//		}
+//		if(LOGGER.isDebugEnabled()) {
+//		    LOGGER.debug("Query activities by geohash, communityId=" + cmd.getCommunity_id() + ", communities=" + strBuilder);
+//		}
+//		List<Condition> conditions = geoHashCodes.stream().map(r->Tables.EH_ACTIVITIES.GEOHASH.like(r+"%")).collect(Collectors.toList());
+//        
+//        int value=configurationProvider.getIntValue("pagination.page.size", AppConstants.PAGINATION_DEFAULT_SIZE);
+//        List<Activity> ret = activityProvider.listActivities(locator, value+1,condtion,Operator.OR, conditions.toArray(new Condition[conditions.size()]));
+//        List<ActivityDTO> activityDtos = ret.stream().map(activity->{
+//            Post post = forumProvider.findPostById(activity.getPostId());
+//            if(post==null){
+//                return null;
+//            }
+//            if(activity.getPosterUri()==null){
+//            	this.forumProvider.populatePostAttachments(post);
+//            	List<Attachment> attachmentList = post.getAttachments();
+//            	if(attachmentList != null && attachmentList.size() != 0){
+//            		for(Attachment attachment : attachmentList){
+//            			if(PostContentType.IMAGE.getCode().equals(attachment.getContentType()))
+//            				activity.setPosterUri(attachment.getContentUri());
+//            			break;
+//            		}
+//            	}
+//            }
+//            ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+//            dto.setActivityId(activity.getId());
+//            dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
+//            dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+//            dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
+//            dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
+//            dto.setProcessStatus(getStatus(activity).getCode());
+//            dto.setFamilyId(activity.getCreatorFamilyId());
+//            dto.setStartTime(activity.getStartTime().toString());
+//            dto.setStopTime(activity.getEndTime().toString());
+//            dto.setGroupId(activity.getGroupId());
+//            dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
+//            dto.setForumId(post.getForumId());
+//            return dto;
+//        }).filter(r->r!=null).collect(Collectors.toList());
+//        if(activityDtos.size()<value){
+//            locator.setAnchor(null);
+//        }
+//        return new Tuple<Long, List<ActivityDTO>>(locator.getAnchor(), activityDtos);
+	}
+	
+	@Override
+	public ListActivitiesReponse listActivitiesByLocation(ListActivitiesByLocationCommand cmd) {
+	    ListActivitiesReponse response = null;
+	    List<GeoLocation> geoLocationList = cmd.getLocationPointList();
+	    if(geoLocationList == null || geoLocationList.size() == 0) {
+	        if(LOGGER.isInfoEnabled()) {
+	            LOGGER.info("The location point list is empty, cmd={}", cmd);
+	        }
+	        return response;
+	    }
+	    
+	    int geoCharCount = convertLocationScopeToGeoCharCount(cmd.getScope());
+	    List<String> geoHashCodes = convertLocationToGeoCodes(geoLocationList, geoCharCount);
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query activities by geohash, geoCharCount={}, cmd={}, geoHashCodes={}", geoCharCount, cmd, geoHashCodes);
+        }
+        
+        //List<Condition> conditions = geoHashCodes.stream().map(r->Tables.EH_ACTIVITIES.GEOHASH.like(r+"%")).collect(Collectors.toList());
+        Condition condition = buildNearbyActivityCondition(cmd.getNamespaceId(), geoHashCodes, cmd.getTag());
+        
+        CrossShardListingLocator locator=new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        int ipageSize = configurationProvider.getIntValue("pagination.page.size", AppConstants.PAGINATION_DEFAULT_SIZE);
+        List<Activity> ret = activityProvider.listActivities(locator, ipageSize + 1, condition);
         List<ActivityDTO> activityDtos = ret.stream().map(activity->{
             Post post = forumProvider.findPostById(activity.getPostId());
-            if(post==null){
-                return null;
-            }
-            if(activity.getPosterUri()==null){
-            	this.forumProvider.populatePostAttachments(post);
-            	List<Attachment> attachmentList = post.getAttachments();
-            	if(attachmentList != null && attachmentList.size() != 0){
-            		for(Attachment attachment : attachmentList){
-            			if(PostContentType.IMAGE.getCode().equals(attachment.getContentType()))
-            				activity.setPosterUri(attachment.getContentUri());
-            			break;
-            		}
-            	}
+            if(activity.getPosterUri() == null && post != null){
+                this.forumProvider.populatePostAttachments(post);
+                List<Attachment> attachmentList = post.getAttachments();
+                if(attachmentList != null && attachmentList.size() != 0){
+                    for(Attachment attachment : attachmentList){
+                        if(PostContentType.IMAGE.getCode().equals(attachment.getContentType()))
+                            activity.setPosterUri(attachment.getContentUri());
+                        break;
+                    }
+                }
             }
             ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
             dto.setActivityId(activity.getId());
@@ -1268,13 +1409,100 @@ public class ActivityServiceImpl implements ActivityService {
             dto.setStopTime(activity.getEndTime().toString());
             dto.setGroupId(activity.getGroupId());
             dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
-            dto.setForumId(post.getForumId());
+            if(post != null) {
+                dto.setForumId(post.getForumId());
+            }
+            
             return dto;
         }).filter(r->r!=null).collect(Collectors.toList());
-        if(activityDtos.size()<value){
-            locator.setAnchor(null);
+        
+        Long nextPageAnchor = null;
+        if(activityDtos.size() > ipageSize) {
+            activityDtos.remove(activityDtos.size() - 1);
+            nextPageAnchor = activityDtos.get(activityDtos.size() - 1).getActivityId();
         }
-        return new Tuple<Long, List<ActivityDTO>>(locator.getAnchor(), activityDtos);
+        
+        response = new ListActivitiesReponse(nextPageAnchor, activityDtos);
+        return response;
+	}
+	
+	private Condition buildNearbyActivityCondition(Integer namespaceId, List<String> geoHashCodes, String tag) {
+	    Condition condition = null;
+	    if(namespaceId != null) {
+	        condition = Tables.EH_ACTIVITIES.NAMESPACE_ID.eq(namespaceId);
+	    }
+	    
+        if(!StringUtils.isEmpty(tag)){
+            if(condition == null) {
+                condition = Tables.EH_ACTIVITIES.TAG.eq(tag);
+            } else {
+                condition = condition.and(Tables.EH_ACTIVITIES.TAG.eq(tag));
+            }
+        } 
+        
+        Condition geoCondition = buildActivityGeoLocationCondition(geoHashCodes);
+        if(geoCondition != null) {
+            if(condition == null) {
+                condition = geoCondition;
+            } else {
+                condition = condition.and(geoCondition);
+            }
+        }
+        
+        return condition;
+	}
+	
+	private Condition buildActivityGeoLocationCondition(List<String> geoHashCodes) {
+	    Condition condition = null;
+	    
+	    if(geoHashCodes != null) {
+	        for(String geoHashCode : geoHashCodes) {
+	            if(condition == null) {
+	                condition = Tables.EH_ACTIVITIES.GEOHASH.like(geoHashCode + "%");
+	            } else {
+	                condition = condition.or(Tables.EH_ACTIVITIES.GEOHASH.like(geoHashCode + "%"));
+	            }
+	        }
+	    }
+	    
+	    return condition;
+	}
+	
+	private int convertLocationScopeToGeoCharCount(Byte locationScope) {
+	    ActivityLocationScope scope = ActivityLocationScope.fromCode(locationScope);
+        int geoCharCount = 6; // 默认在3公里内，按GEO算法最接近的字符数为6
+        if(scope != null) {
+            switch(scope) {
+            case ALL:
+                geoCharCount = 1;
+                break;
+            case NEARBY:
+                geoCharCount = 6;
+                break;
+            case SAME_CITY:
+                geoCharCount = 4;
+            }
+        }
+        
+        return geoCharCount;
+	}
+	
+	private List<String> convertLocationToGeoCodes(List<GeoLocation> geoLocationList, int geoCharCount) {
+	    List<String> geoHashCodes = new ArrayList<String>();
+        for(GeoLocation geoLocation : geoLocationList){
+            Double latitude = geoLocation.getLatitude();
+            Double longitude = geoLocation.getLongitude();
+            
+            GeoHash geo = GeoHash.withCharacterPrecision(latitude, longitude, geoCharCount);
+            
+            GeoHash[] adjacents = geo.getAdjacent();
+            geoHashCodes.add(geo.toBase32());
+            for(GeoHash g : adjacents) {
+               geoHashCodes.add(g.toBase32());
+            }
+        }
+        
+        return geoHashCodes;
 	}
 	
 //	@Override
@@ -1392,4 +1620,112 @@ public class ActivityServiceImpl implements ActivityService {
 	    return response;
 	}
 	
+	@Override
+	public ListActivitiesReponse listNearbyActivitiesByScene(ListNearbyActivitiesBySceneCommand cmd) {
+	    User user = UserContext.current().getUser();
+        Long userId = user.getId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        SceneTokenDTO sceneTokenDto = userService.checkSceneToken(userId, cmd.getSceneToken());
+        
+        int geoCharCount = 6; // 默认使用6位GEO字符
+        ActivityLocationScope scope = ActivityLocationScope.fromCode(cmd.getScope());
+        if(scope == ActivityLocationScope.SAME_CITY) {
+            geoCharCount = 4;
+        }
+        
+        ListActivitiesReponse resp = null;
+        Community community = null;
+        ListActivitiesByTagCommand execCmd = null;
+        UserCurrentEntityType entityType = UserCurrentEntityType.fromCode(sceneTokenDto.getEntityType());
+        switch(entityType) {
+        case COMMUNITY_RESIDENTIAL:
+        case COMMUNITY_COMMERCIAL:
+        case COMMUNITY:
+            community = communityProvider.findCommunityById(sceneTokenDto.getEntityId());
+            execCmd = new ListActivitiesByTagCommand();
+            execCmd.setCommunity_id(community.getId());
+            execCmd.setAnchor(cmd.getPageAnchor());
+            execCmd.setPageSize(cmd.getPageSize());
+            execCmd.setTag(cmd.getTag());
+            execCmd.setRange(geoCharCount);
+            resp = listActivitiesByTag(execCmd);
+            break;
+        case FAMILY:
+            FamilyDTO family = familyProvider.getFamilyById(sceneTokenDto.getEntityId());
+            if(family != null) {
+                community = communityProvider.findCommunityById(family.getCommunityId());
+                execCmd = new ListActivitiesByTagCommand();
+                execCmd.setCommunity_id(community.getId());
+                execCmd.setAnchor(cmd.getPageAnchor());
+                execCmd.setPageSize(cmd.getPageSize());
+                execCmd.setTag(cmd.getTag());
+                execCmd.setRange(geoCharCount);
+                resp = listActivitiesByTag(execCmd);
+            } else {
+                if(LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("Family not found, sceneToken=" + sceneTokenDto);
+                }
+            }
+            break;
+        case ORGANIZATION:
+            ListOrgNearbyActivitiesCommand execOrgCmd = ConvertHelper.convert(cmd, ListOrgNearbyActivitiesCommand.class);
+            execOrgCmd.setOrganizationId(sceneTokenDto.getEntityId());
+            resp = listOrgNearbyActivities(execOrgCmd);
+            break;
+        default:
+            LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneTokenDto);
+            break;
+        }
+        
+        return resp;
+	}
+	
+	@Override
+    public ListActivitiesReponse listOrgNearbyActivities(ListOrgNearbyActivitiesCommand cmd) {
+        List<GeoLocation> geoLocationList = new ArrayList<GeoLocation>();
+
+	    OrganizationDetail orgDetail = organizationProvider.findOrganizationDetailByOrganizationId(cmd.getOrganizationId());
+	    if(orgDetail != null && orgDetail.getLatitude() != null && orgDetail.getLongitude() != null) {
+            GeoLocation geoLocation = new GeoLocation();
+            geoLocation.setLatitude(orgDetail.getLatitude());
+            geoLocation.setLongitude(orgDetail.getLongitude());
+            geoLocationList.add(geoLocation);
+	    }
+	    
+	    // 由于存在大量的公司没有自身的经纬度，故取其所管理的小区来作为经纬度
+	    if(geoLocationList.size() == 0) {
+    	    List<OrganizationCommunity> organizationCommunitys = organizationProvider.listOrganizationCommunities(cmd.getOrganizationId());
+            for(OrganizationCommunity orgCmnty : organizationCommunitys) {
+                List<CommunityGeoPoint> geoPoints = communityProvider.listCommunityGeoPoints(orgCmnty.getCommunityId());
+                
+                StringBuilder strBuilder = new StringBuilder();
+                for(CommunityGeoPoint geoPoint : geoPoints){
+                    if(geoPoint.getLatitude() != null && geoPoint.getLongitude() != null) {
+                        GeoLocation geoLocation = new GeoLocation();
+                        geoLocation.setLatitude(geoPoint.getLatitude());
+                        geoLocation.setLongitude(geoPoint.getLongitude());
+                        geoLocationList.add(geoLocation);
+                    } else {
+                        if(LOGGER.isWarnEnabled()) {
+                            LOGGER.warn("Invalid latitude or longitude, cmd={}, geoPoint={}", cmd, geoPoint);
+                        }
+                    }
+                }
+            }
+	    }
+        
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query activities by geohash, cmd={}, geoLocationList={}", cmd, geoLocationList);
+        }
+        
+        ListActivitiesByLocationCommand execCmd = new ListActivitiesByLocationCommand();
+        execCmd.setLocationPointList(geoLocationList);
+        execCmd.setPageAnchor(cmd.getPageAnchor());
+        execCmd.setScope(cmd.getScope());
+        execCmd.setTag(cmd.getTag());
+        execCmd.setPageSize(cmd.getPageSize());
+        execCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        
+        return listActivitiesByLocation(execCmd);
+   }
 }
