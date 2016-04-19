@@ -1344,9 +1344,6 @@ public class VideoConfServiceImpl implements VideoConfService {
 					ConfConferences conf = vcProvider.findConfConferencesById(account.getAssignedConfId());
 					if(conf != null)
 						cancelCmd.setConfId(conf.getMeetingNo());
-					ConfSourceAccounts source = vcProvider.findSourceAccountById(account.getAssignedSourceId());
-					if(source != null)
-						cancelCmd.setSourceAccountName(source.getAccountName());
 					cancelVideoConf(cancelCmd);
 				}
 			}
