@@ -5,7 +5,7 @@ INSERT INTO `eh_scene_types`(`id`, `namespace_id`, `name`, `display_name`, `crea
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'forum', '101', 'zh_CN', '小区圈');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'forum', '102', 'zh_CN', '周边小区');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'forum', '103', 'zh_CN', '本小区');
-INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'forum', '104', 'zh_CN', '兴趣圈');
+INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'forum', '104', 'zh_CN', '俱乐部');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'forum', '105', 'zh_CN', '公司圈');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'forum', '106', 'zh_CN', '全部');
 
@@ -82,9 +82,6 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'quality.notification', 2, 'zh_CN', '通知整改人', '你被“${userName}”安排执行“${taskName}”任务，截至日期为“${deadline}”，请及时执行');
 
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'quality.notification', 3, 'zh_CN', '分配和转发任务', '“${operator}”安排${target}”执行“${taskName}”任务，截至日期为“${deadline}”');
-INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'quality.notification', 3, 'zh_CN', '上报任务', '“${operator}”安排${target}”执行“${taskName}”任务，截至日期为“${deadline}”');
-INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'quality.notification', 3, 'zh_CN', '关闭任务', '“${operator}”安排${target}”执行“${taskName}”任务，截至日期为“${deadline}”');
-
 
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
 	VALUES(200501, 0, 0, '品质核查类别', '品质核查类别', 0, 2, UTC_TIMESTAMP(), 0);
