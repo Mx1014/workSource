@@ -1,6 +1,6 @@
 //
 // EvhBusinessAdminDTO.m
-// generated at 2016-04-19 12:41:52 
+// generated at 2016-04-19 13:40:00 
 //
 #import "EvhBusinessAdminDTO.h"
 #import "EvhCategoryDTO.h"

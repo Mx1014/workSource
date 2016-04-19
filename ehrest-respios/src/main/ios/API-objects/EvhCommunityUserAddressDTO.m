@@ -1,8 +1,10 @@
 //
 // EvhCommunityUserAddressDTO.m
-// generated at 2016-04-19 12:41:54 
+// generated at 2016-04-19 13:40:01 
 //
 #import "EvhCommunityUserAddressDTO.h"
+#import "EvhOrganizationDetailDTO.h"
+#import "EvhAddressDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhCommunityUserAddressDTO
@@ -53,3 +55,87 @@
         [jsonObject setObject: self.gender forKey: @"gender"];
     if(self.orgDtos) {
         NSMutableArray* jsonArray = [NSMutableArray new];
+        for(EvhOrganizationDetailDTO* item in self.orgDtos) {
+            NSMutableDictionary* dic = [NSMutableDictionary new];
+            [item toJson:dic];
+            [jsonArray addObject:dic];
+        }
+        [jsonObject setObject: jsonArray forKey: @"orgDtos"];
+    }
+    if(self.addressDtos) {
+        NSMutableArray* jsonArray = [NSMutableArray new];
+        for(EvhAddressDTO* item in self.addressDtos) {
+            NSMutableDictionary* dic = [NSMutableDictionary new];
+            [item toJson:dic];
+            [jsonArray addObject:dic];
+        }
+        [jsonObject setObject: jsonArray forKey: @"addressDtos"];
+    }
+}
+
+-(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
+{
+    if([jsonObject isKindOfClass:[NSDictionary class]]) {
+        self.id = [jsonObject objectForKey: @"id"];
+        if(self.id && [self.id isEqual:[NSNull null]])
+            self.id = nil;
+
+        self.userId = [jsonObject objectForKey: @"userId"];
+        if(self.userId && [self.userId isEqual:[NSNull null]])
+            self.userId = nil;
+
+        self.userName = [jsonObject objectForKey: @"userName"];
+        if(self.userName && [self.userName isEqual:[NSNull null]])
+            self.userName = nil;
+
+        self.nikeName = [jsonObject objectForKey: @"nikeName"];
+        if(self.nikeName && [self.nikeName isEqual:[NSNull null]])
+            self.nikeName = nil;
+
+        self.communityId = [jsonObject objectForKey: @"communityId"];
+        if(self.communityId && [self.communityId isEqual:[NSNull null]])
+            self.communityId = nil;
+
+        self.isAuth = [jsonObject objectForKey: @"isAuth"];
+        if(self.isAuth && [self.isAuth isEqual:[NSNull null]])
+            self.isAuth = nil;
+
+        self.applyTime = [jsonObject objectForKey: @"applyTime"];
+        if(self.applyTime && [self.applyTime isEqual:[NSNull null]])
+            self.applyTime = nil;
+
+        self.phone = [jsonObject objectForKey: @"phone"];
+        if(self.phone && [self.phone isEqual:[NSNull null]])
+            self.phone = nil;
+
+        self.gender = [jsonObject objectForKey: @"gender"];
+        if(self.gender && [self.gender isEqual:[NSNull null]])
+            self.gender = nil;
+
+        {
+            NSArray* jsonArray = [jsonObject objectForKey: @"orgDtos"];
+            for(id itemJson in jsonArray) {
+                EvhOrganizationDetailDTO* item = [EvhOrganizationDetailDTO new];
+                
+                [item fromJson: itemJson];
+                [self.orgDtos addObject: item];
+            }
+        }
+        {
+            NSArray* jsonArray = [jsonObject objectForKey: @"addressDtos"];
+            for(id itemJson in jsonArray) {
+                EvhAddressDTO* item = [EvhAddressDTO new];
+                
+                [item fromJson: itemJson];
+                [self.addressDtos addObject: item];
+            }
+        }
+        return self;
+    }
+    
+    return nil;
+}
+
+@end
+
+///////////////////////////////////////////////////////////////////////////////

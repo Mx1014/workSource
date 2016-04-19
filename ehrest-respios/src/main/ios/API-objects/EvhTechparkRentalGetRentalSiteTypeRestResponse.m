@@ -1,6 +1,6 @@
 //
 // EvhTechparkRentalGetRentalSiteTypeRestResponse.m
-// generated at 2016-04-19 12:41:55 
+// generated at 2016-04-19 13:40:02 
 //
 #import "EvhTechparkRentalGetRentalSiteTypeRestResponse.h"
 #import "EvhGetRentalSiteTypeResponse.h"

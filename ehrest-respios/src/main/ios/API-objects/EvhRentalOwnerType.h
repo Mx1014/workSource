@@ -1,6 +1,6 @@
 //
 // EvhRentalOwnerType.h
-// generated at 2016-04-19 12:41:54 
+// generated at 2016-04-19 13:39:59 
 //
 
 #define EvhRentalOwnerType_COMMUNITY @"community"

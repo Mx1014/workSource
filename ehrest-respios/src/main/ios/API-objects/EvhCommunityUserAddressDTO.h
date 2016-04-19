@@ -1,9 +1,11 @@
 //
 // EvhCommunityUserAddressDTO.h
-// generated at 2016-04-19 12:41:54 
+// generated at 2016-04-19 13:40:01 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
+#import "EvhOrganizationDetailDTO.h"
+#import "EvhAddressDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhCommunityUserAddressDTO
@@ -30,4 +32,16 @@
 
 @property(nonatomic, copy) NSNumber* gender;
 
-// item type 
+// item type EvhOrganizationDetailDTO*
+@property(nonatomic, strong) NSMutableArray* orgDtos;
+
+// item type EvhAddressDTO*
+@property(nonatomic, strong) NSMutableArray* addressDtos;
+
+-(id) init;
++(id) withJsonString: (NSString*) jsonString;
+
+@end
+
+///////////////////////////////////////////////////////////////////////////////
+

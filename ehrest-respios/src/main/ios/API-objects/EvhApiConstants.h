@@ -1,6 +1,6 @@
 //
 // EvhApiConstants.h
-// generated at 2016-04-19 12:41:55
+// generated at 2016-04-19 13:40:02
 //
 #define EVH_ACLINK_ACTIVE_URL @"/aclink/active"
 #define EVH_ACLINK_ACTIVING_URL @"/aclink/activing"

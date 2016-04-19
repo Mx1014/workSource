@@ -1,6 +1,6 @@
 //
 // EvhActivityListNearbyActivitiesV2RestResponse.m
-// generated at 2016-04-19 12:41:54 
+// generated at 2016-04-19 13:40:01 
 //
 #import "EvhActivityListNearbyActivitiesV2RestResponse.h"
 #import "EvhListNearbyActivitiesResponse.h"
