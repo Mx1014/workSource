@@ -21,8 +21,6 @@ import com.everhomes.family.FamilyService;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.promotion.OpPromotionService;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.activity.ActivityDTO;
-import com.everhomes.rest.activity.ListActivitiesByTagCommand;
 import com.everhomes.rest.activity.ListActivitiesReponse;
 import com.everhomes.rest.family.ListNeighborUsersCommand;
 import com.everhomes.rest.family.ListNeighborUsersCommandResponse;
@@ -30,28 +28,19 @@ import com.everhomes.rest.family.ParamType;
 import com.everhomes.rest.organization.ListOrganizationContactCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
-import com.everhomes.rest.ui.organization.ListScenesByCummunityIdCommand;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
 import com.everhomes.rest.ui.user.GetUserOpPromotionCommand;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
-import com.everhomes.rest.ui.user.ListActivitiesBySceneCommand;
 import com.everhomes.rest.ui.user.ListContactBySceneRespose;
 import com.everhomes.rest.ui.user.ListContactsBySceneCommand;
 import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
 import com.everhomes.rest.ui.user.SceneContactDTO;
 import com.everhomes.rest.ui.user.SceneDTO;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
-
-
-import com.everhomes.rest.ui.user.SetUserCurrentSceneCommand;
 import com.everhomes.rest.user.ListUserOpPromotionsRespose;
 import com.everhomes.rest.user.UserCurrentEntityType;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.Tuple;
 import com.everhomes.user.UserService;
-
-
 import com.everhomes.util.WebTokenGenerator;
 
 /**
