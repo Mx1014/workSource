@@ -1,6 +1,6 @@
 //
 // EvhUpdateLeasePromotionCommand.m
-// generated at 2016-04-19 13:40:00 
+// generated at 2016-04-19 14:25:56 
 //
 #import "EvhUpdateLeasePromotionCommand.h"
 #import "EvhBuildingForRentAttachmentDTO.h"

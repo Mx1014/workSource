@@ -3,6 +3,7 @@
 package com.everhomes.rest.aclink;
 
 import com.everhomes.rest.RestResponseBase;
+
 import com.everhomes.rest.aclink.DoorAuthDTO;
 
 public class CreateAuthRestResponse extends RestResponseBase {

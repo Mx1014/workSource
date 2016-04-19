@@ -3,6 +3,7 @@
 package com.everhomes.rest.aclink.admin;
 
 import com.everhomes.rest.RestResponseBase;
+
 import com.everhomes.rest.aclink.ListDoorAuthResponse;
 
 public class AclinkSearchDoorAuthRestResponse extends RestResponseBase {

@@ -3,6 +3,7 @@
 package com.everhomes.rest.aclink.admin;
 
 import com.everhomes.rest.RestResponseBase;
+
 import com.everhomes.rest.aclink.AclinkUserResponse;
 
 public class AclinkListAclinkUsersRestResponse extends RestResponseBase {

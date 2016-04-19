@@ -1,6 +1,6 @@
 //
 // EvhAdminUnregisterLoginRestResponse.m
-// generated at 2016-04-19 13:40:01 
+// generated at 2016-04-19 14:25:57 
 //
 #import "EvhAdminUnregisterLoginRestResponse.h"
 #import "EvhUserLoginDTO.h"

@@ -4,7 +4,7 @@ package com.everhomes.rest.openapi;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.user.UserProfileDTO;
+import com.everhomes.rest.ui.user.UserProfileDTO;
 
 public class GetReceivedCouponCountRestResponse extends RestResponseBase {
 

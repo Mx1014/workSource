@@ -1,6 +1,6 @@
 //
 // EvhTechparkPunchGetDayPunchLogsRestResponse.m
-// generated at 2016-04-19 13:40:02 
+// generated at 2016-04-19 14:25:58 
 //
 #import "EvhTechparkPunchGetDayPunchLogsRestResponse.h"
 #import "EvhPunchLogsDay.h"
