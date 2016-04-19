@@ -2,7 +2,6 @@ package com.everhomes.openapi;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
@@ -24,12 +23,14 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.business.BusinessAsignedNamespaceCommand;
+import com.everhomes.rest.business.GetReceivedCouponCountCommand;
 import com.everhomes.rest.business.ListBusinessByCommonityIdCommand;
 import com.everhomes.rest.business.ListUserByIdentifierCommand;
 import com.everhomes.rest.business.ListUserByKeywordCommand;
 import com.everhomes.rest.business.SyncBusinessCommand;
 import com.everhomes.rest.business.SyncDeleteBusinessCommand;
 import com.everhomes.rest.business.SyncUserAddShopStatusCommand;
+import com.everhomes.rest.business.UpdateReceivedCouponCountCommand;
 import com.everhomes.rest.business.UserFavoriteCommand;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
@@ -42,6 +43,7 @@ import com.everhomes.rest.openapi.BusinessMessageCommand;
 import com.everhomes.rest.openapi.GetUserServiceAddressCommand;
 import com.everhomes.rest.openapi.UserCouponsCommand;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.ui.user.UserProfileDTO;
 import com.everhomes.rest.user.FindTokenByUserIdCommand;
 import com.everhomes.rest.user.GetUserByUuidResponse;
 import com.everhomes.rest.user.GetUserDefaultAddressCommand;
@@ -60,7 +62,6 @@ import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
@@ -346,7 +347,7 @@ public class BusinessOpenController extends ControllerBase {
 	}
 
 	@RequestMapping("getUserDefaultAddress")
-	@RestReturn(UserServiceAddressDTO.class)
+	@RestReturn(value=UserServiceAddressDTO.class)
 	public RestResponse getUserDefaultAddress(@Valid GetUserDefaultAddressCommand cmd) {
 		UserServiceAddressDTO address = this.businessService.getUserDefaultAddress(cmd);
 		RestResponse response =  new RestResponse(address);
@@ -356,7 +357,7 @@ public class BusinessOpenController extends ControllerBase {
 	}
 
 	@RequestMapping("listUser")
-	@RestReturn(value=UserDtoForBiz.class,collection=true)
+	@RestReturn(value=UserDtoForBiz.class, collection=true)
 	public RestResponse listUser(@Valid ListUserCommand cmd) {
 		List<UserDtoForBiz> users = this.businessService.listUser(cmd);
 		RestResponse response =  new RestResponse(users);
@@ -384,7 +385,7 @@ public class BusinessOpenController extends ControllerBase {
 	}
 
 	@RequestMapping("getUserInfoById")
-	@RestReturn(UserInfo.class)
+	@RestReturn(value=UserInfo.class)
 	public RestResponse getUserInfoById(@Valid GetUserInfoByIdCommand cmd) {
 		UserInfo user = this.userService.getUserInfoById(cmd);
 		RestResponse response =  new RestResponse(user);
@@ -394,7 +395,7 @@ public class BusinessOpenController extends ControllerBase {
 	}
 
 	@RequestMapping("listUserByKeyword")
-	@RestReturn(value=UserInfo.class,collection=true)
+	@RestReturn(value=UserInfo.class, collection=true)
 	public RestResponse listUserByKeyword(@Valid ListUserByKeywordCommand cmd) {
 		List<UserInfo> users = this.businessService.listUserByKeyword(cmd);
 		RestResponse response =  new RestResponse(users);
@@ -420,6 +421,7 @@ public class BusinessOpenController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
 	@RequestMapping("openBizNamespaceVisible")
 	@RestReturn(String.class)
 	public RestResponse openBizNamespaceVisible(@Valid BusinessAsignedNamespaceCommand cmd) {
@@ -429,6 +431,7 @@ public class BusinessOpenController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
 	@RequestMapping("closeBizNamespaceVisible")
 	@RestReturn(String.class)
 	public RestResponse closeBizNamespaceVisible(@Valid BusinessAsignedNamespaceCommand cmd) {
@@ -439,9 +442,23 @@ public class BusinessOpenController extends ControllerBase {
 		return response;
 	}
 	
-	public static void main(String[] args) {
-		System.out.println(UUID.randomUUID());
-		System.out.println(SignatureHelper.generateSecretKey());
+	@RequestMapping("updateReceivedCouponCount")
+	@RestReturn(String.class)
+	public RestResponse updateReceivedCouponCount(@Valid UpdateReceivedCouponCountCommand cmd) {
+		businessService.updateReceivedCouponCount(cmd);
+		RestResponse response =  new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
-
+	
+	@RequestMapping("getReceivedCouponCount")
+	@RestReturn(value=UserProfileDTO.class)
+	public RestResponse getReceivedCouponCount(@Valid GetReceivedCouponCountCommand cmd) {
+		UserProfileDTO userProfile = businessService.getReceivedCouponCount(cmd);
+		RestResponse response =  new RestResponse(userProfile);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

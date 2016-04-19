@@ -1,6 +1,10 @@
 //
 // EvhVersionRealmType.h
+<<<<<<< HEAD
 // generated at 2016-04-18 14:48:51 
+=======
+// generated at 2016-04-19 14:25:57 
+>>>>>>> 3.3.x
 //
 
 #define EvhVersionRealmType_ANDROID @"Android"
@@ -24,6 +28,8 @@
 #define EvhVersionRealmType_ANDROID_HAIAN @"Android_Haian"
 #define EvhVersionRealmType_IOS_HAIAN @"iOS_Haian"
 #define EvhVersionRealmType_H5_QUALITY @"quality"
+#define EvhVersionRealmType_ANDROID_SHENYE @"Android_Shenye"
+#define EvhVersionRealmType_IOS_SHENYE @"iOS_Shenye"
 
 ///////////////////////////////////////////////////////////////////////////////
 

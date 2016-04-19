@@ -18,6 +18,8 @@ import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.rest.aclink.AesUserKeyStatus;
+import com.everhomes.rest.aclink.AesUserKeyType;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhAesUserKeyDao;

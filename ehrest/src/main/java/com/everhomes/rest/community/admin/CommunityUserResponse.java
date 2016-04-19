@@ -12,7 +12,7 @@ public class CommunityUserResponse {
 	private List<CommunityUserDto> userCommunities;
 
 
-
+	
 	public Long getNextPageAnchor() {
 		return nextPageAnchor;
 	}

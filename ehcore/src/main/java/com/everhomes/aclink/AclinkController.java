@@ -14,6 +14,25 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.aclink.AclinkConnectingCommand;
+import com.everhomes.rest.aclink.AclinkDeleteByIdCommand;
+import com.everhomes.rest.aclink.AclinkDisconnectedCommand;
+import com.everhomes.rest.aclink.AclinkUpgradeCommand;
+import com.everhomes.rest.aclink.AclinkUpgradeResponse;
+import com.everhomes.rest.aclink.AclinkWebSocketMessage;
+import com.everhomes.rest.aclink.CreateDoorAuthByUser;
+import com.everhomes.rest.aclink.DoorAccessActivedCommand;
+import com.everhomes.rest.aclink.DoorAccessActivingCommand;
+import com.everhomes.rest.aclink.DoorAccessDTO;
+import com.everhomes.rest.aclink.DoorAuthDTO;
+import com.everhomes.rest.aclink.DoorMessage;
+import com.everhomes.rest.aclink.GetDoorAccessByHardwareIdCommand;
+import com.everhomes.rest.aclink.ListAesUserKeyByUserResponse;
+import com.everhomes.rest.aclink.ListDoorAccessResponse;
+import com.everhomes.rest.aclink.ListDoorAuthCommand;
+import com.everhomes.rest.aclink.ListDoorAuthResponse;
+import com.everhomes.rest.aclink.QueryDoorMessageCommand;
+import com.everhomes.rest.aclink.QueryDoorMessageResponse;
 import com.everhomes.util.ConvertHelper;
 
 @RestDoc(value="Aclink controller", site="core")
@@ -144,10 +163,10 @@ public class AclinkController extends ControllerBase {
         resp.setDoors(dtos);
         
         for(String hardwareId : cmd.getHardwareIds()) {
-            DoorAccess doorAccess = doorAccessProvider.queryDoorAccessByHardwareId(hardwareId);
+            DoorAccessDTO doorAccess = doorAccessService.getDoorAccessDetail(hardwareId);
 
             if(doorAccess != null) {
-                dtos.add(ConvertHelper.convert(doorAccess, DoorAccessDTO.class));
+                dtos.add(doorAccess);
             }            
         }
 
@@ -220,6 +239,42 @@ public class AclinkController extends ControllerBase {
         RestResponse response = new RestResponse();
         
         response.setResponseObject(doorAccessService.syncWebSocketMessages(cmd));
+        
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /aclink/upgrateAuth</b>
+     * <p>删除授权</p>
+     * @return
+     */
+    @RequestMapping("upgrateAuth")
+    @RestReturn(value=AclinkUpgradeResponse.class)
+    public RestResponse upgrateAuth(@Valid AclinkUpgradeCommand cmd) {
+        RestResponse response = new RestResponse();
+        
+        response.setResponseObject(doorAccessService.upgradeFirmware(cmd));
+        
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /aclink/upgrateAuth</b>
+     * <p>删除授权</p>
+     * @return
+     */
+    @RequestMapping("upgrateVerify")
+    @RestReturn(value=String.class)
+    public RestResponse upgrateVerify(@Valid AclinkUpgradeCommand cmd) {
+        RestResponse response = new RestResponse();
+        
+        response.setResponseObject(doorAccessService.upgradeVerify(cmd));
         
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

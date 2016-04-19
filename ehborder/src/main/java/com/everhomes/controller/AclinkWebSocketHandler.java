@@ -22,9 +22,9 @@ import org.springframework.web.socket.PongMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.BinaryWebSocketHandler;
 
-import com.everhomes.aclink.AclinkWebSocketMessage;
-import com.everhomes.aclink.DataUtil;
-import com.everhomes.aclink.DoorAccessDTO;
+import com.everhomes.rest.aclink.AclinkWebSocketMessage;
+import com.everhomes.rest.aclink.DataUtil;
+import com.everhomes.rest.aclink.DoorAccessDTO;
 import com.everhomes.rest.aclink.SyncWebsocketMessagesRestResponse;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
@@ -52,6 +52,9 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
     private String uuidFromSession(WebSocketSession session) {
         String path = session.getUri().getPath();
         String[] vs = path.split("/");
+        if(vs.length <= 2) {
+            return "";
+        }
         return vs[2];
     }
     
@@ -138,6 +141,10 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
         StringHelper.toStringMap(null, cmd, params);
         final AclinkWebSocketHandler handler = this;
         
+        if(cmd.getPayload() != null) {
+            LOGGER.info("Got reply=" + cmd);    
+        }
+        
         httpRestCallProvider.restCall("/aclink/syncWebsocketMessages", params, new ListenableFutureCallback<ResponseEntity<String>> () {
 
         @Override
@@ -173,6 +180,7 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
 
         @Override
         public void onFailure(Throwable ex) {
+            LOGGER.error("call core server error=", ex);
         }
       });
     }
@@ -210,6 +218,6 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
     
     @Override
     protected void handlePongMessage(WebSocketSession session, PongMessage message) throws Exception {
-        
+        LOGGER.info("Got pong message from " + uuidFromSession(session));
     }
 }

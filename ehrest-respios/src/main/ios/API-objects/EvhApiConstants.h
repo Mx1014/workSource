@@ -1,6 +1,10 @@
 //
 // EvhApiConstants.h
+<<<<<<< HEAD
 // generated at 2016-04-18 14:48:53
+=======
+// generated at 2016-04-19 14:25:58
+>>>>>>> 3.3.x
 //
 #define EVH_ACLINK_ACTIVE_URL @"/aclink/active"
 #define EVH_ACLINK_ACTIVING_URL @"/aclink/activing"
@@ -14,6 +18,8 @@
 #define EVH_ACLINK_LISTAUTHHISTORY_URL @"/aclink/listAuthHistory"
 #define EVH_ACLINK_QUERYMESSAGES_URL @"/aclink/queryMessages"
 #define EVH_ACLINK_SYNCWEBSOCKETMESSAGES_URL @"/aclink/syncWebsocketMessages"
+#define EVH_ACLINK_UPGRATEAUTH_URL @"/aclink/upgrateAuth"
+#define EVH_ACLINK_UPGRATEVERIFY_URL @"/aclink/upgrateVerify"
 #define EVH_ACTIVITY_CANCELSIGNUP_URL @"/activity/cancelSignup"
 #define EVH_ACTIVITY_CHECKIN_URL @"/activity/checkin"
 #define EVH_ACTIVITY_CONFIRM_URL @"/activity/confirm"
@@ -60,6 +66,7 @@
 #define EVH_ADMIN_ACL_UPDATEORGANIZATIONORDINARYADMIN_URL @"/admin/acl/updateOrganizationOrdinaryAdmin"
 #define EVH_ADMIN_ACL_UPDATEORGANIZATIONSUPERADMIN_URL @"/admin/acl/updateOrganizationSuperAdmin"
 #define EVH_ADMIN_ACL_UPDATEROLEPRIVILEGE_URL @"/admin/acl/updateRolePrivilege"
+#define EVH_ADMIN_ACLINK_CREATEACLINKFIRMWARE_URL @"/admin/aclink/createAclinkFirmware"
 #define EVH_ADMIN_ACLINK_CREATEAUTH_URL @"/admin/aclink/createAuth"
 #define EVH_ADMIN_ACLINK_DELETEDOORACCESS_URL @"/admin/aclink/deleteDoorAccess"
 #define EVH_ADMIN_ACLINK_DELETEDOORAUTH_URL @"/admin/aclink/deleteDoorAuth"
@@ -168,11 +175,13 @@
 #define EVH_ADMIN_ORG_CREATEORGANIZATIONACCOUNT_URL @"/admin/org/createOrganizationAccount"
 #define EVH_ADMIN_ORG_CREATEORGANIZATIONCOMMUNITY_URL @"/admin/org/createOrganizationCommunity"
 #define EVH_ADMIN_ORG_CREATEORGANIZATIONMEMBER_URL @"/admin/org/createOrganizationMember"
+#define EVH_ADMIN_ORG_CREATEORGANIZATIONOWNER_URL @"/admin/org/createOrganizationOwner"
 #define EVH_ADMIN_ORG_CREATEORGANIZATIONPERSONNEL_URL @"/admin/org/createOrganizationPersonnel"
 #define EVH_ADMIN_ORG_CREATEPROPERTYORGANIZATION_URL @"/admin/org/createPropertyOrganization"
 #define EVH_ADMIN_ORG_DELETEENTERPRISEBYID_URL @"/admin/org/deleteEnterpriseById"
 #define EVH_ADMIN_ORG_DELETEORGANIZATIONBYID_URL @"/admin/org/deleteOrganizationById"
 #define EVH_ADMIN_ORG_DELETEORGANIZATIONMEMBER_URL @"/admin/org/deleteOrganizationMember"
+#define EVH_ADMIN_ORG_DELETEORGANIZATIONOWNER_URL @"/admin/org/deleteOrganizationOwner"
 #define EVH_ADMIN_ORG_DELETEORGANIZATIONPERSONNEL_URL @"/admin/org/deleteOrganizationPersonnel"
 #define EVH_ADMIN_ORG_DELETEPMCOMMUNITY_URL @"/admin/org/deletePmCommunity"
 #define EVH_ADMIN_ORG_FINDUSERBYINDENTIFIER_URL @"/admin/org/findUserByIndentifier"
@@ -247,6 +256,7 @@
 #define EVH_ADMIN_USER_LISTVEST_URL @"/admin/user/listVest"
 #define EVH_ADMIN_USER_SEARCHINVITATEDUSER_URL @"/admin/user/searchInvitatedUser"
 #define EVH_ADMIN_USER_SEARCHUSERSWITHADDR_URL @"/admin/user/searchUsersWithAddr"
+#define EVH_ADMIN_USER_SENDUSERRICHLINKMESSAGE_URL @"/admin/user/sendUserRichLinkMessage"
 #define EVH_ADMIN_USER_SENDUSERTESTMAIL_URL @"/admin/user/sendUserTestMail"
 #define EVH_ADMIN_USER_SENDUSERTESTSMS_URL @"/admin/user/sendUserTestSms"
 #define EVH_APPKEY_ISTRUSTEDAPP_URL @"/appkey/isTrustedApp"
@@ -485,6 +495,7 @@
 #define EVH_OPENAPI_CLOSEBIZNAMESPACEVISIBLE_URL @"/openapi/closeBizNamespaceVisible"
 #define EVH_OPENAPI_FINDBUSINESSFAVORITESTATUS_URL @"/openapi/findBusinessFavoriteStatus"
 #define EVH_OPENAPI_FINDTOKENBYUSERID_URL @"/openapi/findTokenByUserId"
+#define EVH_OPENAPI_GETRECEIVEDCOUPONCOUNT_URL @"/openapi/getReceivedCouponCount"
 #define EVH_OPENAPI_GETUSERDEFAULTADDRESS_URL @"/openapi/getUserDefaultAddress"
 #define EVH_OPENAPI_GETUSERDETAILBYUUID_URL @"/openapi/getUserDetailByUuid"
 #define EVH_OPENAPI_GETUSERINFOBYID_URL @"/openapi/getUserInfoById"
@@ -508,6 +519,7 @@
 #define EVH_OPENAPI_SYNCUSERDELSHOPSTATUS_URL @"/openapi/syncUserDelShopStatus"
 #define EVH_OPENAPI_SYNCUSERFAVORITE_URL @"/openapi/syncUserFavorite"
 #define EVH_OPENAPI_SYNCUSERINFO_URL @"/openapi/syncuserinfo"
+#define EVH_OPENAPI_UPDATERECEIVEDCOUPONCOUNT_URL @"/openapi/updateReceivedCouponCount"
 #define EVH_OPENAPI_USER_INITCOUPON_URL @"/openapi/user/initCoupon"
 #define EVH_OPENAPI_USER_TESTGETTHIRDSIGNATURE_URL @"/openapi/user/testGetThirdSignature"
 #define EVH_ORG_ADDORGMEMBERBYPHONE_URL @"/org/addOrgMemberByPhone"
@@ -754,6 +766,7 @@
 #define EVH_UI_FORUM_GETTOPICSENTSCOPES_URL @"/ui/forum/getTopicSentScopes"
 #define EVH_UI_FORUM_NEWTOPICBYSCENE_URL @"/ui/forum/newTopicByScene"
 #define EVH_UI_FORUM_SEARCHBYSCENE_URL @"/ui/forum/searchByScene"
+#define EVH_UI_GROUP_LISTNEARBYGROUPSBYSCENE_URL @"/ui/group/listNearbyGroupsByScene"
 #define EVH_UI_LAUNCHPAD_GETLASTLAUNCHPADLAYOUTBYSCENE_URL @"/ui/launchpad/getLastLaunchPadLayoutByScene"
 #define EVH_UI_LAUNCHPAD_GETLAUNCHPADITEMSBYSCENE_URL @"/ui/launchpad/getLaunchPadItemsByScene"
 #define EVH_UI_ORG_ACCEPTTASK_URL @"/ui/org/acceptTask"
@@ -767,8 +780,9 @@
 #define EVH_UI_USER_GETUSEROPPROMOTIONSBYSCENE_URL @"/ui/user/getUserOpPromotionsByScene"
 #define EVH_UI_USER_GETUSERRELATEDADDRESSES_URL @"/ui/user/getUserRelatedAddresses"
 #define EVH_UI_USER_LISTCONTACTSBYSCENE_URL @"/ui/user/listContactsByScene"
-#define EVH_UI_USER_LISTSCENESBYCUMMUNITYID_URL @"/ui/user/listScenesByCummunityId"
+#define EVH_UI_USER_LISTNEARBYACTIVITIESBYSCENE_URL @"/ui/user/listNearbyActivitiesByScene"
 #define EVH_UI_USER_LISTUSERRELATEDSCENES_URL @"/ui/user/listUserRelatedScenes"
+#define EVH_UI_USER_SETCURRENTCOMMUNITYFORSCENE_URL @"/ui/user/setCurrentCommunityForScene"
 #define EVH_USER_ADMINLOGON_URL @"/user/adminLogon"
 #define EVH_USER_APPAGREEMENTS_URL @"/user/appAgreements"
 #define EVH_USER_APPIDSTATUS_URL @"/user/appIdStatus"

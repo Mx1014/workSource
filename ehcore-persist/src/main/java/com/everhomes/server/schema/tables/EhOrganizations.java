@@ -157,6 +157,11 @@ public class EhOrganizations extends org.jooq.impl.TableImpl<com.everhomes.serve
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationsRecord, java.lang.Long> GROUP_ID = createField("group_id", org.jooq.impl.SQLDataType.BIGINT, this, "eh_group id");
 
 	/**
+	 * The column <code>ehcore.eh_organizations.show_flag</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationsRecord, java.lang.Byte> SHOW_FLAG = createField("show_flag", org.jooq.impl.SQLDataType.TINYINT.defaulted(true), this, "");
+
+	/**
 	 * Create a <code>ehcore.eh_organizations</code> table reference
 	 */
 	public EhOrganizations() {

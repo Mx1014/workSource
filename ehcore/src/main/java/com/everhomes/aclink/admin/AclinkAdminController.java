@@ -9,31 +9,33 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.everhomes.aclink.AclinkDeleteByIdCommand;
-import com.everhomes.aclink.AclinkUserResponse;
 import com.everhomes.aclink.AesServerKeyProvider;
 import com.everhomes.aclink.AesUserKey;
-import com.everhomes.aclink.AesUserKeyDTO;
-import com.everhomes.aclink.CreateDoorAuthCommand;
 import com.everhomes.aclink.DoorAccess;
-import com.everhomes.aclink.DoorAccessAdminUpdateCommand;
 import com.everhomes.aclink.DoorAccessProvider;
 import com.everhomes.aclink.DoorAccessService;
-import com.everhomes.aclink.DoorAuthDTO;
-import com.everhomes.aclink.ListAclinkUserCommand;
-import com.everhomes.aclink.ListAesUserKeyByUserIdCommand;
-import com.everhomes.aclink.ListAesUserKeyByUserResponse;
-import com.everhomes.aclink.ListDoorAccessByOwnerIdCommand;
-import com.everhomes.aclink.ListDoorAccessResponse;
-import com.everhomes.aclink.ListDoorAuthResponse;
-import com.everhomes.aclink.QueryDoorAccessAdminCommand;
-import com.everhomes.aclink.QueryDoorMessageResponse;
-import com.everhomes.aclink.SearchDoorAuthCommand;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.aclink.AclinkDeleteByIdCommand;
+import com.everhomes.rest.aclink.AclinkFirmwareDTO;
+import com.everhomes.rest.aclink.AclinkUserResponse;
+import com.everhomes.rest.aclink.AesUserKeyDTO;
+import com.everhomes.rest.aclink.CreateAclinkFirmwareCommand;
+import com.everhomes.rest.aclink.CreateDoorAuthCommand;
+import com.everhomes.rest.aclink.DoorAccessAdminUpdateCommand;
+import com.everhomes.rest.aclink.DoorAuthDTO;
+import com.everhomes.rest.aclink.ListAclinkUserCommand;
+import com.everhomes.rest.aclink.ListAesUserKeyByUserIdCommand;
+import com.everhomes.rest.aclink.ListAesUserKeyByUserResponse;
+import com.everhomes.rest.aclink.ListDoorAccessByOwnerIdCommand;
+import com.everhomes.rest.aclink.ListDoorAccessResponse;
+import com.everhomes.rest.aclink.ListDoorAuthResponse;
+import com.everhomes.rest.aclink.QueryDoorAccessAdminCommand;
+import com.everhomes.rest.aclink.QueryDoorMessageResponse;
+import com.everhomes.rest.aclink.SearchDoorAuthCommand;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
@@ -176,6 +178,24 @@ public class AclinkAdminController extends ControllerBase {
     @RestReturn(value=ListDoorAuthResponse.class)
     public RestResponse searchDoorAuthByAdmin(@Valid SearchDoorAuthCommand cmd) {
         RestResponse response = new RestResponse(doorAccessService.searchDoorAuth(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /admin/aclink/syncDoorMessages</b>
+     * <p>删除授权</p>
+     * @return
+     */
+    @RequestMapping("createAclinkFirmware")
+    @RestReturn(value=AclinkFirmwareDTO.class)
+    public RestResponse createAlinkFireware(@Valid CreateAclinkFirmwareCommand cmd) {
+        RestResponse response = new RestResponse();
+        
+        response.setResponseObject(doorAccessService.createAclinkFirmware(cmd));
+        
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

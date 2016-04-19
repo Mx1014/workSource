@@ -1,5 +1,12 @@
+// @formatter:off
 package com.everhomes.rest.link;
 
+/**
+ * <ul>
+ * <li>NONE(0): 无来源</li>
+ * <li>POST(1): 来源于帖子</li>
+ * </ul>
+ */
 public enum LinkSourceType {
     NONE((byte)0), POST((byte)1);
     

@@ -25,6 +25,8 @@ package com.everhomes.rest.version;
  * <li>ANDROID_HAIAN("Android_Haian"): 海岸城Android版APP</li>
  * <li>IOS_HAIAN("iOS_Haian"): 海岸城iOS版APP</li>
  * <li>H5_QUALITY("quality"): 品质核查H5</li>
+ * <li>ANDROID_SHENYE("Android_Shenye"): 深业物业Android版APP</li>
+ * <li>IOS_SHENYE("iOS_Shenye"): 深业物业iOS版APP</li>
  * </ul>
  */
 public enum VersionRealmType {
@@ -48,7 +50,9 @@ public enum VersionRealmType {
     IOS_LONGGANG("iOS_Longgang"),
     ANDROID_HAIAN("Android_Haian"), 
     IOS_HAIAN("iOS_Haian"),
-    H5_QUALITY("quality");
+    H5_QUALITY("quality"),
+    ANDROID_SHENYE("Android_Shenye"), 
+    IOS_SHENYE("iOS_Shenye");
     
     private String code;
     private VersionRealmType(String code) {

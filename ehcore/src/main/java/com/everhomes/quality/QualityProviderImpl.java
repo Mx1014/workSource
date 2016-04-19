@@ -29,6 +29,14 @@ import java.util.Map;
 
 
 
+
+
+
+
+
+
+import javax.annotation.PostConstruct;
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record1;
@@ -62,9 +70,17 @@ import org.springframework.stereotype.Component;
 
 
 
+
+
+
+
+
+
 import com.everhomes.community.Building;
 import com.everhomes.community.BuildingAttachment;
 import com.everhomes.community.CommunityProviderImpl;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -82,6 +98,8 @@ import com.everhomes.rest.quality.QualityInspectionTaskReviewResult;
 import com.everhomes.rest.quality.QualityInspectionTaskReviewStatus;
 import com.everhomes.rest.quality.QualityInspectionTaskStatus;
 import com.everhomes.rest.quality.QualityStandardStatus;
+import com.everhomes.scheduler.QualityInspectionScheduleJob;
+import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhBuildingAttachmentsDao;
@@ -144,6 +162,22 @@ public class QualityProviderImpl implements QualityProvider {
 	
 	@Autowired
 	private SequenceProvider sequenceProvider;
+	
+	@Autowired
+	private ScheduleProvider scheduleProvider;
+	
+	@Autowired
+	private CoordinationProvider coordinationProvider;
+	
+	@PostConstruct
+	public void init() {
+		this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_TASK.getCode()).tryEnter(()-> {
+			String QUALITY_INSPECTION_TRIGGER_NAME = "QualityInspection " + System.currentTimeMillis();
+			scheduleProvider.scheduleCronJob(QUALITY_INSPECTION_TRIGGER_NAME, QUALITY_INSPECTION_TRIGGER_NAME,
+					"0 0 3 * * ? ", QualityInspectionScheduleJob.class, null);
+        });
+		
+	}
 
 	@Override
 	public void createVerificationTasks(QualityInspectionTasks task) {
@@ -996,20 +1030,21 @@ public class QualityProviderImpl implements QualityProvider {
 			query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASKS.ID.asc());
 			
 			query.fetch().map((r) -> {
-				
-				if(r.getStatus().equals(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode()))
-					r.setResult(QualityInspectionTaskResult.INSPECT_DELAY.getCode());
-				if(r.getStatus().equals(QualityInspectionTaskStatus.RECTIFING.getCode()))
-					r.setResult(QualityInspectionTaskResult.CORRECT_DELAY.getCode());
-				if(r.getStatus().equals(QualityInspectionTaskStatus.RECTIFIED_AND_WAITING_APPROVAL.getCode())
-						|| r.getStatus().equals(QualityInspectionTaskStatus.RECTIFY_CLOSED_AND_WAITING_APPROVAL.getCode()))
-					r.setResult(QualityInspectionTaskResult.RECTIFY_DELAY.getCode());
-				
-				r.setStatus(QualityInspectionTaskStatus.CLOSED.getCode());;
-				EhQualityInspectionTasks task = ConvertHelper.convert(r, EhQualityInspectionTasks.class);
-				EhQualityInspectionTasksDao dao = new EhQualityInspectionTasksDao(context.configuration());
-		        dao.update(task);
-		        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhQualityInspectionTasks.class, task.getId());
+				QualityInspectionTasks task = ConvertHelper.convert(r, QualityInspectionTasks.class);
+				closeTask(task);
+//				if(r.getStatus().equals(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode()))
+//					r.setResult(QualityInspectionTaskResult.INSPECT_DELAY.getCode());
+//				if(r.getStatus().equals(QualityInspectionTaskStatus.RECTIFING.getCode()))
+//					r.setResult(QualityInspectionTaskResult.CORRECT_DELAY.getCode());
+//				if(r.getStatus().equals(QualityInspectionTaskStatus.RECTIFIED_AND_WAITING_APPROVAL.getCode())
+//						|| r.getStatus().equals(QualityInspectionTaskStatus.RECTIFY_CLOSED_AND_WAITING_APPROVAL.getCode()))
+//					r.setResult(QualityInspectionTaskResult.RECTIFY_DELAY.getCode());
+//				
+//				r.setStatus(QualityInspectionTaskStatus.CLOSED.getCode());;
+//				EhQualityInspectionTasks task = ConvertHelper.convert(r, EhQualityInspectionTasks.class);
+//				EhQualityInspectionTasksDao dao = new EhQualityInspectionTasksDao(context.configuration());
+//		        dao.update(task);
+//		        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhQualityInspectionTasks.class, task.getId());
 				return null;
 			});
 			return AfterAction.next;
@@ -1052,6 +1087,26 @@ public class QualityProviderImpl implements QualityProvider {
         
        
         return standardIds;
+	}
+
+	@Override
+	public void closeTask(QualityInspectionTasks task) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		
+		if(task.getStatus().equals(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode()))
+			task.setResult(QualityInspectionTaskResult.INSPECT_DELAY.getCode());
+		if(task.getStatus().equals(QualityInspectionTaskStatus.RECTIFING.getCode()))
+			task.setResult(QualityInspectionTaskResult.CORRECT_DELAY.getCode());
+		if(task.getStatus().equals(QualityInspectionTaskStatus.RECTIFIED_AND_WAITING_APPROVAL.getCode())
+				|| task.getStatus().equals(QualityInspectionTaskStatus.RECTIFY_CLOSED_AND_WAITING_APPROVAL.getCode()))
+			task.setResult(QualityInspectionTaskResult.RECTIFY_DELAY.getCode());
+		
+		task.setStatus(QualityInspectionTaskStatus.CLOSED.getCode());;
+		EhQualityInspectionTasks t = ConvertHelper.convert(task, EhQualityInspectionTasks.class);
+		EhQualityInspectionTasksDao dao = new EhQualityInspectionTasksDao(context.configuration());
+        dao.update(t);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhQualityInspectionTasks.class, t.getId());
+		
 	}
 
 

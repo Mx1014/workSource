@@ -620,12 +620,12 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         }
         LeaveFamilyCommand leaveCmd = new LeaveFamilyCommand();
         leaveCmd.setId(family.getId());
-        familyService.leave(leaveCmd);
+        familyService.leave(leaveCmd, null);
     }
    
     private ClaimedAddressInfo processNewAddressClaim(ClaimAddressCommand cmd) {
         Address address = this.getOrCreateAddress(cmd);
-        Family family = this.familyService.getOrCreatefamily(address);
+        Family family = this.familyService.getOrCreatefamily(address, null);
         
         ClaimedAddressInfo info = new ClaimedAddressInfo();
         info.setAddressId(address.getId());
@@ -635,8 +635,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     }
     
     private FamilyDTO processNewAddressClaimV2(ClaimAddressCommand cmd) {
+    	
         Address address = this.getOrCreateAddress(cmd);
-        Family family = this.familyService.getOrCreatefamily(address);
+        Family family = this.familyService.getOrCreatefamily(address, null);
         FamilyDTO familyDTO = ConvertHelper.convert(family, FamilyDTO.class);
         long communityId = family.getIntegralTag2();
         Community community = this.communityProvider.findCommunityById(communityId);
@@ -663,8 +664,12 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     }
     
     private Address getOrCreateAddress(ClaimAddressCommand cmd) {
-        Address address = this.addressProvider.findApartmentAddress(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), cmd.getCommunityId(), 
-                cmd.getBuildingName(), cmd.getApartmentName());
+    	Address address = null;
+    	
+    	if(null == address){
+    		address = this.addressProvider.findApartmentAddress(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), cmd.getCommunityId(), 
+                    cmd.getBuildingName(), cmd.getApartmentName());
+    	}
         
         Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
         if(community == null)

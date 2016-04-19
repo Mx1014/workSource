@@ -10,6 +10,8 @@ public class CommunityUserDto {
 	
 	private String     userName;
 	
+	private String     nikeName;
+	
 	private Long     communityId;
 	
 	private Integer isAuth;
@@ -29,7 +31,6 @@ public class CommunityUserDto {
 	private String phone;
 	
 	
-
 	public Long getId() {
 		return id;
 	}
@@ -124,6 +125,14 @@ public class CommunityUserDto {
 
 	public void setPhone(String phone) {
 		this.phone = phone;
+	}
+
+	public String getNikeName() {
+		return nikeName;
+	}
+
+	public void setNikeName(String nikeName) {
+		this.nikeName = nikeName;
 	}
 
 	

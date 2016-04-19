@@ -38,6 +38,7 @@ public class EhOrganizationMembers implements java.io.Serializable {
 	private java.lang.String   stringTag5;
 	private java.lang.String   employeeNo;
 	private java.lang.String   avatar;
+	private java.lang.Integer  namespaceId;
 	private java.sql.Timestamp updateTime;
 	private java.sql.Timestamp createTime;
 
@@ -69,6 +70,7 @@ public class EhOrganizationMembers implements java.io.Serializable {
 		java.lang.String   stringTag5,
 		java.lang.String   employeeNo,
 		java.lang.String   avatar,
+		java.lang.Integer  namespaceId,
 		java.sql.Timestamp updateTime,
 		java.sql.Timestamp createTime
 	) {
@@ -97,6 +99,7 @@ public class EhOrganizationMembers implements java.io.Serializable {
 		this.stringTag5 = stringTag5;
 		this.employeeNo = employeeNo;
 		this.avatar = avatar;
+		this.namespaceId = namespaceId;
 		this.updateTime = updateTime;
 		this.createTime = createTime;
 	}
@@ -299,6 +302,13 @@ public class EhOrganizationMembers implements java.io.Serializable {
 
 	public void setAvatar(java.lang.String avatar) {
 		this.avatar = avatar;
+	}
+	public java.lang.Integer getNamespaceId() {
+		return this.namespaceId;
+	}
+
+	public void setNamespaceId(java.lang.Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	public java.sql.Timestamp getUpdateTime() {

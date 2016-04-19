@@ -34,6 +34,47 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.rest.aclink.AclinkConnectingCommand;
+import com.everhomes.rest.aclink.AclinkDeviceVer;
+import com.everhomes.rest.aclink.AclinkDisconnectedCommand;
+import com.everhomes.rest.aclink.AclinkFirmwareDTO;
+import com.everhomes.rest.aclink.AclinkMessage;
+import com.everhomes.rest.aclink.AclinkMessageMeta;
+import com.everhomes.rest.aclink.AclinkServiceErrorCode;
+import com.everhomes.rest.aclink.AclinkUpgradeCommand;
+import com.everhomes.rest.aclink.AclinkUpgradeResponse;
+import com.everhomes.rest.aclink.AclinkUserDTO;
+import com.everhomes.rest.aclink.AclinkUserResponse;
+import com.everhomes.rest.aclink.AclinkWebSocketMessage;
+import com.everhomes.rest.aclink.AesUserKeyDTO;
+import com.everhomes.rest.aclink.AesUserKeyStatus;
+import com.everhomes.rest.aclink.AesUserKeyType;
+import com.everhomes.rest.aclink.CreateAclinkFirmwareCommand;
+import com.everhomes.rest.aclink.CreateDoorAuthByUser;
+import com.everhomes.rest.aclink.CreateDoorAuthCommand;
+import com.everhomes.rest.aclink.DoorAccessActivedCommand;
+import com.everhomes.rest.aclink.DoorAccessActivingCommand;
+import com.everhomes.rest.aclink.DoorAccessAdminUpdateCommand;
+import com.everhomes.rest.aclink.DoorAccessDTO;
+import com.everhomes.rest.aclink.DoorAccessLinkStatus;
+import com.everhomes.rest.aclink.DoorAccessOwnerType;
+import com.everhomes.rest.aclink.DoorAccessStatus;
+import com.everhomes.rest.aclink.DoorAccessType;
+import com.everhomes.rest.aclink.DoorAuthDTO;
+import com.everhomes.rest.aclink.DoorAuthStatus;
+import com.everhomes.rest.aclink.DoorAuthType;
+import com.everhomes.rest.aclink.DoorMessage;
+import com.everhomes.rest.aclink.DoorMessageType;
+import com.everhomes.rest.aclink.ListAclinkUserCommand;
+import com.everhomes.rest.aclink.ListAesUserKeyByUserResponse;
+import com.everhomes.rest.aclink.ListDoorAccessByOwnerIdCommand;
+import com.everhomes.rest.aclink.ListDoorAccessResponse;
+import com.everhomes.rest.aclink.ListDoorAuthCommand;
+import com.everhomes.rest.aclink.ListDoorAuthResponse;
+import com.everhomes.rest.aclink.QueryDoorAccessAdminCommand;
+import com.everhomes.rest.aclink.QueryDoorMessageCommand;
+import com.everhomes.rest.aclink.QueryDoorMessageResponse;
+import com.everhomes.rest.aclink.SearchDoorAuthCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -53,6 +94,7 @@ import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+
 import org.apache.commons.codec.binary.Base64;
 
 
@@ -110,6 +152,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     
     @Autowired
     private MessagingService messagingService;
+    
+    @Autowired
+    private AclinkFirmwareProvider aclinkFirmwareProvider;
     
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
     
@@ -937,6 +982,25 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     }
     
     @Override
+    public DoorAccessDTO getDoorAccessDetail(String hardware) {
+        DoorAccess da = doorAccessProvider.queryDoorAccessByHardwareId(hardware);
+        if(da == null) {
+            return  null;
+            }
+        
+        getDoorAccessLastTick(da);
+        DoorAccessDTO dto = (DoorAccessDTO)ConvertHelper.convert(da, DoorAccessDTO.class);
+        
+        AclinkFirmware firm = aclinkFirmwareProvider.queryAclinkFirmwareMax();
+        if(firm != null) {
+            String version = String.format("%d.%d.%d", firm.getMajor(), firm.getMinor(), firm.getRevision());
+            dto.setVersion(version);
+        }
+        
+        return dto;
+    }
+    
+    @Override
     public ListDoorAuthResponse queryDoorAuthByApproveId(ListDoorAuthCommand cmd) {
         User user = UserContext.current().getUser();
         
@@ -1096,5 +1160,46 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         //}
         
         //return msgGenerator.generateWebSocketMessage(resp.getId());
+    }
+    
+    @Override
+    public AclinkFirmwareDTO createAclinkFirmware(CreateAclinkFirmwareCommand cmd) {
+        AclinkFirmware firmware = (AclinkFirmware)ConvertHelper.convert(cmd, AclinkFirmware.class);
+        firmware.setFirmwareType(new Byte((byte)0));
+        firmware.setStatus(new Byte((byte)1));
+        firmware.setCreatorId(UserContext.current().getUser().getId());
+        aclinkFirmwareProvider.createAclinkFirmware(firmware);
+        return (AclinkFirmwareDTO)ConvertHelper.convert(firmware, AclinkFirmwareDTO.class);
+    }
+    
+    @Override
+    public AclinkUpgradeResponse upgradeFirmware(AclinkUpgradeCommand cmd) {
+        DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getId());
+        if(doorAccess == null) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
+        }
+        
+        AclinkFirmware firm = aclinkFirmwareProvider.queryAclinkFirmwareMax();
+        if(firm == null) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Firmware not found");
+        }
+        
+        AesServerKey aesServerKey = aesServerKeyService.getCurrentAesServerKey(doorAccess.getId());
+        
+        int version = (firm.getMajor().intValue() << 16) + (firm.getMinor().intValue() << 8) + (firm.getRevision().intValue());
+        String message = AclinkUtils.packUpgrade(aesServerKey.getDeviceVer(), aesServerKey.getSecret(), version, firm.getChecksum().shortValue(), doorAccess.getUuid());
+        
+        AclinkUpgradeResponse resp = new AclinkUpgradeResponse();
+        resp.setCreatorId(firm.getCreatorId());
+        resp.setDownloadUrl(firm.getDownloadUrl());
+        resp.setInfoUrl(firm.getInfoUrl());
+        resp.setMessage(message);
+        
+        return resp;
+    }
+    
+    @Override
+    public String upgradeVerify(AclinkUpgradeCommand cmd) {
+        return "OK";
     }
 }

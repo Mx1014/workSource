@@ -612,7 +612,7 @@ INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show
 VALUES (86,712,58123,'绩效统计',1,1,'绩效统计 全部权限',750);
 
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
-VALUES (87,620,52400,'审批列表',1,1,'绩效统计 全部权限',760);
+VALUES (89,620,52400,'审批列表',1,1,'绩效统计 全部权限',760);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
 VALUES (88,621,52400,'审批认证',0,1,'审批同意，拒绝',770);
 

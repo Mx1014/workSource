@@ -9,6 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.rest.aclink.AclinkMessage;
+import com.everhomes.rest.aclink.AclinkWebSocketMessage;
+import com.everhomes.rest.aclink.DoorMessage;
+import com.everhomes.rest.aclink.DoorMessageType;
 
 @Component
 public class AclinkMsgGeneratorImpl implements AclinkMsgGenerator {

@@ -65,6 +65,7 @@ import com.everhomes.rest.business.FindBusinessByIdCommand;
 import com.everhomes.rest.business.GetBusinessesByCategoryCommand;
 import com.everhomes.rest.business.GetBusinessesByCategoryCommandResponse;
 import com.everhomes.rest.business.GetBusinessesByScopeCommand;
+import com.everhomes.rest.business.GetReceivedCouponCountCommand;
 import com.everhomes.rest.business.ListBusinessByCommonityIdCommand;
 import com.everhomes.rest.business.ListBusinessByKeywordCommand;
 import com.everhomes.rest.business.ListBusinessByKeywordCommandResponse;
@@ -74,6 +75,7 @@ import com.everhomes.rest.business.SyncBusinessCommand;
 import com.everhomes.rest.business.SyncDeleteBusinessCommand;
 import com.everhomes.rest.business.UpdateBusinessCommand;
 import com.everhomes.rest.business.UpdateBusinessDistanceCommand;
+import com.everhomes.rest.business.UpdateReceivedCouponCountCommand;
 import com.everhomes.rest.business.UserFavoriteCommand;
 import com.everhomes.rest.business.admin.BusinessAdminDTO;
 import com.everhomes.rest.business.admin.BusinessPromoteScopeDTO;
@@ -92,6 +94,7 @@ import com.everhomes.rest.launchpad.ItemDisplayFlag;
 import com.everhomes.rest.launchpad.ItemTargetType;
 import com.everhomes.rest.launchpad.ScaleType;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.ui.user.UserProfileDTO;
 import com.everhomes.rest.user.GetUserDefaultAddressCommand;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.ListUserCommand;
@@ -105,6 +108,8 @@ import com.everhomes.user.UserActivityService;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserGroup;
 import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProfile;
+import com.everhomes.user.UserProfileContstant;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.user.UserServiceAddress;
@@ -114,10 +119,6 @@ import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
-
-
-
-
 
 @Component
 public class BusinessServiceImpl implements BusinessService {
@@ -615,17 +616,13 @@ public class BusinessServiceImpl implements BusinessService {
 			LOGGER.error("Buiness detail url  is empty.");
 		if(business.getTargetType() == BusinessTargetType.ZUOLIN.getCode()){
 			String businessDetailUrl = null;
-			if(detailUrl.contains("#sign_suffix")){
-				detailUrl = detailUrl.trim();
-				String prefix = detailUrl.substring(0,detailUrl.indexOf("#sign_suffix"));
-				String suffix = detailUrl.substring(detailUrl.indexOf("#sign_suffix"));
-				businessDetailUrl = prefix+business.getTargetId()+suffix;
+			if(detailUrl.contains("spoint")){
+				businessDetailUrl = detailUrl.replace("spoint", business.getTargetId()).trim();
 			}
 			else
 				businessDetailUrl = detailUrl.trim() + business.getTargetId();
 			return authenticatePrefix.trim() + businessDetailUrl;
 		}
-
 		return business.getUrl();
 	}
 
@@ -1699,6 +1696,24 @@ public class BusinessServiceImpl implements BusinessService {
 			businessProvider.createBusinessAssignedNamespace(bizNamespace);
 		}
 
+	}
+
+	@Override
+	public void updateReceivedCouponCount(UpdateReceivedCouponCountCommand cmd) {
+		if(cmd.getUserId()==null||cmd.getCount()==null){
+			LOGGER.error("Invalid parameter,userId or count is null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid parameter,userId or count is null");
+		}
+		userActivityService.updateUserProfile(cmd.getUserId(),UserProfileContstant.RECEIVED_COUPON_COUNT,String.valueOf(cmd.getCount()));
+	}
+
+	@Override
+	public UserProfileDTO getReceivedCouponCount(GetReceivedCouponCountCommand cmd) {
+		UserProfile profile = userActivityProvider.findUserProfileBySpecialKey(cmd.getUserId(), UserProfileContstant.RECEIVED_COUPON_COUNT);
+		if(profile!=null)
+			return ConvertHelper.convert(profile, UserProfileDTO.class);
+		return null;
 	}
 
 }

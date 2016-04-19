@@ -47,6 +47,9 @@ public class OrganizationTaskDTO {
 	private String taskCategory;
 	private String option;
 	private String entrancePrivilege;
+	private String targetName;
+	
+	private String targetToken;
 	
     public java.lang.Long getId() {
 		return id;
@@ -209,6 +212,23 @@ public class OrganizationTaskDTO {
 
 	public void setEntrancePrivilege(String entrancePrivilege) {
 		this.entrancePrivilege = entrancePrivilege;
+	}
+
+	
+	public String getTargetName() {
+		return targetName;
+	}
+
+	public void setTargetName(String targetName) {
+		this.targetName = targetName;
+	}
+
+	public String getTargetToken() {
+		return targetToken;
+	}
+
+	public void setTargetToken(String targetToken) {
+		this.targetToken = targetToken;
 	}
 
 	@Override

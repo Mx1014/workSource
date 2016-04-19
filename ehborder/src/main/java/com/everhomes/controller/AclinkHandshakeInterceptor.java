@@ -37,6 +37,7 @@ public class AclinkHandshakeInterceptor implements HandshakeInterceptor {
             String[] vs = path.split("/", 2);
             if(vs.length != 2) {
                 response.setStatusCode(HttpStatus.BAD_REQUEST);
+                LOGGER.info("bad request from client");
                 return false;
             }
             
@@ -54,16 +55,19 @@ public class AclinkHandshakeInterceptor implements HandshakeInterceptor {
             
             if(resp == null || resp.getErrorCode() == null) {
                 response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+                LOGGER.info("internal server error" + resp);
                 return false;   
             }
             
             if(!resp.getErrorCode().equals(200)) {
                 response.setStatusCode(HttpStatus.FORBIDDEN);
+                LOGGER.info("forbidden by core server" + resp);
                 return false;
             }
             
             if(!aclinkWebSocketHandler.checkAndSet(vs[0], resp.getResponse())) {
                 response.setStatusCode(HttpStatus.CONFLICT);
+                LOGGER.info("two connection by one connection");
                 return false;
             }
         }

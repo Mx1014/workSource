@@ -24,6 +24,8 @@ import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+import com.everhomes.rest.aclink.DataUtil;
+import com.everhomes.rest.aclink.DoorMessage;
 import com.everhomes.util.StringHelper;
 
 public class AclinkUtils {
@@ -121,6 +123,12 @@ public class AclinkUtils {
     public static String packAddUndoList(Byte ver, String aesKey, int availableTime, short keyId) {
         byte[] key = Base64.decodeBase64(aesKey);
         byte[] binaryData = CmdUtil.addUndoListCmd(key, ver, availableTime, keyId);
+        return Base64.encodeBase64String(binaryData);
+    }
+    
+    public static String packUpgrade(Byte ver, String aesKey, int firmVersion, short checksum, String uuid) {
+        byte[] key = Base64.decodeBase64(aesKey);
+        byte[] binaryData = CmdUtil.upgrade(key, ver, firmVersion, checksum, uuid);
         return Base64.encodeBase64String(binaryData);
     }
 }

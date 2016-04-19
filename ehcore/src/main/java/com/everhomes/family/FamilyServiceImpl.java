@@ -192,8 +192,14 @@ public class FamilyServiceImpl implements FamilyService {
     private UserGroupHistoryProvider userGroupHistoryProvider;
     
     @Override
-    public Family getOrCreatefamily(Address address)      {
-        final User user = UserContext.current().getUser();
+    public Family getOrCreatefamily(Address address, User u)      {
+    	
+    	
+    	if(null == u){
+    		u = UserContext.current().getUser();
+    	}
+    	
+    	final User user = u;
         long uid = user.getId();
         Community community = this.communityProvider.findCommunityById(address.getCommunityId());
         Region region;
@@ -420,7 +426,7 @@ public class FamilyServiceImpl implements FamilyService {
         ListingLocator locator = new ListingLocator(familyId);
         List<GroupMember> members = this.groupProvider.listGroupMembers(locator, 1000);
         for(GroupMember gm : members) {
-            if(exclude.get(gm.getMemberId()) == null) {
+            if(exclude.get(gm.getMemberId()) == null && gm.getMemberStatus() == GroupMemberStatus.ACTIVE.getCode()) {
                 sendMessageToUser(gm.getMemberId(), message, meta);
             }
         }
@@ -602,7 +608,7 @@ public class FamilyServiceImpl implements FamilyService {
     }
 
     @Override
-    public void leave(LeaveFamilyCommand cmd) {
+    public void leave(LeaveFamilyCommand cmd, User u) {
         User user = UserContext.current().getUser();
         Long userId = user.getId();
         long familyId = cmd.getId();
@@ -1103,12 +1109,14 @@ public class FamilyServiceImpl implements FamilyService {
                 f.setFamilyId(groupMember.getGroupId());
                 f.setId(groupMember.getId());
                 f.setMemberUid(groupMember.getMemberId());
-                f.setMemberName(groupMember.getMemberNickName());
+//                f.setMemberName(groupMember.getMemberNickName());
                 f.setMemberAvatarUrl((parserUri(groupMember.getMemberAvatar(),EntityType.USER.getCode(),groupMember.getCreatorUid())));
                 f.setMemberAvatarUri(groupMember.getMemberAvatar());
                 //UserInfo userInfo = this.userService.getUserSnapshotInfo(groupMember.getMemberId());
                 UserInfo userInfo = this.userService.getUserInfo(groupMember.getMemberId());
                 if(userInfo != null){
+                	//产品要求家庭昵称和个人昵称一致
+                	f.setMemberName(userInfo.getNickName());
                     f.setBirthday(userInfo.getBirthday());
                     f.setGender(userInfo.getGender());
                     f.setStatusLine(userInfo.getStatusLine());

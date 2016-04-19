@@ -10,6 +10,8 @@ import com.everhomes.util.StringHelper;
 public class CountCommunityUsersCommand {
 	
 	private Integer namespaceId;
+	
+	private Long communityId;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -19,6 +21,16 @@ public class CountCommunityUsersCommand {
 		this.namespaceId = namespaceId;
 	}
 	
+	
+	
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

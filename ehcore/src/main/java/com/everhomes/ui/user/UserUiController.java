@@ -21,33 +21,26 @@ import com.everhomes.family.FamilyService;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.promotion.OpPromotionService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.activity.ListActivitiesReponse;
 import com.everhomes.rest.family.ListNeighborUsersCommand;
 import com.everhomes.rest.family.ListNeighborUsersCommandResponse;
 import com.everhomes.rest.family.ParamType;
 import com.everhomes.rest.organization.ListOrganizationContactCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
-import com.everhomes.rest.ui.organization.ListScenesByCummunityIdCommand;
+import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
 import com.everhomes.rest.ui.user.GetUserOpPromotionCommand;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
 import com.everhomes.rest.ui.user.ListContactBySceneRespose;
 import com.everhomes.rest.ui.user.ListContactsBySceneCommand;
+import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
 import com.everhomes.rest.ui.user.SceneContactDTO;
 import com.everhomes.rest.ui.user.SceneDTO;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
-
-
-import com.everhomes.rest.ui.user.SetUserCurrentSceneCommand;
-
 import com.everhomes.rest.user.ListUserOpPromotionsRespose;
 import com.everhomes.rest.user.UserCurrentEntityType;
-
-import com.everhomes.util.StringHelper;
-
 import com.everhomes.user.UserService;
-
-
 import com.everhomes.util.WebTokenGenerator;
 
 /**
@@ -136,12 +129,13 @@ public class UserUiController extends ControllerBase {
 		}
 		
 		ListNeighborUsersCommandResponse resp = null;
+		// 仅有小区信息看不到邻居 listNeighborUsers方法里示支持小区 by lqs 20160416
  	    if(UserCurrentEntityType.COMMUNITY == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
- 	    	ListNeighborUsersCommand command = new ListNeighborUsersCommand();
- 	    	command.setIsPinyin(1);
- 	    	command.setType(ParamType.COMMUNITY.getCode());
- 	    	command.setId(sceneToken.getEntityId());
- 	    	resp= familyService.listNeighborUsers(command);
+// 	    	ListNeighborUsersCommand command = new ListNeighborUsersCommand();
+// 	    	command.setIsPinyin(1);
+// 	    	command.setType(ParamType.COMMUNITY.getCode());
+// 	    	command.setId(sceneToken.getEntityId());
+// 	    	resp= familyService.listNeighborUsers(command);
 		}else if(UserCurrentEntityType.FAMILY == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
  	    	ListNeighborUsersCommand command = new ListNeighborUsersCommand();
  	    	command.setIsPinyin(1);
@@ -224,13 +218,13 @@ public class UserUiController extends ControllerBase {
 //    }
     
     /**
-     * <b>URL: /ui/user/listScenesByCummunityId</b>
-     * <p>列出小区当前相关场景。</p>
+     * <b>URL: /ui/user/setCurrentCommunityForScene</b>
+     * <p>设置当前小区以获得场景。</p>
      */
-    @RequestMapping("listScenesByCummunityId")
+    @RequestMapping("setCurrentCommunityForScene")
     @RestReturn(value=SceneDTO.class, collection=true)
-    public RestResponse listScenesByCummunityId(ListScenesByCummunityIdCommand cmd) {
-        List<SceneDTO> sceneDtoList = userService.listScenesByCummunityId(cmd);
+    public RestResponse setCurrentCommunityForScene(SetCurrentCommunityForSceneCommand cmd) {
+        List<SceneDTO> sceneDtoList = userService.setCurrentCommunityForScene(cmd);
         
         RestResponse response = new RestResponse(sceneDtoList);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -238,5 +232,19 @@ public class UserUiController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /ui/user/listNearbyActivitiesByScene</b>
+     * <p>根据场景、类型查询周边/同城活动</p>
+     */
+    @RequestMapping("listNearbyActivitiesByScene")
+    @RestReturn(value=ListActivitiesReponse.class)
+    public RestResponse listNearbyActivitiesByScene(ListNearbyActivitiesBySceneCommand cmd){
+        // Tuple<Long, List<ActivityDTO>> tuple = activityService.listActivitiesByTag(cmd);
+        ListActivitiesReponse rsp = null; //new ListActivitiesReponse(tuple.first(),tuple.second());
+        RestResponse response = new RestResponse(rsp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+       return response;
+   }
 
 }

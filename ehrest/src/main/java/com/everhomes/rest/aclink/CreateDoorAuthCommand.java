@@ -1,0 +1,106 @@
+package com.everhomes.rest.aclink;
+
+import javax.validation.constraints.NotNull;
+
+import com.everhomes.util.StringHelper;
+
+/**
+ * <ul>
+ * <li>userId: 授权给的用户</li>
+ * <li>doorId: 门禁 ID</li>
+ * <li>approveUserId: 谁授权的用户ID</li>
+ * <li>AuthType: 0 永久授权， 1 临时授权</li>
+ * <li>validFromMs: 授权开始有效时间</li>
+ * <li>validEndMs: 授权失效时间</li>
+ * <li>organization: 用户来自于</li>
+ * <li>description: 授权描述</li>
+ * </ul>
+ * @author janson
+ *
+ */
+public class CreateDoorAuthCommand {
+    @NotNull
+    private Long     userId;
+    
+    @NotNull
+    private Long     doorId;
+    
+    private Long approveUserId;
+    
+    @NotNull
+    private Byte     authType;
+    
+    private Long     validFromMs;
+    private Long     validEndMs;
+    private String organization;
+    private String description;
+    private Long namespaceId;
+    private String phone;
+    
+    
+    public Long getUserId() {
+        return userId;
+    }
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+    public Long getDoorId() {
+        return doorId;
+    }
+    public void setDoorId(Long doorId) {
+        this.doorId = doorId;
+    }
+    public Byte getAuthType() {
+        return authType;
+    }
+    public void setAuthType(Byte authType) {
+        this.authType = authType;
+    }
+    public Long getValidFromMs() {
+        return validFromMs;
+    }
+    public void setValidFromMs(Long validFromMs) {
+        this.validFromMs = validFromMs;
+    }
+    public Long getValidEndMs() {
+        return validEndMs;
+    }
+    public void setValidEndMs(Long validEndMs) {
+        this.validEndMs = validEndMs;
+    }
+    public String getOrganization() {
+        return organization;
+    }
+    public void setOrganization(String organization) {
+        this.organization = organization;
+    }
+    public String getDescription() {
+        return description;
+    }
+    public void setDescription(String description) {
+        this.description = description;
+    }
+    public Long getApproveUserId() {
+        return approveUserId;
+    }
+    public void setApproveUserId(Long approveUserId) {
+        this.approveUserId = approveUserId;
+    }
+    
+    public Long getNamespaceId() {
+        return namespaceId;
+    }
+    public void setNamespaceId(Long namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+    public String getPhone() {
+        return phone;
+    }
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}

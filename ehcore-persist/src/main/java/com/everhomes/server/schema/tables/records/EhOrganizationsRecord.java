@@ -377,6 +377,20 @@ public class EhOrganizationsRecord extends org.jooq.impl.UpdatableRecordImpl<com
 		return (java.lang.Long) getValue(25);
 	}
 
+	/**
+	 * Setter for <code>ehcore.eh_organizations.show_flag</code>.
+	 */
+	public void setShowFlag(java.lang.Byte value) {
+		setValue(26, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_organizations.show_flag</code>.
+	 */
+	public java.lang.Byte getShowFlag() {
+		return (java.lang.Byte) getValue(26);
+	}
+
 	// -------------------------------------------------------------------------
 	// Primary key information
 	// -------------------------------------------------------------------------
@@ -403,7 +417,7 @@ public class EhOrganizationsRecord extends org.jooq.impl.UpdatableRecordImpl<com
 	/**
 	 * Create a detached, initialised EhOrganizationsRecord
 	 */
-	public EhOrganizationsRecord(java.lang.Long id, java.lang.Long parentId, java.lang.String organizationType, java.lang.String name, java.lang.Long addressId, java.lang.String description, java.lang.String path, java.lang.Integer level, java.lang.Byte status, java.lang.String departmentType, java.lang.String groupType, java.sql.Timestamp createTime, java.sql.Timestamp updateTime, java.lang.Long directlyEnterpriseId, java.lang.Integer namespaceId, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.lang.Long groupId) {
+	public EhOrganizationsRecord(java.lang.Long id, java.lang.Long parentId, java.lang.String organizationType, java.lang.String name, java.lang.Long addressId, java.lang.String description, java.lang.String path, java.lang.Integer level, java.lang.Byte status, java.lang.String departmentType, java.lang.String groupType, java.sql.Timestamp createTime, java.sql.Timestamp updateTime, java.lang.Long directlyEnterpriseId, java.lang.Integer namespaceId, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.lang.Long groupId, java.lang.Byte showFlag) {
 		super(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS);
 
 		setValue(0, id);
@@ -432,5 +446,6 @@ public class EhOrganizationsRecord extends org.jooq.impl.UpdatableRecordImpl<com
 		setValue(23, stringTag4);
 		setValue(24, stringTag5);
 		setValue(25, groupId);
+		setValue(26, showFlag);
 	}
 }

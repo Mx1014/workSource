@@ -10,6 +10,8 @@ import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.bootstrap.PlatformContext;
@@ -20,7 +22,7 @@ import com.everhomes.repeat.RepeatService;
 import com.everhomes.util.DateHelper;
 
 @Component
-public class QualityInspectionScheduleJob implements ScheduleJob {
+public class QualityInspectionScheduleJob  extends QuartzJobBean {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(QualityInspectionScheduleJob.class);
 	
@@ -33,12 +35,14 @@ public class QualityInspectionScheduleJob implements ScheduleJob {
 	@Autowired
 	private RepeatService repeatService;
 	
-	
 	@Override
-	public void execute(JobExecutionContext arg0) throws JobExecutionException {
+	protected void executeInternal(JobExecutionContext context)
+			throws JobExecutionException {
 		if(LOGGER.isInfoEnabled()) {
 			LOGGER.info("QualityInspectionScheduleJob" + new Timestamp(DateHelper.currentGMTTime().getTime()));
 		}
+		
+		qualityProvider.closeDelayTasks();
 		
 		List<QualityInspectionStandards> activeStandards = qualityProvider.listActiveStandards();
 		
@@ -51,5 +55,6 @@ public class QualityInspectionScheduleJob implements ScheduleJob {
 		}
 		
 	}
+	
 
 }

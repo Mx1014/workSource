@@ -1,5 +1,9 @@
 // @formatter:off
+<<<<<<< HEAD
 // generated at 2016-04-18 15:04:31
+=======
+// generated at 2016-04-19 14:25:41
+>>>>>>> 3.3.x
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -16,6 +20,8 @@ public interface ApiConstants {
     public static final String ACLINK_LISTAUTHHISTORY_URL = "/aclink/listAuthHistory";
     public static final String ACLINK_QUERYMESSAGES_URL = "/aclink/queryMessages";
     public static final String ACLINK_SYNCWEBSOCKETMESSAGES_URL = "/aclink/syncWebsocketMessages";
+    public static final String ACLINK_UPGRATEAUTH_URL = "/aclink/upgrateAuth";
+    public static final String ACLINK_UPGRATEVERIFY_URL = "/aclink/upgrateVerify";
     public static final String ACTIVITY_CANCELSIGNUP_URL = "/activity/cancelSignup";
     public static final String ACTIVITY_CHECKIN_URL = "/activity/checkin";
     public static final String ACTIVITY_CONFIRM_URL = "/activity/confirm";
@@ -62,6 +68,7 @@ public interface ApiConstants {
     public static final String ADMIN_ACL_UPDATEORGANIZATIONORDINARYADMIN_URL = "/admin/acl/updateOrganizationOrdinaryAdmin";
     public static final String ADMIN_ACL_UPDATEORGANIZATIONSUPERADMIN_URL = "/admin/acl/updateOrganizationSuperAdmin";
     public static final String ADMIN_ACL_UPDATEROLEPRIVILEGE_URL = "/admin/acl/updateRolePrivilege";
+    public static final String ADMIN_ACLINK_CREATEACLINKFIRMWARE_URL = "/admin/aclink/createAclinkFirmware";
     public static final String ADMIN_ACLINK_CREATEAUTH_URL = "/admin/aclink/createAuth";
     public static final String ADMIN_ACLINK_DELETEDOORACCESS_URL = "/admin/aclink/deleteDoorAccess";
     public static final String ADMIN_ACLINK_DELETEDOORAUTH_URL = "/admin/aclink/deleteDoorAuth";
@@ -170,11 +177,13 @@ public interface ApiConstants {
     public static final String ADMIN_ORG_CREATEORGANIZATIONACCOUNT_URL = "/admin/org/createOrganizationAccount";
     public static final String ADMIN_ORG_CREATEORGANIZATIONCOMMUNITY_URL = "/admin/org/createOrganizationCommunity";
     public static final String ADMIN_ORG_CREATEORGANIZATIONMEMBER_URL = "/admin/org/createOrganizationMember";
+    public static final String ADMIN_ORG_CREATEORGANIZATIONOWNER_URL = "/admin/org/createOrganizationOwner";
     public static final String ADMIN_ORG_CREATEORGANIZATIONPERSONNEL_URL = "/admin/org/createOrganizationPersonnel";
     public static final String ADMIN_ORG_CREATEPROPERTYORGANIZATION_URL = "/admin/org/createPropertyOrganization";
     public static final String ADMIN_ORG_DELETEENTERPRISEBYID_URL = "/admin/org/deleteEnterpriseById";
     public static final String ADMIN_ORG_DELETEORGANIZATIONBYID_URL = "/admin/org/deleteOrganizationById";
     public static final String ADMIN_ORG_DELETEORGANIZATIONMEMBER_URL = "/admin/org/deleteOrganizationMember";
+    public static final String ADMIN_ORG_DELETEORGANIZATIONOWNER_URL = "/admin/org/deleteOrganizationOwner";
     public static final String ADMIN_ORG_DELETEORGANIZATIONPERSONNEL_URL = "/admin/org/deleteOrganizationPersonnel";
     public static final String ADMIN_ORG_DELETEPMCOMMUNITY_URL = "/admin/org/deletePmCommunity";
     public static final String ADMIN_ORG_FINDUSERBYINDENTIFIER_URL = "/admin/org/findUserByIndentifier";
@@ -249,6 +258,7 @@ public interface ApiConstants {
     public static final String ADMIN_USER_LISTVEST_URL = "/admin/user/listVest";
     public static final String ADMIN_USER_SEARCHINVITATEDUSER_URL = "/admin/user/searchInvitatedUser";
     public static final String ADMIN_USER_SEARCHUSERSWITHADDR_URL = "/admin/user/searchUsersWithAddr";
+    public static final String ADMIN_USER_SENDUSERRICHLINKMESSAGE_URL = "/admin/user/sendUserRichLinkMessage";
     public static final String ADMIN_USER_SENDUSERTESTMAIL_URL = "/admin/user/sendUserTestMail";
     public static final String ADMIN_USER_SENDUSERTESTSMS_URL = "/admin/user/sendUserTestSms";
     public static final String APPKEY_ISTRUSTEDAPP_URL = "/appkey/isTrustedApp";
@@ -487,6 +497,7 @@ public interface ApiConstants {
     public static final String OPENAPI_CLOSEBIZNAMESPACEVISIBLE_URL = "/openapi/closeBizNamespaceVisible";
     public static final String OPENAPI_FINDBUSINESSFAVORITESTATUS_URL = "/openapi/findBusinessFavoriteStatus";
     public static final String OPENAPI_FINDTOKENBYUSERID_URL = "/openapi/findTokenByUserId";
+    public static final String OPENAPI_GETRECEIVEDCOUPONCOUNT_URL = "/openapi/getReceivedCouponCount";
     public static final String OPENAPI_GETUSERDEFAULTADDRESS_URL = "/openapi/getUserDefaultAddress";
     public static final String OPENAPI_GETUSERDETAILBYUUID_URL = "/openapi/getUserDetailByUuid";
     public static final String OPENAPI_GETUSERINFOBYID_URL = "/openapi/getUserInfoById";
@@ -510,6 +521,7 @@ public interface ApiConstants {
     public static final String OPENAPI_SYNCUSERDELSHOPSTATUS_URL = "/openapi/syncUserDelShopStatus";
     public static final String OPENAPI_SYNCUSERFAVORITE_URL = "/openapi/syncUserFavorite";
     public static final String OPENAPI_SYNCUSERINFO_URL = "/openapi/syncuserinfo";
+    public static final String OPENAPI_UPDATERECEIVEDCOUPONCOUNT_URL = "/openapi/updateReceivedCouponCount";
     public static final String OPENAPI_USER_INITCOUPON_URL = "/openapi/user/initCoupon";
     public static final String OPENAPI_USER_TESTGETTHIRDSIGNATURE_URL = "/openapi/user/testGetThirdSignature";
     public static final String ORG_ADDORGMEMBERBYPHONE_URL = "/org/addOrgMemberByPhone";
@@ -756,6 +768,7 @@ public interface ApiConstants {
     public static final String UI_FORUM_GETTOPICSENTSCOPES_URL = "/ui/forum/getTopicSentScopes";
     public static final String UI_FORUM_NEWTOPICBYSCENE_URL = "/ui/forum/newTopicByScene";
     public static final String UI_FORUM_SEARCHBYSCENE_URL = "/ui/forum/searchByScene";
+    public static final String UI_GROUP_LISTNEARBYGROUPSBYSCENE_URL = "/ui/group/listNearbyGroupsByScene";
     public static final String UI_LAUNCHPAD_GETLASTLAUNCHPADLAYOUTBYSCENE_URL = "/ui/launchpad/getLastLaunchPadLayoutByScene";
     public static final String UI_LAUNCHPAD_GETLAUNCHPADITEMSBYSCENE_URL = "/ui/launchpad/getLaunchPadItemsByScene";
     public static final String UI_ORG_ACCEPTTASK_URL = "/ui/org/acceptTask";
@@ -769,8 +782,9 @@ public interface ApiConstants {
     public static final String UI_USER_GETUSEROPPROMOTIONSBYSCENE_URL = "/ui/user/getUserOpPromotionsByScene";
     public static final String UI_USER_GETUSERRELATEDADDRESSES_URL = "/ui/user/getUserRelatedAddresses";
     public static final String UI_USER_LISTCONTACTSBYSCENE_URL = "/ui/user/listContactsByScene";
-    public static final String UI_USER_LISTSCENESBYCUMMUNITYID_URL = "/ui/user/listScenesByCummunityId";
+    public static final String UI_USER_LISTNEARBYACTIVITIESBYSCENE_URL = "/ui/user/listNearbyActivitiesByScene";
     public static final String UI_USER_LISTUSERRELATEDSCENES_URL = "/ui/user/listUserRelatedScenes";
+    public static final String UI_USER_SETCURRENTCOMMUNITYFORSCENE_URL = "/ui/user/setCurrentCommunityForScene";
     public static final String USER_ADMINLOGON_URL = "/user/adminLogon";
     public static final String USER_APPAGREEMENTS_URL = "/user/appAgreements";
     public static final String USER_APPIDSTATUS_URL = "/user/appIdStatus";

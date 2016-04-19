@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.rest.aclink.DoorMessage;
+
 public class AclinkGeneratorContext {
     Map<Byte, List<DoorCommand>> orderMessages;
     List<DoorMessage> genMessages;

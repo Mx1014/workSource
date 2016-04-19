@@ -39,6 +39,7 @@ public class EhOrganizations implements java.io.Serializable {
 	private java.lang.String   stringTag4;
 	private java.lang.String   stringTag5;
 	private java.lang.Long     groupId;
+	private java.lang.Byte     showFlag;
 
 	public EhOrganizations() {}
 
@@ -68,7 +69,8 @@ public class EhOrganizations implements java.io.Serializable {
 		java.lang.String   stringTag3,
 		java.lang.String   stringTag4,
 		java.lang.String   stringTag5,
-		java.lang.Long     groupId
+		java.lang.Long     groupId,
+		java.lang.Byte     showFlag
 	) {
 		this.id = id;
 		this.parentId = parentId;
@@ -96,6 +98,7 @@ public class EhOrganizations implements java.io.Serializable {
 		this.stringTag4 = stringTag4;
 		this.stringTag5 = stringTag5;
 		this.groupId = groupId;
+		this.showFlag = showFlag;
 	}
 
 	public java.lang.Long getId() {
@@ -304,5 +307,13 @@ public class EhOrganizations implements java.io.Serializable {
 
 	public void setGroupId(java.lang.Long groupId) {
 		this.groupId = groupId;
+	}
+
+	public java.lang.Byte getShowFlag() {
+		return this.showFlag;
+	}
+
+	public void setShowFlag(java.lang.Byte showFlag) {
+		this.showFlag = showFlag;
 	}
 }

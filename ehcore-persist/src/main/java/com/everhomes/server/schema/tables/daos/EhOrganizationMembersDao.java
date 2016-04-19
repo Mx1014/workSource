@@ -214,6 +214,12 @@ public class EhOrganizationMembersDao extends org.jooq.impl.DAOImpl<com.everhome
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationMembers> fetchByAvatar(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhOrganizationMembers.EH_ORGANIZATION_MEMBERS.AVATAR, values);
 	}
+	/**
+	 * Fetch records that have <code>namespace_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationMembers> fetchByNamespaceId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationMembers.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID, values);
+	}
 
 	/**
 	 * Fetch records that have <code>update_time IN (values)</code>

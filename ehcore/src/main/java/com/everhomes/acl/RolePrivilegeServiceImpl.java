@@ -481,7 +481,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
      */
     public List<Long> getUserPrivileges(String module ,Long organizationId, Long userId){
     	
-    	List<RoleAssignment> userRoles = this.getUserRoles(organizationId, userId);
+    	List<RoleAssignment> userRoles = this.getUserAllOrgRoles(organizationId, userId);
     	
     	List<Long> privileges = new ArrayList<Long>();
     	
@@ -578,6 +578,25 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     	}
     	
     	return true;
+    }
+    
+    private List<RoleAssignment> getUserAllOrgRoles(Long organizationId, Long userId){
+    	List<String> groupTypes = new ArrayList<String>();
+    	groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+    	groupTypes.add(OrganizationGroupType.GROUP.getCode());
+    	
+    	List<Organization> orgs = organizationProvider.listOrganizationByGroupTypes("%/" + organizationId + "%", groupTypes);
+    	
+    	List<RoleAssignment> userRoles = null;
+    	for (Organization organization : orgs) {
+    		if(null == userRoles){
+    			userRoles = this.getUserRoles(organization.getId(), userId);
+    		}else{
+    			userRoles.addAll(this.getUserRoles(organization.getId(), userId));
+    		}
+		}
+    	
+    	return userRoles;
     }
     
     private List<RoleAssignment> getUserRoles(Long organizationId, Long userId){
@@ -723,13 +742,4 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     }
     
     
-    
-    public static void main(String[] args) {
-		Map<Integer, String> map = new HashMap<Integer, String>();
-		map.put(10001, "12");
-		map.put(12000, "45");
-		map.put(21000, "56");
-		System.out.println(map.toString());
-	}
-	
 }

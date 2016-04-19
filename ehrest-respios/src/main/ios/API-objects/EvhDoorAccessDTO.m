@@ -1,6 +1,10 @@
 //
 // EvhDoorAccessDTO.m
+<<<<<<< HEAD
 // generated at 2016-04-18 14:48:50 
+=======
+// generated at 2016-04-19 14:25:55 
+>>>>>>> 3.3.x
 //
 #import "EvhDoorAccessDTO.h"
 
@@ -71,6 +75,8 @@
         [jsonObject setObject: self.creatorPhone forKey: @"creatorPhone"];
     if(self.linkStatus)
         [jsonObject setObject: self.linkStatus forKey: @"linkStatus"];
+    if(self.version)
+        [jsonObject setObject: self.version forKey: @"version"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -155,6 +161,10 @@
         self.linkStatus = [jsonObject objectForKey: @"linkStatus"];
         if(self.linkStatus && [self.linkStatus isEqual:[NSNull null]])
             self.linkStatus = nil;
+
+        self.version = [jsonObject objectForKey: @"version"];
+        if(self.version && [self.version isEqual:[NSNull null]])
+            self.version = nil;
 
         return self;
     }

@@ -1,6 +1,10 @@
 //
 // EvhAppConstants.h
+<<<<<<< HEAD
 // generated at 2016-04-18 14:48:51 
+=======
+// generated at 2016-04-19 14:25:56 
+>>>>>>> 3.3.x
 //
 
 #define EvhAppConstants_APPKEY_BORDER @"b86ddb3b-ac77-4a65-ae03-7e8482a3db70"
