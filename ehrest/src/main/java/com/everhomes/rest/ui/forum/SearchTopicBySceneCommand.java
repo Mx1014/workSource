@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>latitude: 请求人所在位置对应的纬度</li>
  * <li>conditionJson: 搜索条件</li>
  * <li>globalFlag: 是否全局搜索</li>
- * <li>pageOffset: 偏移量</li>
+ * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页的数量</li>
  * </ul>
  */

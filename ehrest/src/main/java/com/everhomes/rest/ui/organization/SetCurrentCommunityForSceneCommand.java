@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  *
  */
-public class ListScenesByCummunityIdCommand {
+public class SetCurrentCommunityForSceneCommand {
 	
 	private Long communityId;
 
