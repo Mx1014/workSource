@@ -3899,4 +3899,19 @@ public class ForumServiceImpl implements ForumService {
         
         return null;
     }
+
+	@Override
+	public List<PostDTO> getTopicById(List<Long> topicIds, List<Long> communityIds, boolean isDetail) {
+		
+		List<PostDTO> postDtoList = new ArrayList<PostDTO>();
+		for(Long communityId : communityIds) {
+            try {
+            	List<PostDTO> postDtos = getTopicById(topicIds, communityId, isDetail, false);
+                postDtoList.addAll(postDtos);
+            } catch(Exception e) {
+                LOGGER.error(e.toString());
+            }
+        }
+		return postDtoList;
+	}
 }
