@@ -44,7 +44,7 @@ CREATE TABLE `eh_schedule_tasks`(
 	`resource_id` BIGINT NOT NULL DEFAULT 0,
 	`owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the owner of the task, user, group, etc',
 	`owner_id` BIGINT NOT NULL DEFAULT 0,
-	`process_count` INTEGER NOT NULL DEFAULT 0 COMMENT '',
+	`process_count` INTEGER NOT NULL DEFAULT 0 COMMENT 'the count of process',
 	`progress` INTEGER NOT NULL DEFAULT 0 COMMENT '0~100 percentage',
     `progress_data` TEXT COMMENT 'the data at the point of progress, it can recover the task if it interupted in the middle, json format',
 	`status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: new, 2: on progress',
