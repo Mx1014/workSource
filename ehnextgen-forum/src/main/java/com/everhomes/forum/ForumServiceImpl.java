@@ -3870,7 +3870,8 @@ public class ForumServiceImpl implements ForumService {
                 locators[i].setAnchor(cmd.getPageAnchor());
             }
             
-            List<Post> posts = forumProvider.queryPosts(locators, 10000, cmd.getPageSize(), (loc, query) -> {
+            int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+            List<Post> posts = forumProvider.queryPosts(locators, 10000, pageSize, (loc, query) -> {
                 query.addJoin(Tables.EH_FORUM_ASSIGNED_SCOPES, JoinType.LEFT_OUTER_JOIN, 
                     Tables.EH_FORUM_ASSIGNED_SCOPES.OWNER_ID.eq(Tables.EH_FORUM_POSTS.ID));
                 query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
