@@ -4,8 +4,9 @@ import java.util.Arrays;
 
 import org.springframework.web.socket.WebSocketSession;
 
-import com.everhomes.aclink.AclinkWebSocketMessage;
-import com.everhomes.aclink.DataUtil;
+import com.everhomes.rest.aclink.AclinkWebSocketMessage;
+import com.everhomes.rest.aclink.DataUtil;
+
 import org.apache.commons.codec.binary.Base64;
 
 public class AclinkWebSocketState {

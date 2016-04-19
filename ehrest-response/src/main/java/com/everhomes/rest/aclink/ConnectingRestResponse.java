@@ -3,8 +3,7 @@
 package com.everhomes.rest.aclink;
 
 import com.everhomes.rest.RestResponseBase;
-
-import com.everhomes.aclink.DoorAccessDTO;
+import com.everhomes.rest.aclink.DoorAccessDTO;
 
 public class ConnectingRestResponse extends RestResponseBase {
 

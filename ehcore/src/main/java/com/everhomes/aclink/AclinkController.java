@@ -14,6 +14,25 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.aclink.AclinkConnectingCommand;
+import com.everhomes.rest.aclink.AclinkDeleteByIdCommand;
+import com.everhomes.rest.aclink.AclinkDisconnectedCommand;
+import com.everhomes.rest.aclink.AclinkUpgradeCommand;
+import com.everhomes.rest.aclink.AclinkUpgradeResponse;
+import com.everhomes.rest.aclink.AclinkWebSocketMessage;
+import com.everhomes.rest.aclink.CreateDoorAuthByUser;
+import com.everhomes.rest.aclink.DoorAccessActivedCommand;
+import com.everhomes.rest.aclink.DoorAccessActivingCommand;
+import com.everhomes.rest.aclink.DoorAccessDTO;
+import com.everhomes.rest.aclink.DoorAuthDTO;
+import com.everhomes.rest.aclink.DoorMessage;
+import com.everhomes.rest.aclink.GetDoorAccessByHardwareIdCommand;
+import com.everhomes.rest.aclink.ListAesUserKeyByUserResponse;
+import com.everhomes.rest.aclink.ListDoorAccessResponse;
+import com.everhomes.rest.aclink.ListDoorAuthCommand;
+import com.everhomes.rest.aclink.ListDoorAuthResponse;
+import com.everhomes.rest.aclink.QueryDoorMessageCommand;
+import com.everhomes.rest.aclink.QueryDoorMessageResponse;
 import com.everhomes.util.ConvertHelper;
 
 @RestDoc(value="Aclink controller", site="core")

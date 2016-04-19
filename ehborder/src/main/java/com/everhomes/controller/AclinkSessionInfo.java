@@ -2,7 +2,7 @@ package com.everhomes.controller;
 
 import org.springframework.web.socket.WebSocketSession;
 
-import com.everhomes.aclink.DoorAccessDTO;
+import com.everhomes.rest.aclink.DoorAccessDTO;
 
 public class AclinkSessionInfo {
     private WebSocketSession session;

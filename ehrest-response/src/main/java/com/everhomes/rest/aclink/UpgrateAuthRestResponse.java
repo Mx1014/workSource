@@ -3,8 +3,7 @@
 package com.everhomes.rest.aclink;
 
 import com.everhomes.rest.RestResponseBase;
-
-import com.everhomes.aclink.AclinkUpgradeResponse;
+import com.everhomes.rest.aclink.AclinkUpgradeResponse;
 
 public class UpgrateAuthRestResponse extends RestResponseBase {
 

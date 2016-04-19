@@ -19,6 +19,8 @@ import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.rest.aclink.DoorAccessOwnerType;
+import com.everhomes.rest.aclink.DoorAccessStatus;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhDoorAccessDao;

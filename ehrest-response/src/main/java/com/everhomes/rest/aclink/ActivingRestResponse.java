@@ -3,8 +3,7 @@
 package com.everhomes.rest.aclink;
 
 import com.everhomes.rest.RestResponseBase;
-
-import com.everhomes.aclink.DoorMessage;
+import com.everhomes.rest.aclink.DoorMessage;
 
 public class ActivingRestResponse extends RestResponseBase {
 

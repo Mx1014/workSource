@@ -3,8 +3,7 @@
 package com.everhomes.rest.aclink;
 
 import com.everhomes.rest.RestResponseBase;
-
-import com.everhomes.aclink.ListDoorAccessResponse;
+import com.everhomes.rest.aclink.ListDoorAccessResponse;
 
 public class GetDoorAccessByHardwareIdRestResponse extends RestResponseBase {
 
