@@ -1,6 +1,6 @@
 //
 // EvhListCommunityUsersCommand.h
-// generated at 2016-04-12 19:00:51 
+// generated at 2016-04-19 12:41:54 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -22,7 +22,7 @@
 
 @property(nonatomic, copy) NSString* keywords;
 
-@property(nonatomic, copy) NSString* communityId;
+@property(nonatomic, copy) NSNumber* communityId;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
