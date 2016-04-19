@@ -93,7 +93,7 @@ CREATE TABLE `eh_op_promotion_messages`(
 	`owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type refer to, eh_op_promotion_activities, etc',
 	`owner_id` BIGINT NOT NULL DEFAULT 0,
     `message_seq` BIGINT NOT NULL COMMENT 'message sequence id generated at server side',
-    `sender_uid` BIGINT NOT NULL DEFAULT 0 'the id of user who send the message',
+    `sender_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'the id of user who send the message',
     `target_uid` BIGINT NOT NULL DEFAULT 0,
     `message_text` TEXT COMMENT 'message content',
     `meta_app_id` BIGINT COMMENT 'app that is in charge of message content and meta intepretation',
