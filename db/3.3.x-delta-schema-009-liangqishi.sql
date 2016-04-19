@@ -18,7 +18,6 @@ CREATE TABLE `eh_op_promotion_activities`(
     `scope_id` BIGINT,
 	`policy_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: registerd, 2: reach amount of consumption in zuolin-biz',
 	`policy_data` TEXT COMMENT 'json format, the parameters which help executing the policy',
-    `title` VARCHAR(64),
     `icon_uri` VARCHAR(1024),
 	`action_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'the type of what to do, according to document',
     `action_data` TEXT COMMENT 'the parameters depend on ation type, json format',
