@@ -24,6 +24,8 @@ import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+import com.everhomes.rest.aclink.DataUtil;
+import com.everhomes.rest.aclink.DoorMessage;
 import com.everhomes.util.StringHelper;
 
 public class AclinkUtils {

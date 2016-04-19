@@ -4,7 +4,7 @@ package com.everhomes.rest.aclink;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.aclink.ListDoorAuthResponse;
+import com.everhomes.rest.aclink.ListDoorAuthResponse;
 
 public class ListAuthHistoryRestResponse extends RestResponseBase {
 

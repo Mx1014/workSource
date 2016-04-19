@@ -22,9 +22,9 @@ import org.springframework.web.socket.PongMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.BinaryWebSocketHandler;
 
-import com.everhomes.aclink.AclinkWebSocketMessage;
-import com.everhomes.aclink.DataUtil;
-import com.everhomes.aclink.DoorAccessDTO;
+import com.everhomes.rest.aclink.AclinkWebSocketMessage;
+import com.everhomes.rest.aclink.DataUtil;
+import com.everhomes.rest.aclink.DoorAccessDTO;
 import com.everhomes.rest.aclink.SyncWebsocketMessagesRestResponse;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;

@@ -1,6 +1,6 @@
 //
 // EvhCommunityUserDto.h
-// generated at 2016-04-12 19:00:52 
+// generated at 2016-04-19 14:25:57 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -17,6 +17,8 @@
 @property(nonatomic, copy) NSNumber* userId;
 
 @property(nonatomic, copy) NSString* userName;
+
+@property(nonatomic, copy) NSString* nikeName;
 
 @property(nonatomic, copy) NSNumber* communityId;
 

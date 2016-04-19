@@ -1,6 +1,6 @@
 //
 // EvhSmsTemplateCode.h
-// generated at 2016-04-12 19:00:51 
+// generated at 2016-04-19 14:25:57 
 //
 
 #define EvhSmsTemplateCode_SCOPE @"sms.default"
@@ -21,3 +21,4 @@
 #define EvhSmsTemplateCode_WY_BILL_CODE 3
 #define EvhSmsTemplateCode_ORGANIZATION_ASSIGNED_CODE 4
 #define EvhSmsTemplateCode_WY_SEND_MSG_CODE 5
+#define EvhSmsTemplateCode_PM_TASK_PROCESS_MSG_CODE 6

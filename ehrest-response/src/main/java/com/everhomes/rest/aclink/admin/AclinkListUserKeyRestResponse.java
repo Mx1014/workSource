@@ -4,7 +4,7 @@ package com.everhomes.rest.aclink.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.aclink.ListAesUserKeyByUserResponse;
+import com.everhomes.rest.aclink.ListAesUserKeyByUserResponse;
 
 public class AclinkListUserKeyRestResponse extends RestResponseBase {
 

@@ -3,6 +3,7 @@ package com.everhomes.rest.community.admin;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.organization.OrganizationDetailDTO;
 
@@ -26,8 +27,10 @@ public class CommunityUserAddressDTO {
 	
 	private Byte gender;
 	
+	@ItemType(OrganizationDetailDTO.class)
 	private List<OrganizationDetailDTO> orgDtos;
 	
+	@ItemType(AddressDTO.class)
 	private List<AddressDTO> addressDtos;
 	
 	public Long getId() {

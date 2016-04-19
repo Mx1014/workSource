@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
+import com.everhomes.rest.aclink.DoorMessage;
 import com.everhomes.sequence.SequenceProvider;
 
 @Component

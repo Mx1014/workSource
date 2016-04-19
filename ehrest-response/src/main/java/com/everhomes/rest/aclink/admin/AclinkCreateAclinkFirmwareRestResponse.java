@@ -4,7 +4,7 @@ package com.everhomes.rest.aclink.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.aclink.AclinkFirmwareDTO;
+import com.everhomes.rest.aclink.AclinkFirmwareDTO;
 
 public class AclinkCreateAclinkFirmwareRestResponse extends RestResponseBase {
 

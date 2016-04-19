@@ -4,7 +4,7 @@ package com.everhomes.rest.aclink;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.aclink.QueryDoorMessageResponse;
+import com.everhomes.rest.aclink.QueryDoorMessageResponse;
 
 public class QueryMessagesRestResponse extends RestResponseBase {
 

@@ -1,6 +1,6 @@
 //
 // EvhCountCommunityUsersCommand.m
-// generated at 2016-04-12 19:00:52 
+// generated at 2016-04-19 14:25:57 
 //
 #import "EvhCountCommunityUsersCommand.h"
 
@@ -33,6 +33,8 @@
 {
     if(self.namespaceId)
         [jsonObject setObject: self.namespaceId forKey: @"namespaceId"];
+    if(self.communityId)
+        [jsonObject setObject: self.communityId forKey: @"communityId"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -41,6 +43,10 @@
         self.namespaceId = [jsonObject objectForKey: @"namespaceId"];
         if(self.namespaceId && [self.namespaceId isEqual:[NSNull null]])
             self.namespaceId = nil;
+
+        self.communityId = [jsonObject objectForKey: @"communityId"];
+        if(self.communityId && [self.communityId isEqual:[NSNull null]])
+            self.communityId = nil;
 
         return self;
     }

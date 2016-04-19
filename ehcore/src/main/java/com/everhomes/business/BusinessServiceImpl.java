@@ -94,6 +94,7 @@ import com.everhomes.rest.launchpad.ItemDisplayFlag;
 import com.everhomes.rest.launchpad.ItemTargetType;
 import com.everhomes.rest.launchpad.ScaleType;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.ui.user.UserProfileDTO;
 import com.everhomes.rest.user.GetUserDefaultAddressCommand;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.ListUserCommand;
@@ -109,7 +110,6 @@ import com.everhomes.user.UserGroup;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProfile;
 import com.everhomes.user.UserProfileContstant;
-import com.everhomes.user.UserProfileDTO;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.user.UserServiceAddress;
@@ -119,10 +119,6 @@ import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
-
-
-
-
 
 @Component
 public class BusinessServiceImpl implements BusinessService {

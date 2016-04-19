@@ -1,6 +1,6 @@
 //
 // EvhCommunityUserDto.m
-// generated at 2016-04-12 19:00:52 
+// generated at 2016-04-19 14:25:57 
 //
 #import "EvhCommunityUserDto.h"
 
@@ -37,6 +37,8 @@
         [jsonObject setObject: self.userId forKey: @"userId"];
     if(self.userName)
         [jsonObject setObject: self.userName forKey: @"userName"];
+    if(self.nikeName)
+        [jsonObject setObject: self.nikeName forKey: @"nikeName"];
     if(self.communityId)
         [jsonObject setObject: self.communityId forKey: @"communityId"];
     if(self.isAuth)
@@ -71,6 +73,10 @@
         self.userName = [jsonObject objectForKey: @"userName"];
         if(self.userName && [self.userName isEqual:[NSNull null]])
             self.userName = nil;
+
+        self.nikeName = [jsonObject objectForKey: @"nikeName"];
+        if(self.nikeName && [self.nikeName isEqual:[NSNull null]])
+            self.nikeName = nil;
 
         self.communityId = [jsonObject objectForKey: @"communityId"];
         if(self.communityId && [self.communityId isEqual:[NSNull null]])

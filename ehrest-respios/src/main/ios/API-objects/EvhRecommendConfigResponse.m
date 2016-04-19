@@ -1,6 +1,6 @@
 //
 // EvhRecommendConfigResponse.m
-// generated at 2016-04-12 19:00:51 
+// generated at 2016-04-19 14:25:56 
 //
 #import "EvhRecommendConfigResponse.h"
 #import "EvhRecommendConfigDTO.h"
