@@ -45,7 +45,10 @@ public class ExportLog {
             
         } finally {
             try{
-                br.close();    
+                if(br != null) {
+                    br.close();
+                    }
+                
             } catch(Exception ex) {
                 
             }

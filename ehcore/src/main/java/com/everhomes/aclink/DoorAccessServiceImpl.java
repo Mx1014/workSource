@@ -1130,4 +1130,35 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         aclinkFirmwareProvider.createAclinkFirmware(firmware);
         return (AclinkFirmwareDTO)ConvertHelper.convert(firmware, AclinkFirmwareDTO.class);
     }
+    
+    @Override
+    public AclinkUpgradeResponse upgradeFirmware(AclinkUpgradeCommand cmd) {
+        DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getId());
+        if(doorAccess == null) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
+        }
+        
+        AclinkFirmware firm = aclinkFirmwareProvider.queryAclinkFirmwareMax();
+        if(firm == null) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Firmware not found");
+        }
+        
+        AesServerKey aesServerKey = aesServerKeyService.getCurrentAesServerKey(doorAccess.getId());
+        
+        int version = (firm.getMajor().intValue() << 16) + (firm.getMinor().intValue() << 8) + (firm.getRevision().intValue());
+        String message = AclinkUtils.packUpgrade(aesServerKey.getDeviceVer(), aesServerKey.getSecret(), version, firm.getChecksum().shortValue(), doorAccess.getUuid());
+        
+        AclinkUpgradeResponse resp = new AclinkUpgradeResponse();
+        resp.setCreatorId(firm.getCreatorId());
+        resp.setDownloadUrl(firm.getDownloadUrl());
+        resp.setInfoUrl(firm.getInfoUrl());
+        resp.setMessage(message);
+        
+        return resp;
+    }
+    
+    @Override
+    public String upgradeVerify(AclinkUpgradeCommand cmd) {
+        return "OK";
+    }
 }

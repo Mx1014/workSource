@@ -46,7 +46,7 @@ public class AclinkFirmwareProviderImpl implements AclinkFirmwareProvider {
     private SequenceProvider sequenceProvider;
 
     @Override
-    @Caching(evict={@CacheEvict(value="aclinkFirmwareMax")})
+    @Caching(evict={@CacheEvict(value="aclinkFirmwareMax", key="'fix'")})
     public Long createAclinkFirmware(AclinkFirmware obj) {
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAclinkFirmware.class));
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAclinkFirmware.class));
@@ -58,7 +58,7 @@ public class AclinkFirmwareProviderImpl implements AclinkFirmwareProvider {
     }
 
     @Override
-    @Caching(evict={@CacheEvict(value="aclinkFirmwareMax")})
+    @Caching(evict={@CacheEvict(value="aclinkFirmwareMax", key="'fix'")})
     public void updateAclinkFirmware(AclinkFirmware obj) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAclinkFirmware.class));
         EhAclinkFirmwareDao dao = new EhAclinkFirmwareDao(context.configuration());
@@ -66,7 +66,7 @@ public class AclinkFirmwareProviderImpl implements AclinkFirmwareProvider {
     }
 
     @Override
-    @Caching(evict={@CacheEvict(value="aclinkFirmwareMax")})
+    @Caching(evict={@CacheEvict(value="aclinkFirmwareMax", key="'fix'")})
     public void deleteAclinkFirmware(AclinkFirmware obj) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAclinkFirmware.class));
         EhAclinkFirmwareDao dao = new EhAclinkFirmwareDao(context.configuration());
@@ -125,7 +125,7 @@ public class AclinkFirmwareProviderImpl implements AclinkFirmwareProvider {
     }
     
     @Override
-    @Cacheable(value="aclinkFirmwareMax")
+    @Cacheable(value="aclinkFirmwareMax", key="'fix'")
     public AclinkFirmware queryAclinkFirmwareMax() {
         
         ListingLocator locator = new ListingLocator();

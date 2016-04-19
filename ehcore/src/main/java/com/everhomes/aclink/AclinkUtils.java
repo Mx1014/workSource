@@ -123,4 +123,10 @@ public class AclinkUtils {
         byte[] binaryData = CmdUtil.addUndoListCmd(key, ver, availableTime, keyId);
         return Base64.encodeBase64String(binaryData);
     }
+    
+    public static String packUpgrade(Byte ver, String aesKey, int firmVersion, short checksum, String uuid) {
+        byte[] key = Base64.decodeBase64(aesKey);
+        byte[] binaryData = CmdUtil.upgrade(key, ver, firmVersion, checksum, uuid);
+        return Base64.encodeBase64String(binaryData);
+    }
 }

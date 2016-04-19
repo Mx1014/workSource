@@ -31,6 +31,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.videoconf.ConfAccountDTO;
 import com.everhomes.rest.videoconf.EnterpriseConfAccountDTO;
 import com.everhomes.rest.videoconf.ListEnterpriseVideoConfAccountResponse;
 import com.everhomes.rest.videoconf.ListEnterpriseWithVideoConfAccountCommand;
@@ -55,8 +56,8 @@ public class ConfEnterpriseSearcherImpl extends AbstractElasticSearch implements
 	@Autowired
     private ConfigurationProvider configProvider;
 	
-	@Autowired
-	private EnterpriseProvider enterpriseProvider;
+//	@Autowired
+//	private EnterpriseProvider enterpriseProvider;
 	
 	@Autowired
 	private OrganizationProvider organizationProvider;
@@ -191,7 +192,16 @@ public class ConfEnterpriseSearcherImpl extends AbstractElasticSearch implements
 		    	}
 		    	
 	    	}
-	    	
+	    		
+//	    	Organization org = organizationProvider.findOrganizationById(confEnterprise.getEnterpriseId());
+//	    	
+//	    	if(org != null) {
+//	    		dto.setEnterpriseName(org.getName());
+//		    	dto.setEnterpriseDisplayName(org.getName());
+//	    	}
+//	    	dto.setEnterpriseContactor(confEnterprise.getContactName());
+//	    	dto.setMobile(confEnterprise.getContact());
+
 	    	if(confEnterprise.getActiveAccountAmount() > 0)
 	    		dto.setUseStatus((byte) 0);
 	    	if(confEnterprise.getActiveAccountAmount() == 0 && confEnterprise.getTrialAccountAmount() > 0) {
@@ -243,9 +253,8 @@ public class ConfEnterpriseSearcherImpl extends AbstractElasticSearch implements
 //          Enterprise enter = enterpriseProvider.findEnterpriseById(enterprise.getEnterpriseId());
           
 			if(null != org) {
-              b.field("enterpriseName", org.getName());
-              b.field("enterpriseDisplayName", org.getName());
-            
+			    b.field("enterpriseName", org.getName());
+			    b.field("enterpriseDisplayName", org.getName());
             } else {
                 b.field("enterpriseName", "");
                 b.field("enterpriseDisplayName", "");

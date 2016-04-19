@@ -20,7 +20,7 @@ public class CancelVideoConfCommand {
 		this.confId = confId;
 	}
 
-	@Override
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
