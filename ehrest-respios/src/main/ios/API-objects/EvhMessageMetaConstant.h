@@ -1,6 +1,6 @@
 //
 // EvhMessageMetaConstant.h
-// generated at 2016-04-12 19:00:52 
+// generated at 2016-04-19 12:41:52 
 //
 
 #define EvhMessageMetaConstant_JUMP_TYPE @"jumpType"
@@ -10,3 +10,4 @@
 #define EvhMessageMetaConstant_INCLUDE @"include"
 #define EvhMessageMetaConstant_EXCLUDE @"exclude"
 #define EvhMessageMetaConstant_SENDER_NAME @"sender-name"
+#define EvhMessageMetaConstant_POPUP_FLAG @"popup-flag"
