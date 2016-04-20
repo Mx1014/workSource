@@ -10,6 +10,8 @@ INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'quali
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'quality', '10008', 'zh_CN', '该任务已关闭');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'quality', '10009', 'zh_CN', '生成excel信息有问题');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'quality', '10010', 'zh_CN', '下载excel信息有问题');
+INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'quality', '10011', 'zh_CN', '不能分配自己');
+
 
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'quality.notification', 1, 'zh_CN', '生成核查任务通知核查人', '你被安排执行“${taskName}”任务，截至日期为“${deadline}”，请及时执行');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'quality.notification', 2, 'zh_CN', '通知整改人', '你被“${userName}”安排执行“${taskName}”任务，截至日期为“${deadline}”，请及时执行');

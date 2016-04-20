@@ -77,6 +77,7 @@ INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'quali
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'quality', '10008', 'zh_CN', '该任务已关闭');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'quality', '10009', 'zh_CN', '生成excel信息有问题');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'quality', '10010', 'zh_CN', '下载excel信息有问题');
+INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'quality', '10011', 'zh_CN', '不能分配自己');
 
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'quality.notification', 1, 'zh_CN', '生成核查任务通知核查人', '你被安排执行“${taskName}”任务，截至日期为“${deadline}”，请及时执行');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES( 'quality.notification', 2, 'zh_CN', '通知整改人', '你被“${userName}”安排执行“${taskName}”任务，截至日期为“${deadline}”，请及时执行');
@@ -86,7 +87,8 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
 	VALUES(200501, 0, 0, '品质核查类别', '品质核查类别', 0, 2, UTC_TIMESTAMP(), 0);
 
-	
+
+INSERT INTO `eh_version_realm` (`id`, `realm`, `description`, `create_time`, `namespace_id`) VALUES ('29', 'quality', NULL, UTC_TIMESTAMP(), '0');	
 	
 -- merge from 3.3.x-delta-data-002-xiongying.sql
 DELETE FROM `eh_conf_account_categories`;
@@ -825,6 +827,12 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`, `namespace_id`) VALUES( 'sms.default.yzx', 6, 'zh_CN', '处理任务时发送的短信-讯美',22718, 999999);
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`, `namespace_id`) VALUES( 'sms.default.yzx', 6, 'zh_CN', '处理任务时发送的短信-金隅嘉业',22719, 999995);
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`, `namespace_id`) VALUES( 'sms.default.yzx', 6, 'zh_CN', '处理任务时发送的短信-海岸城',22720, 999993);
+
+
+INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'organization', '100001', 'zh_CN', '没有权限！');
+INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'organization', '100201', 'zh_CN', '任务已经被处理啦，请刷新！');
+INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'organization', '100202', 'zh_CN', '请指定分配的人员！');
+INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'organization', '100203', 'zh_CN', '请做正确的处理方式！');
 
 -- merge from 3.3.x-delta-data-011-liangqishi.sql
 INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, 'mail.smtp.address', 'smtp.mxhichina.com', '访问邮件SMTP服务器的地址');

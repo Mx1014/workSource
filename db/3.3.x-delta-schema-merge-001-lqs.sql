@@ -44,6 +44,13 @@ ALTER TABLE `eh_launch_pad_layouts` ADD COLUMN `scene_type` VARCHAR(64) NOT NULL
 ALTER TABLE `eh_launch_pad_items` ADD COLUMN `scene_type` VARCHAR(64) NOT NULL DEFAULT 'default';
 ALTER TABLE `eh_banners` ADD COLUMN `scene_type` VARCHAR(64) NOT NULL DEFAULT 'default';
 
+
+
+ALTER TABLE `eh_organizations` ADD COLUMN `show_flag` TINYINT DEFAULT 1 COMMENT '';
+ALTER TABLE `eh_organization_owners` ADD COLUMN `namespace_id` INT NOT NULL DEFAULT '0';
+
+ALTER TABLE `eh_organization_owners` ADD COLUMN `community_id` BIGINT NOT NULL DEFAULT '0';
+
 DROP TABLE IF EXISTS `eh_menus`;
 
 # 

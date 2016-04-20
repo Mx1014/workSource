@@ -829,6 +829,18 @@ public class QualityServiceImpl implements QualityService {
 									UserContext.current().getUser().getLocale(),
 									"the task is closed!"));
 		}
+		if(cmd.getOperatorId() != null && cmd.getOperatorId() == user.getId()) {
+			LOGGER.error("cannot assign to oneself!" + cmd.getOperatorId());
+			throw RuntimeErrorException
+					.errorWith(
+							QualityServiceErrorCode.SCOPE,
+							QualityServiceErrorCode.ERROR_ASSIGN_TO_ONESELF,
+							localeStringService.getLocalizedString(
+									String.valueOf(QualityServiceErrorCode.SCOPE),
+									String.valueOf(QualityServiceErrorCode.ERROR_ASSIGN_TO_ONESELF),
+									UserContext.current().getUser().getLocale(),
+									"cannot assign to oneself!"));
+		}
 		QualityInspectionTaskRecords record = new QualityInspectionTaskRecords();
 		record.setTaskId(task.getId());
 		record.setOperatorType(OwnerType.USER.getCode());
@@ -959,6 +971,18 @@ public class QualityServiceImpl implements QualityService {
 									String.valueOf(QualityServiceErrorCode.ERROR_TASK_IS_CLOSED),
 									UserContext.current().getUser().getLocale(),
 									"the task is closed!"));
+		}
+		if(cmd.getOperatorId() != null && cmd.getOperatorId() == user.getId()) {
+			LOGGER.error("cannot assign to oneself!" + cmd.getOperatorId());
+			throw RuntimeErrorException
+					.errorWith(
+							QualityServiceErrorCode.SCOPE,
+							QualityServiceErrorCode.ERROR_ASSIGN_TO_ONESELF,
+							localeStringService.getLocalizedString(
+									String.valueOf(QualityServiceErrorCode.SCOPE),
+									String.valueOf(QualityServiceErrorCode.ERROR_ASSIGN_TO_ONESELF),
+									UserContext.current().getUser().getLocale(),
+									"cannot assign to oneself!"));
 		}
 		QualityInspectionTaskRecords record = new QualityInspectionTaskRecords();
 		record.setTaskId(task.getId());
