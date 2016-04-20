@@ -15,3 +15,4 @@ INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'organ
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'organization', '100201', 'zh_CN', '任务已经被处理啦，请刷新！');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'organization', '100202', 'zh_CN', '请指定分配的人员！');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'organization', '100203', 'zh_CN', '请做正确的处理方式！');
+
