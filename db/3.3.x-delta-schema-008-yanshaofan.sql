@@ -23,3 +23,10 @@ ALTER TABLE `eh_organization_owners` ADD COLUMN `namespace_id` INT NOT NULL DEFA
 # 20160414
 #
 ALTER TABLE `eh_organization_owners` ADD COLUMN `community_id` BIGINT NOT NULL DEFAULT '0';
+
+
+# 
+# 20160420
+#
+ALTER TABLE `eh_organization_task_targets` ADD COLUMN `message_type` VARCHAR(64) COMMENT 'PUSH COMMENT SMS ';
+
