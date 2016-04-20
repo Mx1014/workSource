@@ -20,7 +20,7 @@ public class ListCommunityUsersCommand {
 	private String keywords;
 	
 	private Long communityId;
-
+	
 
 	public Long getPageAnchor() {
 		return pageAnchor;

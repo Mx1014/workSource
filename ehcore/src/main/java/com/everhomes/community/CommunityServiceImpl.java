@@ -49,6 +49,7 @@ import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationDetail;
 import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationOwners;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.region.Region;
@@ -1209,13 +1210,57 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 	
 	@Override
+	public CommunityUserAddressResponse listOwnerBycommunityId(ListCommunityUsersCommand cmd){
+		CommunityUserAddressResponse res = new CommunityUserAddressResponse();
+		
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		List<OrganizationOwners> owners = organizationProvider.listOrganizationOwnerByCommunityId(cmd.getCommunityId(),locator, cmd.getPageSize(),(loc, query) -> {
+			if(org.springframework.util.StringUtils.isEmpty(cmd.getKeywords())){
+				Condition cond = Tables.EH_ORGANIZATION_OWNERS.CONTACT_NAME.like(cmd.getKeywords() + "%");
+				cond = cond.or(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TOKEN.eq(cmd.getKeywords()));
+				query.addConditions(cond);
+			}
+            return query;
+        });
+		
+		List<CommunityUserAddressDTO> dtos = new ArrayList<CommunityUserAddressDTO>();
+		for (OrganizationOwners organizationOwners : owners) {
+			CommunityUserAddressDTO dto = new CommunityUserAddressDTO();
+			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(organizationOwners.getNamespaceId(), organizationOwners.getContactToken());
+			dto.setIsAuth(2);
+			if(null != userIdentifier){
+				dto.setUserId(userIdentifier.getOwnerUid());
+				dto.setIsAuth(1);
+			}
+			
+			dto.setUserName(organizationOwners.getContactName());
+			dto.setNikeName(organizationOwners.getContactName());
+			dto.setPhone(organizationOwners.getContactToken());
+			dtos.add(dto);
+		}
+		res.setDtos(dtos);
+		res.setNextPageAnchor(locator.getAnchor());
+		return res;
+	}
+	
+	@Override
 	public CommunityUserAddressDTO qryCommunityUserAddressByUserId(QryCommunityUserAddressByUserIdCommand cmd){
 		CommunityUserAddressDTO dto = new CommunityUserAddressDTO();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
-		User user = userProvider.findUserById(cmd.getUserId());
-		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(cmd.getUserId(), IdentifierType.MOBILE.getCode());
-		
-		List<UserGroup> usreGroups = userProvider.listUserGroups(cmd.getUserId(), GroupDiscriminator.FAMILY.getCode());
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getContactToken());
+		if(null == userIdentifier){
+			List<OrganizationOwners> owners = organizationProvider.findOrganizationOwnerByTokenOrNamespaceId(cmd.getContactToken(), namespaceId);
+			List<AddressDTO> addressDtos = new ArrayList<AddressDTO>();
+			for (OrganizationOwners organizationOwners : owners) {
+				Address address = addressProvider.findAddressById(organizationOwners.getAddressId());
+				addressDtos.add(ConvertHelper.convert(address, AddressDTO.class));
+			}
+			return dto;
+		}
+		User user = userProvider.findUserById(userIdentifier.getOwnerUid());
+		List<UserGroup> usreGroups = userProvider.listUserGroups(user.getId(), GroupDiscriminator.FAMILY.getCode());
 		List<AddressDTO> addressDtos = new ArrayList<AddressDTO>();
 		if(null != usreGroups){
 			for (UserGroup userGroup : usreGroups) {
