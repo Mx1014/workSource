@@ -1,0 +1,85 @@
+package com.everhomes.rest.activity;
+
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
+
+/**
+ * <p>按经纬度位置列活动</p>
+ * <ul>
+ * <li>namespaceId: 域空间ID</li>
+ * <li>locationPointList: 经纬度列表</li>
+ * <li>scope: 范围，{@link com.everhomes.rest.ui.user.ActivityLocationScope}</li>
+ * <li>tag: 活动标签</li>
+ * <li>pageAnchor: 锚点</li>
+ * <li>pageSize: 每页的数量</li>
+ * </ul>
+ */
+public class ListActivitiesByLocationCommand {
+    private Integer namespaceId;
+    
+    @ItemType(GeoLocation.class)
+    private List<GeoLocation> locationPointList;
+    
+    private Byte scope;
+    
+    private String tag;
+    
+    private Long pageAnchor;
+    
+    private Integer pageSize;
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
+
+    public List<GeoLocation> getLocationPointList() {
+        return locationPointList;
+    }
+
+    public void setLocationPointList(List<GeoLocation> locationPointList) {
+        this.locationPointList = locationPointList;
+    }
+
+    public Byte getScope() {
+        return scope;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
+    public void setScope(Byte scope) {
+        this.scope = scope;
+    }
+
+    public Long getPageAnchor() {
+        return pageAnchor;
+    }
+
+    public void setPageAnchor(Long pageAnchor) {
+        this.pageAnchor = pageAnchor;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
+    }   
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}

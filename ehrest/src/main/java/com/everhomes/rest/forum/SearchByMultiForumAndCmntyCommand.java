@@ -10,12 +10,13 @@ import com.everhomes.util.StringHelper;
  * <li>queryString: 关键字</li>
  * <li>forumIds: 论坛id列表</li>
  * <li>communityIds: 小区id列表</li>
+ * <li>regionIds: 片区id列表</li>
  * <li>namespaceId: 域空间</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页的数量</li>
  * </ul>
  */
-public class SearchByPMCommand {
+public class SearchByMultiForumAndCmntyCommand {
 	
 	private String queryString;
     
@@ -24,6 +25,9 @@ public class SearchByPMCommand {
     
 	@ItemType(Long.class)
     private List<Long> communityIds;
+
+    @ItemType(Long.class)
+	private List<Long> regionIds;
     
     private Integer namespaceId;
 
@@ -55,7 +59,15 @@ public class SearchByPMCommand {
 		this.communityIds = communityIds;
 	}
 
-	public Integer getNamespaceId() {
+	public List<Long> getRegionIds() {
+        return regionIds;
+    }
+
+    public void setRegionIds(List<Long> regionIds) {
+        this.regionIds = regionIds;
+    }
+
+    public Integer getNamespaceId() {
 		return namespaceId;
 	}
 
