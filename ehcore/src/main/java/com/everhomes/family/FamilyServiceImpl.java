@@ -238,7 +238,11 @@ public class FamilyServiceImpl implements FamilyService {
                     m.setMemberId(uid);
                     m.setMemberAvatar(user.getAvatar());
                     m.setMemberRole(Role.ResourceCreator);
-                    m.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
+                    
+                    if(null == address.getMemberStatus()){
+                    	address.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
+                    }
+                    m.setMemberStatus(address.getMemberStatus());
                     m.setCreatorUid(uid);
                     m.setInviteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     this.groupProvider.createGroupMember(m);
@@ -250,7 +254,7 @@ public class FamilyServiceImpl implements FamilyService {
                     userGroup.setRegionScope(RegionScope.COMMUNITY.getCode());
                     userGroup.setRegionScopeId(community.getId());
                     userGroup.setMemberRole(Role.ResourceCreator);
-                    userGroup.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
+                    userGroup.setMemberStatus(address.getMemberStatus());
                     this.userProvider.createUserGroup(userGroup);
                     
                     sendFamilyNotificationForReqJoinFamily(address,f,m);

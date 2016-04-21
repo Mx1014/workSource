@@ -94,6 +94,7 @@ import com.everhomes.rest.forum.ListTopicCommentCommand;
 import com.everhomes.rest.forum.ListUserRelatedTopicCommand;
 import com.everhomes.rest.forum.LostAndFoundCommand;
 import com.everhomes.rest.forum.LostAndFoundStatus;
+import com.everhomes.rest.forum.MessageType;
 import com.everhomes.rest.forum.NewCommentCommand;
 import com.everhomes.rest.forum.NewTopicCommand;
 import com.everhomes.rest.forum.OrganizationTopicMixType;
@@ -127,6 +128,7 @@ import com.everhomes.rest.organization.OrganizationTaskType;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.point.AddUserPointCommand;
 import com.everhomes.rest.point.PointType;
+import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.ui.forum.GetTopicQueryFilterCommand;
 import com.everhomes.rest.ui.forum.GetTopicSentScopeCommand;
 import com.everhomes.rest.ui.forum.NewTopicBySceneCommand;
@@ -148,6 +150,7 @@ import com.everhomes.search.PostSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
@@ -161,6 +164,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
 import com.everhomes.util.WebTokenGenerator;
 
 @Component
@@ -235,6 +239,9 @@ public class ForumServiceImpl implements ForumService {
     
     @Autowired
     private GroupService groupService;
+    
+    @Autowired
+    private SmsProvider smsProvider;
 
     @Value("${server.contextPath:}")
     private String serverContectPath;
@@ -346,10 +353,19 @@ public class ForumServiceImpl implements ForumService {
     private void sendTaskMsgToMembers(String taskType, String ownerType, Long ownerId){
     	
     	User user = UserContext.current().getUser();
+    	Integer namespaceId = UserContext.getCurrentNamespaceId();
+    	
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
     	
     	Map<String,Object> map = new HashMap<String, Object>();
     	
+    	map.put("createUName", user.getNickName());
+    	map.put("createUToken", userIdentifier.getIdentifierToken());
+    	
     	String msg = localeTemplateService.getLocaleTemplateString(OrganizationNotificationTemplateCode.SCOPE, OrganizationNotificationTemplateCode.ORGANIZATION_TASK_NEW, user.getLocale(), map, "");
+    	
+		List<Long> pushUserIds = new ArrayList<Long>();
+		List<String> phones = new ArrayList<String>();
     	
     	if(!StringUtils.isEmpty(msg)) {
 			String channelType = MessageChannelType.USER.getCode();
@@ -359,8 +375,7 @@ public class ForumServiceImpl implements ForumService {
 			messageDto.setBodyType(MessageBodyType.NOTIFY.getCode());
 			messageDto.setBody(msg);
 			messageDto.setMetaAppId(AppConstants.APPID_DEFAULT);
-			List<Long> userIds = new ArrayList<Long>();
-			
+
 			List<OrganizationTaskTarget> targets = organizationProvider.listOrganizationTaskTargetsByOwner(ownerType, ownerId, taskType);
 			for (OrganizationTaskTarget target : targets) {
 				if(EntityType.fromCode(target.getTargetType()) == EntityType.ORGANIZATIONS){
@@ -368,26 +383,54 @@ public class ForumServiceImpl implements ForumService {
 					org.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
 					List<OrganizationMember> members = organizationProvider.listOrganizationPersonnels(null, org, new CrossShardListingLocator(), 10000);
 					for (OrganizationMember member : members) {
-						if(OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER){
-							userIds.add(member.getTargetId());
+						if(MessageType.fromCode(target.getMessageType()) == MessageType.PUSH){
+							if(OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER){
+								pushUserIds.add(member.getTargetId());
+							}
+						}else if(MessageType.fromCode(target.getMessageType()) == MessageType.SMS){
+							phones.add(member.getContactToken());
 						}
+						
+						
 					}
 				}
 				
 				if(EntityType.fromCode(target.getTargetType()) == EntityType.USER){
-					userIds.add(target.getTargetId());
+					if(MessageType.fromCode(target.getMessageType()) == MessageType.PUSH){
+						pushUserIds.add(target.getTargetId());
+					}else if(MessageType.fromCode(target.getMessageType()) == MessageType.SMS){
+						UserIdentifier userIdentify = userProvider.findClaimedIdentifierByOwnerAndType(target.getTargetId(), IdentifierType.MOBILE.getCode());
+						phones.add(userIdentify.getIdentifierToken());
+					}
+					
 				}
 				
 			}
 			
-			for (Long userId : userIds) {
+			for (Long userId : pushUserIds) {
 				String channelToken = String.valueOf(userId);
 				messageDto.setChannels(new MessageChannel(channelType, channelToken));
 				messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, channelType,
 						channelToken, messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
 			}
 			
+			List<Tuple<String, Object>> variables = null;
+			
+			for (String key : map.keySet()) {
+				if(null == variables){
+					variables = smsProvider.toTupleList(key, map.get(key));
+				}else{
+					smsProvider.addToTupleList(variables, key, map.get(key));
+				}
+				
+			}
+			for (String phone : phones) {
+				smsProvider.sendSms(namespaceId, phone, SmsTemplateCode.SCOPE, SmsTemplateCode.PM_TASK_PUSH_MSG_CODE, user.getLocale(), variables);
+			}
+
 		}
+    	
+    	
     }
     
     @Override

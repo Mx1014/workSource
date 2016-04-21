@@ -114,6 +114,7 @@ import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.forum.PostEntityTag;
 import com.everhomes.rest.forum.PostPrivacy;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
+import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.launchpad.ItemKind;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -5949,7 +5950,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    public void createOrganizationOwner(CreateOrganizationOwnerCommand cmd) {
 	    	Integer namespaceId = UserContext.getCurrentNamespaceId();
 	    	UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getContactToken());
-	    	User user = userProvider.findUserById(userIdentifier.getOwnerUid());
     		
     		Address address = null;
     		if(null != cmd.getAddressId()){
@@ -5967,7 +5967,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     					"invalid parameter.");
     		}
     		
-	    	if(null == user){
+	    	if(null == userIdentifier){
 	    		OrganizationOwners owner = organizationProvider.getOrganizationOwnerByTokenOraddressId(cmd.getContactToken(), address.getId());
 	    		if(null == owner){
 	    			owner = ConvertHelper.convert(owner, OrganizationOwners.class);
@@ -5978,6 +5978,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    			organizationProvider.updateOrganizationOwner(owner);
 	    		}
 	    	}else{
+	    		User user = userProvider.findUserById(userIdentifier.getOwnerUid());
+	    		address.setMemberStatus(GroupMemberStatus.ACTIVE.getCode());
 	    		familyService.getOrCreatefamily(address, user);
 	    	}
 	    }

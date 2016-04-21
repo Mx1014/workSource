@@ -21,6 +21,7 @@ public class AddressDTO {
     private java.lang.Long     creatorUid;
     private java.sql.Timestamp createTime;
     private java.sql.Timestamp deleteTime;
+    private Byte memberStatus;
 
     public AddressDTO() {
     }
@@ -168,7 +169,17 @@ public class AddressDTO {
     public void setDeleteTime(java.sql.Timestamp deleteTime) {
         this.deleteTime = deleteTime;
     }
-    @Override
+    
+    
+    public Byte getMemberStatus() {
+		return memberStatus;
+	}
+
+	public void setMemberStatus(Byte memberStatus) {
+		this.memberStatus = memberStatus;
+	}
+
+	@Override
     public String toString(){
         return StringHelper.toJsonString(this);
         
