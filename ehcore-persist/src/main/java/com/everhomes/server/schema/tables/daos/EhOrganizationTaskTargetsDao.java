@@ -81,4 +81,11 @@ public class EhOrganizationTaskTargetsDao extends org.jooq.impl.DAOImpl<com.ever
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationTaskTargets> fetchByTaskType(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhOrganizationTaskTargets.EH_ORGANIZATION_TASK_TARGETS.TASK_TYPE, values);
 	}
+
+	/**
+	 * Fetch records that have <code>message_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationTaskTargets> fetchByMessageType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationTaskTargets.EH_ORGANIZATION_TASK_TARGETS.MESSAGE_TYPE, values);
+	}
 }

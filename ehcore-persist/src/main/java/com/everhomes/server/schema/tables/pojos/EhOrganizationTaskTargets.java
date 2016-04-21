@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationTaskTargets implements java.io.Serializable {
 
-	private static final long serialVersionUID = -827256209;
+	private static final long serialVersionUID = 538954175;
 
 	private java.lang.Long   id;
 	private java.lang.String ownerType;
@@ -19,6 +19,7 @@ public class EhOrganizationTaskTargets implements java.io.Serializable {
 	private java.lang.String targetType;
 	private java.lang.Long   targetId;
 	private java.lang.String taskType;
+	private java.lang.String messageType;
 
 	public EhOrganizationTaskTargets() {}
 
@@ -28,7 +29,8 @@ public class EhOrganizationTaskTargets implements java.io.Serializable {
 		java.lang.Long   ownerId,
 		java.lang.String targetType,
 		java.lang.Long   targetId,
-		java.lang.String taskType
+		java.lang.String taskType,
+		java.lang.String messageType
 	) {
 		this.id = id;
 		this.ownerType = ownerType;
@@ -36,6 +38,7 @@ public class EhOrganizationTaskTargets implements java.io.Serializable {
 		this.targetType = targetType;
 		this.targetId = targetId;
 		this.taskType = taskType;
+		this.messageType = messageType;
 	}
 
 	public java.lang.Long getId() {
@@ -84,5 +87,13 @@ public class EhOrganizationTaskTargets implements java.io.Serializable {
 
 	public void setTaskType(java.lang.String taskType) {
 		this.taskType = taskType;
+	}
+
+	public java.lang.String getMessageType() {
+		return this.messageType;
+	}
+
+	public void setMessageType(java.lang.String messageType) {
+		this.messageType = messageType;
 	}
 }
