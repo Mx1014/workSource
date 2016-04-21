@@ -5970,7 +5970,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	if(null == userIdentifier){
 	    		OrganizationOwners owner = organizationProvider.getOrganizationOwnerByTokenOraddressId(cmd.getContactToken(), address.getId());
 	    		if(null == owner){
-	    			owner = ConvertHelper.convert(owner, OrganizationOwners.class);
+	    			owner = ConvertHelper.convert(cmd, OrganizationOwners.class);
 	    			organizationProvider.createOrganizationOwner(owner);
 	    		}else{
 	    			owner.setContactName(cmd.getContactName());
