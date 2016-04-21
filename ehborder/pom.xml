@@ -76,7 +76,7 @@
 			<dependency>
 			    <groupId>com.everhomes</groupId>
 			    <artifactId>ehrest-response</artifactId>
-			    <version>3.3.0-20160406.111755-22</version>
+			    <version>3.3.0-20160419.063017-36</version>
 			</dependency>
 
         <dependency>
