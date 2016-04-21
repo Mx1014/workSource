@@ -5971,6 +5971,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    		OrganizationOwners owner = organizationProvider.getOrganizationOwnerByTokenOraddressId(cmd.getContactToken(), address.getId());
 	    		if(null == owner){
 	    			owner = ConvertHelper.convert(cmd, OrganizationOwners.class);
+	    			owner.setAddressId(address.getId());
 	    			organizationProvider.createOrganizationOwner(owner);
 	    		}else{
 	    			owner.setContactName(cmd.getContactName());
