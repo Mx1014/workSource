@@ -834,15 +834,15 @@ INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'organ
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'organization', '100202', 'zh_CN', '请指定分配的人员！');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'organization', '100203', 'zh_CN', '请做正确的处理方式！');
 
-
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`, `namespace_id`) VALUES( 'group.notification', 34, 'zh_CN', '删除俱乐部管理员收到的消息','${userName}已删除俱乐部“${groupName}”', 0);
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`, `namespace_id`) VALUES( 'group.notification', 35, 'zh_CN', '删除俱乐部创建人收到的消息','已删除俱乐部“${groupName}”', 0);
 
--- merge from 3.3.x-delta-data-011-liangqishi.sql
-INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, 'mail.smtp.address', 'smtp.mxhichina.com', '访问邮件SMTP服务器的地址');
-INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, 'mail.smtp.port', '25', '访问邮件SMTP服务器的端口号');
-INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, 'mail.smtp.account', '', '系统邮件发送者帐号');
-INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, 'mail.smtp.passwod', '', '系统邮件发送者帐号密码');
+
+-- merge from 3.3.x-delta-data-011-liangqishi.sql 与 3.3.x-delta-data-002-liangqishi.sql重复
+-- INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, 'mail.smtp.address', 'smtp.mxhichina.com', '访问邮件SMTP服务器的地址');
+-- INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, 'mail.smtp.port', '25', '访问邮件SMTP服务器的端口号');
+-- INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, 'mail.smtp.account', '', '系统邮件发送者帐号');
+-- INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, 'mail.smtp.passwod', '', '系统邮件发送者帐号密码');
 
 
 -- merge from 3.3.x-delta-data-012-liangqishi.sql
