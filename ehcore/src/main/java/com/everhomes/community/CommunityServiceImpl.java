@@ -1418,50 +1418,52 @@ public class CommunityServiceImpl implements CommunityService {
 	public CountCommunityUserResponse countCommunityUsers(
 			CountCommunityUsersCommand cmd) {
 		
-		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-		
-		/**
-		 * 小区用户统计
-		 */
-		if(CommunityType.fromCode(community.getCommunityType()) == CommunityType.RESIDENTIAL){
-			List<Group> groups = groupProvider.listGroupByCommunityId(community.getId(), (loc, query) -> {
-	            Condition c = Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.ACTIVE.getCode());
-	            query.addConditions(c);
-	            return query;
-	        });
+		if(cmd.getCommunityId() != null) {
+			Community community = communityProvider.findCommunityById(cmd.getCommunityId());
 			
-			List<Long> groupIds = new ArrayList<Long>(); 
-			for (Group group : groups) {
-				groupIds.add(group.getId());
-			}
-			
-			CrossShardListingLocator locator = new CrossShardListingLocator();
-			List<GroupMember> groupMembers = groupProvider.listGroupMemberByGroupIds(groupIds,locator,null,(loc, query) -> {
-				Condition c = Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode());
-				c = c.and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.ne(GroupMemberStatus.INACTIVE.getCode()));
-	            query.addConditions(c);
-	            query.addGroupBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID);
-	            return query;
-	        });
-			
-			int allCount = groupMembers.size();
-			
-			List<GroupMember> authMembers = new ArrayList<GroupMember>();
-			for (GroupMember groupMember : groupMembers) {
+			/**
+			 * 小区用户统计
+			 */
+			if(CommunityType.fromCode(community.getCommunityType()) == CommunityType.RESIDENTIAL){
+				List<Group> groups = groupProvider.listGroupByCommunityId(community.getId(), (loc, query) -> {
+		            Condition c = Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.ACTIVE.getCode());
+		            query.addConditions(c);
+		            return query;
+		        });
 				
-				if(GroupMemberStatus.fromCode(groupMember.getMemberStatus()) == GroupMemberStatus.ACTIVE){
-					authMembers.add(groupMember);
+				List<Long> groupIds = new ArrayList<Long>(); 
+				for (Group group : groups) {
+					groupIds.add(group.getId());
 				}
+				
+				CrossShardListingLocator locator = new CrossShardListingLocator();
+				List<GroupMember> groupMembers = groupProvider.listGroupMemberByGroupIds(groupIds,locator,null,(loc, query) -> {
+					Condition c = Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode());
+					c = c.and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.ne(GroupMemberStatus.INACTIVE.getCode()));
+		            query.addConditions(c);
+		            query.addGroupBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID);
+		            return query;
+		        });
+				
+				int allCount = groupMembers.size();
+				
+				List<GroupMember> authMembers = new ArrayList<GroupMember>();
+				for (GroupMember groupMember : groupMembers) {
+					
+					if(GroupMemberStatus.fromCode(groupMember.getMemberStatus()) == GroupMemberStatus.ACTIVE){
+						authMembers.add(groupMember);
+					}
+				}
+				
+				int authCount = authMembers.size();
+				
+				CountCommunityUserResponse resp = new CountCommunityUserResponse();
+				resp.setCommunityUsers(allCount);
+				resp.setAuthUsers(authCount);
+				resp.setNotAuthUsers(allCount - authCount);
+				
+				return resp;
 			}
-			
-			int authCount = authMembers.size();
-			
-			CountCommunityUserResponse resp = new CountCommunityUserResponse();
-			resp.setCommunityUsers(allCount);
-			resp.setAuthUsers(authCount);
-			resp.setNotAuthUsers(allCount - authCount);
-			
-			return resp;
 		}
 		
 		/**

@@ -51,6 +51,7 @@ import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.ForumConstants;
 import com.everhomes.rest.forum.ListPostCommandResponse;
 import com.everhomes.rest.forum.PostDTO;
+import com.everhomes.rest.forum.PostSearchFlag;
 import com.everhomes.rest.forum.PostStatus;
 import com.everhomes.rest.forum.SearchByMultiForumAndCmntyCommand;
 import com.everhomes.rest.forum.SearchTopicCommand;
@@ -271,7 +272,8 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
     
     private FilterBuilder getForumFilter(SearchTopicCommand cmd) {
         FilterBuilder fb = null;
-        if(cmd.getSearchFlag() != null && cmd.getSearchFlag() == 1) {
+        PostSearchFlag searchFlag = PostSearchFlag.fromCode(cmd.getSearchFlag());
+        if(cmd.getSearchFlag() != null && searchFlag == PostSearchFlag.GLOBAL) {
             FilterBuilder comFilter = null;
             if(cmd.getCommunityId() != null) {
                 GetNearbyCommunitiesByIdCommand nearCmd = new GetNearbyCommunitiesByIdCommand();
@@ -466,7 +468,8 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
                 
                 cmntyTopicCmd = ConvertHelper.convert(cmd, SearchTopicCommand.class);
                 cmntyTopicCmd.setNamespaceId(namespaceId);
-                cmntyTopicCmd.setForumId(forumId);
+                cmntyTopicCmd.setCommunityId(community.getId());
+                cmntyTopicCmd.setSearchFlag(PostSearchFlag.GLOBAL.getCode());
                 response = query(cmntyTopicCmd);
             } else {
                 if(LOGGER.isWarnEnabled()) {
@@ -483,7 +486,8 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
 
                     cmntyTopicCmd = ConvertHelper.convert(cmd, SearchTopicCommand.class);
                     cmntyTopicCmd.setNamespaceId(namespaceId);
-                    cmntyTopicCmd.setForumId(forumId);
+                    cmntyTopicCmd.setCommunityId(community.getId());
+                    cmntyTopicCmd.setSearchFlag(PostSearchFlag.GLOBAL.getCode());
                     response = query(cmntyTopicCmd);
                 } else {
                     if(LOGGER.isWarnEnabled()) {
@@ -497,60 +501,66 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
             }
             break;
         case ORGANIZATION:
-            List<Long> forumIdList = new ArrayList<Long>();
-            List<Long> organizationList = new ArrayList<Long>();
-            
-            // 本公司论坛
-            Organization org = this.organizationProvider.findOrganizationById(sceneToken.getEntityId());
-            if(org != null) {
-                organizationList.add(org.getId());
-            }
-            forumId = getOrganizationForumId(sceneToken, org);
-            if(forumId != null) {
-                forumIdList.add(forumId);
-            }
-            
-            // 所有子公司论坛
-            Group group = null;
-            if(org != null) {
-                List<String> groupTypes = new ArrayList<String>();
-                groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
-                List<Organization> subOrgList = organizationProvider.listOrganizationByGroupTypes(org.getPath() + "/%", groupTypes);
-                if(subOrgList != null && subOrgList.size() > 0) {
-                    for(Organization subOrg : subOrgList) {
-                        organizationList.add(subOrg.getId());
-                        if(subOrg.getGroupId() != null) {
-                            group = groupProvider.findGroupById(subOrg.getGroupId());
-                            if(group != null && group.getOwningForumId() != null) {
-                                forumIdList.add(group.getOwningForumId());
-                            }
-                        }
-                    }
-                }
-            }
-            
-            // 所管辖的小区
-            List<Long> communityIdList = new ArrayList<Long>();
-            List<OrganizationCommunity> organizationCommunitys = organizationProvider.listOrganizationCommunities(sceneToken.getEntityId());
-            for(OrganizationCommunity orgCmnty : organizationCommunitys) {
-                community = communityProvider.findCommunityById(orgCmnty.getCommunityId());
-                if(community != null) {
-                    communityIdList.add(community.getId());
-                }
-            }
-
-            SearchByMultiForumAndCmntyCommand orgTopicCmd = ConvertHelper.convert(cmd, SearchByMultiForumAndCmntyCommand.class);
-            orgTopicCmd.setCommunityIds(communityIdList);
-            orgTopicCmd.setForumIds(forumIdList);
-            orgTopicCmd.setRegionIds(organizationList);
-            
-            response = queryByMultiForumAndCmnty(orgTopicCmd);
+            response = queryGlobalPostByOrganizationId(cmd, sceneToken, sceneToken.getEntityId());
             break;
         default:
             break;
         }
         
         return response;
+    }
+    
+    private ListPostCommandResponse queryGlobalPostByOrganizationId(SearchTopicBySceneCommand cmd, 
+            SceneTokenDTO sceneToken, Long organizationId) {
+        List<Long> forumIdList = new ArrayList<Long>();
+        List<Long> organizationList = new ArrayList<Long>();
+        
+        // 本公司论坛
+        Organization org = this.organizationProvider.findOrganizationById(organizationId);
+        if(org != null) {
+            organizationList.add(org.getId());
+        }
+        Long forumId = getOrganizationForumId(sceneToken, org);
+        if(forumId != null) {
+            forumIdList.add(forumId);
+        }
+        
+        // 所有子公司论坛
+        Group group = null;
+        if(org != null) {
+            List<String> groupTypes = new ArrayList<String>();
+            groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+            List<Organization> subOrgList = organizationProvider.listOrganizationByGroupTypes(org.getPath() + "/%", groupTypes);
+            if(subOrgList != null && subOrgList.size() > 0) {
+                for(Organization subOrg : subOrgList) {
+                    organizationList.add(subOrg.getId());
+                    if(subOrg.getGroupId() != null) {
+                        group = groupProvider.findGroupById(subOrg.getGroupId());
+                        if(group != null && group.getOwningForumId() != null) {
+                            forumIdList.add(group.getOwningForumId());
+                        }
+                    }
+                }
+            }
+        }
+        
+        // 所管辖的小区
+        Community community = null;
+        List<Long> communityIdList = new ArrayList<Long>();
+        List<OrganizationCommunity> organizationCommunitys = organizationProvider.listOrganizationCommunities(sceneToken.getEntityId());
+        for(OrganizationCommunity orgCmnty : organizationCommunitys) {
+            community = communityProvider.findCommunityById(orgCmnty.getCommunityId());
+            if(community != null) {
+                communityIdList.add(community.getId());
+            }
+        }
+
+        SearchByMultiForumAndCmntyCommand orgTopicCmd = ConvertHelper.convert(cmd, SearchByMultiForumAndCmntyCommand.class);
+        orgTopicCmd.setCommunityIds(communityIdList);
+        orgTopicCmd.setForumIds(forumIdList);
+        orgTopicCmd.setRegionIds(organizationList);
+        
+        return queryByMultiForumAndCmnty(orgTopicCmd);
     }
     
     private Long getOrganizationForumId(SceneTokenDTO sceneToken, Organization organization) {

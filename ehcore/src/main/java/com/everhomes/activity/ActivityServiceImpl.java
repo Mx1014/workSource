@@ -1622,6 +1622,7 @@ public class ActivityServiceImpl implements ActivityService {
 	
 	@Override
 	public ListActivitiesReponse listNearbyActivitiesByScene(ListNearbyActivitiesBySceneCommand cmd) {
+	    long startTime = System.currentTimeMillis();
 	    User user = UserContext.current().getUser();
         Long userId = user.getId();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -1675,6 +1676,12 @@ public class ActivityServiceImpl implements ActivityService {
         default:
             LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneTokenDto);
             break;
+        }
+        
+        if(LOGGER.isDebugEnabled()) {
+            long endTime = System.currentTimeMillis();
+            LOGGER.debug("List nearby activities by scene, userId={}, namespaceId={}, elapse={}, cmd={}", 
+                userId, namespaceId, (endTime - startTime), cmd);
         }
         
         return resp;
