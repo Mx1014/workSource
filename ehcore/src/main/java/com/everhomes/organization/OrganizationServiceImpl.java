@@ -5976,6 +5976,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    		}else{
 	    			owner.setContactName(cmd.getContactName());
 	    			owner.setContactDescription(cmd.getContactDescription());
+	    			owner.setNamespaceId(namespaceId);
+	    			if(null == owner.getContactType()){
+	    				owner.setContactType(ContactType.MOBILE.getCode());
+	    			}
 	    			organizationProvider.updateOrganizationOwner(owner);
 	    		}
 	    	}else{
