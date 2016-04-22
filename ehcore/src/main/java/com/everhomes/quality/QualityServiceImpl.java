@@ -923,8 +923,14 @@ public class QualityServiceImpl implements QualityService {
 					String.valueOf(QualityServiceErrorCode.ATTACHMENT_TEXT),
 					UserContext.current().getUser().getLocale(),
 					"text:");
-			String msg = record.getProcessMessage()+attText+cmd.getMessage();
-			record.setProcessMessage(msg);
+			if(record.getProcessMessage() != null) {
+				String msg = record.getProcessMessage()+attText+cmd.getMessage();
+				record.setProcessMessage(msg);
+			} else {
+				String msg = attText+cmd.getMessage();
+				record.setProcessMessage(msg);
+			}
+			
 		}
 		
 		QualityInspectionTaskDTO dto = updateVerificationTasks(task, record, cmd.getAttachments());
@@ -1045,8 +1051,14 @@ public class QualityServiceImpl implements QualityService {
 			record.setProcessMessage(msg);
 		}
 		if(cmd.getMessage() != null) {
-			String msg = record.getProcessMessage()+cmd.getMessage();
-			record.setProcessMessage(msg);
+			
+			if(record.getProcessMessage() != null) {
+				String msg = record.getProcessMessage()+cmd.getMessage();
+				record.setProcessMessage(msg);
+			} else {
+				String msg = cmd.getMessage();
+				record.setProcessMessage(msg);
+			}
 		}
 		
 		task.setProcessTime(new Timestamp(System.currentTimeMillis()));
