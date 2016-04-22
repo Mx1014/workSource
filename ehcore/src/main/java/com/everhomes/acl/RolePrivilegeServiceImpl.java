@@ -609,14 +609,15 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     		return new ArrayList<RoleAssignment>();
     	}
     	
+    	Long childrenOrgId = organizationId;
     	if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE){
     		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, org.getId());
     		if(null != member && null != member.getGroupId() && 0 != member.getGroupId()){
-    			organizationId = member.getGroupId();
+    			childrenOrgId = member.getGroupId();
     		}
     	}
     	
-    	List<RoleAssignment> userOrgRoles = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.ORGANIZATIONS.getCode(), organizationId);
+    	List<RoleAssignment> userOrgRoles = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.ORGANIZATIONS.getCode(), childrenOrgId);
     	
     	userRoles.addAll(userOrgRoles);
     	

@@ -5967,19 +5967,21 @@ public class OrganizationServiceImpl implements OrganizationService {
     					"invalid parameter.");
     		}
     		
+    		
 	    	if(null == userIdentifier){
 	    		OrganizationOwners owner = organizationProvider.getOrganizationOwnerByTokenOraddressId(cmd.getContactToken(), address.getId());
 	    		if(null == owner){
 	    			owner = ConvertHelper.convert(cmd, OrganizationOwners.class);
 	    			owner.setAddressId(address.getId());
+	    			if(null == owner.getContactType()){
+	    				owner.setContactType(ContactType.MOBILE.getCode());
+	    			}
+	    			owner.setNamespaceId(namespaceId);
 	    			organizationProvider.createOrganizationOwner(owner);
 	    		}else{
 	    			owner.setContactName(cmd.getContactName());
 	    			owner.setContactDescription(cmd.getContactDescription());
-	    			owner.setNamespaceId(namespaceId);
-	    			if(null == owner.getContactType()){
-	    				owner.setContactType(ContactType.MOBILE.getCode());
-	    			}
+	    			
 	    			organizationProvider.updateOrganizationOwner(owner);
 	    		}
 	    	}else{
