@@ -72,7 +72,7 @@ INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'quali
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'quality', '10003', 'zh_CN', '标准不存在');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'quality', '10004', 'zh_CN', '类型不存在');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'quality', '10005', 'zh_CN', '权重不存在');
-INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'quality', '10006 ', 'zh_CN', '附件文字：');
+INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'quality', '10006 ', 'zh_CN', '说明：');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'quality', '10007', 'zh_CN', '该类型下存在有效的标准，不能删除');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'quality', '10008', 'zh_CN', '该任务已关闭');
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'quality', '10009', 'zh_CN', '生成excel信息有问题');
