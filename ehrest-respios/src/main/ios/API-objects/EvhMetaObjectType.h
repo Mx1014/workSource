@@ -1,6 +1,6 @@
 //
 // EvhMetaObjectType.h
-// generated at 2016-04-19 14:25:56 
+// generated at 2016-04-22 13:56:47 
 //
 
 #define EvhMetaObjectType_GROUP_REQUEST_TO_JOIN @"group.requestToJoin"

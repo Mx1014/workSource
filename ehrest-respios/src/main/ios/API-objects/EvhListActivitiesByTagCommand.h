@@ -1,6 +1,6 @@
 //
 // EvhListActivitiesByTagCommand.h
-// generated at 2016-04-19 14:25:56 
+// generated at 2016-04-22 13:56:46 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -19,6 +19,8 @@
 @property(nonatomic, copy) NSNumber* anchor;
 
 @property(nonatomic, copy) NSNumber* range;
+
+@property(nonatomic, copy) NSNumber* pageSize;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

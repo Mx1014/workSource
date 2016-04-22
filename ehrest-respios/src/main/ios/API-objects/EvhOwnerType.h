@@ -1,9 +1,11 @@
 //
 // EvhOwnerType.h
-// generated at 2016-04-19 14:25:56 
+// generated at 2016-04-22 13:56:47 
 //
 
-#define EvhOwnerType_COMPANY @"company"
+#define EvhOwnerType_ENTERPRISE @"enterprise"
+#define EvhOwnerType_USER @"user"
+#define EvhOwnerType_ORGANIZATION_MEMBER @"orgmem"
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -1,6 +1,5 @@
 //
 // EvhApiConstants.h
-// generated at 2016-04-19 14:25:58
 //
 #define EVH_ACLINK_ACTIVE_URL @"/aclink/active"
 #define EVH_ACLINK_ACTIVING_URL @"/aclink/activing"
@@ -104,6 +103,10 @@
 #define EVH_ADMIN_COMMUNITY_LISTBUILDINGSBYSTATUS_URL @"/admin/community/listBuildingsByStatus"
 #define EVH_ADMIN_COMMUNITY_LISTCOMMUNITIESBYKEYWORD_URL @"/admin/community/listCommunitiesByKeyword"
 #define EVH_ADMIN_COMMUNITY_LISTCOMMUNITIESBYSTATUS_URL @"/admin/community/listCommunitiesByStatus"
+#define EVH_ADMIN_COMMUNITY_LISTOWNERBYCOMMUNITYID_URL @"/admin/community/listOwnerBycommunityId"
+#define EVH_ADMIN_COMMUNITY_LISTUSERBYCOMMUNITYID_URL @"/admin/community/listUserBycommunityId"
+#define EVH_ADMIN_COMMUNITY_QRYCOMMUNITYUSERADDRESSBYUSERID_URL @"/admin/community/qryCommunityUserAddressByUserId"
+#define EVH_ADMIN_COMMUNITY_QRYCOMMUNITYUSERENTERPRISEBYUSERID_URL @"/admin/community/qryCommunityUserEnterpriseByUserId"
 #define EVH_ADMIN_COMMUNITY_REJECTBUILDING_URL @"/admin/community/rejectBuilding"
 #define EVH_ADMIN_COMMUNITY_REJECTCOMMUNITY_URL @"/admin/community/rejectCommunity"
 #define EVH_ADMIN_COMMUNITY_SYNCINDEX_URL @"/admin/community/syncIndex"
@@ -187,6 +190,7 @@
 #define EVH_ADMIN_ORG_IMPORTORGPOST_URL @"/admin/org/importOrgPost"
 #define EVH_ADMIN_ORG_IMPORTORGANIZATION_URL @"/admin/org/importOrganization"
 #define EVH_ADMIN_ORG_IMPORTORGANIZATIONPERSONNELDATA_URL @"/admin/org/importOrganizationPersonnelData"
+#define EVH_ADMIN_ORG_IMPORTOWNERDATA_URL @"/admin/org/importOwnerData"
 #define EVH_ADMIN_ORG_LISTACLROLEBYUSERID_URL @"/admin/org/listAclRoleByUserId"
 #define EVH_ADMIN_ORG_LISTALLCHILDRENORGANIZATIONS_URL @"/admin/org/listAllChildrenOrganizations"
 #define EVH_ADMIN_ORG_LISTALLORGANIZATIONPERSONNELS_URL @"/admin/org/listAllOrganizationPersonnels"

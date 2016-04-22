@@ -1,6 +1,6 @@
 //
 // EvhGroupListPublicGroupsRestResponse.m
-// generated at 2016-04-19 14:25:58 
+// generated at 2016-04-22 13:56:50 
 //
 #import "EvhGroupListPublicGroupsRestResponse.h"
 #import "EvhGroupDTO.h"

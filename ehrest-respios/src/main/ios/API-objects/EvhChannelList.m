@@ -1,6 +1,6 @@
 //
 // EvhChannelList.m
-// generated at 2016-04-19 14:25:56 
+// generated at 2016-04-22 13:56:49 
 //
 #import "EvhChannelList.h"
 #import "EvhMessageChannel.h"
