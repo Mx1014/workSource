@@ -52,6 +52,9 @@ INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, 
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status)
 	VALUES(2101300, 1000750, 'USER', 211300, 'manager', '唐玮', 0, '13510551322', 3);	
 
+INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
+	VALUES(10472, 'EhOrganizations', 1000750, 'USER', 211300, 1001, 1, UTC_TIMESTAMP());
+	
 INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
 	VALUES(1203, 999992, 'COMMUNITY', 240111044331051220, UTC_TIMESTAMP());	
 INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
