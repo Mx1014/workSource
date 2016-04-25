@@ -991,6 +991,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         getDoorAccessLastTick(da);
         DoorAccessDTO dto = (DoorAccessDTO)ConvertHelper.convert(da, DoorAccessDTO.class);
         
+        //TODO support for role
+        dto.setRole((byte)0);
+        
         AclinkFirmware firm = aclinkFirmwareProvider.queryAclinkFirmwareMax();
         if(firm != null) {
             String version = String.format("%d.%d.%d", firm.getMajor(), firm.getMinor(), firm.getRevision());
