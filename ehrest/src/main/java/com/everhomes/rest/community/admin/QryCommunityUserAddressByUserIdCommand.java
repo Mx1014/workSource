@@ -3,9 +3,11 @@ package com.everhomes.rest.community.admin;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
- * userId: 用户ID
- *
+ * <ul>
+ * <li>contactToken: 电话号码</li>
+ * <li>communityId: 小区id</li>
+ * <li>userId: 用户id</li>
+ * </ul>
  */
 public class QryCommunityUserAddressByUserIdCommand {
 	

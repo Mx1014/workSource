@@ -1547,7 +1547,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		messageDto.setBody(message);
 
 		messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.GROUP.getCode(), 
-				String.valueOf(familyId), messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
+				String.valueOf(familyId), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
 	}
 
 	public void sendNoticeToUserById(Long userId,String message){
@@ -1560,7 +1560,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		messageDto.setBody(message);
 
 		messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
-				String.valueOf(userId), messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
+				String.valueOf(userId), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
 	}
 
 	@Override

@@ -1,18 +1,22 @@
 package com.everhomes.rest.community.admin;
 
-import javax.validation.constraints.NotNull;
-
-import org.apache.commons.lang.StringUtils;
 
 
 
+/**
+ * <ul>
+ * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
+ * <li>pageSize: 每页的数量</li>
+ * <li>communityId: 小区id</li>
+ * <li>isAuth: 认证状态  1认证  2非认证</li>
+ * </ul>
+ */
 public class ListCommunityUsersCommand {
 	
 	private Long pageAnchor;
     
     private Integer pageSize;
 	
-	@NotNull
 	private Integer namespaceId;
 	
 	private Integer isAuth;

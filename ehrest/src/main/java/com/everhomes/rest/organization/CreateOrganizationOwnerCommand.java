@@ -1,13 +1,19 @@
 package com.everhomes.rest.organization;
 
-import java.sql.Timestamp;
 
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>organizationId: 机构id</li>
+ * <li>contactName: 用户名</li>
+ * <li>contactToken: 电话号码</li>
+ * <li>contactDescription: 描述</li>
+ * <li>addressId: 地址id</li>
+ * <li>communityId: 小区id</li>
+ * <li>buildingName: 楼栋名称</li>
+ * <li>apartmentName: 公寓名称</li>
  * </ul>
- *
  */
 public class CreateOrganizationOwnerCommand {
 	

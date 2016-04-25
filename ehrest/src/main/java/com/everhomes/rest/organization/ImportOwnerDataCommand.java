@@ -5,8 +5,9 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>organizationId: 机构id</li>
+ * <li>communityId: 小区id</li>
  * </ul>
- *
  */
 public class ImportOwnerDataCommand {
 	

@@ -5,8 +5,9 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>contactToken: 电话号码</li>
+ * <li>addressId: 地址id</li>
  * </ul>
- *
  */
 public class DeleteOrganizationOwnerCommand {
 	
