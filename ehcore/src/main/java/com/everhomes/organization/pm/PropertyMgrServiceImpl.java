@@ -1312,7 +1312,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		List<String> phones = cmd.getMobilePhones();
 		List<Organization> orgs = new ArrayList<Organization>();
 		Integer namespaceId = UserContext.getCurrentNamespaceId(null);
-
+		/** 获取全部企业的全部人员 **/
+		List<OrganizationMember> members = new ArrayList<OrganizationMember>();
 		/** 根据地址获取要推送的企业 **/
 		if(null != addressIds && 0 != addressIds.size()){
 			for (Long addressId : addressIds) {
@@ -1341,19 +1342,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				}
 			}
 
-			/** 根据小区获取要推送的企业  **/
-		}else if(null != communityId){
-			List<OrganizationCommunityRequest> requests = organizationProvider.queryOrganizationCommunityRequestByCommunityId(new CrossShardListingLocator(), communityId, 100000, null);
-			for (OrganizationCommunityRequest req : requests) {
-				orgs.add(organizationProvider.findOrganizationById(req.getMemberId()));
-			}
-		}
-
-		/** 获取全部企业的全部人员 **/
-		List<OrganizationMember> members = this.getOrganizationMembersByAddress(orgs);
-
 		/** 根据电话号码推送   **/
-		if(null != phones && 0 != phones.size()){
+		}else if(null != phones && 0 != phones.size()){
 			members = new ArrayList<OrganizationMember>();
 			for (String phone : phones) {
 				UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, phone);
@@ -1366,8 +1356,19 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				}
 				members.add(member);
 			}
+		/** 根据小区获取要推送的企业  **/
+		}else if(null != communityId){
+			List<OrganizationCommunityRequest> requests = organizationProvider.queryOrganizationCommunityRequestByCommunityId(new CrossShardListingLocator(), communityId, 100000, null);
+			for (OrganizationCommunityRequest req : requests) {
+				orgs.add(organizationProvider.findOrganizationById(req.getMemberId()));
+			}
 		}
 
+		if(null != orgs && 0 != orgs.size()){
+			/** 获取全部企业的全部人员 **/
+			members = this.getOrganizationMembersByAddress(orgs);
+		}
+		
 		/** 推送消息 **/
 		this.processSmsByMembers(members, cmd.getMessage());
 	}
