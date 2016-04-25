@@ -6,6 +6,7 @@ public class AclinkUpgradeResponse {
     private String     downloadUrl;
     private Long     creatorId;
     private String message;
+    private String version;
     
     public Long getId() {
         return id;
@@ -37,4 +38,11 @@ public class AclinkUpgradeResponse {
     public void setMessage(String message) {
         this.message = message;
     }
+    public String getVersion() {
+        return version;
+    }
+    public void setVersion(String version) {
+        this.version = version;
+    }
+    
 }

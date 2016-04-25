@@ -1193,6 +1193,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         resp.setCreatorId(firm.getCreatorId());
         resp.setDownloadUrl(firm.getDownloadUrl());
         resp.setInfoUrl(firm.getInfoUrl());
+        resp.setVersion(String.valueOf(firm.getMajor()) + "." + String.valueOf(firm.getMinor()) + "." + String.valueOf(firm.getRevision()));
         resp.setMessage(message);
         
         return resp;
@@ -1200,6 +1201,10 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     
     @Override
     public String upgradeVerify(AclinkUpgradeCommand cmd) {
-        return "OK";
+        if(!cmd.getMessage().isEmpty()) {
+            return "0";    
+        }
+        
+        return "-1";
     }
 }
