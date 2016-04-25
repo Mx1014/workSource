@@ -3975,11 +3975,11 @@ public class ForumServiceImpl implements ForumService {
                 
                 return query;
             }, new PostCreateTimeDescComparator());
-            
+
+            Long nextPageAnchor = null;
             this.forumProvider.populatePostAttachments(posts);
             
-            Long nextPageAnchor = null;
-            if(posts.size() > cmd.getPageSize()) {
+            if(posts.size() > pageSize) {
                 posts.remove(posts.size() - 1);
                 nextPageAnchor = posts.get(posts.size() - 1).getId();
             }
@@ -3989,7 +3989,6 @@ public class ForumServiceImpl implements ForumService {
             List<PostDTO> postDtoList = posts.stream().map((r) -> {
               return ConvertHelper.convert(r, PostDTO.class);  
             }).collect(Collectors.toList());
-            
             
             return new ListPostCommandResponse(nextPageAnchor, postDtoList);
         }
