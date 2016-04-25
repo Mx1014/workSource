@@ -585,14 +585,23 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     	groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
     	groupTypes.add(OrganizationGroupType.GROUP.getCode());
     	
-    	List<Organization> orgs = organizationProvider.listOrganizationByGroupTypes("%/" + organizationId + "%", groupTypes);
+    	Organization org = organizationProvider.findOrganizationById(organizationId);
+    	
+    	String path = org.getPath();
+    	
+    	String[] orgIds = path.split("/");
     	
     	List<RoleAssignment> userRoles = null;
-    	for (Organization organization : orgs) {
+    	for (String orgId : orgIds) {
+    		
+    		if(StringUtils.isEmpty(orgId)){
+    			continue;
+    		}
+    		
     		if(null == userRoles){
-    			userRoles = this.getUserRoles(organization.getId(), userId);
+    			userRoles = this.getUserRoles(Long.parseLong(orgId), userId);
     		}else{
-    			userRoles.addAll(this.getUserRoles(organization.getId(), userId));
+    			userRoles.addAll(this.getUserRoles(Long.parseLong(orgId), userId));
     		}
 		}
     	
@@ -741,6 +750,5 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_PRIVILEGED,
 				"non-privileged.");
     }
-    
     
 }
