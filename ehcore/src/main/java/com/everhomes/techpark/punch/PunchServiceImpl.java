@@ -2263,6 +2263,13 @@ public class PunchServiceImpl implements PunchService {
 				cmd.getWorkTime(), null, Integer.MAX_VALUE);
 		if (null == result || result.size() ==0 )
 			return null;
+		
+		Organization organization = organizationProvider.findOrganizationById(cmd.getEnterpriseId());
+		List<String> groupTypes = new ArrayList<String>();
+		groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+		List<Organization> departments = organizationProvider.listOrganizationByGroupTypes(organization.getPath() + "/%", groupTypes);
+		Map<Long, Organization> deptMap = this.convertDeptListToMap(departments);
+		
 		List<PunchStatisticsDTO> dtos = result
 				.stream()
 				.map(r -> {
@@ -2275,7 +2282,10 @@ public class PunchServiceImpl implements PunchService {
 
 							dto.setUserName(member.getContactName());
 							dto.setUserPhoneNumber(member.getContactToken());
-							// dto.setUserDepartment(enterpriseContact.get);
+							Organization department = deptMap.get(member.getGroupId());
+							if(null != department){
+								dto.setUserDepartment(department.getName());
+							}
 							PunchExceptionApproval approval = punchProvider
 									.getExceptionApproval(dto.getUserId(),
 											dto.getEnterpriseId(),
