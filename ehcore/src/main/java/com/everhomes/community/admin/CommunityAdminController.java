@@ -33,6 +33,8 @@ import com.everhomes.rest.community.ListComunitiesByKeywordCommand;
 import com.everhomes.rest.community.RejectCommunityCommand;
 import com.everhomes.rest.community.UpdateCommunityCommand;
 import com.everhomes.rest.community.admin.ApproveCommunityAdminCommand;
+import com.everhomes.rest.community.admin.CommunityAuthUserAddressCommand;
+import com.everhomes.rest.community.admin.CommunityAuthUserAddressResponse;
 import com.everhomes.rest.community.admin.CommunityManagerDTO;
 import com.everhomes.rest.community.admin.CommunityUserAddressDTO;
 import com.everhomes.rest.community.admin.CommunityUserAddressResponse;
@@ -435,7 +437,7 @@ public class CommunityAdminController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /admin/community/qryCommunityUserEnterpriseByUserId</b>
+     * <b>URL: /admin/community/listOwnerBycommunityId</b>
      * <p>查询未注册的用户</p>
      */
     @RequestMapping("listOwnerBycommunityId")
@@ -462,7 +464,19 @@ public class CommunityAdminController extends ControllerBase {
         return response;
     }
     
-    
+    /**
+     * <b>URL: /admin/community/ListCommunityAuthUserAddress</b>
+     * <p>用户认证列表</p>
+     */
+    @RequestMapping("ListCommunityAuthUserAddress")
+    @RestReturn(value=CommunityAuthUserAddressResponse.class)
+    public RestResponse ListCommunityAuthUserAddress(@Valid CommunityAuthUserAddressCommand cmd) {
+        
+        RestResponse response =  new RestResponse(communityService.ListCommunityAuthUserAddress(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
     
 }

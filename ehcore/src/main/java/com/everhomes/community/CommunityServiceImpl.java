@@ -78,6 +78,8 @@ import com.everhomes.rest.community.ListCommunitesByStatusCommandResponse;
 import com.everhomes.rest.community.ListCommunitiesByKeywordCommandResponse;
 import com.everhomes.rest.community.UpdateCommunityRequestStatusCommand;
 import com.everhomes.rest.community.admin.ApproveCommunityAdminCommand;
+import com.everhomes.rest.community.admin.CommunityAuthUserAddressCommand;
+import com.everhomes.rest.community.admin.CommunityAuthUserAddressResponse;
 import com.everhomes.rest.community.admin.CommunityManagerDTO;
 import com.everhomes.rest.community.admin.CommunityUserAddressDTO;
 import com.everhomes.rest.community.admin.CommunityUserAddressResponse;
@@ -101,6 +103,7 @@ import com.everhomes.rest.community.admin.VerifyBuildingNameAdminCommand;
 import com.everhomes.rest.community.admin.listBuildingsByStatusCommand;
 import com.everhomes.rest.enterprise.EnterpriseContactStatus;
 import com.everhomes.rest.forum.AttachmentDescriptor;
+import com.everhomes.rest.group.GroupMemberDTO;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -1142,6 +1145,65 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 		return errorDataLogs;
 		
+	}
+	
+	@Override
+	public CommunityAuthUserAddressResponse ListCommunityAuthUserAddress(CommunityAuthUserAddressCommand cmd){
+		Long communityId = cmd.getCommunityId();
+		
+		List<Group> groups = groupProvider.listGroupByCommunityId(communityId, (loc, query) -> {
+            Condition c = Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.ACTIVE.getCode());
+            query.addConditions(c);
+            return query;
+        });
+		
+		List<Long> groupIds = new ArrayList<Long>(); 
+		for (Group group : groups) {
+			groupIds.add(group.getId());
+		}
+		
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		List<GroupMember> groupMembers = groupProvider.listGroupMemberByGroupIds(groupIds,locator,pageSize,(loc, query) -> {
+			Condition c = Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode());
+			c = c.and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(cmd.getMemberStatus()));
+            query.addConditions(c);
+            if(null != locator.getAnchor())
+            	query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_ID.lt(locator.getAnchor()));
+			query.addOrderBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID.desc());
+            return query;
+        });
+		
+		
+		List<GroupMemberDTO> dtos = groupMembers.stream().map(r->{
+			GroupMemberDTO dto = ConvertHelper.convert(r, GroupMemberDTO.class);
+			Group group = groupProvider.findGroupById(dto.getGroupId());
+			if(null != group){
+				Address address = addressProvider.findAddressById(group.getFamilyAddressId());
+				if(null != address){
+					dto.setAddressId(address.getId());
+					dto.setApartmentName(address.getApartmentName());
+					dto.setBuildingName(address.getBuildingName());
+				}
+			}
+			
+			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(dto.getMemberId(), IdentifierType.MOBILE.getCode());
+			if(null != userIdentifier){
+				dto.setCellPhone(userIdentifier.getIdentifierToken());
+				User user = userProvider.findUserById(userIdentifier.getOwnerUid());
+				if(null != user){
+					dto.setInviterNickName(user.getNickName());
+				}
+			}
+			return dto;
+		}).collect(Collectors.toList());
+		
+		CommunityAuthUserAddressResponse res = new CommunityAuthUserAddressResponse();
+		res.setDtos(dtos);
+		res.setNextPageAnchor(locator.getAnchor());
+		
+		return res;
 	}
 	
 	@Override

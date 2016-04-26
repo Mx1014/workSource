@@ -25,3 +25,14 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 
 
 
+#
+#20160426
+#
+UPDATE `eh_acl_roles` SET `name` = '超级管理员' where `id` = 1001;
+UPDATE `eh_acl_roles` SET `name` = '普通管理员' where `id` = 1002;
+UPDATE `eh_acl_roles` SET `name` = '超级管理员' where `id` = 1005;
+UPDATE `eh_acl_roles` SET `name` = '普通管理员' where `id` = 1006;
+
+
+
+

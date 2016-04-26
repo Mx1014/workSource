@@ -8,21 +8,16 @@ package com.everhomes.rest.community.admin;
  * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
  * <li>pageSize: 每页的数量</li>
  * <li>communityId: 小区id</li>
- * <li>isAuth: 认证状态  1认证  2非认证</li>
- * <li>keywords: 关键字</li>
+ * <li>memberStatus: 参考{@com.everhomes.rest.community.admin.GroupMemberStatus}</li>
  * </ul>
  */
-public class ListCommunityUsersCommand {
+public class CommunityAuthUserAddressCommand {
 	
 	private Long pageAnchor;
     
     private Integer pageSize;
 	
-	private Integer namespaceId;
-	
-	private Integer isAuth;
-	
-	private String keywords;
+    private Byte memberStatus;
 	
 	private Long communityId;
 	
@@ -43,33 +38,12 @@ public class ListCommunityUsersCommand {
 		this.pageSize = pageSize;
 	}
 
-
-
-	public Integer getNamespaceId() {
-		return namespaceId;
+	public Byte getMemberStatus() {
+		return memberStatus;
 	}
 
-	public void setNamespaceId(Integer namespaceId) {
-		this.namespaceId = namespaceId;
-	}
-
-	public Integer getIsAuth() {
-		if(null == this.isAuth){
-			return 0;
-		}
-		return isAuth;
-	}
-
-	public void setIsAuth(Integer isAuth) {
-		this.isAuth = isAuth;
-	}
-
-	public String getKeywords() {
-		return keywords;
-	}
-
-	public void setKeywords(String keywords) {
-		this.keywords = keywords;
+	public void setMemberStatus(Byte memberStatus) {
+		this.memberStatus = memberStatus;
 	}
 
 	public Long getCommunityId() {
@@ -79,6 +53,5 @@ public class ListCommunityUsersCommand {
 	public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
 	}
-	
 	
 }
