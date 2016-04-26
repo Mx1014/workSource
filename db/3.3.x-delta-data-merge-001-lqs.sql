@@ -838,6 +838,12 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`, `namespace_id`) VALUES( 'group.notification', 35, 'zh_CN', '删除俱乐部创建人收到的消息','已删除俱乐部“${groupName}”', 0);
 
 
+UPDATE `eh_acl_roles` SET `name` = '超级管理员' where `id` = 1001;
+UPDATE `eh_acl_roles` SET `name` = '普通管理员' where `id` = 1002;
+UPDATE `eh_acl_roles` SET `name` = '超级管理员' where `id` = 1005;
+UPDATE `eh_acl_roles` SET `name` = '普通管理员' where `id` = 1006;
+
+
 -- merge from 3.3.x-delta-data-011-liangqishi.sql 与 3.3.x-delta-data-002-liangqishi.sql重复
 -- INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, 'mail.smtp.address', 'smtp.mxhichina.com', '访问邮件SMTP服务器的地址');
 -- INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, 'mail.smtp.port', '25', '访问邮件SMTP服务器的端口号');
