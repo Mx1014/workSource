@@ -1,6 +1,6 @@
 //
 // EvhAclinkUpgradeResponse.h
-// generated at 2016-04-22 13:56:47 
+// generated at 2016-04-26 18:22:54 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -21,6 +21,8 @@
 @property(nonatomic, copy) NSNumber* creatorId;
 
 @property(nonatomic, copy) NSString* message;
+
+@property(nonatomic, copy) NSString* version;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

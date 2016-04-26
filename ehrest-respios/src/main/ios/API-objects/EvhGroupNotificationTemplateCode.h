@@ -1,6 +1,6 @@
 //
 // EvhGroupNotificationTemplateCode.h
-// generated at 2016-04-22 13:56:45 
+// generated at 2016-04-26 18:22:54 
 //
 
 #define EvhGroupNotificationTemplateCode_SCOPE @"group.notification"
@@ -37,3 +37,5 @@
 #define EvhGroupNotificationTemplateCode_GROUP_MEMBER_DELETED_OPERATOR 31
 #define EvhGroupNotificationTemplateCode_GROUP_MEMBER_DELETE_MEMBER 32
 #define EvhGroupNotificationTemplateCode_GROUP_RECOMMEND 33
+#define EvhGroupNotificationTemplateCode_GROUP_MEMBER_DELETED_CLUB_ADMIN 34
+#define EvhGroupNotificationTemplateCode_GROUP_MEMBER_DELETED_CLUB_OPERATOR 35

@@ -1,0 +1,18 @@
+//
+// EvhOrganizationNaviFlag.h
+// generated at 2016-04-26 18:22:55 
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhOrganizationNaviFlag
+//
+typedef enum {
+
+    EvhOrganizationNaviFlag_HIDE_NAVI = 0, 
+    EvhOrganizationNaviFlag_SHOW_NAVI = 1
+
+} EvhOrganizationNaviFlag;
+
+///////////////////////////////////////////////////////////////////////////////
+

@@ -91,6 +91,7 @@
 #define EVH_ADMIN_BUSINESS_PROMOTEBUSINESS_URL @"/admin/business/promoteBusiness"
 #define EVH_ADMIN_BUSINESS_RECOMMENDBUSINESS_URL @"/admin/business/recommendBusiness"
 #define EVH_ADMIN_CODEGEN_URL @"/admin/codegen"
+#define EVH_ADMIN_COMMUNITY_LISTCOMMUNITYAUTHUSERADDRESS_URL @"/admin/community/ListCommunityAuthUserAddress"
 #define EVH_ADMIN_COMMUNITY_APPROVEBUILDING_URL @"/admin/community/approveBuilding"
 #define EVH_ADMIN_COMMUNITY_APPROVECOMMUNITY_URL @"/admin/community/approveCommunity"
 #define EVH_ADMIN_COMMUNITY_DELETEBUILDING_URL @"/admin/community/deleteBuilding"

@@ -1,6 +1,6 @@
 //
 // EvhPmGetFamilyStatisticRestResponse.m
-// generated at 2016-04-22 13:56:50 
+// generated at 2016-04-26 18:22:57 
 //
 #import "EvhPmGetFamilyStatisticRestResponse.h"
 #import "EvhGetFamilyStatisticCommandResponse.h"

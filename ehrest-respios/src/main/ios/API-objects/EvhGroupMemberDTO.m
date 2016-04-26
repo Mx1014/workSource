@@ -1,6 +1,6 @@
 //
 // EvhGroupMemberDTO.m
-// generated at 2016-04-22 13:56:47 
+// generated at 2016-04-26 18:22:54 
 //
 #import "EvhGroupMemberDTO.h"
 
@@ -73,6 +73,12 @@
         [jsonObject setObject: self.cellPhone forKey: @"cellPhone"];
     if(self.muteNotificationFlag)
         [jsonObject setObject: self.muteNotificationFlag forKey: @"muteNotificationFlag"];
+    if(self.addressId)
+        [jsonObject setObject: self.addressId forKey: @"addressId"];
+    if(self.buildingName)
+        [jsonObject setObject: self.buildingName forKey: @"buildingName"];
+    if(self.apartmentName)
+        [jsonObject setObject: self.apartmentName forKey: @"apartmentName"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -161,6 +167,18 @@
         self.muteNotificationFlag = [jsonObject objectForKey: @"muteNotificationFlag"];
         if(self.muteNotificationFlag && [self.muteNotificationFlag isEqual:[NSNull null]])
             self.muteNotificationFlag = nil;
+
+        self.addressId = [jsonObject objectForKey: @"addressId"];
+        if(self.addressId && [self.addressId isEqual:[NSNull null]])
+            self.addressId = nil;
+
+        self.buildingName = [jsonObject objectForKey: @"buildingName"];
+        if(self.buildingName && [self.buildingName isEqual:[NSNull null]])
+            self.buildingName = nil;
+
+        self.apartmentName = [jsonObject objectForKey: @"apartmentName"];
+        if(self.apartmentName && [self.apartmentName isEqual:[NSNull null]])
+            self.apartmentName = nil;
 
         return self;
     }
