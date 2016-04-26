@@ -184,6 +184,7 @@ import com.everhomes.rest.organization.OrganizationMemberGroupType;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.organization.OrganizationMenuResponse;
+import com.everhomes.rest.organization.OrganizationNaviFlag;
 import com.everhomes.rest.organization.OrganizationNotificationTemplateCode;
 import com.everhomes.rest.organization.OrganizationPostDTO;
 import com.everhomes.rest.organization.OrganizationServiceErrorCode;
@@ -385,6 +386,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		Organization parOrg = this.checkOrganization(cmd.getParentId());
 		
+		organization.setShowFlag(cmd.getNaviFlag());
 		organization.setPath(parOrg.getPath());
 		organization.setLevel(parOrg.getLevel()+1);
 		organization.setOrganizationType(parOrg.getOrganizationType());
@@ -2050,7 +2052,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			messageDto.setBody(message);
 			messageDto.setMetaAppId(AppConstants.APPID_DEFAULT);
 			messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, channelType,
-					channelToken, messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
+					channelToken, messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
 		}
 	}
 
@@ -4919,7 +4921,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	@Override
 	public OrganizationMenuResponse listAllChildrenOrganizationMenus(Long id,
-			List<String> groupTypes) {
+			List<String> groupTypes,Byte naviFlag) {
+		
+		if(null == naviFlag){
+			naviFlag = OrganizationNaviFlag.SHOW_NAVI.getCode();
+		}
 		
 		OrganizationMenuResponse res = new OrganizationMenuResponse();
 		
@@ -4938,9 +4944,17 @@ public class OrganizationServiceImpl implements OrganizationService {
 			return res;
 		}
 		
-		List<OrganizationDTO> rganizationDTOs = orgs.stream().map(r->{ 
-			return ConvertHelper.convert(r, OrganizationDTO.class);
-		}).collect(Collectors.toList());
+		List<OrganizationDTO> rganizationDTOs = new ArrayList<OrganizationDTO>();
+		for (Organization organization : orgs) {
+			OrganizationDTO orgDto = ConvertHelper.convert(organization, OrganizationDTO.class);
+			if(OrganizationNaviFlag.fromCode(naviFlag) == OrganizationNaviFlag.HIDE_NAVI){
+				if(OrganizationNaviFlag.fromCode(organization.getShowFlag()) == OrganizationNaviFlag.SHOW_NAVI){
+					rganizationDTOs.add(orgDto);
+				}
+			}else{
+				rganizationDTOs.add(orgDto);
+			}
+		}
 		
 		dto = this.getOrganizationMenu(rganizationDTOs, dto);
 		res.setOrganizationMenu(dto);
@@ -5233,7 +5247,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}
 			messagingService.routeMessage(User.SYSTEM_USER_LOGIN,
 					AppConstants.APPID_MESSAGING, channelType, channelToken,
-					messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
+					messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
 		}
 	}
 	

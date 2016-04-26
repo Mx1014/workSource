@@ -2244,11 +2244,14 @@ public class PunchServiceImpl implements PunchService {
 		
 		checkCompanyIdIsNull(cmd.getEnterpriseId());
 		
-		List<EnterpriseContact> enterpriseContacts = enterpriseContactProvider
-				.queryEnterpriseContactByKeyword(cmd.getKeyword());
+		List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(cmd.getEnterpriseId());
+		
 		List<Long> userIds = new ArrayList<Long>();
-		for (EnterpriseContact enterpriseContact : enterpriseContacts) {
-			userIds.add(enterpriseContact.getUserId());
+		for (OrganizationMember member : members) {
+			if(OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER){
+				userIds.add(member.getTargetId());
+			}
+		
 		}
 
 		
@@ -2267,17 +2270,11 @@ public class PunchServiceImpl implements PunchService {
 							PunchStatisticsDTO.class);
 					processPunchStatisticsDTOTime(dto, r);
 					if (dto != null) {
-						EnterpriseContact enterpriseContact = enterpriseContactService
-								.queryContactByUserId(cmd.getEnterpriseId(),
-										dto.getUserId());
-						if (null != enterpriseContact) {
+						OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getUserId(), cmd.getEnterpriseId());
+						if (null != member) {
 
-							dto.setUserName(enterpriseContact.getName());
-							dto.setUserPhoneNumber(enterpriseContactProvider
-									.queryContactEntryByContactId(
-											enterpriseContact,
-											ContactType.MOBILE.getCode())
-									.get(0).getEntryValue());
+							dto.setUserName(member.getContactName());
+							dto.setUserPhoneNumber(member.getContactToken());
 							// dto.setUserDepartment(enterpriseContact.get);
 							PunchExceptionApproval approval = punchProvider
 									.getExceptionApproval(dto.getUserId(),
@@ -2288,12 +2285,8 @@ public class PunchServiceImpl implements PunchService {
 										.getApprovalStatus());
 								dto.setMorningApprovalStatus(approval.getMorningApprovalStatus());
 								dto.setAfternoonApprovalStatus(approval.getAfternoonApprovalStatus());
-								enterpriseContact = enterpriseContactService
-										.queryContactByUserId(
-												cmd.getEnterpriseId(),
-												approval.getOperatorUid());
-
-								dto.setOperatorName(enterpriseContact.getName());
+								OrganizationMember operaor = organizationProvider.findOrganizationMemberByOrgIdAndUId(approval.getOperatorUid(), cmd.getEnterpriseId());
+								dto.setOperatorName(operaor.getContactName());
 							} else {
 								dto.setApprovalStatus((byte) 0);
 							}

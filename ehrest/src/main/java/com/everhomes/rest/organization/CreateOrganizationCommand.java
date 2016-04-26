@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>name：名称</li>
  * <li>address：地址</li>
  * <li>groupType：机构类型{@link com.everhomes.rest.organization.OrganizationGroupType}</li>
+ * <li>naviFlag：是否展示在导航{@link com.everhomes.rest.organization.OrganizationNaviFlag}</li>
  * </ul>
  */
 public class CreateOrganizationCommand {
@@ -22,6 +23,7 @@ public class CreateOrganizationCommand {
 	
 	private String groupType;
 	
+	private Byte naviFlag;
 	
 	public CreateOrganizationCommand() {
     }
@@ -64,6 +66,16 @@ public class CreateOrganizationCommand {
 
 	public void setAddress(String address) {
 		this.address = address;
+	}
+
+
+	public Byte getNaviFlag() {
+		return naviFlag;
+	}
+
+
+	public void setNaviFlag(Byte naviFlag) {
+		this.naviFlag = naviFlag;
 	}
 
 
