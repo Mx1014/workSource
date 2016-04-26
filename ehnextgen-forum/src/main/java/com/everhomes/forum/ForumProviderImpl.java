@@ -574,10 +574,11 @@ public class ForumProviderImpl implements ForumProvider {
             this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, reducingContext) -> {
                 SelectQuery<EhForumPostsRecord> query = context.selectQuery(Tables.EH_FORUM_POSTS);
                 query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ID.eq(locator.getEntityId()));
-                query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.isNull());
+                //query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.isNull());
                 if(queryBuilderCallback != null) {
                     queryBuilderCallback.buildCondition(locator, query);
                 }
+                query.addOrderBy(Tables.EH_FORUM_POSTS.CREATE_TIME.desc());
                 query.addLimit(limit[0]);
                 
                 if(LOGGER.isDebugEnabled()) {
