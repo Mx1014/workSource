@@ -3441,7 +3441,7 @@ public class ForumServiceImpl implements ForumService {
             filterDto.setName(menuName);
             filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
             filterDto.setDefaultFlag(SelectorBooleanFlag.TRUE.getCode());; // 整组菜单只有一个是默认的
-            actionUrl = String.format("%s%s?forumId=%s&visibilityScope=%s&communityId=%s&visibilityScope=2", serverContectPath, 
+            actionUrl = String.format("%s%s?forumId=%s&visibilityScope=%s&communityId=%s", serverContectPath, 
                 "/forum/listTopics", community.getDefaultForumId(), VisibilityScope.NEARBY_COMMUNITIES.getCode(), community.getId());
             filterDto.setActionUrl(actionUrl);
             avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.community_nearby", "");
@@ -3458,7 +3458,7 @@ public class ForumServiceImpl implements ForumService {
             filterDto.setName(menuName);
             filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());
             filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());
-            actionUrl = String.format("%s%s?forumId=%s&visibilityScope=%s&communityId=%s&visibilityScope=1", serverContectPath, 
+            actionUrl = String.format("%s%s?forumId=%s&visibilityScope=%s&communityId=%s", serverContectPath, 
                 "/forum/listTopics", community.getDefaultForumId(), VisibilityScope.COMMUNITY.getCode(), community.getId());
             filterDto.setActionUrl(actionUrl);
             avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.community_only", "");
@@ -3649,8 +3649,8 @@ public class ForumServiceImpl implements ForumService {
                     filterDto.setName(community.getName());
                     filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());
                     filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());
-                    actionUrl = String.format("%s%s?forumId=%s", serverContectPath, 
-                        "/forum/listTopics", community.getDefaultForumId());
+                    actionUrl = String.format("%s%s?forumId=%s&visibilityScope=%s&communityId=%s", serverContectPath, 
+                        "/forum/listTopics", community.getDefaultForumId(), VisibilityScope.COMMUNITY.getCode(), community.getId());
                     filterDto.setActionUrl(actionUrl);
                     avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.organization", "");
                     filterDto.setAvatar(avatarUri);
