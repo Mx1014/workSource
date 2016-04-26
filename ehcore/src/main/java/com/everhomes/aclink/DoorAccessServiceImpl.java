@@ -993,6 +993,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         //TODO support for role
         dto.setRole((byte)0);
+        dto.setVersion("1.1.0.0");
         
         AclinkFirmware firm = aclinkFirmwareProvider.queryAclinkFirmwareMax();
         if(firm != null) {
