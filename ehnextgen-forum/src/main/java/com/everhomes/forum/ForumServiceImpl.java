@@ -247,8 +247,21 @@ public class ForumServiceImpl implements ForumService {
     private String serverContectPath;
     
     @Override
-    public boolean isSystemForum(long forumId) {
-        return forumId == ForumConstants.SYSTEM_FORUM;
+    public boolean isSystemForum(long forumId, Long communityId) {
+        if(forumId == ForumConstants.SYSTEM_FORUM) {
+            return true;
+        }
+        
+        // 加入园区后，社区论坛就不只一个，此时小区中配置的default_forum都是社区论坛 by lqs 20160426
+        boolean result = false;
+        if(communityId != null) {
+            Community community = communityProvider.findCommunityById(communityId);
+            if(community != null && community.getDefaultForumId() != null) {
+                result = (forumId == community.getDefaultForumId());
+            }
+        }
+        
+        return result;
     }
     
     @Override
@@ -840,7 +853,7 @@ public class ForumServiceImpl implements ForumService {
         Forum forum = checkForumParameter(operatorId, forumId, "listTopics");
         
         ListPostCommandResponse cmdResponse = null;
-        if(isSystemForum(forumId)) {
+        if(isSystemForum(forumId, cmd.getCommunityId())) {
             cmdResponse = listSystemForumTopicsByUser(forum, cmd);
         } else {
             cmdResponse = listSimpleForumTopicsByUser(forum, cmd);
@@ -3428,7 +3441,7 @@ public class ForumServiceImpl implements ForumService {
             filterDto.setName(menuName);
             filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
             filterDto.setDefaultFlag(SelectorBooleanFlag.TRUE.getCode());; // 整组菜单只有一个是默认的
-            actionUrl = String.format("%s%s?forumId=%s&visibilityScope=%s&communityId=%s", serverContectPath, 
+            actionUrl = String.format("%s%s?forumId=%s&visibilityScope=%s&communityId=%s&visibilityScope=2", serverContectPath, 
                 "/forum/listTopics", community.getDefaultForumId(), VisibilityScope.NEARBY_COMMUNITIES.getCode(), community.getId());
             filterDto.setActionUrl(actionUrl);
             avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.community_nearby", "");
@@ -3445,7 +3458,7 @@ public class ForumServiceImpl implements ForumService {
             filterDto.setName(menuName);
             filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());
             filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());
-            actionUrl = String.format("%s%s?forumId=%s&visibilityScope=%s&communityId=%s", serverContectPath, 
+            actionUrl = String.format("%s%s?forumId=%s&visibilityScope=%s&communityId=%s&visibilityScope=1", serverContectPath, 
                 "/forum/listTopics", community.getDefaultForumId(), VisibilityScope.COMMUNITY.getCode(), community.getId());
             filterDto.setActionUrl(actionUrl);
             avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.community_only", "");
