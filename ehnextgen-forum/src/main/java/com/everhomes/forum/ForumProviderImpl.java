@@ -586,9 +586,14 @@ public class ForumProviderImpl implements ForumProvider {
                     LOGGER.debug("Query posts by forum, bindValues=" + query.getBindValues());
                 }
                 
-                List<Post> l = query.fetch().map((EhForumPostsRecord record) -> {
-                    return ConvertHelper.convert(record, Post.class);
-                });
+//                List<Post> l = query.fetch().map((EhForumPostsRecord record) -> {
+//                    return ConvertHelper.convert(record, Post.class);
+//                });
+                
+                List<EhForumPostsRecord> records = query.fetch().map(new EhForumPostsRecordMapper());
+                List<Post> l = records.stream().map((r) -> {
+                    return ConvertHelper.convert(r, Post.class);
+                }).collect(Collectors.toList());
 
                 if(l.size() > 0) {
                     perForumResults.addAll(l);
