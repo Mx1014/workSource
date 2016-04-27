@@ -87,9 +87,15 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
 	VALUES(200501, 0, 0, '品质核查类别', '品质核查类别', 0, 2, UTC_TIMESTAMP(), 0);
 
-
 INSERT INTO `eh_version_realm` (`id`, `realm`, `description`, `create_time`, `namespace_id`) VALUES ('29', 'quality', NULL, UTC_TIMESTAMP(), '0');	
 	
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES ('4', '29', '1.0.0', 'http://aclink.lab.everhomes.com/nar/quality/dist/quality-1-0-0.zip 
+
+', 'http://aclin.lab.everhomes.com/nar/quality/dist/quality-1-0-0.zip 
+
+', '0');
+insert into `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) values(29,29,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
+
 -- merge from 3.3.x-delta-data-002-xiongying.sql
 DELETE FROM `eh_conf_account_categories`;
 INSERT INTO `eh_conf_account_categories` VALUES ('1', '5', '0', '12', '358.00', '0', '298.00', '1');
