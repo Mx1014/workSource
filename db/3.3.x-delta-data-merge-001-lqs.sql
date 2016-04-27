@@ -89,11 +89,7 @@ INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `defau
 
 INSERT INTO `eh_version_realm` (`id`, `realm`, `description`, `create_time`, `namespace_id`) VALUES ('29', 'quality', NULL, UTC_TIMESTAMP(), '0');	
 	
-INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES ('4', '29', '1.0.0', 'http://aclink.lab.everhomes.com/nar/quality/dist/quality-1-0-0.zip 
-
-', 'http://aclin.lab.everhomes.com/nar/quality/dist/quality-1-0-0.zip 
-
-', '0');
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES ('4', '29', '1.0.0', 'http://aclink.lab.everhomes.com/nar/quality/dist/quality-1-0-0.zip', 'http://aclink.lab.everhomes.com/nar/quality/dist/quality-1-0-0.zip', '0');
 insert into `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) values(29,29,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
 
 -- merge from 3.3.x-delta-data-002-xiongying.sql
