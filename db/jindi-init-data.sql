@@ -24,8 +24,8 @@ INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longi
 INSERT INTO `eh_organization_communities`(organization_id, community_id) 
 	VALUES(1000751, 240111044331051224);
 
-INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`) 
-	VALUES(1000751, 0, 'PM', '金地商置集团有限公司', 0, '金地商置集团有限公司(简称「金地商置」)是大中华区具领先地位的地产发展商和运营商，是香港联合交易所的上市公司(535.HK)，是全国化上市房地产企业金地（集团）股份有限公司(简称「金地集团」)（600383.SH）旗下独立运作的商业地产投资、开发及运营管理的唯一业务平台。', '/1000751', 1, 2);
+INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`) 
+	VALUES(1000751, 0, 'PM', '金地商置集团有限公司', 0, '金地商置集团有限公司(简称「金地商置」)是大中华区具领先地位的地产发展商和运营商，是香港联合交易所的上市公司(535.HK)，是全国化上市房地产企业金地（集团）股份有限公司(简称「金地集团」)（600383.SH）旗下独立运作的商业地产投资、开发及运营管理的唯一业务平台。', '/1000751', 1, 2, 'ENTERPRISE');
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status)
 	VALUES(2102361, 1000751, 'USER', 213211, 'manager', '吴珊', 0, '13798204538', 3);	
 
