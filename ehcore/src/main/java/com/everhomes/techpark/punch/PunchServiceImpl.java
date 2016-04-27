@@ -2244,11 +2244,14 @@ public class PunchServiceImpl implements PunchService {
 		
 		checkCompanyIdIsNull(cmd.getEnterpriseId());
 		
-		List<EnterpriseContact> enterpriseContacts = enterpriseContactProvider
-				.queryEnterpriseContactByKeyword(cmd.getKeyword());
+		List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(cmd.getEnterpriseId());
+		
 		List<Long> userIds = new ArrayList<Long>();
-		for (EnterpriseContact enterpriseContact : enterpriseContacts) {
-			userIds.add(enterpriseContact.getUserId());
+		for (OrganizationMember member : members) {
+			if(OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER){
+				userIds.add(member.getTargetId());
+			}
+		
 		}
 
 		
@@ -2260,6 +2263,13 @@ public class PunchServiceImpl implements PunchService {
 				cmd.getWorkTime(), null, Integer.MAX_VALUE);
 		if (null == result || result.size() ==0 )
 			return null;
+		
+		Organization organization = organizationProvider.findOrganizationById(cmd.getEnterpriseId());
+		List<String> groupTypes = new ArrayList<String>();
+		groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+		List<Organization> departments = organizationProvider.listOrganizationByGroupTypes(organization.getPath() + "/%", groupTypes);
+		Map<Long, Organization> deptMap = this.convertDeptListToMap(departments);
+		
 		List<PunchStatisticsDTO> dtos = result
 				.stream()
 				.map(r -> {
@@ -2267,18 +2277,15 @@ public class PunchServiceImpl implements PunchService {
 							PunchStatisticsDTO.class);
 					processPunchStatisticsDTOTime(dto, r);
 					if (dto != null) {
-						EnterpriseContact enterpriseContact = enterpriseContactService
-								.queryContactByUserId(cmd.getEnterpriseId(),
-										dto.getUserId());
-						if (null != enterpriseContact) {
+						OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getUserId(), cmd.getEnterpriseId());
+						if (null != member) {
 
-							dto.setUserName(enterpriseContact.getName());
-							dto.setUserPhoneNumber(enterpriseContactProvider
-									.queryContactEntryByContactId(
-											enterpriseContact,
-											ContactType.MOBILE.getCode())
-									.get(0).getEntryValue());
-							// dto.setUserDepartment(enterpriseContact.get);
+							dto.setUserName(member.getContactName());
+							dto.setUserPhoneNumber(member.getContactToken());
+							Organization department = deptMap.get(member.getGroupId());
+							if(null != department){
+								dto.setUserDepartment(department.getName());
+							}
 							PunchExceptionApproval approval = punchProvider
 									.getExceptionApproval(dto.getUserId(),
 											dto.getEnterpriseId(),
@@ -2288,12 +2295,8 @@ public class PunchServiceImpl implements PunchService {
 										.getApprovalStatus());
 								dto.setMorningApprovalStatus(approval.getMorningApprovalStatus());
 								dto.setAfternoonApprovalStatus(approval.getAfternoonApprovalStatus());
-								enterpriseContact = enterpriseContactService
-										.queryContactByUserId(
-												cmd.getEnterpriseId(),
-												approval.getOperatorUid());
-
-								dto.setOperatorName(enterpriseContact.getName());
+								OrganizationMember operaor = organizationProvider.findOrganizationMemberByOrgIdAndUId(approval.getOperatorUid(), cmd.getEnterpriseId());
+								dto.setOperatorName(operaor.getContactName());
 							} else {
 								dto.setApprovalStatus((byte) 0);
 							}

@@ -993,10 +993,11 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         //TODO support for role
         dto.setRole((byte)0);
+        dto.setVersion("1.1.0.0");
         
         AclinkFirmware firm = aclinkFirmwareProvider.queryAclinkFirmwareMax();
         if(firm != null) {
-            String version = String.format("%d.%d.%d", firm.getMajor(), firm.getMinor(), firm.getRevision());
+            String version = String.format("1.%d.%d.%d", firm.getMajor(), firm.getMinor(), firm.getRevision());
             dto.setVersion(version);
         }
         
@@ -1196,7 +1197,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         resp.setCreatorId(firm.getCreatorId());
         resp.setDownloadUrl(firm.getDownloadUrl());
         resp.setInfoUrl(firm.getInfoUrl());
-        resp.setVersion(String.valueOf(firm.getMajor()) + "." + String.valueOf(firm.getMinor()) + "." + String.valueOf(firm.getRevision()));
+        resp.setVersion("1" + String.valueOf(firm.getMajor()) + "." + String.valueOf(firm.getMinor()) + "." + String.valueOf(firm.getRevision()));
         resp.setMessage(message);
         
         return resp;

@@ -497,7 +497,7 @@ public class OrganizationAdminController extends ControllerBase {
     @RequestMapping("listAllChildrenOrganizations")
     @RestReturn(value=OrganizationDTO.class, collection=true)
     public RestResponse listAllChildrenOrganizations(@Valid ListAllChildrenOrganizationsCommand cmd) {
-        RestResponse response = new RestResponse(organizationService.listAllChildrenOrganizationMenus(cmd.getId(), cmd.getGroupTypes()));
+        RestResponse response = new RestResponse(organizationService.listAllChildrenOrganizationMenus(cmd.getId(), cmd.getGroupTypes(), cmd.getNaviFlag()));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
