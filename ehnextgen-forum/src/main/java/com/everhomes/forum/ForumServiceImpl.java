@@ -1990,14 +1990,16 @@ public class ForumServiceImpl implements ForumService {
             userId = user.getId();
         }
         
-        Condition condition = Tables.EH_FORUM_POSTS.CREATOR_UID.eq(userId);
-        if(community == null) {
-            LOGGER.error("Community not found, userId=" + userId);
-            return condition;
-        }
+        Condition creatorCondition = Tables.EH_FORUM_POSTS.CREATOR_UID.eq(userId);
         
         // 只有公开的帖子才能查到
         Condition c1 = Tables.EH_FORUM_POSTS.PRIVATE_FLAG.notEqual(PostPrivacy.PRIVATE.getCode());
+        c1 = creatorCondition.or(c1);
+        
+        if(community == null) {
+            LOGGER.error("Community not found, userId=" + userId);
+            return creatorCondition;
+        }
         
         // 如果类型是小区/园区，由于住宅小区含周边社区概念，故对于住宅小区需要增加周边小区范围，而商业园区则只限于本园区；
         Condition c2 = buildDefaultForumPostQryConditionForNearbyCommunity(user, community, scope);
@@ -2006,9 +2008,9 @@ public class ForumServiceImpl implements ForumService {
         Condition c3 = buildDefaultForumPostQryConditionByOrganization(user, community);
         
         if(c3 == null) {
-            return (c1.and(c2)).or(condition);
+            return c1.and(c2);
         } else {
-            return (c1.and(c2.or(c3))).or(condition);
+            return c1.and(c2.or(c3));
         }
     }
     
