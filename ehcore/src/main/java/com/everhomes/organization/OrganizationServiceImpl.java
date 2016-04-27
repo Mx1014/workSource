@@ -4179,9 +4179,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 				if(null == RoleDTOs){
 					continue;
 				}
-				
+				List<RoleDTO> dtos = new ArrayList<RoleDTO>();
 				for (RoleDTO dto : RoleDTOs) {
 					if(null != dto && cmd.getRoleIds().contains(dto.getId())){
+						dtos.add(dto);
+						organizationMemberDTO.setRoles(dtos);
 						roleMembers.add(organizationMemberDTO);
 						break;
 					}
