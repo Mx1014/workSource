@@ -1993,9 +1993,9 @@ public class ForumServiceImpl implements ForumService {
         Condition c3 = buildDefaultForumPostQryConditionByOrganization(user, community);
         
         if(c3 == null) {
-            return (c1.and(c2)).or(condition);
+            return ((c1.or(condition)).and(c2));
         } else {
-            return (c1.and(c2.or(c3))).or(condition);
+            return ((c1.or(condition)).and(c2.or(c3))).or(condition);
         }
     }
     
