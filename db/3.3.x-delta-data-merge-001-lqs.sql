@@ -31,7 +31,7 @@ INSERT INTO `eh_launch_pad_items`(`id`, `scene_type`, `namespace_id`, `app_id`, 
 INSERT INTO `eh_launch_pad_items`(`id`, `scene_type`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`) 
 	VALUES (10006, 'pm_admin', 0, 0, 0, 0, '/home','GovAgencies','NoticeManager','公告管理','cs://1/image/aW1hZ2UvTVRvMU1tUmhZbVE0T0RZek5URm1NVEl5WVRWa05HSTJaVEJpWWpVeU1UUm1OZw',1,1,2, '{"itemLocation":"/home/NoticeManager","layoutName":"SceneNoticeLayout","title":"公告管理","entityTag":"PM"}', 0, 0, 1, 1, '', '0', NULL, NULL, NULL);
 INSERT INTO `eh_launch_pad_items`(`id`, `scene_type`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`) 
-	VALUES (10007, 'pm_admin', 0, 0, 0, 0, '/home/NoticeManager', 'GaActions', 'PUBLIC_NOTICE', '发布公告', 'cs://1/image/aW1hZ2UvTVRwall6VTVOV1U0WkdRMk56aGxPRFV3TVRBMk5qVXlNVFkzWVRZek56aGpOdw', 1, 1, 19, '{"contentCategory":1003,"actionCategory":0,"targetEntityTag":"PM","visibleRegionType":0}', 0, 0, 1, 1, '', '0', NULL, NULL, NULL);
+	VALUES (10007, 'pm_admin', 0, 0, 0, 0, '/home/NoticeManager', 'GaActions', 'PUBLIC_NOTICE', '发布公告', 'cs://1/image/aW1hZ2UvTVRvMk1USXdPREJpTkRSa05XVXhNV1EzTW1ZeVpEWTNaRE5tTnpCaU0ySmhNQQ', 1, 1, 19, '{"contentCategory":1003,"actionCategory":0,"targetEntityTag":"PM","visibleRegionType":0}', 0, 0, 1, 1, '', '0', NULL, NULL, NULL);
 INSERT INTO `eh_launch_pad_items`(`id`, `scene_type`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`) 
 	VALUES (10008, 'pm_admin', 0, 0, 0, 0, '/home', 'Coupons', '优惠券', '优惠券', 'cs://1/image/aW1hZ2UvTVRwbFlXUTBOemd5WkdZd1l6RTVaV1l6WkRRNU1UZ3dOVFl3T1Rjd1pEazFNdw', 3, 1, 14, '{"url":"https://biz.zuolin.com/zl-ec?hideNavigationBar=1&sourceUrl=https%3A%2F%2Fbiz.zuolin.com%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fallpromotions#sign_suffix"}', 0, 0, 1, 1, '','0', NULL, NULL, NULL);
 INSERT INTO `eh_launch_pad_items`(`id`, `scene_type`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`) 
@@ -41,7 +41,7 @@ INSERT INTO `eh_launch_pad_items`(`id`, `scene_type`, `namespace_id`, `app_id`, 
 INSERT INTO `eh_launch_pad_items`(`id`, `scene_type`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`) 
 	VALUES (10011, 'pm_admin', 0, 0, 0, 0, '/home', 'Bizs', 'DoorManagement', '门禁', 'cs://1/image/aW1hZ2UvTVRwalptSm1PRFE1T1dObVpqTXdZelZqWVRNME56azBNelk1TkdNNU1UUm1Zdw', 1, 1, 40, '', 0, 0, 1, 1, '', 0, NULL, NULL, NULL);
 INSERT INTO `eh_launch_pad_items`(`id`, `scene_type`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`) 
-	VALUES (10012, 'pm_admin', 0, 0, 0, 0, '/home', 'Bizs', 'QualityInspection', '品质核查', 'cs://1/image/aW1hZ2UvTVRvNVpEWTROR0prTnpGak0yVm1NRGhsWVRNMU5EY3lPR0kzT1RSalkySmxZdw', '1', '1', '44', ' {"realm":"quality","entryUrl":"http://aclinktest.zuolin.com/nar/quality/index.html?hideNavigationBar=1#/task_list#sign_suffix"}', 0, 0, 1, 1, '', 0, NULL, NULL, NULL);
+	VALUES (10012, 'pm_admin', 0, 0, 0, 0, '/home', 'Bizs', 'QualityInspection', '品质核查', 'cs://1/image/aW1hZ2UvTVRvNVpEWTROR0prTnpGak0yVm1NRGhsWVRNMU5EY3lPR0kzT1RSalkySmxZdw', '1', '1', '44', ' {"realm":"quality","entryUrl":"https://core.zuolin.com/nar/quality/index.html?hideNavigationBar=1#/task_list#sign_suffix"}', 0, 0, 1, 1, '', 0, NULL, NULL, NULL);
 INSERT INTO `eh_launch_pad_items` (`id`,  `scene_type`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`) 
 	VALUES (10013, 'pm_admin', 0, 0, 0, 0, '/home', 'Bizs', '视频会议', '视频会议', 'cs://1/image/aW1hZ2UvTVRveE9HRmlOelV6TUdJNE9ERTRaalF6Wm1Nd05EWmxabVkyTkRjMlltVTNaZw', '1', '1', '27', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1');
 
@@ -89,18 +89,25 @@ INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `defau
 
 INSERT INTO `eh_version_realm` (`id`, `realm`, `description`, `create_time`, `namespace_id`) VALUES ('29', 'quality', NULL, UTC_TIMESTAMP(), '0');	
 	
-INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES ('4', '29', '1.0.0', 'http://aclink.lab.everhomes.com/nar/quality/dist/quality-1-0-0.zip', 'http://aclink.lab.everhomes.com/nar/quality/dist/quality-1-0-0.zip', '0');
+INSERT INTO `eh_version_urls` (`id`, `realm_id`, `target_version`, `download_url`, `info_url`, `namespace_id`) VALUES ('7', '29', '1.0.0', 'https://core.zuolin.com/nar/quality/dist/quality-1-0-0.zip', 'https://core.zuolin.com/nar/quality/dist/quality-1-0-0.zip', '0');
 insert into `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) values(29,29,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
 
 -- merge from 3.3.x-delta-data-002-xiongying.sql
 DELETE FROM `eh_conf_account_categories`;
-INSERT INTO `eh_conf_account_categories` VALUES ('1', '5', '0', '12', '358.00', '0', '298.00', '1');
-INSERT INTO `eh_conf_account_categories` VALUES ('2', '5', '2', '12', '358.00', '0', '298.00', '0');
-INSERT INTO `eh_conf_account_categories` VALUES ('3', '5', '1', '12', '358.00', '0', '298.00', '1');
-INSERT INTO `eh_conf_account_categories` VALUES ('4', '5', '3', '12', '358.00', '0', '298.00', '0');
-INSERT INTO `eh_conf_account_categories` VALUES ('9', '5', '4', '12', '358.00', '0', '298.00', '0');
-INSERT INTO `eh_conf_account_categories` VALUES ('10', '5', '5', '12', '358.00', '0', '298.00', '0');
-INSERT INTO `eh_conf_account_categories` VALUES ('11', '5', '6', '12', '358.00', '0', '298.00', '0');
+INSERT INTO `eh_conf_account_categories`(`id`,`multiple_account_threshold`,`conf_type`,`min_period`,`single_account_price`,`namespace_id`,`multiple_account_price`,`display_flag`)
+	VALUES ('1', '5', '0', '12', '358.00', '0', '298.00', '1');
+INSERT INTO `eh_conf_account_categories`(`id`,`multiple_account_threshold`,`conf_type`,`min_period`,`single_account_price`,`namespace_id`,`multiple_account_price`,`display_flag`) 
+	VALUES ('2', '5', '2', '12', '358.00', '0', '298.00', '0');
+INSERT INTO `eh_conf_account_categories`(`id`,`multiple_account_threshold`,`conf_type`,`min_period`,`single_account_price`,`namespace_id`,`multiple_account_price`,`display_flag`)
+	VALUES ('3', '5', '1', '12', '358.00', '0', '298.00', '1');
+INSERT INTO `eh_conf_account_categories`(`id`,`multiple_account_threshold`,`conf_type`,`min_period`,`single_account_price`,`namespace_id`,`multiple_account_price`,`display_flag`) 
+	VALUES ('4', '5', '3', '12', '358.00', '0', '298.00', '0');
+INSERT INTO `eh_conf_account_categories`(`id`,`multiple_account_threshold`,`conf_type`,`min_period`,`single_account_price`,`namespace_id`,`multiple_account_price`,`display_flag`)
+	VALUES ('9', '5', '4', '12', '358.00', '0', '298.00', '0');
+INSERT INTO `eh_conf_account_categories`(`id`,`multiple_account_threshold`,`conf_type`,`min_period`,`single_account_price`,`namespace_id`,`multiple_account_price`,`display_flag`)
+	VALUES ('10', '5', '5', '12', '358.00', '0', '298.00', '0');
+INSERT INTO `eh_conf_account_categories`(`id`,`multiple_account_threshold`,`conf_type`,`min_period`,`single_account_price`,`namespace_id`,`multiple_account_price`,`display_flag`)
+	VALUES ('11', '5', '6', '12', '358.00', '0', '298.00', '0');
 
 UPDATE `eh_conf_accounts` SET `account_category_id` = 1 WHERE `account_category_id` = 5;
 UPDATE `eh_conf_accounts` SET `account_category_id` = 3 WHERE `account_category_id` = 7;
@@ -987,3 +994,30 @@ UPDATE eh_locale_templates SET `text`='${userName}已删除群聊“${groupName}
 UPDATE eh_locale_templates SET `text`='您已删除群聊“${groupName}”' WHERE id=95;
 UPDATE eh_locale_templates SET `text`='您已取消订阅俱乐部“${groupName}”' WHERE id=96;
 UPDATE eh_locale_templates SET `text`='俱乐部“${groupName}”推荐' WHERE id=107;
+
+
+
+
+-- 修改items图片
+
+delete from eh_launch_pad_items where  item_group ='GaActions' and namespace_id  = 0 and item_label  like "%缴费%";
+INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag) 
+	VALUES (8, 0, 0, '0', 0, '/home/Pm', 'GaActions', 'HELP', '咨询求助', 'cs://1/image/aW1hZ2UvTVRvMFlqazJOalppWkRjME4yTXpOVEE1TlRnNFlqRTFNemMwWXpjeVlqTTNZUQ', 1, 1, 19, '{"contentCategory":1005,"actionCategory":0,"forumId":1,"targetEntityTag":"PM","embedAppId":27}', 0, 0, 1, 1, '', 0,NULL);	
+
+delete from eh_launch_pad_items where id= 6;
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
+	VALUES ('6', '0', '0', '0', '0', '/home/Pm', 'GaActions', 'HELP', '紧急求助', 'cs://1/image/aW1hZ2UvTVRvNE9XSTFaakU1WWprNE4yVTFPV0pqT1dNMk9XWXlPRGN5WVdFMU1qUXpaZw', '1', '1', '19', '{\"contentCategory\":1012,\"actionCategory\":0,\"forumId\":1,\"targetEntityTag\":\"PM\",\"embedAppId\":27}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'default');
+
+delete from eh_launch_pad_items where id=17;
+INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag) 
+	VALUES (25, 0, 0, '0', 0, '/home/Pm', 'GaPosts', 'HELP', '咨询求助', NULL, 1, 1, 15, '{"contentCategory":1005,"actionCategory":0,"forumId":1,"embedAppId":27} ', 0, 0, 1, 1, '', 0,NULL);
+INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag) 
+	VALUES (17, 0, 0, '0', 0, '/home/Pm', 'GaPosts', 'HELP', '紧急求助', NULL, 1, 1, 15, '{"contentCategory":1012,"actionCategory":0,"forumId":1,"embedAppId":27} ', 0, 0, 1, 1, '', 0,NULL);
+		
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvMVl6aGlOekkxT0dGbVlXSTBZbVZtTURjMU5EQmtOMkU0WmpCbU1tSXpOdw' where item_group = 'GaActions' and item_label like "%投诉建议%";
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRwaFpqUmxNRGd6WkRJME1URmtNMlJtWm1Sak1USmtNamN6WTJJelltSTJZUQ' where item_group = 'GaActions' and item_label like "%报修%";
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvMFlqazJOalppWkRjME4yTXpOVEE1TlRnNFlqRTFNemMwWXpjeVlqTTNZUQ' where item_group = 'GaActions' and item_label like "%咨询求助%" ;
+update eh_launch_pad_items set icon_uri = 'cs://1/image/aW1hZ2UvTVRvM1lqZGpObUUyTlRSaE5tUmxOamhsT1RJNVpEQTBaR0ZpTlRrMU16VTNaUQ' where item_group = 'GaActions' and item_label like "%缴费%" ;
+
+
+ 
