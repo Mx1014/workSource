@@ -1,6 +1,6 @@
 //
 // EvhListAllChildrenOrganizationsCommand.h
-// generated at 2016-04-22 13:56:45 
+// generated at 2016-04-26 18:22:55 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -16,6 +16,8 @@
 
 // item type NSString*
 @property(nonatomic, strong) NSMutableArray* groupTypes;
+
+@property(nonatomic, copy) NSNumber* naviFlag;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

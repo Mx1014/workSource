@@ -1,6 +1,6 @@
 //
 // EvhGroupMemberDTO.h
-// generated at 2016-04-22 13:56:47 
+// generated at 2016-04-26 18:22:54 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -53,6 +53,12 @@
 @property(nonatomic, copy) NSString* cellPhone;
 
 @property(nonatomic, copy) NSNumber* muteNotificationFlag;
+
+@property(nonatomic, copy) NSNumber* addressId;
+
+@property(nonatomic, copy) NSString* buildingName;
+
+@property(nonatomic, copy) NSString* apartmentName;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

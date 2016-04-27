@@ -1,6 +1,6 @@
 //
 // EvhForumServiceErrorCode.h
-// generated at 2016-04-22 13:56:47 
+// generated at 2016-04-26 18:22:55 
 //
 
 #define EvhForumServiceErrorCode_SCOPE @"forum"

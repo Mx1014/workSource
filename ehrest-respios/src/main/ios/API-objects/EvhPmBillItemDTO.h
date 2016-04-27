@@ -1,6 +1,6 @@
 //
 // EvhPmBillItemDTO.h
-// generated at 2016-04-22 13:56:45 
+// generated at 2016-04-26 18:22:55 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"

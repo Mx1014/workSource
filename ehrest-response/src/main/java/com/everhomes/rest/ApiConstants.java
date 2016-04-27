@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-04-22 13:56:34
+// generated at 2016-04-26 18:22:38
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -94,6 +94,7 @@ public interface ApiConstants {
     public static final String ADMIN_BUSINESS_PROMOTEBUSINESS_URL = "/admin/business/promoteBusiness";
     public static final String ADMIN_BUSINESS_RECOMMENDBUSINESS_URL = "/admin/business/recommendBusiness";
     public static final String ADMIN_CODEGEN_URL = "/admin/codegen";
+    public static final String ADMIN_COMMUNITY_LISTCOMMUNITYAUTHUSERADDRESS_URL = "/admin/community/ListCommunityAuthUserAddress";
     public static final String ADMIN_COMMUNITY_APPROVEBUILDING_URL = "/admin/community/approveBuilding";
     public static final String ADMIN_COMMUNITY_APPROVECOMMUNITY_URL = "/admin/community/approveCommunity";
     public static final String ADMIN_COMMUNITY_DELETEBUILDING_URL = "/admin/community/deleteBuilding";
