@@ -1463,21 +1463,72 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	public void sendNoticeToCommunityPmOwner(PropCommunityBuildAddessCommand cmd) {
 
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		
 		Long communityId = cmd.getCommunityId();
 		Organization org = this.checkOrganizationByCommIdAndOrgType(communityId, OrganizationType.PM.getCode());
 		Long orgId = org.getId();
 
 		List<String> buildingNames = cmd.getBuildingNames();
 		List<Long> addressIds = cmd.getAddressIds();
-
+		List<String> phones = cmd.getMobilePhones();
 		//物业发通知机制： 对于已注册的发消息 -familyIds   未注册的发短信-userIds。
 		//已注册的user 分三种： 1-已加入家庭，发家庭消息。 2-还未加入家庭，发个人信息 + 提醒配置项【可以加入家庭】。 3-家庭不存在，发个人信息 + 提醒配置项【可以创建家庭】。
 		List<CommunityPmOwner> owners  = new ArrayList<CommunityPmOwner>();
 		List<Long> familyIds = new ArrayList<Long>();
 
 
+		//按地址发送：
+		if(addressIds != null && addressIds.size()  > 0){
+			for (Long addressId : addressIds) {
+				Family family = familyProvider.findFamilyByAddressId(addressId);
+				if(family != null){
+					familyIds.add(family.getId());
+				}
+				List<CommunityPmOwner> ownerList = propertyMgrProvider.listCommunityPmOwners(orgId, addressId);
+				owners.addAll(ownerList);
+			}
+		}
+		//按楼栋发送：
+		else if(buildingNames != null && buildingNames.size() > 0){
+			for (String buildingName : buildingNames) {
+				List<ApartmentDTO> addresses =  addressProvider.listApartmentsByBuildingName(communityId, buildingName, 1, Integer.MAX_VALUE);
+				if(addresses != null && addresses.size() > 0){
+					for (ApartmentDTO address : addresses) {
+						Family family = familyProvider.findFamilyByAddressId(address.getAddressId());
+						if(family != null){
+							familyIds.add(family.getId());
+						}
+						List<CommunityPmOwner> ownerList = propertyMgrProvider.listCommunityPmOwners(orgId, address.getAddressId());
+						owners.addAll(ownerList);
+					}
+				}
+			}
+			
+		//按门牌推送
+		}else if(familyIds != null && familyIds.size() > 0){
+			for (Long familyId : familyIds) {
+				sendNoticeToFamilyById(familyId, cmd.getMessage());
+			}
+			
+		//按手机号码推送
+		}else if(phones != null && phones.size() > 0){
+			List<OrganizationMember> members = new ArrayList<OrganizationMember>();
+			for (String phone : phones) {
+				UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, phone);
+				OrganizationMember member = new OrganizationMember();
+				member.setContactToken(phone);
+				member.setTargetType(OrganizationMemberTargetType.UNTRACK.getCode());
+				if(null != userIdentifier){
+					member.setTargetId(userIdentifier.getOwnerUid());
+					member.setTargetType(OrganizationMemberTargetType.USER.getCode());
+				}
+				members.add(member);
+			}
+			this.processSmsByMembers(members, cmd.getMessage());
+			
 		//按小区发送: buildingNames 和 addressIds 为空。
-		if((buildingNames == null || buildingNames.size() == 0) && (addressIds == null || addressIds.size() == 0)){
+		}else if(null != communityId){
 			ListAddressByKeywordCommand comand = new ListAddressByKeywordCommand();
 			comand.setCommunityId(cmd.getCommunityId());
 			comand.setKeyword("");
@@ -1495,44 +1546,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				}
 			}
 		}
-
-		//按地址发送：
-		else if(addressIds != null && addressIds.size()  > 0){
-			for (Long addressId : addressIds) {
-				Family family = familyProvider.findFamilyByAddressId(addressId);
-				if(family != null){
-					familyIds.add(family.getId());
-				}
-				List<CommunityPmOwner> ownerList = propertyMgrProvider.listCommunityPmOwners(orgId, addressId);
-				owners.addAll(ownerList);
-			}
-		}
-
-		//按楼栋发送：
-		else if((addressIds == null || addressIds.size()  == 0 )  && (buildingNames != null && buildingNames.size() > 0)){
-			for (String buildingName : buildingNames) {
-				List<ApartmentDTO> addresses =  addressProvider.listApartmentsByBuildingName(communityId, buildingName, 1, Integer.MAX_VALUE);
-				if(addresses != null && addresses.size() > 0){
-					for (ApartmentDTO address : addresses) {
-						Family family = familyProvider.findFamilyByAddressId(address.getAddressId());
-						if(family != null){
-							familyIds.add(family.getId());
-						}
-						List<CommunityPmOwner> ownerList = propertyMgrProvider.listCommunityPmOwners(orgId, address.getAddressId());
-						owners.addAll(ownerList);
-					}
-				}
-			}
-		}
-
-		if(familyIds != null && familyIds.size() > 0){
-			for (Long familyId : familyIds) {
-				sendNoticeToFamilyById(familyId, cmd.getMessage());
-			}
-		}
-
 		//处理业主信息表 :1- 是user，已加入家庭，发家庭消息已包含该user。 2- 是user，还未加入家庭，发个人信息 + 提醒配置项【可以加入家庭】。 3-不是user，发短信。  4：是user，家庭不存在，发个人信息 + 提醒配置项【可以创建家庭】。
-		processCommunityPmOwner(communityId,owners,cmd.getMessage());
+		if(null != owners && owners.size() > 0)
+			processCommunityPmOwner(communityId,owners,cmd.getMessage());
 	}
 
 	public void sendNoticeToFamilyById(Long familyId,String message){
