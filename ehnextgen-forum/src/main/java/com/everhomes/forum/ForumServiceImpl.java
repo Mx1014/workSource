@@ -3540,7 +3540,9 @@ public class ForumServiceImpl implements ForumService {
             String actionUrl = null;            
             long menuId = 1;
             String avatarUri = null;
-            Integer namespaceId = sceneToken.getNamespaceId();            
+            Integer namespaceId = sceneToken.getNamespaceId();
+            // 由于有些分组没有，故默认的菜单也需要进行动态设置 by lqs 20160427
+            boolean hasDefault = false; 
 
             long group1Id = menuId++;
             // 本公司
@@ -3620,6 +3622,7 @@ public class ForumServiceImpl implements ForumService {
                 orgAllFilterDto.setName(menuName);
                 orgAllFilterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());
                 orgAllFilterDto.setDefaultFlag(SelectorBooleanFlag.TRUE.getCode()); // 整组菜单只有一个是默认的
+                hasDefault = true;
                 actionUrl = String.format("%s%s?organizationId=%s&mixType=%s", serverContectPath, 
                     "/org/listOrgMixTopics", organization.getId(), OrganizationTopicMixType.CHILDREN_ALL.getCode());
                 orgAllFilterDto.setActionUrl(actionUrl);
@@ -3681,7 +3684,12 @@ public class ForumServiceImpl implements ForumService {
                 menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
                 cmntyAllFilterDto.setName(menuName);
                 cmntyAllFilterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());
-                cmntyAllFilterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());
+                if(hasDefault) {
+                    cmntyAllFilterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());
+                } else {
+                    cmntyAllFilterDto.setDefaultFlag(SelectorBooleanFlag.TRUE.getCode());
+                    hasDefault = true;
+                }
                 actionUrl = String.format("%s%s?organizationId=%s&mixType=%s", serverContectPath, 
                     "/org/listOrgMixTopics", organization.getId(), OrganizationTopicMixType.COMMUNITY_ALL.getCode());
                 cmntyAllFilterDto.setActionUrl(actionUrl);
