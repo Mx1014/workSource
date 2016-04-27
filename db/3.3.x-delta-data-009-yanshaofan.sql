@@ -39,7 +39,10 @@ VALUES (308,0,'设置任务的分类','设置任务的分类',null);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
 VALUES (309,0,'信息统计','任务统计',null);
 
-
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
+VALUES (380,0,'查看区信息','查看区信息',null);
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
+VALUES (381,0,'修改区信息','修改区信息',null);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
 VALUES (390,0,'楼栋列表','楼栋列表',null);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
@@ -262,9 +265,9 @@ INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf
 VALUES (23000,'统计',20000,null,'statistics',0,2,'/20000/23000','park',230);
 
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (30000,'园区管理',0,'fa fa-building',null,1,2,'/30000','park',300);
+VALUES (30000,'项目管理',0,'fa fa-building',null,1,2,'/30000','park',300);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (30500,'园区管理',30000,null,'community_list',0,2,'/30000/30500','park',305);
+VALUES (30500,'区管理',30000,null,'community_list',0,2,'/30000/30500','park',305);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
 VALUES (31000,'楼栋管理',30000,null,'building_management',0,2,'/30000/31000','park',310);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
@@ -615,6 +618,11 @@ INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show
 VALUES (89,620,52400,'审批列表',1,1,'绩效统计 全部权限',760);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
 VALUES (88,621,52400,'审批认证',0,1,'审批同意，拒绝',770);
+
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+VALUES (90,380,30500,'查看区信息',1,1,'查看区信息',88);
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+VALUES (91,381,30500,'修改区信息',0,1,'修改区信息',89);
 
 
 INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
