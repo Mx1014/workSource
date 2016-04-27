@@ -119,6 +119,6 @@ CREATE TABLE `eh_scene_types`(
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
-
+ALTER TABLE `eh_organization_task_targets` ADD COLUMN `message_type` VARCHAR(64) COMMENT 'PUSH COMMENT SMS ';
 
 
