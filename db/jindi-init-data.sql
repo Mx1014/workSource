@@ -67,7 +67,7 @@ INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,ite
 
 	
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`) 
-	VALUES ('1760', '999991', '0', '0', '0', '/home', 'Bizs', 'PM', '物业服务', 'cs://1/image/aW1hZ2UvTVRwaE5qWmlZMkV3TW1Gall6aGxOVFJrWkRjNU1qQXlPV1kwTnpVek5XSXpZZw', '1', '1', '2', '{\"itemLocation\":\"/home/Pm\",\"layoutName\":\"PmLayout\",\"title\":\"物业服务\",\"entityTag\":\"PM\"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1');
+	VALUES ('1760', '999991', '0', '0', '0', '/home', 'Bizs', 'PM', '物业服务', 'cs://1/image/aW1hZ2UvTVRwaE5qWmlZMkV3TW1Gall6aGxOVFJrWkRjNU1qQXlPV1kwTnpVek5XSXpZZw', '1', '1', '2', '{\"itemLocation\":\"/home/Pm\",\"layoutName\":\"PmLayout\",\"title\":\"物业报修\",\"entityTag\":\"PM\"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1');
 	
 
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
