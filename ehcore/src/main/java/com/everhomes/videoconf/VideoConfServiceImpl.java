@@ -606,7 +606,7 @@ public class VideoConfServiceImpl implements VideoConfService {
 		ListSourceVideoConfAccountResponse response = new ListSourceVideoConfAccountResponse();
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		Integer offset = cmd.getPageOffset() == null ? 0 : (cmd.getPageOffset() - 1 ) * pageSize;
+		Integer offset = cmd.getPageOffset() == null ? 0 : cmd.getPageOffset() * pageSize;
 		
 		List<ConfSourceAccounts> sourceAccounts = vcProvider.listSourceAccount(cmd.getSourceAccount(), null, offset, pageSize + 1);
 		
@@ -628,7 +628,8 @@ public class VideoConfServiceImpl implements VideoConfService {
 			
 			if(accounts != null && accounts.size() > pageSize) {
 				accounts.remove(accounts.size() - 1);
-				response.setNextPageOffset(offset + 1);
+				Integer pageOffset = cmd.getPageOffset() == null ? 1 : cmd.getPageOffset()+1;
+				response.setNextPageOffset(pageOffset);
 			}
 			
 			response.setSourceAccounts(accounts);
