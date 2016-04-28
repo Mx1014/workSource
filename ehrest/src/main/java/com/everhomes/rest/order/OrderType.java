@@ -12,7 +12,7 @@ public class OrderType {
 	
 	public static enum OrderTypeEnum{
 		WUYETEST(OrderType.WU_YE_TEST_CODE,"wuyetest","物业支付-测试用"),
-		Parking(OrderType.PARKING_CODE,"parking","停车充值支付");
+		PARKING(OrderType.PARKING_CODE,"parking","停车充值支付");
 
 		private int code;
 		private String pycode;

@@ -1,0 +1,174 @@
+// @formatter:off
+package com.everhomes.organization.pmsy;
+
+import java.util.List;
+
+import javax.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestReturn;
+import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.order.CommonOrderDTO;
+import com.everhomes.rest.pmsy.CreatePmBillOrderCommand;
+import com.everhomes.rest.pmsy.FindMonthlyPmBill;
+import com.everhomes.rest.pmsy.ListPmBillsCommand;
+import com.everhomes.rest.pmsy.OnlinePayPmBillCommand;
+import com.everhomes.rest.pmsy.PmBillItemDTO;
+import com.everhomes.rest.pmsy.PmPayerDTO;
+import com.everhomes.rest.pmsy.PmsyBillsDTO;
+import com.everhomes.rest.pmsy.AddressDTO;
+import com.everhomes.rest.pmsy.PmsyCommunitiesDTO;
+import com.everhomes.rest.pmsy.SearchBillsOrdersResponse;
+import com.everhomes.rest.pmsy.SetPmPropertyCommand;
+import com.everhomes.rest.pmsy.ListResourceCommand;
+import com.everhomes.rest.pmsy.searchBillsOrdersCommand;
+
+@RestController
+@RequestMapping("/pmsy")
+public class PmsyController extends ControllerBase {
+	private static final Logger LOGGER = LoggerFactory.getLogger(PmsyController.class);
+
+	@Autowired
+	PmsyService pmsyService;
+
+	/**
+	 * <b>URL: /pmsy/listPmPayers</b>
+	 * <p>获取用户填写过的有效缴费用户信息</p>
+	 */
+	@RequestMapping("listPmPayers")
+	@RestReturn(value=PmPayerDTO.class,collection=true)
+	public RestResponse listPmPayers(/*@Valid ListPmPayerCommand cmd*/) {
+		//UserTokenCommandResponse commandResponse = propertyMgrService.findUserByIndentifier(cmd);
+		List<PmPayerDTO> resultList = null;
+		RestResponse response = new RestResponse(resultList);
+
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pmsy/listAddresses</b>
+	 * <p>获取门牌号(项目)</p>
+	 */
+	@RequestMapping("listAddresses")
+	@RestReturn(value=AddressDTO.class,collection=true)
+	public RestResponse listAddresses(@Valid ListResourceCommand cmd) {
+		
+		List<AddressDTO> resultList = pmsyService.listAddresses(cmd);
+		
+		RestResponse response = new RestResponse(resultList);
+
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pmsy/listPmBills
+	 * <p>根据条件查询物业缴费单
+	 */
+	@RequestMapping(value="listPmBills",method = RequestMethod.POST)
+	@RestReturn(value=PmsyBillsDTO.class)
+	public RestResponse listPmBillsByConditions(@Valid ListPmBillsCommand cmd) {
+		PmsyBillsDTO pmBillsResponse = null;
+		RestResponse response = new RestResponse(pmBillsResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /pmsy/findMonthlyPmBill
+	 * <p>查询单月物业缴费单
+	 */
+	@RequestMapping(value="findMonthlyPmBill",method = RequestMethod.POST)
+	@RestReturn(value=PmsyBillsDTO.class)
+	public RestResponse findMonthlyPmBill(@Valid FindMonthlyPmBill cmd) {
+		List<PmBillItemDTO> list = null;
+		RestResponse response = new RestResponse(list);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /pmsy/serachBillingOrders
+	 * <p>根据条件搜索缴费记录
+	 */
+	@RequestMapping("searchBillingOrders")
+	@RestReturn(value=SearchBillsOrdersResponse.class)
+	public RestResponse searchBillingOrders(@Valid searchBillsOrdersCommand cmd) {
+		SearchBillsOrdersResponse serachBillsOrdersResponse = null;
+		
+		RestResponse response = new RestResponse(serachBillsOrdersResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+     * <b>URL: /pmsy/notifyParkingRechargeOrderPayment</b>
+     * <p>支付后，由统一支付调用此接口来通知各厂商支付结果</p>
+     */
+    @RequestMapping("notifyPropertyFeesOrderPayment")
+    @RestReturn(value = String.class)
+    public RestResponse notifyPropertyFeesOrderPayment(OnlinePayPmBillCommand cmd) {
+        
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /pmsy/createPmBillOrder</b>
+     * <p>创建订单</p>
+     */
+    @RequestMapping("createPmBillOrder")
+	@RestReturn(value=CommonOrderDTO.class)
+	public RestResponse createPmBillOrder(@Valid CreatePmBillOrderCommand cmd) {
+		CommonOrderDTO order = null;
+		RestResponse response = new RestResponse(order);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+    
+    /**
+     * <b>URL: /pmsy/setPmProperty</b>
+     * <p>设置提示信息和手机号</p>
+     */
+    @RequestMapping("setPmProperty")
+	@RestReturn(value=String.class)
+	public RestResponse setPmProperty(@Valid SetPmPropertyCommand cmd) {
+    	
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+    
+    /**
+     * <b>URL: /pmsy/setPmProperty</b>
+     * <p>设置提示信息和手机号</p>
+     */
+    @RequestMapping("getPmProperty")
+	@RestReturn(value=String.class)
+	public RestResponse getPmProperty(@Valid GetPmPropertyCommand cmd) {
+    	PmsyCommunitiesDTO dto = null;
+		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+}
