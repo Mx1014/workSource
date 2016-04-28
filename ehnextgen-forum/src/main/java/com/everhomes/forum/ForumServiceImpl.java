@@ -624,6 +624,14 @@ public class ForumServiceImpl implements ForumService {
             try {
                 this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_POST.getCode()).enter(()-> {
                     this.forumProvider.updatePost(post);
+                 // 删除评论时帖子的child count减1 mod by xiongying 20160428
+                    if(post.getParentPostId() != null && post.getParentPostId() != 0) {
+                    	Post parentPost = this.forumProvider.findPostById(post.getParentPostId());
+                    	if(parentPost != null) {
+                    		parentPost.setChildCount(parentPost.getChildCount() - 1);
+                            this.forumProvider.updatePost(parentPost);
+                    	}
+                    }
                     if(deleteUserPost) {
                         if(userId.equals(post.getCreatorUid())){
                             this.userActivityProvider.deletePostedTopic(userId, postId); 
