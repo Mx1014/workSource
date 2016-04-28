@@ -1358,6 +1358,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		
 		query.addConditions(Tables.EH_ORGANIZATIONS.PATH.like(superiorPath));
 		query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.DEPARTMENT.getCode()));
+		query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
 		
 		Integer offset = pageOffset == null ? 1 : (pageOffset - 1 ) * pageSize;
 		query.addOrderBy(Tables.EH_ORGANIZATIONS.ID.desc());

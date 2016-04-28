@@ -4705,6 +4705,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		Organization org = checkOrganization(cmd.getOrganizationId());
 		int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		List<Organization> depts = organizationProvider.listDepartments(org.getPath()+"/%", 1, 1000);
+		Map<String, Organization> deptMap = this.convertDeptListToStrMap(depts);
 		for (String str : list) {
 			String[] s = str.split("\\|\\|");
 			
@@ -4731,9 +4732,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 				continue;
 			}
 			
-			
-			Map<String, Organization> deptMap = this.convertDeptListToStrMap(depts);
-			
 			Organization dept = deptMap.get(s[1]);
 			if(StringUtils.isEmpty(s[1])){
 				memberCommand.setGroupId(0l);
@@ -4746,6 +4744,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 					OrganizationDTO deptDto = this.createChildrenOrganization(deptCommand);
 					dept = ConvertHelper.convert(deptDto, Organization.class);
 					deptMap.put(deptDto.getName(), dept);
+					
 				}
 				memberCommand.setOrganizationId(dept.getId());
 			}
@@ -4856,7 +4855,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
 		List<Organization> depts = organizationProvider.listDepartments(org.getPath()+"/%", 1, 1000);
-		depts.add(org);
+		
+		if(OrganizationGroupType.fromCode(org.getGroupType()) != OrganizationGroupType.ENTERPRISE){
+			depts.add(org);
+		}
 		
 		Long orgId = null;
 		
@@ -4887,7 +4889,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				dto.setOrganizationName(organization.getName());
 			
 			Organization group = deptMaps.get(c.getGroupId());
-			if(null != group && !c.getGroupId().equals(org.getId()))
+			if(null != group)
 				dto.setGroupName(group.getName());
 			
 			if(OrganizationMemberTargetType.USER.getCode().equals(dto.getTargetType())){
