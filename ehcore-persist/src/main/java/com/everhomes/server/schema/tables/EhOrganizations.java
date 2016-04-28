@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizations extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhOrganizationsRecord> {
 
-	private static final long serialVersionUID = 787852855;
+	private static final long serialVersionUID = 1213426877;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_organizations</code>

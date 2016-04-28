@@ -599,6 +599,26 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhParkCharge EH_PARK_CHARGE = com.everhomes.server.schema.tables.EhParkCharge.EH_PARK_CHARGE;
 
 	/**
+	 * The table ehcore.eh_pmsy_communities
+	 */
+	public static final com.everhomes.server.schema.tables.EhPmsyCommunities EH_PMSY_COMMUNITIES = com.everhomes.server.schema.tables.EhPmsyCommunities.EH_PMSY_COMMUNITIES;
+
+	/**
+	 * The table ehcore.eh_pmsy_orders
+	 */
+	public static final com.everhomes.server.schema.tables.EhPmsyOrders EH_PMSY_ORDERS = com.everhomes.server.schema.tables.EhPmsyOrders.EH_PMSY_ORDERS;
+
+	/**
+	 * The table ehcore.eh_pmsy_order_items
+	 */
+	public static final com.everhomes.server.schema.tables.EhPmsyOrderItems EH_PMSY_ORDER_ITEMS = com.everhomes.server.schema.tables.EhPmsyOrderItems.EH_PMSY_ORDER_ITEMS;
+
+	/**
+	 * The table ehcore.eh_pmsy_payers
+	 */
+	public static final com.everhomes.server.schema.tables.EhPmsyPayers EH_PMSY_PAYERS = com.everhomes.server.schema.tables.EhPmsyPayers.EH_PMSY_PAYERS;
+
+	/**
 	 * The table ehcore.eh_polls
 	 */
 	public static final com.everhomes.server.schema.tables.EhPolls EH_POLLS = com.everhomes.server.schema.tables.EhPolls.EH_POLLS;
