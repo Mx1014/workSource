@@ -1249,7 +1249,7 @@ public class ForumServiceImpl implements ForumService {
             query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ID.eq(forum.getId()));
             query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(topicId));
             query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
-            query.addConditions(Tables.EH_FORUM_POSTS.DELETER_UID.ne(0L));
+            //query.addConditions(Tables.EH_FORUM_POSTS.DELETER_UID.ne(0L));
             
             return query;
         });
