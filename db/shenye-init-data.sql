@@ -64,6 +64,8 @@ INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `res
 INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
 	VALUES(1206, 999992, 'COMMUNITY', 240111044331051303, UTC_TIMESTAMP());	
 
+INSERT INTO `eh_namespaces`(`id`, `name`) 
+	VALUES(999992, '深业物业');	
 
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
     VALUES(200511, 2, 0, '亲子与教育', '兴趣/亲子与教育', 0, 2, UTC_TIMESTAMP(), 999992);
