@@ -232,7 +232,7 @@ public class ForumProviderImpl implements ForumProvider {
                         throw new InvalidParameterException("Missing parent post info in post parameter");
                     }
 //                  post.setFloorNumber(parentPost.getChildCount() + 1);
-                    //评论的楼层数为帖子的next floor number
+                    //评论的楼层数为帖子的next floor number mod by xiongying 20160428
                     post.setFloorNumber(parentPost.getIntegralTag2());
                     
                 } else {
