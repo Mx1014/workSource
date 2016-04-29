@@ -52,6 +52,10 @@ public class OrganizationDTO {
 	private Long communityId;
 	private String communityName;
 	
+	private Long groupId;
+	
+	private Byte showFlag;
+	
 	@ItemType(OrganizationDTO.class)
 	private List<OrganizationDTO> childrens;
 	
@@ -242,6 +246,23 @@ public class OrganizationDTO {
 	}
 
 
+	public Long getGroupId() {
+		return groupId;
+	}
+
+	public void setGroupId(Long groupId) {
+		this.groupId = groupId;
+	}
+
+	
+	
+	public Byte getShowFlag() {
+		return showFlag;
+	}
+
+	public void setShowFlag(Byte showFlag) {
+		this.showFlag = showFlag;
+	}
 
 	@Override
     public String toString() {

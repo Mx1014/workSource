@@ -58,16 +58,10 @@ public class WebMenuPrivilegeProviderImpl implements WebMenuPrivilegeProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhWebMenuPrivilegesRecord> query = context.selectQuery(Tables.EH_WEB_MENU_PRIVILEGES);
 		Condition cond = null;
-		if(null != privilegeIds && 0 != privilegeIds.size()){
-			cond = Tables.EH_WEB_MENU_PRIVILEGES.PRIVILEGE_ID.in(privilegeIds);
-		}
+		cond = Tables.EH_WEB_MENU_PRIVILEGES.PRIVILEGE_ID.in(privilegeIds);
 		
 		if(null != showFlag){
-			if(null == cond){
-				cond = Tables.EH_WEB_MENU_PRIVILEGES.SHOW_FLAG.eq(showFlag.getCode());
-			}else{
-				cond = cond.and(Tables.EH_WEB_MENU_PRIVILEGES.SHOW_FLAG.eq(showFlag.getCode()));
-			}
+			cond = cond.and(Tables.EH_WEB_MENU_PRIVILEGES.SHOW_FLAG.eq(showFlag.getCode()));
 		}
 		query.addConditions(cond);
 		query.addOrderBy(Tables.EH_WEB_MENU_PRIVILEGES.SORT_NUM);
