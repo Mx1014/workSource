@@ -143,7 +143,12 @@ UPDATE `eh_conf_source_accounts` SET `account_category_id` = 10 WHERE `account_c
 UPDATE `eh_conf_source_accounts` SET `account_category_id` = 11 WHERE `account_category_id` = 14;
 
  
- 
+-- merge from 3.3.x-delta-data-003-xiongying.sql
+INSERT INTO `eh_acl_role_assignments` (`id`,  `owner_type`,  `owner_id`,  `target_type`,  `target_id`,  `role_id`,  `creator_uid`,  `create_time`)
+	VALUES ( 10485, 'EhOrganizations', 1000705, 'EhUsers', 211208, 1005, 0, UTC_TIMESTAMP());
+INSERT INTO `eh_acl_role_assignments` (`id`,  `owner_type`,  `owner_id`,  `target_type`,  `target_id`,  `role_id`,  `creator_uid`,  `create_time`)
+	VALUES ( 10486, 'EhOrganizations', 1000700, 'EhUsers', 70691, 1005, 0, UTC_TIMESTAMP());
+	
 -- merge from 3.3.x-delta-data-002-liangqishi.sql
 INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, 'mail.smtp.address', 'smtp.mxhichina.com', '访问邮件SMTP服务器的地址');
 INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, 'mail.smtp.port', '25', '访问邮件SMTP服务器的端口号');
