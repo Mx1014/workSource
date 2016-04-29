@@ -4912,7 +4912,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 				if(null != resources && 0 != resources.size()){
 					List<RoleDTO> roleDTOs = new ArrayList<RoleDTO>();
 					for (RoleAssignment resource : resources) {
-						roleDTOs.add(ConvertHelper.convert(roleMap.get(resource.getRoleId()), RoleDTO.class));
+						Role role = roleMap.get(resource.getRoleId());
+						if(null != role)
+							roleDTOs.add(ConvertHelper.convert(role, RoleDTO.class));
 					}
 					dto.setRoles(roleDTOs);
 				}
@@ -5073,7 +5075,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 			if(null != resources && resources.size() > 0){
 				List<RoleDTO> roleDTOs = new ArrayList<RoleDTO>();
 				for (RoleAssignment resource : resources) {
-					roleDTOs.add(ConvertHelper.convert(roleMap.get(resource.getRoleId()), RoleDTO.class));
+					Role role = roleMap.get(resource.getRoleId());
+					if(null != role)
+						roleDTOs.add(ConvertHelper.convert(role, RoleDTO.class));
 				}
 				dto.setRoles(roleDTOs);
 			}
