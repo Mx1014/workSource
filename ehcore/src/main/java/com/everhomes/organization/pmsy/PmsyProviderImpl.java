@@ -2,6 +2,7 @@ package com.everhomes.organization.pmsy;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
@@ -134,20 +135,59 @@ public class PmsyProviderImpl implements PmsyProvider {
 	}
 	
 	@Override
-	public List<PmsyOrder> searchBillingOrders(Timestamp startDate,Timestamp endDate,String userName,String userContact){
+	public List<PmsyOrder> searchBillingOrders(Long pageAnchor,Timestamp startDate,Timestamp endDate,String userName,String userContact){
 		
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhPmsyOrdersRecord> query = context.selectQuery(Tables.EH_PMSY_ORDERS);
+		
+		if(pageAnchor != null)
+			query.addConditions(Tables.EH_PMSY_ORDERS.ID.gt(pageAnchor));
 		if(startDate != null)
-			query.addConditions(Tables.EH_PMSY_ORDERS.CREATE_TIME.ge(startDate));
+			query.addConditions(Tables.EH_PMSY_ORDERS.CREATE_TIME.gt(startDate));
 		if(endDate != null)
-			query.addConditions(Tables.EH_PMSY_ORDERS.CREATE_TIME.le(endDate));
+			query.addConditions(Tables.EH_PMSY_ORDERS.CREATE_TIME.lt(endDate));
 		if(StringUtils.isNotBlank(userName))
 			query.addConditions(Tables.EH_PMSY_ORDERS.USER_NAME.eq(userName));
 		if(StringUtils.isNotBlank(userContact))
 			query.addConditions(Tables.EH_PMSY_ORDERS.USER_CONTACT.eq(userContact));
 		
 		return query.fetch().map(r -> ConvertHelper.convert(r, PmsyOrder.class));
+	}
+
+	@Override
+	public void createPmsyOrderItem(List<PmsyOrderItem> list) {
+		
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPmsyOrderItemsDao dao = new EhPmsyOrderItemsDao(context.configuration());
+		dao.insert(list.stream().map(r -> {
+			Long id = sequenceProvider.getNextSequence(NameMapper
+					.getSequenceDomainFromTablePojo(EhPmsyOrderItems.class));
+			r.setId(id);
+			return r;
+		}).collect(Collectors.toList()));
+		
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPmsyOrderItems.class,null);
+		
+	}
+
+	@Override
+	public PmsyOrder findPmsyOrderById(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmsyOrders.class));
+		SelectQuery<EhPmsyOrdersRecord> query = context.selectQuery(Tables.EH_PMSY_ORDERS);
+		query.addJoin(Tables.EH_PMSY_ORDER_ITEMS, Tables.EH_PMSY_ORDERS.ID.eq(Tables.EH_PMSY_ORDER_ITEMS.ORDER_ID));
+		
+		query.addConditions(Tables.EH_PMSY_ORDERS.ID.eq(id));
+		Result<EhPmsyOrdersRecord> records = query.fetch();
+		return null;
+	}
+
+	@Override
+	public void updatePmsyOrder(PmsyOrder pmsyOrder) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPmsyOrdersDao dao = new EhPmsyOrdersDao(context.configuration());
+		dao.update(pmsyOrder);
+		
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPmsyOrders.class,null);
 	}
 	
 }

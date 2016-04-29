@@ -6,14 +6,16 @@ package com.everhomes.rest.pmsy;
  * <li>endDate : 结束时间</li>
  * <li>userName : 用户名</li>
  * <li>userContact : 手机号</li>
+ * <li>pageAnchor : 分页瞄</li>
  *</ul>
  *
  */
-public class searchBillsOrdersCommand {
+public class SearchBillsOrdersCommand {
 	private Long startDate;
 	private Long endDate;
 	private String userName;
 	private String userContact;
+	private Long pageAnchor;
 	
 	public Long getStartDate() {
 		return startDate;
@@ -38,6 +40,12 @@ public class searchBillsOrdersCommand {
 	}
 	public void setUserContact(String userContact) {
 		this.userContact = userContact;
+	}
+	public Long getPageAnchor() {
+		return pageAnchor;
+	}
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
 	}
 	
 }

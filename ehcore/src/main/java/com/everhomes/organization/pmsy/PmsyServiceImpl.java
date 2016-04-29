@@ -23,19 +23,29 @@ import org.springframework.stereotype.Component;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.order.OrderEmbeddedHandler;
+import com.everhomes.order.OrderUtil;
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.order.CommonOrderCommand;
+import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayCallbackCommand;
+import com.everhomes.rest.parking.ParkingCardRequestDTO;
 import com.everhomes.rest.pmsy.AddressDTO;
+import com.everhomes.rest.pmsy.CreatePmsyBillOrderCommand;
 import com.everhomes.rest.pmsy.GetPmsyBills;
 import com.everhomes.rest.pmsy.ListPmsyBillsCommand;
 import com.everhomes.rest.pmsy.ListResourceCommand;
+import com.everhomes.rest.pmsy.PmBillsOrdersDTO;
+import com.everhomes.rest.pmsy.PmsyBillType;
 import com.everhomes.rest.pmsy.PmsyBillsDTO;
 import com.everhomes.rest.pmsy.PmsyBillItemDTO;
+import com.everhomes.rest.pmsy.PmsyOrderStatus;
 import com.everhomes.rest.pmsy.PmsyPayerDTO;
 import com.everhomes.rest.pmsy.PmsyBillsResponse;
 import com.everhomes.rest.pmsy.PmsyPayerStatus;
 import com.everhomes.rest.pmsy.SearchBillsOrdersResponse;
-import com.everhomes.rest.pmsy.searchBillsOrdersCommand;
+import com.everhomes.rest.pmsy.SetPmsyPropertyCommand;
+import com.everhomes.rest.pmsy.SearchBillsOrdersCommand;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -50,6 +60,9 @@ public class PmsyServiceImpl implements PmsyService{
 	
 	@Autowired
 	private PmsyProvider pmsyProvider;
+	
+	@Autowired
+	private OrderUtil commonOrderUtil;
 	
 	@Override
 	public List<PmsyPayerDTO> listPmPayers(){
@@ -136,7 +149,7 @@ public class PmsyServiceImpl implements PmsyService{
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"the id of project is not null.");
 		}
-		if(StringUtils.isBlank(cmd.getBillType())){
+		if(cmd.getBillType() == null){
 			LOGGER.error("the billType is not null.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"the billType is not null.");
@@ -149,7 +162,7 @@ public class PmsyServiceImpl implements PmsyService{
 		if(cmd.getEndDate() != null)
 			endDate = TimeToString(cmd.getEndDate());
 		String json = PmsyHttpUtil.post("UserRev_GetFeeList", cmd.getCustomerId(), startDate,
-				endDate, cmd.getProjectId(), cmd.getBillType(), "", "");
+				endDate, cmd.getProjectId(), cmd.getBillType().getCode(), "", "");
 		Gson gson = new Gson();
 		Map map = gson.fromJson(json, Map.class);
 		List list = (List) map.get("UserRev_GetFeeList");
@@ -266,8 +279,25 @@ public class PmsyServiceImpl implements PmsyService{
 	}
 	
 	@Override
-	public SearchBillsOrdersResponse searchBillingOrders(searchBillsOrdersCommand cmd){
+	public SearchBillsOrdersResponse searchBillingOrders(SearchBillsOrdersCommand cmd){
 		SearchBillsOrdersResponse response = new SearchBillsOrdersResponse();
+		Timestamp startDate = null;
+		Timestamp endDate = null;
+		if(cmd.getStartDate() != null)
+			startDate = new Timestamp(cmd.getStartDate());
+		if(cmd.getEndDate() != null)
+			endDate = new Timestamp(cmd.getEndDate());
+		List<PmsyOrder> list = pmsyProvider.searchBillingOrders(cmd.getPageAnchor(),startDate, endDate, cmd.getUserName(), cmd.getUserContact());
+		
+		if(list.size() > 0){
+    		response.setRequests(list.stream().map(r -> ConvertHelper.convert(r, PmBillsOrdersDTO.class))
+    				.collect(Collectors.toList()));
+    		if(list.size() != AppConstants.PAGINATION_DEFAULT_SIZE){
+        		response.setNextPageAnchor(null);
+        	}else{
+        		response.setNextPageAnchor(list.get(list.size()-1).getId());
+        	}
+    	}
 		
 		return response;
 	}
@@ -295,6 +325,88 @@ public class PmsyServiceImpl implements PmsyService{
 		}
 		LOGGER.debug("orderTypeCode="+code);
 		return String.valueOf(code);
+	}
+	
+	@Override
+	public CommonOrderDTO createPmBillOrder(CreatePmsyBillOrderCommand cmd){
+		
+		User user = UserContext.current().getUser();
+		Integer namespaceId = UserContext.current().getNamespaceId();
+		Long userId = user.getId();
+		
+		PmsyPayer payer = pmsyProvider.findPmPayersById(cmd.getPmPayerId());
+		
+		PmsyOrder order = new PmsyOrder();
+		order.setCreateTime(new Timestamp(System.currentTimeMillis()));
+		order.setCreatorUid(userId);
+		order.setNamespaceId(namespaceId);
+		order.setOwnerId(cmd.getOwnerId());
+		order.setOwnerType(cmd.getOwnerType());
+		order.setStatus(PmsyOrderStatus.UNPAID.getCode());
+		order.setUserContact(payer.getUserContact());
+		order.setUserName(payer.getUserName());
+		order.setOrderAmount(cmd.getOrderAmount());
+		pmsyProvider.createPmsyOrder(order);
+		
+		String json = PmsyHttpUtil.post("UserRev_GetFeeList", cmd.getCustomerId(), "",
+				"", cmd.getProjectId(), PmsyBillType.UNPAID.getCode(), "", "");
+		Gson gson = new Gson();
+		Map map = gson.fromJson(json, Map.class);
+		List list = (List) map.get("UserRev_GetFeeList");
+		Map map2 = (Map) list.get(0);
+		List list2 = (List) map2.get("Syswin");
+		
+		List<PmsyOrderItem> pmsyOrderItemList = new ArrayList<PmsyOrderItem>();
+		for(Object o:list2){
+			Map map3 = (Map) o;
+			for(String id:cmd.getBillIds()){
+				if(id.equals((String)map3.get("ID"))){
+					PmsyOrderItem orderItem = new PmsyOrderItem();
+					orderItem.setCreateTime(new Timestamp(System.currentTimeMillis()));
+					orderItem.setBillId(id);
+					Long billDateStr = StringToTime((String)map3.get("RepYears"));
+					orderItem.setBillDate(new Timestamp(billDateStr));
+					orderItem.setCustomerId(cmd.getCustomerId());
+					orderItem.setItemName((String)map3.get("IpItemName"));
+					orderItem.setOrderId(order.getId());
+					orderItem.setResourceId((String)map3.get("ResID"));
+					BigDecimal priFailures = new BigDecimal((String)map3.get("PriFailures"));
+					BigDecimal lFFailures = new BigDecimal((String)map3.get("LFFailures"));
+					BigDecimal debtAmount = priFailures.add(lFFailures);
+					orderItem.setBillAmount(debtAmount);
+					pmsyOrderItemList.add(orderItem);
+				}
+			}
+			
+		}
+		pmsyProvider.createPmsyOrderItem(pmsyOrderItemList);
+		
+		//调用统一处理订单接口，返回统一订单格式
+		CommonOrderCommand orderCmd = new CommonOrderCommand();
+		orderCmd.setBody(order.getUserName());
+		orderCmd.setOrderNo(order.getId().toString());
+		orderCmd.setOrderType(OrderType.OrderTypeEnum.PMSIYUAN.getPycode());
+		orderCmd.setSubject("物业缴费订单简要描述");
+		orderCmd.setTotalFee(order.getOrderAmount());
+		CommonOrderDTO dto = null;
+		try {
+			dto = commonOrderUtil.convertToCommonOrderTemplate(orderCmd);
+		} catch (Exception e) {
+			LOGGER.error("convertToCommonOrder is fail.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"convertToCommonOrder is fail.");
+		}
+		return dto;
+	}
+	
+	@Override
+	public void setPmProperty(SetPmsyPropertyCommand cmd){
+		PmsyCommunity pmsyCommunity = new PmsyCommunity();
+		pmsyCommunity.setBillTip(cmd.getBillTip());
+		pmsyCommunity.setContact(cmd.getContact());
+		pmsyCommunity.setCommunityId(cmd.getCommunityId());
+		
+		pmsyProvider.createPmsyCommunity(pmsyCommunity);
 	}
 	
 	private String TimeToString(Long time){

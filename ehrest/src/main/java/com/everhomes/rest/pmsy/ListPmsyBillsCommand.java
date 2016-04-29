@@ -28,7 +28,7 @@ public class ListPmsyBillsCommand {
 	@NotNull
 	private Long payerId;
 	@NotNull
-	private String billType;
+	private PmsyBillType billType;
 	
 	public String getCustomerId() {
 		return customerId;
@@ -61,10 +61,11 @@ public class ListPmsyBillsCommand {
 	public void setProjectId(String projectId) {
 		this.projectId = projectId;
 	}
-	public String getBillType() {
+
+	public PmsyBillType getBillType() {
 		return billType;
 	}
-	public void setBillType(String billType) {
+	public void setBillType(PmsyBillType billType) {
 		this.billType = billType;
 	}
 	public Long getPayerId() {

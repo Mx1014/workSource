@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
@@ -19,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.util.RuntimeErrorException;
+import com.google.gson.Gson;
 
 public class PmsyHttpUtil {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PmsyHttpUtil.class);
@@ -79,33 +81,33 @@ public class PmsyHttpUtil {
         return result;
 	}
 	public static void main(String[] args) {
-//		String json = post("UserRev_OwnerVerify","尹秀容","13800010001","","","","","");
-//		Gson gson = new Gson();
-//		Map map = gson.fromJson(json, Map.class);
-//		System.out.println(map);
-//		List list = (List) map.get("UserRev_OwnerVerify");
-//		Map map2 = (Map) list.get(0);
-//		List list2 = (List) map2.get("Syswin");
-//		Map map3 = (Map) list2.get(0);
-//		System.out.println(map3.get("ProjectID"));
-//		System.out.println(map3.get("ProjectName"));
-//		System.out.println(map3.get("CttID"));
-//		System.out.println(map3.get("CusID"));
-//		System.out.println(map3.get("ResID"));
-//		System.out.println(map3.get("ResCode"));
-//		System.out.println(map3.get("ResName"));
-//		System.out.println(map3.get("BuildingCode"));
-//		System.out.println(map3.get("BuildingName"));
-//		System.out.println(map3.get("IDCardName"));
-//		System.out.println(map3.get("IDCardNo"));
-//		System.out.println(map3.get("CusProperty"));
-//		StringBuilder resourceName = new StringBuilder();
-//		resourceName.append(map3.get("ProjectName"))
-//					.append(" ")
-//					.append(map3.get("BuildingName"))
-//					.append(" ")
-//					.append(map3.get("ResName"));
-//		System.out.println(resourceName.toString());
+		String json = post("UserRev_OwnerVerify","尹秀容","13800010001","","","","","");
+		Gson gson = new Gson();
+		Map map = gson.fromJson(json, Map.class);
+		System.out.println(map);
+		List list = (List) map.get("UserRev_OwnerVerify");
+		Map map2 = (Map) list.get(0);
+		List list2 = (List) map2.get("Syswin");
+		Map map3 = (Map) list2.get(0);
+		System.out.println(map3.get("ProjectID"));
+		System.out.println(map3.get("ProjectName"));
+		System.out.println(map3.get("CttID"));
+		System.out.println(map3.get("CusID"));
+		System.out.println(map3.get("ResID"));
+		System.out.println(map3.get("ResCode"));
+		System.out.println(map3.get("ResName"));
+		System.out.println(map3.get("BuildingCode"));
+		System.out.println(map3.get("BuildingName"));
+		System.out.println(map3.get("IDCardName"));
+		System.out.println(map3.get("IDCardNo"));
+		System.out.println(map3.get("CusProperty"));
+		StringBuilder resourceName = new StringBuilder();
+		resourceName.append(map3.get("ProjectName"))
+					.append(" ")
+					.append(map3.get("BuildingName"))
+					.append(" ")
+					.append(map3.get("ResName"));
+		System.out.println(resourceName.toString());
 //		MonthlyBill mb1 = new MonthlyBill();
 //		mb1.setBillDateStr(1414771200000L);
 //		MonthlyBill mb2 = new MonthlyBill();
