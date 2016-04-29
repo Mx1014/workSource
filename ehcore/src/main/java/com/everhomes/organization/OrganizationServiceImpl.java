@@ -4858,7 +4858,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
-		List<Organization> depts = organizationProvider.listDepartments(org.getPath()+"/%", 1, 1000);
+		List<String> groupTypeList = new ArrayList<String>();
+		groupTypeList.add(OrganizationGroupType.GROUP.getCode());
+		groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
+		
+		List<Organization> depts = organizationProvider.listOrganizationByGroupTypes(org.getPath()+"/%", groupTypes);
 		
 		if(null == groupTypes){
 			groupTypes = new ArrayList<String>();
