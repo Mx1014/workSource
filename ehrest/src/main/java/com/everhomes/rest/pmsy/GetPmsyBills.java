@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
  *	</li>
  * </ul>
  */
-public class FindMonthlyPmBill {
+public class GetPmsyBills {
 	
 	@NotNull
 	private String customerId;

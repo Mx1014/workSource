@@ -7,11 +7,11 @@ package com.everhomes.rest.pmsy;
  * <li>COMMUNITY("community"): 小区</li>
  * </ul>
  */
-public enum PmOwnerType {
+public enum PmsyOwnerType {
     COMMUNITY("community");
     
     private String code;
-    private PmOwnerType(String code) {
+    private PmsyOwnerType(String code) {
         this.code = code;
     }
     
@@ -19,10 +19,10 @@ public enum PmOwnerType {
         return this.code;
     }
     
-    public static PmOwnerType fromCode(String code) {
+    public static PmsyOwnerType fromCode(String code) {
         if(code != null) {
-            PmOwnerType[] values = PmOwnerType.values();
-            for(PmOwnerType value : values) {
+            PmsyOwnerType[] values = PmsyOwnerType.values();
+            for(PmsyOwnerType value : values) {
                 if(code.equals(value.code)) {
                     return value;
                 }

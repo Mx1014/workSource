@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
  *</ul>
  *
  */
-public class SetPmPropertyCommand {
+public class SetPmsyPropertyCommand {
 	private Long communityId;
 	@NotNull
 	private String billTip;

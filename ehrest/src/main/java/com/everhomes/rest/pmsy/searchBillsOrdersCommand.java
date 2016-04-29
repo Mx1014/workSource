@@ -5,7 +5,7 @@ package com.everhomes.rest.pmsy;
  * <li>startDate : 开始时间</li>
  * <li>endDate : 结束时间</li>
  * <li>userName : 用户名</li>
- * <li>mobile : 手机号</li>
+ * <li>userContact : 手机号</li>
  *</ul>
  *
  */
@@ -13,7 +13,7 @@ public class searchBillsOrdersCommand {
 	private Long startDate;
 	private Long endDate;
 	private String userName;
-	private String mobile;
+	private String userContact;
 	
 	public Long getStartDate() {
 		return startDate;
@@ -33,12 +33,11 @@ public class searchBillsOrdersCommand {
 	public void setUserName(String userName) {
 		this.userName = userName;
 	}
-	public String getMobile() {
-		return mobile;
+	public String getUserContact() {
+		return userContact;
 	}
-	public void setMobile(String mobile) {
-		this.mobile = mobile;
+	public void setUserContact(String userContact) {
+		this.userContact = userContact;
 	}
-	
 	
 }

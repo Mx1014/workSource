@@ -12,7 +12,7 @@ import java.math.BigDecimal;
  * <li>itemName: 收费项目名称（此笔费用对应的名称，如“电费”，“水费”，“物业管理费”等）</li>
  * </ul>
  */
-public class PmBillItemDTO {
+public class PmsyBillItemDTO {
 	private String billId;
 	private Long billDateStr;
 	private BigDecimal receivableAmount;

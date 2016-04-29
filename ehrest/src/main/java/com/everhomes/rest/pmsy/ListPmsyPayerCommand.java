@@ -6,7 +6,7 @@ package com.everhomes.rest.pmsy;
  *</ul>
  *
  */
-public class ListPmPayerCommand {
+public class ListPmsyPayerCommand {
 	private Long creatorId;
 
 	public Long getCreatorId() {

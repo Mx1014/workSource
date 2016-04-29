@@ -7,13 +7,13 @@ import java.sql.Timestamp;
  * <ul>
  * <li>id: 订单ID</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
- * <li>ownerType: 归属的类型，{@link com.everhomes.rest.pmsy.PmOwnerType}</li>
+ * <li>ownerType: 归属的类型，{@link com.everhomes.rest.pmsy.PmsyOwnerType}</li>
  * <li>payerUid: 付款人ID</li>
  * <li>userName: 该订单 用户名称</li>
  * <li>userContact: 该订单 用户手机号</li>
  * <li>orderAmount: 该订单缴纳 金额</li>
  * <li>paidTime: 付款时间</li>
- * <li>status: 订单状态 {@link com.everhomes.rest.pmsy.PmOrderStatus}</li>
+ * <li>status: 订单状态 {@link com.everhomes.rest.pmsy.PmsyOrderStatus}</li>
  * <li>creatorUid: 订单创建人ID</li>
  * <li>createTime: 缴费记录创建日期</li>
  * <li>paidType: 支付方式,10001-支付宝，10002-微信 com.everhomes.rest.organization.VendorType</li>

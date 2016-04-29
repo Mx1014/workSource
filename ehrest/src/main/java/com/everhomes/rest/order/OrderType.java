@@ -4,15 +4,19 @@ package com.everhomes.rest.order;
  * <p>可按需新增订单类型</p>
  *<ul>
  *	<li>10000001-wuyetest-物业支付-测试用</li>
+ *	<li>10000002-parking-停车充值支付</li>
+ *	<li>10000003-pmsy-思源物业</li>
  *</ul>
  */
 public class OrderType {
 	public static final int WU_YE_TEST_CODE = 10000001;
 	public static final int PARKING_CODE = 10000002;
+	public static final int PM_SIYUAN_CODE = 10000003;
 	
 	public static enum OrderTypeEnum{
 		WUYETEST(OrderType.WU_YE_TEST_CODE,"wuyetest","物业支付-测试用"),
-		PARKING(OrderType.PARKING_CODE,"parking","停车充值支付");
+		PARKING(OrderType.PARKING_CODE,"parking","停车充值支付"),
+		PMSIYUAN(OrderType.PM_SIYUAN_CODE,"pmsy","思源物业");
 
 		private int code;
 		private String pycode;

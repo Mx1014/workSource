@@ -1,11 +1,38 @@
 package com.everhomes.organization.pmsy;
 
+import java.sql.Timestamp;
+import java.util.List;
+
+import org.apache.commons.lang.StringUtils;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.Result;
+import org.jooq.SelectQuery;
+import org.jooq.SelectWhereStep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.pmsy.PmsyPayerStatus;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhPmsyPayers;
+import com.everhomes.server.schema.tables.daos.EhPmsyCommunitiesDao;
+import com.everhomes.server.schema.tables.daos.EhPmsyOrderItemsDao;
+import com.everhomes.server.schema.tables.daos.EhPmsyOrdersDao;
+import com.everhomes.server.schema.tables.daos.EhPmsyPayersDao;
+import com.everhomes.server.schema.tables.pojos.EhPmsyCommunities;
+import com.everhomes.server.schema.tables.pojos.EhPmsyOrderItems;
+import com.everhomes.server.schema.tables.pojos.EhPmsyOrders;
+import com.everhomes.server.schema.tables.records.EhPmsyOrdersRecord;
+import com.everhomes.server.schema.tables.records.EhPmsyPayersRecord;
+import com.everhomes.util.ConvertHelper;
 
 @Component
 public class PmsyProviderImpl implements PmsyProvider {
@@ -14,5 +41,113 @@ public class PmsyProviderImpl implements PmsyProvider {
 	@Autowired
 	private DbProvider dbProvider;
 	
+	@Autowired 
+    private SequenceProvider sequenceProvider;
+	
+	@Override
+	public List<PmsyPayer> listPmPayers(Long id,Integer namespaceId){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmsyPayers.class));
+		SelectWhereStep<EhPmsyPayersRecord> select = context.selectFrom(Tables.EH_PMSY_PAYERS);
+		
+		Result<EhPmsyPayersRecord> result = select.where(Tables.EH_PMSY_PAYERS.STATUS.eq(PmsyPayerStatus.ACTIVE.getCode()))
+			  .and(Tables.EH_PMSY_PAYERS.CREATOR_UID.eq(id))
+			  .and(Tables.EH_PMSY_PAYERS.NAMESPACE_ID.eq(namespaceId))
+			  .fetch();
+		
+		return result.map(r -> ConvertHelper.convert(r, PmsyPayer.class));
+	}
+	
+	@Override
+	public PmsyPayer findPmPayersById(Long id){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmsyPayers.class));
+		EhPmsyPayersDao dao = new EhPmsyPayersDao(context.configuration());
+		
+		return ConvertHelper.convert(dao.fetchOneById(id), PmsyPayer.class);
+	}
+	
+	@Override
+	public void createPmPayer(PmsyPayer pmsyPayer){
+		Long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhPmsyPayers.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPmsyPayersDao dao = new EhPmsyPayersDao(context.configuration());
+		pmsyPayer.setId(id);
+		dao.insert(pmsyPayer);
+		
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPmsyPayers.class,null);
+	}
+	
+	@Override
+	public void updatePmPayer(PmsyPayer pmsyPayer){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPmsyPayersDao dao = new EhPmsyPayersDao(context.configuration());
+		
+		dao.update(pmsyPayer);
+		
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPmsyPayers.class,null);
+	}
+	
+	@Override
+	public void updatePmsyCommunity(PmsyCommunity pmsyCommunity){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPmsyCommunitiesDao dao = new EhPmsyCommunitiesDao(context.configuration());
+		
+		dao.update(pmsyCommunity);
+		
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPmsyCommunities.class,null);
+	}
+	
+	@Override
+	public void createPmsyCommunity(PmsyCommunity pmsyCommunity){
+		Long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhPmsyCommunities.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPmsyCommunitiesDao dao = new EhPmsyCommunitiesDao(context.configuration());
+		pmsyCommunity.setId(id);
+		dao.insert(pmsyCommunity);
+		
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPmsyCommunities.class,null);
+	}
+	
+	@Override
+	public void createPmsyOrderItem(PmsyOrderItem pmsyOrderItem){
+		Long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhPmsyOrderItems.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPmsyOrderItemsDao dao = new EhPmsyOrderItemsDao(context.configuration());
+		pmsyOrderItem.setId(id);
+		dao.insert(pmsyOrderItem);
+		
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPmsyOrderItems.class,null);
+	}
+	
+	@Override
+	public void createPmsyOrder(PmsyOrder pmsyOrder){
+		Long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhPmsyOrderItems.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPmsyOrdersDao dao = new EhPmsyOrdersDao(context.configuration());
+		pmsyOrder.setId(id);
+		dao.insert(pmsyOrder);
+		
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPmsyOrders.class,null);
+	}
+	
+	@Override
+	public List<PmsyOrder> searchBillingOrders(Timestamp startDate,Timestamp endDate,String userName,String userContact){
+		
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhPmsyOrdersRecord> query = context.selectQuery(Tables.EH_PMSY_ORDERS);
+		if(startDate != null)
+			query.addConditions(Tables.EH_PMSY_ORDERS.CREATE_TIME.ge(startDate));
+		if(endDate != null)
+			query.addConditions(Tables.EH_PMSY_ORDERS.CREATE_TIME.le(endDate));
+		if(StringUtils.isNotBlank(userName))
+			query.addConditions(Tables.EH_PMSY_ORDERS.USER_NAME.eq(userName));
+		if(StringUtils.isNotBlank(userContact))
+			query.addConditions(Tables.EH_PMSY_ORDERS.USER_CONTACT.eq(userContact));
+		
+		return query.fetch().map(r -> ConvertHelper.convert(r, PmsyOrder.class));
+	}
 	
 }

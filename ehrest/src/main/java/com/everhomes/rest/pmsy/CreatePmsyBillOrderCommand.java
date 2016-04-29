@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 /**
  *<ul>
- *	<li>ownerType: 归属的类型，{@link com.everhomes.rest.pmsy.PmOwnerType}</li>
+ *	<li>ownerType: 归属的类型，{@link com.everhomes.rest.pmsy.PmsyOwnerType}</li>
  *	<li>ownerId : 归属ID</li>
  *	<li>projectId : 项目ID</li>
  *	<li>customerId : 客户ID</li>
@@ -17,7 +17,7 @@ import java.math.BigDecimal;
  *</ul>
  *
  */
-public class CreatePmBillOrderCommand {
+public class CreatePmsyBillOrderCommand {
 	private String ownerType;
 	private Long ownerId;
 	private String projectId;

@@ -10,12 +10,12 @@ import javax.validation.constraints.NotNull;
  * <li>startDate: 开始时间</li>
  * <li>endDate: 结束时间</li>
  * <li>billType:'01' 表示查询所有欠费，不包括已交清；
- *			'019' 表示查询所有费用，包括未交清和已交清费用； {@link com.everhomes.rest.pmsy.BillType}}
+ *			'019' 表示查询所有费用，包括未交清和已交清费用； {@link com.everhomes.rest.pmsy.PmsyBillType}}
  *	</li>
  *	<li>payerId: 物业缴费用户的ID(存在左邻这边的用户ID)</li>
  * </ul>
  */
-public class ListPmBillsCommand {
+public class ListPmsyBillsCommand {
 	
 	@NotNull
 	private String customerId;

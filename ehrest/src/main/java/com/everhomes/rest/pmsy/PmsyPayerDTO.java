@@ -2,23 +2,18 @@ package com.everhomes.rest.pmsy;
 
 /**
  *<ul>
- * <li>payerId : 物业缴费用户的ID(存在左邻这边的用户ID)</li>
+ * <li>id : 物业缴费用户的ID(存在左邻这边的用户ID)</li>
  * <li>userName : 用户名称</li>
  * <li>userContact : 用户手机号</li>
  *</ul>
  *
  */
-public class PmPayerDTO {
-	private Long payerId;
-	private String userName;
-	private String userContact;
+public class PmsyPayerDTO {
 	
-	public Long getPayerId() {
-		return payerId;
-	}
-	public void setPayerId(Long payerId) {
-		this.payerId = payerId;
-	}
+	private java.lang.Long     id;
+	private java.lang.String   userName;
+	private java.lang.String   userContact;
+	
 	public String getUserName() {
 		return userName;
 	}
@@ -31,6 +26,11 @@ public class PmPayerDTO {
 	public void setUserContact(String userContact) {
 		this.userContact = userContact;
 	}
-	
+	public java.lang.Long getId() {
+		return id;
+	}
+	public void setId(java.lang.Long id) {
+		this.id = id;
+	}
 	
 }

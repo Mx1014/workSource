@@ -3,9 +3,7 @@ package com.everhomes.organization.pmsy;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
@@ -21,13 +19,12 @@ import org.slf4j.LoggerFactory;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.util.RuntimeErrorException;
-import com.google.gson.Gson;
 
 public class PmsyHttpUtil {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PmsyHttpUtil.class);
 
-	static CloseableHttpClient httpclient = HttpClients.createDefault();
 	public static String post(String p0, String p1, String p2, String p3, String p4, String p5, String p6, String p7){
+		CloseableHttpClient httpclient = HttpClients.createDefault();
 		String result = null;
         try {
 
@@ -109,12 +106,18 @@ public class PmsyHttpUtil {
 //					.append(" ")
 //					.append(map3.get("ResName"));
 //		System.out.println(resourceName.toString());
-		HashSet<String> set = new HashSet<String>();
-		set.add("123");
-		set.add("123");
-		set.add("123");
-		set.add("123");
-		System.out.println(set);
+//		MonthlyBill mb1 = new MonthlyBill();
+//		mb1.setBillDateStr(1414771200000L);
+//		MonthlyBill mb2 = new MonthlyBill();
+//		mb2.setBillDateStr(1412092800000L);
+//		MonthlyBill mb3 = new MonthlyBill();
+//		mb3.setBillDateStr(1420041600000L);
+//		List<MonthlyBill> list = new ArrayList<MonthlyBill>();
+//		list.add(mb1);
+//		list.add(mb2);
+//		list.add(mb3);
+//		Collections.sort(list);
+//		list.stream().forEach(r -> System.out.println(r.getBillDateStr()));
 	}
 	
 }

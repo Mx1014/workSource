@@ -7,12 +7,12 @@ package com.everhomes.rest.pmsy;
  * <li>UNPAID("01"): 未支付账单</li>
  * </ul>
  */
-public enum BillType {
+public enum PmsyBillType {
     ALL("019"), UNPAID("01");
     
     private String code;
 
-	private BillType(String code){
+	private PmsyBillType(String code){
 		this.code = code;
 	}
 
@@ -20,8 +20,8 @@ public enum BillType {
 		return code;
 	}
 
-	public static BillType fromCode(String code){
-		for(BillType v :BillType.values()){
+	public static PmsyBillType fromCode(String code){
+		for(PmsyBillType v :PmsyBillType.values()){
 			if(v.getCode().equals(code))
 				return v;
 		}
