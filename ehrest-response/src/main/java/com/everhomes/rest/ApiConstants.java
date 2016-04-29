@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-04-26 18:22:38
+// generated at 2016-04-29 18:55:14
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -647,6 +647,14 @@ public interface ApiConstants {
     public static final String PM_SETPROPCURRENTCOMMUNITY_URL = "/pm/setPropCurrentCommunity";
     public static final String PM_UPDATEPMBILL_URL = "/pm/updatePmBill";
     public static final String PM_UPDATEPMBILLS_URL = "/pm/updatePmBills";
+    public static final String PMSY_CREATEPMBILLORDER_URL = "/pmsy/createPmBillOrder";
+    public static final String PMSY_GETPMSYBILLS_URL = "/pmsy/getPmsyBills";
+    public static final String PMSY_LISTADDRESSES_URL = "/pmsy/listAddresses";
+    public static final String PMSY_LISTPMBILLS_URL = "/pmsy/listPmBills";
+    public static final String PMSY_LISTPMPAYERS_URL = "/pmsy/listPmPayers";
+    public static final String PMSY_NOTIFYPMSYORDERPAYMENT_URL = "/pmsy/notifyPmsyOrderPayment";
+    public static final String PMSY_SEARCHBILLINGORDERS_URL = "/pmsy/searchBillingOrders";
+    public static final String PMSY_SETPMPROPERTY_URL = "/pmsy/setPmProperty";
     public static final String POLL_SHOWRESULT_URL = "/poll/showResult";
     public static final String POLL_VOTE_URL = "/poll/vote";
     public static final String PUSHER_CREATECERT_URL = "/pusher/createCert";

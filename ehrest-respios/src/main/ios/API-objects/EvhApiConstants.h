@@ -1,13 +1,5 @@
 //
 // EvhApiConstants.h
-<<<<<<< HEAD
-<<<<<<< HEAD
-// generated at 2016-04-18 14:48:53
-=======
-// generated at 2016-04-19 14:25:58
->>>>>>> 3.3.x
-=======
->>>>>>> 3.3.x
 //
 #define EVH_ACLINK_ACTIVE_URL @"/aclink/active"
 #define EVH_ACLINK_ACTIVING_URL @"/aclink/activing"
@@ -652,6 +644,14 @@
 #define EVH_PM_SETPROPCURRENTCOMMUNITY_URL @"/pm/setPropCurrentCommunity"
 #define EVH_PM_UPDATEPMBILL_URL @"/pm/updatePmBill"
 #define EVH_PM_UPDATEPMBILLS_URL @"/pm/updatePmBills"
+#define EVH_PMSY_CREATEPMBILLORDER_URL @"/pmsy/createPmBillOrder"
+#define EVH_PMSY_GETPMSYBILLS_URL @"/pmsy/getPmsyBills"
+#define EVH_PMSY_LISTADDRESSES_URL @"/pmsy/listAddresses"
+#define EVH_PMSY_LISTPMBILLS_URL @"/pmsy/listPmBills"
+#define EVH_PMSY_LISTPMPAYERS_URL @"/pmsy/listPmPayers"
+#define EVH_PMSY_NOTIFYPMSYORDERPAYMENT_URL @"/pmsy/notifyPmsyOrderPayment"
+#define EVH_PMSY_SEARCHBILLINGORDERS_URL @"/pmsy/searchBillingOrders"
+#define EVH_PMSY_SETPMPROPERTY_URL @"/pmsy/setPmProperty"
 #define EVH_POLL_SHOWRESULT_URL @"/poll/showResult"
 #define EVH_POLL_VOTE_URL @"/poll/vote"
 #define EVH_PUSHER_CREATECERT_URL @"/pusher/createCert"

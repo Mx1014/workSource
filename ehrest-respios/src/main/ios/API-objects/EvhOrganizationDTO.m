@@ -1,14 +1,6 @@
 //
 // EvhOrganizationDTO.m
-<<<<<<< HEAD
-<<<<<<< HEAD
-// generated at 2016-04-18 14:48:51 
-=======
-// generated at 2016-04-19 14:25:55 
->>>>>>> 3.3.x
-=======
-// generated at 2016-04-26 18:22:53 
->>>>>>> 3.3.x
+// generated at 2016-04-29 18:56:01 
 //
 #import "EvhOrganizationDTO.h"
 #import "EvhOrganizationDTO.h"
@@ -83,6 +75,10 @@
         [jsonObject setObject: self.communityId forKey: @"communityId"];
     if(self.communityName)
         [jsonObject setObject: self.communityName forKey: @"communityName"];
+    if(self.groupId)
+        [jsonObject setObject: self.groupId forKey: @"groupId"];
+    if(self.showFlag)
+        [jsonObject setObject: self.showFlag forKey: @"showFlag"];
     if(self.childrens) {
         NSMutableArray* jsonArray = [NSMutableArray new];
         for(EvhOrganizationDTO* item in self.childrens) {
@@ -185,6 +181,14 @@
         self.communityName = [jsonObject objectForKey: @"communityName"];
         if(self.communityName && [self.communityName isEqual:[NSNull null]])
             self.communityName = nil;
+
+        self.groupId = [jsonObject objectForKey: @"groupId"];
+        if(self.groupId && [self.groupId isEqual:[NSNull null]])
+            self.groupId = nil;
+
+        self.showFlag = [jsonObject objectForKey: @"showFlag"];
+        if(self.showFlag && [self.showFlag isEqual:[NSNull null]])
+            self.showFlag = nil;
 
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"childrens"];
