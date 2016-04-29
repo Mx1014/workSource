@@ -63,6 +63,7 @@ import com.everhomes.forum.Post;
 import com.everhomes.forum.PostCreateTimeDescComparator;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupDiscriminator;
+import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
@@ -1285,6 +1286,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 }
 	        }
 	        
+	        groupDto = null; // 如果缺少这一句，则即使每个子公司都没有group，仍然会加到论坛列表中 by lqs 20160429
 	        List<String> groupTypes = new ArrayList<String>();
             groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
             List<Organization> subOrgList = organizationProvider.listOrganizationByGroupTypes(organization.getPath() + "/%", groupTypes);
@@ -4157,7 +4159,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		response.setNextPageAnchor(locator.getAnchor());
 		
-		response.setMembers(this.convertDTO(organizationMembers, org));
+		response.setMembers(this.convertDTO(organizationMembers, org, null));
 		
 		return response;
 	}
@@ -4239,12 +4241,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		
+		List<String> groupTypes = cmd.getGroupTypes();
+		
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		List<OrganizationMember> organizationMembers = this.organizationProvider.listParentOrganizationMembers(org.getPath(), cmd.getGroupTypes(), locator, pageSize);
+		List<OrganizationMember> organizationMembers = this.organizationProvider.listParentOrganizationMembers(org.getPath(), groupTypes, locator, pageSize);
 		response.setNextPageAnchor(locator.getAnchor());
 		
-		response.setMembers(this.convertDTO(organizationMembers, org));
+		response.setMembers(this.convertDTO(organizationMembers, org, groupTypes));
 		
 		return response;
 	}
@@ -4850,15 +4854,22 @@ public class OrganizationServiceImpl implements OrganizationService {
 	 * @param depts
 	 * @return
 	 */
-	private List<OrganizationMemberDTO> convertDTO(List<OrganizationMember> organizationMembers, Organization org){
+	private List<OrganizationMemberDTO> convertDTO(List<OrganizationMember> organizationMembers, Organization org, List<String> groupTypes){
 		
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
 		List<Organization> depts = organizationProvider.listDepartments(org.getPath()+"/%", 1, 1000);
 		
+		if(null == groupTypes){
+			groupTypes = new ArrayList<String>();
+		}
+		
 		if(OrganizationGroupType.fromCode(org.getGroupType()) != OrganizationGroupType.ENTERPRISE){
 			depts.add(org);
+			groupTypes.add(org.getGroupType());
 		}
+		
+		List<String> types = groupTypes;
 		
 		Long orgId = null;
 		
@@ -4888,7 +4899,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 			if(null != organization)
 				dto.setOrganizationName(organization.getName());
 			
-			Organization group = deptMaps.get(c.getGroupId());
+			Organization group = null;
+			
+			if(types.contains(OrganizationGroupType.GROUP.getCode())){
+				group = deptMaps.get(c.getOrganizationId());
+			}else{
+				group = deptMaps.get(c.getGroupId());
+			}
+			 
 			if(null != group)
 				dto.setGroupName(group.getName());
 			
@@ -6092,6 +6110,25 @@ public class OrganizationServiceImpl implements OrganizationService {
 			return importDataResponse;
 		}
 	    
-	    
+	    @Override
+	    public List<GroupMember> listMessageGroupMembers(Long groupId){
+	    	List<GroupMember> members = new ArrayList<GroupMember>();
+	    	Organization organization = organizationProvider.findOrganizationByGroupId(groupId);
+	    	if(null == organization){
+	    		return members;
+	    	}
+	    	
+	    	List<OrganizationMember> organizationMember = organizationProvider.listOrganizationMembersByOrgId(organization.getId());
+	    	for (OrganizationMember member : organizationMember) {
+				if(OrganizationMemberStatus.fromCode(member.getStatus()) == OrganizationMemberStatus.ACTIVE && OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER){
+					GroupMember groupMember = new GroupMember();
+					groupMember.setMemberId(member.getTargetId());
+					groupMember.setMemberType(EntityType.USER.getCode());
+					members.add(groupMember);
+				}
+			}
+	    	
+	    	return members;
+	    }
 	
 }

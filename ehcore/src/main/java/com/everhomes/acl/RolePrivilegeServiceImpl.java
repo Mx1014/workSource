@@ -139,11 +139,13 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		
 		
 		List<Long> privilegeIds = this.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
-		List<WebMenuPrivilege> webMenuPrivileges = webMenuPrivilegeProvider.ListWebMenuByPrivilegeIds(privilegeIds, WebMenuPrivilegeShowFlag.MENU_SHOW);
-		if(null == webMenuPrivileges){
+		
+		if(null == privilegeIds){
 			res.setMenus(new ArrayList<WebMenuDTO>());
 			return res;
 		}
+		List<WebMenuPrivilege> webMenuPrivileges = webMenuPrivilegeProvider.ListWebMenuByPrivilegeIds(privilegeIds, WebMenuPrivilegeShowFlag.MENU_SHOW);
+		
 		List<Long> menuIds = new ArrayList<Long>();
 		for (WebMenuPrivilege webMenuPrivilege : webMenuPrivileges) {
 			menuIds.add(webMenuPrivilege.getMenuId());

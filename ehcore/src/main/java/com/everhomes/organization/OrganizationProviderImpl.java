@@ -2172,4 +2172,14 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		});
 		return owners;
 	}
+	
+	@Override
+	public Organization findOrganizationByGroupId(Long groupId){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
+		query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_ID.eq(groupId));
+		
+		return ConvertHelper.convert(query.fetchAny(), Organization.class);
+		
+	}
 }

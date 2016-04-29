@@ -5,6 +5,7 @@ package com.everhomes.forum;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -4047,8 +4048,10 @@ public class ForumServiceImpl implements ForumService {
         Long userId = user.getId();
         Long communityId = cmd.getCommunityId();
         
-        List<Long> forumIdList = cmd.getForumIdList();
-        if(forumIdList.size() > 0) {
+        // 由外边传入的论坛ID可能重复，需要进行过虑，否则帖子会有重复 by lqs 20160429
+        List<Long> forumIdList = removeDuplicatedForumIds(cmd.getForumIdList());
+        
+        if(forumIdList != null && forumIdList.size() > 0) {
             CrossShardListingLocator[] locators = new CrossShardListingLocator[forumIdList.size()];
             for(int i = 0; i < forumIdList.size(); i++) {
                 Long forumId = forumIdList.get(i);
@@ -4067,7 +4070,8 @@ public class ForumServiceImpl implements ForumService {
             }, new PostCreateTimeDescComparator());
 
             Long nextPageAnchor = null;
-            this.forumProvider.populatePostAttachments(posts);
+            // 在queryPosts已经进行附件填充，故可去掉 by lqs 20160429
+            // this.forumProvider.populatePostAttachments(posts);
             
             if(posts.size() > pageSize) {
                 posts.remove(posts.size() - 1);
@@ -4113,4 +4117,23 @@ public class ForumServiceImpl implements ForumService {
 	    
 	    return null;
 	}
+    
+    private List<Long> removeDuplicatedForumIds(List<Long> forumIdList) {
+        List<Long> dupForumIdList = new ArrayList<Long>();
+        List<Long> uniqueForumIdList = new ArrayList<Long>();
+        if(forumIdList != null && forumIdList.size() > 0) {
+            for(Long id : forumIdList) {
+                if(!uniqueForumIdList.contains(id)) {
+                    uniqueForumIdList.add(id);
+                } else {
+                    dupForumIdList.add(id);
+                }
+            }
+        }
+        if(dupForumIdList.size() > 0 && LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Remove the duplicated forum ids, duplicatedForumIds={}, forumIdList={}", dupForumIdList, forumIdList);
+        }
+        
+        return uniqueForumIdList;
+    }
 }
