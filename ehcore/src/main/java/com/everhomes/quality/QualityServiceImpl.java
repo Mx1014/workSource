@@ -727,10 +727,11 @@ public class QualityServiceImpl implements QualityService {
 	
 	@Override
 	public List<GroupUserDTO> getGroupMembers(Long groupId) {
+		User current = UserContext.current().getUser();
 		List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(groupId);
     	List<GroupUserDTO> groupUsers = members.stream().map((mem) -> {
          	if(OrganizationMemberTargetType.USER.getCode().equals(mem.getTargetType()) 
-         			&& mem.getTargetId() != null && mem.getTargetId() != 0) {
+         			&& mem.getTargetId() != null && mem.getTargetId() != 0 && mem.getTargetId() != current.getId()) {
          		GroupUserDTO user = new GroupUserDTO();
          		user.setOperatorType(mem.getTargetType());
          		user.setUserId(mem.getTargetId());
@@ -829,6 +830,18 @@ public class QualityServiceImpl implements QualityService {
 									UserContext.current().getUser().getLocale(),
 									"the task is closed!"));
 		}
+		if(cmd.getOperatorId() != null && cmd.getOperatorId() == user.getId()) {
+			LOGGER.error("cannot assign to oneself!" + cmd.getOperatorId());
+			throw RuntimeErrorException
+					.errorWith(
+							QualityServiceErrorCode.SCOPE,
+							QualityServiceErrorCode.ERROR_ASSIGN_TO_ONESELF,
+							localeStringService.getLocalizedString(
+									String.valueOf(QualityServiceErrorCode.SCOPE),
+									String.valueOf(QualityServiceErrorCode.ERROR_ASSIGN_TO_ONESELF),
+									UserContext.current().getUser().getLocale(),
+									"cannot assign to oneself!"));
+		}
 		QualityInspectionTaskRecords record = new QualityInspectionTaskRecords();
 		record.setTaskId(task.getId());
 		record.setOperatorType(OwnerType.USER.getCode());
@@ -899,7 +912,7 @@ public class QualityServiceImpl implements QualityService {
 			msgMap.put("operator", operator.getContactName());
 			msgMap.put("target", target.getContactName());
 			msgMap.put("taskName", task.getTaskName());
-			msgMap.put("deadline", new Timestamp(cmd.getEndTime()));
+			msgMap.put("deadline", timeToStr(new Timestamp(cmd.getEndTime())));
 			int msgCode = QualityNotificationTemplateCode.ASSIGN_TASK_MSG;
 			String msg = localeTemplateService.getLocaleTemplateString(scope, msgCode, locale, msgMap, "");
 			record.setProcessMessage(msg);
@@ -911,8 +924,14 @@ public class QualityServiceImpl implements QualityService {
 					String.valueOf(QualityServiceErrorCode.ATTACHMENT_TEXT),
 					UserContext.current().getUser().getLocale(),
 					"text:");
-			String msg = record.getProcessMessage()+attText+cmd.getMessage();
-			record.setProcessMessage(msg);
+			if(record.getProcessMessage() != null) {
+				String msg = record.getProcessMessage()+attText+cmd.getMessage();
+				record.setProcessMessage(msg);
+			} else {
+				String msg = attText+cmd.getMessage();
+				record.setProcessMessage(msg);
+			}
+			
 		}
 		
 		QualityInspectionTaskDTO dto = updateVerificationTasks(task, record, cmd.getAttachments());
@@ -959,6 +978,18 @@ public class QualityServiceImpl implements QualityService {
 									String.valueOf(QualityServiceErrorCode.ERROR_TASK_IS_CLOSED),
 									UserContext.current().getUser().getLocale(),
 									"the task is closed!"));
+		}
+		if(cmd.getOperatorId() != null && cmd.getOperatorId() == user.getId()) {
+			LOGGER.error("cannot assign to oneself!" + cmd.getOperatorId());
+			throw RuntimeErrorException
+					.errorWith(
+							QualityServiceErrorCode.SCOPE,
+							QualityServiceErrorCode.ERROR_ASSIGN_TO_ONESELF,
+							localeStringService.getLocalizedString(
+									String.valueOf(QualityServiceErrorCode.SCOPE),
+									String.valueOf(QualityServiceErrorCode.ERROR_ASSIGN_TO_ONESELF),
+									UserContext.current().getUser().getLocale(),
+									"cannot assign to oneself!"));
 		}
 		QualityInspectionTaskRecords record = new QualityInspectionTaskRecords();
 		record.setTaskId(task.getId());
@@ -1015,14 +1046,20 @@ public class QualityServiceImpl implements QualityService {
 		    map.put("operator", operator.getContactName());
 		    map.put("target", target.getContactName());
 		    map.put("taskName", task.getTaskName());
-		    map.put("deadline", cmd.getEndTime());
+		    map.put("deadline", timeToStr(new Timestamp(cmd.getEndTime())));
 			int msgCode = QualityNotificationTemplateCode.ASSIGN_TASK_MSG;
 			String msg = localeTemplateService.getLocaleTemplateString(scope, msgCode, locale, msgMap, "");
 			record.setProcessMessage(msg);
 		}
 		if(cmd.getMessage() != null) {
-			String msg = record.getProcessMessage()+cmd.getMessage();
-			record.setProcessMessage(msg);
+			
+			if(record.getProcessMessage() != null) {
+				String msg = record.getProcessMessage()+cmd.getMessage();
+				record.setProcessMessage(msg);
+			} else {
+				String msg = cmd.getMessage();
+				record.setProcessMessage(msg);
+			}
 		}
 		
 		task.setProcessTime(new Timestamp(System.currentTimeMillis()));

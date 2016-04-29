@@ -1,9 +1,13 @@
 //
 // EvhSceneDTO.m
 <<<<<<< HEAD
+<<<<<<< HEAD
 // generated at 2016-04-18 14:48:52 
 =======
 // generated at 2016-04-19 14:25:57 
+>>>>>>> 3.3.x
+=======
+// generated at 2016-04-26 18:22:55 
 >>>>>>> 3.3.x
 //
 #import "EvhSceneDTO.h"
@@ -43,6 +47,8 @@
         [jsonObject setObject: self.entityContent forKey: @"entityContent"];
     if(self.name)
         [jsonObject setObject: self.name forKey: @"name"];
+    if(self.aliasName)
+        [jsonObject setObject: self.aliasName forKey: @"aliasName"];
     if(self.avatar)
         [jsonObject setObject: self.avatar forKey: @"avatar"];
     if(self.avatarUrl)
@@ -67,6 +73,10 @@
         self.name = [jsonObject objectForKey: @"name"];
         if(self.name && [self.name isEqual:[NSNull null]])
             self.name = nil;
+
+        self.aliasName = [jsonObject objectForKey: @"aliasName"];
+        if(self.aliasName && [self.aliasName isEqual:[NSNull null]])
+            self.aliasName = nil;
 
         self.avatar = [jsonObject objectForKey: @"avatar"];
         if(self.avatar && [self.avatar isEqual:[NSNull null]])

@@ -1,6 +1,6 @@
 //
 // EvhCommunityUserAddressResponse.m
-// generated at 2016-04-19 14:25:56 
+// generated at 2016-04-26 18:22:54 
 //
 #import "EvhCommunityUserAddressResponse.h"
 #import "EvhCommunityUserAddressDTO.h"

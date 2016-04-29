@@ -1,6 +1,6 @@
 //
 // EvhOpenapiGetReceivedCouponCountRestResponse.h
-// generated at 2016-04-19 14:25:58 
+// generated at 2016-04-26 18:22:56 
 //
 #import "RestResponseBase.h"
 #import "EvhUserProfileDTO.h"

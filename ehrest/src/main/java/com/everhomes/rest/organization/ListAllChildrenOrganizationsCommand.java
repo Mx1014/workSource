@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * 	<li>id : 机构id</li>
  * <li>groupTypes : 机构类型 参考{@link com.everhomes.rest.organization.OrganizationGroupType}</li>
+ * <li>naviFlag : 机构类型 参考{@link com.everhomes.rest.organization.OrganizationNaviFlag}</li>
  *</ul>
  *
  */
@@ -22,6 +23,8 @@ public class ListAllChildrenOrganizationsCommand {
 	
 	@ItemType(String.class)
 	private List<String> groupTypes;
+	
+	private Byte naviFlag;
 	
 	
 	public Long getId() {
@@ -44,6 +47,18 @@ public class ListAllChildrenOrganizationsCommand {
 
 	public void setGroupTypes(List<String> groupTypes) {
 		this.groupTypes = groupTypes;
+	}
+
+
+
+	public Byte getNaviFlag() {
+		return naviFlag;
+	}
+
+
+
+	public void setNaviFlag(Byte naviFlag) {
+		this.naviFlag = naviFlag;
 	}
 
 

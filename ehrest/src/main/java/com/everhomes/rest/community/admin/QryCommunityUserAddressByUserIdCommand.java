@@ -3,28 +3,30 @@ package com.everhomes.rest.community.admin;
 import com.everhomes.util.StringHelper;
 
 /**
- * 
- * userId: 用户ID
- *
+ * <ul>
+ * <li>contactToken: 电话号码</li>
+ * <li>communityId: 小区id</li>
+ * <li>userId: 用户id</li>
+ * </ul>
  */
 public class QryCommunityUserAddressByUserIdCommand {
 	
-	private Long userId;
+	private String contactToken;
 
 	private Long communityId;
 	
-	
-	public Long getUserId() {
-		return userId;
+	private Long userId;
+
+	public String getContactToken() {
+		return contactToken;
 	}
 
 
 
-	public void setUserId(Long userId) {
-		this.userId = userId;
+	public void setContactToken(String contactToken) {
+		this.contactToken = contactToken;
 	}
 
-	
 
 
 	public Long getCommunityId() {
@@ -35,6 +37,18 @@ public class QryCommunityUserAddressByUserIdCommand {
 
 	public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
+	}
+
+
+
+	public Long getUserId() {
+		return userId;
+	}
+
+
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
 	}
 
 

@@ -1,6 +1,6 @@
 //
 // EvhQryCommunityUserAddressByUserIdCommand.m
-// generated at 2016-04-19 14:25:57 
+// generated at 2016-04-26 18:22:53 
 //
 #import "EvhQryCommunityUserAddressByUserIdCommand.h"
 
@@ -31,22 +31,28 @@
 
 -(void) toJson: (NSMutableDictionary*) jsonObject 
 {
-    if(self.userId)
-        [jsonObject setObject: self.userId forKey: @"userId"];
+    if(self.contactToken)
+        [jsonObject setObject: self.contactToken forKey: @"contactToken"];
     if(self.communityId)
         [jsonObject setObject: self.communityId forKey: @"communityId"];
+    if(self.userId)
+        [jsonObject setObject: self.userId forKey: @"userId"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
 {
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
-        self.userId = [jsonObject objectForKey: @"userId"];
-        if(self.userId && [self.userId isEqual:[NSNull null]])
-            self.userId = nil;
+        self.contactToken = [jsonObject objectForKey: @"contactToken"];
+        if(self.contactToken && [self.contactToken isEqual:[NSNull null]])
+            self.contactToken = nil;
 
         self.communityId = [jsonObject objectForKey: @"communityId"];
         if(self.communityId && [self.communityId isEqual:[NSNull null]])
             self.communityId = nil;
+
+        self.userId = [jsonObject objectForKey: @"userId"];
+        if(self.userId && [self.userId isEqual:[NSNull null]])
+            self.userId = nil;
 
         return self;
     }

@@ -1,9 +1,13 @@
 //
 // EvhListActivitiesByTagCommand.m
 <<<<<<< HEAD
+<<<<<<< HEAD
 // generated at 2016-04-18 14:48:51 
 =======
 // generated at 2016-04-19 14:25:56 
+>>>>>>> 3.3.x
+=======
+// generated at 2016-04-26 18:22:54 
 >>>>>>> 3.3.x
 //
 #import "EvhListActivitiesByTagCommand.h"
@@ -43,6 +47,8 @@
         [jsonObject setObject: self.anchor forKey: @"anchor"];
     if(self.range)
         [jsonObject setObject: self.range forKey: @"range"];
+    if(self.pageSize)
+        [jsonObject setObject: self.pageSize forKey: @"pageSize"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -63,6 +69,10 @@
         self.range = [jsonObject objectForKey: @"range"];
         if(self.range && [self.range isEqual:[NSNull null]])
             self.range = nil;
+
+        self.pageSize = [jsonObject objectForKey: @"pageSize"];
+        if(self.pageSize && [self.pageSize isEqual:[NSNull null]])
+            self.pageSize = nil;
 
         return self;
     }

@@ -1,9 +1,13 @@
 //
 // EvhCreateOrganizationCommand.m
 <<<<<<< HEAD
+<<<<<<< HEAD
 // generated at 2016-04-18 14:48:52 
 =======
 // generated at 2016-04-19 14:25:57 
+>>>>>>> 3.3.x
+=======
+// generated at 2016-04-26 18:22:54 
 >>>>>>> 3.3.x
 //
 #import "EvhCreateOrganizationCommand.h"
@@ -43,6 +47,8 @@
         [jsonObject setObject: self.address forKey: @"address"];
     if(self.groupType)
         [jsonObject setObject: self.groupType forKey: @"groupType"];
+    if(self.naviFlag)
+        [jsonObject setObject: self.naviFlag forKey: @"naviFlag"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -63,6 +69,10 @@
         self.groupType = [jsonObject objectForKey: @"groupType"];
         if(self.groupType && [self.groupType isEqual:[NSNull null]])
             self.groupType = nil;
+
+        self.naviFlag = [jsonObject objectForKey: @"naviFlag"];
+        if(self.naviFlag && [self.naviFlag isEqual:[NSNull null]])
+            self.naviFlag = nil;
 
         return self;
     }

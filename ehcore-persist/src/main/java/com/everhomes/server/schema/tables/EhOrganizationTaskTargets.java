@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationTaskTargets extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhOrganizationTaskTargetsRecord> {
 
-	private static final long serialVersionUID = 1588481729;
+	private static final long serialVersionUID = 1262550444;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_organization_task_targets</code>
@@ -55,6 +55,11 @@ public class EhOrganizationTaskTargets extends org.jooq.impl.TableImpl<com.everh
 	 * The column <code>ehcore.eh_organization_task_targets.task_type</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationTaskTargetsRecord, java.lang.String> TASK_TYPE = createField("task_type", org.jooq.impl.SQLDataType.VARCHAR.length(64).nullable(false), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_organization_task_targets.message_type</code>. PUSH COMMENT SMS 
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationTaskTargetsRecord, java.lang.String> MESSAGE_TYPE = createField("message_type", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "PUSH COMMENT SMS ");
 
 	/**
 	 * Create a <code>ehcore.eh_organization_task_targets</code> table reference

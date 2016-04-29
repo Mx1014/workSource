@@ -1358,6 +1358,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		
 		query.addConditions(Tables.EH_ORGANIZATIONS.PATH.like(superiorPath));
 		query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.DEPARTMENT.getCode()));
+		query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
 		
 		Integer offset = pageOffset == null ? 1 : (pageOffset - 1 ) * pageSize;
 		query.addOrderBy(Tables.EH_ORGANIZATIONS.ID.desc());
@@ -2124,5 +2125,51 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		EhOrganizationOwnersDao dao = new EhOrganizationOwnersDao(context.configuration());
 		dao.update(organizationOwner);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationOwners.class, organizationOwner.getId());
+	}
+	
+	@Override
+	public List<OrganizationOwners> listOrganizationOwnerByCommunityId(Long communityId, ListingLocator locator, Integer pageSize,  ListingQueryBuilderCallback queryBuilderCallback) {
+		Integer count = null == pageSize ? 0 : pageSize + 1;
+		
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+		SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
+		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.COMMUNITY_ID.eq(communityId));
+		if(queryBuilderCallback != null)
+            queryBuilderCallback.buildCondition(locator, query);
+		
+		if(null != locator.getAnchor())
+			query.addConditions(Tables.EH_ORGANIZATION_OWNERS.ID.lt(locator.getAnchor()));
+		
+		query.addOrderBy(Tables.EH_ORGANIZATION_OWNERS.ID.desc());
+		if(null != pageSize)
+			query.addLimit(count);
+		
+		List<OrganizationOwners> owners = query.fetch().map((r) -> {
+       	 	return ConvertHelper.convert(r, OrganizationOwners.class);
+		});
+		
+		 if(null != pageSize){
+			 if(owners.size() > pageSize){
+				 owners = owners.subList(0, pageSize);
+				 locator.setAnchor(owners.get(pageSize-1).getId());
+			 }
+		 }
+		return owners;
+	}
+	
+	@Override
+	public List<OrganizationOwners> findOrganizationOwnerByTokenOrNamespaceId(String contactToken, Integer namespaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+
+		SelectQuery<EhOrganizationOwnersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_OWNERS);
+		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TOKEN.eq(contactToken));
+		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TYPE.eq(ContactType.MOBILE.getCode()));
+		query.addConditions(Tables.EH_ORGANIZATION_OWNERS.NAMESPACE_ID.eq(namespaceId));
+		
+		List<OrganizationOwners> owners = query.fetch().map((r) -> {
+       	 	return ConvertHelper.convert(r, OrganizationOwners.class);
+		});
+		return owners;
 	}
 }

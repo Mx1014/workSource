@@ -35,6 +35,7 @@ import com.everhomes.organization.OrganizationTask;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.organization.pm.ListPropInvitedUserCommandResponse;
+import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhOrganizationAddressMappingsDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationBillItemsDao;
@@ -1010,7 +1011,7 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 	}
 	
 	@Override
-	public List<OrganizationTask> communityPmTaskLists(Long organizationId,String taskType,Byte status,String startTime,String endTime) {
+	public List<OrganizationTask> communityPmTaskLists(Long organizationId,Long communityId,String taskType,Byte status,String startTime,String endTime) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
 		SelectQuery<EhOrganizationTasksRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_TASKS);
@@ -1022,6 +1023,11 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 			condition = condition.and(Tables.EH_ORGANIZATION_TASKS.CREATE_TIME.between(Timestamp.valueOf(startTime), Timestamp.valueOf(endTime)));
 		if(status != null && status >= 0)
 			condition = condition.and(Tables.EH_ORGANIZATION_TASKS.TASK_STATUS.eq(status));
+		
+		if(null != communityId){
+			condition = condition.and(Tables.EH_ORGANIZATION_TASKS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode()));
+			condition = condition.and(Tables.EH_ORGANIZATION_TASKS.VISIBLE_REGION_ID.eq(communityId));
+		}
 		
 		query.addConditions(condition);
 		

@@ -1,9 +1,13 @@
 //
 // EvhAddressDTO.m
 <<<<<<< HEAD
+<<<<<<< HEAD
 // generated at 2016-04-18 14:48:51 
 =======
 // generated at 2016-04-19 14:25:56 
+>>>>>>> 3.3.x
+=======
+// generated at 2016-04-26 18:22:54 
 >>>>>>> 3.3.x
 //
 #import "EvhAddressDTO.h"
@@ -71,6 +75,8 @@
         [jsonObject setObject: self.createTime forKey: @"createTime"];
     if(self.deleteTime)
         [jsonObject setObject: self.deleteTime forKey: @"deleteTime"];
+    if(self.memberStatus)
+        [jsonObject setObject: self.memberStatus forKey: @"memberStatus"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -147,6 +153,10 @@
         self.deleteTime = [jsonObject objectForKey: @"deleteTime"];
         if(self.deleteTime && [self.deleteTime isEqual:[NSNull null]])
             self.deleteTime = nil;
+
+        self.memberStatus = [jsonObject objectForKey: @"memberStatus"];
+        if(self.memberStatus && [self.memberStatus isEqual:[NSNull null]])
+            self.memberStatus = nil;
 
         return self;
     }

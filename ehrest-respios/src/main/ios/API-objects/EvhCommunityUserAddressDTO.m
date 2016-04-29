@@ -1,6 +1,6 @@
 //
 // EvhCommunityUserAddressDTO.m
-// generated at 2016-04-19 14:25:55 
+// generated at 2016-04-26 18:22:53 
 //
 #import "EvhCommunityUserAddressDTO.h"
 #import "EvhOrganizationDetailDTO.h"

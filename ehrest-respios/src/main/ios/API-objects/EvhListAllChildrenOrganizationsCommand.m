@@ -1,9 +1,13 @@
 //
 // EvhListAllChildrenOrganizationsCommand.m
 <<<<<<< HEAD
+<<<<<<< HEAD
 // generated at 2016-04-18 14:48:52 
 =======
 // generated at 2016-04-19 14:25:57 
+>>>>>>> 3.3.x
+=======
+// generated at 2016-04-26 18:22:55 
 >>>>>>> 3.3.x
 //
 #import "EvhListAllChildrenOrganizationsCommand.h"
@@ -45,6 +49,8 @@
         }
         [jsonObject setObject: jsonArray forKey: @"groupTypes"];
     }
+    if(self.naviFlag)
+        [jsonObject setObject: self.naviFlag forKey: @"naviFlag"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -60,6 +66,10 @@
                 [self.groupTypes addObject: itemJson];
             }
         }
+        self.naviFlag = [jsonObject objectForKey: @"naviFlag"];
+        if(self.naviFlag && [self.naviFlag isEqual:[NSNull null]])
+            self.naviFlag = nil;
+
         return self;
     }
     

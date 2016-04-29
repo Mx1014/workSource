@@ -49,6 +49,7 @@ import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationDetail;
 import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationOwners;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.region.Region;
@@ -77,6 +78,8 @@ import com.everhomes.rest.community.ListCommunitesByStatusCommandResponse;
 import com.everhomes.rest.community.ListCommunitiesByKeywordCommandResponse;
 import com.everhomes.rest.community.UpdateCommunityRequestStatusCommand;
 import com.everhomes.rest.community.admin.ApproveCommunityAdminCommand;
+import com.everhomes.rest.community.admin.CommunityAuthUserAddressCommand;
+import com.everhomes.rest.community.admin.CommunityAuthUserAddressResponse;
 import com.everhomes.rest.community.admin.CommunityManagerDTO;
 import com.everhomes.rest.community.admin.CommunityUserAddressDTO;
 import com.everhomes.rest.community.admin.CommunityUserAddressResponse;
@@ -100,6 +103,7 @@ import com.everhomes.rest.community.admin.VerifyBuildingNameAdminCommand;
 import com.everhomes.rest.community.admin.listBuildingsByStatusCommand;
 import com.everhomes.rest.enterprise.EnterpriseContactStatus;
 import com.everhomes.rest.forum.AttachmentDescriptor;
+import com.everhomes.rest.group.GroupMemberDTO;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -1144,6 +1148,65 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 	
 	@Override
+	public CommunityAuthUserAddressResponse ListCommunityAuthUserAddress(CommunityAuthUserAddressCommand cmd){
+		Long communityId = cmd.getCommunityId();
+		
+		List<Group> groups = groupProvider.listGroupByCommunityId(communityId, (loc, query) -> {
+            Condition c = Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.ACTIVE.getCode());
+            query.addConditions(c);
+            return query;
+        });
+		
+		List<Long> groupIds = new ArrayList<Long>(); 
+		for (Group group : groups) {
+			groupIds.add(group.getId());
+		}
+		
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		List<GroupMember> groupMembers = groupProvider.listGroupMemberByGroupIds(groupIds,locator,pageSize,(loc, query) -> {
+			Condition c = Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode());
+			c = c.and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(cmd.getMemberStatus()));
+            query.addConditions(c);
+            if(null != locator.getAnchor())
+            	query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_ID.lt(locator.getAnchor()));
+			query.addOrderBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID.desc());
+            return query;
+        });
+		
+		
+		List<GroupMemberDTO> dtos = groupMembers.stream().map(r->{
+			GroupMemberDTO dto = ConvertHelper.convert(r, GroupMemberDTO.class);
+			Group group = groupProvider.findGroupById(dto.getGroupId());
+			if(null != group){
+				Address address = addressProvider.findAddressById(group.getFamilyAddressId());
+				if(null != address){
+					dto.setAddressId(address.getId());
+					dto.setApartmentName(address.getApartmentName());
+					dto.setBuildingName(address.getBuildingName());
+				}
+			}
+			
+			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(dto.getMemberId(), IdentifierType.MOBILE.getCode());
+			if(null != userIdentifier){
+				dto.setCellPhone(userIdentifier.getIdentifierToken());
+				User user = userProvider.findUserById(userIdentifier.getOwnerUid());
+				if(null != user){
+					dto.setInviterNickName(user.getNickName());
+				}
+			}
+			return dto;
+		}).collect(Collectors.toList());
+		
+		CommunityAuthUserAddressResponse res = new CommunityAuthUserAddressResponse();
+		res.setDtos(dtos);
+		res.setNextPageAnchor(locator.getAnchor());
+		
+		return res;
+	}
+	
+	@Override
 	public CommunityUserAddressResponse listUserBycommunityId(ListCommunityUsersCommand cmd){
 		Long communityId = cmd.getCommunityId();
 		
@@ -1209,19 +1272,64 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 	
 	@Override
+	public CommunityUserAddressResponse listOwnerBycommunityId(ListCommunityUsersCommand cmd){
+		CommunityUserAddressResponse res = new CommunityUserAddressResponse();
+		
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		List<OrganizationOwners> owners = organizationProvider.listOrganizationOwnerByCommunityId(cmd.getCommunityId(),locator, cmd.getPageSize(),(loc, query) -> {
+			if(org.springframework.util.StringUtils.isEmpty(cmd.getKeywords())){
+				Condition cond = Tables.EH_ORGANIZATION_OWNERS.CONTACT_NAME.like(cmd.getKeywords() + "%");
+				cond = cond.or(Tables.EH_ORGANIZATION_OWNERS.CONTACT_TOKEN.eq(cmd.getKeywords()));
+				query.addConditions(cond);
+			}
+            return query;
+        });
+		
+		List<CommunityUserAddressDTO> dtos = new ArrayList<CommunityUserAddressDTO>();
+		for (OrganizationOwners organizationOwners : owners) {
+			CommunityUserAddressDTO dto = new CommunityUserAddressDTO();
+			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(organizationOwners.getNamespaceId(), organizationOwners.getContactToken());
+			dto.setIsAuth(2);
+			if(null != userIdentifier){
+				dto.setUserId(userIdentifier.getOwnerUid());
+				dto.setIsAuth(1);
+			}
+			
+			dto.setUserName(organizationOwners.getContactName());
+			dto.setNikeName(organizationOwners.getContactName());
+			dto.setPhone(organizationOwners.getContactToken());
+			dtos.add(dto);
+		}
+		res.setDtos(dtos);
+		res.setNextPageAnchor(locator.getAnchor());
+		return res;
+	}
+	
+	@Override
 	public CommunityUserAddressDTO qryCommunityUserAddressByUserId(QryCommunityUserAddressByUserIdCommand cmd){
 		CommunityUserAddressDTO dto = new CommunityUserAddressDTO();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
-		User user = userProvider.findUserById(cmd.getUserId());
-		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(cmd.getUserId(), IdentifierType.MOBILE.getCode());
-		
-		List<UserGroup> usreGroups = userProvider.listUserGroups(cmd.getUserId(), GroupDiscriminator.FAMILY.getCode());
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getContactToken());
+		if(null == userIdentifier){
+			List<OrganizationOwners> owners = organizationProvider.findOrganizationOwnerByTokenOrNamespaceId(cmd.getContactToken(), namespaceId);
+			List<AddressDTO> addressDtos = new ArrayList<AddressDTO>();
+			for (OrganizationOwners organizationOwners : owners) {
+				Address address = addressProvider.findAddressById(organizationOwners.getAddressId());
+				addressDtos.add(ConvertHelper.convert(address, AddressDTO.class));
+			}
+			return dto;
+		}
+		User user = userProvider.findUserById(userIdentifier.getOwnerUid());
+		List<UserGroup> usreGroups = userProvider.listUserGroups(user.getId(), GroupDiscriminator.FAMILY.getCode());
 		List<AddressDTO> addressDtos = new ArrayList<AddressDTO>();
 		if(null != usreGroups){
 			for (UserGroup userGroup : usreGroups) {
 				Group group = groupProvider.findGroupById(userGroup.getGroupId());
 				if(null != group && group.getFamilyCommunityId().equals(cmd.getCommunityId())){
 					Address address = addressProvider.findAddressById(group.getFamilyAddressId());
+					address.setMemberStatus(userGroup.getMemberStatus());
 					if(null != address)
 						addressDtos.add(ConvertHelper.convert(address, AddressDTO.class));
 				}
@@ -1372,50 +1480,52 @@ public class CommunityServiceImpl implements CommunityService {
 	public CountCommunityUserResponse countCommunityUsers(
 			CountCommunityUsersCommand cmd) {
 		
-		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
-		
-		/**
-		 * 小区用户统计
-		 */
-		if(CommunityType.fromCode(community.getCommunityType()) == CommunityType.RESIDENTIAL){
-			List<Group> groups = groupProvider.listGroupByCommunityId(community.getId(), (loc, query) -> {
-	            Condition c = Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.ACTIVE.getCode());
-	            query.addConditions(c);
-	            return query;
-	        });
+		if(cmd.getCommunityId() != null) {
+			Community community = communityProvider.findCommunityById(cmd.getCommunityId());
 			
-			List<Long> groupIds = new ArrayList<Long>(); 
-			for (Group group : groups) {
-				groupIds.add(group.getId());
-			}
-			
-			CrossShardListingLocator locator = new CrossShardListingLocator();
-			List<GroupMember> groupMembers = groupProvider.listGroupMemberByGroupIds(groupIds,locator,null,(loc, query) -> {
-				Condition c = Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode());
-				c = c.and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.ne(GroupMemberStatus.INACTIVE.getCode()));
-	            query.addConditions(c);
-	            query.addGroupBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID);
-	            return query;
-	        });
-			
-			int allCount = groupMembers.size();
-			
-			List<GroupMember> authMembers = new ArrayList<GroupMember>();
-			for (GroupMember groupMember : groupMembers) {
+			/**
+			 * 小区用户统计
+			 */
+			if(CommunityType.fromCode(community.getCommunityType()) == CommunityType.RESIDENTIAL){
+				List<Group> groups = groupProvider.listGroupByCommunityId(community.getId(), (loc, query) -> {
+		            Condition c = Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.ACTIVE.getCode());
+		            query.addConditions(c);
+		            return query;
+		        });
 				
-				if(GroupMemberStatus.fromCode(groupMember.getMemberStatus()) == GroupMemberStatus.ACTIVE){
-					authMembers.add(groupMember);
+				List<Long> groupIds = new ArrayList<Long>(); 
+				for (Group group : groups) {
+					groupIds.add(group.getId());
 				}
+				
+				CrossShardListingLocator locator = new CrossShardListingLocator();
+				List<GroupMember> groupMembers = groupProvider.listGroupMemberByGroupIds(groupIds,locator,null,(loc, query) -> {
+					Condition c = Tables.EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode());
+					c = c.and(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.ne(GroupMemberStatus.INACTIVE.getCode()));
+		            query.addConditions(c);
+		            query.addGroupBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID);
+		            return query;
+		        });
+				
+				int allCount = groupMembers.size();
+				
+				List<GroupMember> authMembers = new ArrayList<GroupMember>();
+				for (GroupMember groupMember : groupMembers) {
+					
+					if(GroupMemberStatus.fromCode(groupMember.getMemberStatus()) == GroupMemberStatus.ACTIVE){
+						authMembers.add(groupMember);
+					}
+				}
+				
+				int authCount = authMembers.size();
+				
+				CountCommunityUserResponse resp = new CountCommunityUserResponse();
+				resp.setCommunityUsers(allCount);
+				resp.setAuthUsers(authCount);
+				resp.setNotAuthUsers(allCount - authCount);
+				
+				return resp;
 			}
-			
-			int authCount = authMembers.size();
-			
-			CountCommunityUserResponse resp = new CountCommunityUserResponse();
-			resp.setCommunityUsers(allCount);
-			resp.setAuthUsers(authCount);
-			resp.setNotAuthUsers(allCount - authCount);
-			
-			return resp;
 		}
 		
 		/**

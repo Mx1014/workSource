@@ -1,9 +1,13 @@
 //
 // EvhQualityServiceErrorCode.h
 <<<<<<< HEAD
+<<<<<<< HEAD
 // generated at 2016-04-18 14:48:51 
 =======
 // generated at 2016-04-19 14:25:56 
+>>>>>>> 3.3.x
+=======
+// generated at 2016-04-26 18:22:56 
 >>>>>>> 3.3.x
 //
 
@@ -18,3 +22,4 @@
 #define EvhQualityServiceErrorCode_ERROR_TASK_IS_CLOSED 10008
 #define EvhQualityServiceErrorCode_ERROR_CREATE_EXCEL 10009
 #define EvhQualityServiceErrorCode_ERROR_DOWNLOAD_EXCEL 10010
+#define EvhQualityServiceErrorCode_ERROR_ASSIGN_TO_ONESELF 10011

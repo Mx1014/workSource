@@ -1,6 +1,6 @@
 //
 // EvhAclinkUpgradeResponse.m
-// generated at 2016-04-19 14:25:56 
+// generated at 2016-04-26 18:22:54 
 //
 #import "EvhAclinkUpgradeResponse.h"
 
@@ -41,6 +41,8 @@
         [jsonObject setObject: self.creatorId forKey: @"creatorId"];
     if(self.message)
         [jsonObject setObject: self.message forKey: @"message"];
+    if(self.version)
+        [jsonObject setObject: self.version forKey: @"version"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -65,6 +67,10 @@
         self.message = [jsonObject objectForKey: @"message"];
         if(self.message && [self.message isEqual:[NSNull null]])
             self.message = nil;
+
+        self.version = [jsonObject objectForKey: @"version"];
+        if(self.version && [self.version isEqual:[NSNull null]])
+            self.version = nil;
 
         return self;
     }

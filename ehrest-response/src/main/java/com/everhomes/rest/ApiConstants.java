@@ -1,9 +1,12 @@
 // @formatter:off
 <<<<<<< HEAD
+<<<<<<< HEAD
 // generated at 2016-04-18 15:04:31
 =======
 // generated at 2016-04-19 14:25:41
 >>>>>>> 3.3.x
+=======
+// generated at 2016-04-26 18:22:38
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -98,6 +101,7 @@ public interface ApiConstants {
     public static final String ADMIN_BUSINESS_PROMOTEBUSINESS_URL = "/admin/business/promoteBusiness";
     public static final String ADMIN_BUSINESS_RECOMMENDBUSINESS_URL = "/admin/business/recommendBusiness";
     public static final String ADMIN_CODEGEN_URL = "/admin/codegen";
+    public static final String ADMIN_COMMUNITY_LISTCOMMUNITYAUTHUSERADDRESS_URL = "/admin/community/ListCommunityAuthUserAddress";
     public static final String ADMIN_COMMUNITY_APPROVEBUILDING_URL = "/admin/community/approveBuilding";
     public static final String ADMIN_COMMUNITY_APPROVECOMMUNITY_URL = "/admin/community/approveCommunity";
     public static final String ADMIN_COMMUNITY_DELETEBUILDING_URL = "/admin/community/deleteBuilding";
@@ -110,6 +114,10 @@ public interface ApiConstants {
     public static final String ADMIN_COMMUNITY_LISTBUILDINGSBYSTATUS_URL = "/admin/community/listBuildingsByStatus";
     public static final String ADMIN_COMMUNITY_LISTCOMMUNITIESBYKEYWORD_URL = "/admin/community/listCommunitiesByKeyword";
     public static final String ADMIN_COMMUNITY_LISTCOMMUNITIESBYSTATUS_URL = "/admin/community/listCommunitiesByStatus";
+    public static final String ADMIN_COMMUNITY_LISTOWNERBYCOMMUNITYID_URL = "/admin/community/listOwnerBycommunityId";
+    public static final String ADMIN_COMMUNITY_LISTUSERBYCOMMUNITYID_URL = "/admin/community/listUserBycommunityId";
+    public static final String ADMIN_COMMUNITY_QRYCOMMUNITYUSERADDRESSBYUSERID_URL = "/admin/community/qryCommunityUserAddressByUserId";
+    public static final String ADMIN_COMMUNITY_QRYCOMMUNITYUSERENTERPRISEBYUSERID_URL = "/admin/community/qryCommunityUserEnterpriseByUserId";
     public static final String ADMIN_COMMUNITY_REJECTBUILDING_URL = "/admin/community/rejectBuilding";
     public static final String ADMIN_COMMUNITY_REJECTCOMMUNITY_URL = "/admin/community/rejectCommunity";
     public static final String ADMIN_COMMUNITY_SYNCINDEX_URL = "/admin/community/syncIndex";
@@ -193,6 +201,7 @@ public interface ApiConstants {
     public static final String ADMIN_ORG_IMPORTORGPOST_URL = "/admin/org/importOrgPost";
     public static final String ADMIN_ORG_IMPORTORGANIZATION_URL = "/admin/org/importOrganization";
     public static final String ADMIN_ORG_IMPORTORGANIZATIONPERSONNELDATA_URL = "/admin/org/importOrganizationPersonnelData";
+    public static final String ADMIN_ORG_IMPORTOWNERDATA_URL = "/admin/org/importOwnerData";
     public static final String ADMIN_ORG_LISTACLROLEBYUSERID_URL = "/admin/org/listAclRoleByUserId";
     public static final String ADMIN_ORG_LISTALLCHILDRENORGANIZATIONS_URL = "/admin/org/listAllChildrenOrganizations";
     public static final String ADMIN_ORG_LISTALLORGANIZATIONPERSONNELS_URL = "/admin/org/listAllOrganizationPersonnels";

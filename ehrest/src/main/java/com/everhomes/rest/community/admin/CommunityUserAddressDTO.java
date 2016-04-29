@@ -7,6 +7,20 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.organization.OrganizationDetailDTO;
 
+/**
+ * <ul>
+ * <li>userId: 用户id</li>
+ * <li>userName: 用户姓名</li>
+ * <li>nikeName: 用户昵称</li>
+ * <li>communityId: 小区id</li>
+ * <li>isAuth: 认证状态  1认证 2未认证</li>
+ * <li>applyTime: 时间</li>
+ * <li>phone: 电话号码</li>
+ * <li>gender: 性别</li>
+ * <li>addressDtos: 地址， 参考{@com.everhomes.rest.address.AddressDTO}</li>
+ * <li>orgDtos: 地址， 参考{@com.everhomes.rest.organization.OrganizationDetailDTO}</li>
+ * </ul>
+ */
 public class CommunityUserAddressDTO {
 
 	private Long     id;
