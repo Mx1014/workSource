@@ -1286,6 +1286,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 }
 	        }
 	        
+	        groupDto = null; // 如果缺少这一句，则即使每个子公司都没有group，仍然会加到论坛列表中 by lqs 20160429
 	        List<String> groupTypes = new ArrayList<String>();
             groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
             List<Organization> subOrgList = organizationProvider.listOrganizationByGroupTypes(organization.getPath() + "/%", groupTypes);
