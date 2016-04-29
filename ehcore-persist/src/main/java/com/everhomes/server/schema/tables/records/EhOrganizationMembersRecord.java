@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationMembersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord> {
 
-	private static final long serialVersionUID = -1495730188;
+	private static final long serialVersionUID = 1662525549;
 
 	/**
 	 * Setter for <code>ehcore.eh_organization_members.id</code>. id of the record
@@ -391,6 +391,20 @@ public class EhOrganizationMembersRecord extends org.jooq.impl.UpdatableRecordIm
 		return (java.sql.Timestamp) getValue(26);
 	}
 
+	/**
+	 * Setter for <code>ehcore.eh_organization_members.namespace_id</code>.
+	 */
+	public void setNamespaceId(java.lang.Integer value) {
+		setValue(27, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_organization_members.namespace_id</code>.
+	 */
+	public java.lang.Integer getNamespaceId() {
+		return (java.lang.Integer) getValue(27);
+	}
+
 	// -------------------------------------------------------------------------
 	// Primary key information
 	// -------------------------------------------------------------------------
@@ -417,7 +431,7 @@ public class EhOrganizationMembersRecord extends org.jooq.impl.UpdatableRecordIm
 	/**
 	 * Create a detached, initialised EhOrganizationMembersRecord
 	 */
-	public EhOrganizationMembersRecord(java.lang.Long id, java.lang.Long organizationId, java.lang.String targetType, java.lang.Long targetId, java.lang.String memberGroup, java.lang.String contactName, java.lang.Byte contactType, java.lang.String contactToken, java.lang.String contactDescription, java.lang.Byte status, java.lang.Long groupId, java.lang.String groupPath, java.lang.Byte gender, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.lang.String employeeNo, java.lang.String avatar, java.sql.Timestamp updateTime, java.sql.Timestamp createTime) {
+	public EhOrganizationMembersRecord(java.lang.Long id, java.lang.Long organizationId, java.lang.String targetType, java.lang.Long targetId, java.lang.String memberGroup, java.lang.String contactName, java.lang.Byte contactType, java.lang.String contactToken, java.lang.String contactDescription, java.lang.Byte status, java.lang.Long groupId, java.lang.String groupPath, java.lang.Byte gender, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.lang.String employeeNo, java.lang.String avatar, java.sql.Timestamp updateTime, java.sql.Timestamp createTime, java.lang.Integer namespaceId) {
 		super(com.everhomes.server.schema.tables.EhOrganizationMembers.EH_ORGANIZATION_MEMBERS);
 
 		setValue(0, id);
@@ -447,5 +461,6 @@ public class EhOrganizationMembersRecord extends org.jooq.impl.UpdatableRecordIm
 		setValue(24, avatar);
 		setValue(25, updateTime);
 		setValue(26, createTime);
+		setValue(27, namespaceId);
 	}
 }

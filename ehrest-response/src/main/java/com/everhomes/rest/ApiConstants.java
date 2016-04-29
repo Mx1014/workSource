@@ -1,11 +1,4 @@
 // @formatter:off
-<<<<<<< HEAD
-<<<<<<< HEAD
-// generated at 2016-04-18 15:04:31
-=======
-// generated at 2016-04-19 14:25:41
->>>>>>> 3.3.x
-=======
 // generated at 2016-04-26 18:22:38
 package com.everhomes.rest;
 
