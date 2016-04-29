@@ -71,6 +71,7 @@ import com.everhomes.rest.business.ListBusinessByKeywordCommand;
 import com.everhomes.rest.business.ListBusinessByKeywordCommandResponse;
 import com.everhomes.rest.business.ListUserByIdentifierCommand;
 import com.everhomes.rest.business.ListUserByKeywordCommand;
+import com.everhomes.rest.business.ReSyncBusinessCommand;
 import com.everhomes.rest.business.SyncBusinessCommand;
 import com.everhomes.rest.business.SyncDeleteBusinessCommand;
 import com.everhomes.rest.business.UpdateBusinessCommand;
@@ -218,6 +219,76 @@ public class BusinessServiceImpl implements BusinessService {
 			}
 			return true;
 		});
+	}
+	
+	@Override
+	public void reSyncBusiness(ReSyncBusinessCommand cmd) {
+		if(cmd.getUserId() == null){
+			LOGGER.error("Invalid paramter userId,userId is null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid paramter userId,userId is null");
+		}
+		if(StringUtils.isBlank(cmd.getTargetId())){
+			LOGGER.error("Invalid paramter targetId,targetId is null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid paramter targetId,targetId is null");
+		}
+		User user = userProvider.findUserById(cmd.getUserId());
+		if(user == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid paramter userId,userId is not found");
+		}
+		long userId = user.getId();
+		this.dbProvider.execute((TransactionStatus status) -> {
+			Business business = this.businessProvider.findBusinessByTargetId(cmd.getTargetId());
+			if(business == null){
+				business = createBusiness(cmd, userId);
+			}else{
+				updateBusiness(cmd, business);
+			}
+			if(cmd.getCategroies() != null && !cmd.getCategroies().isEmpty()){
+				createBusinessCategories(business, cmd.getCategroies());
+			}
+			reCreateBusinessAssignedNamespaceOnDelOther(business.getId(),cmd.getNamespaceIds());
+			if(cmd.getScopeType()!=null){
+				if(cmd.getScopeType().byteValue()==ScopeType.ALL.getCode()){
+					createBusinessAssignedScopeOnDelOther(business.getId(),ScopeType.ALL.getCode(),0L);
+				}
+				else if(cmd.getScopeType().byteValue()==ScopeType.CITY.getCode()){
+					Clients client = new Clients();
+					String baiduMapUri = configurationProvider.getValue(BAIDU_MAP_URI, "http://api.map.baidu.com");
+					String baiduMapAccessKey = configurationProvider.getValue(BAIDU_MAP_ACCESS_KEY, "9E2825184e77d546b768bbfbf63050f8");
+					String uri = String.format("%s/geocoder/v2/?ak=%s&location=%s,%s&output=json&pois=0",baiduMapUri,baiduMapAccessKey,cmd.getLatitude(),cmd.getLongitude());
+					String jsonResponse = client.restCall("GET", uri, null, null, null);
+					BaiduGeocoderResponse response = (BaiduGeocoderResponse) StringHelper.fromJsonString(jsonResponse, BaiduGeocoderResponse.class);
+					String province = response.getResult().getAddressComponent().getProvince();
+					String city = response.getResult().getAddressComponent().getCity();
+					Region region = regionProvider.findRegionByPath("/"+province.subSequence(0, province.length()-1)+"/"+city);
+					createBusinessAssignedScopeOnDelOther(business.getId(),ScopeType.CITY.getCode(),region.getId());
+				}
+				else{
+					List<BusinessAssignedScope> list = businessProvider.listBusinessAssignedScopeByOwnerId(business.getId());
+					if(list!=null&&!list.isEmpty())
+						for(BusinessAssignedScope r:list)
+							businessProvider.deleteBusinessAssignedScope(r.getId());
+				}
+			}
+			return true;
+		});
+	}
+	
+	private void reCreateBusinessAssignedNamespaceOnDelOther(Long ownerId,List<Integer> namespaceIds) {
+		this.deleteBusinessAssignedNamespaces(ownerId);
+		if(namespaceIds!=null&&!namespaceIds.isEmpty())
+			for(Integer namespaceId:namespaceIds)
+				createBusinessAssignedNamespace(ownerId,namespaceId);
+	}
+
+	private void deleteBusinessAssignedNamespaces(Long ownerId) {
+		List<BusinessAssignedNamespace> list = businessProvider.listBusinessAssignedNamespaceByOwnerId(ownerId,null);
+		if(list!=null&&!list.isEmpty())
+			for(BusinessAssignedNamespace r:list)
+				businessProvider.deleteBusinessAssignedNamespace(r);
 	}
 
 	private void createBusinessAssignedNamespaceOnDelOther(Long ownerId,Integer namespaceId) {
