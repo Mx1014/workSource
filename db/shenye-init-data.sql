@@ -47,10 +47,10 @@ INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longi
 INSERT INTO `eh_organization_communities`(organization_id, community_id) 
 	VALUES(1000750, 240111044331051303);
 
-INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`) 
-	VALUES(1000750, 0, 'PM', '深业集团（深圳）物业管理有限公司', 0, '', '/1000750', 1, 2, 'ENTERPRISE');
-INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status)
-	VALUES(2101378, 1000750, 'USER', 212500  , 'manager', '唐玮', 0, '13510551322', 3);	
+INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`) 
+	VALUES(1000750, 0, 'PM', '深业集团（深圳）物业管理有限公司', 0, '', '/1000750', 1, 2, 'ENTERPRISE', 999992);
+INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `namespace_id`)
+	VALUES(2101378, 1000750, 'USER', 212500  , 'manager', '唐玮', 0, '13510551322', 3, 999992);	
 
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
 	VALUES(10472, 'EhOrganizations', 1000750, 'EhUsers', 212500  , 1001, 1, UTC_TIMESTAMP());
