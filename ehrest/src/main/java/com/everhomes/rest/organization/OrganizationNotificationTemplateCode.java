@@ -29,4 +29,6 @@ public interface OrganizationNotificationTemplateCode {
 	
 	static final int ORGANIZATION_TASK_FINISH_COMMENT = 16;// 任务已完成后回复的帖子消息
 	
+	static final int ORGANIZATION_APPLY_FOR_CONTACT = 17;// 有用户申请认证公司时给公司管理员发消息
+	
 }
