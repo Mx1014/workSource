@@ -3532,12 +3532,19 @@ public class ForumServiceImpl implements ForumService {
         List<TopicFilterDTO> filterList = new ArrayList<TopicFilterDTO>();
         UserCurrentEntityType entityType = UserCurrentEntityType.fromCode(sceneToken.getEntityType());
         if(entityType != UserCurrentEntityType.ORGANIZATION) {
-            LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
+            LOGGER.error("Unsupported scene for simple user, sceneToken={}", sceneToken);
             return filterList;
         }
 
         Organization organization = organizationProvider.findOrganizationById(sceneToken.getEntityId());
-        if(organization != null) {
+        if(organization == null) {
+            LOGGER.error("Organization not found, sceneToken={}", sceneToken);
+            return filterList;
+        }
+        
+        // 由于公司删除后只是置状态，故需要判断状态是否正常 by lqs 20160430
+        OrganizationStatus orgStatus = OrganizationStatus.fromCode(organization.getStatus());
+        if(orgStatus == OrganizationStatus.ACTIVE) {
             String menuName = null;
             String scope = ForumLocalStringCode.SCOPE;
             String code = "";
@@ -3709,6 +3716,8 @@ public class ForumServiceImpl implements ForumService {
                     LOGGER.debug("No organization community filter for the user, userId={}, sceneToken={}", user.getId(), sceneToken);
                 }
             }
+        } else {
+            LOGGER.error("Organization not in active state, sceneToken={}, orgStatus={}", sceneToken, orgStatus);
         }
         
         return filterList;
@@ -3915,7 +3924,14 @@ public class ForumServiceImpl implements ForumService {
         }
 
         Organization organization = organizationProvider.findOrganizationById(sceneTokenDto.getEntityId());
-        if(organization != null) {
+        if(organization == null) {
+            LOGGER.error("Organization not found, sceneToken={}", sceneTokenDto);
+            return sentScopeList;
+        }
+        
+        // 由于公司删除后只是置状态，故需要判断状态是否正常 by lqs 20160430
+        OrganizationStatus orgStatus = OrganizationStatus.fromCode(organization.getStatus());
+        if(orgStatus == OrganizationStatus.ACTIVE) {
             String sceneToken = WebTokenGenerator.getInstance().toWebToken(sceneTokenDto);
             String menuName = null;
             String scope = ForumLocalStringCode.SCOPE;
@@ -4037,6 +4053,8 @@ public class ForumServiceImpl implements ForumService {
                     LOGGER.debug("No community group topic sent scope for the user, userId={}, sceneToken={}", user.getId(), sceneToken);
                 }
             }
+        } else {
+            LOGGER.error("Organization not in active state, sceneToken={}, orgStatue", sceneTokenDto, orgStatus);
         }
         
         return sentScopeList;
