@@ -4862,7 +4862,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		groupTypeList.add(OrganizationGroupType.GROUP.getCode());
 		groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
 		
-		List<Organization> depts = organizationProvider.listOrganizationByGroupTypes(org.getPath()+"/%", groupTypes);
+		List<Organization> depts = organizationProvider.listOrganizationByGroupTypes(org.getPath()+"/%", groupTypeList);
 		
 		if(null == groupTypes){
 			groupTypes = new ArrayList<String>();
@@ -4876,7 +4876,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 		List<String> types = groupTypes;
 		
 		Long orgId = null;
-		
 
 		if(org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())){
 			orgId = org.getDirectlyEnterpriseId();
