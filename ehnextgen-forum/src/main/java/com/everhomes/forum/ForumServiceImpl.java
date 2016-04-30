@@ -1076,7 +1076,10 @@ public class ForumServiceImpl implements ForumService {
         
         List<Long> categorys = new ArrayList<Long>();
         
-        categorys.add(cmd.getContentCategory());
+        //modify contentCategory not for null by sfyan 20160430
+        if(null != cmd.getContentCategory()){
+        	categorys.add(cmd.getContentCategory());
+        }
         
         if(null != cmd.getEmbeddedAppId()){
         	if(AppConstants.APPID_ORGTASK == cmd.getEmbeddedAppId() && null == cmd.getContentCategory()){
