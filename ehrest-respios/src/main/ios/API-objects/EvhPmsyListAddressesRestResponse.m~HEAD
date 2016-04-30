@@ -1,21 +1,21 @@
 //
-// EvhAdminAclListAclRoleByOrganizationIdsRestResponse.m
-// generated at 2016-04-05 13:45:26 
+// EvhPmsyListAddressesRestResponse.m
+// generated at 2016-04-29 18:56:04 
 //
-#import "EvhAdminAclListAclRoleByOrganizationIdsRestResponse.h"
-#import "EvhRoleDTO.h"
+#import "EvhPmsyListAddressesRestResponse.h"
+#import "EvhPmsyAddressDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhAdminAclListAclRoleByOrganizationIdsRestResponse
+// EvhPmsyListAddressesRestResponse
 //
 
-@implementation EvhAdminAclListAclRoleByOrganizationIdsRestResponse
+@implementation EvhPmsyListAddressesRestResponse
 
 +(id) withJsonString: (NSString*) jsonString
 {
     id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
     if(jsonObject != nil) {
-        EvhAdminAclListAclRoleByOrganizationIdsRestResponse* obj = [EvhAdminAclListAclRoleByOrganizationIdsRestResponse new];
+        EvhPmsyListAddressesRestResponse* obj = [EvhPmsyListAddressesRestResponse new];
         return [obj fromJson:jsonObject];
     }
     return nil;
@@ -37,7 +37,7 @@
     
     if(self.response) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhRoleDTO* item in self.response) {
+        for(EvhPmsyAddressDTO* item in self.response) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -52,7 +52,7 @@
         [super fromJson: jsonObject];
         NSArray* jsonArray = [jsonObject objectForKey: @"response"];
         for(NSMutableDictionary* dic in jsonArray) {
-            EvhRoleDTO* item = [EvhRoleDTO new];
+            EvhPmsyAddressDTO* item = [EvhPmsyAddressDTO new];
             [item fromJson:dic];
             [self.response addObject: item];
         }

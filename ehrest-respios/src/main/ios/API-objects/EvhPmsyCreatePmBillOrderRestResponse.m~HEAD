@@ -1,21 +1,21 @@
 //
-// EvhAdminOrgListOrganizationAdministratorsRestResponse.m
-// generated at 2016-04-05 13:45:27 
+// EvhPmsyCreatePmBillOrderRestResponse.m
+// generated at 2016-04-29 18:56:04 
 //
-#import "EvhAdminOrgListOrganizationAdministratorsRestResponse.h"
-#import "EvhListOrganizationMemberCommandResponse.h"
+#import "EvhPmsyCreatePmBillOrderRestResponse.h"
+#import "EvhCommonOrderDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhAdminOrgListOrganizationAdministratorsRestResponse
+// EvhPmsyCreatePmBillOrderRestResponse
 //
 
-@implementation EvhAdminOrgListOrganizationAdministratorsRestResponse
+@implementation EvhPmsyCreatePmBillOrderRestResponse
 
 +(id) withJsonString: (NSString*) jsonString
 {
     id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
     if(jsonObject != nil) {
-        EvhAdminOrgListOrganizationAdministratorsRestResponse* obj = [EvhAdminOrgListOrganizationAdministratorsRestResponse new];
+        EvhPmsyCreatePmBillOrderRestResponse* obj = [EvhPmsyCreatePmBillOrderRestResponse new];
         return [obj fromJson:jsonObject];
     }
     return nil;
@@ -46,7 +46,7 @@
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
         [super fromJson: jsonObject];
         NSMutableDictionary* dic =  (NSMutableDictionary*)[jsonObject objectForKey: @"response"];
-        self.response = [EvhListOrganizationMemberCommandResponse new];
+        self.response = [EvhCommonOrderDTO new];
         self.response = [self.response fromJson: dic];
         return self;
     }

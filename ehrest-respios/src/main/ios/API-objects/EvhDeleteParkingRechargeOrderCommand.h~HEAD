@@ -1,14 +1,14 @@
 //
-// EvhCancelPmBuildingCommand.h
-// generated at 2016-03-28 15:56:08 
+// EvhDeleteParkingRechargeOrderCommand.h
+// generated at 2016-04-29 18:56:02 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhCancelPmBuildingCommand
+// EvhDeleteParkingRechargeOrderCommand
 //
-@interface EvhCancelPmBuildingCommand
+@interface EvhDeleteParkingRechargeOrderCommand
     : NSObject<EvhJsonSerializable>
 
 

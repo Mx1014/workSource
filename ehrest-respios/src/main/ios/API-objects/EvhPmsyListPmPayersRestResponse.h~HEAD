@@ -1,15 +1,15 @@
 //
-// EvhAdminAclListAclRoleByOrganizationIdsRestResponse.h
-// generated at 2016-04-05 13:45:26 
+// EvhPmsyListPmPayersRestResponse.h
+// generated at 2016-04-29 18:56:04 
 //
 #import "RestResponseBase.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhAdminAclListAclRoleByOrganizationIdsRestResponse
+// EvhPmsyListPmPayersRestResponse
 //
-@interface EvhAdminAclListAclRoleByOrganizationIdsRestResponse : EvhRestResponseBase
+@interface EvhPmsyListPmPayersRestResponse : EvhRestResponseBase
 
-// array of EvhRoleDTO* objects
+// array of EvhPmsyPayerDTO* objects
 @property(nonatomic, strong) NSMutableArray* response;
 
 -(id) init;

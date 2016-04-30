@@ -1,25 +1,21 @@
 //
-// EvhUiUserListScenesByCummunityIdRestResponse.m
-<<<<<<< HEAD
-// generated at 2016-04-18 14:48:53 
-=======
-// generated at 2016-04-12 19:00:53 
->>>>>>> 3.3.x
+// EvhPmsyListPmPayersRestResponse.m
+// generated at 2016-04-29 18:56:04 
 //
-#import "EvhUiUserListScenesByCummunityIdRestResponse.h"
-#import "EvhSceneDTO.h"
+#import "EvhPmsyListPmPayersRestResponse.h"
+#import "EvhPmsyPayerDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhUiUserListScenesByCummunityIdRestResponse
+// EvhPmsyListPmPayersRestResponse
 //
 
-@implementation EvhUiUserListScenesByCummunityIdRestResponse
+@implementation EvhPmsyListPmPayersRestResponse
 
 +(id) withJsonString: (NSString*) jsonString
 {
     id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
     if(jsonObject != nil) {
-        EvhUiUserListScenesByCummunityIdRestResponse* obj = [EvhUiUserListScenesByCummunityIdRestResponse new];
+        EvhPmsyListPmPayersRestResponse* obj = [EvhPmsyListPmPayersRestResponse new];
         return [obj fromJson:jsonObject];
     }
     return nil;
@@ -41,7 +37,7 @@
     
     if(self.response) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhSceneDTO* item in self.response) {
+        for(EvhPmsyPayerDTO* item in self.response) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -56,7 +52,7 @@
         [super fromJson: jsonObject];
         NSArray* jsonArray = [jsonObject objectForKey: @"response"];
         for(NSMutableDictionary* dic in jsonArray) {
-            EvhSceneDTO* item = [EvhSceneDTO new];
+            EvhPmsyPayerDTO* item = [EvhPmsyPayerDTO new];
             [item fromJson:dic];
             [self.response addObject: item];
         }

@@ -1,21 +1,21 @@
 //
-// EvhConfUpdateInvoiceByOrderIdRestResponse.m
-// generated at 2016-03-30 10:13:09 
+// EvhPmsyGetPmsyBillsRestResponse.m
+// generated at 2016-04-29 18:56:04 
 //
-#import "EvhConfUpdateInvoiceByOrderIdRestResponse.h"
-#import "EvhInvoiceDTO.h"
+#import "EvhPmsyGetPmsyBillsRestResponse.h"
+#import "EvhPmsyBillsDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhConfUpdateInvoiceByOrderIdRestResponse
+// EvhPmsyGetPmsyBillsRestResponse
 //
 
-@implementation EvhConfUpdateInvoiceByOrderIdRestResponse
+@implementation EvhPmsyGetPmsyBillsRestResponse
 
 +(id) withJsonString: (NSString*) jsonString
 {
     id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
     if(jsonObject != nil) {
-        EvhConfUpdateInvoiceByOrderIdRestResponse* obj = [EvhConfUpdateInvoiceByOrderIdRestResponse new];
+        EvhPmsyGetPmsyBillsRestResponse* obj = [EvhPmsyGetPmsyBillsRestResponse new];
         return [obj fromJson:jsonObject];
     }
     return nil;
@@ -46,7 +46,7 @@
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
         [super fromJson: jsonObject];
         NSMutableDictionary* dic =  (NSMutableDictionary*)[jsonObject objectForKey: @"response"];
-        self.response = [EvhInvoiceDTO new];
+        self.response = [EvhPmsyBillsDTO new];
         self.response = [self.response fromJson: dic];
         return self;
     }

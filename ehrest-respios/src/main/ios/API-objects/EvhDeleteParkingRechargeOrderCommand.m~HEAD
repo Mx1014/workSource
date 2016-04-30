@@ -1,20 +1,20 @@
 //
-// EvhCancelPmBuildingCommand.m
-// generated at 2016-03-28 15:56:08 
+// EvhDeleteParkingRechargeOrderCommand.m
+// generated at 2016-04-29 18:56:02 
 //
-#import "EvhCancelPmBuildingCommand.h"
+#import "EvhDeleteParkingRechargeOrderCommand.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhCancelPmBuildingCommand
+// EvhDeleteParkingRechargeOrderCommand
 //
 
-@implementation EvhCancelPmBuildingCommand
+@implementation EvhDeleteParkingRechargeOrderCommand
 
 +(id) withJsonString: (NSString*) jsonString
 {
     id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
     if(jsonObject != nil) {
-        EvhCancelPmBuildingCommand* obj = [EvhCancelPmBuildingCommand new];
+        EvhDeleteParkingRechargeOrderCommand* obj = [EvhDeleteParkingRechargeOrderCommand new];
         return [obj fromJson:jsonObject];
     }
     return nil;

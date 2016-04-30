@@ -1,24 +1,24 @@
 //
-// EvhListRuleCommand.h
-// generated at 2016-03-28 15:56:07 
+// EvhGetPmsyBills.h
+// generated at 2016-04-29 18:56:02 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhListRuleCommand
+// EvhGetPmsyBills
 //
-@interface EvhListRuleCommand
+@interface EvhGetPmsyBills
     : NSObject<EvhJsonSerializable>
 
 
-@property(nonatomic, copy) NSNumber* channelType;
+@property(nonatomic, copy) NSString* customerId;
 
-@property(nonatomic, copy) NSNumber* confType;
+@property(nonatomic, copy) NSString* projectId;
 
-@property(nonatomic, copy) NSNumber* pageOffset;
+@property(nonatomic, copy) NSString* resourceId;
 
-@property(nonatomic, copy) NSNumber* pageSize;
+@property(nonatomic, copy) NSNumber* billDateStr;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

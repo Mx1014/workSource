@@ -1,9 +1,9 @@
 //
 // EvhPmsyListAddressesRestResponse.m
-// generated at 2016-04-29 18:56:04 
+// generated at 2016-04-30 11:16:58 
 //
 #import "EvhPmsyListAddressesRestResponse.h"
-#import "EvhPmsyAddressDTO.h"
+#import "EvhAddressDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhPmsyListAddressesRestResponse
@@ -37,7 +37,7 @@
     
     if(self.response) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhPmsyAddressDTO* item in self.response) {
+        for(EvhAddressDTO* item in self.response) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -52,7 +52,7 @@
         [super fromJson: jsonObject];
         NSArray* jsonArray = [jsonObject objectForKey: @"response"];
         for(NSMutableDictionary* dic in jsonArray) {
-            EvhPmsyAddressDTO* item = [EvhPmsyAddressDTO new];
+            EvhAddressDTO* item = [EvhAddressDTO new];
             [item fromJson:dic];
             [self.response addObject: item];
         }

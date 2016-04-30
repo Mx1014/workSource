@@ -1,21 +1,21 @@
 //
-// EvhConfListConfAccountCategoriesRestResponse.m
-// generated at 2016-03-28 15:56:09 
+// EvhPmsyListPmBillsRestResponse.m
+// generated at 2016-04-29 18:56:04 
 //
-#import "EvhConfListConfAccountCategoriesRestResponse.h"
-#import "EvhListVideoConfAccountRuleResponse.h"
+#import "EvhPmsyListPmBillsRestResponse.h"
+#import "EvhPmsyBillsResponse.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhConfListConfAccountCategoriesRestResponse
+// EvhPmsyListPmBillsRestResponse
 //
 
-@implementation EvhConfListConfAccountCategoriesRestResponse
+@implementation EvhPmsyListPmBillsRestResponse
 
 +(id) withJsonString: (NSString*) jsonString
 {
     id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
     if(jsonObject != nil) {
-        EvhConfListConfAccountCategoriesRestResponse* obj = [EvhConfListConfAccountCategoriesRestResponse new];
+        EvhPmsyListPmBillsRestResponse* obj = [EvhPmsyListPmBillsRestResponse new];
         return [obj fromJson:jsonObject];
     }
     return nil;
@@ -46,7 +46,7 @@
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
         [super fromJson: jsonObject];
         NSMutableDictionary* dic =  (NSMutableDictionary*)[jsonObject objectForKey: @"response"];
-        self.response = [EvhListVideoConfAccountRuleResponse new];
+        self.response = [EvhPmsyBillsResponse new];
         self.response = [self.response fromJson: dic];
         return self;
     }

@@ -1,24 +1,20 @@
 //
-// EvhListScenesByCummunityIdCommand.m
-<<<<<<< HEAD
-// generated at 2016-04-18 14:48:52 
-=======
-// generated at 2016-04-12 19:00:51 
->>>>>>> 3.3.x
+// EvhSetPmsyPropertyCommand.m
+// generated at 2016-04-29 18:56:00 
 //
-#import "EvhListScenesByCummunityIdCommand.h"
+#import "EvhSetPmsyPropertyCommand.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhListScenesByCummunityIdCommand
+// EvhSetPmsyPropertyCommand
 //
 
-@implementation EvhListScenesByCummunityIdCommand
+@implementation EvhSetPmsyPropertyCommand
 
 +(id) withJsonString: (NSString*) jsonString
 {
     id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
     if(jsonObject != nil) {
-        EvhListScenesByCummunityIdCommand* obj = [EvhListScenesByCummunityIdCommand new];
+        EvhSetPmsyPropertyCommand* obj = [EvhSetPmsyPropertyCommand new];
         return [obj fromJson:jsonObject];
     }
     return nil;
@@ -37,6 +33,10 @@
 {
     if(self.communityId)
         [jsonObject setObject: self.communityId forKey: @"communityId"];
+    if(self.billTip)
+        [jsonObject setObject: self.billTip forKey: @"billTip"];
+    if(self.contact)
+        [jsonObject setObject: self.contact forKey: @"contact"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -45,6 +45,14 @@
         self.communityId = [jsonObject objectForKey: @"communityId"];
         if(self.communityId && [self.communityId isEqual:[NSNull null]])
             self.communityId = nil;
+
+        self.billTip = [jsonObject objectForKey: @"billTip"];
+        if(self.billTip && [self.billTip isEqual:[NSNull null]])
+            self.billTip = nil;
+
+        self.contact = [jsonObject objectForKey: @"contact"];
+        if(self.contact && [self.contact isEqual:[NSNull null]])
+            self.contact = nil;
 
         return self;
     }
