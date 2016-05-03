@@ -1794,6 +1794,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			if(contentCategoryId == CategoryConstants.CATEGORY_ID_COMPLAINT_ADVICE) {
 				return OrganizationTaskType.COMPLAINT_ADVICE;
 			}
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_EMERGENCY_HELP) {
+				return OrganizationTaskType.EMERGENCY_HELP;
+			}
 		}
 		return null;
 	}
