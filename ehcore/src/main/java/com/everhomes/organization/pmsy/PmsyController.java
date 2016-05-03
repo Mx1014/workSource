@@ -28,7 +28,7 @@ import com.everhomes.rest.pmsy.AddressDTO;
 import com.everhomes.rest.pmsy.SearchBillsOrdersResponse;
 import com.everhomes.rest.pmsy.SetPmsyPropertyCommand;
 import com.everhomes.rest.pmsy.ListResourceCommand;
-import com.everhomes.rest.pmsy.searchBillsOrdersCommand;
+import com.everhomes.rest.pmsy.SearchBillsOrdersCommand;
 
 @RestController
 @RequestMapping("/pmsy")
@@ -36,8 +36,10 @@ public class PmsyController extends ControllerBase {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PmsyController.class);
 
 	@Autowired
-	PmsyService pmsyService;
+	private PmsyService pmsyService;
 
+	@Autowired
+	private PmsyProvider pmsyProvider;
 	/**
 	 * <b>URL: /pmsy/listPmPayers</b>
 	 * <p>获取用户填写过的有效缴费用户信息</p>
@@ -45,7 +47,8 @@ public class PmsyController extends ControllerBase {
 	@RequestMapping("listPmPayers")
 	@RestReturn(value=PmsyPayerDTO.class,collection=true)
 	public RestResponse listPmPayers(/*@Valid ListPmPayerCommand cmd*/) {
-		List<PmsyPayerDTO> resultList = null;
+		PmsyOrder order = pmsyProvider.findPmsyOrderById(1L);
+		List<PmsyPayerDTO> resultList = pmsyService.listPmPayers();
 		RestResponse response = new RestResponse(resultList);
 
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -104,8 +107,8 @@ public class PmsyController extends ControllerBase {
 	 */
 	@RequestMapping("searchBillingOrders")
 	@RestReturn(value=SearchBillsOrdersResponse.class)
-	public RestResponse searchBillingOrders(@Valid searchBillsOrdersCommand cmd) {
-		SearchBillsOrdersResponse serachBillsOrdersResponse = null;
+	public RestResponse searchBillingOrders(@Valid SearchBillsOrdersCommand cmd) {
+		SearchBillsOrdersResponse serachBillsOrdersResponse = pmsyService.searchBillingOrders(cmd);
 		
 		RestResponse response = new RestResponse(serachBillsOrdersResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -134,7 +137,7 @@ public class PmsyController extends ControllerBase {
     @RequestMapping("createPmBillOrder")
 	@RestReturn(value=CommonOrderDTO.class)
 	public RestResponse createPmBillOrder(@Valid CreatePmsyBillOrderCommand cmd) {
-		CommonOrderDTO order = null;
+		CommonOrderDTO order = pmsyService.createPmBillOrder(cmd);
 		RestResponse response = new RestResponse(order);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -149,6 +152,7 @@ public class PmsyController extends ControllerBase {
 	@RestReturn(value=String.class)
 	public RestResponse setPmProperty(@Valid SetPmsyPropertyCommand cmd) {
     	
+    	pmsyService.setPmProperty(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

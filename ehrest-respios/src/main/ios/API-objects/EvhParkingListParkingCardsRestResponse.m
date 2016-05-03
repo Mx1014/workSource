@@ -1,6 +1,6 @@
 //
 // EvhParkingListParkingCardsRestResponse.m
-// generated at 2016-04-18 14:48:52 
+// generated at 2016-04-29 18:56:04 
 //
 #import "EvhParkingListParkingCardsRestResponse.h"
 #import "EvhParkingCardDTO.h"

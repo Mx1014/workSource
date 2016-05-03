@@ -1,6 +1,6 @@
 //
 // EvhSearchParkingRechargeOrdersCommand.m
-// generated at 2016-04-18 14:48:52 
+// generated at 2016-04-29 18:56:01 
 //
 #import "EvhSearchParkingRechargeOrdersCommand.h"
 
@@ -47,6 +47,8 @@
         [jsonObject setObject: self.payerName forKey: @"payerName"];
     if(self.payerPhone)
         [jsonObject setObject: self.payerPhone forKey: @"payerPhone"];
+    if(self.paidType)
+        [jsonObject setObject: self.paidType forKey: @"paidType"];
     if(self.rechargeStatus)
         [jsonObject setObject: self.rechargeStatus forKey: @"rechargeStatus"];
     if(self.startDate)
@@ -93,6 +95,10 @@
         self.payerPhone = [jsonObject objectForKey: @"payerPhone"];
         if(self.payerPhone && [self.payerPhone isEqual:[NSNull null]])
             self.payerPhone = nil;
+
+        self.paidType = [jsonObject objectForKey: @"paidType"];
+        if(self.paidType && [self.paidType isEqual:[NSNull null]])
+            self.paidType = nil;
 
         self.rechargeStatus = [jsonObject objectForKey: @"rechargeStatus"];
         if(self.rechargeStatus && [self.rechargeStatus isEqual:[NSNull null]])

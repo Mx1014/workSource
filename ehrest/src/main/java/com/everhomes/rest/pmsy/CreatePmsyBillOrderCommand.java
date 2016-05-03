@@ -1,6 +1,9 @@
 package com.everhomes.rest.pmsy;
 
 import java.math.BigDecimal;
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
 
 /**
  *<ul>
@@ -26,7 +29,8 @@ public class CreatePmsyBillOrderCommand {
 	private Long creatorId;
 	private BigDecimal orderAmount;
 	private String paidType;
-	private String[] billId;
+	@ItemType(String.class)
+	private List<String> billIds;
 	private Long pmPayerId;
 	
 	
@@ -55,11 +59,11 @@ public class CreatePmsyBillOrderCommand {
 		this.paidType = paidType;
 	}
 	
-	public String[] getBillId() {
-		return billId;
+	public List<String> getBillIds() {
+		return billIds;
 	}
-	public void setBillId(String[] billId) {
-		this.billId = billId;
+	public void setBillIds(List<String> billIds) {
+		this.billIds = billIds;
 	}
 	public Long getPmPayerId() {
 		return pmPayerId;

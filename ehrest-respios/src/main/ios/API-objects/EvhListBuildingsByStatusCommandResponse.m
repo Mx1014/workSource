@@ -1,17 +1,9 @@
 //
 // EvhListBuildingsByStatusCommandResponse.m
-<<<<<<< HEAD
-<<<<<<< HEAD
-// generated at 2016-04-18 14:48:51 
-=======
-// generated at 2016-04-19 14:25:57 
->>>>>>> 3.3.x
-=======
-// generated at 2016-04-26 18:22:55 
->>>>>>> 3.3.x
+// generated at 2016-04-29 18:56:01 
 //
 #import "EvhListBuildingsByStatusCommandResponse.h"
-#import "EvhCommunityBuildingDTO.h"
+#import "EvhBuildingDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhListBuildingsByStatusCommandResponse
@@ -45,7 +37,7 @@
         [jsonObject setObject: self.nextPageAnchor forKey: @"nextPageAnchor"];
     if(self.buildings) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhCommunityBuildingDTO* item in self.buildings) {
+        for(EvhBuildingDTO* item in self.buildings) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -64,7 +56,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"buildings"];
             for(id itemJson in jsonArray) {
-                EvhCommunityBuildingDTO* item = [EvhCommunityBuildingDTO new];
+                EvhBuildingDTO* item = [EvhBuildingDTO new];
                 
                 [item fromJson: itemJson];
                 [self.buildings addObject: item];

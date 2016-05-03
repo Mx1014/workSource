@@ -1,6 +1,6 @@
 //
 // EvhParkingOwnerType.h
-// generated at 2016-04-18 14:48:52 
+// generated at 2016-04-29 18:56:02 
 //
 
 #define EvhParkingOwnerType_COMMUNITY @"community"

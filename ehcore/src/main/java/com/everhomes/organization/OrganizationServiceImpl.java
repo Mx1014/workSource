@@ -1067,12 +1067,22 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public ListOrganizationMemberCommandResponse getUserOwningOrganizations() {
 		User user  = UserContext.current().getUser();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		ListOrganizationMemberCommandResponse response = new ListOrganizationMemberCommandResponse();
 		List<OrganizationMember> result = organizationProvider.listOrganizationMembers(user.getId());
 		if(result != null && result.size() > 0){
 			List<OrganizationMemberDTO> members =  new ArrayList<OrganizationMemberDTO>();
 			for (OrganizationMember organizationMember : result) {
 				Organization organization = organizationProvider.findOrganizationById(organizationMember.getOrganizationId());
+				
+				//Filter out the inactive organization add by sfyan 20130430
+				OrganizationStatus orgStatus = OrganizationStatus.fromCode(organization.getStatus());
+		            if(orgStatus != OrganizationStatus.ACTIVE) {
+		                LOGGER.error("The member is ignored for organization not active, userId=" + user.getId()
+		                    + ", organizationId=" + organizationMember.getOrganizationId() + ", orgMemberId=" + organizationMember.getId() 
+		                    + ", namespaceId=" + namespaceId + ", orgStatus" + orgStatus);
+		                continue;
+		            }
 				if(OrganizationType.PM != OrganizationType.fromCode(organization.getOrganizationType())){
 					OrganizationMemberDTO dto =ConvertHelper.convert(organizationMember,OrganizationMemberDTO.class);
 					dto.setOrganizationName(organization.getName());
@@ -1542,10 +1552,25 @@ public class OrganizationServiceImpl implements OrganizationService {
 		this.checkOrganizationIdIsNull(cmd.getId());
 		Organization organization = this.checkOrganization(cmd.getId());
 		
-		organization.setStatus(OrganizationStatus.DELETED.getCode());
-		Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
-		organization.setUpdateTime(now);
-		organizationProvider.updateOrganization(organization);
+		//modify all subset States by sfyan 20160430
+		List<String> groupTypeList = new ArrayList<String>();
+		groupTypeList.add(OrganizationGroupType.GROUP.getCode());
+		groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
+		groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
+		
+		List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes(organization.getPath()+"/%", groupTypeList);
+		organizations.add(organization);
+		
+		dbProvider.execute((TransactionStatus status) -> {
+			for (Organization org : organizations) {
+				org.setStatus(OrganizationStatus.DELETED.getCode());
+				Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+				org.setUpdateTime(now);
+				organizationProvider.updateOrganization(org);
+			}
+			return null;
+		});
+		
 	}
 
 	@Override
@@ -1788,7 +1813,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public List<OrganizationDetailDTO> listUserRelateEnterprises(ListUserRelatedEnterprisesCommand cmd) {
 		User user = UserContext.current().getUser();
-		
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembers(user.getId());
 		
 		Community community = null;
@@ -1798,6 +1823,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 		List<OrganizationDetailDTO> dtos = new ArrayList<OrganizationDetailDTO>();
 		for (OrganizationMember member : orgMembers) {
 			Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
+			
+			//Filter out the inactive organization add by sfyan 20130430
+			OrganizationStatus orgStatus = OrganizationStatus.fromCode(org.getStatus());
+            if(orgStatus != OrganizationStatus.ACTIVE) {
+                LOGGER.error("The member is ignored for organization not active, userId=" + user.getId()  
+                    + ", organizationId=" + member.getOrganizationId() + ", orgMemberId=" + member.getId() 
+                    + ", namespaceId=" + namespaceId + ", orgStatus" + orgStatus);
+                continue;
+            }
 			if(OrganizationGroupType.ENTERPRISE.getCode().equals(org.getGroupType())){
 				OrganizationDetailDTO dto= this.toOrganizationDetailDTO(org.getId(), false);
 				dto.setMember(ConvertHelper.convert(member, OrganizationMemberDTO.class));
@@ -1834,6 +1868,15 @@ public class OrganizationServiceImpl implements OrganizationService {
                 continue;
             }
             
+            //Filter out the inactive organization add by sfyan 20130430
+            OrganizationStatus orgStatus = OrganizationStatus.fromCode(org.getStatus());
+            if(orgStatus != OrganizationStatus.ACTIVE) {
+                LOGGER.error("The member is ignored for organization not active, userId=" + userId  
+                    + ", organizationId=" + member.getOrganizationId() + ", orgMemberId=" + member.getId() 
+                    + ", namespaceId=" + namespaceId + ", groupType=" + groupType + ", orgStatus" + orgStatus);
+                continue;
+            }
+
             OrganizationDTO dto = toOrganizationDTO(userId, org);
             dtos.add(dto);
         }
@@ -1874,12 +1917,23 @@ public class OrganizationServiceImpl implements OrganizationService {
 	public List<OrganizationSimpleDTO> listUserRelateOrgs(ListUserRelatedOrganizationsCommand cmd) {
 		User user = UserContext.current().getUser();
 
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		
 		List<OrganizationSimpleDTO> orgs = new ArrayList<OrganizationSimpleDTO>();
 		List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembers(user.getId());
 		
 		for (OrganizationMember member : orgMembers) {
 			if(member.getStatus().equals(OrganizationMemberStatus.ACTIVE.getCode())){
 				Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
+				
+				//Filter out the inactive organization add by sfyan 20130430
+				OrganizationStatus orgStatus = OrganizationStatus.fromCode(org.getStatus());
+				if(orgStatus != OrganizationStatus.ACTIVE){
+					LOGGER.error("The member is ignored for organization not active, userId=" + user.getId()  
+		                    + ", organizationId=" + member.getOrganizationId() + ", orgMemberId=" + member.getId() 
+		                    + ", namespaceId=" + namespaceId + ", orgStatus" + orgStatus);
+					continue;
+				}
 				if(cmd.getOrganiztionType() != null && !cmd.getOrganiztionType().equals("")){
 					if(org.getOrganizationType().equals(cmd.getOrganiztionType()) && !org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())){
 						OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
@@ -1891,6 +1945,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 					}
 				}
 				else{
+					//Filter out the inactive organization add by sfyan 20130430
+					if(orgStatus != OrganizationStatus.ACTIVE){
+						LOGGER.error("The member is ignored for organization not active, userId=" + user.getId()  
+			                    + ", organizationId=" + member.getOrganizationId() + ", orgMemberId=" + member.getId() 
+			                    + ", namespaceId=" + namespaceId + ", orgStatus" + orgStatus);
+						continue;
+					}
+					
 					if(!org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())){
 						OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
 						//物业或业委增加小区Id和小区name信息
@@ -4858,7 +4920,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
-		List<Organization> depts = organizationProvider.listDepartments(org.getPath()+"/%", 1, 1000);
+		List<String> groupTypeList = new ArrayList<String>();
+		groupTypeList.add(OrganizationGroupType.GROUP.getCode());
+		groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
+		
+		List<Organization> depts = organizationProvider.listOrganizationByGroupTypes(org.getPath()+"/%", groupTypeList);
 		
 		if(null == groupTypes){
 			groupTypes = new ArrayList<String>();
@@ -4872,7 +4938,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 		List<String> types = groupTypes;
 		
 		Long orgId = null;
-		
 
 		if(org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())){
 			orgId = org.getDirectlyEnterpriseId();
