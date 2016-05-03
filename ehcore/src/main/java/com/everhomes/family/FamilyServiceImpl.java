@@ -574,6 +574,7 @@ public class FamilyServiceImpl implements FamilyService {
         }
         
         //Merge histories, add by Janson
+        //missing addressId, modify by sfyan 20160503 
         List<UserGroupHistory> histories = this.userGroupHistoryProvider.queryUserGroupHistoryByUserId(userId);
         for(UserGroupHistory o : histories) {
             if(!checkList.containsKey(o.getAddressId())) {
@@ -583,6 +584,7 @@ public class FamilyServiceImpl implements FamilyService {
                 FamilyDTO family = new FamilyDTO();
                 family.setId(o.getId());
                 family.setMembershipStatus(GroupMemberStatus.INACTIVE.getCode());
+                family.setAddressId(o.getAddressId());
                 Community community = this.communityProvider.findCommunityById(o.getCommunityId());
                 if(community != null){
                     family.setCommunityId(o.getCommunityId());
