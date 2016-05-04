@@ -133,7 +133,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	
 	
 	@Override
-	public ListWebMenuResponse ListWebMenu(ListWebMenuCommand cmd) {
+	public ListWebMenuResponse listWebMenu(ListWebMenuCommand cmd) {
 		User user = UserContext.current().getUser();
 		ListWebMenuResponse res = new ListWebMenuResponse();
 		
@@ -144,14 +144,14 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			res.setMenus(new ArrayList<WebMenuDTO>());
 			return res;
 		}
-		List<WebMenuPrivilege> webMenuPrivileges = webMenuPrivilegeProvider.ListWebMenuByPrivilegeIds(privilegeIds, WebMenuPrivilegeShowFlag.MENU_SHOW);
+		List<WebMenuPrivilege> webMenuPrivileges = webMenuPrivilegeProvider.listWebMenuByPrivilegeIds(privilegeIds, WebMenuPrivilegeShowFlag.MENU_SHOW);
 		
 		List<Long> menuIds = new ArrayList<Long>();
 		for (WebMenuPrivilege webMenuPrivilege : webMenuPrivileges) {
 			menuIds.add(webMenuPrivilege.getMenuId());
 		}
 		
-		List<WebMenu> menus = webMenuPrivilegeProvider.ListWebMenuByMenuIds(this.getAllMenuIds(menuIds));
+		List<WebMenu> menus = webMenuPrivilegeProvider.listWebMenuByMenuIds(this.getAllMenuIds(menuIds));
 		
 		if(null == menus){
 			res.setMenus(new ArrayList<WebMenuDTO>());
@@ -168,10 +168,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	}
 
 	@Override
-	public List<ListWebMenuPrivilegeDTO> ListWebMenuPrivilege(ListWebMenuPrivilegeCommand cmd) {
+	public List<ListWebMenuPrivilegeDTO> listWebMenuPrivilege(ListWebMenuPrivilegeCommand cmd) {
 		User user = UserContext.current().getUser();
 		List<Long> privilegeIds = this.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
-		List<WebMenuPrivilege> webMenuPrivileges = webMenuPrivilegeProvider.ListWebMenuByPrivilegeIds(privilegeIds, null);
+		List<WebMenuPrivilege> webMenuPrivileges = webMenuPrivilegeProvider.listWebMenuByPrivilegeIds(privilegeIds, null);
 		return this.getListWebMenuPrivilege(webMenuPrivileges);
 	}
 	
@@ -273,7 +273,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			privilegeIds.add(acl.getPrivilegeId());
 		}
 		
-		List<WebMenuPrivilege> webMenuPrivileges = webMenuPrivilegeProvider.ListWebMenuByPrivilegeIds(privilegeIds, null);
+		List<WebMenuPrivilege> webMenuPrivileges = webMenuPrivilegeProvider.listWebMenuByPrivilegeIds(privilegeIds, null);
 		
 		return this.getListWebMenuPrivilege(webMenuPrivileges);
 	}
