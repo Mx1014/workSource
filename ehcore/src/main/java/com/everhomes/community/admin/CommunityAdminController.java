@@ -465,18 +465,31 @@ public class CommunityAdminController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /admin/community/ListCommunityAuthUserAddress</b>
+     * <b>URL: /admin/community/listCommunityAuthUserAddress</b>
      * <p>用户认证列表</p>
      */
-    @RequestMapping("ListCommunityAuthUserAddress")
+    @RequestMapping("listCommunityAuthUserAddress")
     @RestReturn(value=CommunityAuthUserAddressResponse.class)
-    public RestResponse ListCommunityAuthUserAddress(@Valid CommunityAuthUserAddressCommand cmd) {
+    public RestResponse listCommunityAuthUserAddress(@Valid CommunityAuthUserAddressCommand cmd) {
         
-        RestResponse response =  new RestResponse(communityService.ListCommunityAuthUserAddress(cmd));
+        RestResponse response =  new RestResponse(communityService.listCommunityAuthUserAddress(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
     
+    /**
+     * <b>URL: /admin/community/listUserByNotJoinedCommunity</b>
+     * <p>未加入小区的用户</p>
+     */
+    @RequestMapping("listUserByNotJoinedCommunity")
+    @RestReturn(value=CommunityUserAddressResponse.class)
+    public RestResponse listUserByNotJoinedCommunity(@Valid ListCommunityUsersCommand cmd) {
+        RestResponse response =  new RestResponse(communityService.listUserByNotJoinedCommunity(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
+   
 }
