@@ -419,6 +419,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 		RoleAssignment roleAssignment = new RoleAssignment();
 		List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), entityType.getCode(), cmd.getTargetId());
 		
+		//Set roles for no, add by sfyan 20160504
+		if(null == cmd.getRoleId()){
+			if(null != roleAssignments && 0 < roleAssignments.size()){
+				for (RoleAssignment assignment : roleAssignments) {
+					aclProvider.deleteRoleAssignment(assignment.getId());
+				}
+			}
+			return;
+		}
+		
 		if(null != roleAssignments && 0 < roleAssignments.size()){
 			for (RoleAssignment assignment : roleAssignments) {
 				if(assignment.getRoleId().equals(cmd.getRoleId())){
@@ -4515,6 +4525,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 				memberCmd.setOrganizationId(cmd.getOrganizationId());
 				memberCmd.setGender(UserGender.UNDISCLOSURED.getCode());
 				m =  ConvertHelper.convert(this.createOrganizationPersonnel(memberCmd), OrganizationMember.class);
+			}else{
+				if(OrganizationMemberStatus.fromCode(m.getStatus()) != OrganizationMemberStatus.ACTIVE){
+					m.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+					m.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+					organizationProvider.updateOrganizationMember(m);
+				}
 			}
 		
 			if(m.getTargetType().equals(OrganizationMemberTargetType.UNTRACK.getCode())){

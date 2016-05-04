@@ -1148,7 +1148,7 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 	
 	@Override
-	public CommunityAuthUserAddressResponse ListCommunityAuthUserAddress(CommunityAuthUserAddressCommand cmd){
+	public CommunityAuthUserAddressResponse listCommunityAuthUserAddress(CommunityAuthUserAddressCommand cmd){
 		Long communityId = cmd.getCommunityId();
 		
 		List<Group> groups = groupProvider.listGroupByCommunityId(communityId, (loc, query) -> {
@@ -1560,5 +1560,40 @@ public class CommunityServiceImpl implements CommunityService {
 		resp.setNotAuthUsers(notAuthUsers);
 
 		return resp;
+	}
+	
+	@Override
+	public CommunityUserAddressResponse listUserByNotJoinedCommunity(
+			ListCommunityUsersCommand cmd) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		List<CommunityUserAddressDTO> dtos = new ArrayList<CommunityUserAddressDTO>();
+		CommunityUserAddressResponse res = new CommunityUserAddressResponse();
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		List<User> users = userProvider.findUserByNamespaceId(namespaceId, locator, Integer.MAX_VALUE);
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		for (User user : users) {
+			List<UserGroup> groups = userProvider.listUserGroups(user.getId(), GroupDiscriminator.FAMILY.getCode());
+			if(null != groups && groups.size() > 0){
+				UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+				CommunityUserAddressDTO dto = new CommunityUserAddressDTO();
+				dto.setUserId(user.getId());
+				dto.setUserName(user.getNickName());
+				dto.setGender(user.getGender());
+				dto.setIsAuth(2);
+				if(null != userIdentifier){
+					dto.setPhone(userIdentifier.getIdentifierToken());
+				}
+				dto.setApplyTime(user.getCreateTime());
+				dtos.add(dto);
+				if(dtos.size() == pageSize){
+					res.setDtos(dtos);
+					res.setNextPageAnchor(user.getCreateTime().getTime());
+					break;
+				}
+			}
+		}
+		
+		return res;
 	}
 }

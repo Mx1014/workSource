@@ -190,6 +190,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(id));
 		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(phone));
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, OrganizationMember.class));
 			return null;
