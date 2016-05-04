@@ -1250,7 +1250,7 @@ public class ForumServiceImpl implements ForumService {
         CrossShardListingLocator locator = new CrossShardListingLocator(forumId);
         locator.setAnchor(cmd.getPageAnchor());
         List<Post> posts = this.forumProvider.queryPosts(locator, pageSize + 1, (loc, query) -> {
-            query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ID.eq(forum.getId()));
+//            query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ID.eq(forum.getId()));
             query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(topicId));
             query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
             //query.addConditions(Tables.EH_FORUM_POSTS.DELETER_UID.ne(0L));
