@@ -3579,6 +3579,9 @@ public class ForumServiceImpl implements ForumService {
                     actionUrl = String.format("%s%s?forumId=%s", serverContectPath, 
                         "/forum/listTopics", group.getOwningForumId());
                     filterDto.setActionUrl(actionUrl);
+                    avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.organization", "");
+                    filterDto.setAvatar(avatarUri);
+                    filterDto.setAvatarUrl(getPostFilterDefaultAvatar(namespaceId, user.getId(), avatarUri));
                     tmpFilterList.add(filterDto);
                 }
             } else {
