@@ -8,12 +8,12 @@ package com.everhomes.rest.pmsy;
  * <li>billTip: 提示信息</li>
  * </ul>
  */
-public class PmsyCommunitiesDTO {
+public class PmsyCommunityDTO {
 	
-	private Long id;
-	private Long communityId;
-	private String contact;
-	private String billTip;
+	private java.lang.Long    id;
+	private java.lang.Long    communityId;
+	private java.lang.String  contact;
+	private java.lang.String  billTip;
 	
 	public Long getId() {
 		return id;

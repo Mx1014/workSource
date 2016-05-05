@@ -1,7 +1,6 @@
 package com.everhomes.rest.pmsy;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;

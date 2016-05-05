@@ -19,9 +19,11 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.pmsy.CreatePmsyBillOrderCommand;
+import com.everhomes.rest.pmsy.GetPmsyPropertyCommand;
 import com.everhomes.rest.pmsy.GetPmsyBills;
 import com.everhomes.rest.pmsy.ListPmsyBillsCommand;
 import com.everhomes.rest.pmsy.PmsyBillsDTO;
+import com.everhomes.rest.pmsy.PmsyCommunityDTO;
 import com.everhomes.rest.pmsy.PmsyPayerDTO;
 import com.everhomes.rest.pmsy.PmsyBillsResponse;
 import com.everhomes.rest.pmsy.AddressDTO;
@@ -94,7 +96,7 @@ public class PmsyController extends ControllerBase {
 	@RequestMapping(value="getPmsyBills")
 	@RestReturn(value=PmsyBillsDTO.class)
 	public RestResponse getPmsyBills(@Valid GetPmsyBills cmd) {
-		PmsyBillsDTO monthlyBill = pmsyService.findMonthlyPmBill(cmd);
+		PmsyBillsDTO monthlyBill = pmsyService.getMonthlyPmBill(cmd);
 		RestResponse response = new RestResponse(monthlyBill);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -124,6 +126,7 @@ public class PmsyController extends ControllerBase {
     @RestReturn(value = String.class)
     public RestResponse notifyPmsyOrderPayment(PayCallbackCommand cmd) {
         
+    	pmsyService.notifyPmsyOrderPayment(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -159,18 +162,18 @@ public class PmsyController extends ControllerBase {
 		return response;
 	}
     
-//    /**
-//     * <b>URL: /pmsy/setPmProperty</b>
-//     * <p>设置提示信息和手机号</p>
-//     */
-//    @RequestMapping("getPmProperty")
-//	@RestReturn(value=String.class)
-//	public RestResponse getPmProperty(@Valid GetPmPropertyCommand cmd) {
-//    	PmsyCommunitiesDTO dto = null;
-//		RestResponse response = new RestResponse(dto);
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
+    /**
+     * <b>URL: /pmsy/setPmProperty</b>
+     * <p>设置提示信息和手机号</p>
+     */
+    @RequestMapping("getPmProperty")
+	@RestReturn(value=String.class)
+	public RestResponse getPmProperty(@Valid GetPmsyPropertyCommand cmd) {
+    	PmsyCommunityDTO dto = pmsyService.getPmProperty(cmd);
+		RestResponse response = new RestResponse(dto);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 }

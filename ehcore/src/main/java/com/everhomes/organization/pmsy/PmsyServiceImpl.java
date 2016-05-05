@@ -14,7 +14,6 @@ import java.util.Map;
 
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,16 +28,17 @@ import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayCallbackCommand;
-import com.everhomes.rest.parking.ParkingCardRequestDTO;
 import com.everhomes.rest.pmsy.AddressDTO;
 import com.everhomes.rest.pmsy.CreatePmsyBillOrderCommand;
 import com.everhomes.rest.pmsy.GetPmsyBills;
+import com.everhomes.rest.pmsy.GetPmsyPropertyCommand;
 import com.everhomes.rest.pmsy.ListPmsyBillsCommand;
 import com.everhomes.rest.pmsy.ListResourceCommand;
 import com.everhomes.rest.pmsy.PmBillsOrdersDTO;
 import com.everhomes.rest.pmsy.PmsyBillType;
 import com.everhomes.rest.pmsy.PmsyBillsDTO;
 import com.everhomes.rest.pmsy.PmsyBillItemDTO;
+import com.everhomes.rest.pmsy.PmsyCommunityDTO;
 import com.everhomes.rest.pmsy.PmsyOrderStatus;
 import com.everhomes.rest.pmsy.PmsyPayerDTO;
 import com.everhomes.rest.pmsy.PmsyBillsResponse;
@@ -214,12 +214,18 @@ public class PmsyServiceImpl implements PmsyService{
 			newMonthlyBill.setRequests(newRequests);
 			requests.add(newMonthlyBill);
 		}
-		response.setContact("123123");
+		PmsyCommunity pmsyCommunity = pmsyProvider.findPmsyCommunityByToken(cmd.getProjectId());
+		if(pmsyCommunity == null){
+			LOGGER.error("pmsyCommunity relation is not exist.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"pmsyCommunity relation is not exist.");
+		}
+		response.setContact(pmsyCommunity.getContact());
 		response.setCustomerId(cmd.getCustomerId());
 		response.setMonthCount(calculateMonthSet.size());
 		response.setPayerId(cmd.getPayerId());
 		response.setResourceId(cmd.getResourceId());
-		response.setTip("11111111111");
+		response.setBillTip(pmsyCommunity.getBillTip());
 		response.setTotalAmount(totalAmount);
 		response.setProjectId(cmd.getProjectId());
 		//按时间排序
@@ -227,7 +233,7 @@ public class PmsyServiceImpl implements PmsyService{
 		return response;
 	}
 	@Override
-	public PmsyBillsDTO findMonthlyPmBill(GetPmsyBills cmd){
+	public PmsyBillsDTO getMonthlyPmBill(GetPmsyBills cmd){
 		PmsyBillsDTO mb = new PmsyBillsDTO();
 		List<PmsyBillItemDTO> requests = mb.getRequests();
 		if(requests == null)
@@ -334,13 +340,19 @@ public class PmsyServiceImpl implements PmsyService{
 		Integer namespaceId = UserContext.current().getNamespaceId();
 		Long userId = user.getId();
 		
+		PmsyCommunity pmsyCommunity = pmsyProvider.findPmsyCommunityByToken(cmd.getOwnerId().toString());
+		if(pmsyCommunity == null){
+			LOGGER.error("pmsyCommunity relation is not exist.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"pmsyCommunity relation is not exist.");
+		}
 		PmsyPayer payer = pmsyProvider.findPmPayersById(cmd.getPmPayerId());
 		
 		PmsyOrder order = new PmsyOrder();
 		order.setCreateTime(new Timestamp(System.currentTimeMillis()));
 		order.setCreatorUid(userId);
 		order.setNamespaceId(namespaceId);
-		order.setOwnerId(cmd.getOwnerId());
+		order.setOwnerId(pmsyCommunity.getCommunityId());
 		order.setOwnerType(cmd.getOwnerType());
 		order.setStatus(PmsyOrderStatus.UNPAID.getCode());
 		order.setUserContact(payer.getUserContact());
@@ -407,6 +419,12 @@ public class PmsyServiceImpl implements PmsyService{
 		pmsyCommunity.setCommunityId(cmd.getCommunityId());
 		
 		pmsyProvider.createPmsyCommunity(pmsyCommunity);
+	}
+	
+	@Override
+	public PmsyCommunityDTO getPmProperty(GetPmsyPropertyCommand cmd){
+		
+		return ConvertHelper.convert(pmsyProvider.findPmsyCommunityById(cmd.getCommunityId()), PmsyCommunityDTO.class);
 	}
 	
 	private String TimeToString(Long time){

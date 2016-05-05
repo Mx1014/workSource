@@ -15,7 +15,7 @@ import com.everhomes.discover.ItemType;
  * 
  * <li>monthCount：待缴月数</li>
  * <li>totalAmount: 待缴金额</li>
- * <li>tip: 物业提示信息</li>
+ * <li>billTip: 物业提示信息</li>
  * <li>contact: 物业客服电话</li>
  * <li>requests: 账单列表  com.everhomes.rest.property.MonthlyBill</li>
  * </ul>
@@ -28,7 +28,7 @@ public class PmsyBillsResponse {
 	
 	private Integer monthCount;
 	private BigDecimal totalAmount;
-	private String tip;
+	private String billTip;
 	private String contact;
 	@ItemType(PmsyBillsDTO.class)
 	private List<PmsyBillsDTO> requests = new ArrayList<PmsyBillsDTO>();
@@ -53,13 +53,14 @@ public class PmsyBillsResponse {
 	public void setContact(String contact) {
 		this.contact = contact;
 	}
-	public String getTip() {
-		return tip;
-	}
-	public void setTip(String tip) {
-		this.tip = tip;
-	}
 	
+	
+	public String getBillTip() {
+		return billTip;
+	}
+	public void setBillTip(String billTip) {
+		this.billTip = billTip;
+	}
 	public String getCustomerId() {
 		return customerId;
 	}

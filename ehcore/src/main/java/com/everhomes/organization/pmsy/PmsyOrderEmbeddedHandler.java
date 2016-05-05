@@ -1,6 +1,9 @@
 package com.everhomes.organization.pmsy;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,12 +15,9 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.order.OrderEmbeddedHandler;
-import com.everhomes.parking.ParkingOrderEmbeddedHandler;
-import com.everhomes.parking.ParkingRechargeOrder;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayCallbackCommand;
-import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
-import com.everhomes.rest.parking.ParkingRechargeOrderStatus;
+import com.everhomes.rest.pmsy.PmsyBillType;
 import com.everhomes.rest.pmsy.PmsyOrderStatus;
 import com.everhomes.util.RuntimeErrorException;
 import com.google.gson.Gson;
@@ -33,14 +33,63 @@ public class PmsyOrderEmbeddedHandler implements OrderEmbeddedHandler{
 	@Override
 	public void paySuccess(PayCallbackCommand cmd) {
 		
-//		String json = PmsyHttpUtil.post("UserRev_PayFee", cmd.getCustomerId(), TimeToString(cmd.getBillDateStr()),
-//				TimeToString(cmd.getBillDateStr()), cmd.getProjectId(), "01", "", "");
-//		Gson gson = new Gson();
-//		Map map = gson.fromJson(json, Map.class);
-//		List list = (List) map.get("UserRev_PayFee");
-//		Map map2 = (Map) list.get(0);
-//		List list2 = (List) map2.get("Syswin");
+		PmsyOrder order = checkOrder(Long.parseLong(cmd.getOrderNo()));
+		List<PmsyOrderItem> orderItems = pmsyProvider.ListPmsyOrderItem(order.getId());
+		if(orderItems.isEmpty()){
+			LOGGER.error("bill list is empty.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"bill list is empty.");
+		}
 		
+		String feeJson = PmsyHttpUtil.post("UserRev_GetFeeList", orderItems.get(0).getCustomerId(), "",
+				"", "", PmsyBillType.UNPAID.getCode(), "", "");
+		Gson gson = new Gson();
+		Map map = gson.fromJson(feeJson, Map.class);
+		List feeList = (List) map.get("UserRev_GetFeeList");
+		Map map2 = (Map) feeList.get(0);
+		List feeList2 = (List) map2.get("Syswin");
+		
+		List<Map<String,String>> billList = new ArrayList<Map<String,String>>();
+		feeListOuter:
+			for(Object o:feeList2){
+				Map map3 = (Map) o;
+				for(PmsyOrderItem orderItem:orderItems){
+					if(!orderItem.getBillId().equals((String)map3.get("ID")))
+						continue;
+					Map<String,String> tempMap = new HashMap<String,String>();
+					tempMap.put("RevID", orderItem.getBillId());
+					BigDecimal priFailures = new BigDecimal((String)map3.get("PriFailures"));
+					BigDecimal lFFailures = new BigDecimal((String)map3.get("LFFailures"));
+					BigDecimal debtAmount = priFailures.add(lFFailures);
+					tempMap.put("RevMoney", debtAmount.toString());
+					tempMap.put("billNo", orderItem.getId().toString());
+					billList.add(tempMap);
+					continue feeListOuter;
+				}
+				
+			}
+		Map<String,Object> jsonMap = new HashMap<String,Object>();
+		jsonMap.put("Syswin", billList);
+		String billListJson = gson.toJson(jsonMap, Map.class);
+		String json = PmsyHttpUtil.post("UserRev_PayFee", "cmd.getCustomerId()", "projectId",
+				"", "siyuan", "支付宝支付", "", billListJson);
+		Map payFeeMap = gson.fromJson(json, Map.class);
+		List payFeeList = (List) payFeeMap.get("UserRev_PayFee");
+		Map payFeeMap2 = (Map) payFeeList.get(0);
+		List payFeeList2 = (List) map2.get("Syswin");
+		
+		payFeeListOuter:
+		for(Object o:payFeeList2){
+			Map map3 = (Map) o;
+			for(PmsyOrderItem orderItem:orderItems){
+				if(!orderItem.getBillId().equals((String)map3.get("ID")))
+					continue;
+				orderItem.setStatus((byte)map3.get("State"));
+				pmsyProvider.updatePmsyOrderItem(orderItem);
+				continue payFeeListOuter;
+			}
+			
+		}
 		
 	}
 
