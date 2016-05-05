@@ -13,6 +13,8 @@ CREATE TABLE `eh_pmsy_orders` (
   `creator_uid` BIGINT NOT NULL DEFAULT 0,
   `create_time` DATETIME,
   `paid_type` VARCHAR(32) COMMENT 'the type of paid 10001:zhifubao 10002: weixin',
+  `project_id` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the id of siyuan project',
+  `customer_id` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the id of customer according the third system, siyuan',
 
   PRIMARY KEY (`id`)             
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
