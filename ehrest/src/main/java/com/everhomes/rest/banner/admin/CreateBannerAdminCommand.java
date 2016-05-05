@@ -24,6 +24,7 @@ import com.everhomes.util.StringHelper;
  * <li>endTime: banner结束时间</li>
  * <li>status: 状态，参考{@link com.everhomes.rest.banner.BannerStatus}</li>
  * <li>order: banner顺序</li>
+ *  <li>sceneType: 场景类型，{@link com.everhomes.rest.ui.user.SceneType}</li>
  * </ul>
  */
 public class CreateBannerAdminCommand {
@@ -50,6 +51,7 @@ public class CreateBannerAdminCommand {
     @NotNull
     private Byte     status;
     private Integer  order;
+    private String sceneType;
 
     
     public Integer getNamespaceId() {
@@ -138,6 +140,13 @@ public class CreateBannerAdminCommand {
     }
     public void setActionData(String actionData) {
         this.actionData = actionData;
+    }
+        
+    public String getSceneType() {
+        return sceneType;
+    }
+    public void setSceneType(String sceneType) {
+        this.sceneType = sceneType;
     }
     @Override
     public String toString() {
