@@ -48,6 +48,13 @@ public class EhParkingRechargeOrdersDao extends org.jooq.impl.DAOImpl<com.everho
 	}
 
 	/**
+	 * Fetch records that have <code>order_no IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders> fetchByOrderNo(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhParkingRechargeOrders.EH_PARKING_RECHARGE_ORDERS.ORDER_NO, values);
+	}
+
+	/**
 	 * Fetch records that have <code>owner_type IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders> fetchByOwnerType(java.lang.String... values) {
@@ -206,13 +213,6 @@ public class EhParkingRechargeOrdersDao extends org.jooq.impl.DAOImpl<com.everho
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders> fetchByNewExpiredTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhParkingRechargeOrders.EH_PARKING_RECHARGE_ORDERS.NEW_EXPIRED_TIME, values);
-	}
-
-	/**
-	 * Fetch records that have <code>order_no IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders> fetchByOrderNo(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhParkingRechargeOrders.EH_PARKING_RECHARGE_ORDERS.ORDER_NO, values);
 	}
 
 	/**

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPmsyOrders extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhPmsyOrdersRecord> {
 
-	private static final long serialVersionUID = -1973872368;
+	private static final long serialVersionUID = 737230243;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_pmsy_orders</code>
@@ -85,6 +85,16 @@ public class EhPmsyOrders extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	 * The column <code>ehcore.eh_pmsy_orders.paid_type</code>. the type of paid 10001:zhifubao 10002: weixin
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPmsyOrdersRecord, java.lang.String> PAID_TYPE = createField("paid_type", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "the type of paid 10001:zhifubao 10002: weixin");
+
+	/**
+	 * The column <code>ehcore.eh_pmsy_orders.project_id</code>. the id of siyuan project
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPmsyOrdersRecord, java.lang.String> PROJECT_ID = createField("project_id", org.jooq.impl.SQLDataType.VARCHAR.length(128).nullable(false).defaulted(true), this, "the id of siyuan project");
+
+	/**
+	 * The column <code>ehcore.eh_pmsy_orders.customer_id</code>. the id of customer according the third system, siyuan
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPmsyOrdersRecord, java.lang.String> CUSTOMER_ID = createField("customer_id", org.jooq.impl.SQLDataType.VARCHAR.length(128).nullable(false).defaulted(true), this, "the id of customer according the third system, siyuan");
 
 	/**
 	 * Create a <code>ehcore.eh_pmsy_orders</code> table reference

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfAccountCategories extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhConfAccountCategoriesRecord> {
 
-	private static final long serialVersionUID = 493224792;
+	private static final long serialVersionUID = 1704795124;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_conf_account_categories</code>
@@ -37,9 +37,9 @@ public class EhConfAccountCategories extends org.jooq.impl.TableImpl<com.everhom
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfAccountCategoriesRecord, java.lang.Integer> MULTIPLE_ACCOUNT_THRESHOLD = createField("multiple_account_threshold", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "the limit value of mutiple buy channel");
 
 	/**
-	 * The column <code>ehcore.eh_conf_account_categories.conf_type</code>. 0: none, 1: 25方仅视频, 2: 25方支持电话, 3: 100方仅视频, 4: 100方支持电话
+	 * The column <code>ehcore.eh_conf_account_categories.conf_type</code>. 0: 25方仅视频, 1: 25方支持电话, 2: 100方仅视频, 3: 100方支持电话, 4: 6方仅视频, 5: 50方仅视频, 6: 50方支持电话
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfAccountCategoriesRecord, java.lang.Byte> CONF_TYPE = createField("conf_type", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: none, 1: 25方仅视频, 2: 25方支持电话, 3: 100方仅视频, 4: 100方支持电话");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfAccountCategoriesRecord, java.lang.Byte> CONF_TYPE = createField("conf_type", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: 25方仅视频, 1: 25方支持电话, 2: 100方仅视频, 3: 100方支持电话, 4: 6方仅视频, 5: 50方仅视频, 6: 50方支持电话");
 
 	/**
 	 * The column <code>ehcore.eh_conf_account_categories.min_period</code>. the minimum count of months

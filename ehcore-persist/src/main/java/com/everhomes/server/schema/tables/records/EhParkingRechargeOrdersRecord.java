@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkingRechargeOrdersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord> {
 
-	private static final long serialVersionUID = -670924366;
+	private static final long serialVersionUID = -1710090738;
 
 	/**
 	 * Setter for <code>ehcore.eh_parking_recharge_orders.id</code>. id of the record
@@ -28,339 +28,339 @@ public class EhParkingRechargeOrdersRecord extends org.jooq.impl.UpdatableRecord
 	}
 
 	/**
+	 * Setter for <code>ehcore.eh_parking_recharge_orders.order_no</code>.
+	 */
+	public void setOrderNo(java.lang.Long value) {
+		setValue(1, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_parking_recharge_orders.order_no</code>.
+	 */
+	public java.lang.Long getOrderNo() {
+		return (java.lang.Long) getValue(1);
+	}
+
+	/**
 	 * Setter for <code>ehcore.eh_parking_recharge_orders.owner_type</code>. the type of who own the standard, community, etc
 	 */
 	public void setOwnerType(java.lang.String value) {
-		setValue(1, value);
+		setValue(2, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_parking_recharge_orders.owner_type</code>. the type of who own the standard, community, etc
 	 */
 	public java.lang.String getOwnerType() {
-		return (java.lang.String) getValue(1);
+		return (java.lang.String) getValue(2);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_parking_recharge_orders.owner_id</code>.
 	 */
 	public void setOwnerId(java.lang.Long value) {
-		setValue(2, value);
+		setValue(3, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_parking_recharge_orders.owner_id</code>.
 	 */
 	public java.lang.Long getOwnerId() {
-		return (java.lang.Long) getValue(2);
+		return (java.lang.Long) getValue(3);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_parking_recharge_orders.parking_lot_id</code>. reference to id of eh_parking_lots
 	 */
 	public void setParkingLotId(java.lang.Long value) {
-		setValue(3, value);
+		setValue(4, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_parking_recharge_orders.parking_lot_id</code>. reference to id of eh_parking_lots
 	 */
 	public java.lang.Long getParkingLotId() {
-		return (java.lang.Long) getValue(3);
+		return (java.lang.Long) getValue(4);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_parking_recharge_orders.plate_number</code>.
 	 */
 	public void setPlateNumber(java.lang.String value) {
-		setValue(4, value);
+		setValue(5, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_parking_recharge_orders.plate_number</code>.
 	 */
 	public java.lang.String getPlateNumber() {
-		return (java.lang.String) getValue(4);
+		return (java.lang.String) getValue(5);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_parking_recharge_orders.plate_owner_name</code>. the name of plate owner
 	 */
 	public void setPlateOwnerName(java.lang.String value) {
-		setValue(5, value);
+		setValue(6, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_parking_recharge_orders.plate_owner_name</code>. the name of plate owner
 	 */
 	public java.lang.String getPlateOwnerName() {
-		return (java.lang.String) getValue(5);
+		return (java.lang.String) getValue(6);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_parking_recharge_orders.plate_owner_phone</code>. the phone of plate owner
 	 */
 	public void setPlateOwnerPhone(java.lang.String value) {
-		setValue(6, value);
+		setValue(7, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_parking_recharge_orders.plate_owner_phone</code>. the phone of plate owner
 	 */
 	public java.lang.String getPlateOwnerPhone() {
-		return (java.lang.String) getValue(6);
+		return (java.lang.String) getValue(7);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_parking_recharge_orders.payer_enterprise_id</code>. the id of organization where the payer is in
 	 */
 	public void setPayerEnterpriseId(java.lang.Long value) {
-		setValue(7, value);
+		setValue(8, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_parking_recharge_orders.payer_enterprise_id</code>. the id of organization where the payer is in
 	 */
 	public java.lang.Long getPayerEnterpriseId() {
-		return (java.lang.Long) getValue(7);
+		return (java.lang.Long) getValue(8);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_parking_recharge_orders.payer_uid</code>. the user id of payer
 	 */
 	public void setPayerUid(java.lang.Long value) {
-		setValue(8, value);
+		setValue(9, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_parking_recharge_orders.payer_uid</code>. the user id of payer
 	 */
 	public java.lang.Long getPayerUid() {
-		return (java.lang.Long) getValue(8);
+		return (java.lang.Long) getValue(9);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_parking_recharge_orders.payer_phone</code>. the phone of payer
 	 */
 	public void setPayerPhone(java.lang.String value) {
-		setValue(9, value);
+		setValue(10, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_parking_recharge_orders.payer_phone</code>. the phone of payer
 	 */
 	public java.lang.String getPayerPhone() {
-		return (java.lang.String) getValue(9);
+		return (java.lang.String) getValue(10);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_parking_recharge_orders.paid_time</code>. the pay time
 	 */
 	public void setPaidTime(java.sql.Timestamp value) {
-		setValue(10, value);
+		setValue(11, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_parking_recharge_orders.paid_time</code>. the pay time
 	 */
 	public java.sql.Timestamp getPaidTime() {
-		return (java.sql.Timestamp) getValue(10);
+		return (java.sql.Timestamp) getValue(11);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_parking_recharge_orders.vendor_name</code>. reference to name of eh_parking_vendors
 	 */
 	public void setVendorName(java.lang.String value) {
-		setValue(11, value);
+		setValue(12, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_parking_recharge_orders.vendor_name</code>. reference to name of eh_parking_vendors
 	 */
 	public java.lang.String getVendorName() {
-		return (java.lang.String) getValue(11);
+		return (java.lang.String) getValue(12);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_parking_recharge_orders.card_number</code>. it may be number of virtual card or location number
 	 */
 	public void setCardNumber(java.lang.String value) {
-		setValue(12, value);
+		setValue(13, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_parking_recharge_orders.card_number</code>. it may be number of virtual card or location number
 	 */
 	public java.lang.String getCardNumber() {
-		return (java.lang.String) getValue(12);
+		return (java.lang.String) getValue(13);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_parking_recharge_orders.rate_token</code>. it may be from eh_parking_recharge_rates or 3rd system, according to vendor_name
 	 */
 	public void setRateToken(java.lang.String value) {
-		setValue(13, value);
+		setValue(14, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_parking_recharge_orders.rate_token</code>. it may be from eh_parking_recharge_rates or 3rd system, according to vendor_name
 	 */
 	public java.lang.String getRateToken() {
-		return (java.lang.String) getValue(13);
+		return (java.lang.String) getValue(14);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_parking_recharge_orders.rate_name</code>. rate name for recharging the parking card
 	 */
 	public void setRateName(java.lang.String value) {
-		setValue(14, value);
+		setValue(15, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_parking_recharge_orders.rate_name</code>. rate name for recharging the parking card
 	 */
 	public java.lang.String getRateName() {
-		return (java.lang.String) getValue(14);
+		return (java.lang.String) getValue(15);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_parking_recharge_orders.month_count</code>. how many months in the rate for recharging the parking card
 	 */
 	public void setMonthCount(java.math.BigDecimal value) {
-		setValue(15, value);
+		setValue(16, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_parking_recharge_orders.month_count</code>. how many months in the rate for recharging the parking card
 	 */
 	public java.math.BigDecimal getMonthCount() {
-		return (java.math.BigDecimal) getValue(15);
+		return (java.math.BigDecimal) getValue(16);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_parking_recharge_orders.price</code>. the total price in the item for recharging the parking card
 	 */
 	public void setPrice(java.math.BigDecimal value) {
-		setValue(16, value);
+		setValue(17, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_parking_recharge_orders.price</code>. the total price in the item for recharging the parking card
 	 */
 	public java.math.BigDecimal getPrice() {
-		return (java.math.BigDecimal) getValue(16);
+		return (java.math.BigDecimal) getValue(17);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_parking_recharge_orders.status</code>. the status of the order, 0: inactive, 1: unpaid, 2: paid
 	 */
 	public void setStatus(java.lang.Byte value) {
-		setValue(17, value);
+		setValue(18, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_parking_recharge_orders.status</code>. the status of the order, 0: inactive, 1: unpaid, 2: paid
 	 */
 	public java.lang.Byte getStatus() {
-		return (java.lang.Byte) getValue(17);
+		return (java.lang.Byte) getValue(18);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_parking_recharge_orders.recharge_status</code>. 0: none, 1: unrecharged 1: recharged
 	 */
 	public void setRechargeStatus(java.lang.Byte value) {
-		setValue(18, value);
+		setValue(19, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_parking_recharge_orders.recharge_status</code>. 0: none, 1: unrecharged 1: recharged
 	 */
 	public java.lang.Byte getRechargeStatus() {
-		return (java.lang.Byte) getValue(18);
+		return (java.lang.Byte) getValue(19);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_parking_recharge_orders.recharge_time</code>.
 	 */
 	public void setRechargeTime(java.sql.Timestamp value) {
-		setValue(19, value);
+		setValue(20, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_parking_recharge_orders.recharge_time</code>.
 	 */
 	public java.sql.Timestamp getRechargeTime() {
-		return (java.sql.Timestamp) getValue(19);
+		return (java.sql.Timestamp) getValue(20);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_parking_recharge_orders.creator_uid</code>.
 	 */
 	public void setCreatorUid(java.lang.Long value) {
-		setValue(20, value);
+		setValue(21, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_parking_recharge_orders.creator_uid</code>.
 	 */
 	public java.lang.Long getCreatorUid() {
-		return (java.lang.Long) getValue(20);
+		return (java.lang.Long) getValue(21);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_parking_recharge_orders.create_time</code>.
 	 */
 	public void setCreateTime(java.sql.Timestamp value) {
-		setValue(21, value);
+		setValue(22, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_parking_recharge_orders.create_time</code>.
 	 */
 	public java.sql.Timestamp getCreateTime() {
-		return (java.sql.Timestamp) getValue(21);
-	}
-
-	/**
-	 * Setter for <code>ehcore.eh_parking_recharge_orders.old_expired_time</code>. old_expired_time
-	 */
-	public void setOldExpiredTime(java.sql.Timestamp value) {
-		setValue(22, value);
-	}
-
-	/**
-	 * Getter for <code>ehcore.eh_parking_recharge_orders.old_expired_time</code>. old_expired_time
-	 */
-	public java.sql.Timestamp getOldExpiredTime() {
 		return (java.sql.Timestamp) getValue(22);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_parking_recharge_orders.new_expired_time</code>. new_expired_time
+	 * Setter for <code>ehcore.eh_parking_recharge_orders.old_expired_time</code>.
 	 */
-	public void setNewExpiredTime(java.sql.Timestamp value) {
+	public void setOldExpiredTime(java.sql.Timestamp value) {
 		setValue(23, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_parking_recharge_orders.new_expired_time</code>. new_expired_time
+	 * Getter for <code>ehcore.eh_parking_recharge_orders.old_expired_time</code>.
 	 */
-	public java.sql.Timestamp getNewExpiredTime() {
+	public java.sql.Timestamp getOldExpiredTime() {
 		return (java.sql.Timestamp) getValue(23);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_parking_recharge_orders.order_no</code>. order no
+	 * Setter for <code>ehcore.eh_parking_recharge_orders.new_expired_time</code>.
 	 */
-	public void setOrderNo(java.lang.Long value) {
+	public void setNewExpiredTime(java.sql.Timestamp value) {
 		setValue(24, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_parking_recharge_orders.order_no</code>. order no
+	 * Getter for <code>ehcore.eh_parking_recharge_orders.new_expired_time</code>.
 	 */
-	public java.lang.Long getOrderNo() {
-		return (java.lang.Long) getValue(24);
+	public java.sql.Timestamp getNewExpiredTime() {
+		return (java.sql.Timestamp) getValue(24);
 	}
 
 	/**
@@ -417,34 +417,34 @@ public class EhParkingRechargeOrdersRecord extends org.jooq.impl.UpdatableRecord
 	/**
 	 * Create a detached, initialised EhParkingRechargeOrdersRecord
 	 */
-	public EhParkingRechargeOrdersRecord(java.lang.Long id, java.lang.String ownerType, java.lang.Long ownerId, java.lang.Long parkingLotId, java.lang.String plateNumber, java.lang.String plateOwnerName, java.lang.String plateOwnerPhone, java.lang.Long payerEnterpriseId, java.lang.Long payerUid, java.lang.String payerPhone, java.sql.Timestamp paidTime, java.lang.String vendorName, java.lang.String cardNumber, java.lang.String rateToken, java.lang.String rateName, java.math.BigDecimal monthCount, java.math.BigDecimal price, java.lang.Byte status, java.lang.Byte rechargeStatus, java.sql.Timestamp rechargeTime, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.sql.Timestamp oldExpiredTime, java.sql.Timestamp newExpiredTime, java.lang.Long orderNo, java.lang.String paidType, java.lang.Byte isDelete) {
+	public EhParkingRechargeOrdersRecord(java.lang.Long id, java.lang.Long orderNo, java.lang.String ownerType, java.lang.Long ownerId, java.lang.Long parkingLotId, java.lang.String plateNumber, java.lang.String plateOwnerName, java.lang.String plateOwnerPhone, java.lang.Long payerEnterpriseId, java.lang.Long payerUid, java.lang.String payerPhone, java.sql.Timestamp paidTime, java.lang.String vendorName, java.lang.String cardNumber, java.lang.String rateToken, java.lang.String rateName, java.math.BigDecimal monthCount, java.math.BigDecimal price, java.lang.Byte status, java.lang.Byte rechargeStatus, java.sql.Timestamp rechargeTime, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.sql.Timestamp oldExpiredTime, java.sql.Timestamp newExpiredTime, java.lang.String paidType, java.lang.Byte isDelete) {
 		super(com.everhomes.server.schema.tables.EhParkingRechargeOrders.EH_PARKING_RECHARGE_ORDERS);
 
 		setValue(0, id);
-		setValue(1, ownerType);
-		setValue(2, ownerId);
-		setValue(3, parkingLotId);
-		setValue(4, plateNumber);
-		setValue(5, plateOwnerName);
-		setValue(6, plateOwnerPhone);
-		setValue(7, payerEnterpriseId);
-		setValue(8, payerUid);
-		setValue(9, payerPhone);
-		setValue(10, paidTime);
-		setValue(11, vendorName);
-		setValue(12, cardNumber);
-		setValue(13, rateToken);
-		setValue(14, rateName);
-		setValue(15, monthCount);
-		setValue(16, price);
-		setValue(17, status);
-		setValue(18, rechargeStatus);
-		setValue(19, rechargeTime);
-		setValue(20, creatorUid);
-		setValue(21, createTime);
-		setValue(22, oldExpiredTime);
-		setValue(23, newExpiredTime);
-		setValue(24, orderNo);
+		setValue(1, orderNo);
+		setValue(2, ownerType);
+		setValue(3, ownerId);
+		setValue(4, parkingLotId);
+		setValue(5, plateNumber);
+		setValue(6, plateOwnerName);
+		setValue(7, plateOwnerPhone);
+		setValue(8, payerEnterpriseId);
+		setValue(9, payerUid);
+		setValue(10, payerPhone);
+		setValue(11, paidTime);
+		setValue(12, vendorName);
+		setValue(13, cardNumber);
+		setValue(14, rateToken);
+		setValue(15, rateName);
+		setValue(16, monthCount);
+		setValue(17, price);
+		setValue(18, status);
+		setValue(19, rechargeStatus);
+		setValue(20, rechargeTime);
+		setValue(21, creatorUid);
+		setValue(22, createTime);
+		setValue(23, oldExpiredTime);
+		setValue(24, newExpiredTime);
 		setValue(25, paidType);
 		setValue(26, isDelete);
 	}

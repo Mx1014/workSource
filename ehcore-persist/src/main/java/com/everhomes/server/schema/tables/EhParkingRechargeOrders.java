@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkingRechargeOrders extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord> {
 
-	private static final long serialVersionUID = 431200349;
+	private static final long serialVersionUID = -500774431;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_parking_recharge_orders</code>
@@ -30,6 +30,11 @@ public class EhParkingRechargeOrders extends org.jooq.impl.TableImpl<com.everhom
 	 * The column <code>ehcore.eh_parking_recharge_orders.id</code>. id of the record
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id of the record");
+
+	/**
+	 * The column <code>ehcore.eh_parking_recharge_orders.order_no</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.lang.Long> ORDER_NO = createField("order_no", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_parking_recharge_orders.owner_type</code>. the type of who own the standard, community, etc
@@ -137,19 +142,14 @@ public class EhParkingRechargeOrders extends org.jooq.impl.TableImpl<com.everhom
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_parking_recharge_orders.old_expired_time</code>. old_expired_time
+	 * The column <code>ehcore.eh_parking_recharge_orders.old_expired_time</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.sql.Timestamp> OLD_EXPIRED_TIME = createField("old_expired_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "old_expired_time");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.sql.Timestamp> OLD_EXPIRED_TIME = createField("old_expired_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_parking_recharge_orders.new_expired_time</code>. new_expired_time
+	 * The column <code>ehcore.eh_parking_recharge_orders.new_expired_time</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.sql.Timestamp> NEW_EXPIRED_TIME = createField("new_expired_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "new_expired_time");
-
-	/**
-	 * The column <code>ehcore.eh_parking_recharge_orders.order_no</code>. order no
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.lang.Long> ORDER_NO = createField("order_no", org.jooq.impl.SQLDataType.BIGINT, this, "order no");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord, java.sql.Timestamp> NEW_EXPIRED_TIME = createField("new_expired_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_parking_recharge_orders.paid_type</code>. the type of payer

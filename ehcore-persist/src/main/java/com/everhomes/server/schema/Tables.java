@@ -974,6 +974,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhWebMenuPrivileges EH_WEB_MENU_PRIVILEGES = com.everhomes.server.schema.tables.EhWebMenuPrivileges.EH_WEB_MENU_PRIVILEGES;
 
 	/**
+	 * The table ehcore.eh_web_menu_scopes
+	 */
+	public static final com.everhomes.server.schema.tables.EhWebMenuScopes EH_WEB_MENU_SCOPES = com.everhomes.server.schema.tables.EhWebMenuScopes.EH_WEB_MENU_SCOPES;
+
+	/**
 	 * The table ehcore.eh_yellow_pages
 	 */
 	public static final com.everhomes.server.schema.tables.EhYellowPages EH_YELLOW_PAGES = com.everhomes.server.schema.tables.EhYellowPages.EH_YELLOW_PAGES;

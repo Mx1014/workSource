@@ -11,9 +11,10 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhParkingRechargeOrders implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1814332203;
+	private static final long serialVersionUID = 1045523561;
 
 	private java.lang.Long       id;
+	private java.lang.Long       orderNo;
 	private java.lang.String     ownerType;
 	private java.lang.Long       ownerId;
 	private java.lang.Long       parkingLotId;
@@ -37,7 +38,6 @@ public class EhParkingRechargeOrders implements java.io.Serializable {
 	private java.sql.Timestamp   createTime;
 	private java.sql.Timestamp   oldExpiredTime;
 	private java.sql.Timestamp   newExpiredTime;
-	private java.lang.Long       orderNo;
 	private java.lang.String     paidType;
 	private java.lang.Byte       isDelete;
 
@@ -45,6 +45,7 @@ public class EhParkingRechargeOrders implements java.io.Serializable {
 
 	public EhParkingRechargeOrders(
 		java.lang.Long       id,
+		java.lang.Long       orderNo,
 		java.lang.String     ownerType,
 		java.lang.Long       ownerId,
 		java.lang.Long       parkingLotId,
@@ -68,11 +69,11 @@ public class EhParkingRechargeOrders implements java.io.Serializable {
 		java.sql.Timestamp   createTime,
 		java.sql.Timestamp   oldExpiredTime,
 		java.sql.Timestamp   newExpiredTime,
-		java.lang.Long       orderNo,
 		java.lang.String     paidType,
 		java.lang.Byte       isDelete
 	) {
 		this.id = id;
+		this.orderNo = orderNo;
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;
 		this.parkingLotId = parkingLotId;
@@ -96,7 +97,6 @@ public class EhParkingRechargeOrders implements java.io.Serializable {
 		this.createTime = createTime;
 		this.oldExpiredTime = oldExpiredTime;
 		this.newExpiredTime = newExpiredTime;
-		this.orderNo = orderNo;
 		this.paidType = paidType;
 		this.isDelete = isDelete;
 	}
@@ -107,6 +107,14 @@ public class EhParkingRechargeOrders implements java.io.Serializable {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
+	}
+
+	public java.lang.Long getOrderNo() {
+		return this.orderNo;
+	}
+
+	public void setOrderNo(java.lang.Long orderNo) {
+		this.orderNo = orderNo;
 	}
 
 	public java.lang.String getOwnerType() {
@@ -291,14 +299,6 @@ public class EhParkingRechargeOrders implements java.io.Serializable {
 
 	public void setNewExpiredTime(java.sql.Timestamp newExpiredTime) {
 		this.newExpiredTime = newExpiredTime;
-	}
-
-	public java.lang.Long getOrderNo() {
-		return this.orderNo;
-	}
-
-	public void setOrderNo(java.lang.Long orderNo) {
-		this.orderNo = orderNo;
 	}
 
 	public java.lang.String getPaidType() {

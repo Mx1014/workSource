@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPmsyOrders implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1344625949;
+	private static final long serialVersionUID = 1616930721;
 
 	private java.lang.Long       id;
 	private java.lang.Integer    namespaceId;
@@ -25,6 +25,8 @@ public class EhPmsyOrders implements java.io.Serializable {
 	private java.lang.Long       creatorUid;
 	private java.sql.Timestamp   createTime;
 	private java.lang.String     paidType;
+	private java.lang.String     projectId;
+	private java.lang.String     customerId;
 
 	public EhPmsyOrders() {}
 
@@ -40,7 +42,9 @@ public class EhPmsyOrders implements java.io.Serializable {
 		java.lang.Byte       status,
 		java.lang.Long       creatorUid,
 		java.sql.Timestamp   createTime,
-		java.lang.String     paidType
+		java.lang.String     paidType,
+		java.lang.String     projectId,
+		java.lang.String     customerId
 	) {
 		this.id = id;
 		this.namespaceId = namespaceId;
@@ -54,6 +58,8 @@ public class EhPmsyOrders implements java.io.Serializable {
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
 		this.paidType = paidType;
+		this.projectId = projectId;
+		this.customerId = customerId;
 	}
 
 	public java.lang.Long getId() {
@@ -150,5 +156,21 @@ public class EhPmsyOrders implements java.io.Serializable {
 
 	public void setPaidType(java.lang.String paidType) {
 		this.paidType = paidType;
+	}
+
+	public java.lang.String getProjectId() {
+		return this.projectId;
+	}
+
+	public void setProjectId(java.lang.String projectId) {
+		this.projectId = projectId;
+	}
+
+	public java.lang.String getCustomerId() {
+		return this.customerId;
+	}
+
+	public void setCustomerId(java.lang.String customerId) {
+		this.customerId = customerId;
 	}
 }

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfAccountCategoriesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhConfAccountCategoriesRecord> implements org.jooq.Record8<java.lang.Long, java.lang.Integer, java.lang.Byte, java.lang.Integer, java.math.BigDecimal, java.lang.Integer, java.lang.Byte, java.math.BigDecimal> {
 
-	private static final long serialVersionUID = -1593327954;
+	private static final long serialVersionUID = 243238162;
 
 	/**
 	 * Setter for <code>ehcore.eh_conf_account_categories.id</code>. id
@@ -42,14 +42,14 @@ public class EhConfAccountCategoriesRecord extends org.jooq.impl.UpdatableRecord
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_conf_account_categories.conf_type</code>. 0: none, 1: 25方仅视频, 2: 25方支持电话, 3: 100方仅视频, 4: 100方支持电话
+	 * Setter for <code>ehcore.eh_conf_account_categories.conf_type</code>. 0: 25方仅视频, 1: 25方支持电话, 2: 100方仅视频, 3: 100方支持电话, 4: 6方仅视频, 5: 50方仅视频, 6: 50方支持电话
 	 */
 	public void setConfType(java.lang.Byte value) {
 		setValue(2, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_conf_account_categories.conf_type</code>. 0: none, 1: 25方仅视频, 2: 25方支持电话, 3: 100方仅视频, 4: 100方支持电话
+	 * Getter for <code>ehcore.eh_conf_account_categories.conf_type</code>. 0: 25方仅视频, 1: 25方支持电话, 2: 100方仅视频, 3: 100方支持电话, 4: 6方仅视频, 5: 50方仅视频, 6: 50方支持电话
 	 */
 	public java.lang.Byte getConfType() {
 		return (java.lang.Byte) getValue(2);

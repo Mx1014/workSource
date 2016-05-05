@@ -123,4 +123,18 @@ public class EhPmsyOrdersDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPmsyOrders> fetchByPaidType(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhPmsyOrders.EH_PMSY_ORDERS.PAID_TYPE, values);
 	}
+
+	/**
+	 * Fetch records that have <code>project_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPmsyOrders> fetchByProjectId(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPmsyOrders.EH_PMSY_ORDERS.PROJECT_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>customer_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPmsyOrders> fetchByCustomerId(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPmsyOrders.EH_PMSY_ORDERS.CUSTOMER_ID, values);
+	}
 }
