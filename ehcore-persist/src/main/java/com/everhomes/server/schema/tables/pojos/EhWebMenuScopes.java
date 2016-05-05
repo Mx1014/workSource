@@ -11,11 +11,11 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhWebMenuScopes implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1952710087;
+	private static final long serialVersionUID = 249348153;
 
 	private java.lang.Long   id;
 	private java.lang.Long   menuId;
-	private java.lang.Long   menuName;
+	private java.lang.String menuName;
 	private java.lang.String ownerType;
 	private java.lang.Long   ownerId;
 	private java.lang.Byte   applyPolicy;
@@ -25,7 +25,7 @@ public class EhWebMenuScopes implements java.io.Serializable {
 	public EhWebMenuScopes(
 		java.lang.Long   id,
 		java.lang.Long   menuId,
-		java.lang.Long   menuName,
+		java.lang.String menuName,
 		java.lang.String ownerType,
 		java.lang.Long   ownerId,
 		java.lang.Byte   applyPolicy
@@ -54,11 +54,11 @@ public class EhWebMenuScopes implements java.io.Serializable {
 		this.menuId = menuId;
 	}
 
-	public java.lang.Long getMenuName() {
+	public java.lang.String getMenuName() {
 		return this.menuName;
 	}
 
-	public void setMenuName(java.lang.Long menuName) {
+	public void setMenuName(java.lang.String menuName) {
 		this.menuName = menuName;
 	}
 

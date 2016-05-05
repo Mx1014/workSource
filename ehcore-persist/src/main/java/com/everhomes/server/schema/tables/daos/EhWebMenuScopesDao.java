@@ -57,7 +57,7 @@ public class EhWebMenuScopesDao extends org.jooq.impl.DAOImpl<com.everhomes.serv
 	/**
 	 * Fetch records that have <code>menu_name IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhWebMenuScopes> fetchByMenuName(java.lang.Long... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhWebMenuScopes> fetchByMenuName(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhWebMenuScopes.EH_WEB_MENU_SCOPES.MENU_NAME, values);
 	}
 

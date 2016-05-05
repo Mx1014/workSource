@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhWebMenuScopes extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhWebMenuScopesRecord> {
 
-	private static final long serialVersionUID = 130608865;
+	private static final long serialVersionUID = -1869014869;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_web_menu_scopes</code>
@@ -39,7 +39,7 @@ public class EhWebMenuScopes extends org.jooq.impl.TableImpl<com.everhomes.serve
 	/**
 	 * The column <code>ehcore.eh_web_menu_scopes.menu_name</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhWebMenuScopesRecord, java.lang.Long> MENU_NAME = createField("menu_name", org.jooq.impl.SQLDataType.BIGINT, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhWebMenuScopesRecord, java.lang.String> MENU_NAME = createField("menu_name", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_web_menu_scopes.owner_type</code>.
