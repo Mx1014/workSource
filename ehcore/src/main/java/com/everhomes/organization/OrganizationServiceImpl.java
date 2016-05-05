@@ -1125,10 +1125,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public UserTokenCommandResponse findUserByIndentifier(UserTokenCommand cmd) {
         User operator = UserContext.current().getUser();
-        Integer namespaceId = Namespace.DEFAULT_NAMESPACE;
-        if(operator != null) {
-            namespaceId = operator.getNamespaceId();
-        }
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         
 		UserTokenCommandResponse commandResponse = new UserTokenCommandResponse();
 		User user = userService.findUserByIndentifier(namespaceId, cmd.getUserIdentifier());
