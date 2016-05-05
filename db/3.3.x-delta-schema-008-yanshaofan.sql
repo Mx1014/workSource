@@ -44,7 +44,7 @@ CREATE TABLE `eh_web_menu_scopes`(
 `menu_name` BIGINT NULL,
 `owner_type` VARCHAR(64) NOT NULL,
 `owner_id` BIGINT DEFAULT NULL,
-`apply_policy` TINYINT NOT NULL DEFAULT 0 COMMENT '0: delete , 1: override, 2: revert'
+`apply_policy` TINYINT NOT NULL DEFAULT 0 COMMENT '0: delete , 1: override, 2: revert',
 PRIMARY KEY (`id`) 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4; 
 
