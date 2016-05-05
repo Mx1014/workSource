@@ -387,6 +387,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		Organization parOrg = this.checkOrganization(cmd.getParentId());
 		
+		//default show navi, add by sfyan 20160505
+		if(null == cmd.getNaviFlag()){
+			cmd.setNaviFlag((byte)1);
+		}
+		
 		organization.setShowFlag(cmd.getNaviFlag());
 		organization.setPath(parOrg.getPath());
 		organization.setLevel(parOrg.getLevel()+1);
