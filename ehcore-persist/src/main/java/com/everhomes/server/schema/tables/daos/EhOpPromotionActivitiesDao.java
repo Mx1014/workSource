@@ -83,20 +83,6 @@ public class EhOpPromotionActivitiesDao extends org.jooq.impl.DAOImpl<com.everho
 	}
 
 	/**
-	 * Fetch records that have <code>scope_code IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOpPromotionActivities> fetchByScopeCode(java.lang.Byte... values) {
-		return fetch(com.everhomes.server.schema.tables.EhOpPromotionActivities.EH_OP_PROMOTION_ACTIVITIES.SCOPE_CODE, values);
-	}
-
-	/**
-	 * Fetch records that have <code>scope_id IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOpPromotionActivities> fetchByScopeId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhOpPromotionActivities.EH_OP_PROMOTION_ACTIVITIES.SCOPE_ID, values);
-	}
-
-	/**
 	 * Fetch records that have <code>policy_type IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOpPromotionActivities> fetchByPolicyType(java.lang.Byte... values) {

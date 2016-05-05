@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOpPromotionActivities extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhOpPromotionActivitiesRecord> {
 
-	private static final long serialVersionUID = -1106108776;
+	private static final long serialVersionUID = -29071406;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_op_promotion_activities</code>
@@ -55,16 +55,6 @@ public class EhOpPromotionActivities extends org.jooq.impl.TableImpl<com.everhom
 	 * The column <code>ehcore.eh_op_promotion_activities.end_time</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOpPromotionActivitiesRecord, java.sql.Timestamp> END_TIME = createField("end_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
-
-	/**
-	 * The column <code>ehcore.eh_op_promotion_activities.scope_code</code>. 0: all, 1: community, 2: city, 3: user, 4: organization
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOpPromotionActivitiesRecord, java.lang.Byte> SCOPE_CODE = createField("scope_code", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: all, 1: community, 2: city, 3: user, 4: organization");
-
-	/**
-	 * The column <code>ehcore.eh_op_promotion_activities.scope_id</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOpPromotionActivitiesRecord, java.lang.Long> SCOPE_ID = createField("scope_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_op_promotion_activities.policy_type</code>. 0: none, 1: registerd, 2: reach amount of consumption in zuolin-biz

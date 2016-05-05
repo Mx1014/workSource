@@ -449,6 +449,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhOpPromotionActivities EH_OP_PROMOTION_ACTIVITIES = com.everhomes.server.schema.tables.EhOpPromotionActivities.EH_OP_PROMOTION_ACTIVITIES;
 
 	/**
+	 * The table ehcore.eh_op_promotion_assigned_scopes
+	 */
+	public static final com.everhomes.server.schema.tables.EhOpPromotionAssignedScopes EH_OP_PROMOTION_ASSIGNED_SCOPES = com.everhomes.server.schema.tables.EhOpPromotionAssignedScopes.EH_OP_PROMOTION_ASSIGNED_SCOPES;
+
+	/**
 	 * The table ehcore.eh_op_promotion_messages
 	 */
 	public static final com.everhomes.server.schema.tables.EhOpPromotionMessages EH_OP_PROMOTION_MESSAGES = com.everhomes.server.schema.tables.EhOpPromotionMessages.EH_OP_PROMOTION_MESSAGES;

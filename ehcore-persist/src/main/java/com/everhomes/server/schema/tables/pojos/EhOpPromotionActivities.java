@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOpPromotionActivities implements java.io.Serializable {
 
-	private static final long serialVersionUID = -66972218;
+	private static final long serialVersionUID = 2017264588;
 
 	private java.lang.Long     id;
 	private java.lang.Integer  namespaceId;
@@ -19,8 +19,6 @@ public class EhOpPromotionActivities implements java.io.Serializable {
 	private java.lang.String   description;
 	private java.sql.Timestamp startTime;
 	private java.sql.Timestamp endTime;
-	private java.lang.Byte     scopeCode;
-	private java.lang.Long     scopeId;
 	private java.lang.Byte     policyType;
 	private java.lang.String   policyData;
 	private java.lang.String   iconUri;
@@ -42,8 +40,6 @@ public class EhOpPromotionActivities implements java.io.Serializable {
 		java.lang.String   description,
 		java.sql.Timestamp startTime,
 		java.sql.Timestamp endTime,
-		java.lang.Byte     scopeCode,
-		java.lang.Long     scopeId,
 		java.lang.Byte     policyType,
 		java.lang.String   policyData,
 		java.lang.String   iconUri,
@@ -62,8 +58,6 @@ public class EhOpPromotionActivities implements java.io.Serializable {
 		this.description = description;
 		this.startTime = startTime;
 		this.endTime = endTime;
-		this.scopeCode = scopeCode;
-		this.scopeId = scopeId;
 		this.policyType = policyType;
 		this.policyData = policyData;
 		this.iconUri = iconUri;
@@ -123,22 +117,6 @@ public class EhOpPromotionActivities implements java.io.Serializable {
 
 	public void setEndTime(java.sql.Timestamp endTime) {
 		this.endTime = endTime;
-	}
-
-	public java.lang.Byte getScopeCode() {
-		return this.scopeCode;
-	}
-
-	public void setScopeCode(java.lang.Byte scopeCode) {
-		this.scopeCode = scopeCode;
-	}
-
-	public java.lang.Long getScopeId() {
-		return this.scopeId;
-	}
-
-	public void setScopeId(java.lang.Long scopeId) {
-		this.scopeId = scopeId;
 	}
 
 	public java.lang.Byte getPolicyType() {
