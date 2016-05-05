@@ -34,6 +34,14 @@ public class PmsyOrderEmbeddedHandler implements OrderEmbeddedHandler{
 	public void paySuccess(PayCallbackCommand cmd) {
 		
 		PmsyOrder order = checkOrder(Long.parseLong(cmd.getOrderNo()));
+		
+		Timestamp payTimeStamp = new Timestamp(System.currentTimeMillis());
+		order.setStatus(PmsyOrderStatus.PAID.getCode());
+		order.setPaidTime(payTimeStamp);
+		order.setPaidType(cmd.getVendorType());
+		//order.setPaidTime(cmd.getPayTime());
+		pmsyProvider.updatePmsyOrder(order);
+		
 		List<PmsyOrderItem> orderItems = pmsyProvider.ListPmsyOrderItem(order.getId());
 		if(orderItems.isEmpty()){
 			LOGGER.error("bill list is empty.");
@@ -41,8 +49,8 @@ public class PmsyOrderEmbeddedHandler implements OrderEmbeddedHandler{
 					"bill list is empty.");
 		}
 		
-		String feeJson = PmsyHttpUtil.post("UserRev_GetFeeList", orderItems.get(0).getCustomerId(), "",
-				"", "", PmsyBillType.UNPAID.getCode(), "", "");
+		String feeJson = PmsyHttpUtil.post("UserRev_GetFeeList", order.getCustomerId(), "",
+				"", order.getProjectId(), PmsyBillType.UNPAID.getCode(), "", "");
 		Gson gson = new Gson();
 		Map map = gson.fromJson(feeJson, Map.class);
 		List feeList = (List) map.get("UserRev_GetFeeList");
@@ -71,7 +79,7 @@ public class PmsyOrderEmbeddedHandler implements OrderEmbeddedHandler{
 		Map<String,Object> jsonMap = new HashMap<String,Object>();
 		jsonMap.put("Syswin", billList);
 		String billListJson = gson.toJson(jsonMap, Map.class);
-		String json = PmsyHttpUtil.post("UserRev_PayFee", "cmd.getCustomerId()", "projectId",
+		String json = PmsyHttpUtil.post("UserRev_PayFee", order.getCustomerId(), order.getProjectId(),
 				"", "siyuan", "支付宝支付", "", billListJson);
 		Map payFeeMap = gson.fromJson(json, Map.class);
 		List payFeeList = (List) payFeeMap.get("UserRev_PayFee");

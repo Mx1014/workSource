@@ -8,25 +8,23 @@ import com.everhomes.discover.ItemType;
 /**
  *<ul>
  *	<li>ownerType: 归属的类型，{@link com.everhomes.rest.pmsy.PmsyOwnerType}</li>
- *	<li>ownerId : 归属ID</li>
  *	<li>projectId : 项目ID</li>
  *	<li>customerId : 客户ID</li>
  *	<li>resourceId: 资源ID</li>
- *	<li>creatorId : 登录的用户ID（左邻）</li>
  *	<li>orderAmount : 订单金额</li>
  *	<li>paidType : 支付方式,10001-支付宝，10002-微信 com.everhomes.rest.organization.VendorType</li>
- * 	<li>revId : 账单ID（是一个数组，同时缴纳多个item的费用）</li>
+ * 	<li>revId : 账单ID（是一个list，同时缴纳多个item的费用）</li>
  * 	<li>pmPayerId : 物业缴费用户的ID(存在左邻这边的用户ID)</li>
  *</ul>
  *
  */
 public class CreatePmsyBillOrderCommand {
 	private String ownerType;
-	private Long ownerId;
+	//private Long ownerId;
 	private String projectId;
 	private String customerId;
 	private String resourceId;
-	private Long creatorId;
+	//private Long creatorId;
 	private BigDecimal orderAmount;
 	private String paidType;
 	@ItemType(String.class)
@@ -39,12 +37,6 @@ public class CreatePmsyBillOrderCommand {
 	}
 	public void setProjectId(String projectId) {
 		this.projectId = projectId;
-	}
-	public Long getCreatorId() {
-		return creatorId;
-	}
-	public void setCreatorId(Long creatorId) {
-		this.creatorId = creatorId;
 	}
 	public BigDecimal getOrderAmount() {
 		return orderAmount;
@@ -88,12 +80,6 @@ public class CreatePmsyBillOrderCommand {
 	}
 	public void setResourceId(String resourceId) {
 		this.resourceId = resourceId;
-	}
-	public Long getOwnerId() {
-		return ownerId;
-	}
-	public void setOwnerId(Long ownerId) {
-		this.ownerId = ownerId;
 	}
 	
 	

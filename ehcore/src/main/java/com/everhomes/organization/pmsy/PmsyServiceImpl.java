@@ -86,14 +86,27 @@ public class PmsyServiceImpl implements PmsyService{
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"the userContact is not null.");
 		}
+		PmsyPayer pmsyPayer = null;
 		if(cmd.getPayerId() != null){
-			PmsyPayer pmsyPayer = pmsyProvider.findPmPayersById(cmd.getPayerId());
+			pmsyPayer = pmsyProvider.findPmPayersById(cmd.getPayerId());
 			if(pmsyPayer != null && (!pmsyPayer.getUserName().equals(cmd.getUserName()) ||
 					!pmsyPayer.getUserContact().equals(cmd.getUserContact()))){
-				LOGGER.error("the payerId is not exists.");
+				LOGGER.error("the payer is not exists.");
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-						"the payerId is not exists.");
+						"the payer is not exists.");
 			}
+		}else{
+			pmsyPayer = new PmsyPayer();
+			User user = UserContext.current().getUser();
+			Integer namespaceId = UserContext.current().getNamespaceId();
+			Long userId = user.getId();
+			pmsyPayer.setCreateTime(new Timestamp(System.currentTimeMillis()));
+			pmsyPayer.setCreatorUid(userId);
+			pmsyPayer.setNamespaceId(namespaceId);
+			pmsyPayer.setStatus(PmsyPayerStatus.WAITING.getCode());
+			pmsyPayer.setUserContact(cmd.getUserContact());
+			pmsyPayer.setUserName(cmd.getUserName());
+			pmsyProvider.createPmPayer(pmsyPayer);
 		}
 		List<AddressDTO> resultList = new ArrayList<>();
 		String json = PmsyHttpUtil.post("UserRev_OwnerVerify", cmd.getUserName(), cmd.getUserContact(), "", "", "", "", "");
@@ -102,18 +115,8 @@ public class PmsyServiceImpl implements PmsyService{
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
 					"the request of siyuan is fail.");
 		}
-		PmsyPayer newPmsyPayer = new PmsyPayer();
-		User user = UserContext.current().getUser();
-		Integer namespaceId = UserContext.current().getNamespaceId();
-		Long userId = user.getId();
-		newPmsyPayer.setCreateTime(new Timestamp(System.currentTimeMillis()));
-		newPmsyPayer.setCreatorUid(userId);
-		newPmsyPayer.setNamespaceId(namespaceId);
-		newPmsyPayer.setStatus(PmsyPayerStatus.WAITING.getCode());
-		newPmsyPayer.setUserContact(cmd.getUserContact());
-		newPmsyPayer.setUserName(cmd.getUserName());
-		pmsyProvider.createPmPayer(newPmsyPayer);
 		
+		Long payerId = pmsyPayer.getId();
 		Gson gson = new Gson();
 		Map map = gson.fromJson(json, Map.class);
 		List list = (List) map.get("UserRev_OwnerVerify");
@@ -123,7 +126,7 @@ public class PmsyServiceImpl implements PmsyService{
 			Map map3 = (Map) r;
 			AddressDTO dto = new AddressDTO();
 			dto.setCustomerId((String)map3.get("CusID"));
-			dto.setPayerId(cmd.getPayerId());
+			dto.setPayerId(payerId);
 			dto.setProjectId((String)map3.get("ProjectID"));
 			dto.setResourceId((String)map3.get("ResID"));
 			StringBuilder resourceName = new StringBuilder();
@@ -340,7 +343,7 @@ public class PmsyServiceImpl implements PmsyService{
 		Integer namespaceId = UserContext.current().getNamespaceId();
 		Long userId = user.getId();
 		
-		PmsyCommunity pmsyCommunity = pmsyProvider.findPmsyCommunityByToken(cmd.getOwnerId().toString());
+		PmsyCommunity pmsyCommunity = pmsyProvider.findPmsyCommunityByToken(cmd.getProjectId());
 		if(pmsyCommunity == null){
 			LOGGER.error("pmsyCommunity relation is not exist.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
@@ -358,6 +361,8 @@ public class PmsyServiceImpl implements PmsyService{
 		order.setUserContact(payer.getUserContact());
 		order.setUserName(payer.getUserName());
 		order.setOrderAmount(cmd.getOrderAmount());
+		order.setProjectId(cmd.getProjectId());
+		order.setCustomerId(cmd.getCustomerId());
 		pmsyProvider.createPmsyOrder(order);
 		
 		String json = PmsyHttpUtil.post("UserRev_GetFeeList", cmd.getCustomerId(), "",
@@ -413,12 +418,11 @@ public class PmsyServiceImpl implements PmsyService{
 	
 	@Override
 	public void setPmProperty(SetPmsyPropertyCommand cmd){
-		PmsyCommunity pmsyCommunity = new PmsyCommunity();
+		PmsyCommunity pmsyCommunity = pmsyProvider.findPmsyCommunityById(cmd.getCommunityId());
 		pmsyCommunity.setBillTip(cmd.getBillTip());
 		pmsyCommunity.setContact(cmd.getContact());
-		pmsyCommunity.setCommunityId(cmd.getCommunityId());
 		
-		pmsyProvider.createPmsyCommunity(pmsyCommunity);
+		pmsyProvider.updatePmsyCommunity(pmsyCommunity);
 	}
 	
 	@Override
