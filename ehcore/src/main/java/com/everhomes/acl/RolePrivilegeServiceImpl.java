@@ -776,6 +776,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				menuMap.remove(webMenuScope.getMenuId());
 			}else if(WebMenuScopeApplyPolicy.fromCode(webMenuScope.getApplyPolicy()) == WebMenuScopeApplyPolicy.OVERRIDE){
 				//override menu
+				webMenu.setName(webMenuScope.getMenuName());
 			}else if(WebMenuScopeApplyPolicy.fromCode(webMenuScope.getApplyPolicy()) == WebMenuScopeApplyPolicy.REVERT){
 				
 			}
