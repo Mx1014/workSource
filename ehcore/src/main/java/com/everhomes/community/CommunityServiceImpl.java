@@ -1570,20 +1570,17 @@ public class CommunityServiceImpl implements CommunityService {
 		CommunityUserAddressResponse res = new CommunityUserAddressResponse();
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		List<User> users = userProvider.findUserByNamespaceId(namespaceId, locator, Integer.MAX_VALUE);
+		List<User> users = userProvider.listUserByKeyword(cmd.getKeywords(), namespaceId, locator, Integer.MAX_VALUE);
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		for (User user : users) {
 			List<UserGroup> groups = userProvider.listUserGroups(user.getId(), GroupDiscriminator.FAMILY.getCode());
-			if(null != groups && groups.size() > 0){
-				UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+			if(null == groups || groups.size() == 0){
 				CommunityUserAddressDTO dto = new CommunityUserAddressDTO();
 				dto.setUserId(user.getId());
 				dto.setUserName(user.getNickName());
 				dto.setGender(user.getGender());
 				dto.setIsAuth(2);
-				if(null != userIdentifier){
-					dto.setPhone(userIdentifier.getIdentifierToken());
-				}
+				dto.setPhone(user.getIdentifierToken());
 				dto.setApplyTime(user.getCreateTime());
 				dtos.add(dto);
 				if(dtos.size() == pageSize){
