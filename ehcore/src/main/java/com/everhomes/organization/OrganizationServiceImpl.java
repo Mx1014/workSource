@@ -459,8 +459,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 	public void updateChildrenOrganization(UpdateOrganizationsCommand cmd) {
 		//先判断，后台管理员才能创建。状态直接设为正常
 		
+		if(null == cmd.getNaviFlag()){
+			cmd.setNaviFlag((byte)1);
+		}
+		
 		Organization parOrg = this.checkOrganization(cmd.getId());
 		
+		parOrg.setShowFlag(cmd.getNaviFlag());
 		parOrg.setName(cmd.getName());
 		
 		if(OrganizationGroupType.fromCode(parOrg.getGroupType()) == OrganizationGroupType.ENTERPRISE){
