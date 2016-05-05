@@ -33,12 +33,16 @@ import java.util.stream.Collectors;
 
 
 
+
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
+
+
 
 
 
@@ -78,6 +82,7 @@ import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.acl.WebMenuDTO;
 import com.everhomes.rest.acl.WebMenuPrivilegeDTO;
 import com.everhomes.rest.acl.WebMenuPrivilegeShowFlag;
+import com.everhomes.rest.acl.WebMenuScopeApplyPolicy;
 import com.everhomes.rest.acl.WebMenuType;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.acl.admin.CreateRolePrivilegeCommand;
@@ -135,6 +140,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public ListWebMenuResponse listWebMenu(ListWebMenuCommand cmd) {
 		User user = UserContext.current().getUser();
+		
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		
 		ListWebMenuResponse res = new ListWebMenuResponse();
 		
 		
@@ -153,6 +161,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		
 		List<WebMenu> menus = webMenuPrivilegeProvider.listWebMenuByMenuIds(this.getAllMenuIds(menuIds));
 		
+		List<WebMenuScope> webMenuScopes = webMenuPrivilegeProvider.listWebMenuScopeByOwnerId(EntityType.NAMESPACE.getCode(), Long.valueOf(namespaceId));
+		
+		menus = this.handleMenus(menus, webMenuScopes);
+		
 		if(null == menus){
 			res.setMenus(new ArrayList<WebMenuDTO>());
 			return res;
@@ -165,6 +177,36 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		res.setMenus(this.getWebMenu(menuDtos, null).getDtos());
 		
 		return res;
+	}
+	
+	/**
+	 * 处理菜单
+	 * @param menus
+	 * @param webMenuScopes
+	 * @return
+	 */
+	private List<WebMenu> handleMenus(List<WebMenu> menus, List<WebMenuScope> webMenuScopes){
+		Map<Long, WebMenu> menuMap = new HashMap<Long, WebMenu>();
+    	for (WebMenu webMenu : menus) {
+    		menuMap.put(webMenu.getId(), webMenu);
+		}
+    	
+    	for (WebMenuScope webMenuScope : webMenuScopes) {
+    		WebMenu webMenu = menuMap.get(webMenuScope.getMenuId());
+			if(null != webMenu && WebMenuScopeApplyPolicy.fromCode(webMenuScope.getApplyPolicy()) == WebMenuScopeApplyPolicy.DELETE){
+				menuMap.remove(webMenuScope.getMenuId());
+			}else if(WebMenuScopeApplyPolicy.fromCode(webMenuScope.getApplyPolicy()) == WebMenuScopeApplyPolicy.OVERRIDE){
+				//override menu
+			}else if(WebMenuScopeApplyPolicy.fromCode(webMenuScope.getApplyPolicy()) == WebMenuScopeApplyPolicy.REVERT){
+				
+			}
+		}
+    	
+    	menus = new ArrayList<WebMenu>();
+    	for (Long  key : menuMap.keySet()) {
+    		menus.add(menuMap.get(key));
+		}
+    	return menus;
 	}
 
 	@Override
