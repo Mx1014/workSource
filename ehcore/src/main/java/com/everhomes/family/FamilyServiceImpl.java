@@ -1116,13 +1116,15 @@ public class FamilyServiceImpl implements FamilyService {
                 f.setId(groupMember.getId());
                 f.setMemberUid(groupMember.getMemberId());
 //                f.setMemberName(groupMember.getMemberNickName());
-                f.setMemberAvatarUrl((parserUri(groupMember.getMemberAvatar(),EntityType.USER.getCode(),groupMember.getCreatorUid())));
-                f.setMemberAvatarUri(groupMember.getMemberAvatar());
+//                f.setMemberAvatarUrl((parserUri(groupMember.getMemberAvatar(),EntityType.USER.getCode(),groupMember.getCreatorUid())));
+//                f.setMemberAvatarUri(groupMember.getMemberAvatar());
                 //UserInfo userInfo = this.userService.getUserSnapshotInfo(groupMember.getMemberId());
                 UserInfo userInfo = this.userService.getUserInfo(groupMember.getMemberId());
                 if(userInfo != null){
                 	//产品要求家庭昵称和个人昵称一致
                 	f.setMemberName(userInfo.getNickName());
+                	f.setMemberAvatarUrl(userInfo.getAvatarUrl());
+                    f.setMemberAvatarUri(userInfo.getAvatarUri());
                     f.setBirthday(userInfo.getBirthday());
                     f.setGender(userInfo.getGender());
                     f.setStatusLine(userInfo.getStatusLine());
