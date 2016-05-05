@@ -3092,7 +3092,9 @@ public class ForumServiceImpl implements ForumService {
                 case COMMUNITY:
                     Community community = communityProvider.findCommunityById(regionId);
                     if(community != null)
-                    	forumName = community.getName() + forumName;
+                        // 按测试要求不加上“社区论坛”这些字样，故需要把forumName去掉，只显示小区名称 by lqs 20160505
+                    	//forumName = community.getName() + forumName;
+                        forumName = community.getName();
                     break;
                 case REGION:
                     Organization organization = organizationProvider.findOrganizationById(regionId);
