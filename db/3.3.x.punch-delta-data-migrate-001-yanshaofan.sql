@@ -54,7 +54,7 @@ INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`
 
 
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`)
-	VALUES ('10055', '999997', '0', '0', '0', '/home', 'Bizs', 'PUNCH', '打卡', 'cs://1/image/aW1hZ2UvTVRvMU9HRmxaR0V5TnpBNE1tWTVNakEwTnpFek5UTXhObVZoWTJaalptSmtNZw', '1', '1', '23', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin');
+	VALUES ('10055', '999997', '0', '0', '0', '/home', 'Bizs', 'PUNCH', '打卡', 'cs://1/image/aW1hZ2UvTVRveE0ySmpaVFZpTWpoalptRTNZMll3TWpreVpHWTNabU5pWW1FM1lqZGhOQQ', '1', '1', '23', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-	VALUES ('10058', '999997', '0', '0', '0', '/home', 'Bizs', 'DoorManagement', '门禁', 'cs://1/image/aW1hZ2UvTVRvNFptVTROV0k0T1dZeVpEazJaVGRoTmpka1pUQmxPRE01Tm1FMVptWmhNdw', '1', '1', '40', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin');
+	VALUES ('10058', '999997', '0', '0', '0', '/home', 'Bizs', 'DoorManagement', '门禁', 'cs://1/image/aW1hZ2UvTVRwalptSm1PRFE1T1dObVpqTXdZelZqWVRNME56azBNelk1TkdNNU1UUm1Zdw', '1', '1', '40', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin');
 	
