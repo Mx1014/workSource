@@ -3555,7 +3555,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 //				this.organizationProvider.addPmBuilding(pmBuilding);
 //			}
 			
-			OrganizationCommunity organizationCommunity = organizationProvider.findOrganizationCommunityByOrgIdAndCmmtyId(cmd.getCommunityId(), cmd.getOrganizationId());
+			OrganizationCommunity organizationCommunity = organizationProvider.findOrganizationCommunityByOrgIdAndCmmtyId(cmd.getOrganizationId(), cmd.getCommunityId());
 			
 			if(null == organizationCommunity){
 				organizationCommunity = new OrganizationCommunity();

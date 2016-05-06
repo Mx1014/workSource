@@ -574,7 +574,6 @@ public class FamilyServiceImpl implements FamilyService {
         }
         
         //Merge histories, add by Janson
-        //missing addressId, modify by sfyan 20160503 
         List<UserGroupHistory> histories = this.userGroupHistoryProvider.queryUserGroupHistoryByUserId(userId);
         for(UserGroupHistory o : histories) {
             if(!checkList.containsKey(o.getAddressId())) {

@@ -1222,6 +1222,11 @@ public class CommunityServiceImpl implements CommunityService {
             return query;
         });
 		
+		List<Long> groupIds = new ArrayList<Long>(); 
+		for (Group group : groups) {
+			groupIds.add(group.getId());
+		}
+		
 		if(!StringUtils.isNullOrEmpty(cmd.getKeywords())){
 			UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(namespaceId , cmd.getKeywords());
 			
@@ -1235,30 +1240,24 @@ public class CommunityServiceImpl implements CommunityService {
 				return res;
 			}
 			
-			for (Group group : groups) {
-				for (UserGroup userGroup : userGroups) {
-					if(group.getId().equals(userGroup.getGroupId())){
-						User user = userProvider.findUserById(identifier.getOwnerUid());
-						CommunityUserAddressDTO dto = new CommunityUserAddressDTO();
-						dto.setUserId(user.getId());
-						dto.setUserName(user.getNickName());
-						dto.setNikeName(user.getNickName());
-						dto.setGender(user.getGender());
-						dto.setPhone(identifier.getIdentifierToken());
-						dto.setIsAuth(2);
-						if(GroupMemberStatus.fromCode(userGroup.getMemberStatus()) == GroupMemberStatus.ACTIVE)
-							dto.setIsAuth(1);
-						res.setDtos(dtos);
-						return res;
-					}
+			for (UserGroup userGroup : userGroups) {
+				if(groupIds.contains(userGroup.getGroupId())){
+					User user = userProvider.findUserById(identifier.getOwnerUid());
+					CommunityUserAddressDTO dto = new CommunityUserAddressDTO();
+					dto.setUserId(user.getId());
+					dto.setUserName(user.getNickName());
+					dto.setNikeName(user.getNickName());
+					dto.setGender(user.getGender());
+					dto.setPhone(identifier.getIdentifierToken());
+					dto.setIsAuth(2);
+					if(GroupMemberStatus.fromCode(userGroup.getMemberStatus()) == GroupMemberStatus.ACTIVE)
+						dto.setIsAuth(1);
+					dtos.add(dto);
+					break;
 				}
 			}
-		}
-		
-		
-		List<Long> groupIds = new ArrayList<Long>(); 
-		for (Group group : groups) {
-			groupIds.add(group.getId());
+			res.setDtos(dtos);
+			return res;
 		}
 		
 		CrossShardListingLocator locator = new CrossShardListingLocator();
