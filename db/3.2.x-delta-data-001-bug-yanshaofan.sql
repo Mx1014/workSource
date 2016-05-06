@@ -19,3 +19,4 @@ UPDATE `eh_organizations` SET `show_flag` = 1 WHERE `group_type` = 'ENTERPRISE';
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( 1, 33000,'', 'EhNamespaces', 999992 , 0);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( 2, 35000,'', 'EhNamespaces', 1000000 , 0);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( 3, 35000,'', 'EhNamespaces', 999999 , 0);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( 4, 33000,'', 'EhNamespaces', 0 , 0);
