@@ -584,7 +584,6 @@ public class FamilyServiceImpl implements FamilyService {
                 FamilyDTO family = new FamilyDTO();
                 family.setId(o.getId());
                 family.setMembershipStatus(GroupMemberStatus.INACTIVE.getCode());
-                family.setAddressId(o.getAddressId());
                 Community community = this.communityProvider.findCommunityById(o.getCommunityId());
                 if(community != null){
                     family.setCommunityId(o.getCommunityId());

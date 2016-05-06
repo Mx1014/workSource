@@ -64,8 +64,8 @@ public class FamilyAdminController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse adminApproveMember(@Valid ApproveMemberCommand cmd) {
         
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+//        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         this.familyService.adminApproveMember(cmd);
         
@@ -83,8 +83,8 @@ public class FamilyAdminController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse adminRejectMember(@Valid RejectMemberCommand cmd) {
         
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+//        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         cmd.setOperatorRole(Role.SystemAdmin);
         this.familyService.rejectMember(cmd);
