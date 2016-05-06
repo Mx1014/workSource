@@ -126,7 +126,7 @@ public class PmsyProviderImpl implements PmsyProvider {
 		SelectConditionStep<EhPmsyCommunitiesRecord> selectConditionStep = context.selectFrom(Tables.EH_PMSY_COMMUNITIES)
 				.where(Tables.EH_PMSY_COMMUNITIES.COMMUNITY_TOKEN.eq(communityToken));
 			
-			return ConvertHelper.convert(selectConditionStep.fetchOne(), PmsyCommunity.class);
+		return ConvertHelper.convert(selectConditionStep.fetchOne(), PmsyCommunity.class);
 		
 	}
 	
@@ -201,7 +201,7 @@ public class PmsyProviderImpl implements PmsyProvider {
 	@Override
 	public List<PmsyOrder> searchBillingOrders(Long pageAnchor,Timestamp startDate,Timestamp endDate,String userName,String userContact){
 		
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmsyOrders.class));
 		SelectQuery<EhPmsyOrdersRecord> query = context.selectQuery(Tables.EH_PMSY_ORDERS);
 		
 		if(pageAnchor != null)
