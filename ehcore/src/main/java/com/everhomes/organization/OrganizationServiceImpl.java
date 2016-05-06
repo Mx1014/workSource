@@ -3555,10 +3555,20 @@ public class OrganizationServiceImpl implements OrganizationService {
 //				this.organizationProvider.addPmBuilding(pmBuilding);
 //			}
 			
-			OrganizationCommunity organizationCommunity = new OrganizationCommunity();
-			organizationCommunity.setCommunityId(cmd.getCommunityId());
-			organizationCommunity.setOrganizationId(cmd.getOrganizationId()); 
-			organizationProvider.createOrganizationCommunity(organizationCommunity);
+			OrganizationCommunity organizationCommunity = organizationProvider.findOrganizationCommunityByOrgIdAndCmmtyId(cmd.getCommunityId(), cmd.getOrganizationId());
+			
+			if(null == organizationCommunity){
+				organizationCommunity = new OrganizationCommunity();
+				organizationCommunity.setCommunityId(cmd.getCommunityId());
+				organizationCommunity.setOrganizationId(cmd.getOrganizationId()); 
+				organizationProvider.createOrganizationCommunity(organizationCommunity);
+			}else{
+				LOGGER.error("Community already exists, organizationId=" + cmd.getOrganizationId() + ", communityId=" + cmd.getCommunityId());
+    			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_COMMUNITY_EXISTS,
+    					"Community already exists.");
+			}
+			
+			
 			
 			return null;
 		});
@@ -3569,7 +3579,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	public void deletePmCommunity(DeletePmCommunityCommand cmd) {
 		dbProvider.execute((TransactionStatus status) -> {
 			
-			OrganizationCommunity organizationCommunity = organizationProvider.findOrganizationCommunityByOrgIdAndCmmtyId(cmd.getCommunityId(), cmd.getOrganizationId());
+			OrganizationCommunity organizationCommunity = organizationProvider.findOrganizationCommunityByOrgIdAndCmmtyId(cmd.getOrganizationId(), cmd.getCommunityId());
 			if(null != organizationCommunity){
 				organizationProvider.deleteOrganizationCommunityById(organizationCommunity.getId());
 			}

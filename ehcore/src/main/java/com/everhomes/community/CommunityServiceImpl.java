@@ -1211,11 +1211,50 @@ public class CommunityServiceImpl implements CommunityService {
 		Long communityId = cmd.getCommunityId();
 		
 		CommunityUserAddressResponse res = new CommunityUserAddressResponse();
+		List<CommunityUserAddressDTO> dtos = new ArrayList<CommunityUserAddressDTO>();
+		
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		
+		
 		List<Group> groups = groupProvider.listGroupByCommunityId(communityId, (loc, query) -> {
             Condition c = Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.ACTIVE.getCode());
             query.addConditions(c);
             return query;
         });
+		
+		if(!StringUtils.isNullOrEmpty(cmd.getKeywords())){
+			UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(namespaceId , cmd.getKeywords());
+			
+			if(null == identifier){
+				return res;
+			}
+			
+			List<UserGroup> userGroups = userProvider.listUserGroups(identifier.getOwnerUid(), GroupDiscriminator.FAMILY.getCode());
+			
+			if(null == userGroups || userGroups.size() == 0){
+				return res;
+			}
+			
+			for (Group group : groups) {
+				for (UserGroup userGroup : userGroups) {
+					if(group.getId().equals(userGroup.getGroupId())){
+						User user = userProvider.findUserById(identifier.getOwnerUid());
+						CommunityUserAddressDTO dto = new CommunityUserAddressDTO();
+						dto.setUserId(user.getId());
+						dto.setUserName(user.getNickName());
+						dto.setNikeName(user.getNickName());
+						dto.setGender(user.getGender());
+						dto.setPhone(identifier.getIdentifierToken());
+						dto.setIsAuth(2);
+						if(GroupMemberStatus.fromCode(userGroup.getMemberStatus()) == GroupMemberStatus.ACTIVE)
+							dto.setIsAuth(1);
+						res.setDtos(dtos);
+						return res;
+					}
+				}
+			}
+		}
+		
 		
 		List<Long> groupIds = new ArrayList<Long>(); 
 		for (Group group : groups) {
@@ -1245,7 +1284,6 @@ public class CommunityServiceImpl implements CommunityService {
             return query;
         });
 		
-		List<CommunityUserAddressDTO> dtos = new ArrayList<CommunityUserAddressDTO>();
 		
 		for (GroupMember member : groupMembers) {
 			User user = userProvider.findUserById(member.getMemberId());

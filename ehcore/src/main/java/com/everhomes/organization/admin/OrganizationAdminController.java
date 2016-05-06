@@ -313,7 +313,7 @@ public class OrganizationAdminController extends ControllerBase {
     public RestResponse deletePmCommunity(DeletePmCommunityCommand cmd) {
     	
     	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+//        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
     	this.organizationService.deletePmCommunity(cmd);
     	RestResponse response = new RestResponse();
