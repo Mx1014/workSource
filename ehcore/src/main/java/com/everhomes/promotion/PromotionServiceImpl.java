@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.bus.BusBridgeProvider;
 import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusSubscriber;
 import com.everhomes.db.DaoAction;
@@ -21,6 +22,9 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
     @Autowired
     private LocalBus localBus;
     
+    @Autowired
+    private BusBridgeProvider busBridgeProvider;
+    
     @PostConstruct
     void setup() {
         localBus.subscribe(DaoHelper.getDaoActionPublishSubject(DaoAction.CREATE, EhOpPromotionActivities.class, null), this);
@@ -33,6 +37,11 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
 
     @Override
     public Action onLocalBusMessage(Object arg0, String arg1, Object arg2, String arg3) {
+        LocalBusSubscriber localBusSubscriber = (LocalBusSubscriber) busBridgeProvider; 
+        
+        //broadcast
+        localBusSubscriber.onLocalBusMessage(arg0, arg1, arg2, arg3);
+        
         try {
             Long id = (Long)arg2;
             if(null == id) {
