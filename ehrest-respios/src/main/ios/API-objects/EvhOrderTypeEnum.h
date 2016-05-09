@@ -1,6 +1,6 @@
 //
 // EvhOrderTypeEnum.h
-// generated at 2016-04-26 18:22:54 
+// generated at 2016-04-29 18:56:01 
 //
 
 
@@ -9,7 +9,9 @@
 //
 typedef enum {
 
-    EvhOrderTypeEnum_WUYETEST = 10000001
+    EvhOrderTypeEnum_WUYETEST = 10000001, 
+    EvhOrderTypeEnum_PARKING = 10000002, 
+    EvhOrderTypeEnum_PMSIYUAN = 10000003
 
 } EvhOrderTypeEnum;
 

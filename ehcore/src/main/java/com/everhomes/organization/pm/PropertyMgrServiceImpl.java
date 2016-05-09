@@ -1794,6 +1794,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			if(contentCategoryId == CategoryConstants.CATEGORY_ID_COMPLAINT_ADVICE) {
 				return OrganizationTaskType.COMPLAINT_ADVICE;
 			}
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_EMERGENCY_HELP) {
+				return OrganizationTaskType.EMERGENCY_HELP;
+			}
 		}
 		return null;
 	}
@@ -2329,7 +2332,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	private List<Integer> getTaskCounts(Long organizationId, Long communityId, String taskType, long startTime, long endTime){
 		List<Integer> counts = new ArrayList<Integer>();
 		int num = OrganizationTaskStatus.OTHER.getCode();
-		List<OrganizationTask> tasks = propertyMgrProvider.communityPmTaskLists(organizationId, taskType, null, String.format("%tF %<tT", startTime), String.format("%tF %<tT", endTime));
+		List<OrganizationTask> tasks = propertyMgrProvider.communityPmTaskLists(organizationId, communityId, taskType, null, String.format("%tF %<tT", startTime), String.format("%tF %<tT", endTime));
 		if(null != communityId){
 			counts.add(this.getPostByCommunityId(communityId, tasks).size());
 		}else{
@@ -2338,7 +2341,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 		for (int i = 1; i <= num ; i++)
 		{
-			tasks = propertyMgrProvider.communityPmTaskLists(organizationId, taskType,(byte)i,String.format("%tF %<tT", startTime), String.format("%tF %<tT", endTime));
+			tasks = propertyMgrProvider.communityPmTaskLists(organizationId, communityId,taskType,(byte)i,String.format("%tF %<tT", startTime), String.format("%tF %<tT", endTime));
 			if(null != communityId){
 				counts.add(this.getPostByCommunityId(communityId, tasks).size());
 			}else{

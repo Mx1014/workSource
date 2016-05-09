@@ -1,0 +1,19 @@
+//
+// EvhPmsyPayerStatus.h
+// generated at 2016-04-29 18:56:00 
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhPmsyPayerStatus
+//
+typedef enum {
+
+    EvhPmsyPayerStatus_INACTIVE = 0, 
+    EvhPmsyPayerStatus_WAITING = 1, 
+    EvhPmsyPayerStatus_ACTIVE = 2
+
+} EvhPmsyPayerStatus;
+
+///////////////////////////////////////////////////////////////////////////////
+

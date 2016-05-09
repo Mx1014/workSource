@@ -1,0 +1,29 @@
+//
+// EvhListParkingCardsCommand.h
+// generated at 2016-04-29 18:56:00 
+//
+#import <Foundation/Foundation.h>
+#import "JsonSerializable.h"
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhListParkingCardsCommand
+//
+@interface EvhListParkingCardsCommand
+    : NSObject<EvhJsonSerializable>
+
+
+@property(nonatomic, copy) NSString* ownerType;
+
+@property(nonatomic, copy) NSNumber* ownerId;
+
+@property(nonatomic, copy) NSNumber* parkingLotId;
+
+@property(nonatomic, copy) NSString* plateNumber;
+
+-(id) init;
++(id) withJsonString: (NSString*) jsonString;
+
+@end
+
+///////////////////////////////////////////////////////////////////////////////
+

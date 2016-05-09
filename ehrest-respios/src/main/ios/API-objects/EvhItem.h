@@ -1,6 +1,6 @@
 //
 // EvhItem.h
-// generated at 2016-04-26 18:22:51 
+// generated at 2016-04-29 18:56:02 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"

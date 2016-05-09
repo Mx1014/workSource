@@ -1,0 +1,19 @@
+//
+// EvhPmsyOrderStatus.h
+// generated at 2016-04-29 18:56:01 
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhPmsyOrderStatus
+//
+typedef enum {
+
+    EvhPmsyOrderStatus_INACTIVE = 0, 
+    EvhPmsyOrderStatus_UNPAID = 1, 
+    EvhPmsyOrderStatus_PAID = 2
+
+} EvhPmsyOrderStatus;
+
+///////////////////////////////////////////////////////////////////////////////
+

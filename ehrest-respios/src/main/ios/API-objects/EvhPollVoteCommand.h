@@ -1,6 +1,6 @@
 //
 // EvhPollVoteCommand.h
-// generated at 2016-04-26 18:22:55 
+// generated at 2016-04-29 18:56:03 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"

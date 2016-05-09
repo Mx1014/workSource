@@ -731,7 +731,7 @@ public class QualityServiceImpl implements QualityService {
 		List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(groupId);
     	List<GroupUserDTO> groupUsers = members.stream().map((mem) -> {
          	if(OrganizationMemberTargetType.USER.getCode().equals(mem.getTargetType()) 
-         			&& mem.getTargetId() != null && mem.getTargetId() != 0 && mem.getTargetId() != current.getId()) {
+         			&& mem.getTargetId() != null && mem.getTargetId() != 0 && !mem.getTargetId().equals(current.getId())) {
          		GroupUserDTO user = new GroupUserDTO();
          		user.setOperatorType(mem.getTargetType());
          		user.setUserId(mem.getTargetId());
@@ -959,6 +959,24 @@ public class QualityServiceImpl implements QualityService {
 		record.setProcessResult(cmd.getReviewResult());
 
 		updateVerificationTasks(task, record, null);
+		
+		if(cmd.getReviewResult() != null 
+				&& cmd.getReviewResult() == QualityInspectionTaskReviewResult.UNQUALIFIED.getCode()) {
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("taskNumber", task.getTaskNumber());
+			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), task.getOwnerId());
+			if(member != null) {
+				map.put("userName", member.getContactName());
+			} else {
+				map.put("userName", user.getNickName());
+			}
+			String scope = QualityNotificationTemplateCode.SCOPE;
+			int code = QualityNotificationTemplateCode.UNQUALIFIED_TASK_NOTIFY_EXECUTOR;
+			String locale = "zh_CN";
+			String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+			sendMessageToUser(task.getExecutorId(), notifyTextForApplicant);
+			
+		}
 
 		
 	}

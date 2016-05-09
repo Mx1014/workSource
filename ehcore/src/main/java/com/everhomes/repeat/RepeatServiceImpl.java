@@ -1,8 +1,11 @@
 package com.everhomes.repeat;
 
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -137,7 +140,14 @@ public class RepeatServiceImpl implements RepeatService {
 		RepeatSettings repeat = findRepeatSettingById(repeatSettingId);
 		if(repeat.getStatus() == RepeatSettingStatus.ACTIVE.getCode()) {
 			if(repeat.getForeverFlag() == 1) {
-				return true;
+				Date date = timestampToDate(repeat.getCreateTime());
+				List<Integer> differences = getDateDifference(now, new Timestamp(date.getTime()),
+						repeat, repeat.getRepeatType());
+				for(Integer difference : differences) {
+					if(difference % repeat.getRepeatInterval() == 0) {
+						return true;
+					}
+				}
 			} else if(repeat.getForeverFlag() == 0) {
 				if(repeat.getRepeatInterval() == null || repeat.getRepeatInterval() == 0 || repeat.getStartDate() == null) {
 					return false;
@@ -155,9 +165,6 @@ public class RepeatServiceImpl implements RepeatService {
 									return true;
 								}
 							}
-							return false;
-						} else {
-							return false;
 						}
 					}
 					
@@ -180,8 +187,6 @@ public class RepeatServiceImpl implements RepeatService {
 						}
 					}
 				}
-			} else {
-				return false;
 			}
 		}
 		return false;
@@ -289,6 +294,22 @@ public class RepeatServiceImpl implements RepeatService {
 		}
 		
 		return repeat;
+	}
+	
+	private Date timestampToDate(Timestamp time) {
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+		String str = sdf.format(time);
+		Date date = new Date();
+		try {
+			date = sdf.parse(str);
+			
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return date;
 	}
 	
 }

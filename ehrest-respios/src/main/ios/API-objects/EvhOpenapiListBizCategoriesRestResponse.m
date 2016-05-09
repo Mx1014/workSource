@@ -1,6 +1,6 @@
 //
 // EvhOpenapiListBizCategoriesRestResponse.m
-// generated at 2016-04-26 18:22:56 
+// generated at 2016-04-29 18:56:03 
 //
 #import "EvhOpenapiListBizCategoriesRestResponse.h"
 #import "EvhCategoryDTO.h"

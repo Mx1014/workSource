@@ -1148,7 +1148,7 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 	
 	@Override
-	public CommunityAuthUserAddressResponse ListCommunityAuthUserAddress(CommunityAuthUserAddressCommand cmd){
+	public CommunityAuthUserAddressResponse listCommunityAuthUserAddress(CommunityAuthUserAddressCommand cmd){
 		Long communityId = cmd.getCommunityId();
 		
 		List<Group> groups = groupProvider.listGroupByCommunityId(communityId, (loc, query) -> {
@@ -1211,6 +1211,11 @@ public class CommunityServiceImpl implements CommunityService {
 		Long communityId = cmd.getCommunityId();
 		
 		CommunityUserAddressResponse res = new CommunityUserAddressResponse();
+		List<CommunityUserAddressDTO> dtos = new ArrayList<CommunityUserAddressDTO>();
+		
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		
+		
 		List<Group> groups = groupProvider.listGroupByCommunityId(communityId, (loc, query) -> {
             Condition c = Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.ACTIVE.getCode());
             query.addConditions(c);
@@ -1220,6 +1225,39 @@ public class CommunityServiceImpl implements CommunityService {
 		List<Long> groupIds = new ArrayList<Long>(); 
 		for (Group group : groups) {
 			groupIds.add(group.getId());
+		}
+		
+		if(!StringUtils.isNullOrEmpty(cmd.getKeywords())){
+			UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(namespaceId , cmd.getKeywords());
+			
+			if(null == identifier){
+				return res;
+			}
+			
+			List<UserGroup> userGroups = userProvider.listUserGroups(identifier.getOwnerUid(), GroupDiscriminator.FAMILY.getCode());
+			
+			if(null == userGroups || userGroups.size() == 0){
+				return res;
+			}
+			
+			for (UserGroup userGroup : userGroups) {
+				if(groupIds.contains(userGroup.getGroupId())){
+					User user = userProvider.findUserById(identifier.getOwnerUid());
+					CommunityUserAddressDTO dto = new CommunityUserAddressDTO();
+					dto.setUserId(user.getId());
+					dto.setUserName(user.getNickName());
+					dto.setNikeName(user.getNickName());
+					dto.setGender(user.getGender());
+					dto.setPhone(identifier.getIdentifierToken());
+					dto.setIsAuth(2);
+					if(GroupMemberStatus.fromCode(userGroup.getMemberStatus()) == GroupMemberStatus.ACTIVE)
+						dto.setIsAuth(1);
+					dtos.add(dto);
+					break;
+				}
+			}
+			res.setDtos(dtos);
+			return res;
 		}
 		
 		CrossShardListingLocator locator = new CrossShardListingLocator();
@@ -1245,7 +1283,6 @@ public class CommunityServiceImpl implements CommunityService {
             return query;
         });
 		
-		List<CommunityUserAddressDTO> dtos = new ArrayList<CommunityUserAddressDTO>();
 		
 		for (GroupMember member : groupMembers) {
 			User user = userProvider.findUserById(member.getMemberId());
@@ -1560,5 +1597,37 @@ public class CommunityServiceImpl implements CommunityService {
 		resp.setNotAuthUsers(notAuthUsers);
 
 		return resp;
+	}
+	
+	@Override
+	public CommunityUserAddressResponse listUserByNotJoinedCommunity(
+			ListCommunityUsersCommand cmd) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		List<CommunityUserAddressDTO> dtos = new ArrayList<CommunityUserAddressDTO>();
+		CommunityUserAddressResponse res = new CommunityUserAddressResponse();
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		List<User> users = userProvider.listUserByKeyword(cmd.getKeywords(), namespaceId, locator, Integer.MAX_VALUE);
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		for (User user : users) {
+			List<UserGroup> groups = userProvider.listUserGroups(user.getId(), GroupDiscriminator.FAMILY.getCode());
+			if(null == groups || groups.size() == 0){
+				CommunityUserAddressDTO dto = new CommunityUserAddressDTO();
+				dto.setUserId(user.getId());
+				dto.setUserName(user.getNickName());
+				dto.setGender(user.getGender());
+				dto.setIsAuth(2);
+				dto.setPhone(user.getIdentifierToken());
+				dto.setApplyTime(user.getCreateTime());
+				dtos.add(dto);
+				if(dtos.size() == pageSize){
+					res.setDtos(dtos);
+					res.setNextPageAnchor(user.getCreateTime().getTime());
+					break;
+				}
+			}
+		}
+		
+		return res;
 	}
 }

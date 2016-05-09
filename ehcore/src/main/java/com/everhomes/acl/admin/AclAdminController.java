@@ -190,7 +190,7 @@ public class AclAdminController extends ControllerBase {
     @RestReturn(value=ListWebMenuResponse.class)
     public RestResponse listWebMenu(@Valid ListWebMenuCommand cmd) {
     	
-    	RestResponse response =  new RestResponse(rolePrivilegeService.ListWebMenu(cmd));
+    	RestResponse response =  new RestResponse(rolePrivilegeService.listWebMenu(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -203,7 +203,7 @@ public class AclAdminController extends ControllerBase {
     @RequestMapping("listWebMenuPrivilege")
     @RestReturn(value=ListWebMenuPrivilegeDTO.class, collection = true)
     public RestResponse listWebMenuPrivilege(@Valid ListWebMenuPrivilegeCommand cmd) {
-    	RestResponse response =  new RestResponse(rolePrivilegeService.ListWebMenuPrivilege(cmd));
+    	RestResponse response =  new RestResponse(rolePrivilegeService.listWebMenuPrivilege(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

@@ -307,7 +307,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         AclinkUserResponse resp = new AclinkUserResponse();
         resp.setUsers(userDTOs);
-        resp.setUsers(userDTOs);
+        resp.setNextPageAnchor(locator.getAnchor());
         return resp;
     }
     

@@ -57,21 +57,21 @@ public class EhAclinkFirmwareDao extends org.jooq.impl.DAOImpl<com.everhomes.ser
 	/**
 	 * Fetch records that have <code>major IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAclinkFirmware> fetchByMajor(java.lang.Byte... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAclinkFirmware> fetchByMajor(java.lang.Integer... values) {
 		return fetch(com.everhomes.server.schema.tables.EhAclinkFirmware.EH_ACLINK_FIRMWARE.MAJOR, values);
 	}
 
 	/**
 	 * Fetch records that have <code>minor IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAclinkFirmware> fetchByMinor(java.lang.Byte... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAclinkFirmware> fetchByMinor(java.lang.Integer... values) {
 		return fetch(com.everhomes.server.schema.tables.EhAclinkFirmware.EH_ACLINK_FIRMWARE.MINOR, values);
 	}
 
 	/**
 	 * Fetch records that have <code>revision IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAclinkFirmware> fetchByRevision(java.lang.Byte... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAclinkFirmware> fetchByRevision(java.lang.Integer... values) {
 		return fetch(com.everhomes.server.schema.tables.EhAclinkFirmware.EH_ACLINK_FIRMWARE.REVISION, values);
 	}
 

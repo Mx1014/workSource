@@ -23,5 +23,7 @@ public interface OrganizationServiceErrorCode {
     static final int ERROR_ORG_TASK_CANNOT_OPERATE = 100203; //不能进行此操作
     
     static final int ERROR_FILE_CONTEXT_ISNULL=200001; //文件为空
+    
+    static final int ERROR_COMMUNITY_EXISTS=300001; //小区已存在
    
 }

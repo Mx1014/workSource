@@ -5,6 +5,7 @@ package com.everhomes.forum;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -1083,7 +1084,10 @@ public class ForumServiceImpl implements ForumService {
         
         List<Long> categorys = new ArrayList<Long>();
         
-        categorys.add(cmd.getContentCategory());
+        //modify contentCategory not for null by sfyan 20160430
+        if(null != cmd.getContentCategory()){
+        	categorys.add(cmd.getContentCategory());
+        }
         
         if(null != cmd.getEmbeddedAppId()){
         	if(AppConstants.APPID_ORGTASK == cmd.getEmbeddedAppId() && null == cmd.getContentCategory()){
@@ -1254,7 +1258,7 @@ public class ForumServiceImpl implements ForumService {
         CrossShardListingLocator locator = new CrossShardListingLocator(forumId);
         locator.setAnchor(cmd.getPageAnchor());
         List<Post> posts = this.forumProvider.queryPosts(locator, pageSize + 1, (loc, query) -> {
-            query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ID.eq(forum.getId()));
+//            query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ID.eq(forum.getId()));
             query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(topicId));
             query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
             //query.addConditions(Tables.EH_FORUM_POSTS.DELETER_UID.ne(0L));
@@ -3096,7 +3100,9 @@ public class ForumServiceImpl implements ForumService {
                 case COMMUNITY:
                     Community community = communityProvider.findCommunityById(regionId);
                     if(community != null)
-                    	forumName = community.getName() + forumName;
+                        // 按测试要求不加上“社区论坛”这些字样，故需要把forumName去掉，只显示小区名称 by lqs 20160505
+                    	//forumName = community.getName() + forumName;
+                        forumName = community.getName();
                     break;
                 case REGION:
                     Organization organization = organizationProvider.findOrganizationById(regionId);
@@ -3539,12 +3545,19 @@ public class ForumServiceImpl implements ForumService {
         List<TopicFilterDTO> filterList = new ArrayList<TopicFilterDTO>();
         UserCurrentEntityType entityType = UserCurrentEntityType.fromCode(sceneToken.getEntityType());
         if(entityType != UserCurrentEntityType.ORGANIZATION) {
-            LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
+            LOGGER.error("Unsupported scene for simple user, sceneToken={}", sceneToken);
             return filterList;
         }
 
         Organization organization = organizationProvider.findOrganizationById(sceneToken.getEntityId());
-        if(organization != null) {
+        if(organization == null) {
+            LOGGER.error("Organization not found, sceneToken={}", sceneToken);
+            return filterList;
+        }
+        
+        // 由于公司删除后只是置状态，故需要判断状态是否正常 by lqs 20160430
+        OrganizationStatus orgStatus = OrganizationStatus.fromCode(organization.getStatus());
+        if(orgStatus == OrganizationStatus.ACTIVE) {
             String menuName = null;
             String scope = ForumLocalStringCode.SCOPE;
             String code = "";
@@ -3574,6 +3587,9 @@ public class ForumServiceImpl implements ForumService {
                     actionUrl = String.format("%s%s?forumId=%s", serverContectPath, 
                         "/forum/listTopics", group.getOwningForumId());
                     filterDto.setActionUrl(actionUrl);
+                    avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.organization", "");
+                    filterDto.setAvatar(avatarUri);
+                    filterDto.setAvatarUrl(getPostFilterDefaultAvatar(namespaceId, user.getId(), avatarUri));
                     tmpFilterList.add(filterDto);
                 }
             } else {
@@ -3716,6 +3732,8 @@ public class ForumServiceImpl implements ForumService {
                     LOGGER.debug("No organization community filter for the user, userId={}, sceneToken={}", user.getId(), sceneToken);
                 }
             }
+        } else {
+            LOGGER.error("Organization not in active state, sceneToken={}, orgStatus={}", sceneToken, orgStatus);
         }
         
         return filterList;
@@ -3922,7 +3940,14 @@ public class ForumServiceImpl implements ForumService {
         }
 
         Organization organization = organizationProvider.findOrganizationById(sceneTokenDto.getEntityId());
-        if(organization != null) {
+        if(organization == null) {
+            LOGGER.error("Organization not found, sceneToken={}", sceneTokenDto);
+            return sentScopeList;
+        }
+        
+        // 由于公司删除后只是置状态，故需要判断状态是否正常 by lqs 20160430
+        OrganizationStatus orgStatus = OrganizationStatus.fromCode(organization.getStatus());
+        if(orgStatus == OrganizationStatus.ACTIVE) {
             String sceneToken = WebTokenGenerator.getInstance().toWebToken(sceneTokenDto);
             String menuName = null;
             String scope = ForumLocalStringCode.SCOPE;
@@ -4044,6 +4069,8 @@ public class ForumServiceImpl implements ForumService {
                     LOGGER.debug("No community group topic sent scope for the user, userId={}, sceneToken={}", user.getId(), sceneToken);
                 }
             }
+        } else {
+            LOGGER.error("Organization not in active state, sceneToken={}, orgStatue", sceneTokenDto, orgStatus);
         }
         
         return sentScopeList;
@@ -4055,8 +4082,10 @@ public class ForumServiceImpl implements ForumService {
         Long userId = user.getId();
         Long communityId = cmd.getCommunityId();
         
-        List<Long> forumIdList = cmd.getForumIdList();
-        if(forumIdList.size() > 0) {
+        // 由外边传入的论坛ID可能重复，需要进行过虑，否则帖子会有重复 by lqs 20160429
+        List<Long> forumIdList = removeDuplicatedForumIds(cmd.getForumIdList());
+        
+        if(forumIdList != null && forumIdList.size() > 0) {
             CrossShardListingLocator[] locators = new CrossShardListingLocator[forumIdList.size()];
             for(int i = 0; i < forumIdList.size(); i++) {
                 Long forumId = forumIdList.get(i);
@@ -4075,7 +4104,8 @@ public class ForumServiceImpl implements ForumService {
             }, new PostCreateTimeDescComparator());
 
             Long nextPageAnchor = null;
-            this.forumProvider.populatePostAttachments(posts);
+            // 在queryPosts已经进行附件填充，故可去掉 by lqs 20160429
+            // this.forumProvider.populatePostAttachments(posts);
             
             if(posts.size() > pageSize) {
                 posts.remove(posts.size() - 1);
@@ -4121,4 +4151,23 @@ public class ForumServiceImpl implements ForumService {
 	    
 	    return null;
 	}
+    
+    private List<Long> removeDuplicatedForumIds(List<Long> forumIdList) {
+        List<Long> dupForumIdList = new ArrayList<Long>();
+        List<Long> uniqueForumIdList = new ArrayList<Long>();
+        if(forumIdList != null && forumIdList.size() > 0) {
+            for(Long id : forumIdList) {
+                if(!uniqueForumIdList.contains(id)) {
+                    uniqueForumIdList.add(id);
+                } else {
+                    dupForumIdList.add(id);
+                }
+            }
+        }
+        if(dupForumIdList.size() > 0 && LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Remove the duplicated forum ids, duplicatedForumIds={}, forumIdList={}", dupForumIdList, forumIdList);
+        }
+        
+        return uniqueForumIdList;
+    }
 }

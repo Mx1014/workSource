@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-04-26 18:22:38
+// generated at 2016-04-29 20:33:36
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -574,6 +574,25 @@ public interface ApiConstants {
     public static final String ORG_UPDATETOPICPRIVACY_URL = "/org/updateTopicPrivacy";
     public static final String ORG_USEREXITORGANIZATION_URL = "/org/userExitOrganization";
     public static final String ORG_USERJOINORGANIZATION_URL = "/org/userJoinOrganization";
+    public static final String PARKING_CREATEPARKINGRECHARGEORDER_URL = "/parking/createParkingRechargeOrder";
+    public static final String PARKING_CREATEPARKINGRECHARGERATE_URL = "/parking/createParkingRechargeRate";
+    public static final String PARKING_DELETEPARKINGRECHARGEORDER_URL = "/parking/deleteParkingRechargeOrder";
+    public static final String PARKING_DELETEPARKINGRECHARGERATE_URL = "/parking/deleteParkingRechargeRate";
+    public static final String PARKING_EXPORTPARKINGRECHAGEORDERS_URL = "/parking/exportParkingRechageOrders";
+    public static final String PARKING_GETPARKINGACTIVITY_URL = "/parking/getParkingActivity";
+    public static final String PARKING_ISSUEPARKINGCARDS_URL = "/parking/issueParkingCards";
+    public static final String PARKING_LISTPARKINGCARDREQUESTS_URL = "/parking/listParkingCardRequests";
+    public static final String PARKING_LISTPARKINGCARDS_URL = "/parking/listParkingCards";
+    public static final String PARKING_LISTPARKINGLOTS_URL = "/parking/listParkingLots";
+    public static final String PARKING_LISTPARKINGRECHARGEORDERS_URL = "/parking/listParkingRechargeOrders";
+    public static final String PARKING_LISTPARKINGRECHARGERATES_URL = "/parking/listParkingRechargeRates";
+    public static final String PARKING_NOTIFYPARKINGRECHARGEORDERPAYMENT_URL = "/parking/notifyParkingRechargeOrderPayment";
+    public static final String PARKING_REQUESTPARKINGCARD_URL = "/parking/requestParkingCard";
+    public static final String PARKING_SEARCHPARKINGCARDREQUESTS_URL = "/parking/searchParkingCardRequests";
+    public static final String PARKING_SEARCHPARKINGRECHARGEORDERS_URL = "/parking/searchParkingRechargeOrders";
+    public static final String PARKING_SETPARKINGACTIVITY_URL = "/parking/setParkingActivity";
+    public static final String PARKING_SETPARKINGCARDISSUEFLAG_URL = "/parking/setParkingCardIssueFlag";
+    public static final String PARKING_SETPARKINGCARDRESERVEDAYS_URL = "/parking/setParkingCardReserveDays";
     public static final String PKG_ADD_URL = "/pkg/add";
     public static final String PKG_DOWNLOAD_URL = "/pkg/download";
     public static final String PKG_GETUPGRADEFILEINFO_URL = "/pkg/getUpgradeFileInfo";
@@ -628,6 +647,14 @@ public interface ApiConstants {
     public static final String PM_SETPROPCURRENTCOMMUNITY_URL = "/pm/setPropCurrentCommunity";
     public static final String PM_UPDATEPMBILL_URL = "/pm/updatePmBill";
     public static final String PM_UPDATEPMBILLS_URL = "/pm/updatePmBills";
+    public static final String PMSY_CREATEPMBILLORDER_URL = "/pmsy/createPmBillOrder";
+    public static final String PMSY_GETPMSYBILLS_URL = "/pmsy/getPmsyBills";
+    public static final String PMSY_LISTADDRESSES_URL = "/pmsy/listAddresses";
+    public static final String PMSY_LISTPMBILLS_URL = "/pmsy/listPmBills";
+    public static final String PMSY_LISTPMPAYERS_URL = "/pmsy/listPmPayers";
+    public static final String PMSY_NOTIFYPMSYORDERPAYMENT_URL = "/pmsy/notifyPmsyOrderPayment";
+    public static final String PMSY_SEARCHBILLINGORDERS_URL = "/pmsy/searchBillingOrders";
+    public static final String PMSY_SETPMPROPERTY_URL = "/pmsy/setPmProperty";
     public static final String POLL_SHOWRESULT_URL = "/poll/showResult";
     public static final String POLL_VOTE_URL = "/poll/vote";
     public static final String PUSHER_CREATECERT_URL = "/pusher/createCert";

@@ -27,6 +27,7 @@ import com.everhomes.rest.business.GetReceivedCouponCountCommand;
 import com.everhomes.rest.business.ListBusinessByCommonityIdCommand;
 import com.everhomes.rest.business.ListUserByIdentifierCommand;
 import com.everhomes.rest.business.ListUserByKeywordCommand;
+import com.everhomes.rest.business.ReSyncBusinessCommand;
 import com.everhomes.rest.business.SyncBusinessCommand;
 import com.everhomes.rest.business.SyncDeleteBusinessCommand;
 import com.everhomes.rest.business.SyncUserAddShopStatusCommand;
@@ -121,6 +122,21 @@ public class BusinessOpenController extends ControllerBase {
 	public RestResponse syncBusiness(@Valid SyncBusinessCommand cmd) {
 
 		businessService.syncBusiness(cmd);
+		RestResponse response =  new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /openapi/syncBusiness</b>
+	 * <p>biz2.2.0版：同步添加/更新店铺</p>
+	 */
+	@RequestMapping("reSyncBusiness")
+	@RestReturn(value=String.class)
+	public RestResponse reSyncBusiness(@Valid ReSyncBusinessCommand cmd) {
+
+		businessService.reSyncBusiness(cmd);
 		RestResponse response =  new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

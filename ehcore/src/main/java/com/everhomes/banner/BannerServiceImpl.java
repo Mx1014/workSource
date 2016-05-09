@@ -49,6 +49,7 @@ import com.everhomes.rest.organization.pm.ListPropCommunityContactCommand;
 import com.everhomes.rest.organization.pm.PropCommunityContactDTO;
 import com.everhomes.rest.ui.banner.GetBannersBySceneCommand;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
+import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.user.User;
@@ -363,6 +364,10 @@ public class BannerServiceImpl implements BannerService {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid startTime and endTime paramter.");
         }
+        
+        // 增加场景信息，由于jooq生成的pojo不带默认值，场景类型是not null类型，故在没值时需要补充默认值 by lqs 2010505
+        SceneType sceneType = SceneType.fromCode(cmd.getSceneType());
+        
         User user = UserContext.current().getUser();
         long userId = user.getId();
         List<BannerScope> scopes = cmd.getScopes();
@@ -386,6 +391,13 @@ public class BannerServiceImpl implements BannerService {
             banner.setScopeId(scope.getScopeId());
             banner.setOrder(scope.getOrder());
             banner.setVendorTag(cmd.getVendorTag());
+            
+            // 增加场景信息，由于jooq生成的pojo不带默认值，场景类型是not null类型，故在没值时需要补充默认值 by lqs 2010505
+            if(sceneType == null) {
+                banner.setSceneType(SceneType.DEFAULT.getCode());
+            } else {
+                banner.setSceneType(sceneType.getCode());
+            }
             bannerProvider.createBanner(banner);
         });
     }

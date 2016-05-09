@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationMembersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord> {
 
-	private static final long serialVersionUID = -1986904925;
+	private static final long serialVersionUID = -1155107543;
 
 	/**
 	 * Setter for <code>ehcore.eh_organization_members.id</code>. id of the record
@@ -196,14 +196,14 @@ public class EhOrganizationMembersRecord extends org.jooq.impl.UpdatableRecordIm
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_organization_members.group_path</code>.
+	 * Setter for <code>ehcore.eh_organization_members.group_path</code>. refer to the organization path
 	 */
 	public void setGroupPath(java.lang.String value) {
 		setValue(13, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_organization_members.group_path</code>.
+	 * Getter for <code>ehcore.eh_organization_members.group_path</code>. refer to the organization path
 	 */
 	public java.lang.String getGroupPath() {
 		return (java.lang.String) getValue(13);
@@ -224,185 +224,185 @@ public class EhOrganizationMembersRecord extends org.jooq.impl.UpdatableRecordIm
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_organization_members.integral_tag1</code>.
-	 */
-	public void setIntegralTag1(java.lang.Long value) {
-		setValue(15, value);
-	}
-
-	/**
-	 * Getter for <code>ehcore.eh_organization_members.integral_tag1</code>.
-	 */
-	public java.lang.Long getIntegralTag1() {
-		return (java.lang.Long) getValue(15);
-	}
-
-	/**
-	 * Setter for <code>ehcore.eh_organization_members.integral_tag2</code>.
-	 */
-	public void setIntegralTag2(java.lang.Long value) {
-		setValue(16, value);
-	}
-
-	/**
-	 * Getter for <code>ehcore.eh_organization_members.integral_tag2</code>.
-	 */
-	public java.lang.Long getIntegralTag2() {
-		return (java.lang.Long) getValue(16);
-	}
-
-	/**
-	 * Setter for <code>ehcore.eh_organization_members.integral_tag3</code>.
-	 */
-	public void setIntegralTag3(java.lang.Long value) {
-		setValue(17, value);
-	}
-
-	/**
-	 * Getter for <code>ehcore.eh_organization_members.integral_tag3</code>.
-	 */
-	public java.lang.Long getIntegralTag3() {
-		return (java.lang.Long) getValue(17);
-	}
-
-	/**
-	 * Setter for <code>ehcore.eh_organization_members.integral_tag4</code>.
-	 */
-	public void setIntegralTag4(java.lang.Long value) {
-		setValue(18, value);
-	}
-
-	/**
-	 * Getter for <code>ehcore.eh_organization_members.integral_tag4</code>.
-	 */
-	public java.lang.Long getIntegralTag4() {
-		return (java.lang.Long) getValue(18);
-	}
-
-	/**
-	 * Setter for <code>ehcore.eh_organization_members.integral_tag5</code>.
-	 */
-	public void setIntegralTag5(java.lang.Long value) {
-		setValue(19, value);
-	}
-
-	/**
-	 * Getter for <code>ehcore.eh_organization_members.integral_tag5</code>.
-	 */
-	public java.lang.Long getIntegralTag5() {
-		return (java.lang.Long) getValue(19);
-	}
-
-	/**
-	 * Setter for <code>ehcore.eh_organization_members.string_tag1</code>.
-	 */
-	public void setStringTag1(java.lang.String value) {
-		setValue(20, value);
-	}
-
-	/**
-	 * Getter for <code>ehcore.eh_organization_members.string_tag1</code>.
-	 */
-	public java.lang.String getStringTag1() {
-		return (java.lang.String) getValue(20);
-	}
-
-	/**
-	 * Setter for <code>ehcore.eh_organization_members.string_tag2</code>.
-	 */
-	public void setStringTag2(java.lang.String value) {
-		setValue(21, value);
-	}
-
-	/**
-	 * Getter for <code>ehcore.eh_organization_members.string_tag2</code>.
-	 */
-	public java.lang.String getStringTag2() {
-		return (java.lang.String) getValue(21);
-	}
-
-	/**
-	 * Setter for <code>ehcore.eh_organization_members.string_tag3</code>.
-	 */
-	public void setStringTag3(java.lang.String value) {
-		setValue(22, value);
-	}
-
-	/**
-	 * Getter for <code>ehcore.eh_organization_members.string_tag3</code>.
-	 */
-	public java.lang.String getStringTag3() {
-		return (java.lang.String) getValue(22);
-	}
-
-	/**
-	 * Setter for <code>ehcore.eh_organization_members.string_tag4</code>.
-	 */
-	public void setStringTag4(java.lang.String value) {
-		setValue(23, value);
-	}
-
-	/**
-	 * Getter for <code>ehcore.eh_organization_members.string_tag4</code>.
-	 */
-	public java.lang.String getStringTag4() {
-		return (java.lang.String) getValue(23);
-	}
-
-	/**
-	 * Setter for <code>ehcore.eh_organization_members.string_tag5</code>.
-	 */
-	public void setStringTag5(java.lang.String value) {
-		setValue(24, value);
-	}
-
-	/**
-	 * Getter for <code>ehcore.eh_organization_members.string_tag5</code>.
-	 */
-	public java.lang.String getStringTag5() {
-		return (java.lang.String) getValue(24);
-	}
-
-	/**
-	 * Setter for <code>ehcore.eh_organization_members.namespace_id</code>.
-	 */
-	public void setNamespaceId(java.lang.Integer value) {
-		setValue(25, value);
-	}
-
-	/**
-	 * Getter for <code>ehcore.eh_organization_members.namespace_id</code>.
-	 */
-	public java.lang.Integer getNamespaceId() {
-		return (java.lang.Integer) getValue(25);
-	}
-
-	/**
 	 * Setter for <code>ehcore.eh_organization_members.update_time</code>.
 	 */
 	public void setUpdateTime(java.sql.Timestamp value) {
-		setValue(26, value);
+		setValue(15, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_organization_members.update_time</code>.
 	 */
 	public java.sql.Timestamp getUpdateTime() {
-		return (java.sql.Timestamp) getValue(26);
+		return (java.sql.Timestamp) getValue(15);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_organization_members.create_time</code>.
 	 */
 	public void setCreateTime(java.sql.Timestamp value) {
-		setValue(27, value);
+		setValue(16, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_organization_members.create_time</code>.
 	 */
 	public java.sql.Timestamp getCreateTime() {
-		return (java.sql.Timestamp) getValue(27);
+		return (java.sql.Timestamp) getValue(16);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_organization_members.integral_tag1</code>.
+	 */
+	public void setIntegralTag1(java.lang.Long value) {
+		setValue(17, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_organization_members.integral_tag1</code>.
+	 */
+	public java.lang.Long getIntegralTag1() {
+		return (java.lang.Long) getValue(17);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_organization_members.integral_tag2</code>.
+	 */
+	public void setIntegralTag2(java.lang.Long value) {
+		setValue(18, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_organization_members.integral_tag2</code>.
+	 */
+	public java.lang.Long getIntegralTag2() {
+		return (java.lang.Long) getValue(18);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_organization_members.integral_tag3</code>.
+	 */
+	public void setIntegralTag3(java.lang.Long value) {
+		setValue(19, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_organization_members.integral_tag3</code>.
+	 */
+	public java.lang.Long getIntegralTag3() {
+		return (java.lang.Long) getValue(19);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_organization_members.integral_tag4</code>.
+	 */
+	public void setIntegralTag4(java.lang.Long value) {
+		setValue(20, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_organization_members.integral_tag4</code>.
+	 */
+	public java.lang.Long getIntegralTag4() {
+		return (java.lang.Long) getValue(20);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_organization_members.integral_tag5</code>.
+	 */
+	public void setIntegralTag5(java.lang.Long value) {
+		setValue(21, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_organization_members.integral_tag5</code>.
+	 */
+	public java.lang.Long getIntegralTag5() {
+		return (java.lang.Long) getValue(21);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_organization_members.string_tag1</code>.
+	 */
+	public void setStringTag1(java.lang.String value) {
+		setValue(22, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_organization_members.string_tag1</code>.
+	 */
+	public java.lang.String getStringTag1() {
+		return (java.lang.String) getValue(22);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_organization_members.string_tag2</code>.
+	 */
+	public void setStringTag2(java.lang.String value) {
+		setValue(23, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_organization_members.string_tag2</code>.
+	 */
+	public java.lang.String getStringTag2() {
+		return (java.lang.String) getValue(23);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_organization_members.string_tag3</code>.
+	 */
+	public void setStringTag3(java.lang.String value) {
+		setValue(24, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_organization_members.string_tag3</code>.
+	 */
+	public java.lang.String getStringTag3() {
+		return (java.lang.String) getValue(24);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_organization_members.string_tag4</code>.
+	 */
+	public void setStringTag4(java.lang.String value) {
+		setValue(25, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_organization_members.string_tag4</code>.
+	 */
+	public java.lang.String getStringTag4() {
+		return (java.lang.String) getValue(25);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_organization_members.string_tag5</code>.
+	 */
+	public void setStringTag5(java.lang.String value) {
+		setValue(26, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_organization_members.string_tag5</code>.
+	 */
+	public java.lang.String getStringTag5() {
+		return (java.lang.String) getValue(26);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_organization_members.namespace_id</code>.
+	 */
+	public void setNamespaceId(java.lang.Integer value) {
+		setValue(27, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_organization_members.namespace_id</code>.
+	 */
+	public java.lang.Integer getNamespaceId() {
+		return (java.lang.Integer) getValue(27);
 	}
 
 	// -------------------------------------------------------------------------
@@ -431,7 +431,7 @@ public class EhOrganizationMembersRecord extends org.jooq.impl.UpdatableRecordIm
 	/**
 	 * Create a detached, initialised EhOrganizationMembersRecord
 	 */
-	public EhOrganizationMembersRecord(java.lang.Long id, java.lang.Long organizationId, java.lang.String targetType, java.lang.Long targetId, java.lang.String memberGroup, java.lang.String contactName, java.lang.Byte contactType, java.lang.String contactToken, java.lang.String contactDescription, java.lang.Byte status, java.lang.Long groupId, java.lang.String employeeNo, java.lang.String avatar, java.lang.String groupPath, java.lang.Byte gender, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.lang.Integer namespaceId, java.sql.Timestamp updateTime, java.sql.Timestamp createTime) {
+	public EhOrganizationMembersRecord(java.lang.Long id, java.lang.Long organizationId, java.lang.String targetType, java.lang.Long targetId, java.lang.String memberGroup, java.lang.String contactName, java.lang.Byte contactType, java.lang.String contactToken, java.lang.String contactDescription, java.lang.Byte status, java.lang.Long groupId, java.lang.String employeeNo, java.lang.String avatar, java.lang.String groupPath, java.lang.Byte gender, java.sql.Timestamp updateTime, java.sql.Timestamp createTime, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.lang.Integer namespaceId) {
 		super(com.everhomes.server.schema.tables.EhOrganizationMembers.EH_ORGANIZATION_MEMBERS);
 
 		setValue(0, id);
@@ -449,18 +449,18 @@ public class EhOrganizationMembersRecord extends org.jooq.impl.UpdatableRecordIm
 		setValue(12, avatar);
 		setValue(13, groupPath);
 		setValue(14, gender);
-		setValue(15, integralTag1);
-		setValue(16, integralTag2);
-		setValue(17, integralTag3);
-		setValue(18, integralTag4);
-		setValue(19, integralTag5);
-		setValue(20, stringTag1);
-		setValue(21, stringTag2);
-		setValue(22, stringTag3);
-		setValue(23, stringTag4);
-		setValue(24, stringTag5);
-		setValue(25, namespaceId);
-		setValue(26, updateTime);
-		setValue(27, createTime);
+		setValue(15, updateTime);
+		setValue(16, createTime);
+		setValue(17, integralTag1);
+		setValue(18, integralTag2);
+		setValue(19, integralTag3);
+		setValue(20, integralTag4);
+		setValue(21, integralTag5);
+		setValue(22, stringTag1);
+		setValue(23, stringTag2);
+		setValue(24, stringTag3);
+		setValue(25, stringTag4);
+		setValue(26, stringTag5);
+		setValue(27, namespaceId);
 	}
 }

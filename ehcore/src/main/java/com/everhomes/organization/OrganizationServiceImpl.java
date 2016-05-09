@@ -63,6 +63,7 @@ import com.everhomes.forum.Post;
 import com.everhomes.forum.PostCreateTimeDescComparator;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupDiscriminator;
+import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
@@ -387,6 +388,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		Organization parOrg = this.checkOrganization(cmd.getParentId());
 		
+		//default show navi, add by sfyan 20160505
+		if(null == cmd.getNaviFlag()){
+			cmd.setNaviFlag((byte)1);
+		}
+		
 		organization.setShowFlag(cmd.getNaviFlag());
 		organization.setPath(parOrg.getPath());
 		organization.setLevel(parOrg.getLevel()+1);
@@ -419,6 +425,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 		RoleAssignment roleAssignment = new RoleAssignment();
 		List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), entityType.getCode(), cmd.getTargetId());
 		
+		//Set roles for no, add by sfyan 20160504
+		if(null == cmd.getRoleId()){
+			if(null != roleAssignments && 0 < roleAssignments.size()){
+				for (RoleAssignment assignment : roleAssignments) {
+					aclProvider.deleteRoleAssignment(assignment.getId());
+				}
+			}
+			return;
+		}
+		
 		if(null != roleAssignments && 0 < roleAssignments.size()){
 			for (RoleAssignment assignment : roleAssignments) {
 				if(assignment.getRoleId().equals(cmd.getRoleId())){
@@ -444,8 +460,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 	public void updateChildrenOrganization(UpdateOrganizationsCommand cmd) {
 		//先判断，后台管理员才能创建。状态直接设为正常
 		
+		if(null == cmd.getNaviFlag()){
+			cmd.setNaviFlag((byte)1);
+		}
+		
 		Organization parOrg = this.checkOrganization(cmd.getId());
 		
+		parOrg.setShowFlag(cmd.getNaviFlag());
 		parOrg.setName(cmd.getName());
 		
 		if(OrganizationGroupType.fromCode(parOrg.getGroupType()) == OrganizationGroupType.ENTERPRISE){
@@ -1067,12 +1088,22 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public ListOrganizationMemberCommandResponse getUserOwningOrganizations() {
 		User user  = UserContext.current().getUser();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		ListOrganizationMemberCommandResponse response = new ListOrganizationMemberCommandResponse();
 		List<OrganizationMember> result = organizationProvider.listOrganizationMembers(user.getId());
 		if(result != null && result.size() > 0){
 			List<OrganizationMemberDTO> members =  new ArrayList<OrganizationMemberDTO>();
 			for (OrganizationMember organizationMember : result) {
 				Organization organization = organizationProvider.findOrganizationById(organizationMember.getOrganizationId());
+				
+				//Filter out the inactive organization add by sfyan 20130430
+				OrganizationStatus orgStatus = OrganizationStatus.fromCode(organization.getStatus());
+		            if(orgStatus != OrganizationStatus.ACTIVE) {
+		                LOGGER.error("The member is ignored for organization not active, userId=" + user.getId()
+		                    + ", organizationId=" + organizationMember.getOrganizationId() + ", orgMemberId=" + organizationMember.getId() 
+		                    + ", namespaceId=" + namespaceId + ", orgStatus" + orgStatus);
+		                continue;
+		            }
 				if(OrganizationType.PM != OrganizationType.fromCode(organization.getOrganizationType())){
 					OrganizationMemberDTO dto =ConvertHelper.convert(organizationMember,OrganizationMemberDTO.class);
 					dto.setOrganizationName(organization.getName());
@@ -1100,10 +1131,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public UserTokenCommandResponse findUserByIndentifier(UserTokenCommand cmd) {
         User operator = UserContext.current().getUser();
-        Integer namespaceId = Namespace.DEFAULT_NAMESPACE;
-        if(operator != null) {
-            namespaceId = operator.getNamespaceId();
-        }
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         
 		UserTokenCommandResponse commandResponse = new UserTokenCommandResponse();
 		User user = userService.findUserByIndentifier(namespaceId, cmd.getUserIdentifier());
@@ -1286,6 +1314,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 }
 	        }
 	        
+	        groupDto = null; // 如果缺少这一句，则即使每个子公司都没有group，仍然会加到论坛列表中 by lqs 20160429
 	        List<String> groupTypes = new ArrayList<String>();
             groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
             List<Organization> subOrgList = organizationProvider.listOrganizationByGroupTypes(organization.getPath() + "/%", groupTypes);
@@ -1541,10 +1570,25 @@ public class OrganizationServiceImpl implements OrganizationService {
 		this.checkOrganizationIdIsNull(cmd.getId());
 		Organization organization = this.checkOrganization(cmd.getId());
 		
-		organization.setStatus(OrganizationStatus.DELETED.getCode());
-		Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
-		organization.setUpdateTime(now);
-		organizationProvider.updateOrganization(organization);
+		//modify all subset States by sfyan 20160430
+		List<String> groupTypeList = new ArrayList<String>();
+		groupTypeList.add(OrganizationGroupType.GROUP.getCode());
+		groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
+		groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
+		
+		List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes(organization.getPath()+"/%", groupTypeList);
+		organizations.add(organization);
+		
+		dbProvider.execute((TransactionStatus status) -> {
+			for (Organization org : organizations) {
+				org.setStatus(OrganizationStatus.DELETED.getCode());
+				Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+				org.setUpdateTime(now);
+				organizationProvider.updateOrganization(org);
+			}
+			return null;
+		});
+		
 	}
 
 	@Override
@@ -1787,7 +1831,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public List<OrganizationDetailDTO> listUserRelateEnterprises(ListUserRelatedEnterprisesCommand cmd) {
 		User user = UserContext.current().getUser();
-		
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembers(user.getId());
 		
 		Community community = null;
@@ -1797,6 +1841,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 		List<OrganizationDetailDTO> dtos = new ArrayList<OrganizationDetailDTO>();
 		for (OrganizationMember member : orgMembers) {
 			Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
+			
+			//Filter out the inactive organization add by sfyan 20130430
+			OrganizationStatus orgStatus = OrganizationStatus.fromCode(org.getStatus());
+            if(orgStatus != OrganizationStatus.ACTIVE) {
+                LOGGER.error("The member is ignored for organization not active, userId=" + user.getId()  
+                    + ", organizationId=" + member.getOrganizationId() + ", orgMemberId=" + member.getId() 
+                    + ", namespaceId=" + namespaceId + ", orgStatus" + orgStatus);
+                continue;
+            }
 			if(OrganizationGroupType.ENTERPRISE.getCode().equals(org.getGroupType())){
 				OrganizationDetailDTO dto= this.toOrganizationDetailDTO(org.getId(), false);
 				dto.setMember(ConvertHelper.convert(member, OrganizationMemberDTO.class));
@@ -1833,6 +1886,15 @@ public class OrganizationServiceImpl implements OrganizationService {
                 continue;
             }
             
+            //Filter out the inactive organization add by sfyan 20130430
+            OrganizationStatus orgStatus = OrganizationStatus.fromCode(org.getStatus());
+            if(orgStatus != OrganizationStatus.ACTIVE) {
+                LOGGER.error("The member is ignored for organization not active, userId=" + userId  
+                    + ", organizationId=" + member.getOrganizationId() + ", orgMemberId=" + member.getId() 
+                    + ", namespaceId=" + namespaceId + ", groupType=" + groupType + ", orgStatus" + orgStatus);
+                continue;
+            }
+
             OrganizationDTO dto = toOrganizationDTO(userId, org);
             dtos.add(dto);
         }
@@ -1873,12 +1935,23 @@ public class OrganizationServiceImpl implements OrganizationService {
 	public List<OrganizationSimpleDTO> listUserRelateOrgs(ListUserRelatedOrganizationsCommand cmd) {
 		User user = UserContext.current().getUser();
 
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		
 		List<OrganizationSimpleDTO> orgs = new ArrayList<OrganizationSimpleDTO>();
 		List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembers(user.getId());
 		
 		for (OrganizationMember member : orgMembers) {
 			if(member.getStatus().equals(OrganizationMemberStatus.ACTIVE.getCode())){
 				Organization org = this.organizationProvider.findOrganizationById(member.getOrganizationId());
+				
+				//Filter out the inactive organization add by sfyan 20130430
+				OrganizationStatus orgStatus = OrganizationStatus.fromCode(org.getStatus());
+				if(orgStatus != OrganizationStatus.ACTIVE){
+					LOGGER.error("The member is ignored for organization not active, userId=" + user.getId()  
+		                    + ", organizationId=" + member.getOrganizationId() + ", orgMemberId=" + member.getId() 
+		                    + ", namespaceId=" + namespaceId + ", orgStatus" + orgStatus);
+					continue;
+				}
 				if(cmd.getOrganiztionType() != null && !cmd.getOrganiztionType().equals("")){
 					if(org.getOrganizationType().equals(cmd.getOrganiztionType()) && !org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())){
 						OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
@@ -1890,6 +1963,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 					}
 				}
 				else{
+					//Filter out the inactive organization add by sfyan 20130430
+					if(orgStatus != OrganizationStatus.ACTIVE){
+						LOGGER.error("The member is ignored for organization not active, userId=" + user.getId()  
+			                    + ", organizationId=" + member.getOrganizationId() + ", orgMemberId=" + member.getId() 
+			                    + ", namespaceId=" + namespaceId + ", orgStatus" + orgStatus);
+						continue;
+					}
+					
 					if(!org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())){
 						OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
 						//物业或业委增加小区Id和小区name信息
@@ -3475,10 +3556,20 @@ public class OrganizationServiceImpl implements OrganizationService {
 //				this.organizationProvider.addPmBuilding(pmBuilding);
 //			}
 			
-			OrganizationCommunity organizationCommunity = new OrganizationCommunity();
-			organizationCommunity.setCommunityId(cmd.getCommunityId());
-			organizationCommunity.setOrganizationId(cmd.getOrganizationId()); 
-			organizationProvider.createOrganizationCommunity(organizationCommunity);
+			OrganizationCommunity organizationCommunity = organizationProvider.findOrganizationCommunityByOrgIdAndCmmtyId(cmd.getOrganizationId(), cmd.getCommunityId());
+			
+			if(null == organizationCommunity){
+				organizationCommunity = new OrganizationCommunity();
+				organizationCommunity.setCommunityId(cmd.getCommunityId());
+				organizationCommunity.setOrganizationId(cmd.getOrganizationId()); 
+				organizationProvider.createOrganizationCommunity(organizationCommunity);
+			}else{
+				LOGGER.error("Community already exists, organizationId=" + cmd.getOrganizationId() + ", communityId=" + cmd.getCommunityId());
+    			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_COMMUNITY_EXISTS,
+    					"Community already exists.");
+			}
+			
+			
 			
 			return null;
 		});
@@ -3489,7 +3580,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	public void deletePmCommunity(DeletePmCommunityCommand cmd) {
 		dbProvider.execute((TransactionStatus status) -> {
 			
-			OrganizationCommunity organizationCommunity = organizationProvider.findOrganizationCommunityByOrgIdAndCmmtyId(cmd.getCommunityId(), cmd.getOrganizationId());
+			OrganizationCommunity organizationCommunity = organizationProvider.findOrganizationCommunityByOrgIdAndCmmtyId(cmd.getOrganizationId(), cmd.getCommunityId());
 			if(null != organizationCommunity){
 				organizationProvider.deleteOrganizationCommunityById(organizationCommunity.getId());
 			}
@@ -4180,7 +4271,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		response.setNextPageAnchor(locator.getAnchor());
 		
-		response.setMembers(this.convertDTO(organizationMembers, org));
+		response.setMembers(this.convertDTO(organizationMembers, org, null));
 		
 		return response;
 	}
@@ -4262,12 +4353,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		
+		List<String> groupTypes = cmd.getGroupTypes();
+		
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		List<OrganizationMember> organizationMembers = this.organizationProvider.listParentOrganizationMembers(org.getPath(), cmd.getGroupTypes(), locator, pageSize);
+		List<OrganizationMember> organizationMembers = this.organizationProvider.listParentOrganizationMembers(org.getPath(), groupTypes, locator, pageSize);
 		response.setNextPageAnchor(locator.getAnchor());
 		
-		response.setMembers(this.convertDTO(organizationMembers, org));
+		response.setMembers(this.convertDTO(organizationMembers, org, groupTypes));
 		
 		return response;
 	}
@@ -4472,6 +4565,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 				memberCmd.setOrganizationId(cmd.getOrganizationId());
 				memberCmd.setGender(UserGender.UNDISCLOSURED.getCode());
 				m =  ConvertHelper.convert(this.createOrganizationPersonnel(memberCmd), OrganizationMember.class);
+			}else{
+				if(OrganizationMemberStatus.fromCode(m.getStatus()) != OrganizationMemberStatus.ACTIVE){
+					m.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+					m.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+					organizationProvider.updateOrganizationMember(m);
+				}
 			}
 		
 			if(m.getTargetType().equals(OrganizationMemberTargetType.UNTRACK.getCode())){
@@ -4728,6 +4827,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		Organization org = checkOrganization(cmd.getOrganizationId());
 		int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		List<Organization> depts = organizationProvider.listDepartments(org.getPath()+"/%", 1, 1000);
+		Map<String, Organization> deptMap = this.convertDeptListToStrMap(depts);
 		for (String str : list) {
 			String[] s = str.split("\\|\\|");
 			
@@ -4754,9 +4854,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 				continue;
 			}
 			
-			
-			Map<String, Organization> deptMap = this.convertDeptListToStrMap(depts);
-			
 			Organization dept = deptMap.get(s[1]);
 			if(StringUtils.isEmpty(s[1])){
 				memberCommand.setGroupId(0l);
@@ -4769,6 +4866,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 					OrganizationDTO deptDto = this.createChildrenOrganization(deptCommand);
 					dept = ConvertHelper.convert(deptDto, Organization.class);
 					deptMap.put(deptDto.getName(), dept);
+					
 				}
 				memberCommand.setOrganizationId(dept.getId());
 			}
@@ -4874,15 +4972,28 @@ public class OrganizationServiceImpl implements OrganizationService {
 	 * @param depts
 	 * @return
 	 */
-	private List<OrganizationMemberDTO> convertDTO(List<OrganizationMember> organizationMembers, Organization org){
+	private List<OrganizationMemberDTO> convertDTO(List<OrganizationMember> organizationMembers, Organization org, List<String> groupTypes){
 		
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
-		List<Organization> depts = organizationProvider.listDepartments(org.getPath()+"/%", 1, 1000);
-		depts.add(org);
+		List<String> groupTypeList = new ArrayList<String>();
+		groupTypeList.add(OrganizationGroupType.GROUP.getCode());
+		groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
+		
+		List<Organization> depts = organizationProvider.listOrganizationByGroupTypes(org.getPath()+"/%", groupTypeList);
+		
+		if(null == groupTypes){
+			groupTypes = new ArrayList<String>();
+		}
+		
+		if(OrganizationGroupType.fromCode(org.getGroupType()) != OrganizationGroupType.ENTERPRISE){
+			depts.add(org);
+			groupTypes.add(org.getGroupType());
+		}
+		
+		List<String> types = groupTypes;
 		
 		Long orgId = null;
-		
 
 		if(org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())){
 			orgId = org.getDirectlyEnterpriseId();
@@ -4909,8 +5020,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 			if(null != organization)
 				dto.setOrganizationName(organization.getName());
 			
-			Organization group = deptMaps.get(c.getGroupId());
-			if(null != group && !c.getGroupId().equals(org.getId()))
+			Organization group = null;
+			
+			if(types.contains(OrganizationGroupType.GROUP.getCode())){
+				group = deptMaps.get(c.getOrganizationId());
+			}else{
+				group = deptMaps.get(c.getGroupId());
+			}
+			 
+			if(null != group)
 				dto.setGroupName(group.getName());
 			
 			if(OrganizationMemberTargetType.USER.getCode().equals(dto.getTargetType())){
@@ -4933,7 +5051,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 				if(null != resources && 0 != resources.size()){
 					List<RoleDTO> roleDTOs = new ArrayList<RoleDTO>();
 					for (RoleAssignment resource : resources) {
-						roleDTOs.add(ConvertHelper.convert(roleMap.get(resource.getRoleId()), RoleDTO.class));
+						Role role = roleMap.get(resource.getRoleId());
+						if(null != role)
+							roleDTOs.add(ConvertHelper.convert(role, RoleDTO.class));
 					}
 					dto.setRoles(roleDTOs);
 				}
@@ -5094,7 +5214,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 			if(null != resources && resources.size() > 0){
 				List<RoleDTO> roleDTOs = new ArrayList<RoleDTO>();
 				for (RoleAssignment resource : resources) {
-					roleDTOs.add(ConvertHelper.convert(roleMap.get(resource.getRoleId()), RoleDTO.class));
+					Role role = roleMap.get(resource.getRoleId());
+					if(null != role)
+						roleDTOs.add(ConvertHelper.convert(role, RoleDTO.class));
 				}
 				dto.setRoles(roleDTOs);
 			}
@@ -6109,6 +6231,25 @@ public class OrganizationServiceImpl implements OrganizationService {
 			return importDataResponse;
 		}
 	    
-	    
+	    @Override
+	    public List<GroupMember> listMessageGroupMembers(Long groupId){
+	    	List<GroupMember> members = new ArrayList<GroupMember>();
+	    	Organization organization = organizationProvider.findOrganizationByGroupId(groupId);
+	    	if(null == organization){
+	    		return members;
+	    	}
+	    	
+	    	List<OrganizationMember> organizationMember = organizationProvider.listOrganizationMembersByOrgId(organization.getId());
+	    	for (OrganizationMember member : organizationMember) {
+				if(OrganizationMemberStatus.fromCode(member.getStatus()) == OrganizationMemberStatus.ACTIVE && OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER){
+					GroupMember groupMember = new GroupMember();
+					groupMember.setMemberId(member.getTargetId());
+					groupMember.setMemberType(EntityType.USER.getCode());
+					members.add(groupMember);
+				}
+			}
+	    	
+	    	return members;
+	    }
 	
 }

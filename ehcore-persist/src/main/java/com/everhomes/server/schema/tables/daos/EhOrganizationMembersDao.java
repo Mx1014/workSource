@@ -146,6 +146,20 @@ public class EhOrganizationMembersDao extends org.jooq.impl.DAOImpl<com.everhome
 	}
 
 	/**
+	 * Fetch records that have <code>update_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationMembers> fetchByUpdateTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationMembers.EH_ORGANIZATION_MEMBERS.UPDATE_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>create_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationMembers> fetchByCreateTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationMembers.EH_ORGANIZATION_MEMBERS.CREATE_TIME, values);
+	}
+
+	/**
 	 * Fetch records that have <code>integral_tag1 IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationMembers> fetchByIntegralTag1(java.lang.Long... values) {
@@ -220,19 +234,5 @@ public class EhOrganizationMembersDao extends org.jooq.impl.DAOImpl<com.everhome
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationMembers> fetchByNamespaceId(java.lang.Integer... values) {
 		return fetch(com.everhomes.server.schema.tables.EhOrganizationMembers.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID, values);
-	}
-
-	/**
-	 * Fetch records that have <code>update_time IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationMembers> fetchByUpdateTime(java.sql.Timestamp... values) {
-		return fetch(com.everhomes.server.schema.tables.EhOrganizationMembers.EH_ORGANIZATION_MEMBERS.UPDATE_TIME, values);
-	}
-
-	/**
-	 * Fetch records that have <code>create_time IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationMembers> fetchByCreateTime(java.sql.Timestamp... values) {
-		return fetch(com.everhomes.server.schema.tables.EhOrganizationMembers.EH_ORGANIZATION_MEMBERS.CREATE_TIME, values);
 	}
 }

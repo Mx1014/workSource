@@ -72,9 +72,15 @@
 		eh_quality_inspection_task_records | eh_quality_inspection_categories |
 		eh_organization_details  | eh_preferential_rules | eh_scene_types | eh_op_promotion_policies | eh_op_promotion_settings |
 		eh_op_promotions | eh_web_menus | eh_web_menu_privileges |
+		eh_parking_vendors | eh_parking_lots | eh_parking_recharge_rates | eh_parking_recharge_orders | eh_parking_card_requests |
+		eh_parking_activities |
+		eh_organization_role_map | eh_organization_addresses | eh_organization_attachments | eh_organization_community_requests |
+		eh_organization_details  | eh_preferential_rules | eh_scene_types | eh_op_promotion_policies | eh_op_promotion_settings |
+		eh_op_promotions | eh_web_menus | eh_web_menu_privileges | eh_web_menu_scopes |
 		eh_aclinks | eh_door_access | eh_aes_server_key | eh_aes_user_key | eh_aclink_undo_key | eh_door_auth | eh_owner_doors | eh_door_command |
 		eh_aclink_firmware |
-		eh_organization_task_targets | eh_business_assigned_namespaces
+		eh_organization_task_targets | eh_business_assigned_namespaces |
+		eh_pmsy_orders | eh_pmsy_order_items | eh_pmsy_payers | eh_pmsy_communities |
         </includes>
             <!-- All elements that are excluded from your schema
             (A Java regular expression. Use the pipe to separate several expressions).

@@ -60,11 +60,14 @@ VALUES (405,0,'开通企业管理员账号','开通企业管理员账号',null);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
 VALUES (406,0,'查看用户列表','查看用户列表信息',null);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
-VALUES (407,0,'用户的增删改','用户的增删改',null);
+VALUES (407,0,'用户的统计','用户的统计',null);
 
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
 VALUES (408,0,'门牌管理','门牌的管理',null);
-
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
+VALUES (409,0,'用户认证','用户认证',null);
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
+VALUES (410,0,'认证审批','同意/拒绝',null);
 
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
 VALUES (503,0,'查看物业缴费统计','查看物业缴费统计',null);
@@ -276,7 +279,8 @@ INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf
 VALUES (33000,'企业管理',30000,null,'enterprise_management',0,2,'/30000/33000','park',330);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
 VALUES (34000,'用户管理',30000,null,'user_management',0,2,'/30000/34000','park',340);
-
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (35000,'用户认证',30000,null,'user_identify',0,2,'/30000/35000','park',350);
 
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
 VALUES (40000,'运营服务',0,'fa fa-comment',null,1,2,'/40000','park',400);
@@ -624,6 +628,10 @@ VALUES (90,380,30500,'查看区信息',1,1,'查看区信息',88);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
 VALUES (91,381,30500,'修改区信息',0,1,'修改区信息',89);
 
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+VALUES (92,409,35000,'用户认证',1,1,'用户认证',165);
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+VALUES (93,410,35000,'认证审核',0,1,'拒绝，同意',166);
 
 INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
 SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, id, 1001,0,1,now() FROM `eh_acl_privileges`;

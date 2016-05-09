@@ -1,6 +1,6 @@
 //
 // EvhTechparkEntryFindLeasePromotionByIdRestResponse.m
-// generated at 2016-04-26 18:22:57 
+// generated at 2016-04-29 18:56:04 
 //
 #import "EvhTechparkEntryFindLeasePromotionByIdRestResponse.h"
 #import "EvhBuildingForRentDTO.h"

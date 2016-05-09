@@ -1,6 +1,6 @@
 //
 // EvhCoursePostRestResponse.m
-// generated at 2016-04-26 18:22:56 
+// generated at 2016-04-29 18:56:03 
 //
 #import "EvhCoursePostRestResponse.h"
 #import "EvhCourseDTO.h"
