@@ -194,7 +194,7 @@ public class ParkingProviderImpl implements ParkingProvider {
         if(id != null)
         	conditionSb.append(" and e1.REQUESTOR_UID = ").append(id);
         if (pageAnchor != null && pageAnchor != 0)
-        	conditionSb.append(" and e1.ID > ").append(pageAnchor);
+        	conditionSb.append(" and e1.ID < ").append(pageAnchor);
         if(StringUtils.isNotBlank(ownerType))
         	conditionSb.append(" and e1.OWNER_TYPE = '").append(ownerType).append("'");
         if(ownerId != null)
@@ -212,6 +212,8 @@ public class ParkingProviderImpl implements ParkingProvider {
         sb.append(" group by e1.id ");
         if(order != null)
         	sb.append(" order by ").append(order);
+        else
+        	sb.append(" order by e1.id desc");
         if(pageSize != null)
         	sb.append(" limit ").append(pageSize);
         resultList = context.fetch(sb.toString()).stream().map(r -> {
@@ -263,7 +265,7 @@ public class ParkingProviderImpl implements ParkingProvider {
         query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.IS_DELETE.eq(IsOrderDelete.NOTDELETED.getCode()));
 
         if (pageAnchor != null && pageAnchor != 0)
-			query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.ID.gt(pageAnchor));
+			query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.ID.lt(pageAnchor));
         if(StringUtils.isNotBlank(ownerType))
         	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.OWNER_TYPE.eq(ownerType));
         if(ownerId != null)
