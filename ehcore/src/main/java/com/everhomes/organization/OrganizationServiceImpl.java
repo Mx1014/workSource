@@ -5570,7 +5570,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    		organizationProvider.updateOrganizationTask(task);
 	    		
 	    		NewCommentCommand command = new NewCommentCommand();
-	    		command.setForumId(1l);
+//	    		command.setForumId(1l);
+	    		//论坛id为帖子所在论坛 by xiongying 20160509
+	    		Post topic = this.checkTopic(task.getApplyEntityId());
+	    		if(topic != null) {
+	    			command.setForumId(topic.getForumId());
+	    		}
 	    		command.setTopicId(task.getApplyEntityId());
 	    		command.setContentType(PostContentType.TEXT.getCode());
 	    		Map<String,Object> map = new HashMap<String, Object>();
@@ -5624,7 +5629,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    		organizationProvider.updateOrganizationTask(task);
 	    		
 	    		NewCommentCommand command = new NewCommentCommand();
-	    		command.setForumId(1l);
+//	    		command.setForumId(1l);
+	    		//论坛id为帖子所在论坛 by xiongying 20160509
+	    		Post topic = this.checkTopic(task.getApplyEntityId());
+	    		if(topic != null) {
+	    			command.setForumId(topic.getForumId());
+	    		}
 	    		command.setTopicId(task.getApplyEntityId());
 	    		command.setContentType(PostContentType.TEXT.getCode());
 	    		Map<String,Object> map = new HashMap<String, Object>();
