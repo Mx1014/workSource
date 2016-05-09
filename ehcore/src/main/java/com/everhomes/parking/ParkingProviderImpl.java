@@ -312,7 +312,7 @@ public class ParkingProviderImpl implements ParkingProvider {
         query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.IS_DELETE.eq(IsOrderDelete.NOTDELETED.getCode()));
 
         if (pageAnchor != null && pageAnchor != 0)
-			query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.ID.gt(pageAnchor));
+			query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.ID.lt(pageAnchor));
         if(StringUtils.isNotBlank(ownerType))
         	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.OWNER_TYPE.eq(ownerType));
         if(ownerId != null)
@@ -401,7 +401,7 @@ public class ParkingProviderImpl implements ParkingProvider {
         SelectQuery<EhParkingCardRequestsRecord> query = context.selectQuery(Tables.EH_PARKING_CARD_REQUESTS);
         
         if (pageAnchor != null && pageAnchor != 0)
-			query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.ID.gt(pageAnchor));
+			query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.ID.lt(pageAnchor));
         if(StringUtils.isNotBlank(ownerType))
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.OWNER_TYPE.eq(ownerType));
         if(ownerId != null)
