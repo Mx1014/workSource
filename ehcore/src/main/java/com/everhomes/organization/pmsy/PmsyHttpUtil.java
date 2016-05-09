@@ -1,10 +1,14 @@
 package com.everhomes.organization.pmsy;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
@@ -20,7 +24,6 @@ import org.slf4j.LoggerFactory;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.util.RuntimeErrorException;
-import com.google.gson.Gson;
 
 public class PmsyHttpUtil {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PmsyHttpUtil.class);
@@ -56,9 +59,11 @@ public class PmsyHttpUtil {
                 StringBuilder sb = new StringBuilder();
                 if (entity != null) {
                 	InputStream instream = entity.getContent();
-                	while(instream.read(bytes, 0, bytes.length) != -1){
-                		sb.append(new String(bytes));
+                	int l = 0;
+                	while((l = instream.read(bytes, 0, bytes.length)) != -1){
+                		sb.append(new String(bytes,0,l));
                 	}
+                	System.out.println(sb.toString());
                 			//sb.substring(sb.indexOf(">{")+2, sb.indexOf("</string>"));
                 	result = sb.substring(sb.indexOf(">{")+1, sb.indexOf("</string>"));
                 			// do something useful with the response
@@ -81,33 +86,43 @@ public class PmsyHttpUtil {
         return result;
 	}
 	public static void main(String[] args) {
-		String json = post("UserRev_OwnerVerify","尹秀容","13800010001","","","","","");
-		Gson gson = new Gson();
-		Map map = gson.fromJson(json, Map.class);
-		System.out.println(map);
-		List list = (List) map.get("UserRev_OwnerVerify");
-		Map map2 = (Map) list.get(0);
-		List list2 = (List) map2.get("Syswin");
-		Map map3 = (Map) list2.get(0);
-		System.out.println(map3.get("ProjectID"));
-		System.out.println(map3.get("ProjectName"));
-		System.out.println(map3.get("CttID"));
-		System.out.println(map3.get("CusID"));
-		System.out.println(map3.get("ResID"));
-		System.out.println(map3.get("ResCode"));
-		System.out.println(map3.get("ResName"));
-		System.out.println(map3.get("BuildingCode"));
-		System.out.println(map3.get("BuildingName"));
-		System.out.println(map3.get("IDCardName"));
-		System.out.println(map3.get("IDCardNo"));
-		System.out.println(map3.get("CusProperty"));
-		StringBuilder resourceName = new StringBuilder();
-		resourceName.append(map3.get("ProjectName"))
-					.append(" ")
-					.append(map3.get("BuildingName"))
-					.append(" ")
-					.append(map3.get("ResName"));
-		System.out.println(resourceName.toString());
+		
+String json1 = PmsyHttpUtil.post("UserRev_GetFeeList", "00100120091000000001", "","", "00100020090900000003", "01", "", "");
+//Gson gson = new Gson();
+//		System.out.println(json1);
+//		Map map_ = gson.fromJson(json1, Map.class);
+//		System.out.println(map_.toString());
+//		List list_ = (List) map_.get("UserRev_GetFeeList");
+//		Map map2_ = (Map) list_.get(0);
+//		List list2_ = (List) map2_.get("Syswin");
+		sendPost();
+//		String json = post("UserRev_OwnerVerify","尹秀容","13800010001","","","","","");
+//		Gson gson = new Gson();
+//		Map map = gson.fromJson(json, Map.class);
+//		System.out.println(map);
+//		List list = (List) map.get("UserRev_OwnerVerify");
+//		Map map2 = (Map) list.get(0);
+//		List list2 = (List) map2.get("Syswin");
+//		Map map3 = (Map) list2.get(0);
+//		System.out.println(map3.get("ProjectID"));
+//		System.out.println(map3.get("ProjectName"));
+//		System.out.println(map3.get("CttID"));
+//		System.out.println(map3.get("CusID"));
+//		System.out.println(map3.get("ResID"));
+//		System.out.println(map3.get("ResCode"));
+//		System.out.println(map3.get("ResName"));
+//		System.out.println(map3.get("BuildingCode"));
+//		System.out.println(map3.get("BuildingName"));
+//		System.out.println(map3.get("IDCardName"));
+//		System.out.println(map3.get("IDCardNo"));
+//		System.out.println(map3.get("CusProperty"));
+//		StringBuilder resourceName = new StringBuilder();
+//		resourceName.append(map3.get("ProjectName"))
+//					.append(" ")
+//					.append(map3.get("BuildingName"))
+//					.append(" ")
+//					.append(map3.get("ResName"));
+//		System.out.println(resourceName.toString());
 //		MonthlyBill mb1 = new MonthlyBill();
 //		mb1.setBillDateStr(1414771200000L);
 //		MonthlyBill mb2 = new MonthlyBill();
@@ -121,5 +136,68 @@ public class PmsyHttpUtil {
 //		Collections.sort(list);
 //		list.stream().forEach(r -> System.out.println(r.getBillDateStr()));
 	}
+	
+	
+	 /**
+     * 向指定 URL 发送POST方法的请求
+     * 
+     * @param url
+     *            发送请求的 URL
+     * @param param
+     *            请求参数，请求参数应该是 name1=value1&name2=value2 的形式。
+     * @return 所代表远程资源的响应结果
+     */
+    public static String sendPost() {
+    	String url = "http://sysuser.kmdns.net:9090/NetApp/SYS86Service.asmx/GetSYS86Service";
+    	String param = "strToken=syswin&p0=UserRev_GetFeeList&p1=00100120091000000001&p2=&p3=&p4=00100020090900000003&p5=01&p6=&p7=";
+        PrintWriter out = null;
+        BufferedReader in = null;
+        String result = "";
+        try {
+            URL realUrl = new URL(url);
+            // 打开和URL之间的连接
+            URLConnection conn = realUrl.openConnection();
+            // 设置通用的请求属性
+            conn.setRequestProperty("accept", "*/*");
+            conn.setRequestProperty("connection", "Keep-Alive");
+            conn.setRequestProperty("user-agent",
+                    "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
+            // 发送POST请求必须设置如下两行
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            // 获取URLConnection对象对应的输出流
+            out = new PrintWriter(conn.getOutputStream());
+            // 发送请求参数
+            out.print(param);
+            // flush输出流的缓冲
+            out.flush();
+            // 定义BufferedReader输入流来读取URL的响应
+            in = new BufferedReader(
+                    new InputStreamReader(conn.getInputStream()));
+            String line;
+            while ((line = in.readLine()) != null) {
+                result += line;
+            }
+            System.out.println(result);
+        } catch (Exception e) {
+            System.out.println("发送 POST 请求出现异常！"+e);
+            e.printStackTrace();
+        }
+        //使用finally块来关闭输出流、输入流
+        finally{
+            try{
+                if(out!=null){
+                    out.close();
+                }
+                if(in!=null){
+                    in.close();
+                }
+            }
+            catch(IOException ex){
+                ex.printStackTrace();
+            }
+        }
+        return result;
+    }    
 	
 }

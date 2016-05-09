@@ -164,10 +164,12 @@ public class PmsyServiceImpl implements PmsyService{
 			startDate = TimeToString(cmd.getStartDate());
 		if(cmd.getEndDate() != null)
 			endDate = TimeToString(cmd.getEndDate());
-		String json = PmsyHttpUtil.post("UserRev_GetFeeList", cmd.getCustomerId(), startDate,
+		String json = null;
+		json = PmsyHttpUtil.post("UserRev_GetFeeList", cmd.getCustomerId(), startDate,
 				endDate, cmd.getProjectId(), cmd.getBillType().getCode(), "", "");
 		Gson gson = new Gson();
 		Map map = gson.fromJson(json, Map.class);
+		
 		List list = (List) map.get("UserRev_GetFeeList");
 		Map map2 = (Map) list.get(0);
 		List list2 = (List) map2.get("Syswin");

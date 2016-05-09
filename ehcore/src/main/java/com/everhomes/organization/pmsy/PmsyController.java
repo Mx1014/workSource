@@ -49,7 +49,6 @@ public class PmsyController extends ControllerBase {
 	@RequestMapping("listPmPayers")
 	@RestReturn(value=PmsyPayerDTO.class,collection=true)
 	public RestResponse listPmPayers(/*@Valid ListPmPayerCommand cmd*/) {
-		PmsyOrder order = pmsyProvider.findPmsyOrderById(1L);
 		List<PmsyPayerDTO> resultList = pmsyService.listPmPayers();
 		RestResponse response = new RestResponse(resultList);
 
