@@ -1,6 +1,5 @@
 //
 // EvhUserListUsersInCurrentCommunityRestResponse.m
-// generated at 2016-04-29 18:56:04 
 //
 #import "EvhUserListUsersInCurrentCommunityRestResponse.h"
 #import "EvhCommunityStatusResponse.h"

@@ -1,6 +1,5 @@
 //
 // EvhUpdateYellowPageCommand.m
-// generated at 2016-04-29 18:56:01 
 //
 #import "EvhUpdateYellowPageCommand.h"
 #import "EvhYellowPageAattchmentDTO.h"

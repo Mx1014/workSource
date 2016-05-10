@@ -1,6 +1,5 @@
 //
 // EvhCreatePmsyBillOrderCommand.m
-// generated at 2016-04-29 18:56:03 
 //
 #import "EvhCreatePmsyBillOrderCommand.h"
 
@@ -34,16 +33,12 @@
 {
     if(self.ownerType)
         [jsonObject setObject: self.ownerType forKey: @"ownerType"];
-    if(self.ownerId)
-        [jsonObject setObject: self.ownerId forKey: @"ownerId"];
     if(self.projectId)
         [jsonObject setObject: self.projectId forKey: @"projectId"];
     if(self.customerId)
         [jsonObject setObject: self.customerId forKey: @"customerId"];
     if(self.resourceId)
         [jsonObject setObject: self.resourceId forKey: @"resourceId"];
-    if(self.creatorId)
-        [jsonObject setObject: self.creatorId forKey: @"creatorId"];
     if(self.orderAmount)
         [jsonObject setObject: self.orderAmount forKey: @"orderAmount"];
     if(self.paidType)
@@ -66,10 +61,6 @@
         if(self.ownerType && [self.ownerType isEqual:[NSNull null]])
             self.ownerType = nil;
 
-        self.ownerId = [jsonObject objectForKey: @"ownerId"];
-        if(self.ownerId && [self.ownerId isEqual:[NSNull null]])
-            self.ownerId = nil;
-
         self.projectId = [jsonObject objectForKey: @"projectId"];
         if(self.projectId && [self.projectId isEqual:[NSNull null]])
             self.projectId = nil;
@@ -81,10 +72,6 @@
         self.resourceId = [jsonObject objectForKey: @"resourceId"];
         if(self.resourceId && [self.resourceId isEqual:[NSNull null]])
             self.resourceId = nil;
-
-        self.creatorId = [jsonObject objectForKey: @"creatorId"];
-        if(self.creatorId && [self.creatorId isEqual:[NSNull null]])
-            self.creatorId = nil;
 
         self.orderAmount = [jsonObject objectForKey: @"orderAmount"];
         if(self.orderAmount && [self.orderAmount isEqual:[NSNull null]])

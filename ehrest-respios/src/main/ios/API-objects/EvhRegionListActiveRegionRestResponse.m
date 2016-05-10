@@ -1,6 +1,5 @@
 //
 // EvhRegionListActiveRegionRestResponse.m
-// generated at 2016-04-29 18:56:04 
 //
 #import "EvhRegionListActiveRegionRestResponse.h"
 #import "EvhRegionDTO.h"

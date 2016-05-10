@@ -1,6 +1,5 @@
 //
 // EvhAdminContactCreateContactEntryRestResponse.m
-// generated at 2016-04-29 18:56:03 
 //
 #import "EvhAdminContactCreateContactEntryRestResponse.h"
 #import "EvhEnterpriseContactEntryDTO.h"

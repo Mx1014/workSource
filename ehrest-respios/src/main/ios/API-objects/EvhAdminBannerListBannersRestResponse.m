@@ -1,6 +1,5 @@
 //
 // EvhAdminBannerListBannersRestResponse.m
-// generated at 2016-04-29 18:56:03 
 //
 #import "EvhAdminBannerListBannersRestResponse.h"
 #import "EvhListBannersAdminCommandResponse.h"

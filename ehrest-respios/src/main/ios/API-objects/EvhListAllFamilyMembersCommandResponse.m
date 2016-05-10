@@ -1,6 +1,5 @@
 //
 // EvhListAllFamilyMembersCommandResponse.m
-// generated at 2016-04-29 18:56:01 
 //
 #import "EvhListAllFamilyMembersCommandResponse.h"
 #import "EvhFamilyMemberFullDTO.h"

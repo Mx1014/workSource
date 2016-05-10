@@ -1,6 +1,5 @@
 //
 // EvhDoorMessage.m
-// generated at 2016-04-29 18:56:03 
 //
 #import "EvhDoorMessage.h"
 #import "EvhAclinkMessage.h"

@@ -1,6 +1,5 @@
 //
 // EvhOwnerType.h
-// generated at 2016-04-29 18:56:01 
 //
 
 #define EvhOwnerType_ENTERPRISE @"enterprise"

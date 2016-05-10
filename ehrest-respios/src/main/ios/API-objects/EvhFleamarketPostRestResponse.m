@@ -1,6 +1,5 @@
 //
 // EvhFleamarketPostRestResponse.m
-// generated at 2016-04-29 18:56:03 
 //
 #import "EvhFleamarketPostRestResponse.h"
 #import "EvhPostDTO.h"

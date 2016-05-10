@@ -1,6 +1,5 @@
 //
 // EvhPmsyListPmPayersRestResponse.h
-// generated at 2016-04-30 11:16:58 
 //
 #import "RestResponseBase.h"
 

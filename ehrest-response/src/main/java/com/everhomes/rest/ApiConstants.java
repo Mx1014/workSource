@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-04-29 20:33:36
+// generated at 2016-05-10 10:36:43
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -94,7 +94,6 @@ public interface ApiConstants {
     public static final String ADMIN_BUSINESS_PROMOTEBUSINESS_URL = "/admin/business/promoteBusiness";
     public static final String ADMIN_BUSINESS_RECOMMENDBUSINESS_URL = "/admin/business/recommendBusiness";
     public static final String ADMIN_CODEGEN_URL = "/admin/codegen";
-    public static final String ADMIN_COMMUNITY_LISTCOMMUNITYAUTHUSERADDRESS_URL = "/admin/community/ListCommunityAuthUserAddress";
     public static final String ADMIN_COMMUNITY_APPROVEBUILDING_URL = "/admin/community/approveBuilding";
     public static final String ADMIN_COMMUNITY_APPROVECOMMUNITY_URL = "/admin/community/approveCommunity";
     public static final String ADMIN_COMMUNITY_DELETEBUILDING_URL = "/admin/community/deleteBuilding";
@@ -107,7 +106,9 @@ public interface ApiConstants {
     public static final String ADMIN_COMMUNITY_LISTBUILDINGSBYSTATUS_URL = "/admin/community/listBuildingsByStatus";
     public static final String ADMIN_COMMUNITY_LISTCOMMUNITIESBYKEYWORD_URL = "/admin/community/listCommunitiesByKeyword";
     public static final String ADMIN_COMMUNITY_LISTCOMMUNITIESBYSTATUS_URL = "/admin/community/listCommunitiesByStatus";
+    public static final String ADMIN_COMMUNITY_LISTCOMMUNITYAUTHUSERADDRESS_URL = "/admin/community/listCommunityAuthUserAddress";
     public static final String ADMIN_COMMUNITY_LISTOWNERBYCOMMUNITYID_URL = "/admin/community/listOwnerBycommunityId";
+    public static final String ADMIN_COMMUNITY_LISTUSERBYNOTJOINEDCOMMUNITY_URL = "/admin/community/listUserByNotJoinedCommunity";
     public static final String ADMIN_COMMUNITY_LISTUSERBYCOMMUNITYID_URL = "/admin/community/listUserBycommunityId";
     public static final String ADMIN_COMMUNITY_QRYCOMMUNITYUSERADDRESSBYUSERID_URL = "/admin/community/qryCommunityUserAddressByUserId";
     public static final String ADMIN_COMMUNITY_QRYCOMMUNITYUSERENTERPRISEBYUSERID_URL = "/admin/community/qryCommunityUserEnterpriseByUserId";
@@ -514,6 +515,7 @@ public interface ApiConstants {
     public static final String OPENAPI_NOTIFYDOORLOCK_URL = "/openapi/notifyDoorLock";
     public static final String OPENAPI_NOTIFYMESSAGE_URL = "/openapi/notifyMessage";
     public static final String OPENAPI_OPENBIZNAMESPACEVISIBLE_URL = "/openapi/openBizNamespaceVisible";
+    public static final String OPENAPI_RESYNCBUSINESS_URL = "/openapi/reSyncBusiness";
     public static final String OPENAPI_RECEIVECOUPON_URL = "/openapi/receiveCoupon";
     public static final String OPENAPI_SENDMESSAGETOUSER_URL = "/openapi/sendMessageToUser";
     public static final String OPENAPI_SYNCBUSINESS_URL = "/openapi/syncBusiness";
@@ -648,6 +650,7 @@ public interface ApiConstants {
     public static final String PM_UPDATEPMBILL_URL = "/pm/updatePmBill";
     public static final String PM_UPDATEPMBILLS_URL = "/pm/updatePmBills";
     public static final String PMSY_CREATEPMBILLORDER_URL = "/pmsy/createPmBillOrder";
+    public static final String PMSY_GETPMPROPERTY_URL = "/pmsy/getPmProperty";
     public static final String PMSY_GETPMSYBILLS_URL = "/pmsy/getPmsyBills";
     public static final String PMSY_LISTADDRESSES_URL = "/pmsy/listAddresses";
     public static final String PMSY_LISTPMBILLS_URL = "/pmsy/listPmBills";

@@ -1,6 +1,5 @@
 //
 // EvhAddressCreateServiceAddressRestResponse.m
-// generated at 2016-04-29 18:56:03 
 //
 #import "EvhAddressCreateServiceAddressRestResponse.h"
 #import "EvhUserServiceAddressDTO.h"

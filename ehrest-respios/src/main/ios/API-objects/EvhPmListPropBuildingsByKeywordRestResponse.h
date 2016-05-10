@@ -1,6 +1,5 @@
 //
 // EvhPmListPropBuildingsByKeywordRestResponse.h
-// generated at 2016-04-29 18:56:04 
 //
 #import "RestResponseBase.h"
 
@@ -9,7 +8,7 @@
 //
 @interface EvhPmListPropBuildingsByKeywordRestResponse : EvhRestResponseBase
 
-// array of EvhAddressBuildingDTO* objects
+// array of EvhBuildingDTO* objects
 @property(nonatomic, strong) NSMutableArray* response;
 
 -(id) init;

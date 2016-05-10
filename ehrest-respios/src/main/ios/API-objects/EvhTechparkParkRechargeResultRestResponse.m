@@ -1,6 +1,5 @@
 //
 // EvhTechparkParkRechargeResultRestResponse.m
-// generated at 2016-04-29 18:56:04 
 //
 #import "EvhTechparkParkRechargeResultRestResponse.h"
 #import "EvhRechargeSuccessResponse.h"

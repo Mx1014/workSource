@@ -1,6 +1,5 @@
 //
 // EvhPmsyBillsResponse.h
-// generated at 2016-04-29 18:56:02 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -25,7 +24,7 @@
 
 @property(nonatomic, copy) NSNumber* totalAmount;
 
-@property(nonatomic, copy) NSString* tip;
+@property(nonatomic, copy) NSString* billTip;
 
 @property(nonatomic, copy) NSString* contact;
 

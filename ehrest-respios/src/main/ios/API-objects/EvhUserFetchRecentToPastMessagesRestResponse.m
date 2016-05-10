@@ -1,6 +1,5 @@
 //
 // EvhUserFetchRecentToPastMessagesRestResponse.m
-// generated at 2016-04-29 18:56:04 
 //
 #import "EvhUserFetchRecentToPastMessagesRestResponse.h"
 #import "EvhFetchMessageCommandResponse.h"

@@ -1,6 +1,5 @@
 //
 // EvhCreateEnterpriseCommand.m
-// generated at 2016-04-29 18:56:02 
 //
 #import "EvhCreateEnterpriseCommand.h"
 #import "EvhOrganizationAddressDTO.h"

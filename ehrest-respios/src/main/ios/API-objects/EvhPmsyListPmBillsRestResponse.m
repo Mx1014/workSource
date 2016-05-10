@@ -1,6 +1,5 @@
 //
 // EvhPmsyListPmBillsRestResponse.m
-// generated at 2016-04-30 11:16:58 
 //
 #import "EvhPmsyListPmBillsRestResponse.h"
 #import "EvhPmsyBillsResponse.h"

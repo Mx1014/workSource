@@ -1,6 +1,5 @@
 //
 // EvhTechparkEntryListForRentsRestResponse.m
-// generated at 2016-04-29 18:56:04 
 //
 #import "EvhTechparkEntryListForRentsRestResponse.h"
 #import "EvhListBuildingForRentResponse.h"

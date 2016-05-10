@@ -1,6 +1,5 @@
 //
 // EvhCreateBannerAdminCommand.m
-// generated at 2016-04-29 18:56:02 
 //
 #import "EvhCreateBannerAdminCommand.h"
 #import "EvhBannerScope.h"
@@ -68,6 +67,8 @@
         [jsonObject setObject: self.status forKey: @"status"];
     if(self.order)
         [jsonObject setObject: self.order forKey: @"order"];
+    if(self.sceneType)
+        [jsonObject setObject: self.sceneType forKey: @"sceneType"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -133,6 +134,10 @@
         self.order = [jsonObject objectForKey: @"order"];
         if(self.order && [self.order isEqual:[NSNull null]])
             self.order = nil;
+
+        self.sceneType = [jsonObject objectForKey: @"sceneType"];
+        if(self.sceneType && [self.sceneType isEqual:[NSNull null]])
+            self.sceneType = nil;
 
         return self;
     }

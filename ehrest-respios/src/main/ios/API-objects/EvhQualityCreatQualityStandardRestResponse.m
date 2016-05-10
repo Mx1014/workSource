@@ -1,6 +1,5 @@
 //
 // EvhQualityCreatQualityStandardRestResponse.m
-// generated at 2016-04-29 18:56:04 
 //
 #import "EvhQualityCreatQualityStandardRestResponse.h"
 #import "EvhQualityStandardsDTO.h"

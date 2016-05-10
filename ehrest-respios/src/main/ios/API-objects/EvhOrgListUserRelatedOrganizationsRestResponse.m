@@ -1,6 +1,5 @@
 //
 // EvhOrgListUserRelatedOrganizationsRestResponse.m
-// generated at 2016-04-29 18:56:04 
 //
 #import "EvhOrgListUserRelatedOrganizationsRestResponse.h"
 #import "EvhOrganizationSimpleDTO.h"

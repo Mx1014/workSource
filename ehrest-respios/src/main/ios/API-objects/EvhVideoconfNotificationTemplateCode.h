@@ -1,6 +1,5 @@
 //
 // EvhVideoconfNotificationTemplateCode.h
-// generated at 2016-04-29 18:56:01 
 //
 
 #define EvhVideoconfNotificationTemplateCode_SCOPE @"videoconf.notification"

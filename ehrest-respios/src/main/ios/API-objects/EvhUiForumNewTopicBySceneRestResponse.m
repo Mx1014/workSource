@@ -1,6 +1,5 @@
 //
 // EvhUiForumNewTopicBySceneRestResponse.m
-// generated at 2016-04-29 18:56:04 
 //
 #import "EvhUiForumNewTopicBySceneRestResponse.h"
 #import "EvhPostDTO.h"

@@ -1,6 +1,5 @@
 //
 // EvhEntrancePrivilege.h
-// generated at 2016-04-29 18:56:01 
 //
 
 #define EvhEntrancePrivilege_TASK_ALL_LIST @"task_all_list"

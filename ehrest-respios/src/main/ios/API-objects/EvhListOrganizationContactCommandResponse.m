@@ -1,6 +1,5 @@
 //
 // EvhListOrganizationContactCommandResponse.m
-// generated at 2016-04-29 18:56:01 
 //
 #import "EvhListOrganizationContactCommandResponse.h"
 #import "EvhOrganizationContactDTO.h"

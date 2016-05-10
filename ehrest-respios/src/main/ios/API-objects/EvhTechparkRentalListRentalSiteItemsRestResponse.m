@@ -1,6 +1,5 @@
 //
 // EvhTechparkRentalListRentalSiteItemsRestResponse.m
-// generated at 2016-04-29 18:56:04 
 //
 #import "EvhTechparkRentalListRentalSiteItemsRestResponse.h"
 #import "EvhListRentalSiteItemsCommandResponse.h"
