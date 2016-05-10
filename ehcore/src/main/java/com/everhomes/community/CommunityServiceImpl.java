@@ -1645,7 +1645,7 @@ public class CommunityServiceImpl implements CommunityService {
 		List<CommunityDTO> dtos = new ArrayList<CommunityDTO>();
 		for (NamespaceResource namespaceResource : resources) {
 			List<OrganizationCommunityDTO> organizationCommunities = organizationProvider.findOrganizationCommunityByCommunityId(namespaceResource.getResourceId());
-			if(null != organizationCommunities && organizationCommunities.size() > 0){
+			if(null == organizationCommunities || organizationCommunities.size() == 0){
 				Community community = communityProvider.findCommunityById(namespaceResource.getResourceId());
 				dtos.add(ConvertHelper.convert(community, CommunityDTO.class));
 			}
