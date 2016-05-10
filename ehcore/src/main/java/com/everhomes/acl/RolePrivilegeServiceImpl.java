@@ -292,7 +292,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		
 		List<WebMenuPrivilege> webMenuPrivileges = webMenuPrivilegeProvider.listWebMenuByPrivilegeIds(privilegeIds, null);
 		
-		return this.getListWebMenuPrivilege(webMenuPrivileges);
+		return this.getListWebMenuPrivilege(webMenuPrivileges, null);
 	}
 	
 	
@@ -747,9 +747,11 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			}
 		}
 		
-		for (WebMenuScope webMenuScope : webMenuScopes) {
-			if(WebMenuScopeApplyPolicy.fromCode(webMenuScope.getApplyPolicy()) == WebMenuScopeApplyPolicy.DELETE){
-				dtosMap.remove(webMenuScope.getMenuId());
+		if(null != webMenuScopes){
+			for (WebMenuScope webMenuScope : webMenuScopes) {
+				if(WebMenuScopeApplyPolicy.fromCode(webMenuScope.getApplyPolicy()) == WebMenuScopeApplyPolicy.DELETE){
+					dtosMap.remove(webMenuScope.getMenuId());
+				}
 			}
 		}
 		
