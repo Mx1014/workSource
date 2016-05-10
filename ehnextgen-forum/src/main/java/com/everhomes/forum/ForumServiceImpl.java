@@ -3286,12 +3286,20 @@ public class ForumServiceImpl implements ForumService {
 	    case COMMUNITY:
 	        visibleRegionType = VisibleRegionType.COMMUNITY;
 	        visibleRegionId = sceneToken.getEntityId();
+	        
+	        if(topicCmd.getForumId() == null || topicCmd.getForumId() == ForumConstants.SYSTEM_FORUM) {
+	        	setCurrentForumId(topicCmd, visibleRegionId);
+	        }
 	        break;
 	    case FAMILY:
 	        FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
 	        if(family != null) {
 	            visibleRegionType = VisibleRegionType.COMMUNITY;
 	            visibleRegionId = family.getCommunityId();
+	            
+	            if(topicCmd.getForumId() == null || topicCmd.getForumId() == ForumConstants.SYSTEM_FORUM) {
+	            	setCurrentForumId(topicCmd, visibleRegionId);
+		        }
 	        } else {
                 if(LOGGER.isWarnEnabled()) {
                     LOGGER.warn("Family not found, sceneToken=" + sceneToken);
@@ -3336,6 +3344,19 @@ public class ForumServiceImpl implements ForumService {
 	    
 	    return this.createTopic(topicCmd);
 	}
+    
+    /**
+     * 
+     * 小区场景下客户端传入默认论坛id时，找出当前小区论坛id代替 by xiongying 20160510
+     */
+    private void setCurrentForumId(NewTopicCommand topicCmd, Long communityId) {
+    	
+    	Community community = communityProvider.findCommunityById(communityId);
+    	
+    	if(community != null) {
+    		topicCmd.setForumId(community.getDefaultForumId());
+    	}
+    }
     
     @Override
     public List<TopicFilterDTO> getTopicQueryFilters(GetTopicQueryFilterCommand cmd) {
