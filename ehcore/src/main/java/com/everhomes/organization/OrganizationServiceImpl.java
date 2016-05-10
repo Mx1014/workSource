@@ -4511,19 +4511,33 @@ public class OrganizationServiceImpl implements OrganizationService {
 	public ListCommunityByNamespaceCommandResponse listCommunityByOrganizationId(
 			ListCommunityByNamespaceCommand cmd) {
 		int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-		List<OrganizationCommunity> organizationCommunitys = organizationProvider.listOrganizationCommunities(cmd.getOrganizationId());
+		
+		Organization organization = this.checkOrganization(cmd.getOrganizationId());
+		
+		List<String> groupTypes = new ArrayList<String>();
+		groupTypes.add(OrganizationGroupType.GROUP.getCode());
+		groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+		
+		List<Organization> orgs = organizationProvider.listOrganizationByGroupTypes(organization.getPath()+"/%", groupTypes);
+		orgs.add(organization);
 		ListCommunityByNamespaceCommandResponse res = new ListCommunityByNamespaceCommandResponse();
 		List<CommunityDTO> dtos = new ArrayList<CommunityDTO>();
-		for (OrganizationCommunity organizationCommunity : organizationCommunitys) {
-			Community community = communityProvider.findCommunityById(organizationCommunity.getCommunityId());
-			if(null == community){
-				continue;
-			}
-			if(community.getNamespaceId().equals(namespaceId)){
-				dtos.add(ConvertHelper.convert(community, CommunityDTO.class));
+		
+		for (Organization org : orgs) {
+			List<OrganizationCommunity> organizationCommunitys = organizationProvider.listOrganizationCommunities(org.getId());
+			for (OrganizationCommunity organizationCommunity : organizationCommunitys) {
+				Community community = communityProvider.findCommunityById(organizationCommunity.getCommunityId());
+				if(null == community){
+					continue;
+				}
+				if(community.getNamespaceId().equals(namespaceId)){
+					dtos.add(ConvertHelper.convert(community, CommunityDTO.class));
+				}
 			}
 		}
+		
 		res.setCommunities(dtos);
+		
 		return res;
 	}
 	
