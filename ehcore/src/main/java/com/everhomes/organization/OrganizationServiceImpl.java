@@ -5002,6 +5002,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    
 		Map<Long, Organization> deptMaps = this.convertDeptListToMap(depts);
 		return organizationMembers.stream().map((c) ->{
+			Long organizationId = ownerId;
 			if(!StringUtils.isEmpty(c.getInitial())){
 				c.setInitial(c.getInitial().replace("~", "#"));
 			}
@@ -5019,8 +5020,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 				group = deptMaps.get(c.getGroupId());
 			}
 			 
-			if(null != group)
+			if(null != group){
 				dto.setGroupName(group.getName());
+				if(OrganizationGroupType.fromCode(group.getGroupType()) == OrganizationGroupType.GROUP){
+					organizationId = group.getId();
+				}
+			}
+				
 			
 			if(OrganizationMemberTargetType.USER.getCode().equals(dto.getTargetType())){
 				User user = userProvider.findUserById(dto.getTargetId());
@@ -5038,7 +5044,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			 * 补充用户角色
 			 */
 			if(c.getTargetType().equals(OrganizationMemberTargetType.USER.getCode())){
-				List<RoleAssignment> resources = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), ownerId, EntityType.USER.getCode(), c.getTargetId());
+				List<RoleAssignment> resources = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), c.getTargetId());
 				if(null != resources && 0 != resources.size()){
 					List<RoleDTO> roleDTOs = new ArrayList<RoleDTO>();
 					for (RoleAssignment resource : resources) {

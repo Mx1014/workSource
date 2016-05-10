@@ -643,6 +643,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     		if(null != member && null != member.getGroupId() && 0 != member.getGroupId()){
     			childrenOrgId = member.getGroupId();
     		}
+    	}else if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.GROUP){
+    		childrenOrgId = org.getId();
+    		organizationId = org.getDirectlyEnterpriseId();
     	}
     	
     	List<RoleAssignment> userOrgRoles = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.ORGANIZATIONS.getCode(), childrenOrgId);
