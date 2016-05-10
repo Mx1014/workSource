@@ -203,7 +203,7 @@ public class ParkingServiceImpl implements ParkingService {
     	
     	List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(user.getId(),cmd.getOwnerType(), 
     			cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(),null,
-    			"CREATE_TIME asc", cmd.getPageAnchor(), cmd.getPageSize());
+    			null, cmd.getPageAnchor(), cmd.getPageSize());
     					
     	if(list.size() > 0){
     		response.setRequests(list.stream().map(r -> ConvertHelper.convert(r, ParkingCardRequestDTO.class))
