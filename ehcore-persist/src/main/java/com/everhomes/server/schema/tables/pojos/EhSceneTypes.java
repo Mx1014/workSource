@@ -11,13 +11,14 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhSceneTypes implements java.io.Serializable {
 
-	private static final long serialVersionUID = 152085950;
+	private static final long serialVersionUID = -484594604;
 
 	private java.lang.Long     id;
 	private java.lang.Integer  namespaceId;
 	private java.lang.String   name;
 	private java.lang.String   displayName;
 	private java.sql.Timestamp createTime;
+	private java.lang.Long     parentId;
 
 	public EhSceneTypes() {}
 
@@ -26,13 +27,15 @@ public class EhSceneTypes implements java.io.Serializable {
 		java.lang.Integer  namespaceId,
 		java.lang.String   name,
 		java.lang.String   displayName,
-		java.sql.Timestamp createTime
+		java.sql.Timestamp createTime,
+		java.lang.Long     parentId
 	) {
 		this.id = id;
 		this.namespaceId = namespaceId;
 		this.name = name;
 		this.displayName = displayName;
 		this.createTime = createTime;
+		this.parentId = parentId;
 	}
 
 	public java.lang.Long getId() {
@@ -73,5 +76,13 @@ public class EhSceneTypes implements java.io.Serializable {
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+	public java.lang.Long getParentId() {
+		return this.parentId;
+	}
+
+	public void setParentId(java.lang.Long parentId) {
+		this.parentId = parentId;
 	}
 }

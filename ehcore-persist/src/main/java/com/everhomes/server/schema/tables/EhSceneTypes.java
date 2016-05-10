@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhSceneTypes extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhSceneTypesRecord> {
 
-	private static final long serialVersionUID = -1253349042;
+	private static final long serialVersionUID = -588428192;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_scene_types</code>
@@ -50,6 +50,11 @@ public class EhSceneTypes extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	 * The column <code>ehcore.eh_scene_types.create_time</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhSceneTypesRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_scene_types.parent_id</code>. the parent id of scene, it is used to inherit something from the parent scene
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhSceneTypesRecord, java.lang.Long> PARENT_ID = createField("parent_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "the parent id of scene, it is used to inherit something from the parent scene");
 
 	/**
 	 * Create a <code>ehcore.eh_scene_types</code> table reference

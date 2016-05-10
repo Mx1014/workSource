@@ -228,4 +228,11 @@ public class EhOrganizationsDao extends org.jooq.impl.DAOImpl<com.everhomes.serv
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByShowFlag(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.SHOW_FLAG, values);
 	}
+
+	/**
+	 * Fetch records that have <code>community_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByCommunityId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.COMMUNITY_ID, values);
+	}
 }

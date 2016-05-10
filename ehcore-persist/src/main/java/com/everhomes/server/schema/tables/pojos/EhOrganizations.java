@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizations implements java.io.Serializable {
 
-	private static final long serialVersionUID = 890634029;
+	private static final long serialVersionUID = 65912705;
 
 	private java.lang.Long     id;
 	private java.lang.Long     parentId;
@@ -40,6 +40,7 @@ public class EhOrganizations implements java.io.Serializable {
 	private java.lang.String   stringTag5;
 	private java.lang.Long     groupId;
 	private java.lang.Byte     showFlag;
+	private java.lang.Long     communityId;
 
 	public EhOrganizations() {}
 
@@ -70,7 +71,8 @@ public class EhOrganizations implements java.io.Serializable {
 		java.lang.String   stringTag4,
 		java.lang.String   stringTag5,
 		java.lang.Long     groupId,
-		java.lang.Byte     showFlag
+		java.lang.Byte     showFlag,
+		java.lang.Long     communityId
 	) {
 		this.id = id;
 		this.parentId = parentId;
@@ -99,6 +101,7 @@ public class EhOrganizations implements java.io.Serializable {
 		this.stringTag5 = stringTag5;
 		this.groupId = groupId;
 		this.showFlag = showFlag;
+		this.communityId = communityId;
 	}
 
 	public java.lang.Long getId() {
@@ -315,5 +318,13 @@ public class EhOrganizations implements java.io.Serializable {
 
 	public void setShowFlag(java.lang.Byte showFlag) {
 		this.showFlag = showFlag;
+	}
+
+	public java.lang.Long getCommunityId() {
+		return this.communityId;
+	}
+
+	public void setCommunityId(java.lang.Long communityId) {
+		this.communityId = communityId;
 	}
 }
