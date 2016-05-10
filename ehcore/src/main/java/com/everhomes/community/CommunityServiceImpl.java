@@ -44,6 +44,8 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceResource;
+import com.everhomes.namespace.NamespaceResourceProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationCommunity;
@@ -111,6 +113,8 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.messaging.MetaObjectType;
 import com.everhomes.rest.messaging.QuestionMetaObject;
+import com.everhomes.rest.namespace.NamespaceResourceType;
+import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationDetailDTO;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
@@ -177,6 +181,9 @@ public class CommunityServiceImpl implements CommunityService {
 	
 	@Autowired
 	private AddressProvider addressProvider;
+	
+	@Autowired
+	private NamespaceResourceProvider namespaceResourceProvider;
 
 	@Override
 	public ListCommunitesByStatusCommandResponse listCommunitiesByStatus(ListCommunitesByStatusCommand cmd) {
@@ -1629,5 +1636,20 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 		
 		return res;
+	}
+	
+	@Override
+	public List<CommunityDTO> listUnassignedCommunitiesByNamespaceId() {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		List<NamespaceResource> resources = namespaceResourceProvider.listResourceByNamespace(namespaceId, NamespaceResourceType.COMMUNITY);
+		List<CommunityDTO> dtos = new ArrayList<CommunityDTO>();
+		for (NamespaceResource namespaceResource : resources) {
+			List<OrganizationCommunityDTO> organizationCommunities = organizationProvider.findOrganizationCommunityByCommunityId(namespaceResource.getResourceId());
+			if(null != organizationCommunities && organizationCommunities.size() > 0){
+				Community community = communityProvider.findCommunityById(namespaceResource.getResourceId());
+				dtos.add(ConvertHelper.convert(community, CommunityDTO.class));
+			}
+		}
+		return dtos;
 	}
 }

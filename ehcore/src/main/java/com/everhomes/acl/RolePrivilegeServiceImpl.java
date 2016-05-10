@@ -184,9 +184,12 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public List<ListWebMenuPrivilegeDTO> listWebMenuPrivilege(ListWebMenuPrivilegeCommand cmd) {
 		User user = UserContext.current().getUser();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		List<Long> privilegeIds = this.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
 		List<WebMenuPrivilege> webMenuPrivileges = webMenuPrivilegeProvider.listWebMenuByPrivilegeIds(privilegeIds, null);
-		return this.getListWebMenuPrivilege(webMenuPrivileges);
+		List<WebMenuScope> webMenuScopes = webMenuPrivilegeProvider.listWebMenuScopeByOwnerId(EntityType.NAMESPACE.getCode(), Long.valueOf(namespaceId));
+		
+		return this.getListWebMenuPrivilege(webMenuPrivileges, webMenuScopes);
 	}
 	
 	@Override
@@ -726,7 +729,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	 * @param webMenuPrivileges
 	 * @return
 	 */
-	private List<ListWebMenuPrivilegeDTO> getListWebMenuPrivilege(List<WebMenuPrivilege> webMenuPrivileges){
+	private List<ListWebMenuPrivilegeDTO> getListWebMenuPrivilege(List<WebMenuPrivilege> webMenuPrivileges, List<WebMenuScope> webMenuScopes){
 		
 		List<ListWebMenuPrivilegeDTO> dtos = new ArrayList<ListWebMenuPrivilegeDTO>();
 		
@@ -741,6 +744,12 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				dtosMap.put(r.getMenuId(), webMenuPrivilegeDTOs);
 			}else{
 				dtosMap.get(r.getMenuId()).add(webMenuPrivilegeDTO);
+			}
+		}
+		
+		for (WebMenuScope webMenuScope : webMenuScopes) {
+			if(WebMenuScopeApplyPolicy.fromCode(webMenuScope.getApplyPolicy()) == WebMenuScopeApplyPolicy.DELETE){
+				dtosMap.remove(webMenuScope.getMenuId());
 			}
 		}
 		
