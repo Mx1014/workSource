@@ -22,6 +22,8 @@ import com.everhomes.rest.organization.OrganizationAddressDTO;
  *  <li>enterpriseAddress: 公司地址</li>
  *  <li>enterpriseCheckinDate: 公司入驻时间</li>
  *  <li>postUri: 标题图</li>
+ *  <li>longitude: 经度</li>
+ *  <li>latitude: 纬度</li>
  * </ul>
  * @author janson
  *
@@ -43,6 +45,10 @@ public class CreateEnterpriseCommand {
     private Integer namespaceId;
     
     private String organizationType;
+    
+    private String longitude;
+    
+    private String latitude;
     
     @ItemType(OrganizationAddressDTO.class)
 	private List<OrganizationAddressDTO> addressDTOs;
@@ -148,6 +154,18 @@ public class CreateEnterpriseCommand {
 	}
 	public void setCheckinDate(String checkinDate) {
 		this.checkinDate = checkinDate;
+	}
+	public String getLongitude() {
+		return longitude;
+	}
+	public void setLongitude(String longitude) {
+		this.longitude = longitude;
+	}
+	public String getLatitude() {
+		return latitude;
+	}
+	public void setLatitude(String latitude) {
+		this.latitude = latitude;
 	}
     
 }

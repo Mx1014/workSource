@@ -30,6 +30,8 @@ import com.everhomes.util.StringHelper;
  *  <li>postUrl: 标题图 url</li>
  *  <li>addresses: 机构入住门牌地址</li>
  *  <li>attachments: 机构banner图</li>
+ *  <li>longitude: 经度</li>
+ *  <li>latitude: 纬度</li>
  * </ul>
  *
  */
@@ -59,6 +61,10 @@ public class OrganizationDetailDTO {
     
     private String postUri;
     private String postUrl;
+    
+    private String longitude;
+    
+    private String latitude;
     
     private OrganizationMemberDTO member;
     
@@ -374,6 +380,30 @@ public class OrganizationDetailDTO {
 
 	public void setCommunity(CommunityDTO community) {
 		this.community = community;
+	}
+
+
+
+	public String getLongitude() {
+		return longitude;
+	}
+
+
+
+	public void setLongitude(String longitude) {
+		this.longitude = longitude;
+	}
+
+
+
+	public String getLatitude() {
+		return latitude;
+	}
+
+
+
+	public void setLatitude(String latitude) {
+		this.latitude = latitude;
 	}
 
 
