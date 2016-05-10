@@ -33,14 +33,23 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
     @Override
     public void createPromotion() {
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhOpPromotionActivities.class, 5l);
+        //localBus.publish("global", EhOpPromotionActivities.class.getName(), 5l);
+        
+        this.broadcast(DaoAction.CREATE, EhOpPromotionActivities.class, 5l);
+    }
+    
+    private void broadcast(DaoAction action, Class<?> pojoClz, Long id) {
+        LocalBusSubscriber localBusSubscriber = (LocalBusSubscriber) busBridgeProvider; 
+        
+        String arg3 = "" + action.getName() + "." + pojoClz.getSimpleName();
+        String arg1 = arg3 + "." + id.toString();
+        
+        //broadcast
+        localBusSubscriber.onLocalBusMessage(null, arg1, id, arg3);
     }
 
     @Override
     public Action onLocalBusMessage(Object arg0, String arg1, Object arg2, String arg3) {
-        LocalBusSubscriber localBusSubscriber = (LocalBusSubscriber) busBridgeProvider; 
-        
-        //broadcast
-        localBusSubscriber.onLocalBusMessage(arg0, arg1, arg2, arg3);
         
         try {
             Long id = (Long)arg2;
