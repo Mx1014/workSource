@@ -8,20 +8,34 @@ import com.everhomes.rest.acl.admin.RoleDTO;
 import com.everhomes.util.StringHelper;
 
 /**
- * <ul>
+ * <ul>公司已经和机构合并(201604)，故在概念上它们是一个；公司分为物业公司、政府相关的公司（工作站、公安等），以及普通公司；
  * <li>id：主键id</li>
  * <li>parentId：父机构id。没有填0</li>
+ * <li>parentName：父机构名称</li>
  * <li>name：名称</li>
  * <li>path：路径，含层次关系，如/父亲id/第一层孩子id/第二层孩子id/...</li>
  * <li>level：当前层级。没有填0</li>
  * <li>addressId：地址</li>
- * <li>OrganizationType：组织类型：参考{@link com.everhomes.rest.organization.OrganizationType}</li>
+ * <li>OrganizationType：组织类型，仅用来区分机构是物业、工作站、公安、普通公司等，注意其与groupType意义的区别：参考{@link com.everhomes.rest.organization.OrganizationType}</li>
  * <li>status：状态：参考{@link com.everhomes.rest.organization.OrganizationStatus}</li>
  * <li>memberStatus：成员状态：参考{@link com.everhomes.rest.organization.OrganizationMemberStatus}</li>
  * <li>description：组织描述</li>
- * <li>childrens：子集参考{@link com.everhomes.rest.organization.OrganizationDTO}</li>
- * <li>communityId：i小区id</li>
+ * <li>address：机构地址</li>
+ * <li>groupType：机构类别，需要首先用该值来判断是否是一个机构（其还有可能是部门、群组等），在该值为机构的情况下，OrganizationType才有意义，{@link com.everhomes.rest.organization.OrganizationGroupType}</li>
+ * <li>directlyEnterpriseId：如果本身是机构，则此值无效；如果本身是部门、群组（可能多层），则其层次结构上最近的一个直属机构</li>
+ * <li>avatarUri：机构头像URI</li>
+ * <li>avatarUrl：机构头像URL</li>
+ * <li>contact：机构联系电话</li>
+ * <li>displayName：机构显示名称</li>
+ * <li>communityId：机构办公所在的小区id</li>
  * <li>communityName：小区名称</li>
+ * <li>communityType: 园区类型，参考{@link com.everhomes.rest.community.CommunityType}</li>
+ * <li>defaultForumId: 默认论坛ID，每个园区都有一个自己的默认论坛用于放园区整体的帖子（如公告）</li>
+ * <li>feedbackForumId: 意见论坛ID，每个园区都有一个自己的意见反馈论坛用于放园区意见反馈帖子</li>
+ * <li>groupId：机构内部私有圈</li>
+ * <li>showFlag：控制是否在导航菜单中，{@link com.everhomes.rest.organization.OrganizationNaviFlag}</li>
+ * <li>childrens：子集参考{@link com.everhomes.rest.organization.OrganizationDTO}</li>
+ * <li>roles：机构/部门/群组拥有的角色</li>
  * <li>
  * </ul>
  */
@@ -50,7 +64,10 @@ public class OrganizationDTO {
 	
 	//expand 
 	private Long communityId;
-	private String communityName;
+	private String communityName;    
+    private Byte communityType;
+    private Long defaultForumId;
+    private Long feedbackForumId;
 	
 	private Long groupId;
 	
@@ -61,6 +78,7 @@ public class OrganizationDTO {
 	
 	@ItemType(RoleDTO.class)
 	private List<RoleDTO> roles;
+	
 	public Long getCommunityId() {
 		return communityId;
 	}
@@ -215,7 +233,6 @@ public class OrganizationDTO {
 	public void setChildrens(List<OrganizationDTO> childrens) {
 		this.childrens = childrens;
 	}
-
 	
 	public List<RoleDTO> getRoles() {
 		return roles;
@@ -229,22 +246,17 @@ public class OrganizationDTO {
 		return address;
 	}
 
-
 	public void setAddress(String address) {
 		this.address = address;
 	}
-
-
 
 	public Long getDirectlyEnterpriseId() {
 		return directlyEnterpriseId;
 	}
 
-
 	public void setDirectlyEnterpriseId(Long directlyEnterpriseId) {
 		this.directlyEnterpriseId = directlyEnterpriseId;
 	}
-
 
 	public Long getGroupId() {
 		return groupId;
@@ -253,8 +265,6 @@ public class OrganizationDTO {
 	public void setGroupId(Long groupId) {
 		this.groupId = groupId;
 	}
-
-	
 	
 	public Byte getShowFlag() {
 		return showFlag;
@@ -264,7 +274,31 @@ public class OrganizationDTO {
 		this.showFlag = showFlag;
 	}
 
-	@Override
+	public Byte getCommunityType() {
+        return communityType;
+    }
+
+    public void setCommunityType(Byte communityType) {
+        this.communityType = communityType;
+    }
+
+    public Long getDefaultForumId() {
+        return defaultForumId;
+    }
+
+    public void setDefaultForumId(Long defaultForumId) {
+        this.defaultForumId = defaultForumId;
+    }
+
+    public Long getFeedbackForumId() {
+        return feedbackForumId;
+    }
+
+    public void setFeedbackForumId(Long feedbackForumId) {
+        this.feedbackForumId = feedbackForumId;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

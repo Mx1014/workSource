@@ -1913,7 +1913,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
         if(organizationDetail == null){
             if(LOGGER.isInfoEnabled()) {
-                LOGGER.info("Organization detail record is null, userId=" + userId + ", organizationId = " + organization.getId());
+                LOGGER.info("Organization detail record is null, userId={}, organizationId={}", userId, organization.getId());
             } 
         } else {
             organizationDto.setAddress(organizationDetail.getAddress());
@@ -1924,6 +1924,27 @@ public class OrganizationServiceImpl implements OrganizationService {
             if(avatarUri != null && avatarUri.trim().length() == 0) {
                 organizationDto.setAvatarUrl(contentServerService.parserUri(organizationDetail.getPostUri(), 
                     EntityType.ORGANIZATIONS.getCode(), organization.getId()));
+            }
+        }
+        
+        Long communityId = organization.getCommunityId();
+        if(communityId != null) {
+            Community community = communityProvider.findCommunityById(communityId);
+            if(community != null) {
+                organizationDto.setCommunityName(community.getName());
+                organizationDto.setCommunityType(community.getCommunityType());
+                organizationDto.setDefaultForumId(community.getDefaultForumId());
+                organizationDto.setFeedbackForumId(community.getFeedbackForumId());
+            } else {
+                if(LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("Organization community not found, userId={}, organizationId={}, communityId={}", 
+                        userId, organization.getId(), communityId);
+                }
+            }
+        } else {
+            if(LOGGER.isWarnEnabled()) {
+                LOGGER.warn("Organization community id is null, userId={}, organizationId={}", 
+                    userId, organization.getId());
             }
         }
         
