@@ -406,24 +406,24 @@ INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf
 VALUES (58123,'绩效统计',58120,null,'performance_statistics',0,2,'/50000/58000/58100/58120/58123','park',617);
 
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (47000,'公共门禁',40000,null,null,1,2,'/40000/47000','park',470);
+VALUES (47000,'公共门禁',40000,null,null,1,2,'/40000/47000','park',432);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (47100,'门禁管理',47000,null,'access_manage',0,2,'/40000/47000/47100','park',471);
+VALUES (47100,'门禁管理',47000,null,'access_manage',0,2,'/40000/47000/47100','park',432);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (47200,'用户授权',47000,null,'user_auth',0,2,'/40000/47000/47200','park',472);
+VALUES (47200,'用户授权',47000,null,'user_auth',0,2,'/40000/47000/47200','park',432);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (47300,'访客授权',47000,null,'visitor_auth',0,2,'/40000/47000/47300','park',473);
+VALUES (47300,'访客授权',47000,null,'visitor_auth',0,2,'/40000/47000/47300','park',432);
 
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (48000,'服务预约',40000,null,null,1,2,'/40000/48000','park',480);
+VALUES (48000,'服务预约',40000,null,null,1,2,'/40000/48000','park',433);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (48100,'通用设置',48000,null,'service_setting',0,2,'/40000/48000/48100','park',481);
+VALUES (48100,'通用设置',48000,null,'service_setting',0,2,'/40000/48000/48100','park',433);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (48200,'服务类型',48000,null,'service_type',0,2,'/40000/48000/48200','park',482);
+VALUES (48200,'服务类型',48000,null,'service_type',0,2,'/40000/48000/48200','park',433);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (48300,'预约详情',48000,null,'service_detail',0,2,'/40000/48000/48300','park',483);
+VALUES (48300,'预约详情',48000,null,'service_detail',0,2,'/40000/48000/48300','park',433);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (48400,'数据统计',48000,null,'service_statistics',0,2,'/40000/48000/48400','park',484);
+VALUES (48400,'数据统计',48000,null,'service_statistics',0,2,'/40000/48000/48400','park',433);
 
 
 #
@@ -661,9 +661,9 @@ VALUES (93,410,35000,'认证审核',0,1,'拒绝，同意',166);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
 VALUES (94,720,47100,'门禁管理',1,1,'门禁管理',345);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
-VALUES (95,721,47200,'用户授权',0,1,'用户授权',346);
+VALUES (95,721,47200,'用户授权',1,1,'用户授权',346);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
-VALUES (96,722,47300,'访客授权',0,1,'访客授权',347);
+VALUES (96,722,47300,'访客授权',1,1,'访客授权',347);
 
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
 VALUES (97,519,48100,'查询通用设置',1,1,'查询通用设置',348);
