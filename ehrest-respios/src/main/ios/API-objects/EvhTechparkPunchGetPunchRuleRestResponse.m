@@ -1,6 +1,5 @@
 //
 // EvhTechparkPunchGetPunchRuleRestResponse.m
-// generated at 2016-04-29 18:56:04 
 //
 #import "EvhTechparkPunchGetPunchRuleRestResponse.h"
 #import "EvhGetPunchRuleCommandResponse.h"

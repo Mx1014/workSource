@@ -1,6 +1,5 @@
 //
 // EvhUserListPostedTopicsRestResponse.m
-// generated at 2016-04-29 18:56:04 
 //
 #import "EvhUserListPostedTopicsRestResponse.h"
 #import "EvhPostDTO.h"

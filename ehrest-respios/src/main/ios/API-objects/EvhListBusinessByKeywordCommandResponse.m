@@ -1,6 +1,5 @@
 //
 // EvhListBusinessByKeywordCommandResponse.m
-// generated at 2016-04-29 18:56:01 
 //
 #import "EvhListBusinessByKeywordCommandResponse.h"
 #import "EvhBusinessDTO.h"

@@ -1,6 +1,5 @@
 //
 // EvhUpdateOrganizationsCommand.h
-// generated at 2016-04-29 18:56:00 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -19,6 +18,8 @@
 @property(nonatomic, copy) NSString* address;
 
 @property(nonatomic, copy) NSNumber* parentId;
+
+@property(nonatomic, copy) NSNumber* naviFlag;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

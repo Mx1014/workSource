@@ -1,6 +1,5 @@
 //
 // EvhTechparkEntryListEnterpriseDetailsRestResponse.m
-// generated at 2016-04-29 18:56:04 
 //
 #import "EvhTechparkEntryListEnterpriseDetailsRestResponse.h"
 #import "EvhListEnterpriseDetailResponse.h"

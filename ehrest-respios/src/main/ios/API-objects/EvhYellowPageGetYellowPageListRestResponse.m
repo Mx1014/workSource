@@ -1,6 +1,5 @@
 //
 // EvhYellowPageGetYellowPageListRestResponse.m
-// generated at 2016-04-29 18:56:04 
 //
 #import "EvhYellowPageGetYellowPageListRestResponse.h"
 #import "EvhYellowPageListResponse.h"

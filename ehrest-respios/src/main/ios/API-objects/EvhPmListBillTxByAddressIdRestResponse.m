@@ -1,6 +1,5 @@
 //
 // EvhPmListBillTxByAddressIdRestResponse.m
-// generated at 2016-04-29 18:56:04 
 //
 #import "EvhPmListBillTxByAddressIdRestResponse.h"
 #import "EvhFamilyBillingTransactionDTO.h"

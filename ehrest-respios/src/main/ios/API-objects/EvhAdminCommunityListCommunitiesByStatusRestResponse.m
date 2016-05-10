@@ -1,6 +1,5 @@
 //
 // EvhAdminCommunityListCommunitiesByStatusRestResponse.m
-// generated at 2016-04-29 18:56:03 
 //
 #import "EvhAdminCommunityListCommunitiesByStatusRestResponse.h"
 #import "EvhListCommunitesByStatusCommandResponse.h"

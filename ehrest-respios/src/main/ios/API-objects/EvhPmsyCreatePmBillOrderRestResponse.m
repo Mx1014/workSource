@@ -1,6 +1,5 @@
 //
 // EvhPmsyCreatePmBillOrderRestResponse.m
-// generated at 2016-04-30 11:16:58 
 //
 #import "EvhPmsyCreatePmBillOrderRestResponse.h"
 #import "EvhCommonOrderDTO.h"

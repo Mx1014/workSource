@@ -1,6 +1,5 @@
 //
 // EvhOAuth2ServiceErrorCode.h
-// generated at 2016-04-29 18:56:02 
 //
 
 #define EvhOAuth2ServiceErrorCode_SCOPE @"oauth2"

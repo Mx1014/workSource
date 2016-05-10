@@ -1,6 +1,5 @@
 //
 // EvhEnterpriseListUserRelatedEnterprisesRestResponse.m
-// generated at 2016-04-29 18:56:03 
 //
 #import "EvhEnterpriseListUserRelatedEnterprisesRestResponse.h"
 #import "EvhEnterpriseDTO.h"

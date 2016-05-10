@@ -1,6 +1,5 @@
 //
 // EvhFavoriteListFavoritesRestResponse.m
-// generated at 2016-04-29 18:56:03 
 //
 #import "EvhFavoriteListFavoritesRestResponse.h"
 #import "EvhFavoriteDTO.h"

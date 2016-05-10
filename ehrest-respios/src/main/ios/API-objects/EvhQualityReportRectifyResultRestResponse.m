@@ -1,6 +1,5 @@
 //
 // EvhQualityReportRectifyResultRestResponse.m
-// generated at 2016-04-29 18:56:04 
 //
 #import "EvhQualityReportRectifyResultRestResponse.h"
 #import "EvhQualityInspectionTaskDTO.h"

@@ -1,6 +1,5 @@
 //
 // EvhUserLogonRestResponse.m
-// generated at 2016-04-29 18:56:04 
 //
 #import "EvhUserLogonRestResponse.h"
 #import "EvhLogonCommandResponse.h"

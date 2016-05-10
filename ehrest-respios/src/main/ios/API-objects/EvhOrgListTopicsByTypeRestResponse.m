@@ -1,6 +1,5 @@
 //
 // EvhOrgListTopicsByTypeRestResponse.m
-// generated at 2016-04-29 18:56:04 
 //
 #import "EvhOrgListTopicsByTypeRestResponse.h"
 #import "EvhListTopicsByTypeCommandResponse.h"
