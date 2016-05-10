@@ -74,6 +74,8 @@ UPDATE `eh_parking_recharge_orders` SET recharge_status = 1 WHERE recharge_statu
 UPDATE `eh_parking_recharge_orders` SET recharge_status = 2 WHERE recharge_status = 3;
 
 
+
+
 UPDATE `eh_parking_recharge_orders` SET paid_time = '2015-11-30 15:23:19', paid_type = '10001' WHERE order_no = 1448868193193903;
 UPDATE `eh_parking_recharge_orders` SET paid_time = '2015-11-30 15:23:15', paid_type = '10002' WHERE order_no = 1448868193193903;
 UPDATE `eh_parking_recharge_orders` SET paid_time = '2015-11-30 15:23:18', paid_type = '10002' WHERE order_no = 1448868193193903;
@@ -151,5 +153,7 @@ UPDATE `eh_parking_recharge_orders` SET paid_time = '2016-05-09 13:40:34', paid_
 
 
 
+# update parking lot name
+UPDATE `eh_parking_lots` SET name = '金融基地停车场' WHERE id = 10001;
 
 
