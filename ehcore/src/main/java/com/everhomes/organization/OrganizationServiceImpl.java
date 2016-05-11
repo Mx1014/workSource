@@ -1191,7 +1191,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_CLASS_NOT_FOUND,
 					"Unable to find the organization.");
 		}
-		this.checkUserHaveRightToNewTopic(cmd,organization);
+		//Temporarily do not check, delete by sfyan, 20160511
+//		this.checkUserHaveRightToNewTopic(cmd,organization);
 		/*if(cmd.getEmbeddedAppId() == null)
 			cmd.setEmbeddedAppId(AppConstants.APPID_ORGTASK);*/
 		PostDTO post = forumService.createTopic(cmd);
