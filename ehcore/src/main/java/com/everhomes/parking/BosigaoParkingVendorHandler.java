@@ -105,14 +105,6 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 					LOGGER.error("successcommand="+parkingCardDTO.toString());
 				resultList.add(parkingCardDTO);
 				
-				/** ---------以下为假数据 start -------------**/
-				ParkingCardDTO test = new ParkingCardDTO();
-				test = ConvertHelper.convert(parkingCardDTO, ParkingCardDTO.class);
-				test.setPlateOwnerName("测试卡");
-				test.setCardNumber("2133");
-				resultList.add(test);
-				/**---------- 以下为假数据 end  --------------**/
-				
 				return resultList;
 			}
 		}
