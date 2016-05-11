@@ -2,6 +2,7 @@
 insert into eh_web_menu_scopes values (5, 45000, '创客空间', 'EhNamespaces', 999992, 0);
 insert into eh_web_menu_scopes values (6, 44000, '服务联盟', 'EhNamespaces', 999992, 0);
 insert into eh_web_menu_scopes values (7, 41000, '停车充值', 'EhNamespaces', 999992, 0);
+insert into eh_web_menu_scopes values (22, 43000, '招租管理', 'EhNamespaces', 999992, 0);
 
 --海岸999993 隐藏考勤管理、品质核查、VIP车位预定、服务联盟、创客空间、停车充值； 没有vip车位
 insert into eh_web_menu_scopes values (8, 45000, '创客空间', 'EhNamespaces', 999993, 0);
