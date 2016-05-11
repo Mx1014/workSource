@@ -5,7 +5,6 @@ package com.everhomes.forum;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -66,7 +65,6 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryConstants;
-import com.everhomes.rest.category.CategoryType;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.AssignTopicScopeCommand;
@@ -3268,52 +3266,122 @@ public class ForumServiceImpl implements ForumService {
         return response;
 	}
 
+//    @Override
+//	public PostDTO createTopicByScene(NewTopicBySceneCommand cmd) {
+//	    User user = UserContext.current().getUser();
+//	    Long userId = user.getId();
+//	    SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+//	    
+//	    NewTopicCommand topicCmd = ConvertHelper.convert(cmd, NewTopicCommand.class);
+//	    
+//	    PostEntityTag creatorTag = PostEntityTag.USER;
+//	    VisibleRegionType visibleRegionType = null;
+//	    Long visibleRegionId = null;
+//	    UserCurrentEntityType entityType = UserCurrentEntityType.fromCode(sceneToken.getEntityType());
+//	    switch(entityType) {
+//	    case COMMUNITY_RESIDENTIAL:
+//	    case COMMUNITY_COMMERCIAL:
+//	    case COMMUNITY:
+//	        visibleRegionType = VisibleRegionType.COMMUNITY;
+//	        visibleRegionId = sceneToken.getEntityId();
+//	        break;
+//	    case FAMILY:
+//	        FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
+//	        if(family != null) {
+//	            visibleRegionType = VisibleRegionType.COMMUNITY;
+//	            visibleRegionId = family.getCommunityId();
+//	        } else {
+//                if(LOGGER.isWarnEnabled()) {
+//                    LOGGER.warn("Family not found, sceneToken=" + sceneToken);
+//                }
+//            }
+//	        break;
+//	    case ORGANIZATION:
+//	    	
+//            Organization org = this.organizationProvider.findOrganizationById(sceneToken.getEntityId());
+//            if(org != null) {
+//            	String orgType = org.getOrganizationType();
+//                
+//                if(OrganizationType.isGovAgencyOrganization(orgType)) {
+//                	if(VisibleRegionType.fromCode(cmd.getVisibleRegionType()) == VisibleRegionType.COMMUNITY){
+//        	    		creatorTag = PostEntityTag.fromCode(orgType);
+//            			visibleRegionType = VisibleRegionType.COMMUNITY;
+//                        visibleRegionId = cmd.getVisibleRegionId();
+//            		}else{
+//            			creatorTag = PostEntityTag.fromCode(orgType);
+//                        visibleRegionType = VisibleRegionType.REGION;
+//                        visibleRegionId = sceneToken.getEntityId();
+//            		}
+//                    
+//                }
+//            } else {
+//                if(LOGGER.isWarnEnabled()) {
+//                    LOGGER.warn("Organization not found, sceneToken=" + sceneToken);
+//                }
+//            }
+//	        break;
+//	    default:
+//	        break;
+//	    }
+//	    
+//	    if(creatorTag != null) {
+//	        topicCmd.setCreatorTag(creatorTag.getCode());
+//	    }
+//	    if(visibleRegionType != null) {
+//	        topicCmd.setVisibleRegionType(visibleRegionType.getCode());
+//	    }
+//	    topicCmd.setVisibleRegionId(visibleRegionId);
+//	    
+//	    return this.createTopic(topicCmd);
+//	}
+	
     @Override
-	public PostDTO createTopicByScene(NewTopicBySceneCommand cmd) {
-	    User user = UserContext.current().getUser();
-	    Long userId = user.getId();
-	    SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
-	    
-	    NewTopicCommand topicCmd = ConvertHelper.convert(cmd, NewTopicCommand.class);
-	    
-	    PostEntityTag creatorTag = PostEntityTag.USER;
-	    VisibleRegionType visibleRegionType = null;
-	    Long visibleRegionId = null;
-	    UserCurrentEntityType entityType = UserCurrentEntityType.fromCode(sceneToken.getEntityType());
-	    switch(entityType) {
-	    case COMMUNITY_RESIDENTIAL:
-	    case COMMUNITY_COMMERCIAL:
-	    case COMMUNITY:
-	        visibleRegionType = VisibleRegionType.COMMUNITY;
-	        visibleRegionId = sceneToken.getEntityId();
-	        break;
-	    case FAMILY:
-	        FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
-	        if(family != null) {
-	            visibleRegionType = VisibleRegionType.COMMUNITY;
-	            visibleRegionId = family.getCommunityId();
-	        } else {
+    public PostDTO createTopicByScene(NewTopicBySceneCommand cmd) {
+        User user = UserContext.current().getUser();
+        Long userId = user.getId();
+        SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+        
+        NewTopicCommand topicCmd = ConvertHelper.convert(cmd, NewTopicCommand.class);
+        
+        PostEntityTag creatorTag = PostEntityTag.USER;
+        VisibleRegionType visibleRegionType = null;
+        Long visibleRegionId = null;
+        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
+        switch(sceneType) {
+        case DEFAULT:
+        case PARK_TOURIST:
+            visibleRegionType = VisibleRegionType.COMMUNITY;
+            visibleRegionId = sceneToken.getEntityId();
+            break;
+        case FAMILY:
+            FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
+            if(family != null) {
+                visibleRegionType = VisibleRegionType.COMMUNITY;
+                visibleRegionId = family.getCommunityId();
+            } else {
                 if(LOGGER.isWarnEnabled()) {
                     LOGGER.warn("Family not found, sceneToken=" + sceneToken);
                 }
             }
-	        break;
-	    case ORGANIZATION:
-	    	
+            break;
+        case PM_ADMIN:// 无小区ID
+        case PARK_PM_ADMIN: 
+        case PARK_ENTERPRISE:
+        case PARK_ENTERPRISE_NOAUTH:
             Organization org = this.organizationProvider.findOrganizationById(sceneToken.getEntityId());
             if(org != null) {
-            	String orgType = org.getOrganizationType();
+                String orgType = org.getOrganizationType();
                 
                 if(OrganizationType.isGovAgencyOrganization(orgType)) {
-                	if(VisibleRegionType.fromCode(cmd.getVisibleRegionType()) == VisibleRegionType.COMMUNITY){
-        	    		creatorTag = PostEntityTag.fromCode(orgType);
-            			visibleRegionType = VisibleRegionType.COMMUNITY;
+                    if(VisibleRegionType.fromCode(cmd.getVisibleRegionType()) == VisibleRegionType.COMMUNITY){
+                        creatorTag = PostEntityTag.fromCode(orgType);
+                        visibleRegionType = VisibleRegionType.COMMUNITY;
                         visibleRegionId = cmd.getVisibleRegionId();
-            		}else{
-            			creatorTag = PostEntityTag.fromCode(orgType);
+                    }else{
+                        creatorTag = PostEntityTag.fromCode(orgType);
                         visibleRegionType = VisibleRegionType.REGION;
                         visibleRegionId = sceneToken.getEntityId();
-            		}
+                    }
                     
                 }
             } else {
@@ -3321,21 +3389,21 @@ public class ForumServiceImpl implements ForumService {
                     LOGGER.warn("Organization not found, sceneToken=" + sceneToken);
                 }
             }
-	        break;
-	    default:
-	        break;
-	    }
-	    
-	    if(creatorTag != null) {
-	        topicCmd.setCreatorTag(creatorTag.getCode());
-	    }
-	    if(visibleRegionType != null) {
-	        topicCmd.setVisibleRegionType(visibleRegionType.getCode());
-	    }
-	    topicCmd.setVisibleRegionId(visibleRegionId);
-	    
-	    return this.createTopic(topicCmd);
-	}
+            break;
+        default:
+            break;
+        }
+        
+        if(creatorTag != null) {
+            topicCmd.setCreatorTag(creatorTag.getCode());
+        }
+        if(visibleRegionType != null) {
+            topicCmd.setVisibleRegionType(visibleRegionType.getCode());
+        }
+        topicCmd.setVisibleRegionId(visibleRegionId);
+        
+        return this.createTopic(topicCmd);
+    }
     
     @Override
     public List<TopicFilterDTO> getTopicQueryFilters(GetTopicQueryFilterCommand cmd) {
@@ -3343,21 +3411,36 @@ public class ForumServiceImpl implements ForumService {
         Long userId = user.getId();
         SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
         
+        // 增加园区场景，由于很多代码是重复复制的，故把它们转移到Handler里进行构造，方便以后增加新场景只需要增加相应的handler即可 by lqs 20160510
+//        List<TopicFilterDTO> filterList = null;
+//        PostFilterType filterType = PostFilterType.fromCode(cmd.getFilterType());
+//        if(filterType != null) {
+//            switch(filterType) {
+//            case DISCOVERY:
+//                filterList = getDiscoveryTopicQueryFilters(user, sceneToken);
+//                break;
+//            case GA_NOTICE:
+//                break;
+//            default:
+//                LOGGER.error("Unsupported post filter type, cmd=" + cmd + ", sceneToken=" + sceneToken);
+//                break;
+//            }
+//        } else {
+//            LOGGER.error("Post filter type is null, cmd=" + cmd + ", sceneToken=" + sceneToken);
+//        }
         List<TopicFilterDTO> filterList = null;
         PostFilterType filterType = PostFilterType.fromCode(cmd.getFilterType());
-        if(filterType != null) {
-            switch(filterType) {
-            case DISCOVERY:
-                filterList = getDiscoveryTopicQueryFilters(user, sceneToken);
-                break;
-            case GA_NOTICE:
-                break;
-            default:
-                LOGGER.error("Unsupported post filter type, cmd=" + cmd + ", sceneToken=" + sceneToken);
-                break;
-            }
+        if(filterType == null) {
+            LOGGER.error("Unsupported post filter type, cmd={}, sceneToken={}", cmd, sceneToken);
+            return filterList;
+        }
+        
+        String handlerName = TopicQueryFilterHandler.TOPIC_QUERY_FILTER_PREFIX + filterType + "_" + sceneToken.getScene();
+        TopicQueryFilterHandler handler = PlatformContext.getComponent(handlerName);
+        if(handler != null) {
+            filterList = handler.getTopicQueryFilters(user, sceneToken); 
         } else {
-            LOGGER.error("Post filter type is null, cmd=" + cmd + ", sceneToken=" + sceneToken);
+            LOGGER.error("No handler found for post quering filter, cmd={}, sceneToken={}, handlerName={}", cmd, sceneToken, handlerName);
         }
         
         return filterList;

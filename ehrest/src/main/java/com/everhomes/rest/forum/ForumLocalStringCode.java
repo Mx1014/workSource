@@ -13,4 +13,5 @@ public interface ForumLocalStringCode {
     static final int POST_MEMU_INTEREST_GROUP = 104; // 兴趣圈
     static final int POST_MEMU_ORGANIZATION_GROUP = 105; // 公司圈
     static final int POST_MEMU_ALL = 106; // 全部
+    static final int POST_MEMU_PARK_ONLY = 107; // 园区
 }

@@ -1903,6 +1903,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	private OrganizationDTO toOrganizationDTO(Long userId, Organization organization) {
 	    OrganizationDTO organizationDto = ConvertHelper.convert(organization, OrganizationDTO.class);
+	    organizationDto.setOrganizationType(organization.getOrganizationType());
 	    
 	    OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organization.getId());
         if(member != null && member.getStatus() !=null)
@@ -1946,6 +1947,11 @@ public class OrganizationServiceImpl implements OrganizationService {
                 LOGGER.warn("Organization community id is null, userId={}, organizationId={}", 
                     userId, organization.getId());
             }
+        }
+        
+        OrganizationMember orgMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organization.getId());
+        if(orgMember != null) {
+            organizationDto.setMemberStatus(orgMember.getStatus());
         }
         
 	    return organizationDto;

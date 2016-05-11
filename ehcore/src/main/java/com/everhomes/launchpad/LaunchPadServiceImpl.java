@@ -81,9 +81,12 @@ import com.everhomes.rest.organization.pm.PropCommunityContactDTO;
 import com.everhomes.rest.ui.launchpad.GetLaunchPadItemsBySceneCommand;
 import com.everhomes.rest.ui.launchpad.GetLaunchPadLayoutBySceneCommand;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
+import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.rest.visibility.VisibleRegionType;
+import com.everhomes.scene.SceneService;
+import com.everhomes.scene.SceneTypeInfo;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
@@ -133,6 +136,9 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	
 	@Autowired 
 	private FamilyProvider familyProvider;
+	
+	@Autowired
+	private SceneService sceneService;
 
 	@Override
 	public GetLaunchPadItemsCommandResponse getLaunchPadItems(GetLaunchPadItemsCommand cmd, HttpServletRequest request){
@@ -203,62 +209,131 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
     }
 	
-	@Override
-	public GetLaunchPadItemsCommandResponse getLaunchPadItemsByScene(GetLaunchPadItemsBySceneCommand cmd, HttpServletRequest request) {
-	    User user = UserContext.current().getUser();
-	    SceneTokenDTO sceneToken = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
-	    
-	    GetLaunchPadItemsCommand getCmd = new GetLaunchPadItemsCommand();
-	    getCmd.setItemGroup(cmd.getItemGroup());
-	    getCmd.setItemLocation(cmd.getItemLocation());
-	    getCmd.setNamespaceId(sceneToken.getNamespaceId());
-	    getCmd.setSceneType(sceneToken.getScene());
-	    
-	    Community community = null;
-	    GetLaunchPadItemsCommandResponse cmdResponse = null;
-        UserCurrentEntityType entityType = UserCurrentEntityType.fromCode(sceneToken.getEntityType());
-        switch(entityType) {
-        case COMMUNITY_RESIDENTIAL:
-        case COMMUNITY_COMMERCIAL:
-        case COMMUNITY:
-            community = communityProvider.findCommunityById(sceneToken.getEntityId());
-            if(community != null) {
-                getCmd.setCommunityId(community.getId());
-            }
-            
-            cmdResponse = getLaunchPadItems(getCmd, request);
-            break;
-        case FAMILY:
-            FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
-            if(family != null) {
-                community = communityProvider.findCommunityById(family.getCommunityId());
-            } else {
-                if(LOGGER.isWarnEnabled()) {
-                    LOGGER.warn("Family not found, sceneToken=" + sceneToken);
-                }
-            }
-            if(community != null) {
-                getCmd.setCommunityId(community.getId());
-            }
-            
-            cmdResponse = getLaunchPadItems(getCmd, request);
-            break;
-        case ORGANIZATION:// 无小区ID
-            GetLaunchPadItemsByOrgCommand orgCmd = new GetLaunchPadItemsByOrgCommand();
-            orgCmd.setItemGroup(cmd.getItemGroup());
-            orgCmd.setItemLocation(cmd.getItemLocation());
-            orgCmd.setNamespaceId(sceneToken.getNamespaceId());
-            orgCmd.setSceneType(sceneToken.getScene());
-            orgCmd.setOrganizationId(sceneToken.getEntityId());
-            cmdResponse = getLaunchPadItems(orgCmd, request);
-            break;
-        default:
-            LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
-            break;
-        }
-        
-        return cmdResponse;
-	}
+   // 场景需要同时支持小区和园区 by lqs 20160511
+//	@Override
+//	public GetLaunchPadItemsCommandResponse getLaunchPadItemsByScene(GetLaunchPadItemsBySceneCommand cmd, HttpServletRequest request) {
+//	    User user = UserContext.current().getUser();
+//	    SceneTokenDTO sceneToken = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
+//	    
+//	    GetLaunchPadItemsCommand getCmd = new GetLaunchPadItemsCommand();
+//	    getCmd.setItemGroup(cmd.getItemGroup());
+//	    getCmd.setItemLocation(cmd.getItemLocation());
+//	    getCmd.setNamespaceId(sceneToken.getNamespaceId());
+//	    getCmd.setSceneType(sceneToken.getScene());
+//	    
+//	    Community community = null;
+//	    GetLaunchPadItemsCommandResponse cmdResponse = null;
+//        UserCurrentEntityType entityType = UserCurrentEntityType.fromCode(sceneToken.getEntityType());
+//        switch(entityType) {
+//        case COMMUNITY_RESIDENTIAL:
+//        case COMMUNITY_COMMERCIAL:
+//        case COMMUNITY:
+//            community = communityProvider.findCommunityById(sceneToken.getEntityId());
+//            if(community != null) {
+//                getCmd.setCommunityId(community.getId());
+//            }
+//            
+//            cmdResponse = getLaunchPadItems(getCmd, request);
+//            break;
+//        case FAMILY:
+//            FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
+//            if(family != null) {
+//                community = communityProvider.findCommunityById(family.getCommunityId());
+//            } else {
+//                if(LOGGER.isWarnEnabled()) {
+//                    LOGGER.warn("Family not found, sceneToken=" + sceneToken);
+//                }
+//            }
+//            if(community != null) {
+//                getCmd.setCommunityId(community.getId());
+//            }
+//            
+//            cmdResponse = getLaunchPadItems(getCmd, request);
+//            break;
+//        case ORGANIZATION:// 无小区ID
+//            GetLaunchPadItemsByOrgCommand orgCmd = new GetLaunchPadItemsByOrgCommand();
+//            orgCmd.setItemGroup(cmd.getItemGroup());
+//            orgCmd.setItemLocation(cmd.getItemLocation());
+//            orgCmd.setNamespaceId(sceneToken.getNamespaceId());
+//            orgCmd.setSceneType(sceneToken.getScene());
+//            orgCmd.setOrganizationId(sceneToken.getEntityId());
+//            cmdResponse = getLaunchPadItems(orgCmd, request);
+//            break;
+//        default:
+//            LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
+//            break;
+//        }
+//        
+//        return cmdResponse;
+//	}
+   
+   @Override
+   public GetLaunchPadItemsCommandResponse getLaunchPadItemsByScene(GetLaunchPadItemsBySceneCommand cmd, HttpServletRequest request) {
+       User user = UserContext.current().getUser();
+       SceneTokenDTO sceneToken = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
+       
+       GetLaunchPadItemsCommand getCmd = new GetLaunchPadItemsCommand();
+       getCmd.setItemGroup(cmd.getItemGroup());
+       getCmd.setItemLocation(cmd.getItemLocation());
+       getCmd.setNamespaceId(sceneToken.getNamespaceId());
+       
+       SceneTypeInfo sceneInfo = sceneService.getBaseSceneTypeByName(sceneToken.getNamespaceId(), sceneToken.getScene());
+       String sceneStr = sceneToken.getScene();
+       if(sceneInfo != null) {
+           sceneStr = sceneInfo.getName();
+           if(LOGGER.isDebugEnabled()) {
+               LOGGER.debug("Scene type is changed, sceneToken={}, newScene={}", sceneToken, sceneInfo.getName());
+           }
+       } 
+       getCmd.setSceneType(sceneStr);
+       
+       Community community = null;
+       GetLaunchPadItemsCommandResponse cmdResponse = null;
+       SceneType sceneType = SceneType.fromCode(sceneStr);
+       switch(sceneType) {
+       case DEFAULT:
+       case PARK_TOURIST:
+           community = communityProvider.findCommunityById(sceneToken.getEntityId());
+           if(community != null) {
+               getCmd.setCommunityId(community.getId());
+           }
+           
+           cmdResponse = getLaunchPadItems(getCmd, request);
+           break;
+       case FAMILY:
+           FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
+           if(family != null) {
+               community = communityProvider.findCommunityById(family.getCommunityId());
+           } else {
+               if(LOGGER.isWarnEnabled()) {
+                   LOGGER.warn("Family not found, sceneToken=" + sceneToken);
+               }
+           }
+           if(community != null) {
+               getCmd.setCommunityId(community.getId());
+           }
+           
+           cmdResponse = getLaunchPadItems(getCmd, request);
+           break;
+       case PM_ADMIN:// 无小区ID
+       case PARK_PM_ADMIN: 
+       case PARK_ENTERPRISE:
+       case PARK_ENTERPRISE_NOAUTH:
+           GetLaunchPadItemsByOrgCommand orgCmd = new GetLaunchPadItemsByOrgCommand();
+           orgCmd.setItemGroup(cmd.getItemGroup());
+           orgCmd.setItemLocation(cmd.getItemLocation());
+           orgCmd.setNamespaceId(sceneToken.getNamespaceId());
+           orgCmd.setSceneType(sceneToken.getScene());
+           orgCmd.setOrganizationId(sceneToken.getEntityId());
+           cmdResponse = getLaunchPadItems(orgCmd, request);
+           break;
+       default:
+           LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
+           break;
+       }
+       
+       return cmdResponse;
+   }
 	
 	@SuppressWarnings("unchecked")
 	private List<LaunchPadItemDTO> getBusinessItems(GetLaunchPadItemsCommand cmd,Community community) {
