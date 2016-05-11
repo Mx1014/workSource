@@ -16,6 +16,8 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
+import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.organization.ListOrganizationCommunityCommand;
 import com.everhomes.rest.organization.ListOrganizationCommunityV2CommandResponse;
 import com.everhomes.rest.ui.organization.ListCommunitiesBySceneCommand;
@@ -48,7 +50,7 @@ public class CommunityUiController extends ControllerBase {
     @RequestMapping("listCommunitiesByScene")
     @RestReturn(value=ListCommunitiesBySceneResponse.class)
     public RestResponse listCommunitiesByScene(@Valid ListCommunitiesBySceneCommand cmd) {
-    	ListOrganizationCommunityCommand command = new ListOrganizationCommunityCommand();
+    	ListCommunityByNamespaceCommand command = new ListCommunityByNamespaceCommand();
     	ListCommunitiesBySceneResponse resp = new ListCommunitiesBySceneResponse();
     	WebTokenGenerator webToken = WebTokenGenerator.getInstance();
  	    SceneTokenDTO sceneToken = webToken.fromWebToken(cmd.getSceneToken(), SceneTokenDTO.class);
@@ -59,7 +61,7 @@ public class CommunityUiController extends ControllerBase {
  	    
  		if(UserCurrentEntityType.ORGANIZATION == UserCurrentEntityType.fromCode(sceneToken.getEntityType())){
  			command.setOrganizationId(sceneToken.getEntityId());
- 			ListOrganizationCommunityV2CommandResponse res = organizationService.listOrganizationCommunitiesV2(command);
+ 			ListCommunityByNamespaceCommandResponse res = organizationService.listCommunityByOrganizationId(command);
  			resp.setDtos(res.getCommunities());
  		}
         RestResponse response = new RestResponse(resp);

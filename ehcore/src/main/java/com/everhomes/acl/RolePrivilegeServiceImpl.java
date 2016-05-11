@@ -633,6 +633,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     	
     	List<RoleAssignment> userRoles = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), userId);
     	
+    	LOGGER.debug("user[" + userId +  "] roles = " + userRoles);
+    	
     	if(null == org){
     		return new ArrayList<RoleAssignment>();
     	}
@@ -649,6 +651,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     	}
     	
     	List<RoleAssignment> userOrgRoles = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.ORGANIZATIONS.getCode(), childrenOrgId);
+    	
+    	LOGGER.debug("user[" + userId +  "] organization roles = " + userOrgRoles);
     	
     	userRoles.addAll(userOrgRoles);
     	
