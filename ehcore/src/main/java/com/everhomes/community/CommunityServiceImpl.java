@@ -453,7 +453,9 @@ public class CommunityServiceImpl implements CommunityService {
 			throw RuntimeErrorException.errorWith(RegionServiceErrorCode.SCOPE, RegionServiceErrorCode.ERROR_REGION_NOT_EXIST, 
 					"City is not found");
 		}
-		List<Community> communities = this.communityProvider.findCommunitiesByNameAndCityId(cmd.getName(),cmd.getCityId());
+		
+		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+		List<Community> communities = this.communityProvider.findCommunitiesByNameAndCityId(cmd.getName(),cmd.getCityId(), namespaceId);
 		List<CommunityDTO> result = communities.stream().map((r) ->{
 			return ConvertHelper.convert(r, CommunityDTO.class);
 		}).collect(Collectors.toList());
