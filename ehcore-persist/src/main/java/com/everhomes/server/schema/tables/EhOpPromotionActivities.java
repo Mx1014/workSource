@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOpPromotionActivities extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhOpPromotionActivitiesRecord> {
 
-	private static final long serialVersionUID = -29071406;
+	private static final long serialVersionUID = -1634860151;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_op_promotion_activities</code>
@@ -110,6 +110,56 @@ public class EhOpPromotionActivities extends org.jooq.impl.TableImpl<com.everhom
 	 * The column <code>ehcore.eh_op_promotion_activities.create_time</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOpPromotionActivitiesRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_op_promotion_activities.integral_tag1</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOpPromotionActivitiesRecord, java.lang.Long> INTEGRAL_TAG1 = createField("integral_tag1", org.jooq.impl.SQLDataType.BIGINT.defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_op_promotion_activities.integral_tag2</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOpPromotionActivitiesRecord, java.lang.Long> INTEGRAL_TAG2 = createField("integral_tag2", org.jooq.impl.SQLDataType.BIGINT.defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_op_promotion_activities.integral_tag3</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOpPromotionActivitiesRecord, java.lang.Long> INTEGRAL_TAG3 = createField("integral_tag3", org.jooq.impl.SQLDataType.BIGINT.defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_op_promotion_activities.integral_tag4</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOpPromotionActivitiesRecord, java.lang.Long> INTEGRAL_TAG4 = createField("integral_tag4", org.jooq.impl.SQLDataType.BIGINT.defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_op_promotion_activities.integral_tag5</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOpPromotionActivitiesRecord, java.lang.Long> INTEGRAL_TAG5 = createField("integral_tag5", org.jooq.impl.SQLDataType.BIGINT.defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_op_promotion_activities.string_tag1</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOpPromotionActivitiesRecord, java.lang.String> STRING_TAG1 = createField("string_tag1", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_op_promotion_activities.string_tag2</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOpPromotionActivitiesRecord, java.lang.String> STRING_TAG2 = createField("string_tag2", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_op_promotion_activities.string_tag3</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOpPromotionActivitiesRecord, java.lang.String> STRING_TAG3 = createField("string_tag3", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_op_promotion_activities.string_tag4</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOpPromotionActivitiesRecord, java.lang.String> STRING_TAG4 = createField("string_tag4", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_op_promotion_activities.string_tag5</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOpPromotionActivitiesRecord, java.lang.String> STRING_TAG5 = createField("string_tag5", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_op_promotion_activities</code> table reference

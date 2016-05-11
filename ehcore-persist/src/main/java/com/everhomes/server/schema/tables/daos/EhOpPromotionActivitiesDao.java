@@ -158,4 +158,74 @@ public class EhOpPromotionActivitiesDao extends org.jooq.impl.DAOImpl<com.everho
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOpPromotionActivities> fetchByCreateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhOpPromotionActivities.EH_OP_PROMOTION_ACTIVITIES.CREATE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>integral_tag1 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOpPromotionActivities> fetchByIntegralTag1(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOpPromotionActivities.EH_OP_PROMOTION_ACTIVITIES.INTEGRAL_TAG1, values);
+	}
+
+	/**
+	 * Fetch records that have <code>integral_tag2 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOpPromotionActivities> fetchByIntegralTag2(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOpPromotionActivities.EH_OP_PROMOTION_ACTIVITIES.INTEGRAL_TAG2, values);
+	}
+
+	/**
+	 * Fetch records that have <code>integral_tag3 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOpPromotionActivities> fetchByIntegralTag3(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOpPromotionActivities.EH_OP_PROMOTION_ACTIVITIES.INTEGRAL_TAG3, values);
+	}
+
+	/**
+	 * Fetch records that have <code>integral_tag4 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOpPromotionActivities> fetchByIntegralTag4(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOpPromotionActivities.EH_OP_PROMOTION_ACTIVITIES.INTEGRAL_TAG4, values);
+	}
+
+	/**
+	 * Fetch records that have <code>integral_tag5 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOpPromotionActivities> fetchByIntegralTag5(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOpPromotionActivities.EH_OP_PROMOTION_ACTIVITIES.INTEGRAL_TAG5, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag1 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOpPromotionActivities> fetchByStringTag1(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOpPromotionActivities.EH_OP_PROMOTION_ACTIVITIES.STRING_TAG1, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag2 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOpPromotionActivities> fetchByStringTag2(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOpPromotionActivities.EH_OP_PROMOTION_ACTIVITIES.STRING_TAG2, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag3 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOpPromotionActivities> fetchByStringTag3(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOpPromotionActivities.EH_OP_PROMOTION_ACTIVITIES.STRING_TAG3, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag4 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOpPromotionActivities> fetchByStringTag4(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOpPromotionActivities.EH_OP_PROMOTION_ACTIVITIES.STRING_TAG4, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag5 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOpPromotionActivities> fetchByStringTag5(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOpPromotionActivities.EH_OP_PROMOTION_ACTIVITIES.STRING_TAG5, values);
+	}
 }
