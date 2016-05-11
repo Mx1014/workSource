@@ -23,6 +23,7 @@ import com.everhomes.server.schema.tables.pojos.EhOpPromotionActivities;
 import com.everhomes.server.schema.tables.records.EhOpPromotionActivitiesRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 
 @Component
 public class OpPromotionActivitieProviderImpl implements OpPromotionActivityProvider {
@@ -106,5 +107,7 @@ public class OpPromotionActivitieProviderImpl implements OpPromotionActivityProv
     }
 
     private void prepareObj(OpPromotionActivity obj) {
+        Long l2 = DateHelper.currentGMTTime().getTime();
+        obj.setCreateTime(new Timestamp(l2));
     }
 }

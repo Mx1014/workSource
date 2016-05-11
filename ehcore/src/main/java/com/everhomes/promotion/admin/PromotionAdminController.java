@@ -11,7 +11,8 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.promotion.PromotionService;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.promotion.OpPromotionDTO;
+import com.everhomes.rest.promotion.CreateOpPromotionCommand;
+import com.everhomes.rest.promotion.OpPromotionActivityDTO;
 
 @RestDoc(value="Promotion Admin controller", site="core")
 @RestController
@@ -21,10 +22,10 @@ public class PromotionAdminController extends ControllerBase {
     @Autowired
     PromotionService promotionService;
 
-    @RequestMapping("test")
-    @RestReturn(value=OpPromotionDTO.class)
-    public RestResponse listDoorAccessByOwnerId() {
-        promotionService.createPromotion();
+    @RequestMapping("createPromotion")
+    @RestReturn(value=OpPromotionActivityDTO.class)
+    public RestResponse createPromotion(@Valid CreateOpPromotionCommand cmd) {
+        promotionService.createPromotion(cmd);
         return new RestResponse();
     }
 }

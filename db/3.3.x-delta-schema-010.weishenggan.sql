@@ -11,3 +11,15 @@ CREATE TABLE `eh_op_promotion_assigned_scopes`(
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 ALTER TABLE `eh_op_promotion_activities` DROP COLUMN `scope_id`, DROP COLUMN `scope_code`;
+
+ALTER TABLE `eh_op_promotion_activities` ADD COLUMN `integral_tag1` BIGINT DEFAULT 0;
+ALTER TABLE `eh_op_promotion_activities` ADD COLUMN `integral_tag2` BIGINT DEFAULT 0;
+ALTER TABLE `eh_op_promotion_activities` ADD COLUMN `integral_tag3` BIGINT DEFAULT 0;
+ALTER TABLE `eh_op_promotion_activities` ADD COLUMN `integral_tag4` BIGINT DEFAULT 0;
+ALTER TABLE `eh_op_promotion_activities` ADD COLUMN `integral_tag5` BIGINT DEFAULT 0;
+
+ALTER TABLE `eh_op_promotion_activities` ADD COLUMN `string_tag1` VARCHAR(128);
+ALTER TABLE `eh_op_promotion_activities` ADD COLUMN `string_tag2` VARCHAR(128);
+ALTER TABLE `eh_op_promotion_activities` ADD COLUMN `string_tag3` VARCHAR(128);
+ALTER TABLE `eh_op_promotion_activities` ADD COLUMN `string_tag4` VARCHAR(128);
+ALTER TABLE `eh_op_promotion_activities` ADD COLUMN `string_tag5` VARCHAR(128);
