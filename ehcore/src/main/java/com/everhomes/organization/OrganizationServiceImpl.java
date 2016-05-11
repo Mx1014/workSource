@@ -5910,10 +5910,24 @@ public class OrganizationServiceImpl implements OrganizationService {
 			
 			Community community = communityProvider.findCommunityById(commuId);
 			Organization organization = this.checkOrganization(cmd.getOrganizationId());
+			
+			List<String> groupTypes = new ArrayList<String>();
+			groupTypes.add(OrganizationGroupType.GROUP.getCode());
+			groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+			groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+			
+			List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes(organization.getPath()+"/%", groupTypes);
+			
+			List<Long> organizationIds = new ArrayList<Long>();
+			organizationIds.add(organization.getId());
+			for (Organization org : organizations) {
+				organizationIds.add(org.getId());
+			}
+			
 			int pageSize = PaginationConfigHelper.getPageSize(configurationProvider,  cmd.getPageSize());
 			CrossShardListingLocator locator = new CrossShardListingLocator();
 			locator.setAnchor(cmd.getPageOffset());
-			List<OrganizationTask> orgTasks = organizationProvider.listOrganizationTasksByTypeOrStatus(locator, organization.getId(),cmd.getTargetId(), cmd.getTaskType(), cmd.getTaskStatus(),VisibleRegionType.COMMUNITY.getCode(),commuId, pageSize);
+			List<OrganizationTask> orgTasks = organizationProvider.listOrganizationTasksByTypeOrStatus(locator, organizationIds,cmd.getTargetId(), cmd.getTaskType(), cmd.getTaskStatus(),VisibleRegionType.COMMUNITY.getCode(),commuId, pageSize);
 			List<PostDTO> dtos = new ArrayList<PostDTO>();
 			for (OrganizationTask task : orgTasks) {
 				PostDTO dto = this.forumService.getTopicById(task.getApplyEntityId(),commuId,false);

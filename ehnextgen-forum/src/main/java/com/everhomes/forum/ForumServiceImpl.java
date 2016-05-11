@@ -64,6 +64,7 @@ import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.CommunityAdminStatus;
+import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.category.CategoryType;
@@ -120,6 +121,7 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
@@ -1064,7 +1066,14 @@ public class ForumServiceImpl implements ForumService {
         Organization organization = checkOrganizationParameter(operatorId, organizationId, "listOrganizationTopics");
         List<Long> communityIdList = new ArrayList<Long>();
         if(null == communityId){
-        	communityIdList = organizationService.getOrganizationCommunityIdById(organizationId);
+        	ListCommunityByNamespaceCommand command = new ListCommunityByNamespaceCommand();
+        	command.setOrganizationId(organization.getId());;
+        	List<CommunityDTO> communities = organizationService.listCommunityByOrganizationId(command).getCommunities();
+        	if(null != communities){
+        		for (CommunityDTO communityDTO : communities) {
+        			communityIdList.add(communityDTO.getId());
+				}
+        	}
         }else{
         	communityIdList.add(communityId);
         }
