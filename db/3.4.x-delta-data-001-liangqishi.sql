@@ -49,33 +49,26 @@ INSERT INTO `eh_organization_community_requests` (id, community_id, member_type,
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time) 
 	VALUES(110809, 240111044331050812, 'organization', 1000631, 3, 0, '2016-05-11 09:15:50');
 
-
-
-
-|       1 |            0 |         0 | 万科城物业管理处                                 | ENTERPRISE | PM                |      2 |
-|       2 |            0 |         0 | 龙悦居物业管理处                                 | ENTERPRISE | PM                |      2 |
-|       3 |            0 |         0 | 天鹅堡物业管理处                                 | ENTERPRISE | PM                |      2 |
-|       4 |            0 |         0 | 蔚蓝海岸物业                                     | ENTERPRISE | PM                |      2 |
-| 1000001 |      1000000 |         0 | 深圳科技工业园（集团）有限公司                   | ENTERPRISE | PM                |      2 |
-| 1000100 |       999999 |         0 | 讯美科技                                         | ENTERPRISE | PM                |      2 |
-| 1000106 |            0 |         0 | 天通苑北二区物业                                 | ENTERPRISE | PM                |      2 |
-| 1000531 |       999994 |         0 | 龙岗智慧社区物业                                 | ENTERPRISE | PM                |      2 |
-| 1000631 |       999993 |         0 | 深圳市海岸物业管理有限公司                       | ENTERPRISE | PM                |      2 |
-| 1000716 |       999992 |   1000714 | 岭秀名苑                                         | ENTERPRISE | PM                |      2 |
-| 1000717 |       999992 |   1000714 | 风临左岸                                         | ENTERPRISE | PM                |      2 |
-| 1000718 |       999992 |   1000714 | 关山月美术馆                                     | ENTERPRISE | PM                |      2 |
-| 1000719 |       999992 |   1000714 | 紫荆苑                                           | ENTERPRISE | PM                |      2 |
-| 1000720 |       999992 |   1000714 | 东海附小                                         | ENTERPRISE | PM                |      2 |
-| 1000750 |       999992 |         0 | 深业集团（深圳）物业管理有限公司                 | ENTERPRISE | PM                |      2 |
-| 1000760 |       999992 |   1000710 | 经营部                                           | ENTERPRISE | PM                |      2 |
-| 1000761 |       999992 |   1000710 | 财务部                                           | ENTERPRISE | PM                |      2 |
-| 1000762 |       999992 |   1000710 | 发展部                                           | ENTERPRISE | PM                |      2 |
-| 1000763 |       999992 |   1000710 | 法律事务部                                       | ENTERPRISE | PM                |      2 |
-| 1000764 |       999992 |   1000710 | 安保部                                           | ENTERPRISE | PM                |      2 |
-| 1000765 |       999992 |   1000710 | 人力资源部                                       | ENTERPRISE | PM                |      2 |
-| 1000777 |       999992 |   1000710 | 行政部                                           | ENTERPRISE | PM                |      2 |
-| 1000955 |       999992 |   1000750 | 长沙分公司                                       | ENTERPRISE | PM                |      2 |
-
+INSERT INTO `eh_namespace_details` (`id`, `namespace_id`, `resource_type`, `create_time`) 
+	VALUES(1001, 1000001, 'community_residential', '2016-05-12 18:07:50');
+INSERT INTO `eh_namespace_details` (`id`, `namespace_id`, `resource_type`, `create_time`) 
+	VALUES(1002, 1000000, 'community_commercial', '2016-05-12 18:07:50');
+INSERT INTO `eh_namespace_details` (`id`, `namespace_id`, `resource_type`, `create_time`) 
+	VALUES(1003, 999999, 'community_commercial', '2016-05-12 18:07:50');
+INSERT INTO `eh_namespace_details` (`id`, `namespace_id`, `resource_type`, `create_time`) 
+	VALUES(1004, 999998, 'community_commercial', '2016-05-12 18:07:50');
+INSERT INTO `eh_namespace_details` (`id`, `namespace_id`, `resource_type`, `create_time`) 
+	VALUES(1005, 999997, 'community_residential', '2016-05-12 18:07:50');
+INSERT INTO `eh_namespace_details` (`id`, `namespace_id`, `resource_type`, `create_time`) 
+	VALUES(1006, 999996, 'community_residential', '2016-05-12 18:07:50');
+INSERT INTO `eh_namespace_details` (`id`, `namespace_id`, `resource_type`, `create_time`) 
+	VALUES(1007, 999995, 'community_residential', '2016-05-12 18:07:50');
+INSERT INTO `eh_namespace_details` (`id`, `namespace_id`, `resource_type`, `create_time`) 
+	VALUES(1008, 999994, 'community_residential', '2016-05-12 18:07:50');
+INSERT INTO `eh_namespace_details` (`id`, `namespace_id`, `resource_type`, `create_time`) 
+	VALUES(1009, 999993, 'community_commercial', '2016-05-12 18:07:50');
+INSERT INTO `eh_namespace_details` (`id`, `namespace_id`, `resource_type`, `create_time`) 
+	VALUES(1010, 999992, 'community_residential', '2016-05-12 18:07:50');
 
 
 
