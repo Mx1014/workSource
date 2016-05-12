@@ -524,7 +524,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     			if(RoleConstants.PLATFORM_PM_ROLES.contains(roleId) || RoleConstants.PLATFORM_ENTERPRISE_ROLES.contains(roleId)){
     				acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), null, roleId);
     			}else{
-    				acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), organizationId, roleId);
+    				Role role = aclProvider.getRoleById(roleId);
+    				if(null != role){
+    					acls = aclProvider.getResourceAclByRole(role.getOwnerType(), role.getOwnerId(), roleId);
+    				}
     			}
     			for (Acl acl : acls) {
     				privilegeIds.add(acl.getPrivilegeId());
