@@ -15,6 +15,8 @@
 
 @property(nonatomic, copy) NSString* name;
 
+@property(nonatomic, copy) NSNumber* namespaceId;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 

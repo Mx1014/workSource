@@ -35,12 +35,14 @@ import java.util.stream.Collectors;
 
 
 
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
+
 
 
 
@@ -112,6 +114,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 
 @Component
 public class RolePrivilegeServiceImpl implements RolePrivilegeService {
@@ -633,7 +636,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     	
     	List<RoleAssignment> userRoles = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), userId);
     	
-    	LOGGER.debug("user[" + userId +  "] roles = " + userRoles);
+    	LOGGER.debug("organization [ " + organizationId + " ],user[" + userId +  "] roles = " + StringHelper.toJsonString(userRoles));
     	
     	if(null == org){
     		return new ArrayList<RoleAssignment>();
@@ -652,7 +655,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     	
     	List<RoleAssignment> userOrgRoles = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.ORGANIZATIONS.getCode(), childrenOrgId);
     	
-    	LOGGER.debug("user[" + userId +  "] organization roles = " + userOrgRoles);
+    	LOGGER.debug("organization [ " + organizationId + " ],user[" + userId +  "] organization roles = " + StringHelper.toJsonString(userOrgRoles));
     	
     	userRoles.addAll(userOrgRoles);
     	
@@ -817,4 +820,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				"non-privileged.");
     }
     
+    public static void main(String[] args) {
+	}
 }

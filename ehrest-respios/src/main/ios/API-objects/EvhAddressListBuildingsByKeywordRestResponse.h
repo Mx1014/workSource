@@ -8,7 +8,7 @@
 //
 @interface EvhAddressListBuildingsByKeywordRestResponse : EvhRestResponseBase
 
-// array of EvhBuildingDTO* objects
+// array of EvhAddressBuildingDTO* objects
 @property(nonatomic, strong) NSMutableArray* response;
 
 -(id) init;
