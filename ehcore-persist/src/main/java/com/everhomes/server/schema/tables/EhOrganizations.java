@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizations extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhOrganizationsRecord> {
 
-	private static final long serialVersionUID = 547813129;
+	private static final long serialVersionUID = 1213426877;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_organizations</code>
@@ -160,11 +160,6 @@ public class EhOrganizations extends org.jooq.impl.TableImpl<com.everhomes.serve
 	 * The column <code>ehcore.eh_organizations.show_flag</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationsRecord, java.lang.Byte> SHOW_FLAG = createField("show_flag", org.jooq.impl.SQLDataType.TINYINT.defaulted(true), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_organizations.community_id</code>. the id of community where the organization member is working
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhOrganizationsRecord, java.lang.Long> COMMUNITY_ID = createField("community_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "the id of community where the organization member is working");
 
 	/**
 	 * Create a <code>ehcore.eh_organizations</code> table reference
