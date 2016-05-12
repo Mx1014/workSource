@@ -24,8 +24,8 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.address.ApartmentDTO;
 import com.everhomes.rest.address.BuildingDTO;
 import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.address.ListBuildingByKeywordCommand;
 import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
+import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.business.BusinessAsignedNamespaceCommand;
 import com.everhomes.rest.business.GetReceivedCouponCountCommand;
@@ -493,10 +493,10 @@ public class BusinessOpenController extends ControllerBase {
      */
     @RequestMapping("listBuildingsByKeyword")
     @RestReturn(value=BuildingDTO.class, collection=true)
-    public RestResponse listBuildingsByKeyword(@Valid ListBuildingByKeywordCommand cmd) {
-        Tuple<Integer, List<BuildingDTO>> data = this.businessService.listBuildingsByKeyword(cmd);
-        RestResponse response = new RestResponse(data.second());
-        response.setErrorCode(data.first());
+    public RestResponse listBuildingsByKeyword(@Valid ListBuildingByCommunityIdsCommand cmd) {
+        List<BuildingDTO> data = this.businessService.listBuildingsByKeyword(cmd);
+        RestResponse response = new RestResponse(data);
+        response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }

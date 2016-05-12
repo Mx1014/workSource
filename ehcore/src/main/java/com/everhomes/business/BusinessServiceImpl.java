@@ -52,6 +52,7 @@ import com.everhomes.rest.address.BuildingDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.address.ListBuildingByKeywordCommand;
 import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
+import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;
 import com.everhomes.rest.business.BaiduGeocoderResponse;
 import com.everhomes.rest.business.BusinessAsignedNamespaceCommand;
 import com.everhomes.rest.business.BusinessAssignedNamespaceVisibleFlagType;
@@ -1809,9 +1810,23 @@ public class BusinessServiceImpl implements BusinessService {
 	}
 	
 	@Override
-	public Tuple<Integer, List<BuildingDTO>> listBuildingsByKeyword(
-			ListBuildingByKeywordCommand cmd) {
-		return addressService.listBuildingsByKeyword(cmd);
+	public List<BuildingDTO> listBuildingsByKeyword(ListBuildingByCommunityIdsCommand cmd) {
+		if(cmd.getCommunityIds()==null||cmd.getCommunityIds().isEmpty()){
+			LOGGER.error("Invalid parameter,commudityIds is null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid parameter,commudityIds is null");
+		}
+		List<BuildingDTO> list = new ArrayList<BuildingDTO>();
+		ListBuildingByKeywordCommand subcmd = new ListBuildingByKeywordCommand();
+		subcmd.setKeyword(cmd.getKeyword());
+		subcmd.setNamespaceId(cmd.getNamespaceId());
+		for(Long r:cmd.getCommunityIds()){
+			subcmd.setCommunityId(r);
+			Tuple<Integer, List<BuildingDTO>> result = addressService.listBuildingsByKeyword(subcmd);
+			if(result.second()!=null&&!result.second().isEmpty())
+				list.addAll(result.second());
+		}
+		return list;
 	}
 
 	@Override
