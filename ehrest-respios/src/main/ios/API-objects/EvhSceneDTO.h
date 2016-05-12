@@ -25,6 +25,8 @@
 
 @property(nonatomic, copy) NSString* avatarUrl;
 
+@property(nonatomic, copy) NSString* sceneType;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 

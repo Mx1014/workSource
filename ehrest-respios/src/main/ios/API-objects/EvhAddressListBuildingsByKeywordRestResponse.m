@@ -2,7 +2,7 @@
 // EvhAddressListBuildingsByKeywordRestResponse.m
 //
 #import "EvhAddressListBuildingsByKeywordRestResponse.h"
-#import "EvhBuildingDTO.h"
+#import "EvhAddressBuildingDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhAddressListBuildingsByKeywordRestResponse
@@ -36,7 +36,7 @@
     
     if(self.response) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhBuildingDTO* item in self.response) {
+        for(EvhAddressBuildingDTO* item in self.response) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -51,7 +51,7 @@
         [super fromJson: jsonObject];
         NSArray* jsonArray = [jsonObject objectForKey: @"response"];
         for(NSMutableDictionary* dic in jsonArray) {
-            EvhBuildingDTO* item = [EvhBuildingDTO new];
+            EvhAddressBuildingDTO* item = [EvhAddressBuildingDTO new];
             [item fromJson:dic];
             [self.response addObject: item];
         }

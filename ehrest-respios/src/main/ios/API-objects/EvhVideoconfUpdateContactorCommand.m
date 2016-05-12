@@ -1,6 +1,5 @@
 //
 // EvhVideoconfUpdateContactorCommand.m
-// generated at 2016-04-30 11:16:40 
 //
 #import "EvhVideoconfUpdateContactorCommand.h"
 

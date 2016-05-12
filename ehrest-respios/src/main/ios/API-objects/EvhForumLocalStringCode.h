@@ -11,3 +11,4 @@
 #define EvhForumLocalStringCode_POST_MEMU_INTEREST_GROUP 104
 #define EvhForumLocalStringCode_POST_MEMU_ORGANIZATION_GROUP 105
 #define EvhForumLocalStringCode_POST_MEMU_ALL 106
+#define EvhForumLocalStringCode_POST_MEMU_PARK_ONLY 107

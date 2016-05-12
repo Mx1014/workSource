@@ -105,6 +105,7 @@
 #define EVH_ADMIN_COMMUNITY_LISTCOMMUNITIESBYSTATUS_URL @"/admin/community/listCommunitiesByStatus"
 #define EVH_ADMIN_COMMUNITY_LISTCOMMUNITYAUTHUSERADDRESS_URL @"/admin/community/listCommunityAuthUserAddress"
 #define EVH_ADMIN_COMMUNITY_LISTOWNERBYCOMMUNITYID_URL @"/admin/community/listOwnerBycommunityId"
+#define EVH_ADMIN_COMMUNITY_LISTUNASSIGNEDCOMMUNITIESBYNAMESPACEID_URL @"/admin/community/listUnassignedCommunitiesByNamespaceId"
 #define EVH_ADMIN_COMMUNITY_LISTUSERBYNOTJOINEDCOMMUNITY_URL @"/admin/community/listUserByNotJoinedCommunity"
 #define EVH_ADMIN_COMMUNITY_LISTUSERBYCOMMUNITYID_URL @"/admin/community/listUserBycommunityId"
 #define EVH_ADMIN_COMMUNITY_QRYCOMMUNITYUSERADDRESSBYUSERID_URL @"/admin/community/qryCommunityUserAddressByUserId"

@@ -13,6 +13,8 @@
     : NSObject<EvhJsonSerializable>
 
 
+@property(nonatomic, copy) NSNumber* namespaceId;
+
 @property(nonatomic, copy) NSNumber* id;
 
 @property(nonatomic, copy) NSNumber* parentId;
@@ -52,6 +54,12 @@
 @property(nonatomic, copy) NSNumber* communityId;
 
 @property(nonatomic, copy) NSString* communityName;
+
+@property(nonatomic, copy) NSNumber* communityType;
+
+@property(nonatomic, copy) NSNumber* defaultForumId;
+
+@property(nonatomic, copy) NSNumber* feedbackForumId;
 
 @property(nonatomic, copy) NSNumber* groupId;
 
