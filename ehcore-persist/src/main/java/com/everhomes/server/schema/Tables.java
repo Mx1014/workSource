@@ -424,6 +424,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhLocaleTemplates EH_LOCALE_TEMPLATES = com.everhomes.server.schema.tables.EhLocaleTemplates.EH_LOCALE_TEMPLATES;
 
 	/**
+	 * The table ehcore.eh_namespace_details
+	 */
+	public static final com.everhomes.server.schema.tables.EhNamespaceDetails EH_NAMESPACE_DETAILS = com.everhomes.server.schema.tables.EhNamespaceDetails.EH_NAMESPACE_DETAILS;
+
+	/**
 	 * The table ehcore.eh_namespace_resources
 	 */
 	public static final com.everhomes.server.schema.tables.EhNamespaceResources EH_NAMESPACE_RESOURCES = com.everhomes.server.schema.tables.EhNamespaceResources.EH_NAMESPACE_RESOURCES;

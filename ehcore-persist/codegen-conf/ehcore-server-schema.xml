@@ -81,6 +81,7 @@
 		eh_aclink_firmware |
 		eh_organization_task_targets | eh_business_assigned_namespaces |
 		eh_pmsy_orders | eh_pmsy_order_items | eh_pmsy_payers | eh_pmsy_communities |
+		eh_namespace_details |
         </includes>
             <!-- All elements that are excluded from your schema
             (A Java regular expression. Use the pipe to separate several expressions).
