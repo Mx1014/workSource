@@ -156,8 +156,15 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         
         Integer namespaceId = (cmd.getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
         FilterBuilder fb = FilterBuilders.termFilter("namespaceId", namespaceId);
-        qb = QueryBuilders.filteredQuery(qb, fb);
         
+        // 每个企业（含物业管理公司）都有可能在某个园区内，当客户端提供园区作为过滤条件时，则在园区范围内挑选园区 by lqs 20160512
+        if(cmd.getCommunityId() != null) {
+            FilterBuilder cmntyFilter = FilterBuilders.termFilter("communityId", cmd.getCommunityId());
+            fb = FilterBuilders.andFilter(fb, cmntyFilter);
+        }
+        
+        qb = QueryBuilders.filteredQuery(qb, fb);
+       
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         
         builder.setFrom(pageNum * pageSize).setSize(pageSize+1);
