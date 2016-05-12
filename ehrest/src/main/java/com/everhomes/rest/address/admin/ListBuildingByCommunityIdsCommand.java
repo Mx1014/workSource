@@ -2,6 +2,8 @@ package com.everhomes.rest.address.admin;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
+
 /**
  * <ul>
  * <li>communityIds: 小区Id列表</li>
@@ -11,6 +13,7 @@ import java.util.List;
  */
 public class ListBuildingByCommunityIdsCommand {
 	
+	@ItemType(Long.class)
 	private List<Long> communityIds;
     private String keyword;
     private Integer namespaceId;

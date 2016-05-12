@@ -1238,6 +1238,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		 */
 		Job job = new Job(SendNoticeAction.class.getName(),
                 new Object[]{ cmd, this });
+		
         jesqueClientFactory.getClientPool().enqueue("pushMessage", job);
 
 	}

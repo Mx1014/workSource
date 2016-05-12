@@ -528,6 +528,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     				if(null != role){
     					acls = aclProvider.getResourceAclByRole(role.getOwnerType(), role.getOwnerId(), roleId);
     				}
+    				LOGGER.debug("user["+userId+"], role = " + StringHelper.toJsonString(role));
     			}
     			for (Acl acl : acls) {
     				privilegeIds.add(acl.getPrivilegeId());
