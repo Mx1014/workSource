@@ -860,11 +860,11 @@ public class OrganizationController extends ControllerBase {
       }
     
      /**
-      * <b>URL: /org/listOrgTopics</b>
+      * <b>URL: /org/listOrganizationTopics</b>
       * <p>机构人员的帖子查询</p>
       * @return 
       */
-      @RequestMapping("listOrgTopics")
+      @RequestMapping("listOrganizationTopics")
       @RestReturn(value=ListPostCommandResponse.class)
       public RestResponse listOrgTopics(@Valid QueryOrganizationTopicCommand cmd) {
          RestResponse res = new RestResponse(organizationService.listOrgTopics(cmd));
