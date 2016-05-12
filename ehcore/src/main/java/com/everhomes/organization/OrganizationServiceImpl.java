@@ -53,6 +53,8 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
@@ -4223,7 +4225,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         if(member != null) {
             member.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
             updateEnterpriseContactStatus(operator.getId(), member);
-            
+            DaoHelper.publishDaoAction(DaoAction.CREATE, OrganizationMember.class, member.getTargetId());
             sendMessageForContactApproved(member);
         } else {
             LOGGER.warn("Enterprise contact not found, maybe it has been rejected, operatorUid=" + operatorUid + ", cmd=" + cmd);
@@ -4471,6 +4473,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 		organizationMember.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		organizationMember.setCreatorUid(user.getId());
 		organizationMember.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		if(OrganizationMemberTargetType.fromCode(organizationMember.getTargetType()) == OrganizationMemberTargetType.USER){
+			DaoHelper.publishDaoAction(DaoAction.CREATE, OrganizationMember.class, organizationMember.getTargetId());
+		}
 		organizationProvider.createOrganizationMember(organizationMember);
 		userSearcher.feedDoc(organizationMember);
 		return ConvertHelper.convert(organizationMember, OrganizationMemberDTO.class);
@@ -4684,6 +4689,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 	member.setTargetId(user.getId());
                 	
                 	this.updateMemberUser(member);
+                	DaoHelper.publishDaoAction(DaoAction.CREATE, OrganizationMember.class, member.getTargetId());
                     sendMessageForContactApproved(member);
                     		
                     userSearcher.feedDoc(member);
