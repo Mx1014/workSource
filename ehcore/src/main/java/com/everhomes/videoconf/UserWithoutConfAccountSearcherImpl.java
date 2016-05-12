@@ -165,17 +165,18 @@ public class UserWithoutConfAccountSearcherImpl extends AbstractElasticSearch
         for(Long id : ids) {
         	EnterpriseUsersDTO user = new EnterpriseUsersDTO();
         	OrganizationMember member = organizationProvider.findOrganizationMemberById(id);
-        	user.setUserId(member.getTargetId());
-			user.setUserName(member.getContactName());
-			user.setEnterpriseId(member.getOrganizationId());
-			user.setMobile(member.getContactToken());
-			if(member.getGroupId() != null && member.getGroupId() != 0) {
-				Organization group = organizationProvider.findOrganizationById(member.getGroupId());
-				if(group != null) {
-					user.setDepartment(group.getName());
+        	if(member != null) {
+	        	user.setUserId(member.getTargetId());
+				user.setUserName(member.getContactName());
+				user.setEnterpriseId(member.getOrganizationId());
+				user.setMobile(member.getContactToken());
+				if(member.getGroupId() != null && member.getGroupId() != 0) {
+					Organization group = organizationProvider.findOrganizationById(member.getGroupId());
+					if(group != null) {
+						user.setDepartment(group.getName());
+					} 
+					
 				} 
-				
-			} 
 //        	EnterpriseContact contact = enterpriseContactProvider.getContactById(id);
 //        	user.setUserId(contact.getUserId());
 //			user.setUserName(contact.getName());
@@ -194,7 +195,8 @@ public class UserWithoutConfAccountSearcherImpl extends AbstractElasticSearch
 //			if(entry != null && entry.size() >0)
 //				user.setMobile(entry.get(0).getEntryValue());
 			
-			enterpriseUsers.add(user);
+				enterpriseUsers.add(user);
+        	}
         }
         listUsers.setEnterpriseUsers(enterpriseUsers);
         

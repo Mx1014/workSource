@@ -354,7 +354,7 @@ public class QualityController extends ControllerBase {
 	@RestReturn(value = GroupUserDTO.class, collection = true)
 	public RestResponse getGroupMembers(GetGroupMembersCommand cmd) {
 		
-		List<GroupUserDTO> records = qualityService.getGroupMembers(cmd.getGroupId());
+		List<GroupUserDTO> records = qualityService.getGroupMembers(cmd.getGroupId(), true);
 		
 		RestResponse response = new RestResponse(records);
 		response.setErrorCode(ErrorCodes.SUCCESS);

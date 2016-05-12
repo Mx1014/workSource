@@ -217,24 +217,23 @@ public class RepeatServiceImpl implements RepeatService {
 		
 		if(repeat != null && repeat.getExpression() != null) {
 			List<RepeatExpressionDTO> expressionDto =  analyzeExpression(repeat.getExpression());
+			int result = -1;
 			
-			if(expressionDto != null && expressionDto.size() > 0) {
+			if(field == 1) {
+				
+				if(repeat.getEveryWorkdayFlag() != null && repeat.getEveryWorkdayFlag() == 1
+						&& (dayWeekNow == Calendar.SUNDAY || dayWeekNow == Calendar.SATURDAY)) {
+					result = -1;
+				} else {
+					result = (int)((now.getTime() - compareValue.getTime())/86400000);
+				}
+			} else if(expressionDto != null && expressionDto.size() > 0) {
 				for(RepeatExpressionDTO exp : expressionDto) {
-					int result = -1;
 					
 					if(field == 0) {
 						if(yearNow == exp.getYear() && monthNow == exp.getMonth() && dayNow == exp.getDay()) {
 							result = 0;
 						}
-					}
-					if(field == 1) {
-						if(repeat.getEveryWorkdayFlag() != null && repeat.getEveryWorkdayFlag() == 1
-								&& (dayWeekNow == Calendar.SUNDAY || dayWeekNow == Calendar.SATURDAY)) {
-							result = -1;
-						} else {
-							result = (int)((now.getTime() - compareValue.getTime())/86400000);
-						}
-						
 					}
 
 					if(field == 2) {
@@ -265,10 +264,9 @@ public class RepeatServiceImpl implements RepeatService {
 							result = -1;
 						}
 					}
-					
-					results.add(result);
 				}
 			}
+			results.add(result);
 		}
 		
 		return results;

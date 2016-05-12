@@ -1191,7 +1191,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_CLASS_NOT_FOUND,
 					"Unable to find the organization.");
 		}
-		this.checkUserHaveRightToNewTopic(cmd,organization);
+		//Temporarily do not check, delete by sfyan, 20160511
+//		this.checkUserHaveRightToNewTopic(cmd,organization);
 		/*if(cmd.getEmbeddedAppId() == null)
 			cmd.setEmbeddedAppId(AppConstants.APPID_ORGTASK);*/
 		PostDTO post = forumService.createTopic(cmd);
@@ -1584,6 +1585,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 				Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
 				org.setUpdateTime(now);
 				organizationProvider.updateOrganization(org);
+				
+				List<OrganizationCommunity> orgCommunities = organizationProvider.listOrganizationCommunities(org.getId());
+				
+				for (OrganizationCommunity orgCommunity : orgCommunities) {
+					organizationProvider.deleteOrganizationCommunityById(orgCommunity.getId());
+				}
+				
 			}
 			return null;
 		});
@@ -4538,19 +4546,33 @@ public class OrganizationServiceImpl implements OrganizationService {
 	public ListCommunityByNamespaceCommandResponse listCommunityByOrganizationId(
 			ListCommunityByNamespaceCommand cmd) {
 		int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-		List<OrganizationCommunity> organizationCommunitys = organizationProvider.listOrganizationCommunities(cmd.getOrganizationId());
+		
+		Organization organization = this.checkOrganization(cmd.getOrganizationId());
+		
+		List<String> groupTypes = new ArrayList<String>();
+		groupTypes.add(OrganizationGroupType.GROUP.getCode());
+		groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+		
+		List<Organization> orgs = organizationProvider.listOrganizationByGroupTypes(organization.getPath()+"/%", groupTypes);
+		orgs.add(organization);
 		ListCommunityByNamespaceCommandResponse res = new ListCommunityByNamespaceCommandResponse();
 		List<CommunityDTO> dtos = new ArrayList<CommunityDTO>();
-		for (OrganizationCommunity organizationCommunity : organizationCommunitys) {
-			Community community = communityProvider.findCommunityById(organizationCommunity.getCommunityId());
-			if(null == community){
-				continue;
-			}
-			if(community.getNamespaceId().equals(namespaceId)){
-				dtos.add(ConvertHelper.convert(community, CommunityDTO.class));
+		
+		for (Organization org : orgs) {
+			List<OrganizationCommunity> organizationCommunitys = organizationProvider.listOrganizationCommunities(org.getId());
+			for (OrganizationCommunity organizationCommunity : organizationCommunitys) {
+				Community community = communityProvider.findCommunityById(organizationCommunity.getCommunityId());
+				if(null == community){
+					continue;
+				}
+				if(community.getNamespaceId().equals(namespaceId)){
+					dtos.add(ConvertHelper.convert(community, CommunityDTO.class));
+				}
 			}
 		}
+		
 		res.setCommunities(dtos);
+		
 		return res;
 	}
 	
@@ -5015,6 +5037,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    
 		Map<Long, Organization> deptMaps = this.convertDeptListToMap(depts);
 		return organizationMembers.stream().map((c) ->{
+			Long organizationId = ownerId;
 			if(!StringUtils.isEmpty(c.getInitial())){
 				c.setInitial(c.getInitial().replace("~", "#"));
 			}
@@ -5032,8 +5055,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 				group = deptMaps.get(c.getGroupId());
 			}
 			 
-			if(null != group)
+			if(null != group){
 				dto.setGroupName(group.getName());
+				if(OrganizationGroupType.fromCode(group.getGroupType()) == OrganizationGroupType.GROUP){
+					organizationId = group.getId();
+				}
+			}
+				
 			
 			if(OrganizationMemberTargetType.USER.getCode().equals(dto.getTargetType())){
 				User user = userProvider.findUserById(dto.getTargetId());
@@ -5051,7 +5079,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			 * 补充用户角色
 			 */
 			if(c.getTargetType().equals(OrganizationMemberTargetType.USER.getCode())){
-				List<RoleAssignment> resources = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), ownerId, EntityType.USER.getCode(), c.getTargetId());
+				List<RoleAssignment> resources = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), c.getTargetId());
 				if(null != resources && 0 != resources.size()){
 					List<RoleDTO> roleDTOs = new ArrayList<RoleDTO>();
 					for (RoleAssignment resource : resources) {
@@ -5909,10 +5937,24 @@ public class OrganizationServiceImpl implements OrganizationService {
 			
 			Community community = communityProvider.findCommunityById(commuId);
 			Organization organization = this.checkOrganization(cmd.getOrganizationId());
+			
+			List<String> groupTypes = new ArrayList<String>();
+			groupTypes.add(OrganizationGroupType.GROUP.getCode());
+			groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+			groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+			
+			List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes(organization.getPath()+"/%", groupTypes);
+			
+			List<Long> organizationIds = new ArrayList<Long>();
+			organizationIds.add(organization.getId());
+			for (Organization org : organizations) {
+				organizationIds.add(org.getId());
+			}
+			
 			int pageSize = PaginationConfigHelper.getPageSize(configurationProvider,  cmd.getPageSize());
 			CrossShardListingLocator locator = new CrossShardListingLocator();
 			locator.setAnchor(cmd.getPageOffset());
-			List<OrganizationTask> orgTasks = organizationProvider.listOrganizationTasksByTypeOrStatus(locator, organization.getId(),cmd.getTargetId(), cmd.getTaskType(), cmd.getTaskStatus(),VisibleRegionType.COMMUNITY.getCode(),commuId, pageSize);
+			List<OrganizationTask> orgTasks = organizationProvider.listOrganizationTasksByTypeOrStatus(locator, organizationIds,cmd.getTargetId(), cmd.getTaskType(), cmd.getTaskStatus(),VisibleRegionType.COMMUNITY.getCode(),commuId, pageSize);
 			List<PostDTO> dtos = new ArrayList<PostDTO>();
 			for (OrganizationTask task : orgTasks) {
 				PostDTO dto = this.forumService.getTopicById(task.getApplyEntityId(),commuId,false);

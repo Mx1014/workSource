@@ -726,22 +726,38 @@ public class QualityServiceImpl implements QualityService {
 	}
 	
 	@Override
-	public List<GroupUserDTO> getGroupMembers(Long groupId) {
+	public List<GroupUserDTO> getGroupMembers(Long groupId, boolean isAll) {
 		User current = UserContext.current().getUser();
 		List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(groupId);
     	List<GroupUserDTO> groupUsers = members.stream().map((mem) -> {
-         	if(OrganizationMemberTargetType.USER.getCode().equals(mem.getTargetType()) 
-         			&& mem.getTargetId() != null && mem.getTargetId() != 0 && !mem.getTargetId().equals(current.getId())) {
-         		GroupUserDTO user = new GroupUserDTO();
-         		user.setOperatorType(mem.getTargetType());
-         		user.setUserId(mem.getTargetId());
-             	user.setUserName(mem.getContactName());
-             	user.setContact(mem.getContactToken());
-             	user.setEmployeeNo(mem.getEmployeeNo());
-             	return user;
-         	} else {
-         		return null;
-         	}
+    		if(isAll) {
+    			if(OrganizationMemberTargetType.USER.getCode().equals(mem.getTargetType()) 
+             			&& mem.getTargetId() != null && mem.getTargetId() != 0) {
+             		GroupUserDTO user = new GroupUserDTO();
+             		user.setOperatorType(mem.getTargetType());
+             		user.setUserId(mem.getTargetId());
+                 	user.setUserName(mem.getContactName());
+                 	user.setContact(mem.getContactToken());
+                 	user.setEmployeeNo(mem.getEmployeeNo());
+                 	return user;
+             	} else {
+             		return null;
+             	}
+    		} else {
+    			if(OrganizationMemberTargetType.USER.getCode().equals(mem.getTargetType()) 
+             			&& mem.getTargetId() != null && mem.getTargetId() != 0 && !mem.getTargetId().equals(current.getId())) {
+             		GroupUserDTO user = new GroupUserDTO();
+             		user.setOperatorType(mem.getTargetType());
+             		user.setUserId(mem.getTargetId());
+                 	user.setUserName(mem.getContactName());
+                 	user.setContact(mem.getContactToken());
+                 	user.setEmployeeNo(mem.getEmployeeNo());
+                 	return user;
+             	} else {
+             		return null;
+             	}
+    		}
+         	
          }).filter(member->member!=null).collect(Collectors.toList());
     	
     	return groupUsers;
@@ -775,7 +791,7 @@ public class QualityServiceImpl implements QualityService {
 			if(group != null)
 				dto.setGroupName(group.getName());
         	
-			List<GroupUserDTO> groupUsers = getGroupMembers(r.getExecutiveGroupId());
+			List<GroupUserDTO> groupUsers = getGroupMembers(r.getExecutiveGroupId(), false);
         	 
         	dto.setGroupUsers(groupUsers);
         	

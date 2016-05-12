@@ -184,9 +184,12 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public List<ListWebMenuPrivilegeDTO> listWebMenuPrivilege(ListWebMenuPrivilegeCommand cmd) {
 		User user = UserContext.current().getUser();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		List<Long> privilegeIds = this.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
 		List<WebMenuPrivilege> webMenuPrivileges = webMenuPrivilegeProvider.listWebMenuByPrivilegeIds(privilegeIds, null);
-		return this.getListWebMenuPrivilege(webMenuPrivileges);
+		List<WebMenuScope> webMenuScopes = webMenuPrivilegeProvider.listWebMenuScopeByOwnerId(EntityType.NAMESPACE.getCode(), Long.valueOf(namespaceId));
+		
+		return this.getListWebMenuPrivilege(webMenuPrivileges, webMenuScopes);
 	}
 	
 	@Override
@@ -289,7 +292,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		
 		List<WebMenuPrivilege> webMenuPrivileges = webMenuPrivilegeProvider.listWebMenuByPrivilegeIds(privilegeIds, null);
 		
-		return this.getListWebMenuPrivilege(webMenuPrivileges);
+		return this.getListWebMenuPrivilege(webMenuPrivileges, null);
 	}
 	
 	
@@ -630,6 +633,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     	
     	List<RoleAssignment> userRoles = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), userId);
     	
+    	LOGGER.debug("user[" + userId +  "] roles = " + userRoles);
+    	
     	if(null == org){
     		return new ArrayList<RoleAssignment>();
     	}
@@ -640,9 +645,14 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     		if(null != member && null != member.getGroupId() && 0 != member.getGroupId()){
     			childrenOrgId = member.getGroupId();
     		}
+    	}else if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.GROUP){
+    		childrenOrgId = org.getId();
+    		organizationId = org.getDirectlyEnterpriseId();
     	}
     	
     	List<RoleAssignment> userOrgRoles = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.ORGANIZATIONS.getCode(), childrenOrgId);
+    	
+    	LOGGER.debug("user[" + userId +  "] organization roles = " + userOrgRoles);
     	
     	userRoles.addAll(userOrgRoles);
     	
@@ -726,7 +736,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	 * @param webMenuPrivileges
 	 * @return
 	 */
-	private List<ListWebMenuPrivilegeDTO> getListWebMenuPrivilege(List<WebMenuPrivilege> webMenuPrivileges){
+	private List<ListWebMenuPrivilegeDTO> getListWebMenuPrivilege(List<WebMenuPrivilege> webMenuPrivileges, List<WebMenuScope> webMenuScopes){
 		
 		List<ListWebMenuPrivilegeDTO> dtos = new ArrayList<ListWebMenuPrivilegeDTO>();
 		
@@ -741,6 +751,14 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				dtosMap.put(r.getMenuId(), webMenuPrivilegeDTOs);
 			}else{
 				dtosMap.get(r.getMenuId()).add(webMenuPrivilegeDTO);
+			}
+		}
+		
+		if(null != webMenuScopes){
+			for (WebMenuScope webMenuScope : webMenuScopes) {
+				if(WebMenuScopeApplyPolicy.fromCode(webMenuScope.getApplyPolicy()) == WebMenuScopeApplyPolicy.DELETE){
+					dtosMap.remove(webMenuScope.getMenuId());
+				}
 			}
 		}
 		

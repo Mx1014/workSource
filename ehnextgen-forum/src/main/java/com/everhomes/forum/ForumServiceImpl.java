@@ -63,6 +63,7 @@ import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.CommunityAdminStatus;
+import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.community.CommunityType;
@@ -118,6 +119,7 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
@@ -1062,7 +1064,14 @@ public class ForumServiceImpl implements ForumService {
         Organization organization = checkOrganizationParameter(operatorId, organizationId, "listOrganizationTopics");
         List<Long> communityIdList = new ArrayList<Long>();
         if(null == communityId){
-        	communityIdList = organizationService.getOrganizationCommunityIdById(organizationId);
+        	ListCommunityByNamespaceCommand command = new ListCommunityByNamespaceCommand();
+        	command.setOrganizationId(organization.getId());;
+        	List<CommunityDTO> communities = organizationService.listCommunityByOrganizationId(command).getCommunities();
+        	if(null != communities){
+        		for (CommunityDTO communityDTO : communities) {
+        			communityIdList.add(communityDTO.getId());
+				}
+        	}
         }else{
         	communityIdList.add(communityId);
         }
@@ -3352,12 +3361,21 @@ public class ForumServiceImpl implements ForumService {
         case PARK_TOURIST:
             visibleRegionType = VisibleRegionType.COMMUNITY;
             visibleRegionId = sceneToken.getEntityId();
+            
+            // 在园区场景下，客户端可能使用错误的社区论坛（甚至不传），
+            if(topicCmd.getForumId() == null || topicCmd.getForumId() == ForumConstants.SYSTEM_FORUM) {
+                setCurrentForumId(topicCmd, visibleRegionId);
+            }
             break;
         case FAMILY:
             FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
             if(family != null) {
                 visibleRegionType = VisibleRegionType.COMMUNITY;
                 visibleRegionId = family.getCommunityId();
+                
+                if(topicCmd.getForumId() == null || topicCmd.getForumId() == ForumConstants.SYSTEM_FORUM) {
+                    setCurrentForumId(topicCmd, visibleRegionId);
+                }
             } else {
                 if(LOGGER.isWarnEnabled()) {
                     LOGGER.warn("Family not found, sceneToken=" + sceneToken);
@@ -3403,6 +3421,19 @@ public class ForumServiceImpl implements ForumService {
         topicCmd.setVisibleRegionId(visibleRegionId);
         
         return this.createTopic(topicCmd);
+    }
+    
+    /**
+     * 
+     * 小区场景下客户端传入默认论坛id时，找出当前小区论坛id代替 by xiongying 20160510
+     */
+    private void setCurrentForumId(NewTopicCommand topicCmd, Long communityId) {
+    	
+    	Community community = communityProvider.findCommunityById(communityId);
+    	
+    	if(community != null) {
+    		topicCmd.setForumId(community.getDefaultForumId());
+    	}
     }
     
     @Override

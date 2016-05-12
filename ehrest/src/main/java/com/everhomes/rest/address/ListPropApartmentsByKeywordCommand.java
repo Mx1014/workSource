@@ -22,6 +22,8 @@ public class ListPropApartmentsByKeywordCommand {
     private String buildingName;
     
     private String keyword;
+    
+    private Integer namespaceId;
 
     public ListPropApartmentsByKeywordCommand() {
     }
@@ -58,7 +60,15 @@ public class ListPropApartmentsByKeywordCommand {
         this.keyword = keyword;
     }
     
-    @Override
+    public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
