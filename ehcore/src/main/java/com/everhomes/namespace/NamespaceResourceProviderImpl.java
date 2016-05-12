@@ -54,7 +54,7 @@ public class NamespaceResourceProviderImpl implements NamespaceResourceProvider 
     public NamespaceDetail findNamespaceDetailByNamespaceId(Integer namespaceId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         List<NamespaceDetail> list = context.select().from(Tables.EH_NAMESPACE_DETAILS)
-            .where(Tables.EH_NAMESPACE_RESOURCES.NAMESPACE_ID.eq(namespaceId))
+            .where(Tables.EH_NAMESPACE_DETAILS.NAMESPACE_ID.eq(namespaceId))
             .fetch().map((r) -> {
                 return ConvertHelper.convert(r, NamespaceDetail.class);
             });
