@@ -8,7 +8,6 @@ import com.everhomes.util.StringHelper;
  * <ul> 注册流程，绑定已有用户到企业：根据已有用户ID创建企业用户，从而成为此企业的一个成员
  * <li>userId: 用户ID</li>
  * <li>enterpriseId: 可以具体指定到企业，或者由手机号自动查询到相关企业</li>
- * <li>communityId: 企业办公所在的园区/小区ID</li>
  * </ul>
  * @author janson
  *
@@ -24,7 +23,6 @@ public class CreateContactByUserIdCommand {
     private String   nickName;
     private String   avatar;
     private String applyGroup;
-    private Long communityId;
     
     public Long getEnterpriseId() {
         return enterpriseId;
@@ -68,12 +66,6 @@ public class CreateContactByUserIdCommand {
 	public void setGroupId(Long groupId) {
 		this.groupId = groupId;
 	}
-    public Long getCommunityId() {
-        return communityId;
-    }
-    public void setCommunityId(Long communityId) {
-        this.communityId = communityId;
-    }
     
     @Override
     public String toString() {
