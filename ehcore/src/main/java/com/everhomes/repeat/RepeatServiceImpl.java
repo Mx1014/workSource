@@ -138,11 +138,13 @@ public class RepeatServiceImpl implements RepeatService {
 
 		Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
 		RepeatSettings repeat = findRepeatSettingById(repeatSettingId);
+		LOGGER.info("isRepeatSettingActive: repeatSetting = " + repeat);
 		if(repeat.getStatus() == RepeatSettingStatus.ACTIVE.getCode()) {
 			if(repeat.getForeverFlag() == 1) {
 				Date date = timestampToDate(repeat.getCreateTime());
 				List<Integer> differences = getDateDifference(now, new Timestamp(date.getTime()),
 						repeat, repeat.getRepeatType());
+				LOGGER.info("isRepeatSettingActive: differences = " + differences + "; date = " + date);
 				for(Integer difference : differences) {
 					if(difference % repeat.getRepeatInterval() == 0) {
 						return true;
@@ -160,6 +162,7 @@ public class RepeatServiceImpl implements RepeatService {
 						if(expiredDate.after(now)) {
 							List<Integer> differences = getDateDifference(now, new Timestamp(repeat.getStartDate().getTime()),
 									repeat, repeat.getRepeatType());
+							LOGGER.info("isRepeatSettingActive: differences = " + differences + "; startDate = " + repeat.getStartDate());
 							for(Integer difference : differences) {
 								if(difference % repeat.getRepeatInterval() == 0) {
 									return true;
@@ -179,6 +182,7 @@ public class RepeatServiceImpl implements RepeatService {
 						if(endDate.after(now)) {
 							List<Integer> differences = getDateDifference(now, new Timestamp(repeat.getStartDate().getTime()),
 									repeat, repeat.getRepeatType());
+							LOGGER.info("isRepeatSettingActive: differences = " + differences + "; startDate = " + repeat.getStartDate());
 							for(Integer difference : differences) {
 								if(difference % repeat.getRepeatInterval() == 0) {
 									return true;
@@ -213,6 +217,8 @@ public class RepeatServiceImpl implements RepeatService {
 		int yearCompare = c.get(Calendar.YEAR);
 		int monthCompare = c.get(Calendar.MONTH);
 		
+		LOGGER.info("getDateDifference: yearNow = " + yearNow + "; monthNow = " + monthNow + "; dayWeekNow = "
+				+ dayWeekNow + "; dayNow = " + dayNow + "; yearCompare = " + yearCompare + "; monthCompare = " + monthCompare);
 		List<Integer> results = new ArrayList<Integer>();
 		
 		if(repeat != null && repeat.getExpression() != null) {
@@ -220,7 +226,6 @@ public class RepeatServiceImpl implements RepeatService {
 			int result = -1;
 			
 			if(field == 1) {
-				
 				if(repeat.getEveryWorkdayFlag() != null && repeat.getEveryWorkdayFlag() == 1
 						&& (dayWeekNow == Calendar.SUNDAY || dayWeekNow == Calendar.SATURDAY)) {
 					result = -1;

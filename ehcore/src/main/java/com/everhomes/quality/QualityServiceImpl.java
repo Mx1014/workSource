@@ -1106,6 +1106,7 @@ public class QualityServiceImpl implements QualityService {
 	
 	@Override
 	public void createTaskByStandard(QualityStandardsDTO standard) {
+		LOGGER.info("createTaskByStandard: " + standard);
 		if(standard.getExecutiveGroup() != null && standard.getExecutiveGroup().size() > 0) {
 
 			long current = System.currentTimeMillis();
@@ -1359,6 +1360,7 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public void createTaskByStandardId(Long id) {
+		LOGGER.info("createTaskByStandardId:" + id);
 		QualityInspectionStandards standard = qualityProvider.findStandardById(id);
 		if(standard != null &&standard.getStatus() != null || standard.getStatus() == QualityStandardStatus.ACTIVE.getCode()) {
 			this.qualityProvider.populateStandardGroups(standard);
