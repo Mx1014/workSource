@@ -41,6 +41,10 @@
 
 @property(nonatomic, copy) NSString* organizationType;
 
+@property(nonatomic, copy) NSString* longitude;
+
+@property(nonatomic, copy) NSString* latitude;
+
 // item type EvhOrganizationAddressDTO*
 @property(nonatomic, strong) NSMutableArray* addressDTOs;
 

@@ -55,6 +55,10 @@
 
 @property(nonatomic, copy) NSString* postUrl;
 
+@property(nonatomic, copy) NSString* longitude;
+
+@property(nonatomic, copy) NSString* latitude;
+
 @property(nonatomic, strong) EvhOrganizationMemberDTO* member;
 
 @property(nonatomic, strong) EvhCommunityDTO* community;

@@ -32,6 +32,8 @@
 {
     if(self.sceneToken)
         [jsonObject setObject: self.sceneToken forKey: @"sceneToken"];
+    if(self.isSignedup)
+        [jsonObject setObject: self.isSignedup forKey: @"isSignedup"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -40,6 +42,10 @@
         self.sceneToken = [jsonObject objectForKey: @"sceneToken"];
         if(self.sceneToken && [self.sceneToken isEqual:[NSNull null]])
             self.sceneToken = nil;
+
+        self.isSignedup = [jsonObject objectForKey: @"isSignedup"];
+        if(self.isSignedup && [self.isSignedup isEqual:[NSNull null]])
+            self.isSignedup = nil;
 
         return self;
     }

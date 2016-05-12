@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-05-10 10:36:43
+// generated at 2016-05-12 16:12:21
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -108,6 +108,7 @@ public interface ApiConstants {
     public static final String ADMIN_COMMUNITY_LISTCOMMUNITIESBYSTATUS_URL = "/admin/community/listCommunitiesByStatus";
     public static final String ADMIN_COMMUNITY_LISTCOMMUNITYAUTHUSERADDRESS_URL = "/admin/community/listCommunityAuthUserAddress";
     public static final String ADMIN_COMMUNITY_LISTOWNERBYCOMMUNITYID_URL = "/admin/community/listOwnerBycommunityId";
+    public static final String ADMIN_COMMUNITY_LISTUNASSIGNEDCOMMUNITIESBYNAMESPACEID_URL = "/admin/community/listUnassignedCommunitiesByNamespaceId";
     public static final String ADMIN_COMMUNITY_LISTUSERBYNOTJOINEDCOMMUNITY_URL = "/admin/community/listUserByNotJoinedCommunity";
     public static final String ADMIN_COMMUNITY_LISTUSERBYCOMMUNITYID_URL = "/admin/community/listUserBycommunityId";
     public static final String ADMIN_COMMUNITY_QRYCOMMUNITYUSERADDRESSBYUSERID_URL = "/admin/community/qryCommunityUserAddressByUserId";
@@ -556,6 +557,7 @@ public interface ApiConstants {
     public static final String ORG_LISTORGTOPICS_URL = "/org/listOrgTopics";
     public static final String ORG_LISTORGANIZATIONCOMMUNITIES_URL = "/org/listOrganizationCommunities";
     public static final String ORG_LISTORGANIZATIONCOMMUNITIESV2_URL = "/org/listOrganizationCommunitiesV2";
+    public static final String ORG_LISTORGANIZATIONTOPICS_URL = "/org/listOrganizationTopics";
     public static final String ORG_LISTTOPICSBYTYPE_URL = "/org/listTopicsByType";
     public static final String ORG_LISTUSERRELATEDENTERPRISES_URL = "/org/listUserRelatedEnterprises";
     public static final String ORG_LISTUSERRELATEDORGANIZATIONS_URL = "/org/listUserRelatedOrganizations";
