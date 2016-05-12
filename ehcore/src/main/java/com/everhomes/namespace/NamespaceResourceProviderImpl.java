@@ -39,7 +39,6 @@ public class NamespaceResourceProviderImpl implements NamespaceResourceProvider 
     @Override
     public List<NamespaceResource> listResourceByNamespace(Integer namespaceId, NamespaceResourceType type) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        context.select().from(Tables.EH_NAMESPACE_RESOURCES);
         List<NamespaceResource> list = context.select().from(Tables.EH_NAMESPACE_RESOURCES)
             .where(Tables.EH_NAMESPACE_RESOURCES.NAMESPACE_ID.eq(namespaceId))
             .and(Tables.EH_NAMESPACE_RESOURCES.RESOURCE_TYPE.eq(type.getCode()))
@@ -48,5 +47,23 @@ public class NamespaceResourceProviderImpl implements NamespaceResourceProvider 
             });
         
         return list;
+    }
+    
+    @Cacheable(value = "findNamespaceDetailByNamespaceId", key="#namespaceId", unless="#result == null")
+    @Override
+    public NamespaceDetail findNamespaceDetailByNamespaceId(Integer namespaceId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        List<NamespaceDetail> list = context.select().from(Tables.EH_NAMESPACE_DETAILS)
+            .where(Tables.EH_NAMESPACE_RESOURCES.NAMESPACE_ID.eq(namespaceId))
+            .fetch().map((r) -> {
+                return ConvertHelper.convert(r, NamespaceDetail.class);
+            });
+        
+        // eh_namespace_details表是eh_namespaces表的扩展属性表，每个namespace_id只会有一行记录
+        if(list != null && list.size() > 0) {
+            return list.get(0);
+        } else {
+            return null;
+        }
     }
 }
