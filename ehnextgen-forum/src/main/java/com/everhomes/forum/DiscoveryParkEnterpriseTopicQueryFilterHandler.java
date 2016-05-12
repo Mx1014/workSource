@@ -19,6 +19,7 @@ import com.everhomes.group.GroupService;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.ForumLocalStringCode;
 import com.everhomes.rest.group.GroupDTO;
@@ -54,6 +55,9 @@ public class DiscoveryParkEnterpriseTopicQueryFilterHandler implements TopicQuer
     
     @Autowired
     private OrganizationProvider organizationProvider;
+    
+    @Autowired
+    private OrganizationService organizationService;
 
     @Value("${server.contextPath:}")
     private String serverContectPath;
@@ -73,8 +77,9 @@ public class DiscoveryParkEnterpriseTopicQueryFilterHandler implements TopicQuer
         case ORGANIZATION:
             Organization organization = organizationProvider.findOrganizationById(sceneToken.getEntityId());
             if(organization != null) {
-                if(organization.getCommunityId() != null) {
-                    community = communityProvider.findCommunityById(organization.getCommunityId());
+                Long communityId = organizationService.getOrganizationActiveCommunityId(organization.getId());
+                if(communityId != null) {
+                    community = communityProvider.findCommunityById(communityId);
                 } else {
                     LOGGER.error("No community id found in organization, sceneToken=" + sceneToken);
                 }

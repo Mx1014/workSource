@@ -1935,8 +1935,10 @@ public class OrganizationServiceImpl implements OrganizationService {
                     EntityType.ORGANIZATIONS.getCode(), organization.getId()));
             }
         }
-        
-        Long communityId = organization.getCommunityId();
+
+        // 企业入驻的园区
+        Long communityId = getOrganizationActiveCommunityId(organization.getId());
+        // 园区对应的类型、论坛等信息
         if(communityId != null) {
             Community community = communityProvider.findCommunityById(communityId);
             if(community != null) {
@@ -6307,5 +6309,18 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	
 	    	return members;
 	    }
-	
+
+	@Override
+    public Long getOrganizationActiveCommunityId(Long organizationId) {
+        Long communityId = null;
+        OrganizationCommunityRequest orgCmntyRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(organizationId);
+        if(orgCmntyRequest != null) {
+            OrganizationCommunityRequestStatus status = OrganizationCommunityRequestStatus.fromCode(orgCmntyRequest.getMemberStatus());
+            if(status == OrganizationCommunityRequestStatus.ACTIVE) {
+                communityId = orgCmntyRequest.getCommunityId();
+            }
+        }
+        
+        return communityId;
+    }
 }

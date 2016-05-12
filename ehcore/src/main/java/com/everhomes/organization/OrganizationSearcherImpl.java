@@ -50,7 +50,8 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
             b.field("namespaceId", organization.getNamespaceId());
-            b.field("communityId", organization.getCommunityId());
+            Long communityId = organizationService.getOrganizationActiveCommunityId(organization.getId());
+            b.field("communityId", communityId);
             b.field("name", organization.getName());
             b.field("description", organization.getDescription());
             b.field("createTime", organization.getCreateTime());
