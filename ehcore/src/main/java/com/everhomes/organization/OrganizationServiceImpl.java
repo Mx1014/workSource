@@ -6349,4 +6349,16 @@ public class OrganizationServiceImpl implements OrganizationService {
         
         return communityId;
     }
+	
+	@Override
+	public OrganizationDTO getOrganizationById(Long organizationId) {
+	    if(organizationId == null) {
+	        return null;
+	    }
+	    
+	    User user = UserContext.current().getUser();
+	    Organization organization = organizationProvider.findOrganizationById(organizationId);
+	    
+	    return toOrganizationDTO(user.getId(), organization);
+	}
 }
