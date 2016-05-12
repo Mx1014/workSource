@@ -557,6 +557,7 @@ public interface ApiConstants {
     public static final String ORG_LISTORGTOPICS_URL = "/org/listOrgTopics";
     public static final String ORG_LISTORGANIZATIONCOMMUNITIES_URL = "/org/listOrganizationCommunities";
     public static final String ORG_LISTORGANIZATIONCOMMUNITIESV2_URL = "/org/listOrganizationCommunitiesV2";
+    public static final String ORG_LISTORGANIZATIONTOPICS_URL = "/org/listOrganizationTopics";
     public static final String ORG_LISTTOPICSBYTYPE_URL = "/org/listTopicsByType";
     public static final String ORG_LISTUSERRELATEDENTERPRISES_URL = "/org/listUserRelatedEnterprises";
     public static final String ORG_LISTUSERRELATEDORGANIZATIONS_URL = "/org/listUserRelatedOrganizations";

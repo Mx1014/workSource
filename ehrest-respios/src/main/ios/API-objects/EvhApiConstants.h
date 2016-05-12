@@ -554,6 +554,7 @@
 #define EVH_ORG_LISTORGTOPICS_URL @"/org/listOrgTopics"
 #define EVH_ORG_LISTORGANIZATIONCOMMUNITIES_URL @"/org/listOrganizationCommunities"
 #define EVH_ORG_LISTORGANIZATIONCOMMUNITIESV2_URL @"/org/listOrganizationCommunitiesV2"
+#define EVH_ORG_LISTORGANIZATIONTOPICS_URL @"/org/listOrganizationTopics"
 #define EVH_ORG_LISTTOPICSBYTYPE_URL @"/org/listTopicsByType"
 #define EVH_ORG_LISTUSERRELATEDENTERPRISES_URL @"/org/listUserRelatedEnterprises"
 #define EVH_ORG_LISTUSERRELATEDORGANIZATIONS_URL @"/org/listUserRelatedOrganizations"

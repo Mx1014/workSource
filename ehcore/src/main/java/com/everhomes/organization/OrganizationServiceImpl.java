@@ -148,6 +148,7 @@ import com.everhomes.rest.organization.GetOrgDetailCommand;
 import com.everhomes.rest.organization.ImportOrganizationPersonnelDataCommand;
 import com.everhomes.rest.organization.ImportOwnerDataCommand;
 import com.everhomes.rest.organization.ListAclRoleByUserIdCommand;
+import com.everhomes.rest.organization.ListCommunitiesByOrganizationIdCommand;
 import com.everhomes.rest.organization.ListDepartmentsCommand;
 import com.everhomes.rest.organization.ListDepartmentsCommandResponse;
 import com.everhomes.rest.organization.ListEnterprisesCommand;
@@ -238,6 +239,7 @@ import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.ui.privilege.EntrancePrivilege;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeCommand;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeResponse;
+import com.everhomes.rest.ui.user.ContactSignUpStatus;
 import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
@@ -1274,6 +1276,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 	public ListPostCommandResponse  queryTopicsByCategory(QueryOrganizationTopicCommand cmd) {
 		
 		return this.forumService.queryOrganizationTopics(cmd);
+	}
+	
+	@Override
+	public ListPostCommandResponse  listOrgTopics(QueryOrganizationTopicCommand cmd) {
+		
+		return this.forumService.listOrgTopics(cmd);
 	}
 
 	@Override
@@ -4272,7 +4280,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		orgCommoand.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
 		orgCommoand.setGroupType(org.getGroupType());
 		
-		List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getKeywords(),orgCommoand, locator, pageSize);
+		List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getKeywords(),orgCommoand, cmd.getIsSignedup(), locator, pageSize);
 		
 		if(pinyinFlag){
 			organizationMembers = convertPinyin(organizationMembers);
@@ -4342,7 +4350,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		orgCommoand.setStatus(OrganizationMemberStatus.WAITING_FOR_APPROVAL.getCode());
 		orgCommoand.setGroupType(org.getGroupType());
 		
-		List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getKeywords(), orgCommoand, locator, pageSize);
+		List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getKeywords(), orgCommoand, null, locator, pageSize);
 		
 		if(0 == organizationMembers.size()){
 			return response;
@@ -4546,8 +4554,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	@Override
 	public ListCommunityByNamespaceCommandResponse listCommunityByOrganizationId(
-			ListCommunityByNamespaceCommand cmd) {
-		int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+			ListCommunitiesByOrganizationIdCommand cmd) {
+		
+		int namespaceId = UserContext.getCurrentNamespaceId();
 		
 		Organization organization = this.checkOrganization(cmd.getOrganizationId());
 		
