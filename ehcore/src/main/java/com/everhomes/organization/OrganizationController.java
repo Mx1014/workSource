@@ -858,4 +858,18 @@ public class OrganizationController extends ControllerBase {
         return res;
       }
     
+     /**
+      * <b>URL: /org/listOrgTopics</b>
+      * <p>机构人员的帖子查询</p>
+      * @return 
+      */
+      @RequestMapping("listOrgTopics")
+      @RestReturn(value=ListPostCommandResponse.class)
+      public RestResponse listOrgTopics(@Valid QueryOrganizationTopicCommand cmd) {
+         RestResponse res = new RestResponse(organizationService.listOrgTopics(cmd));
+         res.setErrorCode(ErrorCodes.SUCCESS);
+         res.setErrorDescription("OK");
+         
+         return res;
+      }
 }

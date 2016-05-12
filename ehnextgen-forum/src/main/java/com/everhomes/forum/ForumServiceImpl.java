@@ -1056,6 +1056,66 @@ public class ForumServiceImpl implements ForumService {
         return dto;
     }
     
+    
+    public ListPostCommandResponse listOrgTopics(QueryOrganizationTopicCommand cmd){
+    	 long startTime = System.currentTimeMillis();
+    	 User operator = UserContext.current().getUser();
+    	 Long operatorId = operator.getId();
+    	 Long organizationId = cmd.getOrganizationId();
+         Long communityId = cmd.getCommunityId();
+         List<Long> forumIds = new ArrayList<Long>();
+         Organization organization = checkOrganizationParameter(operatorId, organizationId, "listOrganizationTopics");
+         List<Long> communityIdList = new ArrayList<Long>();
+         if(null == communityId){
+         	ListCommunityByNamespaceCommand command = new ListCommunityByNamespaceCommand();
+         	command.setOrganizationId(organization.getId());;
+         	List<CommunityDTO> communities = organizationService.listCommunityByOrganizationId(command).getCommunities();
+         	if(null != communities){
+         		for (CommunityDTO communityDTO : communities) {
+         			communityIdList.add(communityDTO.getId());
+         			forumIds.add(communityDTO.getDefaultForumId());
+ 				}
+         	}
+         }else{
+        	Community community = communityProvider.findCommunityById(communityId);
+         	communityIdList.add(community.getId());
+         	forumIds.add(community.getDefaultForumId());
+         }
+         
+         List<Long> categorys = new ArrayList<Long>();
+         
+         if(null != cmd.getContentCategory()){
+         	categorys.add(cmd.getContentCategory());
+         }
+         
+         if(null != cmd.getEmbeddedAppId()){
+         	if(AppConstants.APPID_ORGTASK == cmd.getEmbeddedAppId() && null == cmd.getContentCategory()){
+         		categorys = CategoryConstants.GA_RELATED_CATEGORIES;
+         	}
+         }
+         
+         Condition communityCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
+         communityCondition = communityCondition.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.in(communityIdList));
+         Condition regionCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.REGION.getCode());
+         regionCondition = regionCondition.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.eq(organizationId));
+         Condition condition = communityCondition.or(regionCondition).and(Tables.EH_FORUM_POSTS.FORUM_ID.in(forumIds));
+         if(null != cmd.getEmbeddedAppId()){
+        	 condition = condition.and(Tables.EH_FORUM_POSTS.EMBEDDED_APP_ID.eq(cmd.getEmbeddedAppId()));
+         }
+         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+         CrossShardListingLocator locator = new CrossShardListingLocator(ForumConstants.SYSTEM_FORUM);
+         locator.setAnchor(cmd.getPageAnchor());
+         
+         List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus());
+    	 if(LOGGER.isInfoEnabled()) {
+             long endTime = System.currentTimeMillis();
+             LOGGER.info("Query organization topics, userId=" + operatorId + ", size=" + dtos.size() 
+                 + ", elapse=" + (endTime - startTime) + ", cmd=" + cmd);
+         }   
+    	 return new ListPostCommandResponse(locator.getAnchor(), dtos); 
+    }
+    
+    
     public ListPostCommandResponse queryOrganizationTopics(QueryOrganizationTopicCommand cmd) {
         long startTime = System.currentTimeMillis();
         User operator = UserContext.current().getUser();
@@ -1096,17 +1156,54 @@ public class ForumServiceImpl implements ForumService {
         	}
         	
         }
+        Condition condition = null;
+        
+        if(null != cmd.getEmbeddedAppId()){
+        	condition = Tables.EH_FORUM_POSTS.EMBEDDED_APP_ID.eq(cmd.getEmbeddedAppId());
+        }
+        
         
         Condition visibilityCondition = buildGaRelatedPostQryConditionByOrganization(operatorId, organization, communityIdList);
 
         Long actionCategoryId = cmd.getActionCategory();
+        
         Condition categoryCondition = buildPostCategoryCondition(categorys, actionCategoryId);
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator(ForumConstants.SYSTEM_FORUM);
         locator.setAnchor(cmd.getPageAnchor());
         
-        Timestamp timestemp = new Timestamp(DateHelper.currentGMTTime().getTime());
+        if(null != condition){
+        	if(null != visibilityCondition)
+        		condition = condition.and(visibilityCondition);
+        	if(null != categoryCondition)
+        		condition = condition.and(categoryCondition);
+        }else{
+        	if(null != visibilityCondition)
+        		condition = visibilityCondition;
+        	if(null == condition){
+        		condition = categoryCondition;
+        	}else if(null != categoryCondition){
+        		condition = condition.and(categoryCondition);
+        	}
+        }
+        
+        List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus());
+        
+        
+        if(LOGGER.isInfoEnabled()) {
+            long endTime = System.currentTimeMillis();
+            LOGGER.info("Query organization topics, userId=" + operatorId + ", size=" + dtos.size() 
+                + ", elapse=" + (endTime - startTime) + ", cmd=" + cmd);
+        }        
+        
+        return new ListPostCommandResponse(locator.getAnchor(), dtos);
+    }
+    
+    private List<PostDTO> getOrgTopics(CrossShardListingLocator locator,Integer pageSize, Condition condition, String publishStatus){
+    	User user = UserContext.current().getUser();
+    	
+    	Timestamp timestemp = new Timestamp(DateHelper.currentGMTTime().getTime());
         
         List<Post> posts = this.forumProvider.queryPosts(locator, pageSize + 1, (loc, query) -> {
             query.addJoin(Tables.EH_FORUM_ASSIGNED_SCOPES, JoinType.LEFT_OUTER_JOIN, 
@@ -1114,43 +1211,37 @@ public class ForumServiceImpl implements ForumService {
             query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
             query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
             
-            if(TopicPublishStatus.fromCode(cmd.getPublishStatus()) == TopicPublishStatus.UNPUBLISHED){
+            if(TopicPublishStatus.fromCode(publishStatus) == TopicPublishStatus.UNPUBLISHED){
             	query.addConditions(Tables.EH_FORUM_POSTS.START_TIME.gt(timestemp));
             }
             
-            if(TopicPublishStatus.fromCode(cmd.getPublishStatus()) == TopicPublishStatus.PUBLISHED){
+            if(TopicPublishStatus.fromCode(publishStatus) == TopicPublishStatus.PUBLISHED){
             	query.addConditions(Tables.EH_FORUM_POSTS.START_TIME.lt(timestemp));
             	query.addConditions(Tables.EH_FORUM_POSTS.END_TIME.gt(timestemp));
             }
             
-            if(TopicPublishStatus.fromCode(cmd.getPublishStatus()) == TopicPublishStatus.EXPIRED){
+            if(TopicPublishStatus.fromCode(publishStatus) == TopicPublishStatus.EXPIRED){
             	query.addConditions(Tables.EH_FORUM_POSTS.END_TIME.lt(timestemp));
             }
             
             
-            if(visibilityCondition != null) {
-                query.addConditions(visibilityCondition);
-            }
-            if(categoryCondition != null) {
-                query.addConditions(categoryCondition);
+            if(condition != null) {
+                query.addConditions(condition);
             }
             
-            if(null != cmd.getEmbeddedAppId()){
-            	query.addConditions(Tables.EH_FORUM_POSTS.EMBEDDED_APP_ID.eq(cmd.getEmbeddedAppId()));
-            }
             return query;
         });
         this.forumProvider.populatePostAttachments(posts);
         
-        Long nextPageAnchor = null;
+        locator.setAnchor(null);
         if(posts.size() > pageSize) {
             posts.remove(posts.size() - 1);
-            nextPageAnchor = posts.get(posts.size() - 1).getId();
+            locator.setAnchor(posts.get(posts.size() - 1).getId());
         }
         
-        populatePosts(operatorId, posts, null, false);
+        populatePosts(user.getId(), posts, null, false);
         
-        List<PostDTO> postDtoList = posts.stream().map((r) -> {
+        return posts.stream().map((r) -> {
         	Timestamp s = r.getStartTime();
         	Timestamp e = r.getEndTime();
         	PostDTO dto= ConvertHelper.convert(r, PostDTO.class);
@@ -1173,14 +1264,6 @@ public class ForumServiceImpl implements ForumService {
         	
           return dto;  
         }).collect(Collectors.toList());
-        
-        if(LOGGER.isInfoEnabled()) {
-            long endTime = System.currentTimeMillis();
-            LOGGER.info("Query organization topics, userId=" + operatorId + ", size=" + postDtoList.size() 
-                + ", elapse=" + (endTime - startTime) + ", cmd=" + cmd);
-        }        
-        
-        return new ListPostCommandResponse(nextPageAnchor, postDtoList);
     }
     
     @Override

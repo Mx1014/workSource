@@ -1275,6 +1275,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		return this.forumService.queryOrganizationTopics(cmd);
 	}
+	
+	@Override
+	public ListPostCommandResponse  listOrgTopics(QueryOrganizationTopicCommand cmd) {
+		
+		return this.forumService.listOrgTopics(cmd);
+	}
 
 	@Override
 	public ListPostCommandResponse listTopics(ListTopicCommand cmd) {
