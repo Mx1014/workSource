@@ -5,7 +5,6 @@ package com.everhomes.forum;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -67,7 +66,6 @@ import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryConstants;
-import com.everhomes.rest.category.CategoryType;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.AssignTopicScopeCommand;
@@ -121,7 +119,7 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
+import com.everhomes.rest.organization.ListCommunitiesByOrganizationIdCommand;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
@@ -1067,7 +1065,7 @@ public class ForumServiceImpl implements ForumService {
          Organization organization = checkOrganizationParameter(operatorId, organizationId, "listOrganizationTopics");
          List<Long> communityIdList = new ArrayList<Long>();
          if(null == communityId){
-         	ListCommunityByNamespaceCommand command = new ListCommunityByNamespaceCommand();
+        	 ListCommunitiesByOrganizationIdCommand command = new ListCommunitiesByOrganizationIdCommand();
          	command.setOrganizationId(organization.getId());;
          	List<CommunityDTO> communities = organizationService.listCommunityByOrganizationId(command).getCommunities();
          	if(null != communities){
@@ -1126,7 +1124,7 @@ public class ForumServiceImpl implements ForumService {
         Organization organization = checkOrganizationParameter(operatorId, organizationId, "listOrganizationTopics");
         List<Long> communityIdList = new ArrayList<Long>();
         if(null == communityId){
-        	ListCommunityByNamespaceCommand command = new ListCommunityByNamespaceCommand();
+        	ListCommunitiesByOrganizationIdCommand command = new ListCommunitiesByOrganizationIdCommand();
         	command.setOrganizationId(organization.getId());;
         	List<CommunityDTO> communities = organizationService.listCommunityByOrganizationId(command).getCommunities();
         	if(null != communities){
