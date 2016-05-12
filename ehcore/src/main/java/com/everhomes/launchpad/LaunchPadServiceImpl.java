@@ -278,18 +278,18 @@ public class LaunchPadServiceImpl implements LaunchPadService {
        getCmd.setNamespaceId(sceneToken.getNamespaceId());
        
        SceneTypeInfo sceneInfo = sceneService.getBaseSceneTypeByName(sceneToken.getNamespaceId(), sceneToken.getScene());
-       String sceneStr = sceneToken.getScene();
+       String baseScene = sceneToken.getScene();
        if(sceneInfo != null) {
-           sceneStr = sceneInfo.getName();
+           baseScene = sceneInfo.getName();
            if(LOGGER.isDebugEnabled()) {
                LOGGER.debug("Scene type is changed, sceneToken={}, newScene={}", sceneToken, sceneInfo.getName());
            }
        } 
-       getCmd.setSceneType(sceneStr);
+       getCmd.setSceneType(baseScene);
        
        Community community = null;
        GetLaunchPadItemsCommandResponse cmdResponse = null;
-       SceneType sceneType = SceneType.fromCode(sceneStr);
+       SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
        switch(sceneType) {
        case DEFAULT:
        case PARK_TOURIST:
