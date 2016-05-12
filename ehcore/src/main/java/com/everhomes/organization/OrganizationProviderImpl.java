@@ -63,6 +63,7 @@ import com.everhomes.rest.organization.OrganizationTaskType;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.pm.OrganizationScopeCode;
 import com.everhomes.rest.techpark.company.ContactType;
+import com.everhomes.rest.ui.user.ContactSignUpStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhOrganizationAddressesDao;
@@ -1416,7 +1417,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 	
 	@Override
-	public List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, CrossShardListingLocator locator,Integer pageSize) {
+	public List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, CrossShardListingLocator locator,Integer pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		pageSize = pageSize + 1;
 		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
@@ -1433,6 +1434,11 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			Condition cond1 = Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(keywords);
 			cond1 = cond1.or(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.eq(keywords));
 			cond = cond.and(cond1);
+		}
+
+		if(contactSignedupStatus != null && contactSignedupStatus == ContactSignUpStatus.SIGNEDUP.getCode()) {
+			cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.ne(0L));
+			cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()));
 		}
 		
 		query.addConditions(cond);

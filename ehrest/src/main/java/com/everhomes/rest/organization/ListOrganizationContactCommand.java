@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>organizationId：政府机构id</li>
+ * <li>isSignedup: 是否左邻注册用户</li>
  * <li>pageAnchor: 页码</li>
  * <li>pageSize: 每页大小</li>
  * </ul>
@@ -15,6 +16,7 @@ import com.everhomes.util.StringHelper;
 public class ListOrganizationContactCommand {
 	@NotNull
 	private Long    organizationId;
+	private Byte isSignedup;
 	private Integer pageOffset;
 	private Long pageAnchor; 
 	private Integer pageSize;
@@ -34,6 +36,13 @@ public class ListOrganizationContactCommand {
 		this.organizationId = organizationId;
 	}
 
+	public Byte getIsSignedup() {
+		return isSignedup;
+	}
+
+	public void setIsSignedup(Byte isSignedup) {
+		this.isSignedup = isSignedup;
+	}
 
 	public Integer getPageOffset() {
 		return pageOffset;

@@ -112,6 +112,7 @@ public class UserUiController extends ControllerBase {
 			ListOrganizationContactCommand command = new ListOrganizationContactCommand();
 			command.setOrganizationId(sceneToken.getEntityId());
 			command.setPageSize(100000);
+			command.setIsSignedup(cmd.getIsSignedup());
 			ListOrganizationMemberCommandResponse res = organizationService.listOrganizationPersonnels(command, true);
 			List<OrganizationMemberDTO> members = res.getMembers();
 			if(null != members){
