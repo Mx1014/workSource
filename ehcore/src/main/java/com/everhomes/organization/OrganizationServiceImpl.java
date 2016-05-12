@@ -683,7 +683,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 	        
 	        this.organizationProvider.createOrganizationCommunityRequest(organizationCommunityRequest);
 			
-	        organization.setCommunityId(cmd.getCommunityId());
+	        // 把企业所在的小区信息放到eh_organization_community_requests表，从eh_organizations表删除掉，以免重复 by lqs 20160512
+	        //organization.setCommunityId(cmd.getCommunityId());
 	        organization.setDescription(enterprise.getDescription());
 	        
 	        organizationSearcher.feedDoc(organization);
@@ -774,7 +775,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 			organizationDetail.setPostUri(cmd.getPostUri());
 			organizationProvider.updateOrganizationDetail(organizationDetail);
 			
-			organization.setCommunityId(cmd.getCommunityId());
+			// 把小区ID移到eh_organization_community_requests后，在企业更新时需要补充小区修改，但修改小区逻辑未想好故暂时不支持 by lqs 20160512
+//			if(cmd.getCommunityId() != null) {
+//			    OrganizationCommunityRequest orgCmntyRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(organization.getId());
+//			    if(orgCmntyRequest != null) {
+//			        orgCmntyRequest.setCommunityId(cmd.getCommunityId());
+//			        organizationProvider.updateOrganizationCommunityRequest(orgCmntyRequest);
+//			    }
+//			}
+			// 把企业所在的小区信息放到eh_organization_community_requests表，从eh_organizations表删除掉，以免重复 by lqs 20160512
+			// organization.setCommunityId(cmd.getCommunityId());
 	        organization.setDescription(organizationDetail.getDescription());
 	        organizationSearcher.feedDoc(organization);
 			return null;
@@ -5215,10 +5225,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 			OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(r.getId());
 			if(null != detail)
 				r.setDescription(detail.getDescription());
-			
-			OrganizationCommunityRequest request = organizationProvider.getOrganizationCommunityRequestByOrganizationId(r.getId());
-			if(request != null)
-				r.setCommunityId(request.getCommunityId());
+
+            // 把企业所在的小区信息放到eh_organization_community_requests表，从eh_organizations表删除掉，以免重复 by lqs 20160512
+//			OrganizationCommunityRequest request = organizationProvider.getOrganizationCommunityRequestByOrganizationId(r.getId());
+//			if(request != null)
+//				r.setCommunityId(request.getCommunityId());
 			return r;
 		}).collect(Collectors.toList());
 		
