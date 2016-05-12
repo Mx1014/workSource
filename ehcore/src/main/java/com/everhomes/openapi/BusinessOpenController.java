@@ -21,6 +21,11 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.address.ApartmentDTO;
+import com.everhomes.rest.address.BuildingDTO;
+import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.address.ListBuildingByKeywordCommand;
+import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.business.BusinessAsignedNamespaceCommand;
 import com.everhomes.rest.business.GetReceivedCouponCountCommand;
@@ -36,6 +41,8 @@ import com.everhomes.rest.business.UserFavoriteCommand;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.category.CategoryDTO;
+import com.everhomes.rest.community.GetCommunitiesByNameAndCityIdCommand;
+import com.everhomes.rest.community.GetCommunityByIdCommand;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -44,6 +51,8 @@ import com.everhomes.rest.openapi.BusinessMessageCommand;
 import com.everhomes.rest.openapi.GetUserServiceAddressCommand;
 import com.everhomes.rest.openapi.UserCouponsCommand;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.region.ListRegionByKeywordCommand;
+import com.everhomes.rest.region.RegionDTO;
 import com.everhomes.rest.ui.user.UserProfileDTO;
 import com.everhomes.rest.user.FindTokenByUserIdCommand;
 import com.everhomes.rest.user.GetUserByUuidResponse;
@@ -477,4 +486,74 @@ public class BusinessOpenController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	/**
+     * <b>URL: /openapi/listBuildingsByKeyword</b>
+     * <p>根据小区Id和关键字查询小区楼栋</p>
+     */
+    @RequestMapping("listBuildingsByKeyword")
+    @RestReturn(value=BuildingDTO.class, collection=true)
+    public RestResponse listBuildingsByKeyword(@Valid ListBuildingByKeywordCommand cmd) {
+        Tuple<Integer, List<BuildingDTO>> data = this.businessService.listBuildingsByKeyword(cmd);
+        RestResponse response = new RestResponse(data.second());
+        response.setErrorCode(data.first());
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /openapi/listApartmentsByKeyword</b>
+     * <p>根据小区Id、楼栋号和关键字查询门牌</p>
+     */
+    @RequestMapping("listApartmentsByKeyword")
+    @RestReturn(value=ApartmentDTO.class, collection=true)
+    public RestResponse listApartmentsByKeyword(@Valid ListPropApartmentsByKeywordCommand cmd) {
+        Tuple<Integer, List<ApartmentDTO>> data = this.businessService.listApartmentsByKeyword(cmd);
+        RestResponse response = new RestResponse(data.second());
+        response.setErrorCode(data.first());
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /api/getCommunitiesByNameAndCityId</b>
+     * <p>根据小区名称和城市id搜索小区</p>
+     */
+    @RequestMapping("getCommunitiesByNameAndCityId")
+    @RestReturn(value=CommunityDTO.class, collection=true)
+    public RestResponse getCommunitiesByNameAndCityId(@Valid GetCommunitiesByNameAndCityIdCommand cmd) {
+        List<CommunityDTO> data = this.businessService.getCommunitiesByNameAndCityId(cmd);
+        RestResponse response =  new RestResponse(data);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /openapi/getCommunityById</b>
+     * <p>根据园区ID获取园区信息</p>
+     */
+    @RequestMapping("getCommunityById")
+    @RestReturn(value=CommunityDTO.class)
+    public RestResponse getCommunityById(@Valid GetCommunityByIdCommand cmd) {
+        CommunityDTO data = this.businessService.getCommunityById(cmd);
+        RestResponse response =  new RestResponse(data);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /openapi/listRegionByKeyword</b>
+     * <p>根据关键字查询区域信息，查询下级区域，需要传入父级区域标识</p>
+     */
+    @RequestMapping("listRegionByKeyword")
+    @RestReturn(value=RegionDTO.class, collection=true)
+    public RestResponse listRegionByKeyword(@Valid ListRegionByKeywordCommand cmd) {
+    	List<RegionDTO> data = this.businessService.listRegionByKeyword(cmd);
+        RestResponse response =  new RestResponse(data);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

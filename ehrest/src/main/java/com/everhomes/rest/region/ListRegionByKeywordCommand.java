@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>sortBy</li>
  * <li>sortOrder: 升降排序的方式，{@link com.everhomes.util.SortOrder}</li>
  * <li>keyword: 关键字</li>
+ * <li>namespaceId: 域空间</li>
  * </ul>
  */
 public class ListRegionByKeywordCommand {
@@ -24,6 +25,7 @@ public class ListRegionByKeywordCommand {
     private Byte sortOrder;
     @NotNull
     private String keyword;
+    private Integer namespaceId;
     
     public ListRegionByKeywordCommand() {
     }
@@ -76,7 +78,15 @@ public class ListRegionByKeywordCommand {
         this.keyword = keyword;
     }
 
-    @Override
+    public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
