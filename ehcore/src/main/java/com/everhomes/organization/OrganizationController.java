@@ -42,6 +42,7 @@ import com.everhomes.rest.organization.DeleteOrganizationCommunityCommand;
 import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
 import com.everhomes.rest.organization.GetOrgDetailCommand;
 import com.everhomes.rest.organization.GetUserResourcePrivilege;
+import com.everhomes.rest.organization.ListCommunitiesByOrganizationIdCommand;
 import com.everhomes.rest.organization.ListEnterprisesCommand;
 import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
 import com.everhomes.rest.organization.ListOrganizationCommunityCommand;
@@ -820,7 +821,7 @@ public class OrganizationController extends ControllerBase {
      */
     @RequestMapping("listCommunitiesByOrganizationId")
     @RestReturn(value=String.class)
-    public RestResponse listCommunitiesByOrganizationId(@Valid ListCommunityByNamespaceCommand cmd) {
+    public RestResponse listCommunitiesByOrganizationId(@Valid ListCommunitiesByOrganizationIdCommand cmd) {
     
         RestResponse response = new RestResponse(this.organizationService.listCommunityByOrganizationId(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);

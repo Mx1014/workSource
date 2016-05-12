@@ -148,6 +148,7 @@ import com.everhomes.rest.organization.GetOrgDetailCommand;
 import com.everhomes.rest.organization.ImportOrganizationPersonnelDataCommand;
 import com.everhomes.rest.organization.ImportOwnerDataCommand;
 import com.everhomes.rest.organization.ListAclRoleByUserIdCommand;
+import com.everhomes.rest.organization.ListCommunitiesByOrganizationIdCommand;
 import com.everhomes.rest.organization.ListDepartmentsCommand;
 import com.everhomes.rest.organization.ListDepartmentsCommandResponse;
 import com.everhomes.rest.organization.ListEnterprisesCommand;
@@ -4524,8 +4525,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	@Override
 	public ListCommunityByNamespaceCommandResponse listCommunityByOrganizationId(
-			ListCommunityByNamespaceCommand cmd) {
-		int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+			ListCommunitiesByOrganizationIdCommand cmd) {
+		
+		int namespaceId = UserContext.getCurrentNamespaceId();
 		
 		Organization organization = this.checkOrganization(cmd.getOrganizationId());
 		
