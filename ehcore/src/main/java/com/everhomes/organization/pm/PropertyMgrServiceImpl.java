@@ -1233,13 +1233,15 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 		this.checkCommunityIdIsNull(cmd.getCommunityId());
 		
-		/**
-		 * 调度执行一键推送
-		 */
-		Job job = new Job(SendNoticeAction.class.getName(),
-                new Object[]{ cmd, this });
+		this.pushMessage(cmd);
 		
-        jesqueClientFactory.getClientPool().enqueue("pushMessage", job);
+//		/**
+//		 * 调度执行一键推送
+//		 */
+//		Job job = new Job(SendNoticeAction.class.getName(),
+//                new Object[]{ cmd, this });
+//		
+//        jesqueClientFactory.getClientPool().enqueue("pushMessage", job);
 
 	}
 	
