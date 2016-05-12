@@ -38,6 +38,8 @@
         [jsonObject setObject: self.buildingName forKey: @"buildingName"];
     if(self.keyword)
         [jsonObject setObject: self.keyword forKey: @"keyword"];
+    if(self.namespaceId)
+        [jsonObject setObject: self.namespaceId forKey: @"namespaceId"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -58,6 +60,10 @@
         self.keyword = [jsonObject objectForKey: @"keyword"];
         if(self.keyword && [self.keyword isEqual:[NSNull null]])
             self.keyword = nil;
+
+        self.namespaceId = [jsonObject objectForKey: @"namespaceId"];
+        if(self.namespaceId && [self.namespaceId isEqual:[NSNull null]])
+            self.namespaceId = nil;
 
         return self;
     }

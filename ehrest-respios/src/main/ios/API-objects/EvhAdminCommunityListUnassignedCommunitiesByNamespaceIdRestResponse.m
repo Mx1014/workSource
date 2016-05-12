@@ -1,20 +1,20 @@
 //
-// EvhAdminCommunityUpdateBuildingRestResponse.m
+// EvhAdminCommunityListUnassignedCommunitiesByNamespaceIdRestResponse.m
 //
-#import "EvhAdminCommunityUpdateBuildingRestResponse.h"
-#import "EvhBuildingDTO.h"
+#import "EvhAdminCommunityListUnassignedCommunitiesByNamespaceIdRestResponse.h"
+#import "EvhCommunityDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhAdminCommunityUpdateBuildingRestResponse
+// EvhAdminCommunityListUnassignedCommunitiesByNamespaceIdRestResponse
 //
 
-@implementation EvhAdminCommunityUpdateBuildingRestResponse
+@implementation EvhAdminCommunityListUnassignedCommunitiesByNamespaceIdRestResponse
 
 +(id) withJsonString: (NSString*) jsonString
 {
     id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
     if(jsonObject != nil) {
-        EvhAdminCommunityUpdateBuildingRestResponse* obj = [EvhAdminCommunityUpdateBuildingRestResponse new];
+        EvhAdminCommunityListUnassignedCommunitiesByNamespaceIdRestResponse* obj = [EvhAdminCommunityListUnassignedCommunitiesByNamespaceIdRestResponse new];
         return [obj fromJson:jsonObject];
     }
     return nil;
@@ -45,7 +45,7 @@
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
         [super fromJson: jsonObject];
         NSMutableDictionary* dic =  (NSMutableDictionary*)[jsonObject objectForKey: @"response"];
-        self.response = [EvhBuildingDTO new];
+        self.response = [EvhCommunityDTO new];
         self.response = [self.response fromJson: dic];
         return self;
     }

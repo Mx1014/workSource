@@ -13,6 +13,8 @@
 
 @property(nonatomic, copy) NSString* sceneToken;
 
+@property(nonatomic, copy) NSNumber* isSignedup;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 

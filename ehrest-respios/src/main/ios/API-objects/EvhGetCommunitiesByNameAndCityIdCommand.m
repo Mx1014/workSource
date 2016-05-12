@@ -34,6 +34,8 @@
         [jsonObject setObject: self.cityId forKey: @"cityId"];
     if(self.name)
         [jsonObject setObject: self.name forKey: @"name"];
+    if(self.namespaceId)
+        [jsonObject setObject: self.namespaceId forKey: @"namespaceId"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -46,6 +48,10 @@
         self.name = [jsonObject objectForKey: @"name"];
         if(self.name && [self.name isEqual:[NSNull null]])
             self.name = nil;
+
+        self.namespaceId = [jsonObject objectForKey: @"namespaceId"];
+        if(self.namespaceId && [self.namespaceId isEqual:[NSNull null]])
+            self.namespaceId = nil;
 
         return self;
     }
