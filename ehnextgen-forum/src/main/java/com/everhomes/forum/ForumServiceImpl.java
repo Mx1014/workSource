@@ -3549,7 +3549,7 @@ public class ForumServiceImpl implements ForumService {
             return filterList;
         }
         
-        String handlerName = TopicQueryFilterHandler.TOPIC_QUERY_FILTER_PREFIX + filterType + "_" + sceneToken.getScene();
+        String handlerName = TopicQueryFilterHandler.TOPIC_QUERY_FILTER_PREFIX + filterType.getCode() + "_" + sceneToken.getScene();
         TopicQueryFilterHandler handler = PlatformContext.getComponent(handlerName);
         if(handler != null) {
             filterList = handler.getTopicQueryFilters(user, sceneToken); 
