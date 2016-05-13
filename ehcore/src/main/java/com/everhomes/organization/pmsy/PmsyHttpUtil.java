@@ -59,9 +59,14 @@ public class PmsyHttpUtil {
                 StringBuilder sb = new StringBuilder();
                 if (entity != null) {
                 	InputStream instream = entity.getContent();
-                	int l = 0;
-                	while((l = instream.read(bytes, 0, bytes.length)) != -1){
-                		sb.append(new String(bytes,0,l));
+                	BufferedReader reader =new BufferedReader(new InputStreamReader(instream,"utf8"));
+//                	int l = 0;
+//                	while((l = instream.read(bytes, 0, bytes.length)) != -1){
+//                		sb.append(new String(bytes,0,l,"UTF-8"));
+//                	}
+                	String s;
+                	while((s = reader.readLine()) != null){
+                		sb.append(s);
                 	}
                 	System.out.println(sb.toString());
                 			//sb.substring(sb.indexOf(">{")+2, sb.indexOf("</string>"));
@@ -88,6 +93,7 @@ public class PmsyHttpUtil {
 	public static void main(String[] args) {
 		
 String json1 = PmsyHttpUtil.post("UserRev_GetFeeList", "00100120091000000001", "","", "00100020090900000003", "01", "", "");
+System.out.println(json1);
 //Gson gson = new Gson();
 //		System.out.println(json1);
 //		Map map_ = gson.fromJson(json1, Map.class);
@@ -95,7 +101,7 @@ String json1 = PmsyHttpUtil.post("UserRev_GetFeeList", "00100120091000000001", "
 //		List list_ = (List) map_.get("UserRev_GetFeeList");
 //		Map map2_ = (Map) list_.get(0);
 //		List list2_ = (List) map2_.get("Syswin");
-		sendPost();
+//		sendPost();
 //		String json = post("UserRev_OwnerVerify","尹秀容","13800010001","","","","","");
 //		Gson gson = new Gson();
 //		Map map = gson.fromJson(json, Map.class);
