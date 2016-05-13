@@ -3934,22 +3934,39 @@ public class ForumServiceImpl implements ForumService {
         Long userId = user.getId();
         SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
         
+        // 增加园区场景，由于很多代码是重复复制的，故把它们转移到Handler里进行构造，方便以后增加新场景只需要增加相应的handler即可 by lqs 20160510
+//        List<TopicScopeDTO> sentScopeList = null;
+//        PostSentScopeType sentScopeType = PostSentScopeType.fromCode(cmd.getScopeType());
+//        if(sentScopeType != null) {
+//            switch(sentScopeType) {
+//            case DISCOVERY:
+//                sentScopeList = getDiscoveryTopicSentScopes(user, sceneToken);
+//                break;
+//            case GA:
+//                break;
+//            default:
+//                LOGGER.error("Unsupported post filter type, cmd=" + cmd + ", sceneToken=" + sceneToken);
+//                break;
+//            }
+//        } else {
+//            LOGGER.error("Post filter type is null, cmd=" + cmd + ", sceneToken=" + sceneToken);
+//        }
+        
         List<TopicScopeDTO> sentScopeList = null;
-        PostSentScopeType sentScopeType = PostSentScopeType.fromCode(cmd.getScopeType());
-        if(sentScopeType != null) {
-            switch(sentScopeType) {
-            case DISCOVERY:
-                sentScopeList = getDiscoveryTopicSentScopes(user, sceneToken);
-                break;
-            case GA:
-                break;
-            default:
-                LOGGER.error("Unsupported post filter type, cmd=" + cmd + ", sceneToken=" + sceneToken);
-                break;
-            }
-        } else {
-            LOGGER.error("Post filter type is null, cmd=" + cmd + ", sceneToken=" + sceneToken);
+        PostFilterType filterType = PostFilterType.fromCode(cmd.getScopeType());
+        if(filterType == null) {
+            LOGGER.error("Unsupported post sent scope type, cmd={}, sceneToken={}", cmd, sceneToken);
+            return sentScopeList;
         }
+        
+        String handlerName = PostSceneHandler.TOPIC_QUERY_FILTER_PREFIX + filterType.getCode() + "_" + sceneToken.getScene();
+        PostSceneHandler handler = PlatformContext.getComponent(handlerName);
+        if(handler != null) {
+            sentScopeList = handler.getTopicSentScopes(user, sceneToken);
+        } else {
+            LOGGER.error("No handler found for post sent scope, cmd={}, sceneToken={}, handlerName={}", cmd, sceneToken, handlerName);
+        }
+        
         
         return sentScopeList;
     }

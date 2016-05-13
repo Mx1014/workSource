@@ -74,7 +74,7 @@ public class DiscoveryParkEnterprisePostSceneHandler extends DiscoveryParkTouris
     }
 
     @Override
-    public List<TopicScopeDTO> getDiscoveryTopicSentScopes(User user, SceneTokenDTO sceneToken) {
+    public List<TopicScopeDTO> getTopicSentScopes(User user, SceneTokenDTO sceneToken) {
         List<TopicScopeDTO> scopeList = new ArrayList<TopicScopeDTO>();
         SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
         if(sceneType == SceneType.PARK_ENTERPRISE) {

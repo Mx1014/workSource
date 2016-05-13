@@ -199,7 +199,7 @@ public class DiscoveryParkTouristPostSceneHandler implements PostSceneHandler {
     }
 
     @Override
-    public List<TopicScopeDTO> getDiscoveryTopicSentScopes(User user, SceneTokenDTO sceneToken) {
+    public List<TopicScopeDTO> getTopicSentScopes(User user, SceneTokenDTO sceneToken) {
         List<TopicScopeDTO> filterList = new ArrayList<TopicScopeDTO>();
         
         SceneType sceneType = SceneType.fromCode(sceneToken.getScene());

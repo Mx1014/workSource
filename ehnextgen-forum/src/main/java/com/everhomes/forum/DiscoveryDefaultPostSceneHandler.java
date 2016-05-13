@@ -198,7 +198,7 @@ public class DiscoveryDefaultPostSceneHandler implements PostSceneHandler {
     }
 
     @Override
-    public List<TopicScopeDTO> getDiscoveryTopicSentScopes(User user, SceneTokenDTO sceneToken) {
+    public List<TopicScopeDTO> getTopicSentScopes(User user, SceneTokenDTO sceneToken) {
         List<TopicScopeDTO> filterList = new ArrayList<TopicScopeDTO>();
         Community community = null;
         SceneType sceneType = SceneType.fromCode(sceneToken.getScene());

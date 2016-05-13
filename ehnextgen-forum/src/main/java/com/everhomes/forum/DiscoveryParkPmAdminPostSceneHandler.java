@@ -28,7 +28,7 @@ public class DiscoveryParkPmAdminPostSceneHandler extends DiscoveryPmAdminPostSc
     }
     
     @Override
-    public List<TopicScopeDTO> getDiscoveryTopicSentScopes(User user, SceneTokenDTO sceneTokenDto) {
+    public List<TopicScopeDTO> getTopicSentScopes(User user, SceneTokenDTO sceneTokenDto) {
         SceneType sceneType = SceneType.fromCode(sceneTokenDto.getScene());
         if(sceneType == SceneType.PARK_PM_ADMIN) {
             LOGGER.error("Unsupported scene for simple user, sceneToken={}", sceneTokenDto);

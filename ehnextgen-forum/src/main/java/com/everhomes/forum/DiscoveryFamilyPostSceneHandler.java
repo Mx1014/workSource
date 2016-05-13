@@ -47,7 +47,7 @@ public class DiscoveryFamilyPostSceneHandler extends DiscoveryDefaultPostSceneHa
     }
     
     @Override
-    public List<TopicScopeDTO> getDiscoveryTopicSentScopes(User user, SceneTokenDTO sceneToken) {
+    public List<TopicScopeDTO> getTopicSentScopes(User user, SceneTokenDTO sceneToken) {
         List<TopicScopeDTO> scopeList = null;
         Community community = null;
         SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
