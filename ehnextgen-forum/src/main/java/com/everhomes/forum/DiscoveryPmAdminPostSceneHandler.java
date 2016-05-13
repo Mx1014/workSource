@@ -178,8 +178,7 @@ public class DiscoveryPmAdminPostSceneHandler implements PostSceneHandler {
                 menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
                 orgAllFilterDto.setName(menuName);
                 orgAllFilterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());
-                orgAllFilterDto.setDefaultFlag(SelectorBooleanFlag.TRUE.getCode()); // 整组菜单只有一个是默认的
-                hasDefault = true;
+                orgAllFilterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode()); // 整组菜单只有一个是默认的，改为默认管辖的小区全部
                 actionUrl = String.format("%s%s?organizationId=%s&mixType=%s", serverContectPath, 
                     "/org/listOrgMixTopics", organization.getId(), OrganizationTopicMixType.CHILDREN_ALL.getCode());
                 orgAllFilterDto.setActionUrl(actionUrl);

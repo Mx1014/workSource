@@ -90,7 +90,7 @@ public class DiscoveryParkEnterprisePostSceneHandler extends DiscoveryParkTouris
                 return scopeList;
             }
             
-            Community community = communityProvider.findCommunityById(sceneToken.getEntityId());
+            Community community = communityProvider.findCommunityById(communityId);
             if(community != null) {
                 scopeList = getDiscoveryTopicSentScopes(user, sceneToken, community);
             } else {

@@ -124,7 +124,7 @@ public class DiscoveryParkTouristPostSceneHandler implements PostSceneHandler {
             menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
             filterDto.setName(menuName);
             filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());
-            filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());
+            filterDto.setDefaultFlag(SelectorBooleanFlag.TRUE.getCode());
             actionUrl = String.format("%s%s?forumId=%s&visibilityScope=%s&communityId=%s", serverContectPath, 
                 "/forum/listTopics", community.getDefaultForumId(), VisibilityScope.COMMUNITY.getCode(), community.getId());
             filterDto.setActionUrl(actionUrl);
