@@ -48,6 +48,7 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationDetail;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.rest.activity.ActivityCancelSignupCommand;
 import com.everhomes.rest.activity.ActivityCheckinCommand;
@@ -94,6 +95,7 @@ import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.ui.user.ActivityLocationScope;
 import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
+import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserCurrentEntityType;
@@ -175,6 +177,9 @@ public class ActivityServiceImpl implements ActivityService {
     
     @Autowired
     private LocaleTemplateService localeTemplateService;
+    
+    @Autowired
+    private OrganizationService organizationService;
     
     @Autowired
     private OrganizationProvider organizationProvider;
@@ -1620,71 +1625,148 @@ public class ActivityServiceImpl implements ActivityService {
 	    return response;
 	}
 	
+	// 由于场景扩展到园区，单纯靠Entity实例已经不能满足要求，需要改为按场景来区分 by lqs 20160513
+//	@Override
+//	public ListActivitiesReponse listNearbyActivitiesByScene(ListNearbyActivitiesBySceneCommand cmd) {
+//	    long startTime = System.currentTimeMillis();
+//	    User user = UserContext.current().getUser();
+//        Long userId = user.getId();
+//        Integer namespaceId = UserContext.getCurrentNamespaceId();
+//        SceneTokenDTO sceneTokenDto = userService.checkSceneToken(userId, cmd.getSceneToken());
+//        
+//        int geoCharCount = 6; // 默认使用6位GEO字符
+//        ActivityLocationScope scope = ActivityLocationScope.fromCode(cmd.getScope());
+//        if(scope == ActivityLocationScope.SAME_CITY) {
+//            geoCharCount = 4;
+//        }
+//        
+//        ListActivitiesReponse resp = null;
+//        Community community = null;
+//        ListActivitiesByTagCommand execCmd = null;
+//        UserCurrentEntityType entityType = UserCurrentEntityType.fromCode(sceneTokenDto.getEntityType());
+//        switch(entityType) {
+//        case COMMUNITY_RESIDENTIAL:
+//        case COMMUNITY_COMMERCIAL:
+//        case COMMUNITY:
+//            community = communityProvider.findCommunityById(sceneTokenDto.getEntityId());
+//            execCmd = new ListActivitiesByTagCommand();
+//            execCmd.setCommunity_id(community.getId());
+//            execCmd.setAnchor(cmd.getPageAnchor());
+//            execCmd.setPageSize(cmd.getPageSize());
+//            execCmd.setTag(cmd.getTag());
+//            execCmd.setRange(geoCharCount);
+//            resp = listActivitiesByTag(execCmd);
+//            break;
+//        case FAMILY:
+//            FamilyDTO family = familyProvider.getFamilyById(sceneTokenDto.getEntityId());
+//            if(family != null) {
+//                community = communityProvider.findCommunityById(family.getCommunityId());
+//                execCmd = new ListActivitiesByTagCommand();
+//                execCmd.setCommunity_id(community.getId());
+//                execCmd.setAnchor(cmd.getPageAnchor());
+//                execCmd.setPageSize(cmd.getPageSize());
+//                execCmd.setTag(cmd.getTag());
+//                execCmd.setRange(geoCharCount);
+//                resp = listActivitiesByTag(execCmd);
+//            } else {
+//                if(LOGGER.isWarnEnabled()) {
+//                    LOGGER.warn("Family not found, sceneToken=" + sceneTokenDto);
+//                }
+//            }
+//            break;
+//        case ORGANIZATION:
+//            ListOrgNearbyActivitiesCommand execOrgCmd = ConvertHelper.convert(cmd, ListOrgNearbyActivitiesCommand.class);
+//            execOrgCmd.setOrganizationId(sceneTokenDto.getEntityId());
+//            resp = listOrgNearbyActivities(execOrgCmd);
+//            break;
+//        default:
+//            LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneTokenDto);
+//            break;
+//        }
+//        
+//        if(LOGGER.isDebugEnabled()) {
+//            long endTime = System.currentTimeMillis();
+//            LOGGER.debug("List nearby activities by scene, userId={}, namespaceId={}, elapse={}, cmd={}", 
+//                userId, namespaceId, (endTime - startTime), cmd);
+//        }
+//        
+//        return resp;
+//	}
+	
 	@Override
 	public ListActivitiesReponse listNearbyActivitiesByScene(ListNearbyActivitiesBySceneCommand cmd) {
 	    long startTime = System.currentTimeMillis();
 	    User user = UserContext.current().getUser();
-        Long userId = user.getId();
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        SceneTokenDTO sceneTokenDto = userService.checkSceneToken(userId, cmd.getSceneToken());
-        
-        int geoCharCount = 6; // 默认使用6位GEO字符
-        ActivityLocationScope scope = ActivityLocationScope.fromCode(cmd.getScope());
-        if(scope == ActivityLocationScope.SAME_CITY) {
-            geoCharCount = 4;
-        }
-        
-        ListActivitiesReponse resp = null;
-        Community community = null;
-        ListActivitiesByTagCommand execCmd = null;
-        UserCurrentEntityType entityType = UserCurrentEntityType.fromCode(sceneTokenDto.getEntityType());
-        switch(entityType) {
-        case COMMUNITY_RESIDENTIAL:
-        case COMMUNITY_COMMERCIAL:
-        case COMMUNITY:
-            community = communityProvider.findCommunityById(sceneTokenDto.getEntityId());
-            execCmd = new ListActivitiesByTagCommand();
-            execCmd.setCommunity_id(community.getId());
+	    Long userId = user.getId();
+	    Integer namespaceId = UserContext.getCurrentNamespaceId();
+	    SceneTokenDTO sceneTokenDto = userService.checkSceneToken(userId, cmd.getSceneToken());
+	    
+	    int geoCharCount = 6; // 默认使用6位GEO字符
+	    ActivityLocationScope scope = ActivityLocationScope.fromCode(cmd.getScope());
+	    if(scope == ActivityLocationScope.SAME_CITY) {
+	        geoCharCount = 4;
+	    }
+	    
+	    ListActivitiesReponse resp = null;
+	    SceneType sceneType = SceneType.fromCode(sceneTokenDto.getScene());
+	    switch(sceneType) {
+	    case DEFAULT:
+	    case PARK_TOURIST:
+	        resp = listCommunityNearbyActivities(sceneTokenDto, cmd, geoCharCount, sceneTokenDto.getEntityId());
+	        break;
+	    case FAMILY:
+	        FamilyDTO family = familyProvider.getFamilyById(sceneTokenDto.getEntityId());
+	        if(family != null) {
+	            resp = listCommunityNearbyActivities(sceneTokenDto, cmd, geoCharCount, family.getCommunityId());
+	        } else {
+	            if(LOGGER.isWarnEnabled()) {
+	                LOGGER.warn("Family not found, sceneToken=" + sceneTokenDto);
+	            }
+	        }
+	        break;
+	    case PARK_ENTERPRISE:
+	    case PARK_ENTERPRISE_NOAUTH:
+	        Organization organization = organizationProvider.findOrganizationById(sceneTokenDto.getEntityId());
+            if(organization != null) {
+                Long communityId = organizationService.getOrganizationActiveCommunityId(organization.getId());
+                resp = listCommunityNearbyActivities(sceneTokenDto, cmd, geoCharCount, communityId);
+            }
+            break;
+	    case PM_ADMIN:
+	    case PARK_PM_ADMIN:
+	        ListOrgNearbyActivitiesCommand execOrgCmd = ConvertHelper.convert(cmd, ListOrgNearbyActivitiesCommand.class);
+	        execOrgCmd.setOrganizationId(sceneTokenDto.getEntityId());
+	        resp = listOrgNearbyActivities(execOrgCmd);
+	        break;
+	    default:
+	        LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneTokenDto);
+	        break;
+	    }
+	    
+	    if(LOGGER.isDebugEnabled()) {
+	        long endTime = System.currentTimeMillis();
+	        LOGGER.debug("List nearby activities by scene, userId={}, namespaceId={}, elapse={}, cmd={}", 
+	            userId, namespaceId, (endTime - startTime), cmd);
+	    }
+	    
+	    return resp;
+	}
+	
+	private ListActivitiesReponse listCommunityNearbyActivities(SceneTokenDTO sceneTokenDto, ListNearbyActivitiesBySceneCommand cmd, 
+	        int geoCharCount, Long communityId) {
+	    if(communityId != null) {
+    	    ListActivitiesByTagCommand execCmd = new ListActivitiesByTagCommand();
+            execCmd.setCommunity_id(communityId);
             execCmd.setAnchor(cmd.getPageAnchor());
             execCmd.setPageSize(cmd.getPageSize());
             execCmd.setTag(cmd.getTag());
             execCmd.setRange(geoCharCount);
-            resp = listActivitiesByTag(execCmd);
-            break;
-        case FAMILY:
-            FamilyDTO family = familyProvider.getFamilyById(sceneTokenDto.getEntityId());
-            if(family != null) {
-                community = communityProvider.findCommunityById(family.getCommunityId());
-                execCmd = new ListActivitiesByTagCommand();
-                execCmd.setCommunity_id(community.getId());
-                execCmd.setAnchor(cmd.getPageAnchor());
-                execCmd.setPageSize(cmd.getPageSize());
-                execCmd.setTag(cmd.getTag());
-                execCmd.setRange(geoCharCount);
-                resp = listActivitiesByTag(execCmd);
-            } else {
-                if(LOGGER.isWarnEnabled()) {
-                    LOGGER.warn("Family not found, sceneToken=" + sceneTokenDto);
-                }
-            }
-            break;
-        case ORGANIZATION:
-            ListOrgNearbyActivitiesCommand execOrgCmd = ConvertHelper.convert(cmd, ListOrgNearbyActivitiesCommand.class);
-            execOrgCmd.setOrganizationId(sceneTokenDto.getEntityId());
-            resp = listOrgNearbyActivities(execOrgCmd);
-            break;
-        default:
-            LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneTokenDto);
-            break;
-        }
-        
-        if(LOGGER.isDebugEnabled()) {
-            long endTime = System.currentTimeMillis();
-            LOGGER.debug("List nearby activities by scene, userId={}, namespaceId={}, elapse={}, cmd={}", 
-                userId, namespaceId, (endTime - startTime), cmd);
-        }
-        
-        return resp;
+            
+            return listActivitiesByTag(execCmd);
+	    } else {
+	        LOGGER.error("Community not found to query nearby activities, sceneTokenDto={}, communityId={}", sceneTokenDto, communityId);
+	        return null;
+	    }
 	}
 	
 	@Override
