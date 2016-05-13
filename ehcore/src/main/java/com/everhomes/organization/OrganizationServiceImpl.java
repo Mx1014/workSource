@@ -1962,6 +1962,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         if(communityId != null) {
             Community community = communityProvider.findCommunityById(communityId);
             if(community != null) {
+                organizationDto.setCommunityId(communityId);
                 organizationDto.setCommunityName(community.getName());
                 organizationDto.setCommunityType(community.getCommunityType());
                 organizationDto.setDefaultForumId(community.getDefaultForumId());
