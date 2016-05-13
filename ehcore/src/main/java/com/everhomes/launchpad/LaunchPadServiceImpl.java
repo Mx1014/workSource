@@ -1050,11 +1050,21 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	    User user = UserContext.current().getUser();
         SceneTokenDTO sceneToken = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
         
+        // 当场景有继承时，使用base场景对应的layout by lqs 20160513
+        SceneTypeInfo sceneInfo = sceneService.getBaseSceneTypeByName(sceneToken.getNamespaceId(), sceneToken.getScene());
+        String baseScene = sceneToken.getScene();
+        if(sceneInfo != null) {
+            baseScene = sceneInfo.getName();
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Scene type is changed, sceneToken={}, newScene={}", sceneToken, sceneInfo.getName());
+            }
+        } 
+        
         GetLaunchPadLayoutByVersionCodeCommand getCmd = new GetLaunchPadLayoutByVersionCodeCommand();
         getCmd.setVersionCode(cmd.getVersionCode());
         getCmd.setName(cmd.getName());
         getCmd.setNamespaceId(sceneToken.getNamespaceId());
-        getCmd.setSceneType(sceneToken.getScene());
+        getCmd.setSceneType(baseScene);
         
         return getLastLaunchPadLayoutByVersionCode(getCmd);
 	}
