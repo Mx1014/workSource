@@ -37,9 +37,9 @@ INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_i
 	VALUES(2102401, 1001000, 'USER', 214001, 'manager', '郑小二', 0, '17704027221', 3);	
 
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
-	VALUES(10501, 'EhOrganizations', 1001000, 'EhUsers', 214000, 1001, 1, UTC_TIMESTAMP());
+	VALUES(10551, 'EhOrganizations', 1001000, 'EhUsers', 214000, 1001, 1, UTC_TIMESTAMP());
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
-	VALUES(10502, 'EhOrganizations', 1001000, 'EhUsers', 214001, 1001, 1, UTC_TIMESTAMP());
+	VALUES(10552, 'EhOrganizations', 1001000, 'EhUsers', 214001, 1001, 1, UTC_TIMESTAMP());
 
 INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
 	VALUES(1208, 999990, 'COMMUNITY', 240111044331051400, UTC_TIMESTAMP());	
