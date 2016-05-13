@@ -20,10 +20,10 @@ public class DiscoveryParkPmAdminPostSceneHandler extends DiscoveryPmAdminPostSc
     public List<TopicFilterDTO> getTopicQueryFilters(User user, SceneTokenDTO sceneToken) {
         SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
         if(sceneType == SceneType.PARK_PM_ADMIN) {
+            return getTopicQueryFilters(user, sceneToken, sceneToken.getEntityId());
+        } else {
             LOGGER.error("Unsupported scene for simple user, sceneToken={}", sceneToken);
             return null;
-        } else {
-            return getTopicQueryFilters(user, sceneToken, sceneToken.getEntityId());
         }
     }
     
@@ -31,10 +31,10 @@ public class DiscoveryParkPmAdminPostSceneHandler extends DiscoveryPmAdminPostSc
     public List<TopicScopeDTO> getTopicSentScopes(User user, SceneTokenDTO sceneTokenDto) {
         SceneType sceneType = SceneType.fromCode(sceneTokenDto.getScene());
         if(sceneType == SceneType.PARK_PM_ADMIN) {
+            return getDiscoveryTopicSentScopes(user, sceneTokenDto, sceneTokenDto.getEntityId());
+        } else {
             LOGGER.error("Unsupported scene for simple user, sceneToken={}", sceneTokenDto);
             return null;
-        } else {
-            return getDiscoveryTopicSentScopes(user, sceneTokenDto, sceneTokenDto.getEntityId());
         }
     }
 }

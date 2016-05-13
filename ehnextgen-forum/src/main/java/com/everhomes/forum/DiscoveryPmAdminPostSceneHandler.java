@@ -69,7 +69,7 @@ public class DiscoveryPmAdminPostSceneHandler implements PostSceneHandler {
     
     public List<TopicFilterDTO> getTopicQueryFilters(User user, SceneTokenDTO sceneToken) {
         SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
-        if(sceneType == SceneType.PM_ADMIN) {
+        if(sceneType != SceneType.PM_ADMIN) {
             LOGGER.error("Unsupported scene for simple user, sceneToken={}", sceneToken);
             return null;
         } else {
@@ -285,7 +285,7 @@ public class DiscoveryPmAdminPostSceneHandler implements PostSceneHandler {
     @Override
     public List<TopicScopeDTO> getTopicSentScopes(User user, SceneTokenDTO sceneTokenDto) {
         SceneType sceneType = SceneType.fromCode(sceneTokenDto.getScene());
-        if(sceneType == SceneType.PM_ADMIN) {
+        if(sceneType != SceneType.PM_ADMIN) {
             LOGGER.error("Unsupported scene for simple user, sceneToken={}", sceneTokenDto);
             return null;
         } else {
