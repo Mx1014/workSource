@@ -1824,7 +1824,11 @@ public class BusinessServiceImpl implements BusinessService {
 			subcmd.setCommunityId(r);
 			Tuple<Integer, List<BuildingDTO>> result = addressService.listBuildingsByKeyword(subcmd);
 			if(result.second()!=null&&!result.second().isEmpty()){
-				//list.addAll(result.second().stream().map(r2 -> { r2.setCommunityId(r2); }).collect(Collectors.toList()));
+				List<BuildingDTO> tmpList = result.second().stream().map((r2) -> {
+					r2.setCommunityId(r);
+					return r2; 
+				}).collect(Collectors.toList());
+				list.addAll(tmpList);
 			}
 		}
 		return list;
