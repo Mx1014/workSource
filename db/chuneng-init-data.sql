@@ -29,8 +29,8 @@ INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longi
 INSERT INTO `eh_organization_communities`(organization_id, community_id) 
 	VALUES(1001000, 240111044331051400);
 
-INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`) 
-	VALUES(1001000, 0, 'PM', '深圳中正信息科技有限公司', 239825274387098429, '', '/1001000', 1, 2);
+INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`) 
+	VALUES(1001000, 0, 'PM', '深圳中正信息科技有限公司', 239825274387098429, '', '/1001000', 1, 2, 'ENTERPRISE', 999990);
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status)
 	VALUES(2102400, 1001000, 'USER', 214000, 'manager', '喻旭日', 0, '18927485550', 3);	
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status)
