@@ -60,7 +60,7 @@ INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `des
 
 
 INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `banner_group`, `scope_code`, `scope_id`, `name`, `vendor_tag`, `poster_path`, `action_type`, `action_data`, `start_time`, `end_time`, `status`, `order`, `creator_uid`, `create_time`, `delete_time`) 
-	VALUES(85, 999990, 0, '/home', 'Default', 0, 0, 'chuneng', 'chuneng','cs://1/image/aW1hZ2UvTVRveVlqZzBZV00xTkRnNVlUVmpNbVV5TkRjMU9UWXdaVEV3TldaaU9UTmxOUQ','0','',NULL,NULL,'2','1','0','2015-06-30 16:01:45',NULL);	
+	VALUES(85, 999990, 0, '/home', 'Default', 0, 0, 'chuneng', 'chuneng','cs://1/image/aW1hZ2UvTVRwaU5UWmhObUUwWmpVeE9XVXdNakUyWVdZeE9ESTFOamt5WlRZM1pUQXpZZw','0','',NULL,NULL,'2','1','0','2015-06-30 16:01:45',NULL);	
 
 
 INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`, `scene_type`) 
