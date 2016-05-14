@@ -1,32 +1,42 @@
 package com.everhomes.promotion;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+
+import com.everhomes.user.User;
 
 
 @Component
 @Scope("prototype")
-public class OpPromotionListAllCondition implements OpPromotionCondition {
-
+public class OpPromotionListAllCondition implements OpPromotionCondition, OpPromotionUserCallback {
+    @Autowired
+    PromotionUserService promotionUserService;
+    
     @Override
     public void createCondition(OpPromotionContext ctx) {
-        // TODO Auto-generated method stub
+        OpPromotionUserVisitor visitor = new OpPromotionUserVisitor();
         
-        //select * from xxx
-        /*for(a : users) {
-         OpPromotionAction action = getActionFromContext(ctx);
-         action.fire(ctx, a);
-         }*/
+        //TODO use OpPromotionActivityContext directly
+        OpPromotionActivityContext c = (OpPromotionActivityContext) ctx;
+        visitor.setPromotion(c.getPromotion());
+        
+        promotionUserService.listAllUser(visitor, this);
     }
 
     @Override
     public void deleteCondition(OpPromotionContext ctx) {
-        // TODO Auto-generated method stub
-        
+        //nothing to delete
     }
-    
-    private OpPromotionAction getActionFromContext(OpPromotionContext ctx) {
-        return null;
+
+    @Override
+    public void userFound(User u, OpPromotionUserVisitor visitor) {
+        OpPromotionAction action = OpPromotionUtils.getActionFromPromotion(visitor.getPromotion());
+        
+        OpPromotionActivityContext ctx = new OpPromotionActivityContext(visitor.getPromotion());
+        ctx.setUser(u);
+        
+        action.fire(ctx);
     }
 
 }

@@ -110,5 +110,7 @@ public class OpPromotionAssignedScopeProviderImpl implements OpPromotionAssigned
 
     private void prepareObj(OpPromotionAssignedScope obj) {
     }
+    
+//    public OpPromotionAssignedScope getOpPromotionScopeByPromotionId
 }
 

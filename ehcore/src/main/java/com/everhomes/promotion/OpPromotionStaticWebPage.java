@@ -1,0 +1,43 @@
+package com.everhomes.promotion;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.everhomes.messaging.MessagingService;
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.promotion.OpPromotionWebPageData;
+import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.user.User;
+import com.everhomes.util.StringHelper;
+
+public class OpPromotionStaticWebPage implements OpPromotionAction {
+    @Autowired
+    MessagingService messagingService;
+    
+    @Override
+    public void fire(OpPromotionContext ctx) {
+        
+        OpPromotionActivityContext activityContext = (OpPromotionActivityContext)ctx;
+        User user = activityContext.getUser();
+        Long userId = user.getId();
+        
+        String dataStr = activityContext.getPromotion().getActionData();
+        OpPromotionWebPageData data = (OpPromotionWebPageData)StringHelper.fromJsonString(dataStr, OpPromotionWebPageData.class);
+        
+        MessageDTO messageDto = new MessageDTO();
+        messageDto.setAppId(AppConstants.APPID_MESSAGING);
+        messageDto.setSenderUid(User.SYSTEM_UID);
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()), 
+                new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.BIZ_USER_LOGIN.getUserId())));
+        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+        messageDto.setBody(data.getUrl());
+        messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+
+        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
+                userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());        
+    }
+
+}

@@ -1028,4 +1028,34 @@ public class CommunityProviderImpl implements CommunityProvider {
         return list;
 	}
 
+	/**
+	 * Added by Janson
+	 */
+    @Override
+    public List<Community> findCommunitiesByCityId(ListingLocator locator, int count, int namespaceId, long cityId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+        
+        final List<Community> communities = new ArrayList<Community>();
+        SelectQuery<EhCommunitiesRecord> query = context.selectQuery(Tables.EH_COMMUNITIES);
+
+            
+        if(locator.getAnchor() != null)
+            query.addConditions(Tables.EH_COMMUNITIES.ID.gt(locator.getAnchor()));
+        
+        query.addConditions(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_COMMUNITIES.CITY_ID.eq(cityId));
+        query.addOrderBy(Tables.EH_COMMUNITIES.ID.asc());
+        query.addLimit(count);
+        
+        query.fetch().map((r) -> {
+            communities.add(ConvertHelper.convert(r, Community.class));
+            return null;
+        });
+        
+        if(communities.size() > 0) {
+            locator.setAnchor(communities.get(communities.size() -1).getId());
+        }
+        
+        return communities;
+    }
 }

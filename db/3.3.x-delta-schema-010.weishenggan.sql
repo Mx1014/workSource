@@ -23,3 +23,5 @@ ALTER TABLE `eh_op_promotion_activities` ADD COLUMN `string_tag2` VARCHAR(128);
 ALTER TABLE `eh_op_promotion_activities` ADD COLUMN `string_tag3` VARCHAR(128);
 ALTER TABLE `eh_op_promotion_activities` ADD COLUMN `string_tag4` VARCHAR(128);
 ALTER TABLE `eh_op_promotion_activities` ADD COLUMN `string_tag5` VARCHAR(128);
+
+ALTER TABLE `eh_schedule_tasks` DROP COLUMN `owner_type`, DROP COLUMN `owner_id`;

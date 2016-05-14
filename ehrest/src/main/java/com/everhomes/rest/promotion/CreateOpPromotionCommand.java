@@ -38,14 +38,16 @@ public class CreateOpPromotionCommand {
     private String     pushMessage;
     
     @NotNull
-    private Timestamp     startTime;
+    private Long     startTime;
     
     @NotNull
     private Byte     policyType;
     
     @NotNull
-    private Timestamp     endTime;
+    private Long     endTime;
     
+    @ItemType(OpPromotionAssignedScopeDTO.class)
+    private List<OpPromotionAssignedScopeDTO> assignedScopes;
     
     public String getTitle() {
         return title;
@@ -106,17 +108,6 @@ public class CreateOpPromotionCommand {
         this.pushMessage = pushMessage;
     }
 
-
-    public Timestamp getStartTime() {
-        return startTime;
-    }
-
-
-    public void setStartTime(Timestamp startTime) {
-        this.startTime = startTime;
-    }
-
-
     public Byte getPolicyType() {
         return policyType;
     }
@@ -126,13 +117,22 @@ public class CreateOpPromotionCommand {
         this.policyType = policyType;
     }
 
+    public Long getStartTime() {
+        return startTime;
+    }
 
-    public Timestamp getEndTime() {
+
+    public void setStartTime(Long startTime) {
+        this.startTime = startTime;
+    }
+
+
+    public Long getEndTime() {
         return endTime;
     }
 
 
-    public void setEndTime(Timestamp endTime) {
+    public void setEndTime(Long endTime) {
         this.endTime = endTime;
     }
 
@@ -145,8 +145,4 @@ public class CreateOpPromotionCommand {
     public void setAssignedScopes(List<OpPromotionAssignedScopeDTO> assignedScopes) {
         this.assignedScopes = assignedScopes;
     }
-
-
-    @ItemType(OpPromotionAssignedScopeDTO.class)
-    private List<OpPromotionAssignedScopeDTO> assignedScopes;
 }

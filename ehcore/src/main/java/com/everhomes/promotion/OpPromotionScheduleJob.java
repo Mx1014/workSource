@@ -20,6 +20,9 @@ public class OpPromotionScheduleJob extends QuartzJobBean {
     @Autowired
     OpPromotionActivityProvider promotionActivityProvider;
     
+    @Autowired
+    PromotionService promotionService;
+    
     @Override
     protected void executeInternal(JobExecutionContext context) {
         JobDataMap jobMap = context.getJobDetail().getJobDataMap();
@@ -28,10 +31,7 @@ public class OpPromotionScheduleJob extends QuartzJobBean {
         Long id = Long.parseLong(idStr);
         
         OpPromotionActivity promotion = promotionActivityProvider.getOpPromotionActivitieById(id);
-        
-        OpPromotionCondition condition = OpPromotionUtils.getConditionFromPromotion(promotion);
-        OpPromotionActivityContext ctx = new OpPromotionActivityContext(promotion);
-        condition.createCondition(ctx);
+        promotionService.createScheduleTaskByPromotion(promotion);
         
         LOGGER.error("OpPromotion schedule Id=" + id);
     }

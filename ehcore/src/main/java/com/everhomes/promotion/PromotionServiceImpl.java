@@ -1,5 +1,6 @@
 package com.everhomes.promotion;
 
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -14,7 +15,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 
-import com.everhomes.aclink.DoorAuth;
 import com.everhomes.bus.BusBridgeProvider;
 import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusSubscriber;
@@ -24,8 +24,9 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.messaging.AddressMessageRoutingHandler;
 import com.everhomes.rest.promotion.CreateOpPromotionCommand;
 import com.everhomes.rest.promotion.OpPromotionAssignedScopeDTO;
+import com.everhomes.rest.promotion.ScheduleTaskResourceType;
+import com.everhomes.rest.promotion.ScheduleTaskStatus;
 import com.everhomes.scheduler.ScheduleProvider;
-import com.everhomes.scheduler.SimpleJobTest;
 import com.everhomes.server.schema.tables.EhOpPromotionActivities;
 import com.everhomes.util.ConvertHelper;
 
@@ -51,6 +52,9 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
     @Autowired
     private ScheduleProvider scheduleProvider;
     
+    @Autowired
+    private ScheduleTaskProvider scheduleTaskProvider;
+    
     @PostConstruct
     void setup() {
         String subcribeKey = DaoHelper.getDaoActionPublishSubject(DaoAction.CREATE, EhOpPromotionActivities.class, null);
@@ -70,6 +74,9 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
             @Override
             public OpPromotionActivity doInTransaction(TransactionStatus arg0) {
                 OpPromotionActivity activity = (OpPromotionActivity)ConvertHelper.convert(cmd, OpPromotionActivity.class);
+                activity.setStartTime(new Timestamp(cmd.getStartTime()));
+                activity.setEndTime(new Timestamp(cmd.getEndTime()));
+                promotionActivityProvider.createOpPromotionActivitie(activity);
                 
                 for(OpPromotionAssignedScopeDTO dto : scopes) {
                     OpPromotionAssignedScope scope = (OpPromotionAssignedScope)ConvertHelper.convert(dto, OpPromotionAssignedScope.class);
@@ -92,6 +99,8 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
         
         scheduleProvider.scheduleSimpleJob(triggerName, jobName, new Date(promotion.getStartTime().getTime()), OpPromotionScheduleJob.class, map);
         
+        triggerName = "oppromotion-cron-" + System.currentTimeMillis();
+        jobName = triggerName;
         Map<String, Object> map2 = new HashMap<String, Object>();
         map.put("id", promotion.getId().toString());
         map.put("type", "end");
@@ -129,5 +138,23 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
             }
 
         return Action.none;
+    }
+    
+    @Override
+    public ScheduleTask createScheduleTaskByPromotion(OpPromotionActivity promotion) {
+        ScheduleTask task = new ScheduleTask();
+        task.setNamespaceId(promotion.getNamespaceId());
+        task.setProcessCount(0);
+        task.setProgress(0);
+        task.setResourceId(promotion.getId());
+        task.setResourceType(ScheduleTaskResourceType.PROMOTION_ACTIVITY.getCode());
+        task.setStatus(ScheduleTaskStatus.CREATING.getCode());
+        scheduleTaskProvider.createScheduleTask(task);
+        
+        OpPromotionCondition condition = OpPromotionUtils.getConditionFromPromotion(promotion);
+        OpPromotionActivityContext ctx = new OpPromotionActivityContext(promotion);
+        condition.createCondition(ctx);
+        
+        return task;
     }
 }

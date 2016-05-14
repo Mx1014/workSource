@@ -23,6 +23,7 @@ import com.everhomes.server.schema.tables.pojos.EhScheduleTasks;
 import com.everhomes.server.schema.tables.records.EhScheduleTasksRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 
 @Component
 public class ScheduleTaskProviderImpl implements ScheduleTaskProvider {
@@ -106,5 +107,7 @@ public class ScheduleTaskProviderImpl implements ScheduleTaskProvider {
     }
 
     private void prepareObj(ScheduleTask obj) {
+        Long l2 = DateHelper.currentGMTTime().getTime();
+        obj.setCreateTime(new Timestamp(l2));
     }
 }

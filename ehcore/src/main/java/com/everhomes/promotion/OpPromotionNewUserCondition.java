@@ -1,38 +1,80 @@
 package com.everhomes.promotion;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusSubscriber;
-import com.everhomes.bus.LocalBusSubscriber.Action;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
+import com.everhomes.group.GroupMember;
+import com.everhomes.group.GroupProvider;
+import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.server.schema.tables.pojos.EhGroupMembers;
+import com.everhomes.user.User;
+import com.everhomes.user.UserProvider;
 
 @Component
 @Scope("prototype")
 public class OpPromotionNewUserCondition implements OpPromotionCondition, LocalBusSubscriber {
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpPromotionNewUserCondition.class);
+    
     @Autowired
     private LocalBus localBus;
     
     @Autowired
     private PromotionService promotionService;
     
+    @Autowired 
+    private GroupProvider groupProvider;
+    
+    @Autowired
+    private UserProvider userProvider;
+    
+    private OpPromotionActivity cacheActivity; 
+    
     @Override
-    public void createCondition(OpPromotionContext ctx) {        
+    public void createCondition(OpPromotionContext ctx) {
+        OpPromotionActivityContext c = (OpPromotionActivityContext) ctx;
+        this.cacheActivity = c.getPromotion();
+        
         localBus.subscribe(DaoHelper.getDaoActionPublishSubject(DaoAction.MODIFY, EhGroupMembers.class, null), this);
     }
 
     @Override
     public void deleteCondition(OpPromotionContext ctx) {
-        
+        localBus.unsubscribe(DaoHelper.getDaoActionPublishSubject(DaoAction.MODIFY, EhGroupMembers.class, null), this);
     }
 
     @Override
     public Action onLocalBusMessage(Object arg0, String arg1, Object arg2, String arg3) {
-        //TODO create a job for this user
+        try {
+            Long groupMemberId = (Long)arg2;
+            GroupMember groupMember = this.groupProvider.findGroupMemberById(groupMemberId);
+            if(null == groupMember) {
+                LOGGER.error("None of groupMember");
+                return Action.none;
+                }
+            
+            if(groupMember.getMemberStatus() != GroupMemberStatus.ACTIVE.getCode()) {
+                return Action.none;
+                }
+            
+            OpPromotionAction action = OpPromotionUtils.getActionFromPromotion(this.cacheActivity);
+            
+            OpPromotionActivityContext ctx = new OpPromotionActivityContext(this.cacheActivity);
+            User u = userProvider.findUserById(groupMember.getMemberId());
+            if(u != null) {
+                ctx.setUser(u);
+                action.fire(ctx);
+            }
+            
+        } catch(Exception e) {
+            LOGGER.error("onLocalBusMessage error ", e);
+            }
         
         return Action.none;
     }
