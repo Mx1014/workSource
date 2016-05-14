@@ -78,12 +78,14 @@ public class LauchPadUiController extends ControllerBase {
         
         LaunchPadLayoutDTO launchPadLayoutDTO = this.launchPadService.getLastLaunchPadLayoutByScene(cmd);
         RestResponse resp =  new RestResponse();
-        if(launchPadLayoutDTO != null){
-            long hashCode = launchPadLayoutDTO.getVersionCode();
-            if(EtagHelper.checkHeaderEtagOnly(30,hashCode+"", request, response)) {
-                resp.setResponseObject(launchPadLayoutDTO);
-            }
-        }
+        // 有域空间时，这样判断ETAG会导致有些域空间拿不到数据（同一个域空间不同场景切换也有问题），先暂时不使用ETAG by lqs 20160514
+//        if(launchPadLayoutDTO != null){
+//            long hashCode = launchPadLayoutDTO.getVersionCode();
+//            if(EtagHelper.checkHeaderEtagOnly(30,hashCode+"", request, response)) {
+//                resp.setResponseObject(launchPadLayoutDTO);
+//            }
+//        }
+        resp.setResponseObject(launchPadLayoutDTO);
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
         return resp;
