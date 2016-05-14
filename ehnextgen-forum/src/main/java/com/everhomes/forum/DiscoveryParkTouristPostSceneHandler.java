@@ -88,16 +88,16 @@ public class DiscoveryParkTouristPostSceneHandler implements PostSceneHandler {
             long menuId = 1;
             
             // 菜单：小区圈
-//            long group1Id = menuId++;
-//            TopicFilterDTO filterDto = new TopicFilterDTO();
-//            filterDto.setId(group1Id);
-//            filterDto.setParentId(0L);
-//            code = String.valueOf(ForumLocalStringCode.POST_MEMU_COMMUNITY_GROUP);
-//            menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
-//            filterDto.setName(menuName);
-//            filterDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());
-//            filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());;
-//            filterList.add(filterDto);
+            long group1Id = menuId++;
+            TopicFilterDTO filterDto = new TopicFilterDTO();
+            filterDto.setId(group1Id);
+            filterDto.setParentId(0L);
+            code = String.valueOf(ForumLocalStringCode.POST_MEMU_COMMUNITY_GROUP);
+            menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
+            filterDto.setName(menuName);
+            filterDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());
+            filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());;
+            filterList.add(filterDto);
 
             // 菜单：周边小区 （园区场景暂无周边小区）
 //            filterDto = new TopicFilterDTO();
@@ -117,9 +117,9 @@ public class DiscoveryParkTouristPostSceneHandler implements PostSceneHandler {
 //            filterList.add(filterDto);
 
             // 菜单：园区
-            TopicFilterDTO filterDto = new TopicFilterDTO();
+            filterDto = new TopicFilterDTO();
             filterDto.setId(menuId++);
-            filterDto.setParentId(0L);
+            filterDto.setParentId(group1Id);
             code = String.valueOf(ForumLocalStringCode.POST_MEMU_PARK_ONLY);
             menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
             filterDto.setName(menuName);
@@ -229,15 +229,15 @@ public class DiscoveryParkTouristPostSceneHandler implements PostSceneHandler {
             long menuId = 1;
             
             // 菜单：小区圈
-//            long group1Id = menuId++;
-//            TopicScopeDTO sentScopeDto = new TopicScopeDTO();
-//            sentScopeDto.setId(group1Id);
-//            sentScopeDto.setParentId(0L);
-//            code = String.valueOf(ForumLocalStringCode.POST_MEMU_COMMUNITY_GROUP);
-//            menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
-//            sentScopeDto.setName(menuName);
-//            sentScopeDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());;
-//            scopeList.add(sentScopeDto);
+            long group1Id = menuId++;
+            TopicScopeDTO sentScopeDto = new TopicScopeDTO();
+            sentScopeDto.setId(group1Id);
+            sentScopeDto.setParentId(0L);
+            code = String.valueOf(ForumLocalStringCode.POST_MEMU_COMMUNITY_GROUP);
+            menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
+            sentScopeDto.setName(menuName);
+            sentScopeDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());;
+            scopeList.add(sentScopeDto);
 
             // 菜单：周边小区
 //            sentScopeDto = new TopicScopeDTO();
@@ -256,8 +256,8 @@ public class DiscoveryParkTouristPostSceneHandler implements PostSceneHandler {
 //            scopeList.add(sentScopeDto);
 
             // 菜单：本小区
-            TopicScopeDTO sentScopeDto = new TopicScopeDTO();
-            sentScopeDto.setId(menuId++);
+            sentScopeDto = new TopicScopeDTO();
+            sentScopeDto.setId(group1Id);
             sentScopeDto.setParentId(0L);
             code = String.valueOf(ForumLocalStringCode.POST_MEMU_PARK_ONLY);
             menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
