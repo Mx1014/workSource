@@ -44,7 +44,7 @@ INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, tar
 INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
 	VALUES(1208, 999990, 'COMMUNITY', 240111044331051400, UTC_TIMESTAMP());	
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time) 
-	VALUES(1108901, 240111044331051400, 'organization', 1, 3, 0, '2016-05-11 09:15:50');
+	VALUES(1108902, 240111044331051400, 'organization', 1, 3, 0, '2016-05-11 09:15:50');
     
 INSERT INTO `eh_namespace_details` (`id`, `namespace_id`, `resource_type`, `create_time`) 
 	VALUES(1011, 999990, 'community_residential', '2016-05-12 18:07:50');
