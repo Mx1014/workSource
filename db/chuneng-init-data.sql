@@ -43,7 +43,9 @@ INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, tar
 
 INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
 	VALUES(1208, 999990, 'COMMUNITY', 240111044331051400, UTC_TIMESTAMP());	
-
+INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time) 
+	VALUES(1108901, 24210090697425925, 'organization', 1, 3, 0, '2016-05-11 09:15:50');
+    
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
 	VALUES ('90', 'app.agreements.url', 'http://core.zuolin.com/mobile/static/app_agreements/UFine_agreements.html', 'the relative path for chuneng app agreements', '999990', NULL);	
 	
