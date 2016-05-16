@@ -187,7 +187,40 @@ INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `defau
     VALUES(200561, 1, 0, '失物招领', '帖子/失物招领', 1, 2, UTC_TIMESTAMP(), 999990);
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
     VALUES(200562, 1, 0, '紧急通知', '帖子/紧急通知', 1, 2, UTC_TIMESTAMP(), 999990);
-	
+
+
+insert into `eh_yellow_pages` (`id`, `parent_id`, `owner_type`, `owner_id`, `name`, `nick_name`, `type`, `address`, `contact`, `description`, `poster_uri`, `status`, `default_order`, `longitude`, `latitude`, `geohash`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `creator_uid`, `create_time`) values(200056,'0','community', '240111044331051400','服务联盟','服务联盟首页','2','','18927485550','公共服务联盟旨在集聚社会优质服务资源，为园区广大企业提供专业、高效、有保障的服务，以帮助广大企业畅通信息渠道，提升企业管理，降低经营成本，增强市场竞争能力。服务类型包括项目融资对接、人才招聘和培训、信息化建设、管理咨询、知识产权管理、质量管理、外贸事务、法律事务、 物流服务、场地装修等。','cs://1/image/aW1hZ2UvTVRvMU56TXpOV0l3T1RKaFlqQTRNVFJpWmpSaVlUazFNall5WldRNVlUZ3dZUQ','2',NULL,NULL,NULL,'',NULL,NULL,NULL,NULL,NULL,'','','',NULL,NULL,NULL,NULL); 
+
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+VALUES('200801','0','0','服务联盟类型','服务联盟类型','0','2','2015-11-24 11:37:24',NULL,NULL,NULL,'999990');
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+VALUES('200802','200801','0','知识产权','服务联盟类型/知识产权','0','2','2015-11-24 11:37:24',NULL,NULL,NULL,'999990');
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+VALUES('200803','200801','0','法律事务','服务联盟类型/法律事务','0','2','2015-11-24 11:37:24',NULL,NULL,NULL,'999990');
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+VALUES('200804','200801','0','项目申报','服务联盟类型/项目申报','0','2','2015-11-24 11:37:24',NULL,NULL,NULL,'999990');
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+VALUES('200805','200801','0','人力资源','服务联盟类型/人力资源','0','2','2015-11-24 11:37:24',NULL,NULL,NULL,'999990');
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+VALUES('200806','200801','0','管理咨询','服务联盟类型/管理咨询','0','2','2015-11-24 11:37:24',NULL,NULL,NULL,'999990');
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+VALUES('200807','200801','0','信息化建设','服务联盟类型/信息化建设','0','2','2015-11-24 11:37:24',NULL,NULL,NULL,'999990');
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+VALUES('200808','200801','0','财税服务','服务联盟类型/财税服务','0','2','2015-11-24 11:37:24',NULL,NULL,NULL,'999990');
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+VALUES('200809','200801','0','办公服务','服务联盟类型/办公服务','0','2','2015-11-24 11:37:24',NULL,NULL,NULL,'999990');
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+VALUES('200810','200801','0','员工关怀','服务联盟类型/员工关怀','0','2','2015-11-24 11:37:24',NULL,NULL,NULL,'999990');
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+VALUES('200811','200801','0','外贸实务','服务联盟类型/外贸实务','0','2','2015-11-24 11:37:24',NULL,NULL,NULL,'999990');
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+VALUES('200812','200801','0','其他','服务联盟类型/其他','0','2','2015-11-24 11:37:24',NULL,NULL,NULL,'999990');
+ 
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
+    VALUES ('10616', '999990', '0', '0', '0', '/home', 'GovAgencies', '服务联盟', '服务联盟', 'cs://1/image/aW1hZ2UvTVRvNFpUZG1ZbUk1T0RReE5EQTJOakkwTXpjeFpUVXpaRGswWm1Zd00yUTFPQQ', '2', '1', '33', '{\"type\":2,\"parentId\":200801}', '0', '0', '1', '1', '', '10', NULL, NULL, NULL, '0', 'park_pm_admin');
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
+    VALUES ('10634', '999990', '0', '0', '0', '/home', 'GovAgencies', '服务联盟', '服务联盟', 'cs://1/image/aW1hZ2UvTVRvNFpUZG1ZbUk1T0RReE5EQTJOakkwTXpjeFpUVXpaRGswWm1Zd00yUTFPQQ', '2', '1', '33', '{\"type\":2,\"parentId\":200801}', '0', '0', '1', '1', '', '10', NULL, NULL, NULL, '0', 'park_tourist');
+
 	
 INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`) 
 	VALUES(177030, 240111044331051400, '中国储能大厦', '储能大厦', 214000, '0755-27888888', '中国深圳深南大道与科苑路交汇处', 139180.4, NULL, NULL, NULL, '中国储能大厦，屹立于深圳主干道深南大道，依托高新园总部经济优势，集萃国际商务视野的顶级规划，打造时代前沿的商务平台，树立科技CBD商务新标准，开创总部商务新格局。中国储能大厦四维一体交通网络，最有效地利用通达交通资源。', NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999990);
