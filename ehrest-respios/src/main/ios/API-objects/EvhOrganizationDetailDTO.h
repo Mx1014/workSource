@@ -1,6 +1,5 @@
 //
 // EvhOrganizationDetailDTO.h
-// generated at 2016-04-29 18:56:01 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -55,6 +54,10 @@
 @property(nonatomic, copy) NSString* postUri;
 
 @property(nonatomic, copy) NSString* postUrl;
+
+@property(nonatomic, copy) NSString* longitude;
+
+@property(nonatomic, copy) NSString* latitude;
 
 @property(nonatomic, strong) EvhOrganizationMemberDTO* member;
 

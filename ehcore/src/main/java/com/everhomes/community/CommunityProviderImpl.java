@@ -561,8 +561,8 @@ public class CommunityProviderImpl implements CommunityProvider {
     }
 
     @Override
-    public List<Community> findCommunitiesByNameAndCityId(String name, long cityId) {
-    	int namespaceId =UserContext.getCurrentNamespaceId(null);
+    public List<Community> findCommunitiesByNameAndCityId(String name, long cityId, int namespaceId) {
+//    	int namespaceId =UserContext.getCurrentNamespaceId(null);
         List<Community> result = new ArrayList<Community>();
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), result, 
                 (DSLContext context, Object reducingContext) -> {

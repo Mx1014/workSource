@@ -1,6 +1,5 @@
 //
 // EvhOrganizationDTO.m
-// generated at 2016-04-29 18:56:01 
 //
 #import "EvhOrganizationDTO.h"
 #import "EvhOrganizationDTO.h"
@@ -35,6 +34,8 @@
 
 -(void) toJson: (NSMutableDictionary*) jsonObject 
 {
+    if(self.namespaceId)
+        [jsonObject setObject: self.namespaceId forKey: @"namespaceId"];
     if(self.id)
         [jsonObject setObject: self.id forKey: @"id"];
     if(self.parentId)
@@ -75,6 +76,12 @@
         [jsonObject setObject: self.communityId forKey: @"communityId"];
     if(self.communityName)
         [jsonObject setObject: self.communityName forKey: @"communityName"];
+    if(self.communityType)
+        [jsonObject setObject: self.communityType forKey: @"communityType"];
+    if(self.defaultForumId)
+        [jsonObject setObject: self.defaultForumId forKey: @"defaultForumId"];
+    if(self.feedbackForumId)
+        [jsonObject setObject: self.feedbackForumId forKey: @"feedbackForumId"];
     if(self.groupId)
         [jsonObject setObject: self.groupId forKey: @"groupId"];
     if(self.showFlag)
@@ -102,6 +109,10 @@
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
 {
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
+        self.namespaceId = [jsonObject objectForKey: @"namespaceId"];
+        if(self.namespaceId && [self.namespaceId isEqual:[NSNull null]])
+            self.namespaceId = nil;
+
         self.id = [jsonObject objectForKey: @"id"];
         if(self.id && [self.id isEqual:[NSNull null]])
             self.id = nil;
@@ -181,6 +192,18 @@
         self.communityName = [jsonObject objectForKey: @"communityName"];
         if(self.communityName && [self.communityName isEqual:[NSNull null]])
             self.communityName = nil;
+
+        self.communityType = [jsonObject objectForKey: @"communityType"];
+        if(self.communityType && [self.communityType isEqual:[NSNull null]])
+            self.communityType = nil;
+
+        self.defaultForumId = [jsonObject objectForKey: @"defaultForumId"];
+        if(self.defaultForumId && [self.defaultForumId isEqual:[NSNull null]])
+            self.defaultForumId = nil;
+
+        self.feedbackForumId = [jsonObject objectForKey: @"feedbackForumId"];
+        if(self.feedbackForumId && [self.feedbackForumId isEqual:[NSNull null]])
+            self.feedbackForumId = nil;
 
         self.groupId = [jsonObject objectForKey: @"groupId"];
         if(self.groupId && [self.groupId isEqual:[NSNull null]])

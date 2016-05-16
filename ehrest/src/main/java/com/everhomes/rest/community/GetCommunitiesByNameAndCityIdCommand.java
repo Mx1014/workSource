@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>cityId: 城市Id</li>
  * <li>name: 小区名字</li>
+ * <li>namespaceId: 域空间id</li>
  * </ul>
  */
 public class GetCommunitiesByNameAndCityIdCommand {
@@ -17,6 +18,8 @@ public class GetCommunitiesByNameAndCityIdCommand {
     private Long cityId;
     @NotNull
     private String name;
+    
+    private Integer namespaceId;
     
     public GetCommunitiesByNameAndCityIdCommand() {
     }
@@ -37,7 +40,15 @@ public class GetCommunitiesByNameAndCityIdCommand {
         this.name = name;
     }
 
-    @Override
+    public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

@@ -142,9 +142,10 @@ public class RegionController extends ControllerBase {
         if(cmd.getSortBy() != null)
             orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(), SortOrder.fromCode(cmd.getSortOrder()));
         
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         List<Region> entityResultList = this.regionProvider.listRegionByKeyword(cmd.getParentId(), 
             RegionScope.fromCode(cmd.getScope()), 
-            RegionAdminStatus.fromCode(cmd.getStatus()), orderBy, cmd.getKeyword());
+            RegionAdminStatus.fromCode(cmd.getStatus()), orderBy, cmd.getKeyword(), namespaceId);
         
         List<RegionDTO> dtoResultList = entityResultList.stream() 
                 .map(r->{ return ConvertHelper.convert(r, RegionDTO.class); })

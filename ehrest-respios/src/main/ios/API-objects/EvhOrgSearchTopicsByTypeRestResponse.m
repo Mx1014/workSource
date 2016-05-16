@@ -1,6 +1,5 @@
 //
 // EvhOrgSearchTopicsByTypeRestResponse.m
-// generated at 2016-04-29 18:56:04 
 //
 #import "EvhOrgSearchTopicsByTypeRestResponse.h"
 #import "EvhSearchTopicsByTypeResponse.h"

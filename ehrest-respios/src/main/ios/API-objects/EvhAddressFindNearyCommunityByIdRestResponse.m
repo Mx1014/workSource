@@ -1,6 +1,5 @@
 //
 // EvhAddressFindNearyCommunityByIdRestResponse.m
-// generated at 2016-04-29 18:56:03 
 //
 #import "EvhAddressFindNearyCommunityByIdRestResponse.h"
 #import "EvhCommunityDoc.h"

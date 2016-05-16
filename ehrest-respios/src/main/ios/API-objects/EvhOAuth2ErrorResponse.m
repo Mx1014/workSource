@@ -1,6 +1,5 @@
 //
 // EvhOAuth2ErrorResponse.m
-// generated at 2016-04-29 18:56:02 
 //
 #import "EvhOAuth2ErrorResponse.h"
 

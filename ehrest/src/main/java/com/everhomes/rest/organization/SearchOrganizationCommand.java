@@ -6,7 +6,6 @@ public class SearchOrganizationCommand {
     private Integer namespaceId;
     private String keyword;
     
-    //TODO for communityId, not support now.
     private Long communityId;
     
     private Long pageAnchor;

@@ -1,6 +1,5 @@
 //
 // EvhListPropInvitedUserCommandResponse.m
-// generated at 2016-04-29 18:56:02 
 //
 #import "EvhListPropInvitedUserCommandResponse.h"
 #import "EvhPropInvitedUserDTO.h"

@@ -45,6 +45,7 @@ import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.community.GetNearbyCommunitiesByIdCommand;
 import com.everhomes.rest.family.FamilyDTO;
@@ -59,6 +60,7 @@ import com.everhomes.rest.group.GroupDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.ui.forum.SearchTopicBySceneCommand;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
+import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.rest.visibility.VisibleRegionType;
@@ -107,6 +109,9 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
     
     @Autowired
     FamilyProvider familyProvider;
+    
+    @Autowired
+    private OrganizationService organizationService;
     
     @Autowired
     OrganizationProvider organizationProvider;
@@ -446,6 +451,70 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
        return listPost;
    }
     
+//    @Override
+//    public ListPostCommandResponse queryByScene(SearchTopicBySceneCommand cmd) {
+//        User user = UserContext.current().getUser();
+//        Long userId = user.getId();
+//        SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+//        
+//        ListPostCommandResponse response = null;
+//        SearchTopicCommand cmntyTopicCmd = null;
+//        
+//        Integer namespaceId = sceneToken.getNamespaceId();
+//        Long forumId = 0L;
+//        UserCurrentEntityType entityType = UserCurrentEntityType.fromCode(sceneToken.getEntityType());
+//        switch(entityType) {
+//        case COMMUNITY_RESIDENTIAL:
+//        case COMMUNITY_COMMERCIAL:
+//        case COMMUNITY:
+//            Community community = communityProvider.findCommunityById(sceneToken.getEntityId());
+//            if(community != null) {
+//                forumId = community.getDefaultForumId();
+//                
+//                cmntyTopicCmd = ConvertHelper.convert(cmd, SearchTopicCommand.class);
+//                cmntyTopicCmd.setNamespaceId(namespaceId);
+//                cmntyTopicCmd.setCommunityId(community.getId());
+//                cmntyTopicCmd.setSearchFlag(PostSearchFlag.GLOBAL.getCode());
+//                response = query(cmntyTopicCmd);
+//            } else {
+//                if(LOGGER.isWarnEnabled()) {
+//                    LOGGER.warn("Community not found, userId=" + userId + ", namespaceId=" + namespaceId + ", sceneToken=" + sceneToken);
+//                }
+//            }
+//            break;
+//        case FAMILY:
+//            FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
+//            if(family != null) {
+//                community = communityProvider.findCommunityById(family.getCommunityId());
+//                if(community != null) {
+//                    forumId = community.getDefaultForumId();
+//
+//                    cmntyTopicCmd = ConvertHelper.convert(cmd, SearchTopicCommand.class);
+//                    cmntyTopicCmd.setNamespaceId(namespaceId);
+//                    cmntyTopicCmd.setCommunityId(community.getId());
+//                    cmntyTopicCmd.setSearchFlag(PostSearchFlag.GLOBAL.getCode());
+//                    response = query(cmntyTopicCmd);
+//                } else {
+//                    if(LOGGER.isWarnEnabled()) {
+//                        LOGGER.warn("Community not found, sceneToken=" + sceneToken + ", communityId=" + family.getCommunityId());
+//                    }
+//                }
+//            } else {
+//                if(LOGGER.isWarnEnabled()) {
+//                    LOGGER.warn("Family not found, sceneToken=" + sceneToken);
+//                }
+//            }
+//            break;
+//        case ORGANIZATION:
+//            response = queryGlobalPostByOrganizationId(cmd, sceneToken, sceneToken.getEntityId());
+//            break;
+//        default:
+//            break;
+//        }
+//        
+//        return response;
+//    }
+    
     @Override
     public ListPostCommandResponse queryByScene(SearchTopicBySceneCommand cmd) {
         User user = UserContext.current().getUser();
@@ -453,54 +522,34 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
         SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
         
         ListPostCommandResponse response = null;
-        SearchTopicCommand cmntyTopicCmd = null;
         
         Integer namespaceId = sceneToken.getNamespaceId();
-        Long forumId = 0L;
-        UserCurrentEntityType entityType = UserCurrentEntityType.fromCode(sceneToken.getEntityType());
-        switch(entityType) {
-        case COMMUNITY_RESIDENTIAL:
-        case COMMUNITY_COMMERCIAL:
-        case COMMUNITY:
-            Community community = communityProvider.findCommunityById(sceneToken.getEntityId());
-            if(community != null) {
-                forumId = community.getDefaultForumId();
-                
-                cmntyTopicCmd = ConvertHelper.convert(cmd, SearchTopicCommand.class);
-                cmntyTopicCmd.setNamespaceId(namespaceId);
-                cmntyTopicCmd.setCommunityId(community.getId());
-                cmntyTopicCmd.setSearchFlag(PostSearchFlag.GLOBAL.getCode());
-                response = query(cmntyTopicCmd);
-            } else {
-                if(LOGGER.isWarnEnabled()) {
-                    LOGGER.warn("Community not found, userId=" + userId + ", namespaceId=" + namespaceId + ", sceneToken=" + sceneToken);
-                }
-            }
+        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
+        switch(sceneType) {
+        case DEFAULT:
+        case PARK_TOURIST:
+            response = queryGlobalPostByCommunityId(namespaceId, cmd, sceneToken, sceneToken.getEntityId());
             break;
         case FAMILY:
             FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
             if(family != null) {
-                community = communityProvider.findCommunityById(family.getCommunityId());
-                if(community != null) {
-                    forumId = community.getDefaultForumId();
-
-                    cmntyTopicCmd = ConvertHelper.convert(cmd, SearchTopicCommand.class);
-                    cmntyTopicCmd.setNamespaceId(namespaceId);
-                    cmntyTopicCmd.setCommunityId(community.getId());
-                    cmntyTopicCmd.setSearchFlag(PostSearchFlag.GLOBAL.getCode());
-                    response = query(cmntyTopicCmd);
-                } else {
-                    if(LOGGER.isWarnEnabled()) {
-                        LOGGER.warn("Community not found, sceneToken=" + sceneToken + ", communityId=" + family.getCommunityId());
-                    }
-                }
+                response = queryGlobalPostByCommunityId(namespaceId, cmd, sceneToken, family.getCommunityId());
             } else {
                 if(LOGGER.isWarnEnabled()) {
                     LOGGER.warn("Family not found, sceneToken=" + sceneToken);
                 }
             }
             break;
-        case ORGANIZATION:
+        case PARK_ENTERPRISE:
+        case PARK_ENTERPRISE_NOAUTH:
+            Organization organization = organizationProvider.findOrganizationById(sceneToken.getEntityId());
+            if(organization != null) {
+                Long communityId = organizationService.getOrganizationActiveCommunityId(organization.getId());
+                response = queryGlobalPostByCommunityId(namespaceId, cmd, sceneToken, communityId);
+            }
+            break;
+        case PM_ADMIN:
+        case PARK_PM_ADMIN:
             response = queryGlobalPostByOrganizationId(cmd, sceneToken, sceneToken.getEntityId());
             break;
         default:
@@ -508,6 +557,24 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
         }
         
         return response;
+    }
+    
+    private ListPostCommandResponse queryGlobalPostByCommunityId(Integer namespaceId, SearchTopicBySceneCommand cmd, 
+        SceneTokenDTO sceneToken, Long communityId) {
+        Community community = communityProvider.findCommunityById(communityId);
+        if(community != null) {
+            SearchTopicCommand cmntyTopicCmd = ConvertHelper.convert(cmd, SearchTopicCommand.class);
+            cmntyTopicCmd.setNamespaceId(namespaceId);
+            cmntyTopicCmd.setCommunityId(community.getId());
+            cmntyTopicCmd.setSearchFlag(PostSearchFlag.GLOBAL.getCode());
+            return query(cmntyTopicCmd);
+        } else {
+            if(LOGGER.isWarnEnabled()) {
+                LOGGER.warn("Community not found, sceneToken=" + sceneToken + ", communityId=" + communityId);
+            }
+        }
+        
+        return null;
     }
     
     private ListPostCommandResponse queryGlobalPostByOrganizationId(SearchTopicBySceneCommand cmd, 

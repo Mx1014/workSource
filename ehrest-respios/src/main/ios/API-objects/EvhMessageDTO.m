@@ -1,6 +1,5 @@
 //
 // EvhMessageDTO.m
-// generated at 2016-04-29 18:56:01 
 //
 #import "EvhMessageDTO.h"
 #import "EvhMessageChannel.h"

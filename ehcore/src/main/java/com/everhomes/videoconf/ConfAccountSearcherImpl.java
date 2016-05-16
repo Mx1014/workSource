@@ -165,6 +165,12 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
         	}
         }
         
+        if(fb == null) {
+    		fb = FilterBuilders.termFilter("deleteUid", 0);
+    	} else {
+    		fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("deleteUid", 0));
+    	}
+        
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
         if(cmd.getPageAnchor() != null) {
@@ -286,6 +292,7 @@ public class ConfAccountSearcherImpl extends AbstractElasticSearch implements
             b.field("expiredDate", account.getExpiredDate());
             b.field("status", account.getStatus());
             b.field("enterpriseId", account.getEnterpriseId());
+            b.field("deleteUid", account.getDeleteUid());
 
             if(account.getOwnerId() != null)
             	b.field("ownerId", account.getOwnerId());

@@ -1,6 +1,5 @@
 //
 // EvhUserGetUserInfoRestResponse.m
-// generated at 2016-04-29 18:56:04 
 //
 #import "EvhUserGetUserInfoRestResponse.h"
 #import "EvhUserInfo.h"

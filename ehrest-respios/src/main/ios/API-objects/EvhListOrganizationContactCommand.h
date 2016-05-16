@@ -1,6 +1,5 @@
 //
 // EvhListOrganizationContactCommand.h
-// generated at 2016-04-29 18:56:02 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -13,6 +12,8 @@
 
 
 @property(nonatomic, copy) NSNumber* organizationId;
+
+@property(nonatomic, copy) NSNumber* isSignedup;
 
 @property(nonatomic, copy) NSNumber* pageOffset;
 

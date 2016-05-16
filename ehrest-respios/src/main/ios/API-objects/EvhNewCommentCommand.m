@@ -1,6 +1,5 @@
 //
 // EvhNewCommentCommand.m
-// generated at 2016-04-29 18:56:02 
 //
 #import "EvhNewCommentCommand.h"
 #import "EvhAttachmentDescriptor.h"

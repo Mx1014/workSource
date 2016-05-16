@@ -1,6 +1,5 @@
 //
 // EvhSceneDTO.m
-// generated at 2016-04-29 18:56:03 
 //
 #import "EvhSceneDTO.h"
 
@@ -45,6 +44,8 @@
         [jsonObject setObject: self.avatar forKey: @"avatar"];
     if(self.avatarUrl)
         [jsonObject setObject: self.avatarUrl forKey: @"avatarUrl"];
+    if(self.sceneType)
+        [jsonObject setObject: self.sceneType forKey: @"sceneType"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -77,6 +78,10 @@
         self.avatarUrl = [jsonObject objectForKey: @"avatarUrl"];
         if(self.avatarUrl && [self.avatarUrl isEqual:[NSNull null]])
             self.avatarUrl = nil;
+
+        self.sceneType = [jsonObject objectForKey: @"sceneType"];
+        if(self.sceneType && [self.sceneType isEqual:[NSNull null]])
+            self.sceneType = nil;
 
         return self;
     }

@@ -35,12 +35,14 @@ import java.util.stream.Collectors;
 
 
 
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
+
 
 
 
@@ -112,6 +114,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 
 @Component
 public class RolePrivilegeServiceImpl implements RolePrivilegeService {
@@ -184,9 +187,12 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public List<ListWebMenuPrivilegeDTO> listWebMenuPrivilege(ListWebMenuPrivilegeCommand cmd) {
 		User user = UserContext.current().getUser();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		List<Long> privilegeIds = this.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
 		List<WebMenuPrivilege> webMenuPrivileges = webMenuPrivilegeProvider.listWebMenuByPrivilegeIds(privilegeIds, null);
-		return this.getListWebMenuPrivilege(webMenuPrivileges);
+		List<WebMenuScope> webMenuScopes = webMenuPrivilegeProvider.listWebMenuScopeByOwnerId(EntityType.NAMESPACE.getCode(), Long.valueOf(namespaceId));
+		
+		return this.getListWebMenuPrivilege(webMenuPrivileges, webMenuScopes);
 	}
 	
 	@Override
@@ -289,7 +295,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		
 		List<WebMenuPrivilege> webMenuPrivileges = webMenuPrivilegeProvider.listWebMenuByPrivilegeIds(privilegeIds, null);
 		
-		return this.getListWebMenuPrivilege(webMenuPrivileges);
+		return this.getListWebMenuPrivilege(webMenuPrivileges, null);
 	}
 	
 	
@@ -518,7 +524,11 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     			if(RoleConstants.PLATFORM_PM_ROLES.contains(roleId) || RoleConstants.PLATFORM_ENTERPRISE_ROLES.contains(roleId)){
     				acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), null, roleId);
     			}else{
-    				acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), organizationId, roleId);
+    				Role role = aclProvider.getRoleById(roleId);
+    				if(null != role){
+    					acls = aclProvider.getResourceAclByRole(role.getOwnerType(), role.getOwnerId(), roleId);
+    				}
+    				LOGGER.debug("user["+userId+"], role = " + StringHelper.toJsonString(role));
     			}
     			for (Acl acl : acls) {
     				privilegeIds.add(acl.getPrivilegeId());
@@ -539,7 +549,11 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     			if(RoleConstants.PLATFORM_PM_ROLES.contains(roleId) || RoleConstants.PLATFORM_ENTERPRISE_ROLES.contains(roleId)){
     				acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), null, roleId);
     			}else{
-    				acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), organizationId, roleId);
+    				Role role = aclProvider.getRoleById(roleId);
+    				if(null != role){
+    					acls = aclProvider.getResourceAclByRole(role.getOwnerType(), role.getOwnerId(), roleId);
+    				}
+    				LOGGER.debug("user["+userId+"], role = " + StringHelper.toJsonString(role));
     			}
     			for (Acl acl : acls) {
     				privilegeIds.add(acl.getPrivilegeId());
@@ -630,6 +644,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     	
     	List<RoleAssignment> userRoles = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), userId);
     	
+    	LOGGER.debug("organization [ " + organizationId + " ],user[" + userId +  "] roles = " + StringHelper.toJsonString(userRoles));
+    	
     	if(null == org){
     		return new ArrayList<RoleAssignment>();
     	}
@@ -640,9 +656,14 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     		if(null != member && null != member.getGroupId() && 0 != member.getGroupId()){
     			childrenOrgId = member.getGroupId();
     		}
+    	}else if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.GROUP){
+    		childrenOrgId = org.getId();
+    		organizationId = org.getDirectlyEnterpriseId();
     	}
     	
     	List<RoleAssignment> userOrgRoles = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.ORGANIZATIONS.getCode(), childrenOrgId);
+    	
+    	LOGGER.debug("organization [ " + organizationId + " ],user[" + userId +  "] organization roles = " + StringHelper.toJsonString(userOrgRoles));
     	
     	userRoles.addAll(userOrgRoles);
     	
@@ -726,7 +747,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	 * @param webMenuPrivileges
 	 * @return
 	 */
-	private List<ListWebMenuPrivilegeDTO> getListWebMenuPrivilege(List<WebMenuPrivilege> webMenuPrivileges){
+	private List<ListWebMenuPrivilegeDTO> getListWebMenuPrivilege(List<WebMenuPrivilege> webMenuPrivileges, List<WebMenuScope> webMenuScopes){
 		
 		List<ListWebMenuPrivilegeDTO> dtos = new ArrayList<ListWebMenuPrivilegeDTO>();
 		
@@ -741,6 +762,14 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				dtosMap.put(r.getMenuId(), webMenuPrivilegeDTOs);
 			}else{
 				dtosMap.get(r.getMenuId()).add(webMenuPrivilegeDTO);
+			}
+		}
+		
+		if(null != webMenuScopes){
+			for (WebMenuScope webMenuScope : webMenuScopes) {
+				if(WebMenuScopeApplyPolicy.fromCode(webMenuScope.getApplyPolicy()) == WebMenuScopeApplyPolicy.DELETE){
+					dtosMap.remove(webMenuScope.getMenuId());
+				}
 			}
 		}
 		
@@ -799,4 +828,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				"non-privileged.");
     }
     
+    public static void main(String[] args) {
+	}
 }

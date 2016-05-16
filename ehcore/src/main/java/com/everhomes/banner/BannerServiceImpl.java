@@ -52,6 +52,8 @@ import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.UserCurrentEntityType;
+import com.everhomes.scene.SceneService;
+import com.everhomes.scene.SceneTypeInfo;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
@@ -82,6 +84,9 @@ public class BannerServiceImpl implements BannerService {
     
     @Autowired
     private FamilyProvider familyProvider;
+    
+    @Autowired
+    private SceneService sceneService;
     
     @Override
     public List<BannerDTO> getBanners(GetBannersCommand cmd, HttpServletRequest request){
@@ -144,12 +149,12 @@ public class BannerServiceImpl implements BannerService {
         User user = UserContext.current().getUser();
         long userId = user.getId();
         Integer namespaceId = (user.getNamespaceId() == null) ? 0 : user.getNamespaceId();
-        String sceneType = cmd.getCurrentSceneType();
+        String sceneTypeStr = cmd.getCurrentSceneType();
         //String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
         //query user relate banners
-        List<Banner> countryBanners = bannerProvider.findBannersByTagAndScope(namespaceId, sceneType, cmd.getBannerLocation(), cmd.getBannerGroup(),
+        List<Banner> countryBanners = bannerProvider.findBannersByTagAndScope(namespaceId, sceneTypeStr, cmd.getBannerLocation(), cmd.getBannerGroup(),
                 ScopeType.ALL.getCode(), 0L);
-        List<Banner> orgBanners = bannerProvider.findBannersByTagAndScope(namespaceId, sceneType, cmd.getBannerLocation(), cmd.getBannerGroup(), ScopeType.ORGANIZATION.getCode(), organizationId);
+        List<Banner> orgBanners = bannerProvider.findBannersByTagAndScope(namespaceId, sceneTypeStr, cmd.getBannerLocation(), cmd.getBannerGroup(), ScopeType.ORGANIZATION.getCode(), organizationId);
         List<Banner> allBanners = new ArrayList<Banner>();
         if(countryBanners != null)
             allBanners.addAll(countryBanners);
@@ -173,6 +178,65 @@ public class BannerServiceImpl implements BannerService {
         return result;
     }
     
+    // 场景需要同时支持小区和园区 by lqs 20160511
+//    @Override
+//    public List<BannerDTO> getBannersByScene(GetBannersBySceneCommand cmd, HttpServletRequest request) {
+//        User user = UserContext.current().getUser();
+//        SceneTokenDTO sceneToken = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
+//        
+//        GetBannersCommand getCmd = new GetBannersCommand();
+//        getCmd.setBannerGroup(cmd.getBannerGroup());
+//        getCmd.setBannerLocation(cmd.getBannerLocation());
+//        getCmd.setNamespaceId(sceneToken.getNamespaceId());
+//        getCmd.setSceneType(sceneToken.getScene());
+//        
+//        Community community = null;
+//        List<BannerDTO> bannerList = null;
+//        UserCurrentEntityType entityType = UserCurrentEntityType.fromCode(sceneToken.getEntityType());
+//        switch(entityType) {
+//        case COMMUNITY_RESIDENTIAL:
+//        case COMMUNITY_COMMERCIAL:
+//        case COMMUNITY:
+//            community = communityProvider.findCommunityById(sceneToken.getEntityId());
+//            if(community != null) {
+//                getCmd.setCommunityId(community.getId());
+//            }
+//            
+//            bannerList = getBanners(getCmd, request);
+//            break;
+//        case FAMILY:
+//            FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
+//            if(family != null) {
+//                community = communityProvider.findCommunityById(family.getCommunityId());
+//            } else {
+//                if(LOGGER.isWarnEnabled()) {
+//                    LOGGER.warn("Family not found, sceneToken=" + sceneToken);
+//                }
+//            }
+//            if(community != null) {
+//                getCmd.setCommunityId(community.getId());
+//            }
+//            
+//            bannerList = getBanners(getCmd, request);
+//            
+//            break;
+//        case ORGANIZATION:// 无小区ID
+//            GetBannersByOrgCommand orgCmd = new GetBannersByOrgCommand();
+//            getCmd.setBannerGroup(cmd.getBannerGroup());
+//            getCmd.setBannerLocation(cmd.getBannerLocation());
+//            getCmd.setNamespaceId(sceneToken.getNamespaceId());
+//            getCmd.setSceneType(sceneToken.getScene());
+//            orgCmd.setOrganizationId(sceneToken.getEntityId());
+//            bannerList = getBannersByOrg(orgCmd, request);
+//            break;
+//        default:
+//            LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
+//            break;
+//        }
+//        
+//        return bannerList;
+//    }
+    
     @Override
     public List<BannerDTO> getBannersByScene(GetBannersBySceneCommand cmd, HttpServletRequest request) {
         User user = UserContext.current().getUser();
@@ -182,15 +246,23 @@ public class BannerServiceImpl implements BannerService {
         getCmd.setBannerGroup(cmd.getBannerGroup());
         getCmd.setBannerLocation(cmd.getBannerLocation());
         getCmd.setNamespaceId(sceneToken.getNamespaceId());
-        getCmd.setSceneType(sceneToken.getScene());
+        
+        SceneTypeInfo sceneInfo = sceneService.getBaseSceneTypeByName(sceneToken.getNamespaceId(), sceneToken.getScene());
+        String baseScene = sceneToken.getScene();
+        if(sceneInfo != null) {
+            baseScene = sceneInfo.getName();
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Scene type is changed, sceneToken={}, newScene={}", sceneToken, sceneInfo.getName());
+            }
+        } 
+        getCmd.setSceneType(baseScene);
         
         Community community = null;
         List<BannerDTO> bannerList = null;
-        UserCurrentEntityType entityType = UserCurrentEntityType.fromCode(sceneToken.getEntityType());
-        switch(entityType) {
-        case COMMUNITY_RESIDENTIAL:
-        case COMMUNITY_COMMERCIAL:
-        case COMMUNITY:
+        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
+        switch(sceneType) {
+        case DEFAULT:
+        case PARK_TOURIST:
             community = communityProvider.findCommunityById(sceneToken.getEntityId());
             if(community != null) {
                 getCmd.setCommunityId(community.getId());
@@ -212,14 +284,16 @@ public class BannerServiceImpl implements BannerService {
             }
             
             bannerList = getBanners(getCmd, request);
-            
             break;
-        case ORGANIZATION:// 无小区ID
+        case PM_ADMIN:// 无小区ID
+        case PARK_PM_ADMIN: 
+        case PARK_ENTERPRISE:
+        case PARK_ENTERPRISE_NOAUTH:
             GetBannersByOrgCommand orgCmd = new GetBannersByOrgCommand();
             getCmd.setBannerGroup(cmd.getBannerGroup());
             getCmd.setBannerLocation(cmd.getBannerLocation());
             getCmd.setNamespaceId(sceneToken.getNamespaceId());
-            getCmd.setSceneType(sceneToken.getScene());
+            getCmd.setSceneType(baseScene);
             orgCmd.setOrganizationId(sceneToken.getEntityId());
             bannerList = getBannersByOrg(orgCmd, request);
             break;

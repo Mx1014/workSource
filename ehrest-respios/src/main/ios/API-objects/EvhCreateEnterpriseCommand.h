@@ -1,6 +1,5 @@
 //
 // EvhCreateEnterpriseCommand.h
-// generated at 2016-04-29 18:56:02 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -41,6 +40,10 @@
 @property(nonatomic, copy) NSNumber* namespaceId;
 
 @property(nonatomic, copy) NSString* organizationType;
+
+@property(nonatomic, copy) NSString* longitude;
+
+@property(nonatomic, copy) NSString* latitude;
 
 // item type EvhOrganizationAddressDTO*
 @property(nonatomic, strong) NSMutableArray* addressDTOs;

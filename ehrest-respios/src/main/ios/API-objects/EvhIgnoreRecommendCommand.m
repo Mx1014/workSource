@@ -1,6 +1,5 @@
 //
 // EvhIgnoreRecommendCommand.m
-// generated at 2016-04-29 18:56:01 
 //
 #import "EvhIgnoreRecommendCommand.h"
 #import "EvhIgnoreRecommandItem.h"

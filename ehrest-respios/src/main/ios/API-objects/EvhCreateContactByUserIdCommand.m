@@ -1,6 +1,5 @@
 //
 // EvhCreateContactByUserIdCommand.m
-// generated at 2016-04-29 18:56:02 
 //
 #import "EvhCreateContactByUserIdCommand.h"
 
@@ -45,6 +44,8 @@
         [jsonObject setObject: self.avatar forKey: @"avatar"];
     if(self.applyGroup)
         [jsonObject setObject: self.applyGroup forKey: @"applyGroup"];
+    if(self.communityId)
+        [jsonObject setObject: self.communityId forKey: @"communityId"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -77,6 +78,10 @@
         self.applyGroup = [jsonObject objectForKey: @"applyGroup"];
         if(self.applyGroup && [self.applyGroup isEqual:[NSNull null]])
             self.applyGroup = nil;
+
+        self.communityId = [jsonObject objectForKey: @"communityId"];
+        if(self.communityId && [self.communityId isEqual:[NSNull null]])
+            self.communityId = nil;
 
         return self;
     }

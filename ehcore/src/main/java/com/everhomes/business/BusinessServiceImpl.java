@@ -23,11 +23,13 @@ import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.RoleAssignment;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.address.AddressService;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityGeoPoint;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.CommunityService;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -40,10 +42,17 @@ import com.everhomes.group.GroupProvider;
 import com.everhomes.launchpad.LaunchPadConstants;
 import com.everhomes.launchpad.LaunchPadItem;
 import com.everhomes.launchpad.LaunchPadProvider;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.oauth2.Clients;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.address.AddressType;
+import com.everhomes.rest.address.ApartmentDTO;
+import com.everhomes.rest.address.BuildingDTO;
+import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.address.ListBuildingByKeywordCommand;
+import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
+import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;
 import com.everhomes.rest.business.BaiduGeocoderResponse;
 import com.everhomes.rest.business.BusinessAsignedNamespaceCommand;
 import com.everhomes.rest.business.BusinessAssignedNamespaceVisibleFlagType;
@@ -89,12 +98,18 @@ import com.everhomes.rest.business.admin.RecommendBusinessesAdminCommand;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
+import com.everhomes.rest.community.GetCommunitiesByNameAndCityIdCommand;
+import com.everhomes.rest.community.GetCommunityByIdCommand;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.launchpad.ApplyPolicy;
 import com.everhomes.rest.launchpad.ItemDisplayFlag;
 import com.everhomes.rest.launchpad.ItemTargetType;
 import com.everhomes.rest.launchpad.ScaleType;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.region.ListRegionByKeywordCommand;
+import com.everhomes.rest.region.RegionAdminStatus;
+import com.everhomes.rest.region.RegionDTO;
+import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.ui.user.UserProfileDTO;
 import com.everhomes.rest.user.GetUserDefaultAddressCommand;
 import com.everhomes.rest.user.IdentifierType;
@@ -118,7 +133,9 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.SortOrder;
 import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
 import com.everhomes.util.WebTokenGenerator;
 
 @Component
@@ -152,8 +169,6 @@ public class BusinessServiceImpl implements BusinessService {
 	@Autowired
 	private UserActivityService userActivityService;
 	@Autowired
-	private RegionProvider regionProvider;
-	@Autowired
 	private LaunchPadProvider launchPadProvider;
 	@Autowired
 	private AddressProvider addressProvider;
@@ -163,6 +178,13 @@ public class BusinessServiceImpl implements BusinessService {
 	private AclProvider aclProvider;
 	@Autowired
 	private UserService userService;
+	
+	@Autowired
+	private RegionProvider regionProvider;
+	@Autowired
+	private CommunityService communityService;
+	@Autowired
+	private AddressService addressService;
 
 	@Override
 	public void syncBusiness(SyncBusinessCommand cmd) {
@@ -1785,6 +1807,69 @@ public class BusinessServiceImpl implements BusinessService {
 		if(profile!=null)
 			return ConvertHelper.convert(profile, UserProfileDTO.class);
 		return null;
+	}
+	
+	@Override
+	public List<BuildingDTO> listBuildingsByKeyword(ListBuildingByCommunityIdsCommand cmd) {
+		if(cmd.getCommunityIds()==null||cmd.getCommunityIds().isEmpty()){
+			LOGGER.error("Invalid parameter,commudityIds is null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid parameter,commudityIds is null");
+		}
+		List<BuildingDTO> list = new ArrayList<BuildingDTO>();
+		ListBuildingByKeywordCommand subcmd = new ListBuildingByKeywordCommand();
+		subcmd.setKeyword(cmd.getKeyword());
+		subcmd.setNamespaceId(cmd.getNamespaceId());
+		for(Long r:cmd.getCommunityIds()){
+			subcmd.setCommunityId(r);
+			Tuple<Integer, List<BuildingDTO>> result = addressService.listBuildingsByKeyword(subcmd);
+			if(result.second()!=null&&!result.second().isEmpty()){
+				List<BuildingDTO> tmpList = result.second().stream().map((r2) -> {
+					r2.setCommunityId(r);
+					return r2; 
+				}).collect(Collectors.toList());
+				list.addAll(tmpList);
+			}
+		}
+		return list;
+	}
+
+	@Override
+	public Tuple<Integer, List<ApartmentDTO>> listApartmentsByKeyword(
+			ListPropApartmentsByKeywordCommand cmd) {
+		return addressService.listApartmentsByKeyword(cmd);
+	}
+
+	@Override
+	public List<CommunityDTO> getCommunitiesByNameAndCityId(
+			GetCommunitiesByNameAndCityIdCommand cmd) {
+		return communityService.getCommunitiesByNameAndCityId(cmd);
+	}
+
+	@Override
+	public CommunityDTO getCommunityById(GetCommunityByIdCommand cmd) {
+		return communityService.getCommunityById(cmd);
+	}
+
+	@Override
+	public List<RegionDTO> listRegionByKeyword(ListRegionByKeywordCommand cmd) {
+		Tuple<String, SortOrder> orderBy = null;
+		if(cmd.getSortBy() == null)
+			cmd.setSortBy("");
+		if(cmd.getSortBy() != null)
+			orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(), SortOrder.fromCode(cmd.getSortOrder()));
+
+		Integer namespaceId = cmd.getNamespaceId()==null?Namespace.DEFAULT_NAMESPACE:cmd.getNamespaceId();
+
+		List<Region> entityResultList = this.regionProvider.listRegionByKeyword(cmd.getParentId(), 
+				RegionScope.fromCode(cmd.getScope()), 
+				RegionAdminStatus.fromCode(cmd.getStatus()), orderBy, cmd.getKeyword(), namespaceId);
+
+		List<RegionDTO> dtoResultList = entityResultList.stream() 
+				.map(r->{ return ConvertHelper.convert(r, RegionDTO.class); })
+				.collect(Collectors.toList());
+		
+		return dtoResultList;
 	}
 
 }

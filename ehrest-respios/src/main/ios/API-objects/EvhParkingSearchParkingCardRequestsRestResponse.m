@@ -1,6 +1,5 @@
 //
 // EvhParkingSearchParkingCardRequestsRestResponse.m
-// generated at 2016-04-29 18:56:04 
 //
 #import "EvhParkingSearchParkingCardRequestsRestResponse.h"
 #import "EvhListParkingCardRequestResponse.h"

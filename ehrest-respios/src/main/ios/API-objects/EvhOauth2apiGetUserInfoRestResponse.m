@@ -1,6 +1,5 @@
 //
 // EvhOauth2apiGetUserInfoRestResponse.m
-// generated at 2016-04-29 18:56:03 
 //
 #import "EvhOauth2apiGetUserInfoRestResponse.h"
 #import "EvhUserInfo.h"

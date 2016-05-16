@@ -1,6 +1,5 @@
 //
 // EvhListPushMessageResponse.m
-// generated at 2016-04-29 18:56:01 
 //
 #import "EvhListPushMessageResponse.h"
 #import "EvhPushMessageDTO.h"

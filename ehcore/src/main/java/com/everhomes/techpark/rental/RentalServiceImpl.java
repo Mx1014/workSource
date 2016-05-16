@@ -203,6 +203,9 @@ public class RentalServiceImpl implements RentalService {
 		checkEnterpriseCommunityIdIsNull(cmd.getOwnerId());
 		RentalRule rentalRuleExist = rentalProvider.getRentalRule(
 				cmd.getOwnerId(),cmd.getOwnerType(), cmd.getSiteType());
+		if(null == cmd.getRefundFlag()){
+			cmd.setRefundFlag((byte)1);
+		}
 		if(rentalRuleExist != null) {
 //		rentalRule.setOwnerId(cmd.getOwnerId());
 //		rentalRule.setOwnerType(cmd.getOwnerType());

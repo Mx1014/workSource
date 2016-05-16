@@ -1,6 +1,5 @@
 //
 // EvhPmsyBillsResponse.m
-// generated at 2016-04-29 18:56:02 
 //
 #import "EvhPmsyBillsResponse.h"
 #import "EvhPmsyBillsDTO.h"
@@ -45,8 +44,8 @@
         [jsonObject setObject: self.monthCount forKey: @"monthCount"];
     if(self.totalAmount)
         [jsonObject setObject: self.totalAmount forKey: @"totalAmount"];
-    if(self.tip)
-        [jsonObject setObject: self.tip forKey: @"tip"];
+    if(self.billTip)
+        [jsonObject setObject: self.billTip forKey: @"billTip"];
     if(self.contact)
         [jsonObject setObject: self.contact forKey: @"contact"];
     if(self.requests) {
@@ -87,9 +86,9 @@
         if(self.totalAmount && [self.totalAmount isEqual:[NSNull null]])
             self.totalAmount = nil;
 
-        self.tip = [jsonObject objectForKey: @"tip"];
-        if(self.tip && [self.tip isEqual:[NSNull null]])
-            self.tip = nil;
+        self.billTip = [jsonObject objectForKey: @"billTip"];
+        if(self.billTip && [self.billTip isEqual:[NSNull null]])
+            self.billTip = nil;
 
         self.contact = [jsonObject objectForKey: @"contact"];
         if(self.contact && [self.contact isEqual:[NSNull null]])

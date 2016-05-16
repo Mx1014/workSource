@@ -1,6 +1,5 @@
 //
 // EvhGroupListNearbyGroupsRestResponse.m
-// generated at 2016-04-29 18:56:03 
 //
 #import "EvhGroupListNearbyGroupsRestResponse.h"
 #import "EvhListNearbyGroupCommandResponse.h"

@@ -1,6 +1,5 @@
 //
 // EvhGetUserOpPromotionCommand.m
-// generated at 2016-04-29 18:56:00 
 //
 #import "EvhGetUserOpPromotionCommand.h"
 

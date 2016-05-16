@@ -1,6 +1,5 @@
 //
 // EvhUiPrivilegeGetEntranceByPrivilegeRestResponse.m
-// generated at 2016-04-29 18:56:04 
 //
 #import "EvhUiPrivilegeGetEntranceByPrivilegeRestResponse.h"
 #import "EvhGetEntranceByPrivilegeResponse.h"

@@ -1,6 +1,5 @@
 //
 // EvhPmsyListAddressesRestResponse.h
-// generated at 2016-04-30 11:16:58 
 //
 #import "RestResponseBase.h"
 
@@ -9,7 +8,7 @@
 //
 @interface EvhPmsyListAddressesRestResponse : EvhRestResponseBase
 
-// array of EvhAddressDTO* objects
+// array of EvhPmsyAddressDTO* objects
 @property(nonatomic, strong) NSMutableArray* response;
 
 -(id) init;

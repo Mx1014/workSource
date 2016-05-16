@@ -1,6 +1,5 @@
 //
 // EvhPmFindFamilyBillAndPaysByFamilyIdAndTimeRestResponse.m
-// generated at 2016-04-29 18:56:04 
 //
 #import "EvhPmFindFamilyBillAndPaysByFamilyIdAndTimeRestResponse.h"
 #import "EvhPmBillsDTO.h"

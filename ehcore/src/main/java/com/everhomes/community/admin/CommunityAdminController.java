@@ -491,5 +491,16 @@ public class CommunityAdminController extends ControllerBase {
         return response;
     }
     
-   
+    /**
+     * <b>URL: /admin/community/listUnassignedCommunitiesByNamespaceId</b>
+     * <p>域下面未被管理的小区</p>
+     */
+    @RequestMapping("listUnassignedCommunitiesByNamespaceId")
+    @RestReturn(value=CommunityDTO.class)
+    public RestResponse listUnassignedCommunitiesByNamespaceId() {
+        RestResponse response =  new RestResponse(communityService.listUnassignedCommunitiesByNamespaceId());
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

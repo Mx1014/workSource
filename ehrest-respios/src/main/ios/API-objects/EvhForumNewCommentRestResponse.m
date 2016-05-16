@@ -1,6 +1,5 @@
 //
 // EvhForumNewCommentRestResponse.m
-// generated at 2016-04-29 18:56:03 
 //
 #import "EvhForumNewCommentRestResponse.h"
 #import "EvhPostDTO.h"

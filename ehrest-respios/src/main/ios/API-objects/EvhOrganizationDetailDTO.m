@@ -1,6 +1,5 @@
 //
 // EvhOrganizationDetailDTO.m
-// generated at 2016-04-29 18:56:01 
 //
 #import "EvhOrganizationDetailDTO.h"
 #import "EvhOrganizationMemberDTO.h"
@@ -77,6 +76,10 @@
         [jsonObject setObject: self.postUri forKey: @"postUri"];
     if(self.postUrl)
         [jsonObject setObject: self.postUrl forKey: @"postUrl"];
+    if(self.longitude)
+        [jsonObject setObject: self.longitude forKey: @"longitude"];
+    if(self.latitude)
+        [jsonObject setObject: self.latitude forKey: @"latitude"];
     if(self.member) {
         NSMutableDictionary* dic = [NSMutableDictionary new];
         [self.member toJson: dic];
@@ -193,6 +196,14 @@
         self.postUrl = [jsonObject objectForKey: @"postUrl"];
         if(self.postUrl && [self.postUrl isEqual:[NSNull null]])
             self.postUrl = nil;
+
+        self.longitude = [jsonObject objectForKey: @"longitude"];
+        if(self.longitude && [self.longitude isEqual:[NSNull null]])
+            self.longitude = nil;
+
+        self.latitude = [jsonObject objectForKey: @"latitude"];
+        if(self.latitude && [self.latitude isEqual:[NSNull null]])
+            self.latitude = nil;
 
         NSMutableDictionary* itemJson =  (NSMutableDictionary*)[jsonObject objectForKey: @"member"];
 

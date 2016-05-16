@@ -5,7 +5,6 @@ package com.everhomes.forum;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -64,9 +63,9 @@ import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.CommunityAdminStatus;
+import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryConstants;
-import com.everhomes.rest.category.CategoryType;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.AssignTopicScopeCommand;
@@ -120,6 +119,7 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.organization.ListCommunitiesByOrganizationIdCommand;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
@@ -395,7 +395,7 @@ public class ForumServiceImpl implements ForumService {
 				if(EntityType.fromCode(target.getTargetType()) == EntityType.ORGANIZATIONS){
 					Organization org =  organizationProvider.findOrganizationById(target.getId());
 					org.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-					List<OrganizationMember> members = organizationProvider.listOrganizationPersonnels(null, org, new CrossShardListingLocator(), 10000);
+					List<OrganizationMember> members = organizationProvider.listOrganizationPersonnels(null, org, null, new CrossShardListingLocator(), 10000);
 					for (OrganizationMember member : members) {
 						if(MessageType.fromCode(target.getMessageType()) == MessageType.PUSH){
 							if(OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER){
@@ -1062,6 +1062,66 @@ public class ForumServiceImpl implements ForumService {
         return dto;
     }
     
+    
+    public ListPostCommandResponse listOrgTopics(QueryOrganizationTopicCommand cmd){
+    	 long startTime = System.currentTimeMillis();
+    	 User operator = UserContext.current().getUser();
+    	 Long operatorId = operator.getId();
+    	 Long organizationId = cmd.getOrganizationId();
+         Long communityId = cmd.getCommunityId();
+         List<Long> forumIds = new ArrayList<Long>();
+         Organization organization = checkOrganizationParameter(operatorId, organizationId, "listOrganizationTopics");
+         List<Long> communityIdList = new ArrayList<Long>();
+         if(null == communityId){
+        	 ListCommunitiesByOrganizationIdCommand command = new ListCommunitiesByOrganizationIdCommand();
+         	command.setOrganizationId(organization.getId());;
+         	List<CommunityDTO> communities = organizationService.listCommunityByOrganizationId(command).getCommunities();
+         	if(null != communities){
+         		for (CommunityDTO communityDTO : communities) {
+         			communityIdList.add(communityDTO.getId());
+         			forumIds.add(communityDTO.getDefaultForumId());
+ 				}
+         	}
+         }else{
+        	Community community = communityProvider.findCommunityById(communityId);
+         	communityIdList.add(community.getId());
+         	forumIds.add(community.getDefaultForumId());
+         }
+         
+         List<Long> categorys = new ArrayList<Long>();
+         
+         if(null != cmd.getContentCategory()){
+         	categorys.add(cmd.getContentCategory());
+         }
+         
+         if(null != cmd.getEmbeddedAppId()){
+         	if(AppConstants.APPID_ORGTASK == cmd.getEmbeddedAppId() && null == cmd.getContentCategory()){
+         		categorys = CategoryConstants.GA_RELATED_CATEGORIES;
+         	}
+         }
+         
+         Condition communityCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
+         communityCondition = communityCondition.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.in(communityIdList));
+         Condition regionCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.REGION.getCode());
+         regionCondition = regionCondition.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.eq(organizationId));
+         Condition condition = communityCondition.or(regionCondition).and(Tables.EH_FORUM_POSTS.FORUM_ID.in(forumIds));
+         if(null != cmd.getEmbeddedAppId()){
+        	 condition = condition.and(Tables.EH_FORUM_POSTS.EMBEDDED_APP_ID.eq(cmd.getEmbeddedAppId()));
+         }
+         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+         CrossShardListingLocator locator = new CrossShardListingLocator(ForumConstants.SYSTEM_FORUM);
+         locator.setAnchor(cmd.getPageAnchor());
+         
+         List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus());
+    	 if(LOGGER.isInfoEnabled()) {
+             long endTime = System.currentTimeMillis();
+             LOGGER.info("Query organization topics, userId=" + operatorId + ", size=" + dtos.size() 
+                 + ", elapse=" + (endTime - startTime) + ", cmd=" + cmd);
+         }   
+    	 return new ListPostCommandResponse(locator.getAnchor(), dtos); 
+    }
+    
+    
     public ListPostCommandResponse queryOrganizationTopics(QueryOrganizationTopicCommand cmd) {
         long startTime = System.currentTimeMillis();
         User operator = UserContext.current().getUser();
@@ -1072,7 +1132,14 @@ public class ForumServiceImpl implements ForumService {
         Organization organization = checkOrganizationParameter(operatorId, organizationId, "listOrganizationTopics");
         List<Long> communityIdList = new ArrayList<Long>();
         if(null == communityId){
-        	communityIdList = organizationService.getOrganizationCommunityIdById(organizationId);
+        	ListCommunitiesByOrganizationIdCommand command = new ListCommunitiesByOrganizationIdCommand();
+        	command.setOrganizationId(organization.getId());;
+        	List<CommunityDTO> communities = organizationService.listCommunityByOrganizationId(command).getCommunities();
+        	if(null != communities){
+        		for (CommunityDTO communityDTO : communities) {
+        			communityIdList.add(communityDTO.getId());
+				}
+        	}
         }else{
         	communityIdList.add(communityId);
         }
@@ -1095,17 +1162,54 @@ public class ForumServiceImpl implements ForumService {
         	}
         	
         }
+        Condition condition = null;
+        
+        if(null != cmd.getEmbeddedAppId()){
+        	condition = Tables.EH_FORUM_POSTS.EMBEDDED_APP_ID.eq(cmd.getEmbeddedAppId());
+        }
+        
         
         Condition visibilityCondition = buildGaRelatedPostQryConditionByOrganization(operatorId, organization, communityIdList);
 
         Long actionCategoryId = cmd.getActionCategory();
+        
         Condition categoryCondition = buildPostCategoryCondition(categorys, actionCategoryId);
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator(ForumConstants.SYSTEM_FORUM);
         locator.setAnchor(cmd.getPageAnchor());
         
-        Timestamp timestemp = new Timestamp(DateHelper.currentGMTTime().getTime());
+        if(null != condition){
+        	if(null != visibilityCondition)
+        		condition = condition.and(visibilityCondition);
+        	if(null != categoryCondition)
+        		condition = condition.and(categoryCondition);
+        }else{
+        	if(null != visibilityCondition)
+        		condition = visibilityCondition;
+        	if(null == condition){
+        		condition = categoryCondition;
+        	}else if(null != categoryCondition){
+        		condition = condition.and(categoryCondition);
+        	}
+        }
+        
+        List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus());
+        
+        
+        if(LOGGER.isInfoEnabled()) {
+            long endTime = System.currentTimeMillis();
+            LOGGER.info("Query organization topics, userId=" + operatorId + ", size=" + dtos.size() 
+                + ", elapse=" + (endTime - startTime) + ", cmd=" + cmd);
+        }        
+        
+        return new ListPostCommandResponse(locator.getAnchor(), dtos);
+    }
+    
+    private List<PostDTO> getOrgTopics(CrossShardListingLocator locator,Integer pageSize, Condition condition, String publishStatus){
+    	User user = UserContext.current().getUser();
+    	
+    	Timestamp timestemp = new Timestamp(DateHelper.currentGMTTime().getTime());
         
         List<Post> posts = this.forumProvider.queryPosts(locator, pageSize + 1, (loc, query) -> {
             query.addJoin(Tables.EH_FORUM_ASSIGNED_SCOPES, JoinType.LEFT_OUTER_JOIN, 
@@ -1113,43 +1217,37 @@ public class ForumServiceImpl implements ForumService {
             query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
             query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
             
-            if(TopicPublishStatus.fromCode(cmd.getPublishStatus()) == TopicPublishStatus.UNPUBLISHED){
+            if(TopicPublishStatus.fromCode(publishStatus) == TopicPublishStatus.UNPUBLISHED){
             	query.addConditions(Tables.EH_FORUM_POSTS.START_TIME.gt(timestemp));
             }
             
-            if(TopicPublishStatus.fromCode(cmd.getPublishStatus()) == TopicPublishStatus.PUBLISHED){
+            if(TopicPublishStatus.fromCode(publishStatus) == TopicPublishStatus.PUBLISHED){
             	query.addConditions(Tables.EH_FORUM_POSTS.START_TIME.lt(timestemp));
             	query.addConditions(Tables.EH_FORUM_POSTS.END_TIME.gt(timestemp));
             }
             
-            if(TopicPublishStatus.fromCode(cmd.getPublishStatus()) == TopicPublishStatus.EXPIRED){
+            if(TopicPublishStatus.fromCode(publishStatus) == TopicPublishStatus.EXPIRED){
             	query.addConditions(Tables.EH_FORUM_POSTS.END_TIME.lt(timestemp));
             }
             
             
-            if(visibilityCondition != null) {
-                query.addConditions(visibilityCondition);
-            }
-            if(categoryCondition != null) {
-                query.addConditions(categoryCondition);
+            if(condition != null) {
+                query.addConditions(condition);
             }
             
-            if(null != cmd.getEmbeddedAppId()){
-            	query.addConditions(Tables.EH_FORUM_POSTS.EMBEDDED_APP_ID.eq(cmd.getEmbeddedAppId()));
-            }
             return query;
         });
         this.forumProvider.populatePostAttachments(posts);
         
-        Long nextPageAnchor = null;
+        locator.setAnchor(null);
         if(posts.size() > pageSize) {
             posts.remove(posts.size() - 1);
-            nextPageAnchor = posts.get(posts.size() - 1).getId();
+            locator.setAnchor(posts.get(posts.size() - 1).getId());
         }
         
-        populatePosts(operatorId, posts, null, false);
+        populatePosts(user.getId(), posts, null, false);
         
-        List<PostDTO> postDtoList = posts.stream().map((r) -> {
+        return posts.stream().map((r) -> {
         	Timestamp s = r.getStartTime();
         	Timestamp e = r.getEndTime();
         	PostDTO dto= ConvertHelper.convert(r, PostDTO.class);
@@ -1172,14 +1270,6 @@ public class ForumServiceImpl implements ForumService {
         	
           return dto;  
         }).collect(Collectors.toList());
-        
-        if(LOGGER.isInfoEnabled()) {
-            long endTime = System.currentTimeMillis();
-            LOGGER.info("Query organization topics, userId=" + operatorId + ", size=" + postDtoList.size() 
-                + ", elapse=" + (endTime - startTime) + ", cmd=" + cmd);
-        }        
-        
-        return new ListPostCommandResponse(nextPageAnchor, postDtoList);
     }
     
     @Override
@@ -3276,52 +3366,131 @@ public class ForumServiceImpl implements ForumService {
         return response;
 	}
 
+//    @Override
+//	public PostDTO createTopicByScene(NewTopicBySceneCommand cmd) {
+//	    User user = UserContext.current().getUser();
+//	    Long userId = user.getId();
+//	    SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+//	    
+//	    NewTopicCommand topicCmd = ConvertHelper.convert(cmd, NewTopicCommand.class);
+//	    
+//	    PostEntityTag creatorTag = PostEntityTag.USER;
+//	    VisibleRegionType visibleRegionType = null;
+//	    Long visibleRegionId = null;
+//	    UserCurrentEntityType entityType = UserCurrentEntityType.fromCode(sceneToken.getEntityType());
+//	    switch(entityType) {
+//	    case COMMUNITY_RESIDENTIAL:
+//	    case COMMUNITY_COMMERCIAL:
+//	    case COMMUNITY:
+//	        visibleRegionType = VisibleRegionType.COMMUNITY;
+//	        visibleRegionId = sceneToken.getEntityId();
+//	        break;
+//	    case FAMILY:
+//	        FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
+//	        if(family != null) {
+//	            visibleRegionType = VisibleRegionType.COMMUNITY;
+//	            visibleRegionId = family.getCommunityId();
+//	        } else {
+//                if(LOGGER.isWarnEnabled()) {
+//                    LOGGER.warn("Family not found, sceneToken=" + sceneToken);
+//                }
+//            }
+//	        break;
+//	    case ORGANIZATION:
+//	    	
+//            Organization org = this.organizationProvider.findOrganizationById(sceneToken.getEntityId());
+//            if(org != null) {
+//            	String orgType = org.getOrganizationType();
+//                
+//                if(OrganizationType.isGovAgencyOrganization(orgType)) {
+//                	if(VisibleRegionType.fromCode(cmd.getVisibleRegionType()) == VisibleRegionType.COMMUNITY){
+//        	    		creatorTag = PostEntityTag.fromCode(orgType);
+//            			visibleRegionType = VisibleRegionType.COMMUNITY;
+//                        visibleRegionId = cmd.getVisibleRegionId();
+//            		}else{
+//            			creatorTag = PostEntityTag.fromCode(orgType);
+//                        visibleRegionType = VisibleRegionType.REGION;
+//                        visibleRegionId = sceneToken.getEntityId();
+//            		}
+//                    
+//                }
+//            } else {
+//                if(LOGGER.isWarnEnabled()) {
+//                    LOGGER.warn("Organization not found, sceneToken=" + sceneToken);
+//                }
+//            }
+//	        break;
+//	    default:
+//	        break;
+//	    }
+//	    
+//	    if(creatorTag != null) {
+//	        topicCmd.setCreatorTag(creatorTag.getCode());
+//	    }
+//	    if(visibleRegionType != null) {
+//	        topicCmd.setVisibleRegionType(visibleRegionType.getCode());
+//	    }
+//	    topicCmd.setVisibleRegionId(visibleRegionId);
+//	    
+//	    return this.createTopic(topicCmd);
+//	}
+	
     @Override
-	public PostDTO createTopicByScene(NewTopicBySceneCommand cmd) {
-	    User user = UserContext.current().getUser();
-	    Long userId = user.getId();
-	    SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
-	    
-	    NewTopicCommand topicCmd = ConvertHelper.convert(cmd, NewTopicCommand.class);
-	    
-	    PostEntityTag creatorTag = PostEntityTag.USER;
-	    VisibleRegionType visibleRegionType = null;
-	    Long visibleRegionId = null;
-	    UserCurrentEntityType entityType = UserCurrentEntityType.fromCode(sceneToken.getEntityType());
-	    switch(entityType) {
-	    case COMMUNITY_RESIDENTIAL:
-	    case COMMUNITY_COMMERCIAL:
-	    case COMMUNITY:
-	        visibleRegionType = VisibleRegionType.COMMUNITY;
-	        visibleRegionId = sceneToken.getEntityId();
-	        break;
-	    case FAMILY:
-	        FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
-	        if(family != null) {
-	            visibleRegionType = VisibleRegionType.COMMUNITY;
-	            visibleRegionId = family.getCommunityId();
-	        } else {
+    public PostDTO createTopicByScene(NewTopicBySceneCommand cmd) {
+        User user = UserContext.current().getUser();
+        Long userId = user.getId();
+        SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+        
+        NewTopicCommand topicCmd = ConvertHelper.convert(cmd, NewTopicCommand.class);
+        
+        PostEntityTag creatorTag = PostEntityTag.USER;
+        VisibleRegionType visibleRegionType = null;
+        Long visibleRegionId = null;
+        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
+        switch(sceneType) {
+        case DEFAULT:
+        case PARK_TOURIST:
+            visibleRegionType = VisibleRegionType.COMMUNITY;
+            visibleRegionId = sceneToken.getEntityId();
+            
+            // 在园区场景下，客户端可能使用错误的社区论坛（甚至不传），
+            if(topicCmd.getForumId() == null || topicCmd.getForumId() == ForumConstants.SYSTEM_FORUM) {
+                setCurrentForumId(topicCmd, visibleRegionId);
+            }
+            break;
+        case FAMILY:
+            FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
+            if(family != null) {
+                visibleRegionType = VisibleRegionType.COMMUNITY;
+                visibleRegionId = family.getCommunityId();
+                
+                if(topicCmd.getForumId() == null || topicCmd.getForumId() == ForumConstants.SYSTEM_FORUM) {
+                    setCurrentForumId(topicCmd, visibleRegionId);
+                }
+            } else {
                 if(LOGGER.isWarnEnabled()) {
                     LOGGER.warn("Family not found, sceneToken=" + sceneToken);
                 }
             }
-	        break;
-	    case ORGANIZATION:
-	    	
+            break;
+        case PM_ADMIN:// 无小区ID
+        case PARK_PM_ADMIN: 
+        case PARK_ENTERPRISE:
+        case PARK_ENTERPRISE_NOAUTH:
             Organization org = this.organizationProvider.findOrganizationById(sceneToken.getEntityId());
             if(org != null) {
-            	String orgType = org.getOrganizationType();
+                String orgType = org.getOrganizationType();
                 
                 if(OrganizationType.isGovAgencyOrganization(orgType)) {
-                	if(VisibleRegionType.fromCode(cmd.getVisibleRegionType()) == VisibleRegionType.COMMUNITY){
-        	    		creatorTag = PostEntityTag.fromCode(orgType);
-            			visibleRegionType = VisibleRegionType.COMMUNITY;
+                    if(VisibleRegionType.fromCode(cmd.getVisibleRegionType()) == VisibleRegionType.COMMUNITY){
+                        creatorTag = PostEntityTag.fromCode(orgType);
+                        visibleRegionType = VisibleRegionType.COMMUNITY;
                         visibleRegionId = cmd.getVisibleRegionId();
-            		}else{
-            			creatorTag = PostEntityTag.fromCode(orgType);
+                    }else{
+                        creatorTag = PostEntityTag.fromCode(orgType);
                         visibleRegionType = VisibleRegionType.REGION;
                         visibleRegionId = sceneToken.getEntityId();
-            		}
+                    }
                     
                 }
             } else {
@@ -3329,21 +3498,34 @@ public class ForumServiceImpl implements ForumService {
                     LOGGER.warn("Organization not found, sceneToken=" + sceneToken);
                 }
             }
-	        break;
-	    default:
-	        break;
-	    }
-	    
-	    if(creatorTag != null) {
-	        topicCmd.setCreatorTag(creatorTag.getCode());
-	    }
-	    if(visibleRegionType != null) {
-	        topicCmd.setVisibleRegionType(visibleRegionType.getCode());
-	    }
-	    topicCmd.setVisibleRegionId(visibleRegionId);
-	    
-	    return this.createTopic(topicCmd);
-	}
+            break;
+        default:
+            break;
+        }
+        
+        if(creatorTag != null) {
+            topicCmd.setCreatorTag(creatorTag.getCode());
+        }
+        if(visibleRegionType != null) {
+            topicCmd.setVisibleRegionType(visibleRegionType.getCode());
+        }
+        topicCmd.setVisibleRegionId(visibleRegionId);
+        
+        return this.createTopic(topicCmd);
+    }
+    
+    /**
+     * 
+     * 小区场景下客户端传入默认论坛id时，找出当前小区论坛id代替 by xiongying 20160510
+     */
+    private void setCurrentForumId(NewTopicCommand topicCmd, Long communityId) {
+    	
+    	Community community = communityProvider.findCommunityById(communityId);
+    	
+    	if(community != null) {
+    		topicCmd.setForumId(community.getDefaultForumId());
+    	}
+    }
     
     @Override
     public List<TopicFilterDTO> getTopicQueryFilters(GetTopicQueryFilterCommand cmd) {
@@ -3351,21 +3533,36 @@ public class ForumServiceImpl implements ForumService {
         Long userId = user.getId();
         SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
         
+        // 增加园区场景，由于很多代码是重复复制的，故把它们转移到Handler里进行构造，方便以后增加新场景只需要增加相应的handler即可 by lqs 20160510
+//        List<TopicFilterDTO> filterList = null;
+//        PostFilterType filterType = PostFilterType.fromCode(cmd.getFilterType());
+//        if(filterType != null) {
+//            switch(filterType) {
+//            case DISCOVERY:
+//                filterList = getDiscoveryTopicQueryFilters(user, sceneToken);
+//                break;
+//            case GA_NOTICE:
+//                break;
+//            default:
+//                LOGGER.error("Unsupported post filter type, cmd=" + cmd + ", sceneToken=" + sceneToken);
+//                break;
+//            }
+//        } else {
+//            LOGGER.error("Post filter type is null, cmd=" + cmd + ", sceneToken=" + sceneToken);
+//        }
         List<TopicFilterDTO> filterList = null;
         PostFilterType filterType = PostFilterType.fromCode(cmd.getFilterType());
-        if(filterType != null) {
-            switch(filterType) {
-            case DISCOVERY:
-                filterList = getDiscoveryTopicQueryFilters(user, sceneToken);
-                break;
-            case GA_NOTICE:
-                break;
-            default:
-                LOGGER.error("Unsupported post filter type, cmd=" + cmd + ", sceneToken=" + sceneToken);
-                break;
-            }
+        if(filterType == null) {
+            LOGGER.error("Unsupported post filter type, cmd={}, sceneToken={}", cmd, sceneToken);
+            return filterList;
+        }
+        
+        String handlerName = PostSceneHandler.TOPIC_QUERY_FILTER_PREFIX + filterType.getCode() + "_" + sceneToken.getScene();
+        PostSceneHandler handler = PlatformContext.getComponent(handlerName);
+        if(handler != null) {
+            filterList = handler.getTopicQueryFilters(user, sceneToken); 
         } else {
-            LOGGER.error("Post filter type is null, cmd=" + cmd + ", sceneToken=" + sceneToken);
+            LOGGER.error("No handler found for post quering filter, cmd={}, sceneToken={}, handlerName={}", cmd, sceneToken, handlerName);
         }
         
         return filterList;
@@ -3745,22 +3942,39 @@ public class ForumServiceImpl implements ForumService {
         Long userId = user.getId();
         SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
         
+        // 增加园区场景，由于很多代码是重复复制的，故把它们转移到Handler里进行构造，方便以后增加新场景只需要增加相应的handler即可 by lqs 20160510
+//        List<TopicScopeDTO> sentScopeList = null;
+//        PostSentScopeType sentScopeType = PostSentScopeType.fromCode(cmd.getScopeType());
+//        if(sentScopeType != null) {
+//            switch(sentScopeType) {
+//            case DISCOVERY:
+//                sentScopeList = getDiscoveryTopicSentScopes(user, sceneToken);
+//                break;
+//            case GA:
+//                break;
+//            default:
+//                LOGGER.error("Unsupported post filter type, cmd=" + cmd + ", sceneToken=" + sceneToken);
+//                break;
+//            }
+//        } else {
+//            LOGGER.error("Post filter type is null, cmd=" + cmd + ", sceneToken=" + sceneToken);
+//        }
+        
         List<TopicScopeDTO> sentScopeList = null;
-        PostSentScopeType sentScopeType = PostSentScopeType.fromCode(cmd.getScopeType());
-        if(sentScopeType != null) {
-            switch(sentScopeType) {
-            case DISCOVERY:
-                sentScopeList = getDiscoveryTopicSentScopes(user, sceneToken);
-                break;
-            case GA:
-                break;
-            default:
-                LOGGER.error("Unsupported post filter type, cmd=" + cmd + ", sceneToken=" + sceneToken);
-                break;
-            }
-        } else {
-            LOGGER.error("Post filter type is null, cmd=" + cmd + ", sceneToken=" + sceneToken);
+        PostFilterType filterType = PostFilterType.fromCode(cmd.getScopeType());
+        if(filterType == null) {
+            LOGGER.error("Unsupported post sent scope type, cmd={}, sceneToken={}", cmd, sceneToken);
+            return sentScopeList;
         }
+        
+        String handlerName = PostSceneHandler.TOPIC_QUERY_FILTER_PREFIX + filterType.getCode() + "_" + sceneToken.getScene();
+        PostSceneHandler handler = PlatformContext.getComponent(handlerName);
+        if(handler != null) {
+            sentScopeList = handler.getTopicSentScopes(user, sceneToken);
+        } else {
+            LOGGER.error("No handler found for post sent scope, cmd={}, sceneToken={}, handlerName={}", cmd, sceneToken, handlerName);
+        }
+        
         
         return sentScopeList;
     }

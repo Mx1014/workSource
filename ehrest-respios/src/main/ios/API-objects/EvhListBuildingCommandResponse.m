@@ -1,6 +1,5 @@
 //
 // EvhListBuildingCommandResponse.m
-// generated at 2016-04-29 18:56:03 
 //
 #import "EvhListBuildingCommandResponse.h"
 #import "EvhBuildingDTO.h"

@@ -1,6 +1,5 @@
 //
 // EvhSceneDTO.h
-// generated at 2016-04-29 18:56:03 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -25,6 +24,8 @@
 @property(nonatomic, copy) NSString* avatar;
 
 @property(nonatomic, copy) NSString* avatarUrl;
+
+@property(nonatomic, copy) NSString* sceneType;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

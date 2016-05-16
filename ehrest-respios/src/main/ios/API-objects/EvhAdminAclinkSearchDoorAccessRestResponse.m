@@ -1,6 +1,5 @@
 //
 // EvhAdminAclinkSearchDoorAccessRestResponse.m
-// generated at 2016-04-29 18:56:03 
 //
 #import "EvhAdminAclinkSearchDoorAccessRestResponse.h"
 #import "EvhListDoorAccessResponse.h"
