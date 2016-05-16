@@ -285,12 +285,14 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         List<CommunityGeoPoint> pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatigtue(),cmd.getLongitude());
         List<Long> communityIds = getAllCommunityIds(pointList);
         
+        //select active community by xiongying 20160516
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
             (DSLContext context, Object reducingContext)-> {
             
             context.select().from(Tables.EH_COMMUNITIES)
                 .where(Tables.EH_COMMUNITIES.ID.in(communityIds))
                 .and(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()))
                 .fetch().map((r) -> {
                 CommunityDTO community = ConvertHelper.convert(r, CommunityDTO.class);
                 results.add(community);
