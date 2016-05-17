@@ -46,8 +46,7 @@ public class OpPromotionNewUserCondition implements OpPromotionCondition, LocalB
         localBus.subscribe(DaoHelper.getDaoActionPublishSubject(DaoAction.MODIFY, EhOpPromotionActivities.class, this.cacheActivity.getId()), this);
     }
 
-    @Override
-    public void deleteCondition(OpPromotionContext ctx) {
+    private void deleteCondition(OpPromotionContext ctx) {
         localBus.unsubscribe(DaoHelper.getDaoActionPublishSubject(DaoAction.MODIFY, EhGroupMembers.class, null), this);
         localBus.unsubscribe(DaoHelper.getDaoActionPublishSubject(DaoAction.MODIFY, EhOpPromotionActivities.class, this.cacheActivity.getId()), this);
     }

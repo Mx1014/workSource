@@ -45,6 +45,13 @@ public class PromotionAdminController extends ControllerBase {
         return new RestResponse(promotionService.getPromotionById(cmd));
     }    
     
+    @RequestMapping("closePromotion")
+    @RestReturn(value=GetOpPromotionActivityByPromotionId.class)
+    public RestResponse closePromotion(@Valid GetOpPromotionActivityByPromotionId cmd) {
+        promotionService.closeOpPromotion(cmd);
+        return new RestResponse();
+    }
+    
     @RequestMapping("newOrderPrice")
     @RestReturn(value=OpPromotionOrderRangeCommand.class)
     public RestResponse newOrderPrice(@Valid OpPromotionOrderRangeCommand cmd) {

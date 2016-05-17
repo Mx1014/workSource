@@ -43,7 +43,7 @@ public class OpPromotionActivitieProviderImpl implements OpPromotionActivityProv
     private SequenceProvider sequenceProvider;
 
     @Override
-    public Long createOpPromotionActivitie(OpPromotionActivity obj) {
+    public Long createOpPromotionActivity(OpPromotionActivity obj) {
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOpPromotionActivities.class));
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOpPromotionActivities.class));
         obj.setId(id);
@@ -51,28 +51,28 @@ public class OpPromotionActivitieProviderImpl implements OpPromotionActivityProv
         EhOpPromotionActivitiesDao dao = new EhOpPromotionActivitiesDao(context.configuration());
         dao.insert(obj);
         
-        DaoHelper.publishDaoAction(DaoAction.CREATE, EhOpPromotionActivities.class, id);
+//        DaoHelper.publishDaoAction(DaoAction.CREATE, EhOpPromotionActivities.class, id);
         return id;
     }
 
     @Override
-    public void updateOpPromotionActivitie(OpPromotionActivity obj) {
+    public void updateOpPromotionActivity(OpPromotionActivity obj) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOpPromotionActivities.class));
         EhOpPromotionActivitiesDao dao = new EhOpPromotionActivitiesDao(context.configuration());
         dao.update(obj);
-        
-        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOpPromotionActivities.class, obj.getId());
+//        Change to service level
+//        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOpPromotionActivities.class, obj.getId());
     }
 
     @Override
-    public void deleteOpPromotionActivitie(OpPromotionActivity obj) {
+    public void deleteOpPromotionActivity(OpPromotionActivity obj) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOpPromotionActivities.class));
         EhOpPromotionActivitiesDao dao = new EhOpPromotionActivitiesDao(context.configuration());
         dao.deleteById(obj.getId());
     }
 
     @Override
-    public OpPromotionActivity getOpPromotionActivitieById(Long id) {
+    public OpPromotionActivity getOpPromotionActivityById(Long id) {
         try {
             OpPromotionActivity[] result = new OpPromotionActivity[1];
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOpPromotionActivities.class));

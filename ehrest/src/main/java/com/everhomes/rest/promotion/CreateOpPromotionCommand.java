@@ -6,6 +6,7 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
@@ -149,5 +150,21 @@ public class CreateOpPromotionCommand {
 
     public void setAssignedScopes(List<OpPromotionAssignedScopeDTO> assignedScopes) {
         this.assignedScopes = assignedScopes;
+    }
+    
+    
+    public String getPolicyData() {
+        return policyData;
+    }
+
+
+    public void setPolicyData(String policyData) {
+        this.policyData = policyData;
+    }
+
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

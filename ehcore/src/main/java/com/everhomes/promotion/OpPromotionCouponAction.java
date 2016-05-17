@@ -8,24 +8,23 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.promotion.OpPromotionWebPageData;
+import com.everhomes.rest.promotion.OpPromotionCouponData;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.user.User;
 import com.everhomes.util.StringHelper;
 
-public class OpPromotionStaticWebPage implements OpPromotionAction {
+public class OpPromotionCouponAction implements OpPromotionAction {
     @Autowired
     MessagingService messagingService;
     
     @Override
     public void fire(OpPromotionContext ctx) {
-        
         OpPromotionActivityContext activityContext = (OpPromotionActivityContext)ctx;
         User user = activityContext.getUser();
         Long userId = user.getId();
         
         String dataStr = activityContext.getPromotion().getActionData();
-        OpPromotionWebPageData data = (OpPromotionWebPageData)StringHelper.fromJsonString(dataStr, OpPromotionWebPageData.class);
+        OpPromotionCouponData data = (OpPromotionCouponData)StringHelper.fromJsonString(dataStr, OpPromotionCouponData.class);
         
         MessageDTO messageDto = new MessageDTO();
         messageDto.setAppId(AppConstants.APPID_MESSAGING);

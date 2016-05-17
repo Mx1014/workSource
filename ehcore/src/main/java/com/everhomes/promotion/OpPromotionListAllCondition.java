@@ -24,10 +24,9 @@ public class OpPromotionListAllCondition implements OpPromotionCondition, OpProm
         promotionUserService.listAllUser(visitor, this);
     }
 
-    @Override
-    public void deleteCondition(OpPromotionContext ctx) {
-        //nothing to delete
-    }
+//    @Override
+//    public void deleteCondition(OpPromotionContext ctx) {
+//    }
 
     @Override
     public void userFound(User u, OpPromotionUserVisitor visitor) {

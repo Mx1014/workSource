@@ -11,8 +11,8 @@ public class OpPromotionOrderValueCondition implements OpPromotionCondition {
     public void createCondition(OpPromotionContext ctx) {
     }
 
-    @Override
-    public void deleteCondition(OpPromotionContext ctx) {
-    }
+//    @Override
+//    public void deleteCondition(OpPromotionContext ctx) {
+//    }
 
 }

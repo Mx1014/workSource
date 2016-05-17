@@ -115,7 +115,7 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
             public OpPromotionActivity doInTransaction(TransactionStatus arg0) {
                 OpPromotionActivity activity = (OpPromotionActivity)ConvertHelper.convert(cmd, OpPromotionActivity.class);
                 
-                OpPromotionConditionType condType = OpPromotionConditionType.fromCode(activity.getActionType());
+                OpPromotionConditionType condType = OpPromotionConditionType.fromCode(activity.getPolicyType());
                 if(condType == null) {
                     //TODO throw exception
                     return null;
@@ -135,7 +135,8 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
                 activity.setStartTime(new Timestamp(cmd.getStartTime()));
                 activity.setEndTime(new Timestamp(cmd.getEndTime()));
                 activity.setCreatorUid(user.getId());
-                promotionActivityProvider.createOpPromotionActivitie(activity);
+                activity.setStatus(OpPromotionStatus.ACTIVE.getCode());
+                promotionActivityProvider.createOpPromotionActivity(activity);
                 
                 for(OpPromotionAssignedScopeDTO dto : scopes) {
                     OpPromotionAssignedScope scope = (OpPromotionAssignedScope)ConvertHelper.convert(dto, OpPromotionAssignedScope.class);
@@ -252,7 +253,7 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
     
     @Override
     public OpPromotionActivityDTO getPromotionById(GetOpPromotionActivityByPromotionId cmd) {
-        OpPromotionActivity promotion = this.promotionActivityProvider.getOpPromotionActivitieById(cmd.getPromotionId());
+        OpPromotionActivity promotion = this.promotionActivityProvider.getOpPromotionActivityById(cmd.getPromotionId());
         if(promotion != null) {
             OpPromotionActivityDTO dto = ConvertHelper.convert(promotion, OpPromotionActivityDTO.class);
             return dto;
@@ -299,8 +300,21 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
     }
     
     @Override
+    public void updateOpPromotionActivity(OpPromotionActivity obj) {
+        //Update status, and broadcast event to all server
+        promotionActivityProvider.updateOpPromotionActivity(obj);
+        this.broadcastEvent(DaoAction.MODIFY, EhOpPromotionActivities.class, obj.getId());
+    }
+    
+    @Override
     public void closeOpPromotion(OpPromotionActivity promotion) {
         promotion.setStatus(OpPromotionStatus.INACTIVE.getCode());
-        promotionActivityProvider.updateOpPromotionActivitie(promotion);
+        updateOpPromotionActivity(promotion);
+    }
+    
+    @Override
+    public void closeOpPromotion(GetOpPromotionActivityByPromotionId cmd) {
+        OpPromotionActivity promotion = this.promotionActivityProvider.getOpPromotionActivityById(cmd.getPromotionId());
+        closeOpPromotion(promotion);
     }
 }

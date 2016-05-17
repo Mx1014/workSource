@@ -37,14 +37,14 @@ public class OpPromotionScheduleJob extends QuartzJobBean {
         String idStr = (String)jobMap.get("id");
         Long id = Long.parseLong(idStr);
         
-        OpPromotionActivity promotion = promotionActivityProvider.getOpPromotionActivitieById(id);
+        OpPromotionActivity promotion = promotionActivityProvider.getOpPromotionActivityById(id);
         if(promotion == null) {
             LOGGER.error("promotion not found in schdule job");
             return;
         }
         
         if(jobMap.get(OpPromotionConstant.SCHEDULE_TYPE).equals(OpPromotionConstant.SCHEDULE_START)) {
-            promotion = promotionActivityProvider.getOpPromotionActivitieById(id);
+            promotion = promotionActivityProvider.getOpPromotionActivityById(id);
             promotionService.createScheduleTaskByPromotion(promotion);
             
             LOGGER.error("OpPromotion schedule Id=" + id);
@@ -52,17 +52,16 @@ public class OpPromotionScheduleJob extends QuartzJobBean {
             Map<String, Object> map = new HashMap<String, Object>();
             String triggerName = OpPromotionConstant.SCHEDULE_TARGET_NAME + System.currentTimeMillis();
             String jobName = triggerName;
-            Map<String, Object> map2 = new HashMap<String, Object>();
             map.put("id", promotion.getId().toString());
             map.put(OpPromotionConstant.SCHEDULE_TYPE, OpPromotionConstant.SCHEDULE_END);
-            scheduleProvider.scheduleSimpleJob(triggerName, jobName, new Date(promotion.getEndTime().getTime()), OpPromotionScheduleJob.class, map2);            
+            scheduleProvider.scheduleSimpleJob(triggerName, jobName, new Date(promotion.getEndTime().getTime()), OpPromotionScheduleJob.class, map);            
         } else {
-            OpPromotionCondition condition = OpPromotionUtils.getConditionFromPromotion(promotion);
-            promotion.setStatus(OpPromotionStatus.INACTIVE.getCode());
-            promotionActivityProvider.updateOpPromotionActivitie(promotion);
+
+            promotionService.closeOpPromotion(promotion);
             
-            OpPromotionActivityContext ctx = new OpPromotionActivityContext(promotion); 
-            condition.deleteCondition(ctx);
+//          OpPromotionCondition condition = OpPromotionUtils.getConditionFromPromotion(promotion);            
+//            OpPromotionActivityContext ctx = new OpPromotionActivityContext(promotion); 
+//            condition.deleteCondition(ctx);
         }
         
 
