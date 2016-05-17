@@ -34,7 +34,8 @@ import com.everhomes.rest.address.ListApartmentByBuildingNameCommandResponse;
 import com.everhomes.rest.address.ListBuildingByKeywordCommand;
 import com.everhomes.rest.address.ListCommunityByKeywordCommand;
 import com.everhomes.rest.address.ListNearbyCommunityCommand;
-import com.everhomes.rest.address.ListNearbyMixCommunities;
+import com.everhomes.rest.address.ListNearbyMixCommunitiesCommand;
+import com.everhomes.rest.address.ListNearbyMixCommunitiesCommandResponse;
 import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.address.SearchCommunityCommand;
 import com.everhomes.rest.address.SuggestCommunityCommand;
@@ -311,10 +312,10 @@ public class AddressController extends ControllerBase {
      * <p>获取附近小区列表</p>
      */
     @RequestMapping("listNearbyMixCommunities")
-    @RestReturn(value=CommunityDTO.class, collection = true)
-    public RestResponse listNearbyMixCommunities(@Valid ListNearbyMixCommunities cmd) {
+    @RestReturn(value=ListNearbyMixCommunitiesCommandResponse.class)
+    public RestResponse listNearbyMixCommunities(@Valid ListNearbyMixCommunitiesCommand cmd) {
  		
-		List<CommunityDTO> res = addressService.listNearbyMixCommunities(cmd);
+    	ListNearbyMixCommunitiesCommandResponse res = addressService.listNearbyMixCommunities(cmd);
 
  		RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);

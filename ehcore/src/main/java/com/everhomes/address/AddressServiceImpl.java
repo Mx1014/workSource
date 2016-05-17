@@ -51,6 +51,8 @@ import com.everhomes.family.FamilyService;
 import com.everhomes.family.FamilyUtils;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupProvider;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
 import com.everhomes.organization.pm.CommunityPmContact;
@@ -79,7 +81,8 @@ import com.everhomes.rest.address.ListApartmentByBuildingNameCommandResponse;
 import com.everhomes.rest.address.ListBuildingByKeywordCommand;
 import com.everhomes.rest.address.ListCommunityByKeywordCommand;
 import com.everhomes.rest.address.ListNearbyCommunityCommand;
-import com.everhomes.rest.address.ListNearbyMixCommunities;
+import com.everhomes.rest.address.ListNearbyMixCommunitiesCommand;
+import com.everhomes.rest.address.ListNearbyMixCommunitiesCommandResponse;
 import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.address.SearchCommunityCommand;
 import com.everhomes.rest.address.SuggestCommunityCommand;
@@ -99,6 +102,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
@@ -1596,8 +1600,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 	}
 
 	@Override
-	public List<CommunityDTO> listNearbyMixCommunities(
-			ListNearbyMixCommunities cmd) {
+	public ListNearbyMixCommunitiesCommandResponse listNearbyMixCommunities(
+			ListNearbyMixCommunitiesCommand cmd) {
+		ListNearbyMixCommunitiesCommandResponse resp = new ListNearbyMixCommunitiesCommandResponse();
         final List<CommunityDTO> results = new ArrayList<>();
 
         if(cmd.getLatigtue() == null || cmd.getLongitude() == null)
@@ -1608,13 +1613,21 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         List<CommunityGeoPoint> pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatigtue(),cmd.getLongitude(), 5);
         List<Long> communityIds = getAllCommunityIds(pointList);
         
+        if(cmd.getPageAnchor()==null)
+			cmd.setPageAnchor(0L);
+        
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        ListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
             (DSLContext context, Object reducingContext)-> {
             
             context.select().from(Tables.EH_COMMUNITIES)
-                .where(Tables.EH_COMMUNITIES.ID.in(communityIds))
+                .where(Tables.EH_COMMUNITIES.ID.gt(locator.getAnchor())
+                .and(Tables.EH_COMMUNITIES.ID.in(communityIds)))
                 .and(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()))
                 .orderBy(Tables.EH_COMMUNITIES.NAMESPACE_ID.desc())
+                .limit(pageSize+1)
                 .fetch().map((r) -> {
                 CommunityDTO community = ConvertHelper.convert(r, CommunityDTO.class);
                 results.add(community);
@@ -1625,7 +1638,14 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             return true;
         });
         
+        if(results != null && results.size() > pageSize){
+        	results.remove(results.size()-1);
+        	resp.setNextPageAnchor(results.get(results.size()-1).getId());
+		}
+		if(results != null){
+			resp.setDtos(results);
+		}
         
-        return results;
+        return resp;
 	}
 }
