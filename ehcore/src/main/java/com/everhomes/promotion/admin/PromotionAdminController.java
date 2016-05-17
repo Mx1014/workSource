@@ -28,7 +28,7 @@ public class PromotionAdminController extends ControllerBase {
 
     @RequestMapping("createPromotion")
     @RestReturn(value=OpPromotionActivityDTO.class)
-    public RestResponse createPromotion(@Valid CreateOpPromotionCommand cmd) {
+    public RestResponse createPromoti(@Valid CreateOpPromotionCommand cmd) {
         promotionService.createPromotion(cmd);
         return new RestResponse();
     }
@@ -45,7 +45,7 @@ public class PromotionAdminController extends ControllerBase {
         return new RestResponse(promotionService.getPromotionById(cmd));
     }    
     
-    @RequestMapping("getPromotionById")
+    @RequestMapping("newOrderPrice")
     @RestReturn(value=OpPromotionOrderRangeCommand.class)
     public RestResponse newOrderPrice(@Valid OpPromotionOrderRangeCommand cmd) {
         return new RestResponse("ok");

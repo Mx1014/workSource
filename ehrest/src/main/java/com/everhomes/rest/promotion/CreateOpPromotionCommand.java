@@ -44,6 +44,9 @@ public class CreateOpPromotionCommand {
     private Byte     policyType;
     
     @NotNull
+    private String policyData;
+    
+    @NotNull
     private Long     endTime;
     
     @ItemType(OpPromotionAssignedScopeDTO.class)

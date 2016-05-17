@@ -1,5 +1,10 @@
 package com.everhomes.rest.promotion;
 
+/**
+ * 
+ * @author janson
+ *
+ */
 public enum OpPromotionConditionType {
     ALL((byte)0), NEW_USER((byte)1), ORDER_RANGE_VALUE((byte)2);
     
