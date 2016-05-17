@@ -34,6 +34,7 @@ import com.everhomes.rest.address.ListApartmentByBuildingNameCommandResponse;
 import com.everhomes.rest.address.ListBuildingByKeywordCommand;
 import com.everhomes.rest.address.ListCommunityByKeywordCommand;
 import com.everhomes.rest.address.ListNearbyCommunityCommand;
+import com.everhomes.rest.address.ListNearbyMixCommunities;
 import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.address.SearchCommunityCommand;
 import com.everhomes.rest.address.SuggestCommunityCommand;
@@ -41,6 +42,7 @@ import com.everhomes.rest.address.SuggestCommunityDTO;
 import com.everhomes.rest.community.CommunityDoc;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.ui.organization.ListCommunitiesBySceneResponse;
 import com.everhomes.search.CommunitySearcher;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.EtagHelper;
@@ -302,6 +304,22 @@ public class AddressController extends ControllerBase {
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
         return resp;
+    }
+    
+    /**
+     * <b>URL: /address/listNearbyMixCommunities</b>
+     * <p>获取附近小区列表</p>
+     */
+    @RequestMapping("listNearbyMixCommunities")
+    @RestReturn(value=CommunityDTO.class, collection = true)
+    public RestResponse listNearbyMixCommunities(@Valid ListNearbyMixCommunities cmd) {
+ 		
+		List<CommunityDTO> res = addressService.listNearbyMixCommunities(cmd);
+
+ 		RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
 
 }

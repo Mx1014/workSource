@@ -414,9 +414,9 @@ public class CommunityProviderImpl implements CommunityProvider {
     }
     
     @Override
-    public List<CommunityGeoPoint> findCommunityGeoPointByGeoHash(double latitude, double longitude) {
+    public List<CommunityGeoPoint> findCommunityGeoPointByGeoHash(double latitude, double longitude, int geoHashLength) {
         List<CommunityGeoPoint> l = new ArrayList<>();
-        String geoHashStr = GeoHashUtils.encode(latitude, longitude).substring(0, 6);
+        String geoHashStr = GeoHashUtils.encode(latitude, longitude).substring(0, geoHashLength);
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
                 (DSLContext context, Object reducingContext)-> {
                     

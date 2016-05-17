@@ -79,6 +79,7 @@ import com.everhomes.rest.address.ListApartmentByBuildingNameCommandResponse;
 import com.everhomes.rest.address.ListBuildingByKeywordCommand;
 import com.everhomes.rest.address.ListCommunityByKeywordCommand;
 import com.everhomes.rest.address.ListNearbyCommunityCommand;
+import com.everhomes.rest.address.ListNearbyMixCommunities;
 import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.address.SearchCommunityCommand;
 import com.everhomes.rest.address.SuggestCommunityCommand;
@@ -282,7 +283,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
         // TODO, return all communities only to test our REST response for now
         
-        List<CommunityGeoPoint> pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatigtue(),cmd.getLongitude());
+        List<CommunityGeoPoint> pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatigtue(),cmd.getLongitude(), 6);
         List<Long> communityIds = getAllCommunityIds(pointList);
         
         //select active community by xiongying 20160516
@@ -1592,5 +1593,39 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 				result.add(s);
 			}
 			return result;
+	}
+
+	@Override
+	public List<CommunityDTO> listNearbyMixCommunities(
+			ListNearbyMixCommunities cmd) {
+        final List<CommunityDTO> results = new ArrayList<>();
+
+        if(cmd.getLatigtue() == null || cmd.getLongitude() == null)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid parameter, latitude and longitude have to be both specified or neigher");
+
+        
+        List<CommunityGeoPoint> pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatigtue(),cmd.getLongitude(), 5);
+        List<Long> communityIds = getAllCommunityIds(pointList);
+        
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
+            (DSLContext context, Object reducingContext)-> {
+            
+            context.select().from(Tables.EH_COMMUNITIES)
+                .where(Tables.EH_COMMUNITIES.ID.in(communityIds))
+                .and(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()))
+                .orderBy(Tables.EH_COMMUNITIES.NAMESPACE_ID.desc())
+                .fetch().map((r) -> {
+                CommunityDTO community = ConvertHelper.convert(r, CommunityDTO.class);
+                results.add(community);
+                
+                return null;
+            });
+                
+            return true;
+        });
+        
+        
+        return results;
 	}
 }
