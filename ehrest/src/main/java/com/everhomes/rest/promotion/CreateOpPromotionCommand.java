@@ -16,6 +16,8 @@ import com.everhomes.discover.ItemType;
  * <li>actionData: 动作类型</li>
  * <li>startTime: 活动开始时间</li>
  * <li>endTime: 活动结束时间</li>
+ * <li>policyType: 推送数据，参考{@link com.everhomes.rest.promotion.OpPromotionConditionType}</li>
+ * <li>policyData: 推送数据，参考{@link com.everhomes.rest.promotion.OpPromotionRangePriceData}</li>
  * </ul>
  */
 public class CreateOpPromotionCommand {

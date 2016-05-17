@@ -31,7 +31,9 @@ import com.everhomes.rest.promotion.ListOpPromotionActivityResponse;
 import com.everhomes.rest.promotion.ListPromotionCommand;
 import com.everhomes.rest.promotion.OpPromotionActivityDTO;
 import com.everhomes.rest.promotion.OpPromotionAssignedScopeDTO;
+import com.everhomes.rest.promotion.OpPromotionConditionType;
 import com.everhomes.rest.promotion.OpPromotionOrderRangeCommand;
+import com.everhomes.rest.promotion.OpPromotionRangePriceData;
 import com.everhomes.rest.promotion.ScheduleTaskResourceType;
 import com.everhomes.rest.promotion.ScheduleTaskStatus;
 import com.everhomes.scheduler.ScheduleProvider;
@@ -40,6 +42,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.StringHelper;
 
 @Component
 public class PromotionServiceImpl implements PromotionService, LocalBusSubscriber {
@@ -91,6 +94,24 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
             @Override
             public OpPromotionActivity doInTransaction(TransactionStatus arg0) {
                 OpPromotionActivity activity = (OpPromotionActivity)ConvertHelper.convert(cmd, OpPromotionActivity.class);
+                
+                OpPromotionConditionType condType = OpPromotionConditionType.fromCode(activity.getActionType());
+                if(condType == null) {
+                    //TODO throw exception
+                    return null;
+                }
+                
+                if(condType == OpPromotionConditionType.ORDER_RANGE_VALUE) {
+                    OpPromotionRangePriceData data = (OpPromotionRangePriceData)StringHelper.fromJsonString(activity.getPolicyData(), OpPromotionRangePriceData.class);
+                    if(data == null) {
+                        //TODO throw exception
+                        return null;
+                    }
+                    
+                    activity.setIntegralTag1(data.getFrom());
+                    activity.setIntegralTag2(data.getTo());
+                }
+                
                 activity.setStartTime(new Timestamp(cmd.getStartTime()));
                 activity.setEndTime(new Timestamp(cmd.getEndTime()));
                 activity.setCreatorUid(user.getId());

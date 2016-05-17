@@ -1,7 +1,11 @@
 package com.everhomes.rest.promotion;
 
 /**
- * 
+ * <ul>
+ * <li>ALL: 无条件</li>
+ * <li>NEW_USER: 新用户</li>
+ * <li>ORDER_RANGE_VALUE: 价格范围</li>
+ * </ul>
  * @author janson
  *
  */
