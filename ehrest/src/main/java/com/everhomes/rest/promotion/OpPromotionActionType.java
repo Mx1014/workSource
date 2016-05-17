@@ -1,5 +1,13 @@
 package com.everhomes.rest.promotion;
 
+/**
+ * <ul>
+ * <li>STATIC_WEB_PAGE: 静态网页</li>
+ * <li>COUPON: 优惠券</li>
+ * </ul>
+ * @author janson
+ *
+ */
 public enum OpPromotionActionType {
     STATIC_WEB_PAGE((byte)0), COUPON((byte)1);
     

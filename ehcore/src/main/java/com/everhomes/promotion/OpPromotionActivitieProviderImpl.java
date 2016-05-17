@@ -1,6 +1,8 @@
 package com.everhomes.promotion;
 
 import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.listing.ListingLocator;
@@ -20,6 +22,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhOpPromotionActivitiesDao;
 import com.everhomes.server.schema.tables.pojos.EhOpPromotionActivities;
+import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.server.schema.tables.records.EhOpPromotionActivitiesRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
@@ -44,6 +47,8 @@ public class OpPromotionActivitieProviderImpl implements OpPromotionActivityProv
         prepareObj(obj);
         EhOpPromotionActivitiesDao dao = new EhOpPromotionActivitiesDao(context.configuration());
         dao.insert(obj);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhOpPromotionActivities.class, id);
         return id;
     }
 
@@ -52,6 +57,8 @@ public class OpPromotionActivitieProviderImpl implements OpPromotionActivityProv
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOpPromotionActivities.class));
         EhOpPromotionActivitiesDao dao = new EhOpPromotionActivitiesDao(context.configuration());
         dao.update(obj);
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOpPromotionActivities.class, obj.getId());
     }
 
     @Override
@@ -109,5 +116,10 @@ public class OpPromotionActivitieProviderImpl implements OpPromotionActivityProv
     private void prepareObj(OpPromotionActivity obj) {
         Long l2 = DateHelper.currentGMTTime().getTime();
         obj.setCreateTime(new Timestamp(l2));
+    }
+    
+    @Override
+    public List<OpPromotionActivity> listOpPromotion(ListingLocator locator, int count) {
+        return queryOpPromotionActivities(locator, count, null);
     }
 }

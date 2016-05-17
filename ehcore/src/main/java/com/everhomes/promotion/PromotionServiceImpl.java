@@ -1,6 +1,7 @@
 package com.everhomes.promotion;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -18,16 +19,26 @@ import org.springframework.transaction.support.TransactionCallback;
 import com.everhomes.bus.BusBridgeProvider;
 import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusSubscriber;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.messaging.AddressMessageRoutingHandler;
 import com.everhomes.rest.promotion.CreateOpPromotionCommand;
+import com.everhomes.rest.promotion.GetOpPromotionActivityByPromotionId;
+import com.everhomes.rest.promotion.ListOpPromotionActivityResponse;
+import com.everhomes.rest.promotion.ListPromotionCommand;
+import com.everhomes.rest.promotion.OpPromotionActivityDTO;
 import com.everhomes.rest.promotion.OpPromotionAssignedScopeDTO;
+import com.everhomes.rest.promotion.OpPromotionOrderRangeCommand;
 import com.everhomes.rest.promotion.ScheduleTaskResourceType;
 import com.everhomes.rest.promotion.ScheduleTaskStatus;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.tables.EhOpPromotionActivities;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 
 @Component
@@ -55,6 +66,9 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
     @Autowired
     private ScheduleTaskProvider scheduleTaskProvider;
     
+    @Autowired
+    private ConfigurationProvider  configProvider;
+    
     @PostConstruct
     void setup() {
         String subcribeKey = DaoHelper.getDaoActionPublishSubject(DaoAction.CREATE, EhOpPromotionActivities.class, null);
@@ -67,6 +81,9 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
         //DaoHelper.publishDaoAction(DaoAction.CREATE, EhOpPromotionActivities.class, 5l);
         //localBus.publish("global", EhOpPromotionActivities.class.getName(), 5l);
         
+        //TODO check login
+        User user = UserContext.current().getUser();
+        
         List<OpPromotionAssignedScopeDTO> scopes = cmd.getAssignedScopes();
         cmd.setAssignedScopes(null);
         
@@ -76,6 +93,7 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
                 OpPromotionActivity activity = (OpPromotionActivity)ConvertHelper.convert(cmd, OpPromotionActivity.class);
                 activity.setStartTime(new Timestamp(cmd.getStartTime()));
                 activity.setEndTime(new Timestamp(cmd.getEndTime()));
+                activity.setCreatorUid(user.getId());
                 promotionActivityProvider.createOpPromotionActivitie(activity);
                 
                 for(OpPromotionAssignedScopeDTO dto : scopes) {
@@ -88,23 +106,23 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
             }
         });
         
-        String triggerName = "oppromotion-cron-" + System.currentTimeMillis();
+        String triggerName = OpPromotionConstant.SCHEDULE_TARGET_NAME + System.currentTimeMillis();
         String jobName = triggerName;
         
         Map<String, Object> map = new HashMap<String, Object>();
         //String cronExpression = "0/5 * * * * ?";
         map.put("id", promotion.getId().toString());
-        map.put("type", "start");
+        map.put(OpPromotionConstant.SCHEDULE_TYPE, OpPromotionConstant.SCHEDULE_START);
         //scheduleProvider.scheduleCronJob(triggerName, jobName, cronExpression, OpPromotionScheduleJob.class, map);
         
         scheduleProvider.scheduleSimpleJob(triggerName, jobName, new Date(promotion.getStartTime().getTime()), OpPromotionScheduleJob.class, map);
         
-        triggerName = "oppromotion-cron-" + System.currentTimeMillis();
-        jobName = triggerName;
-        Map<String, Object> map2 = new HashMap<String, Object>();
-        map.put("id", promotion.getId().toString());
-        map.put("type", "end");
-        scheduleProvider.scheduleSimpleJob(triggerName, jobName, new Date(promotion.getEndTime().getTime()), OpPromotionScheduleJob.class, map2);
+//        triggerName = "oppromotion-cron-" + System.currentTimeMillis();
+//        jobName = triggerName;
+//        Map<String, Object> map2 = new HashMap<String, Object>();
+//        map.put("id", promotion.getId().toString());
+//        map.put("type", "end");
+//        scheduleProvider.scheduleSimpleJob(triggerName, jobName, new Date(promotion.getEndTime().getTime()), OpPromotionScheduleJob.class, map2);
         
         //this.broadcastEvent(DaoAction.CREATE, EhOpPromotionActivities.class, promotion.getId());
     }
@@ -156,5 +174,56 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
         condition.createCondition(ctx);
         
         return task;
+    }
+    
+    @Override
+    public ListOpPromotionActivityResponse listPromotion(ListPromotionCommand cmd) {
+        ListingLocator locator = new ListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        
+        List<OpPromotionActivity> promotions = promotionActivityProvider.listOpPromotion(locator, count);
+        
+        ListOpPromotionActivityResponse resp = new ListOpPromotionActivityResponse();
+        if(promotions != null) {
+            List<OpPromotionActivityDTO> dtos = new ArrayList<OpPromotionActivityDTO>();
+            for(OpPromotionActivity op : promotions) {
+                OpPromotionActivityDTO dto = ConvertHelper.convert(op, OpPromotionActivityDTO.class);
+                
+                if(dto != null) {
+                    ScheduleTask task = scheduleTaskProvider.getSchduleTaskByPromotionId(dto.getId());
+                    if(task != null) {
+                        dto.setPushCount(task.getProcessCount());
+                    }
+                    dtos.add(dto);
+                }
+            }
+            
+            resp.setPromotions(dtos);
+        }
+        resp.setNextPageAnchor(locator.getAnchor());
+        
+        return resp;
+    }
+    
+    @Override
+    public OpPromotionActivityDTO getPromotionById(GetOpPromotionActivityByPromotionId cmd) {
+        OpPromotionActivity promotion = this.promotionActivityProvider.getOpPromotionActivitieById(cmd.getPromotionId());
+        if(promotion != null) {
+            OpPromotionActivityDTO dto = ConvertHelper.convert(promotion, OpPromotionActivityDTO.class);
+            return dto;
+        }
+        
+        return null;
+    }
+    
+    @Override
+    public void newOrderPriceEvent(OpPromotionOrderRangeCommand cmd) {
+        
+    }
+    
+    @Override
+    public void onNewOrderPriceJob(Long userId, Double price) {
+        
     }
 }

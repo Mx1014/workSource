@@ -1,5 +1,6 @@
 package com.everhomes.promotion;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,16 +13,22 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.rest.promotion.OpPromotionStatus;
+import com.everhomes.scheduler.ScheduleProvider;
+
 @Component
 @Scope("prototype")
 public class OpPromotionScheduleJob extends QuartzJobBean {
     private static final Logger LOGGER = LoggerFactory.getLogger("schedulelog");
     
     @Autowired
-    OpPromotionActivityProvider promotionActivityProvider;
+    private OpPromotionActivityProvider promotionActivityProvider;
     
     @Autowired
-    PromotionService promotionService;
+    private PromotionService promotionService;
+    
+    @Autowired
+    private ScheduleProvider scheduleProvider;
     
     @Override
     protected void executeInternal(JobExecutionContext context) {
@@ -31,8 +38,33 @@ public class OpPromotionScheduleJob extends QuartzJobBean {
         Long id = Long.parseLong(idStr);
         
         OpPromotionActivity promotion = promotionActivityProvider.getOpPromotionActivitieById(id);
-        promotionService.createScheduleTaskByPromotion(promotion);
+        if(promotion == null) {
+            LOGGER.error("promotion not found in schdule job");
+            return;
+        }
         
-        LOGGER.error("OpPromotion schedule Id=" + id);
+        if(jobMap.get(OpPromotionConstant.SCHEDULE_TYPE).equals(OpPromotionConstant.SCHEDULE_START)) {
+            promotion = promotionActivityProvider.getOpPromotionActivitieById(id);
+            promotionService.createScheduleTaskByPromotion(promotion);
+            
+            LOGGER.error("OpPromotion schedule Id=" + id);
+            
+            Map<String, Object> map = new HashMap<String, Object>();
+            String triggerName = OpPromotionConstant.SCHEDULE_TARGET_NAME + System.currentTimeMillis();
+            String jobName = triggerName;
+            Map<String, Object> map2 = new HashMap<String, Object>();
+            map.put("id", promotion.getId().toString());
+            map.put(OpPromotionConstant.SCHEDULE_TYPE, OpPromotionConstant.SCHEDULE_END);
+            scheduleProvider.scheduleSimpleJob(triggerName, jobName, new Date(promotion.getEndTime().getTime()), OpPromotionScheduleJob.class, map2);            
+        } else {
+            OpPromotionCondition condition = OpPromotionUtils.getConditionFromPromotion(promotion);
+            promotion.setStatus(OpPromotionStatus.INACTIVE.getCode());
+            promotionActivityProvider.updateOpPromotionActivitie(promotion);
+            
+            OpPromotionActivityContext ctx = new OpPromotionActivityContext(promotion); 
+            condition.deleteCondition(ctx);
+        }
+        
+
     }
 }

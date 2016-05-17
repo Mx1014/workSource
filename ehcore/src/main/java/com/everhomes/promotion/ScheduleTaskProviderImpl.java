@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -109,5 +110,26 @@ public class ScheduleTaskProviderImpl implements ScheduleTaskProvider {
     private void prepareObj(ScheduleTask obj) {
         Long l2 = DateHelper.currentGMTTime().getTime();
         obj.setCreateTime(new Timestamp(l2));
+    }
+    
+    @Override
+    public ScheduleTask getSchduleTaskByPromotionId(Long promotionId) {
+        ListingLocator locator = new ListingLocator();
+        List<ScheduleTask> tasks = this.queryScheduleTasks(locator, 1, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_SCHEDULE_TASKS.RESOURCE_ID.eq(promotionId));
+                return query;
+            }
+            
+        });
+        
+        if(tasks != null && tasks.size() > 0) {
+            return tasks.get(0);
+        }
+        
+        return null;
     }
 }

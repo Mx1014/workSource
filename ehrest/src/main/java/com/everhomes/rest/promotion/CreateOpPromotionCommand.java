@@ -12,7 +12,7 @@ import com.everhomes.discover.ItemType;
  * <li>title: 标题</li>
  * <li>description: 运营推广描述</li>
  * <li>namespaceId: 域空间ID</li>
- * <li>actionType: 动作类型，参考{@link com.everhomes.rest.ui.user.SceneType}</li>
+ * <li>actionType: 动作类型，参考{@link com.everhomes.rest.promotion.OpPromotionActionType}</li>
  * <li>actionData: 动作类型</li>
  * <li>startTime: 活动开始时间</li>
  * <li>endTime: 活动结束时间</li>

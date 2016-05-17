@@ -14,6 +14,7 @@ import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.server.schema.tables.pojos.EhGroupMembers;
+import com.everhomes.server.schema.tables.pojos.EhOpPromotionActivities;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
 
@@ -42,11 +43,13 @@ public class OpPromotionNewUserCondition implements OpPromotionCondition, LocalB
         this.cacheActivity = c.getPromotion();
         
         localBus.subscribe(DaoHelper.getDaoActionPublishSubject(DaoAction.MODIFY, EhGroupMembers.class, null), this);
+        localBus.subscribe(DaoHelper.getDaoActionPublishSubject(DaoAction.MODIFY, EhOpPromotionActivities.class, this.cacheActivity.getId()), this);
     }
 
     @Override
     public void deleteCondition(OpPromotionContext ctx) {
         localBus.unsubscribe(DaoHelper.getDaoActionPublishSubject(DaoAction.MODIFY, EhGroupMembers.class, null), this);
+        localBus.unsubscribe(DaoHelper.getDaoActionPublishSubject(DaoAction.MODIFY, EhOpPromotionActivities.class, this.cacheActivity.getId()), this);
     }
 
     @Override

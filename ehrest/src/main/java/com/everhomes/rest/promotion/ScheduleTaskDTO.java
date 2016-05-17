@@ -11,14 +11,11 @@ public class ScheduleTaskDTO {
     private String     progressData;
     private String     resourceType;
     private Long     resourceId;
-    private String     ownerType;
     private Timestamp     createTime;
     private Integer     namespaceId;
     private Integer     progress;
     private Integer     processCount;
-    private Long     ownerId;
     private Long     id;
-
     
 
     public Byte getStatus() {
@@ -68,19 +65,6 @@ public class ScheduleTaskDTO {
     }
 
 
-
-    public String getOwnerType() {
-        return ownerType;
-    }
-
-
-
-    public void setOwnerType(String ownerType) {
-        this.ownerType = ownerType;
-    }
-
-
-
     public Timestamp getCreateTime() {
         return createTime;
     }
@@ -126,19 +110,6 @@ public class ScheduleTaskDTO {
     public void setProcessCount(Integer processCount) {
         this.processCount = processCount;
     }
-
-
-
-    public Long getOwnerId() {
-        return ownerId;
-    }
-
-
-
-    public void setOwnerId(Long ownerId) {
-        this.ownerId = ownerId;
-    }
-
 
 
     public Long getId() {
