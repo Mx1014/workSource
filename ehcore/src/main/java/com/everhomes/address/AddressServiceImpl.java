@@ -1619,14 +1619,18 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         ListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
+		
+		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+		
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
             (DSLContext context, Object reducingContext)-> {
             
             context.select().from(Tables.EH_COMMUNITIES)
                 .where(Tables.EH_COMMUNITIES.ID.gt(locator.getAnchor())
                 .and(Tables.EH_COMMUNITIES.ID.in(communityIds)))
+                .and(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()))
-                .orderBy(Tables.EH_COMMUNITIES.NAMESPACE_ID.desc())
+                .orderBy(Tables.EH_COMMUNITIES.COMMUNITY_TYPE.desc())
                 .limit(pageSize+1)
                 .fetch().map((r) -> {
                 CommunityDTO community = ConvertHelper.convert(r, CommunityDTO.class);
