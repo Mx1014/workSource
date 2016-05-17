@@ -14,10 +14,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.rest.promotion.OpPromotionConditionType;
+import com.everhomes.rest.promotion.OpPromotionStatus;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhOpPromotionActivitiesDao;
@@ -120,6 +123,33 @@ public class OpPromotionActivitieProviderImpl implements OpPromotionActivityProv
     
     @Override
     public List<OpPromotionActivity> listOpPromotion(ListingLocator locator, int count) {
-        return queryOpPromotionActivities(locator, count, null);
+        return queryOpPromotionActivities(locator, count, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_OP_PROMOTION_ACTIVITIES.STATUS.ne(OpPromotionStatus.INACTIVE.getCode()));
+                return query;
+            }
+            
+        });
+    }
+    
+    @Override
+    public List<OpPromotionActivity> listOpPromotionByPriceRange(ListingLocator locator, int count, Long value) {
+        List<OpPromotionActivity> promotions = queryOpPromotionActivities(locator, count, new ListingQueryBuilderCallback() {
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_OP_PROMOTION_ACTIVITIES.POLICY_TYPE.eq(OpPromotionConditionType.ORDER_RANGE_VALUE.getCode()));
+                query.addConditions(Tables.EH_OP_PROMOTION_ACTIVITIES.INTEGRAL_TAG1.ge(value));
+                query.addConditions(Tables.EH_OP_PROMOTION_ACTIVITIES.INTEGRAL_TAG2.le(value));
+                query.addConditions(Tables.EH_OP_PROMOTION_ACTIVITIES.STATUS.ne(OpPromotionStatus.INACTIVE.getCode()));
+                return query;
+            }
+            
+        });
+        
+        return promotions;
     }
 }

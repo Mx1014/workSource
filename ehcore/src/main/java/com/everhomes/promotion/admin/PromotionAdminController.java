@@ -48,6 +48,7 @@ public class PromotionAdminController extends ControllerBase {
     @RequestMapping("newOrderPrice")
     @RestReturn(value=OpPromotionOrderRangeCommand.class)
     public RestResponse newOrderPrice(@Valid OpPromotionOrderRangeCommand cmd) {
+        promotionService.newOrderPriceEvent(cmd);
         return new RestResponse("ok");
     }    
 }
