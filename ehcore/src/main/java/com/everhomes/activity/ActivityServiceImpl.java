@@ -1726,6 +1726,8 @@ public class ActivityServiceImpl implements ActivityService {
 	        break;
 	    case PARK_ENTERPRISE:
 	    case PARK_ENTERPRISE_NOAUTH:
+        case ENTERPRISE: // 增加两场景，与园区企业保持一致 by lqs 20160517
+        case ENTERPRISE_NOAUTH: // 增加两场景，与园区企业保持一致 by lqs 20160517
 	        Organization organization = organizationProvider.findOrganizationById(sceneTokenDto.getEntityId());
             if(organization != null) {
                 Long communityId = organizationService.getOrganizationActiveCommunityId(organization.getId());
