@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-05-12 14:28:07
+// generated at 2016-05-17 18:47:43
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -43,6 +43,7 @@ public interface ApiConstants {
     public static final String ADDRESS_LISTBUILDINGSBYKEYWORD_URL = "/address/listBuildingsByKeyword";
     public static final String ADDRESS_LISTCOMMUNITIESBYKEYWORD_URL = "/address/listCommunitiesByKeyword";
     public static final String ADDRESS_LISTNEARBYCOMMUNITIES_URL = "/address/listNearbyCommunities";
+    public static final String ADDRESS_LISTNEARBYMIXCOMMUNITIES_URL = "/address/listNearbyMixCommunities";
     public static final String ADDRESS_LISTSUGGESTEDCOMMUNITIES_URL = "/address/listSuggestedCommunities";
     public static final String ADDRESS_LISTUNASSIGNEDAPARTMENTSBYBUILDINGNAME_URL = "/address/listUnassignedApartmentsByBuildingName";
     public static final String ADDRESS_SEARCHCOMMUNITIES_URL = "/address/searchCommunities";
@@ -501,6 +502,8 @@ public interface ApiConstants {
     public static final String OPENAPI_CLOSEBIZNAMESPACEVISIBLE_URL = "/openapi/closeBizNamespaceVisible";
     public static final String OPENAPI_FINDBUSINESSFAVORITESTATUS_URL = "/openapi/findBusinessFavoriteStatus";
     public static final String OPENAPI_FINDTOKENBYUSERID_URL = "/openapi/findTokenByUserId";
+    public static final String OPENAPI_GETCOMMUNITIESBYNAMEANDCITYID_URL = "/openapi/getCommunitiesByNameAndCityId";
+    public static final String OPENAPI_GETCOMMUNITYBYID_URL = "/openapi/getCommunityById";
     public static final String OPENAPI_GETRECEIVEDCOUPONCOUNT_URL = "/openapi/getReceivedCouponCount";
     public static final String OPENAPI_GETUSERDEFAULTADDRESS_URL = "/openapi/getUserDefaultAddress";
     public static final String OPENAPI_GETUSERDETAILBYUUID_URL = "/openapi/getUserDetailByUuid";
@@ -508,8 +511,11 @@ public interface ApiConstants {
     public static final String OPENAPI_GETUSERINFOBYUUID_URL = "/openapi/getUserInfoByUuid";
     public static final String OPENAPI_GETUSERSERVICEADDRESS_URL = "/openapi/getUserServiceAddress";
     public static final String OPENAPI_INVALIDCOUPON_URL = "/openapi/invalidCoupon";
+    public static final String OPENAPI_LISTAPARTMENTSBYKEYWORD_URL = "/openapi/listApartmentsByKeyword";
     public static final String OPENAPI_LISTBIZCATEGORIES_URL = "/openapi/listBizCategories";
+    public static final String OPENAPI_LISTBUILDINGSBYKEYWORD_URL = "/openapi/listBuildingsByKeyword";
     public static final String OPENAPI_LISTBUSINESSBYCOMMONITYID_URL = "/openapi/listBusinessByCommonityId";
+    public static final String OPENAPI_LISTREGIONBYKEYWORD_URL = "/openapi/listRegionByKeyword";
     public static final String OPENAPI_LISTUSER_URL = "/openapi/listUser";
     public static final String OPENAPI_LISTUSERBYIDENTIFIER_URL = "/openapi/listUserByIdentifier";
     public static final String OPENAPI_LISTUSERBYKEYWORD_URL = "/openapi/listUserByKeyword";

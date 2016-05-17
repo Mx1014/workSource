@@ -1,21 +1,22 @@
 //
-// EvhUpdateContactorCommand.h
+// EvhListBuildingByCommunityIdsCommand.h
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhUpdateContactorCommand
+// EvhListBuildingByCommunityIdsCommand
 //
-@interface EvhUpdateContactorCommand
+@interface EvhListBuildingByCommunityIdsCommand
     : NSObject<EvhJsonSerializable>
 
 
-@property(nonatomic, copy) NSString* contactorName;
+// item type NSNumber*
+@property(nonatomic, strong) NSMutableArray* communityIds;
 
-@property(nonatomic, copy) NSString* contactor;
+@property(nonatomic, copy) NSString* keyword;
 
-@property(nonatomic, copy) NSNumber* enterpriseId;
+@property(nonatomic, copy) NSNumber* namespaceId;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

@@ -1,21 +1,21 @@
 //
-// EvhUpdateContactorCommand.h
+// EvhListNearbyMixCommunitiesCommandResponse.h
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
+#import "EvhCommunityDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhUpdateContactorCommand
+// EvhListNearbyMixCommunitiesCommandResponse
 //
-@interface EvhUpdateContactorCommand
+@interface EvhListNearbyMixCommunitiesCommandResponse
     : NSObject<EvhJsonSerializable>
 
 
-@property(nonatomic, copy) NSString* contactorName;
+// item type EvhCommunityDTO*
+@property(nonatomic, strong) NSMutableArray* dtos;
 
-@property(nonatomic, copy) NSString* contactor;
-
-@property(nonatomic, copy) NSNumber* enterpriseId;
+@property(nonatomic, copy) NSNumber* nextPageAnchor;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

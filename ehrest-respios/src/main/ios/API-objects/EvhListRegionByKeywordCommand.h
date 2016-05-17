@@ -23,6 +23,8 @@
 
 @property(nonatomic, copy) NSString* keyword;
 
+@property(nonatomic, copy) NSNumber* namespaceId;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 
