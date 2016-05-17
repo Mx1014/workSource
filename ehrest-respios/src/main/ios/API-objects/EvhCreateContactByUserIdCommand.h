@@ -25,8 +25,6 @@
 
 @property(nonatomic, copy) NSString* applyGroup;
 
-@property(nonatomic, copy) NSNumber* communityId;
-
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 

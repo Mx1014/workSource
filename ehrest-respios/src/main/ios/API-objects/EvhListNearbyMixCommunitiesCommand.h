@@ -1,21 +1,23 @@
 //
-// EvhUpdateContactorCommand.h
+// EvhListNearbyMixCommunitiesCommand.h
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhUpdateContactorCommand
+// EvhListNearbyMixCommunitiesCommand
 //
-@interface EvhUpdateContactorCommand
+@interface EvhListNearbyMixCommunitiesCommand
     : NSObject<EvhJsonSerializable>
 
 
-@property(nonatomic, copy) NSString* contactorName;
+@property(nonatomic, copy) NSNumber* longitude;
 
-@property(nonatomic, copy) NSString* contactor;
+@property(nonatomic, copy) NSNumber* latigtue;
 
-@property(nonatomic, copy) NSNumber* enterpriseId;
+@property(nonatomic, copy) NSNumber* pageAnchor;
+
+@property(nonatomic, copy) NSNumber* pageSize;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

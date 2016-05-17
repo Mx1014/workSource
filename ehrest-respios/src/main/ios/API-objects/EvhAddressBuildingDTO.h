@@ -15,6 +15,8 @@
 
 @property(nonatomic, copy) NSString* buildingAliasName;
 
+@property(nonatomic, copy) NSNumber* communityId;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 
