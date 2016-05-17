@@ -134,52 +134,52 @@ public class DiscoveryParkTouristPostSceneHandler implements PostSceneHandler {
             filterList.add(filterDto);
 
 
-            long group2Id = menuId++;
-            // 各兴趣圈
-            List<TopicFilterDTO> tmpFilterList = new ArrayList<TopicFilterDTO>();
-            ListPublicGroupCommand groupCmd = new ListPublicGroupCommand();
-            groupCmd.setUserId(user.getId());
-            List<GroupDTO> groupList = groupService.listPublicGroups(groupCmd);
-            if(groupList != null && groupList.size() > 0) {
-                for(GroupDTO groupDto : groupList) {
-                    filterDto = new TopicFilterDTO();
-                    filterDto.setId(menuId++);
-                    filterDto.setParentId(group2Id);
-                    filterDto.setName(groupDto.getName());
-                    filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
-                    filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());;
-                    actionUrl = String.format("%s%s?forumId=%s&communityId=%s", serverContectPath, 
-                        "/forum/listTopics", groupDto.getOwningForumId(), community.getId());
-                    filterDto.setActionUrl(actionUrl);
-                    avatarUri = groupDto.getAvatar();
-                    if(avatarUri == null || avatarUri.trim().length() == 0) {
-                        avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.all", "");
-                    }
-                    filterDto.setAvatar(avatarUri);
-                    filterDto.setAvatarUrl(getPostFilterDefaultAvatar(namespaceId, user.getId(), avatarUri));
-                    tmpFilterList.add(filterDto);
-                }
-            }
-            // 当没有孩子节点时，组节点也不要显示 by lqs 20160426
-            if(tmpFilterList.size() > 0) {
-                // 菜单：兴趣圈组
-                TopicFilterDTO group2FilterDto = new TopicFilterDTO();
-                group2FilterDto.setId(group2Id);
-                group2FilterDto.setParentId(0L);
-                code = String.valueOf(ForumLocalStringCode.POST_MEMU_INTEREST_GROUP);
-                menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
-                group2FilterDto.setName(menuName);
-                group2FilterDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());
-                group2FilterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());
-                filterList.add(group2FilterDto);
-                
-                // 各兴趣圈
-                filterList.addAll(tmpFilterList);
-            } else {
-                if(LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("No interest group filter for the user, userId={}, sceneToken={}", user.getId(), sceneToken);
-                }
-            }
+//            long group2Id = menuId++;
+//            // 各兴趣圈
+//            List<TopicFilterDTO> tmpFilterList = new ArrayList<TopicFilterDTO>();
+//            ListPublicGroupCommand groupCmd = new ListPublicGroupCommand();
+//            groupCmd.setUserId(user.getId());
+//            List<GroupDTO> groupList = groupService.listPublicGroups(groupCmd);
+//            if(groupList != null && groupList.size() > 0) {
+//                for(GroupDTO groupDto : groupList) {
+//                    filterDto = new TopicFilterDTO();
+//                    filterDto.setId(menuId++);
+//                    filterDto.setParentId(group2Id);
+//                    filterDto.setName(groupDto.getName());
+//                    filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
+//                    filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());;
+//                    actionUrl = String.format("%s%s?forumId=%s&communityId=%s", serverContectPath, 
+//                        "/forum/listTopics", groupDto.getOwningForumId(), community.getId());
+//                    filterDto.setActionUrl(actionUrl);
+//                    avatarUri = groupDto.getAvatar();
+//                    if(avatarUri == null || avatarUri.trim().length() == 0) {
+//                        avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.all", "");
+//                    }
+//                    filterDto.setAvatar(avatarUri);
+//                    filterDto.setAvatarUrl(getPostFilterDefaultAvatar(namespaceId, user.getId(), avatarUri));
+//                    tmpFilterList.add(filterDto);
+//                }
+//            }
+//            // 当没有孩子节点时，组节点也不要显示 by lqs 20160426
+//            if(tmpFilterList.size() > 0) {
+//                // 菜单：兴趣圈组
+//                TopicFilterDTO group2FilterDto = new TopicFilterDTO();
+//                group2FilterDto.setId(group2Id);
+//                group2FilterDto.setParentId(0L);
+//                code = String.valueOf(ForumLocalStringCode.POST_MEMU_INTEREST_GROUP);
+//                menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
+//                group2FilterDto.setName(menuName);
+//                group2FilterDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());
+//                group2FilterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());
+//                filterList.add(group2FilterDto);
+//                
+//                // 各兴趣圈
+//                filterList.addAll(tmpFilterList);
+//            } else {
+//                if(LOGGER.isDebugEnabled()) {
+//                    LOGGER.debug("No interest group filter for the user, userId={}, sceneToken={}", user.getId(), sceneToken);
+//                }
+//            }
         }
         
         return filterList;
@@ -272,51 +272,51 @@ public class DiscoveryParkTouristPostSceneHandler implements PostSceneHandler {
             scopeList.add(sentScopeDto);
 
             // 各兴趣圈
-            long group2Id = menuId++;
-            List<TopicScopeDTO> tmpFilterList = new ArrayList<TopicScopeDTO>();
-            ListPublicGroupCommand groupCmd = new ListPublicGroupCommand();
-            groupCmd.setUserId(user.getId());
-            List<GroupDTO> groupList = groupService.listPublicGroups(groupCmd);
-            if(groupList != null && groupList.size() > 0) {
-                for(GroupDTO groupDto : groupList) {
-                    sentScopeDto = new TopicScopeDTO();
-                    sentScopeDto.setId(menuId++);
-                    sentScopeDto.setParentId(group2Id);
-                    sentScopeDto.setName(groupDto.getName());
-                    sentScopeDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
-                    sentScopeDto.setForumId(groupDto.getOwningForumId());
-                    sentScopeDto.setSceneToken(sceneToken);
-                    sentScopeDto.setTargetTag(PostEntityTag.USER.getCode());
-                    if(groupDto.getAvatar() != null) {
-                        sentScopeDto.setAvatar(groupDto.getAvatar());
-                        sentScopeDto.setAvatarUrl(groupDto.getAvatarUrl());
-                    } else {
-                        avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.group", "");
-                        sentScopeDto.setAvatar(avatarUri);
-                        sentScopeDto.setAvatarUrl(getPostFilterDefaultAvatar(namespaceId, user.getId(), avatarUri));
-                    }
-                    tmpFilterList.add(sentScopeDto);
-                }
-            }
-            
-            if(tmpFilterList.size() > 0) {
-                // 菜单：兴趣圈
-                sentScopeDto = new TopicScopeDTO();
-                sentScopeDto.setId(group2Id);
-                sentScopeDto.setParentId(0L);
-                code = String.valueOf(ForumLocalStringCode.POST_MEMU_INTEREST_GROUP);
-                menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
-                sentScopeDto.setName(menuName);
-                sentScopeDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());;
-                scopeList.add(sentScopeDto);
-                
-                // 各兴趣圈
-                scopeList.addAll(tmpFilterList);
-            } else {
-                if(LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("No interest group topic sent scope for the user, userId={}, sceneToken={}", user.getId(), sceneToken);
-                }
-            }
+//            long group2Id = menuId++;
+//            List<TopicScopeDTO> tmpFilterList = new ArrayList<TopicScopeDTO>();
+//            ListPublicGroupCommand groupCmd = new ListPublicGroupCommand();
+//            groupCmd.setUserId(user.getId());
+//            List<GroupDTO> groupList = groupService.listPublicGroups(groupCmd);
+//            if(groupList != null && groupList.size() > 0) {
+//                for(GroupDTO groupDto : groupList) {
+//                    sentScopeDto = new TopicScopeDTO();
+//                    sentScopeDto.setId(menuId++);
+//                    sentScopeDto.setParentId(group2Id);
+//                    sentScopeDto.setName(groupDto.getName());
+//                    sentScopeDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
+//                    sentScopeDto.setForumId(groupDto.getOwningForumId());
+//                    sentScopeDto.setSceneToken(sceneToken);
+//                    sentScopeDto.setTargetTag(PostEntityTag.USER.getCode());
+//                    if(groupDto.getAvatar() != null) {
+//                        sentScopeDto.setAvatar(groupDto.getAvatar());
+//                        sentScopeDto.setAvatarUrl(groupDto.getAvatarUrl());
+//                    } else {
+//                        avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.group", "");
+//                        sentScopeDto.setAvatar(avatarUri);
+//                        sentScopeDto.setAvatarUrl(getPostFilterDefaultAvatar(namespaceId, user.getId(), avatarUri));
+//                    }
+//                    tmpFilterList.add(sentScopeDto);
+//                }
+//            }
+//            
+//            if(tmpFilterList.size() > 0) {
+//                // 菜单：兴趣圈
+//                sentScopeDto = new TopicScopeDTO();
+//                sentScopeDto.setId(group2Id);
+//                sentScopeDto.setParentId(0L);
+//                code = String.valueOf(ForumLocalStringCode.POST_MEMU_INTEREST_GROUP);
+//                menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
+//                sentScopeDto.setName(menuName);
+//                sentScopeDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());;
+//                scopeList.add(sentScopeDto);
+//                
+//                // 各兴趣圈
+//                scopeList.addAll(tmpFilterList);
+//            } else {
+//                if(LOGGER.isDebugEnabled()) {
+//                    LOGGER.debug("No interest group topic sent scope for the user, userId={}, sceneToken={}", user.getId(), sceneToken);
+//                }
+//            }
         }
         
         return scopeList;
