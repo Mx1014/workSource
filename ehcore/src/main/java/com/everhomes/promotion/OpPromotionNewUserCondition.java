@@ -46,7 +46,7 @@ public class OpPromotionNewUserCondition implements OpPromotionCondition, LocalB
         localBus.subscribe(DaoHelper.getDaoActionPublishSubject(DaoAction.MODIFY, EhOpPromotionActivities.class, this.cacheActivity.getId()), this);
     }
 
-    private void deleteCondition(OpPromotionContext ctx) {
+    private void unsubcribeMyself() {
         localBus.unsubscribe(DaoHelper.getDaoActionPublishSubject(DaoAction.MODIFY, EhGroupMembers.class, null), this);
         localBus.unsubscribe(DaoHelper.getDaoActionPublishSubject(DaoAction.MODIFY, EhOpPromotionActivities.class, this.cacheActivity.getId()), this);
     }
@@ -54,26 +54,32 @@ public class OpPromotionNewUserCondition implements OpPromotionCondition, LocalB
     @Override
     public Action onLocalBusMessage(Object arg0, String arg1, Object arg2, String arg3) {
         try {
-            Long groupMemberId = (Long)arg2;
-            GroupMember groupMember = this.groupProvider.findGroupMemberById(groupMemberId);
-            if(null == groupMember) {
-                LOGGER.error("None of groupMember");
-                return Action.none;
+            
+            if(arg1.indexOf(EhOpPromotionActivities.class.getName()) >= 0) {
+                this.unsubcribeMyself();
+            } else {
+                Long groupMemberId = (Long)arg2;
+                GroupMember groupMember = this.groupProvider.findGroupMemberById(groupMemberId);
+                if(null == groupMember) {
+                    LOGGER.error("None of groupMember");
+                    return Action.none;
+                    }
+                
+                if(groupMember.getMemberStatus() != GroupMemberStatus.ACTIVE.getCode()) {
+                    return Action.none;
+                    }
+                
+                OpPromotionAction action = OpPromotionUtils.getActionFromPromotion(this.cacheActivity);
+                
+                OpPromotionActivityContext ctx = new OpPromotionActivityContext(this.cacheActivity);
+                User u = userProvider.findUserById(groupMember.getMemberId());
+                if(u != null) {
+                    ctx.setUser(u);
+                    ctx.setNeedUpdate(true);
+                    action.fire(ctx);
                 }
-            
-            if(groupMember.getMemberStatus() != GroupMemberStatus.ACTIVE.getCode()) {
-                return Action.none;
-                }
-            
-            OpPromotionAction action = OpPromotionUtils.getActionFromPromotion(this.cacheActivity);
-            
-            OpPromotionActivityContext ctx = new OpPromotionActivityContext(this.cacheActivity);
-            User u = userProvider.findUserById(groupMember.getMemberId());
-            if(u != null) {
-                ctx.setUser(u);
-                action.fire(ctx);
             }
-            
+
         } catch(Exception e) {
             LOGGER.error("onLocalBusMessage error ", e);
             }

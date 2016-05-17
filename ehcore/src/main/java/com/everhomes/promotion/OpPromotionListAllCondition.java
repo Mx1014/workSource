@@ -13,6 +13,9 @@ public class OpPromotionListAllCondition implements OpPromotionCondition, OpProm
     @Autowired
     PromotionUserService promotionUserService;
     
+    @Autowired
+    PromotionService promotionService;
+    
     @Override
     public void createCondition(OpPromotionContext ctx) {
         OpPromotionUserVisitor visitor = new OpPromotionUserVisitor();
@@ -35,7 +38,14 @@ public class OpPromotionListAllCondition implements OpPromotionCondition, OpProm
         OpPromotionActivityContext ctx = new OpPromotionActivityContext(visitor.getPromotion());
         ctx.setUser(u);
         
+        visitor.setPushCount(visitor.getPushCount()+1);
+        
         action.fire(ctx);
+        
+        if(visitor.getPushCount() % 100 == 0) {
+            promotionService.addPushCountByPromotionId(visitor.getPromotion().getId(), (int)visitor.getPushCount());
+            visitor.setPushCount(0);
+        }
     }
 
 }

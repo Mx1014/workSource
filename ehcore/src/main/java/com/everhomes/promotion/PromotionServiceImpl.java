@@ -236,10 +236,10 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
                 OpPromotionActivityDTO dto = ConvertHelper.convert(op, OpPromotionActivityDTO.class);
                 
                 if(dto != null) {
-                    ScheduleTask task = scheduleTaskProvider.getSchduleTaskByPromotionId(dto.getId());
-                    if(task != null) {
-                        dto.setPushCount(task.getProcessCount());
-                    }
+//                    ScheduleTask task = scheduleTaskProvider.getSchduleTaskByPromotionId(dto.getId());
+//                    if(task != null) {
+//                        dto.setPushCount(task.getProcessCount());
+//                    }
                     dtos.add(dto);
                 }
             }
@@ -287,6 +287,7 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
                 OpPromotionAction action = OpPromotionUtils.getActionFromPromotion(promotion);
                 OpPromotionActivityContext ctx = new OpPromotionActivityContext(promotion);
                 ctx.setUser(user);
+                ctx.setNeedUpdate(true);
                 action.fire(ctx);
             }
             
@@ -316,5 +317,21 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
     public void closeOpPromotion(GetOpPromotionActivityByPromotionId cmd) {
         OpPromotionActivity promotion = this.promotionActivityProvider.getOpPromotionActivityById(cmd.getPromotionId());
         closeOpPromotion(promotion);
+    }
+    
+    @Override
+    public OpPromotionActivity addPushCountByPromotionId(Long id, int count) {
+        return this.dbProvider.execute(new TransactionCallback<OpPromotionActivity>() {
+            @Override
+            public OpPromotionActivity doInTransaction(TransactionStatus arg0) {
+                OpPromotionActivity promotion = promotionActivityProvider.getOpPromotionActivityById(id);
+                if(promotion != null) {
+                    promotion.setPushCount(promotion.getPushCount()+count);
+                    promotionActivityProvider.updateOpPromotionActivity(promotion);
+                }
+                
+                return promotion;
+            }
+        });
     }
 }

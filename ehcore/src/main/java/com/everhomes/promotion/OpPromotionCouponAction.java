@@ -17,6 +17,9 @@ public class OpPromotionCouponAction implements OpPromotionAction {
     @Autowired
     MessagingService messagingService;
     
+    @Autowired
+    PromotionService promotionService;
+    
     @Override
     public void fire(OpPromotionContext ctx) {
         OpPromotionActivityContext activityContext = (OpPromotionActivityContext)ctx;
@@ -36,7 +39,11 @@ public class OpPromotionCouponAction implements OpPromotionAction {
         messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
 
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
-                userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());        
+                userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+        
+        if(activityContext.getNeedUpdate()) {
+            promotionService.addPushCountByPromotionId(activityContext.getPromotion().getId(), 1);    
+        }
     }
 
 }
