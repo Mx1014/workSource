@@ -150,11 +150,12 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
                     , FilterBuilders.termFilter("regionId", regionId));
         }
         
-        if(null == fb) {
-            fb = FilterBuilders.termFilter("communityType", t.getCode());
-        } else {
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityType", EnterpriseCommunityType.Normal.getCode()));
-        }
+        //园区和小区都要搜索出来 by xiongying 20160518
+//        if(null == fb) {
+//            fb = FilterBuilders.termFilter("communityType", t.getCode());
+//        } else {
+//            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityType", EnterpriseCommunityType.Normal.getCode()));
+//        }
         
         if(null != fb) {
             qb = QueryBuilders.filteredQuery(qb, fb);
