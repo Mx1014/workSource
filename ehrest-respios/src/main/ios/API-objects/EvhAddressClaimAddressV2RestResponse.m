@@ -1,6 +1,5 @@
 //
 // EvhAddressClaimAddressV2RestResponse.m
-// generated at 2016-04-19 14:25:57 
 //
 #import "EvhAddressClaimAddressV2RestResponse.h"
 #import "EvhFamilyDTO.h"

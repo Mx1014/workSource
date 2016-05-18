@@ -48,6 +48,8 @@ public class QualityInspectionScheduleJob  extends QuartzJobBean {
 		
 		for(QualityInspectionStandards standard : activeStandards) {
 			boolean isRepeat = repeatService.isRepeatSettingActive(standard.getRepeatSettingId());
+			LOGGER.info("QualityInspectionScheduleJob: standard id = " + standard.getId() 
+					+ "repeat setting id = "+ standard.getRepeatSettingId() + "is repeat setting active: " + isRepeat);
 			if(isRepeat) {
 				qualityService.createTaskByStandardId(standard.getId());
 			}

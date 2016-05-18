@@ -33,12 +33,18 @@ import com.everhomes.rest.community.ListComunitiesByKeywordCommand;
 import com.everhomes.rest.community.RejectCommunityCommand;
 import com.everhomes.rest.community.UpdateCommunityCommand;
 import com.everhomes.rest.community.admin.ApproveCommunityAdminCommand;
+import com.everhomes.rest.community.admin.CommunityAuthUserAddressCommand;
+import com.everhomes.rest.community.admin.CommunityAuthUserAddressResponse;
 import com.everhomes.rest.community.admin.CommunityManagerDTO;
+import com.everhomes.rest.community.admin.CommunityUserAddressDTO;
+import com.everhomes.rest.community.admin.CommunityUserAddressResponse;
 import com.everhomes.rest.community.admin.DeleteBuildingAdminCommand;
 import com.everhomes.rest.community.admin.ListBuildingsByStatusCommandResponse;
 import com.everhomes.rest.community.admin.ListCommunityManagersAdminCommand;
+import com.everhomes.rest.community.admin.ListCommunityUsersCommand;
 import com.everhomes.rest.community.admin.ListComunitiesByKeywordAdminCommand;
 import com.everhomes.rest.community.admin.ListUserCommunitiesCommand;
+import com.everhomes.rest.community.admin.QryCommunityUserAddressByUserIdCommand;
 import com.everhomes.rest.community.admin.RejectCommunityAdminCommand;
 import com.everhomes.rest.community.admin.UpdateBuildingAdminCommand;
 import com.everhomes.rest.community.admin.UpdateCommunityAdminCommand;
@@ -397,6 +403,102 @@ public class CommunityAdminController extends ControllerBase {
 		}
 		ImportDataResponse importDataResponse = this.communityService.importBuildingData(files[0], userId);
         RestResponse response = new RestResponse(importDataResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/community/qryCommunityUserEnterpriseByUserId</b>
+     * <p>查询用户所在的企业</p>
+     */
+    @RequestMapping("qryCommunityUserEnterpriseByUserId")
+    @RestReturn(value=CommunityUserAddressDTO.class)
+    public RestResponse qryCommunityUserEnterpriseByUserId(@Valid QryCommunityUserAddressByUserIdCommand cmd) {
+        
+        RestResponse response =  new RestResponse(communityService.qryCommunityUserEnterpriseByUserId(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/community/qryCommunityUserEnterpriseByUserId</b>
+     * <p>查询用户所在的地址</p>
+     */
+    @RequestMapping("qryCommunityUserAddressByUserId")
+    @RestReturn(value=CommunityUserAddressDTO.class)
+    public RestResponse qryCommunityUserAddressByUserId(@Valid QryCommunityUserAddressByUserIdCommand cmd) {
+        
+        RestResponse response =  new RestResponse(communityService.qryCommunityUserAddressByUserId(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/community/listOwnerBycommunityId</b>
+     * <p>查询未注册的用户</p>
+     */
+    @RequestMapping("listOwnerBycommunityId")
+    @RestReturn(value=CommunityUserAddressResponse.class)
+    public RestResponse listOwnerBycommunityId(@Valid ListCommunityUsersCommand cmd) {
+        
+        RestResponse response =  new RestResponse(communityService.listOwnerBycommunityId(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/community/listUserBycommunityId</b>
+     * <p>查询已注册的用户</p>
+     */
+    @RequestMapping("listUserBycommunityId")
+    @RestReturn(value=CommunityUserAddressResponse.class)
+    public RestResponse listUserBycommunityId(@Valid ListCommunityUsersCommand cmd) {
+        
+        RestResponse response =  new RestResponse(communityService.listUserBycommunityId(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/community/listCommunityAuthUserAddress</b>
+     * <p>用户认证列表</p>
+     */
+    @RequestMapping("listCommunityAuthUserAddress")
+    @RestReturn(value=CommunityAuthUserAddressResponse.class)
+    public RestResponse listCommunityAuthUserAddress(@Valid CommunityAuthUserAddressCommand cmd) {
+        
+        RestResponse response =  new RestResponse(communityService.listCommunityAuthUserAddress(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/community/listUserByNotJoinedCommunity</b>
+     * <p>未加入小区的用户</p>
+     */
+    @RequestMapping("listUserByNotJoinedCommunity")
+    @RestReturn(value=CommunityUserAddressResponse.class)
+    public RestResponse listUserByNotJoinedCommunity(@Valid ListCommunityUsersCommand cmd) {
+        RestResponse response =  new RestResponse(communityService.listUserByNotJoinedCommunity(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/community/listUnassignedCommunitiesByNamespaceId</b>
+     * <p>域下面未被管理的小区</p>
+     */
+    @RequestMapping("listUnassignedCommunitiesByNamespaceId")
+    @RestReturn(value=CommunityDTO.class)
+    public RestResponse listUnassignedCommunitiesByNamespaceId() {
+        RestResponse response =  new RestResponse(communityService.listUnassignedCommunitiesByNamespaceId());
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

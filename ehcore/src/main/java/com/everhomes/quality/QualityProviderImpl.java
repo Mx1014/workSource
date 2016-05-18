@@ -171,7 +171,7 @@ public class QualityProviderImpl implements QualityProvider {
 	
 	@PostConstruct
 	public void init() {
-		this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_TASK.getCode()).tryEnter(()-> {
+		this.coordinationProvider.getNamedLock(CoordinationLocks.SCHEDULE_QUALITY_TASK.getCode()).tryEnter(()-> {
 			String QUALITY_INSPECTION_TRIGGER_NAME = "QualityInspection " + System.currentTimeMillis();
 			scheduleProvider.scheduleCronJob(QUALITY_INSPECTION_TRIGGER_NAME, QUALITY_INSPECTION_TRIGGER_NAME,
 					"0 0 3 * * ? ", QualityInspectionScheduleJob.class, null);
@@ -181,11 +181,14 @@ public class QualityProviderImpl implements QualityProvider {
 
 	@Override
 	public void createVerificationTasks(QualityInspectionTasks task) {
+		
 		long id = this.shardingProvider.allocShardableContentId(EhQualityInspectionTasks.class).second();
 		
 		task.setId(id);
 		task.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         
+		LOGGER.info("createVerificationTasks: " + task);
+		
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhQualityInspectionTasks.class, id));
         EhQualityInspectionTasksDao dao = new EhQualityInspectionTasksDao(context.configuration());
         dao.insert(task);

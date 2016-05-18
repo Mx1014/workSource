@@ -1,6 +1,5 @@
 //
 // EvhTechparkParkQryPreferentialRuleByCommunityIdRestResponse.m
-// generated at 2016-04-19 14:25:58 
 //
 #import "EvhTechparkParkQryPreferentialRuleByCommunityIdRestResponse.h"
 #import "EvhPreferentialRulesDTO.h"

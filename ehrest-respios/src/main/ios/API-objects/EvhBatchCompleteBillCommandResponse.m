@@ -1,6 +1,5 @@
 //
 // EvhBatchCompleteBillCommandResponse.m
-// generated at 2016-04-19 14:25:57 
 //
 #import "EvhBatchCompleteBillCommandResponse.h"
 #import "EvhRentalBillDTO.h"

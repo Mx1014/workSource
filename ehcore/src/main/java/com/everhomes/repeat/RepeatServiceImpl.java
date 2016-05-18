@@ -1,8 +1,11 @@
 package com.everhomes.repeat;
 
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -135,9 +138,18 @@ public class RepeatServiceImpl implements RepeatService {
 
 		Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
 		RepeatSettings repeat = findRepeatSettingById(repeatSettingId);
+		LOGGER.info("isRepeatSettingActive: repeatSetting = " + repeat);
 		if(repeat.getStatus() == RepeatSettingStatus.ACTIVE.getCode()) {
 			if(repeat.getForeverFlag() == 1) {
-				return true;
+				Date date = timestampToDate(repeat.getCreateTime());
+				List<Integer> differences = getDateDifference(now, new Timestamp(date.getTime()),
+						repeat, repeat.getRepeatType());
+				LOGGER.info("isRepeatSettingActive: differences = " + differences + "; date = " + date);
+				for(Integer difference : differences) {
+					if(difference % repeat.getRepeatInterval() == 0 && difference > 0) {
+						return true;
+					}
+				}
 			} else if(repeat.getForeverFlag() == 0) {
 				if(repeat.getRepeatInterval() == null || repeat.getRepeatInterval() == 0 || repeat.getStartDate() == null) {
 					return false;
@@ -150,14 +162,12 @@ public class RepeatServiceImpl implements RepeatService {
 						if(expiredDate.after(now)) {
 							List<Integer> differences = getDateDifference(now, new Timestamp(repeat.getStartDate().getTime()),
 									repeat, repeat.getRepeatType());
+							LOGGER.info("isRepeatSettingActive: differences = " + differences + "; startDate = " + repeat.getStartDate());
 							for(Integer difference : differences) {
-								if(difference % repeat.getRepeatInterval() == 0) {
+								if(difference % repeat.getRepeatInterval() == 0  && difference > 0) {
 									return true;
 								}
 							}
-							return false;
-						} else {
-							return false;
 						}
 					}
 					
@@ -172,16 +182,15 @@ public class RepeatServiceImpl implements RepeatService {
 						if(endDate.after(now)) {
 							List<Integer> differences = getDateDifference(now, new Timestamp(repeat.getStartDate().getTime()),
 									repeat, repeat.getRepeatType());
+							LOGGER.info("isRepeatSettingActive: differences = " + differences + "; startDate = " + repeat.getStartDate());
 							for(Integer difference : differences) {
-								if(difference % repeat.getRepeatInterval() == 0) {
+								if(difference % repeat.getRepeatInterval() == 0 && difference > 0) {
 									return true;
 								}
 							}
 						}
 					}
 				}
-			} else {
-				return false;
 			}
 		}
 		return false;
@@ -208,28 +217,28 @@ public class RepeatServiceImpl implements RepeatService {
 		int yearCompare = c.get(Calendar.YEAR);
 		int monthCompare = c.get(Calendar.MONTH);
 		
+		LOGGER.info("getDateDifference: yearNow = " + yearNow + "; monthNow = " + monthNow + "; dayWeekNow = "
+				+ dayWeekNow + "; dayNow = " + dayNow + "; yearCompare = " + yearCompare + "; monthCompare = " + monthCompare);
 		List<Integer> results = new ArrayList<Integer>();
 		
 		if(repeat != null && repeat.getExpression() != null) {
 			List<RepeatExpressionDTO> expressionDto =  analyzeExpression(repeat.getExpression());
+			int result = -1;
 			
-			if(expressionDto != null && expressionDto.size() > 0) {
+			if(field == 1) {
+				if(repeat.getEveryWorkdayFlag() != null && repeat.getEveryWorkdayFlag() == 1
+						&& (dayWeekNow == Calendar.SUNDAY || dayWeekNow == Calendar.SATURDAY)) {
+					result = -1;
+				} else {
+					result = (int)((now.getTime() - compareValue.getTime())/86400000);
+				}
+			} else if(expressionDto != null && expressionDto.size() > 0) {
 				for(RepeatExpressionDTO exp : expressionDto) {
-					int result = -1;
 					
 					if(field == 0) {
 						if(yearNow == exp.getYear() && monthNow == exp.getMonth() && dayNow == exp.getDay()) {
 							result = 0;
 						}
-					}
-					if(field == 1) {
-						if(repeat.getEveryWorkdayFlag() != null && repeat.getEveryWorkdayFlag() == 1
-								&& (dayWeekNow == Calendar.SUNDAY || dayWeekNow == Calendar.SATURDAY)) {
-							result = -1;
-						} else {
-							result = (int)((now.getTime() - compareValue.getTime())/86400000);
-						}
-						
 					}
 
 					if(field == 2) {
@@ -260,10 +269,9 @@ public class RepeatServiceImpl implements RepeatService {
 							result = -1;
 						}
 					}
-					
-					results.add(result);
 				}
 			}
+			results.add(result);
 		}
 		
 		return results;
@@ -289,6 +297,22 @@ public class RepeatServiceImpl implements RepeatService {
 		}
 		
 		return repeat;
+	}
+	
+	private Date timestampToDate(Timestamp time) {
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+		String str = sdf.format(time);
+		Date date = new Date();
+		try {
+			date = sdf.parse(str);
+			
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return date;
 	}
 	
 }

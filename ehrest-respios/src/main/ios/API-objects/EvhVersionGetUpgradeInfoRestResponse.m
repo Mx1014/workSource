@@ -1,6 +1,5 @@
 //
 // EvhVersionGetUpgradeInfoRestResponse.m
-// generated at 2016-04-19 14:25:58 
 //
 #import "EvhVersionGetUpgradeInfoRestResponse.h"
 #import "EvhUpgradeInfoResponse.h"

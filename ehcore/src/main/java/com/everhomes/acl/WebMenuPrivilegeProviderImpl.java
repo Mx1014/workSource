@@ -21,7 +21,9 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.rest.acl.WebMenuPrivilegeShowFlag;
 import com.everhomes.rest.acl.WebMenuStatus;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.pojos.EhWebMenuScopes;
 import com.everhomes.server.schema.tables.records.EhWebMenuPrivilegesRecord;
+import com.everhomes.server.schema.tables.records.EhWebMenuScopesRecord;
 import com.everhomes.server.schema.tables.records.EhWebMenusRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
@@ -53,21 +55,15 @@ public class WebMenuPrivilegeProviderImpl implements WebMenuPrivilegeProvider {
 	
 	@Override
 	//@Caching(evict={@CacheEvict(value="ListWebMenuByPrivilegeIds", key="webMenuByPrivilegeIds")})
-	public List<WebMenuPrivilege> ListWebMenuByPrivilegeIds(
+	public List<WebMenuPrivilege> listWebMenuByPrivilegeIds(
 			List<Long> privilegeIds, WebMenuPrivilegeShowFlag showFlag) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhWebMenuPrivilegesRecord> query = context.selectQuery(Tables.EH_WEB_MENU_PRIVILEGES);
 		Condition cond = null;
-		if(null != privilegeIds && 0 != privilegeIds.size()){
-			cond = Tables.EH_WEB_MENU_PRIVILEGES.PRIVILEGE_ID.in(privilegeIds);
-		}
+		cond = Tables.EH_WEB_MENU_PRIVILEGES.PRIVILEGE_ID.in(privilegeIds);
 		
 		if(null != showFlag){
-			if(null == cond){
-				cond = Tables.EH_WEB_MENU_PRIVILEGES.SHOW_FLAG.eq(showFlag.getCode());
-			}else{
-				cond = cond.and(Tables.EH_WEB_MENU_PRIVILEGES.SHOW_FLAG.eq(showFlag.getCode()));
-			}
+			cond = cond.and(Tables.EH_WEB_MENU_PRIVILEGES.SHOW_FLAG.eq(showFlag.getCode()));
 		}
 		query.addConditions(cond);
 		query.addOrderBy(Tables.EH_WEB_MENU_PRIVILEGES.SORT_NUM);
@@ -78,7 +74,7 @@ public class WebMenuPrivilegeProviderImpl implements WebMenuPrivilegeProvider {
 	
 	@Override
 	//@Caching(evict = {@CacheEvict(value="listWebMenuByType", key="'webMenuByMenuIds'")})
-	public List<WebMenu> ListWebMenuByMenuIds(
+	public List<WebMenu> listWebMenuByMenuIds(
 			List<Long> menuIds) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhWebMenusRecord> query = context.selectQuery(Tables.EH_WEB_MENUS);
@@ -88,6 +84,19 @@ public class WebMenuPrivilegeProviderImpl implements WebMenuPrivilegeProvider {
 		query.addOrderBy(Tables.EH_WEB_MENUS.SORT_NUM);
 		return query.fetch().map((r) -> {
 			return ConvertHelper.convert(r, WebMenu.class);
+		});
+	}
+	
+	@Override
+	//@Caching(evict = {@CacheEvict(value="listWebMenuByType", key="'webMenuByMenuIds'")})
+	public List<WebMenuScope> listWebMenuScopeByOwnerId(String ownerType, Long ownerId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhWebMenuScopesRecord> query = context.selectQuery(Tables.EH_WEB_MENU_SCOPES);
+		Condition cond = Tables.EH_WEB_MENU_SCOPES.OWNER_TYPE.eq(ownerType);
+		cond = cond.and(Tables.EH_WEB_MENU_SCOPES.OWNER_ID.eq(ownerId));
+		query.addConditions(cond);
+		return query.fetch().map((r) -> {
+			return ConvertHelper.convert(r, WebMenuScope.class);
 		});
 	}
 }

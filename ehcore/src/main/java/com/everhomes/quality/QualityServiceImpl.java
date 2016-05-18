@@ -39,6 +39,8 @@ import org.springframework.stereotype.Component;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
@@ -156,6 +158,9 @@ public class QualityServiceImpl implements QualityService {
 	
 	@Autowired
 	private OrganizationService organizationService;
+	
+	@Autowired
+	private CoordinationProvider coordinationProvider;
 	
 	@Override
 	public QualityStandardsDTO creatQualityStandard(CreatQualityStandardCommand cmd) {
@@ -726,21 +731,38 @@ public class QualityServiceImpl implements QualityService {
 	}
 	
 	@Override
-	public List<GroupUserDTO> getGroupMembers(Long groupId) {
+	public List<GroupUserDTO> getGroupMembers(Long groupId, boolean isAll) {
+		User current = UserContext.current().getUser();
 		List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(groupId);
     	List<GroupUserDTO> groupUsers = members.stream().map((mem) -> {
-         	if(OrganizationMemberTargetType.USER.getCode().equals(mem.getTargetType()) 
-         			&& mem.getTargetId() != null && mem.getTargetId() != 0) {
-         		GroupUserDTO user = new GroupUserDTO();
-         		user.setOperatorType(mem.getTargetType());
-         		user.setUserId(mem.getTargetId());
-             	user.setUserName(mem.getContactName());
-             	user.setContact(mem.getContactToken());
-             	user.setEmployeeNo(mem.getEmployeeNo());
-             	return user;
-         	} else {
-         		return null;
-         	}
+    		if(isAll) {
+    			if(OrganizationMemberTargetType.USER.getCode().equals(mem.getTargetType()) 
+             			&& mem.getTargetId() != null && mem.getTargetId() != 0) {
+             		GroupUserDTO user = new GroupUserDTO();
+             		user.setOperatorType(mem.getTargetType());
+             		user.setUserId(mem.getTargetId());
+                 	user.setUserName(mem.getContactName());
+                 	user.setContact(mem.getContactToken());
+                 	user.setEmployeeNo(mem.getEmployeeNo());
+                 	return user;
+             	} else {
+             		return null;
+             	}
+    		} else {
+    			if(OrganizationMemberTargetType.USER.getCode().equals(mem.getTargetType()) 
+             			&& mem.getTargetId() != null && mem.getTargetId() != 0 && !mem.getTargetId().equals(current.getId())) {
+             		GroupUserDTO user = new GroupUserDTO();
+             		user.setOperatorType(mem.getTargetType());
+             		user.setUserId(mem.getTargetId());
+                 	user.setUserName(mem.getContactName());
+                 	user.setContact(mem.getContactToken());
+                 	user.setEmployeeNo(mem.getEmployeeNo());
+                 	return user;
+             	} else {
+             		return null;
+             	}
+    		}
+         	
          }).filter(member->member!=null).collect(Collectors.toList());
     	
     	return groupUsers;
@@ -774,7 +796,7 @@ public class QualityServiceImpl implements QualityService {
 			if(group != null)
 				dto.setGroupName(group.getName());
         	
-			List<GroupUserDTO> groupUsers = getGroupMembers(r.getExecutiveGroupId());
+			List<GroupUserDTO> groupUsers = getGroupMembers(r.getExecutiveGroupId(), false);
         	 
         	dto.setGroupUsers(groupUsers);
         	
@@ -828,6 +850,18 @@ public class QualityServiceImpl implements QualityService {
 									String.valueOf(QualityServiceErrorCode.ERROR_TASK_IS_CLOSED),
 									UserContext.current().getUser().getLocale(),
 									"the task is closed!"));
+		}
+		if(cmd.getOperatorId() != null && cmd.getOperatorId() == user.getId()) {
+			LOGGER.error("cannot assign to oneself!" + cmd.getOperatorId());
+			throw RuntimeErrorException
+					.errorWith(
+							QualityServiceErrorCode.SCOPE,
+							QualityServiceErrorCode.ERROR_ASSIGN_TO_ONESELF,
+							localeStringService.getLocalizedString(
+									String.valueOf(QualityServiceErrorCode.SCOPE),
+									String.valueOf(QualityServiceErrorCode.ERROR_ASSIGN_TO_ONESELF),
+									UserContext.current().getUser().getLocale(),
+									"cannot assign to oneself!"));
 		}
 		QualityInspectionTaskRecords record = new QualityInspectionTaskRecords();
 		record.setTaskId(task.getId());
@@ -899,7 +933,7 @@ public class QualityServiceImpl implements QualityService {
 			msgMap.put("operator", operator.getContactName());
 			msgMap.put("target", target.getContactName());
 			msgMap.put("taskName", task.getTaskName());
-			msgMap.put("deadline", new Timestamp(cmd.getEndTime()));
+			msgMap.put("deadline", timeToStr(new Timestamp(cmd.getEndTime())));
 			int msgCode = QualityNotificationTemplateCode.ASSIGN_TASK_MSG;
 			String msg = localeTemplateService.getLocaleTemplateString(scope, msgCode, locale, msgMap, "");
 			record.setProcessMessage(msg);
@@ -911,8 +945,14 @@ public class QualityServiceImpl implements QualityService {
 					String.valueOf(QualityServiceErrorCode.ATTACHMENT_TEXT),
 					UserContext.current().getUser().getLocale(),
 					"text:");
-			String msg = record.getProcessMessage()+attText+cmd.getMessage();
-			record.setProcessMessage(msg);
+			if(record.getProcessMessage() != null) {
+				String msg = record.getProcessMessage()+attText+cmd.getMessage();
+				record.setProcessMessage(msg);
+			} else {
+				String msg = attText+cmd.getMessage();
+				record.setProcessMessage(msg);
+			}
+			
 		}
 		
 		QualityInspectionTaskDTO dto = updateVerificationTasks(task, record, cmd.getAttachments());
@@ -940,6 +980,24 @@ public class QualityServiceImpl implements QualityService {
 		record.setProcessResult(cmd.getReviewResult());
 
 		updateVerificationTasks(task, record, null);
+		
+		if(cmd.getReviewResult() != null 
+				&& cmd.getReviewResult() == QualityInspectionTaskReviewResult.UNQUALIFIED.getCode()) {
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("taskNumber", task.getTaskNumber());
+			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), task.getOwnerId());
+			if(member != null) {
+				map.put("userName", member.getContactName());
+			} else {
+				map.put("userName", user.getNickName());
+			}
+			String scope = QualityNotificationTemplateCode.SCOPE;
+			int code = QualityNotificationTemplateCode.UNQUALIFIED_TASK_NOTIFY_EXECUTOR;
+			String locale = "zh_CN";
+			String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+			sendMessageToUser(task.getExecutorId(), notifyTextForApplicant);
+			
+		}
 
 		
 	}
@@ -959,6 +1017,18 @@ public class QualityServiceImpl implements QualityService {
 									String.valueOf(QualityServiceErrorCode.ERROR_TASK_IS_CLOSED),
 									UserContext.current().getUser().getLocale(),
 									"the task is closed!"));
+		}
+		if(cmd.getOperatorId() != null && cmd.getOperatorId() == user.getId()) {
+			LOGGER.error("cannot assign to oneself!" + cmd.getOperatorId());
+			throw RuntimeErrorException
+					.errorWith(
+							QualityServiceErrorCode.SCOPE,
+							QualityServiceErrorCode.ERROR_ASSIGN_TO_ONESELF,
+							localeStringService.getLocalizedString(
+									String.valueOf(QualityServiceErrorCode.SCOPE),
+									String.valueOf(QualityServiceErrorCode.ERROR_ASSIGN_TO_ONESELF),
+									UserContext.current().getUser().getLocale(),
+									"cannot assign to oneself!"));
 		}
 		QualityInspectionTaskRecords record = new QualityInspectionTaskRecords();
 		record.setTaskId(task.getId());
@@ -1015,14 +1085,20 @@ public class QualityServiceImpl implements QualityService {
 		    map.put("operator", operator.getContactName());
 		    map.put("target", target.getContactName());
 		    map.put("taskName", task.getTaskName());
-		    map.put("deadline", cmd.getEndTime());
+		    map.put("deadline", timeToStr(new Timestamp(cmd.getEndTime())));
 			int msgCode = QualityNotificationTemplateCode.ASSIGN_TASK_MSG;
 			String msg = localeTemplateService.getLocaleTemplateString(scope, msgCode, locale, msgMap, "");
 			record.setProcessMessage(msg);
 		}
 		if(cmd.getMessage() != null) {
-			String msg = record.getProcessMessage()+cmd.getMessage();
-			record.setProcessMessage(msg);
+			
+			if(record.getProcessMessage() != null) {
+				String msg = record.getProcessMessage()+cmd.getMessage();
+				record.setProcessMessage(msg);
+			} else {
+				String msg = cmd.getMessage();
+				record.setProcessMessage(msg);
+			}
 		}
 		
 		task.setProcessTime(new Timestamp(System.currentTimeMillis()));
@@ -1035,6 +1111,7 @@ public class QualityServiceImpl implements QualityService {
 	
 	@Override
 	public void createTaskByStandard(QualityStandardsDTO standard) {
+		LOGGER.info("createTaskByStandard: " + standard);
 		if(standard.getExecutiveGroup() != null && standard.getExecutiveGroup().size() > 0) {
 
 			long current = System.currentTimeMillis();
@@ -1064,27 +1141,30 @@ public class QualityServiceImpl implements QualityService {
 					
 					if(timeRanges != null && timeRanges.size() > 0) {
 						for(TimeRangeDTO timeRange : timeRanges) {
-							String duration = timeRange.getDuration();
-							String start = timeRange.getStartTime();
-							String str = day + " " + start;
-							Timestamp startTime = strToTimestamp(str);
-							Timestamp expiredTime = repeatService.getEndTimeByAnalyzeDuration(startTime, duration);
-							task.setExecutiveStartTime(startTime);
-							task.setExecutiveExpireTime(expiredTime);
-							long now = System.currentTimeMillis();
-							String taskNum = timestampToStr(new Timestamp(now)) + now;
-							task.setTaskNumber(taskNum);
-							qualityProvider.createVerificationTasks(task);
-							
-							Map<String, Object> map = new HashMap<String, Object>();
-						    map.put("taskName", task.getTaskName());
-						    map.put("deadline", timeToStr(expiredTime));
-							String scope = QualityNotificationTemplateCode.SCOPE;
-							int code = QualityNotificationTemplateCode.GENERATE_QUALITY_TASK_NOTIFY_EXECUTOR;
-							String locale = "zh_CN";
-							String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-							sendMessageToUser(member.getTargetId(), notifyTextForApplicant);
+							this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_QUALITY_TASK.getCode()).tryEnter(()-> {
+								String duration = timeRange.getDuration();
+								String start = timeRange.getStartTime();
+								String str = day + " " + start;
+								Timestamp startTime = strToTimestamp(str);
+								Timestamp expiredTime = repeatService.getEndTimeByAnalyzeDuration(startTime, duration);
+								task.setExecutiveStartTime(startTime);
+								task.setExecutiveExpireTime(expiredTime);
+								long now = System.currentTimeMillis();
+								String taskNum = timestampToStr(new Timestamp(now)) + now;
+								task.setTaskNumber(taskNum);
+								qualityProvider.createVerificationTasks(task);
+								
+								Map<String, Object> map = new HashMap<String, Object>();
+							    map.put("taskName", task.getTaskName());
+							    map.put("deadline", timeToStr(expiredTime));
+								String scope = QualityNotificationTemplateCode.SCOPE;
+								int code = QualityNotificationTemplateCode.GENERATE_QUALITY_TASK_NOTIFY_EXECUTOR;
+								String locale = "zh_CN";
+								String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+								sendMessageToUser(member.getTargetId(), notifyTextForApplicant);
+							});
 						}
+							
 					}
 					
 				} else {
@@ -1288,6 +1368,7 @@ public class QualityServiceImpl implements QualityService {
 
 	@Override
 	public void createTaskByStandardId(Long id) {
+		LOGGER.info("createTaskByStandardId:" + id);
 		QualityInspectionStandards standard = qualityProvider.findStandardById(id);
 		if(standard != null &&standard.getStatus() != null || standard.getStatus() == QualityStandardStatus.ACTIVE.getCode()) {
 			this.qualityProvider.populateStandardGroups(standard);

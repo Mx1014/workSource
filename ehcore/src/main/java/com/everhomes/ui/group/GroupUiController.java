@@ -55,7 +55,7 @@ public class GroupUiController extends ControllerBase {
     @RestReturn(value=ListNearbyGroupCommandResponse.class)
     public RestResponse listNearbyGroupsByScene(ListNearbyGroupBySceneCommand cmd) {
     
-        ListNearbyGroupCommandResponse cmdResponse = null;//this.groupService.listNearbyGroups(cmd);
+        ListNearbyGroupCommandResponse cmdResponse = this.groupService.listNearbyGroupsByScene(cmd);
         RestResponse response = new RestResponse(cmdResponse);
         
         response.setErrorCode(ErrorCodes.SUCCESS);

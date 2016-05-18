@@ -1,6 +1,5 @@
 //
 // EvhQualityServiceErrorCode.h
-// generated at 2016-04-19 14:25:56 
 //
 
 #define EvhQualityServiceErrorCode_SCOPE @"quality"
@@ -14,3 +13,4 @@
 #define EvhQualityServiceErrorCode_ERROR_TASK_IS_CLOSED 10008
 #define EvhQualityServiceErrorCode_ERROR_CREATE_EXCEL 10009
 #define EvhQualityServiceErrorCode_ERROR_DOWNLOAD_EXCEL 10010
+#define EvhQualityServiceErrorCode_ERROR_ASSIGN_TO_ONESELF 10011

@@ -1,6 +1,5 @@
 //
 // EvhCreateEnterpriseCommand.m
-// generated at 2016-04-19 14:25:56 
 //
 #import "EvhCreateEnterpriseCommand.h"
 #import "EvhOrganizationAddressDTO.h"
@@ -63,6 +62,10 @@
         [jsonObject setObject: self.namespaceId forKey: @"namespaceId"];
     if(self.organizationType)
         [jsonObject setObject: self.organizationType forKey: @"organizationType"];
+    if(self.longitude)
+        [jsonObject setObject: self.longitude forKey: @"longitude"];
+    if(self.latitude)
+        [jsonObject setObject: self.latitude forKey: @"latitude"];
     if(self.addressDTOs) {
         NSMutableArray* jsonArray = [NSMutableArray new];
         for(EvhOrganizationAddressDTO* item in self.addressDTOs) {
@@ -141,6 +144,14 @@
         self.organizationType = [jsonObject objectForKey: @"organizationType"];
         if(self.organizationType && [self.organizationType isEqual:[NSNull null]])
             self.organizationType = nil;
+
+        self.longitude = [jsonObject objectForKey: @"longitude"];
+        if(self.longitude && [self.longitude isEqual:[NSNull null]])
+            self.longitude = nil;
+
+        self.latitude = [jsonObject objectForKey: @"latitude"];
+        if(self.latitude && [self.latitude isEqual:[NSNull null]])
+            self.latitude = nil;
 
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"addressDTOs"];

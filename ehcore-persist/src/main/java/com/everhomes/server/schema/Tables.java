@@ -424,6 +424,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhLocaleTemplates EH_LOCALE_TEMPLATES = com.everhomes.server.schema.tables.EhLocaleTemplates.EH_LOCALE_TEMPLATES;
 
 	/**
+	 * The table ehcore.eh_namespace_details
+	 */
+	public static final com.everhomes.server.schema.tables.EhNamespaceDetails EH_NAMESPACE_DETAILS = com.everhomes.server.schema.tables.EhNamespaceDetails.EH_NAMESPACE_DETAILS;
+
+	/**
 	 * The table ehcore.eh_namespace_resources
 	 */
 	public static final com.everhomes.server.schema.tables.EhNamespaceResources EH_NAMESPACE_RESOURCES = com.everhomes.server.schema.tables.EhNamespaceResources.EH_NAMESPACE_RESOURCES;
@@ -559,6 +564,36 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhOwnerDoors EH_OWNER_DOORS = com.everhomes.server.schema.tables.EhOwnerDoors.EH_OWNER_DOORS;
 
 	/**
+	 * The table ehcore.eh_parking_activities
+	 */
+	public static final com.everhomes.server.schema.tables.EhParkingActivities EH_PARKING_ACTIVITIES = com.everhomes.server.schema.tables.EhParkingActivities.EH_PARKING_ACTIVITIES;
+
+	/**
+	 * The table ehcore.eh_parking_card_requests
+	 */
+	public static final com.everhomes.server.schema.tables.EhParkingCardRequests EH_PARKING_CARD_REQUESTS = com.everhomes.server.schema.tables.EhParkingCardRequests.EH_PARKING_CARD_REQUESTS;
+
+	/**
+	 * The table ehcore.eh_parking_lots
+	 */
+	public static final com.everhomes.server.schema.tables.EhParkingLots EH_PARKING_LOTS = com.everhomes.server.schema.tables.EhParkingLots.EH_PARKING_LOTS;
+
+	/**
+	 * The table ehcore.eh_parking_recharge_orders
+	 */
+	public static final com.everhomes.server.schema.tables.EhParkingRechargeOrders EH_PARKING_RECHARGE_ORDERS = com.everhomes.server.schema.tables.EhParkingRechargeOrders.EH_PARKING_RECHARGE_ORDERS;
+
+	/**
+	 * The table ehcore.eh_parking_recharge_rates
+	 */
+	public static final com.everhomes.server.schema.tables.EhParkingRechargeRates EH_PARKING_RECHARGE_RATES = com.everhomes.server.schema.tables.EhParkingRechargeRates.EH_PARKING_RECHARGE_RATES;
+
+	/**
+	 * The table ehcore.eh_parking_vendors
+	 */
+	public static final com.everhomes.server.schema.tables.EhParkingVendors EH_PARKING_VENDORS = com.everhomes.server.schema.tables.EhParkingVendors.EH_PARKING_VENDORS;
+
+	/**
 	 * The table ehcore.eh_park_apply_card
 	 */
 	public static final com.everhomes.server.schema.tables.EhParkApplyCard EH_PARK_APPLY_CARD = com.everhomes.server.schema.tables.EhParkApplyCard.EH_PARK_APPLY_CARD;
@@ -567,6 +602,26 @@ public class Tables {
 	 * The table ehcore.eh_park_charge
 	 */
 	public static final com.everhomes.server.schema.tables.EhParkCharge EH_PARK_CHARGE = com.everhomes.server.schema.tables.EhParkCharge.EH_PARK_CHARGE;
+
+	/**
+	 * The table ehcore.eh_pmsy_communities
+	 */
+	public static final com.everhomes.server.schema.tables.EhPmsyCommunities EH_PMSY_COMMUNITIES = com.everhomes.server.schema.tables.EhPmsyCommunities.EH_PMSY_COMMUNITIES;
+
+	/**
+	 * The table ehcore.eh_pmsy_orders
+	 */
+	public static final com.everhomes.server.schema.tables.EhPmsyOrders EH_PMSY_ORDERS = com.everhomes.server.schema.tables.EhPmsyOrders.EH_PMSY_ORDERS;
+
+	/**
+	 * The table ehcore.eh_pmsy_order_items
+	 */
+	public static final com.everhomes.server.schema.tables.EhPmsyOrderItems EH_PMSY_ORDER_ITEMS = com.everhomes.server.schema.tables.EhPmsyOrderItems.EH_PMSY_ORDER_ITEMS;
+
+	/**
+	 * The table ehcore.eh_pmsy_payers
+	 */
+	public static final com.everhomes.server.schema.tables.EhPmsyPayers EH_PMSY_PAYERS = com.everhomes.server.schema.tables.EhPmsyPayers.EH_PMSY_PAYERS;
 
 	/**
 	 * The table ehcore.eh_polls
@@ -932,6 +987,11 @@ public class Tables {
 	 * The table ehcore.eh_web_menu_privileges
 	 */
 	public static final com.everhomes.server.schema.tables.EhWebMenuPrivileges EH_WEB_MENU_PRIVILEGES = com.everhomes.server.schema.tables.EhWebMenuPrivileges.EH_WEB_MENU_PRIVILEGES;
+
+	/**
+	 * The table ehcore.eh_web_menu_scopes
+	 */
+	public static final com.everhomes.server.schema.tables.EhWebMenuScopes EH_WEB_MENU_SCOPES = com.everhomes.server.schema.tables.EhWebMenuScopes.EH_WEB_MENU_SCOPES;
 
 	/**
 	 * The table ehcore.eh_yellow_pages

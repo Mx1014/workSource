@@ -238,7 +238,11 @@ public class FamilyServiceImpl implements FamilyService {
                     m.setMemberId(uid);
                     m.setMemberAvatar(user.getAvatar());
                     m.setMemberRole(Role.ResourceCreator);
-                    m.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
+                    
+                    if(null == address.getMemberStatus()){
+                    	address.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
+                    }
+                    m.setMemberStatus(address.getMemberStatus());
                     m.setCreatorUid(uid);
                     m.setInviteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     this.groupProvider.createGroupMember(m);
@@ -250,7 +254,7 @@ public class FamilyServiceImpl implements FamilyService {
                     userGroup.setRegionScope(RegionScope.COMMUNITY.getCode());
                     userGroup.setRegionScopeId(community.getId());
                     userGroup.setMemberRole(Role.ResourceCreator);
-                    userGroup.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
+                    userGroup.setMemberStatus(address.getMemberStatus());
                     this.userProvider.createUserGroup(userGroup);
                     
                     sendFamilyNotificationForReqJoinFamily(address,f,m);
@@ -567,42 +571,43 @@ public class FamilyServiceImpl implements FamilyService {
           for(FamilyDTO f : families) {
                 checkList.put(f.getAddressId(), 1l);
             }     
-        }
+        
         
         //Merge histories, add by Janson
-        List<UserGroupHistory> histories = this.userGroupHistoryProvider.queryUserGroupHistoryByUserId(userId);
-        for(UserGroupHistory o : histories) {
-            if(!checkList.containsKey(o.getAddressId())) {
-                
-                checkList.put(o.getAddressId(), 1l);
-                
-                FamilyDTO family = new FamilyDTO();
-                family.setId(o.getId());
-                family.setMembershipStatus(GroupMemberStatus.INACTIVE.getCode());
-                Community community = this.communityProvider.findCommunityById(o.getCommunityId());
-                if(community != null){
-                    family.setCommunityId(o.getCommunityId());
-                    family.setCommunityName(community.getName());
-                    family.setCityId(community.getCityId());
-                    family.setCityName(community.getCityName()+community.getAreaName());
-                    family.setCommunityType(community.getCommunityType());
-                    family.setDefaultForumId(community.getDefaultForumId());
-                    family.setFeedbackForumId(community.getFeedbackForumId());
-                    }
-                
-                Address address = this.addressProvider.findAddressById(o.getAddressId());
-                if(address != null){
-                    family.setBuildingName(address.getBuildingName());
-                    family.setApartmentName(address.getApartmentName());
-                    family.setAddressStatus(address.getStatus());
-                    String addrStr = FamilyUtils.joinDisplayName(community.getCityName(),community.getAreaName(), community.getName(), 
-                            address.getBuildingName(), address.getApartmentName());
-                    family.setDisplayName(addrStr);
-                    family.setAddress(addrStr);
-                    }
-                
-                families.add(family);
-                }
+	        List<UserGroupHistory> histories = this.userGroupHistoryProvider.queryUserGroupHistoryByUserId(userId);
+	        for(UserGroupHistory o : histories) {
+	            if(!checkList.containsKey(o.getAddressId())) {
+	                
+	                checkList.put(o.getAddressId(), 1l);
+	                
+	                FamilyDTO family = new FamilyDTO();
+	                family.setId(o.getId());
+	                family.setMembershipStatus(GroupMemberStatus.INACTIVE.getCode());
+	                Community community = this.communityProvider.findCommunityById(o.getCommunityId());
+	                if(community != null){
+	                    family.setCommunityId(o.getCommunityId());
+	                    family.setCommunityName(community.getName());
+	                    family.setCityId(community.getCityId());
+	                    family.setCityName(community.getCityName()+community.getAreaName());
+	                    family.setCommunityType(community.getCommunityType());
+	                    family.setDefaultForumId(community.getDefaultForumId());
+	                    family.setFeedbackForumId(community.getFeedbackForumId());
+	                    }
+	                
+	                Address address = this.addressProvider.findAddressById(o.getAddressId());
+	                if(address != null){
+	                    family.setBuildingName(address.getBuildingName());
+	                    family.setApartmentName(address.getApartmentName());
+	                    family.setAddressStatus(address.getStatus());
+	                    String addrStr = FamilyUtils.joinDisplayName(community.getCityName(),community.getAreaName(), community.getName(), 
+	                            address.getBuildingName(), address.getApartmentName());
+	                    family.setDisplayName(addrStr);
+	                    family.setAddress(addrStr);
+	                }
+	                
+	                families.add(family);
+	                }
+	        }
         }
         return families;
     }
@@ -1110,13 +1115,15 @@ public class FamilyServiceImpl implements FamilyService {
                 f.setId(groupMember.getId());
                 f.setMemberUid(groupMember.getMemberId());
 //                f.setMemberName(groupMember.getMemberNickName());
-                f.setMemberAvatarUrl((parserUri(groupMember.getMemberAvatar(),EntityType.USER.getCode(),groupMember.getCreatorUid())));
-                f.setMemberAvatarUri(groupMember.getMemberAvatar());
+//                f.setMemberAvatarUrl((parserUri(groupMember.getMemberAvatar(),EntityType.USER.getCode(),groupMember.getCreatorUid())));
+//                f.setMemberAvatarUri(groupMember.getMemberAvatar());
                 //UserInfo userInfo = this.userService.getUserSnapshotInfo(groupMember.getMemberId());
                 UserInfo userInfo = this.userService.getUserInfo(groupMember.getMemberId());
                 if(userInfo != null){
                 	//产品要求家庭昵称和个人昵称一致
                 	f.setMemberName(userInfo.getNickName());
+                	f.setMemberAvatarUrl(userInfo.getAvatarUrl());
+                    f.setMemberAvatarUri(userInfo.getAvatarUri());
                     f.setBirthday(userInfo.getBirthday());
                     f.setGender(userInfo.getGender());
                     f.setStatusLine(userInfo.getStatusLine());

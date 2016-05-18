@@ -1,6 +1,5 @@
 //
 // EvhUiOrgListTaskPostsBySceneRestResponse.m
-// generated at 2016-04-19 14:25:58 
 //
 #import "EvhUiOrgListTaskPostsBySceneRestResponse.h"
 #import "EvhListTaskPostsResponse.h"

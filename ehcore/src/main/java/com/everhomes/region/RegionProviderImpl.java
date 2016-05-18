@@ -283,8 +283,8 @@ public class RegionProviderImpl implements RegionProvider {
 	@SuppressWarnings({"unchecked", "rawtypes" })
 	@Override
 	public List<Region> listRegionByKeyword(Long parentRegionId, RegionScope scope, RegionAdminStatus status,
-			Tuple<String, SortOrder> orderBy, String keyword) {
-		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+			Tuple<String, SortOrder> orderBy, String keyword, int namespaceId) {
+//		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
 		List<Region> result = new ArrayList<>();
 		if(StringUtils.isEmpty(keyword)){
 			LOGGER.error("Keyword is null or empty" );

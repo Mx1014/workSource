@@ -1,6 +1,5 @@
 //
 // EvhAddressBuildingDTO.m
-// generated at 2016-04-19 14:25:57 
 //
 #import "EvhAddressBuildingDTO.h"
 
@@ -35,6 +34,8 @@
         [jsonObject setObject: self.buildingName forKey: @"buildingName"];
     if(self.buildingAliasName)
         [jsonObject setObject: self.buildingAliasName forKey: @"buildingAliasName"];
+    if(self.communityId)
+        [jsonObject setObject: self.communityId forKey: @"communityId"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -47,6 +48,10 @@
         self.buildingAliasName = [jsonObject objectForKey: @"buildingAliasName"];
         if(self.buildingAliasName && [self.buildingAliasName isEqual:[NSNull null]])
             self.buildingAliasName = nil;
+
+        self.communityId = [jsonObject objectForKey: @"communityId"];
+        if(self.communityId && [self.communityId isEqual:[NSNull null]])
+            self.communityId = nil;
 
         return self;
     }

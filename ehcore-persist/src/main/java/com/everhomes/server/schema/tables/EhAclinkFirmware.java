@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAclinkFirmware extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhAclinkFirmwareRecord> {
 
-	private static final long serialVersionUID = -305662211;
+	private static final long serialVersionUID = -1299729427;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_aclink_firmware</code>
@@ -39,17 +39,17 @@ public class EhAclinkFirmware extends org.jooq.impl.TableImpl<com.everhomes.serv
 	/**
 	 * The column <code>ehcore.eh_aclink_firmware.major</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAclinkFirmwareRecord, java.lang.Byte> MAJOR = createField("major", org.jooq.impl.SQLDataType.TINYINT.nullable(false), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAclinkFirmwareRecord, java.lang.Integer> MAJOR = createField("major", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_aclink_firmware.minor</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAclinkFirmwareRecord, java.lang.Byte> MINOR = createField("minor", org.jooq.impl.SQLDataType.TINYINT.nullable(false), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAclinkFirmwareRecord, java.lang.Integer> MINOR = createField("minor", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_aclink_firmware.revision</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAclinkFirmwareRecord, java.lang.Byte> REVISION = createField("revision", org.jooq.impl.SQLDataType.TINYINT.nullable(false), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAclinkFirmwareRecord, java.lang.Integer> REVISION = createField("revision", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_aclink_firmware.checksum</code>.

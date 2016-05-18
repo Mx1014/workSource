@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhConfAccountCategories extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhConfAccountCategoriesRecord> {
 
-	private static final long serialVersionUID = -997760504;
+	private static final long serialVersionUID = 1704795124;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_conf_account_categories</code>
@@ -57,14 +57,14 @@ public class EhConfAccountCategories extends org.jooq.impl.TableImpl<com.everhom
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfAccountCategoriesRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_conf_account_categories.multiple_account_price</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfAccountCategoriesRecord, java.math.BigDecimal> MULTIPLE_ACCOUNT_PRICE = createField("multiple_account_price", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "");
-
-	/**
 	 * The column <code>ehcore.eh_conf_account_categories.display_flag</code>. display when online or offline, 0: all, 1: online, 2: offline
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfAccountCategoriesRecord, java.lang.Byte> DISPLAY_FLAG = createField("display_flag", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "display when online or offline, 0: all, 1: online, 2: offline");
+
+	/**
+	 * The column <code>ehcore.eh_conf_account_categories.multiple_account_price</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhConfAccountCategoriesRecord, java.math.BigDecimal> MULTIPLE_ACCOUNT_PRICE = createField("multiple_account_price", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_conf_account_categories</code> table reference

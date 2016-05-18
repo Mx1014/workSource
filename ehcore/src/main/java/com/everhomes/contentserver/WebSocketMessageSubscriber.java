@@ -79,7 +79,10 @@ public class WebSocketMessageSubscriber implements LocalBusOneshotSubscriber {
 
             @Override
             protected void doResponse(String errMsg, int errCode) throws Exception {
-                session.sendMessage(new TextMessage(createPduFrame(errCode, errMsg, frame, request).toJson()));
+                // WebSocket的session不是线程安全的，需要加锁 by lqs20160503
+                synchronized(session) {
+                    session.sendMessage(new TextMessage(createPduFrame(errCode, errMsg, frame, request).toJson()));
+                }
             }
         });
     }
@@ -103,7 +106,10 @@ public class WebSocketMessageSubscriber implements LocalBusOneshotSubscriber {
                 //    LOGGER.debug("send upload success to server");
                 //LOGGER.info("content url(before handleUpload doResponse), url=" + request.getUrl());
                 PduFrame pdu = createPduFrame(errCode, errMsg, frame, request);
-                session.sendMessage(new TextMessage(pdu.toJson()));
+                // WebSocket的session不是线程安全的，需要加锁 by lqs20160503
+                synchronized(session) {
+                    session.sendMessage(new TextMessage(pdu.toJson()));
+                }
                 // LOGGER.info("content url(after handleUpload doResponse), url=" + request.getUrl());
                 // LOGGER.info("content url(after handleUpload doResponse), pdu=" + pdu.toJson());
                 
@@ -121,7 +127,10 @@ public class WebSocketMessageSubscriber implements LocalBusOneshotSubscriber {
 
             @Override
             protected void doResponse(String errMsg, int errCode) throws Exception {
-                session.sendMessage(new TextMessage(createPduFrame(errCode, errMsg, frame, request).toJson()));
+                // WebSocket的session不是线程安全的，需要加锁 by lqs20160503
+                synchronized(session) {
+                    session.sendMessage(new TextMessage(createPduFrame(errCode, errMsg, frame, request).toJson()));
+                }
             }
         });
     }

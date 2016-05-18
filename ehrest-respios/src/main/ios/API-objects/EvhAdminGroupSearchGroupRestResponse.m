@@ -1,6 +1,5 @@
 //
 // EvhAdminGroupSearchGroupRestResponse.m
-// generated at 2016-04-19 14:25:57 
 //
 #import "EvhAdminGroupSearchGroupRestResponse.h"
 #import "EvhListGroupCommandResponse.h"

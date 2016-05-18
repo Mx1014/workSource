@@ -42,6 +42,7 @@ import com.everhomes.rest.organization.DeleteOrganizationCommunityCommand;
 import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
 import com.everhomes.rest.organization.GetOrgDetailCommand;
 import com.everhomes.rest.organization.GetUserResourcePrivilege;
+import com.everhomes.rest.organization.ListCommunitiesByOrganizationIdCommand;
 import com.everhomes.rest.organization.ListEnterprisesCommand;
 import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
 import com.everhomes.rest.organization.ListOrganizationCommunityCommand;
@@ -820,7 +821,7 @@ public class OrganizationController extends ControllerBase {
      */
     @RequestMapping("listCommunitiesByOrganizationId")
     @RestReturn(value=String.class)
-    public RestResponse listCommunitiesByOrganizationId(@Valid ListCommunityByNamespaceCommand cmd) {
+    public RestResponse listCommunitiesByOrganizationId(@Valid ListCommunitiesByOrganizationIdCommand cmd) {
     
         RestResponse response = new RestResponse(this.organizationService.listCommunityByOrganizationId(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -858,4 +859,18 @@ public class OrganizationController extends ControllerBase {
         return res;
       }
     
+     /**
+      * <b>URL: /org/listOrganizationTopics</b>
+      * <p>机构人员的帖子查询</p>
+      * @return 
+      */
+      @RequestMapping("listOrganizationTopics")
+      @RestReturn(value=ListPostCommandResponse.class)
+      public RestResponse listOrgTopics(@Valid QueryOrganizationTopicCommand cmd) {
+         RestResponse res = new RestResponse(organizationService.listOrgTopics(cmd));
+         res.setErrorCode(ErrorCodes.SUCCESS);
+         res.setErrorDescription("OK");
+         
+         return res;
+      }
 }

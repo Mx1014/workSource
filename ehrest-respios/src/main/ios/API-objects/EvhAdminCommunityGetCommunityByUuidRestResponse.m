@@ -1,6 +1,5 @@
 //
 // EvhAdminCommunityGetCommunityByUuidRestResponse.m
-// generated at 2016-04-19 14:25:57 
 //
 #import "EvhAdminCommunityGetCommunityByUuidRestResponse.h"
 #import "EvhCommunityDTO.h"

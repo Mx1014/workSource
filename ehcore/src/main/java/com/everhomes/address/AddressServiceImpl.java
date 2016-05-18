@@ -51,6 +51,8 @@ import com.everhomes.family.FamilyService;
 import com.everhomes.family.FamilyUtils;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupProvider;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
 import com.everhomes.organization.pm.CommunityPmContact;
@@ -79,6 +81,8 @@ import com.everhomes.rest.address.ListApartmentByBuildingNameCommandResponse;
 import com.everhomes.rest.address.ListBuildingByKeywordCommand;
 import com.everhomes.rest.address.ListCommunityByKeywordCommand;
 import com.everhomes.rest.address.ListNearbyCommunityCommand;
+import com.everhomes.rest.address.ListNearbyMixCommunitiesCommand;
+import com.everhomes.rest.address.ListNearbyMixCommunitiesCommandResponse;
 import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.address.SearchCommunityCommand;
 import com.everhomes.rest.address.SuggestCommunityCommand;
@@ -98,6 +102,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
@@ -282,15 +287,17 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
         // TODO, return all communities only to test our REST response for now
         
-        List<CommunityGeoPoint> pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatigtue(),cmd.getLongitude());
+        List<CommunityGeoPoint> pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatigtue(),cmd.getLongitude(), 6);
         List<Long> communityIds = getAllCommunityIds(pointList);
         
+        //select active community by xiongying 20160516
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
             (DSLContext context, Object reducingContext)-> {
             
             context.select().from(Tables.EH_COMMUNITIES)
                 .where(Tables.EH_COMMUNITIES.ID.in(communityIds))
                 .and(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()))
                 .fetch().map((r) -> {
                 CommunityDTO community = ConvertHelper.convert(r, CommunityDTO.class);
                 results.add(community);
@@ -438,7 +445,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         List<ApartmentDTO> results = new ArrayList<>();
         String likeVal = "%" + cmd.getKeyword() + "%";
         long startTime = System.currentTimeMillis();
-        int namespaceId = UserContext.getCurrentNamespaceId(null);
+        int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
                 (DSLContext context, Object reducingContext)-> {
                     context.selectDistinct(Tables.EH_ADDRESSES.ID,Tables.EH_ADDRESSES.APARTMENT_NAME,Tables.EH_ADDRESSES.AREA_SIZE)
@@ -1590,5 +1597,59 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 				result.add(s);
 			}
 			return result;
+	}
+
+	@Override
+	public ListNearbyMixCommunitiesCommandResponse listNearbyMixCommunities(
+			ListNearbyMixCommunitiesCommand cmd) {
+		ListNearbyMixCommunitiesCommandResponse resp = new ListNearbyMixCommunitiesCommandResponse();
+        final List<CommunityDTO> results = new ArrayList<>();
+
+        if(cmd.getLatigtue() == null || cmd.getLongitude() == null)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid parameter, latitude and longitude have to be both specified or neigher");
+
+        
+        List<CommunityGeoPoint> pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatigtue(),cmd.getLongitude(), 5);
+        List<Long> communityIds = getAllCommunityIds(pointList);
+        
+        if(cmd.getPageAnchor()==null)
+			cmd.setPageAnchor(0L);
+        
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        ListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		
+		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+		
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
+            (DSLContext context, Object reducingContext)-> {
+            
+            context.select().from(Tables.EH_COMMUNITIES)
+                .where(Tables.EH_COMMUNITIES.ID.gt(locator.getAnchor())
+                .and(Tables.EH_COMMUNITIES.ID.in(communityIds)))
+                .and(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()))
+                .orderBy(Tables.EH_COMMUNITIES.COMMUNITY_TYPE.desc())
+                .limit(pageSize+1)
+                .fetch().map((r) -> {
+                CommunityDTO community = ConvertHelper.convert(r, CommunityDTO.class);
+                results.add(community);
+                
+                return null;
+            });
+                
+            return true;
+        });
+        
+        if(results != null && results.size() > pageSize){
+        	results.remove(results.size()-1);
+        	resp.setNextPageAnchor(results.get(results.size()-1).getId());
+		}
+		if(results != null){
+			resp.setDtos(results);
+		}
+        
+        return resp;
 	}
 }

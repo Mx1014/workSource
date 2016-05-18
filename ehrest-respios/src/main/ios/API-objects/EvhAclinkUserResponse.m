@@ -1,6 +1,5 @@
 //
 // EvhAclinkUserResponse.m
-// generated at 2016-04-19 14:25:56 
 //
 #import "EvhAclinkUserResponse.h"
 #import "EvhAclinkUserDTO.h"

@@ -1,6 +1,5 @@
 //
 // EvhOrganizationNotificationTemplateCode.h
-// generated at 2016-04-19 14:25:56 
 //
 
 #define EvhOrganizationNotificationTemplateCode_SCOPE @"organization.notification"
@@ -19,3 +18,4 @@
 #define EvhOrganizationNotificationTemplateCode_ORGANIZATION_TASK_REFUSE 14
 #define EvhOrganizationNotificationTemplateCode_ORGANIZATION_TASK_FINISH 15
 #define EvhOrganizationNotificationTemplateCode_ORGANIZATION_TASK_FINISH_COMMENT 16
+#define EvhOrganizationNotificationTemplateCode_ORGANIZATION_APPLY_FOR_CONTACT 17

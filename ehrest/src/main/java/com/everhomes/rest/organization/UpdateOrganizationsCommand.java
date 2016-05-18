@@ -18,6 +18,8 @@ public class UpdateOrganizationsCommand {
 	private String address;
 	
 	private Long parentId;
+	
+	private Byte naviFlag; 
 
 	
 	public String getName() {
@@ -50,6 +52,14 @@ public class UpdateOrganizationsCommand {
 
 	public void setAddress(String address) {
 		this.address = address;
+	}
+
+	public Byte getNaviFlag() {
+		return naviFlag;
+	}
+
+	public void setNaviFlag(Byte naviFlag) {
+		this.naviFlag = naviFlag;
 	}
 
 

@@ -1,6 +1,5 @@
 //
 // EvhOrganizationDTO.h
-// generated at 2016-04-19 14:25:55 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -13,6 +12,8 @@
 @interface EvhOrganizationDTO
     : NSObject<EvhJsonSerializable>
 
+
+@property(nonatomic, copy) NSNumber* namespaceId;
 
 @property(nonatomic, copy) NSNumber* id;
 
@@ -53,6 +54,16 @@
 @property(nonatomic, copy) NSNumber* communityId;
 
 @property(nonatomic, copy) NSString* communityName;
+
+@property(nonatomic, copy) NSNumber* communityType;
+
+@property(nonatomic, copy) NSNumber* defaultForumId;
+
+@property(nonatomic, copy) NSNumber* feedbackForumId;
+
+@property(nonatomic, copy) NSNumber* groupId;
+
+@property(nonatomic, copy) NSNumber* showFlag;
 
 // item type EvhOrganizationDTO*
 @property(nonatomic, strong) NSMutableArray* childrens;

@@ -1,6 +1,5 @@
 //
 // EvhUsersWithAddrResponse.m
-// generated at 2016-04-19 14:25:56 
 //
 #import "EvhUsersWithAddrResponse.h"
 #import "EvhListUsersWithAddrResponse.h"

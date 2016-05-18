@@ -74,4 +74,11 @@ public class EhSceneTypesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhSceneTypes> fetchByCreateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhSceneTypes.EH_SCENE_TYPES.CREATE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>parent_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhSceneTypes> fetchByParentId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhSceneTypes.EH_SCENE_TYPES.PARENT_ID, values);
+	}
 }

@@ -231,7 +231,10 @@ public class ForumProviderImpl implements ForumProvider {
                     if(parentPost == null) {
                         throw new InvalidParameterException("Missing parent post info in post parameter");
                     }
-                    post.setFloorNumber(parentPost.getChildCount() + 1);
+//                  post.setFloorNumber(parentPost.getChildCount() + 1);
+                    //评论的楼层数为帖子的next floor number mod by xiongying 20160428
+                    post.setFloorNumber(parentPost.getIntegralTag2());
+                    
                 } else {
                     userActivityProvider.addPostedTopic(post.getCreatorUid(), id);
                     userActivityProvider.updateProfileIfNotExist(post.getCreatorUid(), UserProfileContstant.POSTED_TOPIC_COUNT, 1);
@@ -244,6 +247,8 @@ public class ForumProviderImpl implements ForumProvider {
                 DaoHelper.publishDaoAction(DaoAction.CREATE, EhForumPosts.class, null);
             
                 if(parentPost != null) {
+                	// 增加评论时帖子的next floor number加1 mod by xiongying 20160428
+                	parentPost.setIntegralTag2(parentPost.getIntegralTag2()+1);
                     parentPost.setChildCount(parentPost.getChildCount() + 1);
                     ForumProvider self = PlatformContext.getComponent(ForumProvider.class);
                     self.updatePost(parentPost);
@@ -276,17 +281,17 @@ public class ForumProviderImpl implements ForumProvider {
                 throw new InvalidParameterException("Missing parent post info in post parameter");
             }
 //            post.setFloorNumber(parentPost.getChildCount() - 1);
-            String template = localeStringService.getLocalizedString(
-            		ForumLocalStringCode.SCOPE,
-                    String.valueOf(ForumLocalStringCode.FORUM_COMMENT_DELETED),
-                    UserContext.current().getUser().getLocale(),
-                    "");
-           
-            post.setContent(template);
-            post.setStatus(PostStatus.ACTIVE.getCode());
-        } else {
+            // 删除评论时评论置为inactive，评论内容不变 mod by xiongying 20160428
+//            String template = localeStringService.getLocalizedString(
+//            		ForumLocalStringCode.SCOPE,
+//                    String.valueOf(ForumLocalStringCode.FORUM_COMMENT_DELETED),
+//                    UserContext.current().getUser().getLocale(),
+//                    "");
+//           
+//            post.setContent(template);
+//            post.setStatus(PostStatus.ACTIVE.getCode());
+//        } else {
 //            userActivityProvider.addPostedTopic(post.getCreatorUid(), id);
-            
         }
         
         EhForumPostsDao dao = new EhForumPostsDao(context.configuration());
@@ -574,10 +579,11 @@ public class ForumProviderImpl implements ForumProvider {
             this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, reducingContext) -> {
                 SelectQuery<EhForumPostsRecord> query = context.selectQuery(Tables.EH_FORUM_POSTS);
                 query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ID.eq(locator.getEntityId()));
-                query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.isNull());
+                //query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.isNull());
                 if(queryBuilderCallback != null) {
                     queryBuilderCallback.buildCondition(locator, query);
                 }
+                query.addOrderBy(Tables.EH_FORUM_POSTS.CREATE_TIME.desc());
                 query.addLimit(limit[0]);
                 
                 if(LOGGER.isDebugEnabled()) {
@@ -585,9 +591,14 @@ public class ForumProviderImpl implements ForumProvider {
                     LOGGER.debug("Query posts by forum, bindValues=" + query.getBindValues());
                 }
                 
-                List<Post> l = query.fetch().map((EhForumPostsRecord record) -> {
-                    return ConvertHelper.convert(record, Post.class);
-                });
+//                List<Post> l = query.fetch().map((EhForumPostsRecord record) -> {
+//                    return ConvertHelper.convert(record, Post.class);
+//                });
+                
+                List<EhForumPostsRecord> records = query.fetch().map(new EhForumPostsRecordMapper());
+                List<Post> l = records.stream().map((r) -> {
+                    return ConvertHelper.convert(r, Post.class);
+                }).collect(Collectors.toList());
 
                 if(l.size() > 0) {
                     perForumResults.addAll(l);

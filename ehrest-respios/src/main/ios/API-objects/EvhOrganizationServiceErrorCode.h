@@ -1,6 +1,5 @@
 //
 // EvhOrganizationServiceErrorCode.h
-// generated at 2016-04-19 14:25:56 
 //
 
 #define EvhOrganizationServiceErrorCode_SCOPE @"organization"
@@ -14,3 +13,4 @@
 #define EvhOrganizationServiceErrorCode_ERROR_ORG_TASK_NOT_ASSIGNED_PERSONNEL 100202
 #define EvhOrganizationServiceErrorCode_ERROR_ORG_TASK_CANNOT_OPERATE 100203
 #define EvhOrganizationServiceErrorCode_ERROR_FILE_CONTEXT_ISNULL 200001
+#define EvhOrganizationServiceErrorCode_ERROR_COMMUNITY_EXISTS 300001

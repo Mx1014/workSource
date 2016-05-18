@@ -1,6 +1,5 @@
 //
 // EvhPmFindPropertyOrganizationRestResponse.m
-// generated at 2016-04-19 14:25:58 
 //
 #import "EvhPmFindPropertyOrganizationRestResponse.h"
 #import "EvhOrganizationDTO.h"

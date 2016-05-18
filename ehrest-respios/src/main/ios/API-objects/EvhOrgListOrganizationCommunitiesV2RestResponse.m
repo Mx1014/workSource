@@ -1,6 +1,5 @@
 //
 // EvhOrgListOrganizationCommunitiesV2RestResponse.m
-// generated at 2016-04-19 14:25:58 
 //
 #import "EvhOrgListOrganizationCommunitiesV2RestResponse.h"
 #import "EvhListOrganizationCommunityCommandResponse.h"

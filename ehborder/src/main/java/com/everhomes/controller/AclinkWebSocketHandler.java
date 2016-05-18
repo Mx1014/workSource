@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.tomcat.util.codec.binary.Base64;
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,6 @@ import com.everhomes.rest.aclink.AclinkWebSocketMessage;
 import com.everhomes.rest.aclink.DataUtil;
 import com.everhomes.rest.aclink.DoorAccessDTO;
 import com.everhomes.rest.aclink.SyncWebsocketMessagesRestResponse;
-import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
 
 public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
@@ -189,7 +188,7 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
     protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) {
         AclinkWebSocketState state = session2State.get(session);
         if(state == null) {
-            try {
+            try { 
                 session.close();
             } catch (IOException e) {
                 LOGGER.error("closed error", e);

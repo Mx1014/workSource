@@ -1,6 +1,5 @@
 //
 // EvhParkResponseList.m
-// generated at 2016-04-19 14:25:55 
 //
 #import "EvhParkResponseList.h"
 #import "EvhParkingChargeDTO.h"

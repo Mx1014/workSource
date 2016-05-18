@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-04-19 14:25:41
+// generated at 2016-05-17 18:47:43
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -43,6 +43,7 @@ public interface ApiConstants {
     public static final String ADDRESS_LISTBUILDINGSBYKEYWORD_URL = "/address/listBuildingsByKeyword";
     public static final String ADDRESS_LISTCOMMUNITIESBYKEYWORD_URL = "/address/listCommunitiesByKeyword";
     public static final String ADDRESS_LISTNEARBYCOMMUNITIES_URL = "/address/listNearbyCommunities";
+    public static final String ADDRESS_LISTNEARBYMIXCOMMUNITIES_URL = "/address/listNearbyMixCommunities";
     public static final String ADDRESS_LISTSUGGESTEDCOMMUNITIES_URL = "/address/listSuggestedCommunities";
     public static final String ADDRESS_LISTUNASSIGNEDAPARTMENTSBYBUILDINGNAME_URL = "/address/listUnassignedApartmentsByBuildingName";
     public static final String ADDRESS_SEARCHCOMMUNITIES_URL = "/address/searchCommunities";
@@ -106,6 +107,13 @@ public interface ApiConstants {
     public static final String ADMIN_COMMUNITY_LISTBUILDINGSBYSTATUS_URL = "/admin/community/listBuildingsByStatus";
     public static final String ADMIN_COMMUNITY_LISTCOMMUNITIESBYKEYWORD_URL = "/admin/community/listCommunitiesByKeyword";
     public static final String ADMIN_COMMUNITY_LISTCOMMUNITIESBYSTATUS_URL = "/admin/community/listCommunitiesByStatus";
+    public static final String ADMIN_COMMUNITY_LISTCOMMUNITYAUTHUSERADDRESS_URL = "/admin/community/listCommunityAuthUserAddress";
+    public static final String ADMIN_COMMUNITY_LISTOWNERBYCOMMUNITYID_URL = "/admin/community/listOwnerBycommunityId";
+    public static final String ADMIN_COMMUNITY_LISTUNASSIGNEDCOMMUNITIESBYNAMESPACEID_URL = "/admin/community/listUnassignedCommunitiesByNamespaceId";
+    public static final String ADMIN_COMMUNITY_LISTUSERBYNOTJOINEDCOMMUNITY_URL = "/admin/community/listUserByNotJoinedCommunity";
+    public static final String ADMIN_COMMUNITY_LISTUSERBYCOMMUNITYID_URL = "/admin/community/listUserBycommunityId";
+    public static final String ADMIN_COMMUNITY_QRYCOMMUNITYUSERADDRESSBYUSERID_URL = "/admin/community/qryCommunityUserAddressByUserId";
+    public static final String ADMIN_COMMUNITY_QRYCOMMUNITYUSERENTERPRISEBYUSERID_URL = "/admin/community/qryCommunityUserEnterpriseByUserId";
     public static final String ADMIN_COMMUNITY_REJECTBUILDING_URL = "/admin/community/rejectBuilding";
     public static final String ADMIN_COMMUNITY_REJECTCOMMUNITY_URL = "/admin/community/rejectCommunity";
     public static final String ADMIN_COMMUNITY_SYNCINDEX_URL = "/admin/community/syncIndex";
@@ -189,6 +197,7 @@ public interface ApiConstants {
     public static final String ADMIN_ORG_IMPORTORGPOST_URL = "/admin/org/importOrgPost";
     public static final String ADMIN_ORG_IMPORTORGANIZATION_URL = "/admin/org/importOrganization";
     public static final String ADMIN_ORG_IMPORTORGANIZATIONPERSONNELDATA_URL = "/admin/org/importOrganizationPersonnelData";
+    public static final String ADMIN_ORG_IMPORTOWNERDATA_URL = "/admin/org/importOwnerData";
     public static final String ADMIN_ORG_LISTACLROLEBYUSERID_URL = "/admin/org/listAclRoleByUserId";
     public static final String ADMIN_ORG_LISTALLCHILDRENORGANIZATIONS_URL = "/admin/org/listAllChildrenOrganizations";
     public static final String ADMIN_ORG_LISTALLORGANIZATIONPERSONNELS_URL = "/admin/org/listAllOrganizationPersonnels";
@@ -493,6 +502,8 @@ public interface ApiConstants {
     public static final String OPENAPI_CLOSEBIZNAMESPACEVISIBLE_URL = "/openapi/closeBizNamespaceVisible";
     public static final String OPENAPI_FINDBUSINESSFAVORITESTATUS_URL = "/openapi/findBusinessFavoriteStatus";
     public static final String OPENAPI_FINDTOKENBYUSERID_URL = "/openapi/findTokenByUserId";
+    public static final String OPENAPI_GETCOMMUNITIESBYNAMEANDCITYID_URL = "/openapi/getCommunitiesByNameAndCityId";
+    public static final String OPENAPI_GETCOMMUNITYBYID_URL = "/openapi/getCommunityById";
     public static final String OPENAPI_GETRECEIVEDCOUPONCOUNT_URL = "/openapi/getReceivedCouponCount";
     public static final String OPENAPI_GETUSERDEFAULTADDRESS_URL = "/openapi/getUserDefaultAddress";
     public static final String OPENAPI_GETUSERDETAILBYUUID_URL = "/openapi/getUserDetailByUuid";
@@ -500,14 +511,18 @@ public interface ApiConstants {
     public static final String OPENAPI_GETUSERINFOBYUUID_URL = "/openapi/getUserInfoByUuid";
     public static final String OPENAPI_GETUSERSERVICEADDRESS_URL = "/openapi/getUserServiceAddress";
     public static final String OPENAPI_INVALIDCOUPON_URL = "/openapi/invalidCoupon";
+    public static final String OPENAPI_LISTAPARTMENTSBYKEYWORD_URL = "/openapi/listApartmentsByKeyword";
     public static final String OPENAPI_LISTBIZCATEGORIES_URL = "/openapi/listBizCategories";
+    public static final String OPENAPI_LISTBUILDINGSBYKEYWORD_URL = "/openapi/listBuildingsByKeyword";
     public static final String OPENAPI_LISTBUSINESSBYCOMMONITYID_URL = "/openapi/listBusinessByCommonityId";
+    public static final String OPENAPI_LISTREGIONBYKEYWORD_URL = "/openapi/listRegionByKeyword";
     public static final String OPENAPI_LISTUSER_URL = "/openapi/listUser";
     public static final String OPENAPI_LISTUSERBYIDENTIFIER_URL = "/openapi/listUserByIdentifier";
     public static final String OPENAPI_LISTUSERBYKEYWORD_URL = "/openapi/listUserByKeyword";
     public static final String OPENAPI_NOTIFYDOORLOCK_URL = "/openapi/notifyDoorLock";
     public static final String OPENAPI_NOTIFYMESSAGE_URL = "/openapi/notifyMessage";
     public static final String OPENAPI_OPENBIZNAMESPACEVISIBLE_URL = "/openapi/openBizNamespaceVisible";
+    public static final String OPENAPI_RESYNCBUSINESS_URL = "/openapi/reSyncBusiness";
     public static final String OPENAPI_RECEIVECOUPON_URL = "/openapi/receiveCoupon";
     public static final String OPENAPI_SENDMESSAGETOUSER_URL = "/openapi/sendMessageToUser";
     public static final String OPENAPI_SYNCBUSINESS_URL = "/openapi/syncBusiness";
@@ -548,6 +563,7 @@ public interface ApiConstants {
     public static final String ORG_LISTORGTOPICS_URL = "/org/listOrgTopics";
     public static final String ORG_LISTORGANIZATIONCOMMUNITIES_URL = "/org/listOrganizationCommunities";
     public static final String ORG_LISTORGANIZATIONCOMMUNITIESV2_URL = "/org/listOrganizationCommunitiesV2";
+    public static final String ORG_LISTORGANIZATIONTOPICS_URL = "/org/listOrganizationTopics";
     public static final String ORG_LISTTOPICSBYTYPE_URL = "/org/listTopicsByType";
     public static final String ORG_LISTUSERRELATEDENTERPRISES_URL = "/org/listUserRelatedEnterprises";
     public static final String ORG_LISTUSERRELATEDORGANIZATIONS_URL = "/org/listUserRelatedOrganizations";
@@ -568,6 +584,25 @@ public interface ApiConstants {
     public static final String ORG_UPDATETOPICPRIVACY_URL = "/org/updateTopicPrivacy";
     public static final String ORG_USEREXITORGANIZATION_URL = "/org/userExitOrganization";
     public static final String ORG_USERJOINORGANIZATION_URL = "/org/userJoinOrganization";
+    public static final String PARKING_CREATEPARKINGRECHARGEORDER_URL = "/parking/createParkingRechargeOrder";
+    public static final String PARKING_CREATEPARKINGRECHARGERATE_URL = "/parking/createParkingRechargeRate";
+    public static final String PARKING_DELETEPARKINGRECHARGEORDER_URL = "/parking/deleteParkingRechargeOrder";
+    public static final String PARKING_DELETEPARKINGRECHARGERATE_URL = "/parking/deleteParkingRechargeRate";
+    public static final String PARKING_EXPORTPARKINGRECHAGEORDERS_URL = "/parking/exportParkingRechageOrders";
+    public static final String PARKING_GETPARKINGACTIVITY_URL = "/parking/getParkingActivity";
+    public static final String PARKING_ISSUEPARKINGCARDS_URL = "/parking/issueParkingCards";
+    public static final String PARKING_LISTPARKINGCARDREQUESTS_URL = "/parking/listParkingCardRequests";
+    public static final String PARKING_LISTPARKINGCARDS_URL = "/parking/listParkingCards";
+    public static final String PARKING_LISTPARKINGLOTS_URL = "/parking/listParkingLots";
+    public static final String PARKING_LISTPARKINGRECHARGEORDERS_URL = "/parking/listParkingRechargeOrders";
+    public static final String PARKING_LISTPARKINGRECHARGERATES_URL = "/parking/listParkingRechargeRates";
+    public static final String PARKING_NOTIFYPARKINGRECHARGEORDERPAYMENT_URL = "/parking/notifyParkingRechargeOrderPayment";
+    public static final String PARKING_REQUESTPARKINGCARD_URL = "/parking/requestParkingCard";
+    public static final String PARKING_SEARCHPARKINGCARDREQUESTS_URL = "/parking/searchParkingCardRequests";
+    public static final String PARKING_SEARCHPARKINGRECHARGEORDERS_URL = "/parking/searchParkingRechargeOrders";
+    public static final String PARKING_SETPARKINGACTIVITY_URL = "/parking/setParkingActivity";
+    public static final String PARKING_SETPARKINGCARDISSUEFLAG_URL = "/parking/setParkingCardIssueFlag";
+    public static final String PARKING_SETPARKINGCARDRESERVEDAYS_URL = "/parking/setParkingCardReserveDays";
     public static final String PKG_ADD_URL = "/pkg/add";
     public static final String PKG_DOWNLOAD_URL = "/pkg/download";
     public static final String PKG_GETUPGRADEFILEINFO_URL = "/pkg/getUpgradeFileInfo";
@@ -622,6 +657,15 @@ public interface ApiConstants {
     public static final String PM_SETPROPCURRENTCOMMUNITY_URL = "/pm/setPropCurrentCommunity";
     public static final String PM_UPDATEPMBILL_URL = "/pm/updatePmBill";
     public static final String PM_UPDATEPMBILLS_URL = "/pm/updatePmBills";
+    public static final String PMSY_CREATEPMBILLORDER_URL = "/pmsy/createPmBillOrder";
+    public static final String PMSY_GETPMPROPERTY_URL = "/pmsy/getPmProperty";
+    public static final String PMSY_GETPMSYBILLS_URL = "/pmsy/getPmsyBills";
+    public static final String PMSY_LISTADDRESSES_URL = "/pmsy/listAddresses";
+    public static final String PMSY_LISTPMBILLS_URL = "/pmsy/listPmBills";
+    public static final String PMSY_LISTPMPAYERS_URL = "/pmsy/listPmPayers";
+    public static final String PMSY_NOTIFYPMSYORDERPAYMENT_URL = "/pmsy/notifyPmsyOrderPayment";
+    public static final String PMSY_SEARCHBILLINGORDERS_URL = "/pmsy/searchBillingOrders";
+    public static final String PMSY_SETPMPROPERTY_URL = "/pmsy/setPmProperty";
     public static final String POLL_SHOWRESULT_URL = "/poll/showResult";
     public static final String POLL_VOTE_URL = "/poll/vote";
     public static final String PUSHER_CREATECERT_URL = "/pusher/createCert";

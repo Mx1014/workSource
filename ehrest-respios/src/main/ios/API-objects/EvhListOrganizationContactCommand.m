@@ -1,6 +1,5 @@
 //
 // EvhListOrganizationContactCommand.m
-// generated at 2016-04-19 14:25:56 
 //
 #import "EvhListOrganizationContactCommand.h"
 
@@ -33,6 +32,8 @@
 {
     if(self.organizationId)
         [jsonObject setObject: self.organizationId forKey: @"organizationId"];
+    if(self.isSignedup)
+        [jsonObject setObject: self.isSignedup forKey: @"isSignedup"];
     if(self.pageOffset)
         [jsonObject setObject: self.pageOffset forKey: @"pageOffset"];
     if(self.pageAnchor)
@@ -49,6 +50,10 @@
         self.organizationId = [jsonObject objectForKey: @"organizationId"];
         if(self.organizationId && [self.organizationId isEqual:[NSNull null]])
             self.organizationId = nil;
+
+        self.isSignedup = [jsonObject objectForKey: @"isSignedup"];
+        if(self.isSignedup && [self.isSignedup isEqual:[NSNull null]])
+            self.isSignedup = nil;
 
         self.pageOffset = [jsonObject objectForKey: @"pageOffset"];
         if(self.pageOffset && [self.pageOffset isEqual:[NSNull null]])

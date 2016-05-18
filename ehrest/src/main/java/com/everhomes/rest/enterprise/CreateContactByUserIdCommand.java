@@ -1,7 +1,8 @@
 // @formatter:off
 package com.everhomes.rest.enterprise;
 
-import javax.validation.constraints.NotNull;
+import com.everhomes.util.StringHelper;
+
 
 /**
  * <ul> 注册流程，绑定已有用户到企业：根据已有用户ID创建企业用户，从而成为此企业的一个成员
@@ -66,4 +67,8 @@ public class CreateContactByUserIdCommand {
 		this.groupId = groupId;
 	}
     
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

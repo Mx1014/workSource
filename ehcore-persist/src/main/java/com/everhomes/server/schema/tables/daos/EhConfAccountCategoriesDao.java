@@ -83,16 +83,16 @@ public class EhConfAccountCategoriesDao extends org.jooq.impl.DAOImpl<com.everho
 	}
 
 	/**
-	 * Fetch records that have <code>multiple_account_price IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfAccountCategories> fetchByMultipleAccountPrice(java.math.BigDecimal... values) {
-		return fetch(com.everhomes.server.schema.tables.EhConfAccountCategories.EH_CONF_ACCOUNT_CATEGORIES.MULTIPLE_ACCOUNT_PRICE, values);
-	}
-
-	/**
 	 * Fetch records that have <code>display_flag IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfAccountCategories> fetchByDisplayFlag(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhConfAccountCategories.EH_CONF_ACCOUNT_CATEGORIES.DISPLAY_FLAG, values);
+	}
+
+	/**
+	 * Fetch records that have <code>multiple_account_price IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhConfAccountCategories> fetchByMultipleAccountPrice(java.math.BigDecimal... values) {
+		return fetch(com.everhomes.server.schema.tables.EhConfAccountCategories.EH_CONF_ACCOUNT_CATEGORIES.MULTIPLE_ACCOUNT_PRICE, values);
 	}
 }

@@ -4,7 +4,12 @@ import java.util.List;
 
 import com.everhomes.discover.ItemType;
 
-
+/**
+ * <ul>
+ * <li>nextPageAnchor: 下一页</li>
+ * <li>dtos: 参考{@com.everhomes.rest.community.admin.CommunityUserAddressDTO}</li>
+ * </ul>
+ */
 public class CommunityUserAddressResponse {
 
 	private Long nextPageAnchor;

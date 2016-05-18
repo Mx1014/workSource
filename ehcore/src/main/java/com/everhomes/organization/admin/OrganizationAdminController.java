@@ -43,6 +43,7 @@ import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
 import com.everhomes.rest.organization.DeleteOrganizationOwnerCommand;
 import com.everhomes.rest.organization.GetUserResourcePrivilege;
 import com.everhomes.rest.organization.ImportOrganizationPersonnelDataCommand;
+import com.everhomes.rest.organization.ImportOwnerDataCommand;
 import com.everhomes.rest.organization.ListAclRoleByUserIdCommand;
 import com.everhomes.rest.organization.ListAllChildrenOrganizationsCommand;
 import com.everhomes.rest.organization.ListDepartmentsCommand;
@@ -312,7 +313,7 @@ public class OrganizationAdminController extends ControllerBase {
     public RestResponse deletePmCommunity(DeletePmCommunityCommand cmd) {
     	
     	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+//        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
     	this.organizationService.deletePmCommunity(cmd);
     	RestResponse response = new RestResponse();
@@ -496,7 +497,7 @@ public class OrganizationAdminController extends ControllerBase {
     @RequestMapping("listAllChildrenOrganizations")
     @RestReturn(value=OrganizationDTO.class, collection=true)
     public RestResponse listAllChildrenOrganizations(@Valid ListAllChildrenOrganizationsCommand cmd) {
-        RestResponse response = new RestResponse(organizationService.listAllChildrenOrganizationMenus(cmd.getId(), cmd.getGroupTypes()));
+        RestResponse response = new RestResponse(organizationService.listAllChildrenOrganizationMenus(cmd.getId(), cmd.getGroupTypes(), cmd.getNaviFlag()));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -1011,6 +1012,24 @@ public class OrganizationAdminController extends ControllerBase {
              res.setErrorDescription("OK");
              
              return res;
+          }
+          
+          /**
+           * <b>URL: /admin/org/importOwnerData</b>
+           * <p>导入业主信息</p>
+           */
+          @RequestMapping("importOwnerData")
+          @RestReturn(value=String.class)
+          public RestResponse importOwnerData(@Valid ImportOwnerDataCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
+      		if(null == files || null == files[0]){
+      			LOGGER.error("files is null。");
+      			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
+      					"files is null");
+      		}
+              RestResponse response = new RestResponse(organizationService.importOwnerData(files[0], cmd));
+              response.setErrorCode(ErrorCodes.SUCCESS);
+              response.setErrorDescription("OK");
+              return response;
           }
           
           

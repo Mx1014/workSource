@@ -1,6 +1,5 @@
 //
 // EvhUpdateOrganizationsCommand.m
-// generated at 2016-04-19 14:25:57 
 //
 #import "EvhUpdateOrganizationsCommand.h"
 
@@ -39,6 +38,8 @@
         [jsonObject setObject: self.address forKey: @"address"];
     if(self.parentId)
         [jsonObject setObject: self.parentId forKey: @"parentId"];
+    if(self.naviFlag)
+        [jsonObject setObject: self.naviFlag forKey: @"naviFlag"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -59,6 +60,10 @@
         self.parentId = [jsonObject objectForKey: @"parentId"];
         if(self.parentId && [self.parentId isEqual:[NSNull null]])
             self.parentId = nil;
+
+        self.naviFlag = [jsonObject objectForKey: @"naviFlag"];
+        if(self.naviFlag && [self.naviFlag isEqual:[NSNull null]])
+            self.naviFlag = nil;
 
         return self;
     }

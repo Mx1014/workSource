@@ -1,6 +1,5 @@
 //
 // EvhPmListPropFamilyWaitingMemberRestResponse.m
-// generated at 2016-04-19 14:25:58 
 //
 #import "EvhPmListPropFamilyWaitingMemberRestResponse.h"
 #import "EvhListPropFamilyWaitingMemberCommandResponse.h"

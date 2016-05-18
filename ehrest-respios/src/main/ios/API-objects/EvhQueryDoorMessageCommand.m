@@ -1,6 +1,5 @@
 //
 // EvhQueryDoorMessageCommand.m
-// generated at 2016-04-19 14:25:56 
 //
 #import "EvhQueryDoorMessageCommand.h"
 #import "EvhDoorMessage.h"

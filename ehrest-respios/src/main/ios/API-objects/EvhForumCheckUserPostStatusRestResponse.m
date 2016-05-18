@@ -1,6 +1,5 @@
 //
 // EvhForumCheckUserPostStatusRestResponse.m
-// generated at 2016-04-19 14:25:58 
 //
 #import "EvhForumCheckUserPostStatusRestResponse.h"
 #import "EvhCheckUserPostDTO.h"

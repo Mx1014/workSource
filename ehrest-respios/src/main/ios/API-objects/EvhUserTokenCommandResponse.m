@@ -1,6 +1,5 @@
 //
 // EvhUserTokenCommandResponse.m
-// generated at 2016-04-19 14:25:57 
 //
 #import "EvhUserTokenCommandResponse.h"
 #import "EvhUserInfo.h"

@@ -11,13 +11,13 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAclinkFirmware implements java.io.Serializable {
 
-	private static final long serialVersionUID = 347436654;
+	private static final long serialVersionUID = -846335326;
 
 	private java.lang.Long     id;
 	private java.lang.Byte     firmwareType;
-	private java.lang.Byte     major;
-	private java.lang.Byte     minor;
-	private java.lang.Byte     revision;
+	private java.lang.Integer  major;
+	private java.lang.Integer  minor;
+	private java.lang.Integer  revision;
 	private java.lang.Long     checksum;
 	private java.lang.String   md5sum;
 	private java.lang.String   downloadUrl;
@@ -33,9 +33,9 @@ public class EhAclinkFirmware implements java.io.Serializable {
 	public EhAclinkFirmware(
 		java.lang.Long     id,
 		java.lang.Byte     firmwareType,
-		java.lang.Byte     major,
-		java.lang.Byte     minor,
-		java.lang.Byte     revision,
+		java.lang.Integer  major,
+		java.lang.Integer  minor,
+		java.lang.Integer  revision,
 		java.lang.Long     checksum,
 		java.lang.String   md5sum,
 		java.lang.String   downloadUrl,
@@ -78,27 +78,27 @@ public class EhAclinkFirmware implements java.io.Serializable {
 		this.firmwareType = firmwareType;
 	}
 
-	public java.lang.Byte getMajor() {
+	public java.lang.Integer getMajor() {
 		return this.major;
 	}
 
-	public void setMajor(java.lang.Byte major) {
+	public void setMajor(java.lang.Integer major) {
 		this.major = major;
 	}
 
-	public java.lang.Byte getMinor() {
+	public java.lang.Integer getMinor() {
 		return this.minor;
 	}
 
-	public void setMinor(java.lang.Byte minor) {
+	public void setMinor(java.lang.Integer minor) {
 		this.minor = minor;
 	}
 
-	public java.lang.Byte getRevision() {
+	public java.lang.Integer getRevision() {
 		return this.revision;
 	}
 
-	public void setRevision(java.lang.Byte revision) {
+	public void setRevision(java.lang.Integer revision) {
 		this.revision = revision;
 	}
 
