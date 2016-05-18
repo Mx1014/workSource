@@ -1724,8 +1724,6 @@ public class ActivityServiceImpl implements ActivityService {
 	            }
 	        }
 	        break;
-	    case PARK_ENTERPRISE:
-	    case PARK_ENTERPRISE_NOAUTH:
         case ENTERPRISE: // 增加两场景，与园区企业保持一致 by lqs 20160517
         case ENTERPRISE_NOAUTH: // 增加两场景，与园区企业保持一致 by lqs 20160517
 	        Organization organization = organizationProvider.findOrganizationById(sceneTokenDto.getEntityId());
@@ -1735,7 +1733,6 @@ public class ActivityServiceImpl implements ActivityService {
             }
             break;
 	    case PM_ADMIN:
-	    case PARK_PM_ADMIN:
 	        ListOrgNearbyActivitiesCommand execOrgCmd = ConvertHelper.convert(cmd, ListOrgNearbyActivitiesCommand.class);
 	        execOrgCmd.setOrganizationId(sceneTokenDto.getEntityId());
 	        resp = listOrgNearbyActivities(execOrgCmd);
