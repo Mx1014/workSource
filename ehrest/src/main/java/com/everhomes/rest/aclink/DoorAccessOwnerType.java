@@ -1,7 +1,7 @@
 package com.everhomes.rest.aclink;
 
 public enum DoorAccessOwnerType {
-    COMMUNITY((byte)0), ENTERPRISE((byte)1);
+    COMMUNITY((byte)0), ENTERPRISE((byte)1), FAMILY((byte)2);
     
     private byte code;
     
@@ -23,6 +23,8 @@ public enum DoorAccessOwnerType {
             
         case 1 :
             return ENTERPRISE;
+        case 2:
+            return FAMILY;
         }
         
         return null;

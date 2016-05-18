@@ -449,19 +449,19 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhOauth2Tokens EH_OAUTH2_TOKENS = com.everhomes.server.schema.tables.EhOauth2Tokens.EH_OAUTH2_TOKENS;
 
 	/**
-	 * The table ehcore.eh_op_promotions
+	 * The table ehcore.eh_op_promotion_activities
 	 */
-	public static final com.everhomes.server.schema.tables.EhOpPromotions EH_OP_PROMOTIONS = com.everhomes.server.schema.tables.EhOpPromotions.EH_OP_PROMOTIONS;
+	public static final com.everhomes.server.schema.tables.EhOpPromotionActivities EH_OP_PROMOTION_ACTIVITIES = com.everhomes.server.schema.tables.EhOpPromotionActivities.EH_OP_PROMOTION_ACTIVITIES;
 
 	/**
-	 * The table ehcore.eh_op_promotion_policies
+	 * The table ehcore.eh_op_promotion_assigned_scopes
 	 */
-	public static final com.everhomes.server.schema.tables.EhOpPromotionPolicies EH_OP_PROMOTION_POLICIES = com.everhomes.server.schema.tables.EhOpPromotionPolicies.EH_OP_PROMOTION_POLICIES;
+	public static final com.everhomes.server.schema.tables.EhOpPromotionAssignedScopes EH_OP_PROMOTION_ASSIGNED_SCOPES = com.everhomes.server.schema.tables.EhOpPromotionAssignedScopes.EH_OP_PROMOTION_ASSIGNED_SCOPES;
 
 	/**
-	 * The table ehcore.eh_op_promotion_settings
+	 * The table ehcore.eh_op_promotion_messages
 	 */
-	public static final com.everhomes.server.schema.tables.EhOpPromotionSettings EH_OP_PROMOTION_SETTINGS = com.everhomes.server.schema.tables.EhOpPromotionSettings.EH_OP_PROMOTION_SETTINGS;
+	public static final com.everhomes.server.schema.tables.EhOpPromotionMessages EH_OP_PROMOTION_MESSAGES = com.everhomes.server.schema.tables.EhOpPromotionMessages.EH_OP_PROMOTION_MESSAGES;
 
 	/**
 	 * The table ehcore.eh_organizations
@@ -812,6 +812,16 @@ public class Tables {
 	 * The table ehcore.eh_scene_types
 	 */
 	public static final com.everhomes.server.schema.tables.EhSceneTypes EH_SCENE_TYPES = com.everhomes.server.schema.tables.EhSceneTypes.EH_SCENE_TYPES;
+
+	/**
+	 * The table ehcore.eh_schedule_tasks
+	 */
+	public static final com.everhomes.server.schema.tables.EhScheduleTasks EH_SCHEDULE_TASKS = com.everhomes.server.schema.tables.EhScheduleTasks.EH_SCHEDULE_TASKS;
+
+	/**
+	 * The table ehcore.eh_schedule_task_logs
+	 */
+	public static final com.everhomes.server.schema.tables.EhScheduleTaskLogs EH_SCHEDULE_TASK_LOGS = com.everhomes.server.schema.tables.EhScheduleTaskLogs.EH_SCHEDULE_TASK_LOGS;
 
 	/**
 	 * The table ehcore.eh_scoped_configurations

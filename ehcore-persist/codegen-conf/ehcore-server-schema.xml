@@ -80,6 +80,7 @@
 		eh_aclinks | eh_door_access | eh_aes_server_key | eh_aes_user_key | eh_aclink_undo_key | eh_door_auth | eh_owner_doors | eh_door_command |
 		eh_aclink_firmware |
 		eh_organization_task_targets | eh_business_assigned_namespaces |
+		eh_op_promotion_activities | eh_schedule_tasks | eh_schedule_task_logs | eh_op_promotion_messages | eh_op_promotion_assigned_scopes |
 		eh_pmsy_orders | eh_pmsy_order_items | eh_pmsy_payers | eh_pmsy_communities |
 		eh_namespace_details |
         </includes>

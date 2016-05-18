@@ -20,7 +20,6 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.family.FamilyService;
 import com.everhomes.organization.OrganizationService;
-import com.everhomes.promotion.OpPromotionService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.activity.ListActivitiesReponse;
 import com.everhomes.rest.family.ListNeighborUsersCommand;
@@ -68,8 +67,8 @@ public class UserUiController extends ControllerBase {
     @Autowired
     private UserService userService;
     
-    @Autowired
-    private OpPromotionService opPromotionService;
+    //@Autowired
+    //private OpPromotionService opPromotionService;
     
     @Autowired
     private ActivityService activityService;
@@ -195,17 +194,17 @@ public class UserUiController extends ControllerBase {
      * <p>获取用户相关的运营活动，打开APP时调用一次该接口，里面包含用户当前可享受的运营活动。
      *    对于一次性的活动，如果还在有效期内，用户不管是否已经查看，此接口都有数据返回，客户端需要记录是否看过来决定是否还显示该活动。</p>
      */
-    @RequestMapping(value = "getUserOpPromotionsByScene")
-    @RestReturn(ListUserOpPromotionsRespose.class)
-    public RestResponse getUserOpPromotionsByScene(GetUserOpPromotionCommand cmd) throws Exception {
-        ListUserOpPromotionsRespose cmdResponse = opPromotionService.getUserOpPromotionsByScene(cmd);
-        
-        RestResponse response = new RestResponse(cmdResponse);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
+//    @RequestMapping(value = "getUserOpPromotionsByScene")
+//    @RestReturn(ListUserOpPromotionsRespose.class)
+//    public RestResponse getUserOpPromotionsByScene(GetUserOpPromotionCommand cmd) throws Exception {
+//        ListUserOpPromotionsRespose cmdResponse = opPromotionService.getUserOpPromotionsByScene(cmd);
+//        
+//        RestResponse response = new RestResponse(cmdResponse);
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
+//    
     /**
      * <b>URL: /ui/user/setUserCurrentScene</b>
      * <p>设置当前的scene信息，服务器端不使用此信息，会在userInfo里还给客户端做选中上一次的场景使用</p>

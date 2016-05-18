@@ -42,7 +42,7 @@ public class ScheduleProviderTest extends LoginAuthTestCase {
     	cleanData();
     }
     
-    //@Test
+    @Test
     public void testScheduleAt() {
         String triggerName = "schedule-at-" + System.currentTimeMillis();
         String jobName = triggerName;

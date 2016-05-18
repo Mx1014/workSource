@@ -17,6 +17,8 @@ import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.PrefixQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -393,6 +395,10 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
         builder.setQuery(qb);
+        
+        if(cmd.getQueryString() == null || cmd.getQueryString().isEmpty()) {
+            builder.addSort("createTime", SortOrder.DESC);
+        }
         
         if(LOGGER.isDebugEnabled())
 			LOGGER.info("PostSearcherImpl query builder ："+builder);
