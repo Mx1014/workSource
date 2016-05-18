@@ -17,6 +17,7 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.group.GroupService;
 import com.everhomes.locale.LocaleStringService;
+import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.ForumLocalStringCode;
 import com.everhomes.rest.forum.PostEntityTag;
@@ -107,8 +108,8 @@ public class DiscoveryDefaultPostSceneHandler implements PostSceneHandler {
             filterDto.setName(menuName);
             filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
             filterDto.setDefaultFlag(SelectorBooleanFlag.TRUE.getCode());; // 整组菜单只有一个是默认的
-            actionUrl = String.format("%s%s?forumId=%s&visibilityScope=%s&communityId=%s", serverContectPath, 
-                "/forum/listTopics", community.getDefaultForumId(), VisibilityScope.NEARBY_COMMUNITIES.getCode(), community.getId());
+            actionUrl = String.format("%s%s?forumId=%s&visibilityScope=%s&communityId=%s&excludeCategories[0]=%s", serverContectPath, 
+                "/forum/listTopics", community.getDefaultForumId(), VisibilityScope.NEARBY_COMMUNITIES.getCode(), community.getId(), CategoryConstants.CATEGORY_ID_TOPIC_ACTIVITY);
             filterDto.setActionUrl(actionUrl);
             avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.community_nearby", "");
             filterDto.setAvatar(avatarUri);
@@ -124,8 +125,8 @@ public class DiscoveryDefaultPostSceneHandler implements PostSceneHandler {
             filterDto.setName(menuName);
             filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());
             filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());
-            actionUrl = String.format("%s%s?forumId=%s&visibilityScope=%s&communityId=%s", serverContectPath, 
-                "/forum/listTopics", community.getDefaultForumId(), VisibilityScope.COMMUNITY.getCode(), community.getId());
+            actionUrl = String.format("%s%s?forumId=%s&visibilityScope=%s&communityId=%s&excludeCategories[0]=%s", serverContectPath, 
+                "/forum/listTopics", community.getDefaultForumId(), VisibilityScope.COMMUNITY.getCode(), community.getId(), CategoryConstants.CATEGORY_ID_TOPIC_ACTIVITY);
             filterDto.setActionUrl(actionUrl);
             avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.community_only", "");
             filterDto.setAvatar(avatarUri);

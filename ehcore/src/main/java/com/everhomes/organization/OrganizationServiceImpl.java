@@ -1363,6 +1363,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    forumCmd.setForumIdList(forumIdList);
 	    forumCmd.setPageAnchor(cmd.getPageAnchor());
 	    forumCmd.setPageSize(cmd.getPageSize());
+	    forumCmd.setExcludeCategories(cmd.getExcludeCategories());
 	    return forumService.listTopicsByForums(forumCmd);
 	}
 

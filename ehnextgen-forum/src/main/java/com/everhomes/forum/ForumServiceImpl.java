@@ -1098,7 +1098,10 @@ public class ForumServiceImpl implements ForumService {
          if(null != cmd.getEmbeddedAppId()){
         	 condition = condition.and(Tables.EH_FORUM_POSTS.EMBEDDED_APP_ID.eq(cmd.getEmbeddedAppId()));
          }
-         condition = condition.and(unCateGoryCondition);
+         if(null != unCateGoryCondition){
+        	 condition = condition.and(unCateGoryCondition);
+         }
+         
          if(null != cmd.getContentCategory()){
         	 Category contentCatogry = this.categoryProvider.findCategoryById(cmd.getContentCategory());
         	 condition = condition.and(Tables.EH_FORUM_POSTS.CATEGORY_PATH.like(contentCatogry.getPath() + "%"));
@@ -2203,7 +2206,9 @@ public class ForumServiceImpl implements ForumService {
             query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ID.eq(forum.getId())); 
             query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
             query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
-            query.addConditions(condition);
+            if(null != condition){
+            	query.addConditions(condition);
+            }
             return query;
         });
         this.forumProvider.populatePostAttachments(posts);
@@ -4328,6 +4333,9 @@ public class ForumServiceImpl implements ForumService {
         List<Long> forumIdList = removeDuplicatedForumIds(cmd.getForumIdList());
         
         if(forumIdList != null && forumIdList.size() > 0) {
+        	
+        	Condition cond = this.notEqPostCategoryCondition(cmd.getExcludeCategories());
+        	
             CrossShardListingLocator[] locators = new CrossShardListingLocator[forumIdList.size()];
             for(int i = 0; i < forumIdList.size(); i++) {
                 Long forumId = forumIdList.get(i);
@@ -4341,6 +4349,9 @@ public class ForumServiceImpl implements ForumService {
                     Tables.EH_FORUM_ASSIGNED_SCOPES.OWNER_ID.eq(Tables.EH_FORUM_POSTS.ID));
                 query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
                 query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+                if(null != cond){
+                	query.addConditions(cond);
+                }
                 
                 return query;
             }, new PostCreateTimeDescComparator());
