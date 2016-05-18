@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhScheduleTasks extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhScheduleTasksRecord> {
 
-	private static final long serialVersionUID = 1209704180;
+	private static final long serialVersionUID = 51431648;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_schedule_tasks</code>
@@ -45,16 +45,6 @@ public class EhScheduleTasks extends org.jooq.impl.TableImpl<com.everhomes.serve
 	 * The column <code>ehcore.eh_schedule_tasks.resource_id</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhScheduleTasksRecord, java.lang.Long> RESOURCE_ID = createField("resource_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_schedule_tasks.owner_type</code>. the owner of the task, user, group, etc
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhScheduleTasksRecord, java.lang.String> OWNER_TYPE = createField("owner_type", org.jooq.impl.SQLDataType.VARCHAR.length(32).nullable(false).defaulted(true), this, "the owner of the task, user, group, etc");
-
-	/**
-	 * The column <code>ehcore.eh_schedule_tasks.owner_id</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhScheduleTasksRecord, java.lang.Long> OWNER_ID = createField("owner_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_schedule_tasks.process_count</code>. the count of process

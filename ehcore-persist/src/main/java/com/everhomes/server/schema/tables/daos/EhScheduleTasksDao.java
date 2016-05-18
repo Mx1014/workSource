@@ -69,20 +69,6 @@ public class EhScheduleTasksDao extends org.jooq.impl.DAOImpl<com.everhomes.serv
 	}
 
 	/**
-	 * Fetch records that have <code>owner_type IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhScheduleTasks> fetchByOwnerType(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhScheduleTasks.EH_SCHEDULE_TASKS.OWNER_TYPE, values);
-	}
-
-	/**
-	 * Fetch records that have <code>owner_id IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhScheduleTasks> fetchByOwnerId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhScheduleTasks.EH_SCHEDULE_TASKS.OWNER_ID, values);
-	}
-
-	/**
 	 * Fetch records that have <code>process_count IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhScheduleTasks> fetchByProcessCount(java.lang.Integer... values) {

@@ -90,6 +90,7 @@ import com.everhomes.rest.address.SuggestCommunityDTO;
 import com.everhomes.rest.address.admin.CorrectAddressAdminCommand;
 import com.everhomes.rest.address.admin.ImportAddressCommand;
 import com.everhomes.rest.community.CommunityDoc;
+import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.family.LeaveFamilyCommand;
 import com.everhomes.rest.group.GroupMemberStatus;
@@ -1603,12 +1604,11 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 	public ListNearbyMixCommunitiesCommandResponse listNearbyMixCommunities(
 			ListNearbyMixCommunitiesCommand cmd) {
 		ListNearbyMixCommunitiesCommandResponse resp = new ListNearbyMixCommunitiesCommandResponse();
-        final List<CommunityDTO> results = new ArrayList<>();
-
+		List<CommunityDTO> results = new ArrayList<>();
+		
         if(cmd.getLatigtue() == null || cmd.getLongitude() == null)
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid parameter, latitude and longitude have to be both specified or neigher");
-
         
         List<CommunityGeoPoint> pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatigtue(),cmd.getLongitude(), 5);
         List<Long> communityIds = getAllCommunityIds(pointList);
@@ -1620,27 +1620,53 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         ListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 		
-		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+		if(cmd.getPageAnchor() != 0) {
+			Community anchorCommunity = this.communityProvider.findCommunityById(cmd.getPageAnchor());
+			if(anchorCommunity != null && anchorCommunity.getCommunityType() == CommunityType.COMMERCIAL.getCode()) {
+				//园区 Anchor
+				List<CommunityDTO> commercials = this.communityProvider.listCommunitiesByType(communityIds, 
+						CommunityType.COMMERCIAL.getCode(), locator, pageSize+1);
+				if(commercials != null) {
+					results.addAll(commercials);
+				} 
+
+				if(commercials != null && commercials.size() <= pageSize){
+					//小区  从0开始
+					ListingLocator residentialsLocator = new CrossShardListingLocator();
+					residentialsLocator.setAnchor(0L);
+					List<CommunityDTO> residentials = this.communityProvider.listCommunitiesByType(communityIds, 
+							CommunityType.RESIDENTIAL.getCode(), residentialsLocator, pageSize+1);
+					if(residentials != null) {
+						results.addAll(residentials);
+					}
+				}
+				
+			} else {
+				//小区 Anchor
+				List<CommunityDTO> residentials = this.communityProvider.listCommunitiesByType(communityIds, 
+						CommunityType.RESIDENTIAL.getCode(), locator, pageSize+1);
+				if(residentials != null) {
+					results.addAll(residentials);
+				}
+			}
+		} else {
+			//园区  从0开始
+			List<CommunityDTO> commercials = this.communityProvider.listCommunitiesByType(communityIds, 
+					CommunityType.COMMERCIAL.getCode(), locator, pageSize+1);
+			if(commercials != null) {
+				results.addAll(commercials);
+			} 
+			
+			if(commercials != null && commercials.size() <= pageSize){
+				//小区  从0开始
+				List<CommunityDTO> residentials = this.communityProvider.listCommunitiesByType(communityIds, 
+						CommunityType.RESIDENTIAL.getCode(), locator, pageSize+1);
+				if(residentials != null) {
+					results.addAll(residentials);
+				}
+			}
+		}
 		
-        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
-            (DSLContext context, Object reducingContext)-> {
-            
-            context.select().from(Tables.EH_COMMUNITIES)
-                .where(Tables.EH_COMMUNITIES.ID.gt(locator.getAnchor())
-                .and(Tables.EH_COMMUNITIES.ID.in(communityIds)))
-                .and(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId))
-                .and(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()))
-                .orderBy(Tables.EH_COMMUNITIES.COMMUNITY_TYPE.desc())
-                .limit(pageSize+1)
-                .fetch().map((r) -> {
-                CommunityDTO community = ConvertHelper.convert(r, CommunityDTO.class);
-                results.add(community);
-                
-                return null;
-            });
-                
-            return true;
-        });
         
         if(results != null && results.size() > pageSize){
         	results.remove(results.size()-1);

@@ -11,14 +11,12 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhScheduleTasks implements java.io.Serializable {
 
-	private static final long serialVersionUID = 790057334;
+	private static final long serialVersionUID = 1395280292;
 
 	private java.lang.Long     id;
 	private java.lang.Integer  namespaceId;
 	private java.lang.String   resourceType;
 	private java.lang.Long     resourceId;
-	private java.lang.String   ownerType;
-	private java.lang.Long     ownerId;
 	private java.lang.Integer  processCount;
 	private java.lang.Integer  progress;
 	private java.lang.String   progressData;
@@ -32,8 +30,6 @@ public class EhScheduleTasks implements java.io.Serializable {
 		java.lang.Integer  namespaceId,
 		java.lang.String   resourceType,
 		java.lang.Long     resourceId,
-		java.lang.String   ownerType,
-		java.lang.Long     ownerId,
 		java.lang.Integer  processCount,
 		java.lang.Integer  progress,
 		java.lang.String   progressData,
@@ -44,8 +40,6 @@ public class EhScheduleTasks implements java.io.Serializable {
 		this.namespaceId = namespaceId;
 		this.resourceType = resourceType;
 		this.resourceId = resourceId;
-		this.ownerType = ownerType;
-		this.ownerId = ownerId;
 		this.processCount = processCount;
 		this.progress = progress;
 		this.progressData = progressData;
@@ -83,22 +77,6 @@ public class EhScheduleTasks implements java.io.Serializable {
 
 	public void setResourceId(java.lang.Long resourceId) {
 		this.resourceId = resourceId;
-	}
-
-	public java.lang.String getOwnerType() {
-		return this.ownerType;
-	}
-
-	public void setOwnerType(java.lang.String ownerType) {
-		this.ownerType = ownerType;
-	}
-
-	public java.lang.Long getOwnerId() {
-		return this.ownerId;
-	}
-
-	public void setOwnerId(java.lang.Long ownerId) {
-		this.ownerId = ownerId;
 	}
 
 	public java.lang.Integer getProcessCount() {
