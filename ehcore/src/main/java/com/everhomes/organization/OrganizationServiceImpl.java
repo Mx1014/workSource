@@ -4591,14 +4591,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 		return res;
 	}
 	
-	
 	@Override
-	public ListCommunityByNamespaceCommandResponse listCommunityByOrganizationId(
-			ListCommunitiesByOrganizationIdCommand cmd) {
+	public List<CommunityDTO> listAllChildrenOrganizationCoummunities(Long organizationId){
 		
-		int namespaceId = UserContext.getCurrentNamespaceId();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
-		Organization organization = this.checkOrganization(cmd.getOrganizationId());
+		Organization organization = this.checkOrganization(organizationId);
 		
 		List<String> groupTypes = new ArrayList<String>();
 		groupTypes.add(OrganizationGroupType.GROUP.getCode());
@@ -4606,7 +4604,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		List<Organization> orgs = organizationProvider.listOrganizationByGroupTypes(organization.getPath()+"/%", groupTypes);
 		orgs.add(organization);
-		ListCommunityByNamespaceCommandResponse res = new ListCommunityByNamespaceCommandResponse();
 		List<CommunityDTO> dtos = new ArrayList<CommunityDTO>();
 		
 		for (Organization org : orgs) {
@@ -4622,6 +4619,27 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}
 		}
 		
+		return dtos;
+	}
+	
+	@Override
+	public ListCommunityByNamespaceCommandResponse listCommunityByOrganizationId(
+			ListCommunitiesByOrganizationIdCommand cmd) {
+		ListCommunityByNamespaceCommandResponse res = new ListCommunityByNamespaceCommandResponse();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		
+		Organization organization = this.checkOrganization(cmd.getOrganizationId());
+		List<CommunityDTO> dtos = new ArrayList<CommunityDTO>();
+		List<OrganizationCommunity> organizationCommunitys = organizationProvider.listOrganizationCommunities(organization.getId());
+		for (OrganizationCommunity organizationCommunity : organizationCommunitys) {
+			Community community = communityProvider.findCommunityById(organizationCommunity.getCommunityId());
+			if(null == community){
+				continue;
+			}
+			if(community.getNamespaceId().equals(namespaceId)){
+				dtos.add(ConvertHelper.convert(community, CommunityDTO.class));
+			}
+		}
 		res.setCommunities(dtos);
 		
 		return res;

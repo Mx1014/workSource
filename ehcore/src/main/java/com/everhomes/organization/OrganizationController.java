@@ -33,6 +33,7 @@ import com.everhomes.rest.forum.NewTopicCommand;
 import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
+import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.organization.ApplyOrganizationMemberCommand;
 import com.everhomes.rest.organization.AssginOrgTopicCommand;
 import com.everhomes.rest.organization.CreateOrganizationCommunityCommand;
@@ -820,10 +821,11 @@ public class OrganizationController extends ControllerBase {
      * <p>机构官署的小区</p>
      */
     @RequestMapping("listCommunitiesByOrganizationId")
-    @RestReturn(value=String.class)
+    @RestReturn(value=ListCommunityByNamespaceCommandResponse.class)
     public RestResponse listCommunitiesByOrganizationId(@Valid ListCommunitiesByOrganizationIdCommand cmd) {
-    
-        RestResponse response = new RestResponse(this.organizationService.listCommunityByOrganizationId(cmd));
+    	ListCommunityByNamespaceCommandResponse res = new ListCommunityByNamespaceCommandResponse();
+    	res.setCommunities(organizationService.listAllChildrenOrganizationCoummunities(cmd.getOrganizationId()));
+        RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
