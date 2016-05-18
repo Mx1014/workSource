@@ -1,6 +1,9 @@
 // @formatter:off
 package com.everhomes.rest.forum;
 
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -12,6 +15,7 @@ import com.everhomes.util.StringHelper;
  * <li>actionCategory: 动作类型ID，对应以前的serviceType</li>
  * <li>publishStatus: 帖子发布状态，{@link com.everhomes.rest.forum.TopicPublishStatus}</li>
  * <li>embeddedAppId: appid，{@link com.everhomes.rest.app.AppConstants}</li>
+ * <li>excludeCategories: 不查询的内容类型 {@link com.everhomes.rest.category.CategoryConstants}</li>
  * <li>pageAnchor: 本页开始的锚点</li>
  * <li>pageSize: 每页的数量</li>
  * </ul>
@@ -26,6 +30,9 @@ public class QueryOrganizationTopicCommand {
     private Long pageAnchor;
     private Integer pageSize;
     private Long embeddedAppId; 
+    
+    @ItemType(Long.class)
+    private List<Long> excludeCategories;
     
     public QueryOrganizationTopicCommand() {
     }
@@ -120,6 +127,17 @@ public class QueryOrganizationTopicCommand {
 
 	public void setEmbeddedAppId(Long embeddedAppId) {
 		this.embeddedAppId = embeddedAppId;
+	}
+
+
+	public List<Long> getExcludeCategories() {
+		return excludeCategories;
+	}
+
+
+
+	public void setExcludeCategories(List<Long> excludeCategories) {
+		this.excludeCategories = excludeCategories;
 	}
 
 

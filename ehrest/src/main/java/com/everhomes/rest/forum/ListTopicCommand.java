@@ -1,6 +1,9 @@
 // @formatter:off
 package com.everhomes.rest.forum;
 
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -8,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>forumId: 论坛ID</li>
  * <li>visibilityScope: 可见性范围类型，仅社区圈有效，{@link com.everhomes.rest.visibility.VisibilityScope}</li>
  * <li>communityId: 当前小区ID，仅社区圈有效</li>
+ * <li>excludeCategories: 排除类型</li>
  * <li>pageAnchor: 本页开始的锚点</li>
  * <li>pageSize: 每页的数量</li>
  * </ul>
@@ -18,6 +22,9 @@ public class ListTopicCommand {
     private Long communityId;
     private Long pageAnchor;
     private Integer pageSize;
+    
+    @ItemType(Long.class)
+    private List<Long> excludeCategories;
     
     public ListTopicCommand() {
     }
@@ -62,7 +69,16 @@ public class ListTopicCommand {
         this.pageSize = pageSize;
     }
 
-    @Override
+    
+    public List<Long> getExcludeCategories() {
+		return excludeCategories;
+	}
+
+	public void setExcludeCategories(List<Long> excludeCategories) {
+		this.excludeCategories = excludeCategories;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

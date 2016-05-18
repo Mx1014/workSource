@@ -1080,17 +1080,7 @@ public class ForumServiceImpl implements ForumService {
          	forumIds.add(community.getDefaultForumId());
          }
          
-         List<Long> categorys = new ArrayList<Long>();
-         
-         if(null != cmd.getContentCategory()){
-         	categorys.add(cmd.getContentCategory());
-         }
-         
-         if(null != cmd.getEmbeddedAppId()){
-         	if(AppConstants.APPID_ORGTASK == cmd.getEmbeddedAppId() && null == cmd.getContentCategory()){
-         		categorys = CategoryConstants.GA_RELATED_CATEGORIES;
-         	}
-         }
+         Condition unCateGoryCondition = notEqPostCategoryCondition(cmd.getExcludeCategories());
          
          Condition communityCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
          communityCondition = communityCondition.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.in(communityIdList));
@@ -1100,6 +1090,12 @@ public class ForumServiceImpl implements ForumService {
          if(null != cmd.getEmbeddedAppId()){
         	 condition = condition.and(Tables.EH_FORUM_POSTS.EMBEDDED_APP_ID.eq(cmd.getEmbeddedAppId()));
          }
+         condition = condition.and(unCateGoryCondition);
+         if(null != cmd.getContentCategory()){
+        	 Category contentCatogry = this.categoryProvider.findCategoryById(cmd.getContentCategory());
+        	 condition = condition.and(Tables.EH_FORUM_POSTS.CATEGORY_PATH.like(contentCatogry.getPath() + "%"));
+         }
+         
          int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
          CrossShardListingLocator locator = new CrossShardListingLocator(ForumConstants.SYSTEM_FORUM);
          locator.setAnchor(cmd.getPageAnchor());
@@ -2034,6 +2030,8 @@ public class ForumServiceImpl implements ForumService {
         VisibilityScope scope = VisibilityScope.fromCode(cmd.getVisibilityScope());
         Condition visibilityCondition = buildDefaultForumPostQryConditionForCommunity(user, community, scope);
         
+        Condition condition= this.notEqPostCategoryCondition(cmd.getExcludeCategories());
+        
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator(forum.getId());
         locator.setAnchor(cmd.getPageAnchor());
@@ -2045,6 +2043,10 @@ public class ForumServiceImpl implements ForumService {
             query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
             if(visibilityCondition != null) {
                 query.addConditions(visibilityCondition);
+            }
+            
+            if(null != condition){
+            	query.addConditions(condition);
             }
             
             return query;
@@ -2185,12 +2187,15 @@ public class ForumServiceImpl implements ForumService {
         long userId = user.getId();
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         
+        Condition condition = this.notEqPostCategoryCondition(cmd.getExcludeCategories());
+        
         CrossShardListingLocator locator = new CrossShardListingLocator(forum.getId());
         locator.setAnchor(cmd.getPageAnchor());
         List<Post> posts = this.forumProvider.queryPosts(locator, pageSize + 1, (loc, query) -> {
             query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ID.eq(forum.getId())); 
             query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
             query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+            query.addConditions(condition);
             return query;
         });
         this.forumProvider.populatePostAttachments(posts);
@@ -2861,6 +2866,27 @@ public class ForumServiceImpl implements ForumService {
         Condition c3 = Tables.EH_FORUM_ASSIGNED_SCOPES.SCOPE_CODE.eq(VisibilityScope.ALL.getCode());
         
         return c1.or(c2).or(c3);
+    }
+    
+    private Condition notEqPostCategoryCondition(List<Long> unCategorys) {
+    	if(null == unCategorys || 0 == unCategorys.size()){
+       	 	unCategorys = new ArrayList<Long>();
+        }
+        
+        Condition condition = null;
+        // contentCategoryId为0表示全部查，此时也不需要给category条件
+        for (Long categoryId : unCategorys) {
+        	Category contentCatogry = this.categoryProvider.findCategoryById(categoryId);
+            if(contentCatogry != null) {
+                if(null == condition){
+                	condition = Tables.EH_FORUM_POSTS.CATEGORY_PATH.notLike(contentCatogry.getPath() + "%");
+                }else{
+                	condition = condition.or(Tables.EH_FORUM_POSTS.CATEGORY_PATH.notLike(contentCatogry.getPath() + "%"));
+                }
+                	 
+            }
+		}
+        return condition;
     }
     
     private Condition buildPostCategoryCondition(List<Long> categorys, Long actionCategoryId) {
