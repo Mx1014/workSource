@@ -617,14 +617,10 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
         }
         
         // 所管辖的小区
-        Community community = null;
         List<Long> communityIdList = new ArrayList<Long>();
-        List<OrganizationCommunity> organizationCommunitys = organizationProvider.listOrganizationCommunities(sceneToken.getEntityId());
-        for(OrganizationCommunity orgCmnty : organizationCommunitys) {
-            community = communityProvider.findCommunityById(orgCmnty.getCommunityId());
-            if(community != null) {
-                communityIdList.add(community.getId());
-            }
+        List<CommunityDTO> communities = organizationService.listAllChildrenOrganizationCoummunities(organizationId);
+        for(CommunityDTO community : communities) {
+            communityIdList.add(community.getId());
         }
 
         SearchByMultiForumAndCmntyCommand orgTopicCmd = ConvertHelper.convert(cmd, SearchByMultiForumAndCmntyCommand.class);

@@ -375,6 +375,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Autowired
 	private UserWithoutConfAccountSearcher userSearcher;
+	
+    @Autowired
+    private OrganizationService organizationService; 
 
 	private int getPageCount(int totalCount, int pageSize){
 		int pageCount = totalCount/pageSize;
@@ -1349,9 +1352,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             }
 	        break;
 	    case COMMUNITY_ALL:
-	        List<OrganizationCommunity> organizationCommunitys = organizationProvider.listOrganizationCommunities(organizationId);
-            for(OrganizationCommunity orgCmnty : organizationCommunitys) {
-                Community community = communityProvider.findCommunityById(orgCmnty.getCommunityId());
+	        List<CommunityDTO> communities = organizationService.listAllChildrenOrganizationCoummunities(organizationId);
+            for(CommunityDTO community : communities) {
                 if(community != null) {
                     forumIdList.add(community.getDefaultForumId());
                 }

@@ -73,6 +73,7 @@ import com.everhomes.rest.activity.ListActivityCategoriesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
 import com.everhomes.rest.activity.ListOrgNearbyActivitiesCommand;
+import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
@@ -1782,9 +1783,9 @@ public class ActivityServiceImpl implements ActivityService {
 	    
 	    // 由于存在大量的公司没有自身的经纬度，故取其所管理的小区来作为经纬度
 	    if(geoLocationList.size() == 0) {
-    	    List<OrganizationCommunity> organizationCommunitys = organizationProvider.listOrganizationCommunities(cmd.getOrganizationId());
-            for(OrganizationCommunity orgCmnty : organizationCommunitys) {
-                List<CommunityGeoPoint> geoPoints = communityProvider.listCommunityGeoPoints(orgCmnty.getCommunityId());
+	        List<CommunityDTO> communities = organizationService.listAllChildrenOrganizationCoummunities(cmd.getOrganizationId());
+            for(CommunityDTO community : communities) {
+                List<CommunityGeoPoint> geoPoints = communityProvider.listCommunityGeoPoints(community.getId());
                 
                 StringBuilder strBuilder = new StringBuilder();
                 for(CommunityGeoPoint geoPoint : geoPoints){
