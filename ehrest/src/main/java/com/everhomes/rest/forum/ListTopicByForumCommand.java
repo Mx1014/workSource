@@ -10,6 +10,8 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>forumIdList: 论坛ID列表</li>
  * <li>communityId: 当前小区ID，仅社区圈有效</li>
+ * <li>communityId: 当前小区ID，仅社区圈有效</li>
+ * <li>excludeCategories: 不查询的内容类型 {@link com.everhomes.rest.category.CategoryConstants}</li>
  * <li>pageAnchor: 本页开始的锚点</li>
  * <li>pageSize: 每页的数量</li>
  * </ul>
@@ -23,6 +25,9 @@ public class ListTopicByForumCommand {
     private Long pageAnchor;
     
     private Integer pageSize;
+    
+    @ItemType(Long.class)
+    private List<Long> excludeCategories;
     
     public ListTopicByForumCommand() {
     }
@@ -59,7 +64,17 @@ public class ListTopicByForumCommand {
         this.pageSize = pageSize;
     }
 
-    @Override
+    
+    
+    public List<Long> getExcludeCategories() {
+		return excludeCategories;
+	}
+
+	public void setExcludeCategories(List<Long> excludeCategories) {
+		this.excludeCategories = excludeCategories;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
