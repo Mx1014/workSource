@@ -1630,12 +1630,16 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 					results.addAll(commercials);
 				} 
 
-				if(commercials != null && commercials.size() <= pageSize){
+				if(commercials == null || (commercials != null && commercials.size() <= pageSize)){
+					int count = pageSize;
+					if(commercials != null) {
+						count = pageSize-commercials.size();
+					}
 					//小区  从0开始
 					ListingLocator residentialsLocator = new CrossShardListingLocator();
 					residentialsLocator.setAnchor(0L);
 					List<CommunityDTO> residentials = this.communityProvider.listCommunitiesByType(communityIds, 
-							CommunityType.RESIDENTIAL.getCode(), residentialsLocator, pageSize+1);
+							CommunityType.RESIDENTIAL.getCode(), residentialsLocator, count+1);
 					if(residentials != null) {
 						results.addAll(residentials);
 					}
@@ -1657,10 +1661,14 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 				results.addAll(commercials);
 			} 
 			
-			if(commercials != null && commercials.size() <= pageSize){
+			if(commercials == null || (commercials != null && commercials.size() <= pageSize)){
+				int count = pageSize;
+				if(commercials != null) {
+					count = pageSize-commercials.size();
+				}
 				//小区  从0开始
 				List<CommunityDTO> residentials = this.communityProvider.listCommunitiesByType(communityIds, 
-						CommunityType.RESIDENTIAL.getCode(), locator, pageSize+1);
+						CommunityType.RESIDENTIAL.getCode(), locator, count+1);
 				if(residentials != null) {
 					results.addAll(residentials);
 				}
