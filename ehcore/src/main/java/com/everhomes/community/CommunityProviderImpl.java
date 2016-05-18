@@ -39,6 +39,8 @@ import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.address.CommunityAdminStatus;
+import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.enterprise.EnterpriseContactStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -1026,6 +1028,34 @@ public class CommunityProviderImpl implements CommunityProvider {
             });
         
         return list;
+	}
+
+	@Override
+	public List<CommunityDTO> listCommunitiesByType(List<Long> communityIds, Byte communityType,
+			ListingLocator locator, int pageSize) {
+		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+		final List<CommunityDTO> results = new ArrayList<>();
+		
+		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
+	            (DSLContext context, Object reducingContext)-> {
+	            
+	            context.select().from(Tables.EH_COMMUNITIES)
+	                .where(Tables.EH_COMMUNITIES.ID.gt(locator.getAnchor())
+	                .and(Tables.EH_COMMUNITIES.ID.in(communityIds)))
+	                .and(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId))
+	                .and(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()))
+	                .and(Tables.EH_COMMUNITIES.COMMUNITY_TYPE.eq(communityType))
+	                .limit(pageSize)
+	                .fetch().map((r) -> {
+	                CommunityDTO community = ConvertHelper.convert(r, CommunityDTO.class);
+	                results.add(community);
+	                
+	                return null;
+	            });
+	                
+	            return true;
+	        });
+		return results;
 	}
 
 }
