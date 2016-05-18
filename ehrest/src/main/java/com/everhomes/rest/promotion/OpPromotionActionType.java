@@ -9,7 +9,7 @@ package com.everhomes.rest.promotion;
  *
  */
 public enum OpPromotionActionType {
-    STATIC_WEB_PAGE((byte)0), COUPON((byte)1);
+    STATIC_WEB_PAGE((byte)0), COUPON((byte)1), TEXT_ONLY((byte)1);
     
     private byte code;
     

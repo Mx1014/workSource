@@ -19,10 +19,6 @@ public class PriceOrderAction implements Runnable {
     public void run() {
         this.promotionService.onNewOrderPriceJob(id, price);
     }
-
-    public PriceOrderAction() {
-        //None used
-    }
     
     public PriceOrderAction(String idStr, String priceStr) {
         this.id = Long.parseLong(idStr);

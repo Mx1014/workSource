@@ -11,6 +11,7 @@ import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.promotion.OpPromotionWebPageData;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.user.User;
+import com.everhomes.user.UserService;
 import com.everhomes.util.StringHelper;
 
 public class OpPromotionStaticWebPageAction implements OpPromotionAction {
@@ -19,6 +20,12 @@ public class OpPromotionStaticWebPageAction implements OpPromotionAction {
     
     @Autowired
     PromotionService promotionService;
+    
+    @Autowired
+    UserService userService;
+    
+    @Autowired
+    OpPromotionMessageProvider promotionMessageProvider;
     
     @Override
     public void fire(OpPromotionContext ctx) {
@@ -45,6 +52,16 @@ public class OpPromotionStaticWebPageAction implements OpPromotionAction {
         if(activityContext.getNeedUpdate()) {
             promotionService.addPushCountByPromotionId(activityContext.getPromotion().getId(), 1);    
         }
+        
+        OpPromotionMessage promotionMessage = new OpPromotionMessage();
+        promotionMessage.setMessageText(data.getUrl());
+        promotionMessage.setNamespaceId(activityContext.getPromotion().getNamespaceId());
+        promotionMessage.setSenderUid(User.SYSTEM_UID);
+        promotionMessage.setTargetUid(userId);
+        promotionMessage.setResultData(dataStr);
+        promotionMessage.setMessageSeq(userService.getNextStoreSequence(User.SYSTEM_USER_LOGIN, 
+                activityContext.getPromotion().getNamespaceId(), AppConstants.APPID_MESSAGING));
+        promotionMessageProvider.createOpPromotionMessage(promotionMessage);
         
     }
 

@@ -34,11 +34,13 @@ import com.everhomes.rest.promotion.CreateOpPromotionCommand;
 import com.everhomes.rest.promotion.GetOpPromotionActivityByPromotionId;
 import com.everhomes.rest.promotion.ListOpPromotionActivityResponse;
 import com.everhomes.rest.promotion.ListPromotionCommand;
+import com.everhomes.rest.promotion.OpPromotionActionType;
 import com.everhomes.rest.promotion.OpPromotionActivityDTO;
 import com.everhomes.rest.promotion.OpPromotionAssignedScopeDTO;
 import com.everhomes.rest.promotion.OpPromotionConditionType;
 import com.everhomes.rest.promotion.OpPromotionOrderRangeCommand;
 import com.everhomes.rest.promotion.OpPromotionRangePriceData;
+import com.everhomes.rest.promotion.OpPromotionRegionPushingCommand;
 import com.everhomes.rest.promotion.OpPromotionStatus;
 import com.everhomes.rest.promotion.ScheduleTaskResourceType;
 import com.everhomes.rest.promotion.ScheduleTaskStatus;
@@ -170,6 +172,22 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
             //this.broadcastEvent(DaoAction.CREATE, EhOpPromotionActivities.class, promotion.getId());            
         }
 
+    }
+    
+    @Override
+    public void createRegionPushing(OpPromotionRegionPushingCommand regionCommand) {
+        CreateOpPromotionCommand cmd = new CreateOpPromotionCommand();
+        cmd.setActionData(regionCommand.getContent());
+        cmd.setActionType(OpPromotionActionType.TEXT_ONLY.getCode());
+        cmd.setStartTime(regionCommand.getStartTime());
+        cmd.setEndTime(regionCommand.getEndTime());
+        cmd.setPolicyType(OpPromotionConditionType.ALL.getCode());
+        
+        List<OpPromotionAssignedScopeDTO> scopes = new ArrayList<OpPromotionAssignedScopeDTO>();
+        OpPromotionAssignedScopeDTO scope = new OpPromotionAssignedScopeDTO();
+        scope.setPromotionId(regionCommand.getScopeId());
+        cmd.setAssignedScopes(scopes);
+        this.createPromotion(cmd);
     }
     
     @Override
