@@ -19,10 +19,10 @@ import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.user.User;
 
 @Component(PostSceneHandler.TOPIC_QUERY_FILTER_PREFIX + "discovery_enterprise_noauth")
-public class DiscoveryEnterpriseNoAuthPostSceneHandler extends DiscoveryParkEnterprisePostSceneHandler {
+public class DiscoveryEnterpriseNoAuthPostSceneHandler extends DiscoveryParkTouristPostSceneHandler {
 // 园区版即使用户加入了非物业管理公司，其帖子相关菜单与园区游客相似，故继承DiscoveryParkTouristPostSceneHandler以减少代码 by lqs 20160512
     
-    private static final Logger LOGGER = LoggerFactory.getLogger(DiscoveryParkEnterprisePostSceneHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DiscoveryEnterpriseNoAuthPostSceneHandler.class);
         
     @Autowired
     private OrganizationProvider organizationProvider;

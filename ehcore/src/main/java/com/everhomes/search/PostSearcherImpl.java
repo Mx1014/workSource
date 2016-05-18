@@ -546,8 +546,6 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
                 }
             }
             break;
-        case PARK_ENTERPRISE:
-        case PARK_ENTERPRISE_NOAUTH:
         case ENTERPRISE: // 增加两场景，与园区企业保持一致 by lqs 20160517
         case ENTERPRISE_NOAUTH: // 增加两场景，与园区企业保持一致 by lqs 20160517
             Organization organization = organizationProvider.findOrganizationById(sceneToken.getEntityId());
@@ -557,7 +555,6 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
             }
             break;
         case PM_ADMIN:
-        case PARK_PM_ADMIN:
             response = queryGlobalPostByOrganizationId(cmd, sceneToken, sceneToken.getEntityId());
             break;
         default:
@@ -620,14 +617,10 @@ public class PostSearcherImpl extends AbstractElasticSearch implements PostSearc
         }
         
         // 所管辖的小区
-        Community community = null;
         List<Long> communityIdList = new ArrayList<Long>();
-        List<OrganizationCommunity> organizationCommunitys = organizationProvider.listOrganizationCommunities(sceneToken.getEntityId());
-        for(OrganizationCommunity orgCmnty : organizationCommunitys) {
-            community = communityProvider.findCommunityById(orgCmnty.getCommunityId());
-            if(community != null) {
-                communityIdList.add(community.getId());
-            }
+        List<CommunityDTO> communities = organizationService.listAllChildrenOrganizationCoummunities(organizationId);
+        for(CommunityDTO community : communities) {
+            communityIdList.add(community.getId());
         }
 
         SearchByMultiForumAndCmntyCommand orgTopicCmd = ConvertHelper.convert(cmd, SearchByMultiForumAndCmntyCommand.class);
