@@ -1193,6 +1193,11 @@ public class ForumServiceImpl implements ForumService {
         	}
         }
         
+        Condition cond = this.notEqPostCategoryCondition(cmd.getExcludeCategories());
+        
+        if(null != cond){
+        	condition.and(cond);
+        }
         List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus());
         
         

@@ -1650,10 +1650,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 		List<Long> communityIds = cmd.getCommunityIds();
 
 		if(communityIds == null || communityIds.size() == 0){
-			List<OrganizationCommunity> organizationCommunityList =  organizationProvider.listOrganizationCommunities(cmd.getOrganizationId());
-			if(organizationCommunityList != null && organizationCommunityList.size() > 0){
-				for (OrganizationCommunity organizationCommunity : organizationCommunityList) {
-					communityIds.add(organizationCommunity.getCommunityId());
+			List<CommunityDTO> dtos =  this.listAllChildrenOrganizationCoummunities(cmd.getOrganizationId());
+			if(dtos != null && dtos.size() > 0){
+				for (CommunityDTO dto : dtos) {
+					communityIds.add(dto.getId());
 				}
 			}
 		}
