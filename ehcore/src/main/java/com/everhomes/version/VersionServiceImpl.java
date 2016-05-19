@@ -3,6 +3,8 @@ package com.everhomes.version;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +24,7 @@ import com.everhomes.util.Version;
 
 @Component
 public class VersionServiceImpl implements VersionService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(VersionServiceImpl.class);
     
     @Autowired
     private VersionProvider versionProvider;
@@ -51,15 +54,19 @@ public class VersionServiceImpl implements VersionService {
         VersionUpgradeRule rule = this.versionProvider.matchVersionUpgradeRule(realm.getId(), 
                 ConvertHelper.convert(cmd.getCurrentVersion(), Version.class));
         
-        if(rule == null)
-            throw RuntimeErrorException.errorWith(VersionServiceErrorCode.SCOPE, VersionServiceErrorCode.ERROR_NO_UPGRADE_RULE_SET, 
-                    "No upgrade rule has been setup yet");
+        // 客户端没有对该错进行处理而直接提示，用户体验不好，故去掉报错 by lqs 20160519
+//        if(rule == null)
+//            throw RuntimeErrorException.errorWith(VersionServiceErrorCode.SCOPE, VersionServiceErrorCode.ERROR_NO_UPGRADE_RULE_SET, 
+//                    "No upgrade rule has been setup yet");
         
         UpgradeInfoResponse response = new UpgradeInfoResponse();
-        response.setForceFlag(rule.getForceUpgrade());
-        
-        Version version = Version.fromVersionString(rule.getTargetVersion());
-        response.setTargetVersion(ConvertHelper.convert(version, VersionDTO.class));
+        if(rule != null) {
+            response.setForceFlag(rule.getForceUpgrade());
+            Version version = Version.fromVersionString(rule.getTargetVersion());
+            response.setTargetVersion(ConvertHelper.convert(version, VersionDTO.class));
+        } else {
+            LOGGER.error("No upgrade rule has been setup yet, cmd={}", cmd);
+        }
         return response;
     }
 
