@@ -1610,15 +1610,43 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid parameter, latitude and longitude have to be both specified or neigher");
         
-        List<CommunityGeoPoint> pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatigtue(),cmd.getLongitude(), 5);
-        List<Long> communityIds = getAllCommunityIds(pointList);
-        
-        if(cmd.getPageAnchor()==null)
+
+		if(cmd.getPageAnchor()==null)
 			cmd.setPageAnchor(0L);
         
         int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         ListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
+		
+        int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+        if(namespaceId == 0) {
+        	resp = listMixCommunitiesByDistance(cmd, locator, pageSize);
+        	return resp;
+        }else {
+        	results = this.communityProvider.listCommunitiesByNamespaceId(namespaceId, locator, pageSize+1);
+        	
+        	if(results != null && results.size() > pageSize){
+            	results.remove(results.size()-1);
+            	resp.setNextPageAnchor(results.get(results.size()-1).getId());
+    		}
+    		if(results != null){
+    			resp.setDtos(results);
+    		}
+            
+            return resp;
+        }
+        
+	}
+	
+	private ListNearbyMixCommunitiesCommandResponse listMixCommunitiesByDistance(ListNearbyMixCommunitiesCommand cmd
+			, ListingLocator locator, int pageSize) {
+		ListNearbyMixCommunitiesCommandResponse resp = new ListNearbyMixCommunitiesCommandResponse();
+		List<CommunityDTO> results = new ArrayList<>();
+		
+		List<CommunityGeoPoint> pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatigtue(),cmd.getLongitude(), 5);
+        List<Long> communityIds = getAllCommunityIds(pointList);
+        
+        
 		
 		if(cmd.getPageAnchor() != 0) {
 			Community anchorCommunity = this.communityProvider.findCommunityById(cmd.getPageAnchor());
