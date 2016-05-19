@@ -793,14 +793,10 @@ public class OrganizationController extends ControllerBase {
      * <p>申请加入企业</p>
      */
     @RequestMapping("applyForEnterpriseContact")
-    @RestReturn(value=OrganizationDetailDTO.class)
+    @RestReturn(value=OrganizationDTO.class)
     public RestResponse applyForEnterpriseContact(@Valid CreateOrganizationMemberCommand cmd) {
-    	OrganizationMemberDetailDTO dto = organizationService.applyForEnterpriseContact(cmd);
-    	OrganizationDetailDTO organizationDetailDTO = null;
-    	if(null != dto){
-    		organizationDetailDTO = dto.getOrganizationDetailDTO();
-    	}
-        RestResponse response = new RestResponse(organizationDetailDTO);
+    	OrganizationDTO dto = organizationService.applyForEnterpriseContact(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -852,9 +848,9 @@ public class OrganizationController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /enterprise/listUserRelatedEnterprises</b>
+     * <b>URL: /org/ listUserRelatedEnterprises</b>
      * <p>列出个人相关的企业</p>
-     * @return {@link EnterpriseDTO}
+     * @return {@link OrganizationDetailDTO}
      */
      @RequestMapping("listUserRelatedEnterprises")
      @RestReturn(value=OrganizationDetailDTO.class, collection=true)

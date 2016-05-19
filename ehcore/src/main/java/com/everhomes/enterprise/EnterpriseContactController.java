@@ -47,6 +47,7 @@ import com.everhomes.rest.organization.CreateOrganizationMemberCommand;
 import com.everhomes.rest.organization.ListOrganizationContactCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
+import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationDetailDTO;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.OrganizationMemberDetailDTO;
@@ -154,7 +155,7 @@ public class EnterpriseContactController extends ControllerBase {
      * <b>URL: /contact/createContactByUserIdCommand</b>
      * <p>注册流程，绑定已有用户到企业：根据已有用户ID创建企业用户，从而成为此企业的一个成员</p>
      * 申请加入企业
-     * @return {@link OrganizationMemberDTO}
+     * @return {@link EnterpriseContactDTO}
      */
     @RequestMapping("createContactByUserIdCommand")
     @RestReturn(value=EnterpriseContactDTO.class)
@@ -163,28 +164,16 @@ public class EnterpriseContactController extends ControllerBase {
         CreateOrganizationMemberCommand command = new CreateOrganizationMemberCommand();
         command.setOrganizationId(cmd.getEnterpriseId());
         command.setContactName(cmd.getName());
-        OrganizationMemberDetailDTO dto = organizationService.applyForEnterpriseContact(command);
+        OrganizationDTO dto = organizationService.applyForEnterpriseContact(command);
         RestResponse res = new RestResponse();
         if (null == dto) {
             //TODO for error code
             res.setErrorCode(ErrorCodes.ERROR_GENERAL_EXCEPTION); 
         } else {
-        	OrganizationDetailDTO organizationDetailDTO = dto.getOrganizationDetailDTO();
         	 EnterpriseContactDTO contact = new EnterpriseContactDTO();
              contact.setId(dto.getId());
-             contact.setAvatar(dto.getAvatar());
-             if(null != organizationDetailDTO){
-            	 contact.setEnterpriseId(dto.getId());
-             }
-             
-             contact.setEmployeeNo(String.valueOf(dto.getEmployeeNo()));
-             contact.setGroupName(dto.getGroupName());
-             contact.setName(dto.getContactName());
-             contact.setNickName(dto.getContactName());
-             contact.setPhone(dto.getContactToken());
-             contact.setStatus(dto.getStatus());
-             contact.setUserId(dto.getTargetId());
-             contact.setSex(String.valueOf(dto.getGender()));
+             contact.setEnterpriseId(dto.getId());
+             contact.setStatus(dto.getMemberStatus());
             res.setResponseObject(contact);
         }
         
