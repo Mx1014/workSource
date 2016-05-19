@@ -65,6 +65,7 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
         Long pageSize = 200l;
         Long i = 1l;
         Long count = 0l;
+        this.deleteAll();
         
         for(;;) {
             List<Community> communities = this.communityProvider.listAllCommunities(i,pageSize);
