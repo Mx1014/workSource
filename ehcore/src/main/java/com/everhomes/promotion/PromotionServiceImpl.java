@@ -41,6 +41,7 @@ import com.everhomes.rest.promotion.OpPromotionConditionType;
 import com.everhomes.rest.promotion.OpPromotionOrderRangeCommand;
 import com.everhomes.rest.promotion.OpPromotionRangePriceData;
 import com.everhomes.rest.promotion.OpPromotionRegionPushingCommand;
+import com.everhomes.rest.promotion.OpPromotionSearchCommand;
 import com.everhomes.rest.promotion.OpPromotionStatus;
 import com.everhomes.rest.promotion.ScheduleTaskResourceType;
 import com.everhomes.rest.promotion.ScheduleTaskStatus;
@@ -258,6 +259,14 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
 //                    if(task != null) {
 //                        dto.setPushCount(task.getProcessCount());
 //                    }
+                    List<OpPromotionAssignedScope> scopes = promotionAssignedScopeProvider.getOpPromotionScopeByPromotionId(dto.getId());
+                    
+                    List<OpPromotionAssignedScopeDTO> scopeDtos = new ArrayList<OpPromotionAssignedScopeDTO>();
+                    for(OpPromotionAssignedScope r : scopes) {
+                        scopeDtos.add(ConvertHelper.convert(r, OpPromotionAssignedScopeDTO.class));
+                    }
+                    dto.setAssignedScopes(scopeDtos);
+                    
                     dtos.add(dto);
                 }
             }
@@ -274,6 +283,14 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
         OpPromotionActivity promotion = this.promotionActivityProvider.getOpPromotionActivityById(cmd.getPromotionId());
         if(promotion != null) {
             OpPromotionActivityDTO dto = ConvertHelper.convert(promotion, OpPromotionActivityDTO.class);
+            List<OpPromotionAssignedScope> scopes = promotionAssignedScopeProvider.getOpPromotionScopeByPromotionId(dto.getId());
+            
+            List<OpPromotionAssignedScopeDTO> scopeDtos = new ArrayList<OpPromotionAssignedScopeDTO>();
+            for(OpPromotionAssignedScope r : scopes) {
+                scopeDtos.add(ConvertHelper.convert(r, OpPromotionAssignedScopeDTO.class));
+            }
+            dto.setAssignedScopes(scopeDtos);
+            
             return dto;
         }
         
@@ -351,5 +368,44 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
                 return promotion;
             }
         });
+    }
+    
+    @Override
+    public ListOpPromotionActivityResponse searchPromotion(OpPromotionSearchCommand cmd) {
+        ListingLocator locator = new ListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        List<OpPromotionActivity> promotions = null;
+        
+        if(cmd.getKeyword() == null || cmd.getKeyword().isEmpty()) {
+            promotions = promotionActivityProvider.listOpPromotion(locator, count);
+        } else {
+            promotions = promotionActivityProvider.searchOpPromotionByKeyword(locator, count, cmd.getKeyword());
+        }
+        
+        ListOpPromotionActivityResponse resp = new ListOpPromotionActivityResponse();
+        if(promotions != null) {
+            List<OpPromotionActivityDTO> dtos = new ArrayList<OpPromotionActivityDTO>();
+            for(OpPromotionActivity op : promotions) {
+                OpPromotionActivityDTO dto = ConvertHelper.convert(op, OpPromotionActivityDTO.class);
+                
+                if(dto != null) {
+                    List<OpPromotionAssignedScope> scopes = promotionAssignedScopeProvider.getOpPromotionScopeByPromotionId(dto.getId());
+                    
+                    List<OpPromotionAssignedScopeDTO> scopeDtos = new ArrayList<OpPromotionAssignedScopeDTO>();
+                    for(OpPromotionAssignedScope r : scopes) {
+                        scopeDtos.add(ConvertHelper.convert(r, OpPromotionAssignedScopeDTO.class));
+                    }
+                    dto.setAssignedScopes(scopeDtos);
+                    
+                    dtos.add(dto);
+                }
+            }
+            
+            resp.setPromotions(dtos);
+        }
+        resp.setNextPageAnchor(locator.getAnchor());
+        
+        return resp;
     }
 }

@@ -152,4 +152,33 @@ public class OpPromotionActivitieProviderImpl implements OpPromotionActivityProv
         
         return promotions;
     }
+    
+    @Override
+    public List<OpPromotionActivity> searchOpPromotionByKeyword(ListingLocator locator, int count, String keyword) {
+        
+        Long id = 0l;
+        try {
+            id = Long.parseLong(keyword);
+        } catch(Exception ex) {
+            
+        }
+        
+        final Long searchId = id;
+        
+        List<OpPromotionActivity> promotions = queryOpPromotionActivities(locator, count, new ListingQueryBuilderCallback() {
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_OP_PROMOTION_ACTIVITIES.TITLE.like("%" + keyword + "%")
+                        .or(Tables.EH_OP_PROMOTION_ACTIVITIES.DESCRIPTION.like("%" + keyword + "%"))
+                        .or(Tables.EH_OP_PROMOTION_ACTIVITIES.ID.eq(searchId)));
+                
+                query.addConditions(Tables.EH_OP_PROMOTION_ACTIVITIES.STATUS.ne(OpPromotionStatus.INACTIVE.getCode()));
+                return query;
+            }
+            
+        });
+        
+        return promotions;        
+    }
 }

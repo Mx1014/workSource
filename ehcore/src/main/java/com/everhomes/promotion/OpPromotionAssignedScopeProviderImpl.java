@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -111,6 +112,21 @@ public class OpPromotionAssignedScopeProviderImpl implements OpPromotionAssigned
     private void prepareObj(OpPromotionAssignedScope obj) {
     }
     
-//    public OpPromotionAssignedScope getOpPromotionScopeByPromotionId
+    @Override
+    public List<OpPromotionAssignedScope> getOpPromotionScopeByPromotionId(Long promotionId) {
+        ListingLocator locator = new ListingLocator();
+        int count = 100;
+        
+        return this.queryOpPromotionAssignedScopes(locator, count, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_OP_PROMOTION_ASSIGNED_SCOPES.PROMOTION_ID.eq(promotionId));
+                return query;
+            }
+            
+        });
+    }
 }
 
