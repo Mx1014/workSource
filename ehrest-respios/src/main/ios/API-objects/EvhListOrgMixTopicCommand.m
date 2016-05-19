@@ -23,6 +23,7 @@
 {
     self = [super init];
     if(self) {
+        _excludeCategories = [NSMutableArray new];
         return self;
     }
     return nil;
@@ -38,6 +39,13 @@
         [jsonObject setObject: self.pageAnchor forKey: @"pageAnchor"];
     if(self.pageSize)
         [jsonObject setObject: self.pageSize forKey: @"pageSize"];
+    if(self.excludeCategories) {
+        NSMutableArray* jsonArray = [NSMutableArray new];
+        for(NSNumber* item in self.excludeCategories) {
+            [jsonArray addObject:item];
+        }
+        [jsonObject setObject: jsonArray forKey: @"excludeCategories"];
+    }
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -59,6 +67,12 @@
         if(self.pageSize && [self.pageSize isEqual:[NSNull null]])
             self.pageSize = nil;
 
+        {
+            NSArray* jsonArray = [jsonObject objectForKey: @"excludeCategories"];
+            for(id itemJson in jsonArray) {
+                [self.excludeCategories addObject: itemJson];
+            }
+        }
         return self;
     }
     

@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-05-17 18:47:43
+// generated at 2016-05-19 12:52:09
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -226,6 +226,12 @@ public interface ApiConstants {
     public static final String ADMIN_ORG_UPDATEPERSONNELSTODEPARTMENT_URL = "/admin/org/updatePersonnelsToDepartment";
     public static final String ADMIN_ORG_VERIFYPERSONNELBYPHONE_URL = "/admin/org/verifyPersonnelByPhone";
     public static final String ADMIN_PINGBORDER_URL = "/admin/pingBorder";
+    public static final String ADMIN_PROMOTION_CLOSEPROMOTION_URL = "/admin/promotion/closePromotion";
+    public static final String ADMIN_PROMOTION_CREATEPROMOTION_URL = "/admin/promotion/createPromotion";
+    public static final String ADMIN_PROMOTION_GETPROMOTIONBYID_URL = "/admin/promotion/getPromotionById";
+    public static final String ADMIN_PROMOTION_LISTPROMOTION_URL = "/admin/promotion/listPromotion";
+    public static final String ADMIN_PROMOTION_NEWORDERPRICE_URL = "/admin/promotion/newOrderPrice";
+    public static final String ADMIN_PROMOTION_SEARCHPROMOTION_URL = "/admin/promotion/searchPromotion";
     public static final String ADMIN_PUSHMESSAGE_CREATEPUSHMESSAGE_URL = "/admin/pushmessage/createPushMessage";
     public static final String ADMIN_PUSHMESSAGE_DELETEPUSHMESSAGE_URL = "/admin/pushmessage/deletePushMessage";
     public static final String ADMIN_PUSHMESSAGE_LISTPUSHMESSAGE_URL = "/admin/pushmessage/listPushMessage";
@@ -491,6 +497,7 @@ public interface ApiConstants {
     public static final String LAUNCHPAD_USERDEFINEDLAUNCHPAD_URL = "/launchpad/userDefinedLaunchPad";
     public static final String LINK_FINDLINKBYID_URL = "/link/findLinkById";
     public static final String LOCALE_GETLOCALIZEDSTRING_URL = "/locale/getLocalizedString";
+    public static final String NAMESPACE_GETNAMESPACEDETAIL_URL = "/namespace/getNamespaceDetail";
     public static final String NAMESPACE_LISTCOMMUNITYBYNAMESPACE_URL = "/namespace/listCommunityByNamespace";
     public static final String OAUTH2_AUTHORIZE_URL = "/oauth2/authorize";
     public static final String OAUTH2_CONFIRM_URL = "/oauth2/confirm";
@@ -800,7 +807,6 @@ public interface ApiConstants {
     public static final String UI_ORG_PROCESSINGTASK_URL = "/ui/org/processingTask";
     public static final String UI_ORG_REFUSETASK_URL = "/ui/org/refuseTask";
     public static final String UI_PRIVILEGE_GETENTRANCEBYPRIVILEGE_URL = "/ui/privilege/getEntranceByPrivilege";
-    public static final String UI_USER_GETUSEROPPROMOTIONSBYSCENE_URL = "/ui/user/getUserOpPromotionsByScene";
     public static final String UI_USER_GETUSERRELATEDADDRESSES_URL = "/ui/user/getUserRelatedAddresses";
     public static final String UI_USER_LISTCONTACTSBYSCENE_URL = "/ui/user/listContactsByScene";
     public static final String UI_USER_LISTNEARBYACTIVITIESBYSCENE_URL = "/ui/user/listNearbyActivitiesByScene";
