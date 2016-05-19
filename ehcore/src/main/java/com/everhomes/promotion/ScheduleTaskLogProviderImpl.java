@@ -13,10 +13,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.rest.promotion.OpPromotionOwnerType;
+import com.everhomes.rest.promotion.ScheduleTaskResourceType;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhScheduleTaskLogsDao;
@@ -25,6 +28,7 @@ import com.everhomes.server.schema.tables.records.EhScheduleTaskLogsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
@@ -109,6 +113,34 @@ public class ScheduleTaskLogProviderImpl implements ScheduleTaskLogProvider {
     }
 
     private void prepareObj(ScheduleTaskLog obj) {
+        Long l2 = DateHelper.currentGMTTime().getTime();
+        obj.setCreateTime(new Timestamp(l2));
+    }
+    
+    @Override 
+    public ScheduleTaskLog findScheduleTaskLogByUser(Long promotionId, Long userId) {
+        ListingLocator locator = new ListingLocator();
+        int count = 1;
+        
+        List<ScheduleTaskLog> taskLogs = this.queryScheduleTaskLogs(locator, count, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_SCHEDULE_TASK_LOGS.RESOURCE_ID.eq(promotionId));
+                query.addConditions(Tables.EH_SCHEDULE_TASK_LOGS.RESOURCE_TYPE.eq(ScheduleTaskResourceType.PROMOTION_ACTIVITY.getCode()));
+                query.addConditions(Tables.EH_SCHEDULE_TASK_LOGS.OWNER_ID.eq(userId));
+                query.addConditions(Tables.EH_SCHEDULE_TASK_LOGS.OWNER_TYPE.eq(OpPromotionOwnerType.USER.getCode()));
+                return query;
+            }
+            
+        });
+        
+        if(taskLogs != null && taskLogs.size() > 0) {
+            return taskLogs.get(0);
+        }
+        
+        return null;
     }
 }
 

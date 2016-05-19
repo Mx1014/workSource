@@ -1,7 +1,9 @@
 package com.everhomes.promotion;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -11,6 +13,8 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.CommunityService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.community.admin.CommunityUserAddressDTO;
 import com.everhomes.rest.community.admin.CommunityUserAddressResponse;
@@ -20,6 +24,7 @@ import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
+import com.everhomes.rest.promotion.OpPromotionScopeType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
 
@@ -36,6 +41,12 @@ public class PromotionUserServiceImpl implements PromotionUserService {
     
     @Autowired
     private OrganizationService organizationService;
+    
+    @Autowired
+    private OrganizationProvider organizationProvider;
+    
+    @Autowired
+    private OpPromotionAssignedScopeProvider promotionAssignedScopeProvider;
     
     @Override
     public void listAllUser(OpPromotionUserVisitor visitor, OpPromotionUserCallback callback) {
@@ -145,7 +156,51 @@ public class PromotionUserServiceImpl implements PromotionUserService {
             cmd.setPageAnchor(resp.getNextPageAnchor());
             resp = organizationService.ListParentOrganizationPersonnels(cmd);
             
+        }   
+    }
+    
+    @Override
+    public Boolean checkOrganizationMember(OpPromotionActivity promotion, OrganizationMember member) {       
+        Map<String, Integer> checkExists = new HashMap<String, Integer>();
+        
+        List<OpPromotionAssignedScope> scopes = promotionAssignedScopeProvider.getOpPromotionScopeByPromotionId(promotion.getId());
+        for(OpPromotionAssignedScope scope : scopes) {
+            checkExists.put("" + scope.getScopeCode() + ":" + scope.getScopeId(), 1);
         }
         
+        String key = "" + OpPromotionScopeType.ORGANIZATION.getCode() + ":" + member.getOrganizationId();
+        if(checkExists.containsKey(key)) {
+            return true;
+        }
+        
+        key = "" + OpPromotionScopeType.ALL.getCode() + ":0";
+        if(checkExists.containsKey(key)) {
+            return true;
+        }
+        
+            Long communityId = organizationService.getOrganizationActiveCommunityId(member.getOrganizationId());
+            key = "" + OpPromotionScopeType.COMMUNITY.getCode() + ":" + member.getOrganizationId();
+            
+            if(checkExists.containsKey(key)) {
+                return true;
+            }
+            
+            Community community = communityProvider.findCommunityById(communityId);
+            key = "" + OpPromotionScopeType.CITY.getCode() + ":" + community.getCityId();
+            if(checkExists.containsKey(key)) {
+                return true;
+            }
+        
+        return false;
     }
+    
+//    @Override
+//    public Community listUserCommunities(Long userId) {
+//        
+//    }
+//    
+//    @Override
+//    public Boolean checkUserInCompany(Long userId, Long companyId) {
+//        
+//    }
 }

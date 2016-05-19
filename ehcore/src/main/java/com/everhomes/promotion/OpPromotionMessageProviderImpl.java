@@ -13,10 +13,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.rest.promotion.OpPromotionOwnerType;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhOpPromotionMessagesDao;
@@ -112,5 +114,27 @@ public class OpPromotionMessageProviderImpl implements OpPromotionMessageProvide
     private void prepareObj(OpPromotionMessage obj) {
         Long l2 = DateHelper.currentGMTTime().getTime();
         obj.setCreateTime(new Timestamp(l2));
+    }
+    
+    @Override
+    public OpPromotionMessage findTargetByPromotionId(Long userId, Long promotionId) {
+        List<OpPromotionMessage> messages = queryOpPromotionMessages(new ListingLocator(), 1, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_OP_PROMOTION_MESSAGES.OWNER_ID.eq(promotionId));
+                query.addConditions(Tables.EH_OP_PROMOTION_MESSAGES.OWNER_TYPE.eq(OpPromotionOwnerType.USER.getCode()));
+                query.addConditions(Tables.EH_OP_PROMOTION_MESSAGES.TARGET_UID.eq(userId));
+                return query;
+            }
+            
+        });
+        
+        if(messages != null && messages.size() > 0) {
+            return messages.get(0);
+        }
+        
+        return null;
     }
 }

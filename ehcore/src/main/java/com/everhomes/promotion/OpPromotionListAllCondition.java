@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.rest.promotion.OpPromotionScope;
+import com.everhomes.rest.promotion.OpPromotionScopeType;
 import com.everhomes.user.User;
 
 
@@ -36,7 +36,7 @@ public class OpPromotionListAllCondition implements OpPromotionCondition, OpProm
         
         List<OpPromotionAssignedScope> scopes = promotionAssignedScopeProvider.getOpPromotionScopeByPromotionId(c.getPromotion().getId());
         for(OpPromotionAssignedScope scope : scopes) {
-            OpPromotionScope scopeType = OpPromotionScope.fromCode(scope.getScopeCode());
+            OpPromotionScopeType scopeType = OpPromotionScopeType.fromCode(scope.getScopeCode());
             switch(scopeType) {
             case ALL:
                 promotionUserService.listAllUser(visitor, this);

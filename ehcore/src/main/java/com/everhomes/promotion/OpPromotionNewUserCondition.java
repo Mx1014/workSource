@@ -12,7 +12,10 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.group.GroupMemberStatus;
+import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.server.schema.tables.pojos.EhGroupMembers;
 import com.everhomes.server.schema.tables.pojos.EhOpPromotionActivities;
 import com.everhomes.user.User;
@@ -34,6 +37,12 @@ public class OpPromotionNewUserCondition implements OpPromotionCondition, LocalB
     
     @Autowired
     private UserProvider userProvider;
+    
+    @Autowired
+    private PromotionUserService promotionUserService;
+    
+    @Autowired
+    private OrganizationProvider organizationProvider;
     
     private OpPromotionActivity cacheActivity; 
     
@@ -57,6 +66,27 @@ public class OpPromotionNewUserCondition implements OpPromotionCondition, LocalB
             
             if(arg1.indexOf(EhOpPromotionActivities.class.getName()) >= 0) {
                 this.unsubcribeMyself();
+            } else if(arg1.indexOf(OrganizationMember.class.getName()) >= 0) {
+                Long memberId = (Long)arg2;
+                
+                OrganizationMember member = organizationProvider.findOrganizationMemberById(memberId);
+                OrganizationMemberTargetType targetType = OrganizationMemberTargetType.fromCode(member.getTargetType());
+                if(targetType != OrganizationMemberTargetType.USER) {
+                    return Action.none;
+                }
+                
+                if(promotionUserService.checkOrganizationMember(this.cacheActivity, member)) {
+                    OpPromotionAction action = OpPromotionUtils.getActionFromPromotion(this.cacheActivity);
+                    
+                    OpPromotionActivityContext ctx = new OpPromotionActivityContext(this.cacheActivity);
+                    User u = userProvider.findUserById(member.getTargetId());
+                    if(u != null) {
+                        ctx.setUser(u);
+                        ctx.setNeedUpdate(true);
+                        action.fire(ctx);
+                    }
+                }
+                    
             } else {
                 Long groupMemberId = (Long)arg2;
                 GroupMember groupMember = this.groupProvider.findGroupMemberById(groupMemberId);

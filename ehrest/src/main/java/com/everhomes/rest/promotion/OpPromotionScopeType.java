@@ -10,12 +10,12 @@ package com.everhomes.rest.promotion;
  * <li>ORGANIZATION(4): 某个公司/机构</li>
  * </ul>
  */
-public enum OpPromotionScope {
+public enum OpPromotionScopeType {
     ALL((byte)0), COMMUNITY((byte)1), CITY((byte)2), USER((byte)3), ORGANIZATION((byte)4);
     
     private byte code;
     
-    private OpPromotionScope(byte code) {
+    private OpPromotionScopeType(byte code) {
         this.code = code;
     }
     
@@ -23,10 +23,10 @@ public enum OpPromotionScope {
         return this.code;
     }
     
-    public static OpPromotionScope fromCode(Byte code) {
+    public static OpPromotionScopeType fromCode(Byte code) {
         if(code != null) {
-            OpPromotionScope[] values = OpPromotionScope.values();
-            for(OpPromotionScope value : values) {
+            OpPromotionScopeType[] values = OpPromotionScopeType.values();
+            for(OpPromotionScopeType value : values) {
                 if(value.code == code.byteValue()) {
                     return value;
                 }

@@ -1,5 +1,10 @@
 package com.everhomes.promotion;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.everhomes.messaging.MessagingService;
@@ -16,6 +21,8 @@ import com.everhomes.user.UserService;
 import com.everhomes.util.StringHelper;
 
 public class OpPromotionStaticWebPageAction implements OpPromotionAction {
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpPromotionStaticWebPageAction.class);
+    
     @Autowired
     MessagingService messagingService;
     
@@ -28,12 +35,20 @@ public class OpPromotionStaticWebPageAction implements OpPromotionAction {
     @Autowired
     OpPromotionMessageProvider promotionMessageProvider;
     
+    @Autowired
+    ScheduleTaskLogProvider scheduleTaskLogProvider;
+    
     @Override
     public void fire(OpPromotionContext ctx) {
-        
         OpPromotionActivityContext activityContext = (OpPromotionActivityContext)ctx;
         User user = activityContext.getUser();
         Long userId = user.getId();
+        
+        OpPromotionMessage promotionMessage = promotionMessageProvider.findTargetByPromotionId(userId, activityContext.getPromotion().getId());
+        if(promotionMessage != null) {
+            LOGGER.error("already pushed to user=" + promotionMessage.getTargetUid() + ", promotionId=" + promotionMessage.getOwnerId());
+            return;
+        }
         
         String dataStr = activityContext.getPromotion().getActionData();
         OpPromotionWebPageData data = (OpPromotionWebPageData)StringHelper.fromJsonString(dataStr, OpPromotionWebPageData.class);
@@ -54,6 +69,10 @@ public class OpPromotionStaticWebPageAction implements OpPromotionAction {
         messageDto.setBody(bodyStr);
         
         messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+        
+        Map<String, String> meta = new HashMap<String, String>();
+        meta.put("popup-flag", "1");
+        messageDto.setMeta(meta);
 
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
                 userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode()); 
@@ -62,7 +81,7 @@ public class OpPromotionStaticWebPageAction implements OpPromotionAction {
             promotionService.addPushCountByPromotionId(activityContext.getPromotion().getId(), 1);    
         }
         
-        OpPromotionMessage promotionMessage = new OpPromotionMessage();
+        promotionMessage = new OpPromotionMessage();
         promotionMessage.setMessageText(data.getUrl());
         promotionMessage.setNamespaceId(activityContext.getPromotion().getNamespaceId());
         promotionMessage.setSenderUid(User.SYSTEM_UID);
