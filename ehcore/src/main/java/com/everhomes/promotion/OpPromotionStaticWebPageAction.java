@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.messaging.LinkBody;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -42,8 +43,16 @@ public class OpPromotionStaticWebPageAction implements OpPromotionAction {
         messageDto.setSenderUid(User.SYSTEM_UID);
         messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()), 
                 new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.BIZ_USER_LOGIN.getUserId())));
-        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
-        messageDto.setBody(data.getUrl());
+        
+        messageDto.setBodyType(MessageBodyType.LINK.getCode());
+        LinkBody linkBody = new LinkBody();
+        linkBody.setActionUrl(data.getUrl());
+        linkBody.setContent(activityContext.getPromotion().getDescription());
+        linkBody.setTitle(activityContext.getPromotion().getTitle());
+        String bodyStr = StringHelper.toJsonString(linkBody);
+        
+        messageDto.setBody(bodyStr);
+        
         messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
 
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
