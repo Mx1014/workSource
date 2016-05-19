@@ -2,9 +2,9 @@ INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'forum
 
 INSERT INTO `eh_scene_types` (`id`, `namespace_id`, `name`, `display_name`, `create_time`, `parent_id`) VALUES(3, 0, 'family', '家庭场景', '2016-05-11 09:15:50', 1);
 INSERT INTO `eh_scene_types` (`id`, `namespace_id`, `name`, `display_name`, `create_time`, `parent_id`) VALUES(1001, 0, 'park_tourist', '园区游客场景', '2016-05-11 09:15:50', 0);
-INSERT INTO `eh_scene_types` (`id`, `namespace_id`, `name`, `display_name`, `create_time`, `parent_id`) VALUES(1002, 0, 'park_enterprise', '园区加入公司且认证通过的场景', '2016-05-11 09:15:50', 1001);
-INSERT INTO `eh_scene_types` (`id`, `namespace_id`, `name`, `display_name`, `create_time`, `parent_id`) VALUES(1003, 0, 'park_enterprise_noauth', '园区加入公司且未认证通过的场景', '2016-05-11 09:15:50', 1001);
-INSERT INTO `eh_scene_types` (`id`, `namespace_id`, `name`, `display_name`, `create_time`, `parent_id`) VALUES(1004, 0, 'park_pm_admin', '园区管理员场景', '2016-05-11 09:15:50', 0);
+INSERT INTO `eh_scene_types` (`id`, `namespace_id`, `name`, `display_name`, `create_time`, `parent_id`) VALUES(1002, 0, 'enterprise', '加入公司且认证通过的场景（不分小区和园区）', '2016-05-11 09:15:50', 1001);
+INSERT INTO `eh_scene_types` (`id`, `namespace_id`, `name`, `display_name`, `create_time`, `parent_id`) VALUES(1003, 0, 'enterprise_noauth', '园区加入公司且未认证通过的场景（不分小区和园区）', '2016-05-11 09:15:50', 1001);
+-- INSERT INTO `eh_scene_types` (`id`, `namespace_id`, `name`, `display_name`, `create_time`, `parent_id`) VALUES(1004, 0, 'park_pm_admin', '园区管理员场景', '2016-05-11 09:15:50', 0);
 
 -- UPDATE `eh_organizations` SET `community_id`=24210090697425925 WHERE `id`=1; -- 万科城物业管理处
 -- UPDATE `eh_organizations` SET `community_id`=24210090697427178 WHERE `id`=2; -- 龙悦居物业管理处
