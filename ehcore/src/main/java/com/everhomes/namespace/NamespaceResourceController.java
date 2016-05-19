@@ -17,6 +17,7 @@ import com.everhomes.rest.namespace.GetNamespaceDetailCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.namespace.NamespaceDetailDTO;
+import com.everhomes.util.RequireAuthentication;
 
 /**
  * Namespace resource REST API controller
@@ -51,6 +52,7 @@ public class NamespaceResourceController extends ControllerBase {
      * <p>获取命名空间的一些配置信息</p>
      */
     //checked
+    @RequireAuthentication(false)
     @RequestMapping("getNamespaceDetail")
     @RestReturn(value=NamespaceDetailDTO.class)
     public RestResponse getNamespaceDetail(GetNamespaceDetailCommand cmd) {
