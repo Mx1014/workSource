@@ -9,7 +9,8 @@
 typedef enum {
 
     EvhDoorAccessOwnerType_COMMUNITY = 0, 
-    EvhDoorAccessOwnerType_ENTERPRISE = 1
+    EvhDoorAccessOwnerType_ENTERPRISE = 1, 
+    EvhDoorAccessOwnerType_FAMILY = 2
 
 } EvhDoorAccessOwnerType;
 

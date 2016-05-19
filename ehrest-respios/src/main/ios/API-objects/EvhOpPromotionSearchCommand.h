@@ -1,26 +1,21 @@
 //
-// EvhListOrgMixTopicCommand.h
+// EvhOpPromotionSearchCommand.h
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhListOrgMixTopicCommand
+// EvhOpPromotionSearchCommand
 //
-@interface EvhListOrgMixTopicCommand
+@interface EvhOpPromotionSearchCommand
     : NSObject<EvhJsonSerializable>
 
 
-@property(nonatomic, copy) NSNumber* organizationId;
-
-@property(nonatomic, copy) NSString* mixType;
+@property(nonatomic, copy) NSString* keyword;
 
 @property(nonatomic, copy) NSNumber* pageAnchor;
 
 @property(nonatomic, copy) NSNumber* pageSize;
-
-// item type NSNumber*
-@property(nonatomic, strong) NSMutableArray* excludeCategories;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

@@ -222,7 +222,7 @@ public class ForumProviderImpl implements ForumProvider {
         if(post.getUpdateTime() == null) {
             post.setUpdateTime(post.getCreateTime());
         }
-                
+        
         this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_POST.getCode()).enter(()-> {
             this.dbProvider.execute((status) -> {
                 Post parentPost = null;
@@ -233,7 +233,8 @@ public class ForumProviderImpl implements ForumProvider {
                     }
 //                  post.setFloorNumber(parentPost.getChildCount() + 1);
                     //评论的楼层数为帖子的next floor number mod by xiongying 20160428
-                    post.setFloorNumber(parentPost.getIntegralTag2());
+                    long floorNumber = parentPost.getIntegralTag2() == null ? 0 : parentPost.getIntegralTag2();
+                    post.setFloorNumber(floorNumber);
                     
                 } else {
                     userActivityProvider.addPostedTopic(post.getCreatorUid(), id);
@@ -248,7 +249,8 @@ public class ForumProviderImpl implements ForumProvider {
             
                 if(parentPost != null) {
                 	// 增加评论时帖子的next floor number加1 mod by xiongying 20160428
-                	parentPost.setIntegralTag2(parentPost.getIntegralTag2()+1);
+                	long floorNumber = parentPost.getIntegralTag2() == null ? 0 : parentPost.getIntegralTag2();
+                	parentPost.setIntegralTag2(floorNumber+1);
                     parentPost.setChildCount(parentPost.getChildCount() + 1);
                     ForumProvider self = PlatformContext.getComponent(ForumProvider.class);
                     self.updatePost(parentPost);
