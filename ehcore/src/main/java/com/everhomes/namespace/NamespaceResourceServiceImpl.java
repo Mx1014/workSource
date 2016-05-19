@@ -16,8 +16,11 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.namespace.GetNamespaceDetailCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
+import com.everhomes.rest.namespace.NamespaceCommunityType;
+import com.everhomes.rest.namespace.NamespaceDetailDTO;
 import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.util.ConvertHelper;
 
@@ -76,4 +79,16 @@ public class NamespaceResourceServiceImpl implements NamespaceResourceService {
         
         return response;
     }
+	
+	@Override
+	public NamespaceDetailDTO getNamespaceDetail(GetNamespaceDetailCommand cmd) {
+	    NamespaceDetailDTO detailDto = null;
+	    
+	    NamespaceDetail namespaceDetail = namespaceResourceProvider.findNamespaceDetailByNamespaceId(cmd.getNamespaceId());
+        if(namespaceDetail != null) {
+            detailDto = ConvertHelper.convert(namespaceDetail, NamespaceDetailDTO.class);
+        }
+        
+        return detailDto;
+	}
 }

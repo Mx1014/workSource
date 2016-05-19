@@ -13,8 +13,10 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.namespace.GetNamespaceDetailCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
+import com.everhomes.rest.namespace.NamespaceDetailDTO;
 
 /**
  * Namespace resource REST API controller
@@ -39,6 +41,22 @@ public class NamespaceResourceController extends ControllerBase {
         ListCommunityByNamespaceCommandResponse commandResponse = namespaceResourceService.listCommunityByNamespace(cmd);
         
         RestResponse response = new RestResponse(commandResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /namespace/getNamespaceDetail</b>
+     * <p>获取命名空间的一些配置信息</p>
+     */
+    //checked
+    @RequestMapping("getNamespaceDetail")
+    @RestReturn(value=NamespaceDetailDTO.class)
+    public RestResponse getNamespaceDetail(GetNamespaceDetailCommand cmd) {
+        NamespaceDetailDTO dto = namespaceResourceService.getNamespaceDetail(cmd);
+        
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
