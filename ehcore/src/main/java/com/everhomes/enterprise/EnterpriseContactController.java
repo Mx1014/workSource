@@ -47,7 +47,9 @@ import com.everhomes.rest.organization.CreateOrganizationMemberCommand;
 import com.everhomes.rest.organization.ListOrganizationContactCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
+import com.everhomes.rest.organization.OrganizationDetailDTO;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.organization.OrganizationMemberDetailDTO;
 import com.everhomes.rest.organization.UpdateOrganizationMemberCommand;
 import com.everhomes.rest.organization.UpdatePersonnelsToDepartment;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
@@ -161,24 +163,28 @@ public class EnterpriseContactController extends ControllerBase {
         CreateOrganizationMemberCommand command = new CreateOrganizationMemberCommand();
         command.setOrganizationId(cmd.getEnterpriseId());
         command.setContactName(cmd.getName());
-        OrganizationMemberDTO dto = organizationService.applyForEnterpriseContact(command);
-        EnterpriseContactDTO contact = new EnterpriseContactDTO();
-        contact.setId(dto.getId());
-        contact.setAvatar(dto.getAvatar());
-        contact.setEnterpriseId(dto.getOrganizationId());
-        contact.setEmployeeNo(String.valueOf(dto.getEmployeeNo()));
-        contact.setGroupName(dto.getGroupName());
-        contact.setName(dto.getContactName());
-        contact.setNickName(dto.getNickName());
-        contact.setPhone(dto.getContactToken());
-        contact.setStatus(dto.getStatus());
-        contact.setUserId(dto.getTargetId());
-        contact.setSex(String.valueOf(dto.getGender()));
+        OrganizationMemberDetailDTO dto = organizationService.applyForEnterpriseContact(command);
         RestResponse res = new RestResponse();
-        if (null == contact) {
+        if (null == dto) {
             //TODO for error code
             res.setErrorCode(ErrorCodes.ERROR_GENERAL_EXCEPTION); 
         } else {
+        	OrganizationDetailDTO organizationDetailDTO = dto.getOrganizationDetailDTO();
+        	 EnterpriseContactDTO contact = new EnterpriseContactDTO();
+             contact.setId(dto.getId());
+             contact.setAvatar(dto.getAvatar());
+             if(null != organizationDetailDTO){
+            	 contact.setEnterpriseId(dto.getId());
+             }
+             
+             contact.setEmployeeNo(String.valueOf(dto.getEmployeeNo()));
+             contact.setGroupName(dto.getGroupName());
+             contact.setName(dto.getContactName());
+             contact.setNickName(dto.getContactName());
+             contact.setPhone(dto.getContactToken());
+             contact.setStatus(dto.getStatus());
+             contact.setUserId(dto.getTargetId());
+             contact.setSex(String.valueOf(dto.getGender()));
             res.setResponseObject(contact);
         }
         

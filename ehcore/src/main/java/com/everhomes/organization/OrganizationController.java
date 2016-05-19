@@ -61,6 +61,7 @@ import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationDetailDTO;
 import com.everhomes.rest.organization.OrganizationMemberCommand;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.organization.OrganizationMemberDetailDTO;
 import com.everhomes.rest.organization.OrganizationSimpleDTO;
 import com.everhomes.rest.organization.RejectOrganizationCommand;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
@@ -792,10 +793,14 @@ public class OrganizationController extends ControllerBase {
      * <p>申请加入企业</p>
      */
     @RequestMapping("applyForEnterpriseContact")
-    @RestReturn(value=OrganizationMemberDTO.class)
+    @RestReturn(value=OrganizationDetailDTO.class)
     public RestResponse applyForEnterpriseContact(@Valid CreateOrganizationMemberCommand cmd) {
-    	OrganizationMemberDTO res = organizationService.applyForEnterpriseContact(cmd);
-        RestResponse response = new RestResponse(res);
+    	OrganizationMemberDetailDTO dto = organizationService.applyForEnterpriseContact(cmd);
+    	OrganizationDetailDTO organizationDetailDTO = null;
+    	if(null != dto){
+    		organizationDetailDTO = dto.getOrganizationDetailDTO();
+    	}
+        RestResponse response = new RestResponse(organizationDetailDTO);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
