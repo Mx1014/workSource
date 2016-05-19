@@ -56,6 +56,7 @@ public class PromotionUserServiceImpl implements PromotionUserService {
         }
     }
     
+    @Override
     public void listUserByCity(OpPromotionUserVisitor visitor, OpPromotionUserCallback callback) {
         
         int namespaceId = visitor.getPromotion().getNamespaceId().intValue();
@@ -86,6 +87,7 @@ public class PromotionUserServiceImpl implements PromotionUserService {
         
     }
     
+    @Override
     public void listUserByCommunity(OpPromotionUserVisitor visitor, OpPromotionUserCallback callback) {
         ListCommunityUsersCommand cmd = new ListCommunityUsersCommand();
         Long id = (Long)visitor.getParent().getValue();
@@ -116,6 +118,7 @@ public class PromotionUserServiceImpl implements PromotionUserService {
         }
     }
     
+    @Override
     public void listUserByCompany(OpPromotionUserVisitor visitor, OpPromotionUserCallback callback) {
         ListOrganizationMemberCommand cmd = new ListOrganizationMemberCommand();
         cmd.setOrganizationId((Long)visitor.getValue());
