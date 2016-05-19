@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 
 import net.greghaines.jesque.Job;
@@ -94,6 +95,7 @@ import com.everhomes.organization.OrganizationTask;
 import com.everhomes.organization.pm.pay.ResultHolder;
 import com.everhomes.pusher.PusherAction;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
+import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.ApartmentDTO;
 import com.everhomes.rest.address.BuildingDTO;
@@ -249,6 +251,7 @@ import com.everhomes.util.DateStatisticHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.excel.handler.ProcessBillModel1;
 import com.everhomes.util.excel.handler.PropMgrBillHandler;
@@ -335,6 +338,16 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	
 	@Autowired
 	private OrderUtil commonOrderUtil;
+	
+    @Autowired
+    WorkerPoolFactory workerPoolFactory;
+    
+    private String queueName = "property-mgr-push";
+	
+    @PostConstruct
+    public void setup() {
+        workerPoolFactory.getWorkerPool().addQueue(queueName);
+    }
 
 	@Override
 	public void applyPropertyMember(applyPropertyMemberCommand cmd) {
@@ -1233,15 +1246,15 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 		this.checkCommunityIdIsNull(cmd.getCommunityId());
 		
-		this.pushMessage(cmd);
+//		this.pushMessage(cmd);
 		
-//		/**
-//		 * 调度执行一键推送
-//		 */
-//		Job job = new Job(SendNoticeAction.class.getName(),
-//                new Object[]{ cmd, this });
-//		
-//        jesqueClientFactory.getClientPool().enqueue("pushMessage", job);
+		/**
+		 * 调度执行一键推送
+		 */
+		Job job = new Job(SendNoticeAction.class.getName(),
+                new Object[]{StringHelper.toJsonString(cmd)});
+		
+        jesqueClientFactory.getClientPool().enqueue(queueName, job);
 
 	}
 	
@@ -1515,7 +1528,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				}
 				members.add(member);
 			}
-			this.processSmsByMembers(members, cmd.getMessage());
+			if(members.size() > 0)
+				this.processSmsByMembers(members, cmd.getMessage());
 		//按门牌地址发送：
 		}if(addressIds != null && addressIds.size()  > 0){
 			for (Long addressId : addressIds) {
