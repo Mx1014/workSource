@@ -1400,12 +1400,14 @@ public class FamilyServiceImpl implements FamilyService {
         pageOffset = pageOffset == null ? 1 : pageOffset;
         List<NeighborUserDTO> results = processNeighborUserInfo(userDetailList,myaddress,pageOffset);
         
-        if(cmd.getIsPinyin().equals(1)){
-        	results = this.convertPinyin(results);
-        	results = results.stream().map(r->{
-        		r.setInitial(r.getInitial().replace("~", "#"));
-        		return r;
-        	}).collect(Collectors.toList());
+        if(results != null && results.size() > 0) {
+            if(cmd.getIsPinyin().equals(1)){
+            	results = this.convertPinyin(results);
+            	results = results.stream().map(r->{
+            		r.setInitial(r.getInitial().replace("~", "#"));
+            		return r;
+            	}).collect(Collectors.toList());
+            }
         }
         
         long endTime = System.currentTimeMillis();
