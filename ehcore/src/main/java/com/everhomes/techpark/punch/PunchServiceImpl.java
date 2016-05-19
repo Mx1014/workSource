@@ -116,8 +116,6 @@ public class PunchServiceImpl implements PunchService {
 	SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	@Autowired
 	private PunchProvider punchProvider;
-	@Autowired
-	private EnterpriseContactService enterpriseContactService;
 
 	@Autowired
 	private EnterpriseContactProvider enterpriseContactProvider;
@@ -506,27 +504,24 @@ public class PunchServiceImpl implements PunchService {
 					// 对于申请
 					punchExceptionDTO.setExceptionComment(exceptionRequest
 							.getDescription());
-					EnterpriseContact enterpriseContact = enterpriseContactService
-							.queryContactByUserId(companyId,
-									exceptionRequest.getUserId());
+					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(exceptionRequest.getUserId(), companyId);
 
-					if (null == enterpriseContact) {
+					if (null == member) {
 						punchExceptionDTO.setName("无此人");
 					} else {
-						punchExceptionDTO.setName(enterpriseContact.getName());
+						punchExceptionDTO.setName(member.getContactName());
 					}
 				} else {
 					// 审批
 					punchExceptionDTO.setExceptionComment(exceptionRequest
 							.getProcessDetails());
-					EnterpriseContact enterpriseContact = enterpriseContactService
-							.queryContactByUserId(companyId,
-									exceptionRequest.getOperatorUid());
-					if (null == enterpriseContact) {
+					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(exceptionRequest.getOperatorUid(), companyId);
+
+					if (null == member) {
 						punchExceptionDTO.setName("无此人");
 					} else {
-						punchExceptionDTO.setName(enterpriseContact.getName());
-					} 
+						punchExceptionDTO.setName(member.getContactName());
+					}
 				}
 				if (null == pdl.getPunchExceptionDTOs()) {
 					pdl.setPunchExceptionDTOs(new ArrayList<PunchExceptionDTO>());
@@ -874,29 +869,25 @@ public class PunchServiceImpl implements PunchService {
 				if (exceptionRequest.getRequestType().equals(
 						PunchRquestType.REQUEST.getCode())) {
 					// 对于申请
-					punchExceptionDTO.setExceptionComment(exceptionRequest
-							.getDescription());
-					EnterpriseContact enterpriseContact = enterpriseContactService
-							.queryContactByUserId(companyId,
-									exceptionRequest.getUserId());
+					
+					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(exceptionRequest.getUserId(), companyId);
 
-					if (null == enterpriseContact) {
+					if (null == member) {
 						punchExceptionDTO.setName("无此人");
 					} else {
-						punchExceptionDTO.setName(enterpriseContact.getName());
+						punchExceptionDTO.setName(member.getContactName());
 					}
 				} else {
 					// 审批
 					punchExceptionDTO.setExceptionComment(exceptionRequest
 							.getProcessDetails());
-					EnterpriseContact enterpriseContact = enterpriseContactService
-							.queryContactByUserId(companyId,
-									exceptionRequest.getOperatorUid());
-					if (null == enterpriseContact) {
+					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(exceptionRequest.getOperatorUid(), companyId);
+
+					if (null == member) {
 						punchExceptionDTO.setName("无此人");
 					} else {
-						punchExceptionDTO.setName(enterpriseContact.getName());
-					} 
+						punchExceptionDTO.setName(member.getContactName());
+					}
 				}
 				if (null == pdl.getPunchExceptionDTOs()) {
 					pdl.setPunchExceptionDTOs(new ArrayList<PunchExceptionDTO>());
@@ -1403,27 +1394,23 @@ public class PunchServiceImpl implements PunchService {
 					if(null!=punchDayLog.getWorkTime() )
 						dto.setWorkTime(punchDayLog.getWorkTime().getTime()); 
 					dto.setPunchTimesPerDay(punchDayLog.getPunchTimesPerDay());
-					EnterpriseContact enterpriseContact = enterpriseContactService
-							.queryContactByUserId(cmd.getEnterpriseId(),
-									dto.getUserId());
+					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getUserId(), cmd.getEnterpriseId());
 
-					dto.setUserName(enterpriseContact.getName());
-
-					dto.setUserPhoneNumber(enterpriseContactProvider
-							.queryContactEntryByContactId(enterpriseContact,
-									ContactType.MOBILE.getCode()).get(0)
-							.getEntryValue());
+					if (null == member) {
+					} else {
+						dto.setUserName(member.getContactName());
+						dto.setUserPhoneNumber(member.getContactToken());
+					}
+					
 					if (null != dto.getOperatorUid()
 							&& 0 != dto.getOperatorUid()) {
-						enterpriseContact = enterpriseContactService
-								.queryContactByUserId(cmd.getEnterpriseId(),
-										dto.getOperatorUid());
 
+						member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getOperatorUid(), cmd.getEnterpriseId());
 
-						if (null == enterpriseContact) {
+						if (null == member) {
 							dto.setOperatorName("无此人");
 						} else {
-							dto.setOperatorName(enterpriseContact.getName());
+							dto.setOperatorName(member.getContactName());
 						}
 					}
 					
@@ -1482,22 +1469,20 @@ public class PunchServiceImpl implements PunchService {
 				.map(r -> {
 					PunchExceptionRequestDTO dto = ConvertHelper.convert(r,
 							PunchExceptionRequestDTO.class);
-					EnterpriseContact enterpriseContact = enterpriseContactService
-							.queryContactByUserId(cmd.getEnterpriseId(),
-									dto.getUserId());
+					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getUserId(), cmd.getEnterpriseId());
 					PunchExceptionApproval  approval = punchProvider.getExceptionApproval(cmd.getUserId(), cmd.getEnterpriseId(), java.sql.Date.valueOf(cmd.getPunchDate()));
-					dto.setUserName(enterpriseContact.getName());
+					if(null != member){
+						dto.setUserName(member.getContactName());
+						dto.setUserPhoneNumber(member.getContactToken());
+					}
 					if (null != dto.getOperatorUid()
 							&& 0 != dto.getOperatorUid()) {
-						enterpriseContact = enterpriseContactService
-								.queryContactByUserId(cmd.getEnterpriseId(),
-										dto.getOperatorUid());
 
-
-						if (null == enterpriseContact) {
+						member = organizationProvider.findOrganizationMemberByOrgIdAndUId(dto.getOperatorUid(), cmd.getEnterpriseId());
+						if (null == member) {
 							dto.setOperatorName("无此人");
 						} else {
-							dto.setOperatorName(enterpriseContact.getName());
+							dto.setOperatorName(member.getContactName());
 						}
 					}
 					
@@ -1506,10 +1491,7 @@ public class PunchServiceImpl implements PunchService {
 					}  
 					dto.setPunchTimesPerDay(approval.getPunchTimesPerDay());
 					dto.setPunchDate(approval.getPunchDate().getTime());
-					dto.setUserPhoneNumber(enterpriseContactProvider
-							.queryContactEntryByContactId(enterpriseContact,
-									ContactType.MOBILE.getCode()).get(0)
-							.getEntryValue());
+					
 					 
 					
 					

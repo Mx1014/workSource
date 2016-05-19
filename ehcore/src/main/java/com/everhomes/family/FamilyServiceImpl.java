@@ -777,8 +777,10 @@ public class FamilyServiceImpl implements FamilyService {
         GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(familyId, 
                 EntityType.USER.getCode(), memberUid);
         if(member == null){
-            throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_NOT_IN_FAMILY, 
-                    "User not in familly.");
+        	LOGGER.error("User not in familly.userId=" + memberUid);
+        	return ;
+//            throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_NOT_IN_FAMILY, 
+//                    "User not in familly.");
         }
         if(member.getMemberStatus().byteValue() == GroupMemberStatus.ACTIVE.getCode()){
             throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_FAMILY_EXIST, 
@@ -899,8 +901,9 @@ public class FamilyServiceImpl implements FamilyService {
                 EntityType.USER.getCode(), memberUid);
         if(member == null){
             LOGGER.error("Invalid memberUid parameter,user has not apply join in family.memberUid=" + memberUid);
-            throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_NOT_IN_FAMILY, 
-                    "User has not apply join in family, or other approve the user.");
+            return ;
+//            throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_NOT_IN_FAMILY, 
+//                    "User has not apply join in family, or other approve the user.");
         }
         Tuple<Boolean,Boolean> tuple = this.coordinationProvider.getNamedLock(CoordinationLocks.LEAVE_FAMILY.getCode()).enter(()-> {
             this.dbProvider.execute((TransactionStatus status) -> {

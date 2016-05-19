@@ -185,6 +185,7 @@ import com.everhomes.rest.organization.OrganizationGroup;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberCommand;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.organization.OrganizationMemberDetailDTO;
 import com.everhomes.rest.organization.OrganizationMemberGroupType;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
@@ -4169,18 +4170,45 @@ public class OrganizationServiceImpl implements OrganizationService {
 	 * @param contact
 	 */
 	@Override
-	public OrganizationMemberDTO applyForEnterpriseContact(CreateOrganizationMemberCommand cmd) {
+	public OrganizationDTO applyForEnterpriseContact(CreateOrganizationMemberCommand cmd) {
 		User user = UserContext.current().getUser();
 		if(StringUtils.isEmpty(cmd.getTargetId())){
 			cmd.setTargetId(user.getId());
 		}
+		
+		Organization organization = this.checkOrganization(cmd.getOrganizationId());
+		
+		Long communityId = this.getOrganizationActiveCommunityId(organization.getId());
+		
+		Community community = new Community();
+		
+		if(null != communityId){
+			community = communityProvider.findCommunityById(communityId);
+		}
+		
 		// Check exists
-		OrganizationMember organizationmember = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getTargetId(), cmd.getOrganizationId());
+		OrganizationMember organizationmember = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getTargetId(), organization.getId());
 		if (null != organizationmember) {
-			organizationmember.setCreatorUid(user.getId());
-			organizationmember.setNickName(user.getNickName());
-			organizationmember.setAvatar(user.getAvatar());
-			return ConvertHelper.convert(organizationmember, OrganizationMemberDTO.class);
+			
+			OrganizationDTO organizationDTO = ConvertHelper.convert(organization, OrganizationDTO.class);
+			
+			OrganizationDetailDTO organizationDetailDTO = toOrganizationDetailDTO(organization.getId(), false);
+			
+			organizationDTO.setDisplayName(organizationDetailDTO.getDisplayName());
+			organizationDTO.setAvatarUrl(organizationDetailDTO.getAvatarUrl());
+			organizationDTO.setContact(organizationDetailDTO.getContact());
+			organizationDTO.setDescription(organizationDetailDTO.getDescription());
+			organizationDTO.setAddress(organizationDetailDTO.getAddress());
+			
+			if(null != community){
+				organizationDTO.setCommunityId(community.getId());
+				organizationDTO.setCommunityName(community.getName());
+				organizationDTO.setDefaultForumId(community.getDefaultForumId());
+				organizationDTO.setFeedbackForumId(community.getFeedbackForumId());
+				organizationDTO.setCommunityType(community.getCommunityType());
+			}
+			
+			return organizationDTO;
 		}
 		
 		organizationmember = this.dbProvider.execute((TransactionStatus status) -> {
@@ -4234,7 +4262,26 @@ public class OrganizationServiceImpl implements OrganizationService {
 		        	}
 		        }
 			}
-			return ConvertHelper.convert(organizationmember, OrganizationMemberDTO.class);
+			
+			OrganizationDTO organizationDTO = ConvertHelper.convert(organization, OrganizationDTO.class);
+			
+			OrganizationDetailDTO organizationDetailDTO = toOrganizationDetailDTO(organization.getId(), false);
+			
+			organizationDTO.setDisplayName(organizationDetailDTO.getDisplayName());
+			organizationDTO.setAvatarUrl(organizationDetailDTO.getAvatarUrl());
+			organizationDTO.setContact(organizationDetailDTO.getContact());
+			organizationDTO.setDescription(organizationDetailDTO.getDescription());
+			organizationDTO.setAddress(organizationDetailDTO.getAddress());
+			
+			if(null != community){
+				organizationDTO.setCommunityId(community.getId());
+				organizationDTO.setCommunityName(community.getName());
+				organizationDTO.setDefaultForumId(community.getDefaultForumId());
+				organizationDTO.setFeedbackForumId(community.getFeedbackForumId());
+				organizationDTO.setCommunityType(community.getCommunityType());
+			}
+			
+			return organizationDTO;
 		}
 	}
 	
@@ -4259,7 +4306,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         if(member != null) {
             member.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
             updateEnterpriseContactStatus(operator.getId(), member);
-            DaoHelper.publishDaoAction(DaoAction.CREATE, OrganizationMember.class, member.getTargetId());
+            DaoHelper.publishDaoAction(DaoAction.CREATE, OrganizationMember.class, member.getId());
             sendMessageForContactApproved(member);
         } else {
             LOGGER.warn("Enterprise contact not found, maybe it has been rejected, operatorUid=" + operatorUid + ", cmd=" + cmd);
@@ -4508,7 +4555,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		organizationMember.setCreatorUid(user.getId());
 		organizationMember.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		if(OrganizationMemberTargetType.fromCode(organizationMember.getTargetType()) == OrganizationMemberTargetType.USER){
-			DaoHelper.publishDaoAction(DaoAction.CREATE, OrganizationMember.class, organizationMember.getTargetId());
+			DaoHelper.publishDaoAction(DaoAction.CREATE, OrganizationMember.class, organizationMember.getId());
 		}
 		organizationProvider.createOrganizationMember(organizationMember);
 		userSearcher.feedDoc(organizationMember);
@@ -4741,7 +4788,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 	member.setTargetId(user.getId());
                 	
                 	this.updateMemberUser(member);
-                	DaoHelper.publishDaoAction(DaoAction.CREATE, OrganizationMember.class, member.getTargetId());
+                	DaoHelper.publishDaoAction(DaoAction.CREATE, OrganizationMember.class, member.getId());
                     sendMessageForContactApproved(member);
                     		
                     userSearcher.feedDoc(member);

@@ -1044,10 +1044,10 @@ public class CommunityProviderImpl implements CommunityProvider {
 	            
 	            context.select().from(Tables.EH_COMMUNITIES)
 	                .where(Tables.EH_COMMUNITIES.ID.gt(locator.getAnchor())
-	                .and(Tables.EH_COMMUNITIES.ID.in(communityIds)))
+	                .and(Tables.EH_COMMUNITIES.ID.in(communityIds))
 	                .and(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId))
 	                .and(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()))
-	                .and(Tables.EH_COMMUNITIES.COMMUNITY_TYPE.eq(communityType))
+	                .and(Tables.EH_COMMUNITIES.COMMUNITY_TYPE.eq(communityType)))
 	                .limit(pageSize)
 	                .fetch().map((r) -> {
 	                CommunityDTO community = ConvertHelper.convert(r, CommunityDTO.class);
@@ -1092,5 +1092,31 @@ public class CommunityProviderImpl implements CommunityProvider {
         
         return communities;
     }
+
+	@Override
+	public List<CommunityDTO> listCommunitiesByNamespaceId(Integer namespaceId,
+			ListingLocator locator, int pageSize) {
+		final List<CommunityDTO> results = new ArrayList<>();
+		
+		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
+	            (DSLContext context, Object reducingContext)-> {
+	            
+	            context.select().from(Tables.EH_COMMUNITIES)
+	                .where(Tables.EH_COMMUNITIES.ID.gt(locator.getAnchor())
+	                .and(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId))
+	                .and(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode())))
+	                .limit(pageSize)
+	                .fetch().map((r) -> {
+	                CommunityDTO community = ConvertHelper.convert(r, CommunityDTO.class);
+	                results.add(community);
+	                
+	                return null;
+	            });
+	                
+	            return true;
+	        });
+		return results;
+	}
+
 
 }
