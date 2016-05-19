@@ -45,6 +45,7 @@ import com.everhomes.rest.promotion.OpPromotionSearchCommand;
 import com.everhomes.rest.promotion.OpPromotionStatus;
 import com.everhomes.rest.promotion.ScheduleTaskResourceType;
 import com.everhomes.rest.promotion.ScheduleTaskStatus;
+import com.everhomes.rest.promotion.UpdateOpPromotionCommand;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.tables.EhOpPromotionActivities;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -407,5 +408,19 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
         resp.setNextPageAnchor(locator.getAnchor());
         
         return resp;
+    }
+    
+    @Override
+    public void udpateOpPromotion(UpdateOpPromotionCommand cmd) {
+        OpPromotionActivity promotion = promotionActivityProvider.getOpPromotionActivityById(cmd.getId());
+        if(cmd.getTitle() != null && (!cmd.getTitle().isEmpty())) {
+            promotion.setTitle(cmd.getTitle());    
+        }
+        
+        if(cmd.getDescription() != null && (!cmd.getDescription().isEmpty())) {
+            promotion.setDescription(cmd.getDescription());    
+        }
+        
+        promotionActivityProvider.updateOpPromotionActivity(promotion);
     }
 }

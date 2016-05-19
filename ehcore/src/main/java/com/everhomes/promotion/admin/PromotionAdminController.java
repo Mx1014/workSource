@@ -18,6 +18,7 @@ import com.everhomes.rest.promotion.ListPromotionCommand;
 import com.everhomes.rest.promotion.OpPromotionActivityDTO;
 import com.everhomes.rest.promotion.OpPromotionOrderRangeCommand;
 import com.everhomes.rest.promotion.OpPromotionSearchCommand;
+import com.everhomes.rest.promotion.UpdateOpPromotionCommand;
 
 @RestDoc(value="Promotion Admin controller", site="core")
 @RestController
@@ -65,4 +66,11 @@ public class PromotionAdminController extends ControllerBase {
     public RestResponse searchPromotion(@Valid OpPromotionSearchCommand cmd) {
         return new RestResponse(promotionService.searchPromotion(cmd));
     }
+
+    @RequestMapping("updatePromotion")
+    @RestReturn(value=String.class)
+    public RestResponse udpatePromotion(@Valid UpdateOpPromotionCommand cmd) {
+        promotionService.udpateOpPromotion(cmd);
+        return new RestResponse("ok");
+    } 
 }
