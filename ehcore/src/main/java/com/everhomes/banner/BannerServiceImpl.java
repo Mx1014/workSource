@@ -291,10 +291,10 @@ public class BannerServiceImpl implements BannerService {
         case ENTERPRISE: // 增加两场景，与园区企业保持一致 by lqs 20160517
         case ENTERPRISE_NOAUTH: // 增加两场景，与园区企业保持一致 by lqs 20160517
             GetBannersByOrgCommand orgCmd = new GetBannersByOrgCommand();
-            getCmd.setBannerGroup(cmd.getBannerGroup());
-            getCmd.setBannerLocation(cmd.getBannerLocation());
-            getCmd.setNamespaceId(sceneToken.getNamespaceId());
-            getCmd.setSceneType(baseScene);
+            orgCmd.setBannerGroup(cmd.getBannerGroup());
+            orgCmd.setBannerLocation(cmd.getBannerLocation());
+            orgCmd.setNamespaceId(sceneToken.getNamespaceId());
+            orgCmd.setSceneType(baseScene);
             orgCmd.setOrganizationId(sceneToken.getEntityId());
             bannerList = getBannersByOrg(orgCmd, request);
             break;
