@@ -3,6 +3,7 @@ package com.everhomes.rest.forum;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -26,6 +27,7 @@ public class QueryTopicByCategoryCommand {
     private Long pageAnchor;
     private Integer pageSize;
     
+    @ItemType(Long.class)
     private List<Long> excludeCategories;
     
     public QueryTopicByCategoryCommand() {
