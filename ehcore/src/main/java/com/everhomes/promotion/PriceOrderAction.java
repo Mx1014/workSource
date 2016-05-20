@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class PriceOrderAction implements Runnable {
 
-    private Long id;
-    private Long price;
+    private final Long id;
+    private final Long price;
     
     @Autowired
     PromotionService promotionService;
@@ -20,7 +20,7 @@ public class PriceOrderAction implements Runnable {
         this.promotionService.onNewOrderPriceJob(id, price);
     }
     
-    public PriceOrderAction(String idStr, String priceStr) {
+    public PriceOrderAction(final String idStr, final String priceStr) {
         this.id = Long.parseLong(idStr);
         this.price = Long.parseLong(priceStr);
     }

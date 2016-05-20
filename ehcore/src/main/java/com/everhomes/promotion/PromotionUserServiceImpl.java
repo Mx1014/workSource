@@ -69,6 +69,7 @@ public class PromotionUserServiceImpl implements PromotionUserService {
     
     @Override
     public void listUserByCity(OpPromotionUserVisitor visitor, OpPromotionUserCallback callback) {
+        //TODO fix value error
         
         int namespaceId = visitor.getPromotion().getNamespaceId().intValue();
         Long id = (Long)visitor.getParent().getValue();

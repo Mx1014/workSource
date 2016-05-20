@@ -1,5 +1,7 @@
 package com.everhomes.promotion;
 
+import java.util.Date;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,7 @@ import com.everhomes.server.schema.tables.pojos.EhGroupMembers;
 import com.everhomes.server.schema.tables.pojos.EhOpPromotionActivities;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
+import com.everhomes.util.DateHelper;
 
 @Component
 @Scope("prototype")
@@ -52,17 +55,27 @@ public class OpPromotionNewUserCondition implements OpPromotionCondition, LocalB
         this.cacheActivity = c.getPromotion();
         
         localBus.subscribe(DaoHelper.getDaoActionPublishSubject(DaoAction.MODIFY, EhGroupMembers.class, null), this);
+        localBus.subscribe(DaoHelper.getDaoActionPublishSubject(DaoAction.CREATE, OrganizationMember.class, null), this);
+        
         localBus.subscribe(DaoHelper.getDaoActionPublishSubject(DaoAction.MODIFY, EhOpPromotionActivities.class, this.cacheActivity.getId()), this);
     }
 
     private void unsubcribeMyself() {
         localBus.unsubscribe(DaoHelper.getDaoActionPublishSubject(DaoAction.MODIFY, EhGroupMembers.class, null), this);
+        localBus.unsubscribe(DaoHelper.getDaoActionPublishSubject(DaoAction.CREATE, OrganizationMember.class, null), this);
         localBus.unsubscribe(DaoHelper.getDaoActionPublishSubject(DaoAction.MODIFY, EhOpPromotionActivities.class, this.cacheActivity.getId()), this);
     }
 
     @Override
     public Action onLocalBusMessage(Object arg0, String arg1, Object arg2, String arg3) {
         try {
+            Date now = DateHelper.currentGMTTime();
+            Date endTime = this.cacheActivity.getEndTime();
+            if(endTime.before(now)) {
+                this.unsubcribeMyself();
+                LOGGER.info("listen timeout, delete myself");
+                return Action.none;
+            }
             
             if(arg1.indexOf(EhOpPromotionActivities.class.getName()) >= 0) {
                 this.unsubcribeMyself();

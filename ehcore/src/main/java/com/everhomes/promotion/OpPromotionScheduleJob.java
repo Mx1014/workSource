@@ -57,7 +57,7 @@ public class OpPromotionScheduleJob extends QuartzJobBean {
             scheduleProvider.scheduleSimpleJob(triggerName, jobName, new Date(promotion.getEndTime().getTime()), OpPromotionScheduleJob.class, map);            
         } else {
 
-            promotionService.closeOpPromotion(promotion);
+            //promotionService.closeOpPromotion(promotion);
             
 //          OpPromotionCondition condition = OpPromotionUtils.getConditionFromPromotion(promotion);            
 //            OpPromotionActivityContext ctx = new OpPromotionActivityContext(promotion); 

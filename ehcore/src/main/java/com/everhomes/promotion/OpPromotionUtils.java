@@ -29,6 +29,8 @@ public class OpPromotionUtils {
             return PlatformContext.getComponent(OpPromotionStaticWebPageAction.class);
         case COUPON:
             return PlatformContext.getComponent(OpPromotionCouponAction.class);
+        case TEXT_ONLY:
+            return PlatformContext.getComponent(OpPromotionTextOnlyAction.class);
         }
         
         return null;

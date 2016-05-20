@@ -1,5 +1,6 @@
 package com.everhomes.promotion;
 
+import java.io.UnsupportedEncodingException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -14,9 +15,11 @@ import net.greghaines.jesque.Job;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import com.everhomes.bus.BusBridgeProvider;
 import com.everhomes.bus.LocalBus;
@@ -88,6 +91,9 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
     
     @Autowired
     WorkerPoolFactory workerPoolFactory;
+    
+    @Autowired
+    BizHttpRestCallProvider bizHttpRestCallProvider;
     
     @Autowired
     JesqueClientFactory jesqueClientFactory;
@@ -301,7 +307,7 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
     @Override
     public void newOrderPriceEvent(OpPromotionOrderRangeCommand cmd) {
         final Job job = new Job(PriceOrderAction.class.getName(),
-                new Object[]{ cmd.getUserId().longValue(), Long.toString(cmd.getPrice().longValue()) });
+                new Object[]{ cmd.getUserId().toString(), Long.toString(cmd.getPrice().longValue()) });
         jesqueClientFactory.getClientPool().enqueue(queueName, job);
     }
     
@@ -422,5 +428,38 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
         }
         
         promotionActivityProvider.updateOpPromotionActivity(promotion);
+    }
+    
+    @Override
+    public void bizFetchCoupon(Long userId, Long couposId) {
+        Integer nonce = (int)(Math.random()*1000);
+        Long timestamp = System.currentTimeMillis();       
+        Map<String,String> params = new HashMap<String, String>();
+        params.put("nonce", nonce+"");
+        params.put("timestamp", timestamp+"");
+        params.put("promotionNo", couposId+"");
+        params.put("userId", userId+"");
+        
+        try {
+            bizHttpRestCallProvider.restCall("rest/openapi/promotion/fetch", params, new ListenableFutureCallback<ResponseEntity<String>> () {
+
+                @Override
+                public void onSuccess(ResponseEntity<String> result) {
+                    String body = result.getBody();
+                    if(body.indexOf("true") < 0) {
+                        LOGGER.warn(body);    
+                    }
+                    
+                }
+
+                @Override
+                public void onFailure(Throwable ex) {
+                    LOGGER.error("fetch error", ex);
+                }
+                
+            });
+        } catch (UnsupportedEncodingException e) {
+            LOGGER.error("fetch error", e);
+        }
     }
 }

@@ -6,6 +6,8 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.rest.app.AppConstants;
@@ -21,6 +23,8 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserService;
 import com.everhomes.util.StringHelper;
 
+@Component
+@Scope("prototype")
 public class OpPromotionCouponAction implements OpPromotionAction {
     private static final Logger LOGGER = LoggerFactory.getLogger(OpPromotionCouponAction.class);
     
@@ -79,6 +83,10 @@ public class OpPromotionCouponAction implements OpPromotionAction {
         
         if(activityContext.getNeedUpdate()) {
             promotionService.addPushCountByPromotionId(activityContext.getPromotion().getId(), 1);    
+        }
+        
+        for(Long coupon : data.getCouponList()) {
+            promotionService.bizFetchCoupon(userId, coupon);
         }
         
         promotionMessage = new OpPromotionMessage();

@@ -42,18 +42,26 @@ public class OpPromotionListAllCondition implements OpPromotionCondition, OpProm
                 promotionUserService.listAllUser(visitor, this);
                 break;
             case COMMUNITY:
+                visitor.setValue(scope.getScopeId());
                 promotionUserService.listUserByCommunity(visitor, this);
                 break;
             case CITY:
+                visitor.setValue(scope.getScopeId());
                 promotionUserService.listUserByCity(visitor, this);
                 break;
             case ORGANIZATION:
+                visitor.setValue(scope.getScopeId());
                 promotionUserService.listUserByCompany(visitor, this);
                 break;
             default:
                 LOGGER.error("scopeType not found");
                 break;
             }
+        }
+        
+        if(visitor.getPushCount() > 0) {
+            promotionService.addPushCountByPromotionId(visitor.getPromotion().getId(), (int)visitor.getPushCount());
+            visitor.setPushCount(0);
         }
     }
 

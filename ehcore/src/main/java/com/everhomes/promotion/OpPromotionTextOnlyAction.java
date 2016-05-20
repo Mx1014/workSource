@@ -1,6 +1,8 @@
 package com.everhomes.promotion;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.rest.app.AppConstants;
@@ -12,6 +14,8 @@ import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserService;
 
+@Component
+@Scope("prototype")
 public class OpPromotionTextOnlyAction implements OpPromotionAction {
     @Autowired
     MessagingService messagingService;
