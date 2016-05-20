@@ -254,7 +254,9 @@ public class BannerServiceImpl implements BannerService {
             if(LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Scene type is changed, sceneToken={}, newScene={}", sceneToken, sceneInfo.getName());
             }
-        } 
+        } else {
+            LOGGER.error("Scene is not found, cmd={}, sceneToken={}", cmd, sceneToken);
+        }
         getCmd.setSceneType(baseScene);
         
         Community community = null;
