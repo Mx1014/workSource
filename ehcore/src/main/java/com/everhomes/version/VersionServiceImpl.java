@@ -54,19 +54,15 @@ public class VersionServiceImpl implements VersionService {
         VersionUpgradeRule rule = this.versionProvider.matchVersionUpgradeRule(realm.getId(), 
                 ConvertHelper.convert(cmd.getCurrentVersion(), Version.class));
         
-        // 客户端没有对该错进行处理而直接提示，用户体验不好，故去掉报错 by lqs 20160519
-//        if(rule == null)
-//            throw RuntimeErrorException.errorWith(VersionServiceErrorCode.SCOPE, VersionServiceErrorCode.ERROR_NO_UPGRADE_RULE_SET, 
-//                    "No upgrade rule has been setup yet");
+        if(rule == null)
+            throw RuntimeErrorException.errorWith(VersionServiceErrorCode.SCOPE, VersionServiceErrorCode.ERROR_NO_UPGRADE_RULE_SET, 
+                    "No upgrade rule has been setup yet");
         
         UpgradeInfoResponse response = new UpgradeInfoResponse();
-        if(rule != null) {
-            response.setForceFlag(rule.getForceUpgrade());
-            Version version = Version.fromVersionString(rule.getTargetVersion());
-            response.setTargetVersion(ConvertHelper.convert(version, VersionDTO.class));
-        } else {
-            LOGGER.error("No upgrade rule has been setup yet, cmd={}", cmd);
-        }
+        response.setForceFlag(rule.getForceUpgrade());
+        Version version = Version.fromVersionString(rule.getTargetVersion());
+        response.setTargetVersion(ConvertHelper.convert(version, VersionDTO.class));
+        
         return response;
     }
 
