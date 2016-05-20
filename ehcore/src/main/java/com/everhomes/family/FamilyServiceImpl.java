@@ -572,7 +572,11 @@ public class FamilyServiceImpl implements FamilyService {
                 checkList.put(f.getAddressId(), 1l);
             }     
         
+        }
         
+        if(families == null) {
+        	families = new ArrayList<FamilyDTO>();
+        }
         //Merge histories, add by Janson
 	        List<UserGroupHistory> histories = this.userGroupHistoryProvider.queryUserGroupHistoryByUserId(userId);
 	        for(UserGroupHistory o : histories) {
@@ -606,9 +610,10 @@ public class FamilyServiceImpl implements FamilyService {
 	                }
 	                
 	                families.add(family);
-	                }
+	                
+	            }
 	        }
-        }
+        
         return families;
     }
 

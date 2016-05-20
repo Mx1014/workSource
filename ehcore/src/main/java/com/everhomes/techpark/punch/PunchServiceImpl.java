@@ -1511,6 +1511,13 @@ public class PunchServiceImpl implements PunchService {
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid company Id parameter in the command");
 		}
+		
+		if(cmd.getMorningApprovalStatus() == null && cmd.getAfternoonApprovalStatus() == null && cmd.getApprovalStatus() == null ) {
+			LOGGER.error("morningApprovalStatus、afternoonApprovalStatus、approvalStatus cannot be null at the same time!");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"morningApprovalStatus、afternoonApprovalStatus、approvalStatus cannot be null at the same time!");
+		}
 		checkCompanyIdIsNull(cmd.getEnterpriseId());
 		// 插入一条eh_punch_exception_requests 记录
 		PunchExceptionRequest punchExceptionRequest = ConvertHelper.convert(cmd,PunchExceptionRequest.class );
