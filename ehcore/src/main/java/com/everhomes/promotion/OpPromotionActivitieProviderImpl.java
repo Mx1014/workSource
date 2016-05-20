@@ -142,8 +142,8 @@ public class OpPromotionActivitieProviderImpl implements OpPromotionActivityProv
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
                     SelectQuery<? extends Record> query) {
                 query.addConditions(Tables.EH_OP_PROMOTION_ACTIVITIES.POLICY_TYPE.eq(OpPromotionConditionType.ORDER_RANGE_VALUE.getCode()));
-                query.addConditions(Tables.EH_OP_PROMOTION_ACTIVITIES.INTEGRAL_TAG1.ge(value));
-                query.addConditions(Tables.EH_OP_PROMOTION_ACTIVITIES.INTEGRAL_TAG2.le(value));
+                query.addConditions(Tables.EH_OP_PROMOTION_ACTIVITIES.INTEGRAL_TAG1.le(value));
+                query.addConditions(Tables.EH_OP_PROMOTION_ACTIVITIES.INTEGRAL_TAG2.ge(value));
                 query.addConditions(Tables.EH_OP_PROMOTION_ACTIVITIES.STATUS.ne(OpPromotionStatus.INACTIVE.getCode()));
                 return query;
             }
