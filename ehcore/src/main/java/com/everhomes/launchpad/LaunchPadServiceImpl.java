@@ -435,7 +435,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
 		
 		Long communityId = cmd.getCommunityId();
-        Community community = null;
+        Community community = new Community();
         if(communityId != null) {
             community = communityProvider.findCommunityById(communityId);
         }
