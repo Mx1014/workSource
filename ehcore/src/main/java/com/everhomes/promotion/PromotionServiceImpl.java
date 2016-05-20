@@ -144,6 +144,7 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
                 
                 activity.setStartTime(new Timestamp(cmd.getStartTime()));
                 activity.setEndTime(new Timestamp(cmd.getEndTime()));
+                //LOGGER.info("in=" + cmd.getStartTime() + ", curr=" + System.currentTimeMillis());
                 activity.setCreatorUid(user.getId());
                 activity.setStatus(OpPromotionStatus.ACTIVE.getCode());
                 promotionActivityProvider.createOpPromotionActivity(activity);
@@ -153,6 +154,15 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
                     scope.setPromotionId(activity.getId());
                     promotionAssignedScopeProvider.createOpPromotionAssignedScope(scope);
                     }
+                
+                ScheduleTask task = new ScheduleTask();
+                task.setNamespaceId(activity.getNamespaceId());
+                task.setProcessCount(0);
+                task.setProgress(0);
+                task.setResourceId(activity.getId());
+                task.setResourceType(ScheduleTaskResourceType.PROMOTION_ACTIVITY.getCode());
+                task.setStatus(ScheduleTaskStatus.CREATING.getCode());
+                scheduleTaskProvider.createScheduleTask(task);
                 
                 return activity;
             }
@@ -177,7 +187,7 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
 //            map.put("type", "end");
 //            scheduleProvider.scheduleSimpleJob(triggerName, jobName, new Date(promotion.getEndTime().getTime()), OpPromotionScheduleJob.class, map2);
             
-            //this.broadcastEvent(DaoAction.CREATE, EhOpPromotionActivities.class, promotion.getId());            
+            //this.broadcastEvent(DaoAction.CREATE, EhOpPromotionActivities.class, promotion.getId());
         }
 
     }
@@ -217,34 +227,24 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
         try {
             Long id = (Long)arg2;
             if(null == id) {
-                LOGGER.error("None of groupMember");
+                LOGGER.error("None of promotion");
                 return Action.none;
             } else {
-                LOGGER.error(" id= " + id);
+                LOGGER.error("new promotion id= " + id);
+                OpPromotionActivity promotion = promotionActivityProvider.getOpPromotionActivityById(id);
+                if(promotion != null) {
+                    OpPromotionCondition condition = OpPromotionUtils.getConditionFromPromotion(promotion);
+                    OpPromotionActivityContext ctx = new OpPromotionActivityContext(promotion);
+                    
+                    //Create local condition event
+                    condition.createCondition(ctx);
+                    }
                 }
         } catch(Exception e) {
             LOGGER.error("onLocalBusMessage error ", e);
             }
 
         return Action.none;
-    }
-    
-    @Override
-    public ScheduleTask createScheduleTaskByPromotion(OpPromotionActivity promotion) {
-        ScheduleTask task = new ScheduleTask();
-        task.setNamespaceId(promotion.getNamespaceId());
-        task.setProcessCount(0);
-        task.setProgress(0);
-        task.setResourceId(promotion.getId());
-        task.setResourceType(ScheduleTaskResourceType.PROMOTION_ACTIVITY.getCode());
-        task.setStatus(ScheduleTaskStatus.CREATING.getCode());
-        scheduleTaskProvider.createScheduleTask(task);
-        
-        OpPromotionCondition condition = OpPromotionUtils.getConditionFromPromotion(promotion);
-        OpPromotionActivityContext ctx = new OpPromotionActivityContext(promotion);
-        condition.createCondition(ctx);
-        
-        return task;
     }
     
     @Override
@@ -351,13 +351,16 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
     
     @Override
     public void closeOpPromotion(OpPromotionActivity promotion) {
-        promotion.setStatus(OpPromotionStatus.INACTIVE.getCode());
-        updateOpPromotionActivity(promotion);
+        if(promotion != null) {
+            promotion.setStatus(OpPromotionStatus.INACTIVE.getCode());
+            updateOpPromotionActivity(promotion);    
+        }
+        
     }
     
     @Override
     public void closeOpPromotion(GetOpPromotionActivityByPromotionId cmd) {
-        OpPromotionActivity promotion = this.promotionActivityProvider.getOpPromotionActivityById(cmd.getPromotionId());
+        OpPromotionActivity promotion = promotionActivityProvider.getOpPromotionActivityById(cmd.getPromotionId());
         closeOpPromotion(promotion);
     }
     

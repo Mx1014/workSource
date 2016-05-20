@@ -8,7 +8,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
 
+import com.everhomes.db.DbProvider;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.messaging.LinkBody;
@@ -16,6 +19,7 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.promotion.OpPromotionOwnerType;
 import com.everhomes.rest.promotion.OpPromotionWebPageData;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.user.User;
@@ -26,6 +30,9 @@ import com.everhomes.util.StringHelper;
 @Scope("prototype")
 public class OpPromotionStaticWebPageAction implements OpPromotionAction {
     private static final Logger LOGGER = LoggerFactory.getLogger(OpPromotionStaticWebPageAction.class);
+    
+    @Autowired
+    private DbProvider dbProvider;
     
     @Autowired
     MessagingService messagingService;
@@ -48,14 +55,37 @@ public class OpPromotionStaticWebPageAction implements OpPromotionAction {
         User user = activityContext.getUser();
         Long userId = user.getId();
         
-        OpPromotionMessage promotionMessage = promotionMessageProvider.findTargetByPromotionId(userId, activityContext.getPromotion().getId());
-        if(promotionMessage != null) {
-            LOGGER.error("already pushed to user=" + promotionMessage.getTargetUid() + ", promotionId=" + promotionMessage.getOwnerId());
-            return;
-        }
-        
         String dataStr = activityContext.getPromotion().getActionData();
         OpPromotionWebPageData data = (OpPromotionWebPageData)StringHelper.fromJsonString(dataStr, OpPromotionWebPageData.class);
+        
+        OpPromotionMessage promotion = this.dbProvider.execute(new TransactionCallback<OpPromotionMessage>() {
+            @Override
+            public OpPromotionMessage doInTransaction(TransactionStatus arg0) {
+                OpPromotionMessage promotionMessage = promotionMessageProvider.findTargetByPromotionId(userId, activityContext.getPromotion().getId());
+                if(promotionMessage != null) {
+                    return promotionMessage;
+                } else {
+                    promotionMessage = new OpPromotionMessage();
+                    promotionMessage.setMessageText(dataStr);
+                    promotionMessage.setNamespaceId(activityContext.getPromotion().getNamespaceId());
+                    promotionMessage.setSenderUid(User.SYSTEM_UID);
+                    promotionMessage.setTargetUid(userId);
+                    promotionMessage.setResultData(dataStr);
+                    promotionMessage.setOwnerId(activityContext.getPromotion().getId());
+                    promotionMessage.setOwnerType(OpPromotionOwnerType.USER.getCode());
+                    promotionMessage.setMessageSeq(userService.getNextStoreSequence(User.SYSTEM_USER_LOGIN, 
+                            activityContext.getPromotion().getNamespaceId(), AppConstants.APPID_MESSAGING));
+                    promotionMessageProvider.createOpPromotionMessage(promotionMessage);
+                    
+                    return null;
+                }
+            }
+        });
+        
+        if(promotion != null) {
+            LOGGER.error("already pushed to user=" + promotion.getTargetUid() + ", promotionId=" + promotion.getOwnerId());
+            return;
+        }
         
         MessageDTO messageDto = new MessageDTO();
         messageDto.setAppId(AppConstants.APPID_MESSAGING);
@@ -84,16 +114,6 @@ public class OpPromotionStaticWebPageAction implements OpPromotionAction {
         if(activityContext.getNeedUpdate()) {
             promotionService.addPushCountByPromotionId(activityContext.getPromotion().getId(), 1);    
         }
-        
-        promotionMessage = new OpPromotionMessage();
-        promotionMessage.setMessageText(data.getUrl());
-        promotionMessage.setNamespaceId(activityContext.getPromotion().getNamespaceId());
-        promotionMessage.setSenderUid(User.SYSTEM_UID);
-        promotionMessage.setTargetUid(userId);
-        promotionMessage.setResultData(dataStr);
-        promotionMessage.setMessageSeq(userService.getNextStoreSequence(User.SYSTEM_USER_LOGIN, 
-                activityContext.getPromotion().getNamespaceId(), AppConstants.APPID_MESSAGING));
-        promotionMessageProvider.createOpPromotionMessage(promotionMessage);
         
     }
 

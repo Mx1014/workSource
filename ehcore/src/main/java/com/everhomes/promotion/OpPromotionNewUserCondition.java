@@ -77,9 +77,9 @@ public class OpPromotionNewUserCondition implements OpPromotionCondition, LocalB
                 return Action.none;
             }
             
-            if(arg1.indexOf(EhOpPromotionActivities.class.getName()) >= 0) {
+            if(arg1.indexOf("EhOpPromotionActivities") >= 0) {
                 this.unsubcribeMyself();
-            } else if(arg1.indexOf(OrganizationMember.class.getName()) >= 0) {
+            } else if(arg1.indexOf("OrganizationMember") >= 0) {
                 Long memberId = (Long)arg2;
                 
                 OrganizationMember member = organizationProvider.findOrganizationMemberById(memberId);

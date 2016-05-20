@@ -187,11 +187,13 @@ public class PromotionUserServiceImpl implements PromotionUserService {
             }
             
             Community community = communityProvider.findCommunityById(communityId);
-            key = "" + OpPromotionScopeType.CITY.getCode() + ":" + community.getCityId();
-            if(checkExists.containsKey(key)) {
-                return true;
+            if(community != null) {
+                key = "" + OpPromotionScopeType.CITY.getCode() + ":" + community.getCityId();
+                if(checkExists.containsKey(key)) {
+                    return true;
+                }      
             }
-        
+          
         return false;
     }
     

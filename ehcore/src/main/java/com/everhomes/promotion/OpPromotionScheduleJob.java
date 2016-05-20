@@ -13,8 +13,12 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
+import com.everhomes.rest.promotion.OpPromotionConditionType;
 import com.everhomes.rest.promotion.OpPromotionStatus;
 import com.everhomes.scheduler.ScheduleProvider;
+import com.everhomes.server.schema.tables.pojos.EhOpPromotionActivities;
 
 @Component
 @Scope("prototype")
@@ -44,10 +48,18 @@ public class OpPromotionScheduleJob extends QuartzJobBean {
         }
         
         if(jobMap.get(OpPromotionConstant.SCHEDULE_TYPE).equals(OpPromotionConstant.SCHEDULE_START)) {
-            promotion = promotionActivityProvider.getOpPromotionActivityById(id);
-            promotionService.createScheduleTaskByPromotion(promotion);
+            OpPromotionConditionType conditionType = OpPromotionConditionType.fromCode(promotion.getPolicyType());
+            switch(conditionType) {
+            case NEW_USER:
+                //broadcast to all nodes
+                promotionService.broadcastEvent(DaoAction.CREATE, EhOpPromotionActivities.class, id);
+                break;
+            default:
+                //Local only
+                DaoHelper.publishDaoAction(DaoAction.CREATE, EhOpPromotionActivities.class, id);
+            }
             
-            LOGGER.error("OpPromotion schedule Id=" + id);
+            LOGGER.info("broadcast to all, OpPromotion schedule Id=" + id);
             
             Map<String, Object> map = new HashMap<String, Object>();
             String triggerName = OpPromotionConstant.SCHEDULE_TARGET_NAME + System.currentTimeMillis();
@@ -57,11 +69,8 @@ public class OpPromotionScheduleJob extends QuartzJobBean {
             scheduleProvider.scheduleSimpleJob(triggerName, jobName, new Date(promotion.getEndTime().getTime()), OpPromotionScheduleJob.class, map);            
         } else {
 
-            //promotionService.closeOpPromotion(promotion);
-            
-//          OpPromotionCondition condition = OpPromotionUtils.getConditionFromPromotion(promotion);            
-//            OpPromotionActivityContext ctx = new OpPromotionActivityContext(promotion); 
-//            condition.deleteCondition(ctx);
+            LOGGER.info("close OpPromotion schedule Id=" + id);
+            promotionService.closeOpPromotion(promotion);
         }
         
 
