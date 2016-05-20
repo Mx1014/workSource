@@ -2,6 +2,7 @@ package com.everhomes.rest.pmsy;
 
 /**
  *<ul>
+ * <li>communityId : 小区ID（左邻）</li>
  * <li>startDate : 开始时间</li>
  * <li>endDate : 结束时间</li>
  * <li>userName : 用户名</li>
@@ -11,6 +12,7 @@ package com.everhomes.rest.pmsy;
  *
  */
 public class SearchBillsOrdersCommand {
+	private Long communityId;
 	private Long startDate;
 	private Long endDate;
 	private String userName;
@@ -46,6 +48,12 @@ public class SearchBillsOrdersCommand {
 	}
 	public void setPageAnchor(Long pageAnchor) {
 		this.pageAnchor = pageAnchor;
+	}
+	public Long getCommunityId() {
+		return communityId;
+	}
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
 	}
 	
 }

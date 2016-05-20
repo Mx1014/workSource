@@ -68,6 +68,18 @@ public class PmsyProviderImpl implements PmsyProvider {
 	}
 	
 	@Override
+	public PmsyPayer findPmPayersByNameAndContact(String userName, String userContact){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmsyPayers.class));
+		SelectWhereStep<EhPmsyPayersRecord> select = context.selectFrom(Tables.EH_PMSY_PAYERS);
+		
+		EhPmsyPayersRecord result = select.where(Tables.EH_PMSY_PAYERS.USER_NAME.eq(userName))
+			  .and(Tables.EH_PMSY_PAYERS.USER_CONTACT.eq(userContact))
+			  .fetchOne();
+		
+		return ConvertHelper.convert(result, PmsyPayer.class);
+	}
+	
+	@Override
 	public void createPmPayer(PmsyPayer pmsyPayer){
 		Long id = sequenceProvider.getNextSequence(NameMapper
 				.getSequenceDomainFromTablePojo(EhPmsyPayers.class));
@@ -199,7 +211,7 @@ public class PmsyProviderImpl implements PmsyProvider {
 	}
 	
 	@Override
-	public List<PmsyOrder> searchBillingOrders(Long pageAnchor,Timestamp startDate,Timestamp endDate,String userName,String userContact){
+	public List<PmsyOrder> searchBillingOrders(Long communityId ,Long pageAnchor,Timestamp startDate,Timestamp endDate,String userName,String userContact){
 		
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmsyOrders.class));
 		SelectQuery<EhPmsyOrdersRecord> query = context.selectQuery(Tables.EH_PMSY_ORDERS);
@@ -214,6 +226,7 @@ public class PmsyProviderImpl implements PmsyProvider {
 			query.addConditions(Tables.EH_PMSY_ORDERS.USER_NAME.eq(userName));
 		if(StringUtils.isNotBlank(userContact))
 			query.addConditions(Tables.EH_PMSY_ORDERS.USER_CONTACT.eq(userContact));
+		query.addConditions(Tables.EH_PMSY_ORDERS.OWNER_ID.eq(communityId));
 		
 		return query.fetch().map(r -> ConvertHelper.convert(r, PmsyOrder.class));
 	}

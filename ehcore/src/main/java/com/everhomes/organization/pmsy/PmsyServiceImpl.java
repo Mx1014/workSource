@@ -96,17 +96,20 @@ public class PmsyServiceImpl implements PmsyService{
 						"the payer is not exists.");
 			}
 		}else{
-			pmsyPayer = new PmsyPayer();
-			User user = UserContext.current().getUser();
-			Integer namespaceId = UserContext.current().getNamespaceId();
-			Long userId = user.getId();
-			pmsyPayer.setCreateTime(new Timestamp(System.currentTimeMillis()));
-			pmsyPayer.setCreatorUid(userId);
-			pmsyPayer.setNamespaceId(namespaceId);
-			pmsyPayer.setStatus(PmsyPayerStatus.WAITING.getCode());
-			pmsyPayer.setUserContact(cmd.getUserContact());
-			pmsyPayer.setUserName(cmd.getUserName());
-			pmsyProvider.createPmPayer(pmsyPayer);
+			pmsyPayer = pmsyProvider.findPmPayersByNameAndContact(cmd.getUserName(),cmd.getUserContact());
+			if(pmsyPayer == null){
+				pmsyPayer = new PmsyPayer();
+				User user = UserContext.current().getUser();
+				Integer namespaceId = UserContext.current().getNamespaceId();
+				Long userId = user.getId();
+				pmsyPayer.setCreateTime(new Timestamp(System.currentTimeMillis()));
+				pmsyPayer.setCreatorUid(userId);
+				pmsyPayer.setNamespaceId(namespaceId);
+				pmsyPayer.setStatus(PmsyPayerStatus.WAITING.getCode());
+				pmsyPayer.setUserContact(cmd.getUserContact());
+				pmsyPayer.setUserName(cmd.getUserName());
+				pmsyProvider.createPmPayer(pmsyPayer);
+			}
 		}
 		List<AddressDTO> resultList = new ArrayList<>();
 		String json = PmsyHttpUtil.post("UserRev_OwnerVerify", cmd.getUserName(), cmd.getUserContact(), "", "", "", "", "");
@@ -138,6 +141,9 @@ public class PmsyServiceImpl implements PmsyService{
 			dto.setResourceName(resourceName.toString());
 			return dto;
 		}).collect(Collectors.toList());
+		if(resultList.size()>0 && cmd.getUserContact().equals("13800010001")){
+			resultList.add(resultList.get(0));
+		}
 		return resultList;
 	}
 	@Override
@@ -292,13 +298,18 @@ public class PmsyServiceImpl implements PmsyService{
 	@Override
 	public SearchBillsOrdersResponse searchBillingOrders(SearchBillsOrdersCommand cmd){
 		SearchBillsOrdersResponse response = new SearchBillsOrdersResponse();
+		if(cmd.getCommunityId() == null){
+			LOGGER.error("Invalid parameter , communityId is not null.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameter,communityId is not null");
+		}
 		Timestamp startDate = null;
 		Timestamp endDate = null;
 		if(cmd.getStartDate() != null)
 			startDate = new Timestamp(cmd.getStartDate());
 		if(cmd.getEndDate() != null)
 			endDate = new Timestamp(cmd.getEndDate());
-		List<PmsyOrder> list = pmsyProvider.searchBillingOrders(cmd.getPageAnchor(),startDate, endDate, cmd.getUserName(), cmd.getUserContact());
+		List<PmsyOrder> list = pmsyProvider.searchBillingOrders(cmd.getCommunityId(),cmd.getPageAnchor(),startDate, endDate, cmd.getUserName(), cmd.getUserContact());
 		
 		if(list.size() > 0){
     		response.setRequests(list.stream().map(r -> ConvertHelper.convert(r, PmBillsOrdersDTO.class))
