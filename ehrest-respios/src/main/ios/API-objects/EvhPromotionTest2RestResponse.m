@@ -1,20 +1,20 @@
 //
-// EvhOrgApplyForEnterpriseContactRestResponse.m
+// EvhPromotionTest2RestResponse.m
 //
-#import "EvhOrgApplyForEnterpriseContactRestResponse.h"
-#import "EvhOrganizationDTO.h"
+#import "EvhPromotionTest2RestResponse.h"
+#import "EvhOpPromotionDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhOrgApplyForEnterpriseContactRestResponse
+// EvhPromotionTest2RestResponse
 //
 
-@implementation EvhOrgApplyForEnterpriseContactRestResponse
+@implementation EvhPromotionTest2RestResponse
 
 +(id) withJsonString: (NSString*) jsonString
 {
     id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
     if(jsonObject != nil) {
-        EvhOrgApplyForEnterpriseContactRestResponse* obj = [EvhOrgApplyForEnterpriseContactRestResponse new];
+        EvhPromotionTest2RestResponse* obj = [EvhPromotionTest2RestResponse new];
         return [obj fromJson:jsonObject];
     }
     return nil;
@@ -45,7 +45,7 @@
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
         [super fromJson: jsonObject];
         NSMutableDictionary* dic =  (NSMutableDictionary*)[jsonObject objectForKey: @"response"];
-        self.response = [EvhOrganizationDTO new];
+        self.response = [EvhOpPromotionDTO new];
         self.response = [self.response fromJson: dic];
         return self;
     }

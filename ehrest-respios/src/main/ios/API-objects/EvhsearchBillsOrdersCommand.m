@@ -30,6 +30,8 @@
 
 -(void) toJson: (NSMutableDictionary*) jsonObject 
 {
+    if(self.communityId)
+        [jsonObject setObject: self.communityId forKey: @"communityId"];
     if(self.startDate)
         [jsonObject setObject: self.startDate forKey: @"startDate"];
     if(self.endDate)
@@ -45,6 +47,10 @@
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
 {
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
+        self.communityId = [jsonObject objectForKey: @"communityId"];
+        if(self.communityId && [self.communityId isEqual:[NSNull null]])
+            self.communityId = nil;
+
         self.startDate = [jsonObject objectForKey: @"startDate"];
         if(self.startDate && [self.startDate isEqual:[NSNull null]])
             self.startDate = nil;

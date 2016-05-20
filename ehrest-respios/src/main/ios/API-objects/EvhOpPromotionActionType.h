@@ -10,7 +10,7 @@ typedef enum {
 
     EvhOpPromotionActionType_STATIC_WEB_PAGE = 0, 
     EvhOpPromotionActionType_COUPON = 1, 
-    EvhOpPromotionActionType_TEXT_ONLY = 1
+    EvhOpPromotionActionType_TEXT_ONLY = 2
 
 } EvhOpPromotionActionType;
 

@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-05-19 12:52:09
+// generated at 2016-05-20 19:31:56
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -232,6 +232,7 @@ public interface ApiConstants {
     public static final String ADMIN_PROMOTION_LISTPROMOTION_URL = "/admin/promotion/listPromotion";
     public static final String ADMIN_PROMOTION_NEWORDERPRICE_URL = "/admin/promotion/newOrderPrice";
     public static final String ADMIN_PROMOTION_SEARCHPROMOTION_URL = "/admin/promotion/searchPromotion";
+    public static final String ADMIN_PROMOTION_UPDATEPROMOTION_URL = "/admin/promotion/updatePromotion";
     public static final String ADMIN_PUSHMESSAGE_CREATEPUSHMESSAGE_URL = "/admin/pushmessage/createPushMessage";
     public static final String ADMIN_PUSHMESSAGE_DELETEPUSHMESSAGE_URL = "/admin/pushmessage/deletePushMessage";
     public static final String ADMIN_PUSHMESSAGE_LISTPUSHMESSAGE_URL = "/admin/pushmessage/listPushMessage";
@@ -675,6 +676,7 @@ public interface ApiConstants {
     public static final String PMSY_SETPMPROPERTY_URL = "/pmsy/setPmProperty";
     public static final String POLL_SHOWRESULT_URL = "/poll/showResult";
     public static final String POLL_VOTE_URL = "/poll/vote";
+    public static final String PROMOTION_TEST2_URL = "/promotion/test2";
     public static final String PUSHER_CREATECERT_URL = "/pusher/createCert";
     public static final String PUSHER_PUSH_URL = "/pusher/push";
     public static final String PUSHER_RECENTMESSAGES_URL = "/pusher/recentMessages";

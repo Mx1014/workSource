@@ -1,15 +1,15 @@
 //
-// EvhOrgApplyForEnterpriseContactRestResponse.h
+// EvhPromotionTest2RestResponse.h
 //
 #import "RestResponseBase.h"
-#import "EvhOrganizationDTO.h"
+#import "EvhOpPromotionDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhOrgApplyForEnterpriseContactRestResponse
+// EvhPromotionTest2RestResponse
 //
-@interface EvhOrgApplyForEnterpriseContactRestResponse : EvhRestResponseBase
+@interface EvhPromotionTest2RestResponse : EvhRestResponseBase
 
-@property(nonatomic, strong) EvhOrganizationDTO* response;
+@property(nonatomic, strong) EvhOpPromotionDTO* response;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

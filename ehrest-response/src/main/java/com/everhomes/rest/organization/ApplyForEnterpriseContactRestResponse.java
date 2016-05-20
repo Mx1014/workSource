@@ -4,20 +4,20 @@ package com.everhomes.rest.organization;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.organization.OrganizationDTO;
 
 public class ApplyForEnterpriseContactRestResponse extends RestResponseBase {
 
-    private OrganizationMemberDTO response;
+    private OrganizationDTO response;
 
     public ApplyForEnterpriseContactRestResponse () {
     }
 
-    public OrganizationMemberDTO getResponse() {
+    public OrganizationDTO getResponse() {
         return response;
     }
 
-    public void setResponse(OrganizationMemberDTO response) {
+    public void setResponse(OrganizationDTO response) {
         this.response = response;
     }
 }

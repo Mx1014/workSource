@@ -11,6 +11,8 @@
     : NSObject<EvhJsonSerializable>
 
 
+@property(nonatomic, copy) NSNumber* communityId;
+
 @property(nonatomic, copy) NSNumber* startDate;
 
 @property(nonatomic, copy) NSNumber* endDate;
