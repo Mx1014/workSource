@@ -211,7 +211,7 @@ public class PmsyProviderImpl implements PmsyProvider {
 	}
 	
 	@Override
-	public List<PmsyOrder> searchBillingOrders(Long communityId ,Long pageAnchor,Timestamp startDate,Timestamp endDate,String userName,String userContact){
+	public List<PmsyOrder> searchBillingOrders(Integer pageSize ,Long communityId ,Long pageAnchor,Timestamp startDate,Timestamp endDate,String userName,String userContact){
 		
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmsyOrders.class));
 		SelectQuery<EhPmsyOrdersRecord> query = context.selectQuery(Tables.EH_PMSY_ORDERS);
@@ -227,6 +227,7 @@ public class PmsyProviderImpl implements PmsyProvider {
 		if(StringUtils.isNotBlank(userContact))
 			query.addConditions(Tables.EH_PMSY_ORDERS.USER_CONTACT.eq(userContact));
 		query.addConditions(Tables.EH_PMSY_ORDERS.OWNER_ID.eq(communityId));
+		query.addLimit(pageSize);
 		
 		return query.fetch().map(r -> ConvertHelper.convert(r, PmsyOrder.class));
 	}
