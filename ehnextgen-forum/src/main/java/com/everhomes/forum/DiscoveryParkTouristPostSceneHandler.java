@@ -258,8 +258,8 @@ public class DiscoveryParkTouristPostSceneHandler implements PostSceneHandler {
 
             // 菜单：本小区
             sentScopeDto = new TopicScopeDTO();
-            sentScopeDto.setId(group1Id);
-            sentScopeDto.setParentId(0L);
+            sentScopeDto.setId(menuId++);
+            sentScopeDto.setParentId(group1Id);
             code = String.valueOf(ForumLocalStringCode.POST_MEMU_PARK_ONLY);
             menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
             sentScopeDto.setName(menuName);

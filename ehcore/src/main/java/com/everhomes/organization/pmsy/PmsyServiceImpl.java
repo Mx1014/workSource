@@ -46,6 +46,7 @@ import com.everhomes.rest.pmsy.PmsyPayerStatus;
 import com.everhomes.rest.pmsy.SearchBillsOrdersResponse;
 import com.everhomes.rest.pmsy.SetPmsyPropertyCommand;
 import com.everhomes.rest.pmsy.SearchBillsOrdersCommand;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -309,7 +310,7 @@ public class PmsyServiceImpl implements PmsyService{
 			startDate = new Timestamp(cmd.getStartDate());
 		if(cmd.getEndDate() != null)
 			endDate = new Timestamp(cmd.getEndDate());
-		List<PmsyOrder> list = pmsyProvider.searchBillingOrders(cmd.getCommunityId(),cmd.getPageAnchor(),startDate, endDate, cmd.getUserName(), cmd.getUserContact());
+		List<PmsyOrder> list = pmsyProvider.searchBillingOrders(AppConstants.PAGINATION_DEFAULT_SIZE,cmd.getCommunityId(),cmd.getPageAnchor(),startDate, endDate, cmd.getUserName(), cmd.getUserContact());
 		
 		if(list.size() > 0){
     		response.setRequests(list.stream().map(r -> ConvertHelper.convert(r, PmBillsOrdersDTO.class))

@@ -764,6 +764,8 @@ public class ForumServiceImpl implements ForumService {
         Condition visibilityCondition = buildPostCategoryQryCondition(user, entityTag, community, 
             cmd.getContentCategory(), cmd.getActionCategory());
         
+        Condition cond = this.notEqPostCategoryCondition(cmd.getExcludeCategories());
+        
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator(forum.getId());
         locator.setAnchor(cmd.getPageAnchor());
@@ -777,6 +779,9 @@ public class ForumServiceImpl implements ForumService {
                 query.addConditions(visibilityCondition);
             }
             
+            if(null != cond){
+            	query.addConditions(cond);
+            }
             return query;
         });
         this.forumProvider.populatePostAttachments(posts);
