@@ -553,6 +553,35 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhBusinessAssignedNamespaces.class, Tables.EH_BUSINESS_ASSIGNED_NAMESPACES.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_BUSINESS_ASSIGNED_NAMESPACES.ID.max()).from(Tables.EH_BUSINESS_ASSIGNED_NAMESPACES).fetchOne().value1(); 
         });
+        
+        syncTableSequence(null, EhParkingRechargeOrders.class, Tables.EH_PARKING_RECHARGE_ORDERS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_PARKING_RECHARGE_ORDERS.ID.max()).from(Tables.EH_PARKING_RECHARGE_ORDERS).fetchOne().value1(); 
+        });
+        syncTableSequence(null, EhParkingRechargeRates.class, Tables.EH_PARKING_RECHARGE_RATES.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_PARKING_RECHARGE_RATES.ID.max()).from(Tables.EH_PARKING_RECHARGE_RATES).fetchOne().value1(); 
+        });
+        syncTableSequence(null, EhParkingCardRequests.class, Tables.EH_PARKING_CARD_REQUESTS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_PARKING_CARD_REQUESTS.ID.max()).from(Tables.EH_PARKING_CARD_REQUESTS).fetchOne().value1(); 
+        });
+        syncTableSequence(null, EhParkingLots.class, Tables.EH_PARKING_LOTS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_PARKING_LOTS.ID.max()).from(Tables.EH_PARKING_LOTS).fetchOne().value1(); 
+        });
+        syncTableSequence(null, EhParkingVendors.class, Tables.EH_PARKING_VENDORS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_PARKING_VENDORS.ID.max()).from(Tables.EH_PARKING_VENDORS).fetchOne().value1(); 
+        });
+        
+        syncTableSequence(null, EhPmsyPayers.class, Tables.EH_PMSY_PAYERS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_PMSY_PAYERS.ID.max()).from(Tables.EH_PMSY_PAYERS).fetchOne().value1(); 
+        });
+        syncTableSequence(null, EhPmsyOrders.class, Tables.EH_PMSY_ORDERS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_PMSY_ORDERS.ID.max()).from(Tables.EH_PMSY_ORDERS).fetchOne().value1(); 
+        });
+        syncTableSequence(null, EhPmsyOrderItems.class, Tables.EH_PMSY_ORDER_ITEMS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_PMSY_ORDER_ITEMS.ID.max()).from(Tables.EH_PMSY_ORDER_ITEMS).fetchOne().value1(); 
+        });
+        syncTableSequence(null, EhPmsyCommunities.class, Tables.EH_PMSY_COMMUNITIES.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_PMSY_COMMUNITIES.ID.max()).from(Tables.EH_PMSY_COMMUNITIES).fetchOne().value1(); 
+        });
     }
     
     @SuppressWarnings("rawtypes")
