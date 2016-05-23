@@ -11,6 +11,7 @@
         <module>ehcore-persist</module>
         <module>ehcore</module>
         <module>ehborder</module>
+		<module>ehtest-integration</module>
     </modules>
 </project>
 
