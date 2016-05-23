@@ -1,60 +1,30 @@
 package com.everhomes.wifi;
 
-import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-
-
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.order.OrderEmbeddedHandler;
-import com.everhomes.order.OrderUtil;
-import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.order.CommonOrderCommand;
-import com.everhomes.rest.order.CommonOrderDTO;
-import com.everhomes.rest.order.OrderType;
-import com.everhomes.rest.order.PayCallbackCommand;
-import com.everhomes.rest.pmsy.AddressDTO;
-import com.everhomes.rest.pmsy.CreatePmsyBillOrderCommand;
-import com.everhomes.rest.pmsy.GetPmsyBills;
-import com.everhomes.rest.pmsy.GetPmsyPropertyCommand;
-import com.everhomes.rest.pmsy.ListPmsyBillsCommand;
-import com.everhomes.rest.pmsy.ListResourceCommand;
-import com.everhomes.rest.pmsy.PmBillsOrdersDTO;
-import com.everhomes.rest.pmsy.PmsyBillType;
-import com.everhomes.rest.pmsy.PmsyBillsDTO;
-import com.everhomes.rest.pmsy.PmsyBillItemDTO;
-import com.everhomes.rest.pmsy.PmsyCommunityDTO;
-import com.everhomes.rest.pmsy.PmsyOrderStatus;
-import com.everhomes.rest.pmsy.PmsyPayerDTO;
-import com.everhomes.rest.pmsy.PmsyBillsResponse;
-import com.everhomes.rest.pmsy.PmsyPayerStatus;
-import com.everhomes.rest.pmsy.SearchBillsOrdersResponse;
-import com.everhomes.rest.pmsy.SetPmsyPropertyCommand;
-import com.everhomes.rest.pmsy.SearchBillsOrdersCommand;
-import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.rest.wifi.CreateWifiSettingCommand;
+import com.everhomes.rest.wifi.DeleteWifiSettingCommand;
+import com.everhomes.rest.wifi.EditWifiSettingCommand;
+import com.everhomes.rest.wifi.ListWifiSettingCommand;
+import com.everhomes.rest.wifi.VerifyWifiCommand;
+import com.everhomes.rest.wifi.VerifyWifiDTO;
+import com.everhomes.rest.wifi.WifiSettingDTO;
+import com.everhomes.rest.wifi.WifiSettingStatus;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
-import com.google.gson.Gson;
 
 @Component
-@SuppressWarnings({ "rawtypes", "unchecked" })
 public class WifiServiceImpl implements WifiService{
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(WifiServiceImpl.class);
@@ -62,30 +32,92 @@ public class WifiServiceImpl implements WifiService{
 	@Autowired
 	private WifiProvider wifiProvider;
 	
-	/*@Override
-	public List<PmsyPayerDTO> listPmPayers(){
-		User user = UserContext.current().getUser();
-		Integer namespaceId = UserContext.current().getNamespaceId();
-		Long userId = user.getId();
-		List<PmsyPayer> list = pmsyProvider.listPmPayers(userId, namespaceId);
+	@Override
+	public List<WifiSettingDTO> listWifiSetting(ListWifiSettingCommand cmd){
+		if(cmd.getOwnerId() == null || StringUtils.isBlank(cmd.getOwnerType())){
+    		LOGGER.error("ownerId or ownertype cannot be null.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"ownerId or ownertype cannot be null.");
+    	}
+		List<WifiSetting> list = wifiProvider.listWifiSetting(cmd.getOwnerId(), cmd.getOwnerType());
 		
-		return list.stream().map(r -> ConvertHelper.convert(r, PmsyPayerDTO.class)).collect(Collectors.toList());
-	}*/
-	
-	
-	
-	private String TimeToString(Long time){
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
-		return sdf.format(new Date(time));
+		return list.stream().map(r -> ConvertHelper.convert(r, WifiSettingDTO.class))
+				.collect(Collectors.toList());
 	}
 	
-	private Long StringToTime(String s){
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
-		try {
-			return sdf.parse(s).getTime();
-		} catch (ParseException e) {
-			e.printStackTrace();
+	@Override
+	public WifiSettingDTO createWifiSetting(CreateWifiSettingCommand cmd){
+		if(cmd.getOwnerId() == null || StringUtils.isBlank(cmd.getOwnerType())){
+    		LOGGER.error("ownerId or ownertype cannot be null.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"ownerId or ownertype cannot be null.");
+    	}
+		if(StringUtils.isBlank(cmd.getSsid())){
+			LOGGER.error("ssid cannot be null.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"ssid cannot be null.");
 		}
-		return null;
+		WifiSetting wifiSetting = wifiProvider.findWifiSettingBySsid(cmd.getSsid());
+		if(wifiSetting != null){
+			LOGGER.error("the wifi ssid already existing.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"the wifi ssid already existing.");
+		}
+		User user = UserContext.current().getUser();
+		Long userId = user.getId();
+		wifiSetting = new WifiSetting();
+		wifiSetting.setCreateTime(new Timestamp(System.currentTimeMillis()));
+		wifiSetting.setCreatorUid(userId);
+		wifiSetting.setOwnerId(cmd.getOwnerId());
+		wifiSetting.setOwnerType(cmd.getOwnerType());
+		wifiSetting.setSsid(cmd.getSsid());
+		wifiSetting.setStatus(WifiSettingStatus.ACTIVE.getCode());
+		
+		wifiProvider.createWifiSetting(wifiSetting);
+		return ConvertHelper.convert(wifiSetting, WifiSettingDTO.class);
+	}
+	
+	@Override
+	public WifiSettingDTO editWifiSetting(EditWifiSettingCommand cmd){
+		WifiSetting wifiSetting = checkId(cmd.getId());
+		wifiSetting.setSsid(cmd.getSsid());
+		
+		wifiProvider.updateWifiSetting(wifiSetting);
+		return ConvertHelper.convert(wifiSetting, WifiSettingDTO.class);
+	}
+	
+	@Override
+	public void deleteWifiSetting(DeleteWifiSettingCommand cmd){
+		WifiSetting wifiSetting = checkId(cmd.getId());
+		wifiSetting.setStatus(WifiSettingStatus.UNACTIVE.getCode());
+		
+		wifiProvider.updateWifiSetting(wifiSetting);
+	}
+	
+	@Override
+	public VerifyWifiDTO verifyWifi(VerifyWifiCommand cmd){
+		VerifyWifiDTO dto = new VerifyWifiDTO();
+		WifiSetting wifiSetting = wifiProvider.findWifiSettingBySsid(cmd.getSsid());
+		if(wifiSetting != null){
+			dto.setFlag(true);
+		}else{
+			dto.setFlag(false);
+		}
+		return dto;
+	}
+	
+	private WifiSetting checkId(Long id){
+		if(null == id){
+			LOGGER.error("id cannot be null.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"id cannot be null.");
+		}
+		WifiSetting wifiSetting = wifiProvider.findWifiSettingById(id);
+		if(null == wifiSetting){
+			LOGGER.error("wifiSetting {} is not exist.",id);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"wifiSetting is not exist.");
+		}
+		return wifiSetting;
 	}
 }
