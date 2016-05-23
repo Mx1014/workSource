@@ -41,6 +41,7 @@ import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
 import com.everhomes.rest.organization.OrganizationAddressDTO;
 import com.everhomes.rest.organization.OrganizationDetailDTO;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.search.EnterpriseSearcher;
 import com.everhomes.user.UserContext;
@@ -149,6 +150,8 @@ public class EnterpriseController extends ControllerBase {
     @RestReturn(value=ListEnterpriseResponse.class)
     public RestResponse searchEnterprise(@Valid SearchEnterpriseCommand cmd) {
     	SearchOrganizationCommand command = ConvertHelper.convert(cmd, SearchOrganizationCommand.class);
+    	
+    	command.setOrganizationType(OrganizationType.ENTERPRISE.getCode());
         ListEnterprisesCommandResponse resp = organizationService.searchEnterprise(command);
         List<EnterpriseDTO> enterprises = resp.getDtos().stream().map((r) ->{
         	 EnterpriseDTO eDto = ConvertHelper.convert(r, EnterpriseDTO.class);
