@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>cityId: 城市Id</li>
  * <li>keyword: 查询关键字</li>
+ * <li>communityType: 园区小区类型{@link com.everhomes.rest.community.CommunityType}</li>
  * <li>pageOffset: 页码</li>
  * <li>pageSize: 每页大小</li>
  * </ul>
@@ -24,6 +25,8 @@ public class SearchCommunityCommand {
     private Integer pageOffset;
     // start from 1, page size is configurable at server side
     private Integer pageSize;
+    
+    private Byte communityType;
     
     public SearchCommunityCommand() {
     }
@@ -68,7 +71,15 @@ public class SearchCommunityCommand {
         this.pageOffset = pageOffset;
     }
 
-    @Override
+    public Byte getCommunityType() {
+		return communityType;
+	}
+
+	public void setCommunityType(Byte communityType) {
+		this.communityType = communityType;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

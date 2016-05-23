@@ -20,7 +20,6 @@ public class ListComunitiesByKeywordAdminCommand {
 	
 	private Integer pageSize;
 	
-	@NotNull
 	private String keyword;
 	
 	private Integer namespaceId;

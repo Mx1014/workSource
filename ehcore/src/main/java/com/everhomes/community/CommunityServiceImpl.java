@@ -568,10 +568,7 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public ListCommunitiesByKeywordCommandResponse listCommunitiesByKeyword(
 			ListComunitiesByKeywordAdminCommand cmd) {
-		if(cmd.getKeyword() == null || cmd.getKeyword().equals("")){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Invalid keyword parameter");
-		}
+		
 		if(cmd.getPageAnchor()==null)
 			cmd.setPageAnchor(0L);
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());

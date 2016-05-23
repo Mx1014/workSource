@@ -140,7 +140,7 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
                 .field("name.pinyin_gram", 1.0f);
         
         FilterBuilder fb = null;
-        int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+        int namespaceId = UserContext.getCurrentNamespaceId();
         fb = FilterBuilders.termFilter("namespaceId", namespaceId);
         if(null != communityType) {
             fb = FilterBuilders.termFilter("communityType", communityType);
@@ -186,8 +186,8 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
     }
 
     @Override
-    public List<CommunityDoc> searchDocs(String queryString, Long cityId, Long regionId, int pageNum, int pageSize) {
-        return this.searchDocsByType(queryString,null, EnterpriseCommunityType.Normal, cityId, regionId, pageNum, pageSize);
+    public List<CommunityDoc> searchDocs(String queryString,Byte communityType, Long cityId, Long regionId, int pageNum, int pageSize) {
+        return this.searchDocsByType(queryString,communityType, EnterpriseCommunityType.Normal, cityId, regionId, pageNum, pageSize);
     }
     
     @Override
