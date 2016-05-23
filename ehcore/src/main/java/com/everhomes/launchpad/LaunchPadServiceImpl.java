@@ -435,15 +435,22 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
 		
 		Long communityId = cmd.getCommunityId();
-        Community community = new Community();
+        Community community = null;
         if(communityId != null) {
             community = communityProvider.findCommunityById(communityId);
+        }
+        
+        if(community == null) {
+        	community = new Community();
+        	community.setId(0L);
+        	community.setCityId(0L);
         }
 		
 		List<LaunchPadItemDTO> result = new ArrayList<LaunchPadItemDTO>();
 		List<LaunchPadItem> defaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.ALL.getCode(),0L,null);
 		List<LaunchPadItem> cityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.CITY.getCode(),community.getCityId(),null);
 		List<LaunchPadItem> communityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.COMMUNITY.getCode(),community.getId(),null);
+		
 		List<LaunchPadItem> userItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(), cmd.getItemGroup(), ScopeType.USER.getCode(), userId, null);
 		List<LaunchPadItem> allItems = new ArrayList<LaunchPadItem>();
 
