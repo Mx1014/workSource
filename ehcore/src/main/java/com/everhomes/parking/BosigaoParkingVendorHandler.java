@@ -73,36 +73,34 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 
 			if(LOGGER.isDebugEnabled())
 				LOGGER.error("validStatus="+validStatus);
-
+			
+			String plateOwnerName = (String) card.get("userName");
+			String carNumber = (String) card.get("carNumber");
+			
+			String validEnd = (String) card.get("validEnd");
+			String cardNumber = (String) card.get("cardCode");
+			String cardType = (String) card.get("cardDescript");
+			String plateOwnerPhone = (String) card.get("mobile");
+			Timestamp endTime = strToTimestamp(validEnd);
+			
+			parkingCardDTO.setOwnerType(ParkingOwnerType.COMMUNITY.getCode());
+			parkingCardDTO.setOwnerId(ownerId);
+			parkingCardDTO.setParkingLotId(parkingLotId);
+			parkingCardDTO.setPlateOwnerName(plateOwnerName);
+			parkingCardDTO.setPlateNumber(carNumber);
+			//parkingCardDTO.setStartTime(startTime);
+			parkingCardDTO.setEndTime(endTime.getTime());
+			parkingCardDTO.setCardType(cardType);
+			parkingCardDTO.setCardNumber(cardNumber);
+			parkingCardDTO.setPlateOwnerPhone(plateOwnerPhone);
+			
 			if(!validStatus){
 				parkingCardDTO.setIsValid(false);
 				resultList.add(parkingCardDTO);
 				return resultList;
 			}
 			else if(validStatus){
-				String plateOwnerName = (String) card.get("userName");
-				String carNumber = (String) card.get("carNumber");
-				
-				String validEnd = (String) card.get("validEnd");
-				String cardNumber = (String) card.get("cardCode");
-				String cardType = (String) card.get("cardDescript");
-				String plateOwnerPhone = (String) card.get("mobile");
-				Timestamp endTime = strToTimestamp(validEnd);
-				
-				parkingCardDTO.setOwnerType(ParkingOwnerType.COMMUNITY.getCode());
-				parkingCardDTO.setOwnerId(ownerId);
-				parkingCardDTO.setParkingLotId(parkingLotId);
-				parkingCardDTO.setPlateOwnerName(plateOwnerName);
-				parkingCardDTO.setPlateNumber(carNumber);
-				//parkingCardDTO.setStartTime(startTime);
-				parkingCardDTO.setEndTime(endTime.getTime());
-				parkingCardDTO.setCardType(cardType);
-				parkingCardDTO.setCardNumber(cardNumber);
-				parkingCardDTO.setPlateOwnerPhone(plateOwnerPhone);
 				parkingCardDTO.setIsValid(true);
-				
-				if(LOGGER.isDebugEnabled())
-					LOGGER.error("successcommand="+parkingCardDTO.toString());
 				resultList.add(parkingCardDTO);
 				
 				return resultList;

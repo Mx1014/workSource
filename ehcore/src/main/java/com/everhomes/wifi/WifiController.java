@@ -33,7 +33,7 @@ import com.everhomes.rest.pmsy.ListResourceCommand;
 import com.everhomes.rest.pmsy.SearchBillsOrdersCommand;
 
 @RestController
-@RequestMapping("/pmsy")
+@RequestMapping("/wifi")
 public class WifiController extends ControllerBase {
 	private static final Logger LOGGER = LoggerFactory.getLogger(WifiController.class);
 
