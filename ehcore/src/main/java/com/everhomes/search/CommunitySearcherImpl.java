@@ -127,7 +127,7 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
         return null;
     }
     
-    private List<CommunityDoc> searchDocsByType(String queryString, EnterpriseCommunityType t, Long cityId, Long regionId, int pageNum, int pageSize) {
+    private List<CommunityDoc> searchDocsByType(String queryString,Byte communityType, EnterpriseCommunityType t, Long cityId, Long regionId, int pageNum, int pageSize) {
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         
         QueryBuilder qb;
@@ -140,8 +140,11 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
                 .field("name.pinyin_gram", 1.0f);
         
         FilterBuilder fb = null;
-        int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+        int namespaceId = UserContext.getCurrentNamespaceId();
         fb = FilterBuilders.termFilter("namespaceId", namespaceId);
+        if(null != communityType) {
+            fb = FilterBuilders.termFilter("communityType", communityType);
+        }
         if((null != cityId) && (cityId > 0)) {
             fb = FilterBuilders.termFilter("cityId", cityId);
         }
@@ -183,13 +186,13 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
     }
 
     @Override
-    public List<CommunityDoc> searchDocs(String queryString, Long cityId, Long regionId, int pageNum, int pageSize) {
-        return this.searchDocsByType(queryString, EnterpriseCommunityType.Normal, cityId, regionId, pageNum, pageSize);
+    public List<CommunityDoc> searchDocs(String queryString,Byte communityType, Long cityId, Long regionId, int pageNum, int pageSize) {
+        return this.searchDocsByType(queryString,communityType, EnterpriseCommunityType.Normal, cityId, regionId, pageNum, pageSize);
     }
     
     @Override
-    public List<CommunityDoc> searchEnterprise(String queryString, Long regionId, int pageNum, int pageSize) {
-        return this.searchDocsByType(queryString, EnterpriseCommunityType.Enterprise, null, regionId, pageNum, pageSize);
+    public List<CommunityDoc> searchEnterprise(String queryString,Byte communityType, Long regionId, int pageNum, int pageSize) {
+        return this.searchDocsByType(queryString,communityType, EnterpriseCommunityType.Enterprise, null, regionId, pageNum, pageSize);
     }
 
 }

@@ -15,6 +15,7 @@ import java.util.UUID;
 
 
 
+
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -46,6 +47,7 @@ import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.community.CommunityDoc;
+import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.enterprise.DeleteEnterpriseCommand;
 import com.everhomes.rest.enterprise.EnterpriseAddressDTO;
@@ -246,6 +248,10 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 
     @Override
     public List<CommunityDoc> searchCommunities(SearchEnterpriseCommunityCommand cmd) {
+    	if(null == cmd.getCommunityType()){
+    		cmd.setCommunityType(CommunityType.COMMERCIAL.getCode());
+    	}
+    	
         if(cmd.getKeyword() == null){
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid keyword paramter.");
@@ -254,7 +260,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         final int pageSize = cmd.getPageSize() == null ? this.configProvider.getIntValue("pagination.page.size", 
                 AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
         
-        return communitySearcher.searchEnterprise(cmd.getKeyword(), cmd.getRegionId(), pageNum - 1, pageSize);
+        return communitySearcher.searchEnterprise(cmd.getKeyword(), cmd.getCommunityType(), cmd.getRegionId(), pageNum - 1, pageSize);
     }
     
     @Override
@@ -411,7 +417,6 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     @Override
     public ListEnterpriseCommunityResponse listEnterpriseEnrollCommunties(GetEnterpriseInfoCommand cmd) {
         CrossShardListingLocator locator = new CrossShardListingLocator();
-        
         int pageSize = 100;
         List<EnterpriseCommunity> ecs = this.listEnterpriseEnrollCommunties(locator, cmd.getEnterpriseId(), pageSize);
         List<EnterpriseCommunityDTO> dtos = new ArrayList<EnterpriseCommunityDTO>();

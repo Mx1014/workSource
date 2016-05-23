@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
@@ -30,12 +31,16 @@ import com.everhomes.rest.community.GetCommunitiesByNameAndCityIdCommand;
 import com.everhomes.rest.community.GetCommunityByIdCommand;
 import com.everhomes.rest.community.ListBuildingCommand;
 import com.everhomes.rest.community.ListBuildingCommandResponse;
+import com.everhomes.rest.community.ListCommunitiesByKeywordCommandResponse;
 import com.everhomes.rest.community.UpdateCommunityRequestStatusCommand;
 import com.everhomes.rest.community.admin.CommunityUserDto;
 import com.everhomes.rest.community.admin.CommunityUserResponse;
 import com.everhomes.rest.community.admin.CountCommunityUserResponse;
 import com.everhomes.rest.community.admin.CountCommunityUsersCommand;
 import com.everhomes.rest.community.admin.ListCommunityUsersCommand;
+import com.everhomes.rest.community.admin.ListComunitiesByKeywordAdminCommand;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.EtagHelper;
 
 /**
@@ -180,6 +185,8 @@ public class CommunityController extends ControllerBase {
         return response;
 	}
 	
+
+	
 	/**
 	 * <b>URL: /community/countCommunityUsers</b>
 	 * <p>统计园区用户列表</p>
@@ -195,6 +202,20 @@ public class CommunityController extends ControllerBase {
         return response;
 	}
 	
-	
+	 /**
+     * <b>URL: /community/listCommunitiesByNamespaceId</b>
+     * <p>根据域查询小区</p>
+     */
+    @RequestMapping("listCommunitiesByNamespaceId")
+    @RestReturn(value=ListCommunitiesByKeywordCommandResponse.class)
+    public RestResponse listCommunitiesByNamespaceId(ListComunitiesByKeywordAdminCommand cmd) {
+    	
+    	ListCommunitiesByKeywordCommandResponse cmdResponse = this.communityService.listCommunitiesByKeyword(cmd);
+    	RestResponse response =  new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    	
+    }
 
 }

@@ -53,6 +53,8 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
             Long communityId = organizationService.getOrganizationActiveCommunityId(organization.getId());
             b.field("communityId", communityId);
             b.field("name", organization.getName());
+            //保证后面只能筛选出普通企业（ 注：不包含物业等机构），且一般不会改动，所以加入搜索引擎， by sfyan 20160523
+            b.field("organizationType", organization.getOrganizationType());
             b.field("description", organization.getDescription());
             b.field("createTime", organization.getCreateTime());
             b.endObject();
@@ -164,6 +166,11 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
             fb = FilterBuilders.andFilter(fb, cmntyFilter);
         }
         
+        // 用于一些场景下只能搜索出普通公司 by sfyan 20160523
+        if(null != cmd.getOrganizationType()) {
+            FilterBuilder cmntyFilter = FilterBuilders.termFilter("organizationType", cmd.getOrganizationType());
+            fb = FilterBuilders.andFilter(fb, cmntyFilter);
+        }
         qb = QueryBuilders.filteredQuery(qb, fb);
        
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);

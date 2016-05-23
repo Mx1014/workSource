@@ -11,6 +11,8 @@ public class SearchOrganizationCommand {
     private Long pageAnchor;
     private Integer pageSize;
     
+    private String organizationType;
+    
     public Integer getNamespaceId() {
         return namespaceId;
     }
@@ -41,8 +43,15 @@ public class SearchOrganizationCommand {
     public void setCommunityId(Long communityId) {
         this.communityId = communityId;
     }
+    
 
-    @Override
+    public String getOrganizationType() {
+		return organizationType;
+	}
+	public void setOrganizationType(String organizationType) {
+		this.organizationType = organizationType;
+	}
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

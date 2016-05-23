@@ -851,7 +851,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         final int pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size", 
                 AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
         
-        return communitySearcher.searchDocs(cmd.getKeyword(), cmd.getCityId(), cmd.getRegionId(), pageNum - 1, pageSize);
+        return communitySearcher.searchDocs(cmd.getKeyword(),cmd.getCommunityType(), cmd.getCityId(), cmd.getRegionId(), pageNum - 1, pageSize);
     }
 
     private void checkUserPrivilege(long userId, long communityId) {
