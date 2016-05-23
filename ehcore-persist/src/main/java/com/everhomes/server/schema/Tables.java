@@ -994,6 +994,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhWebMenuScopes EH_WEB_MENU_SCOPES = com.everhomes.server.schema.tables.EhWebMenuScopes.EH_WEB_MENU_SCOPES;
 
 	/**
+	 * The table ehcore.eh_wifi_settings
+	 */
+	public static final com.everhomes.server.schema.tables.EhWifiSettings EH_WIFI_SETTINGS = com.everhomes.server.schema.tables.EhWifiSettings.EH_WIFI_SETTINGS;
+
+	/**
 	 * The table ehcore.eh_yellow_pages
 	 */
 	public static final com.everhomes.server.schema.tables.EhYellowPages EH_YELLOW_PAGES = com.everhomes.server.schema.tables.EhYellowPages.EH_YELLOW_PAGES;
