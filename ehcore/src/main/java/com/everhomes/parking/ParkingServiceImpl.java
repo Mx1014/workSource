@@ -169,9 +169,9 @@ public class ParkingServiceImpl implements ParkingService {
     public List<ParkingLotDTO> listParkingLots(ListParkingLotsCommand cmd){
     	List<ParkingLotDTO> parkingLotList = null;
     	if(cmd.getOwnerId() == null || StringUtils.isBlank(cmd.getOwnerType())){
-    		LOGGER.error("ownerId or ownertype is null.");
+    		LOGGER.error("ownerId or ownertype cannot be null.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"ownerId or ownertype is null.");
+					"ownerId or ownertype cannot be null.");
     	}
     	
     	List<ParkingLot> list = parkingProvider.listParkingLots(cmd.getOwnerType(), cmd.getOwnerId());
@@ -256,7 +256,7 @@ public class ParkingServiceImpl implements ParkingService {
 		
 		parkingProvider.createParkingRechargeOrder(parkingRechargeOrder);
 		}catch(Exception e) {
-			LOGGER.error("createParkingRechargeOrder is fail.");
+			LOGGER.error("createParkingRechargeOrder is fail. {}",e);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"createParkingRechargeOrder is fail.");
 		}
@@ -273,7 +273,7 @@ public class ParkingServiceImpl implements ParkingService {
 		try {
 			dto = commonOrderUtil.convertToCommonOrderTemplate(orderCmd);
 		} catch (Exception e) {
-			LOGGER.error("convertToCommonOrder is fail.");
+			LOGGER.error("convertToCommonOrder is fail. {}",e);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"convertToCommonOrder is fail.");
 		}
@@ -396,9 +396,9 @@ public class ParkingServiceImpl implements ParkingService {
 		
         checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
         if(cmd.getId() == null){
-        	LOGGER.error("id is not null.");
+        	LOGGER.error("SetParkingCardIssueFlagCommand id cannot be null.");
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"id is not null.");
+    				"SetParkingCardIssueFlagCommand id cannot be null.");
         }
         
         ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(cmd.getId());
@@ -422,9 +422,9 @@ public class ParkingServiceImpl implements ParkingService {
 	public void issueParkingCards(IssueParkingCardsCommand cmd) {
 		
 		if(cmd.getCount() == null) {
-        	LOGGER.error("count is not null.");
+        	LOGGER.error("count cannot be null.");
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"count is not null.");
+    				"count cannot be null.");
         }
         checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
         
@@ -483,21 +483,21 @@ public class ParkingServiceImpl implements ParkingService {
 	
     private ParkingLot checkParkingLot(String ownerType,Long ownerId,Long parkingLotId){
     	if(ownerId == null ) {
-        	LOGGER.error("ownerId is not null.");
+        	LOGGER.error("ownerId cannot be null.");
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"ownerId is not null.");
+    				"ownerId cannot be null.");
         }
     	
     	if(StringUtils.isBlank(ownerType)) {
-        	LOGGER.error("ownerType is not null.");
+        	LOGGER.error("ownerType cannot be null.");
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"ownerType is not null.");
+    				"ownerType cannot be null.");
         }
     	
     	if(parkingLotId == null ) {
-        	LOGGER.error("parkingLotId is not null.");
+        	LOGGER.error("parkingLotId cannot be null.");
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"parkingLotId is not null.");
+    				"parkingLotId cannot be null.");
         }
     	
     	ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotId);
@@ -522,9 +522,9 @@ public class ParkingServiceImpl implements ParkingService {
     
     private void checkPlateNumber(String plateNumber){
     	if(StringUtils.isBlank(plateNumber)) {
-        	LOGGER.error("plateNumber is not null.");
+        	LOGGER.error("plateNumber cannot be null.");
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"plateNumber is not null.");
+    				"plateNumber cannot be null.");
         }
     }
     
@@ -635,7 +635,7 @@ public class ParkingServiceImpl implements ParkingService {
 			wb.write(out);
 			download(out, response);
 		} catch (IOException e) {
-			LOGGER.error("exportParkingRechageOrders is fail.");
+			LOGGER.error("exportParkingRechageOrders is fail. {}",e);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"exportParkingRechageOrders is fail.");
 		}
