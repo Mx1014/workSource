@@ -4243,28 +4243,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 		} else {
 			
 			sendMessageForContactApply(organizationmember);
-			//认证申请时推送消息给企业管理员 mod by xiongying 20160428
-			Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
-			if(org != null) {
-				
-		        ListOrganizationAdministratorCommand adminCmd = new ListOrganizationAdministratorCommand();
-		        adminCmd.setOrganizationId(org.getId());
-		        ListOrganizationMemberCommandResponse resp = rolePrivilegeService.listOrganizationAdministrators(adminCmd);
-		        if(resp != null && resp.getMembers() != null && resp.getMembers().size() > 0) {
-		        	
-		        	String scope = OrganizationNotificationTemplateCode.SCOPE;
-		        	int code = OrganizationNotificationTemplateCode.ORGANIZATION_APPLY_FOR_CONTACT;
-					Map<String, String> map = new HashMap<String, String>();
-			        map.put("userName", user.getNickName());
-			        map.put("organizationName", org.getName());
-			        String message = localeTemplateService.getLocaleTemplateString(scope, code, user.getLocale(), map, "");
-			        
-			        for(OrganizationMemberDTO mem : resp.getMembers()) {
-			        	
-			        	sendOrganizationNotificationToUser(mem.getTargetId(), message);
-		        	}
-		        }
-			}
 			
 			OrganizationDTO organizationDTO = ConvertHelper.convert(organization, OrganizationDTO.class);
 			

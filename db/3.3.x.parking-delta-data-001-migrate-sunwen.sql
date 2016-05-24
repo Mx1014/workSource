@@ -153,7 +153,4 @@ UPDATE `eh_parking_recharge_orders` SET paid_time = '2016-05-09 13:40:34', paid_
 
 
 
-# update parking lot name
-UPDATE `eh_parking_lots` SET name = '金融基地停车场' WHERE id = 10001;
-
 
