@@ -1,6 +1,5 @@
 //
 // EvhAddressAddressDTO.h
-// generated at 2016-04-30 11:16:42 
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"

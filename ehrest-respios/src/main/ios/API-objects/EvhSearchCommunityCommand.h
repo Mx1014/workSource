@@ -21,6 +21,8 @@
 
 @property(nonatomic, copy) NSNumber* pageSize;
 
+@property(nonatomic, copy) NSNumber* communityType;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 

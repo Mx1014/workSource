@@ -34,6 +34,8 @@
         [jsonObject setObject: self.organizationId forKey: @"organizationId"];
     if(self.namespaceId)
         [jsonObject setObject: self.namespaceId forKey: @"namespaceId"];
+    if(self.communityType)
+        [jsonObject setObject: self.communityType forKey: @"communityType"];
     if(self.pageAnchor)
         [jsonObject setObject: self.pageAnchor forKey: @"pageAnchor"];
     if(self.pageSize)
@@ -50,6 +52,10 @@
         self.namespaceId = [jsonObject objectForKey: @"namespaceId"];
         if(self.namespaceId && [self.namespaceId isEqual:[NSNull null]])
             self.namespaceId = nil;
+
+        self.communityType = [jsonObject objectForKey: @"communityType"];
+        if(self.communityType && [self.communityType isEqual:[NSNull null]])
+            self.communityType = nil;
 
         self.pageAnchor = [jsonObject objectForKey: @"pageAnchor"];
         if(self.pageAnchor && [self.pageAnchor isEqual:[NSNull null]])

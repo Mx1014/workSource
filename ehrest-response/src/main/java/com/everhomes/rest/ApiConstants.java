@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-05-20 19:31:56
+// generated at 2016-05-24 11:35:00
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -306,6 +306,7 @@ public interface ApiConstants {
     public static final String COMMUNITY_GETCOMMUNITIESBYIDS_URL = "/community/getCommunitiesByIds";
     public static final String COMMUNITY_GETCOMMUNITIESBYNAMEANDCITYID_URL = "/community/getCommunitiesByNameAndCityId";
     public static final String COMMUNITY_LISTBUILDINGS_URL = "/community/listBuildings";
+    public static final String COMMUNITY_LISTCOMMUNITIESBYNAMESPACEID_URL = "/community/listCommunitiesByNamespaceId";
     public static final String COMMUNITY_LISTCOMMUNITYUSERS_URL = "/community/listCommunityUsers";
     public static final String COMMUNITY_UPDATECOMMUNITYREQUESTSTATUS_URL = "/community/updateCommunityRequestStatus";
     public static final String CONF_ADDSOURCEVIDEOCONFACCOUNT_URL = "/conf/addSourceVideoConfAccount";
@@ -864,6 +865,11 @@ public interface ApiConstants {
     public static final String VERSION_GETVERSIONURLS_URL = "/version/getVersionUrls";
     public static final String VERSION_GETVERSIONURLSWITHOUTCURRENTVERSION_URL = "/version/getVersionUrlsWithoutCurrentVersion";
     public static final String VERSION_GETVERSIONEDCONTENT_URL = "/version/getVersionedContent";
+    public static final String WIFI_CREATEWIFISETTING_URL = "/wifi/createWifiSetting";
+    public static final String WIFI_DELETEWIFISETTING_URL = "/wifi/deleteWifiSetting";
+    public static final String WIFI_EDITWIFISETTING_URL = "/wifi/editWifiSetting";
+    public static final String WIFI_LISTWIFISETTING_URL = "/wifi/listWifiSetting";
+    public static final String WIFI_VERIFYWIFI_URL = "/wifi/verifyWifi";
     public static final String YELLOWPAGE_ADDYELLOWPAGE_URL = "/yellowPage/addYellowPage";
     public static final String YELLOWPAGE_DELETEYELLOWPAGE_URL = "/yellowPage/deleteYellowPage";
     public static final String YELLOWPAGE_GETYELLOWPAGEDETAIL_URL = "/yellowPage/getYellowPageDetail";

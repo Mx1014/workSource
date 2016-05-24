@@ -32,6 +32,8 @@
 {
     if(self.regionId)
         [jsonObject setObject: self.regionId forKey: @"regionId"];
+    if(self.communityType)
+        [jsonObject setObject: self.communityType forKey: @"communityType"];
     if(self.keyword)
         [jsonObject setObject: self.keyword forKey: @"keyword"];
     if(self.pageOffset)
@@ -46,6 +48,10 @@
         self.regionId = [jsonObject objectForKey: @"regionId"];
         if(self.regionId && [self.regionId isEqual:[NSNull null]])
             self.regionId = nil;
+
+        self.communityType = [jsonObject objectForKey: @"communityType"];
+        if(self.communityType && [self.communityType isEqual:[NSNull null]])
+            self.communityType = nil;
 
         self.keyword = [jsonObject objectForKey: @"keyword"];
         if(self.keyword && [self.keyword isEqual:[NSNull null]])

@@ -15,6 +15,8 @@
 
 @property(nonatomic, copy) NSNumber* namespaceId;
 
+@property(nonatomic, copy) NSNumber* communityType;
+
 @property(nonatomic, copy) NSNumber* pageAnchor;
 
 @property(nonatomic, copy) NSNumber* pageSize;

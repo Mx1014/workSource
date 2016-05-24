@@ -13,6 +13,8 @@
 
 @property(nonatomic, copy) NSNumber* regionId;
 
+@property(nonatomic, copy) NSNumber* communityType;
+
 @property(nonatomic, copy) NSString* keyword;
 
 @property(nonatomic, copy) NSNumber* pageOffset;

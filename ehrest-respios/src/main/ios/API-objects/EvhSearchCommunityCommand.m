@@ -40,6 +40,8 @@
         [jsonObject setObject: self.pageOffset forKey: @"pageOffset"];
     if(self.pageSize)
         [jsonObject setObject: self.pageSize forKey: @"pageSize"];
+    if(self.communityType)
+        [jsonObject setObject: self.communityType forKey: @"communityType"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -64,6 +66,10 @@
         self.pageSize = [jsonObject objectForKey: @"pageSize"];
         if(self.pageSize && [self.pageSize isEqual:[NSNull null]])
             self.pageSize = nil;
+
+        self.communityType = [jsonObject objectForKey: @"communityType"];
+        if(self.communityType && [self.communityType isEqual:[NSNull null]])
+            self.communityType = nil;
 
         return self;
     }
