@@ -2,17 +2,19 @@ package com.everhomes.rest.wifi;
 
 /**
  * <ul>
- * <li>flag: true表示成功  ,false 失败</li>
+ * <li>flag: 1表示成功  ,0 失败 com.everhomes.rest.wifi.VerifyWifiStatus</li>
  * </ul>
  */
 public class VerifyWifiDTO {
-	private boolean flag;
+	private byte flag;
 
-	public boolean isFlag() {
+	public byte getFlag() {
 		return flag;
 	}
 
-	public void setFlag(boolean flag) {
+	public void setFlag(byte flag) {
 		this.flag = flag;
 	}
+
+	
 }
