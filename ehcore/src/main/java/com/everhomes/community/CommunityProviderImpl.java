@@ -1051,7 +1051,10 @@ public class CommunityProviderImpl implements CommunityProvider {
 	            	Condition cond = Tables.EH_COMMUNITIES.ID.in(communityIds);
 	        		cond = cond.and(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId));
 	        		cond = cond.and(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
-	        		cond = cond.and(Tables.EH_COMMUNITIES.COMMUNITY_TYPE.eq(communityType));
+	        		if(null != communityType){
+	        			cond = cond.and(Tables.EH_COMMUNITIES.COMMUNITY_TYPE.eq(communityType));
+	        		}
+	        		
 	        		if(null != locator.getAnchor()){
 	        			cond = cond.and(Tables.EH_COMMUNITIES.ID.gt(locator.getAnchor()));
 	        		}
@@ -1061,7 +1064,10 @@ public class CommunityProviderImpl implements CommunityProvider {
 	                .fetch().map((r) -> {
 	                CommunityDTO community = ConvertHelper.convert(r, CommunityDTO.class);
 	                results.add(community);
-	                
+	                locator.setAnchor(null);
+	                if(results.size() == pageSize){
+	                	locator.setAnchor(community.getId());
+	                }
 	                return null;
 	            });
 	                
