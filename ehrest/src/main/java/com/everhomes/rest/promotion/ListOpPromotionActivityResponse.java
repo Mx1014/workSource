@@ -2,10 +2,12 @@ package com.everhomes.rest.promotion;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 public class ListOpPromotionActivityResponse {
 
+	@ItemType(OpPromotionActivityDTO.class)
     List<OpPromotionActivityDTO> promotions;
     
     private Long nextPageAnchor;
