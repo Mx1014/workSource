@@ -22,6 +22,7 @@ import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.namespace.NamespaceDetailDTO;
 import com.everhomes.rest.namespace.NamespaceResourceType;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 
 @Component
@@ -43,8 +44,8 @@ public class NamespaceResourceServiceImpl implements NamespaceResourceService {
 	    ListCommunityByNamespaceCommandResponse response = new ListCommunityByNamespaceCommandResponse();
 	    
 	    // TODO: 暂时先不分页查，后面再补
-	    int namespaceId = (cmd.getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
-	    List<NamespaceResource> result = namespaceResourceProvider.listResourceByNamespace(namespaceId, NamespaceResourceType.COMMUNITY);
+	    int namespaceId = UserContext.getCurrentNamespaceId();
+//	    List<NamespaceResource> result = namespaceResourceProvider.listResourceByNamespace(namespaceId, NamespaceResourceType.COMMUNITY);
 //	    
 //	    List<CommunityDTO> communityList = new ArrayList<CommunityDTO>();
 //        if(result != null && result.size() > 0){
@@ -69,10 +70,15 @@ public class NamespaceResourceServiceImpl implements NamespaceResourceService {
 	    List<CommunityDTO> communityList = new ArrayList<CommunityDTO>();
 	    List<Community> communities = communityProvider.listCommunitiesByNamespaceId(namespaceId);
 	    if(communities != null && communities.size() > 0) {
-	    	communityList = communities.stream().map(r -> {
-	    		CommunityDTO dto = ConvertHelper.convert(r, CommunityDTO.class);
-	    		return dto;
-	    	}).collect(Collectors.toList());
+	    	for (Community community : communities) {
+				if(null != cmd.getCommunityType()){
+					if(cmd.getCommunityType().equals(community.getCommunityType())){
+						communityList.add(ConvertHelper.convert(community, CommunityDTO.class));
+					}
+				}else{
+					communityList.add(ConvertHelper.convert(community, CommunityDTO.class));
+				}
+			}
 	    }
 
         response.setCommunities(communityList);
