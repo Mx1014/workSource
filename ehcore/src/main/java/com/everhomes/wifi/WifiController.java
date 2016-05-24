@@ -19,6 +19,7 @@ import com.everhomes.rest.wifi.CreateWifiSettingCommand;
 import com.everhomes.rest.wifi.DeleteWifiSettingCommand;
 import com.everhomes.rest.wifi.ListWifiSettingCommand;
 import com.everhomes.rest.wifi.EditWifiSettingCommand;
+import com.everhomes.rest.wifi.ListWifiSettingResponse;
 import com.everhomes.rest.wifi.VerifyWifiCommand;
 import com.everhomes.rest.wifi.VerifyWifiDTO;
 import com.everhomes.rest.wifi.WifiSettingDTO;
@@ -36,10 +37,10 @@ public class WifiController extends ControllerBase {
 	 * <p>获取wifi列表</p>
 	 */
 	@RequestMapping("listWifiSetting")
-	@RestReturn(value=WifiSettingDTO.class,collection=true)
+	@RestReturn(value=ListWifiSettingResponse.class,collection=true)
 	public RestResponse listWifiSetting(ListWifiSettingCommand cmd) {
-		List<WifiSettingDTO> result = wifiService.listWifiSetting(cmd);
-		RestResponse response = new RestResponse(result);
+		ListWifiSettingResponse resp = wifiService.listWifiSetting(cmd);
+		RestResponse response = new RestResponse(resp);
 
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

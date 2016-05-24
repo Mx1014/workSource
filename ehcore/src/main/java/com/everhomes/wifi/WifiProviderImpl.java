@@ -4,8 +4,10 @@ import java.util.List;
 
 import javax.persistence.Table;
 
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Result;
+import org.jooq.SelectQuery;
 import org.jooq.SelectWhereStep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,14 +38,21 @@ public class WifiProviderImpl implements WifiProvider {
 	
 	
 	@Override
-	public List<WifiSetting> listWifiSetting(Long ownerId,String ownerType){
+	public List<WifiSetting> listWifiSetting(Long ownerId,String ownerType,Long pageAnchor,Integer pageSize){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhWifiSettings.class));
-		SelectWhereStep<EhWifiSettingsRecord> select = context.selectFrom(Tables.EH_WIFI_SETTINGS);
-		Result<EhWifiSettingsRecord> result = select.where(Tables.EH_WIFI_SETTINGS.OWNER_ID.eq(ownerId))
-				  .and(Tables.EH_WIFI_SETTINGS.OWNER_TYPE.eq(ownerType))
-				  .fetch();
+		SelectQuery<EhWifiSettingsRecord> query = context.selectQuery(Tables.EH_WIFI_SETTINGS);
+		if(pageAnchor != null && pageAnchor != 0)
+			query.addConditions(Tables.EH_WIFI_SETTINGS.ID.gt(pageAnchor));
+		query.addConditions(Tables.EH_WIFI_SETTINGS.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_WIFI_SETTINGS.OWNER_TYPE.eq(ownerType));
+		if(pageSize != null)
+			query.addLimit(pageSize);
+
+		//query.s
+		//Result<EhWifiSettingsRecord> result = query
 		
-		return result.map(r -> ConvertHelper.convert(r, WifiSetting.class));
+		//return result.map(r -> ConvertHelper.convert(r, WifiSetting.class));
+		return null;
 	}
 	
 	@Override

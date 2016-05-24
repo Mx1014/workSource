@@ -10,15 +10,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.rest.parking.ParkingRechargeOrderDTO;
 import com.everhomes.rest.wifi.CreateWifiSettingCommand;
 import com.everhomes.rest.wifi.DeleteWifiSettingCommand;
 import com.everhomes.rest.wifi.EditWifiSettingCommand;
 import com.everhomes.rest.wifi.ListWifiSettingCommand;
+import com.everhomes.rest.wifi.ListWifiSettingResponse;
 import com.everhomes.rest.wifi.VerifyWifiCommand;
 import com.everhomes.rest.wifi.VerifyWifiDTO;
 import com.everhomes.rest.wifi.WifiSettingDTO;
 import com.everhomes.rest.wifi.WifiSettingStatus;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -32,16 +36,32 @@ public class WifiServiceImpl implements WifiService{
 	@Autowired
 	private WifiProvider wifiProvider;
 	
+	@Autowired
+    private ConfigurationProvider configProvider;
+	
 	@Override
-	public List<WifiSettingDTO> listWifiSetting(ListWifiSettingCommand cmd){
+	public ListWifiSettingResponse listWifiSetting(ListWifiSettingCommand cmd){
 		if(cmd.getOwnerId() == null || StringUtils.isBlank(cmd.getOwnerType())){
     		LOGGER.error("ownerId or ownertype cannot be null.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"ownerId or ownertype cannot be null.");
     	}
-		List<WifiSetting> list = wifiProvider.listWifiSetting(cmd.getOwnerId(), cmd.getOwnerType());
+		ListWifiSettingResponse response = new ListWifiSettingResponse();
+		cmd.setPageSize(PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize()));
+
+		List<WifiSetting> list = wifiProvider.listWifiSetting(cmd.getOwnerId(), cmd.getOwnerType(),cmd.getPageAnchor(),cmd.getPageSize());
 		
-		return list.stream().map(r -> ConvertHelper.convert(r, WifiSettingDTO.class))
+//		if(list.size() > 0){
+//    		response.setOrders(list.stream().map(r -> ConvertHelper.convert(r, ParkingRechargeOrderDTO.class))
+//    				.collect(Collectors.toList()));
+//    		if(list.size() != cmd.getPageSize()){
+//        		response.setNextPageAnchor(null);
+//        	}else{
+//        		response.setNextPageAnchor(list.get(list.size()-1).getId());
+//        	}
+//    	}
+//		
+		return (ListWifiSettingResponse) list.stream().map(r -> ConvertHelper.convert(r, WifiSettingDTO.class))
 				.collect(Collectors.toList());
 	}
 	
