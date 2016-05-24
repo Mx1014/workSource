@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.rest.parking.ParkingRechargeOrderDTO;
 import com.everhomes.rest.wifi.CreateWifiSettingCommand;
 import com.everhomes.rest.wifi.DeleteWifiSettingCommand;
 import com.everhomes.rest.wifi.EditWifiSettingCommand;
@@ -21,6 +20,7 @@ import com.everhomes.rest.wifi.ListWifiSettingResponse;
 import com.everhomes.rest.wifi.VerifyWifiCommand;
 import com.everhomes.rest.wifi.VerifyWifiDTO;
 import com.everhomes.rest.wifi.VerifyWifiStatus;
+import com.everhomes.rest.wifi.WifiOwnerType;
 import com.everhomes.rest.wifi.WifiSettingDTO;
 import com.everhomes.rest.wifi.WifiSettingStatus;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -52,18 +52,17 @@ public class WifiServiceImpl implements WifiService{
 
 		List<WifiSetting> list = wifiProvider.listWifiSetting(cmd.getOwnerId(), cmd.getOwnerType(),cmd.getPageAnchor(),cmd.getPageSize());
 		
-//		if(list.size() > 0){
-//    		response.setOrders(list.stream().map(r -> ConvertHelper.convert(r, ParkingRechargeOrderDTO.class))
-//    				.collect(Collectors.toList()));
-//    		if(list.size() != cmd.getPageSize()){
-//        		response.setNextPageAnchor(null);
-//        	}else{
-//        		response.setNextPageAnchor(list.get(list.size()-1).getId());
-//        	}
-//    	}
-//		
-		return (ListWifiSettingResponse) list.stream().map(r -> ConvertHelper.convert(r, WifiSettingDTO.class))
-				.collect(Collectors.toList());
+		if(list.size() > 0){
+    		response.setRequests(list.stream().map(r -> ConvertHelper.convert(r, WifiSettingDTO.class))
+    				.collect(Collectors.toList()));
+    		if(list.size() != cmd.getPageSize()){
+        		response.setNextPageAnchor(null);
+        	}else{
+        		response.setNextPageAnchor(list.get(list.size()-1).getId());
+        	}
+    	}
+		
+		return response;
 	}
 	
 	@Override
@@ -78,7 +77,7 @@ public class WifiServiceImpl implements WifiService{
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"ssid cannot be null.");
 		}
-		WifiSetting wifiSetting = wifiProvider.findWifiSettingBySsid(cmd.getSsid());
+		WifiSetting wifiSetting = wifiProvider.findWifiSettingByCondition(cmd.getSsid(),cmd.getOwnerId(),cmd.getOwnerType());
 		if(wifiSetting != null){
 			LOGGER.error("the wifi ssid already existing.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
@@ -100,7 +99,7 @@ public class WifiServiceImpl implements WifiService{
 	
 	@Override
 	public WifiSettingDTO editWifiSetting(EditWifiSettingCommand cmd){
-		WifiSetting wifiSetting = checkId(cmd.getId());
+		WifiSetting wifiSetting = checkId(cmd.getId(),cmd.getOwnerId(),cmd.getOwnerType());
 		wifiSetting.setSsid(cmd.getSsid());
 		
 		wifiProvider.updateWifiSetting(wifiSetting);
@@ -109,7 +108,7 @@ public class WifiServiceImpl implements WifiService{
 	
 	@Override
 	public void deleteWifiSetting(DeleteWifiSettingCommand cmd){
-		WifiSetting wifiSetting = checkId(cmd.getId());
+		WifiSetting wifiSetting = checkId(cmd.getId(),cmd.getOwnerId(),cmd.getOwnerType());
 		wifiSetting.setStatus(WifiSettingStatus.UNACTIVE.getCode());
 		
 		wifiProvider.updateWifiSetting(wifiSetting);
@@ -118,16 +117,16 @@ public class WifiServiceImpl implements WifiService{
 	@Override
 	public VerifyWifiDTO verifyWifi(VerifyWifiCommand cmd){
 		VerifyWifiDTO dto = new VerifyWifiDTO();
-		WifiSetting wifiSetting = wifiProvider.findWifiSettingBySsid(cmd.getSsid());
+		WifiSetting wifiSetting = wifiProvider.findWifiSettingByCondition(cmd.getSsid(),cmd.getOwnerId(),cmd.getOwnerType());
 		if(wifiSetting != null){
-			dto.setFlag(VerifyWifiStatus.SUCCESS.getCode());;
+			dto.setStatus(VerifyWifiStatus.SUCCESS.getCode());;
 		}else{
-			dto.setFlag(VerifyWifiStatus.FAIL.getCode());
+			dto.setStatus(VerifyWifiStatus.FAIL.getCode());
 		}
 		return dto;
 	}
 	
-	private WifiSetting checkId(Long id){
+	private WifiSetting checkId(Long id,Long ownerId,String ownerType){
 		if(null == id){
 			LOGGER.error("id cannot be null.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -139,6 +138,17 @@ public class WifiServiceImpl implements WifiService{
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"wifiSetting is not exist.");
 		}
+		// 检查参数里的ownerType和ownerId是否与查出来停车场里的匹配
+        if(ownerId != null && ownerId.longValue() != wifiSetting.getOwnerId().longValue()) {
+        	LOGGER.error("ownerId {} is not match with wifiSetting ownerId.",ownerId);
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+    				"ownerId is not match with wifiSetting ownerId.");
+        }
+        if(WifiOwnerType.fromCode(wifiSetting.getOwnerType()) != WifiOwnerType.fromCode(ownerType)){
+            LOGGER.error("ownertype {} is not match with wifiSetting ownerType.",ownerType);
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+    				"ownertype is not match with wifiSetting ownerType.");
+        }
 		return wifiSetting;
 	}
 }
