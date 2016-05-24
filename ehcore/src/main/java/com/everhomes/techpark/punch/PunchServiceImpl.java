@@ -358,6 +358,9 @@ public class PunchServiceImpl implements PunchService {
 	}
 	
 	private Byte caculateExceptionCode(Byte status) {
+		if(status == null) {
+			return ExceptionStatus.NORMAL.getCode();
+		}
 		if(status.equals( ApprovalStatus.NORMAL.getCode())||status.equals( ApprovalStatus.OVERTIME.getCode())
 				||status.equals( ApprovalStatus.EXCHANGE.getCode())||status.equals( ApprovalStatus.OVERTIME.getCode())
 				||status.equals( ApprovalStatus.NORMAL.getCode())||status.equals( ApprovalStatus.OUTWORK.getCode())
@@ -365,6 +368,7 @@ public class PunchServiceImpl implements PunchService {
 				||status.equals( ApprovalStatus.HALFSICK.getCode())||status.equals( ApprovalStatus.HALFABSENCE.getCode())
 				||status.equals( ApprovalStatus.HALFEXCHANGE.getCode())||status.equals( ApprovalStatus.HALFOUTWORK.getCode()))
 			return ExceptionStatus.NORMAL.getCode();
+		
 		return ExceptionStatus.EXCEPTION.getCode();
 	}
 
