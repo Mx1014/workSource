@@ -23,11 +23,14 @@ import com.everhomes.rest.aclink.AclinkWebSocketMessage;
 import com.everhomes.rest.aclink.CreateDoorAuthByUser;
 import com.everhomes.rest.aclink.DoorAccessActivedCommand;
 import com.everhomes.rest.aclink.DoorAccessActivingCommand;
+import com.everhomes.rest.aclink.DoorAccessCapapilityDTO;
 import com.everhomes.rest.aclink.DoorAccessDTO;
 import com.everhomes.rest.aclink.DoorAuthDTO;
 import com.everhomes.rest.aclink.DoorMessage;
 import com.everhomes.rest.aclink.GetDoorAccessByHardwareIdCommand;
+import com.everhomes.rest.aclink.GetDoorAccessCapapilityCommand;
 import com.everhomes.rest.aclink.ListAesUserKeyByUserResponse;
+import com.everhomes.rest.aclink.ListDoorAccessQRKeyResponse;
 import com.everhomes.rest.aclink.ListDoorAccessResponse;
 import com.everhomes.rest.aclink.ListDoorAuthCommand;
 import com.everhomes.rest.aclink.ListDoorAuthResponse;
@@ -275,6 +278,38 @@ public class AclinkController extends ControllerBase {
         RestResponse response = new RestResponse();
         
         response.setResponseObject(doorAccessService.upgradeVerify(cmd));
+        
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /aclink/getDoorAccessCapapilityCommand</b>
+     * <p>创建 Lingling 门禁设备 </p>
+     * @return
+     */
+    @RequestMapping("getDoorAccessCapapilityCommand")
+    @RestReturn(value=DoorAccessCapapilityDTO.class)
+    public RestResponse getDoorAccessCapapility(@Valid GetDoorAccessCapapilityCommand cmd) {
+        RestResponse response = new RestResponse(); 
+        
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /aclink/listDoorAccessQRKey</b>
+     * <p>列出所有二维码门禁列表 </p>
+     * @return
+     */
+    @RequestMapping("listDoorAccessQRKey")
+    @RestReturn(value=ListDoorAccessQRKeyResponse.class)
+    public RestResponse listDoorAccessQRKey() {
+        RestResponse response = new RestResponse(); 
         
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
