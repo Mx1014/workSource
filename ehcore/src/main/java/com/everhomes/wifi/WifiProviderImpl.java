@@ -19,6 +19,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.wifi.WifiSettingStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhWifiSettingsDao;
@@ -45,14 +46,14 @@ public class WifiProviderImpl implements WifiProvider {
 			query.addConditions(Tables.EH_WIFI_SETTINGS.ID.gt(pageAnchor));
 		query.addConditions(Tables.EH_WIFI_SETTINGS.OWNER_ID.eq(ownerId));
 		query.addConditions(Tables.EH_WIFI_SETTINGS.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_WIFI_SETTINGS.STATUS.eq(WifiSettingStatus.ACTIVE.getCode()));
 		if(pageSize != null)
 			query.addLimit(pageSize);
 
-		//query.s
-		//Result<EhWifiSettingsRecord> result = query
+		query.addOrderBy(Tables.EH_WIFI_SETTINGS.ID.asc());
+		Result<EhWifiSettingsRecord> result = query.fetch();
 		
-		//return result.map(r -> ConvertHelper.convert(r, WifiSetting.class));
-		return null;
+		return result.map(r -> ConvertHelper.convert(r, WifiSetting.class));
 	}
 	
 	@Override
@@ -65,11 +66,13 @@ public class WifiProviderImpl implements WifiProvider {
 	}
 	
 	@Override
-	public WifiSetting findWifiSettingBySsid(String ssid){
+	public WifiSetting findWifiSettingByCondition(String ssid,Long ownerId,String ownerType){
 		
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		SelectWhereStep<EhWifiSettingsRecord> select = context.selectFrom(Tables.EH_WIFI_SETTINGS);
 		EhWifiSettingsRecord record = select.where(Tables.EH_WIFI_SETTINGS.SSID.eq(ssid))
+				.and(Tables.EH_WIFI_SETTINGS.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_WIFI_SETTINGS.OWNER_TYPE.eq(ownerType))
 				.fetchOne();
 		
 		return ConvertHelper.convert(record, WifiSetting.class);
