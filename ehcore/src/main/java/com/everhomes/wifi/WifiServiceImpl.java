@@ -20,6 +20,7 @@ import com.everhomes.rest.wifi.ListWifiSettingCommand;
 import com.everhomes.rest.wifi.ListWifiSettingResponse;
 import com.everhomes.rest.wifi.VerifyWifiCommand;
 import com.everhomes.rest.wifi.VerifyWifiDTO;
+import com.everhomes.rest.wifi.VerifyWifiStatus;
 import com.everhomes.rest.wifi.WifiSettingDTO;
 import com.everhomes.rest.wifi.WifiSettingStatus;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -119,9 +120,9 @@ public class WifiServiceImpl implements WifiService{
 		VerifyWifiDTO dto = new VerifyWifiDTO();
 		WifiSetting wifiSetting = wifiProvider.findWifiSettingBySsid(cmd.getSsid());
 		if(wifiSetting != null){
-			dto.setFlag(true);
+			dto.setFlag(VerifyWifiStatus.SUCCESS.getCode());;
 		}else{
-			dto.setFlag(false);
+			dto.setFlag(VerifyWifiStatus.FAIL.getCode());
 		}
 		return dto;
 	}
