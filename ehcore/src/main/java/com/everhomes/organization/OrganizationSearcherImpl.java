@@ -168,7 +168,8 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         
         // 用于一些场景下只能搜索出普通公司 by sfyan 20160523
         if(null != cmd.getOrganizationType()) {
-            FilterBuilder cmntyFilter = FilterBuilders.termFilter("organizationType", cmd.getOrganizationType());
+        	//转小写查 by xiongying 20160524
+            FilterBuilder cmntyFilter = FilterBuilders.termFilter("organizationType", cmd.getOrganizationType().toLowerCase());
             fb = FilterBuilders.andFilter(fb, cmntyFilter);
         }
         qb = QueryBuilders.filteredQuery(qb, fb);
