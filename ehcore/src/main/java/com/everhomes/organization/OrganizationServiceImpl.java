@@ -98,6 +98,7 @@ import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
 import com.everhomes.rest.enterprise.ListUserRelatedEnterprisesCommand;
 import com.everhomes.rest.enterprise.RejectContactCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
+import com.everhomes.rest.family.FamilyNotificationTemplateCode;
 import com.everhomes.rest.family.LeaveFamilyCommand;
 import com.everhomes.rest.family.ParamType;
 import com.everhomes.rest.forum.AttachmentDescriptor;
@@ -4199,7 +4200,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			organizationDTO.setContact(organizationDetailDTO.getContact());
 			organizationDTO.setDescription(organizationDetailDTO.getDescription());
 			organizationDTO.setAddress(organizationDetailDTO.getAddress());
-			
+			organizationDTO.setMemberStatus(organizationmember.getStatus());
 			if(null != community){
 				organizationDTO.setCommunityId(community.getId());
 				organizationDTO.setCommunityName(community.getName());
@@ -4272,6 +4273,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			organizationDTO.setContact(organizationDetailDTO.getContact());
 			organizationDTO.setDescription(organizationDetailDTO.getDescription());
 			organizationDTO.setAddress(organizationDetailDTO.getAddress());
+			organizationDTO.setMemberStatus(organizationmember.getStatus());
 			
 			if(null != community){
 				organizationDTO.setCommunityId(community.getId());
@@ -4559,8 +4561,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 		organizationProvider.createOrganizationMember(organizationMember);
 		userSearcher.feedDoc(organizationMember);
+		sendMessageForContactApproved(organizationMember);
 		return ConvertHelper.convert(organizationMember, OrganizationMemberDTO.class);
 	}
+	
 	
 	@Override
 	public void updatePersonnelsToDepartment(UpdatePersonnelsToDepartment cmd) {
@@ -5445,6 +5449,8 @@ public class OrganizationServiceImpl implements OrganizationService {
          // send notification to who is requesting to join the enterprise
         String notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_USER_SUCCESS_MYSELF);
          
+        QuestionMetaObject metaObject = createGroupQuestionMetaObject(org, member, null);
+        
 		// send notification to who is requesting to join the enterprise
 		List<Long> includeList = new ArrayList<Long>();
 		includeList.add(member.getTargetId());
@@ -5454,6 +5460,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 		notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_USER_SUCCESS_OTHER);
 		includeList = this.includeOrgList(org, member.getTargetId());
 		sendEnterpriseNotification(org.getId(), includeList, null, notifyTextForApplicant, null, null);
+		
+		//通知客户端通讯录有变化  by sfyan 20160524
+		includeList = this.includeOrgList(org, member.getTargetId());
+		includeList.add(member.getTargetId());
+		sendEnterpriseNotification(org.getId(), includeList, null, notifyTextForApplicant, MetaObjectType.ENTERPRISE_CHANGE_CONTACT, metaObject);
 	}
 	
 	

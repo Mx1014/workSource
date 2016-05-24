@@ -10,6 +10,7 @@ package com.everhomes.rest.messaging;
  * <li>GROUP_INVITE_TO_BE_ADMIN: 邀请用户成为group管理员需要被邀请者同意/拒绝</li>
  * <li>ENTERPRISE_REQUEST_TO_JOIN: 主动申请加入企业需要审核</li>
  * <li>ENTERPRISE_INVITE_TO_JOIN: 邀请用户加入企业需要同意</li>
+ * <li>ENTERPRISE_CHANGE_CONTACT: 通讯录有变化</li>
  * </ul>
  */
 public enum MetaObjectType {
@@ -19,6 +20,7 @@ public enum MetaObjectType {
     GROUP_INVITE_TO_BE_ADMIN("group.inviteToBeAdmin"),
     ENTERPRISE_REQUEST_TO_JOIN("enterprise.requestToJoin"), 
     ENTERPRISE_INVITE_TO_JOIN("enterprise.inviteToJoin"),
+    ENTERPRISE_CHANGE_CONTACT("enterprise.change.contact"),
     ACLINK_AUTH_CHANGED("aclink.authChanged");
     
     private String code;

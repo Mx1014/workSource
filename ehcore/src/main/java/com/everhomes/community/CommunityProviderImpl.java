@@ -1041,18 +1041,22 @@ public class CommunityProviderImpl implements CommunityProvider {
 	@Override
 	public List<CommunityDTO> listCommunitiesByType(List<Long> communityIds, Byte communityType,
 			ListingLocator locator, int pageSize) {
-		int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+		int namespaceId = UserContext.getCurrentNamespaceId();
 		final List<CommunityDTO> results = new ArrayList<>();
 		
 		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
 	            (DSLContext context, Object reducingContext)-> {
-	            
+	            	
+	            	//增加分页 by sfyan 20160524
+	            	Condition cond = Tables.EH_COMMUNITIES.ID.in(communityIds);
+	        		cond = cond.and(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId));
+	        		cond = cond.and(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
+	        		cond = cond.and(Tables.EH_COMMUNITIES.COMMUNITY_TYPE.eq(communityType));
+	        		if(null != locator.getAnchor()){
+	        			cond = cond.and(Tables.EH_COMMUNITIES.ID.gt(locator.getAnchor()));
+	        		}
 	            context.select().from(Tables.EH_COMMUNITIES)
-	                .where(Tables.EH_COMMUNITIES.ID.gt(locator.getAnchor())
-	                .and(Tables.EH_COMMUNITIES.ID.in(communityIds))
-	                .and(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId))
-	                .and(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()))
-	                .and(Tables.EH_COMMUNITIES.COMMUNITY_TYPE.eq(communityType)))
+	                .where(cond)
 	                .limit(pageSize)
 	                .fetch().map((r) -> {
 	                CommunityDTO community = ConvertHelper.convert(r, CommunityDTO.class);
@@ -1099,8 +1103,7 @@ public class CommunityProviderImpl implements CommunityProvider {
     }
 
 	@Override
-	public List<CommunityDTO> listCommunitiesByNamespaceId(Integer namespaceId,
-			ListingLocator locator, int pageSize) {
+	public List<CommunityDTO> listCommunitiesByNamespaceId(Integer namespaceId,ListingLocator locator, int pageSize) {
 		final List<CommunityDTO> results = new ArrayList<>();
 		
 		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
