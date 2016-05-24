@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>namespaceId：命名空间id</li>
  * <li>organizationId：机构id</li>
+ * <li>communityType: 园区小区类型{@link com.everhomes.rest.community.CommunityType}</li>
  * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
  * <li>pageSize: 每页的数量</li>
  * </ul>
@@ -16,6 +17,8 @@ public class ListCommunityByNamespaceCommand {
 	private Long organizationId;
 	
 	private Integer namespaceId;
+	
+	private Byte communityType;
     
     private Long pageAnchor;
     
@@ -23,6 +26,23 @@ public class ListCommunityByNamespaceCommand {
 	
 	public ListCommunityByNamespaceCommand() {
     }
+
+	
+	
+	
+	public Byte getCommunityType() {
+		return communityType;
+	}
+
+
+
+
+	public void setCommunityType(Byte communityType) {
+		this.communityType = communityType;
+	}
+
+
+
 
 	public Integer getNamespaceId() {
         return namespaceId;
