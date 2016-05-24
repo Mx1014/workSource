@@ -5419,9 +5419,12 @@ public class OrganizationServiceImpl implements OrganizationService {
          String notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_CONTACT_REQUEST_TO_JOIN_FOR_APPLICANT);
          
          List<Long> includeList = new ArrayList<Long>();
-         includeList.add(member.getTargetId());
          
-         sendEnterpriseNotification(org.getId(), includeList, null, notifyTextForApplicant, null, null);
+       //给申请人发的信息应为私信by xiongying 20160524
+ 		sendMessageToUser(member.getTargetId(), notifyTextForApplicant, null);
+//         includeList.add(member.getTargetId());
+//         
+//         sendEnterpriseNotification(org.getId(), includeList, null, notifyTextForApplicant, null, null);
 
          // send notification to all the other members in the group
          notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_CONTACT_REQUEST_TO_JOIN_FOR_OPERATOR);
@@ -5452,8 +5455,9 @@ public class OrganizationServiceImpl implements OrganizationService {
         QuestionMetaObject metaObject = createGroupQuestionMetaObject(org, member, null);
         
 		// send notification to who is requesting to join the enterprise
-		List<Long> includeList = new ArrayList<Long>();
-		includeList.add(member.getTargetId());
+        List<Long> includeList = new ArrayList<Long>();
+        
+        includeList.add(member.getTargetId());
 		sendEnterpriseNotification(org.getId(), includeList, null, notifyTextForApplicant, null, null);
 
 		// send notification to all the other members in the group
@@ -5467,7 +5471,21 @@ public class OrganizationServiceImpl implements OrganizationService {
 		sendEnterpriseNotification(org.getId(), includeList, null, notifyTextForApplicant, MetaObjectType.ENTERPRISE_CHANGE_CONTACT, metaObject);
 	}
 	
-	
+	private void sendMessageToUser(Long uid, String content, Map<String, String> meta) {
+        MessageDTO messageDto = new MessageDTO();
+        messageDto.setAppId(AppConstants.APPID_MESSAGING);
+        messageDto.setSenderUid(User.SYSTEM_UID);
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid.toString()));
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+        messageDto.setBody(content);
+        messageDto.setMetaAppId(AppConstants.APPID_GROUP);
+        if(null != meta && meta.size() > 0) {
+            messageDto.getMeta().putAll(meta);
+            }
+        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
+                uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+    }
 	
    private void sendMessageForContactReject(OrganizationMember member) {
 	   // send notification to who is requesting to join the enterprise
@@ -5480,8 +5498,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 		// send notification to who is requesting to join the enterprise
 		
        List<Long> includeList = new ArrayList<Long>();
-       includeList.add(member.getTargetId());
-       sendEnterpriseNotification(org.getId(), includeList, null, notifyTextForApplicant, null, null);
+     //给申请人发的信息应为私信by xiongying 20160524
+       sendMessageToUser(member.getTargetId(), notifyTextForApplicant, null);
+//       includeList.add(member.getTargetId());
+//       sendEnterpriseNotification(org.getId(), includeList, null, notifyTextForApplicant, null, null);
 
        // send notification to all the other members in the group
        // code = EnterpriseNotifyTemplateCode.ENTERPRISE_USER_SUCCESS_OTHER;
@@ -5496,8 +5516,10 @@ public class OrganizationServiceImpl implements OrganizationService {
        // send notification to who is requesting to join the enterprise
        String notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_CONTACT_LEAVE_FOR_APPLICANT);
        List<Long> includeList = new ArrayList<Long>();
-       includeList.add(member.getTargetId());
-       sendEnterpriseNotification(org.getId(), includeList, null, notifyTextForApplicant, null, null);
+     //给申请人发的信息应为私信by xiongying 20160524
+       sendMessageToUser(member.getTargetId(), notifyTextForApplicant, null);
+//       includeList.add(member.getTargetId());
+//       sendEnterpriseNotification(org.getId(), includeList, null, notifyTextForApplicant, null, null);
 
        // send notification to all the other members in the enterprise
        notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_CONTACT_LEAVE_FOR_OTHER);
