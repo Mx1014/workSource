@@ -288,9 +288,11 @@ public class ParkingServiceImpl implements ParkingService {
 		ListParkingRechargeOrdersResponse response = new ListParkingRechargeOrdersResponse();
 		//设置分页
 		cmd.setPageSize(PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize()));
+		User user = UserContext.current().getUser();
+
 		List<ParkingRechargeOrder> list = parkingProvider.listParkingRechargeOrders
-    			(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId(), 
-    					cmd.getPlateNumber(), cmd.getPageAnchor(), cmd.getPageSize());
+    			(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(),
+    					cmd.getPageAnchor(), cmd.getPageSize(),user.getId());
     					
     	if(list.size() > 0){
     		response.setOrders(list.stream().map(r -> ConvertHelper.convert(r, ParkingRechargeOrderDTO.class))
@@ -335,11 +337,11 @@ public class ParkingServiceImpl implements ParkingService {
 		if(cmd.getEndDate() != null)
 			new Timestamp(cmd.getEndDate());
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-		
+		//User user = UserContext.current().getUser();
 		List<ParkingRechargeOrder> list = parkingProvider.searchParkingRechargeOrders(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
 				cmd.getPlateOwnerPhone(),cmd.getPaidType(), cmd.getPayerName(), cmd.getPayerPhone(), cmd.getPageAnchor(), 
-				pageSize,startDate,endDate,cmd.getRechargeStatus()
+				pageSize,startDate,endDate,cmd.getRechargeStatus()/*,user.getId()*/
 				);
     					
     	if(list.size() > 0){
@@ -526,6 +528,11 @@ public class ParkingServiceImpl implements ParkingService {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     				"plateNumber cannot be null.");
         }
+    	if(plateNumber.length() != 7) {
+        	LOGGER.error("plateNumber is Invalid.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"plateNumber is Invalid.");
+        }
     }
     
     @Scheduled(cron="0 0 2 * * ? ")
@@ -588,10 +595,12 @@ public class ParkingServiceImpl implements ParkingService {
 			startDate = new Timestamp(cmd.getStartDate());
 		if(cmd.getEndDate() != null)
 			new Timestamp(cmd.getEndDate());
+		//User user = UserContext.current().getUser();
+
 		List<ParkingRechargeOrder> list = parkingProvider.searchParkingRechargeOrders(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
 				cmd.getPlateOwnerPhone(),cmd.getPaidType(), cmd.getPayerName(), cmd.getPayerPhone(), cmd.getPageAnchor(), 
-				null,startDate,endDate,cmd.getRechargeStatus()
+				null,startDate,endDate,cmd.getRechargeStatus()/*,user.getId()*/
 				);
 		Workbook wb = new XSSFWorkbook();
 		
