@@ -209,6 +209,7 @@ import com.everhomes.rest.organization.PrivateFlag;
 import com.everhomes.rest.organization.ProcessOrganizationTaskCommand;
 import com.everhomes.rest.organization.RejectOrganizationCommand;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
+import com.everhomes.rest.organization.SearchOrganizationCommandResponse;
 import com.everhomes.rest.organization.SearchTopicsByTypeCommand;
 import com.everhomes.rest.organization.SearchTopicsByTypeResponse;
 import com.everhomes.rest.organization.SendOrganizationMessageCommand;
@@ -239,6 +240,7 @@ import com.everhomes.rest.organization.pm.UnassignedBuildingDTO;
 import com.everhomes.rest.organization.pm.UpdateOrganizationMemberByIdsCommand;
 import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.search.GroupQueryResult;
+import com.everhomes.rest.search.OrganizationQueryResult;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.ui.privilege.EntrancePrivilege;
@@ -6482,5 +6484,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    Organization organization = organizationProvider.findOrganizationById(organizationId);
 	    
 	    return toOrganizationDTO(user.getId(), organization);
+	}
+	
+	@Override
+	public SearchOrganizationCommandResponse searchOrganization(
+			SearchOrganizationCommand cmd) {
+		SearchOrganizationCommandResponse resp = new SearchOrganizationCommandResponse();
+	    OrganizationQueryResult olt = this.organizationSearcher.queryOrganization(cmd);
+	    resp.setDtos(olt.getDtos());
+	    resp.setNextPageAnchor(olt.getPageAnchor());
+		return resp;
 	}
 }

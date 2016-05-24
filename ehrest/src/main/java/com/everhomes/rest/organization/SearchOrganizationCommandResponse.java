@@ -4,11 +4,11 @@ import java.util.List;
 
 import com.everhomes.discover.ItemType;
 
-public class ListEnterprisesCommandResponse {
+public class SearchOrganizationCommandResponse {
     private Long nextPageAnchor;
     
-    @ItemType(OrganizationDetailDTO.class)
-    private List<OrganizationDetailDTO> dtos;
+    @ItemType(OrganizationDTO.class)
+    private List<OrganizationDTO> dtos;
 
     public Long getNextPageAnchor() {
         return nextPageAnchor;
@@ -18,11 +18,11 @@ public class ListEnterprisesCommandResponse {
         this.nextPageAnchor = nextPageAnchor;
     }
 
-	public List<OrganizationDetailDTO> getDtos() {
+	public List<OrganizationDTO> getDtos() {
 		return dtos;
 	}
 
-	public void setDtos(List<OrganizationDetailDTO> dtos) {
+	public void setDtos(List<OrganizationDTO> dtos) {
 		this.dtos = dtos;
 	}
 

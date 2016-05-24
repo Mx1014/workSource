@@ -2,6 +2,17 @@ package com.everhomes.rest.organization;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ *  <li>communityId: 用户当前所有小区ID</li>
+ *  <li>namespaceId : 域</li>
+ *  <li>keyword: 内容关键字</li>
+ *  <li>organizationType : 机构类型 ，详情{@link com.everhomes.rest.organization.organizationType}</li>
+ *  <li>pageAnchor: 本页开始锚点</li>
+ *  <li>pageSize: 每页的数量</li>
+ * </ul>
+ *
+ */
 public class SearchOrganizationCommand {
     private Integer namespaceId;
     private String keyword;
