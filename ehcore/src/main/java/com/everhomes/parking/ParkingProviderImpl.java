@@ -182,14 +182,13 @@ public class ParkingProviderImpl implements ParkingProvider {
     
     @Override
     public List<ParkingCardRequest> listParkingCardRequests(Long id,String ownerType,Long ownerId
-    		,Long parkingLotId,String plateNumber,ParkingCardRequestStatus status,String order,
-    		Long pageAnchor,Integer pageSize){
+    		,Long parkingLotId,String plateNumber,String order,Long pageAnchor,Integer pageSize){
     	List<ParkingCardRequest> resultList = null;
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(ParkingCardRequest.class));
         
         StringBuilder sb = new StringBuilder("");
         StringBuilder conditionSb = new StringBuilder("");
-        sb.append("select count(*)-1 as ranking,e1.* from eh_parking_card_requests e1 join eh_parking_card_requests e2 on e1.create_time >= e2.create_time ");
+        sb.append("select case e1.status when  1 then count(*) else 0 end as ranking,e1.* from eh_parking_card_requests e1 left join (select * from eh_parking_card_requests e3 where e3.status =1) e2 on e1.create_time >= e2.create_time ");
         
         if(id != null)
         	conditionSb.append(" and e1.REQUESTOR_UID = ").append(id);
@@ -203,8 +202,6 @@ public class ParkingProviderImpl implements ParkingProvider {
         	conditionSb.append(" and e1.PARKING_LOT_ID = ").append(parkingLotId);
         if(StringUtils.isNotBlank(plateNumber))
         	conditionSb.append(" and e1.PLATE_NUMBER = '").append(plateNumber).append("'");
-        if(status != null)
-        	conditionSb.append(" and e1.STATUS = ").append(status.getCode());
         
         if(!conditionSb.toString().equals("")){
         	sb.append(" where ").append(conditionSb.replace(0, 4, "").toString());
@@ -242,6 +239,37 @@ public class ParkingProviderImpl implements ParkingProvider {
     }
     
     @Override
+    public List<ParkingCardRequest> listParkingCardRequests(Long id,String ownerType,Long ownerId
+    		,Long parkingLotId,String plateNumber,ParkingCardRequestStatus status,String order,
+    		Long pageAnchor,Integer pageSize){
+    	List<ParkingCardRequest> resultList = null;
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        SelectQuery<EhParkingCardRequestsRecord> query = context.selectQuery(Tables.EH_PARKING_CARD_REQUESTS);
+        
+        if (pageAnchor != null && pageAnchor != 0)
+			query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.ID.lt(pageAnchor));
+        if(StringUtils.isNotBlank(ownerType))
+        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.OWNER_TYPE.eq(ownerType));
+        if(ownerId != null)
+        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.OWNER_ID.eq(ownerId));
+        if(parkingLotId != null)
+        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PARKING_LOT_ID.eq(parkingLotId));
+        if(StringUtils.isNotBlank(plateNumber))
+        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PLATE_NUMBER.eq(plateNumber));
+        if(status != null)
+        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.STATUS.eq(status.getCode()));
+
+        query.addOrderBy(Tables.EH_PARKING_CARD_REQUESTS.ID.desc());
+        if(pageSize != null)
+        	query.addLimit(pageSize);
+        
+        resultList = query.fetch().map(r -> 
+			ConvertHelper.convert(r, ParkingCardRequest.class));
+        
+    	return resultList;
+    }
+    
+    @Override
     public Integer waitingCardCount(String ownerType,Long ownerId
     		,Long parkingLotId,Timestamp createTime){
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(ParkingCardRequest.class));
@@ -251,7 +279,7 @@ public class ParkingProviderImpl implements ParkingProvider {
         condition = condition.and(Tables.EH_PARKING_CARD_REQUESTS.OWNER_ID.eq(ownerId));
         condition = condition.and(Tables.EH_PARKING_CARD_REQUESTS.PARKING_LOT_ID.eq(parkingLotId));
         condition = condition.and(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.lt(createTime));
-        
+        condition = condition.and(Tables.EH_PARKING_CARD_REQUESTS.STATUS.eq(ParkingCardRequestStatus.QUEUEING.getCode()));
     	return query.where(condition).fetchOneInto(Integer.class);
     }
     
