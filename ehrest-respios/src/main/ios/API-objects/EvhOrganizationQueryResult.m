@@ -1,20 +1,20 @@
 //
-// EvhListEnterprisesCommandResponse.m
+// EvhOrganizationQueryResult.m
 //
-#import "EvhListEnterprisesCommandResponse.h"
-#import "EvhOrganizationDetailDTO.h"
+#import "EvhOrganizationQueryResult.h"
+#import "EvhOrganizationDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhListEnterprisesCommandResponse
+// EvhOrganizationQueryResult
 //
 
-@implementation EvhListEnterprisesCommandResponse
+@implementation EvhOrganizationQueryResult
 
 +(id) withJsonString: (NSString*) jsonString
 {
     id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
     if(jsonObject != nil) {
-        EvhListEnterprisesCommandResponse* obj = [EvhListEnterprisesCommandResponse new];
+        EvhOrganizationQueryResult* obj = [EvhOrganizationQueryResult new];
         return [obj fromJson:jsonObject];
     }
     return nil;
@@ -24,6 +24,7 @@
 {
     self = [super init];
     if(self) {
+        _ids = [NSMutableArray new];
         _dtos = [NSMutableArray new];
         return self;
     }
@@ -32,11 +33,18 @@
 
 -(void) toJson: (NSMutableDictionary*) jsonObject 
 {
-    if(self.nextPageAnchor)
-        [jsonObject setObject: self.nextPageAnchor forKey: @"nextPageAnchor"];
+    if(self.pageAnchor)
+        [jsonObject setObject: self.pageAnchor forKey: @"pageAnchor"];
+    if(self.ids) {
+        NSMutableArray* jsonArray = [NSMutableArray new];
+        for(NSNumber* item in self.ids) {
+            [jsonArray addObject:item];
+        }
+        [jsonObject setObject: jsonArray forKey: @"ids"];
+    }
     if(self.dtos) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhOrganizationDetailDTO* item in self.dtos) {
+        for(EvhOrganizationDTO* item in self.dtos) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -48,14 +56,20 @@
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
 {
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
-        self.nextPageAnchor = [jsonObject objectForKey: @"nextPageAnchor"];
-        if(self.nextPageAnchor && [self.nextPageAnchor isEqual:[NSNull null]])
-            self.nextPageAnchor = nil;
+        self.pageAnchor = [jsonObject objectForKey: @"pageAnchor"];
+        if(self.pageAnchor && [self.pageAnchor isEqual:[NSNull null]])
+            self.pageAnchor = nil;
 
+        {
+            NSArray* jsonArray = [jsonObject objectForKey: @"ids"];
+            for(id itemJson in jsonArray) {
+                [self.ids addObject: itemJson];
+            }
+        }
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"dtos"];
             for(id itemJson in jsonArray) {
-                EvhOrganizationDetailDTO* item = [EvhOrganizationDetailDTO new];
+                EvhOrganizationDTO* item = [EvhOrganizationDTO new];
                 
                 [item fromJson: itemJson];
                 [self.dtos addObject: item];

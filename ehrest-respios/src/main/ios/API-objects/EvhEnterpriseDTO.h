@@ -3,7 +3,7 @@
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
-#import "EvhAddressAddressDTO.h"
+#import "EvhAddressDTO.h"
 #import "EvhEnterpriseAttachmentDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -87,7 +87,7 @@
 
 @property(nonatomic, copy) NSNumber* feedbackForumId;
 
-// item type EvhAddressAddressDTO*
+// item type EvhAddressDTO*
 @property(nonatomic, strong) NSMutableArray* address;
 
 // item type EvhEnterpriseAttachmentDTO*

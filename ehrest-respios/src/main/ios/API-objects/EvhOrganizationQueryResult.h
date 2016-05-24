@@ -1,20 +1,23 @@
 //
-// EvhListEnterprisesCommandResponse.h
+// EvhOrganizationQueryResult.h
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
-#import "EvhOrganizationDetailDTO.h"
+#import "EvhOrganizationDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhListEnterprisesCommandResponse
+// EvhOrganizationQueryResult
 //
-@interface EvhListEnterprisesCommandResponse
+@interface EvhOrganizationQueryResult
     : NSObject<EvhJsonSerializable>
 
 
-@property(nonatomic, copy) NSNumber* nextPageAnchor;
+@property(nonatomic, copy) NSNumber* pageAnchor;
 
-// item type EvhOrganizationDetailDTO*
+// item type NSNumber*
+@property(nonatomic, strong) NSMutableArray* ids;
+
+// item type EvhOrganizationDTO*
 @property(nonatomic, strong) NSMutableArray* dtos;
 
 -(id) init;

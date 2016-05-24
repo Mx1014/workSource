@@ -581,6 +581,7 @@
 #define EVH_ORG_REJECTORGANIZATION_URL @"/org/rejectOrganization"
 #define EVH_ORG_REJECTORGANIZATIONMEMBER_URL @"/org/rejectOrganizationMember"
 #define EVH_ORG_SEARCHENTERPRISE_URL @"/org/searchEnterprise"
+#define EVH_ORG_SEARCHORGANIZATION_URL @"/org/searchOrganization"
 #define EVH_ORG_SEARCHTOPICSBYTYPE_URL @"/org/searchTopicsByType"
 #define EVH_ORG_SENDORGMESSAGE_URL @"/org/sendOrgMessage"
 #define EVH_ORG_SETCURRENTORGANIZATION_URL @"/org/setCurrentOrganization"

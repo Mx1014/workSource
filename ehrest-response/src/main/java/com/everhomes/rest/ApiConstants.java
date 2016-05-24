@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-05-24 11:35:00
+// generated at 2016-05-24 19:32:50
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -584,6 +584,7 @@ public interface ApiConstants {
     public static final String ORG_REJECTORGANIZATION_URL = "/org/rejectOrganization";
     public static final String ORG_REJECTORGANIZATIONMEMBER_URL = "/org/rejectOrganizationMember";
     public static final String ORG_SEARCHENTERPRISE_URL = "/org/searchEnterprise";
+    public static final String ORG_SEARCHORGANIZATION_URL = "/org/searchOrganization";
     public static final String ORG_SEARCHTOPICSBYTYPE_URL = "/org/searchTopicsByType";
     public static final String ORG_SENDORGMESSAGE_URL = "/org/sendOrgMessage";
     public static final String ORG_SETCURRENTORGANIZATION_URL = "/org/setCurrentOrganization";

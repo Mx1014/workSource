@@ -30,16 +30,16 @@
 
 -(void) toJson: (NSMutableDictionary*) jsonObject 
 {
-    if(self.flag)
-        [jsonObject setObject: self.flag forKey: @"flag"];
+    if(self.status)
+        [jsonObject setObject: self.status forKey: @"status"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
 {
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
-        self.flag = [jsonObject objectForKey: @"flag"];
-        if(self.flag && [self.flag isEqual:[NSNull null]])
-            self.flag = nil;
+        self.status = [jsonObject objectForKey: @"status"];
+        if(self.status && [self.status isEqual:[NSNull null]])
+            self.status = nil;
 
         return self;
     }
