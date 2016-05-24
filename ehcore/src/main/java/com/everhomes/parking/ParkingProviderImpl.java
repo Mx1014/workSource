@@ -343,7 +343,7 @@ public class ParkingProviderImpl implements ParkingProvider {
         
 
         if (pageAnchor != null && pageAnchor != 0)
-			query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.ID.lt(pageAnchor));
+			query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.CREATE_TIME.lt(new Timestamp(pageAnchor)));
         if(StringUtils.isNotBlank(ownerType))
         	query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.OWNER_TYPE.eq(ownerType));
         if(ownerId != null)
@@ -374,7 +374,7 @@ public class ParkingProviderImpl implements ParkingProvider {
         	query.addConditions(Tables.EH_USERS.NICK_NAME.eq(payerName));
         }
         
-        query.addOrderBy(Tables.EH_PARKING_RECHARGE_ORDERS.ID.desc());
+        query.addOrderBy(Tables.EH_PARKING_RECHARGE_ORDERS.CREATE_TIME.desc());
         if(pageSize != null)
         	query.addLimit(pageSize);
         
@@ -433,7 +433,7 @@ public class ParkingProviderImpl implements ParkingProvider {
         SelectQuery<EhParkingCardRequestsRecord> query = context.selectQuery(Tables.EH_PARKING_CARD_REQUESTS);
         
         if (pageAnchor != null && pageAnchor != 0)
-			query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.ID.lt(pageAnchor));
+			query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.lt(new Timestamp(pageAnchor)));
         if(StringUtils.isNotBlank(ownerType))
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.OWNER_TYPE.eq(ownerType));
         if(ownerId != null)
@@ -454,7 +454,7 @@ public class ParkingProviderImpl implements ParkingProvider {
         if(endDate != null)
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.le(endDate));
 
-        query.addOrderBy(Tables.EH_PARKING_CARD_REQUESTS.ID.desc());
+        query.addOrderBy(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.desc());
         if(pageSize != null)
         	query.addLimit(pageSize);
         
