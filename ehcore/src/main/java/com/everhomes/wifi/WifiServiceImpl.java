@@ -119,9 +119,9 @@ public class WifiServiceImpl implements WifiService{
 		VerifyWifiDTO dto = new VerifyWifiDTO();
 		WifiSetting wifiSetting = wifiProvider.findWifiSettingByCondition(cmd.getSsid(),cmd.getOwnerId(),cmd.getOwnerType());
 		if(wifiSetting != null){
-			dto.setFlag(VerifyWifiStatus.SUCCESS.getCode());;
+			dto.setStatus(VerifyWifiStatus.SUCCESS.getCode());;
 		}else{
-			dto.setFlag(VerifyWifiStatus.FAIL.getCode());
+			dto.setStatus(VerifyWifiStatus.FAIL.getCode());
 		}
 		return dto;
 	}

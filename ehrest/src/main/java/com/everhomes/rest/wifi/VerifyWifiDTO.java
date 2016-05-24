@@ -6,15 +6,14 @@ package com.everhomes.rest.wifi;
  * </ul>
  */
 public class VerifyWifiDTO {
-	private byte flag;
+	private byte status;
 
-	public byte getFlag() {
-		return flag;
+	public byte getStatus() {
+		return status;
 	}
 
-	public void setFlag(byte flag) {
-		this.flag = flag;
+	public void setStatus(byte status) {
+		this.status = status;
 	}
-
 	
 }
