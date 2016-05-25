@@ -1,5 +1,7 @@
 package com.everhomes.rest.aclink;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * <li>doorAccessId: 可以是组 ID 或者是 门禁设备 ID</li>
@@ -18,5 +20,9 @@ public class DeleteDoorAccessById {
         this.doorAccessId = doorAccessId;
     }
     
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
     
 }

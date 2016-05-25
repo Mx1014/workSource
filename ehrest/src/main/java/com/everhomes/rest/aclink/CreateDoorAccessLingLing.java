@@ -2,6 +2,8 @@ package com.everhomes.rest.aclink;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul> 创建 LingLing 门禁设备
  * <li>ownerType: 参考{@link com.everhomes.rest.aclink.DoorAccessOwnerType}</li>
@@ -90,5 +92,8 @@ public class CreateDoorAccessLingLing {
         this.address = address;
     }
     
-    
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

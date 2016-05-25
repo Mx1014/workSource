@@ -2,6 +2,8 @@ package com.everhomes.rest.aclink;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul> 创建分组，比如大堂门禁，可以对应多台具体的门禁设备。一个独立的门禁也可以与自己产生一组。如果要把一个组里的门禁迁移到另外的组，则需要重置门禁，再重新激活或加入。
  * <li>ownerType: 参考{@link com.everhomes.rest.aclink.DoorAccessOwnerType}</li>
@@ -65,5 +67,10 @@ public class CreateDoorAccessGroup {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+    
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

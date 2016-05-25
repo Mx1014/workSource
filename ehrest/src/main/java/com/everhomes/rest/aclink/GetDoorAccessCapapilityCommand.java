@@ -2,6 +2,8 @@ package com.everhomes.rest.aclink;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul> 获取门禁能力
  * <li>ownerType: 参考{@link com.everhomes.rest.aclink.DoorAccessOwnerType}</li>
@@ -45,5 +47,8 @@ public class GetDoorAccessCapapilityCommand {
         this.ownerId = ownerId;
     }
     
-    
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

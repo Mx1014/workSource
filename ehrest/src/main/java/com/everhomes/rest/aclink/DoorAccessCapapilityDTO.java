@@ -1,5 +1,7 @@
 package com.everhomes.rest.aclink;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * <li>isSupportQR: 是否支持二维码门禁</li>
@@ -41,5 +43,9 @@ public class DoorAccessCapapilityDTO {
         this.smartDriver = smartDriver;
     }
     
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
     
 }
