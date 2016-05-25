@@ -11,7 +11,7 @@
     : NSObject<EvhJsonSerializable>
 
 
-@property(nonatomic, copy) NSNumber* flag;
+@property(nonatomic, copy) NSNumber* status;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

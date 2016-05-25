@@ -1,20 +1,20 @@
 //
-// EvhListOpPromotionActivityResponse.m
+// EvhListDoorAccessQRKeyResponse.m
 //
-#import "EvhListOpPromotionActivityResponse.h"
-#import "EvhOpPromotionActivityDTO.h"
+#import "EvhListDoorAccessQRKeyResponse.h"
+#import "EvhDoorAccessQRKeyDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhListOpPromotionActivityResponse
+// EvhListDoorAccessQRKeyResponse
 //
 
-@implementation EvhListOpPromotionActivityResponse
+@implementation EvhListDoorAccessQRKeyResponse
 
 +(id) withJsonString: (NSString*) jsonString
 {
     id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
     if(jsonObject != nil) {
-        EvhListOpPromotionActivityResponse* obj = [EvhListOpPromotionActivityResponse new];
+        EvhListDoorAccessQRKeyResponse* obj = [EvhListDoorAccessQRKeyResponse new];
         return [obj fromJson:jsonObject];
     }
     return nil;
@@ -24,7 +24,7 @@
 {
     self = [super init];
     if(self) {
-        _promotions = [NSMutableArray new];
+        _keys = [NSMutableArray new];
         return self;
     }
     return nil;
@@ -32,35 +32,29 @@
 
 -(void) toJson: (NSMutableDictionary*) jsonObject 
 {
-    if(self.promotions) {
+    if(self.keys) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhOpPromotionActivityDTO* item in self.promotions) {
+        for(EvhDoorAccessQRKeyDTO* item in self.keys) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
         }
-        [jsonObject setObject: jsonArray forKey: @"promotions"];
+        [jsonObject setObject: jsonArray forKey: @"keys"];
     }
-    if(self.nextPageAnchor)
-        [jsonObject setObject: self.nextPageAnchor forKey: @"nextPageAnchor"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
 {
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
         {
-            NSArray* jsonArray = [jsonObject objectForKey: @"promotions"];
+            NSArray* jsonArray = [jsonObject objectForKey: @"keys"];
             for(id itemJson in jsonArray) {
-                EvhOpPromotionActivityDTO* item = [EvhOpPromotionActivityDTO new];
+                EvhDoorAccessQRKeyDTO* item = [EvhDoorAccessQRKeyDTO new];
                 
                 [item fromJson: itemJson];
-                [self.promotions addObject: item];
+                [self.keys addObject: item];
             }
         }
-        self.nextPageAnchor = [jsonObject objectForKey: @"nextPageAnchor"];
-        if(self.nextPageAnchor && [self.nextPageAnchor isEqual:[NSNull null]])
-            self.nextPageAnchor = nil;
-
         return self;
     }
     

@@ -1,21 +1,23 @@
 //
-// EvhUpdateContactorCommand.h
+// EvhDoorAccessCapapilityDTO.h
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhUpdateContactorCommand
+// EvhDoorAccessCapapilityDTO
 //
-@interface EvhUpdateContactorCommand
+@interface EvhDoorAccessCapapilityDTO
     : NSObject<EvhJsonSerializable>
 
 
-@property(nonatomic, copy) NSString* contactorName;
+@property(nonatomic, copy) NSNumber* isSupportQR;
 
-@property(nonatomic, copy) NSString* contactor;
+@property(nonatomic, copy) NSNumber* isSupportSmart;
 
-@property(nonatomic, copy) NSNumber* enterpriseId;
+@property(nonatomic, copy) NSString* qrDriver;
+
+@property(nonatomic, copy) NSString* smartDriver;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

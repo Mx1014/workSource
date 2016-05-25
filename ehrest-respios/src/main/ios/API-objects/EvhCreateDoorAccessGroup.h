@@ -1,21 +1,25 @@
 //
-// EvhUpdateContactorCommand.h
+// EvhCreateDoorAccessGroup.h
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhUpdateContactorCommand
+// EvhCreateDoorAccessGroup
 //
-@interface EvhUpdateContactorCommand
+@interface EvhCreateDoorAccessGroup
     : NSObject<EvhJsonSerializable>
 
 
-@property(nonatomic, copy) NSString* contactorName;
+@property(nonatomic, copy) NSNumber* ownerType;
 
-@property(nonatomic, copy) NSString* contactor;
+@property(nonatomic, copy) NSNumber* ownerId;
 
-@property(nonatomic, copy) NSNumber* enterpriseId;
+@property(nonatomic, copy) NSString* name;
+
+@property(nonatomic, copy) NSString* description_;
+
+@property(nonatomic, copy) NSString* address;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

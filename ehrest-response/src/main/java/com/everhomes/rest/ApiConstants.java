@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-05-24 11:35:00
+// generated at 2016-05-25 16:27:08
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -11,9 +11,11 @@ public interface ApiConstants {
     public static final String ACLINK_DELETEDOORAUTH_URL = "/aclink/deleteDoorAuth";
     public static final String ACLINK_DISCONNECTED_URL = "/aclink/disConnected";
     public static final String ACLINK_GETDOORACCESSBYHARDWAREID_URL = "/aclink/getDoorAccessByHardwareId";
+    public static final String ACLINK_GETDOORACCESSCAPAPILITYCOMMAND_URL = "/aclink/getDoorAccessCapapilityCommand";
     public static final String ACLINK_LISTADMINAESUSERKEY_URL = "/aclink/listAdminAesUserKey";
     public static final String ACLINK_LISTAESUSERKEY_URL = "/aclink/listAesUserKey";
     public static final String ACLINK_LISTAUTHHISTORY_URL = "/aclink/listAuthHistory";
+    public static final String ACLINK_LISTDOORACCESSQRKEY_URL = "/aclink/listDoorAccessQRKey";
     public static final String ACLINK_QUERYMESSAGES_URL = "/aclink/queryMessages";
     public static final String ACLINK_SYNCWEBSOCKETMESSAGES_URL = "/aclink/syncWebsocketMessages";
     public static final String ACLINK_UPGRATEAUTH_URL = "/aclink/upgrateAuth";
@@ -67,7 +69,10 @@ public interface ApiConstants {
     public static final String ADMIN_ACL_UPDATEROLEPRIVILEGE_URL = "/admin/acl/updateRolePrivilege";
     public static final String ADMIN_ACLINK_CREATEACLINKFIRMWARE_URL = "/admin/aclink/createAclinkFirmware";
     public static final String ADMIN_ACLINK_CREATEAUTH_URL = "/admin/aclink/createAuth";
+    public static final String ADMIN_ACLINK_CREATEDOORACCESSGROUP_URL = "/admin/aclink/createDoorAccessGroup";
+    public static final String ADMIN_ACLINK_CREATEDOORACCESSLINGLING_URL = "/admin/aclink/createDoorAccessLingLing";
     public static final String ADMIN_ACLINK_DELETEDOORACCESS_URL = "/admin/aclink/deleteDoorAccess";
+    public static final String ADMIN_ACLINK_DELETEDOORACCESSBYID_URL = "/admin/aclink/deleteDoorAccessById";
     public static final String ADMIN_ACLINK_DELETEDOORAUTH_URL = "/admin/aclink/deleteDoorAuth";
     public static final String ADMIN_ACLINK_LISTACLINKUSERS_URL = "/admin/aclink/listAclinkUsers";
     public static final String ADMIN_ACLINK_LISTUSERKEY_URL = "/admin/aclink/listUserKey";
