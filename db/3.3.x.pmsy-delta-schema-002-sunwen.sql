@@ -10,6 +10,6 @@ UPDATE `eh_launch_pad_items` SET item_name = '家政服务',item_label = '家政
 UPDATE `eh_launch_pad_items` SET item_name = '家政服务',item_label = '家政服务' WHERE id = 1768;
 
 INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag) 
-	VALUES (1764, 999993, 0, '0', 0, '/home/Pm', 'GaActions', '便民服务', '便民服务', 'cs://1/image/aW1hZ2UvTVRwall6VTVOV1U0WkdRMk56aGxPRFV3TVRBMk5qVXlNVFkzWVRZek56aGpOdw', 1, 1, 45, '', 0, 0, 1, 1, '', 0,NULL);
+	VALUES (1764, 999993, 0, '0', 0, '/home/Pm', 'GaActions', '便民服务', '便民服务', 'cs://1/image/aW1hZ2UvTVRwaFptSXdNMlJtWWpSak9XVm1ZekV4TXpReE5tRXdPRFJrTlRZNVpHUTJOdw', 1, 1, 45, '', 0, 0, 1, 1, '', 0,NULL);
 INSERT INTO `eh_launch_pad_items`(id,namespace_id,app_id,scope_code,scope_id,item_location,item_group,item_name,item_label,icon_uri,item_width,item_height,action_type,action_data,default_order,apply_policy,min_version,display_flag,display_layout,bgcolor,tag) 
 	VALUES (1767, 999993, 0, '0', 0, '/home/Pm', 'GaPosts', '便民服务', '便民服务', NULL, 1, 1, 45, '', 0, 0, 1, 1, '', 0,NULL);
