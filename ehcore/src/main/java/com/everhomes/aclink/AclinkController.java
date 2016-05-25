@@ -309,7 +309,9 @@ public class AclinkController extends ControllerBase {
     @RequestMapping("listDoorAccessQRKey")
     @RestReturn(value=ListDoorAccessQRKeyResponse.class)
     public RestResponse listDoorAccessQRKey() {
-        RestResponse response = new RestResponse(); 
+        RestResponse response = new RestResponse();
+        
+        response.setResponseObject(doorAccessService.listDoorAccessQRKey());
         
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

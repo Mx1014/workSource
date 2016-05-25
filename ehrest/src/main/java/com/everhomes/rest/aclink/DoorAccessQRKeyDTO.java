@@ -1,5 +1,7 @@
 package com.everhomes.rest.aclink;
 
+import java.util.List;
+
 import com.everhomes.discover.ItemType;
 
 /**
@@ -30,7 +32,7 @@ public class DoorAccessQRKeyDTO {
     private Byte     status;
     
     @ItemType(String.class)
-    private String hardwares;
+    private List<String> hardwares;
     
     private String extra;
 
@@ -105,12 +107,12 @@ public class DoorAccessQRKeyDTO {
     public void setStatus(Byte status) {
         this.status = status;
     }
-
-    public String getHardwares() {
+    
+    public List<String> getHardwares() {
         return hardwares;
     }
 
-    public void setHardwares(String hardwares) {
+    public void setHardwares(List<String> hardwares) {
         this.hardwares = hardwares;
     }
 

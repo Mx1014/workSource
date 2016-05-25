@@ -56,18 +56,22 @@ import com.everhomes.rest.aclink.DoorAccessActivedCommand;
 import com.everhomes.rest.aclink.DoorAccessActivingCommand;
 import com.everhomes.rest.aclink.DoorAccessAdminUpdateCommand;
 import com.everhomes.rest.aclink.DoorAccessDTO;
+import com.everhomes.rest.aclink.DoorAccessDriverType;
 import com.everhomes.rest.aclink.DoorAccessLinkStatus;
 import com.everhomes.rest.aclink.DoorAccessOwnerType;
+import com.everhomes.rest.aclink.DoorAccessQRKeyDTO;
 import com.everhomes.rest.aclink.DoorAccessStatus;
 import com.everhomes.rest.aclink.DoorAccessType;
 import com.everhomes.rest.aclink.DoorAuthDTO;
 import com.everhomes.rest.aclink.DoorAuthStatus;
 import com.everhomes.rest.aclink.DoorAuthType;
+import com.everhomes.rest.aclink.DoorLinglingExtraKeyDTO;
 import com.everhomes.rest.aclink.DoorMessage;
 import com.everhomes.rest.aclink.DoorMessageType;
 import com.everhomes.rest.aclink.ListAclinkUserCommand;
 import com.everhomes.rest.aclink.ListAesUserKeyByUserResponse;
 import com.everhomes.rest.aclink.ListDoorAccessByOwnerIdCommand;
+import com.everhomes.rest.aclink.ListDoorAccessQRKeyResponse;
 import com.everhomes.rest.aclink.ListDoorAccessResponse;
 import com.everhomes.rest.aclink.ListDoorAuthCommand;
 import com.everhomes.rest.aclink.ListDoorAuthResponse;
@@ -1211,4 +1215,48 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         return "-1";
     }
+    
+    @Override
+    public ListDoorAccessQRKeyResponse listDoorAccessQRKey() {
+        User user = UserContext.current().getUser();
+        ListDoorAccessQRKeyResponse resp = new ListDoorAccessQRKeyResponse();
+        List<DoorAccessQRKeyDTO> qrKeys = new ArrayList<DoorAccessQRKeyDTO>();
+        resp.setKeys(qrKeys);
+        
+        DoorAccessQRKeyDTO qr = new DoorAccessQRKeyDTO();
+        qr.setCreateTimeMs(System.currentTimeMillis());
+        qr.setCreatorUid(user.getId());
+        qr.setDoorGroupId(1008l);
+        qr.setDoorName("testname");
+        qr.setExpireTimeMs(System.currentTimeMillis() + 5*60*1000);
+        
+        List<String> hardwares = new ArrayList<String>();
+        hardwares.add("03e80003e8");
+        
+        qr.setHardwares(hardwares);
+        qr.setQrDriver(DoorAccessDriverType.LINGLING.getCode());
+        qr.setStatus(DoorAccessStatus.ACTIVE.getCode());
+        qr.setQrCodeKey("11223344");
+        qr.setId(1008l);
+        
+        DoorLinglingExtraKeyDTO extra = new DoorLinglingExtraKeyDTO();
+        extra.setAuthLevel(0l);
+        extra.setAuthStorey(8l);
+        
+        List<Long> storeyAuthList = new ArrayList<Long>();
+        storeyAuthList.add(8l);
+        storeyAuthList.add(9l);
+        storeyAuthList.add(11l);
+        extra.setStoreyAuthList(storeyAuthList);
+        
+        List<String> sdkKeys = new ArrayList<String>();
+        sdkKeys.add("179C536BB35CA90A58FFB0EF217386255E8E5F59CDD0F63B9EFE5F07B2FE5C684ACCE014947CE5CCE0212EB05C8DB3778433");
+        extra.setKeys(sdkKeys);
+        
+        qr.setExtra(StringHelper.toJsonString(extra));
+        
+        qrKeys.add(qr);
+        
+        return resp;
+        }
 }
