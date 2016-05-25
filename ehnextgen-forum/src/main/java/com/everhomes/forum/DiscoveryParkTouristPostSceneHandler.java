@@ -204,7 +204,7 @@ public class DiscoveryParkTouristPostSceneHandler implements PostSceneHandler {
         List<TopicScopeDTO> filterList = new ArrayList<TopicScopeDTO>();
         
         SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
-        if(sceneType != SceneType.PARK_TOURIST) {
+        if(sceneType == SceneType.PARK_TOURIST) {
             Community community = communityProvider.findCommunityById(sceneToken.getEntityId());
             if(community != null) {
                 filterList = getDiscoveryTopicSentScopes(user, sceneToken, community);
