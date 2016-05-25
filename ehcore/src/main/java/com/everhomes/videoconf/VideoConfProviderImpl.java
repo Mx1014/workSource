@@ -12,12 +12,18 @@ import java.util.Set;
 
 
 
+
+
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.jooq.tools.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+
+
 
 
 
@@ -67,6 +73,7 @@ import com.everhomes.server.schema.tables.pojos.EhParkApplyCard;
 import com.everhomes.server.schema.tables.pojos.EhWarningContacts;
 import com.everhomes.server.schema.tables.records.EhConfAccountCategoriesRecord;
 import com.everhomes.server.schema.tables.records.EhConfAccountsRecord;
+import com.everhomes.server.schema.tables.records.EhConfConferencesRecord;
 import com.everhomes.server.schema.tables.records.EhConfEnterprisesRecord;
 import com.everhomes.server.schema.tables.records.EhConfOrderAccountMapRecord;
 import com.everhomes.server.schema.tables.records.EhConfOrdersRecord;
@@ -1043,13 +1050,13 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 
 	@Override
 	public int countConfByAccount(Long accountId) {
-		int namespaceId = (UserContext.current().getUser().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getUser().getNamespaceId();
+//		int namespaceId = (UserContext.current().getUser().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getUser().getNamespaceId();
 		final Integer[] count = new Integer[1];
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhConfConferences.class), null, 
                 (DSLContext context, Object reducingContext)-> {
                     count[0] = context.selectCount().from(Tables.EH_CONF_CONFERENCES)
                             .where(Tables.EH_CONF_CONFERENCES.CONF_ACCOUNT_ID.equal(accountId))
-                            .and(Tables.EH_CONF_CONFERENCES.NAMESPACE_ID.eq(namespaceId))
+//                            .and(Tables.EH_CONF_CONFERENCES.NAMESPACE_ID.eq(namespaceId))
                             .fetchOneInto(Integer.class);
                     return true;
                 });
@@ -1376,6 +1383,70 @@ public class VideoConfProviderImpl implements VideoConfProvider {
         });
 
         return accounts;
+	}
+
+	@Override
+	public Long listConfTimeByAccount(Long accountId) {
+		Long count = 0L;
+		List<Integer> realDurations = new ArrayList<Integer>();
+		CrossShardListingLocator locator=new CrossShardListingLocator();
+		if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readWriteWith(EhConfConferences.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+            SelectQuery<EhConfConferencesRecord> query = context.selectQuery(Tables.EH_CONF_CONFERENCES);
+            query.addConditions(Tables.EH_CONF_CONFERENCES.CONF_ACCOUNT_ID.eq(accountId));
+            
+            query.fetch().map((r) -> {
+            	
+            	realDurations.add(r.getRealDuration());
+                return null;
+            });
+
+            return AfterAction.next;
+        });
+
+        if(realDurations != null && realDurations.size() > 0) {
+        	for(Integer realDuration : realDurations) {
+        		count += realDuration;
+        	}
+        }
+        
+        return count;
+	}
+
+	@Override
+	public List<ConfConferences> listConfbyAccount(Long accountId, CrossShardListingLocator locator, Integer pageSize) {
+
+		List<ConfConferences> conferences = new ArrayList<ConfConferences>();
+		
+		if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhConfConferences.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+            SelectQuery<EhConfConferencesRecord> query = context.selectQuery(Tables.EH_CONF_CONFERENCES);
+            if(locator.getAnchor() != null)
+            	query.addConditions(Tables.EH_CONF_CONFERENCES.ID.lt(locator.getAnchor()));
+            
+            query.addConditions(Tables.EH_CONF_CONFERENCES.CONF_ACCOUNT_ID.eq(accountId));
+           
+            query.addOrderBy(Tables.EH_CONF_CONFERENCES.ID.desc());
+            query.addLimit(pageSize - conferences.size());
+            
+            query.fetch().map((r) -> {
+            	
+            	conferences.add(ConvertHelper.convert(r, ConfConferences.class));
+                return null;
+            });
+
+            return AfterAction.next;
+        });
+
+        return conferences;
 	}
 	
 	

@@ -14,19 +14,19 @@ import com.everhomes.util.StringHelper;
  */
 public class ConfRecordDTO {
 
-	private Integer confId;
+	private Long confId;
 	
 	private Timestamp confDate;
 	
-	private Long confTime;
+	private Integer confTime;
 	
 	private Integer people;
 
-	public Integer getConfId() {
+	public Long getConfId() {
 		return confId;
 	}
 
-	public void setConfId(Integer confId) {
+	public void setConfId(Long confId) {
 		this.confId = confId;
 	}
 
@@ -38,11 +38,11 @@ public class ConfRecordDTO {
 		this.confDate = confDate;
 	}
 
-	public Long getConfTime() {
+	public Integer getConfTime() {
 		return confTime;
 	}
 
-	public void setConfTime(Long confTime) {
+	public void setConfTime(Integer confTime) {
 		this.confTime = confTime;
 	}
 
