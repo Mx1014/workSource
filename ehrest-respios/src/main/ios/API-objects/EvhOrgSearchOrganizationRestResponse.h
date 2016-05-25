@@ -1,14 +1,14 @@
 //
-// EvhPmsyListAddressesRestResponse.h
+// EvhOrgSearchOrganizationRestResponse.h
 //
 #import "RestResponseBase.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhPmsyListAddressesRestResponse
+// EvhOrgSearchOrganizationRestResponse
 //
-@interface EvhPmsyListAddressesRestResponse : EvhRestResponseBase
+@interface EvhOrgSearchOrganizationRestResponse : EvhRestResponseBase
 
-// array of EvhPmsyAddressDTO* objects
+// array of EvhOrganizationDTO* objects
 @property(nonatomic, strong) NSMutableArray* response;
 
 -(id) init;

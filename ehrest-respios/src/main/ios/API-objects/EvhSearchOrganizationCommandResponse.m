@@ -1,20 +1,20 @@
 //
-// EvhListOpPromotionActivityResponse.m
+// EvhSearchOrganizationCommandResponse.m
 //
-#import "EvhListOpPromotionActivityResponse.h"
-#import "EvhOpPromotionActivityDTO.h"
+#import "EvhSearchOrganizationCommandResponse.h"
+#import "EvhOrganizationDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhListOpPromotionActivityResponse
+// EvhSearchOrganizationCommandResponse
 //
 
-@implementation EvhListOpPromotionActivityResponse
+@implementation EvhSearchOrganizationCommandResponse
 
 +(id) withJsonString: (NSString*) jsonString
 {
     id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
     if(jsonObject != nil) {
-        EvhListOpPromotionActivityResponse* obj = [EvhListOpPromotionActivityResponse new];
+        EvhSearchOrganizationCommandResponse* obj = [EvhSearchOrganizationCommandResponse new];
         return [obj fromJson:jsonObject];
     }
     return nil;
@@ -24,7 +24,7 @@
 {
     self = [super init];
     if(self) {
-        _promotions = [NSMutableArray new];
+        _dtos = [NSMutableArray new];
         return self;
     }
     return nil;
@@ -32,35 +32,35 @@
 
 -(void) toJson: (NSMutableDictionary*) jsonObject 
 {
-    if(self.promotions) {
+    if(self.nextPageAnchor)
+        [jsonObject setObject: self.nextPageAnchor forKey: @"nextPageAnchor"];
+    if(self.dtos) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhOpPromotionActivityDTO* item in self.promotions) {
+        for(EvhOrganizationDTO* item in self.dtos) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
         }
-        [jsonObject setObject: jsonArray forKey: @"promotions"];
+        [jsonObject setObject: jsonArray forKey: @"dtos"];
     }
-    if(self.nextPageAnchor)
-        [jsonObject setObject: self.nextPageAnchor forKey: @"nextPageAnchor"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
 {
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
-        {
-            NSArray* jsonArray = [jsonObject objectForKey: @"promotions"];
-            for(id itemJson in jsonArray) {
-                EvhOpPromotionActivityDTO* item = [EvhOpPromotionActivityDTO new];
-                
-                [item fromJson: itemJson];
-                [self.promotions addObject: item];
-            }
-        }
         self.nextPageAnchor = [jsonObject objectForKey: @"nextPageAnchor"];
         if(self.nextPageAnchor && [self.nextPageAnchor isEqual:[NSNull null]])
             self.nextPageAnchor = nil;
 
+        {
+            NSArray* jsonArray = [jsonObject objectForKey: @"dtos"];
+            for(id itemJson in jsonArray) {
+                EvhOrganizationDTO* item = [EvhOrganizationDTO new];
+                
+                [item fromJson: itemJson];
+                [self.dtos addObject: item];
+            }
+        }
         return self;
     }
     

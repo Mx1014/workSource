@@ -1,4 +1,4 @@
-
+DELETE FROM `eh_parking_recharge_orders`;
 DELETE FROM `eh_parking_lots`;
 DELETE FROM `eh_parking_recharge_rates`;
 DELETE FROM `eh_parking_card_requests`;
