@@ -6234,8 +6234,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    		UserIdentifier target = userProvider.findClaimedIdentifierByOwnerAndType(task.getTargetId(), IdentifierType.MOBILE.getCode());
 	    		if(null != target){
 	    			List<Tuple<String, Object>> variables = smsProvider.toTupleList("operatorUName", map.get("operatorUName"));
-	    			smsProvider.addToTupleList(variables, "targetUName", map.get("targetUName"));
-	    			smsProvider.addToTupleList(variables, "targetUToken", map.get("targetUToken"));
+	    			smsProvider.addToTupleList(variables, "createUName", map.get("createUName"));
+	    			smsProvider.addToTupleList(variables, "createUToken", map.get("createUToken"));
     				//发送短信
 	    			smsProvider.sendSms(namespaceId, target.getIdentifierToken(), SmsTemplateCode.SCOPE, SmsTemplateCode.PM_TASK_PROCESS_MSG_CODE, user.getLocale(), variables);
 	    		}
