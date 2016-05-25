@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAclinks extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhAclinksRecord> {
 
-	private static final long serialVersionUID = 1778198110;
+	private static final long serialVersionUID = 376249333;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_aclinks</code>
@@ -52,11 +52,6 @@ public class EhAclinks extends org.jooq.impl.TableImpl<com.everhomes.server.sche
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAclinksRecord, java.lang.String> FIRWARE_VER = createField("firware_ver", org.jooq.impl.SQLDataType.VARCHAR.length(32).nullable(false), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_aclinks.driver</code>. identify the hardware driver of aclink, not used now
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAclinksRecord, java.lang.Byte> DRIVER = createField("driver", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "identify the hardware driver of aclink, not used now");
-
-	/**
 	 * The column <code>ehcore.eh_aclinks.create_time</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAclinksRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
@@ -65,6 +60,11 @@ public class EhAclinks extends org.jooq.impl.TableImpl<com.everhomes.server.sche
 	 * The column <code>ehcore.eh_aclinks.status</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAclinksRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_aclinks.driver</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAclinksRecord, java.lang.String> DRIVER = createField("driver", org.jooq.impl.SQLDataType.VARCHAR.length(32).nullable(false).defaulted(true), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_aclinks</code> table reference

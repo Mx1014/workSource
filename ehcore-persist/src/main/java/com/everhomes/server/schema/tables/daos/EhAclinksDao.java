@@ -76,13 +76,6 @@ public class EhAclinksDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sch
 	}
 
 	/**
-	 * Fetch records that have <code>driver IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAclinks> fetchByDriver(java.lang.Byte... values) {
-		return fetch(com.everhomes.server.schema.tables.EhAclinks.EH_ACLINKS.DRIVER, values);
-	}
-
-	/**
 	 * Fetch records that have <code>create_time IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAclinks> fetchByCreateTime(java.sql.Timestamp... values) {
@@ -94,5 +87,12 @@ public class EhAclinksDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sch
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAclinks> fetchByStatus(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhAclinks.EH_ACLINKS.STATUS, values);
+	}
+
+	/**
+	 * Fetch records that have <code>driver IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAclinks> fetchByDriver(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAclinks.EH_ACLINKS.DRIVER, values);
 	}
 }

@@ -11,16 +11,16 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAclinks implements java.io.Serializable {
 
-	private static final long serialVersionUID = 130595654;
+	private static final long serialVersionUID = 1002447508;
 
 	private java.lang.Long     id;
 	private java.lang.Long     doorId;
 	private java.lang.String   deviceName;
 	private java.lang.String   manufacturer;
 	private java.lang.String   firwareVer;
-	private java.lang.Byte     driver;
 	private java.sql.Timestamp createTime;
 	private java.lang.Byte     status;
+	private java.lang.String   driver;
 
 	public EhAclinks() {}
 
@@ -30,18 +30,18 @@ public class EhAclinks implements java.io.Serializable {
 		java.lang.String   deviceName,
 		java.lang.String   manufacturer,
 		java.lang.String   firwareVer,
-		java.lang.Byte     driver,
 		java.sql.Timestamp createTime,
-		java.lang.Byte     status
+		java.lang.Byte     status,
+		java.lang.String   driver
 	) {
 		this.id = id;
 		this.doorId = doorId;
 		this.deviceName = deviceName;
 		this.manufacturer = manufacturer;
 		this.firwareVer = firwareVer;
-		this.driver = driver;
 		this.createTime = createTime;
 		this.status = status;
+		this.driver = driver;
 	}
 
 	public java.lang.Long getId() {
@@ -84,14 +84,6 @@ public class EhAclinks implements java.io.Serializable {
 		this.firwareVer = firwareVer;
 	}
 
-	public java.lang.Byte getDriver() {
-		return this.driver;
-	}
-
-	public void setDriver(java.lang.Byte driver) {
-		this.driver = driver;
-	}
-
 	public java.sql.Timestamp getCreateTime() {
 		return this.createTime;
 	}
@@ -106,5 +98,13 @@ public class EhAclinks implements java.io.Serializable {
 
 	public void setStatus(java.lang.Byte status) {
 		this.status = status;
+	}
+
+	public java.lang.String getDriver() {
+		return this.driver;
+	}
+
+	public void setDriver(java.lang.String driver) {
+		this.driver = driver;
 	}
 }
