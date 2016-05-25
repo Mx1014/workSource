@@ -318,6 +318,30 @@ public class DiscoveryDefaultPostSceneHandler implements PostSceneHandler {
 //            }
         }
         
+      //保证整个菜单列表有且只有一个默认的叶子节点 如果上面创建菜单的时候没有指定该默认的叶子节点，则拿第一个叶子节点作为默认节点 by lqs 20160525
+        setDefaultLeafMenu(scopeList);
+        
         return scopeList;
+    }
+    
+    private void setDefaultLeafMenu(List<TopicScopeDTO> sentScopeList) {
+    	TopicScopeDTO firstUndefaultScopeDto = null;
+        boolean hasDefault = false;
+        for(TopicScopeDTO sentScopeDto : sentScopeList) {
+        	if(SelectorBooleanFlag.fromCode(sentScopeDto.getLeafFlag()) == SelectorBooleanFlag.TRUE) {
+        		if(SelectorBooleanFlag.fromCode(sentScopeDto.getDefaultFlag()) == SelectorBooleanFlag.TRUE) {
+        			hasDefault = true;
+        			break;
+        		} else {
+        			if(firstUndefaultScopeDto != null) {
+        				firstUndefaultScopeDto = sentScopeDto;
+        			}
+        		}
+        	}
+        }
+        
+        if(!hasDefault && firstUndefaultScopeDto != null) {
+        	firstUndefaultScopeDto.setDefaultFlag(SelectorBooleanFlag.TRUE.getCode());
+        }
     }
 }

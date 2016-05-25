@@ -14,7 +14,8 @@ import com.everhomes.util.StringHelper;
  * <li>sceneToken: 场景token</li>
  * <li>forumId: 论坛ID</li>
  * <li>targetTag: 帖子接收者标签，该标签仍然需要客户端填写，参考{@link com.everhomes.rest.forum.PostEntityTag}</li>
- * <li>leafFlag: 是否叶子节点，非叶子节点则可折叠，{@link com.everhomes.rest.ui.forum.SelecterBooleanFlag}</li>
+ * <li>leafFlag: 是否叶子节点，非叶子节点则可折叠，{@link com.everhomes.rest.ui.forum.SelectorBooleanFlag}</li>
+ * <li>defaultFlag: 默认触发该过滤器，{@link com.everhomes.rest.ui.forum.SelectorBooleanFlag}</li>
  * </ul>
  */
 public class TopicScopeDTO {
@@ -28,6 +29,7 @@ public class TopicScopeDTO {
     private Long forumId;
     private String targetTag;
     private Byte leafFlag;
+    private Byte defaultFlag;
 
     public Long getId() {
         return id;
@@ -109,7 +111,15 @@ public class TopicScopeDTO {
         this.leafFlag = leafFlag;
     }
 
-    @Override
+    public Byte getDefaultFlag() {
+		return defaultFlag;
+	}
+
+	public void setDefaultFlag(Byte defaultFlag) {
+		this.defaultFlag = defaultFlag;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
