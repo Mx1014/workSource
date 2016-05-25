@@ -1,21 +1,17 @@
 //
-// EvhUpdateContactorCommand.h
+// EvhDeleteDoorAccessById.h
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhUpdateContactorCommand
+// EvhDeleteDoorAccessById
 //
-@interface EvhUpdateContactorCommand
+@interface EvhDeleteDoorAccessById
     : NSObject<EvhJsonSerializable>
 
 
-@property(nonatomic, copy) NSString* contactorName;
-
-@property(nonatomic, copy) NSString* contactor;
-
-@property(nonatomic, copy) NSNumber* enterpriseId;
+@property(nonatomic, copy) NSNumber* doorAccessId;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

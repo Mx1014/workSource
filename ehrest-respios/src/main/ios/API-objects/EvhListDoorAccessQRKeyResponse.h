@@ -1,21 +1,19 @@
 //
-// EvhUpdateContactorCommand.h
+// EvhListDoorAccessQRKeyResponse.h
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
+#import "EvhDoorAccessQRKeyDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhUpdateContactorCommand
+// EvhListDoorAccessQRKeyResponse
 //
-@interface EvhUpdateContactorCommand
+@interface EvhListDoorAccessQRKeyResponse
     : NSObject<EvhJsonSerializable>
 
 
-@property(nonatomic, copy) NSString* contactorName;
-
-@property(nonatomic, copy) NSString* contactor;
-
-@property(nonatomic, copy) NSNumber* enterpriseId;
+// item type EvhDoorAccessQRKeyDTO*
+@property(nonatomic, strong) NSMutableArray* keys;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
