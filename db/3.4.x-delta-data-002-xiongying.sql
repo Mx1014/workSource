@@ -1,3 +1,5 @@
+delete from eh_launch_pad_items where id = 802;
+delete from eh_launch_pad_items where id = 10303;
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
 VALUES ('802', '1000000', '0', '0', '0', '/home', 'GovAgencies', 'SERVICE_HOT_LINE', '园区热线', 'cs://1/image/aW1hZ2UvTVRwaE56VTFNR0k1TlRJd016aGlOekJtT0RoaE9HVTNPVGRoTnpsbVpXRXpOUQ', '1', '1', '45', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
