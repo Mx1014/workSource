@@ -318,7 +318,7 @@ public class DiscoveryDefaultPostSceneHandler implements PostSceneHandler {
 //            }
         }
         
-      //保证整个菜单列表有且只有一个默认的叶子节点 如果上面创建菜单的时候没有指定该默认的叶子节点，则拿第一个叶子节点作为默认节点 by lqs 20160525
+        //保证整个菜单列表有且只有一个默认的叶子节点 如果上面创建菜单的时候没有指定该默认的叶子节点，则拿第一个叶子节点作为默认节点 by lqs 20160525
         setDefaultLeafMenu(scopeList);
         
         return scopeList;
