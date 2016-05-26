@@ -1367,8 +1367,13 @@ public class VideoConfProviderImpl implements VideoConfProvider {
 	@Override
 	public List<ConfAccounts> listOccupiedConfAccounts(Timestamp assignedTime) {
 		List<ConfAccounts> accounts = new ArrayList<ConfAccounts>();
-		CrossShardListingLocator locator=new CrossShardListingLocator();
-        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readWriteWith(EhConfAccounts.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+		this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (DSLContext context, Object reducingContext) -> {
             SelectQuery<EhConfAccountsRecord> query = context.selectQuery(Tables.EH_CONF_ACCOUNTS);
             query.addConditions(Tables.EH_CONF_ACCOUNTS.ASSIGNED_FLAG.eq((byte) 1));
             query.addConditions(Tables.EH_CONF_ACCOUNTS.ASSIGNED_TIME.le(assignedTime));
