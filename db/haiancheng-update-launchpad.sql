@@ -92,9 +92,9 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 VALUES ('10383', '999993', '0', '0', '0', '/home', 'Coupons', '左邻小站', '左邻小站', 'cs://1/image/aW1hZ2UvTVRwak5qRmpPVGd3WkdVeE5EZGlOalV4TXpKa05EaG1NVE00T1dJNU9HTTJPQQ', '5', '1', '14', '{\"url\":\"http://m.ubive.com/index.php"}', '2', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin');
 
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-VALUES ('10384', '999993', '0', '0', '0', '/home', 'Bizs', '更多', '更多', 'cs://1/image/aW1hZ2UvTVRvNE1XRTNZVEUxT0RGaE1EQmpZakF6TmprNE1EZ3paR1k0TVRVMFptUTJZdw', '1', '1', '1', '{\"itemLocation\":\"/home\", \"itemGroup\":\"Bizs\"}', '30', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist');
+VALUES ('10391', '999993', '0', '0', '0', '/home', 'Bizs', '更多', '更多', 'cs://1/image/aW1hZ2UvTVRvNE1XRTNZVEUxT0RGaE1EQmpZakF6TmprNE1EZ3paR1k0TVRVMFptUTJZdw', '1', '1', '1', '{\"itemLocation\":\"/home\", \"itemGroup\":\"Bizs\"}', '30', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-VALUES ('10385', '999993', '0', '0', '0', '/home', 'Bizs', '更多', '更多', 'cs://1/image/aW1hZ2UvTVRvNE1XRTNZVEUxT0RGaE1EQmpZakF6TmprNE1EZ3paR1k0TVRVMFptUTJZdw', '1', '1', '1', '{\"itemLocation\":\"/home\", \"itemGroup\":\"Bizs\"}', '30', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin');
+VALUES ('10392', '999993', '0', '0', '0', '/home', 'Bizs', '更多', '更多', 'cs://1/image/aW1hZ2UvTVRvNE1XRTNZVEUxT0RGaE1EQmpZakF6TmprNE1EZ3paR1k0TVRVMFptUTJZdw', '1', '1', '1', '{\"itemLocation\":\"/home\", \"itemGroup\":\"Bizs\"}', '30', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin');
 
 
 
