@@ -42,6 +42,6 @@ VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),714,43502,'设置
 
 
 #
-#
+#20160526
 #
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'organization', '10101', 'zh_CN', '要审核的人员已经退出了公司！');
