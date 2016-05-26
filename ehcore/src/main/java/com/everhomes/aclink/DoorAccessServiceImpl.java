@@ -1250,7 +1250,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         extra.setStoreyAuthList(storeyAuthList);
         
         List<String> sdkKeys = new ArrayList<String>();
-        sdkKeys.add("179C536BB35CA90A58FFB0EF217386255E8E5F59CDD0F63B9EFE5F07B2FE5C684ACCE014947CE5CCE0212EB05C8DB3778433");
+        sdkKeys.add("1B70F6FCB1080D2C91B81DFEAFD0B43D26F9F8D70AA08B095B995D55FDEB520223F8642771A5E123EA10C9B8122B77474489");
+        sdkKeys.add("CA30CFF4A0C4C46A9AC3DEE75733269C3D1137C00D7301D8BDC12F02D40EA77D16F59B94D86FCA7DC71FBFE48DC7B87B4752");
         extra.setKeys(sdkKeys);
         
         qr.setExtra(StringHelper.toJsonString(extra));

@@ -1,14 +1,23 @@
 package com.everhomes.aclink;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.aclink.lingling.AclinkLinglingConstant;
+import com.everhomes.aclink.lingling.AclinkLinglingDevice;
+import com.everhomes.aclink.lingling.AclinkLinglingMakeSdkKey;
+import com.everhomes.aclink.lingling.AclinkLinglingService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -50,6 +59,9 @@ public class AclinkController extends ControllerBase {
     
     @Autowired
     private DoorAccessProvider doorAccessProvider;
+    
+    @Autowired
+    private AclinkLinglingService aclinkLinglingService;
     
     /**
      * <b>URL: /aclink/activing</b>
@@ -293,7 +305,16 @@ public class AclinkController extends ControllerBase {
     @RequestMapping("getDoorAccessCapapilityCommand")
     @RestReturn(value=DoorAccessCapapilityDTO.class)
     public RestResponse getDoorAccessCapapility(@Valid GetDoorAccessCapapilityCommand cmd) {
-        RestResponse response = new RestResponse(); 
+        RestResponse response = new RestResponse();
+      
+//        AclinkLinglingMakeSdkKey sdkKey = new AclinkLinglingMakeSdkKey();
+//        sdkKey.setDeviceIds(new ArrayList<Long>(){{add(1008l);}});
+//        aclinkLinglingService.makeSdkKey(sdkKey);
+        
+        AclinkLinglingDevice device = new AclinkLinglingDevice();
+        device.setDeviceCode("920F41B7F74A0");
+        device.setDeviceName("test");
+        aclinkLinglingService.createDevice(device);
         
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
