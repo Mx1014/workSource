@@ -5439,16 +5439,16 @@ public class OrganizationServiceImpl implements OrganizationService {
         
         includeList.add(member.getTargetId());
 		sendEnterpriseNotification(org.getId(), includeList, null, notifyTextForApplicant, null, null);
+		
+		
+		//同意加入公司通知客户端  by sfyan 20160526
+		sendEnterpriseNotification(org.getId(), includeList, null, notifyTextForApplicant, MetaObjectType.ENTERPRISE_AGREE_TO_JOIN, metaObject);
 
 		// send notification to all the other members in the group
 		notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_USER_SUCCESS_OTHER);
 		includeList = this.includeOrgList(org, member.getTargetId());
 		sendEnterpriseNotification(org.getId(), includeList, null, notifyTextForApplicant, null, null);
 		
-		//通知客户端通讯录有变化  by sfyan 20160524
-		includeList = this.includeOrgList(org, member.getTargetId());
-		includeList.add(member.getTargetId());
-		sendEnterpriseNotification(org.getId(), includeList, null, notifyTextForApplicant, MetaObjectType.ENTERPRISE_CHANGE_CONTACT, metaObject);
 	}
 	
 	private void sendMessageToUser(Long uid, String content, Map<String, String> meta) {
