@@ -31,6 +31,8 @@
 
 @property(nonatomic, copy) NSNumber* leafFlag;
 
+@property(nonatomic, copy) NSNumber* defaultFlag;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 

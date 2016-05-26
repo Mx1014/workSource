@@ -50,6 +50,8 @@
         [jsonObject setObject: self.targetTag forKey: @"targetTag"];
     if(self.leafFlag)
         [jsonObject setObject: self.leafFlag forKey: @"leafFlag"];
+    if(self.defaultFlag)
+        [jsonObject setObject: self.defaultFlag forKey: @"defaultFlag"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -94,6 +96,10 @@
         self.leafFlag = [jsonObject objectForKey: @"leafFlag"];
         if(self.leafFlag && [self.leafFlag isEqual:[NSNull null]])
             self.leafFlag = nil;
+
+        self.defaultFlag = [jsonObject objectForKey: @"defaultFlag"];
+        if(self.defaultFlag && [self.defaultFlag isEqual:[NSNull null]])
+            self.defaultFlag = nil;
 
         return self;
     }

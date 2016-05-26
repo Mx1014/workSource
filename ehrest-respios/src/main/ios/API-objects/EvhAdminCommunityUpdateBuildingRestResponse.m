@@ -2,7 +2,7 @@
 // EvhAdminCommunityUpdateBuildingRestResponse.m
 //
 #import "EvhAdminCommunityUpdateBuildingRestResponse.h"
-#import "EvhBuildingDTO.h"
+#import "EvhCommunityBuildingDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhAdminCommunityUpdateBuildingRestResponse
@@ -45,7 +45,7 @@
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
         [super fromJson: jsonObject];
         NSMutableDictionary* dic =  (NSMutableDictionary*)[jsonObject objectForKey: @"response"];
-        self.response = [EvhBuildingDTO new];
+        self.response = [EvhCommunityBuildingDTO new];
         self.response = [self.response fromJson: dic];
         return self;
     }
