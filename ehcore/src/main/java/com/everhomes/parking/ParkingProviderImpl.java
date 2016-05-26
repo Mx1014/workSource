@@ -193,7 +193,7 @@ public class ParkingProviderImpl implements ParkingProvider {
         if(userId != null)
         	conditionSb.append(" and e1.REQUESTOR_UID = ").append(userId);
         if (pageAnchor != null && pageAnchor != 0)
-        	conditionSb.append(" and e1.create_time < ").append(new Timestamp(pageAnchor));
+        	conditionSb.append(" and e1.create_time < '").append(new Timestamp(pageAnchor)).append("'");
         if(StringUtils.isNotBlank(ownerType))
         	conditionSb.append(" and e1.OWNER_TYPE = '").append(ownerType).append("'");
         if(ownerId != null)
