@@ -212,8 +212,10 @@ public class PmsyServiceImpl implements PmsyService{
 					mb.getRequests().add(dto);
 					BigDecimal monthlyReceivableAmount = mb.getMonthlyDebtAmount();
 					BigDecimal monthlyDebtAmount = mb.getMonthlyDebtAmount();
-					mb.setMonthlyReceivableAmount(monthlyReceivableAmount.add(receivableAmount));
-					mb.setMonthlyDebtAmount(monthlyDebtAmount.add(debtAmount));
+					monthlyReceivableAmount = monthlyReceivableAmount.add(receivableAmount);
+					monthlyDebtAmount = monthlyDebtAmount.add(debtAmount);
+					mb.setMonthlyReceivableAmount(monthlyReceivableAmount);
+					mb.setMonthlyDebtAmount(monthlyDebtAmount);
 					continue outer;
 				}
 			}
@@ -289,10 +291,13 @@ public class PmsyServiceImpl implements PmsyService{
 			dto.setDebtAmount(debtAmount);
 			
 			requests.add(dto);
-			mb.setMonthlyReceivableAmount(monthlyReceivableAmount.add(receivableAmount));
-			mb.setMonthlyDebtAmount(monthlyDebtAmount.add(debtAmount));
+			monthlyReceivableAmount = monthlyReceivableAmount.add(receivableAmount);
+			monthlyDebtAmount = monthlyDebtAmount.add(debtAmount);
+			
 			mb.setBillDateStr(billDateStr);
 		}
+		mb.setMonthlyReceivableAmount(monthlyReceivableAmount);
+		mb.setMonthlyDebtAmount(monthlyDebtAmount);
 		return mb;
 	}
 	
