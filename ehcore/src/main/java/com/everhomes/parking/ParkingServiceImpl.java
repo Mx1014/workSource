@@ -211,7 +211,7 @@ public class ParkingServiceImpl implements ParkingService {
     		if(list.size() != cmd.getPageSize()){
         		response.setNextPageAnchor(null);
         	}else{
-        		response.setNextPageAnchor(list.get(list.size()-1).getId());
+        		response.setNextPageAnchor(list.get(list.size()-1).getCreateTime().getTime());
         	}
     	}
     	
@@ -300,7 +300,7 @@ public class ParkingServiceImpl implements ParkingService {
     		if(list.size() != cmd.getPageSize()){
         		response.setNextPageAnchor(null);
         	}else{
-        		response.setNextPageAnchor(list.get(list.size()-1).getId());
+        		response.setNextPageAnchor(list.get(list.size()-1).getRechargeTime().getTime());
         	}
     	}
     	
@@ -350,7 +350,7 @@ public class ParkingServiceImpl implements ParkingService {
     		if(pageSize != null && list.size() != pageSize){
         		response.setNextPageAnchor(null);
         	}else{
-        		response.setNextPageAnchor(list.get(list.size()-1).getId());
+        		response.setNextPageAnchor(list.get(list.size()-1).getRechargeTime().getTime());
         	}
     	}
     	
@@ -377,7 +377,7 @@ public class ParkingServiceImpl implements ParkingService {
     		if( pageSize != null && list.size() != pageSize){
         		response.setNextPageAnchor(null);
         	}else{
-        		response.setNextPageAnchor(list.get(list.size()-1).getId());
+        		response.setNextPageAnchor(list.get(list.size()-1).getCreateTime().getTime());
         	}
     	}
     	
