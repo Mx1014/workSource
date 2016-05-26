@@ -415,6 +415,7 @@ public class ParkingServiceImpl implements ParkingService {
 				"parkingCardRequest status is not notified.");
         }
         //设置已领取状态和 领取时间
+        parkingCardRequest.setStatus(ParkingCardRequestStatus.ISSUED.getCode());
         parkingCardRequest.setIssueFlag(ParkingCardIssueFlag.ISSUED.getCode());
         parkingCardRequest.setIssueTime(new Timestamp(System.currentTimeMillis()));
         parkingProvider.updateParkingCardRequest(Collections.singletonList(parkingCardRequest));
