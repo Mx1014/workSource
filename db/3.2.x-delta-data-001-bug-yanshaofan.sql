@@ -37,3 +37,10 @@ SELECT (@address_id := @address_id + 1),`uuid`,`community_id`,`city_id`,`city_na
 INSERT INTO `eh_addresses` (`id`,`uuid`,`community_id`,`city_id`,`city_name`,`area_id`,`area_name`,`zipcode`,`address`,`longitude`,`latitude`,`geohash`,`address_alias`,`building_name`,`building_alias_name`,`apartment_name`,`apartment_floor`,`status`,`operator_uid`,`operate_time`,`creator_uid`,`create_time`,`delete_time`,`integral_tag1`,`integral_tag2`,`integral_tag3`,`integral_tag4`,`integral_tag5`,`string_tag1`,`string_tag2`,`string_tag3`,`string_tag4`,`string_tag5`,`area_size`,`namespace_id`)
 SELECT (@address_id := @address_id + 1),`uuid`,`community_id`,`city_id`,`city_name`,`area_id`,`area_name`,`zipcode`,'金融基地-1-6D2',`longitude`,`latitude`,`geohash`,`address_alias`,`building_name`,`building_alias_name`,'1-6D2',`apartment_floor`,`status`,`operator_uid`,`operate_time`,`creator_uid`,`create_time`,`delete_time`,`integral_tag1`,`integral_tag2`,`integral_tag3`,`integral_tag4`,`integral_tag5`,`string_tag1`,`string_tag2`,`string_tag3`,`string_tag4`,`string_tag5`,`area_size`,`namespace_id`  from `eh_addresses` where id = 239825274387091134;
 
+
+#
+#20160526
+#
+UPDATE `eh_punch_exception_approvals` SET `approval_status` = 0 where `approval_status` IS NULL;
+UPDATE `eh_punch_exception_approvals` SET `morning_approval_status` = 0 where `morning_approval_status` IS NULL;
+UPDATE `eh_punch_exception_approvals` SET `afternoon_approval_status` = 0 where `afternoon_approval_status` IS NULL;
