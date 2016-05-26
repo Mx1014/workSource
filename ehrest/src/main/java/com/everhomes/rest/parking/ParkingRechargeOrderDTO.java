@@ -51,7 +51,7 @@ public class ParkingRechargeOrderDTO {
     private String cardNumber;
     private String rateToken;
     private String rateName;
-    private Integer monthCount;
+    private BigDecimal monthCount;
     private BigDecimal price;
     private Byte status;
     private Byte rechargeStatus;
@@ -189,15 +189,15 @@ public class ParkingRechargeOrderDTO {
         this.rateName = rateName;
     }
 
-    public Integer getMonthCount() {
-        return monthCount;
-    }
+    public BigDecimal getMonthCount() {
+		return monthCount;
+	}
 
-    public void setMonthCount(Integer monthCount) {
-        this.monthCount = monthCount;
-    }
+	public void setMonthCount(BigDecimal monthCount) {
+		this.monthCount = monthCount;
+	}
 
-    public BigDecimal getPrice() {
+	public BigDecimal getPrice() {
         return price;
     }
 

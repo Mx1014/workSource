@@ -181,7 +181,7 @@ public class ParkingProviderImpl implements ParkingProvider {
 	}
     
     @Override
-    public List<ParkingCardRequest> listParkingCardRequests(Long id,String ownerType,Long ownerId
+    public List<ParkingCardRequest> listParkingCardRequests(Long userId,String ownerType,Long ownerId
     		,Long parkingLotId,String plateNumber,String order,Long pageAnchor,Integer pageSize){
     	List<ParkingCardRequest> resultList = null;
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(ParkingCardRequest.class));
@@ -190,8 +190,8 @@ public class ParkingProviderImpl implements ParkingProvider {
         StringBuilder conditionSb = new StringBuilder("");
         sb.append("select case e1.status when  1 then count(*) else 0 end as ranking,e1.* from eh_parking_card_requests e1 left join (select * from eh_parking_card_requests e3 where e3.status =1) e2 on e1.create_time >= e2.create_time ");
         
-        if(id != null)
-        	conditionSb.append(" and e1.REQUESTOR_UID = ").append(id);
+        if(userId != null)
+        	conditionSb.append(" and e1.REQUESTOR_UID = ").append(userId);
         if (pageAnchor != null && pageAnchor != 0)
         	conditionSb.append(" and e1.create_time < ").append(new Timestamp(pageAnchor));
         if(StringUtils.isNotBlank(ownerType))
@@ -239,15 +239,16 @@ public class ParkingProviderImpl implements ParkingProvider {
     }
     
     @Override
-    public List<ParkingCardRequest> listParkingCardRequests(Long id,String ownerType,Long ownerId
-    		,Long parkingLotId,String plateNumber,ParkingCardRequestStatus status,String order,
-    		Long pageAnchor,Integer pageSize){
+    public List<ParkingCardRequest> listParkingCardRequests(Long userId,String ownerType,Long ownerId
+    		,Long parkingLotId,String plateNumber,Byte requestStatus,Byte unRequestStatus,Long pageAnchor,Integer pageSize){
     	List<ParkingCardRequest> resultList = null;
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         SelectQuery<EhParkingCardRequestsRecord> query = context.selectQuery(Tables.EH_PARKING_CARD_REQUESTS);
         
+        if(userId != null)
+        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.REQUESTOR_UID.eq(userId));
         if (pageAnchor != null && pageAnchor != 0)
-			query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.ID.lt(pageAnchor));
+			query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.gt(new Timestamp(pageAnchor)));
         if(StringUtils.isNotBlank(ownerType))
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.OWNER_TYPE.eq(ownerType));
         if(ownerId != null)
@@ -256,10 +257,12 @@ public class ParkingProviderImpl implements ParkingProvider {
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PARKING_LOT_ID.eq(parkingLotId));
         if(StringUtils.isNotBlank(plateNumber))
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PLATE_NUMBER.eq(plateNumber));
-        if(status != null)
-        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.STATUS.eq(status.getCode()));
+        if(requestStatus != null)
+        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.STATUS.eq(requestStatus));
+        if(unRequestStatus != null)
+        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.STATUS.notEqual(unRequestStatus));
 
-        query.addOrderBy(Tables.EH_PARKING_CARD_REQUESTS.ID.desc());
+        query.addOrderBy(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.asc());
         if(pageSize != null)
         	query.addLimit(pageSize);
         

@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
@@ -64,6 +63,7 @@ import com.everhomes.rest.parking.ParkingCardDTO;
 import com.everhomes.rest.parking.ParkingCardIssueFlag;
 import com.everhomes.rest.parking.ParkingCardRequestDTO;
 import com.everhomes.rest.parking.ParkingCardRequestStatus;
+import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.parking.ParkingLotDTO;
 import com.everhomes.rest.parking.ParkingOwnerType;
 import com.everhomes.rest.parking.ParkingRechargeOrderDTO;
@@ -431,8 +431,8 @@ public class ParkingServiceImpl implements ParkingService {
         checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
         
     	List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(null,null, 
-    			null, null, null,ParkingCardRequestStatus.QUEUEING,
-    			"CREATE_TIME asc", null, cmd.getCount())
+    			null, null, null,ParkingCardRequestStatus.QUEUEING.getCode(),
+    			null, null, cmd.getCount())
     			.stream().map(r -> {
     				r.setStatus(ParkingCardRequestStatus.NOTIFIED.getCode());
 					return r;
@@ -529,10 +529,12 @@ public class ParkingServiceImpl implements ParkingService {
     				"plateNumber cannot be null.");
         }
     	if(plateNumber.length() != 7) {
-        	LOGGER.error("plateNumber is Invalid.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"plateNumber is Invalid.");
-        }
+			LOGGER.error("the length of plateNumber is wrong.");
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_LENGTH,
+					localeStringService.getLocalizedString(String.valueOf(ParkingErrorCode.SCOPE), 
+							String.valueOf(ParkingErrorCode.ERROR_PLATE_LENGTH),
+							UserContext.current().getUser().getLocale(),"the length of plateNumber is wrong."));
+		}
     }
     
     @Scheduled(cron="0 0 2 * * ? ")
