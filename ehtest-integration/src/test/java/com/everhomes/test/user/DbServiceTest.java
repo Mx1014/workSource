@@ -47,6 +47,7 @@ public class DbServiceTest extends BaseServerTestCase {
     public void setUp() {
     	String createTablefilePath = "data/tables/20160522_create_tables.sql";
     	long startTime = System.currentTimeMillis();
+    	//dbProvider.truncateAllTables();
         //dbProvider.runClassPathSqlFile(createTablefilePath);
         long endTime = System.currentTimeMillis();
         System.out.println("run create tables sql file, elapse=" + (endTime - startTime));
@@ -58,7 +59,7 @@ public class DbServiceTest extends BaseServerTestCase {
         System.out.println("run truncate tables sql file, elapse=" + (endTime - startTime));
     }
     
-    @Ignore @Test
+    @Test
     public void testGetUserInfo() {
     	ClassPathResource pathResource = new ClassPathResource("config");
     	try {
@@ -74,7 +75,7 @@ public class DbServiceTest extends BaseServerTestCase {
     	//assertNotNull(nsResource);
     }
     
-    @Test
+    @Ignore @Test
     public void testJsonFormate() {
     	DSLContext dslContext = dbProvider.getDslContext();
     	List<EhNamespaceResources> nsResources = new ArrayList<EhNamespaceResources>();
