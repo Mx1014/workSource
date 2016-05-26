@@ -44,3 +44,7 @@ SELECT (@address_id := @address_id + 1),`uuid`,`community_id`,`city_id`,`city_na
 UPDATE `eh_punch_exception_approvals` SET `approval_status` = 0 where `approval_status` IS NULL;
 UPDATE `eh_punch_exception_approvals` SET `morning_approval_status` = 0 where `morning_approval_status` IS NULL;
 UPDATE `eh_punch_exception_approvals` SET `afternoon_approval_status` = 0 where `afternoon_approval_status` IS NULL;
+
+UPDATE `eh_punch_exception_requests` SET `approval_status` = 0 where `approval_status` IS NULL and request_type = 1;
+UPDATE `eh_punch_exception_requests` SET `morning_approval_status` = 0 where `morning_approval_status` IS NULL  and request_type = 1;
+UPDATE `eh_punch_exception_requests` SET `afternoon_approval_status` = 0 where `afternoon_approval_status` IS NULL  and request_type = 1;
