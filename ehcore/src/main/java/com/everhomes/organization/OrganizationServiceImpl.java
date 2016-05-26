@@ -5612,7 +5612,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	        if(member == null) {
 	            LOGGER.error("Enterprise contact not found, operatorUid=" + operatorUid 
 	                + ", enterpriseId=" + enterpriseId + ", targetId=" + targetId + ", tag=" + tag);
-	            throw RuntimeErrorException.errorWith(EnterpriseServiceErrorCode.SCOPE, EnterpriseServiceErrorCode.ERROR_ENTERPRISE_CONTACT_NOT_FOUND, 
+	            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ENTERPRISE_CONTACT_NOT_FOUND, 
 	                    "Unable to find the enterprise contact");
 	        }
 	        
