@@ -1,27 +1,18 @@
 package com.everhomes.test.core;
 
-import com.everhomes.util.GsonJacksonDateAdapter;
-import com.everhomes.util.GsonJacksonTimestampAdapter;
-import com.everhomes.util.ReflectionHelper;
-import com.everhomes.util.StringHelper;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStreamReader;
-import java.lang.reflect.Field;
-import java.sql.Timestamp;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 public class GsonHelper {
 	/**
@@ -36,12 +27,50 @@ public class GsonHelper {
         return gson.toJson(je);
 	}
 	
-	public static void test(String filePath) {
-		try {
-			JsonReader reader = new JsonReader(new InputStreamReader(new FileInputStream(filePath)));
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public static void writeTextFile(String dstFilePath, String str) {
+	    BufferedWriter writer = null;
+	    
+	    try {
+	        writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(dstFilePath), "utf8"));
+	        writer.write(str);
+	    } catch (Exception e) {
+	        throw new IllegalStateException("Failed to write file, filePath=" + dstFilePath, e);
+	    } finally {
+	        if(writer != null) {
+	            try {
+	                writer.close();
+	            } catch(Exception e) {
+	                // Do nothing
+	            }
+	        }
+	    }
 	}
+    
+    public static String readerTextFile(String filePath) {
+        BufferedReader reader = null;
+        
+        StringBuilder strBuilder = new StringBuilder();
+        try {
+            reader = new BufferedReader(new InputStreamReader(new FileInputStream(filePath), "utf8"));
+            String line = null;
+            while((line = reader.readLine()) != null) {
+                line = line.trim();
+                if(line.length() > 0) {
+                    strBuilder.append(line);
+                }
+            }
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to read file, filePath=" + filePath, e);
+        } finally {
+            if(reader != null) {
+                try {
+                    reader.close();
+                } catch(Exception e) {
+                    // Do nothing
+                }
+            }
+        }
+        
+        return strBuilder.toString();
+    }
 }

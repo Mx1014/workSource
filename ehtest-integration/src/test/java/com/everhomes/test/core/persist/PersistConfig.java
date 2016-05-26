@@ -5,6 +5,9 @@ import javax.sql.DataSource;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
+import org.jooq.conf.MappedSchema;
+import org.jooq.conf.RenderMapping;
+import org.jooq.conf.Settings;
 import org.jooq.impl.DataSourceConnectionProvider;
 import org.jooq.impl.DefaultConfiguration;
 import org.jooq.impl.DefaultDSLContext;
@@ -78,6 +81,14 @@ public class PersistConfig {
         String sqlDialectName = env.getRequiredProperty("jooq.sql.dialect");
         SQLDialect dialect = SQLDialect.valueOf(sqlDialectName);
         jooqConfiguration.set(dialect);
+        
+        String dbName = env.getProperty("db.name");
+        String mapptingDbName = env.getProperty("db.mapping_name");
+        if(dbName != null && dbName.trim().length() > 0 && mapptingDbName != null && mapptingDbName.trim().length() > 0)  {
+            RenderMapping mapping = new RenderMapping().withSchemata(new MappedSchema().withInput(dbName).withOutput(mapptingDbName));
+            Settings settings = new Settings().withRenderMapping(mapping);
+            jooqConfiguration.set(settings);
+        }
  
         return jooqConfiguration;
     }
