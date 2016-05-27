@@ -2,7 +2,7 @@
 #保存一个公司的一个场所图标的默认设置
 #
 #
-DROP TABLE eh_rental_default_rules;
+DROP TABLE IF EXISTS eh_rental_default_rules;
 
 CREATE TABLE `eh_rental_default_rules` (
 `id` BIGINT(20)    COMMENT 'id',
@@ -29,7 +29,7 @@ CREATE TABLE `eh_rental_default_rules` (
 `multi_unit` TINYINT(4)    COMMENT '是否允许预约多个场所 1是 0否',
 `multi_time_interval` TINYINT(4)    COMMENT '是否允许预约多个时段 1是 0否',
 `cancel_flag`   COMMENT '是否允许取消 1是 0否',
-`rental_step` INT(11) NULL  COMMENT 'how many time_step must be rental every time',
+`rental_step` INT(11)    COMMENT 'how many time_step must be rental every time',
 `need_pay` TINYINT(4)    COMMENT '是否需要支付 1是 0否',
 `launch_pad_item_id` BIGINT(20)    COMMENT '广场图标id',
   PRIMARY KEY (`id`)
@@ -39,7 +39,7 @@ CREATE TABLE `eh_rental_default_rules` (
 #
 #对于按小时预定的场所默认设置，保存时间段
 #
-DROP TABLE eh_rental_time_interval;
+DROP TABLE IF EXISTS eh_rental_time_interval;
 
 CREATE TABLE `eh_rental_time_interval` (
 `id` BIGINT(20)    COMMENT '',
@@ -54,7 +54,7 @@ CREATE TABLE `eh_rental_time_interval` (
 #
 #保存默认设置的关闭时间
 #
-DROP TABLE eh_rental_close_dates;
+DROP TABLE IF EXISTS eh_rental_close_dates;
 
 CREATE TABLE `eh_rental_close_dates` (
 `id` BIGINT(20)    COMMENT '',
@@ -68,7 +68,7 @@ CREATE TABLE `eh_rental_close_dates` (
 #
 #保存场所详情图片
 #
-DROP TABLE eh_rental_site_pics;
+DROP TABLE IF EXISTS eh_rental_site_pics;
 
 CREATE TABLE `eh_rental_site_pics` (
 `id` BIGINT(20)    COMMENT '',
@@ -82,7 +82,7 @@ CREATE TABLE `eh_rental_site_pics` (
 #
 #保存场所附件设置
 #
-DROP TABLE eh_rental_config_attachments;
+DROP TABLE IF EXISTS eh_rental_config_attachments;
 
 CREATE TABLE `eh_rental_config_attachments` (
 `id` BIGINT(20)    COMMENT '',
@@ -122,22 +122,22 @@ ADD `exclusive_flag` TINYINT(4)    COMMENT '是否为独占资源0否 1 是',
 ADD `auto_assign` TINYINT(4)    COMMENT '是否动态分配 1是 0否',
 ADD `multi_unit` TINYINT(4)    COMMENT '是否允许预约多个场所 1是 0否',
 ADD `multi_time_interval` TINYINT(4)    COMMENT '是否允许预约多个时段 1是 0否',
-ADD `cancel_flag`   COMMENT '是否允许取消 1是 0否',
-ADD `launch_pad_item_id` BIGINT(20)    COMMENT '广场图标id';
+ADD `cancel_flag` TINYINT(4)   COMMENT '是否允许取消 1是 0否',
+ADD `launch_pad_item_id` BIGINT(20)   COMMENT '广场图标id';
 
 #
 #商品增加排序字段和图片
 #
 
-ALTER TABLE  eh_rental_site_items ADD `default_order` INT(11) NULL  COMMENT '排序字段',
-ADD `img_uri` VARCHAR(1024) NULL  COMMENT '图片uri';
+ALTER TABLE  eh_rental_site_items ADD `default_order` INT(11)    COMMENT '排序字段',
+ADD `img_uri` VARCHAR(1024)    COMMENT '图片uri';
 
 #
 #资源订单增加必要信息(脱离对场所的依赖)
 #
-ALTER TABLE  eh_rental_bills ADD `site_name` VARCHAR(255) NULL  COMMENT '名称',
-ADD `use_time` VARCHAR(255) NULL  COMMENT '使用时间',
-ADD `vendor_type` VARCHAR(255) NULL  COMMENT '支付方式,10001-支付宝，10002-微信',
+ALTER TABLE  eh_rental_bills ADD `site_name` VARCHAR(255)    COMMENT '名称',
+ADD `use_time` VARCHAR(255)    COMMENT '使用时间',
+ADD `vendor_type` VARCHAR(255)    COMMENT '支付方式,10001-支付宝，10002-微信',
 ADD `launch_pad_item_id` BIGINT(20)    COMMENT '广场图标id';
 
 #
@@ -158,5 +158,5 @@ ALTER TABLE  eh_rental_items_bills ADD `launch_pad_item_id` BIGINT(20)    COMMEN
 #
 #订单支付关联表增加支付方式
 #
-ALTER TABLE eh_rental_bill_paybill_map ADD `vendor_type` VARCHAR(255) NULL  COMMENT '支付方式,10001-支付宝，10002-微信',
+ALTER TABLE eh_rental_bill_paybill_map ADD `vendor_type` VARCHAR(255)    COMMENT '支付方式,10001-支付宝，10002-微信',
 
