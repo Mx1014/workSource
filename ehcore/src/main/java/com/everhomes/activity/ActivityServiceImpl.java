@@ -442,7 +442,7 @@ public class ActivityServiceImpl implements ActivityService {
                         + (roster.getAdultCount() + roster.getChildCount()));
                 roster.setCheckinFlag((byte)1);
                 forumProvider.createPost(p);
-                
+                LOGGER.debug("post p={}.roster={}", p, roster);
         	}
             
             return status;
