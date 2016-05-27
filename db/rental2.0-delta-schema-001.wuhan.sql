@@ -28,7 +28,7 @@ CREATE TABLE `eh_rental_default_rules` (
 `auto_assign` TINYINT(4)    COMMENT '是否动态分配 1是 0否',
 `multi_unit` TINYINT(4)    COMMENT '是否允许预约多个场所 1是 0否',
 `multi_time_interval` TINYINT(4)    COMMENT '是否允许预约多个时段 1是 0否',
-`cancel_flag`   COMMENT '是否允许取消 1是 0否',
+`cancel_flag`  TINYINT(4)  COMMENT '是否允许取消 1是 0否',
 `rental_step` INT(11)    COMMENT 'how many time_step must be rental every time',
 `need_pay` TINYINT(4)    COMMENT '是否需要支付 1是 0否',
 `launch_pad_item_id` BIGINT(20)    COMMENT '广场图标id',
