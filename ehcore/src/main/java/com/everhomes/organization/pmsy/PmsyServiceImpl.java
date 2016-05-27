@@ -123,6 +123,8 @@ public class PmsyServiceImpl implements PmsyService{
 		Long payerId = pmsyPayer.getId();
 		Gson gson = new Gson();
 		Map map = gson.fromJson(json, Map.class);
+		if(map.containsKey("_ERROR"))
+			return resultList;
 		List list = (List) map.get("UserRev_OwnerVerify");
 		Map map2 = (Map) list.get(0);
 		List list2 = (List) map2.get("Syswin");
