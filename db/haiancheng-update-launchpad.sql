@@ -1,3 +1,6 @@
+update `eh_communities` set `name` = '海岸大厦西座' where id = 240111044331050812;
+update `eh_communities` set `alias_name` = '海岸大厦西座' where id = 240111044331050812;
+
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
 VALUES ('1760', '999993', '0', '0', '0', '/home', 'GovAgencies', 'NOTICE', '物业通知', 'cs://1/image/aW1hZ2UvTVRvMFpEazRNREkzTmpnMk5UVmhPR1F6TXpjMFptUTNOalJqWm1ObVpHUTBZUQ', '1', '1', '15', '{\"contentCategory\":1003,\"actionCategory\":0,\"forumId\":179511,\"embedAppId\":27} ', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
