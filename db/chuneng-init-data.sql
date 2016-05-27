@@ -11,7 +11,7 @@ INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `ide
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
 	VALUES(180000, UUID(), 999990, 2, 'EhGroups', 0,'储能大厦论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
-	VALUES(180001, UUID(), 999990, 2, 'EhGroups', 0,'储能大厦意见反馈论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
+	VALUES(180002, UUID(), 999990, 2, 'EhGroups', 0,'储能大厦意见反馈论坛','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP()); 
 
 
 INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_prefix`, `path`, `level`, `scope_code`, `iso_code`, `tel_code`, `status`, `hot_flag`, `namespace_id`) 
@@ -23,7 +23,7 @@ INSERT INTO `eh_regions` (`id`, `parent_id`, `name`, `pinyin_name`, `pinyin_pref
 
 	
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
-	VALUES( 240111044331051400, UUID(), 14964, '深圳市',  14965, '南山区', '中国储能大厦', '中国储能大厦', '南山深南大道与科苑路交汇处', NULL, '中国储能大厦，屹立于深圳主干道深南大道，依托高新园总部经济优势，集萃国际商务视野的顶级规划，打造时代前沿的商务平台，树立科技CBD商务新标准，开创总部商务新格局。中国储能大厦四维一体交通网络，最有效地利用通达交通资源。', NULL, NULL, NULL, NULL, NULL, NULL,NULL, 259, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'1', 180000, 180001, UTC_TIMESTAMP(), 999990);
+	VALUES( 240111044331051400, UUID(), 14964, '深圳市',  14965, '南山区', '中国储能大厦', '中国储能大厦', '南山深南大道与科苑路交汇处', NULL, '中国储能大厦，屹立于深圳主干道深南大道，依托高新园总部经济优势，集萃国际商务视野的顶级规划，打造时代前沿的商务平台，树立科技CBD商务新标准，开创总部商务新格局。中国储能大厦四维一体交通网络，最有效地利用通达交通资源。', NULL, NULL, NULL, NULL, NULL, NULL,NULL, 259, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'1', 180000, 180002, UTC_TIMESTAMP(), 999990);
 INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
 	VALUES(240111044331048000, 240111044331051400, '', 113.94470215, 22.53833867, 'ws100yup24b5');
 INSERT INTO `eh_organization_communities`(organization_id, community_id) 
