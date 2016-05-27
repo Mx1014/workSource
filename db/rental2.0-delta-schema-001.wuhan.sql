@@ -158,5 +158,5 @@ ALTER TABLE  eh_rental_items_bills ADD `launch_pad_item_id` BIGINT(20)    COMMEN
 #
 #订单支付关联表增加支付方式
 #
-ALTER TABLE eh_rental_bill_paybill_map ADD `vendor_type` VARCHAR(255)    COMMENT '支付方式,10001-支付宝，10002-微信',
+ALTER TABLE eh_rental_bill_paybill_map ADD `vendor_type` VARCHAR(255)    COMMENT '支付方式,10001-支付宝，10002-微信';
 
