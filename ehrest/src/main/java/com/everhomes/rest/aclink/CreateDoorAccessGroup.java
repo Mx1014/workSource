@@ -25,6 +25,8 @@ public class CreateDoorAccessGroup {
     @NotNull
     String name;
     
+    String   avatar;
+    
     String description;
     
     String address;
@@ -69,6 +71,14 @@ public class CreateDoorAccessGroup {
         this.address = address;
     }
     
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

@@ -30,6 +30,8 @@ public class CreateDoorAccessLingLing {
     @NotNull
     String hardwareId;
     
+    Long existsId;
+    
     Long doorGroupId;
     
     String description;
@@ -92,6 +94,14 @@ public class CreateDoorAccessLingLing {
         this.address = address;
     }
     
+    public Long getExistsId() {
+        return existsId;
+    }
+
+    public void setExistsId(Long existsId) {
+        this.existsId = existsId;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);

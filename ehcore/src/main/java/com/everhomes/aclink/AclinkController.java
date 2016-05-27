@@ -302,7 +302,7 @@ public class AclinkController extends ControllerBase {
      * <p>创建 Lingling 门禁设备 </p>
      * @return
      */
-    @RequestMapping("getDoorAccessCapapilityCommand")
+    @RequestMapping("getDoorAccessCapapility")
     @RestReturn(value=DoorAccessCapapilityDTO.class)
     public RestResponse getDoorAccessCapapility(@Valid GetDoorAccessCapapilityCommand cmd) {
         RestResponse response = new RestResponse();
@@ -311,10 +311,12 @@ public class AclinkController extends ControllerBase {
 //        sdkKey.setDeviceIds(new ArrayList<Long>(){{add(1008l);}});
 //        aclinkLinglingService.makeSdkKey(sdkKey);
         
-        AclinkLinglingDevice device = new AclinkLinglingDevice();
-        device.setDeviceCode("920F41B7F74A0");
-        device.setDeviceName("test");
-        aclinkLinglingService.createDevice(device);
+//        AclinkLinglingDevice device = new AclinkLinglingDevice();
+//        device.setDeviceCode("920F41B7F75C0");
+//        device.setDeviceName("test");
+//        aclinkLinglingService.createDevice(device);
+        
+        response.setResponseObject(doorAccessService.getDoorAccessCapapility(cmd));
         
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

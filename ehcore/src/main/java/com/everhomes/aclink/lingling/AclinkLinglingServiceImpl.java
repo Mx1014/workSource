@@ -146,9 +146,25 @@ public class AclinkLinglingServiceImpl implements AclinkLinglingService {
         
         HashMap resp = (HashMap)StringHelper.fromJsonString(body, HashMap.class);
         Object o = resp.get("responseResult");
-        //{deviceId=1012.0}
-        System.out.println(o);
+        if(o.toString().indexOf("{") == -1) {
+            LOGGER.error("create device=" + device + ", result=" + o.toString());
+            return null;
+        }
         
-        return 0l;
+        //{deviceId=1012.0}
+        Map result = (Map)o;
+        Double devId = (Double)result.get("deviceId");
+        
+        return devId.longValue();
+    }
+    
+    @Override
+    public void updateDevice(AclinkLinglingDevice device) {
+        this.restCall(AclinkLinglingConstant.UPDATE_DEVICE, device);
+    }
+    
+    @Override
+    public void deleteDevice(AclinkLinglingDevice device) {
+        this.restCall(AclinkLinglingConstant.DEL_DEVICE, device);
     }
 }

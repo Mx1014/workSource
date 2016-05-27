@@ -122,7 +122,7 @@ public class AclinkAdminController extends ControllerBase {
     /**
      * 
      * <b>URL: /admin/aclink/deleteDoorAccess</b>
-     * <p>删除门禁</p>
+     * <p>删除一个组或者单独一个门禁设备</p>
      * @return
      */
     @RequestMapping("deleteDoorAccess")
@@ -216,22 +216,6 @@ public class AclinkAdminController extends ControllerBase {
     @RequestMapping("createDoorAccessGroup")
     @RestReturn(value=DoorAccessDTO.class)
     public RestResponse createDoorAccessGroup(@Valid CreateDoorAccessGroup cmd) {
-        RestResponse response = new RestResponse();
-        
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
-    /**
-     * 
-     * <b>URL: /admin/aclink/deleteDoorAccessById</b>
-     * <p>删除一个组或者单独一个门禁设备</p>
-     * @return
-     */
-    @RequestMapping("deleteDoorAccessById")
-    @RestReturn(value=DoorAccessDTO.class)
-    public RestResponse deleteDoorAccessById(@Valid DeleteDoorAccessById cmd) {
         RestResponse response = new RestResponse();
         
         response.setErrorCode(ErrorCodes.SUCCESS);
