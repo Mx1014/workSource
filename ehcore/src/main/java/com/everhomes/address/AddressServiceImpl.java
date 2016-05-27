@@ -300,8 +300,15 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                 .and(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()))
                 .fetch().map((r) -> {
+                
                 CommunityDTO community = ConvertHelper.convert(r, CommunityDTO.class);
-                results.add(community);
+                if(null == cmd.getCommunityType()){
+                	results.add(community);
+                }else{
+                	if(cmd.getCommunityType().equals(community.getCommunityType())){
+                    	results.add(community);
+                    }
+                }
                 
                 return null;
             });
@@ -657,6 +664,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             
             familyDTO.setAreaId(community.getAreaId());
             familyDTO.setAreaName(community.getAreaName());
+            familyDTO.setCommunityType(community.getCommunityType());
         }
         familyDTO.setMembershipStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
         if(address != null){

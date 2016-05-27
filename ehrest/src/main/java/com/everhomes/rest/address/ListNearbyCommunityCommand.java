@@ -13,12 +13,15 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class ListNearbyCommunityCommand {
-    Long cityId;
-    Double longitude;
-    Double latigtue;
+    private Long cityId;
+    private Double longitude;
+    private Double latigtue;
+    
     
     // start from 1, page size is configurable at server side
-    Long pageOffset;
+    private Long pageOffset;
+    
+    private Byte communityType;
     
     public ListNearbyCommunityCommand() {
     }
@@ -46,16 +49,24 @@ public class ListNearbyCommunityCommand {
     public void setLatigtue(Double latigtue) {
         this.latigtue = latigtue;
     }
-
-    public Long getPageOffset() {
-        return pageOffset;
-    }
-
-    public void setOffset(Long pageOffset) {
-        this.pageOffset = pageOffset;
-    }
     
-    @Override
+    public Byte getCommunityType() {
+		return communityType;
+	}
+
+	public void setCommunityType(Byte communityType) {
+		this.communityType = communityType;
+	}
+
+	public void setPageOffset(Long pageOffset) {
+		this.pageOffset = pageOffset;
+	}
+
+	public Long getPageOffset() {
+		return pageOffset;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
