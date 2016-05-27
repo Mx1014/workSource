@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
@@ -63,5 +64,8 @@ public class PmsyBillsDTO implements Comparable<PmsyBillsDTO>{
         	return this.billDateStr.longValue() == ((PmsyBillsDTO)obj).billDateStr.longValue();
         return false;
     }
-	
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

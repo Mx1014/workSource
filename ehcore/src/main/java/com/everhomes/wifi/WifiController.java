@@ -1,10 +1,6 @@
 // @formatter:off
 package com.everhomes.wifi;
 
-
-
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +33,7 @@ public class WifiController extends ControllerBase {
 	 * <p>获取wifi列表</p>
 	 */
 	@RequestMapping("listWifiSetting")
-	@RestReturn(value=ListWifiSettingResponse.class,collection=true)
+	@RestReturn(value=ListWifiSettingResponse.class)
 	public RestResponse listWifiSetting(ListWifiSettingCommand cmd) {
 		ListWifiSettingResponse resp = wifiService.listWifiSetting(cmd);
 		RestResponse response = new RestResponse(resp);

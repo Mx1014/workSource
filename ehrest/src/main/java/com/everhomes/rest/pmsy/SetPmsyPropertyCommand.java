@@ -2,6 +2,8 @@ package com.everhomes.rest.pmsy;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.util.StringHelper;
+
 /**
  *<ul>
  * <li>communityId : 小区ID（左邻）</li>
@@ -38,6 +40,9 @@ public class SetPmsyPropertyCommand {
 	public void setContact(String contact) {
 		this.contact = contact;
 	}
-	
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 	
 }

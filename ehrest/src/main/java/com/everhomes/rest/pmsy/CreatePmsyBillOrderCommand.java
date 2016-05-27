@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 /**
  *<ul>
@@ -82,5 +83,8 @@ public class CreatePmsyBillOrderCommand {
 		this.resourceId = resourceId;
 	}
 	
-	
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

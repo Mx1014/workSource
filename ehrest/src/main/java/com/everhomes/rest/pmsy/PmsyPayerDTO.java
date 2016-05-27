@@ -1,5 +1,7 @@
 package com.everhomes.rest.pmsy;
 
+import com.everhomes.util.StringHelper;
+
 /**
  *<ul>
  * <li>id : 物业缴费用户的ID(存在左邻这边的用户ID)</li>
@@ -32,5 +34,8 @@ public class PmsyPayerDTO {
 	public void setId(java.lang.Long id) {
 		this.id = id;
 	}
-	
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }
