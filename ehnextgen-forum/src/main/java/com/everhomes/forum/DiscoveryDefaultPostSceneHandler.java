@@ -246,6 +246,7 @@ public class DiscoveryDefaultPostSceneHandler implements PostSceneHandler {
             menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
             sentScopeDto.setName(menuName);
             sentScopeDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
+            sentScopeDto.setDefaultFlag(SelectorBooleanFlag.TRUE.getCode());
             sentScopeDto.setForumId(community.getDefaultForumId());
             sentScopeDto.setSceneToken(sceneToken);
             sentScopeDto.setTargetTag(PostEntityTag.USER.getCode());

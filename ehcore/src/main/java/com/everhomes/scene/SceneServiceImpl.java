@@ -35,7 +35,7 @@ public class SceneServiceImpl implements SceneService {
         List<SceneTypeInfo> sceneList = sceneProvider.findSceneTypeByName(namespaceId, name);
         if(sceneList != null && sceneList.size() > 0) {
             scene = sceneList.get(0);
-            if(scene != null && scene.getParentId() != null) {
+            if(scene != null && scene.getParentId() != null && scene.getParentId() > 0) {
                 scene = getSceneTypeById(scene.getParentId());
             }
         }
