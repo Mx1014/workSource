@@ -1,21 +1,19 @@
 //
-// EvhUpdateContactorCommand.h
+// EvhCancelFavoriteBusinessBySceneCommand.h
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhUpdateContactorCommand
+// EvhCancelFavoriteBusinessBySceneCommand
 //
-@interface EvhUpdateContactorCommand
+@interface EvhCancelFavoriteBusinessBySceneCommand
     : NSObject<EvhJsonSerializable>
 
 
-@property(nonatomic, copy) NSString* contactorName;
+@property(nonatomic, copy) NSString* sceneToken;
 
-@property(nonatomic, copy) NSString* contactor;
-
-@property(nonatomic, copy) NSNumber* enterpriseId;
+@property(nonatomic, copy) NSNumber* id;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

@@ -798,6 +798,8 @@
 #define EVH_UI_FORUM_NEWTOPICBYSCENE_URL @"/ui/forum/newTopicByScene"
 #define EVH_UI_FORUM_SEARCHBYSCENE_URL @"/ui/forum/searchByScene"
 #define EVH_UI_GROUP_LISTNEARBYGROUPSBYSCENE_URL @"/ui/group/listNearbyGroupsByScene"
+#define EVH_UI_LAUNCHPAD_CANCELFAVORITEBUSINESSBYSCENE_URL @"/ui/launchpad/cancelFavoriteBusinessByScene"
+#define EVH_UI_LAUNCHPAD_FAVORITEBUSINESSESBYSCENE_URL @"/ui/launchpad/favoriteBusinessesByScene"
 #define EVH_UI_LAUNCHPAD_GETLASTLAUNCHPADLAYOUTBYSCENE_URL @"/ui/launchpad/getLastLaunchPadLayoutByScene"
 #define EVH_UI_LAUNCHPAD_GETLAUNCHPADITEMSBYSCENE_URL @"/ui/launchpad/getLaunchPadItemsByScene"
 #define EVH_UI_ORG_ACCEPTTASK_URL @"/ui/org/acceptTask"
