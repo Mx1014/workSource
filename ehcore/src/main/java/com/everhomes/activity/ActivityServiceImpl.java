@@ -426,6 +426,7 @@ public class ActivityServiceImpl implements ActivityService {
         }
         
         ActivityRoster acroster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId());
+        
         dbProvider.execute(status->{
         	if(activity.getConfirmFlag() == null || activity.getConfirmFlag() == ConfirmStatus.UN_CONFIRMED.getCode() 
         			|| (activity.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode() && acroster.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode().longValue())){
