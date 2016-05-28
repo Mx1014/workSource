@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-05-28 11:59:28
+// generated at 2016-05-28 15:21:56
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -801,6 +801,8 @@ public interface ApiConstants {
     public static final String UI_FORUM_NEWTOPICBYSCENE_URL = "/ui/forum/newTopicByScene";
     public static final String UI_FORUM_SEARCHBYSCENE_URL = "/ui/forum/searchByScene";
     public static final String UI_GROUP_LISTNEARBYGROUPSBYSCENE_URL = "/ui/group/listNearbyGroupsByScene";
+    public static final String UI_LAUNCHPAD_CANCELFAVORITEBUSINESSBYSCENE_URL = "/ui/launchpad/cancelFavoriteBusinessByScene";
+    public static final String UI_LAUNCHPAD_FAVORITEBUSINESSESBYSCENE_URL = "/ui/launchpad/favoriteBusinessesByScene";
     public static final String UI_LAUNCHPAD_GETLASTLAUNCHPADLAYOUTBYSCENE_URL = "/ui/launchpad/getLastLaunchPadLayoutByScene";
     public static final String UI_LAUNCHPAD_GETLAUNCHPADITEMSBYSCENE_URL = "/ui/launchpad/getLaunchPadItemsByScene";
     public static final String UI_ORG_ACCEPTTASK_URL = "/ui/org/acceptTask";
