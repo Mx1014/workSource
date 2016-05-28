@@ -78,6 +78,8 @@ import com.everhomes.rest.organization.GetOrgDetailCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.pm.ListPropCommunityContactCommand;
 import com.everhomes.rest.organization.pm.PropCommunityContactDTO;
+import com.everhomes.rest.ui.launchpad.CancelFavoriteBusinessBySceneCommand;
+import com.everhomes.rest.ui.launchpad.FavoriteBusinessesBySceneCommand;
 import com.everhomes.rest.ui.launchpad.GetLaunchPadItemsBySceneCommand;
 import com.everhomes.rest.ui.launchpad.GetLaunchPadLayoutBySceneCommand;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
@@ -1302,6 +1304,19 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"propterty id paramter can not be null or empty.");
 		}
+	}
+
+	@Override
+	public void favoriteBusinessesByScene(FavoriteBusinessesBySceneCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void cancelFavoriteBusinessByScene(
+			CancelFavoriteBusinessBySceneCommand cmd) {
+		// TODO Auto-generated method stub
+		
 	}
 
 
