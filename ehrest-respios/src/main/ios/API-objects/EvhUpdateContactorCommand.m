@@ -30,28 +30,40 @@
 
 -(void) toJson: (NSMutableDictionary*) jsonObject 
 {
-    if(self.contactorName)
-        [jsonObject setObject: self.contactorName forKey: @"contactorName"];
-    if(self.contactor)
-        [jsonObject setObject: self.contactor forKey: @"contactor"];
+    if(self.contactName)
+        [jsonObject setObject: self.contactName forKey: @"contactName"];
+    if(self.entryValue)
+        [jsonObject setObject: self.entryValue forKey: @"entryValue"];
     if(self.enterpriseId)
         [jsonObject setObject: self.enterpriseId forKey: @"enterpriseId"];
+    if(self.communityId)
+        [jsonObject setObject: self.communityId forKey: @"communityId"];
+    if(self.namespaceId)
+        [jsonObject setObject: self.namespaceId forKey: @"namespaceId"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
 {
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
-        self.contactorName = [jsonObject objectForKey: @"contactorName"];
-        if(self.contactorName && [self.contactorName isEqual:[NSNull null]])
-            self.contactorName = nil;
+        self.contactName = [jsonObject objectForKey: @"contactName"];
+        if(self.contactName && [self.contactName isEqual:[NSNull null]])
+            self.contactName = nil;
 
-        self.contactor = [jsonObject objectForKey: @"contactor"];
-        if(self.contactor && [self.contactor isEqual:[NSNull null]])
-            self.contactor = nil;
+        self.entryValue = [jsonObject objectForKey: @"entryValue"];
+        if(self.entryValue && [self.entryValue isEqual:[NSNull null]])
+            self.entryValue = nil;
 
         self.enterpriseId = [jsonObject objectForKey: @"enterpriseId"];
         if(self.enterpriseId && [self.enterpriseId isEqual:[NSNull null]])
             self.enterpriseId = nil;
+
+        self.communityId = [jsonObject objectForKey: @"communityId"];
+        if(self.communityId && [self.communityId isEqual:[NSNull null]])
+            self.communityId = nil;
+
+        self.namespaceId = [jsonObject objectForKey: @"namespaceId"];
+        if(self.namespaceId && [self.namespaceId isEqual:[NSNull null]])
+            self.namespaceId = nil;
 
         return self;
     }

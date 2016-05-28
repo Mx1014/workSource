@@ -23,6 +23,8 @@
 
 @property(nonatomic, copy) NSNumber* namespaceId;
 
+@property(nonatomic, copy) NSNumber* communityType;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 
