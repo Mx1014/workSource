@@ -26,6 +26,7 @@ import org.springframework.transaction.TransactionStatus;
 
 import com.everhomes.business.Business;
 import com.everhomes.business.BusinessProvider;
+import com.everhomes.business.BusinessService;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -40,6 +41,9 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.business.BusinessTargetType;
+import com.everhomes.rest.business.CancelFavoriteBusinessCommand;
+import com.everhomes.rest.business.FavoriteBusinessDTO;
+import com.everhomes.rest.business.FavoriteFlagType;
 import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.PostEntityTag;
@@ -142,6 +146,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	@Autowired
 	private SceneService sceneService;
 
+	@Autowired
+	private BusinessService businessService;
 	@Override
 	public GetLaunchPadItemsCommandResponse getLaunchPadItems(GetLaunchPadItemsCommand cmd, HttpServletRequest request){
 		if(cmd.getItemLocation() == null){
@@ -1308,15 +1314,33 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 	@Override
 	public void favoriteBusinessesByScene(FavoriteBusinessesBySceneCommand cmd) {
-		// TODO Auto-generated method stub
+		User user = UserContext.current().getUser();
+		long userId = user.getId();
+		SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
 		
+		SceneTypeInfo sceneInfo = sceneService.getBaseSceneTypeByName(sceneToken.getNamespaceId(), sceneToken.getScene());
+        String baseScene = sceneToken.getScene();
+        if(sceneInfo != null) {
+            baseScene = sceneInfo.getName();
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Scene type is changed, sceneToken={}, newScene={}", sceneToken, sceneInfo.getName());
+            }
+        } else {
+            LOGGER.error("Scene is not found, cmd={}, sceneToken={}", cmd, sceneToken);
+        }
+        
+        this.businessService.favoriteBusinessesByScene(cmd, baseScene);
 	}
 
 	@Override
 	public void cancelFavoriteBusinessByScene(
 			CancelFavoriteBusinessBySceneCommand cmd) {
-		// TODO Auto-generated method stub
+		User user = UserContext.current().getUser();
+		SceneTokenDTO sceneToken = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
 		
+		CancelFavoriteBusinessCommand command = new CancelFavoriteBusinessCommand();
+		command.setId(cmd.getId());
+		this.businessService.cancelFavoriteBusiness(command);
 	}
 
 

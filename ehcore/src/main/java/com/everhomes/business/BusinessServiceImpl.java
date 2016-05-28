@@ -110,6 +110,7 @@ import com.everhomes.rest.region.ListRegionByKeywordCommand;
 import com.everhomes.rest.region.RegionAdminStatus;
 import com.everhomes.rest.region.RegionDTO;
 import com.everhomes.rest.region.RegionScope;
+import com.everhomes.rest.ui.launchpad.FavoriteBusinessesBySceneCommand;
 import com.everhomes.rest.ui.user.UserProfileDTO;
 import com.everhomes.rest.user.GetUserDefaultAddressCommand;
 import com.everhomes.rest.user.IdentifierType;
@@ -1151,7 +1152,7 @@ public class BusinessServiceImpl implements BusinessService {
 	public void syncUserFavorite(UserFavoriteCommand cmd) {
 		isValiad(cmd);
 		Business business = this.businessProvider.findBusinessByTargetId(cmd.getId());
-		favoriteBusiness(cmd.getUserId(),cmd.getNamespaceId(), business.getId(),true);
+		favoriteBusiness(cmd.getUserId(),cmd.getNamespaceId(), business.getId(),true, "default");
 
 	}
 
@@ -1181,7 +1182,7 @@ public class BusinessServiceImpl implements BusinessService {
 	public void syncUserCancelFavorite(UserFavoriteCommand cmd) {
 		isValiad(cmd);
 		Business business = this.businessProvider.findBusinessByTargetId(cmd.getId()); 
-		cancelFavoriteBusiness(cmd.getUserId(),cmd.getNamespaceId(), business.getId(),true);
+		cancelFavoriteBusiness(cmd.getUserId(),cmd.getNamespaceId(), business.getId(),true, "default");
 
 	}
 
@@ -1207,7 +1208,7 @@ public class BusinessServiceImpl implements BusinessService {
 
 		User user = UserContext.current().getUser();
 		long userId = user.getId();
-		favoriteBusiness(userId,user.getNamespaceId(),cmd.getId(),true);
+		favoriteBusiness(userId,user.getNamespaceId(),cmd.getId(),true, "default");
 	}
 
 	@Override
@@ -1229,13 +1230,13 @@ public class BusinessServiceImpl implements BusinessService {
 				continue ;
 			}
 			if(r.getFavoriteFlag() == FavoriteFlagType.FAVORITE.getCode())
-				favoriteBusiness(userId,user.getNamespaceId(), r.getId(),false);
+				favoriteBusiness(userId,user.getNamespaceId(), r.getId(),false, "default");
 			else if(r.getFavoriteFlag() == FavoriteFlagType.CANCEL_FAVORITE.getCode())
-				cancelFavoriteBusiness(userId,user.getNamespaceId(), r.getId(),false);
+				cancelFavoriteBusiness(userId,user.getNamespaceId(), r.getId(),false, "default");
 		}
 	}
 
-	private void favoriteBusiness(long userId,Integer namespaceId, long businessId, boolean isException){
+	private void favoriteBusiness(long userId,Integer namespaceId, long businessId, boolean isException, String baseScene){
 		Business business = this.businessProvider.findBusinessById(businessId);
 		if(business == null){
 			LOGGER.error("Business is not exists.id=" + businessId);
@@ -1257,6 +1258,7 @@ public class BusinessServiceImpl implements BusinessService {
 			}else{
 				item.setApplyPolicy(ApplyPolicy.DEFAULT.getCode());
 			}
+			item.setSceneType(baseScene);
 			item.setScopeId(userId);
 			item.setDisplayFlag(ItemDisplayFlag.DISPLAY.getCode());
 			this.launchPadProvider.updateLaunchPadItem(item);
@@ -1282,6 +1284,7 @@ public class BusinessServiceImpl implements BusinessService {
 			item.setBgcolor(0);
 			item.setTargetType(ItemTargetType.BIZ.getCode());
 			item.setTargetId(businessId);
+			item.setSceneType(baseScene);
 			if(flag)
 				item.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
 			items.add(item);
@@ -1318,10 +1321,10 @@ public class BusinessServiceImpl implements BusinessService {
 					"Invalid paramter id null,categoryId is null");
 		User user = UserContext.current().getUser();
 		long userId = user.getId();
-		cancelFavoriteBusiness(userId,user.getNamespaceId(), cmd.getId(),true);
+		cancelFavoriteBusiness(userId,user.getNamespaceId(), cmd.getId(),true, "default");
 	}
 
-	private void cancelFavoriteBusiness(long userId,Integer namespaceId, long businessId,boolean isThrowExcept){
+	private void cancelFavoriteBusiness(long userId,Integer namespaceId, long businessId,boolean isThrowExcept, String baseScene){
 		Business business = this.businessProvider.findBusinessById(businessId);
 		if(business == null){
 			LOGGER.error("Business is not exists.id=" + businessId);
@@ -1359,6 +1362,7 @@ public class BusinessServiceImpl implements BusinessService {
 				item.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
 				item.setScopeCode(ScopeType.USER.getCode());
 				item.setNamespaceId(namespaceId==null?0:namespaceId);
+				item.setSceneType(baseScene);
 				this.launchPadProvider.createLaunchPadItem(item);
 			}
 		}
@@ -1870,6 +1874,33 @@ public class BusinessServiceImpl implements BusinessService {
 				.collect(Collectors.toList());
 		
 		return dtoResultList;
+	}
+
+	@Override
+	public void favoriteBusinessesByScene(FavoriteBusinessesBySceneCommand cmd, String baseScene) {
+
+		if(cmd.getBizs() == null || cmd.getBizs().size() < 1)
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid paramter bizs is null or empty");
+
+		User user = UserContext.current().getUser();
+		long userId = user.getId();
+		for(FavoriteBusinessDTO r:cmd.getBizs()){
+			FavoriteFlagType flag = FavoriteFlagType.fromCode(r.getFavoriteFlag());
+			if(flag == null){
+				LOGGER.error("FavoriteFlag is error.bizId=" + r.getId()+",favoriteFlag="+r.getFavoriteFlag());
+				continue ;
+			}
+			if(r.getId() == null){
+				LOGGER.error("biz id is null.bizId=" + r.getId()+",favoriteFlag="+r.getFavoriteFlag());
+				continue ;
+			}
+			if(r.getFavoriteFlag() == FavoriteFlagType.FAVORITE.getCode())
+				favoriteBusiness(userId,user.getNamespaceId(), r.getId(),false, baseScene);
+			else if(r.getFavoriteFlag() == FavoriteFlagType.CANCEL_FAVORITE.getCode())
+				cancelFavoriteBusiness(userId,user.getNamespaceId(), r.getId(),false, baseScene);
+		}
+	
 	}
 
 }
