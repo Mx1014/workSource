@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>name: 分组名字</li>
  * <li>description: 分组描述</li>
  * <li>address: 分组所在地址</li>
+ * <li>groupType: 5 左邻分组， 6 令令分组</li>
  * </ul>
  * @author janson
  *
@@ -24,6 +25,9 @@ public class CreateDoorAccessGroup {
     
     @NotNull
     String name;
+    
+    @NotNull
+    Byte groupType;
     
     String   avatar;
     
@@ -77,6 +81,14 @@ public class CreateDoorAccessGroup {
 
     public void setAvatar(String avatar) {
         this.avatar = avatar;
+    }
+
+    public Byte getGroupType() {
+        return groupType;
+    }
+
+    public void setGroupType(Byte groupType) {
+        this.groupType = groupType;
     }
 
     @Override

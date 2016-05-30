@@ -16,6 +16,7 @@ import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.rest.aclink.DoorAccessDriverType;
 import com.everhomes.rest.aclink.DoorAuthStatus;
 import com.everhomes.rest.aclink.DoorAuthType;
 import com.everhomes.server.schema.Tables;
@@ -171,7 +172,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
     }
     
     @Override
-    public List<DoorAuth> queryValidDoorAuthByUserId(ListingLocator locator, long userId, int count) {
+    public List<DoorAuth> queryValidDoorAuthByUserId(ListingLocator locator, long userId, DoorAccessDriverType driver, int count) {
         
         long now = DateHelper.currentGMTTime().getTime();
         
@@ -186,6 +187,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                 Condition c2 = Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode());
                 query.addConditions(Tables.EH_DOOR_AUTH.USER_ID.eq(userId));
                 query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
+                query.addConditions(Tables.EH_DOOR_AUTH.DRIVER.eq(driver.getCode()));
                 query.addConditions(c1.or(c2));
                 return query;
             }
