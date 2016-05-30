@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSitesBills extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalSitesBillsRecord> {
 
-	private static final long serialVersionUID = 580003189;
+	private static final long serialVersionUID = 2087226799;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_sites_bills</code>
@@ -32,14 +32,9 @@ public class EhRentalSitesBills extends org.jooq.impl.TableImpl<com.everhomes.se
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesBillsRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id");
 
 	/**
-	 * The column <code>ehcore.eh_rental_sites_bills.owner_type</code>. owner type: community, organization
+	 * The column <code>ehcore.eh_rental_sites_bills.owner_id</code>.     community id or organization id 
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesBillsRecord, java.lang.String> OWNER_TYPE = createField("owner_type", org.jooq.impl.SQLDataType.VARCHAR.length(255), this, "owner type: community, organization");
-
-	/**
-	 * The column <code>ehcore.eh_rental_sites_bills.owner_id</code>. community id or organization id
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesBillsRecord, java.lang.Long> OWNER_ID = createField("owner_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "community id or organization id");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesBillsRecord, java.lang.Long> OWNER_ID = createField("owner_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "    community id or organization id ");
 
 	/**
 	 * The column <code>ehcore.eh_rental_sites_bills.site_type</code>.
@@ -85,6 +80,16 @@ public class EhRentalSitesBills extends org.jooq.impl.TableImpl<com.everhomes.se
 	 * The column <code>ehcore.eh_rental_sites_bills.operate_time</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesBillsRecord, java.sql.Timestamp> OPERATE_TIME = createField("operate_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_rental_sites_bills.owner_type</code>. owner type : community ; organization
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesBillsRecord, java.lang.String> OWNER_TYPE = createField("owner_type", org.jooq.impl.SQLDataType.VARCHAR.length(255), this, "owner type : community ; organization");
+
+	/**
+	 * The column <code>ehcore.eh_rental_sites_bills.launch_pad_item_id</code>. 广场图标id
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesBillsRecord, java.lang.Long> LAUNCH_PAD_ITEM_ID = createField("launch_pad_item_id", org.jooq.impl.SQLDataType.BIGINT, this, "广场图标id");
 
 	/**
 	 * Create a <code>ehcore.eh_rental_sites_bills</code> table reference

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSitesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhRentalSitesRecord> {
 
-	private static final long serialVersionUID = -2140533995;
+	private static final long serialVersionUID = 277315289;
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_sites.id</code>. id
@@ -42,283 +42,283 @@ public class EhRentalSitesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_sites.owner_type</code>. owner type: community, organization
+	 * Setter for <code>ehcore.eh_rental_sites.owner_id</code>.     community id or organization id 
 	 */
-	public void setOwnerType(java.lang.String value) {
+	public void setOwnerId(java.lang.Long value) {
 		setValue(2, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_sites.owner_type</code>. owner type: community, organization
-	 */
-	public java.lang.String getOwnerType() {
-		return (java.lang.String) getValue(2);
-	}
-
-	/**
-	 * Setter for <code>ehcore.eh_rental_sites.owner_id</code>. community id or organization id
-	 */
-	public void setOwnerId(java.lang.Long value) {
-		setValue(3, value);
-	}
-
-	/**
-	 * Getter for <code>ehcore.eh_rental_sites.owner_id</code>. community id or organization id
+	 * Getter for <code>ehcore.eh_rental_sites.owner_id</code>.     community id or organization id 
 	 */
 	public java.lang.Long getOwnerId() {
-		return (java.lang.Long) getValue(3);
+		return (java.lang.Long) getValue(2);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_sites.site_type</code>.
 	 */
 	public void setSiteType(java.lang.String value) {
-		setValue(4, value);
+		setValue(3, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_sites.site_type</code>.
 	 */
 	public java.lang.String getSiteType() {
-		return (java.lang.String) getValue(4);
+		return (java.lang.String) getValue(3);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_sites.site_name</code>.
 	 */
 	public void setSiteName(java.lang.String value) {
-		setValue(5, value);
+		setValue(4, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_sites.site_name</code>.
 	 */
 	public java.lang.String getSiteName() {
-		return (java.lang.String) getValue(5);
+		return (java.lang.String) getValue(4);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_sites.site_type2</code>.
 	 */
 	public void setSiteType2(java.lang.Byte value) {
-		setValue(6, value);
+		setValue(5, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_sites.site_type2</code>.
 	 */
 	public java.lang.Byte getSiteType2() {
-		return (java.lang.Byte) getValue(6);
+		return (java.lang.Byte) getValue(5);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_sites.building_name</code>.
 	 */
 	public void setBuildingName(java.lang.String value) {
-		setValue(7, value);
+		setValue(6, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_sites.building_name</code>.
 	 */
 	public java.lang.String getBuildingName() {
-		return (java.lang.String) getValue(7);
+		return (java.lang.String) getValue(6);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_sites.building_id</code>.
 	 */
 	public void setBuildingId(java.lang.Long value) {
-		setValue(8, value);
+		setValue(7, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_sites.building_id</code>.
 	 */
 	public java.lang.Long getBuildingId() {
-		return (java.lang.Long) getValue(8);
+		return (java.lang.Long) getValue(7);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_sites.address</code>.
 	 */
 	public void setAddress(java.lang.String value) {
-		setValue(9, value);
+		setValue(8, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_sites.address</code>.
 	 */
 	public java.lang.String getAddress() {
-		return (java.lang.String) getValue(9);
+		return (java.lang.String) getValue(8);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_sites.address_id</code>.
 	 */
 	public void setAddressId(java.lang.Long value) {
-		setValue(10, value);
+		setValue(9, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_sites.address_id</code>.
 	 */
 	public java.lang.Long getAddressId() {
-		return (java.lang.Long) getValue(10);
+		return (java.lang.Long) getValue(9);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_sites.spec</code>. spec ,user setting ,maybe meetingroom seats ,KTV ROOM: big small VIP and so on
 	 */
 	public void setSpec(java.lang.String value) {
-		setValue(11, value);
+		setValue(10, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_sites.spec</code>. spec ,user setting ,maybe meetingroom seats ,KTV ROOM: big small VIP and so on
 	 */
 	public java.lang.String getSpec() {
-		return (java.lang.String) getValue(11);
+		return (java.lang.String) getValue(10);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_sites.own_company_name</code>.
 	 */
 	public void setOwnCompanyName(java.lang.String value) {
-		setValue(12, value);
+		setValue(11, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_sites.own_company_name</code>.
 	 */
 	public java.lang.String getOwnCompanyName() {
-		return (java.lang.String) getValue(12);
+		return (java.lang.String) getValue(11);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_sites.contact_name</code>.
 	 */
 	public void setContactName(java.lang.String value) {
-		setValue(13, value);
+		setValue(12, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_sites.contact_name</code>.
 	 */
 	public java.lang.String getContactName() {
-		return (java.lang.String) getValue(13);
+		return (java.lang.String) getValue(12);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_sites.contact_phonenum</code>.
 	 */
 	public void setContactPhonenum(java.lang.String value) {
-		setValue(14, value);
+		setValue(13, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_sites.contact_phonenum</code>.
 	 */
 	public java.lang.String getContactPhonenum() {
-		return (java.lang.String) getValue(14);
+		return (java.lang.String) getValue(13);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_sites.contact_phonenum2</code>.
 	 */
 	public void setContactPhonenum2(java.lang.String value) {
-		setValue(15, value);
+		setValue(14, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_sites.contact_phonenum2</code>.
 	 */
 	public java.lang.String getContactPhonenum2() {
-		return (java.lang.String) getValue(15);
+		return (java.lang.String) getValue(14);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_sites.contact_phonenum3</code>.
 	 */
 	public void setContactPhonenum3(java.lang.String value) {
-		setValue(16, value);
+		setValue(15, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_sites.contact_phonenum3</code>.
 	 */
 	public java.lang.String getContactPhonenum3() {
-		return (java.lang.String) getValue(16);
+		return (java.lang.String) getValue(15);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_sites.status</code>.
 	 */
 	public void setStatus(java.lang.Byte value) {
-		setValue(17, value);
+		setValue(16, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_sites.status</code>.
 	 */
 	public java.lang.Byte getStatus() {
-		return (java.lang.Byte) getValue(17);
+		return (java.lang.Byte) getValue(16);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_sites.creator_uid</code>.
 	 */
 	public void setCreatorUid(java.lang.Long value) {
-		setValue(18, value);
+		setValue(17, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_sites.creator_uid</code>.
 	 */
 	public java.lang.Long getCreatorUid() {
-		return (java.lang.Long) getValue(18);
+		return (java.lang.Long) getValue(17);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_sites.create_time</code>.
 	 */
 	public void setCreateTime(java.sql.Timestamp value) {
-		setValue(19, value);
+		setValue(18, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_sites.create_time</code>.
 	 */
 	public java.sql.Timestamp getCreateTime() {
-		return (java.sql.Timestamp) getValue(19);
+		return (java.sql.Timestamp) getValue(18);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_sites.operator_uid</code>.
 	 */
 	public void setOperatorUid(java.lang.Long value) {
-		setValue(20, value);
+		setValue(19, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_sites.operator_uid</code>.
 	 */
 	public java.lang.Long getOperatorUid() {
-		return (java.lang.Long) getValue(20);
+		return (java.lang.Long) getValue(19);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_sites.operate_time</code>.
 	 */
 	public void setOperateTime(java.sql.Timestamp value) {
-		setValue(21, value);
+		setValue(20, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_sites.operate_time</code>.
 	 */
 	public java.sql.Timestamp getOperateTime() {
-		return (java.sql.Timestamp) getValue(21);
+		return (java.sql.Timestamp) getValue(20);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_rental_sites.owner_type</code>. owner type : community ; organization
+	 */
+	public void setOwnerType(java.lang.String value) {
+		setValue(21, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_rental_sites.owner_type</code>. owner type : community ; organization
+	 */
+	public java.lang.String getOwnerType() {
+		return (java.lang.String) getValue(21);
 	}
 
 	/**
@@ -349,6 +349,216 @@ public class EhRentalSitesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 		return (java.lang.String) getValue(23);
 	}
 
+	/**
+	 * Setter for <code>ehcore.eh_rental_sites.charge_uid</code>. 负责人id
+	 */
+	public void setChargeUid(java.lang.Long value) {
+		setValue(24, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_rental_sites.charge_uid</code>. 负责人id
+	 */
+	public java.lang.Long getChargeUid() {
+		return (java.lang.Long) getValue(24);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_rental_sites.cover_uri</code>. 封面图uri
+	 */
+	public void setCoverUri(java.lang.String value) {
+		setValue(25, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_rental_sites.cover_uri</code>. 封面图uri
+	 */
+	public java.lang.String getCoverUri() {
+		return (java.lang.String) getValue(25);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_rental_sites.discount_type</code>. 折扣信息：0不打折 1满减优惠2比例折扣
+	 */
+	public void setDiscountType(java.lang.Byte value) {
+		setValue(26, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_rental_sites.discount_type</code>. 折扣信息：0不打折 1满减优惠2比例折扣
+	 */
+	public java.lang.Byte getDiscountType() {
+		return (java.lang.Byte) getValue(26);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_rental_sites.full_price</code>. 满XX元
+	 */
+	public void setFullPrice(java.math.BigDecimal value) {
+		setValue(27, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_rental_sites.full_price</code>. 满XX元
+	 */
+	public java.math.BigDecimal getFullPrice() {
+		return (java.math.BigDecimal) getValue(27);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_rental_sites.cut_price</code>. 减XX元
+	 */
+	public void setCutPrice(java.math.BigDecimal value) {
+		setValue(28, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_rental_sites.cut_price</code>. 减XX元
+	 */
+	public java.math.BigDecimal getCutPrice() {
+		return (java.math.BigDecimal) getValue(28);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_rental_sites.discount_ratio</code>. 折扣比例
+	 */
+	public void setDiscountRatio(java.lang.Double value) {
+		setValue(29, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_rental_sites.discount_ratio</code>. 折扣比例
+	 */
+	public java.lang.Double getDiscountRatio() {
+		return (java.lang.Double) getValue(29);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_rental_sites.rental_type</code>. 0: as hour:min 1-as half day 2-as day 3-支持晚上的半天
+	 */
+	public void setRentalType(java.lang.Byte value) {
+		setValue(30, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_rental_sites.rental_type</code>. 0: as hour:min 1-as half day 2-as day 3-支持晚上的半天
+	 */
+	public java.lang.Byte getRentalType() {
+		return (java.lang.Byte) getValue(30);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_rental_sites.rental_step</code>. how many time_step must be rental every time
+	 */
+	public void setRentalStep(java.lang.Integer value) {
+		setValue(31, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_rental_sites.rental_step</code>. how many time_step must be rental every time
+	 */
+	public java.lang.Integer getRentalStep() {
+		return (java.lang.Integer) getValue(31);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_rental_sites.exclusive_flag</code>. 是否为独占资源0否 1 是
+	 */
+	public void setExclusiveFlag(java.lang.Byte value) {
+		setValue(32, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_rental_sites.exclusive_flag</code>. 是否为独占资源0否 1 是
+	 */
+	public java.lang.Byte getExclusiveFlag() {
+		return (java.lang.Byte) getValue(32);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_rental_sites.auto_assign</code>. 是否动态分配 1是 0否
+	 */
+	public void setAutoAssign(java.lang.Byte value) {
+		setValue(33, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_rental_sites.auto_assign</code>. 是否动态分配 1是 0否
+	 */
+	public java.lang.Byte getAutoAssign() {
+		return (java.lang.Byte) getValue(33);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_rental_sites.multi_unit</code>. 是否允许预约多个场所 1是 0否
+	 */
+	public void setMultiUnit(java.lang.Byte value) {
+		setValue(34, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_rental_sites.multi_unit</code>. 是否允许预约多个场所 1是 0否
+	 */
+	public java.lang.Byte getMultiUnit() {
+		return (java.lang.Byte) getValue(34);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_rental_sites.multi_time_interval</code>. 是否允许预约多个时段 1是 0否
+	 */
+	public void setMultiTimeInterval(java.lang.Byte value) {
+		setValue(35, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_rental_sites.multi_time_interval</code>. 是否允许预约多个时段 1是 0否
+	 */
+	public java.lang.Byte getMultiTimeInterval() {
+		return (java.lang.Byte) getValue(35);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_rental_sites.cancel_flag</code>. 是否允许取消 1是 0否
+	 */
+	public void setCancelFlag(java.lang.Byte value) {
+		setValue(36, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_rental_sites.cancel_flag</code>. 是否允许取消 1是 0否
+	 */
+	public java.lang.Byte getCancelFlag() {
+		return (java.lang.Byte) getValue(36);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_rental_sites.need_pay</code>. 是否需要支付 1是 0否
+	 */
+	public void setNeedPay(java.lang.Byte value) {
+		setValue(37, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_rental_sites.need_pay</code>. 是否需要支付 1是 0否
+	 */
+	public java.lang.Byte getNeedPay() {
+		return (java.lang.Byte) getValue(37);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_rental_sites.launch_pad_item_id</code>. 广场图标id
+	 */
+	public void setLaunchPadItemId(java.lang.Long value) {
+		setValue(38, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_rental_sites.launch_pad_item_id</code>. 广场图标id
+	 */
+	public java.lang.Long getLaunchPadItemId() {
+		return (java.lang.Long) getValue(38);
+	}
+
 	// -------------------------------------------------------------------------
 	// Primary key information
 	// -------------------------------------------------------------------------
@@ -375,32 +585,47 @@ public class EhRentalSitesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	/**
 	 * Create a detached, initialised EhRentalSitesRecord
 	 */
-	public EhRentalSitesRecord(java.lang.Long id, java.lang.Long parentId, java.lang.String ownerType, java.lang.Long ownerId, java.lang.String siteType, java.lang.String siteName, java.lang.Byte siteType2, java.lang.String buildingName, java.lang.Long buildingId, java.lang.String address, java.lang.Long addressId, java.lang.String spec, java.lang.String ownCompanyName, java.lang.String contactName, java.lang.String contactPhonenum, java.lang.String contactPhonenum2, java.lang.String contactPhonenum3, java.lang.Byte status, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.String introduction, java.lang.String notice) {
+	public EhRentalSitesRecord(java.lang.Long id, java.lang.Long parentId, java.lang.Long ownerId, java.lang.String siteType, java.lang.String siteName, java.lang.Byte siteType2, java.lang.String buildingName, java.lang.Long buildingId, java.lang.String address, java.lang.Long addressId, java.lang.String spec, java.lang.String ownCompanyName, java.lang.String contactName, java.lang.String contactPhonenum, java.lang.String contactPhonenum2, java.lang.String contactPhonenum3, java.lang.Byte status, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.String ownerType, java.lang.String introduction, java.lang.String notice, java.lang.Long chargeUid, java.lang.String coverUri, java.lang.Byte discountType, java.math.BigDecimal fullPrice, java.math.BigDecimal cutPrice, java.lang.Double discountRatio, java.lang.Byte rentalType, java.lang.Integer rentalStep, java.lang.Byte exclusiveFlag, java.lang.Byte autoAssign, java.lang.Byte multiUnit, java.lang.Byte multiTimeInterval, java.lang.Byte cancelFlag, java.lang.Byte needPay, java.lang.Long launchPadItemId) {
 		super(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES);
 
 		setValue(0, id);
 		setValue(1, parentId);
-		setValue(2, ownerType);
-		setValue(3, ownerId);
-		setValue(4, siteType);
-		setValue(5, siteName);
-		setValue(6, siteType2);
-		setValue(7, buildingName);
-		setValue(8, buildingId);
-		setValue(9, address);
-		setValue(10, addressId);
-		setValue(11, spec);
-		setValue(12, ownCompanyName);
-		setValue(13, contactName);
-		setValue(14, contactPhonenum);
-		setValue(15, contactPhonenum2);
-		setValue(16, contactPhonenum3);
-		setValue(17, status);
-		setValue(18, creatorUid);
-		setValue(19, createTime);
-		setValue(20, operatorUid);
-		setValue(21, operateTime);
+		setValue(2, ownerId);
+		setValue(3, siteType);
+		setValue(4, siteName);
+		setValue(5, siteType2);
+		setValue(6, buildingName);
+		setValue(7, buildingId);
+		setValue(8, address);
+		setValue(9, addressId);
+		setValue(10, spec);
+		setValue(11, ownCompanyName);
+		setValue(12, contactName);
+		setValue(13, contactPhonenum);
+		setValue(14, contactPhonenum2);
+		setValue(15, contactPhonenum3);
+		setValue(16, status);
+		setValue(17, creatorUid);
+		setValue(18, createTime);
+		setValue(19, operatorUid);
+		setValue(20, operateTime);
+		setValue(21, ownerType);
 		setValue(22, introduction);
 		setValue(23, notice);
+		setValue(24, chargeUid);
+		setValue(25, coverUri);
+		setValue(26, discountType);
+		setValue(27, fullPrice);
+		setValue(28, cutPrice);
+		setValue(29, discountRatio);
+		setValue(30, rentalType);
+		setValue(31, rentalStep);
+		setValue(32, exclusiveFlag);
+		setValue(33, autoAssign);
+		setValue(34, multiUnit);
+		setValue(35, multiTimeInterval);
+		setValue(36, cancelFlag);
+		setValue(37, needPay);
+		setValue(38, launchPadItemId);
 	}
 }

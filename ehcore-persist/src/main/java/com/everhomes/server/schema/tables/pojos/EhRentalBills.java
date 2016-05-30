@@ -11,10 +11,9 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalBills implements java.io.Serializable {
 
-	private static final long serialVersionUID = -961310809;
+	private static final long serialVersionUID = 1459270661;
 
 	private java.lang.Long       id;
-	private java.lang.String     ownerType;
 	private java.lang.Long       ownerId;
 	private java.lang.String     siteType;
 	private java.lang.Long       rentalSiteId;
@@ -39,12 +38,16 @@ public class EhRentalBills implements java.io.Serializable {
 	private java.sql.Timestamp   createTime;
 	private java.lang.Long       operatorUid;
 	private java.sql.Timestamp   operateTime;
+	private java.lang.String     ownerType;
+	private java.lang.String     siteName;
+	private java.lang.String     useTime;
+	private java.lang.String     vendorType;
+	private java.lang.Long       launchPadItemId;
 
 	public EhRentalBills() {}
 
 	public EhRentalBills(
 		java.lang.Long       id,
-		java.lang.String     ownerType,
 		java.lang.Long       ownerId,
 		java.lang.String     siteType,
 		java.lang.Long       rentalSiteId,
@@ -68,10 +71,14 @@ public class EhRentalBills implements java.io.Serializable {
 		java.lang.Long       creatorUid,
 		java.sql.Timestamp   createTime,
 		java.lang.Long       operatorUid,
-		java.sql.Timestamp   operateTime
+		java.sql.Timestamp   operateTime,
+		java.lang.String     ownerType,
+		java.lang.String     siteName,
+		java.lang.String     useTime,
+		java.lang.String     vendorType,
+		java.lang.Long       launchPadItemId
 	) {
 		this.id = id;
-		this.ownerType = ownerType;
 		this.ownerId = ownerId;
 		this.siteType = siteType;
 		this.rentalSiteId = rentalSiteId;
@@ -96,6 +103,11 @@ public class EhRentalBills implements java.io.Serializable {
 		this.createTime = createTime;
 		this.operatorUid = operatorUid;
 		this.operateTime = operateTime;
+		this.ownerType = ownerType;
+		this.siteName = siteName;
+		this.useTime = useTime;
+		this.vendorType = vendorType;
+		this.launchPadItemId = launchPadItemId;
 	}
 
 	public java.lang.Long getId() {
@@ -104,14 +116,6 @@ public class EhRentalBills implements java.io.Serializable {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
-	}
-
-	public java.lang.String getOwnerType() {
-		return this.ownerType;
-	}
-
-	public void setOwnerType(java.lang.String ownerType) {
-		this.ownerType = ownerType;
 	}
 
 	public java.lang.Long getOwnerId() {
@@ -304,5 +308,45 @@ public class EhRentalBills implements java.io.Serializable {
 
 	public void setOperateTime(java.sql.Timestamp operateTime) {
 		this.operateTime = operateTime;
+	}
+
+	public java.lang.String getOwnerType() {
+		return this.ownerType;
+	}
+
+	public void setOwnerType(java.lang.String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+	public java.lang.String getSiteName() {
+		return this.siteName;
+	}
+
+	public void setSiteName(java.lang.String siteName) {
+		this.siteName = siteName;
+	}
+
+	public java.lang.String getUseTime() {
+		return this.useTime;
+	}
+
+	public void setUseTime(java.lang.String useTime) {
+		this.useTime = useTime;
+	}
+
+	public java.lang.String getVendorType() {
+		return this.vendorType;
+	}
+
+	public void setVendorType(java.lang.String vendorType) {
+		this.vendorType = vendorType;
+	}
+
+	public java.lang.Long getLaunchPadItemId() {
+		return this.launchPadItemId;
+	}
+
+	public void setLaunchPadItemId(java.lang.Long launchPadItemId) {
+		this.launchPadItemId = launchPadItemId;
 	}
 }

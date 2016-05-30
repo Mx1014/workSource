@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteItems extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalSiteItemsRecord> {
 
-	private static final long serialVersionUID = 738317508;
+	private static final long serialVersionUID = 1045156808;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_site_items</code>
@@ -32,9 +32,9 @@ public class EhRentalSiteItems extends org.jooq.impl.TableImpl<com.everhomes.ser
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteItemsRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id");
 
 	/**
-	 * The column <code>ehcore.eh_rental_site_items.rental_site_id</code>. rental_site id
+	 * The column <code>ehcore.eh_rental_site_items.rental_site_id</code>.   rental_site id
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteItemsRecord, java.lang.Long> RENTAL_SITE_ID = createField("rental_site_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "rental_site id");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteItemsRecord, java.lang.Long> RENTAL_SITE_ID = createField("rental_site_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "  rental_site id");
 
 	/**
 	 * The column <code>ehcore.eh_rental_site_items.name</code>.
@@ -75,6 +75,16 @@ public class EhRentalSiteItems extends org.jooq.impl.TableImpl<com.everhomes.ser
 	 * The column <code>ehcore.eh_rental_site_items.operate_time</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteItemsRecord, java.sql.Timestamp> OPERATE_TIME = createField("operate_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_rental_site_items.default_order</code>. 排序字段
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteItemsRecord, java.lang.Integer> DEFAULT_ORDER = createField("default_order", org.jooq.impl.SQLDataType.INTEGER, this, "排序字段");
+
+	/**
+	 * The column <code>ehcore.eh_rental_site_items.img_uri</code>. 图片uri
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteItemsRecord, java.lang.String> IMG_URI = createField("img_uri", org.jooq.impl.SQLDataType.VARCHAR.length(1024), this, "图片uri");
 
 	/**
 	 * Create a <code>ehcore.eh_rental_site_items</code> table reference

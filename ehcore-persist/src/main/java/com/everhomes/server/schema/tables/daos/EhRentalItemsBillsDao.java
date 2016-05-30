@@ -116,4 +116,11 @@ public class EhRentalItemsBillsDao extends org.jooq.impl.DAOImpl<com.everhomes.s
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalItemsBills> fetchByOperateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalItemsBills.EH_RENTAL_ITEMS_BILLS.OPERATE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>launch_pad_item_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalItemsBills> fetchByLaunchPadItemId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalItemsBills.EH_RENTAL_ITEMS_BILLS.LAUNCH_PAD_ITEM_ID, values);
+	}
 }
