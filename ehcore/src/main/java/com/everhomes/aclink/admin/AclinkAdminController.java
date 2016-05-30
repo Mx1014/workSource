@@ -218,6 +218,8 @@ public class AclinkAdminController extends ControllerBase {
     public RestResponse createDoorAccessGroup(@Valid CreateDoorAccessGroup cmd) {
         RestResponse response = new RestResponse();
         
+        response.setResponseObject(doorAccessService.createDoorAccessGroup(cmd));
+        
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -233,6 +235,8 @@ public class AclinkAdminController extends ControllerBase {
     @RestReturn(value=DoorAccessDTO.class)
     public RestResponse createDoorAccessLingLing(@Valid CreateDoorAccessLingLing cmd) {
         RestResponse response = new RestResponse();
+        
+        response.setResponseObject(doorAccessService.createDoorAccessLingLing(cmd));
         
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

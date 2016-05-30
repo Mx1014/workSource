@@ -394,6 +394,14 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             doorAuth.setDescription(cmd.getDescription());
             doorAuth.setStatus(DoorAuthStatus.VALID.getCode());
             
+            //Set the auth driver type
+            if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_LINGLING.getCode())
+                    || doorAcc.getDoorType().equals(DoorAccessType.ACLINK_LINGLING_GROUP.getCode())) {
+                doorAuth.setDriver(DoorAccessDriverType.LINGLING.getCode());    
+            } else {
+                doorAuth.setDriver(DoorAccessDriverType.ZUOLIN.getCode());
+            }
+            
             if(user.getPhones() != null && user.getPhones().size() > 0) {
                 doorAuth.setPhone(user.getPhones().get(0));    
                 }
@@ -1365,7 +1373,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             qr.setCreatorUid(user.getId());
             qr.setDoorGroupId(doorAccess.getId());
             qr.setDoorName(doorAccess.getName());
-            qr.setExpireTimeMs(validTime);
+            qr.setExpireTimeMs(validTime-1000*10); //for safe to open door
             
             qr.setHardwares(hardwares);
             qr.setQrDriver(DoorAccessDriverType.LINGLING.getCode());
@@ -1461,6 +1469,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 doorAcc.setStatus(DoorAccessStatus.ACTIVE.getCode());
                 doorAcc.setDoorType(cmd.getGroupType());
                 doorAcc.setUuid(groupHardwareId);
+                doorAcc.setAesIv("");
                 doorAccessProvider.createDoorAccess(doorAcc);
                 
                 OwnerDoor ownerDoor = new OwnerDoor();
@@ -1480,6 +1489,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 aclink.setDoorId(doorAcc.getId());
                 aclink.setDriver(DoorAccessDriverType.LINGLING.getCode());
                 aclink.setDeviceName(linglingId);
+                aclink.setFirwareVer("");
                 aclinkProvider.createAclink(aclink);
                
                 return doorAcc;
@@ -1531,6 +1541,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 doorAcc.setAvatar(cmd.getAddress());
                 doorAcc.setStatus(DoorAccessStatus.ACTIVE.getCode());
                 doorAcc.setDoorType(DoorAccessType.ACLINK_LINGLING.getCode());
+                doorAcc.setAesIv("");
                 if(cmd.getDoorGroupId() != null) {
                     doorAcc.setGroupid(cmd.getDoorGroupId());
                 } else {
@@ -1555,6 +1566,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 aclink.setDeviceName(linglingId);
                 aclink.setDriver(DoorAccessDriverType.LINGLING.getCode());
                 aclink.setIntegralTag1(lDoorId);
+                aclink.setFirwareVer("");
                 aclinkProvider.createAclink(aclink);
                
                 return doorAcc;
