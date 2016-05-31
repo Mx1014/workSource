@@ -11,18 +11,10 @@ CREATE TABLE `eh_rental_default_rules` (
 `site_type` VARCHAR(255)    COMMENT 'rule for what function',
 `rental_start_time` BIGINT(20)    COMMENT '最多提前多少时间预定',
 `rental_end_time` BIGINT(20)    COMMENT '最少提前多少时间预定',
-`pay_start_time` BIGINT(20)    COMMENT '',
-`pay_end_time` BIGINT(20)    COMMENT '',
-`payment_ratio` INT(11)       COMMENT 'payment ratio',
-`refund_flag` TINYINT(4)    COMMENT '0 allow refund , 1 can not refund',
-`contact_num` VARCHAR(20)   COMMENT 'phone number',
-`creator_uid` BIGINT(20)    COMMENT '',
-`create_time` DATETIME      COMMENT '',
-`operator_uid` BIGINT(20)    COMMENT '',
-`operate_time` DATETIME      COMMENT '',
+`refund_flag` TINYINT(4)    COMMENT  '是否支持退款 1是 0否',
 `rental_type` TINYINT(4)    COMMENT '0: as hour:min 1-as half day 2-as day 3-支持晚上的半天',
-`cancel_time` BIGINT(20)    COMMENT '',
-`overtime_time` BIGINT(20)    COMMENT '',
+`cancel_time` BIGINT(20)    COMMENT '至少提前取消时间',
+`overtime_time` BIGINT(20)    COMMENT '超期时间',
 `exclusive_flag` TINYINT(4)    COMMENT '是否为独占资源0否 1 是',
 `unit` DOUBLE  COMMENT '1 整租 0.5 可半个租',
 `auto_assign` TINYINT(4)    COMMENT '是否动态分配 1是 0否',
@@ -32,6 +24,11 @@ CREATE TABLE `eh_rental_default_rules` (
 `rental_step` INT(11)    COMMENT 'how many time_step must be rental every time',
 `need_pay` TINYINT(4)    COMMENT '是否需要支付 1是 0否',
 `launch_pad_item_id` BIGINT(20)    COMMENT '广场图标id',
+`refund_ratio` INT(11)       COMMENT '退款比例',
+`creator_uid` BIGINT(20)    COMMENT '',
+`create_time` DATETIME      COMMENT '',
+`operator_uid` BIGINT(20)    COMMENT '',
+`operate_time` DATETIME      COMMENT '',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4	
 ;
@@ -112,7 +109,9 @@ ADD `multi_unit` TINYINT(4)    COMMENT '是否允许预约多个场所 1是 0否
 ADD `multi_time_interval` TINYINT(4)    COMMENT '是否允许预约多个时段 1是 0否',
 ADD `cancel_flag`  TINYINT(4) COMMENT '是否允许取消 1是 0否',
 ADD `need_pay` TINYINT(4)    COMMENT '是否需要支付 1是 0否',
-ADD `launch_pad_item_id` BIGINT(20)    COMMENT '广场图标id';
+ADD `launch_pad_item_id` BIGINT(20)    COMMENT '广场图标id',
+ADD `refund_ratio` INT(11)       COMMENT '退款比例',
+ADD `refund_flag` TINYINT(4)    COMMENT  '是否支持退款 1是 0否';
 
 #
 #场所资源单元格增加设定信息
