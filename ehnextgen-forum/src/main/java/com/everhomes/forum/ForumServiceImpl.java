@@ -3523,7 +3523,10 @@ public class ForumServiceImpl implements ForumService {
                 
                 if(OrganizationType.isGovAgencyOrganization(orgType)) {
                     if(VisibleRegionType.fromCode(cmd.getVisibleRegionType()) == VisibleRegionType.COMMUNITY){
-                        creatorTag = PostEntityTag.fromCode(orgType);
+                    	creatorTag = PostEntityTag.fromCode(orgType);
+                    	if(OrganizationType.fromCode(orgType) == OrganizationType.ENTERPRISE){
+                    		creatorTag = PostEntityTag.USER;
+                    	}
                         visibleRegionType = VisibleRegionType.COMMUNITY;
                         visibleRegionId = cmd.getVisibleRegionId();
                     }else{
