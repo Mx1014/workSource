@@ -123,6 +123,8 @@ public class PmsyServiceImpl implements PmsyService{
 		Long payerId = pmsyPayer.getId();
 		Gson gson = new Gson();
 		Map map = gson.fromJson(json, Map.class);
+		if(map.containsKey("_ERROR"))
+			return resultList;
 		List list = (List) map.get("UserRev_OwnerVerify");
 		Map map2 = (Map) list.get(0);
 		List list2 = (List) map2.get("Syswin");
@@ -212,8 +214,10 @@ public class PmsyServiceImpl implements PmsyService{
 					mb.getRequests().add(dto);
 					BigDecimal monthlyReceivableAmount = mb.getMonthlyDebtAmount();
 					BigDecimal monthlyDebtAmount = mb.getMonthlyDebtAmount();
-					mb.setMonthlyReceivableAmount(monthlyReceivableAmount.add(receivableAmount));
-					mb.setMonthlyDebtAmount(monthlyDebtAmount.add(debtAmount));
+					monthlyReceivableAmount = monthlyReceivableAmount.add(receivableAmount);
+					monthlyDebtAmount = monthlyDebtAmount.add(debtAmount);
+					mb.setMonthlyReceivableAmount(monthlyReceivableAmount);
+					mb.setMonthlyDebtAmount(monthlyDebtAmount);
 					continue outer;
 				}
 			}
@@ -289,10 +293,13 @@ public class PmsyServiceImpl implements PmsyService{
 			dto.setDebtAmount(debtAmount);
 			
 			requests.add(dto);
-			mb.setMonthlyReceivableAmount(monthlyReceivableAmount.add(receivableAmount));
-			mb.setMonthlyDebtAmount(monthlyDebtAmount.add(debtAmount));
+			monthlyReceivableAmount = monthlyReceivableAmount.add(receivableAmount);
+			monthlyDebtAmount = monthlyDebtAmount.add(debtAmount);
+			
 			mb.setBillDateStr(billDateStr);
 		}
+		mb.setMonthlyReceivableAmount(monthlyReceivableAmount);
+		mb.setMonthlyDebtAmount(monthlyDebtAmount);
 		return mb;
 	}
 	

@@ -45,6 +45,8 @@
         [jsonObject setObject: self.pageAnchor forKey: @"pageAnchor"];
     if(self.pageSize)
         [jsonObject setObject: self.pageSize forKey: @"pageSize"];
+    if(self.embeddedAppId)
+        [jsonObject setObject: self.embeddedAppId forKey: @"embeddedAppId"];
     if(self.excludeCategories) {
         NSMutableArray* jsonArray = [NSMutableArray new];
         for(NSNumber* item in self.excludeCategories) {
@@ -84,6 +86,10 @@
         self.pageSize = [jsonObject objectForKey: @"pageSize"];
         if(self.pageSize && [self.pageSize isEqual:[NSNull null]])
             self.pageSize = nil;
+
+        self.embeddedAppId = [jsonObject objectForKey: @"embeddedAppId"];
+        if(self.embeddedAppId && [self.embeddedAppId isEqual:[NSNull null]])
+            self.embeddedAppId = nil;
 
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"excludeCategories"];

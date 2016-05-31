@@ -17,6 +17,7 @@ public class CommunityDoc {
     private String cityName;
     private Long regionId;
     private Integer namespaceId;
+    private Byte communityType;
     
     public Long getId() {
         return id;
@@ -53,6 +54,12 @@ public class CommunityDoc {
 	}
 	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
+	}
+	public Byte getCommunityType() {
+		return communityType;
+	}
+	public void setCommunityType(Byte communityType) {
+		this.communityType = communityType;
 	}
 
 }

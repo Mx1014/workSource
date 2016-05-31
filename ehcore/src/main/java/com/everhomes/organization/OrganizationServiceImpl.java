@@ -98,6 +98,7 @@ import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
 import com.everhomes.rest.enterprise.ListUserRelatedEnterprisesCommand;
 import com.everhomes.rest.enterprise.RejectContactCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
+import com.everhomes.rest.family.FamilyNotificationTemplateCode;
 import com.everhomes.rest.family.LeaveFamilyCommand;
 import com.everhomes.rest.family.ParamType;
 import com.everhomes.rest.forum.AttachmentDescriptor;
@@ -208,6 +209,7 @@ import com.everhomes.rest.organization.PrivateFlag;
 import com.everhomes.rest.organization.ProcessOrganizationTaskCommand;
 import com.everhomes.rest.organization.RejectOrganizationCommand;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
+import com.everhomes.rest.organization.SearchOrganizationCommandResponse;
 import com.everhomes.rest.organization.SearchTopicsByTypeCommand;
 import com.everhomes.rest.organization.SearchTopicsByTypeResponse;
 import com.everhomes.rest.organization.SendOrganizationMessageCommand;
@@ -238,6 +240,7 @@ import com.everhomes.rest.organization.pm.UnassignedBuildingDTO;
 import com.everhomes.rest.organization.pm.UpdateOrganizationMemberByIdsCommand;
 import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.search.GroupQueryResult;
+import com.everhomes.rest.search.OrganizationQueryResult;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.ui.privilege.EntrancePrivilege;
@@ -4199,7 +4202,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			organizationDTO.setContact(organizationDetailDTO.getContact());
 			organizationDTO.setDescription(organizationDetailDTO.getDescription());
 			organizationDTO.setAddress(organizationDetailDTO.getAddress());
-			
+			organizationDTO.setMemberStatus(organizationmember.getStatus());
 			if(null != community){
 				organizationDTO.setCommunityId(community.getId());
 				organizationDTO.setCommunityName(community.getName());
@@ -4240,28 +4243,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 		} else {
 			
 			sendMessageForContactApply(organizationmember);
-			//认证申请时推送消息给企业管理员 mod by xiongying 20160428
-			Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
-			if(org != null) {
-				
-		        ListOrganizationAdministratorCommand adminCmd = new ListOrganizationAdministratorCommand();
-		        adminCmd.setOrganizationId(org.getId());
-		        ListOrganizationMemberCommandResponse resp = rolePrivilegeService.listOrganizationAdministrators(adminCmd);
-		        if(resp != null && resp.getMembers() != null && resp.getMembers().size() > 0) {
-		        	
-		        	String scope = OrganizationNotificationTemplateCode.SCOPE;
-		        	int code = OrganizationNotificationTemplateCode.ORGANIZATION_APPLY_FOR_CONTACT;
-					Map<String, String> map = new HashMap<String, String>();
-			        map.put("userName", user.getNickName());
-			        map.put("organizationName", org.getName());
-			        String message = localeTemplateService.getLocaleTemplateString(scope, code, user.getLocale(), map, "");
-			        
-			        for(OrganizationMemberDTO mem : resp.getMembers()) {
-			        	
-			        	sendOrganizationNotificationToUser(mem.getTargetId(), message);
-		        	}
-		        }
-			}
 			
 			OrganizationDTO organizationDTO = ConvertHelper.convert(organization, OrganizationDTO.class);
 			
@@ -4272,6 +4253,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			organizationDTO.setContact(organizationDetailDTO.getContact());
 			organizationDTO.setDescription(organizationDetailDTO.getDescription());
 			organizationDTO.setAddress(organizationDetailDTO.getAddress());
+			organizationDTO.setMemberStatus(organizationmember.getStatus());
 			
 			if(null != community){
 				organizationDTO.setCommunityId(community.getId());
@@ -4559,8 +4541,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 		organizationProvider.createOrganizationMember(organizationMember);
 		userSearcher.feedDoc(organizationMember);
+		sendMessageForContactApproved(organizationMember);
 		return ConvertHelper.convert(organizationMember, OrganizationMemberDTO.class);
 	}
+	
 	
 	@Override
 	public void updatePersonnelsToDepartment(UpdatePersonnelsToDepartment cmd) {
@@ -5415,9 +5399,12 @@ public class OrganizationServiceImpl implements OrganizationService {
          String notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_CONTACT_REQUEST_TO_JOIN_FOR_APPLICANT);
          
          List<Long> includeList = new ArrayList<Long>();
-         includeList.add(member.getTargetId());
          
-         sendEnterpriseNotification(org.getId(), includeList, null, notifyTextForApplicant, null, null);
+       //给申请人发的信息应为私信by xiongying 20160524
+ 		sendMessageToUser(member.getTargetId(), notifyTextForApplicant, null);
+//         includeList.add(member.getTargetId());
+//         
+//         sendEnterpriseNotification(org.getId(), includeList, null, notifyTextForApplicant, null, null);
 
          // send notification to all the other members in the group
          notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_CONTACT_REQUEST_TO_JOIN_FOR_OPERATOR);
@@ -5445,18 +5432,40 @@ public class OrganizationServiceImpl implements OrganizationService {
          // send notification to who is requesting to join the enterprise
         String notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_USER_SUCCESS_MYSELF);
          
+        QuestionMetaObject metaObject = createGroupQuestionMetaObject(org, member, null);
+        
 		// send notification to who is requesting to join the enterprise
-		List<Long> includeList = new ArrayList<Long>();
-		includeList.add(member.getTargetId());
+        List<Long> includeList = new ArrayList<Long>();
+        
+        includeList.add(member.getTargetId());
 		sendEnterpriseNotification(org.getId(), includeList, null, notifyTextForApplicant, null, null);
+		
+		
+		//同意加入公司通知客户端  by sfyan 20160526
+		sendEnterpriseNotification(org.getId(), includeList, null, notifyTextForApplicant, MetaObjectType.ENTERPRISE_AGREE_TO_JOIN, metaObject);
 
 		// send notification to all the other members in the group
 		notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_USER_SUCCESS_OTHER);
 		includeList = this.includeOrgList(org, member.getTargetId());
 		sendEnterpriseNotification(org.getId(), includeList, null, notifyTextForApplicant, null, null);
+		
 	}
 	
-	
+	private void sendMessageToUser(Long uid, String content, Map<String, String> meta) {
+        MessageDTO messageDto = new MessageDTO();
+        messageDto.setAppId(AppConstants.APPID_MESSAGING);
+        messageDto.setSenderUid(User.SYSTEM_UID);
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid.toString()));
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+        messageDto.setBody(content);
+        messageDto.setMetaAppId(AppConstants.APPID_GROUP);
+        if(null != meta && meta.size() > 0) {
+            messageDto.getMeta().putAll(meta);
+            }
+        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
+                uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+    }
 	
    private void sendMessageForContactReject(OrganizationMember member) {
 	   // send notification to who is requesting to join the enterprise
@@ -5469,8 +5478,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 		// send notification to who is requesting to join the enterprise
 		
        List<Long> includeList = new ArrayList<Long>();
-       includeList.add(member.getTargetId());
-       sendEnterpriseNotification(org.getId(), includeList, null, notifyTextForApplicant, null, null);
+     //给申请人发的信息应为私信by xiongying 20160524
+       sendMessageToUser(member.getTargetId(), notifyTextForApplicant, null);
+//       includeList.add(member.getTargetId());
+//       sendEnterpriseNotification(org.getId(), includeList, null, notifyTextForApplicant, null, null);
 
        // send notification to all the other members in the group
        // code = EnterpriseNotifyTemplateCode.ENTERPRISE_USER_SUCCESS_OTHER;
@@ -5485,8 +5496,10 @@ public class OrganizationServiceImpl implements OrganizationService {
        // send notification to who is requesting to join the enterprise
        String notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_CONTACT_LEAVE_FOR_APPLICANT);
        List<Long> includeList = new ArrayList<Long>();
-       includeList.add(member.getTargetId());
-       sendEnterpriseNotification(org.getId(), includeList, null, notifyTextForApplicant, null, null);
+     //给申请人发的信息应为私信by xiongying 20160524
+       sendMessageToUser(member.getTargetId(), notifyTextForApplicant, null);
+//       includeList.add(member.getTargetId());
+//       sendEnterpriseNotification(org.getId(), includeList, null, notifyTextForApplicant, null, null);
 
        // send notification to all the other members in the enterprise
        notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_CONTACT_LEAVE_FOR_OTHER);
@@ -5599,7 +5612,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	        if(member == null) {
 	            LOGGER.error("Enterprise contact not found, operatorUid=" + operatorUid 
 	                + ", enterpriseId=" + enterpriseId + ", targetId=" + targetId + ", tag=" + tag);
-	            throw RuntimeErrorException.errorWith(EnterpriseServiceErrorCode.SCOPE, EnterpriseServiceErrorCode.ERROR_ENTERPRISE_CONTACT_NOT_FOUND, 
+	            throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ENTERPRISE_CONTACT_NOT_FOUND, 
 	                    "Unable to find the enterprise contact");
 	        }
 	        
@@ -6221,8 +6234,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    		UserIdentifier target = userProvider.findClaimedIdentifierByOwnerAndType(task.getTargetId(), IdentifierType.MOBILE.getCode());
 	    		if(null != target){
 	    			List<Tuple<String, Object>> variables = smsProvider.toTupleList("operatorUName", map.get("operatorUName"));
-	    			smsProvider.addToTupleList(variables, "targetUName", map.get("targetUName"));
-	    			smsProvider.addToTupleList(variables, "targetUToken", map.get("targetUToken"));
+	    			smsProvider.addToTupleList(variables, "createUName", map.get("createUName"));
+	    			smsProvider.addToTupleList(variables, "createUToken", map.get("createUToken"));
     				//发送短信
 	    			smsProvider.sendSms(namespaceId, target.getIdentifierToken(), SmsTemplateCode.SCOPE, SmsTemplateCode.PM_TASK_PROCESS_MSG_CODE, user.getLocale(), variables);
 	    		}
@@ -6449,5 +6462,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    Organization organization = organizationProvider.findOrganizationById(organizationId);
 	    
 	    return toOrganizationDTO(user.getId(), organization);
+	}
+	
+	@Override
+	public SearchOrganizationCommandResponse searchOrganization(
+			SearchOrganizationCommand cmd) {
+		SearchOrganizationCommandResponse resp = new SearchOrganizationCommandResponse();
+	    OrganizationQueryResult olt = this.organizationSearcher.queryOrganization(cmd);
+	    resp.setDtos(olt.getDtos());
+	    resp.setNextPageAnchor(olt.getPageAnchor());
+		return resp;
 	}
 }

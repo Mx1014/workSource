@@ -1,5 +1,7 @@
 package com.everhomes.rest.pmsy;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * <li>userName: 用户姓名</li>
@@ -32,5 +34,8 @@ public class ListResourceCommand {
 		this.userContact = userContact;
 	}
 	
-	
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

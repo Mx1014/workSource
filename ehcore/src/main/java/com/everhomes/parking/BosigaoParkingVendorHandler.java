@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import com.bosigao.cxf.Service1;
 import com.bosigao.cxf.Service1Soap;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.organization.pm.pay.ResultHolder;
 import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
@@ -27,6 +28,7 @@ import com.everhomes.rest.parking.ParkingCardDTO;
 import com.everhomes.rest.parking.ParkingCardIssueFlag;
 import com.everhomes.rest.parking.ParkingCardRequestDTO;
 import com.everhomes.rest.parking.ParkingCardRequestStatus;
+import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.parking.ParkingLotVendor;
 import com.everhomes.rest.parking.ParkingOwnerType;
 import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
@@ -44,6 +46,9 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 
 	@Autowired
 	private ParkingProvider parkingProvider;
+	
+	@Autowired
+	private LocaleStringService localeStringService;
 	
     @SuppressWarnings("unchecked")
 	@Override
@@ -236,11 +241,37 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 	
 	@Override
 	public ParkingCardRequestDTO getRequestParkingCard(RequestParkingCardCommand cmd) {
+        List<ParkingCardDTO> cardList = getParkingCardsByPlate(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId(),
+        		cmd.getPlateNumber());
+        User user = UserContext.current().getUser();
+		if(cardList.size()>0){
+			LOGGER.error("the plateNumber card is existed .");
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_EXIST,
+					localeStringService.getLocalizedString(String.valueOf(ParkingErrorCode.SCOPE), 
+							String.valueOf(ParkingErrorCode.ERROR_PLATE_EXIST),
+							UserContext.current().getUser().getLocale(),"the plateNumber card is existed."));
+		}
+
+        if(cardList.size() == 0){
+        	
+        	List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(user.getId(),cmd.getOwnerType(), 
+        			cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(),null,
+        			ParkingCardRequestStatus.INACTIVE.getCode(), null, null);
+        	if(list.size()>0){
+        		LOGGER.error("the plateNumber is already applied.");
+    			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_APPLIED,
+    					localeStringService.getLocalizedString(String.valueOf(ParkingErrorCode.SCOPE), 
+    							String.valueOf(ParkingErrorCode.ERROR_PLATE_APPLIED),
+    							UserContext.current().getUser().getLocale(),"the plateNumber is already applied."));
+        	}
+        }
 		
 		if(cmd.getPlateNumber().length() != 7) {
 			LOGGER.error("the length of plateNumber is wrong.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"the length of plateNumber is wrong.");
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_LENGTH,
+					localeStringService.getLocalizedString(String.valueOf(ParkingErrorCode.SCOPE), 
+							String.valueOf(ParkingErrorCode.ERROR_PLATE_LENGTH),
+							UserContext.current().getUser().getLocale(),"the length of plateNumber is wrong."));
 		}
 		ParkingCardRequestDTO parkingCardRequestDTO = new ParkingCardRequestDTO();
 		try {
@@ -253,11 +284,11 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 			parkingCardRequest.setPlateOwnerEntperiseName(cmd.getPlateOwnerEntperiseName());
 			parkingCardRequest.setPlateOwnerName(cmd.getPlateOwnerName());
 			parkingCardRequest.setPlateOwnerPhone(cmd.getPlateOwnerPhone());
-			parkingCardRequest.setRequestorUid(UserContext.current().getLogin().getUserId());
+			parkingCardRequest.setRequestorUid(user.getId());
 			//设置一些初始状态
 			parkingCardRequest.setIssueFlag(ParkingCardIssueFlag.UNISSUED.getCode());
 			parkingCardRequest.setStatus(ParkingCardRequestStatus.QUEUEING.getCode());
-			parkingCardRequest.setCreatorUid(UserContext.current().getLogin().getUserId());
+			parkingCardRequest.setCreatorUid(user.getId());
 			parkingCardRequest.setCreateTime(new Timestamp(System.currentTimeMillis()));
 			
 			parkingProvider.requestParkingCard(parkingCardRequest);

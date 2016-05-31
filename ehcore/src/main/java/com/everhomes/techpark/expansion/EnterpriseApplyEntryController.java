@@ -64,6 +64,8 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 			EnterpriseDetailDTO dto = ConvertHelper.convert(c, EnterpriseDetailDTO.class);
 			dto.setEnterpriseId(c.getOrganizationId());
 			dto.setEnterpriseName(c.getDisplayName());
+			if(dto.getEnterpriseName() == null)
+				dto.setEnterpriseName(c.getName());
 			dto.setContactPhone(c.getAccountPhone());
 			return dto;
 		}).collect(Collectors.toList()));

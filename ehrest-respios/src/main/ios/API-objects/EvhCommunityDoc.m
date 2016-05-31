@@ -42,6 +42,8 @@
         [jsonObject setObject: self.regionId forKey: @"regionId"];
     if(self.namespaceId)
         [jsonObject setObject: self.namespaceId forKey: @"namespaceId"];
+    if(self.communityType)
+        [jsonObject setObject: self.communityType forKey: @"communityType"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -70,6 +72,10 @@
         self.namespaceId = [jsonObject objectForKey: @"namespaceId"];
         if(self.namespaceId && [self.namespaceId isEqual:[NSNull null]])
             self.namespaceId = nil;
+
+        self.communityType = [jsonObject objectForKey: @"communityType"];
+        if(self.communityType && [self.communityType isEqual:[NSNull null]])
+            self.communityType = nil;
 
         return self;
     }

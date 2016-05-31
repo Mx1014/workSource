@@ -14,14 +14,18 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.DbProvider;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.namespace.GetNamespaceDetailCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.namespace.NamespaceDetailDTO;
 import com.everhomes.rest.namespace.NamespaceResourceType;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 
@@ -38,6 +42,9 @@ public class NamespaceResourceServiceImpl implements NamespaceResourceService {
 
 	@Autowired
 	private CommunityProvider communityProvider;
+	
+	@Autowired
+	private ConfigurationProvider configurationProvider;
 	
 	@Override
     public ListCommunityByNamespaceCommandResponse listCommunityByNamespace(ListCommunityByNamespaceCommand cmd) {
@@ -67,20 +74,17 @@ public class NamespaceResourceServiceImpl implements NamespaceResourceService {
 //                }
 //            }
 //        }
-	    List<CommunityDTO> communityList = new ArrayList<CommunityDTO>();
-	    List<Community> communities = communityProvider.listCommunitiesByNamespaceId(namespaceId);
-	    if(communities != null && communities.size() > 0) {
-	    	for (Community community : communities) {
-				if(null != cmd.getCommunityType()){
-					if(cmd.getCommunityType().equals(community.getCommunityType())){
-						communityList.add(ConvertHelper.convert(community, CommunityDTO.class));
-					}
-				}else{
-					communityList.add(ConvertHelper.convert(community, CommunityDTO.class));
-				}
-			}
-	    }
-
+	    
+	    // 先从namespaceResource查询域下面的全部的小区，然后再从community筛选类型  by sfyan 20160524
+	    int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+	    List<NamespaceResource> resources = namespaceResourceProvider.listResourceByNamespace(namespaceId, NamespaceResourceType.COMMUNITY);
+	    List<Long> communityIds = new ArrayList<Long>();
+	    for (NamespaceResource resource : resources) {
+	    	communityIds.add(resource.getResourceId());
+		}
+	    CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());		
+		List<CommunityDTO> communityList = communityProvider.listCommunitiesByType(communityIds, cmd.getCommunityType(), locator, pageSize);		
         response.setCommunities(communityList);
         
         return response;

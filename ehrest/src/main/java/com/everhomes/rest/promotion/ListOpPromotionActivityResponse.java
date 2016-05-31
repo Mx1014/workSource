@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
 
 public class ListOpPromotionActivityResponse {
 
-    @ItemType(OpPromotionActivityDTO.class)
+	@ItemType(OpPromotionActivityDTO.class)
     List<OpPromotionActivityDTO> promotions;
     
     private Long nextPageAnchor;

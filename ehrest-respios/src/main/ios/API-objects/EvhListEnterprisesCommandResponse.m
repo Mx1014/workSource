@@ -2,7 +2,7 @@
 // EvhListEnterprisesCommandResponse.m
 //
 #import "EvhListEnterprisesCommandResponse.h"
-#import "EvhOrganizationDTO.h"
+#import "EvhOrganizationDetailDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhListEnterprisesCommandResponse
@@ -36,7 +36,7 @@
         [jsonObject setObject: self.nextPageAnchor forKey: @"nextPageAnchor"];
     if(self.dtos) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhOrganizationDTO* item in self.dtos) {
+        for(EvhOrganizationDetailDTO* item in self.dtos) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -55,7 +55,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"dtos"];
             for(id itemJson in jsonArray) {
-                EvhOrganizationDTO* item = [EvhOrganizationDTO new];
+                EvhOrganizationDetailDTO* item = [EvhOrganizationDetailDTO new];
                 
                 [item fromJson: itemJson];
                 [self.dtos addObject: item];

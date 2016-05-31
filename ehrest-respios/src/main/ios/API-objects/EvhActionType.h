@@ -51,7 +51,8 @@ typedef enum {
     EvhActionType_NOTICE_MANAGERMENT = 43, 
     EvhActionType_OFFLINE_WEBAPP = 44, 
     EvhActionType_SERVICE_HOT_LINE = 45, 
-    EvhActionType_CONTACTS = 46
+    EvhActionType_CONTACTS = 46, 
+    EvhActionType_WIFI = 47
 
 } EvhActionType;
 

@@ -30,6 +30,7 @@ import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.rest.visibility.VisibilityScope;
+import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.user.User;
 import com.everhomes.util.WebTokenGenerator;
 
@@ -246,12 +247,16 @@ public class DiscoveryDefaultPostSceneHandler implements PostSceneHandler {
             menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
             sentScopeDto.setName(menuName);
             sentScopeDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
+            sentScopeDto.setDefaultFlag(SelectorBooleanFlag.TRUE.getCode());
             sentScopeDto.setForumId(community.getDefaultForumId());
             sentScopeDto.setSceneToken(sceneToken);
             sentScopeDto.setTargetTag(PostEntityTag.USER.getCode());
             String avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.community_nearby", "");
             sentScopeDto.setAvatar(avatarUri);
             sentScopeDto.setAvatarUrl(getPostFilterDefaultAvatar(namespaceId, user.getId(), avatarUri));
+            
+            sentScopeDto.setVisibleRegionType(VisibleRegionType.COMMUNITY.getCode());
+            sentScopeDto.setVisibleRegionId(community.getId());
             scopeList.add(sentScopeDto);
 
             // 菜单：本小区
@@ -268,6 +273,9 @@ public class DiscoveryDefaultPostSceneHandler implements PostSceneHandler {
             avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.community_only", "");
             sentScopeDto.setAvatar(avatarUri);
             sentScopeDto.setAvatarUrl(getPostFilterDefaultAvatar(namespaceId, user.getId(), avatarUri));
+            
+            sentScopeDto.setVisibleRegionType(VisibleRegionType.COMMUNITY.getCode());
+            sentScopeDto.setVisibleRegionId(community.getId());
             scopeList.add(sentScopeDto);
 
             // 各兴趣圈
@@ -318,6 +326,30 @@ public class DiscoveryDefaultPostSceneHandler implements PostSceneHandler {
 //            }
         }
         
+        //保证整个菜单列表有且只有一个默认的叶子节点 如果上面创建菜单的时候没有指定该默认的叶子节点，则拿第一个叶子节点作为默认节点 by lqs 20160525
+        setDefaultLeafMenu(scopeList);
+        
         return scopeList;
+    }
+    
+    private void setDefaultLeafMenu(List<TopicScopeDTO> sentScopeList) {
+    	TopicScopeDTO firstUndefaultScopeDto = null;
+        boolean hasDefault = false;
+        for(TopicScopeDTO sentScopeDto : sentScopeList) {
+        	if(SelectorBooleanFlag.fromCode(sentScopeDto.getLeafFlag()) == SelectorBooleanFlag.TRUE) {
+        		if(SelectorBooleanFlag.fromCode(sentScopeDto.getDefaultFlag()) == SelectorBooleanFlag.TRUE) {
+        			hasDefault = true;
+        			break;
+        		} else {
+        			if(firstUndefaultScopeDto == null) {
+        				firstUndefaultScopeDto = sentScopeDto;
+        			}
+        		}
+        	}
+        }
+        
+        if(!hasDefault && firstUndefaultScopeDto != null) {
+        	firstUndefaultScopeDto.setDefaultFlag(SelectorBooleanFlag.TRUE.getCode());
+        }
     }
 }

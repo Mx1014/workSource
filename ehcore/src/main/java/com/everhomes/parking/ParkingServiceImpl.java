@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
@@ -64,6 +63,7 @@ import com.everhomes.rest.parking.ParkingCardDTO;
 import com.everhomes.rest.parking.ParkingCardIssueFlag;
 import com.everhomes.rest.parking.ParkingCardRequestDTO;
 import com.everhomes.rest.parking.ParkingCardRequestStatus;
+import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.parking.ParkingLotDTO;
 import com.everhomes.rest.parking.ParkingOwnerType;
 import com.everhomes.rest.parking.ParkingRechargeOrderDTO;
@@ -202,8 +202,8 @@ public class ParkingServiceImpl implements ParkingService {
     	User user = UserContext.current().getUser();
     	
     	List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(user.getId(),cmd.getOwnerType(), 
-    			cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(),null,
-    			null, cmd.getPageAnchor(), cmd.getPageSize());
+    			cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(),null, cmd.getPageAnchor(),
+    			cmd.getPageSize());
     					
     	if(list.size() > 0){
     		response.setRequests(list.stream().map(r -> ConvertHelper.convert(r, ParkingCardRequestDTO.class))
@@ -211,7 +211,7 @@ public class ParkingServiceImpl implements ParkingService {
     		if(list.size() != cmd.getPageSize()){
         		response.setNextPageAnchor(null);
         	}else{
-        		response.setNextPageAnchor(list.get(list.size()-1).getId());
+        		response.setNextPageAnchor(list.get(list.size()-1).getCreateTime().getTime());
         	}
     	}
     	
@@ -222,14 +222,13 @@ public class ParkingServiceImpl implements ParkingService {
 	public CommonOrderDTO createParkingRechargeOrder(CreateParkingRechargeOrderCommand cmd){
 		
 		checkPlateNumber(cmd.getPlateNumber());
-        checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
 		ParkingRechargeOrder parkingRechargeOrder = new ParkingRechargeOrder();
 		
 		User user = UserContext.current().getUser();
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 		
-		ParkingLot parkingLot = parkingProvider.findParkingLotById(cmd.getParkingLotId());
 		try{
 		parkingRechargeOrder.setOwnerType(cmd.getOwnerType());
 		parkingRechargeOrder.setOwnerId(cmd.getOwnerId());
@@ -288,9 +287,11 @@ public class ParkingServiceImpl implements ParkingService {
 		ListParkingRechargeOrdersResponse response = new ListParkingRechargeOrdersResponse();
 		//设置分页
 		cmd.setPageSize(PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize()));
+		User user = UserContext.current().getUser();
+
 		List<ParkingRechargeOrder> list = parkingProvider.listParkingRechargeOrders
-    			(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId(), 
-    					cmd.getPlateNumber(), cmd.getPageAnchor(), cmd.getPageSize());
+    			(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(),
+    					cmd.getPageAnchor(), cmd.getPageSize(),user.getId());
     					
     	if(list.size() > 0){
     		response.setOrders(list.stream().map(r -> ConvertHelper.convert(r, ParkingRechargeOrderDTO.class))
@@ -298,7 +299,7 @@ public class ParkingServiceImpl implements ParkingService {
     		if(list.size() != cmd.getPageSize()){
         		response.setNextPageAnchor(null);
         	}else{
-        		response.setNextPageAnchor(list.get(list.size()-1).getId());
+        		response.setNextPageAnchor(list.get(list.size()-1).getRechargeTime().getTime());
         	}
     	}
     	
@@ -335,11 +336,11 @@ public class ParkingServiceImpl implements ParkingService {
 		if(cmd.getEndDate() != null)
 			new Timestamp(cmd.getEndDate());
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-		
+		//User user = UserContext.current().getUser();
 		List<ParkingRechargeOrder> list = parkingProvider.searchParkingRechargeOrders(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
 				cmd.getPlateOwnerPhone(),cmd.getPaidType(), cmd.getPayerName(), cmd.getPayerPhone(), cmd.getPageAnchor(), 
-				pageSize,startDate,endDate,cmd.getRechargeStatus()
+				pageSize,startDate,endDate,cmd.getRechargeStatus()/*,user.getId()*/
 				);
     					
     	if(list.size() > 0){
@@ -348,7 +349,7 @@ public class ParkingServiceImpl implements ParkingService {
     		if(pageSize != null && list.size() != pageSize){
         		response.setNextPageAnchor(null);
         	}else{
-        		response.setNextPageAnchor(list.get(list.size()-1).getId());
+        		response.setNextPageAnchor(list.get(list.size()-1).getRechargeTime().getTime());
         	}
     	}
     	
@@ -375,7 +376,7 @@ public class ParkingServiceImpl implements ParkingService {
     		if( pageSize != null && list.size() != pageSize){
         		response.setNextPageAnchor(null);
         	}else{
-        		response.setNextPageAnchor(list.get(list.size()-1).getId());
+        		response.setNextPageAnchor(list.get(list.size()-1).getCreateTime().getTime());
         	}
     	}
     	
@@ -413,6 +414,7 @@ public class ParkingServiceImpl implements ParkingService {
 				"parkingCardRequest status is not notified.");
         }
         //设置已领取状态和 领取时间
+        parkingCardRequest.setStatus(ParkingCardRequestStatus.ISSUED.getCode());
         parkingCardRequest.setIssueFlag(ParkingCardIssueFlag.ISSUED.getCode());
         parkingCardRequest.setIssueTime(new Timestamp(System.currentTimeMillis()));
         parkingProvider.updateParkingCardRequest(Collections.singletonList(parkingCardRequest));
@@ -429,8 +431,8 @@ public class ParkingServiceImpl implements ParkingService {
         checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
         
     	List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(null,null, 
-    			null, null, null,ParkingCardRequestStatus.QUEUEING,
-    			"CREATE_TIME asc", null, cmd.getCount())
+    			null, null, null,ParkingCardRequestStatus.QUEUEING.getCode(),
+    			null, null, cmd.getCount())
     			.stream().map(r -> {
     				r.setStatus(ParkingCardRequestStatus.NOTIFIED.getCode());
 					return r;
@@ -526,6 +528,13 @@ public class ParkingServiceImpl implements ParkingService {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     				"plateNumber cannot be null.");
         }
+    	if(plateNumber.length() != 7) {
+			LOGGER.error("the length of plateNumber is wrong.");
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_LENGTH,
+					localeStringService.getLocalizedString(String.valueOf(ParkingErrorCode.SCOPE), 
+							String.valueOf(ParkingErrorCode.ERROR_PLATE_LENGTH),
+							UserContext.current().getUser().getLocale(),"the length of plateNumber is wrong."));
+		}
     }
     
     @Scheduled(cron="0 0 2 * * ? ")
@@ -588,10 +597,12 @@ public class ParkingServiceImpl implements ParkingService {
 			startDate = new Timestamp(cmd.getStartDate());
 		if(cmd.getEndDate() != null)
 			new Timestamp(cmd.getEndDate());
+		//User user = UserContext.current().getUser();
+
 		List<ParkingRechargeOrder> list = parkingProvider.searchParkingRechargeOrders(cmd.getOwnerType(),
 				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
 				cmd.getPlateOwnerPhone(),cmd.getPaidType(), cmd.getPayerName(), cmd.getPayerPhone(), cmd.getPageAnchor(), 
-				null,startDate,endDate,cmd.getRechargeStatus()
+				null,startDate,endDate,cmd.getRechargeStatus()/*,user.getId()*/
 				);
 		Workbook wb = new XSSFWorkbook();
 		

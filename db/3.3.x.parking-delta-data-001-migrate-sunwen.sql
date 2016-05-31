@@ -1,4 +1,4 @@
-
+DELETE FROM `eh_parking_recharge_orders`;
 DELETE FROM `eh_parking_lots`;
 DELETE FROM `eh_parking_recharge_rates`;
 DELETE FROM `eh_parking_card_requests`;
@@ -9,6 +9,8 @@ INSERT INTO `eh_parking_recharge_rates` VALUES ('10001', 'community', '240111044
 INSERT INTO `eh_parking_recharge_rates` VALUES ('10002', 'community', '240111044331048623', '10001', '普通月卡', '6.00', '2400.00', '2', '1025', '2016-03-31 17:15:41');
 INSERT INTO `eh_parking_recharge_rates` VALUES ('10003', 'community', '240111044331048623', '10001', '固定车位卡', '3.00', '2400.00', '2', '1025', '2016-03-31 17:16:17');
 INSERT INTO `eh_parking_recharge_rates` VALUES ('10004', 'community', '240111044331048623', '10001', '固定车位卡', '6.00', '4800.00', '2', '1025', '2016-03-31 17:16:17');
+INSERT INTO `eh_parking_recharge_rates` VALUES ('10005', 'community', '240111044331048623', '10001', '普通月卡', '1.00', '0.01', '2', '1025', '2016-03-31 17:16:17');
+
 
 INSERT INTO `eh_parking_card_requests` VALUES ('81', 'community', '240111044331048623', '10001', '178945', '195675', '粤B54609 ', '深圳市永佳天成科技发展有限公司', '顾大洋', '13008862125', '1', '0', null, '195675', '2016-03-09 15:00:27');
 INSERT INTO `eh_parking_card_requests` VALUES ('82', 'community', '240111044331048623', '10001', '178945', '196008', '粤AA799F ', '深圳市永佳天成科技发展有限公司', 'hitlilei', '15307935896', '1', '0', null, '196008', '2016-03-15 17:03:51');
@@ -152,8 +154,5 @@ UPDATE `eh_parking_recharge_orders` SET paid_time = '2016-05-09 13:36:51', paid_
 UPDATE `eh_parking_recharge_orders` SET paid_time = '2016-05-09 13:40:34', paid_type = '10002' WHERE order_no = 1462772424815432;
 
 
-
-# update parking lot name
-UPDATE `eh_parking_lots` SET name = '金融基地停车场' WHERE id = 10001;
 
 

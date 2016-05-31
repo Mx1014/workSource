@@ -36,6 +36,7 @@ public class NamespaceResourceController extends ControllerBase {
      * <p>根据命名空间下列出机构所管辖的小区信息</p>
      */
     //checked
+    @RequireAuthentication(false)
     @RequestMapping("listCommunityByNamespace")
     @RestReturn(value=ListCommunityByNamespaceCommandResponse.class)
     public RestResponse listCommunityByNamespace(@Valid ListCommunityByNamespaceCommand cmd) {

@@ -1,5 +1,7 @@
 package com.everhomes.rest.pmsy;
 
+import com.everhomes.util.StringHelper;
+
 /**
  *<ul>
  * <li>communityId : 小区ID（左邻）</li>
@@ -55,5 +57,8 @@ public class SearchBillsOrdersCommand {
 	public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
 	}
-	
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

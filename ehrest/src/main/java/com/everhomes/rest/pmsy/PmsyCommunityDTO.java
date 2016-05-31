@@ -1,5 +1,7 @@
 package com.everhomes.rest.pmsy;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * <li>id: ID</li>
@@ -39,6 +41,9 @@ public class PmsyCommunityDTO {
 	public void setBillTip(String billTip) {
 		this.billTip = billTip;
 	}
-	
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 	
 }

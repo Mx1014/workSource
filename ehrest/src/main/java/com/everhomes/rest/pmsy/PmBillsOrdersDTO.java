@@ -3,6 +3,8 @@ package com.everhomes.rest.pmsy;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * <li>id: 订单ID</li>
@@ -106,5 +108,8 @@ public class PmBillsOrdersDTO {
 		this.paidType = paidType;
 	}
 	
-	
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

@@ -7,7 +7,7 @@ import com.everhomes.discover.ItemType;
 public class ListEnterprisesCommandResponse {
     private Long nextPageAnchor;
     
-    @ItemType(OrganizationDTO.class)
+    @ItemType(OrganizationDetailDTO.class)
     private List<OrganizationDetailDTO> dtos;
 
     public Long getNextPageAnchor() {

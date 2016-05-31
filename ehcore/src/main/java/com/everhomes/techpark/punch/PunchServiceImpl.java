@@ -167,7 +167,9 @@ public class PunchServiceImpl implements PunchService {
 	 */
 
 	public String statusToString (Byte status){
-
+		if(null == status){
+			return "";
+		}
 		if(status.equals(ApprovalStatus.HALFABSENCE.getCode()))
 			return "半天事假";
 		if(status.equals(ApprovalStatus.HALFEXCHANGE.getCode()))

@@ -1,7 +1,9 @@
 package com.everhomes.organization;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -14,6 +16,7 @@ import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,13 +26,16 @@ import org.springframework.util.StringUtils;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.search.GroupQueryResult;
+import com.everhomes.rest.search.OrganizationQueryResult;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.GroupQueryFilter;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.UserContext;
 
 @Service
 public class OrganizationSearcherImpl extends AbstractElasticSearch implements OrganizationSearcher {
@@ -157,7 +163,7 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
 //            qb = QueryBuilders.filteredQuery(qb, fb);
 //        }
         
-        Integer namespaceId = (cmd.getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         FilterBuilder fb = FilterBuilders.termFilter("namespaceId", namespaceId);
         
         // 每个企业（含物业管理公司）都有可能在某个园区内，当客户端提供园区作为过滤条件时，则在园区范围内挑选园区 by lqs 20160512
@@ -196,5 +202,98 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         return result;
     }
 
-	
+    @Override
+    public OrganizationQueryResult queryOrganization(SearchOrganizationCommand cmd) {
+        GroupQueryFilter filter = new GroupQueryFilter();
+        int pageNum = 0;
+        if(cmd.getPageAnchor() != null) {
+            pageNum = cmd.getPageAnchor().intValue();
+        }
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+
+       SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
+        
+        QueryBuilder qb;
+        
+        if(StringUtils.isEmpty(cmd.getKeyword())) {
+            qb = QueryBuilders.matchAllQuery();
+        } else {
+        	qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
+                    .field("name", 5.0f)
+                    .field("name.pinyin_prefix", 2.0f)
+                    .field("name.pinyin_gram", 1.0f);      
+        }
+        
+//        FilterBuilder fb = null;
+//
+//        if(null == fb) {
+//            fb = FilterBuilders.termFilter("communityType", t.getCode());
+//        } else {
+//            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityType", EnterpriseCommunityType.Normal.getCode()));
+//        }
+        
+//        if(null != fb) {
+//            qb = QueryBuilders.filteredQuery(qb, fb);
+//        }
+        
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+        FilterBuilder fb = FilterBuilders.termFilter("namespaceId", namespaceId);
+        
+        // 每个企业（含物业管理公司）都有可能在某个园区内，当客户端提供园区作为过滤条件时，则在园区范围内挑选园区 by lqs 20160512
+        if(cmd.getCommunityId() != null) {
+            FilterBuilder cmntyFilter = FilterBuilders.termFilter("communityId", cmd.getCommunityId());
+            fb = FilterBuilders.andFilter(fb, cmntyFilter);
+        }
+        
+        // 用于一些场景下只能搜索出普通公司 by sfyan 20160523
+        if(!StringUtils.isEmpty(cmd.getOrganizationType())) {
+        	//转小写查 by xiongying 20160524
+            FilterBuilder cmntyFilter = FilterBuilders.termFilter("organizationType", cmd.getOrganizationType().toLowerCase());
+            fb = FilterBuilders.andFilter(fb, cmntyFilter);
+        }
+        qb = QueryBuilders.filteredQuery(qb, fb);
+       
+        builder.setSearchType(SearchType.QUERY_THEN_FETCH);
+        
+        builder.setFrom(pageNum * pageSize).setSize(pageSize+1);
+        
+        builder.setQuery(qb);
+        
+        SearchResponse rsp = builder.execute().actionGet();
+        
+        OrganizationQueryResult result = new OrganizationQueryResult();
+        
+        List<OrganizationDTO> dtos = this.getDTOs(rsp);
+        
+        if(dtos.size() > pageSize){
+        	result.setPageAnchor(dtos.get(pageSize - 1).getId());
+        }
+        
+        result.setDtos(this.getDTOs(rsp));
+        
+        return result;
+    }
+    
+    private List<OrganizationDTO> getDTOs(SearchResponse rsp) {
+        List<OrganizationDTO> dtos = new ArrayList<OrganizationDTO>();
+        SearchHit[] docs = rsp.getHits().getHits();
+        for (SearchHit sd : docs) {
+            try {
+            	OrganizationDTO dto = new OrganizationDTO();
+            	dto.setId(Long.parseLong(sd.getId()));
+            	Map<String, Object> source = sd.getSource();
+            	
+            	dto.setName(String.valueOf(source.get("name")));
+            	dto.setCommunityId(SearchUtils.getLongField(source.get("communityId")));
+            	dto.setDescription(String.valueOf(source.get("description")));
+            	dtos.add(dto);
+            	
+            }
+            catch(Exception ex) {
+                LOGGER.info("getTopicIds error " + ex.getMessage());
+            }
+        }
+        
+        return dtos;
+    }
 }

@@ -37,6 +37,7 @@ import com.everhomes.category.CategoryProvider;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.discover.ItemType;
 import com.everhomes.enterprise.Enterprise;
 import com.everhomes.enterprise.EnterpriseContact;
 import com.everhomes.enterprise.EnterpriseContactEntry;
@@ -69,6 +70,7 @@ import com.everhomes.rest.videoconf.ConfCapacity;
 import com.everhomes.rest.videoconf.ConfCategoryDTO;
 import com.everhomes.rest.videoconf.ConfOrderAccountDTO;
 import com.everhomes.rest.videoconf.ConfOrderDTO;
+import com.everhomes.rest.videoconf.ConfRecordDTO;
 import com.everhomes.rest.videoconf.ConfReservationsDTO;
 import com.everhomes.rest.videoconf.ConfServiceErrorCode;
 import com.everhomes.rest.videoconf.ConfType;
@@ -801,9 +803,41 @@ public class VideoConfServiceImpl implements VideoConfService {
 		
 		int countConf = vcProvider.countConfByAccount(cmd.getAccountId());
 		response.setConfCount(countConf);
+
+		Long confTimeCount = vcProvider.listConfTimeByAccount(cmd.getAccountId());
+		response.setConfTimeCount(confTimeCount);
 		
+		CrossShardListingLocator locator=new CrossShardListingLocator();
+	    locator.setAnchor(cmd.getPageAnchor());
+	    int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+	    
+		List<ConfConferences> conferences = vcProvider.listConfbyAccount(cmd.getAccountId(), locator, pageSize+1);
+		
+		if(conferences != null && conferences.size() > 0) {
+			
+			Long nextPageAnchor = null;
+			if(conferences != null && conferences.size() > pageSize) {
+				nextPageAnchor = conferences.get(conferences.size() -1).getId();
+				conferences.remove(conferences.size() - 1);
+			}
+			response.setNextPageAnchor(nextPageAnchor);
+			
+			List<ConfRecordDTO> confRecords = conferences.stream().map(r -> {
+				ConfRecordDTO confRecord = new ConfRecordDTO();
+				 confRecord.setConfId(r.getMeetingNo());
+				 confRecord.setConfDate(r.getStartTime());
+				 confRecord.setConfTime(r.getRealDuration());
+				 confRecord.setPeople(r.getMaxCount());
+				
+				return confRecord;
+			}).collect(Collectors.toList());
+			
+			response.setConfRecords(confRecords);
+		}
+	
 		return response;
 	}
+		
 
 	@Override
 	public void updateVideoConfAccount(UpdateVideoConfAccountCommand cmd) {

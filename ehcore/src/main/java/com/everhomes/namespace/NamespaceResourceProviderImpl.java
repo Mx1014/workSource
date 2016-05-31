@@ -3,6 +3,7 @@ package com.everhomes.namespace;
 
 import java.util.List;
 
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.schema.tables.daos.EhNamespacesDao;
 import com.everhomes.server.schema.Tables;
@@ -47,6 +49,27 @@ public class NamespaceResourceProviderImpl implements NamespaceResourceProvider 
             });
         
         return list;
+    }
+    
+    @Cacheable(value = "listResourceByNamespaceLocator", key="{#namespaceId, #type, #count}", unless="#result.size() == 0")
+    @Override
+    public List<NamespaceResource> listResourceByNamespace(
+    		ListingLocator locator, int count, Integer namespaceId,
+    		NamespaceResourceType type) {
+    	 DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+    	 Condition cond = Tables.EH_NAMESPACE_RESOURCES.NAMESPACE_ID.eq(namespaceId);
+    	 cond = cond.and(Tables.EH_NAMESPACE_RESOURCES.RESOURCE_TYPE.eq(type.getCode()));
+    	 if(null != locator.getAnchor()){
+    		 cond = cond.and(Tables.EH_NAMESPACE_RESOURCES.ID.gt(locator.getAnchor()));
+    	 }
+         List<NamespaceResource> list = context.select().from(Tables.EH_NAMESPACE_RESOURCES)
+             .where(cond)
+             .orderBy(Tables.EH_NAMESPACE_RESOURCES.ID.asc())
+             .limit(count)
+             .fetch().map((r) -> {
+                 return ConvertHelper.convert(r, NamespaceResource.class);
+             });
+    	return null;
     }
     
     @Cacheable(value = "findNamespaceDetailByNamespaceId", key="#namespaceId", unless="#result == null")

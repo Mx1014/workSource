@@ -25,6 +25,9 @@ public class SearchUtils {
         Long v = -1l;
         String s = "";
         try {
+        	if(null == o){
+        		return v;
+        	}
             v = (Long)o;
             return v;
         }

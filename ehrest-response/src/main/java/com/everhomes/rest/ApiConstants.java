@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-05-25 16:27:08
+// generated at 2016-05-31 11:07:12
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -589,6 +589,7 @@ public interface ApiConstants {
     public static final String ORG_REJECTORGANIZATION_URL = "/org/rejectOrganization";
     public static final String ORG_REJECTORGANIZATIONMEMBER_URL = "/org/rejectOrganizationMember";
     public static final String ORG_SEARCHENTERPRISE_URL = "/org/searchEnterprise";
+    public static final String ORG_SEARCHORGANIZATION_URL = "/org/searchOrganization";
     public static final String ORG_SEARCHTOPICSBYTYPE_URL = "/org/searchTopicsByType";
     public static final String ORG_SENDORGMESSAGE_URL = "/org/sendOrgMessage";
     public static final String ORG_SETCURRENTORGANIZATION_URL = "/org/setCurrentOrganization";
@@ -805,6 +806,8 @@ public interface ApiConstants {
     public static final String UI_FORUM_NEWTOPICBYSCENE_URL = "/ui/forum/newTopicByScene";
     public static final String UI_FORUM_SEARCHBYSCENE_URL = "/ui/forum/searchByScene";
     public static final String UI_GROUP_LISTNEARBYGROUPSBYSCENE_URL = "/ui/group/listNearbyGroupsByScene";
+    public static final String UI_LAUNCHPAD_CANCELFAVORITEBUSINESSBYSCENE_URL = "/ui/launchpad/cancelFavoriteBusinessByScene";
+    public static final String UI_LAUNCHPAD_FAVORITEBUSINESSESBYSCENE_URL = "/ui/launchpad/favoriteBusinessesByScene";
     public static final String UI_LAUNCHPAD_GETLASTLAUNCHPADLAYOUTBYSCENE_URL = "/ui/launchpad/getLastLaunchPadLayoutByScene";
     public static final String UI_LAUNCHPAD_GETLAUNCHPADITEMSBYSCENE_URL = "/ui/launchpad/getLaunchPadItemsByScene";
     public static final String UI_ORG_ACCEPTTASK_URL = "/ui/org/acceptTask";

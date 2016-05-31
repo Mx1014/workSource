@@ -116,6 +116,7 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
             doc.setCityName((String)source.get("cityName"));
             doc.setRegionId(SearchUtils.getLongField(source.get("regionId")));
             doc.setNamespaceId(SearchUtils.getLongField(source.get("namespaceId")).intValue());
+            doc.setCommunityType(SearchUtils.getLongField(source.get("communityType")).byteValue());
             
             return doc;
         }

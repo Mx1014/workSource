@@ -1,5 +1,7 @@
 package com.everhomes.rest.wifi;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * <li>ownerType: 归属的类型，{@link com.everhomes.rest.wifi.WifiOwnerType}</li>
@@ -35,5 +37,8 @@ public class VerifyWifiCommand {
 	public void setOwnerId(java.lang.Long ownerId) {
 		this.ownerId = ownerId;
 	}
-	
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

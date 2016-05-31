@@ -2,6 +2,8 @@ package com.everhomes.rest.pmsy;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * <li>customerId: 用户id</li>
@@ -48,5 +50,8 @@ public class GetPmsyBills {
 	public void setProjectId(String projectId) {
 		this.projectId = projectId;
 	}
-	
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

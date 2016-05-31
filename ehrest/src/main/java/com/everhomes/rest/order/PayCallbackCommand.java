@@ -2,6 +2,8 @@ package com.everhomes.rest.order;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  *	<li>orderNo : 订单号</li>
@@ -78,5 +80,8 @@ public class PayCallbackCommand {
 	public void setPayObj(String payObj) {
 		this.payObj = payObj;
 	}
-	
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

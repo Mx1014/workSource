@@ -65,6 +65,7 @@ import com.everhomes.rest.organization.OrganizationMemberDetailDTO;
 import com.everhomes.rest.organization.OrganizationSimpleDTO;
 import com.everhomes.rest.organization.RejectOrganizationCommand;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
+import com.everhomes.rest.organization.SearchOrganizationCommandResponse;
 import com.everhomes.rest.organization.SearchTopicsByTypeCommand;
 import com.everhomes.rest.organization.SearchTopicsByTypeResponse;
 import com.everhomes.rest.organization.SendOrganizationMessageCommand;
@@ -772,6 +773,21 @@ public class OrganizationController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /org/searchOrganization</b>
+     * <p>搜索 机构</p>
+     */
+    @RequestMapping("searchOrganization")
+    @RestReturn(value=OrganizationDTO.class, collection=true)
+    public RestResponse searchOrganization(@Valid SearchOrganizationCommand cmd) {
+    	SearchOrganizationCommandResponse res = organizationService.searchOrganization(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
     
     /**
      * <b>URL: /org/listEnterprises</b>

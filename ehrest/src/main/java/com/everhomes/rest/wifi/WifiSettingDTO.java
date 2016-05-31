@@ -1,5 +1,7 @@
 package com.everhomes.rest.wifi;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * <li>id: wifi ID</li>
@@ -62,6 +64,9 @@ public class WifiSettingDTO {
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
 	}
-	
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 	
 }

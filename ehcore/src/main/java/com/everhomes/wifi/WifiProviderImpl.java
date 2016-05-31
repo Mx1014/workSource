@@ -73,6 +73,7 @@ public class WifiProviderImpl implements WifiProvider {
 		EhWifiSettingsRecord record = select.where(Tables.EH_WIFI_SETTINGS.SSID.eq(ssid))
 				.and(Tables.EH_WIFI_SETTINGS.OWNER_ID.eq(ownerId))
 				.and(Tables.EH_WIFI_SETTINGS.OWNER_TYPE.eq(ownerType))
+				.and(Tables.EH_WIFI_SETTINGS.STATUS.eq(WifiSettingStatus.ACTIVE.getCode()))
 				.fetchOne();
 		
 		return ConvertHelper.convert(record, WifiSetting.class);
