@@ -870,6 +870,8 @@ public class RentalServiceImpl implements RentalService {
 			for (RentalItemsBill rib : rentalSiteItems) {
 				SiteItemDTO siDTO = new SiteItemDTO();
 				siDTO.setCounts(rib.getRentalCount());
+				//返回商品id add by xiongying20160531
+				siDTO.setId(rib.getRentalSiteItemId());
 				RentalSiteItem rsItem = rentalProvider
 						.findRentalSiteItemById(rib.getRentalSiteItemId());
 				if(rsItem != null) {
