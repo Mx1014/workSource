@@ -300,4 +300,31 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         });    
     }
     
+    @Override
+    public DoorAuth getLinglingDoorAuthByUuid(String uuid) {
+        
+        ListingLocator locator = new ListingLocator();
+        
+        List<DoorAuth> auths = queryDoorAuth(locator, 1, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                
+                query.addConditions(Tables.EH_DOOR_AUTH.STATUS.ne(DoorAuthStatus.INVALID.getCode()));
+                query.addConditions(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.LINGLING_VISITOR.getCode()));
+                query.addConditions(AclinkAuthCustomField.AUTH_LINGLING_UUID.getField().eq(uuid));
+
+                return query;
+            }
+            
+        });
+        
+        if(auths == null || auths.size() == 0) {
+            return null;
+        }
+        
+        return auths.get(0);
+    }
+    
 }

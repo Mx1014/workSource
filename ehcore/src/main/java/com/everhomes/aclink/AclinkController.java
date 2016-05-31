@@ -39,6 +39,8 @@ import com.everhomes.rest.aclink.DoorAuthDTO;
 import com.everhomes.rest.aclink.DoorMessage;
 import com.everhomes.rest.aclink.GetDoorAccessByHardwareIdCommand;
 import com.everhomes.rest.aclink.GetDoorAccessCapapilityCommand;
+import com.everhomes.rest.aclink.GetVisitorCommand;
+import com.everhomes.rest.aclink.GetVisitorResponse;
 import com.everhomes.rest.aclink.ListAesUserKeyByUserResponse;
 import com.everhomes.rest.aclink.ListDoorAccessQRKeyResponse;
 import com.everhomes.rest.aclink.ListDoorAccessResponse;
@@ -344,16 +346,19 @@ public class AclinkController extends ControllerBase {
     
     /**
      * 
-     * <b>URL: /aclink/createAuth</b>
-     * <p>给其它用户授权</p>
-     * @return OK 成功
+     * <b>URL: /aclink/listDoorAccessQRKey</b>
+     * <p>列出所有二维码门禁列表 </p>
+     * @return
      */
-    @RequestMapping("createLingingVistor")
-    @RestReturn(value=DoorAuthDTO.class)
-    public RestResponse createDoorAuth(@Valid CreateLinglingVisitorCommand cmd) {
-        RestResponse response = new RestResponse(doorAccessService.createLinglingVisitorAuth(cmd));
+    @RequestMapping("getVisitor")
+    @RestReturn(value=GetVisitorResponse.class)
+    public RestResponse getDoorVisitorAuthByUuid(GetVisitorCommand cmd) {
+        RestResponse response = new RestResponse();
+        
+        response.setResponseObject(doorAccessService.getVisitor(cmd));
+        
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
-        return response;        
+        return response;
     }
 }

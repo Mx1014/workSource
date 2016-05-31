@@ -28,6 +28,8 @@ import org.springframework.transaction.support.TransactionCallback;
 
 import com.everhomes.aclink.lingling.AclinkLinglingDevice;
 import com.everhomes.aclink.lingling.AclinkLinglingMakeSdkKey;
+import com.everhomes.aclink.lingling.AclinkLinglingQRCode;
+import com.everhomes.aclink.lingling.AclinkLinglingQrCodeRequest;
 import com.everhomes.aclink.lingling.AclinkLinglingService;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
@@ -77,6 +79,8 @@ import com.everhomes.rest.aclink.DoorLinglingExtraKeyDTO;
 import com.everhomes.rest.aclink.DoorMessage;
 import com.everhomes.rest.aclink.DoorMessageType;
 import com.everhomes.rest.aclink.GetDoorAccessCapapilityCommand;
+import com.everhomes.rest.aclink.GetVisitorCommand;
+import com.everhomes.rest.aclink.GetVisitorResponse;
 import com.everhomes.rest.aclink.ListAclinkUserCommand;
 import com.everhomes.rest.aclink.ListAesUserKeyByUserResponse;
 import com.everhomes.rest.aclink.ListDoorAccessByOwnerIdCommand;
@@ -1385,7 +1389,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             qr.setQrCodeKey("11223344");
             qr.setId(auth.getId());
             
-            //TODO if the user is Vip?
+            //TODO if the user is Vip?                        List<DoorAccess> childs = doorAccessProvider.listDoorAccessByGroupId(doorAccess.getId(), maxCount);
+            List<Long> deviceIds = new ArrayList<Long>();
             DoorLinglingExtraKeyDTO extra = new DoorLinglingExtraKeyDTO();
             extra.setAuthLevel(0l);
             extra.setAuthStorey(8l);
@@ -1586,6 +1591,85 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     
     @Override
     public DoorAuthDTO createLinglingVisitorAuth(CreateLinglingVisitorCommand cmd) {
-        return null;
+        DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
+        if(doorAccess == null) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "DoorAccess not found");
+        }
+        
+        String uuid = UUID.randomUUID().toString();
+        uuid = uuid.replace("-", "");
+        
+        User user = UserContext.current().getUser();
+        DoorAuth auth = new DoorAuth();
+        auth.setApplyUserName(cmd.getUserName());
+        auth.setApproveUserId(user.getId());
+        auth.setAuthType(DoorAuthType.LINGLING_VISITOR.getCode());
+        auth.setDescription(cmd.getDescription());
+        auth.setDoorId(cmd.getDoorId());
+        auth.setDriver(DoorAccessDriverType.LINGLING.getCode());
+        auth.setOrganization(cmd.getOrganization());
+        
+        List<DoorAccess> childs = doorAccessProvider.listDoorAccessByGroupId(doorAccess.getId(), 32);
+        List<Long> deviceIds = new ArrayList<Long>();
+        for(DoorAccess child : childs) {
+            Aclink ca = aclinkProvider.getAclinkByDoorId(child.getId());
+            deviceIds.add(ca.getLinglingDoorId());
+            }
+        
+        AclinkLinglingMakeSdkKey sdkKey = new AclinkLinglingMakeSdkKey();
+        sdkKey.setDeviceIds(deviceIds);
+        Map<Long, String> keyMap = aclinkLinglingService.makeSdkKey(sdkKey);
+        
+        List<String> keys = new ArrayList<String>();
+        for(String key : keyMap.values()) {
+            keys.add(key);
+        }
+        
+        AclinkLinglingQrCodeRequest qrRequest = new AclinkLinglingQrCodeRequest();
+        qrRequest.setEffecNumber(2l);
+        qrRequest.setEndTime(30l);
+        qrRequest.setStartTime(Long.toString(System.currentTimeMillis() - 5000));
+        
+        List<Long> floorIds = new ArrayList<Long>();
+        floorIds.add(8l);
+        qrRequest.setFloorIds(floorIds);
+        
+        Aclink dAc = aclinkProvider.getAclinkByDoorId(cmd.getDoorId());
+        qrRequest.setLingLingId(dAc.getDeviceName());
+        
+        //Normal user
+        qrRequest.setUserType(0l);
+        qrRequest.setStrKey("44332211");
+        qrRequest.setSdkKeys(keys);
+        AclinkLinglingQRCode qrCode = aclinkLinglingService.getQrCode(qrRequest);
+        
+        auth.setLinglingUuid(uuid + "-" + qrCode.getCodeId().toString());
+        auth.setQrKey(qrCode.getQrcodeKey());
+        
+        return ConvertHelper.convert(auth, DoorAuthDTO.class);
+    }
+    
+    @Override
+    public GetVisitorResponse getVisitor(GetVisitorCommand cmd) {
+        GetVisitorResponse resp = new GetVisitorResponse();
+        DoorAuth auth = doorAuthProvider.getLinglingDoorAuthByUuid(cmd.getId());
+        if(auth == null) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "auth not found");
+        }
+        
+        DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
+        if(doorAccess != null) {
+            resp.setDoorName(doorAccess.getName());
+        }
+        
+        User user = userProvider.findUserById(auth.getApproveUserId());
+        if(user != null) {
+            resp.setUserName(user.getNickName());
+        }
+        
+        resp.setCreateTime(auth.getCreateTime().getTime());
+        resp.setQr(auth.getQrKey());
+      
+        return resp;
     }
 }
