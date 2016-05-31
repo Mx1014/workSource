@@ -67,6 +67,9 @@ public class DbProviderImpl implements DbProvider {
 	@Override
 	public void truncateAllTables() {
 		this.dslContext.meta().getTables().stream().map((r) -> {
+		    if("eh_acl_privileges".equals(r.getName())) {
+		        System.out.println();
+		    }
 			this.dslContext.truncate(r).execute();
 			return null;
 		});

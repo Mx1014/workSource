@@ -1,9 +1,6 @@
 // @formatter:off
 package com.everhomes.test.core;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Value;
 
 import com.everhomes.rest.StringRestResponse;
@@ -39,6 +36,18 @@ public class UserContext {
         this.httpClient = httpClient;
         this.namespaceId = namespaceId;
         this.realmType = realmType;
+    }
+    
+    public boolean logon(Integer namespaceId, String phone, String plainPassword) {
+        namespaceId = (namespaceId == null) ? 0 : namespaceId;
+        
+        LogonCommand cmd = new LogonCommand();
+        cmd.setDeviceIdentifier("none");
+        cmd.setNamespaceId(namespaceId);
+        cmd.setUserIdentifier(phone);
+        cmd.setPassword(EncryptionUtils.hashPassword(plainPassword));
+        
+        return logon(cmd);
     }
     
     public boolean logon(LogonCommand cmd) {

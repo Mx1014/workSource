@@ -1,0 +1,114 @@
+{
+  "eh_scene_types": [
+    {
+      "namespace_id": "0",
+      "create_time": "2016-03-06 10:50:32",
+      "parent_id": "0",
+      "name": "default",
+      "id": "1",
+      "display_name": "默认场景"
+    },
+    {
+      "namespace_id": "0",
+      "create_time": "2016-03-06 10:50:32",
+      "parent_id": "0",
+      "name": "pm_admin",
+      "id": "2",
+      "display_name": "物业管理员场景"
+    },
+    {
+      "namespace_id": "0",
+      "create_time": "2016-05-11 09:15:50",
+      "parent_id": "1",
+      "name": "family",
+      "id": "3",
+      "display_name": "家庭场景"
+    },
+    {
+      "namespace_id": "0",
+      "create_time": "2016-05-11 09:15:50",
+      "parent_id": "0",
+      "name": "park_tourist",
+      "id": "1001",
+      "display_name": "园区游客场景"
+    },
+    {
+      "namespace_id": "0",
+      "create_time": "2016-05-11 09:15:50",
+      "parent_id": "1001",
+      "name": "enterprise",
+      "id": "1002",
+      "display_name": "加入公司且认证通过的场景（不分小区和园区）"
+    },
+    {
+      "namespace_id": "0",
+      "create_time": "2016-05-11 09:15:50",
+      "parent_id": "1001",
+      "name": "enterprise_noauth",
+      "id": "1003",
+      "display_name": "园区加入公司且未认证通过的场景（不分小区和园区）"
+    }
+  ],
+  "eh_namespace_details": [
+    {
+      "namespace_id": "1000001",
+      "create_time": "2016-05-12 18:07:50",
+      "resource_type": "community_residential",
+      "id": "1001"
+    },
+    {
+      "namespace_id": "1000000",
+      "create_time": "2016-05-12 18:07:50",
+      "resource_type": "community_commercial",
+      "id": "1002"
+    },
+    {
+      "namespace_id": "999999",
+      "create_time": "2016-05-12 18:07:50",
+      "resource_type": "community_commercial",
+      "id": "1003"
+    },
+    {
+      "namespace_id": "999998",
+      "create_time": "2016-05-12 18:07:50",
+      "resource_type": "community_commercial",
+      "id": "1004"
+    },
+    {
+      "namespace_id": "999997",
+      "create_time": "2016-05-12 18:07:50",
+      "resource_type": "community_residential",
+      "id": "1005"
+    },
+    {
+      "namespace_id": "999996",
+      "create_time": "2016-05-12 18:07:50",
+      "resource_type": "community_residential",
+      "id": "1006"
+    },
+    {
+      "namespace_id": "999995",
+      "create_time": "2016-05-12 18:07:50",
+      "resource_type": "community_residential",
+      "id": "1007"
+    },
+    {
+      "namespace_id": "999994",
+      "create_time": "2016-05-12 18:07:50",
+      "resource_type": "community_residential",
+      "id": "1008"
+    },
+    {
+      "namespace_id": "999993",
+      "create_time": "2016-05-12 18:07:50",
+      "resource_type": "community_commercial",
+      "id": "1009"
+    },
+    {
+      "namespace_id": "999992",
+      "create_time": "2016-05-12 18:07:50",
+      "resource_type": "community_residential",
+      "id": "1010"
+    }
+  ]
+}
