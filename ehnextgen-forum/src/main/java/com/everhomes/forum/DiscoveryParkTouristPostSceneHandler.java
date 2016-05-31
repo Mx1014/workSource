@@ -338,7 +338,7 @@ public class DiscoveryParkTouristPostSceneHandler implements PostSceneHandler {
         			hasDefault = true;
         			break;
         		} else {
-        			if(firstUndefaultScopeDto != null) {
+        			if(firstUndefaultScopeDto == null) {
         				firstUndefaultScopeDto = sentScopeDto;
         			}
         		}
