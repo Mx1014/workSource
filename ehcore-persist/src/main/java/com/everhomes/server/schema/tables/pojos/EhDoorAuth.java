@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhDoorAuth implements java.io.Serializable {
 
-	private static final long serialVersionUID = 143174113;
+	private static final long serialVersionUID = 1682223881;
 
 	private java.lang.Long     id;
 	private java.lang.Long     doorId;
@@ -39,6 +39,7 @@ public class EhDoorAuth implements java.io.Serializable {
 	private java.lang.String   stringTag3;
 	private java.lang.String   stringTag4;
 	private java.lang.String   stringTag5;
+	private java.lang.String   stringTag6;
 
 	public EhDoorAuth() {}
 
@@ -68,7 +69,8 @@ public class EhDoorAuth implements java.io.Serializable {
 		java.lang.String   stringTag2,
 		java.lang.String   stringTag3,
 		java.lang.String   stringTag4,
-		java.lang.String   stringTag5
+		java.lang.String   stringTag5,
+		java.lang.String   stringTag6
 	) {
 		this.id = id;
 		this.doorId = doorId;
@@ -96,6 +98,7 @@ public class EhDoorAuth implements java.io.Serializable {
 		this.stringTag3 = stringTag3;
 		this.stringTag4 = stringTag4;
 		this.stringTag5 = stringTag5;
+		this.stringTag6 = stringTag6;
 	}
 
 	public java.lang.Long getId() {
@@ -304,5 +307,13 @@ public class EhDoorAuth implements java.io.Serializable {
 
 	public void setStringTag5(java.lang.String stringTag5) {
 		this.stringTag5 = stringTag5;
+	}
+
+	public java.lang.String getStringTag6() {
+		return this.stringTag6;
+	}
+
+	public void setStringTag6(java.lang.String stringTag6) {
+		this.stringTag6 = stringTag6;
 	}
 }

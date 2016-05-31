@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhDoorAuthRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhDoorAuthRecord> {
 
-	private static final long serialVersionUID = 2007265608;
+	private static final long serialVersionUID = 1228970284;
 
 	/**
 	 * Setter for <code>ehcore.eh_door_auth.id</code>. id of the record
@@ -377,6 +377,20 @@ public class EhDoorAuthRecord extends org.jooq.impl.UpdatableRecordImpl<com.ever
 		return (java.lang.String) getValue(25);
 	}
 
+	/**
+	 * Setter for <code>ehcore.eh_door_auth.string_tag6</code>.
+	 */
+	public void setStringTag6(java.lang.String value) {
+		setValue(26, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_door_auth.string_tag6</code>.
+	 */
+	public java.lang.String getStringTag6() {
+		return (java.lang.String) getValue(26);
+	}
+
 	// -------------------------------------------------------------------------
 	// Primary key information
 	// -------------------------------------------------------------------------
@@ -403,7 +417,7 @@ public class EhDoorAuthRecord extends org.jooq.impl.UpdatableRecordImpl<com.ever
 	/**
 	 * Create a detached, initialised EhDoorAuthRecord
 	 */
-	public EhDoorAuthRecord(java.lang.Long id, java.lang.Long doorId, java.lang.Long userId, java.lang.Long approveUserId, java.lang.Byte authType, java.lang.Long validFromMs, java.lang.Long validEndMs, java.lang.Byte ownerType, java.lang.Long ownerId, java.lang.String organization, java.lang.String description, java.lang.String nickname, java.lang.String phone, java.sql.Timestamp createTime, java.lang.Byte status, java.lang.String driver, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5) {
+	public EhDoorAuthRecord(java.lang.Long id, java.lang.Long doorId, java.lang.Long userId, java.lang.Long approveUserId, java.lang.Byte authType, java.lang.Long validFromMs, java.lang.Long validEndMs, java.lang.Byte ownerType, java.lang.Long ownerId, java.lang.String organization, java.lang.String description, java.lang.String nickname, java.lang.String phone, java.sql.Timestamp createTime, java.lang.Byte status, java.lang.String driver, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.lang.String stringTag6) {
 		super(com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH);
 
 		setValue(0, id);
@@ -432,5 +446,6 @@ public class EhDoorAuthRecord extends org.jooq.impl.UpdatableRecordImpl<com.ever
 		setValue(23, stringTag3);
 		setValue(24, stringTag4);
 		setValue(25, stringTag5);
+		setValue(26, stringTag6);
 	}
 }

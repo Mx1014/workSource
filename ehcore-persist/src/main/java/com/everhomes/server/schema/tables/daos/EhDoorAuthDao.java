@@ -221,4 +221,11 @@ public class EhDoorAuthDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sc
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAuth> fetchByStringTag5(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH.STRING_TAG5, values);
 	}
+
+	/**
+	 * Fetch records that have <code>string_tag6 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAuth> fetchByStringTag6(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH.STRING_TAG6, values);
+	}
 }
