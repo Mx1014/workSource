@@ -31,7 +31,8 @@ CREATE TABLE `eh_acl_privileges` (
   `description` varchar(512) DEFAULT NULL COMMENT 'privilege description',
   `tag` varchar(32) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_acl_priv_app_id_name` (`app_id`,`name`)
+  UNIQUE KEY `u_eh_acl_priv_app_id_name` (`app_id`,`name`),
+  KEY `u_eh_acl_priv_tag` (`tag`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4096 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -52,7 +53,10 @@ CREATE TABLE `eh_acl_role_assignments` (
   `creator_uid` bigint(20) NOT NULL COMMENT 'assignment creator uid',
   `create_time` datetime DEFAULT NULL COMMENT 'record create time',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_acl_role_asgn_unique` (`owner_type`,`owner_id`,`target_type`,`target_id`,`role_id`)
+  UNIQUE KEY `u_eh_acl_role_asgn_unique` (`owner_type`,`owner_id`,`target_type`,`target_id`,`role_id`),
+  KEY `i_eh_acl_role_asgn_owner` (`owner_type`,`owner_id`),
+  KEY `i_eh_acl_role_asgn_creator` (`creator_uid`),
+  KEY `i_eh_acl_role_asgn_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -73,7 +77,9 @@ CREATE TABLE `eh_acl_roles` (
   `owner_type` varchar(32) DEFAULT NULL,
   `owner_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_acl_role_name` (`namespace_id`,`app_id`,`name`,`owner_type`,`owner_id`)
+  UNIQUE KEY `u_eh_acl_role_name` (`namespace_id`,`app_id`,`name`,`owner_type`,`owner_id`),
+  KEY `u_eh_acl_role_tag` (`tag`),
+  KEY `i_eh_ach_role_owner` (`namespace_id`,`app_id`,`owner_type`,`owner_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4100 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -117,7 +123,9 @@ CREATE TABLE `eh_aclink_undo_key` (
   `status` tinyint(4) NOT NULL COMMENT '0: invalid, 1: requesting, 2: confirm',
   `expire_time_ms` bigint(20) NOT NULL,
   `create_time_ms` bigint(20) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `fk_eh_aclink_undo_key_door_id` (`door_id`),
+  CONSTRAINT `eh_aclink_undo_key_ibfk_1` FOREIGN KEY (`door_id`) REFERENCES `eh_door_access` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -137,7 +145,9 @@ CREATE TABLE `eh_aclinks` (
   `driver` tinyint(4) NOT NULL DEFAULT '0' COMMENT 'identify the hardware driver of aclink, not used now',
   `create_time` datetime DEFAULT NULL,
   `status` tinyint(4) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `fk_eh_aclink_door_id` (`door_id`),
+  CONSTRAINT `eh_aclinks_ibfk_1` FOREIGN KEY (`door_id`) REFERENCES `eh_door_access` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -158,7 +168,11 @@ CREATE TABLE `eh_acls` (
   `order_seq` int(11) NOT NULL DEFAULT '0',
   `creator_uid` bigint(20) NOT NULL COMMENT 'assignment creator uid',
   `create_time` datetime NOT NULL COMMENT 'record create time',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `i_eh_acl_owner_privilege` (`owner_type`,`owner_id`),
+  KEY `i_eh_acl_owner_order_seq` (`order_seq`),
+  KEY `i_eh_acl_creator` (`creator_uid`),
+  KEY `i_eh_acl_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -207,7 +221,14 @@ CREATE TABLE `eh_activities` (
   `delete_time` datetime DEFAULT NULL COMMENT 'mark-deletion policy, historic data may be valuable',
   `guest` varchar(2048) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_uuid` (`uuid`)
+  UNIQUE KEY `u_eh_uuid` (`uuid`),
+  KEY `i_eh_act_start_time_ms` (`start_time_ms`),
+  KEY `i_eh_act_end_time_ms` (`end_time_ms`),
+  KEY `i_eh_act_creator_uid` (`creator_uid`),
+  KEY `i_eh_act_post_id` (`post_id`),
+  KEY `i_eh_act_group` (`group_discriminator`,`group_id`),
+  KEY `i_eh_act_create_time` (`create_time`),
+  KEY `i_eh_act_delete_time` (`delete_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -237,7 +258,8 @@ CREATE TABLE `eh_activity_roster` (
   `create_time` datetime DEFAULT NULL COMMENT 'remove-deletion policy, user directly managed data',
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_act_roster_uuid` (`uuid`),
-  UNIQUE KEY `u_eh_act_roster_user` (`activity_id`,`uid`)
+  UNIQUE KEY `u_eh_act_roster_user` (`activity_id`,`uid`),
+  KEY `i_eh_act_roster_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -310,7 +332,13 @@ CREATE TABLE `eh_addresses` (
   `string_tag5` varchar(128) DEFAULT NULL,
   `area_size` double DEFAULT NULL,
   `namespace_id` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `i_eh_addr_city` (`city_id`),
+  KEY `i_eh_addr_community` (`community_id`),
+  KEY `i_eh_addr_address_alias` (`address_alias`),
+  KEY `i_eh_addr_building_apt_name` (`building_name`,`apartment_name`),
+  KEY `i_eh_addr_building_alias_apt_name` (`building_alias_name`,`apartment_name`),
+  KEY `i_eh_addr_address` (`address`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -328,7 +356,9 @@ CREATE TABLE `eh_aes_server_key` (
   `secret_ver` bigint(20) NOT NULL COMMENT 'ignore it',
   `secret` varchar(64) NOT NULL COMMENT 'The base64 secret 16B',
   `create_time_ms` bigint(20) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `fk_eh_aes_server_key_door_id` (`door_id`),
+  CONSTRAINT `eh_aes_server_key_ibfk_1` FOREIGN KEY (`door_id`) REFERENCES `eh_door_access` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -351,7 +381,9 @@ CREATE TABLE `eh_aes_user_key` (
   `creator_uid` bigint(20) NOT NULL,
   `secret` varchar(64) NOT NULL,
   `status` tinyint(4) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `fk_eh_aes_user_key_door_id` (`door_id`),
+  CONSTRAINT `eh_aes_user_key_ibfk_1` FOREIGN KEY (`door_id`) REFERENCES `eh_door_access` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -369,7 +401,9 @@ CREATE TABLE `eh_app_profiles` (
   `item_name` varchar(32) DEFAULT NULL,
   `item_value` text,
   `item_tag` varchar(32) DEFAULT NULL COMMENT 'for profile value tagging purpose',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `i_eh_appprof_app_id_group` (`app_id`,`item_group`),
+  CONSTRAINT `eh_app_profiles_ibfk_1` FOREIGN KEY (`app_id`) REFERENCES `eh_apps` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -392,7 +426,9 @@ CREATE TABLE `eh_app_promotions` (
   `register_count` int(11) NOT NULL DEFAULT '0',
   `create_time` datetime DEFAULT NULL,
   `delete_time` datetime DEFAULT NULL COMMENT 'mark-deletion policy, historic data may be valuable',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `i_app_promo_create_time` (`create_time`),
+  KEY `i_app_promo_delete_time` (`delete_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -416,7 +452,8 @@ CREATE TABLE `eh_apps` (
   `update_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_app_reg_name` (`name`),
-  UNIQUE KEY `u_eh_app_reg_app_key` (`app_key`)
+  UNIQUE KEY `u_eh_app_reg_app_key` (`app_key`),
+  KEY `i_eh_app_reg_create_time` (`create_time`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4099 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -450,7 +487,15 @@ CREATE TABLE `eh_audit_logs` (
   `string_tag5` varchar(128) DEFAULT NULL,
   `create_time` datetime DEFAULT NULL COMMENT 'time of the operation that was performed',
   `delete_time` datetime DEFAULT NULL COMMENT 'mark-deletion policy, historic data may be valuable',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `i_eh_audit_operator_uid` (`operator_uid`),
+  KEY `i_eh_audit_requestor_uid` (`requestor_uid`),
+  KEY `i_eh_audit_create_time` (`create_time`),
+  KEY `i_eh_audit_delete_time` (`delete_time`),
+  KEY `i_eh_audit_itag1` (`integral_tag1`),
+  KEY `i_eh_audit_itag2` (`integral_tag2`),
+  KEY `i_eh_audit_stag1` (`string_tag1`),
+  KEY `i_eh_audit_stag2` (`string_tag2`)
 ) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -472,7 +517,9 @@ CREATE TABLE `eh_banner_clicks` (
   `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_banner_clk_uuid` (`uuid`),
-  UNIQUE KEY `u_eh_banner_clk_user` (`banner_id`,`uid`)
+  UNIQUE KEY `u_eh_banner_clk_user` (`banner_id`,`uid`),
+  KEY `i_eh_banner_clk_last_time` (`last_click_time`),
+  KEY `i_eh_banner_clk_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -492,7 +539,11 @@ CREATE TABLE `eh_banner_orders` (
   `description` text,
   `purchase_time` datetime DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `i_eh_banner_order_banner` (`banner_id`),
+  KEY `i_eh_banner_order_user` (`uid`),
+  KEY `i_eh_banner_order_purchase_time` (`purchase_time`),
+  KEY `i_eh_banner_order_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -547,7 +598,10 @@ CREATE TABLE `eh_binary_resources` (
   `reference_count` bigint(20) DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
   `access_time` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `i_eh_bin_res_checksum` (`checksum`),
+  KEY `i_eh_bin_res_create_time` (`create_time`),
+  KEY `i_eh_bin_res_access_time` (`access_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -567,7 +621,8 @@ CREATE TABLE `eh_borders` (
   `status` int(11) NOT NULL DEFAULT '0' COMMENT '0 : disabled, 1: enabled',
   `config_tag` varchar(32) DEFAULT NULL,
   `description` varchar(256) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `i_eh_border_config_tag` (`config_tag`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -627,7 +682,8 @@ CREATE TABLE `eh_buildings` (
   `string_tag4` varchar(128) DEFAULT NULL,
   `string_tag5` varchar(128) DEFAULT NULL,
   `namespace_id` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `u_eh_community_id_name` (`community_id`,`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -662,7 +718,10 @@ CREATE TABLE `eh_business_assigned_scopes` (
   `scope_code` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: all, 1: community, 2: city',
   `scope_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_scope_owner_code_id` (`owner_id`,`scope_code`,`scope_id`)
+  UNIQUE KEY `u_eh_scope_owner_code_id` (`owner_id`,`scope_code`,`scope_id`),
+  KEY `i_eh_bussiness_scope_owner_id` (`owner_id`),
+  KEY `i_eh_bussiness_scope_target` (`scope_code`,`scope_id`),
+  CONSTRAINT `eh_business_assigned_scopes_ibfk_1` FOREIGN KEY (`owner_id`) REFERENCES `eh_businesses` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -679,7 +738,9 @@ CREATE TABLE `eh_business_categories` (
   `category_id` bigint(20) NOT NULL DEFAULT '0',
   `category_path` varchar(128) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_bussiness_category_id` (`owner_id`,`category_id`)
+  UNIQUE KEY `u_eh_bussiness_category_id` (`owner_id`,`category_id`),
+  KEY `i_eh_bussiness_owner_id` (`owner_id`),
+  CONSTRAINT `eh_business_categories_ibfk_1` FOREIGN KEY (`owner_id`) REFERENCES `eh_businesses` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -696,7 +757,10 @@ CREATE TABLE `eh_business_visible_scopes` (
   `scope_code` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: all, 1: community, 2: city',
   `scope_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_scope_owner_code_id` (`owner_id`,`scope_code`,`scope_id`)
+  UNIQUE KEY `u_eh_scope_owner_code_id` (`owner_id`,`scope_code`,`scope_id`),
+  KEY `i_eh_bussiness_scope_owner_id` (`owner_id`),
+  KEY `i_eh_bussiness_scope_target` (`scope_code`,`scope_id`),
+  CONSTRAINT `eh_business_visible_scopes_ibfk_1` FOREIGN KEY (`owner_id`) REFERENCES `eh_businesses` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -751,7 +815,10 @@ CREATE TABLE `eh_categories` (
   `logo_uri` varchar(1024) DEFAULT NULL COMMENT 'the logo uri of the category',
   `description` text,
   `namespace_id` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `i_eh_category_path` (`path`),
+  KEY `i_eh_category_order` (`default_order`),
+  KEY `i_eh_category_delete_time` (`delete_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -787,7 +854,9 @@ CREATE TABLE `eh_client_package_files` (
   `file_name` varchar(128) DEFAULT NULL,
   `file_size` bigint(20) DEFAULT NULL,
   `file_md5` varchar(64) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `fk_eh_cpkg_file_package` (`package_id`),
+  CONSTRAINT `eh_client_package_files_ibfk_1` FOREIGN KEY (`package_id`) REFERENCES `eh_client_packages` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -863,7 +932,17 @@ CREATE TABLE `eh_communities` (
   `namespace_id` int(11) NOT NULL DEFAULT '0',
   `area_size` double DEFAULT NULL COMMENT 'area size',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_uuid` (`uuid`)
+  UNIQUE KEY `u_eh_uuid` (`uuid`),
+  KEY `i_eh_community_area_name` (`area_name`),
+  KEY `i_eh_community_name` (`name`),
+  KEY `i_eh_community_alias_name` (`alias_name`),
+  KEY `i_eh_community_zipcode` (`zipcode`),
+  KEY `i_eh_community_create_time` (`create_time`),
+  KEY `i_eh_community_delete_time` (`delete_time`),
+  KEY `i_eh_community_itag1` (`integral_tag1`),
+  KEY `i_eh_community_itag2` (`integral_tag2`),
+  KEY `i_eh_community_stag1` (`string_tag1`),
+  KEY `i_eh_community_stag2` (`string_tag2`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -881,7 +960,9 @@ CREATE TABLE `eh_community_geopoints` (
   `longitude` double DEFAULT NULL,
   `latitude` double DEFAULT NULL,
   `geohash` varchar(32) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `i_eh_comm_description` (`description`),
+  KEY `i_eh_comm_geopoints` (`geohash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -911,7 +992,13 @@ CREATE TABLE `eh_community_profiles` (
   `string_tag3` varchar(128) DEFAULT NULL,
   `string_tag4` varchar(128) DEFAULT NULL,
   `string_tag5` varchar(128) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `i_eh_cprof_item` (`app_id`,`owner_id`,`item_name`),
+  KEY `i_eh_cprof_owner` (`owner_id`),
+  KEY `i_eh_cprof_itag1` (`integral_tag1`),
+  KEY `i_eh_cprof_itag2` (`integral_tag2`),
+  KEY `i_eh_cprof_stag1` (`string_tag1`),
+  KEY `i_eh_cprof_stag2` (`string_tag2`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1301,7 +1388,8 @@ CREATE TABLE `eh_devices` (
   `meta` varchar(256) DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_dev_id` (`device_id`)
+  UNIQUE KEY `u_eh_dev_id` (`device_id`),
+  KEY `u_eh_dev_create_time` (`create_time`)
 ) ENGINE=InnoDB AUTO_INCREMENT=12055 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1336,7 +1424,10 @@ CREATE TABLE `eh_door_access` (
   `acking_secret_version` int(11) NOT NULL DEFAULT '1',
   `expect_secret_key` int(11) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_door_access_uuid` (`uuid`)
+  UNIQUE KEY `u_eh_door_access_uuid` (`uuid`),
+  KEY `i_eh_door_access_name` (`name`),
+  KEY `i_eh_door_hardware_id` (`hardware_id`),
+  KEY `i_eh_door_access_owner` (`owner_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1363,7 +1454,9 @@ CREATE TABLE `eh_door_auth` (
   `phone` varchar(64) DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
   `status` tinyint(4) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `fk_eh_door_auth_door_id` (`door_id`),
+  CONSTRAINT `eh_door_auth_ibfk_1` FOREIGN KEY (`door_id`) REFERENCES `eh_door_access` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1387,7 +1480,9 @@ CREATE TABLE `eh_door_command` (
   `user_id` bigint(20) DEFAULT NULL,
   `owner_id` bigint(20) DEFAULT NULL,
   `owner_type` tinyint(4) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `fk_eh_door_command_id` (`door_id`),
+  CONSTRAINT `eh_door_command_ibfk_1` FOREIGN KEY (`door_id`) REFERENCES `eh_door_access` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1694,7 +1789,11 @@ CREATE TABLE `eh_event_roster` (
   `signup_uid` bigint(20) DEFAULT NULL,
   `signup_time` datetime DEFAULT NULL,
   `create_time` datetime DEFAULT NULL COMMENT 'remove-deletion policy, user directly managed data',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `u_eh_evt_roster_uuid` (`uuid`),
+  UNIQUE KEY `u_eh_evt_roster_attendee` (`event_id`,`uid`),
+  KEY `i_eh_evt_roster_signup_time` (`signup_time`),
+  KEY `i_eh_evt_roster_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1712,7 +1811,10 @@ CREATE TABLE `eh_event_ticket_groups` (
   `total_count` int(11) DEFAULT NULL,
   `allocated_count` int(11) DEFAULT NULL,
   `create_time` datetime DEFAULT NULL COMMENT 'remove-deletion policy, user directly managed data',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `u_eh_evt_tg_name` (`event_id`,`name`),
+  KEY `i_eh_evt_tg_event_id` (`event_id`),
+  KEY `i_eh_evt_tg_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1733,7 +1835,9 @@ CREATE TABLE `eh_event_tickets` (
   `status` tinyint(4) DEFAULT NULL COMMENT '0: free, 1: allocated',
   `create_time` datetime DEFAULT NULL COMMENT 'remove-deletion policy, user directly managed data',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_evt_ticket_ticket` (`ticket_group_id`,`ticket_number`)
+  UNIQUE KEY `u_eh_evt_ticket_ticket` (`ticket_group_id`,`ticket_number`),
+  KEY `i_eh_evt_ticket_event` (`event_id`),
+  KEY `i_eh_evt_ticket_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1771,7 +1875,12 @@ CREATE TABLE `eh_events` (
   `status` int(11) DEFAULT NULL COMMENT '0: inactive, 1: drafting, 2: active',
   `create_time` datetime DEFAULT NULL,
   `delete_time` datetime DEFAULT NULL COMMENT 'mark-deletion policy, historic data may be valuable',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `i_eh_evt_start_time_ms` (`start_time_ms`),
+  KEY `i_eh_evt_end_time_ms` (`end_time_ms`),
+  KEY `i_eh_evt_creator_uid` (`creator_uid`),
+  KEY `i_eh_evt_create_time` (`create_time`),
+  KEY `i_eh_evt_delete_time` (`delete_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1838,7 +1947,9 @@ CREATE TABLE `eh_family_followers` (
   `follower_uid` bigint(20) NOT NULL,
   `create_time` datetime DEFAULT NULL COMMENT 'remove-deletion, user directly managed data',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `i_fm_follower_follower` (`owner_family`,`follower_uid`)
+  UNIQUE KEY `i_fm_follower_follower` (`owner_family`,`follower_uid`),
+  KEY `i_eh_fm_follower_owner` (`owner_family`),
+  KEY `i_eh_fm_follower_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1878,7 +1989,10 @@ CREATE TABLE `eh_forum_assigned_scopes` (
   `scope_code` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: all, 1: community, 2: city',
   `scope_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_scope_owner_code_id` (`owner_id`,`scope_code`,`scope_id`)
+  UNIQUE KEY `u_eh_scope_owner_code_id` (`owner_id`,`scope_code`,`scope_id`),
+  KEY `i_eh_post_scope_owner_id` (`owner_id`),
+  KEY `i_eh_post_scope_target` (`scope_code`,`scope_id`),
+  CONSTRAINT `eh_forum_assigned_scopes_ibfk_1` FOREIGN KEY (`owner_id`) REFERENCES `eh_forum_posts` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1897,7 +2011,8 @@ CREATE TABLE `eh_forum_attachments` (
   `creator_uid` bigint(20) NOT NULL,
   `create_time` datetime NOT NULL,
   `orignial_path` varchar(1024) DEFAULT NULL COMMENT 'attachment file path in 2.8 version, keep it for migration',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `i_eh_frmatt_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1959,7 +2074,17 @@ CREATE TABLE `eh_forum_posts` (
   `tag` varchar(32) DEFAULT NULL,
   `start_time` datetime DEFAULT NULL COMMENT 'publish start time',
   `end_time` datetime DEFAULT NULL COMMENT 'publish end time',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `u_eh_uuid` (`uuid`),
+  KEY `i_eh_post_seqs` (`modify_seq`),
+  KEY `i_eh_post_geohash` (`geohash`),
+  KEY `i_eh_post_creator` (`creator_uid`),
+  KEY `i_eh_post_itag1` (`integral_tag1`),
+  KEY `i_eh_post_itag2` (`integral_tag2`),
+  KEY `i_eh_post_stag1` (`string_tag1`),
+  KEY `i_eh_post_stag2` (`string_tag2`),
+  KEY `i_eh_post_update_time` (`update_time`),
+  KEY `i_eh_post_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1975,7 +2100,10 @@ CREATE TABLE `eh_forum_visible_scopes` (
   `owner_id` bigint(20) NOT NULL COMMENT 'owner post id',
   `scope_code` tinyint(4) DEFAULT NULL,
   `scope_id` bigint(20) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `fk_eh_post_scope_owner` (`owner_id`),
+  KEY `i_eh_post_scope_target` (`scope_code`,`scope_id`),
+  CONSTRAINT `eh_forum_visible_scopes_ibfk_1` FOREIGN KEY (`owner_id`) REFERENCES `eh_forum_posts` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -2000,7 +2128,13 @@ CREATE TABLE `eh_forums` (
   `update_time` datetime NOT NULL,
   `create_time` datetime NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_uuid` (`uuid`)
+  UNIQUE KEY `u_eh_uuid` (`uuid`),
+  KEY `i_eh_frm_namespace` (`namespace_id`),
+  KEY `i_eh_frm_owner` (`owner_type`,`owner_id`),
+  KEY `i_eh_frm_post_count` (`post_count`),
+  KEY `i_eh_frm_modify_seq` (`modify_seq`),
+  KEY `i_eh_frm_update_time` (`update_time`),
+  KEY `i_eh_frm_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -2045,7 +2179,15 @@ CREATE TABLE `eh_group_members` (
   `string_tag5` varchar(128) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_uuid` (`uuid`),
-  UNIQUE KEY `u_eh_grp_member` (`group_id`,`member_type`,`member_id`)
+  UNIQUE KEY `u_eh_grp_member` (`group_id`,`member_type`,`member_id`),
+  KEY `i_eh_grp_member_group_id` (`group_id`),
+  KEY `i_eh_grp_member_member` (`member_type`,`member_id`),
+  KEY `i_eh_grp_member_create_time` (`create_time`),
+  KEY `i_eh_grp_member_approve_time` (`approve_time`),
+  KEY `i_eh_gprof_itag1` (`integral_tag1`),
+  KEY `i_eh_gprof_itag2` (`integral_tag2`),
+  KEY `i_eh_gprof_stag1` (`string_tag1`),
+  KEY `i_eh_gprof_stag2` (`string_tag2`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -2068,7 +2210,11 @@ CREATE TABLE `eh_group_op_requests` (
   `process_message` text,
   `create_time` datetime DEFAULT NULL,
   `process_time` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `i_eh_grp_op_group` (`group_id`),
+  KEY `i_eh_grp_op_requestor` (`requestor_uid`),
+  KEY `i_eh_grp_op_create_time` (`create_time`),
+  KEY `i_eh_grp_op_process_time` (`process_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -2098,7 +2244,13 @@ CREATE TABLE `eh_group_profiles` (
   `string_tag3` varchar(128) DEFAULT NULL,
   `string_tag4` varchar(128) DEFAULT NULL,
   `string_tag5` varchar(128) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `i_eh_gprof_item` (`app_id`,`owner_id`,`item_name`),
+  KEY `i_eh_gprof_owner` (`owner_id`),
+  KEY `i_eh_gprof_itag1` (`integral_tag1`),
+  KEY `i_eh_gprof_itag2` (`integral_tag2`),
+  KEY `i_eh_gprof_stag1` (`string_tag1`),
+  KEY `i_eh_gprof_stag2` (`string_tag2`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -2114,7 +2266,10 @@ CREATE TABLE `eh_group_visible_scopes` (
   `owner_id` bigint(20) NOT NULL COMMENT 'owner group id',
   `scope_code` tinyint(4) DEFAULT NULL,
   `scope_id` bigint(20) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `fk_eh_grp_scope_owner` (`owner_id`),
+  KEY `i_eh_grp_scope_target` (`scope_code`,`scope_id`),
+  CONSTRAINT `eh_group_visible_scopes_ibfk_1` FOREIGN KEY (`owner_id`) REFERENCES `eh_groups` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -2162,7 +2317,14 @@ CREATE TABLE `eh_groups` (
   `visible_region_type` tinyint(4) NOT NULL DEFAULT '0' COMMENT 'the type of region where the group belong to',
   `visible_region_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'the id of region where the group belong to',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_uuid` (`uuid`)
+  UNIQUE KEY `u_eh_uuid` (`uuid`),
+  KEY `i_eh_group_creator` (`creator_uid`),
+  KEY `i_eh_group_create_time` (`create_time`),
+  KEY `i_eh_group_delete_time` (`delete_time`),
+  KEY `i_eh_group_itag1` (`integral_tag1`),
+  KEY `i_eh_group_itag2` (`integral_tag2`),
+  KEY `i_eh_group_stag1` (`string_tag1`),
+  KEY `i_eh_group_stag2` (`string_tag2`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -2199,7 +2361,9 @@ CREATE TABLE `eh_launch_pad_items` (
   `target_id` bigint(20) DEFAULT NULL COMMENT 'the entity id linked back to the orginal resource',
   `delete_flag` tinyint(4) NOT NULL DEFAULT '1' COMMENT 'whether the item can be deleted from desk, 0: no, 1: yes',
   `scene_type` varchar(64) NOT NULL DEFAULT 'default',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `i_eh_scoped_cfg_combo` (`namespace_id`,`app_id`,`scope_code`,`scope_id`,`item_name`),
+  KEY `i_eh_scoped_cfg_order` (`default_order`)
 ) ENGINE=InnoDB AUTO_INCREMENT=10138 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -2350,7 +2514,13 @@ CREATE TABLE `eh_message_boxs` (
   `message_seq` bigint(20) NOT NULL COMMENT 'message sequence id that identifies the message',
   `box_seq` bigint(20) NOT NULL COMMENT 'sequence of the message inside the box',
   `create_time` datetime NOT NULL COMMENT 'time that message goes into the box, taken from create time of the message',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `fk_eh_mbx_msg_id` (`message_id`),
+  KEY `i_eh_mbx_namespace` (`namespace_id`),
+  KEY `i_eh_mbx_msg_seq` (`message_seq`),
+  KEY `i_eh_mbx_box_seq` (`box_seq`),
+  KEY `i_eh_mbx_create_time` (`create_time`),
+  CONSTRAINT `eh_message_boxs_ibfk_1` FOREIGN KEY (`message_id`) REFERENCES `eh_messages` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -2377,7 +2547,9 @@ CREATE TABLE `eh_messages` (
   `encode_version` int(11) NOT NULL DEFAULT '1' COMMENT 'message meta encode version',
   `sender_tag` varchar(32) DEFAULT NULL COMMENT 'sender generated tag',
   `create_time` datetime NOT NULL COMMENT 'message creation time',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `i_eh_msgs_namespace` (`namespace_id`),
+  KEY `i_eh_msgs_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -2395,7 +2567,8 @@ CREATE TABLE `eh_namespace_resources` (
   `resource_id` bigint(20) NOT NULL DEFAULT '0',
   `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_namespace_resource_id` (`namespace_id`,`resource_type`,`resource_id`)
+  UNIQUE KEY `u_eh_namespace_resource_id` (`namespace_id`,`resource_type`,`resource_id`),
+  KEY `i_eh_resource_id` (`resource_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -2427,7 +2600,9 @@ CREATE TABLE `eh_nearby_community_map` (
   `nearby_community_id` bigint(20) NOT NULL DEFAULT '0',
   `namespace_id` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_community_relation` (`community_id`,`nearby_community_id`)
+  UNIQUE KEY `u_eh_community_relation` (`community_id`,`nearby_community_id`),
+  KEY `u_eh_community_id` (`community_id`),
+  KEY `u_eh_nearby_community_id` (`nearby_community_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -2449,7 +2624,10 @@ CREATE TABLE `eh_oauth2_codes` (
   `create_time` datetime DEFAULT NULL,
   `modify_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_ocode_code` (`code`)
+  UNIQUE KEY `u_eh_ocode_code` (`code`),
+  KEY `i_eh_ocode_expiration_time` (`expiration_time`),
+  KEY `i_eh_ocode_create_time` (`create_time`),
+  KEY `i_eh_ocode_modify_time` (`modify_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -2470,7 +2648,9 @@ CREATE TABLE `eh_oauth2_tokens` (
   `type` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: access token, 1: refresh token',
   `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_otoken_token_string` (`token_string`)
+  UNIQUE KEY `u_eh_otoken_token_string` (`token_string`),
+  KEY `i_eh_otoken_expiration_time` (`expiration_time`),
+  KEY `i_eh_otoken_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -2532,7 +2712,9 @@ CREATE TABLE `eh_organization_address_mappings` (
   `address_id` bigint(20) NOT NULL COMMENT 'address id',
   `organization_address` varchar(128) DEFAULT NULL COMMENT 'organization address used in organization',
   `living_status` tinyint(4) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `fk_eh_organization` (`organization_id`),
+  CONSTRAINT `eh_organization_address_mappings_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `eh_organizations` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=15623 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -2615,7 +2797,9 @@ CREATE TABLE `eh_organization_bill_items` (
   `description` text,
   `creator_uid` bigint(20) DEFAULT NULL COMMENT 'uid of the user who has the bill',
   `create_time` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `fk_eh_organization_bill` (`bill_id`),
+  CONSTRAINT `eh_organization_bill_items_ibfk_1` FOREIGN KEY (`bill_id`) REFERENCES `eh_organization_bills` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -2633,7 +2817,8 @@ CREATE TABLE `eh_organization_billing_accounts` (
   `balance` decimal(10,2) NOT NULL DEFAULT '0.00',
   `update_time` datetime DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `u_eh_account_number` (`account_number`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -2711,7 +2896,9 @@ CREATE TABLE `eh_organization_communities` (
   `organization_id` bigint(20) NOT NULL,
   `community_id` bigint(20) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_org_community_id` (`organization_id`,`community_id`)
+  UNIQUE KEY `u_eh_org_community_id` (`organization_id`,`community_id`),
+  KEY `i_eh_orgc_dept` (`organization_id`),
+  KEY `i_eh_orgc_community` (`community_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=136 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -2769,7 +2956,9 @@ CREATE TABLE `eh_organization_contacts` (
   `contact_token` varchar(128) DEFAULT NULL COMMENT 'phone number or email address',
   `creator_uid` bigint(20) DEFAULT NULL COMMENT 'uid of the user who has the bill',
   `create_time` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `fk_eh_organization` (`organization_id`),
+  CONSTRAINT `eh_organization_contacts_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `eh_organizations` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=58 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -2846,7 +3035,10 @@ CREATE TABLE `eh_organization_members` (
   `string_tag4` varchar(128) DEFAULT NULL,
   `string_tag5` varchar(128) DEFAULT NULL,
   `namespace_id` int(11) DEFAULT '0',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `fk_eh_orgm_owner` (`organization_id`),
+  KEY `i_eh_corg_group` (`member_group`),
+  CONSTRAINT `eh_organization_members_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `eh_organizations` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=2102530 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -2891,7 +3083,9 @@ CREATE TABLE `eh_organization_owners` (
   `create_time` datetime DEFAULT NULL,
   `namespace_id` int(11) NOT NULL DEFAULT '0',
   `community_id` bigint(20) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `fk_eh_organization` (`organization_id`),
+  CONSTRAINT `eh_organization_owners_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `eh_organizations` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -2962,7 +3156,9 @@ CREATE TABLE `eh_organization_tasks` (
   `task_category` varchar(128) DEFAULT NULL COMMENT '1:PUBLIC_AREA 2:PRIVATE_OWNER',
   `visible_region_type` tinyint(4) DEFAULT NULL COMMENT 'define the visible region type',
   `visible_region_id` bigint(20) DEFAULT NULL COMMENT 'visible region id',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `fk_eh_organization` (`organization_id`),
+  CONSTRAINT `eh_organization_tasks_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `eh_organizations` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=646 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -3001,7 +3197,11 @@ CREATE TABLE `eh_organizations` (
   `string_tag4` varchar(128) DEFAULT NULL,
   `string_tag5` varchar(128) DEFAULT NULL,
   `show_flag` tinyint(4) DEFAULT '1',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `i_eh_org_name_level` (`name`,`level`),
+  KEY `i_eh_org_path` (`path`),
+  KEY `i_eh_org_path_level` (`path`,`level`),
+  KEY `i_eh_org_parent` (`parent_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1001025 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -3311,7 +3511,9 @@ CREATE TABLE `eh_poll_items` (
   `vote_count` int(11) NOT NULL DEFAULT '0',
   `change_version` int(11) NOT NULL DEFAULT '0',
   `create_time` datetime DEFAULT NULL COMMENT 'remove-deletion policy, user directly managed data',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `i_eh_poll_item_poll` (`poll_id`),
+  KEY `i_eh_poll_item_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -3330,7 +3532,9 @@ CREATE TABLE `eh_poll_votes` (
   `voter_family_id` bigint(20) DEFAULT NULL,
   `create_time` datetime DEFAULT NULL COMMENT 'remove-deletion policy, user directly managed data',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `i_eh_poll_vote_voter` (`poll_id`,`item_id`,`voter_uid`)
+  UNIQUE KEY `i_eh_poll_vote_voter` (`poll_id`,`item_id`,`voter_uid`),
+  KEY `i_eh_poll_vote_poll` (`poll_id`),
+  KEY `i_eh_poll_vote_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -3362,7 +3566,13 @@ CREATE TABLE `eh_polls` (
   `create_time` datetime DEFAULT NULL,
   `delete_time` datetime DEFAULT NULL COMMENT 'mark-deletion policy, historic data may be valuable',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_uuid` (`uuid`)
+  UNIQUE KEY `u_eh_uuid` (`uuid`),
+  KEY `i_eh_poll_start_time_ms` (`start_time_ms`),
+  KEY `i_eh_poll_end_time_ms` (`end_time_ms`),
+  KEY `i_eh_poll_creator_uid` (`creator_uid`),
+  KEY `i_eh_poll_post_id` (`post_id`),
+  KEY `i_eh_poll_create_time` (`create_time`),
+  KEY `i_eh_poll_delete_time` (`delete_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -3888,7 +4098,9 @@ CREATE TABLE `eh_recommendations` (
   `status` int(11) NOT NULL DEFAULT '0',
   `create_time` datetime DEFAULT NULL,
   `expire_time` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `fk_eh_recommendations_user_idx` (`user_id`),
+  CONSTRAINT `fk_eh_recommendations_user_idx` FOREIGN KEY (`user_id`) REFERENCES `eh_users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB AUTO_INCREMENT=998191 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -3914,7 +4126,11 @@ CREATE TABLE `eh_regions` (
   `hot_flag` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: not hot, 1: hot',
   `namespace_id` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_region_name` (`namespace_id`,`parent_id`,`name`)
+  UNIQUE KEY `u_eh_region_name` (`namespace_id`,`parent_id`,`name`),
+  KEY `i_eh_region_name_level` (`name`,`level`),
+  KEY `i_eh_region_path` (`path`),
+  KEY `i_eh_region_path_level` (`path`,`level`),
+  KEY `i_eh_region_parent` (`parent_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=14960 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -4235,7 +4451,10 @@ CREATE TABLE `eh_rtxt_resources` (
   `reference_count` bigint(20) DEFAULT NULL,
   `create_time` datetime DEFAULT NULL,
   `access_time` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `i_eh_rtxt_res_checksum` (`checksum`),
+  KEY `i_eh_rtxt_res_create_time` (`create_time`),
+  KEY `i_eh_rtxt_res_access_time` (`access_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -4286,7 +4505,12 @@ CREATE TABLE `eh_scoped_configurations` (
   `string_tag3` varchar(128) DEFAULT NULL,
   `string_tag4` varchar(128) DEFAULT NULL,
   `string_tag5` varchar(128) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `i_eh_scoped_cfg_combo` (`namespace_id`,`app_id`,`scope_type`,`scope_id`,`item_name`),
+  KEY `i_eh_scoped_cfg_itag1` (`integral_tag1`),
+  KEY `i_eh_scoped_cfg_itag2` (`integral_tag2`),
+  KEY `i_eh_scoped_cfg_stag1` (`string_tag1`),
+  KEY `i_eh_scoped_cfg_stag2` (`string_tag2`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -4308,7 +4532,10 @@ CREATE TABLE `eh_search_keywords` (
   `update_time` datetime DEFAULT NULL,
   `create_time` datetime DEFAULT NULL COMMENT 'remove-deletion policy',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `u_kword_scoped_kword` (`scope`,`scope_id`,`keyword`)
+  UNIQUE KEY `u_kword_scoped_kword` (`scope`,`scope_id`,`keyword`),
+  KEY `i_kword_weight_frequency` (`weight`,`frequency`),
+  KEY `i_kword_update_time` (`update_time`),
+  KEY `i_kword_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -4359,7 +4586,8 @@ CREATE TABLE `eh_servers` (
   `status` int(11) NOT NULL DEFAULT '0' COMMENT '0 : disabled, 1: enabled',
   `config_tag` varchar(32) DEFAULT NULL,
   `description` varchar(256) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `i_eh_servers_config_tag` (`config_tag`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -4376,7 +4604,9 @@ CREATE TABLE `eh_shards` (
   `anchor` bigint(20) DEFAULT NULL,
   `create_time` datetime DEFAULT NULL COMMENT 'time that shard has been created',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_shards_domain_anchor` (`sharding_domain`,`anchor`)
+  UNIQUE KEY `u_eh_shards_domain_anchor` (`sharding_domain`,`anchor`),
+  KEY `i_eh_shards_anchor` (`anchor`),
+  KEY `i_eh_shards_create_time` (`create_time`)
 ) ENGINE=InnoDB AUTO_INCREMENT=77 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -4445,7 +4675,8 @@ CREATE TABLE `eh_stats_by_city` (
   `create_time` datetime DEFAULT NULL,
   `delete_time` datetime DEFAULT NULL COMMENT 'mark-deletion policy, historic data may be valuable',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `u_stats_city_report` (`city_id`,`stats_date`,`stats_type`)
+  UNIQUE KEY `u_stats_city_report` (`city_id`,`stats_date`,`stats_type`),
+  KEY `u_stats_delete_time` (`delete_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -4468,7 +4699,9 @@ CREATE TABLE `eh_suggestions` (
   `STATUS` int(11) NOT NULL DEFAULT '0',
   `CREATE_TIME` datetime DEFAULT NULL,
   `EXPIRED_TIME` varchar(64) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`ID`)
+  PRIMARY KEY (`ID`),
+  KEY `fk_eh_suggestions_user_idx` (`USER_ID`),
+  CONSTRAINT `fk_eh_suggestions_user_idx` FOREIGN KEY (`USER_ID`) REFERENCES `eh_users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -4575,7 +4808,9 @@ CREATE TABLE `eh_user_blacklist` (
   `target_id` bigint(20) DEFAULT NULL,
   `create_time` datetime DEFAULT NULL COMMENT 'remove-deletion policy, user directly managed data',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_usr_blk_owner_target` (`owner_uid`,`target_type`,`target_id`)
+  UNIQUE KEY `u_eh_usr_blk_owner_target` (`owner_uid`,`target_type`,`target_id`),
+  KEY `i_eh_usr_blk_owner` (`owner_uid`),
+  KEY `i_eh_usr_blk_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -4630,7 +4865,9 @@ CREATE TABLE `eh_user_favorites` (
   `target_id` bigint(20) DEFAULT NULL,
   `create_time` datetime DEFAULT NULL COMMENT 'remove-deletion policy, user directly managed data',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_usr_favorite_target` (`owner_uid`,`target_type`,`target_id`)
+  UNIQUE KEY `u_eh_usr_favorite_target` (`owner_uid`,`target_type`,`target_id`),
+  KEY `i_eh_usr_favorite_owner` (`owner_uid`),
+  KEY `i_eh_usr_favorite_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -4648,7 +4885,9 @@ CREATE TABLE `eh_user_followed_families` (
   `alias_name` varchar(64) DEFAULT NULL,
   `create_time` datetime DEFAULT NULL COMMENT 'remove-deletion policy, user directly managed data',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `i_eh_usr_ffmy_followed` (`owner_uid`,`followed_family`)
+  UNIQUE KEY `i_eh_usr_ffmy_followed` (`owner_uid`,`followed_family`),
+  KEY `i_eh_usr_ffmy_owner` (`owner_uid`),
+  KEY `i_eh_usr_ffmy_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -4689,7 +4928,9 @@ CREATE TABLE `eh_user_groups` (
   `member_status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: inactive, 1: waitingForApproval, 2: waitingForAcceptance, 3: active',
   `create_time` datetime NOT NULL COMMENT 'remove-deletion policy, user directly managed data',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_usr_grp_owner_group` (`owner_uid`,`group_id`)
+  UNIQUE KEY `u_eh_usr_grp_owner_group` (`owner_uid`,`group_id`),
+  KEY `i_eh_usr_grp_owner` (`owner_uid`),
+  KEY `i_eh_usr_grp_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -4711,7 +4952,11 @@ CREATE TABLE `eh_user_identifiers` (
   `notify_time` datetime DEFAULT NULL,
   `namespace_id` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_user_idf_owner_type_token` (`owner_uid`,`identifier_type`,`identifier_token`)
+  UNIQUE KEY `u_eh_user_idf_owner_type_token` (`owner_uid`,`identifier_type`,`identifier_token`),
+  KEY `i_eh_user_idf_owner` (`owner_uid`),
+  KEY `i_eh_user_idf_type_token` (`identifier_type`,`identifier_token`),
+  KEY `i_eh_user_idf_create_time` (`create_time`),
+  KEY `i_eh_user_idf_notify_time` (`notify_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -4748,7 +4993,9 @@ CREATE TABLE `eh_user_invitation_roster` (
   `invite_id` bigint(20) DEFAULT NULL COMMENT 'owner invitation record id',
   `name` varchar(64) DEFAULT NULL,
   `contact` varchar(64) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `fk_eh_invite_roster_invite_id` (`invite_id`),
+  CONSTRAINT `eh_user_invitation_roster_ibfk_1` FOREIGN KEY (`invite_id`) REFERENCES `eh_user_invitations` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -4772,7 +5019,10 @@ CREATE TABLE `eh_user_invitations` (
   `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '0: inactive, 1: active',
   `create_time` datetime NOT NULL COMMENT 'remove-deletion policy, user directly managed data',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_invite_code` (`invite_code`)
+  UNIQUE KEY `u_eh_invite_code` (`invite_code`),
+  KEY `u_eh_invite_expiration` (`expiration`),
+  KEY `u_eh_invite_code_status` (`invite_code`,`status`),
+  KEY `u_eh_invite_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -4791,7 +5041,9 @@ CREATE TABLE `eh_user_likes` (
   `like_type` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0:none, 1: dislike, 2: like',
   `create_time` datetime DEFAULT NULL COMMENT 'remove-deletion policy, user directly managed data',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_usr_like_target` (`owner_uid`,`target_type`,`target_id`)
+  UNIQUE KEY `u_eh_usr_like_target` (`owner_uid`,`target_type`,`target_id`),
+  KEY `i_eh_usr_like_owner` (`owner_uid`),
+  KEY `i_eh_usr_like_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -4858,7 +5110,13 @@ CREATE TABLE `eh_user_profiles` (
   `string_tag3` varchar(128) DEFAULT NULL,
   `string_tag4` varchar(128) DEFAULT NULL,
   `string_tag5` varchar(128) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `i_eh_uprof_item` (`app_id`,`owner_id`,`item_name`),
+  KEY `i_eh_uprof_owner` (`owner_id`),
+  KEY `i_eh_uprof_itag1` (`integral_tag1`),
+  KEY `i_eh_uprof_itag2` (`integral_tag2`),
+  KEY `i_eh_uprof_stag1` (`string_tag1`),
+  KEY `i_eh_uprof_stag2` (`string_tag2`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -4950,7 +5208,8 @@ CREATE TABLE `eh_users` (
   `namespace_user_token` varchar(2048) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_uuid` (`uuid`),
-  UNIQUE KEY `u_eh_user_account_name` (`account_name`)
+  UNIQUE KEY `u_eh_user_account_name` (`account_name`),
+  KEY `i_eh_user_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -4968,7 +5227,8 @@ CREATE TABLE `eh_version_realm` (
   `create_time` datetime DEFAULT NULL,
   `namespace_id` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `u_eh_ver_realm` (`realm`,`namespace_id`)
+  UNIQUE KEY `u_eh_ver_realm` (`realm`,`namespace_id`),
+  KEY `i_eh_ver_realm_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -4989,7 +5249,11 @@ CREATE TABLE `eh_version_upgrade_rules` (
   `force_upgrade` tinyint(4) NOT NULL DEFAULT '0',
   `create_time` datetime DEFAULT NULL,
   `namespace_id` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `fk_eh_ver_upgrade_realm` (`realm_id`),
+  KEY `i_eh_ver_upgrade_order` (`order`),
+  KEY `i_eh_ver_upgrade_create_time` (`create_time`),
+  CONSTRAINT `eh_version_upgrade_rules_ibfk_1` FOREIGN KEY (`realm_id`) REFERENCES `eh_version_realm` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -5028,7 +5292,11 @@ CREATE TABLE `eh_versioned_content` (
   `content` text,
   `create_time` datetime DEFAULT NULL,
   `namespace_id` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `fk_eh_ver_content_realm` (`realm_id`),
+  KEY `i_eh_ver_content_order` (`order`),
+  KEY `i_eh_ver_content_create_time` (`create_time`),
+  CONSTRAINT `eh_versioned_content_ibfk_1` FOREIGN KEY (`realm_id`) REFERENCES `eh_version_realm` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
