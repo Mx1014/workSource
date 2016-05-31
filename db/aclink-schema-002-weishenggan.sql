@@ -29,4 +29,7 @@ ALTER TABLE `eh_door_auth` ADD COLUMN `string_tag3` VARCHAR(128);
 ALTER TABLE `eh_door_auth` ADD COLUMN `string_tag4` VARCHAR(128);
 ALTER TABLE `eh_door_auth` ADD COLUMN `string_tag5` VARCHAR(128);
 
+# modify at 2016-05-31
+ALTER TABLE `eh_door_auth` ADD COLUMN `string_tag6` TEXT;
+
 

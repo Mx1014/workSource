@@ -58,6 +58,7 @@ import com.everhomes.rest.aclink.CreateDoorAccessGroup;
 import com.everhomes.rest.aclink.CreateDoorAccessLingLing;
 import com.everhomes.rest.aclink.CreateDoorAuthByUser;
 import com.everhomes.rest.aclink.CreateDoorAuthCommand;
+import com.everhomes.rest.aclink.CreateLinglingVisitorCommand;
 import com.everhomes.rest.aclink.DoorAccessActivedCommand;
 import com.everhomes.rest.aclink.DoorAccessActivingCommand;
 import com.everhomes.rest.aclink.DoorAccessAdminUpdateCommand;
@@ -1301,7 +1302,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             Long validTime = System.currentTimeMillis() + 1*1*60*60*1000;
             int maxCount = 32;
             
-            if(auth.getLinglingDoorId() == null || (auth.getKeyValidTime() <= System.currentTimeMillis()) ) {
+            //TODO how to cache it?
+//            if(auth.getLinglingDoorId() == null || (auth.getKeyValidTime() <= System.currentTimeMillis()) ) {
                 
                 qr.setDoorGroupId(doorAccess.getId());
                 auth.setKeyValidTime(validTime);
@@ -1348,26 +1350,28 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     }
                     
                     auth.setKeyValidTime(validTime);
+                    auth.setLinglingDoorId(doorAccess.getId());
+                    doorAuthProvider.updateDoorAuth(auth);
                         
                 } catch(Exception ex) {
                     LOGGER.error("create doorAuth key error", ex);
                     continue;
                 }
 
-                } else {
-                    if(doorAccess.getDoorType().equals(DoorAccessType.ACLINK_LINGLING_GROUP.getCode())) {
-                        List<DoorAccess> childs = doorAccessProvider.listDoorAccessByGroupId(doorAccess.getId(), maxCount);
-                        for(DoorAccess child : childs) {
-                            Aclink ca = aclinkProvider.getAclinkByDoorId(child.getId());
-                            hardwares.add(child.getHardwareId());
-                            sdkKeys.add(ca.getLinglingSDKKey());
-                            }
-                    } else {
-                        hardwares.add(doorAccess.getHardwareId());
-                        Aclink ca = aclinkProvider.getAclinkByDoorId(doorAccess.getId());
-                    }
-                    
-                }
+//                } else {
+//                    if(doorAccess.getDoorType().equals(DoorAccessType.ACLINK_LINGLING_GROUP.getCode())) {
+//                        List<DoorAccess> childs = doorAccessProvider.listDoorAccessByGroupId(doorAccess.getId(), maxCount);
+//                        for(DoorAccess child : childs) {
+//                            Aclink ca = aclinkProvider.getAclinkByDoorId(child.getId());
+//                            hardwares.add(child.getHardwareId());
+//                            sdkKeys.add(ca.getLinglingSDKKey());
+//                            }
+//                    } else {
+//                        hardwares.add(doorAccess.getHardwareId());
+//                        Aclink ca = aclinkProvider.getAclinkByDoorId(doorAccess.getId());
+//                    }
+//                    
+//                }
             
             qr.setCreateTimeMs(System.currentTimeMillis());
             qr.setCreatorUid(user.getId());
@@ -1578,5 +1582,10 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         }
         
         return ConvertHelper.convert(doorAccess, DoorAccessDTO.class);
+    }
+    
+    @Override
+    public DoorAuthDTO createLinglingVisitorAuth(CreateLinglingVisitorCommand cmd) {
+        return null;
     }
 }

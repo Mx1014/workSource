@@ -30,6 +30,7 @@ import com.everhomes.rest.aclink.AclinkUpgradeCommand;
 import com.everhomes.rest.aclink.AclinkUpgradeResponse;
 import com.everhomes.rest.aclink.AclinkWebSocketMessage;
 import com.everhomes.rest.aclink.CreateDoorAuthByUser;
+import com.everhomes.rest.aclink.CreateLinglingVisitorCommand;
 import com.everhomes.rest.aclink.DoorAccessActivedCommand;
 import com.everhomes.rest.aclink.DoorAccessActivingCommand;
 import com.everhomes.rest.aclink.DoorAccessCapapilityDTO;
@@ -339,5 +340,20 @@ public class AclinkController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /aclink/createAuth</b>
+     * <p>给其它用户授权</p>
+     * @return OK 成功
+     */
+    @RequestMapping("createLingingVistor")
+    @RestReturn(value=DoorAuthDTO.class)
+    public RestResponse createDoorAuth(@Valid CreateLinglingVisitorCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.createLinglingVisitorAuth(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;        
     }
 }
