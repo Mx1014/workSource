@@ -1633,6 +1633,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         List<Long> floorIds = new ArrayList<Long>();
         floorIds.add(8l);
         qrRequest.setFloorIds(floorIds);
+        qrRequest.setAutoFloorId(8l);
         
         Aclink dAc = aclinkProvider.getAclinkByDoorId(cmd.getDoorId());
         qrRequest.setLingLingId(dAc.getDeviceName());
@@ -1645,6 +1646,11 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         auth.setLinglingUuid(uuid + "-" + qrCode.getCodeId().toString());
         auth.setQrKey(qrCode.getQrcodeKey());
+        auth.setUserId(0l);
+        auth.setOwnerType(doorAccess.getOwnerType());
+        auth.setOwnerId(doorAccess.getOwnerId());
+        auth.setStatus(DoorAuthStatus.VALID.getCode());
+        doorAuthProvider.createDoorAuth(auth);
         
         return ConvertHelper.convert(auth, DoorAuthDTO.class);
     }

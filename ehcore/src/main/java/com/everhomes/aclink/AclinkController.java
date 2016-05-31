@@ -49,6 +49,7 @@ import com.everhomes.rest.aclink.ListDoorAuthResponse;
 import com.everhomes.rest.aclink.QueryDoorMessageCommand;
 import com.everhomes.rest.aclink.QueryDoorMessageResponse;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RequireAuthentication;
 
 @RestDoc(value="Aclink controller", site="core")
 @RestController
@@ -351,6 +352,7 @@ public class AclinkController extends ControllerBase {
      * @return
      */
     @RequestMapping("getVisitor")
+    @RequireAuthentication(false)
     @RestReturn(value=GetVisitorResponse.class)
     public RestResponse getDoorVisitorAuthByUuid(GetVisitorCommand cmd) {
         RestResponse response = new RestResponse();
