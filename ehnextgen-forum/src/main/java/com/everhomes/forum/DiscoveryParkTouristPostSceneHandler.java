@@ -30,6 +30,7 @@ import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.rest.visibility.VisibilityScope;
+import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.user.User;
 import com.everhomes.util.WebTokenGenerator;
 
@@ -270,6 +271,8 @@ public class DiscoveryParkTouristPostSceneHandler implements PostSceneHandler {
             avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.community_only", "");
             sentScopeDto.setAvatar(avatarUri);
             sentScopeDto.setAvatarUrl(getPostFilterDefaultAvatar(namespaceId, user.getId(), avatarUri));
+            sentScopeDto.setVisibleRegionType(VisibleRegionType.COMMUNITY.getCode());
+            sentScopeDto.setVisibleRegionId(community.getId());
             scopeList.add(sentScopeDto);
 
             // 各兴趣圈
