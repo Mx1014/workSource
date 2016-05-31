@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteRules extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord> {
 
-	private static final long serialVersionUID = 1570499103;
+	private static final long serialVersionUID = -1976451781;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_site_rules</code>
@@ -32,59 +32,49 @@ public class EhRentalSiteRules extends org.jooq.impl.TableImpl<com.everhomes.ser
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id");
 
 	/**
-	 * The column <code>ehcore.eh_rental_site_rules.owner_id</code>.     community id or organization id 
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Long> OWNER_ID = createField("owner_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "    community id or organization id ");
-
-	/**
-	 * The column <code>ehcore.eh_rental_site_rules.site_type</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.String> SITE_TYPE = createField("site_type", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
-
-	/**
 	 * The column <code>ehcore.eh_rental_site_rules.rental_site_id</code>. rental_site id
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Long> RENTAL_SITE_ID = createField("rental_site_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "rental_site id");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Long> RENTAL_SITE_ID = createField("rental_site_id", org.jooq.impl.SQLDataType.BIGINT, this, "rental_site id");
 
 	/**
-	 * The column <code>ehcore.eh_rental_site_rules.rental_type</code>. 0: as hour:min  1-as half day 2-as day
+	 * The column <code>ehcore.eh_rental_site_rules.rental_type</code>. 0: as hour:min 1-as half day 2-as day 3-支持晚上的半天
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Byte> RENTAL_TYPE = createField("rental_type", org.jooq.impl.SQLDataType.TINYINT, this, "0: as hour:min  1-as half day 2-as day");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Byte> RENTAL_TYPE = createField("rental_type", org.jooq.impl.SQLDataType.TINYINT, this, "0: as hour:min 1-as half day 2-as day 3-支持晚上的半天");
 
 	/**
-	 * The column <code>ehcore.eh_rental_site_rules.amorpm</code>. 0:am  1:pm
+	 * The column <code>ehcore.eh_rental_site_rules.amorpm</code>. 0:am 1:pm 2:night
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Byte> AMORPM = createField("amorpm", org.jooq.impl.SQLDataType.TINYINT, this, "0:am  1:pm");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Byte> AMORPM = createField("amorpm", org.jooq.impl.SQLDataType.TINYINT, this, "0:am 1:pm 2:night");
 
 	/**
-	 * The column <code>ehcore.eh_rental_site_rules.rental_step</code>. how many time_step must be rental every time 
+	 * The column <code>ehcore.eh_rental_site_rules.rental_step</code>. how many time_step must be rental every time
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Integer> RENTAL_STEP = createField("rental_step", org.jooq.impl.SQLDataType.INTEGER.defaulted(true), this, "how many time_step must be rental every time ");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Integer> RENTAL_STEP = createField("rental_step", org.jooq.impl.SQLDataType.INTEGER, this, "how many time_step must be rental every time");
 
 	/**
-	 * The column <code>ehcore.eh_rental_site_rules.begin_time</code>.
+	 * The column <code>ehcore.eh_rental_site_rules.begin_time</code>. 开始时间 对于按时间定
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.sql.Timestamp> BEGIN_TIME = createField("begin_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.sql.Timestamp> BEGIN_TIME = createField("begin_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "开始时间 对于按时间定");
 
 	/**
-	 * The column <code>ehcore.eh_rental_site_rules.end_time</code>.
+	 * The column <code>ehcore.eh_rental_site_rules.end_time</code>. 结束时间 对于按时间定
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.sql.Timestamp> END_TIME = createField("end_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.sql.Timestamp> END_TIME = createField("end_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "结束时间 对于按时间定");
 
 	/**
-	 * The column <code>ehcore.eh_rental_site_rules.counts</code>. site count
+	 * The column <code>ehcore.eh_rental_site_rules.counts</code>. 共多少个
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Double> COUNTS = createField("counts", org.jooq.impl.SQLDataType.DOUBLE, this, "site count");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Double> COUNTS = createField("counts", org.jooq.impl.SQLDataType.DOUBLE, this, "共多少个");
 
 	/**
-	 * The column <code>ehcore.eh_rental_site_rules.unit</code>. 1 or 0.5 basketball yard can rental half
+	 * The column <code>ehcore.eh_rental_site_rules.unit</code>. 是否支持0.5个
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Double> UNIT = createField("unit", org.jooq.impl.SQLDataType.DOUBLE, this, "1 or 0.5 basketball yard can rental half");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Double> UNIT = createField("unit", org.jooq.impl.SQLDataType.DOUBLE, this, "是否支持0.5个");
 
 	/**
-	 * The column <code>ehcore.eh_rental_site_rules.price</code>.
+	 * The column <code>ehcore.eh_rental_site_rules.price</code>. 折后价
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.math.BigDecimal> PRICE = createField("price", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.math.BigDecimal> PRICE = createField("price", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "折后价");
 
 	/**
 	 * The column <code>ehcore.eh_rental_site_rules.site_rental_date</code>. which day
@@ -92,9 +82,9 @@ public class EhRentalSiteRules extends org.jooq.impl.TableImpl<com.everhomes.ser
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.sql.Date> SITE_RENTAL_DATE = createField("site_rental_date", org.jooq.impl.SQLDataType.DATE, this, "which day");
 
 	/**
-	 * The column <code>ehcore.eh_rental_site_rules.status</code>. unuse 0:open  1:closed
+	 * The column <code>ehcore.eh_rental_site_rules.status</code>. unuse 0:open 1:closed
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT, this, "unuse 0:open  1:closed");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT, this, "unuse 0:open 1:closed");
 
 	/**
 	 * The column <code>ehcore.eh_rental_site_rules.creator_uid</code>.
@@ -115,11 +105,6 @@ public class EhRentalSiteRules extends org.jooq.impl.TableImpl<com.everhomes.ser
 	 * The column <code>ehcore.eh_rental_site_rules.operate_time</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.sql.Timestamp> OPERATE_TIME = createField("operate_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
-
-	/**
-	 * The column <code>ehcore.eh_rental_site_rules.owner_type</code>. owner type : community ; organization
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.String> OWNER_TYPE = createField("owner_type", org.jooq.impl.SQLDataType.VARCHAR.length(255), this, "owner type : community ; organization");
 
 	/**
 	 * The column <code>ehcore.eh_rental_site_rules.time_step</code>.
@@ -150,11 +135,6 @@ public class EhRentalSiteRules extends org.jooq.impl.TableImpl<com.everhomes.ser
 	 * The column <code>ehcore.eh_rental_site_rules.multi_time_interval</code>. 是否允许预约多个时段 1是 0否
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Byte> MULTI_TIME_INTERVAL = createField("multi_time_interval", org.jooq.impl.SQLDataType.TINYINT, this, "是否允许预约多个时段 1是 0否");
-
-	/**
-	 * The column <code>ehcore.eh_rental_site_rules.cancel_flag</code>. 是否允许取消 1是 0否
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Byte> CANCEL_FLAG = createField("cancel_flag", org.jooq.impl.SQLDataType.TINYINT, this, "是否允许取消 1是 0否");
 
 	/**
 	 * The column <code>ehcore.eh_rental_site_rules.launch_pad_item_id</code>. 广场图标id

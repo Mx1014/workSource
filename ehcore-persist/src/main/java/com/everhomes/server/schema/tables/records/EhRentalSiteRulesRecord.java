@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteRulesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord> {
 
-	private static final long serialVersionUID = -313065120;
+	private static final long serialVersionUID = -400720990;
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_site_rules.id</code>. id
@@ -28,367 +28,311 @@ public class EhRentalSiteRulesRecord extends org.jooq.impl.UpdatableRecordImpl<c
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_site_rules.owner_id</code>.     community id or organization id 
-	 */
-	public void setOwnerId(java.lang.Long value) {
-		setValue(1, value);
-	}
-
-	/**
-	 * Getter for <code>ehcore.eh_rental_site_rules.owner_id</code>.     community id or organization id 
-	 */
-	public java.lang.Long getOwnerId() {
-		return (java.lang.Long) getValue(1);
-	}
-
-	/**
-	 * Setter for <code>ehcore.eh_rental_site_rules.site_type</code>.
-	 */
-	public void setSiteType(java.lang.String value) {
-		setValue(2, value);
-	}
-
-	/**
-	 * Getter for <code>ehcore.eh_rental_site_rules.site_type</code>.
-	 */
-	public java.lang.String getSiteType() {
-		return (java.lang.String) getValue(2);
-	}
-
-	/**
 	 * Setter for <code>ehcore.eh_rental_site_rules.rental_site_id</code>. rental_site id
 	 */
 	public void setRentalSiteId(java.lang.Long value) {
-		setValue(3, value);
+		setValue(1, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_site_rules.rental_site_id</code>. rental_site id
 	 */
 	public java.lang.Long getRentalSiteId() {
-		return (java.lang.Long) getValue(3);
+		return (java.lang.Long) getValue(1);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_site_rules.rental_type</code>. 0: as hour:min  1-as half day 2-as day
+	 * Setter for <code>ehcore.eh_rental_site_rules.rental_type</code>. 0: as hour:min 1-as half day 2-as day 3-支持晚上的半天
 	 */
 	public void setRentalType(java.lang.Byte value) {
+		setValue(2, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_rental_site_rules.rental_type</code>. 0: as hour:min 1-as half day 2-as day 3-支持晚上的半天
+	 */
+	public java.lang.Byte getRentalType() {
+		return (java.lang.Byte) getValue(2);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_rental_site_rules.amorpm</code>. 0:am 1:pm 2:night
+	 */
+	public void setAmorpm(java.lang.Byte value) {
+		setValue(3, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_rental_site_rules.amorpm</code>. 0:am 1:pm 2:night
+	 */
+	public java.lang.Byte getAmorpm() {
+		return (java.lang.Byte) getValue(3);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_rental_site_rules.rental_step</code>. how many time_step must be rental every time
+	 */
+	public void setRentalStep(java.lang.Integer value) {
 		setValue(4, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_site_rules.rental_type</code>. 0: as hour:min  1-as half day 2-as day
+	 * Getter for <code>ehcore.eh_rental_site_rules.rental_step</code>. how many time_step must be rental every time
 	 */
-	public java.lang.Byte getRentalType() {
-		return (java.lang.Byte) getValue(4);
+	public java.lang.Integer getRentalStep() {
+		return (java.lang.Integer) getValue(4);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_site_rules.amorpm</code>. 0:am  1:pm
+	 * Setter for <code>ehcore.eh_rental_site_rules.begin_time</code>. 开始时间 对于按时间定
 	 */
-	public void setAmorpm(java.lang.Byte value) {
+	public void setBeginTime(java.sql.Timestamp value) {
 		setValue(5, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_site_rules.amorpm</code>. 0:am  1:pm
+	 * Getter for <code>ehcore.eh_rental_site_rules.begin_time</code>. 开始时间 对于按时间定
 	 */
-	public java.lang.Byte getAmorpm() {
-		return (java.lang.Byte) getValue(5);
+	public java.sql.Timestamp getBeginTime() {
+		return (java.sql.Timestamp) getValue(5);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_site_rules.rental_step</code>. how many time_step must be rental every time 
+	 * Setter for <code>ehcore.eh_rental_site_rules.end_time</code>. 结束时间 对于按时间定
 	 */
-	public void setRentalStep(java.lang.Integer value) {
+	public void setEndTime(java.sql.Timestamp value) {
 		setValue(6, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_site_rules.rental_step</code>. how many time_step must be rental every time 
+	 * Getter for <code>ehcore.eh_rental_site_rules.end_time</code>. 结束时间 对于按时间定
 	 */
-	public java.lang.Integer getRentalStep() {
-		return (java.lang.Integer) getValue(6);
+	public java.sql.Timestamp getEndTime() {
+		return (java.sql.Timestamp) getValue(6);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_site_rules.begin_time</code>.
+	 * Setter for <code>ehcore.eh_rental_site_rules.counts</code>. 共多少个
 	 */
-	public void setBeginTime(java.sql.Timestamp value) {
+	public void setCounts(java.lang.Double value) {
 		setValue(7, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_site_rules.begin_time</code>.
+	 * Getter for <code>ehcore.eh_rental_site_rules.counts</code>. 共多少个
 	 */
-	public java.sql.Timestamp getBeginTime() {
-		return (java.sql.Timestamp) getValue(7);
+	public java.lang.Double getCounts() {
+		return (java.lang.Double) getValue(7);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_site_rules.end_time</code>.
+	 * Setter for <code>ehcore.eh_rental_site_rules.unit</code>. 是否支持0.5个
 	 */
-	public void setEndTime(java.sql.Timestamp value) {
+	public void setUnit(java.lang.Double value) {
 		setValue(8, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_site_rules.end_time</code>.
+	 * Getter for <code>ehcore.eh_rental_site_rules.unit</code>. 是否支持0.5个
 	 */
-	public java.sql.Timestamp getEndTime() {
-		return (java.sql.Timestamp) getValue(8);
+	public java.lang.Double getUnit() {
+		return (java.lang.Double) getValue(8);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_site_rules.counts</code>. site count
+	 * Setter for <code>ehcore.eh_rental_site_rules.price</code>. 折后价
 	 */
-	public void setCounts(java.lang.Double value) {
+	public void setPrice(java.math.BigDecimal value) {
 		setValue(9, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_site_rules.counts</code>. site count
-	 */
-	public java.lang.Double getCounts() {
-		return (java.lang.Double) getValue(9);
-	}
-
-	/**
-	 * Setter for <code>ehcore.eh_rental_site_rules.unit</code>. 1 or 0.5 basketball yard can rental half
-	 */
-	public void setUnit(java.lang.Double value) {
-		setValue(10, value);
-	}
-
-	/**
-	 * Getter for <code>ehcore.eh_rental_site_rules.unit</code>. 1 or 0.5 basketball yard can rental half
-	 */
-	public java.lang.Double getUnit() {
-		return (java.lang.Double) getValue(10);
-	}
-
-	/**
-	 * Setter for <code>ehcore.eh_rental_site_rules.price</code>.
-	 */
-	public void setPrice(java.math.BigDecimal value) {
-		setValue(11, value);
-	}
-
-	/**
-	 * Getter for <code>ehcore.eh_rental_site_rules.price</code>.
+	 * Getter for <code>ehcore.eh_rental_site_rules.price</code>. 折后价
 	 */
 	public java.math.BigDecimal getPrice() {
-		return (java.math.BigDecimal) getValue(11);
+		return (java.math.BigDecimal) getValue(9);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_site_rules.site_rental_date</code>. which day
 	 */
 	public void setSiteRentalDate(java.sql.Date value) {
-		setValue(12, value);
+		setValue(10, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_site_rules.site_rental_date</code>. which day
 	 */
 	public java.sql.Date getSiteRentalDate() {
-		return (java.sql.Date) getValue(12);
+		return (java.sql.Date) getValue(10);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_site_rules.status</code>. unuse 0:open  1:closed
+	 * Setter for <code>ehcore.eh_rental_site_rules.status</code>. unuse 0:open 1:closed
 	 */
 	public void setStatus(java.lang.Byte value) {
-		setValue(13, value);
+		setValue(11, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_site_rules.status</code>. unuse 0:open  1:closed
+	 * Getter for <code>ehcore.eh_rental_site_rules.status</code>. unuse 0:open 1:closed
 	 */
 	public java.lang.Byte getStatus() {
-		return (java.lang.Byte) getValue(13);
+		return (java.lang.Byte) getValue(11);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_site_rules.creator_uid</code>.
 	 */
 	public void setCreatorUid(java.lang.Long value) {
-		setValue(14, value);
+		setValue(12, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_site_rules.creator_uid</code>.
 	 */
 	public java.lang.Long getCreatorUid() {
-		return (java.lang.Long) getValue(14);
+		return (java.lang.Long) getValue(12);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_site_rules.create_time</code>.
 	 */
 	public void setCreateTime(java.sql.Timestamp value) {
-		setValue(15, value);
+		setValue(13, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_site_rules.create_time</code>.
 	 */
 	public java.sql.Timestamp getCreateTime() {
-		return (java.sql.Timestamp) getValue(15);
+		return (java.sql.Timestamp) getValue(13);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_site_rules.operator_uid</code>.
 	 */
 	public void setOperatorUid(java.lang.Long value) {
-		setValue(16, value);
+		setValue(14, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_site_rules.operator_uid</code>.
 	 */
 	public java.lang.Long getOperatorUid() {
-		return (java.lang.Long) getValue(16);
+		return (java.lang.Long) getValue(14);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_site_rules.operate_time</code>.
 	 */
 	public void setOperateTime(java.sql.Timestamp value) {
-		setValue(17, value);
+		setValue(15, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_site_rules.operate_time</code>.
 	 */
 	public java.sql.Timestamp getOperateTime() {
-		return (java.sql.Timestamp) getValue(17);
-	}
-
-	/**
-	 * Setter for <code>ehcore.eh_rental_site_rules.owner_type</code>. owner type : community ; organization
-	 */
-	public void setOwnerType(java.lang.String value) {
-		setValue(18, value);
-	}
-
-	/**
-	 * Getter for <code>ehcore.eh_rental_site_rules.owner_type</code>. owner type : community ; organization
-	 */
-	public java.lang.String getOwnerType() {
-		return (java.lang.String) getValue(18);
+		return (java.sql.Timestamp) getValue(15);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_site_rules.time_step</code>.
 	 */
 	public void setTimeStep(java.lang.Double value) {
-		setValue(19, value);
+		setValue(16, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_site_rules.time_step</code>.
 	 */
 	public java.lang.Double getTimeStep() {
-		return (java.lang.Double) getValue(19);
+		return (java.lang.Double) getValue(16);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_site_rules.original_price</code>. 原价（如果不为null则price为打折价）
 	 */
 	public void setOriginalPrice(java.math.BigDecimal value) {
-		setValue(20, value);
+		setValue(17, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_site_rules.original_price</code>. 原价（如果不为null则price为打折价）
 	 */
 	public java.math.BigDecimal getOriginalPrice() {
-		return (java.math.BigDecimal) getValue(20);
+		return (java.math.BigDecimal) getValue(17);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_site_rules.exclusive_flag</code>. 是否为独占资源0否 1 是
 	 */
 	public void setExclusiveFlag(java.lang.Byte value) {
-		setValue(21, value);
+		setValue(18, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_site_rules.exclusive_flag</code>. 是否为独占资源0否 1 是
 	 */
 	public java.lang.Byte getExclusiveFlag() {
-		return (java.lang.Byte) getValue(21);
+		return (java.lang.Byte) getValue(18);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_site_rules.auto_assign</code>. 是否动态分配 1是 0否
 	 */
 	public void setAutoAssign(java.lang.Byte value) {
-		setValue(22, value);
+		setValue(19, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_site_rules.auto_assign</code>. 是否动态分配 1是 0否
 	 */
 	public java.lang.Byte getAutoAssign() {
-		return (java.lang.Byte) getValue(22);
+		return (java.lang.Byte) getValue(19);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_site_rules.multi_unit</code>. 是否允许预约多个场所 1是 0否
 	 */
 	public void setMultiUnit(java.lang.Byte value) {
-		setValue(23, value);
+		setValue(20, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_site_rules.multi_unit</code>. 是否允许预约多个场所 1是 0否
 	 */
 	public java.lang.Byte getMultiUnit() {
-		return (java.lang.Byte) getValue(23);
+		return (java.lang.Byte) getValue(20);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_site_rules.multi_time_interval</code>. 是否允许预约多个时段 1是 0否
 	 */
 	public void setMultiTimeInterval(java.lang.Byte value) {
-		setValue(24, value);
+		setValue(21, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_site_rules.multi_time_interval</code>. 是否允许预约多个时段 1是 0否
 	 */
 	public java.lang.Byte getMultiTimeInterval() {
-		return (java.lang.Byte) getValue(24);
-	}
-
-	/**
-	 * Setter for <code>ehcore.eh_rental_site_rules.cancel_flag</code>. 是否允许取消 1是 0否
-	 */
-	public void setCancelFlag(java.lang.Byte value) {
-		setValue(25, value);
-	}
-
-	/**
-	 * Getter for <code>ehcore.eh_rental_site_rules.cancel_flag</code>. 是否允许取消 1是 0否
-	 */
-	public java.lang.Byte getCancelFlag() {
-		return (java.lang.Byte) getValue(25);
+		return (java.lang.Byte) getValue(21);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_site_rules.launch_pad_item_id</code>. 广场图标id
 	 */
 	public void setLaunchPadItemId(java.lang.Long value) {
-		setValue(26, value);
+		setValue(22, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_site_rules.launch_pad_item_id</code>. 广场图标id
 	 */
 	public java.lang.Long getLaunchPadItemId() {
-		return (java.lang.Long) getValue(26);
+		return (java.lang.Long) getValue(22);
 	}
 
 	// -------------------------------------------------------------------------
@@ -417,35 +361,31 @@ public class EhRentalSiteRulesRecord extends org.jooq.impl.UpdatableRecordImpl<c
 	/**
 	 * Create a detached, initialised EhRentalSiteRulesRecord
 	 */
-	public EhRentalSiteRulesRecord(java.lang.Long id, java.lang.Long ownerId, java.lang.String siteType, java.lang.Long rentalSiteId, java.lang.Byte rentalType, java.lang.Byte amorpm, java.lang.Integer rentalStep, java.sql.Timestamp beginTime, java.sql.Timestamp endTime, java.lang.Double counts, java.lang.Double unit, java.math.BigDecimal price, java.sql.Date siteRentalDate, java.lang.Byte status, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.String ownerType, java.lang.Double timeStep, java.math.BigDecimal originalPrice, java.lang.Byte exclusiveFlag, java.lang.Byte autoAssign, java.lang.Byte multiUnit, java.lang.Byte multiTimeInterval, java.lang.Byte cancelFlag, java.lang.Long launchPadItemId) {
+	public EhRentalSiteRulesRecord(java.lang.Long id, java.lang.Long rentalSiteId, java.lang.Byte rentalType, java.lang.Byte amorpm, java.lang.Integer rentalStep, java.sql.Timestamp beginTime, java.sql.Timestamp endTime, java.lang.Double counts, java.lang.Double unit, java.math.BigDecimal price, java.sql.Date siteRentalDate, java.lang.Byte status, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.Double timeStep, java.math.BigDecimal originalPrice, java.lang.Byte exclusiveFlag, java.lang.Byte autoAssign, java.lang.Byte multiUnit, java.lang.Byte multiTimeInterval, java.lang.Long launchPadItemId) {
 		super(com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES);
 
 		setValue(0, id);
-		setValue(1, ownerId);
-		setValue(2, siteType);
-		setValue(3, rentalSiteId);
-		setValue(4, rentalType);
-		setValue(5, amorpm);
-		setValue(6, rentalStep);
-		setValue(7, beginTime);
-		setValue(8, endTime);
-		setValue(9, counts);
-		setValue(10, unit);
-		setValue(11, price);
-		setValue(12, siteRentalDate);
-		setValue(13, status);
-		setValue(14, creatorUid);
-		setValue(15, createTime);
-		setValue(16, operatorUid);
-		setValue(17, operateTime);
-		setValue(18, ownerType);
-		setValue(19, timeStep);
-		setValue(20, originalPrice);
-		setValue(21, exclusiveFlag);
-		setValue(22, autoAssign);
-		setValue(23, multiUnit);
-		setValue(24, multiTimeInterval);
-		setValue(25, cancelFlag);
-		setValue(26, launchPadItemId);
+		setValue(1, rentalSiteId);
+		setValue(2, rentalType);
+		setValue(3, amorpm);
+		setValue(4, rentalStep);
+		setValue(5, beginTime);
+		setValue(6, endTime);
+		setValue(7, counts);
+		setValue(8, unit);
+		setValue(9, price);
+		setValue(10, siteRentalDate);
+		setValue(11, status);
+		setValue(12, creatorUid);
+		setValue(13, createTime);
+		setValue(14, operatorUid);
+		setValue(15, operateTime);
+		setValue(16, timeStep);
+		setValue(17, originalPrice);
+		setValue(18, exclusiveFlag);
+		setValue(19, autoAssign);
+		setValue(20, multiUnit);
+		setValue(21, multiTimeInterval);
+		setValue(22, launchPadItemId);
 	}
 }

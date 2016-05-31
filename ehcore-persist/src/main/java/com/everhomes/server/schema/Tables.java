@@ -809,6 +809,10 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhRentalSiteItems EH_RENTAL_SITE_ITEMS = com.everhomes.server.schema.tables.EhRentalSiteItems.EH_RENTAL_SITE_ITEMS;
 
 	/**
+	 * The table ehcore.eh_rental_site_owners
+	 */
+	public static final com.everhomes.server.schema.tables.EhRentalSiteOwners EH_RENTAL_SITE_OWNERS = com.everhomes.server.schema.tables.EhRentalSiteOwners.EH_RENTAL_SITE_OWNERS;
+	/**
 	 * The table ehcore.eh_rental_site_pics
 	 */
 	public static final com.everhomes.server.schema.tables.EhRentalSitePics EH_RENTAL_SITE_PICS = com.everhomes.server.schema.tables.EhRentalSitePics.EH_RENTAL_SITE_PICS;

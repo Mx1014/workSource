@@ -11,66 +11,80 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalDefaultRules implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1356216667;
+	private static final long serialVersionUID = -1570389761;
 
-	private java.lang.Long     id;
-	private java.lang.String   ownerType;
-	private java.lang.Long     ownerId;
-	private java.lang.String   siteType;
-	private java.lang.Long     rentalStartTime;
-	private java.lang.Long     rentalEndTime;
-	private java.lang.Long     payStartTime;
-	private java.lang.Long     payEndTime;
-	private java.lang.Integer  paymentRatio;
-	private java.lang.Byte     refundFlag;
-	private java.lang.String   contactNum;
-	private java.lang.Long     creatorUid;
-	private java.sql.Timestamp createTime;
-	private java.lang.Long     operatorUid;
-	private java.sql.Timestamp operateTime;
-	private java.lang.Byte     rentalType;
-	private java.lang.Long     cancelTime;
-	private java.lang.Long     overtimeTime;
-	private java.lang.Byte     exclusiveFlag;
-	private java.lang.Double   unit;
-	private java.lang.Byte     autoAssign;
-	private java.lang.Byte     multiUnit;
-	private java.lang.Byte     multiTimeInterval;
-	private java.lang.Byte     cancelFlag;
-	private java.lang.Integer  rentalStep;
-	private java.lang.Byte     needPay;
-	private java.lang.Long     launchPadItemId;
+	private java.lang.Long       id;
+	private java.lang.String     ownerType;
+	private java.lang.Long       ownerId;
+	private java.lang.Long       siteType;
+	private java.lang.Long       rentalStartTime;
+	private java.lang.Long       rentalEndTime;
+	private java.lang.Long       payStartTime;
+	private java.lang.Long       payEndTime;
+	private java.lang.Integer    paymentRatio;
+	private java.lang.Byte       refundFlag;
+	private java.lang.Integer    refundRatio;
+	private java.lang.String     contactNum;
+	private java.lang.Long       creatorUid;
+	private java.sql.Timestamp   createTime;
+	private java.lang.Long       operatorUid;
+	private java.sql.Timestamp   operateTime;
+	private java.lang.Byte       rentalType;
+	private java.lang.Long       cancelTime;
+	private java.lang.Long       overtimeTime;
+	private java.lang.Byte       exclusiveFlag;
+	private java.lang.Double     unit;
+	private java.lang.Byte       autoAssign;
+	private java.lang.Byte       multiUnit;
+	private java.lang.Byte       multiTimeInterval;
+	private java.lang.Byte       cancelFlag;
+	private java.lang.Integer    rentalStep;
+	private java.lang.Byte       needPay;
+	private java.lang.Long       launchPadItemId;
+	private java.math.BigDecimal workdayPrice;
+	private java.math.BigDecimal weekendPrice;
+	private java.lang.Double     siteCounts;
+	private java.sql.Date        beginDate;
+	private java.sql.Date        endDate;
+	private java.lang.String     openWeekday;
 
 	public EhRentalDefaultRules() {}
 
 	public EhRentalDefaultRules(
-		java.lang.Long     id,
-		java.lang.String   ownerType,
-		java.lang.Long     ownerId,
-		java.lang.String   siteType,
-		java.lang.Long     rentalStartTime,
-		java.lang.Long     rentalEndTime,
-		java.lang.Long     payStartTime,
-		java.lang.Long     payEndTime,
-		java.lang.Integer  paymentRatio,
-		java.lang.Byte     refundFlag,
-		java.lang.String   contactNum,
-		java.lang.Long     creatorUid,
-		java.sql.Timestamp createTime,
-		java.lang.Long     operatorUid,
-		java.sql.Timestamp operateTime,
-		java.lang.Byte     rentalType,
-		java.lang.Long     cancelTime,
-		java.lang.Long     overtimeTime,
-		java.lang.Byte     exclusiveFlag,
-		java.lang.Double   unit,
-		java.lang.Byte     autoAssign,
-		java.lang.Byte     multiUnit,
-		java.lang.Byte     multiTimeInterval,
-		java.lang.Byte     cancelFlag,
-		java.lang.Integer  rentalStep,
-		java.lang.Byte     needPay,
-		java.lang.Long     launchPadItemId
+		java.lang.Long       id,
+		java.lang.String     ownerType,
+		java.lang.Long       ownerId,
+		java.lang.Long       siteType,
+		java.lang.Long       rentalStartTime,
+		java.lang.Long       rentalEndTime,
+		java.lang.Long       payStartTime,
+		java.lang.Long       payEndTime,
+		java.lang.Integer    paymentRatio,
+		java.lang.Byte       refundFlag,
+		java.lang.Integer    refundRatio,
+		java.lang.String     contactNum,
+		java.lang.Long       creatorUid,
+		java.sql.Timestamp   createTime,
+		java.lang.Long       operatorUid,
+		java.sql.Timestamp   operateTime,
+		java.lang.Byte       rentalType,
+		java.lang.Long       cancelTime,
+		java.lang.Long       overtimeTime,
+		java.lang.Byte       exclusiveFlag,
+		java.lang.Double     unit,
+		java.lang.Byte       autoAssign,
+		java.lang.Byte       multiUnit,
+		java.lang.Byte       multiTimeInterval,
+		java.lang.Byte       cancelFlag,
+		java.lang.Integer    rentalStep,
+		java.lang.Byte       needPay,
+		java.lang.Long       launchPadItemId,
+		java.math.BigDecimal workdayPrice,
+		java.math.BigDecimal weekendPrice,
+		java.lang.Double     siteCounts,
+		java.sql.Date        beginDate,
+		java.sql.Date        endDate,
+		java.lang.String     openWeekday
 	) {
 		this.id = id;
 		this.ownerType = ownerType;
@@ -82,6 +96,7 @@ public class EhRentalDefaultRules implements java.io.Serializable {
 		this.payEndTime = payEndTime;
 		this.paymentRatio = paymentRatio;
 		this.refundFlag = refundFlag;
+		this.refundRatio = refundRatio;
 		this.contactNum = contactNum;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
@@ -99,6 +114,12 @@ public class EhRentalDefaultRules implements java.io.Serializable {
 		this.rentalStep = rentalStep;
 		this.needPay = needPay;
 		this.launchPadItemId = launchPadItemId;
+		this.workdayPrice = workdayPrice;
+		this.weekendPrice = weekendPrice;
+		this.siteCounts = siteCounts;
+		this.beginDate = beginDate;
+		this.endDate = endDate;
+		this.openWeekday = openWeekday;
 	}
 
 	public java.lang.Long getId() {
@@ -125,11 +146,11 @@ public class EhRentalDefaultRules implements java.io.Serializable {
 		this.ownerId = ownerId;
 	}
 
-	public java.lang.String getSiteType() {
+	public java.lang.Long getSiteType() {
 		return this.siteType;
 	}
 
-	public void setSiteType(java.lang.String siteType) {
+	public void setSiteType(java.lang.Long siteType) {
 		this.siteType = siteType;
 	}
 
@@ -179,6 +200,14 @@ public class EhRentalDefaultRules implements java.io.Serializable {
 
 	public void setRefundFlag(java.lang.Byte refundFlag) {
 		this.refundFlag = refundFlag;
+	}
+
+	public java.lang.Integer getRefundRatio() {
+		return this.refundRatio;
+	}
+
+	public void setRefundRatio(java.lang.Integer refundRatio) {
+		this.refundRatio = refundRatio;
 	}
 
 	public java.lang.String getContactNum() {
@@ -315,5 +344,53 @@ public class EhRentalDefaultRules implements java.io.Serializable {
 
 	public void setLaunchPadItemId(java.lang.Long launchPadItemId) {
 		this.launchPadItemId = launchPadItemId;
+	}
+
+	public java.math.BigDecimal getWorkdayPrice() {
+		return this.workdayPrice;
+	}
+
+	public void setWorkdayPrice(java.math.BigDecimal workdayPrice) {
+		this.workdayPrice = workdayPrice;
+	}
+
+	public java.math.BigDecimal getWeekendPrice() {
+		return this.weekendPrice;
+	}
+
+	public void setWeekendPrice(java.math.BigDecimal weekendPrice) {
+		this.weekendPrice = weekendPrice;
+	}
+
+	public java.lang.Double getSiteCounts() {
+		return this.siteCounts;
+	}
+
+	public void setSiteCounts(java.lang.Double siteCounts) {
+		this.siteCounts = siteCounts;
+	}
+
+	public java.sql.Date getBeginDate() {
+		return this.beginDate;
+	}
+
+	public void setBeginDate(java.sql.Date beginDate) {
+		this.beginDate = beginDate;
+	}
+
+	public java.sql.Date getEndDate() {
+		return this.endDate;
+	}
+
+	public void setEndDate(java.sql.Date endDate) {
+		this.endDate = endDate;
+	}
+
+	public java.lang.String getOpenWeekday() {
+		return this.openWeekday;
+	}
+
+	public void setOpenWeekday(java.lang.String openWeekday) {
+		this.openWeekday = openWeekday;
 	}
 }

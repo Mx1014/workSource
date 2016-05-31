@@ -11,12 +11,10 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSites implements java.io.Serializable {
 
-	private static final long serialVersionUID = -441552697;
+	private static final long serialVersionUID = 308726283;
 
 	private java.lang.Long       id;
 	private java.lang.Long       parentId;
-	private java.lang.Long       ownerId;
-	private java.lang.String     siteType;
 	private java.lang.String     siteName;
 	private java.lang.Byte       siteType2;
 	private java.lang.String     buildingName;
@@ -34,7 +32,6 @@ public class EhRentalSites implements java.io.Serializable {
 	private java.sql.Timestamp   createTime;
 	private java.lang.Long       operatorUid;
 	private java.sql.Timestamp   operateTime;
-	private java.lang.String     ownerType;
 	private java.lang.String     introduction;
 	private java.lang.String     notice;
 	private java.lang.Long       chargeUid;
@@ -52,14 +49,17 @@ public class EhRentalSites implements java.io.Serializable {
 	private java.lang.Byte       cancelFlag;
 	private java.lang.Byte       needPay;
 	private java.lang.Long       launchPadItemId;
+	private java.lang.Long       cancelTime;
+	private java.lang.Long       rentalStartTime;
+	private java.lang.Long       rentalEndTime;
+	private java.lang.Byte       refundFlag;
+	private java.lang.Integer    refundRatio;
 
 	public EhRentalSites() {}
 
 	public EhRentalSites(
 		java.lang.Long       id,
 		java.lang.Long       parentId,
-		java.lang.Long       ownerId,
-		java.lang.String     siteType,
 		java.lang.String     siteName,
 		java.lang.Byte       siteType2,
 		java.lang.String     buildingName,
@@ -77,7 +77,6 @@ public class EhRentalSites implements java.io.Serializable {
 		java.sql.Timestamp   createTime,
 		java.lang.Long       operatorUid,
 		java.sql.Timestamp   operateTime,
-		java.lang.String     ownerType,
 		java.lang.String     introduction,
 		java.lang.String     notice,
 		java.lang.Long       chargeUid,
@@ -94,12 +93,15 @@ public class EhRentalSites implements java.io.Serializable {
 		java.lang.Byte       multiTimeInterval,
 		java.lang.Byte       cancelFlag,
 		java.lang.Byte       needPay,
-		java.lang.Long       launchPadItemId
+		java.lang.Long       launchPadItemId,
+		java.lang.Long       cancelTime,
+		java.lang.Long       rentalStartTime,
+		java.lang.Long       rentalEndTime,
+		java.lang.Byte       refundFlag,
+		java.lang.Integer    refundRatio
 	) {
 		this.id = id;
 		this.parentId = parentId;
-		this.ownerId = ownerId;
-		this.siteType = siteType;
 		this.siteName = siteName;
 		this.siteType2 = siteType2;
 		this.buildingName = buildingName;
@@ -117,7 +119,6 @@ public class EhRentalSites implements java.io.Serializable {
 		this.createTime = createTime;
 		this.operatorUid = operatorUid;
 		this.operateTime = operateTime;
-		this.ownerType = ownerType;
 		this.introduction = introduction;
 		this.notice = notice;
 		this.chargeUid = chargeUid;
@@ -135,6 +136,11 @@ public class EhRentalSites implements java.io.Serializable {
 		this.cancelFlag = cancelFlag;
 		this.needPay = needPay;
 		this.launchPadItemId = launchPadItemId;
+		this.cancelTime = cancelTime;
+		this.rentalStartTime = rentalStartTime;
+		this.rentalEndTime = rentalEndTime;
+		this.refundFlag = refundFlag;
+		this.refundRatio = refundRatio;
 	}
 
 	public java.lang.Long getId() {
@@ -151,22 +157,6 @@ public class EhRentalSites implements java.io.Serializable {
 
 	public void setParentId(java.lang.Long parentId) {
 		this.parentId = parentId;
-	}
-
-	public java.lang.Long getOwnerId() {
-		return this.ownerId;
-	}
-
-	public void setOwnerId(java.lang.Long ownerId) {
-		this.ownerId = ownerId;
-	}
-
-	public java.lang.String getSiteType() {
-		return this.siteType;
-	}
-
-	public void setSiteType(java.lang.String siteType) {
-		this.siteType = siteType;
 	}
 
 	public java.lang.String getSiteName() {
@@ -305,14 +295,6 @@ public class EhRentalSites implements java.io.Serializable {
 		this.operateTime = operateTime;
 	}
 
-	public java.lang.String getOwnerType() {
-		return this.ownerType;
-	}
-
-	public void setOwnerType(java.lang.String ownerType) {
-		this.ownerType = ownerType;
-	}
-
 	public java.lang.String getIntroduction() {
 		return this.introduction;
 	}
@@ -447,5 +429,45 @@ public class EhRentalSites implements java.io.Serializable {
 
 	public void setLaunchPadItemId(java.lang.Long launchPadItemId) {
 		this.launchPadItemId = launchPadItemId;
+	}
+
+	public java.lang.Long getCancelTime() {
+		return this.cancelTime;
+	}
+
+	public void setCancelTime(java.lang.Long cancelTime) {
+		this.cancelTime = cancelTime;
+	}
+
+	public java.lang.Long getRentalStartTime() {
+		return this.rentalStartTime;
+	}
+
+	public void setRentalStartTime(java.lang.Long rentalStartTime) {
+		this.rentalStartTime = rentalStartTime;
+	}
+
+	public java.lang.Long getRentalEndTime() {
+		return this.rentalEndTime;
+	}
+
+	public void setRentalEndTime(java.lang.Long rentalEndTime) {
+		this.rentalEndTime = rentalEndTime;
+	}
+
+	public java.lang.Byte getRefundFlag() {
+		return this.refundFlag;
+	}
+
+	public void setRefundFlag(java.lang.Byte refundFlag) {
+		this.refundFlag = refundFlag;
+	}
+
+	public java.lang.Integer getRefundRatio() {
+		return this.refundRatio;
+	}
+
+	public void setRefundRatio(java.lang.Integer refundRatio) {
+		this.refundRatio = refundRatio;
 	}
 }

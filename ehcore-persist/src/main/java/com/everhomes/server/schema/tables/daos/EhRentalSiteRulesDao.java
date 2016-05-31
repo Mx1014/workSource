@@ -48,20 +48,6 @@ public class EhRentalSiteRulesDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	}
 
 	/**
-	 * Fetch records that have <code>owner_id IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchByOwnerId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES.OWNER_ID, values);
-	}
-
-	/**
-	 * Fetch records that have <code>site_type IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchBySiteType(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES.SITE_TYPE, values);
-	}
-
-	/**
 	 * Fetch records that have <code>rental_site_id IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchByRentalSiteId(java.lang.Long... values) {
@@ -167,13 +153,6 @@ public class EhRentalSiteRulesDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	}
 
 	/**
-	 * Fetch records that have <code>owner_type IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchByOwnerType(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES.OWNER_TYPE, values);
-	}
-
-	/**
 	 * Fetch records that have <code>time_step IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchByTimeStep(java.lang.Double... values) {
@@ -213,13 +192,6 @@ public class EhRentalSiteRulesDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchByMultiTimeInterval(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES.MULTI_TIME_INTERVAL, values);
-	}
-
-	/**
-	 * Fetch records that have <code>cancel_flag IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchByCancelFlag(java.lang.Byte... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES.CANCEL_FLAG, values);
 	}
 
 	/**

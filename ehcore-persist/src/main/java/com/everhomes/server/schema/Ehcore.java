@@ -193,6 +193,7 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES,
 			com.everhomes.server.schema.tables.EhRentalSitesBills.EH_RENTAL_SITES_BILLS,
 			com.everhomes.server.schema.tables.EhRentalSiteItems.EH_RENTAL_SITE_ITEMS,
+			com.everhomes.server.schema.tables.EhRentalSiteOwners.EH_RENTAL_SITE_OWNERS,
 			com.everhomes.server.schema.tables.EhRentalSitePics.EH_RENTAL_SITE_PICS,
 			com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES,
 			com.everhomes.server.schema.tables.EhRentalTimeInterval.EH_RENTAL_TIME_INTERVAL,

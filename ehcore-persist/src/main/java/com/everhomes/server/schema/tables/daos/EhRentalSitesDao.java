@@ -55,20 +55,6 @@ public class EhRentalSitesDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	}
 
 	/**
-	 * Fetch records that have <code>owner_id IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchByOwnerId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.OWNER_ID, values);
-	}
-
-	/**
-	 * Fetch records that have <code>site_type IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchBySiteType(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.SITE_TYPE, values);
-	}
-
-	/**
 	 * Fetch records that have <code>site_name IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchBySiteName(java.lang.String... values) {
@@ -188,13 +174,6 @@ public class EhRentalSitesDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	}
 
 	/**
-	 * Fetch records that have <code>owner_type IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchByOwnerType(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.OWNER_TYPE, values);
-	}
-
-	/**
 	 * Fetch records that have <code>introduction IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchByIntroduction(java.lang.String... values) {
@@ -311,5 +290,40 @@ public class EhRentalSitesDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchByLaunchPadItemId(java.lang.Long... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.LAUNCH_PAD_ITEM_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>cancel_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchByCancelTime(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.CANCEL_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>rental_start_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchByRentalStartTime(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.RENTAL_START_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>rental_end_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchByRentalEndTime(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.RENTAL_END_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>refund_flag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchByRefundFlag(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.REFUND_FLAG, values);
+	}
+
+	/**
+	 * Fetch records that have <code>refund_ratio IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchByRefundRatio(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.REFUND_RATIO, values);
 	}
 }

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalDefaultRules extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord> {
 
-	private static final long serialVersionUID = -1365267516;
+	private static final long serialVersionUID = 1069697107;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_default_rules</code>
@@ -44,7 +44,7 @@ public class EhRentalDefaultRules extends org.jooq.impl.TableImpl<com.everhomes.
 	/**
 	 * The column <code>ehcore.eh_rental_default_rules.site_type</code>. rule for what function
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord, java.lang.String> SITE_TYPE = createField("site_type", org.jooq.impl.SQLDataType.VARCHAR.length(255), this, "rule for what function");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord, java.lang.Long> SITE_TYPE = createField("site_type", org.jooq.impl.SQLDataType.BIGINT, this, "rule for what function");
 
 	/**
 	 * The column <code>ehcore.eh_rental_default_rules.rental_start_time</code>. 最多提前多少时间预定
@@ -72,9 +72,14 @@ public class EhRentalDefaultRules extends org.jooq.impl.TableImpl<com.everhomes.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord, java.lang.Integer> PAYMENT_RATIO = createField("payment_ratio", org.jooq.impl.SQLDataType.INTEGER, this, "payment ratio");
 
 	/**
-	 * The column <code>ehcore.eh_rental_default_rules.refund_flag</code>. 0 allow refund , 1 can not refund
+	 * The column <code>ehcore.eh_rental_default_rules.refund_flag</code>. 是否支持退款 1是 0否
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord, java.lang.Byte> REFUND_FLAG = createField("refund_flag", org.jooq.impl.SQLDataType.TINYINT, this, "0 allow refund , 1 can not refund");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord, java.lang.Byte> REFUND_FLAG = createField("refund_flag", org.jooq.impl.SQLDataType.TINYINT, this, "是否支持退款 1是 0否");
+
+	/**
+	 * The column <code>ehcore.eh_rental_default_rules.refund_ratio</code>. 退款比例
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord, java.lang.Integer> REFUND_RATIO = createField("refund_ratio", org.jooq.impl.SQLDataType.INTEGER, this, "退款比例");
 
 	/**
 	 * The column <code>ehcore.eh_rental_default_rules.contact_num</code>. phone number
@@ -107,14 +112,14 @@ public class EhRentalDefaultRules extends org.jooq.impl.TableImpl<com.everhomes.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord, java.lang.Byte> RENTAL_TYPE = createField("rental_type", org.jooq.impl.SQLDataType.TINYINT, this, "0: as hour:min 1-as half day 2-as day 3-支持晚上的半天");
 
 	/**
-	 * The column <code>ehcore.eh_rental_default_rules.cancel_time</code>.
+	 * The column <code>ehcore.eh_rental_default_rules.cancel_time</code>. 至少提前取消时间
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord, java.lang.Long> CANCEL_TIME = createField("cancel_time", org.jooq.impl.SQLDataType.BIGINT, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord, java.lang.Long> CANCEL_TIME = createField("cancel_time", org.jooq.impl.SQLDataType.BIGINT, this, "至少提前取消时间");
 
 	/**
-	 * The column <code>ehcore.eh_rental_default_rules.overtime_time</code>.
+	 * The column <code>ehcore.eh_rental_default_rules.overtime_time</code>. 超期时间
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord, java.lang.Long> OVERTIME_TIME = createField("overtime_time", org.jooq.impl.SQLDataType.BIGINT, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord, java.lang.Long> OVERTIME_TIME = createField("overtime_time", org.jooq.impl.SQLDataType.BIGINT, this, "超期时间");
 
 	/**
 	 * The column <code>ehcore.eh_rental_default_rules.exclusive_flag</code>. 是否为独占资源0否 1 是
@@ -160,6 +165,36 @@ public class EhRentalDefaultRules extends org.jooq.impl.TableImpl<com.everhomes.
 	 * The column <code>ehcore.eh_rental_default_rules.launch_pad_item_id</code>. 广场图标id
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord, java.lang.Long> LAUNCH_PAD_ITEM_ID = createField("launch_pad_item_id", org.jooq.impl.SQLDataType.BIGINT, this, "广场图标id");
+
+	/**
+	 * The column <code>ehcore.eh_rental_default_rules.workday_price</code>. 工作日价格
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord, java.math.BigDecimal> WORKDAY_PRICE = createField("workday_price", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "工作日价格");
+
+	/**
+	 * The column <code>ehcore.eh_rental_default_rules.weekend_price</code>. 周末价格
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord, java.math.BigDecimal> WEEKEND_PRICE = createField("weekend_price", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "周末价格");
+
+	/**
+	 * The column <code>ehcore.eh_rental_default_rules.site_counts</code>. 可预约个数
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord, java.lang.Double> SITE_COUNTS = createField("site_counts", org.jooq.impl.SQLDataType.DOUBLE, this, "可预约个数");
+
+	/**
+	 * The column <code>ehcore.eh_rental_default_rules.begin_date</code>. 开始日期
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord, java.sql.Date> BEGIN_DATE = createField("begin_date", org.jooq.impl.SQLDataType.DATE, this, "开始日期");
+
+	/**
+	 * The column <code>ehcore.eh_rental_default_rules.end_date</code>. 结束日期
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord, java.sql.Date> END_DATE = createField("end_date", org.jooq.impl.SQLDataType.DATE, this, "结束日期");
+
+	/**
+	 * The column <code>ehcore.eh_rental_default_rules.open_weekday</code>. 7位二进制，0000000每一位表示星期7123456
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord, java.lang.String> OPEN_WEEKDAY = createField("open_weekday", org.jooq.impl.SQLDataType.VARCHAR.length(7), this, "7位二进制，0000000每一位表示星期7123456");
 
 	/**
 	 * Create a <code>ehcore.eh_rental_default_rules</code> table reference

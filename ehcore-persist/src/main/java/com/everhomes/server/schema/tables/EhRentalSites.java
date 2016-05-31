@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSites extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalSitesRecord> {
 
-	private static final long serialVersionUID = 1876859896;
+	private static final long serialVersionUID = -320238458;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_sites</code>
@@ -37,19 +37,9 @@ public class EhRentalSites extends org.jooq.impl.TableImpl<com.everhomes.server.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.Long> PARENT_ID = createField("parent_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_rental_sites.owner_id</code>.     community id or organization id 
+	 * The column <code>ehcore.eh_rental_sites.site_name</code>. 名称：
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.Long> OWNER_ID = createField("owner_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "    community id or organization id ");
-
-	/**
-	 * The column <code>ehcore.eh_rental_sites.site_type</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.String> SITE_TYPE = createField("site_type", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
-
-	/**
-	 * The column <code>ehcore.eh_rental_sites.site_name</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.String> SITE_NAME = createField("site_name", org.jooq.impl.SQLDataType.VARCHAR.length(127), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.String> SITE_NAME = createField("site_name", org.jooq.impl.SQLDataType.VARCHAR.length(127), this, "名称：");
 
 	/**
 	 * The column <code>ehcore.eh_rental_sites.site_type2</code>.
@@ -67,9 +57,9 @@ public class EhRentalSites extends org.jooq.impl.TableImpl<com.everhomes.server.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.Long> BUILDING_ID = createField("building_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_rental_sites.address</code>.
+	 * The column <code>ehcore.eh_rental_sites.address</code>. 地址
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.String> ADDRESS = createField("address", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.String> ADDRESS = createField("address", org.jooq.impl.SQLDataType.VARCHAR.length(192), this, "地址");
 
 	/**
 	 * The column <code>ehcore.eh_rental_sites.address_id</code>.
@@ -77,9 +67,9 @@ public class EhRentalSites extends org.jooq.impl.TableImpl<com.everhomes.server.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.Long> ADDRESS_ID = createField("address_id", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_rental_sites.spec</code>. spec ,user setting ,maybe meetingroom seats ,KTV ROOM: big small VIP and so on
+	 * The column <code>ehcore.eh_rental_sites.spec</code>. 规格
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.String> SPEC = createField("spec", org.jooq.impl.SQLDataType.VARCHAR.length(255), this, "spec ,user setting ,maybe meetingroom seats ,KTV ROOM: big small VIP and so on");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.String> SPEC = createField("spec", org.jooq.impl.SQLDataType.VARCHAR.length(255), this, "规格");
 
 	/**
 	 * The column <code>ehcore.eh_rental_sites.own_company_name</code>.
@@ -92,9 +82,9 @@ public class EhRentalSites extends org.jooq.impl.TableImpl<com.everhomes.server.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.String> CONTACT_NAME = createField("contact_name", org.jooq.impl.SQLDataType.VARCHAR.length(40), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_rental_sites.contact_phonenum</code>.
+	 * The column <code>ehcore.eh_rental_sites.contact_phonenum</code>. 咨询电话
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.String> CONTACT_PHONENUM = createField("contact_phonenum", org.jooq.impl.SQLDataType.VARCHAR.length(20), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.String> CONTACT_PHONENUM = createField("contact_phonenum", org.jooq.impl.SQLDataType.VARCHAR.length(20), this, "咨询电话");
 
 	/**
 	 * The column <code>ehcore.eh_rental_sites.contact_phonenum2</code>.
@@ -132,14 +122,9 @@ public class EhRentalSites extends org.jooq.impl.TableImpl<com.everhomes.server.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.sql.Timestamp> OPERATE_TIME = createField("operate_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
-	 * The column <code>ehcore.eh_rental_sites.owner_type</code>. owner type : community ; organization
+	 * The column <code>ehcore.eh_rental_sites.introduction</code>. 详情
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.String> OWNER_TYPE = createField("owner_type", org.jooq.impl.SQLDataType.VARCHAR.length(255), this, "owner type : community ; organization");
-
-	/**
-	 * The column <code>ehcore.eh_rental_sites.introduction</code>.
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.String> INTRODUCTION = createField("introduction", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.String> INTRODUCTION = createField("introduction", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "详情");
 
 	/**
 	 * The column <code>ehcore.eh_rental_sites.notice</code>.
@@ -159,7 +144,7 @@ public class EhRentalSites extends org.jooq.impl.TableImpl<com.everhomes.server.
 	/**
 	 * The column <code>ehcore.eh_rental_sites.discount_type</code>. 折扣信息：0不打折 1满减优惠2比例折扣
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.Byte> DISCOUNT_TYPE = createField("discount_type", org.jooq.impl.SQLDataType.TINYINT.defaulted(true), this, "折扣信息：0不打折 1满减优惠2比例折扣");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.Byte> DISCOUNT_TYPE = createField("discount_type", org.jooq.impl.SQLDataType.TINYINT, this, "折扣信息：0不打折 1满减优惠2比例折扣");
 
 	/**
 	 * The column <code>ehcore.eh_rental_sites.full_price</code>. 满XX元
@@ -220,6 +205,31 @@ public class EhRentalSites extends org.jooq.impl.TableImpl<com.everhomes.server.
 	 * The column <code>ehcore.eh_rental_sites.launch_pad_item_id</code>. 广场图标id
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.Long> LAUNCH_PAD_ITEM_ID = createField("launch_pad_item_id", org.jooq.impl.SQLDataType.BIGINT, this, "广场图标id");
+
+	/**
+	 * The column <code>ehcore.eh_rental_sites.cancel_time</code>. 至少提前取消时间
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.Long> CANCEL_TIME = createField("cancel_time", org.jooq.impl.SQLDataType.BIGINT, this, "至少提前取消时间");
+
+	/**
+	 * The column <code>ehcore.eh_rental_sites.rental_start_time</code>. 最多提前多少时间预定
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.Long> RENTAL_START_TIME = createField("rental_start_time", org.jooq.impl.SQLDataType.BIGINT, this, "最多提前多少时间预定");
+
+	/**
+	 * The column <code>ehcore.eh_rental_sites.rental_end_time</code>. 最少提前多少时间预定
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.Long> RENTAL_END_TIME = createField("rental_end_time", org.jooq.impl.SQLDataType.BIGINT, this, "最少提前多少时间预定");
+
+	/**
+	 * The column <code>ehcore.eh_rental_sites.refund_flag</code>. 是否支持退款 1是 0否
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.Byte> REFUND_FLAG = createField("refund_flag", org.jooq.impl.SQLDataType.TINYINT, this, "是否支持退款 1是 0否");
+
+	/**
+	 * The column <code>ehcore.eh_rental_sites.refund_ratio</code>. 退款比例
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.Integer> REFUND_RATIO = createField("refund_ratio", org.jooq.impl.SQLDataType.INTEGER, this, "退款比例");
 
 	/**
 	 * Create a <code>ehcore.eh_rental_sites</code> table reference

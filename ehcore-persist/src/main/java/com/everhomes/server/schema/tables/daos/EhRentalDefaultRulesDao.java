@@ -64,7 +64,7 @@ public class EhRentalDefaultRulesDao extends org.jooq.impl.DAOImpl<com.everhomes
 	/**
 	 * Fetch records that have <code>site_type IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalDefaultRules> fetchBySiteType(java.lang.String... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalDefaultRules> fetchBySiteType(java.lang.Long... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalDefaultRules.EH_RENTAL_DEFAULT_RULES.SITE_TYPE, values);
 	}
 
@@ -108,6 +108,13 @@ public class EhRentalDefaultRulesDao extends org.jooq.impl.DAOImpl<com.everhomes
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalDefaultRules> fetchByRefundFlag(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalDefaultRules.EH_RENTAL_DEFAULT_RULES.REFUND_FLAG, values);
+	}
+
+	/**
+	 * Fetch records that have <code>refund_ratio IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalDefaultRules> fetchByRefundRatio(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalDefaultRules.EH_RENTAL_DEFAULT_RULES.REFUND_RATIO, values);
 	}
 
 	/**
@@ -227,5 +234,47 @@ public class EhRentalDefaultRulesDao extends org.jooq.impl.DAOImpl<com.everhomes
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalDefaultRules> fetchByLaunchPadItemId(java.lang.Long... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalDefaultRules.EH_RENTAL_DEFAULT_RULES.LAUNCH_PAD_ITEM_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>workday_price IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalDefaultRules> fetchByWorkdayPrice(java.math.BigDecimal... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalDefaultRules.EH_RENTAL_DEFAULT_RULES.WORKDAY_PRICE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>weekend_price IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalDefaultRules> fetchByWeekendPrice(java.math.BigDecimal... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalDefaultRules.EH_RENTAL_DEFAULT_RULES.WEEKEND_PRICE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>site_counts IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalDefaultRules> fetchBySiteCounts(java.lang.Double... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalDefaultRules.EH_RENTAL_DEFAULT_RULES.SITE_COUNTS, values);
+	}
+
+	/**
+	 * Fetch records that have <code>begin_date IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalDefaultRules> fetchByBeginDate(java.sql.Date... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalDefaultRules.EH_RENTAL_DEFAULT_RULES.BEGIN_DATE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>end_date IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalDefaultRules> fetchByEndDate(java.sql.Date... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalDefaultRules.EH_RENTAL_DEFAULT_RULES.END_DATE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>open_weekday IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalDefaultRules> fetchByOpenWeekday(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalDefaultRules.EH_RENTAL_DEFAULT_RULES.OPEN_WEEKDAY, values);
 	}
 }

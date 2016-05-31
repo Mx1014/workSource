@@ -11,11 +11,9 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteRules implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1169812357;
+	private static final long serialVersionUID = 738814871;
 
 	private java.lang.Long       id;
-	private java.lang.Long       ownerId;
-	private java.lang.String     siteType;
 	private java.lang.Long       rentalSiteId;
 	private java.lang.Byte       rentalType;
 	private java.lang.Byte       amorpm;
@@ -31,22 +29,18 @@ public class EhRentalSiteRules implements java.io.Serializable {
 	private java.sql.Timestamp   createTime;
 	private java.lang.Long       operatorUid;
 	private java.sql.Timestamp   operateTime;
-	private java.lang.String     ownerType;
 	private java.lang.Double     timeStep;
 	private java.math.BigDecimal originalPrice;
 	private java.lang.Byte       exclusiveFlag;
 	private java.lang.Byte       autoAssign;
 	private java.lang.Byte       multiUnit;
 	private java.lang.Byte       multiTimeInterval;
-	private java.lang.Byte       cancelFlag;
 	private java.lang.Long       launchPadItemId;
 
 	public EhRentalSiteRules() {}
 
 	public EhRentalSiteRules(
 		java.lang.Long       id,
-		java.lang.Long       ownerId,
-		java.lang.String     siteType,
 		java.lang.Long       rentalSiteId,
 		java.lang.Byte       rentalType,
 		java.lang.Byte       amorpm,
@@ -62,19 +56,15 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		java.sql.Timestamp   createTime,
 		java.lang.Long       operatorUid,
 		java.sql.Timestamp   operateTime,
-		java.lang.String     ownerType,
 		java.lang.Double     timeStep,
 		java.math.BigDecimal originalPrice,
 		java.lang.Byte       exclusiveFlag,
 		java.lang.Byte       autoAssign,
 		java.lang.Byte       multiUnit,
 		java.lang.Byte       multiTimeInterval,
-		java.lang.Byte       cancelFlag,
 		java.lang.Long       launchPadItemId
 	) {
 		this.id = id;
-		this.ownerId = ownerId;
-		this.siteType = siteType;
 		this.rentalSiteId = rentalSiteId;
 		this.rentalType = rentalType;
 		this.amorpm = amorpm;
@@ -90,14 +80,12 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		this.createTime = createTime;
 		this.operatorUid = operatorUid;
 		this.operateTime = operateTime;
-		this.ownerType = ownerType;
 		this.timeStep = timeStep;
 		this.originalPrice = originalPrice;
 		this.exclusiveFlag = exclusiveFlag;
 		this.autoAssign = autoAssign;
 		this.multiUnit = multiUnit;
 		this.multiTimeInterval = multiTimeInterval;
-		this.cancelFlag = cancelFlag;
 		this.launchPadItemId = launchPadItemId;
 	}
 
@@ -107,22 +95,6 @@ public class EhRentalSiteRules implements java.io.Serializable {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
-	}
-
-	public java.lang.Long getOwnerId() {
-		return this.ownerId;
-	}
-
-	public void setOwnerId(java.lang.Long ownerId) {
-		this.ownerId = ownerId;
-	}
-
-	public java.lang.String getSiteType() {
-		return this.siteType;
-	}
-
-	public void setSiteType(java.lang.String siteType) {
-		this.siteType = siteType;
 	}
 
 	public java.lang.Long getRentalSiteId() {
@@ -245,14 +217,6 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		this.operateTime = operateTime;
 	}
 
-	public java.lang.String getOwnerType() {
-		return this.ownerType;
-	}
-
-	public void setOwnerType(java.lang.String ownerType) {
-		this.ownerType = ownerType;
-	}
-
 	public java.lang.Double getTimeStep() {
 		return this.timeStep;
 	}
@@ -299,14 +263,6 @@ public class EhRentalSiteRules implements java.io.Serializable {
 
 	public void setMultiTimeInterval(java.lang.Byte multiTimeInterval) {
 		this.multiTimeInterval = multiTimeInterval;
-	}
-
-	public java.lang.Byte getCancelFlag() {
-		return this.cancelFlag;
-	}
-
-	public void setCancelFlag(java.lang.Byte cancelFlag) {
-		this.cancelFlag = cancelFlag;
 	}
 
 	public java.lang.Long getLaunchPadItemId() {

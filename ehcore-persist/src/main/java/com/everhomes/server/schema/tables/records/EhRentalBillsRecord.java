@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalBillsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhRentalBillsRecord> {
 
-	private static final long serialVersionUID = 1782760978;
+	private static final long serialVersionUID = -1708129590;
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.id</code>. id
@@ -28,409 +28,367 @@ public class EhRentalBillsRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_bills.owner_id</code>.     community id or organization id 
-	 */
-	public void setOwnerId(java.lang.Long value) {
-		setValue(1, value);
-	}
-
-	/**
-	 * Getter for <code>ehcore.eh_rental_bills.owner_id</code>.     community id or organization id 
-	 */
-	public java.lang.Long getOwnerId() {
-		return (java.lang.Long) getValue(1);
-	}
-
-	/**
-	 * Setter for <code>ehcore.eh_rental_bills.site_type</code>.
-	 */
-	public void setSiteType(java.lang.String value) {
-		setValue(2, value);
-	}
-
-	/**
-	 * Getter for <code>ehcore.eh_rental_bills.site_type</code>.
-	 */
-	public java.lang.String getSiteType() {
-		return (java.lang.String) getValue(2);
-	}
-
-	/**
 	 * Setter for <code>ehcore.eh_rental_bills.rental_site_id</code>. id
 	 */
 	public void setRentalSiteId(java.lang.Long value) {
-		setValue(3, value);
+		setValue(1, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_bills.rental_site_id</code>. id
 	 */
 	public java.lang.Long getRentalSiteId() {
-		return (java.lang.Long) getValue(3);
+		return (java.lang.Long) getValue(1);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.rental_uid</code>. rental user id
 	 */
 	public void setRentalUid(java.lang.Long value) {
-		setValue(4, value);
+		setValue(2, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_bills.rental_uid</code>. rental user id
 	 */
 	public java.lang.Long getRentalUid() {
-		return (java.lang.Long) getValue(4);
+		return (java.lang.Long) getValue(2);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_bills.rental_date</code>. rental target date
+	 * Setter for <code>ehcore.eh_rental_bills.rental_date</code>. 使用日期
 	 */
 	public void setRentalDate(java.sql.Date value) {
+		setValue(3, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_rental_bills.rental_date</code>. 使用日期
+	 */
+	public java.sql.Date getRentalDate() {
+		return (java.sql.Date) getValue(3);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_rental_bills.start_time</code>. 使用开始时间
+	 */
+	public void setStartTime(java.sql.Timestamp value) {
+		setValue(4, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_rental_bills.start_time</code>. 使用开始时间
+	 */
+	public java.sql.Timestamp getStartTime() {
+		return (java.sql.Timestamp) getValue(4);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_rental_bills.end_time</code>. 使用结束时间
+	 */
+	public void setEndTime(java.sql.Timestamp value) {
 		setValue(5, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_bills.rental_date</code>. rental target date
+	 * Getter for <code>ehcore.eh_rental_bills.end_time</code>. 使用结束时间
 	 */
-	public java.sql.Date getRentalDate() {
-		return (java.sql.Date) getValue(5);
+	public java.sql.Timestamp getEndTime() {
+		return (java.sql.Timestamp) getValue(5);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_bills.start_time</code>. begin datetime unuse 
+	 * Setter for <code>ehcore.eh_rental_bills.rental_count</code>. 预约数
 	 */
-	public void setStartTime(java.sql.Timestamp value) {
+	public void setRentalCount(java.lang.Double value) {
 		setValue(6, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_bills.start_time</code>. begin datetime unuse 
+	 * Getter for <code>ehcore.eh_rental_bills.rental_count</code>. 预约数
 	 */
-	public java.sql.Timestamp getStartTime() {
-		return (java.sql.Timestamp) getValue(6);
+	public java.lang.Double getRentalCount() {
+		return (java.lang.Double) getValue(6);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_bills.end_time</code>. end datetime unuse
+	 * Setter for <code>ehcore.eh_rental_bills.pay_total_money</code>. 总价
 	 */
-	public void setEndTime(java.sql.Timestamp value) {
+	public void setPayTotalMoney(java.math.BigDecimal value) {
 		setValue(7, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_bills.end_time</code>. end datetime unuse
-	 */
-	public java.sql.Timestamp getEndTime() {
-		return (java.sql.Timestamp) getValue(7);
-	}
-
-	/**
-	 * Setter for <code>ehcore.eh_rental_bills.rental_count</code>. amount of rental sites 
-	 */
-	public void setRentalCount(java.lang.Double value) {
-		setValue(8, value);
-	}
-
-	/**
-	 * Getter for <code>ehcore.eh_rental_bills.rental_count</code>. amount of rental sites 
-	 */
-	public java.lang.Double getRentalCount() {
-		return (java.lang.Double) getValue(8);
-	}
-
-	/**
-	 * Setter for <code>ehcore.eh_rental_bills.pay_total_money</code>.
-	 */
-	public void setPayTotalMoney(java.math.BigDecimal value) {
-		setValue(9, value);
-	}
-
-	/**
-	 * Getter for <code>ehcore.eh_rental_bills.pay_total_money</code>.
+	 * Getter for <code>ehcore.eh_rental_bills.pay_total_money</code>. 总价
 	 */
 	public java.math.BigDecimal getPayTotalMoney() {
-		return (java.math.BigDecimal) getValue(9);
+		return (java.math.BigDecimal) getValue(7);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.site_total_money</code>.
 	 */
 	public void setSiteTotalMoney(java.math.BigDecimal value) {
-		setValue(10, value);
+		setValue(8, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_bills.site_total_money</code>.
 	 */
 	public java.math.BigDecimal getSiteTotalMoney() {
-		return (java.math.BigDecimal) getValue(10);
+		return (java.math.BigDecimal) getValue(8);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.reserve_money</code>.
 	 */
 	public void setReserveMoney(java.math.BigDecimal value) {
-		setValue(11, value);
+		setValue(9, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_bills.reserve_money</code>.
 	 */
 	public java.math.BigDecimal getReserveMoney() {
-		return (java.math.BigDecimal) getValue(11);
+		return (java.math.BigDecimal) getValue(9);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_bills.reserve_time</code>. reserve time 
+	 * Setter for <code>ehcore.eh_rental_bills.reserve_time</code>. reserve time
 	 */
 	public void setReserveTime(java.sql.Timestamp value) {
-		setValue(12, value);
+		setValue(10, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_bills.reserve_time</code>. reserve time 
+	 * Getter for <code>ehcore.eh_rental_bills.reserve_time</code>. reserve time
 	 */
 	public java.sql.Timestamp getReserveTime() {
-		return (java.sql.Timestamp) getValue(12);
+		return (java.sql.Timestamp) getValue(10);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.pay_start_time</code>.
 	 */
 	public void setPayStartTime(java.sql.Timestamp value) {
-		setValue(13, value);
+		setValue(11, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_bills.pay_start_time</code>.
 	 */
 	public java.sql.Timestamp getPayStartTime() {
-		return (java.sql.Timestamp) getValue(13);
+		return (java.sql.Timestamp) getValue(11);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.pay_end_time</code>.
 	 */
 	public void setPayEndTime(java.sql.Timestamp value) {
-		setValue(14, value);
+		setValue(12, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_bills.pay_end_time</code>.
 	 */
 	public java.sql.Timestamp getPayEndTime() {
-		return (java.sql.Timestamp) getValue(14);
+		return (java.sql.Timestamp) getValue(12);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.pay_time</code>.
 	 */
 	public void setPayTime(java.sql.Timestamp value) {
-		setValue(15, value);
+		setValue(13, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_bills.pay_time</code>.
 	 */
 	public java.sql.Timestamp getPayTime() {
-		return (java.sql.Timestamp) getValue(15);
+		return (java.sql.Timestamp) getValue(13);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.cancel_time</code>.
 	 */
 	public void setCancelTime(java.sql.Timestamp value) {
-		setValue(16, value);
+		setValue(14, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_bills.cancel_time</code>.
 	 */
 	public java.sql.Timestamp getCancelTime() {
-		return (java.sql.Timestamp) getValue(16);
+		return (java.sql.Timestamp) getValue(14);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.paid_money</code>.
 	 */
 	public void setPaidMoney(java.math.BigDecimal value) {
-		setValue(17, value);
+		setValue(15, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_bills.paid_money</code>.
 	 */
 	public java.math.BigDecimal getPaidMoney() {
-		return (java.math.BigDecimal) getValue(17);
+		return (java.math.BigDecimal) getValue(15);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_bills.status</code>. 0:wait for reserve 1:paid reserve  2:paid all money reserve success  3:wait for final payment 4:unlock reserve fail
+	 * Setter for <code>ehcore.eh_rental_bills.status</code>. 0:wait for reserve 1:paid reserve 2:paid all money reserve success 3:wait for final payment 4:unlock reserve fail
 	 */
 	public void setStatus(java.lang.Byte value) {
-		setValue(18, value);
+		setValue(16, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_bills.status</code>. 0:wait for reserve 1:paid reserve  2:paid all money reserve success  3:wait for final payment 4:unlock reserve fail
+	 * Getter for <code>ehcore.eh_rental_bills.status</code>. 0:wait for reserve 1:paid reserve 2:paid all money reserve success 3:wait for final payment 4:unlock reserve fail
 	 */
 	public java.lang.Byte getStatus() {
-		return (java.lang.Byte) getValue(18);
+		return (java.lang.Byte) getValue(16);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.visible_flag</code>. 0:visible 1:unvisible
 	 */
 	public void setVisibleFlag(java.lang.Byte value) {
-		setValue(19, value);
+		setValue(17, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_bills.visible_flag</code>. 0:visible 1:unvisible
 	 */
 	public java.lang.Byte getVisibleFlag() {
-		return (java.lang.Byte) getValue(19);
+		return (java.lang.Byte) getValue(17);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.invoice_flag</code>. 0:want invocie 1 no need
 	 */
 	public void setInvoiceFlag(java.lang.Byte value) {
-		setValue(20, value);
+		setValue(18, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_bills.invoice_flag</code>. 0:want invocie 1 no need
 	 */
 	public java.lang.Byte getInvoiceFlag() {
-		return (java.lang.Byte) getValue(20);
+		return (java.lang.Byte) getValue(18);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_bills.creator_uid</code>.
+	 * Setter for <code>ehcore.eh_rental_bills.creator_uid</code>. 预约人
 	 */
 	public void setCreatorUid(java.lang.Long value) {
-		setValue(21, value);
+		setValue(19, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_bills.creator_uid</code>.
+	 * Getter for <code>ehcore.eh_rental_bills.creator_uid</code>. 预约人
 	 */
 	public java.lang.Long getCreatorUid() {
-		return (java.lang.Long) getValue(21);
+		return (java.lang.Long) getValue(19);
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_bills.create_time</code>.
+	 * Setter for <code>ehcore.eh_rental_bills.create_time</code>. 下单时间
 	 */
 	public void setCreateTime(java.sql.Timestamp value) {
-		setValue(22, value);
+		setValue(20, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_bills.create_time</code>.
+	 * Getter for <code>ehcore.eh_rental_bills.create_time</code>. 下单时间
 	 */
 	public java.sql.Timestamp getCreateTime() {
-		return (java.sql.Timestamp) getValue(22);
+		return (java.sql.Timestamp) getValue(20);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.operator_uid</code>.
 	 */
 	public void setOperatorUid(java.lang.Long value) {
-		setValue(23, value);
+		setValue(21, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_bills.operator_uid</code>.
 	 */
 	public java.lang.Long getOperatorUid() {
-		return (java.lang.Long) getValue(23);
+		return (java.lang.Long) getValue(21);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.operate_time</code>.
 	 */
 	public void setOperateTime(java.sql.Timestamp value) {
-		setValue(24, value);
+		setValue(22, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_bills.operate_time</code>.
 	 */
 	public java.sql.Timestamp getOperateTime() {
-		return (java.sql.Timestamp) getValue(24);
-	}
-
-	/**
-	 * Setter for <code>ehcore.eh_rental_bills.owner_type</code>. owner type : community ; organization
-	 */
-	public void setOwnerType(java.lang.String value) {
-		setValue(25, value);
-	}
-
-	/**
-	 * Getter for <code>ehcore.eh_rental_bills.owner_type</code>. owner type : community ; organization
-	 */
-	public java.lang.String getOwnerType() {
-		return (java.lang.String) getValue(25);
+		return (java.sql.Timestamp) getValue(22);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.site_name</code>. 名称
 	 */
 	public void setSiteName(java.lang.String value) {
-		setValue(26, value);
+		setValue(23, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_bills.site_name</code>. 名称
 	 */
 	public java.lang.String getSiteName() {
-		return (java.lang.String) getValue(26);
+		return (java.lang.String) getValue(23);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.use_time</code>. 使用时间
 	 */
 	public void setUseTime(java.lang.String value) {
-		setValue(27, value);
+		setValue(24, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_bills.use_time</code>. 使用时间
 	 */
 	public java.lang.String getUseTime() {
-		return (java.lang.String) getValue(27);
+		return (java.lang.String) getValue(24);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.vendor_type</code>. 支付方式,10001-支付宝，10002-微信
 	 */
 	public void setVendorType(java.lang.String value) {
-		setValue(28, value);
+		setValue(25, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_bills.vendor_type</code>. 支付方式,10001-支付宝，10002-微信
 	 */
 	public java.lang.String getVendorType() {
-		return (java.lang.String) getValue(28);
+		return (java.lang.String) getValue(25);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.launch_pad_item_id</code>. 广场图标id
 	 */
 	public void setLaunchPadItemId(java.lang.Long value) {
-		setValue(29, value);
+		setValue(26, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_bills.launch_pad_item_id</code>. 广场图标id
 	 */
 	public java.lang.Long getLaunchPadItemId() {
-		return (java.lang.Long) getValue(29);
+		return (java.lang.Long) getValue(26);
 	}
 
 	// -------------------------------------------------------------------------
@@ -459,38 +417,35 @@ public class EhRentalBillsRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	/**
 	 * Create a detached, initialised EhRentalBillsRecord
 	 */
-	public EhRentalBillsRecord(java.lang.Long id, java.lang.Long ownerId, java.lang.String siteType, java.lang.Long rentalSiteId, java.lang.Long rentalUid, java.sql.Date rentalDate, java.sql.Timestamp startTime, java.sql.Timestamp endTime, java.lang.Double rentalCount, java.math.BigDecimal payTotalMoney, java.math.BigDecimal siteTotalMoney, java.math.BigDecimal reserveMoney, java.sql.Timestamp reserveTime, java.sql.Timestamp payStartTime, java.sql.Timestamp payEndTime, java.sql.Timestamp payTime, java.sql.Timestamp cancelTime, java.math.BigDecimal paidMoney, java.lang.Byte status, java.lang.Byte visibleFlag, java.lang.Byte invoiceFlag, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.String ownerType, java.lang.String siteName, java.lang.String useTime, java.lang.String vendorType, java.lang.Long launchPadItemId) {
+	public EhRentalBillsRecord(java.lang.Long id, java.lang.Long rentalSiteId, java.lang.Long rentalUid, java.sql.Date rentalDate, java.sql.Timestamp startTime, java.sql.Timestamp endTime, java.lang.Double rentalCount, java.math.BigDecimal payTotalMoney, java.math.BigDecimal siteTotalMoney, java.math.BigDecimal reserveMoney, java.sql.Timestamp reserveTime, java.sql.Timestamp payStartTime, java.sql.Timestamp payEndTime, java.sql.Timestamp payTime, java.sql.Timestamp cancelTime, java.math.BigDecimal paidMoney, java.lang.Byte status, java.lang.Byte visibleFlag, java.lang.Byte invoiceFlag, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.String siteName, java.lang.String useTime, java.lang.String vendorType, java.lang.Long launchPadItemId) {
 		super(com.everhomes.server.schema.tables.EhRentalBills.EH_RENTAL_BILLS);
 
 		setValue(0, id);
-		setValue(1, ownerId);
-		setValue(2, siteType);
-		setValue(3, rentalSiteId);
-		setValue(4, rentalUid);
-		setValue(5, rentalDate);
-		setValue(6, startTime);
-		setValue(7, endTime);
-		setValue(8, rentalCount);
-		setValue(9, payTotalMoney);
-		setValue(10, siteTotalMoney);
-		setValue(11, reserveMoney);
-		setValue(12, reserveTime);
-		setValue(13, payStartTime);
-		setValue(14, payEndTime);
-		setValue(15, payTime);
-		setValue(16, cancelTime);
-		setValue(17, paidMoney);
-		setValue(18, status);
-		setValue(19, visibleFlag);
-		setValue(20, invoiceFlag);
-		setValue(21, creatorUid);
-		setValue(22, createTime);
-		setValue(23, operatorUid);
-		setValue(24, operateTime);
-		setValue(25, ownerType);
-		setValue(26, siteName);
-		setValue(27, useTime);
-		setValue(28, vendorType);
-		setValue(29, launchPadItemId);
+		setValue(1, rentalSiteId);
+		setValue(2, rentalUid);
+		setValue(3, rentalDate);
+		setValue(4, startTime);
+		setValue(5, endTime);
+		setValue(6, rentalCount);
+		setValue(7, payTotalMoney);
+		setValue(8, siteTotalMoney);
+		setValue(9, reserveMoney);
+		setValue(10, reserveTime);
+		setValue(11, payStartTime);
+		setValue(12, payEndTime);
+		setValue(13, payTime);
+		setValue(14, cancelTime);
+		setValue(15, paidMoney);
+		setValue(16, status);
+		setValue(17, visibleFlag);
+		setValue(18, invoiceFlag);
+		setValue(19, creatorUid);
+		setValue(20, createTime);
+		setValue(21, operatorUid);
+		setValue(22, operateTime);
+		setValue(23, siteName);
+		setValue(24, useTime);
+		setValue(25, vendorType);
+		setValue(26, launchPadItemId);
 	}
 }
