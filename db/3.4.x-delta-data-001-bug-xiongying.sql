@@ -15,17 +15,17 @@ INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, tar
 
     
 INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
-    VALUES(240111044331051396, UUID(),  13905, '深圳市',  13908, '南山区', '武汉大学产学研大楼', '武汉大学产学研大楼', '深圳市南山区粤兴二道6号', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL, 70, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'1', 1, 2, UTC_TIMESTAMP(), 0);
+    VALUES(240111044331051460, UUID(),  13905, '深圳市',  13908, '南山区', '武汉大学产学研大楼', '武汉大学产学研大楼', '深圳市南山区粤兴二道6号', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL, 70, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'1', 1, 2, UTC_TIMESTAMP(), 0);
 INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
-    VALUES(240111044331047996, 240111044331051396, '', 113.951336,22.536295, 'ws101n8g6tfs');
+    VALUES(240111044331048060, 240111044331051460, '', 113.951336,22.536295, 'ws101n8g6tfs');
 INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
-	VALUES(1105, 0, 'COMMUNITY', 240111044331051396, UTC_TIMESTAMP());	
+	VALUES(1105, 0, 'COMMUNITY', 240111044331051460, UTC_TIMESTAMP());	
 INSERT INTO `eh_organization_communities`(organization_id, community_id) 
-	VALUES(1001027, 240111044331051396);
+	VALUES(1001027, 240111044331051460);
 INSERT INTO `eh_organization_community_requests`(`id`, `community_id`, `member_type`, `member_id`, `member_status`, `create_time`, `update_time`) 
-    VALUES(111425, 240111044331051396, 'organization', 1001027, 3, UTC_TIMESTAMP(), UTC_TIMESTAMP());
+    VALUES(111425, 240111044331051460, 'organization', 1001027, 3, UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organization_community_requests`(`id`, `community_id`, `member_type`, `member_id`, `member_status`, `create_time`, `update_time`) 
-    VALUES(111426, 240111044331051396, 'organization', 180040, 3, UTC_TIMESTAMP(), UTC_TIMESTAMP());
+    VALUES(111426, 240111044331051460, 'organization', 180040, 3, UTC_TIMESTAMP(), UTC_TIMESTAMP());
     
 INSERT INTO `eh_organization_community_requests`(`id`, `community_id`, `member_type`, `member_id`, `member_status`, `create_time`, `update_time`) VALUES(111350,24210090697425925, 'organization', 1, 3, UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organization_community_requests`(`id`, `community_id`, `member_type`, `member_id`, `member_status`, `create_time`, `update_time`) VALUES(111351,24210090697427178, 'organization', 2, 3, UTC_TIMESTAMP(), UTC_TIMESTAMP());
