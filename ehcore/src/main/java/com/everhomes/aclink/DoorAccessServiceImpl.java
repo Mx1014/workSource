@@ -46,6 +46,7 @@ import com.everhomes.rest.aclink.AclinkDisconnectedCommand;
 import com.everhomes.rest.aclink.AclinkFirmwareDTO;
 import com.everhomes.rest.aclink.AclinkMessage;
 import com.everhomes.rest.aclink.AclinkMessageMeta;
+import com.everhomes.rest.aclink.AclinkMgmtCommand;
 import com.everhomes.rest.aclink.AclinkServiceErrorCode;
 import com.everhomes.rest.aclink.AclinkUpgradeCommand;
 import com.everhomes.rest.aclink.AclinkUpgradeResponse;
@@ -1677,5 +1678,32 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         resp.setQr(auth.getQrKey());
       
         return resp;
+    }
+    
+    @Override
+    public DoorMessage queryWifiMgmtMessage(AclinkMgmtCommand cmd) {
+        DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
+        if(doorAccess == null) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "doorAccess not found");
+        }
+        
+        DoorMessage doorMessage = new DoorMessage();
+        doorMessage.setDoorId(cmd.getDoorId());
+        doorMessage.setSeq(0l);
+        doorMessage.setMessageType(DoorMessageType.NORMAL.getCode());
+        
+        AesServerKey aesServerKey = aesServerKeyService.getCurrentAesServerKey(cmd.getDoorId());
+        if(aesServerKey == null) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_PARAM_ERROR, "doorAccess key error");
+        }
+        
+        AclinkMessage body = new AclinkMessage();
+        body.setCmd((byte)0xb);
+        body.setSecretVersion(aesServerKey.getDeviceVer());
+        body.setEncrypted(AclinkUtils.packWifiCmd(aesServerKey.getDeviceVer(), aesServerKey.getSecret(), cmd.getWifiSsid(), cmd.getWifiPwd(), "wss://"));
+        
+        doorMessage.setBody(body);
+        
+        return doorMessage;
     }
 }

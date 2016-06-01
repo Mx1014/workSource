@@ -26,6 +26,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.aclink.AclinkConnectingCommand;
 import com.everhomes.rest.aclink.AclinkDeleteByIdCommand;
 import com.everhomes.rest.aclink.AclinkDisconnectedCommand;
+import com.everhomes.rest.aclink.AclinkMgmtCommand;
 import com.everhomes.rest.aclink.AclinkUpgradeCommand;
 import com.everhomes.rest.aclink.AclinkUpgradeResponse;
 import com.everhomes.rest.aclink.AclinkWebSocketMessage;
@@ -358,6 +359,24 @@ public class AclinkController extends ControllerBase {
         RestResponse response = new RestResponse();
         
         response.setResponseObject(doorAccessService.getVisitor(cmd));
+        
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /aclink/listDoorAccessQRKey</b>
+     * <p>列出所有二维码门禁列表 </p>
+     * @return
+     */
+    @RequestMapping("wifiMgmt")
+    @RestReturn(value=DoorMessage.class)
+    public RestResponse getDoorVisitorAuthByUuid(AclinkMgmtCommand cmd) {
+        RestResponse response = new RestResponse();
+        
+        response.setResponseObject(doorAccessService.queryWifiMgmtMessage(cmd));
         
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

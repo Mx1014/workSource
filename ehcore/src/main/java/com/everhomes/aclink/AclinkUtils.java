@@ -131,4 +131,10 @@ public class AclinkUtils {
         byte[] binaryData = CmdUtil.upgrade(key, ver, firmVersion, checksum, uuid);
         return Base64.encodeBase64String(binaryData);
     }
+    
+    public static String packWifiCmd(Byte ver, String aesKey, String ssid, String pwd, String borderUrl) {
+        byte[] key = Base64.decodeBase64(aesKey);
+        byte[] binaryData = CmdUtil.wifiCmd(key, ver, ssid, pwd, borderUrl);
+        return Base64.encodeBase64String(binaryData);
+    }
 }
