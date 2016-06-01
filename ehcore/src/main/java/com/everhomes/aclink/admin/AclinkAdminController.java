@@ -33,6 +33,7 @@ import com.everhomes.rest.aclink.DoorAccessAdminUpdateCommand;
 import com.everhomes.rest.aclink.DoorAccessCapapilityDTO;
 import com.everhomes.rest.aclink.DoorAccessDTO;
 import com.everhomes.rest.aclink.DoorAuthDTO;
+import com.everhomes.rest.aclink.GetCurrentFirmwareCommand;
 import com.everhomes.rest.aclink.GetDoorAccessCapapilityCommand;
 import com.everhomes.rest.aclink.ListAclinkUserCommand;
 import com.everhomes.rest.aclink.ListAesUserKeyByUserIdCommand;
@@ -270,6 +271,15 @@ public class AclinkAdminController extends ControllerBase {
     @RestReturn(value=ListDoorAccessResponse.class)
     public RestResponse listDoorAccessGroup(@Valid ListDoorAccessGroupCommand cmd) {
         RestResponse response = new RestResponse(doorAccessService.listDoorAccessGroup(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;        
+    }
+    
+    @RequestMapping("getCurrentFirmware")
+    @RestReturn(value=ListDoorAccessResponse.class)
+    public RestResponse listDoorAccessGroup(@Valid GetCurrentFirmwareCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.getCurrentFirmware(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;        

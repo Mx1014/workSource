@@ -79,6 +79,7 @@ import com.everhomes.rest.aclink.DoorAuthType;
 import com.everhomes.rest.aclink.DoorLinglingExtraKeyDTO;
 import com.everhomes.rest.aclink.DoorMessage;
 import com.everhomes.rest.aclink.DoorMessageType;
+import com.everhomes.rest.aclink.GetCurrentFirmwareCommand;
 import com.everhomes.rest.aclink.GetDoorAccessCapapilityCommand;
 import com.everhomes.rest.aclink.GetVisitorCommand;
 import com.everhomes.rest.aclink.GetVisitorResponse;
@@ -1733,5 +1734,11 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         newCmd.setDoorType(DoorAccessType.ACLINK_LINGLING_GROUP.getCode());
         
         return searchDoorAccessByAdmin(newCmd);
+    }
+    
+    @Override
+    public AclinkFirmwareDTO getCurrentFirmware(GetCurrentFirmwareCommand cmd) {
+        AclinkFirmware firm = aclinkFirmwareProvider.queryAclinkFirmwareMax();
+        return ConvertHelper.convert(firm, AclinkFirmwareDTO.class);
     }
 }

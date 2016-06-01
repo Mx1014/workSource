@@ -10,6 +10,7 @@ public class CreateAclinkFirmwareCommand {
     private String     infoUrl;
     private Long     checksum;
     private String     md5sum;
+    private String firmwareType;
     
     @NotNull
     private String     downloadUrl;
@@ -65,6 +66,13 @@ public class CreateAclinkFirmwareCommand {
     }
     public void setRevision(Byte revision) {
         this.revision = revision;
+    }
+    
+    public String getFirmwareType() {
+        return firmwareType;
+    }
+    public void setFirmwareType(String firmwareType) {
+        this.firmwareType = firmwareType;
     }
     @Override
     public String toString() {
