@@ -1,7 +1,6 @@
 package com.everhomes.rest.techpark.rental.admin;
 
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -22,7 +21,7 @@ import com.everhomes.discover.ItemType;
  * <li>needPay: 是否需要支付</li>
  * <li>multiTimeInterval: 是否允许预约多个时段</li>
  * <li>attachments: 预约需要提交的信息</li>
- * <li>rentalType: 预约类型，0按小时，1按半天，2按天，3支持晚上的半天</li>
+ * <li>rentalType: 预约类型，参考{@link com.everhomes.rest.techpark.rental.admin.RentalType}</li>
  * <li>rentalEndTime: 至少提前预约时间</li>
  * <li>rentalStartTime: 最多提前预约时间</li>
  * <li>rentalStep: 最短可预约时长</li>
@@ -46,30 +45,30 @@ public class AddDefaultRuleAdminCommand {
 	private Long ownerId;
 	@NotNull
 	private Long launchPadItemId;
-	private Integer exclusiveFlag;
+	private Byte exclusiveFlag;
 	private Double unit;
-	private Integer autoAssign;
-	private Integer multiUnit;
-	private Integer needPay;
-	private Integer multiTimeInterval;
+	private Byte autoAssign;
+	private Byte multiUnit;
+	private Byte needPay;
+	private Byte multiTimeInterval;
 	@ItemType(Attachment.class)
 	private List<Attachment> attachments;
-	private Integer rentalType;
+	private Byte rentalType;
 	private Long rentalEndTime;
 	private Long rentalStartTime;
 	private Integer rentalStep;
 	@ItemType(TimeInterval.class)
 	private List<TimeInterval> timeIntervals;
-	private Date beginDate;
-	private Date endDate;
+	private Long beginDate;
+	private Long endDate;
 	private String openWeekday;
-	@ItemType(Date.class)
-	private List<Date> closeDates;
+	@ItemType(Long.class)
+	private List<Long> closeDates;
 	private BigDecimal workdayPrice;
 	private BigDecimal weekendPrice;
 	private Double siteCounts;
 	private Long cancelTime;
-	private Integer refundFlag;
+	private Byte refundFlag;
 	private Integer refundRatio;
 
 	public String getOwnerType() {
@@ -96,11 +95,11 @@ public class AddDefaultRuleAdminCommand {
 		this.launchPadItemId = launchPadItemId;
 	}
 
-	public Integer getExclusiveFlag() {
+	public Byte getExclusiveFlag() {
 		return exclusiveFlag;
 	}
 
-	public void setExclusiveFlag(Integer exclusiveFlag) {
+	public void setExclusiveFlag(Byte exclusiveFlag) {
 		this.exclusiveFlag = exclusiveFlag;
 	}
 
@@ -112,35 +111,35 @@ public class AddDefaultRuleAdminCommand {
 		this.unit = unit;
 	}
 
-	public Integer getAutoAssign() {
+	public Byte getAutoAssign() {
 		return autoAssign;
 	}
 
-	public void setAutoAssign(Integer autoAssign) {
+	public void setAutoAssign(Byte autoAssign) {
 		this.autoAssign = autoAssign;
 	}
 
-	public Integer getMultiUnit() {
+	public Byte getMultiUnit() {
 		return multiUnit;
 	}
 
-	public void setMultiUnit(Integer multiUnit) {
+	public void setMultiUnit(Byte multiUnit) {
 		this.multiUnit = multiUnit;
 	}
 
-	public Integer getNeedPay() {
+	public Byte getNeedPay() {
 		return needPay;
 	}
 
-	public void setNeedPay(Integer needPay) {
+	public void setNeedPay(Byte needPay) {
 		this.needPay = needPay;
 	}
 
-	public Integer getMultiTimeInterval() {
+	public Byte getMultiTimeInterval() {
 		return multiTimeInterval;
 	}
 
-	public void setMultiTimeInterval(Integer multiTimeInterval) {
+	public void setMultiTimeInterval(Byte multiTimeInterval) {
 		this.multiTimeInterval = multiTimeInterval;
 	}
 
@@ -152,11 +151,11 @@ public class AddDefaultRuleAdminCommand {
 		this.attachments = attachments;
 	}
 
-	public Integer getRentalType() {
+	public Byte getRentalType() {
 		return rentalType;
 	}
 
-	public void setRentalType(Integer rentalType) {
+	public void setRentalType(Byte rentalType) {
 		this.rentalType = rentalType;
 	}
 
@@ -192,19 +191,19 @@ public class AddDefaultRuleAdminCommand {
 		this.timeIntervals = timeIntervals;
 	}
 
-	public Date getBeginDate() {
+	public Long getBeginDate() {
 		return beginDate;
 	}
 
-	public void setBeginDate(Date beginDate) {
+	public void setBeginDate(Long beginDate) {
 		this.beginDate = beginDate;
 	}
 
-	public Date getEndDate() {
+	public Long getEndDate() {
 		return endDate;
 	}
 
-	public void setEndDate(Date endDate) {
+	public void setEndDate(Long endDate) {
 		this.endDate = endDate;
 	}
 
@@ -216,11 +215,11 @@ public class AddDefaultRuleAdminCommand {
 		this.openWeekday = openWeekday;
 	}
 
-	public List<Date> getCloseDates() {
+	public List<Long> getCloseDates() {
 		return closeDates;
 	}
 
-	public void setCloseDates(List<Date> closeDates) {
+	public void setCloseDates(List<Long> closeDates) {
 		this.closeDates = closeDates;
 	}
 
@@ -256,11 +255,11 @@ public class AddDefaultRuleAdminCommand {
 		this.cancelTime = cancelTime;
 	}
 
-	public Integer getRefundFlag() {
+	public Byte getRefundFlag() {
 		return refundFlag;
 	}
 
-	public void setRefundFlag(Integer refundFlag) {
+	public void setRefundFlag(Byte refundFlag) {
 		this.refundFlag = refundFlag;
 	}
 
