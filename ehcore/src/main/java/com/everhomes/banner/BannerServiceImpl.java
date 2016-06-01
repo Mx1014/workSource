@@ -43,6 +43,7 @@ import com.everhomes.rest.banner.admin.ListBannersAdminCommand;
 import com.everhomes.rest.banner.admin.ListBannersAdminCommandResponse;
 import com.everhomes.rest.banner.admin.UpdateBannerAdminCommand;
 import com.everhomes.rest.common.ScopeType;
+import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.organization.pm.ListPropCommunityContactCommand;
@@ -106,7 +107,16 @@ public class BannerServiceImpl implements BannerService {
         User user = UserContext.current().getUser();
         long userId = user.getId();
         Integer namespaceId = (user.getNamespaceId() == null) ? 0 : user.getNamespaceId();
-        String sceneType = cmd.getCurrentSceneType();
+        // 对于老版本客户端，没有场景概念，此时它传过来的场景为null，但数据却已经有场景，需要根据小区类型来区分场景 by lqs 20160601
+        // String sceneType = cmd.getCurrentSceneType();
+        String sceneType = cmd.getSceneType();
+        if(sceneType == null) {
+            if(CommunityType.fromCode(community.getCommunityType()) == CommunityType.COMMERCIAL) {
+                sceneType = SceneType.PARK_TOURIST.getCode();
+            } else {
+                sceneType = SceneType.DEFAULT.getCode();
+            }
+        }
         //String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
         //query user relate banners
         List<Banner> countryBanners = bannerProvider.findBannersByTagAndScope(namespaceId, sceneType, cmd.getBannerLocation(), cmd.getBannerGroup(),
