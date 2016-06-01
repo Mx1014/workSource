@@ -9,22 +9,22 @@ package com.everhomes.rest.techpark.rental.admin;
  * </ul>
  */
 public class Attachment {
-	private Integer attachmentType;
-	private Integer mustOptions;
+	private Byte attachmentType;
+	private Byte mustOptions;
 
-	public Integer getAttachmentType() {
+	public Byte getAttachmentType() {
 		return attachmentType;
 	}
 
-	public void setAttachmentType(Integer attachmentType) {
+	public void setAttachmentType(Byte attachmentType) {
 		this.attachmentType = attachmentType;
 	}
 
-	public Integer getMustOptions() {
+	public Byte getMustOptions() {
 		return mustOptions;
 	}
 
-	public void setMustOptions(Integer mustOptions) {
+	public void setMustOptions(Byte mustOptions) {
 		this.mustOptions = mustOptions;
 	}
 

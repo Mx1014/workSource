@@ -9,19 +9,18 @@ package com.everhomes.rest.techpark.rental.admin;
  * </ul>
  */
 public enum AttachmentType {
-	TEXT_REMARK("text_remark"), LICENSE_NUMBER("license_number"), SHOW_CONTENT("show_content"), ATTACHMENT(
-			"attachment");
-	private String code;
+	TEXT_REMARK((byte)0), LICENSE_NUMBER((byte)1), SHOW_CONTENT((byte)2), ATTACHMENT((byte)3);
+	private Byte code;
 
-	private AttachmentType(String code) {
+	private AttachmentType(Byte code) {
 		this.code = code;
 	}
 
-	public String getCode() {
+	public Byte getCode() {
 		return code;
 	}
 
-	public static AttachmentType fromCode(String code) {
+	public static AttachmentType fromCode(Byte code) {
 		if (code != null) {
 			for (AttachmentType a : AttachmentType.values()) {
 				if (code.equals(a.code)) {
