@@ -100,10 +100,12 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessageMetaConstant;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.messaging.MetaObjectType;
+import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
@@ -112,6 +114,7 @@ import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
 
 import org.apache.commons.codec.binary.Base64;
 
@@ -176,6 +179,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     
     @Autowired
     private AclinkLinglingService aclinkLinglingService;
+    
+    @Autowired
+    private SmsProvider smsProvider;
     
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
     
@@ -1652,6 +1658,18 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         auth.setOwnerId(doorAccess.getOwnerId());
         auth.setStatus(DoorAuthStatus.VALID.getCode());
         doorAuthProvider.createDoorAuth(auth);
+        
+        String nickName = user.getNickName();
+        if(nickName == null || nickName.isEmpty()) {
+            nickName = user.getAccountName();
+        }
+        
+        String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
+        List<Tuple<String, Object>> variables = smsProvider.toTupleList(AclinkConstant.SMS_VISITOR_USER, nickName);
+        smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_DOOR, doorAccess.getName());
+        smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_LINK, homeUrl + "/aclink/getVisitor?id=" + auth.getLinglingUuid());
+        String templateLocale = user.getLocale();
+        smsProvider.sendSms(cmd.getNamespaceId(), cmd.getPhone(), SmsTemplateCode.SCOPE, SmsTemplateCode.ACLINK_VISITOR_MSG_CODE, templateLocale, variables);
         
         return ConvertHelper.convert(auth, DoorAuthDTO.class);
     }

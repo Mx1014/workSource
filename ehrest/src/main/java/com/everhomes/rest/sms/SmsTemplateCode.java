@@ -28,4 +28,5 @@ public interface SmsTemplateCode {
     static final int WY_SEND_MSG_CODE = 5; // 物业一键推送消息
     static final int PM_TASK_PROCESS_MSG_CODE = 6; // 任务处理消息
     static final int PM_TASK_PUSH_MSG_CODE = 7; // 任务发布消息
+    static final int ACLINK_VISITOR_MSG_CODE = 8; // 访客授权链接
 }
