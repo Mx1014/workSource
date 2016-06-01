@@ -610,7 +610,11 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                             itemDTO.setItemLabel(b.getName() == null ? itemDTO.getItemLabel() : b.getName());
                     }
                 }else{
-                    itemDTO.setIconUrl(parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId));
+                    String url = parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId);
+                    itemDTO.setIconUrl(url);
+//                    if(LOGGER.isDebugEnabled()) {
+//                        LOGGER.debug("Parse uri while processing launchpad items, item=" + itemDTO);
+//                    }
                 }
                 
                 distinctDto.add(itemDTO);
@@ -671,7 +675,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			//            if(jsonObject != null)
 			//                jsonObject.put(LaunchPadConstants.COMMUNITY_ID, communityId);
 		}catch(Exception e){
-			LOGGER.error("Parser json is error,communityId=" + communityId,e.getMessage());
+			LOGGER.error("Parser json is error,communityId=" + communityId, e);
 		}
 
 		return jsonObject.toJSONString();

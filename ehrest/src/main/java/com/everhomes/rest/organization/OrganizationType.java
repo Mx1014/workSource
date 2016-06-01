@@ -48,7 +48,6 @@ public enum OrganizationType {
             case GANC:
             case GAPS:
             case GACW:
-            case ENTERPRISE:
                 return true;
             default:
                 return false;
