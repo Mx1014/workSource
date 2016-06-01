@@ -1,5 +1,7 @@
 package com.everhomes.techpark.rental.admin;
 
+import javax.validation.Valid;
+
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,7 +21,7 @@ public class RentalAdminController extends ControllerBase {
 
 	@RequestMapping("addDefaultRule")
 	@RestReturn(String.class)
-	public RestResponse addDefaultRule(AddDefaultRuleAdminCommand addDefaultRuleAdminCommand) {
+	public RestResponse addDefaultRule(@Valid AddDefaultRuleAdminCommand addDefaultRuleAdminCommand) {
 
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -29,7 +31,7 @@ public class RentalAdminController extends ControllerBase {
 
 	@RequestMapping("queryDefaultRule")
 	@RestReturn(QueryDefaultRuleAdminResponse.class)
-	public RestResponse queryDefaultRule(QueryDefaultRuleAdminCommand queryDefaultRuleAdminCommand) {
+	public RestResponse queryDefaultRule(@Valid QueryDefaultRuleAdminCommand queryDefaultRuleAdminCommand) {
 		QueryDefaultRuleAdminResponse queryDefaultRuleAdminResponse = new QueryDefaultRuleAdminResponse();
 		RestResponse response = new RestResponse(queryDefaultRuleAdminResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);

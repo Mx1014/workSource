@@ -216,13 +216,12 @@ public class RentalController extends ControllerBase {
 	/**
 	 * <b>URL: /techpark/rental/findRentalSites</b>
 	 * <p>
-	 * 查询某场所
+	 * 查询某园区某图标下的资源列表
 	 * </p>
 	 */
 	@RequestMapping("findRentalSites")
 	@RestReturn(value = FindRentalSitesCommandResponse.class)
-	public RestResponse findRentalSites(
-			@Valid FindRentalSitesCommand cmd) { 
+	public RestResponse findRentalSites(@Valid FindRentalSitesCommand cmd) { 
 		FindRentalSitesCommandResponse findRentalSitesCommandResponse = rentalService
 				.findRentalSites(cmd);
 		RestResponse response = new RestResponse(
