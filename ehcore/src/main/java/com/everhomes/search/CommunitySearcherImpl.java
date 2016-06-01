@@ -144,7 +144,7 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
         int namespaceId = UserContext.getCurrentNamespaceId();
         fb = FilterBuilders.termFilter("namespaceId", namespaceId);
         if(null != communityType) {
-            fb = FilterBuilders.termFilter("communityType", communityType);
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityType", communityType));
         }
         if((null != cityId) && (cityId > 0)) {
             fb = FilterBuilders.termFilter("cityId", cityId);
