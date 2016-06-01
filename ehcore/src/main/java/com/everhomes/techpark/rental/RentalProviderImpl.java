@@ -395,13 +395,14 @@ public class RentalProviderImpl implements RentalProvider {
 			ListingLocator locator, int count, Byte status) {
 		final List<RentalBill> result = new ArrayList<RentalBill>();
 		Condition condition = Tables.EH_RENTAL_BILLS.ID.lt(locator.getAnchor());
-		condition = condition.and(Tables.EH_RENTAL_BILLS.OWNER_ID
-				.eq(ownerId));
-		condition = condition.and(Tables.EH_RENTAL_BILLS.OWNER_TYPE
-				.eq(ownerType));
-		if (StringUtils.isNotEmpty(siteType))
-			condition = condition.and(Tables.EH_RENTAL_BILLS.SITE_TYPE
-					.eq(siteType));
+		//TODO:
+//		condition = condition.and(Tables.EH_RENTAL_BILLS.OWNER_ID
+//				.eq(ownerId));
+//		condition = condition.and(Tables.EH_RENTAL_BILLS.OWNER_TYPE
+//				.eq(ownerType));
+//		if (StringUtils.isNotEmpty(siteType))
+//			condition = condition.and(Tables.EH_RENTAL_BILLS.SITE_TYPE
+//					.eq(siteType));
 		if (null != userId) {
 			condition = condition.and(Tables.EH_RENTAL_BILLS.RENTAL_UID
 					.eq(userId));
@@ -629,30 +630,31 @@ public class RentalProviderImpl implements RentalProvider {
 	@Override
 	public int countRentalSites(Long ownerId,String ownerType,  String siteType,
 			String keyword,List<Byte> status) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		SelectJoinStep<Record1<Integer>> step = context.selectCount().from(
-				Tables.EH_RENTAL_SITES);
-		Condition condition = Tables.EH_RENTAL_SITES.OWNER_TYPE
-				.equal(ownerType);
-		
-
-		condition = condition.and(Tables.EH_RENTAL_SITES.OWNER_ID
-				.equal(ownerId));
-		condition = condition.and(Tables.EH_RENTAL_SITES.SITE_TYPE
-				.equal(siteType));
-		if (!StringUtils.isEmpty(keyword)) {
-			condition = condition.and(Tables.EH_RENTAL_SITES.ADDRESS
-					.like("%" + keyword + "%")
-					.or(Tables.EH_RENTAL_SITES.SITE_NAME.like("%" + keyword
-							+ "%"))
-					.or(Tables.EH_RENTAL_SITES.BUILDING_NAME.like("%" + keyword
-							+ "%")));
-		}
-		if(null != status)
-			condition = condition.and(Tables.EH_RENTAL_SITES.STATUS
-				.in(status));
-		return step.where(condition).fetchOneInto(Integer.class);
-
+//		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+//		SelectJoinStep<Record1<Integer>> step = context.selectCount().from(
+//				Tables.EH_RENTAL_SITES);
+//		Condition condition = Tables.EH_RENTAL_SITES.OWNER_TYPE
+//				.equal(ownerType);
+//		
+//
+//		condition = condition.and(Tables.EH_RENTAL_SITES.OWNER_ID
+//				.equal(ownerId));
+//		condition = condition.and(Tables.EH_RENTAL_SITES.SITE_TYPE
+//				.equal(siteType));
+//		if (!StringUtils.isEmpty(keyword)) {
+//			condition = condition.and(Tables.EH_RENTAL_SITES.ADDRESS
+//					.like("%" + keyword + "%")
+//					.or(Tables.EH_RENTAL_SITES.SITE_NAME.like("%" + keyword
+//							+ "%"))
+//					.or(Tables.EH_RENTAL_SITES.BUILDING_NAME.like("%" + keyword
+//							+ "%")));
+//		}
+//		if(null != status)
+//			condition = condition.and(Tables.EH_RENTAL_SITES.STATUS
+//				.in(status));
+//		return step.where(condition).fetchOneInto(Integer.class);
+		//TODO:
+return 1 ;
 	}
 
 	@Override
@@ -708,13 +710,14 @@ public class RentalProviderImpl implements RentalProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record1<Integer>> step = context.selectCount().from(
 				Tables.EH_RENTAL_BILLS);
-		Condition condition = Tables.EH_RENTAL_BILLS.OWNER_ID
+		//TODO:
+		Condition condition = Tables.EH_RENTAL_BILLS.LAUNCH_PAD_ITEM_ID
 				.equal(ownerId);
-		condition = condition.and(Tables.EH_RENTAL_BILLS.OWNER_TYPE
-				.equal(ownerType));
-		if (StringUtils.isNotEmpty(siteType))
-			condition = condition.and(Tables.EH_RENTAL_BILLS.SITE_TYPE
-					.equal(siteType));
+//		condition = condition.and(Tables.EH_RENTAL_BILLS.OWNER_TYPE
+//				.equal(ownerType));
+//		if (StringUtils.isNotEmpty(siteType))
+//			condition = condition.and(Tables.EH_RENTAL_BILLS.SITE_TYPE
+//					.equal(siteType));
 		if (null != rentalSiteId)
 			condition = condition.and(Tables.EH_RENTAL_BILLS.RENTAL_SITE_ID
 					.equal(rentalSiteId));
@@ -745,13 +748,14 @@ public class RentalProviderImpl implements RentalProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTAL_BILLS);
-		Condition condition = Tables.EH_RENTAL_BILLS.OWNER_ID
+		//TODO
+		Condition condition = Tables.EH_RENTAL_BILLS.LAUNCH_PAD_ITEM_ID
 				.equal(ownerId);
-		condition = condition.and(Tables.EH_RENTAL_BILLS.OWNER_TYPE
-				.equal(ownerType));
-		if (StringUtils.isNotEmpty(siteType))
-			condition = condition.and(Tables.EH_RENTAL_BILLS.SITE_TYPE
-					.equal(siteType));
+//		condition = condition.and(Tables.EH_RENTAL_BILLS.OWNER_TYPE
+//				.equal(ownerType));
+//		if (StringUtils.isNotEmpty(siteType))
+//			condition = condition.and(Tables.EH_RENTAL_BILLS.SITE_TYPE
+//					.equal(siteType));
 		if (null != rentalSiteId)
 			condition = condition.and(Tables.EH_RENTAL_BILLS.RENTAL_SITE_ID
 					.equal(rentalSiteId));
@@ -795,12 +799,13 @@ public class RentalProviderImpl implements RentalProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTAL_SITES);
-		Condition condition = Tables.EH_RENTAL_SITES.OWNER_ID
+		//TODO
+		Condition condition = Tables.EH_RENTAL_SITES.LAUNCH_PAD_ITEM_ID
 				.equal(ownerId);
-		condition = condition.and(Tables.EH_RENTAL_SITES.OWNER_TYPE
-				.equal(ownerType));
-		condition = condition.and(Tables.EH_RENTAL_SITES.SITE_TYPE
-				.equal(siteType));
+//		condition = condition.and(Tables.EH_RENTAL_SITES.OWNER_TYPE
+//				.equal(ownerType));
+//		condition = condition.and(Tables.EH_RENTAL_SITES.SITE_TYPE
+//				.equal(siteType));
 		if (!StringUtils.isEmpty(keyword)) {
 			condition = condition.and(Tables.EH_RENTAL_SITES.ADDRESS
 					.like("%" + keyword + "%")
@@ -982,13 +987,14 @@ public class RentalProviderImpl implements RentalProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTAL_BILLS);
-		Condition condition = Tables.EH_RENTAL_BILLS.OWNER_ID
+		//TODO：
+		Condition condition = Tables.EH_RENTAL_BILLS.LAUNCH_PAD_ITEM_ID
 				.equal(ownerId);
-		condition = condition.and(Tables.EH_RENTAL_BILLS.OWNER_TYPE
-				.equal(ownerType));
-		if (StringUtils.isNotEmpty(siteType))
-			condition = condition.and(Tables.EH_RENTAL_BILLS.SITE_TYPE
-					.equal(siteType));
+//		condition = condition.and(Tables.EH_RENTAL_BILLS.OWNER_TYPE
+//				.equal(ownerType));
+//		if (StringUtils.isNotEmpty(siteType))
+//			condition = condition.and(Tables.EH_RENTAL_BILLS.SITE_TYPE
+//					.equal(siteType));
 		if (null != rentalSiteId)
 			condition = condition.and(Tables.EH_RENTAL_BILLS.RENTAL_SITE_ID
 					.equal(rentalSiteId));

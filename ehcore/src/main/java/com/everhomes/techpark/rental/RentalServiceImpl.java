@@ -647,9 +647,10 @@ public class RentalServiceImpl implements RentalService {
 									"reserve Time after reserve end time"));
 		}
 		RentalBill rentalBill = new RentalBill();
-		rentalBill.setOwnerId(cmd.getOwnerId());
-		rentalBill.setOwnerType(cmd.getOwnerType());
-		rentalBill.setSiteType(cmd.getSiteType());
+		//TODO:OWNER
+//		rentalBill.setOwnerId(cmd.getOwnerId());
+//		rentalBill.setOwnerType(cmd.getOwnerType());
+//		rentalBill.setSiteType(cmd.getSiteType());
 		rentalBill.setRentalSiteId(cmd.getRentalSiteId());
 		rentalBill.setRentalUid(userId);
 		rentalBill.setInvoiceFlag(InvoiceFlag.NONEED.getCode());
@@ -792,9 +793,10 @@ public class RentalServiceImpl implements RentalService {
 		// 循环存site订单
 		for (RentalSiteRule rsr : rentalSiteRules) {
 			RentalSitesBill rsb = new RentalSitesBill();
-			rsb.setOwnerId(cmd.getOwnerId());
-			rsb.setOwnerType(cmd.getOwnerType());
-			rsb.setSiteType(cmd.getSiteType());
+//			TODO:
+//			rsb.setOwnerId(cmd.getOwnerId());
+//			rsb.setOwnerType(cmd.getOwnerType());
+//			rsb.setSiteType(cmd.getSiteType());
 			rsb.setRentalBillId(rentalBillId);
 			rsb.setTotalMoney( (null ==rsr.getPrice()?new java.math.BigDecimal(0):rsr.getPrice()).multiply (new java.math.BigDecimal(cmd.getRentalCount() / rsr.getUnit())));
 			rsb.setRentalCount(cmd.getRentalCount());
@@ -890,12 +892,13 @@ public class RentalServiceImpl implements RentalService {
 			LOGGER.debug("RentalSite is null...bill id  = " + bill.getId()+",and site id = "+bill.getRentalSiteId());
 			return ;
 		}
-		RentalRule rr=rentalProvider.getRentalRule(bill.getOwnerId(), bill.getOwnerType(), bill.getSiteType());
-
-		if(null== rr){
-			LOGGER.debug("RentalRule is null...getOwnerId  = " + bill.getOwnerId()+",and getOwnerType = "+bill.getOwnerType()+",and getSiteType = "+ bill.getSiteType());
-			return ;
-		}
+		//TODO:site取
+//		RentalRule rr=rentalProvider.getRentalRule(bill.getOwnerId(), bill.getOwnerType(), bill.getSiteType());
+		RentalRule rr=null;
+//		if(null== rr){
+//			LOGGER.debug("RentalRule is null...getOwnerId  = " + bill.getOwnerId()+",and getOwnerType = "+bill.getOwnerType()+",and getSiteType = "+ bill.getSiteType());
+//			return ;
+//		}
 		UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(bill.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
 		if(null == userIdentifier){
 			LOGGER.debug("userIdentifier is null...userId = " + bill.getRentalUid());
@@ -919,16 +922,18 @@ public class RentalServiceImpl implements RentalService {
 		dto.setSpec(rs.getSpec());
 		dto.setCompanyName(rs.getOwnCompanyName());
 		dto.setContactName(rs.getContactName());
-		if(rs.getOwnerType().equals(RentalOwnerType.COMMUNITY.getCode())){
-			dto.setCommunityId(rs.getOwnerId());
-		}
+		//TODO
+//		if(rs.getOwnerType().equals(RentalOwnerType.COMMUNITY.getCode())){
+//			dto.setCommunityId(rs.getOwnerId());
+//		}
 		
 		dto.setNotice(rs.getNotice());
 		dto.setIntroduction(rs.getIntroduction());
 		dto.setRentalBillId(bill.getId());
-		dto.setOwnerId(bill.getOwnerId());
-		dto.setOwnerType(bill.getOwnerType());
-		dto.setSiteType(bill.getSiteType());
+		//TODO
+//			dto.setOwnerId(bill.getOwnerId());
+//			dto.setOwnerType(bill.getOwnerType());
+//			dto.setSiteType(bill.getSiteType());
 		dto.setRentalCount(bill.getRentalCount());
 		if (null == bill.getStartTime()) {
 
@@ -1100,9 +1105,10 @@ public class RentalServiceImpl implements RentalService {
 			if (cmd.getChoosen().contains(weekday)) {
 				if (cmd.getRentalType().equals(RentalType.HOUR.getCode())) {
 					for (double i = cmd.getBeginTime(); i < cmd.getEndTime();) {
-						rsr.setOwnerId(cmd.getOwnerId());
-						rsr.setOwnerType(cmd.getOwnerType());
-						rsr.setSiteType(cmd.getSiteType());
+						//TODO
+//						rsr.setOwnerId(cmd.getOwnerId());
+//						rsr.setOwnerType(cmd.getOwnerType());
+//						rsr.setSiteType(cmd.getSiteType());
 						rsr.setBeginTime(Timestamp.valueOf(dateSF.format(start
 								.getTime())
 								+ " "
@@ -1145,9 +1151,10 @@ public class RentalServiceImpl implements RentalService {
 				// 按半日预定
 				else if (cmd.getRentalType().equals(
 						RentalType.HALFDAY.getCode())) {
-					rsr.setOwnerId(cmd.getOwnerId());
-					rsr.setOwnerType(cmd.getOwnerType());
-					rsr.setSiteType(cmd.getSiteType());
+					//TODO
+//					rsr.setOwnerId(cmd.getOwnerId());
+//					rsr.setOwnerType(cmd.getOwnerType());
+//					rsr.setSiteType(cmd.getSiteType());
 					rsr.setRentalSiteId(cmd.getRentalSiteId());
 					rsr.setRentalType(cmd.getRentalType());
 					rsr.setCounts(cmd.getCounts()==null?1:cmd.getCounts());
@@ -1177,9 +1184,10 @@ public class RentalServiceImpl implements RentalService {
 				}
 				// 按日预定
 				else if (cmd.getRentalType().equals(RentalType.DAY.getCode())) {
-					rsr.setOwnerId(cmd.getOwnerId());
-					rsr.setOwnerType(cmd.getOwnerType());
-					rsr.setSiteType(cmd.getSiteType());
+					//TODO:
+//					rsr.setOwnerId(cmd.getOwnerId());
+//					rsr.setOwnerType(cmd.getOwnerType());
+//					rsr.setSiteType(cmd.getSiteType());
 					rsr.setRentalSiteId(cmd.getRentalSiteId());
 					rsr.setRentalType(cmd.getRentalType());
 					rsr.setCounts(cmd.getCounts());
@@ -1410,8 +1418,8 @@ public class RentalServiceImpl implements RentalService {
 					}
 					RentalItemsBill rib = new RentalItemsBill();
 					rib.setTotalMoney(siDto.getItemPrice().multiply( new java.math.BigDecimal(siDto.getCounts())));
-
-					rib.setCommunityId(cmd.getOwnerId());
+					//TODO
+//					rib.setCommunityId(cmd.getOwnerId());
 					rib.setRentalSiteItemId(siDto.getId());
 					rib.setRentalCount(siDto.getCounts());
 					rib.setRentalBillId(cmd.getRentalBillId());
@@ -1494,9 +1502,10 @@ public class RentalServiceImpl implements RentalService {
 		if (null != cmd.getAttachmentType()) {
 			RentalBillAttachment rba = new RentalBillAttachment();
 			rba.setRentalBillId(cmd.getRentalBillId());
-			rba.setOwnerId(cmd.getOwnerId());
-			rba.setOwnerType(cmd.getOwnerType());
-			rba.setSiteType(cmd.getSiteType());
+			//TODO 
+//			rba.setOwnerId(cmd.getOwnerId());
+//			rba.setOwnerType(cmd.getOwnerType());
+//			rba.setSiteType(cmd.getSiteType());
 
 			rba.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 					.getTime()));
@@ -1881,8 +1890,10 @@ public class RentalServiceImpl implements RentalService {
 	private RentalBillCountDTO processRentalBillCountDTO(RentalSite site,
 			Long beginDate, Long endDate) {
 		RentalBillCountDTO dto = new RentalBillCountDTO();
-		List<RentalBill> bills = this.rentalProvider.listRentalBills(site.getOwnerId(), site.getOwnerType(), site.getSiteType(), 
-				site.getId(),beginDate,endDate);
+		//TODO:
+		List<RentalBill> bills  = null; 
+//		List<RentalBill> bills = this.rentalProvider.listRentalBills(site.getOwnerId(), site.getOwnerType(), site.getSiteType(), 
+//				site.getId(),beginDate,endDate);
 		dto.setSiteName(site.getSiteName());
 		processRentalBillCountDTO(dto, bills);
 		return dto;
