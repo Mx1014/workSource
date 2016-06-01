@@ -122,6 +122,8 @@ CREATE TABLE `eh_rental_sites` (
 `rental_end_time` BIGINT(20)    COMMENT '最少提前多少时间预定',
 `refund_flag` TINYINT(4)    COMMENT '是否支持退款 1是 0否',
 `refund_ratio` INT(11)       COMMENT '退款比例',
+`longitude` DOUBLE  COMMENT '地址经度',
+`latitude` DOUBLE  COMMENT '地址纬度',
 
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4	

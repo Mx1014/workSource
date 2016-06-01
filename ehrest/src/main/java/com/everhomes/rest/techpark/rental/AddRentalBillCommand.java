@@ -25,12 +25,7 @@ import com.everhomes.util.StringHelper;
  */
 public class AddRentalBillCommand {
 	@NotNull
-	private Long rentalSiteId;
-	private Long communityId;
-	private String ownerType;
-	private Long ownerId;
-	@NotNull
-	private String siteType; 
+	private Long rentalSiteId;   
 	private Long rentalDate;
 	@NotNull
 	private Long startTime;
@@ -80,15 +75,7 @@ public class AddRentalBillCommand {
 	public void setEndTime(Long endTime) {
 		this.endTime = endTime;
 	}
- 
-	public String getSiteType() {
-		return siteType;
-	}
-
-	public void setSiteType(String siteType) {
-		this.siteType = siteType;
-	}
- 
+  
 
 	public List<Long> getRentalSiteRuleIds() {
 		return rentalSiteRuleIds;
@@ -105,32 +92,7 @@ public class AddRentalBillCommand {
 	public void setRentalCount(Double rentalCount) {
 		this.rentalCount = rentalCount;
 	}
-
-	public String getOwnerType() {
-		return ownerType;
-	}
-
-	public void setOwnerType(String ownerType) {
-		this.ownerType = ownerType;
-	}
-
-	public Long getOwnerId() {
-		return ownerId;
-	}
-
-	public void setOwnerId(Long ownerId) {
-		this.ownerId = ownerId;
-	}
-
-	public Long getCommunityId() {
-		return communityId;
-	}
-
-	public void setCommunityId(Long communityId) {
-		this.communityId = communityId;
-	}
  
-
 //	public List<SiteItemDTO> getRentalItems() {
 //		return rentalItems;
 //	}

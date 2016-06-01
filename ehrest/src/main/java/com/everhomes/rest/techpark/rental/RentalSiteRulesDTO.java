@@ -14,6 +14,11 @@ import com.everhomes.util.StringHelper;
  * <li>rentalStep：最小预定时间(整数，rentalType=0为多少个半小时，rentalType=1为多少个半天，rentalType=2为多少天)</li>
  * <li>TimeStep：坐标轴单位时间（小时）</li> 
  * <li>price：场所数量</li> 
+ * <li>	originalPrice：     	原价（如果不为null则price为打折价）	</li>
+ * <li>	exclusiveFlag：     	是否为独占资源0否 1 是	</li>
+ * <li>	autoAssign：        	是否动态分配 1是 0否	</li>
+ * <li>	multiUnit：         	是否允许预约多个场所 1是 0否	</li>
+ * <li>	multiTimeInterval： 	是否允许预约多个时段 1是 0否	</li>
  * <li>ruleDate：规则日期</li>  
  * <li>Status： OPEN(0),CLOSE(1){@link com.everhomes.rest.techpark.rental.SiteRuleStatus} </li> 
  * </ul>
@@ -28,6 +33,11 @@ public class RentalSiteRulesDTO {
 	private Double counts;
 	private Double unit;
 	private java.math.BigDecimal price;
+	private java.math.BigDecimal originalPrice;
+	private java.lang.Byte       exclusiveFlag;
+	private java.lang.Byte       autoAssign;
+	private java.lang.Byte       multiUnit;
+	private java.lang.Byte       multiTimeInterval;
 	private Integer rentalStep;
 	private Double timeStep;
 	private Long ruleDate; 
@@ -44,6 +54,66 @@ public class RentalSiteRulesDTO {
 
 	public Long getRentalSiteId() {
 		return rentalSiteId;
+	}
+
+
+
+	public java.math.BigDecimal getOriginalPrice() {
+		return originalPrice;
+	}
+
+
+
+	public void setOriginalPrice(java.math.BigDecimal originalPrice) {
+		this.originalPrice = originalPrice;
+	}
+
+
+
+	public java.lang.Byte getExclusiveFlag() {
+		return exclusiveFlag;
+	}
+
+
+
+	public void setExclusiveFlag(java.lang.Byte exclusiveFlag) {
+		this.exclusiveFlag = exclusiveFlag;
+	}
+
+
+
+	public java.lang.Byte getAutoAssign() {
+		return autoAssign;
+	}
+
+
+
+	public void setAutoAssign(java.lang.Byte autoAssign) {
+		this.autoAssign = autoAssign;
+	}
+
+
+
+	public java.lang.Byte getMultiUnit() {
+		return multiUnit;
+	}
+
+
+
+	public void setMultiUnit(java.lang.Byte multiUnit) {
+		this.multiUnit = multiUnit;
+	}
+
+
+
+	public java.lang.Byte getMultiTimeInterval() {
+		return multiTimeInterval;
+	}
+
+
+
+	public void setMultiTimeInterval(java.lang.Byte multiTimeInterval) {
+		this.multiTimeInterval = multiTimeInterval;
 	}
 
 

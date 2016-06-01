@@ -16,8 +16,8 @@ import com.everhomes.util.StringHelper;
  */
 public class FindRentalSitesCommand {
 	private String ownerType;
-	private Long ownerId;
-	private String siteType;
+	private Long ownerId; 
+	private Long launchPadItemId;
 	private String keyword;
 	private Integer pageOffset;
 	private Integer pageSize;
@@ -27,12 +27,7 @@ public class FindRentalSitesCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     } 
-	public String getSiteType() {
-		return siteType;
-	}
-	public void setSiteType(String siteType) {
-		this.siteType = siteType;
-	}
+	 
 	public Integer getPageOffset() {
 		return pageOffset;
 	}
@@ -68,5 +63,11 @@ public class FindRentalSitesCommand {
 	}
 	public void setStatus(List<Byte> status) {
 		this.status = status;
+	}
+	public Long getLaunchPadItemId() {
+		return launchPadItemId;
+	}
+	public void setLaunchPadItemId(Long launchPadItemId) {
+		this.launchPadItemId = launchPadItemId;
 	} 
 }
