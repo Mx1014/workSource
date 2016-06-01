@@ -1,7 +1,5 @@
 SET foreign_key_checks = 0;
 
-use ehcore;
-
 INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, 'db.init.timestamp', UTC_TIMESTAMP(), 'Database seeding timestamp');
 INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, 'sms.handler.type','MW','sms handler');
 INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, 'mw.port','9003','sms handler');
