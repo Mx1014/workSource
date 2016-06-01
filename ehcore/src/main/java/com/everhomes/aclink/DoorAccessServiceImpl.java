@@ -85,6 +85,7 @@ import com.everhomes.rest.aclink.GetVisitorResponse;
 import com.everhomes.rest.aclink.ListAclinkUserCommand;
 import com.everhomes.rest.aclink.ListAesUserKeyByUserResponse;
 import com.everhomes.rest.aclink.ListDoorAccessByOwnerIdCommand;
+import com.everhomes.rest.aclink.ListDoorAccessGroupCommand;
 import com.everhomes.rest.aclink.ListDoorAccessQRKeyResponse;
 import com.everhomes.rest.aclink.ListDoorAccessResponse;
 import com.everhomes.rest.aclink.ListDoorAuthCommand;
@@ -1723,5 +1724,14 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         doorMessage.setBody(body);
         
         return doorMessage;
+    }
+    
+    @Override
+    public  ListDoorAccessResponse listDoorAccessGroup(ListDoorAccessGroupCommand cmd) {
+        QueryDoorAccessAdminCommand newCmd = (QueryDoorAccessAdminCommand)ConvertHelper.convert(cmd, QueryDoorAccessAdminCommand.class);
+        //TODO read from configuration
+        newCmd.setDoorType(DoorAccessType.ACLINK_LINGLING_GROUP.getCode());
+        
+        return searchDoorAccessByAdmin(newCmd);
     }
 }

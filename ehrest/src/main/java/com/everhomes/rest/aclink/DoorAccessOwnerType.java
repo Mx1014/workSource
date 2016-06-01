@@ -1,5 +1,14 @@
 package com.everhomes.rest.aclink;
 
+/**
+ * <ul>
+ * <li>COMMUNITY:0, 小区</li>
+ * <li>ENTERPRISE:1, 企业</li>
+ * <li>FAMILY:2, 家庭</li>
+ * </ul>
+ * @author janson
+ *
+ */
 public enum DoorAccessOwnerType {
     COMMUNITY((byte)0), ENTERPRISE((byte)1), FAMILY((byte)2);
     

@@ -38,6 +38,7 @@ import com.everhomes.rest.aclink.ListAclinkUserCommand;
 import com.everhomes.rest.aclink.ListAesUserKeyByUserIdCommand;
 import com.everhomes.rest.aclink.ListAesUserKeyByUserResponse;
 import com.everhomes.rest.aclink.ListDoorAccessByOwnerIdCommand;
+import com.everhomes.rest.aclink.ListDoorAccessGroupCommand;
 import com.everhomes.rest.aclink.ListDoorAccessResponse;
 import com.everhomes.rest.aclink.ListDoorAuthResponse;
 import com.everhomes.rest.aclink.QueryDoorAccessAdminCommand;
@@ -254,6 +255,21 @@ public class AclinkAdminController extends ControllerBase {
     @RestReturn(value=DoorAuthDTO.class)
     public RestResponse createDoorAuth(@Valid CreateLinglingVisitorCommand cmd) {
         RestResponse response = new RestResponse(doorAccessService.createLinglingVisitorAuth(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;        
+    }
+    
+    /**
+     * 
+     * <b>URL: /admin/aclink/createLingingVistor</b>
+     * <p>给令令访客授权</p>
+     * @return OK 成功
+     */
+    @RequestMapping("listDoorAccessGroup")
+    @RestReturn(value=ListDoorAccessResponse.class)
+    public RestResponse listDoorAccessGroup(@Valid ListDoorAccessGroupCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.listDoorAccessGroup(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;        
