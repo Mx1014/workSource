@@ -694,7 +694,32 @@ public class ParkServiceImpl implements ParkService {
 				}
 			}
 		}
+		
 		RechargeSuccessResponse rechargeResponse = getRechargeStatus(Long.valueOf(cmd.getOrderNo()));
+		//PayStatus.WAITING_FOR_PAY.getCode();
+		//RechargeStatus.HANDING.getCode();
+		ParkingRechargeOrder order = parkProvider.findParkingRechargeOrderByOrderNo(Long.valueOf(cmd.getOrderNo()));
+		//1.0订单
+		RechargeInfo order_1_0 = onlinePayProvider.findRechargeInfoByOrderId(Long.valueOf(cmd.getOrderNo()));
+		Timestamp payTimeStamp = new Timestamp(System.currentTimeMillis());
+		order.setStatus(order_1_0.getPaymentStatus());
+		if(order_1_0.getRechargeStatus().equals(RechargeStatus.INACTIVE.getCode())){
+			order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.NONE.getCode());
+		}
+		if(order_1_0.getRechargeStatus().equals(RechargeStatus.HANDING.getCode())){
+			order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.UNRECHARGED.getCode());
+		}
+		if(order_1_0.getRechargeStatus().equals(RechargeStatus.UPDATING.getCode())){
+			order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.UNRECHARGED.getCode());
+		}
+		if(order_1_0.getRechargeStatus().equals(RechargeStatus.SUCCESS.getCode())){
+			order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode());
+		}
+		order.setPaidTime(payTimeStamp);
+		order.setPaidType(cmd.getVendorType());
+		order.setRechargeTime(payTimeStamp);
+		//order.setPaidTime(cmd.getPayTime());
+		parkingProvider.updateParkingRechargeOrder(order);
 		return rechargeResponse;
 		
 	}
