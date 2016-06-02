@@ -867,19 +867,20 @@ public class RentalServiceImpl implements RentalService {
 			dto.setSiteItems(new ArrayList<SiteItemDTO>());
 			List<RentalItemsBill> rentalSiteItems = rentalProvider
 					.findRentalItemsBillBySiteBillId(dto.getRentalBillId());
-			for (RentalItemsBill rib : rentalSiteItems) {
-				SiteItemDTO siDTO = new SiteItemDTO();
-				siDTO.setCounts(rib.getRentalCount());
-				//返回商品id add by xiongying20160531
-				siDTO.setId(rib.getRentalSiteItemId());
-				RentalSiteItem rsItem = rentalProvider
-						.findRentalSiteItemById(rib.getRentalSiteItemId());
-				if(rsItem != null) {
-					siDTO.setItemName(rsItem.getName());
+			if(null!=rentalSiteItems)
+				for (RentalItemsBill rib : rentalSiteItems) {
+					SiteItemDTO siDTO = new SiteItemDTO();
+					siDTO.setCounts(rib.getRentalCount());
+					//返回商品id add by xiongying20160531
+					siDTO.setId(rib.getRentalSiteItemId());
+					RentalSiteItem rsItem = rentalProvider
+							.findRentalSiteItemById(rib.getRentalSiteItemId());
+					if(rsItem != null) {
+						siDTO.setItemName(rsItem.getName());
+					}
+					siDTO.setItemPrice(rib.getTotalMoney());
+					dto.getSiteItems().add(siDTO);
 				}
-				siDTO.setItemPrice(rib.getTotalMoney());
-				dto.getSiteItems().add(siDTO);
-			}
 			response.getRentalBills().add(dto);
 		}
 		return response;
@@ -1575,18 +1576,19 @@ public class RentalServiceImpl implements RentalService {
 			dto.setSiteItems(new ArrayList<SiteItemDTO>());
 			List<RentalItemsBill> rentalSiteItems = rentalProvider
 					.findRentalItemsBillBySiteBillId(dto.getRentalBillId());
-			for (RentalItemsBill rib : rentalSiteItems) {
-				SiteItemDTO siDTO = new SiteItemDTO();
-				siDTO.setCounts(rib.getRentalCount());
-				RentalSiteItem rsItem = rentalProvider.findRentalSiteItemById(rib.getRentalSiteItemId());
-				if(rsItem != null) {
-    				siDTO.setItemName(rsItem.getName());
-    				siDTO.setItemPrice(rib.getTotalMoney());
-    				dto.getSiteItems().add(siDTO);
-				} else {
-				    LOGGER.error("Rental site item not found, rentalSiteItemId=" + rib.getRentalSiteItemId() + ", cmd=" + cmd);
+			if (null!=rentalSiteItems)
+				for (RentalItemsBill rib : rentalSiteItems) {
+					SiteItemDTO siDTO = new SiteItemDTO();
+					siDTO.setCounts(rib.getRentalCount());
+					RentalSiteItem rsItem = rentalProvider.findRentalSiteItemById(rib.getRentalSiteItemId());
+					if(rsItem != null) {
+	    				siDTO.setItemName(rsItem.getName());
+	    				siDTO.setItemPrice(rib.getTotalMoney());
+	    				dto.getSiteItems().add(siDTO);
+					} else {
+					    LOGGER.error("Rental site item not found, rentalSiteItemId=" + rib.getRentalSiteItemId() + ", cmd=" + cmd);
+					}
 				}
-			}
 			response.getRentalBills().add(dto);
 		}
 
@@ -1950,20 +1952,18 @@ public class RentalServiceImpl implements RentalService {
 			dto.setSiteItems(new ArrayList<SiteItemDTO>());
 			List<RentalItemsBill> rentalSiteItems = rentalProvider
 					.findRentalItemsBillBySiteBillId(dto.getRentalBillId());
-			if(null == rentalSiteItems){
-				continue;
-			}
-			for (RentalItemsBill rib : rentalSiteItems) {
-				SiteItemDTO siDTO = new SiteItemDTO();
-				siDTO.setCounts(rib.getRentalCount());
-				RentalSiteItem rsItem = rentalProvider
-						.findRentalSiteItemById(rib.getRentalSiteItemId());
-				if(null != rsItem){
-					siDTO.setItemName(rsItem.getName());
+			if(null != rentalSiteItems) 
+				for (RentalItemsBill rib : rentalSiteItems) {
+					SiteItemDTO siDTO = new SiteItemDTO();
+					siDTO.setCounts(rib.getRentalCount());
+					RentalSiteItem rsItem = rentalProvider
+							.findRentalSiteItemById(rib.getRentalSiteItemId());
+					if(null != rsItem){
+						siDTO.setItemName(rsItem.getName());
+					}
+					siDTO.setItemPrice(rib.getTotalMoney());
+					dto.getSiteItems().add(siDTO);
 				}
-				siDTO.setItemPrice(rib.getTotalMoney());
-				dto.getSiteItems().add(siDTO);
-			}
 			
 			dtos.add(dto);
 		}
