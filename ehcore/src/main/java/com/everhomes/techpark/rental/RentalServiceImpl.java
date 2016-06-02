@@ -1,8 +1,6 @@
 package com.everhomes.techpark.rental;
 
 
-import java.math.BigDecimal;
-import java.net.URLEncoder;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -11,7 +9,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -43,8 +43,10 @@ import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleStringService;
@@ -108,6 +110,7 @@ import com.everhomes.rest.techpark.rental.RentalOwnerType;
 import com.everhomes.rest.techpark.rental.RentalServiceErrorCode;
 import com.everhomes.rest.techpark.rental.RentalSiteDTO;
 import com.everhomes.rest.techpark.rental.RentalSiteDayRulesDTO;
+import com.everhomes.rest.techpark.rental.RentalSitePicDTO;
 import com.everhomes.rest.techpark.rental.RentalSiteRulesDTO;
 import com.everhomes.rest.techpark.rental.RentalSiteStatus;
 import com.everhomes.rest.techpark.rental.RentalType;
@@ -120,9 +123,9 @@ import com.everhomes.rest.techpark.rental.UpdateRentalSiteCommand;
 import com.everhomes.rest.techpark.rental.VerifyRentalBillCommandResponse;
 import com.everhomes.rest.techpark.rental.VisibleFlag;
 import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.server.schema.tables.EhRentalSites;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.onlinePay.OnlinePayService;
-import com.everhomes.techpark.punch.PunchServiceImpl;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
@@ -147,7 +150,8 @@ public class RentalServiceImpl implements RentalService {
 
 	private String queueName = "rentalService";
 	
-
+	@Autowired
+	ContentServerService contentServerService;
     @Autowired
     WorkerPoolFactory workerPoolFactory;
     
@@ -501,8 +505,13 @@ public class RentalServiceImpl implements RentalService {
 			cmd.setStatus(new ArrayList<Byte>());
 			cmd.getStatus().add(RentalSiteStatus.NORMAL.getCode());
 		}
-		int totalCount = rentalProvider.countRentalSites(cmd.getOwnerId(),cmd.getOwnerType(),
-				cmd.getSiteType(), cmd.getKeyword(),cmd.getStatus());
+		List<RentalSiteOwner> siteOwners = this.rentalProvider.findRentalSiteOwnersByOwnerTypeAndId(cmd.getOwnerType(), cmd.getOwnerId());
+		List<Long> siteIds = new ArrayList<>();
+		if(siteOwners !=null)
+			for(RentalSiteOwner siteOwner : siteOwners){
+				siteIds.add(siteOwner.getRentalSiteId());
+			}
+		int totalCount = rentalProvider.countRentalSites( cmd.getLaunchPadItemId(), cmd.getKeyword(),cmd.getStatus(),siteIds);
 		if (totalCount == 0)
 			return response;
 
@@ -512,24 +521,13 @@ public class RentalServiceImpl implements RentalService {
 
 		checkEnterpriseCommunityIdIsNull(cmd.getOwnerId());
 		List<RentalSite> rentalSites = rentalProvider.findRentalSites(
-				cmd.getOwnerId(),cmd.getOwnerType(), cmd.getSiteType(), cmd.getKeyword(),
-				cmd.getPageOffset(), pageSize,cmd.getStatus());
+				cmd.getLaunchPadItemId(), cmd.getKeyword(),
+				cmd.getPageOffset(), pageSize,cmd.getStatus(),siteIds);
 
 		response.setRentalSites(new ArrayList<RentalSiteDTO>());
 		for (RentalSite rentalSite : rentalSites) {
-			RentalSiteDTO rSiteDTO =ConvertHelper.convert(rentalSite, RentalSiteDTO.class);
-			rSiteDTO.setRentalSiteId(rentalSite.getId());
-			rSiteDTO.setCreateTime(rentalSite.getCreateTime().getTime());
-			rSiteDTO.setSiteItems(new ArrayList<SiteItemDTO>());
-			List<RentalSiteItem> items = rentalProvider
-					.findRentalSiteItems(rentalSite.getId());
-			for (RentalSiteItem item : items) {
-				SiteItemDTO siteItemDTO = new SiteItemDTO();
-				siteItemDTO.setCounts(item.getCounts());
-				siteItemDTO.setItemName(item.getName());
-				siteItemDTO.setItemPrice(item.getPrice());
-				rSiteDTO.getSiteItems().add(siteItemDTO);
-			}
+			RentalSiteDTO rSiteDTO =convertRentalSite2DTO(rentalSite);
+			
 			response.getRentalSites().add(rSiteDTO);
 		}
 		response.setNextPageOffset(cmd.getPageOffset() == pageCount ? null
@@ -537,7 +535,37 @@ public class RentalServiceImpl implements RentalService {
 
 		return response;
 	}
-
+	private RentalSiteDTO convertRentalSite2DTO(RentalSite rentalSite){
+		RentalSiteDTO rSiteDTO =ConvertHelper.convert(rentalSite, RentalSiteDTO.class);
+		rSiteDTO.setRentalSiteId(rentalSite.getId());
+		rSiteDTO.setCreateTime(rentalSite.getCreateTime().getTime());
+		rSiteDTO.setSiteItems(new ArrayList<SiteItemDTO>());
+		rSiteDTO.setCoverUrl(this.contentServerService.parserUri(rSiteDTO.getCoverUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
+		List<RentalSitePic> pics = this.rentalProvider.findRentalSitePicsByOwnerTypeAndId(EhRentalSites.class.toString(), rentalSite.getId());
+		if(null!=pics){
+			rSiteDTO.setSitePics(new ArrayList<>());
+			for(RentalSitePic pic:pics){
+				RentalSitePicDTO picDTO=ConvertHelper.convert(pic, RentalSitePicDTO.class);
+				picDTO.setUrl(this.contentServerService.parserUri(pic.getUri(), 
+						EntityType.USER.getCode(), UserContext.current().getUser().getId()));
+				rSiteDTO.getSitePics().add(picDTO);
+			}
+		}
+		
+		List<RentalSiteItem> items = rentalProvider
+				.findRentalSiteItems(rentalSite.getId());
+		for (RentalSiteItem item : items) {
+			SiteItemDTO siteItemDTO = new SiteItemDTO();
+			siteItemDTO.setCounts(item.getCounts());
+			siteItemDTO.setItemName(item.getName());
+			siteItemDTO.setItemPrice(item.getPrice());
+			rSiteDTO.getSiteItems().add(siteItemDTO);
+		}
+		
+		
+		return rSiteDTO;
+		
+	}
 	@Override
 	public FindRentalSiteRulesCommandResponse findRentalSiteRules(
 			FindRentalSiteRulesCommand cmd) {

@@ -628,33 +628,30 @@ public class RentalProviderImpl implements RentalProvider {
 	}
 
 	@Override
-	public int countRentalSites(Long ownerId,String ownerType,  String siteType,
-			String keyword,List<Byte> status) {
-//		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-//		SelectJoinStep<Record1<Integer>> step = context.selectCount().from(
-//				Tables.EH_RENTAL_SITES);
-//		Condition condition = Tables.EH_RENTAL_SITES.OWNER_TYPE
-//				.equal(ownerType);
-//		
-//
-//		condition = condition.and(Tables.EH_RENTAL_SITES.OWNER_ID
-//				.equal(ownerId));
-//		condition = condition.and(Tables.EH_RENTAL_SITES.SITE_TYPE
-//				.equal(siteType));
-//		if (!StringUtils.isEmpty(keyword)) {
-//			condition = condition.and(Tables.EH_RENTAL_SITES.ADDRESS
-//					.like("%" + keyword + "%")
-//					.or(Tables.EH_RENTAL_SITES.SITE_NAME.like("%" + keyword
-//							+ "%"))
-//					.or(Tables.EH_RENTAL_SITES.BUILDING_NAME.like("%" + keyword
-//							+ "%")));
-//		}
-//		if(null != status)
-//			condition = condition.and(Tables.EH_RENTAL_SITES.STATUS
-//				.in(status));
-//		return step.where(condition).fetchOneInto(Integer.class);
-		//TODO:
-return 1 ;
+	public int countRentalSites(Long  launchPadItemId,String keyword,List<Byte>  status,List<Long>  siteIds){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record1<Integer>> step = context.selectCount().from(
+				Tables.EH_RENTAL_SITES);
+		Condition condition = Tables.EH_RENTAL_SITES.LAUNCH_PAD_ITEM_ID
+				.equal(launchPadItemId);
+		
+		if(null!= siteIds)
+			condition = condition.and(Tables.EH_RENTAL_SITES.ID
+				.in(siteIds));
+		 
+		if (!StringUtils.isEmpty(keyword)) {
+			condition = condition.and(Tables.EH_RENTAL_SITES.ADDRESS
+					.like("%" + keyword + "%")
+					.or(Tables.EH_RENTAL_SITES.SITE_NAME.like("%" + keyword
+							+ "%"))
+					.or(Tables.EH_RENTAL_SITES.BUILDING_NAME.like("%" + keyword
+							+ "%")));
+		}
+		if(null != status)
+			condition = condition.and(Tables.EH_RENTAL_SITES.STATUS
+				.in(status));
+		return step.where(condition).fetchOneInto(Integer.class);
+		 
 	}
 
 	@Override
@@ -793,15 +790,16 @@ return 1 ;
 	}
 
 	@Override
-	public List<RentalSite> findRentalSites(Long ownerId,String ownerType, 
-			String siteType, String keyword, Integer pageOffset,
-			Integer pageSize,List<Byte>  status) {
+	public List<RentalSite> findRentalSites(Long  launchPadItemId, String keyword, Integer pageOffset,
+			Integer pageSize,List<Byte>  status,List<Long>  siteIds) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTAL_SITES);
 		//TODO
 		Condition condition = Tables.EH_RENTAL_SITES.LAUNCH_PAD_ITEM_ID
-				.equal(ownerId);
+				.equal(launchPadItemId);
+		if(null!=siteIds)
+			condition= condition.and( Tables.EH_RENTAL_SITES.ID.in(siteIds));
 //		condition = condition.and(Tables.EH_RENTAL_SITES.OWNER_TYPE
 //				.equal(ownerType));
 //		condition = condition.and(Tables.EH_RENTAL_SITES.SITE_TYPE
@@ -1009,8 +1007,9 @@ return 1 ;
 				.orderBy(Tables.EH_RENTAL_BILLS.ID.desc()).fetch().map((r) -> {
 					return ConvertHelper.convert(r, RentalBill.class);
 				});
-
-		return result;
+		if (null != result && result.size() > 0)
+			return result ;
+		return null;
 	}
 
 	@Override
@@ -1029,5 +1028,48 @@ return 1 ;
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalRules.class,
 				null);
 		
+	}
+
+	@Override
+	public List<RentalSiteOwner> findRentalSiteOwnersByOwnerTypeAndId(String ownerType,Long ownerId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTAL_SITE_OWNERS);
+		Condition condition = Tables.EH_RENTAL_SITE_OWNERS.OWNER_ID
+				.equal(ownerId);
+		condition = condition.and(Tables.EH_RENTAL_SITE_OWNERS.OWNER_TYPE
+				.equal(ownerType));
+		step.where(condition);
+		List<RentalSiteOwner> result = step
+				.orderBy(Tables.EH_RENTAL_SITE_OWNERS.ID.desc()).fetch()
+				.map((r) -> {
+					return ConvertHelper.convert(r, RentalSiteOwner.class);
+				});
+		if (null != result && result.size() > 0)
+			return result ;
+		return null;
+
+	}
+
+
+	@Override
+	public List<RentalSitePic> findRentalSitePicsByOwnerTypeAndId(String ownerType,Long ownerId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTAL_SITE_PICS);
+		Condition condition = Tables.EH_RENTAL_SITE_PICS.OWNER_ID
+				.equal(ownerId);
+		condition = condition.and(Tables.EH_RENTAL_SITE_PICS.OWNER_TYPE
+				.equal(ownerType));
+		step.where(condition);
+		List<RentalSitePic> result = step
+				.orderBy(Tables.EH_RENTAL_SITE_OWNERS.ID.desc()).fetch()
+				.map((r) -> {
+					return ConvertHelper.convert(r, RentalSitePic.class);
+				});
+		if (null != result && result.size() > 0)
+			return result ;
+		return null;
+
 	}
 }
