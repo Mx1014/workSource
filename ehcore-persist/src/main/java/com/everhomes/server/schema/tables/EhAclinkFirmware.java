@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAclinkFirmware extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhAclinkFirmwareRecord> {
 
-	private static final long serialVersionUID = -1299729427;
+	private static final long serialVersionUID = 1358370351;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_aclink_firmware</code>
@@ -30,11 +30,6 @@ public class EhAclinkFirmware extends org.jooq.impl.TableImpl<com.everhomes.serv
 	 * The column <code>ehcore.eh_aclink_firmware.id</code>. id of the record
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAclinkFirmwareRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id of the record");
-
-	/**
-	 * The column <code>ehcore.eh_aclink_firmware.firmware_type</code>. firmware type
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAclinkFirmwareRecord, java.lang.Byte> FIRMWARE_TYPE = createField("firmware_type", org.jooq.impl.SQLDataType.TINYINT.nullable(false), this, "firmware type");
 
 	/**
 	 * The column <code>ehcore.eh_aclink_firmware.major</code>.
@@ -95,6 +90,11 @@ public class EhAclinkFirmware extends org.jooq.impl.TableImpl<com.everhomes.serv
 	 * The column <code>ehcore.eh_aclink_firmware.owner_type</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAclinkFirmwareRecord, java.lang.Byte> OWNER_TYPE = createField("owner_type", org.jooq.impl.SQLDataType.TINYINT, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_aclink_firmware.firmware_type</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhAclinkFirmwareRecord, java.lang.String> FIRMWARE_TYPE = createField("firmware_type", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_aclink_firmware</code> table reference

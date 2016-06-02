@@ -11,10 +11,9 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAclinkFirmware implements java.io.Serializable {
 
-	private static final long serialVersionUID = -846335326;
+	private static final long serialVersionUID = 1889786268;
 
 	private java.lang.Long     id;
-	private java.lang.Byte     firmwareType;
 	private java.lang.Integer  major;
 	private java.lang.Integer  minor;
 	private java.lang.Integer  revision;
@@ -27,12 +26,12 @@ public class EhAclinkFirmware implements java.io.Serializable {
 	private java.lang.Long     creatorId;
 	private java.lang.Long     ownerId;
 	private java.lang.Byte     ownerType;
+	private java.lang.String   firmwareType;
 
 	public EhAclinkFirmware() {}
 
 	public EhAclinkFirmware(
 		java.lang.Long     id,
-		java.lang.Byte     firmwareType,
 		java.lang.Integer  major,
 		java.lang.Integer  minor,
 		java.lang.Integer  revision,
@@ -44,10 +43,10 @@ public class EhAclinkFirmware implements java.io.Serializable {
 		java.sql.Timestamp createTime,
 		java.lang.Long     creatorId,
 		java.lang.Long     ownerId,
-		java.lang.Byte     ownerType
+		java.lang.Byte     ownerType,
+		java.lang.String   firmwareType
 	) {
 		this.id = id;
-		this.firmwareType = firmwareType;
 		this.major = major;
 		this.minor = minor;
 		this.revision = revision;
@@ -60,6 +59,7 @@ public class EhAclinkFirmware implements java.io.Serializable {
 		this.creatorId = creatorId;
 		this.ownerId = ownerId;
 		this.ownerType = ownerType;
+		this.firmwareType = firmwareType;
 	}
 
 	public java.lang.Long getId() {
@@ -68,14 +68,6 @@ public class EhAclinkFirmware implements java.io.Serializable {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
-	}
-
-	public java.lang.Byte getFirmwareType() {
-		return this.firmwareType;
-	}
-
-	public void setFirmwareType(java.lang.Byte firmwareType) {
-		this.firmwareType = firmwareType;
 	}
 
 	public java.lang.Integer getMajor() {
@@ -172,5 +164,13 @@ public class EhAclinkFirmware implements java.io.Serializable {
 
 	public void setOwnerType(java.lang.Byte ownerType) {
 		this.ownerType = ownerType;
+	}
+
+	public java.lang.String getFirmwareType() {
+		return this.firmwareType;
+	}
+
+	public void setFirmwareType(java.lang.String firmwareType) {
+		this.firmwareType = firmwareType;
 	}
 }

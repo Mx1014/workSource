@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhDoorAuth implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1682223881;
+	private static final long serialVersionUID = -1515588675;
 
 	private java.lang.Long     id;
 	private java.lang.Long     doorId;
@@ -40,6 +40,9 @@ public class EhDoorAuth implements java.io.Serializable {
 	private java.lang.String   stringTag4;
 	private java.lang.String   stringTag5;
 	private java.lang.String   stringTag6;
+	private java.lang.Byte     rightOpen;
+	private java.lang.Byte     rightVisitor;
+	private java.lang.Byte     rightRemote;
 
 	public EhDoorAuth() {}
 
@@ -70,7 +73,10 @@ public class EhDoorAuth implements java.io.Serializable {
 		java.lang.String   stringTag3,
 		java.lang.String   stringTag4,
 		java.lang.String   stringTag5,
-		java.lang.String   stringTag6
+		java.lang.String   stringTag6,
+		java.lang.Byte     rightOpen,
+		java.lang.Byte     rightVisitor,
+		java.lang.Byte     rightRemote
 	) {
 		this.id = id;
 		this.doorId = doorId;
@@ -99,6 +105,9 @@ public class EhDoorAuth implements java.io.Serializable {
 		this.stringTag4 = stringTag4;
 		this.stringTag5 = stringTag5;
 		this.stringTag6 = stringTag6;
+		this.rightOpen = rightOpen;
+		this.rightVisitor = rightVisitor;
+		this.rightRemote = rightRemote;
 	}
 
 	public java.lang.Long getId() {
@@ -315,5 +324,29 @@ public class EhDoorAuth implements java.io.Serializable {
 
 	public void setStringTag6(java.lang.String stringTag6) {
 		this.stringTag6 = stringTag6;
+	}
+
+	public java.lang.Byte getRightOpen() {
+		return this.rightOpen;
+	}
+
+	public void setRightOpen(java.lang.Byte rightOpen) {
+		this.rightOpen = rightOpen;
+	}
+
+	public java.lang.Byte getRightVisitor() {
+		return this.rightVisitor;
+	}
+
+	public void setRightVisitor(java.lang.Byte rightVisitor) {
+		this.rightVisitor = rightVisitor;
+	}
+
+	public java.lang.Byte getRightRemote() {
+		return this.rightRemote;
+	}
+
+	public void setRightRemote(java.lang.Byte rightRemote) {
+		this.rightRemote = rightRemote;
 	}
 }

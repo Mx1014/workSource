@@ -228,4 +228,25 @@ public class EhDoorAuthDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sc
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAuth> fetchByStringTag6(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH.STRING_TAG6, values);
 	}
+
+	/**
+	 * Fetch records that have <code>right_open IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAuth> fetchByRightOpen(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH.RIGHT_OPEN, values);
+	}
+
+	/**
+	 * Fetch records that have <code>right_visitor IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAuth> fetchByRightVisitor(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH.RIGHT_VISITOR, values);
+	}
+
+	/**
+	 * Fetch records that have <code>right_remote IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAuth> fetchByRightRemote(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH.RIGHT_REMOTE, values);
+	}
 }

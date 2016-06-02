@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhDoorAuth extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhDoorAuthRecord> {
 
-	private static final long serialVersionUID = 1896609769;
+	private static final long serialVersionUID = -975335154;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_door_auth</code>
@@ -160,6 +160,21 @@ public class EhDoorAuth extends org.jooq.impl.TableImpl<com.everhomes.server.sch
 	 * The column <code>ehcore.eh_door_auth.string_tag6</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorAuthRecord, java.lang.String> STRING_TAG6 = createField("string_tag6", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_door_auth.right_open</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorAuthRecord, java.lang.Byte> RIGHT_OPEN = createField("right_open", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_door_auth.right_visitor</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorAuthRecord, java.lang.Byte> RIGHT_VISITOR = createField("right_visitor", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_door_auth.right_remote</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhDoorAuthRecord, java.lang.Byte> RIGHT_REMOTE = createField("right_remote", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_door_auth</code> table reference

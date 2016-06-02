@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhDoorAuthRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhDoorAuthRecord> {
 
-	private static final long serialVersionUID = 1228970284;
+	private static final long serialVersionUID = 2001211064;
 
 	/**
 	 * Setter for <code>ehcore.eh_door_auth.id</code>. id of the record
@@ -391,6 +391,48 @@ public class EhDoorAuthRecord extends org.jooq.impl.UpdatableRecordImpl<com.ever
 		return (java.lang.String) getValue(26);
 	}
 
+	/**
+	 * Setter for <code>ehcore.eh_door_auth.right_open</code>.
+	 */
+	public void setRightOpen(java.lang.Byte value) {
+		setValue(27, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_door_auth.right_open</code>.
+	 */
+	public java.lang.Byte getRightOpen() {
+		return (java.lang.Byte) getValue(27);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_door_auth.right_visitor</code>.
+	 */
+	public void setRightVisitor(java.lang.Byte value) {
+		setValue(28, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_door_auth.right_visitor</code>.
+	 */
+	public java.lang.Byte getRightVisitor() {
+		return (java.lang.Byte) getValue(28);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_door_auth.right_remote</code>.
+	 */
+	public void setRightRemote(java.lang.Byte value) {
+		setValue(29, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_door_auth.right_remote</code>.
+	 */
+	public java.lang.Byte getRightRemote() {
+		return (java.lang.Byte) getValue(29);
+	}
+
 	// -------------------------------------------------------------------------
 	// Primary key information
 	// -------------------------------------------------------------------------
@@ -417,7 +459,7 @@ public class EhDoorAuthRecord extends org.jooq.impl.UpdatableRecordImpl<com.ever
 	/**
 	 * Create a detached, initialised EhDoorAuthRecord
 	 */
-	public EhDoorAuthRecord(java.lang.Long id, java.lang.Long doorId, java.lang.Long userId, java.lang.Long approveUserId, java.lang.Byte authType, java.lang.Long validFromMs, java.lang.Long validEndMs, java.lang.Byte ownerType, java.lang.Long ownerId, java.lang.String organization, java.lang.String description, java.lang.String nickname, java.lang.String phone, java.sql.Timestamp createTime, java.lang.Byte status, java.lang.String driver, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.lang.String stringTag6) {
+	public EhDoorAuthRecord(java.lang.Long id, java.lang.Long doorId, java.lang.Long userId, java.lang.Long approveUserId, java.lang.Byte authType, java.lang.Long validFromMs, java.lang.Long validEndMs, java.lang.Byte ownerType, java.lang.Long ownerId, java.lang.String organization, java.lang.String description, java.lang.String nickname, java.lang.String phone, java.sql.Timestamp createTime, java.lang.Byte status, java.lang.String driver, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.lang.String stringTag6, java.lang.Byte rightOpen, java.lang.Byte rightVisitor, java.lang.Byte rightRemote) {
 		super(com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH);
 
 		setValue(0, id);
@@ -447,5 +489,8 @@ public class EhDoorAuthRecord extends org.jooq.impl.UpdatableRecordImpl<com.ever
 		setValue(24, stringTag4);
 		setValue(25, stringTag5);
 		setValue(26, stringTag6);
+		setValue(27, rightOpen);
+		setValue(28, rightVisitor);
+		setValue(29, rightRemote);
 	}
 }

@@ -48,13 +48,6 @@ public class EhAclinkFirmwareDao extends org.jooq.impl.DAOImpl<com.everhomes.ser
 	}
 
 	/**
-	 * Fetch records that have <code>firmware_type IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAclinkFirmware> fetchByFirmwareType(java.lang.Byte... values) {
-		return fetch(com.everhomes.server.schema.tables.EhAclinkFirmware.EH_ACLINK_FIRMWARE.FIRMWARE_TYPE, values);
-	}
-
-	/**
 	 * Fetch records that have <code>major IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAclinkFirmware> fetchByMajor(java.lang.Integer... values) {
@@ -136,5 +129,12 @@ public class EhAclinkFirmwareDao extends org.jooq.impl.DAOImpl<com.everhomes.ser
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAclinkFirmware> fetchByOwnerType(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhAclinkFirmware.EH_ACLINK_FIRMWARE.OWNER_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>firmware_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAclinkFirmware> fetchByFirmwareType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAclinkFirmware.EH_ACLINK_FIRMWARE.FIRMWARE_TYPE, values);
 	}
 }
