@@ -6,6 +6,20 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>infoUrl: 固件说明页面</li>
+ * <li>checksum: 固件校验码</li>
+ * <li>md5sum: 固件md5值</li>
+ * <li>firmwareType: 固件类型，默认 zuolin </li>
+ * <li>downloadUrl: 下载url </li>
+ * <li>major: 主版本号 </li>
+ * <li>minor: 次版本好 </li>
+ * <li>revision: 修订版本号 </li>
+ * </ul>
+ * @author janson
+ *
+ */
 public class CreateAclinkFirmwareCommand {
     private String     infoUrl;
     private Long     checksum;
