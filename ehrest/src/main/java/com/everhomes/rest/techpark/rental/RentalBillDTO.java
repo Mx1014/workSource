@@ -40,10 +40,6 @@ import com.everhomes.util.StringHelper;
  */
 public class RentalBillDTO {
 	private Long rentalBillId;
-	private String ownerType;
-	private Long ownerId;
-	private Long communityId;
-	private String siteType;
 	private String siteName;
 	private String buildingName;
 	private String address;
@@ -69,7 +65,10 @@ public class RentalBillDTO {
 	private BigDecimal unPayPrice;
 	private Byte invoiceFlag;
 	private Byte status;
-	private Double rentalCount;
+	private Double rentalCount; 
+	private java.lang.String     useTime;
+	private java.lang.String     vendorType;
+	private java.lang.Long       launchPadItemId;
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> siteItems; 
 
@@ -85,14 +84,7 @@ public class RentalBillDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
- 
-	public String getSiteType() {
-		return siteType;
-	}
-
-	public void setSiteType(String siteType) {
-		this.siteType = siteType;
-	}
+  
 
 	public String getBuildingName() {
 		return buildingName;
@@ -280,23 +272,7 @@ public class RentalBillDTO {
 	public void setUnPayPrice(BigDecimal unPayPrice) {
 		this.unPayPrice = unPayPrice;
 	}
-
-	public String getOwnerType() {
-		return ownerType;
-	}
-
-	public void setOwnerType(String ownerType) {
-		this.ownerType = ownerType;
-	}
-
-	public Long getOwnerId() {
-		return ownerId;
-	}
-
-	public void setOwnerId(Long ownerId) {
-		this.ownerId = ownerId;
-	}
-
+ 
 	public Double getRentalCount() {
 		return rentalCount;
 	}
@@ -336,14 +312,37 @@ public class RentalBillDTO {
 	public void setNotice(String notice) {
 		this.notice = notice;
 	}
+ 
 
-	public Long getCommunityId() {
-		return communityId;
+	public java.lang.String getUseTime() {
+		return useTime;
 	}
 
-	public void setCommunityId(Long communityId) {
-		this.communityId = communityId;
+
+	public void setUseTime(java.lang.String useTime) {
+		this.useTime = useTime;
 	}
+
+
+	public java.lang.String getVendorType() {
+		return vendorType;
+	}
+
+
+	public void setVendorType(java.lang.String vendorType) {
+		this.vendorType = vendorType;
+	}
+
+
+	public java.lang.Long getLaunchPadItemId() {
+		return launchPadItemId;
+	}
+
+
+	public void setLaunchPadItemId(java.lang.Long launchPadItemId) {
+		this.launchPadItemId = launchPadItemId;
+	}
+
 
 	public String getUserPhone() {
 		return userPhone;
