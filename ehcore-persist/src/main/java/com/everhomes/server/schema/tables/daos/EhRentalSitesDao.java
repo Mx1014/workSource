@@ -326,4 +326,25 @@ public class EhRentalSitesDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchByRefundRatio(java.lang.Integer... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.REFUND_RATIO, values);
 	}
+
+	/**
+	 * Fetch records that have <code>longitude IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchByLongitude(java.lang.Double... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.LONGITUDE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>latitude IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchByLatitude(java.lang.Double... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.LATITUDE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>organization_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchByOrganizationId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.ORGANIZATION_ID, values);
+	}
 }

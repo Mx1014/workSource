@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSites implements java.io.Serializable {
 
-	private static final long serialVersionUID = 308726283;
+	private static final long serialVersionUID = 505830861;
 
 	private java.lang.Long       id;
 	private java.lang.Long       parentId;
@@ -54,6 +54,9 @@ public class EhRentalSites implements java.io.Serializable {
 	private java.lang.Long       rentalEndTime;
 	private java.lang.Byte       refundFlag;
 	private java.lang.Integer    refundRatio;
+	private java.lang.Double     longitude;
+	private java.lang.Double     latitude;
+	private java.lang.Long       organizationId;
 
 	public EhRentalSites() {}
 
@@ -98,7 +101,10 @@ public class EhRentalSites implements java.io.Serializable {
 		java.lang.Long       rentalStartTime,
 		java.lang.Long       rentalEndTime,
 		java.lang.Byte       refundFlag,
-		java.lang.Integer    refundRatio
+		java.lang.Integer    refundRatio,
+		java.lang.Double     longitude,
+		java.lang.Double     latitude,
+		java.lang.Long       organizationId
 	) {
 		this.id = id;
 		this.parentId = parentId;
@@ -141,6 +147,9 @@ public class EhRentalSites implements java.io.Serializable {
 		this.rentalEndTime = rentalEndTime;
 		this.refundFlag = refundFlag;
 		this.refundRatio = refundRatio;
+		this.longitude = longitude;
+		this.latitude = latitude;
+		this.organizationId = organizationId;
 	}
 
 	public java.lang.Long getId() {
@@ -469,5 +478,29 @@ public class EhRentalSites implements java.io.Serializable {
 
 	public void setRefundRatio(java.lang.Integer refundRatio) {
 		this.refundRatio = refundRatio;
+	}
+
+	public java.lang.Double getLongitude() {
+		return this.longitude;
+	}
+
+	public void setLongitude(java.lang.Double longitude) {
+		this.longitude = longitude;
+	}
+
+	public java.lang.Double getLatitude() {
+		return this.latitude;
+	}
+
+	public void setLatitude(java.lang.Double latitude) {
+		this.latitude = latitude;
+	}
+
+	public java.lang.Long getOrganizationId() {
+		return this.organizationId;
+	}
+
+	public void setOrganizationId(java.lang.Long organizationId) {
+		this.organizationId = organizationId;
 	}
 }

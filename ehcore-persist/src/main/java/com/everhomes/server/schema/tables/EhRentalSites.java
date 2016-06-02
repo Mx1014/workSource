@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSites extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalSitesRecord> {
 
-	private static final long serialVersionUID = -320238458;
+	private static final long serialVersionUID = -1306914106;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_sites</code>
@@ -230,6 +230,21 @@ public class EhRentalSites extends org.jooq.impl.TableImpl<com.everhomes.server.
 	 * The column <code>ehcore.eh_rental_sites.refund_ratio</code>. 退款比例
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.Integer> REFUND_RATIO = createField("refund_ratio", org.jooq.impl.SQLDataType.INTEGER, this, "退款比例");
+
+	/**
+	 * The column <code>ehcore.eh_rental_sites.longitude</code>. 地址经度
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.Double> LONGITUDE = createField("longitude", org.jooq.impl.SQLDataType.DOUBLE, this, "地址经度");
+
+	/**
+	 * The column <code>ehcore.eh_rental_sites.latitude</code>. 地址纬度
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.Double> LATITUDE = createField("latitude", org.jooq.impl.SQLDataType.DOUBLE, this, "地址纬度");
+
+	/**
+	 * The column <code>ehcore.eh_rental_sites.organization_id</code>. 所属公司的ID
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.Long> ORGANIZATION_ID = createField("organization_id", org.jooq.impl.SQLDataType.BIGINT, this, "所属公司的ID");
 
 	/**
 	 * Create a <code>ehcore.eh_rental_sites</code> table reference

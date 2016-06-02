@@ -13,15 +13,10 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class FindRentalBillsCommand {
-
-
-	private String ownerType;
-	private Long ownerId;
-	private Long communityId;
-	private String siteType;  
 	
+	private Long launchPadItemId;
 	private Long pageAnchor;
-	
+		
 	private Integer pageSize;
 	private Byte billStatus;
 	@Override
@@ -32,17 +27,7 @@ public class FindRentalBillsCommand {
     } 
 
 	 
- 
-
-	public String getSiteType() {
-		return siteType;
-	}
-
-	public void setSiteType(String siteType) {
-		this.siteType = siteType;
-	}
-
-
+  
 
 	public Long getPageAnchor() {
 		return pageAnchor;
@@ -79,45 +64,18 @@ public class FindRentalBillsCommand {
 	}
 
 
+ 
 
 
-	public String getOwnerType() {
-		return ownerType;
+	public Long getLaunchPadItemId() {
+		return launchPadItemId;
 	}
 
 
 
 
-	public void setOwnerType(String ownerType) {
-		this.ownerType = ownerType;
-	}
-
-
-
-
-	public Long getOwnerId() {
-		return ownerId;
-	}
-
-
-
-
-	public void setOwnerId(Long ownerId) {
-		this.ownerId = ownerId;
-	}
-
-
-
-
-	public Long getCommunityId() {
-		return communityId;
-	}
-
-
-
-
-	public void setCommunityId(Long communityId) {
-		this.communityId = communityId;
+	public void setLaunchPadItemId(Long launchPadItemId) {
+		this.launchPadItemId = launchPadItemId;
 	}
 
 

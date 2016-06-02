@@ -124,6 +124,7 @@ CREATE TABLE `eh_rental_sites` (
 `refund_ratio` INT(11)       COMMENT '退款比例',
 `longitude` DOUBLE  COMMENT '地址经度',
 `latitude` DOUBLE  COMMENT '地址纬度',
+`organization_id` BIGINT(20)    COMMENT '所属公司的ID',
 
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4	
@@ -323,7 +324,7 @@ DROP TABLE IF EXISTS eh_rental_bill_attachments;
 CREATE TABLE `eh_rental_bill_attachments` (
 `id` BIGINT(20) NOT NULL  COMMENT 'id',
 `rental_bill_id` BIGINT(20) NULL  COMMENT '',
-`attachment_type` TINYINT(4) NULL  COMMENT '0:String 1:email 2:attachment file',
+`attachment_type` TINYINT(4) NULL  COMMENT '0:文本 1:车牌 2:显示内容 3：附件链接',
 `content` VARCHAR(500) NULL  COMMENT '',
 `file_path` VARCHAR(500) NULL  COMMENT '',
 `creator_uid` BIGINT(20) NULL  COMMENT '',

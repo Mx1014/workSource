@@ -10,9 +10,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>rentalSiteId：场所id</li>
- * <li>enterpriseCommunityId：园区id</li>
- * <li>siteType：场所类型</li>
+ * <li>rentalSiteId：场所id</li>  
  * <li>rentalDate：预定日期</li>
  * <li>startTime：开始时间</li>
  * <li>endTime：结束时间</li>
@@ -28,21 +26,15 @@ import com.everhomes.util.StringHelper;
  */
 public class AddRentalBillItemCommand {
 	@NotNull
-	private Long rentalSiteId;
-	private Long communityId;
-	private String ownerType;
-	private Long ownerId;
+	private Long rentalSiteId;  
 	@NotNull
-	private Byte invoiceFlag;
-	@NotNull
-	private String siteType;
+	private Byte invoiceFlag; 
 	@NotNull
 	private Long rentalBillId; 
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> rentalItems;
-	@ItemType(String.class)
-	private List<String> rentalAttachments;
-	private Byte attachmentType;
+	@ItemType(AttachmentDTO.class)
+	private List<AttachmentDTO> rentalAttachments; 
 
 	@Override
 	public String toString() {
@@ -57,16 +49,7 @@ public class AddRentalBillItemCommand {
 		this.rentalSiteId = rentalSiteId;
 	}
 
-	 
- 
-	public String getSiteType() {
-		return siteType;
-	}
-
-	public void setSiteType(String siteType) {
-		this.siteType = siteType;
-	}
-
+	  
 	 
 	public Long getRentalBillId() {
 		return rentalBillId;
@@ -92,46 +75,13 @@ public class AddRentalBillItemCommand {
 		this.invoiceFlag = invoiceFlag;
 	}
 
-	public List<String> getRentalAttachments() {
+	public List<AttachmentDTO> getRentalAttachments() {
 		return rentalAttachments;
 	}
 
-	public void setRentalAttachments(List<String> rentalAttachments) {
+	public void setRentalAttachments(List<AttachmentDTO> rentalAttachments) {
 		this.rentalAttachments = rentalAttachments;
-	}
-
-	public Byte getAttachmentType() {
-		return attachmentType;
-	}
-
-	public void setAttachmentType(Byte attachmentType) {
-		this.attachmentType = attachmentType;
-	}
-
-	public String getOwnerType() {
-		return ownerType;
-	}
-
-	public void setOwnerType(String ownerType) {
-		this.ownerType = ownerType;
-	}
-
-	public Long getOwnerId() {
-		return ownerId;
-	}
-
-	public void setOwnerId(Long ownerId) {
-		this.ownerId = ownerId;
-	}
-
-	public Long getCommunityId() {
-		return communityId;
-	}
-
-	public void setCommunityId(Long communityId) {
-		this.communityId = communityId;
-	}
- 
+	} 
  
  
  
