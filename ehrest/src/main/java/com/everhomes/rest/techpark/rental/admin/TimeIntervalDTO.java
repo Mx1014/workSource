@@ -7,7 +7,7 @@ package com.everhomes.rest.techpark.rental.admin;
  * <li>endTime: 结束时间</li>
  * </ul>
  */
-public class TimeInterval {
+public class TimeIntervalDTO {
 	private Double beginTime;
 	private Double endTime;
 
