@@ -70,4 +70,4 @@ VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),715,46100,'Wifi�
 #
 #20160602
 #
-UPDATE `eh_forum_posts` SET category_id = 1010 WHERE `embedded_app_id` = 3 and `category_id` = 1003;
+UPDATE `eh_forum_posts` SET category_id = 1010,`category_path`='帖子/活动' WHERE `embedded_app_id` = 3 and `category_id` = 1003;
