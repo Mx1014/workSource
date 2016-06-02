@@ -23,6 +23,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.parking.ParkingRechargeOrder;
 import com.everhomes.parking.ParkingRechargeRate;
 import com.everhomes.rest.techpark.onlinePay.PayStatus;
 import com.everhomes.rest.techpark.onlinePay.RechargeStatus;
@@ -32,6 +33,7 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhParkApplyCardDao;
 import com.everhomes.server.schema.tables.daos.EhParkChargeDao;
+import com.everhomes.server.schema.tables.daos.EhParkingRechargeOrdersDao;
 import com.everhomes.server.schema.tables.daos.EhPreferentialRulesDao;
 import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
@@ -41,6 +43,7 @@ import com.everhomes.server.schema.tables.pojos.EhPreferentialRules;
 import com.everhomes.server.schema.tables.pojos.EhRechargeInfo;
 import com.everhomes.server.schema.tables.records.EhParkApplyCardRecord;
 import com.everhomes.server.schema.tables.records.EhParkChargeRecord;
+import com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord;
 import com.everhomes.server.schema.tables.records.EhParkingRechargeRatesRecord;
 import com.everhomes.server.schema.tables.records.EhPreferentialRulesRecord;
 import com.everhomes.server.schema.tables.records.EhRechargeInfoRecord;
@@ -565,4 +568,13 @@ public class ParkProviderImpl implements ParkProvider {
         return ConvertHelper.convert(query.fetchOne(), ParkingRechargeRate.class);
     }
 	
+	@Override
+    public ParkingRechargeOrder findParkingRechargeOrderByOrderNo(Long orderNo) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(ParkingRechargeOrder.class));
+        
+        SelectQuery<EhParkingRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_ORDERS);
+        query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.ORDER_NO.eq(orderNo));
+        
+        return ConvertHelper.convert(query.fetchOne(), ParkingRechargeOrder.class);
+    }
 }

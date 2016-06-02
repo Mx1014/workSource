@@ -5,6 +5,27 @@ INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longi
 INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
 	VALUES(1102, 0, 'COMMUNITY', 240111044331051380, UTC_TIMESTAMP());	
     
+INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`) 
+	VALUES(1001027, 0, 'PM', '武汉大学产学研大楼物业', 239825274387098429, '', '/1001027', 1, 2, 'ENTERPRISE', 0);
+INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status)
+	VALUES(2102408, 1001027, 'USER', 4763, 'manager', '冯译萱', 0, '13570893886', 3);	
+
+INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
+	VALUES(10331, 'EhOrganizations', 1001027, 'EhUsers', 4763, 1001, 1, UTC_TIMESTAMP());
+
+    
+INSERT INTO `eh_communities` (`id`, `uuid`, `city_id`, `city_name`, `area_id`, `area_name`, `name`, `alias_name`, `address`, `zipcode`, `description`, `detail_description`, `apt_segment1`, `apt_segment2`, `apt_segment3`, `apt_seg1_sample`, `apt_seg2_sample`, `apt_seg3_sample`, `apt_count`, `creator_uid`, `operator_uid`, `status`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `community_type`, `default_forum_id`, `feedback_forum_id`, `update_time`, `namespace_id`)
+    VALUES(240111044331051460, UUID(),  13905, '深圳市',  13908, '南山区', '武汉大学产学研大楼', '武汉大学产学研大楼', '深圳市南山区粤兴二道6号', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL, 70, 1,NULL,'2',UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,NULL,'1', 1, 2, UTC_TIMESTAMP(), 0);
+INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longitude`, `latitude`, `geohash`) 
+    VALUES(240111044331048060, 240111044331051460, '', 113.951336,22.536295, 'ws101n8g6tfs');
+INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
+	VALUES(1105, 0, 'COMMUNITY', 240111044331051460, UTC_TIMESTAMP());	
+INSERT INTO `eh_organization_communities`(organization_id, community_id) 
+	VALUES(1001027, 240111044331051460);
+INSERT INTO `eh_organization_community_requests`(`id`, `community_id`, `member_type`, `member_id`, `member_status`, `create_time`, `update_time`) 
+    VALUES(111425, 240111044331051460, 'organization', 1001027, 3, UTC_TIMESTAMP(), UTC_TIMESTAMP());
+INSERT INTO `eh_organization_community_requests`(`id`, `community_id`, `member_type`, `member_id`, `member_status`, `create_time`, `update_time`) 
+    VALUES(111426, 240111044331051460, 'organization', 180040, 3, UTC_TIMESTAMP(), UTC_TIMESTAMP());
     
 INSERT INTO `eh_organization_community_requests`(`id`, `community_id`, `member_type`, `member_id`, `member_status`, `create_time`, `update_time`) VALUES(111350,24210090697425925, 'organization', 1, 3, UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organization_community_requests`(`id`, `community_id`, `member_type`, `member_id`, `member_status`, `create_time`, `update_time`) VALUES(111351,24210090697427178, 'organization', 2, 3, UTC_TIMESTAMP(), UTC_TIMESTAMP());
@@ -55,7 +76,7 @@ INSERT INTO `eh_organization_community_requests`(`id`, `community_id`, `member_t
 INSERT INTO `eh_organization_community_requests`(`id`, `community_id`, `member_type`, `member_id`, `member_status`, `create_time`, `update_time`) VALUES(111396,24210090697427387, 'organization', 48, 3, UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organization_community_requests`(`id`, `community_id`, `member_type`, `member_id`, `member_status`, `create_time`, `update_time`) VALUES(111397,24210090697427171, 'organization', 49, 3, UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organization_community_requests`(`id`, `community_id`, `member_type`, `member_id`, `member_status`, `create_time`, `update_time`) VALUES(111398,24206938191431152, 'organization', 50, 3, UTC_TIMESTAMP(), UTC_TIMESTAMP());
-INSERT INTO `eh_organization_community_requests`(`id`, `community_id`, `member_type`, `member_id`, `member_status`, `create_time`, `update_time`) VALUES(111399,240111044331048623, 'organization', 180040, 3, UTC_TIMESTAMP(), UTC_TIMESTAMP());
+INSERT INTO `eh_organization_community_requests`(`id`, `community_id`, `member_type`, `member_id`, `member_status`, `create_time`, `update_time`) VALUES(111399,240111044331048623, 'organization', 178945, 3, UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organization_community_requests`(`id`, `community_id`, `member_type`, `member_id`, `member_status`, `create_time`, `update_time`) VALUES(111400,240111044331051300, 'organization', 180041, 3, UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organization_community_requests`(`id`, `community_id`, `member_type`, `member_id`, `member_status`, `create_time`, `update_time`) VALUES(111401,240111044331051380, 'organization', 180341, 3, UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organization_community_requests`(`id`, `community_id`, `member_type`, `member_id`, `member_status`, `create_time`, `update_time`) VALUES(111402,240111044331048623, 'organization', 1000001, 3, UTC_TIMESTAMP(), UTC_TIMESTAMP());
@@ -81,4 +102,4 @@ INSERT INTO `eh_organization_community_requests`(`id`, `community_id`, `member_t
 INSERT INTO `eh_organization_community_requests`(`id`, `community_id`, `member_type`, `member_id`, `member_status`, `create_time`, `update_time`) VALUES(111422,240111044331051300, 'organization', 1000777, 3, UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organization_community_requests`(`id`, `community_id`, `member_type`, `member_id`, `member_status`, `create_time`, `update_time`) VALUES(111423,240111044331051300, 'organization', 1000955, 3, UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO `eh_organization_community_requests`(`id`, `community_id`, `member_type`, `member_id`, `member_status`, `create_time`, `update_time`) VALUES(111424,240111044331051380, 'organization', 1000999, 3, UTC_TIMESTAMP(), UTC_TIMESTAMP());
-                                                                                                                                                         
+                                                                                                                                                        

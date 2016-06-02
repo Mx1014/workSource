@@ -37,6 +37,8 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceDetail;
+import com.everhomes.namespace.NamespaceResourceProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.region.RegionProvider;
@@ -45,6 +47,7 @@ import com.everhomes.rest.business.CancelFavoriteBusinessCommand;
 import com.everhomes.rest.business.FavoriteBusinessDTO;
 import com.everhomes.rest.business.FavoriteFlagType;
 import com.everhomes.rest.common.ScopeType;
+import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.PostEntityTag;
 import com.everhomes.rest.launchpad.ActionType;
@@ -78,6 +81,8 @@ import com.everhomes.rest.launchpad.admin.LaunchPadItemAdminDTO;
 import com.everhomes.rest.launchpad.admin.ListLaunchPadLayoutAdminCommand;
 import com.everhomes.rest.launchpad.admin.UpdateLaunchPadItemAdminCommand;
 import com.everhomes.rest.launchpad.admin.UpdateLaunchPadLayoutAdminCommand;
+import com.everhomes.rest.namespace.NamespaceCommunityType;
+import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.organization.GetOrgDetailCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.pm.ListPropCommunityContactCommand;
@@ -148,6 +153,10 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 	@Autowired
 	private BusinessService businessService;
+	
+	@Autowired
+	private NamespaceResourceProvider namespaceResourceProvider;
+	
 	@Override
 	public GetLaunchPadItemsCommandResponse getLaunchPadItems(GetLaunchPadItemsCommand cmd, HttpServletRequest request){
 		if(cmd.getItemLocation() == null){
@@ -349,7 +358,16 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		User user = UserContext.current().getUser();
 		long userId = user.getId();
 		Integer namespaceId = (user.getNamespaceId() == null) ? 0 : user.getNamespaceId();
-		String sceneType = cmd.getCurrentSceneType();
+		// 对于老版本客户端，没有场景概念，此时它传过来的场景为null，但数据却已经有场景，需要根据小区类型来区分场景 by lqs 20160601
+        // String sceneType = cmd.getCurrentSceneType();
+        String sceneType = cmd.getSceneType();
+        if(sceneType == null) {
+            if(CommunityType.fromCode(community.getCommunityType()) == CommunityType.COMMERCIAL) {
+                sceneType = SceneType.PARK_TOURIST.getCode();
+            } else {
+                sceneType = SceneType.DEFAULT.getCode();
+            }
+        }
 		List<LaunchPadItemDTO> result = new ArrayList<LaunchPadItemDTO>();
 
 		//TODO get the businesses with the user create
@@ -439,7 +457,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		User user = UserContext.current().getUser();
 		long userId = user.getId();
         Integer namespaceId = (user.getNamespaceId() == null) ? 0 : user.getNamespaceId();
-        String sceneType = cmd.getCurrentSceneType();
+        //String sceneType = cmd.getCurrentSceneType();
 		String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
 		
 		Long communityId = cmd.getCommunityId();
@@ -452,6 +470,15 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         	community = new Community();
         	community.setId(0L);
         	community.setCityId(0L);
+        }
+        // 对于老版本客户端，没有场景概念，此时它传过来的场景为null，但数据却已经有场景，需要根据小区类型来区分场景 by lqs 20160601
+        String sceneType = cmd.getSceneType();
+        if(sceneType == null) {
+            if(CommunityType.fromCode(community.getCommunityType()) == CommunityType.COMMERCIAL) {
+                sceneType = SceneType.PARK_TOURIST.getCode();
+            } else {
+                sceneType = SceneType.DEFAULT.getCode();
+            }
         }
 		
 		List<LaunchPadItemDTO> result = new ArrayList<LaunchPadItemDTO>();
@@ -583,7 +610,11 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                             itemDTO.setItemLabel(b.getName() == null ? itemDTO.getItemLabel() : b.getName());
                     }
                 }else{
-                    itemDTO.setIconUrl(parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId));
+                    String url = parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId);
+                    itemDTO.setIconUrl(url);
+//                    if(LOGGER.isDebugEnabled()) {
+//                        LOGGER.debug("Parse uri while processing launchpad items, item=" + itemDTO);
+//                    }
                 }
                 
                 distinctDto.add(itemDTO);
@@ -644,7 +675,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			//            if(jsonObject != null)
 			//                jsonObject.put(LaunchPadConstants.COMMUNITY_ID, communityId);
 		}catch(Exception e){
-			LOGGER.error("Parser json is error,communityId=" + communityId,e.getMessage());
+			LOGGER.error("Parser json is error,communityId=" + communityId, e);
 		}
 
 		return jsonObject.toJSONString();
@@ -1096,7 +1127,20 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 		User user = UserContext.current().getUser();
 		Integer namespaceId = (cmd.getNamespaceId() == null) ? 0 : cmd.getNamespaceId(); 
-		String sceneType = cmd.getCurrentSceneType();
+		// 对于老版本客户端，没有场景概念，此时它传过来的场景为null，但数据却已经有场景，需要根据小区类型来区分场景，
+		// 由于该接口客户端并没有传小区信息过来，只能通过域空间配置的资源类型来定 by lqs 20160601
+		// String sceneType = cmd.getCurrentSceneType();
+		String sceneType = cmd.getSceneType();
+		if(sceneType == null) {
+		    NamespaceDetail namespaceDetail = namespaceResourceProvider.findNamespaceDetailByNamespaceId(namespaceId);
+		    if(namespaceDetail != null 
+		        && NamespaceCommunityType.fromCode(namespaceDetail.getResourceType()) == NamespaceCommunityType.COMMUNITY_COMMERCIAL) {
+		        sceneType = SceneType.PARK_TOURIST.getCode();
+            } else {
+                sceneType = SceneType.DEFAULT.getCode();
+            }
+		}
+		
 		List<LaunchPadLayoutDTO> results = new ArrayList<LaunchPadLayoutDTO>();
 		this.launchPadProvider.findLaunchPadItemsByVersionCode(namespaceId, sceneType, cmd.getName(),cmd.getVersionCode()).stream().map((r) ->{;
 		results.add(ConvertHelper.convert(r, LaunchPadLayoutDTO.class));

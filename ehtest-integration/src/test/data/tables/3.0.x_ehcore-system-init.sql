@@ -27,6 +27,14 @@ INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`)
 INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (0, 'business.detail.url', '/web/app/user/index.html#/store/details/', 'business details');
 INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (0, 'business.image.url', 'http://121.199.69.107:8081/imageService/', 'business image url');
 INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (0, 'biz.back.url', 'http://biz.zuolin.com/Zl-MallMgt/bizmgt/main/tokenlogin.ihtml', 'biz.back.url');
+-- INSERT INTO `eh_configurations` (`namespace_id`, `name`,`value`,`description`) VALUES (0, 'prefix.url', 'http://biz.zuolin.com/zl-ec?hideNavigationBar=0&sourceUrl=http://biz.zuolin.com', null);
+-- INSERT INTO `eh_configurations` (`namespace_id`, `name`,`value`,`description`) VALUES (0, 'common.pay.url', 'http://pay.zuolin.com/EDS_PAY/', null);
+-- INSERT INTO `eh_configurations` (`namespace_id`, `name`,`value`,`description`) VALUES (0, 'apply.shop.url', '%2fweb%2fapp%2flib%2fhtml%2fcoming_soon%2findex.html', null);
+-- INSERT INTO `eh_configurations` (`namespace_id`, `name`,`value`,`description`) VALUES (0, 'manage.shop.url', '%2fweb%2fapp%2flib%2fhtml%2fcoming_soon%2findex.html', null);
+-- INSERT INTO `eh_configurations` (`namespace_id`, `name`,`value`,`description`) VALUES (0, 'user.order.url', '%2fweb%2fapp%2flib%2fhtml%2fcoming_soon%2findex.html', null);
+-- INSERT INTO `eh_configurations` (`namespace_id`, `name`,`value`,`description`) VALUES (0, 'user.coupon.url', '%2fweb%2fapp%2flib%2fhtml%2fcoming_soon%2findex.html', null);
+-- INSERT INTO `eh_configurations` (`namespace_id`, `name`,`value`,`description`) VALUES (0, 'business.image.url', 'http://bizimg.zuolin.com/imageService/', 'image url');
+-- INSERT INTO `eh_configurations` (`namespace_id`, `name`,`value`,`description`) VALUES (0, 'business.detail.url', '%2fweb%2fapp%2flib%2fhtml%2fcoming_soon%2findex.html', 'detail url');
 
 INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, 'user.avatar.male.url', 'cs://1/image/aW1hZ2UvTVRvME1qVTBZalpqT1dGa05USm1aVEE1WVRnMU9EWmhOVE0zTm1Nd1pXSTVZUQ','默认男头像url'); 
 INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, 'user.avatar.female.url', 'cs://1/image/aW1hZ2UvTVRvMU1EQTVZVEZrTkdVek9EQXhZbVE0WlRZd1l6UXdOVE0zWVdJNFkyTmlNUQ','默认女头像url'); 
@@ -63,11 +71,20 @@ ALTER TABLE `eh_apps` AUTO_INCREMENT = 4096;
 
 ALTER TABLE `eh_namespaces` AUTO_INCREMENT = 4096;
 
+#
+# populate default system user root/password
+#
 INSERT INTO `eh_users`(`id`, `namespace_id`, `uuid`, `account_name`, `nick_name`, `status`, `create_time`, `salt`, `password_hash`, `avatar`) VALUES (1, 0, UUID(), 'root', 'system user', 1, 
     NOW(), 'baf7c0473ec68eda2643882cecfb13fe', '8c7f2be062ee6c96affb6d78b6bc12bc7c60891cec30a6366278ebc958e39b5b', 'cs://1/image/aW1hZ2UvTVRwak5qQm1OVGRqT1RjelpqWXpORFV3WXpsaU9UQm1Nalk1WVRsalltWmlOZw');
 INSERT INTO `eh_users`(`id`, `namespace_id`, `uuid`, `account_name`, `nick_name`, `status`, `create_time`, `salt`, `password_hash`, `avatar`) VALUES (2, 0, UUID(), 'system assistant', '系统小助手', 1, 
     NOW(), 'baf7c0473ec68eda2643882cecfb13fe', '8c7f2be062ee6c96affb6d78b6bc12bc7c60891cec30a6366278ebc958e39b5b', 'cs://1/image/aW1hZ2UvTVRwak5qQm1OVGRqT1RjelpqWXpORFV3WXpsaU9UQm1Nalk1WVRsalltWmlOZw');	
 INSERT INTO `eh_users`(`id`, `namespace_id`, `uuid`, `account_name`, `nick_name`, `status`, `create_time`, `salt`, `password_hash`, `avatar`) VALUES (3, 0, UUID(), 'business assistant', '电商小助手', 1, 
     NOW(), 'baf7c0473ec68eda2643882cecfb13fe', '8c7f2be062ee6c96affb6d78b6bc12bc7c60891cec30a6366278ebc958e39b5b', 'cs://1/image/aW1hZ2UvTVRwak5qQm1OVGRqT1RjelpqWXpORFV3WXpsaU9UQm1Nalk1WVRsalltWmlOZw');	
+	
+#
+# Reserve IDs
+#
+INSERT INTO `eh_sequences`(`domain`, `start_seq`) VALUES('EhUsers', 10000);
+INSERT INTO `eh_sequences`(`domain`, `start_seq`) VALUES('EhForums', 10000);
 
 SET foreign_key_checks = 1;
