@@ -8,7 +8,7 @@ INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `res
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`) 
 	VALUES(1001027, 0, 'PM', '武汉大学产学研大楼物业', 239825274387098429, '', '/1001027', 1, 2, 'ENTERPRISE', 0);
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status)
-	VALUES(2102408, 1001027, 'USER', 214001, 'manager', '冯译萱', 0, '13570893886', 3);	
+	VALUES(2102408, 1001027, 'USER', 4763, 'manager', '冯译萱', 0, '13570893886', 3);	
 
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
 	VALUES(10331, 'EhOrganizations', 1001027, 'EhUsers', 4763, 1001, 1, UTC_TIMESTAMP());
