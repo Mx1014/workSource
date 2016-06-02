@@ -44,6 +44,7 @@ import com.everhomes.rest.aclink.AclinkConnectingCommand;
 import com.everhomes.rest.aclink.AclinkDeviceVer;
 import com.everhomes.rest.aclink.AclinkDisconnectedCommand;
 import com.everhomes.rest.aclink.AclinkFirmwareDTO;
+import com.everhomes.rest.aclink.AclinkFirmwareType;
 import com.everhomes.rest.aclink.AclinkMessage;
 import com.everhomes.rest.aclink.AclinkMessageMeta;
 import com.everhomes.rest.aclink.AclinkMgmtCommand;
@@ -326,10 +327,14 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             dto.setPhone(u.getIdentifierToken());
             DoorAuth doorAuth = doorAuthProvider.queryValidDoorAuthForever(cmd.getDoorId(), dto.getId());
             if(doorAuth != null) {
-                dto.setStatus(DoorAuthStatus.VALID.getCode());
+                dto.setRightOpen(doorAuth.getRightOpen());
+                dto.setRightRemote(doorAuth.getRightRemote());
+                dto.setRightVisitor(doorAuth.getRightVisitor());
                 dto.setAuthId(doorAuth.getId());
             } else {
-                dto.setStatus(DoorAuthStatus.INVALID.getCode());
+                dto.setRightOpen((byte)0);
+                dto.setRightRemote((byte)0);
+                dto.setRightVisitor((byte)0);
                 }
             userDTOs.add(dto);
         }
@@ -352,6 +357,16 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             cmd.setApproveUserId(user.getId());
         }
         
+        if(cmd.getRightOpen() == null) {
+            cmd.setRightOpen((byte)0);
+        }
+        if(cmd.getRightRemote() == null) {
+            cmd.setRightRemote((byte)0);
+        }
+        if(cmd.getRightVisitor() == null) {
+            cmd.setRightVisitor((byte)0);
+        }
+        
         DoorAccess doorAcc = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
         UserInfo user = userService.getUserSnapshotInfoWithPhone(cmd.getUserId());
         
@@ -364,10 +379,20 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 public DoorAuth doInTransaction(TransactionStatus arg0) {
                     DoorAuth doorAuth = doorAuthProvider.queryValidDoorAuthForever(doorAcc.getId(), user.getId());
                     if(doorAuth != null) {
+                        doorAuth.setRightOpen(cmd.getRightOpen());
+                        doorAuth.setRightRemote(cmd.getRightRemote());
+                        doorAuth.setRightVisitor(cmd.getRightVisitor());
+                        
+                        doorAuthProvider.updateDoorAuth(doorAuth);
                         return doorAuth;
                         }
                     
                     doorAuth = new DoorAuth();
+               
+                    doorAuth.setRightOpen(cmd.getRightOpen());
+                    doorAuth.setRightRemote(cmd.getRightRemote());
+                    doorAuth.setRightVisitor(cmd.getRightVisitor());
+                    
                     doorAuth.setDoorId(doorAcc.getId());
                     doorAuth.setAuthType(DoorAuthType.FOREVER.getCode());
                     doorAuth.setOwnerId(doorAcc.getOwnerId());
@@ -401,6 +426,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_PARAM_ERROR, "Invalid param error");        
             }
             
+            doorAuth.setRightOpen((byte)1);
             doorAuth.setApproveUserId(cmd.getApproveUserId());
             doorAuth.setOwnerId(doorAcc.getOwnerId());
             doorAuth.setOwnerType(doorAcc.getOwnerType());
@@ -457,10 +483,11 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         cmd.setApproveUserId(user.getId());
         cmd.setUserId(targetUser.getId());
         DoorAuth auth = doorAuthProvider.queryValidDoorAuthForever(cmd.getDoorId(), user.getId());
-        if(auth == null) {
+        if(auth == null || (!auth.getRightVisitor().equals((byte)1))) {
             throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "User not auth");   
         }
         
+        //创建临时授权
         cmd.setAuthType(DoorAuthType.TEMPERATE.getCode());
         return createDoorAuth(cmd);
     }
@@ -502,7 +529,13 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     
                     AesUserKey aesUserKey2 = aesUserKeyProvider.queryAesUserKeyByDoorId(doorAuth.getDoorId(), doorAuth.getUserId(), doorAuthId);
                     
-                    doorAuth.setStatus(DoorAuthStatus.INVALID.getCode());
+                    if(doorAuth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
+                        //Remove right open
+                        doorAuth.setRightOpen((byte)0);
+                    } else {
+                        doorAuth.setStatus(DoorAuthStatus.INVALID.getCode());    
+                    }
+                    
                     doorAuthProvider.updateDoorAuth(doorAuth);
                     
                     if(aesUserKey1 != null) {
@@ -942,12 +975,27 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         List<AesUserKeyDTO> dtos = new ArrayList<AesUserKeyDTO>();
         for(DoorAuth auth : auths) {
             AesUserKeyDTO dto = new AesUserKeyDTO();
+            
+            if(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
+                if(auth.getRightOpen().equals((byte)0)) {
+                    //Not has right
+                    continue;
+                } else if(auth.getRightVisitor().equals((byte)1)) {
+                        //有访客授权权限
+                    dto.setKeyType(AesUserKeyType.ADMIN.getCode());   
+                } else {
+                    //普通用户权限
+                 dto.setKeyType(AesUserKeyType.NORMAL.getCode());   
+                }
+            } else {
+                dto.setKeyType(AesUserKeyType.TEMP.getCode());
+            }
+            
             dto.setCreateTimeMs(auth.getCreateTime().getTime());
             dto.setCreatorUid(user.getId());
             dto.setDoorId(auth.getDoorId());
             dto.setUserId(auth.getUserId());
             dto.setStatus(AesUserKeyStatus.VALID.getCode());
-            dto.setKeyType(AesUserKeyType.ADMIN.getCode());
             dto.setId(auth.getId());
             
             DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(dto.getDoorId());
@@ -1224,7 +1272,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     @Override
     public AclinkFirmwareDTO createAclinkFirmware(CreateAclinkFirmwareCommand cmd) {
         AclinkFirmware firmware = (AclinkFirmware)ConvertHelper.convert(cmd, AclinkFirmware.class);
-        firmware.setFirmwareType(new Byte((byte)0));
+        firmware.setFirmwareType(AclinkFirmwareType.ZUOLIN.getCode());
         firmware.setStatus(new Byte((byte)1));
         firmware.setCreatorId(UserContext.current().getUser().getId());
         aclinkFirmwareProvider.createAclinkFirmware(firmware);

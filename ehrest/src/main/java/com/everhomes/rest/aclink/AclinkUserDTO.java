@@ -7,8 +7,10 @@ import com.everhomes.util.StringHelper;
  * <li>id: 用户ID</li>
  * <li>userName: 用户名</li>
  * <li>phone: 用户手机号</li>
- * <li>status: 0 未授权， 1 授权</li>
  * <li>authId: 授权对应的授权ID</li>
+ * <li>rightOpen: 0 开门未授权， 1 授权</li>
+ * <li>rightVisitor: 0 访客未授权， 1 授权</li>
+ * <li>rightRemote: 0 远程访问未授权， 1 授权</li>
  * </ul>
  * @author janson
  *
@@ -18,8 +20,10 @@ public class AclinkUserDTO {
     private String userName;
     private String phone;
     private String nickName;
-    private Byte status;
     private Long authId;
+    private Byte     rightOpen;
+    private Byte     rightVisitor;
+    private Byte     rightRemote;
     
     public Long getId() {
         return id;
@@ -45,18 +49,30 @@ public class AclinkUserDTO {
     public void setNickName(String nickName) {
         this.nickName = nickName;
     }
-    public Byte getStatus() {
-        return status;
-    }
-    public void setStatus(Byte status) {
-        this.status = status;
-    }
-    
     public Long getAuthId() {
         return authId;
     }
     public void setAuthId(Long authId) {
         this.authId = authId;
+    }
+
+    public Byte getRightOpen() {
+        return rightOpen;
+    }
+    public void setRightOpen(Byte rightOpen) {
+        this.rightOpen = rightOpen;
+    }
+    public Byte getRightVisitor() {
+        return rightVisitor;
+    }
+    public void setRightVisitor(Byte rightVisitor) {
+        this.rightVisitor = rightVisitor;
+    }
+    public Byte getRightRemote() {
+        return rightRemote;
+    }
+    public void setRightRemote(Byte rightRemote) {
+        this.rightRemote = rightRemote;
     }
     @Override
     public String toString() {
