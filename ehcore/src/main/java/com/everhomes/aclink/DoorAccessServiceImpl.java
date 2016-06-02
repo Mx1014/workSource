@@ -41,6 +41,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.rest.aclink.AclinkConnectingCommand;
+import com.everhomes.rest.aclink.AclinkCreateDoorAuthListCommand;
 import com.everhomes.rest.aclink.AclinkDeviceVer;
 import com.everhomes.rest.aclink.AclinkDisconnectedCommand;
 import com.everhomes.rest.aclink.AclinkFirmwareDTO;
@@ -1782,5 +1783,20 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     public AclinkFirmwareDTO getCurrentFirmware(GetCurrentFirmwareCommand cmd) {
         AclinkFirmware firm = aclinkFirmwareProvider.queryAclinkFirmwareMax();
         return ConvertHelper.convert(firm, AclinkFirmwareDTO.class);
+    }
+    
+    @Override
+    public ListDoorAuthResponse createDoorAuthList(AclinkCreateDoorAuthListCommand cmd) {
+        ListDoorAuthResponse resp = new ListDoorAuthResponse();
+        
+        List<DoorAuthDTO> dtos = new ArrayList<DoorAuthDTO>();
+        resp.setDtos(dtos);
+        
+        for(CreateDoorAuthCommand authCmd: cmd.getAuths()) {
+            DoorAuthDTO dto = createDoorAuth(authCmd);
+            dtos.add(dto);
+        }
+        
+        return resp;
     }
 }

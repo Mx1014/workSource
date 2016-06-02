@@ -19,6 +19,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.aclink.AclinkCreateDoorAuthListCommand;
 import com.everhomes.rest.aclink.AclinkDeleteByIdCommand;
 import com.everhomes.rest.aclink.AclinkFirmwareDTO;
 import com.everhomes.rest.aclink.AclinkUserResponse;
@@ -275,11 +276,32 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;        
     }
-    
+
+    /**
+     * 
+     * <b>URL: /admin/aclink/getCurrentFirmware</b>
+     * <p>获取当前版本</p>
+     * @return OK 成功
+     */
     @RequestMapping("getCurrentFirmware")
     @RestReturn(value=ListDoorAccessResponse.class)
     public RestResponse listDoorAccessGroup(@Valid GetCurrentFirmwareCommand cmd) {
         RestResponse response = new RestResponse(doorAccessService.getCurrentFirmware(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;        
+    }
+    
+    /**
+     * 
+     * <b>URL: /admin/aclink/createAuthList</b>
+     * <p>创建授权</p>
+     * @return OK 成功
+     */
+    @RequestMapping("createAuthList")
+    @RestReturn(value=ListDoorAuthResponse.class)
+    public RestResponse createDoorAuthList(@Valid AclinkCreateDoorAuthListCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.createDoorAuthList(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;        
