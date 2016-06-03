@@ -26,45 +26,7 @@ public class CompleteBillCommand {
 
 	 
  
-
-	public String getSiteType() {
-		return siteType;
-	}
-
-	public void setSiteType(String siteType) {
-		this.siteType = siteType;
-	}
-
  
-
-	public String getOwnerType() {
-		return ownerType;
-	}
-
-
-
-
-	public void setOwnerType(String ownerType) {
-		this.ownerType = ownerType;
-	}
-
-
-
-
-	public Long getOwnerId() {
-		return ownerId;
-	}
-
-
-
-
-	public void setOwnerId(Long ownerId) {
-		this.ownerId = ownerId;
-	}
-
-
-
-
 	public Long getRentalBillId() {
 		return rentalBillId;
 	}
