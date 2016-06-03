@@ -109,4 +109,18 @@ public class EhQualityInspectionCategoriesDao extends org.jooq.impl.DAOImpl<com.
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionCategories> fetchByCreateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionCategories.EH_QUALITY_INSPECTION_CATEGORIES.CREATE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>score IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionCategories> fetchByScore(java.lang.Double... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionCategories.EH_QUALITY_INSPECTION_CATEGORIES.SCORE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>description IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionCategories> fetchByDescription(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionCategories.EH_QUALITY_INSPECTION_CATEGORIES.DESCRIPTION, values);
+	}
 }
