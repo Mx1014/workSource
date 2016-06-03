@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
@@ -59,6 +60,10 @@ public class QueryDefaultRuleAdminResponse {
 	private Byte refundFlag;
 	private Integer refundRatio;
 
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 	public Byte getExclusiveFlag() {
 		return exclusiveFlag;
 	}

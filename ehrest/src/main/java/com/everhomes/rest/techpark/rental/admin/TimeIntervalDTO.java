@@ -1,5 +1,7 @@
 package com.everhomes.rest.techpark.rental.admin;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * 
  * <ul>
@@ -27,4 +29,8 @@ public class TimeIntervalDTO {
 		this.endTime = endTime;
 	}
 
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

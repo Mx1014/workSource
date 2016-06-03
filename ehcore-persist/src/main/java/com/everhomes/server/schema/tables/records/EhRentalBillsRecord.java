@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalBillsRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhRentalBillsRecord> {
 
-	private static final long serialVersionUID = -1708129590;
+	private static final long serialVersionUID = 326954219;
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_bills.id</code>. id
@@ -391,6 +391,20 @@ public class EhRentalBillsRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 		return (java.lang.Long) getValue(26);
 	}
 
+	/**
+	 * Setter for <code>ehcore.eh_rental_bills.organization_id</code>. 所属公司的ID
+	 */
+	public void setOrganizationId(java.lang.Long value) {
+		setValue(27, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_rental_bills.organization_id</code>. 所属公司的ID
+	 */
+	public java.lang.Long getOrganizationId() {
+		return (java.lang.Long) getValue(27);
+	}
+
 	// -------------------------------------------------------------------------
 	// Primary key information
 	// -------------------------------------------------------------------------
@@ -417,7 +431,7 @@ public class EhRentalBillsRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	/**
 	 * Create a detached, initialised EhRentalBillsRecord
 	 */
-	public EhRentalBillsRecord(java.lang.Long id, java.lang.Long rentalSiteId, java.lang.Long rentalUid, java.sql.Date rentalDate, java.sql.Timestamp startTime, java.sql.Timestamp endTime, java.lang.Double rentalCount, java.math.BigDecimal payTotalMoney, java.math.BigDecimal siteTotalMoney, java.math.BigDecimal reserveMoney, java.sql.Timestamp reserveTime, java.sql.Timestamp payStartTime, java.sql.Timestamp payEndTime, java.sql.Timestamp payTime, java.sql.Timestamp cancelTime, java.math.BigDecimal paidMoney, java.lang.Byte status, java.lang.Byte visibleFlag, java.lang.Byte invoiceFlag, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.String siteName, java.lang.String useTime, java.lang.String vendorType, java.lang.Long launchPadItemId) {
+	public EhRentalBillsRecord(java.lang.Long id, java.lang.Long rentalSiteId, java.lang.Long rentalUid, java.sql.Date rentalDate, java.sql.Timestamp startTime, java.sql.Timestamp endTime, java.lang.Double rentalCount, java.math.BigDecimal payTotalMoney, java.math.BigDecimal siteTotalMoney, java.math.BigDecimal reserveMoney, java.sql.Timestamp reserveTime, java.sql.Timestamp payStartTime, java.sql.Timestamp payEndTime, java.sql.Timestamp payTime, java.sql.Timestamp cancelTime, java.math.BigDecimal paidMoney, java.lang.Byte status, java.lang.Byte visibleFlag, java.lang.Byte invoiceFlag, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.String siteName, java.lang.String useTime, java.lang.String vendorType, java.lang.Long launchPadItemId, java.lang.Long organizationId) {
 		super(com.everhomes.server.schema.tables.EhRentalBills.EH_RENTAL_BILLS);
 
 		setValue(0, id);
@@ -447,5 +461,6 @@ public class EhRentalBillsRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 		setValue(24, useTime);
 		setValue(25, vendorType);
 		setValue(26, launchPadItemId);
+		setValue(27, organizationId);
 	}
 }

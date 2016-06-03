@@ -267,7 +267,7 @@ CREATE TABLE `eh_rental_bills` (
 `use_time` VARCHAR(255) NULL  COMMENT '使用时间',
 `vendor_type` VARCHAR(255) NULL  COMMENT '支付方式,10001-支付宝，10002-微信',
 `launch_pad_item_id` BIGINT(20)    COMMENT '广场图标id',
-
+`organization_id` BIGINT(20)    COMMENT '所属公司的ID', 
  PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4	
 ;

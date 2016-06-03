@@ -1,162 +1,68 @@
 package com.everhomes.rest.techpark.rental;
 
-import java.math.BigDecimal;
+import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 /**
  * <ul>
-*<li>id：商品id</li>
+ * <li>enterpriseCommunityId：园区id</li>
+ * <li>siteType：场所类型</li>
+ * <li>rentalSiteId：场所id</li>
  * <li>itemName：商品名称</li>
  * <li>itemPrice：商品价格</li>
  * <li>counts：商品数量</li> 
  * </ul>
  */
-public class SiteItemDTO {
-	private Long id;
+public class AddItemAdminCommand { 
+	@NotNull
+	private Long rentalSiteId;
+	@NotNull
 	private String itemName;
-	private BigDecimal itemPrice;
+	@NotNull
+	private java.math.BigDecimal itemPrice;
+	@NotNull
 	private Integer counts;
 	private java.lang.String     imgUri;
-	private java.lang.String     imgUrl;
 	private java.lang.Integer    defaultOrder;
-	
-	
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-
-
- 
- 
-
-
-
-	public Integer getCounts() {
-		return counts;
+	public Long getRentalSiteId() {
+		return rentalSiteId;
 	}
-
-
-
-	public void setCounts(Integer counts) {
-		this.counts = counts;
+	public void setRentalSiteId(Long rentalSiteId) {
+		this.rentalSiteId = rentalSiteId;
 	}
-
-
-
-	public Long getId() {
-		return id;
-	}
-
-
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-
-
- 
-
-
-
-
 	public String getItemName() {
 		return itemName;
 	}
-
-
-
-
-
-
-
 	public void setItemName(String itemName) {
 		this.itemName = itemName;
+	} 
+	public Integer getCounts() {
+		return counts;
 	}
-
-
-
-
-
-
-
-	public BigDecimal getItemPrice() {
-		return itemPrice;
-	}
-
-
-
-
-
-
-
-	public void setItemPrice(BigDecimal itemPrice) {
-		this.itemPrice = itemPrice;
-	}
-
-
-
-
-
-
-
+	public void setCounts(Integer counts) {
+		this.counts = counts;
+	} 
+	
 	public java.lang.String getImgUri() {
 		return imgUri;
 	}
-
-
-
-
-
-
-
 	public void setImgUri(java.lang.String imgUri) {
 		this.imgUri = imgUri;
 	}
-
-
-
-
-
-
-
-	public java.lang.String getImgUrl() {
-		return imgUrl;
-	}
-
-
-
-
-
-
-
-	public void setImgUrl(java.lang.String imgUrl) {
-		this.imgUrl = imgUrl;
-	}
-
-
-
-
-
-
-
 	public java.lang.Integer getDefaultOrder() {
 		return defaultOrder;
 	}
-
-
-
-
-
-
-
 	public void setDefaultOrder(java.lang.Integer defaultOrder) {
 		this.defaultOrder = defaultOrder;
 	}
-
-
-
-
- 
+	public java.math.BigDecimal getItemPrice() {
+		return itemPrice;
+	}
+	public void setItemPrice(java.math.BigDecimal itemPrice) {
+		this.itemPrice = itemPrice;
+	} 
 }

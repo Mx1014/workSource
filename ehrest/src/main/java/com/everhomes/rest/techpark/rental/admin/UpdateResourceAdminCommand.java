@@ -5,6 +5,7 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
@@ -60,6 +61,10 @@ public class UpdateResourceAdminCommand {
 	private List<SiteOwnerDTO> owners;
 	private Byte status;
 
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 	public Long getOwnerId() {
 		return ownerId;
 	}

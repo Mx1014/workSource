@@ -68,7 +68,7 @@ public class RentalBillDTO {
 	private Double rentalCount; 
 	private java.lang.String     useTime;
 	private java.lang.String     vendorType;
-	private java.lang.Long       launchPadItemId;
+	private java.lang.Long       launchPadItemId; 
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> siteItems; 
 

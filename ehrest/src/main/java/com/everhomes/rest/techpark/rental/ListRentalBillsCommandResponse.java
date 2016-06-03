@@ -7,7 +7,8 @@ import com.everhomes.rest.techpark.punch.PunchStatisticsDTO;
 import com.everhomes.util.StringHelper;
 
 public class ListRentalBillsCommandResponse {
-	private Integer nextPageOffset;
+
+	private Long nextPageAnchor;
     @ItemType(RentalBillDTO.class)
 	private List<RentalBillDTO> rentalBills; 
 	@Override
@@ -22,10 +23,10 @@ public class ListRentalBillsCommandResponse {
 	public void setRentalBills(List<RentalBillDTO> rentalBills) {
 		this.rentalBills = rentalBills;
 	}
-	public Integer getNextPageOffset() {
-		return nextPageOffset;
+	public Long getNextPageAnchor() {
+		return nextPageAnchor;
 	}
-	public void setNextPageOffset(Integer nextPageOffset) {
-		this.nextPageOffset = nextPageOffset;
+	public void setNextPageAnchor(Long nextPageAnchor) {
+		this.nextPageAnchor = nextPageAnchor;
 	} 
 }

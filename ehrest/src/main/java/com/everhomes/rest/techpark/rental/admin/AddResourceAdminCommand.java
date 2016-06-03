@@ -5,6 +5,7 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
@@ -27,9 +28,7 @@ import com.everhomes.discover.ItemType;
  * <li>status: 是否开启，1是0否</li>
  * </ul>
  */
-public class AddResourceAdminCommand {
-	private Long ownerId;
-	private String ownerType;
+public class AddResourceAdminCommand { 
 	@NotNull
 	private Long launchPadItemId;
 	@NotNull
@@ -57,21 +56,10 @@ public class AddResourceAdminCommand {
 	private List<SiteOwnerDTO> owners;
 	private Byte status;
 
-	public Long getOwnerId() {
-		return ownerId;
-	}
-
-	public void setOwnerId(Long ownerId) {
-		this.ownerId = ownerId;
-	}
-
-	public String getOwnerType() {
-		return ownerType;
-	}
-
-	public void setOwnerType(String ownerType) {
-		this.ownerType = ownerType;
-	}
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 
 	public Long getLaunchPadItemId() {
 		return launchPadItemId;

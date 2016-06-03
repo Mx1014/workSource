@@ -2,6 +2,8 @@ package com.everhomes.rest.techpark.rental.admin;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * 添加默认规则
@@ -19,6 +21,10 @@ public class QueryDefaultRuleAdminCommand {
 	@NotNull
 	private Long launchPadItemId;
 
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 	public String getOwnerType() {
 		return ownerType;
 	}

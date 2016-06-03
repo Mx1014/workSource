@@ -1,5 +1,7 @@
 package com.everhomes.rest.techpark.rental.admin;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * 列出资源列表返回值(根据图标和园区)
@@ -11,6 +13,10 @@ public class SiteOwnerDTO {
 	private String ownerType;
 	private String ownerId;
 
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 	public String getOwnerType() {
 		return ownerType;
 	}

@@ -9,10 +9,11 @@ import com.everhomes.util.StringHelper;
  * <li>siteItems：场所商品</li>
  * </ul>
  */
-public class ListRentalSiteItemsCommandResponse {
+public class getItemListCommandResponse {
 
     @ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> siteItems;
+	private Long nextPageAnchor;
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -22,5 +23,11 @@ public class ListRentalSiteItemsCommandResponse {
 	}
 	public void setSiteItems(List<SiteItemDTO> siteItems) {
 		this.siteItems = siteItems;
+	}
+	public Long getNextPageAnchor() {
+		return nextPageAnchor;
+	}
+	public void setNextPageAnchor(Long nextPageAnchor) {
+		this.nextPageAnchor = nextPageAnchor;
 	}
 }

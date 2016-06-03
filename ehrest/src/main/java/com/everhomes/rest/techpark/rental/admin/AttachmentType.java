@@ -1,5 +1,7 @@
 package com.everhomes.rest.techpark.rental.admin;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * <li>TEXT_REMARK: 文本备注</li>
@@ -20,6 +22,10 @@ public enum AttachmentType {
 		return code;
 	}
 
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 	public static AttachmentType fromCode(Byte code) {
 		if (code != null) {
 			for (AttachmentType a : AttachmentType.values()) {

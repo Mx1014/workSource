@@ -15,9 +15,6 @@ import com.everhomes.util.StringHelper;
 public class IncompleteBillCommand {
 
 
-	private String ownerType;
-	private Long ownerId;
-	private String siteType;  
 	private Long rentalBillId;
 	
 	@Override
@@ -27,45 +24,7 @@ public class IncompleteBillCommand {
         return StringHelper.toJsonString(this);
     } 
 
-	 
- 
-
-	public String getSiteType() {
-		return siteType;
-	}
-
-	public void setSiteType(String siteType) {
-		this.siteType = siteType;
-	}
-
- 
-
-	public String getOwnerType() {
-		return ownerType;
-	}
-
-
-
-
-	public void setOwnerType(String ownerType) {
-		this.ownerType = ownerType;
-	}
-
-
-
-
-	public Long getOwnerId() {
-		return ownerId;
-	}
-
-
-
-
-	public void setOwnerId(Long ownerId) {
-		this.ownerId = ownerId;
-	}
-
-
+	  
 
 
 	public Long getRentalBillId() {

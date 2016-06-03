@@ -10,29 +10,13 @@ import com.everhomes.util.StringHelper;
  * <li>rentalSiteId：物品id</li> 
  * </ul>
  */
-public class DeleteRentalSiteItemCommand {
-	@NotNull
-	private Long enterpriseCommunityId;
-	@NotNull
-	private String siteType;
+public class DeleteItemAdminCommand { 
 	@NotNull
 	private Long rentalSiteItemId; 
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
-    } 
-	public Long getEnterpriseCommunityId() {
-		return enterpriseCommunityId;
-	}
-	public void setEnterpriseCommunityId(Long enterpriseCommunityId) {
-		this.enterpriseCommunityId = enterpriseCommunityId;
-	}
-	public String getSiteType() {
-		return siteType;
-	}
-	public void setSiteType(String siteType) {
-		this.siteType = siteType;
-	}
+    }  
 	public Long getRentalSiteItemId() {
 		return rentalSiteItemId;
 	}

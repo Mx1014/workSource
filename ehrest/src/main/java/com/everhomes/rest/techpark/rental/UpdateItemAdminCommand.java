@@ -13,11 +13,9 @@ import com.everhomes.util.StringHelper;
  * <li>counts：商品数量</li> 
  * </ul>
  */
-public class AddRentalSiteItemsCommand {
+public class UpdateItemAdminCommand {
 	@NotNull
-	private Long enterpriseCommunityId;
-	@NotNull
-	private String siteType;
+	private Long id;
 	@NotNull
 	private Long rentalSiteId;
 	@NotNull
@@ -26,6 +24,8 @@ public class AddRentalSiteItemsCommand {
 	private java.math.BigDecimal itemPrice;
 	@NotNull
 	private Integer counts;
+	private java.lang.String     imgUri;
+	private java.lang.Integer    defaultOrder;
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -47,23 +47,30 @@ public class AddRentalSiteItemsCommand {
 	}
 	public void setCounts(Integer counts) {
 		this.counts = counts;
+	} 
+	
+	public java.lang.String getImgUri() {
+		return imgUri;
 	}
-	public Long getEnterpriseCommunityId() {
-		return enterpriseCommunityId;
+	public void setImgUri(java.lang.String imgUri) {
+		this.imgUri = imgUri;
 	}
-	public void setEnterpriseCommunityId(Long enterpriseCommunityId) {
-		this.enterpriseCommunityId = enterpriseCommunityId;
+	public java.lang.Integer getDefaultOrder() {
+		return defaultOrder;
 	}
-	public String getSiteType() {
-		return siteType;
-	}
-	public void setSiteType(String siteType) {
-		this.siteType = siteType;
+	public void setDefaultOrder(java.lang.Integer defaultOrder) {
+		this.defaultOrder = defaultOrder;
 	}
 	public java.math.BigDecimal getItemPrice() {
 		return itemPrice;
 	}
 	public void setItemPrice(java.math.BigDecimal itemPrice) {
 		this.itemPrice = itemPrice;
+	}
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
 	} 
 }

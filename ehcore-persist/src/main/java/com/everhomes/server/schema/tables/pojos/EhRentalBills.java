@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalBills implements java.io.Serializable {
 
-	private static final long serialVersionUID = -267523903;
+	private static final long serialVersionUID = -1759543909;
 
 	private java.lang.Long       id;
 	private java.lang.Long       rentalSiteId;
@@ -40,6 +40,7 @@ public class EhRentalBills implements java.io.Serializable {
 	private java.lang.String     useTime;
 	private java.lang.String     vendorType;
 	private java.lang.Long       launchPadItemId;
+	private java.lang.Long       organizationId;
 
 	public EhRentalBills() {}
 
@@ -70,7 +71,8 @@ public class EhRentalBills implements java.io.Serializable {
 		java.lang.String     siteName,
 		java.lang.String     useTime,
 		java.lang.String     vendorType,
-		java.lang.Long       launchPadItemId
+		java.lang.Long       launchPadItemId,
+		java.lang.Long       organizationId
 	) {
 		this.id = id;
 		this.rentalSiteId = rentalSiteId;
@@ -99,6 +101,7 @@ public class EhRentalBills implements java.io.Serializable {
 		this.useTime = useTime;
 		this.vendorType = vendorType;
 		this.launchPadItemId = launchPadItemId;
+		this.organizationId = organizationId;
 	}
 
 	public java.lang.Long getId() {
@@ -315,5 +318,13 @@ public class EhRentalBills implements java.io.Serializable {
 
 	public void setLaunchPadItemId(java.lang.Long launchPadItemId) {
 		this.launchPadItemId = launchPadItemId;
+	}
+
+	public java.lang.Long getOrganizationId() {
+		return this.organizationId;
+	}
+
+	public void setOrganizationId(java.lang.Long organizationId) {
+		this.organizationId = organizationId;
 	}
 }

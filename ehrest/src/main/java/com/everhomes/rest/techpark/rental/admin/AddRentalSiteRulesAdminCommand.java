@@ -10,10 +10,8 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * 添加默认规则
- * <li>ownerType: 所有者类型 参考
- * {@link com.everhomes.rest.techpark.rental.RentalOwnerType}</li>
- * <li>ownerId: 园区id</li>
+ * 给资源增加单元格
+ * <li>rentalSiteId: 资源id</li>
  * <li>launchPadItemId: 图标id</li>
  * <li>exclusiveFlag: 是否是独占资源</li>
  * <li>unit: 1整租，0.5可半租</li>
@@ -39,13 +37,9 @@ import com.everhomes.util.StringHelper;
  * <li>refundRatio: 退款比例</li>
  * </ul>
  */
-public class AddDefaultRuleAdminCommand {
+public class AddRentalSiteRulesAdminCommand {
 	@NotNull
-	private String ownerType;
-	@NotNull
-	private Long ownerId;
-	@NotNull
-	private Long launchPadItemId;
+	private Long rentalSiteId;
 	private Byte exclusiveFlag;
 	private Double unit;
 	private Byte autoAssign;
@@ -78,28 +72,13 @@ public class AddDefaultRuleAdminCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-	public String getOwnerType() {
-		return ownerType;
+
+	public Long getRentalSiteId() {
+		return rentalSiteId;
 	}
 
-	public void setOwnerType(String ownerType) {
-		this.ownerType = ownerType;
-	}
-
-	public Long getOwnerId() {
-		return ownerId;
-	}
-
-	public void setOwnerId(Long ownerId) {
-		this.ownerId = ownerId;
-	}
-
-	public Long getLaunchPadItemId() {
-		return launchPadItemId;
-	}
-
-	public void setLaunchPadItemId(Long launchPadItemId) {
-		this.launchPadItemId = launchPadItemId;
+	public void setRentalSiteId(Long rentalSiteId) {
+		this.rentalSiteId = rentalSiteId;
 	}
 
 	public Byte getExclusiveFlag() {
@@ -213,13 +192,15 @@ public class AddDefaultRuleAdminCommand {
 	public void setEndDate(Long endDate) {
 		this.endDate = endDate;
 	}
- 
+
 	public List<Integer> getOpenWeekday() {
 		return openWeekday;
 	}
+
 	public void setOpenWeekday(List<Integer> openWeekday) {
 		this.openWeekday = openWeekday;
 	}
+
 	public List<Long> getCloseDates() {
 		return closeDates;
 	}
@@ -275,5 +256,6 @@ public class AddDefaultRuleAdminCommand {
 	public void setRefundRatio(Integer refundRatio) {
 		this.refundRatio = refundRatio;
 	}
-
+	
+	
 }

@@ -1,5 +1,7 @@
 package com.everhomes.rest.techpark.rental.admin;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * 预约需要提交的信息
@@ -28,4 +30,8 @@ public class AttachmentDTO {
 		this.mustOptions = mustOptions;
 	}
 
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

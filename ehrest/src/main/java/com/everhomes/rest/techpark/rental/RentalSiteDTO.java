@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.techpark.rental.admin.SiteOwnerDTO;
 import com.everhomes.util.StringHelper;
 /**
  * <ul>
@@ -67,7 +68,8 @@ public class RentalSiteDTO {
 //	private List<RentalSiteRulesDTO> siteRules;
 	@ItemType(RentalSitePicDTO.class)
 	private List<RentalSitePicDTO> sitePics;
-	
+	@ItemType(SiteOwnerDTO.class)
+	private List<SiteOwnerDTO> owners;
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

@@ -14,22 +14,15 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.techpark.punch.ExportPunchStatisticsCommand;
 import com.everhomes.rest.techpark.rental.AddRentalBillCommand;
 import com.everhomes.rest.techpark.rental.AddRentalBillItemCommand;
 import com.everhomes.rest.techpark.rental.AddRentalBillItemCommandResponse;
 import com.everhomes.rest.techpark.rental.AddRentalSiteCommand;
-import com.everhomes.rest.techpark.rental.AddRentalSiteItemsCommand;
-import com.everhomes.rest.techpark.rental.AddRentalSiteSimpleRulesCommand;
-import com.everhomes.rest.techpark.rental.BatchCompleteBillCommand;
-import com.everhomes.rest.techpark.rental.BatchCompleteBillCommandResponse;
-import com.everhomes.rest.techpark.rental.BatchIncompleteBillCommand;
 import com.everhomes.rest.techpark.rental.CancelRentalBillCommand;
-import com.everhomes.rest.techpark.rental.CompleteBillCommand;
 import com.everhomes.rest.techpark.rental.ConfirmBillCommand;
+import com.everhomes.rest.techpark.rental.DeleteItemAdminCommand;
 import com.everhomes.rest.techpark.rental.DeleteRentalBillCommand;
 import com.everhomes.rest.techpark.rental.DeleteRentalSiteCommand;
-import com.everhomes.rest.techpark.rental.DeleteRentalSiteItemCommand;
 import com.everhomes.rest.techpark.rental.DeleteRentalSiteRulesCommand;
 import com.everhomes.rest.techpark.rental.DisableRentalSiteCommand;
 import com.everhomes.rest.techpark.rental.EnableRentalSiteCommand;
@@ -48,15 +41,11 @@ import com.everhomes.rest.techpark.rental.FindRentalSitesStatusCommandResponse;
 import com.everhomes.rest.techpark.rental.GetRentalSiteTypeResponse;
 import com.everhomes.rest.techpark.rental.GetRentalTypeRuleCommand;
 import com.everhomes.rest.techpark.rental.GetRentalTypeRuleCommandResponse;
-import com.everhomes.rest.techpark.rental.IncompleteBillCommand;
 import com.everhomes.rest.techpark.rental.ListRentalBillCountCommand;
 import com.everhomes.rest.techpark.rental.ListRentalBillCountCommandResponse;
 import com.everhomes.rest.techpark.rental.ListRentalBillsCommand;
 import com.everhomes.rest.techpark.rental.ListRentalBillsCommandResponse;
-import com.everhomes.rest.techpark.rental.ListRentalSiteItemsCommand;
-import com.everhomes.rest.techpark.rental.ListRentalSiteItemsCommandResponse;
 import com.everhomes.rest.techpark.rental.OnlinePayCallbackCommand;
-import com.everhomes.rest.techpark.rental.OnlinePayCallbackCommandResponse;
 import com.everhomes.rest.techpark.rental.RentalBillDTO;
 import com.everhomes.rest.techpark.rental.UpdateRentalRuleCommand;
 import com.everhomes.rest.techpark.rental.UpdateRentalSiteCommand;
@@ -231,38 +220,38 @@ public class RentalController extends ControllerBase {
 		return response;
 	}
 	
-	
-	/**
-	 * <b>URL: /techpark/rental/addRentalSiteItems</b>
-	 * <p>
-	 * 添加具体场所商品信息
-	 * </p>
-	 */
-	@RequestMapping("addRentalSiteItems")
-	@RestReturn(value = String.class)
-	public RestResponse addRentalSiteItems(@Valid AddRentalSiteItemsCommand cmd) {
-		rentalService.addRentalSiteItems(cmd);
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	
-	/**
-	 * <b>URL: /techpark/rental/listRentalSiteItems</b>
-	 * <p>
-	 * 查询具体场所商品信息
-	 * </p>
-	 */
-	@RequestMapping("listRentalSiteItems")
-	@RestReturn(value = ListRentalSiteItemsCommandResponse.class)
-	public RestResponse listRentalSiteItems(@Valid ListRentalSiteItemsCommand cmd) {
-		ListRentalSiteItemsCommandResponse listRentalSiteItemsCommandResponse =  rentalService.listRentalSiteItems(cmd);
-		RestResponse response = new RestResponse(listRentalSiteItemsCommandResponse);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+//	
+//	/**
+//	 * <b>URL: /techpark/rental/addRentalSiteItems</b>
+//	 * <p>
+//	 * 添加具体场所商品信息
+//	 * </p>
+//	 */
+//	@RequestMapping("addRentalSiteItems")
+//	@RestReturn(value = String.class)
+//	public RestResponse addRentalSiteItems(@Valid AddRentalSiteItemsCommand cmd) {
+//		rentalService.addRentalSiteItems(cmd);
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+//	
+//	/**
+//	 * <b>URL: /techpark/rental/listRentalSiteItems</b>
+//	 * <p>
+//	 * 查询具体场所商品信息
+//	 * </p>
+//	 */
+//	@RequestMapping("listRentalSiteItems")
+//	@RestReturn(value = ListRentalSiteItemsCommandResponse.class)
+//	public RestResponse listRentalSiteItems(@Valid ListRentalSiteItemsCommand cmd) {
+//		ListRentalSiteItemsCommandResponse listRentalSiteItemsCommandResponse =  rentalService.listRentalSiteItems(cmd);
+//		RestResponse response = new RestResponse(listRentalSiteItemsCommandResponse);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
 
 	
 	/**
@@ -273,7 +262,7 @@ public class RentalController extends ControllerBase {
 	 */
 	@RequestMapping("deleteRentalSiteItem")
 	@RestReturn(value = String.class)
-	public RestResponse deleteRentalSiteItem(@Valid DeleteRentalSiteItemCommand cmd) {
+	public RestResponse deleteRentalSiteItem(@Valid DeleteItemAdminCommand cmd) {
 		rentalService.deleteRentalSiteItem(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -298,22 +287,22 @@ public class RentalController extends ControllerBase {
 //		return response;
 //	}
 
-	/**
-	 * <b>URL: /techpark/rental/addRentalSiteSimpleRules</b>
-	 * <p>
-	 * 添加具体场所预定规则-简单模式
-	 * </p>
-	 */
-
-	@RequestMapping("addRentalSiteSimpleRules")
-	@RestReturn(value = String.class)
-	public RestResponse addRentalSiteSimpleRules(@Valid AddRentalSiteSimpleRulesCommand cmd) {
-		rentalService.addRentalSiteSimpleRules(cmd);
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+//	/**
+//	 * <b>URL: /techpark/rental/addRentalSiteSimpleRules</b>
+//	 * <p>
+//	 * 添加具体场所预定规则-简单模式
+//	 * </p>
+//	 */
+//
+//	@RequestMapping("addRentalSiteSimpleRules")
+//	@RestReturn(value = String.class)
+//	public RestResponse addRentalSiteSimpleRules(@Valid AddRentalSiteRulesCommand cmd) {
+//		rentalService.addRentalSiteSimpleRules(cmd);
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
 	
 	/**
 	 * <b>URL: /techpark/rental/deleteRentalSiteSimpleRules</b>
@@ -449,9 +438,9 @@ public class RentalController extends ControllerBase {
 	 * 查询订单
 	 * </p>
 	 */
-	@RequestMapping("findRentalBills")
+	@RequestMapping("findUserRentalBills")
 	@RestReturn(value = FindRentalBillsCommandResponse.class)
-	public RestResponse findRentalBills(@Valid FindRentalBillsCommand cmd) {
+	public RestResponse findUserRentalBills(@Valid FindRentalBillsCommand cmd) {
 		FindRentalBillsCommandResponse findRentalBillsCommandResponse = rentalService
 				.findRentalBills(cmd);
 		RestResponse response = new RestResponse(
@@ -533,92 +522,92 @@ public class RentalController extends ControllerBase {
 		return response;
 	}
 	
-	
-	/**
-	 * <b>URL: /techpark/rental/findRentalSitesStatus</b>
-	 * <p>
-	 * 确认预约- 状态置为成功
-	 * </p>
-	 */
-
-	@RequestMapping("confirmBill")
-	@RestReturn(value = String.class)
-	public RestResponse confirmBill(@Valid ConfirmBillCommand cmd) {
-		RentalBillDTO bill = rentalService.confirmBill(cmd);
-		RestResponse response = new RestResponse(bill);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	
-
-	/**
-	 * <b>URL: /techpark/rental/findRentalSitesStatus</b>
-	 * <p>
-	 * 完成预约- 状态置为已完成
-	 * </p>
-	 */
-
-	@RequestMapping("batchCompleteBill")
-	@RestReturn(value = BatchCompleteBillCommandResponse.class )
-	public RestResponse batchCompleteBill(@Valid BatchCompleteBillCommand cmd) {
-		BatchCompleteBillCommandResponse res= rentalService.batchCompleteBill(cmd);
-		RestResponse response = new RestResponse(res);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-
-	/**
-	 * <b>URL: /techpark/rental/findRentalSitesStatus</b>
-	 * <p>
-	 * 完成预约- 状态置为已完成
-	 * </p>
-	 */
-
-	@RequestMapping("completeBill")
-	@RestReturn(value = RentalBillDTO.class)
-	public RestResponse completeBill(@Valid CompleteBillCommand cmd) {
-		RentalBillDTO bill = rentalService.completeBill(cmd);
-		RestResponse response = new RestResponse(bill);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	/**
-	 * <b>URL: /techpark/rental/findRentalSitesStatus</b>
-	 * <p>
-	 * 未完成预约- 状态置为未完成
-	 * </p>
-	 */
-
-	@RequestMapping("batchIncompleteBill")
-	@RestReturn(value = BatchCompleteBillCommandResponse.class)
-	public RestResponse batchIncompleteBill(@Valid BatchIncompleteBillCommand cmd) {
-		BatchCompleteBillCommandResponse res = rentalService.batchIncompleteBill(cmd);
-		RestResponse response = new RestResponse(res);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-
-	/**
-	 * <b>URL: /techpark/rental/findRentalSitesStatus</b>
-	 * <p>
-	 * 未完成预约- 状态置为未完成
-	 * </p>
-	 */
-
-	@RequestMapping("incompleteBill")
-	@RestReturn(value = RentalBillDTO.class)
-	public RestResponse incompleteBill(@Valid IncompleteBillCommand cmd) {
-		RentalBillDTO bill = rentalService.incompleteBill(cmd);
-		RestResponse response = new RestResponse(bill);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	
+//	
+//	/**
+//	 * <b>URL: /techpark/rental/findRentalSitesStatus</b>
+//	 * <p>
+//	 * 确认预约- 状态置为成功
+//	 * </p>
+//	 */
+//
+//	@RequestMapping("confirmBill")
+//	@RestReturn(value = String.class)
+//	public RestResponse confirmBill(@Valid ConfirmBillCommand cmd) {
+//		RentalBillDTO bill = rentalService.confirmBill(cmd);
+//		RestResponse response = new RestResponse(bill);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+//	
+//
+//	/**
+//	 * <b>URL: /techpark/rental/findRentalSitesStatus</b>
+//	 * <p>
+//	 * 完成预约- 状态置为已完成
+//	 * </p>
+//	 */
+//
+//	@RequestMapping("batchCompleteBill")
+//	@RestReturn(value = BatchCompleteBillCommandResponse.class )
+//	public RestResponse batchCompleteBill(@Valid BatchCompleteBillCommand cmd) {
+//		BatchCompleteBillCommandResponse res= rentalService.batchCompleteBill(cmd);
+//		RestResponse response = new RestResponse(res);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+//
+//	/**
+//	 * <b>URL: /techpark/rental/findRentalSitesStatus</b>
+//	 * <p>
+//	 * 完成预约- 状态置为已完成
+//	 * </p>
+//	 */
+//
+//	@RequestMapping("completeBill")
+//	@RestReturn(value = RentalBillDTO.class)
+//	public RestResponse completeBill(@Valid CompleteBillCommand cmd) {
+//		RentalBillDTO bill = rentalService.completeBill(cmd);
+//		RestResponse response = new RestResponse(bill);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+//	/**
+//	 * <b>URL: /techpark/rental/findRentalSitesStatus</b>
+//	 * <p>
+//	 * 未完成预约- 状态置为未完成
+//	 * </p>
+//	 */
+//
+//	@RequestMapping("batchIncompleteBill")
+//	@RestReturn(value = BatchCompleteBillCommandResponse.class)
+//	public RestResponse batchIncompleteBill(@Valid BatchIncompleteBillCommand cmd) {
+//		BatchCompleteBillCommandResponse res = rentalService.batchIncompleteBill(cmd);
+//		RestResponse response = new RestResponse(res);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+//
+//	/**
+//	 * <b>URL: /techpark/rental/findRentalSitesStatus</b>
+//	 * <p>
+//	 * 未完成预约- 状态置为未完成
+//	 * </p>
+//	 */
+//
+//	@RequestMapping("incompleteBill")
+//	@RestReturn(value = RentalBillDTO.class)
+//	public RestResponse incompleteBill(@Valid IncompleteBillCommand cmd) {
+//		RentalBillDTO bill = rentalService.incompleteBill(cmd);
+//		RestResponse response = new RestResponse(bill);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+//	
 
 
 	/**

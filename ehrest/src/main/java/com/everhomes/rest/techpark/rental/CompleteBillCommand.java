@@ -14,10 +14,7 @@ import com.everhomes.util.StringHelper;
  */
 public class CompleteBillCommand {
 
-
-	private String ownerType;
-	private Long ownerId;
-	private String siteType;  
+ 
 	private Long rentalBillId;
 	
 	@Override

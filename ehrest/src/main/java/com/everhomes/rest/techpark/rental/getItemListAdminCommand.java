@@ -2,8 +2,6 @@ package com.everhomes.rest.techpark.rental;
 
 import java.util.List;
 
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
@@ -15,17 +13,20 @@ import com.everhomes.util.StringHelper;
  * <li>rentalSiteRuleIds：预定场所规则ID列表 json字符串 </li> 
  * </ul>
  */
-public class FindRentalSiteItemsCommand {
- 
-	private Long rentalSiteId;  
-    @ItemType(Long.class)
-	private List<Long> rentalSiteRuleIds;
+public class getItemListAdminCommand {
+
+	private Long rentalSiteId;
+
+	private Long pageAnchor;
+    
+	private Integer pageSize;
+	
 	
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-  
+ 
 	public Long getRentalSiteId() {
 		return rentalSiteId;
 	}
@@ -34,14 +35,21 @@ public class FindRentalSiteItemsCommand {
 		this.rentalSiteId = rentalSiteId;
 	}
 
-	public List<Long> getRentalSiteRuleIds() {
-		return rentalSiteRuleIds;
+	public Long getPageAnchor() {
+		return pageAnchor;
 	}
 
-	public void setRentalSiteRuleIds(List<Long> rentalSiteRuleIds) {
-		this.rentalSiteRuleIds = rentalSiteRuleIds;
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
+	}
+
+	public Integer getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
 	}
  
-
  
 }
