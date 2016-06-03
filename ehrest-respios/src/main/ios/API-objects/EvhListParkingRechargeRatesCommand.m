@@ -36,6 +36,10 @@
         [jsonObject setObject: self.ownerId forKey: @"ownerId"];
     if(self.parkingLotId)
         [jsonObject setObject: self.parkingLotId forKey: @"parkingLotId"];
+    if(self.plateNumber)
+        [jsonObject setObject: self.plateNumber forKey: @"plateNumber"];
+    if(self.cardNo)
+        [jsonObject setObject: self.cardNo forKey: @"cardNo"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -52,6 +56,14 @@
         self.parkingLotId = [jsonObject objectForKey: @"parkingLotId"];
         if(self.parkingLotId && [self.parkingLotId isEqual:[NSNull null]])
             self.parkingLotId = nil;
+
+        self.plateNumber = [jsonObject objectForKey: @"plateNumber"];
+        if(self.plateNumber && [self.plateNumber isEqual:[NSNull null]])
+            self.plateNumber = nil;
+
+        self.cardNo = [jsonObject objectForKey: @"cardNo"];
+        if(self.cardNo && [self.cardNo isEqual:[NSNull null]])
+            self.cardNo = nil;
 
         return self;
     }
