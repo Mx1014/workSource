@@ -8,7 +8,7 @@ package com.everhomes.rest.techpark.rental.admin;
  * <li>mustOptions: 是否必选，1是0否</li>
  * </ul>
  */
-public class Attachment {
+public class AttachmentDTO {
 	private Byte attachmentType;
 	private Byte mustOptions;
 

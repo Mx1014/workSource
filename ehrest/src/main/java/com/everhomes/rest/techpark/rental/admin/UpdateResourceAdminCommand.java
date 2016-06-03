@@ -1,0 +1,199 @@
+package com.everhomes.rest.techpark.rental.admin;
+
+import java.util.List;
+
+import javax.validation.constraints.NotNull;
+
+import com.everhomes.discover.ItemType;
+
+/**
+ * <ul>
+ * 列出资源列表返回值(根据图标和园区)
+ * <li>ownerId: 所属者id</li>
+ * <li>ownerType: 所属者类型</li>
+ * <li>launchPadItemId: 图标id</li>
+ * <li>organizationId: 所属公司id</li>
+ * <li>siteId: 资源id</li>
+ * <li>siteName: 名称</li>
+ * <li>spec: 规格</li>
+ * <li>address: 地址</li>
+ * <li>longitude: 地址经度</li>
+ * <li>latitude: 地址纬度</li>
+ * <li>contactPhonenum: 咨询电话</li>
+ * <li>chargeUid: 负责人id</li>
+ * <li>introduction: 详情</li>
+ * <li>coverUri: 封面图uri</li>
+ * <li>detailUris: 详情图</li>
+ * <li>owners: 可见社区</li>
+ * <li>status: 是否开启，1是0否</li>
+ * </ul>
+ */
+public class UpdateResourceAdminCommand {
+	private Long ownerId;
+	private String ownerType;
+	@NotNull
+	private Long launchPadItemId;
+	@NotNull
+	private Long organizationId;
+	@NotNull
+	private Long siteId;
+	@NotNull
+	private String siteName;
+	@NotNull
+	private String spec;
+	@NotNull
+	private String address;
+	@NotNull
+	private Double longitude;
+	@NotNull
+	private Double latitude;
+	private String contactPhonenum;
+	@NotNull
+	private Long chargeUid;
+	@NotNull
+	private String introduction;
+	@NotNull
+	private String coverUri;
+	@ItemType(String.class)
+	private List<String> detailUris;
+	@ItemType(SiteOwnerDTO.class)
+	private List<SiteOwnerDTO> owners;
+	private Byte status;
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+
+	public String getOwnerType() {
+		return ownerType;
+	}
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+	public Long getLaunchPadItemId() {
+		return launchPadItemId;
+	}
+
+	public void setLaunchPadItemId(Long launchPadItemId) {
+		this.launchPadItemId = launchPadItemId;
+	}
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
+
+	public Long getSiteId() {
+		return siteId;
+	}
+
+	public void setSiteId(Long siteId) {
+		this.siteId = siteId;
+	}
+
+	public String getSiteName() {
+		return siteName;
+	}
+
+	public void setSiteName(String siteName) {
+		this.siteName = siteName;
+	}
+
+	public String getSpec() {
+		return spec;
+	}
+
+	public void setSpec(String spec) {
+		this.spec = spec;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	public Double getLongitude() {
+		return longitude;
+	}
+
+	public void setLongitude(Double longitude) {
+		this.longitude = longitude;
+	}
+
+	public Double getLatitude() {
+		return latitude;
+	}
+
+	public void setLatitude(Double latitude) {
+		this.latitude = latitude;
+	}
+
+	public String getContactPhonenum() {
+		return contactPhonenum;
+	}
+
+	public void setContactPhonenum(String contactPhonenum) {
+		this.contactPhonenum = contactPhonenum;
+	}
+
+	public Long getChargeUid() {
+		return chargeUid;
+	}
+
+	public void setChargeUid(Long chargeUid) {
+		this.chargeUid = chargeUid;
+	}
+
+	public String getIntroduction() {
+		return introduction;
+	}
+
+	public void setIntroduction(String introduction) {
+		this.introduction = introduction;
+	}
+
+	public String getCoverUri() {
+		return coverUri;
+	}
+
+	public void setCoverUri(String coverUri) {
+		this.coverUri = coverUri;
+	}
+
+	public List<String> getDetailUris() {
+		return detailUris;
+	}
+
+	public void setDetailUris(List<String> detailUris) {
+		this.detailUris = detailUris;
+	}
+
+	public List<SiteOwnerDTO> getOwners() {
+		return owners;
+	}
+
+	public void setOwners(List<SiteOwnerDTO> owners) {
+		this.owners = owners;
+	}
+
+	public Byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
+
+}

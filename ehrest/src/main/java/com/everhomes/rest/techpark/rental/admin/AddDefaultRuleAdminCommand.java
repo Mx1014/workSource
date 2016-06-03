@@ -51,14 +51,14 @@ public class AddDefaultRuleAdminCommand {
 	private Byte multiUnit;
 	private Byte needPay;
 	private Byte multiTimeInterval;
-	@ItemType(Attachment.class)
-	private List<Attachment> attachments;
+	@ItemType(AttachmentDTO.class)
+	private List<AttachmentDTO> attachments;
 	private Byte rentalType;
 	private Long rentalEndTime;
 	private Long rentalStartTime;
 	private Integer rentalStep;
-	@ItemType(TimeInterval.class)
-	private List<TimeInterval> timeIntervals;
+	@ItemType(TimeIntervalDTO.class)
+	private List<TimeIntervalDTO> timeIntervals;
 	private Long beginDate;
 	private Long endDate;
 	private String openWeekday;
@@ -143,11 +143,11 @@ public class AddDefaultRuleAdminCommand {
 		this.multiTimeInterval = multiTimeInterval;
 	}
 
-	public List<Attachment> getAttachments() {
+	public List<AttachmentDTO> getAttachments() {
 		return attachments;
 	}
 
-	public void setAttachments(List<Attachment> attachments) {
+	public void setAttachments(List<AttachmentDTO> attachments) {
 		this.attachments = attachments;
 	}
 
@@ -183,11 +183,11 @@ public class AddDefaultRuleAdminCommand {
 		this.rentalStep = rentalStep;
 	}
 
-	public List<TimeInterval> getTimeIntervals() {
+	public List<TimeIntervalDTO> getTimeIntervals() {
 		return timeIntervals;
 	}
 
-	public void setTimeIntervals(List<TimeInterval> timeIntervals) {
+	public void setTimeIntervals(List<TimeIntervalDTO> timeIntervals) {
 		this.timeIntervals = timeIntervals;
 	}
 
