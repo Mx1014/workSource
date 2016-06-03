@@ -71,7 +71,7 @@ CREATE TABLE `eh_payment_card_recharge_orders` (
   `pay_status` TINYINT NOT NULL DEFAULT 1 COMMENT 'the status of the order, 0: inactive, 1: unpaid, 2: paid',
 
   `recharge_time` DATETIME COMMENT 'recharge time',
-  `recharge_status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: none, 1: unrecharged 1: recharged',
+  `recharge_status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: fail, 1: unrecharged 2: recharged 3:COMPLETE 4:REFUNDED',
   `creator_uid` BIGINT NOT NULL DEFAULT 0,
   `create_time` DATETIME,
   `paid_type` VARCHAR(32) COMMENT 'the type of paid 10001:zhifubao 10002: weixin',
