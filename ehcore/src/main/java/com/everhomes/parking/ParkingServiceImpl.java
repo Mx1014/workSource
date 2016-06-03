@@ -142,13 +142,19 @@ public class ParkingServiceImpl implements ParkingService {
     @Override
     public List<ParkingRechargeRateDTO> listParkingRechargeRates(ListParkingRechargeRatesCommand cmd){
     	Long parkingLotId = cmd.getParkingLotId();
-           
+    	if(StringUtils.isBlank(cmd.getPlateNumber())) {
+        	LOGGER.error("plateNumber cannot be null.");
+        	throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_NULL,
+					localeStringService.getLocalizedString(String.valueOf(ParkingErrorCode.SCOPE), 
+							String.valueOf(ParkingErrorCode.ERROR_PLATE_NULL),
+							UserContext.current().getUser().getLocale(),"plateNumber cannot be null."));
+        }
         ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId);
         
         List<ParkingRechargeRateDTO> parkingRechargeRateList = null;
         String venderName = parkingLot.getVendorName();
         ParkingVendorHandler handler = getParkingVendorHandler(venderName);
-        parkingRechargeRateList = handler.getParkingRechargeRates(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId);
+        parkingRechargeRateList = handler.getParkingRechargeRates(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId,cmd.getPlateNumber(),cmd.getCardNo());
         
         return parkingRechargeRateList;
     }
