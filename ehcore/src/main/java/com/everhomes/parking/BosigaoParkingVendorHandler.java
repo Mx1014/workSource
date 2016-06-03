@@ -88,6 +88,9 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 			String plateOwnerPhone = (String) card.get("mobile");
 			Timestamp endTime = strToTimestamp(validEnd);
 			
+			if(!validStatus){
+				return resultList;
+			}
 			parkingCardDTO.setOwnerType(ParkingOwnerType.COMMUNITY.getCode());
 			parkingCardDTO.setOwnerId(ownerId);
 			parkingCardDTO.setParkingLotId(parkingLotId);
@@ -99,26 +102,31 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 			parkingCardDTO.setCardNumber(cardNumber);
 			parkingCardDTO.setPlateOwnerPhone(plateOwnerPhone);
 			
-			if(!validStatus){
-				parkingCardDTO.setIsValid(false);
-				resultList.add(parkingCardDTO);
-				return resultList;
-			}
-			else if(validStatus){
 				parkingCardDTO.setIsValid(true);
 				resultList.add(parkingCardDTO);
 				
-				return resultList;
-			}
 		}
         
         return resultList;
     }
 
     @Override
-    public List<ParkingRechargeRateDTO> getParkingRechargeRates(String ownerType, Long ownerId, Long parkingLotId) {
+    public List<ParkingRechargeRateDTO> getParkingRechargeRates(String ownerType, Long ownerId, Long parkingLotId,String plateNumber,String cardNo) {
+        URL wsdlURL = Service1.WSDL_LOCATION;
+        Service1 ss = new Service1(wsdlURL, Service1.SERVICE);
+        Service1Soap port = ss.getService1Soap12();
+        LOGGER.info("verifyRechargedPlate");
+        String json = port.getCardInfo("", plateNumber, "2", "sign");
         
-		List<ParkingRechargeRate> parkingRechargeRateList = parkingProvider.listParkingRechargeRates(ownerType, ownerId, parkingLotId);
+        ResultHolder resultHolder = GsonUtil.fromJson(json, ResultHolder.class);
+        this.checkResultHolderIsNull(resultHolder,plateNumber);
+        Map<String,Object> data = (Map<String, Object>) resultHolder.getData();
+		Map<String,Object> card = (Map<String, Object>) data.get("card");
+		Boolean validStatus =  (Boolean) card.get("valid");
+		this.checkValidStatusIsNull(validStatus,plateNumber);
+
+		String cardType = (String) card.get("cardDescript");
+		List<ParkingRechargeRate> parkingRechargeRateList = parkingProvider.listParkingRechargeRates(ownerType, ownerId, parkingLotId,cardType);
 		
 		List<ParkingRechargeRateDTO> result = parkingRechargeRateList.stream().map(r->{
 			ParkingRechargeRateDTO dto = new ParkingRechargeRateDTO();
