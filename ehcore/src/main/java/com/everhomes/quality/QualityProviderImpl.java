@@ -35,6 +35,11 @@ import java.util.Map;
 
 
 
+
+
+
+
+
 import javax.annotation.PostConstruct;
 
 import org.jooq.Condition;
@@ -46,6 +51,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+
+
+
+
 
 
 
@@ -89,10 +99,9 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.quality.QualityProvider;
-import com.everhomes.rest.address.CommunityAdminStatus;
-import com.everhomes.rest.quality.ListQualityInspectionTasksCommand;
 import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.rest.quality.QualityInspectionCategoryStatus;
+import com.everhomes.rest.quality.QualityInspectionLogType;
 import com.everhomes.rest.quality.QualityInspectionTaskResult;
 import com.everhomes.rest.quality.QualityInspectionTaskReviewResult;
 import com.everhomes.rest.quality.QualityInspectionTaskReviewStatus;
@@ -102,8 +111,6 @@ import com.everhomes.scheduler.QualityInspectionScheduleJob;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhBuildingAttachmentsDao;
-import com.everhomes.server.schema.tables.daos.EhConfAccountsDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionCategoriesDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionEvaluationFactorsDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionEvaluationsDao;
@@ -112,10 +119,6 @@ import com.everhomes.server.schema.tables.daos.EhQualityInspectionStandardsDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionTaskAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionTaskRecordsDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionTasksDao;
-import com.everhomes.server.schema.tables.pojos.EhBuildingAttachments;
-import com.everhomes.server.schema.tables.pojos.EhBuildings;
-import com.everhomes.server.schema.tables.pojos.EhCommunities;
-import com.everhomes.server.schema.tables.pojos.EhConfAccounts;
 import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionCategories;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionEvaluationFactors;
@@ -125,10 +128,6 @@ import com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandards;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTaskAttachments;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTaskRecords;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks;
-import com.everhomes.server.schema.tables.records.EhBuildingAttachmentsRecord;
-import com.everhomes.server.schema.tables.records.EhBuildingsRecord;
-import com.everhomes.server.schema.tables.records.EhConfAccountsRecord;
-import com.everhomes.server.schema.tables.records.EhParkChargeRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionCategoriesRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionEvaluationFactorsRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionEvaluationsRecord;
@@ -139,12 +138,9 @@ import com.everhomes.server.schema.tables.records.EhQualityInspectionTaskRecords
 import com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
-import com.everhomes.techpark.park.ParkCharge;
-import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
-import com.mysql.fabric.xmlrpc.base.Array;
 import com.mysql.jdbc.StringUtils;
 
 
@@ -735,6 +731,8 @@ public class QualityProviderImpl implements QualityProvider {
 		
 		category.setId(id);
 		category.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		category.setPath(category.getPath() + category.getId());
+		
         
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhQualityInspectionCategories.class, id));
         EhQualityInspectionCategoriesDao dao = new EhQualityInspectionCategoriesDao(context.configuration());
@@ -774,7 +772,7 @@ public class QualityProviderImpl implements QualityProvider {
 
 	@Override
 	public List<QualityInspectionCategories> listQualityInspectionCategories(
-			ListingLocator locator, int count, Long ownerId, String ownerType) {
+			ListingLocator locator, int count, Long ownerId, String ownerType, Long parentId) {
 		assert(locator.getEntityId() != 0);
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhQualityInspectionCategories.class, locator.getEntityId()));
 		List<QualityInspectionCategories> categories = new ArrayList<QualityInspectionCategories>();
@@ -788,6 +786,10 @@ public class QualityProviderImpl implements QualityProvider {
         }
 		if(!StringUtils.isNullOrEmpty(ownerType)) {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_CATEGORIES.OWNER_TYPE.eq(ownerType));    	
+		}
+		
+		if(parentId != null) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_CATEGORIES.PARENT_ID.eq(parentId));
 		}
 		
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_CATEGORIES.STATUS.ne(QualityInspectionCategoryStatus.DISABLED.getCode()));
@@ -1110,6 +1112,33 @@ public class QualityProviderImpl implements QualityProvider {
         dao.update(t);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhQualityInspectionTasks.class, t.getId());
 		
+	}
+
+	@Override
+	public List<QualityInspectionCategories> listQualityInspectionCategoriesByPath(
+			String superiorPath) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<QualityInspectionCategories> categories = new ArrayList<QualityInspectionCategories>();
+        SelectQuery<EhQualityInspectionCategoriesRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_CATEGORIES);
+    
+		if(!StringUtils.isNullOrEmpty(superiorPath)) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_CATEGORIES.PATH.like(superiorPath + "/%"));    	
+		}
+		
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_CATEGORIES.STATUS.ne(QualityInspectionCategoryStatus.DISABLED.getCode()));
+        query.addOrderBy(Tables.EH_QUALITY_INSPECTION_CATEGORIES.ID.desc());
+        
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query categories by count, sql=" + query.getSQL());
+            LOGGER.debug("Query categories by count, bindValues=" + query.getBindValues());
+        }
+        
+        query.fetch().map((EhQualityInspectionCategoriesRecord record) -> {
+        	categories.add(ConvertHelper.convert(record, QualityInspectionCategories.class));
+        	return null;
+        });
+        
+		return categories;
 	}
 
 

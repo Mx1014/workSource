@@ -11,6 +11,8 @@ import com.everhomes.util.StringHelper;
  *  <li>name: 类型名称</li>
  *  <li>ownerId: 类型所属的主体id</li>
  *  <li>ownerType: 类型所属的主体，如enterprise</li>
+ *  <li>score: 分数</li>
+ *  <li>description: 规范内容</li>
  * </ul>
  */
 public class UpdateQualityCategoryCommand {
@@ -27,6 +29,10 @@ public class UpdateQualityCategoryCommand {
 	
 	@NotNull
 	private String ownerType;
+	
+	private Double score;
+	
+	private String description;
 
 	public Long getId() {
 		return id;
@@ -66,6 +72,22 @@ public class UpdateQualityCategoryCommand {
 
 	public void setOwnerType(String ownerType) {
 		this.ownerType = ownerType;
+	}
+
+	public Double getScore() {
+		return score;
+	}
+
+	public void setScore(Double score) {
+		this.score = score;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	@Override

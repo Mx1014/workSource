@@ -4,28 +4,33 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 
+
 /**
  * <ul>
- *  <li>ownerId: 标准类型所属组织等的id</li>
- *  <li>ownerType: 标准类型所属组织类型，如enterprise</li>
+ *  <li>ownerId: 标准所属的主体id</li>
+ *  <li>ownerType: 标准所属的主体，com.everhomes.rest.quality.OwnerType</li>
+ *  <li>targetType: 目标类型，标准的话为standard</li>
+ *  <li>targetId: 目标id</li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
- *  <li>parentId: 父节点id。全要则不填</li>
  * </ul>
  */
-public class ListQualityCategoriesCommand {
-	
+public class ListQualityInspectionLogsCommand {
+
 	@NotNull
 	private Long ownerId;
 	
 	@NotNull
 	private String ownerType;
 	
+	@NotNull
+	private String targetType;
+	
+	private Long targetId;
+	
 	private Long pageAnchor;
 	
 	private Integer pageSize;
-	
-	private Long parentId;
 
 	public Long getOwnerId() {
 		return ownerId;
@@ -41,6 +46,22 @@ public class ListQualityCategoriesCommand {
 
 	public void setOwnerType(String ownerType) {
 		this.ownerType = ownerType;
+	}
+	
+	public String getTargetType() {
+		return targetType;
+	}
+
+	public void setTargetType(String targetType) {
+		this.targetType = targetType;
+	}
+
+	public Long getTargetId() {
+		return targetId;
+	}
+
+	public void setTargetId(Long targetId) {
+		this.targetId = targetId;
 	}
 
 	public Long getPageAnchor() {
@@ -59,17 +80,8 @@ public class ListQualityCategoriesCommand {
 		this.pageSize = pageSize;
 	}
 
-	public Long getParentId() {
-		return parentId;
-	}
-
-	public void setParentId(Long parentId) {
-		this.parentId = parentId;
-	}
-
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-
 }

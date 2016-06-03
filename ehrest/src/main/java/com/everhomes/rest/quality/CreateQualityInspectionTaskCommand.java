@@ -1,5 +1,6 @@
 package com.everhomes.rest.quality;
 
+
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -10,21 +11,34 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *  <li>taskId: 任务id</li>
+ *  <li>ownerId: 标准所属的主体id</li>
+ *  <li>ownerType: 标准所属的主体，com.everhomes.rest.quality.OwnerType</li>
+ *  <li>name: 任务名称</li>
+ *  <li>categoryId: category表中的id</li>
+ *  <li>group: 业务组信息 com.everhomes.rest.quality.StandardGroupDTO</li>
  *  <li>attachments: 核查上报内容图片</li>
  *  <li>message: 核查上报内容文字</li>
  *  <li>verificationResult: 核查结果   com.everhomes.rest.quality.QualityInspectionTaskResult</li>
  *  <li>endTime: 整改截止时间</li>
  *  <li>operatorType: 整改执行人类型</li>
  *  <li>operatorId: 整改执行人id</li>
- *  <li>categoryId: 违反的规范id</li>
  * </ul>
  */
-public class ReportVerificationResultCommand {
+public class CreateQualityInspectionTaskCommand {
+
+	@NotNull
+	private Long ownerId;
 	
 	@NotNull
-	private Long taskId;
+	private String ownerType;
+
+	private String name;
 	
+	private Long categoryId;
+	
+	@ItemType(StandardGroupDTO.class)
+	private StandardGroupDTO group;
+
 	@NotNull
 	private Byte verificationResult;
 	
@@ -40,75 +54,119 @@ public class ReportVerificationResultCommand {
 	
 	private String message;
 	
-	private Long categoryId;
 	
-	public String getMessage() {
-		return message;
+	public Long getOwnerId() {
+		return ownerId;
 	}
 
-	public void setMessage(String message) {
-		this.message = message;
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
 	}
 
-	public Long getTaskId() {
-		return taskId;
+
+	public String getOwnerType() {
+		return ownerType;
 	}
 
-	public void setTaskId(Long taskId) {
-		this.taskId = taskId;
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
 	}
 
-	public Byte getVerificationResult() {
-		return verificationResult;
+
+	public String getName() {
+		return name;
 	}
 
-	public void setVerificationResult(Byte verificationResult) {
-		this.verificationResult = verificationResult;
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
-	public List<AttachmentDescriptor> getAttachments() {
-		return attachments;
-	}
-	
-	public void setAttachments(List<AttachmentDescriptor> attachments) {
-		this.attachments = attachments;
-	}
-
-	public Long getEndTime() {
-		return endTime;
-	}
-
-	public void setEndTime(Long endTime) {
-		this.endTime = endTime;
-	}
-
-	public String getOperatorType() {
-		return operatorType;
-	}
-
-	public void setOperatorType(String operatorType) {
-		this.operatorType = operatorType;
-	}
-
-	public Long getOperatorId() {
-		return operatorId;
-	}
-
-	public void setOperatorId(Long operatorId) {
-		this.operatorId = operatorId;
-	}
 
 	public Long getCategoryId() {
 		return categoryId;
 	}
 
+
 	public void setCategoryId(Long categoryId) {
 		this.categoryId = categoryId;
 	}
+
+
+	public StandardGroupDTO getGroup() {
+		return group;
+	}
+
+
+	public void setGroup(StandardGroupDTO group) {
+		this.group = group;
+	}
+
+
+	public Byte getVerificationResult() {
+		return verificationResult;
+	}
+
+
+	public void setVerificationResult(Byte verificationResult) {
+		this.verificationResult = verificationResult;
+	}
+
+
+	public List<AttachmentDescriptor> getAttachments() {
+		return attachments;
+	}
+
+
+	public void setAttachments(List<AttachmentDescriptor> attachments) {
+		this.attachments = attachments;
+	}
+
+
+	public Long getEndTime() {
+		return endTime;
+	}
+
+
+	public void setEndTime(Long endTime) {
+		this.endTime = endTime;
+	}
+
+
+	public String getOperatorType() {
+		return operatorType;
+	}
+
+
+	public void setOperatorType(String operatorType) {
+		this.operatorType = operatorType;
+	}
+
+
+	public Long getOperatorId() {
+		return operatorId;
+	}
+
+
+	public void setOperatorId(Long operatorId) {
+		this.operatorId = operatorId;
+	}
+
+
+	public String getMessage() {
+		return message;
+	}
+
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
 
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-
 }

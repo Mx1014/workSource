@@ -61,15 +61,18 @@ import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberGroupType;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.quality.CreatQualityStandardCommand;
+import com.everhomes.rest.quality.CreateQualityInspectionTaskCommand;
 import com.everhomes.rest.quality.DeleteQualityCategoryCommand;
 import com.everhomes.rest.quality.DeleteQualityStandardCommand;
 import com.everhomes.rest.quality.DeleteFactorCommand;
 import com.everhomes.rest.quality.EvaluationDTO;
 import com.everhomes.rest.quality.FactorsDTO;
+import com.everhomes.rest.quality.GetGroupMembersCommand;
 import com.everhomes.rest.quality.GroupUserDTO;
 import com.everhomes.rest.quality.ListEvaluationsCommand;
 import com.everhomes.rest.quality.ListEvaluationsResponse;
@@ -82,6 +85,8 @@ import com.everhomes.rest.quality.ListQualityInspectionTasksResponse;
 import com.everhomes.rest.quality.ListFactorsCommand;
 import com.everhomes.rest.quality.ListFactorsResponse;
 import com.everhomes.rest.quality.ListRecordsByTaskIdCommand;
+import com.everhomes.rest.quality.ListQualityInspectionLogsCommand;
+import com.everhomes.rest.quality.ListQualityInspectionLogsResponse;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.quality.ProcessType;
 import com.everhomes.rest.quality.QualityCategoriesDTO;
@@ -341,12 +346,18 @@ public class QualityServiceImpl implements QualityService {
 			category.setStatus(QualityInspectionCategoryStatus.ACTIVE.getCode());
 			category.setCreatorUid(user.getId());
 			if(cmd.getParentId() != null) {
-				QualityInspectionCategories parent = verifiedCategoryById(cmd.getId());
+				QualityInspectionCategories parent = verifiedCategoryById(cmd.getParentId());
 				category.setParentId(cmd.getParentId());
-				category.setPath(parent.getPath()+"/"+cmd.getName());
+				category.setPath(parent.getPath()+"/");
 			} else {
-				category.setPath("/"+cmd.getName());
+				category.setPath("/");
 			}
+			
+			if(cmd.getScore() != null)
+				category.setScore(cmd.getScore());
+			
+			if(cmd.getDescription() != null)
+				category.setDescription(cmd.getDescription());
 			
 			qualityProvider.createQualityInspectionCategories(category);
 		} else {
@@ -355,12 +366,18 @@ public class QualityServiceImpl implements QualityService {
 			category.setOwnerType(cmd.getOwnerType());
 			category.setOwnerId(cmd.getOwnerId());
 			if(cmd.getParentId() != null) {
-				QualityInspectionCategories parent = verifiedCategoryById(cmd.getId());
+				QualityInspectionCategories parent = verifiedCategoryById(cmd.getParentId());
 				category.setParentId(cmd.getParentId());
-				category.setPath(parent.getPath()+"/"+cmd.getName());
+				category.setPath(parent.getPath()+"/" + category.getId());
 			} else {
-				category.setPath("/"+cmd.getName());
+				category.setPath("/" + category.getId());
 			}
+			
+			if(cmd.getScore() != null)
+				category.setScore(cmd.getScore());
+			
+			if(cmd.getDescription() != null)
+				category.setDescription(cmd.getDescription());
 			
 			qualityProvider.updateQualityInspectionCategories(category);
 		}
@@ -870,6 +887,10 @@ public class QualityServiceImpl implements QualityService {
  
 		task.setResult(cmd.getVerificationResult());
 		task.setExecutiveTime(new Timestamp(System.currentTimeMillis()));
+		
+		if(cmd.getCategoryId() != null) {
+			task.setCategoryId(cmd.getCategoryId());
+		}
 		if(cmd.getOperatorType() != null) {
 			task.setOperatorType(cmd.getOperatorType());
 			record.setTargetType(cmd.getOperatorType());
@@ -1348,7 +1369,9 @@ public class QualityServiceImpl implements QualityService {
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         
-        List<QualityInspectionCategories> qaCategories = qualityProvider.listQualityInspectionCategories(locator, pageSize+1, ownerId, ownerType);
+        if(cmd.getParentId() == null)
+        	cmd.setParentId(0L);
+        List<QualityInspectionCategories> qaCategories = qualityProvider.listQualityInspectionCategories(locator, pageSize+1, ownerId, ownerType, cmd.getParentId());
 		
         Long nextPageAnchor = null;
         if(qaCategories.size() > pageSize) {
@@ -1358,12 +1381,53 @@ public class QualityServiceImpl implements QualityService {
         
         List<QualityCategoriesDTO> categories = qaCategories.stream().map((r) -> {
         	
-        	QualityCategoriesDTO dto = ConvertHelper.convert(r, QualityCategoriesDTO.class);  
+        	QualityCategoriesDTO dto = ConvertHelper.convert(r, QualityCategoriesDTO.class);
+        	dto.setPath(getQualityCategoryNamePath(dto.getPath()));
+        	
+        	List<QualityInspectionCategories> categoryTree = qualityProvider.listQualityInspectionCategoriesByPath(r.getPath());
+        	List<QualityCategoriesDTO> treeDtos = categoryTree.stream().map((t) -> {
+        		QualityCategoriesDTO treeDto = ConvertHelper.convert(t, QualityCategoriesDTO.class);
+        		treeDto.setPath(getQualityCategoryNamePath(treeDto.getPath()));
+        		
+        		return treeDto;
+        	}).collect(Collectors.toList());
+        	
+        	
+        	dto = this.getQualityCategorynMenu(treeDtos, dto);
         	return dto;
         }).collect(Collectors.toList());
         
         
         return new ListQualityCategoriesResponse(nextPageAnchor, categories);
+	}
+	
+	private QualityCategoriesDTO getQualityCategorynMenu(List<QualityCategoriesDTO> categories, QualityCategoriesDTO dto){
+		
+		List<QualityCategoriesDTO> categoryChildrens = new ArrayList<QualityCategoriesDTO>();
+		
+		for (QualityCategoriesDTO category : categories) {
+			if(dto.getId().equals(category.getParentId())){
+				QualityCategoriesDTO categoryDTO= getQualityCategorynMenu(categories, category);
+				categoryChildrens.add(categoryDTO);
+			}
+		}
+		dto.setChildrens(categoryChildrens);
+		
+		return dto;
+	}
+
+	private String getQualityCategoryNamePath(String path) {
+		path = path.substring(1,path.length());
+		String[] pathIds = path.split("/");
+		StringBuilder sb = new StringBuilder();
+		for(String pathId : pathIds) {
+			Long categoryId = Long.valueOf(pathId);
+			QualityInspectionCategories category = this.verifiedCategoryById(categoryId);
+			sb.append("/" + category.getName());
+		}
+		
+		String namePath = sb.toString();
+		return namePath;
 	}
 
 	@Override
@@ -1725,6 +1789,69 @@ public class QualityServiceImpl implements QualityService {
 			}
 				
 		}
+	}
+
+	@Override
+	public List<OrganizationDTO> listUserRelateOrgGroups() {
+		
+		User user = UserContext.current().getUser();
+		Integer namespaceId = UserContext.getCurrentNamespaceId(); 
+		
+		List<OrganizationDTO> groupDtos = organizationService.listUserRelateOrganizations(namespaceId, user.getId(), OrganizationGroupType.GROUP);
+		
+		return groupDtos;
+	}
+
+	@Override
+	public ListQualityInspectionLogsResponse listStandardRecords(
+			ListQualityInspectionLogsCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public QualityInspectionTaskDTO createQualityInspectionTask(CreateQualityInspectionTaskCommand cmd) {
+		
+		User user = UserContext.current().getUser();
+		long current = System.currentTimeMillis();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+		String day = sdf.format(current);
+		
+		QualityInspectionTasks task = new QualityInspectionTasks();
+		
+		task.setOwnerType(cmd.getOwnerType());
+		task.setOwnerId(cmd.getOwnerId());
+		task.setTaskName(cmd.getName());
+		task.setTaskType((byte) 1);
+		task.setStatus(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode());
+		task.setExecutiveGroupId(cmd.getGroup().getGroupId());
+		
+		
+		task.setExecutorType(OrganizationMemberTargetType.USER.getCode());
+		task.setExecutorId(user.getId());
+		
+		this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_QUALITY_TASK.getCode()).tryEnter(()-> {
+			Timestamp startTime = new Timestamp(current);
+			task.setExecutiveStartTime(startTime);
+			String taskNum = timestampToStr(new Timestamp(current)) + current;
+			task.setTaskNumber(taskNum);
+			qualityProvider.createVerificationTasks(task);
+			
+		});
+		
+		ReportVerificationResultCommand command = new ReportVerificationResultCommand();
+
+		command.setTaskId(task.getId());
+		command.setAttachments(cmd.getAttachments());
+		command.setMessage(cmd.getMessage());
+		command.setVerificationResult(cmd.getVerificationResult());
+		command.setEndTime(cmd.getEndTime());
+		command.setOperatorType(cmd.getOperatorType());
+		command.setOperatorId(cmd.getOperatorId());
+		command.setCategoryId(cmd.getCategoryId());
+		QualityInspectionTaskDTO dto = reportVerificationResult(command);
+		return dto;
+		
 	}
 
 }
