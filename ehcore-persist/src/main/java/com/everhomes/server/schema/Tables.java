@@ -924,6 +924,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhUserInvitationRoster EH_USER_INVITATION_ROSTER = com.everhomes.server.schema.tables.EhUserInvitationRoster.EH_USER_INVITATION_ROSTER;
 
 	/**
+	 * The table ehcore.eh_user_launch_pad_items
+	 */
+	public static final com.everhomes.server.schema.tables.EhUserLaunchPadItems EH_USER_LAUNCH_PAD_ITEMS = com.everhomes.server.schema.tables.EhUserLaunchPadItems.EH_USER_LAUNCH_PAD_ITEMS;
+
+	/**
 	 * The table ehcore.eh_user_likes
 	 */
 	public static final com.everhomes.server.schema.tables.EhUserLikes EH_USER_LIKES = com.everhomes.server.schema.tables.EhUserLikes.EH_USER_LIKES;
