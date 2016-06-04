@@ -55,6 +55,20 @@ public class EhUserLaunchPadItemsDao extends org.jooq.impl.DAOImpl<com.everhomes
 	}
 
 	/**
+	 * Fetch records that have <code>owner_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserLaunchPadItems> fetchByOwnerType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUserLaunchPadItems.EH_USER_LAUNCH_PAD_ITEMS.OWNER_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>owner_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserLaunchPadItems> fetchByOwnerId(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUserLaunchPadItems.EH_USER_LAUNCH_PAD_ITEMS.OWNER_ID, values);
+	}
+
+	/**
 	 * Fetch records that have <code>user_id IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserLaunchPadItems> fetchByUserId(java.lang.Byte... values) {

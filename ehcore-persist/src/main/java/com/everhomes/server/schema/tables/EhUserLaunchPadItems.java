@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUserLaunchPadItems extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhUserLaunchPadItemsRecord> {
 
-	private static final long serialVersionUID = 1982672599;
+	private static final long serialVersionUID = 1507396112;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_user_launch_pad_items</code>
@@ -35,6 +35,16 @@ public class EhUserLaunchPadItems extends org.jooq.impl.TableImpl<com.everhomes.
 	 * The column <code>ehcore.eh_user_launch_pad_items.item_id</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserLaunchPadItemsRecord, java.lang.Long> ITEM_ID = createField("item_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_user_launch_pad_items.owner_type</code>. community, organization
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserLaunchPadItemsRecord, java.lang.String> OWNER_TYPE = createField("owner_type", org.jooq.impl.SQLDataType.VARCHAR.length(64).nullable(false), this, "community, organization");
+
+	/**
+	 * The column <code>ehcore.eh_user_launch_pad_items.owner_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserLaunchPadItemsRecord, java.lang.Byte> OWNER_ID = createField("owner_id", org.jooq.impl.SQLDataType.TINYINT.nullable(false), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_user_launch_pad_items.user_id</code>.
