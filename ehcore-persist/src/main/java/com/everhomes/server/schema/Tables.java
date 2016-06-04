@@ -389,6 +389,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhGroupVisibleScopes EH_GROUP_VISIBLE_SCOPES = com.everhomes.server.schema.tables.EhGroupVisibleScopes.EH_GROUP_VISIBLE_SCOPES;
 
 	/**
+	 * The table ehcore.eh_hot_tags
+	 */
+	public static final com.everhomes.server.schema.tables.EhHotTags EH_HOT_TAGS = com.everhomes.server.schema.tables.EhHotTags.EH_HOT_TAGS;
+
+	/**
 	 * The table ehcore.eh_launch_pad_items
 	 */
 	public static final com.everhomes.server.schema.tables.EhLaunchPadItems EH_LAUNCH_PAD_ITEMS = com.everhomes.server.schema.tables.EhLaunchPadItems.EH_LAUNCH_PAD_ITEMS;

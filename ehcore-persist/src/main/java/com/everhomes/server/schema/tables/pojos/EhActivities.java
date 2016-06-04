@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhActivities implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1086650452;
+	private static final long serialVersionUID = 6976284;
 
 	private java.lang.Long     id;
 	private java.lang.String   uuid;
@@ -49,6 +49,7 @@ public class EhActivities implements java.io.Serializable {
 	private java.sql.Timestamp createTime;
 	private java.sql.Timestamp deleteTime;
 	private java.lang.String   guest;
+	private java.lang.String   mediaUrl;
 
 	public EhActivities() {}
 
@@ -88,7 +89,8 @@ public class EhActivities implements java.io.Serializable {
 		java.lang.Integer  changeVersion,
 		java.sql.Timestamp createTime,
 		java.sql.Timestamp deleteTime,
-		java.lang.String   guest
+		java.lang.String   guest,
+		java.lang.String   mediaUrl
 	) {
 		this.id = id;
 		this.uuid = uuid;
@@ -126,6 +128,7 @@ public class EhActivities implements java.io.Serializable {
 		this.createTime = createTime;
 		this.deleteTime = deleteTime;
 		this.guest = guest;
+		this.mediaUrl = mediaUrl;
 	}
 
 	public java.lang.Long getId() {
@@ -414,5 +417,13 @@ public class EhActivities implements java.io.Serializable {
 
 	public void setGuest(java.lang.String guest) {
 		this.guest = guest;
+	}
+
+	public java.lang.String getMediaUrl() {
+		return this.mediaUrl;
+	}
+
+	public void setMediaUrl(java.lang.String mediaUrl) {
+		this.mediaUrl = mediaUrl;
 	}
 }
