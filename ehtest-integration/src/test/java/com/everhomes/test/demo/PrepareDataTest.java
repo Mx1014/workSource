@@ -15,8 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhNamespaceResources;
 import com.everhomes.test.core.BaseServerTestCase;
-import com.everhomes.test.core.GsonHelper;
 import com.everhomes.test.core.persist.DbProvider;
+import com.everhomes.test.core.util.GsonHelper;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 

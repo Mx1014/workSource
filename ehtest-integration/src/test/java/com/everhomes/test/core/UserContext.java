@@ -7,6 +7,8 @@ import com.everhomes.rest.StringRestResponse;
 import com.everhomes.rest.user.LogonCommand;
 import com.everhomes.rest.user.LogonRestResponse;
 import com.everhomes.rest.version.VersionRealmType;
+import com.everhomes.test.core.http.HttpClientService;
+import com.everhomes.test.core.util.EncryptionUtils;
 import com.everhomes.util.StringHelper;
 
 public class UserContext {    

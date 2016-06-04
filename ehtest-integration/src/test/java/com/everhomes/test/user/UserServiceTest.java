@@ -9,8 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.everhomes.rest.user.GetUserInfoRestResponse;
 import com.everhomes.rest.user.LogonCommand;
 import com.everhomes.test.core.BaseServerTestCase;
-import com.everhomes.test.core.HttpClientService;
 import com.everhomes.test.core.UserContext;
+import com.everhomes.test.core.http.HttpClientService;
 import com.everhomes.util.StringHelper;
 
 public class UserServiceTest extends BaseServerTestCase {

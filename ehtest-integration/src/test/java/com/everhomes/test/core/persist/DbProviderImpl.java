@@ -33,7 +33,7 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.records.EhNamespaceDetailsRecord;
-import com.everhomes.test.core.GsonHelper;
+import com.everhomes.test.core.util.GsonHelper;
 import com.everhomes.util.StringHelper;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
