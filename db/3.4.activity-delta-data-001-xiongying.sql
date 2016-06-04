@@ -11,5 +11,5 @@ CREATE TABLE `eh_hot_tags` (
 `create_uid` BIGINT DEFAULT NULL,
 `delete_time` DATETIME DEFAULT NULL,
 `delete_uid` BIGINT DEFAULT NULL,
-PRIMARY KEY (`id`),
+PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
