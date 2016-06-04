@@ -35,7 +35,13 @@ import com.everhomes.rest.activity.ListNearByActivitiesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
 import com.everhomes.rest.activity.ListNearbyActivitiesResponse;
 import com.everhomes.rest.category.CategoryDTO;
+import com.everhomes.rest.forum.GetTopicCommand;
+import com.everhomes.rest.forum.PostDTO;
+import com.everhomes.rest.hotTag.SearchTagCommand;
+import com.everhomes.rest.hotTag.TagDTO;
+import com.everhomes.rest.hotTag.DeleteHotTagCommand;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.Tuple;
 
 @RestController

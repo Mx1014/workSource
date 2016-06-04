@@ -1,15 +1,21 @@
 package com.everhomes.rest.user;
 
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
  * <p>用户所收藏过的帖子或评论信息：</p>
  * <ul>
  * <li>communityId: 用户所在小区ID</li>
+ * <li>excludeCategories: 排除类型 {@link com.everhomes.rest.category.CategoryConstants}</li>
  * </ul>
  */
 public class ListUserFavoriteTopicCommand {
     private Long communityId;
+    @ItemType(Long.class)
+    private List<Long> excludeCategories;
 
     public Long getCommunityId() {
         return communityId;
@@ -19,7 +25,15 @@ public class ListUserFavoriteTopicCommand {
         this.communityId = communityId;
     }
 
-    @Override
+    public List<Long> getExcludeCategories() {
+		return excludeCategories;
+	}
+
+	public void setExcludeCategories(List<Long> excludeCategories) {
+		this.excludeCategories = excludeCategories;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

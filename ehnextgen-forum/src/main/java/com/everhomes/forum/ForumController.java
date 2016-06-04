@@ -21,6 +21,7 @@ import com.everhomes.rest.forum.DeleteCommentCommand;
 import com.everhomes.rest.forum.DeleteTopicCommand;
 import com.everhomes.rest.forum.FreeStuffCommand;
 import com.everhomes.rest.forum.GetTopicCommand;
+import com.everhomes.rest.forum.IncreasePostViewCountCommand;
 import com.everhomes.rest.forum.LikeTopicCommand;
 import com.everhomes.rest.forum.ListPostCommandResponse;
 import com.everhomes.rest.forum.ListTopicCommand;
@@ -366,6 +367,21 @@ public class ForumController extends ControllerBase {
             }
         
         searchSyncManager.SyncDb(SearchSyncType.POST);
+        
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /forum/increasePostViewCount</b>
+     * <p>增加阅读量计数</p>
+     */
+    @RequestMapping("increasePostViewCount")
+    @RestReturn(value=PostDTO.class)
+    public RestResponse increasePostViewCount(IncreasePostViewCountCommand cmd) {
+//        PostDTO postDto = this.forumService.getTopic(cmd);
         
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
