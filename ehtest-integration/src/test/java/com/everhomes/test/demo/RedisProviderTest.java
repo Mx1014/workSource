@@ -5,7 +5,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.everhomes.test.core.BaseServerTestCase;
+import com.everhomes.test.core.base.BaseServerTestCase;
 import com.everhomes.test.core.redis.RedisProvider;
 
 public class RedisProviderTest extends BaseServerTestCase {
@@ -25,7 +25,7 @@ public class RedisProviderTest extends BaseServerTestCase {
     /**
      * <p>清除redis storage，要谨慎操作，清除后要手工重启服务器并同步sequence</p>
      */
-    @Test
+    @Ignore @Test
     public void redisStorageFlushall() {
         redisProvider.redisStorageFlushAll();
     }

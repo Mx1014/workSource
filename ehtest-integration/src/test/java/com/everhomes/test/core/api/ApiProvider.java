@@ -1,7 +1,7 @@
 package com.everhomes.test.core.api;
 
 import com.everhomes.rest.ui.user.UserListUserRelatedScenesRestResponse;
-import com.everhomes.test.core.UserContext;
+import com.everhomes.test.core.base.UserContext;
 
 public interface ApiProvider {
     void syncSequence();

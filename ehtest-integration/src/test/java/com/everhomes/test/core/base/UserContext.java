@@ -1,5 +1,5 @@
 // @formatter:off
-package com.everhomes.test.core;
+package com.everhomes.test.core.base;
 
 import org.springframework.beans.factory.annotation.Value;
 

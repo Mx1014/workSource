@@ -3,7 +3,7 @@ package com.everhomes.test.core.http;
 import java.util.Map;
 
 import com.everhomes.rest.RestResponseBase;
-import com.everhomes.test.core.UserContext;
+import com.everhomes.test.core.base.UserContext;
 
 public interface HttpClientService {
     /**

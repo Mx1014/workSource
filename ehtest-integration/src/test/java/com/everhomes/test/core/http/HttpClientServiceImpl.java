@@ -35,7 +35,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.rest.RestResponseBase;
-import com.everhomes.test.core.UserContext;
+import com.everhomes.test.core.base.UserContext;
 import com.everhomes.util.GsonJacksonDateAdapter;
 import com.everhomes.util.GsonJacksonTimestampAdapter;
 import com.everhomes.util.SimpleConvertHelper;

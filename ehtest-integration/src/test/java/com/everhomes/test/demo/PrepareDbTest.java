@@ -6,8 +6,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.everhomes.test.core.BaseServerTestCase;
 import com.everhomes.test.core.api.ApiProvider;
+import com.everhomes.test.core.base.BaseServerTestCase;
 import com.everhomes.test.core.persist.DbProvider;
 import com.everhomes.test.core.redis.RedisProvider;
 
@@ -43,7 +43,7 @@ public class PrepareDbTest extends BaseServerTestCase {
      * <p>先准备一个SQL文件（包含所有表的TRUNCATE语句），执行该SQL文件把数据库中的数据全部去掉。</p>
      * <p>速度次之，大概需要2分钟，不同性能的机器表现不一样。执行前要先导入一份数据库（它是基于有表结构的情况下清数据的）。</p>
      */
-    @Test
+    @Ignore @Test
     public void prepareDbWithTruncateSql() {
         long totalStartTime = System.currentTimeMillis();
         

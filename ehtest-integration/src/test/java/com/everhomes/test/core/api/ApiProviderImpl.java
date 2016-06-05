@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.rest.StringRestResponse;
 import com.everhomes.rest.ui.user.UserListUserRelatedScenesRestResponse;
-import com.everhomes.test.core.UserContext;
+import com.everhomes.test.core.base.UserContext;
 import com.everhomes.test.core.http.HttpClientService;
 
 @Component
