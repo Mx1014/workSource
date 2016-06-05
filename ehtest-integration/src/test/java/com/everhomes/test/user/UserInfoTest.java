@@ -63,7 +63,7 @@ public class UserInfoTest extends BaseLoginAuthTestCase {
         assertEquals("左邻李四", user.getNickName());
     }
     
-    @Ignore @Test
+    @Test
     public void testTechparkNamespaceUserInfo() {
         Integer namespaceId = 1000000;
         String userIdentifier = "12000000001";
