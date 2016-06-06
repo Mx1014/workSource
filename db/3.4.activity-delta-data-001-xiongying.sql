@@ -1,4 +1,6 @@
 ALTER TABLE `eh_activities` ADD COLUMN media_url VARCHAR(1024) DEFAULT NULL;
+ALTER TABLE `eh_user_posts` ADD COLUMN target_type VARCHAR(32) DEFAULT NULL;
+ALTER TABLE `eh_user_posts` CHANGE post_id target_id BIGINT NOT NULL DEFAULT '0';
 
 CREATE TABLE `eh_hot_tags` (
 `id` BIGINT NOT NULL,
