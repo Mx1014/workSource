@@ -1,4 +1,4 @@
-package com.everhomes.test.core;
+package com.everhomes.test.core.util;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

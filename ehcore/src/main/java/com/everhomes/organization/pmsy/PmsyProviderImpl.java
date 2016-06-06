@@ -217,7 +217,7 @@ public class PmsyProviderImpl implements PmsyProvider {
 		SelectQuery<EhPmsyOrdersRecord> query = context.selectQuery(Tables.EH_PMSY_ORDERS);
 		
 		if(pageAnchor != null)
-			query.addConditions(Tables.EH_PMSY_ORDERS.ID.gt(pageAnchor));
+			query.addConditions(Tables.EH_PMSY_ORDERS.CREATE_TIME.lt(new Timestamp(pageAnchor)));
 		if(startDate != null)
 			query.addConditions(Tables.EH_PMSY_ORDERS.CREATE_TIME.gt(startDate));
 		if(endDate != null)
@@ -227,6 +227,7 @@ public class PmsyProviderImpl implements PmsyProvider {
 		if(StringUtils.isNotBlank(userContact))
 			query.addConditions(Tables.EH_PMSY_ORDERS.USER_CONTACT.eq(userContact));
 		query.addConditions(Tables.EH_PMSY_ORDERS.OWNER_ID.eq(communityId));
+		query.addOrderBy(Tables.EH_PMSY_ORDERS.CREATE_TIME.desc());
 		query.addLimit(pageSize);
 		
 		return query.fetch().map(r -> ConvertHelper.convert(r, PmsyOrder.class));

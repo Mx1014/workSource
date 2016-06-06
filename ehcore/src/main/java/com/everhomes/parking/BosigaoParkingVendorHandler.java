@@ -88,6 +88,9 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 			String plateOwnerPhone = (String) card.get("mobile");
 			Timestamp endTime = strToTimestamp(validEnd);
 			
+			if(!validStatus){
+				return resultList;
+			}
 			parkingCardDTO.setOwnerType(ParkingOwnerType.COMMUNITY.getCode());
 			parkingCardDTO.setOwnerId(ownerId);
 			parkingCardDTO.setParkingLotId(parkingLotId);
@@ -99,17 +102,9 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 			parkingCardDTO.setCardNumber(cardNumber);
 			parkingCardDTO.setPlateOwnerPhone(plateOwnerPhone);
 			
-			if(!validStatus){
-				parkingCardDTO.setIsValid(false);
-				resultList.add(parkingCardDTO);
-				return resultList;
-			}
-			else if(validStatus){
 				parkingCardDTO.setIsValid(true);
 				resultList.add(parkingCardDTO);
 				
-				return resultList;
-			}
 		}
         
         return resultList;
