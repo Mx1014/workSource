@@ -319,6 +319,27 @@ public class PmsyServiceImpl implements PmsyService{
 			endDate = new Timestamp(cmd.getEndDate());
 		List<PmsyOrder> list = pmsyProvider.searchBillingOrders(AppConstants.PAGINATION_DEFAULT_SIZE,cmd.getCommunityId(),cmd.getPageAnchor(),startDate, endDate, cmd.getUserName(), cmd.getUserContact());
 		
+		Long[] ids = list.stream().map(r -> r.getId()).collect(Collectors.toList()).toArray(new Long[0]);
+		List<PmsyOrderItem> orderItemList = pmsyProvider.ListBillOrderItems(ids);
+		outer:
+		for(PmsyOrder order:list){
+			for(PmsyOrderItem item:orderItemList){
+				if(order.getId().equals(item.getOrderId())){
+					List<PmsyOrderItem> items = order.getItems();
+					if(items == null)
+						items = new ArrayList<PmsyOrderItem>();
+					items.add(item);
+					order.setItems(items);
+					order.setBillDate(item.getBillDate());
+					if(items.size()>1){
+						order.setBillDate(null);
+						continue outer;
+					}
+						
+				}
+			}
+		}
+		
 		if(list.size() > 0){
     		response.setRequests(list.stream().map(r -> ConvertHelper.convert(r, PmBillsOrdersDTO.class))
     				.collect(Collectors.toList()));
