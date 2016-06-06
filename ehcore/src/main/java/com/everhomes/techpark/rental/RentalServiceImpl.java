@@ -64,6 +64,7 @@ import com.everhomes.rest.techpark.rental.AddRentalBillItemCommandResponse;
 import com.everhomes.rest.techpark.rental.AddRentalSiteCommand;
 import com.everhomes.rest.techpark.rental.AddRentalSiteSingleSimpleRule;
 import com.everhomes.rest.techpark.rental.AmorpmFlag;
+import com.everhomes.rest.techpark.rental.AttachmentDTO;
 import com.everhomes.rest.techpark.rental.AttachmentType;
 import com.everhomes.rest.techpark.rental.BatchCompleteBillCommand;
 import com.everhomes.rest.techpark.rental.BatchCompleteBillCommandResponse;
@@ -640,8 +641,6 @@ public class RentalServiceImpl implements RentalService {
 		this.dbProvider.execute((TransactionStatus status) -> {
 			java.util.Date reserveTime = new java.util.Date();
 			List<RentalSiteRule> rentalSiteRules = new ArrayList<RentalSiteRule>();
-	//		RentalRule rentalRule = rentalProvider.getRentalRule(
-	//				cmd.getOwnerId(),cmd.getOwnerType(), cmd.getSiteType());
 			if (reserveTime.before(new java.util.Date(cmd.getStartTime()
 					- rs.getRentalStartTime()))) {
 				LOGGER.error("reserve Time before reserve start time");
@@ -669,10 +668,7 @@ public class RentalServiceImpl implements RentalService {
 										"reserve Time after reserve end time"));
 			}
 			RentalBill rentalBill = ConvertHelper.convert(rs, RentalBill.class);
-			//TODO:OWNER
-	//		rentalBill.setOwnerId(cmd.getOwnerId());
-	//		rentalBill.setOwnerType(cmd.getOwnerType());
-	//		rentalBill.setSiteType(cmd.getSiteType());
+			rentalBill.setSiteName(rs.getSiteName());
 			rentalBill.setRentalSiteId(cmd.getRentalSiteId());
 			rentalBill.setRentalUid(userId);
 			rentalBill.setInvoiceFlag(InvoiceFlag.NONEED.getCode());
@@ -899,12 +895,7 @@ public class RentalServiceImpl implements RentalService {
 
 	@Override
 	public FindRentalBillsCommandResponse findRentalBills(
-			FindRentalBillsCommand cmd) {
-		if(null!=cmd.getCommunityId()){
-			cmd.setOwnerId(cmd.getCommunityId());
-			cmd.setOwnerType(RentalOwnerType.COMMUNITY.getCode());
-		}
-		
+			FindRentalBillsCommand cmd) { 
 		Long userId = UserContext.current().getUser().getId();
 		if (cmd.getPageAnchor() == null)
 			cmd.setPageAnchor(9223372036854775807L);
@@ -914,13 +905,13 @@ public class RentalServiceImpl implements RentalService {
 		ListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
 		List<RentalBill> billList = this.rentalProvider.listRentalBills(userId,
-				cmd.getOwnerId(),cmd.getOwnerType(), cmd.getSiteType(), locator, pageSize + 1,
+				cmd.getLaunchPadItemId(), locator, pageSize + 1,
 				cmd.getBillStatus());
 		FindRentalBillsCommandResponse response = new FindRentalBillsCommandResponse();
 		response.setRentalBills(new ArrayList<RentalBillDTO>());
 		for (RentalBill bill : billList) {
 
-			RentalBillDTO dto = new RentalBillDTO();
+			RentalBillDTO dto = ConvertHelper.convert(bill, RentalBillDTO.class);
 			mappingRentalBillDTO(dto, bill);
 
 			dto.setSiteItems(new ArrayList<SiteItemDTO>());
@@ -1436,6 +1427,10 @@ public class RentalServiceImpl implements RentalService {
  
 		// 循环存物品订单
 		AddRentalBillItemCommandResponse response = new AddRentalBillItemCommandResponse();
+
+		response.setName("资源预定订单");
+		response.setDescription("资源预定订单");
+		response.setOrderType("resourceOrder"); 
 		Long userId = UserContext.current().getUser().getId();
 
 		RentalBill bill = rentalProvider.findRentalBillById(cmd
@@ -1454,40 +1449,35 @@ public class RentalServiceImpl implements RentalService {
 		if (!cmd.getInvoiceFlag().equals(bill.getInvoiceFlag()))
 			rentalProvider.updateBillInvoice(cmd.getRentalBillId(),
 					cmd.getInvoiceFlag());
-		if (null != cmd.getRentalItems()) {
-			if (cmd.getRentalItems().get(0).getItemPrice() != null) {
-				java.math.BigDecimal itemMoney = new java.math.BigDecimal(0);
-				for (SiteItemDTO siDto : cmd.getRentalItems()) {
-					if (cmd.getRentalItems().get(0).getItemPrice() == null)
-						continue;
-					if(siDto.getId() == null) {
-						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-			                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of siDto id"+ siDto+".");
-					}
-					
-					if(cmd.getRentalBillId() == null) {
-						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-			                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of cmd RentalBillId"+ cmd+".");
-					}
-					RentalItemsBill rib = new RentalItemsBill();
-					rib.setTotalMoney(siDto.getItemPrice().multiply( new java.math.BigDecimal(siDto.getCounts())));
-					//TODO
-//					rib.setCommunityId(cmd.getOwnerId());
-					rib.setRentalSiteItemId(siDto.getId());
-					rib.setRentalCount(siDto.getCounts());
-					rib.setRentalBillId(cmd.getRentalBillId());
-					rib.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-							.getTime()));
-					rib.setCreatorUid(userId);
-					itemMoney  = itemMoney.add(rib.getTotalMoney());
-					rentalProvider.createRentalItemBill(rib);
+		//2016-6-2 10:32:44 fix bug :当有物品订单（说明是付款失败再次付款），就不再生成物品订单
+		if (null != cmd.getRentalItems()&&this.rentalProvider.findRentalItemsBillBySiteBillId(cmd.getRentalBillId())==null) {
+			java.math.BigDecimal itemMoney = new java.math.BigDecimal(0);
+			for (SiteItemDTO siDto : cmd.getRentalItems()) {
+				 
+				if(siDto.getId() == null) {
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+		                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of siDto id"+ siDto+".");
 				}
-				if (itemMoney.doubleValue() > 0) {
-					bill.setPayTotalMoney(bill.getSiteTotalMoney().add(itemMoney));
-					bill.setReserveMoney(bill.getReserveMoney().add(itemMoney));
-				}
-			
+				RentalSiteItem rSiteItem = this.rentalProvider.getRentalSiteItemById(siDto.getId());
+				if (null == rSiteItem)
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+		                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of siDto id"+ siDto+".");
+				
+				RentalItemsBill rib = new RentalItemsBill();
+				rib.setTotalMoney(rSiteItem.getPrice().multiply( new java.math.BigDecimal(siDto.getCounts())));
 
+				rib.setRentalSiteItemId(siDto.getId());
+				rib.setRentalCount(siDto.getCounts());
+				rib.setRentalBillId(cmd.getRentalBillId());
+				rib.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+						.getTime()));
+				rib.setCreatorUid(userId);
+				itemMoney  = itemMoney.add(rib.getTotalMoney());
+				rentalProvider.createRentalItemBill(rib);
+			}
+			if (itemMoney.doubleValue() > 0) {
+				bill.setPayTotalMoney(bill.getSiteTotalMoney().add(itemMoney));
+				bill.setReserveMoney(bill.getReserveMoney().add(itemMoney));
 			}
 		}
 		int compare = bill.getPayTotalMoney().compareTo(BigDecimal.ZERO);
@@ -1506,23 +1496,23 @@ public class RentalServiceImpl implements RentalService {
 		}
 		rentalProvider.updateRentalBill(bill);
 		
-		switch(cmd.getSiteType()){
-		case("MEETINGROOM"): 
-			response.setName("会议室预定订单");
-			response.setDescription("会议室预定订单");
-			response.setOrderType("huiyishiorder");
-			break;
-		case("VIPPARKING"):
-			response.setName("VIP车位预定订单");
-			response.setDescription("VIP车位预定订单");
-			response.setOrderType("vipcheweiorder");
-			break;
-		case("ELECSCREEN"):
-			response.setName("电子屏预定订单");
-			response.setDescription("电子屏预定订单");
-			response.setOrderType("dianzipingorder"); 
-			break;
-		}
+//		switch(cmd.getSiteType()){
+//		case("MEETINGROOM"): 
+//			response.setName("会议室预定订单");
+//			response.setDescription("会议室预定订单");
+//			response.setOrderType("huiyishiorder");
+//			break;
+//		case("VIPPARKING"):
+//			response.setName("VIP车位预定订单");
+//			response.setDescription("VIP车位预定订单");
+//			response.setOrderType("vipcheweiorder");
+//			break;
+//		case("ELECSCREEN"):
+//			response.setName("电子屏预定订单");
+//			response.setDescription("电子屏预定订单");
+//			response.setOrderType("dianzipingorder"); 
+//			break;
+//		}
 		Long orderNo = null;
 		if (bill.getStatus().equals(SiteBillStatus.LOCKED.getCode())) {
 			orderNo = onlinePayService.createBillId(DateHelper
@@ -1541,44 +1531,22 @@ public class RentalServiceImpl implements RentalService {
 		}
 		// save bill and online pay bill
 		RentalBillPaybillMap billmap = new RentalBillPaybillMap();
-
-		billmap.setOwnerId(cmd.getOwnerId());
-		billmap.setOwnerType(cmd.getOwnerType());
-		billmap.setSiteType(cmd.getSiteType());
+ 
 		billmap.setRentalBillId(cmd.getRentalBillId());
 		billmap.setOnlinePayBillId(orderNo);
 		billmap.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 				.getTime()));
 		billmap.setCreatorUid(userId);
 		rentalProvider.createRentalBillPaybillMap(billmap);
-
-		if (null != cmd.getAttachmentType()) {
+		for(AttachmentDTO attachment : cmd.getRentalAttachments()){
 			RentalBillAttachment rba = new RentalBillAttachment();
 			rba.setRentalBillId(cmd.getRentalBillId());
-			//TODO 
-//			rba.setOwnerId(cmd.getOwnerId());
-//			rba.setOwnerType(cmd.getOwnerType());
-//			rba.setSiteType(cmd.getSiteType());
-
 			rba.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 					.getTime()));
 			rba.setCreatorUid(userId);
-			rba.setAttachmentType(cmd.getAttachmentType());
-			if (cmd.getAttachmentType().equals(AttachmentType.STRING.getCode())) {
-				if (null != cmd.getRentalAttachments()
-						&& cmd.getRentalAttachments().size() > 0) {
-					for (String attachment : cmd.getRentalAttachments()) {
-
-						rba.setContent(attachment);
-						rentalProvider.createRentalBillAttachment(rba);
-					}
-				}
-			} else if (cmd.getAttachmentType().equals(
-					AttachmentType.EMAIL.getCode())) {
-				rentalProvider.createRentalBillAttachment(rba);
-			} else {
-			}
-		}
+			rba.setAttachmentType(attachment.getAttachmentType());
+			rba.setContent(attachment.getContent());
+		} 
 		//签名
 		this.setSignatureParam(response);
 		// 客户端生成订单
@@ -1678,6 +1646,8 @@ public class RentalServiceImpl implements RentalService {
 			RentalBillPaybillMap bpbMap= rentalProvider.findRentalBillPaybillMapByOrderNo(cmd.getOrderNo());
 			RentalBill bill = rentalProvider.findRentalBillById(bpbMap.getRentalBillId());
 			bill.setPaidMoney(bill.getPaidMoney().add(new java.math.BigDecimal(cmd.getPayAmount())));
+			bill.setVendorType(cmd.getVendorType());
+			bpbMap.setVendorType(cmd.getVendorType());
 			if(bill.getStatus().equals(SiteBillStatus.LOCKED.getCode())){
 				bill.setStatus(SiteBillStatus.RESERVED.getCode());
 			}

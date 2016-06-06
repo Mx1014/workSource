@@ -390,14 +390,14 @@ public class RentalProviderImpl implements RentalProvider {
 	}
 
 	@Override
-	public List<RentalBill> listRentalBills(Long userId,
-			Long ownerId,String ownerType, String siteType,
+	public List<RentalBill> listRentalBills(Long userId,Long launchPadItemId,
 			ListingLocator locator, int count, Byte status) {
 		final List<RentalBill> result = new ArrayList<RentalBill>();
 		Condition condition = Tables.EH_RENTAL_BILLS.ID.lt(locator.getAnchor());
 		//TODO:
-//		condition = condition.and(Tables.EH_RENTAL_BILLS.OWNER_ID
-//				.eq(ownerId));
+		if(null!=launchPadItemId)
+			condition = condition.and(Tables.EH_RENTAL_BILLS.LAUNCH_PAD_ITEM_ID
+				.eq(launchPadItemId));
 //		condition = condition.and(Tables.EH_RENTAL_BILLS.OWNER_TYPE
 //				.eq(ownerType));
 //		if (StringUtils.isNotEmpty(siteType))
@@ -1071,5 +1071,21 @@ public class RentalProviderImpl implements RentalProvider {
 			return result ;
 		return null;
 
+	}
+
+	@Override
+	public RentalSiteItem getRentalSiteItemById(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTAL_SITE_ITEMS);
+		Condition condition = Tables.EH_RENTAL_SITE_ITEMS.ID.equal(id);
+		step.where(condition);
+		List<RentalSiteItem> result = step
+				.orderBy(Tables.EH_RENTAL_SITE_ITEMS.ID.desc()).fetch().map((r) -> {
+					return ConvertHelper.convert(r, RentalSiteItem.class);
+				});
+		if (null != result && result.size() > 0)
+			return result.get(0);
+		return null;
 	}
 }
