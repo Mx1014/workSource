@@ -22,7 +22,7 @@ import com.everhomes.rest.forum.ListPostCommandResponse;
 import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.ui.forum.GetTopicQueryFilterCommand;
 import com.everhomes.rest.ui.forum.GetTopicSentScopeCommand;
-import com.everhomes.rest.ui.forum.ListTopicBySceneCommand;
+import com.everhomes.rest.ui.forum.ListNoticeBySceneCommand;
 import com.everhomes.rest.ui.forum.NewTopicBySceneCommand;
 import com.everhomes.rest.ui.forum.SearchTopicBySceneCommand;
 import com.everhomes.rest.ui.forum.TopicFilterDTO;
@@ -112,12 +112,12 @@ public class ForumUiController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /ui/forum/listTopicByScene</b>
+     * <b>URL: /ui/forum/listNoticeByScene</b>
      * <p>根据场景查询贴</p>
      */
-    @RequestMapping("listTopicByScene")
+    @RequestMapping("listNoticeByScene")
     @RestReturn(value=ListPostCommandResponse.class)
-    public RestResponse listTopicByScene(ListTopicBySceneCommand cmd) {
+    public RestResponse listNoticeByScene(ListNoticeBySceneCommand cmd) {
         
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

@@ -16,7 +16,7 @@ import com.everhomes.util.StringHelper;
  * <li>pageSize: 每页的数量</li>
  * </ul>
  */
-public class ListTopicBySceneCommand {
+public class ListNoticeBySceneCommand {
 	
     private String sceneToken;
     
@@ -31,7 +31,7 @@ public class ListTopicBySceneCommand {
     
     private Integer pageSize;
     
-    public ListTopicBySceneCommand() {
+    public ListNoticeBySceneCommand() {
     }
 
     public String getSceneToken() {
