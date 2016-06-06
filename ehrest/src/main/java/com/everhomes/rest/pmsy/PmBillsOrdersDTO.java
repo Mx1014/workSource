@@ -34,6 +34,7 @@ public class PmBillsOrdersDTO {
 	private Long creatorUid;
 	private Timestamp createTime;
 	private String paidType;
+	private Timestamp billDate;
 	
 	public Long getId() {
 		return id;
@@ -112,4 +113,10 @@ public class PmBillsOrdersDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+	public Timestamp getBillDate() {
+		return billDate;
+	}
+	public void setBillDate(Timestamp billDate) {
+		this.billDate = billDate;
+	}
 }
