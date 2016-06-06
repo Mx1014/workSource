@@ -1,15 +1,15 @@
 //
-// EvhPmsyListAddressesRestResponse.h
+// EvhForumIncreasePostViewCountRestResponse.h
 //
 #import "RestResponseBase.h"
+#import "EvhPostDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhPmsyListAddressesRestResponse
+// EvhForumIncreasePostViewCountRestResponse
 //
-@interface EvhPmsyListAddressesRestResponse : EvhRestResponseBase
+@interface EvhForumIncreasePostViewCountRestResponse : EvhRestResponseBase
 
-// array of EvhAddressDTO* objects
-@property(nonatomic, strong) NSMutableArray* response;
+@property(nonatomic, strong) EvhPostDTO* response;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

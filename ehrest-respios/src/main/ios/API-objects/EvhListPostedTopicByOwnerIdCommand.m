@@ -23,6 +23,7 @@
 {
     self = [super init];
     if(self) {
+        _excludeCategories = [NSMutableArray new];
         return self;
     }
     return nil;
@@ -34,6 +35,13 @@
         [jsonObject setObject: self.ownerUid forKey: @"ownerUid"];
     if(self.communityId)
         [jsonObject setObject: self.communityId forKey: @"communityId"];
+    if(self.excludeCategories) {
+        NSMutableArray* jsonArray = [NSMutableArray new];
+        for(NSNumber* item in self.excludeCategories) {
+            [jsonArray addObject:item];
+        }
+        [jsonObject setObject: jsonArray forKey: @"excludeCategories"];
+    }
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -47,6 +55,12 @@
         if(self.communityId && [self.communityId isEqual:[NSNull null]])
             self.communityId = nil;
 
+        {
+            NSArray* jsonArray = [jsonObject objectForKey: @"excludeCategories"];
+            for(id itemJson in jsonArray) {
+                [self.excludeCategories addObject: itemJson];
+            }
+        }
         return self;
     }
     

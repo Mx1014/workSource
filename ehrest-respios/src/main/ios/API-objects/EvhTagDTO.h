@@ -1,22 +1,19 @@
 //
-// EvhListPostedTopicByOwnerIdCommand.h
+// EvhTagDTO.h
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhListPostedTopicByOwnerIdCommand
+// EvhTagDTO
 //
-@interface EvhListPostedTopicByOwnerIdCommand
+@interface EvhTagDTO
     : NSObject<EvhJsonSerializable>
 
 
-@property(nonatomic, copy) NSNumber* ownerUid;
+@property(nonatomic, copy) NSNumber* id;
 
-@property(nonatomic, copy) NSNumber* communityId;
-
-// item type NSNumber*
-@property(nonatomic, strong) NSMutableArray* excludeCategories;
+@property(nonatomic, copy) NSString* name;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

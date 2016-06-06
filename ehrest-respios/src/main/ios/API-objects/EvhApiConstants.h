@@ -439,6 +439,7 @@
 #define EVH_FORUM_DELETECOMMENT_URL @"/forum/deleteComment"
 #define EVH_FORUM_DELETETOPIC_URL @"/forum/deleteTopic"
 #define EVH_FORUM_GETTOPIC_URL @"/forum/getTopic"
+#define EVH_FORUM_INCREASEPOSTVIEWCOUNT_URL @"/forum/increasePostViewCount"
 #define EVH_FORUM_LIKETOPIC_URL @"/forum/likeTopic"
 #define EVH_FORUM_LISTTOPICCOMMENTS_URL @"/forum/listTopicComments"
 #define EVH_FORUM_LISTTOPICS_URL @"/forum/listTopics"

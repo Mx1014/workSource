@@ -1,22 +1,21 @@
 //
-// EvhListPostedTopicByOwnerIdCommand.h
+// EvhIncreasePostViewCountCommand.h
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhListPostedTopicByOwnerIdCommand
+// EvhIncreasePostViewCountCommand
 //
-@interface EvhListPostedTopicByOwnerIdCommand
+@interface EvhIncreasePostViewCountCommand
     : NSObject<EvhJsonSerializable>
 
 
-@property(nonatomic, copy) NSNumber* ownerUid;
+@property(nonatomic, copy) NSNumber* forumId;
+
+@property(nonatomic, copy) NSNumber* topicId;
 
 @property(nonatomic, copy) NSNumber* communityId;
-
-// item type NSNumber*
-@property(nonatomic, strong) NSMutableArray* excludeCategories;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

@@ -2,7 +2,7 @@
 // EvhEnterpriseDTO.m
 //
 #import "EvhEnterpriseDTO.h"
-#import "EvhAddressDTO.h"
+#import "EvhAddressAddressDTO.h"
 #import "EvhEnterpriseAttachmentDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -120,7 +120,7 @@
         [jsonObject setObject: self.feedbackForumId forKey: @"feedbackForumId"];
     if(self.address) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhAddressDTO* item in self.address) {
+        for(EvhAddressAddressDTO* item in self.address) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -292,7 +292,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"address"];
             for(id itemJson in jsonArray) {
-                EvhAddressDTO* item = [EvhAddressDTO new];
+                EvhAddressAddressDTO* item = [EvhAddressAddressDTO new];
                 
                 [item fromJson: itemJson];
                 [self.address addObject: item];
