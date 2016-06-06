@@ -390,7 +390,7 @@ public class QualityController extends ControllerBase {
 	@RestReturn(value = ListQualityInspectionLogsResponse.class)
 	public RestResponse listQualityInspectionLogs(ListQualityInspectionLogsCommand cmd) {
 		
-		ListQualityInspectionLogsResponse recordDtos = qualityService.listStandardRecords(cmd);
+		ListQualityInspectionLogsResponse recordDtos = qualityService.listQualityInspectionLogs(cmd);
 		
 		RestResponse response = new RestResponse(recordDtos);
 		response.setErrorCode(ErrorCodes.SUCCESS);

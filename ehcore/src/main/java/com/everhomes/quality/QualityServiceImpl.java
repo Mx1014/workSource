@@ -92,6 +92,9 @@ import com.everhomes.rest.quality.ProcessType;
 import com.everhomes.rest.quality.QualityCategoriesDTO;
 import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.rest.quality.QualityInspectionCategoryStatus;
+import com.everhomes.rest.quality.QualityInspectionLogDTO;
+import com.everhomes.rest.quality.QualityInspectionLogProcessType;
+import com.everhomes.rest.quality.QualityInspectionLogType;
 import com.everhomes.rest.quality.QualityInspectionTaskDTO;
 import com.everhomes.rest.quality.QualityInspectionTaskRecordsDTO;
 import com.everhomes.rest.quality.QualityInspectionTaskResult;
@@ -167,6 +170,9 @@ public class QualityServiceImpl implements QualityService {
 	@Autowired
 	private CoordinationProvider coordinationProvider;
 	
+	@Autowired
+	private UserProvider userProvider;
+	
 	@Override
 	public QualityStandardsDTO creatQualityStandard(CreatQualityStandardCommand cmd) {
 		
@@ -202,12 +208,26 @@ public class QualityServiceImpl implements QualityService {
 			
 		qualityProvider.createQualityInspectionStandards(standard);
 		
+		createQualityInspectionStandardLogs(standard, QualityInspectionLogProcessType.INSERT.getCode(), user.getId());
+		
 		List<StandardGroupDTO> groupList = cmd.getGroup();
 		processStandardGroups(groupList, standard);
 		processRepeatSetting(standard);
 		QualityStandardsDTO dto = ConvertHelper.convert(standard, QualityStandardsDTO.class);
 		return dto;
 		
+	}
+	
+	private void createQualityInspectionStandardLogs(QualityInspectionStandards standard, Byte processType, Long userId) {
+		
+		QualityInspectionLogs log = new QualityInspectionLogs();
+		log.setOwnerType(standard.getOwnerType());
+		log.setOwnerId(standard.getOwnerId());
+		log.setTargetType(QualityInspectionLogType.STANDARD.getCode());
+		log.setTargetId(standard.getId());
+		log.setProcessType(processType);
+		log.setOperatorUid(userId);
+		qualityProvider.createQualityInspectionLogs(log);
 	}
 
 	@Override
@@ -223,6 +243,8 @@ public class QualityServiceImpl implements QualityService {
 		standard.setDescription(cmd.getDescription());
 		standard.setOperatorUid(user.getId());
 		qualityProvider.updateQualityInspectionStandards(standard);
+		
+		createQualityInspectionStandardLogs(standard, QualityInspectionLogProcessType.UPDATE.getCode(), user.getId());
 		
 		List<StandardGroupDTO> groupList = cmd.getGroup();
 		processStandardGroups(groupList, standard);
@@ -707,13 +729,13 @@ public class QualityServiceImpl implements QualityService {
         	
         	tasks = qualityProvider.listVerificationTasks(locator, pageSize + 1, ownerId, ownerType, 
             		cmd.getTaskType(), executeUid, startDate, endDate, cmd.getGroupId(),
-            		cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared, standardIds);
+            		cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared, standardIds, cmd.getManualFlag());
 
         	
         } else {
         	tasks = qualityProvider.listVerificationTasks(locator, pageSize + 1, ownerId, ownerType, 
         		cmd.getTaskType(), executeUid, startDate, endDate, cmd.getGroupId(),
-        		cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared, null);
+        		cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared, null, cmd.getManualFlag());
         }
         
         Long nextPageAnchor = null;
@@ -790,14 +812,10 @@ public class QualityServiceImpl implements QualityService {
 		List<QualityInspectionTaskDTO> dtoList = tasks.stream().map((r) -> {
         	
 //        	QualityInspectionStandards standard = verifiedStandardById(r.getStandardId());
-			QualityInspectionStandards standard = qualityProvider.findStandardById(r.getStandardId());
-			if(standard == null) {
-				LOGGER.error("the standard which id="+r.getStandardId()+" don't exist!");
-				return null;
-			}
-        	QualityInspectionCategories category = verifiedCategoryById(standard.getCategoryId());
-        	r.setCategoryName(category.getName());
-        	
+			
+			QualityInspectionCategories category = verifiedCategoryById(r.getCategoryId());
+        	r.setCategoryName(getQualityCategoryNamePath(category.getPath()));
+			
         	if(executeUid != null) {
         		if(r.getExecutorId() != null && r.getExecutorId().equals(executeUid)) {
         			r.setTaskFlag(QualityTaskType.VERIFY_TASK.getCode());
@@ -807,7 +825,12 @@ public class QualityServiceImpl implements QualityService {
         	}
         	
         	QualityInspectionTaskDTO dto = ConvertHelper.convert(r, QualityInspectionTaskDTO.class);  
-        	dto.setStandardDescription(standard.getDescription());
+        	
+        	dto.setCategoryDescription(category.getDescription());
+        	QualityInspectionStandards standard = qualityProvider.findStandardById(r.getStandardId());
+			if(standard != null) {
+				dto.setStandardDescription(standard.getDescription());
+			} 
         	
         	Organization group = organizationProvider.findOrganizationById(r.getExecutiveGroupId());
 			if(group != null)
@@ -1289,10 +1312,16 @@ public class QualityServiceImpl implements QualityService {
 
 		this.qualityProvider.populateRecordAttachment(lastRecord);
 		
-		QualityInspectionTaskDTO dto = ConvertHelper.convert(task, QualityInspectionTaskDTO.class);
-		QualityInspectionTaskRecordsDTO recordDto = ConvertHelper.convert(task.getRecord(), QualityInspectionTaskRecordsDTO.class);
-   	 	dto.setRecord(recordDto);
-		return dto;
+		List<QualityInspectionTasks> tasks = new ArrayList<QualityInspectionTasks>();
+		tasks.add(task);
+		List<QualityInspectionTaskDTO> dtos = convertQualityInspectionTaskToDTO(tasks, user.getId()); 
+		//ConvertHelper.convert(task, QualityInspectionTaskDTO.class);
+//		QualityInspectionTaskRecordsDTO recordDto = ConvertHelper.convert(task.getRecord(), QualityInspectionTaskRecordsDTO.class);
+//   	 	dto.setRecord(recordDto);
+		if(dtos != null && dtos.size() > 0)
+			return dtos.get(0);
+		
+		return null;
 	}
 	
 	private void processRecordAttachments(long userId, List<AttachmentDescriptor> attachmentList, QualityInspectionTaskRecords record) {
@@ -1604,13 +1633,13 @@ public class QualityServiceImpl implements QualityService {
         	
         	tasks = qualityProvider.listVerificationTasks(locator, pageSize + 1, ownerId, ownerType, 
             		cmd.getTaskType(), null, startDate, endDate, cmd.getGroupId(),
-            		cmd.getExecuteStatus(), cmd.getReviewStatus(), false, standardIds);
+            		cmd.getExecuteStatus(), cmd.getReviewStatus(), false, standardIds, cmd.getManualFlag());
 
         	
         } else {
         	tasks = qualityProvider.listVerificationTasks(locator, pageSize + 1, ownerId, ownerType, 
         		cmd.getTaskType(), null, startDate, endDate, cmd.getGroupId(),
-        		cmd.getExecuteStatus(), cmd.getReviewStatus(), false, null);
+        		cmd.getExecuteStatus(), cmd.getReviewStatus(), false, null, cmd.getManualFlag());
         }
 
 		List<QualityInspectionTaskRecords> records = new ArrayList<QualityInspectionTaskRecords>();
@@ -1687,6 +1716,7 @@ public class QualityServiceImpl implements QualityService {
 		row.createCell(++i).setCellValue("审阅状态");
 		row.createCell(++i).setCellValue("审阅结果");
 		row.createCell(++i).setCellValue("审阅人");
+		row.createCell(++i).setCellValue("是否手动添加");
 	}
 	
 	private void setNewInspectionTasksBookRow(Sheet sheet ,QualityInspectionTaskDTO dto){
@@ -1724,9 +1754,18 @@ public class QualityServiceImpl implements QualityService {
 				row.createCell(++i).setCellValue("已审阅");
 				row.createCell(++i).setCellValue("不合格");
 			}
-		}
-		else {
+		} else {
 			row.createCell(++i).setCellValue("");
+			row.createCell(++i).setCellValue("");
+		}
+		if(dto.getManualFlag() != null) {
+			if(dto.getManualFlag() == 0)
+				row.createCell(++i).setCellValue("否");
+			
+			if(dto.getManualFlag() == 1)
+				row.createCell(++i).setCellValue("是");
+			
+		} else {
 			row.createCell(++i).setCellValue("");
 		}
 		
@@ -1803,10 +1842,49 @@ public class QualityServiceImpl implements QualityService {
 	}
 
 	@Override
-	public ListQualityInspectionLogsResponse listStandardRecords(
+	public ListQualityInspectionLogsResponse listQualityInspectionLogs(
 			ListQualityInspectionLogsCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        
+        List<QualityInspectionLogs> logs = qualityProvider.listQualityInspectionLogs(cmd.getOwnerType(), cmd.getOwnerId(),
+        									cmd.getTargetType(), cmd.getTargetId(), locator, pageSize+1);
+        
+        Long nextPageAnchor = null;
+        if(logs != null && logs.size() > pageSize) {
+        	logs.remove(logs.size() - 1);
+            nextPageAnchor = logs.get(logs.size() - 1).getId();
+        }
+
+        List<QualityInspectionLogDTO> dtos = logs.stream().map((r) -> {
+        	
+        	QualityInspectionLogDTO dto = ConvertHelper.convert(r, QualityInspectionLogDTO.class);
+        	dto.setOperateType(r.getProcessType());
+        	dto.setOperatorId(r.getOperatorUid());
+        	dto.setOperateTime(r.getCreateTime());
+        	if(r.getOperatorUid() != null ) {
+        		User user = userProvider.findUserById(r.getOperatorUid());
+        		if(user != null) {
+        			dto.setOperatorName(user.getNickName());
+        		}
+        	}
+        	
+        	if(QualityInspectionLogType.STANDARD.getCode().equals(r.getTargetType()) && r.getTargetId() != null) {
+        		QualityInspectionStandards standard = qualityProvider.findStandardById(r.getTargetId());
+        		if(standard != null) {
+        			dto.setTargetName(standard.getName());
+        		}
+        	}
+        	return dto;
+        }).collect(Collectors.toList());
+        
+        ListQualityInspectionLogsResponse response = new ListQualityInspectionLogsResponse();
+        response.setNextPageAnchor(nextPageAnchor);
+        response.setDtos(dtos);
+		
+		return response;
 	}
 
 	@Override
@@ -1825,6 +1903,7 @@ public class QualityServiceImpl implements QualityService {
 		task.setTaskType((byte) 1);
 		task.setStatus(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode());
 		task.setExecutiveGroupId(cmd.getGroup().getGroupId());
+		task.setManualFlag((byte) 1);
 		
 		
 		task.setExecutorType(OrganizationMemberTargetType.USER.getCode());

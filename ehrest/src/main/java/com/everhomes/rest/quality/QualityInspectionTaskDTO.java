@@ -41,6 +41,7 @@ import com.everhomes.util.StringHelper;
  *  <li>groupUsers: 参考com.everhomes.rest.quality.GroupUserDTO</li>
  *  <li>standardDescription: 标准内容</li>
  *  <li>categoryId: 类型id</li>
+ *  <li>categoryDescription: 规范内容</li>
  *  <li>manualFlag : 是否手动添加 0：自动生成，1：手动添加</li>
  * </ul>
  */
@@ -107,6 +108,8 @@ public class QualityInspectionTaskDTO {
 	private Byte manualFlag;
 	
 	private String standardDescription;
+	
+	private String categoryDescription;
 
 	public Long getId() {
 		return id;
@@ -346,6 +349,14 @@ public class QualityInspectionTaskDTO {
 
 	public void setManualFlag(Byte manualFlag) {
 		this.manualFlag = manualFlag;
+	}
+
+	public String getCategoryDescription() {
+		return categoryDescription;
+	}
+
+	public void setCategoryDescription(String categoryDescription) {
+		this.categoryDescription = categoryDescription;
 	}
 
 	@Override

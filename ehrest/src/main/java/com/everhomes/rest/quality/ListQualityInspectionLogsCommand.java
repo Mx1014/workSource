@@ -7,8 +7,8 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *  <li>ownerId: 标准所属的主体id</li>
- *  <li>ownerType: 标准所属的主体，com.everhomes.rest.quality.OwnerType</li>
+ *  <li>ownerId: 记录所属的主体id</li>
+ *  <li>ownerType: 记录所属的主体，com.everhomes.rest.quality.OwnerType</li>
  *  <li>targetType: 目标类型，标准的话为standard</li>
  *  <li>targetId: 目标id</li>
  *  <li>pageAnchor: 锚点</li>
