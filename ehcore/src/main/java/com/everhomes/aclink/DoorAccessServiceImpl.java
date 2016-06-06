@@ -1675,7 +1675,21 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         auth.setDriver(DoorAccessDriverType.LINGLING.getCode());
         auth.setOrganization(cmd.getOrganization());
         
-        List<DoorAccess> childs = doorAccessProvider.listDoorAccessByGroupId(doorAccess.getId(), 32);
+        List<DoorAccess> childs = null;
+        
+        if(doorAccess.getDoorType().equals(DoorAccessType.ACLINK_LINGLING.getCode())) {
+            if(!doorAccess.getGroupid().equals(0l)) {
+                doorAccess = doorAccessProvider.getDoorAccessById(doorAccess.getGroupid());
+            } else {
+                childs = new ArrayList<DoorAccess>();
+                childs.add(doorAccess);
+            }
+        }
+        
+      if(childs == null) {
+            childs = doorAccessProvider.listDoorAccessByGroupId(doorAccess.getId(), 32);    
+        }
+        
         List<Long> deviceIds = new ArrayList<Long>();
         for(DoorAccess child : childs) {
             Aclink ca = aclinkProvider.getAclinkByDoorId(child.getId());
