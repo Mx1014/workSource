@@ -11,6 +11,8 @@ alter table `eh_quality_inspection_tasks` add column `manual_flag` tinyint(4) NO
 -- 新增表记录修改的记录
 CREATE TABLE `eh_quality_inspection_logs` (
 `id` bigint(20) NOT NULL COMMENT 'id',
+`owner_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the log, enterprise, etc',
+`owner_id` bigint(20) NOT NULL DEFAULT '0',
 `target_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'standard, etc',
 `target_id` bigint(20) NOT NULL DEFAULT '0',
 `process_type` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: none, 1: insert, 2: update, 3: delete',
