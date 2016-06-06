@@ -1,20 +1,20 @@
 //
-// EvhAdminCommunityUpdateBuildingRestResponse.m
+// EvhUiLaunchpadGetMoreItemsBySceneRestResponse.m
 //
-#import "EvhAdminCommunityUpdateBuildingRestResponse.h"
-#import "EvhBuildingDTO.h"
+#import "EvhUiLaunchpadGetMoreItemsBySceneRestResponse.h"
+#import "EvhGetLaunchPadItemsCommandResponse.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhAdminCommunityUpdateBuildingRestResponse
+// EvhUiLaunchpadGetMoreItemsBySceneRestResponse
 //
 
-@implementation EvhAdminCommunityUpdateBuildingRestResponse
+@implementation EvhUiLaunchpadGetMoreItemsBySceneRestResponse
 
 +(id) withJsonString: (NSString*) jsonString
 {
     id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
     if(jsonObject != nil) {
-        EvhAdminCommunityUpdateBuildingRestResponse* obj = [EvhAdminCommunityUpdateBuildingRestResponse new];
+        EvhUiLaunchpadGetMoreItemsBySceneRestResponse* obj = [EvhUiLaunchpadGetMoreItemsBySceneRestResponse new];
         return [obj fromJson:jsonObject];
     }
     return nil;
@@ -45,7 +45,7 @@
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
         [super fromJson: jsonObject];
         NSMutableDictionary* dic =  (NSMutableDictionary*)[jsonObject objectForKey: @"response"];
-        self.response = [EvhBuildingDTO new];
+        self.response = [EvhGetLaunchPadItemsCommandResponse new];
         self.response = [self.response fromJson: dic];
         return self;
     }

@@ -1,21 +1,19 @@
 //
-// EvhListBuildingsByStatusCommandResponse.h
+// EvhLaunchPadItemSort.h
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
-#import "EvhBuildingDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhListBuildingsByStatusCommandResponse
+// EvhLaunchPadItemSort
 //
-@interface EvhListBuildingsByStatusCommandResponse
+@interface EvhLaunchPadItemSort
     : NSObject<EvhJsonSerializable>
 
 
-@property(nonatomic, copy) NSNumber* nextPageAnchor;
+@property(nonatomic, copy) NSNumber* id;
 
-// item type EvhBuildingDTO*
-@property(nonatomic, strong) NSMutableArray* buildings;
+@property(nonatomic, copy) NSNumber* defaultOrder;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
