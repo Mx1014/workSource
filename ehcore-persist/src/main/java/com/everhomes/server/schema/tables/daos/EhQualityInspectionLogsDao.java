@@ -48,6 +48,20 @@ public class EhQualityInspectionLogsDao extends org.jooq.impl.DAOImpl<com.everho
 	}
 
 	/**
+	 * Fetch records that have <code>owner_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionLogs> fetchByOwnerType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionLogs.EH_QUALITY_INSPECTION_LOGS.OWNER_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>owner_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionLogs> fetchByOwnerId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionLogs.EH_QUALITY_INSPECTION_LOGS.OWNER_ID, values);
+	}
+
+	/**
 	 * Fetch records that have <code>target_type IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionLogs> fetchByTargetType(java.lang.String... values) {

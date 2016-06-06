@@ -11,9 +11,11 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhQualityInspectionLogs implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1698390499;
+	private static final long serialVersionUID = 943944851;
 
 	private java.lang.Long     id;
+	private java.lang.String   ownerType;
+	private java.lang.Long     ownerId;
 	private java.lang.String   targetType;
 	private java.lang.Long     targetId;
 	private java.lang.Byte     processType;
@@ -24,6 +26,8 @@ public class EhQualityInspectionLogs implements java.io.Serializable {
 
 	public EhQualityInspectionLogs(
 		java.lang.Long     id,
+		java.lang.String   ownerType,
+		java.lang.Long     ownerId,
 		java.lang.String   targetType,
 		java.lang.Long     targetId,
 		java.lang.Byte     processType,
@@ -31,6 +35,8 @@ public class EhQualityInspectionLogs implements java.io.Serializable {
 		java.sql.Timestamp createTime
 	) {
 		this.id = id;
+		this.ownerType = ownerType;
+		this.ownerId = ownerId;
 		this.targetType = targetType;
 		this.targetId = targetId;
 		this.processType = processType;
@@ -44,6 +50,22 @@ public class EhQualityInspectionLogs implements java.io.Serializable {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
+	}
+
+	public java.lang.String getOwnerType() {
+		return this.ownerType;
+	}
+
+	public void setOwnerType(java.lang.String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+	public java.lang.Long getOwnerId() {
+		return this.ownerId;
+	}
+
+	public void setOwnerId(java.lang.Long ownerId) {
+		this.ownerId = ownerId;
 	}
 
 	public java.lang.String getTargetType() {
