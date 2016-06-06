@@ -34,6 +34,7 @@ import com.everhomes.rest.payment.SearchCardRechargeOrderCommand;
 import com.everhomes.rest.payment.SearchCardRechargeOrderResponse;
 import com.everhomes.rest.payment.SearchCardTransactionsCommand;
 import com.everhomes.rest.payment.SearchCardTransactionsResponse;
+import com.everhomes.server.schema.tables.pojos.EhPaymentCardRechargeOrders;
 
 
 @Controller
@@ -49,6 +50,7 @@ public class PaymentCardController extends ControllerBase{
     @RestReturn(value=CardInfoDTO.class,collection=true)
     public RestResponse listCardInfo(ListCardInfoCommand cmd) {
         List<CardInfoDTO> result = null;
+        EhPaymentCardRechargeOrders s;
         RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

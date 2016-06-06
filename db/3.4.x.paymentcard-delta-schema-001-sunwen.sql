@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS `eh_payment_card_categories`;
-CREATE TABLE `eh_payment_card_categories` (
+DROP TABLE IF EXISTS `eh_payment_card_issuers`;
+CREATE TABLE `eh_payment_card_issuers` (
   `id` BIGINT(20) NOT NULL COMMENT 'id of the record',
   `name` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'name',
   `description` VARCHAR(256) NOT NULL DEFAULT '' COMMENT 'description',
@@ -7,7 +7,6 @@ CREATE TABLE `eh_payment_card_categories` (
   `alipay_recharge_account` VARCHAR(256) NOT NULL DEFAULT '' COMMENT 'alipay_recharge_account',
   `weixin_recharge_account` VARCHAR(256) NOT NULL DEFAULT '' COMMENT 'weixin_recharge_account',
 
--- `branch_code` VARCHAR(256) NOT NULL COMMENT 'the code of branch',
   `vendor_name` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'reference to name of vendors taotaogu',
   `vendor_data` TEXT COMMENT 'the extra information of card for example make_no',
   `create_time` DATETIME,
@@ -16,12 +15,12 @@ CREATE TABLE `eh_payment_card_categories` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
 
-DROP TABLE IF EXISTS `eh_payment_card_category_communities`;
-CREATE TABLE `eh_payment_card_category_communities` (
+DROP TABLE IF EXISTS `eh_payment_card_issuer_communities`;
+CREATE TABLE `eh_payment_card_issuer_communities` (
   `id` BIGINT(20) NOT NULL COMMENT 'id of the record',
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
   `owner_id` BIGINT NOT NULL DEFAULT 0,
-  `category_id` BIGINT(20) NOT NULL DEFAULT 0 COMMENT 'id of the card type',
+  `issuer_id` BIGINT(20) NOT NULL DEFAULT 0 COMMENT 'id of the card issuer',
   `create_time` DATETIME,
 
   PRIMARY KEY (`id`)
