@@ -1394,6 +1394,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     
                     AclinkLinglingMakeSdkKey sdkKey = new AclinkLinglingMakeSdkKey();
                     sdkKey.setDeviceIds(deviceIds);
+                    sdkKey.setKeyEffecDay(200l);
                     Map<Long, String> keyMap = aclinkLinglingService.makeSdkKey(sdkKey);
                     
                     for(Aclink ca : aclinks) {
@@ -1412,6 +1413,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     deviceIds.add(ca.getLinglingDoorId());
                     AclinkLinglingMakeSdkKey sdkKey = new AclinkLinglingMakeSdkKey();
                     sdkKey.setDeviceIds(deviceIds);
+                    sdkKey.setKeyEffecDay(200l);
                     Map<Long, String> keyMap = aclinkLinglingService.makeSdkKey(sdkKey);
                     
                     String key = keyMap.get(ca.getLinglingDoorId());
@@ -1670,6 +1672,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         AclinkLinglingMakeSdkKey sdkKey = new AclinkLinglingMakeSdkKey();
         sdkKey.setDeviceIds(deviceIds);
+        sdkKey.setKeyEffecDay(200l);
         Map<Long, String> keyMap = aclinkLinglingService.makeSdkKey(sdkKey);
         
         List<String> keys = new ArrayList<String>();
