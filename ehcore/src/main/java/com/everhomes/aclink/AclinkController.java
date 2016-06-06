@@ -43,6 +43,7 @@ import com.everhomes.rest.aclink.GetDoorAccessCapapilityCommand;
 import com.everhomes.rest.aclink.GetVisitorCommand;
 import com.everhomes.rest.aclink.GetVisitorResponse;
 import com.everhomes.rest.aclink.ListAesUserKeyByUserResponse;
+import com.everhomes.rest.aclink.ListDoorAccessGroupCommand;
 import com.everhomes.rest.aclink.ListDoorAccessQRKeyResponse;
 import com.everhomes.rest.aclink.ListDoorAccessResponse;
 import com.everhomes.rest.aclink.ListDoorAuthCommand;
@@ -381,5 +382,20 @@ public class AclinkController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /aclink/listDoorAccessGroup</b>
+     * <p>列出所有二维码门禁列表 </p>
+     * @return
+     */
+    @RequestMapping("listDoorAccessGroup")
+    @RestReturn(value=ListDoorAccessResponse.class)
+    public RestResponse listDoorAccessGroup(@Valid ListDoorAccessGroupCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.listDoorAccessGroup(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;        
     }
 }
