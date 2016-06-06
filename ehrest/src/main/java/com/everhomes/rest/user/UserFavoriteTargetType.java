@@ -2,7 +2,7 @@
 package com.everhomes.rest.user;
 
 public enum UserFavoriteTargetType {
-    TOPIC("topic"), BIZ("biz");
+    TOPIC("topic"), BIZ("biz"), ACTIVITY("activity");
     
     private String code;
     

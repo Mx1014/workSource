@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
  * 
  * @author elians
  *<ul>
- *<li>targetType:收藏类型,topic-帖子,biz-商家</li>
+ *<li>targetType:收藏类型,topic-帖子,biz-商家,activity-活动</li>
  *<li>targetId:收藏对象的Id</li>
  *<ul>
  */
