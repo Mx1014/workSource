@@ -95,4 +95,11 @@ public class EhUserLaunchPadItemsDao extends org.jooq.impl.DAOImpl<com.everhomes
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserLaunchPadItems> fetchByDefaultOrder(java.lang.Integer... values) {
 		return fetch(com.everhomes.server.schema.tables.EhUserLaunchPadItems.EH_USER_LAUNCH_PAD_ITEMS.DEFAULT_ORDER, values);
 	}
+
+	/**
+	 * Fetch records that have <code>scene_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserLaunchPadItems> fetchBySceneType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUserLaunchPadItems.EH_USER_LAUNCH_PAD_ITEMS.SCENE_TYPE, values);
+	}
 }

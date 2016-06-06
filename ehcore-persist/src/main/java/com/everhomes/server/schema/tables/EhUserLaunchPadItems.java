@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUserLaunchPadItems extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhUserLaunchPadItemsRecord> {
 
-	private static final long serialVersionUID = 1507396112;
+	private static final long serialVersionUID = -197016193;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_user_launch_pad_items</code>
@@ -65,6 +65,11 @@ public class EhUserLaunchPadItems extends org.jooq.impl.TableImpl<com.everhomes.
 	 * The column <code>ehcore.eh_user_launch_pad_items.default_order</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserLaunchPadItemsRecord, java.lang.Integer> DEFAULT_ORDER = createField("default_order", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_user_launch_pad_items.scene_type</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserLaunchPadItemsRecord, java.lang.String> SCENE_TYPE = createField("scene_type", org.jooq.impl.SQLDataType.VARCHAR.length(64).nullable(false).defaulted(true), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_user_launch_pad_items</code> table reference

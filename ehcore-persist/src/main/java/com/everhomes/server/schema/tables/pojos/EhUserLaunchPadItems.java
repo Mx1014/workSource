@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUserLaunchPadItems implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1042692372;
+	private static final long serialVersionUID = 1012599248;
 
 	private java.lang.Long    id;
 	private java.lang.Long    itemId;
@@ -21,6 +21,7 @@ public class EhUserLaunchPadItems implements java.io.Serializable {
 	private java.lang.Byte    applyPolicy;
 	private java.lang.Byte    displayFlag;
 	private java.lang.Integer defaultOrder;
+	private java.lang.String  sceneType;
 
 	public EhUserLaunchPadItems() {}
 
@@ -32,7 +33,8 @@ public class EhUserLaunchPadItems implements java.io.Serializable {
 		java.lang.Byte    userId,
 		java.lang.Byte    applyPolicy,
 		java.lang.Byte    displayFlag,
-		java.lang.Integer defaultOrder
+		java.lang.Integer defaultOrder,
+		java.lang.String  sceneType
 	) {
 		this.id = id;
 		this.itemId = itemId;
@@ -42,6 +44,7 @@ public class EhUserLaunchPadItems implements java.io.Serializable {
 		this.applyPolicy = applyPolicy;
 		this.displayFlag = displayFlag;
 		this.defaultOrder = defaultOrder;
+		this.sceneType = sceneType;
 	}
 
 	public java.lang.Long getId() {
@@ -106,5 +109,13 @@ public class EhUserLaunchPadItems implements java.io.Serializable {
 
 	public void setDefaultOrder(java.lang.Integer defaultOrder) {
 		this.defaultOrder = defaultOrder;
+	}
+
+	public java.lang.String getSceneType() {
+		return this.sceneType;
+	}
+
+	public void setSceneType(java.lang.String sceneType) {
+		this.sceneType = sceneType;
 	}
 }
