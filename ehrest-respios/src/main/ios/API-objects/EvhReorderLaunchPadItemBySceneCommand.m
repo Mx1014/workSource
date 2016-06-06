@@ -1,20 +1,20 @@
 //
-// EvhListBuildingsByStatusCommandResponse.m
+// EvhReorderLaunchPadItemBySceneCommand.m
 //
-#import "EvhListBuildingsByStatusCommandResponse.h"
-#import "EvhBuildingDTO.h"
+#import "EvhReorderLaunchPadItemBySceneCommand.h"
+#import "EvhLaunchPadItemSort.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhListBuildingsByStatusCommandResponse
+// EvhReorderLaunchPadItemBySceneCommand
 //
 
-@implementation EvhListBuildingsByStatusCommandResponse
+@implementation EvhReorderLaunchPadItemBySceneCommand
 
 +(id) withJsonString: (NSString*) jsonString
 {
     id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
     if(jsonObject != nil) {
-        EvhListBuildingsByStatusCommandResponse* obj = [EvhListBuildingsByStatusCommandResponse new];
+        EvhReorderLaunchPadItemBySceneCommand* obj = [EvhReorderLaunchPadItemBySceneCommand new];
         return [obj fromJson:jsonObject];
     }
     return nil;
@@ -24,7 +24,7 @@
 {
     self = [super init];
     if(self) {
-        _buildings = [NSMutableArray new];
+        _sorts = [NSMutableArray new];
         return self;
     }
     return nil;
@@ -32,33 +32,33 @@
 
 -(void) toJson: (NSMutableDictionary*) jsonObject 
 {
-    if(self.nextPageAnchor)
-        [jsonObject setObject: self.nextPageAnchor forKey: @"nextPageAnchor"];
-    if(self.buildings) {
+    if(self.sceneToken)
+        [jsonObject setObject: self.sceneToken forKey: @"sceneToken"];
+    if(self.sorts) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhBuildingDTO* item in self.buildings) {
+        for(EvhLaunchPadItemSort* item in self.sorts) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
         }
-        [jsonObject setObject: jsonArray forKey: @"buildings"];
+        [jsonObject setObject: jsonArray forKey: @"sorts"];
     }
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
 {
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
-        self.nextPageAnchor = [jsonObject objectForKey: @"nextPageAnchor"];
-        if(self.nextPageAnchor && [self.nextPageAnchor isEqual:[NSNull null]])
-            self.nextPageAnchor = nil;
+        self.sceneToken = [jsonObject objectForKey: @"sceneToken"];
+        if(self.sceneToken && [self.sceneToken isEqual:[NSNull null]])
+            self.sceneToken = nil;
 
         {
-            NSArray* jsonArray = [jsonObject objectForKey: @"buildings"];
+            NSArray* jsonArray = [jsonObject objectForKey: @"sorts"];
             for(id itemJson in jsonArray) {
-                EvhBuildingDTO* item = [EvhBuildingDTO new];
+                EvhLaunchPadItemSort* item = [EvhLaunchPadItemSort new];
                 
                 [item fromJson: itemJson];
-                [self.buildings addObject: item];
+                [self.sorts addObject: item];
             }
         }
         return self;
