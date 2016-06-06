@@ -22,7 +22,7 @@ import com.everhomes.util.StringHelper;
  * <li>needPay: 是否需要支付</li>
  * <li>multiTimeInterval: 是否允许预约多个时段</li>
  * <li>attachments: 预约需要提交的信息</li>
- * <li>rentalType: 预约类型，参考{@link com.everhomes.rest.techpark.rental.admin.RentalType}</li>
+ * <li>rentalType: 预约类型，参考{@link com.everhomes.rest.techpark.rental.RentalType}</li>
  * <li>rentalEndTime: 至少提前预约时间</li>
  * <li>rentalStartTime: 最多提前预约时间</li>
  * <li>rentalStep: 最短可预约时长</li>
