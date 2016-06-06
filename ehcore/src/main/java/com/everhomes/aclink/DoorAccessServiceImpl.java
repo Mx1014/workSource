@@ -259,9 +259,14 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 }
                 
                 query.addConditions(Tables.EH_DOOR_ACCESS.STATUS.ne(DoorAccessStatus.INVALID.getCode()));
-//                if(cmd.getLinkStatus() != null) {
-//                    
-//                }
+                
+                if(cmd.getGroupId() == null) {
+                    //Select door access only
+                    query.addConditions(Tables.EH_DOOR_ACCESS.GROUPID.ne(0l));
+                } else if(!cmd.getGroupId().equals(0)) {
+                    query.addConditions(Tables.EH_DOOR_ACCESS.GROUPID.eq(cmd.getGroupId()));
+                }
+                //else select all include groups
                 
                 if(cmd.getDoorType() != null) {
                     query.addConditions(Tables.EH_DOOR_ACCESS.DOOR_TYPE.eq(cmd.getDoorType()));
@@ -287,6 +292,13 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     }
                 dto.setCreatorPhone(phone);
                 }
+            
+            if(da.getGroupid() != 0) {
+                DoorAccess group = doorAccessProvider.getDoorAccessById(da.getGroupid());
+                if(group != null) {
+                    dto.setGroupName(group.getName());
+                }
+            }
             
             dtos.add(dto);
         }
