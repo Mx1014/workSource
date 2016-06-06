@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>rechargeType: 充值方式  10001-支付宝，10002-微信</li>
  * <li>rechargeStatus: 0:充值失败   1:处理中  2:充值成功 3:处理完成  4:已退款{@link com.everhomes.rest.payment.CardRechargeStatus}</li>
  * <li>condition: 手机号或者姓名</li>
- * <li>nextPageAnchor: 分页的瞄</li>
+ * <li>pageAnchor: 分页的瞄</li>
  * <li>pageSize: 每页条数</li>
  * </ul>
  */
@@ -23,7 +23,7 @@ public class SearchCardRechargeOrderCommand {
     private String rechargeType;
     private byte rechargeStatus;
     private String condition;
-    private Long nextPageAnchor;
+    private Long pageAnchor;
     private Integer pageSize;
     
 	public String getOwnerType() {
@@ -69,13 +69,13 @@ public class SearchCardRechargeOrderCommand {
 	public void setCondition(String condition) {
 		this.condition = condition;
 	}
-	public Long getNextPageAnchor() {
-		return nextPageAnchor;
+	
+	public Long getPageAnchor() {
+		return pageAnchor;
 	}
-	public void setNextPageAnchor(Long nextPageAnchor) {
-		this.nextPageAnchor = nextPageAnchor;
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
 	}
-    
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

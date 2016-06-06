@@ -9,21 +9,13 @@ import com.everhomes.util.StringHelper;
  * <li>startDate: 开始日期</li>
  * <li>endDate: 结束日期</li>
  * <li>consumeType: 消费方式</li>
- * <li>status: 00: 处理中
- 	01：成功
- 	02：失败
-	03：已撤销
-	04：已冲正
-	05: 已退货
-	06: 已调账
-	07: 已部分退货
-	{@link com.everhomes.rest.payment.CardTranscationStatus}</li>
+ * <li>status: 0：失败 1: 处理中 2：成功 3: 已退货 {@link com.everhomes.rest.payment.TAOTAOGUCardTranscationStatus}</li>
  * <li>condition: 手机号或者姓名</li>
- * <li>nextPageAnchor: 分页的瞄</li>
+ * <li>pageAnchor: 分页的瞄</li>
  * <li>pageSize: 每页条数</li>
  * </ul>
  */
-public class SearchCardTranscationsCommand {
+public class SearchCardTransactionsCommand {
 	private String ownerType;
     private Long ownerId;
     private Long startDate;
@@ -32,7 +24,7 @@ public class SearchCardTranscationsCommand {
     private byte status;
     private String condition;
     private Integer pageSize;
-    private Long nextPageAnchor;
+    private Long pageAnchor;
     
 	public String getOwnerType() {
 		return ownerType;
@@ -46,11 +38,12 @@ public class SearchCardTranscationsCommand {
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
 	}
-	public Long getNextPageAnchor() {
-		return nextPageAnchor;
+	
+	public Long getPageAnchor() {
+		return pageAnchor;
 	}
-	public void setNextPageAnchor(Long nextPageAnchor) {
-		this.nextPageAnchor = nextPageAnchor;
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
 	}
 	public Long getStartDate() {
 		return startDate;
@@ -83,14 +76,15 @@ public class SearchCardTranscationsCommand {
 		this.condition = condition;
 	}
     
-	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
 	public Integer getPageSize() {
 		return pageSize;
 	}
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
 	}
+	
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

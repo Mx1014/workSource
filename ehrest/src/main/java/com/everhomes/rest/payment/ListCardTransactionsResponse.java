@@ -7,13 +7,13 @@ import java.util.List;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
-public class ListTranscationsResponse {
+public class ListCardTransactionsResponse {
 	private Long nextPageAnchor;
 	private Timestamp date;
 	private BigDecimal consumeAmount;
 	private BigDecimal rechargeAmount;
-	@ItemType(CardTranscationsForAppDTO.class)
-	private List<CardTranscationsForAppDTO> requests;
+	@ItemType(CardTransactionsDTO.class)
+	private List<CardTransactionsDTO> requests;
 	public Timestamp getDate() {
 		return date;
 	}
@@ -32,10 +32,11 @@ public class ListTranscationsResponse {
 	public void setRechargeAmount(BigDecimal rechargeAmount) {
 		this.rechargeAmount = rechargeAmount;
 	}
-	public List<CardTranscationsForAppDTO> getRequests() {
+	
+	public List<CardTransactionsDTO> getRequests() {
 		return requests;
 	}
-	public void setRequests(List<CardTranscationsForAppDTO> requests) {
+	public void setRequests(List<CardTransactionsDTO> requests) {
 		this.requests = requests;
 	}
 	public Long getNextPageAnchor() {

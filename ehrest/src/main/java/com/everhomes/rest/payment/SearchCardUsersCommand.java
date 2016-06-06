@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>condition: 手机号或者姓名</li>
  * <li>status: 1：开通  0：未开通  {@link com.everhomes.rest.payment.CardOpenStatus}</li>
- * <li>nextPageAnchor: 分页的瞄</li>
+ * <li>pageAnchor: 分页的瞄</li>
  * <li>pageSize: 每页条数</li>
  * </ul>
  */
@@ -17,7 +17,7 @@ public class SearchCardUsersCommand {
     private Long ownerId;
 	private byte status;
 	private String condition;
-	private Long nextPageAnchor;
+	private Long pageAnchor;
 	private Integer pageSize;
 	
 	public byte getStatus() {
@@ -32,11 +32,12 @@ public class SearchCardUsersCommand {
 	public void setCondition(String condition) {
 		this.condition = condition;
 	}
-	public Long getNextPageAnchor() {
-		return nextPageAnchor;
+	
+	public Long getPageAnchor() {
+		return pageAnchor;
 	}
-	public void setNextPageAnchor(Long nextPageAnchor) {
-		this.nextPageAnchor = nextPageAnchor;
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
 	}
 	public String getOwnerType() {
 		return ownerType;

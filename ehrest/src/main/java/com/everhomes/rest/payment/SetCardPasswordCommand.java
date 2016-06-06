@@ -8,15 +8,13 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>oldPassword: 旧密码</li>
  * <li>newPassword: 新密码</li>
- * <li>newRePassword: 再一次新密码</li>
  * </ul>
  */
-public class ChangePasswordCommand {
+public class SetCardPasswordCommand {
 	private String ownerType;
     private Long ownerId;
     private String oldPassword;
     private String newPassword;
-    private String newRePassword;
 	public String getOwnerType() {
 		return ownerType;
 	}
@@ -40,12 +38,6 @@ public class ChangePasswordCommand {
 	}
 	public void setNewPassword(String newPassword) {
 		this.newPassword = newPassword;
-	}
-	public String getNewRePassword() {
-		return newRePassword;
-	}
-	public void setNewRePassword(String newRePassword) {
-		this.newRePassword = newRePassword;
 	}
     
 	@Override

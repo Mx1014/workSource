@@ -15,7 +15,7 @@ import com.everhomes.util.StringHelper;
  * <li>transcationTime: 交易时间</li>
  * </ul>
  */
-public class GeiPaidResultDTO {
+public class GetCardPaidResultDTO {
 	private String merchantNo;
 	private String merchantName;
 	private BigDecimal amount;

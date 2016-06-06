@@ -13,19 +13,15 @@ import com.everhomes.util.StringHelper;
  * <li>itemName: 商品名称</li>
  * <li>amount: 金额</li>
  * <li>transcationTime: 交易时间</li>
- * <li>status: 00: 处理中
- 	01：成功
- 	02：失败
-	03：已撤销
-	04：已冲正
-	05: 已退货
-	06: 已调账
-	07: 已部分退货
-	{@link com.everhomes.rest.payment.CardTranscationStatus}</li>
+ * <li>status: 状态码</li>
  * <li>nextPageAnchor: 分页的瞄 </li>
+ * <li>merchant: 商户</li>
+ * <li>transcationType: 交易类型   1：充值   2 ：消费</li>
+ * <li>vendorName: 第三方厂商</li>
+ * <li>vendorResult: </li>
  * </ul>
  */
-public class CardTranscationsDTO {
+public class CardTransactionsDTO {
 	private java.lang.Long       id;
 	private java.lang.String     userName;
 	private java.lang.String     mobile;
@@ -36,6 +32,12 @@ public class CardTranscationsDTO {
 	private java.math.BigDecimal amount;
 	private java.sql.Timestamp   transcationTime;
 	private java.lang.Byte       status;
+	
+	private String merchant;
+	private String transcationType;
+	private String vendorName;
+	private String vendorResult;
+	
     private Long nextPageAnchor;
 	public java.lang.Long getId() {
 		return id;
@@ -104,8 +106,34 @@ public class CardTranscationsDTO {
 		this.nextPageAnchor = nextPageAnchor;
 	}
     
+	public String getMerchant() {
+		return merchant;
+	}
+	public void setMerchant(String merchant) {
+		this.merchant = merchant;
+	}
+	public String getTranscationType() {
+		return transcationType;
+	}
+	public void setTranscationType(String transcationType) {
+		this.transcationType = transcationType;
+	}
+	public String getVendorName() {
+		return vendorName;
+	}
+	public void setVendorName(String vendorName) {
+		this.vendorName = vendorName;
+	}
+	
+	public String getVendorResult() {
+		return vendorResult;
+	}
+	public void setVendorResult(String vendorResult) {
+		this.vendorResult = vendorResult;
+	}
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+	
 }

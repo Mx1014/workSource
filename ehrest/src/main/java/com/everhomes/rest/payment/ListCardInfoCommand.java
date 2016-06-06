@@ -6,14 +6,12 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>ownerType: 归属的类型</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
- * <li>nextPageAnchor: 分页的瞄</li>
  * </ul>
  */
-public class ListTranscationsCommand {
+public class ListCardInfoCommand {
 	private String ownerType;
     private Long ownerId;
-	private Long nextPageAnchor;
-
+    
 	public String getOwnerType() {
 		return ownerType;
 	}
@@ -26,14 +24,10 @@ public class ListTranscationsCommand {
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
 	}
-	public Long getNextPageAnchor() {
-		return nextPageAnchor;
-	}
-	public void setNextPageAnchor(Long nextPageAnchor) {
-		this.nextPageAnchor = nextPageAnchor;
-	}
+    
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+    
 }

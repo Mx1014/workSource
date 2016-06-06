@@ -4,22 +4,24 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>captcha: 验证码</li>
+ * <li>code: 卡支付信息</li>
  * </ul>
  */
-public class GetCaptchaDTO {
-	private String captcha;
+public class GetCardPaidQrCodeDTO {
+	private String code;
 
-	public String getCaptcha() {
-		return captcha;
-	}
-
-	public void setCaptcha(String captcha) {
-		this.captcha = captcha;
-	}
 	
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
 }

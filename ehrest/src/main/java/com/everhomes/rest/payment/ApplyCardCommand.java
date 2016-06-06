@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>mobile: 手机号</li>
  * <li>password: 支付密码</li>
+ * <li>issuerId: 卡发行人ID</li>
  * </ul>
  */
 public class ApplyCardCommand {
@@ -16,6 +17,8 @@ public class ApplyCardCommand {
     private Long ownerId;
 	private String mobile;
 	private String password;
+	private Long issuerId;
+	
 	public String getOwnerType() {
 		return ownerType;
 	}
@@ -45,5 +48,11 @@ public class ApplyCardCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+	public Long getIssuerId() {
+		return issuerId;
+	}
+	public void setIssuerId(Long issuerId) {
+		this.issuerId = issuerId;
+	}
     
 }

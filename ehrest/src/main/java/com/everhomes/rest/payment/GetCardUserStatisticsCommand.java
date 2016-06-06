@@ -8,10 +8,9 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: 归属的ID，如小区ID</li>
  * </ul>
  */
-public class VerifyOpenCardCommand {
+public class GetCardUserStatisticsCommand {
 	private String ownerType;
     private Long ownerId;
-    
 	public String getOwnerType() {
 		return ownerType;
 	}
@@ -29,5 +28,4 @@ public class VerifyOpenCardCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-    
 }

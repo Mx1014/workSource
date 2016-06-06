@@ -11,29 +11,29 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.payment.ApplyCardCommand;
-import com.everhomes.rest.payment.ChangePasswordCommand;
-import com.everhomes.rest.payment.CountCardUsersCommand;
-import com.everhomes.rest.payment.CountCardUsersDTO;
-import com.everhomes.rest.payment.ResetPasswordCommand;
-import com.everhomes.rest.payment.GeiPaidResultCommand;
-import com.everhomes.rest.payment.GeiPaidResultDTO;
-import com.everhomes.rest.payment.GetCardInfoCommand;
+import com.everhomes.rest.payment.CardIssuerDTO;
+import com.everhomes.rest.payment.SetCardPasswordCommand;
+import com.everhomes.rest.payment.GetCardUserStatisticsCommand;
+import com.everhomes.rest.payment.GetCardUserStatisticsDTO;
+import com.everhomes.rest.payment.ListCardIssuerCommand;
+import com.everhomes.rest.payment.ResetCardPasswordCommand;
+import com.everhomes.rest.payment.GetCardPaidResultCommand;
+import com.everhomes.rest.payment.GetCardPaidResultDTO;
+import com.everhomes.rest.payment.ListCardInfoCommand;
 import com.everhomes.rest.payment.CardInfoDTO;
-import com.everhomes.rest.payment.GetCaptchaCommand;
-import com.everhomes.rest.payment.GetCaptchaDTO;
-import com.everhomes.rest.payment.GetPaidQrCodeCommand;
-import com.everhomes.rest.payment.GetPaidQrCodeDTO;
-import com.everhomes.rest.payment.ListTranscationsCommand;
-import com.everhomes.rest.payment.ListTranscationsResponse;
+import com.everhomes.rest.payment.SendCardVerifyCodeCommand;
+import com.everhomes.rest.payment.SendCardVerifyCodeDTO;
+import com.everhomes.rest.payment.GetCardPaidQrCodeCommand;
+import com.everhomes.rest.payment.GetCardPaidQrCodeDTO;
+import com.everhomes.rest.payment.ListCardTransactionsCommand;
+import com.everhomes.rest.payment.ListCardTransactionsResponse;
 import com.everhomes.rest.payment.RechargeCardCommand;
 import com.everhomes.rest.payment.SearchCardUsersCommand;
 import com.everhomes.rest.payment.SearchCardUsersResponse;
 import com.everhomes.rest.payment.SearchCardRechargeOrderCommand;
 import com.everhomes.rest.payment.SearchCardRechargeOrderResponse;
-import com.everhomes.rest.payment.SearchCardTranscationsCommand;
-import com.everhomes.rest.payment.SearchCardTranscationsResponse;
-import com.everhomes.rest.payment.VerifyOpenCardCommand;
-import com.everhomes.rest.payment.VerifyOpenCardDTO;
+import com.everhomes.rest.payment.SearchCardTransactionsCommand;
+import com.everhomes.rest.payment.SearchCardTransactionsResponse;
 
 
 @Controller
@@ -41,30 +41,28 @@ import com.everhomes.rest.payment.VerifyOpenCardDTO;
 public class PaymentCardController extends ControllerBase{
 
 
-	
 	/**
-     * <b>URL: /payment/verifyOpenCard</b>
-     * <p>验证是否开卡</p>
+     * <b>URL: /payment/listCardInfo</b>
+     * <p>获取卡信息</p>
      */
-	@RequestMapping("verifyOpenCard")
-    @RestReturn(value=VerifyOpenCardDTO.class)
-    public RestResponse verifyOpenCard(VerifyOpenCardCommand cmd) {
-		VerifyOpenCardDTO dto = null;
-        
-        RestResponse response = new RestResponse(dto);
+    @RequestMapping("listCardInfo")
+    @RestReturn(value=CardInfoDTO.class,collection=true)
+    public RestResponse listCardInfo(ListCardInfoCommand cmd) {
+        List<CardInfoDTO> result = null;
+        RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
-	/**
-     * <b>URL: /payment/getCardInfo</b>
-     * <p>获取卡信息</p>
+    
+    /**
+     * <b>URL: /payment/listCardIssuer</b>
+     * <p>获取卡发行人</p>
      */
-    @RequestMapping("getCardInfo")
-    @RestReturn(value=CardInfoDTO.class,collection=true)
-    public RestResponse getCardInfo(GetCardInfoCommand cmd) {
-        List<CardInfoDTO> result = null;
-        RestResponse response = new RestResponse(result);
+    @RequestMapping("listCardIssuer")
+    @RestReturn(value=CardIssuerDTO.class,collection=true)
+    public RestResponse listCardIssuer(ListCardIssuerCommand cmd) {
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -84,12 +82,12 @@ public class PaymentCardController extends ControllerBase{
         return response;
     }
 	/**
-     * <b>URL: /payment/getPaidQrCode</b>
+     * <b>URL: /payment/getCardPaidQrCode</b>
      * <p>获取二维码</p>
      */
-    @RequestMapping("getPaidQrCode")
-    @RestReturn(value=GetPaidQrCodeDTO.class)
-    public RestResponse getPaidCode(GetPaidQrCodeCommand cmd) {
+    @RequestMapping("getCardPaidQrCode")
+    @RestReturn(value=GetCardPaidQrCodeDTO.class)
+    public RestResponse getCardPaidQrCode(GetCardPaidQrCodeCommand cmd) {
         
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -98,12 +96,12 @@ public class PaymentCardController extends ControllerBase{
     }
     
     /**
-     * <b>URL: /payment/geiPaidResult</b>
+     * <b>URL: /payment/getCardPaidResult</b>
      * <p>获取支付结果</p>
      */
-    @RequestMapping("geiPaidResult")
-    @RestReturn(value=GeiPaidResultDTO.class)
-    public RestResponse geiPaidResult(GeiPaidResultCommand cmd) {
+    @RequestMapping("getCardPaidResult")
+    @RestReturn(value=GetCardPaidResultDTO.class)
+    public RestResponse getCardPaidResult(GetCardPaidResultCommand cmd) {
         
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -124,12 +122,12 @@ public class PaymentCardController extends ControllerBase{
         return response;
     }
 	/**
-     * <b>URL: /payment/changePassword</b>
+     * <b>URL: /payment/setCardPassword</b>
      * <p>修改密码</p>
      */
-    @RequestMapping("changePassword")
+    @RequestMapping("setCardPassword")
     @RestReturn(value=String.class)
-    public RestResponse changePassword(ChangePasswordCommand cmd) {
+    public RestResponse setCardPassword(SetCardPasswordCommand cmd) {
         
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -138,12 +136,12 @@ public class PaymentCardController extends ControllerBase{
     }
     
     /**
-     * <b>URL: /payment/getCaptcha</b>
+     * <b>URL: /payment/sendCardVerifyCode</b>
      * <p>获取验证码</p>
      */
-    @RequestMapping("getCaptcha")
-    @RestReturn(value=GetCaptchaDTO.class)
-    public RestResponse getCaptcha(GetCaptchaCommand cmd) {
+    @RequestMapping("sendCardVerifyCode")
+    @RestReturn(value=SendCardVerifyCodeDTO.class)
+    public RestResponse sendCardVerifyCode(SendCardVerifyCodeCommand cmd) {
         
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -151,12 +149,12 @@ public class PaymentCardController extends ControllerBase{
         return response;
     }
 	/**
-     * <b>URL: /payment/resetPassword</b>
+     * <b>URL: /payment/resetCardPassword</b>
      * <p>忘记密码</p>
      */
-    @RequestMapping("resetPassword")
+    @RequestMapping("resetCardPassword")
     @RestReturn(value=String.class)
-    public RestResponse forgetPassword(ResetPasswordCommand cmd) {
+    public RestResponse resetCardPassword(ResetCardPasswordCommand cmd) {
         
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -165,12 +163,12 @@ public class PaymentCardController extends ControllerBase{
     }
 
 	/**
-     * <b>URL: /payment/listTranscations</b>
+     * <b>URL: /payment/listCardTransactions</b>
      * <p>获取交易记录列表</p>
      */
-    @RequestMapping("listTranscations")
-    @RestReturn(value=ListTranscationsResponse.class)
-    public RestResponse listTranscations(ListTranscationsCommand cmd) {
+    @RequestMapping("listCardTransactions")
+    @RestReturn(value=ListCardTransactionsResponse.class)
+    public RestResponse listCardTransactions(ListCardTransactionsCommand cmd) {
         
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -193,12 +191,12 @@ public class PaymentCardController extends ControllerBase{
         return response;
     }
     /**
-     * <b>URL: /payment/countCardUsers</b>
+     * <b>URL: /payment/getCardUserStatistics</b>
      * <p>统计用户列表</p>
      */
-    @RequestMapping("countCardUsers")
-    @RestReturn(value=CountCardUsersDTO.class)
-    public RestResponse countCardUsers(CountCardUsersCommand cmd) {
+    @RequestMapping("getCardUserStatistics")
+    @RestReturn(value=GetCardUserStatisticsDTO.class)
+    public RestResponse getCardUserStatistics(GetCardUserStatisticsCommand cmd) {
         
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -219,12 +217,12 @@ public class PaymentCardController extends ControllerBase{
         return response;
     }
     /**
-     * <b>URL: /payment/searchCardTranscations</b>
+     * <b>URL: /payment/searchCardTransactions</b>
      * <p>搜索卡交易记录列表</p>
      */
-    @RequestMapping("searchCardTranscations")
-    @RestReturn(value=SearchCardTranscationsResponse.class)
-    public RestResponse searchCardTranscations(SearchCardTranscationsCommand cmd) {
+    @RequestMapping("searchCardTransactions")
+    @RestReturn(value=SearchCardTransactionsResponse.class)
+    public RestResponse searchCardTransactions(SearchCardTransactionsCommand cmd) {
         
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -242,19 +240,19 @@ public class PaymentCardController extends ControllerBase{
         
     }
     /**
-     * <b>URL: /payment/exportRechargeOrder</b>
+     * <b>URL: /payment/exportCardRechargeOrder</b>
      * <p>导出充值订单列表</p>
      */
-    @RequestMapping("exportRechargeOrder")
-    public void exportRechargeOrder(SearchCardRechargeOrderCommand cmd) {
+    @RequestMapping("exportCardRechargeOrder")
+    public void exportCardRechargeOrder(SearchCardRechargeOrderCommand cmd) {
         
     }
     /**
-     * <b>URL: /payment/exportTranscations</b>
+     * <b>URL: /payment/exportCardTransactions</b>
      * <p>导出交易记录列表</p>
      */
-    @RequestMapping("exportTranscations")
-    public void exportTranscations(SearchCardTranscationsCommand cmd) {
+    @RequestMapping("exportCardTransactions")
+    public void exportCardTransactions(SearchCardTransactionsCommand cmd) {
         
     }
     

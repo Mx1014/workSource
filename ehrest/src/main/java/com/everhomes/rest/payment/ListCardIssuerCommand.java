@@ -8,10 +8,9 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: 归属的ID，如小区ID</li>
  * </ul>
  */
-public class GetCardInfoCommand {
+public class ListCardIssuerCommand {
 	private String ownerType;
     private Long ownerId;
-    
 	public String getOwnerType() {
 		return ownerType;
 	}
@@ -24,10 +23,9 @@ public class GetCardInfoCommand {
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
 	}
-    
+   
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-    
 }

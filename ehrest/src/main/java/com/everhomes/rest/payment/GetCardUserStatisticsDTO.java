@@ -9,16 +9,17 @@ import com.everhomes.util.StringHelper;
  * <li>normalUserCount: 未开卡人数</li>
  * </ul>
  */
-public class CountCardUsersDTO {
-	private Long totality;
+public class GetCardUserStatisticsDTO {
+	private Long totalCount;
 	private Long cardUserCount;
 	private Long normalUserCount;
 	
-	public Long getTotality() {
-		return totality;
+	
+	public Long getTotalCount() {
+		return totalCount;
 	}
-	public void setTotality(Long totality) {
-		this.totality = totality;
+	public void setTotalCount(Long totalCount) {
+		this.totalCount = totalCount;
 	}
 	public Long getCardUserCount() {
 		return cardUserCount;

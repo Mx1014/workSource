@@ -4,20 +4,20 @@ import java.util.List;
 
 import com.everhomes.discover.ItemType;
 
-public class SearchCardTranscationsResponse {
+public class SearchCardTransactionsResponse {
 	private Long nextPageAnchor;
-	@ItemType(CardTranscationsDTO.class)
-	private List<CardTranscationsDTO> requests;
+	@ItemType(CardTransactionsDTO.class)
+	private List<CardTransactionsDTO> requests;
 	public Long getNextPageAnchor() {
 		return nextPageAnchor;
 	}
 	public void setNextPageAnchor(Long nextPageAnchor) {
 		this.nextPageAnchor = nextPageAnchor;
 	}
-	public List<CardTranscationsDTO> getRequests() {
+	public List<CardTransactionsDTO> getRequests() {
 		return requests;
 	}
-	public void setRequests(List<CardTranscationsDTO> requests) {
+	public void setRequests(List<CardTransactionsDTO> requests) {
 		this.requests = requests;
 	}
 	

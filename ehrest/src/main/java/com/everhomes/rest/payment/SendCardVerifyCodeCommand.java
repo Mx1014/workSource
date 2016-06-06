@@ -7,18 +7,12 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType: 归属的类型</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>mobile: 手机号</li>
- * <li>captcha: 验证码</li>
- * <li>newPassword: 新密码</li>
- * <li>newRePassword: 再一次新密码</li>
  * </ul>
  */
-public class ResetPasswordCommand {
+public class SendCardVerifyCodeCommand {
 	private String ownerType;
     private Long ownerId;
     private String mobile;
-    private String captcha;
-    private String newPassword;
-    private String newRePassword;
 	public String getOwnerType() {
 		return ownerType;
 	}
@@ -31,35 +25,15 @@ public class ResetPasswordCommand {
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
 	}
-	
 	public String getMobile() {
 		return mobile;
 	}
 	public void setMobile(String mobile) {
 		this.mobile = mobile;
 	}
-	
-	public String getCaptcha() {
-		return captcha;
-	}
-	public void setCaptcha(String captcha) {
-		this.captcha = captcha;
-	}
-	public String getNewPassword() {
-		return newPassword;
-	}
-	public void setNewPassword(String newPassword) {
-		this.newPassword = newPassword;
-	}
-	public String getNewRePassword() {
-		return newRePassword;
-	}
-	public void setNewRePassword(String newRePassword) {
-		this.newRePassword = newRePassword;
-	}
+    
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-    
 }

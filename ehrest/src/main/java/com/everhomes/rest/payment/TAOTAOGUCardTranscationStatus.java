@@ -14,12 +14,12 @@ package com.everhomes.rest.payment;
  * <li>PARTREFUNDED("07"): 已部分退货</li>
  * </ul>
  */
-public enum CardTranscationStatus {
+public enum TAOTAOGUCardTranscationStatus {
 	HANDLING("00"), FAIL("02"),SUCCESS("01"),REVOKED("03"),
 	REFUNDED("05"),CHONGZHENG("04"),BILLED("06"),PARTREFUNDED("07");
     
     private String code;
-    private CardTranscationStatus(String code) {
+    private TAOTAOGUCardTranscationStatus(String code) {
         this.code = code;
     }
     
@@ -27,10 +27,10 @@ public enum CardTranscationStatus {
         return this.code;
     }
     
-    public static CardTranscationStatus fromCode(String code) {
+    public static TAOTAOGUCardTranscationStatus fromCode(String code) {
         if(code != null) {
-            CardTranscationStatus[] values = CardTranscationStatus.values();
-            for(CardTranscationStatus value : values) {
+            TAOTAOGUCardTranscationStatus[] values = TAOTAOGUCardTranscationStatus.values();
+            for(TAOTAOGUCardTranscationStatus value : values) {
                 if(code.equals(value.code)) {
                     return value;
                 }
