@@ -609,14 +609,14 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhPaymentCards EH_PAYMENT_CARDS = com.everhomes.server.schema.tables.EhPaymentCards.EH_PAYMENT_CARDS;
 
 	/**
-	 * The table ehcore.eh_payment_card_categories
+	 * The table ehcore.eh_payment_card_issuers
 	 */
-	public static final com.everhomes.server.schema.tables.EhPaymentCardCategories EH_PAYMENT_CARD_CATEGORIES = com.everhomes.server.schema.tables.EhPaymentCardCategories.EH_PAYMENT_CARD_CATEGORIES;
+	public static final com.everhomes.server.schema.tables.EhPaymentCardIssuers EH_PAYMENT_CARD_ISSUERS = com.everhomes.server.schema.tables.EhPaymentCardIssuers.EH_PAYMENT_CARD_ISSUERS;
 
 	/**
-	 * The table ehcore.eh_payment_card_category_communities
+	 * The table ehcore.eh_payment_card_issuer_communities
 	 */
-	public static final com.everhomes.server.schema.tables.EhPaymentCardCategoryCommunities EH_PAYMENT_CARD_CATEGORY_COMMUNITIES = com.everhomes.server.schema.tables.EhPaymentCardCategoryCommunities.EH_PAYMENT_CARD_CATEGORY_COMMUNITIES;
+	public static final com.everhomes.server.schema.tables.EhPaymentCardIssuerCommunities EH_PAYMENT_CARD_ISSUER_COMMUNITIES = com.everhomes.server.schema.tables.EhPaymentCardIssuerCommunities.EH_PAYMENT_CARD_ISSUER_COMMUNITIES;
 
 	/**
 	 * The table ehcore.eh_payment_card_recharge_orders
