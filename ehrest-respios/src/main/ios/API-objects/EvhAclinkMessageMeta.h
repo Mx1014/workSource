@@ -15,6 +15,8 @@
 
 @property(nonatomic, copy) NSNumber* doorId;
 
+@property(nonatomic, copy) NSNumber* doorType;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 

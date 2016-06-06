@@ -38,6 +38,12 @@
         [jsonObject setObject: self.approveUserId forKey: @"approveUserId"];
     if(self.authType)
         [jsonObject setObject: self.authType forKey: @"authType"];
+    if(self.rightOpen)
+        [jsonObject setObject: self.rightOpen forKey: @"rightOpen"];
+    if(self.rightVisitor)
+        [jsonObject setObject: self.rightVisitor forKey: @"rightVisitor"];
+    if(self.rightRemote)
+        [jsonObject setObject: self.rightRemote forKey: @"rightRemote"];
     if(self.validFromMs)
         [jsonObject setObject: self.validFromMs forKey: @"validFromMs"];
     if(self.validEndMs)
@@ -70,6 +76,18 @@
         self.authType = [jsonObject objectForKey: @"authType"];
         if(self.authType && [self.authType isEqual:[NSNull null]])
             self.authType = nil;
+
+        self.rightOpen = [jsonObject objectForKey: @"rightOpen"];
+        if(self.rightOpen && [self.rightOpen isEqual:[NSNull null]])
+            self.rightOpen = nil;
+
+        self.rightVisitor = [jsonObject objectForKey: @"rightVisitor"];
+        if(self.rightVisitor && [self.rightVisitor isEqual:[NSNull null]])
+            self.rightVisitor = nil;
+
+        self.rightRemote = [jsonObject objectForKey: @"rightRemote"];
+        if(self.rightRemote && [self.rightRemote isEqual:[NSNull null]])
+            self.rightRemote = nil;
 
         self.validFromMs = [jsonObject objectForKey: @"validFromMs"];
         if(self.validFromMs && [self.validFromMs isEqual:[NSNull null]])

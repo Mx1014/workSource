@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-05-31 11:07:12
+// generated at 2016-06-06 12:57:37
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -11,7 +11,8 @@ public interface ApiConstants {
     public static final String ACLINK_DELETEDOORAUTH_URL = "/aclink/deleteDoorAuth";
     public static final String ACLINK_DISCONNECTED_URL = "/aclink/disConnected";
     public static final String ACLINK_GETDOORACCESSBYHARDWAREID_URL = "/aclink/getDoorAccessByHardwareId";
-    public static final String ACLINK_GETDOORACCESSCAPAPILITYCOMMAND_URL = "/aclink/getDoorAccessCapapilityCommand";
+    public static final String ACLINK_GETDOORACCESSCAPAPILITY_URL = "/aclink/getDoorAccessCapapility";
+    public static final String ACLINK_GETVISITOR_URL = "/aclink/getVisitor";
     public static final String ACLINK_LISTADMINAESUSERKEY_URL = "/aclink/listAdminAesUserKey";
     public static final String ACLINK_LISTAESUSERKEY_URL = "/aclink/listAesUserKey";
     public static final String ACLINK_LISTAUTHHISTORY_URL = "/aclink/listAuthHistory";
@@ -20,6 +21,7 @@ public interface ApiConstants {
     public static final String ACLINK_SYNCWEBSOCKETMESSAGES_URL = "/aclink/syncWebsocketMessages";
     public static final String ACLINK_UPGRATEAUTH_URL = "/aclink/upgrateAuth";
     public static final String ACLINK_UPGRATEVERIFY_URL = "/aclink/upgrateVerify";
+    public static final String ACLINK_WIFIMGMT_URL = "/aclink/wifiMgmt";
     public static final String ACTIVITY_CANCELSIGNUP_URL = "/activity/cancelSignup";
     public static final String ACTIVITY_CHECKIN_URL = "/activity/checkin";
     public static final String ACTIVITY_CONFIRM_URL = "/activity/confirm";
@@ -69,12 +71,15 @@ public interface ApiConstants {
     public static final String ADMIN_ACL_UPDATEROLEPRIVILEGE_URL = "/admin/acl/updateRolePrivilege";
     public static final String ADMIN_ACLINK_CREATEACLINKFIRMWARE_URL = "/admin/aclink/createAclinkFirmware";
     public static final String ADMIN_ACLINK_CREATEAUTH_URL = "/admin/aclink/createAuth";
+    public static final String ADMIN_ACLINK_CREATEAUTHLIST_URL = "/admin/aclink/createAuthList";
     public static final String ADMIN_ACLINK_CREATEDOORACCESSGROUP_URL = "/admin/aclink/createDoorAccessGroup";
     public static final String ADMIN_ACLINK_CREATEDOORACCESSLINGLING_URL = "/admin/aclink/createDoorAccessLingLing";
+    public static final String ADMIN_ACLINK_CREATELINGINGVISTOR_URL = "/admin/aclink/createLingingVistor";
     public static final String ADMIN_ACLINK_DELETEDOORACCESS_URL = "/admin/aclink/deleteDoorAccess";
-    public static final String ADMIN_ACLINK_DELETEDOORACCESSBYID_URL = "/admin/aclink/deleteDoorAccessById";
     public static final String ADMIN_ACLINK_DELETEDOORAUTH_URL = "/admin/aclink/deleteDoorAuth";
+    public static final String ADMIN_ACLINK_GETCURRENTFIRMWARE_URL = "/admin/aclink/getCurrentFirmware";
     public static final String ADMIN_ACLINK_LISTACLINKUSERS_URL = "/admin/aclink/listAclinkUsers";
+    public static final String ADMIN_ACLINK_LISTDOORACCESSGROUP_URL = "/admin/aclink/listDoorAccessGroup";
     public static final String ADMIN_ACLINK_LISTUSERKEY_URL = "/admin/aclink/listUserKey";
     public static final String ADMIN_ACLINK_SEARCHDOORACCESS_URL = "/admin/aclink/searchDoorAccess";
     public static final String ADMIN_ACLINK_SEARCHDOORAUTH_URL = "/admin/aclink/searchDoorAuth";

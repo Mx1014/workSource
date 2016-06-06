@@ -34,6 +34,8 @@
         [jsonObject setObject: self.userId forKey: @"userId"];
     if(self.doorId)
         [jsonObject setObject: self.doorId forKey: @"doorId"];
+    if(self.doorType)
+        [jsonObject setObject: self.doorType forKey: @"doorType"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -46,6 +48,10 @@
         self.doorId = [jsonObject objectForKey: @"doorId"];
         if(self.doorId && [self.doorId isEqual:[NSNull null]])
             self.doorId = nil;
+
+        self.doorType = [jsonObject objectForKey: @"doorType"];
+        if(self.doorType && [self.doorType isEqual:[NSNull null]])
+            self.doorType = nil;
 
         return self;
     }

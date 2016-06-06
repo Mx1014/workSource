@@ -38,6 +38,8 @@
         [jsonObject setObject: self.name forKey: @"name"];
     if(self.hardwareId)
         [jsonObject setObject: self.hardwareId forKey: @"hardwareId"];
+    if(self.existsId)
+        [jsonObject setObject: self.existsId forKey: @"existsId"];
     if(self.doorGroupId)
         [jsonObject setObject: self.doorGroupId forKey: @"doorGroupId"];
     if(self.description_)
@@ -64,6 +66,10 @@
         self.hardwareId = [jsonObject objectForKey: @"hardwareId"];
         if(self.hardwareId && [self.hardwareId isEqual:[NSNull null]])
             self.hardwareId = nil;
+
+        self.existsId = [jsonObject objectForKey: @"existsId"];
+        if(self.existsId && [self.existsId isEqual:[NSNull null]])
+            self.existsId = nil;
 
         self.doorGroupId = [jsonObject objectForKey: @"doorGroupId"];
         if(self.doorGroupId && [self.doorGroupId isEqual:[NSNull null]])

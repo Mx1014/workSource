@@ -36,6 +36,10 @@
         [jsonObject setObject: self.ownerId forKey: @"ownerId"];
     if(self.name)
         [jsonObject setObject: self.name forKey: @"name"];
+    if(self.groupType)
+        [jsonObject setObject: self.groupType forKey: @"groupType"];
+    if(self.avatar)
+        [jsonObject setObject: self.avatar forKey: @"avatar"];
     if(self.description_)
         [jsonObject setObject: self.description_ forKey: @"description"];
     if(self.address)
@@ -56,6 +60,14 @@
         self.name = [jsonObject objectForKey: @"name"];
         if(self.name && [self.name isEqual:[NSNull null]])
             self.name = nil;
+
+        self.groupType = [jsonObject objectForKey: @"groupType"];
+        if(self.groupType && [self.groupType isEqual:[NSNull null]])
+            self.groupType = nil;
+
+        self.avatar = [jsonObject objectForKey: @"avatar"];
+        if(self.avatar && [self.avatar isEqual:[NSNull null]])
+            self.avatar = nil;
 
         self.description_ = [jsonObject objectForKey: @"description"];
         if(self.description_ && [self.description_ isEqual:[NSNull null]])

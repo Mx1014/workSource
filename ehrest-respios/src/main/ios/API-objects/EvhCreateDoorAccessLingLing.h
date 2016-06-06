@@ -19,6 +19,8 @@
 
 @property(nonatomic, copy) NSString* hardwareId;
 
+@property(nonatomic, copy) NSNumber* existsId;
+
 @property(nonatomic, copy) NSNumber* doorGroupId;
 
 @property(nonatomic, copy) NSString* description_;

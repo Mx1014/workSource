@@ -17,6 +17,10 @@
 
 @property(nonatomic, copy) NSString* name;
 
+@property(nonatomic, copy) NSNumber* groupType;
+
+@property(nonatomic, copy) NSString* avatar;
+
 @property(nonatomic, copy) NSString* description_;
 
 @property(nonatomic, copy) NSString* address;

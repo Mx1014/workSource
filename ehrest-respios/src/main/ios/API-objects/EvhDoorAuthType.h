@@ -9,7 +9,8 @@
 typedef enum {
 
     EvhDoorAuthType_FOREVER = 0, 
-    EvhDoorAuthType_TEMPERATE = 1
+    EvhDoorAuthType_TEMPERATE = 1, 
+    EvhDoorAuthType_LINGLING_VISITOR = 2
 
 } EvhDoorAuthType;
 
