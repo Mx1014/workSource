@@ -6,18 +6,18 @@ import com.everhomes.discover.ItemType;
 
 public class SearchCardTransactionsResponse {
 	private Long nextPageAnchor;
-	@ItemType(CardTransactionsDTO.class)
-	private List<CardTransactionsDTO> requests;
+	@ItemType(CardTransactionDTO.class)
+	private List<CardTransactionDTO> requests;
 	public Long getNextPageAnchor() {
 		return nextPageAnchor;
 	}
 	public void setNextPageAnchor(Long nextPageAnchor) {
 		this.nextPageAnchor = nextPageAnchor;
 	}
-	public List<CardTransactionsDTO> getRequests() {
+	public List<CardTransactionDTO> getRequests() {
 		return requests;
 	}
-	public void setRequests(List<CardTransactionsDTO> requests) {
+	public void setRequests(List<CardTransactionDTO> requests) {
 		this.requests = requests;
 	}
 	

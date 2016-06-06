@@ -12,8 +12,8 @@ public class ListCardTransactionsResponse {
 	private Timestamp date;
 	private BigDecimal consumeAmount;
 	private BigDecimal rechargeAmount;
-	@ItemType(CardTransactionsDTO.class)
-	private List<CardTransactionsDTO> requests;
+	@ItemType(CardTransactionDTO.class)
+	private List<CardTransactionDTO> requests;
 	public Timestamp getDate() {
 		return date;
 	}
@@ -33,10 +33,10 @@ public class ListCardTransactionsResponse {
 		this.rechargeAmount = rechargeAmount;
 	}
 	
-	public List<CardTransactionsDTO> getRequests() {
+	public List<CardTransactionDTO> getRequests() {
 		return requests;
 	}
-	public void setRequests(List<CardTransactionsDTO> requests) {
+	public void setRequests(List<CardTransactionDTO> requests) {
 		this.requests = requests;
 	}
 	public Long getNextPageAnchor() {

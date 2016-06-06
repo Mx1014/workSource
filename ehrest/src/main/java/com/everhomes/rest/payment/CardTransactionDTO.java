@@ -21,7 +21,7 @@ import com.everhomes.util.StringHelper;
  * <li>vendorResult: </li>
  * </ul>
  */
-public class CardTransactionsDTO {
+public class CardTransactionDTO {
 	private java.lang.Long       id;
 	private java.lang.String     userName;
 	private java.lang.String     mobile;
