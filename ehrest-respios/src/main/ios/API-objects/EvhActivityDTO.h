@@ -65,6 +65,8 @@
 
 @property(nonatomic, copy) NSString* guest;
 
+@property(nonatomic, copy) NSString* mediaUrl;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 

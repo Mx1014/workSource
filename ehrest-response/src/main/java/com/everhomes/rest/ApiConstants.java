@@ -1,5 +1,7 @@
 // @formatter:off
+
 // generated at 2016-06-07 11:21:26
+
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -442,6 +444,7 @@ public interface ApiConstants {
     public static final String FORUM_DELETECOMMENT_URL = "/forum/deleteComment";
     public static final String FORUM_DELETETOPIC_URL = "/forum/deleteTopic";
     public static final String FORUM_GETTOPIC_URL = "/forum/getTopic";
+    public static final String FORUM_INCREASEPOSTVIEWCOUNT_URL = "/forum/increasePostViewCount";
     public static final String FORUM_LIKETOPIC_URL = "/forum/likeTopic";
     public static final String FORUM_LISTTOPICCOMMENTS_URL = "/forum/listTopicComments";
     public static final String FORUM_LISTTOPICS_URL = "/forum/listTopics";

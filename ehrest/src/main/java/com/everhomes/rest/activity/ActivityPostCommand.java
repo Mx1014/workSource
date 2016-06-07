@@ -28,6 +28,7 @@ import com.everhomes.util.StringHelper;
  *<li>changeVersion:版本</li>
  *<li>posterUri:海报</li>
  *<li>guest:嘉宾</li>
+ *<li>mediaUrl:活动url</li>
  *</ul>
  */
 public class ActivityPostCommand{
@@ -51,6 +52,8 @@ public class ActivityPostCommand{
     private transient Long id;
     private String posterUri;
     private String guest;
+    
+    private String mediaUrl;
     
     public ActivityPostCommand() {
     }
