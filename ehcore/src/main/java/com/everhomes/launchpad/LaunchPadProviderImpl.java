@@ -25,6 +25,7 @@ import com.everhomes.server.schema.tables.daos.EhLaunchPadItemsDao;
 import com.everhomes.server.schema.tables.daos.EhLaunchPadLayoutsDao;
 import com.everhomes.server.schema.tables.pojos.EhLaunchPadItems;
 import com.everhomes.server.schema.tables.pojos.EhLaunchPadLayouts;
+import com.everhomes.server.schema.tables.pojos.EhUserLaunchPadItems;
 import com.everhomes.util.ConvertHelper;
 
 @Component
@@ -324,5 +325,26 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
         
         return items;
 	}
+	
+	@Override
+	public List<UserLaunchPadItem> findUserLaunchPadItemByUserId(Long userId, String sceneType, String ownerType, Long ownerId) {
+		List<UserLaunchPadItem> items = new ArrayList<UserLaunchPadItem>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUserLaunchPadItems.class));
+        SelectJoinStep<Record> step = context.select().from(Tables.EH_USER_LAUNCH_PAD_ITEMS);
 
+        Condition condition = Tables.EH_USER_LAUNCH_PAD_ITEMS.USER_ID.eq(userId);
+        condition = condition.and(Tables.EH_USER_LAUNCH_PAD_ITEMS.OWNER_TYPE.eq(ownerType));
+        condition = condition.and(Tables.EH_USER_LAUNCH_PAD_ITEMS.OWNER_ID.eq(ownerId));
+        condition = condition.and(Tables.EH_USER_LAUNCH_PAD_ITEMS.SCENE_TYPE.eq(sceneType));
+       
+        step.where(condition).fetch().map(r ->{
+            items.add(ConvertHelper.convert(r, UserLaunchPadItem.class));
+            return null;
+        });
+        
+        return items;
+	}
+	
+
+	
 }

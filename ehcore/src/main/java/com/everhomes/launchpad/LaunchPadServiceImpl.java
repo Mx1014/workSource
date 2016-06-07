@@ -480,33 +480,64 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 sceneType = SceneType.DEFAULT.getCode();
             }
         }
+        List<LaunchPadItem> allItems = new ArrayList<LaunchPadItem>();
 		
-		List<LaunchPadItemDTO> result = new ArrayList<LaunchPadItemDTO>();
-		List<LaunchPadItem> defaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.ALL.getCode(),0L,null);
-		List<LaunchPadItem> cityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.CITY.getCode(),community.getCityId(),null);
 		List<LaunchPadItem> communityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.COMMUNITY.getCode(),community.getId(),null);
-		
-		List<LaunchPadItem> userItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(), cmd.getItemGroup(), ScopeType.USER.getCode(), userId, null);
-		List<LaunchPadItem> allItems = new ArrayList<LaunchPadItem>();
 
-		if(defaultItems == null || defaultItems.isEmpty()){
-			defaultItems = cityItems;
+		List<LaunchPadItem> customizedItems = new ArrayList<LaunchPadItem>();
+		
+		for (LaunchPadItem launchPadItem : communityItems) {
+			if(ApplyPolicy.fromCode(launchPadItem.getApplyPolicy()) == ApplyPolicy.CUSTOMIZED){
+				customizedItems.add(launchPadItem);
+			}
+		}
+		
+		if(customizedItems.size() > 0){
+			allItems = customizedItems;
+			
+		}else{
+			List<LaunchPadItem> defaultItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.ALL.getCode(),0L,null);
+			List<LaunchPadItem> cityItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(),cmd.getItemGroup(),ScopeType.CITY.getCode(),community.getCityId(),null);
+			
+			List<LaunchPadItem> userItems = this.launchPadProvider.findLaunchPadItemsByTagAndScope(namespaceId, sceneType, cmd.getItemLocation(), cmd.getItemGroup(), ScopeType.USER.getCode(), userId, null);
+			
+
 			if(defaultItems == null || defaultItems.isEmpty()){
-				defaultItems = communityItems;
+				defaultItems = cityItems;
+				if(defaultItems == null || defaultItems.isEmpty()){
+					defaultItems = communityItems;
+				}
+			}
+			if(defaultItems != null && !defaultItems.isEmpty()){
+				allItems = defaultItems;
+				if(cityItems != null && !cityItems.isEmpty()){
+					allItems = overrideOrRevertItems(allItems,cityItems);
+				}
+				if(communityItems != null && !communityItems.isEmpty())
+					allItems = overrideOrRevertItems(allItems, communityItems);
+				if(userItems != null && !userItems.isEmpty())
+					allItems = overrideOrRevertItems(allItems, userItems);
 			}
 		}
-		if(defaultItems != null && !defaultItems.isEmpty()){
-			allItems = defaultItems;
-			if(cityItems != null && !cityItems.isEmpty()){
-				allItems = overrideOrRevertItems(allItems,cityItems);
-			}
-			if(communityItems != null && !communityItems.isEmpty())
-				allItems = overrideOrRevertItems(allItems, communityItems);
-			if(userItems != null && !userItems.isEmpty())
-				allItems = overrideOrRevertItems(allItems, userItems);
-		}
-		if(allItems!=null&&!allItems.isEmpty())
+		
+		
+		if(allItems!=null&&!allItems.isEmpty()){
+			List<UserLaunchPadItem> userLaunchPadItems = this.launchPadProvider.findUserLaunchPadItemByUserId(userId, sceneType, EntityType.COMMUNITY.getCode(), community.getId());
+			
+			allItems = overrideUserItems(allItems, userLaunchPadItems);
+			
+			Collections.sort(allItems, new Comparator<LaunchPadItem>() {
+				public int compare(LaunchPadItem arg0, LaunchPadItem arg1) {  
+	                return arg0.getDefaultOrder().compareTo(arg1.getDefaultOrder());  
+	            } 
+			});
+			
 			allItems = allItems.stream().filter(r -> r.getDisplayFlag()==ItemDisplayFlag.DISPLAY.getCode()).collect(Collectors.toList());
+		}
+			
+			
+			
+			
 
 		// 把对item的处理独立成一个新的方法，供公共调用 by lqs 20160324
 //		try{ 
@@ -841,6 +872,30 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			flag = false;
 		}
 		return allItems;
+	}
+	
+	/**
+	 * 1、applyPolicy=1(覆盖)，小范围覆盖大范围，
+	 * 用户自定义的，直接根据itemId比较，系统配置的覆盖，根据itemName进行比较
+	 * 2、applyPolicy=2(恢复)，直接忽略即可
+	 * @param defalultItems
+	 * @param userItems
+	 * @return
+	 */
+	private List<LaunchPadItem> overrideUserItems(List<LaunchPadItem> defalultItems, List<UserLaunchPadItem> userItems) {
+
+		if(defalultItems == null || userItems == null) return null;
+		for(LaunchPadItem d : defalultItems){
+			for(UserLaunchPadItem o : userItems){
+				if(d.getId().equals(o.getItemId())){
+					if(ApplyPolicy.fromCode(o.getApplyPolicy()) == ApplyPolicy.OVERRIDE){
+						d.setDisplayFlag(o.getDisplayFlag());
+						d.setDefaultOrder(o.getDefaultOrder());
+					}
+				}
+			}
+		}
+		return defalultItems;
 	}
 
 	@SuppressWarnings("unchecked")

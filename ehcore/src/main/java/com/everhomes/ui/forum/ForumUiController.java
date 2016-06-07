@@ -113,7 +113,7 @@ public class ForumUiController extends ControllerBase {
     
     /**
      * <b>URL: /ui/forum/listNoticeByScene</b>
-     * <p>根据场景查询贴</p>
+     * <p>根据场景查询公告</p>
      */
     @RequestMapping("listNoticeByScene")
     @RestReturn(value=ListPostCommandResponse.class)
