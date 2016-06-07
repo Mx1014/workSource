@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-06-03 19:18:20
+// generated at 2016-06-07 20:41:14
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -243,6 +243,7 @@ public interface ApiConstants {
     public static final String ADMIN_REGISTERLOGIN_URL = "/admin/registerLogin";
     public static final String ADMIN_REMOVEBORDER_URL = "/admin/removeBorder";
     public static final String ADMIN_SAMPLE_URL = "/admin/sample";
+    public static final String ADMIN_SCENE_LISTSCENETYPES_URL = "/admin/scene/listSceneTypes";
     public static final String ADMIN_SCHEDULE_LISTJOBINFOS_URL = "/admin/schedule/listJobInfos";
     public static final String ADMIN_SCHEDULE_SCHEDULEATTIME_URL = "/admin/schedule/scheduleAtTime";
     public static final String ADMIN_SCHEDULE_SCHEDULECRONJOB_URL = "/admin/schedule/scheduleCronJob";
