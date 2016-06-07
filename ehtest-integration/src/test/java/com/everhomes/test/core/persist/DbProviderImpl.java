@@ -42,6 +42,9 @@ import com.google.gson.JsonParser;
 
 @Component
 public class DbProviderImpl implements DbProvider {
+    public static final String CALL_FUN_PREFIX = "callfun(";
+    public static final String CALL_FUN_SUFFIX = ")";
+    
     @Autowired
     private DSLContext dslContext;
     
@@ -303,4 +306,22 @@ public class DbProviderImpl implements DbProvider {
         
         return dslContext.insertInto(table, colunNames).values(colunValues);
 	}
+	
+//	private String processValue(String originalValue) {
+//	    if(originalValue == null || originalValue.trim().length() == 0) {
+//	        return originalValue;
+//	    }
+//	    
+//	    if(originalValue.startsWith(CALL_FUN_PREFIX) && originalValue.endsWith(CALL_FUN_SUFFIX)) {
+//	        String funStr = originalValue.substring(CALL_FUN_PREFIX.length(), originalValue.length() - CALL_FUN_SUFFIX.length());
+//	        int pos = funStr.indexOf(':');
+//	        if(pos != -1) {
+//	            String className = funStr.substring(0, pos);
+//	            String methodName = funStr.substring(pos + 1);
+//	            
+//	            Class.forName(className).
+//	            .getDeclaredMethod(methodName, null).invoke(obj, args);
+//	        }
+//	    }
+//	}
 }
