@@ -51,6 +51,7 @@ public class CreateBannerAdminCommand {
     @NotNull
     private Byte     status;
     private Integer  order;
+    @ItemType(String.class)
     private List<String> sceneTypeList;
 
     
