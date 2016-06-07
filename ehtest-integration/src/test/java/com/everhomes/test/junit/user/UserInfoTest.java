@@ -1,5 +1,5 @@
 // @formatter:off
-package com.everhomes.test.user;
+package com.everhomes.test.junit.user;
 
 import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
 

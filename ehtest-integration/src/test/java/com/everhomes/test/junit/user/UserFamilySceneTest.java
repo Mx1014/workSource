@@ -1,5 +1,5 @@
 // @formatter:off
-package com.everhomes.test.user;
+package com.everhomes.test.junit.user;
 
 import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
 
@@ -38,7 +38,7 @@ public class UserFamilySceneTest extends BaseLoginAuthTestCase {
         
         String commandRelativeUri = "/ui/user/listUserRelatedScenes";
         UserListUserRelatedScenesRestResponse response = httpClientService.restGet(commandRelativeUri, null, 
-            UserListUserRelatedScenesRestResponse.class);
+            UserListUserRelatedScenesRestResponse.class, context);
         
         assertNotNull("The reponse of may not be null", response);
         assertTrue("The user scenes should be get from server, response=" + 
@@ -49,6 +49,7 @@ public class UserFamilySceneTest extends BaseLoginAuthTestCase {
     
     @After
     public void tearDown() {
+        super.tearDown();
         logoff();
     }
     
@@ -58,6 +59,10 @@ public class UserFamilySceneTest extends BaseLoginAuthTestCase {
         dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
         
         jsonFilePath = "data/json/3.4.x-test-data-community_address_160605.txt";
+        fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
+        dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
+        
+        jsonFilePath = "data/json/3.4.x-test-data-zuolin_default_forum_160605.txt";
         fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
         dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
         
