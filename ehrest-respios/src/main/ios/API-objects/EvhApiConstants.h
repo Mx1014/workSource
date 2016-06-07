@@ -795,6 +795,7 @@
 #define EVH_UI_COMMUNITY_LISTCOMMUNITIESBYSCENE_URL @"/ui/community/listCommunitiesByScene"
 #define EVH_UI_FORUM_GETTOPICQUERYFILTERS_URL @"/ui/forum/getTopicQueryFilters"
 #define EVH_UI_FORUM_GETTOPICSENTSCOPES_URL @"/ui/forum/getTopicSentScopes"
+#define EVH_UI_FORUM_LISTNOTICEBYSCENE_URL @"/ui/forum/listNoticeByScene"
 #define EVH_UI_FORUM_NEWTOPICBYSCENE_URL @"/ui/forum/newTopicByScene"
 #define EVH_UI_FORUM_SEARCHBYSCENE_URL @"/ui/forum/searchByScene"
 #define EVH_UI_GROUP_LISTNEARBYGROUPSBYSCENE_URL @"/ui/group/listNearbyGroupsByScene"

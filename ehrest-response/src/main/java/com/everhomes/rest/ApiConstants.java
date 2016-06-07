@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-06-06 16:20:04
+// generated at 2016-06-07 11:21:26
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -798,6 +798,7 @@ public interface ApiConstants {
     public static final String UI_COMMUNITY_LISTCOMMUNITIESBYSCENE_URL = "/ui/community/listCommunitiesByScene";
     public static final String UI_FORUM_GETTOPICQUERYFILTERS_URL = "/ui/forum/getTopicQueryFilters";
     public static final String UI_FORUM_GETTOPICSENTSCOPES_URL = "/ui/forum/getTopicSentScopes";
+    public static final String UI_FORUM_LISTNOTICEBYSCENE_URL = "/ui/forum/listNoticeByScene";
     public static final String UI_FORUM_NEWTOPICBYSCENE_URL = "/ui/forum/newTopicByScene";
     public static final String UI_FORUM_SEARCHBYSCENE_URL = "/ui/forum/searchByScene";
     public static final String UI_GROUP_LISTNEARBYGROUPSBYSCENE_URL = "/ui/group/listNearbyGroupsByScene";
