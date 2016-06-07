@@ -51,7 +51,7 @@ public class CreateBannerAdminCommand {
     @NotNull
     private Byte     status;
     private Integer  order;
-    private String sceneType;
+    private List<String> sceneTypeList;
 
     
     public Integer getNamespaceId() {
@@ -141,12 +141,12 @@ public class CreateBannerAdminCommand {
     public void setActionData(String actionData) {
         this.actionData = actionData;
     }
-        
-    public String getSceneType() {
-        return sceneType;
+    
+    public List<String> getSceneTypeList() {
+        return sceneTypeList;
     }
-    public void setSceneType(String sceneType) {
-        this.sceneType = sceneType;
+    public void setSceneTypeList(List<String> sceneTypeList) {
+        this.sceneTypeList = sceneTypeList;
     }
     @Override
     public String toString() {

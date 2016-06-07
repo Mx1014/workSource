@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
+import com.everhomes.rest.scene.ListSceneTypesCommand;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhSceneTypesDao;
 import com.everhomes.util.ConvertHelper;
@@ -42,6 +43,24 @@ public class SceneProviderImpl implements SceneProvider {
         List<SceneTypeInfo> result  = new ArrayList<SceneTypeInfo>();
         SelectJoinStep<Record> query = context.select().from(Tables.EH_SCENE_TYPES);
         query.where(condition);
+        query.fetch().map((r) -> {
+            result.add(ConvertHelper.convert(r, SceneTypeInfo.class));
+            return null;
+        });
+        
+        return result;
+    }
+
+    @Override
+    public List<SceneTypeInfo> listSceneTypes(Integer namespaceId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        
+        List<SceneTypeInfo> result  = new ArrayList<SceneTypeInfo>();
+        SelectJoinStep<Record> query = context.select().from(Tables.EH_SCENE_TYPES);
+        if(namespaceId != null) {
+            Condition condition = Tables.EH_SCENE_TYPES.NAMESPACE_ID.eq(namespaceId);
+            query.where(condition);
+        }
         query.fetch().map((r) -> {
             result.add(ConvertHelper.convert(r, SceneTypeInfo.class));
             return null;
