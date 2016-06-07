@@ -534,13 +534,13 @@ public class ParkingServiceImpl implements ParkingService {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     				"plateNumber cannot be null.");
         }
-    	if(plateNumber.length() != 7) {
+    	/*if(plateNumber.length() != 7) {
 			LOGGER.error("the length of plateNumber is wrong.");
 			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_LENGTH,
 					localeStringService.getLocalizedString(String.valueOf(ParkingErrorCode.SCOPE), 
 							String.valueOf(ParkingErrorCode.ERROR_PLATE_LENGTH),
 							UserContext.current().getUser().getLocale(),"the length of plateNumber is wrong."));
-		}
+		}*/
     }
     
     @Scheduled(cron="0 0 2 * * ? ")
