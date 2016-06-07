@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -17,6 +18,8 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.scene.ListSceneTypesCommand;
 import com.everhomes.rest.scene.SceneTypeInfoDTO;
 import com.everhomes.scene.SceneService;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 
 @RestDoc(value="Scene admin controller", site="core")
 @RestController
@@ -34,6 +37,9 @@ public class SceneAdminController extends ControllerBase {
     @RequestMapping("listSceneTypes")
     @RestReturn(value=SceneTypeInfoDTO.class, collection=true)
     public RestResponse listSceneTypes(ListSceneTypesCommand cmd){
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
         List<SceneTypeInfoDTO> cmdResponse = sceneService.listSceneTypes(cmd);
         RestResponse response =  new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);

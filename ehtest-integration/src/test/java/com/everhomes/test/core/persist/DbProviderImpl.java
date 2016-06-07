@@ -2,6 +2,7 @@ package com.everhomes.test.core.persist;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -300,28 +301,34 @@ public class DbProviderImpl implements DbProvider {
             Entry<String, JsonElement> recordEntry = recordIterator.next();
             String columnName = recordEntry.getKey();
             colunNames.add(DSL.fieldByName(columnName));
-            String columnValue = recordEntry.getValue().getAsString();
+            String columnValue = processValue(recordEntry.getValue().getAsString());
             colunValues.add(columnValue);
         }
         
         return dslContext.insertInto(table, colunNames).values(colunValues);
 	}
 	
-//	private String processValue(String originalValue) {
-//	    if(originalValue == null || originalValue.trim().length() == 0) {
-//	        return originalValue;
-//	    }
-//	    
-//	    if(originalValue.startsWith(CALL_FUN_PREFIX) && originalValue.endsWith(CALL_FUN_SUFFIX)) {
-//	        String funStr = originalValue.substring(CALL_FUN_PREFIX.length(), originalValue.length() - CALL_FUN_SUFFIX.length());
-//	        int pos = funStr.indexOf(':');
-//	        if(pos != -1) {
-//	            String className = funStr.substring(0, pos);
-//	            String methodName = funStr.substring(pos + 1);
-//	            
-//	            Class.forName(className).
-//	            .getDeclaredMethod(methodName, null).invoke(obj, args);
-//	        }
-//	    }
-//	}
+	private String processValue(String originalValue) {
+	    if(originalValue == null || originalValue.trim().length() == 0) {
+	        return originalValue;
+	    }
+	    
+	    if(originalValue.startsWith(CALL_FUN_PREFIX) && originalValue.endsWith(CALL_FUN_SUFFIX)) {
+	        String funStr = originalValue.substring(CALL_FUN_PREFIX.length(), originalValue.length() - CALL_FUN_SUFFIX.length());
+	        int pos = funStr.indexOf(':');
+	        if(pos != -1) {
+	            String className = funStr.substring(0, pos);
+	            String methodName = funStr.substring(pos + 1);
+	            
+	            try {
+                    Object obj = Class.forName(className).getDeclaredMethod(methodName, null).invoke(null, null);
+                    originalValue = obj.toString();
+                } catch (Exception e) {
+                    throw new IllegalArgumentException("Invalid call function in value, value=" + originalValue, e);
+                } 
+	        }
+	    }
+	    
+	    return originalValue;
+	}
 }
