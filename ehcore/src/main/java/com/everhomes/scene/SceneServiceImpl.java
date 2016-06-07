@@ -55,10 +55,14 @@ public class SceneServiceImpl implements SceneService {
     
     @Override
     public List<SceneTypeInfoDTO> listSceneTypes(ListSceneTypesCommand cmd) {
-        List<SceneTypeInfo> sceneList = sceneProvider.listSceneTypes(cmd.getNamespaceId());
+        Integer namespaceId = null;
+        if(cmd != null) {
+            namespaceId = cmd.getNamespaceId();
+        }
+        List<SceneTypeInfo> sceneList = sceneProvider.listSceneTypes(namespaceId);
         
         List<SceneTypeInfoDTO> result = null;
-        if(sceneList != null && sceneList.size() == 0) {
+        if(sceneList != null && sceneList.size() != 0) {
             result = sceneList.stream().map((r) -> {
                 return ConvertHelper.convert(r, SceneTypeInfoDTO.class);
             }).collect(Collectors.toList());
