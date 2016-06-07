@@ -4,7 +4,7 @@ alter table `eh_quality_inspection_categories` add column `description` text DEF
  
 -- task表新增category_id字段记录任务所属类型；category_path字段记录类型路径；增加字段记录创建任务的人的id，0为根据标准自动创建的任务；增加manual_flag字段标识是否是自动生成的任务
 alter table `eh_quality_inspection_tasks` add column `category_id` bigint(20) NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_categories';
-alter table `eh_quality_inspection_tasks` add column `category_path` bigint(20) NOT NULL DEFAULT '0' COMMENT 'refernece to the path of eh_categories';
+alter table `eh_quality_inspection_tasks` add column `category_path` varchar(128) DEFAULT NULL COMMENT 'refernece to the path of eh_categories';
 alter table `eh_quality_inspection_tasks` add column `create_uid` bigint(20) NOT NULL DEFAULT '0';
 alter table `eh_quality_inspection_tasks` add column `manual_flag` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: auto 1:manual';
  

@@ -1170,6 +1170,9 @@ public class QualityServiceImpl implements QualityService {
 			task.setTaskName(standard.getName());
 			task.setTaskType((byte) 1);
 			task.setStatus(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode());
+			task.setCategoryId(standard.getCategoryId());
+			QualityInspectionCategories category = verifiedCategoryById(standard.getCategoryId());
+			task.setCategoryPath(category.getPath());
 			for(StandardGroupDTO executiveGroup : standard.getExecutiveGroup()) {
 				
 				task.setExecutiveGroupId(executiveGroup.getGroupId());
@@ -1553,18 +1556,35 @@ public class QualityServiceImpl implements QualityService {
 	
 	private Double calculateScore(QualityInspectionTasks task, Double score) {
 		
-		if(task.getStatus() == QualityInspectionTaskResult.INSPECT_DELAY.getCode() 
-				|| task.getStatus() == QualityInspectionTaskResult.RECTIFY_DELAY.getCode()) {
-//			QualityInspectionStandards standard = verifiedStandardById(task.getStandardId());
-			QualityInspectionStandards standard = qualityProvider.findStandardById(task.getStandardId());
-			if(standard == null) {
-				LOGGER.error("the standard which id="+task.getStandardId()+" don't exist!");
-				return null;
-			}
+//		if(task.getStatus() == QualityInspectionTaskResult.INSPECT_DELAY.getCode() 
+//				|| task.getStatus() == QualityInspectionTaskResult.RECTIFY_DELAY.getCode()) {
+////			QualityInspectionStandards standard = verifiedStandardById(task.getStandardId());
+//			QualityInspectionStandards standard = qualityProvider.findStandardById(task.getStandardId());
+//			if(standard == null) {
+//				LOGGER.error("the standard which id="+task.getStandardId()+" don't exist!");
+//				return null;
+//			}
+//			QualityInspectionEvaluationFactors factor = qualityProvider.findQualityInspectionFactorByGroupIdAndCategoryId(
+//					task.getExecutiveGroupId(), standard.getCategoryId());
+//			if(factor != null) {
+//				score = score - factor.getWeight();
+//			}
+//		}
+		
+		String path = task.getCategoryPath();
+		path = path.substring(1,path.length());
+		String[] pathIds = path.split("/");
+		Long factorCategoryId = Long.valueOf(pathIds[0]);
+		Long scoreCategoryId = Long.valueOf(pathIds[pathIds.length-1]);
+		
+		QualityInspectionCategories scoreCategory = qualityProvider.findQualityInspectionCategoriesByCategoryId(scoreCategoryId);
+		
+		if(scoreCategory != null) {
 			QualityInspectionEvaluationFactors factor = qualityProvider.findQualityInspectionFactorByGroupIdAndCategoryId(
-					task.getExecutiveGroupId(), standard.getCategoryId());
+					task.getExecutiveGroupId(), factorCategoryId);
+			
 			if(factor != null) {
-				score = score - factor.getWeight();
+				score = score - factor.getWeight() * scoreCategory.getScore();
 			}
 		}
 		
@@ -1903,6 +1923,10 @@ public class QualityServiceImpl implements QualityService {
 		task.setTaskType((byte) 1);
 		task.setStatus(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode());
 		task.setExecutiveGroupId(cmd.getGroup().getGroupId());
+		task.setCategoryId(cmd.getCategoryId());
+		
+		QualityInspectionCategories category = verifiedCategoryById(cmd.getCategoryId());
+		task.setCategoryPath(category.getPath());
 		task.setManualFlag((byte) 1);
 		
 		
@@ -1918,18 +1942,11 @@ public class QualityServiceImpl implements QualityService {
 			
 		});
 		
-		ReportVerificationResultCommand command = new ReportVerificationResultCommand();
-
-		command.setTaskId(task.getId());
-		command.setAttachments(cmd.getAttachments());
-		command.setMessage(cmd.getMessage());
-		command.setVerificationResult(cmd.getVerificationResult());
-		command.setEndTime(cmd.getEndTime());
-		command.setOperatorType(cmd.getOperatorType());
-		command.setOperatorId(cmd.getOperatorId());
-		command.setCategoryId(cmd.getCategoryId());
-		QualityInspectionTaskDTO dto = reportVerificationResult(command);
-		return dto;
+		List<QualityInspectionTasks> tasks = new ArrayList<QualityInspectionTasks>();
+		tasks.add(task);
+		List<QualityInspectionTaskDTO> dtos = convertQualityInspectionTaskToDTO(tasks, user.getId());
+		
+		return dtos.get(0);
 		
 	}
 
