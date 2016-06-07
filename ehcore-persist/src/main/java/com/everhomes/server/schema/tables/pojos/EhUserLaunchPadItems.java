@@ -11,13 +11,13 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUserLaunchPadItems implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1012599248;
+	private static final long serialVersionUID = 1506049696;
 
 	private java.lang.Long    id;
 	private java.lang.Long    itemId;
 	private java.lang.String  ownerType;
-	private java.lang.Byte    ownerId;
-	private java.lang.Byte    userId;
+	private java.lang.Long    ownerId;
+	private java.lang.Long    userId;
 	private java.lang.Byte    applyPolicy;
 	private java.lang.Byte    displayFlag;
 	private java.lang.Integer defaultOrder;
@@ -29,8 +29,8 @@ public class EhUserLaunchPadItems implements java.io.Serializable {
 		java.lang.Long    id,
 		java.lang.Long    itemId,
 		java.lang.String  ownerType,
-		java.lang.Byte    ownerId,
-		java.lang.Byte    userId,
+		java.lang.Long    ownerId,
+		java.lang.Long    userId,
 		java.lang.Byte    applyPolicy,
 		java.lang.Byte    displayFlag,
 		java.lang.Integer defaultOrder,
@@ -71,19 +71,19 @@ public class EhUserLaunchPadItems implements java.io.Serializable {
 		this.ownerType = ownerType;
 	}
 
-	public java.lang.Byte getOwnerId() {
+	public java.lang.Long getOwnerId() {
 		return this.ownerId;
 	}
 
-	public void setOwnerId(java.lang.Byte ownerId) {
+	public void setOwnerId(java.lang.Long ownerId) {
 		this.ownerId = ownerId;
 	}
 
-	public java.lang.Byte getUserId() {
+	public java.lang.Long getUserId() {
 		return this.userId;
 	}
 
-	public void setUserId(java.lang.Byte userId) {
+	public void setUserId(java.lang.Long userId) {
 		this.userId = userId;
 	}
 
