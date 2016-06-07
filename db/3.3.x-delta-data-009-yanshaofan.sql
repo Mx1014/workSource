@@ -247,7 +247,10 @@ INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
 VALUES (721,0,'用户授权','用户授权 全部功能',null);
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
 VALUES (722,0,'访客授权','访客授权 全部功能',null);
-
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
+VALUES (723,0,'版本管理 ','版本管理  全部功能',null);
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
+VALUES (724,0,'门禁分组','门禁分组 全部功能',null);
 
 
 #
@@ -410,9 +413,13 @@ VALUES (47000,'公共门禁',40000,null,null,1,2,'/40000/47000','park',432);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
 VALUES (47100,'门禁管理',47000,null,'access_manage',0,2,'/40000/47000/47100','park',433);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (47200,'用户授权',47000,null,'user_auth',0,2,'/40000/47000/47200','park',434);
+VALUES (47150,'版本管理',47000,null,'version_manage',0,2,'/40000/47000/47150','park',434);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (47300,'访客授权',47000,null,'visitor_auth',0,2,'/40000/47000/47300','park',435);
+VALUES (47160,'门禁分组',47000,null,'access_group',0,2,'/40000/47000/47160','park',435);
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (47200,'用户授权',47000,null,'user_auth',0,2,'/40000/47000/47200','park',436);
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (47300,'访客授权',47000,null,'visitor_auth',0,2,'/40000/47000/47300','park',437);
 
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
 VALUES (48000,'服务预约',40000,null,null,1,2,'/40000/48000','park',440);
@@ -679,7 +686,10 @@ INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show
 VALUES (102,525,48400,'查询数据统计',1,1,'数据统计',350);
 
 
-
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+VALUES (103,723,47150,'版本管理',1,1,'版本管理',346);
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+VALUES (104,724,47160,'门禁分组',1,1,'门禁分组',346);
 
 
 
