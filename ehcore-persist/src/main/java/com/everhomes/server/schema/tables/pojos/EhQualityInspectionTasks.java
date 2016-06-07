@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhQualityInspectionTasks implements java.io.Serializable {
 
-	private static final long serialVersionUID = 36294038;
+	private static final long serialVersionUID = 44670304;
 
 	private java.lang.Long     id;
 	private java.lang.String   ownerType;
@@ -41,7 +41,7 @@ public class EhQualityInspectionTasks implements java.io.Serializable {
 	private java.sql.Timestamp reviewTime;
 	private java.sql.Timestamp createTime;
 	private java.lang.Long     categoryId;
-	private java.lang.Long     categoryPath;
+	private java.lang.String   categoryPath;
 	private java.lang.Long     createUid;
 	private java.lang.Byte     manualFlag;
 
@@ -76,7 +76,7 @@ public class EhQualityInspectionTasks implements java.io.Serializable {
 		java.sql.Timestamp reviewTime,
 		java.sql.Timestamp createTime,
 		java.lang.Long     categoryId,
-		java.lang.Long     categoryPath,
+		java.lang.String   categoryPath,
 		java.lang.Long     createUid,
 		java.lang.Byte     manualFlag
 	) {
@@ -337,11 +337,11 @@ public class EhQualityInspectionTasks implements java.io.Serializable {
 		this.categoryId = categoryId;
 	}
 
-	public java.lang.Long getCategoryPath() {
+	public java.lang.String getCategoryPath() {
 		return this.categoryPath;
 	}
 
-	public void setCategoryPath(java.lang.Long categoryPath) {
+	public void setCategoryPath(java.lang.String categoryPath) {
 		this.categoryPath = categoryPath;
 	}
 

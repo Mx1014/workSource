@@ -239,7 +239,7 @@ public class EhQualityInspectionTasksDao extends org.jooq.impl.DAOImpl<com.everh
 	/**
 	 * Fetch records that have <code>category_path IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks> fetchByCategoryPath(java.lang.Long... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks> fetchByCategoryPath(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhQualityInspectionTasks.EH_QUALITY_INSPECTION_TASKS.CATEGORY_PATH, values);
 	}
 

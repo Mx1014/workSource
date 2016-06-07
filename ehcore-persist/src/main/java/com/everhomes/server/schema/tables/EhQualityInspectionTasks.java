@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhQualityInspectionTasks extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord> {
 
-	private static final long serialVersionUID = 2105114138;
+	private static final long serialVersionUID = -390873335;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_quality_inspection_tasks</code>
@@ -169,7 +169,7 @@ public class EhQualityInspectionTasks extends org.jooq.impl.TableImpl<com.everho
 	/**
 	 * The column <code>ehcore.eh_quality_inspection_tasks.category_path</code>. refernece to the path of eh_categories
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.lang.Long> CATEGORY_PATH = createField("category_path", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "refernece to the path of eh_categories");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord, java.lang.String> CATEGORY_PATH = createField("category_path", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "refernece to the path of eh_categories");
 
 	/**
 	 * The column <code>ehcore.eh_quality_inspection_tasks.create_uid</code>.
