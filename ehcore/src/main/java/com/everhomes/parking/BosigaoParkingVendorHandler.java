@@ -148,7 +148,7 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 			}
 			else {
 				String carNumber = order.getPlateNumber();
-				String cost = order.getPrice().intValue() + "";
+				String cost = (order.getPrice().intValue()*100) + "";
 				String flag = "2"; //停车场系统接口的传入参数，2表示是车牌号
 				String payTime = order.getPaidTime().toString();
 				String validStart = timestampToStr(order.getOldExpiredTime());
