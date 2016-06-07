@@ -5586,8 +5586,7 @@ CREATE TABLE `eh_yellow_pages` (
   `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
 
 SET autocommit=1;
 SET foreign_key_checks = 1;
