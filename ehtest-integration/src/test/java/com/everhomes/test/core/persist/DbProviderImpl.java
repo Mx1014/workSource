@@ -321,7 +321,7 @@ public class DbProviderImpl implements DbProvider {
 	            String methodName = funStr.substring(pos + 1);
 	            
 	            try {
-                    Object obj = Class.forName(className).getDeclaredMethod(methodName, null).invoke(null, null);
+                    Object obj = Class.forName(className).getDeclaredMethod(methodName).invoke(null);
                     originalValue = obj.toString();
                 } catch (Exception e) {
                     throw new IllegalArgumentException("Invalid call function in value, value=" + originalValue, e);

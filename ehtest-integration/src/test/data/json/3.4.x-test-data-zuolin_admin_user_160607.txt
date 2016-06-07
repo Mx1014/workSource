@@ -3,7 +3,7 @@
     {
       "gender": "0",
       "locale": "zh_CN",
-      "uuid": "callfun(java.util.UUID randomUUID)",
+      "uuid": "callfun(java.util.UUID:randomUUID)",
       "points": "165",
       "community_id": "0",
       "reg_channel_id": "0",
@@ -24,7 +24,7 @@
     },
     {
       "gender": "0",
-      "uuid": "callfun(java.util.UUID randomUUID)",
+      "uuid": "callfun(java.util.UUID:randomUUID)",
       "points": "0",
       "reg_channel_id": "0",
       "account_name": "1002",
