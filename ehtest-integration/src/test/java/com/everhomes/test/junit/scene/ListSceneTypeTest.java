@@ -50,13 +50,13 @@ public class ListSceneTypeTest extends BaseLoginAuthTestCase {
                 flag = flag | 0x04;
             }
             if(SceneType.PARK_TOURIST == sceneType) {
-                flag = flag | 0x04;
+                flag = flag | 0x08;
             }
             if(SceneType.ENTERPRISE == sceneType) {
-                flag = flag | 0x04;
+                flag = flag | 0x10;
             }
             if(SceneType.ENTERPRISE_NOAUTH == sceneType) {
-                flag = flag | 0x04;
+                flag = flag | 0x20;
             }
         }
         assertEquals(0x3F, flag);
