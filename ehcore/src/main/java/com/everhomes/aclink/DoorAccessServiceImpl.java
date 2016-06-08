@@ -1664,6 +1664,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         String uuid = UUID.randomUUID().toString();
         uuid = uuid.replace("-", "");
+        uuid = uuid.substring(0, 5);
         
         User user = UserContext.current().getUser();
         DoorAuth auth = new DoorAuth();

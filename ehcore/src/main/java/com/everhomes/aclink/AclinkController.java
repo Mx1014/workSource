@@ -1,6 +1,8 @@
 package com.everhomes.aclink;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,6 +11,8 @@ import java.util.Map;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -349,7 +353,7 @@ public class AclinkController extends ControllerBase {
     
     /**
      * 
-     * <b>URL: /aclink/listDoorAccessQRKey</b>
+     * <b>URL: /aclink/getVisitor</b>
      * <p>列出所有二维码门禁列表 </p>
      * @return
      */
@@ -364,6 +368,23 @@ public class AclinkController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /aclink/v</b>
+     * <p>列出所有二维码门禁列表 </p>
+     * @return
+     */
+    @RequestMapping("v")
+    @RequireAuthentication(false)
+    public Object doorVisitor(GetVisitorCommand cmd) {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        try {
+            httpHeaders.setLocation(new URI("/mobile/static/qr_access/qrCode.html?id=" + cmd.getId()));
+        } catch (URISyntaxException e) {
+        }
+        return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
     }
     
     /**
