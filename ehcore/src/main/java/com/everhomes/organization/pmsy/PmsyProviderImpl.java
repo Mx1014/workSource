@@ -229,7 +229,7 @@ public class PmsyProviderImpl implements PmsyProvider {
 		if(StringUtils.isNotBlank(userContact))
 			query.addConditions(Tables.EH_PMSY_ORDERS.USER_CONTACT.eq(userContact));
 		query.addConditions(Tables.EH_PMSY_ORDERS.OWNER_ID.eq(communityId));
-		query.addConditions(Tables.EH_PMSY_ORDERS.STATUS.eq(PmsyOrderStatus.PAID.getCode()));
+		query.addConditions(Tables.EH_PMSY_ORDERS.STATUS.gt(PmsyOrderStatus.PAID.getCode()));
 		query.addOrderBy(Tables.EH_PMSY_ORDERS.CREATE_TIME.desc());
 		query.addLimit(pageSize);
 		

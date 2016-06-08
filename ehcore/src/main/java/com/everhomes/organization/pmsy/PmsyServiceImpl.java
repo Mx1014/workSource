@@ -330,9 +330,9 @@ public class PmsyServiceImpl implements PmsyService{
 						items = new ArrayList<PmsyOrderItem>();
 					items.add(item);
 					order.setItems(items);
-					order.setBillDate(item.getBillDate());
+					order.setBillDate(item.getBillDate().getTime());
 					if(items.size()>1){
-						order.setBillDate(null);
+						order.setBillDate(0L);
 						continue outer;
 					}
 						

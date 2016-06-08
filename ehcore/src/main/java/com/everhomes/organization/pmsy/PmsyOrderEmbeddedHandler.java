@@ -83,6 +83,13 @@ public class PmsyOrderEmbeddedHandler implements OrderEmbeddedHandler{
 				"", "siyuan", "支付宝支付", "", billListJson);
 		Map payFeeMap = gson.fromJson(json, Map.class);
 		List payFeeList = (List) payFeeMap.get("UserRev_PayFee");
+		if(payFeeList == null){
+			order.setStatus(PmsyOrderStatus.FAIL.getCode());
+			pmsyProvider.updatePmsyOrder(order);
+			LOGGER.error("the pay of fee is fail.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+					"the pay of fee is fail.");
+		}
 		Map payFeeMap2 = (Map) payFeeList.get(0);
 		List payFeeList2 = (List) map2.get("Syswin");
 		
@@ -98,6 +105,8 @@ public class PmsyOrderEmbeddedHandler implements OrderEmbeddedHandler{
 			}
 			
 		}
+		order.setStatus(PmsyOrderStatus.SUCCESS.getCode());
+		pmsyProvider.updatePmsyOrder(order);
 		
 	}
 

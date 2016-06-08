@@ -1,25 +1,12 @@
 // @formatter:off
 package com.everhomes.test.junit.user;
 
-import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.jooq.DSLContext;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.everhomes.rest.ui.user.UserListUserRelatedScenesRestResponse;
-import com.everhomes.rest.user.GetUserInfoRestResponse;
-import com.everhomes.rest.user.IdentifierClaimStatus;
-import com.everhomes.server.schema.tables.daos.EhUsersDao;
-import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
-import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
-import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 
 public class UserFamilySceneTest extends BaseLoginAuthTestCase {
