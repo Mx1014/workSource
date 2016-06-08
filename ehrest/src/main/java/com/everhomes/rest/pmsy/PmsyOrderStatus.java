@@ -9,7 +9,7 @@ package com.everhomes.rest.pmsy;
  * </ul>
  */
 public enum PmsyOrderStatus {
-    INACTIVE((byte)0), UNPAID((byte)1), PAID((byte)2);
+    INACTIVE((byte)0), UNPAID((byte)1), PAID((byte)2),FAIL((byte)3),SUCCESS((byte)4);
     
     private byte code;
     
