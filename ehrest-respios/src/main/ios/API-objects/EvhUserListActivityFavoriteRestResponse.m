@@ -1,20 +1,20 @@
 //
-// EvhUserListPostedTopicsRestResponse.m
+// EvhUserListActivityFavoriteRestResponse.m
 //
-#import "EvhUserListPostedTopicsRestResponse.h"
+#import "EvhUserListActivityFavoriteRestResponse.h"
 #import "EvhListPostResponse.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhUserListPostedTopicsRestResponse
+// EvhUserListActivityFavoriteRestResponse
 //
 
-@implementation EvhUserListPostedTopicsRestResponse
+@implementation EvhUserListActivityFavoriteRestResponse
 
 +(id) withJsonString: (NSString*) jsonString
 {
     id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
     if(jsonObject != nil) {
-        EvhUserListPostedTopicsRestResponse* obj = [EvhUserListPostedTopicsRestResponse new];
+        EvhUserListActivityFavoriteRestResponse* obj = [EvhUserListActivityFavoriteRestResponse new];
         return [obj fromJson:jsonObject];
     }
     return nil;

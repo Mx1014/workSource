@@ -32,6 +32,10 @@
 {
     if(self.communityId)
         [jsonObject setObject: self.communityId forKey: @"communityId"];
+    if(self.pageAnchor)
+        [jsonObject setObject: self.pageAnchor forKey: @"pageAnchor"];
+    if(self.pageSize)
+        [jsonObject setObject: self.pageSize forKey: @"pageSize"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -40,6 +44,14 @@
         self.communityId = [jsonObject objectForKey: @"communityId"];
         if(self.communityId && [self.communityId isEqual:[NSNull null]])
             self.communityId = nil;
+
+        self.pageAnchor = [jsonObject objectForKey: @"pageAnchor"];
+        if(self.pageAnchor && [self.pageAnchor isEqual:[NSNull null]])
+            self.pageAnchor = nil;
+
+        self.pageSize = [jsonObject objectForKey: @"pageSize"];
+        if(self.pageSize && [self.pageSize isEqual:[NSNull null]])
+            self.pageSize = nil;
 
         return self;
     }

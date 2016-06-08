@@ -1,13 +1,13 @@
 //
-// EvhUserListPostedTopicsRestResponse.h
+// EvhUserListPostedActivitiesRestResponse.h
 //
 #import "RestResponseBase.h"
 #import "EvhListPostResponse.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhUserListPostedTopicsRestResponse
+// EvhUserListPostedActivitiesRestResponse
 //
-@interface EvhUserListPostedTopicsRestResponse : EvhRestResponseBase
+@interface EvhUserListPostedActivitiesRestResponse : EvhRestResponseBase
 
 @property(nonatomic, strong) EvhListPostResponse* response;
 

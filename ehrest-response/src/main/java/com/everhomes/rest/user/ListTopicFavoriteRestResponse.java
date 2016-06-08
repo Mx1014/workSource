@@ -4,21 +4,20 @@ package com.everhomes.rest.user;
 
 import com.everhomes.rest.RestResponseBase;
 
-import java.util.List;
-import com.everhomes.rest.forum.PostDTO;
+import com.everhomes.rest.user.ListPostResponse;
 
 public class ListTopicFavoriteRestResponse extends RestResponseBase {
 
-    private List<PostDTO> response;
+    private ListPostResponse response;
 
     public ListTopicFavoriteRestResponse () {
     }
 
-    public List<PostDTO> getResponse() {
+    public ListPostResponse getResponse() {
         return response;
     }
 
-    public void setResponse(List<PostDTO> response) {
+    public void setResponse(ListPostResponse response) {
         this.response = response;
     }
 }

@@ -42,6 +42,10 @@
         }
         [jsonObject setObject: jsonArray forKey: @"excludeCategories"];
     }
+    if(self.pageAnchor)
+        [jsonObject setObject: self.pageAnchor forKey: @"pageAnchor"];
+    if(self.pageSize)
+        [jsonObject setObject: self.pageSize forKey: @"pageSize"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -61,6 +65,14 @@
                 [self.excludeCategories addObject: itemJson];
             }
         }
+        self.pageAnchor = [jsonObject objectForKey: @"pageAnchor"];
+        if(self.pageAnchor && [self.pageAnchor isEqual:[NSNull null]])
+            self.pageAnchor = nil;
+
+        self.pageSize = [jsonObject objectForKey: @"pageSize"];
+        if(self.pageSize && [self.pageSize isEqual:[NSNull null]])
+            self.pageSize = nil;
+
         return self;
     }
     

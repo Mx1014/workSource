@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-06-07 17:44:23
+// generated at 2016-06-08 16:18:50
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -842,9 +842,12 @@ public interface ApiConstants {
     public static final String USER_GETUSERINFO_URL = "/user/getUserInfo";
     public static final String USER_GETUSERRELATESERVICEADDRESS_URL = "/user/getUserRelateServiceAddress";
     public static final String USER_GETUSERSNAPSHOTINFO_URL = "/user/getUserSnapshotInfo";
+    public static final String USER_LISTACTIVITYFAVORITE_URL = "/user/listActivityFavorite";
     public static final String USER_LISTCONTACTS_URL = "/user/listContacts";
+    public static final String USER_LISTPOSTEDACTIVITIES_URL = "/user/listPostedActivities";
     public static final String USER_LISTPOSTEDTOPICS_URL = "/user/listPostedTopics";
     public static final String USER_LISTRECIPIENT_URL = "/user/listRecipient";
+    public static final String USER_LISTSIGNUPACTIVITIES_URL = "/user/listSignupActivities";
     public static final String USER_LISTTOPICFAVORITE_URL = "/user/listTopicFavorite";
     public static final String USER_LISTTREASURE_URL = "/user/listTreasure";
     public static final String USER_LISTUSERIDENTIFIERS_URL = "/user/listUserIdentifiers";

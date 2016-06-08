@@ -1,19 +1,19 @@
 //
-// EvhListUserFavoriteTopicCommand.m
+// EvhListSignupActivitiesCommand.m
 //
-#import "EvhListUserFavoriteTopicCommand.h"
+#import "EvhListSignupActivitiesCommand.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhListUserFavoriteTopicCommand
+// EvhListSignupActivitiesCommand
 //
 
-@implementation EvhListUserFavoriteTopicCommand
+@implementation EvhListSignupActivitiesCommand
 
 +(id) withJsonString: (NSString*) jsonString
 {
     id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
     if(jsonObject != nil) {
-        EvhListUserFavoriteTopicCommand* obj = [EvhListUserFavoriteTopicCommand new];
+        EvhListSignupActivitiesCommand* obj = [EvhListSignupActivitiesCommand new];
         return [obj fromJson:jsonObject];
     }
     return nil;
@@ -23,7 +23,6 @@
 {
     self = [super init];
     if(self) {
-        _excludeCategories = [NSMutableArray new];
         return self;
     }
     return nil;
@@ -33,13 +32,6 @@
 {
     if(self.communityId)
         [jsonObject setObject: self.communityId forKey: @"communityId"];
-    if(self.excludeCategories) {
-        NSMutableArray* jsonArray = [NSMutableArray new];
-        for(NSNumber* item in self.excludeCategories) {
-            [jsonArray addObject:item];
-        }
-        [jsonObject setObject: jsonArray forKey: @"excludeCategories"];
-    }
     if(self.pageAnchor)
         [jsonObject setObject: self.pageAnchor forKey: @"pageAnchor"];
     if(self.pageSize)
@@ -53,12 +45,6 @@
         if(self.communityId && [self.communityId isEqual:[NSNull null]])
             self.communityId = nil;
 
-        {
-            NSArray* jsonArray = [jsonObject objectForKey: @"excludeCategories"];
-            for(id itemJson in jsonArray) {
-                [self.excludeCategories addObject: itemJson];
-            }
-        }
         self.pageAnchor = [jsonObject objectForKey: @"pageAnchor"];
         if(self.pageAnchor && [self.pageAnchor isEqual:[NSNull null]])
             self.pageAnchor = nil;

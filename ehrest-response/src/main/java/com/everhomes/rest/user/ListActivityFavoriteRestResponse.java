@@ -6,11 +6,11 @@ import com.everhomes.rest.RestResponseBase;
 
 import com.everhomes.rest.user.ListPostResponse;
 
-public class ListPostedTopicsRestResponse extends RestResponseBase {
+public class ListActivityFavoriteRestResponse extends RestResponseBase {
 
     private ListPostResponse response;
 
-    public ListPostedTopicsRestResponse () {
+    public ListActivityFavoriteRestResponse () {
     }
 
     public ListPostResponse getResponse() {

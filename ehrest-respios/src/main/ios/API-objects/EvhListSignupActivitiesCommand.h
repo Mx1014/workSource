@@ -1,13 +1,13 @@
 //
-// EvhListUserFavoriteActivityCommand.h
+// EvhListSignupActivitiesCommand.h
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhListUserFavoriteActivityCommand
+// EvhListSignupActivitiesCommand
 //
-@interface EvhListUserFavoriteActivityCommand
+@interface EvhListSignupActivitiesCommand
     : NSObject<EvhJsonSerializable>
 
 

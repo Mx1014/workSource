@@ -1,21 +1,21 @@
 //
-// EvhListUserFavoriteActivityCommand.h
+// EvhListPostResponse.h
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
+#import "EvhPostDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhListUserFavoriteActivityCommand
+// EvhListPostResponse
 //
-@interface EvhListUserFavoriteActivityCommand
+@interface EvhListPostResponse
     : NSObject<EvhJsonSerializable>
 
 
-@property(nonatomic, copy) NSNumber* communityId;
+// item type EvhPostDTO*
+@property(nonatomic, strong) NSMutableArray* postDtos;
 
-@property(nonatomic, copy) NSNumber* pageAnchor;
-
-@property(nonatomic, copy) NSNumber* pageSize;
+@property(nonatomic, copy) NSNumber* nextPageAnchor;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
