@@ -6,6 +6,8 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>ownerUid: 用户ID</li>
  * <li>communityId: 用户所在小区或园区ID</li>
+ * <li>pageAnchor: 锚点</li>
+ * <li>pageSize: 每页的数量</li>
  * </ul>
  */
 public class ListPostedActivityByOwnerIdCommand {
@@ -13,6 +15,10 @@ public class ListPostedActivityByOwnerIdCommand {
 	private Long ownerUid;
 	    
 	private Long communityId;
+	
+	private Long pageAnchor;
+    
+    private Integer pageSize;
 	
 	public Long getOwnerUid() {
         return ownerUid;
@@ -30,7 +36,23 @@ public class ListPostedActivityByOwnerIdCommand {
         this.communityId = communityId;
     }
     
-    @Override
+    public Long getPageAnchor() {
+		return pageAnchor;
+	}
+
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
+	}
+
+	public Integer getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
