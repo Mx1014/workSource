@@ -90,7 +90,7 @@ CREATE TABLE `eh_payment_card_transactions` (
   `item_name` VARCHAR(256) NOT NULL DEFAULT '' COMMENT 'the name of item',
   `merchant` VARCHAR(64) COMMENT 'the merchant',
   `amount` DECIMAL(10,2) NOT NULL DEFAULT '0.00' COMMENT 'the amount of money paid',
-  `transaction_no` VARCHAR(256) NOT NULL DEFAULT '' COMMENT 'transcation serial number',
+  `transaction_no` VARCHAR(256) NOT NULL DEFAULT '' COMMENT 'transaction serial number',
   `transaction_time` DATETIME COMMENT 'the pay time',
   `card_id` BIGINT(20) NOT NULL DEFAULT 0 COMMENT 'id of the eh_payment_cards record',
   
@@ -98,7 +98,7 @@ CREATE TABLE `eh_payment_card_transactions` (
   `creator_uid` BIGINT NOT NULL DEFAULT 0,
   `create_time` DATETIME,
   `vendor_name` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'reference to name of vendors taotaogu',
-  `vendor_result` TEXT COMMENT 'the extra information of transcations',
+  `vendor_result` TEXT COMMENT 'the extra information of transactions',
 
   PRIMARY KEY (`id`)             
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
