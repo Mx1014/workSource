@@ -50,7 +50,6 @@ public class PaymentCardController extends ControllerBase{
     @RestReturn(value=CardInfoDTO.class,collection=true)
     public RestResponse listCardInfo(ListCardInfoCommand cmd) {
         List<CardInfoDTO> result = null;
-        EhPaymentCardRechargeOrders s;
         RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

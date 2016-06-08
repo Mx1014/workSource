@@ -12,11 +12,11 @@ import com.everhomes.util.StringHelper;
  * <li>consumeType: 消费类型</li>
  * <li>itemName: 商品名称</li>
  * <li>amount: 金额</li>
- * <li>transcationTime: 交易时间</li>
+ * <li>transactionTime: 交易时间</li>
  * <li>status: 状态码</li>
  * <li>nextPageAnchor: 分页的瞄 </li>
  * <li>merchant: 商户</li>
- * <li>transcationType: 交易类型   1：充值   2 ：消费</li>
+ * <li>transactionType: 交易类型   1：充值   2 ：消费</li>
  * <li>vendorName: 第三方厂商</li>
  * <li>vendorResult: </li>
  * </ul>
@@ -30,11 +30,11 @@ public class CardTransactionDTO {
 	private java.lang.Byte       consumeType;
 	private java.lang.String     itemName;
 	private java.math.BigDecimal amount;
-	private java.sql.Timestamp   transcationTime;
+	private java.sql.Timestamp   transactionTime;
 	private java.lang.Byte       status;
 	
 	private String merchant;
-	private String transcationType;
+	private String transactionType;
 	private String vendorName;
 	private String vendorResult;
 	
@@ -87,12 +87,7 @@ public class CardTransactionDTO {
 	public void setAmount(java.math.BigDecimal amount) {
 		this.amount = amount;
 	}
-	public java.sql.Timestamp getTranscationTime() {
-		return transcationTime;
-	}
-	public void setTranscationTime(java.sql.Timestamp transcationTime) {
-		this.transcationTime = transcationTime;
-	}
+	
 	public java.lang.Byte getStatus() {
 		return status;
 	}
@@ -112,11 +107,18 @@ public class CardTransactionDTO {
 	public void setMerchant(String merchant) {
 		this.merchant = merchant;
 	}
-	public String getTranscationType() {
-		return transcationType;
+	
+	public java.sql.Timestamp getTransactionTime() {
+		return transactionTime;
 	}
-	public void setTranscationType(String transcationType) {
-		this.transcationType = transcationType;
+	public void setTransactionTime(java.sql.Timestamp transactionTime) {
+		this.transactionTime = transactionTime;
+	}
+	public String getTransactionType() {
+		return transactionType;
+	}
+	public void setTransactionType(String transactionType) {
+		this.transactionType = transactionType;
 	}
 	public String getVendorName() {
 		return vendorName;

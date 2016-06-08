@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>amount: 金额</li>
  * <li>disAmount: 折扣金额</li>
  * <li>status: 1： 成功   0：失败 {@link com.everhomes.rest.payment.PaidResultStatus}</li>
- * <li>transcationTime: 交易时间</li>
+ * <li>transactionTime: 交易时间</li>
  * </ul>
  */
 public class GetCardPaidResultDTO {
@@ -21,7 +21,7 @@ public class GetCardPaidResultDTO {
 	private BigDecimal amount;
 	private BigDecimal disAmount;
 	private String status;
-	private Timestamp transcationTime;
+	private Timestamp transactionTime;
 	public String getMerchantNo() {
 		return merchantNo;
 	}
@@ -52,13 +52,13 @@ public class GetCardPaidResultDTO {
 	public void setStatus(String status) {
 		this.status = status;
 	}
-	public Timestamp getTranscationTime() {
-		return transcationTime;
-	}
-	public void setTranscationTime(Timestamp transcationTime) {
-		this.transcationTime = transcationTime;
-	}
 	
+	public Timestamp getTransactionTime() {
+		return transactionTime;
+	}
+	public void setTransactionTime(Timestamp transactionTime) {
+		this.transactionTime = transactionTime;
+	}
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

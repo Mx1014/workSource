@@ -1,5 +1,7 @@
 package com.everhomes.payment;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,5 +21,10 @@ public class PaymentCardProviderImpl implements PaymentCardProvider{
     @Autowired 
     private SequenceProvider sequenceProvider;
     
+    public List<PaymentCard> listPaymentCard(){
+    	List<PaymentCard> list = null;
+    	
+    	return list;
+    }
     
 }

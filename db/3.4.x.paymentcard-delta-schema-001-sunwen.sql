@@ -32,7 +32,7 @@ CREATE TABLE `eh_payment_cards` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
   `owner_id` BIGINT NOT NULL DEFAULT 0, 
-  `category_id` BIGINT(20) NOT NULL DEFAULT 0 COMMENT 'id of the card type',
+  `issuer_id` BIGINT(20) NOT NULL DEFAULT 0 COMMENT 'id of the card issuer',
 
   `card_no` VARCHAR(256) NOT NULL DEFAULT '' COMMENT 'the id of card ,according the third system',
   `balance` DECIMAL(10,2) COMMENT 'the balance of card',
@@ -79,8 +79,8 @@ CREATE TABLE `eh_payment_card_recharge_orders` (
   PRIMARY KEY (`id`)             
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
 
-DROP TABLE IF EXISTS `eh_payment_card_transcations`;
-CREATE TABLE `eh_payment_card_transcations` (   
+DROP TABLE IF EXISTS `eh_payment_card_transactions`;
+CREATE TABLE `eh_payment_card_transactions` (   
   `id` BIGINT(20) NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
@@ -90,7 +90,7 @@ CREATE TABLE `eh_payment_card_transcations` (
   `item_name` VARCHAR(256) NOT NULL DEFAULT '' COMMENT 'the name of item',
   `merchant` VARCHAR(64) COMMENT 'the merchant',
   `amount` DECIMAL(10,2) NOT NULL DEFAULT '0.00' COMMENT 'the amount of money paid',
-  `transcation_no` VARCHAR(256) NOT NULL DEFAULT '' COMMENT 'transcation serial number',
+  `transaction_no` VARCHAR(256) NOT NULL DEFAULT '' COMMENT 'transcation serial number',
   `transaction_time` DATETIME COMMENT 'the pay time',
   `card_id` BIGINT(20) NOT NULL DEFAULT 0 COMMENT 'id of the eh_payment_cards record',
   
