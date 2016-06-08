@@ -88,18 +88,18 @@ public class DiscoveryParkTouristPostSceneHandler implements PostSceneHandler {
         List<TopicFilterDTO> filterList = new ArrayList<TopicFilterDTO>();
         if(community != null) {
             long menuId = 1;
-            
+          //产品要求只留园区 mod by xiongying 20160601
             // 菜单：小区圈
-            long group1Id = menuId++;
+//            long group1Id = menuId++;
             TopicFilterDTO filterDto = new TopicFilterDTO();
-            filterDto.setId(group1Id);
-            filterDto.setParentId(0L);
-            code = String.valueOf(ForumLocalStringCode.POST_MEMU_COMMUNITY_GROUP);
-            menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
-            filterDto.setName(menuName);
-            filterDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());
-            filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());;
-            filterList.add(filterDto);
+//            filterDto.setId(group1Id);
+//            filterDto.setParentId(0L);
+//            code = String.valueOf(ForumLocalStringCode.POST_MEMU_COMMUNITY_GROUP);
+//            menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
+//            filterDto.setName(menuName);
+//            filterDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());
+//            filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());;
+//            filterList.add(filterDto);
 
             // 菜单：周边小区 （园区场景暂无周边小区）
 //            filterDto = new TopicFilterDTO();
@@ -121,7 +121,7 @@ public class DiscoveryParkTouristPostSceneHandler implements PostSceneHandler {
             // 菜单：园区
             filterDto = new TopicFilterDTO();
             filterDto.setId(menuId++);
-            filterDto.setParentId(group1Id);
+            filterDto.setParentId(0L);
             code = String.valueOf(ForumLocalStringCode.POST_MEMU_PARK_ONLY);
             menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
             filterDto.setName(menuName);

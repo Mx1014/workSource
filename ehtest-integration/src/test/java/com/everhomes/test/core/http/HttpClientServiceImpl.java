@@ -1,5 +1,5 @@
 // @formatter:off
-package com.everhomes.test.core;
+package com.everhomes.test.core.http;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -35,6 +35,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.rest.RestResponseBase;
+import com.everhomes.test.core.base.UserContext;
 import com.everhomes.util.GsonJacksonDateAdapter;
 import com.everhomes.util.GsonJacksonTimestampAdapter;
 import com.everhomes.util.SimpleConvertHelper;

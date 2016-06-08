@@ -3521,20 +3521,29 @@ public class ForumServiceImpl implements ForumService {
             if(org != null) {
                 String orgType = org.getOrganizationType();
                 
+                // 以前由于只有物业管理员场景故需要进行管理员判断，后来加上普通企业之后，就不需要进行这个判断；
+                // 客户端会从发送范围里把visible_region_type/id传过来，如果不传则说明是偏老一点的版本，此时使用REGION类型 by lqs 20160601
+//                if(OrganizationType.isGovAgencyOrganization(orgType)) {
+//                    if(VisibleRegionType.fromCode(cmd.getVisibleRegionType()) == VisibleRegionType.COMMUNITY){
+//                    	creatorTag = PostEntityTag.fromCode(orgType);
+//                    	if(OrganizationType.fromCode(orgType) == OrganizationType.ENTERPRISE){
+//                    		creatorTag = PostEntityTag.USER;
+//                    	}
+//                        visibleRegionType = VisibleRegionType.COMMUNITY;
+//                        visibleRegionId = cmd.getVisibleRegionId();
+//                    }else{
+//                        creatorTag = PostEntityTag.fromCode(orgType);
+//                        visibleRegionType = VisibleRegionType.REGION;
+//                        visibleRegionId = sceneToken.getEntityId();
+//                    }
+//                    
+//                }
+                visibleRegionType = VisibleRegionType.fromCode(cmd.getVisibleRegionType());
+                visibleRegionType = (visibleRegionType == null) ? VisibleRegionType.REGION : visibleRegionType;
+                visibleRegionId = cmd.getVisibleRegionId();
+                visibleRegionId = (visibleRegionId == null) ? org.getId() : visibleRegionId;
                 if(OrganizationType.isGovAgencyOrganization(orgType)) {
-                    if(VisibleRegionType.fromCode(cmd.getVisibleRegionType()) == VisibleRegionType.COMMUNITY){
-                    	creatorTag = PostEntityTag.fromCode(orgType);
-                    	if(OrganizationType.fromCode(orgType) == OrganizationType.ENTERPRISE){
-                    		creatorTag = PostEntityTag.USER;
-                    	}
-                        visibleRegionType = VisibleRegionType.COMMUNITY;
-                        visibleRegionId = cmd.getVisibleRegionId();
-                    }else{
-                        creatorTag = PostEntityTag.fromCode(orgType);
-                        visibleRegionType = VisibleRegionType.REGION;
-                        visibleRegionId = sceneToken.getEntityId();
-                    }
-                    
+                    creatorTag = PostEntityTag.fromCode(orgType);
                 }
             } else {
                 if(LOGGER.isWarnEnabled()) {

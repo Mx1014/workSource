@@ -62,3 +62,12 @@ VALUES (46100,'Wifi热点',40000,null,'wifi_hotspot',0,2,'/40000/46100','park',4
 
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),715,46100,'Wifi热点',1,1,'Wifi热点',401);
+
+
+
+
+
+#
+#20160602
+#
+UPDATE `eh_forum_posts` SET category_id = 1010,`category_path`='帖子/活动' WHERE `embedded_app_id` = 3 and `category_id` = 1003;

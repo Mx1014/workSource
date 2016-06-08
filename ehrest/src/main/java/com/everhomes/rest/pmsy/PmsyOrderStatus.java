@@ -2,7 +2,7 @@
 package com.everhomes.rest.pmsy;
 
 /**
- * <ul>停车充值订单状态
+ * <ul>物业缴费订单状态
  * <li>INACTIVE(0): 无效</li>
  * <li>UNPAID(1): 未支付</li>
  * <li>PAID(2): 已支付</li>

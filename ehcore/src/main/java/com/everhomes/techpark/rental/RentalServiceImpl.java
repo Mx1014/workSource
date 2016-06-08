@@ -867,19 +867,20 @@ public class RentalServiceImpl implements RentalService {
 			dto.setSiteItems(new ArrayList<SiteItemDTO>());
 			List<RentalItemsBill> rentalSiteItems = rentalProvider
 					.findRentalItemsBillBySiteBillId(dto.getRentalBillId());
-			for (RentalItemsBill rib : rentalSiteItems) {
-				SiteItemDTO siDTO = new SiteItemDTO();
-				siDTO.setCounts(rib.getRentalCount());
-				//返回商品id add by xiongying20160531
-				siDTO.setId(rib.getRentalSiteItemId());
-				RentalSiteItem rsItem = rentalProvider
-						.findRentalSiteItemById(rib.getRentalSiteItemId());
-				if(rsItem != null) {
-					siDTO.setItemName(rsItem.getName());
+			if(null!=rentalSiteItems)
+				for (RentalItemsBill rib : rentalSiteItems) {
+					SiteItemDTO siDTO = new SiteItemDTO();
+					siDTO.setCounts(rib.getRentalCount());
+					//返回商品id add by xiongying20160531
+					siDTO.setId(rib.getRentalSiteItemId());
+					RentalSiteItem rsItem = rentalProvider
+							.findRentalSiteItemById(rib.getRentalSiteItemId());
+					if(rsItem != null) {
+						siDTO.setItemName(rsItem.getName());
+					}
+					siDTO.setItemPrice(rib.getTotalMoney());
+					dto.getSiteItems().add(siDTO);
 				}
-				siDTO.setItemPrice(rib.getTotalMoney());
-				dto.getSiteItems().add(siDTO);
-			}
 			response.getRentalBills().add(dto);
 		}
 		return response;
@@ -1373,6 +1374,11 @@ public class RentalServiceImpl implements RentalService {
 	public AddRentalBillItemCommandResponse addRentalItemBill(
 			AddRentalBillItemCommand cmd) {
 
+		if(cmd.getRentalBillId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of cmd RentalBillId"+ cmd+".");
+		}
+		
 		if(null!=cmd.getCommunityId()){
 			cmd.setOwnerId(cmd.getCommunityId());
 			cmd.setOwnerType(RentalOwnerType.COMMUNITY.getCode());
@@ -1397,41 +1403,40 @@ public class RentalServiceImpl implements RentalService {
 		if (!cmd.getInvoiceFlag().equals(bill.getInvoiceFlag()))
 			rentalProvider.updateBillInvoice(cmd.getRentalBillId(),
 					cmd.getInvoiceFlag());
-		if (null != cmd.getRentalItems()) {
-			if (cmd.getRentalItems().get(0).getItemPrice() != null) {
-				java.math.BigDecimal itemMoney = new java.math.BigDecimal(0);
-				for (SiteItemDTO siDto : cmd.getRentalItems()) {
-					if (cmd.getRentalItems().get(0).getItemPrice() == null)
-						continue;
-					if(siDto.getId() == null) {
-						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-			                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of siDto id"+ siDto+".");
-					}
-					
-					if(cmd.getRentalBillId() == null) {
-						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-			                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of cmd RentalBillId"+ cmd+".");
-					}
-					RentalItemsBill rib = new RentalItemsBill();
-					rib.setTotalMoney(siDto.getItemPrice().multiply( new java.math.BigDecimal(siDto.getCounts())));
+		//2016-6-2 10:32:44 fix bug :当有物品订单（说明是付款失败再次付款），就不再生成物品订单
+		if (null != cmd.getRentalItems()&&this.rentalProvider.findRentalItemsBillBySiteBillId(cmd.getRentalBillId())==null) {
+			
+			java.math.BigDecimal itemMoney = new java.math.BigDecimal(0);
+			for (SiteItemDTO siDto : cmd.getRentalItems()) {
+				 
+				if(siDto.getId() == null) {
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+		                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of siDto id"+ siDto+".");
+				}
+				RentalSiteItem rSiteItem = this.rentalProvider.getRentalSiteItemById(siDto.getId());
+				if (null == rSiteItem)
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+		                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of siDto id"+ siDto+".");
+				
+				RentalItemsBill rib = new RentalItemsBill();
+				rib.setTotalMoney(rSiteItem.getPrice().multiply( new java.math.BigDecimal(siDto.getCounts())));
 
-					rib.setCommunityId(cmd.getOwnerId());
-					rib.setRentalSiteItemId(siDto.getId());
-					rib.setRentalCount(siDto.getCounts());
-					rib.setRentalBillId(cmd.getRentalBillId());
-					rib.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-							.getTime()));
-					rib.setCreatorUid(userId);
-					itemMoney  = itemMoney.add(rib.getTotalMoney());
-					rentalProvider.createRentalItemBill(rib);
-				}
-				if (itemMoney.doubleValue() > 0) {
-					bill.setPayTotalMoney(bill.getSiteTotalMoney().add(itemMoney));
-					bill.setReserveMoney(bill.getReserveMoney().add(itemMoney));
-				}
+				rib.setCommunityId(cmd.getOwnerId());
+				rib.setRentalSiteItemId(siDto.getId());
+				rib.setRentalCount(siDto.getCounts());
+				rib.setRentalBillId(cmd.getRentalBillId());
+				rib.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+						.getTime()));
+				rib.setCreatorUid(userId);
+				itemMoney  = itemMoney.add(rib.getTotalMoney());
+				rentalProvider.createRentalItemBill(rib);
+			}
+			if (itemMoney.doubleValue() > 0) {
+				bill.setPayTotalMoney(bill.getSiteTotalMoney().add(itemMoney));
+				bill.setReserveMoney(bill.getReserveMoney().add(itemMoney));
+			}
 			
 
-			}
 		}
 		int compare = bill.getPayTotalMoney().compareTo(BigDecimal.ZERO);
 		
@@ -1571,18 +1576,19 @@ public class RentalServiceImpl implements RentalService {
 			dto.setSiteItems(new ArrayList<SiteItemDTO>());
 			List<RentalItemsBill> rentalSiteItems = rentalProvider
 					.findRentalItemsBillBySiteBillId(dto.getRentalBillId());
-			for (RentalItemsBill rib : rentalSiteItems) {
-				SiteItemDTO siDTO = new SiteItemDTO();
-				siDTO.setCounts(rib.getRentalCount());
-				RentalSiteItem rsItem = rentalProvider.findRentalSiteItemById(rib.getRentalSiteItemId());
-				if(rsItem != null) {
-    				siDTO.setItemName(rsItem.getName());
-    				siDTO.setItemPrice(rib.getTotalMoney());
-    				dto.getSiteItems().add(siDTO);
-				} else {
-				    LOGGER.error("Rental site item not found, rentalSiteItemId=" + rib.getRentalSiteItemId() + ", cmd=" + cmd);
+			if (null!=rentalSiteItems)
+				for (RentalItemsBill rib : rentalSiteItems) {
+					SiteItemDTO siDTO = new SiteItemDTO();
+					siDTO.setCounts(rib.getRentalCount());
+					RentalSiteItem rsItem = rentalProvider.findRentalSiteItemById(rib.getRentalSiteItemId());
+					if(rsItem != null) {
+	    				siDTO.setItemName(rsItem.getName());
+	    				siDTO.setItemPrice(rib.getTotalMoney());
+	    				dto.getSiteItems().add(siDTO);
+					} else {
+					    LOGGER.error("Rental site item not found, rentalSiteItemId=" + rib.getRentalSiteItemId() + ", cmd=" + cmd);
+					}
 				}
-			}
 			response.getRentalBills().add(dto);
 		}
 
@@ -1946,20 +1952,18 @@ public class RentalServiceImpl implements RentalService {
 			dto.setSiteItems(new ArrayList<SiteItemDTO>());
 			List<RentalItemsBill> rentalSiteItems = rentalProvider
 					.findRentalItemsBillBySiteBillId(dto.getRentalBillId());
-			if(null == rentalSiteItems){
-				continue;
-			}
-			for (RentalItemsBill rib : rentalSiteItems) {
-				SiteItemDTO siDTO = new SiteItemDTO();
-				siDTO.setCounts(rib.getRentalCount());
-				RentalSiteItem rsItem = rentalProvider
-						.findRentalSiteItemById(rib.getRentalSiteItemId());
-				if(null != rsItem){
-					siDTO.setItemName(rsItem.getName());
+			if(null != rentalSiteItems) 
+				for (RentalItemsBill rib : rentalSiteItems) {
+					SiteItemDTO siDTO = new SiteItemDTO();
+					siDTO.setCounts(rib.getRentalCount());
+					RentalSiteItem rsItem = rentalProvider
+							.findRentalSiteItemById(rib.getRentalSiteItemId());
+					if(null != rsItem){
+						siDTO.setItemName(rsItem.getName());
+					}
+					siDTO.setItemPrice(rib.getTotalMoney());
+					dto.getSiteItems().add(siDTO);
 				}
-				siDTO.setItemPrice(rib.getTotalMoney());
-				dto.getSiteItems().add(siDTO);
-			}
 			
 			dtos.add(dto);
 		}

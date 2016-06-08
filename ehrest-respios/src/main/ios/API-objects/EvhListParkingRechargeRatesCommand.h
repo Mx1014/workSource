@@ -17,6 +17,10 @@
 
 @property(nonatomic, copy) NSNumber* parkingLotId;
 
+@property(nonatomic, copy) NSString* plateNumber;
+
+@property(nonatomic, copy) NSString* cardNo;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 
