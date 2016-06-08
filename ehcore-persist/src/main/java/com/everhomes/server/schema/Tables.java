@@ -624,9 +624,9 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhPaymentCardRechargeOrders EH_PAYMENT_CARD_RECHARGE_ORDERS = com.everhomes.server.schema.tables.EhPaymentCardRechargeOrders.EH_PAYMENT_CARD_RECHARGE_ORDERS;
 
 	/**
-	 * The table ehcore.eh_payment_card_transcations
+	 * The table ehcore.eh_payment_card_transactions
 	 */
-	public static final com.everhomes.server.schema.tables.EhPaymentCardTranscations EH_PAYMENT_CARD_TRANSCATIONS = com.everhomes.server.schema.tables.EhPaymentCardTranscations.EH_PAYMENT_CARD_TRANSCATIONS;
+	public static final com.everhomes.server.schema.tables.EhPaymentCardTransactions EH_PAYMENT_CARD_TRANSACTIONS = com.everhomes.server.schema.tables.EhPaymentCardTransactions.EH_PAYMENT_CARD_TRANSACTIONS;
 
 	/**
 	 * The table ehcore.eh_pmsy_communities
