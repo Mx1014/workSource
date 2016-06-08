@@ -33,8 +33,6 @@ ALTER TABLE `eh_door_auth` ADD COLUMN `string_tag5` VARCHAR(128);
 ALTER TABLE `eh_door_auth` ADD COLUMN `string_tag6` TEXT;
 
 # modify at 2016-06-01
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999990, 'sms.default', 8, 'zh_CN', '${username}已授权给你${doorname}门禁二维码，请点击以下链接使用：${link}（24小时有效）', '24901');
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES(999990, 'sms.default.yzx', 8, 'zh_CN', '${username}已授权给你${doorname}门禁二维码，请点击以下链接使用：${link}（24小时有效）', '24901');
 
 ALTER TABLE `eh_aclink_firmware` DROP COLUMN `firmware_type`;
 ALTER TABLE `eh_aclink_firmware` ADD COLUMN `firmware_type` VARCHAR(128);

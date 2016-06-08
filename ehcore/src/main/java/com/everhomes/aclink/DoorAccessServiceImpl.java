@@ -1742,7 +1742,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
         List<Tuple<String, Object>> variables = smsProvider.toTupleList(AclinkConstant.SMS_VISITOR_USER, nickName);
         smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_DOOR, doorAccess.getName());
-        smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_LINK, homeUrl + "/aclink/getVisitor?id=" + auth.getLinglingUuid());
+        smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_LINK, homeUrl);
+        smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_LINK, auth.getLinglingUuid());
         String templateLocale = user.getLocale();
         smsProvider.sendSms(cmd.getNamespaceId(), cmd.getPhone(), SmsTemplateCode.SCOPE, SmsTemplateCode.ACLINK_VISITOR_MSG_CODE, templateLocale, variables);
         
@@ -1804,7 +1805,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     public  ListDoorAccessResponse listDoorAccessGroup(ListDoorAccessGroupCommand cmd) {
         QueryDoorAccessAdminCommand newCmd = (QueryDoorAccessAdminCommand)ConvertHelper.convert(cmd, QueryDoorAccessAdminCommand.class);
         //TODO read from configuration
-        newCmd.setDoorType(DoorAccessType.ACLINK_LINGLING_GROUP.getCode());
+        //newCmd.setDoorType(DoorAccessType.ACLINK_LINGLING_GROUP.getCode());
         
         return searchDoorAccessByAdmin(newCmd);
     }
