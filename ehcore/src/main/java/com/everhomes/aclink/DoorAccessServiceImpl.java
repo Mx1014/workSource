@@ -643,6 +643,13 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_EXISTS, "DoorAccess exists");
         }
         
+        if(cmd.getGroupId() != null) {
+            DoorAccess doorGroup = doorAccessProvider.getDoorAccessById(cmd.getGroupId());
+            if(doorGroup == null || doorAccess.getStatus().equals(DoorAccessStatus.INVALID.getCode())) {
+                throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door group not found");
+            }
+        }
+        
         doorAccess = this.dbProvider.execute(new TransactionCallback<DoorAccess>() {
             @Override
             public DoorAccess doInTransaction(TransactionStatus arg0) {
@@ -655,6 +662,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     doorAcc.setActiveUserId(user.getId());
                     doorAcc.setOwnerId(cmd.getOwnerId());
                     doorAcc.setOwnerType(cmd.getOwnerType());
+                    doorAcc.setGroupid(cmd.getGroupId());
                     doorAccessProvider.updateDoorAccess(doorAcc);
                     return doorAcc;
                     }
@@ -674,6 +682,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 doorAcc.setAddress(cmd.getAddress());
                 doorAcc.setCreatorUserId(user.getId());
                 doorAcc.setAesIv(aesIv);
+                doorAcc.setGroupid(cmd.getGroupId());
                 doorAccessProvider.createDoorAccess(doorAcc);
                 
                 OwnerDoor ownerDoor = new OwnerDoor();

@@ -1,5 +1,13 @@
 package com.everhomes.rest.aclink;
 
+/**
+ * <ul> 授权状态
+ * <li>0: 已失效</li>
+ * <li>1: 未失效</li>
+ * </ul>
+ * @author janson
+ *
+ */
 public enum DoorAuthStatus {
     INVALID((byte)0), VALID((byte)1);
     
