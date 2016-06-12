@@ -322,23 +322,23 @@ public abstract class CertCoder {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		byte[] data = "{\"AppName\":\"ICCard\",\"Version\":\"V0.01\",\"ClientDt\":\"20160511125151\",\"SrcId\":\"10002900\",\"DstId\":\"00000000\",\"MsgType\":\"1010\",\"MsgID\":\"10002900000000000000000000000411\",\"Param\":{\"branchCode\":\"10002900\",\"CardId\":\"3300025840200000090\",\"AcctType\":\"00\"}}".getBytes();
-		//4AA5559EE11221A41D4332DCD2517E11B99E1E3B81FDD1C8A1BA71022F4B9D639A4995A6F0A4FE3B8E5E1128C964884A2AA9FC2924F33351F36722CA04F6B8BD711C6EB4DA65B53BE84C78515B1EF97575FC06E7259B74651254543D2C984098082F55E1C24AD1152F1A78F6EDDEB73AF9E86439703F322E0A81732C85E08C6B
-		byte[] sign = sign(data, "d:/jxd.keystore", "jxd", "123456", "123456");
-		System.out.println(ByteTools.BytesToHexStr(sign));
-		boolean status = verifySign(data, sign, "d:/jxd.cer");
-//		
-		System.out.println(status);
+//		byte[] data = "{\"AppName\":\"ICCard\",\"Version\":\"V0.01\",\"ClientDt\":\"20160511125151\",\"SrcId\":\"10002900\",\"DstId\":\"00000000\",\"MsgType\":\"1010\",\"MsgID\":\"10002900000000000000000000000411\",\"Param\":{\"branchCode\":\"10002900\",\"CardId\":\"3300025840200000090\",\"AcctType\":\"00\"}}".getBytes();
+//		//4AA5559EE11221A41D4332DCD2517E11B99E1E3B81FDD1C8A1BA71022F4B9D639A4995A6F0A4FE3B8E5E1128C964884A2AA9FC2924F33351F36722CA04F6B8BD711C6EB4DA65B53BE84C78515B1EF97575FC06E7259B74651254543D2C984098082F55E1C24AD1152F1A78F6EDDEB73AF9E86439703F322E0A81732C85E08C6B
+//		byte[] sign = sign(data, "d:/jxd.keystore", "jxd", "123456", "123456");
+//		System.out.println(ByteTools.BytesToHexStr(sign));
+//		boolean status = verifySign(data, sign, "d:/jxd.cer");
+////		
+//		System.out.println(status);
 		
 		//公钥加密-私钥解密
-//		byte[] ciphertext = encryptByPublicKey(data, "h:/pin3.crt");
-//		System.out.println("共钥加密-密文：" + ByteTools.BytesToHexStr(ciphertext));
+		byte[] ciphertext = encryptByPublicKey("123456".getBytes(), "h:/pin3.crt");
+		System.out.println("共钥加密-密文：" + ByteTools.BytesToHexStr(ciphertext));
 		
 //		byte[] plaintext = decryptByPrivateKey(ciphertext, "e:/xuyuji.keystore", "xuyuji", "123456", "123456");
 //		System.out.println("私钥解密-明文：" + new String(plaintext));
 //		
 //		//私钥加密-公钥解密
-//		ciphertext = encryptByPrivateKey(data, "e:/xuyuji.keystore", "xuyuji", "123456", "123456");;
+//		byte[] ciphertext = encryptByPrivateKey("123456".getBytes(), "E:\\一卡通接口\\jxd.keystore","jxd", "123456", "123456");;
 //		System.out.println("私钥加密-密文：" + ByteTools.BytesToHexStr(ciphertext));
 //		
 //		plaintext = decryptByPublicKey(ciphertext, "e:/xuyuji.cer");

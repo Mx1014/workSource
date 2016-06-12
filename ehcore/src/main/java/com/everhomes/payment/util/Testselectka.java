@@ -20,7 +20,7 @@ import org.apache.http.util.EntityUtils;
 
 import com.google.gson.Gson;
 
-public class Test2 {
+public class Testselectka {
 	public static final String URL = "http://test.ippit.cn:30821/iccard/service";
 	
 	protected static boolean test() throws Exception {
@@ -32,10 +32,10 @@ public class Test2 {
 		String s = getJson();
 		System.out.println(s);
 		pairs.add(new BasicNameValuePair("msg", s));
-		request.setEntity(new UrlEncodedFormEntity(pairs, "GBK"));
+		request.setEntity(new UrlEncodedFormEntity(pairs, "UTF-8"));
 		HttpResponse rsp = httpClient.execute(request);
 		StatusLine status = rsp.getStatusLine();
-		String rspText = EntityUtils.toString(rsp.getEntity(), "GBK");
+		String rspText = EntityUtils.toString(rsp.getEntity(), "UTF-8");
 		
 		
 		System.out.println(rspText);
@@ -62,17 +62,17 @@ public class Test2 {
 		requestParam.put("ClientDt",sdf.format(new Date()));
 		requestParam.put("SrcId","10002900");
 		requestParam.put("DstId","00000000");
-		requestParam.put("MsgType","0000");
+		requestParam.put("MsgType","1010");
 		requestParam.put("MsgID","10002900" + StringUtils.leftPad(String.valueOf(System.currentTimeMillis()), 24, "0"));
 		requestParam.put("Sign", "");
 
 		Map<String, Object> param = new HashMap<String, Object>();
-//		param.put("BranchCode", "10002900");
-//		param.put("CardId", "5882572900500000182");
-//		param.put("AcctType", "00");
 		param.put("BranchCode", "10002900");
-		param.put("CardPatternid", "887093");
-		param.put("CardNum", "1");
+		//param.put("CardId", "5882572900500000182");
+		param.put("CardId", "5882572900500005884");
+		param.put("AcctType", "00");
+		param.put("SubAcctType", "");
+	
 		requestParam.put("Param",param);
 		byte[] data = gson.toJson(requestParam).getBytes();
 		
