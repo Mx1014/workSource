@@ -306,4 +306,18 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;        
     }
+    
+    /**
+     * <b>URL: /admin/aclink/searchVisitorDoorAuth</b>
+     * <p>获取门禁列表</p>
+     * @return 门禁列表
+     */
+    @RequestMapping("searchVisitorDoorAuth")
+    @RestReturn(value=ListDoorAuthResponse.class)
+    public RestResponse searchVisitorDoorAuthByAdmin(@Valid SearchDoorAuthCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.searchVisitorDoorAuth(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

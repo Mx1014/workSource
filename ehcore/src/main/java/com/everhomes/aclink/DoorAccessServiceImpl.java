@@ -1198,6 +1198,36 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         return resp;        
     }
     
+    @Override
+    public ListDoorAuthResponse searchVisitorDoorAuth(SearchDoorAuthCommand cmd) {
+        ListingLocator locator = new ListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        ListDoorAuthResponse resp = new ListDoorAuthResponse();
+        
+        List<DoorAuth> auths = doorAuthProvider.searchVisitorDoorAuthByAdmin(locator, cmd.getDoorId(), cmd.getKeyword(), cmd.getStatus(), count);
+        List<DoorAuthDTO> dtos = new ArrayList<DoorAuthDTO>();
+        for(DoorAuth auth : auths) {
+            DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
+            DoorAuthDTO dto = ConvertHelper.convert(auth, DoorAuthDTO.class);
+            dto.setHardwareId(doorAccess.getHardwareId());
+            dto.setDoorName(doorAccess.getName());
+            User u = userProvider.findUserById(auth.getApproveUserId());
+            if(u != null) {
+                if(u.getNickName() != null) {
+                    dto.setApproveUserName(u.getNickName());
+                } else {
+                    dto.setApproveUserName(u.getAccountName());
+                }
+            }
+            dtos.add(dto);
+        }
+        
+        resp.setDtos(dtos);
+        resp.setNextPageAnchor(locator.getAnchor());
+        return resp;        
+    }
+    
     private Long getDoorAccessLastTick(DoorAccess doorAccess) {
         Long doorAccId = doorAccess.getId();
         String key = String.format(LAST_TICK, doorAccId);

@@ -304,6 +304,34 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
     }
     
     @Override
+    public List<DoorAuth> searchVisitorDoorAuthByAdmin(ListingLocator locator, Long doorId, String keyword, Byte status, int count) {
+        
+        return queryDoorAuth(locator, count, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                if(status != null) {
+                    query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(status));    
+                }
+                
+                if(doorId != null) {
+                    query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.eq(doorId));
+                }
+                
+                if(keyword != null) {
+                    query.addConditions(Tables.EH_DOOR_AUTH.NICKNAME.like(keyword+"%").or(Tables.EH_DOOR_AUTH.PHONE.like(keyword+"%")));                    
+                }
+                
+                query.addConditions(Tables.EH_DOOR_AUTH.AUTH_TYPE.ne(DoorAuthType.FOREVER.getCode()));
+
+                return query;
+            }
+            
+        });        
+    }
+    
+    @Override
     public List<DoorAuth> queryDoorAuthForeverByUserId(ListingLocator locator, Long userId, int count) {
         return queryDoorAuthByTime(locator, count, new ListingQueryBuilderCallback() {
 
