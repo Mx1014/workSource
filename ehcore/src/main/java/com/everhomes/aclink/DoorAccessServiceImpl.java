@@ -265,6 +265,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     query.addConditions(Tables.EH_DOOR_ACCESS.GROUPID.ne(0l));
                 } else if(!cmd.getGroupId().equals(0)) {
                     query.addConditions(Tables.EH_DOOR_ACCESS.GROUPID.eq(cmd.getGroupId()));
+                } else if(cmd.getGroupId().equals(-1)) {
+                    query.addConditions(Tables.EH_DOOR_ACCESS.GROUPID.eq(0l));
                 }
                 //else select all include groups
                 
@@ -1847,6 +1849,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         //TODO read from configuration
         //newCmd.setDoorType(DoorAccessType.ACLINK_LINGLING_GROUP.getCode());
         
+        //Search only groups
+        newCmd.setGroupId(-1l);
         return searchDoorAccessByAdmin(newCmd);
     }
     
