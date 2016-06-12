@@ -1508,14 +1508,25 @@ public class QualityServiceImpl implements QualityService {
 		return standardDto;
 	}
 
-	@Scheduled(cron="0 30 3 1 * ?" )
+	private Timestamp addMonth(Timestamp startTime, int period) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(startTime);
+		calendar.add(Calendar.MONTH, period);
+		
+		Timestamp time = new Timestamp(calendar.getTimeInMillis());
+		
+		return time;
+	}
+
+	@Scheduled(cron="0 35 17 12 * ?" )
 	@Override
 	public void createEvaluations() {
 		if(LOGGER.isInfoEnabled()) {
 			LOGGER.info("createEvaluations" + new Timestamp(DateHelper.currentGMTTime().getTime()));
 		}
 		
-		List<QualityInspectionTasks> closedTasks = qualityProvider.listClosedTask();
+		Timestamp current = new Timestamp(DateHelper.currentGMTTime().getTime());
+		List<QualityInspectionTasks> closedTasks = qualityProvider.listClosedTask(addMonth(current, -1),current);
 		Map<Long, QualityInspectionEvaluations> map = new HashMap<Long, QualityInspectionEvaluations>();
 		
 		for (QualityInspectionTasks task :  closedTasks) {
@@ -1558,7 +1569,7 @@ public class QualityServiceImpl implements QualityService {
 		
 //		if(task.getStatus() == QualityInspectionTaskResult.INSPECT_DELAY.getCode() 
 //				|| task.getStatus() == QualityInspectionTaskResult.RECTIFY_DELAY.getCode()) {
-////			QualityInspectionStandards standard = verifiedStandardById(task.getStandardId());
+//			QualityInspectionStandards standard = verifiedStandardById(task.getStandardId());
 //			QualityInspectionStandards standard = qualityProvider.findStandardById(task.getStandardId());
 //			if(standard == null) {
 //				LOGGER.error("the standard which id="+task.getStandardId()+" don't exist!");

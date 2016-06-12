@@ -852,12 +852,20 @@ public class QualityProviderImpl implements QualityProvider {
 	}
 
 	@Override
-	public List<QualityInspectionTasks> listClosedTask() {
+	public List<QualityInspectionTasks> listClosedTask(Timestamp startDate, Timestamp endDate) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhQualityInspectionTasks.class));
 		List<QualityInspectionTasks> tasks = new ArrayList<QualityInspectionTasks>();
         SelectQuery<EhQualityInspectionTasksRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_TASKS);
         
         query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(QualityInspectionTaskStatus.CLOSED.getCode()));
+
+        if(startDate != null && !"".equals(startDate)) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_TIME.ge(startDate));
+		}
+		
+		if(endDate != null && !"".equals(endDate)) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_TIME.le(endDate));
+		}
         query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASKS.ID.desc());
         
         if(LOGGER.isDebugEnabled()) {
@@ -871,6 +879,7 @@ public class QualityProviderImpl implements QualityProvider {
         });
 		return tasks;
 	}
+
 
 	@Override
 	public QualityInspectionEvaluationFactors findQualityInspectionFactorByGroupIdAndCategoryId(
