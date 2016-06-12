@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhContentServer;
 import com.everhomes.server.schema.tables.daos.EhContentServerDao;
@@ -26,11 +28,13 @@ public class ContentServerProviderImpl implements ContentServerProvider {
     private DbProvider dbProvider;
 
     @Autowired
-    private ShardingProvider shardingProvider;
+    //private ShardingProvider shardingProvider;
+    private SequenceProvider sequenceProvider;
 
     @Override
     public void addResource(ContentServerResource contentServerResource) {
-        Long id = shardingProvider.allocShardableContentId(EhContentServerResources.class).second();
+        //Long id = shardingProvider.allocShardableContentId(EhContentServerResources.class).second();
+        Long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhContentServerResources.class));
         contentServerResource.setId(id);
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhContentServerResources.class, id));
         EhContentServerResourcesDao dao = new EhContentServerResourcesDao(context.configuration());
