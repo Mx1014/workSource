@@ -52,8 +52,9 @@ public class BaseLoginAuthTestCase extends BaseServerTestCase {
     }
     
     protected void tuncateDbData() {
-        String truncateTablefilePath = "data/tables/3.4.x_truncate_tables.sql";
-        dbProvider.runClassPathSqlFile(truncateTablefilePath);
+        //String truncateTablefilePath = "data/tables/3.4.x_truncate_tables.sql";
+        //dbProvider.runClassPathSqlFile(truncateTablefilePath);
+        dbProvider.truncateAllTables();
     }
     
     protected void initSystemData() {

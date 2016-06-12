@@ -92,63 +92,65 @@
     </dependencies>
 
     <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.2</version>
-                <configuration>
-                    <source>${java.source.version}</source>
-                    <target>${java.target.version}</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.7</version>
-                <executions>
-                    <execution>
-                    <phase>process-resources</phase>
-                    <goals>
-                        <goal>run</goal>
-                    </goals>
-                    <configuration>
-	                    <tasks>
-		                    <echo>Copy configuration file(s) to target directory</echo>
-		                    <copy todir="${basedir}/target">
-		                       <fileset dir="${basedir}/src/main/config">
-		                          <include name="*.*" />
-		                       </fileset>
-		                    </copy>
-							<exec executable="cp">
-							    <arg line="${basedir}/scripts/border-server ${basedir}/target/border-server"/>
-							</exec>
-	                    </tasks>
-                    </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                 <groupId>org.codehaus.mojo</groupId>
-                 <artifactId>properties-maven-plugin</artifactId>
-                 <version>1.0-alpha-1</version>
-                 <executions>
-                     <execution>
-                         <phase>initialize</phase>
-                         <goals>
-                             <goal>read-project-properties</goal>
-                         </goals>
-                         <configuration>
-                             <files>
-                                 <file>${basedir}/../pom.properties</file>
-                             </files>
-                         </configuration>
-                     </execution>
-                 </executions>
-            </plugin>
-        </plugins>
+    	<pluginManagement>
+	        <plugins>
+	            <plugin>
+	                <artifactId>maven-compiler-plugin</artifactId>
+	                <version>3.2</version>
+	                <configuration>
+	                    <source>${java.source.version}</source>
+	                    <target>${java.target.version}</target>
+	                </configuration>
+	            </plugin>
+	            <plugin>
+	                <groupId>org.apache.maven.plugins</groupId>
+	                <artifactId>maven-antrun-plugin</artifactId>
+	                <version>1.7</version>
+	                <executions>
+	                    <execution>
+	                    <phase>process-resources</phase>
+	                    <goals>
+	                        <goal>run</goal>
+	                    </goals>
+	                    <configuration>
+		                    <tasks>
+			                    <echo>Copy configuration file(s) to target directory</echo>
+			                    <copy todir="${basedir}/target">
+			                       <fileset dir="${basedir}/src/main/config">
+			                          <include name="*.*" />
+			                       </fileset>
+			                    </copy>
+								<exec executable="cp">
+								    <arg line="${basedir}/scripts/border-server ${basedir}/target/border-server"/>
+								</exec>
+		                    </tasks>
+	                    </configuration>
+	                    </execution>
+	                </executions>
+	            </plugin>
+	            <plugin>
+	                <groupId>org.springframework.boot</groupId>
+	                <artifactId>spring-boot-maven-plugin</artifactId>
+	            </plugin>
+	            <plugin>
+	                 <groupId>org.codehaus.mojo</groupId>
+	                 <artifactId>properties-maven-plugin</artifactId>
+	                 <version>1.0-alpha-1</version>
+	                 <executions>
+	                     <execution>
+	                         <phase>initialize</phase>
+	                         <goals>
+	                             <goal>read-project-properties</goal>
+	                         </goals>
+	                         <configuration>
+	                             <files>
+	                                 <file>${basedir}/../pom.properties</file>
+	                             </files>
+	                         </configuration>
+	                     </execution>
+	                 </executions>
+	            </plugin>
+	        </plugins>
+        </pluginManagement>
     </build>
 </project>

@@ -72,14 +72,12 @@ public class PrepareDbTest extends BaseServerTestCase {
     }
     
     /**
-     * <p>把数据库中的所有表结构都读取出来，然后一个个把数据删除掉。不依赖SQL文件，但数据库版本需要支持能够拿到meta信息。</p>
-     * <p>速度大概需要1分钟，不同性能的机器表现不一样。执行前要先导入一份数据库（它是基于有表结构的情况下清数据的）。</p>
-     * <p>由于jooq拿meta时拿的是所有数据库的meta，并且最后并没有真正能够清除数据，故暂不使用</p>
+     * <p>把数据库中的所有表结构都读取出来，过滤掉没有数据的表结构，然后一个个把有数据的表truncate掉，不依赖SQL文件。</p>
      */
     @Ignore @Test
     public void prepareDbWithTruncateTables() {
         long startTime = System.currentTimeMillis();
-        //dbProvider.truncateAllTables();
+        dbProvider.truncateAllTables();
         long endTime = System.currentTimeMillis();
         System.out.println("run truncate tables sql file, elapse=" + (endTime - startTime));
     }
