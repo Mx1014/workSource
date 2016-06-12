@@ -255,7 +255,7 @@ public class AclinkAdminController extends ControllerBase {
      */
     @RequestMapping("createLingingVistor")
     @RestReturn(value=DoorAuthDTO.class)
-    public RestResponse createDoorAuth(@Valid CreateLinglingVisitorCommand cmd) {
+    public RestResponse createLingingVistor(@Valid CreateLinglingVisitorCommand cmd) {
         RestResponse response = new RestResponse(doorAccessService.createLinglingVisitorAuth(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
