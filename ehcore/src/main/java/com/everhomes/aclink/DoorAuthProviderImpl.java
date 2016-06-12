@@ -278,7 +278,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
     }
     
     @Override
-    public List<DoorAuth> searchDoorAuthByAdmin(ListingLocator locator, String keyword, Byte status, int count) {
+    public List<DoorAuth> searchDoorAuthByAdmin(ListingLocator locator, Long doorId, String keyword, Byte status, int count) {
         
         return queryDoorAuth(locator, count, new ListingQueryBuilderCallback() {
 
@@ -287,6 +287,10 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                     SelectQuery<? extends Record> query) {
                 if(status != null) {
                     query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(status));    
+                }
+                
+                if(doorId != null) {
+                    query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.eq(doorId));
                 }
                 
                 if(keyword != null) {

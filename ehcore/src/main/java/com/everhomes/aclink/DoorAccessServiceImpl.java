@@ -850,19 +850,20 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             
             //create device name command
             AesServerKey aesServerKey = aesServerKeyService.getCurrentAesServerKey(doorAccess.getId());
-            doorCommand = new DoorCommand();
-            doorCommand.setDoorId(doorAccess.getId());
-            doorCommand.setOwnerId(doorAccess.getOwnerId());
-            doorCommand.setOwnerType(doorAccess.getOwnerType());
-            doorCommand.setCmdId(AclinkCommandType.CMD_UPDATE_DEVNAME.getCode());
-            doorCommand.setCmdType((byte)0);
-            doorCommand.setServerKeyVer(aesServerKey.getSecretVer());
-            doorCommand.setAclinkKeyVer(aesServerKey.getDeviceVer());
-            doorCommand.setStatus(DoorCommandStatus.CREATING.getCode());
-            
-            //Generate a message body for command
-//            doorCommand.setCmdBody(AclinkUtils.packUpdateDeviceName(aesServerKey.getDeviceVer(), aesServerKey.getSecret()
-//                    , doorAccess.getAesIv(), doorAccess.getName()));
+            if(aesServerKey != null) {
+                doorCommand = new DoorCommand();
+                doorCommand.setDoorId(doorAccess.getId());
+                doorCommand.setOwnerId(doorAccess.getOwnerId());
+                doorCommand.setOwnerType(doorAccess.getOwnerType());
+                doorCommand.setCmdId(AclinkCommandType.CMD_UPDATE_DEVNAME.getCode());
+                doorCommand.setCmdType((byte)0);
+                doorCommand.setServerKeyVer(aesServerKey.getSecretVer());
+                doorCommand.setAclinkKeyVer(aesServerKey.getDeviceVer());
+                doorCommand.setStatus(DoorCommandStatus.CREATING.getCode());
+                //Generate a message body for command
+//              doorCommand.setCmdBody(AclinkUtils.packUpdateDeviceName(aesServerKey.getDeviceVer(), aesServerKey.getSecret()
+//                      , doorAccess.getAesIv(), doorAccess.getName()));
+            }
         }
         if(cmd.getAddress() != null) {
             doorAccess.setAddress(cmd.getAddress());
@@ -1165,7 +1166,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         ListDoorAuthResponse resp = new ListDoorAuthResponse();
         
-        List<DoorAuth> auths = doorAuthProvider.searchDoorAuthByAdmin(locator, cmd.getKeyword(), cmd.getStatus(), count);
+        List<DoorAuth> auths = doorAuthProvider.searchDoorAuthByAdmin(locator, cmd.getDoorId(), cmd.getKeyword(), cmd.getStatus(), count);
         List<DoorAuthDTO> dtos = new ArrayList<DoorAuthDTO>();
         for(DoorAuth auth : auths) {
             DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
