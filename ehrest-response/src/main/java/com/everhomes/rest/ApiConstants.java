@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-06-08 16:18:50
+// generated at 2016-06-12 14:23:25
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -492,6 +492,10 @@ public interface ApiConstants {
     public static final String GROUP_SEARCH_URL = "/group/search";
     public static final String GROUP_UPDATE_URL = "/group/update";
     public static final String GROUP_UPDATEGROUPMEMBER_URL = "/group/updateGroupMember";
+    public static final String HOTTAG_DELETEHOTTAG_URL = "/hotTag/deleteHotTag";
+    public static final String HOTTAG_LISTHOTTAG_URL = "/hotTag/listHotTag";
+    public static final String HOTTAG_SEARCHTAG_URL = "/hotTag/searchTag";
+    public static final String HOTTAG_SETHOTTAG_URL = "/hotTag/setHotTag";
     public static final String LAUNCHPAD_DELETELAUNCHPADBYID_URL = "/launchpad/deleteLaunchPadById";
     public static final String LAUNCHPAD_GETLASTLAUNCHPADLAYOUTBYVERSIONCODE_URL = "/launchpad/getLastLaunchPadLayoutByVersionCode";
     public static final String LAUNCHPAD_GETLAUNCHPADITEMBYID_URL = "/launchpad/getLaunchPadItemById";
