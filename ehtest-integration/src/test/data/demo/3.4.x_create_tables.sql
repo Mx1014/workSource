@@ -599,21 +599,21 @@ CREATE TABLE `eh_binary_resources` (
 -- Table structure for table `eh_borders`
 --
 
--- DROP TABLE IF EXISTS `eh_borders`;
+DROP TABLE IF EXISTS `eh_borders`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
--- CREATE TABLE `eh_borders` (
---   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
---   `private_address` varchar(128) NOT NULL,
---   `private_port` int(11) NOT NULL DEFAULT '8086',
---   `public_address` varchar(128) NOT NULL,
---   `public_port` int(11) NOT NULL DEFAULT '80',
---   `status` int(11) NOT NULL DEFAULT '0' COMMENT '0 : disabled, 1: enabled',
---   `config_tag` varchar(32) DEFAULT NULL,
---   `description` varchar(256) DEFAULT NULL,
---   PRIMARY KEY (`id`),
---   KEY `i_eh_border_config_tag` (`config_tag`)
--- ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `eh_borders` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
+  `private_address` varchar(128) NOT NULL,
+  `private_port` int(11) NOT NULL DEFAULT '8086',
+  `public_address` varchar(128) NOT NULL,
+  `public_port` int(11) NOT NULL DEFAULT '80',
+  `status` int(11) NOT NULL DEFAULT '0' COMMENT '0 : disabled, 1: enabled',
+  `config_tag` varchar(32) DEFAULT NULL,
+  `description` varchar(256) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `i_eh_border_config_tag` (`config_tag`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1282,19 +1282,19 @@ CREATE TABLE `eh_configurations` (
 -- Table structure for table `eh_content_server`
 --
 
--- DROP TABLE IF EXISTS `eh_content_server`;
+DROP TABLE IF EXISTS `eh_content_server`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
--- CREATE TABLE `eh_content_server` (
---   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'content server id',
---   `name` varchar(32) DEFAULT NULL,
---   `description` varchar(40) DEFAULT NULL,
---   `private_address` varchar(32) DEFAULT NULL,
---   `private_port` int(11) DEFAULT NULL,
---   `public_address` varchar(32) NOT NULL,
---   `public_port` int(11) NOT NULL,
---   PRIMARY KEY (`id`)
--- ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `eh_content_server` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'content server id',
+  `name` varchar(32) DEFAULT NULL,
+  `description` varchar(40) DEFAULT NULL,
+  `private_address` varchar(32) DEFAULT NULL,
+  `private_port` int(11) DEFAULT NULL,
+  `public_address` varchar(32) NOT NULL,
+  `public_port` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -4707,21 +4707,21 @@ CREATE TABLE `eh_server_shard_map` (
 -- Table structure for table `eh_servers`
 --
 
--- DROP TABLE IF EXISTS `eh_servers`;
+DROP TABLE IF EXISTS `eh_servers`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
--- CREATE TABLE `eh_servers` (
---   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
---   `master_id` int(11) DEFAULT NULL COMMENT 'master server id',
---   `address_uri` varchar(256) DEFAULT NULL,
---   `address_port` int(11) DEFAULT NULL,
---   `server_type` int(11) NOT NULL DEFAULT '0' COMMENT '0: DB, 1: redis storage server, 2: redis cache server',
---   `status` int(11) NOT NULL DEFAULT '0' COMMENT '0 : disabled, 1: enabled',
---   `config_tag` varchar(32) DEFAULT NULL,
---   `description` varchar(256) DEFAULT NULL,
---   PRIMARY KEY (`id`),
---   KEY `i_eh_servers_config_tag` (`config_tag`)
--- ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;
+CREATE TABLE `eh_servers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
+  `master_id` int(11) DEFAULT NULL COMMENT 'master server id',
+  `address_uri` varchar(256) DEFAULT NULL,
+  `address_port` int(11) DEFAULT NULL,
+  `server_type` int(11) NOT NULL DEFAULT '0' COMMENT '0: DB, 1: redis storage server, 2: redis cache server',
+  `status` int(11) NOT NULL DEFAULT '0' COMMENT '0 : disabled, 1: enabled',
+  `config_tag` varchar(32) DEFAULT NULL,
+  `description` varchar(256) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `i_eh_servers_config_tag` (`config_tag`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -5586,8 +5586,7 @@ CREATE TABLE `eh_yellow_pages` (
   `create_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
 
 SET autocommit=1;
 SET foreign_key_checks = 1;

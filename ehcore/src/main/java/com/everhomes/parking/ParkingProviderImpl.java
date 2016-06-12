@@ -114,7 +114,7 @@ public class ParkingProviderImpl implements ParkingProvider {
     }
     
     @Override
-    public List<ParkingRechargeRate> listParkingRechargeRates(String ownerType,Long ownerId,Long parkingLotId) {
+    public List<ParkingRechargeRate> listParkingRechargeRates(String ownerType,Long ownerId,Long parkingLotId,String cardType) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(ParkingRechargeRate.class));
         
         SelectQuery<EhParkingRechargeRatesRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_RATES);
@@ -124,6 +124,8 @@ public class ParkingProviderImpl implements ParkingProvider {
         	query.addConditions(Tables.EH_PARKING_RECHARGE_RATES.OWNER_ID.eq(ownerId));
         if(parkingLotId != null)
         	query.addConditions(Tables.EH_PARKING_RECHARGE_RATES.PARKING_LOT_ID.eq(parkingLotId));
+        if(StringUtils.isNotBlank(cardType))
+        	query.addConditions(Tables.EH_PARKING_RECHARGE_RATES.RATE_NAME.eq(cardType));
         
         List<ParkingRechargeRate> result = new ArrayList<ParkingRechargeRate>();
         

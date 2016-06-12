@@ -107,7 +107,7 @@ public class EtcpParkingVendorHandler implements ParkingVendorHandler {
 
     @SuppressWarnings("unchecked")
 	@Override
-    public List<ParkingRechargeRateDTO> getParkingRechargeRates(String ownerType, Long ownerId, Long parkingLotId) {
+    public List<ParkingRechargeRateDTO> getParkingRechargeRates(String ownerType, Long ownerId, Long parkingLotId,String plateNumber,String cardNo) {
     	List<ParkingRechargeRateDTO> resultList = new ArrayList<ParkingRechargeRateDTO>();
     	
     	String json = "";
