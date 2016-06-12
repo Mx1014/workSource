@@ -45,6 +45,7 @@ import java.util.Map;
 
 
 
+
 import javax.annotation.PostConstruct;
 
 import org.jooq.Condition;
@@ -56,6 +57,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 
 
 
@@ -1124,7 +1126,8 @@ public class QualityProviderImpl implements QualityProvider {
 				|| task.getStatus().equals(QualityInspectionTaskStatus.RECTIFY_CLOSED_AND_WAITING_APPROVAL.getCode()))
 			task.setResult(QualityInspectionTaskResult.RECTIFY_DELAY.getCode());
 		
-		task.setStatus(QualityInspectionTaskStatus.CLOSED.getCode());;
+		task.setStatus(QualityInspectionTaskStatus.CLOSED.getCode());
+		task.setExecutiveTime(new Timestamp(System.currentTimeMillis()));
 		EhQualityInspectionTasks t = ConvertHelper.convert(task, EhQualityInspectionTasks.class);
 		EhQualityInspectionTasksDao dao = new EhQualityInspectionTasksDao(context.configuration());
         dao.update(t);
