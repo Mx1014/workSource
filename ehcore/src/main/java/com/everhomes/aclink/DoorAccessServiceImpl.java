@@ -263,10 +263,10 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 if(cmd.getGroupId() == null) {
                     //Select door access only
                     query.addConditions(Tables.EH_DOOR_ACCESS.GROUPID.ne(0l));
-                } else if(!cmd.getGroupId().equals(0)) {
-                    query.addConditions(Tables.EH_DOOR_ACCESS.GROUPID.eq(cmd.getGroupId()));
-                } else if(cmd.getGroupId().equals(-1)) {
+                } else if(cmd.getGroupId().equals(-1l)) {
                     query.addConditions(Tables.EH_DOOR_ACCESS.GROUPID.eq(0l));
+                } else if(!cmd.getGroupId().equals(0l)) {
+                    query.addConditions(Tables.EH_DOOR_ACCESS.GROUPID.eq(cmd.getGroupId()));
                 }
                 //else select all include groups
                 
