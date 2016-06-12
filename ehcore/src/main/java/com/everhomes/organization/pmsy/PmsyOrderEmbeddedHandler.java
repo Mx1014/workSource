@@ -19,6 +19,7 @@ import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.pmsy.PmsyBillType;
 import com.everhomes.rest.pmsy.PmsyOrderStatus;
+import com.everhomes.rest.pmsy.PmsyPayerStatus;
 import com.everhomes.util.RuntimeErrorException;
 import com.google.gson.Gson;
 
@@ -108,6 +109,12 @@ public class PmsyOrderEmbeddedHandler implements OrderEmbeddedHandler{
 		order.setStatus(PmsyOrderStatus.SUCCESS.getCode());
 		pmsyProvider.updatePmsyOrder(order);
 		
+		PmsyPayer pmsyPayer = pmsyProvider.findPmPayersByNameAndContact(order.getUserName(), order.getUserContact());
+		if(pmsyPayer != null){
+			pmsyPayer.setStatus(PmsyPayerStatus.ACTIVE.getCode());
+			pmsyProvider.updatePmPayer(pmsyPayer);
+		}
+		
 	}
 
 	@Override
@@ -124,6 +131,12 @@ public class PmsyOrderEmbeddedHandler implements OrderEmbeddedHandler{
 		order.setPaidType(cmd.getVendorType());
 		//order.setPaidTime(cmd.getPayTime());
 		pmsyProvider.updatePmsyOrder(order);
+		
+		PmsyPayer pmsyPayer = pmsyProvider.findPmPayersByNameAndContact(order.getUserName(), order.getUserContact());
+		if(pmsyPayer != null){
+			pmsyPayer.setStatus(PmsyPayerStatus.INACTIVE.getCode());
+			pmsyProvider.updatePmPayer(pmsyPayer);
+		}
 		
 	}
 
