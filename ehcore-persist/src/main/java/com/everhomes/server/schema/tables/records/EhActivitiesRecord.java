@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhActivitiesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhActivitiesRecord> {
 
-	private static final long serialVersionUID = -375014601;
+	private static final long serialVersionUID = 1786874697;
 
 	/**
 	 * Setter for <code>ehcore.eh_activities.id</code>. id of the record
@@ -503,6 +503,20 @@ public class EhActivitiesRecord extends org.jooq.impl.UpdatableRecordImpl<com.ev
 		return (java.sql.Timestamp) getValue(34);
 	}
 
+	/**
+	 * Setter for <code>ehcore.eh_activities.guest</code>.
+	 */
+	public void setGuest(java.lang.String value) {
+		setValue(35, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_activities.guest</code>.
+	 */
+	public java.lang.String getGuest() {
+		return (java.lang.String) getValue(35);
+	}
+
 	// -------------------------------------------------------------------------
 	// Primary key information
 	// -------------------------------------------------------------------------
@@ -529,7 +543,7 @@ public class EhActivitiesRecord extends org.jooq.impl.UpdatableRecordImpl<com.ev
 	/**
 	 * Create a detached, initialised EhActivitiesRecord
 	 */
-	public EhActivitiesRecord(java.lang.Long id, java.lang.String uuid, java.lang.Integer namespaceId, java.lang.String subject, java.lang.String description, java.lang.String posterUri, java.lang.String tag, java.lang.Double longitude, java.lang.Double latitude, java.lang.String geohash, java.lang.String location, java.lang.String contactPerson, java.lang.String contactNumber, java.lang.Long startTimeMs, java.sql.Timestamp startTime, java.lang.Long endTimeMs, java.sql.Timestamp endTime, java.lang.Byte signupFlag, java.lang.Byte confirmFlag, java.lang.Integer maxAttendeeCount, java.lang.Integer signupAttendeeCount, java.lang.Integer signupFamilyCount, java.lang.Integer checkinAttendeeCount, java.lang.Integer checkinFamilyCount, java.lang.Integer confirmAttendeeCount, java.lang.Integer confirmFamilyCount, java.lang.Long creatorUid, java.lang.Long creatorFamilyId, java.lang.Long postId, java.lang.String groupDiscriminator, java.lang.Long groupId, java.lang.Byte status, java.lang.Integer changeVersion, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime) {
+	public EhActivitiesRecord(java.lang.Long id, java.lang.String uuid, java.lang.Integer namespaceId, java.lang.String subject, java.lang.String description, java.lang.String posterUri, java.lang.String tag, java.lang.Double longitude, java.lang.Double latitude, java.lang.String geohash, java.lang.String location, java.lang.String contactPerson, java.lang.String contactNumber, java.lang.Long startTimeMs, java.sql.Timestamp startTime, java.lang.Long endTimeMs, java.sql.Timestamp endTime, java.lang.Byte signupFlag, java.lang.Byte confirmFlag, java.lang.Integer maxAttendeeCount, java.lang.Integer signupAttendeeCount, java.lang.Integer signupFamilyCount, java.lang.Integer checkinAttendeeCount, java.lang.Integer checkinFamilyCount, java.lang.Integer confirmAttendeeCount, java.lang.Integer confirmFamilyCount, java.lang.Long creatorUid, java.lang.Long creatorFamilyId, java.lang.Long postId, java.lang.String groupDiscriminator, java.lang.Long groupId, java.lang.Byte status, java.lang.Integer changeVersion, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime, java.lang.String guest) {
 		super(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES);
 
 		setValue(0, id);
@@ -567,5 +581,6 @@ public class EhActivitiesRecord extends org.jooq.impl.UpdatableRecordImpl<com.ev
 		setValue(32, changeVersion);
 		setValue(33, createTime);
 		setValue(34, deleteTime);
+		setValue(35, guest);
 	}
 }

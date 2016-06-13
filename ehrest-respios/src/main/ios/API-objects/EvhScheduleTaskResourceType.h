@@ -1,0 +1,8 @@
+//
+// EvhScheduleTaskResourceType.h
+//
+
+#define EvhScheduleTaskResourceType_PROMOTION_ACTIVITY @"activity"
+
+///////////////////////////////////////////////////////////////////////////////
+

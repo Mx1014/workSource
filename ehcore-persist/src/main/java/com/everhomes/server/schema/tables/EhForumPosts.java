@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPosts extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhForumPostsRecord> {
 
-	private static final long serialVersionUID = -565565534;
+	private static final long serialVersionUID = -606551497;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_forum_posts</code>
@@ -164,7 +164,7 @@ public class EhForumPosts extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	/**
 	 * The column <code>ehcore.eh_forum_posts.embedded_json</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.String> EMBEDDED_JSON = createField("embedded_json", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.String> EMBEDDED_JSON = createField("embedded_json", org.jooq.impl.SQLDataType.CLOB, this, "");
 
 	/**
 	 * The column <code>ehcore.eh_forum_posts.embedded_version</code>.
@@ -260,6 +260,21 @@ public class EhForumPosts extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	 * The column <code>ehcore.eh_forum_posts.delete_time</code>. mark-deletion policy. historic data may be useful
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.sql.Timestamp> DELETE_TIME = createField("delete_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "mark-deletion policy. historic data may be useful");
+
+	/**
+	 * The column <code>ehcore.eh_forum_posts.tag</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.lang.String> TAG = createField("tag", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_forum_posts.start_time</code>. publish start time
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.sql.Timestamp> START_TIME = createField("start_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "publish start time");
+
+	/**
+	 * The column <code>ehcore.eh_forum_posts.end_time</code>. publish end time
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhForumPostsRecord, java.sql.Timestamp> END_TIME = createField("end_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "publish end time");
 
 	/**
 	 * Create a <code>ehcore.eh_forum_posts</code> table reference

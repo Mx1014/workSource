@@ -1,0 +1,73 @@
+package com.everhomes.rest.organization;
+
+
+import java.util.List;
+
+import javax.validation.constraints.NotNull;
+
+import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
+
+/**
+ * <ul>
+ * 	<li>id : 机构id</li>
+ * <li>groupTypes : 机构类型 参考{@link com.everhomes.rest.organization.OrganizationGroupType}</li>
+ * <li>naviFlag : 机构类型 参考{@link com.everhomes.rest.organization.OrganizationNaviFlag}</li>
+ *</ul>
+ *
+ */
+public class ListAllChildrenOrganizationsCommand {
+	
+	@NotNull
+	private Long id;
+	
+	@ItemType(String.class)
+	private List<String> groupTypes;
+	
+	private Byte naviFlag;
+	
+	
+	public Long getId() {
+		return id;
+	}
+
+
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+
+
+	public List<String> getGroupTypes() {
+		return groupTypes;
+	}
+
+
+
+	public void setGroupTypes(List<String> groupTypes) {
+		this.groupTypes = groupTypes;
+	}
+
+
+
+	public Byte getNaviFlag() {
+		return naviFlag;
+	}
+
+
+
+	public void setNaviFlag(Byte naviFlag) {
+		this.naviFlag = naviFlag;
+	}
+
+
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
+	
+	
+
+}

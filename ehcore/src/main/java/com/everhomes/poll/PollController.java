@@ -9,12 +9,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.poll.PollDTO;
 import com.everhomes.poll.PollService;
-import com.everhomes.poll.PollShowResultCommand;
-import com.everhomes.poll.PollShowResultResponse;
-import com.everhomes.poll.PollVoteCommand;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.poll.PollDTO;
+import com.everhomes.rest.poll.PollShowResultCommand;
+import com.everhomes.rest.poll.PollShowResultResponse;
+import com.everhomes.rest.poll.PollVoteCommand;
 
 @RestController
 @RequestMapping("/poll")

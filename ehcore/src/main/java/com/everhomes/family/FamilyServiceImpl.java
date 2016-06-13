@@ -10,10 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.validation.constraints.Null;
-
 import org.apache.lucene.spatial.DistanceUtils;
-import org.hibernate.dialect.Ingres10Dialect;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
@@ -30,11 +27,7 @@ import ch.hsr.geohash.GeoHash;
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Role;
 import com.everhomes.address.Address;
-import com.everhomes.address.AddressAdminStatus;
 import com.everhomes.address.AddressProvider;
-import com.everhomes.address.AddressServiceErrorCode;
-import com.everhomes.app.AppConstants;
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -46,61 +39,93 @@ import com.everhomes.core.AppConfig;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.family.admin.ListAllFamilyMembersAdminCommand;
-import com.everhomes.family.admin.ListWaitApproveFamilyAdminCommand;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupAdminStatus;
 import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupMember;
-import com.everhomes.group.GroupMemberStatus;
-import com.everhomes.group.GroupPrivacy;
 import com.everhomes.group.GroupProvider;
-import com.everhomes.launchpad.LaunchPadItemDTO;
+import com.everhomes.group.GroupService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.messaging.MessageBodyType;
-import com.everhomes.messaging.MessageChannel;
-import com.everhomes.messaging.MessageDTO;
-import com.everhomes.messaging.MessageMetaConstant;
-import com.everhomes.messaging.MessagingConstants;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.messaging.MetaObjectType;
-import com.everhomes.messaging.QuestionMetaObject;
 import com.everhomes.namespace.Namespace;
-import com.everhomes.point.AddUserPointCommand;
-import com.everhomes.point.PointType;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.rest.point.PointType;
 import com.everhomes.point.UserPointService;
 import com.everhomes.recommend.RecommendationService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
-import com.everhomes.region.RegionScope;
+import com.everhomes.rest.address.AddressAdminStatus;
+import com.everhomes.rest.address.AddressServiceErrorCode;
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.family.ApproveMemberCommand;
+import com.everhomes.rest.family.FamilyDTO;
+import com.everhomes.rest.family.FamilyMemberDTO;
+import com.everhomes.rest.family.FamilyMemberFullDTO;
+import com.everhomes.rest.family.FamilyMembershipRequestDTO;
+import com.everhomes.rest.family.FamilyNotificationTemplateCode;
+import com.everhomes.rest.family.FamilyServiceErrorCode;
+import com.everhomes.rest.family.FindFamilyByAddressIdCommand;
+import com.everhomes.rest.family.GetFamilyCommand;
+import com.everhomes.rest.family.GetOwningFamilyByIdCommand;
+import com.everhomes.rest.family.JoinFamilyCommand;
+import com.everhomes.rest.family.LeaveFamilyCommand;
+import com.everhomes.rest.family.ListAllFamilyMembersCommandResponse;
+import com.everhomes.rest.family.ListFamilyRequestsCommand;
+import com.everhomes.rest.family.ListFamilyRequestsCommandResponse;
+import com.everhomes.rest.family.ListNearbyNeighborUserCommand;
+import com.everhomes.rest.family.ListNeighborUsersCommand;
+import com.everhomes.rest.family.ListNeighborUsersCommandResponse;
+import com.everhomes.rest.family.ListOwningFamilyMembersCommand;
+import com.everhomes.rest.family.ListWaitApproveFamilyCommandResponse;
+import com.everhomes.rest.family.NeighborUserDTO;
+import com.everhomes.rest.family.NeighborUserDetailDTO;
+import com.everhomes.rest.family.NeighborhoodRelation;
+import com.everhomes.rest.family.ParamType;
+import com.everhomes.rest.family.RejectMemberCommand;
+import com.everhomes.rest.family.RevokeMemberCommand;
+import com.everhomes.rest.family.SetCurrentFamilyCommand;
+import com.everhomes.rest.family.UpdateFamilyInfoCommand;
+import com.everhomes.rest.family.admin.ListAllFamilyMembersAdminCommand;
+import com.everhomes.rest.family.admin.ListWaitApproveFamilyAdminCommand;
+import com.everhomes.rest.group.GroupMemberStatus;
+import com.everhomes.rest.group.GroupPrivacy;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessageMetaConstant;
+import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.messaging.MetaObjectType;
+import com.everhomes.rest.messaging.QuestionMetaObject;
+import com.everhomes.rest.point.AddUserPointCommand;
+import com.everhomes.rest.region.RegionScope;
+import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.rest.user.UserCurrentEntityType;
+import com.everhomes.rest.user.UserInfo;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.IdentifierType;
-import com.everhomes.user.MessageChannelType;
 import com.everhomes.user.User;
+import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserGroup;
+import com.everhomes.user.UserGroupHistory;
+import com.everhomes.user.UserGroupHistoryProvider;
 import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserInfo;
 import com.everhomes.user.UserLocation;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
-import com.everhomes.user.UserServiceErrorCode;
-import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
+import com.everhomes.util.PinYinHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
-
-import freemarker.core.ReturnInstruction.Return;
-
-
 
 /**
  * Family inherits from Group for family member management. GroupDiscriminator.FAMILY
@@ -120,8 +145,10 @@ public class FamilyServiceImpl implements FamilyService {
     
     @Autowired
     private GroupProvider groupProvider;
+    
     @Autowired
     private FamilyProvider familyProvider;
+    
     @Autowired
     private UserProvider userProvider;
     
@@ -154,12 +181,25 @@ public class FamilyServiceImpl implements FamilyService {
     
     @Autowired
     private UserPointService userPointService;
+    
     @Autowired
     private RecommendationService recommendationService;
     
+    @Autowired 
+    private UserActivityProvider userActivityProvider;
+    
+    @Autowired
+    private UserGroupHistoryProvider userGroupHistoryProvider;
+    
     @Override
-    public Family getOrCreatefamily(Address address)      {
-        final User user = UserContext.current().getUser();
+    public Family getOrCreatefamily(Address address, User u)      {
+    	
+    	
+    	if(null == u){
+    		u = UserContext.current().getUser();
+    	}
+    	
+    	final User user = u;
         long uid = user.getId();
         Community community = this.communityProvider.findCommunityById(address.getCommunityId());
         Region region;
@@ -198,7 +238,11 @@ public class FamilyServiceImpl implements FamilyService {
                     m.setMemberId(uid);
                     m.setMemberAvatar(user.getAvatar());
                     m.setMemberRole(Role.ResourceCreator);
-                    m.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
+                    
+                    if(null == address.getMemberStatus()){
+                    	address.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
+                    }
+                    m.setMemberStatus(address.getMemberStatus());
                     m.setCreatorUid(uid);
                     m.setInviteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
                     this.groupProvider.createGroupMember(m);
@@ -210,7 +254,7 @@ public class FamilyServiceImpl implements FamilyService {
                     userGroup.setRegionScope(RegionScope.COMMUNITY.getCode());
                     userGroup.setRegionScopeId(community.getId());
                     userGroup.setMemberRole(Role.ResourceCreator);
-                    userGroup.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
+                    userGroup.setMemberStatus(address.getMemberStatus());
                     this.userProvider.createUserGroup(userGroup);
                     
                     sendFamilyNotificationForReqJoinFamily(address,f,m);
@@ -312,8 +356,25 @@ public class FamilyServiceImpl implements FamilyService {
         return FamilyUtils.joinDisplayName(community.getCityName(),community.getAreaName(), community.getName(), buildingName, apartmentName);
         
     }
-        
-    private void sendFamilyNotification(Long familyId,List<Long> includeList, List<Long> excludeList, 
+    
+    private void sendMessageToUser(Long uid, String content, Map<String, String> meta) {
+        MessageDTO messageDto = new MessageDTO();
+        messageDto.setAppId(AppConstants.APPID_MESSAGING);
+        messageDto.setSenderUid(User.SYSTEM_UID);
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid.toString()));
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+        messageDto.setBody(content);
+        messageDto.setMetaAppId(AppConstants.APPID_FAMILY);
+        if(null != meta && meta.size() > 0) {
+            messageDto.getMeta().putAll(meta);
+            }
+        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
+                uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+    }
+    
+     //TODO when user group session?
+    private void sendFamilyNotificationGroupSession(Long familyId,List<Long> includeList, List<Long> excludeList, 
             String message, MetaObjectType metaObjectType, QuestionMetaObject metaObject) {
         if(message != null && message.length() != 0) {
             String channelType = MessageChannelType.GROUP.getCode();
@@ -339,6 +400,39 @@ public class FamilyServiceImpl implements FamilyService {
                 channelToken, messageDto, MessagingConstants.MSG_FLAG_STORED.getCode());
 
             LOGGER.info("Send family notification,familyId=" + familyId + ",includeList=" + includeList + ",exculdeList=" + excludeList);
+        }
+    }
+    
+    private void sendFamilyNotification(Long familyId,List<Long> includeList, List<Long> excludeList, 
+            String message, MetaObjectType metaObjectType, QuestionMetaObject metaObject) {
+        //User session
+        Map<String, String> meta = null;
+        if(metaObjectType != null && metaObject != null) {
+            meta = new HashMap<String, String>();
+            meta.put(MessageMetaConstant.META_OBJECT_TYPE, metaObjectType.getCode());
+            meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(metaObject));
+        }
+        
+        if(includeList != null && includeList.size() > 0) {
+            for(Long userId : includeList) {
+                sendMessageToUser(userId, message, meta);
+            }
+            return;
+        }
+        
+        Map<Long, Long> exclude = new HashMap<Long, Long>();
+        if(excludeList != null) {
+            for(Long userId : excludeList) {
+                exclude.put(userId, 1l);
+            }
+        }
+        
+        ListingLocator locator = new ListingLocator(familyId);
+        List<GroupMember> members = this.groupProvider.listGroupMembers(locator, 1000);
+        for(GroupMember gm : members) {
+            if(exclude.get(gm.getMemberId()) == null && gm.getMemberStatus() == GroupMemberStatus.ACTIVE.getCode()) {
+                sendMessageToUser(gm.getMemberId(), message, meta);
+            }
         }
     }
 
@@ -471,11 +565,60 @@ public class FamilyServiceImpl implements FamilyService {
         User user = UserContext.current().getUser();
         Long userId = user.getId();
        
-        return this.familyProvider.getUserFamiliesByUserId(userId);
+        List<FamilyDTO> families = this.familyProvider.getUserFamiliesByUserId(userId);
+        Map<Long, Long> checkList = new HashMap<Long, Long>();
+        if(null != families) {
+          for(FamilyDTO f : families) {
+                checkList.put(f.getAddressId(), 1l);
+            }     
+        
+        }
+        
+        if(families == null) {
+        	families = new ArrayList<FamilyDTO>();
+        }
+        //Merge histories, add by Janson
+	        List<UserGroupHistory> histories = this.userGroupHistoryProvider.queryUserGroupHistoryByUserId(userId);
+	        for(UserGroupHistory o : histories) {
+	            if(!checkList.containsKey(o.getAddressId())) {
+	                
+	                checkList.put(o.getAddressId(), 1l);
+	                
+	                FamilyDTO family = new FamilyDTO();
+	                family.setId(o.getId());
+	                family.setMembershipStatus(GroupMemberStatus.INACTIVE.getCode());
+	                Community community = this.communityProvider.findCommunityById(o.getCommunityId());
+	                if(community != null){
+	                    family.setCommunityId(o.getCommunityId());
+	                    family.setCommunityName(community.getName());
+	                    family.setCityId(community.getCityId());
+	                    family.setCityName(community.getCityName()+community.getAreaName());
+	                    family.setCommunityType(community.getCommunityType());
+	                    family.setDefaultForumId(community.getDefaultForumId());
+	                    family.setFeedbackForumId(community.getFeedbackForumId());
+	                    }
+	                
+	                Address address = this.addressProvider.findAddressById(o.getAddressId());
+	                if(address != null){
+	                    family.setBuildingName(address.getBuildingName());
+	                    family.setApartmentName(address.getApartmentName());
+	                    family.setAddressStatus(address.getStatus());
+	                    String addrStr = FamilyUtils.joinDisplayName(community.getCityName(),community.getAreaName(), community.getName(), 
+	                            address.getBuildingName(), address.getApartmentName());
+	                    family.setDisplayName(addrStr);
+	                    family.setAddress(addrStr);
+	                }
+	                
+	                families.add(family);
+	                
+	            }
+	        }
+        
+        return families;
     }
 
     @Override
-    public void leave(LeaveFamilyCommand cmd) {
+    public void leave(LeaveFamilyCommand cmd, User u) {
         User user = UserContext.current().getUser();
         Long userId = user.getId();
         long familyId = cmd.getId();
@@ -639,8 +782,10 @@ public class FamilyServiceImpl implements FamilyService {
         GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(familyId, 
                 EntityType.USER.getCode(), memberUid);
         if(member == null){
-            throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_NOT_IN_FAMILY, 
-                    "User not in familly.");
+        	LOGGER.error("User not in familly.userId=" + memberUid);
+        	return ;
+//            throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_NOT_IN_FAMILY, 
+//                    "User not in familly.");
         }
         if(member.getMemberStatus().byteValue() == GroupMemberStatus.ACTIVE.getCode()){
             throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_FAMILY_EXIST, 
@@ -657,6 +802,15 @@ public class FamilyServiceImpl implements FamilyService {
         
         this.familyProvider.leaveFamilyAtAddress(address, userGroup);
         setCurrentFamilyAfterApproval(userGroup.getOwnerUid(),0,1);
+        
+        //Create reject history
+        UserGroupHistory history = new UserGroupHistory();
+        history.setGroupId(familyId);
+        history.setGroupDiscriminator(GroupDiscriminator.FAMILY.getCode());
+        history.setOwnerUid(memberUid);
+        history.setAddressId(address.getId());
+        history.setCommunityId(group.getIntegralTag2());
+        this.userGroupHistoryProvider.createUserGroupHistory(history);
         
         if(cmd.getOperatorRole() == Role.ResourceOperator)
             sendFamilyNotificationForMemberRejectFamily(address,group,member,userId);
@@ -752,8 +906,9 @@ public class FamilyServiceImpl implements FamilyService {
                 EntityType.USER.getCode(), memberUid);
         if(member == null){
             LOGGER.error("Invalid memberUid parameter,user has not apply join in family.memberUid=" + memberUid);
-            throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_NOT_IN_FAMILY, 
-                    "User has not apply join in family, or other approve the user.");
+            return ;
+//            throw RuntimeErrorException.errorWith(FamilyServiceErrorCode.SCOPE, FamilyServiceErrorCode.ERROR_USER_NOT_IN_FAMILY, 
+//                    "User has not apply join in family, or other approve the user.");
         }
         Tuple<Boolean,Boolean> tuple = this.coordinationProvider.getNamedLock(CoordinationLocks.LEAVE_FAMILY.getCode()).enter(()-> {
             this.dbProvider.execute((TransactionStatus status) -> {
@@ -967,12 +1122,16 @@ public class FamilyServiceImpl implements FamilyService {
                 f.setFamilyId(groupMember.getGroupId());
                 f.setId(groupMember.getId());
                 f.setMemberUid(groupMember.getMemberId());
-                f.setMemberName(groupMember.getMemberNickName());
-                f.setMemberAvatarUrl((parserUri(groupMember.getMemberAvatar(),EntityType.USER.getCode(),groupMember.getCreatorUid())));
-                f.setMemberAvatarUri(groupMember.getMemberAvatar());
+//                f.setMemberName(groupMember.getMemberNickName());
+//                f.setMemberAvatarUrl((parserUri(groupMember.getMemberAvatar(),EntityType.USER.getCode(),groupMember.getCreatorUid())));
+//                f.setMemberAvatarUri(groupMember.getMemberAvatar());
                 //UserInfo userInfo = this.userService.getUserSnapshotInfo(groupMember.getMemberId());
                 UserInfo userInfo = this.userService.getUserInfo(groupMember.getMemberId());
                 if(userInfo != null){
+                	//产品要求家庭昵称和个人昵称一致
+                	f.setMemberName(userInfo.getNickName());
+                	f.setMemberAvatarUrl(userInfo.getAvatarUrl());
+                    f.setMemberAvatarUri(userInfo.getAvatarUri());
                     f.setBirthday(userInfo.getBirthday());
                     f.setGender(userInfo.getGender());
                     f.setStatusLine(userInfo.getStatusLine());
@@ -1017,6 +1176,12 @@ public class FamilyServiceImpl implements FamilyService {
                 u.setAddressId(address.getId());
                 u.setAddress(address.getAddress());
                 u.setCommunityId(address.getCommunityId());
+
+                userService.updateUserCurrentCommunityToProfile(userId, address.getCommunityId(), u.getNamespaceId());
+                
+                long timestemp = DateHelper.currentGMTTime().getTime();
+                String key = UserCurrentEntityType.FAMILY.getUserProfileKey();
+                userActivityProvider.updateUserCurrentEntityProfile(userId, key, familyId, timestemp, u.getNamespaceId());
             }
         }
         else {
@@ -1085,7 +1250,20 @@ public class FamilyServiceImpl implements FamilyService {
             member.setProofResourceUri(proofResourceUri);
         }
         this.groupProvider.updateGroupMember(member);
+        
         //更新之后，发送命令
+        //Add by Janson
+//        Address address = this.addressProvider.findAddressById(group.getIntegralTag1());
+//        if(null == address) {
+//            return;
+//        }
+//        
+//        Map<String, Object> map = bulidMapBeforeSendFamilyNotification(address,group,member,0L,0L);
+//        
+//        String scope = FamilyNotificationTemplateCode.SCOPE;
+//        int code = FamilyNotificationTemplateCode.FAMILY_MEMBER_QUICK_APPLICANT;
+//        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, user.getLocale(), map, "");
+//        sendFamilyNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
     }
 
     @Override
@@ -1152,6 +1330,10 @@ public class FamilyServiceImpl implements FamilyService {
     public ListNeighborUsersCommandResponse listNeighborUsers(ListNeighborUsersCommand cmd) {
         User user = UserContext.current().getUser();
         
+        if(null == cmd.getIsPinyin()){
+        	cmd.setIsPinyin(0);
+        }
+        
         checkParamIsValid(ParamType.fromCode(cmd.getType()).getCode() , cmd.getId());
         Long familyId = cmd.getId();
         Group group = this.groupProvider.findGroupById(familyId);
@@ -1208,6 +1390,7 @@ public class FamilyServiceImpl implements FamilyService {
                             n.setUserAvatarUrl(parserUri(u.getAvatar(),EntityType.USER.getCode(),u.getId()));
                             n.setUserAvatarUri(u.getAvatar());
                             n.setUserStatusLine(u.getStatusLine());
+                            n.setOccupation(u.getOccupation());
                             n.setBuildingName(address.getBuildingName());
                             n.setApartmentFloor(address.getApartmentFloor());
                             userDetailList.add(n);
@@ -1217,9 +1400,21 @@ public class FamilyServiceImpl implements FamilyService {
             }
             
         });
+        
         Long pageOffset = cmd.getPageOffset();
         pageOffset = pageOffset == null ? 1 : pageOffset;
         List<NeighborUserDTO> results = processNeighborUserInfo(userDetailList,myaddress,pageOffset);
+        
+        if(results != null && results.size() > 0) {
+            if(cmd.getIsPinyin().equals(1)){
+            	results = this.convertPinyin(results);
+            	results = results.stream().map(r->{
+            		r.setInitial(r.getInitial().replace("~", "#"));
+            		return r;
+            	}).collect(Collectors.toList());
+            }
+        }
+        
         long endTime = System.currentTimeMillis();
         LOGGER.info("Query neighbor user of community,elapse=" + (endTime - startTime));
         ListNeighborUsersCommandResponse response = new ListNeighborUsersCommandResponse();
@@ -1228,6 +1423,21 @@ public class FamilyServiceImpl implements FamilyService {
         return response;
     }
 
+    private List<NeighborUserDTO> convertPinyin(List<NeighborUserDTO> neighborUserDTOs){
+		
+    	neighborUserDTOs = neighborUserDTOs.stream().map((c) ->{
+    		String pinyin = PinYinHelper.getPinYin(c.getUserName());
+			c.setFullInitial(PinYinHelper.getFullCapitalInitial(pinyin));
+			c.setFullPinyin(pinyin.replaceAll(" ", ""));
+			c.setInitial(PinYinHelper.getCapitalInitial(c.getFullPinyin()));
+			return c;
+		}).collect(Collectors.toList());
+		
+		Collections.sort(neighborUserDTOs);
+		
+		return neighborUserDTOs;
+	}
+    
     private List<NeighborUserDTO> processNeighborUserInfo(List<NeighborUserDetailDTO> userDetailList,
             Address myaddress,long pageOffset) {
         
@@ -1469,37 +1679,39 @@ public class FamilyServiceImpl implements FamilyService {
             return null;
         }
         
-        FamilyDTO familyDTO = ConvertHelper.convert(family, FamilyDTO.class);
-        //familyDTO.setAddressId(cmd.getAddressId());
-        if(family.getCreatorUid() == user.getId())
-            familyDTO.setAdminStatus(GroupAdminStatus.ACTIVE.getCode());
+//        FamilyDTO familyDTO = ConvertHelper.convert(family, FamilyDTO.class);
+//        //familyDTO.setAddressId(cmd.getAddressId());
+//        if(family.getCreatorUid() == user.getId())
+//            familyDTO.setAdminStatus(GroupAdminStatus.ACTIVE.getCode());
+//        
+//        GroupMember m = this.groupProvider.findGroupMemberByMemberInfo(family.getId(), 
+//                EntityType.USER.getCode(), user.getId());
+//        if(m != null){
+//            familyDTO.setMemberUid(m.getMemberId());
+//            familyDTO.setMemberNickName(m.getMemberNickName());
+//            familyDTO.setMemberAvatarUrl(parserUri(m.getMemberAvatar(),EntityType.USER.getCode(),m.getCreatorUid()));
+//            familyDTO.setMemberAvatarUri(m.getMemberAvatar());
+//            familyDTO.setMembershipStatus(m.getMemberStatus());
+//            Address address = this.addressProvider.findAddressById(addressId);
+//            if(address != null){
+//                familyDTO.setAddress(address.getAddress());
+//                familyDTO.setAddressId(address.getId());
+//                familyDTO.setApartmentName(address.getApartmentName());
+//                familyDTO.setBuildingName(address.getBuildingName());
+//                familyDTO.setAddressStatus(address.getStatus());
+//            }
+//            
+//            Community community = communityProvider.findCommunityById(family.getCommunityId());
+//            if(community != null){
+//                familyDTO.setCityName(community.getCityName());
+//                familyDTO.setAreaName(community.getAreaName());
+//                familyDTO.setCommunityName(community.getName());
+//            }
+//            
+//        }
+//        return familyDTO;
         
-        GroupMember m = this.groupProvider.findGroupMemberByMemberInfo(family.getId(), 
-                EntityType.USER.getCode(), user.getId());
-        if(m != null){
-            familyDTO.setMemberUid(m.getMemberId());
-            familyDTO.setMemberNickName(m.getMemberNickName());
-            familyDTO.setMemberAvatarUrl(parserUri(m.getMemberAvatar(),EntityType.USER.getCode(),m.getCreatorUid()));
-            familyDTO.setMemberAvatarUri(m.getMemberAvatar());
-            familyDTO.setMembershipStatus(m.getMemberStatus());
-            Address address = this.addressProvider.findAddressById(addressId);
-            if(address != null){
-                familyDTO.setAddress(address.getAddress());
-                familyDTO.setAddressId(address.getId());
-                familyDTO.setApartmentName(address.getApartmentName());
-                familyDTO.setBuildingName(address.getBuildingName());
-                familyDTO.setAddressStatus(address.getStatus());
-            }
-            
-            Community community = communityProvider.findCommunityById(family.getCommunityId());
-            if(community != null){
-                familyDTO.setCityName(community.getCityName());
-                familyDTO.setAreaName(community.getAreaName());
-                familyDTO.setCommunityName(community.getName());
-            }
-            
-        }
-        return familyDTO;
+        return toFamilyDto(user.getId(), family);
     }
 
     @Override
@@ -1600,7 +1812,6 @@ public class FamilyServiceImpl implements FamilyService {
         }
         if(type == ParamType.COMMUNITY.getCode()){
             //TODO
-            
         }
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                 "Invalid id or type parameter");
@@ -1864,7 +2075,63 @@ public class FamilyServiceImpl implements FamilyService {
         
         return result;
     }
+    
+    private FamilyDTO toFamilyDto(Long userId, Family family) {
+        FamilyDTO familyDto = ConvertHelper.convert(family, FamilyDTO.class);
+        
+        if(family.getCreatorUid() == userId)
+            familyDto.setAdminStatus(GroupAdminStatus.ACTIVE.getCode());
+        
+        familyDto.setAvatarUrl(parserUri(family.getAvatar(),EntityType.FAMILY.getCode(),family.getCreatorUid()));
+        familyDto.setAvatarUri(family.getAvatar());
+        familyDto.setAddressId(family.getIntegralTag1());
+        Long communityId = family.getIntegralTag2();
+        Community community = this.communityProvider.findCommunityById(communityId);
+        if(community != null){
+            familyDto.setCommunityId(communityId);
+            familyDto.setCommunityName(community.getName());
+            familyDto.setCityId(community.getCityId());
+            familyDto.setCityName(community.getCityName()+community.getAreaName());
+            familyDto.setCommunityType(community.getCommunityType());
+            familyDto.setDefaultForumId(community.getDefaultForumId());
+            familyDto.setFeedbackForumId(community.getFeedbackForumId());
+        }
+        
+      if(family.getCreatorUid().longValue() == userId.longValue())
+          familyDto.setAdminStatus(GroupAdminStatus.ACTIVE.getCode());
+    
+      GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(familyDto.getId(), 
+              EntityType.USER.getCode(), userId);
+      if(member != null){
+          familyDto.setMemberUid(member.getMemberId());
+          familyDto.setMemberNickName(member.getMemberNickName());
+          familyDto.setMembershipStatus(member.getMemberStatus());
+          familyDto.setMemberAvatarUrl(parserUri(member.getMemberAvatar(), EntityType.USER.getCode(), member.getCreatorUid()));
+          familyDto.setMemberAvatarUri(member.getMemberAvatar());
+          familyDto.setProofResourceUri(member.getProofResourceUri());
+          familyDto.setProofResourceUrl(parserUri(member.getProofResourceUri(), EntityType.USER.getCode(), member.getCreatorUid()));
+      }
+    
+      Address address = this.addressProvider.findAddressById(family.getIntegralTag1());
+      if(address != null){
+          familyDto.setBuildingName(address.getBuildingName());
+          familyDto.setApartmentName(address.getApartmentName());
+          familyDto.setAddressStatus(address.getStatus());
+          String addrStr = FamilyUtils.joinDisplayName(community.getCityName(),community.getAreaName(), community.getName(), 
+                  address.getBuildingName(), address.getApartmentName());
+          familyDto.setDisplayName(addrStr);
+          familyDto.setAddress(addrStr);
+          familyDto.setAddressId(address.getId());
+      }
+             
+      return familyDto;
+    }
 
-
-
+    @Override
+    public void deleteHistoryById(Long id) {
+        UserGroupHistory history = this.userGroupHistoryProvider.getHistoryById(id);
+        if(history != null) {
+            this.userGroupHistoryProvider.deleteUserGroupHistory(history);
+        }
+    }
 }

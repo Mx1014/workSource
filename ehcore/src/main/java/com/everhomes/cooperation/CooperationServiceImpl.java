@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.rest.cooperation.NewCooperationCommand;
 import com.everhomes.util.ConvertHelper;
 //import com.everhomes.cooperation.admin.CooperationDTO;
 //import com.everhomes.cooperation.admin.ListCooperationAdminCommand;

@@ -1,0 +1,18 @@
+//
+// EvhLeasePromotionStatus.h
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhLeasePromotionStatus
+//
+typedef enum {
+
+    EvhLeasePromotionStatus_RENTING = 1, 
+    EvhLeasePromotionStatus_RENTAL = 2, 
+    EvhLeasePromotionStatus_OFFLINE = 3
+
+} EvhLeasePromotionStatus;
+
+///////////////////////////////////////////////////////////////////////////////
+

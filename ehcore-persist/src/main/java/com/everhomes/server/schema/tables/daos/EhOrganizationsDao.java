@@ -102,4 +102,130 @@ public class EhOrganizationsDao extends org.jooq.impl.DAOImpl<com.everhomes.serv
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByStatus(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.STATUS, values);
 	}
+
+	/**
+	 * Fetch records that have <code>department_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByDepartmentType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.DEPARTMENT_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>group_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByGroupType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.GROUP_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>create_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByCreateTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.CREATE_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>update_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByUpdateTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.UPDATE_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>directly_enterprise_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByDirectlyEnterpriseId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.DIRECTLY_ENTERPRISE_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>namespace_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByNamespaceId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.NAMESPACE_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>integral_tag1 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByIntegralTag1(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.INTEGRAL_TAG1, values);
+	}
+
+	/**
+	 * Fetch records that have <code>integral_tag2 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByIntegralTag2(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.INTEGRAL_TAG2, values);
+	}
+
+	/**
+	 * Fetch records that have <code>integral_tag3 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByIntegralTag3(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.INTEGRAL_TAG3, values);
+	}
+
+	/**
+	 * Fetch records that have <code>integral_tag4 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByIntegralTag4(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.INTEGRAL_TAG4, values);
+	}
+
+	/**
+	 * Fetch records that have <code>integral_tag5 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByIntegralTag5(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.INTEGRAL_TAG5, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag1 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByStringTag1(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.STRING_TAG1, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag2 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByStringTag2(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.STRING_TAG2, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag3 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByStringTag3(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.STRING_TAG3, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag4 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByStringTag4(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.STRING_TAG4, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag5 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByStringTag5(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.STRING_TAG5, values);
+	}
+
+	/**
+	 * Fetch records that have <code>group_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByGroupId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.GROUP_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>show_flag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizations> fetchByShowFlag(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizations.EH_ORGANIZATIONS.SHOW_FLAG, values);
+	}
 }

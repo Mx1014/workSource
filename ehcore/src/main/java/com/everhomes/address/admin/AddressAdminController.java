@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.address.AddressService;
-import com.everhomes.address.CorrectAddressCommand;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -20,6 +19,9 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.address.CorrectAddressCommand;
+import com.everhomes.rest.address.admin.CorrectAddressAdminCommand;
+import com.everhomes.rest.address.admin.ImportAddressCommand;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
@@ -91,5 +93,40 @@ public class AddressAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /admin/address/importParkAddressData</b>
+     * @param files 上传的文件
+     * @return 上传的结果
+     */
+    @RequestMapping(value="importParkAddressData", method = RequestMethod.POST)
+    @RestReturn(value=String.class)
+    public RestResponse importParkAddressData(@Valid ImportAddressCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
+        
+    	addressService.importParkAddressData(cmd, files);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/address/importAddressInfos</b>
+     * @param files 上传的文件
+     * @return 上传的结果
+     */
+    @RequestMapping(value="importAddressData", method = RequestMethod.POST)
+    @RestReturn(value=String.class)
+    public RestResponse importAddressData(@RequestParam(value = "attachment") MultipartFile[] files) {
+//        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+    	addressService.importAddressData(files);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
 
 }

@@ -11,32 +11,68 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationMembers implements java.io.Serializable {
 
-	private static final long serialVersionUID = 983767297;
+	private static final long serialVersionUID = -1794501885;
 
-	private java.lang.Long   id;
-	private java.lang.Long   organizationId;
-	private java.lang.String targetType;
-	private java.lang.Long   targetId;
-	private java.lang.String memberGroup;
-	private java.lang.String contactName;
-	private java.lang.Byte   contactType;
-	private java.lang.String contactToken;
-	private java.lang.String contactDescription;
-	private java.lang.Byte   status;
+	private java.lang.Long     id;
+	private java.lang.Long     organizationId;
+	private java.lang.String   targetType;
+	private java.lang.Long     targetId;
+	private java.lang.String   memberGroup;
+	private java.lang.String   contactName;
+	private java.lang.Byte     contactType;
+	private java.lang.String   contactToken;
+	private java.lang.String   contactDescription;
+	private java.lang.Byte     status;
+	private java.lang.Long     groupId;
+	private java.lang.String   employeeNo;
+	private java.lang.String   avatar;
+	private java.lang.String   groupPath;
+	private java.lang.Byte     gender;
+	private java.sql.Timestamp updateTime;
+	private java.sql.Timestamp createTime;
+	private java.lang.Long     integralTag1;
+	private java.lang.Long     integralTag2;
+	private java.lang.Long     integralTag3;
+	private java.lang.Long     integralTag4;
+	private java.lang.Long     integralTag5;
+	private java.lang.String   stringTag1;
+	private java.lang.String   stringTag2;
+	private java.lang.String   stringTag3;
+	private java.lang.String   stringTag4;
+	private java.lang.String   stringTag5;
+	private java.lang.Integer  namespaceId;
 
 	public EhOrganizationMembers() {}
 
 	public EhOrganizationMembers(
-		java.lang.Long   id,
-		java.lang.Long   organizationId,
-		java.lang.String targetType,
-		java.lang.Long   targetId,
-		java.lang.String memberGroup,
-		java.lang.String contactName,
-		java.lang.Byte   contactType,
-		java.lang.String contactToken,
-		java.lang.String contactDescription,
-		java.lang.Byte   status
+		java.lang.Long     id,
+		java.lang.Long     organizationId,
+		java.lang.String   targetType,
+		java.lang.Long     targetId,
+		java.lang.String   memberGroup,
+		java.lang.String   contactName,
+		java.lang.Byte     contactType,
+		java.lang.String   contactToken,
+		java.lang.String   contactDescription,
+		java.lang.Byte     status,
+		java.lang.Long     groupId,
+		java.lang.String   employeeNo,
+		java.lang.String   avatar,
+		java.lang.String   groupPath,
+		java.lang.Byte     gender,
+		java.sql.Timestamp updateTime,
+		java.sql.Timestamp createTime,
+		java.lang.Long     integralTag1,
+		java.lang.Long     integralTag2,
+		java.lang.Long     integralTag3,
+		java.lang.Long     integralTag4,
+		java.lang.Long     integralTag5,
+		java.lang.String   stringTag1,
+		java.lang.String   stringTag2,
+		java.lang.String   stringTag3,
+		java.lang.String   stringTag4,
+		java.lang.String   stringTag5,
+		java.lang.Integer  namespaceId
 	) {
 		this.id = id;
 		this.organizationId = organizationId;
@@ -48,6 +84,24 @@ public class EhOrganizationMembers implements java.io.Serializable {
 		this.contactToken = contactToken;
 		this.contactDescription = contactDescription;
 		this.status = status;
+		this.groupId = groupId;
+		this.employeeNo = employeeNo;
+		this.avatar = avatar;
+		this.groupPath = groupPath;
+		this.gender = gender;
+		this.updateTime = updateTime;
+		this.createTime = createTime;
+		this.integralTag1 = integralTag1;
+		this.integralTag2 = integralTag2;
+		this.integralTag3 = integralTag3;
+		this.integralTag4 = integralTag4;
+		this.integralTag5 = integralTag5;
+		this.stringTag1 = stringTag1;
+		this.stringTag2 = stringTag2;
+		this.stringTag3 = stringTag3;
+		this.stringTag4 = stringTag4;
+		this.stringTag5 = stringTag5;
+		this.namespaceId = namespaceId;
 	}
 
 	public java.lang.Long getId() {
@@ -128,5 +182,149 @@ public class EhOrganizationMembers implements java.io.Serializable {
 
 	public void setStatus(java.lang.Byte status) {
 		this.status = status;
+	}
+
+	public java.lang.Long getGroupId() {
+		return this.groupId;
+	}
+
+	public void setGroupId(java.lang.Long groupId) {
+		this.groupId = groupId;
+	}
+
+	public java.lang.String getEmployeeNo() {
+		return this.employeeNo;
+	}
+
+	public void setEmployeeNo(java.lang.String employeeNo) {
+		this.employeeNo = employeeNo;
+	}
+
+	public java.lang.String getAvatar() {
+		return this.avatar;
+	}
+
+	public void setAvatar(java.lang.String avatar) {
+		this.avatar = avatar;
+	}
+
+	public java.lang.String getGroupPath() {
+		return this.groupPath;
+	}
+
+	public void setGroupPath(java.lang.String groupPath) {
+		this.groupPath = groupPath;
+	}
+
+	public java.lang.Byte getGender() {
+		return this.gender;
+	}
+
+	public void setGender(java.lang.Byte gender) {
+		this.gender = gender;
+	}
+
+	public java.sql.Timestamp getUpdateTime() {
+		return this.updateTime;
+	}
+
+	public void setUpdateTime(java.sql.Timestamp updateTime) {
+		this.updateTime = updateTime;
+	}
+
+	public java.sql.Timestamp getCreateTime() {
+		return this.createTime;
+	}
+
+	public void setCreateTime(java.sql.Timestamp createTime) {
+		this.createTime = createTime;
+	}
+
+	public java.lang.Long getIntegralTag1() {
+		return this.integralTag1;
+	}
+
+	public void setIntegralTag1(java.lang.Long integralTag1) {
+		this.integralTag1 = integralTag1;
+	}
+
+	public java.lang.Long getIntegralTag2() {
+		return this.integralTag2;
+	}
+
+	public void setIntegralTag2(java.lang.Long integralTag2) {
+		this.integralTag2 = integralTag2;
+	}
+
+	public java.lang.Long getIntegralTag3() {
+		return this.integralTag3;
+	}
+
+	public void setIntegralTag3(java.lang.Long integralTag3) {
+		this.integralTag3 = integralTag3;
+	}
+
+	public java.lang.Long getIntegralTag4() {
+		return this.integralTag4;
+	}
+
+	public void setIntegralTag4(java.lang.Long integralTag4) {
+		this.integralTag4 = integralTag4;
+	}
+
+	public java.lang.Long getIntegralTag5() {
+		return this.integralTag5;
+	}
+
+	public void setIntegralTag5(java.lang.Long integralTag5) {
+		this.integralTag5 = integralTag5;
+	}
+
+	public java.lang.String getStringTag1() {
+		return this.stringTag1;
+	}
+
+	public void setStringTag1(java.lang.String stringTag1) {
+		this.stringTag1 = stringTag1;
+	}
+
+	public java.lang.String getStringTag2() {
+		return this.stringTag2;
+	}
+
+	public void setStringTag2(java.lang.String stringTag2) {
+		this.stringTag2 = stringTag2;
+	}
+
+	public java.lang.String getStringTag3() {
+		return this.stringTag3;
+	}
+
+	public void setStringTag3(java.lang.String stringTag3) {
+		this.stringTag3 = stringTag3;
+	}
+
+	public java.lang.String getStringTag4() {
+		return this.stringTag4;
+	}
+
+	public void setStringTag4(java.lang.String stringTag4) {
+		this.stringTag4 = stringTag4;
+	}
+
+	public java.lang.String getStringTag5() {
+		return this.stringTag5;
+	}
+
+	public void setStringTag5(java.lang.String stringTag5) {
+		this.stringTag5 = stringTag5;
+	}
+
+	public java.lang.Integer getNamespaceId() {
+		return this.namespaceId;
+	}
+
+	public void setNamespaceId(java.lang.Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 }

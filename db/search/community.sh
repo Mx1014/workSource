@@ -1,7 +1,8 @@
 ELASTIC=elasticsearch:9200
+INDEX=everhomesv32x
 
-curl -XDELETE http://$ELASTIC/everhomesv3/_mapping/community
-curl -XPUT "http://$ELASTIC/everhomesv3/_mapping/community" -d '
+curl -XDELETE http://$ELASTIC/$INDEX/_mapping/community
+curl -XPUT "http://$ELASTIC/$INDEX/_mapping/community" -d '
 {
     "community": {
         "properties": {
@@ -29,6 +30,10 @@ curl -XPUT "http://$ELASTIC/everhomesv3/_mapping/community" -d '
                 "index": "not_analyzed"
                 },
             "regionId": {
+                "type": "long",
+                "index": "not_analyzed"
+                },
+            "communityType": {
                 "type": "long",
                 "index": "not_analyzed"
                 }

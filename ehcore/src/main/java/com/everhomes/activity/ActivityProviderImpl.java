@@ -25,6 +25,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.rest.activity.ActivityServiceErrorCode;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhActivitiesDao;
 import com.everhomes.server.schema.tables.daos.EhActivityRosterDao;
@@ -302,7 +303,7 @@ public class ActivityProviderImpl implements ActivityProivider {
     }
 
     @Override
-    public List<Activity> listActivities(CrossShardListingLocator locator, int count, Condition condition1,Operator op,Condition... conditions) {
+    public List<Activity> listActivities(CrossShardListingLocator locator, int count, Condition condition) {
         List<Activity> activities=new ArrayList<Activity>();
         List<Activity> overdue =new ArrayList<Activity>();
         Timestamp now = new Timestamp(System.currentTimeMillis());
@@ -313,10 +314,6 @@ public class ActivityProviderImpl implements ActivityProivider {
         }
         this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
             SelectQuery<EhActivitiesRecord> query = context.selectQuery(Tables.EH_ACTIVITIES);
-
-            if (conditions != null) {
-                query.addConditions(op,conditions);
-            }
             
             if (locator.getAnchor() == null){
             	locator.setAnchor(0L);
@@ -326,14 +323,19 @@ public class ActivityProviderImpl implements ActivityProivider {
             	query.addConditions(Tables.EH_ACTIVITIES.ID.lt(locator.getAnchor()));
             }
             
-            if(condition1!=null){
-                query.addConditions(condition1);
+            if(condition != null){
+                query.addConditions(condition);
             }
             
 
             query.addConditions(Tables.EH_ACTIVITIES.STATUS.eq((byte) 2));
-            query.addOrderBy(Tables.EH_ACTIVITIES.CREATE_TIME.desc());
+            query.addOrderBy(Tables.EH_ACTIVITIES.START_TIME.desc());
             query.addLimit(count - activities.size());
+            
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Query activities by geohash, sql=" + query.getSQL());
+                LOGGER.debug("Query activities by geohash, bindValues=" + query.getBindValues());
+            }
 
             query.fetch().map((r) -> {
             	if(r.getEndTime().after(now)){

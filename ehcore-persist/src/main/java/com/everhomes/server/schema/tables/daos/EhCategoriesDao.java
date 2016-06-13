@@ -116,4 +116,11 @@ public class EhCategoriesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCategories> fetchByDescription(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhCategories.EH_CATEGORIES.DESCRIPTION, values);
 	}
+
+	/**
+	 * Fetch records that have <code>namespace_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCategories> fetchByNamespaceId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCategories.EH_CATEGORIES.NAMESPACE_ID, values);
+	}
 }

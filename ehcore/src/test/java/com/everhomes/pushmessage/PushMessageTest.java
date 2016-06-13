@@ -24,13 +24,13 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
-import com.everhomes.messaging.MessageChannel;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.visibility.VisibilityScope;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.base.LoginAuthTestCase;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
-import com.everhomes.visibility.VisibilityScope;
 
 public class PushMessageTest extends LoginAuthTestCase {
     private PushMessage pushMessage;

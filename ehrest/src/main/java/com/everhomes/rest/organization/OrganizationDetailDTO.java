@@ -1,0 +1,416 @@
+package com.everhomes.rest.organization;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.forum.AttachmentDescriptor;
+import com.everhomes.util.StringHelper;
+
+/**
+ * <ul>
+ *  <li>id: 主键id</li>
+ *  <li>organizationId: 机构id</li>
+ *  <li>description: 描述</li>
+ *  <li>contact: 联系电话</li>
+ *  <li>address: 地址</li>
+ *  <li>geohash: 地理哈希</li>
+ *  <li>contactor: 联系人</li>
+ *  <li>memberCount: 机构人数</li>
+ *  <li>checkinDate: 入住时间</li>
+ *  <li>name: 机构名称</li>
+ *  <li>avatarUri: 机构logo uri</li>
+ *  <li>avatarUrl: 机构logo url</li>
+ *  <li>accountPhone: 公司管理账号电话</li>
+ *  <li>accountName: 公司管理账号人名称</li>
+ *  <li>assignmentId: 用户权限id</li>
+ *  <li>postUri: 标题图 uri</li>
+ *  <li>postUrl: 标题图 url</li>
+ *  <li>addresses: 机构入住门牌地址</li>
+ *  <li>attachments: 机构banner图</li>
+ *  <li>longitude: 经度</li>
+ *  <li>latitude: 纬度</li>
+ * </ul>
+ *
+ */
+public class OrganizationDetailDTO {
+	
+	private Long     id;
+	private Long     organizationId;
+	private String   description;
+	private String   contact;
+	private String   address;
+	private String   geohash;
+	private String   displayName;
+	private String   contactor;
+	private Long     memberCount;
+	private Long checkinDate;
+	private String name;
+	
+    private String avatarUri;
+    private String avatarUrl;
+    
+    private Long updateTime;
+    private Long createTime;
+    
+    private String accountPhone; 
+    private String accountName;
+    private Long assignmentId;
+    
+    private String postUri;
+    private String postUrl;
+    
+    private String longitude;
+    
+    private String latitude;
+    
+    private OrganizationMemberDTO member;
+    
+    private CommunityDTO community;
+    
+    
+	//TODO address info ?
+    @ItemType(value = AddressDTO.class)
+    private List<AddressDTO> addresses;
+    
+    @ItemType(value = AttachmentDescriptor.class)
+    private List<AttachmentDescriptor> attachments = new ArrayList<AttachmentDescriptor>();
+    
+    private Long communityId;
+    
+	public Long getId() {
+		return id;
+	}
+
+
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
+
+
+
+	public String getDescription() {
+		return description;
+	}
+
+
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+
+
+	public String getContact() {
+		return contact;
+	}
+
+
+
+	public void setContact(String contact) {
+		this.contact = contact;
+	}
+
+
+
+	public String getAddress() {
+		return address;
+	}
+
+
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+
+
+	public String getGeohash() {
+		return geohash;
+	}
+
+
+
+	public void setGeohash(String geohash) {
+		this.geohash = geohash;
+	}
+
+
+
+	public String getDisplayName() {
+		return displayName;
+	}
+
+
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
+
+
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
+
+
+
+	public String getContactor() {
+		return contactor;
+	}
+
+
+
+	public void setContactor(String contactor) {
+		this.contactor = contactor;
+	}
+
+
+
+	public Long getMemberCount() {
+		return memberCount;
+	}
+
+
+
+	public void setMemberCount(Long memberCount) {
+		this.memberCount = memberCount;
+	}
+
+
+
+	public Long getCheckinDate() {
+		return checkinDate;
+	}
+
+
+
+	public void setCheckinDate(Long checkinDate) {
+		this.checkinDate = checkinDate;
+	}
+
+
+
+	public String getName() {
+		return name;
+	}
+
+
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+
+
+	public String getAvatarUri() {
+		return avatarUri;
+	}
+
+
+
+	public void setAvatarUri(String avatarUri) {
+		this.avatarUri = avatarUri;
+	}
+
+
+
+	public String getAvatarUrl() {
+		return avatarUrl;
+	}
+
+
+
+	public void setAvatarUrl(String avatarUrl) {
+		this.avatarUrl = avatarUrl;
+	}
+
+
+
+	public Long getUpdateTime() {
+		return updateTime;
+	}
+
+
+
+	public void setUpdateTime(Long updateTime) {
+		this.updateTime = updateTime;
+	}
+
+
+
+	public Long getCreateTime() {
+		return createTime;
+	}
+
+
+
+	public void setCreateTime(Long createTime) {
+		this.createTime = createTime;
+	}
+
+
+
+	public String getAccountPhone() {
+		return accountPhone;
+	}
+
+
+
+	public void setAccountPhone(String accountPhone) {
+		this.accountPhone = accountPhone;
+	}
+
+
+
+	public String getAccountName() {
+		return accountName;
+	}
+
+
+
+	public void setAccountName(String accountName) {
+		this.accountName = accountName;
+	}
+
+
+
+	public String getPostUri() {
+		return postUri;
+	}
+
+
+
+	public void setPostUri(String postUri) {
+		this.postUri = postUri;
+	}
+
+
+
+	public String getPostUrl() {
+		return postUrl;
+	}
+
+
+
+	public void setPostUrl(String postUrl) {
+		this.postUrl = postUrl;
+	}
+
+
+
+
+
+	public List<AddressDTO> getAddresses() {
+		return addresses;
+	}
+
+
+
+	public void setAddresses(List<AddressDTO> addresses) {
+		this.addresses = addresses;
+	}
+
+
+
+	public List<AttachmentDescriptor> getAttachments() {
+		return attachments;
+	}
+
+
+
+	public void setAttachments(List<AttachmentDescriptor> attachments) {
+		this.attachments = attachments;
+	}
+
+
+
+	public Long getAssignmentId() {
+		return assignmentId;
+	}
+
+
+
+	public void setAssignmentId(Long assignmentId) {
+		this.assignmentId = assignmentId;
+	}
+
+
+
+
+
+	public OrganizationMemberDTO getMember() {
+		return member;
+	}
+
+
+
+	public void setMember(OrganizationMemberDTO member) {
+		this.member = member;
+	}
+
+
+
+	public CommunityDTO getCommunity() {
+		return community;
+	}
+
+
+
+	public void setCommunity(CommunityDTO community) {
+		this.community = community;
+	}
+
+
+
+	public String getLongitude() {
+		return longitude;
+	}
+
+
+
+	public void setLongitude(String longitude) {
+		this.longitude = longitude;
+	}
+
+
+
+	public String getLatitude() {
+		return latitude;
+	}
+
+
+
+	public void setLatitude(String latitude) {
+		this.latitude = latitude;
+	}
+
+
+
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+
+}

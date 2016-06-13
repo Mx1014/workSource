@@ -17,10 +17,19 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.category.Category;
+import com.everhomes.category.CategoryProvider;
 import com.everhomes.controller.ControllerBase;
+import com.everhomes.util.RequireAuthentication;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.entity.EntityType;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.category.CategoryAdminStatus;
+import com.everhomes.rest.category.CategoryConstants;
+import com.everhomes.rest.category.CategoryDTO;
+import com.everhomes.rest.category.ListCategoryCommand;
+import com.everhomes.rest.category.ListCategoryV2Command;
+import com.everhomes.rest.category.UpdateCategoryLogoUriCommand;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -91,7 +100,10 @@ public class CategoryController extends ControllerBase {
 			orderBy = defaultSort();
 		}
 
-		List<Category> entityResultList = this.categoryProvider.listChildCategories(cmd.getParentId(),
+		User user = UserContext.current().getUser();
+		Integer namespaceId = (user.getNamespaceId() == null) ? 0 : user.getNamespaceId();
+		namespaceId = cmd.getNamespaceId() == null ? namespaceId : cmd.getNamespaceId();
+		List<Category> entityResultList = this.categoryProvider.listChildCategories(namespaceId, cmd.getParentId(),
 				CategoryAdminStatus.fromCode(cmd.getStatus()), orderBy);
 
 		List<CategoryDTO> dtoResultList = entityResultList.stream().map(r -> {
@@ -106,7 +118,6 @@ public class CategoryController extends ControllerBase {
 		}
 		return new RestResponse();
 	}
-
 	@SuppressWarnings("rawtypes")
 	private Tuple[] defaultSort(){
 		Tuple[] tuples = new Tuple[1]; 
@@ -114,6 +125,7 @@ public class CategoryController extends ControllerBase {
 		//tuples[1] = new Tuple<String, SortOrder>(CATEGORY_PATH, SortOrder.ASC);
 		return tuples;
 	}
+
 
 	/**
 	 * <b>URL: /category/listDescendants</b> 列出指定类型下的所有孩子类型
@@ -145,6 +157,9 @@ public class CategoryController extends ControllerBase {
 		return new RestResponse();
 	}
 
+
+
+
 	/**
 	 * <b>URL: /category/listRoot</b> 列出所有的大类
 	 */
@@ -172,12 +187,14 @@ public class CategoryController extends ControllerBase {
 	@RequireAuthentication(false)
 	@RequestMapping("listInterestCategories")
 	@RestReturn(value = CategoryDTO.class, collection = true)
-	public RestResponse listInterestCategories(HttpServletRequest request, HttpServletResponse response) {
-
+	public RestResponse listInterestCategories(ListCategoryV2Command cmd, HttpServletRequest request, HttpServletResponse response) {
+	    LOGGER.info("listInterestCategories, cmd=" + cmd);
+		User user = UserContext.current().getUser();
+		Integer namespaceId = (user.getNamespaceId() == null) ? 0 : user.getNamespaceId();
 		@SuppressWarnings("rawtypes")
 		Tuple[] orderBy = defaultSort();
 		@SuppressWarnings("unchecked")
-		List<Category> entityResultList = this.categoryProvider.listChildCategories(CategoryConstants.CATEGORY_ID_INTEREST,
+		List<Category> entityResultList = this.categoryProvider.listChildCategories(namespaceId, CategoryConstants.CATEGORY_ID_INTEREST,
 				CategoryAdminStatus.ACTIVE, orderBy);
 
 		List<CategoryDTO> dtoResultList = entityResultList.stream().map(r -> {
@@ -253,6 +270,7 @@ public class CategoryController extends ControllerBase {
 		User user = UserContext.current().getUser();
 		long userId = user.getId();
 
+		Integer namespaceId = (user.getNamespaceId() == null) ? 0 : user.getNamespaceId();
 		Tuple[] orderBy = defaultSort();
 		//暂时去掉
 		//        Category category = new Category();
@@ -262,8 +280,10 @@ public class CategoryController extends ControllerBase {
 		//        category.setStatus(CategoryAdminStatus.ACTIVE.getCode());
 		List<Category> entityResultList = new ArrayList<Category>();
 		//entityResultList.add(category);
-		List<Category> result = this.categoryProvider.listChildCategories(CategoryConstants.CATEGORY_ID_SERVICE,
-				CategoryAdminStatus.ACTIVE, orderBy);
+		List<Category> result = this.categoryProvider.listChildCategories(namespaceId, CategoryConstants.CATEGORY_ID_SERVICE,CategoryAdminStatus.ACTIVE, orderBy);
+		if(result==null||result.isEmpty())
+			result = this.categoryProvider.listChildCategories(0, CategoryConstants.CATEGORY_ID_SERVICE,CategoryAdminStatus.ACTIVE, orderBy);
+		
 		if(result != null && !result.isEmpty())
 			entityResultList.addAll(result);
 		List<CategoryDTO> dtoResultList = entityResultList.stream().map(r -> {

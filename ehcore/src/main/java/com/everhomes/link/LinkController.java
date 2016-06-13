@@ -8,13 +8,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.link.FindLinkByIdCommand;
+import com.everhomes.rest.link.LinkDTO;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RequireAuthentication;
 
 @RestDoc(value="Link controller", site="core")
 @RestController
@@ -28,6 +30,7 @@ public class LinkController extends ControllerBase {
      * <b>URL: /link/findLinkById</b>
      * <p>根据id查询link</p>
      */
+    @RequireAuthentication(false)
     @RequestMapping("findLinkById")
     @RestReturn(value=LinkDTO.class)
     public RestResponse findLinkById(@Valid FindLinkByIdCommand cmd) {

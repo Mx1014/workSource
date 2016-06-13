@@ -1,0 +1,20 @@
+//
+// EvhOrderType.h
+//
+#import <Foundation/Foundation.h>
+#import "JsonSerializable.h"
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhOrderType
+//
+@interface EvhOrderType
+    : NSObject<EvhJsonSerializable>
+
+
+-(id) init;
++(id) withJsonString: (NSString*) jsonString;
+
+@end
+
+///////////////////////////////////////////////////////////////////////////////
+

@@ -10,6 +10,8 @@ import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
 import org.jooq.Record;
 import org.jooq.SelectJoinStep;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -22,6 +24,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.banner.BannerStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhBannerClicksDao;
@@ -38,6 +41,8 @@ import com.everhomes.util.DateHelper;
 
 @Component
 public class BannerProviderImpl implements BannerProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BannerProviderImpl.class);
+    
     @Autowired
     private DbProvider dbProvider;
     
@@ -97,7 +102,7 @@ public class BannerProviderImpl implements BannerProvider {
     
 //    @Cacheable(value="BannerList", key="{#scopeType,#scopeId}", unless="#result.size() == 0")
     @Override
-    public List<Banner> findBannersByTagAndScope(String bannerLocation,String bannerGroup,byte scopeCode, long scopeId){
+    public List<Banner> findBannersByTagAndScope(Integer namespaceId, String sceneType, String bannerLocation,String bannerGroup,byte scopeCode, long scopeId){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectJoinStep<Record> step = context.select().from(Tables.EH_BANNERS);
         Condition condition = Tables.EH_BANNERS.STATUS.eq(BannerStatus.ACTIVE.getCode());
@@ -107,13 +112,23 @@ public class BannerProviderImpl implements BannerProvider {
         if(bannerGroup != null && !bannerGroup.trim().equals("")){
             condition = condition.and(Tables.EH_BANNERS.BANNER_GROUP.eq(bannerGroup));
         }
+        condition = condition.and(Tables.EH_BANNERS.NAMESPACE_ID.eq(namespaceId));
+        condition = condition.and(Tables.EH_BANNERS.SCENE_TYPE.eq(sceneType));
+        
         condition = condition.and(Tables.EH_BANNERS.SCOPE_CODE.eq(scopeCode));
         condition = condition.and(Tables.EH_BANNERS.SCOPE_ID.eq(scopeId));
         if(condition != null) {
             step.where(condition);
         }
+        
         List<Banner> result = step.orderBy(Tables.EH_BANNERS.ORDER.desc()).
                 fetch().map((r) ->{ return ConvertHelper.convert(r, Banner.class);});
+        
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query banners by tag and scope, sql=" + step.getSQL());
+            LOGGER.debug("Query banners by tag and scope, bindValues=" + step.getBindValues());
+        }
+        
         return result;
     }
     

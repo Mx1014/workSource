@@ -1,0 +1,17 @@
+//
+// EvhGroupMemberMuteNotificationFlag.h
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhGroupMemberMuteNotificationFlag
+//
+typedef enum {
+
+    EvhGroupMemberMuteNotificationFlag_NONE = 0, 
+    EvhGroupMemberMuteNotificationFlag_MUTE = 1
+
+} EvhGroupMemberMuteNotificationFlag;
+
+///////////////////////////////////////////////////////////////////////////////
+

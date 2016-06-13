@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhForumPosts implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1850856877;
+	private static final long serialVersionUID = 517560709;
 
 	private java.lang.Long     id;
 	private java.lang.String   uuid;
@@ -60,6 +60,9 @@ public class EhForumPosts implements java.io.Serializable {
 	private java.sql.Timestamp createTime;
 	private java.lang.Long     deleterUid;
 	private java.sql.Timestamp deleteTime;
+	private java.lang.String   tag;
+	private java.sql.Timestamp startTime;
+	private java.sql.Timestamp endTime;
 
 	public EhForumPosts() {}
 
@@ -110,7 +113,10 @@ public class EhForumPosts implements java.io.Serializable {
 		java.sql.Timestamp updateTime,
 		java.sql.Timestamp createTime,
 		java.lang.Long     deleterUid,
-		java.sql.Timestamp deleteTime
+		java.sql.Timestamp deleteTime,
+		java.lang.String   tag,
+		java.sql.Timestamp startTime,
+		java.sql.Timestamp endTime
 	) {
 		this.id = id;
 		this.uuid = uuid;
@@ -159,6 +165,9 @@ public class EhForumPosts implements java.io.Serializable {
 		this.createTime = createTime;
 		this.deleterUid = deleterUid;
 		this.deleteTime = deleteTime;
+		this.tag = tag;
+		this.startTime = startTime;
+		this.endTime = endTime;
 	}
 
 	public java.lang.Long getId() {
@@ -535,5 +544,29 @@ public class EhForumPosts implements java.io.Serializable {
 
 	public void setDeleteTime(java.sql.Timestamp deleteTime) {
 		this.deleteTime = deleteTime;
+	}
+
+	public java.lang.String getTag() {
+		return this.tag;
+	}
+
+	public void setTag(java.lang.String tag) {
+		this.tag = tag;
+	}
+
+	public java.sql.Timestamp getStartTime() {
+		return this.startTime;
+	}
+
+	public void setStartTime(java.sql.Timestamp startTime) {
+		this.startTime = startTime;
+	}
+
+	public java.sql.Timestamp getEndTime() {
+		return this.endTime;
+	}
+
+	public void setEndTime(java.sql.Timestamp endTime) {
+		this.endTime = endTime;
 	}
 }

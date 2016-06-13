@@ -1,0 +1,13 @@
+update eh_organization_members set organization_id=1000001 where contact_token = '13509688398';
+update eh_organization_members set organization_id=1000001 where contact_token = '13922807918';
+update eh_organization_members set organization_id=1000001 where contact_token = '13714628789';
+update eh_organization_members set organization_id=1000001 where contact_token = '13825259316';
+update eh_organization_members set organization_id=1000001 where contact_token = '13713526639';
+update eh_organization_members set organization_id=1000001 where contact_token = '18688825835';
+update eh_organization_members set organization_id=1000001 where contact_token = '13926574194';
+update eh_organization_members set organization_id=1000001 where contact_token = '13714203868';
+update eh_organization_members set organization_id=1000001 where contact_token = '13686467512';
+update eh_organization_members set organization_id=1000001 where contact_token = '13922807918';
+update eh_organization_members set organization_id=1000001 where contact_token = '15220091196';
+update eh_organization_members set organization_id=1000001 where contact_token = '18676794665' and target_id = '196644';
+update eh_organization_members set organization_id=1000001 where contact_token = '13632650699';

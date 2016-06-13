@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhOrganizationTasks implements java.io.Serializable {
 
-	private static final long serialVersionUID = 976689606;
+	private static final long serialVersionUID = -1918622412;
 
 	private java.lang.Long     id;
 	private java.lang.Long     organizationId;
@@ -30,6 +30,9 @@ public class EhOrganizationTasks implements java.io.Serializable {
 	private java.sql.Timestamp processedTime;
 	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
+	private java.lang.String   taskCategory;
+	private java.lang.Byte     visibleRegionType;
+	private java.lang.Long     visibleRegionId;
 
 	public EhOrganizationTasks() {}
 
@@ -50,7 +53,10 @@ public class EhOrganizationTasks implements java.io.Serializable {
 		java.sql.Timestamp processingTime,
 		java.sql.Timestamp processedTime,
 		java.lang.Long     creatorUid,
-		java.sql.Timestamp createTime
+		java.sql.Timestamp createTime,
+		java.lang.String   taskCategory,
+		java.lang.Byte     visibleRegionType,
+		java.lang.Long     visibleRegionId
 	) {
 		this.id = id;
 		this.organizationId = organizationId;
@@ -69,6 +75,9 @@ public class EhOrganizationTasks implements java.io.Serializable {
 		this.processedTime = processedTime;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
+		this.taskCategory = taskCategory;
+		this.visibleRegionType = visibleRegionType;
+		this.visibleRegionId = visibleRegionId;
 	}
 
 	public java.lang.Long getId() {
@@ -205,5 +214,29 @@ public class EhOrganizationTasks implements java.io.Serializable {
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+	public java.lang.String getTaskCategory() {
+		return this.taskCategory;
+	}
+
+	public void setTaskCategory(java.lang.String taskCategory) {
+		this.taskCategory = taskCategory;
+	}
+
+	public java.lang.Byte getVisibleRegionType() {
+		return this.visibleRegionType;
+	}
+
+	public void setVisibleRegionType(java.lang.Byte visibleRegionType) {
+		this.visibleRegionType = visibleRegionType;
+	}
+
+	public java.lang.Long getVisibleRegionId() {
+		return this.visibleRegionId;
+	}
+
+	public void setVisibleRegionId(java.lang.Long visibleRegionId) {
+		this.visibleRegionId = visibleRegionId;
 	}
 }

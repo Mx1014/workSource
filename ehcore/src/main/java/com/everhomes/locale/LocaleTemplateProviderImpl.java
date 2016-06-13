@@ -47,14 +47,15 @@ public class LocaleTemplateProviderImpl implements LocaleTemplateProvider {
         return ConvertHelper.convert(record, LocaleTemplate.class);
     }
     
-    @Cacheable(value="LocaleTemplateByScope", key="{#scope, #code, #locale}")
+    @Cacheable(value="LocaleTemplateByScope", key="{#namespaceId, #scope, #code, #locale}", unless="#result == null")
     @Override
-    public LocaleTemplate findLocaleTemplateByScope(String scope, int code, String locale) {
+    public LocaleTemplate findLocaleTemplateByScope(Integer namespaceId, String scope, int code, String locale) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         EhLocaleTemplatesRecord record = (EhLocaleTemplatesRecord)context.select().from(Tables.EH_LOCALE_TEMPLATES)
             .where(Tables.EH_LOCALE_TEMPLATES.SCOPE.like(scope))
             .and(Tables.EH_LOCALE_TEMPLATES.CODE.eq(code))
             .and(Tables.EH_LOCALE_TEMPLATES.LOCALE.like(locale))
+            .and(Tables.EH_LOCALE_TEMPLATES.NAMESPACE_ID.eq(namespaceId))
             .fetchAny();
             
         return ConvertHelper.convert(record, LocaleTemplate.class);

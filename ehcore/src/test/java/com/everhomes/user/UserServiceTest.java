@@ -7,6 +7,13 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.everhomes.junit.CoreServerTestCase;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.rest.user.IdentifierClaimStatus;
+import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.LoginToken;
+import com.everhomes.rest.user.SignupCommand;
+import com.everhomes.rest.user.UserStatus;
+import com.everhomes.rest.user.VerifyAndLogonCommand;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.RandomGenerator;
 import com.everhomes.util.Version;
@@ -85,7 +92,7 @@ public class UserServiceTest extends CoreServerTestCase {
         UserIdentifier device = this.userProvider.findIdentifierById(1);
         System.out.println("device: " + device.getIdentifierToken());
         
-        device = this.userProvider.findClaimedIdentifierByToken("14083076807");
+        device = this.userProvider.findClaimedIdentifierByToken(Namespace.DEFAULT_NAMESPACE, "14083076807");
         System.out.println("device id : " + device.getId());
     }
     

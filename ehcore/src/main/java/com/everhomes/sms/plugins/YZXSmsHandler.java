@@ -2,6 +2,7 @@ package com.everhomes.sms.plugins;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javassist.expr.NewArray;
@@ -23,6 +24,9 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.rest.organization.OrganizationNotificationTemplateCode;
+import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.sms.EncryptUtil;
 import com.everhomes.sms.SmsBuilder;
@@ -30,6 +34,7 @@ import com.everhomes.sms.SmsChannel;
 import com.everhomes.sms.SmsHandler;
 import com.everhomes.sms.TemplateSMS;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.Tuple;
 import com.google.gson.Gson;
 
 /**
@@ -54,6 +59,9 @@ public class YZXSmsHandler implements SmsHandler {
     private static final int MAX_LIMIT = 100;
     @Autowired
     private ConfigurationProvider configurationProvider;
+    
+    @Autowired
+    private LocaleTemplateService localeTemplateService;
     private String accountSid;
     private String token;
     private String appId;
@@ -147,12 +155,12 @@ public class YZXSmsHandler implements SmsHandler {
         try { 
             auth = EncryptUtil.base64Encoder(src);
         } catch (Exception e) {
-            LOGGER.error("Encoder accountsid is error.src={}",src);
+            LOGGER.error("Send sms, encoder accountsid is error, src=" + src, e);
         }
         headers.put("Authorization", auth);
         
         String result = channel.sendMessage(uri, SmsBuilder.HttpMethod.POST.val(), null, headers,entityJsonStr).getMessage();
-        LOGGER.info("send message result={}",result);
+        LOGGER.info("Send sms, result={}, uri={}, headers={}", result, uri, headers);
     }
 
     private String createUrl(String accountSid, String authToken,String timestamp) {
@@ -204,5 +212,48 @@ public class YZXSmsHandler implements SmsHandler {
         createAndSend((String[]) ArrayUtils.subarray(phoneNumbers, index - MAX_LIMIT, phoneNumbers.length), text,templateId);
         
     }
+    
+    @Override
+    public void doSend(Integer namespaceId, String phoneNumber, String templateScope, int templateId,
+        String templateLocale, List<Tuple<String, Object>> variables) {
+        doSend(namespaceId, new String[]{phoneNumber}, templateScope, templateId, templateLocale, variables);
+    }
 
+    @Override
+    public void doSend(Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId,
+        String templateLocale, List<Tuple<String, Object>> variables) {
+        // 对于云之讯短信厂商，由于模板是在云之讯定义，在此只能使用模板ID作为参数传给云之讯API，
+        // 为了使得短信厂商这些特殊要求从业务层剥离出来、业务层只决定要发短信的内容及收短信的人，
+        // 故业务层只给短信模块传phoneNumber（要收短信的人）、templateScope/templateId/templateLocale（决定短信内容），
+        // 由于有些短信厂商是直接发内容的，而有些厂商则要使用模板的，为了兼容这两种情况，
+        // 需要在template表既定义一种有模板内容的，同时再加一种templateLocale+厂商后缀的模板（模板值为厂商要求的模板ID）
+        StringBuilder strBuilder = new StringBuilder();
+        templateScope = strBuilder.append(templateScope).append(".").append(SmsTemplateCode.YZX_SUFFIX).toString();
+
+        String yzxTemplateId = localeTemplateService.getLocaleTemplateString(namespaceId, templateScope, templateId, 
+            templateLocale, new HashMap<String, Object>(), "");
+        
+        if(yzxTemplateId != null && yzxTemplateId.trim().length() > 0) {
+            String content = "";
+            if(variables != null) {
+                strBuilder.setLength(0);
+                for(Tuple<String, Object> variable : variables) {
+                    if(strBuilder.length() > 0) {
+                        strBuilder.append(",");
+                    }
+                    if(variable.second() == null) {
+                        strBuilder.append("");
+                    } else {
+                        strBuilder.append(variable.second().toString());
+                    }
+                }
+                content = strBuilder.toString();
+            }
+            
+            createAndSend(phoneNumbers, content, yzxTemplateId);
+        } else {
+            LOGGER.error("The yzx template id is empty, namespaceId=" + namespaceId + ", templateScope=" + templateScope 
+                + ", templateId=" + templateId + ", templateLocale=" + templateLocale);
+        }
+    }
 }

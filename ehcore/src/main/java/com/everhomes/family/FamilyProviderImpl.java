@@ -47,15 +47,17 @@ import com.everhomes.group.Group;
 import com.everhomes.group.GroupAdminStatus;
 import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupMember;
-import com.everhomes.group.GroupMemberStatus;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.organization.BillTransactionResult;
 import com.everhomes.region.RegionProvider;
-import com.everhomes.region.RegionScope;
+import com.everhomes.rest.family.FamilyDTO;
+import com.everhomes.rest.group.GroupMemberStatus;
+import com.everhomes.rest.organization.BillTransactionResult;
+import com.everhomes.rest.region.RegionScope;
+import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhFamilyBillingAccountsDao;
 import com.everhomes.server.schema.tables.daos.EhFamilyBillingTransactionsDao;
@@ -65,7 +67,6 @@ import com.everhomes.server.schema.tables.pojos.EhFamilyBillingTransactions;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.records.EhFamilyBillingAccountsRecord;
 import com.everhomes.server.schema.tables.records.EhGroupMembersRecord;
-import com.everhomes.user.IdentifierType;
 import com.everhomes.user.UserGroup;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
@@ -266,6 +267,9 @@ public class FamilyProviderImpl implements FamilyProvider {
 				family.setCommunityName(community.getName());
 				family.setCityId(community.getCityId());
 				family.setCityName(community.getCityName()+community.getAreaName());
+				family.setCommunityType(community.getCommunityType());
+				family.setDefaultForumId(community.getDefaultForumId());
+				family.setFeedbackForumId(community.getFeedbackForumId());
 				
 			}
 			if(group.getCreatorUid().longValue() == userId.longValue())
@@ -297,6 +301,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 
 		return familyList;
 	}
+	
 	// @Cacheable(value="FamiliesOfUser", key="#userId", unless="#result.size() == 0")
 	@Override
 	public List<FamilyDTO> getUserFamiliesByUserId(long userId) {
@@ -427,6 +432,9 @@ public class FamilyProviderImpl implements FamilyProvider {
 	                        f.setAreaName(community.getAreaName());
 	                        f.setCommunityId(community.getId());
 	                        f.setCommunityName(community.getName());
+	                        f.setCommunityType(community.getCommunityType());
+	                        f.setDefaultForumId(community.getDefaultForumId());
+	                        f.setFeedbackForumId(community.getFeedbackForumId());
 						}
 						f.setId(r.getValue(Tables.EH_GROUPS.ID));
 						f.setMemberCount(r.getValue(Tables.EH_GROUPS.MEMBER_COUNT));

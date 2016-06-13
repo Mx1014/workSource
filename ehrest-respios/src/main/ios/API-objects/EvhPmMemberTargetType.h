@@ -1,0 +1,9 @@
+//
+// EvhPmMemberTargetType.h
+//
+
+#define EvhPmMemberTargetType_USER @"user"
+#define EvhPmMemberTargetType_UNTRACK @"untrack"
+
+///////////////////////////////////////////////////////////////////////////////
+

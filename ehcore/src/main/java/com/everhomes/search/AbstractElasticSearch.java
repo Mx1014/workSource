@@ -29,14 +29,23 @@ import org.elasticsearch.search.SearchHit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+
+import com.everhomes.rest.enterprise.SearchEnterpriseCommand;
 
 public abstract class AbstractElasticSearch {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractElasticSearch.class);
-            
+    
+    @Value("${elastic.index}")
+    String elasticIndex;
+    
     @Autowired
     TransportClientFactory clientFactory;
     
-    public abstract String getIndexName();
+    public String getIndexName() {
+        return elasticIndex;
+    }
+    
     public abstract String getIndexType();
     
     protected Client getClient() {

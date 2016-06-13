@@ -284,4 +284,46 @@ public class EhCommunitiesDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunities> fetchByStringTag5(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES.STRING_TAG5, values);
 	}
+
+	/**
+	 * Fetch records that have <code>community_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunities> fetchByCommunityType(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES.COMMUNITY_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>default_forum_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunities> fetchByDefaultForumId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES.DEFAULT_FORUM_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>feedback_forum_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunities> fetchByFeedbackForumId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES.FEEDBACK_FORUM_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>update_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunities> fetchByUpdateTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES.UPDATE_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>namespace_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunities> fetchByNamespaceId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES.NAMESPACE_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>area_size IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhCommunities> fetchByAreaSize(java.lang.Double... values) {
+		return fetch(com.everhomes.server.schema.tables.EhCommunities.EH_COMMUNITIES.AREA_SIZE, values);
+	}
 }

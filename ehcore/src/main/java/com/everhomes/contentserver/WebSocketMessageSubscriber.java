@@ -10,7 +10,8 @@ import org.springframework.web.socket.WebSocketSession;
 import com.everhomes.bus.LocalBusOneshotSubscriber;
 import com.everhomes.contentserver.MessageHandleRequest;
 import com.everhomes.contentserver.MessageHandleResponse;
-import com.everhomes.rpc.PduFrame;
+import com.everhomes.rest.contentserver.WebSocketConstant;
+import com.everhomes.rest.rpc.PduFrame;
 
 public class WebSocketMessageSubscriber implements LocalBusOneshotSubscriber {
 
@@ -45,7 +46,7 @@ public class WebSocketMessageSubscriber implements LocalBusOneshotSubscriber {
         MessageHandleRequest request = frame.getPayload(MessageHandleRequest.class);
         request.setAccessType(AccessType.fromStringCode(StringUtils.trim(arr[1])));
 
-        LOGGER.info("Request message={}", request);
+        // LOGGER.info("Request message={}", request);
         switch (request.getMessageType()) {
         case UPLOADED:
             LOGGER.info("content url(before handleUpload), url=" + request.getUrl());
@@ -78,7 +79,10 @@ public class WebSocketMessageSubscriber implements LocalBusOneshotSubscriber {
 
             @Override
             protected void doResponse(String errMsg, int errCode) throws Exception {
-                session.sendMessage(new TextMessage(createPduFrame(errCode, errMsg, frame, request).toJson()));
+                // WebSocket的session不是线程安全的，需要加锁 by lqs20160503
+                synchronized(session) {
+                    session.sendMessage(new TextMessage(createPduFrame(errCode, errMsg, frame, request).toJson()));
+                }
             }
         });
     }
@@ -98,13 +102,16 @@ public class WebSocketMessageSubscriber implements LocalBusOneshotSubscriber {
 
             @Override
             protected void doResponse(String errMsg, int errCode) throws Exception {
-                if (LOGGER.isDebugEnabled())
-                    LOGGER.debug("send upload success to server");
-                LOGGER.info("content url(before handleUpload doResponse), url=" + request.getUrl());
+                // if (LOGGER.isDebugEnabled())
+                //    LOGGER.debug("send upload success to server");
+                //LOGGER.info("content url(before handleUpload doResponse), url=" + request.getUrl());
                 PduFrame pdu = createPduFrame(errCode, errMsg, frame, request);
-                session.sendMessage(new TextMessage(pdu.toJson()));
-                LOGGER.info("content url(after handleUpload doResponse), url=" + request.getUrl());
-                LOGGER.info("content url(after handleUpload doResponse), pdu=" + pdu.toJson());
+                // WebSocket的session不是线程安全的，需要加锁 by lqs20160503
+                synchronized(session) {
+                    session.sendMessage(new TextMessage(pdu.toJson()));
+                }
+                // LOGGER.info("content url(after handleUpload doResponse), url=" + request.getUrl());
+                // LOGGER.info("content url(after handleUpload doResponse), pdu=" + pdu.toJson());
                 
             }
         });
@@ -120,7 +127,10 @@ public class WebSocketMessageSubscriber implements LocalBusOneshotSubscriber {
 
             @Override
             protected void doResponse(String errMsg, int errCode) throws Exception {
-                session.sendMessage(new TextMessage(createPduFrame(errCode, errMsg, frame, request).toJson()));
+                // WebSocket的session不是线程安全的，需要加锁 by lqs20160503
+                synchronized(session) {
+                    session.sendMessage(new TextMessage(createPduFrame(errCode, errMsg, frame, request).toJson()));
+                }
             }
         });
     }
@@ -133,10 +143,10 @@ public class WebSocketMessageSubscriber implements LocalBusOneshotSubscriber {
         rsp.setErrMsg(errMsg);
         rsp.setObjectId(request.getObjectId());
 
-        LOGGER.info("content url(before createPduFrame), url=" + rsp.getUrl());
+        //LOGGER.info("content url(before createPduFrame), url=" + rsp.getUrl());
 
-        if (LOGGER.isDebugEnabled())
-            LOGGER.debug("send response message to content server responese={}", rsp);
+        //if (LOGGER.isDebugEnabled())
+        //    LOGGER.debug("send response message to content server responese={}", rsp);
         PduFrame pdu = new PduFrame();
         pdu.setAppId(oldFrame.getAppId());
         pdu.setName(oldFrame.getName().replace("request", "response"));

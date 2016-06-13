@@ -6,17 +6,17 @@ import java.sql.Timestamp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.app.AppConstants;
-import com.everhomes.category.CategoryConstants;
 import com.everhomes.entity.EntityType;
 import com.everhomes.forum.ForumEmbeddedHandler;
 import com.everhomes.forum.Post;
 import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationTaskStatus;
-import com.everhomes.organization.OrganizationTaskType;
-import com.everhomes.organization.OrganizationType;
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.category.CategoryConstants;
+import com.everhomes.rest.organization.OrganizationTaskStatus;
+import com.everhomes.rest.organization.OrganizationTaskType;
+import com.everhomes.rest.organization.OrganizationType;
+import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.util.DateHelper;
-import com.everhomes.visibility.VisibleRegionType;
 
 @Component(PropertyEmbeddedHandler.FORUM_EMBEDED_OBJ_RESOLVER_PREFIX + AppConstants.APPID_PM)
 public class PropertyEmbeddedHandler implements ForumEmbeddedHandler {

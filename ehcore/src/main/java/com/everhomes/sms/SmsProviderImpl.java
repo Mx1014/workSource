@@ -1,7 +1,9 @@
 //@format
 package com.everhomes.sms;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -14,7 +16,10 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.rest.organization.OrganizationNotificationTemplateCode;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.Tuple;
 
 /**
  * TODO To manage throughput and throttling, SMS/email notification service
@@ -48,9 +53,9 @@ public class SmsProviderImpl implements SmsProvider {
     }
     
 
-    private SmsHandler getHandler() {
+    private SmsHandler getHandler(Integer namespaceId) {
         // find name from db
-        String handlerName = configurationProvider.getValue(VCODE_SEND_TYPE, "MW");
+        String handlerName = configurationProvider.getValue(namespaceId, VCODE_SEND_TYPE, "MW");
         SmsHandler handler = handlers.get(handlerName.toLowerCase());
         if (handler == null) {
             LOGGER.error("cannot find relate handler.handler={}", handlerName);
@@ -66,7 +71,7 @@ public class SmsProviderImpl implements SmsProvider {
         String escapedText = SmsHepler.convert(text);
 
         Future<?> f = taskQueue.submit(() -> {
-            getHandler().doSend(phoneNumber, escapedText,templateId);
+            getHandler(Namespace.DEFAULT_NAMESPACE).doSend(phoneNumber, escapedText,templateId);
             LOGGER.info("send sms message ok.endTime={}", System.currentTimeMillis());
             return null;
         });
@@ -84,7 +89,7 @@ public class SmsProviderImpl implements SmsProvider {
                 StringUtils.join(phoneNumbers, ","), System.currentTimeMillis());
         String escapedText = SmsHepler.convert(text);
         Future<?> f = taskQueue.submit(() -> {
-            getHandler().doSend(phoneNumbers, SmsHepler.getEncodingString(escapedText),templateId);
+            getHandler(Namespace.DEFAULT_NAMESPACE).doSend(phoneNumbers, SmsHepler.getEncodingString(escapedText),templateId);
             LOGGER.info("send sms message ok.endTime={}", System.currentTimeMillis());
             return null;
         });
@@ -119,5 +124,35 @@ public class SmsProviderImpl implements SmsProvider {
     public void sendSms(String[] phoneNumbers, String text, String templateId)
             throws Exception {
         this.doSend(phoneNumbers, text,templateId);
+    }
+    
+    @Override
+    public void sendSms(Integer namespaceId, String phoneNumber, String templateScope, int templateId, String templateLocale, List<Tuple<String, Object>> variables) {
+        sendSms(namespaceId, new String[]{phoneNumber}, templateScope, templateId, templateLocale, variables);
+    }
+    
+    @Override
+    public void sendSms(Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId, String templateLocale, List<Tuple<String, Object>> variables) {
+        Future<?> f = taskQueue.submit(() -> {
+            getHandler(namespaceId).doSend(namespaceId, phoneNumbers, templateScope, templateId, templateLocale, variables);
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.info("Send sms message, namespaceId=" + namespaceId + ", phoneNumbers=[" + StringUtils.join(phoneNumbers, ",")
+                    + "], templateScope=" + templateScope + ", templateId=" + templateId + ", templateLocale=" + templateLocale);
+            }
+            return null;
+        });
+    }
+    
+    public List<Tuple<String, Object>> toTupleList(String key, Object value) {
+        List<Tuple<String, Object>> list = new ArrayList<Tuple<String,Object>>();
+        Tuple<String, Object> variable = new Tuple<String, Object>(key, value);
+        list.add(variable);
+        
+        return list;
+    }
+    
+    public void addToTupleList(List<Tuple<String, Object>> list, String key, Object value) {
+        Tuple<String, Object> variable = new Tuple<String, Object>(key, value);
+        list.add(variable);
     }
 }

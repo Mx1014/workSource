@@ -277,4 +277,18 @@ public class EhGroupsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sche
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByDeleteTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.DELETE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>visible_region_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByVisibleRegionType(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.VISIBLE_REGION_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>visible_region_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhGroups> fetchByVisibleRegionId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhGroups.EH_GROUPS.VISIBLE_REGION_ID, values);
+	}
 }

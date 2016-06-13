@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLaunchPadItems implements java.io.Serializable {
 
-	private static final long serialVersionUID = -331267573;
+	private static final long serialVersionUID = -2060373623;
 
 	private java.lang.Long    id;
 	private java.lang.Integer namespaceId;
@@ -36,6 +36,8 @@ public class EhLaunchPadItems implements java.io.Serializable {
 	private java.lang.String  tag;
 	private java.lang.String  targetType;
 	private java.lang.Long    targetId;
+	private java.lang.Byte    deleteFlag;
+	private java.lang.String  sceneType;
 
 	public EhLaunchPadItems() {}
 
@@ -62,7 +64,9 @@ public class EhLaunchPadItems implements java.io.Serializable {
 		java.lang.Integer bgcolor,
 		java.lang.String  tag,
 		java.lang.String  targetType,
-		java.lang.Long    targetId
+		java.lang.Long    targetId,
+		java.lang.Byte    deleteFlag,
+		java.lang.String  sceneType
 	) {
 		this.id = id;
 		this.namespaceId = namespaceId;
@@ -87,6 +91,8 @@ public class EhLaunchPadItems implements java.io.Serializable {
 		this.tag = tag;
 		this.targetType = targetType;
 		this.targetId = targetId;
+		this.deleteFlag = deleteFlag;
+		this.sceneType = sceneType;
 	}
 
 	public java.lang.Long getId() {
@@ -271,5 +277,21 @@ public class EhLaunchPadItems implements java.io.Serializable {
 
 	public void setTargetId(java.lang.Long targetId) {
 		this.targetId = targetId;
+	}
+
+	public java.lang.Byte getDeleteFlag() {
+		return this.deleteFlag;
+	}
+
+	public void setDeleteFlag(java.lang.Byte deleteFlag) {
+		this.deleteFlag = deleteFlag;
+	}
+
+	public java.lang.String getSceneType() {
+		return this.sceneType;
+	}
+
+	public void setSceneType(java.lang.String sceneType) {
+		this.sceneType = sceneType;
 	}
 }

@@ -6,45 +6,69 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.everhomes.app.AppConstants;
 import com.everhomes.business.BusinessService;
-import com.everhomes.business.SyncBusinessCommand;
-import com.everhomes.business.SyncDeleteBusinessCommand;
-import com.everhomes.business.SyncUserAddShopStatusCommand;
-import com.everhomes.business.UserFavoriteCommand;
 import com.everhomes.category.Category;
-import com.everhomes.category.CategoryAdminStatus;
-import com.everhomes.category.CategoryConstants;
-import com.everhomes.category.CategoryDTO;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.messaging.MessageBodyType;
-import com.everhomes.messaging.MessageChannel;
-import com.everhomes.messaging.MessageDTO;
-import com.everhomes.messaging.MessagingConstants;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.user.FindTokenByUserIdCommand;
-import com.everhomes.user.GetUserByUuidResponse;
-import com.everhomes.user.GetUserDefaultAddressCommand;
-import com.everhomes.user.GetUserDetailByUuidResponse;
-import com.everhomes.user.GetUserInfoByUuid;
-import com.everhomes.user.IdentifierType;
-import com.everhomes.user.ListUserCommand;
-import com.everhomes.user.MessageChannelType;
+import com.everhomes.rest.address.ApartmentDTO;
+import com.everhomes.rest.address.BuildingDTO;
+import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
+import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.business.BusinessAsignedNamespaceCommand;
+import com.everhomes.rest.business.GetReceivedCouponCountCommand;
+import com.everhomes.rest.business.ListBusinessByCommonityIdCommand;
+import com.everhomes.rest.business.ListUserByIdentifierCommand;
+import com.everhomes.rest.business.ListUserByKeywordCommand;
+import com.everhomes.rest.business.ReSyncBusinessCommand;
+import com.everhomes.rest.business.SyncBusinessCommand;
+import com.everhomes.rest.business.SyncDeleteBusinessCommand;
+import com.everhomes.rest.business.SyncUserAddShopStatusCommand;
+import com.everhomes.rest.business.UpdateReceivedCouponCountCommand;
+import com.everhomes.rest.business.UserFavoriteCommand;
+import com.everhomes.rest.category.CategoryAdminStatus;
+import com.everhomes.rest.category.CategoryConstants;
+import com.everhomes.rest.category.CategoryDTO;
+import com.everhomes.rest.community.GetCommunitiesByNameAndCityIdCommand;
+import com.everhomes.rest.community.GetCommunityByIdCommand;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.openapi.BusinessMessageCommand;
+import com.everhomes.rest.openapi.GetUserServiceAddressCommand;
+import com.everhomes.rest.openapi.UserCouponsCommand;
+import com.everhomes.rest.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.region.ListRegionByKeywordCommand;
+import com.everhomes.rest.region.RegionDTO;
+import com.everhomes.rest.ui.user.UserProfileDTO;
+import com.everhomes.rest.user.FindTokenByUserIdCommand;
+import com.everhomes.rest.user.GetUserByUuidResponse;
+import com.everhomes.rest.user.GetUserDefaultAddressCommand;
+import com.everhomes.rest.user.GetUserDetailByUuidResponse;
+import com.everhomes.rest.user.GetUserInfoByIdCommand;
+import com.everhomes.rest.user.GetUserInfoByUuid;
+import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.ListUserCommand;
+import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.rest.user.UserDtoForBiz;
+import com.everhomes.rest.user.UserInfo;
 import com.everhomes.user.SignupToken;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityService;
-import com.everhomes.user.UserDtoForBiz;
 import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserInfo;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
@@ -57,299 +81,479 @@ import com.everhomes.util.WebTokenGenerator;
 @RestController
 @RequestMapping("/openapi")
 public class BusinessOpenController extends ControllerBase {
-    private static final String DEFAULT_SORT = "default_order";
-    @Autowired
-    private UserService userService;
+	private static final Logger LOGGER = LoggerFactory.getLogger(BusinessOpenController.class);
+	private static final String DEFAULT_SORT = "default_order";
+	@Autowired
+	private UserService userService;
 
-    @Autowired
-    private UserProvider userProvider;
-    
-    @Autowired
-    private BusinessService businessService;
-    
-    @Autowired
-    private CategoryProvider categoryProvider;
-    
-    @Autowired
-    private UserActivityService userActivityService;
-    
-    @Autowired
-    MessagingService messagingService;
-    
-    /**
-     * <b>URL: /openapi/listBizCategories</b> 列出所有商家分类
-     */
-    @RequestMapping("listBizCategories")
-    @RestReturn(value = CategoryDTO.class, collection = true)
-    public RestResponse listBizCategories() {
-        
-        Tuple<String, SortOrder> orderBy = new Tuple<String, SortOrder>(DEFAULT_SORT, SortOrder.ASC);;
-        @SuppressWarnings("unchecked")
-//        List<Category> entityResultList = this.categoryProvider.listChildCategories(CategoryConstants.CATEGORY_ID_SERVICE,
-//                CategoryAdminStatus.ACTIVE, orderBy);
-        List<Category> entityResultList = this.categoryProvider.listBusinessSubCategories(CategoryConstants.CATEGORY_ID_SERVICE,
-                CategoryAdminStatus.ACTIVE, orderBy);
+	@Autowired
+	private UserProvider userProvider;
 
-        List<CategoryDTO> dtoResultList = entityResultList.stream().map(r -> {
-            return ConvertHelper.convert(r, CategoryDTO.class);
-        }).collect(Collectors.toList());
-        
-        return new RestResponse(dtoResultList);
-    }
-    
-    /**
-     * <b>URL: /openapi/syncBusiness</b>
-     * <p>同步添加/更新店铺</p>
-     */
-    @RequestMapping("syncBusiness")
-    @RestReturn(value=String.class)
-    public RestResponse syncBusiness(@Valid SyncBusinessCommand cmd) {
-        
-        businessService.syncBusiness(cmd);
-        RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
-    /**
-     * <b>URL: /openapi/syncDeleteBusiness</b>
-     * <p>同步删除店铺</p>
-     */
-    @RequestMapping("syncDeleteBusiness")
-    @RestReturn(value=String.class)
-    public RestResponse syncDeleteBusiness(@Valid SyncDeleteBusinessCommand cmd) {
-        
-        businessService.syncDeleteBusiness(cmd);
-        RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
-    /**
-     * <b>URL: /openapi/syncUserAddShopStatus</b>
-     * <p>同步开店状态</p>
-     */
-    @RequestMapping("syncUserAddShopStatus")
-    @RestReturn(value=String.class)
-    public RestResponse syncUserAppliedShopStatus(SyncUserAddShopStatusCommand cmd) {
-        
-        userActivityService.addUserShop(cmd.getUserId());
-        RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
-    /**
-     * <b>URL: /openapi/syncUserFavorite</b>
-     * <p>同步用户收藏</p>
-     */
-    @RequestMapping("syncUserFavorite")
-    @RestReturn(value=String.class)
-    public RestResponse syncUserFavorite(UserFavoriteCommand cmd) {
-        
-        businessService.syncUserFavorite(cmd);
-        RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
-    /**
-     * <b>URL: /openapi/syncUserCancelFavorite</b>
-     * <p>同步用户取消收藏</p>
-     */
-    @RequestMapping("syncUserCancelFavorite")
-    @RestReturn(value=String.class)
-    public RestResponse syncUserCancelFavorite(UserFavoriteCommand cmd) {
-        
-        businessService.syncUserCancelFavorite(cmd);
-        RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
-    /**
-     * <b>URL: /openapi/findBusinessFavoriteStatus</b>
-     * <p>获取收藏状态</p>
-     */
-    @RequestMapping("findBusinessFavoriteStatus")
-    @RestReturn(value=String.class)
-    public RestResponse findBusinessFavoriteStatus(UserFavoriteCommand cmd) {
-        
-        RestResponse response =  new RestResponse(businessService.findBusinessFavoriteStatus(cmd));
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
-    private void sendMessageToUser(Long userId, String content, Map<String, String> meta) {
-        MessageDTO messageDto = new MessageDTO();
-        messageDto.setAppId(AppConstants.APPID_MESSAGING);
-        messageDto.setSenderUid(User.SYSTEM_UID);
-        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()));
-        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
-        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
-        messageDto.setBody(content);
-        messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
-        if(null != meta && meta.size() > 0) {
-            messageDto.getMeta().putAll(meta);
-            }
-        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
-                userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
-    }
-    
-    @RequestMapping("sendMessageToUser")
-    @RestReturn(value=String.class)
-    public RestResponse sendMessageToUser(BusinessMessageCommand cmd) {
-        sendMessageToUser(cmd.getUserId(), cmd.getContent(), cmd.getMeta());
-        
-        RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
-    /**
-     * <b>URL: /openapi/getUserServiceAddress</b>
-     * <p>获取用户相关的服务地址</p>
-     */
-    @RequestMapping("getUserServiceAddress")
-    @RestReturn(value=UserServiceAddressDTO.class, collection=true)
-    public RestResponse getUserServiceAddress(GetUserServiceAddressCommand cmd) {
-        List<UserServiceAddressDTO> result = this.userActivityService.getUserServiceAddress(cmd);
-        
-        RestResponse response = new RestResponse(result);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
-    /**
-     * <b>URL: /openapi/receiveCoupon</b>
-     * <p>同步用户领取优惠券</p>
-     */
-    @RequestMapping("receiveCoupon")
-    @RestReturn(String.class)
-    public RestResponse receiveCoupon(UserCouponsCommand cmd) {
-    	userActivityService.receiveCoupon(cmd.getUserId());
-    	RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
-    /**
-     * 
-     * <b>URL: /openapi/invalidCoupon</b>
-     * <p>同步用户不能使用的优惠券</p>
-     */
-    @RequestMapping("invalidCoupon")
-    @RestReturn(String.class)
-    public RestResponse invalidCoupon(UserCouponsCommand cmd) {
-    	userActivityService.invalidCoupon(cmd.getUserId());
-    	RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
-    @RequestMapping("getUserInfoByUuid")
-    @RestReturn(GetUserByUuidResponse.class)
-    public RestResponse getUserInfoByUuid(@Valid GetUserInfoByUuid cmd) {
-        UserInfo user = userService.getUserBasicByUuid(cmd.getUuid());
-        RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        
-        if(null == user) {
-            response.setErrorCode(ErrorCodes.ERROR_CLASS_NOT_FOUND);
-            response.setErrorDescription("User not found");
-            return response;
-        }
-        
-        GetUserByUuidResponse resp = new GetUserByUuidResponse();
-        resp.setMobile(user.getPhones().get(0));
-        resp.setNickName(user.getNickName());
-        resp.setAvatarUrl(user.getAvatarUrl());
-        resp.setUuid(user.getUuid());
-        resp.setGender(user.getGender());
-        
-        response.setResponseObject(resp);
-        return response;
-    }
-    
-    @RequestMapping("getUserDetailByUuid")
-    @RestReturn(GetUserDetailByUuidResponse.class)
-    public RestResponse getUserDetailByUuid(@Valid GetUserInfoByUuid cmd) {
-        UserInfo user = userService.getUserBasicByUuid(cmd.getUuid());
-        RestResponse response =  new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        
-        if(null == user) {
-            response.setErrorCode(ErrorCodes.ERROR_CLASS_NOT_FOUND);
-            response.setErrorDescription("User not found");
-            return response;
-        }
-        
-        GetUserDetailByUuidResponse resp = new GetUserDetailByUuidResponse();
-        resp.setMobile(user.getPhones().get(0));
-        resp.setNickName(user.getNickName());
-        resp.setAvatarUrl(user.getAvatarUrl());
-        resp.setUuid(user.getUuid());
-        resp.setGender(user.getGender());
-        
-        GetUserServiceAddressCommand getUserCmd = new GetUserServiceAddressCommand();
-        getUserCmd.setUserId(user.getId());
-        List<UserServiceAddressDTO> result = this.userActivityService.getUserServiceAddress(getUserCmd);
-        if(result != null && result.size() > 0) {
-            resp.setAddress(result.get(0));
-        }
-        
-        response.setResponseObject(resp);
-        return response;
-    }
-    
-    @RequestMapping("getUserDefaultAddress")
-    @RestReturn(UserServiceAddressDTO.class)
-    public RestResponse getUserDefaultAddress(@Valid GetUserDefaultAddressCommand cmd) {
-    	UserServiceAddressDTO address = this.businessService.getUserDefaultAddress(cmd);
-    	RestResponse response =  new RestResponse(address);
-    	response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
+	@Autowired
+	private BusinessService businessService;
+
+	@Autowired
+	private CategoryProvider categoryProvider;
+
+	@Autowired
+	private UserActivityService userActivityService;
+
+	@Autowired
+	MessagingService messagingService;
+
+	/**
+	 * <b>URL: /openapi/listBizCategories</b> 列出所有商家分类
+	 */
+	@RequestMapping("listBizCategories")
+	@RestReturn(value = CategoryDTO.class, collection = true)
+	public RestResponse listBizCategories() {
+
+		Tuple<String, SortOrder> orderBy = new Tuple<String, SortOrder>(DEFAULT_SORT, SortOrder.ASC);;
+		@SuppressWarnings("unchecked")
+		//        List<Category> entityResultList = this.categoryProvider.listChildCategories(CategoryConstants.CATEGORY_ID_SERVICE,
+		//                CategoryAdminStatus.ACTIVE, orderBy);
+		List<Category> entityResultList = this.categoryProvider.listBusinessSubCategories(CategoryConstants.CATEGORY_ID_SERVICE,
+				CategoryAdminStatus.ACTIVE, orderBy);
+
+		List<CategoryDTO> dtoResultList = entityResultList.stream().map(r -> {
+			return ConvertHelper.convert(r, CategoryDTO.class);
+		}).collect(Collectors.toList());
+
+		return new RestResponse(dtoResultList);
+	}
+
+	/**
+	 * <b>URL: /openapi/syncBusiness</b>
+	 * <p>同步添加/更新店铺</p>
+	 */
+	@RequestMapping("syncBusiness")
+	@RestReturn(value=String.class)
+	public RestResponse syncBusiness(@Valid SyncBusinessCommand cmd) {
+
+		businessService.syncBusiness(cmd);
+		RestResponse response =  new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
 		return response;
-    }
-    
-    @RequestMapping("listUser")
-    @RestReturn(value=UserDtoForBiz.class,collection=true)
-    public RestResponse listUser(@Valid ListUserCommand cmd) {
-    	List<UserDtoForBiz> users = this.businessService.listUser(cmd);
-    	RestResponse response =  new RestResponse(users);
-    	response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
+	}
+	
+	/**
+	 * <b>URL: /openapi/syncBusiness</b>
+	 * <p>biz2.2.0版：同步添加/更新店铺</p>
+	 */
+	@RequestMapping("reSyncBusiness")
+	@RestReturn(value=String.class)
+	public RestResponse reSyncBusiness(@Valid ReSyncBusinessCommand cmd) {
+
+		businessService.reSyncBusiness(cmd);
+		RestResponse response =  new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
 		return response;
-    }
-    
-    @RequestMapping("findTokenByUserId")
-    @RestReturn(String.class)
-    public RestResponse findTokenByUserId(@Valid FindTokenByUserIdCommand cmd) {
-    	
-    	User user = userProvider.findUserById(cmd.getUserId());
-    	List<UserIdentifier> idens = userProvider.listUserIdentifiersOfUser(user.getId());
-    	UserIdentifier iden = idens.get(0);
-		
-    	
-    	SignupToken signUpToken = new SignupToken(user.getId(),IdentifierType.fromCode(iden.getIdentifierType()),iden.getIdentifierToken());
-    	String token = WebTokenGenerator.getInstance().toWebToken(signUpToken);
-    	
-    	RestResponse response =  new RestResponse(token);
-    	response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
+	}
+
+	/**
+	 * <b>URL: /openapi/syncDeleteBusiness</b>
+	 * <p>同步删除店铺</p>
+	 */
+	@RequestMapping("syncDeleteBusiness")
+	@RestReturn(value=String.class)
+	public RestResponse syncDeleteBusiness(@Valid SyncDeleteBusinessCommand cmd) {
+
+		businessService.syncDeleteBusiness(cmd);
+		RestResponse response =  new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
 		return response;
+	}
+
+	/**
+	 * <b>URL: /openapi/syncUserAddShopStatus</b>
+	 * <p>同步开店状态</p>
+	 */
+	@RequestMapping("syncUserAddShopStatus")
+	@RestReturn(value=String.class)
+	public RestResponse syncUserAppliedShopStatus(SyncUserAddShopStatusCommand cmd) {
+
+		userActivityService.addUserShop(cmd.getUserId());
+		RestResponse response =  new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	/**
+	 * <b>URL: /openapi/syncUserDelShopStatus</b>
+	 * <p>同步未开店状态</p>
+	 */
+	@RequestMapping("syncUserDelShopStatus")
+	@RestReturn(value=String.class)
+	public RestResponse syncUserDelShopStatus(SyncUserAddShopStatusCommand cmd) {
+		userActivityService.cancelShop(cmd.getUserId());
+		RestResponse response =  new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /openapi/syncUserFavorite</b>
+	 * <p>同步用户收藏</p>
+	 */
+	@RequestMapping("syncUserFavorite")
+	@RestReturn(value=String.class)
+	public RestResponse syncUserFavorite(UserFavoriteCommand cmd) {
+
+		businessService.syncUserFavorite(cmd);
+		RestResponse response =  new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /openapi/syncUserCancelFavorite</b>
+	 * <p>同步用户取消收藏</p>
+	 */
+	@RequestMapping("syncUserCancelFavorite")
+	@RestReturn(value=String.class)
+	public RestResponse syncUserCancelFavorite(UserFavoriteCommand cmd) {
+
+		businessService.syncUserCancelFavorite(cmd);
+		RestResponse response =  new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /openapi/findBusinessFavoriteStatus</b>
+	 * <p>获取收藏状态</p>
+	 */
+	@RequestMapping("findBusinessFavoriteStatus")
+	@RestReturn(value=String.class)
+	public RestResponse findBusinessFavoriteStatus(UserFavoriteCommand cmd) {
+
+		RestResponse response =  new RestResponse(businessService.findBusinessFavoriteStatus(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	private void sendMessageToUser(Long userId, String content, Map<String, String> meta) {
+		MessageDTO messageDto = new MessageDTO();
+		messageDto.setAppId(AppConstants.APPID_MESSAGING);
+		messageDto.setSenderUid(User.BIZ_UID);
+		messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()), 
+				new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.BIZ_USER_LOGIN.getUserId())));
+		messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+		messageDto.setBody(content);
+		messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+		if(null != meta && meta.size() > 0) {
+			messageDto.getMeta().putAll(meta);
+		}
+
+		LOGGER.debug("sendMessageToUser-bizuserId="+User.BIZ_UID);
+		LOGGER.debug("sendMessageToUser-BIZ_USER_LOGIN="+StringHelper.toJsonString(User.BIZ_USER_LOGIN));
+
+		messagingService.routeMessage(User.BIZ_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
+				userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+	}
+
+	@RequestMapping("sendMessageToUser")
+	@RestReturn(value=String.class)
+	public RestResponse sendMessageToUser(BusinessMessageCommand cmd) {
+		sendMessageToUser(cmd.getUserId(), cmd.getContent(), cmd.getMeta());
+
+		RestResponse response =  new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /openapi/getUserServiceAddress</b>
+	 * <p>获取用户相关的服务地址</p>
+	 */
+	@RequestMapping("getUserServiceAddress")
+	@RestReturn(value=UserServiceAddressDTO.class, collection=true)
+	public RestResponse getUserServiceAddress(GetUserServiceAddressCommand cmd) {
+		List<UserServiceAddressDTO> result = this.userActivityService.getUserServiceAddress(cmd);
+
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /openapi/receiveCoupon</b>
+	 * <p>同步用户领取优惠券</p>
+	 */
+	@RequestMapping("receiveCoupon")
+	@RestReturn(String.class)
+	public RestResponse receiveCoupon(UserCouponsCommand cmd) {
+		userActivityService.receiveCoupon(cmd.getUserId());
+		RestResponse response =  new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * 
+	 * <b>URL: /openapi/invalidCoupon</b>
+	 * <p>同步用户不能使用的优惠券</p>
+	 */
+	@RequestMapping("invalidCoupon")
+	@RestReturn(String.class)
+	public RestResponse invalidCoupon(UserCouponsCommand cmd) {
+		userActivityService.invalidCoupon(cmd.getUserId());
+		RestResponse response =  new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	@RequestMapping("getUserInfoByUuid")
+	@RestReturn(GetUserByUuidResponse.class)
+	public RestResponse getUserInfoByUuid(@Valid GetUserInfoByUuid cmd) {
+		UserInfo user = userService.getUserBasicByUuid(cmd.getUuid());
+		RestResponse response =  new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+
+		if(null == user) {
+			response.setErrorCode(ErrorCodes.ERROR_CLASS_NOT_FOUND);
+			response.setErrorDescription("User not found");
+			return response;
+		}
+
+		GetUserByUuidResponse resp = new GetUserByUuidResponse();
+		resp.setMobile(user.getPhones().get(0));
+		resp.setNickName(user.getNickName());
+		resp.setAvatarUrl(user.getAvatarUrl());
+		resp.setUuid(user.getUuid());
+		resp.setGender(user.getGender());
+
+		response.setResponseObject(resp);
+		return response;
+	}
+
+	@RequestMapping("getUserDetailByUuid")
+	@RestReturn(GetUserDetailByUuidResponse.class)
+	public RestResponse getUserDetailByUuid(@Valid GetUserInfoByUuid cmd) {
+		UserInfo user = userService.getUserBasicByUuid(cmd.getUuid());
+		RestResponse response =  new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+
+		if(null == user) {
+			response.setErrorCode(ErrorCodes.ERROR_CLASS_NOT_FOUND);
+			response.setErrorDescription("User not found");
+			return response;
+		}
+
+		GetUserDetailByUuidResponse resp = new GetUserDetailByUuidResponse();
+		resp.setMobile(user.getPhones().get(0));
+		resp.setNickName(user.getNickName());
+		resp.setAvatarUrl(user.getAvatarUrl());
+		resp.setUuid(user.getUuid());
+		resp.setGender(user.getGender());
+
+		GetUserServiceAddressCommand getUserCmd = new GetUserServiceAddressCommand();
+		getUserCmd.setUserId(user.getId());
+		List<UserServiceAddressDTO> result = this.userActivityService.getUserServiceAddress(getUserCmd);
+		if(result != null && result.size() > 0) {
+			resp.setAddress(result.get(0));
+		}
+
+		response.setResponseObject(resp);
+		return response;
+	}
+
+	@RequestMapping("getUserDefaultAddress")
+	@RestReturn(value=UserServiceAddressDTO.class)
+	public RestResponse getUserDefaultAddress(@Valid GetUserDefaultAddressCommand cmd) {
+		UserServiceAddressDTO address = this.businessService.getUserDefaultAddress(cmd);
+		RestResponse response =  new RestResponse(address);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	@RequestMapping("listUser")
+	@RestReturn(value=UserDtoForBiz.class, collection=true)
+	public RestResponse listUser(@Valid ListUserCommand cmd) {
+		List<UserDtoForBiz> users = this.businessService.listUser(cmd);
+		RestResponse response =  new RestResponse(users);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	@RequestMapping("findTokenByUserId")
+	@RestReturn(String.class)
+	public RestResponse findTokenByUserId(@Valid FindTokenByUserIdCommand cmd) {
+
+		User user = userProvider.findUserById(cmd.getUserId());
+		List<UserIdentifier> idens = userProvider.listUserIdentifiersOfUser(user.getId());
+		UserIdentifier iden = idens.get(0);
+
+
+		SignupToken signUpToken = new SignupToken(user.getId(),IdentifierType.fromCode(iden.getIdentifierType()),iden.getIdentifierToken());
+		String token = WebTokenGenerator.getInstance().toWebToken(signUpToken);
+
+		RestResponse response =  new RestResponse(token);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	@RequestMapping("getUserInfoById")
+	@RestReturn(value=UserInfo.class)
+	public RestResponse getUserInfoById(@Valid GetUserInfoByIdCommand cmd) {
+		UserInfo user = this.userService.getUserInfoById(cmd);
+		RestResponse response =  new RestResponse(user);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	@RequestMapping("listUserByKeyword")
+	@RestReturn(value=UserInfo.class, collection=true)
+	public RestResponse listUserByKeyword(@Valid ListUserByKeywordCommand cmd) {
+		List<UserInfo> users = this.businessService.listUserByKeyword(cmd);
+		RestResponse response =  new RestResponse(users);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	@RequestMapping("listBusinessByCommonityId")
+	@RestReturn(value=String.class,collection=true)
+	public RestResponse listBusinessByCommonityId(@Valid ListBusinessByCommonityIdCommand cmd) {
+		List<String> list = this.businessService.listBusinessByCommonityId(cmd);
+		RestResponse response =  new RestResponse(list);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	@RequestMapping("listUserByIdentifier")
+	@RestReturn(value=UserInfo.class,collection=true)
+	public RestResponse listUserByIdentifier(@Valid ListUserByIdentifierCommand cmd) {
+		List<UserInfo> users = this.businessService.listUserByIdentifier(cmd);
+		RestResponse response =  new RestResponse(users);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	@RequestMapping("openBizNamespaceVisible")
+	@RestReturn(String.class)
+	public RestResponse openBizNamespaceVisible(@Valid BusinessAsignedNamespaceCommand cmd) {
+		businessService.openBusinessAssignedNamespace(cmd);
+		RestResponse response =  new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	@RequestMapping("closeBizNamespaceVisible")
+	@RestReturn(String.class)
+	public RestResponse closeBizNamespaceVisible(@Valid BusinessAsignedNamespaceCommand cmd) {
+		businessService.closeBusinessAssignedNamespace(cmd);
+		RestResponse response =  new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	@RequestMapping("updateReceivedCouponCount")
+	@RestReturn(String.class)
+	public RestResponse updateReceivedCouponCount(@Valid UpdateReceivedCouponCountCommand cmd) {
+		businessService.updateReceivedCouponCount(cmd);
+		RestResponse response =  new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	@RequestMapping("getReceivedCouponCount")
+	@RestReturn(value=UserProfileDTO.class)
+	public RestResponse getReceivedCouponCount(@Valid GetReceivedCouponCountCommand cmd) {
+		UserProfileDTO userProfile = businessService.getReceivedCouponCount(cmd);
+		RestResponse response =  new RestResponse(userProfile);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+     * <b>URL: /openapi/listBuildingsByKeyword</b>
+     * <p>根据小区Id和关键字查询小区楼栋</p>
+     */
+    @RequestMapping("listBuildingsByKeyword")
+    @RestReturn(value=BuildingDTO.class, collection=true)
+    public RestResponse listBuildingsByKeyword(@Valid ListBuildingByCommunityIdsCommand cmd) {
+        List<BuildingDTO> data = this.businessService.listBuildingsByKeyword(cmd);
+        RestResponse response = new RestResponse(data);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
     
+    /**
+     * <b>URL: /openapi/listApartmentsByKeyword</b>
+     * <p>根据小区Id、楼栋号和关键字查询门牌</p>
+     */
+    @RequestMapping("listApartmentsByKeyword")
+    @RestReturn(value=ApartmentDTO.class, collection=true)
+    public RestResponse listApartmentsByKeyword(@Valid ListPropApartmentsByKeywordCommand cmd) {
+        Tuple<Integer, List<ApartmentDTO>> data = this.businessService.listApartmentsByKeyword(cmd);
+        RestResponse response = new RestResponse(data.second());
+        response.setErrorCode(data.first());
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /api/getCommunitiesByNameAndCityId</b>
+     * <p>根据小区名称和城市id搜索小区</p>
+     */
+    @RequestMapping("getCommunitiesByNameAndCityId")
+    @RestReturn(value=CommunityDTO.class, collection=true)
+    public RestResponse getCommunitiesByNameAndCityId(@Valid GetCommunitiesByNameAndCityIdCommand cmd) {
+        List<CommunityDTO> data = this.businessService.getCommunitiesByNameAndCityId(cmd);
+        RestResponse response =  new RestResponse(data);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /openapi/getCommunityById</b>
+     * <p>根据园区ID获取园区信息</p>
+     */
+    @RequestMapping("getCommunityById")
+    @RestReturn(value=CommunityDTO.class)
+    public RestResponse getCommunityById(@Valid GetCommunityByIdCommand cmd) {
+        CommunityDTO data = this.businessService.getCommunityById(cmd);
+        RestResponse response =  new RestResponse(data);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /openapi/listRegionByKeyword</b>
+     * <p>根据关键字查询区域信息，查询下级区域，需要传入父级区域标识</p>
+     */
+    @RequestMapping("listRegionByKeyword")
+    @RestReturn(value=RegionDTO.class, collection=true)
+    public RestResponse listRegionByKeyword(@Valid ListRegionByKeywordCommand cmd) {
+    	List<RegionDTO> data = this.businessService.listRegionByKeyword(cmd);
+        RestResponse response =  new RestResponse(data);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

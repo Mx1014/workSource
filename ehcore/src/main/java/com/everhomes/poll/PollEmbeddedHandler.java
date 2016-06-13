@@ -6,9 +6,15 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.app.AppConstants;
+import com.everhomes.forum.Forum;
 import com.everhomes.forum.ForumEmbeddedHandler;
+import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.Post;
+import com.everhomes.rest.activity.ActivityPostCommand;
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.poll.PollDTO;
+import com.everhomes.rest.poll.PollPostCommand;
+import com.everhomes.rest.poll.PollShowResultResponse;
 import com.everhomes.server.schema.tables.pojos.EhPolls;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.StringHelper;
@@ -21,6 +27,9 @@ public class PollEmbeddedHandler implements ForumEmbeddedHandler {
     
     @Autowired
     private ShardingProvider shardingProvider;
+    
+    @Autowired
+    private ForumProvider forumProvider;
 
     @Override
     public String renderEmbeddedObjectSnapshot(Post post) {
@@ -47,6 +56,18 @@ public class PollEmbeddedHandler implements ForumEmbeddedHandler {
     public Post preProcessEmbeddedObject(Post post) {
         Long id = shardingProvider.allocShardableContentId(EhPolls.class).second();
         post.setEmbeddedId(id);
+        PollPostCommand cmd = (PollPostCommand) StringHelper.fromJsonString(post.getEmbeddedJson(),
+            PollPostCommand.class);
+        
+        if(null == cmd.getNamespaceId()){
+        	Forum forum = forumProvider.findForumById(post.getForumId());
+        	if(null != forum)
+        		cmd.setNamespaceId(forum.getNamespaceId());
+        	else
+				cmd.setNamespaceId(0);
+        }
+        
+        post.setEmbeddedJson(StringHelper.toJsonString(cmd));
         return post;
     }
 

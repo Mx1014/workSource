@@ -24,24 +24,24 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.forum.Forum;
 import com.everhomes.forum.ForumProvider;
-import com.everhomes.group.CreateGroupCommand;
 import com.everhomes.group.Group;
-import com.everhomes.group.GroupDTO;
 import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupMember;
-import com.everhomes.group.GroupPrivacy;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.group.GroupService;
-import com.everhomes.messaging.MessageChannel;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.rest.group.CreateGroupCommand;
+import com.everhomes.rest.group.GroupDTO;
+import com.everhomes.rest.group.GroupPrivacy;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.user.SendMessageCommand;
+import com.everhomes.rest.visibility.VisibilityScope;
 import com.everhomes.sharding.ShardingProvider;
-import com.everhomes.user.SendMessageCommand;
 import com.everhomes.user.User;
 import com.everhomes.user.UserService;
 import com.everhomes.user.base.LoginAuthTestCase;
 import com.everhomes.user.base.UserGenerator;
 import com.everhomes.util.StringHelper;
-import com.everhomes.visibility.VisibilityScope;
 
 //public class GroupServiceTest extends UserGenerator {
 public class GroupIterateTest extends LoginAuthTestCase {

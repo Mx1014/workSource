@@ -16,7 +16,7 @@ import com.everhomes.oauth2.OAuth2AuthenticationType;
 import com.everhomes.oauth2.OAuth2UserContext;
 import com.everhomes.oauth2.RequireOAuth2Authentication;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.user.UserInfo;
+import com.everhomes.rest.user.UserInfo;
 import com.everhomes.user.UserService;
 import com.everhomes.util.RequireAuthentication;
 

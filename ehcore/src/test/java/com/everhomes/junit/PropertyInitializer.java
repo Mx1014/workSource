@@ -31,7 +31,7 @@ public class PropertyInitializer implements ApplicationContextInitializer<Config
             .withProperty("messaging.routing.block.size", 10)
             .withProperty("forum.postbox.size", 10)
             .withProperty("forum.flush.interval", 3000)
-            .withProperty("db.master", "jdbc:mysql://ehcore:ehcore@db-master:3306/ehcore")
+            .withProperty("db.master", "jdbc:mysql://ehcore:123456@db-master:3306/ehcore_0229")
             .withProperty("db.conn.pool", 8)
             .withProperty("db.tx.timeout", 600)
             .withProperty("db.jta", false)
@@ -51,10 +51,14 @@ public class PropertyInitializer implements ApplicationContextInitializer<Config
             .withProperty("db.driver", "com.mysql.jdbc.Driver")
             .withProperty("elastic.nodes.hosts", "elasticsearch")
             .withProperty("elastic.nodes.ports", "9300")
+            .withProperty("elastic.index", "everhomesv31x")
             .withProperty("javadoc.root", "http://localhost:8080/apidocs")
             .withProperty("javadoc.location", "file:///Users/kelveny/archive/ehng/apidocs/")
             .withProperty("web.location", "/resources/")
             .withProperty("apns.certname", "apns-develop")
+            .withProperty("biz.serverUrl", "http://biz.zuolin.com/zl-ec")
+            .withProperty("biz.appKey", "39628d1c-0646-4ff6-9691-2c327b03f9c4")
+            .withProperty("biz.secretKey", "PSsIB9nZm3ENS3stei8oAvGa2afRW7wT+Y6x76XDtUCUcXOUhkPYK9V/5r03pD2rquQ==")
             );
     }
 }

@@ -76,7 +76,7 @@ messaging.routing.block.size: 1000
 #
 # iOS cert
 #
-apns.certname: apns-develop
+apns.certname: apns-product
 
 forum.postbox.size: 1000
 forum.flush.interval: 3000
@@ -106,7 +106,8 @@ db.tx.timeout: 600
 #
 # ElasticSearch configuration
 #
-elastic:
+elastic:    
+    index: everhomesv31x
     nodes:
         hosts: elasticsearch
         ports: 9300
@@ -121,11 +122,15 @@ objc.header.ext: .h
 objc.source.ext: .m
 objc.response.base: EvhRestResponseBase
 
+biz.serverUrl: http://biz.zuolin.com/zl-ec
+biz.appKey: 39628d1c-0646-4ff6-9691-2c327b03f9c4
+biz.secretKey: PSsIB9nZm3ENS3stei8oAvGa2afRW7wT+UxBn9li4C7JCfjCtHYJY6x76XDtUCUcXOUhkPYK9V/5r03pD2rquQ==
+
 class.name.prefix: Evh
 
-source.jars: ${EVH_HOME}/ehrest/target/ehrest-0.0.1-SNAPSHOT.jar
-source.excludes: com.everhomes.rpc.*, com.everhomes.rest.RestResponse, com.everhomes.rest.RestResponseBase, com.everhomes.rest.RestVersion
-destination.dir: ${EVH_IOS_HOME}/API-objects/
+source.jars: ${EVH_HOME}/ehrest/target/ehrest-3.4.0-SNAPSHOT.jar
+source.excludes: com.everhomes.rest.rpc.*, com.everhomes.rest.RestResponse, com.everhomes.rest.RestResponseBase, com.everhomes.rest.RestVersion
+destination.dir: ${EVH_IOS_HOME}/ehrest-respios/src/main/ios/API-objects
 destination.dir.java: ${EVH_HOME}/ehrest-response/src/main/java/
 
         

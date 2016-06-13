@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAddressesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhAddressesRecord> {
 
-	private static final long serialVersionUID = -84508886;
+	private static final long serialVersionUID = 195979951;
 
 	/**
 	 * Setter for <code>ehcore.eh_addresses.id</code>. id of the record
@@ -475,6 +475,34 @@ public class EhAddressesRecord extends org.jooq.impl.UpdatableRecordImpl<com.eve
 		return (java.lang.String) getValue(32);
 	}
 
+	/**
+	 * Setter for <code>ehcore.eh_addresses.area_size</code>. the area size of the room according to the address
+	 */
+	public void setAreaSize(java.lang.Double value) {
+		setValue(33, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_addresses.area_size</code>. the area size of the room according to the address
+	 */
+	public java.lang.Double getAreaSize() {
+		return (java.lang.Double) getValue(33);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_addresses.namespace_id</code>.
+	 */
+	public void setNamespaceId(java.lang.Integer value) {
+		setValue(34, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_addresses.namespace_id</code>.
+	 */
+	public java.lang.Integer getNamespaceId() {
+		return (java.lang.Integer) getValue(34);
+	}
+
 	// -------------------------------------------------------------------------
 	// Primary key information
 	// -------------------------------------------------------------------------
@@ -501,7 +529,7 @@ public class EhAddressesRecord extends org.jooq.impl.UpdatableRecordImpl<com.eve
 	/**
 	 * Create a detached, initialised EhAddressesRecord
 	 */
-	public EhAddressesRecord(java.lang.Long id, java.lang.String uuid, java.lang.Long communityId, java.lang.Long cityId, java.lang.String cityName, java.lang.Long areaId, java.lang.String areaName, java.lang.String zipcode, java.lang.String address, java.lang.Double longitude, java.lang.Double latitude, java.lang.String geohash, java.lang.String addressAlias, java.lang.String buildingName, java.lang.String buildingAliasName, java.lang.String apartmentName, java.lang.String apartmentFloor, java.lang.Byte status, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5) {
+	public EhAddressesRecord(java.lang.Long id, java.lang.String uuid, java.lang.Long communityId, java.lang.Long cityId, java.lang.String cityName, java.lang.Long areaId, java.lang.String areaName, java.lang.String zipcode, java.lang.String address, java.lang.Double longitude, java.lang.Double latitude, java.lang.String geohash, java.lang.String addressAlias, java.lang.String buildingName, java.lang.String buildingAliasName, java.lang.String apartmentName, java.lang.String apartmentFloor, java.lang.Byte status, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.sql.Timestamp deleteTime, java.lang.Long integralTag1, java.lang.Long integralTag2, java.lang.Long integralTag3, java.lang.Long integralTag4, java.lang.Long integralTag5, java.lang.String stringTag1, java.lang.String stringTag2, java.lang.String stringTag3, java.lang.String stringTag4, java.lang.String stringTag5, java.lang.Double areaSize, java.lang.Integer namespaceId) {
 		super(com.everhomes.server.schema.tables.EhAddresses.EH_ADDRESSES);
 
 		setValue(0, id);
@@ -537,5 +565,7 @@ public class EhAddressesRecord extends org.jooq.impl.UpdatableRecordImpl<com.eve
 		setValue(30, stringTag3);
 		setValue(31, stringTag4);
 		setValue(32, stringTag5);
+		setValue(33, areaSize);
+		setValue(34, namespaceId);
 	}
 }

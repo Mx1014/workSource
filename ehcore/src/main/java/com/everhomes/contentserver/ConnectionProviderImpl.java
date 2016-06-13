@@ -30,7 +30,9 @@ import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import com.everhomes.bus.LocalBusOneshotSubscriber;
 import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
 import com.everhomes.contentserver.ConfigResponse;
-import com.everhomes.rpc.PduFrame;
+import com.everhomes.rest.contentserver.ContentServerErrorCode;
+import com.everhomes.rest.contentserver.WebSocketConstant;
+import com.everhomes.rest.rpc.PduFrame;
 import com.everhomes.util.RuntimeErrorException;
 
 @Component
@@ -109,7 +111,10 @@ public class ConnectionProviderImpl implements ConnectionProvider {
     @Override
     public void sendMessage(WebSocketSession session, String name, Object payLoad) throws IOException {
         PduFrame frame = Generator.createPduFrame(name, payLoad, 0);
-        session.sendMessage(new TextMessage(frame.toJson()));
+        // WebSocket的session不是线程安全的，需要加锁 by lqs20160503
+        synchronized(session) {
+            session.sendMessage(new TextMessage(frame.toJson()));
+        }
     }
 
     @Override
@@ -119,14 +124,17 @@ public class ConnectionProviderImpl implements ConnectionProvider {
             return;
         }
         sessionCache.values().parallelStream().forEach(
-                        session -> {
-                            try {
-                                session.sendMessage(new TextMessage(item.toJson()));
-                            } catch (Exception e) {
-                                LOGGER.error("send message error", e);
-                                throw RuntimeErrorException.errorWith(ContentServerErrorCode.SCOPE,ContentServerErrorCode.ERROR_INVALID_SERVER,"cannot connect to content server");
-                            }
-                        });
+            session -> {
+                try {
+                    // WebSocket的session不是线程安全的，需要加锁 by lqs20160503
+                    synchronized(session) {
+                        session.sendMessage(new TextMessage(item.toJson()));
+                    }
+                } catch (Exception e) {
+                    LOGGER.error("send message error", e);
+                    throw RuntimeErrorException.errorWith(ContentServerErrorCode.SCOPE,ContentServerErrorCode.ERROR_INVALID_SERVER,"cannot connect to content server");
+                }
+            });
         List<ConfigResponse> rsp = new ArrayList<>();
         subscriber.build("config.contentstorage." + item.getRequestId(), new LocalBusOneshotSubscriber() {
 
@@ -199,7 +207,10 @@ public class ConnectionProviderImpl implements ConnectionProvider {
         }
         sessionCache.forEach((key, session) -> {
             try {
-                session.sendMessage(new PingMessage(ByteBuffer.allocate(0x9)));
+                // WebSocket的session不是线程安全的，需要加锁 by lqs20160503
+                synchronized(this) {
+                    session.sendMessage(new PingMessage(ByteBuffer.allocate(0x9)));
+                }
             } catch (Exception e) {
                 LOGGER.error("send message error.do handShake again.", e);
                 try {

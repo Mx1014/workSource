@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.rest.oauth2.OAuth2AccessTokenResponse;
 import com.everhomes.util.DateHelper;
 
 @RequireOAuth2Authentication(OAuth2AuthenticationType.CLIENT_AUTHENTICATION)

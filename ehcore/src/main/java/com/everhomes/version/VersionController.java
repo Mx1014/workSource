@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.version.UpgradeInfoResponse;
+import com.everhomes.rest.version.VersionRequestCommand;
+import com.everhomes.rest.version.VersionUrlResponse;
+import com.everhomes.rest.version.WithoutCurrentVersionRequestCommand;
 import com.everhomes.util.RequireAuthentication;
 
 @RestController
@@ -42,6 +46,14 @@ public class VersionController extends ControllerBase {
     public RestResponse getVersionUrls(@Valid VersionRequestCommand cmd) {
 
         VersionUrlResponse cmdResponse = this.versionService.getVersionUrls(cmd);
+        return new RestResponse(cmdResponse);
+    }
+    
+    @RequestMapping("getVersionUrlsWithoutCurrentVersion")
+    @RestReturn(value=VersionUrlResponse.class)
+    public RestResponse getVersionUrlsWithoutCurrentVersion(@Valid WithoutCurrentVersionRequestCommand cmd) {
+
+        VersionUrlResponse cmdResponse = this.versionService.getVersionUrlsWithoutCurrentVersion(cmd);
         return new RestResponse(cmdResponse);
     }
 }

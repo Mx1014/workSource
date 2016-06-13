@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunities extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhCommunitiesRecord> {
 
-	private static final long serialVersionUID = 1425878724;
+	private static final long serialVersionUID = 1466624740;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_communities</code>
@@ -195,6 +195,36 @@ public class EhCommunities extends org.jooq.impl.TableImpl<com.everhomes.server.
 	 * The column <code>ehcore.eh_communities.string_tag5</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.String> STRING_TAG5 = createField("string_tag5", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_communities.community_type</code>. 0: residential, 1: commercial
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.Byte> COMMUNITY_TYPE = createField("community_type", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: residential, 1: commercial");
+
+	/**
+	 * The column <code>ehcore.eh_communities.default_forum_id</code>. the default forum for the community, forum-1 is system default forum
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.Long> DEFAULT_FORUM_ID = createField("default_forum_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "the default forum for the community, forum-1 is system default forum");
+
+	/**
+	 * The column <code>ehcore.eh_communities.feedback_forum_id</code>. the default forum for the community, forum-2 is system feedback forum
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.Long> FEEDBACK_FORUM_ID = createField("feedback_forum_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "the default forum for the community, forum-2 is system feedback forum");
+
+	/**
+	 * The column <code>ehcore.eh_communities.update_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.sql.Timestamp> UPDATE_TIME = createField("update_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_communities.namespace_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_communities.area_size</code>. area size
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCommunitiesRecord, java.lang.Double> AREA_SIZE = createField("area_size", org.jooq.impl.SQLDataType.DOUBLE, this, "area size");
 
 	/**
 	 * Create a <code>ehcore.eh_communities</code> table reference

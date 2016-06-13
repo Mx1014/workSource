@@ -277,4 +277,18 @@ public class EhUsersDao extends org.jooq.impl.DAOImpl<com.everhomes.server.schem
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByPasswordHash(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.PASSWORD_HASH, values);
 	}
+
+	/**
+	 * Fetch records that have <code>namespace_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByNamespaceId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.NAMESPACE_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>namespace_user_token IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUsers> fetchByNamespaceUserToken(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUsers.EH_USERS.NAMESPACE_USER_TOKEN, values);
+	}
 }

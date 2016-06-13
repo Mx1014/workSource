@@ -375,4 +375,25 @@ public class EhForumPostsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByDeleteTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS.DELETE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>tag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByTag(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS.TAG, values);
+	}
+
+	/**
+	 * Fetch records that have <code>start_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByStartTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS.START_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>end_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhForumPosts> fetchByEndTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhForumPosts.EH_FORUM_POSTS.END_TIME, values);
+	}
 }

@@ -1,0 +1,9 @@
+//
+// EvhItemTargetType.h
+//
+
+#define EvhItemTargetType_DEFAULT @"default"
+#define EvhItemTargetType_BIZ @"biz"
+
+///////////////////////////////////////////////////////////////////////////////
+

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
@@ -36,12 +37,20 @@ public class LocaleTemplateServiceImpl implements LocaleTemplateService {
     }
     
     @Override
-    public LocaleTemplate getLocalizedTemplate(String scope, int code, String locale) {
-        return this.provider.findLocaleTemplateByScope(scope, code, locale);
+    public LocaleTemplate getLocalizedTemplate(Integer namespaceId, String scope, int code, String locale) {
+        if(namespaceId == null) {
+            namespaceId = Namespace.DEFAULT_NAMESPACE;
+        }
+        return this.provider.findLocaleTemplateByScope(namespaceId, scope, code, locale);
     }
 
     @Override
     public String getLocaleTemplateString(String scope, int code, String locale, Object model, String defaultValue) {
+        return getLocaleTemplateString(Namespace.DEFAULT_NAMESPACE, scope, code, locale, model, defaultValue);
+    }
+    
+    @Override
+    public String getLocaleTemplateString(Integer namespaceId, String scope, int code, String locale, Object model, String defaultValue) {
         String templateKey = getTemplateKey(scope, code, locale);
         try {
             Template freeMarkerTemplate = null;
@@ -51,7 +60,7 @@ public class LocaleTemplateServiceImpl implements LocaleTemplateService {
                 
             }
             if(freeMarkerTemplate == null) {
-                LocaleTemplate template = getLocalizedTemplate(scope, code, locale);
+                LocaleTemplate template = getLocalizedTemplate(namespaceId, scope, code, locale);
                 if(template != null) {
                     String templateText = template.getText();
                     templateLoader.putTemplate(templateKey, templateText);
@@ -71,7 +80,7 @@ public class LocaleTemplateServiceImpl implements LocaleTemplateService {
         return defaultValue;
     }
     
-    public void updateLocaleTemplate(long id, String description, String templateText) {
+    public void updateLocaleTemplate(Integer namespaceId, long id, String description, String templateText) {
         User user = UserContext.current().getUser();
         LocaleTemplate template = this.provider.findLocaleTemplateById(id);
         if(template ==  null) {
@@ -96,7 +105,7 @@ public class LocaleTemplateServiceImpl implements LocaleTemplateService {
         }
     }
     
-    public void deleteLocaleTemplate(long id) {
+    public void deleteLocaleTemplate(Integer namespaceId, long id) {
         User user = UserContext.current().getUser();
         LocaleTemplate template = this.provider.findLocaleTemplateById(id);
         if(template ==  null) {

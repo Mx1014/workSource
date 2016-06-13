@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroups implements java.io.Serializable {
 
-	private static final long serialVersionUID = -988933983;
+	private static final long serialVersionUID = -557001515;
 
 	private java.lang.Long     id;
 	private java.lang.String   uuid;
@@ -46,6 +46,8 @@ public class EhGroups implements java.io.Serializable {
 	private java.sql.Timestamp updateTime;
 	private java.sql.Timestamp createTime;
 	private java.sql.Timestamp deleteTime;
+	private java.lang.Byte     visibleRegionType;
+	private java.lang.Long     visibleRegionId;
 
 	public EhGroups() {}
 
@@ -82,7 +84,9 @@ public class EhGroups implements java.io.Serializable {
 		java.lang.String   stringTag5,
 		java.sql.Timestamp updateTime,
 		java.sql.Timestamp createTime,
-		java.sql.Timestamp deleteTime
+		java.sql.Timestamp deleteTime,
+		java.lang.Byte     visibleRegionType,
+		java.lang.Long     visibleRegionId
 	) {
 		this.id = id;
 		this.uuid = uuid;
@@ -117,6 +121,8 @@ public class EhGroups implements java.io.Serializable {
 		this.updateTime = updateTime;
 		this.createTime = createTime;
 		this.deleteTime = deleteTime;
+		this.visibleRegionType = visibleRegionType;
+		this.visibleRegionId = visibleRegionId;
 	}
 
 	public java.lang.Long getId() {
@@ -381,5 +387,21 @@ public class EhGroups implements java.io.Serializable {
 
 	public void setDeleteTime(java.sql.Timestamp deleteTime) {
 		this.deleteTime = deleteTime;
+	}
+
+	public java.lang.Byte getVisibleRegionType() {
+		return this.visibleRegionType;
+	}
+
+	public void setVisibleRegionType(java.lang.Byte visibleRegionType) {
+		this.visibleRegionType = visibleRegionType;
+	}
+
+	public java.lang.Long getVisibleRegionId() {
+		return this.visibleRegionId;
+	}
+
+	public void setVisibleRegionId(java.lang.Long visibleRegionId) {
+		this.visibleRegionId = visibleRegionId;
 	}
 }

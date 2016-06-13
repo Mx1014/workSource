@@ -111,9 +111,10 @@ CREATE TABLE `eh_locale_templates`(
     `locale` VARCHAR(16),
 	`description` VARCHAR(2048),
     `text` TEXT,
+	`namespace_id` INTEGER NOT NULL DEFAULT 0,
     
     PRIMARY KEY (`id`),
-    UNIQUE `u_eh_lstr_identifier`(`scope`, `code`, `locale`)
+    UNIQUE `u_eh_template_identifier`(`namespace_id`, `scope`, `code`, `locale`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
  
 DROP TABLE IF EXISTS `eh_categories`;
@@ -129,9 +130,10 @@ CREATE TABLE `eh_categories`(
     `delete_time` DATETIME COMMENT 'mark-deletion policy. It is much more safer to do so if an allocated category is broadly used', 
     `logo_uri` VARCHAR(1024) COMMENT 'the logo uri of the category',
 	`description` TEXT,
+	
+	`namespace_id` INTEGER NOT NULL DEFAULT 0,
     
     PRIMARY KEY (`id`),
-    UNIQUE `u_eh_category_name`(`parent_id`, `name`),
     INDEX `i_eh_category_path`(`path`),
     INDEX `i_eh_category_order`(`default_order`),
     INDEX `i_eh_category_delete_time`(`delete_time`)
@@ -210,7 +212,7 @@ CREATE TABLE `eh_app_promotions` (
 DROP TABLE IF EXISTS `eh_scoped_configurations`;
 CREATE TABLE `eh_scoped_configurations`(
     `id` BIGINT NOT NULL AUTO_INCREMENT,
-    `namespace_id` INTEGER,
+    `namespace_id` INTEGER NOT NULL DEFAULT 0,
     `app_id` BIGINT,
     `scope_type` VARCHAR(32),
     `scope_id` BIGINT,
@@ -246,7 +248,7 @@ CREATE TABLE `eh_scoped_configurations`(
 DROP TABLE IF EXISTS `eh_launch_pad_layouts`;
 CREATE TABLE `eh_launch_pad_layouts` (
     `id` BIGINT NOT NULL AUTO_INCREMENT,
-    `namespace_id` INTEGER,
+    `namespace_id` INTEGER NOT NULL DEFAULT 0,
     `name` VARCHAR(32),
     `layout_json` TEXT,
     `version_code` BIGINT NOT NULL DEFAULT 0 COMMENT 'the current version code',    
@@ -263,7 +265,7 @@ CREATE TABLE `eh_launch_pad_layouts` (
 DROP TABLE IF EXISTS `eh_launch_pad_items`;
 CREATE TABLE `eh_launch_pad_items` (
     `id` BIGINT NOT NULL AUTO_INCREMENT,
-    `namespace_id` INTEGER,
+    `namespace_id` INTEGER NOT NULL DEFAULT 0,
     `app_id` BIGINT,
 	`scope_code` TINYINT NOT NULL DEFAULT 0 COMMENT '0: all, 1: community, 2: city, 3: user',
     `scope_id` BIGINT,
@@ -428,6 +430,9 @@ CREATE TABLE `eh_users` (
     `salt` VARCHAR(64),
     `password_hash` VARCHAR(128) DEFAULT '' COMMENT 'Note, password is stored as salted hash, salt is appended by hash together',
     
+	`namespace_id` INTEGER NOT NULL DEFAULT 0,
+	`namespace_user_token` VARCHAR(2048) NOT NULL DEFAULT '',
+	
     PRIMARY KEY (`id`),
 	UNIQUE `u_eh_uuid`(`uuid`),
     UNIQUE `u_eh_user_account_name`(`account_name`),
@@ -447,6 +452,8 @@ CREATE TABLE `eh_user_identifiers` (
     `claim_status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: free standing, 1: claiming, 2: claim verifying, 3: claimed',
     `create_time` DATETIME NOT NULL COMMENT 'remove-deletion policy, user directly managed data',
     `notify_time` DATETIME,
+	
+	`namespace_id` INTEGER NOT NULL DEFAULT 0,
     
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_user_idf_owner_type_token`(`owner_uid`, `identifier_type`, `identifier_token`),
@@ -478,6 +485,24 @@ CREATE TABLE `eh_user_groups` (
     UNIQUE `u_eh_usr_grp_owner_group`(`owner_uid`, `group_id`),
     INDEX `i_eh_usr_grp_owner`(`owner_uid`),
     INDEX `i_eh_usr_grp_create_time`(`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+# 
+# member of eh_users partition
+# Used for duplicated recording of group membership that user is involved in order to store 
+# it in the same shard as of its owner user
+#
+DROP TABLE IF EXISTS `eh_user_group_histories`;
+CREATE TABLE `eh_user_group_histories` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `owner_uid` BIGINT NOT NULL COMMENT 'owner user id',
+    `group_discriminator` VARCHAR(32) COMMENT 'redendant info for quickly distinguishing associated group', 
+    `group_id` BIGINT,
+    `community_id` BIGINT,
+    `address_id` BIGINT,
+    `create_time` DATETIME NOT NULL COMMENT 'remove-deletion policy, user directly managed data',
+
+    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 # 
@@ -610,7 +635,7 @@ CREATE TABLE `eh_user_profiles`(
     `id` BIGINT NOT NULL COMMENT 'id of the record',
 	`app_id` BIGINT,    
     `owner_id` BIGINT NOT NULL COMMENT 'owner user id',
-    `item_name` VARCHAR(32),
+    `item_name` VARCHAR(128),
     `item_kind` TINYINT NOT NULL DEFAULT 0 COMMENT '0, opaque json object, 1: entity',
     `item_value` TEXT,
     `target_type` VARCHAR(32),
@@ -660,6 +685,24 @@ CREATE TABLE `eh_user_service_addresses` (
     UNIQUE `u_eh_usr_service_address_id`(`owner_uid`, `address_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+# 
+# member of eh_users partition
+# Used for duplicated recording of group membership that user is involved in order to store 
+# it in the same shard as of its owner user
+#
+DROP TABLE IF EXISTS `eh_user_communities`;
+CREATE TABLE `eh_user_communities` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `owner_uid` BIGINT NOT NULL COMMENT 'owner user id',
+    `community_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'redendant info for quickly distinguishing associated community', 
+    `community_id` BIGINT NOT NULL DEFAULT 0,
+    `join_policy` TINYINT NOT NULL DEFAULT 1 COMMENT '1: register, 2: request to join',
+    `create_time` DATETIME,
+    
+    PRIMARY KEY (`id`),
+    UNIQUE `u_eh_usr_community`(`owner_uid`, `community_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 #
 # key table of grouping related sharding group
 # Usually there is no need for group object to carry information for other applications, therefore there is
@@ -671,7 +714,7 @@ DROP TABLE IF EXISTS `eh_groups`;
 CREATE TABLE `eh_groups` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
 	`uuid` VARCHAR(128) NOT NULL DEFAULT '',
-    `namespace_id` INTEGER,
+    `namespace_id` INTEGER NOT NULL DEFAULT 0,
     `name` VARCHAR(128) NOT NULL,
     `display_name` VARCHAR(64),
     `avatar` VARCHAR(256),
@@ -706,6 +749,8 @@ CREATE TABLE `eh_groups` (
     `update_time` DATETIME NOT NULL,
     `create_time` DATETIME NOT NULL,
     `delete_time` DATETIME COMMENT 'mark-deletion policy, multi-purpose base entity',
+	`visible_region_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'the type of region where the group belong to',
+	`visible_region_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the id of region where the group belong to',
     
     PRIMARY KEY (`id`),
 	UNIQUE `u_eh_uuid`(`uuid`),
@@ -910,7 +955,7 @@ CREATE TABLE `eh_forum_posts` (
  
     `embedded_app_id` BIGINT,
     `embedded_id` BIGINT,
-    `embedded_json` TEXT,
+    `embedded_json` LONGTEXT,
     `embedded_version` INTEGER NOT NULL DEFAULT 1,
     
     `integral_tag1` BIGINT COMMENT 'user for action category id',
@@ -932,6 +977,7 @@ CREATE TABLE `eh_forum_posts` (
     `create_time` DATETIME NOT NULL,
 	`deleter_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'deleter id',
     `delete_time` DATETIME COMMENT 'mark-deletion policy. historic data may be useful',
+	`tag` VARCHAR(32),
     
     PRIMARY KEY (`id`),
 	UNIQUE `u_eh_uuid`(`uuid`),
@@ -1029,9 +1075,10 @@ CREATE TABLE `eh_regions` (
 	`tel_code` VARCHAR(32) COMMENT 'primary telephone area code',
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '1: inactive, 2: active, 3: locked, 4: mark as deleted',
 	`hot_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: not hot, 1: hot',
+	`namespace_id` int(11) NOT NULL DEFAULT '0',
     
     PRIMARY KEY(`id`),
-    UNIQUE `u_eh_region_name`(`parent_id`, `name`),
+    UNIQUE `u_eh_region_name`(`namespace_id`, `parent_id`, `name`),
  	INDEX `i_eh_region_name_level`(`name`, `level`),   
     INDEX `i_eh_region_path`(`path`),
  	INDEX `i_eh_region_path_level`(`path`, `level`),   
@@ -1079,6 +1126,12 @@ CREATE TABLE `eh_communities`(
     `string_tag3` VARCHAR(128),
     `string_tag4` VARCHAR(128),
     `string_tag5` VARCHAR(128),
+	
+	`community_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: residential, 1: commercial',
+	`default_forum_id` BIGINT NOT NULL DEFAULT 1 COMMENT 'the default forum for the community, forum-1 is system default forum',
+	`feedback_forum_id` BIGINT NOT NULL DEFAULT 2 COMMENT 'the default forum for the community, forum-2 is system feedback forum',
+	`update_time` DATETIME,
+	`namespace_id` int(11) NOT NULL DEFAULT '0',
     
     PRIMARY KEY (`id`),
 	UNIQUE `u_eh_uuid`(`uuid`),
@@ -1119,6 +1172,7 @@ CREATE TABLE `eh_nearby_community_map` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
     `community_id` BIGINT NOT NULL DEFAULT 0,
     `nearby_community_id` BIGINT NOT NULL DEFAULT 0,
+	`namespace_id` int(11) NOT NULL DEFAULT '0',
 	
     PRIMARY KEY (`id`),
     UNIQUE `u_eh_community_relation`(`community_id`, `nearby_community_id`),
@@ -1174,6 +1228,7 @@ CREATE TABLE `eh_organizations` (
     `path` VARCHAR(128) COMMENT 'path from the root',
     `level` INTEGER NOT NULL DEFAULT 0,
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '1: inactive, 2: active, 3: locked, 4: mark as deleted',
+	`department_type` VARCHAR(64),
     
     PRIMARY KEY(`id`),
     UNIQUE `u_eh_org_name`(`parent_id`, `name`),
@@ -1192,6 +1247,21 @@ CREATE TABLE `eh_organization_communities` (
     UNIQUE `u_eh_org_community_id`(`organization_id`, `community_id`),
     INDEX `i_eh_orgc_dept`(`organization_id`),
     INDEX `i_eh_orgc_community`(`community_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+#
+# member of global parition
+# shared among namespaces, no application module specific information
+# the resourses(building, community, etc.) assigned to the organization
+#
+DROP TABLE IF EXISTS `eh_organization_assigned_scopes`;
+CREATE TABLE `eh_organization_assigned_scopes` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
+  `organization_id` bigint(20) NOT NULL,
+  `scope_code` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: building',
+  `scope_id` BIGINT,
+  
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 #
@@ -1449,6 +1519,9 @@ CREATE TABLE `eh_addresses` (
     `string_tag3` VARCHAR(128),
     `string_tag4` VARCHAR(128),
     `string_tag5` VARCHAR(128),
+	
+	`area_size` DOUBLE COMMENT 'the area size of the room according to the address',
+	`namespace_id` int(11) NOT NULL DEFAULT '0',
     
     PRIMARY KEY (`id`),
 	UNIQUE `u_eh_uuid`(`uuid`),
@@ -1547,7 +1620,7 @@ CREATE TABLE `eh_family_followers` (
 DROP TABLE IF EXISTS `eh_banners`;
 CREATE TABLE `eh_banners` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
-    `namespace_id` INTEGER,
+    `namespace_id` INTEGER NOT NULL DEFAULT 0,
     `appId` BIGINT,
 	`banner_location` VARCHAR(2048),
     `banner_group` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'the type to filter item when querying: GA, BIZ, PM, GARC, GANC, GAPS',
@@ -1621,7 +1694,7 @@ CREATE TABLE `eh_banner_orders` (
 DROP TABLE IF EXISTS `eh_binary_resources`;
 CREATE TABLE `eh_binary_resources` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
-    `namespace_id` INTEGER,
+    `namespace_id` INTEGER NOT NULL DEFAULT 0,
     `checksum` VARCHAR(128),
     `store_type` VARCHAR(32) COMMENT 'content store type',
     `store_uri` VARCHAR(32) COMMENT 'identify the store instance',
@@ -1645,7 +1718,7 @@ CREATE TABLE `eh_binary_resources` (
 DROP TABLE IF EXISTS `eh_rtxt_resources`;
 CREATE TABLE `eh_rtxt_resources`(
     `id` BIGINT NOT NULL COMMENT 'id of the record',
-    `namespace_id` INTEGER,
+    `namespace_id` INTEGER NOT NULL DEFAULT 0,
     `checksum` VARCHAR(128),
     `tile` TEXT,
     `author` TEXT,
@@ -1678,7 +1751,7 @@ CREATE TABLE `eh_rtxt_resources`(
 DROP TABLE IF EXISTS `eh_events`;
 CREATE TABLE `eh_events`(
     `id` BIGINT NOT NULL COMMENT 'id of the record',
-    `namespace_id` INTEGER,
+    `namespace_id` INTEGER NOT NULL DEFAULT 0,
     `subject` VARCHAR(512),
     `description` TEXT,
     `location` TEXT,
@@ -1852,6 +1925,7 @@ CREATE TABLE `eh_activities` (
     `change_version` INTEGER NOT NULL DEFAULT 1,
     `create_time` DATETIME,
     `delete_time` DATETIME COMMENT 'mark-deletion policy, historic data may be valuable',
+	`guest` VARCHAR(2048),
     
     PRIMARY KEY (`id`),
 	UNIQUE `u_eh_uuid`(`uuid`),
@@ -1901,7 +1975,7 @@ DROP TABLE IF EXISTS `eh_polls`;
 CREATE TABLE `eh_polls` (
     `id` BIGINT NOT NULL COMMENT 'id of the record',
 	`uuid` VARCHAR(128) NOT NULL DEFAULT '',
-    `namespace_id` INTEGER,
+    `namespace_id` INTEGER NOT NULL DEFAULT 0,
     `subject` VARCHAR(512),
     `description` TEXT,
     `start_time_ms` BIGINT,
@@ -2439,6 +2513,7 @@ CREATE TABLE `eh_version_realm` (
     `description` TEXT,
     
     `create_time` DATETIME,
+	
     PRIMARY KEY(`id`),
     UNIQUE `u_eh_ver_realm`(`realm`),
     INDEX `i_eh_ver_realm_create_time`(`create_time`)
@@ -2469,7 +2544,7 @@ CREATE TABLE `eh_version_urls` (
     `target_version` VARCHAR(128),
     `download_url` VARCHAR(128) COMMENT 'example configuration: http://serviceurl/download/client-packages/${locale}/andriod-${major}-${minor}-${revision}.apk',
     `info_url` VARCHAR(128) COMMENT 'example configuration: http://serviceurl/download/client-package-info/${locale}/andriod-${major}-${minor}-${revision}.html',
-    
+    	
     PRIMARY KEY(`id`),
     UNIQUE `u_eh_ver_url`(`realm_id`, `target_version`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -2554,5 +2629,307 @@ CREATE TABLE `eh_push_message_results` (
     `send_time` DATETIME DEFAULT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+#
+# member of eh_groups sharding group
+#
+DROP TABLE IF EXISTS `eh_enterprise_attachments`;
+CREATE TABLE `eh_enterprise_attachments` (
+  `id` bigint(20) NOT NULL COMMENT 'id of the record',
+  `enterprise_id` bigint(20) NOT NULL DEFAULT '0',
+  `content_type` varchar(32) DEFAULT NULL COMMENT 'attachment object content type',
+  `content_uri` varchar(1024) DEFAULT NULL COMMENT 'attachment object link info on storage',
+  `creator_uid` bigint(20) NOT NULL,
+  `create_time` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;# 
+
+#
+# member of eh_groups partition
+# the supplement enterprise info of eh_groups
+#
+DROP TABLE IF EXISTS `eh_enterprise_details`;
+CREATE TABLE `eh_enterprise_details` ( 
+	`id` BIGINT NOT NULL COMMENT 'id of the record', 
+	`enterprise_id` BIGINT NOT NULL COMMENT 'group id', 
+	`description` text COMMENT 'description', 
+	`contact` VARCHAR(128) COMMENT 'the phone number',
+	`address` VARCHAR(256) COMMENT 'address str', 
+    `longitude` DOUBLE,
+    `latitude` DOUBLE,
+    `geohash` VARCHAR(32),
+    `create_time` DATETIME,
+	PRIMARY KEY (`id`) 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4; 
+
+# 
+# member of global partition
+#
+DROP TABLE IF EXISTS `eh_enterprise_op_requests`;
+CREATE TABLE `eh_enterprise_op_requests` ( 
+	`id` BIGINT NOT NULL COMMENT 'id of the record', 
+    `namespace_id` INTEGER NOT NULL DEFAULT 0,
+    `community_id` BIGINT NOT NULL DEFAULT 0,
+    `source_type` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'enterprise, marker zone',
+    `source_id` BIGINT NOT NULL DEFAULT 0,
+	`enterprise_name` VARCHAR(128) NOT NULL COMMENT 'enterprise name', 
+    `enterprise_id` BIGINT NOT NULL DEFAULT 0,
+	`apply_contact` VARCHAR(128) COMMENT 'contact phone', 
+	`apply_user_id` BIGINT COMMENT 'user id', 
+	`apply_user_name` VARCHAR(128) COMMENT 'apply user name', 
+	`apply_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'apply type 1:apply 2:The expansion of rent 3:Renew', 
+	`description` TEXT COMMENT 'description', 
+	`size_unit` TINYINT COMMENT '1:singleton 2:square meters', 
+    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: requesting, 2: accepted',
+	`area_size` DOUBLE, 
+	`create_time` DATETIME, 
+    `operator_uid` BIGINT,
+    `process_message` TEXT,
+    `process_time` DATETIME,
+	
+	PRIMARY KEY (`id`) 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+#
+# member of eh_groups partition
+# the relationship between eh_enterprises and eh_enterprise_communities
+#
+DROP TABLE IF EXISTS `eh_enterprise_addresses`;
+CREATE TABLE `eh_enterprise_addresses` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `enterprise_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to id of eh_groups',
+    `address_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to id of eh_addresses',
+    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: waitingForApproval, 2: active',
+    `creator_uid` BIGINT COMMENT 'record creator user id',
+    `create_time` DATETIME,
+    `operator_uid` BIGINT COMMENT 'redundant auditing info',
+    `process_code` TINYINT,
+    `process_details` TEXT,
+    `proof_resource_uri` VARCHAR(1024),
+    `approve_time` DATETIME COMMENT 'redundant auditing info',
+    `update_time` DATETIME,
+	
+	`building_id` BIGINT NOT NULL DEFAULT 0,
+	`building_name` VARCHAR(128),
+
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+#
+# member of eh_groups partition
+# the relationship between eh_enterprises and eh_enterprise_communities
+#
+DROP TABLE IF EXISTS `eh_enterprise_contacts`;
+CREATE TABLE `eh_enterprise_contacts` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `enterprise_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'enterprise id',
+    `name` VARCHAR(256) COMMENT 'real name',
+    `nick_name` VARCHAR(256) COMMENT 'display name',
+    `avatar` VARCHAR(128) COMMENT 'avatar uri',
+    `user_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'user id reference to eh_users, it determine the contact authenticated or not',
+    `role` BIGINT NOT NULL DEFAULT 7 COMMENT 'The role in company',
+    `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive, 1: waitingForApproval, 2: waitingForAcceptance 3: active',
+    `creator_uid` BIGINT COMMENT 'record creator user id',
+    `create_time` DATETIME,
+    `integral_tag1` BIGINT,
+    `integral_tag2` BIGINT,
+    `integral_tag3` BIGINT,
+    `integral_tag4` BIGINT,
+    `integral_tag5` BIGINT,
+    `string_tag1` VARCHAR(128),
+    `string_tag2` VARCHAR(128),
+    `string_tag3` VARCHAR(128),
+    `string_tag4` VARCHAR(128),
+    `string_tag5` VARCHAR(128),
+	
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+#
+# member of eh_groups partition
+# entry info of eh_enterprise_contacts
+#
+DROP TABLE IF EXISTS `eh_enterprise_contact_entries`;
+CREATE TABLE `eh_enterprise_contact_entries` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `enterprise_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'enterprise id',
+    `contact_id` BIGINT NOT NULL COMMENT 'contact id',
+    `entry_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: mobile, 1: email',
+    `entry_value` VARCHAR(128),
+    `creator_uid` BIGINT COMMENT 'record creator user id',
+    `create_time` DATETIME,
+
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+#
+# member of eh_groups partition
+# internal group in enterprise, use for department
+#
+DROP TABLE IF EXISTS `eh_enterprise_contact_groups`;
+CREATE TABLE `eh_enterprise_contact_groups` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `enterprise_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'enterprise id',
+    `role` BIGINT NOT NULL DEFAULT 7 COMMENT 'The role in company',
+    `name` VARCHAR(256),
+    `parent_id` BIGINT NOT NULL DEFAULT 0,
+	`path` VARCHAR(128) COMMENT 'path from the root',
+    `creator_uid` BIGINT COMMENT 'record creator user id',
+    `create_time` DATETIME,
+	
+    `integral_tag1` BIGINT,
+    `integral_tag2` BIGINT,
+    `integral_tag3` BIGINT,
+    `integral_tag4` BIGINT,
+    `integral_tag5` BIGINT,
+    `string_tag1` VARCHAR(128),
+    `string_tag2` VARCHAR(128),
+    `string_tag3` VARCHAR(128),
+    `string_tag4` VARCHAR(128),
+    `string_tag5` VARCHAR(128),
+
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+#
+# member of eh_groups partition
+# role of member inside the group (internal)
+#
+DROP TABLE IF EXISTS `eh_enterprise_contact_group_members`;
+CREATE TABLE `eh_enterprise_contact_group_members` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `enterprise_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'enterprise id',
+    `contact_group_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to id of eh_enterprise_contact_groups',
+    `contact_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to id of eh_enterprise_contacts',
+    `role` BIGINT NOT NULL DEFAULT 7 COMMENT 'The role in company',
+    `contact_avatar` VARCHAR(128) COMMENT 'contact avatar image identifier in storage sub-system',
+    `contact_nick_name` VARCHAR(128) COMMENT 'contact nick name within the group',
+    `contact_status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: waitingForApproval, 2: active',
+    `creator_uid` BIGINT COMMENT 'record creator user id',
+    `create_time` DATETIME,
+	
+    `integral_tag1` BIGINT,
+    `integral_tag2` BIGINT,
+    `integral_tag3` BIGINT,
+    `integral_tag4` BIGINT,
+    `integral_tag5` BIGINT,
+    `string_tag1` VARCHAR(128),
+    `string_tag2` VARCHAR(128),
+    `string_tag3` VARCHAR(128),
+    `string_tag4` VARCHAR(128),
+    `string_tag5` VARCHAR(128),
+
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+#
+# member of eh_communities partition
+# the relationship between eh_enterprises and eh_enterprise_communities
+#
+DROP TABLE IF EXISTS `eh_enterprise_community_map`;
+CREATE TABLE `eh_enterprise_community_map` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `community_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to id of eh_enterprise_communities',
+    `member_type` VARCHAR(32) NOT NULL COMMENT 'enterprise',
+    `member_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'enterprise_id etc',
+    `member_status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: waitingForApproval, 2: waitingForAcceptance 3: active',
+    `creator_uid` BIGINT COMMENT 'record creator user id',
+    `create_time` DATETIME,
+    `operator_uid` BIGINT COMMENT 'redundant auditing info',
+    `process_code` TINYINT,
+    `process_details` TEXT,
+    `proof_resource_uri` VARCHAR(1024),
+    `approve_time` DATETIME COMMENT 'redundant auditing info',
+    `requestor_comment` TEXT,
+    `operation_type` TINYINT COMMENT '1: request to join, 2: invite to join',
+    `inviter_uid` BIGINT COMMENT 'record inviter user id',
+    `invite_time` DATETIME COMMENT 'the time the member is invited',
+    `update_time` DATETIME NOT NULL,
+
+    `integral_tag1` BIGINT,
+    `integral_tag2` BIGINT,
+    `integral_tag3` BIGINT,
+    `integral_tag4` BIGINT,
+    `integral_tag5` BIGINT,
+    `string_tag1` VARCHAR(128),
+    `string_tag2` VARCHAR(128),
+    `string_tag3` VARCHAR(128),
+    `string_tag4` VARCHAR(128),
+    `string_tag5` VARCHAR(128),
+
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+#
+# member of eh_communities partition
+#
+DROP TABLE IF EXISTS `eh_buildings`;
+CREATE TABLE `eh_buildings` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `community_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refering to eh_communities',
+    `name` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'building name',
+	`alias_name` VARCHAR(128),
+	`manager_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'the manager of the building',
+	`contact` VARCHAR(128) COMMENT 'the phone number',
+    `address` VARCHAR(1024),
+    `area_size` DOUBLE,
+    `longitude` DOUBLE,
+    `latitude` DOUBLE,
+    `geohash` VARCHAR(32),
+    `description` TEXT,
+    `poster_uri` VARCHAR(128),
+    `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 1: confirming, 2: active',
+	`operator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'uid of the user who process the address',
+    `operate_time` DATETIME,
+    `creator_uid` BIGINT COMMENT 'uid of the user who has suggested address, NULL if it is system created',
+    `create_time` DATETIME,
+    `delete_time` DATETIME COMMENT 'mark-deletion policy, historic data may be valuable',
+    
+    `integral_tag1` BIGINT,
+    `integral_tag2` BIGINT,
+    `integral_tag3` BIGINT,
+    `integral_tag4` BIGINT,
+    `integral_tag5` BIGINT,
+    `string_tag1` VARCHAR(128),
+    `string_tag2` VARCHAR(128),
+    `string_tag3` VARCHAR(128),
+    `string_tag4` VARCHAR(128),
+    `string_tag5` VARCHAR(128),
+	`namespace_id` int(11) NOT NULL DEFAULT '0',
+    
+	UNIQUE `u_eh_community_id_name`(`community_id`, `name`),
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+#
+# member of eh_communities sharding group
+#
+DROP TABLE IF EXISTS `eh_building_attachments`;
+CREATE TABLE `eh_building_attachments` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `building_id` BIGINT NOT NULL DEFAULT 0,
+    `content_type` VARCHAR(32) COMMENT 'attachment object content type',
+    `content_uri` VARCHAR(1024) COMMENT 'attachment object link info on storage',
+    `creator_uid` BIGINT NOT NULL DEFAULT 0,
+    `create_time` DATETIME,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+#
+# member of global partition
+# the resources related to the namespace
+#
+DROP TABLE IF EXISTS `eh_namespace_resources`;
+CREATE TABLE `eh_namespace_resources` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `namespace_id` INTEGER NOT NULL DEFAULT 0,
+    `resource_type` VARCHAR(128) COMMENT 'COMMUNITY',
+    `resource_id` BIGINT NOT NULL DEFAULT 0,
+    `create_time` DATETIME,
+    PRIMARY KEY (`id`),
+    UNIQUE `u_eh_namespace_resource_id`(`namespace_id`, `resource_type`, `resource_id`),
+    INDEX `i_eh_resource_id`(`resource_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 SET foreign_key_checks = 1;

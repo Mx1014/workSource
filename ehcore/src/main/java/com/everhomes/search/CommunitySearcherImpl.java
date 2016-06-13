@@ -22,10 +22,13 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 
-import com.everhomes.address.ListAllCommunitesCommand;
 import com.everhomes.community.Community;
-import com.everhomes.community.CommunityDoc;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.rest.address.ListAllCommunitesCommand;
+import com.everhomes.rest.community.CommunityDoc;
+import com.everhomes.rest.enterprise.EnterpriseCommunityType;
+import com.everhomes.user.UserContext;
 
 @Service
 public class CommunitySearcherImpl extends AbstractElasticSearch implements CommunitySearcher {
@@ -34,11 +37,6 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
     @Autowired
     private CommunityProvider communityProvider;
     
-    @Override
-    public String getIndexName() {
-        return SearchUtils.COMMUNITYINDEXNAME;
-    }
-
     @Override
     public String getIndexType() {
         return SearchUtils.COMMUNITYINDEXTYPE;
@@ -52,6 +50,8 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
             b.field("cityId", community.getCityId());
             b.field("cityName", community.getCityName());
             b.field("regionId", (community.getAreaId() == null ? community.getCityId() : community.getAreaId()));
+            b.field("communityType", community.getCommunityType());
+            b.field("namespaceId", community.getNamespaceId());
             b.endObject();
             return b;
         } catch (IOException ex) {
@@ -65,6 +65,7 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
         Long pageSize = 200l;
         Long i = 1l;
         Long count = 0l;
+        this.deleteAll();
         
         for(;;) {
             List<Community> communities = this.communityProvider.listAllCommunities(i,pageSize);
@@ -114,6 +115,8 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
             doc.setName((String)source.get("name"));
             doc.setCityName((String)source.get("cityName"));
             doc.setRegionId(SearchUtils.getLongField(source.get("regionId")));
+            doc.setNamespaceId(SearchUtils.getLongField(source.get("namespaceId")).intValue());
+            doc.setCommunityType(SearchUtils.getLongField(source.get("communityType")).byteValue());
             
             return doc;
         }
@@ -124,9 +127,8 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
 
         return null;
     }
-
-    @Override
-    public List<CommunityDoc> searchDocs(String queryString, Long cityId, Long regionId, int pageNum, int pageSize) {
+    
+    private List<CommunityDoc> searchDocsByType(String queryString,Byte communityType, EnterpriseCommunityType t, Long cityId, Long regionId, int pageNum, int pageSize) {
         SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
         
         QueryBuilder qb;
@@ -139,6 +141,11 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
                 .field("name.pinyin_gram", 1.0f);
         
         FilterBuilder fb = null;
+        int namespaceId = UserContext.getCurrentNamespaceId();
+        fb = FilterBuilders.termFilter("namespaceId", namespaceId);
+        if(null != communityType) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityType", communityType));
+        }
         if((null != cityId) && (cityId > 0)) {
             fb = FilterBuilders.termFilter("cityId", cityId);
         }
@@ -147,6 +154,13 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
             fb = FilterBuilders.orFilter(FilterBuilders.termFilter("cityId", regionId)
                     , FilterBuilders.termFilter("regionId", regionId));
         }
+        
+        //园区和小区都要搜索出来 by xiongying 20160518
+//        if(null == fb) {
+//            fb = FilterBuilders.termFilter("communityType", t.getCode());
+//        } else {
+//            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityType", EnterpriseCommunityType.Normal.getCode()));
+//        }
         
         if(null != fb) {
             qb = QueryBuilders.filteredQuery(qb, fb);
@@ -169,7 +183,17 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
             }
         }
         
-        return comIds;
+        return comIds;        
+    }
+
+    @Override
+    public List<CommunityDoc> searchDocs(String queryString,Byte communityType, Long cityId, Long regionId, int pageNum, int pageSize) {
+        return this.searchDocsByType(queryString,communityType, EnterpriseCommunityType.Normal, cityId, regionId, pageNum, pageSize);
+    }
+    
+    @Override
+    public List<CommunityDoc> searchEnterprise(String queryString,Byte communityType, Long regionId, int pageNum, int pageSize) {
+        return this.searchDocsByType(queryString,communityType, EnterpriseCommunityType.Enterprise, null, regionId, pageNum, pageSize);
     }
 
 }

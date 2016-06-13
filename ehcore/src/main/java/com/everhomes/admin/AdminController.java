@@ -19,9 +19,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.tools.ant.Project;
-import org.apache.tools.ant.taskdefs.Zip;
-import org.apache.tools.ant.types.FileSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,13 +33,11 @@ import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Privilege;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
-import com.everhomes.border.AddBorderCommand;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.border.Border;
 import com.everhomes.border.BorderConnection;
 import com.everhomes.border.BorderConnectionProvider;
-import com.everhomes.border.BorderDTO;
 import com.everhomes.border.BorderProvider;
-import com.everhomes.border.UpdateBorderCommand;
 import com.everhomes.bus.LocalBusMessageClassRegistry;
 import com.everhomes.bus.LocalBusOneshotSubscriber;
 import com.everhomes.bus.LocalBusOneshotSubscriberBuilder;
@@ -55,21 +50,33 @@ import com.everhomes.discover.RestMethod;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
-import com.everhomes.persist.server.AddPersistServerCommand;
-import com.everhomes.persist.server.UpdatePersistServerCommand;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rpc.server.PingRequestPdu;
-import com.everhomes.rpc.server.PingResponsePdu;
+import com.everhomes.rest.admin.AppCreateCommand;
+import com.everhomes.rest.admin.DecodeContentPathCommand;
+import com.everhomes.rest.admin.NamespaceDTO;
+import com.everhomes.rest.admin.SampleCommand;
+import com.everhomes.rest.admin.SampleEmbedded;
+import com.everhomes.rest.admin.SampleObject;
+import com.everhomes.rest.admin.ServerDTO;
+import com.everhomes.rest.border.AddBorderCommand;
+import com.everhomes.rest.border.BorderDTO;
+import com.everhomes.rest.border.UpdateBorderCommand;
+import com.everhomes.rest.persist.server.AddPersistServerCommand;
+import com.everhomes.rest.persist.server.UpdatePersistServerCommand;
+import com.everhomes.rest.rpc.server.PingRequestPdu;
+import com.everhomes.rest.rpc.server.PingResponsePdu;
+import com.everhomes.rest.user.LoginToken;
+import com.everhomes.rest.user.UserLoginDTO;
+import com.everhomes.rest.admin.DecodeWebTokenCommand;
 import com.everhomes.sequence.LocalSequenceGenerator;
 import com.everhomes.sequence.SequenceService;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.sharding.Server;
 import com.everhomes.sharding.ShardingProvider;
-import com.everhomes.user.LoginToken;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
-import com.everhomes.user.UserLoginDTO;
 import com.everhomes.user.UserService;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.FileHelper;
 import com.everhomes.util.ReflectionHelper;
@@ -238,14 +245,15 @@ public class AdminController extends ControllerBase {
             // generate API constants
             generator.generateApiConstants(apiMethods, context);
             
-            File srcDir = new File(this.destinationDir);
-            File dstFile = srcDir.getParentFile();
-            if(!dstFile.exists()) {
-                dstFile.mkdirs();
-            }
-            dstFile = new File(dstFile, "ehng-ios.zip");
-            
-            ZipHelper.compress(this.destinationDir, dstFile.getAbsolutePath());
+            // 改为使用标准maven打包方式，不再在此生成 by lqs 20160325
+//            File srcDir = new File(this.destinationDir);
+//            File dstFile = srcDir.getParentFile();
+//            if(!dstFile.exists()) {
+//                dstFile.mkdirs();
+//            }
+//            dstFile = new File(dstFile, "ehng-ios.zip");
+//            
+//            ZipHelper.compress(this.destinationDir, dstFile.getAbsolutePath());
         } else {
             JavaGenerator generator = new JavaGenerator();
 
@@ -651,5 +659,73 @@ public class AdminController extends ControllerBase {
         }          
 
         return null;
+    }
+    
+    /**
+     * 
+     * 解开webtoken
+     * @return
+     */
+    @RequestMapping("decodeWebToken")
+    @RestReturn(String.class)
+    public RestResponse decodeWebToken(@Valid DecodeWebTokenCommand cmd) {        
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+        String webToken = cmd.getWebToken();
+        String tokenType = cmd.getTokenType();
+        
+        if(webToken == null || webToken.trim().length() == 0) {
+            LOGGER.error("Web token may not be empty, cmd=" + cmd);
+            throw new IllegalArgumentException("Web token may not be empty");
+        }
+        
+        if(tokenType == null || tokenType.trim().length() == 0) {
+            LOGGER.error("Token type may not be empty, cmd=" + cmd);
+            throw new IllegalArgumentException("Token type may not be empty");
+        }
+        
+        @SuppressWarnings("rawtypes")
+        Class clsObj = null;
+        try {
+            clsObj = Class.forName(tokenType);
+        } catch (Exception e) {
+            LOGGER.error("Invalid token type, cmd=" + cmd, e);
+            throw new IllegalArgumentException("Invalid token type");
+        }
+        
+        @SuppressWarnings("unchecked")
+        Object obj = WebTokenGenerator.getInstance().fromWebToken(webToken, clsObj);
+        
+        RestResponse response = new RestResponse(StringHelper.toJsonString(obj));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        
+        return response;
+    }
+    
+    /**
+     * 
+     * 解开content server产生的路径
+     * @return
+     */
+    @RequestMapping("decodeContentPath")
+    @RestReturn(String.class)
+    public RestResponse decodeContentPath(@Valid DecodeContentPathCommand cmd) {        
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        
+        String path = cmd.getPath();
+        if(path == null || path.trim().length() == 0) {
+            LOGGER.error("Content path may not be empty, cmd=" + cmd);
+            throw new IllegalArgumentException("Content path may not be empty");
+        }
+        
+        String url = com.everhomes.contentserver.Generator.decodeUrl(path);
+        RestResponse response = new RestResponse(url);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        
+        return response;
     }
 }

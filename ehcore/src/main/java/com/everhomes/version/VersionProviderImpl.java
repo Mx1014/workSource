@@ -1,9 +1,11 @@
 package com.everhomes.version;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -24,6 +26,9 @@ import com.everhomes.server.schema.tables.pojos.EhVersionRealm;
 import com.everhomes.server.schema.tables.pojos.EhVersionUpgradeRules;
 import com.everhomes.server.schema.tables.pojos.EhVersionUrls;
 import com.everhomes.server.schema.tables.pojos.EhVersionedContent;
+import com.everhomes.server.schema.tables.records.EhUserLikesRecord;
+import com.everhomes.server.schema.tables.records.EhVersionUrlsRecord;
+import com.everhomes.user.UserLike;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.Version;
@@ -108,7 +113,7 @@ public class VersionProviderImpl implements VersionProvider {
         return null;
     }
 
-    @Cacheable(value="VersionRealm-Name", key="#realmName", unless="#result == null")
+    @Cacheable(value="VersionRealm-Name", key="{#namespaceId, #realmName}", unless="#result == null")
     @Override
     public VersionRealm findVersionRealmByName(String realmName) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -399,20 +404,23 @@ public class VersionProviderImpl implements VersionProvider {
     @Cacheable(value="VersionUrl-Version", key="{#realmName, #targetVersion}", unless="#result == null")
     @Override
     public VersionUrl findVersionUrlByVersion(String realmName, String targetVersion) {
-        
+    	List<VersionUrl> versionUrls = new ArrayList<VersionUrl>();
         VersionProvider self = PlatformContext.getComponent(VersionProvider.class);
         VersionRealm realm = self.findVersionRealmByName(realmName);
         if(realm == null)
             return null;
         
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
-
-        List<VersionUrl> versionUrls = context.select().from(Tables.EH_VERSION_URLS)
-            .where(Tables.EH_VERSION_URLS.REALM_ID.eq(realm.getId()))
-            .and(Tables.EH_VERSION_URLS.TARGET_VERSION.eq(targetVersion))
-            .fetch().map((record)-> {
-                return ConvertHelper.convert(record, VersionUrl.class);
-            });
+        SelectQuery<EhVersionUrlsRecord> query = context.selectQuery(Tables.EH_VERSION_URLS);
+        query.addConditions(Tables.EH_VERSION_URLS.REALM_ID.eq(realm.getId()));
+        if(targetVersion != null)
+            query.addConditions(Tables.EH_VERSION_URLS.TARGET_VERSION.eq(targetVersion));
+        
+        query.addOrderBy(Tables.EH_VERSION_URLS.TARGET_VERSION.desc());
+        query.fetch().map((r)-> { 
+        	versionUrls.add(ConvertHelper.convert(r, VersionUrl.class));
+        	return null;
+        });
         
         if(versionUrls.size() > 0)
             return versionUrls.get(0);

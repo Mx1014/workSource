@@ -9,6 +9,8 @@ import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectJoinStep;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +18,8 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.rest.launchpad.LaunchPadLayoutDTO;
+import com.everhomes.rest.launchpad.LaunchPadLayoutStatus;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhLaunchPadItemsDao;
 import com.everhomes.server.schema.tables.daos.EhLaunchPadLayoutsDao;
@@ -25,9 +29,10 @@ import com.everhomes.util.ConvertHelper;
 
 @Component
 public class LaunchPadProviderImpl implements LaunchPadProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(LaunchPadProvider.class);
+
 	@Autowired
 	private DbProvider dbProvider;
-
 	@Override
 	public void createLaunchPadItem(LaunchPadItem item) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -140,7 +145,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 	}
 
 	@Override
-	public List<LaunchPadLayout> findLaunchPadItemsByVersionCode(String name,long versionCode) {
+	public List<LaunchPadLayout> findLaunchPadItemsByVersionCode(Integer namespaceId, String sceneType, String name,long versionCode) {
 		List<LaunchPadLayout> layouts = new ArrayList<LaunchPadLayout>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadLayouts.class));
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_LAUNCH_PAD_LAYOUTS);
@@ -148,16 +153,26 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		if(versionCode != 0){
 			condition = condition.and(Tables.EH_LAUNCH_PAD_LAYOUTS.MIN_VERSION_CODE.lessOrEqual(versionCode));
 		}
+
+        condition = condition.and(Tables.EH_LAUNCH_PAD_LAYOUTS.NAMESPACE_ID.eq(namespaceId));
+        condition = condition.and(Tables.EH_LAUNCH_PAD_LAYOUTS.SCENE_TYPE.eq(sceneType));
 		condition = condition.and(Tables.EH_LAUNCH_PAD_LAYOUTS.STATUS.eq(LaunchPadLayoutStatus.ACTIVE.getCode()));
+
+        
 		step.where(condition).orderBy(Tables.EH_LAUNCH_PAD_LAYOUTS.VERSION_CODE.desc()).fetch().map((r) ->{
 			layouts.add(ConvertHelper.convert(r, LaunchPadLayout.class));
 			return null;
-		});
+		});        
+		
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query launch pad items by version code, sql=" + step.getSQL());
+            LOGGER.debug("Query launch pad items by version code, bindValues=" + step.getBindValues());
+        }
 
 		return layouts;
 	}
 	@Override
-	public List<LaunchPadItem> findLaunchPadItemsByTagAndScope(String itemLocation,String itemGroup,Byte scopeCode,long scopeId,List<String> tags){
+	public List<LaunchPadItem> findLaunchPadItemsByTagAndScope(Integer namespaceId, String sceneType, String itemLocation,String itemGroup,Byte scopeCode,long scopeId,List<String> tags){
 		List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_LAUNCH_PAD_ITEMS);
@@ -173,10 +188,17 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		}else{
 		    condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.TAG.isNull().or(Tables.EH_LAUNCH_PAD_ITEMS.TAG.eq("")));
 		}
+        condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.NAMESPACE_ID.eq(namespaceId));
+        condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCENE_TYPE.eq(sceneType));
 		step.where(condition).fetch().map((r) ->{
 			items.add(ConvertHelper.convert(r, LaunchPadItem.class));
 			return null;
-		});
+		});       
+        
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query launch pad items by tag and scope, sql=" + step.getSQL());
+            LOGGER.debug("Query launch pad items by tag and scope, bindValues=" + step.getBindValues());
+        }
 
 		return items;
 	}
@@ -226,14 +248,14 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		return list;
 	}
     @Override
-    public List<LaunchPadItem> findLaunchPadItemByTargetAndScope(String targetType, long targetId,Byte scopeCode, long scopeId) {
+    public List<LaunchPadItem> findLaunchPadItemByTargetAndScope(String targetType, long targetId,Byte scopeCode, long scopeId,Integer namesapceId) {
         List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
         SelectJoinStep<Record> step = context.select().from(Tables.EH_LAUNCH_PAD_ITEMS);
 
-        Condition condition = null;
+        Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.NAMESPACE_ID.eq(namesapceId);
         if(scopeCode != null){
-            condition = Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(scopeCode);
+            condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(scopeCode));
             if(scopeId != 0)
                 condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_ID.eq(scopeId));
         }
@@ -241,7 +263,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
         if(targetType != null){
             if(condition != null){
                 condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.TARGET_TYPE.eq(targetType));
-                if(targetId != 0)
+                if(targetId != 0) 
                     condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.TARGET_ID.eq(targetId));
             }else{
                 condition = Tables.EH_LAUNCH_PAD_ITEMS.TARGET_TYPE.eq(targetType);
@@ -281,12 +303,14 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
         
     }
 	@Override
-	public List<LaunchPadItem> findLaunchPadItem(String itemGroup,String itemName, Byte scopeCode, long scopeId) {
+	public List<LaunchPadItem> findLaunchPadItem(Integer nameSpaceId,String itemGroup,String itemName, Byte scopeCode, long scopeId) {
 		List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadItems.class));
         SelectJoinStep<Record> step = context.select().from(Tables.EH_LAUNCH_PAD_ITEMS);
 
         Condition condition = Tables.EH_LAUNCH_PAD_ITEMS.ITEM_GROUP.eq(itemGroup).and(Tables.EH_LAUNCH_PAD_ITEMS.ITEM_NAME.eq(itemName));
+        if(nameSpaceId!=null)
+        	condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.NAMESPACE_ID.eq(nameSpaceId));
         if(scopeCode != null){
             condition = condition.and(Tables.EH_LAUNCH_PAD_ITEMS.SCOPE_CODE.eq(scopeCode));
             if(scopeId != 0)

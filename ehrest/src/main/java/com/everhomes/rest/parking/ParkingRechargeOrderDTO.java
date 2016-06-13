@@ -1,0 +1,252 @@
+// @formatter:off
+package com.everhomes.rest.parking;
+
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+
+import com.everhomes.util.StringHelper;
+
+/**
+ * <ul>
+ * <li>id: 订单ID</li>
+ * <li>ownerType: 归属的类型，{@link com.everhomes.rest.parking.ParkingOwnerType}</li>
+ * <li>ownerId: 归属的ID，如小区ID</li>
+ * <li>parkingLotId: 停车场ID</li>
+ * <li>plateNumber: 车牌号</li>
+ * <li>plateOwnerName: 车主名称</li>
+ * <li>plateOwnerPhone: 车主手机号</li>
+ * <li>payerEnterpriseId: 付款人所在公司</li>
+ * <li>payerUid: 付款人用户ID</li>
+ * <li>payerName: 付款人名称</li>
+ * <li>payerPhone: 付款人手机</li>
+ * <li>paidType: 支付方式,10001-支付宝，10002-微信</li>
+ * <li>paidTime: 付款时间</li>
+ * <li>vendorName: 厂商名称（用于作逻辑，不用于显示），{@link com.everhomes.rest.parking.ParkingLotVendor}</li>
+ * <li>cardNumber: 卡号</li>
+ * <li>rateToken: 费率ID，不同厂商有不同类型的ID</li>
+ * <li>rateName: 费率名称</li>
+ * <li>monthCount: 充值月数，不一定每个厂商都有</li>
+ * <li>price: 价格</li>
+ * <li>status: 订单状态，{@link com.everhomes.rest.parking.ParkingRechargeOrderStatus}</li>
+ * <li>rechargeStatus: 充值状态， {@link com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus}</li>
+ * <li>rechargeTime: 充值时间</li>
+ * <li>createTime: 订单创建时间</li>
+ * </ul>
+ */
+public class ParkingRechargeOrderDTO {
+    private Long id;
+    private String ownerType;
+    private Long ownerId;
+    private Long parkingLotId;
+    private String plateNumber;
+    private String plateOwnerName;
+    private String plateOwnerPhone;
+    private Long payerEnterpriseId;
+    private Long payerUid;
+    private String payerName;
+    private String payerPhone;
+    private String paidType;
+    private Timestamp paidTime;
+    private String vendorName;
+    private String cardNumber;
+    private String rateToken;
+    private String rateName;
+    private BigDecimal monthCount;
+    private BigDecimal price;
+    private Byte status;
+    private Byte rechargeStatus;
+    private Timestamp rechargeTime;
+    private Timestamp createTime;
+    
+    public ParkingRechargeOrderDTO() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public Long getParkingLotId() {
+        return parkingLotId;
+    }
+
+    public void setParkingLotId(Long parkingLotId) {
+        this.parkingLotId = parkingLotId;
+    }
+
+    public String getPlateNumber() {
+        return plateNumber;
+    }
+
+    public void setPlateNumber(String plateNumber) {
+        this.plateNumber = plateNumber;
+    }
+
+    public String getPlateOwnerName() {
+        return plateOwnerName;
+    }
+
+    public void setPlateOwnerName(String plateOwnerName) {
+        this.plateOwnerName = plateOwnerName;
+    }
+
+    public String getPlateOwnerPhone() {
+        return plateOwnerPhone;
+    }
+
+    public void setPlateOwnerPhone(String plateOwnerPhone) {
+        this.plateOwnerPhone = plateOwnerPhone;
+    }
+
+    public Long getPayerEnterpriseId() {
+        return payerEnterpriseId;
+    }
+
+    public void setPayerEnterpriseId(Long payerEnterpriseId) {
+        this.payerEnterpriseId = payerEnterpriseId;
+    }
+
+    public Long getPayerUid() {
+        return payerUid;
+    }
+
+    public void setPayerUid(Long payerUid) {
+        this.payerUid = payerUid;
+    }
+
+    public String getPayerName() {
+        return payerName;
+    }
+
+    public void setPayerName(String payerName) {
+        this.payerName = payerName;
+    }
+
+    public String getPayerPhone() {
+        return payerPhone;
+    }
+
+    public void setPayerPhone(String payerPhone) {
+        this.payerPhone = payerPhone;
+    }
+
+    public Timestamp getPaidTime() {
+        return paidTime;
+    }
+
+    public void setPaidTime(Timestamp paidTime) {
+        this.paidTime = paidTime;
+    }
+
+    public String getVendorName() {
+        return vendorName;
+    }
+
+    public void setVendorName(String vendorName) {
+        this.vendorName = vendorName;
+    }
+
+    public String getCardNumber() {
+        return cardNumber;
+    }
+
+    public void setCardNumber(String cardNumber) {
+        this.cardNumber = cardNumber;
+    }
+
+    public String getRateToken() {
+        return rateToken;
+    }
+
+    public void setRateToken(String rateToken) {
+        this.rateToken = rateToken;
+    }
+
+    public String getRateName() {
+        return rateName;
+    }
+
+    public void setRateName(String rateName) {
+        this.rateName = rateName;
+    }
+
+    public BigDecimal getMonthCount() {
+		return monthCount;
+	}
+
+	public void setMonthCount(BigDecimal monthCount) {
+		this.monthCount = monthCount;
+	}
+
+	public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+
+    public Byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(Byte status) {
+        this.status = status;
+    }
+
+    public Byte getRechargeStatus() {
+        return rechargeStatus;
+    }
+
+    public void setRechargeStatus(Byte rechargeStatus) {
+        this.rechargeStatus = rechargeStatus;
+    }
+
+    public Timestamp getRechargeTime() {
+        return rechargeTime;
+    }
+
+    public void setRechargeTime(Timestamp rechargeTime) {
+        this.rechargeTime = rechargeTime;
+    }
+
+    public Timestamp getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Timestamp createTime) {
+        this.createTime = createTime;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+
+	public String getPaidType() {
+		return paidType;
+	}
+
+	public void setPaidType(String paidType) {
+		this.paidType = paidType;
+	}
+}

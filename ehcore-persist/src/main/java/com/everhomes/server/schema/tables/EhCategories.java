@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCategories extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhCategoriesRecord> {
 
-	private static final long serialVersionUID = 867164017;
+	private static final long serialVersionUID = 1097455686;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_categories</code>
@@ -82,6 +82,11 @@ public class EhCategories extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCategoriesRecord, java.lang.String> DESCRIPTION = createField("description", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "");
 
 	/**
+	 * The column <code>ehcore.eh_categories.namespace_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhCategoriesRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
+
+	/**
 	 * Create a <code>ehcore.eh_categories</code> table reference
 	 */
 	public EhCategories() {
@@ -116,7 +121,7 @@ public class EhCategories extends org.jooq.impl.TableImpl<com.everhomes.server.s
 	 */
 	@Override
 	public java.util.List<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhCategoriesRecord>> getKeys() {
-		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhCategoriesRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_CATEGORIES_PRIMARY, com.everhomes.server.schema.Keys.KEY_EH_CATEGORIES_U_EH_CATEGORY_NAME);
+		return java.util.Arrays.<org.jooq.UniqueKey<com.everhomes.server.schema.tables.records.EhCategoriesRecord>>asList(com.everhomes.server.schema.Keys.KEY_EH_CATEGORIES_PRIMARY);
 	}
 
 	/**

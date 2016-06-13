@@ -1,0 +1,9 @@
+//
+// EvhDepartmentType.h
+//
+
+#define EvhDepartmentType_TWG @"TWG"
+#define EvhDepartmentType_ORGS @"ORGS"
+
+///////////////////////////////////////////////////////////////////////////////
+

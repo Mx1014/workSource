@@ -109,4 +109,18 @@ public class EhOrganizationOwnersDao extends org.jooq.impl.DAOImpl<com.everhomes
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationOwners> fetchByCreateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhOrganizationOwners.EH_ORGANIZATION_OWNERS.CREATE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>namespace_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationOwners> fetchByNamespaceId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationOwners.EH_ORGANIZATION_OWNERS.NAMESPACE_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>community_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhOrganizationOwners> fetchByCommunityId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhOrganizationOwners.EH_ORGANIZATION_OWNERS.COMMUNITY_ID, values);
+	}
 }

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhEvents extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhEventsRecord> {
 
-	private static final long serialVersionUID = -787781587;
+	private static final long serialVersionUID = 216153905;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_events</code>
@@ -34,7 +34,7 @@ public class EhEvents extends org.jooq.impl.TableImpl<com.everhomes.server.schem
 	/**
 	 * The column <code>ehcore.eh_events.namespace_id</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEventsRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhEventsRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_events.subject</code>.

@@ -1,0 +1,17 @@
+//
+// EvhRecommendUserSourceType.h
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhRecommendUserSourceType
+//
+typedef enum {
+
+    EvhRecommendUserSourceType_COMMUNITY_USER = 0, 
+    EvhRecommendUserSourceType_CONTACT_USER = 1
+
+} EvhRecommendUserSourceType;
+
+///////////////////////////////////////////////////////////////////////////////
+

@@ -1,0 +1,31 @@
+package com.everhomes.rest.techpark.rental;
+ 
+/**
+ * <ul>
+ * <li>NORMAL(0): 启用</li> 
+ * <li>DISABLE(-1):停用</li> 
+ * </ul>
+ */
+public enum RentalSiteStatus {
+   
+	NORMAL((byte)0),DISABLE((byte)-1) ;
+    
+    private byte code;
+    private RentalSiteStatus(byte code) {
+        this.code = code;
+    }
+    
+    public byte getCode() {
+        return this.code;
+    }
+    
+    public static RentalSiteStatus fromCode(byte code) {
+        for(RentalSiteStatus t : RentalSiteStatus.values()) {
+            if (t.code == code) {
+                return t;
+            }
+        }
+        
+        return null;
+    }
+}

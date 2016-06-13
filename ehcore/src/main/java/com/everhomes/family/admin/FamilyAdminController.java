@@ -14,14 +14,16 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.family.ApproveMemberCommand;
 import com.everhomes.family.FamilyService;
-import com.everhomes.family.ListAllFamilyMembersCommand;
-import com.everhomes.family.ListAllFamilyMembersCommandResponse;
-import com.everhomes.family.ListWaitApproveFamilyCommand;
-import com.everhomes.family.ListWaitApproveFamilyCommandResponse;
-import com.everhomes.family.RejectMemberCommand;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.family.ApproveMemberCommand;
+import com.everhomes.rest.family.ListAllFamilyMembersCommand;
+import com.everhomes.rest.family.ListAllFamilyMembersCommandResponse;
+import com.everhomes.rest.family.ListWaitApproveFamilyCommand;
+import com.everhomes.rest.family.ListWaitApproveFamilyCommandResponse;
+import com.everhomes.rest.family.RejectMemberCommand;
+import com.everhomes.rest.family.admin.ListAllFamilyMembersAdminCommand;
+import com.everhomes.rest.family.admin.ListWaitApproveFamilyAdminCommand;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
@@ -62,8 +64,8 @@ public class FamilyAdminController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse adminApproveMember(@Valid ApproveMemberCommand cmd) {
         
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+//        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         this.familyService.adminApproveMember(cmd);
         
@@ -81,8 +83,8 @@ public class FamilyAdminController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse adminRejectMember(@Valid RejectMemberCommand cmd) {
         
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+//        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         cmd.setOperatorRole(Role.SystemAdmin);
         this.familyService.rejectMember(cmd);

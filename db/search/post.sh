@@ -1,8 +1,9 @@
 ELASTIC=elasticsearch:9200
+INDEX=everhomesv32x
 
-curl -XDELETE http://$ELASTIC/everhomesv3/_mapping/topic
+curl -XDELETE http://$ELASTIC/$INDEX/_mapping/topic
 
-curl -XPUT "http://$ELASTIC/everhomesv3/_mapping/topic" -d '
+curl -XPUT "http://$ELASTIC/$INDEX/_mapping/topic" -d '
 {
 	"topic": {
 		"properties": {
@@ -26,6 +27,7 @@ curl -XPUT "http://$ELASTIC/everhomesv3/_mapping/topic" -d '
 			"forumName":{"type":"string", "index":"no", "store":"yes"},
 			"displayName":{"type":"string", "index":"no", "store":"yes"},
             "parentPostId": {"type":"long"},
+			"namespaceId": {"type":"long"},
             "location": {
                 "type": "geo_point",
                 "geohash": true,

@@ -7,10 +7,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
-import com.everhomes.course.CourseDTO;
-import com.everhomes.course.CoursePostCommand;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.course.CourseDTO;
+import com.everhomes.rest.course.CoursePostCommand;
 
 @RestController
 @RequestMapping("/course")

@@ -1,0 +1,17 @@
+//
+// EvhEnterpriseContactEntryType.h
+//
+
+
+///////////////////////////////////////////////////////////////////////////////
+// EvhEnterpriseContactEntryType
+//
+typedef enum {
+
+    EvhEnterpriseContactEntryType_Email = 1, 
+    EvhEnterpriseContactEntryType_Mobile = 0
+
+} EvhEnterpriseContactEntryType;
+
+///////////////////////////////////////////////////////////////////////////////
+

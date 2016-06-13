@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhCommunities implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1556177156;
+	private static final long serialVersionUID = -567747500;
 
 	private java.lang.Long     id;
 	private java.lang.String   uuid;
@@ -47,6 +47,12 @@ public class EhCommunities implements java.io.Serializable {
 	private java.lang.String   stringTag3;
 	private java.lang.String   stringTag4;
 	private java.lang.String   stringTag5;
+	private java.lang.Byte     communityType;
+	private java.lang.Long     defaultForumId;
+	private java.lang.Long     feedbackForumId;
+	private java.sql.Timestamp updateTime;
+	private java.lang.Integer  namespaceId;
+	private java.lang.Double   areaSize;
 
 	public EhCommunities() {}
 
@@ -84,7 +90,13 @@ public class EhCommunities implements java.io.Serializable {
 		java.lang.String   stringTag2,
 		java.lang.String   stringTag3,
 		java.lang.String   stringTag4,
-		java.lang.String   stringTag5
+		java.lang.String   stringTag5,
+		java.lang.Byte     communityType,
+		java.lang.Long     defaultForumId,
+		java.lang.Long     feedbackForumId,
+		java.sql.Timestamp updateTime,
+		java.lang.Integer  namespaceId,
+		java.lang.Double   areaSize
 	) {
 		this.id = id;
 		this.uuid = uuid;
@@ -120,6 +132,12 @@ public class EhCommunities implements java.io.Serializable {
 		this.stringTag3 = stringTag3;
 		this.stringTag4 = stringTag4;
 		this.stringTag5 = stringTag5;
+		this.communityType = communityType;
+		this.defaultForumId = defaultForumId;
+		this.feedbackForumId = feedbackForumId;
+		this.updateTime = updateTime;
+		this.namespaceId = namespaceId;
+		this.areaSize = areaSize;
 	}
 
 	public java.lang.Long getId() {
@@ -392,5 +410,53 @@ public class EhCommunities implements java.io.Serializable {
 
 	public void setStringTag5(java.lang.String stringTag5) {
 		this.stringTag5 = stringTag5;
+	}
+
+	public java.lang.Byte getCommunityType() {
+		return this.communityType;
+	}
+
+	public void setCommunityType(java.lang.Byte communityType) {
+		this.communityType = communityType;
+	}
+
+	public java.lang.Long getDefaultForumId() {
+		return this.defaultForumId;
+	}
+
+	public void setDefaultForumId(java.lang.Long defaultForumId) {
+		this.defaultForumId = defaultForumId;
+	}
+
+	public java.lang.Long getFeedbackForumId() {
+		return this.feedbackForumId;
+	}
+
+	public void setFeedbackForumId(java.lang.Long feedbackForumId) {
+		this.feedbackForumId = feedbackForumId;
+	}
+
+	public java.sql.Timestamp getUpdateTime() {
+		return this.updateTime;
+	}
+
+	public void setUpdateTime(java.sql.Timestamp updateTime) {
+		this.updateTime = updateTime;
+	}
+
+	public java.lang.Integer getNamespaceId() {
+		return this.namespaceId;
+	}
+
+	public void setNamespaceId(java.lang.Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public java.lang.Double getAreaSize() {
+		return this.areaSize;
+	}
+
+	public void setAreaSize(java.lang.Double areaSize) {
+		this.areaSize = areaSize;
 	}
 }

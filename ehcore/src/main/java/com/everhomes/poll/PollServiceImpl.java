@@ -24,8 +24,15 @@ import com.everhomes.family.Family;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.Post;
-import com.everhomes.forum.PostContentType;
 import com.everhomes.poll.PollService;
+import com.everhomes.rest.forum.PostContentType;
+import com.everhomes.rest.poll.PollDTO;
+import com.everhomes.rest.poll.PollItemDTO;
+import com.everhomes.rest.poll.PollPostCommand;
+import com.everhomes.rest.poll.PollServiceErrorCode;
+import com.everhomes.rest.poll.PollShowResultCommand;
+import com.everhomes.rest.poll.PollShowResultResponse;
+import com.everhomes.rest.poll.PollVoteCommand;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -72,12 +79,17 @@ public class PollServiceImpl implements PollService {
             poll.setCreatorUid(user.getId());
             poll.setPollCount(0);
             poll.setPostId(postId);
-            long startTimeMs=convert(cmd.getStartTime(), "yyyy-MM-dd HH:mm:ss").getTime();
-            long endTimeMs=convert(cmd.getStopTime(), "yyyy-MM-dd HH:mm:ss").getTime();
-            poll.setStartTime(new Timestamp(startTimeMs));
-            poll.setStartTimeMs(startTimeMs);
-            poll.setEndTimeMs(endTimeMs);
-            poll.setEndTime(new Timestamp(endTimeMs));
+            // 当没有填开始时间或截止时间时会报空指针，故加上判断 by lqs 20151216
+            if(cmd.getStartTime() != null) {
+                long startTimeMs=convert(cmd.getStartTime(), "yyyy-MM-dd HH:mm:ss").getTime();
+                poll.setStartTime(new Timestamp(startTimeMs));
+                poll.setStartTimeMs(startTimeMs);
+            }
+            if(cmd.getStopTime() != null) {
+                long endTimeMs=convert(cmd.getStopTime(), "yyyy-MM-dd HH:mm:ss").getTime();
+                poll.setEndTimeMs(endTimeMs);
+                poll.setEndTime(new Timestamp(endTimeMs));
+            }
             poll.setStatus(PollStatus.Published.getCode());
             poll.setId(cmd.getId());
             pollProvider.createPoll(poll);
@@ -310,7 +322,7 @@ public class PollServiceImpl implements PollService {
         SimpleDateFormat f=new SimpleDateFormat(format);
         try {
             return f.parse(time);
-        } catch (ParseException e) {
+        } catch (Exception e) {
             return new Date();
         }
     }
@@ -330,10 +342,14 @@ public class PollServiceImpl implements PollService {
         }
         User user=UserContext.current().getUser();
         PollVote votes = pollProvider.findPollVoteByUidAndPollId(user.getId(), poll.getId());
-        dto.setStartTime(fommat.format(new Date(poll.getStartTime().getTime())).toString());
-        dto.setStopTime(fommat.format(new Date(poll.getEndTime().getTime())).toString());
-        dto.setAnonymousFlag(poll.getAnonymousFlag()==null?0:poll.getAnonymousFlag().intValue());
-        dto.setMultiChoiceFlag(poll.getMultiSelectFlag()==null?0:poll.getMultiSelectFlag().intValue());
+        if(poll.getStartTime() != null) {
+            dto.setStartTime(fommat.format(new Date(poll.getStartTime().getTime())).toString());
+        }
+        if(poll.getEndTime() != null) {
+            dto.setStopTime(fommat.format(new Date(poll.getEndTime().getTime())).toString());
+        }
+        dto.setAnonymousFlag(poll.getAnonymousFlag() == null ? 0 : poll.getAnonymousFlag().intValue());
+        dto.setMultiChoiceFlag(poll.getMultiSelectFlag() == null ? 0 : poll.getMultiSelectFlag().intValue());
         dto.setPollVoterStatus(VotedStatus.VOTED.getCode());
         dto.setPollId(poll.getId());
         if(votes==null){

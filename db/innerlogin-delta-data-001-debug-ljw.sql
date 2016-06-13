@@ -1,0 +1,1 @@
+INSERT INTO `eh_configurations`(`name`, `value`, `description`, `namespace_id`) VALUES ('biz.appKey','d80e06ca-3766-11e5-b18f-b083fe4e159f','biz.appKey',0);

@@ -6,8 +6,8 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.everhomes.messaging.MessageChannel;
-import com.everhomes.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;

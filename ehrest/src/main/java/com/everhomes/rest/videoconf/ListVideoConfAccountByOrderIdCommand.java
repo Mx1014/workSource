@@ -1,0 +1,50 @@
+package com.everhomes.rest.videoconf;
+
+import com.everhomes.util.StringHelper;
+
+
+/**
+ * <ul>
+ * <li>orderId: 订单号</li>
+ * <li>pageAnchor: 本页开始的锚点</li>
+ * <li>pageSize: 每页的数量</li>
+ * </ul>
+ */
+public class ListVideoConfAccountByOrderIdCommand {
+	
+	private Long orderId;
+	
+	private Long pageAnchor;
+	
+    private Integer pageSize;
+
+	public Long getOrderId() {
+		return orderId;
+	}
+
+	public void setOrderId(Long orderId) {
+		this.orderId = orderId;
+	}
+
+	public Long getPageAnchor() {
+		return pageAnchor;
+	}
+
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
+	}
+
+	public Integer getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
+	}
+    
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+
+}

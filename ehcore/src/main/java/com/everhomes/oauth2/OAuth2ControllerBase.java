@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.controller.WebRequestSequence;
+import com.everhomes.rest.oauth2.OAuth2ErrorResponse;
+import com.everhomes.rest.oauth2.OAuth2ServiceErrorCode;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
 

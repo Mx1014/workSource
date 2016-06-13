@@ -26,6 +26,7 @@ public class GroupQueryFilter implements QueryMaker {
     public static final String TERM_CATEGORY_PATH = "category";
     public static final String TERM_CREATORUID = "creatorUid";
     public static final String TERM_CATEGORY_ID = "categoryId";
+    public static final String TERM_NAMESPACE_ID = "namespaceId";
     
     private static final Map<String, Float> termQueryMap;
     static

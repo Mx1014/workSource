@@ -2,8 +2,6 @@
 package com.everhomes.business;
 
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -25,22 +23,13 @@ import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.RoleAssignment;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
-import com.everhomes.business.admin.BusinessAdminDTO;
-import com.everhomes.business.admin.BusinessPromoteScopeDTO;
-import com.everhomes.business.admin.CreateBusinessAdminCommand;
-import com.everhomes.business.admin.DeletePromoteBusinessAdminCommand;
-import com.everhomes.business.admin.ListBusinessesByKeywordAdminCommand;
-import com.everhomes.business.admin.ListBusinessesByKeywordAdminCommandResponse;
-import com.everhomes.business.admin.PromoteBusinessAdminCommand;
-import com.everhomes.business.admin.RecommendBusinessesAdminCommand;
+import com.everhomes.address.AddressService;
 import com.everhomes.category.Category;
-import com.everhomes.category.CategoryDTO;
 import com.everhomes.category.CategoryProvider;
-import com.everhomes.common.ScopeType;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityGeoPoint;
 import com.everhomes.community.CommunityProvider;
-import com.everhomes.community.CommunityServiceErrorCode;
+import com.everhomes.community.CommunityService;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -50,41 +39,105 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupDiscriminator;
 import com.everhomes.group.GroupProvider;
-import com.everhomes.launchpad.ActionType;
-import com.everhomes.launchpad.ApplyPolicy;
-import com.everhomes.launchpad.ItemDisplayFlag;
-import com.everhomes.launchpad.ItemTargetType;
 import com.everhomes.launchpad.LaunchPadConstants;
 import com.everhomes.launchpad.LaunchPadItem;
 import com.everhomes.launchpad.LaunchPadProvider;
-import com.everhomes.launchpad.ScaleType;
-import com.everhomes.openapi.UserServiceAddressDTO;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.oauth2.Clients;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
+import com.everhomes.rest.address.AddressType;
+import com.everhomes.rest.address.ApartmentDTO;
+import com.everhomes.rest.address.BuildingDTO;
+import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.address.ListBuildingByKeywordCommand;
+import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
+import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;
+import com.everhomes.rest.business.BaiduGeocoderResponse;
+import com.everhomes.rest.business.BusinessAsignedNamespaceCommand;
+import com.everhomes.rest.business.BusinessAssignedNamespaceVisibleFlagType;
+import com.everhomes.rest.business.BusinessAssignedScopeDTO;
+import com.everhomes.rest.business.BusinessCommand;
+import com.everhomes.rest.business.BusinessDTO;
+import com.everhomes.rest.business.BusinessFavoriteStatus;
+import com.everhomes.rest.business.BusinessRecommendStatus;
+import com.everhomes.rest.business.BusinessScope;
+import com.everhomes.rest.business.BusinessServiceErrorCode;
+import com.everhomes.rest.business.BusinessTargetType;
+import com.everhomes.rest.business.CancelFavoriteBusinessCommand;
+import com.everhomes.rest.business.DeleteBusinessCommand;
+import com.everhomes.rest.business.FavoriteBusinessCommand;
+import com.everhomes.rest.business.FavoriteBusinessDTO;
+import com.everhomes.rest.business.FavoriteBusinessesCommand;
+import com.everhomes.rest.business.FavoriteFlagType;
+import com.everhomes.rest.business.FindBusinessByIdCommand;
+import com.everhomes.rest.business.GetBusinessesByCategoryCommand;
+import com.everhomes.rest.business.GetBusinessesByCategoryCommandResponse;
+import com.everhomes.rest.business.GetBusinessesByScopeCommand;
+import com.everhomes.rest.business.GetReceivedCouponCountCommand;
+import com.everhomes.rest.business.ListBusinessByCommonityIdCommand;
+import com.everhomes.rest.business.ListBusinessByKeywordCommand;
+import com.everhomes.rest.business.ListBusinessByKeywordCommandResponse;
+import com.everhomes.rest.business.ListUserByIdentifierCommand;
+import com.everhomes.rest.business.ListUserByKeywordCommand;
+import com.everhomes.rest.business.ReSyncBusinessCommand;
+import com.everhomes.rest.business.SyncBusinessCommand;
+import com.everhomes.rest.business.SyncDeleteBusinessCommand;
+import com.everhomes.rest.business.UpdateBusinessCommand;
+import com.everhomes.rest.business.UpdateBusinessDistanceCommand;
+import com.everhomes.rest.business.UpdateReceivedCouponCountCommand;
+import com.everhomes.rest.business.UserFavoriteCommand;
+import com.everhomes.rest.business.admin.BusinessAdminDTO;
+import com.everhomes.rest.business.admin.BusinessPromoteScopeDTO;
+import com.everhomes.rest.business.admin.CreateBusinessAdminCommand;
+import com.everhomes.rest.business.admin.DeletePromoteBusinessAdminCommand;
+import com.everhomes.rest.business.admin.ListBusinessesByKeywordAdminCommand;
+import com.everhomes.rest.business.admin.ListBusinessesByKeywordAdminCommandResponse;
+import com.everhomes.rest.business.admin.PromoteBusinessAdminCommand;
+import com.everhomes.rest.business.admin.RecommendBusinessesAdminCommand;
+import com.everhomes.rest.category.CategoryDTO;
+import com.everhomes.rest.common.ScopeType;
+import com.everhomes.rest.community.CommunityServiceErrorCode;
+import com.everhomes.rest.community.GetCommunitiesByNameAndCityIdCommand;
+import com.everhomes.rest.community.GetCommunityByIdCommand;
+import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.rest.launchpad.ApplyPolicy;
+import com.everhomes.rest.launchpad.ItemDisplayFlag;
+import com.everhomes.rest.launchpad.ItemTargetType;
+import com.everhomes.rest.launchpad.ScaleType;
+import com.everhomes.rest.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.region.ListRegionByKeywordCommand;
+import com.everhomes.rest.region.RegionAdminStatus;
+import com.everhomes.rest.region.RegionDTO;
+import com.everhomes.rest.region.RegionScope;
+import com.everhomes.rest.ui.launchpad.FavoriteBusinessesBySceneCommand;
+import com.everhomes.rest.ui.user.UserProfileDTO;
+import com.everhomes.rest.user.GetUserDefaultAddressCommand;
+import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.ListUserCommand;
+import com.everhomes.rest.user.UserDtoForBiz;
+import com.everhomes.rest.user.UserInfo;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.GetUserDefaultAddressCommand;
-import com.everhomes.user.IdentifierType;
-import com.everhomes.user.ListUserCommand;
 import com.everhomes.user.SignupToken;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserActivityService;
 import com.everhomes.user.UserContext;
-import com.everhomes.user.UserDtoForBiz;
 import com.everhomes.user.UserGroup;
 import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProfile;
+import com.everhomes.user.UserProfileContstant;
 import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
 import com.everhomes.user.UserServiceAddress;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.SortOrder;
 import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
 import com.everhomes.util.WebTokenGenerator;
-
-
-
-
 
 @Component
 public class BusinessServiceImpl implements BusinessService {
@@ -96,6 +149,8 @@ public class BusinessServiceImpl implements BusinessService {
 	private static final String BUSINESS_IMAGE_URL = "business.image.url";
 	private static final long CATEOGRY_RECOMMEND = 9999L;
 	private static final String CATEOGRY_RECOMMEND_NAME = "推荐";
+	private static final String BAIDU_MAP_URI = "baidu.map.uri";
+	private static final String BAIDU_MAP_ACCESS_KEY = "baidu.map.access.key";
 	@Autowired
 	private BusinessProvider businessProvider;
 	@Autowired
@@ -115,8 +170,6 @@ public class BusinessServiceImpl implements BusinessService {
 	@Autowired
 	private UserActivityService userActivityService;
 	@Autowired
-	private RegionProvider regionProvider;
-	@Autowired
 	private LaunchPadProvider launchPadProvider;
 	@Autowired
 	private AddressProvider addressProvider;
@@ -124,43 +177,183 @@ public class BusinessServiceImpl implements BusinessService {
 	private GroupProvider groupProvider;
 	@Autowired
 	private AclProvider aclProvider;
+	@Autowired
+	private UserService userService;
+	
+	@Autowired
+	private RegionProvider regionProvider;
+	@Autowired
+	private CommunityService communityService;
+	@Autowired
+	private AddressService addressService;
 
 	@Override
 	public void syncBusiness(SyncBusinessCommand cmd) {
-		if(cmd.getUserId() == null)
+		if(cmd.getUserId() == null){
+			LOGGER.error("Invalid paramter userId,userId is null");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"Invalid paramter userId,userId is null");
-
+		}
+		if(StringUtils.isBlank(cmd.getTargetId())){
+			LOGGER.error("Invalid paramter targetId,targetId is null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid paramter targetId,targetId is null");
+		}
 		User user = userProvider.findUserById(cmd.getUserId());
 		if(user == null){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"Invalid paramter userId,userId is not found");
 		}
-		if(cmd.getTargetId() == null || cmd.getTargetId().trim().equals("")){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Invalid paramter targetId,targetId is null");
-		}
 		long userId = user.getId();
 		this.dbProvider.execute((TransactionStatus status) -> {
 			Business business = this.businessProvider.findBusinessByTargetId(cmd.getTargetId());
-			if(LOGGER.isDebugEnabled()){
-				if(business == null)
-					LOGGER.info("syncBusiness-business=null");
-				else
-					LOGGER.info("syncBusiness-business="+StringHelper.toJsonString(business));
-			}
-
 			if(business == null){
 				business = createBusiness(cmd, userId);
 			}else{
 				updateBusiness(cmd, business);
 			}
-
 			if(cmd.getCategroies() != null && !cmd.getCategroies().isEmpty()){
 				createBusinessCategories(business, cmd.getCategroies());
 			}
+			if(cmd.getNamespaceId()!=null)
+				createBusinessAssignedNamespaceOnDelOther(business.getId(),cmd.getNamespaceId());
+			if(cmd.getScopeType()!=null){
+				if(cmd.getScopeType().byteValue()==ScopeType.ALL.getCode()){
+					createBusinessAssignedScopeOnDelOther(business.getId(),ScopeType.ALL.getCode(),0L);
+				}
+				else if(cmd.getScopeType().byteValue()==ScopeType.CITY.getCode()){
+					Clients client = new Clients();
+					String baiduMapUri = configurationProvider.getValue(BAIDU_MAP_URI, "http://api.map.baidu.com");
+					String baiduMapAccessKey = configurationProvider.getValue(BAIDU_MAP_ACCESS_KEY, "9E2825184e77d546b768bbfbf63050f8");
+					String uri = String.format("%s/geocoder/v2/?ak=%s&location=%s,%s&output=json&pois=0",baiduMapUri,baiduMapAccessKey,cmd.getLatitude(),cmd.getLongitude());
+					String jsonResponse = client.restCall("GET", uri, null, null, null);
+					BaiduGeocoderResponse response = (BaiduGeocoderResponse) StringHelper.fromJsonString(jsonResponse, BaiduGeocoderResponse.class);
+					String province = response.getResult().getAddressComponent().getProvince();
+					String city = response.getResult().getAddressComponent().getCity();
+					Region region = regionProvider.findRegionByPath("/"+province.subSequence(0, province.length()-1)+"/"+city);
+					createBusinessAssignedScopeOnDelOther(business.getId(),ScopeType.CITY.getCode(),region.getId());
+				}
+				else{
+					List<BusinessAssignedScope> list = businessProvider.listBusinessAssignedScopeByOwnerId(business.getId());
+					if(list!=null&&!list.isEmpty())
+						for(BusinessAssignedScope r:list)
+							businessProvider.deleteBusinessAssignedScope(r.getId());
+				}
+			}
 			return true;
 		});
+	}
+	
+	@Override
+	public void reSyncBusiness(ReSyncBusinessCommand cmd) {
+		if(cmd.getUserId() == null){
+			LOGGER.error("Invalid paramter userId,userId is null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid paramter userId,userId is null");
+		}
+		if(StringUtils.isBlank(cmd.getTargetId())){
+			LOGGER.error("Invalid paramter targetId,targetId is null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid paramter targetId,targetId is null");
+		}
+		User user = userProvider.findUserById(cmd.getUserId());
+		if(user == null){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid paramter userId,userId is not found");
+		}
+		long userId = user.getId();
+		this.dbProvider.execute((TransactionStatus status) -> {
+			Business business = this.businessProvider.findBusinessByTargetId(cmd.getTargetId());
+			if(business == null){
+				business = createBusiness(cmd, userId);
+			}else{
+				updateBusiness(cmd, business);
+			}
+			if(cmd.getCategroies() != null && !cmd.getCategroies().isEmpty()){
+				createBusinessCategories(business, cmd.getCategroies());
+			}
+			reCreateBusinessAssignedNamespaceOnDelOther(business.getId(),cmd.getNamespaceIds());
+			if(cmd.getScopeType()!=null){
+				if(cmd.getScopeType().byteValue()==ScopeType.ALL.getCode()){
+					createBusinessAssignedScopeOnDelOther(business.getId(),ScopeType.ALL.getCode(),0L);
+				}
+				else if(cmd.getScopeType().byteValue()==ScopeType.CITY.getCode()){
+					Clients client = new Clients();
+					String baiduMapUri = configurationProvider.getValue(BAIDU_MAP_URI, "http://api.map.baidu.com");
+					String baiduMapAccessKey = configurationProvider.getValue(BAIDU_MAP_ACCESS_KEY, "9E2825184e77d546b768bbfbf63050f8");
+					String uri = String.format("%s/geocoder/v2/?ak=%s&location=%s,%s&output=json&pois=0",baiduMapUri,baiduMapAccessKey,cmd.getLatitude(),cmd.getLongitude());
+					String jsonResponse = client.restCall("GET", uri, null, null, null);
+					BaiduGeocoderResponse response = (BaiduGeocoderResponse) StringHelper.fromJsonString(jsonResponse, BaiduGeocoderResponse.class);
+					String province = response.getResult().getAddressComponent().getProvince();
+					String city = response.getResult().getAddressComponent().getCity();
+					Region region = regionProvider.findRegionByPath("/"+province.subSequence(0, province.length()-1)+"/"+city);
+					createBusinessAssignedScopeOnDelOther(business.getId(),ScopeType.CITY.getCode(),region.getId());
+				}
+				else{
+					List<BusinessAssignedScope> list = businessProvider.listBusinessAssignedScopeByOwnerId(business.getId());
+					if(list!=null&&!list.isEmpty())
+						for(BusinessAssignedScope r:list)
+							businessProvider.deleteBusinessAssignedScope(r.getId());
+				}
+			}
+			return true;
+		});
+	}
+	
+	private void reCreateBusinessAssignedNamespaceOnDelOther(Long ownerId,List<Integer> namespaceIds) {
+		this.deleteBusinessAssignedNamespaces(ownerId);
+		if(namespaceIds!=null&&!namespaceIds.isEmpty())
+			for(Integer namespaceId:namespaceIds)
+				createBusinessAssignedNamespace(ownerId,namespaceId);
+	}
+
+	private void deleteBusinessAssignedNamespaces(Long ownerId) {
+		List<BusinessAssignedNamespace> list = businessProvider.listBusinessAssignedNamespaceByOwnerId(ownerId,null);
+		if(list!=null&&!list.isEmpty())
+			for(BusinessAssignedNamespace r:list)
+				businessProvider.deleteBusinessAssignedNamespace(r);
+	}
+
+	private void createBusinessAssignedNamespaceOnDelOther(Long ownerId,Integer namespaceId) {
+		List<BusinessAssignedNamespace> list = businessProvider.listBusinessAssignedNamespaceByOwnerId(ownerId,null);
+		if(list!=null&&!list.isEmpty())
+			for(BusinessAssignedNamespace r:list)
+				businessProvider.deleteBusinessAssignedNamespace(r);
+		createBusinessAssignedNamespace(ownerId,namespaceId);
+	}
+
+	private void createBusinessAssignedScopeOnDelOther(Long ownerId, Byte scopeCode, Long scopeId) {
+		List<BusinessAssignedScope> list = businessProvider.listBusinessAssignedScopeByOwnerId(ownerId);
+		if(list!=null&&!list.isEmpty())
+			for(BusinessAssignedScope r:list)
+				businessProvider.deleteBusinessAssignedScope(r.getId());
+		createBusinessAssignedScope(ownerId,scopeCode,scopeId);
+	}
+
+	private void createBusinessAssignedScope(Long ownerId, Byte scopeCode, Long scopeId) {
+		BusinessAssignedScope scope = new BusinessAssignedScope();
+		scope = new BusinessAssignedScope();
+		scope.setOwnerId(ownerId);
+		scope.setScopeCode(scopeCode);
+		scope.setScopeId(scopeId);
+		businessProvider.createBusinessAssignedScope(scope);
+	}
+
+	private void createBusinessAssignedNamespace(Long businessId, Integer namespaceId) {
+		BusinessAssignedNamespace bizNamespace = businessProvider.findBusinessAssignedNamespaceByNamespace(businessId,namespaceId,null);
+		if(bizNamespace!=null){
+			if(bizNamespace.getVisibleFlag().byteValue()!=BusinessAssignedNamespaceVisibleFlagType.VISIBLE.getCode()){
+				bizNamespace.setVisibleFlag(BusinessAssignedNamespaceVisibleFlagType.VISIBLE.getCode());
+				businessProvider.updateBusinessAssignedNamespace(bizNamespace);
+			}
+		}else{
+			bizNamespace = new BusinessAssignedNamespace();
+			bizNamespace.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			bizNamespace.setNamespaceId(namespaceId);
+			bizNamespace.setOwnerId(businessId);
+			bizNamespace.setVisibleFlag(BusinessAssignedNamespaceVisibleFlagType.VISIBLE.getCode());
+			businessProvider.createBusinessAssignedNamespace(bizNamespace);
+		}
 	}
 
 	private Business createBusiness(BusinessCommand cmd, long userId){
@@ -245,172 +438,223 @@ public class BusinessServiceImpl implements BusinessService {
 
 	@Override
 	public GetBusinessesByCategoryCommandResponse getBusinessesByCategory(GetBusinessesByCategoryCommand cmd) {
+		long startTime = System.currentTimeMillis();
 		if(cmd.getCategoryId() == null){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"Invalid paramter categoryId,categoryId is null");
 		}
-		if(cmd.getCommunityId() == null){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Invalid paramter communityId,communityId is null");
+		GetBusinessesByCategoryCommandResponse response = new GetBusinessesByCategoryCommandResponse();
+		int pageOffset = cmd.getPageOffset() == null ? 1 : cmd.getPageOffset();
+		int pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size", 
+				AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
+
+		Long userId = UserContext.current().getUser().getId();
+		Integer namespaceId = UserContext.current().getNamespaceId();
+		//域空间可见
+		List<Long> businessNamespaceOwnerIds = listBusinessAssignedNamespaceIdByNamespaceId(namespaceId,BusinessAssignedNamespaceVisibleFlagType.VISIBLE.getCode());
+		if(businessNamespaceOwnerIds==null||businessNamespaceOwnerIds.isEmpty()){
+			LOGGER.debug("businessAssignedNamespaceOwnerIds is empty.namespaceId="+namespaceId);
+			return null;
 		}
+		//查全国，小区，城市,附近5000米可见
 		Community community = communityProvider.findCommunityById(cmd.getCommunityId());
 		if(community == null){
-			LOGGER.error("Community is not exists,communityId=" + cmd.getCommunityId());
+			LOGGER.error("Invalid paramter communityId,community is not exists.,communityId=" + cmd.getCommunityId());
 			throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST, 
-					"Invalid paramter communityId,communityId is not exists.");
+					"Invalid paramter communityId,community is not exists.");
 		}
-
-		if(LOGGER.isDebugEnabled()){
-			LOGGER.info("getBusinessesByCategory-community="+StringHelper.toJsonString(community));
-		}
-
-		User user = UserContext.current().getUser();
-		long userId = user.getId();
-		long startTime = System.currentTimeMillis();
-
-		GetBusinessesByCategoryCommandResponse response = new GetBusinessesByCategoryCommandResponse();
-		//只作校验用
-		//        List<BusinessCategory> busineseCategories = this.businessProvider.findBusinessCategoriesByCategory(cmd.getCategoryId(),offset,pageSize);
-		//        if(busineseCategories == null || busineseCategories.isEmpty())
-		//            return response;
-
-		List<CommunityGeoPoint> points = communityProvider.listCommunityGeoPoints(cmd.getCommunityId());
+		//CommunityGeoPoint
+		List<CommunityGeoPoint> points = communityProvider.listCommunityGeoPoints(community.getId());
 		if(points == null || points.isEmpty()){
-			LOGGER.error("Community is not exists geo points,communityId=" + cmd.getCommunityId());
-			return response;
+			LOGGER.error("Community geo points is not exists,communityId=" + community.getId());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Community geo points is not exists.");
 		}
-
-		if(LOGGER.isDebugEnabled()){
-			LOGGER.info("getBusinessesByCategory-points="+StringHelper.toJsonString(points));
-		}
-
 		CommunityGeoPoint point = points.get(0);
-		final double lat = point != null ? point.getLatitude() : 0;
-		final double lon = point != null ? point.getLongitude() : 0;
-
+		final double lat = point.getLatitude();
+		final double lon = point.getLongitude();
 		List<String> geoHashList = getGeoHashCodeList(lat, lon);
-		List<Business> businesses = null;
-
-		if(LOGGER.isDebugEnabled()){
-			LOGGER.info("getBusinessesByCategory-geoHashList="+StringHelper.toJsonString(geoHashList));
-		}
-
-		//recommend to user
-		List<Long> recommendBizIds = this.businessProvider.findBusinessAssignedScopeByScope(community.getCityId(),cmd.getCommunityId()).stream()
+		//recommendBizIds
+		long communityId = community.getId();
+		long cityId = community.getCityId();
+		List<Long> recommendBizIds = this.businessProvider.listBusinessAssignedScopeByScope(cityId,communityId,businessNamespaceOwnerIds).stream()
 				.map(r->r.getOwnerId()).collect(Collectors.toList());
-
-		if(LOGGER.isDebugEnabled()){
-			if(recommendBizIds == null)
-				LOGGER.info("getBusinessesByCategory-recommendBizIds=null");
-			else
-				LOGGER.info("getBusinessesByCategory-recommendBizIds="+StringHelper.toJsonString(recommendBizIds));
-		}
-
-		//查询推荐列表
-		if(cmd.getCategoryId() == CATEOGRY_RECOMMEND){
-			businesses = this.businessProvider.findBusinessByIds(recommendBizIds);
-		}else{
-			//获取指定类型的服务
-			List<Long> categoryIds = this.categoryProvider.getBusinessSubCategories(cmd.getCategoryId());
-
-			if(LOGGER.isDebugEnabled()){
-				LOGGER.info("getBusinessesByCategory-categoryIds="+StringHelper.toJsonString(categoryIds));
-			}
-
-			businesses = this.businessProvider.findBusinessByCategroy(categoryIds,geoHashList);
-		}
-
-		if(LOGGER.isDebugEnabled()){
-			if(businesses == null)
-				LOGGER.info("getBusinessesByCategory-businesses=null");
-			else
-				LOGGER.info("getBusinessesByCategory-businesses="+StringHelper.toJsonString(businesses));
-		}
-
-		Category category = categoryProvider.findCategoryById(cmd.getCategoryId());
-		if(cmd.getCategoryId() == CATEOGRY_RECOMMEND){
-			category = new Category();
-			category.setId(CATEOGRY_RECOMMEND);
-			category.setName(CATEOGRY_RECOMMEND_NAME);
-		}
-		//user favorite
-		//        List<Long> favoriteBizIds = userActivityProvider.findFavorite(userId).stream()
-		//                .filter(r -> r.getTargetType().equalsIgnoreCase("biz")).map(r->r.getTargetId()).collect(Collectors.toList());
-		List<Long> favoriteBizIds = getFavoriteBizIds(userId, cmd.getCommunityId(), community.getCityId());
-
-		if(LOGGER.isDebugEnabled()){
-			if(recommendBizIds == null)
-				LOGGER.info("getBusinessesByCategory-favoriteBizIds=null");
-			else
-				LOGGER.info("getBusinessesByCategory-favoriteBizIds="+StringHelper.toJsonString(favoriteBizIds));
-		}
-
-		//final String businessHomeUrl = configurationProvider.getValue(BUSINESS_HOME_URL, "");
+		//获取指定类型的服务
+		List<Long> categoryIds = categoryProvider.getBusinessSubCategories(cmd.getCategoryId());
+		List<Business> scopeBusinesses = filterBusinessByCategorysAndBizIds(recommendBizIds,categoryIds);
+		List<Business> geoBusinesses = businessProvider.listBusinessByCategroys(categoryIds,geoHashList,businessNamespaceOwnerIds);
+		List<Business> businesses = filterBusinessByDistance(scopeBusinesses,geoBusinesses,lat,lon);
+		//组装
 		final String businessDetailUrl = configurationProvider.getValue(BUSINESS_DETAIL_URL, "");
-		//final String authenticatePrefix = configurationProvider.getValue(AUTHENTICATE_PREFIX_URL, "");
 		final String prefixUrl = configurationProvider.getValue(PREFIX_URL, "");
 		final String imageUrl = configurationProvider.getValue(BUSINESS_IMAGE_URL, "");
+		Category c = categoryProvider.findCategoryById(cmd.getCategoryId());
+		//favoriteBizIds
+		List<Long> favoriteBizIds = getFavoriteBizIds(userId, communityId,cityId,namespaceId);
 		List<BusinessDTO> dtos = new ArrayList<BusinessDTO>();
-		final Category c = category;
-
-		//从算法过滤的范围中再缩小范围
-		businesses = this.filterDistance(businesses,lat,lon,recommendBizIds);
-		
 		final Integer [] favoriteCount = new Integer [1];
 		favoriteCount[0] = 0;
 
-		businesses.forEach(r ->{
-			BusinessDTO dto = ConvertHelper.convert(r, BusinessDTO.class);
-			List<CategoryDTO> categories = new ArrayList<>();
-			categories.add(ConvertHelper.convert(c, CategoryDTO.class));
-			dto.setCategories(categories);
-			dto.setLogoUrl(processLogoUrl(r, userId,imageUrl));
-			dto.setUrl(processUrl(r,prefixUrl,businessDetailUrl));
-			if(favoriteBizIds != null && favoriteBizIds.contains(r.getId())){
-				dto.setFavoriteStatus(BusinessFavoriteStatus.FAVORITE.getCode());
-				favoriteCount[0] += 1;
-			}
-			else{
-				dto.setFavoriteStatus(BusinessFavoriteStatus.NONE.getCode());
-			}
-
-			if(recommendBizIds != null && recommendBizIds.contains(r.getId())){
-				dto.setRecommendStatus(BusinessRecommendStatus.RECOMMEND.getCode());
-				//删除掉已在列表中的
-				recommendBizIds.remove(r.getId());
-			}
-			else
+		if(businesses!=null&&!businesses.isEmpty()){
+			businesses.forEach(r ->{
+				BusinessDTO dto = ConvertHelper.convert(r, BusinessDTO.class);
+				List<CategoryDTO> categories = new ArrayList<>();
+				categories.add(ConvertHelper.convert(c, CategoryDTO.class));
+				dto.setCategories(categories);
+				dto.setLogoUrl(processLogoUrl(r, userId,imageUrl));
+				dto.setUrl(processUrl(r,prefixUrl,businessDetailUrl));
 				dto.setRecommendStatus(BusinessRecommendStatus.NONE.getCode());
-
-			if(lat != 0 || lon != 0)
-				dto.setDistance((int)calculateDistance(r.getLatitude(),r.getLongitude(),lat, lon));
-			else
-				dto.setDistance(0);
-			//店铺图标需要裁剪
-			if(r.getTargetType().byteValue() == BusinessTargetType.ZUOLIN.getCode()){
-				dto.setScaleType(ScaleType.TAILOR.getCode());
-			}
-
-			dtos.add(dto);
-		});
-
-		if(LOGGER.isDebugEnabled()){
-			LOGGER.info("getBusinessesByCategory-processRecommendBusinesses");
+				if(favoriteBizIds != null && favoriteBizIds.contains(r.getId())){
+					dto.setFavoriteStatus(BusinessFavoriteStatus.FAVORITE.getCode());
+					favoriteCount[0] += 1;
+				}
+				else{
+					dto.setFavoriteStatus(BusinessFavoriteStatus.NONE.getCode());
+				}
+				if(lat != 0 || lon != 0)
+					dto.setDistance((int)calculateDistance(r.getLatitude(),r.getLongitude(),lat, lon));
+				else
+					dto.setDistance(0);
+				//店铺图标需要裁剪
+				if(r.getTargetType().byteValue() == BusinessTargetType.ZUOLIN.getCode()){
+					dto.setScaleType(ScaleType.TAILOR.getCode());
+				}
+				dtos.add(dto);
+			});
 		}
-
-		processRecommendBusinesses(recommendBizIds,dtos,category,userId,favoriteBizIds,favoriteCount);
-
+		//按分类查询剩余推荐的商家
 		sortBusinesses(dtos);
-		
 		List<BusinessDTO> dtos2 = this.operatorByPage(dtos,response,cmd.getPageOffset(),cmd.getPageSize());
-
 		response.setRequests(dtos2);
 		response.setFavoriteCount(favoriteCount[0]);
 		long endTime = System.currentTimeMillis();
-		LOGGER.info("GetBusinesses by category,categoryId=" + cmd.getCategoryId() 
+		LOGGER.debug("GetBusinesses by category,categoryId=" + cmd.getCategoryId() 
 				+ ",communityId=" + cmd.getCommunityId() + ",elapse=" + (endTime - startTime));
-
 		return response;
+	}
+
+	private List<Business> filterBusinessByDistance(List<Business> scopeBusinesses, List<Business> geoBusinesses,double lantitude,double longitude) {
+		if(scopeBusinesses==null||scopeBusinesses.isEmpty()){
+			if(geoBusinesses==null||geoBusinesses.isEmpty()){
+				return null;
+			}else{
+				return filterBusinessByScope(scopeBusinesses,geoBusinesses,lantitude,longitude);
+			}
+		}else{
+			if(geoBusinesses==null||geoBusinesses.isEmpty()){
+				return scopeBusinesses;
+			}else{
+				return filterBusinessByScope(scopeBusinesses,geoBusinesses,lantitude,longitude);
+			}
+		}
+	}
+
+	private List<Business> filterBusinessByScope(List<Business> scopeBusinesses, List<Business> geoBusinesses,double lantitude,double longitude) {
+		if(scopeBusinesses==null||scopeBusinesses.isEmpty()){
+			List<Business> list = new ArrayList<Business>();
+			for(Business r:geoBusinesses){
+				double distance = calculateDistance(r.getLatitude(),r.getLongitude(),lantitude, longitude);
+				if(distance <= r.getVisibleDistance().doubleValue())
+					list.add(r);
+			}
+			return list;
+		}
+		List<Business> list = new ArrayList<Business>();
+		for(Business r:geoBusinesses){
+			boolean isExist = false;
+			for(Business scopeBiz:scopeBusinesses){
+				if(r.getId().longValue()==scopeBiz.getId().longValue()){
+					isExist=true;break;
+				}
+			}
+			if(!isExist){//geoBusinesses不存在于scopeBusinesses,计算附近5000米距离
+				double distance = calculateDistance(r.getLatitude(),r.getLongitude(),lantitude, longitude);
+				if(distance <= r.getVisibleDistance().doubleValue())
+					list.add(r);
+			}
+		}
+		if(list!=null)
+			scopeBusinesses.addAll(list);
+		return scopeBusinesses;
+	}
+
+	private List<Business> filterBusinessByCategorysAndBizIds(List<Long> bizIds,List<Long> categoryIds) {
+		if(bizIds==null||bizIds.isEmpty())
+			return null;
+		return businessProvider.listBusinessByCategorys(categoryIds,bizIds);
+	}
+
+	private List<Long> listBusinessAssignedNamespaceIdByNamespaceId(Integer namespaceId, Byte code) {
+		List<BusinessAssignedNamespace> list = businessProvider.listBusinessAssignedNamespaceByNamespaceId(namespaceId,code);
+		if(list==null||list.isEmpty())
+			return null;
+		return list.stream().map(r->{return r.getOwnerId();}).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<String> listBusinessByCommonityId(ListBusinessByCommonityIdCommand cmd) {
+		Community community = null;
+		if(cmd.getCommunityId()!=null){
+			community = communityProvider.findCommunityById(cmd.getCommunityId());
+			if(community == null){
+				LOGGER.error("Community is not exists,communityId=" + cmd.getCommunityId());
+				throw RuntimeErrorException.errorWith(CommunityServiceErrorCode.SCOPE, CommunityServiceErrorCode.ERROR_COMMUNITY_NOT_EXIST, 
+						"Invalid paramter communityId,communityId is not exists.");
+			}
+		}
+
+		long startTime = System.currentTimeMillis();
+
+		List<String> bizIds = new ArrayList<String>();
+		//CommunityGeoPoint
+		CommunityGeoPoint point = null;
+		if(cmd.getCommunityId()!=null){
+			List<CommunityGeoPoint> points = communityProvider.listCommunityGeoPoints(cmd.getCommunityId());
+			if(points == null || points.isEmpty()){
+				LOGGER.error("Community is not exists geo points,communityId=" + cmd.getCommunityId());
+			}
+			else
+				point = points.get(0);
+		}
+		final double lat = point != null ? point.getLatitude() : 0;
+		final double lon = point != null ? point.getLongitude() : 0;
+		List<String> geoHashList = getGeoHashCodeList(lat, lon);
+		List<Business> businesses = null;
+
+		//recommendBizIds
+		long cityId = community.getCityId()==null?0:community.getCityId();
+		long communityId = cmd.getCommunityId()==null?0:cmd.getCommunityId();
+		List<Long> recommendBizIds = this.businessProvider.listBusinessAssignedScopeByScope(cityId,communityId,null).stream()
+				.map(r->r.getOwnerId()).collect(Collectors.toList());
+
+		//获取指定类型的服务
+		List<Long> categoryPIds = this.categoryProvider.getBusinessSubCategories(cmd.getCategoryId());
+		List<Long> categoryIds = new ArrayList<Long>();
+		if(categoryPIds!=null&&!categoryPIds.isEmpty()){
+			for(Long catePId:categoryPIds){
+				List<Long> subCateIds = this.categoryProvider.getBusinessSubCategories(catePId);
+				if(subCateIds!=null&&!subCateIds.isEmpty())
+					categoryIds.addAll(subCateIds);
+			}
+		}
+		businesses = this.businessProvider.listBusinessByCategroys(categoryIds,geoHashList,null);
+		//从算法过滤的范围中再缩小范围
+		businesses = this.filterDistance(businesses,lat,lon,recommendBizIds);
+		if(recommendBizIds!=null&&!recommendBizIds.isEmpty()){
+			List<Business> recombizs = this.businessProvider.listBusinessByIds(recommendBizIds);
+			recombizs.forEach(r->{
+				if(r.getTargetId()!=null)
+					bizIds.add(r.getTargetId());
+			});
+		}
+		businesses.forEach(r ->{
+			if(!bizIds.contains(r.getTargetId()))
+				bizIds.add(r.getTargetId());
+		});
+		long endTime = System.currentTimeMillis();
+		LOGGER.debug("get businesses by communityId,categoryId=" + cmd.getCategoryId() 
+				+ ",communityId=" + cmd.getCommunityId()+ ",elapse=" + (endTime - startTime));
+		return bizIds;
 	}
 
 	private List<BusinessDTO> operatorByPage(List<BusinessDTO> dtos,GetBusinessesByCategoryCommandResponse resposne,Integer cmdPageOffset, Integer cmdPageSize) {
@@ -419,7 +663,7 @@ public class BusinessServiceImpl implements BusinessService {
 		int pageOffset = cmdPageOffset == null ? 1 : cmdPageOffset;
 		int pageSize = cmdPageSize == null ? 10 : cmdPageSize;
 		int offset = (int) PaginationHelper.offsetFromPageOffset((long)pageOffset, pageSize);
-		
+
 		int needRow = offset+pageSize;
 		if(dtos.size() > needRow){
 			resposne.setNextPageOffset(pageOffset+1);
@@ -444,24 +688,19 @@ public class BusinessServiceImpl implements BusinessService {
 				list.add(r);
 				continue;
 			}
-			if(lat != 0 || lon != 0){
-				int distance = (int)calculateDistance(r.getLatitude(),r.getLongitude(),lat, lon);
-				if(r.getVisibleDistance() == null || r.getVisibleDistance().doubleValue() == 0){
-					if(distance <= 5000)
-						list.add(r);
-				}
-				else{
-					if(distance <= r.getVisibleDistance().doubleValue())
-						list.add(r);
-				}
-			}
-			else{
+			if(r.getVisibleDistance()==null||r.getVisibleDistance().doubleValue()==0){
 				list.add(r);
+				continue;
 			}
+			if(lat == 0 && lon == 0){
+				list.add(r);
+				continue;
+			}
+			int distance = (int)calculateDistance(r.getLatitude(),r.getLongitude(),lat, lon);
+			if(distance <= r.getVisibleDistance().doubleValue())
+				list.add(r);
 		}
-
 		return list;
-
 	}
 
 	private String processUrl(Business business, String authenticatePrefix,String detailUrl){
@@ -471,21 +710,13 @@ public class BusinessServiceImpl implements BusinessService {
 			LOGGER.error("Buiness detail url  is empty.");
 		if(business.getTargetType() == BusinessTargetType.ZUOLIN.getCode()){
 			String businessDetailUrl = null;
-			try {
-				if(detailUrl.contains("#sign_suffix")){
-					detailUrl = detailUrl.trim();
-					String prefix = detailUrl.substring(0,detailUrl.indexOf("#sign_suffix"));
-					String suffix = detailUrl.substring(detailUrl.indexOf("#sign_suffix"));
-					businessDetailUrl = URLEncoder.encode(prefix+business.getTargetId(), "utf-8")+suffix;
-				}
-				else
-					businessDetailUrl = URLEncoder.encode(detailUrl.trim() + business.getTargetId(), "utf-8");
-			} catch (UnsupportedEncodingException e) {
-				LOGGER.error("unsported encoding.");
+			if(detailUrl.contains("spoint")){
+				businessDetailUrl = detailUrl.replace("spoint", business.getTargetId()).trim();
 			}
+			else
+				businessDetailUrl = detailUrl.trim() + business.getTargetId();
 			return authenticatePrefix.trim() + businessDetailUrl;
 		}
-
 		return business.getUrl();
 	}
 
@@ -499,7 +730,7 @@ public class BusinessServiceImpl implements BusinessService {
 			Category category, long userId,List<Long> favoriteBizIds, Integer[] favoriteCount){
 		if(category.getId().longValue() == CATEOGRY_RECOMMEND)
 			return;
-
+		//businessCategories
 		List<BusinessCategory> businessCategories = this.businessProvider.listBusinessCategoriesByCatPIdAndOwnerIds(category.getId(),recommendBizIds);
 		if(businessCategories == null || businessCategories.isEmpty())
 			return;
@@ -544,7 +775,6 @@ public class BusinessServiceImpl implements BusinessService {
 	private List<BusinessDTO> sortBusinesses(List<BusinessDTO> dtos){
 		if(dtos == null || dtos.isEmpty())
 			return dtos;
-
 		//sort by distance
 		dtos.sort(new Comparator<BusinessDTO>() {
 			@Override
@@ -553,15 +783,13 @@ public class BusinessServiceImpl implements BusinessService {
 				return (int) (o1.getDistance() - o2.getDistance());
 			}
 		});
-
 		//recommand business first
-		dtos.sort(new Comparator<BusinessDTO>() {
+		/*dtos.sort(new Comparator<BusinessDTO>() {
 			@Override
 			public int compare(BusinessDTO o1, BusinessDTO o2) {
 				return o2.getRecommendStatus() - o1.getRecommendStatus();
 			}
-		});
-
+		});*/
 		//sort by targetType
 		dtos.sort(new Comparator<BusinessDTO>() {
 			@Override
@@ -569,8 +797,6 @@ public class BusinessServiceImpl implements BusinessService {
 				return o2.getTargetType() - o1.getTargetType();
 			}
 		});
-
-
 		return null;
 	}
 
@@ -598,25 +824,33 @@ public class BusinessServiceImpl implements BusinessService {
 		return geoHashCodes;
 	}
 
-	private List<Long> getFavoriteBizIds(long userId,long cmmtyId,long cityId){
+	private List<Long> getFavoriteBizIds(long userId,long cmmtyId,long cityId,Integer namesapceId){
 		List<Long> removeIds = new ArrayList<>();
 		List<Long> userBizIds = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
-				0, ScopeType.USER.getCode(), userId).stream()
+				0, ScopeType.USER.getCode(), userId,namesapceId).stream()
 				.filter(r ->{
 					if(r.getDisplayFlag().byteValue() == ItemDisplayFlag.DISPLAY.getCode())
 						return true;
 					removeIds.add(r.getTargetId());
 					return false;
 				}).map(r ->r.getTargetId()).collect(Collectors.toList());
-		List<Long> cmmtyBizIds = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
-				0, ScopeType.COMMUNITY.getCode(), cmmtyId).stream()
-				.filter(r -> !removeIds.contains(r.getTargetId())).map(r ->r.getTargetId()).collect(Collectors.toList());
-		List<Long> cityBizIds = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
-				0, ScopeType.CITY.getCode(), cityId).stream()
-				.filter(r -> !removeIds.contains(r.getTargetId())).map(r ->r.getTargetId()).collect(Collectors.toList());
+
+		List<Long> cmmtyBizIds = null;
+		if(cmmtyId!=0){
+			cmmtyBizIds = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
+					0, ScopeType.COMMUNITY.getCode(), cmmtyId,namesapceId).stream()
+					.filter(r -> !removeIds.contains(r.getTargetId())).map(r ->r.getTargetId()).collect(Collectors.toList());
+		}
+		List<Long> cityBizIds = null;
+		if(cityId!=0){
+			cityBizIds = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
+					0, ScopeType.CITY.getCode(), cityId,namesapceId).stream()
+					.filter(r -> !removeIds.contains(r.getTargetId())).map(r ->r.getTargetId()).collect(Collectors.toList());
+		}
 		List<Long> countyBizIds = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
-				0, ScopeType.ALL.getCode(), 0).stream()
+				0, ScopeType.ALL.getCode(), 0,namesapceId).stream()
 				.filter(r -> !removeIds.contains(r.getTargetId())).map(r ->r.getTargetId()).collect(Collectors.toList());
+
 		List<Long> favoriteBizIds = new ArrayList<Long>();
 		if(userBizIds != null && !userBizIds.isEmpty())
 			favoriteBizIds.addAll(userBizIds);
@@ -728,6 +962,7 @@ public class BusinessServiceImpl implements BusinessService {
 		int pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size", 
 				AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
 		User user = UserContext.current().getUser();
+		Integer namespaceId = user.getNamespaceId()==null?0:user.getNamespaceId();
 		int offset = (int) PaginationHelper.offsetFromPageOffset((long)pageOffset, pageSize);
 		List<BusinessAdminDTO> result = null;
 		final String imageUrl = configurationProvider.getValue(BUSINESS_IMAGE_URL, "");
@@ -739,7 +974,7 @@ public class BusinessServiceImpl implements BusinessService {
 				//set recommend status
 				processRecommendStatus(dto);
 
-				processPromoteFlag(dto);
+				processPromoteFlag(dto,namespaceId);
 
 				return dto;
 			}
@@ -753,9 +988,9 @@ public class BusinessServiceImpl implements BusinessService {
 		return response;
 	}
 
-	private void processPromoteFlag(BusinessAdminDTO dto) {
+	private void processPromoteFlag(BusinessAdminDTO dto,Integer namespaceId) {
 		List<LaunchPadItem> countryItems = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
-				dto.getId(), ScopeType.ALL.getCode(),0);
+				dto.getId(), ScopeType.ALL.getCode(),0,namespaceId);
 		List<BusinessPromoteScopeDTO> promoteScopes = new ArrayList<>();
 		if(countryItems != null && !countryItems.isEmpty()){
 			dto.setPromoteFlag((byte)1);
@@ -767,7 +1002,7 @@ public class BusinessServiceImpl implements BusinessService {
 			return ;
 		}
 		List<LaunchPadItem> cityItems = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
-				dto.getId(), ScopeType.CITY.getCode(),0);
+				dto.getId(), ScopeType.CITY.getCode(),0,namespaceId);
 		if(cityItems != null && !cityItems.isEmpty()){
 			dto.setPromoteFlag((byte)1);
 			cityItems.forEach(c ->{
@@ -782,7 +1017,7 @@ public class BusinessServiceImpl implements BusinessService {
 			dto.setPromoteScopes(promoteScopes);
 		}
 		List<LaunchPadItem> cmmtyItems = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
-				dto.getId(), ScopeType.COMMUNITY.getCode(),0);
+				dto.getId(), ScopeType.COMMUNITY.getCode(),0,namespaceId);
 		if(cmmtyItems != null && !cmmtyItems.isEmpty()){
 			dto.setPromoteFlag((byte)1);
 			cmmtyItems.forEach(c ->{
@@ -857,7 +1092,6 @@ public class BusinessServiceImpl implements BusinessService {
 			}
 			return true;
 		});
-
 	}
 
 	@Override
@@ -882,11 +1116,15 @@ public class BusinessServiceImpl implements BusinessService {
 				this.businessProvider.deleteBusiness(business.getId());
 				//删除服务市场item
 				this.launchPadProvider.deleteLaunchPadItemByTargetTypeAndTargetId(ItemTargetType.BIZ.getCode(),business.getId());
+				//删除商家namespace
+				List<BusinessAssignedNamespace> bizNamespacelist = businessProvider.listBusinessAssignedNamespaceByOwnerId(business.getId(),null);
+				if(bizNamespacelist!=null&&!bizNamespacelist.isEmpty()){
+					for(BusinessAssignedNamespace r:bizNamespacelist)
+						businessProvider.deleteBusinessAssignedNamespace(r);
+				}
 			}
 			return true;
 		});
-
-
 	}
 
 	@Override
@@ -914,7 +1152,7 @@ public class BusinessServiceImpl implements BusinessService {
 	public void syncUserFavorite(UserFavoriteCommand cmd) {
 		isValiad(cmd);
 		Business business = this.businessProvider.findBusinessByTargetId(cmd.getId());
-		favoriteBusiness(cmd.getUserId(), business.getId(),true);
+		favoriteBusiness(cmd.getUserId(),cmd.getNamespaceId(), business.getId(),true, "default");
 
 	}
 
@@ -944,7 +1182,7 @@ public class BusinessServiceImpl implements BusinessService {
 	public void syncUserCancelFavorite(UserFavoriteCommand cmd) {
 		isValiad(cmd);
 		Business business = this.businessProvider.findBusinessByTargetId(cmd.getId()); 
-		cancelFavoriteBusiness(cmd.getUserId(), business.getId(),true);
+		cancelFavoriteBusiness(cmd.getUserId(),cmd.getNamespaceId(), business.getId(),true, "default");
 
 	}
 
@@ -952,19 +1190,13 @@ public class BusinessServiceImpl implements BusinessService {
 	public Byte findBusinessFavoriteStatus(UserFavoriteCommand cmd) {
 		isValiad(cmd);
 		User user = userProvider.findUserById(cmd.getUserId());
+		Integer namespaceId = user.getNamespaceId()==null?0:user.getNamespaceId();
 		Business business = this.businessProvider.findBusinessByTargetId(cmd.getId());
 		List<LaunchPadItem> userItems = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
-				business.getId(), ScopeType.USER.getCode(), user.getId());
+				business.getId(), ScopeType.USER.getCode(), user.getId(),namespaceId);
 		if(userItems != null && !userItems.isEmpty()){
 			return BusinessFavoriteStatus.FAVORITE.getCode();
 		}
-		//        List<Long> ret = userActivityProvider.findFavorite(user.getId()).stream()
-		//                .filter(r -> r.getTargetType().equalsIgnoreCase("biz")).map(r->r.getTargetId()).collect(Collectors.toList());
-		//        if(ret != null && !ret.isEmpty()&& ret.contains(business.getId())){
-		//            return BusinessFavoriteStatus.FAVORITE.getCode();
-		//        }else{
-		//            
-		//        }
 		return BusinessFavoriteStatus.NONE.getCode();
 	}
 
@@ -976,8 +1208,7 @@ public class BusinessServiceImpl implements BusinessService {
 
 		User user = UserContext.current().getUser();
 		long userId = user.getId();
-		favoriteBusiness(userId, cmd.getId(),true);
-
+		favoriteBusiness(userId,user.getNamespaceId(),cmd.getId(),true, "default");
 	}
 
 	@Override
@@ -999,13 +1230,13 @@ public class BusinessServiceImpl implements BusinessService {
 				continue ;
 			}
 			if(r.getFavoriteFlag() == FavoriteFlagType.FAVORITE.getCode())
-				favoriteBusiness(userId, r.getId(),false);
+				favoriteBusiness(userId,user.getNamespaceId(), r.getId(),false, "default");
 			else if(r.getFavoriteFlag() == FavoriteFlagType.CANCEL_FAVORITE.getCode())
-				cancelFavoriteBusiness(userId, r.getId(),false);
+				cancelFavoriteBusiness(userId,user.getNamespaceId(), r.getId(),false, "default");
 		}
 	}
 
-	private void favoriteBusiness(long userId,long businessId,boolean isException){
+	private void favoriteBusiness(long userId,Integer namespaceId, long businessId, boolean isException, String baseScene){
 		Business business = this.businessProvider.findBusinessById(businessId);
 		if(business == null){
 			LOGGER.error("Business is not exists.id=" + businessId);
@@ -1014,23 +1245,23 @@ public class BusinessServiceImpl implements BusinessService {
 			else
 				return ;
 		}
-		List<LaunchPadItem> list = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), businessId, ScopeType.USER.getCode(), userId);
+		List<LaunchPadItem> list = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), businessId, ScopeType.USER.getCode(), userId,namespaceId);
 		LaunchPadItem item = null;
 		if(list != null && list.size() > 0){
 			item = list.get(0);
 		}
 		//List<LaunchPadItem> bizItems = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), businessId, null, 0);
-		boolean flag = isExistsUnUserItem(businessId);
+		boolean flag = isExistsUnUserItem(businessId,namespaceId);
 		if(item != null){
 			if(flag){
 				item.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
 			}else{
 				item.setApplyPolicy(ApplyPolicy.DEFAULT.getCode());
 			}
+			item.setSceneType(baseScene);
 			item.setScopeId(userId);
 			item.setDisplayFlag(ItemDisplayFlag.DISPLAY.getCode());
 			this.launchPadProvider.updateLaunchPadItem(item);
-
 		}else{
 			List<LaunchPadItem> items = new ArrayList<LaunchPadItem>();
 			item = new LaunchPadItem();
@@ -1044,7 +1275,7 @@ public class BusinessServiceImpl implements BusinessService {
 			item.setIconUri(business.getLogoUri());
 			item.setItemWidth(1);
 			item.setItemHeight(1);
-			item.setNamespaceId(0);
+			item.setNamespaceId(namespaceId==null?0:namespaceId);
 			item.setScopeCode(ScopeType.USER.getCode());
 			item.setScopeId(userId);
 			item.setDefaultOrder(0);
@@ -1053,6 +1284,7 @@ public class BusinessServiceImpl implements BusinessService {
 			item.setBgcolor(0);
 			item.setTargetType(ItemTargetType.BIZ.getCode());
 			item.setTargetId(businessId);
+			item.setSceneType(baseScene);
 			if(flag)
 				item.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
 			items.add(item);
@@ -1060,18 +1292,18 @@ public class BusinessServiceImpl implements BusinessService {
 		}
 	}
 
-	private boolean isExistsUnUserItem(long businessId){
-		List<LaunchPadItem> result = getUnUserItems(businessId);
+	private boolean isExistsUnUserItem(long businessId,Integer namespaceId){
+		List<LaunchPadItem> result = getUnUserItems(businessId,namespaceId);
 		if(result != null && !result.isEmpty())
 			return true;
 		return false;
 	}
 
-	private List<LaunchPadItem> getUnUserItems(long businessId){
+	private List<LaunchPadItem> getUnUserItems(long businessId,Integer namespaceId){
 		List<LaunchPadItem> result = new ArrayList<LaunchPadItem>();
-		List<LaunchPadItem> countyItems = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), businessId, ScopeType.ALL.getCode(), 0);
-		List<LaunchPadItem> cityItems = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), businessId, ScopeType.CITY.getCode(), 0);
-		List<LaunchPadItem> cmmtyItems = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), businessId, ScopeType.COMMUNITY.getCode(), 0);
+		List<LaunchPadItem> countyItems = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), businessId, ScopeType.ALL.getCode(), 0,namespaceId);
+		List<LaunchPadItem> cityItems = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), businessId, ScopeType.CITY.getCode(), 0,namespaceId);
+		List<LaunchPadItem> cmmtyItems = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), businessId, ScopeType.COMMUNITY.getCode(), 0,namespaceId);
 		if(countyItems != null && !countyItems.isEmpty())
 			result.addAll(countyItems);
 		if(cityItems != null && !cityItems.isEmpty())
@@ -1089,10 +1321,10 @@ public class BusinessServiceImpl implements BusinessService {
 					"Invalid paramter id null,categoryId is null");
 		User user = UserContext.current().getUser();
 		long userId = user.getId();
-		cancelFavoriteBusiness(userId, cmd.getId(),true);
+		cancelFavoriteBusiness(userId,user.getNamespaceId(), cmd.getId(),true, "default");
 	}
 
-	private void cancelFavoriteBusiness(long userId, long businessId,boolean isThrowExcept){
+	private void cancelFavoriteBusiness(long userId,Integer namespaceId, long businessId,boolean isThrowExcept, String baseScene){
 		Business business = this.businessProvider.findBusinessById(businessId);
 		if(business == null){
 			LOGGER.error("Business is not exists.id=" + businessId);
@@ -1103,7 +1335,7 @@ public class BusinessServiceImpl implements BusinessService {
 				return ;
 		}
 
-		List<LaunchPadItem> list = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), businessId, ScopeType.USER.getCode(), userId);
+		List<LaunchPadItem> list = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), businessId, ScopeType.USER.getCode(), userId,namespaceId);
 		LaunchPadItem item = null;
 		if(list != null && list.size() > 0){
 			item = list.get(0);
@@ -1111,7 +1343,7 @@ public class BusinessServiceImpl implements BusinessService {
 
 		if(item != null){
 			//存在非用户可见的item,则修改为 覆盖且不可见,否则直接删除
-			if(isExistsUnUserItem(businessId)){
+			if(isExistsUnUserItem(businessId,namespaceId)){
 				item.setDisplayFlag(ItemDisplayFlag.HIDE.getCode());
 				item.setScopeId(userId);
 				item.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
@@ -1121,7 +1353,7 @@ public class BusinessServiceImpl implements BusinessService {
 				this.launchPadProvider.deleteLaunchPadItem(item);
 			}
 		}else{
-			List<LaunchPadItem> bizItems = getUnUserItems(businessId);
+			List<LaunchPadItem> bizItems = getUnUserItems(businessId,namespaceId);
 			if(bizItems != null && !bizItems.isEmpty()){
 				item = bizItems.get(0);
 				item.setId(0L);
@@ -1129,6 +1361,8 @@ public class BusinessServiceImpl implements BusinessService {
 				item.setScopeId(userId);
 				item.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
 				item.setScopeCode(ScopeType.USER.getCode());
+				item.setNamespaceId(namespaceId==null?0:namespaceId);
+				item.setSceneType(baseScene);
 				this.launchPadProvider.createLaunchPadItem(item);
 			}
 		}
@@ -1249,6 +1483,7 @@ public class BusinessServiceImpl implements BusinessService {
 						if(province != null)
 							dto.setProvince(province.getName());
 					}
+					dto.setAddressType(AddressType.COMMUNITY_ADDRESS.getCode());
 					dto.setId(addr.getId());
 					dto.setCity(addr.getCityName());
 					dto.setArea(addr.getAreaName());
@@ -1287,6 +1522,7 @@ public class BusinessServiceImpl implements BusinessService {
 					if(province != null)
 						dto.setProvince(province.getName());
 				}
+				dto.setAddressType(AddressType.SERVICE_ADDRESS.getCode());
 				dto.setId(addr.getId());
 				dto.setCity(addr.getCityName());
 				dto.setArea(addr.getAreaName());
@@ -1399,17 +1635,18 @@ public class BusinessServiceImpl implements BusinessService {
 	@Override
 	public BusinessDTO findBusinessById(FindBusinessByIdCommand cmd) {
 		this.checkBizIdIsNull(cmd.getId());
-		
+
 		User user = UserContext.current().getUser();
 		Long userId = user.getId();
-		
+		Integer namesapceId = user.getNamespaceId()==null?0:user.getNamespaceId();
+
 		Business r = this.businessProvider.findBusinessById(cmd.getId());
-		
+
 		final String businessDetailUrl = configurationProvider.getValue(BUSINESS_DETAIL_URL, "");
 		final String prefixUrl = configurationProvider.getValue(PREFIX_URL, "");
 		final String imageUrl = configurationProvider.getValue(BUSINESS_IMAGE_URL, "");
 		List<BusinessDTO> dtos = new ArrayList<BusinessDTO>();
-		
+
 		BusinessDTO dto = ConvertHelper.convert(r, BusinessDTO.class);
 		List<CategoryDTO> categories = new ArrayList<>();
 		dto.setLogoUrl(processLogoUrl(r, userId,imageUrl));
@@ -1418,7 +1655,7 @@ public class BusinessServiceImpl implements BusinessService {
 		if(r.getTargetType().byteValue() == BusinessTargetType.ZUOLIN.getCode()){
 			dto.setScaleType(ScaleType.TAILOR.getCode());
 		}
-		
+
 		if(cmd.getCommunityId() != null){
 			Community community = this.checkCommunity(cmd.getCommunityId(),true);
 			List<CommunityGeoPoint> points = communityProvider.listCommunityGeoPoints(cmd.getCommunityId());
@@ -1429,21 +1666,21 @@ public class BusinessServiceImpl implements BusinessService {
 			CommunityGeoPoint point = points.get(0);
 			final double lat = point != null ? point.getLatitude() : 0;
 			final double lon = point != null ? point.getLongitude() : 0;
-			
-			List<Long> recommendBizIds = this.businessProvider.findBusinessAssignedScopeByScope(community.getCityId(),cmd.getCommunityId()).stream()
+
+			List<Long> recommendBizIds = this.businessProvider.listBusinessAssignedScopeByScope(community.getCityId(),cmd.getCommunityId(),null).stream()
 					.map(r2->r2.getOwnerId()).collect(Collectors.toList());
-			List<Long> favoriteBizIds = getFavoriteBizIds(userId, cmd.getCommunityId(), community.getCityId());
-			
+			List<Long> favoriteBizIds = getFavoriteBizIds(userId, cmd.getCommunityId(), community.getCityId(),namesapceId);
+
 			if(favoriteBizIds != null && favoriteBizIds.contains(r.getId()))
 				dto.setFavoriteStatus(BusinessFavoriteStatus.FAVORITE.getCode());
 			else
 				dto.setFavoriteStatus(BusinessFavoriteStatus.NONE.getCode());
-			
+
 			if(recommendBizIds != null && recommendBizIds.contains(r.getId()))
 				dto.setRecommendStatus(BusinessRecommendStatus.RECOMMEND.getCode());
 			else
 				dto.setRecommendStatus(BusinessRecommendStatus.NONE.getCode());
-			
+
 			if(lat != 0 || lon != 0)
 				dto.setDistance((int)calculateDistance(r.getLatitude(),r.getLongitude(),lat, lon));
 			else
@@ -1468,7 +1705,7 @@ public class BusinessServiceImpl implements BusinessService {
 	public ListBusinessByKeywordCommandResponse listBusinessByKeyword(ListBusinessByKeywordCommand cmd) {
 		ListBusinessByKeywordCommandResponse response = new ListBusinessByKeywordCommandResponse();
 		List<BusinessDTO> dtos = new ArrayList<BusinessDTO>();
-		
+
 		cmd.setPageOffset(cmd.getPageOffset() == null?1:cmd.getPageOffset());
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		long offset = PaginationHelper.offsetFromPageOffset((long)cmd.getPageOffset(), (long)pageSize);
@@ -1485,6 +1722,185 @@ public class BusinessServiceImpl implements BusinessService {
 		}
 		response.setList(dtos);
 		return response;
+	}
+
+	@Override
+	public List<UserInfo> listUserByKeyword(ListUserByKeywordCommand cmd) {
+		if(StringUtils.isEmpty(cmd.getKeyword())){
+			LOGGER.error("Invalid paramter keyword,keyword is null.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid paramter keyword,keyword is null");
+		}
+		List<UserInfo> users = userService.listUserByKeyword(cmd.getKeyword());
+		return users;
+	}
+
+	@Override
+	public List<UserInfo> listUserByIdentifier(ListUserByIdentifierCommand cmd) {
+		if(StringUtils.isEmpty(cmd.getIdentifier())){
+			LOGGER.error("Invalid paramter identifier,identifier is null.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid paramter identifier,identifier is null");
+		}
+		return userService.listUserInfoByIdentifier(cmd.getIdentifier());
+	}
+
+	@Override
+	public void openBusinessAssignedNamespace(BusinessAsignedNamespaceCommand cmd) {
+		if(cmd.getNamespaceId()==null||StringUtils.isBlank(cmd.getTargetId())){
+			LOGGER.error("namespaceId or targetId is null.namespaceId="+cmd.getNamespaceId()+",targetId="+cmd.getTargetId());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"namespaceId or targetId is null.");
+		}
+		Business business = businessProvider.findBusinessByTargetId(cmd.getTargetId());
+		if(business==null){
+			LOGGER.error("business not found.targetId="+cmd.getTargetId());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"business not found.");
+		}
+		createBusinessAssignedNamespace(business.getId(),cmd.getNamespaceId());
+	}
+
+	@Override
+	public void closeBusinessAssignedNamespace(BusinessAsignedNamespaceCommand cmd) {
+		if(cmd.getNamespaceId()==null||StringUtils.isBlank(cmd.getTargetId())){
+			LOGGER.error("namespaceId or targetId is null.namespaceId="+cmd.getNamespaceId()+",targetId="+cmd.getTargetId());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"namespaceId or targetId is null.");
+		}
+		Business business = businessProvider.findBusinessByTargetId(cmd.getTargetId());
+		if(business==null){
+			LOGGER.error("business not found.targetId="+cmd.getTargetId());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"business not found.");
+		}
+		deleteBusinessAssignedNamespace(business.getId(),cmd.getNamespaceId());
+	}
+
+	private void deleteBusinessAssignedNamespace(Long businessId, Integer namespaceId) {
+		BusinessAssignedNamespace bizNamespace = businessProvider.findBusinessAssignedNamespaceByNamespace(businessId,namespaceId,null);
+		if(bizNamespace!=null){
+			if(bizNamespace.getVisibleFlag().byteValue()!=BusinessAssignedNamespaceVisibleFlagType.HIDE.getCode()){
+				bizNamespace.setVisibleFlag(BusinessAssignedNamespaceVisibleFlagType.HIDE.getCode());
+				businessProvider.updateBusinessAssignedNamespace(bizNamespace);
+			}
+		}else{
+			bizNamespace = new BusinessAssignedNamespace();
+			bizNamespace.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			bizNamespace.setNamespaceId(namespaceId);
+			bizNamespace.setOwnerId(businessId);
+			bizNamespace.setVisibleFlag(BusinessAssignedNamespaceVisibleFlagType.HIDE.getCode());
+			businessProvider.createBusinessAssignedNamespace(bizNamespace);
+		}
+
+	}
+
+	@Override
+	public void updateReceivedCouponCount(UpdateReceivedCouponCountCommand cmd) {
+		if(cmd.getUserId()==null||cmd.getCount()==null){
+			LOGGER.error("Invalid parameter,userId or count is null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid parameter,userId or count is null");
+		}
+		userActivityService.updateUserProfile(cmd.getUserId(),UserProfileContstant.RECEIVED_COUPON_COUNT,String.valueOf(cmd.getCount()));
+	}
+
+	@Override
+	public UserProfileDTO getReceivedCouponCount(GetReceivedCouponCountCommand cmd) {
+		UserProfile profile = userActivityProvider.findUserProfileBySpecialKey(cmd.getUserId(), UserProfileContstant.RECEIVED_COUPON_COUNT);
+		if(profile!=null)
+			return ConvertHelper.convert(profile, UserProfileDTO.class);
+		return null;
+	}
+	
+	@Override
+	public List<BuildingDTO> listBuildingsByKeyword(ListBuildingByCommunityIdsCommand cmd) {
+		if(cmd.getCommunityIds()==null||cmd.getCommunityIds().isEmpty()){
+			LOGGER.error("Invalid parameter,commudityIds is null");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid parameter,commudityIds is null");
+		}
+		List<BuildingDTO> list = new ArrayList<BuildingDTO>();
+		ListBuildingByKeywordCommand subcmd = new ListBuildingByKeywordCommand();
+		subcmd.setKeyword(cmd.getKeyword());
+		subcmd.setNamespaceId(cmd.getNamespaceId());
+		for(Long r:cmd.getCommunityIds()){
+			subcmd.setCommunityId(r);
+			Tuple<Integer, List<BuildingDTO>> result = addressService.listBuildingsByKeyword(subcmd);
+			if(result.second()!=null&&!result.second().isEmpty()){
+				List<BuildingDTO> tmpList = result.second().stream().map((r2) -> {
+					r2.setCommunityId(r);
+					return r2; 
+				}).collect(Collectors.toList());
+				list.addAll(tmpList);
+			}
+		}
+		return list;
+	}
+
+	@Override
+	public Tuple<Integer, List<ApartmentDTO>> listApartmentsByKeyword(
+			ListPropApartmentsByKeywordCommand cmd) {
+		return addressService.listApartmentsByKeyword(cmd);
+	}
+
+	@Override
+	public List<CommunityDTO> getCommunitiesByNameAndCityId(
+			GetCommunitiesByNameAndCityIdCommand cmd) {
+		return communityService.getCommunitiesByNameAndCityId(cmd);
+	}
+
+	@Override
+	public CommunityDTO getCommunityById(GetCommunityByIdCommand cmd) {
+		return communityService.getCommunityById(cmd);
+	}
+
+	@Override
+	public List<RegionDTO> listRegionByKeyword(ListRegionByKeywordCommand cmd) {
+		Tuple<String, SortOrder> orderBy = null;
+		if(cmd.getSortBy() == null)
+			cmd.setSortBy("");
+		if(cmd.getSortBy() != null)
+			orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(), SortOrder.fromCode(cmd.getSortOrder()));
+
+		Integer namespaceId = cmd.getNamespaceId()==null?Namespace.DEFAULT_NAMESPACE:cmd.getNamespaceId();
+
+		List<Region> entityResultList = this.regionProvider.listRegionByKeyword(cmd.getParentId(), 
+				RegionScope.fromCode(cmd.getScope()), 
+				RegionAdminStatus.fromCode(cmd.getStatus()), orderBy, cmd.getKeyword(), namespaceId);
+
+		List<RegionDTO> dtoResultList = entityResultList.stream() 
+				.map(r->{ return ConvertHelper.convert(r, RegionDTO.class); })
+				.collect(Collectors.toList());
+		
+		return dtoResultList;
+	}
+
+	@Override
+	public void favoriteBusinessesByScene(FavoriteBusinessesBySceneCommand cmd, String baseScene) {
+
+		if(cmd.getBizs() == null || cmd.getBizs().size() < 1)
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid paramter bizs is null or empty");
+
+		User user = UserContext.current().getUser();
+		long userId = user.getId();
+		for(FavoriteBusinessDTO r:cmd.getBizs()){
+			FavoriteFlagType flag = FavoriteFlagType.fromCode(r.getFavoriteFlag());
+			if(flag == null){
+				LOGGER.error("FavoriteFlag is error.bizId=" + r.getId()+",favoriteFlag="+r.getFavoriteFlag());
+				continue ;
+			}
+			if(r.getId() == null){
+				LOGGER.error("biz id is null.bizId=" + r.getId()+",favoriteFlag="+r.getFavoriteFlag());
+				continue ;
+			}
+			if(r.getFavoriteFlag() == FavoriteFlagType.FAVORITE.getCode())
+				favoriteBusiness(userId,user.getNamespaceId(), r.getId(),false, baseScene);
+			else if(r.getFavoriteFlag() == FavoriteFlagType.CANCEL_FAVORITE.getCode())
+				cancelFavoriteBusiness(userId,user.getNamespaceId(), r.getId(),false, baseScene);
+		}
+	
 	}
 
 }

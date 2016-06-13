@@ -13,15 +13,39 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.community.Community;
-import com.everhomes.community.CommunityDoc;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.family.FamilyDTO;
-import com.everhomes.openapi.UserServiceAddressDTO;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.address.ApartmentDTO;
+import com.everhomes.rest.address.BuildingDTO;
+import com.everhomes.rest.address.ClaimAddressCommand;
+import com.everhomes.rest.address.ClaimedAddressInfo;
+import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.address.CommunitySummaryDTO;
+import com.everhomes.rest.address.CreateServiceAddressCommand;
+import com.everhomes.rest.address.DeleteServiceAddressCommand;
+import com.everhomes.rest.address.DisclaimAddressCommand;
+import com.everhomes.rest.address.ListAddressByKeywordCommand;
+import com.everhomes.rest.address.ListAddressByKeywordCommandResponse;
+import com.everhomes.rest.address.ListApartmentByBuildingNameCommand;
+import com.everhomes.rest.address.ListApartmentByBuildingNameCommandResponse;
+import com.everhomes.rest.address.ListBuildingByKeywordCommand;
+import com.everhomes.rest.address.ListCommunityByKeywordCommand;
+import com.everhomes.rest.address.ListNearbyCommunityCommand;
+import com.everhomes.rest.address.ListNearbyMixCommunitiesCommand;
+import com.everhomes.rest.address.ListNearbyMixCommunitiesCommandResponse;
+import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
+import com.everhomes.rest.address.SearchCommunityCommand;
+import com.everhomes.rest.address.SuggestCommunityCommand;
+import com.everhomes.rest.address.SuggestCommunityDTO;
+import com.everhomes.rest.community.CommunityDoc;
+import com.everhomes.rest.family.FamilyDTO;
+import com.everhomes.rest.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.ui.organization.ListCommunitiesBySceneResponse;
 import com.everhomes.search.CommunitySearcher;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.EtagHelper;
 import com.everhomes.util.Tuple;
 
@@ -194,7 +218,7 @@ public class AddressController extends ControllerBase {
     @RequestMapping("findNearyCommunityById")
     @RestReturn(value=CommunityDoc.class, collection=true)
     public RestResponse findNearyCommunityById(@Valid ListPropApartmentsByKeywordCommand cmd) {
-        List<Community> results = this.communityProvider.findNearyByCommunityById(cmd.getCommunityId());
+        List<Community> results = this.communityProvider.findNearyByCommunityById(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), cmd.getCommunityId());
         RestResponse response =  new RestResponse(results);
 
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -265,6 +289,38 @@ public class AddressController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /address/listUnassignedApartmentsByBuildingName</b>
+     * <p>根据小区Id、楼栋号查询未入驻的门牌列表</p>
+     */
+    @RequestMapping("listUnassignedApartmentsByBuildingName")
+    @RestReturn(value=ApartmentDTO.class, collection = true)
+    public RestResponse listUnassignedApartmentsByBuildingName(@Valid ListApartmentByBuildingNameCommand cmd,HttpServletRequest request,HttpServletResponse response) {
+    	List<ApartmentDTO> result = this.addressService.listUnassignedApartmentsByBuildingName(cmd);
+        RestResponse resp = new RestResponse();
+        if(EtagHelper.checkHeaderEtagOnly(30,result.hashCode()+"", request, response)) {
+            resp.setResponseObject(result);
+        }
+        
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
     
+    /**
+     * <b>URL: /address/listNearbyMixCommunities</b>
+     * <p>获取附近小区列表</p>
+     */
+    @RequestMapping("listNearbyMixCommunities")
+    @RestReturn(value=ListNearbyMixCommunitiesCommandResponse.class)
+    public RestResponse listNearbyMixCommunities(@Valid ListNearbyMixCommunitiesCommand cmd) {
+ 		
+    	ListNearbyMixCommunitiesCommandResponse res = addressService.listNearbyMixCommunities(cmd);
+
+ 		RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 }

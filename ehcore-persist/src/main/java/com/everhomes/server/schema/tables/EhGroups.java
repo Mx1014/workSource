@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhGroups extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhGroupsRecord> {
 
-	private static final long serialVersionUID = 1737124362;
+	private static final long serialVersionUID = -1719758271;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_groups</code>
@@ -39,7 +39,7 @@ public class EhGroups extends org.jooq.impl.TableImpl<com.everhomes.server.schem
 	/**
 	 * The column <code>ehcore.eh_groups.namespace_id</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_groups.name</code>.
@@ -190,6 +190,16 @@ public class EhGroups extends org.jooq.impl.TableImpl<com.everhomes.server.schem
 	 * The column <code>ehcore.eh_groups.delete_time</code>. mark-deletion policy, multi-purpose base entity
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.sql.Timestamp> DELETE_TIME = createField("delete_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "mark-deletion policy, multi-purpose base entity");
+
+	/**
+	 * The column <code>ehcore.eh_groups.visible_region_type</code>. the type of region where the group belong to
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Byte> VISIBLE_REGION_TYPE = createField("visible_region_type", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "the type of region where the group belong to");
+
+	/**
+	 * The column <code>ehcore.eh_groups.visible_region_id</code>. the id of region where the group belong to
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhGroupsRecord, java.lang.Long> VISIBLE_REGION_ID = createField("visible_region_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "the id of region where the group belong to");
 
 	/**
 	 * Create a <code>ehcore.eh_groups</code> table reference

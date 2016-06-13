@@ -1,0 +1,209 @@
+package com.everhomes.promotion;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.CommunityService;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.community.admin.CommunityUserAddressDTO;
+import com.everhomes.rest.community.admin.CommunityUserAddressResponse;
+import com.everhomes.rest.community.admin.ListCommunityUsersCommand;
+import com.everhomes.rest.organization.ListOrganizationMemberCommand;
+import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
+import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.organization.OrganizationMemberTargetType;
+import com.everhomes.rest.promotion.OpPromotionScopeType;
+import com.everhomes.user.User;
+import com.everhomes.user.UserProvider;
+
+@Component
+public class PromotionUserServiceImpl implements PromotionUserService {
+    @Autowired
+    private CommunityService communityService;
+    
+    @Autowired
+    private CommunityProvider communityProvider;
+    
+    @Autowired
+    private UserProvider userProvider;
+    
+    @Autowired
+    private OrganizationService organizationService;
+    
+    @Autowired
+    private OrganizationProvider organizationProvider;
+    
+    @Autowired
+    private OpPromotionAssignedScopeProvider promotionAssignedScopeProvider;
+    
+    @Override
+    public void listAllUser(OpPromotionUserVisitor visitor, OpPromotionUserCallback callback) {
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        int pageSize = 100;
+        List<User> users = userProvider.findUserByNamespaceId(visitor.getPromotion().getNamespaceId().intValue(), locator, pageSize);
+        while((users != null) && (users.size() > 0)) {
+            
+            for(User user : users) {
+                callback.userFound(user, visitor);    
+            }
+            
+            if(locator.getAnchor() == null) {
+                break;
+            }
+            
+            users = userProvider.findUserByNamespaceId(visitor.getPromotion().getNamespaceId().intValue(), locator, pageSize);
+        }
+    }
+    
+    @Override
+    public void listUserByCity(OpPromotionUserVisitor visitor, OpPromotionUserCallback callback) {
+        //TODO fix value error
+        
+        int namespaceId = visitor.getPromotion().getNamespaceId().intValue();
+        Long id = (Long)visitor.getParent().getValue();
+        
+        ListingLocator locator = new ListingLocator();
+        int pageSize = 100;
+        
+        List<Community> comunities = communityProvider.findCommunitiesByCityId(locator, pageSize, namespaceId, id);
+        
+        while((comunities != null) && (!comunities.isEmpty())) {
+            for(Community c : comunities) {
+                OpPromotionUserVisitor child = new OpPromotionUserVisitor();
+                child.setParent(visitor);
+                child.setValue(c.getId());
+                child.setPromotion(visitor.getPromotion());
+                
+                listUserByCommunity(child, callback);
+            }
+            
+            //Break after first process
+            if(locator.getAnchor() == null) {
+                break;
+            }
+            
+            comunities = communityProvider.findCommunitiesByCityId(locator, pageSize, namespaceId, id);
+        }
+        
+    }
+    
+    @Override
+    public void listUserByCommunity(OpPromotionUserVisitor visitor, OpPromotionUserCallback callback) {
+        ListCommunityUsersCommand cmd = new ListCommunityUsersCommand();
+        Long id = (Long)visitor.getParent().getValue();
+        cmd.setCommunityId(id);
+        cmd.setNamespaceId(visitor.getPromotion().getNamespaceId());
+        cmd.setPageSize(100);
+        
+        CommunityUserAddressResponse resp = communityService.listUserBycommunityId(cmd);
+        
+        while((resp != null) && (resp.getDtos() != null) && (resp.getDtos().size() > 0)) {
+            List<CommunityUserAddressDTO>  dtos = resp.getDtos();
+            for(CommunityUserAddressDTO dto : dtos) {
+                User user = userProvider.findUserById(dto.getUserId());
+                
+                if(user != null) {
+                    callback.userFound(user, visitor);
+                }
+            }
+            
+            //break after first process
+            if(resp.getNextPageAnchor() == null) {
+                break;
+            }
+            
+            cmd.setPageAnchor(resp.getNextPageAnchor());
+            resp = communityService.listUserBycommunityId(cmd);
+            
+        }
+    }
+    
+    @Override
+    public void listUserByCompany(OpPromotionUserVisitor visitor, OpPromotionUserCallback callback) {
+        ListOrganizationMemberCommand cmd = new ListOrganizationMemberCommand();
+        cmd.setOrganizationId((Long)visitor.getValue());
+        List<String> groupTypes = new ArrayList<String>();
+        //groupTypes.add(OrganizationGroupType.GROUP.getCode());
+        //groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+        groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+        cmd.setGroupTypes(groupTypes);
+        
+        ListOrganizationMemberCommandResponse resp = organizationService.ListParentOrganizationPersonnels(cmd);
+        while((resp != null) && (resp.getMembers() != null) && (resp.getMembers().size() > 0)) {
+            List<OrganizationMemberDTO>  dtos = resp.getMembers();
+            for(OrganizationMemberDTO dto : dtos) {
+                if(dto.getTargetType().equals(OrganizationMemberTargetType.USER.toString())) {
+                    User user = userProvider.findUserById(dto.getTargetId());
+                    callback.userFound(user, visitor);
+                }
+            }
+            
+            if(resp.getNextPageAnchor() == null) {
+                break;
+            }
+            
+            cmd.setPageAnchor(resp.getNextPageAnchor());
+            resp = organizationService.ListParentOrganizationPersonnels(cmd);
+            
+        }   
+    }
+    
+    @Override
+    public Boolean checkOrganizationMember(OpPromotionActivity promotion, OrganizationMember member) {       
+        Map<String, Integer> checkExists = new HashMap<String, Integer>();
+        
+        List<OpPromotionAssignedScope> scopes = promotionAssignedScopeProvider.getOpPromotionScopeByPromotionId(promotion.getId());
+        for(OpPromotionAssignedScope scope : scopes) {
+            checkExists.put("" + scope.getScopeCode() + ":" + scope.getScopeId(), 1);
+        }
+        
+        String key = "" + OpPromotionScopeType.ORGANIZATION.getCode() + ":" + member.getOrganizationId();
+        if(checkExists.containsKey(key)) {
+            return true;
+        }
+        
+        key = "" + OpPromotionScopeType.ALL.getCode() + ":0";
+        if(checkExists.containsKey(key)) {
+            return true;
+        }
+        
+            Long communityId = organizationService.getOrganizationActiveCommunityId(member.getOrganizationId());
+            key = "" + OpPromotionScopeType.COMMUNITY.getCode() + ":" + member.getOrganizationId();
+            
+            if(checkExists.containsKey(key)) {
+                return true;
+            }
+            
+            Community community = communityProvider.findCommunityById(communityId);
+            if(community != null) {
+                key = "" + OpPromotionScopeType.CITY.getCode() + ":" + community.getCityId();
+                if(checkExists.containsKey(key)) {
+                    return true;
+                }      
+            }
+          
+        return false;
+    }
+    
+//    @Override
+//    public Community listUserCommunities(Long userId) {
+//        
+//    }
+//    
+//    @Override
+//    public Boolean checkUserInCompany(Long userId, Long companyId) {
+//        
+//    }
+}

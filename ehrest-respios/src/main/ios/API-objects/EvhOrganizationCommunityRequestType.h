@@ -1,0 +1,8 @@
+//
+// EvhOrganizationCommunityRequestType.h
+//
+
+#define EvhOrganizationCommunityRequestType_Organization @"organization"
+
+///////////////////////////////////////////////////////////////////////////////
+

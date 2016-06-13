@@ -20,9 +20,11 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupAdminStatus;
 import com.everhomes.group.GroupDiscriminator;
-import com.everhomes.group.GroupPrivacy;
 import com.everhomes.group.GroupProvider;
-import com.everhomes.group.SearchGroupCommand;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.rest.group.GroupPrivacy;
+import com.everhomes.rest.group.SearchGroupCommand;
+import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.settings.PaginationConfigHelper;
 
 @Service
@@ -34,11 +36,6 @@ public class GroupSearcherImpl extends AbstractElasticSearch implements GroupSea
     
     @Autowired
     private ConfigurationProvider  configProvider;
-    
-    @Override
-    public String getIndexName() {
-        return SearchUtils.GROUPINDEXNAME;
-    }
 
     @Override
     public String getIndexType() {
@@ -70,6 +67,7 @@ public class GroupSearcherImpl extends AbstractElasticSearch implements GroupSea
         try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
             b.field("name", group.getName());
+            b.field("namespaceId", group.getNamespaceId());
             b.field("description", group.getDescription());
             b.field("creatorUid", group.getCreatorUid());
             b.field("categoryId", group.getCategoryId());
@@ -110,7 +108,7 @@ public class GroupSearcherImpl extends AbstractElasticSearch implements GroupSea
         for (Group group : groups) {
             XContentBuilder source = createDoc(group);
             if(null != source) {
-                LOGGER.info("id:" + group.getId());
+                LOGGER.info("Sync group(update), id=" + group.getId());
                 brb.add(Requests.indexRequest(getIndexName()).type(getIndexType())
                         .id(group.getId().toString()).source(source));    
                 }
@@ -133,29 +131,33 @@ public class GroupSearcherImpl extends AbstractElasticSearch implements GroupSea
     public void syncFromDb() {
         List<Group> groups = new ArrayList<Group>();
         int pageSize = 200;
-        AtomicInteger count = new AtomicInteger(); 
-        
-        
         
         this.deleteAll();
         
         this.groupProvider.iterateGroups(pageSize, GroupDiscriminator.GROUP, (group)->{
             if((group.getPrivateFlag().equals(GroupPrivacy.PUBLIC.getCode())) 
-            		&& Byte.valueOf(GroupAdminStatus.ACTIVE.getCode()).equals(group.getStatus())){
+            		&& GroupAdminStatus.fromCode(group.getStatus()) == GroupAdminStatus.ACTIVE){
                 groups.add(group); 
+                if(LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Sync group(add), id=" + group.getId());
                 }
+            } else {
+                if(LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Sync group(ignore), id=" + group.getId());
+                }
+            }
             
             if(groups.size() >= pageSize) {
                 this.bulkUpdate(groups);
                 groups.clear();
-                LOGGER.info("process count: " + count.get());
-                }
+                LOGGER.info("Sync group(iterate), process count: " + groups.size());
+            }
         });
         
         if(groups.size() > 0) {
             this.bulkUpdate(groups);
             groups.clear();
-            LOGGER.info("process count: " + count.get());
+            LOGGER.info("Sync group(syncupdate), process count: " + groups.size());
         }
         
         //TODO merge ?
@@ -164,6 +166,7 @@ public class GroupSearcherImpl extends AbstractElasticSearch implements GroupSea
         this.refresh();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public GroupQueryResult query(SearchGroupCommand cmd) {
         GroupQueryFilter filter = new GroupQueryFilter();
@@ -172,8 +175,15 @@ public class GroupSearcherImpl extends AbstractElasticSearch implements GroupSea
             pageNum = cmd.getPageAnchor().intValue();
         }
 
+        Integer namespaceId = (cmd.getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
+        @SuppressWarnings("rawtypes")
+        List namespaceList = new ArrayList();
+        namespaceList.add(namespaceId);
+        
         filter.setPageInfo(pageNum, PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize()));
         filter.addQueryTerm(GroupQueryFilter.TERM_NAME).addQueryTerm(GroupQueryFilter.TERM_TAG);
+        filter.includeFilter(GroupQueryFilter.TERM_NAMESPACE_ID, namespaceList);
+        filter.addQueryTerm(GroupQueryFilter.TERM_NAME).addQueryTerm(GroupQueryFilter.TERM_NAMESPACE_ID);
         filter.setQueryString(cmd.getQueryString());
         return this.query(filter);
     }

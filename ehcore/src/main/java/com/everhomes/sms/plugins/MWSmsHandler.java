@@ -1,5 +1,9 @@
 package com.everhomes.sms.plugins;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang.ArrayUtils;
@@ -16,10 +20,12 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.sms.SmsBuilder;
 import com.everhomes.sms.SmsChannel;
 import com.everhomes.sms.SmsHandler;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.Tuple;
 
 /**
  * mw sms provider
@@ -39,6 +45,9 @@ public class MWSmsHandler implements SmsHandler {
     private static final int MAX_LIMIT = 100;
     @Autowired
     private ConfigurationProvider configurationProvider;
+    
+    @Autowired
+    private LocaleTemplateService localeTemplateService;
     private String host;
     private String username;
 
@@ -128,4 +137,30 @@ public class MWSmsHandler implements SmsHandler {
        doSend(phoneNumbers, text);
     }
 
+    @Override
+    public void doSend(Integer namespaceId, String phoneNumber, String templateScope, int templateId,
+        String templateLocale, List<Tuple<String, Object>> variables) {
+        doSend(namespaceId, new String[]{phoneNumber}, templateScope, templateId, templateLocale, variables);
+    }
+
+    @Override
+    public void doSend(Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId,
+        String templateLocale, List<Tuple<String, Object>> variables) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        if(variables != null) {
+            for(Tuple<String, Object> variable : variables) {
+                map.put(variable.first(), variable.second());
+            }
+        }
+        
+        String content = localeTemplateService.getLocaleTemplateString(templateScope, templateId, 
+            templateLocale, map, "");
+
+        if(content != null && content.trim().length() > 0) {
+            doSend(phoneNumbers, content);
+        } else {
+            LOGGER.error("The mw template id is empty, namespaceId=" + namespaceId + ", templateScope=" + templateScope 
+                + ", templateId=" + templateId + ", templateLocale=" + templateLocale);
+        }
+    }
 }

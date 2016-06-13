@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.app.AppConstants;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.rest.app.AppConstants;
 
 
 @Component(LaunchPadHandler.LAUNCH_PAD_ITEM_RESOLVER_PREFIX + AppConstants.APPID_DEFAULT)

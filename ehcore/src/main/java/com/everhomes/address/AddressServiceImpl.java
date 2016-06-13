@@ -27,12 +27,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import ch.qos.logback.core.joran.conditional.ElseAction;
 
-import com.everhomes.address.admin.CorrectAddressAdminCommand;
 import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusSubscriber;
+import com.everhomes.community.Building;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityDataInfo;
-import com.everhomes.community.CommunityDoc;
 import com.everhomes.community.CommunityGeoPoint;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -44,31 +43,72 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.enterprise.Enterprise;
+import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.family.Family;
-import com.everhomes.family.FamilyDTO;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
 import com.everhomes.family.FamilyUtils;
-import com.everhomes.family.LeaveFamilyCommand;
 import com.everhomes.group.Group;
-import com.everhomes.group.GroupMemberStatus;
 import com.everhomes.group.GroupProvider;
-import com.everhomes.openapi.UserServiceAddressDTO;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.namespace.Namespace;
+import com.everhomes.rest.openapi.UserServiceAddressDTO;
 import com.everhomes.organization.pm.CommunityPmContact;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.region.Region;
-import com.everhomes.region.RegionAdminStatus;
 import com.everhomes.region.RegionProvider;
-import com.everhomes.region.RegionScope;
-import com.everhomes.region.RegionServiceErrorCode;
+import com.everhomes.rest.address.AddressAdminStatus;
+import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.rest.address.AddressLivingStatus;
+import com.everhomes.rest.address.AddressServiceErrorCode;
+import com.everhomes.rest.address.ApartmentDTO;
+import com.everhomes.rest.address.BuildingDTO;
+import com.everhomes.rest.address.ClaimAddressCommand;
+import com.everhomes.rest.address.ClaimedAddressInfo;
+import com.everhomes.rest.address.CommunityAdminStatus;
+import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.address.CommunitySummaryDTO;
+import com.everhomes.rest.address.CreateServiceAddressCommand;
+import com.everhomes.rest.address.DeleteServiceAddressCommand;
+import com.everhomes.rest.address.DisclaimAddressCommand;
+import com.everhomes.rest.address.ListAddressByKeywordCommand;
+import com.everhomes.rest.address.ListAddressByKeywordCommandResponse;
+import com.everhomes.rest.address.ListAddressCommand;
+import com.everhomes.rest.address.ListApartmentByBuildingNameCommand;
+import com.everhomes.rest.address.ListApartmentByBuildingNameCommandResponse;
+import com.everhomes.rest.address.ListBuildingByKeywordCommand;
+import com.everhomes.rest.address.ListCommunityByKeywordCommand;
+import com.everhomes.rest.address.ListNearbyCommunityCommand;
+import com.everhomes.rest.address.ListNearbyMixCommunitiesCommand;
+import com.everhomes.rest.address.ListNearbyMixCommunitiesCommandResponse;
+import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
+import com.everhomes.rest.address.SearchCommunityCommand;
+import com.everhomes.rest.address.SuggestCommunityCommand;
+import com.everhomes.rest.address.SuggestCommunityDTO;
+import com.everhomes.rest.address.admin.CorrectAddressAdminCommand;
+import com.everhomes.rest.address.admin.ImportAddressCommand;
+import com.everhomes.rest.community.CommunityDoc;
+import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.family.FamilyDTO;
+import com.everhomes.rest.family.LeaveFamilyCommand;
+import com.everhomes.rest.group.GroupMemberStatus;
+import com.everhomes.rest.openapi.UserServiceAddressDTO;
+import com.everhomes.rest.region.RegionAdminStatus;
+import com.everhomes.rest.region.RegionScope;
+import com.everhomes.rest.region.RegionServiceErrorCode;
 import com.everhomes.search.CommunitySearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserGroupHistory;
+import com.everhomes.user.UserGroupHistoryProvider;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserServiceAddress;
 import com.everhomes.util.ConvertHelper;
@@ -77,6 +117,8 @@ import com.everhomes.util.FileHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
+import com.everhomes.util.excel.RowResult;
+import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.util.file.DataFileHandler;
 import com.everhomes.util.file.DataProcessConstants;
 
@@ -129,6 +171,12 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     @Autowired
     private UserActivityProvider userActivityProvider;
     
+    @Autowired
+    private EnterpriseProvider enterpriseProvider;
+    
+    @Autowired
+    private UserGroupHistoryProvider userGroupHistoryProvider;
+    
     @PostConstruct
     public void setup() {
         localBus.subscribe(DaoHelper.getDaoActionPublishSubject(DaoAction.CREATE, EhCommunities.class, null), this);
@@ -142,6 +190,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     
     @Override
     public SuggestCommunityDTO suggestCommunity(SuggestCommunityCommand cmd) {
+    	int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId(); 
         if(cmd.getRegionId() == null || cmd.getName() == null || cmd.getName().isEmpty())
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid parameter, regionId and name should not be null or empty");
@@ -179,6 +228,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         User user = UserContext.current().getUser();
         community.setCreatorUid(user.getId());
         community.setStatus(CommunityAdminStatus.CONFIRMING.getCode());
+        community.setNamespaceId(namespaceId);
 
         this.dbProvider.execute((TransactionStatus status) ->  {
             this.communityProvider.createCommunity(user.getId(), community);
@@ -225,6 +275,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     
     @Override
     public Tuple<Integer, List<CommunityDTO>> listNearbyCommunities(ListNearbyCommunityCommand cmd) {
+    	int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
         final List<CommunityDTO> results = new ArrayList<>();
 
         if(cmd.getCityId() == null && cmd.getLatigtue() == null && cmd.getLongitude() == null)
@@ -237,17 +288,27 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 
         // TODO, return all communities only to test our REST response for now
         
-        List<CommunityGeoPoint> pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatigtue(),cmd.getLongitude());
+        List<CommunityGeoPoint> pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatigtue(),cmd.getLongitude(), 6);
         List<Long> communityIds = getAllCommunityIds(pointList);
         
+        //select active community by xiongying 20160516
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
             (DSLContext context, Object reducingContext)-> {
             
             context.select().from(Tables.EH_COMMUNITIES)
                 .where(Tables.EH_COMMUNITIES.ID.in(communityIds))
+                .and(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()))
                 .fetch().map((r) -> {
+                
                 CommunityDTO community = ConvertHelper.convert(r, CommunityDTO.class);
-                results.add(community);
+                if(null == cmd.getCommunityType()){
+                	results.add(community);
+                }else{
+                	if(cmd.getCommunityType().equals(community.getCommunityType())){
+                    	results.add(community);
+                    }
+                }
                 
                 return null;
             });
@@ -273,6 +334,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
      */
     @Override
     public Tuple<Integer, List<CommunityDTO>> listCommunitiesByKeyword(ListCommunityByKeywordCommand cmd) {
+    	int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
         //
         // TODO, should be integrating with keyword search server
         //
@@ -293,6 +355,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                     Long count = context.selectCount().from(Tables.EH_COMMUNITIES)
                             .where(Tables.EH_COMMUNITIES.NAME.like(cmd.getKeyword() + "%"))
                             .or(Tables.EH_COMMUNITIES.ALIAS_NAME.like(cmd.getKeyword() + "%"))
+                            .and(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId))
                             .fetchOne(0, Long.class);
                     
                     countsInShards.add(count);
@@ -323,6 +386,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                 context.select().from(Tables.EH_COMMUNITIES)
                     .where(Tables.EH_COMMUNITIES.NAME.like(cmd.getKeyword() + "%"))
                     .or(Tables.EH_COMMUNITIES.ALIAS_NAME.like(cmd.getKeyword() + "%"))
+                    .and(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId))
                     .limit((int)pageSize).offset((int)off)
                     .fetch().map((r) -> {
                         CommunityDTO community = ConvertHelper.convert(r, CommunityDTO.class);
@@ -352,6 +416,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             cmd.setKeyword("");;
         List<BuildingDTO> results = new ArrayList<BuildingDTO>();
         long startTime = System.currentTimeMillis();
+        int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
                 (DSLContext context, Object reducingContext)-> {
                     
@@ -359,6 +424,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                     context.selectDistinct(Tables.EH_ADDRESSES.BUILDING_NAME, Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME)
                         .from(Tables.EH_ADDRESSES)
                         .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId())
+                        .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
                         .and(Tables.EH_ADDRESSES.BUILDING_NAME.like(likeVal)
                                 .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.like(likeVal))))
                          .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()))
@@ -387,12 +453,13 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         List<ApartmentDTO> results = new ArrayList<>();
         String likeVal = "%" + cmd.getKeyword() + "%";
         long startTime = System.currentTimeMillis();
+        int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
                 (DSLContext context, Object reducingContext)-> {
-                    
-                    context.selectDistinct(Tables.EH_ADDRESSES.ID,Tables.EH_ADDRESSES.APARTMENT_NAME)
+                    context.selectDistinct(Tables.EH_ADDRESSES.ID,Tables.EH_ADDRESSES.APARTMENT_NAME,Tables.EH_ADDRESSES.AREA_SIZE)
                         .from(Tables.EH_ADDRESSES)
                         .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId())
+                        .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
                         .and(Tables.EH_ADDRESSES.BUILDING_NAME.equal(cmd.getBuildingName())
                                 .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.equal(cmd.getBuildingName()))))
                         .and(Tables.EH_ADDRESSES.APARTMENT_NAME.like(likeVal))
@@ -401,6 +468,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                             ApartmentDTO apartment = new ApartmentDTO();
                             apartment.setAddressId(r.getValue(Tables.EH_ADDRESSES.ID));
                             apartment.setApartmentName(r.getValue(Tables.EH_ADDRESSES.APARTMENT_NAME));
+                            apartment.setAreaSize(r.getValue(Tables.EH_ADDRESSES.AREA_SIZE));
                             results.add(apartment);
                             return null;
                         });
@@ -425,6 +493,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         long offset = PaginationHelper.offsetFromPageOffset(pageOffset, pageSize);
         Tuple<Integer, Long> targetShard = new Tuple<>(0, offset);
         String likeVal = "%" + cmd.getKeyword() + "%";
+        int namespaceId = UserContext.getCurrentNamespaceId(null);
         if(offset > 0) {
             final List<Long> countsInShards = new ArrayList<>();
             this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
@@ -432,6 +501,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                         
                     Long count = context.selectCount().from(Tables.EH_ADDRESSES)
                             .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId()))
+                            .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
                             .and(Tables.EH_ADDRESSES.APARTMENT_NAME.like(likeVal))
                             .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()))
                             .fetchOne(0, Long.class);
@@ -466,6 +536,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                     context.select().from(Tables.EH_ADDRESSES)
                     .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId()))
                     .and(Tables.EH_ADDRESSES.APARTMENT_NAME.like(likeVal))
+                    .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
                     .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()))
                     .limit((int)pageSize).offset((int)off)
                     .fetch().map((r) -> {
@@ -509,6 +580,13 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             || cmd.getApartmentName() == null || cmd.getApartmentName().isEmpty()) {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
                     "Invalid communityId, buildingName or appartmentName parameter");
+        }
+        
+        if(cmd.getHistoryId() != null) {
+            UserGroupHistory history = this.userGroupHistoryProvider.getHistoryById(cmd.getHistoryId());
+            if(null != history) {
+                this.userGroupHistoryProvider.deleteUserGroupHistory(history);
+            }
         }
         
         if(cmd.getReplacedAddressId() == null) {
@@ -557,12 +635,12 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         }
         LeaveFamilyCommand leaveCmd = new LeaveFamilyCommand();
         leaveCmd.setId(family.getId());
-        familyService.leave(leaveCmd);
+        familyService.leave(leaveCmd, null);
     }
    
     private ClaimedAddressInfo processNewAddressClaim(ClaimAddressCommand cmd) {
         Address address = this.getOrCreateAddress(cmd);
-        Family family = this.familyService.getOrCreatefamily(address);
+        Family family = this.familyService.getOrCreatefamily(address, null);
         
         ClaimedAddressInfo info = new ClaimedAddressInfo();
         info.setAddressId(address.getId());
@@ -572,8 +650,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     }
     
     private FamilyDTO processNewAddressClaimV2(ClaimAddressCommand cmd) {
+    	
         Address address = this.getOrCreateAddress(cmd);
-        Family family = this.familyService.getOrCreatefamily(address);
+        Family family = this.familyService.getOrCreatefamily(address, null);
         FamilyDTO familyDTO = ConvertHelper.convert(family, FamilyDTO.class);
         long communityId = family.getIntegralTag2();
         Community community = this.communityProvider.findCommunityById(communityId);
@@ -585,6 +664,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             
             familyDTO.setAreaId(community.getAreaId());
             familyDTO.setAreaName(community.getAreaName());
+            familyDTO.setCommunityType(community.getCommunityType());
         }
         familyDTO.setMembershipStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());
         if(address != null){
@@ -600,8 +680,12 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     }
     
     private Address getOrCreateAddress(ClaimAddressCommand cmd) {
-        Address address = this.addressProvider.findApartmentAddress(cmd.getCommunityId(), 
-                cmd.getBuildingName(), cmd.getApartmentName());
+    	Address address = null;
+    	
+    	if(null == address){
+    		address = this.addressProvider.findApartmentAddress(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), cmd.getCommunityId(), 
+                    cmd.getBuildingName(), cmd.getApartmentName());
+    	}
         
         Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
         if(community == null)
@@ -614,7 +698,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
             Tuple<Address, Boolean> result = this.coordinationProvider
                      .getNamedLock(CoordinationLocks.CREATE_ADDRESS.getCode()).enter(()-> {
                 long lqStartTime = System.currentTimeMillis();
-                Address addr = this.addressProvider.findApartmentAddress(cmd.getCommunityId(), 
+                Address addr = this.addressProvider.findApartmentAddress(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), cmd.getCommunityId(), 
                                  cmd.getBuildingName(), cmd.getApartmentName());
                 long lqEndTime = System.currentTimeMillis();
                 LOGGER.info("find address ,in the lock,elapse=" + (lqEndTime - lqStartTime));
@@ -655,12 +739,13 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         final long pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size", 
                 AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
         long offset = PaginationHelper.offsetFromPageOffset(cmd.getPageOffset(), pageSize);
-        
+        int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhGroups.class), null, 
             (DSLContext context, Object reducingContext)-> {
                 
                 context.select().from(Tables.EH_ADDRESSES)
                     .where(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(cmd.getCommunityId()))
+                    .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
                     .limit((int)pageSize).offset((int)offset)
                     .fetch().map((r) -> {
                         results.add(ConvertHelper.convert(r, Address.class)); 
@@ -711,7 +796,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         User user = UserContext.current().getUser();
         long userId = user.getId();
         long startTime = System.currentTimeMillis();
-        Address addr = this.addressProvider.findApartmentAddress(cmd.getCommunityId(), cmd.getBuildingName(), cmd.getApartmentName());
+        Address addr = this.addressProvider.findApartmentAddress(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), cmd.getCommunityId(), cmd.getBuildingName(), cmd.getApartmentName());
         this.dbProvider.execute((TransactionStatus status) -> {
             Family family = this.familyProvider.findFamilyByAddressId(cmd.getAddressId());
             if(family == null){
@@ -774,7 +859,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         final int pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size", 
                 AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
         
-        return communitySearcher.searchDocs(cmd.getKeyword(), cmd.getCityId(), cmd.getRegionId(), pageNum - 1, pageSize);
+        return communitySearcher.searchDocs(cmd.getKeyword(),cmd.getCommunityType(), cmd.getCityId(), cmd.getRegionId(), pageNum - 1, pageSize);
     }
 
     private void checkUserPrivilege(long userId, long communityId) {
@@ -1007,8 +1092,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 	public void importCommunityInfos(MultipartFile[] files) {
 		long startTime = System.currentTimeMillis();
 		User user  = UserContext.current().getUser();
-		List<Region> cityList = regionProvider.listRegions(RegionScope.CITY, RegionAdminStatus.ACTIVE, null);
-		List<Region> areaList = regionProvider.listRegions(RegionScope.AREA, RegionAdminStatus.ACTIVE, null);
+		List<Region> cityList = regionProvider.listRegions(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), RegionScope.CITY, RegionAdminStatus.ACTIVE, null);
+		List<Region> areaList = regionProvider.listRegions(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), RegionScope.AREA, RegionAdminStatus.ACTIVE, null);
 		
 		try {
 			String seperator = configurationProvider.getValue(ADMIN_IMPORT_DATA_SEPERATOR, "#@");
@@ -1107,12 +1192,12 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 	}
 
 	@Override
-	public void importAddressInfos(MultipartFile[] files) {
+	public void importAddressInfos( MultipartFile[] files) {
 		long startTime =  System.currentTimeMillis();
 		
 		User user  = UserContext.current().getUser();
-		List<Region> cityList = regionProvider.listRegions(RegionScope.CITY, RegionAdminStatus.ACTIVE, null);
-		List<Region> areaList = regionProvider.listRegions(RegionScope.AREA, RegionAdminStatus.ACTIVE, null);
+		List<Region> cityList = regionProvider.listRegions(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), RegionScope.CITY, RegionAdminStatus.ACTIVE, null);
+		List<Region> areaList = regionProvider.listRegions(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), RegionScope.AREA, RegionAdminStatus.ACTIVE, null);
 		
 	
 		try {
@@ -1310,6 +1395,347 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 		return count;
 	}
 
+	@Override
+	public List<ApartmentDTO> listUnassignedApartmentsByBuildingName(
+			ListApartmentByBuildingNameCommand cmd) {
+        
+        List<ApartmentDTO> results = new ArrayList<ApartmentDTO>();
+        int pageOffset = cmd.getPageOffset() == null ? 1 : cmd.getPageOffset();
+        int pageSize = cmd.getPageSize() == null ? this.configurationProvider.getIntValue("pagination.page.size", 
+                AppConfig.DEFAULT_PAGINATION_PAGE_SIZE) : cmd.getPageSize();
+        int offset = (int) PaginationHelper.offsetFromPageOffset((long)pageOffset, (long)pageSize);
+        
+        List<ApartmentDTO> list = this.addressProvider.listApartmentsByBuildingName(cmd.getCommunityId(), 
+                cmd.getBuildingName() , offset , pageSize);
+        
+        list.stream().map((r) ->{
+        	r.setLivingStatus(AddressLivingStatus.INACTIVE.getCode());
+            Family family = this.familyProvider.findFamilyByAddressId(r.getAddressId());
+            if(family != null && family.getMemberCount() > 0){
+                r.setLivingStatus(AddressLivingStatus.ACTIVE.getCode());
+                r.setFamilyId(family.getId());
+            }
+            
+            Enterprise enterprise = this.enterpriseProvider.findEnterpriseByAddressId(r.getAddressId());
+            if(enterprise != null && enterprise.getId() != null) {
+            	r.setLivingStatus(AddressLivingStatus.ACTIVE.getCode());
+            }
+            
+            if(r.getLivingStatus() == AddressLivingStatus.INACTIVE.getCode()){
+            	results.add(r);
+            }
+            return null;
+        }).collect(Collectors.toList());
+        sortApartment(results);
+        return results;
+	}
 
+	@Override
+	public void importParkAddressData(ImportAddressCommand cmd,
+		MultipartFile[] files) {
+		long communityId = cmd.getCommunityId();
+		
+		if(org.springframework.util.StringUtils.isEmpty(files) || files.length == 0){
+			LOGGER.error("File content is empty。");
+			throw new RuntimeErrorException("File content is empty。");
+		}
+		
+		try {
+			List list = PropMrgOwnerHandler.processorExcel(files[0].getInputStream());
+			
+			List<String[]> datas = this.convertToParkDatas(list);
+			
+			Community community = communityProvider.findCommunityById(communityId);
+			
+			this.batchAddAddresses(community, datas);
+			
+		} catch (Exception e) {
+			throw new RuntimeErrorException("File parsing error");
+		}
+		
+	}
+	
+	@Override
+	public void importAddressData(MultipartFile[] files) {
+		
+		if(org.springframework.util.StringUtils.isEmpty(files) || files.length == 0){
+			LOGGER.error("File content is empty。");
+			throw new RuntimeErrorException("File content is empty。");
+		}
+		
+		try {
+			List list = PropMrgOwnerHandler.processorExcel(files[0].getInputStream());
+			
+			Map<String, List<String[]>> dataMap = this.convertToAddrDatas(list);
+			
+			
+			for (String key : dataMap.keySet()) {
+				List<String[]> datas = dataMap.get(key);
+				String[] str = datas.get(0);
+				String cityName = str[3];
+				String areaName = str[4];
+				String communityName = str[5];
+				Long cityId = regionProvider.findRegionByPath("/" + cityName).getId();
+				if(null == cityId){
+					LOGGER.error("The city does not exist。 data = " + key);
+					continue;
+				}
+				Long areaId = regionProvider.findRegionByPath("/" + cityName + "/" + areaName).getId();
+				if(null == areaId){
+					LOGGER.error("The area does not exist。 data = " + key);
+					continue;
+				}
+				List<Community>  communitys = communityProvider.findCommunitiesByNameCityIdAreaId(communityName, cityId, areaId);
+				
+				if(null == communitys || 0 == communitys.size()){
+					LOGGER.error("The community does not exist。 data = " + key);
+					continue;
+				}
+				Community community = communitys.get(0);
+				
+				this.batchAddAddresses(community, datas);
+			}
+			
+			
+			
+		} catch (Exception e) {
+			throw new RuntimeErrorException("File parsing error");
+		}
+		
+	}
+	
+	private void batchAddAddresses(Community community, List<String[]> datas){
+		
+		
+		for (String[] arr : datas) {
+			
+			if(org.springframework.util.StringUtils.isEmpty(arr[0]) 
+					|| org.springframework.util.StringUtils.isEmpty(arr[1]) ){
+				LOGGER.error("Data is not complete or empty. data = " + arr[0] + "|" + arr[1] + "|" + arr[2]);
+				continue;
+			}
+			
+			Building building = communityProvider.findBuildingByCommunityIdAndName(community.getId(), arr[0]);
+			
+			if(null == building){
+				building = new Building();
+				building.setCommunityId(community.getId());
+				building.setName(arr[0]);
+				building.setOperatorUid(UserContext.current().getUser().getId());
+				building = communityProvider.createBuilding(building.getOperatorUid(), building);
+			}
+			
+			double areaSize = 0;
+			try {
+				areaSize = Double.parseDouble(arr[2]);
+			} catch (Exception e) {
+			}
+			
+			Address address = new Address();
+			address.setCommunityId(community.getId());
+			address.setCityId(community.getCityId());
+			address.setCityName(community.getCityName());
+			address.setAreaId(community.getAreaId());
+			address.setAreaName(community.getAreaName());
+			address.setBuildingName(building.getName());
+			address.setApartmentName(arr[1]);
+			address.setAreaSize(areaSize);
+			address.setAddress(building.getName() + "-" + arr[1]);
+			address.setStatus(AddressAdminStatus.ACTIVE.getCode());
+			address.setNamespaceId(community.getNamespaceId());
+			
+			Address addr = addressProvider.findAddressByCommunityAndAddress(address.getCityId(), address.getAreaId(), address.getCommunityId(), address.getAddress());
+			
+			if(null != addr){
+				LOGGER.error("Data already exists. data = " + arr[0] + "|" + arr[1] + "|" + arr[2]);
+				continue;
+			}
+			addressProvider.createAddress(address);
+		}
+	}
+	
+	 private Map<String, List<String[]>> convertToAddrDatas(List list) {
+		 Map<String, List<String[]>> map = new HashMap<String, List<String[]>>();
+		 String key = "";
+		 List<String[]> values = null;
+			boolean firstRow = true;
+			for (Object o : list) {
+				if(firstRow){
+					firstRow = false;
+					continue;
+				}
+				RowResult r = (RowResult)o;
+				
+				if(null == r.getA() || "".equals(r.getA()) || "null".equals(r.getA())
+						||null == r.getB() || "".equals(r.getB()) || "null".equals(r.getB())
+						||null == r.getC() || "".equals(r.getC()) || "null".equals(r.getC()))
+					continue;
+				key = r.getA() + r.getB() + r.getC();
+				String[] value = new String[6];
+				value[3] = r.getA();
+				value[4] = r.getB();
+				value[5] = r.getC();
+				value[0] = r.getD();
+				value[1] = r.getE();
+				value[2] = r.getF();
+				if(null == map.get(key)){
+					values = new ArrayList<String[]>();
+					values.add(value);
+					map.put(key, values);
+				}else{
+					map.get(key).add(value);
+				}
+				
+			}
+			return map;
+	}
+	 
+	 private List<String[]> convertToParkDatas(List list) {
+			List<String[]> result = new ArrayList<String[]>();
+			boolean firstRow = true;
+			for (Object o : list) {
+				if(firstRow){
+					firstRow = false;
+					continue;
+				}
+				RowResult r = (RowResult)o;
+				String[] s = new String[3];
+				s[0] = r.getA();
+				s[1] = r.getB();
+				s[2] = r.getC();
+				result.add(s);
+			}
+			return result;
+	}
 
+	@Override
+	public ListNearbyMixCommunitiesCommandResponse listNearbyMixCommunities(
+			ListNearbyMixCommunitiesCommand cmd) {
+		ListNearbyMixCommunitiesCommandResponse resp = new ListNearbyMixCommunitiesCommandResponse();
+		List<CommunityDTO> results = new ArrayList<>();
+		
+        if(cmd.getLatigtue() == null || cmd.getLongitude() == null)
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid parameter, latitude and longitude have to be both specified or neigher");
+        
+
+		if(cmd.getPageAnchor()==null)
+			cmd.setPageAnchor(0L);
+        
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        ListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getPageAnchor());
+		
+        int namespaceId = (UserContext.current().getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : UserContext.current().getNamespaceId();
+        if(namespaceId == 0) {
+        	resp = listMixCommunitiesByDistance(cmd, locator, pageSize);
+        	return resp;
+        }else {
+        	results = this.communityProvider.listCommunitiesByNamespaceId(cmd.getCommunityType(), namespaceId, locator, pageSize+1);
+        	
+        	if(results != null && results.size() > pageSize){
+            	results.remove(results.size()-1);
+            	resp.setNextPageAnchor(results.get(results.size()-1).getId());
+    		}
+    		if(results != null){
+    			resp.setDtos(results);
+    		}
+            
+            return resp;
+        }
+        
+	}
+	
+	private ListNearbyMixCommunitiesCommandResponse listMixCommunitiesByDistance(ListNearbyMixCommunitiesCommand cmd
+			, ListingLocator locator, int pageSize) {
+		ListNearbyMixCommunitiesCommandResponse resp = new ListNearbyMixCommunitiesCommandResponse();
+		List<CommunityDTO> results = new ArrayList<>();
+		
+		List<CommunityGeoPoint> pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatigtue(),cmd.getLongitude(), 5);
+        List<Long> communityIds = getAllCommunityIds(pointList);
+        
+        if(cmd.getCommunityType() == null) {
+        	if(cmd.getPageAnchor() != 0) {
+    			Community anchorCommunity = this.communityProvider.findCommunityById(cmd.getPageAnchor());
+    			if(anchorCommunity != null && anchorCommunity.getCommunityType() == CommunityType.COMMERCIAL.getCode()) {
+    				//园区 Anchor
+    				List<CommunityDTO> commercials = this.communityProvider.listCommunitiesByType(communityIds, 
+    						CommunityType.COMMERCIAL.getCode(), locator, pageSize+1);
+    				if(commercials != null) {
+    					results.addAll(commercials);
+    				} 
+
+    				if(commercials == null || (commercials != null && commercials.size() <= pageSize)){
+    					int count = pageSize;
+    					if(commercials != null) {
+    						count = pageSize-commercials.size();
+    					}
+    					//小区  从0开始
+    					ListingLocator residentialsLocator = new CrossShardListingLocator();
+    					residentialsLocator.setAnchor(0L);
+    					List<CommunityDTO> residentials = this.communityProvider.listCommunitiesByType(communityIds, 
+    							CommunityType.RESIDENTIAL.getCode(), residentialsLocator, count+1);
+    					if(residentials != null) {
+    						results.addAll(residentials);
+    					}
+    				}
+    				
+    			} else {
+    				//小区 Anchor
+    				List<CommunityDTO> residentials = this.communityProvider.listCommunitiesByType(communityIds, 
+    						CommunityType.RESIDENTIAL.getCode(), locator, pageSize+1);
+    				if(residentials != null) {
+    					results.addAll(residentials);
+    				}
+    			}
+    		} else {
+    			//园区  从0开始
+    			List<CommunityDTO> commercials = this.communityProvider.listCommunitiesByType(communityIds, 
+    					CommunityType.COMMERCIAL.getCode(), locator, pageSize+1);
+    			if(commercials != null) {
+    				results.addAll(commercials);
+    			} 
+    			
+    			if(commercials == null || (commercials != null && commercials.size() <= pageSize)){
+    				int count = pageSize;
+    				if(commercials != null) {
+    					count = pageSize-commercials.size();
+    				}
+    				//小区  从0开始
+    				List<CommunityDTO> residentials = this.communityProvider.listCommunitiesByType(communityIds, 
+    						CommunityType.RESIDENTIAL.getCode(), locator, count+1);
+    				if(residentials != null) {
+    					results.addAll(residentials);
+    				}
+    			}
+    		}
+        }
+        
+        else if(cmd.getCommunityType() != null && cmd.getCommunityType().equals(CommunityType.COMMERCIAL.getCode())) {
+        	List<CommunityDTO> commercials = this.communityProvider.listCommunitiesByType(communityIds, 
+					CommunityType.COMMERCIAL.getCode(), locator, pageSize+1);
+			if(commercials != null) {
+				results.addAll(commercials);
+			} 
+        }
+        
+        else if(cmd.getCommunityType() != null && cmd.getCommunityType().equals(CommunityType.RESIDENTIAL.getCode())) {
+        	List<CommunityDTO> residentials = this.communityProvider.listCommunitiesByType(communityIds, 
+					CommunityType.RESIDENTIAL.getCode(), locator, pageSize+1);
+			if(residentials != null) {
+				results.addAll(residentials);
+			}
+        }
+		
+		
+        if(results != null && results.size() > pageSize){
+        	results.remove(results.size()-1);
+        	resp.setNextPageAnchor(results.get(results.size()-1).getId());
+		}
+		if(results != null){
+			resp.setDtos(results);
+		}
+        
+        return resp;
+	}
 }

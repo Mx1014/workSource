@@ -69,7 +69,8 @@ public class EhForumPostsRecordMapper implements RecordMapper<Record, EhForumPos
         post.setCreateTime(r.getValue((Field<Timestamp>)r.field("create_time")));
         post.setDeleterUid(r.getValue((Field<Long>)r.field("deleter_uid")));
         post.setDeleteTime(r.getValue((Field<Timestamp>)r.field("delete_time")));
-                           
+        post.setStartTime(r.getValue((Field<Timestamp>)r.field("start_time")));     
+        post.setEndTime(r.getValue((Field<Timestamp>)r.field("end_time")));  
         return post;
     }
 }

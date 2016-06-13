@@ -8,7 +8,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import com.everhomes.junit.CoreServerTestCase;
+import com.everhomes.rest.region.RegionAdminStatus;
+import com.everhomes.rest.region.RegionScope;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
 
@@ -74,14 +78,14 @@ public class RegionProviderTest extends CoreServerTestCase {
     @SuppressWarnings("unchecked")
     @Test
     public void test() {
-        List<Region> regions = this.regionProvider.listRegions(RegionScope.CITY, null, 
+        List<Region> regions = this.regionProvider.listRegions(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), RegionScope.CITY, null, 
                 new Tuple<String, SortOrder>("name", SortOrder.DESC));
         
         for(Region region: regions) {
             System.out.println("region: " + region.toString());
         }
         
-        regions = this.regionProvider.listDescendantRegions(null, RegionScope.CITY, null, 
+        regions = this.regionProvider.listDescendantRegions(0, null, RegionScope.CITY, null, 
                 new Tuple<String, SortOrder>("name", SortOrder.DESC));
         
         for(Region region: regions) {

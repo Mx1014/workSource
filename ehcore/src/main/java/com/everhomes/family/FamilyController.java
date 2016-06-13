@@ -16,13 +16,29 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.family.FamilyDTO;
-import com.everhomes.family.FamilyMemberDTO;
-import com.everhomes.family.FamilyMembershipRequestDTO;
-import com.everhomes.family.ListNearbyNeighborUserCommand;
-import com.everhomes.family.NeighborUserDTO;
-import com.everhomes.family.UpdateFamilyInfoCommand;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.family.ApproveMemberCommand;
+import com.everhomes.rest.family.DeleteHistoryByIdCommand;
+import com.everhomes.rest.family.FamilyDTO;
+import com.everhomes.rest.family.FamilyMemberDTO;
+import com.everhomes.rest.family.FamilyMembershipRequestDTO;
+import com.everhomes.rest.family.FindFamilyByAddressIdCommand;
+import com.everhomes.rest.family.GetFamilyCommand;
+import com.everhomes.rest.family.GetOwningFamilyByIdCommand;
+import com.everhomes.rest.family.JoinFamilyCommand;
+import com.everhomes.rest.family.LeaveFamilyCommand;
+import com.everhomes.rest.family.ListFamilyByKeywordCommand;
+import com.everhomes.rest.family.ListFamilyRequestsCommand;
+import com.everhomes.rest.family.ListFamilyRequestsCommandResponse;
+import com.everhomes.rest.family.ListNearbyNeighborUserCommand;
+import com.everhomes.rest.family.ListNeighborUsersCommand;
+import com.everhomes.rest.family.ListNeighborUsersCommandResponse;
+import com.everhomes.rest.family.ListOwningFamilyMembersCommand;
+import com.everhomes.rest.family.NeighborUserDTO;
+import com.everhomes.rest.family.RejectMemberCommand;
+import com.everhomes.rest.family.RevokeMemberCommand;
+import com.everhomes.rest.family.SetCurrentFamilyCommand;
+import com.everhomes.rest.family.UpdateFamilyInfoCommand;
 import com.everhomes.search.CommunitySearcher;
 import com.everhomes.util.EtagHelper;
 import com.everhomes.util.Tuple;
@@ -141,7 +157,7 @@ public class FamilyController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse leave(@Valid LeaveFamilyCommand cmd) {
         
-        familyService.leave(cmd);
+        familyService.leave(cmd, null);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -339,7 +355,15 @@ public class FamilyController extends ControllerBase {
         return response;
     }
     
-    
+    @RequestMapping("deleteHistoryById")
+    @RestReturn(value=String.class)
+    public RestResponse deleteHistoryById(DeleteHistoryByIdCommand cmd) {
+        this.familyService.deleteHistoryById(cmd.getHistoryId());
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;        
+    }
     
 //    /**
 //     * <b>URL: /family/setPrimaryFamily</b>

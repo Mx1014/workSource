@@ -3,7 +3,7 @@ package com.everhomes.contentserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.everhomes.contentserver.WebSocketConstant;
+import com.everhomes.rest.contentserver.WebSocketConstant;
 
 public abstract class MessageTask implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageTask.class);
@@ -16,11 +16,11 @@ public abstract class MessageTask implements Runnable {
     @Override
     public void run() {
         try {
-            if (LOGGER.isDebugEnabled())
-                LOGGER.debug("handle message from content server.do deal with message");
+            // if (LOGGER.isDebugEnabled())
+            //    LOGGER.debug("handle message from content server.do deal with message");
             doRequest(contentServerManager);
-            if (LOGGER.isDebugEnabled())
-                LOGGER.debug("send reply to content server");
+            //if (LOGGER.isDebugEnabled())
+            //    LOGGER.debug("send reply to content server");
             doResponse("handle message ok", WebSocketConstant.OK_CODE);
         } catch (Throwable e) {
             LOGGER.error("error message", e);

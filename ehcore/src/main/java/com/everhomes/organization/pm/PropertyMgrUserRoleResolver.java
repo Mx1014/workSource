@@ -11,6 +11,7 @@ import com.everhomes.acl.Role;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.rest.organization.pm.PmMemberGroup;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.RuntimeErrorException;

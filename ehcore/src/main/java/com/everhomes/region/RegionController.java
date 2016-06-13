@@ -16,13 +16,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.region.ListRegionCommand;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.region.Region;
-import com.everhomes.region.RegionAdminStatus;
-import com.everhomes.region.RegionDTO;
 import com.everhomes.region.RegionProvider;
-import com.everhomes.region.RegionScope;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.region.ListActiveRegionCommand;
+import com.everhomes.rest.region.ListRegionByKeywordCommand;
+import com.everhomes.rest.region.ListRegionCommand;
+import com.everhomes.rest.region.RegionAdminStatus;
+import com.everhomes.rest.region.RegionDTO;
+import com.everhomes.rest.region.RegionScope;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.EtagHelper;
 import com.everhomes.util.SortOrder;
@@ -56,7 +60,7 @@ public class RegionController extends ControllerBase {
             orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(), SortOrder.fromCode(cmd.getSortOrder()));
         
         @SuppressWarnings("unchecked")
-        List<Region> entityResultList = this.regionProvider.listRegions(RegionScope.fromCode(cmd.getScope()), 
+        List<Region> entityResultList = this.regionProvider.listRegions(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), RegionScope.fromCode(cmd.getScope()), 
             RegionAdminStatus.fromCode(cmd.getStatus()), orderBy);
         
         List<RegionDTO> dtoResultList = entityResultList.stream()
@@ -85,7 +89,7 @@ public class RegionController extends ControllerBase {
             orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(), SortOrder.fromCode(cmd.getSortOrder()));
         
         @SuppressWarnings("unchecked")
-        List<Region> entityResultList = this.regionProvider.listChildRegions(cmd.getParentId(), 
+        List<Region> entityResultList = this.regionProvider.listChildRegions(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), cmd.getParentId(), 
             RegionScope.fromCode(cmd.getScope()), 
             RegionAdminStatus.fromCode(cmd.getStatus()), orderBy);
         
@@ -114,7 +118,7 @@ public class RegionController extends ControllerBase {
             orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(), SortOrder.fromCode(cmd.getSortOrder()));
         
         @SuppressWarnings("unchecked")
-        List<Region> entityResultList = this.regionProvider.listDescendantRegions(cmd.getParentId(), 
+        List<Region> entityResultList = this.regionProvider.listDescendantRegions(UserContext.getCurrentNamespaceId(UserContext.current().getNamespaceId()), cmd.getParentId(), 
             RegionScope.fromCode(cmd.getScope()), 
             RegionAdminStatus.fromCode(cmd.getStatus()), orderBy);
         
@@ -138,9 +142,10 @@ public class RegionController extends ControllerBase {
         if(cmd.getSortBy() != null)
             orderBy = new Tuple<String, SortOrder>(cmd.getSortBy(), SortOrder.fromCode(cmd.getSortOrder()));
         
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         List<Region> entityResultList = this.regionProvider.listRegionByKeyword(cmd.getParentId(), 
             RegionScope.fromCode(cmd.getScope()), 
-            RegionAdminStatus.fromCode(cmd.getStatus()), orderBy, cmd.getKeyword());
+            RegionAdminStatus.fromCode(cmd.getStatus()), orderBy, cmd.getKeyword(), namespaceId);
         
         List<RegionDTO> dtoResultList = entityResultList.stream() 
                 .map(r->{ return ConvertHelper.convert(r, RegionDTO.class); })

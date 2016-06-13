@@ -36,11 +36,20 @@ import org.springframework.context.annotation.Configuration;
 
 import ch.qos.logback.core.util.ContextUtil;
 
-import com.everhomes.common.ScopeType;
 import com.everhomes.junit.CoreServerTestCase;
-import com.everhomes.launchpad.admin.CreateLaunchPadItemAdminCommand;
-import com.everhomes.launchpad.admin.CreateLaunchPadLayoutAdminCommand;
-import com.everhomes.launchpad.admin.DeleteLaunchPadItemAdminCommand;
+import com.everhomes.rest.common.ScopeType;
+import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.rest.launchpad.ApplyPolicy;
+import com.everhomes.rest.launchpad.GetLaunchPadItemsCommand;
+import com.everhomes.rest.launchpad.GetLaunchPadItemsCommandResponse;
+import com.everhomes.rest.launchpad.GetLaunchPadLayoutByVersionCodeCommand;
+import com.everhomes.rest.launchpad.Item;
+import com.everhomes.rest.launchpad.ItemGroup;
+import com.everhomes.rest.launchpad.ItemScope;
+import com.everhomes.rest.launchpad.UserDefinedLaunchPadCommand;
+import com.everhomes.rest.launchpad.admin.CreateLaunchPadItemAdminCommand;
+import com.everhomes.rest.launchpad.admin.CreateLaunchPadLayoutAdminCommand;
+import com.everhomes.rest.launchpad.admin.DeleteLaunchPadItemAdminCommand;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;

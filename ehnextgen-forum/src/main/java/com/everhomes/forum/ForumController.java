@@ -14,6 +14,27 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.forum.CancelLikeTopicCommand;
+import com.everhomes.rest.forum.CheckUserPostCommand;
+import com.everhomes.rest.forum.CheckUserPostDTO;
+import com.everhomes.rest.forum.DeleteCommentCommand;
+import com.everhomes.rest.forum.DeleteTopicCommand;
+import com.everhomes.rest.forum.FreeStuffCommand;
+import com.everhomes.rest.forum.GetTopicCommand;
+import com.everhomes.rest.forum.LikeTopicCommand;
+import com.everhomes.rest.forum.ListPostCommandResponse;
+import com.everhomes.rest.forum.ListTopicCommand;
+import com.everhomes.rest.forum.ListTopicCommentCommand;
+import com.everhomes.rest.forum.ListUserRelatedTopicCommand;
+import com.everhomes.rest.forum.LostAndFoundCommand;
+import com.everhomes.rest.forum.MakeTopCommand;
+import com.everhomes.rest.forum.NewCommentCommand;
+import com.everhomes.rest.forum.NewTopicCommand;
+import com.everhomes.rest.forum.PostDTO;
+import com.everhomes.rest.forum.QueryTopicByCategoryCommand;
+import com.everhomes.rest.forum.QueryTopicByEntityAndCategoryCommand;
+import com.everhomes.rest.forum.SearchTopicCommand;
+import com.everhomes.rest.forum.UsedAndRentalCommand;
 import com.everhomes.search.PostSearcher;
 import com.everhomes.search.SearchSyncManager;
 import com.everhomes.search.SearchSyncType;
@@ -93,6 +114,21 @@ public class ForumController extends ControllerBase {
     @RestReturn(value=ListPostCommandResponse.class)
     public RestResponse listUserRelatedTopics(ListUserRelatedTopicCommand cmd) {
         ListPostCommandResponse cmdResponse = this.forumService.listUserRelatedTopics(cmd);
+        
+        RestResponse response = new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /forum/checkUserPostStatus</b>
+     * <p>检查请求者是否有新帖</p>
+     */
+    @RequestMapping("checkUserPostStatus")
+    @RestReturn(value=CheckUserPostDTO.class)
+    public RestResponse checkUserPostStatus(CheckUserPostCommand cmd) {
+        CheckUserPostDTO cmdResponse = this.forumService.checkUserPostStatus(cmd);
         
         RestResponse response = new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);

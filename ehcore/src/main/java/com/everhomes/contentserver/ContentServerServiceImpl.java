@@ -15,12 +15,19 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.contentserver.WebSocketConstant;
-import com.everhomes.rpc.PduFrame;
+import com.everhomes.rest.contentserver.AddConfigItemCommand;
+import com.everhomes.rest.contentserver.AddContentServerCommand;
+import com.everhomes.rest.contentserver.ContentServerDTO;
+import com.everhomes.rest.contentserver.ContentServerErrorCode;
+import com.everhomes.rest.contentserver.UpdateContentServerCommand;
+import com.everhomes.rest.contentserver.WebSocketConstant;
+import com.everhomes.rest.rpc.PduFrame;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.WebTokenGenerator;
+import com.google.gson.Gson;
 
 @Component
 public class ContentServerServiceImpl implements ContentServerService {
@@ -158,7 +165,7 @@ public class ContentServerServiceImpl implements ContentServerService {
         return cache;
     }
 
-    private static String parserSingleUri(String uri, Map<Long, ContentServer> cache, String ownerType, Long ownerId,
+    private String parserSingleUri(String uri, Map<Long, ContentServer> cache, String ownerType, Long ownerId,
             String token) {
         if(StringUtils.isEmpty(uri)){
             return null;
@@ -184,13 +191,46 @@ public class ContentServerServiceImpl implements ContentServerService {
         if(cache.get(serverId)==null){
             return uri;
         }
-        if (uri.indexOf("?") != -1) {
-            return String.format("http://%s:%d/%s&ownerType=%s&ownerId=%s&token=%s", cache.get(serverId)
-                    .getPublicAddress(), cache.get(serverId).getPublicPort(), uri, ownerType, ownerId, token);
+//        if (uri.indexOf("?") != -1) {
+//            return String.format("http://%s:%d/%s&ownerType=%s&ownerId=%s&token=%s", cache.get(serverId)
+//                    .getPublicAddress(), cache.get(serverId).getPublicPort(), uri, ownerType, ownerId, token);
+//        }
+        
+        int width = 0;
+        int height = 0;
+        String metaData = null;
+        try {
+            String resourceId = uri;
+            position = resourceId.indexOf("/");
+            if(position != -1) {
+                resourceId = resourceId.substring(position + 1);
+            }
+            resourceId = Generator.decodeUrl(resourceId);
+            if(resourceId != null) {
+                ContentServerResource resource = contentServerProvider.findByResourceId(resourceId);
+                if(resource != null) {
+                    metaData = resource.getMetadata();
+                    if(metaData != null && metaData.trim().length() > 0) {
+                        HashMap map = (HashMap)StringHelper.fromJsonString(metaData, HashMap.class);
+                        Object widthObj = map.get("width");
+                        if(widthObj != null) {
+                            width = Integer.parseInt(widthObj.toString());
+                        }
+                        Object heightObj = map.get("height");
+                        if(heightObj != null) {
+                            height = Integer.parseInt(heightObj.toString());
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed to parse the width and height of resources, owenerType=" + ownerType 
+                + ", ownerId=" + ownerId + ", metaData=" + metaData + ", uri=" + uri, e);
         }
-        return String.format("http://%s:%d/%s?ownerType=%s&ownerId=%s&token=%s",
+        
+        return String.format("http://%s:%d/%s?ownerType=%s&ownerId=%s&token=%s&pxw=%d&pxh=%d",
                 cache.get(serverId).getPublicAddress(), cache.get(serverId).getPublicPort(), uri, ownerType, ownerId,
-                token);
+                token, width, height);
     }
 
     @Override

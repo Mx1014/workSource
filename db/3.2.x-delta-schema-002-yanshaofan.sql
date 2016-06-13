@@ -1,0 +1,1 @@
+ALTER TABLE `eh_enterprise_op_requests` MODIFY COLUMN enterprise_name varchar(128) COMMENT 'enterprise name';

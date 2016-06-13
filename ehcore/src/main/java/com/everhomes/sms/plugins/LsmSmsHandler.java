@@ -1,6 +1,7 @@
 package com.everhomes.sms.plugins;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -14,6 +15,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.sms.SmsBuilder;
 import com.everhomes.sms.SmsChannel;
 import com.everhomes.sms.SmsHandler;
+import com.everhomes.util.Tuple;
 
 @Component("Lsm")
 public class LsmSmsHandler implements SmsHandler {
@@ -69,5 +71,17 @@ public class LsmSmsHandler implements SmsHandler {
     public void doSend(String[] phoneNumbers, String text, String templateId) {
         doSend(phoneNumbers,text);
         
+    }
+
+    @Override
+    public void doSend(Integer namespaceId, String phoneNumber, String templateScope, int templateId,
+        String templateLocale, List<Tuple<String, Object>> variables) {
+        // Lsm厂商已经不支持，故不实现
+    }
+
+    @Override
+    public void doSend(Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId,
+        String templateLocale, List<Tuple<String, Object>> variables) {
+        // Lsm厂商已经不支持，故不实现
     }
 }

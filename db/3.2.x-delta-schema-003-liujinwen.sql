@@ -1,0 +1,1 @@
+ALTER TABLE `eh_launch_pad_items` ADD COLUMN `delete_flag` TINYINT NOT NULL DEFAULT 1 COMMENT 'whether the item can be deleted from desk, 0: no, 1: yes';

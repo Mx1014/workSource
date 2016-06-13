@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.organization;
 
 import java.util.List;
@@ -10,22 +11,76 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.forum.CancelLikeTopicCommand;
-import com.everhomes.forum.GetTopicCommand;
-import com.everhomes.forum.LikeTopicCommand;
-import com.everhomes.forum.ListPostCommandResponse;
-import com.everhomes.forum.ListTopicCommand;
-import com.everhomes.forum.ListTopicCommentCommand;
-import com.everhomes.forum.NewCommentCommand;
-import com.everhomes.forum.NewTopicCommand;
-import com.everhomes.forum.PostDTO;
-import com.everhomes.forum.QueryOrganizationTopicCommand;
+import com.everhomes.entity.EntityType;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.user.UserTokenCommand;
-import com.everhomes.user.UserTokenCommandResponse;
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.enterprise.EnterpriseDTO;
+import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
+import com.everhomes.rest.enterprise.ListUserRelatedEnterprisesCommand;
+import com.everhomes.rest.forum.CancelLikeTopicCommand;
+import com.everhomes.rest.forum.GetTopicCommand;
+import com.everhomes.rest.forum.LikeTopicCommand;
+import com.everhomes.rest.forum.ListOrgMixTopicCommand;
+import com.everhomes.rest.forum.ListPostCommandResponse;
+import com.everhomes.rest.forum.ListTopicCommand;
+import com.everhomes.rest.forum.ListTopicCommentCommand;
+import com.everhomes.rest.forum.NewCommentCommand;
+import com.everhomes.rest.forum.NewTopicCommand;
+import com.everhomes.rest.forum.PostDTO;
+import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
+import com.everhomes.rest.namespace.ListCommunityByNamespaceCommand;
+import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
+import com.everhomes.rest.organization.ApplyOrganizationMemberCommand;
+import com.everhomes.rest.organization.AssginOrgTopicCommand;
+import com.everhomes.rest.organization.CreateOrganizationCommunityCommand;
+import com.everhomes.rest.organization.CreateOrganizationContactCommand;
+import com.everhomes.rest.organization.CreateOrganizationMemberCommand;
+import com.everhomes.rest.organization.DeleteOrganizationCommunityCommand;
+import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
+import com.everhomes.rest.organization.GetOrgDetailCommand;
+import com.everhomes.rest.organization.GetUserResourcePrivilege;
+import com.everhomes.rest.organization.ListCommunitiesByOrganizationIdCommand;
+import com.everhomes.rest.organization.ListEnterprisesCommand;
+import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
+import com.everhomes.rest.organization.ListOrganizationCommunityCommand;
+import com.everhomes.rest.organization.ListOrganizationCommunityCommandResponse;
+import com.everhomes.rest.organization.ListOrganizationCommunityV2CommandResponse;
+import com.everhomes.rest.organization.ListOrganizationContactCommand;
+import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
+import com.everhomes.rest.organization.ListOrganizationMemberCommand;
+import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
+import com.everhomes.rest.organization.ListTopicsByTypeCommand;
+import com.everhomes.rest.organization.ListTopicsByTypeCommandResponse;
+import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
+import com.everhomes.rest.organization.ListUserTaskCommand;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationDetailDTO;
+import com.everhomes.rest.organization.OrganizationMemberCommand;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.organization.OrganizationMemberDetailDTO;
+import com.everhomes.rest.organization.OrganizationSimpleDTO;
+import com.everhomes.rest.organization.RejectOrganizationCommand;
+import com.everhomes.rest.organization.SearchOrganizationCommand;
+import com.everhomes.rest.organization.SearchOrganizationCommandResponse;
+import com.everhomes.rest.organization.SearchTopicsByTypeCommand;
+import com.everhomes.rest.organization.SearchTopicsByTypeResponse;
+import com.everhomes.rest.organization.SendOrganizationMessageCommand;
+import com.everhomes.rest.organization.SetCurrentOrganizationCommand;
+import com.everhomes.rest.organization.SetOrgTopicStatusCommand;
+import com.everhomes.rest.organization.UpdateOrganizationContactCommand;
+import com.everhomes.rest.organization.UpdatePersonnelsToDepartment;
+import com.everhomes.rest.organization.UpdateTopicPrivacyCommand;
+import com.everhomes.rest.organization.UserExitOrganizationCommand;
+import com.everhomes.rest.organization.UserJoinOrganizationCommand;
+import com.everhomes.rest.ui.organization.ProcessingTaskCommand;
+import com.everhomes.rest.user.UserTokenCommand;
+import com.everhomes.rest.user.UserTokenCommandResponse;
+import com.everhomes.search.OrganizationSearcher;
+import com.everhomes.user.UserContext;
 
 @RestController
 @RequestMapping("/org")
@@ -34,6 +89,12 @@ public class OrganizationController extends ControllerBase {
 
 	@Autowired
 	private OrganizationService organizationService;
+	
+	@Autowired
+	private OrganizationSearcher organizationSearcher;
+	
+	@Autowired
+	private RolePrivilegeService rolePrivilegeService;
 
 	/**
 	 * <b>URL: /org/getUserOwningOrganizations</b>
@@ -155,6 +216,21 @@ public class OrganizationController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	/**
+     * <b>URL: /org/listOrganizationCommunitiesV2</b>
+     * <p>根据机构ID列出机构所管辖的小区信息，与listOrganizationCommunities的区别是返回值是CommunityDTO</p>
+     */
+    //checked
+    @RequestMapping("listOrganizationCommunitiesV2")
+    @RestReturn(value=ListOrganizationCommunityCommandResponse.class)
+    public RestResponse listOrganizationCommunitiesV2(@Valid ListOrganizationCommunityCommand cmd) {
+        ListOrganizationCommunityV2CommandResponse commandResponse = organizationService.listOrganizationCommunitiesV2(cmd);
+        RestResponse response = new RestResponse(commandResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 	/**
 	 * <b>URL: /org/findUserByIndentifier</b>
@@ -196,6 +272,14 @@ public class OrganizationController extends ControllerBase {
 	@RequestMapping("queryOrgTopicsByCategory")
 	@RestReturn(value=ListPostCommandResponse.class)
 	public RestResponse queryOrgTopicsByCategory(QueryOrganizationTopicCommand cmd) {
+		
+		/*是PM_ADMIN的场景下*/
+		if(null != cmd.getOrganizationId()){
+			/**
+			 * 校验权限
+			 */
+			rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.NoticeManagementPost);
+		}
 		ListPostCommandResponse  cmdResponse = organizationService.queryTopicsByCategory(cmd);
 		RestResponse response = new RestResponse(cmdResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -217,6 +301,21 @@ public class OrganizationController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+    /**
+     * <b>URL: /org/listOrgMixTopics</b>
+     * <p>查询指定机构的所有帖子列表</p>
+     */
+    //checked
+    @RequestMapping("listOrgMixTopics")
+    @RestReturn(value=ListPostCommandResponse.class)
+    public RestResponse listOrgMixTopics(ListOrgMixTopicCommand cmd) {
+        ListPostCommandResponse cmdResponse = organizationService.listOrgMixTopics(cmd);
+        RestResponse response = new RestResponse(cmdResponse);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
 	/**
 	 * <b>URL: /org/deleteOrgTopic</b>
@@ -542,7 +641,7 @@ public class OrganizationController extends ControllerBase {
 	//8. 报修贴修改状态
 	/**
 	 * <b>URL: /org/setOrgTopicStatus</b>
-	 * <p>设置帖状态：未处理、处理中、已处理、其它</p>
+	 * <p>设置帖状态：待处理、处理中、已处理、其它</p>
 	 */
 	@RequestMapping("setOrgTopicStatus")
 	@RestReturn(value=String.class)
@@ -629,4 +728,168 @@ public class OrganizationController extends ControllerBase {
         return response;
     }
     
+    /**
+     * <b>URL: /org/listUserTask</b>
+     * <p>查询分配给自己的任务</p>
+     */
+    @RequestMapping("listUserTask")
+    @RestReturn(value=ListTopicsByTypeCommandResponse.class)
+    public RestResponse listUserTask(ListUserTaskCommand cmd){
+    	ListTopicsByTypeCommandResponse tasks = this.organizationService.listUserTask(cmd);
+        
+        RestResponse response = new RestResponse(tasks);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /org/searchTopicsByType</b>
+     * <p>搜索任务贴</p>
+     */
+    @RequestMapping("searchTopicsByType")
+	@RestReturn(value=SearchTopicsByTypeResponse.class)
+	public RestResponse searchTopicsByType(SearchTopicsByTypeCommand cmd) {
+    	SearchTopicsByTypeResponse result= organizationService.searchTopicsByType(cmd);
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+    
+    
+    
+    
+    /**
+     * <b>URL: /org/searchEnterprise</b>
+     * <p>搜索企业</p>
+     */
+    @RequestMapping("searchEnterprise")
+    @RestReturn(value=OrganizationDetailDTO.class, collection=true)
+    public RestResponse searchEnterprise(@Valid SearchOrganizationCommand cmd) {
+    	ListEnterprisesCommandResponse res = organizationService.searchEnterprise(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /org/searchOrganization</b>
+     * <p>搜索 机构</p>
+     */
+    @RequestMapping("searchOrganization")
+    @RestReturn(value=OrganizationDTO.class, collection=true)
+    public RestResponse searchOrganization(@Valid SearchOrganizationCommand cmd) {
+    	SearchOrganizationCommandResponse res = organizationService.searchOrganization(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    
+    /**
+     * <b>URL: /org/listEnterprises</b>
+     * <p>企业列表</p>
+     */
+    @RequestMapping("listEnterprises")
+    @RestReturn(value=OrganizationDetailDTO.class, collection=true)
+    public RestResponse listEnterprises(@Valid ListEnterprisesCommand cmd) {
+    	cmd.setQryAdminRoleFlag(false);
+    	ListEnterprisesCommandResponse  res= organizationService.listEnterprises(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /org/applyForEnterpriseContact</b>
+     * <p>申请加入企业</p>
+     */
+    @RequestMapping("applyForEnterpriseContact")
+    @RestReturn(value=OrganizationDTO.class)
+    public RestResponse applyForEnterpriseContact(@Valid CreateOrganizationMemberCommand cmd) {
+    	OrganizationDTO dto = organizationService.applyForEnterpriseContact(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /org/leaveForEnterpriseContact</b>
+     * <p>退出指定企业</p>
+     */
+    @RequestMapping("leaveForEnterpriseContact")
+    @RestReturn(value=String.class)
+    public RestResponse leaveForEnterpriseContact(@Valid LeaveEnterpriseCommand cmd) {
+    
+        this.organizationService.leaveForEnterpriseContact(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /org/listCommunitiesByOrganizationId</b>
+     * <p>机构官署的小区</p>
+     */
+    @RequestMapping("listCommunitiesByOrganizationId")
+    @RestReturn(value=ListCommunityByNamespaceCommandResponse.class)
+    public RestResponse listCommunitiesByOrganizationId(@Valid ListCommunitiesByOrganizationIdCommand cmd) {
+    	ListCommunityByNamespaceCommandResponse res = new ListCommunityByNamespaceCommandResponse();
+    	res.setCommunities(organizationService.listAllChildrenOrganizationCoummunities(cmd.getOrganizationId()));
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /org/syncIndex</b>
+     * <p>搜索索引同步 TODO: 求敢哥优化</p>
+     * @return {String.class}
+     */
+    @RequestMapping("syncIndex")
+    @RestReturn(value=String.class)
+    public RestResponse syncIndex() {
+    	organizationSearcher.syncFromDb();
+        RestResponse res = new RestResponse();
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        return res;
+    }
+    
+    /**
+     * <b>URL: /org/ listUserRelatedEnterprises</b>
+     * <p>列出个人相关的企业</p>
+     * @return {@link OrganizationDetailDTO}
+     */
+     @RequestMapping("listUserRelatedEnterprises")
+     @RestReturn(value=OrganizationDetailDTO.class, collection=true)
+     public RestResponse listUserRelatedEnterprises(@Valid ListUserRelatedEnterprisesCommand cmd) {
+        RestResponse res = new RestResponse(organizationService.listUserRelateEnterprises(cmd));
+        res.setErrorCode(ErrorCodes.SUCCESS);
+        res.setErrorDescription("OK");
+        
+        return res;
+      }
+    
+     /**
+      * <b>URL: /org/listOrganizationTopics</b>
+      * <p>机构人员的帖子查询</p>
+      * @return 
+      */
+      @RequestMapping("listOrganizationTopics")
+      @RestReturn(value=ListPostCommandResponse.class)
+      public RestResponse listOrgTopics(@Valid QueryOrganizationTopicCommand cmd) {
+         RestResponse res = new RestResponse(organizationService.listOrgTopics(cmd));
+         res.setErrorCode(ErrorCodes.SUCCESS);
+         res.setErrorDescription("OK");
+         
+         return res;
+      }
 }

@@ -1,0 +1,2 @@
+INSERT INTO `eh_configurations`(`name`, `value`, `description`) VALUES ('baidu.map.uri', 'http://api.map.baidu.com', 'baidu map uri');
+INSERT INTO `eh_configurations`(`name`, `value`, `description`) VALUES ('baidu.map.access.key', 'e8YEUam0LEzdew17mv5mVZf7', 'baidu map access key');

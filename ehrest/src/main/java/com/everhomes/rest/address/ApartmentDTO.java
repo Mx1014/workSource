@@ -1,0 +1,106 @@
+// @formatter:off
+package com.everhomes.rest.address;
+
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
+import com.everhomes.util.StringHelper;
+
+/**
+ * <ul>
+ * <li>addressId: 门牌号</li>
+ * <li>familyId: 家庭ID，如果为0，则表示地址不存在家庭</li>
+ * <li>apartmentName: 门牌号</li>
+ * <li>address: 楼栋门牌地址</li>
+  * <li>livingStatus: 地址入住状态 ，参考{@link com.everhomes.rest.address.AddressLivingStatus}</li>
+ * </ul>
+ */
+public class ApartmentDTO {
+    private Long addressId;
+    private Long familyId;
+    private String apartmentName;
+    private String address;
+    private Byte livingStatus;
+    private Double areaSize;
+    private String enterpriseName;
+    
+    public ApartmentDTO() {
+    }
+    
+    public String getAddress() {
+		return address;
+	}
+
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+
+	public Long getAddressId() {
+        return addressId;
+    }
+
+    public void setAddressId(Long addressId) {
+        this.addressId = addressId;
+    }
+
+    public java.lang.String getApartmentName() {
+        return apartmentName;
+    }
+
+    public void setApartmentName(java.lang.String apartmentName) {
+        this.apartmentName = apartmentName;
+    }
+
+    public Byte getLivingStatus() {
+        return livingStatus;
+    }
+
+    public void setLivingStatus(Byte livingStatus) {
+        this.livingStatus = livingStatus;
+    }
+
+    public Long getFamilyId() {
+        return familyId;
+    }
+
+    public void setFamilyId(Long familyId) {
+        this.familyId = familyId;
+    }
+    
+    
+    
+    public Double getAreaSize() {
+		return areaSize;
+	}
+
+	public void setAreaSize(Double areaSize) {
+		this.areaSize = areaSize;
+	}
+
+	public String getEnterpriseName() {
+		return enterpriseName;
+	}
+
+	public void setEnterpriseName(String enterpriseName) {
+		this.enterpriseName = enterpriseName;
+	}
+
+	@Override
+    public boolean equals(Object obj){
+        if (! (obj instanceof ApartmentDTO)) {
+            return false;
+        }
+        return EqualsBuilder.reflectionEquals(this, obj);
+    }
+    
+    @Override
+    public int hashCode(){
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}

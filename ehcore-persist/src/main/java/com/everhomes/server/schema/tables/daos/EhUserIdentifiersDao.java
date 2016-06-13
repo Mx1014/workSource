@@ -95,4 +95,11 @@ public class EhUserIdentifiersDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserIdentifiers> fetchByNotifyTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhUserIdentifiers.EH_USER_IDENTIFIERS.NOTIFY_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>namespace_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserIdentifiers> fetchByNamespaceId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUserIdentifiers.EH_USER_IDENTIFIERS.NAMESPACE_ID, values);
+	}
 }

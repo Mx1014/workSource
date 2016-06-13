@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLaunchPadLayouts implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1167764474;
+	private static final long serialVersionUID = -102924702;
 
 	private java.lang.Long     id;
 	private java.lang.Integer  namespaceId;
@@ -21,6 +21,7 @@ public class EhLaunchPadLayouts implements java.io.Serializable {
 	private java.lang.Long     minVersionCode;
 	private java.lang.Byte     status;
 	private java.sql.Timestamp createTime;
+	private java.lang.String   sceneType;
 
 	public EhLaunchPadLayouts() {}
 
@@ -32,7 +33,8 @@ public class EhLaunchPadLayouts implements java.io.Serializable {
 		java.lang.Long     versionCode,
 		java.lang.Long     minVersionCode,
 		java.lang.Byte     status,
-		java.sql.Timestamp createTime
+		java.sql.Timestamp createTime,
+		java.lang.String   sceneType
 	) {
 		this.id = id;
 		this.namespaceId = namespaceId;
@@ -42,6 +44,7 @@ public class EhLaunchPadLayouts implements java.io.Serializable {
 		this.minVersionCode = minVersionCode;
 		this.status = status;
 		this.createTime = createTime;
+		this.sceneType = sceneType;
 	}
 
 	public java.lang.Long getId() {
@@ -106,5 +109,13 @@ public class EhLaunchPadLayouts implements java.io.Serializable {
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+	public java.lang.String getSceneType() {
+		return this.sceneType;
+	}
+
+	public void setSceneType(java.lang.String sceneType) {
+		this.sceneType = sceneType;
 	}
 }

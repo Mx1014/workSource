@@ -8,11 +8,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.app.AppConstants;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.forum.ForumEmbeddedHandler;
 import com.everhomes.forum.Post;
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.link.CreateLinkCommand;
+import com.everhomes.rest.link.LinkContentType;
+import com.everhomes.rest.link.LinkSourceType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;

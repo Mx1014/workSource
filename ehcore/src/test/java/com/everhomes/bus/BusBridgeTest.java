@@ -6,12 +6,12 @@ import java.util.List;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.everhomes.app.AppConstants;
 import com.everhomes.junit.CoreServerTestCase;
 import com.everhomes.msgbox.Message;
 import com.everhomes.msgbox.MessageBoxProvider;
 import com.everhomes.msgbox.MessageLocator;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.rest.app.AppConstants;
 
 public class BusBridgeTest  extends CoreServerTestCase {
 

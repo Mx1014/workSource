@@ -12,17 +12,29 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.acl.AclProvider;
-import com.everhomes.activity.ActivityCheckinCommand;
-import com.everhomes.activity.ActivityDTO;
-import com.everhomes.activity.ActivityListCommand;
-import com.everhomes.activity.ActivityListResponse;
-import com.everhomes.activity.ActivitySignupCommand;
 import com.everhomes.category.Category;
-import com.everhomes.category.CategoryDTO;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.activity.ActivityCancelSignupCommand;
+import com.everhomes.rest.activity.ActivityCheckinCommand;
+import com.everhomes.rest.activity.ActivityConfirmCommand;
+import com.everhomes.rest.activity.ActivityDTO;
+import com.everhomes.rest.activity.ActivityListCommand;
+import com.everhomes.rest.activity.ActivityListResponse;
+import com.everhomes.rest.activity.ActivityRejectCommand;
+import com.everhomes.rest.activity.ActivitySignupCommand;
+import com.everhomes.rest.activity.ListActivitiesByNamespaceIdAndTagCommand;
+import com.everhomes.rest.activity.ListActivitiesByTagCommand;
+import com.everhomes.rest.activity.ListActivitiesCommand;
+import com.everhomes.rest.activity.ListActivitiesReponse;
+import com.everhomes.rest.activity.ListActivityCategories;
+import com.everhomes.rest.activity.ListActivityCategoriesCommand;
+import com.everhomes.rest.activity.ListNearByActivitiesCommand;
+import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
+import com.everhomes.rest.activity.ListNearbyActivitiesResponse;
+import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.Tuple;
 
@@ -146,8 +158,8 @@ public class ActivityController extends ControllerBase {
      */
     @RequestMapping("listActivityCategories")
     @RestReturn(ListActivityCategories.class)
-    public RestResponse listActivityCategories(){
-        List<Category> result = activityService.listActivityCategories();
+    public RestResponse listActivityCategories(ListActivityCategoriesCommand cmd){
+        List<Category> result = activityService.listActivityCategories(cmd);
         if(CollectionUtils.isEmpty(result))
             return new RestResponse(new ListActivityCategories());
         ListActivityCategories categories=new ListActivityCategories();
@@ -206,9 +218,24 @@ public class ActivityController extends ControllerBase {
     @RequestMapping("listActivitiesByTag")
     @RestReturn(value=ListActivitiesReponse.class)
    public RestResponse listActivitiesByTag(@Valid ListActivitiesByTagCommand cmd){
-        Tuple<Long, List<ActivityDTO>> tuple = activityService.listActivitiesByTag(cmd);
-        ListActivitiesReponse rsp=new ListActivitiesReponse(tuple.first(),tuple.second());
+        //Tuple<Long, List<ActivityDTO>> tuple = activityService.listActivitiesByTag(cmd);
+        //ListActivitiesReponse rsp=new ListActivitiesReponse(tuple.first(),tuple.second());
+        ListActivitiesReponse rsp = activityService.listActivitiesByTag(cmd);
         RestResponse response = new RestResponse(rsp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+       return response;
+   }
+    
+    /**
+     * 查询活动，根据namespaseId，tag
+     * @return {@link }
+     */
+    @RequestMapping("listActivitiesByNamespaceIdAndTag")
+    @RestReturn(value=ListActivitiesReponse.class)
+   public RestResponse listActivitiesByNamespaceIdAndTag(@Valid ListActivitiesByNamespaceIdAndTagCommand cmd){
+        ListActivitiesReponse cmdResponse = activityService.listActivitiesByNamespaceIdAndTag(cmd);
+        RestResponse response = new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
        return response;

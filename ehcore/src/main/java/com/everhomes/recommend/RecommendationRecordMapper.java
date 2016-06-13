@@ -4,7 +4,7 @@ import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
 
-import com.everhomes.server.schema.tables.records.EhRecommendationsRecord;;
+import com.everhomes.server.schema.tables.records.EhRecommendationsRecord;
 
 public class RecommendationRecordMapper implements RecordMapper<Record, EhRecommendationsRecord> {
     @SuppressWarnings("unchecked")

@@ -25,6 +25,8 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.jooq.JooqHelper;
+import com.everhomes.rest.category.CategoryAdminStatus;
+import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhCategoriesDao;
 import com.everhomes.server.schema.tables.pojos.EhCategories;
@@ -102,7 +104,7 @@ public class CategoryProviderImpl implements CategoryProvider {
         }
     }
 
-    @Cacheable(value="Category", key="#id")
+    @Cacheable(value="Category", key="#id", unless="#result == null")
     @Override
     public Category findCategoryById(long id) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -128,7 +130,7 @@ public class CategoryProviderImpl implements CategoryProvider {
     @Cacheable(value = "listChildCategory" , unless="#result.size() == 0")
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public List<Category> listChildCategories(Long parentId, CategoryAdminStatus status,
+    public List<Category> listChildCategories(Integer namespaceId, Long parentId, CategoryAdminStatus status,
             Tuple<String, SortOrder>... orderBy) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         //暂不向客户端开放排序字段指定 20150519
@@ -140,7 +142,6 @@ public class CategoryProviderImpl implements CategoryProvider {
         SelectJoinStep<Record> selectStep = context.select().from(Tables.EH_CATEGORIES);
         Condition condition = null;
         
-        
         if(parentId != null)
             condition = Tables.EH_CATEGORIES.PARENT_ID.eq(parentId.longValue());
         else
@@ -149,6 +150,7 @@ public class CategoryProviderImpl implements CategoryProvider {
         if(status != null)
             condition = condition.and(Tables.EH_CATEGORIES.STATUS.eq(status.getCode()));
 
+        condition = condition.and(Tables.EH_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
 //        if(parentId != null){
 //            Category parentCategory = this.findCategoryById(parentId);
 //            if(parentCategory == null){
@@ -160,6 +162,12 @@ public class CategoryProviderImpl implements CategoryProvider {
 //        }
         if(condition != null) {
             selectStep.where(condition);
+        }
+        
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query child categories, namespaceId=" + namespaceId + ", parentId=" + parentId + ", status=" + status);
+            LOGGER.debug("Query child categories, sql=" + selectStep.getSQL());
+            LOGGER.debug("Query child categories, bindValues=" + selectStep.getBindValues());
         }
         
         if(orderByFields != null) {

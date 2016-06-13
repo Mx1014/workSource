@@ -14,21 +14,77 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.everhomes.address.BuildingDTO;
-import com.everhomes.address.ListBuildingByKeywordCommand;
-import com.everhomes.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.family.FamilyBillingTransactionDTO;
-import com.everhomes.family.FamilyMemberDTO;
-import com.everhomes.organization.OrganizationBillingTransactionDTO;
-import com.everhomes.organization.OrganizationDTO;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.user.SetCurrentCommunityCommand;
-import com.everhomes.user.UserTokenCommand;
-import com.everhomes.user.UserTokenCommandResponse;
+import com.everhomes.rest.address.BuildingDTO;
+import com.everhomes.rest.address.ListBuildingByKeywordCommand;
+import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
+import com.everhomes.rest.family.FamilyBillingTransactionDTO;
+import com.everhomes.rest.family.FamilyMemberDTO;
+import com.everhomes.rest.order.CommonOrderDTO;
+import com.everhomes.rest.organization.OrganizationBillingTransactionDTO;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.pm.CommunityPropFamilyMemberCommand;
+import com.everhomes.rest.organization.pm.CreatePmBillOrderCommand;
+import com.everhomes.rest.organization.pm.CreatePropMemberCommand;
+import com.everhomes.rest.organization.pm.DeletePmBillCommand;
+import com.everhomes.rest.organization.pm.DeletePmBillsCommand;
+import com.everhomes.rest.organization.pm.FindBillByAddressIdAndTimeCommand;
+import com.everhomes.rest.organization.pm.FindFamilyBillAndPaysByFamilyIdAndTimeCommand;
+import com.everhomes.rest.organization.pm.FindNewestBillByAddressIdCommand;
+import com.everhomes.rest.organization.pm.FindPmBillByOrderNoCommand;
+import com.everhomes.rest.organization.pm.GetFamilyStatisticCommand;
+import com.everhomes.rest.organization.pm.GetFamilyStatisticCommandResponse;
+import com.everhomes.rest.organization.pm.GetPmPayStatisticsCommand;
+import com.everhomes.rest.organization.pm.GetPmPayStatisticsCommandResponse;
+import com.everhomes.rest.organization.pm.ImportPmBillsCommand;
+import com.everhomes.rest.organization.pm.InsertPmBillCommand;
+import com.everhomes.rest.organization.pm.InsertPmBillsCommand;
+import com.everhomes.rest.organization.pm.ListBillTxByAddressIdCommand;
+import com.everhomes.rest.organization.pm.ListBillTxByAddressIdCommandResponse;
+import com.everhomes.rest.organization.pm.ListFamilyBillsAndPaysByFamilyIdCommand;
+import com.everhomes.rest.organization.pm.ListFamilyBillsAndPaysByFamilyIdCommandResponse;
+import com.everhomes.rest.organization.pm.ListOrgBillingTransactionsByConditionsCommand;
+import com.everhomes.rest.organization.pm.ListOrgBillingTransactionsByConditionsCommandResponse;
+import com.everhomes.rest.organization.pm.ListOweFamilysByConditionsCommand;
+import com.everhomes.rest.organization.pm.ListOweFamilysByConditionsCommandResponse;
+import com.everhomes.rest.organization.pm.ListPmBillsByConditionsCommand;
+import com.everhomes.rest.organization.pm.ListPmBillsByConditionsCommandResponse;
+import com.everhomes.rest.organization.pm.ListPropAddressMappingCommand;
+import com.everhomes.rest.organization.pm.ListPropAddressMappingCommandResponse;
+import com.everhomes.rest.organization.pm.ListPropCommunityAddressCommand;
+import com.everhomes.rest.organization.pm.ListPropFamilyMemberCommand;
+import com.everhomes.rest.organization.pm.ListPropFamilyWaitingMemberCommand;
+import com.everhomes.rest.organization.pm.ListPropFamilyWaitingMemberCommandResponse;
+import com.everhomes.rest.organization.pm.ListPropMemberCommand;
+import com.everhomes.rest.organization.pm.ListPropMemberCommandResponse;
+import com.everhomes.rest.organization.pm.ListPropOwnerCommand;
+import com.everhomes.rest.organization.pm.ListPropOwnerCommandResponse;
+import com.everhomes.rest.organization.pm.ListPropTopicStatisticCommand;
+import com.everhomes.rest.organization.pm.ListPropTopicStatisticCommandResponse;
+import com.everhomes.rest.organization.pm.OnlinePayPmBillCommand;
+import com.everhomes.rest.organization.pm.OrganizationOrderDTO;
+import com.everhomes.rest.organization.pm.OweFamilyDTO;
+import com.everhomes.rest.organization.pm.PayPmBillByAddressIdCommand;
+import com.everhomes.rest.organization.pm.PmBillForOrderNoDTO;
+import com.everhomes.rest.organization.pm.PmBillsDTO;
+import com.everhomes.rest.organization.pm.PropAptStatisticDTO;
+import com.everhomes.rest.organization.pm.PropCommunityBuildAddessCommand;
+import com.everhomes.rest.organization.pm.PropCommunityIdCommand;
+import com.everhomes.rest.organization.pm.PropCommunityIdMessageCommand;
+import com.everhomes.rest.organization.pm.PropFamilyDTO;
+import com.everhomes.rest.organization.pm.SendPmPayMessageByAddressIdCommand;
+import com.everhomes.rest.organization.pm.SendPmPayMessageToAllOweFamiliesCommand;
+import com.everhomes.rest.organization.pm.SetPropAddressStatusCommand;
+import com.everhomes.rest.organization.pm.UpdatePmBillCommand;
+import com.everhomes.rest.organization.pm.UpdatePmBillsCommand;
+import com.everhomes.rest.organization.pm.applyPropertyMemberCommand;
+import com.everhomes.rest.user.SetCurrentCommunityCommand;
+import com.everhomes.rest.user.UserTokenCommand;
+import com.everhomes.rest.user.UserTokenCommandResponse;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.WebTokenGenerator;
 
@@ -1282,17 +1338,6 @@ public class PropertyMgrController extends ControllerBase {
 		return response;
 	}
 	
-	@RequestMapping("testOnline")
-	@RestReturn(value=String.class)
-	public RestResponse testOnline(@Valid FindPmBillByOrderNoCommand cmd) {
-		String orderNo = cmd.getOrderNo();
-		propertyMgrService.remoteUpdateOrgOrderByOrderNo(orderNo);
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	
 	@RequestMapping("getWebToken")
     @RestReturn(value=String.class)
     public RestResponse getWebToken(@Valid FindPmBillByOrderNoCommand cmd){
@@ -1303,5 +1348,25 @@ public class PropertyMgrController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+	
+	@RequestMapping("sendNoticeToOrganizationMember")
+    @RestReturn(value=String.class)
+    public RestResponse sendNoticeToOrganizationMember(@Valid PropCommunityBuildAddessCommand cmd){
+		propertyMgrService.sendNoticeToOrganizationMember(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+	
+	@RequestMapping("createPmBillOrderDemo")
+	@RestReturn(value=CommonOrderDTO.class)
+	public RestResponse createPmBillOrderDemo(@Valid CreatePmBillOrderCommand cmd) {
+		CommonOrderDTO order = propertyMgrService.createPmBillOrderDemo(cmd);
+		RestResponse response = new RestResponse(order);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	
 }

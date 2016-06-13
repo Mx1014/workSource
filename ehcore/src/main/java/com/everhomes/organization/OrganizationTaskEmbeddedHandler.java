@@ -8,13 +8,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.app.AppConstants;
-import com.everhomes.category.CategoryConstants;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.forum.ForumEmbeddedHandler;
+import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.Post;
-import com.everhomes.forum.PostEntityTag;
-import com.everhomes.forum.PostPrivacy;
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.category.CategoryConstants;
+import com.everhomes.rest.forum.PostEntityTag;
+import com.everhomes.rest.forum.PostPrivacy;
+import com.everhomes.rest.organization.OrganizationTaskApplyEnityType;
+import com.everhomes.rest.organization.OrganizationTaskDTO;
+import com.everhomes.rest.organization.OrganizationTaskStatus;
+import com.everhomes.rest.organization.OrganizationTaskType;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -29,6 +34,9 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 
 	@Autowired
 	private OrganizationProvider organizationProvider;
+	
+	@Autowired
+	private ForumProvider forumProvider;
 
 	@Override
 	public String renderEmbeddedObjectSnapshot(Post post) {
@@ -58,11 +66,11 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 			task.setOrganizationType(organization.getOrganizationType());
 			task.setApplyEntityType(OrganizationTaskApplyEnityType.TOPIC.getCode());
 			task.setApplyEntityId(0L); // 还没有帖子ID
-			task.setTargetType(post.getTargetTag());
-			if(post.getTargetTag().equals(PostEntityTag.USER.getCode()))
-				task.setTargetId(post.getCreatorUid() == null ? 0L:post.getCreatorUid());
-			else
-				task.setTargetId(organization.getId());
+			task.setTargetType(null);
+//			if(post.getTargetTag().equals(PostEntityTag.USER.getCode()))
+//				task.setTargetId(post.getCreatorUid() == null ? 0L:post.getCreatorUid());
+//			else
+				task.setTargetId(0l);
 			task.setCreatorUid(post.getCreatorUid() == null ? 0L:post.getCreatorUid());
 			task.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			task.setUnprocessedTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -74,6 +82,8 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 
 			task.setTaskStatus(OrganizationTaskStatus.UNPROCESSED.getCode());
 			task.setOperatorUid(0L);
+			task.setVisibleRegionId(post.getVisibleRegionId());
+			task.setVisibleRegionType(post.getVisibleRegionType());
 			this.organizationProvider.createOrganizationTask(task);
 			post.setEmbeddedId(task.getId());
 			/*if(LOGGER.isDebugEnabled()) {
@@ -167,6 +177,18 @@ public class OrganizationTaskEmbeddedHandler implements ForumEmbeddedHandler {
 			}
 			if(contentCategoryId == CategoryConstants.CATEGORY_ID_COMPLAINT_ADVICE) {
 				return OrganizationTaskType.COMPLAINT_ADVICE;
+			}
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_CLEANING) {
+				return OrganizationTaskType.CLEANING;
+			}
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_HOUSE_KEEPING) {
+				return OrganizationTaskType.HOUSE_KEEPING;
+			}
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_MAINTENANCE) {
+				return OrganizationTaskType.MAINTENANCE;
+			}
+			if(contentCategoryId == CategoryConstants.CATEGORY_ID_EMERGENCY_HELP){
+				return OrganizationTaskType.EMERGENCY_HELP;
 			}
 		}
 

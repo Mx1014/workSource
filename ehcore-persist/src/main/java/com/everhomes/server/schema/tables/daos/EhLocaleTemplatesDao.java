@@ -81,4 +81,11 @@ public class EhLocaleTemplatesDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLocaleTemplates> fetchByText(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhLocaleTemplates.EH_LOCALE_TEMPLATES.TEXT, values);
 	}
+
+	/**
+	 * Fetch records that have <code>namespace_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLocaleTemplates> fetchByNamespaceId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLocaleTemplates.EH_LOCALE_TEMPLATES.NAMESPACE_ID, values);
+	}
 }

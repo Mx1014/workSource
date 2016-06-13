@@ -7,10 +7,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
-import com.everhomes.coupon.CouponDTO;
-import com.everhomes.coupon.CouponPostCommand;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.coupon.CouponDTO;
+import com.everhomes.rest.coupon.CouponPostCommand;
 
 @RestController
 @RequestMapping("/coupon")

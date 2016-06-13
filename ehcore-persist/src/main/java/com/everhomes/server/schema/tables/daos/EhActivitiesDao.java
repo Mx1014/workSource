@@ -291,4 +291,11 @@ public class EhActivitiesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByDeleteTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.DELETE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>guest IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByGuest(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.GUEST, values);
+	}
 }

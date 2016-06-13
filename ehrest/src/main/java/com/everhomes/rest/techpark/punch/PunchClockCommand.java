@@ -1,0 +1,57 @@
+package com.everhomes.rest.techpark.punch;
+
+import com.everhomes.util.StringHelper;
+
+
+/**
+* <ul>  
+* <li>companyId：企业Id</li>
+* <li>latitude: 坐标纬度</li>
+* <li>longitude： 坐标经度</li>
+* </ul>
+*/
+public class PunchClockCommand {
+ 
+    private Long enterpriseId;
+    private String identification;
+    private Double latitude;
+    private Double longitude;
+    
+     @Override
+     public String toString() {
+         return StringHelper.toJsonString(this);
+     }
+
+	public Double getLatitude() {
+		return latitude;
+	}
+
+	public void setLatitude(Double latitude) {
+		this.latitude = latitude;
+	}
+
+	public Double getLongitude() {
+		return longitude;
+	}
+
+	public void setLongitude(Double longitude) {
+		this.longitude = longitude;
+	}
+
+	public String getIdentification() {
+		return identification;
+	}
+
+	public void setIdentification(String identification) {
+		this.identification = identification;
+	}
+
+	public Long getEnterpriseId() {
+		return enterpriseId;
+	}
+
+	public void setEnterpriseId(Long enterpriseId) {
+		this.enterpriseId = enterpriseId;
+	}
+
+ }

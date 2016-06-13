@@ -1,0 +1,202 @@
+package com.everhomes.rest.techpark.rental;
+
+import com.everhomes.util.StringHelper;
+/**
+ * <ul>
+ * <li>id：id</li>
+ * <li>rentalSiteId：场所id</li> 
+ * <li>rentalType： time(0),halfday(1){@link com.everhomes.rest.techpark.rental.RentalType} </li> 
+ * <li>amorpm： am(0),pm(1){@link com.everhomes.rest.techpark.rental.AmorpmFlag} </li> 
+ * <li>beginTime：开始时间(MM:SS)</li>
+ * <li>endTime：结束时间(MM:SS)</li>
+ * <li>counts：场所数量</li> 
+ * <li>unit：场所单位:1or0.5</li> 
+ * <li>rentalStep：最小预定时间(整数，rentalType=0为多少个半小时，rentalType=1为多少个半天，rentalType=2为多少天)</li>
+ * <li>TimeStep：坐标轴单位时间（小时）</li> 
+ * <li>price：场所数量</li> 
+ * <li>ruleDate：规则日期</li>  
+ * <li>Status： OPEN(0),CLOSE(1){@link com.everhomes.rest.techpark.rental.SiteRuleStatus} </li> 
+ * </ul>
+ */
+public class RentalSiteRulesDTO {
+	private Long id;
+	private Long rentalSiteId; 
+	private Byte rentalType;
+	private Byte amorpm;
+	private Long beginTime;
+	private Long endTime;
+	private Double counts;
+	private Double unit;
+	private java.math.BigDecimal price;
+	private Integer rentalStep;
+	private Double timeStep;
+	private Long ruleDate; 
+	private Byte status;
+	
+	
+	
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+
+
+
+	public Long getRentalSiteId() {
+		return rentalSiteId;
+	}
+
+
+
+	public void setRentalSiteId(Long rentalSiteId) {
+		this.rentalSiteId = rentalSiteId;
+	}
+ 
+	public Double getUnit() {
+		return unit;
+	}
+
+
+
+	public void setUnit(Double unit) {
+		this.unit = unit;
+	}
+ 
+ 
+
+
+ 
+
+
+	public Byte getStatus() {
+		return status;
+	}
+
+
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
+
+
+
+	public Long getId() {
+		return id;
+	}
+
+
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+
+
+	public Long getBeginTime() {
+		return beginTime;
+	}
+
+
+
+	public void setBeginTime(Long beginTime) {
+		this.beginTime = beginTime;
+	}
+
+
+
+	public Long getEndTime() {
+		return endTime;
+	}
+
+
+
+	public void setEndTime(Long endTime) {
+		this.endTime = endTime;
+	}
+
+
+
+	public Double getCounts() {
+		return counts;
+	}
+
+
+
+	public void setCounts(Double counts) {
+		this.counts = counts;
+	}
+
+
+
+	public Long getRuleDate() {
+		return ruleDate;
+	}
+
+
+
+	public void setRuleDate(Long ruleDate) {
+		this.ruleDate = ruleDate;
+	}
+
+
+ 
+
+
+	public java.math.BigDecimal getPrice() {
+		return price;
+	}
+
+
+
+	public void setPrice(java.math.BigDecimal price) {
+		this.price = price;
+	}
+
+
+
+	public Byte getRentalType() {
+		return rentalType;
+	}
+
+
+
+	public void setRentalType(Byte rentalType) {
+		this.rentalType = rentalType;
+	}
+
+
+
+	public Byte getAmorpm() {
+		return amorpm;
+	}
+
+
+
+	public void setAmorpm(Byte amorpm) {
+		this.amorpm = amorpm;
+	}
+
+
+
+	public Integer getRentalStep() {
+		return rentalStep;
+	}
+
+
+
+	public void setRentalStep(Integer rentalStep) {
+		this.rentalStep = rentalStep;
+	}
+
+
+
+	public Double getTimeStep() {
+		return timeStep;
+	}
+
+
+
+	public void setTimeStep(Double timeStep) {
+		this.timeStep = timeStep;
+	}
+}

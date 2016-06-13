@@ -11,21 +11,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.everhomes.app.AppConstants;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.launchpad.ActionType;
-import com.everhomes.messaging.MessageBodyType;
-import com.everhomes.messaging.MessageChannel;
-import com.everhomes.messaging.MessageDTO;
-import com.everhomes.messaging.MessagingConstants;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.openapi.NotifyDoorLockCommand;
+import com.everhomes.rest.openapi.NotifyDoorMessageCommand;
+import com.everhomes.rest.openapi.NotifyDoorMessageResponse;
+import com.everhomes.rest.openapi.PhoneStatus;
+import com.everhomes.rest.openapi.SyncUserCommand;
+import com.everhomes.rest.openapi.SyncUserResponse;
+import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.thirdpartuser.ThirdpartUser;
 import com.everhomes.thirdpartuser.ThirdpartUserProvider;
-import com.everhomes.user.MessageChannelType;
 import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
@@ -65,10 +73,16 @@ public class DoorVenderController extends ControllerBase {
     
     @RequestMapping("notifyMessage")
     @RestReturn(NotifyDoorMessageResponse.class)
-    public RestResponse notifyMessage(@Valid NotifyDoorMessageCommand cmd) {
+    public RestResponse notifyMessage(@Valid NotifyDoorMessageCommand cmd) {        
+        User operator = UserContext.current().getUser();
+        Integer namespaceId = Namespace.DEFAULT_NAMESPACE;
+        if(operator != null) {
+            namespaceId = operator.getNamespaceId();
+        }
+        
         NotifyDoorMessageResponse rsp = new NotifyDoorMessageResponse();
         for(String phone: cmd.getPhones()) {
-            User u = userService.findUserByIndentifier(phone);
+            User u = userService.findUserByIndentifier(namespaceId, phone);
             if(null == u) {
                 rsp.getPhoneStatus().add(new PhoneStatus(phone, "NOT_FOUND"));
                 continue;
@@ -85,9 +99,15 @@ public class DoorVenderController extends ControllerBase {
     @RequestMapping("notifyDoorLock")
     @RestReturn(NotifyDoorMessageResponse.class)
     public RestResponse notifyDoorLock(@Valid NotifyDoorLockCommand cmd) {
+        User operator = UserContext.current().getUser();
+        Integer namespaceId = Namespace.DEFAULT_NAMESPACE;
+        if(operator != null) {
+            namespaceId = operator.getNamespaceId();
+        }
+        
         NotifyDoorMessageResponse rsp = new NotifyDoorMessageResponse();
         for(String phone: cmd.getPhones()) {
-            User u = userService.findUserByIndentifier(phone);
+            User u = userService.findUserByIndentifier(namespaceId, phone);
             if(null == u) {
                 rsp.getPhoneStatus().add(new PhoneStatus(phone, "NOT_FOUND"));
                 continue;

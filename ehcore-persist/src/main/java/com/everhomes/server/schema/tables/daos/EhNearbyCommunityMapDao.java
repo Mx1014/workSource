@@ -60,4 +60,11 @@ public class EhNearbyCommunityMapDao extends org.jooq.impl.DAOImpl<com.everhomes
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhNearbyCommunityMap> fetchByNearbyCommunityId(java.lang.Long... values) {
 		return fetch(com.everhomes.server.schema.tables.EhNearbyCommunityMap.EH_NEARBY_COMMUNITY_MAP.NEARBY_COMMUNITY_ID, values);
 	}
+
+	/**
+	 * Fetch records that have <code>namespace_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhNearbyCommunityMap> fetchByNamespaceId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhNearbyCommunityMap.EH_NEARBY_COMMUNITY_MAP.NAMESPACE_ID, values);
+	}
 }

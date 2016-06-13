@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.acl.PortalRoleResolver;
-import com.everhomes.app.AppConstants;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.rest.app.AppConstants;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;

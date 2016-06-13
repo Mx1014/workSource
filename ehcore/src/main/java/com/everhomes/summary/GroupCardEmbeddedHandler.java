@@ -6,12 +6,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.app.AppConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.forum.ForumEmbeddedHandler;
 import com.everhomes.forum.Post;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupProvider;
+import com.everhomes.rest.app.AppConstants;
 
 @Component(GroupCardEmbeddedHandler.FORUM_EMBEDED_OBJ_RESOLVER_PREFIX + AppConstants.APPID_GROUP_CARD)
 public class GroupCardEmbeddedHandler implements ForumEmbeddedHandler {
