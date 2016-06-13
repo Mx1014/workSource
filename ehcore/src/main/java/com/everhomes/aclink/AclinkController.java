@@ -30,6 +30,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.aclink.AclinkConnectingCommand;
 import com.everhomes.rest.aclink.AclinkDeleteByIdCommand;
 import com.everhomes.rest.aclink.AclinkDisconnectedCommand;
+import com.everhomes.rest.aclink.AclinkMessageTestCommand;
 import com.everhomes.rest.aclink.AclinkMgmtCommand;
 import com.everhomes.rest.aclink.AclinkUpgradeCommand;
 import com.everhomes.rest.aclink.AclinkUpgradeResponse;
@@ -415,6 +416,19 @@ public class AclinkController extends ControllerBase {
     @RestReturn(value=ListDoorAccessResponse.class)
     public RestResponse listDoorAccessGroup(@Valid ListDoorAccessGroupCommand cmd) {
         RestResponse response = new RestResponse(doorAccessService.listDoorAccessGroup(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;        
+    }
+    
+    /**
+     * 
+     */
+    @RequestMapping("aclinkMessageTest")
+    @RestReturn(value=ListDoorAccessResponse.class)
+    public RestResponse aclinkMessageTest(@Valid AclinkMessageTestCommand cmd) {
+        doorAccessService.sendMessageToUser(cmd.getUid(), cmd.getDoorId(), cmd.getDoorType());
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;        

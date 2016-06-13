@@ -216,7 +216,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
     }
     
-    private void sendMessageToUser(Long uid, Long doorId, Byte doorType) {
+    @Override
+    public void sendMessageToUser(Long uid, Long doorId, Byte doorType) {
         Map<String, String> meta = new HashMap<String, String>();
         meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.ACLINK_AUTH_CHANGED.getCode());
         meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(new AclinkMessageMeta(uid, doorId, doorType)));
