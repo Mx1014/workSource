@@ -1,14 +1,14 @@
 //
-// EvhAddressListBuildingsByKeywordRestResponse.h
+// EvhQualityListUserRelateOrgGroupsRestResponse.h
 //
 #import "RestResponseBase.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhAddressListBuildingsByKeywordRestResponse
+// EvhQualityListUserRelateOrgGroupsRestResponse
 //
-@interface EvhAddressListBuildingsByKeywordRestResponse : EvhRestResponseBase
+@interface EvhQualityListUserRelateOrgGroupsRestResponse : EvhRestResponseBase
 
-// array of EvhAddressBuildingDTO* objects
+// array of EvhOrganizationDTO* objects
 @property(nonatomic, strong) NSMutableArray* response;
 
 -(id) init;

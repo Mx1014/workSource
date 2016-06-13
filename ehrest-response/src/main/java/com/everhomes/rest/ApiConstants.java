@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-06-07 20:41:14
+// generated at 2016-06-13 14:14:55
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -689,6 +689,7 @@ public interface ApiConstants {
     public static final String QRCODE_GETQRCODEINFO_URL = "/qrcode/getQRCodeInfo";
     public static final String QRCODE_NEWQRCODE_URL = "/qrcode/newQRCode";
     public static final String QUALITY_CREATQUALITYSTANDARD_URL = "/quality/creatQualityStandard";
+    public static final String QUALITY_CREATEQUALITYINSPECTIONTASK_URL = "/quality/createQualityInspectionTask";
     public static final String QUALITY_CREATETASKBYSTANDARD_URL = "/quality/createTaskByStandard";
     public static final String QUALITY_DELETEFACTOR_URL = "/quality/deleteFactor";
     public static final String QUALITY_DELETEQUALITYCATEGORY_URL = "/quality/deleteQualityCategory";
@@ -699,9 +700,11 @@ public interface ApiConstants {
     public static final String QUALITY_LISTEVALUATIONS_URL = "/quality/listEvaluations";
     public static final String QUALITY_LISTFACTORS_URL = "/quality/listFactors";
     public static final String QUALITY_LISTQUALITYCATEGORIES_URL = "/quality/listQualityCategories";
+    public static final String QUALITY_LISTQUALITYINSPECTIONLOGS_URL = "/quality/listQualityInspectionLogs";
     public static final String QUALITY_LISTQUALITYINSPECTIONTASKS_URL = "/quality/listQualityInspectionTasks";
     public static final String QUALITY_LISTQUALITYSTANDARDS_URL = "/quality/listQualityStandards";
     public static final String QUALITY_LISTRECORDSBYTASKID_URL = "/quality/listRecordsByTaskId";
+    public static final String QUALITY_LISTUSERRELATEORGGROUPS_URL = "/quality/listUserRelateOrgGroups";
     public static final String QUALITY_REPORTRECTIFYRESULT_URL = "/quality/reportRectifyResult";
     public static final String QUALITY_REPORTVERIFICATIONRESULT_URL = "/quality/reportVerificationResult";
     public static final String QUALITY_REVIEWVERIFICATIONRESULT_URL = "/quality/reviewVerificationResult";

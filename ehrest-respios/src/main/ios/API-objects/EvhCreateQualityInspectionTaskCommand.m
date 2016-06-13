@@ -1,19 +1,20 @@
 //
-// EvhListQualityCategoriesCommand.m
+// EvhCreateQualityInspectionTaskCommand.m
 //
-#import "EvhListQualityCategoriesCommand.h"
+#import "EvhCreateQualityInspectionTaskCommand.h"
+#import "EvhStandardGroupDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhListQualityCategoriesCommand
+// EvhCreateQualityInspectionTaskCommand
 //
 
-@implementation EvhListQualityCategoriesCommand
+@implementation EvhCreateQualityInspectionTaskCommand
 
 +(id) withJsonString: (NSString*) jsonString
 {
     id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
     if(jsonObject != nil) {
-        EvhListQualityCategoriesCommand* obj = [EvhListQualityCategoriesCommand new];
+        EvhCreateQualityInspectionTaskCommand* obj = [EvhCreateQualityInspectionTaskCommand new];
         return [obj fromJson:jsonObject];
     }
     return nil;
@@ -34,12 +35,16 @@
         [jsonObject setObject: self.ownerId forKey: @"ownerId"];
     if(self.ownerType)
         [jsonObject setObject: self.ownerType forKey: @"ownerType"];
-    if(self.pageAnchor)
-        [jsonObject setObject: self.pageAnchor forKey: @"pageAnchor"];
-    if(self.pageSize)
-        [jsonObject setObject: self.pageSize forKey: @"pageSize"];
-    if(self.parentId)
-        [jsonObject setObject: self.parentId forKey: @"parentId"];
+    if(self.name)
+        [jsonObject setObject: self.name forKey: @"name"];
+    if(self.categoryId)
+        [jsonObject setObject: self.categoryId forKey: @"categoryId"];
+    if(self.group) {
+        NSMutableDictionary* dic = [NSMutableDictionary new];
+        [self.group toJson: dic];
+        
+        [jsonObject setObject: dic forKey: @"group"];
+    }
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -53,18 +58,18 @@
         if(self.ownerType && [self.ownerType isEqual:[NSNull null]])
             self.ownerType = nil;
 
-        self.pageAnchor = [jsonObject objectForKey: @"pageAnchor"];
-        if(self.pageAnchor && [self.pageAnchor isEqual:[NSNull null]])
-            self.pageAnchor = nil;
+        self.name = [jsonObject objectForKey: @"name"];
+        if(self.name && [self.name isEqual:[NSNull null]])
+            self.name = nil;
 
-        self.pageSize = [jsonObject objectForKey: @"pageSize"];
-        if(self.pageSize && [self.pageSize isEqual:[NSNull null]])
-            self.pageSize = nil;
+        self.categoryId = [jsonObject objectForKey: @"categoryId"];
+        if(self.categoryId && [self.categoryId isEqual:[NSNull null]])
+            self.categoryId = nil;
 
-        self.parentId = [jsonObject objectForKey: @"parentId"];
-        if(self.parentId && [self.parentId isEqual:[NSNull null]])
-            self.parentId = nil;
+        NSMutableDictionary* itemJson =  (NSMutableDictionary*)[jsonObject objectForKey: @"group"];
 
+        self.group = [EvhStandardGroupDTO new];
+        self.group = [self.group fromJson: itemJson];
         return self;
     }
     

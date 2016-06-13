@@ -1,19 +1,19 @@
 //
-// EvhListQualityCategoriesCommand.m
+// EvhListQualityInspectionLogsCommand.m
 //
-#import "EvhListQualityCategoriesCommand.h"
+#import "EvhListQualityInspectionLogsCommand.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhListQualityCategoriesCommand
+// EvhListQualityInspectionLogsCommand
 //
 
-@implementation EvhListQualityCategoriesCommand
+@implementation EvhListQualityInspectionLogsCommand
 
 +(id) withJsonString: (NSString*) jsonString
 {
     id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
     if(jsonObject != nil) {
-        EvhListQualityCategoriesCommand* obj = [EvhListQualityCategoriesCommand new];
+        EvhListQualityInspectionLogsCommand* obj = [EvhListQualityInspectionLogsCommand new];
         return [obj fromJson:jsonObject];
     }
     return nil;
@@ -34,12 +34,14 @@
         [jsonObject setObject: self.ownerId forKey: @"ownerId"];
     if(self.ownerType)
         [jsonObject setObject: self.ownerType forKey: @"ownerType"];
+    if(self.targetType)
+        [jsonObject setObject: self.targetType forKey: @"targetType"];
+    if(self.targetId)
+        [jsonObject setObject: self.targetId forKey: @"targetId"];
     if(self.pageAnchor)
         [jsonObject setObject: self.pageAnchor forKey: @"pageAnchor"];
     if(self.pageSize)
         [jsonObject setObject: self.pageSize forKey: @"pageSize"];
-    if(self.parentId)
-        [jsonObject setObject: self.parentId forKey: @"parentId"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -53,6 +55,14 @@
         if(self.ownerType && [self.ownerType isEqual:[NSNull null]])
             self.ownerType = nil;
 
+        self.targetType = [jsonObject objectForKey: @"targetType"];
+        if(self.targetType && [self.targetType isEqual:[NSNull null]])
+            self.targetType = nil;
+
+        self.targetId = [jsonObject objectForKey: @"targetId"];
+        if(self.targetId && [self.targetId isEqual:[NSNull null]])
+            self.targetId = nil;
+
         self.pageAnchor = [jsonObject objectForKey: @"pageAnchor"];
         if(self.pageAnchor && [self.pageAnchor isEqual:[NSNull null]])
             self.pageAnchor = nil;
@@ -60,10 +70,6 @@
         self.pageSize = [jsonObject objectForKey: @"pageSize"];
         if(self.pageSize && [self.pageSize isEqual:[NSNull null]])
             self.pageSize = nil;
-
-        self.parentId = [jsonObject objectForKey: @"parentId"];
-        if(self.parentId && [self.parentId isEqual:[NSNull null]])
-            self.parentId = nil;
 
         return self;
     }

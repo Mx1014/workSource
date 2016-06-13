@@ -21,6 +21,10 @@
 
 @property(nonatomic, copy) NSString* ownerType;
 
+@property(nonatomic, copy) NSNumber* score;
+
+@property(nonatomic, copy) NSString* description_;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 

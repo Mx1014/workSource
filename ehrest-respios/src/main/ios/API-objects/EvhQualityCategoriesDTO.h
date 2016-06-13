@@ -3,6 +3,7 @@
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
+#import "EvhQualityCategoriesDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhQualityCategoriesDTO
@@ -26,6 +27,13 @@
 @property(nonatomic, copy) NSNumber* defaultOrder;
 
 @property(nonatomic, copy) NSNumber* status;
+
+@property(nonatomic, copy) NSNumber* score;
+
+@property(nonatomic, copy) NSString* description_;
+
+// item type EvhQualityCategoriesDTO*
+@property(nonatomic, strong) NSMutableArray* childrens;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

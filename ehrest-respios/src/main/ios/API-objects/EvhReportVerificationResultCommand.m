@@ -53,6 +53,8 @@
         [jsonObject setObject: self.operatorId forKey: @"operatorId"];
     if(self.message)
         [jsonObject setObject: self.message forKey: @"message"];
+    if(self.categoryId)
+        [jsonObject setObject: self.categoryId forKey: @"categoryId"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -90,6 +92,10 @@
         self.message = [jsonObject objectForKey: @"message"];
         if(self.message && [self.message isEqual:[NSNull null]])
             self.message = nil;
+
+        self.categoryId = [jsonObject objectForKey: @"categoryId"];
+        if(self.categoryId && [self.categoryId isEqual:[NSNull null]])
+            self.categoryId = nil;
 
         return self;
     }

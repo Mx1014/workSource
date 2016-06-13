@@ -1,20 +1,20 @@
 //
-// EvhOpenapiListBuildingsByKeywordRestResponse.m
+// EvhQualityListUserRelateOrgGroupsRestResponse.m
 //
-#import "EvhOpenapiListBuildingsByKeywordRestResponse.h"
-#import "EvhAddressBuildingDTO.h"
+#import "EvhQualityListUserRelateOrgGroupsRestResponse.h"
+#import "EvhOrganizationDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhOpenapiListBuildingsByKeywordRestResponse
+// EvhQualityListUserRelateOrgGroupsRestResponse
 //
 
-@implementation EvhOpenapiListBuildingsByKeywordRestResponse
+@implementation EvhQualityListUserRelateOrgGroupsRestResponse
 
 +(id) withJsonString: (NSString*) jsonString
 {
     id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
     if(jsonObject != nil) {
-        EvhOpenapiListBuildingsByKeywordRestResponse* obj = [EvhOpenapiListBuildingsByKeywordRestResponse new];
+        EvhQualityListUserRelateOrgGroupsRestResponse* obj = [EvhQualityListUserRelateOrgGroupsRestResponse new];
         return [obj fromJson:jsonObject];
     }
     return nil;
@@ -36,7 +36,7 @@
     
     if(self.response) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhAddressBuildingDTO* item in self.response) {
+        for(EvhOrganizationDTO* item in self.response) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -51,7 +51,7 @@
         [super fromJson: jsonObject];
         NSArray* jsonArray = [jsonObject objectForKey: @"response"];
         for(NSMutableDictionary* dic in jsonArray) {
-            EvhAddressBuildingDTO* item = [EvhAddressBuildingDTO new];
+            EvhOrganizationDTO* item = [EvhOrganizationDTO new];
             [item fromJson:dic];
             [self.response addObject: item];
         }

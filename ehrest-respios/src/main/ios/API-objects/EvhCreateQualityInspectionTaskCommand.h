@@ -1,13 +1,14 @@
 //
-// EvhListQualityCategoriesCommand.h
+// EvhCreateQualityInspectionTaskCommand.h
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
+#import "EvhStandardGroupDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhListQualityCategoriesCommand
+// EvhCreateQualityInspectionTaskCommand
 //
-@interface EvhListQualityCategoriesCommand
+@interface EvhCreateQualityInspectionTaskCommand
     : NSObject<EvhJsonSerializable>
 
 
@@ -15,11 +16,11 @@
 
 @property(nonatomic, copy) NSString* ownerType;
 
-@property(nonatomic, copy) NSNumber* pageAnchor;
+@property(nonatomic, copy) NSString* name;
 
-@property(nonatomic, copy) NSNumber* pageSize;
+@property(nonatomic, copy) NSNumber* categoryId;
 
-@property(nonatomic, copy) NSNumber* parentId;
+@property(nonatomic, strong) EvhStandardGroupDTO* group;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
