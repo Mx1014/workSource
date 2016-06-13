@@ -298,6 +298,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             if(da.getGroupid() != 0) {
                 DoorAccess group = doorAccessProvider.getDoorAccessById(da.getGroupid());
                 if(group != null) {
+                    dto.setGroupId(group.getId());
                     dto.setGroupName(group.getName());
                 }
             }

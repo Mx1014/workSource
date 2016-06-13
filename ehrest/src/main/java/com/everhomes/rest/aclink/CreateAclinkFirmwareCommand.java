@@ -30,13 +30,13 @@ public class CreateAclinkFirmwareCommand {
     private String     downloadUrl;
     
     @NotNull
-    private Byte     major;
+    private Integer     major;
     
     @NotNull
-    private Byte     minor;
+    private Integer     minor;
     
     
-    private Byte     revision;
+    private Integer     revision;
     
     public String getInfoUrl() {
         return infoUrl;
@@ -62,26 +62,25 @@ public class CreateAclinkFirmwareCommand {
     public void setDownloadUrl(String downloadUrl) {
         this.downloadUrl = downloadUrl;
     }
-    
-    public Byte getMajor() {
+
+    public Integer getMajor() {
         return major;
     }
-    public void setMajor(Byte major) {
+    public void setMajor(Integer major) {
         this.major = major;
     }
-    public Byte getMinor() {
+    public Integer getMinor() {
         return minor;
     }
-    public void setMinor(Byte minor) {
+    public void setMinor(Integer minor) {
         this.minor = minor;
     }
-    public Byte getRevision() {
+    public Integer getRevision() {
         return revision;
     }
-    public void setRevision(Byte revision) {
+    public void setRevision(Integer revision) {
         this.revision = revision;
     }
-    
     public String getFirmwareType() {
         return firmwareType;
     }
