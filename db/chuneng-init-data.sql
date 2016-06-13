@@ -29,8 +29,13 @@ INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longi
 INSERT INTO `eh_organization_communities`(organization_id, community_id) 
 	VALUES(1001050, 240111044331051500);
 
-INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`) 
-	VALUES(1001050, 0, 'PM', '深圳中正信息科技有限公司', 239825274387098429, '', '/1001050', 1, 2, 'ENTERPRISE', 999990);
+INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
+	VALUES(1001097, UUID(), '中国储能大厦物业管理有限公司', '', 1, 0, 240111044331051500, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 167930, 1, 999990); 
+INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
+	VALUES(167930, UUID(), 999990, 2, 'EhGroups', 1001097,'中国储能大厦物业管理有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());                                                                
+
+INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`, `group_id`) 
+	VALUES(1001050, 0, 'PM', '深圳中正信息科技有限公司', 239825274387098429, '', '/1001050', 1, 2, 'ENTERPRISE', 999990, 1001097);
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status)
 	VALUES(2102600, 1001050, 'USER', 214000, 'manager', '喻旭日', 0, '18927485550', 3);	
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status)
