@@ -20,6 +20,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.pmsy.PmsyOrderStatus;
 import com.everhomes.rest.pmsy.PmsyPayerStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -32,6 +33,7 @@ import com.everhomes.server.schema.tables.pojos.EhPmsyCommunities;
 import com.everhomes.server.schema.tables.pojos.EhPmsyOrderItems;
 import com.everhomes.server.schema.tables.pojos.EhPmsyOrders;
 import com.everhomes.server.schema.tables.records.EhPmsyCommunitiesRecord;
+import com.everhomes.server.schema.tables.records.EhPmsyOrderItemsRecord;
 import com.everhomes.server.schema.tables.records.EhPmsyOrdersRecord;
 import com.everhomes.server.schema.tables.records.EhPmsyPayersRecord;
 import com.everhomes.util.ConvertHelper;
@@ -217,7 +219,7 @@ public class PmsyProviderImpl implements PmsyProvider {
 		SelectQuery<EhPmsyOrdersRecord> query = context.selectQuery(Tables.EH_PMSY_ORDERS);
 		
 		if(pageAnchor != null)
-			query.addConditions(Tables.EH_PMSY_ORDERS.ID.gt(pageAnchor));
+			query.addConditions(Tables.EH_PMSY_ORDERS.CREATE_TIME.lt(new Timestamp(pageAnchor)));
 		if(startDate != null)
 			query.addConditions(Tables.EH_PMSY_ORDERS.CREATE_TIME.gt(startDate));
 		if(endDate != null)
@@ -227,9 +229,23 @@ public class PmsyProviderImpl implements PmsyProvider {
 		if(StringUtils.isNotBlank(userContact))
 			query.addConditions(Tables.EH_PMSY_ORDERS.USER_CONTACT.eq(userContact));
 		query.addConditions(Tables.EH_PMSY_ORDERS.OWNER_ID.eq(communityId));
+		query.addConditions(Tables.EH_PMSY_ORDERS.STATUS.gt(PmsyOrderStatus.PAID.getCode()));
+		query.addOrderBy(Tables.EH_PMSY_ORDERS.CREATE_TIME.desc());
 		query.addLimit(pageSize);
 		
 		return query.fetch().map(r -> ConvertHelper.convert(r, PmsyOrder.class));
+	}
+	
+	@Override
+	public List<PmsyOrderItem> ListBillOrderItems(Long...orderIds){
+		
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmsyOrderItems.class));
+		SelectQuery<EhPmsyOrderItemsRecord> query = context.selectQuery(Tables.EH_PMSY_ORDER_ITEMS);
+		
+		if(null != orderIds && orderIds.length != 0)
+			query.addConditions(Tables.EH_PMSY_ORDER_ITEMS.ORDER_ID.in(orderIds));
+		
+		return query.fetch().map(r -> ConvertHelper.convert(r, PmsyOrderItem.class));
 	}
 
 	@Override

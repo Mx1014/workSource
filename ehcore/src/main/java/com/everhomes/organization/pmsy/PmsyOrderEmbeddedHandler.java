@@ -19,6 +19,7 @@ import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.pmsy.PmsyBillType;
 import com.everhomes.rest.pmsy.PmsyOrderStatus;
+import com.everhomes.rest.pmsy.PmsyPayerStatus;
 import com.everhomes.util.RuntimeErrorException;
 import com.google.gson.Gson;
 
@@ -83,6 +84,13 @@ public class PmsyOrderEmbeddedHandler implements OrderEmbeddedHandler{
 				"", "siyuan", "支付宝支付", "", billListJson);
 		Map payFeeMap = gson.fromJson(json, Map.class);
 		List payFeeList = (List) payFeeMap.get("UserRev_PayFee");
+		if(payFeeList == null){
+			order.setStatus(PmsyOrderStatus.FAIL.getCode());
+			pmsyProvider.updatePmsyOrder(order);
+			LOGGER.error("the pay of fee is fail.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
+					"the pay of fee is fail.");
+		}
 		Map payFeeMap2 = (Map) payFeeList.get(0);
 		List payFeeList2 = (List) map2.get("Syswin");
 		
@@ -97,6 +105,14 @@ public class PmsyOrderEmbeddedHandler implements OrderEmbeddedHandler{
 				continue payFeeListOuter;
 			}
 			
+		}
+		order.setStatus(PmsyOrderStatus.SUCCESS.getCode());
+		pmsyProvider.updatePmsyOrder(order);
+		
+		PmsyPayer pmsyPayer = pmsyProvider.findPmPayersByNameAndContact(order.getUserName(), order.getUserContact());
+		if(pmsyPayer != null){
+			pmsyPayer.setStatus(PmsyPayerStatus.ACTIVE.getCode());
+			pmsyProvider.updatePmPayer(pmsyPayer);
 		}
 		
 	}
@@ -115,6 +131,12 @@ public class PmsyOrderEmbeddedHandler implements OrderEmbeddedHandler{
 		order.setPaidType(cmd.getVendorType());
 		//order.setPaidTime(cmd.getPayTime());
 		pmsyProvider.updatePmsyOrder(order);
+		
+		PmsyPayer pmsyPayer = pmsyProvider.findPmPayersByNameAndContact(order.getUserName(), order.getUserContact());
+		if(pmsyPayer != null){
+			pmsyPayer.setStatus(PmsyPayerStatus.INACTIVE.getCode());
+			pmsyProvider.updatePmPayer(pmsyPayer);
+		}
 		
 	}
 

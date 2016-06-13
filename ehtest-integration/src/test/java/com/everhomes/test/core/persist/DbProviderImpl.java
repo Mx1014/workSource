@@ -2,6 +2,7 @@ package com.everhomes.test.core.persist;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -12,6 +13,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
@@ -23,8 +26,10 @@ import org.jooq.Result;
 import org.jooq.SelectQuery;
 import org.jooq.Table;
 import org.jooq.impl.DSL;
+import org.jooq.types.ULong;
 import org.jooq.Field;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils;
@@ -39,9 +44,20 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mysql.fabric.xmlrpc.base.Array;
 
 @Component
 public class DbProviderImpl implements DbProvider {
+    public static final String CALL_FUN_PREFIX = "callfun(";
+    public static final String CALL_FUN_SUFFIX = ")";
+    
+    /** 服务器地址 */
+    @Value("${db.mapping_name:ehcore_test}")
+    private String dbMappingName;
+    
+    @Value("${db.exclude_tables:}")
+    private String excludeTableString;
+    
     @Autowired
     private DSLContext dslContext;
     
@@ -54,25 +70,55 @@ public class DbProviderImpl implements DbProvider {
 	
 	@Override
     public void truncateTable(Table<?> table) {
+	    this.dslContext.execute("SET foreign_key_checks = 0");
 	    this.dslContext.truncate(table).execute();
+	    this.dslContext.execute("SET foreign_key_checks = 1");
 	}
     
     @Override
     public void truncateTable(List<Table<?>> tables) {
         for(Table<?> table : tables) {
-            this.dslContext.truncate(table).execute();
+            truncateTable(table);
         }
     }
 	
 	@Override
 	public void truncateAllTables() {
-		this.dslContext.meta().getTables().stream().map((r) -> {
-		    if("eh_acl_privileges".equals(r.getName())) {
-		        System.out.println();
-		    }
-			this.dslContext.truncate(r).execute();
-			return null;
-		});
+//		this.dslContext.meta().getTables().stream().map((r) -> {
+//		    if("eh_acl_privileges".equals(r.getName())) {
+//		        System.out.println();
+//		    }
+//			this.dslContext.truncate(r).execute();
+//			return null;
+//		});
+	    
+	    List<String> excludeTables = new ArrayList<String>();
+	    if(excludeTableString != null && excludeTableString.trim().length() > 0) {
+	        String[] segments = excludeTableString.split(",");
+	        for(String segment : segments) {
+	            segment = segment.trim();
+	            if(segment.length() > 0) {
+	                excludeTables.add(segment);
+	            }
+	        }
+	    }
+	    
+	    List<Table<?>> tables = this.dslContext.select(org.jooq.util.mysql.information_schema.tables.Tables.TABLE_SCHEMA,
+	            org.jooq.util.mysql.information_schema.tables.Tables.TABLE_NAME,
+	            org.jooq.util.mysql.information_schema.tables.Tables.TABLE_ROWS)
+	        .from(org.jooq.util.mysql.information_schema.Tables.TABLES)
+	        .where(org.jooq.util.mysql.information_schema.tables.Tables.TABLE_SCHEMA.in(dbMappingName))
+	        .fetch().stream().map((r) -> {
+	            String tableName = r.getValue(org.jooq.util.mysql.information_schema.tables.Tables.TABLE_NAME);
+	            long rowCount = r.getValue(org.jooq.util.mysql.information_schema.tables.Tables.TABLE_ROWS).longValue();
+	            if(!excludeTables.contains(tableName) && rowCount > 0) {
+	                return DSL.table(tableName);
+	            } else {
+	                return null;
+	            }
+	        }).filter(Objects::nonNull).collect(Collectors.toList());
+	    
+	    truncateTable(tables);
 	}
 	
 	@Override
@@ -297,10 +343,34 @@ public class DbProviderImpl implements DbProvider {
             Entry<String, JsonElement> recordEntry = recordIterator.next();
             String columnName = recordEntry.getKey();
             colunNames.add(DSL.fieldByName(columnName));
-            String columnValue = recordEntry.getValue().getAsString();
+            String columnValue = processValue(recordEntry.getValue().getAsString());
             colunValues.add(columnValue);
         }
         
         return dslContext.insertInto(table, colunNames).values(colunValues);
+	}
+	
+	private String processValue(String originalValue) {
+	    if(originalValue == null || originalValue.trim().length() == 0) {
+	        return originalValue;
+	    }
+	    
+	    if(originalValue.startsWith(CALL_FUN_PREFIX) && originalValue.endsWith(CALL_FUN_SUFFIX)) {
+	        String funStr = originalValue.substring(CALL_FUN_PREFIX.length(), originalValue.length() - CALL_FUN_SUFFIX.length());
+	        int pos = funStr.indexOf(':');
+	        if(pos != -1) {
+	            String className = funStr.substring(0, pos);
+	            String methodName = funStr.substring(pos + 1);
+	            
+	            try {
+                    Object obj = Class.forName(className).getDeclaredMethod(methodName).invoke(null);
+                    originalValue = obj.toString();
+                } catch (Exception e) {
+                    throw new IllegalArgumentException("Invalid call function in value, value=" + originalValue, e);
+                } 
+	        }
+	    }
+	    
+	    return originalValue;
 	}
 }

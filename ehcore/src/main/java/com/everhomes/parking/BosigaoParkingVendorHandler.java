@@ -148,7 +148,7 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 			}
 			else {
 				String carNumber = order.getPlateNumber();
-				String cost = order.getPrice().intValue() + "";
+				String cost = (order.getPrice().intValue()*100) + "";
 				String flag = "2"; //停车场系统接口的传入参数，2表示是车牌号
 				String payTime = order.getPaidTime().toString();
 				String validStart = timestampToStr(order.getOldExpiredTime());
@@ -274,13 +274,6 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
         	}
         }
 		
-		if(cmd.getPlateNumber().length() != 7) {
-			LOGGER.error("the length of plateNumber is wrong.");
-			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_LENGTH,
-					localeStringService.getLocalizedString(String.valueOf(ParkingErrorCode.SCOPE), 
-							String.valueOf(ParkingErrorCode.ERROR_PLATE_LENGTH),
-							UserContext.current().getUser().getLocale(),"the length of plateNumber is wrong."));
-		}
 		ParkingCardRequestDTO parkingCardRequestDTO = new ParkingCardRequestDTO();
 		try {
 			ParkingCardRequest parkingCardRequest = new ParkingCardRequest();

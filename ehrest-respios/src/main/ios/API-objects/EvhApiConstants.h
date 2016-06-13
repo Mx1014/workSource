@@ -240,6 +240,7 @@
 #define EVH_ADMIN_REGISTERLOGIN_URL @"/admin/registerLogin"
 #define EVH_ADMIN_REMOVEBORDER_URL @"/admin/removeBorder"
 #define EVH_ADMIN_SAMPLE_URL @"/admin/sample"
+#define EVH_ADMIN_SCENE_LISTSCENETYPES_URL @"/admin/scene/listSceneTypes"
 #define EVH_ADMIN_SCHEDULE_LISTJOBINFOS_URL @"/admin/schedule/listJobInfos"
 #define EVH_ADMIN_SCHEDULE_SCHEDULEATTIME_URL @"/admin/schedule/scheduleAtTime"
 #define EVH_ADMIN_SCHEDULE_SCHEDULECRONJOB_URL @"/admin/schedule/scheduleCronJob"
