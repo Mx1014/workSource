@@ -33,7 +33,6 @@ public class OpPromotionListAllCondition implements OpPromotionCondition, OpProm
         //TODO use OpPromotionActivityContext directly
         OpPromotionActivityContext c = (OpPromotionActivityContext) ctx;
         visitor.setPromotion(c.getPromotion());
-        
         List<OpPromotionAssignedScope> scopes = promotionAssignedScopeProvider.getOpPromotionScopeByPromotionId(c.getPromotion().getId());
         for(OpPromotionAssignedScope scope : scopes) {
             OpPromotionScopeType scopeType = OpPromotionScopeType.fromCode(scope.getScopeCode());

@@ -200,10 +200,14 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
         cmd.setStartTime(regionCommand.getStartTime());
         cmd.setEndTime(regionCommand.getEndTime());
         cmd.setPolicyType(OpPromotionConditionType.ALL.getCode());
+        cmd.setNamespaceId(regionCommand.getNamespaceId());
         
         List<OpPromotionAssignedScopeDTO> scopes = new ArrayList<OpPromotionAssignedScopeDTO>();
         OpPromotionAssignedScopeDTO scope = new OpPromotionAssignedScopeDTO();
-        scope.setPromotionId(regionCommand.getScopeId());
+        //scope.setPromotionId(regionCommand.getScopeId());
+        scope.setScopeCode(regionCommand.getScopeCode());
+        scope.setScopeId(regionCommand.getScopeId());
+        scopes.add(scope);
         cmd.setAssignedScopes(scopes);
         this.createPromotion(cmd);
     }
