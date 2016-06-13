@@ -10,6 +10,7 @@ public interface ForumServiceErrorCode {
     static final int ERROR_FORUM_ORGANIZATION_NOT_FOUND = 10004;
     static final int ERROR_FORUM_ORGANIZATION_COMMUNITY_NOT_FOUND = 10005;
     static final int ERROR_FORUM_TOPIC_DELETED = 10006;
+    static final int ERROR_INVALID_PARAMETER = 10010;
     
 
     static final int ERROR_FORUM_TOPIC_NOT_ASSIGNED = 10011;

@@ -132,6 +132,7 @@ import com.everhomes.rest.point.PointType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.ui.forum.GetTopicQueryFilterCommand;
 import com.everhomes.rest.ui.forum.GetTopicSentScopeCommand;
+import com.everhomes.rest.ui.forum.ListNoticeBySceneCommand;
 import com.everhomes.rest.ui.forum.NewTopicBySceneCommand;
 import com.everhomes.rest.ui.forum.PostFilterType;
 import com.everhomes.rest.ui.forum.PostSentScopeType;
@@ -3564,6 +3565,79 @@ public class ForumServiceImpl implements ForumService {
         topicCmd.setVisibleRegionId(visibleRegionId);
         
         return this.createTopic(topicCmd);
+    }
+    
+    @Override
+    public ListPostCommandResponse listNoticeByScene(ListNoticeBySceneCommand cmd) {
+        User user = UserContext.current().getUser();
+        Long userId = user.getId();
+        SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
+        List<Long> visibleRegionIds = new ArrayList<Long>();
+        VisibleRegionType visibleRegionType = VisibleRegionType.COMMUNITY;
+        switch(sceneType) {
+        case DEFAULT:
+        case PARK_TOURIST:
+        	visibleRegionIds.add(sceneToken.getEntityId());
+            break;
+        case FAMILY:
+            FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
+            if(family != null) {
+                visibleRegionIds.add(family.getCommunityId());
+            } else {
+                if(LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("Family not found, sceneToken=" + sceneToken);
+                }
+            }
+            break;
+        case PM_ADMIN:// 无小区ID
+        case ENTERPRISE: 
+        case ENTERPRISE_NOAUTH: 
+            Organization org = this.organizationProvider.findOrganizationById(sceneToken.getEntityId());
+            if(org != null) {
+            	ListCommunitiesByOrganizationIdCommand command = new ListCommunitiesByOrganizationIdCommand();
+            	command.setOrganizationId(org.getId());		
+            	List<CommunityDTO> communityDTOs = organizationService.listCommunityByOrganizationId(command).getCommunities();
+            	for (CommunityDTO communityDTO : communityDTOs) {
+            		visibleRegionIds.add(communityDTO.getId());
+				}
+            } else {
+                if(LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("Organization not found, sceneToken=" + sceneToken);
+                }
+            }
+            break;
+        default:
+            break;
+        }
+        
+        return this.listNoticeTopic(visibleRegionType, visibleRegionIds, cmd.getPublishStatus(), cmd.getPageSize(), cmd.getPageAnchor());
+    }
+    
+    @Override
+    public ListPostCommandResponse listNoticeTopic(VisibleRegionType visibleRegionType, List<Long> visibleRegionIds, String publishStatus, Integer pageSize, Long pageAnchor){
+    	if(visibleRegionIds.size() == 0){
+    		LOGGER.error("visibleRegionIds is null, visibleRegionIds =" + visibleRegionIds);
+    		throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, ForumServiceErrorCode.ERROR_INVALID_PARAMETER, 
+   					"visibleRegionIds is null.");
+    	}
+    	pageSize = PaginationConfigHelper.getPageSize(configProvider, pageSize);
+    	CrossShardListingLocator locator = new CrossShardListingLocator(ForumConstants.SYSTEM_FORUM);
+        locator.setAnchor(pageAnchor);
+        
+    	Category contentCatogry = this.categoryProvider.findCategoryById(CategoryConstants.CATEGORY_ID_NOTICE);
+    	Condition condition = Tables.EH_FORUM_POSTS.CATEGORY_PATH.like(contentCatogry.getPath() + "%");
+    	Condition communityCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
+        communityCondition = communityCondition.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.in(visibleRegionIds));
+        condition = condition.and(communityCondition);
+        
+        List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, publishStatus);
+        
+        ListPostCommandResponse response = new ListPostCommandResponse();
+        response.setPosts(dtos);
+        response.setNextPageAnchor(locator.getAnchor());
+        
+        return response;
     }
     
     /**

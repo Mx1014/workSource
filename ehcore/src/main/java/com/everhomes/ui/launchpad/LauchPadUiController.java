@@ -135,8 +135,8 @@ public class LauchPadUiController extends ControllerBase {
     @RequestMapping("getMoreItemsByScene")
     @RestReturn(value=GetLaunchPadItemsCommandResponse.class)
     public RestResponse getMoreItemsByScene(@Valid GetLaunchPadItemsBySceneCommand cmd,HttpServletRequest request,HttpServletResponse response) {
-        
-        RestResponse resp =  new RestResponse();
+        this.launchPadService.getMoreItemsByScene(cmd, request);
+    	RestResponse resp =  new RestResponse();
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
         return resp;
@@ -149,7 +149,7 @@ public class LauchPadUiController extends ControllerBase {
     @RequestMapping("addLaunchPadItemByScene")
     @RestReturn(value=String.class)
     public RestResponse addLaunchPadItemByScene(AddLaunchPadItemBySceneCommand cmd) {
-        
+    	this.launchPadService.addLaunchPadItemByScene(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -163,7 +163,7 @@ public class LauchPadUiController extends ControllerBase {
     @RequestMapping("deleteLaunchPadItemByScene")
     @RestReturn(value=String.class)
     public RestResponse deleteLaunchPadItemByScene(DeleteLaunchPadItemBySceneCommand cmd) {
-        
+    	this.launchPadService.deleteLaunchPadItemByScene(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -177,7 +177,7 @@ public class LauchPadUiController extends ControllerBase {
     @RequestMapping("reorderLaunchPadItemByScene")
     @RestReturn(value=String.class)
     public RestResponse reorderLaunchPadItemByScene(ReorderLaunchPadItemBySceneCommand cmd) {
-        
+    	this.launchPadService.reorderLaunchPadItemByScene(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

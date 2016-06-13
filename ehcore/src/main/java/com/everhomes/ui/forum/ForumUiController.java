@@ -118,8 +118,8 @@ public class ForumUiController extends ControllerBase {
     @RequestMapping("listNoticeByScene")
     @RestReturn(value=ListPostCommandResponse.class)
     public RestResponse listNoticeByScene(ListNoticeBySceneCommand cmd) {
-        
-        RestResponse response = new RestResponse();
+    	ListPostCommandResponse res = forumService.listNoticeByScene(cmd);
+        RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
