@@ -8,14 +8,14 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>ownerType: 归属的类型</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
- * <li>cardNo: 卡号</li>
+ * <li>cardId: 卡号</li>
  * <li>amount: 充值金额</li>
  * </ul>
  */
 public class RechargeCardCommand {
 	private String ownerType;
     private Long ownerId;
-    private String cardNo;
+    private Long cardId;
     private BigDecimal amount;
     
 	public String getOwnerType() {
@@ -30,11 +30,12 @@ public class RechargeCardCommand {
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
 	}
-	public String getCardNo() {
-		return cardNo;
+
+	public Long getCardId() {
+		return cardId;
 	}
-	public void setCardNo(String cardNo) {
-		this.cardNo = cardNo;
+	public void setCardId(Long cardId) {
+		this.cardId = cardId;
 	}
 	public BigDecimal getAmount() {
 		return amount;

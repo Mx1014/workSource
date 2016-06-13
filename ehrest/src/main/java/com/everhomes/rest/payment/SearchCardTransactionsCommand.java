@@ -9,8 +9,8 @@ import com.everhomes.util.StringHelper;
  * <li>startDate: 开始日期</li>
  * <li>endDate: 结束日期</li>
  * <li>consumeType: 消费方式</li>
- * <li>status: 0：失败 1: 处理中 2：成功 3: 已退货 {@link com.everhomes.rest.payment.TAOTAOGUCardTranscationStatus}</li>
- * <li>condition: 手机号或者姓名</li>
+ * <li>status: 0:支付失败   1:过期  2:已撤销 3:支付成功  4:未支付{@link com.everhomes.rest.payment.CardTransactionStatus}</li>
+ * <li>keyword: 手机号或者姓名</li>
  * <li>pageAnchor: 分页的瞄</li>
  * <li>pageSize: 每页条数</li>
  * </ul>
@@ -21,8 +21,8 @@ public class SearchCardTransactionsCommand {
     private Long startDate;
     private Long endDate;
     private String consumeType;
-    private byte status;
-    private String condition;
+    private Byte status;
+    private String keyword;
     private Integer pageSize;
     private Long pageAnchor;
     
@@ -63,19 +63,19 @@ public class SearchCardTransactionsCommand {
 	public void setConsumeType(String consumeType) {
 		this.consumeType = consumeType;
 	}
-	public byte getStatus() {
+	
+	public Byte getStatus() {
 		return status;
 	}
-	public void setStatus(byte status) {
+	public void setStatus(Byte status) {
 		this.status = status;
 	}
-	public String getCondition() {
-		return condition;
+	public String getKeyword() {
+		return keyword;
 	}
-	public void setCondition(String condition) {
-		this.condition = condition;
+	public void setKeyword(String keyword) {
+		this.keyword = keyword;
 	}
-    
 	public Integer getPageSize() {
 		return pageSize;
 	}

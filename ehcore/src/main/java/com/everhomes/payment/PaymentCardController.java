@@ -2,6 +2,7 @@ package com.everhomes.payment;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -34,13 +35,14 @@ import com.everhomes.rest.payment.SearchCardRechargeOrderCommand;
 import com.everhomes.rest.payment.SearchCardRechargeOrderResponse;
 import com.everhomes.rest.payment.SearchCardTransactionsCommand;
 import com.everhomes.rest.payment.SearchCardTransactionsResponse;
-import com.everhomes.server.schema.tables.pojos.EhPaymentCardRechargeOrders;
 
 
 @Controller
 @RequestMapping("payment")
 public class PaymentCardController extends ControllerBase{
 
+	@Autowired
+	private PaymentCardService paymentCardService;
 
 	/**
      * <b>URL: /payment/listCardInfo</b>
@@ -49,7 +51,7 @@ public class PaymentCardController extends ControllerBase{
     @RequestMapping("listCardInfo")
     @RestReturn(value=CardInfoDTO.class,collection=true)
     public RestResponse listCardInfo(ListCardInfoCommand cmd) {
-        List<CardInfoDTO> result = null;
+        List<CardInfoDTO> result = paymentCardService.listCardInfo(cmd);
         RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -63,7 +65,8 @@ public class PaymentCardController extends ControllerBase{
     @RequestMapping("listCardIssuer")
     @RestReturn(value=CardIssuerDTO.class,collection=true)
     public RestResponse listCardIssuer(ListCardIssuerCommand cmd) {
-        RestResponse response = new RestResponse();
+    	List<CardIssuerDTO> result = paymentCardService.listCardIssuer(cmd);
+        RestResponse response = new RestResponse(result);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -76,8 +79,8 @@ public class PaymentCardController extends ControllerBase{
     @RequestMapping("applyCard")
     @RestReturn(value=CardInfoDTO.class)
     public RestResponse applyCard(ApplyCardCommand cmd) {
-        
-        RestResponse response = new RestResponse();
+    	CardInfoDTO dto = paymentCardService.applyCard(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -129,7 +132,7 @@ public class PaymentCardController extends ControllerBase{
     @RequestMapping("setCardPassword")
     @RestReturn(value=String.class)
     public RestResponse setCardPassword(SetCardPasswordCommand cmd) {
-        
+    	paymentCardService.setCardPassword(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -143,8 +146,8 @@ public class PaymentCardController extends ControllerBase{
     @RequestMapping("sendCardVerifyCode")
     @RestReturn(value=SendCardVerifyCodeDTO.class)
     public RestResponse sendCardVerifyCode(SendCardVerifyCodeCommand cmd) {
-        
-        RestResponse response = new RestResponse();
+    	SendCardVerifyCodeDTO dto = paymentCardService.sendCardVerifyCode(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -156,7 +159,7 @@ public class PaymentCardController extends ControllerBase{
     @RequestMapping("resetCardPassword")
     @RestReturn(value=String.class)
     public RestResponse resetCardPassword(ResetCardPasswordCommand cmd) {
-        
+    	paymentCardService.resetCardPassword(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -170,7 +173,7 @@ public class PaymentCardController extends ControllerBase{
     @RequestMapping("listCardTransactions")
     @RestReturn(value=ListCardTransactionsResponse.class)
     public RestResponse listCardTransactions(ListCardTransactionsCommand cmd) {
-        
+    	ListCardTransactionsResponse resp = paymentCardService.listCardTransactions(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -185,8 +188,8 @@ public class PaymentCardController extends ControllerBase{
     @RequestMapping("searchCardUsers")
     @RestReturn(value=SearchCardUsersResponse.class)
     public RestResponse searchCardUsers(SearchCardUsersCommand cmd) {
-        
-        RestResponse response = new RestResponse();
+    	SearchCardUsersResponse resp = paymentCardService.searchCardUsers(cmd);
+        RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -198,8 +201,8 @@ public class PaymentCardController extends ControllerBase{
     @RequestMapping("getCardUserStatistics")
     @RestReturn(value=GetCardUserStatisticsDTO.class)
     public RestResponse getCardUserStatistics(GetCardUserStatisticsCommand cmd) {
-        
-        RestResponse response = new RestResponse();
+    	GetCardUserStatisticsDTO dto = paymentCardService.getCardUserStatistics(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -211,8 +214,8 @@ public class PaymentCardController extends ControllerBase{
     @RequestMapping("searchCardRechargeOrder")
     @RestReturn(value=SearchCardRechargeOrderResponse.class)
     public RestResponse searchCardRechargeOrder(SearchCardRechargeOrderCommand cmd) {
-        
-        RestResponse response = new RestResponse();
+    	SearchCardRechargeOrderResponse resp = paymentCardService.searchCardRechargeOrder(cmd);
+        RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -224,8 +227,8 @@ public class PaymentCardController extends ControllerBase{
     @RequestMapping("searchCardTransactions")
     @RestReturn(value=SearchCardTransactionsResponse.class)
     public RestResponse searchCardTransactions(SearchCardTransactionsCommand cmd) {
-        
-        RestResponse response = new RestResponse();
+    	SearchCardTransactionsResponse resp = paymentCardService.searchCardTransactions(cmd);
+        RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

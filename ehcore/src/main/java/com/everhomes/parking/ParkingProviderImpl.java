@@ -42,6 +42,7 @@ import com.everhomes.server.schema.tables.pojos.EhParkingCardRequests;
 import com.everhomes.server.schema.tables.pojos.EhParkingLots;
 import com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders;
 import com.everhomes.server.schema.tables.pojos.EhParkingRechargeRates;
+import com.everhomes.server.schema.tables.pojos.EhParkingVendors;
 import com.everhomes.server.schema.tables.records.EhParkingActivitiesRecord;
 import com.everhomes.server.schema.tables.records.EhParkingCardRequestsRecord;
 import com.everhomes.server.schema.tables.records.EhParkingLotsRecord;
@@ -75,7 +76,7 @@ public class ParkingProviderImpl implements ParkingProvider {
     
     @Override
     public ParkingVendor findParkingVendorByName(String name) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(ParkingVendor.class));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingVendors.class));
         EhParkingVendorsDao dao = new EhParkingVendorsDao(context.configuration());
         return ConvertHelper.convert(dao.fetchOneByName(name), ParkingVendor.class);
     }
@@ -89,7 +90,7 @@ public class ParkingProviderImpl implements ParkingProvider {
     
     @Override
     public ParkingRechargeOrder findParkingRechargeOrderById(Long id) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(ParkingRechargeOrder.class));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingRechargeOrders.class));
         EhParkingRechargeOrdersDao dao = new EhParkingRechargeOrdersDao(context.configuration());
         
         return ConvertHelper.convert(dao.findById(id), ParkingRechargeOrder.class);
@@ -115,7 +116,7 @@ public class ParkingProviderImpl implements ParkingProvider {
     
     @Override
     public List<ParkingRechargeRate> listParkingRechargeRates(String ownerType,Long ownerId,Long parkingLotId,String cardType) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(ParkingRechargeRate.class));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingRechargeRates.class));
         
         SelectQuery<EhParkingRechargeRatesRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_RATES);
         if(StringUtils.isNotBlank(ownerType))
@@ -186,7 +187,7 @@ public class ParkingProviderImpl implements ParkingProvider {
     public List<ParkingCardRequest> listParkingCardRequests(Long userId,String ownerType,Long ownerId
     		,Long parkingLotId,String plateNumber,String order,Long pageAnchor,Integer pageSize){
     	List<ParkingCardRequest> resultList = null;
-    	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(ParkingCardRequest.class));
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingCardRequests.class));
         
         StringBuilder sb = new StringBuilder("");
         StringBuilder conditionSb = new StringBuilder("");
@@ -277,7 +278,7 @@ public class ParkingProviderImpl implements ParkingProvider {
     @Override
     public Integer waitingCardCount(String ownerType,Long ownerId
     		,Long parkingLotId,Timestamp createTime){
-    	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(ParkingCardRequest.class));
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingCardRequests.class));
     	SelectJoinStep<Record1<Integer>> query = context.selectCount().from(Tables.EH_PARKING_CARD_REQUESTS);
         
         Condition condition = Tables.EH_PARKING_CARD_REQUESTS.OWNER_TYPE.eq(ownerType);
@@ -292,7 +293,7 @@ public class ParkingProviderImpl implements ParkingProvider {
     public List<ParkingRechargeOrder> listParkingRechargeOrders(String ownerType,Long ownerId
     		,Long parkingLotId,String plateNumber,Long pageAnchor,Integer pageSize,Long userId){
     	List<ParkingRechargeOrder> resultList = null;
-    	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(ParkingRechargeOrder.class));
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingRechargeOrders.class));
         SelectQuery<EhParkingRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_ORDERS);
         //带上逻辑删除条件
         query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.IS_DELETE.eq(IsOrderDelete.NOTDELETED.getCode()));
@@ -323,7 +324,7 @@ public class ParkingProviderImpl implements ParkingProvider {
     @Override
     public List<ParkingRechargeOrder> findWaitingParkingRechargeOrders(ParkingLotVendor vendor){
     	List<ParkingRechargeOrder> resultList = null;
-    	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(ParkingRechargeOrder.class));
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingRechargeOrders.class));
         SelectQuery<EhParkingRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_ORDERS);
 		
         query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.VENDOR_NAME.eq(vendor.getCode()));
@@ -344,7 +345,7 @@ public class ParkingProviderImpl implements ParkingProvider {
     		,String paidType ,String payerName,String payerPhone,Long pageAnchor,Integer pageSize,Timestamp startDate,
     		Timestamp endDate,Byte rechargeStatus/*,Long userId*/){
     	List<ParkingRechargeOrder> resultList = null;
-    	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(ParkingRechargeOrder.class));
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingRechargeOrders.class));
         SelectQuery<EhParkingRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_ORDERS);
         
 
@@ -540,7 +541,7 @@ public class ParkingProviderImpl implements ParkingProvider {
 	@Override
 	public ParkingActivity getParkingActivity(String ownerType,
 			Long ownerId, Long parkingLotId) {
-		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(ParkingActivity.class));
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingActivities.class));
         SelectQuery<EhParkingActivitiesRecord> query = context.selectQuery(Tables.EH_PARKING_ACTIVITIES);
 		
 		if(StringUtils.isNotBlank(ownerType))

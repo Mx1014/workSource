@@ -6,13 +6,13 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>ownerType: 归属的类型</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
- * <li>cardNo: 卡号</li>
+ * <li>cardId: 卡号</li>
  * </ul>
  */
 public class GetCardPaidResultCommand {
 	private String ownerType;
     private Long ownerId;
-	private String cardNo;
+	private String cardId;
 	
 	
 	@Override
@@ -20,16 +20,13 @@ public class GetCardPaidResultCommand {
         return StringHelper.toJsonString(this);
     }
 
-
-	public String getCardNo() {
-		return cardNo;
+	public String getCardId() {
+		return cardId;
 	}
 
-
-	public void setCardNo(String cardNo) {
-		this.cardNo = cardNo;
+	public void setCardId(String cardId) {
+		this.cardId = cardId;
 	}
-
 
 	public String getOwnerType() {
 		return ownerType;
@@ -49,6 +46,5 @@ public class GetCardPaidResultCommand {
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
 	}
-	
 	
 }

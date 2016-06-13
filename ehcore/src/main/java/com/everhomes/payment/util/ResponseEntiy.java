@@ -1,0 +1,74 @@
+package com.everhomes.payment.util;
+
+import java.util.List;
+import java.util.Map;
+
+import com.everhomes.util.StringHelper;
+import com.google.gson.Gson;
+
+public class ResponseEntiy {
+	private String RespCode;
+	private String AppName;
+	private String Version;
+	private String MsgType;
+	private Object Result;
+	
+	public String getAppName() {
+		return AppName;
+	}
+	public void setAppName(String appName) {
+		AppName = appName;
+	}
+	public String getRespCode() {
+		return RespCode;
+	}
+	public void setRespCode(String respCode) {
+		RespCode = respCode;
+	}
+	
+	public String getVersion() {
+		return Version;
+	}
+	public void setVersion(String version) {
+		Version = version;
+	}
+	public String getMsgType() {
+		return MsgType;
+	}
+	public void setMsgType(String msgType) {
+		MsgType = msgType;
+	}
+	public Object getResult() {
+		return Result;
+	}
+	public void setResult(Object result) {
+		Result = result;
+	}
+	public boolean isSuccess(){
+		if("00".equals(this.RespCode))
+			return true;
+		return false;
+	}
+	@SuppressWarnings("rawtypes")
+	public Map getData(){
+		if(null == this.Result)
+			return null;
+		List list = (List) this.Result;
+		Map map = null;
+		if(!list.isEmpty()){
+			map = (Map) list.get(0);
+		}
+		return map;
+	}
+	
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+	public static void main(String[] args) {
+		String json = "{\"AppName\":\"ICCard\",\"Version\":\"V0.01\",\"ClientDt\":\"20160612154124\",\"RespCode\":\"00\"}";
+		Gson gson = new Gson();
+		ResponseEntiy r = gson.fromJson(json, ResponseEntiy.class);
+		System.out.println(r);
+	}
+}

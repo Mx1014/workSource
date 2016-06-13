@@ -72,7 +72,7 @@ public class Testchangepassword {
 //		param.put("AcctType", "00");
 		param.put("BranchCode", "10002900");
 		param.put("CardId", "5882572900500005884");
-		byte[] oldpsd = CertCoder.encryptByPublicKey("111111".getBytes(), "E:\\pin3.crt");
+		byte[] oldpsd = CertCoder.encryptByPublicKey("654321".getBytes(), "E:\\pin3.crt");
 //		System.out.println("共钥加密-密文：" + ByteTools.BytesToHexStr(ciphertext));
 		param.put("OrigPassWord", ByteTools.BytesToHexStr(oldpsd));
 		

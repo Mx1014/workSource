@@ -20,42 +20,30 @@ import org.apache.http.util.EntityUtils;
 
 import com.google.gson.Gson;
 
-public class Testselectka {
-	public static final String URL = "http://test.ippit.cn:30821/iccard/service";
+public class TAOTAOGUHttpUtil {
+	static final String URL = "http://test.ippit.cn:30821/iccard/service";
 	
-	protected static boolean test() throws Exception {
+	public static ResponseEntiy post(String brandCode,String msgType,Map<String, Object> param) throws Exception {
 		CloseableHttpClient httpClient = HttpClients.createDefault();
 
-		
 		HttpPost request = new HttpPost(URL);
 		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
-		String s = getJson();
-		System.out.println(s);
-		pairs.add(new BasicNameValuePair("msg", s));
+		String msg = getJson(brandCode,msgType,param);
+		pairs.add(new BasicNameValuePair("msg", msg));
 		request.setEntity(new UrlEncodedFormEntity(pairs, "UTF-8"));
 		HttpResponse rsp = httpClient.execute(request);
 		StatusLine status = rsp.getStatusLine();
-		String rspText = EntityUtils.toString(rsp.getEntity(), "UTF-8");
-		
-		
-		
-		Gson gson = new Gson();
-		ResponseEntiy r = gson.fromJson(rspText, ResponseEntiy.class);
-		List list = (List) r.getResult();
-		System.out.println(rspText);
-		return true;
-	}
-	
-	public static void main(String[] args) {
-		try {
-			test();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if(status.getStatusCode() == 200){
+			String rspText = EntityUtils.toString(rsp.getEntity(), "UTF-8");
+			Gson gson = new Gson();
+			ResponseEntiy resp = gson.fromJson(rspText, ResponseEntiy.class);
+			
+			return resp;	
 		}
+		return null;
 	}
 	
-	public static String getJson() throws Exception{
+	private static String getJson(String brandCode,String msgType,Map<String, Object> param) throws Exception{
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 		Gson gson = new Gson();
 		
@@ -63,19 +51,12 @@ public class Testselectka {
 		requestParam.put("AppName", "ICCard");
 		requestParam.put("Version","V0.01");
 		requestParam.put("ClientDt",sdf.format(new Date()));
-		requestParam.put("SrcId","10002900");
+		requestParam.put("SrcId",brandCode);
 		requestParam.put("DstId","00000000");
-		requestParam.put("MsgType","1010");
-		requestParam.put("MsgID","10002900" + StringUtils.leftPad(String.valueOf(System.currentTimeMillis()), 24, "0"));
+		requestParam.put("MsgType",msgType);
+		requestParam.put("MsgID",brandCode + StringUtils.leftPad(String.valueOf(System.currentTimeMillis()), 24, "0"));
 		requestParam.put("Sign", "");
 
-		Map<String, Object> param = new HashMap<String, Object>();
-		param.put("BranchCode", "10002900");
-		//param.put("CardId", "5882572900500000182");
-		param.put("CardId", "5882572900500005884");
-		param.put("AcctType", "00");
-		param.put("SubAcctType", "");
-	
 		requestParam.put("Param",param);
 		byte[] data = gson.toJson(requestParam).getBytes();
 		
@@ -84,5 +65,18 @@ public class Testselectka {
 		
 		return gson.toJson(requestParam);
 	}
-
+	public static void main(String[] args) {
+		try {
+			Map<String, Object> param = new HashMap<String, Object>();
+			param.put("BranchCode", "10002900");
+			//param.put("CardId", "5882572900500000182");
+			param.put("CardId", "5882572900500005884");
+			param.put("AcctType", "00");
+			param.put("SubAcctType", "");
+			post("10002900","1010",param);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }

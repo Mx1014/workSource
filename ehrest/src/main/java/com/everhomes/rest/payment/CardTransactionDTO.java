@@ -31,7 +31,7 @@ public class CardTransactionDTO {
 	private java.lang.String     itemName;
 	private java.math.BigDecimal amount;
 	private java.sql.Timestamp   transactionTime;
-	private java.lang.Byte       status;
+	private String       status;
 	
 	private String merchant;
 	private String transactionType;
@@ -88,10 +88,11 @@ public class CardTransactionDTO {
 		this.amount = amount;
 	}
 	
-	public java.lang.Byte getStatus() {
+	
+	public String getStatus() {
 		return status;
 	}
-	public void setStatus(java.lang.Byte status) {
+	public void setStatus(String status) {
 		this.status = status;
 	}
 	public Long getNextPageAnchor() {

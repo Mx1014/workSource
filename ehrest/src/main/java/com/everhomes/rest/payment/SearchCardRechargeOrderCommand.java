@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>endDate: 结束日期</li>
  * <li>rechargeType: 充值方式  10001-支付宝，10002-微信</li>
  * <li>rechargeStatus: 0:充值失败   1:处理中  2:充值成功 3:处理完成  4:已退款{@link com.everhomes.rest.payment.CardRechargeStatus}</li>
- * <li>condition: 手机号或者姓名</li>
+ * <li>keyword: 手机号或者姓名</li>
  * <li>pageAnchor: 分页的瞄</li>
  * <li>pageSize: 每页条数</li>
  * </ul>
@@ -21,8 +21,8 @@ public class SearchCardRechargeOrderCommand {
     private Long startDate;
     private Long endDate;
     private String rechargeType;
-    private byte rechargeStatus;
-    private String condition;
+    private Byte rechargeStatus;
+    private String keyword;
     private Long pageAnchor;
     private Integer pageSize;
     
@@ -56,20 +56,18 @@ public class SearchCardRechargeOrderCommand {
 	public void setRechargeType(String rechargeType) {
 		this.rechargeType = rechargeType;
 	}
-	
-	public byte getRechargeStatus() {
+	public Byte getRechargeStatus() {
 		return rechargeStatus;
 	}
-	public void setRechargeStatus(byte rechargeStatus) {
+	public void setRechargeStatus(Byte rechargeStatus) {
 		this.rechargeStatus = rechargeStatus;
 	}
-	public String getCondition() {
-		return condition;
+	public String getKeyword() {
+		return keyword;
 	}
-	public void setCondition(String condition) {
-		this.condition = condition;
+	public void setKeyword(String keyword) {
+		this.keyword = keyword;
 	}
-	
 	public Long getPageAnchor() {
 		return pageAnchor;
 	}
