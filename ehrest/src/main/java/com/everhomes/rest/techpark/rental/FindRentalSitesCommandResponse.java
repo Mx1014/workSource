@@ -11,7 +11,8 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class FindRentalSitesCommandResponse {
-	private Integer nextPageOffset;
+
+    private Long nextPageAnchor;
     @ItemType(RentalSiteDTO.class)
 	private List<RentalSiteDTO> rentalSites;
 	
@@ -27,13 +28,14 @@ public class FindRentalSitesCommandResponse {
 	public void setRentalSites(List<RentalSiteDTO> rentalSites) {
 		this.rentalSites = rentalSites;
 	}
+ 
 
-	public Integer getNextPageOffset() {
-		return nextPageOffset;
+	public Long getNextPageAnchor() {
+		return nextPageAnchor;
 	}
 
-	public void setNextPageOffset(Integer nextPageOffset) {
-		this.nextPageOffset = nextPageOffset;
+	public void setNextPageAnchor(Long nextPageAnchor) {
+		this.nextPageAnchor = nextPageAnchor;
 	}
  
 }

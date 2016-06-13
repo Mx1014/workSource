@@ -800,7 +800,7 @@ public class RentalProviderImpl implements RentalProvider {
 	}
 
 	@Override
-	public List<RentalSite> findRentalSites(Long  launchPadItemId, String keyword, Integer pageOffset,
+	public List<RentalSite> findRentalSites(Long  launchPadItemId, String keyword, ListingLocator locator,
 			Integer pageSize,List<Byte>  status,List<Long>  siteIds) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
@@ -822,20 +822,20 @@ public class RentalProviderImpl implements RentalProvider {
 					.or(Tables.EH_RENTAL_SITES.BUILDING_NAME.like("%" + keyword
 							+ "%")));
 		}
+
+        if(locator.getAnchor() != null)
+        	condition=condition.and(Tables.EH_COMMUNITIES.ID.lt(locator.getAnchor()));
 		if(null!= status)
 			condition = condition.and(Tables.EH_RENTAL_SITES.STATUS
 					.in(status));
 		step.where(condition);
-		if (null != pageSize) {
-			Integer offset = pageOffset == null ? 1 : (pageOffset - 1)
-					* pageSize;
-			step.limit(offset, pageSize);
-		}
+
 		List<RentalSite> result = step
 				.orderBy(Tables.EH_RENTAL_SITES.ID.desc()).fetch().map((r) -> {
 					return ConvertHelper.convert(r, RentalSite.class);
 				});
-
+		if(result.size()==0)
+			return null;
 		return result;
 	}
 

@@ -9,6 +9,8 @@ import com.everhomes.util.StringHelper;
  * <li>itemName：商品名称</li>
  * <li>itemPrice：商品价格</li>
  * <li>counts：商品数量</li> 
+ * <li>imgUrl：商品图片</li> 
+ * <li>defaultOrder：商品排序</li> 
  * </ul>
  */
 public class SiteItemDTO {

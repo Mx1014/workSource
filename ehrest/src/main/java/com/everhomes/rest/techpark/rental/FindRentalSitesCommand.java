@@ -7,11 +7,13 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * 查询场所
- * <li>enterpriseCommunityId：园区id</li>
- * <li>siteType：场所类型</li>
+ * <li>ownerType：所有者类型：“community”</li>
+ * <li>ownerId：所有者id</li>
+ * <li>launchPadItemId: 广场图标id</li>
  * <li>keyword: 关键字</li>
- * <li>pageOffset: 页码</li>
- * <li>pageSize: 每页大小</li>
+ * <li>anchor: 锚点</li>
+ * <li>pageSize: 每页个数</li>
+ * <li>status: 状态码，List<Byte></li>
  * </ul>
  */
 public class FindRentalSitesCommand {
@@ -19,7 +21,7 @@ public class FindRentalSitesCommand {
 	private Long ownerId; 
 	private Long launchPadItemId;
 	private String keyword;
-	private Integer pageOffset;
+	private Long anchor;
 	private Integer pageSize;
 	@ItemType(Byte.class)
 	private List<Byte> status;
@@ -27,13 +29,7 @@ public class FindRentalSitesCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     } 
-	 
-	public Integer getPageOffset() {
-		return pageOffset;
-	}
-	public void setPageOffset(Integer pageOffset) {
-		this.pageOffset = pageOffset;
-	}
+	  
 	public Integer getPageSize() {
 		return pageSize;
 	}
@@ -69,5 +65,13 @@ public class FindRentalSitesCommand {
 	}
 	public void setLaunchPadItemId(Long launchPadItemId) {
 		this.launchPadItemId = launchPadItemId;
+	}
+
+	public Long getAnchor() {
+		return anchor;
+	}
+
+	public void setAnchor(Long anchor) {
+		this.anchor = anchor;
 	} 
 }

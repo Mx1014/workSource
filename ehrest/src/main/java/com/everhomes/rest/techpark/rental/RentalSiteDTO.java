@@ -24,8 +24,8 @@ import com.everhomes.util.StringHelper;
  * <li>	fullPrice：        	满XX元	</li>
  * <li>	cutPrice：         	减XX元	</li>
  * <li>	discountRatio：    	折扣比例	</li>
- * <li>	rentalType：       	0: as hour:min  1-as half day 2-as day 3-支持晚上的半天      	</li>
- * <li>	rentalStep：       	how many time_step must be rental every time	</li>
+ * <li>	rentalType：0: 按小时预定  1-半天 2-天 3-支持晚上的半天	</li>
+ * <li>	rentalStep：步长，每次最少预定多少个单元格（目前默认都是1）</li>
  * <li>	exclusiveFlag：    	是否为独占资源0否 1 是	</li>
  * <li>	autoAssign：       	是否动态分配 1是 0否	</li>
  * <li>	multiUnit：        	是否允许预约多个场所 1是 0否	</li>

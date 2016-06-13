@@ -433,7 +433,7 @@ public class RentalController extends ControllerBase {
 	}
 	
 	/**
-	 * <b>URL: /techpark/rental/findRentalBills</b>
+	 * <b>URL: /techpark/rental/findUserRentalBills</b>
 	 * <p>
 	 * 查询用户的预约记录
 	 * </p>

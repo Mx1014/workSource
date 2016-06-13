@@ -58,6 +58,7 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
+import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.techpark.rental.AddItemAdminCommand;
 import com.everhomes.rest.techpark.rental.AddRentalBillCommand;
 import com.everhomes.rest.techpark.rental.AddRentalBillItemCommand;
@@ -581,7 +582,12 @@ public class RentalServiceImpl implements RentalService {
 	public FindRentalSitesCommandResponse findRentalSites(
 			FindRentalSitesCommand cmd) {
 		FindRentalSitesCommandResponse response = new FindRentalSitesCommandResponse();
-		cmd.setPageOffset(cmd.getPageOffset() == null ? 1 : cmd.getPageOffset());
+
+		if(cmd.getAnchor() == null)
+			cmd.setAnchor(0L); 
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		locator.setAnchor(cmd.getAnchor());
 		if(null==cmd.getStatus() || cmd.getStatus().size() == 0){
 			cmd.setStatus(new ArrayList<Byte>());
 			cmd.getStatus().add(RentalSiteStatus.NORMAL.getCode());
@@ -591,28 +597,28 @@ public class RentalServiceImpl implements RentalService {
 		if(siteOwners !=null)
 			for(RentalSiteOwner siteOwner : siteOwners){
 				siteIds.add(siteOwner.getRentalSiteId());
-			}
-		int totalCount = rentalProvider.countRentalSites( cmd.getLaunchPadItemId(), cmd.getKeyword(),cmd.getStatus(),siteIds);
-		if (totalCount == 0)
-			return response;
-
-		Integer pageSize = PaginationConfigHelper.getPageSize(
-				configurationProvider, cmd.getPageSize());
-		int pageCount = getPageCount(totalCount, pageSize);
-
+			}  
 		checkEnterpriseCommunityIdIsNull(cmd.getOwnerId());
 		List<RentalSite> rentalSites = rentalProvider.findRentalSites(
 				cmd.getLaunchPadItemId(), cmd.getKeyword(),
-				cmd.getPageOffset(), pageSize,cmd.getStatus(),siteIds);
+				locator, pageSize,cmd.getStatus(),siteIds);
+		if(null==rentalSites)
+			return response;
 
+		Long nextPageAnchor = null;
+		if(rentalSites != null && rentalSites.size() > pageSize) {
+			rentalSites.remove(rentalSites.size() - 1);
+			nextPageAnchor = rentalSites.get(rentalSites.size() -1).getId();
+		}
+		response.setNextPageAnchor(nextPageAnchor);
 		response.setRentalSites(new ArrayList<RentalSiteDTO>());
+		
 		for (RentalSite rentalSite : rentalSites) {
 			RentalSiteDTO rSiteDTO =convertRentalSite2DTO(rentalSite);
 			
 			response.getRentalSites().add(rSiteDTO);
 		}
-		response.setNextPageOffset(cmd.getPageOffset() == pageCount ? null
-				: cmd.getPageOffset() + 1);
+ 
 
 		return response;
 	}
@@ -995,7 +1001,7 @@ public class RentalServiceImpl implements RentalService {
 				//分配半个
 				for( siteCount=siteCount-0.5;siteCount <=rsb.getRentalCount();){
 					if (siteCount <rsb.getRentalCount())
-						billDTO.setToastFlag((byte)1);
+						billDTO.setToastFlag(NormalFlag.NEED.getCode());
 					while(true){
 						if( siteNumberMap.get(site_number)==0.5)
 							break;
@@ -1657,9 +1663,7 @@ public class RentalServiceImpl implements RentalService {
 									UserContext.current().getUser().getLocale(),
 									"BILL OVERTIME"));
 		}
-		if (!cmd.getInvoiceFlag().equals(bill.getInvoiceFlag()))
-			rentalProvider.updateBillInvoice(cmd.getRentalBillId(),
-					cmd.getInvoiceFlag());
+		 
 		//2016-6-2 10:32:44 fix bug :当有物品订单（说明是付款失败再次付款），就不再生成物品订单
 		if (null != cmd.getRentalItems()&&this.rentalProvider.findRentalItemsBillBySiteBillId(cmd.getRentalBillId())==null) {
 			java.math.BigDecimal itemMoney = new java.math.BigDecimal(0);
@@ -1883,6 +1887,16 @@ public class RentalServiceImpl implements RentalService {
 		
 		RentalSite rs = this.rentalProvider.getRentalSiteById(cmd.getSiteId());
 		FindRentalSiteWeekStatusCommandResponse response = ConvertHelper.convert(rs, FindRentalSiteWeekStatusCommandResponse.class);
+		List<RentalSitePic> pics = this.rentalProvider.findRentalSitePicsByOwnerTypeAndId(EhRentalSites.class.toString(), rs.getId());
+		if(null!=pics){
+			response.setSitePics(new ArrayList<>());
+			for(RentalSitePic pic:pics){
+				RentalSitePicDTO picDTO=ConvertHelper.convert(pic, RentalSitePicDTO.class);
+				picDTO.setUrl(this.contentServerService.parserUri(pic.getUri(), 
+						EntityType.USER.getCode(), UserContext.current().getUser().getId()));
+				response.getSitePics().add(picDTO);
+			}
+		}
 		response.setAnchorTime(0L);
 		
 		// 查rules

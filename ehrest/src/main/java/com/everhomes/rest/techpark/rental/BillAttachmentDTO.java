@@ -3,10 +3,10 @@ package com.everhomes.rest.techpark.rental;
 import com.everhomes.util.StringHelper;
 /**
  * <ul>
-*<li>id：商品id</li>
- * <li>itemName：商品名称</li>
- * <li>itemPrice：商品价格</li>
- * <li>counts：商品数量</li> 
+*<li>id： id</li>
+ * <li>billId：订单id</li>
+ * <li>attachmentType: 类型，参考{@link com.everhomes.rest.techpark.rental.admin.AttachmentType}</li>
+ * <li>content：内容</li> 
  * </ul>
  */
 public class BillAttachmentDTO {

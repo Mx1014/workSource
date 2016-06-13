@@ -36,6 +36,7 @@ import com.everhomes.util.StringHelper;
  * <li>siteItems：场所商品</li> 
  * <li>rentalSiteRules：场所时间段</li>
  * <li>billAttachments：订单附加信息</li>
+ * <li>toastFlag：0-无 1-有，弹出一个toast提示用户可能分配到半场</li>
  * </ul>
  */
 public class RentalBillDTO {

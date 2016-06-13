@@ -10,25 +10,15 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>rentalSiteId：场所id</li>  
- * <li>rentalDate：预定日期</li>
- * <li>startTime：开始时间</li>
- * <li>endTime：结束时间</li>
- * <li>rentalSiteRuleIds：预定场所规则ID列表 json字符串</li>
- * <li>invoiceFlag：要不要发票，0 要 1 不要 参考
- * {@link com.everhomes.rest.techpark.rental.InvoiceFlag}</li>
- * <li>rentalcount：预定场所数量</li>
- * <li>rentalItems：预定商品</li>
- * <li>rentalAttanchments：预定附件，如车牌号，文字信息等</li>
- * <li>attachmentType：附件类型 0：字符串 1：邮件 2：文件
- * {@link com.everhomes.rest.techpark.rental.AttachmentType}</li>
+ * <li>rentalSiteId：场所id</li>   
+ * <li>rentalBillId：订单id</li>
+ * <li>rentalItems：List<SiteItemDTO> 商品列表</li>
+ * <li>rentalAttachments：List<AttachmentDTO> 附件列表</li> 
  * </ul>
  */
 public class AddRentalBillItemCommand {
 	@NotNull
-	private Long rentalSiteId;  
-	@NotNull
-	private Byte invoiceFlag; 
+	private Long rentalSiteId;   
 	@NotNull
 	private Long rentalBillId; 
 	@ItemType(SiteItemDTO.class)
@@ -66,14 +56,7 @@ public class AddRentalBillItemCommand {
 	public void setRentalItems(List<SiteItemDTO> rentalItems) {
 		this.rentalItems = rentalItems;
 	}
-
-	public Byte getInvoiceFlag() {
-		return invoiceFlag;
-	}
-
-	public void setInvoiceFlag(Byte invoiceFlag) {
-		this.invoiceFlag = invoiceFlag;
-	}
+ 
 
 	public List<AttachmentDTO> getRentalAttachments() {
 		return rentalAttachments;

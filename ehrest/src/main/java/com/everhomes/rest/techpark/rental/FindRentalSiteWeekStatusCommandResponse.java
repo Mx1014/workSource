@@ -3,14 +3,46 @@ package com.everhomes.rest.techpark.rental;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.techpark.rental.admin.AttachmentDTO;
 import com.everhomes.util.StringHelper;
-
+/**
+ * <ul> 
+ * <li>rentalSiteId：场所id</li> 
+ * <li>rentalSiteId：场所id</li> 
+ * <li>siteName：场所名称</li>
+ * <li>notice：详情</li>
+ * <li>address：地址</li>
+ * <li>longitude：经纬度</li>
+ * <li>latitude：经纬度</li>
+ * <li>contactPhonenum：电话号码</li>  
+ * <li>	discountType：     	折扣信息：0不打折 1满减优惠2比例折扣	</li>
+ * <li>	fullPrice：        	满XX元	</li>
+ * <li>	cutPrice：         	减XX元	</li>
+ * <li>	discountRatio：    	折扣比例	</li>
+ * <li>	rentalType： 0: 按小时预定  1-半天 2-天 3-支持晚上的半天	</li>
+ * <li>	rentalStep：     步长，每次最少预定多少个单元格（目前默认都是1）</li>
+ * <li>	exclusiveFlag：   是否为独占资源0否 1 是	</li>
+ * <li>	autoAssign：       	是否动态分配 1是 0否	</li>
+ * <li>	multiUnit：        	是否允许预约多个场所 1是 0否	</li>
+ * <li>	multiTimeInterval：	是否允许预约多个时段 1是 0否	</li>
+ * <li>	cancelFlag：       	是否允许取消 1是 0否	</li>
+ * <li>	needPay：          	是否需要支付 1是 0否	</li>
+ * <li>anchorTime：规则日期</li>  
+ * <li>siteDays：List<RentalSiteDayRulesDTO>  每一天的单元格</li> 
+ * <li>sitePics：List<RentalSitePicDTO> 详情图片多张 </li> 
+ * <li>attachments：List<AttachmentDTO> 附件列表 </li> 
+ * <li>siteItems：List<SiteItemDTO> 商品列表</li> 
+ * </ul>
+ */
 public class FindRentalSiteWeekStatusCommandResponse {
 	private Long rentalSiteId; 
 	private String contactNum;
 	private String siteName; 
-	private String introduction;
 	private String notice;  
+	private String address;
+	private double longitude;
+	private double latitude;
+	private String contactPhonenum;
 	private java.lang.Byte       discountType;
 	private java.math.BigDecimal fullPrice;
 	private java.math.BigDecimal cutPrice;
@@ -28,6 +60,10 @@ public class FindRentalSiteWeekStatusCommandResponse {
 	private List<RentalSiteDayRulesDTO> siteDays;
 	@ItemType(RentalSitePicDTO.class)
 	private List<RentalSitePicDTO> sitePics;
+	@ItemType(AttachmentDTO.class)
+	private List<AttachmentDTO> attachments;
+	@ItemType(SiteItemDTO.class)
+	private List<SiteItemDTO> siteItems;
 	
 	@Override
     public String toString() {
@@ -62,16 +98,7 @@ public class FindRentalSiteWeekStatusCommandResponse {
 		this.siteDays = siteDays;
 	}
 
-
-	public String getIntroduction() {
-		return introduction;
-	}
-
-
-	public void setIntroduction(String introduction) {
-		this.introduction = introduction;
-	}
-
+ 
 
 	public String getNotice() {
 		return notice;
@@ -231,6 +258,46 @@ public class FindRentalSiteWeekStatusCommandResponse {
 
 	public void setSitePics(List<RentalSitePicDTO> sitePics) {
 		this.sitePics = sitePics;
+	}
+
+
+	public String getAddress() {
+		return address;
+	}
+
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+
+	public double getLongitude() {
+		return longitude;
+	}
+
+
+	public void setLongitude(double longitude) {
+		this.longitude = longitude;
+	}
+
+
+	public double getLatitude() {
+		return latitude;
+	}
+
+
+	public void setLatitude(double latitude) {
+		this.latitude = latitude;
+	}
+
+
+	public String getContactPhonenum() {
+		return contactPhonenum;
+	}
+
+
+	public void setContactPhonenum(String contactPhonenum) {
+		this.contactPhonenum = contactPhonenum;
 	}
  
 
