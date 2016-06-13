@@ -44,21 +44,31 @@ import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhRentalBillAttachments;
 import com.everhomes.server.schema.tables.pojos.EhRentalBillPaybillMap;
 import com.everhomes.server.schema.tables.pojos.EhRentalBills;
+import com.everhomes.server.schema.tables.pojos.EhRentalCloseDates;
+import com.everhomes.server.schema.tables.pojos.EhRentalConfigAttachments;
+import com.everhomes.server.schema.tables.pojos.EhRentalDefaultRules;
 import com.everhomes.server.schema.tables.pojos.EhRentalItemsBills;
 import com.everhomes.server.schema.tables.pojos.EhRentalRules;
 import com.everhomes.server.schema.tables.pojos.EhRentalSiteItems;
 import com.everhomes.server.schema.tables.pojos.EhRentalSiteRules;
 import com.everhomes.server.schema.tables.pojos.EhRentalSites;
+import com.everhomes.server.schema.tables.pojos.EhRentalSitesBillNumbers;
 import com.everhomes.server.schema.tables.pojos.EhRentalSitesBills;
+import com.everhomes.server.schema.tables.pojos.EhRentalTimeInterval;
 import com.everhomes.server.schema.tables.records.EhRentalBillAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhRentalBillPaybillMapRecord;
 import com.everhomes.server.schema.tables.records.EhRentalBillsRecord;
+import com.everhomes.server.schema.tables.records.EhRentalCloseDatesRecord;
+import com.everhomes.server.schema.tables.records.EhRentalConfigAttachmentsRecord;
+import com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord;
 import com.everhomes.server.schema.tables.records.EhRentalItemsBillsRecord;
 import com.everhomes.server.schema.tables.records.EhRentalRulesRecord;
 import com.everhomes.server.schema.tables.records.EhRentalSiteItemsRecord;
 import com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord;
+import com.everhomes.server.schema.tables.records.EhRentalSitesBillNumbersRecord;
 import com.everhomes.server.schema.tables.records.EhRentalSitesBillsRecord;
 import com.everhomes.server.schema.tables.records.EhRentalSitesRecord;
+import com.everhomes.server.schema.tables.records.EhRentalTimeIntervalRecord;
 import com.everhomes.util.ConvertHelper;
 
 @Component
@@ -1088,4 +1098,205 @@ public class RentalProviderImpl implements RentalProvider {
 			return result.get(0);
 		return null;
 	}
+
+	@Override
+	public List<RentalSitesBillNumber> findSitesBillNumbersBySiteId(
+			Long siteRuleId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTAL_SITES_BILL_NUMBERS);
+		Condition condition = Tables.EH_RENTAL_SITES_BILL_NUMBERS.RENTAL_SITE_RULE_ID.equal(siteRuleId);
+		step.where(condition);
+		List<RentalSitesBillNumber> result = step
+				.orderBy(Tables.EH_RENTAL_SITES_BILL_NUMBERS.ID.desc()).fetch().map((r) -> {
+					return ConvertHelper.convert(r, RentalSitesBillNumber.class);
+				});
+		if (null != result && result.size() > 0)
+			return result;
+		return null;
+	}
+	@Override
+	public List<RentalSitesBillNumber> findSitesBillNumbersByBillId(
+			Long siteBillId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTAL_SITES_BILL_NUMBERS);
+		Condition condition = Tables.EH_RENTAL_SITES_BILL_NUMBERS.RENTAL_SITE_BILL_ID.equal(siteBillId);
+		step.where(condition);
+		List<RentalSitesBillNumber> result = step
+				.orderBy(Tables.EH_RENTAL_SITES_BILL_NUMBERS.ID.desc()).fetch().map((r) -> {
+					return ConvertHelper.convert(r, RentalSitesBillNumber.class);
+				});
+		if (null != result && result.size() > 0)
+			return result;
+		return null;
+	}
+	@Override
+	public void createRentalSitesBillNumber(RentalSitesBillNumber sitesBillNumber) {
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhRentalSitesBillNumbers.class));
+		sitesBillNumber.setId(id);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRentalSitesBillNumbersRecord record = ConvertHelper.convert(sitesBillNumber,
+				EhRentalSitesBillNumbersRecord.class);
+		InsertQuery<EhRentalSitesBillNumbersRecord> query = context
+				.insertQuery(Tables.EH_RENTAL_SITES_BILL_NUMBERS);
+		query.setRecord(record); 
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalSitesBillNumbers.class, null);
+		 
+	}
+
+	@Override
+	public void createRentalDefaultRule(RentalDefaultRule defaultRule) {
+
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhRentalDefaultRules.class));
+		defaultRule.setId(id);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRentalDefaultRulesRecord record = ConvertHelper.convert(defaultRule,
+				EhRentalDefaultRulesRecord.class);
+		InsertQuery<EhRentalDefaultRulesRecord> query = context
+				.insertQuery(Tables.EH_RENTAL_DEFAULT_RULES);
+		query.setRecord(record);
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalDefaultRules.class,
+				null); 
+		
+	}
+
+	@Override
+	public void createTimeInterval(RentalTimeInterval timeInterval) {
+
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhRentalTimeInterval.class));
+		timeInterval.setId(id);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRentalTimeIntervalRecord record = ConvertHelper.convert(timeInterval,
+				EhRentalTimeIntervalRecord.class);
+		InsertQuery<EhRentalTimeIntervalRecord> query = context
+				.insertQuery(Tables.EH_RENTAL_TIME_INTERVAL);
+		query.setRecord(record);
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalTimeInterval.class,
+				null); 
+	}
+
+	@Override
+	public void createRentalCloseDate(RentalCloseDate rcd) {
+
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhRentalCloseDates.class));
+		rcd.setId(id);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRentalCloseDatesRecord record = ConvertHelper.convert(rcd,
+				EhRentalCloseDatesRecord.class);
+		InsertQuery<EhRentalCloseDatesRecord> query = context
+				.insertQuery(Tables.EH_RENTAL_CLOSE_DATES);
+		query.setRecord(record);
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalCloseDates.class,
+				null); 
+	}
+
+	@Override
+	public void createRentalConfigAttachment(RentalConfigAttachment rca) {
+
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhRentalConfigAttachments.class));
+		rca.setId(id);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRentalConfigAttachmentsRecord record = ConvertHelper.convert(rca,
+				EhRentalConfigAttachmentsRecord.class);
+		InsertQuery<EhRentalConfigAttachmentsRecord> query = context
+				.insertQuery(Tables.EH_RENTAL_CONFIG_ATTACHMENTS);
+		query.setRecord(record);
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalConfigAttachments.class,
+				null); 
+	}
+
+	@Override
+	public RentalDefaultRule getRentalDefaultRule(String ownerType,
+			Long ownerId, Long launchPadItemId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTAL_DEFAULT_RULES);
+		Condition condition = Tables.EH_RENTAL_DEFAULT_RULES.OWNER_ID
+				.equal(ownerId);
+		condition = condition.and(Tables.EH_RENTAL_DEFAULT_RULES.OWNER_TYPE
+				.equal(ownerType));
+		condition = condition.and(Tables.EH_RENTAL_DEFAULT_RULES.LAUNCH_PAD_ITEM_ID
+				.equal(launchPadItemId));
+		step.where(condition);
+		List<RentalDefaultRule> result = step
+				.orderBy(Tables.EH_RENTAL_DEFAULT_RULES.ID.desc()).fetch().map((r) -> {
+					return ConvertHelper.convert(r, RentalDefaultRule.class);
+				});
+		if (null != result && result.size() > 0)
+			return result.get(0);
+		return null;
+	}
+
+	@Override
+	public List<RentalTimeInterval> queryRentalTimeIntervalByOwner(
+			String ownerType, Long ownerId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTAL_TIME_INTERVAL);
+		Condition condition = Tables.EH_RENTAL_TIME_INTERVAL.OWNER_ID
+				.equal(ownerId);
+		condition = condition.and(Tables.EH_RENTAL_TIME_INTERVAL.OWNER_TYPE
+				.equal(ownerType));
+		step.where(condition);
+		List<RentalTimeInterval> result = step
+				.orderBy(Tables.EH_RENTAL_TIME_INTERVAL.ID.desc()).fetch().map((r) -> {
+					return ConvertHelper.convert(r, RentalTimeInterval.class);
+				});
+		if (null != result && result.size() > 0)
+			return result;
+		return null;
+	}
+
+	@Override
+	public List<RentalCloseDate> queryRentalCloseDateByOwner(String ownerType,
+			Long ownerId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTAL_TIME_INTERVAL);
+		Condition condition = Tables.EH_RENTAL_TIME_INTERVAL.OWNER_ID
+				.equal(ownerId);
+		condition = condition.and(Tables.EH_RENTAL_TIME_INTERVAL.OWNER_TYPE
+				.equal(ownerType));
+		step.where(condition);
+		List<RentalCloseDate> result = step
+				.orderBy(Tables.EH_RENTAL_TIME_INTERVAL.ID.desc()).fetch().map((r) -> {
+					return ConvertHelper.convert(r, RentalCloseDate.class);
+				});
+		if (null != result && result.size() > 0)
+			return result;
+		return null;
+	}
+
+	@Override
+	public List<RentalConfigAttachment> queryRentalConfigAttachmentByOwner(
+			String ownerType, Long ownerId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTAL_TIME_INTERVAL);
+		Condition condition = Tables.EH_RENTAL_TIME_INTERVAL.OWNER_ID
+				.equal(ownerId);
+		condition = condition.and(Tables.EH_RENTAL_TIME_INTERVAL.OWNER_TYPE
+				.equal(ownerType));
+		step.where(condition);
+		List<RentalConfigAttachment> result = step
+				.orderBy(Tables.EH_RENTAL_TIME_INTERVAL.ID.desc()).fetch().map((r) -> {
+					return ConvertHelper.convert(r, RentalConfigAttachment.class);
+				});
+		if (null != result && result.size() > 0)
+			return result;
+		return null;
+	}
+
+	
 }

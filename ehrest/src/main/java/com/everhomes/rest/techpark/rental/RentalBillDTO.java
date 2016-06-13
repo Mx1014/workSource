@@ -77,7 +77,8 @@ public class RentalBillDTO {
 	
 	@ItemType(BillAttachmentDTO.class)
 	private List<BillAttachmentDTO> billAttachments; 
-	
+
+	private Byte toastFlag;
 	
 	
 	@Override
@@ -359,5 +360,17 @@ public class RentalBillDTO {
 	public void setUserName(String userName) {
 		this.userName = userName;
 	}
+
+
+	public Byte getToastFlag() {
+		return toastFlag;
+	}
+
+
+	public void setToastFlag(Byte toastFlag) {
+		this.toastFlag = toastFlag;
+	}
+
+ 
  
 }

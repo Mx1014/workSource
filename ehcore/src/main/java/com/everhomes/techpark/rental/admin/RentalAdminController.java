@@ -84,7 +84,7 @@ public class RentalAdminController extends ControllerBase {
 	@RequestMapping("queryDefaultRule")
 	@RestReturn(QueryDefaultRuleAdminResponse.class)
 	public RestResponse queryDefaultRule(@Valid QueryDefaultRuleAdminCommand cmd) {
-		QueryDefaultRuleAdminResponse queryDefaultRuleAdminResponse = new QueryDefaultRuleAdminResponse();
+		QueryDefaultRuleAdminResponse queryDefaultRuleAdminResponse = this.rentalService.queryDefaultRule(cmd);
 		RestResponse response = new RestResponse(queryDefaultRuleAdminResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

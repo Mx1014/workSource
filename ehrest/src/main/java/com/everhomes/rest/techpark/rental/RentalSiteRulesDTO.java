@@ -42,7 +42,7 @@ public class RentalSiteRulesDTO {
 	private Double timeStep;
 	private Long ruleDate; 
 	private Byte status;
-	
+	private String siteNumber;
 	
 	
 	@Override
@@ -268,5 +268,17 @@ public class RentalSiteRulesDTO {
 
 	public void setTimeStep(Double timeStep) {
 		this.timeStep = timeStep;
+	}
+
+
+
+	public String getSiteNumber() {
+		return siteNumber;
+	}
+
+
+
+	public void setSiteNumber(String siteNumber) {
+		this.siteNumber = siteNumber;
 	}
 }

@@ -183,6 +183,7 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhRecommendationConfigs.EH_RECOMMENDATION_CONFIGS,
 			com.everhomes.server.schema.tables.EhRegions.EH_REGIONS,
 			com.everhomes.server.schema.tables.EhRentalBills.EH_RENTAL_BILLS,
+			com.everhomes.server.schema.tables.EhRentalSitesBillNumbers.EH_RENTAL_SITES_BILL_NUMBERS,
 			com.everhomes.server.schema.tables.EhRentalBillAttachments.EH_RENTAL_BILL_ATTACHMENTS,
 			com.everhomes.server.schema.tables.EhRentalBillPaybillMap.EH_RENTAL_BILL_PAYBILL_MAP,
 			com.everhomes.server.schema.tables.EhRentalCloseDates.EH_RENTAL_CLOSE_DATES,

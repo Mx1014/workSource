@@ -17,4 +17,9 @@ public interface RentalServiceErrorCode {
     static final int ERROR_CREATE_EXCEL = 10011;  //生成预订信息有问题
     static final int ERROR_DOWNLOAD_EXCEL = 10012;  //下载预订信息有问题
     
+    
+    static final int ERROR_REPEAT_SITE_ASSGIN = 11000;  //分配资源编号重复
+    static final int ERROR_SITE_ASSGIN_NULL= 11001;  //资源空指针
+    
+    static final int ERROR_LOOP_TOOMUCH = 12000;  //循环过多次
 }

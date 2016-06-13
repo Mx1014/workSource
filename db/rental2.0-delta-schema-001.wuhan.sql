@@ -294,6 +294,23 @@ CREATE TABLE `eh_rental_sites_bills` (
 ;
 
 #
+#订单分表-场所订单-对应资源编号表
+#
+DROP TABLE IF EXISTS eh_rental_sites_bill_numbers;
+
+CREATE TABLE `eh_rental_sites_bill_numbers` (
+`id` BIGINT(20) NOT NULL  COMMENT 'id',
+`rental_site_bill_id` BIGINT(20) NULL  COMMENT 'fk',
+`rental_site_rule_id` BIGINT(20) NULL  COMMENT '场所单元格id',
+`site_number` INT  COMMENT '场所编号',
+`rental_count` DOUBLE NULL  COMMENT '0.5为半个1为全个',
+
+ PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4	
+;
+
+
+#
 #订单分表-物品订单表
 #
 DROP TABLE IF EXISTS eh_rental_items_bills;
