@@ -53,6 +53,7 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -3595,12 +3596,25 @@ public class ForumServiceImpl implements ForumService {
         case ENTERPRISE_NOAUTH: 
             Organization org = this.organizationProvider.findOrganizationById(sceneToken.getEntityId());
             if(org != null) {
-            	ListCommunitiesByOrganizationIdCommand command = new ListCommunitiesByOrganizationIdCommand();
-            	command.setOrganizationId(org.getId());		
-            	List<CommunityDTO> communityDTOs = organizationService.listCommunityByOrganizationId(command).getCommunities();
-            	for (CommunityDTO communityDTO : communityDTOs) {
-            		visibleRegionIds.add(communityDTO.getId());
-				}
+
+            	if(OrganizationType.ENTERPRISE == OrganizationType.fromCode(org.getOrganizationType())){
+            		OrganizationCommunityRequest  organizationCommunityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(org.getId());
+            		if(null != organizationCommunityRequest){
+                		visibleRegionIds.add(organizationCommunityRequest.getCommunityId());
+            		}
+            	}else{
+//                	ListCommunitiesByOrganizationIdCommand command = new ListCommunitiesByOrganizationIdCommand();
+//                	command.setOrganizationId(org.getId());		
+//                	List<CommunityDTO> communityDTOs = organizationService.listCommunityByOrganizationId(command).getCommunities();
+//                	for (CommunityDTO communityDTO : communityDTOs) {
+//                		visibleRegionIds.add(communityDTO.getId());
+//    				}
+            		OrganizationCommunityRequest  organizationCommunityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(org.getId());
+            		if(null != organizationCommunityRequest){
+                		visibleRegionIds.add(organizationCommunityRequest.getCommunityId());
+            		}
+            	}
+            	
             } else {
                 if(LOGGER.isWarnEnabled()) {
                     LOGGER.warn("Organization not found, sceneToken=" + sceneToken);
