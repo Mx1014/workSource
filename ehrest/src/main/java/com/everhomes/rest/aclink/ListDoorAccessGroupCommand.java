@@ -11,6 +11,8 @@ public class ListDoorAccessGroupCommand {
     @NotNull
     private Byte ownerType;
     
+    private String search;
+    
     private Long pageAnchor;
     
     private Integer pageSize;
@@ -45,6 +47,14 @@ public class ListDoorAccessGroupCommand {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public String getSearch() {
+        return search;
+    }
+
+    public void setSearch(String search) {
+        this.search = search;
     }
 
     @Override

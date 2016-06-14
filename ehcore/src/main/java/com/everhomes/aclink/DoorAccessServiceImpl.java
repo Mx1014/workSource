@@ -1939,6 +1939,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         //Search only groups
         newCmd.setGroupId(-1l);
+        newCmd.setSearch(cmd.getSearch());
         return searchDoorAccessByAdmin(newCmd);
     }
     
