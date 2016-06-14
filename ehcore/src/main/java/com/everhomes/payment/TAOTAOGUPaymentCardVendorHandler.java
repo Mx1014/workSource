@@ -193,7 +193,9 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error("the  apply card request of taotaogu is failed.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"the apply card request of taotaogu is failed.");
 		}
 		return cardInfoDTO;
 	}
