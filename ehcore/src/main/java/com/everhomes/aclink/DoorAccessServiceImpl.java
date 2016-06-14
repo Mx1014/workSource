@@ -649,7 +649,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         if(cmd.getGroupId() != null) {
             DoorAccess doorGroup = doorAccessProvider.getDoorAccessById(cmd.getGroupId());
-            if(doorGroup == null || doorAccess.getStatus().equals(DoorAccessStatus.INVALID.getCode())) {
+            if(doorGroup == null || doorGroup.getStatus().equals(DoorAccessStatus.INVALID.getCode())) {
                 throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door group not found");
             }
         }
