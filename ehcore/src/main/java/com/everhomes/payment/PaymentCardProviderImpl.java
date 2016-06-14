@@ -1,13 +1,13 @@
 package com.everhomes.payment;
 
-import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
-
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,8 +19,6 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.user.IdentifierClaimStatus;
-import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhPaymentCardRechargeOrdersDao;
@@ -68,21 +66,31 @@ public class PaymentCardProviderImpl implements PaymentCardProvider{
     @Override
     public List<PaymentCardIssuer> listPaymentCardIssuer(Long ownerId,String ownerType){
     	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPaymentCardIssuers.class));
-    	SelectQuery<EhPaymentCardIssuersRecord> query = context.selectQuery(Tables.EH_PAYMENT_CARD_ISSUERS);
-    	query.addJoin(Tables.EH_PAYMENT_CARD_ISSUER_COMMUNITIES, 
-    					Tables.EH_PAYMENT_CARD_ISSUER_COMMUNITIES.ISSUER_ID.eq(Tables.EH_PAYMENT_CARD_ISSUERS.ID));
-    	if(StringUtils.isNotBlank(ownerType))
-        	query.addConditions(Tables.EH_PAYMENT_CARD_ISSUER_COMMUNITIES.OWNER_TYPE.eq(ownerType));
-        if(ownerId != null)
-        	query.addConditions(Tables.EH_PAYMENT_CARD_ISSUER_COMMUNITIES.OWNER_ID.eq(ownerId));
+    	SelectJoinStep<Record> query = context.select(Tables.EH_PAYMENT_CARD_ISSUERS.fields()).from(Tables.EH_PAYMENT_CARD_ISSUERS);
+    	query.join(Tables.EH_PAYMENT_CARD_ISSUER_COMMUNITIES).on(Tables.EH_PAYMENT_CARD_ISSUER_COMMUNITIES.ISSUER_ID
+    			.eq(Tables.EH_PAYMENT_CARD_ISSUERS.ID));
+        query.where(Tables.EH_PAYMENT_CARD_ISSUER_COMMUNITIES.OWNER_TYPE.eq(ownerType))
+        	.and(Tables.EH_PAYMENT_CARD_ISSUER_COMMUNITIES.OWNER_ID.eq(ownerId));
         
         List<PaymentCardIssuer> result = new ArrayList<PaymentCardIssuer>();
         
-        result = query.fetch().map(
-        		r -> ConvertHelper.convert(r, PaymentCardIssuer.class));
+        query.fetch().forEach(
+        		r -> {
+        			PaymentCardIssuer issuer = new PaymentCardIssuer();
+        			issuer.setId(r.getValue(Tables.EH_PAYMENT_CARD_ISSUERS.ID));
+        			issuer.setName(r.getValue(Tables.EH_PAYMENT_CARD_ISSUERS.NAME));
+        			issuer.setDescription(r.getValue(Tables.EH_PAYMENT_CARD_ISSUERS.DESCRIPTION));
+        			issuer.setPayUrl(r.getValue(Tables.EH_PAYMENT_CARD_ISSUERS.PAY_URL));
+        			issuer.setAlipayRechargeAccount(r.getValue(Tables.EH_PAYMENT_CARD_ISSUERS.ALIPAY_RECHARGE_ACCOUNT));
+        			issuer.setWeixinRechargeAccount(r.getValue(Tables.EH_PAYMENT_CARD_ISSUERS.WEIXIN_RECHARGE_ACCOUNT));
+        			issuer.setVendorName(r.getValue(Tables.EH_PAYMENT_CARD_ISSUERS.VENDOR_NAME));
+        			issuer.setVendorData(r.getValue(Tables.EH_PAYMENT_CARD_ISSUERS.VENDOR_DATA));
+        			issuer.setCreateTime(r.getValue(Tables.EH_PAYMENT_CARD_ISSUERS.CREATE_TIME));
+        			issuer.setStatus(r.getValue(Tables.EH_PAYMENT_CARD_ISSUERS.STATUS));
+        			result.add(issuer);
+        		});
         return result;
     }
-    
     @Override
     public PaymentCardIssuer findPaymentCardIssuerById(Long issuerId){
     	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPaymentCardIssuers.class));

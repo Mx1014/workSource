@@ -14,8 +14,10 @@ import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.parking.ParkingVendorHandler;
 import com.everhomes.payment.taotaogu.ByteTools;
 import com.everhomes.payment.taotaogu.CertCoder;
 import com.everhomes.payment.taotaogu.ResponseEntiy;
@@ -38,6 +40,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.google.gson.Gson;
 
+@Component(PaymentCardVendorHandler.PAYMENTCARD_VENDOR_PREFIX + "TAOTAOGU")
 public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandler{
 	private static final Logger LOGGER = LoggerFactory.getLogger(TAOTAOGUPaymentCardVendorHandler.class);
 	@Autowired
