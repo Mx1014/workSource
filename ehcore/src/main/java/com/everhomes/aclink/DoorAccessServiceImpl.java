@@ -238,6 +238,10 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         User user = userProvider.findUserById(uid);
         DoorAccess doorAcc = doorAccessProvider.getDoorAccessById(doorId);
         
+        if(user == null || doorAcc == null) {
+            return;
+        }
+        
         sendMessageToUser(user, doorAcc, doorType);
     }
     
@@ -250,6 +254,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             userName = user.getAccountName();
         }
         map.put("userName", userName);
+        map.put("doorName", doorAcc.getName());
         
         String scope = AclinkNotificationTemplateCode.SCOPE;
         int code = AclinkNotificationTemplateCode.ACLINK_NEW_AUTH;
@@ -557,12 +562,19 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             @Override
             public DoorAccess doInTransaction(TransactionStatus arg0) {
                 DoorAccess doorAcc = doorAccessProvider.getDoorAccessById(doorAccessId);
+                
+                //delete childs
+                List<DoorAccess> childs = doorAccessProvider.listDoorAccessByGroupId(doorAccessId, 20);
+                if(childs != null && childs.size() > 0) {
+                    for(DoorAccess dc : childs) {
+                        dc.setStatus(DoorAccessStatus.INVALID.getCode());
+                        doorAccessProvider.updateDoorAccess(doorAcc);
+                    }
+                }
+                
                 if(doorAcc != null) {
                     doorAcc.setStatus(DoorAccessStatus.INVALID.getCode());
                     doorAccessProvider.updateDoorAccess(doorAcc);
-                    
-                    
-                    
                     return doorAcc;
                 }
                 
