@@ -9,7 +9,7 @@ public class GetDoorAccessByHardwareIdCommand {
     @ItemType(String.class)
     private List<String> hardwareIds;
     
-    
+    Long organizationId;
     
     public List<String> getHardwareIds() {
         return hardwareIds;
@@ -19,6 +19,18 @@ public class GetDoorAccessByHardwareIdCommand {
 
     public void setHardwareIds(List<String> hardwareIds) {
         this.hardwareIds = hardwareIds;
+    }
+
+
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 
 

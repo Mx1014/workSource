@@ -18,6 +18,7 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.aclink.lingling.AclinkLinglingConstant;
 import com.everhomes.aclink.lingling.AclinkLinglingDevice;
 import com.everhomes.aclink.lingling.AclinkLinglingMakeSdkKey;
@@ -26,7 +27,9 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.entity.EntityType;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.aclink.AclinkConnectingCommand;
 import com.everhomes.rest.aclink.AclinkDeleteByIdCommand;
 import com.everhomes.rest.aclink.AclinkDisconnectedCommand;
@@ -73,6 +76,9 @@ public class AclinkController extends ControllerBase {
     
     @Autowired
     private AclinkLinglingService aclinkLinglingService;
+    
+    @Autowired
+    private RolePrivilegeService rolePrivilegeService;
     
     /**
      * <b>URL: /aclink/activing</b>
@@ -187,6 +193,18 @@ public class AclinkController extends ControllerBase {
         RestResponse response = new RestResponse(resp);
         List<DoorAccessDTO> dtos = new ArrayList<DoorAccessDTO>();
         resp.setDoors(dtos);
+        Long role = 0l;
+        
+        if(cmd.getOrganizationId() != null) {
+            try {
+                rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.AclinkManager);
+                role = 1l;
+            } catch(Exception e) {
+                
+            }
+        }
+        
+        resp.setRole(role);
         
         for(String hardwareId : cmd.getHardwareIds()) {
             DoorAccessDTO doorAccess = doorAccessService.getDoorAccessDetail(hardwareId);

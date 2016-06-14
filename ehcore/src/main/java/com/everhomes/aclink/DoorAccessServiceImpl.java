@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.aclink.lingling.AclinkLinglingDevice;
 import com.everhomes.aclink.lingling.AclinkLinglingMakeSdkKey;
 import com.everhomes.aclink.lingling.AclinkLinglingQRCode;
@@ -36,10 +37,15 @@ import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.aclink.AclinkConnectingCommand;
 import com.everhomes.rest.aclink.AclinkCreateDoorAuthListCommand;
 import com.everhomes.rest.aclink.AclinkDeviceVer;
@@ -49,6 +55,7 @@ import com.everhomes.rest.aclink.AclinkFirmwareType;
 import com.everhomes.rest.aclink.AclinkMessage;
 import com.everhomes.rest.aclink.AclinkMessageMeta;
 import com.everhomes.rest.aclink.AclinkMgmtCommand;
+import com.everhomes.rest.aclink.AclinkNotificationTemplateCode;
 import com.everhomes.rest.aclink.AclinkServiceErrorCode;
 import com.everhomes.rest.aclink.AclinkUpgradeCommand;
 import com.everhomes.rest.aclink.AclinkUpgradeResponse;
@@ -98,6 +105,7 @@ import com.everhomes.rest.aclink.QueryDoorMessageCommand;
 import com.everhomes.rest.aclink.QueryDoorMessageResponse;
 import com.everhomes.rest.aclink.SearchDoorAuthCommand;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.group.GroupNotificationTemplateCode;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -187,6 +195,15 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     @Autowired
     private SmsProvider smsProvider;
     
+    @Autowired
+    private OrganizationProvider organizationProvider;
+    
+    @Autowired
+    private RolePrivilegeService rolePrivilegeService;
+    
+    @Autowired
+    private LocaleTemplateService localeTemplateService;
+    
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
     
     final String LAST_TICK = "dooraccess:%d:lasttick";
@@ -218,10 +235,30 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     
     @Override
     public void sendMessageToUser(Long uid, Long doorId, Byte doorType) {
+        User user = userProvider.findUserById(uid);
+        DoorAccess doorAcc = doorAccessProvider.getDoorAccessById(doorId);
+        
+        sendMessageToUser(user, doorAcc, doorType);
+    }
+    
+    
+    private void sendMessageToUser(User user, DoorAccess doorAcc, Byte doorType) {
+        String locale = user.getLocale();
+        Map<String, Object> map = new HashMap<String, Object>();
+        String userName = user.getNickName();
+        if(userName == null || userName.isEmpty()) {
+            userName = user.getAccountName();
+        }
+        map.put("userName", userName);
+        
+        String scope = AclinkNotificationTemplateCode.SCOPE;
+        int code = AclinkNotificationTemplateCode.ACLINK_NEW_AUTH;
+        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+        
         Map<String, String> meta = new HashMap<String, String>();
         meta.put(MessageMetaConstant.META_OBJECT_TYPE, MetaObjectType.ACLINK_AUTH_CHANGED.getCode());
-        meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(new AclinkMessageMeta(uid, doorId, doorType)));
-        sendMessageToUser(uid, "You have new auth", meta);
+        meta.put(MessageMetaConstant.META_OBJECT, StringHelper.toJsonString(new AclinkMessageMeta(user.getId(), doorAcc.getId(), doorType)));
+        sendMessageToUser(user.getId(), notifyTextForApplicant, meta);
     }
     
     //列出某园区下的所有锁门禁
@@ -474,12 +511,17 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             rlt.setHardwareId(doorAcc.getHardwareId());
         }
         
+        User tmpUser = new User();
+        tmpUser.setId(user.getId());
+        tmpUser.setAccountName(user.getAccountName());
+        tmpUser.setNickName(user.getNickName());
+        
         //Send messages
         if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_LINGLING.getCode())
                 || (doorAcc.getDoorType().equals(DoorAccessType.ACLINK_LINGLING_GROUP.getCode()))) {
-            sendMessageToUser(user.getId(), doorAcc.getId(), DoorAccessType.ACLINK_LINGLING.getCode()); 
+            sendMessageToUser(tmpUser, doorAcc, DoorAccessType.ACLINK_LINGLING.getCode()); 
         } else {
-            sendMessageToUser(user.getId(), doorAcc.getId(), DoorAccessType.ZLACLINK_WIFI.getCode());    
+            sendMessageToUser(tmpUser, doorAcc, DoorAccessType.ZLACLINK_WIFI.getCode());    
         }
         
         return rlt;
@@ -1117,6 +1159,34 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         return aesUserKey;
     }
     
+    private boolean checkDoorAccessRole(DoorAccess da) {
+        DoorAccessOwnerType t = DoorAccessOwnerType.fromCode(da.getOwnerType());
+        Long orgId = -1l;
+        
+        switch(t) {
+        case ENTERPRISE:
+            orgId = da.getOwnerId();
+            break;
+        case COMMUNITY:
+            List<OrganizationCommunity> orgs = organizationProvider.listOrganizationByCommunityId(da.getOwnerId());
+            if(orgs == null || orgs.size() == 0) {
+                return false;
+            }
+            orgId = orgs.get(0).getId();
+            break;
+        case FAMILY:
+            return true;
+        }
+        
+        try {
+            rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), orgId, PrivilegeConstants.AclinkManager);
+            return true;
+        } catch(Exception ex) {
+        }
+        
+        return false;
+    }
+    
     @Override
     public DoorAccessDTO getDoorAccessDetail(String hardware) {
         DoorAccess da = doorAccessProvider.queryDoorAccessByHardwareId(hardware);
@@ -1127,8 +1197,12 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         getDoorAccessLastTick(da);
         DoorAccessDTO dto = (DoorAccessDTO)ConvertHelper.convert(da, DoorAccessDTO.class);
         
-        //TODO support for role
-        dto.setRole((byte)0);
+        if(checkDoorAccessRole(da)) {
+            dto.setRole((byte)1);    
+        } else {
+            dto.setRole((byte)0);
+        }
+        
         dto.setVersion("1.1.0.0");
         
         AclinkFirmware firm = aclinkFirmwareProvider.queryAclinkFirmwareMax();
