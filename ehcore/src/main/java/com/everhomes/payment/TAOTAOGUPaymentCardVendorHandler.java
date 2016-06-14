@@ -10,17 +10,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.payment.util.ByteTools;
-import com.everhomes.payment.util.CertCoder;
-import com.everhomes.payment.util.ResponseEntiy;
-import com.everhomes.payment.util.TAOTAOGUHttpUtil;
+import com.everhomes.payment.taotaogu.ByteTools;
+import com.everhomes.payment.taotaogu.CertCoder;
+import com.everhomes.payment.taotaogu.ResponseEntiy;
+import com.everhomes.payment.taotaogu.TAOTAOGUHttpUtil;
+import com.everhomes.payment.taotaogu.TAOTAOGUOrderHttpUtil;
 import com.everhomes.rest.payment.ApplyCardCommand;
 import com.everhomes.rest.payment.CardInfoDTO;
+import com.everhomes.rest.payment.CardRechargeStatus;
 import com.everhomes.rest.payment.CardTransactionDTO;
 import com.everhomes.rest.payment.CardTransactionOfMonth;
 import com.everhomes.rest.payment.CardTransactionTypeStatus;
@@ -347,5 +350,96 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 			return null;
 		}
 		return new Timestamp(d.getTime());
+	}
+
+	@Override
+	public String getCardPaidQrCodeByVendor(PaymentCard paymentCard) {
+		String result = null;
+		boolean flag = true;
+		String aesKey = null;
+		String token = null;
+		while(flag){
+			Map map = null;
+			try {
+				map = TAOTAOGUOrderHttpUtil.orderLogin();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			String returnCode = (String) map.get("return_code");
+			if("00".equals(returnCode)){
+				flag = false;
+				aesKey = (String) map.get("aes_key");
+				token = (String) map.get("token");
+			}
+		}
+		
+		JSONObject json = new JSONObject();
+		Date now = new Date();
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");// 可以方便地修改日期格式
+		String timeStr = dateFormat.format(now);
+		//timeStr = "20160223152525";
+		json.put("chnl_type", "WEB");
+		json.put("chnl_id", "12345678");
+		json.put("chnl_sn", System.currentTimeMillis());
+		json.put("card_id", paymentCard.getCardNo());
+		json.put("reserved", "");
+		json.put("request_time", timeStr);	
+		
+		try {
+			boolean getTokenFlag = true;
+			while(getTokenFlag){
+				Map codeMap = TAOTAOGUOrderHttpUtil.post(token, aesKey, json);
+				String returnCode = (String) codeMap.get("return_code");
+				if("00".equals(returnCode)){
+					getTokenFlag = false;
+					result = token;
+				}
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	@Override
+	public void rechargeCard(PaymentCardRechargeOrder order, PaymentCard card) {
+		Gson gson = new Gson();
+		Map vendorDataMap = gson.fromJson(card.getVendorCardData(), Map.class);
+		String brandCode = (String) vendorDataMap.get("BranchCode");
+		Map<String, Object> param = new HashMap<String, Object>();
+
+		param.put("BranchCode", brandCode);
+		param.put("CardId", card.getId());
+		param.put("EndCardId", "");
+		param.put("RechargeNum", "");
+		param.put("RechargeType", "0");
+		param.put("RechargeAcctType", "fund");
+		param.put("Amt", order.getAmount().doubleValue());
+		param.put("RealAmt", order.getAmount().doubleValue());
+		
+		param.put("PayAccNo", "");
+		param.put("PayAccName", "");
+		param.put("ActivityId", "");
+		param.put("DiscountAmt", "");
+		param.put("GiveAmt", "");
+		param.put("SaleUser", "");
+		
+		ResponseEntiy responseEntiy = null;
+		try {
+			responseEntiy = TAOTAOGUHttpUtil.post(brandCode,"0020",param);
+		} catch (Exception e) {
+			LOGGER.error("the recharge request of taotaogu is failed.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"the recharge request of taotaogu is failed.");
+		}
+		if(responseEntiy.isSuccess()){
+			order.setRechargeStatus(CardRechargeStatus.RECHARGED.getCode());
+			order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
+			paymentCardProvider.updatePaymentCardRechargeOrder(order);
+		}else{
+			
+		}
+		
 	}
 }

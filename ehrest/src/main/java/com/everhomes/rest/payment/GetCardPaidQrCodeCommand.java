@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
 public class GetCardPaidQrCodeCommand {
 	private String ownerType;
     private Long ownerId;
-    private String cardId;
+    private Long cardId;
     
 	public String getOwnerType() {
 		return ownerType;
@@ -27,10 +27,11 @@ public class GetCardPaidQrCodeCommand {
 		this.ownerId = ownerId;
 	}
     
-	public String getCardId() {
+	
+	public Long getCardId() {
 		return cardId;
 	}
-	public void setCardId(String cardId) {
+	public void setCardId(Long cardId) {
 		this.cardId = cardId;
 	}
 	@Override

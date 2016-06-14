@@ -12,19 +12,18 @@ import com.everhomes.util.StringHelper;
 public class GetCardPaidResultCommand {
 	private String ownerType;
     private Long ownerId;
-	private String cardId;
-	
+	private Long cardId;
 	
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
 
-	public String getCardId() {
+	public Long getCardId() {
 		return cardId;
 	}
 
-	public void setCardId(String cardId) {
+	public void setCardId(Long cardId) {
 		this.cardId = cardId;
 	}
 
@@ -32,16 +31,13 @@ public class GetCardPaidResultCommand {
 		return ownerType;
 	}
 
-
 	public void setOwnerType(String ownerType) {
 		this.ownerType = ownerType;
 	}
 
-
 	public Long getOwnerId() {
 		return ownerId;
 	}
-
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;

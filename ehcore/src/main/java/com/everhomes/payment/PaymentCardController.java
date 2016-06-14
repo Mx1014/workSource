@@ -13,6 +13,8 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.payment.ApplyCardCommand;
 import com.everhomes.rest.payment.CardIssuerDTO;
+import com.everhomes.rest.payment.NotifyEntityCommand;
+import com.everhomes.rest.payment.NotifyEntityDTO;
 import com.everhomes.rest.payment.SetCardPasswordCommand;
 import com.everhomes.rest.payment.GetCardUserStatisticsCommand;
 import com.everhomes.rest.payment.GetCardUserStatisticsDTO;
@@ -38,7 +40,7 @@ import com.everhomes.rest.payment.SearchCardTransactionsResponse;
 
 
 @Controller
-@RequestMapping("payment")
+@RequestMapping("/payment")
 public class PaymentCardController extends ControllerBase{
 
 	@Autowired
@@ -92,8 +94,8 @@ public class PaymentCardController extends ControllerBase{
     @RequestMapping("getCardPaidQrCode")
     @RestReturn(value=GetCardPaidQrCodeDTO.class)
     public RestResponse getCardPaidQrCode(GetCardPaidQrCodeCommand cmd) {
-        
-        RestResponse response = new RestResponse();
+    	GetCardPaidQrCodeDTO dto = paymentCardService.getCardPaidQrCode(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -112,6 +114,21 @@ public class PaymentCardController extends ControllerBase{
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /payment/getCardPaidResult</b>
+     * <p>第三方通知</p>
+     */
+    @RequestMapping("notifyPaidResult")
+    @RestReturn(value=NotifyEntityDTO.class)
+    public RestResponse notifyPaidResult(NotifyEntityCommand cmd) {
+    	NotifyEntityDTO dto = paymentCardService.notifyPaidResult(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
 	/**
      * <b>URL: /payment/rechargeCard</b>
      * <p>一卡通充值</p>

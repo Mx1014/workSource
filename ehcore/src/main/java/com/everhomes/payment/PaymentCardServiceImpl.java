@@ -1,7 +1,11 @@
 package com.everhomes.payment;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -16,7 +20,8 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.order.OrderUtil;
-import com.everhomes.payment.util.VerifyCodeEntity;
+import com.everhomes.payment.util.CacheItem;
+import com.everhomes.payment.util.CachePool;
 import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
@@ -38,6 +43,8 @@ import com.everhomes.rest.payment.ListCardInfoCommand;
 import com.everhomes.rest.payment.ListCardIssuerCommand;
 import com.everhomes.rest.payment.ListCardTransactionsCommand;
 import com.everhomes.rest.payment.ListCardTransactionsResponse;
+import com.everhomes.rest.payment.NotifyEntityCommand;
+import com.everhomes.rest.payment.NotifyEntityDTO;
 import com.everhomes.rest.payment.RechargeCardCommand;
 import com.everhomes.rest.payment.ResetCardPasswordCommand;
 import com.everhomes.rest.payment.SearchCardRechargeOrderCommand;
@@ -67,7 +74,6 @@ import com.everhomes.util.Tuple;
 public class PaymentCardServiceImpl implements PaymentCardService{
 	
     private static final Logger LOGGER = LoggerFactory.getLogger(PaymentCardServiceImpl.class);
-    private static ConcurrentHashMap<String,VerifyCodeEntity> threadMap = new ConcurrentHashMap();  
     @Autowired
     private PaymentCardProvider paymentCardProvider;
     
@@ -164,13 +170,26 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     @Override
     public GetCardPaidQrCodeDTO getCardPaidQrCode(GetCardPaidQrCodeCommand cmd){
     	GetCardPaidQrCodeDTO dto = new GetCardPaidQrCodeDTO();
-    	
+    	PaymentCard paymentCard = checkPaymentCard(cmd.getCardId());
+    	if(paymentCard == null){
+    		LOGGER.error("card id can not be null.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"card id can not be null.");
+    	}
+    	PaymentCardVendorHandler handler = getPaymentCardVendorHandler(paymentCard.getVendorName());
+		String code = handler.getCardPaidQrCodeByVendor(paymentCard);
+		dto.setCode(code);
     	return dto;
     }
     @Override
     public GetCardPaidResultDTO getCardPaidResult(GetCardPaidResultCommand cmd){
     	GetCardPaidResultDTO dto = new GetCardPaidResultDTO();
-    	
+    	PaymentCard paymentCard = checkPaymentCard(cmd.getCardId());
+    	if(paymentCard == null){
+    		LOGGER.error("card id can not be null.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"card id can not be null.");
+    	}
     	return dto;
     }
     
@@ -183,10 +202,10 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 
 		sendVerificationCodeSms(userIdentifier.getNamespaceId(), userIdentifier.getIdentifierToken(),verifyCode);
 		dto.setVerifyCode(verifyCode);
-		VerifyCodeEntity verifyCodeEntity = new VerifyCodeEntity();
-		verifyCodeEntity.setCreateTime(System.currentTimeMillis());
-		verifyCodeEntity.setVerifyCode(verifyCode);
-		threadMap.put(userIdentifier.getIdentifierToken(),verifyCodeEntity);
+		//丢到缓存中
+		CachePool cachePool = CachePool.getInstance();
+		cachePool.putCacheItem(userIdentifier.getIdentifierToken(), verifyCode);
+		
     	return dto;
     }
     private void sendVerificationCodeSms(Integer namespaceId, String phoneNumber, String verificationCode){
@@ -221,8 +240,15 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"verifyCode cannot be null.");
     	}
-    	VerifyCodeEntity entity = threadMap.get(cmd.getMobile());
-    	if(!entity.getVerifyCode().equals(cmd.getVerifyCode())){
+		CachePool cachePool = CachePool.getInstance();
+
+    	CacheItem entity = (CacheItem) cachePool.getCacheItem(cmd.getMobile());
+    	if(entity == null){
+    		LOGGER.error("verifyCode is not exists.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"verifyCode is not exists.");
+    	}
+    	if(!((String)entity.getEntity()).equals(cmd.getVerifyCode())){
     		LOGGER.error("verifyCode is not correctly.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"verifyCode is not correctly.");
@@ -230,8 +256,9 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     	if(entity.isExpired()){
     		LOGGER.error("verifyCode is expired.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"verifyCode is nexpired.");
+					"verifyCode is expired.");
     	}
+    	cachePool.removeCacheItem(cmd.getMobile());
     	PaymentCard paymentCard = checkPaymentCard(cmd.getCardId());
     	if(paymentCard == null){
     		LOGGER.error("card id cannot be null.");
@@ -319,7 +346,53 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     	
 		return response;
     }
-    
+    @Override
+    public NotifyEntityDTO notifyPaidResult(NotifyEntityCommand cmd){
+    	PaymentCardTransaction transaction = new PaymentCardTransaction();
+    	
+       	User user = UserContext.current().getUser();
+    	UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+    	PaymentCard paymentCard = paymentCardProvider.findPaymentCardByCardNo(cmd.getCard_id(), VendorConstant.TAOTAOGU);
+    	transaction.setOwnerId(paymentCard.getOwnerId());
+    	transaction.setOwnerType(paymentCard.getOwnerType());
+    	
+    	transaction.setItemName("");
+    	transaction.setMerchant(cmd.getMerch_name());
+    	transaction.setAmount(new BigDecimal(cmd.getTrade_amt()));
+    	transaction.setTransactionNo(cmd.getAcct_sn());
+    	transaction.setTransactionTime(StrTotimestamp(cmd.getFinal_time()));
+    	transaction.setCardId(paymentCard.getId());
+    	transaction.setStatus(convertTransaction(cmd.getTrade_status()));
+    	transaction.setCreatorUid(user.getId());
+    	transaction.setCreateTime(new Timestamp(System.currentTimeMillis()));
+    	transaction.setVendorName(VendorConstant.TAOTAOGU);
+    	transaction.setVendorResult(paymentCard.getVendorCardData());
+    	
+    	paymentCardProvider.createPaymentCardTransaction(transaction);
+    	NotifyEntityDTO dto = new NotifyEntityDTO();
+    	dto.setMsg_sn(cmd.getMsg_sn());
+    	dto.setReturn_code("00");
+    	return dto;
+    }
+
+    private Byte convertTransaction(String status){
+    	Byte result = null;
+    	switch (status) {
+		case "00": result = 3;
+			break;
+		case "01": result = 4;
+			break;
+		case "02": result = 0;
+			break;
+		case "03": result = 1;
+			break;
+		case "04": result = 2;
+			break;
+		default:
+			break;
+		}
+    	return result;
+    }
     private PaymentCardVendorHandler getPaymentCardVendorHandler(String vendorName) {
     	PaymentCardVendorHandler handler = null;
         
@@ -344,4 +417,16 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     	PaymentCard paymentCard = paymentCardProvider.findPaymentCardById(cardId);
     	return paymentCard;
     }
+    
+    private Timestamp StrTotimestamp(String date){
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+		Date d = null;
+		try {
+			d = sdf.parse(date);
+		} catch (ParseException e) {
+			return null;
+		}
+		return new Timestamp(d.getTime());
+	}
+    
 }

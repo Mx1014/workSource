@@ -34,6 +34,8 @@ CREATE TABLE `eh_payment_cards` (
   `owner_id` BIGINT NOT NULL DEFAULT 0, 
   `issuer_id` BIGINT(20) NOT NULL DEFAULT 0 COMMENT 'id of the card issuer',
 
+  `user_name` VARCHAR(64) COMMENT 'the name of user',
+  `mobile` VARCHAR(64) COMMENT 'the mobile of user',
   `card_no` VARCHAR(256) NOT NULL DEFAULT '' COMMENT 'the id of card ,according the third system',
   `balance` DECIMAL(10,2) COMMENT 'the balance of card',
   `password` VARCHAR(1024) NOT NULL DEFAULT '' COMMENT 'the password of user',
@@ -86,7 +88,9 @@ CREATE TABLE `eh_payment_card_transactions` (
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, community, etc',
   `owner_id` BIGINT NOT NULL DEFAULT 0,
 
-  `payer_uid` BIGINT NOT NULL DEFAULT 0, 
+  `payer_uid` BIGINT NOT NULL DEFAULT 0,
+  `user_name` VARCHAR(64) COMMENT 'the name of user',
+  `mobile` VARCHAR(64) COMMENT 'the mobile of user',
   `item_name` VARCHAR(256) NOT NULL DEFAULT '' COMMENT 'the name of item',
   `merchant` VARCHAR(64) COMMENT 'the merchant',
   `amount` DECIMAL(10,2) NOT NULL DEFAULT '0.00' COMMENT 'the amount of money paid',

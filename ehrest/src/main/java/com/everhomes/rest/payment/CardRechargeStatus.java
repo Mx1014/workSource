@@ -2,7 +2,7 @@
 package com.everhomes.rest.payment;
 
 /**
- * <ul>园区用户开卡状态
+ * <ul>
  * <li>FAIL(0): 充值失败</li>
  * <li>UNRECHARGED(1): 未充值,处理中</li>
  * <li>RECHARGED(2): 充值成功</li>

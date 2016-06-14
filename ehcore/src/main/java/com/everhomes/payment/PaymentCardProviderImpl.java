@@ -1,5 +1,7 @@
 package com.everhomes.payment;
 
+import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
+
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,13 +19,17 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.user.IdentifierClaimStatus;
+import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhPaymentCardRechargeOrdersDao;
+import com.everhomes.server.schema.tables.daos.EhPaymentCardTransactionsDao;
 import com.everhomes.server.schema.tables.daos.EhPaymentCardsDao;
 import com.everhomes.server.schema.tables.pojos.EhPaymentCardIssuerCommunities;
 import com.everhomes.server.schema.tables.pojos.EhPaymentCardIssuers;
 import com.everhomes.server.schema.tables.pojos.EhPaymentCardRechargeOrders;
+import com.everhomes.server.schema.tables.pojos.EhPaymentCardTransactions;
 import com.everhomes.server.schema.tables.pojos.EhPaymentCards;
 import com.everhomes.server.schema.tables.records.EhPaymentCardIssuerCommunitiesRecord;
 import com.everhomes.server.schema.tables.records.EhPaymentCardIssuersRecord;
@@ -126,6 +132,16 @@ public class PaymentCardProviderImpl implements PaymentCardProvider{
     }
     
     @Override
+    public PaymentCard findPaymentCardByCardNo(String cardNo,String vendorName){
+    	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPaymentCards.class));
+    	SelectQuery<EhPaymentCardsRecord> query = context.selectQuery(Tables.EH_PAYMENT_CARDS);
+        if(cardNo != null)
+        	query.addConditions(Tables.EH_PAYMENT_CARDS.CARD_NO.eq(cardNo));
+        query.addConditions(Tables.EH_PAYMENT_CARDS.VENDOR_NAME.eq(vendorName));
+        return ConvertHelper.convert(query.fetchOne(), PaymentCard.class);
+    }
+    
+    @Override
     public List<PaymentCard> listPaymentCard(Long ownerId,String ownerType,Long userId){
     	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPaymentCards.class));
     	SelectQuery<EhPaymentCardsRecord> query = context.selectQuery(Tables.EH_PAYMENT_CARDS);
@@ -144,18 +160,30 @@ public class PaymentCardProviderImpl implements PaymentCardProvider{
     }
     
     @Override
-    public List<PaymentCard> searchCardUsers(Long ownerId,String ownerType,Long userId){
+    public List<PaymentCard> searchCardUsers(Long ownerId,String ownerType,Long userId,String keyword,Long pageAnchor,Integer pageSize){
     	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPaymentCards.class));
     	SelectQuery<EhPaymentCardsRecord> query = context.selectQuery(Tables.EH_PAYMENT_CARDS);
+    	query.addJoin(Tables.EH_USER_IDENTIFIERS, Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(Tables.EH_PAYMENT_CARDS.USER_ID));
+    	query.addConditions(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode()));
+    	query.addConditions(EH_USER_IDENTIFIERS.IDENTIFIER_TYPE.eq(IdentifierType.MOBILE.getCode()));
+
+    	if (pageAnchor != null && pageAnchor != 0)
+			query.addConditions(Tables.EH_PAYMENT_CARDS.CREATE_TIME.lt(new Timestamp(pageAnchor)));
     	if(StringUtils.isNotBlank(ownerType))
         	query.addConditions(Tables.EH_PAYMENT_CARDS.OWNER_TYPE.eq(ownerType));
         if(ownerId != null)
         	query.addConditions(Tables.EH_PAYMENT_CARDS.OWNER_ID.eq(ownerId));
         if(userId != null)
         	query.addConditions(Tables.EH_PAYMENT_CARDS.USER_ID.eq(userId));
+//        if(StringUtils.isNotBlank(keyword))
+//        	query.addConditions(Tables.EH_PAYMENT_CARDS.USER_NAME.eq(keyword)
+//        			.or(Tables.EH_PAYMENT_CARDS.MOBILE.eq(keyword)));
 
-        List<PaymentCard> result = new ArrayList<PaymentCard>();
+        query.addOrderBy(Tables.EH_PAYMENT_CARDS.CREATE_TIME.desc());
+        if(pageSize != null)
+        	query.addLimit(pageSize);
         
+        List<PaymentCard> result = new ArrayList<PaymentCard>();
         result = query.fetch().map(
         		r -> ConvertHelper.convert(r, PaymentCard.class));
         return result;
@@ -197,6 +225,31 @@ public class PaymentCardProviderImpl implements PaymentCardProvider{
     }
     
     @Override
+    public PaymentCardRechargeOrder findPaymentCardRechargeOrderById(Long orderId){
+    	
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPaymentCardRechargeOrders.class));
+		SelectQuery<EhPaymentCardRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS);
+    	
+		if (orderId != null)
+			query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.ID.eq(orderId));
+        
+        return ConvertHelper.convert(query.fetchOne(), PaymentCardRechargeOrder.class);
+		
+    }
+    
+    @Override
+    public void updatePaymentCardRechargeOrder(PaymentCardRechargeOrder order){
+    	
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPaymentCardRechargeOrders.class));
+		EhPaymentCardRechargeOrdersDao dao = new EhPaymentCardRechargeOrdersDao(context.configuration());
+    	
+		dao.update(order);
+        
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPaymentCardRechargeOrders.class, null);
+		
+    }
+    
+    @Override
     public List<PaymentCardTransaction> searchCardTransactions(String ownerType,Long ownerId,Timestamp startDate,Timestamp endDate,
     		String consumeType,Byte status,String keyword,Long pageAnchor,Integer pageSize){
     	
@@ -230,5 +283,17 @@ public class PaymentCardProviderImpl implements PaymentCardProvider{
 			ConvertHelper.convert(r, PaymentCardTransaction.class));
 		
     }
-    
+    @Override
+    public void createPaymentCardTransaction(PaymentCardTransaction paymentCardTransaction){
+    	
+    	long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhPaymentCardTransactions.class));
+    	paymentCardTransaction.setId(id);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPaymentCardTransactionsDao dao = new EhPaymentCardTransactionsDao(context.configuration());
+		dao.insert(paymentCardTransaction);
+		
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPaymentCardTransactions.class, null);
+    	
+    }
 }
