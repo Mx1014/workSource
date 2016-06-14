@@ -172,7 +172,8 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 					PaymentCard paymentCard = new PaymentCard();
 					paymentCard.setOwnerId(cmd.getOwnerId());
 					paymentCard.setOwnerType(cmd.getOwnerType());
-					paymentCard.setCategoryId(cardIssuer.getId());
+					paymentCard.setNamespaceId(user.getNamespaceId());
+					paymentCard.setIssuerId(cardIssuer.getId());
 					paymentCard.setCardNo(cardId);
 					paymentCard.setBalance(new BigDecimal(0));
 					paymentCard.setPassword(EncryptionUtils.hashPassword(cmd.getPassword()));

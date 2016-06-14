@@ -2,6 +2,8 @@ package com.everhomes.payment;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -256,8 +258,8 @@ public class PaymentCardController extends ControllerBase{
      * <p>导出用户列表</p>
      */
     @RequestMapping("exportCardUsers")
-    public void exportCardUsers(SearchCardUsersCommand cmd) {
-        
+    public void exportCardUsers(SearchCardUsersCommand cmd,HttpServletResponse response) {
+    	paymentCardService.exportCardUsers(cmd, response);
         
     }
     /**
@@ -265,16 +267,16 @@ public class PaymentCardController extends ControllerBase{
      * <p>导出充值订单列表</p>
      */
     @RequestMapping("exportCardRechargeOrder")
-    public void exportCardRechargeOrder(SearchCardRechargeOrderCommand cmd) {
-        
+    public void exportCardRechargeOrder(SearchCardRechargeOrderCommand cmd,HttpServletResponse response) {
+    	paymentCardService.exportCardRechargeOrder(cmd, response);
     }
     /**
      * <b>URL: /payment/exportCardTransactions</b>
      * <p>导出交易记录列表</p>
      */
     @RequestMapping("exportCardTransactions")
-    public void exportCardTransactions(SearchCardTransactionsCommand cmd) {
-        
+    public void exportCardTransactions(SearchCardTransactionsCommand cmd,HttpServletResponse response) {
+    	paymentCardService.exportCardTransactions(cmd, response);
     }
     
 }

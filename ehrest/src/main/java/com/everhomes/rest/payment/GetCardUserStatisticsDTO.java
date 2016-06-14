@@ -10,29 +10,34 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class GetCardUserStatisticsDTO {
-	private Long totalCount;
-	private Long cardUserCount;
-	private Long normalUserCount;
+	private Integer totalCount;
+	private Integer cardUserCount;
+	private Integer normalUserCount;
 	
-	
-	public Long getTotalCount() {
+	public Integer getTotalCount() {
 		return totalCount;
 	}
-	public void setTotalCount(Long totalCount) {
+
+	public void setTotalCount(Integer totalCount) {
 		this.totalCount = totalCount;
 	}
-	public Long getCardUserCount() {
+
+	public Integer getCardUserCount() {
 		return cardUserCount;
 	}
-	public void setCardUserCount(Long cardUserCount) {
+
+	public void setCardUserCount(Integer cardUserCount) {
 		this.cardUserCount = cardUserCount;
 	}
-	public Long getNormalUserCount() {
+
+	public Integer getNormalUserCount() {
 		return normalUserCount;
 	}
-	public void setNormalUserCount(Long normalUserCount) {
+
+	public void setNormalUserCount(Integer normalUserCount) {
 		this.normalUserCount = normalUserCount;
 	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

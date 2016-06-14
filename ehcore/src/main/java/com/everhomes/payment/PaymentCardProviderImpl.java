@@ -160,12 +160,9 @@ public class PaymentCardProviderImpl implements PaymentCardProvider{
     }
     
     @Override
-    public List<PaymentCard> searchCardUsers(Long ownerId,String ownerType,Long userId,String keyword,Long pageAnchor,Integer pageSize){
+    public List<PaymentCard> searchCardUsers(Long ownerId,String ownerType,String keyword,Long pageAnchor,Integer pageSize){
     	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPaymentCards.class));
     	SelectQuery<EhPaymentCardsRecord> query = context.selectQuery(Tables.EH_PAYMENT_CARDS);
-    	query.addJoin(Tables.EH_USER_IDENTIFIERS, Tables.EH_USER_IDENTIFIERS.OWNER_UID.eq(Tables.EH_PAYMENT_CARDS.USER_ID));
-    	query.addConditions(EH_USER_IDENTIFIERS.CLAIM_STATUS.eq(IdentifierClaimStatus.CLAIMED.getCode()));
-    	query.addConditions(EH_USER_IDENTIFIERS.IDENTIFIER_TYPE.eq(IdentifierType.MOBILE.getCode()));
 
     	if (pageAnchor != null && pageAnchor != 0)
 			query.addConditions(Tables.EH_PAYMENT_CARDS.CREATE_TIME.lt(new Timestamp(pageAnchor)));
@@ -173,11 +170,10 @@ public class PaymentCardProviderImpl implements PaymentCardProvider{
         	query.addConditions(Tables.EH_PAYMENT_CARDS.OWNER_TYPE.eq(ownerType));
         if(ownerId != null)
         	query.addConditions(Tables.EH_PAYMENT_CARDS.OWNER_ID.eq(ownerId));
-        if(userId != null)
-        	query.addConditions(Tables.EH_PAYMENT_CARDS.USER_ID.eq(userId));
-//        if(StringUtils.isNotBlank(keyword))
-//        	query.addConditions(Tables.EH_PAYMENT_CARDS.USER_NAME.eq(keyword)
-//        			.or(Tables.EH_PAYMENT_CARDS.MOBILE.eq(keyword)));
+     
+        if(StringUtils.isNotBlank(keyword))
+        	query.addConditions(Tables.EH_PAYMENT_CARDS.USER_NAME.eq(keyword)
+        			.or(Tables.EH_PAYMENT_CARDS.MOBILE.eq(keyword)));
 
         query.addOrderBy(Tables.EH_PAYMENT_CARDS.CREATE_TIME.desc());
         if(pageSize != null)
@@ -187,6 +183,17 @@ public class PaymentCardProviderImpl implements PaymentCardProvider{
         result = query.fetch().map(
         		r -> ConvertHelper.convert(r, PaymentCard.class));
         return result;
+    }
+    
+    @Override
+    public Integer countCardUsers(Long ownerId,String ownerType,Integer namespaceId){
+    	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPaymentCards.class));
+    	SelectQuery<EhPaymentCardsRecord> query = context.selectQuery(Tables.EH_PAYMENT_CARDS);
+        query.addConditions(Tables.EH_PAYMENT_CARDS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_PAYMENT_CARDS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_PAYMENT_CARDS.NAMESPACE_ID.eq(namespaceId));
+
+        return query.fetchCount();
     }
     
     @Override
@@ -262,9 +269,9 @@ public class PaymentCardProviderImpl implements PaymentCardProvider{
         	query.addConditions(Tables.EH_PAYMENT_CARD_TRANSACTIONS.OWNER_TYPE.eq(ownerType));
         if(ownerId != null)
         	query.addConditions(Tables.EH_PAYMENT_CARD_TRANSACTIONS.OWNER_ID.eq(ownerId));
-//        if(StringUtils.isNotBlank(keyword))
-//        	query.addConditions(Tables.EH_PAYMENT_CARD_TRANSACTIONS.USER_NAME.eq(keyword)
-//        			.or(Tables.EH_PAYMENT_CARD_TRANSACTIONS.MOBILE.eq(keyword)));
+        if(StringUtils.isNotBlank(keyword))
+        	query.addConditions(Tables.EH_PAYMENT_CARD_TRANSACTIONS.USER_NAME.eq(keyword)
+        			.or(Tables.EH_PAYMENT_CARD_TRANSACTIONS.MOBILE.eq(keyword)));
 //        if(StringUtils.isNotBlank(consumeType))
 //        	query.addConditions(Tables.EH_PAYMENT_CARD_TRANSACTIONS.PAID_TYPE.eq(consumeType));
         

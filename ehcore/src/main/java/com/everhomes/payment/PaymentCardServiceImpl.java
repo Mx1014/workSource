@@ -1,5 +1,7 @@
 package com.everhomes.payment;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -7,10 +9,17 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang.StringUtils;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +31,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.payment.util.CacheItem;
 import com.everhomes.payment.util.CachePool;
+import com.everhomes.payment.util.Util;
 import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
@@ -33,6 +43,7 @@ import com.everhomes.rest.payment.CardRechargeOrderDTO;
 import com.everhomes.rest.payment.CardRechargeStatus;
 import com.everhomes.rest.payment.CardTransactionDTO;
 import com.everhomes.rest.payment.CardTransactionOfMonth;
+import com.everhomes.rest.payment.CardUserDTO;
 import com.everhomes.rest.payment.GetCardPaidQrCodeCommand;
 import com.everhomes.rest.payment.GetCardPaidQrCodeDTO;
 import com.everhomes.rest.payment.GetCardPaidResultCommand;
@@ -74,6 +85,7 @@ import com.everhomes.util.Tuple;
 public class PaymentCardServiceImpl implements PaymentCardService{
 	
     private static final Logger LOGGER = LoggerFactory.getLogger(PaymentCardServiceImpl.class);
+    private SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     @Autowired
     private PaymentCardProvider paymentCardProvider;
     
@@ -134,6 +146,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     	PaymentCardRechargeOrder paymentCardRechargeOrder = new PaymentCardRechargeOrder();
     	paymentCardRechargeOrder.setOwnerType(cmd.getOwnerType());
     	paymentCardRechargeOrder.setOwnerId(cmd.getOwnerId());
+    	paymentCardRechargeOrder.setNamespaceId(user.getNamespaceId());
     	paymentCardRechargeOrder.setOrderNo(createOrderNo(System.currentTimeMillis()));
     	paymentCardRechargeOrder.setUserId(user.getId());
     	paymentCardRechargeOrder.setUserName(user.getNickName());
@@ -286,13 +299,34 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     
     @Override
     public SearchCardUsersResponse searchCardUsers(SearchCardUsersCommand cmd){
+    	SearchCardUsersResponse response = new SearchCardUsersResponse();
+		
+		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		//User user = UserContext.current().getUser();
+		List<PaymentCard> list = paymentCardProvider.searchCardUsers(cmd.getOwnerId(),cmd.getOwnerType(),
+				cmd.getKeyword(),cmd.getPageAnchor(), pageSize);
+    	if(list.size() > 0){
+    		response.setRequests(list.stream().map(r -> ConvertHelper.convert(r, CardUserDTO.class))
+    				.collect(Collectors.toList()));
+    		if(pageSize != null && list.size() != pageSize){
+        		response.setNextPageAnchor(null);
+        	}else{
+        		response.setNextPageAnchor(list.get(list.size()-1).getCreateTime().getTime());
+        	}
+    	}
     	
-    	return null;
+		return response;
     }
     @Override
     public GetCardUserStatisticsDTO getCardUserStatistics(GetCardUserStatisticsCommand cmd){
-    	
-    	return null;
+    	GetCardUserStatisticsDTO dto = new GetCardUserStatisticsDTO();
+    	User user = UserContext.current().getUser();
+		int communityUserCount = userProvider.countUserByNamespaceId(user.getNamespaceId(), null);
+		Integer cardUserCount = paymentCardProvider.countCardUsers(cmd.getOwnerId(), cmd.getOwnerType(), user.getNamespaceId());
+		dto.setCardUserCount(cardUserCount);
+		dto.setTotalCount(communityUserCount);
+		dto.setNormalUserCount(communityUserCount - cardUserCount);
+    	return dto;
     }
     @Override
     public SearchCardRechargeOrderResponse searchCardRechargeOrder(SearchCardRechargeOrderCommand cmd){
@@ -346,6 +380,167 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     	
 		return response;
     }
+    
+    @Override
+    public void exportCardUsers(SearchCardUsersCommand cmd,HttpServletResponse response){
+    	Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		//User user = UserContext.current().getUser();
+		List<PaymentCard> list = paymentCardProvider.searchCardUsers(cmd.getOwnerId(),cmd.getOwnerType(),
+				cmd.getKeyword(),cmd.getPageAnchor(), pageSize);
+		Workbook wb = new XSSFWorkbook();
+		
+		Font font = wb.createFont();   
+		font.setFontName("黑体");   
+		font.setFontHeightInPoints((short) 16);
+		CellStyle style = wb.createCellStyle();
+		style.setFont(font);
+		
+		Sheet sheet = wb.createSheet("cardUsers");
+		sheet.setDefaultColumnWidth(20);  
+		sheet.setDefaultRowHeightInPoints(20); 
+		Row row = sheet.createRow(0);
+		row.createCell(0).setCellValue("手机号");
+		row.createCell(1).setCellValue("姓名");
+		row.createCell(2).setCellValue("开卡时间");
+		row.createCell(3).setCellValue("卡号");
+		for(int i=0;i<list.size();i++){
+			Row tempRow = sheet.createRow(i + 1);
+			PaymentCard paymentCard = list.get(i);
+			tempRow.createCell(0).setCellValue(paymentCard.getMobile());
+			tempRow.createCell(1).setCellValue(paymentCard.getUserName());
+			tempRow.createCell(2).setCellValue(datetimeSF.format(paymentCard.getCreateTime()));
+			tempRow.createCell(3).setCellValue(paymentCard.getCardNo());
+		}
+		ByteArrayOutputStream out = null;
+		try {
+			out = new ByteArrayOutputStream();
+			wb.write(out);
+			Util.download(out, response);
+		} catch (IOException e) {
+			LOGGER.error("exportCardUsers is fail. {}",e);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"exportCardUsers is fail.");
+		}
+		
+	}
+    
+	@Override
+	public void exportCardRechargeOrder(SearchCardRechargeOrderCommand cmd,
+			HttpServletResponse response) {
+		Timestamp startDate = null;
+		Timestamp endDate = null;
+		if(cmd.getStartDate() != null)
+			startDate = new Timestamp(cmd.getStartDate());
+		if(cmd.getEndDate() != null)
+			new Timestamp(cmd.getEndDate());
+		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		//User user = UserContext.current().getUser();
+		List<PaymentCardRechargeOrder> list = paymentCardProvider.searchCardRechargeOrder(cmd.getOwnerType(),
+				cmd.getOwnerId(), startDate,endDate,cmd.getRechargeType(), cmd.getRechargeStatus(), cmd.getKeyword(),
+				cmd.getPageAnchor(), pageSize);
+		Workbook wb = new XSSFWorkbook();
+		
+		Font font = wb.createFont();   
+		font.setFontName("黑体");   
+		font.setFontHeightInPoints((short) 16);
+		CellStyle style = wb.createCellStyle();
+		style.setFont(font);
+		
+		Sheet sheet = wb.createSheet("cardUsers");
+		sheet.setDefaultColumnWidth(20);  
+		sheet.setDefaultRowHeightInPoints(20); 
+		Row row = sheet.createRow(0);
+		row.createCell(0).setCellValue("手机号");
+		row.createCell(1).setCellValue("姓名");
+		row.createCell(2).setCellValue("卡号");
+		row.createCell(3).setCellValue("充值金额");
+		row.createCell(4).setCellValue("充值时间");
+		row.createCell(5).setCellValue("支付方式");
+		row.createCell(6).setCellValue("处理状态");
+		for(int i=0;i<list.size();i++){
+			Row tempRow = sheet.createRow(i + 1);
+			PaymentCardRechargeOrder order = list.get(i);
+			tempRow.createCell(0).setCellValue(order.getMobile());
+			tempRow.createCell(1).setCellValue(order.getUserName());
+			tempRow.createCell(2).setCellValue(order.getCardNo());
+			tempRow.createCell(3).setCellValue(order.getAmount().doubleValue());
+			tempRow.createCell(4).setCellValue(order.getRechargeTime()!=null?datetimeSF.format(order.getRechargeTime()):"");
+			tempRow.createCell(5).setCellValue(order.getPaidType());
+			tempRow.createCell(6).setCellValue(order.getRechargeStatus());
+		}
+		ByteArrayOutputStream out = null;
+		try {
+			out = new ByteArrayOutputStream();
+			wb.write(out);
+			Util.download(out, response);
+		} catch (IOException e) {
+			LOGGER.error("exportCardUsers is fail. {}",e);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"exportCardUsers is fail.");
+		}
+		
+	}
+	@Override
+	public void exportCardTransactions(SearchCardTransactionsCommand cmd,
+			HttpServletResponse response) {
+		Timestamp startDate = null;
+		Timestamp endDate = null;
+		if(cmd.getStartDate() != null)
+			startDate = new Timestamp(cmd.getStartDate());
+		if(cmd.getEndDate() != null)
+			new Timestamp(cmd.getEndDate());
+		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		//User user = UserContext.current().getUser();
+		List<PaymentCardTransaction> list = paymentCardProvider.searchCardTransactions(cmd.getOwnerType(),
+				cmd.getOwnerId(), startDate,endDate,cmd.getConsumeType(), cmd.getStatus(), cmd.getKeyword(),
+				cmd.getPageAnchor(), pageSize);
+		Workbook wb = new XSSFWorkbook();
+		
+		Font font = wb.createFont();   
+		font.setFontName("黑体");   
+		font.setFontHeightInPoints((short) 16);
+		CellStyle style = wb.createCellStyle();
+		style.setFont(font);
+		
+		Sheet sheet = wb.createSheet("cardUsers");
+		sheet.setDefaultColumnWidth(20);  
+		sheet.setDefaultRowHeightInPoints(20); 
+		Row row = sheet.createRow(0);
+		row.createCell(0).setCellValue("手机号");
+		row.createCell(1).setCellValue("姓名");
+		row.createCell(2).setCellValue("卡号");
+		row.createCell(3).setCellValue("消费类型");
+		row.createCell(4).setCellValue("商品");
+		row.createCell(5).setCellValue("订单号");
+		row.createCell(6).setCellValue("交易时间");
+		row.createCell(7).setCellValue("交易金额");
+		row.createCell(8).setCellValue("处理状态");
+		for(int i=0;i<list.size();i++){
+			Row tempRow = sheet.createRow(i + 1);
+			PaymentCardTransaction transaction = list.get(i);
+			tempRow.createCell(0).setCellValue(transaction.getMobile());
+			tempRow.createCell(1).setCellValue(transaction.getUserName());
+			tempRow.createCell(2).setCellValue(transaction.getCardNo());
+			tempRow.createCell(3).setCellValue("");
+			tempRow.createCell(4).setCellValue(transaction.getItemName());
+			tempRow.createCell(5).setCellValue(transaction.getId());
+			tempRow.createCell(6).setCellValue(datetimeSF.format(transaction.getTransactionTime()));
+			tempRow.createCell(7).setCellValue(transaction.getAmount().doubleValue());
+			tempRow.createCell(8).setCellValue(transaction.getStatus());
+		}
+		ByteArrayOutputStream out = null;
+		try {
+			out = new ByteArrayOutputStream();
+			wb.write(out);
+			Util.download(out, response);
+		} catch (IOException e) {
+			LOGGER.error("exportCardUsers is fail. {}",e);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"exportCardUsers is fail.");
+		}
+		
+	}
+    
     @Override
     public NotifyEntityDTO notifyPaidResult(NotifyEntityCommand cmd){
     	PaymentCardTransaction transaction = new PaymentCardTransaction();
@@ -355,7 +550,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     	PaymentCard paymentCard = paymentCardProvider.findPaymentCardByCardNo(cmd.getCard_id(), VendorConstant.TAOTAOGU);
     	transaction.setOwnerId(paymentCard.getOwnerId());
     	transaction.setOwnerType(paymentCard.getOwnerType());
-    	
+    	transaction.setNamespaceId(user.getNamespaceId());
     	transaction.setItemName("");
     	transaction.setMerchant(cmd.getMerch_name());
     	transaction.setAmount(new BigDecimal(cmd.getTrade_amt()));
@@ -428,5 +623,6 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 		}
 		return new Timestamp(d.getTime());
 	}
+
     
 }
