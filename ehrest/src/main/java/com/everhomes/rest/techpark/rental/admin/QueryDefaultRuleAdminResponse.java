@@ -23,7 +23,7 @@ import com.everhomes.util.StringHelper;
  * <li>timeIntervals: 开放时段</li>
  * <li>beginDate: 开放日期始</li>
  * <li>endDate: 开放日期终</li>
- * <li>openWeekday: 周几开放，字符串0000000每一位分别表示星期日一二三四五六，1代表开放，0代表关闭</li>
+ * <li>openWeekday: 开放日期，从周日到周六是0123456，开放哪天就在数组传哪天</li>
  * <li>closeDates: 关闭日期</li>
  * <li>workdayPrice: 工作日价格</li>
  * <li>weekendPrice: 周末价格</li>
@@ -50,7 +50,8 @@ public class QueryDefaultRuleAdminResponse {
 	private List<TimeIntervalDTO> timeIntervals;
 	private Long beginDate;
 	private Long endDate;
-	private String openWeekday;
+	@ItemType(Integer.class)
+	private List<Integer> openWeekday;
 	@ItemType(Long.class)
 	private List<Long> closeDates;
 	private BigDecimal workdayPrice;
@@ -175,15 +176,14 @@ public class QueryDefaultRuleAdminResponse {
 	public void setEndDate(Long endDate) {
 		this.endDate = endDate;
 	}
+ 
 
-	public String getOpenWeekday() {
+	public List<Integer> getOpenWeekday() {
 		return openWeekday;
 	}
-
-	public void setOpenWeekday(String openWeekday) {
+	public void setOpenWeekday(List<Integer> openWeekday) {
 		this.openWeekday = openWeekday;
 	}
-
 	public List<Long> getCloseDates() {
 		return closeDates;
 	}

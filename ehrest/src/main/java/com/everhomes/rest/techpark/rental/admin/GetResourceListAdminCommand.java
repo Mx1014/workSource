@@ -9,6 +9,8 @@ import javax.validation.constraints.NotNull;
  * <li>ownerType: 所属者类型</li>
  * <li>launchPadItemId: 图标id</li>
  * <li>organizationId: 所属公司id</li>
+ * <li>pageAnchor: 锚点</li>
+ * <li>pageSize:每页数量 </li>
  * </ul>
  */
 public class GetResourceListAdminCommand {

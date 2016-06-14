@@ -748,21 +748,23 @@ public class RentalProviderImpl implements RentalProvider {
 	}
 
 	@Override
-	public List<RentalBill> listRentalBills(Long ownerId,String ownerType,
-			String siteType, Long rentalSiteId, Byte billStatus,
-			Integer pageOffset, Integer pageSize, Long startTime, Long endTime,
-			Byte invoiceFlag,Long userId) {
+	public List<RentalBill> listRentalBills(Long launchPadItemId, Long organizationId, Long rentalSiteId, ListingLocator locator, Byte billStatus,
+			String vendorType , Integer pageSize, Long startTime, Long endTime,
+			Byte invoiceFlag,Long userId){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTAL_BILLS);
 		//TODO
 		Condition condition = Tables.EH_RENTAL_BILLS.LAUNCH_PAD_ITEM_ID
-				.equal(ownerId);
+				.equal(launchPadItemId);
 //		condition = condition.and(Tables.EH_RENTAL_BILLS.OWNER_TYPE
 //				.equal(ownerType));
-//		if (StringUtils.isNotEmpty(siteType))
-//			condition = condition.and(Tables.EH_RENTAL_BILLS.SITE_TYPE
-//					.equal(siteType));
+		if (StringUtils.isNotEmpty(vendorType))
+			condition = condition.and(Tables.EH_RENTAL_BILLS.VENDOR_TYPE
+					.equal(vendorType));
+		if(null!=organizationId)
+			condition = condition.and(Tables.EH_RENTAL_BILLS.ORGANIZATION_ID
+					.equal(organizationId));
 		if (null != rentalSiteId)
 			condition = condition.and(Tables.EH_RENTAL_BILLS.RENTAL_SITE_ID
 					.equal(rentalSiteId));
@@ -782,9 +784,11 @@ public class RentalProviderImpl implements RentalProvider {
 		}
 		if (null != userId)
 			condition = condition.and(Tables.EH_RENTAL_BILLS.RENTAL_UID
-								.equal(userId));
-		Integer offset = pageOffset == null ? 1 : (pageOffset - 1) * pageSize;
-		step.limit(offset, pageSize);
+								.equal(userId)); 
+		if(null!=locator && locator.getAnchor() != null)
+			condition=condition.and(Tables.EH_RENTAL_BILLS.ID.lt(locator.getAnchor()));
+								
+		step.limit(pageSize);
 		step.where(condition);
 		List<RentalBill> result = step
 				.orderBy(Tables.EH_RENTAL_BILLS.ID.desc()).fetch().map((r) -> {
@@ -824,14 +828,14 @@ public class RentalProviderImpl implements RentalProvider {
 		}
 
         if(locator.getAnchor() != null)
-        	condition=condition.and(Tables.EH_COMMUNITIES.ID.lt(locator.getAnchor()));
+        	condition=condition.and(Tables.EH_RENTAL_SITES.ID.lt(locator.getAnchor()));
 		if(null!= status)
 			condition = condition.and(Tables.EH_RENTAL_SITES.STATUS
 					.in(status));
 		step.where(condition);
 
 		List<RentalSite> result = step
-				.orderBy(Tables.EH_RENTAL_SITES.ID.desc()).fetch().map((r) -> {
+				.orderBy(Tables.EH_RENTAL_SITES.ID.desc()).limit(pageSize).fetch().map((r) -> {
 					return ConvertHelper.convert(r, RentalSite.class);
 				});
 		if(result.size()==0)

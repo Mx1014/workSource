@@ -2,10 +2,16 @@ package com.everhomes.rest.techpark.rental.admin;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.rest.techpark.rental.SiteItemDTO;
 import com.everhomes.util.StringHelper;
-
+/**
+ * <ul>
+ * <li>itemDTOs：物品列表</li> 
+ * </ul>
+ */
 public class UpdateItemsAdminCommand {
+	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> itemDTOs;
 
 	public List<SiteItemDTO> getItemDTOs() {

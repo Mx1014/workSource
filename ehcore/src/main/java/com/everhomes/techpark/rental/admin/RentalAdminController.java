@@ -90,7 +90,14 @@ public class RentalAdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
+	/**
+	 * 
+	 * <b>URL: /rental/admin/getResourceList<b>
+	 * <p>
+	 * 获取资源列表
+	 * </p>
+	 */
 	@RequestMapping("getResourceList")
 	@RestReturn(GetResourceListAdminResponse.class)
 	public RestResponse getResourceList(@Valid GetResourceListAdminCommand cmd){
@@ -100,7 +107,14 @@ public class RentalAdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
+	/**
+	 * 
+	 * <b>URL: /rental/admin/addResource<b>
+	 * <p>
+	 * 添加一个预约资源
+	 * </p>
+	 */
 	@RequestMapping("addResource")
 	@RestReturn(String.class)
 	public RestResponse addResource(@Valid AddResourceAdminCommand cmd){
@@ -110,7 +124,14 @@ public class RentalAdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
+	/**
+	 * 
+	 * <b>URL: /rental/admin/updateResource<b>
+	 * <p>
+	 * 更新资源
+	 * </p>
+	 */
 	@RequestMapping("updateResource")
 	@RestReturn(String.class)
 	public RestResponse updateResource(@Valid UpdateResourceAdminCommand cmd){
@@ -122,9 +143,9 @@ public class RentalAdminController extends ControllerBase {
 	}
 	
 	/**
-	 * <b>URL: /techpark/rental/listRentalSiteItems</b>
+	 * <b>URL: /techpark/rental/getItemList</b>
 	 * <p>
-	 * 查询具体场所商品信息
+	 * 查询资源的商品列表
 	 * </p>
 	 */
 	@RequestMapping("getItemList")
@@ -139,9 +160,9 @@ public class RentalAdminController extends ControllerBase {
 
 
 	/**
-	 * <b>URL: /techpark/rental/addRentalSiteItems</b>
+	 * <b>URL: /techpark/rental/addItems</b>
 	 * <p>
-	 * 添加具体场所商品信息
+	 * 添加具体资源的商品信息
 	 * </p>
 	 */
 	@RequestMapping("addItems")
@@ -158,9 +179,9 @@ public class RentalAdminController extends ControllerBase {
 
 	
 	/**
-	 * <b>URL: /techpark/rental/deleteRentalSiteItem</b>
+	 * <b>URL: /techpark/rental/updateItem</b>
 	 * <p>
-	 * 删除具体场所商品信息
+	 * 更新具体资源商品信息
 	 * </p>
 	 */
 	@RequestMapping("updateItem")
@@ -207,9 +228,9 @@ public class RentalAdminController extends ControllerBase {
 	
 
 	/**
-	 * <b>URL: /techpark/rental/addRentalSiteSimpleRules</b>
+	 * <b>URL: /techpark/rental/addRentalSiteRules</b>
 	 * <p>
-	 * 添加具体场所预定规则-简单模式
+	 * 添加具体资源的规则
 	 * </p>
 	 */
 
@@ -223,7 +244,7 @@ public class RentalAdminController extends ControllerBase {
 		return response;
 	}
 	/**
-	 * <b>URL: /techpark/rental/addRentalSiteSimpleRules</b>
+	 * <b>URL: /techpark/rental/updateRentalSiteRules</b>
 	 * <p>
 	 * 更新单元格信息
 	 * </p>
@@ -240,7 +261,7 @@ public class RentalAdminController extends ControllerBase {
 	}
 	
 	/**
-	 * <b>URL: /techpark/rental/addRentalSiteSimpleRules</b>
+	 * <b>URL: /techpark/rental/updateRentalSiteDiscount</b>
 	 * <p>
 	 * 更新优惠信息
 	 * </p>
@@ -289,7 +310,7 @@ public class RentalAdminController extends ControllerBase {
 	/**
 	 * <b>URL: /techpark/rental/findRentalSitesStatus</b>
 	 * <p>
-	 * 完成预约- 状态置为已完成
+	 * 批量完成预约- 状态置为已完成
 	 * </p>
 	 */
 
@@ -304,7 +325,7 @@ public class RentalAdminController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /techpark/rental/findRentalSitesStatus</b>
+	 * <b>URL: /techpark/rental/completeBill</b>
 	 * <p>
 	 * 完成预约- 状态置为已完成
 	 * </p>
@@ -320,9 +341,9 @@ public class RentalAdminController extends ControllerBase {
 		return response;
 	}
 	/**
-	 * <b>URL: /techpark/rental/findRentalSitesStatus</b>
+	 * <b>URL: /techpark/rental/batchIncompleteBill</b>
 	 * <p>
-	 * 未完成预约- 状态置为未完成
+	 * 批量未完成预约- 状态置为未完成
 	 * </p>
 	 */
 
@@ -337,7 +358,7 @@ public class RentalAdminController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /techpark/rental/findRentalSitesStatus</b>
+	 * <b>URL: /techpark/rental/incompleteBill</b>
 	 * <p>
 	 * 未完成预约- 状态置为未完成
 	 * </p>

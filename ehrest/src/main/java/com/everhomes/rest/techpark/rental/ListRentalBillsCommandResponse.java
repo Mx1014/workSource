@@ -6,6 +6,15 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.rest.techpark.punch.PunchStatisticsDTO;
 import com.everhomes.util.StringHelper;
 
+
+import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
+/**
+ * <ul> 
+ * <li>rentalBills：订单列表</li>
+ * <li>nextPageAnchor：下页锚点</li>
+ * </ul>
+ */
 public class ListRentalBillsCommandResponse {
 
 	private Long nextPageAnchor;

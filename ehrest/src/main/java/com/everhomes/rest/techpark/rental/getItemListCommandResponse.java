@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul> 
  * <li>siteItems：场所商品</li>
+ * <li>nextPageAnchor：下页锚点</li>
  * </ul>
  */
 public class getItemListCommandResponse {

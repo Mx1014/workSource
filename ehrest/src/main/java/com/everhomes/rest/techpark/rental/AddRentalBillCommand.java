@@ -11,16 +11,11 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>rentalSiteId：场所id</li>
- * <li>enterpriseCommunityId：园区id</li>
- * <li>siteType：场所类型</li>
  * <li>rentalDate：预定日期</li>
  * <li>startTime：开始时间</li>
  * <li>endTime：结束时间</li>
- * <li>rentalSiteRuleIds：预定场所规则ID列表 json字符串</li>
- * <li>invoiceFlag：要不要发票，0 要 1 不要 参考
- * {@link com.everhomes.rest.techpark.rental.InvoiceFlag}</li>
- * <li>rentalcount：预定场所数量</li>
- * <li>rentalItems：预定商品的json字符串</li>
+ * <li>rentalSiteRuleIds：预定单元格列表List<Long></li> 
+ * <li>rentalcount：预定场所数量</li> 
  * </ul>
  */
 public class AddRentalBillCommand {

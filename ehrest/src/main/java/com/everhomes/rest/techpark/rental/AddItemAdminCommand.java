@@ -4,13 +4,13 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 /**
- * <ul>
- * <li>enterpriseCommunityId：园区id</li>
- * <li>siteType：场所类型</li>
+ * <ul> 
  * <li>rentalSiteId：场所id</li>
  * <li>itemName：商品名称</li>
  * <li>itemPrice：商品价格</li>
  * <li>counts：商品数量</li> 
+ * <li>imgUri：商品图片uri</li> 
+ * <li>defaultOrder：商品排序</li> 
  * </ul>
  */
 public class AddItemAdminCommand { 

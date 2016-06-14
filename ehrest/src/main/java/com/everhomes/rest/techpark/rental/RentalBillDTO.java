@@ -9,14 +9,10 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * 订单DTO
  * <li>rentalBillId：订单id</li>
- * <li>enterpriseCommunityId：园区id</li>
- * <li>siteType：场所类型</li>
  * <li>siteName：场所名称</li>
  * <li>buildingName：楼栋名称</li>
- * <li>address：位置</li>
- * <li>spec：用户设置座位数等</li>
- * <li>companyName：场所隶属的公司</li>
- * <li>contactName：负责人id</li>
+ * <li>address：地址</li>
+ * <li>spec：规格</li>
  * <li>contactPhonenum：电话号码</li>
  * <li>startTime：开始时间</li>
  * <li>endTime：结束时间</li> 
@@ -26,11 +22,10 @@ import com.everhomes.util.StringHelper;
  * <li>cancelTime：取消时间</li> 
  * <li>payDeadLineTime：最后支付时间</li> 
  * <li>sitePrice：场所总价</li>
- * <li>totalPrice：全部总价</li>
+ * <li>totalPrice：全部总价包含物品</li>
  * <li>reservePrice：订金</li>
  * <li>paidPrice：已付金额</li>
  * <li>unPayPrice：未付金额</li>
- * <li>invoiceFlag：要不要发票，0 要 1 不要 参考{@link com.everhomes.rest.techpark.rental.InvoiceFlag}</li>  
  * <li>status：订单状态  0待付订金1已付定金2已付清 3待付全款 4已取消 参考{@link com.everhomes.rest.techpark.rental.SiteBillStatus}</li>  
  * <li>rentalCount：场所预定数量</li> 
  * <li>siteItems：场所商品</li> 

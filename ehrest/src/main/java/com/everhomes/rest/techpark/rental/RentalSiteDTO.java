@@ -18,8 +18,9 @@ import com.everhomes.util.StringHelper;
  * <li>companyId：场所隶属的公司id</li>
  * <li>ownId：负责人id</li>
  * <li>contactPhonenum：电话号码</li>
- * <li>siteItems：场所商品</li>
+ * <li>introduction：详情</li>
  * <li>	coverUri：	封面图uri	</li>
+ * <li>	coverUrl：	封面图url	</li>
  * <li>	discountType：     	折扣信息：0不打折 1满减优惠2比例折扣	</li>
  * <li>	fullPrice：        	满XX元	</li>
  * <li>	cutPrice：         	减XX元	</li>
@@ -32,6 +33,11 @@ import com.everhomes.util.StringHelper;
  * <li>	multiTimeInterval：	是否允许预约多个时段 1是 0否	</li>
  * <li>	cancelFlag：       	是否允许取消 1是 0否	</li>
  * <li>	needPay：          	是否需要支付 1是 0否	</li>
+ * <li>	status：资源状态</li>
+ * <li>	createTime：创建时间</li>
+ * <li>	siteItems：资源物品列表</li>
+ * <li>	sitePics： List资源图片列表</li>
+ * <li>	owners： List资源可显示的园区范围列表</li> 
  * </ul>
  */
 public class RentalSiteDTO {

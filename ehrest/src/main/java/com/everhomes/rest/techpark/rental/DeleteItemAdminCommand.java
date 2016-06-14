@@ -5,22 +5,20 @@ import javax.validation.constraints.NotNull;
 import com.everhomes.util.StringHelper;
 /**
  * <ul>
- * <li>enterpriseCommunityId：园区id</li>
- * <li>siteType：场所类型</li>
- * <li>rentalSiteId：物品id</li> 
+ * <li>itemId：物品id</li> 
  * </ul>
  */
 public class DeleteItemAdminCommand { 
 	@NotNull
-	private Long rentalSiteItemId; 
+	private Long itemId; 
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
-    }  
-	public Long getRentalSiteItemId() {
-		return rentalSiteItemId;
+    }
+	public Long getItemId() {
+		return itemId;
 	}
-	public void setRentalSiteItemId(Long rentalSiteItemId) {
-		this.rentalSiteItemId = rentalSiteItemId;
-	}
+	public void setItemId(Long itemId) {
+		this.itemId = itemId;
+	}   
 }

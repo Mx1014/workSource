@@ -2,6 +2,19 @@ package com.everhomes.rest.techpark.rental;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>orderNo：支付订单id</li>   
+ * <li>amount：支付金额</li> 
+ * <li>name：name</li> 
+ * <li>description：详情</li> 
+ * <li>orderType：orderType</li> 
+ * <li>appKey：appKey </li> 
+ * <li>randomNum：randomNum </li> 
+ * <li>timestamp： timestamp</li> 
+ * <li>signature：signature </li>  
+ * </ul>
+ */
 public class AddRentalBillItemCommandResponse {
 	private String orderNo;
 	private java.math.BigDecimal amount;

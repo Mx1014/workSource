@@ -10,8 +10,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * 列出资源列表返回值(根据图标和园区)
- * <li>ownerId: 所属者id</li>
- * <li>ownerType: 所属者类型</li>
+ * <li>id: id</li>
  * <li>launchPadItemId: 图标id</li>
  * <li>organizationId: 所属公司id</li>
  * <li>siteId: 资源id</li>
@@ -30,8 +29,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class UpdateResourceAdminCommand {
-	private Long ownerId;
-	private String ownerType;
+	private Long id; 
 	@NotNull
 	private Long launchPadItemId;
 	@NotNull
@@ -65,21 +63,17 @@ public class UpdateResourceAdminCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-	public Long getOwnerId() {
-		return ownerId;
+ 
+
+	public Long getId() {
+		return id;
 	}
 
-	public void setOwnerId(Long ownerId) {
-		this.ownerId = ownerId;
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 
-	public String getOwnerType() {
-		return ownerType;
-	}
-
-	public void setOwnerType(String ownerType) {
-		this.ownerType = ownerType;
-	}
 
 	public Long getLaunchPadItemId() {
 		return launchPadItemId;

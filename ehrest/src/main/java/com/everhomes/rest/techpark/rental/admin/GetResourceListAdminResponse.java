@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * 列出资源列表返回值(根据图标和园区)
  * <li>nextPageAnchor: 分页，下一页锚点</li>
- * <li>rentalSites: 资源列表</li> 
+ * <li>rentalSites: 资源列表list</li> 
  * </ul>
  */
 public class GetResourceListAdminResponse {

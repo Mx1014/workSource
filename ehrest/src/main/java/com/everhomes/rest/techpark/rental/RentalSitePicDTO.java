@@ -2,6 +2,15 @@ package com.everhomes.rest.techpark.rental;
 
 import com.everhomes.util.StringHelper;
 
+
+import com.everhomes.util.StringHelper;
+/**
+ * <ul>
+*<li>id：id</li>
+ * <li>uri：图片uri</li>
+ * <li>url：图片url</li> 
+ * </ul>
+ */
 public class RentalSitePicDTO {
 	private java.lang.Long   id;
 	private java.lang.String uri;

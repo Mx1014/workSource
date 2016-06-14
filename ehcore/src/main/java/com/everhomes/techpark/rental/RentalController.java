@@ -62,117 +62,117 @@ import com.everhomes.techpark.punch.PunchController;
  */
 @RestDoc(value = "rental controller", site = "ehcore")
 @RestController
-@RequestMapping("/techpark/rental")
+@RequestMapping("/rental")
 public class RentalController extends ControllerBase {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(PunchController.class);
 
 	@Autowired
 	private RentalService rentalService;
-	/**
-	 * <b>URL: /techpark/rental/getRentalSiteType</b>
-	 * <p>
-	 * 获取场所类型
-	 * </p>
-	 */
-	@RequestMapping("getRentalSiteType")
-	@RestReturn(value = GetRentalSiteTypeResponse.class)
-	public RestResponse getRentalSiteType() {
-		GetRentalSiteTypeResponse updateRentalRuleCommandResponse = rentalService
-				.findRentalSiteTypes();
-		RestResponse response = new RestResponse(
-				updateRentalRuleCommandResponse);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	/**
-	 * <b>URL: /techpark/rental/getRentalTypeRule</b>
-	 * <p>
-	 * 查询某类场所的通用设置
-	 * </p>
-	 */
-	@RequestMapping("getRentalTypeRule")
-	@RestReturn(value = GetRentalTypeRuleCommandResponse.class)
-	public RestResponse getRentalTypeRule(
-			@Valid GetRentalTypeRuleCommand cmd) {
-		GetRentalTypeRuleCommandResponse getRentalTypeRuleCommandResponse = rentalService
-				.getRentalTypeRule(cmd);
-		RestResponse response = new RestResponse(
-				getRentalTypeRuleCommandResponse);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+//	/**
+//	 * <b>URL: /rental/getRentalSiteType</b>
+//	 * <p>
+//	 * 获取场所类型
+//	 * </p>
+//	 */
+//	@RequestMapping("getRentalSiteType")
+//	@RestReturn(value = GetRentalSiteTypeResponse.class)
+//	public RestResponse getRentalSiteType() {
+//		GetRentalSiteTypeResponse updateRentalRuleCommandResponse = rentalService
+//				.findRentalSiteTypes();
+//		RestResponse response = new RestResponse(
+//				updateRentalRuleCommandResponse);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+//	/**
+//	 * <b>URL: /rental/getRentalTypeRule</b>
+//	 * <p>
+//	 * 查询某类场所的通用设置
+//	 * </p>
+//	 */
+//	@RequestMapping("getRentalTypeRule")
+//	@RestReturn(value = GetRentalTypeRuleCommandResponse.class)
+//	public RestResponse getRentalTypeRule(
+//			@Valid GetRentalTypeRuleCommand cmd) {
+//		GetRentalTypeRuleCommandResponse getRentalTypeRuleCommandResponse = rentalService
+//				.getRentalTypeRule(cmd);
+//		RestResponse response = new RestResponse(
+//				getRentalTypeRuleCommandResponse);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
 	
 
-	/**
-	 * <b>URL: /techpark/rental/updateRentalRule</b>
-	 * <p>
-	 * 设置通用设置
-	 * </p>
-	 */
-	@RequestMapping("updateRentalRule")
-	@RestReturn(value = String.class)
-	public RestResponse updateRentalRule(@Valid UpdateRentalRuleCommand cmd) {
-		rentalService.updateRentalRule(cmd);
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+//	/**
+//	 * <b>URL: /rental/updateRentalRule</b>
+//	 * <p>
+//	 * 设置通用设置
+//	 * </p>
+//	 */
+//	@RequestMapping("updateRentalRule")
+//	@RestReturn(value = String.class)
+//	public RestResponse updateRentalRule(@Valid UpdateRentalRuleCommand cmd) {
+//		rentalService.updateRentalRule(cmd);
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+
+//	/**
+//	 * <b>URL: /rental/addRentalSite</b>
+//	 * <p>
+//	 * 添加具体场所
+//	 * </p>
+//	 */
+//	@RequestMapping("addRentalSite")
+//	@RestReturn(value = String.class)
+//	public RestResponse addRentalSite(@Valid AddRentalSiteCommand cmd) {
+//		Long siteId = rentalService.addRentalSite(cmd);
+//		RestResponse response = new RestResponse(siteId);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+//	/**
+//	 * <b>URL: /rental/updateRentalSite</b>
+//	 * <p>
+//	 * 更新具体场所
+//	 * </p>
+//	 */
+//	@RequestMapping("updateRentalSite")
+//	@RestReturn(value = String.class)
+//	public RestResponse updateRentalSite(@Valid UpdateRentalSiteCommand cmd) {
+//		rentalService.updateRentalSite(cmd);
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+//
+//
+//	/**
+//	 * <b>URL: /rental/deleteRentalSite</b>
+//	 * <p>
+//	 * 删除具体场所
+//	 * </p>
+//	 */
+//	@RequestMapping("deleteRentalSite")
+//	@RestReturn(value = String.class)
+//	public RestResponse deleteRentalSite(@Valid DeleteRentalSiteCommand cmd) {
+//		rentalService.deleteRentalSite(cmd);
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+//	
 
 	/**
-	 * <b>URL: /techpark/rental/addRentalSite</b>
-	 * <p>
-	 * 添加具体场所
-	 * </p>
-	 */
-	@RequestMapping("addRentalSite")
-	@RestReturn(value = String.class)
-	public RestResponse addRentalSite(@Valid AddRentalSiteCommand cmd) {
-		Long siteId = rentalService.addRentalSite(cmd);
-		RestResponse response = new RestResponse(siteId);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	/**
-	 * <b>URL: /techpark/rental/updateRentalSite</b>
-	 * <p>
-	 * 更新具体场所
-	 * </p>
-	 */
-	@RequestMapping("updateRentalSite")
-	@RestReturn(value = String.class)
-	public RestResponse updateRentalSite(@Valid UpdateRentalSiteCommand cmd) {
-		rentalService.updateRentalSite(cmd);
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-
-
-	/**
-	 * <b>URL: /techpark/rental/deleteRentalSite</b>
-	 * <p>
-	 * 删除具体场所
-	 * </p>
-	 */
-	@RequestMapping("deleteRentalSite")
-	@RestReturn(value = String.class)
-	public RestResponse deleteRentalSite(@Valid DeleteRentalSiteCommand cmd) {
-		rentalService.deleteRentalSite(cmd);
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	
-
-	/**
-	 * <b>URL: /techpark/rental/deleteRentalSite</b>
+	 * <b>URL: /rental/deleteRentalSite</b>
 	 * <p>
 	 * 删除具体场所
 	 * </p>
@@ -187,7 +187,7 @@ public class RentalController extends ControllerBase {
 		return response;
 	}
 	/**
-	 * <b>URL: /techpark/rental/deleteRentalSite</b>
+	 * <b>URL: /rental/deleteRentalSite</b>
 	 * <p>
 	 * 删除具体场所
 	 * </p>
@@ -203,7 +203,7 @@ public class RentalController extends ControllerBase {
 	}
 	
 	/**
-	 * <b>URL: /techpark/rental/findRentalSites</b>
+	 * <b>URL: /rental/findRentalSites</b>
 	 * <p>
 	 * 查询某园区某图标下的资源列表
 	 * </p>
@@ -222,7 +222,7 @@ public class RentalController extends ControllerBase {
 	
 //	
 //	/**
-//	 * <b>URL: /techpark/rental/addRentalSiteItems</b>
+//	 * <b>URL: /rental/addRentalSiteItems</b>
 //	 * <p>
 //	 * 添加具体场所商品信息
 //	 * </p>
@@ -238,7 +238,7 @@ public class RentalController extends ControllerBase {
 //	}
 //	
 //	/**
-//	 * <b>URL: /techpark/rental/listRentalSiteItems</b>
+//	 * <b>URL: /rental/listRentalSiteItems</b>
 //	 * <p>
 //	 * 查询具体场所商品信息
 //	 * </p>
@@ -255,7 +255,7 @@ public class RentalController extends ControllerBase {
 
 	
 	/**
-	 * <b>URL: /techpark/rental/deleteRentalSiteItem</b>
+	 * <b>URL: /rental/deleteRentalSiteItem</b>
 	 * <p>
 	 * 删除具体场所商品信息
 	 * </p>
@@ -271,7 +271,7 @@ public class RentalController extends ControllerBase {
 	}
 
 //	/**
-//	 * <b>URL: /techpark/rental/addRentalSiteRules</b>
+//	 * <b>URL: /rental/addRentalSiteRules</b>
 //	 * <p>
 //	 * 添加具体场所预定规则
 //	 * </p>
@@ -288,7 +288,7 @@ public class RentalController extends ControllerBase {
 //	}
 
 //	/**
-//	 * <b>URL: /techpark/rental/addRentalSiteSimpleRules</b>
+//	 * <b>URL: /rental/addRentalSiteSimpleRules</b>
 //	 * <p>
 //	 * 添加具体场所预定规则-简单模式
 //	 * </p>
@@ -305,7 +305,7 @@ public class RentalController extends ControllerBase {
 //	}
 	
 	/**
-	 * <b>URL: /techpark/rental/deleteRentalSiteSimpleRules</b>
+	 * <b>URL: /rental/deleteRentalSiteSimpleRules</b>
 	 * <p>
 	 * 关闭日期-删除某些日期的rules
 	 * </p>
@@ -321,7 +321,7 @@ public class RentalController extends ControllerBase {
 		return response;
 	}
 	/**
-	 * <b>URL: /techpark/rental/findRentalSiteRules</b>
+	 * <b>URL: /rental/findRentalSiteRules</b>
 	 * <p>
 	 * 查询某场所的预定规则
 	 * </p>
@@ -339,7 +339,7 @@ public class RentalController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /techpark/rental/addRentalBill</b>
+	 * <b>URL: /rental/addRentalBill</b>
 	 * <p>
 	 * 添加订单
 	 * </p>
@@ -354,7 +354,7 @@ public class RentalController extends ControllerBase {
 		return response;
 	}
 //	/**
-//	 * <b>URL: /techpark/rental/addRentalBill</b>
+//	 * <b>URL: /rental/addRentalBill</b>
 //	 * <p>
 //	 * 添加订单
 //	 * </p>
@@ -369,7 +369,7 @@ public class RentalController extends ControllerBase {
 //		return response;
 //	}
 	/**
-	 * <b>URL: /techpark/rental/addRentalItemBill</b>
+	 * <b>URL: /rental/addRentalItemBill</b>
 	 * <p>
 	 * 添加场所商品订单
 	 * </p>
@@ -385,7 +385,7 @@ public class RentalController extends ControllerBase {
 	}
 	
 	/**
-	 * <b>URL: /techpark/rental/cancelRentalBill</b>
+	 * <b>URL: /rental/cancelRentalBill</b>
 	 * <p>
 	 * 取消订单
 	 * </p>
@@ -401,7 +401,7 @@ public class RentalController extends ControllerBase {
 	}
 	
 	/**
-	 * <b>URL: /techpark/rental/deleteRentalBill</b>
+	 * <b>URL: /rental/deleteRentalBill</b>
 	 * <p>
 	 * 取消订单
 	 * </p>
@@ -417,7 +417,7 @@ public class RentalController extends ControllerBase {
 	}
 	
 	/**
-	 * <b>URL: /techpark/rental/onlinePayCallback</b>
+	 * <b>URL: /rental/onlinePayCallback</b>
 	 * <p>
 	 * 取消订单
 	 * </p>
@@ -433,7 +433,7 @@ public class RentalController extends ControllerBase {
 	}
 	
 	/**
-	 * <b>URL: /techpark/rental/findUserRentalBills</b>
+	 * <b>URL: /rental/findUserRentalBills</b>
 	 * <p>
 	 * 查询用户的预约记录
 	 * </p>
@@ -450,7 +450,7 @@ public class RentalController extends ControllerBase {
 		return response;
 	}
 	/**
-	 * <b>URL: /techpark/rental/listRentalBills</b>
+	 * <b>URL: /rental/listRentalBills</b>
 	 * <p>
 	 * 查询订单
 	 * </p>
@@ -466,7 +466,7 @@ public class RentalController extends ControllerBase {
 		return response;
 	}
 //	/**
-//	 * <b>URL: /techpark/rental/findRentalSitesStatus</b>
+//	 * <b>URL: /rental/findRentalSitesStatus</b>
 //	 * <p>
 //	 * 查询某日某场所的状态
 //	 * </p>
@@ -485,7 +485,7 @@ public class RentalController extends ControllerBase {
 //	}
 
 	/**
-	 * <b>URL: /techpark/rental/findRentalSiteItems</b>
+	 * <b>URL: /rental/findRentalSiteItems</b>
 	 * <p>
 	 * 查询某场所的可预订物品
 	 * </p>
@@ -504,7 +504,7 @@ public class RentalController extends ControllerBase {
 	 
 	
 	/**
-	 * <b>URL: /techpark/rental/findRentalSitesStatus</b>
+	 * <b>URL: /rental/findRentalSiteWeekStatus</b>
 	 * <p>
 	 * 查询某服务预约某周的状态
 	 * </p>
@@ -524,7 +524,7 @@ public class RentalController extends ControllerBase {
 	
 //	
 //	/**
-//	 * <b>URL: /techpark/rental/findRentalSitesStatus</b>
+//	 * <b>URL: /rental/findRentalSitesStatus</b>
 //	 * <p>
 //	 * 确认预约- 状态置为成功
 //	 * </p>
@@ -542,7 +542,7 @@ public class RentalController extends ControllerBase {
 //	
 //
 //	/**
-//	 * <b>URL: /techpark/rental/findRentalSitesStatus</b>
+//	 * <b>URL: /rental/findRentalSitesStatus</b>
 //	 * <p>
 //	 * 完成预约- 状态置为已完成
 //	 * </p>
@@ -559,7 +559,7 @@ public class RentalController extends ControllerBase {
 //	}
 //
 //	/**
-//	 * <b>URL: /techpark/rental/findRentalSitesStatus</b>
+//	 * <b>URL: /rental/findRentalSitesStatus</b>
 //	 * <p>
 //	 * 完成预约- 状态置为已完成
 //	 * </p>
@@ -575,7 +575,7 @@ public class RentalController extends ControllerBase {
 //		return response;
 //	}
 //	/**
-//	 * <b>URL: /techpark/rental/findRentalSitesStatus</b>
+//	 * <b>URL: /rental/findRentalSitesStatus</b>
 //	 * <p>
 //	 * 未完成预约- 状态置为未完成
 //	 * </p>
@@ -592,7 +592,7 @@ public class RentalController extends ControllerBase {
 //	}
 //
 //	/**
-//	 * <b>URL: /techpark/rental/findRentalSitesStatus</b>
+//	 * <b>URL: /rental/findRentalSitesStatus</b>
 //	 * <p>
 //	 * 未完成预约- 状态置为未完成
 //	 * </p>
@@ -610,26 +610,26 @@ public class RentalController extends ControllerBase {
 //	
 
 
-	/**
-	 * <b>URL: /techpark/rental/listRentalBillCount</b>
-	 * <p>
-	 * 数据统计
-	 * </p>
-	 */
-
-	@RequestMapping("listRentalBillCount")
-	@RestReturn(value = ListRentalBillCountCommandResponse.class)
-	public RestResponse listRentalBillCount(@Valid ListRentalBillCountCommand cmd) {
-		ListRentalBillCountCommandResponse bill = rentalService.listRentalBillCount(cmd);
-		RestResponse response = new RestResponse(bill);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+//	/**
+//	 * <b>URL: /rental/listRentalBillCount</b>
+//	 * <p>
+//	 * 数据统计
+//	 * </p>
+//	 */
+//
+//	@RequestMapping("listRentalBillCount")
+//	@RestReturn(value = ListRentalBillCountCommandResponse.class)
+//	public RestResponse listRentalBillCount(@Valid ListRentalBillCountCommand cmd) {
+//		ListRentalBillCountCommandResponse bill = rentalService.listRentalBillCount(cmd);
+//		RestResponse response = new RestResponse(bill);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
 	
 	
 	/**
-	 * <b>URL: /techpark/rental/exportRentalBills</b>
+	 * <b>URL: /rental/exportRentalBills</b>
 	 * <p>
 	 * 导出预订详情
 	 * </p>

@@ -6,12 +6,15 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>查询订单
- * <li>enterpriseCommunityId：场所id</li>
- * <li>siteType：场所类型</li> 
- * <li>rentalSiteId：场所id</li> 
+ * <li>rentalSiteId：资源id</li>
+ * <li>organizationId：机构id</li> 
+ * <li>launchPadItemId：图标id</li> 
+ * <li>startTime：开始时间</li> 
+ * <li>endTime：结束时间</li> 
+ * <li>vendorType：支付方式,10001-支付宝，10002-微信</li> 
+* <li>billStatus：订单状态  0待付订金1已付定金2已付清 3待付全款 4已取消 参考{@link com.everhomes.rest.techpark.rental.SiteBillStatus}</li>   
  * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
  * <li>pageSize: 每页的数量</li>
-* <li>status：订单状态  0待付订金1已付定金2已付清 3待付全款 4已取消 参考{@link com.everhomes.rest.techpark.rental.SiteBillStatus}</li>   
  * </ul>
  */
 public class ListRentalBillsCommand { 

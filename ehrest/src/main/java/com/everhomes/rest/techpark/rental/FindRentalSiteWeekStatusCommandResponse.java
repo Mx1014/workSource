@@ -8,7 +8,6 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul> 
  * <li>rentalSiteId：场所id</li> 
- * <li>rentalSiteId：场所id</li> 
  * <li>siteName：场所名称</li>
  * <li>notice：详情</li>
  * <li>address：地址</li>
@@ -36,9 +35,8 @@ import com.everhomes.util.StringHelper;
  */
 public class FindRentalSiteWeekStatusCommandResponse {
 	private Long rentalSiteId; 
-	private String contactNum;
 	private String siteName; 
-	private String notice;  
+	private String introduction;  
 	private String address;
 	private double longitude;
 	private double latitude;
@@ -97,27 +95,38 @@ public class FindRentalSiteWeekStatusCommandResponse {
 	public void setSiteDays(List<RentalSiteDayRulesDTO> siteDays) {
 		this.siteDays = siteDays;
 	}
+ 
 
  
 
-	public String getNotice() {
-		return notice;
+
+	public String getIntroduction() {
+		return introduction;
 	}
 
 
-	public void setNotice(String notice) {
-		this.notice = notice;
-	}
-
- 
-
-	public String getContactNum() {
-		return contactNum;
+	public void setIntroduction(String introduction) {
+		this.introduction = introduction;
 	}
 
 
-	public void setContactNum(String contactNum) {
-		this.contactNum = contactNum;
+	public List<AttachmentDTO> getAttachments() {
+		return attachments;
+	}
+
+
+	public void setAttachments(List<AttachmentDTO> attachments) {
+		this.attachments = attachments;
+	}
+
+
+	public List<SiteItemDTO> getSiteItems() {
+		return siteItems;
+	}
+
+
+	public void setSiteItems(List<SiteItemDTO> siteItems) {
+		this.siteItems = siteItems;
 	}
 
 

@@ -4,7 +4,12 @@ import java.util.List;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
-
+/**
+ * <ul>
+ * <li>rentalDate：Long 日期</li>
+ * <li>siteRules：单元格列表</li> 
+ * </ul>
+ */
 public class RentalSiteDayRulesDTO {
 	private Long rentalDate;
 	@ItemType(RentalSiteRulesDTO.class)

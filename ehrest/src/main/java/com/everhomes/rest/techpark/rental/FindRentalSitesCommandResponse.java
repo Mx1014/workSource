@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * 场所
  * <li>rentalSites：场所列表</li>
+ * <li>nextPageAnchor：下页的anchor</li>
  * </ul>
  */
 public class FindRentalSitesCommandResponse {

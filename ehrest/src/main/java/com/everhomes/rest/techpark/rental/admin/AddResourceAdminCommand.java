@@ -9,9 +9,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * 列出资源列表返回值(根据图标和园区)
- * <li>ownerId: 所属者id</li>
- * <li>ownerType: 所属者类型</li>
+ * 列出资源列表返回值(根据图标和园区) 
  * <li>launchPadItemId: 图标id</li>
  * <li>organizationId: 所属公司id</li>
  * <li>siteName: 名称</li>
