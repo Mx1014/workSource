@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPaymentCardRechargeOrders extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhPaymentCardRechargeOrdersRecord> {
 
-	private static final long serialVersionUID = -1370904458;
+	private static final long serialVersionUID = 796275574;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_payment_card_recharge_orders</code>
@@ -107,9 +107,9 @@ public class EhPaymentCardRechargeOrders extends org.jooq.impl.TableImpl<com.eve
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPaymentCardRechargeOrdersRecord, java.sql.Timestamp> RECHARGE_TIME = createField("recharge_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "recharge time");
 
 	/**
-	 * The column <code>ehcore.eh_payment_card_recharge_orders.recharge_status</code>. 0: none, 1: unrecharged 1: recharged
+	 * The column <code>ehcore.eh_payment_card_recharge_orders.recharge_status</code>. 0: fail, 1: unrecharged 2: recharged 3:COMPLETE 4:REFUNDED
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPaymentCardRechargeOrdersRecord, java.lang.Byte> RECHARGE_STATUS = createField("recharge_status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: none, 1: unrecharged 1: recharged");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPaymentCardRechargeOrdersRecord, java.lang.Byte> RECHARGE_STATUS = createField("recharge_status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: fail, 1: unrecharged 2: recharged 3:COMPLETE 4:REFUNDED");
 
 	/**
 	 * The column <code>ehcore.eh_payment_card_recharge_orders.creator_uid</code>.

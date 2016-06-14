@@ -11,13 +11,15 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPaymentCardTransactions implements java.io.Serializable {
 
-	private static final long serialVersionUID = 336273924;
+	private static final long serialVersionUID = -204120220;
 
 	private java.lang.Long       id;
 	private java.lang.Integer    namespaceId;
 	private java.lang.String     ownerType;
 	private java.lang.Long       ownerId;
 	private java.lang.Long       payerUid;
+	private java.lang.String     userName;
+	private java.lang.String     mobile;
 	private java.lang.String     itemName;
 	private java.lang.String     merchant;
 	private java.math.BigDecimal amount;
@@ -38,6 +40,8 @@ public class EhPaymentCardTransactions implements java.io.Serializable {
 		java.lang.String     ownerType,
 		java.lang.Long       ownerId,
 		java.lang.Long       payerUid,
+		java.lang.String     userName,
+		java.lang.String     mobile,
 		java.lang.String     itemName,
 		java.lang.String     merchant,
 		java.math.BigDecimal amount,
@@ -55,6 +59,8 @@ public class EhPaymentCardTransactions implements java.io.Serializable {
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;
 		this.payerUid = payerUid;
+		this.userName = userName;
+		this.mobile = mobile;
 		this.itemName = itemName;
 		this.merchant = merchant;
 		this.amount = amount;
@@ -106,6 +112,22 @@ public class EhPaymentCardTransactions implements java.io.Serializable {
 
 	public void setPayerUid(java.lang.Long payerUid) {
 		this.payerUid = payerUid;
+	}
+
+	public java.lang.String getUserName() {
+		return this.userName;
+	}
+
+	public void setUserName(java.lang.String userName) {
+		this.userName = userName;
+	}
+
+	public java.lang.String getMobile() {
+		return this.mobile;
+	}
+
+	public void setMobile(java.lang.String mobile) {
+		this.mobile = mobile;
 	}
 
 	public java.lang.String getItemName() {

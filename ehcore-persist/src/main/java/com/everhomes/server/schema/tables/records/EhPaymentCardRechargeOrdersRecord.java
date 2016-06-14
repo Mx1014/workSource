@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPaymentCardRechargeOrdersRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhPaymentCardRechargeOrdersRecord> implements org.jooq.Record20<java.lang.Long, java.lang.Long, java.lang.Integer, java.lang.String, java.lang.Long, java.lang.Long, java.lang.String, java.lang.String, java.lang.String, java.lang.Long, java.math.BigDecimal, java.lang.Long, java.lang.String, java.sql.Timestamp, java.lang.Byte, java.sql.Timestamp, java.lang.Byte, java.lang.Long, java.sql.Timestamp, java.lang.String> {
 
-	private static final long serialVersionUID = -1641008212;
+	private static final long serialVersionUID = -1356070228;
 
 	/**
 	 * Setter for <code>ehcore.eh_payment_card_recharge_orders.id</code>. id of the record
@@ -238,14 +238,14 @@ public class EhPaymentCardRechargeOrdersRecord extends org.jooq.impl.UpdatableRe
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_payment_card_recharge_orders.recharge_status</code>. 0: none, 1: unrecharged 1: recharged
+	 * Setter for <code>ehcore.eh_payment_card_recharge_orders.recharge_status</code>. 0: fail, 1: unrecharged 2: recharged 3:COMPLETE 4:REFUNDED
 	 */
 	public void setRechargeStatus(java.lang.Byte value) {
 		setValue(16, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_payment_card_recharge_orders.recharge_status</code>. 0: none, 1: unrecharged 1: recharged
+	 * Getter for <code>ehcore.eh_payment_card_recharge_orders.recharge_status</code>. 0: fail, 1: unrecharged 2: recharged 3:COMPLETE 4:REFUNDED
 	 */
 	public java.lang.Byte getRechargeStatus() {
 		return (java.lang.Byte) getValue(16);

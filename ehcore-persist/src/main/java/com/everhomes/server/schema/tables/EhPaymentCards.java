@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPaymentCards extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhPaymentCardsRecord> {
 
-	private static final long serialVersionUID = 2111692898;
+	private static final long serialVersionUID = -2073456854;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_payment_cards</code>
@@ -47,9 +47,19 @@ public class EhPaymentCards extends org.jooq.impl.TableImpl<com.everhomes.server
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPaymentCardsRecord, java.lang.Long> OWNER_ID = createField("owner_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_payment_cards.category_id</code>. id of the card type
+	 * The column <code>ehcore.eh_payment_cards.issuer_id</code>. id of the card issuer
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPaymentCardsRecord, java.lang.Long> CATEGORY_ID = createField("category_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "id of the card type");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPaymentCardsRecord, java.lang.Long> ISSUER_ID = createField("issuer_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "id of the card issuer");
+
+	/**
+	 * The column <code>ehcore.eh_payment_cards.user_name</code>. the name of user
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPaymentCardsRecord, java.lang.String> USER_NAME = createField("user_name", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "the name of user");
+
+	/**
+	 * The column <code>ehcore.eh_payment_cards.mobile</code>. the mobile of user
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPaymentCardsRecord, java.lang.String> MOBILE = createField("mobile", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "the mobile of user");
 
 	/**
 	 * The column <code>ehcore.eh_payment_cards.card_no</code>. the id of card ,according the third system

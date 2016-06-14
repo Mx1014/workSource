@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPaymentCardTransactions extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhPaymentCardTransactionsRecord> {
 
-	private static final long serialVersionUID = 1586257706;
+	private static final long serialVersionUID = -1539083075;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_payment_card_transactions</code>
@@ -50,6 +50,16 @@ public class EhPaymentCardTransactions extends org.jooq.impl.TableImpl<com.everh
 	 * The column <code>ehcore.eh_payment_card_transactions.payer_uid</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPaymentCardTransactionsRecord, java.lang.Long> PAYER_UID = createField("payer_uid", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_payment_card_transactions.user_name</code>. the name of user
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPaymentCardTransactionsRecord, java.lang.String> USER_NAME = createField("user_name", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "the name of user");
+
+	/**
+	 * The column <code>ehcore.eh_payment_card_transactions.mobile</code>. the mobile of user
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPaymentCardTransactionsRecord, java.lang.String> MOBILE = createField("mobile", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "the mobile of user");
 
 	/**
 	 * The column <code>ehcore.eh_payment_card_transactions.item_name</code>. the name of item

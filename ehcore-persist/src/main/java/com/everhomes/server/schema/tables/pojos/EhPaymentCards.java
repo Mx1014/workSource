@@ -11,13 +11,15 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPaymentCards implements java.io.Serializable {
 
-	private static final long serialVersionUID = -286716080;
+	private static final long serialVersionUID = -1328618884;
 
 	private java.lang.Long       id;
 	private java.lang.Integer    namespaceId;
 	private java.lang.String     ownerType;
 	private java.lang.Long       ownerId;
-	private java.lang.Long       categoryId;
+	private java.lang.Long       issuerId;
+	private java.lang.String     userName;
+	private java.lang.String     mobile;
 	private java.lang.String     cardNo;
 	private java.math.BigDecimal balance;
 	private java.lang.String     password;
@@ -37,7 +39,9 @@ public class EhPaymentCards implements java.io.Serializable {
 		java.lang.Integer    namespaceId,
 		java.lang.String     ownerType,
 		java.lang.Long       ownerId,
-		java.lang.Long       categoryId,
+		java.lang.Long       issuerId,
+		java.lang.String     userName,
+		java.lang.String     mobile,
 		java.lang.String     cardNo,
 		java.math.BigDecimal balance,
 		java.lang.String     password,
@@ -54,7 +58,9 @@ public class EhPaymentCards implements java.io.Serializable {
 		this.namespaceId = namespaceId;
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;
-		this.categoryId = categoryId;
+		this.issuerId = issuerId;
+		this.userName = userName;
+		this.mobile = mobile;
 		this.cardNo = cardNo;
 		this.balance = balance;
 		this.password = password;
@@ -100,12 +106,28 @@ public class EhPaymentCards implements java.io.Serializable {
 		this.ownerId = ownerId;
 	}
 
-	public java.lang.Long getCategoryId() {
-		return this.categoryId;
+	public java.lang.Long getIssuerId() {
+		return this.issuerId;
 	}
 
-	public void setCategoryId(java.lang.Long categoryId) {
-		this.categoryId = categoryId;
+	public void setIssuerId(java.lang.Long issuerId) {
+		this.issuerId = issuerId;
+	}
+
+	public java.lang.String getUserName() {
+		return this.userName;
+	}
+
+	public void setUserName(java.lang.String userName) {
+		this.userName = userName;
+	}
+
+	public java.lang.String getMobile() {
+		return this.mobile;
+	}
+
+	public void setMobile(java.lang.String mobile) {
+		this.mobile = mobile;
 	}
 
 	public java.lang.String getCardNo() {

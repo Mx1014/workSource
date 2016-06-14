@@ -69,10 +69,24 @@ public class EhPaymentCardsDao extends org.jooq.impl.DAOImpl<com.everhomes.serve
 	}
 
 	/**
-	 * Fetch records that have <code>category_id IN (values)</code>
+	 * Fetch records that have <code>issuer_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPaymentCards> fetchByCategoryId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhPaymentCards.EH_PAYMENT_CARDS.CATEGORY_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPaymentCards> fetchByIssuerId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPaymentCards.EH_PAYMENT_CARDS.ISSUER_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>user_name IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPaymentCards> fetchByUserName(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPaymentCards.EH_PAYMENT_CARDS.USER_NAME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>mobile IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPaymentCards> fetchByMobile(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPaymentCards.EH_PAYMENT_CARDS.MOBILE, values);
 	}
 
 	/**

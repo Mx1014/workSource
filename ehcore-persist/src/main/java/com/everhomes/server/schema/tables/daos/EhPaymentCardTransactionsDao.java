@@ -76,6 +76,20 @@ public class EhPaymentCardTransactionsDao extends org.jooq.impl.DAOImpl<com.ever
 	}
 
 	/**
+	 * Fetch records that have <code>user_name IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPaymentCardTransactions> fetchByUserName(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPaymentCardTransactions.EH_PAYMENT_CARD_TRANSACTIONS.USER_NAME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>mobile IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPaymentCardTransactions> fetchByMobile(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPaymentCardTransactions.EH_PAYMENT_CARD_TRANSACTIONS.MOBILE, values);
+	}
+
+	/**
 	 * Fetch records that have <code>item_name IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPaymentCardTransactions> fetchByItemName(java.lang.String... values) {
