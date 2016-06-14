@@ -55,10 +55,10 @@ public class EhUserPostsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.s
 	}
 
 	/**
-	 * Fetch records that have <code>post_id IN (values)</code>
+	 * Fetch records that have <code>target_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserPosts> fetchByPostId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhUserPosts.EH_USER_POSTS.POST_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserPosts> fetchByTargetId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUserPosts.EH_USER_POSTS.TARGET_ID, values);
 	}
 
 	/**
@@ -66,5 +66,12 @@ public class EhUserPostsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.s
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserPosts> fetchByCreateTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhUserPosts.EH_USER_POSTS.CREATE_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>target_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserPosts> fetchByTargetType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUserPosts.EH_USER_POSTS.TARGET_TYPE, values);
 	}
 }
