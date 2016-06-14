@@ -11,25 +11,28 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUserPosts implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1786271767;
+	private static final long serialVersionUID = 581603019;
 
 	private java.lang.Long     id;
 	private java.lang.Long     ownerUid;
-	private java.lang.Long     postId;
+	private java.lang.Long     targetId;
 	private java.sql.Timestamp createTime;
+	private java.lang.String   targetType;
 
 	public EhUserPosts() {}
 
 	public EhUserPosts(
 		java.lang.Long     id,
 		java.lang.Long     ownerUid,
-		java.lang.Long     postId,
-		java.sql.Timestamp createTime
+		java.lang.Long     targetId,
+		java.sql.Timestamp createTime,
+		java.lang.String   targetType
 	) {
 		this.id = id;
 		this.ownerUid = ownerUid;
-		this.postId = postId;
+		this.targetId = targetId;
 		this.createTime = createTime;
+		this.targetType = targetType;
 	}
 
 	public java.lang.Long getId() {
@@ -48,12 +51,12 @@ public class EhUserPosts implements java.io.Serializable {
 		this.ownerUid = ownerUid;
 	}
 
-	public java.lang.Long getPostId() {
-		return this.postId;
+	public java.lang.Long getTargetId() {
+		return this.targetId;
 	}
 
-	public void setPostId(java.lang.Long postId) {
-		this.postId = postId;
+	public void setTargetId(java.lang.Long targetId) {
+		this.targetId = targetId;
 	}
 
 	public java.sql.Timestamp getCreateTime() {
@@ -62,5 +65,13 @@ public class EhUserPosts implements java.io.Serializable {
 
 	public void setCreateTime(java.sql.Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+	public java.lang.String getTargetType() {
+		return this.targetType;
+	}
+
+	public void setTargetType(java.lang.String targetType) {
+		this.targetType = targetType;
 	}
 }

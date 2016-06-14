@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUserPosts extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhUserPostsRecord> {
 
-	private static final long serialVersionUID = 1010074514;
+	private static final long serialVersionUID = -1421954116;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_user_posts</code>
@@ -37,14 +37,19 @@ public class EhUserPosts extends org.jooq.impl.TableImpl<com.everhomes.server.sc
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserPostsRecord, java.lang.Long> OWNER_UID = createField("owner_uid", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "owner user id");
 
 	/**
-	 * The column <code>ehcore.eh_user_posts.post_id</code>.
+	 * The column <code>ehcore.eh_user_posts.target_id</code>.
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserPostsRecord, java.lang.Long> POST_ID = createField("post_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserPostsRecord, java.lang.Long> TARGET_ID = createField("target_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "");
 
 	/**
 	 * The column <code>ehcore.eh_user_posts.create_time</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserPostsRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_user_posts.target_type</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserPostsRecord, java.lang.String> TARGET_TYPE = createField("target_type", org.jooq.impl.SQLDataType.VARCHAR.length(32), this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_user_posts</code> table reference
