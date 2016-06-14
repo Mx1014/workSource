@@ -56,6 +56,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.ExecutorUtil;
 import com.everhomes.util.StringHelper;
 
 @Component
@@ -229,24 +230,32 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
     public Action onLocalBusMessage(Object arg0, String arg1, Object arg2, String arg3) {
         //Must be
         try {
-            Long id = (Long)arg2;
-            if(null == id) {
-                LOGGER.error("None of promotion");
-                return Action.none;
-            } else {
-                LOGGER.error("new promotion id= " + id);
-                OpPromotionActivity promotion = promotionActivityProvider.getOpPromotionActivityById(id);
-                if(promotion != null) {
-                    OpPromotionCondition condition = OpPromotionUtils.getConditionFromPromotion(promotion);
-                    OpPromotionActivityContext ctx = new OpPromotionActivityContext(promotion);
-                    
-                    //Create local condition event
-                    condition.createCondition(ctx);
-                    }
-                }
+        	ExecutorUtil.submit(new Runnable() {
+				@Override
+				public void run() {
+					LOGGER.info("start run.....");
+					 Long id = (Long)arg2;
+			         if(null == id) {
+			              LOGGER.error("None of promotion");
+			         } else {
+			              LOGGER.debug("new promotion id= " + id);
+			              OpPromotionActivity promotion = promotionActivityProvider.getOpPromotionActivityById(id);
+			              if(promotion != null) {
+				              	OpPromotionCondition condition = OpPromotionUtils.getConditionFromPromotion(promotion);
+				              	OpPromotionActivityContext ctx = new OpPromotionActivityContext(promotion);
+				                    
+				                //Create local condition event
+				                condition.createCondition(ctx);
+			               }
+			         }
+				}
+			});
+			
         } catch(Exception e) {
             LOGGER.error("onLocalBusMessage error ", e);
-            }
+        } finally{
+        	
+        }
 
         return Action.none;
     }
