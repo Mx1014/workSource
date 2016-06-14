@@ -1820,6 +1820,10 @@ public class DoorAccessServiceImpl implements DoorAccessService {
       if(childs == null) {
             childs = doorAccessProvider.listDoorAccessByGroupId(doorAccess.getId(), 32);    
         }
+      
+      if(childs == null) {
+          return null;
+      }
         
         List<Long> deviceIds = new ArrayList<Long>();
         for(DoorAccess child : childs) {
