@@ -144,6 +144,7 @@ import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserCurrentEntityType;
+import com.everhomes.rest.user.UserFavoriteTargetType;
 import com.everhomes.rest.user.UserLikeType;
 import com.everhomes.rest.visibility.VisibilityScope;
 import com.everhomes.rest.visibility.VisibleRegionType;
@@ -608,7 +609,8 @@ public class ForumServiceImpl implements ForumService {
                 (DSLContext context, Object reducingContext)-> {
                     context.select().from(Tables.EH_USER_FAVORITES)
                         .where(Tables.EH_USER_FAVORITES.TARGET_ID.eq(postId))
-                        .and(Tables.EH_USER_FAVORITES.TARGET_TYPE.eq("topic"))
+                        .and(Tables.EH_USER_FAVORITES.TARGET_TYPE.eq(UserFavoriteTargetType.TOPIC.getCode())
+                        		.or(Tables.EH_USER_FAVORITES.TARGET_TYPE.eq(UserFavoriteTargetType.ACTIVITY.getCode())))
                         .fetch().map( (r) ->{
                         	
                         	userIds.add(r.getValue(Tables.EH_USER_FAVORITES.OWNER_UID));
@@ -642,7 +644,8 @@ public class ForumServiceImpl implements ForumService {
                         }
                     if(userIds.size() != 0){
                     	for(Long id:userIds){
-                    		userActivityProvider.deleteFavorite(id, postId, "topic");
+                    		userActivityProvider.deleteFavorite(id, postId, UserFavoriteTargetType.TOPIC.getCode());
+                    		userActivityProvider.deleteFavorite(id, postId, UserFavoriteTargetType.ACTIVITY.getCode());
                     	}
                     }
                    return null;
@@ -666,7 +669,12 @@ public class ForumServiceImpl implements ForumService {
                                     userActivityProvider.updateProfileIfNotExist(post.getCreatorUid(), UserProfileContstant.POSTED_TOPIC_COUNT, -1);    
                                     }
                                 }
-                            
+                            if(userIds.size() != 0){
+                            	for(Long id:userIds){
+                            		userActivityProvider.deleteFavorite(id, postId, UserFavoriteTargetType.TOPIC.getCode());
+                            		userActivityProvider.deleteFavorite(id, postId, UserFavoriteTargetType.ACTIVITY.getCode());
+                            	}
+                            }
                         return null;
                         });
                 } catch(Exception e) {

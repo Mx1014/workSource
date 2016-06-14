@@ -218,7 +218,15 @@ public class ActivityPostCommand{
         this.guest = guest;
     }
 
-    @Override
+    public String getMediaUrl() {
+		return mediaUrl;
+	}
+
+	public void setMediaUrl(String mediaUrl) {
+		this.mediaUrl = mediaUrl;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
