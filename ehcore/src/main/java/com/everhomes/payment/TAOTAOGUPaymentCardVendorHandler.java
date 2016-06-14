@@ -313,27 +313,55 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"the listCardTransactions request of taotaogu is failed.");
 		}
-		List<CardTransactionDTO> cardTransactionList = new ArrayList<>();
 		Map map = responseEntiy.getData();
+		List<CardTransactionOfMonth> resultList = new ArrayList<>();
 		if(map != null){
 			
 			String count = (String)map.get("Count");
 			List<Map<String,Object>> list = (List<Map<String, Object>>) map.get("Row");
+			outer:
 			for(Map<String,Object> m:list){
+				
+				BigDecimal consumeAmount = new BigDecimal(0);
+				BigDecimal rechargeAmount = new BigDecimal(0);
+				
 				CardTransactionDTO dto = new CardTransactionDTO();
 				dto.setMerchant((String)m.get("MerchId"));
-				dto.setAmount(new BigDecimal((String)m.get("ChdrRvaAmt")));
+				BigDecimal amount = new BigDecimal((String)m.get("ChdrRvaAmt"));
+				dto.setAmount(amount);
 				String transactionType = (String)m.get("TransType");
-				if("101".equals(transactionType))
+				if("101".equals(transactionType)){
 					dto.setTransactionType(CardTransactionTypeStatus.CONSUME.getCode());
-				if("203".equals(transactionType))
+					consumeAmount = consumeAmount.add(amount);
+				}
+				if("203".equals(transactionType)){
 					dto.setTransactionType(CardTransactionTypeStatus.RECHARGE.getCode());
+					rechargeAmount = rechargeAmount.add(amount);
+				}
 				dto.setStatus((String)m.get("ProcStatus"));
-				dto.setTransactionTime(StrTotimestamp2((String)m.get("RecvTime")));
+				String recvTime = (String)m.get("RecvTime");
+				dto.setTransactionTime(StrTotimestamp2(recvTime));
+				
+				for(CardTransactionOfMonth ctm:resultList){
+					if(ctm.getDate().getTime() == StrTotimestamp(recvTime).getTime()){
+						List<CardTransactionDTO> requests = ctm.getRequests();
+						ctm.setConsumeAmount(ctm.getConsumeAmount().add(consumeAmount));
+						ctm.setRechargeAmount(ctm.getRechargeAmount().add(rechargeAmount));
+						requests.add(dto);
+						continue outer;
+					}
+				}
+				CardTransactionOfMonth  cardTransactionOfMonth = new CardTransactionOfMonth();
+				List<CardTransactionDTO> cardTransactionList = new ArrayList<>();
 				cardTransactionList.add(dto);
+				cardTransactionOfMonth.setRequests(cardTransactionList);
+				cardTransactionOfMonth.setDate(StrTotimestamp(recvTime));
+				cardTransactionOfMonth.setConsumeAmount(consumeAmount);
+				cardTransactionOfMonth.setRechargeAmount(rechargeAmount);
+				resultList.add(cardTransactionOfMonth);
 			}
 		}
-		return null;
+		return resultList;
 	}
 	
 	private Timestamp StrTotimestamp(String date){
@@ -434,17 +462,31 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		ResponseEntiy responseEntiy = null;
 		try {
 			responseEntiy = TAOTAOGUHttpUtil.post(brandCode,"0020",param);
+		
+			if(responseEntiy.isSuccess()){
+				order.setRechargeStatus(CardRechargeStatus.RECHARGED.getCode());
+				order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
+				paymentCardProvider.updatePaymentCardRechargeOrder(order);
+			}else{
+				boolean flag = true;
+				int i = 1;
+				
+				Map<String, Object> queryParam = new HashMap<String, Object>();
+				queryParam.put("QueryType", "0020");
+				queryParam.put("OrigMsgId", responseEntiy.getMsgID());
+				while(flag&&i<=10){
+					responseEntiy = TAOTAOGUHttpUtil.post(brandCode,"9990",param);
+					if(responseEntiy.isSuccess()){
+						Map map = responseEntiy.getData();
+						String status = (String) map.get("ProcStatus");
+					}
+				}
+				
+			}
 		} catch (Exception e) {
 			LOGGER.error("the recharge request of taotaogu is failed.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"the recharge request of taotaogu is failed.");
-		}
-		if(responseEntiy.isSuccess()){
-			order.setRechargeStatus(CardRechargeStatus.RECHARGED.getCode());
-			order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
-			paymentCardProvider.updatePaymentCardRechargeOrder(order);
-		}else{
-			
 		}
 		
 	}

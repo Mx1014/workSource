@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -288,12 +289,15 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     	User user = UserContext.current().getUser();
     	ListCardTransactionsResponse response = new ListCardTransactionsResponse();
     	List<PaymentCard> cardList = paymentCardProvider.listPaymentCard(cmd.getOwnerId(),cmd.getOwnerType(),user.getId());
-		for(PaymentCard card:cardList){
+		//for(PaymentCard card:cardList){
+    	PaymentCard card = cardList.get(0);
 			PaymentCardVendorHandler handler = getPaymentCardVendorHandler(card.getVendorName());
 			List<CardTransactionOfMonth> list = handler.listCardTransactions(cmd,card);
-//			if(null != dto)
-//				result.add(dto);
-		}
+		//}
+			//按时间排序
+			Collections.sort(list);
+			response.setRequests(list);
+			response.setNextPageAnchor(cmd.getPageAnchor()+1);
 		return response;
     }
     

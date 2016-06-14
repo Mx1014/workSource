@@ -11,6 +11,7 @@ public class ResponseEntiy {
 	private String AppName;
 	private String Version;
 	private String MsgType;
+	private String MsgID;
 	private Object Result;
 	
 	public String getAppName() {
@@ -43,6 +44,13 @@ public class ResponseEntiy {
 	}
 	public void setResult(Object result) {
 		Result = result;
+	}
+	
+	public String getMsgID() {
+		return MsgID;
+	}
+	public void setMsgID(String msgID) {
+		MsgID = msgID;
 	}
 	public boolean isSuccess(){
 		if("00".equals(this.RespCode))

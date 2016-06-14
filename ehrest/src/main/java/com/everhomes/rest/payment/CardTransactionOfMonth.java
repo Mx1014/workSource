@@ -7,7 +7,7 @@ import java.util.List;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
-public class CardTransactionOfMonth {
+public class CardTransactionOfMonth implements Comparable<CardTransactionOfMonth>{
 	private Timestamp date;
 	private BigDecimal consumeAmount;
 	private BigDecimal rechargeAmount;
@@ -41,5 +41,21 @@ public class CardTransactionOfMonth {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+	@Override
+	public int compareTo(CardTransactionOfMonth o) {
+		if(this.date.getTime() < o.date.getTime())
+			return -1;
+		if(this.date.getTime() > o.date.getTime())
+			return 1;
+		return 0;
+	}
 	
+	@Override
+	public boolean equals(Object obj) {
+        if(this == obj)
+        	return true;
+        if(obj instanceof CardTransactionOfMonth)
+        	return this.date.getTime() == ((CardTransactionOfMonth)obj).date.getTime();
+        return false;
+    }
 }

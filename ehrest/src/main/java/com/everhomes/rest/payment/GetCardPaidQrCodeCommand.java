@@ -26,7 +26,6 @@ public class GetCardPaidQrCodeCommand {
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
 	}
-    
 	
 	public Long getCardId() {
 		return cardId;
