@@ -323,15 +323,20 @@ public class PmsyServiceImpl implements PmsyService{
 		List<PmsyOrderItem> orderItemList = pmsyProvider.ListBillOrderItems(ids);
 		outer:
 		for(PmsyOrder order:list){
+			long billdate = 0;
 			for(PmsyOrderItem item:orderItemList){
 				if(order.getId().equals(item.getOrderId())){
+					
 					List<PmsyOrderItem> items = order.getItems();
 					if(items == null)
 						items = new ArrayList<PmsyOrderItem>();
 					items.add(item);
 					order.setItems(items);
 					order.setBillDate(item.getBillDate().getTime());
-					if(items.size()>1){
+					if(items.size()==1){
+						billdate = item.getBillDate().getTime();
+					}
+					if(billdate != item.getBillDate().getTime()){
 						order.setBillDate(0L);
 						continue outer;
 					}
