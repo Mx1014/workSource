@@ -1,5 +1,8 @@
 package com.everhomes.payment.taotaogu;
 
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -17,12 +20,19 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.cert.Cert;
+import com.everhomes.cert.CertProvider;
+import com.everhomes.payment.TAOTAOGUPaymentCardVendorHandler;
 import com.everhomes.payment.VendorConstant;
 import com.google.gson.Gson;
 
 public class TAOTAOGUHttpUtil {
-	
+	private static final Logger LOGGER = LoggerFactory.getLogger(TAOTAOGUHttpUtil.class);
+
 	public static ResponseEntiy post(String brandCode,String msgType,Map<String, Object> param) throws Exception {
 		CloseableHttpClient httpClient = HttpClients.createDefault();
 
@@ -59,8 +69,17 @@ public class TAOTAOGUHttpUtil {
 
 		requestParam.put("Param",param);
 		byte[] data = gson.toJson(requestParam).getBytes();
-		String keyStorePath = TAOTAOGUHttpUtil.class.getClassLoader().getResource(VendorConstant.keyStorePath).getPath();
-		byte[] sign = CertCoder.sign(data, keyStorePath,"jxd", "123456", "123456");
+		
+		CertProvider certProvider =  PlatformContext.getComponent("certProviderImpl");
+		Cert cert = certProvider.findCertByName("sunwen");
+		InputStream in = new ByteArrayInputStream(cert.getData());
+		
+		String pass = cert.getCertPass();
+		String[] passArr = pass.split(",");
+		
+	//	String keyStorePath = TAOTAOGUHttpUtil.class.getClassLoader().getResource(VendorConstant.keyStorePath).getPath();
+		
+		byte[] sign = CertCoder.sign(data, in,passArr[0], passArr[1], passArr[2]);
 		requestParam.put("Sign",ByteTools.BytesToHexStr(sign));
 		
 		return gson.toJson(requestParam);

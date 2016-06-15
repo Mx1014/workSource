@@ -1,5 +1,7 @@
 package com.everhomes.payment;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
@@ -17,6 +19,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.cert.Cert;
+import com.everhomes.cert.CertProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.payment.taotaogu.ByteTools;
@@ -50,6 +55,9 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
     private PaymentCardProvider paymentCardProvider;
 	@Autowired
     private ConfigurationProvider configProvider;
+	@Autowired
+	private CertProvider certProvider;
+	
 	@SuppressWarnings("rawtypes")
 	@Override
 	public CardInfoDTO getCardInfoByVendor(PaymentCard card) {
@@ -162,11 +170,12 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				Map<String, Object> changePasswordParam = new HashMap<String, Object>();
 				changePasswordParam.put("BranchCode", brandCode);
 				changePasswordParam.put("CardId", cardId);
-				String pin3_crt = TAOTAOGUPaymentCardVendorHandler.class.getClassLoader().getResource(VendorConstant.pin3_crt).getPath();
-
-				byte[] oldpsd = CertCoder.encryptByPublicKey("111111".getBytes(), pin3_crt);
+				Cert cert = certProvider.findCertByName("sunwen_public_key");
+				InputStream in = new ByteArrayInputStream(cert.getData());
+				
+				byte[] oldpsd = CertCoder.encryptByPublicKey("111111".getBytes(), in);
 				changePasswordParam.put("OrigPassWord", ByteTools.BytesToHexStr(oldpsd));
-				byte[] newpsd = CertCoder.encryptByPublicKey(cmd.getPassword().getBytes(), pin3_crt);
+				byte[] newpsd = CertCoder.encryptByPublicKey(cmd.getPassword().getBytes(), in);
 				changePasswordParam.put("NewPassWord", ByteTools.BytesToHexStr(newpsd));
 				changePasswordParam.put("Remark", "");
 				ResponseEntiy changePasswordResponseEntiy = TAOTAOGUHttpUtil.post(brandCode,"0050",changePasswordParam);
@@ -229,11 +238,11 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		byte[] newpsd = null;
 		ResponseEntiy changePasswordResponseEntiy = null;
 		try {
-			String pin3_crt = TAOTAOGUPaymentCardVendorHandler.class.getClassLoader().getResource(VendorConstant.pin3_crt).getPath();
-
-			oldpsd = CertCoder.encryptByPublicKey(cmd.getOldPassword().getBytes(), pin3_crt);		
+			Cert cert = certProvider.findCertByName("sunwen_public_key");
+			InputStream in = new ByteArrayInputStream(cert.getData());
+			oldpsd = CertCoder.encryptByPublicKey(cmd.getOldPassword().getBytes(), in);		
 			changePasswordParam.put("OrigPassWord", ByteTools.BytesToHexStr(oldpsd));
-			newpsd = CertCoder.encryptByPublicKey(cmd.getNewPassword().getBytes(), pin3_crt);
+			newpsd = CertCoder.encryptByPublicKey(cmd.getNewPassword().getBytes(), in);
 			changePasswordParam.put("NewPassWord", ByteTools.BytesToHexStr(newpsd));
 			changePasswordParam.put("Remark", "");
 			changePasswordResponseEntiy = TAOTAOGUHttpUtil.post(brandCode,"0050",changePasswordParam);
@@ -247,6 +256,8 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"change password of paymentCard is failed.");
 		}
+		paymentCard.setPassword(EncryptionUtils.hashPassword(cmd.getNewPassword()));
+		paymentCardProvider.updatePaymentCard(paymentCard);
 			
 	}
 
@@ -278,11 +289,11 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		changePasswordParam.put("CardId", paymentCard.getCardNo());
 		byte[] oldpsd = null;
 		byte[] newpsd = null;
-		
-		String pin3_crt = TAOTAOGUPaymentCardVendorHandler.class.getClassLoader().getResource(VendorConstant.pin3_crt).getPath();
-			oldpsd = CertCoder.encryptByPublicKey("111111".getBytes(), pin3_crt);		
+		Cert cert = certProvider.findCertByName("sunwen_public_key");
+		InputStream in = new ByteArrayInputStream(cert.getData());
+			oldpsd = CertCoder.encryptByPublicKey("111111".getBytes(), in);		
 			changePasswordParam.put("OrigPassWord", ByteTools.BytesToHexStr(oldpsd));
-			newpsd = CertCoder.encryptByPublicKey(cmd.getNewPassword().getBytes(), pin3_crt);
+			newpsd = CertCoder.encryptByPublicKey(cmd.getNewPassword().getBytes(), in);
 			changePasswordParam.put("NewPassWord", ByteTools.BytesToHexStr(newpsd));
 			changePasswordParam.put("Remark", "");
 			changePasswordResponseEntiy = TAOTAOGUHttpUtil.post(brandCode,"0050",changePasswordParam);
@@ -296,6 +307,8 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"change password of paymentCard is failed.");
 		}
+		paymentCard.setPassword(EncryptionUtils.hashPassword(cmd.getNewPassword()));
+		paymentCardProvider.updatePaymentCard(paymentCard);
 		
 	}
 	@Override
@@ -309,18 +322,19 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		param.put("BranchCode", brandCode);
 		//param.put("CardId", "5882572900500000182");
 		//param.put("CardId", "5882572900500005884");
+		param.put("CardId", "");
 		param.put("EndCardId", "");
 		param.put("MerchId", "");
 		param.put("TerminalId", "");
 		param.put("StartDate", "");
 		param.put("Enddate", "");
 		param.put("TransType", "");
-		param.put("PageNumber", cmd.getPageAnchor());
-		param.put("PageSize", cmd.getPageSize());
+		param.put("PageNumber", cmd.getPageAnchor()==null?"":String.valueOf(cmd.getPageAnchor()));
+		param.put("PageSize", cmd.getPageSize()==null?"":String.valueOf(cmd.getPageSize()));
 		
 		ResponseEntiy responseEntiy = null;
 		try {
-			responseEntiy = TAOTAOGUHttpUtil.post(brandCode,"0040",param);
+			responseEntiy = TAOTAOGUHttpUtil.post(brandCode,"1030",param);
 		} catch (Exception e) {
 			LOGGER.error("the listCardTransactions request of taotaogu is failed.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
@@ -335,7 +349,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		List<CardTransactionOfMonth> resultList = new ArrayList<>();
 		if(map != null){
 			
-			String count = (String)map.get("Count");
+			Double count = (Double)map.get("Count");
 			List<Map<String,Object>> list = (List<Map<String, Object>>) map.get("Row");
 			outer:
 			for(Map<String,Object> m:list){
@@ -345,7 +359,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				
 				CardTransactionDTO dto = new CardTransactionDTO();
 				dto.setMerchant((String)m.get("MerchId"));
-				BigDecimal amount = new BigDecimal((String)m.get("ChdrRvaAmt"));
+				BigDecimal amount = new BigDecimal((Double)m.get("ChdrRvaAmt"));
 				dto.setAmount(amount);
 				String transactionType = (String)m.get("TransType");
 				if("101".equals(transactionType)){

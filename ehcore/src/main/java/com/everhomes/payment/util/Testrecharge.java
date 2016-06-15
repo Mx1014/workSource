@@ -19,7 +19,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
 import com.everhomes.payment.taotaogu.ByteTools;
-import com.everhomes.payment.taotaogu.CertCoder;
 import com.google.gson.Gson;
 
 public class Testrecharge {

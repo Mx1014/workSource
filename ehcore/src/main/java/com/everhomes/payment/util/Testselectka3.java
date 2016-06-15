@@ -19,7 +19,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
 import com.everhomes.payment.taotaogu.ByteTools;
-import com.everhomes.payment.taotaogu.CertCoder;
 import com.google.gson.Gson;
 
 public class Testselectka3 {
@@ -71,15 +70,15 @@ public class Testselectka3 {
 		Map<String, Object> param = new HashMap<String, Object>();
 		param.put("BranchCode", "10002900");
 		//param.put("CardId", "5882572900500000182");
-		param.put("CardId", "5882572900500005884");
+		//param.put("CardId", "5882572900500005884");
 		param.put("EndCardId", "");
 		param.put("MerchId", "");
 		param.put("TerminalId", "");
 		param.put("StartDate", "");
 		param.put("Enddate", "");
 		param.put("TransType", "");
-		param.put("PageNumber", "1");
-		param.put("PageSize", "5");
+		param.put("PageNumber", "");
+		param.put("PageSize", "");
 
 	
 		requestParam.put("Param",param);

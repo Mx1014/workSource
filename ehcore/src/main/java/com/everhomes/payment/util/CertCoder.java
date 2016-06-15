@@ -1,7 +1,6 @@
-package com.everhomes.payment.taotaogu;
+package com.everhomes.payment.util;
 
 import java.io.FileInputStream;
-import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -43,10 +42,10 @@ public abstract class CertCoder {
 	 * @return
 	 * @throws Exception
 	 */
-	private static PrivateKey getPrivateKeyByKeyStore(InputStream in, String alias, String ksPassword, String pkPassword)
+	private static PrivateKey getPrivateKeyByKeyStore(String keyStorePath, String alias, String ksPassword, String pkPassword)
 		throws Exception {
 		// 加载密钥库.
-		KeyStore ks = getKeyStore(in, ksPassword);
+		KeyStore ks = getKeyStore(keyStorePath, ksPassword);
 		
 		return (PrivateKey) ks.getKey(alias, pkPassword.toCharArray());
 	}
@@ -59,15 +58,22 @@ public abstract class CertCoder {
 	 * @return
 	 * @throws Exception 
 	 */
-	private static KeyStore getKeyStore(InputStream in, String password) throws Exception {
+	private static KeyStore getKeyStore(String keyStorePath, String password) throws Exception {
 		// 实例化密钥库.
 		KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
 		
+		// 加载密钥库.
+		FileInputStream is = null;
+		
 		try {
-			ks.load(in, password.toCharArray());
+			is = new FileInputStream(keyStorePath);
+			ks.load(is, password.toCharArray());
 		}
 		catch(Exception e) {
 			e.printStackTrace();
+		}
+		finally {
+			IOUtils.closeQuietly(is);
 		}
 		
 		return ks;
@@ -80,9 +86,9 @@ public abstract class CertCoder {
 	 * @return
 	 * @throws Exception
 	 */
-	private static PublicKey getPublicKeyByCert(InputStream in) throws Exception {
+	private static PublicKey getPublicKeyByCert(String certPath) throws Exception {
 		// 获得证书.
-		Certificate cert = getCert(in);
+		Certificate cert = getCert(certPath);
 		
 		// 获得公钥.
 		return cert.getPublicKey();
@@ -95,18 +101,23 @@ public abstract class CertCoder {
 	 * @return
 	 * @throws Exception
 	 */
-	private static Certificate getCert(InputStream in) throws Exception {
+	private static Certificate getCert(String certPath) throws Exception {
 		// 实例化证书工厂.
 		CertificateFactory factory = CertificateFactory.getInstance(CERT_TYPE);
 		
 		// 加载证书.
-		in.reset();
+		FileInputStream is = null;
+		
 		try {
+			is = new FileInputStream(certPath);
 			
-			return factory.generateCertificate(in);
+			return factory.generateCertificate(is);
 		}
 		catch(Exception e) {
 			e.printStackTrace();
+		}
+		finally {
+			IOUtils.closeQuietly(is);
 		}
 		
 		return null;
@@ -121,9 +132,9 @@ public abstract class CertCoder {
 	 * @return
 	 * @throws Exception
 	 */
-	private static Certificate getCert(InputStream in, String alias, String password) throws Exception {
+	private static Certificate getCert(String keyStorePath, String alias, String password) throws Exception {
 		// 获得密钥库.
-		KeyStore ks = getKeyStore(in, password);
+		KeyStore ks = getKeyStore(keyStorePath, password);
 		
 		return ks.getCertificate(alias);
 	}
@@ -138,9 +149,9 @@ public abstract class CertCoder {
 	 * @return
 	 * @throws Exception
 	 */
-	public static byte[] encryptByPrivateKey(byte[] data, InputStream in, String alias, String ksPassword, String pkPassword) throws Exception {
+	public static byte[] encryptByPrivateKey(byte[] data, String keyStorePath, String alias, String ksPassword, String pkPassword) throws Exception {
 		// 取得私钥.
-		PrivateKey privateKey = getPrivateKeyByKeyStore(in, alias, ksPassword, pkPassword);
+		PrivateKey privateKey = getPrivateKeyByKeyStore(keyStorePath, alias, ksPassword, pkPassword);
 		
 		// 对数据加密.
 		Cipher cipher = Cipher.getInstance(privateKey.getAlgorithm());
@@ -173,9 +184,9 @@ public abstract class CertCoder {
 	 * @return
 	 * @throws Exception
 	 */
-	public static byte[] decryptByPrivateKey(byte[] data, InputStream in, String alias, String ksPassword, String pkPassword) throws Exception {
+	public static byte[] decryptByPrivateKey(byte[] data, String keyStorePath, String alias, String ksPassword, String pkPassword) throws Exception {
 		// 取得私钥.
-		PrivateKey privateKey = getPrivateKeyByKeyStore(in, alias, ksPassword, pkPassword);
+		PrivateKey privateKey = getPrivateKeyByKeyStore(keyStorePath, alias, ksPassword, pkPassword);
 		
 		// 对数据加密.
 		Cipher cipher = Cipher.getInstance(privateKey.getAlgorithm());
@@ -206,9 +217,9 @@ public abstract class CertCoder {
 	 * @return
 	 * @throws Exception
 	 */
-	public static byte[] encryptByPublicKey(byte[] data, InputStream in) throws Exception {
+	public static byte[] encryptByPublicKey(byte[] data, String certPath) throws Exception {
 		// 取得公钥.
-		PublicKey publicKey = getPublicKeyByCert(in);
+		PublicKey publicKey = getPublicKeyByCert(certPath);
 		
 		// 对数据加密.
 		Cipher cipher = Cipher.getInstance(publicKey.getAlgorithm());
@@ -239,9 +250,9 @@ public abstract class CertCoder {
 	 * @return
 	 * @throws Exception
 	 */
-	public static byte[] decryptByPublicKey(byte[] data, InputStream in) throws Exception {
+	public static byte[] decryptByPublicKey(byte[] data, String certPath) throws Exception {
 		// 取得公钥.
-		PublicKey publicKey = getPublicKeyByCert(in);
+		PublicKey publicKey = getPublicKeyByCert(certPath);
 		
 		// 对数据加密.
 		Cipher cipher = Cipher.getInstance(publicKey.getAlgorithm());
@@ -274,12 +285,12 @@ public abstract class CertCoder {
 	 * @return
 	 * @throws Exception
 	 */
-	public static byte[] sign(byte[] data, InputStream in, String alias, String ksPassword, String pkPassword) throws Exception {
+	public static byte[] sign(byte[] data, String keyStorePath, String alias, String ksPassword, String pkPassword) throws Exception {
 		// 获得证书.
-		X509Certificate cert = (X509Certificate) getCert(in, alias, ksPassword);
-		in.reset();
+		X509Certificate cert = (X509Certificate) getCert(keyStorePath, alias, ksPassword);
+		
 		// 获得私钥.
-		PrivateKey privateKey = getPrivateKeyByKeyStore(in, alias, ksPassword, pkPassword);
+		PrivateKey privateKey = getPrivateKeyByKeyStore(keyStorePath, alias, ksPassword, pkPassword);
 		
 		// 构建签名, 由证书指定签名算法, 由私钥初始化签名.
 		Signature sign = Signature.getInstance(cert.getSigAlgName());
@@ -298,9 +309,9 @@ public abstract class CertCoder {
 	 * @return
 	 * @throws Exception
 	 */
-	public static boolean verifySign(byte[] data, byte[] sign, InputStream in) throws Exception {
+	public static boolean verifySign(byte[] data, byte[] sign, String certPath) throws Exception {
 		// 获得证书.
-		X509Certificate cert = (X509Certificate) getCert(in);
+		X509Certificate cert = (X509Certificate) getCert(certPath);
 		
 		// 由证书构建签名.
 		Signature signature = Signature.getInstance(cert.getSigAlgName());
@@ -310,27 +321,4 @@ public abstract class CertCoder {
 		return signature.verify(sign);
 	}
 	
-	public static void main(String[] args) throws Exception {
-//		byte[] data = "{\"AppName\":\"ICCard\",\"Version\":\"V0.01\",\"ClientDt\":\"20160511125151\",\"SrcId\":\"10002900\",\"DstId\":\"00000000\",\"MsgType\":\"1010\",\"MsgID\":\"10002900000000000000000000000411\",\"Param\":{\"branchCode\":\"10002900\",\"CardId\":\"3300025840200000090\",\"AcctType\":\"00\"}}".getBytes();
-//		//4AA5559EE11221A41D4332DCD2517E11B99E1E3B81FDD1C8A1BA71022F4B9D639A4995A6F0A4FE3B8E5E1128C964884A2AA9FC2924F33351F36722CA04F6B8BD711C6EB4DA65B53BE84C78515B1EF97575FC06E7259B74651254543D2C984098082F55E1C24AD1152F1A78F6EDDEB73AF9E86439703F322E0A81732C85E08C6B
-//		byte[] sign = sign(data, "d:/jxd.keystore", "jxd", "123456", "123456");
-//		System.out.println(ByteTools.BytesToHexStr(sign));
-//		boolean status = verifySign(data, sign, "d:/jxd.cer");
-////		
-//		System.out.println(status);
-		
-		//公钥加密-私钥解密
-//		byte[] ciphertext = encryptByPublicKey("123456".getBytes(), "h:/pin3.crt");
-//		System.out.println("共钥加密-密文：" + ByteTools.BytesToHexStr(ciphertext));
-		
-//		byte[] plaintext = decryptByPrivateKey(ciphertext, "e:/xuyuji.keystore", "xuyuji", "123456", "123456");
-//		System.out.println("私钥解密-明文：" + new String(plaintext));
-//		
-//		//私钥加密-公钥解密
-//		byte[] ciphertext = encryptByPrivateKey("123456".getBytes(), "E:\\一卡通接口\\jxd.keystore","jxd", "123456", "123456");;
-//		System.out.println("私钥加密-密文：" + ByteTools.BytesToHexStr(ciphertext));
-//		
-//		plaintext = decryptByPublicKey(ciphertext, "e:/xuyuji.cer");
-//		System.out.println("共钥解密-明文：" + new String(plaintext));
-	}
 }

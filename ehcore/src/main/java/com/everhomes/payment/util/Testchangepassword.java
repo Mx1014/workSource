@@ -19,7 +19,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
 import com.everhomes.payment.taotaogu.ByteTools;
-import com.everhomes.payment.taotaogu.CertCoder;
 import com.google.gson.Gson;
 
 public class Testchangepassword {
@@ -78,7 +77,7 @@ public class Testchangepassword {
 //		System.out.println("共钥加密-密文：" + ByteTools.BytesToHexStr(ciphertext));
 		param.put("OrigPassWord", ByteTools.BytesToHexStr(oldpsd));
 		
-		byte[] newpsd = CertCoder.encryptByPublicKey("654321".getBytes(), "E:\\pin3.crt");
+		byte[] newpsd = CertCoder.encryptByPublicKey("123456".getBytes(), "E:\\pin3.crt");
 //		System.out.println("共钥加密-密文：" + ByteTools.BytesToHexStr(ciphertext1));
 		param.put("NewPassWord", ByteTools.BytesToHexStr(newpsd));
 		param.put("Remark", "");

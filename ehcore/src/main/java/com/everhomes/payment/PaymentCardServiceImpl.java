@@ -292,6 +292,8 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     
     @Override
     public ListCardTransactionsResponse listCardTransactions(ListCardTransactionsCommand cmd){
+    	if(cmd.getPageAnchor() == null)
+    		cmd.setPageAnchor(1L);
     	User user = UserContext.current().getUser();
     	ListCardTransactionsResponse response = new ListCardTransactionsResponse();
     	List<PaymentCard> cardList = paymentCardProvider.listPaymentCard(cmd.getOwnerId(),cmd.getOwnerType(),user.getId());
@@ -303,7 +305,10 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 			//按时间排序
 			Collections.sort(list);
 			response.setRequests(list);
-			response.setNextPageAnchor(cmd.getPageAnchor()+1);
+			if(list.size()==0)
+				response.setNextPageAnchor(null);
+			else
+				response.setNextPageAnchor(cmd.getPageAnchor()+1);
 		return response;
     }
     

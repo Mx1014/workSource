@@ -117,6 +117,17 @@ public class PaymentCardProviderImpl implements PaymentCardProvider{
     }
     
     @Override
+    public void updatePaymentCard(PaymentCard paymentCard){
+    	
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPaymentCardsDao dao = new EhPaymentCardsDao(context.configuration());
+		dao.update(paymentCard);
+		
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPaymentCards.class, null);
+    	
+    }
+    
+    @Override
     public void createPaymentCardRechargeOrder(PaymentCardRechargeOrder paymentCardRechargeOrder){
     	
     	long id = sequenceProvider.getNextSequence(NameMapper

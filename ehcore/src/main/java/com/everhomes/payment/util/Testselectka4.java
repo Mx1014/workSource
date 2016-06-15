@@ -19,7 +19,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
 import com.everhomes.payment.taotaogu.ByteTools;
-import com.everhomes.payment.taotaogu.CertCoder;
 import com.google.gson.Gson;
 
 public class Testselectka4 {
@@ -64,7 +63,7 @@ public class Testselectka4 {
 		requestParam.put("ClientDt",sdf.format(new Date()));
 		requestParam.put("SrcId","10002900");
 		requestParam.put("DstId","00000000");
-		requestParam.put("MsgType","1030");
+		requestParam.put("MsgType","9990");
 		requestParam.put("MsgID","10002900" + StringUtils.leftPad(String.valueOf(System.currentTimeMillis()), 24, "0"));
 		requestParam.put("Sign", "");
 

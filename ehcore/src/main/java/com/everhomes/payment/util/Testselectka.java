@@ -1,5 +1,8 @@
 package com.everhomes.payment.util;
 
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -19,7 +22,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
 import com.everhomes.payment.taotaogu.ByteTools;
-import com.everhomes.payment.taotaogu.CertCoder;
 import com.everhomes.payment.taotaogu.ResponseEntiy;
 import com.google.gson.Gson;
 
@@ -81,6 +83,8 @@ public class Testselectka {
 	
 		requestParam.put("Param",param);
 		byte[] data = gson.toJson(requestParam).getBytes();
+		
+		
 		
 		byte[] sign = CertCoder.sign(data, "E:\\一卡通接口\\jxd.keystore","jxd", "123456", "123456");
 		requestParam.put("Sign",ByteTools.BytesToHexStr(sign));
