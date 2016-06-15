@@ -1807,6 +1807,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         auth.setDoorId(cmd.getDoorId());
         auth.setDriver(DoorAccessDriverType.LINGLING.getCode());
         auth.setOrganization(cmd.getOrganization());
+        auth.setPhone(cmd.getPhone());
+        auth.setNickname(cmd.getUserName());
+        auth.setKeyValidTime(System.currentTimeMillis() + 12* 60*60 * 1000l);
         
         List<DoorAccess> childs = null;
         

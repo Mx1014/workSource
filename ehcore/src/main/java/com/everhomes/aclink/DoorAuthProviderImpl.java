@@ -280,7 +280,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
     @Override
     public List<DoorAuth> searchDoorAuthByAdmin(ListingLocator locator, Long doorId, String keyword, Byte status, int count) {
         
-        return queryDoorAuth(locator, count, new ListingQueryBuilderCallback() {
+        return queryDoorAuthByTime(locator, count, new ListingQueryBuilderCallback() {
 
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
@@ -306,7 +306,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
     @Override
     public List<DoorAuth> searchVisitorDoorAuthByAdmin(ListingLocator locator, Long doorId, String keyword, Byte status, int count) {
         
-        return queryDoorAuth(locator, count, new ListingQueryBuilderCallback() {
+        return queryDoorAuthByTime(locator, count, new ListingQueryBuilderCallback() {
 
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
