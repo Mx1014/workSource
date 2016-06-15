@@ -34,6 +34,8 @@ import com.everhomes.aclink.lingling.AclinkLinglingQrCodeRequest;
 import com.everhomes.aclink.lingling.AclinkLinglingService;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
+import com.everhomes.border.Border;
+import com.everhomes.border.BorderProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
@@ -203,6 +205,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     
     @Autowired
     private LocaleTemplateService localeTemplateService;
+    
+    @Autowired
+    private BorderProvider borderProvider;
     
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
     
@@ -1925,6 +1930,14 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         doorMessage.setSeq(0l);
         doorMessage.setMessageType(DoorMessageType.NORMAL.getCode());
         
+        String borderUrl = "";
+        
+        List<Border> borders = borderProvider.listAllBorders();
+        if(borders == null || borders.size() <= 0) {
+            return null;
+        }
+        borderUrl = borders.get(0).getPublicAddress();
+        
         AesServerKey aesServerKey = aesServerKeyService.getCurrentAesServerKey(cmd.getDoorId());
         if(aesServerKey == null) {
             throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_PARAM_ERROR, "doorAccess key error");
@@ -1933,7 +1946,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         AclinkMessage body = new AclinkMessage();
         body.setCmd((byte)0xb);
         body.setSecretVersion(aesServerKey.getDeviceVer());
-        body.setEncrypted(AclinkUtils.packWifiCmd(aesServerKey.getDeviceVer(), aesServerKey.getSecret(), cmd.getWifiSsid(), cmd.getWifiPwd(), "wss://"));
+        body.setEncrypted(AclinkUtils.packWifiCmd(aesServerKey.getDeviceVer(), aesServerKey.getSecret(), cmd.getWifiSsid(), cmd.getWifiPwd(), borderUrl));
         
         doorMessage.setBody(body);
         
