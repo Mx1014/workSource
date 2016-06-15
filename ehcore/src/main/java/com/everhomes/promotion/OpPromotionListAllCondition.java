@@ -33,7 +33,6 @@ public class OpPromotionListAllCondition implements OpPromotionCondition, OpProm
         //TODO use OpPromotionActivityContext directly
         OpPromotionActivityContext c = (OpPromotionActivityContext) ctx;
         visitor.setPromotion(c.getPromotion());
-        
         List<OpPromotionAssignedScope> scopes = promotionAssignedScopeProvider.getOpPromotionScopeByPromotionId(c.getPromotion().getId());
         for(OpPromotionAssignedScope scope : scopes) {
             OpPromotionScopeType scopeType = OpPromotionScopeType.fromCode(scope.getScopeCode());
@@ -83,6 +82,12 @@ public class OpPromotionListAllCondition implements OpPromotionCondition, OpProm
         if(visitor.getPushCount() % 100 == 0) {
             promotionService.addPushCountByPromotionId(visitor.getPromotion().getId(), (int)visitor.getPushCount());
             visitor.setPushCount(0);
+            try {
+            	Thread.sleep(10*1000L);
+			} catch (Exception e) {
+				LOGGER.error("sleep error", e);
+			}
+            
         }
     }
 

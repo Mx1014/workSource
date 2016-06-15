@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.everhomes.rest.organization.pm.PropCommunityBuildAddessCommand;
+import com.everhomes.user.User;
 import com.everhomes.util.StringHelper;
 
 @Service
@@ -19,6 +20,8 @@ public class SendNoticeAction implements Runnable {
 
 	private String cmd;
 	
+	private String user;
+	
 	@Autowired
 	private PropertyMgrService propertyMgrService;
 	
@@ -27,11 +30,13 @@ public class SendNoticeAction implements Runnable {
 		//一键推送
 		LOGGER.debug("Start scheduling a push to push...." + cmd);
 		PropCommunityBuildAddessCommand command = (PropCommunityBuildAddessCommand) StringHelper.fromJsonString(cmd, PropCommunityBuildAddessCommand.class);
-		propertyMgrService.pushMessage(command);
+		User u = (User) StringHelper.fromJsonString(user, User.class);
+		propertyMgrService.pushMessage(command, u);
 		LOGGER.debug("End scheduling a push to push....");
 	}
 
-	public SendNoticeAction(String cmd){
+	public SendNoticeAction(String cmd, String user){
 		this.cmd = cmd;
+		this.user = user;
 	}
 }
