@@ -2,7 +2,7 @@
 // EvhUserListSignupActivitiesRestResponse.m
 //
 #import "EvhUserListSignupActivitiesRestResponse.h"
-#import "EvhListPostResponse.h"
+#import "EvhListActivitiesReponse.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhUserListSignupActivitiesRestResponse
@@ -45,7 +45,7 @@
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
         [super fromJson: jsonObject];
         NSMutableDictionary* dic =  (NSMutableDictionary*)[jsonObject objectForKey: @"response"];
-        self.response = [EvhListPostResponse new];
+        self.response = [EvhListActivitiesReponse new];
         self.response = [self.response fromJson: dic];
         return self;
     }

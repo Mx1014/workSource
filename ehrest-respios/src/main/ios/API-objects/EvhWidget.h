@@ -8,6 +8,7 @@
 #define EvhWidget_POSTS @"Posts"
 #define EvhWidget_ACTIONBARS @"ActionBars"
 #define EvhWidget_CALLPHONES @"CallPhones"
+#define EvhWidget_BULLETINS @"Bulletins"
 
 ///////////////////////////////////////////////////////////////////////////////
 

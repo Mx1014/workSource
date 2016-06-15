@@ -4,20 +4,20 @@ package com.everhomes.rest.user;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.rest.user.ListPostResponse;
+import com.everhomes.rest.activity.ListActivitiesReponse;
 
 public class ListSignupActivitiesRestResponse extends RestResponseBase {
 
-    private ListPostResponse response;
+    private ListActivitiesReponse response;
 
     public ListSignupActivitiesRestResponse () {
     }
 
-    public ListPostResponse getResponse() {
+    public ListActivitiesReponse getResponse() {
         return response;
     }
 
-    public void setResponse(ListPostResponse response) {
+    public void setResponse(ListActivitiesReponse response) {
         this.response = response;
     }
 }

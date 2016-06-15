@@ -2,14 +2,14 @@
 // EvhUserListPostedActivitiesRestResponse.h
 //
 #import "RestResponseBase.h"
-#import "EvhListPostResponse.h"
+#import "EvhListActivitiesReponse.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhUserListPostedActivitiesRestResponse
 //
 @interface EvhUserListPostedActivitiesRestResponse : EvhRestResponseBase
 
-@property(nonatomic, strong) EvhListPostResponse* response;
+@property(nonatomic, strong) EvhListActivitiesReponse* response;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
