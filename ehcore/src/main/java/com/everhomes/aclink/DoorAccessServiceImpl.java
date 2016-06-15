@@ -1302,6 +1302,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             DoorAuthDTO dto = ConvertHelper.convert(auth, DoorAuthDTO.class);
             dto.setHardwareId(doorAccess.getHardwareId());
             dto.setDoorName(doorAccess.getName());
+            dto.setPhone(auth.getPhone());
+            dto.setOrganization(auth.getOrganization());
             User u = userProvider.findUserById(auth.getApproveUserId());
             if(u != null) {
                 if(u.getNickName() != null) {
