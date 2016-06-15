@@ -22,7 +22,7 @@ import com.everhomes.payment.taotaogu.ByteTools;
 import com.everhomes.payment.taotaogu.CertCoder;
 import com.google.gson.Gson;
 
-public class Testselectka2 {
+public class Testselectka4 {
 	public static final String URL = "http://test.ippit.cn:30821/iccard/service";
 	
 	protected static boolean test() throws Exception {
@@ -64,15 +64,14 @@ public class Testselectka2 {
 		requestParam.put("ClientDt",sdf.format(new Date()));
 		requestParam.put("SrcId","10002900");
 		requestParam.put("DstId","00000000");
-		requestParam.put("MsgType","1020");
+		requestParam.put("MsgType","1030");
 		requestParam.put("MsgID","10002900" + StringUtils.leftPad(String.valueOf(System.currentTimeMillis()), 24, "0"));
 		requestParam.put("Sign", "");
 
 		Map<String, Object> param = new HashMap<String, Object>();
-		param.put("BranchCode", "10002900");
+		param.put("QueryType", "0000");
 		//param.put("CardId", "5882572900500000182");
-		//param.put("CardId", "5882572900500005934");
-		param.put("CardId", "5882572900500005884");
+		param.put("OrigMsgId", "10002900000000000001465980362246");
 
 	
 		requestParam.put("Param",param);

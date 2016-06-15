@@ -71,7 +71,7 @@ public class Testshouka {
 		Map<String, Object> param = new HashMap<String, Object>();
 
 		param.put("BranchCode", "10002900");
-		param.put("CardId", "5882572900500005900");
+		param.put("CardId", "5882572900500005942");
 		param.put("EndCardId", "");
 		param.put("SaleNum", "");
 		param.put("SaleType", "1");

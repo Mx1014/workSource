@@ -59,8 +59,8 @@ public class TAOTAOGUHttpUtil {
 
 		requestParam.put("Param",param);
 		byte[] data = gson.toJson(requestParam).getBytes();
-		
-		byte[] sign = CertCoder.sign(data, VendorConstant.keyStorePath,"jxd", "123456", "123456");
+		String keyStorePath = TAOTAOGUHttpUtil.class.getClassLoader().getResource(VendorConstant.keyStorePath).getPath();
+		byte[] sign = CertCoder.sign(data, keyStorePath,"jxd", "123456", "123456");
 		requestParam.put("Sign",ByteTools.BytesToHexStr(sign));
 		
 		return gson.toJson(requestParam);

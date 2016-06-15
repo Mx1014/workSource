@@ -20,6 +20,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONObject;
 
+import com.everhomes.payment.VendorConstant;
 import com.google.gson.Gson;
 
 public class TAOTAOGUOrderHttpUtil {
@@ -41,11 +42,13 @@ public class TAOTAOGUOrderHttpUtil {
 		json.put("merch_id", "862900000000001");
 		json.put("termnl_id", "00011071");
 	
-		
+		String server_cer = TAOTAOGUHttpUtil.class.getClassLoader().getResource(VendorConstant.server_cer).getPath();
+		String client_pfx = TAOTAOGUHttpUtil.class.getClassLoader().getResource(VendorConstant.client_pfx).getPath();
+
 		String msg = json.toString();
-		msg = Base64.encodeBase64String(com.ipp.order.utils.CertCoder.encryptByPublicKey(msg.getBytes(), "E:\\一卡通接口\\server.cer"));
+		msg = Base64.encodeBase64String(com.ipp.order.utils.CertCoder.encryptByPublicKey(msg.getBytes(), server_cer));
 		
-		byte[] r=  com.ipp.order.utils.CertCoder.sign(msg.getBytes(), "E:\\一卡通接口\\client.pfx",null, "123456");
+		byte[] r=  com.ipp.order.utils.CertCoder.sign(msg.getBytes(), client_pfx,null, "123456");
 		String sign = Base64.encodeBase64String(r);
 		
 		pairs.add(new BasicNameValuePair("msg", msg));
@@ -60,8 +63,8 @@ public class TAOTAOGUOrderHttpUtil {
 		int b = rspText.indexOf("&sign=");
 		msg = rspText.substring(a + 4, b);
 		sign = rspText.substring(b + 6);
-		boolean bSign = com.ipp.order.utils.CertCoder.verifySign(msg.getBytes(), Base64.decodeBase64(sign), "E:\\一卡通接口\\server.cer");
-		r = com.ipp.order.utils.CertCoder.decryptByPrivateKey(Base64.decodeBase64(msg), "E:\\一卡通接口\\client.pfx", null, "123456");
+		boolean bSign = com.ipp.order.utils.CertCoder.verifySign(msg.getBytes(), Base64.decodeBase64(sign), server_cer);
+		r = com.ipp.order.utils.CertCoder.decryptByPrivateKey(Base64.decodeBase64(msg), client_pfx, null, "123456");
 		
 		String r1 = new String(r, "GBK");
 		System.out.println(r1);

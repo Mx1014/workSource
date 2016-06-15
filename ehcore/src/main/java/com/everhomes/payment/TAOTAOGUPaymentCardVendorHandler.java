@@ -1,6 +1,7 @@
 package com.everhomes.payment;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -18,7 +19,6 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.parking.ParkingVendorHandler;
 import com.everhomes.payment.taotaogu.ByteTools;
 import com.everhomes.payment.taotaogu.CertCoder;
 import com.everhomes.payment.taotaogu.ResponseEntiy;
@@ -45,6 +45,7 @@ import com.google.gson.Gson;
 @Component(PaymentCardVendorHandler.PAYMENTCARD_VENDOR_PREFIX + "TAOTAOGU")
 public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandler{
 	private static final Logger LOGGER = LoggerFactory.getLogger(TAOTAOGUPaymentCardVendorHandler.class);
+	
 	@Autowired
     private PaymentCardProvider paymentCardProvider;
 	@Autowired
@@ -96,7 +97,15 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 			Map accountMap = accountResponseEntiy.getData();
 			if(accountMap != null){
 				cardInfo.setCardId(card.getId());
-				cardInfo.setBalance(new BigDecimal((String)accountMap.get("AvlbBal")));
+				List list = (List) accountMap.get("Row");
+				for(int i=0;i<list.size();i++){
+					Map map = (Map) list.get(i);
+					if("fund".equals(((String)map.get("SubAcctType")).trim())){
+						cardInfo.setBalance(new BigDecimal((Double)map.get("AvlbBal")).setScale(2,RoundingMode.DOWN));
+						break;
+					}
+				}
+				
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -153,9 +162,11 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				Map<String, Object> changePasswordParam = new HashMap<String, Object>();
 				changePasswordParam.put("BranchCode", brandCode);
 				changePasswordParam.put("CardId", cardId);
-				byte[] oldpsd = CertCoder.encryptByPublicKey("111111".getBytes(), "E:\\pin3.crt");
+				String pin3_crt = TAOTAOGUPaymentCardVendorHandler.class.getClassLoader().getResource(VendorConstant.pin3_crt).getPath();
+
+				byte[] oldpsd = CertCoder.encryptByPublicKey("111111".getBytes(), pin3_crt);
 				changePasswordParam.put("OrigPassWord", ByteTools.BytesToHexStr(oldpsd));
-				byte[] newpsd = CertCoder.encryptByPublicKey(cmd.getPassword().getBytes(), "E:\\pin3.crt");
+				byte[] newpsd = CertCoder.encryptByPublicKey(cmd.getPassword().getBytes(), pin3_crt);
 				changePasswordParam.put("NewPassWord", ByteTools.BytesToHexStr(newpsd));
 				changePasswordParam.put("Remark", "");
 				ResponseEntiy changePasswordResponseEntiy = TAOTAOGUHttpUtil.post(brandCode,"0050",changePasswordParam);
@@ -218,9 +229,11 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		byte[] newpsd = null;
 		ResponseEntiy changePasswordResponseEntiy = null;
 		try {
-			oldpsd = CertCoder.encryptByPublicKey(cmd.getOldPassword().getBytes(), "E:\\pin3.crt");		
+			String pin3_crt = TAOTAOGUPaymentCardVendorHandler.class.getClassLoader().getResource(VendorConstant.pin3_crt).getPath();
+
+			oldpsd = CertCoder.encryptByPublicKey(cmd.getOldPassword().getBytes(), pin3_crt);		
 			changePasswordParam.put("OrigPassWord", ByteTools.BytesToHexStr(oldpsd));
-			newpsd = CertCoder.encryptByPublicKey(cmd.getNewPassword().getBytes(), "E:\\pin3.crt");
+			newpsd = CertCoder.encryptByPublicKey(cmd.getNewPassword().getBytes(), pin3_crt);
 			changePasswordParam.put("NewPassWord", ByteTools.BytesToHexStr(newpsd));
 			changePasswordParam.put("Remark", "");
 			changePasswordResponseEntiy = TAOTAOGUHttpUtil.post(brandCode,"0050",changePasswordParam);
@@ -266,10 +279,10 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		byte[] oldpsd = null;
 		byte[] newpsd = null;
 		
-		
-			oldpsd = CertCoder.encryptByPublicKey("111111".getBytes(), "E:\\pin3.crt");		
+		String pin3_crt = TAOTAOGUPaymentCardVendorHandler.class.getClassLoader().getResource(VendorConstant.pin3_crt).getPath();
+			oldpsd = CertCoder.encryptByPublicKey("111111".getBytes(), pin3_crt);		
 			changePasswordParam.put("OrigPassWord", ByteTools.BytesToHexStr(oldpsd));
-			newpsd = CertCoder.encryptByPublicKey(cmd.getNewPassword().getBytes(), "E:\\pin3.crt");
+			newpsd = CertCoder.encryptByPublicKey(cmd.getNewPassword().getBytes(), pin3_crt);
 			changePasswordParam.put("NewPassWord", ByteTools.BytesToHexStr(newpsd));
 			changePasswordParam.put("Remark", "");
 			changePasswordResponseEntiy = TAOTAOGUHttpUtil.post(brandCode,"0050",changePasswordParam);
