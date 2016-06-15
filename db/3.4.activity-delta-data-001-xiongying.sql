@@ -15,3 +15,13 @@ CREATE TABLE `eh_hot_tags` (
 `delete_uid` BIGINT DEFAULT NULL,
 PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+  update eh_user_favorites set target_type = 'activity' where target_id in (
+  select id from eh_forum_posts where id in (select a.target_id from (select target_id from eh_user_favorites where target_type = 'topic') a) 
+  and category_id = 1010);
+  
+  update eh_user_posts set target_type = 'topic';
+  
+  update eh_user_posts set target_type = 'activity' where target_id in (
+  select id from eh_forum_posts where id in (select a.target_id from (select target_id from eh_user_posts where target_type = 'topic') a) 
+  and category_id = 1010);
