@@ -23,7 +23,6 @@
 {
     self = [super init];
     if(self) {
-        _excludeCategories = [NSMutableArray new];
         return self;
     }
     return nil;
@@ -33,17 +32,8 @@
 {
     if(self.sceneToken)
         [jsonObject setObject: self.sceneToken forKey: @"sceneToken"];
-    if(self.contentCategory)
-        [jsonObject setObject: self.contentCategory forKey: @"contentCategory"];
     if(self.publishStatus)
         [jsonObject setObject: self.publishStatus forKey: @"publishStatus"];
-    if(self.excludeCategories) {
-        NSMutableArray* jsonArray = [NSMutableArray new];
-        for(NSNumber* item in self.excludeCategories) {
-            [jsonArray addObject:item];
-        }
-        [jsonObject setObject: jsonArray forKey: @"excludeCategories"];
-    }
     if(self.pageAnchor)
         [jsonObject setObject: self.pageAnchor forKey: @"pageAnchor"];
     if(self.pageSize)
@@ -57,20 +47,10 @@
         if(self.sceneToken && [self.sceneToken isEqual:[NSNull null]])
             self.sceneToken = nil;
 
-        self.contentCategory = [jsonObject objectForKey: @"contentCategory"];
-        if(self.contentCategory && [self.contentCategory isEqual:[NSNull null]])
-            self.contentCategory = nil;
-
         self.publishStatus = [jsonObject objectForKey: @"publishStatus"];
         if(self.publishStatus && [self.publishStatus isEqual:[NSNull null]])
             self.publishStatus = nil;
 
-        {
-            NSArray* jsonArray = [jsonObject objectForKey: @"excludeCategories"];
-            for(id itemJson in jsonArray) {
-                [self.excludeCategories addObject: itemJson];
-            }
-        }
         self.pageAnchor = [jsonObject objectForKey: @"pageAnchor"];
         if(self.pageAnchor && [self.pageAnchor isEqual:[NSNull null]])
             self.pageAnchor = nil;

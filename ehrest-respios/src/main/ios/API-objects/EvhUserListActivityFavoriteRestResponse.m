@@ -2,7 +2,7 @@
 // EvhUserListActivityFavoriteRestResponse.m
 //
 #import "EvhUserListActivityFavoriteRestResponse.h"
-#import "EvhListPostResponse.h"
+#import "EvhListActivitiesReponse.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhUserListActivityFavoriteRestResponse
@@ -45,7 +45,7 @@
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
         [super fromJson: jsonObject];
         NSMutableDictionary* dic =  (NSMutableDictionary*)[jsonObject objectForKey: @"response"];
-        self.response = [EvhListPostResponse new];
+        self.response = [EvhListActivitiesReponse new];
         self.response = [self.response fromJson: dic];
         return self;
     }
