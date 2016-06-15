@@ -11,7 +11,7 @@ package com.everhomes.rest.payment;
  */
 public enum CardTransactionStatus {
 	FAIL((byte)0), EXPIRED((byte)1),REVOKED((byte)2),PAIDED((byte)3),UNPAIDED((byte)4);
-        
+ 
     private Byte code;
     private CardTransactionStatus(Byte code) {
         this.code = code;

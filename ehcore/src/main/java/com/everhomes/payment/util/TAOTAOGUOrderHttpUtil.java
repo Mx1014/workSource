@@ -102,8 +102,8 @@ public class TAOTAOGUOrderHttpUtil {
 		json.put("reserved", "00011071");
 		json.put("request_time", timeStr);		
 
-		String token = "701c821caf4772e6db17b6ed9b56aa38";
-		String aesKey = "a28a179edb92c711c4e48dda52e23946";		
+		String token = "578416bb28e11fc633555ff5c41582fb";
+		String aesKey = "fd2434d34ba3f670342e21c376ccd006";		
 		
 		pairs.add(new BasicNameValuePair("token", token));
 		String msg = Base64.encodeBase64String(AESCoder.encrypt(json.toString().getBytes("GBK"), aesKey.getBytes()));

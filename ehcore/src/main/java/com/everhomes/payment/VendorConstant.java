@@ -14,6 +14,10 @@ public class VendorConstant {
 	public static final String pin3_crt = "pin3.crt";
 	public static final String server_cer = "server.cer";
 	
+	public static final String TAOTAOGU_AESKEY = "TAOTAOGU_AESKEY";
+	public static final String TAOTAOGU_TOKEN = "TAOTAOGU_TOKEN";
+
+	
 
 	
 	

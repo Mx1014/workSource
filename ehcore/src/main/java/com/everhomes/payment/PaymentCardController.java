@@ -5,7 +5,6 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -41,6 +40,7 @@ import com.everhomes.rest.payment.SearchCardRechargeOrderCommand;
 import com.everhomes.rest.payment.SearchCardRechargeOrderResponse;
 import com.everhomes.rest.payment.SearchCardTransactionsCommand;
 import com.everhomes.rest.payment.SearchCardTransactionsResponse;
+import com.everhomes.util.RequireAuthentication;
 
 
 @RestDoc(value="Payment controller", site="payment")
@@ -113,17 +113,18 @@ public class PaymentCardController extends ControllerBase{
     @RequestMapping("getCardPaidResult")
     @RestReturn(value=GetCardPaidResultDTO.class)
     public RestResponse getCardPaidResult(GetCardPaidResultCommand cmd) {
-        
-        RestResponse response = new RestResponse();
+    	GetCardPaidResultDTO dto = paymentCardService.getCardPaidResult(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
     
     /**
-     * <b>URL: /payment/getCardPaidResult</b>
+     * <b>URL: /payment/notifyPaidResult</b>
      * <p>第三方通知</p>
      */
+    @RequireAuthentication(false)
     @RequestMapping("notifyPaidResult")
     @RestReturn(value=NotifyEntityDTO.class)
     public RestResponse notifyPaidResult(NotifyEntityCommand cmd) {
@@ -141,7 +142,7 @@ public class PaymentCardController extends ControllerBase{
     @RequestMapping("rechargeCard")
     @RestReturn(value=CommonOrderDTO.class)
     public RestResponse rechargeCard(RechargeCardCommand cmd) {
-    	CommonOrderDTO dto = null;
+    	CommonOrderDTO dto = paymentCardService.rechargeCard(cmd);
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -196,7 +197,7 @@ public class PaymentCardController extends ControllerBase{
     @RestReturn(value=ListCardTransactionsResponse.class)
     public RestResponse listCardTransactions(ListCardTransactionsCommand cmd) {
     	ListCardTransactionsResponse resp = paymentCardService.listCardTransactions(cmd);
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

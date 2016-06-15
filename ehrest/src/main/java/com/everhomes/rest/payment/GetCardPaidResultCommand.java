@@ -13,6 +13,7 @@ public class GetCardPaidResultCommand {
 	private String ownerType;
     private Long ownerId;
 	private Long cardId;
+	private String token;
 	
 	@Override
     public String toString() {
@@ -41,6 +42,14 @@ public class GetCardPaidResultCommand {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
 	}
 	
 }

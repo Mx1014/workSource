@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.parking.ParkingVendorHandler;
 import com.everhomes.payment.taotaogu.ByteTools;
@@ -23,6 +24,7 @@ import com.everhomes.payment.taotaogu.CertCoder;
 import com.everhomes.payment.taotaogu.ResponseEntiy;
 import com.everhomes.payment.taotaogu.TAOTAOGUHttpUtil;
 import com.everhomes.payment.taotaogu.TAOTAOGUOrderHttpUtil;
+import com.everhomes.payment.util.CachePool;
 import com.everhomes.rest.payment.ApplyCardCommand;
 import com.everhomes.rest.payment.CardInfoDTO;
 import com.everhomes.rest.payment.CardRechargeStatus;
@@ -45,7 +47,8 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 	private static final Logger LOGGER = LoggerFactory.getLogger(TAOTAOGUPaymentCardVendorHandler.class);
 	@Autowired
     private PaymentCardProvider paymentCardProvider;
-	
+	@Autowired
+    private ConfigurationProvider configProvider;
 	@SuppressWarnings("rawtypes")
 	@Override
 	public CardInfoDTO getCardInfoByVendor(PaymentCard card) {
@@ -389,23 +392,10 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 	@Override
 	public String getCardPaidQrCodeByVendor(PaymentCard paymentCard) {
 		String result = null;
-		boolean flag = true;
-		String aesKey = null;
-		String token = null;
-		while(flag){
-			Map map = null;
-			try {
-				map = TAOTAOGUOrderHttpUtil.orderLogin();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			String returnCode = (String) map.get("return_code");
-			if("00".equals(returnCode)){
-				flag = false;
-				aesKey = (String) map.get("aes_key");
-				token = (String) map.get("token");
-			}
-		}
+		getToken();
+		CachePool cachePool = CachePool.getInstance();
+		String aesKey = cachePool.getStringValue(VendorConstant.TAOTAOGU_AESKEY);
+		String token = cachePool.getStringValue(VendorConstant.TAOTAOGU_TOKEN);
 		
 		JSONObject json = new JSONObject();
 		Date now = new Date();
@@ -429,11 +419,34 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 					result = token;
 				}
 			}
-			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return result;
+	}
+	
+	private void getToken(){
+		CachePool cachePool = CachePool.getInstance();
+		String aesKey = cachePool.getStringValue(VendorConstant.TAOTAOGU_AESKEY);
+		String token = cachePool.getStringValue(VendorConstant.TAOTAOGU_TOKEN);
+		if(aesKey == null || token == null){
+			boolean flag = true;
+			//丢到缓存中
+			while(flag){
+				Map map = null;
+				try {
+					map = TAOTAOGUOrderHttpUtil.orderLogin();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				String returnCode = (String) map.get("return_code");
+				if("00".equals(returnCode)){
+					flag = false;
+					cachePool.putCacheItem(VendorConstant.TAOTAOGU_AESKEY, (String) map.get("aes_key"), 24*60*60*1000);
+					cachePool.putCacheItem(VendorConstant.TAOTAOGU_TOKEN, (String) map.get("token"), 24*60*60*1000);
+				}
+			}
+		}
 	}
 
 	@Override
@@ -462,27 +475,57 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		ResponseEntiy responseEntiy = null;
 		try {
 			responseEntiy = TAOTAOGUHttpUtil.post(brandCode,"0020",param);
-		
 			if(responseEntiy.isSuccess()){
-				order.setRechargeStatus(CardRechargeStatus.RECHARGED.getCode());
-				order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
-				paymentCardProvider.updatePaymentCardRechargeOrder(order);
-			}else{
-				boolean flag = true;
-				int i = 1;
+				Map map = responseEntiy.getData();
+				String status = (String) map.get("ProcStatus");
+				if("01".equals(status)){
+					order.setRechargeStatus(CardRechargeStatus.RECHARGED.getCode());
+					order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
+					paymentCardProvider.updatePaymentCardRechargeOrder(order);
+					return;
+				}
+				if("06".equals(status)){
+					order.setRechargeStatus(CardRechargeStatus.FAIL.getCode());
+					order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
+					paymentCardProvider.updatePaymentCardRechargeOrder(order);
+					return;
+				}
+			}
+			
+			boolean flag = true;
+			int i = 1;
 				
-				Map<String, Object> queryParam = new HashMap<String, Object>();
-				queryParam.put("QueryType", "0020");
-				queryParam.put("OrigMsgId", responseEntiy.getMsgID());
-				while(flag&&i<=10){
-					responseEntiy = TAOTAOGUHttpUtil.post(brandCode,"9990",param);
-					if(responseEntiy.isSuccess()){
-						Map map = responseEntiy.getData();
-						String status = (String) map.get("ProcStatus");
+			Map<String, Object> queryParam = new HashMap<String, Object>();
+			queryParam.put("QueryType", "0020");
+			queryParam.put("OrigMsgId", responseEntiy.getMsgID());
+			while(flag&&i<=10){
+				i++;
+				responseEntiy = TAOTAOGUHttpUtil.post(brandCode,"9990",param);
+				if(responseEntiy.isSuccess()){
+					
+					Map map = responseEntiy.getData();
+					String status = (String) map.get("ProcStatus");
+					if("01".equals(status)){
+						flag = false;
+						order.setRechargeStatus(CardRechargeStatus.RECHARGED.getCode());
+						order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
+						paymentCardProvider.updatePaymentCardRechargeOrder(order);
+						return;
+					}if("06".equals(status)){
+						flag = false;
+						order.setRechargeStatus(CardRechargeStatus.FAIL.getCode());
+						order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
+						paymentCardProvider.updatePaymentCardRechargeOrder(order);
+						return;
 					}
 				}
-				
+				Thread.sleep(5000);
 			}
+			if(flag){
+				order.setRechargeStatus(CardRechargeStatus.FAIL.getCode());
+				order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
+				paymentCardProvider.updatePaymentCardRechargeOrder(order);
+			}	
 		} catch (Exception e) {
 			LOGGER.error("the recharge request of taotaogu is failed.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,

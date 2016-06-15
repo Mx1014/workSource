@@ -1,7 +1,10 @@
 package com.everhomes.payment.util;
 
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.springframework.scheduling.annotation.Scheduled;
 
 public class CachePool {
 	private static CachePool instance;//缓存池唯一实例
@@ -30,7 +33,7 @@ public class CachePool {
 	   * @param name
 	   * @return
 	   */
-	  public Object getCacheItem(String name){
+	  public CacheItem getCacheItem(String name){
 	    if(!cacheItems.containsKey(name)){
 	      return null;
 	    }
@@ -38,7 +41,29 @@ public class CachePool {
 //	    if(cacheItem.isExpired()){
 //	      return null;
 //	    }
-	    return cacheItem.getEntity();
+	    return cacheItem;
+	  }
+	  
+	  public Object getObjectValue(String name){
+		    if(!cacheItems.containsKey(name)){
+		      return null;
+		    }
+		    CacheItem cacheItem = (CacheItem) cacheItems.get(name);
+		    if(cacheItem.isExpired()){
+		      return null;
+		    }
+		    return cacheItem.getEntity();
+	  }
+	  
+	  public String getStringValue(String name){
+		    if(!cacheItems.containsKey(name)){
+		      return null;
+		    }
+		    CacheItem cacheItem = (CacheItem) cacheItems.get(name);
+		    if(cacheItem.isExpired()){
+		      return null;
+		    }
+		    return (String) cacheItem.getEntity();
 	  }
 	  /**
 	   * 存放缓存信息
@@ -83,4 +108,16 @@ public class CachePool {
 	  public int getSize(){
 	    return cacheItems.size();
 	  }
+	  
+	  @Scheduled(cron="0 0 2 * * ? ")
+	  void quartzClearMap(){
+		  Enumeration<String> keys =  cacheItems.keys();
+		  while(keys.hasMoreElements()){
+			  String key = keys.nextElement();
+			  CacheItem item = (CacheItem) cacheItems.get(key);
+			  if(item.isExpired())
+				  cacheItems.remove(key);
+		  }
+	  }
+	  
 }

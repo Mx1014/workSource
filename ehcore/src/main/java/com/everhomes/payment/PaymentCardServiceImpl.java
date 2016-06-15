@@ -10,10 +10,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
@@ -30,6 +32,9 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.order.OrderUtil;
+import com.everhomes.payment.taotaogu.AESCoder;
+import com.everhomes.payment.taotaogu.NotifyEntity;
+import com.everhomes.payment.taotaogu.SHA1;
 import com.everhomes.payment.util.CacheItem;
 import com.everhomes.payment.util.CachePool;
 import com.everhomes.payment.util.Util;
@@ -81,6 +86,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RandomGenerator;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
+import com.google.gson.Gson;
 
 @Component
 public class PaymentCardServiceImpl implements PaymentCardService{
@@ -218,7 +224,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 		dto.setVerifyCode(verifyCode);
 		//丢到缓存中
 		CachePool cachePool = CachePool.getInstance();
-		cachePool.putCacheItem(userIdentifier.getIdentifierToken(), verifyCode);
+		cachePool.putCacheItem(userIdentifier.getIdentifierToken(), verifyCode,10*60*1000);
 		
     	return dto;
     }
@@ -256,7 +262,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     	}
 		CachePool cachePool = CachePool.getInstance();
 
-    	CacheItem entity = (CacheItem) cachePool.getCacheItem(cmd.getMobile());
+    	CacheItem entity = cachePool.getCacheItem(cmd.getMobile());
     	if(entity == null){
     		LOGGER.error("verifyCode is not exists.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -548,20 +554,33 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     @Override
     public NotifyEntityDTO notifyPaidResult(NotifyEntityCommand cmd){
     	PaymentCardTransaction transaction = new PaymentCardTransaction();
-    	
+    	CachePool cachePool = CachePool.getInstance();
+		String aesKey = cachePool.getStringValue(VendorConstant.TAOTAOGU_AESKEY);
+		String token = cachePool.getStringValue(VendorConstant.TAOTAOGU_TOKEN);
+    	Gson gson = new Gson();
+		Map map = gson.fromJson(cmd.getMsg(), Map.class);
+		String data = (String) map.get("data");
+		String data1 = null;
+		try {
+			data1 = new String (AESCoder.decrypt(Base64.decodeBase64(data), aesKey.getBytes()), "GBK");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		NotifyEntity result = gson.fromJson(data1, NotifyEntity.class);
        	User user = UserContext.current().getUser();
     	UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-    	PaymentCard paymentCard = paymentCardProvider.findPaymentCardByCardNo(cmd.getCard_id(), VendorConstant.TAOTAOGU);
+    	PaymentCard paymentCard = paymentCardProvider.findPaymentCardByCardNo(result.getCard_id(), VendorConstant.TAOTAOGU);
     	transaction.setOwnerId(paymentCard.getOwnerId());
     	transaction.setOwnerType(paymentCard.getOwnerType());
     	transaction.setNamespaceId(user.getNamespaceId());
     	transaction.setItemName("");
-    	transaction.setMerchant(cmd.getMerch_name());
-    	transaction.setAmount(new BigDecimal(cmd.getTrade_amt()));
-    	transaction.setTransactionNo(cmd.getAcct_sn());
-    	transaction.setTransactionTime(StrTotimestamp(cmd.getFinal_time()));
+    	transaction.setMerchant(result.getMerch_name());
+    	transaction.setAmount(new BigDecimal(result.getTrade_amt()));
+    	transaction.setTransactionNo(result.getAcct_sn());
+    	transaction.setTransactionTime(StrTotimestamp(result.getFinal_time()));
     	transaction.setCardId(paymentCard.getId());
-    	transaction.setStatus(convertTransaction(cmd.getTrade_status()));
+    	transaction.setStatus(convertTransaction(result.getTrade_status()));
     	transaction.setCreatorUid(user.getId());
     	transaction.setCreateTime(new Timestamp(System.currentTimeMillis()));
     	transaction.setVendorName(VendorConstant.TAOTAOGU);
@@ -569,7 +588,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     	
     	paymentCardProvider.createPaymentCardTransaction(transaction);
     	NotifyEntityDTO dto = new NotifyEntityDTO();
-    	dto.setMsg_sn(cmd.getMsg_sn());
+    	dto.setMsg_sn(result.getMsg_sn());
     	dto.setReturn_code("00");
     	return dto;
     }
