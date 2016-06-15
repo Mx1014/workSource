@@ -112,6 +112,7 @@ public class PmsyOrderEmbeddedHandler implements OrderEmbeddedHandler{
 		PmsyPayer pmsyPayer = pmsyProvider.findPmPayersByNameAndContact(order.getUserName(), order.getUserContact());
 		if(pmsyPayer != null){
 			pmsyPayer.setStatus(PmsyPayerStatus.ACTIVE.getCode());
+			pmsyPayer.setCreateTime(new Timestamp(System.currentTimeMillis()));
 			pmsyProvider.updatePmPayer(pmsyPayer);
 		}
 		

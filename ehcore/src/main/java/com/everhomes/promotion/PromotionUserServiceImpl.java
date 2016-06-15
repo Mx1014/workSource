@@ -16,11 +16,14 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.community.admin.CommunityUserAddressDTO;
 import com.everhomes.rest.community.admin.CommunityUserAddressResponse;
 import com.everhomes.rest.community.admin.ListCommunityUsersCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
+import com.everhomes.rest.organization.ListOrganizationsCommandResponse;
+import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
@@ -72,7 +75,7 @@ public class PromotionUserServiceImpl implements PromotionUserService {
         //TODO fix value error
         
         int namespaceId = visitor.getPromotion().getNamespaceId().intValue();
-        Long id = (Long)visitor.getParent().getValue();
+        Long id = (Long)visitor.getValue();
         
         ListingLocator locator = new ListingLocator();
         int pageSize = 100;
@@ -102,32 +105,57 @@ public class PromotionUserServiceImpl implements PromotionUserService {
     @Override
     public void listUserByCommunity(OpPromotionUserVisitor visitor, OpPromotionUserCallback callback) {
         ListCommunityUsersCommand cmd = new ListCommunityUsersCommand();
-        Long id = (Long)visitor.getParent().getValue();
+        Long id = (Long)visitor.getValue();
         cmd.setCommunityId(id);
         cmd.setNamespaceId(visitor.getPromotion().getNamespaceId());
         cmd.setPageSize(100);
         
-        CommunityUserAddressResponse resp = communityService.listUserBycommunityId(cmd);
+        Community community = communityProvider.findCommunityById(id);
         
-        while((resp != null) && (resp.getDtos() != null) && (resp.getDtos().size() > 0)) {
-            List<CommunityUserAddressDTO>  dtos = resp.getDtos();
-            for(CommunityUserAddressDTO dto : dtos) {
-                User user = userProvider.findUserById(dto.getUserId());
-                
-                if(user != null) {
-                    callback.userFound(user, visitor);
+        if(CommunityType.fromCode(community.getCommunityType()) == CommunityType.RESIDENTIAL) {
+            CommunityUserAddressResponse resp = communityService.listUserBycommunityId(cmd);
+            
+            while((resp != null) && (resp.getDtos() != null) && (resp.getDtos().size() > 0)) {
+                List<CommunityUserAddressDTO>  dtos = resp.getDtos();
+                for(CommunityUserAddressDTO dto : dtos) {
+                    User user = userProvider.findUserById(dto.getUserId());
+                    
+                    if(user != null) {
+                        callback.userFound(user, visitor);
+                    }
                 }
+                
+                //break after first process
+                if(resp.getNextPageAnchor() == null) {
+                    break;
+                }
+                
+                cmd.setPageAnchor(resp.getNextPageAnchor());
+                resp = communityService.listUserBycommunityId(cmd);
+                
             }
-            
-            //break after first process
-            if(resp.getNextPageAnchor() == null) {
-                break;
-            }
-            
-            cmd.setPageAnchor(resp.getNextPageAnchor());
-            resp = communityService.listUserBycommunityId(cmd);
-            
+        } else {
+        	//园区
+//        	ListOrganizationsCommand cmd = null;
+//        	ListOrganizationsCommandResponse resp = organizationService.listOrganizations(cmd);
+//        	for(OrganizationDTO dto : resp.getDtos()) {
+//                OpPromotionUserVisitor child = new OpPromotionUserVisitor();
+//                child.setParent(visitor);
+//                child.setValue(dto.getId());
+//                child.setPromotion(visitor.getPromotion());
+//                
+//                listUserByCompany(child, callback);
+//        	}
+        	
+        	if(visitor.getParent() == null) {
+        		OpPromotionUserVisitor child = new OpPromotionUserVisitor();
+        		child.setParent(visitor);
+        		child.setValue(id);
+        		child.setPromotion(visitor.getPromotion());
+        		this.listAllUser(visitor, callback);
+        	}
         }
+
     }
     
     @Override
