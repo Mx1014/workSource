@@ -42,7 +42,7 @@ public class TAOTAOGUOrderHttpUtil {
 	
 	static{
 		configProvider = PlatformContext.getComponent("configurationProviderImpl");
-		url = configProvider.getValue("taotaogu.card.url", "");
+		url = configProvider.getValue("taotaogu.order.url", "");
 	}
 	
 	public static Map orderLogin() throws Exception {
