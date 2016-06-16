@@ -17,6 +17,7 @@ CREATE TABLE `eh_news` (
 	`create_time` DATETIME NULL DEFAULT NULL,
 	`deleter_uid` BIGINT(20) NOT NULL COMMENT 'deleter id',
 	`delete_time` DATETIME NULL DEFAULT NULL COMMENT 'mark-deletion policy. historic data may be useful',
+	`sort_index` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'if has this value, go to first, order from big to small',
 	PRIMARY KEY (`id`)
 );
 
