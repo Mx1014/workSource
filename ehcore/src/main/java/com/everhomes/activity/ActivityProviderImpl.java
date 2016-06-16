@@ -385,7 +385,7 @@ public class ActivityProviderImpl implements ActivityProivider {
            SelectQuery<EhActivityRosterRecord> query = context.selectQuery(Tables.EH_ACTIVITY_ROSTER);
 
             if (locator.getAnchor() != null)
-                query.addConditions(Tables.EH_ACTIVITY_ROSTER.ID.gt(locator.getAnchor()));
+                query.addConditions(Tables.EH_ACTIVITY_ROSTER.CREATE_TIME.ge(new Timestamp(locator.getAnchor())));
             
             query.addConditions(Tables.EH_ACTIVITY_ROSTER.UID.eq(uid));
             
