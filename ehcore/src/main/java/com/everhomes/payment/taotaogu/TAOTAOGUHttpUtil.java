@@ -36,11 +36,19 @@ import com.google.gson.Gson;
  */
 public class TAOTAOGUHttpUtil {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TAOTAOGUHttpUtil.class);
+	
+	private static ConfigurationProvider configProvider;
+	private static String url;
+	
+	static{
+		configProvider = PlatformContext.getComponent("configurationProviderImpl");
+		url = configProvider.getValue("taotaogu.card.url", "");
+	}
 
 	public static ResponseEntiy post(String brandCode,String msgType,Map<String, Object> param) throws Exception {
 		CloseableHttpClient httpClient = HttpClients.createDefault();
 
-		HttpPost request = new HttpPost(VendorConstant.CARD_URL);
+		HttpPost request = new HttpPost(url);
 		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
 		String msg = getJson(brandCode,msgType,param);
 		pairs.add(new BasicNameValuePair("msg", msg));
@@ -75,7 +83,7 @@ public class TAOTAOGUHttpUtil {
 		byte[] data = gson.toJson(requestParam).getBytes();
 		
 		CertProvider certProvider = PlatformContext.getComponent("certProviderImpl");
-		ConfigurationProvider configProvider = PlatformContext.getComponent("configurationProviderImpl");
+		
 		Cert cert = certProvider.findCertByName(configProvider.getValue(VendorConstant.KEY_STORE, ""));
 		InputStream in = new ByteArrayInputStream(cert.getData());
 		

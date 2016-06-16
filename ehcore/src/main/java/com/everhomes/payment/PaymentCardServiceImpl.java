@@ -38,14 +38,12 @@ import com.everhomes.payment.taotaogu.AESCoder;
 import com.everhomes.payment.taotaogu.NotifyEntity;
 import com.everhomes.payment.taotaogu.PaidResultThread;
 import com.everhomes.payment.taotaogu.PaidResultThreadPool;
-import com.everhomes.payment.taotaogu.SHA1;
 import com.everhomes.payment.util.CacheItem;
 import com.everhomes.payment.util.CachePool;
 import com.everhomes.payment.util.Util;
 import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
-import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.payment.ApplyCardCommand;
 import com.everhomes.rest.payment.CardInfoDTO;
 import com.everhomes.rest.payment.CardIssuerDTO;
@@ -163,11 +161,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     public CommonOrderDTO rechargeCard(RechargeCardCommand cmd){
     	
     	PaymentCard paymentCard = checkPaymentCard(cmd.getCardId());
-    	if(paymentCard == null){
-    		LOGGER.error("card id can not be null.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"card id can not be null.");
-    	}
+    	checkPaymentCardIsNull(paymentCard,cmd.getCardId());
     	User user = UserContext.current().getUser();
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 
@@ -212,11 +206,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     public GetCardPaidQrCodeDTO getCardPaidQrCode(GetCardPaidQrCodeCommand cmd){
     	GetCardPaidQrCodeDTO dto = new GetCardPaidQrCodeDTO();
     	PaymentCard paymentCard = checkPaymentCard(cmd.getCardId());
-    	if(paymentCard == null){
-    		LOGGER.error("card id can not be null.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"card id can not be null.");
-    	}
+    	checkPaymentCardIsNull(paymentCard,cmd.getCardId());
     	PaymentCardVendorHandler handler = getPaymentCardVendorHandler(paymentCard.getVendorName());
 		String code = handler.getCardPaidQrCodeByVendor(paymentCard);
 		dto.setCode(code);
@@ -226,11 +216,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     public GetCardPaidResultDTO getCardPaidResult(GetCardPaidResultCommand cmd){
     	GetCardPaidResultDTO dto = new GetCardPaidResultDTO();
     	PaymentCard paymentCard = checkPaymentCard(cmd.getCardId());
-    	if(paymentCard == null){
-    		LOGGER.error("card id can not be null.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"card id can not be null.");
-    	}
+    	checkPaymentCardIsNull(paymentCard,cmd.getCardId());
     	dto.setToken(cmd.getToken());
     	ExecutorService service = PaidResultThreadPool.getInstance();
     	PaidResultThread thread = new PaidResultThread(dto);
@@ -272,11 +258,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     @Override
     public void setCardPassword(SetCardPasswordCommand cmd){
     	PaymentCard paymentCard = checkPaymentCard(cmd.getCardId());
-    	if(paymentCard == null){
-    		LOGGER.error("card id can not be null.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"card id can not be null.");
-    	}
+    	checkPaymentCardIsNull(paymentCard,cmd.getCardId());
     	if(!paymentCard.getPassword().equals(EncryptionUtils.hashPassword(cmd.getOldPassword()))){
     		LOGGER.error("the old password is not correctly.");
 			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_OLD_PASSWORD,
@@ -322,13 +304,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     	}
     	cachePool.removeCacheItem(cmd.getMobile());
     	PaymentCard paymentCard = checkPaymentCard(cmd.getCardId());
-    	if(paymentCard == null){
-    		LOGGER.error("paymentCard is not exists {}.",cmd.getCardId());
-    		throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_NOT_EXISTS_CARD,
-					localeStringService.getLocalizedString(String.valueOf(PaymentCardErrorCode.SCOPE), 
-							String.valueOf(PaymentCardErrorCode.ERROR_NOT_EXISTS_CARD),
-							UserContext.current().getUser().getLocale(),"paymentCard is not exists ."));
-    	}
+    	checkPaymentCardIsNull(paymentCard,cmd.getCardId());
     		
     	PaymentCardVendorHandler handler = getPaymentCardVendorHandler(paymentCard.getVendorName());
 		handler.resetCardPassword(cmd,paymentCard);
@@ -698,5 +674,15 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 		}
 		return new Timestamp(d.getTime());
 	}
+    
+    private void checkPaymentCardIsNull(PaymentCard paymentCard,Long id){
+    	if(paymentCard == null){
+    		LOGGER.error("paymentCard is not exists {}.",id);
+    		throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_NOT_EXISTS_CARD,
+					localeStringService.getLocalizedString(String.valueOf(PaymentCardErrorCode.SCOPE), 
+							String.valueOf(PaymentCardErrorCode.ERROR_NOT_EXISTS_CARD),
+							UserContext.current().getUser().getLocale(),"paymentCard is not exists ."));
+    	}
+    }
     
 }

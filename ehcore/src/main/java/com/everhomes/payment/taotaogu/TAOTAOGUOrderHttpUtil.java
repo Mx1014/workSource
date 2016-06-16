@@ -34,10 +34,18 @@ import com.google.gson.Gson;
  */
 public class TAOTAOGUOrderHttpUtil {
 	
+	private static ConfigurationProvider configProvider;
+	private static String url;
+	
+	static{
+		configProvider = PlatformContext.getComponent("configurationProviderImpl");
+		url = configProvider.getValue("taotaogu.card.url", "");
+	}
+	
 	public static Map orderLogin() throws Exception {
 		CloseableHttpClient httpClient = HttpClients.createDefault();
 		Gson gson = new Gson();
-		HttpPost request = new HttpPost(VendorConstant.ORDER_URL+"/iips2/order/login");
+		HttpPost request = new HttpPost(url+"/iips2/order/login");
 		JSONObject json = new JSONObject();
 		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
 		Date now = new Date();
@@ -51,7 +59,7 @@ public class TAOTAOGUOrderHttpUtil {
 		json.put("termnl_id", VendorConstant.TERMNL_ID);
 	
 		CertProvider certProvider =  PlatformContext.getComponent("certProviderImpl");
-		ConfigurationProvider configProvider = PlatformContext.getComponent("configurationProviderImpl");
+		//ConfigurationProvider configProvider = PlatformContext.getComponent("configurationProviderImpl");
 		Cert serverCer = certProvider.findCertByName(configProvider.getValue(VendorConstant.SERVER_CER, ""));
 		InputStream serverCerIn = new ByteArrayInputStream(serverCer.getData());
 		Cert clientPfx = certProvider.findCertByName(configProvider.getValue(VendorConstant.CLIENT_PFX, ""));
@@ -94,7 +102,7 @@ public class TAOTAOGUOrderHttpUtil {
 	public static Map post(String method,String token,String aesKey,JSONObject json) throws Exception {
 		CloseableHttpClient httpClient = HttpClients.createDefault();
 		Gson gson = new Gson();
-		HttpPost request = new HttpPost(VendorConstant.ORDER_URL+method);
+		HttpPost request = new HttpPost(url+method);
 		
 		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
 			
