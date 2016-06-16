@@ -22,6 +22,7 @@ import com.everhomes.rest.business.CancelFavoriteBusinessCommand;
 import com.everhomes.rest.business.FavoriteBusinessesCommand;
 import com.everhomes.rest.launchpad.GetLaunchPadItemsCommandResponse;
 import com.everhomes.rest.launchpad.LaunchPadLayoutDTO;
+import com.everhomes.rest.launchpad.UserLaunchPadItemDTO;
 import com.everhomes.rest.ui.launchpad.AddLaunchPadItemBySceneCommand;
 import com.everhomes.rest.ui.launchpad.CancelFavoriteBusinessBySceneCommand;
 import com.everhomes.rest.ui.launchpad.DeleteLaunchPadItemBySceneCommand;
@@ -147,10 +148,10 @@ public class LauchPadUiController extends ControllerBase {
      * <p>添加item到桌面</p>
      */
     @RequestMapping("addLaunchPadItemByScene")
-    @RestReturn(value=String.class)
+    @RestReturn(value=UserLaunchPadItemDTO.class)
     public RestResponse addLaunchPadItemByScene(AddLaunchPadItemBySceneCommand cmd) {
-    	this.launchPadService.addLaunchPadItemByScene(cmd);
-        RestResponse response =  new RestResponse();
+    	UserLaunchPadItemDTO userItemDTO = this.launchPadService.addLaunchPadItemByScene(cmd);
+        RestResponse response =  new RestResponse(userItemDTO);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -161,10 +162,10 @@ public class LauchPadUiController extends ControllerBase {
      * <p>删除桌面的item</p>
      */
     @RequestMapping("deleteLaunchPadItemByScene")
-    @RestReturn(value=String.class)
+    @RestReturn(value=UserLaunchPadItemDTO.class)
     public RestResponse deleteLaunchPadItemByScene(DeleteLaunchPadItemBySceneCommand cmd) {
-    	this.launchPadService.deleteLaunchPadItemByScene(cmd);
-        RestResponse response =  new RestResponse();
+    	UserLaunchPadItemDTO userItemDTO = this.launchPadService.deleteLaunchPadItemByScene(cmd);
+        RestResponse response =  new RestResponse(userItemDTO);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

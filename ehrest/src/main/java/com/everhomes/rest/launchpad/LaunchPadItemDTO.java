@@ -31,6 +31,7 @@ import com.everhomes.util.StringHelper;
  * <li>bgcolor: item的背景颜色</li>
  * <li>scaleType: 图标是否需要裁剪0-不需要，1-需要</li>
  * <li>deleteFlag: 是否可删除,0-不可删除,1-可删除,详情{@link com.everhomes.rest.launchpad.DeleteFlagType}</li>
+ * <li>editFlag: 是否可编辑,0-不可编辑,1-可编辑 详情{@link com.everhomes.rest.launchpad.EditFlagType}</li>
  * </ul>
  */
 public class LaunchPadItemDTO {
@@ -57,7 +58,7 @@ public class LaunchPadItemDTO {
     private Integer    bgcolor;
     private Byte    scaleType;
     private Byte deleteFlag;
-    
+    private Byte editFlag;
 
     public Long getId() {
         return id;
@@ -241,6 +242,15 @@ public class LaunchPadItemDTO {
 
 	public void setDeleteFlag(Byte deleteFlag) {
 		this.deleteFlag = deleteFlag;
+	}
+	
+
+	public Byte getEditFlag() {
+		return editFlag;
+	}
+
+	public void setEditFlag(Byte editFlag) {
+		this.editFlag = editFlag;
 	}
 
 	@Override
