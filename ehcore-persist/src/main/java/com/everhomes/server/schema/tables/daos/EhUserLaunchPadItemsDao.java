@@ -102,4 +102,18 @@ public class EhUserLaunchPadItemsDao extends org.jooq.impl.DAOImpl<com.everhomes
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserLaunchPadItems> fetchBySceneType(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhUserLaunchPadItems.EH_USER_LAUNCH_PAD_ITEMS.SCENE_TYPE, values);
 	}
+
+	/**
+	 * Fetch records that have <code>update_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserLaunchPadItems> fetchByUpdateTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUserLaunchPadItems.EH_USER_LAUNCH_PAD_ITEMS.UPDATE_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>create_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhUserLaunchPadItems> fetchByCreateTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhUserLaunchPadItems.EH_USER_LAUNCH_PAD_ITEMS.CREATE_TIME, values);
+	}
 }
