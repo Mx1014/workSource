@@ -80,7 +80,7 @@ public class UserInfo {
     private List<UserCurrentEntity> entityList;
     
     private String sceneToken;
-    private Long registerDays;
+    private String registerDaysDesc;
 
     public UserInfo() {
     }
@@ -309,12 +309,12 @@ public class UserInfo {
         this.sceneToken = sceneToken;
     }
 
-	public Long getRegisterDays() {
-		return registerDays;
+	public String getRegisterDaysDesc() {
+		return registerDaysDesc;
 	}
 
-	public void setRegisterDays(Long registerDays) {
-		this.registerDays = registerDays;
+	public void setRegisterDaysDesc(String registerDaysDesc) {
+		this.registerDaysDesc = registerDaysDesc;
 	}
 
 	@Override

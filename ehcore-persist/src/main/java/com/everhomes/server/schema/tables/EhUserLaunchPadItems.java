@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUserLaunchPadItems extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhUserLaunchPadItemsRecord> {
 
-	private static final long serialVersionUID = 1516323199;
+	private static final long serialVersionUID = -844747434;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_user_launch_pad_items</code>
@@ -70,6 +70,16 @@ public class EhUserLaunchPadItems extends org.jooq.impl.TableImpl<com.everhomes.
 	 * The column <code>ehcore.eh_user_launch_pad_items.scene_type</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserLaunchPadItemsRecord, java.lang.String> SCENE_TYPE = createField("scene_type", org.jooq.impl.SQLDataType.VARCHAR.length(64).nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_user_launch_pad_items.update_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserLaunchPadItemsRecord, java.sql.Timestamp> UPDATE_TIME = createField("update_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_user_launch_pad_items.create_time</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhUserLaunchPadItemsRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
 
 	/**
 	 * Create a <code>ehcore.eh_user_launch_pad_items</code> table reference

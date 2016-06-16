@@ -11,30 +11,34 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhUserLaunchPadItems implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1506049696;
+	private static final long serialVersionUID = 73406252;
 
-	private java.lang.Long    id;
-	private java.lang.Long    itemId;
-	private java.lang.String  ownerType;
-	private java.lang.Long    ownerId;
-	private java.lang.Long    userId;
-	private java.lang.Byte    applyPolicy;
-	private java.lang.Byte    displayFlag;
-	private java.lang.Integer defaultOrder;
-	private java.lang.String  sceneType;
+	private java.lang.Long     id;
+	private java.lang.Long     itemId;
+	private java.lang.String   ownerType;
+	private java.lang.Long     ownerId;
+	private java.lang.Long     userId;
+	private java.lang.Byte     applyPolicy;
+	private java.lang.Byte     displayFlag;
+	private java.lang.Integer  defaultOrder;
+	private java.lang.String   sceneType;
+	private java.sql.Timestamp updateTime;
+	private java.sql.Timestamp createTime;
 
 	public EhUserLaunchPadItems() {}
 
 	public EhUserLaunchPadItems(
-		java.lang.Long    id,
-		java.lang.Long    itemId,
-		java.lang.String  ownerType,
-		java.lang.Long    ownerId,
-		java.lang.Long    userId,
-		java.lang.Byte    applyPolicy,
-		java.lang.Byte    displayFlag,
-		java.lang.Integer defaultOrder,
-		java.lang.String  sceneType
+		java.lang.Long     id,
+		java.lang.Long     itemId,
+		java.lang.String   ownerType,
+		java.lang.Long     ownerId,
+		java.lang.Long     userId,
+		java.lang.Byte     applyPolicy,
+		java.lang.Byte     displayFlag,
+		java.lang.Integer  defaultOrder,
+		java.lang.String   sceneType,
+		java.sql.Timestamp updateTime,
+		java.sql.Timestamp createTime
 	) {
 		this.id = id;
 		this.itemId = itemId;
@@ -45,6 +49,8 @@ public class EhUserLaunchPadItems implements java.io.Serializable {
 		this.displayFlag = displayFlag;
 		this.defaultOrder = defaultOrder;
 		this.sceneType = sceneType;
+		this.updateTime = updateTime;
+		this.createTime = createTime;
 	}
 
 	public java.lang.Long getId() {
@@ -117,5 +123,21 @@ public class EhUserLaunchPadItems implements java.io.Serializable {
 
 	public void setSceneType(java.lang.String sceneType) {
 		this.sceneType = sceneType;
+	}
+
+	public java.sql.Timestamp getUpdateTime() {
+		return this.updateTime;
+	}
+
+	public void setUpdateTime(java.sql.Timestamp updateTime) {
+		this.updateTime = updateTime;
+	}
+
+	public java.sql.Timestamp getCreateTime() {
+		return this.createTime;
+	}
+
+	public void setCreateTime(java.sql.Timestamp createTime) {
+		this.createTime = createTime;
 	}
 }
