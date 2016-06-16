@@ -19,6 +19,8 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.cert.Cert;
@@ -33,7 +35,8 @@ import com.google.gson.Gson;
  *
  */
 public class TAOTAOGUOrderHttpUtil {
-	
+	private static final Logger LOGGER = LoggerFactory.getLogger(TAOTAOGUHttpUtil.class);
+
 	private static ConfigurationProvider configProvider;
 	private static String url;
 	
@@ -78,7 +81,8 @@ public class TAOTAOGUOrderHttpUtil {
 		HttpResponse rsp = httpClient.execute(request);
 		StatusLine status = rsp.getStatusLine();
 		String rspText = EntityUtils.toString(rsp.getEntity(), "GBK");
-		
+		LOGGER.debug(rspText);
+		LOGGER.debug("---------------------------------------------------------------------");
 		if(rspText.indexOf("return_code") != -1){
 			int a = rspText.indexOf("\"return_code\":\"");
 			int b = rspText.indexOf("\"",a+15);
