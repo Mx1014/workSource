@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPaymentCardTransactions implements java.io.Serializable {
 
-	private static final long serialVersionUID = -204120220;
+	private static final long serialVersionUID = 401536638;
 
 	private java.lang.Long       id;
 	private java.lang.Integer    namespaceId;
@@ -31,6 +31,10 @@ public class EhPaymentCardTransactions implements java.io.Serializable {
 	private java.sql.Timestamp   createTime;
 	private java.lang.String     vendorName;
 	private java.lang.String     vendorResult;
+	private java.lang.Byte       comsumeType;
+	private java.lang.String     token;
+	private java.lang.String     cardNo;
+	private java.lang.Long       orderNo;
 
 	public EhPaymentCardTransactions() {}
 
@@ -52,7 +56,11 @@ public class EhPaymentCardTransactions implements java.io.Serializable {
 		java.lang.Long       creatorUid,
 		java.sql.Timestamp   createTime,
 		java.lang.String     vendorName,
-		java.lang.String     vendorResult
+		java.lang.String     vendorResult,
+		java.lang.Byte       comsumeType,
+		java.lang.String     token,
+		java.lang.String     cardNo,
+		java.lang.Long       orderNo
 	) {
 		this.id = id;
 		this.namespaceId = namespaceId;
@@ -72,6 +80,10 @@ public class EhPaymentCardTransactions implements java.io.Serializable {
 		this.createTime = createTime;
 		this.vendorName = vendorName;
 		this.vendorResult = vendorResult;
+		this.comsumeType = comsumeType;
+		this.token = token;
+		this.cardNo = cardNo;
+		this.orderNo = orderNo;
 	}
 
 	public java.lang.Long getId() {
@@ -216,5 +228,37 @@ public class EhPaymentCardTransactions implements java.io.Serializable {
 
 	public void setVendorResult(java.lang.String vendorResult) {
 		this.vendorResult = vendorResult;
+	}
+
+	public java.lang.Byte getComsumeType() {
+		return this.comsumeType;
+	}
+
+	public void setComsumeType(java.lang.Byte comsumeType) {
+		this.comsumeType = comsumeType;
+	}
+
+	public java.lang.String getToken() {
+		return this.token;
+	}
+
+	public void setToken(java.lang.String token) {
+		this.token = token;
+	}
+
+	public java.lang.String getCardNo() {
+		return this.cardNo;
+	}
+
+	public void setCardNo(java.lang.String cardNo) {
+		this.cardNo = cardNo;
+	}
+
+	public java.lang.Long getOrderNo() {
+		return this.orderNo;
+	}
+
+	public void setOrderNo(java.lang.Long orderNo) {
+		this.orderNo = orderNo;
 	}
 }

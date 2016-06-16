@@ -165,4 +165,32 @@ public class EhPaymentCardTransactionsDao extends org.jooq.impl.DAOImpl<com.ever
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPaymentCardTransactions> fetchByVendorResult(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhPaymentCardTransactions.EH_PAYMENT_CARD_TRANSACTIONS.VENDOR_RESULT, values);
 	}
+
+	/**
+	 * Fetch records that have <code>comsume_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPaymentCardTransactions> fetchByComsumeType(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPaymentCardTransactions.EH_PAYMENT_CARD_TRANSACTIONS.COMSUME_TYPE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>token IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPaymentCardTransactions> fetchByToken(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPaymentCardTransactions.EH_PAYMENT_CARD_TRANSACTIONS.TOKEN, values);
+	}
+
+	/**
+	 * Fetch records that have <code>card_no IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPaymentCardTransactions> fetchByCardNo(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPaymentCardTransactions.EH_PAYMENT_CARD_TRANSACTIONS.CARD_NO, values);
+	}
+
+	/**
+	 * Fetch records that have <code>order_no IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhPaymentCardTransactions> fetchByOrderNo(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhPaymentCardTransactions.EH_PAYMENT_CARD_TRANSACTIONS.ORDER_NO, values);
+	}
 }
