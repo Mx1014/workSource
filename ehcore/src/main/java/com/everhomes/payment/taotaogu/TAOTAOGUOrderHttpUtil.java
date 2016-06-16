@@ -1,5 +1,7 @@
 package com.everhomes.payment.taotaogu;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -20,6 +22,9 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONObject;
 
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.cert.Cert;
+import com.everhomes.cert.CertProvider;
 import com.everhomes.payment.VendorConstant;
 import com.google.gson.Gson;
 
@@ -42,13 +47,16 @@ public class TAOTAOGUOrderHttpUtil {
 		json.put("merch_id", "862900000000001");
 		json.put("termnl_id", "00011071");
 	
-		String server_cer = TAOTAOGUHttpUtil.class.getClassLoader().getResource(VendorConstant.server_cer).getPath();
-		String client_pfx = TAOTAOGUHttpUtil.class.getClassLoader().getResource(VendorConstant.client_pfx).getPath();
-
-		String msg = json.toString();
-		msg = Base64.encodeBase64String(com.ipp.order.utils.CertCoder.encryptByPublicKey(msg.getBytes(), server_cer));
+		CertProvider certProvider =  PlatformContext.getComponent("certProviderImpl");
+		Cert serverCer = certProvider.findCertByName("sunwen_server.cer");
+		InputStream serverCerIn = new ByteArrayInputStream(serverCer.getData());
+		Cert clientPfx = certProvider.findCertByName("sunwen_client.pfx");
+		InputStream clientPfxIn = new ByteArrayInputStream(clientPfx.getData());
 		
-		byte[] r=  com.ipp.order.utils.CertCoder.sign(msg.getBytes(), client_pfx,null, "123456");
+		String msg = json.toString();
+		msg = Base64.encodeBase64String(OrderCertCoder.encryptByPublicKey(msg.getBytes(), serverCerIn));
+		
+		byte[] r=  OrderCertCoder.sign(msg.getBytes(), clientPfxIn,null, clientPfx.getCertPass());
 		String sign = Base64.encodeBase64String(r);
 		
 		pairs.add(new BasicNameValuePair("msg", msg));
@@ -70,8 +78,8 @@ public class TAOTAOGUOrderHttpUtil {
 		int b = rspText.indexOf("&sign=");
 		msg = rspText.substring(a + 4, b);
 		sign = rspText.substring(b + 6);
-		boolean bSign = com.ipp.order.utils.CertCoder.verifySign(msg.getBytes(), Base64.decodeBase64(sign), server_cer);
-		r = com.ipp.order.utils.CertCoder.decryptByPrivateKey(Base64.decodeBase64(msg), client_pfx, null, "123456");
+		boolean bSign = OrderCertCoder.verifySign(msg.getBytes(), Base64.decodeBase64(sign), serverCerIn);
+		r = OrderCertCoder.decryptByPrivateKey(Base64.decodeBase64(msg), clientPfxIn, null, clientPfx.getCertPass());
 		
 		String r1 = new String(r, "GBK");
 		System.out.println(r1);

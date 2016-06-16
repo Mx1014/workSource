@@ -45,9 +45,9 @@ public class TAOTAOGUOrderHttpUtil {
 	
 		
 		String msg = json.toString();
-		msg = Base64.encodeBase64String(com.ipp.order.utils.CertCoder.encryptByPublicKey(msg.getBytes(), "E:\\一卡通接口\\server.cer"));
+		msg = Base64.encodeBase64String(OrderCertCoder.encryptByPublicKey(msg.getBytes(), "E:\\一卡通接口\\server.cer"));
 		
-		byte[] r=  com.ipp.order.utils.CertCoder.sign(msg.getBytes(), "E:\\一卡通接口\\client.pfx",null, "123456");
+		byte[] r=  OrderCertCoder.sign(msg.getBytes(), "E:\\一卡通接口\\client.pfx",null, "123456");
 		String sign = Base64.encodeBase64String(r);
 		
 		pairs.add(new BasicNameValuePair("msg", msg));
@@ -71,8 +71,8 @@ public class TAOTAOGUOrderHttpUtil {
 		int b = rspText.indexOf("&sign=");
 		msg = rspText.substring(a + 4, b);
 		sign = rspText.substring(b + 6);
-		boolean bSign = com.ipp.order.utils.CertCoder.verifySign(msg.getBytes(), Base64.decodeBase64(sign), "E:\\一卡通接口\\server.cer");
-		r = com.ipp.order.utils.CertCoder.decryptByPrivateKey(Base64.decodeBase64(msg), "E:\\一卡通接口\\client.pfx", null, "123456");
+		boolean bSign = OrderCertCoder.verifySign(msg.getBytes(), Base64.decodeBase64(sign), "E:\\一卡通接口\\server.cer");
+		r = OrderCertCoder.decryptByPrivateKey(Base64.decodeBase64(msg), "E:\\一卡通接口\\client.pfx", null, "123456");
 		
 		String r1 = new String(r, "GBK");
 		System.out.println(r1);

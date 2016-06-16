@@ -11,8 +11,8 @@ public class CardTransactionOfMonth implements Comparable<CardTransactionOfMonth
 	private Timestamp date;
 	private BigDecimal consumeAmount;
 	private BigDecimal rechargeAmount;
-	@ItemType(CardTransactionDTO.class)
-	private List<CardTransactionDTO> requests;
+	@ItemType(CardTransactionFromVendorDTO.class)
+	private List<CardTransactionFromVendorDTO> requests;
 	public Timestamp getDate() {
 		return date;
 	}
@@ -31,10 +31,11 @@ public class CardTransactionOfMonth implements Comparable<CardTransactionOfMonth
 	public void setRechargeAmount(BigDecimal rechargeAmount) {
 		this.rechargeAmount = rechargeAmount;
 	}
-	public List<CardTransactionDTO> getRequests() {
+	
+	public List<CardTransactionFromVendorDTO> getRequests() {
 		return requests;
 	}
-	public void setRequests(List<CardTransactionDTO> requests) {
+	public void setRequests(List<CardTransactionFromVendorDTO> requests) {
 		this.requests = requests;
 	}
 	@Override

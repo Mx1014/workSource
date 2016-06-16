@@ -170,7 +170,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     	paymentCardRechargeOrder.setOwnerType(cmd.getOwnerType());
     	paymentCardRechargeOrder.setOwnerId(cmd.getOwnerId());
     	paymentCardRechargeOrder.setNamespaceId(user.getNamespaceId());
-    	paymentCardRechargeOrder.setOrderNo(createOrderNo(System.currentTimeMillis()));
+    	paymentCardRechargeOrder.setOrderNo(createOrderNo(user.getId()));
     	paymentCardRechargeOrder.setUserId(user.getId());
     	paymentCardRechargeOrder.setUserName(user.getNickName());
     	paymentCardRechargeOrder.setMobile(userIdentifier.getIdentifierToken());
@@ -619,6 +619,9 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     	transaction.setCreateTime(new Timestamp(System.currentTimeMillis()));
     	transaction.setVendorName(VendorConstant.TAOTAOGU);
     	transaction.setVendorResult(paymentCard.getVendorCardData());
+    	transaction.setToken(result.getToken());
+    	transaction.setCardNo(result.getCard_id());
+    	transaction.setOrderNo(createOrderNo(user.getId()));
     	
     	paymentCardProvider.createPaymentCardTransaction(transaction);
     	NotifyEntityDTO dto = new NotifyEntityDTO();
@@ -655,8 +658,8 @@ public class PaymentCardServiceImpl implements PaymentCardService{
         
         return handler;
     }
-    private Long createOrderNo(Long time) {
-		String bill = String.valueOf(time) + (int) (Math.random()*1000);
+    private Long createOrderNo(Long id) {
+		String bill = String.valueOf(System.currentTimeMillis()) + (int) (Math.random()*1000) +id;
 		return Long.valueOf(bill);
 	}
     
@@ -680,6 +683,5 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 		}
 		return new Timestamp(d.getTime());
 	}
-
     
 }

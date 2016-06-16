@@ -34,6 +34,7 @@ import com.everhomes.rest.payment.ApplyCardCommand;
 import com.everhomes.rest.payment.CardInfoDTO;
 import com.everhomes.rest.payment.CardRechargeStatus;
 import com.everhomes.rest.payment.CardTransactionDTO;
+import com.everhomes.rest.payment.CardTransactionFromVendorDTO;
 import com.everhomes.rest.payment.CardTransactionOfMonth;
 import com.everhomes.rest.payment.CardTransactionTypeStatus;
 import com.everhomes.rest.payment.ListCardTransactionsCommand;
@@ -363,7 +364,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				BigDecimal consumeAmount = new BigDecimal(0);
 				BigDecimal rechargeAmount = new BigDecimal(0);
 				
-				CardTransactionDTO dto = new CardTransactionDTO();
+				CardTransactionFromVendorDTO dto = new CardTransactionFromVendorDTO();
 				dto.setMerchant((String)m.get("MerchId"));
 				BigDecimal amount = new BigDecimal((Double)m.get("ChdrRvaAmt"));
 				dto.setAmount(amount);
@@ -382,7 +383,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				
 				for(CardTransactionOfMonth ctm:resultList){
 					if(ctm.getDate().getTime() == StrTotimestamp(recvTime).getTime()){
-						List<CardTransactionDTO> requests = ctm.getRequests();
+						List<CardTransactionFromVendorDTO> requests = ctm.getRequests();
 						ctm.setConsumeAmount(ctm.getConsumeAmount().add(consumeAmount));
 						ctm.setRechargeAmount(ctm.getRechargeAmount().add(rechargeAmount));
 						requests.add(dto);
@@ -390,7 +391,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 					}
 				}
 				CardTransactionOfMonth  cardTransactionOfMonth = new CardTransactionOfMonth();
-				List<CardTransactionDTO> cardTransactionList = new ArrayList<>();
+				List<CardTransactionFromVendorDTO> cardTransactionList = new ArrayList<>();
 				cardTransactionList.add(dto);
 				cardTransactionOfMonth.setRequests(cardTransactionList);
 				cardTransactionOfMonth.setDate(StrTotimestamp(recvTime));
