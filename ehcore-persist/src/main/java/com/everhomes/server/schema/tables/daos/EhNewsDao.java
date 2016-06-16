@@ -158,4 +158,11 @@ public class EhNewsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.schema
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhNews> fetchByDeleteTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhNews.EH_NEWS.DELETE_TIME, values);
 	}
+
+	/**
+	 * Fetch records that have <code>sort_index IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhNews> fetchBySortIndex(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhNews.EH_NEWS.SORT_INDEX, values);
+	}
 }
