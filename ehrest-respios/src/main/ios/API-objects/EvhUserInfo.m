@@ -107,8 +107,8 @@
     }
     if(self.sceneToken)
         [jsonObject setObject: self.sceneToken forKey: @"sceneToken"];
-    if(self.registerDays)
-        [jsonObject setObject: self.registerDays forKey: @"registerDays"];
+    if(self.registerDaysDesc)
+        [jsonObject setObject: self.registerDaysDesc forKey: @"registerDaysDesc"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -235,9 +235,9 @@
         if(self.sceneToken && [self.sceneToken isEqual:[NSNull null]])
             self.sceneToken = nil;
 
-        self.registerDays = [jsonObject objectForKey: @"registerDays"];
-        if(self.registerDays && [self.registerDays isEqual:[NSNull null]])
-            self.registerDays = nil;
+        self.registerDaysDesc = [jsonObject objectForKey: @"registerDaysDesc"];
+        if(self.registerDaysDesc && [self.registerDaysDesc isEqual:[NSNull null]])
+            self.registerDaysDesc = nil;
 
         return self;
     }
