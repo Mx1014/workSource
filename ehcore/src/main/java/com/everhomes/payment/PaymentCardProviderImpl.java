@@ -179,6 +179,20 @@ public class PaymentCardProviderImpl implements PaymentCardProvider{
     }
     
     @Override
+    public Integer countPaymentCard(Long ownerId,String ownerType,Long userId){
+    	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPaymentCards.class));
+    	SelectQuery<EhPaymentCardsRecord> query = context.selectQuery(Tables.EH_PAYMENT_CARDS);
+    	if(StringUtils.isNotBlank(ownerType))
+        	query.addConditions(Tables.EH_PAYMENT_CARDS.OWNER_TYPE.eq(ownerType));
+        if(ownerId != null)
+        	query.addConditions(Tables.EH_PAYMENT_CARDS.OWNER_ID.eq(ownerId));
+        if(userId != null)
+        	query.addConditions(Tables.EH_PAYMENT_CARDS.USER_ID.eq(userId));
+
+        return query.fetchCount();
+    }
+    
+    @Override
     public List<PaymentCard> searchCardUsers(Long ownerId,String ownerType,String keyword,Long pageAnchor,Integer pageSize){
     	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPaymentCards.class));
     	SelectQuery<EhPaymentCardsRecord> query = context.selectQuery(Tables.EH_PAYMENT_CARDS);

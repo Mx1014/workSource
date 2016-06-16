@@ -41,6 +41,7 @@ import com.everhomes.payment.util.Util;
 import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.payment.ApplyCardCommand;
 import com.everhomes.rest.payment.CardInfoDTO;
 import com.everhomes.rest.payment.CardIssuerDTO;
@@ -133,6 +134,18 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     }
     @Override
     public CardInfoDTO applyCard(ApplyCardCommand cmd){
+    	User user = UserContext.current().getUser();
+    	Integer count = paymentCardProvider.countPaymentCard(cmd.getOwnerId(), cmd.getOwnerType(), user.getId());
+    	if(count > 0){
+//    		LOGGER.error("plateNumber cannot be null.");
+//        	throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_NULL,
+//					localeStringService.getLocalizedString(String.valueOf(ParkingErrorCode.SCOPE), 
+//							String.valueOf(ParkingErrorCode.ERROR_PLATE_NULL),
+//							UserContext.current().getUser().getLocale(),"plateNumber cannot be null."));
+    		LOGGER.error("Already open card.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"Already open card.");
+    	}
     	PaymentCardIssuer cardIssuer = paymentCardProvider.findPaymentCardIssuerById(cmd.getIssuerId());
     	PaymentCardVendorHandler handler = getPaymentCardVendorHandler(cardIssuer.getVendorName());
 		CardInfoDTO dto = handler.applyCard(cmd,cardIssuer);
