@@ -458,7 +458,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				}
 			}
 		} catch (Exception e) {
-			LOGGER.error("the cardPaidQrCode request of taotaogu is failed.");
+			LOGGER.error("the cardPaidQrCode request of taotaogu is failed {}.",e);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"the cardPaidQrCode request of taotaogu is failed.");
 		}

@@ -42,7 +42,7 @@ public class TAOTAOGUOrderHttpUtil {
 		String timeStr = dateFormat.format(now);
 		//timeStr = "20160223152525";
 		json.put("chnl_type", "WEB");
-		json.put("chnl_id", "12345678");
+		json.put("chnl_id", "12345679");
 		json.put("chnl_sn", System.currentTimeMillis());
 		json.put("merch_id", "862900000000001");
 		json.put("termnl_id", "00011071");
