@@ -84,7 +84,11 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 			if(!cardResponseEntiy.isSuccess())
 				return null;
 			Map cardMap = cardResponseEntiy.getData();
-			if(cardMap != null){
+			if(cardMap == null){
+				LOGGER.error("the getCardInfo request of taotaogu is failed.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						"the getCardInfo request of taotaogu is failed.");
+			}else{
 				cardInfo.setCardId(card.getId());
 				cardInfo.setCardNo((String)cardMap.get("CardId"));
 				cardInfo.setCardType((String)cardMap.get("CardSubClass"));
@@ -116,7 +120,9 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error("the cardInfo request of taotaogu is failed.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"the cardInfo request of taotaogu is failed.");
 		}
 		
 		return cardInfo;
@@ -442,14 +448,18 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 			boolean getTokenFlag = true;
 			while(getTokenFlag){
 				Map codeMap = TAOTAOGUOrderHttpUtil.post(token, aesKey, json);
-				String returnCode = (String) codeMap.get("return_code");
-				if("00".equals(returnCode)){
-					getTokenFlag = false;
-					result = token;
+				if(codeMap != null){
+					String returnCode = (String) codeMap.get("return_code");
+					if("00".equals(returnCode)){
+						getTokenFlag = false;
+						result = (String) codeMap.get("token");
+					}
 				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.error("the cardPaidQrCode request of taotaogu is failed.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"the cardPaidQrCode request of taotaogu is failed.");
 		}
 		return result;
 	}
@@ -466,10 +476,11 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				try {
 					map = TAOTAOGUOrderHttpUtil.orderLogin();
 				} catch (Exception e) {
-					e.printStackTrace();
+					LOGGER.error("the orderLogin request of taotaogu is failed.");
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+							"the orderLogin request of taotaogu is failed.");
 				}
-				String returnCode = (String) map.get("return_code");
-				if("00".equals(returnCode)){
+				if(map != null){
 					flag = false;
 					cachePool.putCacheItem(VendorConstant.TAOTAOGU_AESKEY, (String) map.get("aes_key"), 24*60*60*1000);
 					cachePool.putCacheItem(VendorConstant.TAOTAOGU_TOKEN, (String) map.get("token"), 24*60*60*1000);

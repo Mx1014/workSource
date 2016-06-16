@@ -16,6 +16,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class GetCardPaidResultDTO {
+	private String token;
 	private String merchantNo;
 	private String merchantName;
 	private BigDecimal amount;
@@ -63,4 +64,10 @@ public class GetCardPaidResultDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+	public String getToken() {
+		return token;
+	}
+	public void setToken(String token) {
+		this.token = token;
+	}
 }

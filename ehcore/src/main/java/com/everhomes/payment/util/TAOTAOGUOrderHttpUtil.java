@@ -40,7 +40,7 @@ public class TAOTAOGUOrderHttpUtil {
 		json.put("chnl_type", "WEB");
 		json.put("chnl_id", "12345678");
 		json.put("chnl_sn", System.currentTimeMillis());
-		json.put("merch_id", "862900000000001");
+		json.put("merch_id", "8629000000000011");
 		json.put("termnl_id", "00011071");
 	
 		
@@ -58,6 +58,15 @@ public class TAOTAOGUOrderHttpUtil {
 		StatusLine status = rsp.getStatusLine();
 		String rspText = EntityUtils.toString(rsp.getEntity(), "GBK");
 		
+		if(rspText.indexOf("return_code") != -1){
+			int a = rspText.indexOf("\"return_code\":\"");
+			int b = rspText.indexOf("\"",a+15);
+			String returnCode = rspText.substring(a + 15,b);
+			if(!"00".equals(returnCode))
+				return null;
+		}
+		
+		System.out.println(rspText);
 		int a = rspText.indexOf("msg=");
 		int b = rspText.indexOf("&sign=");
 		msg = rspText.substring(a + 4, b);
@@ -75,7 +84,7 @@ public class TAOTAOGUOrderHttpUtil {
 	
 	public static void main(String[] args) {
 		try {
-			orderLogin();
+			System.out.println(orderLogin());
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
