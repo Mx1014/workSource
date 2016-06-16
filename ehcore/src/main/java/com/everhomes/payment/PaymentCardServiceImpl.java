@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
@@ -34,6 +35,8 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.payment.taotaogu.AESCoder;
 import com.everhomes.payment.taotaogu.NotifyEntity;
+import com.everhomes.payment.taotaogu.PaidResultThread;
+import com.everhomes.payment.taotaogu.PaidResultThreadPool;
 import com.everhomes.payment.taotaogu.SHA1;
 import com.everhomes.payment.util.CacheItem;
 import com.everhomes.payment.util.CachePool;
@@ -223,6 +226,19 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"card id can not be null.");
     	}
+    	dto.setToken(cmd.getToken());
+    	ExecutorService service = PaidResultThreadPool.getInstance();
+    	PaidResultThread thread = new PaidResultThread(dto);
+    	service.execute(thread);
+    	synchronized (dto) {
+			try {
+				dto.wait();
+			} catch (InterruptedException e) {
+				LOGGER.error("card id can not be null.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"card id can not be null.");
+			}
+		}
     	return dto;
     }
     

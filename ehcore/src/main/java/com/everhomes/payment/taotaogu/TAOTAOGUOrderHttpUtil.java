@@ -27,7 +27,7 @@ public class TAOTAOGUOrderHttpUtil {
 	
 	public static Map orderLogin() throws Exception {
 		CloseableHttpClient httpClient = HttpClients.createDefault();
-
+		Gson gson = new Gson();
 		HttpPost request = new HttpPost(
 				"http://test.ippit.cn:8010/orderform/iips2/order/login");
 		JSONObject json = new JSONObject();
@@ -59,6 +59,13 @@ public class TAOTAOGUOrderHttpUtil {
 		StatusLine status = rsp.getStatusLine();
 		String rspText = EntityUtils.toString(rsp.getEntity(), "GBK");
 		
+		if(rspText.indexOf("return_code") != -1){
+			int a = rspText.indexOf("\"return_code\":\"");
+			int b = rspText.indexOf("\"",a+15);
+			String returnCode = rspText.substring(a + 15,b);
+			if(!"00".equals(returnCode))
+				return null;
+		}
 		int a = rspText.indexOf("msg=");
 		int b = rspText.indexOf("&sign=");
 		msg = rspText.substring(a + 4, b);
@@ -68,7 +75,7 @@ public class TAOTAOGUOrderHttpUtil {
 		
 		String r1 = new String(r, "GBK");
 		System.out.println(r1);
-		Gson gson = new Gson();
+		
 		Map result = gson.fromJson(r1, Map.class);
 		return result;
 	}
@@ -85,7 +92,7 @@ public class TAOTAOGUOrderHttpUtil {
 
 	public static Map post(String token,String aesKey,JSONObject json) throws Exception {
 		CloseableHttpClient httpClient = HttpClients.createDefault();
-
+		Gson gson = new Gson();
 		HttpPost request = new HttpPost(
 				"http://test.ippit.cn:8010/orderform/iips2/order/tokenrequest");
 		
@@ -103,12 +110,18 @@ public class TAOTAOGUOrderHttpUtil {
 		String rspText = EntityUtils.toString(rsp.getEntity(), "GBK");
 		System.out.println(rspText);
 		
-		
+		if(rspText.indexOf("return_code") != -1){
+			int a = rspText.indexOf("\"return_code\":\"");
+			int b = rspText.indexOf("\"",a+15);
+			String returnCode = rspText.substring(a + 15,b);
+			if(!"00".equals(returnCode))
+				return null;
+		}
 		int a = rspText.indexOf("msg=");
 		int b = rspText.indexOf("&sign=");
 		msg = rspText.substring(a + 4, b);
 		String sign = rspText.substring(b + 6);
-		Gson gson = new Gson();
+		
 		Map map = gson.fromJson(msg, Map.class);
 		String newSign = SHA1.EnCodeSHA1(msg + aesKey + token);
 		System.out.println(msg + "\n" + sign + "\n" + newSign);
