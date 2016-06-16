@@ -44,9 +44,9 @@ public class CardTransactionOfMonth implements Comparable<CardTransactionOfMonth
 	@Override
 	public int compareTo(CardTransactionOfMonth o) {
 		if(this.date.getTime() < o.date.getTime())
-			return -1;
-		if(this.date.getTime() > o.date.getTime())
 			return 1;
+		if(this.date.getTime() > o.date.getTime())
+			return -1;
 		return 0;
 	}
 	
