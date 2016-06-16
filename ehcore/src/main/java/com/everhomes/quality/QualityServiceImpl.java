@@ -1518,7 +1518,7 @@ public class QualityServiceImpl implements QualityService {
 		return time;
 	}
 
-	@Scheduled(cron="0 35 17 12 * ?" )
+	@Scheduled(cron="0 55 3 1 * ?" )
 	@Override
 	public void createEvaluations() {
 		if(LOGGER.isInfoEnabled()) {
