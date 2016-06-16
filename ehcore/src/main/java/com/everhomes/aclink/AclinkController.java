@@ -1,39 +1,65 @@
 package com.everhomes.aclink;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.aclink.lingling.AclinkLinglingConstant;
+import com.everhomes.aclink.lingling.AclinkLinglingDevice;
+import com.everhomes.aclink.lingling.AclinkLinglingMakeSdkKey;
+import com.everhomes.aclink.lingling.AclinkLinglingService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.entity.EntityType;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.aclink.AclinkConnectingCommand;
 import com.everhomes.rest.aclink.AclinkDeleteByIdCommand;
 import com.everhomes.rest.aclink.AclinkDisconnectedCommand;
+import com.everhomes.rest.aclink.AclinkMessageTestCommand;
+import com.everhomes.rest.aclink.AclinkMgmtCommand;
 import com.everhomes.rest.aclink.AclinkUpgradeCommand;
 import com.everhomes.rest.aclink.AclinkUpgradeResponse;
 import com.everhomes.rest.aclink.AclinkWebSocketMessage;
 import com.everhomes.rest.aclink.CreateDoorAuthByUser;
+import com.everhomes.rest.aclink.CreateLinglingVisitorCommand;
 import com.everhomes.rest.aclink.DoorAccessActivedCommand;
 import com.everhomes.rest.aclink.DoorAccessActivingCommand;
+import com.everhomes.rest.aclink.DoorAccessCapapilityDTO;
 import com.everhomes.rest.aclink.DoorAccessDTO;
 import com.everhomes.rest.aclink.DoorAuthDTO;
 import com.everhomes.rest.aclink.DoorMessage;
 import com.everhomes.rest.aclink.GetDoorAccessByHardwareIdCommand;
+import com.everhomes.rest.aclink.GetDoorAccessCapapilityCommand;
+import com.everhomes.rest.aclink.GetVisitorCommand;
+import com.everhomes.rest.aclink.GetVisitorResponse;
 import com.everhomes.rest.aclink.ListAesUserKeyByUserResponse;
+import com.everhomes.rest.aclink.ListDoorAccessGroupCommand;
+import com.everhomes.rest.aclink.ListDoorAccessQRKeyResponse;
 import com.everhomes.rest.aclink.ListDoorAccessResponse;
 import com.everhomes.rest.aclink.ListDoorAuthCommand;
 import com.everhomes.rest.aclink.ListDoorAuthResponse;
 import com.everhomes.rest.aclink.QueryDoorMessageCommand;
 import com.everhomes.rest.aclink.QueryDoorMessageResponse;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RequireAuthentication;
 
 @RestDoc(value="Aclink controller", site="core")
 @RestController
@@ -47,6 +73,12 @@ public class AclinkController extends ControllerBase {
     
     @Autowired
     private DoorAccessProvider doorAccessProvider;
+    
+    @Autowired
+    private AclinkLinglingService aclinkLinglingService;
+    
+    @Autowired
+    private RolePrivilegeService rolePrivilegeService;
     
     /**
      * <b>URL: /aclink/activing</b>
@@ -161,6 +193,18 @@ public class AclinkController extends ControllerBase {
         RestResponse response = new RestResponse(resp);
         List<DoorAccessDTO> dtos = new ArrayList<DoorAccessDTO>();
         resp.setDoors(dtos);
+        Long role = 0l;
+        
+        if(cmd.getOrganizationId() != null) {
+            try {
+                rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.AclinkManager);
+                role = 1l;
+            } catch(Exception e) {
+                
+            }
+        }
+        
+        resp.setRole(role);
         
         for(String hardwareId : cmd.getHardwareIds()) {
             DoorAccessDTO doorAccess = doorAccessService.getDoorAccessDetail(hardwareId);
@@ -279,5 +323,132 @@ public class AclinkController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /aclink/getDoorAccessCapapilityCommand</b>
+     * <p>创建 Lingling 门禁设备 </p>
+     * @return
+     */
+    @RequestMapping("getDoorAccessCapapility")
+    @RestReturn(value=DoorAccessCapapilityDTO.class)
+    public RestResponse getDoorAccessCapapility(@Valid GetDoorAccessCapapilityCommand cmd) {
+        RestResponse response = new RestResponse();
+      
+//        AclinkLinglingMakeSdkKey sdkKey = new AclinkLinglingMakeSdkKey();
+//        sdkKey.setDeviceIds(new ArrayList<Long>(){{add(1008l);}});
+//        aclinkLinglingService.makeSdkKey(sdkKey);
+        
+//        AclinkLinglingDevice device = new AclinkLinglingDevice();
+//        device.setDeviceCode("920F41B7F75C0");
+//        device.setDeviceName("test");
+//        aclinkLinglingService.createDevice(device);
+        
+        response.setResponseObject(doorAccessService.getDoorAccessCapapility(cmd));
+        
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /aclink/listDoorAccessQRKey</b>
+     * <p>列出所有二维码门禁列表 </p>
+     * @return
+     */
+    @RequestMapping("listDoorAccessQRKey")
+    @RestReturn(value=ListDoorAccessQRKeyResponse.class)
+    public RestResponse listDoorAccessQRKey() {
+        RestResponse response = new RestResponse();
+        
+        response.setResponseObject(doorAccessService.listDoorAccessQRKey());
+        
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /aclink/getVisitor</b>
+     * <p>列出所有二维码门禁列表 </p>
+     * @return
+     */
+    @RequestMapping("getVisitor")
+    @RequireAuthentication(false)
+    @RestReturn(value=GetVisitorResponse.class)
+    public RestResponse getDoorVisitorAuthByUuid(GetVisitorCommand cmd) {
+        RestResponse response = new RestResponse();
+        
+        response.setResponseObject(doorAccessService.getVisitor(cmd));
+        
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /aclink/v</b>
+     * <p>列出所有二维码门禁列表 </p>
+     * @return
+     */
+    @RequestMapping("v")
+    @RequireAuthentication(false)
+    public Object doorVisitor(GetVisitorCommand cmd) {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        try {
+            httpHeaders.setLocation(new URI("/mobile/static/qr_access/qrCode.html?id=" + cmd.getId()));
+        } catch (URISyntaxException e) {
+        }
+        return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
+    }
+    
+    /**
+     * 
+     * <b>URL: /aclink/listDoorAccessQRKey</b>
+     * <p>列出所有二维码门禁列表 </p>
+     * @return
+     */
+    @RequestMapping("wifiMgmt")
+    @RestReturn(value=DoorMessage.class)
+    public RestResponse getDoorVisitorAuthByUuid(AclinkMgmtCommand cmd) {
+        RestResponse response = new RestResponse();
+        
+        response.setResponseObject(doorAccessService.queryWifiMgmtMessage(cmd));
+        
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * 
+     * <b>URL: /aclink/listDoorAccessGroup</b>
+     * <p>列出所有二维码门禁列表 </p>
+     * @return
+     */
+    @RequestMapping("listDoorAccessGroup")
+    @RestReturn(value=ListDoorAccessResponse.class)
+    public RestResponse listDoorAccessGroup(@Valid ListDoorAccessGroupCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.listDoorAccessGroup(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;        
+    }
+    
+    /**
+     * 
+     */
+    @RequestMapping("aclinkMessageTest")
+    @RestReturn(value=ListDoorAccessResponse.class)
+    public RestResponse aclinkMessageTest(@Valid AclinkMessageTestCommand cmd) {
+        doorAccessService.sendMessageToUser(cmd.getUid(), cmd.getDoorId(), cmd.getDoorType());
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;        
     }
 }

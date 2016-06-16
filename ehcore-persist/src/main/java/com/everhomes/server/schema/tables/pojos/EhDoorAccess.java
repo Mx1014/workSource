@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhDoorAccess implements java.io.Serializable {
 
-	private static final long serialVersionUID = 833535291;
+	private static final long serialVersionUID = 191337767;
 
 	private java.lang.Long     id;
 	private java.lang.String   uuid;
@@ -35,6 +35,7 @@ public class EhDoorAccess implements java.io.Serializable {
 	private java.lang.Byte     status;
 	private java.lang.Integer  ackingSecretVersion;
 	private java.lang.Integer  expectSecretKey;
+	private java.lang.Long     groupid;
 
 	public EhDoorAccess() {}
 
@@ -60,7 +61,8 @@ public class EhDoorAccess implements java.io.Serializable {
 		java.sql.Timestamp createTime,
 		java.lang.Byte     status,
 		java.lang.Integer  ackingSecretVersion,
-		java.lang.Integer  expectSecretKey
+		java.lang.Integer  expectSecretKey,
+		java.lang.Long     groupid
 	) {
 		this.id = id;
 		this.uuid = uuid;
@@ -84,6 +86,7 @@ public class EhDoorAccess implements java.io.Serializable {
 		this.status = status;
 		this.ackingSecretVersion = ackingSecretVersion;
 		this.expectSecretKey = expectSecretKey;
+		this.groupid = groupid;
 	}
 
 	public java.lang.Long getId() {
@@ -260,5 +263,13 @@ public class EhDoorAccess implements java.io.Serializable {
 
 	public void setExpectSecretKey(java.lang.Integer expectSecretKey) {
 		this.expectSecretKey = expectSecretKey;
+	}
+
+	public java.lang.Long getGroupid() {
+		return this.groupid;
+	}
+
+	public void setGroupid(java.lang.Long groupid) {
+		this.groupid = groupid;
 	}
 }

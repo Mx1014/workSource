@@ -1,7 +1,16 @@
 package com.everhomes.rest.aclink;
 
+/**
+ * <ul>
+ * <li>FOREVER: 永久授权</li>
+ * <li>TEMPERATE: 临时有效期授权</li>
+ * <li>LINGLING_VISITOR: 令令访客授权</li>
+ * </ul>
+ * @author janson
+ *
+ */
 public enum DoorAuthType {
-    FOREVER((byte)0), TEMPERATE((byte)1);
+    FOREVER((byte)0), TEMPERATE((byte)1), LINGLING_VISITOR((byte)2);
     private byte code;
     
     private DoorAuthType(byte code) {
@@ -21,6 +30,8 @@ public enum DoorAuthType {
             return FOREVER;
         case 1 :
             return TEMPERATE;
+        case 2 :
+            return LINGLING_VISITOR;
         default :
             break;
         }
