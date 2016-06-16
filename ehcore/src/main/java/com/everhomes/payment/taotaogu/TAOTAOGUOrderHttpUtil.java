@@ -23,6 +23,7 @@ import org.json.simple.JSONObject;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.cert.Cert;
 import com.everhomes.cert.CertProvider;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.payment.VendorConstant;
 import com.google.gson.Gson;
 
@@ -50,9 +51,10 @@ public class TAOTAOGUOrderHttpUtil {
 		json.put("termnl_id", VendorConstant.TERMNL_ID);
 	
 		CertProvider certProvider =  PlatformContext.getComponent("certProviderImpl");
-		Cert serverCer = certProvider.findCertByName(VendorConstant.SERVER_CER);
+		ConfigurationProvider configProvider = PlatformContext.getComponent("configurationProviderImpl");
+		Cert serverCer = certProvider.findCertByName(configProvider.getValue(VendorConstant.SERVER_CER, ""));
 		InputStream serverCerIn = new ByteArrayInputStream(serverCer.getData());
-		Cert clientPfx = certProvider.findCertByName("sunwen_client.pfx");
+		Cert clientPfx = certProvider.findCertByName(configProvider.getValue(VendorConstant.CLIENT_PFX, ""));
 		InputStream clientPfxIn = new ByteArrayInputStream(clientPfx.getData());
 		
 		String msg = json.toString();

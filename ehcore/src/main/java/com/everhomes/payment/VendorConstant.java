@@ -15,10 +15,10 @@ public class VendorConstant {
 	public static final String DSTID = "00000000";
 	
 	public static final String KEY_STORE = "taotaogu.keystore";
-	public static final String PIN3_CRT = "taotaogu.server.cer";
+	public static final String PIN3_CRT = "taotaogu.pin3.crt";
 	
-	public static final String CLIENT_PFX = "taotaogu.pin3.crt";
-	public static final String SERVER_CER = "taotaogu.client.pfx";
+	public static final String CLIENT_PFX = "taotaogu.client.pfx";
+	public static final String SERVER_CER = "taotaogu.server.cer";
 	
 	public static final String TAOTAOGU_AESKEY = "TAOTAOGU_AESKEY";
 	public static final String TAOTAOGU_TOKEN = "TAOTAOGU_TOKEN";

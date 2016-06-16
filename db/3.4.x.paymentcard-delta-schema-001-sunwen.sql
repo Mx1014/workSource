@@ -96,11 +96,12 @@ CREATE TABLE `eh_payment_card_transactions` (
   `amount` DECIMAL(10,2) NOT NULL DEFAULT '0.00' COMMENT 'the amount of money paid',
   `transaction_no` VARCHAR(256) NOT NULL DEFAULT '' COMMENT 'transaction serial number',
   `transaction_time` DATETIME COMMENT 'the pay time',
-  `transcation_type` TINYINT NOT NULL DEFAULT 1 COMMENT 'the type of recharged card or consume',
   `card_id` BIGINT(20) NOT NULL DEFAULT 0 COMMENT 'id of the eh_payment_cards record',
   `card_no` VARCHAR(256) NOT NULL COMMENT 'the number of card',
   `token` VARCHAR(512) NOT NULL COMMENT 'the token of card token to pay',
   `order_no` BIGINT(30) NOT NULL DEFAULT '0' COMMENT 'order no',
+  `comsume_Type` TINYINT NOT NULL DEFAULT 1 COMMENT 'the type of recharged card or consume',
+
 
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: fail, 1: waitting 2: sucess',
   `creator_uid` BIGINT NOT NULL DEFAULT 0,

@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.cert.Cert;
 import com.everhomes.cert.CertProvider;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.payment.VendorConstant;
 import com.google.gson.Gson;
 
@@ -73,8 +74,9 @@ public class TAOTAOGUHttpUtil {
 		requestParam.put("Param",param);
 		byte[] data = gson.toJson(requestParam).getBytes();
 		
-		CertProvider certProvider =  PlatformContext.getComponent("certProviderImpl");
-		Cert cert = certProvider.findCertByName(VendorConstant.KEY_STORE);
+		CertProvider certProvider = PlatformContext.getComponent("certProviderImpl");
+		ConfigurationProvider configProvider = PlatformContext.getComponent("configurationProviderImpl");
+		Cert cert = certProvider.findCertByName(configProvider.getValue(VendorConstant.KEY_STORE, ""));
 		InputStream in = new ByteArrayInputStream(cert.getData());
 		
 		String pass = cert.getCertPass();
