@@ -439,6 +439,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhNearbyCommunityMap EH_NEARBY_COMMUNITY_MAP = com.everhomes.server.schema.tables.EhNearbyCommunityMap.EH_NEARBY_COMMUNITY_MAP;
 
 	/**
+	 * The table ehcore.eh_news
+	 */
+	public static final com.everhomes.server.schema.tables.EhNews EH_NEWS = com.everhomes.server.schema.tables.EhNews.EH_NEWS;
+
+	/**
 	 * The table ehcore.eh_oauth2_codes
 	 */
 	public static final com.everhomes.server.schema.tables.EhOauth2Codes EH_OAUTH2_CODES = com.everhomes.server.schema.tables.EhOauth2Codes.EH_OAUTH2_CODES;
