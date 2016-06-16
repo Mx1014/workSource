@@ -13,12 +13,7 @@
 
 @property(nonatomic, copy) NSString* sceneToken;
 
-@property(nonatomic, copy) NSNumber* contentCategory;
-
 @property(nonatomic, copy) NSString* publishStatus;
-
-// item type NSNumber*
-@property(nonatomic, strong) NSMutableArray* excludeCategories;
 
 @property(nonatomic, copy) NSNumber* pageAnchor;
 

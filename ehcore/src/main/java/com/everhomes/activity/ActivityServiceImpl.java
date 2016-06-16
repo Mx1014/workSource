@@ -263,23 +263,24 @@ public class ActivityServiceImpl implements ActivityService {
         }
         ActivityRoster roster = createRoster(cmd, user, activity);
         dbProvider.execute((status) -> {
-            Post comment = new Post();
-            comment.setParentPostId(post.getId());
-            comment.setForumId(post.getForumId());
-            comment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-            comment.setCreatorUid(user.getId());
-            comment.setContentType(PostContentType.TEXT.getCode());
-//            String template = configurationProvider.getValue(SIGNUP_AUTO_COMMENT, "");
-            String template = localeStringService.getLocalizedString(
-            		ActivityLocalStringCode.SCOPE,
-                    String.valueOf(ActivityLocalStringCode.ACTIVITY_SIGNUP),
-                    UserContext.current().getUser().getLocale(),
-                    "");
-
-            if (!StringUtils.isEmpty(template)) {
-                comment.setContent(template);
-                forumProvider.createPost(comment);
-            }
+        	//去掉报名评论 by xiongying 20160615
+//            Post comment = new Post();
+//            comment.setParentPostId(post.getId());
+//            comment.setForumId(post.getForumId());
+//            comment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//            comment.setCreatorUid(user.getId());
+//            comment.setContentType(PostContentType.TEXT.getCode());
+////            String template = configurationProvider.getValue(SIGNUP_AUTO_COMMENT, "");
+//            String template = localeStringService.getLocalizedString(
+//            		ActivityLocalStringCode.SCOPE,
+//                    String.valueOf(ActivityLocalStringCode.ACTIVITY_SIGNUP),
+//                    UserContext.current().getUser().getLocale(),
+//                    "");
+//
+//            if (!StringUtils.isEmpty(template)) {
+//                comment.setContent(template);
+//                forumProvider.createPost(comment);
+//            }
             if (activity.getGroupId() != null) {
                 RequestToJoinGroupCommand joinCmd = new RequestToJoinGroupCommand();
                 joinCmd.setGroupId(activity.getGroupId());
@@ -380,11 +381,11 @@ public class ActivityServiceImpl implements ActivityService {
             //remove from group or not
            // groupService.leaveGroup(leaveCmd);
         }
-        Post p = createPost(user.getId(), post, null, "");
-//        p.setContent(configurationProvider.getValue(CANCEL_AUTO_COMMENT, ""));
-        p.setContent(localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE,
-                    String.valueOf(ActivityLocalStringCode.ACTIVITY_CANCEL), UserContext.current().getUser().getLocale(), ""));
-        forumProvider.createPost(p);
+//        Post p = createPost(user.getId(), post, null, "");
+////        p.setContent(configurationProvider.getValue(CANCEL_AUTO_COMMENT, ""));
+//        p.setContent(localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE,
+//                    String.valueOf(ActivityLocalStringCode.ACTIVITY_CANCEL), UserContext.current().getUser().getLocale(), ""));
+//        forumProvider.createPost(p);
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
         dto.setActivityId(activity.getId());
         dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
@@ -432,18 +433,18 @@ public class ActivityServiceImpl implements ActivityService {
         			|| (activity.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode() && acroster.getConfirmFlag() == ConfirmStatus.CONFIRMED.getCode().longValue())){
         		
         		ActivityRoster roster = activityProvider.checkIn(activity, user.getId(), getFamilyId());
-                Post p = createPost(user.getId(),post,null,"");
-//                p.setContent(configurationProvider.getValue(CHECKIN_AUTO_COMMENT, ""));
-                p.setContent(localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE,
-                    String.valueOf(ActivityLocalStringCode.ACTIVITY_CHECKIN), UserContext.current().getUser().getLocale(), ""));
+//                Post p = createPost(user.getId(),post,null,"");
+////                p.setContent(configurationProvider.getValue(CHECKIN_AUTO_COMMENT, ""));
+//                p.setContent(localeStringService.getLocalizedString(ActivityLocalStringCode.SCOPE,
+//                    String.valueOf(ActivityLocalStringCode.ACTIVITY_CHECKIN), UserContext.current().getUser().getLocale(), ""));
                 Long familyId = getFamilyId();
                 if (familyId != null)
                     activity.setSignupFamilyCount(activity.getSignupFamilyCount() + 1);
                 activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()
                         + (roster.getAdultCount() + roster.getChildCount()));
                 roster.setCheckinFlag((byte)1);
-                forumProvider.createPost(p);
-                LOGGER.debug("post p={}.roster={}", p, roster);
+//                forumProvider.createPost(p);
+                LOGGER.debug("roster={}", roster);
         	}
             
             return status;
@@ -661,7 +662,7 @@ public class ActivityServiceImpl implements ActivityService {
                     "the user is invalid.cannot confirm id=" + cmd.getRosterId());
         }
         dbProvider.execute(status -> {
-            forumProvider.createPost(createPost(user.getId(), post, cmd.getConfirmFamilyId(), cmd.getTargetName()));
+ //           forumProvider.createPost(createPost(user.getId(), post, cmd.getConfirmFamilyId(), cmd.getTargetName()));
             activity.setConfirmAttendeeCount(activity.getConfirmAttendeeCount() + item.getChildCount()
                     + item.getChildCount());
             activity.setConfirmFamilyCount(activity.getConfirmFamilyCount() + 1);
@@ -831,7 +832,7 @@ public class ActivityServiceImpl implements ActivityService {
             put("username",queryUser.getNickName()==null?queryUser.getAccountName():queryUser.getNickName());
             put("reason",cmd.getReason());
         }}, ""));
-        forumProvider.createPost(comment);
+//        forumProvider.createPost(comment);
         
         
         
