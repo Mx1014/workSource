@@ -38,9 +38,9 @@ public class TAOTAOGUOrderHttpUtil {
 		String timeStr = dateFormat.format(now);
 		//timeStr = "20160223152525";
 		json.put("chnl_type", "WEB");
-		json.put("chnl_id", "12345678");
+		json.put("chnl_id", "12345679");
 		json.put("chnl_sn", System.currentTimeMillis());
-		json.put("merch_id", "8629000000000011");
+		json.put("merch_id", "862900000000001");
 		json.put("termnl_id", "00011071");
 	
 		
@@ -84,7 +84,7 @@ public class TAOTAOGUOrderHttpUtil {
 	
 	public static void main(String[] args) {
 		try {
-			System.out.println(orderLogin());
+			System.out.println(post());
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -105,14 +105,14 @@ public class TAOTAOGUOrderHttpUtil {
 		String timeStr = dateFormat.format(now);
 		//timeStr = "20160223152525";
 		json.put("chnl_type", "WEB");
-		json.put("chnl_id", "12345678");
+		json.put("chnl_id", "12345679");
 		json.put("chnl_sn", System.currentTimeMillis());
-		json.put("card_id", "5882572900500005884");
+		json.put("card_id", "5882572900500006023");
 		json.put("reserved", "00011071");
 		json.put("request_time", timeStr);		
 
-		String token = "578416bb28e11fc633555ff5c41582fb";
-		String aesKey = "fd2434d34ba3f670342e21c376ccd006";		
+		String token = "86135e19f36ad0146bb723c252a6968b";
+		String aesKey = "b90cfc8ff64de647dfc8c58b27327336";		
 		
 		pairs.add(new BasicNameValuePair("token", token));
 		String msg = Base64.encodeBase64String(AESCoder.encrypt(json.toString().getBytes("GBK"), aesKey.getBytes()));

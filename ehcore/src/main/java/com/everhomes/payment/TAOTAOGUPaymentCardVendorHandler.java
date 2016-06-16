@@ -439,7 +439,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		String timeStr = dateFormat.format(now);
 		//timeStr = "20160223152525";
 		json.put("chnl_type", "WEB");
-		json.put("chnl_id", "12345678");
+		json.put("chnl_id", "12345679");
 		json.put("chnl_sn", System.currentTimeMillis());
 		json.put("card_id", paymentCard.getCardNo());
 		json.put("reserved", "");
