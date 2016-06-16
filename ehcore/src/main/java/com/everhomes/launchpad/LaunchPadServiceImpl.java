@@ -67,6 +67,7 @@ import com.everhomes.rest.launchpad.LaunchPadServiceErrorCode;
 import com.everhomes.rest.launchpad.ListLaunchPadLayoutCommandResponse;
 import com.everhomes.rest.launchpad.ScaleType;
 import com.everhomes.rest.launchpad.UserDefinedLaunchPadCommand;
+import com.everhomes.rest.launchpad.UserLaunchPadItemDTO;
 import com.everhomes.rest.launchpad.admin.CreateLaunchPadItemAdminCommand;
 import com.everhomes.rest.launchpad.admin.CreateLaunchPadLayoutAdminCommand;
 import com.everhomes.rest.launchpad.admin.DeleteLaunchPadItemAdminCommand;
@@ -1614,7 +1615,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	}
 	
 	@Override
-	public void deleteLaunchPadItemByScene(DeleteLaunchPadItemBySceneCommand cmd){
+	public UserLaunchPadItemDTO deleteLaunchPadItemByScene(DeleteLaunchPadItemBySceneCommand cmd){
 		User user = UserContext.current().getUser();
 		Long userId = user.getId();
 	    SceneTokenDTO sceneToken = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
@@ -1626,6 +1627,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	    GetLaunchPadItemsCommandResponse response = null;
 	    List<LaunchPadItemDTO> launchPadItemDTOs = null;
 	    Integer order = 0;
+	    UserLaunchPadItem userItem = null;
 	    SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
 	       switch(sceneType) {
 	       case DEFAULT:
@@ -1644,7 +1646,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	           if(null != launchPadItemDTOs && launchPadItemDTOs.size() > 0){
 	        	   order = launchPadItemDTOs.get(launchPadItemDTOs.size() - 1).getDefaultOrder();
 	           }
-	           this.updateUserLaunchPadItem(userId, EntityType.COMMUNITY.getCode(), community.getId(), sceneType.getCode(), order, cmd.getId(), ItemDisplayFlag.HIDE);
+	           userItem = this.updateUserLaunchPadItem(userId, EntityType.COMMUNITY.getCode(), community.getId(), sceneType.getCode(), order, cmd.getId(), ItemDisplayFlag.HIDE);
 	           break;
 	       case FAMILY:
 	           FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
@@ -1665,7 +1667,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	           if(null != launchPadItemDTOs && launchPadItemDTOs.size() > 0){
 	        	   order = launchPadItemDTOs.get(launchPadItemDTOs.size() - 1).getDefaultOrder();
 	           }
-	           this.updateUserLaunchPadItem(userId, EntityType.COMMUNITY.getCode(), community.getId(), sceneType.getCode(), order, cmd.getId(), ItemDisplayFlag.HIDE);
+	           userItem = this.updateUserLaunchPadItem(userId, EntityType.COMMUNITY.getCode(), community.getId(), sceneType.getCode(), order, cmd.getId(), ItemDisplayFlag.HIDE);
 	           break;
 	       case PM_ADMIN:
 	       case ENTERPRISE: 
@@ -1687,10 +1689,12 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	           LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
 	           break;
 	       }
+	       
+	       return ConvertHelper.convert(userItem, UserLaunchPadItemDTO.class);
 	}
 	
 	@Override
-	public void addLaunchPadItemByScene(AddLaunchPadItemBySceneCommand cmd){
+	public UserLaunchPadItemDTO addLaunchPadItemByScene(AddLaunchPadItemBySceneCommand cmd){
 		User user = UserContext.current().getUser();
 		Long userId = user.getId();
 	    SceneTokenDTO sceneToken = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
@@ -1702,6 +1706,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	    GetLaunchPadItemsCommandResponse response = null;
 	    List<LaunchPadItemDTO> launchPadItemDTOs = null;
 	    Integer order = 0;
+	    UserLaunchPadItem userItem = null;
 	    SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
 	       switch(sceneType) {
 	       case DEFAULT:
@@ -1743,7 +1748,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	           if(null != launchPadItemDTOs && launchPadItemDTOs.size() > 0){
 	        	   order = launchPadItemDTOs.get(launchPadItemDTOs.size() - 1).getDefaultOrder();
 	           }
-	           this.updateUserLaunchPadItem(userId, EntityType.COMMUNITY.getCode(), community.getId(), sceneType.getCode(), order, cmd.getId(), ItemDisplayFlag.DISPLAY);
+	           userItem = this.updateUserLaunchPadItem(userId, EntityType.COMMUNITY.getCode(), community.getId(), sceneType.getCode(), order, cmd.getId(), ItemDisplayFlag.DISPLAY);
 	           break;
 	       case PM_ADMIN:
 	       case ENTERPRISE: 
@@ -1759,15 +1764,17 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	           if(null != launchPadItemDTOs && launchPadItemDTOs.size() > 0){
 	        	   order = launchPadItemDTOs.get(launchPadItemDTOs.size() - 1).getDefaultOrder();
 	           }
-	           this.updateUserLaunchPadItem(userId, EntityType.ORGANIZATIONS.getCode(), sceneToken.getEntityId(), sceneType.getCode(), order, cmd.getId(), ItemDisplayFlag.DISPLAY);
+	           userItem = this.updateUserLaunchPadItem(userId, EntityType.ORGANIZATIONS.getCode(), sceneToken.getEntityId(), sceneType.getCode(), order, cmd.getId(), ItemDisplayFlag.DISPLAY);
 	           break;
 	       default:
 	           LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
 	           break;
 	       }
+	       
+	       return ConvertHelper.convert(userItem, UserLaunchPadItemDTO.class);
 	}
 	
-	private void updateUserLaunchPadItem(Long userId, String ownerType, Long ownerId, String sceneType, Integer order, Long itemId, ItemDisplayFlag itemDisplayFlag){
+	private UserLaunchPadItem updateUserLaunchPadItem(Long userId, String ownerType, Long ownerId, String sceneType, Integer order, Long itemId, ItemDisplayFlag itemDisplayFlag){
 		UserLaunchPadItem userItem = launchPadProvider.getUserLaunchPadItemByOwner(userId, sceneType, ownerType, ownerId, itemId);
 		if(userItem == null){
 			userItem = new UserLaunchPadItem();
@@ -1785,6 +1792,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			userItem.setDisplayFlag(itemDisplayFlag.getCode());
 			launchPadProvider.updateUserLaunchPadItemById(userItem);
 		}
+		
+		return userItem;
 	}
 	
 	private void reorderLaunchPadItem(Long userId, String ownerType, Long ownerId, String sceneType, List<LaunchPadItemSort> sorts){

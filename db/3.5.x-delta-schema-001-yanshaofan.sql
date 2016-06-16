@@ -16,4 +16,4 @@ CREATE TABLE `eh_user_launch_pad_items`(
     `update_time` DATETIME,
     `create_time` DATETIME,
     PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
