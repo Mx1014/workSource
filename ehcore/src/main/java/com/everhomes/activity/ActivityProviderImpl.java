@@ -371,4 +371,35 @@ public class ActivityProviderImpl implements ActivityProivider {
         });
         return activities[0];
     }
+
+	@Override
+	public List<ActivityRoster> findRostersByUid(Long uid, CrossShardListingLocator locator, int count) {
+		List<ActivityRoster> rosters = new ArrayList<ActivityRoster>();
+		
+        if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhActivities.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+           SelectQuery<EhActivityRosterRecord> query = context.selectQuery(Tables.EH_ACTIVITY_ROSTER);
+
+            if (locator.getAnchor() != null)
+                query.addConditions(Tables.EH_ACTIVITY_ROSTER.ID.gt(locator.getAnchor()));
+            
+            query.addConditions(Tables.EH_ACTIVITY_ROSTER.UID.eq(uid));
+            
+            query.addOrderBy(Tables.EH_ACTIVITY_ROSTER.CREATE_TIME.asc());
+            query.addLimit(count - rosters.size());
+
+            query.fetch().map((r) -> {
+                rosters.add(ConvertHelper.convert(r, ActivityRoster.class));
+                return null;
+            });
+
+            return AfterAction.next;
+        });
+
+        return rosters;
+	}
 }
