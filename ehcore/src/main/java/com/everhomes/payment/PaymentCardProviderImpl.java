@@ -19,6 +19,8 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.payment.CardOrderStatus;
+import com.everhomes.rest.payment.CardRechargeStatus;
 import com.everhomes.rest.payment.PaymentCardStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -256,6 +258,7 @@ public class PaymentCardProviderImpl implements PaymentCardProvider{
         if(rechargeStatus != null)
         	query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.RECHARGE_STATUS.eq(rechargeStatus));
         
+    	query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.PAY_STATUS.eq(CardOrderStatus.PAID.getCode()));
         query.addOrderBy(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.CREATE_TIME.desc());
         if(pageSize != null)
         	query.addLimit(pageSize);

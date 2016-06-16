@@ -70,7 +70,7 @@ public class Testrecharge {
 		Map<String, Object> param = new HashMap<String, Object>();
 
 		param.put("BranchCode", "10002900");
-		param.put("CardId", "5882572900500005884");
+		param.put("CardId", "5882572900500006023");
 		param.put("EndCardId", "");
 		param.put("RechargeNum", "");
 		param.put("RechargeType", "0");

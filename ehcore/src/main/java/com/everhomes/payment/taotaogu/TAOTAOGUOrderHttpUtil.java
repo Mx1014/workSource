@@ -5,12 +5,10 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
@@ -28,24 +26,28 @@ import com.everhomes.cert.CertProvider;
 import com.everhomes.payment.VendorConstant;
 import com.google.gson.Gson;
 
+/**
+ * TAOTAOGU 订单登录和post请求方法
+ * @author 
+ *
+ */
 public class TAOTAOGUOrderHttpUtil {
 	
 	public static Map orderLogin() throws Exception {
 		CloseableHttpClient httpClient = HttpClients.createDefault();
 		Gson gson = new Gson();
-		HttpPost request = new HttpPost(
-				"http://test.ippit.cn:8010/orderform/iips2/order/login");
+		HttpPost request = new HttpPost(VendorConstant.ORDER_URL+"/iips2/order/login");
 		JSONObject json = new JSONObject();
 		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
 		Date now = new Date();
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");// 可以方便地修改日期格式
 		String timeStr = dateFormat.format(now);
 		//timeStr = "20160223152525";
-		json.put("chnl_type", "WEB");
-		json.put("chnl_id", "12345679");
+		json.put("chnl_type", VendorConstant.CHNL_TYPE);
+		json.put("chnl_id", VendorConstant.CHNL_ID);
 		json.put("chnl_sn", System.currentTimeMillis());
-		json.put("merch_id", "862900000000001");
-		json.put("termnl_id", "00011071");
+		json.put("merch_id", VendorConstant.MERCH_ID);
+		json.put("termnl_id", VendorConstant.TERMNL_ID);
 	
 		CertProvider certProvider =  PlatformContext.getComponent("certProviderImpl");
 		Cert serverCer = certProvider.findCertByName("sunwen_server.cer");
@@ -82,27 +84,15 @@ public class TAOTAOGUOrderHttpUtil {
 		r = OrderCertCoder.decryptByPrivateKey(Base64.decodeBase64(msg), clientPfxIn, null, clientPfx.getCertPass());
 		
 		String r1 = new String(r, "GBK");
-		System.out.println(r1);
 		
 		Map result = gson.fromJson(r1, Map.class);
 		return result;
 	}
 
-	
-	public static void main(String[] args) {
-		try {
-			//orderLogin();
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static Map post(String token,String aesKey,JSONObject json) throws Exception {
+	public static Map post(String method,String token,String aesKey,JSONObject json) throws Exception {
 		CloseableHttpClient httpClient = HttpClients.createDefault();
 		Gson gson = new Gson();
-		HttpPost request = new HttpPost(
-				"http://test.ippit.cn:8010/orderform/iips2/order/tokenrequest");
+		HttpPost request = new HttpPost(VendorConstant.ORDER_URL+method);
 		
 		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
 			

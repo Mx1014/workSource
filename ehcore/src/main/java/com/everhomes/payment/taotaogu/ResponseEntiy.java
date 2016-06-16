@@ -73,10 +73,4 @@ public class ResponseEntiy {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-	public static void main(String[] args) {
-		String json = "{\"AppName\":\"ICCard\",\"Version\":\"V0.01\",\"ClientDt\":\"20160612154124\",\"RespCode\":\"00\"}";
-		Gson gson = new Gson();
-		ResponseEntiy r = gson.fromJson(json, ResponseEntiy.class);
-		System.out.println(r);
-	}
 }

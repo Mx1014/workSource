@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.cert.Cert;
 import com.everhomes.cert.CertProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -33,7 +32,6 @@ import com.everhomes.payment.util.CachePool;
 import com.everhomes.rest.payment.ApplyCardCommand;
 import com.everhomes.rest.payment.CardInfoDTO;
 import com.everhomes.rest.payment.CardRechargeStatus;
-import com.everhomes.rest.payment.CardTransactionDTO;
 import com.everhomes.rest.payment.CardTransactionFromVendorDTO;
 import com.everhomes.rest.payment.CardTransactionOfMonth;
 import com.everhomes.rest.payment.CardTransactionTypeStatus;
@@ -86,7 +84,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				return null;
 			Map cardMap = cardResponseEntiy.getData();
 			if(cardMap == null){
-				LOGGER.error("the getCardInfo request of taotaogu is failed.");
+				LOGGER.error("the getCardInfo request of taotaogu is failed {}.",cardResponseEntiy.toString());
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 						"the getCardInfo request of taotaogu is failed.");
 			}else{
@@ -118,10 +116,9 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 						break;
 					}
 				}
-				
 			}
 		} catch (Exception e) {
-			LOGGER.error("the cardInfo request of taotaogu is failed.");
+			LOGGER.error("the cardInfo request of taotaogu is failed {}.",e);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"the cardInfo request of taotaogu is failed.");
 		}
@@ -177,10 +174,10 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				Map<String, Object> changePasswordParam = new HashMap<String, Object>();
 				changePasswordParam.put("BranchCode", brandCode);
 				changePasswordParam.put("CardId", cardId);
-				Cert cert = certProvider.findCertByName("sunwen_public_key");
+				Cert cert = certProvider.findCertByName(VendorConstant.PIN3_CRT);
 				InputStream in = new ByteArrayInputStream(cert.getData());
 				
-				byte[] oldpsd = CertCoder.encryptByPublicKey("111111".getBytes(), in);
+				byte[] oldpsd = CertCoder.encryptByPublicKey(VendorConstant.INITIAL_PASSWORD.getBytes(), in);
 				changePasswordParam.put("OrigPassWord", ByteTools.BytesToHexStr(oldpsd));
 				byte[] newpsd = CertCoder.encryptByPublicKey(cmd.getPassword().getBytes(), in);
 				changePasswordParam.put("NewPassWord", ByteTools.BytesToHexStr(newpsd));
@@ -225,7 +222,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				}
 			}
 		} catch (Exception e) {
-			LOGGER.error("the  apply card request of taotaogu is failed.");
+			LOGGER.error("the apply card request of taotaogu is failed {}.",e);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"the apply card request of taotaogu is failed.");
 		}
@@ -245,7 +242,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		byte[] newpsd = null;
 		ResponseEntiy changePasswordResponseEntiy = null;
 		try {
-			Cert cert = certProvider.findCertByName("sunwen_public_key");
+			Cert cert = certProvider.findCertByName(VendorConstant.PIN3_CRT);
 			InputStream in = new ByteArrayInputStream(cert.getData());
 			oldpsd = CertCoder.encryptByPublicKey(cmd.getOldPassword().getBytes(), in);		
 			changePasswordParam.put("OrigPassWord", ByteTools.BytesToHexStr(oldpsd));
@@ -254,12 +251,12 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 			changePasswordParam.put("Remark", "");
 			changePasswordResponseEntiy = TAOTAOGUHttpUtil.post(brandCode,"0050",changePasswordParam);
 		} catch (Exception e) {
-			LOGGER.error("the change password request of taotaogu is failed.");
+			LOGGER.error("the change password request of taotaogu is failed {}.",e);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"the change password request of taotaogu is failed.");
 		}
 		if(!changePasswordResponseEntiy.isSuccess()){
-			LOGGER.error("change password of paymentCard is failed.");
+			LOGGER.error("change password of paymentCard is failed {}.",changePasswordResponseEntiy.toString());
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"change password of paymentCard is failed.");
 		}
@@ -286,9 +283,9 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		
 		resetPasswordResponseEntiy = TAOTAOGUHttpUtil.post(brandCode,"0040",param);
 		if(!resetPasswordResponseEntiy.isSuccess()){
-			LOGGER.error("reset password of paymentCard is failed.");
+			LOGGER.error("reset password of taotaogu is failed {}.",resetPasswordResponseEntiy.toString());
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"reset password of paymentCard is failed.");
+					"reset password of taotaogu is failed.");
 		}
 		
 		Map<String, Object> changePasswordParam = new HashMap<String, Object>();
@@ -296,21 +293,21 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		changePasswordParam.put("CardId", paymentCard.getCardNo());
 		byte[] oldpsd = null;
 		byte[] newpsd = null;
-		Cert cert = certProvider.findCertByName("sunwen_public_key");
+		Cert cert = certProvider.findCertByName(VendorConstant.PIN3_CRT);
 		InputStream in = new ByteArrayInputStream(cert.getData());
-			oldpsd = CertCoder.encryptByPublicKey("111111".getBytes(), in);		
+			oldpsd = CertCoder.encryptByPublicKey(VendorConstant.INITIAL_PASSWORD.getBytes(), in);		
 			changePasswordParam.put("OrigPassWord", ByteTools.BytesToHexStr(oldpsd));
 			newpsd = CertCoder.encryptByPublicKey(cmd.getNewPassword().getBytes(), in);
 			changePasswordParam.put("NewPassWord", ByteTools.BytesToHexStr(newpsd));
 			changePasswordParam.put("Remark", "");
 			changePasswordResponseEntiy = TAOTAOGUHttpUtil.post(brandCode,"0050",changePasswordParam);
 		} catch (Exception e) {
-			LOGGER.error("the change password request of taotaogu is failed.");
+			LOGGER.error("the change password request of taotaogu is failed {}.",e);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"the change password request of taotaogu is failed.");
 		}
 		if(!changePasswordResponseEntiy.isSuccess()){
-			LOGGER.error("change password of paymentCard is failed.");
+			LOGGER.error("change password of paymentCard is failed {}.",changePasswordResponseEntiy.toString());
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"change password of paymentCard is failed.");
 		}
@@ -343,12 +340,12 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		try {
 			responseEntiy = TAOTAOGUHttpUtil.post(brandCode,"1030",param);
 		} catch (Exception e) {
-			LOGGER.error("the listCardTransactions request of taotaogu is failed.");
+			LOGGER.error("the listCardTransactions request of taotaogu is failed {}.",e);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"the listCardTransactions request of taotaogu is failed.");
 		}
 		if(!responseEntiy.isSuccess()){
-			LOGGER.error("the listCardTransactions request of taotaogu is failed.");
+			LOGGER.error("the listCardTransactions request of taotaogu is failed {}.",responseEntiy.toString());
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"the listCardTransactions request of taotaogu is failed.");
 		}
@@ -448,7 +445,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		try {
 			boolean getTokenFlag = true;
 			while(getTokenFlag){
-				Map codeMap = TAOTAOGUOrderHttpUtil.post(token, aesKey, json);
+				Map codeMap = TAOTAOGUOrderHttpUtil.post("/iips2/order/tokenrequest",token, aesKey, json);
 				if(codeMap != null){
 					String returnCode = (String) codeMap.get("return_code");
 					if("00".equals(returnCode)){
@@ -477,7 +474,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				try {
 					map = TAOTAOGUOrderHttpUtil.orderLogin();
 				} catch (Exception e) {
-					LOGGER.error("the orderLogin request of taotaogu is failed.");
+					LOGGER.error("the orderLogin request of taotaogu is failed {}.",e);
 					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 							"the orderLogin request of taotaogu is failed.");
 				}
@@ -517,58 +514,54 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		try {
 			responseEntiy = TAOTAOGUHttpUtil.post(brandCode,"0020",param);
 			if(responseEntiy.isSuccess()){
-				Map map = responseEntiy.getData();
-				String status = (String) map.get("ProcStatus");
-				if("01".equals(status)){
-					order.setRechargeStatus(CardRechargeStatus.RECHARGED.getCode());
-					order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
-					paymentCardProvider.updatePaymentCardRechargeOrder(order);
-					return;
+				order.setRechargeStatus(CardRechargeStatus.RECHARGED.getCode());
+				order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
+				paymentCardProvider.updatePaymentCardRechargeOrder(order);
+				return;
+			}else if("A0".equals(responseEntiy.getRespCode())){
+				boolean flag = true;
+				int i = 1;
+					
+				Map<String, Object> queryParam = new HashMap<String, Object>();
+				queryParam.put("QueryType", "0020");
+				queryParam.put("OrigMsgId", responseEntiy.getMsgID());
+				while(flag&&i<=10){
+					i++;
+					ResponseEntiy selectResponseEntiy = TAOTAOGUHttpUtil.post(brandCode,"9990",param);
+					if(selectResponseEntiy.isSuccess()){
+						
+						Map map = selectResponseEntiy.getData();
+						String status = (String) map.get("ProcStatus");
+						if("01".equals(status)){
+							flag = false;
+							order.setRechargeStatus(CardRechargeStatus.RECHARGED.getCode());
+							order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
+							paymentCardProvider.updatePaymentCardRechargeOrder(order);
+							return;
+						}if("06".equals(status)){
+							flag = false;
+							order.setRechargeStatus(CardRechargeStatus.FAIL.getCode());
+							order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
+							paymentCardProvider.updatePaymentCardRechargeOrder(order);
+							return;
+						}
+					}
+					Thread.sleep(5000);
 				}
-				if("06".equals(status)){
+				if(flag){
 					order.setRechargeStatus(CardRechargeStatus.FAIL.getCode());
 					order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
 					paymentCardProvider.updatePaymentCardRechargeOrder(order);
-					return;
 				}
-			}
-			
-			boolean flag = true;
-			int i = 1;
-				
-			Map<String, Object> queryParam = new HashMap<String, Object>();
-			queryParam.put("QueryType", "0020");
-			queryParam.put("OrigMsgId", responseEntiy.getMsgID());
-			while(flag&&i<=10){
-				i++;
-				responseEntiy = TAOTAOGUHttpUtil.post(brandCode,"9990",param);
-				if(responseEntiy.isSuccess()){
-					
-					Map map = responseEntiy.getData();
-					String status = (String) map.get("ProcStatus");
-					if("01".equals(status)){
-						flag = false;
-						order.setRechargeStatus(CardRechargeStatus.RECHARGED.getCode());
-						order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
-						paymentCardProvider.updatePaymentCardRechargeOrder(order);
-						return;
-					}if("06".equals(status)){
-						flag = false;
-						order.setRechargeStatus(CardRechargeStatus.FAIL.getCode());
-						order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
-						paymentCardProvider.updatePaymentCardRechargeOrder(order);
-						return;
-					}
-				}
-				Thread.sleep(5000);
-			}
-			if(flag){
+			}else{
 				order.setRechargeStatus(CardRechargeStatus.FAIL.getCode());
 				order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
 				paymentCardProvider.updatePaymentCardRechargeOrder(order);
-			}	
-		} catch (Exception e) {
-			LOGGER.error("the recharge request of taotaogu is failed.");
+				return;
+			}
+			
+		}catch (Exception e) {
+			LOGGER.error("the recharge request of taotaogu is failed {}.",e);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"the recharge request of taotaogu is failed.");
 		}

@@ -1,7 +1,6 @@
 package com.everhomes.payment.taotaogu;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -26,17 +25,21 @@ import org.slf4j.LoggerFactory;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.cert.Cert;
 import com.everhomes.cert.CertProvider;
-import com.everhomes.payment.TAOTAOGUPaymentCardVendorHandler;
 import com.everhomes.payment.VendorConstant;
 import com.google.gson.Gson;
 
+/**
+ * TAOTAOGU 制卡post请求方法
+ * @author 
+ *
+ */
 public class TAOTAOGUHttpUtil {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TAOTAOGUHttpUtil.class);
 
 	public static ResponseEntiy post(String brandCode,String msgType,Map<String, Object> param) throws Exception {
 		CloseableHttpClient httpClient = HttpClients.createDefault();
 
-		HttpPost request = new HttpPost(VendorConstant.URL);
+		HttpPost request = new HttpPost(VendorConstant.CARD_URL);
 		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
 		String msg = getJson(brandCode,msgType,param);
 		pairs.add(new BasicNameValuePair("msg", msg));
@@ -58,11 +61,11 @@ public class TAOTAOGUHttpUtil {
 		Gson gson = new Gson();
 		
 		Map<String, Object> requestParam = new HashMap<String, Object>();
-		requestParam.put("AppName", VendorConstant.AppName);
-		requestParam.put("Version",VendorConstant.Version);
+		requestParam.put("AppName", VendorConstant.APP_NAME);
+		requestParam.put("Version",VendorConstant.VERSION);
 		requestParam.put("ClientDt",sdf.format(new Date()));
 		requestParam.put("SrcId",brandCode);
-		requestParam.put("DstId",VendorConstant.DstId);
+		requestParam.put("DstId",VendorConstant.DSTID);
 		requestParam.put("MsgType",msgType);
 		requestParam.put("MsgID",brandCode + StringUtils.leftPad(String.valueOf(System.currentTimeMillis()), 24, "0"));
 		requestParam.put("Sign", "");
@@ -71,13 +74,11 @@ public class TAOTAOGUHttpUtil {
 		byte[] data = gson.toJson(requestParam).getBytes();
 		
 		CertProvider certProvider =  PlatformContext.getComponent("certProviderImpl");
-		Cert cert = certProvider.findCertByName("sunwen");
+		Cert cert = certProvider.findCertByName(VendorConstant.KEY_STORE);
 		InputStream in = new ByteArrayInputStream(cert.getData());
 		
 		String pass = cert.getCertPass();
 		String[] passArr = pass.split(",");
-		
-	//	String keyStorePath = TAOTAOGUHttpUtil.class.getClassLoader().getResource(VendorConstant.keyStorePath).getPath();
 		
 		byte[] sign = CertCoder.sign(data, in,passArr[0], passArr[1], passArr[2]);
 		requestParam.put("Sign",ByteTools.BytesToHexStr(sign));

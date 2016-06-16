@@ -24,7 +24,7 @@ import com.everhomes.payment.taotaogu.AESCoder;
 import com.everhomes.payment.taotaogu.SHA1;
 import com.google.gson.Gson;
 
-public class TAOTAOGUOrderHttpUtil {
+public class Ordertest {
 	
 	public static Map orderLogin() throws Exception {
 		CloseableHttpClient httpClient = HttpClients.createDefault();

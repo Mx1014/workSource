@@ -189,7 +189,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     	CommonOrderCommand orderCmd = new CommonOrderCommand();
     	orderCmd.setBody(paymentCardRechargeOrder.getMobile());
     	orderCmd.setOrderNo(paymentCardRechargeOrder.getId().toString());
-    	orderCmd.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
+    	orderCmd.setOrderType(OrderType.OrderTypeEnum.PAYMENTCARD.getPycode());
     	orderCmd.setSubject("一卡通充值订单简要描述");
     	orderCmd.setTotalFee(paymentCardRechargeOrder.getAmount());
     	CommonOrderDTO dto = null;
@@ -276,6 +276,10 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     		LOGGER.error("the old password is not correctly.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"the old password is not correctly.");
+//			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_NULL,
+//					localeStringService.getLocalizedString(String.valueOf(ParkingErrorCode.SCOPE), 
+//							String.valueOf(ParkingErrorCode.ERROR_PLATE_NULL),
+//							UserContext.current().getUser().getLocale(),"plateNumber cannot be null."));
     	}
     		
     	PaymentCardVendorHandler handler = getPaymentCardVendorHandler(paymentCard.getVendorName());

@@ -68,9 +68,9 @@ public class Testselectka4 {
 		requestParam.put("Sign", "");
 
 		Map<String, Object> param = new HashMap<String, Object>();
-		param.put("QueryType", "0000");
+		param.put("QueryType", "0020");
 		//param.put("CardId", "5882572900500000182");
-		param.put("OrigMsgId", "10002900000000000001465980362246");
+		param.put("OrigMsgId", "10002900000000000001466073972791");
 
 	
 		requestParam.put("Param",param);
