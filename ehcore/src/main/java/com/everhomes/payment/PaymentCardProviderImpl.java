@@ -19,6 +19,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.payment.PaymentCardStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhPaymentCardRechargeOrdersDao;
@@ -170,7 +171,7 @@ public class PaymentCardProviderImpl implements PaymentCardProvider{
         	query.addConditions(Tables.EH_PAYMENT_CARDS.OWNER_ID.eq(ownerId));
         if(userId != null)
         	query.addConditions(Tables.EH_PAYMENT_CARDS.USER_ID.eq(userId));
-
+        query.addConditions(Tables.EH_PAYMENT_CARDS.STATUS.eq(PaymentCardStatus.ACTIVE.getCode()));
         List<PaymentCard> result = new ArrayList<PaymentCard>();
         
         result = query.fetch().map(
@@ -188,7 +189,7 @@ public class PaymentCardProviderImpl implements PaymentCardProvider{
         	query.addConditions(Tables.EH_PAYMENT_CARDS.OWNER_ID.eq(ownerId));
         if(userId != null)
         	query.addConditions(Tables.EH_PAYMENT_CARDS.USER_ID.eq(userId));
-
+        query.addConditions(Tables.EH_PAYMENT_CARDS.STATUS.eq(PaymentCardStatus.ACTIVE.getCode()));
         return query.fetchCount();
     }
     
