@@ -659,7 +659,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
         return handler;
     }
     private Long createOrderNo(Long id) {
-		String bill = String.valueOf(System.currentTimeMillis()) + (int) (Math.random()*1000) +id;
+		String bill = String.valueOf(System.currentTimeMillis()) + (int) (Math.random()*1000);
 		return Long.valueOf(bill);
 	}
     
