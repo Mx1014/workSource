@@ -1,4 +1,5 @@
-CREATE TABLE eh_news (
+drop table if exists `eh_news`;
+CREATE TABLE `eh_news` (
 	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
 	`owner_uid` BIGINT(20) NOT NULL COMMENT 'owner user id',
 	`source_type` TINYINT(4) NOT NULL DEFAULT '0' COMMENT 'the source type who refers the link, 0: none, 1: post',
@@ -17,5 +18,5 @@ CREATE TABLE eh_news (
 	`deleter_uid` BIGINT(20) NOT NULL COMMENT 'deleter id',
 	`delete_time` DATETIME NULL DEFAULT NULL COMMENT 'mark-deletion policy. historic data may be useful',
 	PRIMARY KEY (`id`)
-)
+);
 
