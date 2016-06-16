@@ -16,12 +16,15 @@ CREATE TABLE `eh_hot_tags` (
 PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-  update eh_user_favorites set target_type = 'activity' where target_id in (
-  select id from eh_forum_posts where id in (select a.target_id from (select target_id from eh_user_favorites where target_type = 'topic') a) 
-  and category_id = 1010);
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`, `namespace_id`) 
+    VALUES( 'user.notification', 2, 'zh_CN', '注册天数描述', '我已加入左邻“${days}”天', 0);
   
-  update eh_user_posts set target_type = 'topic';
+UPDATE eh_user_favorites SET target_type = 'activity' WHERE target_id IN (
+  SELECT id FROM eh_forum_posts WHERE id IN (SELECT a.target_id FROM (SELECT target_id FROM eh_user_favorites WHERE target_type = 'topic') a) 
+  AND category_id = 1010);
   
-  update eh_user_posts set target_type = 'activity' where target_id in (
-  select id from eh_forum_posts where id in (select a.target_id from (select target_id from eh_user_posts where target_type = 'topic') a) 
-  and category_id = 1010);
+UPDATE eh_user_posts SET target_type = 'topic';
+  
+UPDATE eh_user_posts SET target_type = 'activity' WHERE target_id IN (
+  SELECT id FROM eh_forum_posts WHERE id IN (SELECT a.target_id FROM (SELECT target_id FROM eh_user_posts WHERE target_type = 'topic') a) 
+  AND category_id = 1010);
