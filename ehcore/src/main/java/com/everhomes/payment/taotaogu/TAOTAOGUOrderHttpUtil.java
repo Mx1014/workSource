@@ -50,7 +50,7 @@ public class TAOTAOGUOrderHttpUtil {
 		json.put("termnl_id", VendorConstant.TERMNL_ID);
 	
 		CertProvider certProvider =  PlatformContext.getComponent("certProviderImpl");
-		Cert serverCer = certProvider.findCertByName("sunwen_server.cer");
+		Cert serverCer = certProvider.findCertByName(VendorConstant.SERVER_CER);
 		InputStream serverCerIn = new ByteArrayInputStream(serverCer.getData());
 		Cert clientPfx = certProvider.findCertByName("sunwen_client.pfx");
 		InputStream clientPfxIn = new ByteArrayInputStream(clientPfx.getData());
