@@ -32,6 +32,7 @@ import org.springframework.stereotype.Component;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.payment.taotaogu.AESCoder;
 import com.everhomes.payment.taotaogu.NotifyEntity;
@@ -66,6 +67,7 @@ import com.everhomes.rest.payment.ListCardTransactionsCommand;
 import com.everhomes.rest.payment.ListCardTransactionsResponse;
 import com.everhomes.rest.payment.NotifyEntityCommand;
 import com.everhomes.rest.payment.NotifyEntityDTO;
+import com.everhomes.rest.payment.PaymentCardErrorCode;
 import com.everhomes.rest.payment.RechargeCardCommand;
 import com.everhomes.rest.payment.ResetCardPasswordCommand;
 import com.everhomes.rest.payment.SearchCardRechargeOrderCommand;
@@ -111,6 +113,9 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     
     @Autowired
 	private SmsProvider smsProvider;
+    
+    @Autowired
+	private LocaleStringService localeStringService;
     
     @Override
     public List<CardInfoDTO> listCardInfo(ListCardInfoCommand cmd){
@@ -274,12 +279,10 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     	}
     	if(!paymentCard.getPassword().equals(EncryptionUtils.hashPassword(cmd.getOldPassword()))){
     		LOGGER.error("the old password is not correctly.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"the old password is not correctly.");
-//			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_NULL,
-//					localeStringService.getLocalizedString(String.valueOf(ParkingErrorCode.SCOPE), 
-//							String.valueOf(ParkingErrorCode.ERROR_PLATE_NULL),
-//							UserContext.current().getUser().getLocale(),"plateNumber cannot be null."));
+			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_OLD_PASSWORD,
+					localeStringService.getLocalizedString(String.valueOf(PaymentCardErrorCode.SCOPE), 
+							String.valueOf(PaymentCardErrorCode.ERROR_OLD_PASSWORD),
+							UserContext.current().getUser().getLocale(),"the old password is not correctly."));
     	}
     		
     	PaymentCardVendorHandler handler = getPaymentCardVendorHandler(paymentCard.getVendorName());
@@ -298,25 +301,33 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     	CacheItem entity = cachePool.getCacheItem(cmd.getMobile());
     	if(entity == null){
     		LOGGER.error("verifyCode is not exists.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"verifyCode is not exists.");
+			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_VERIFY_CODE,
+					localeStringService.getLocalizedString(String.valueOf(PaymentCardErrorCode.SCOPE), 
+							String.valueOf(PaymentCardErrorCode.ERROR_VERIFY_CODE),
+							UserContext.current().getUser().getLocale(),"verifyCode is not exists."));
     	}
     	if(!((String)entity.getEntity()).equals(cmd.getVerifyCode())){
     		LOGGER.error("verifyCode is not correctly.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"verifyCode is not correctly.");
+    		throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_VERIFY_CODE,
+					localeStringService.getLocalizedString(String.valueOf(PaymentCardErrorCode.SCOPE), 
+							String.valueOf(PaymentCardErrorCode.ERROR_VERIFY_CODE),
+							UserContext.current().getUser().getLocale(),"verifyCode is not correctly."));
     	}
     	if(entity.isExpired()){
     		LOGGER.error("verifyCode is expired.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"verifyCode is expired.");
+    		throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_VERIFY_CODE,
+					localeStringService.getLocalizedString(String.valueOf(PaymentCardErrorCode.SCOPE), 
+							String.valueOf(PaymentCardErrorCode.ERROR_VERIFY_CODE),
+							UserContext.current().getUser().getLocale(),"verifyCode is expired."));
     	}
     	cachePool.removeCacheItem(cmd.getMobile());
     	PaymentCard paymentCard = checkPaymentCard(cmd.getCardId());
     	if(paymentCard == null){
-    		LOGGER.error("card id cannot be null.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"card id cannot be null.");
+    		LOGGER.error("paymentCard is not exists {}.",cmd.getCardId());
+    		throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_NOT_EXISTS_CARD,
+					localeStringService.getLocalizedString(String.valueOf(PaymentCardErrorCode.SCOPE), 
+							String.valueOf(PaymentCardErrorCode.ERROR_NOT_EXISTS_CARD),
+							UserContext.current().getUser().getLocale(),"paymentCard is not exists ."));
     	}
     		
     	PaymentCardVendorHandler handler = getPaymentCardVendorHandler(paymentCard.getVendorName());

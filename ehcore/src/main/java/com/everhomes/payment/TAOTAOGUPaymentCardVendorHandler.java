@@ -23,6 +23,7 @@ import com.everhomes.cert.Cert;
 import com.everhomes.cert.CertProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.payment.taotaogu.ByteTools;
 import com.everhomes.payment.taotaogu.CertCoder;
 import com.everhomes.payment.taotaogu.ResponseEntiy;
@@ -36,6 +37,7 @@ import com.everhomes.rest.payment.CardTransactionFromVendorDTO;
 import com.everhomes.rest.payment.CardTransactionOfMonth;
 import com.everhomes.rest.payment.CardTransactionTypeStatus;
 import com.everhomes.rest.payment.ListCardTransactionsCommand;
+import com.everhomes.rest.payment.PaymentCardErrorCode;
 import com.everhomes.rest.payment.PaymentCardStatus;
 import com.everhomes.rest.payment.ResetCardPasswordCommand;
 import com.everhomes.rest.payment.SetCardPasswordCommand;
@@ -56,6 +58,8 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
     private ConfigurationProvider configProvider;
 	@Autowired
 	private CertProvider certProvider;
+	@Autowired
+	private LocaleStringService localeStringService;
 	
 	@SuppressWarnings("rawtypes")
 	@Override
@@ -252,13 +256,17 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 			changePasswordResponseEntiy = TAOTAOGUHttpUtil.post(brandCode,"0050",changePasswordParam);
 		} catch (Exception e) {
 			LOGGER.error("the change password request of taotaogu is failed {}.",e);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"the change password request of taotaogu is failed.");
+			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
+					localeStringService.getLocalizedString(String.valueOf(PaymentCardErrorCode.SCOPE), 
+							String.valueOf(PaymentCardErrorCode.ERROR_SERVER_REQUEST),
+							UserContext.current().getUser().getLocale(),"the change password request of taotaogu is failed."));
 		}
 		if(!changePasswordResponseEntiy.isSuccess()){
-			LOGGER.error("change password of paymentCard is failed {}.",changePasswordResponseEntiy.toString());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"change password of paymentCard is failed.");
+			LOGGER.error("the change password request of taotaogu is failed {}.",changePasswordResponseEntiy.toString());
+			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
+					localeStringService.getLocalizedString(String.valueOf(PaymentCardErrorCode.SCOPE), 
+							String.valueOf(PaymentCardErrorCode.ERROR_SERVER_REQUEST),
+							UserContext.current().getUser().getLocale(),"the change password request of taotaogu is failed."));
 		}
 		paymentCard.setPassword(EncryptionUtils.hashPassword(cmd.getNewPassword()));
 		paymentCardProvider.updatePaymentCard(paymentCard);
@@ -283,9 +291,11 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		
 		resetPasswordResponseEntiy = TAOTAOGUHttpUtil.post(brandCode,"0040",param);
 		if(!resetPasswordResponseEntiy.isSuccess()){
-			LOGGER.error("reset password of taotaogu is failed {}.",resetPasswordResponseEntiy.toString());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"reset password of taotaogu is failed.");
+			LOGGER.error("the reset password request of taotaogu is failed {}.",resetPasswordResponseEntiy.toString());
+			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
+					localeStringService.getLocalizedString(String.valueOf(PaymentCardErrorCode.SCOPE), 
+							String.valueOf(PaymentCardErrorCode.ERROR_SERVER_REQUEST),
+							UserContext.current().getUser().getLocale(),"the reset password request of taotaogu is failed."));
 		}
 		
 		Map<String, Object> changePasswordParam = new HashMap<String, Object>();
@@ -303,13 +313,17 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 			changePasswordResponseEntiy = TAOTAOGUHttpUtil.post(brandCode,"0050",changePasswordParam);
 		} catch (Exception e) {
 			LOGGER.error("the change password request of taotaogu is failed {}.",e);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"the change password request of taotaogu is failed.");
+			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
+					localeStringService.getLocalizedString(String.valueOf(PaymentCardErrorCode.SCOPE), 
+							String.valueOf(PaymentCardErrorCode.ERROR_SERVER_REQUEST),
+							UserContext.current().getUser().getLocale(),"the change password request of taotaogu is failed."));
 		}
 		if(!changePasswordResponseEntiy.isSuccess()){
-			LOGGER.error("change password of paymentCard is failed {}.",changePasswordResponseEntiy.toString());
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"change password of paymentCard is failed.");
+			LOGGER.error("the change password request of taotaogu is failed {}.",changePasswordResponseEntiy.toString());
+			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
+					localeStringService.getLocalizedString(String.valueOf(PaymentCardErrorCode.SCOPE), 
+							String.valueOf(PaymentCardErrorCode.ERROR_SERVER_REQUEST),
+							UserContext.current().getUser().getLocale(),"the change password request of taotaogu is failed."));
 		}
 		paymentCard.setPassword(EncryptionUtils.hashPassword(cmd.getNewPassword()));
 		paymentCardProvider.updatePaymentCard(paymentCard);
