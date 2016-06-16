@@ -88,7 +88,7 @@ public class AclinkUtils {
     
     public static String packUpdateDeviceName(Byte ver, String aesKey, String aesIv, String devName) {
         byte[] key = Base64.decodeBase64(aesKey);
-        byte[] binaryData = CmdUtil.updateDevName(key, ver.byteValue(), (devName+"            ").substring(0, 8));
+        byte[] binaryData = CmdUtil.updateDevName(key, ver.byteValue(), (devName+"            ").substring(0, 12));
         return Base64.encodeBase64String(binaryData);
     }
     
