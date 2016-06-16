@@ -55,7 +55,7 @@ public class PmsyProviderImpl implements PmsyProvider {
 		
 		Result<EhPmsyPayersRecord> result = select.where(Tables.EH_PMSY_PAYERS.STATUS.eq(PmsyPayerStatus.ACTIVE.getCode()))
 			  .and(Tables.EH_PMSY_PAYERS.CREATOR_UID.eq(id))
-			  .and(Tables.EH_PMSY_PAYERS.NAMESPACE_ID.eq(namespaceId))
+			  .and(Tables.EH_PMSY_PAYERS.NAMESPACE_ID.eq(namespaceId)).orderBy(Tables.EH_PMSY_PAYERS.CREATE_TIME.desc())
 			  .fetch();
 		
 		return result.map(r -> ConvertHelper.convert(r, PmsyPayer.class));
