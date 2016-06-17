@@ -136,8 +136,8 @@ public class LauchPadUiController extends ControllerBase {
     @RequestMapping("getMoreItemsByScene")
     @RestReturn(value=GetLaunchPadItemsCommandResponse.class)
     public RestResponse getMoreItemsByScene(@Valid GetLaunchPadItemsBySceneCommand cmd,HttpServletRequest request,HttpServletResponse response) {
-        this.launchPadService.getMoreItemsByScene(cmd, request);
-    	RestResponse resp =  new RestResponse();
+    	GetLaunchPadItemsCommandResponse commandResponse = this.launchPadService.getMoreItemsByScene(cmd, request);
+    	RestResponse resp =  new RestResponse(commandResponse);
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
         return resp;
