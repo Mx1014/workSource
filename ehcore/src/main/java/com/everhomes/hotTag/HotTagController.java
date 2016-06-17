@@ -13,6 +13,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.hotTag.ListHotTagCommand;
 import com.everhomes.rest.hotTag.SearchTagCommand;
+import com.everhomes.rest.hotTag.SearchTagResponse;
 import com.everhomes.rest.hotTag.SetHotTagCommand;
 import com.everhomes.rest.hotTag.TagDTO;
 import com.everhomes.rest.hotTag.DeleteHotTagCommand;
@@ -78,7 +79,7 @@ public class HotTagController extends ControllerBase {
      * <p>搜素自定义标签</p>
      */
     @RequestMapping("searchTag")
-    @RestReturn(value=TagDTO.class, collection = true)
+    @RestReturn(value=SearchTagResponse.class)
     public RestResponse searchTag(SearchTagCommand cmd) {
         
 //    	List<TagDTO> tags = hotTagService.
