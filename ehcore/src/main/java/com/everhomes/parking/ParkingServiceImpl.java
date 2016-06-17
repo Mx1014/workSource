@@ -174,6 +174,7 @@ public class ParkingServiceImpl implements ParkingService {
     		parkingRechargeRateList = list.stream().map(r->{
     			ParkingRechargeRateDTO dto = new ParkingRechargeRateDTO();
     			dto = ConvertHelper.convert(r, ParkingRechargeRateDTO.class);
+    			dto.setRateName(dto.getMonthCount().intValue()+"个月");
     			dto.setRateToken(r.getId().toString());
     			dto.setVendorName(ParkingLotVendor.BOSIGAO.getCode());
     			return dto;
