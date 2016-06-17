@@ -1,5 +1,7 @@
 package com.everhomes.rest.payment;
 
+import com.everhomes.util.StringHelper;
+
 public class NotifyEntityCommand {
 	private String token;
 	private String sign;
@@ -23,5 +25,8 @@ public class NotifyEntityCommand {
 	public void setMsg(String msg) {
 		this.msg = msg;
 	}
-	
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

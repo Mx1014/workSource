@@ -77,8 +77,8 @@ public class Testselectka3 {
 		param.put("StartDate", "");
 		param.put("Enddate", "");
 		param.put("TransType", "");
-		param.put("PageNumber", "");
-		param.put("PageSize", "");
+		param.put("PageNumber", "1");
+		param.put("PageSize", "3");
 
 	
 		requestParam.put("Param",param);

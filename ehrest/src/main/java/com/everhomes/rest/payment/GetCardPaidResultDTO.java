@@ -60,14 +60,16 @@ public class GetCardPaidResultDTO {
 	public void setTransactionTime(Timestamp transactionTime) {
 		this.transactionTime = transactionTime;
 	}
-	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
+	
 	public String getToken() {
 		return token;
 	}
 	public void setToken(String token) {
 		this.token = token;
 	}
+	
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }

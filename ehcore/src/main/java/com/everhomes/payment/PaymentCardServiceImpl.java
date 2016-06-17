@@ -166,7 +166,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     	paymentCardRechargeOrder.setOwnerType(cmd.getOwnerType());
     	paymentCardRechargeOrder.setOwnerId(cmd.getOwnerId());
     	paymentCardRechargeOrder.setNamespaceId(user.getNamespaceId());
-    	paymentCardRechargeOrder.setOrderNo(createOrderNo(user.getId()));
+    	paymentCardRechargeOrder.setOrderNo(createOrderNo());
     	paymentCardRechargeOrder.setUserId(user.getId());
     	paymentCardRechargeOrder.setUserName(user.getNickName());
     	paymentCardRechargeOrder.setMobile(userIdentifier.getIdentifierToken());
@@ -214,7 +214,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     	GetCardPaidResultDTO dto = new GetCardPaidResultDTO();
     	PaymentCard paymentCard = checkPaymentCard(cmd.getCardId());
     	checkPaymentCardIsNull(paymentCard,cmd.getCardId());
-    	dto.setToken(cmd.getToken());
+    	//dto.setToken(cmd.getCode());
 //    	ExecutorService service = PaidResultThreadPool.getInstance();
 //    	PaidResultThread thread = new PaidResultThread(dto);
 //    	service.execute(thread);
@@ -227,6 +227,10 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 //						"card id can not be null.");
 //			}
 //		}
+    	PaymentCardTransaction paymentCardTransaction = paymentCardProvider.findPaymentCardTransactionByCondition(cmd.getCode(),paymentCard.getCardNo());
+    	if(paymentCardTransaction != null){
+    		
+    	}
     	return dto;
     }
     
@@ -597,7 +601,8 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     	transaction.setOwnerType(paymentCard.getOwnerType());
     	transaction.setNamespaceId(user.getNamespaceId());
     	transaction.setItemName("");
-    	transaction.setMerchant(result.getMerch_name());
+    	transaction.setMerchantNo(result.getMerch_id());
+    	transaction.setMerchantName(result.getMerch_name());
     	transaction.setAmount(new BigDecimal(result.getTrade_amt()));
     	transaction.setTransactionNo(result.getAcct_sn());
     	transaction.setTransactionTime(StrTotimestamp(result.getFinal_time()));
@@ -606,12 +611,11 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     	transaction.setCreatorUid(user.getId());
     	transaction.setCreateTime(new Timestamp(System.currentTimeMillis()));
     	transaction.setVendorName(VendorConstant.TAOTAOGU);
-    	String vendorCardData = paymentCard.getVendorCardData();
-    	String extraData = VendorConstant.CARD_TRANSACTION_STATUS_JSON;
-    	transaction.setVendorResult(mergeJson(vendorCardData, extraData));
+    	String extraData = VendorConstant.CARD_TRADE_STATUS_JSON;
+    	transaction.setVendorResult(extraData);
     	transaction.setToken(result.getToken());
     	transaction.setCardNo(result.getCard_id());
-    	transaction.setOrderNo(createOrderNo(user.getId()));
+    	//transaction.setOrderNo(createOrderNo());
     	
     	paymentCardProvider.createPaymentCardTransaction(transaction);
     	NotifyEntityDTO dto = new NotifyEntityDTO();
@@ -648,7 +652,8 @@ public class PaymentCardServiceImpl implements PaymentCardService{
         
         return handler;
     }
-    private Long createOrderNo(Long id) {
+    
+    private Long createOrderNo() {
 		String bill = String.valueOf(System.currentTimeMillis()) + (int) (Math.random()*1000);
 		return Long.valueOf(bill);
 	}

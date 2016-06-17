@@ -45,7 +45,7 @@ public class TAOTAOGUOrderHttpUtil {
 		url = configProvider.getValue("taotaogu.order.url", "");
 	}
 	
-	public static Map orderLogin() throws Exception {
+	public static Map orderLogin(Map vendorDataMap) throws Exception {
 		CloseableHttpClient httpClient = HttpClients.createDefault();
 		Gson gson = new Gson();
 		HttpPost request = new HttpPost(url+"/iips2/order/login");
@@ -54,15 +54,18 @@ public class TAOTAOGUOrderHttpUtil {
 		Date now = new Date();
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");// 可以方便地修改日期格式
 		String timeStr = dateFormat.format(now);
-		//timeStr = "20160223152525";
-		json.put("chnl_type", VendorConstant.CHNL_TYPE);
-		json.put("chnl_id", VendorConstant.CHNL_ID);
+		
+		String chnl_type = (String) vendorDataMap.get(VendorConstant.CHNL_TYPE);
+		String chnl_id = (String) vendorDataMap.get(VendorConstant.CHNL_ID);
+		String merch_id = (String) vendorDataMap.get(VendorConstant.MERCH_ID);
+		String termnl_id = (String) vendorDataMap.get(VendorConstant.TERMNL_ID);
+		json.put("chnl_type", chnl_type);
+		json.put("chnl_id", chnl_id);
 		json.put("chnl_sn", System.currentTimeMillis());
-		json.put("merch_id", VendorConstant.MERCH_ID);
-		json.put("termnl_id", VendorConstant.TERMNL_ID);
+		json.put("merch_id", merch_id);
+		json.put("termnl_id", termnl_id);
 	
 		CertProvider certProvider =  PlatformContext.getComponent("certProviderImpl");
-		//ConfigurationProvider configProvider = PlatformContext.getComponent("configurationProviderImpl");
 		Cert serverCer = certProvider.findCertByName(configProvider.getValue(VendorConstant.SERVER_CER, ""));
 		InputStream serverCerIn = new ByteArrayInputStream(serverCer.getData());
 		Cert clientPfx = certProvider.findCertByName(configProvider.getValue(VendorConstant.CLIENT_PFX, ""));

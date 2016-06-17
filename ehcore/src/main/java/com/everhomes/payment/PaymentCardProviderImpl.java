@@ -20,7 +20,6 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.payment.CardOrderStatus;
-import com.everhomes.rest.payment.CardRechargeStatus;
 import com.everhomes.rest.payment.PaymentCardStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -310,7 +309,7 @@ public class PaymentCardProviderImpl implements PaymentCardProvider{
         	query.addConditions(Tables.EH_PAYMENT_CARD_TRANSACTIONS.USER_NAME.eq(keyword)
         			.or(Tables.EH_PAYMENT_CARD_TRANSACTIONS.MOBILE.eq(keyword)));
 //        if(StringUtils.isNotBlank(consumeType))
-//        	query.addConditions(Tables.EH_PAYMENT_CARD_TRANSACTIONS.PAID_TYPE.eq(consumeType));
+//        	query.addConditions(Tables.EH_PAYMENT_CARD_TRANSACTIONS.CONSUME_TYPE.eq(consumeType));
         
         if(startDate != null)
         	query.addConditions(Tables.EH_PAYMENT_CARD_TRANSACTIONS.TRANSACTION_TIME.gt(startDate));
@@ -340,6 +339,21 @@ public class PaymentCardProviderImpl implements PaymentCardProvider{
 		dao.insert(paymentCardTransaction);
 		
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhPaymentCardTransactions.class, null);
+    	
+    }
+    
+    @Override
+    public PaymentCardTransaction findPaymentCardTransactionByCondition(String token,String cardNo){
+    	
+    	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPaymentCardRechargeOrders.class));
+		SelectQuery<EhPaymentCardTransactionsRecord> query = context.selectQuery(Tables.EH_PAYMENT_CARD_TRANSACTIONS);
+    
+        if(token != null)
+        	query.addConditions(Tables.EH_PAYMENT_CARD_TRANSACTIONS.TOKEN.eq(token));
+        if(cardNo != null)
+        	query.addConditions(Tables.EH_PAYMENT_CARD_TRANSACTIONS.CARD_NO.eq(cardNo));
+        
+        return  ConvertHelper.convert(query.fetchOne(), PaymentCardTransaction.class);
     	
     }
 }

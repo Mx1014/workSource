@@ -72,7 +72,7 @@ public class Testresetpassword {
 //		param.put("CardId", "5882572900500000182");
 //		param.put("AcctType", "00");
 		param.put("BranchCode", "10002900");
-		param.put("CardId", "5882572900500005884");
+		param.put("CardId", "5882572900500006023");
 		param.put("Remark", "");
 		requestParam.put("Param",param);
 		byte[] data = gson.toJson(requestParam).getBytes();

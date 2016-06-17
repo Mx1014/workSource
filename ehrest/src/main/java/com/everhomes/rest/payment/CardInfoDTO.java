@@ -26,6 +26,7 @@ public class CardInfoDTO {
 	private Timestamp expiredTime;
 	private BigDecimal balance;
 	private String status;
+	private String vendorCardData;
 	
 	public String getMobile() {
 		return mobile;
@@ -79,9 +80,15 @@ public class CardInfoDTO {
 		this.cardId = cardId;
 	}
 	
-	
+	public String getVendorCardData() {
+		return vendorCardData;
+	}
+	public void setVendorCardData(String vendorCardData) {
+		this.vendorCardData = vendorCardData;
+	}
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+	
 }

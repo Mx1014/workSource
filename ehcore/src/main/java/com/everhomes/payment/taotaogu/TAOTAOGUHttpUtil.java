@@ -45,12 +45,12 @@ public class TAOTAOGUHttpUtil {
 		url = configProvider.getValue("taotaogu.card.url", "");
 	}
 
-	public static ResponseEntiy post(String brandCode,String msgType,Map<String, Object> param) throws Exception {
+	public static ResponseEntiy post(Map vendorDataMap,String msgType,Map<String, Object> param) throws Exception {
 		CloseableHttpClient httpClient = HttpClients.createDefault();
 
 		HttpPost request = new HttpPost(url);
 		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
-		String msg = getJson(brandCode,msgType,param);
+		String msg = getJson(vendorDataMap,msgType,param);
 		pairs.add(new BasicNameValuePair("msg", msg));
 		request.setEntity(new UrlEncodedFormEntity(pairs, "UTF-8"));
 		HttpResponse rsp = httpClient.execute(request);
@@ -65,16 +65,20 @@ public class TAOTAOGUHttpUtil {
 		return null;
 	}
 	
-	private static String getJson(String brandCode,String msgType,Map<String, Object> param) throws Exception{
+	private static String getJson(Map vendorDataMap,String msgType,Map<String, Object> param) throws Exception{
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 		Gson gson = new Gson();
 		
 		Map<String, Object> requestParam = new HashMap<String, Object>();
-		requestParam.put("AppName", VendorConstant.APP_NAME);
-		requestParam.put("Version",VendorConstant.VERSION);
+		String appName = (String) vendorDataMap.get(VendorConstant.APP_NAME);
+		String version = (String) vendorDataMap.get(VendorConstant.VERSION);
+		String dstId = (String) vendorDataMap.get(VendorConstant.DSTID);
+		String brandCode = (String) vendorDataMap.get(VendorConstant.BRANCH_CODE);
+		requestParam.put("AppName", appName);
+		requestParam.put("Version",version);
 		requestParam.put("ClientDt",sdf.format(new Date()));
 		requestParam.put("SrcId",brandCode);
-		requestParam.put("DstId",VendorConstant.DSTID);
+		requestParam.put("DstId",dstId);
 		requestParam.put("MsgType",msgType);
 		requestParam.put("MsgID",brandCode + StringUtils.leftPad(String.valueOf(System.currentTimeMillis()), 24, "0"));
 		requestParam.put("Sign", "");
