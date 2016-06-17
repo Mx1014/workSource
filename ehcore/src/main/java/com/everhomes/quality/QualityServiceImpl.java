@@ -1290,7 +1290,7 @@ public class QualityServiceImpl implements QualityService {
 									UserContext.current().getUser().getLocale(),
 									"the task don't exist!"));
 		} else {
-			if(task.getExecutiveExpireTime().before(current)) {
+			if(task.getExecutiveExpireTime() != null && task.getExecutiveExpireTime().before(current)) {
 				qualityProvider.closeTask(task);
 			}
 		}
