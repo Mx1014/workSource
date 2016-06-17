@@ -14,6 +14,7 @@ import com.everhomes.util.StringHelper;
  *  <li>name: 任务名称</li>
  *  <li>categoryId: category表中的id</li>
  *  <li>group: 业务组信息 com.everhomes.rest.quality.StandardGroupDTO</li>
+ *  <li>executiveExpireTime: 任务截止时间</li>
  * </ul>
  */
 public class CreateQualityInspectionTaskCommand {
@@ -33,7 +34,7 @@ public class CreateQualityInspectionTaskCommand {
 	@ItemType(StandardGroupDTO.class)
 	private StandardGroupDTO group;
 
-	
+	private Long executiveExpireTime;
 	
 	public Long getOwnerId() {
 		return ownerId;
@@ -82,6 +83,16 @@ public class CreateQualityInspectionTaskCommand {
 
 	public void setGroup(StandardGroupDTO group) {
 		this.group = group;
+	}
+
+
+	public Long getExecutiveExpireTime() {
+		return executiveExpireTime;
+	}
+
+
+	public void setExecutiveExpireTime(Long executiveExpireTime) {
+		this.executiveExpireTime = executiveExpireTime;
 	}
 
 

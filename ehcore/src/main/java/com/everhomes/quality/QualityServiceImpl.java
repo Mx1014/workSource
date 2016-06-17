@@ -1934,6 +1934,7 @@ public class QualityServiceImpl implements QualityService {
 		task.setTaskType((byte) 1);
 		task.setStatus(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode());
 		task.setExecutiveGroupId(cmd.getGroup().getGroupId());
+		task.setExecutiveExpireTime(new Timestamp(cmd.getExecutiveExpireTime()));
 		task.setCategoryId(cmd.getCategoryId());
 		
 		QualityInspectionCategories category = verifiedCategoryById(cmd.getCategoryId());
