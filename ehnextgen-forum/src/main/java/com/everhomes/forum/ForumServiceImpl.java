@@ -568,16 +568,27 @@ public class ForumServiceImpl implements ForumService {
         Post post = checkPostParameter(userId, -1L, topicId, "getTopicById");
         if(post != null) {
             if(PostStatus.ACTIVE != PostStatus.fromCode(post.getStatus())) {
-                //Added by Janson
-                if( (!(getByOwnerId && post.getCreatorUid().equals(userId)))
-                        && (post.getCreatorUid().equals(post.getDeleterUid()) || post.getCreatorUid() != userId.longValue()) ){
+            	
+            	//查我发的贴&&当前用户=发帖人 && 发帖人=删帖人时 可以看到该帖 modified by xiongying 20160617
+            	if(getByOwnerId && post.getCreatorUid().equals(userId) && post.getCreatorUid().equals(post.getDeleterUid())) {
+            		this.forumProvider.populatePostAttachments(post);
+                    populatePost(userId, post, communityId, isDetail, getByOwnerId);
+                    return ConvertHelper.convert(post, PostDTO.class);
+            	} else {
             		LOGGER.error("Forum post already deleted, userId=" + userId + ", topicId=" + topicId);
-//            		throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
-//            				ForumServiceErrorCode.ERROR_FORUM_TOPIC_DELETED, "Forum post already deleted");
             		return null;
             	}
             }
-            
+                //Added by Janson
+//                if( (!(getByOwnerId && post.getCreatorUid().equals(userId)))
+//                        && (post.getCreatorUid().equals(post.getDeleterUid()) || post.getCreatorUid() != userId.longValue()) ){
+//            		LOGGER.error("Forum post already deleted, userId=" + userId + ", topicId=" + topicId);
+////            		throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE, 
+////            				ForumServiceErrorCode.ERROR_FORUM_TOPIC_DELETED, "Forum post already deleted");
+//            		return null;
+//            	}
+//            }
+//            
             this.forumProvider.populatePostAttachments(post);
             populatePost(userId, post, communityId, isDetail, getByOwnerId);
             return ConvertHelper.convert(post, PostDTO.class);

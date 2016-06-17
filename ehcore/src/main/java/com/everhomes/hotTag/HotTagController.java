@@ -1,5 +1,8 @@
 package com.everhomes.hotTag;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,6 +21,9 @@ import com.everhomes.rest.hotTag.DeleteHotTagCommand;
 @RestController
 @RequestMapping("/hotTag")
 public class HotTagController extends ControllerBase {
+	
+	@Autowired
+	private HotTagService hotTagService;
 
 	/**
      * <b>URL: /hotTag/listHotTag</b>
@@ -26,6 +32,8 @@ public class HotTagController extends ControllerBase {
     @RequestMapping("listHotTag")
     @RestReturn(value=TagDTO.class, collection = true)
     public RestResponse listHotTag(ListHotTagCommand cmd) {
+    	
+    	List<TagDTO> tags = hotTagService.listHotTag(cmd);
         
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -40,6 +48,8 @@ public class HotTagController extends ControllerBase {
     @RequestMapping("setHotTag")
     @RestReturn(value=TagDTO.class)
     public RestResponse setHotTag(SetHotTagCommand cmd) {
+    	
+    	TagDTO tag = hotTagService.setHotTag(cmd);
         
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -54,6 +64,8 @@ public class HotTagController extends ControllerBase {
     @RequestMapping("deleteHotTag")
     @RestReturn(value=String.class)
     public RestResponse deleteHotTag(DeleteHotTagCommand cmd) {
+    	
+    	hotTagService.deleteHotTag(cmd);
         
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -69,6 +81,8 @@ public class HotTagController extends ControllerBase {
     @RestReturn(value=TagDTO.class, collection = true)
     public RestResponse searchTag(SearchTagCommand cmd) {
         
+//    	List<TagDTO> tags = hotTagService.
+    	
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
