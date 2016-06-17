@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * 参数
- * <li>ownerType: 所属类型，{@link com.everhomes.rest.news.NewsOwnerType}</li>
+ * <li>ownerType: 所属类型，参考{@link com.everhomes.rest.news.NewsOwnerType}</li>
  * <li>ownerId: 所属ID</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页的数量</li>

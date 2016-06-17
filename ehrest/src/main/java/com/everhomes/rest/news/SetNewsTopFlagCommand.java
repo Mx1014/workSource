@@ -7,10 +7,10 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * 参数
- * <li>ownerType: 所属类型，{@link com.everhomes.rest.news.NewsOwnerType}</li>
+ * <li>ownerType: 所属类型，参考{@link com.everhomes.rest.news.NewsOwnerType}</li>
  * <li>ownerId: 所属ID</li>
  * <li>newsToken: 新闻标识</li>
- * <li>topFlag: 现在的置顶状态，0未置顶，1已置顶，{@link com.everhomes.rest.news.NewsTopFlag}</li>
+ * <li>topFlag: 现在的置顶状态，0未置顶，1已置顶，参考{@link com.everhomes.rest.news.NewsTopFlag}</li>
  * </ul>
  */
 public class SetNewsTopFlagCommand {

@@ -13,11 +13,9 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.news.BriefNewsDTO;
 import com.everhomes.rest.news.CreateNewsCommand;
 import com.everhomes.rest.news.ImportNewsCommand;
-import com.everhomes.rest.news.ListNewsBySceneCommand;
 import com.everhomes.rest.news.ListNewsCommand;
 import com.everhomes.rest.news.NewsContentDTO;
 import com.everhomes.rest.news.NewsDTO;
-import com.everhomes.rest.news.NewsDetailInfoAdminCommand;
 import com.everhomes.rest.news.NewsDetailInfoCommand;
 import com.everhomes.rest.news.NewsListResponse;
 import com.everhomes.rest.news.SetNewsTopFlagCommand;
@@ -40,7 +38,7 @@ public class NewsController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /news/importNews<b>
+	 * <b>URL: /news/importNews</b>
 	 * <p>
 	 * 批量导入新闻
 	 * </p>
@@ -52,7 +50,7 @@ public class NewsController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /news/listNews<b>
+	 * <b>URL: /news/listNews</b>
 	 * <p>
 	 * 后台查询新闻列表
 	 * </p>
@@ -64,19 +62,19 @@ public class NewsController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /news/getNewsDetailInfo<b>
+	 * <b>URL: /news/getNewsDetailInfo</b>
 	 * <p>
-	 * 后台查询新闻详情
+	 * 查询新闻详情
 	 * </p>
 	 */
 	@RequestMapping("getNewsDetailInfo")
 	@RestReturn(NewsDTO.class)
-	public RestResponse getNewsDetailInfo(NewsDetailInfoAdminCommand cmd) {
+	public RestResponse getNewsDetailInfo(NewsDetailInfoCommand cmd) {
 		return new RestResponse();
 	}
 
 	/**
-	 * <b>URL: /news/setNewsTopFlag<b>
+	 * <b>URL: /news/setNewsTopFlag</b>
 	 * <p>
 	 * 置顶新闻
 	 * </p>
@@ -86,33 +84,9 @@ public class NewsController extends ControllerBase {
 	public RestResponse setNewsTopFlag(SetNewsTopFlagCommand cmd) {
 		return new RestResponse();
 	}
-
-	/**
-	 * <b>URL: /news/listNewsByScene<b>
-	 * <p>
-	 * APP端查询新闻列表
-	 * </p>
-	 */
-	@RequestMapping("listNewsByScene")
-	@RestReturn(NewsListResponse.class)
-	public RestResponse listNewsByScene(ListNewsBySceneCommand cmd) {
-		return new RestResponse();
-	}
 	
 	/**
-	 * <b>URL: /news/getNewsDetailInfoByScene<b>
-	 * <p>
-	 * APP查询新闻详情
-	 * </p>
-	 */
-	@RequestMapping("getNewsDetailInfoByScene")
-	@RestReturn(NewsDTO.class)
-	public RestResponse getNewsDetailInfoByScene(NewsDetailInfoCommand cmd) {
-		return new RestResponse();
-	}
-	
-	/**
-	 * <b>URL: /news/getNewsContent<b>
+	 * <b>URL: /news/getNewsContent</b>
 	 * <p>
 	 * 查询新闻正文
 	 * </p>

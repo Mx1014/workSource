@@ -16,7 +16,7 @@ import com.everhomes.util.StringHelper;
  * <li>contentAbstract: 摘要</li>
  * <li>likeCount: 赞数量</li>
  * <li>childCount: 评论数量</li>
- * <li>topFlag: 置顶标记，0未置顶，1已置顶,{@link com.everhomes.rest.news.NewsTopFlag}</li>
+ * <li>topFlag: 置顶标记，0未置顶，1已置顶，参考{@link com.everhomes.rest.news.NewsTopFlag}</li>
  * </ul>
  */
 public class BriefNewsDTO {
