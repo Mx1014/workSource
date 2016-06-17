@@ -377,6 +377,9 @@ INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(999996, '上海联通版');
 INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(999995, '金隅嘉业版');
 INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(999994, '龙岗智慧社区');
 INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(999993, '海岸物业');
+INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(999992, '深业物业');
+INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(999991, '金地威新');
+INSERT INTO `eh_namespaces`(`id`, `name`) VALUES(999990, '储能大厦');
 
 -- INSERT INTO `eh_acl_privileges` (`app_id`,`name`,`description`) VALUES(32, '设置组的管理员，普通成员的增删改Group_member_mgt', '设置组的管理员，普通成员的增删改');
 -- INSERT INTO `eh_acl_privileges` (`app_id`,`name`,`description`) VALUES(32, 'Group_mgt', '组的增删改');

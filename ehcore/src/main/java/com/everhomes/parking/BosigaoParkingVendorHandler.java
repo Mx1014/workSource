@@ -131,6 +131,7 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 		List<ParkingRechargeRateDTO> result = parkingRechargeRateList.stream().map(r->{
 			ParkingRechargeRateDTO dto = new ParkingRechargeRateDTO();
 			dto = ConvertHelper.convert(r, ParkingRechargeRateDTO.class);
+			dto.setRateName(dto.getMonthCount().intValue()+"个月");
 			dto.setRateToken(r.getId().toString());
 			dto.setVendorName(ParkingLotVendor.BOSIGAO.getCode());
 			return dto;

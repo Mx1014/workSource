@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.rest.order.OrderType;
@@ -30,6 +31,8 @@ public class PmsyOrderEmbeddedHandler implements OrderEmbeddedHandler{
 	
 	@Autowired
 	private PmsyProvider pmsyProvider;
+	@Autowired
+    private ConfigurationProvider configProvider;
 	
 	@Override
 	public void paySuccess(PayCallbackCommand cmd) {
@@ -50,7 +53,7 @@ public class PmsyOrderEmbeddedHandler implements OrderEmbeddedHandler{
 					"bill list is empty.");
 		}
 		
-		String feeJson = PmsyHttpUtil.post("UserRev_GetFeeList", order.getCustomerId(), "",
+		String feeJson = PmsyHttpUtil.post(configProvider.getValue("haian.siyuan", ""),"UserRev_GetFeeList", order.getCustomerId(), "",
 				"", order.getProjectId(), PmsyBillType.UNPAID.getCode(), "", "");
 		Gson gson = new Gson();
 		Map map = gson.fromJson(feeJson, Map.class);
@@ -80,7 +83,7 @@ public class PmsyOrderEmbeddedHandler implements OrderEmbeddedHandler{
 		Map<String,Object> jsonMap = new HashMap<String,Object>();
 		jsonMap.put("Syswin", billList);
 		String billListJson = gson.toJson(jsonMap, Map.class);
-		String json = PmsyHttpUtil.post("UserRev_PayFee", order.getCustomerId(), order.getProjectId(),
+		String json = PmsyHttpUtil.post(configProvider.getValue("haian.siyuan", ""),"UserRev_PayFee", order.getCustomerId(), order.getProjectId(),
 				"", "siyuan", "支付宝支付", "", billListJson);
 		Map payFeeMap = gson.fromJson(json, Map.class);
 		List payFeeList = (List) payFeeMap.get("UserRev_PayFee");

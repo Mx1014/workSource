@@ -281,6 +281,39 @@ public class CmdUtil {
         }
         return null;
     }
+    
+    public static byte[] wifiCmd(byte[] curServerKey, byte ver, String wifiSsid, String wifiPwd, String borderUrl) {
+        byte cmd = 0xB;
+
+        int time = (int) Math.ceil((System.currentTimeMillis() / 1000)) + EXPIRE_TIME;
+        
+        byte[] timeBytes = DataUtil.intToByteArray(time);
+        byte[] ssidData = wifiSsid.getBytes();
+        byte[] pwdData = wifiPwd.getBytes();
+        byte[] serverUrlData = borderUrl.getBytes();
+        byte[] len = {(byte) ssidData.length, (byte) pwdData.length, (byte) serverUrlData.length};
+        byte[] dataArr = new byte[timeBytes.length + len.length + ssidData.length + pwdData.length + serverUrlData.length];
+        System.arraycopy(timeBytes, 0, dataArr, 0, timeBytes.length);
+        System.arraycopy(len, 0, dataArr, timeBytes.length, len.length);
+        System.arraycopy(ssidData, 0, dataArr, timeBytes.length + len.length, ssidData.length);
+        System.arraycopy(pwdData, 0, dataArr, timeBytes.length + len.length + ssidData.length, pwdData.length);
+        System.arraycopy(serverUrlData, 0, dataArr, timeBytes.length + len.length + ssidData.length + pwdData.length, serverUrlData.length);
+        
+        try {
+            byte[] odata = addPaddingTo16Bytes(dataArr);
+            LOGGER.error(StringHelper.toHexString(odata));
+            byte[] aeskeyEncryptResult = AESUtil.encrypt(odata, curServerKey);
+            byte[] resultArr = new byte[2 + aeskeyEncryptResult.length];
+            resultArr[0] = cmd;
+            resultArr[1] = ver;
+            System.arraycopy(aeskeyEncryptResult, 0, resultArr, 2, aeskeyEncryptResult.length);
+            LOGGER.error(StringHelper.toHexString(resultArr));
+            return resultArr;
+        } catch (Exception e) {
+            LOGGER.error("wifiCmd()...", e);
+        }
+        return null;
+    }
 
     public static short getCheckSum(byte[] data) {
         short sum = 0;

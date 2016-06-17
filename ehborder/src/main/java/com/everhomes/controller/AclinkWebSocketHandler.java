@@ -26,6 +26,7 @@ import com.everhomes.rest.aclink.AclinkWebSocketMessage;
 import com.everhomes.rest.aclink.DataUtil;
 import com.everhomes.rest.aclink.DoorAccessDTO;
 import com.everhomes.rest.aclink.SyncWebsocketMessagesRestResponse;
+import com.everhomes.rest.rpc.server.AclinkRemotePdu;
 import com.everhomes.util.StringHelper;
 
 public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
@@ -69,6 +70,31 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
         }
     }
     
+    public void aclinkRemote(WebSocketSession serverSession, AclinkRemotePdu pdu) {
+        if(null == pdu) {
+            LOGGER.error("aclinkRemote pdu is null");
+        }
+        AclinkSessionInfo aclinkSession = uuid2Session.get(pdu.getUuid());
+        if(aclinkSession == null) {
+            LOGGER.error("aclink session is null");
+        }
+        
+        WebSocketSession session = aclinkSession.getSession();
+        if(session == null) {
+            LOGGER.error("session is null");
+            return;
+        }
+        
+        try {
+            synchronized(session) {
+                BinaryMessage wsMessage = new BinaryMessage(Base64.decodeBase64(pdu.getBody()));
+                session.sendMessage(wsMessage);
+            }
+        } catch (IOException e) {
+            LOGGER.error("sendMessage error", e);
+            }
+    }
+    
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         String uuid = uuidFromSession(session);
@@ -84,7 +110,7 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
         AclinkWebSocketState state = new AclinkWebSocketState();
         state.setHardwareId(sInfo.getDto().getHardwareId());
         state.setId(sInfo.getDto().getId());
-        state.setUuid(uuid);  
+        state.setUuid(uuid);
         sInfo.setSession(session);
         
         session2State.put(session, state);
@@ -167,7 +193,10 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
                     
                     BinaryMessage wsMessage = new BinaryMessage(mBuf);
                     try {
-                        session.sendMessage(wsMessage);
+                        synchronized(session) {
+                            session.sendMessage(wsMessage);    
+                        }
+                        
                     } catch (IOException e) {
                         LOGGER.error("sendMessage error", e);
                     }

@@ -18,6 +18,7 @@ import org.springframework.web.socket.WebSocketSession;
 
 import com.everhomes.rest.rpc.HeartbeatPdu;
 import com.everhomes.rest.rpc.PduFrame;
+import com.everhomes.rest.rpc.server.AclinkRemotePdu;
 import com.everhomes.rest.rpc.server.ClientForwardPdu;
 import com.everhomes.rest.rpc.server.PingRequestPdu;
 import com.everhomes.rest.rpc.server.PingResponsePdu;
@@ -40,6 +41,9 @@ public class ServerWebSocketHandler implements WebSocketHandler {
     
     @Autowired
     private PusherWebSocketHandler pusherWebSocketHandler;
+    
+    @Autowired
+    private AclinkWebSocketHandler aclinkWebSocketHandler;
     
     @Value("${heartbeat.interval}")
     private long heartbeatInterval;
@@ -114,6 +118,12 @@ public class ServerWebSocketHandler implements WebSocketHandler {
     private void handlePusherNotifyPdu(WebSocketSession session, PduFrame frame) {
         PusherNotifyPdu pdu = frame.getPayload(PusherNotifyPdu.class);
         pusherWebSocketHandler.notify(session, pdu);
+    }
+    
+    @NamedHandler(byClass=AclinkRemotePdu.class)
+    private void handleAclinkRemotePdu(WebSocketSession session, PduFrame frame) {
+        AclinkRemotePdu pdu = frame.getPayload(AclinkRemotePdu.class);
+        aclinkWebSocketHandler.aclinkRemote(session, pdu);
     }
 
     @Override
