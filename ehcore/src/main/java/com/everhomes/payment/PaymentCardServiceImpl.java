@@ -231,7 +231,9 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 //			}
 //		}
     	boolean flag = true;
-    	while(flag){
+    	int i = 1;
+    	while(flag&&i<=5){
+    		i++;
     		PaymentCardTransaction paymentCardTransaction = paymentCardProvider.findPaymentCardTransactionByCondition(cmd.getCode(),paymentCard.getCardNo());
         	if(paymentCardTransaction != null){
         		dto = new GetCardPaidResultDTO();
@@ -250,6 +252,14 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 				continue;
 			}
     	}
+    	if(flag){
+    		LOGGER.error("the old password is not correctly.");
+    		throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_OLD_PASSWORD,
+    				localeStringService.getLocalizedString(String.valueOf(PaymentCardErrorCode.SCOPE), 
+    						String.valueOf(PaymentCardErrorCode.ERROR_OLD_PASSWORD),
+    						UserContext.current().getUser().getLocale(),"the old password is not correctly."));
+    	}
+    	
     	return dto;
     }
     
