@@ -71,7 +71,7 @@ public class Testselectka2 {
 		param.put("BranchCode", "10002900");
 		//param.put("CardId", "5882572900500000182");
 		//param.put("CardId", "5882572900500005934");
-		param.put("CardId", "5882572900500005884");
+		param.put("CardId", "5882572900500006023");
 
 	
 		requestParam.put("Param",param);

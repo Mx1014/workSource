@@ -102,9 +102,10 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				String expirDate = (String)cardMap.get("ExpirDate");
 				cardInfo.setActivedTime(StrTotimestamp(effDate));
 				cardInfo.setExpiredTime(StrTotimestamp(expirDate));
-				cardInfo.setMobile((String)cardMap.get("MobileNo"));
+				
 				String cardStatus = (String)cardMap.get("CardStatus");
 				cardInfo.setStatus(cardStatus);
+				cardInfo.setMobile(card.getMobile());
 				cardInfo.setVendorCardData(card.getVendorCardData());
 			}
 		

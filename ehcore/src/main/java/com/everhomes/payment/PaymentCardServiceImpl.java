@@ -49,6 +49,7 @@ import com.everhomes.rest.payment.CardRechargeOrderDTO;
 import com.everhomes.rest.payment.CardRechargeStatus;
 import com.everhomes.rest.payment.CardTransactionDTO;
 import com.everhomes.rest.payment.CardTransactionOfMonth;
+import com.everhomes.rest.payment.CardTransactionStatus;
 import com.everhomes.rest.payment.CardUserDTO;
 import com.everhomes.rest.payment.GetCardPaidQrCodeCommand;
 import com.everhomes.rest.payment.GetCardPaidQrCodeDTO;
@@ -62,6 +63,7 @@ import com.everhomes.rest.payment.ListCardTransactionsCommand;
 import com.everhomes.rest.payment.ListCardTransactionsResponse;
 import com.everhomes.rest.payment.NotifyEntityCommand;
 import com.everhomes.rest.payment.NotifyEntityDTO;
+import com.everhomes.rest.payment.PaidResultStatus;
 import com.everhomes.rest.payment.PaymentCardErrorCode;
 import com.everhomes.rest.payment.RechargeCardCommand;
 import com.everhomes.rest.payment.ResetCardPasswordCommand;
@@ -74,6 +76,7 @@ import com.everhomes.rest.payment.SearchCardUsersResponse;
 import com.everhomes.rest.payment.SendCardVerifyCodeCommand;
 import com.everhomes.rest.payment.SendCardVerifyCodeDTO;
 import com.everhomes.rest.payment.SetCardPasswordCommand;
+import com.everhomes.rest.payment.UpdateCardRechargeOrderCommand;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -211,7 +214,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     }
     @Override
     public GetCardPaidResultDTO getCardPaidResult(GetCardPaidResultCommand cmd){
-    	GetCardPaidResultDTO dto = new GetCardPaidResultDTO();
+    	GetCardPaidResultDTO dto = null;
     	PaymentCard paymentCard = checkPaymentCard(cmd.getCardId());
     	checkPaymentCardIsNull(paymentCard,cmd.getCardId());
     	//dto.setToken(cmd.getCode());
@@ -227,9 +230,25 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 //						"card id can not be null.");
 //			}
 //		}
-    	PaymentCardTransaction paymentCardTransaction = paymentCardProvider.findPaymentCardTransactionByCondition(cmd.getCode(),paymentCard.getCardNo());
-    	if(paymentCardTransaction != null){
-    		
+    	boolean flag = true;
+    	while(flag){
+    		PaymentCardTransaction paymentCardTransaction = paymentCardProvider.findPaymentCardTransactionByCondition(cmd.getCode(),paymentCard.getCardNo());
+        	if(paymentCardTransaction != null){
+        		dto = new GetCardPaidResultDTO();
+        		dto.setAmount(paymentCardTransaction.getAmount());
+        		dto.setDisAmount(paymentCardTransaction.getAmount());
+        		dto.setMerchantName(paymentCardTransaction.getMerchantName());
+        		dto.setMerchantNo(paymentCardTransaction.getMerchantNo());
+        		dto.setTransactionTime(paymentCardTransaction.getTransactionTime());
+        		dto.setStatus(paymentCardTransaction.getStatus().equals(CardTransactionStatus.PAIDED.getCode())
+        				?PaidResultStatus.SUCCESS.getCode():PaidResultStatus.FAIL.getCode());
+        		flag = false;
+        	}
+        	try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				continue;
+			}
     	}
     	return dto;
     }
@@ -415,6 +434,18 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     	}
     	
 		return response;
+    }
+    
+    @Override
+    public void updateCardRechargeOrder(UpdateCardRechargeOrderCommand cmd){
+    	if(cmd.getId() == null){
+    		LOGGER.error("order id cannot be null.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"order id cannot be null.");
+    	}
+    	PaymentCardRechargeOrder order = paymentCardProvider.findPaymentCardRechargeOrderById(cmd.getId());
+    	order.setRechargeStatus(cmd.getRechargeStatus());
+    	paymentCardProvider.updatePaymentCardRechargeOrder(order);
     }
     
     @Override

@@ -21,8 +21,10 @@ public class GetCardPaidResultDTO {
 	private String merchantName;
 	private BigDecimal amount;
 	private BigDecimal disAmount;
-	private String status;
+	private Byte status;
 	private Timestamp transactionTime;
+	
+	
 	public String getMerchantNo() {
 		return merchantNo;
 	}
@@ -47,13 +49,13 @@ public class GetCardPaidResultDTO {
 	public void setDisAmount(BigDecimal disAmount) {
 		this.disAmount = disAmount;
 	}
-	public String getStatus() {
+	
+	public Byte getStatus() {
 		return status;
 	}
-	public void setStatus(String status) {
+	public void setStatus(Byte status) {
 		this.status = status;
 	}
-	
 	public Timestamp getTransactionTime() {
 		return transactionTime;
 	}

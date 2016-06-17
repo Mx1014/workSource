@@ -40,6 +40,7 @@ import com.everhomes.rest.payment.SearchCardRechargeOrderCommand;
 import com.everhomes.rest.payment.SearchCardRechargeOrderResponse;
 import com.everhomes.rest.payment.SearchCardTransactionsCommand;
 import com.everhomes.rest.payment.SearchCardTransactionsResponse;
+import com.everhomes.rest.payment.UpdateCardRechargeOrderCommand;
 import com.everhomes.util.RequireAuthentication;
 
 
@@ -239,6 +240,19 @@ public class PaymentCardController extends ControllerBase{
     public RestResponse searchCardRechargeOrder(SearchCardRechargeOrderCommand cmd) {
     	SearchCardRechargeOrderResponse resp = paymentCardService.searchCardRechargeOrder(cmd);
         RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    /**
+     * <b>URL: /payment/updateCardRechargeOrder</b>
+     * <p>搜索充值订单列表</p>
+     */
+    @RequestMapping("updateCardRechargeOrder")
+    @RestReturn(value=String.class)
+    public RestResponse updateCardRechargeOrder(UpdateCardRechargeOrderCommand cmd) {
+    	paymentCardService.updateCardRechargeOrder(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
