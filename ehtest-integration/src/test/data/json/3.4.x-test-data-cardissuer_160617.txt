@@ -1,0 +1,29 @@
+{
+    "eh_payment_card_issuers": [
+        {
+            "id": 1,
+            "name": "test",
+            "description": "test",
+            "pay_url": "adfasdf",
+            "alipay_recharge_account": "adfasdf",
+            "weixin_recharge_account": "asdfsdfasdf",
+            "vendor_name": "TAOTAOGU",
+            "vendor_data": "{\"BranchCode\":\"10002900\",\"AppName\":\"ICCard\",\"Version\":\"V0.01\",\"DstId\":\"00000000\",\"chnl_type\":\"WEB\",\"chnl_id\":\"12345679\",\"merch_id\":\"862900000000001\",\"termnl_id\":\"00011071\",\"init_password\":\"111111\"}",
+            "create_time": "2016/6/14 17:07:20",
+            "status": 1
+        },
+        {
+            "id": 2,
+            "name": "test",
+            "description": "test",
+            "pay_url": "adfasdf",
+            "alipay_recharge_account": "adfasdf",
+            "weixin_recharge_account": "asdfsdfasdf",
+            "vendor_name": "TAOTAOGU",
+            "vendor_data": "{\"BranchCode\":\"10002900\",\"AppName\":\"ICCard\",\"Version\":\"V0.01\",\"DstId\":\"00000000\",\"chnl_type\":\"WEB\",\"chnl_id\":\"12345679\",\"merch_id\":\"862900000000001\",\"termnl_id\":\"00011071\",\"init_password\":\"111111\"}",
+            "create_time": "2016/6/14 17:07:20",
+            "status": 0
+        }
+    ]
+}
+
