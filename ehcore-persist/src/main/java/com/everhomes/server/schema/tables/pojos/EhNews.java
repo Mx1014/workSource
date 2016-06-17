@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhNews implements java.io.Serializable {
 
-	private static final long serialVersionUID = -803537034;
+	private static final long serialVersionUID = 1812631466;
 
 	private java.lang.Long     id;
 	private java.lang.Long     ownerUid;
@@ -30,6 +30,7 @@ public class EhNews implements java.io.Serializable {
 	private java.sql.Timestamp createTime;
 	private java.lang.Long     deleterUid;
 	private java.sql.Timestamp deleteTime;
+	private java.lang.Long     sortIndex;
 
 	public EhNews() {}
 
@@ -50,7 +51,8 @@ public class EhNews implements java.io.Serializable {
 		java.sql.Timestamp releaseTime,
 		java.sql.Timestamp createTime,
 		java.lang.Long     deleterUid,
-		java.sql.Timestamp deleteTime
+		java.sql.Timestamp deleteTime,
+		java.lang.Long     sortIndex
 	) {
 		this.id = id;
 		this.ownerUid = ownerUid;
@@ -69,6 +71,7 @@ public class EhNews implements java.io.Serializable {
 		this.createTime = createTime;
 		this.deleterUid = deleterUid;
 		this.deleteTime = deleteTime;
+		this.sortIndex = sortIndex;
 	}
 
 	public java.lang.Long getId() {
@@ -205,5 +208,13 @@ public class EhNews implements java.io.Serializable {
 
 	public void setDeleteTime(java.sql.Timestamp deleteTime) {
 		this.deleteTime = deleteTime;
+	}
+
+	public java.lang.Long getSortIndex() {
+		return this.sortIndex;
+	}
+
+	public void setSortIndex(java.lang.Long sortIndex) {
+		this.sortIndex = sortIndex;
 	}
 }

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhNews extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhNewsRecord> {
 
-	private static final long serialVersionUID = 523065846;
+	private static final long serialVersionUID = 243204176;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_news</code>
@@ -110,6 +110,11 @@ public class EhNews extends org.jooq.impl.TableImpl<com.everhomes.server.schema.
 	 * The column <code>ehcore.eh_news.delete_time</code>. mark-deletion policy. historic data may be useful
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.sql.Timestamp> DELETE_TIME = createField("delete_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "mark-deletion policy. historic data may be useful");
+
+	/**
+	 * The column <code>ehcore.eh_news.sort_index</code>. if has this value, go to first, order from big to small
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.Long> SORT_INDEX = createField("sort_index", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "if has this value, go to first, order from big to small");
 
 	/**
 	 * Create a <code>ehcore.eh_news</code> table reference
