@@ -35,7 +35,7 @@
     {
       "namespace_id": "0",
       "create_time": "2016-05-11 09:15:50",
-      "parent_id": "1001",
+      "parent_id": "4",
       "name": "enterprise",
       "id": "5",
       "display_name": "加入公司且认证通过的场景（不分小区和园区）"
@@ -43,7 +43,7 @@
     {
       "namespace_id": "0",
       "create_time": "2016-05-11 09:15:50",
-      "parent_id": "1001",
+      "parent_id": "4",
       "name": "enterprise_noauth",
       "id": "6",
       "display_name": "区加入公司且未认证通过的场景（不分小区和园区）"
