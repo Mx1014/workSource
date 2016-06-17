@@ -6,19 +6,23 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * 创建一条新闻
- * <li>sceneToken: 场景标识</li>
+ * 参数
+ * <li>ownerType: 所属类型，{@link com.everhomes.rest.news.NewsOwnerType}</li>
+ * <li>ownerId: 所属ID</li>
  * <li>title: 标题</li>
  * <li>contentAbstract: 摘要</li>
  * <li>coverUri: 封面</li>
  * <li>content: 正文</li>
  * <li>author: 作者</li>
- * <li>original: 来源</li>
- * <li>originalLink: 原文链接</li>
+ * <li>sourceDesc: 来源</li>
+ * <li>sourceUrl: 原文链接</li>
  * </ul>
  */
 public class CreateNewsCommand {
-	private String sceneToken;
+	@NotNull
+	private String ownerType;
+	@NotNull
+	private Long ownerId;
 	@NotNull
 	private String title;
 	private String contentAbstract;
@@ -26,20 +30,12 @@ public class CreateNewsCommand {
 	@NotNull
 	private String content;
 	private String author;
-	private String original;
-	private String originalLink;
+	private String sourceDesc;
+	private String sourceUrl;
 
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
-	}
-	
-	public String getSceneToken() {
-		return sceneToken;
-	}
-
-	public void setSceneToken(String sceneToken) {
-		this.sceneToken = sceneToken;
 	}
 
 	public String getTitle() {
@@ -82,20 +78,36 @@ public class CreateNewsCommand {
 		this.author = author;
 	}
 
-	public String getOriginal() {
-		return original;
+	public String getSourceDesc() {
+		return sourceDesc;
 	}
 
-	public void setOriginal(String original) {
-		this.original = original;
+	public void setSourceDesc(String sourceDesc) {
+		this.sourceDesc = sourceDesc;
 	}
 
-	public String getOriginalLink() {
-		return originalLink;
+	public String getSourceUrl() {
+		return sourceUrl;
 	}
 
-	public void setOriginalLink(String originalLink) {
-		this.originalLink = originalLink;
+	public void setSourceUrl(String sourceUrl) {
+		this.sourceUrl = sourceUrl;
+	}
+
+	public String getOwnerType() {
+		return ownerType;
+	}
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
 	}
 
 }

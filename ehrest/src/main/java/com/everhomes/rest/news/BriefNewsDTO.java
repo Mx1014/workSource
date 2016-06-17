@@ -6,34 +6,42 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * 后台查询新闻列表
- * <li>id: 新闻id</li>
+ * 返回值
+ * <li>newsToken: 新闻标识</li>
  * <li>title: 标题</li>
  * <li>releaseTime: 发布时间</li>
  * <li>author: 作者</li>
- * <li>original: 来源</li>
+ * <li>sourceDesc: 来源</li>
  * <li>coverUri: 封面</li>
  * <li>contentAbstract: 摘要</li>
  * <li>likeCount: 赞数量</li>
  * <li>childCount: 评论数量</li>
- * <li>flag: 置顶标记，0未置顶，1置顶</li>
+ * <li>topFlag: 置顶标记，0未置顶，1已置顶,{@link com.everhomes.rest.news.NewsTopFlag}</li>
  * </ul>
  */
-public class ListNewsAdminDTO {
-	private Long id;
+public class BriefNewsDTO {
+	private String newsToken;
 	private String title;
 	private Timestamp releaseTime;
 	private String author;
-	private String original;
+	private String sourceDesc;
 	private String coverUri;
 	private String contentAbstract;
 	private Long likeCount;
 	private Long childCount;
-	private Byte flag;
+	private Byte topFlag;
 
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+
+	public String getNewsToken() {
+		return newsToken;
+	}
+
+	public void setNewsToken(String newsToken) {
+		this.newsToken = newsToken;
 	}
 
 	public String getTitle() {
@@ -60,12 +68,12 @@ public class ListNewsAdminDTO {
 		this.author = author;
 	}
 
-	public String getOriginal() {
-		return original;
+	public String getSourceDesc() {
+		return sourceDesc;
 	}
 
-	public void setOriginal(String original) {
-		this.original = original;
+	public void setSourceDesc(String sourceDesc) {
+		this.sourceDesc = sourceDesc;
 	}
 
 	public String getCoverUri() {
@@ -100,20 +108,12 @@ public class ListNewsAdminDTO {
 		this.childCount = childCount;
 	}
 
-	public Long getId() {
-		return id;
+	public Byte getTopFlag() {
+		return topFlag;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public Byte getFlag() {
-		return flag;
-	}
-
-	public void setFlag(Byte flag) {
-		this.flag = flag;
+	public void setTopFlag(Byte topFlag) {
+		this.topFlag = topFlag;
 	}
 
 }

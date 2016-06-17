@@ -7,15 +7,15 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * 后台查询新闻列表
+ * 返回值
  * <li>nextPageAnchor: 分页的锚点，下一页开始取数据的位置</li>
- * <li>newsList: 新闻列表，参数{@link com.everhomes.rest.news.ListNewsAdminDTO}</li>
+ * <li>newsList: 新闻列表，参数{@link com.everhomes.rest.news.BriefNewsDTO}</li>
  * </ul>
  */
-public class ListNewsAdminResponse {
+public class NewsListResponse {
 	private Long nextPageAnchor;
-	@ItemType(ListNewsAdminDTO.class)
-	private List<ListNewsAdminDTO> newsList;
+	@ItemType(BriefNewsDTO.class)
+	private List<BriefNewsDTO> newsList;
 
 	@Override
 	public String toString() {
@@ -30,11 +30,11 @@ public class ListNewsAdminResponse {
 		this.nextPageAnchor = nextPageAnchor;
 	}
 
-	public List<ListNewsAdminDTO> getNewsList() {
+	public List<BriefNewsDTO> getNewsList() {
 		return newsList;
 	}
 
-	public void setNewsList(List<ListNewsAdminDTO> newsList) {
+	public void setNewsList(List<BriefNewsDTO> newsList) {
 		this.newsList = newsList;
 	}
 

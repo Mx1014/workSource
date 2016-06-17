@@ -4,11 +4,11 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * 查询新闻正文
+ * 返回值
  * <li>content: 正文</li>
  * </ul>
  */
-public class QueryNewsContentResponse {
+public class NewsContentDTO {
 	private String content;
 
 	@Override

@@ -6,27 +6,29 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * 查询新闻详情
+ * 返回值
  * <li>postId: 帖子id</li>
  * <li>title: 标题</li>
  * <li>releaseTime: 发布时间</li>
  * <li>author: 作者</li>
- * <li>original: 来源</li>
- * <li>contentLink: 正文链接</li>
- * <li>originalLink: 原文链接</li>
+ * <li>sourceDesc: 来源</li>
+ * <li>sourceUrl: 原文链接</li>
+ * <li>contentUrl: 正文链接</li>
+ * <li>content: 正文</li>
  * <li>likeCount: 赞数量</li>
  * <li>childCount: 评论数量</li>
  * <li>viewCount: 查看数量</li>
  * </ul>
  */
-public class QueryNewsDetailResponse {
+public class NewsDTO {
 	private Long postId;
 	private String title;
 	private Timestamp releaseTime;
 	private String author;
-	private String original;
-	private String contentLink;
-	private String originalLink;
+	private String sourceDesc;
+	private String sourceUrl;
+	private String contentUrl;
+	private String content;
 	private Long likeCount;
 	private Long childCount;
 	private Long viewCount;
@@ -34,6 +36,14 @@ public class QueryNewsDetailResponse {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+
+	public Long getPostId() {
+		return postId;
+	}
+
+	public void setPostId(Long postId) {
+		this.postId = postId;
 	}
 
 	public String getTitle() {
@@ -60,28 +70,28 @@ public class QueryNewsDetailResponse {
 		this.author = author;
 	}
 
-	public String getOriginal() {
-		return original;
+	public String getSourceDesc() {
+		return sourceDesc;
 	}
 
-	public void setOriginal(String original) {
-		this.original = original;
+	public void setSourceDesc(String sourceDesc) {
+		this.sourceDesc = sourceDesc;
 	}
 
-	public String getContentLink() {
-		return contentLink;
+	public String getContentUrl() {
+		return contentUrl;
 	}
 
-	public void setContentLink(String contentLink) {
-		this.contentLink = contentLink;
+	public void setContentUrl(String contentUrl) {
+		this.contentUrl = contentUrl;
 	}
 
-	public String getOriginalLink() {
-		return originalLink;
+	public String getSourceUrl() {
+		return sourceUrl;
 	}
 
-	public void setOriginalLink(String originalLink) {
-		this.originalLink = originalLink;
+	public void setSourceUrl(String sourceUrl) {
+		this.sourceUrl = sourceUrl;
 	}
 
 	public Long getLikeCount() {
@@ -108,12 +118,12 @@ public class QueryNewsDetailResponse {
 		this.viewCount = viewCount;
 	}
 
-	public Long getPostId() {
-		return postId;
+	public String getContent() {
+		return content;
 	}
 
-	public void setPostId(Long postId) {
-		this.postId = postId;
+	public void setContent(String content) {
+		this.content = content;
 	}
 
 }

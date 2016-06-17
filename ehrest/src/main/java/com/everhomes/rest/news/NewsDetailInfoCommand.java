@@ -6,25 +6,25 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * 查询新闻正文
- * <li>id: 新闻id</li>
+ * 参数
+ * <li>newsToken: 新闻标识</li>
  * </ul>
  */
-public class QueryNewsContentCommand {
+public class NewsDetailInfoCommand {
 	@NotNull
-	private Long id;
+	private String newsToken;
 
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
 
-	public Long getId() {
-		return id;
+	public String getNewsToken() {
+		return newsToken;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
+	public void setNewsToken(String newsToken) {
+		this.newsToken = newsToken;
 	}
 
 }
