@@ -35,6 +35,7 @@ import com.everhomes.aclink.lingling.AclinkLinglingService;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.border.Border;
+import com.everhomes.border.BorderConnectionProvider;
 import com.everhomes.border.BorderProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -114,9 +115,11 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessageMetaConstant;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.messaging.MetaObjectType;
+import com.everhomes.rest.rpc.server.AclinkRemotePdu;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserInfo;
+import com.everhomes.sequence.LocalSequenceGenerator;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
@@ -208,6 +211,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     
     @Autowired
     private BorderProvider borderProvider;
+    
+    @Autowired
+    private BorderConnectionProvider borderConnectionProvider;
     
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
     
@@ -1986,9 +1992,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         }
         borderUrl = borders.get(0).getPublicAddress();
         if(borders.get(0).getPublicPort().equals(443)) {
-            borderUrl = "wss://" + borderUrl;
+            borderUrl = "wss://" + borderUrl + "/aclink";
         } else {
-            borderUrl = "ws://" + borderUrl + ":" + borders.get(0).getPublicAddress();
+            borderUrl = "ws://" + borderUrl + ":" + borders.get(0).getPublicAddress() + "/aclink";
         }
         
         AesServerKey aesServerKey = aesServerKeyService.getCurrentAesServerKey(cmd.getDoorId());
@@ -2037,5 +2043,29 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         }
         
         return resp;
+    }
+    
+    @Override
+    public void remoteOpenDoor(Long doorId) {
+        User user = UserContext.current().getUser();
+        DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(doorId);
+        if(doorAccess == null) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
+        }
+        
+        DoorAuth auth = doorAuthProvider.queryValidDoorAuthForever(doorId, user.getId(), null, null, (byte)1);
+        AesUserKey aesUserKey = generateAesUserKey(user, auth);
+        if(aesUserKey == null) {
+            LOGGER.error("remote AesUserKey created error");
+            return;
+        }
+        
+        AclinkRemotePdu pdu = new AclinkRemotePdu();
+        pdu.setBody(aesUserKey.getSecret());
+        pdu.setType(1);
+        pdu.setUuid(doorAccess.getUuid());
+        long requestId = LocalSequenceGenerator.getNextSequence();
+        borderConnectionProvider.broadcastToAllBorders(requestId, pdu);            
+    
     }
 }
