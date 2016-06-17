@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPaymentCardTransactions extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhPaymentCardTransactionsRecord> {
 
-	private static final long serialVersionUID = 829896483;
+	private static final long serialVersionUID = -158479334;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_payment_card_transactions</code>
@@ -67,9 +67,14 @@ public class EhPaymentCardTransactions extends org.jooq.impl.TableImpl<com.everh
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPaymentCardTransactionsRecord, java.lang.String> ITEM_NAME = createField("item_name", org.jooq.impl.SQLDataType.VARCHAR.length(256).nullable(false).defaulted(true), this, "the name of item");
 
 	/**
-	 * The column <code>ehcore.eh_payment_card_transactions.merchant</code>. the merchant
+	 * The column <code>ehcore.eh_payment_card_transactions.merchant_no</code>. the merchant no
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPaymentCardTransactionsRecord, java.lang.String> MERCHANT = createField("merchant", org.jooq.impl.SQLDataType.VARCHAR.length(64), this, "the merchant");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPaymentCardTransactionsRecord, java.lang.String> MERCHANT_NO = createField("merchant_no", org.jooq.impl.SQLDataType.VARCHAR.length(256), this, "the merchant no");
+
+	/**
+	 * The column <code>ehcore.eh_payment_card_transactions.merchant_name</code>. the merchant name
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPaymentCardTransactionsRecord, java.lang.String> MERCHANT_NAME = createField("merchant_name", org.jooq.impl.SQLDataType.VARCHAR.length(256), this, "the merchant name");
 
 	/**
 	 * The column <code>ehcore.eh_payment_card_transactions.amount</code>. the amount of money paid
@@ -79,7 +84,7 @@ public class EhPaymentCardTransactions extends org.jooq.impl.TableImpl<com.everh
 	/**
 	 * The column <code>ehcore.eh_payment_card_transactions.transaction_no</code>. transaction serial number
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPaymentCardTransactionsRecord, java.lang.String> TRANSACTION_NO = createField("transaction_no", org.jooq.impl.SQLDataType.VARCHAR.length(256).nullable(false).defaulted(true), this, "transaction serial number");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPaymentCardTransactionsRecord, java.lang.String> TRANSACTION_NO = createField("transaction_no", org.jooq.impl.SQLDataType.VARCHAR.length(512).nullable(false).defaulted(true), this, "transaction serial number");
 
 	/**
 	 * The column <code>ehcore.eh_payment_card_transactions.transaction_time</code>. the pay time
@@ -90,6 +95,26 @@ public class EhPaymentCardTransactions extends org.jooq.impl.TableImpl<com.everh
 	 * The column <code>ehcore.eh_payment_card_transactions.card_id</code>. id of the eh_payment_cards record
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPaymentCardTransactionsRecord, java.lang.Long> CARD_ID = createField("card_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "id of the eh_payment_cards record");
+
+	/**
+	 * The column <code>ehcore.eh_payment_card_transactions.card_no</code>. the number of card
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPaymentCardTransactionsRecord, java.lang.String> CARD_NO = createField("card_no", org.jooq.impl.SQLDataType.VARCHAR.length(256).nullable(false).defaulted(true), this, "the number of card");
+
+	/**
+	 * The column <code>ehcore.eh_payment_card_transactions.token</code>. the token of card token to pay
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPaymentCardTransactionsRecord, java.lang.String> TOKEN = createField("token", org.jooq.impl.SQLDataType.VARCHAR.length(512).nullable(false).defaulted(true), this, "the token of card token to pay");
+
+	/**
+	 * The column <code>ehcore.eh_payment_card_transactions.order_no</code>. order no
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPaymentCardTransactionsRecord, java.lang.String> ORDER_NO = createField("order_no", org.jooq.impl.SQLDataType.VARCHAR.length(512), this, "order no");
+
+	/**
+	 * The column <code>ehcore.eh_payment_card_transactions.consume_Type</code>. the type of merchant
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPaymentCardTransactionsRecord, java.lang.Byte> CONSUME_TYPE = createField("consume_Type", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "the type of merchant");
 
 	/**
 	 * The column <code>ehcore.eh_payment_card_transactions.status</code>. 0: fail, 1: waitting 2: sucess
@@ -115,26 +140,6 @@ public class EhPaymentCardTransactions extends org.jooq.impl.TableImpl<com.everh
 	 * The column <code>ehcore.eh_payment_card_transactions.vendor_result</code>. the extra information of transactions
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPaymentCardTransactionsRecord, java.lang.String> VENDOR_RESULT = createField("vendor_result", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "the extra information of transactions");
-
-	/**
-	 * The column <code>ehcore.eh_payment_card_transactions.comsume_type</code>. the type of consume
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPaymentCardTransactionsRecord, java.lang.Byte> COMSUME_TYPE = createField("comsume_type", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "the type of consume");
-
-	/**
-	 * The column <code>ehcore.eh_payment_card_transactions.token</code>. the token of card token to pay
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPaymentCardTransactionsRecord, java.lang.String> TOKEN = createField("token", org.jooq.impl.SQLDataType.VARCHAR.length(512).nullable(false), this, "the token of card token to pay");
-
-	/**
-	 * The column <code>ehcore.eh_payment_card_transactions.card_no</code>. the number of card
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPaymentCardTransactionsRecord, java.lang.String> CARD_NO = createField("card_no", org.jooq.impl.SQLDataType.VARCHAR.length(256).nullable(false), this, "the number of card");
-
-	/**
-	 * The column <code>ehcore.eh_payment_card_transactions.order_no</code>. order no
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhPaymentCardTransactionsRecord, java.lang.Long> ORDER_NO = createField("order_no", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "order no");
 
 	/**
 	 * Create a <code>ehcore.eh_payment_card_transactions</code> table reference

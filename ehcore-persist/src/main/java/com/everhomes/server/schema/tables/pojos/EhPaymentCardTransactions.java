@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhPaymentCardTransactions implements java.io.Serializable {
 
-	private static final long serialVersionUID = 401536638;
+	private static final long serialVersionUID = 292929596;
 
 	private java.lang.Long       id;
 	private java.lang.Integer    namespaceId;
@@ -21,20 +21,21 @@ public class EhPaymentCardTransactions implements java.io.Serializable {
 	private java.lang.String     userName;
 	private java.lang.String     mobile;
 	private java.lang.String     itemName;
-	private java.lang.String     merchant;
+	private java.lang.String     merchantNo;
+	private java.lang.String     merchantName;
 	private java.math.BigDecimal amount;
 	private java.lang.String     transactionNo;
 	private java.sql.Timestamp   transactionTime;
 	private java.lang.Long       cardId;
+	private java.lang.String     cardNo;
+	private java.lang.String     token;
+	private java.lang.String     orderNo;
+	private java.lang.Byte       consumeType;
 	private java.lang.Byte       status;
 	private java.lang.Long       creatorUid;
 	private java.sql.Timestamp   createTime;
 	private java.lang.String     vendorName;
 	private java.lang.String     vendorResult;
-	private java.lang.Byte       comsumeType;
-	private java.lang.String     token;
-	private java.lang.String     cardNo;
-	private java.lang.Long       orderNo;
 
 	public EhPaymentCardTransactions() {}
 
@@ -47,20 +48,21 @@ public class EhPaymentCardTransactions implements java.io.Serializable {
 		java.lang.String     userName,
 		java.lang.String     mobile,
 		java.lang.String     itemName,
-		java.lang.String     merchant,
+		java.lang.String     merchantNo,
+		java.lang.String     merchantName,
 		java.math.BigDecimal amount,
 		java.lang.String     transactionNo,
 		java.sql.Timestamp   transactionTime,
 		java.lang.Long       cardId,
+		java.lang.String     cardNo,
+		java.lang.String     token,
+		java.lang.String     orderNo,
+		java.lang.Byte       consumeType,
 		java.lang.Byte       status,
 		java.lang.Long       creatorUid,
 		java.sql.Timestamp   createTime,
 		java.lang.String     vendorName,
-		java.lang.String     vendorResult,
-		java.lang.Byte       comsumeType,
-		java.lang.String     token,
-		java.lang.String     cardNo,
-		java.lang.Long       orderNo
+		java.lang.String     vendorResult
 	) {
 		this.id = id;
 		this.namespaceId = namespaceId;
@@ -70,20 +72,21 @@ public class EhPaymentCardTransactions implements java.io.Serializable {
 		this.userName = userName;
 		this.mobile = mobile;
 		this.itemName = itemName;
-		this.merchant = merchant;
+		this.merchantNo = merchantNo;
+		this.merchantName = merchantName;
 		this.amount = amount;
 		this.transactionNo = transactionNo;
 		this.transactionTime = transactionTime;
 		this.cardId = cardId;
+		this.cardNo = cardNo;
+		this.token = token;
+		this.orderNo = orderNo;
+		this.consumeType = consumeType;
 		this.status = status;
 		this.creatorUid = creatorUid;
 		this.createTime = createTime;
 		this.vendorName = vendorName;
 		this.vendorResult = vendorResult;
-		this.comsumeType = comsumeType;
-		this.token = token;
-		this.cardNo = cardNo;
-		this.orderNo = orderNo;
 	}
 
 	public java.lang.Long getId() {
@@ -150,12 +153,20 @@ public class EhPaymentCardTransactions implements java.io.Serializable {
 		this.itemName = itemName;
 	}
 
-	public java.lang.String getMerchant() {
-		return this.merchant;
+	public java.lang.String getMerchantNo() {
+		return this.merchantNo;
 	}
 
-	public void setMerchant(java.lang.String merchant) {
-		this.merchant = merchant;
+	public void setMerchantNo(java.lang.String merchantNo) {
+		this.merchantNo = merchantNo;
+	}
+
+	public java.lang.String getMerchantName() {
+		return this.merchantName;
+	}
+
+	public void setMerchantName(java.lang.String merchantName) {
+		this.merchantName = merchantName;
 	}
 
 	public java.math.BigDecimal getAmount() {
@@ -188,6 +199,38 @@ public class EhPaymentCardTransactions implements java.io.Serializable {
 
 	public void setCardId(java.lang.Long cardId) {
 		this.cardId = cardId;
+	}
+
+	public java.lang.String getCardNo() {
+		return this.cardNo;
+	}
+
+	public void setCardNo(java.lang.String cardNo) {
+		this.cardNo = cardNo;
+	}
+
+	public java.lang.String getToken() {
+		return this.token;
+	}
+
+	public void setToken(java.lang.String token) {
+		this.token = token;
+	}
+
+	public java.lang.String getOrderNo() {
+		return this.orderNo;
+	}
+
+	public void setOrderNo(java.lang.String orderNo) {
+		this.orderNo = orderNo;
+	}
+
+	public java.lang.Byte getConsumeType() {
+		return this.consumeType;
+	}
+
+	public void setConsumeType(java.lang.Byte consumeType) {
+		this.consumeType = consumeType;
 	}
 
 	public java.lang.Byte getStatus() {
@@ -228,37 +271,5 @@ public class EhPaymentCardTransactions implements java.io.Serializable {
 
 	public void setVendorResult(java.lang.String vendorResult) {
 		this.vendorResult = vendorResult;
-	}
-
-	public java.lang.Byte getComsumeType() {
-		return this.comsumeType;
-	}
-
-	public void setComsumeType(java.lang.Byte comsumeType) {
-		this.comsumeType = comsumeType;
-	}
-
-	public java.lang.String getToken() {
-		return this.token;
-	}
-
-	public void setToken(java.lang.String token) {
-		this.token = token;
-	}
-
-	public java.lang.String getCardNo() {
-		return this.cardNo;
-	}
-
-	public void setCardNo(java.lang.String cardNo) {
-		this.cardNo = cardNo;
-	}
-
-	public java.lang.Long getOrderNo() {
-		return this.orderNo;
-	}
-
-	public void setOrderNo(java.lang.Long orderNo) {
-		this.orderNo = orderNo;
 	}
 }
