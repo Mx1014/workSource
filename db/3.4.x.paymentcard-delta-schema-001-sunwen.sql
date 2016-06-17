@@ -103,6 +103,7 @@ CREATE TABLE `eh_payment_card_transactions` (
   `token` VARCHAR(512) NOT NULL DEFAULT '' COMMENT 'the token of card token to pay',
   
   `order_no` VARCHAR(512) COMMENT 'order no',
+  `consume_Type` TINYINT NOT NULL DEFAULT 1 COMMENT 'the type of merchant',
 
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: fail, 1: waitting 2: sucess',
   `creator_uid` BIGINT NOT NULL DEFAULT 0,
