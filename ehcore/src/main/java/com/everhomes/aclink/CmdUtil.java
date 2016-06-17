@@ -285,7 +285,8 @@ public class CmdUtil {
     public static byte[] wifiCmd(byte[] curServerKey, byte ver, String wifiSsid, String wifiPwd, String borderUrl) {
         byte cmd = 0xB;
 
-        int time = (int) System.currentTimeMillis();
+        int time = (int) Math.ceil((System.currentTimeMillis() / 1000)) + EXPIRE_TIME;
+        
         byte[] timeBytes = DataUtil.intToByteArray(time);
         byte[] ssidData = wifiSsid.getBytes();
         byte[] pwdData = wifiPwd.getBytes();
@@ -299,11 +300,14 @@ public class CmdUtil {
         System.arraycopy(serverUrlData, 0, dataArr, timeBytes.length + len.length + ssidData.length + pwdData.length, serverUrlData.length);
         
         try {
-            byte[] aeskeyEncryptResult = AESUtil.encrypt(addPaddingTo16Bytes(dataArr), curServerKey);
+            byte[] odata = addPaddingTo16Bytes(dataArr);
+            LOGGER.error(StringHelper.toHexString(odata));
+            byte[] aeskeyEncryptResult = AESUtil.encrypt(odata, curServerKey);
             byte[] resultArr = new byte[2 + aeskeyEncryptResult.length];
             resultArr[0] = cmd;
             resultArr[1] = ver;
             System.arraycopy(aeskeyEncryptResult, 0, resultArr, 2, aeskeyEncryptResult.length);
+            LOGGER.error(StringHelper.toHexString(resultArr));
             return resultArr;
         } catch (Exception e) {
             LOGGER.error("wifiCmd()...", e);
