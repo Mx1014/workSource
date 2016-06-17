@@ -1786,10 +1786,13 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			userItem.setOwnerType(ownerType);
 			userItem.setSceneType(sceneType);
 			userItem.setUserId(userId);
+			userItem.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			userItem.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			launchPadProvider.createUserLaunchPadItem(userItem);
 		}else{
 			userItem.setDefaultOrder(order);
 			userItem.setDisplayFlag(itemDisplayFlag.getCode());
+			userItem.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			launchPadProvider.updateUserLaunchPadItemById(userItem);
 		}
 		
@@ -1822,6 +1825,8 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 				userItem.setOwnerType(ownerType);
 				userItem.setSceneType(sceneType);
 				userItem.setUserId(userId);
+				userItem.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				userItem.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 				launchPadProvider.createUserLaunchPadItem(userItem);
 			}
 			

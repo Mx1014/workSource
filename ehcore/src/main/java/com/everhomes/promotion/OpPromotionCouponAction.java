@@ -83,7 +83,9 @@ public class OpPromotionCouponAction implements OpPromotionAction {
         });
         
         if(promotion != null) {
-            LOGGER.error("already pushed to user=" + promotion.getTargetUid() + ", promotionId=" + promotion.getOwnerId());
+        	if(LOGGER.isDebugEnabled()){
+        		LOGGER.error("already pushed to user=" + promotion.getTargetUid() + ", promotionId=" + promotion.getOwnerId());
+        	}
             return;
         }
         
