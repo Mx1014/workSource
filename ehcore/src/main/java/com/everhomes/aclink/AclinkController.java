@@ -451,4 +451,21 @@ public class AclinkController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;        
     }
+    
+    /**
+     * 
+     * <b>URL: /aclink/remoteOpen</b>
+     * <p>删除一个组或者单独一个门禁设备</p>
+     * @return
+     */
+    @RequestMapping("remoteOpen")
+    @RestReturn(value=String.class)
+    public RestResponse remoteOpen(@Valid AclinkDeleteByIdCommand cmd) {
+        doorAccessService.remoteOpenDoor(cmd.getId());
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;        
+    }
+    
 }

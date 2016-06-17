@@ -76,12 +76,12 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
         }
         AclinkSessionInfo aclinkSession = uuid2Session.get(pdu.getUuid());
         if(aclinkSession == null) {
-            LOGGER.error("aclink session is null");
+            LOGGER.error("aclink session is null uuid=" + pdu.getUuid());
         }
         
         WebSocketSession session = aclinkSession.getSession();
         if(session == null) {
-            LOGGER.error("session is null");
+            LOGGER.error("session is null uuid=" + pdu.getUuid());
             return;
         }
         
@@ -89,6 +89,7 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
             synchronized(session) {
                 BinaryMessage wsMessage = new BinaryMessage(Base64.decodeBase64(pdu.getBody()));
                 session.sendMessage(wsMessage);
+                LOGGER.info("sendBody to uuid=" + pdu.getUuid());
             }
         } catch (IOException e) {
             LOGGER.error("sendMessage error", e);
