@@ -706,11 +706,13 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_EXISTS, "DoorAccess exists");
         }
         
-        if(cmd.getGroupId() != null) {
+        if(cmd.getGroupId() != null && (!cmd.getGroupId().equals(0l))) {
             DoorAccess doorGroup = doorAccessProvider.getDoorAccessById(cmd.getGroupId());
             if(doorGroup == null || doorGroup.getStatus().equals(DoorAccessStatus.INVALID.getCode())) {
                 throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door group not found");
             }
+        } else {
+            cmd.setGroupId(null);
         }
         
         doorAccess = this.dbProvider.execute(new TransactionCallback<DoorAccess>() {

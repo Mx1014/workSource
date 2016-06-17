@@ -408,8 +408,8 @@ public class AclinkController extends ControllerBase {
     
     /**
      * 
-     * <b>URL: /aclink/listDoorAccessQRKey</b>
-     * <p>列出所有二维码门禁列表 </p>
+     * <b>URL: /aclink/wifiMgmt</b>
+     * <p> wifi 配置命令 </p>
      * @return
      */
     @RequestMapping("wifiMgmt")
