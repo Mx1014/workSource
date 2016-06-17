@@ -4,7 +4,7 @@ public interface VendorConstant {
 	//淘淘谷
 	String TAOTAOGU = "TAOTAOGU";
 	
-	String INITIAL_PASSWORD = "111111";
+	String INITIAL_PASSWORD = "init_password";
 
 	String BRANCH_CODE = "BranchCode";
 	String APP_NAME = "AppName";

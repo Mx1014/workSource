@@ -185,7 +185,8 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				Cert cert = certProvider.findCertByName(configProvider.getValue(VendorConstant.PIN3_CRT, ""));
 				InputStream in = new ByteArrayInputStream(cert.getData());
 				
-				byte[] oldpsd = CertCoder.encryptByPublicKey(VendorConstant.INITIAL_PASSWORD.getBytes(), in);
+				String initPassword = (String) vendorDataMap.get(VendorConstant.INITIAL_PASSWORD);
+				byte[] oldpsd = CertCoder.encryptByPublicKey(initPassword.getBytes(), in);
 				changePasswordParam.put("OrigPassWord", ByteTools.BytesToHexStr(oldpsd));
 				byte[] newpsd = CertCoder.encryptByPublicKey(cmd.getPassword().getBytes(), in);
 				changePasswordParam.put("NewPassWord", ByteTools.BytesToHexStr(newpsd));
@@ -313,7 +314,8 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		byte[] newpsd = null;
 		Cert cert = certProvider.findCertByName(configProvider.getValue(VendorConstant.PIN3_CRT, ""));
 		InputStream in = new ByteArrayInputStream(cert.getData());
-			oldpsd = CertCoder.encryptByPublicKey(VendorConstant.INITIAL_PASSWORD.getBytes(), in);		
+			String initPassword = (String) vendorDataMap.get(VendorConstant.INITIAL_PASSWORD);
+			oldpsd = CertCoder.encryptByPublicKey(initPassword.getBytes(), in);		
 			changePasswordParam.put("OrigPassWord", ByteTools.BytesToHexStr(oldpsd));
 			newpsd = CertCoder.encryptByPublicKey(cmd.getNewPassword().getBytes(), in);
 			changePasswordParam.put("NewPassWord", ByteTools.BytesToHexStr(newpsd));
