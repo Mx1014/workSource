@@ -101,10 +101,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				cardInfo.setExpiredTime(StrTotimestamp(expirDate));
 				cardInfo.setMobile((String)cardMap.get("MobileNo"));
 				String cardStatus = (String)cardMap.get("CardStatus");
-				if("10".equals(cardStatus))
-					cardInfo.setStatus("正常（已激活）");
-				else
-					cardInfo.setStatus("无效");
+				cardInfo.setStatus(cardStatus);
 			}
 		
 			if(!accountResponseEntiy.isSuccess())
@@ -220,7 +217,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 					paymentCard.setCreatorUid(user.getId());
 					paymentCard.setStatus(PaymentCardStatus.ACTIVE.getCode());
 					paymentCard.setVendorName(VendorConstant.TAOTAOGU);
-					paymentCard.setVendorCardData(cardIssuer.getVendorData());
+					paymentCard.setVendorCardData(mergeJson(cardIssuer.getVendorData(), VendorConstant.CARD__STATUS_JSON));
 					paymentCardProvider.createPaymentCard(paymentCard);
 					cardInfoDTO = ConvertHelper.convert(paymentCard, CardInfoDTO.class);
 				}
@@ -581,4 +578,12 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		}
 		
 	}
+	
+	 private String mergeJson(String json1,String json2){
+	    	Gson gson = new Gson();
+			Map map = gson.fromJson(json1, Map.class);
+			Map map1 = gson.fromJson(json2, Map.class);
+			map.putAll(map1);
+			return gson.toJson(map);
+	    }
 }

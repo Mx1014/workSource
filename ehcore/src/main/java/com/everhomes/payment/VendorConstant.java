@@ -1,38 +1,36 @@
 package com.everhomes.payment;
 
-public class VendorConstant {
+public interface VendorConstant {
 	//淘淘谷
-	public static final String TAOTAOGU = "TAOTAOGU";
+	String TAOTAOGU = "TAOTAOGU";
 	
-	public static final String CARD_URL = "http://test.ippit.cn:30821/iccard/service";
-	public static final String ORDER_URL = "http://test.ippit.cn:8010/orderform";
-	
-	public static final String INITIAL_PASSWORD = "111111";
+	String INITIAL_PASSWORD = "111111";
 
 	
-	public static final String APP_NAME = "ICCard";
-	public static final String VERSION = "V0.01";
-	public static final String DSTID = "00000000";
+	String APP_NAME = "ICCard";
+	String VERSION = "V0.01";
+	String DSTID = "00000000";
 	
-	public static final String KEY_STORE = "taotaogu.keystore";
-	public static final String PIN3_CRT = "taotaogu.pin3.crt";
+	String KEY_STORE = "taotaogu.keystore";
+	String PIN3_CRT = "taotaogu.pin3.crt";
 	
-	public static final String CLIENT_PFX = "taotaogu.client.pfx";
-	public static final String SERVER_CER = "taotaogu.server.cer";
+	String CLIENT_PFX = "taotaogu.client.pfx";
+	String SERVER_CER = "taotaogu.server.cer";
 	
-	public static final String TAOTAOGU_AESKEY = "TAOTAOGU_AESKEY";
-	public static final String TAOTAOGU_TOKEN = "TAOTAOGU_TOKEN";
+	String TAOTAOGU_AESKEY = "TAOTAOGU_AESKEY";
+	String TAOTAOGU_TOKEN = "TAOTAOGU_TOKEN";
 	
 	//渠道类型 chnl_type
-	public static final String CHNL_TYPE = "WEB";
+	String CHNL_TYPE = "WEB";
 	//渠道号 CHNL_ID
-	public static final String CHNL_ID = "12345679";
+	String CHNL_ID = "12345679";
 	//商户号 MERCH_ID
-	public static final String MERCH_ID = "862900000000001";
+	String MERCH_ID = "862900000000001";
 	//终端号 TERMNL_ID
-	public static final String TERMNL_ID = "00011071";
-
-
+	String TERMNL_ID = "00011071";
 	
+	String CARD_TRANSACTION_STATUS_JSON = "{\"CARD_TRANSACTION_STATUS_JSON\":{\"00\":\"处理中\",\"01\":\"成功\",\"02\":\"失败\",\"03\":\"已撤销\",\"04\":\"已冲正\",\"05\":\"已退货\",\"06\":\"已调账\",\"07\":\"已部分退货\"}}";
+	String CARD__STATUS_JSON = "{\"CARD_STATUS_JSON\":{\"00\":\"待制卡\",\"02\":\"制卡中\",\"03\":\"已入库\",\"04\":\"已领卡待售\",\"05\":\"预售出\",\"10\":\"正常（已激活）\",\"20\":\"已退卡(销户)\",\"21\":\"挂失\",\"22\":\"锁定\",\"23\":\"异常卡\"}}";
+
 	
 }

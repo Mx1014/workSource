@@ -11,7 +11,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
@@ -36,11 +35,9 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.payment.taotaogu.AESCoder;
 import com.everhomes.payment.taotaogu.NotifyEntity;
-import com.everhomes.payment.taotaogu.PaidResultThread;
-import com.everhomes.payment.taotaogu.PaidResultThreadPool;
 import com.everhomes.payment.util.CacheItem;
 import com.everhomes.payment.util.CachePool;
-import com.everhomes.payment.util.Util;
+import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
@@ -218,18 +215,18 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     	PaymentCard paymentCard = checkPaymentCard(cmd.getCardId());
     	checkPaymentCardIsNull(paymentCard,cmd.getCardId());
     	dto.setToken(cmd.getToken());
-    	ExecutorService service = PaidResultThreadPool.getInstance();
-    	PaidResultThread thread = new PaidResultThread(dto);
-    	service.execute(thread);
-    	synchronized (dto) {
-			try {
-				dto.wait();
-			} catch (InterruptedException e) {
-				LOGGER.error("card id can not be null.");
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"card id can not be null.");
-			}
-		}
+//    	ExecutorService service = PaidResultThreadPool.getInstance();
+//    	PaidResultThread thread = new PaidResultThread(dto);
+//    	service.execute(thread);
+//    	synchronized (dto) {
+//			try {
+//				dto.wait();
+//			} catch (InterruptedException e) {
+//				LOGGER.error("card id can not be null.");
+//				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//						"card id can not be null.");
+//			}
+//		}
     	return dto;
     }
     
@@ -450,7 +447,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 		try {
 			out = new ByteArrayOutputStream();
 			wb.write(out);
-			Util.download(out, response);
+			DownloadUtil.download(out, response);
 		} catch (IOException e) {
 			LOGGER.error("exportCardUsers is fail. {}",e);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
@@ -507,7 +504,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 		try {
 			out = new ByteArrayOutputStream();
 			wb.write(out);
-			Util.download(out, response);
+			DownloadUtil.download(out, response);
 		} catch (IOException e) {
 			LOGGER.error("exportCardUsers is fail. {}",e);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
@@ -567,7 +564,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 		try {
 			out = new ByteArrayOutputStream();
 			wb.write(out);
-			Util.download(out, response);
+			DownloadUtil.download(out, response);
 		} catch (IOException e) {
 			LOGGER.error("exportCardUsers is fail. {}",e);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
@@ -609,7 +606,9 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     	transaction.setCreatorUid(user.getId());
     	transaction.setCreateTime(new Timestamp(System.currentTimeMillis()));
     	transaction.setVendorName(VendorConstant.TAOTAOGU);
-    	transaction.setVendorResult(paymentCard.getVendorCardData());
+    	String vendorCardData = paymentCard.getVendorCardData();
+    	String extraData = VendorConstant.CARD_TRANSACTION_STATUS_JSON;
+    	transaction.setVendorResult(mergeJson(vendorCardData, extraData));
     	transaction.setToken(result.getToken());
     	transaction.setCardNo(result.getCard_id());
     	transaction.setOrderNo(createOrderNo(user.getId()));
@@ -683,6 +682,14 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 							String.valueOf(PaymentCardErrorCode.ERROR_NOT_EXISTS_CARD),
 							UserContext.current().getUser().getLocale(),"paymentCard is not exists ."));
     	}
+    }
+    
+    private String mergeJson(String json1,String json2){
+    	Gson gson = new Gson();
+		Map map = gson.fromJson(json1, Map.class);
+		Map map1 = gson.fromJson(json2, Map.class);
+		map.putAll(map1);
+		return gson.toJson(map);
     }
     
 }

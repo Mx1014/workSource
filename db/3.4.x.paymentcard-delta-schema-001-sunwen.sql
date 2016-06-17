@@ -91,17 +91,18 @@ CREATE TABLE `eh_payment_card_transactions` (
   `payer_uid` BIGINT NOT NULL DEFAULT 0,
   `user_name` VARCHAR(64) COMMENT 'the name of user',
   `mobile` VARCHAR(64) COMMENT 'the mobile of user',
-  `item_name` VARCHAR(256) NOT NULL DEFAULT '' COMMENT 'the name of item',
-  `merchant` VARCHAR(64) COMMENT 'the merchant',
+  `item_name` VARCHAR(256) NOT NULL DEFAULT '' COMMENT 'the name of item',       
+  `merchant_no` VARCHAR(256) COMMENT 'the merchant no',
+  `merchant_name` VARCHAR(256) COMMENT 'the merchant name',
   `amount` DECIMAL(10,2) NOT NULL DEFAULT '0.00' COMMENT 'the amount of money paid',
-  `transaction_no` VARCHAR(256) NOT NULL DEFAULT '' COMMENT 'transaction serial number',
+  `transaction_no` VARCHAR(512) NOT NULL DEFAULT '' COMMENT 'transaction serial number',
   `transaction_time` DATETIME COMMENT 'the pay time',
   `card_id` BIGINT(20) NOT NULL DEFAULT 0 COMMENT 'id of the eh_payment_cards record',
-  `card_no` VARCHAR(256) NOT NULL COMMENT 'the number of card',
-  `token` VARCHAR(512) NOT NULL COMMENT 'the token of card token to pay',
-  `order_no` BIGINT(30) NOT NULL DEFAULT '0' COMMENT 'order no',
-  `comsume_Type` TINYINT NOT NULL DEFAULT 1 COMMENT 'the type of recharged card or consume',
-
+  `card_no` VARCHAR(256) NOT NULL DEFAULT '' COMMENT 'the number of card',
+  
+  `token` VARCHAR(512) NOT NULL DEFAULT '' COMMENT 'the token of card token to pay',
+  
+  `order_no` VARCHAR(512) COMMENT 'order no',
 
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: fail, 1: waitting 2: sucess',
   `creator_uid` BIGINT NOT NULL DEFAULT 0,

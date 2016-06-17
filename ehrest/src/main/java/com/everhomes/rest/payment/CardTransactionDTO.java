@@ -9,14 +9,15 @@ import com.everhomes.util.StringHelper;
  * <li>userName: 用户名称</li>
  * <li>cardNo: 卡号</li>
  * <li>orderNo: 订单号</li>
- * <li>comsumeType: 消费类型</li>
+ * <li>consumeType: 消费类型</li>
  * <li>itemName: 商品名称</li>
  * <li>amount: 金额</li>
  * <li>transactionTime: 交易时间</li>
  * <li>status: 状态码</li>
  * <li>nextPageAnchor: 分页的瞄 </li>
- * <li>merchant: 商户</li>
- * <li>transactionType: 交易类型   1：充值   2 ：消费</li>
+ * <li>merchantNo: 商户号</li>
+ * <li>merchantName: 商户名称</li>
+ * <li>consumeType: 交易类型   1：充值   2 ：消费</li>
  * <li>vendorName: 第三方厂商</li>
  * <li>vendorResult: </li>
  * <li>token: </li>

@@ -14,8 +14,8 @@ import org.slf4j.LoggerFactory;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.util.RuntimeErrorException;
 
-public class Util{
-	private static final Logger LOGGER = LoggerFactory.getLogger(Util.class);
+public class DownloadUtil{
+	private static final Logger LOGGER = LoggerFactory.getLogger(DownloadUtil.class);
 	
 	public static HttpServletResponse download(ByteArrayOutputStream out, HttpServletResponse response) {
         try {
