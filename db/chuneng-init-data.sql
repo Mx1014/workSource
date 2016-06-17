@@ -517,7 +517,15 @@ INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`
 INSERT INTO `eh_addresses` (`id`, `uuid`, `community_id`, `city_id`, `city_name`, `area_id`, `area_name`, `address`, `building_name`, `apartment_name`, `status`, `operator_uid`, `create_time`, `namespace_id`) VALUES('239825274387099158',UUID(),240111044331051500, 14964, '深圳市',  14965, '南山区' ,'中国储能大厦-58C','中国储能大厦','58C','2','0',UTC_TIMESTAMP(), 999990);	
                                                                                                                                                                                                                         
 
-	
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( 23, 43501,'', 'EhNamespaces', 999990 , 0);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( 24, 43502,'', 'EhNamespaces', 999990 , 0);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( 25, 48100,'', 'EhNamespaces', 999990 , 0);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( 26, 48200,'', 'EhNamespaces', 999990 , 0);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( 27, 48300,'', 'EhNamespaces', 999990 , 0);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( 28, 48400,'', 'EhNamespaces', 999990 , 0);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( 29, 43500,'', 'EhNamespaces', 999990 , 0);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES( 30, 48000,'', 'EhNamespaces', 999990 , 0);
+
 	
 	
 	
