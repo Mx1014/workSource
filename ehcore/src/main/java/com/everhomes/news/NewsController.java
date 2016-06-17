@@ -17,6 +17,7 @@ import com.everhomes.rest.news.ListNewsBySceneCommand;
 import com.everhomes.rest.news.ListNewsCommand;
 import com.everhomes.rest.news.NewsContentDTO;
 import com.everhomes.rest.news.NewsDTO;
+import com.everhomes.rest.news.NewsDetailInfoAdminCommand;
 import com.everhomes.rest.news.NewsDetailInfoCommand;
 import com.everhomes.rest.news.NewsListResponse;
 import com.everhomes.rest.news.SetNewsTopFlagCommand;
@@ -65,12 +66,12 @@ public class NewsController extends ControllerBase {
 	/**
 	 * <b>URL: /news/getNewsDetailInfo<b>
 	 * <p>
-	 * APP查询新闻详情
+	 * 后台查询新闻详情
 	 * </p>
 	 */
 	@RequestMapping("getNewsDetailInfo")
 	@RestReturn(NewsDTO.class)
-	public RestResponse getNewsDetailInfo(NewsDetailInfoCommand cmd) {
+	public RestResponse getNewsDetailInfo(NewsDetailInfoAdminCommand cmd) {
 		return new RestResponse();
 	}
 

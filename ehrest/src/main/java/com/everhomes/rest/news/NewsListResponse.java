@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * 返回值
  * <li>nextPageAnchor: 分页的锚点，下一页开始取数据的位置</li>
- * <li>newsList: 新闻列表，参数{@link com.everhomes.rest.news.BriefNewsDTO}</li>
+ * <li>newsList: 新闻列表，参考{@link com.everhomes.rest.news.BriefNewsDTO}</li>
  * </ul>
  */
 public class NewsListResponse {
