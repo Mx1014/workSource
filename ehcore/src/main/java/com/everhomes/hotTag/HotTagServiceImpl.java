@@ -1,0 +1,97 @@
+package com.everhomes.hotTag;
+
+import java.sql.Timestamp;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.locale.LocaleStringService;
+import com.everhomes.rest.hotTag.DeleteHotTagCommand;
+import com.everhomes.rest.hotTag.HotTagServiceErrorCode;
+import com.everhomes.rest.hotTag.HotTagStatus;
+import com.everhomes.rest.hotTag.ListHotTagCommand;
+import com.everhomes.rest.hotTag.SetHotTagCommand;
+import com.everhomes.rest.hotTag.TagDTO;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.RuntimeErrorException;
+
+@Component
+public class HotTagServiceImpl implements HotTagService{
+	private static final Logger LOGGER = LoggerFactory.getLogger(HotTagServiceImpl.class);
+	
+	@Autowired
+	private HotTagProvider hotTagProvider;
+	
+	@Autowired
+	private ConfigurationProvider configurationProvider;
+	
+	@Autowired
+	private LocaleStringService localeStringService;
+
+	@Override
+	public List<TagDTO> listHotTag(ListHotTagCommand cmd) {
+		
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		
+		List<TagDTO> tags = hotTagProvider.listHotTag(cmd.getServiceType(), pageSize);
+		return tags;
+	}
+
+	@Override
+	public TagDTO setHotTag(SetHotTagCommand cmd) {
+		User user = UserContext.current().getUser();
+		
+		HotTags tag = hotTagProvider.findByName(cmd.getServiceType(), cmd.getName());
+		if(tag != null) {
+			if(tag.getStatus() == HotTagStatus.ACTIVE.getCode()) {
+				LOGGER.error("the tag which name = "+cmd.getName()+" and serviceType = "+cmd.getServiceType()+" is already hot tag!");
+				throw RuntimeErrorException
+						.errorWith(
+								HotTagServiceErrorCode.SCOPE,
+								HotTagServiceErrorCode.ERROR_HOTTAG_EXIST,
+								localeStringService.getLocalizedString(
+										String.valueOf(HotTagServiceErrorCode.SCOPE),
+										String.valueOf(HotTagServiceErrorCode.ERROR_HOTTAG_EXIST),
+										UserContext.current().getUser().getLocale(),
+										"the tag is already hot tag!"));
+			} else {
+				tag.setStatus(HotTagStatus.ACTIVE.getCode());
+				tag.setCreateUid(user.getId());
+				tag.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				tag.setDeleteUid(0L);
+				tag.setDeleteTime(null);
+				hotTagProvider.updateHotTag(tag);
+			}
+		}
+		else {
+			tag = new HotTags();
+			tag.setName(cmd.getName());
+			tag.setServiceType(cmd.getServiceType());
+			tag.setCreateUid(user.getId());
+			hotTagProvider.createHotTag(tag);
+		}
+		
+		TagDTO dto = ConvertHelper.convert(tag, TagDTO.class);
+		return dto;
+	}
+
+	@Override
+	public void deleteHotTag(DeleteHotTagCommand cmd) {
+		User user = UserContext.current().getUser();
+		
+		HotTags tag = hotTagProvider.findById(cmd.getId());
+		tag.setStatus(HotTagStatus.INACTIVE.getCode());
+		tag.setDeleteUid(user.getId());
+		tag.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		hotTagProvider.updateHotTag(tag);
+	}
+
+}

@@ -28,3 +28,5 @@ UPDATE eh_user_posts SET target_type = 'topic';
 UPDATE eh_user_posts SET target_type = 'activity' WHERE target_id IN (
   SELECT id FROM eh_forum_posts WHERE id IN (SELECT a.target_id FROM (SELECT target_id FROM eh_user_posts WHERE target_type = 'topic') a) 
   AND category_id = 1010);
+
+INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'hottag', '10001', 'zh_CN', '该标签已是热门标签');
