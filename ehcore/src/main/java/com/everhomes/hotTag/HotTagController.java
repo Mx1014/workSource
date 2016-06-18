@@ -17,6 +17,7 @@ import com.everhomes.rest.hotTag.SearchTagResponse;
 import com.everhomes.rest.hotTag.SetHotTagCommand;
 import com.everhomes.rest.hotTag.TagDTO;
 import com.everhomes.rest.hotTag.DeleteHotTagCommand;
+import com.everhomes.search.HotTagSearcher;
 
 @RestDoc(value = "HotTag Controller", site = "core")
 @RestController
@@ -25,6 +26,9 @@ public class HotTagController extends ControllerBase {
 	
 	@Autowired
 	private HotTagService hotTagService;
+	
+	@Autowired
+	private HotTagSearcher hotTagSearcher;
 
 	/**
      * <b>URL: /hotTag/listHotTag</b>
@@ -52,7 +56,7 @@ public class HotTagController extends ControllerBase {
     	
     	TagDTO tag = hotTagService.setHotTag(cmd);
         
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(tag);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -82,11 +86,11 @@ public class HotTagController extends ControllerBase {
     @RestReturn(value=SearchTagResponse.class)
     public RestResponse searchTag(SearchTagCommand cmd) {
         
-//    	List<TagDTO> tags = hotTagService.
-    	
-        RestResponse response = new RestResponse();
+    	SearchTagResponse resp = hotTagSearcher.query(cmd);    	
+        RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
+    
 }
