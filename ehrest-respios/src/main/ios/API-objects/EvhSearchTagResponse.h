@@ -1,21 +1,21 @@
 //
-// EvhListBuildingsByStatusCommandResponse.h
+// EvhSearchTagResponse.h
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
-#import "EvhCommunityBuildingDTO.h"
+#import "EvhTagDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhListBuildingsByStatusCommandResponse
+// EvhSearchTagResponse
 //
-@interface EvhListBuildingsByStatusCommandResponse
+@interface EvhSearchTagResponse
     : NSObject<EvhJsonSerializable>
 
 
-@property(nonatomic, copy) NSNumber* nextPageAnchor;
+// item type EvhTagDTO*
+@property(nonatomic, strong) NSMutableArray* tags;
 
-// item type EvhCommunityBuildingDTO*
-@property(nonatomic, strong) NSMutableArray* buildings;
+@property(nonatomic, copy) NSNumber* nextPageAnchor;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

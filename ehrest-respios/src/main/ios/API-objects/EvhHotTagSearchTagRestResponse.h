@@ -2,14 +2,14 @@
 // EvhHotTagSearchTagRestResponse.h
 //
 #import "RestResponseBase.h"
+#import "EvhSearchTagResponse.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhHotTagSearchTagRestResponse
 //
 @interface EvhHotTagSearchTagRestResponse : EvhRestResponseBase
 
-// array of EvhTagDTO* objects
-@property(nonatomic, strong) NSMutableArray* response;
+@property(nonatomic, strong) EvhSearchTagResponse* response;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

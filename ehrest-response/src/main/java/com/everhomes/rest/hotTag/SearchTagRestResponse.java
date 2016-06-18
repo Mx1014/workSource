@@ -4,21 +4,20 @@ package com.everhomes.rest.hotTag;
 
 import com.everhomes.rest.RestResponseBase;
 
-import java.util.List;
-import com.everhomes.rest.hotTag.TagDTO;
+import com.everhomes.rest.hotTag.SearchTagResponse;
 
 public class SearchTagRestResponse extends RestResponseBase {
 
-    private List<TagDTO> response;
+    private SearchTagResponse response;
 
     public SearchTagRestResponse () {
     }
 
-    public List<TagDTO> getResponse() {
+    public SearchTagResponse getResponse() {
         return response;
     }
 
-    public void setResponse(List<TagDTO> response) {
+    public void setResponse(SearchTagResponse response) {
         this.response = response;
     }
 }

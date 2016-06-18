@@ -1,19 +1,17 @@
 //
-// EvhAccountType.h
+// EvhHotTagStatus.h
 //
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhAccountType
+// EvhHotTagStatus
 //
 typedef enum {
 
-    EvhAccountType_NONE = 0, 
-    EvhAccountType_USER = 1, 
-    EvhAccountType_FAMILY = 2, 
-    EvhAccountType_ORGANIZATION = 3
+    EvhHotTagStatus_INACTIVE = 0, 
+    EvhHotTagStatus_ACTIVE = 1
 
-} EvhAccountType;
+} EvhHotTagStatus;
 
 ///////////////////////////////////////////////////////////////////////////////
 

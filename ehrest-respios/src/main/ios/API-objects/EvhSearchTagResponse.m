@@ -1,20 +1,20 @@
 //
-// EvhListBuildingsByStatusCommandResponse.m
+// EvhSearchTagResponse.m
 //
-#import "EvhListBuildingsByStatusCommandResponse.h"
-#import "EvhCommunityBuildingDTO.h"
+#import "EvhSearchTagResponse.h"
+#import "EvhTagDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhListBuildingsByStatusCommandResponse
+// EvhSearchTagResponse
 //
 
-@implementation EvhListBuildingsByStatusCommandResponse
+@implementation EvhSearchTagResponse
 
 +(id) withJsonString: (NSString*) jsonString
 {
     id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
     if(jsonObject != nil) {
-        EvhListBuildingsByStatusCommandResponse* obj = [EvhListBuildingsByStatusCommandResponse new];
+        EvhSearchTagResponse* obj = [EvhSearchTagResponse new];
         return [obj fromJson:jsonObject];
     }
     return nil;
@@ -24,7 +24,7 @@
 {
     self = [super init];
     if(self) {
-        _buildings = [NSMutableArray new];
+        _tags = [NSMutableArray new];
         return self;
     }
     return nil;
@@ -32,35 +32,35 @@
 
 -(void) toJson: (NSMutableDictionary*) jsonObject 
 {
-    if(self.nextPageAnchor)
-        [jsonObject setObject: self.nextPageAnchor forKey: @"nextPageAnchor"];
-    if(self.buildings) {
+    if(self.tags) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhCommunityBuildingDTO* item in self.buildings) {
+        for(EvhTagDTO* item in self.tags) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
         }
-        [jsonObject setObject: jsonArray forKey: @"buildings"];
+        [jsonObject setObject: jsonArray forKey: @"tags"];
     }
+    if(self.nextPageAnchor)
+        [jsonObject setObject: self.nextPageAnchor forKey: @"nextPageAnchor"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
 {
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
+        {
+            NSArray* jsonArray = [jsonObject objectForKey: @"tags"];
+            for(id itemJson in jsonArray) {
+                EvhTagDTO* item = [EvhTagDTO new];
+                
+                [item fromJson: itemJson];
+                [self.tags addObject: item];
+            }
+        }
         self.nextPageAnchor = [jsonObject objectForKey: @"nextPageAnchor"];
         if(self.nextPageAnchor && [self.nextPageAnchor isEqual:[NSNull null]])
             self.nextPageAnchor = nil;
 
-        {
-            NSArray* jsonArray = [jsonObject objectForKey: @"buildings"];
-            for(id itemJson in jsonArray) {
-                EvhCommunityBuildingDTO* item = [EvhCommunityBuildingDTO new];
-                
-                [item fromJson: itemJson];
-                [self.buildings addObject: item];
-            }
-        }
         return self;
     }
     
