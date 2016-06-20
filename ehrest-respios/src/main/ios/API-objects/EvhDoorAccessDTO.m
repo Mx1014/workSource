@@ -72,6 +72,10 @@
         [jsonObject setObject: self.linkStatus forKey: @"linkStatus"];
     if(self.version)
         [jsonObject setObject: self.version forKey: @"version"];
+    if(self.groupName)
+        [jsonObject setObject: self.groupName forKey: @"groupName"];
+    if(self.groupId)
+        [jsonObject setObject: self.groupId forKey: @"groupId"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -160,6 +164,14 @@
         self.version = [jsonObject objectForKey: @"version"];
         if(self.version && [self.version isEqual:[NSNull null]])
             self.version = nil;
+
+        self.groupName = [jsonObject objectForKey: @"groupName"];
+        if(self.groupName && [self.groupName isEqual:[NSNull null]])
+            self.groupName = nil;
+
+        self.groupId = [jsonObject objectForKey: @"groupId"];
+        if(self.groupId && [self.groupId isEqual:[NSNull null]])
+            self.groupId = nil;
 
         return self;
     }

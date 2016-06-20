@@ -10,7 +10,8 @@ typedef enum {
 
     EvhOrderTypeEnum_WUYETEST = 10000001, 
     EvhOrderTypeEnum_PARKING = 10000002, 
-    EvhOrderTypeEnum_PMSIYUAN = 10000003
+    EvhOrderTypeEnum_PMSIYUAN = 10000003, 
+    EvhOrderTypeEnum_PAYMENTCARD = 10000004
 
 } EvhOrderTypeEnum;
 
