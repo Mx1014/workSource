@@ -1099,6 +1099,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             dto.setUserId(auth.getUserId());
             dto.setStatus(AesUserKeyStatus.VALID.getCode());
             dto.setId(auth.getId());
+            dto.setAuthId(auth.getId());
             
             DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(dto.getDoorId());
             if(doorAccess != null && (!doorAccess.getStatus().equals(DoorAccessStatus.INVALID.getCode()))) {
