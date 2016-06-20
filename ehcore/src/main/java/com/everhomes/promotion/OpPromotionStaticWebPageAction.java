@@ -11,7 +11,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.messaging.LinkBody;
@@ -48,6 +50,9 @@ public class OpPromotionStaticWebPageAction implements OpPromotionAction {
     
     @Autowired
     ScheduleTaskLogProvider scheduleTaskLogProvider;
+    
+    @Autowired
+    ContentServerService contentServerService;
     
     @Override
     public void fire(OpPromotionContext ctx) {
@@ -100,6 +105,8 @@ public class OpPromotionStaticWebPageAction implements OpPromotionAction {
         linkBody.setActionUrl(data.getUrl());
         linkBody.setContent(activityContext.getPromotion().getDescription());
         linkBody.setTitle(activityContext.getPromotion().getTitle());
+        String url = contentServerService.parserUri(activityContext.getPromotion().getIconUri(), EntityType.USER.getCode(), userId);
+        linkBody.setCoverUrl(url);
         String bodyStr = StringHelper.toJsonString(linkBody);
         
         messageDto.setBody(bodyStr);
