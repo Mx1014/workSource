@@ -283,7 +283,7 @@ public class PaymentCardProviderImpl implements PaymentCardProvider{
     @Override
     public void updatePaymentCardRechargeOrder(PaymentCardRechargeOrder order){
     	
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPaymentCardRechargeOrders.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhPaymentCardRechargeOrdersDao dao = new EhPaymentCardRechargeOrdersDao(context.configuration());
     	
 		dao.update(order);

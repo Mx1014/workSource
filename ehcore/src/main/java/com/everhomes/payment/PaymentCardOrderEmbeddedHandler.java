@@ -63,6 +63,7 @@ public class PaymentCardOrderEmbeddedHandler implements OrderEmbeddedHandler{
 		Timestamp payTimeStamp = new Timestamp(System.currentTimeMillis());
 		order.setPayStatus(CardOrderStatus.INACTIVE.getCode());
 		order.setRechargeStatus(CardRechargeStatus.FAIL.getCode());
+		order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
 		order.setPaidTime(payTimeStamp);
 		order.setPaidType(cmd.getVendorType());
 		paymentCardProvider.updatePaymentCardRechargeOrder(order);

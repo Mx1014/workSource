@@ -543,7 +543,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 			tempRow.createCell(3).setCellValue(order.getAmount().doubleValue());
 			tempRow.createCell(4).setCellValue(order.getRechargeTime()!=null?datetimeSF.format(order.getRechargeTime()):"");
 			tempRow.createCell(5).setCellValue(order.getPaidType());
-			tempRow.createCell(6).setCellValue(CardOrderStatus.fromCode(order.getRechargeStatus()).toString());
+			tempRow.createCell(6).setCellValue(CardRechargeStatus.fromCode(order.getRechargeStatus()).toString());
 		}
 		ByteArrayOutputStream out = null;
 		try {
