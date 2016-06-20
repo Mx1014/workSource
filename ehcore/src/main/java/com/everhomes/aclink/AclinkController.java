@@ -35,6 +35,7 @@ import com.everhomes.rest.aclink.AclinkDeleteByIdCommand;
 import com.everhomes.rest.aclink.AclinkDisconnectedCommand;
 import com.everhomes.rest.aclink.AclinkMessageTestCommand;
 import com.everhomes.rest.aclink.AclinkMgmtCommand;
+import com.everhomes.rest.aclink.AclinkRemoteOpenCommand;
 import com.everhomes.rest.aclink.AclinkUpgradeCommand;
 import com.everhomes.rest.aclink.AclinkUpgradeResponse;
 import com.everhomes.rest.aclink.AclinkWebSocketMessage;
@@ -460,8 +461,8 @@ public class AclinkController extends ControllerBase {
      */
     @RequestMapping("remoteOpen")
     @RestReturn(value=String.class)
-    public RestResponse remoteOpen(@Valid AclinkDeleteByIdCommand cmd) {
-        doorAccessService.remoteOpenDoor(cmd.getId());
+    public RestResponse remoteOpen(@Valid AclinkRemoteOpenCommand cmd) {
+        doorAccessService.remoteOpenDoor(cmd.getAuthId());
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
