@@ -23,6 +23,8 @@
 
 @property(nonatomic, copy) NSString* name;
 
+@property(nonatomic, copy) NSNumber* groupId;
+
 @property(nonatomic, copy) NSString* description_;
 
 @property(nonatomic, copy) NSString* address;
