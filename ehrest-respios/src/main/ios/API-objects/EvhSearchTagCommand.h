@@ -15,6 +15,10 @@
 
 @property(nonatomic, copy) NSString* serviceType;
 
+@property(nonatomic, copy) NSNumber* pageAnchor;
+
+@property(nonatomic, copy) NSNumber* pageSize;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 

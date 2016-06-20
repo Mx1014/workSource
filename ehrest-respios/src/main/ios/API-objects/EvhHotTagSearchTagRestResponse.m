@@ -2,7 +2,7 @@
 // EvhHotTagSearchTagRestResponse.m
 //
 #import "EvhHotTagSearchTagRestResponse.h"
-#import "EvhTagDTO.h"
+#import "EvhSearchTagResponse.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhHotTagSearchTagRestResponse
@@ -24,7 +24,6 @@
 {
     self = [super init];
     if(self) {
-        _response = [NSMutableArray new];
         return self;
     }
     return nil;
@@ -35,13 +34,9 @@
     [super toJson: jsonObject];
     
     if(self.response) {
-        NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhTagDTO* item in self.response) {
-            NSMutableDictionary* dic = [NSMutableDictionary new];
-            [item toJson:dic];
-            [jsonArray addObject:dic];
-        }
-        [jsonObject setObject: jsonArray forKey: @"response"];
+        NSMutableDictionary* dic = [NSMutableDictionary new];
+        [self.response toJson: dic];
+        [jsonObject setObject: dic forKey: @"response"];
     }
 }
 
@@ -49,12 +44,9 @@
 {
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
         [super fromJson: jsonObject];
-        NSArray* jsonArray = [jsonObject objectForKey: @"response"];
-        for(NSMutableDictionary* dic in jsonArray) {
-            EvhTagDTO* item = [EvhTagDTO new];
-            [item fromJson:dic];
-            [self.response addObject: item];
-        }
+        NSMutableDictionary* dic =  (NSMutableDictionary*)[jsonObject objectForKey: @"response"];
+        self.response = [EvhSearchTagResponse new];
+        self.response = [self.response fromJson: dic];
         return self;
     }
     

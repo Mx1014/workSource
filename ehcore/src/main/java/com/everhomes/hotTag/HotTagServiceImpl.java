@@ -16,6 +16,7 @@ import com.everhomes.rest.hotTag.HotTagStatus;
 import com.everhomes.rest.hotTag.ListHotTagCommand;
 import com.everhomes.rest.hotTag.SetHotTagCommand;
 import com.everhomes.rest.hotTag.TagDTO;
+import com.everhomes.search.HotTagSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -35,6 +36,9 @@ public class HotTagServiceImpl implements HotTagService{
 	
 	@Autowired
 	private LocaleStringService localeStringService;
+	
+	@Autowired
+	private HotTagSearcher hotTagSearcher;
 
 	@Override
 	public List<TagDTO> listHotTag(ListHotTagCommand cmd) {
@@ -69,6 +73,9 @@ public class HotTagServiceImpl implements HotTagService{
 				tag.setDeleteUid(0L);
 				tag.setDeleteTime(null);
 				hotTagProvider.updateHotTag(tag);
+				
+				tag.setHotFlag(HotTagStatus.ACTIVE.getCode());
+				hotTagSearcher.feedDoc(tag);
 			}
 		}
 		else {
@@ -77,6 +84,9 @@ public class HotTagServiceImpl implements HotTagService{
 			tag.setServiceType(cmd.getServiceType());
 			tag.setCreateUid(user.getId());
 			hotTagProvider.createHotTag(tag);
+			
+			tag.setHotFlag(HotTagStatus.ACTIVE.getCode());
+			hotTagSearcher.feedDoc(tag);
 		}
 		
 		TagDTO dto = ConvertHelper.convert(tag, TagDTO.class);
@@ -92,6 +102,9 @@ public class HotTagServiceImpl implements HotTagService{
 		tag.setDeleteUid(user.getId());
 		tag.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		hotTagProvider.updateHotTag(tag);
+		
+		tag.setHotFlag(HotTagStatus.INACTIVE.getCode());
+		hotTagSearcher.feedDoc(tag);
 	}
 
 }
