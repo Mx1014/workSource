@@ -2,18 +2,8 @@
 // EvhAccountType.h
 //
 
-
-///////////////////////////////////////////////////////////////////////////////
-// EvhAccountType
-//
-typedef enum {
-
-    EvhAccountType_NONE = 0, 
-    EvhAccountType_USER = 1, 
-    EvhAccountType_FAMILY = 2, 
-    EvhAccountType_ORGANIZATION = 3
-
-} EvhAccountType;
+#define EvhAccountType_ACCOUNT_TYPE_SINGLE @"单账号"
+#define EvhAccountType_ACCOUNT_TYPE_MULTIPLE @"多账号"
 
 ///////////////////////////////////////////////////////////////////////////////
 
