@@ -35,6 +35,7 @@ import com.everhomes.aclink.lingling.AclinkLinglingService;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.border.Border;
+import com.everhomes.border.BorderConnectionProvider;
 import com.everhomes.border.BorderProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -73,6 +74,7 @@ import com.everhomes.rest.aclink.CreateDoorAccessLingLing;
 import com.everhomes.rest.aclink.CreateDoorAuthByUser;
 import com.everhomes.rest.aclink.CreateDoorAuthCommand;
 import com.everhomes.rest.aclink.CreateLinglingVisitorCommand;
+import com.everhomes.rest.aclink.DataUtil;
 import com.everhomes.rest.aclink.DoorAccessActivedCommand;
 import com.everhomes.rest.aclink.DoorAccessActivingCommand;
 import com.everhomes.rest.aclink.DoorAccessAdminUpdateCommand;
@@ -114,9 +116,11 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessageMetaConstant;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.messaging.MetaObjectType;
+import com.everhomes.rest.rpc.server.AclinkRemotePdu;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserInfo;
+import com.everhomes.sequence.LocalSequenceGenerator;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
@@ -208,6 +212,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     
     @Autowired
     private BorderProvider borderProvider;
+    
+    @Autowired
+    private BorderConnectionProvider borderConnectionProvider;
     
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
     
@@ -766,6 +773,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 aclink.setManufacturer(Manufacturer);
                 //TODO set active as default
                 aclink.setStatus(DoorAccessStatus.ACTIVE.getCode());
+                aclink.setDriver(DoorAccessDriverType.ZUOLIN.getCode());
                 aclink.setDoorId(doorAcc.getId());
                 aclink.setDeviceName("ZLTODO");
                 aclinkProvider.createAclink(aclink);
@@ -980,7 +988,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         //TODO cache AesUserKey
         
         ListingLocator locator = new ListingLocator();
-        List<DoorAuth> auths = uniqueAuths(doorAuthProvider.queryValidDoorAuthByUserId(locator, user.getId(), DoorAccessDriverType.ZUOLIN, 60));
+        List<DoorAuth> auths = uniqueAuths(doorAuthProvider.queryValidDoorAuthByUserId(locator, user.getId(), DoorAccessDriverType.ZUOLIN.getCode(), 60));
         
         //TODO when the key is invalid, MUST invalid it and generate a command.
         
@@ -1421,10 +1429,12 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         Long lastTick = updateDoorAccessLastTick(resp.getId());
         //generate a time message
         //if( (lastTick+5*60*1000) < System.currentTimeMillis() ) {
-            return msgGenerator.generateTimeMessage(resp.getId());
+            //return msgGenerator.generateTimeMessage(resp.getId());
         //}
         
         //return msgGenerator.generateWebSocketMessage(resp.getId());
+        
+        return null;
     }
     
     @Override
@@ -1483,6 +1493,133 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         return dto;
     }
+    
+    private void doLinglingQRKey(User user, DoorAccess doorAccess, DoorAuth auth, List<DoorAccessQRKeyDTO> qrKeys) {
+        DoorAccessQRKeyDTO qr = new DoorAccessQRKeyDTO();
+        List<String> hardwares = new ArrayList<String>();
+        List<String> sdkKeys = new ArrayList<String>();
+        List<Long> storeyAuthList = new ArrayList<Long>();
+        storeyAuthList.add(8l);
+        storeyAuthList.add(9l);
+        storeyAuthList.add(11l);
+        
+        //TODO 支持后台配置有效时间
+        Long validTime = System.currentTimeMillis() + 1*1*60*60*1000;
+        int maxCount = 32;
+            
+        qr.setDoorGroupId(doorAccess.getId());
+        auth.setKeyValidTime(validTime);
+        
+        try {
+            if(doorAccess.getDoorType().equals(DoorAccessType.ACLINK_LINGLING_GROUP.getCode())) {
+                List<DoorAccess> childs = doorAccessProvider.listDoorAccessByGroupId(doorAccess.getId(), maxCount);
+                List<Long> deviceIds = new ArrayList<Long>();
+                List<Aclink> aclinks = new ArrayList<Aclink>();
+                for(DoorAccess child : childs) {
+                    Aclink ca = aclinkProvider.getAclinkByDoorId(child.getId());
+                    deviceIds.add(ca.getLinglingDoorId());
+                    aclinks.add(ca);
+                    hardwares.add(child.getHardwareId());
+                    }
+                
+                AclinkLinglingMakeSdkKey sdkKey = new AclinkLinglingMakeSdkKey();
+                sdkKey.setDeviceIds(deviceIds);
+                sdkKey.setKeyEffecDay(180l);
+                Map<Long, String> keyMap = aclinkLinglingService.makeSdkKey(sdkKey);
+                
+                for(Aclink ca : aclinks) {
+                    String key = keyMap.get(ca.getLinglingDoorId());
+                    ca.setLinglingSDKKey(key);
+                    aclinkProvider.updateAclink(ca);
+                    
+                    sdkKeys.add(key);
+                    }
+                
+            } else {
+                hardwares.add(doorAccess.getHardwareId());
+                
+                Aclink ca = aclinkProvider.getAclinkByDoorId(doorAccess.getId());
+                List<Long> deviceIds = new ArrayList<Long>();
+                deviceIds.add(ca.getLinglingDoorId());
+                AclinkLinglingMakeSdkKey sdkKey = new AclinkLinglingMakeSdkKey();
+                sdkKey.setDeviceIds(deviceIds);
+                sdkKey.setKeyEffecDay(180l);
+                Map<Long, String> keyMap = aclinkLinglingService.makeSdkKey(sdkKey);
+                
+                String key = keyMap.get(ca.getLinglingDoorId());
+                ca.setLinglingSDKKey(key);
+                aclinkProvider.updateAclink(ca);
+                
+                sdkKeys.add(key);
+            }
+            
+            auth.setKeyValidTime(validTime);
+            auth.setLinglingDoorId(doorAccess.getId());
+            doorAuthProvider.updateDoorAuth(auth);
+                
+        } catch(Exception ex) {
+            LOGGER.error("create doorAuth key error", ex);
+            return;
+        }
+        
+        qr.setCreateTimeMs(System.currentTimeMillis());
+        qr.setCreatorUid(user.getId());
+        qr.setDoorGroupId(doorAccess.getId());
+        qr.setDoorName(doorAccess.getName());
+        qr.setExpireTimeMs(validTime-1000*10); //for safe to open door
+        
+        qr.setHardwares(hardwares);
+        qr.setQrDriver(DoorAccessDriverType.LINGLING.getCode());
+        qr.setStatus(DoorAccessStatus.ACTIVE.getCode());
+        qr.setQrCodeKey("11223344");
+        qr.setId(auth.getId());
+        
+        //TODO if the user is Vip?
+        DoorLinglingExtraKeyDTO extra = new DoorLinglingExtraKeyDTO();
+        extra.setAuthLevel(0l);
+        extra.setAuthStorey(8l);
+        extra.setStoreyAuthList(storeyAuthList);
+        extra.setKeys(sdkKeys);
+        
+        qr.setExtra(StringHelper.toJsonString(extra));
+        
+        qrKeys.add(qr);
+    }
+    
+    private void doZuolinQRKey(User user, DoorAccess doorAccess, DoorAuth auth, List<DoorAccessQRKeyDTO> qrKeys) {
+        List<String> hardwares = new ArrayList<String>();
+        int maxCount = 32;
+        
+        if(doorAccess.getDoorType().equals(DoorAccessType.ACLINK_ZL_GROUP.getCode())) {
+            List<DoorAccess> childs = doorAccessProvider.listDoorAccessByGroupId(doorAccess.getId(), maxCount);
+            for(DoorAccess child : childs) {
+                hardwares.add(child.getHardwareId());
+                }
+        } else {
+            hardwares.add(doorAccess.getHardwareId());
+        }
+        
+        DoorAccessQRKeyDTO qr = new DoorAccessQRKeyDTO();
+        
+        AesUserKey aesUserKey = generateAesUserKey(user, auth);
+        if(aesUserKey == null) {
+            LOGGER.error("aesUserKey created error");
+            return;
+        }
+        
+        qr.setCreateTimeMs(auth.getCreateTime().getTime());
+        qr.setCreatorUid(auth.getApproveUserId());
+        qr.setDoorGroupId(doorAccess.getId());
+        qr.setDoorName(doorAccess.getName());
+        qr.setExpireTimeMs(auth.getKeyValidTime());
+        qr.setHardwares(hardwares);
+        qr.setId(auth.getId());
+        qr.setQrDriver(DoorAccessDriverType.ZUOLIN.getCode());
+        
+        qr.setQrCodeKey(aesUserKey.getSecret());
+        
+        qrKeys.add(qr);
+    }
 
     /**
      * <ul> 获取二维码列表。 TODO 优化函数，太长了。
@@ -1494,7 +1631,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         User user = UserContext.current().getUser();
         
         ListingLocator locator = new ListingLocator();
-        List<DoorAuth> auths = uniqueAuths(doorAuthProvider.queryValidDoorAuthByUserId(locator, user.getId(), DoorAccessDriverType.LINGLING, 60));
+        //List<DoorAuth> auths = uniqueAuths(doorAuthProvider.queryValidDoorAuthByUserId(locator, user.getId(), DoorAccessDriverType.LINGLING, 60));
+        List<DoorAuth> auths = uniqueAuths(doorAuthProvider.queryValidDoorAuthByUserId(locator, user.getId(), null, 60));
         
         ListDoorAccessQRKeyResponse resp = new ListDoorAccessQRKeyResponse();
         List<DoorAccessQRKeyDTO> qrKeys = new ArrayList<DoorAccessQRKeyDTO>();
@@ -1516,95 +1654,12 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 return null;
             }
             
-            DoorAccessQRKeyDTO qr = new DoorAccessQRKeyDTO();
-            List<String> hardwares = new ArrayList<String>();
-            List<String> sdkKeys = new ArrayList<String>();
-            List<Long> storeyAuthList = new ArrayList<Long>();
-            storeyAuthList.add(8l);
-            storeyAuthList.add(9l);
-            storeyAuthList.add(11l);
-            
-            //TODO 支持后台配置有效时间
-            Long validTime = System.currentTimeMillis() + 1*1*60*60*1000;
-            int maxCount = 32;
-                
-            qr.setDoorGroupId(doorAccess.getId());
-            auth.setKeyValidTime(validTime);
-            
-            try {
-                if(doorAccess.getDoorType().equals(DoorAccessType.ACLINK_LINGLING_GROUP.getCode())) {
-                    List<DoorAccess> childs = doorAccessProvider.listDoorAccessByGroupId(doorAccess.getId(), maxCount);
-                    List<Long> deviceIds = new ArrayList<Long>();
-                    List<Aclink> aclinks = new ArrayList<Aclink>();
-                    for(DoorAccess child : childs) {
-                        Aclink ca = aclinkProvider.getAclinkByDoorId(child.getId());
-                        deviceIds.add(ca.getLinglingDoorId());
-                        aclinks.add(ca);
-                        hardwares.add(child.getHardwareId());
-                        }
-                    
-                    AclinkLinglingMakeSdkKey sdkKey = new AclinkLinglingMakeSdkKey();
-                    sdkKey.setDeviceIds(deviceIds);
-                    sdkKey.setKeyEffecDay(180l);
-                    Map<Long, String> keyMap = aclinkLinglingService.makeSdkKey(sdkKey);
-                    
-                    for(Aclink ca : aclinks) {
-                        String key = keyMap.get(ca.getLinglingDoorId());
-                        ca.setLinglingSDKKey(key);
-                        aclinkProvider.updateAclink(ca);
-                        
-                        sdkKeys.add(key);
-                        }
-                    
-                } else {
-                    hardwares.add(doorAccess.getHardwareId());
-                    
-                    Aclink ca = aclinkProvider.getAclinkByDoorId(doorAccess.getId());
-                    List<Long> deviceIds = new ArrayList<Long>();
-                    deviceIds.add(ca.getLinglingDoorId());
-                    AclinkLinglingMakeSdkKey sdkKey = new AclinkLinglingMakeSdkKey();
-                    sdkKey.setDeviceIds(deviceIds);
-                    sdkKey.setKeyEffecDay(180l);
-                    Map<Long, String> keyMap = aclinkLinglingService.makeSdkKey(sdkKey);
-                    
-                    String key = keyMap.get(ca.getLinglingDoorId());
-                    ca.setLinglingSDKKey(key);
-                    aclinkProvider.updateAclink(ca);
-                    
-                    sdkKeys.add(key);
-                }
-                
-                auth.setKeyValidTime(validTime);
-                auth.setLinglingDoorId(doorAccess.getId());
-                doorAuthProvider.updateDoorAuth(auth);
-                    
-            } catch(Exception ex) {
-                LOGGER.error("create doorAuth key error", ex);
-                continue;
+            if(auth.getDriver().equals(DoorAccessDriverType.LINGLING.getCode())) {
+                doLinglingQRKey(user, doorAccess, auth, qrKeys);
+            } else {
+                doZuolinQRKey(user, doorAccess, auth, qrKeys);
             }
-            
-            qr.setCreateTimeMs(System.currentTimeMillis());
-            qr.setCreatorUid(user.getId());
-            qr.setDoorGroupId(doorAccess.getId());
-            qr.setDoorName(doorAccess.getName());
-            qr.setExpireTimeMs(validTime-1000*10); //for safe to open door
-            
-            qr.setHardwares(hardwares);
-            qr.setQrDriver(DoorAccessDriverType.LINGLING.getCode());
-            qr.setStatus(DoorAccessStatus.ACTIVE.getCode());
-            qr.setQrCodeKey("11223344");
-            qr.setId(auth.getId());
-            
-            //TODO if the user is Vip?
-            DoorLinglingExtraKeyDTO extra = new DoorLinglingExtraKeyDTO();
-            extra.setAuthLevel(0l);
-            extra.setAuthStorey(8l);
-            extra.setStoreyAuthList(storeyAuthList);
-            extra.setKeys(sdkKeys);
-            
-            qr.setExtra(StringHelper.toJsonString(extra));
-            
-            qrKeys.add(qr);
+           
             }
             
         return resp;              
@@ -1939,6 +1994,11 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             return null;
         }
         borderUrl = borders.get(0).getPublicAddress();
+        if(borders.get(0).getPublicPort().equals(443)) {
+            borderUrl = "wss://" + borderUrl + "/aclink";
+        } else {
+            borderUrl = "ws://" + borderUrl + ":" + borders.get(0).getPublicAddress() + "/aclink";
+        }
         
         AesServerKey aesServerKey = aesServerKeyService.getCurrentAesServerKey(cmd.getDoorId());
         if(aesServerKey == null) {
@@ -1986,5 +2046,51 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         }
         
         return resp;
+    }
+    
+    @Override
+    public void remoteOpenDoor(Long doorAuthId) {
+        User user = UserContext.current().getUser();
+        
+//        DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(doorId);
+//        if(doorAccess == null) {
+//            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
+//        }
+        
+        DoorAuth doorAuth = doorAuthProvider.getDoorAuthById(doorAuthId);
+        if(doorAuth == null /* || !doorAuth.getUserId().equals(user.getId()) */ || !doorAuth.getRightRemote().equals((byte)1) ) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "DoorAuth error");
+        }
+        
+        DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(doorAuth.getDoorId());
+        if(doorAccess == null) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
+            }        
+        
+        //DoorAuth auth = doorAuthProvider.queryValidDoorAuthForever(doorId, user.getId(), null, null, (byte)1);
+        AesUserKey aesUserKey = generateAesUserKey(user, doorAuth);
+        if(aesUserKey == null) {
+            LOGGER.error("remote AesUserKey created error");
+            return;
+        }
+        
+        byte[] secret = Base64.decodeBase64(aesUserKey.getSecret());
+        LOGGER.error(StringHelper.toHexString(secret));
+        byte[] bPayload = CmdUtil.openDoorCmd(secret);
+        
+        byte[] bSeq = DataUtil.intToByteArray(0);
+        byte[] bLen = DataUtil.intToByteArray(bPayload.length + 6);
+        byte[] mBuf = new byte[bPayload.length + 10];
+        
+        System.arraycopy(bLen, 0, mBuf, 0, bLen.length);
+        System.arraycopy(bSeq, 0, mBuf, 6, bSeq.length);
+        System.arraycopy(bPayload, 0, mBuf, 10, bPayload.length);
+        
+        AclinkRemotePdu pdu = new AclinkRemotePdu();
+        pdu.setBody(Base64.encodeBase64String(mBuf));
+        pdu.setType(1);
+        pdu.setUuid(doorAccess.getUuid());
+        long requestId = LocalSequenceGenerator.getNextSequence();
+        borderConnectionProvider.broadcastToAllBorders(requestId, pdu);
     }
 }

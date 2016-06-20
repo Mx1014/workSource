@@ -16,5 +16,6 @@ public interface RentalServiceErrorCode {
     
     static final int ERROR_CREATE_EXCEL = 10011;  //生成预订信息有问题
     static final int ERROR_DOWNLOAD_EXCEL = 10012;  //下载预订信息有问题
+    static final int ERROR_RENTAL_RULE_NOT_FOUND = 10013;  // 未设置预订规则
     
 }

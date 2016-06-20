@@ -5380,9 +5380,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         map.put("enterpriseName", org.getName());
 
-        map.put("userName", StringUtils.isEmpty(user.getNickName()) ? member.getContactName() : user.getNickName());
+        map.put("userName", member.getContactName());
         
         String scope = EnterpriseNotifyTemplateCode.SCOPE;
+        
+        user = UserContext.current().getUser();
         
         String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, user.getLocale(), map, "");
         
