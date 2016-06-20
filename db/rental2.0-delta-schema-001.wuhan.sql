@@ -109,7 +109,7 @@ CREATE TABLE `eh_rental_sites` (
 `cut_price` DECIMAL(10,2)  COMMENT '减XX元',
 `discount_ratio` DOUBLE  COMMENT '折扣比例',
 `rental_type` TINYINT(4)   COMMENT '0: as hour:min 1-as half day 2-as day 3-支持晚上的半天',
-`rental_step` INT(11)   COMMENT 'how many time_step must be rental every time',
+`rental_step` DOUBLE   COMMENT '按小时预约：最小单元格是多少小时，浮点型',
 `exclusive_flag` TINYINT(4)    COMMENT '是否为独占资源0否 1 是',
 `auto_assign` TINYINT(4)    COMMENT '是否动态分配 1是 0否',
 `multi_unit` TINYINT(4)    COMMENT '是否允许预约多个场所 1是 0否',
@@ -125,6 +125,8 @@ CREATE TABLE `eh_rental_sites` (
 `longitude` DOUBLE  COMMENT '地址经度',
 `latitude` DOUBLE  COMMENT '地址纬度',
 `organization_id` BIGINT(20)    COMMENT '所属公司的ID',
+`day_begin_time` TIME  COMMENT '对于按小时预定的每天开始时间',
+`day_end_time` TIME  COMMENT '对于按小时预定的每天结束时间',
 
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4	
@@ -189,7 +191,7 @@ CREATE TABLE `eh_rental_site_rules` (
 `multi_unit` TINYINT(4)    COMMENT '是否允许预约多个场所 1是 0否',
 `multi_time_interval` TINYINT(4)    COMMENT '是否允许预约多个时段 1是 0否',
 `launch_pad_item_id` BIGINT(20)    COMMENT '广场图标id',
-
+`site_number` INT  COMMENT '场所号',
 
  PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4	
@@ -229,6 +231,7 @@ CREATE TABLE `eh_rental_site_items` (
 `operate_time` DATETIME   COMMENT '',
 `default_order` INT(11)   COMMENT '排序字段',
 `img_uri` VARCHAR(1024)   COMMENT '图片uri',
+`item_type` TINYINT(4)   COMMENT '1购买型 2租用型',
 
  PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4	

@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * 场所
- * <li>rentalSites：场所列表</li>
+ * <li>rentalSites：场所列表{@link com.everhomes.rest.techpark.rental.RentalSiteDTO}</li>
  * <li>nextPageAnchor：下页的anchor</li>
  * </ul>
  */

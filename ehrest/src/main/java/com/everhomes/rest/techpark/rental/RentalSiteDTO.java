@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.techpark.rental.admin.AttachmentDTO;
 import com.everhomes.rest.techpark.rental.admin.SiteOwnerDTO;
 import com.everhomes.util.StringHelper;
 /**
@@ -26,7 +27,9 @@ import com.everhomes.util.StringHelper;
  * <li>	cutPrice：         	减XX元	</li>
  * <li>	discountRatio：    	折扣比例	</li>
  * <li>	rentalType：0: 按小时预定  1-半天 2-天 3-支持晚上的半天	</li>
- * <li>	rentalStep：步长，每次最少预定多少个单元格（目前默认都是1）</li>
+ * <li>	rentalStep：按小时预定步长，每个单元格代表多少小时，浮点型</li>
+ * <li>	dayBeginTime：按小时预定，每天最早时间</li>
+ * <li>	dayEndTime：按小时预定，每天最晚时间</li>
  * <li>	exclusiveFlag：    	是否为独占资源0否 1 是	</li>
  * <li>	autoAssign：       	是否动态分配 1是 0否	</li>
  * <li>	multiUnit：        	是否允许预约多个场所 1是 0否	</li>
@@ -35,9 +38,10 @@ import com.everhomes.util.StringHelper;
  * <li>	needPay：          	是否需要支付 1是 0否	</li>
  * <li>	status：资源状态</li>
  * <li>	createTime：创建时间</li>
- * <li>	siteItems：资源物品列表</li>
- * <li>	sitePics： List资源图片列表</li>
- * <li>	owners： List资源可显示的园区范围列表</li> 
+ * <li>	siteItems：资源物品列表 {@link com.everhomes.rest.techpark.rental.SiteItemDTO}</li>
+ * <li>	sitePics： List资源图片列表 {@link com.everhomes.rest.techpark.rental.RentalSitePicDTO}</li>
+ * <li>	owners： List资源可显示的园区范围列表 {@link com.everhomes.rest.techpark.rental.SiteOwnerDTO}</li> 
+ * <li>attachments: 可添加的附件{@link com.everhomes.rest.techpark.rental.admin.AttachmentDTO}</li>
  * </ul>
  */
 public class RentalSiteDTO {
@@ -59,7 +63,9 @@ public class RentalSiteDTO {
 	private java.math.BigDecimal cutPrice;
 	private java.lang.Double     discountRatio;
 	private java.lang.Byte       rentalType;
-	private java.lang.Integer    rentalStep;
+	private Double   rentalStep;
+	private java.sql.Time        dayBeginTime;
+	private java.sql.Time        dayEndTime;
 	private java.lang.Byte       exclusiveFlag;
 	private java.lang.Byte       autoAssign;
 	private java.lang.Byte       multiUnit;
@@ -76,6 +82,8 @@ public class RentalSiteDTO {
 	private List<RentalSitePicDTO> sitePics;
 	@ItemType(SiteOwnerDTO.class)
 	private List<SiteOwnerDTO> owners;
+	@ItemType(AttachmentDTO.class)
+	private List<AttachmentDTO> attachments;
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -266,13 +274,45 @@ public class RentalSiteDTO {
 	}
 
 
-	public java.lang.Integer getRentalStep() {
+	 
+
+	public Double getRentalStep() {
 		return rentalStep;
 	}
 
 
-	public void setRentalStep(java.lang.Integer rentalStep) {
+	public void setRentalStep(Double rentalStep) {
 		this.rentalStep = rentalStep;
+	}
+
+
+	public java.sql.Time getDayBeginTime() {
+		return dayBeginTime;
+	}
+
+
+	public void setDayBeginTime(java.sql.Time dayBeginTime) {
+		this.dayBeginTime = dayBeginTime;
+	}
+
+
+	public java.sql.Time getDayEndTime() {
+		return dayEndTime;
+	}
+
+
+	public void setDayEndTime(java.sql.Time dayEndTime) {
+		this.dayEndTime = dayEndTime;
+	}
+
+
+	public List<SiteOwnerDTO> getOwners() {
+		return owners;
+	}
+
+
+	public void setOwners(List<SiteOwnerDTO> owners) {
+		this.owners = owners;
 	}
 
 
@@ -363,6 +403,16 @@ public class RentalSiteDTO {
 
 	public void setSitePics(List<RentalSitePicDTO> sitePics) {
 		this.sitePics = sitePics;
+	}
+
+
+	public List<AttachmentDTO> getAttachments() {
+		return attachments;
+	}
+
+
+	public void setAttachments(List<AttachmentDTO> attachments) {
+		this.attachments = attachments;
 	}
  
 }

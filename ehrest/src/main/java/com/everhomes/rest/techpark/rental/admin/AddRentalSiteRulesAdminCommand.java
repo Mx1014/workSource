@@ -51,7 +51,7 @@ public class AddRentalSiteRulesAdminCommand {
 	private Byte rentalType;
 	private Long rentalEndTime;
 	private Long rentalStartTime;
-	private Integer rentalStep;
+	private Double timeStep;
 	@ItemType(TimeIntervalDTO.class)
 	private List<TimeIntervalDTO> timeIntervals;
 	private Long beginDate;
@@ -160,13 +160,13 @@ public class AddRentalSiteRulesAdminCommand {
 	public void setRentalStartTime(Long rentalStartTime) {
 		this.rentalStartTime = rentalStartTime;
 	}
-
-	public Integer getRentalStep() {
-		return rentalStep;
+ 
+	public Double getTimeStep() {
+		return timeStep;
 	}
 
-	public void setRentalStep(Integer rentalStep) {
-		this.rentalStep = rentalStep;
+	public void setTimeStep(Double timeStep) {
+		this.timeStep = timeStep;
 	}
 
 	public List<TimeIntervalDTO> getTimeIntervals() {

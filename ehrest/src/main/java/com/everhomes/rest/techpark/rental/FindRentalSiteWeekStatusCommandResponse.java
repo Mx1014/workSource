@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  * <ul> 
  * <li>rentalSiteId：场所id</li> 
  * <li>siteName：场所名称</li>
- * <li>notice：详情</li>
+ * <li>introduction：详情</li>
  * <li>address：地址</li>
  * <li>longitude：经纬度</li>
  * <li>latitude：经纬度</li>

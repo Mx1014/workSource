@@ -39,6 +39,7 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhRentalBillsDao;
 import com.everhomes.server.schema.tables.daos.EhRentalRulesDao;
+import com.everhomes.server.schema.tables.daos.EhRentalSiteItemsDao;
 import com.everhomes.server.schema.tables.daos.EhRentalSitesDao;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhRentalBillAttachments;
@@ -50,11 +51,14 @@ import com.everhomes.server.schema.tables.pojos.EhRentalDefaultRules;
 import com.everhomes.server.schema.tables.pojos.EhRentalItemsBills;
 import com.everhomes.server.schema.tables.pojos.EhRentalRules;
 import com.everhomes.server.schema.tables.pojos.EhRentalSiteItems;
+import com.everhomes.server.schema.tables.pojos.EhRentalSiteOwners;
+import com.everhomes.server.schema.tables.pojos.EhRentalSitePics;
 import com.everhomes.server.schema.tables.pojos.EhRentalSiteRules;
 import com.everhomes.server.schema.tables.pojos.EhRentalSites;
 import com.everhomes.server.schema.tables.pojos.EhRentalSitesBillNumbers;
 import com.everhomes.server.schema.tables.pojos.EhRentalSitesBills;
 import com.everhomes.server.schema.tables.pojos.EhRentalTimeInterval;
+import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.server.schema.tables.records.EhRentalBillAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhRentalBillPaybillMapRecord;
 import com.everhomes.server.schema.tables.records.EhRentalBillsRecord;
@@ -64,6 +68,8 @@ import com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord;
 import com.everhomes.server.schema.tables.records.EhRentalItemsBillsRecord;
 import com.everhomes.server.schema.tables.records.EhRentalRulesRecord;
 import com.everhomes.server.schema.tables.records.EhRentalSiteItemsRecord;
+import com.everhomes.server.schema.tables.records.EhRentalSiteOwnersRecord;
+import com.everhomes.server.schema.tables.records.EhRentalSitePicsRecord;
 import com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord;
 import com.everhomes.server.schema.tables.records.EhRentalSitesBillNumbersRecord;
 import com.everhomes.server.schema.tables.records.EhRentalSitesBillsRecord;
@@ -1300,6 +1306,87 @@ public class RentalProviderImpl implements RentalProvider {
 		if (null != result && result.size() > 0)
 			return result;
 		return null;
+	}
+
+	@Override
+	public void createRentalSiteOwner(RentalSiteOwner siteOwner) {
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhRentalSiteOwners.class));
+		siteOwner.setId(id);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRentalSiteOwnersRecord record = ConvertHelper.convert(siteOwner,
+				EhRentalSiteOwnersRecord.class);
+		InsertQuery<EhRentalSiteOwnersRecord> query = context
+				.insertQuery(Tables.EH_RENTAL_SITE_OWNERS);
+		query.setRecord(record);
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalSiteOwners.class, null);
+	}
+
+	@Override
+	public void createRentalSitePic(RentalSitePic detailPic) {
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhRentalSitePics.class));
+		detailPic.setId(id);
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRentalSitePicsRecord record = ConvertHelper.convert(detailPic,
+				EhRentalSitePicsRecord.class);
+		InsertQuery<EhRentalSitePicsRecord> query = context
+				.insertQuery(Tables.EH_RENTAL_SITE_PICS);
+		query.setRecord(record);
+		query.execute();
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhRentalSitePics.class, null);
+		
+	}
+
+	@Override
+	public void deleteRentalSitePicsBySiteId(Long siteId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DeleteWhereStep<EhRentalSitePicsRecord> step = context
+				.delete(Tables.EH_RENTAL_SITE_PICS);
+		Condition condition = Tables.EH_RENTAL_SITE_PICS.OWNER_ID
+				.equal(siteId);
+		condition = condition.and(Tables.EH_RENTAL_SITE_PICS.OWNER_TYPE
+				.equal(EhRentalSites.class.getSimpleName()));
+		step.where(condition);
+		step.execute();
+	}
+
+	@Override
+	public void deleteRentalSiteOwnersBySiteId(Long siteId) { 
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DeleteWhereStep<EhRentalSiteOwnersRecord> step = context
+				.delete(Tables.EH_RENTAL_SITE_OWNERS);
+		Condition condition = Tables.EH_RENTAL_SITE_OWNERS.RENTAL_SITE_ID
+				.equal(siteId);
+		step.where(condition);
+		step.execute();
+	}
+
+	@Override
+	public void updateRentalSiteItem(RentalSiteItem siteItem) {
+		assert(siteItem.getId() != null);
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, siteItem.getId().longValue()));
+        EhRentalSiteItemsDao dao = new EhRentalSiteItemsDao(context.configuration());
+        dao.update(siteItem);
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUsers.class, siteItem.getId());
+	}
+
+	@Override
+	public Integer countRentalSiteItemSoldCount(Long itemId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record1<BigDecimal>> step = context
+				.select(Tables.EH_RENTAL_ITEMS_BILLS.RENTAL_COUNT.sum())
+				.from(Tables.EH_RENTAL_ITEMS_BILLS);
+				 
+		Condition condition = Tables.EH_RENTAL_ITEMS_BILLS.RENTAL_SITE_ITEM_ID
+				.equal(itemId);
+		 
+		step.where(condition);
+		Integer result = step.fetchOne().value1().intValue();
+		return result;
 	}
 
 	

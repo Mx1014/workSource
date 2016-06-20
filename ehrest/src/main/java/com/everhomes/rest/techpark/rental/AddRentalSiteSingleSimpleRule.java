@@ -1,73 +1,78 @@
 package com.everhomes.rest.techpark.rental;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.techpark.rental.admin.AttachmentDTO;
+import com.everhomes.rest.techpark.rental.admin.TimeIntervalDTO;
 import com.everhomes.util.StringHelper;
 /**
- * <ul>
- * <li>rentalSiteId：场所id</li>
- * <li>rentalType：0按时间 1按半天 2按全天 参考{@link com.everhomes.rest.techpark.rental.RentalType} </li> 
- * <li>beginDate：开始日期(Long)</li>
- * <li>endDate：结束日期(Long)</li>
- * <li>rentalStep：最小预定时间</li> 
- * <li>TimeStep：坐标轴单位时间（小时）</li>
+ * <ul> 
  * <li>beginTime：开始时间(hour)</li>
  * <li>endTime：结束时间(hour)</li>
- * <li>counts：场所数量</li> 
- * <li>unit：场所单位:1or0.5</li> 
- * <li>workdayPrice：平日价格</li> 
- * <li>weekendPrice：周末价格</li> 
- * <li>workdayAMPrice：平日早上价格</li> 
- * <li>weekendAMPrice：周末早上价格</li> 
- * <li>workdayPMPrice：平日下午价格</li> 
- * <li>weekendPMPrice：周末下午价格</li>  
- * <li>ruleDate：规则日期</li> 
- * <li>loopType：循环方式 参考{@link com.everhomes.rest.techpark.rental.LoopType} </li> 
- * <li>Status：状态 参考{@link com.everhomes.rest.techpark.rental.SiteRuleStatus} </li> 
- * <li>choosen：选择的日期</li>
+ * <li>rentalSiteId: 资源id</li>
+ * <li>launchPadItemId: 图标id</li>
+ * <li>exclusiveFlag: 是否是独占资源</li>
+ * <li>unit: 1整租，0.5可半租</li>
+ * <li>autoAssign: 是否需要自动分配资源</li>
+ * <li>multiUnit: 是否允许预约多个场所</li>
+ * <li>needPay: 是否需要支付</li>
+ * <li>attachments: 预约需要提交的信息</li>
+ * <li>rentalType: 预约类型，参考{@link com.everhomes.rest.techpark.rental.admin.RentalType}</li>
+ * <li>rentalEndTime: 至少提前预约时间</li>
+ * <li>rentalStartTime: 最多提前预约时间</li>
+ * <li>rentalStep: 最短可预约时长</li>
+ * <li>timeIntervals: 开放时段</li>
+ * <li>beginDate: 开放日期始</li>
+ * <li>endDate: 开放日期终</li>
+ * <li>openWeekday: 开放日期，从周日到周六是0123456，开放哪天就在数组传哪天List< Integer></li>
+ * <li>closeDates: 关闭日期</li>
+ * <li>workdayPrice: 工作日价格</li>
+ * <li>weekendPrice: 周末价格</li>
+ * <li>siteCounts: 可预约个数</li>
+ * <li>cancelTime: 至少提前取消时间</li>
+ * <li>refundFlag: 是否允许退款</li>
+ * <li>refundRatio: 退款比例</li>
  * </ul>
  */
 public class AddRentalSiteSingleSimpleRule {
-	@NotNull
-
-	private String ownerType;
-	private Long ownerId;
-	@NotNull
-	private String siteType;
-	@NotNull
-	private Long rentalSiteId;
-	@NotNull
-	private Byte rentalType;
-	@NotNull
-	private Long beginDate;
-	@NotNull
-	private Long endDate; 
-	private Double timeStep; 
-	@NotNull
-	private Integer rentalStep; 
+ 
 	private Double beginTime; 
 	private Double endTime;
+	 
 	@NotNull
-	private Double counts;
-	@NotNull
+	private Long rentalSiteId;
+	private Byte exclusiveFlag;
 	private Double unit;
-	private java.math.BigDecimal workdayPrice;
-	private java.math.BigDecimal weekendPrice;
-	private java.math.BigDecimal workdayAMPrice;
-	private java.math.BigDecimal weekendAMPrice;
-	private java.math.BigDecimal workdayPMPrice;
-	private java.math.BigDecimal weekendPMPrice;
-	@NotNull
-	private Byte loopType;
-	@NotNull
-	private Byte status;
-	@NotNull
+	private Byte autoAssign;
+	private Byte multiUnit;
+	private Byte needPay;
+	private Byte multiTimeInterval;
+	@ItemType(AttachmentDTO.class)
+	private List<AttachmentDTO> attachments;
+	private Byte rentalType;
+	private Long rentalEndTime;
+	private Long rentalStartTime;
+	private Double timeStep;
+	@ItemType(TimeIntervalDTO.class)
+	private List<TimeIntervalDTO> timeIntervals;
+	private Long beginDate;
+	private Long endDate;
+
 	@ItemType(Integer.class)
-	private List<Integer> choosen;
-	
+	private List<Integer> openWeekday;
+	@ItemType(Long.class)
+	private List<Long> closeDates;
+	private BigDecimal workdayPrice;
+	private BigDecimal weekendPrice;
+	private Double siteCounts;
+	private Long cancelTime;
+	private Byte refundFlag;
+	private Integer refundRatio;
+
 	
 	@Override
     public String toString() {
@@ -75,85 +80,9 @@ public class AddRentalSiteSingleSimpleRule {
     }
 
 
-
-	public Long getRentalSiteId() {
-		return rentalSiteId;
-	}
-
-
-
-	public void setRentalSiteId(Long rentalSiteId) {
-		this.rentalSiteId = rentalSiteId;
-	}
-
-
-
-	public Byte getRentalType() {
-		return rentalType;
-	}
-
-
-
-	public void setRentalType(Byte rentalType) {
-		this.rentalType = rentalType;
-	}
-
-
-   
-
-
-	public Double getUnit() {
-		return unit;
-	}
-
-
-
-	public void setUnit(Double unit) {
-		this.unit = unit;
-	}
- 
-	public Byte getLoopType() {
-		return loopType;
-	}
-
-
-
-	public void setLoopType(Byte loopType) {
-		this.loopType = loopType;
-	}
-
-
- 
-
-
-	public Long getBeginDate() {
-		return beginDate;
-	}
-
-
-
-	public void setBeginDate(Long beginDate) {
-		this.beginDate = beginDate;
-	}
-
-
-
-	public Long getEndDate() {
-		return endDate;
-	}
-
-
-
-	public void setEndDate(Long endDate) {
-		this.endDate = endDate;
-	}
-
-
-
 	public Double getBeginTime() {
 		return beginTime;
 	}
-
 
 
 	public void setBeginTime(Double beginTime) {
@@ -161,29 +90,234 @@ public class AddRentalSiteSingleSimpleRule {
 	}
 
 
-
 	public Double getEndTime() {
 		return endTime;
 	}
-
 
 
 	public void setEndTime(Double endTime) {
 		this.endTime = endTime;
 	}
 
-  
 
-	public String getSiteType() {
-		return siteType;
+	public Long getRentalSiteId() {
+		return rentalSiteId;
 	}
 
 
-
-	public void setSiteType(String siteType) {
-		this.siteType = siteType;
+	public void setRentalSiteId(Long rentalSiteId) {
+		this.rentalSiteId = rentalSiteId;
 	}
 
+
+	public Byte getExclusiveFlag() {
+		return exclusiveFlag;
+	}
+
+
+	public void setExclusiveFlag(Byte exclusiveFlag) {
+		this.exclusiveFlag = exclusiveFlag;
+	}
+
+
+	public Double getUnit() {
+		return unit;
+	}
+
+
+	public void setUnit(Double unit) {
+		this.unit = unit;
+	}
+
+
+	public Byte getAutoAssign() {
+		return autoAssign;
+	}
+
+
+	public void setAutoAssign(Byte autoAssign) {
+		this.autoAssign = autoAssign;
+	}
+
+
+	public Byte getMultiUnit() {
+		return multiUnit;
+	}
+
+
+	public void setMultiUnit(Byte multiUnit) {
+		this.multiUnit = multiUnit;
+	}
+
+
+	public Byte getNeedPay() {
+		return needPay;
+	}
+
+
+	public void setNeedPay(Byte needPay) {
+		this.needPay = needPay;
+	}
+
+
+	public Byte getMultiTimeInterval() {
+		return multiTimeInterval;
+	}
+
+
+	public void setMultiTimeInterval(Byte multiTimeInterval) {
+		this.multiTimeInterval = multiTimeInterval;
+	}
+
+
+	public List<AttachmentDTO> getAttachments() {
+		return attachments;
+	}
+
+
+	public void setAttachments(List<AttachmentDTO> attachments) {
+		this.attachments = attachments;
+	}
+
+
+	public Byte getRentalType() {
+		return rentalType;
+	}
+
+
+	public void setRentalType(Byte rentalType) {
+		this.rentalType = rentalType;
+	}
+
+
+	public Long getRentalEndTime() {
+		return rentalEndTime;
+	}
+
+
+	public void setRentalEndTime(Long rentalEndTime) {
+		this.rentalEndTime = rentalEndTime;
+	}
+
+
+	public Long getRentalStartTime() {
+		return rentalStartTime;
+	}
+
+
+	public void setRentalStartTime(Long rentalStartTime) {
+		this.rentalStartTime = rentalStartTime;
+	}
+ 
+
+	public List<TimeIntervalDTO> getTimeIntervals() {
+		return timeIntervals;
+	}
+
+
+	public void setTimeIntervals(List<TimeIntervalDTO> timeIntervals) {
+		this.timeIntervals = timeIntervals;
+	}
+
+
+	public Long getBeginDate() {
+		return beginDate;
+	}
+
+
+	public void setBeginDate(Long beginDate) {
+		this.beginDate = beginDate;
+	}
+
+
+	public Long getEndDate() {
+		return endDate;
+	}
+
+
+	public void setEndDate(Long endDate) {
+		this.endDate = endDate;
+	}
+
+
+	public List<Integer> getOpenWeekday() {
+		return openWeekday;
+	}
+
+
+	public void setOpenWeekday(List<Integer> openWeekday) {
+		this.openWeekday = openWeekday;
+	}
+
+
+	public List<Long> getCloseDates() {
+		return closeDates;
+	}
+
+
+	public void setCloseDates(List<Long> closeDates) {
+		this.closeDates = closeDates;
+	}
+
+
+	public BigDecimal getWorkdayPrice() {
+		return workdayPrice;
+	}
+
+
+	public void setWorkdayPrice(BigDecimal workdayPrice) {
+		this.workdayPrice = workdayPrice;
+	}
+
+
+	public BigDecimal getWeekendPrice() {
+		return weekendPrice;
+	}
+
+
+	public void setWeekendPrice(BigDecimal weekendPrice) {
+		this.weekendPrice = weekendPrice;
+	}
+
+
+	public Double getSiteCounts() {
+		return siteCounts;
+	}
+
+
+	public void setSiteCounts(Double siteCounts) {
+		this.siteCounts = siteCounts;
+	}
+
+
+	public Long getCancelTime() {
+		return cancelTime;
+	}
+
+
+	public void setCancelTime(Long cancelTime) {
+		this.cancelTime = cancelTime;
+	}
+
+
+	public Byte getRefundFlag() {
+		return refundFlag;
+	}
+
+
+	public void setRefundFlag(Byte refundFlag) {
+		this.refundFlag = refundFlag;
+	}
+
+
+	public Integer getRefundRatio() {
+		return refundRatio;
+	}
+
+
+	public void setRefundRatio(Integer refundRatio) {
+		this.refundRatio = refundRatio;
+	}
 
 
 	public Double getTimeStep() {
@@ -191,159 +325,9 @@ public class AddRentalSiteSingleSimpleRule {
 	}
 
 
-
 	public void setTimeStep(Double timeStep) {
 		this.timeStep = timeStep;
 	}
-
-
- 
-
-
-
-	public Byte getStatus() {
-		return status;
-	}
-
-
-
-	public void setStatus(Byte status) {
-		this.status = status;
-	}
-
-
-
-	public Double getCounts() {
-		return counts;
-	}
-
-
-
-	public void setCounts(Double counts) {
-		this.counts = counts;
-	}
-
-
- 
-
-	public java.math.BigDecimal getWorkdayPrice() {
-		return workdayPrice;
-	}
-
-
-
-	public void setWorkdayPrice(java.math.BigDecimal workdayPrice) {
-		this.workdayPrice = workdayPrice;
-	}
-
-
-
-	public java.math.BigDecimal getWeekendPrice() {
-		return weekendPrice;
-	}
-
-
-
-	public void setWeekendPrice(java.math.BigDecimal weekendPrice) {
-		this.weekendPrice = weekendPrice;
-	}
-
-
-
-	public java.math.BigDecimal getWorkdayAMPrice() {
-		return workdayAMPrice;
-	}
-
-
-
-	public void setWorkdayAMPrice(java.math.BigDecimal workdayAMPrice) {
-		this.workdayAMPrice = workdayAMPrice;
-	}
-
-
-
-	public java.math.BigDecimal getWeekendAMPrice() {
-		return weekendAMPrice;
-	}
-
-
-
-	public void setWeekendAMPrice(java.math.BigDecimal weekendAMPrice) {
-		this.weekendAMPrice = weekendAMPrice;
-	}
-
-
-
-	public java.math.BigDecimal getWorkdayPMPrice() {
-		return workdayPMPrice;
-	}
-
-
-
-	public void setWorkdayPMPrice(java.math.BigDecimal workdayPMPrice) {
-		this.workdayPMPrice = workdayPMPrice;
-	}
-
-
-
-	public java.math.BigDecimal getWeekendPMPrice() {
-		return weekendPMPrice;
-	}
-
-
-
-	public void setWeekendPMPrice(java.math.BigDecimal weekendPMPrice) {
-		this.weekendPMPrice = weekendPMPrice;
-	}
-
-
-
-	public List<Integer> getChoosen() {
-		return choosen;
-	}
-
-
-
-	public void setChoosen(List<Integer> choosen) {
-		this.choosen = choosen;
-	}
-
-
-
-	public Integer getRentalStep() {
-		return rentalStep;
-	}
-
-
-
-	public void setRentalStep(Integer rentalStep) {
-		this.rentalStep = rentalStep;
-	}
-
-
-
-	public String getOwnerType() {
-		return ownerType;
-	}
-
-
-
-	public void setOwnerType(String ownerType) {
-		this.ownerType = ownerType;
-	}
-
-
-
-	public Long getOwnerId() {
-		return ownerId;
-	}
-
-
-
-	public void setOwnerId(Long ownerId) {
-		this.ownerId = ownerId;
-	}
- 
 
  
 

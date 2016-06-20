@@ -10,8 +10,6 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>rentalSiteId：场所id</li>
- * <li>enterpriseCommunityId：园区id</li>
- * <li>siteType：场所类型</li>
  * <li>rentalSiteRuleIds：预定场所规则ID列表 json字符串 </li> 
  * </ul>
  */

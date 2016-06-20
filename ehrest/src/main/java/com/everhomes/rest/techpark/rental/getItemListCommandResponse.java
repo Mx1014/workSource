@@ -6,7 +6,7 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 /**
  * <ul> 
- * <li>siteItems：场所商品</li>
+ * <li>siteItems：场所商品{@link com.everhomes.rest.techpark.rental.SiteItemDTO}}</li>
  * <li>nextPageAnchor：下页锚点</li>
  * </ul>
  */
