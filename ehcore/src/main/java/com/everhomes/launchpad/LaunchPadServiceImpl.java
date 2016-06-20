@@ -748,7 +748,11 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			actionDataJson.put(LaunchPadConstants.CREATOR_TAG, tag);
 		}
 
-		Byte visibleRegionType = (Byte)actionDataJson.get(LaunchPadConstants.VISIBLE_REGION_TYPE);
+		Byte visibleRegionType = null;
+		Object regionType = actionDataJson.get(LaunchPadConstants.VISIBLE_REGION_TYPE);
+		if(regionType != null) {
+		    visibleRegionType = Byte.valueOf(regionType.toString());
+		}
 
 		//给GANC（居委）或GAPS（公安）发帖，visibleRegionType填片区、visibleRegionId填居委或公安所管理的片区ID
 		if(VisibleRegionType.fromCode(visibleRegionType) == VisibleRegionType.REGION){
