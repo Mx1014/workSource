@@ -48,24 +48,31 @@ public class EhNewsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.schema
 	}
 
 	/**
-	 * Fetch records that have <code>owner_uid IN (values)</code>
+	 * Fetch records that have <code>namespace_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhNews> fetchByOwnerUid(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhNews.EH_NEWS.OWNER_UID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhNews> fetchByNamespaceId(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhNews.EH_NEWS.NAMESPACE_ID, values);
 	}
 
 	/**
-	 * Fetch records that have <code>source_type IN (values)</code>
+	 * Fetch records that have <code>owner_type IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhNews> fetchBySourceType(java.lang.Byte... values) {
-		return fetch(com.everhomes.server.schema.tables.EhNews.EH_NEWS.SOURCE_TYPE, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhNews> fetchByOwnerType(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhNews.EH_NEWS.OWNER_TYPE, values);
 	}
 
 	/**
-	 * Fetch records that have <code>source_id IN (values)</code>
+	 * Fetch records that have <code>owner_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhNews> fetchBySourceId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhNews.EH_NEWS.SOURCE_ID, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhNews> fetchByOwnerId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhNews.EH_NEWS.OWNER_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>post_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhNews> fetchByPostId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhNews.EH_NEWS.POST_ID, values);
 	}
 
 	/**
@@ -111,17 +118,38 @@ public class EhNewsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.schema
 	}
 
 	/**
-	 * Fetch records that have <code>original IN (values)</code>
+	 * Fetch records that have <code>source_desc IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhNews> fetchByOriginal(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhNews.EH_NEWS.ORIGINAL, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhNews> fetchBySourceDesc(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhNews.EH_NEWS.SOURCE_DESC, values);
 	}
 
 	/**
-	 * Fetch records that have <code>original_link IN (values)</code>
+	 * Fetch records that have <code>source_url IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhNews> fetchByOriginalLink(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhNews.EH_NEWS.ORIGINAL_LINK, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhNews> fetchBySourceUrl(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhNews.EH_NEWS.SOURCE_URL, values);
+	}
+
+	/**
+	 * Fetch records that have <code>publish_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhNews> fetchByPublishTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhNews.EH_NEWS.PUBLISH_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>top_index IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhNews> fetchByTopIndex(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhNews.EH_NEWS.TOP_INDEX, values);
+	}
+
+	/**
+	 * Fetch records that have <code>top_flag IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhNews> fetchByTopFlag(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhNews.EH_NEWS.TOP_FLAG, values);
 	}
 
 	/**
@@ -132,10 +160,10 @@ public class EhNewsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.schema
 	}
 
 	/**
-	 * Fetch records that have <code>release_time IN (values)</code>
+	 * Fetch records that have <code>creator_uid IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhNews> fetchByReleaseTime(java.sql.Timestamp... values) {
-		return fetch(com.everhomes.server.schema.tables.EhNews.EH_NEWS.RELEASE_TIME, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhNews> fetchByCreatorUid(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhNews.EH_NEWS.CREATOR_UID, values);
 	}
 
 	/**
@@ -157,12 +185,5 @@ public class EhNewsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.schema
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhNews> fetchByDeleteTime(java.sql.Timestamp... values) {
 		return fetch(com.everhomes.server.schema.tables.EhNews.EH_NEWS.DELETE_TIME, values);
-	}
-
-	/**
-	 * Fetch records that have <code>sort_index IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhNews> fetchBySortIndex(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhNews.EH_NEWS.SORT_INDEX, values);
 	}
 }
