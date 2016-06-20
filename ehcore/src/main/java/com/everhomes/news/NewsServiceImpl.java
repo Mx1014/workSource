@@ -14,6 +14,7 @@ import com.everhomes.rest.news.CreateNewsCommand;
 import com.everhomes.rest.news.NewsOwnerType;
 import com.everhomes.rest.news.NewsServiceErrorCode;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 @Component
@@ -22,6 +23,9 @@ public class NewsServiceImpl implements NewsService {
 	
 	@Autowired
 	private OrganizationProvider organizationProvider;
+	
+	@Autowired
+	private NewsProvider newsProvider;
 
 	@Override
 	public BriefNewsDTO createNews(CreateNewsCommand cmd) {
@@ -31,11 +35,14 @@ public class NewsServiceImpl implements NewsService {
 		
 		News  news = processNewsCommand(userId, organization, cmd);
 
+		newsProvider.createNews(news);
+		
 		return null;
 	}
 
 	private News processNewsCommand(Long userId, Organization organization, CreateNewsCommand cmd) {
-		return null;
+		News news = ConvertHelper.convert(cmd, News.class);
+		return news;
 	}
 
 	private void checkNewsParameter(Long userId, CreateNewsCommand cmd) {
