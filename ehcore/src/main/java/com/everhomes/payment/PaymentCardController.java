@@ -246,7 +246,7 @@ public class PaymentCardController extends ControllerBase{
     }
     /**
      * <b>URL: /payment/updateCardRechargeOrder</b>
-     * <p>搜索充值订单列表</p>
+     * <p>更新充值订单</p>
      */
     @RequestMapping("updateCardRechargeOrder")
     @RestReturn(value=String.class)
