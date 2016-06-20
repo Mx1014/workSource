@@ -399,11 +399,12 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				if("101".equals(transactionType)){
 					dto.setTransactionType(CardTransactionTypeStatus.CONSUME.getCode());
 					consumeAmount = consumeAmount.add(amount);
-				}
-				if("203".equals(transactionType)){
+				}else if("203".equals(transactionType)){
 					dto.setTransactionType(CardTransactionTypeStatus.RECHARGE.getCode());
 					rechargeAmount = rechargeAmount.add(amount);
-				}
+				}else
+					continue outer;
+				
 				dto.setStatus((String)m.get("ProcStatus"));
 				String recvTime = (String)m.get("RecvTime");
 				dto.setTransactionTime(StrTotimestamp2(recvTime));
@@ -430,17 +431,20 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		return resultList;
 	}
 	
-	private Timestamp StrTotimestamp(String date){
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+	private static Timestamp StrTotimestamp(String date){
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyyMM");
 		Date d = null;
 		try {
 			d = sdf.parse(date);
+			String s = sdf1.format(d);
+			d = sdf1.parse(s);
 		} catch (ParseException e) {
 			return null;
 		}
 		return new Timestamp(d.getTime());
 	}
-	   
+ 
 	private Timestamp StrTotimestamp2(String date){
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 		Date d = null;
