@@ -3,25 +3,33 @@ package com.everhomes.test.payment;
 
 import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectJoinStep;
+import org.jooq.SelectQuery;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.everhomes.db.AccessSpec;
+import com.everhomes.payment.PaymentCardRechargeOrder;
+import com.everhomes.rest.payment.CardOrderStatus;
 import com.everhomes.rest.payment.SearchCardRechargeOrderRestResponse;
 import com.everhomes.rest.user.GetUserInfoRestResponse;
 import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhUsersDao;
 import com.everhomes.server.schema.tables.pojos.EhPaymentCardIssuers;
+import com.everhomes.server.schema.tables.pojos.EhPaymentCardRechargeOrders;
 import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
+import com.everhomes.server.schema.tables.records.EhPaymentCardRechargeOrdersRecord;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
@@ -34,9 +42,12 @@ public class searchCardRechargeOrderTest extends BaseLoginAuthTestCase {
     
     @Test
     public void testSearchCardRechargeOrder() {
-        Integer namespaceId = 0;
-        String ownerType = "";
+    	String ownerType = "";
         Long ownerId = 0L;
+        String keyword = "";
+        Long pageAnchor = null;
+        Integer pageSize = 5;
+        
         String userIdentifier = "12000000001";
         String plainTexPassword = "123456";
         // 登录时不传namepsace，默认为左邻域空间
@@ -52,30 +63,28 @@ public class searchCardRechargeOrderTest extends BaseLoginAuthTestCase {
 //        assertEquals("左邻李四", response.getResponse().getNickName());
         
         DSLContext context = dbProvider.getDslContext();
-        SelectJoinStep<Record> query = context.select(Tables.EH_PAYMENT_CARD_ISSUERS.fields()).from(Tables.EH_PAYMENT_CARD_ISSUERS);
-    	query.join(Tables.EH_PAYMENT_CARD_ISSUER_COMMUNITIES).on(Tables.EH_PAYMENT_CARD_ISSUER_COMMUNITIES.ISSUER_ID
-    			.eq(Tables.EH_PAYMENT_CARD_ISSUERS.ID));
-        query.where(Tables.EH_PAYMENT_CARD_ISSUER_COMMUNITIES.OWNER_TYPE.eq(ownerType))
-        	.and(Tables.EH_PAYMENT_CARD_ISSUER_COMMUNITIES.OWNER_ID.eq(ownerId));
+		SelectQuery<EhPaymentCardRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS);
+    	
+		if (pageAnchor != null && pageAnchor != 0)
+			query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.CREATE_TIME.lt(new Timestamp(pageAnchor)));
+        	query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.OWNER_TYPE.eq(ownerType));
+        	query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.OWNER_ID.eq(ownerId));
+        	query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.USER_NAME.eq(keyword)
+        			.or(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.MOBILE.eq(keyword)));
+        	query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.PAID_TYPE.eq(rechargeType));
         
-        List<EhPaymentCardIssuers> result = new ArrayList<>();
+        	query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.RECHARGE_TIME.gt(startDate));
+        	query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.RECHARGE_TIME.lt(endDate));
+        	query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.RECHARGE_STATUS.eq(rechargeStatus));
         
-        query.fetch().forEach(
-        		r -> {
-        			EhPaymentCardIssuers issuer = new EhPaymentCardIssuers();
-        			issuer.setId(r.getValue(Tables.EH_PAYMENT_CARD_ISSUERS.ID));
-        			issuer.setName(r.getValue(Tables.EH_PAYMENT_CARD_ISSUERS.NAME));
-        			issuer.setDescription(r.getValue(Tables.EH_PAYMENT_CARD_ISSUERS.DESCRIPTION));
-        			issuer.setPayUrl(r.getValue(Tables.EH_PAYMENT_CARD_ISSUERS.PAY_URL));
-        			issuer.setAlipayRechargeAccount(r.getValue(Tables.EH_PAYMENT_CARD_ISSUERS.ALIPAY_RECHARGE_ACCOUNT));
-        			issuer.setWeixinRechargeAccount(r.getValue(Tables.EH_PAYMENT_CARD_ISSUERS.WEIXIN_RECHARGE_ACCOUNT));
-        			issuer.setVendorName(r.getValue(Tables.EH_PAYMENT_CARD_ISSUERS.VENDOR_NAME));
-        			issuer.setVendorData(r.getValue(Tables.EH_PAYMENT_CARD_ISSUERS.VENDOR_DATA));
-        			issuer.setCreateTime(r.getValue(Tables.EH_PAYMENT_CARD_ISSUERS.CREATE_TIME));
-        			issuer.setStatus(r.getValue(Tables.EH_PAYMENT_CARD_ISSUERS.STATUS));
-        			result.add(issuer);
-        		});
-        assertEquals(2, result.size());
+    	query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.PAY_STATUS.eq(CardOrderStatus.PAID.getCode()));
+        query.addOrderBy(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.CREATE_TIME.desc());
+        if(pageSize != null)
+        	query.addLimit(pageSize);
+        
+        List<EhPaymentCardRechargeOrders> result =  query.fetch().map(r -> 
+			ConvertHelper.convert(r, EhPaymentCardRechargeOrders.class));
+        assertEquals(5, result.size());
         
     }
     
