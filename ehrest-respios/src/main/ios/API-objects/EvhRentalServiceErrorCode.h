@@ -15,3 +15,4 @@
 #define EvhRentalServiceErrorCode_ERROR_ORDER_DUPLICATE 10010
 #define EvhRentalServiceErrorCode_ERROR_CREATE_EXCEL 10011
 #define EvhRentalServiceErrorCode_ERROR_DOWNLOAD_EXCEL 10012
+#define EvhRentalServiceErrorCode_ERROR_RENTAL_RULE_NOT_FOUND 10013

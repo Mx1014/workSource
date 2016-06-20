@@ -1,5 +1,7 @@
 // @formatter:off
-// generated at 2016-06-20 11:39:59
+
+// generated at 2016-06-20 15:02:06
+
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -20,6 +22,7 @@ public interface ApiConstants {
     public static final String ACLINK_LISTDOORACCESSGROUP_URL = "/aclink/listDoorAccessGroup";
     public static final String ACLINK_LISTDOORACCESSQRKEY_URL = "/aclink/listDoorAccessQRKey";
     public static final String ACLINK_QUERYMESSAGES_URL = "/aclink/queryMessages";
+    public static final String ACLINK_REMOTEOPEN_URL = "/aclink/remoteOpen";
     public static final String ACLINK_SYNCWEBSOCKETMESSAGES_URL = "/aclink/syncWebsocketMessages";
     public static final String ACLINK_UPGRATEAUTH_URL = "/aclink/upgrateAuth";
     public static final String ACLINK_UPGRATEVERIFY_URL = "/aclink/upgrateVerify";

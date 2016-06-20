@@ -99,6 +99,7 @@ public class OpPromotionCouponAction implements OpPromotionAction {
         linkBody.setActionUrl(data.getUrl());
         linkBody.setContent(activityContext.getPromotion().getDescription());
         linkBody.setTitle(activityContext.getPromotion().getTitle());
+        linkBody.setCoverUrl(activityContext.getPromotion().getIconUri());
         String bodyStr = StringHelper.toJsonString(linkBody);
         
         messageDto.setBody(bodyStr);

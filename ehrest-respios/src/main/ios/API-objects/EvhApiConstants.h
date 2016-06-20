@@ -17,6 +17,7 @@
 #define EVH_ACLINK_LISTDOORACCESSGROUP_URL @"/aclink/listDoorAccessGroup"
 #define EVH_ACLINK_LISTDOORACCESSQRKEY_URL @"/aclink/listDoorAccessQRKey"
 #define EVH_ACLINK_QUERYMESSAGES_URL @"/aclink/queryMessages"
+#define EVH_ACLINK_REMOTEOPEN_URL @"/aclink/remoteOpen"
 #define EVH_ACLINK_SYNCWEBSOCKETMESSAGES_URL @"/aclink/syncWebsocketMessages"
 #define EVH_ACLINK_UPGRATEAUTH_URL @"/aclink/upgrateAuth"
 #define EVH_ACLINK_UPGRATEVERIFY_URL @"/aclink/upgrateVerify"

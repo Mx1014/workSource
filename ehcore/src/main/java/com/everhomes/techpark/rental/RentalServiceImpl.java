@@ -344,6 +344,13 @@ public class RentalServiceImpl implements RentalService {
 		response.setSites(new ArrayList<RentalSiteDTO>());
 		RentalRule rentalRule = rentalProvider.getRentalRule(
 				cmd.getOwnerId(),cmd.getOwnerType(), cmd.getSiteType());
+		// 当没有预订规则时会报空指针，需要对该情况作检查 by lqs 20160617
+		if(rentalRule == null) {
+            LOGGER.error("Rental rule not found, cmd={}", cmd);
+            throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE, 
+                RentalServiceErrorCode.ERROR_RENTAL_RULE_NOT_FOUND, "Rental rule not found");
+		}
+		
 		response.setContactNum(rentalRule.getContactNum());
 		// 查sites
 		List<RentalSite> rentalSites = rentalProvider.findRentalSites(
