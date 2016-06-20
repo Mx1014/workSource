@@ -1,5 +1,5 @@
 // @formatter:off
-package com.everhomes.test.payment;
+package com.everhomes.test.junit.payment;
 
 import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
 
@@ -19,7 +19,9 @@ import org.junit.Test;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.rest.payment.CardOrderStatus;
+import com.everhomes.rest.payment.CardRechargeOrderDTO;
 import com.everhomes.rest.payment.CardRechargeStatus;
+import com.everhomes.rest.payment.CardUserDTO;
 import com.everhomes.rest.payment.PaidTypeStatus;
 import com.everhomes.rest.payment.SearchCardRechargeOrderCommand;
 import com.everhomes.rest.payment.SearchCardRechargeOrderRestResponse;
@@ -44,8 +46,8 @@ public class searchCardRechargeOrderTest extends BaseLoginAuthTestCase {
     
     @Test
     public void testSearchCardRechargeOrder() {
-    	String ownerType = "";
-        Long ownerId = 0L;
+    	String ownerType = "community";
+        Long ownerId = 240111044331051500L;
         String keyword = "";
         Long pageAnchor = null;
         Integer pageSize = 5;
@@ -84,14 +86,21 @@ public class searchCardRechargeOrderTest extends BaseLoginAuthTestCase {
     	
 		if (pageAnchor != null && pageAnchor != 0)
 			query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.CREATE_TIME.lt(new Timestamp(pageAnchor)));
+		if(StringUtils.isNotBlank(ownerType))
         	query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.OWNER_TYPE.eq(ownerType));
+        if(ownerId != null)
         	query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.OWNER_ID.eq(ownerId));
+        if(StringUtils.isNotBlank(keyword))
         	query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.USER_NAME.eq(keyword)
         			.or(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.MOBILE.eq(keyword)));
+        if(StringUtils.isNotBlank(paidType))
         	query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.PAID_TYPE.eq(paidType));
         
+        if(startDate != null)
         	query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.RECHARGE_TIME.gt(new Timestamp(startDate)));
+        if(endDate != null)
         	query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.RECHARGE_TIME.lt(new Timestamp(endDate)));
+        if(rechargeStatus != null)
         	query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.RECHARGE_STATUS.eq(rechargeStatus));
         
     	query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.PAY_STATUS.eq(CardOrderStatus.PAID.getCode()));
@@ -100,7 +109,8 @@ public class searchCardRechargeOrderTest extends BaseLoginAuthTestCase {
         
         List<EhPaymentCardRechargeOrders> result =  query.fetch().map(r -> 
 			ConvertHelper.convert(r, EhPaymentCardRechargeOrders.class));
-        assertEquals(5, result.size());
+        List<CardRechargeOrderDTO> list = response.getResponse().getRequests();
+        assertEquals(list.size(), result.size());
         
     }
     
@@ -111,7 +121,7 @@ public class searchCardRechargeOrderTest extends BaseLoginAuthTestCase {
     }
     
     protected void initCustomData() {
-        String cardIssuerFilePath = "data/json/paymentcard/3.4.x-test-data-cardissuer_160617.txt";
+        String cardIssuerFilePath = "data/json/3.4.x-test-data-cardissuer_160617.txt";
         String filePath = dbProvider.getAbsolutePathFromClassPath(cardIssuerFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
     }

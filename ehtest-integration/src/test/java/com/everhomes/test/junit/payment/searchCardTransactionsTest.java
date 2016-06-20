@@ -1,5 +1,5 @@
 // @formatter:off
-package com.everhomes.test.payment;
+package com.everhomes.test.junit.payment;
 
 
 import java.sql.Timestamp;
@@ -12,7 +12,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.everhomes.rest.payment.CardTransactionDTO;
 import com.everhomes.rest.payment.CardTransactionStatus;
+import com.everhomes.rest.payment.CardUserDTO;
 import com.everhomes.rest.payment.SearchCardTransactionsCommand;
 import com.everhomes.rest.payment.SearchCardTransactionsRestResponse;
 import com.everhomes.server.schema.Tables;
@@ -30,8 +32,8 @@ public class searchCardTransactionsTest extends BaseLoginAuthTestCase {
     
     @Test
     public void testSearchCardTransactions() {
-    	String ownerType = "";
-        Long ownerId = 0L;
+    	String ownerType = "community";
+        Long ownerId = 240111044331051500L;
         String keyword = "";
         Long pageAnchor = null;
         Integer pageSize = 5;
@@ -93,7 +95,10 @@ public class searchCardTransactionsTest extends BaseLoginAuthTestCase {
         
         List<EhPaymentCardTransactions> result =  query.fetch().map(r -> 
 			ConvertHelper.convert(r, EhPaymentCardTransactions.class));
-        assertEquals(1, result.size());
+        List<CardTransactionDTO> list = response.getResponse().getRequests();
+
+        
+        assertEquals(list.size(), result.size());
         
     }
     
@@ -104,7 +109,7 @@ public class searchCardTransactionsTest extends BaseLoginAuthTestCase {
     }
     
     protected void initCustomData() {
-        String cardIssuerFilePath = "data/json/paymentcard/3.4.x-test-data-cardissuer_160617.txt";
+        String cardIssuerFilePath = "data/json/3.4.x-test-data-cardissuer_160617.txt";
         String filePath = dbProvider.getAbsolutePathFromClassPath(cardIssuerFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
     }

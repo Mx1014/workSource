@@ -1,5 +1,5 @@
 // @formatter:off
-package com.everhomes.test.payment;
+package com.everhomes.test.junit.payment;
 
 import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
 
@@ -19,6 +19,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.everhomes.rest.payment.CardUserDTO;
 import com.everhomes.rest.payment.SearchCardUsersCommand;
 import com.everhomes.rest.payment.SearchCardUsersRestResponse;
 import com.everhomes.rest.user.GetUserInfoRestResponse;
@@ -47,8 +48,8 @@ public class searchCardUsersTest extends BaseLoginAuthTestCase {
     @Test
     public void testSearchCardUsers() {
     
-        String ownerType = "";
-        Long ownerId = 0L;
+        String ownerType = "community";
+        Long ownerId = 240111044331051500L;
         String keyword = "";
         Long pageAnchor = null;
         Integer pageSize = 5;
@@ -71,26 +72,31 @@ public class searchCardUsersTest extends BaseLoginAuthTestCase {
         assertNotNull("The reponse may not be null", response);
         assertTrue("response=" + 
             StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
-//        assertEquals("User should be in 0 namespace", namespaceId, response.getResponse().getNamespaceId());
-//        assertEquals("左邻李四", response.getResponse().getNickName());
         
         DSLContext context = dbProvider.getDslContext();
         SelectQuery<EhPaymentCardsRecord> query = context.selectQuery(Tables.EH_PAYMENT_CARDS);
 
     	if (pageAnchor != null && pageAnchor != 0)
     		query.addConditions(Tables.EH_PAYMENT_CARDS.CREATE_TIME.lt(new Timestamp(pageAnchor)));
-        query.addConditions(Tables.EH_PAYMENT_CARDS.OWNER_TYPE.eq(ownerType));
-        query.addConditions(Tables.EH_PAYMENT_CARDS.OWNER_ID.eq(ownerId));
-        query.addConditions(Tables.EH_PAYMENT_CARDS.USER_NAME.eq(keyword)
+    	if(StringUtils.isNotBlank(ownerType))
+        	query.addConditions(Tables.EH_PAYMENT_CARDS.OWNER_TYPE.eq(ownerType));
+        if(ownerId != null)
+        	query.addConditions(Tables.EH_PAYMENT_CARDS.OWNER_ID.eq(ownerId));
+     
+        if(StringUtils.isNotBlank(keyword))
+        	query.addConditions(Tables.EH_PAYMENT_CARDS.USER_NAME.eq(keyword)
         			.or(Tables.EH_PAYMENT_CARDS.MOBILE.eq(keyword)));
         query.addOrderBy(Tables.EH_PAYMENT_CARDS.CREATE_TIME.desc());
-        query.addLimit(pageSize);
+        if(pageSize != null)
+        	query.addLimit(pageSize);
         
         List<EhPaymentCards> result = new ArrayList<>();
 
         result = query.fetch().map(
         		r -> ConvertHelper.convert(r, EhPaymentCards.class));
-        assertEquals(2, result.size());
+        List<CardUserDTO> list = response.getResponse().getRequests();
+        assertNotNull(list);
+        assertEquals(list.size(), result.size());
         
     }
     
@@ -101,7 +107,7 @@ public class searchCardUsersTest extends BaseLoginAuthTestCase {
     }
     
     protected void initCustomData() {
-        String cardIssuerFilePath = "data/json/paymentcard/3.4.x-test-data-cardissuer_160617.txt";
+        String cardIssuerFilePath = "data/json/3.4.x-test-data-cardissuer_160617.txt";
         String filePath = dbProvider.getAbsolutePathFromClassPath(cardIssuerFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
     }

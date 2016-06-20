@@ -1,5 +1,5 @@
 // @formatter:off
-package com.everhomes.test.payment;
+package com.everhomes.test.junit.payment;
 
 
 import org.jooq.DSLContext;
@@ -62,7 +62,7 @@ public class updateCardRechargeOrderTest extends BaseLoginAuthTestCase {
     }
     
     protected void initCustomData() {
-        String cardIssuerFilePath = "data/json/paymentcard/3.4.x-test-data-cardissuer_160617.txt";
+        String cardIssuerFilePath = "data/json/3.4.x-test-data-cardissuer_160617.txt";
         String filePath = dbProvider.getAbsolutePathFromClassPath(cardIssuerFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
     }

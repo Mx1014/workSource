@@ -1,5 +1,5 @@
 // @formatter:off
-package com.everhomes.test.payment;
+package com.everhomes.test.junit.payment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +11,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.everhomes.rest.payment.CardIssuerDTO;
+import com.everhomes.rest.payment.CardUserDTO;
 import com.everhomes.rest.payment.ListCardIssuerRestResponse;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhPaymentCardIssuers;
@@ -25,8 +27,8 @@ public class CardIssuerTest extends BaseLoginAuthTestCase {
     
     @Test
     public void testListCardIssuer() {
-        String ownerType = "";
-        Long ownerId = 0L;
+        String ownerType = "community";
+        Long ownerId = 240111044331051500L;
         String userIdentifier = "12000000001";
         String plainTexPassword = "123456";
         // 登录时不传namepsace，默认为左邻域空间
@@ -65,6 +67,8 @@ public class CardIssuerTest extends BaseLoginAuthTestCase {
         			issuer.setStatus(r.getValue(Tables.EH_PAYMENT_CARD_ISSUERS.STATUS));
         			result.add(issuer);
         		});
+        List<CardIssuerDTO> list = response.getResponse();
+        assertEquals(list.size(), result.size());
         assertEquals(2, result.size());
         
     }
@@ -104,7 +108,7 @@ public class CardIssuerTest extends BaseLoginAuthTestCase {
     }
     
     protected void initCustomData() {
-        String cardIssuerFilePath = "data/json/paymentcard/3.4.x-test-data-cardissuer_160617.txt";
+        String cardIssuerFilePath = "data/json/3.4.x-test-data-cardissuer_160617.txt";
         String filePath = dbProvider.getAbsolutePathFromClassPath(cardIssuerFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
     }
