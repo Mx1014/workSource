@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhNews extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhNewsRecord> {
 
-	private static final long serialVersionUID = 243204176;
+	private static final long serialVersionUID = -1197544784;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_news</code>
@@ -32,29 +32,34 @@ public class EhNews extends org.jooq.impl.TableImpl<com.everhomes.server.schema.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "");
 
 	/**
-	 * The column <code>ehcore.eh_news.owner_uid</code>. owner user id
+	 * The column <code>ehcore.eh_news.namespace_id</code>. namespace id
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.Long> OWNER_UID = createField("owner_uid", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "owner user id");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.Integer> NAMESPACE_ID = createField("namespace_id", org.jooq.impl.SQLDataType.INTEGER.nullable(false).defaulted(true), this, "namespace id");
 
 	/**
-	 * The column <code>ehcore.eh_news.source_type</code>. the source type who refers the link, 0: none, 1: post
+	 * The column <code>ehcore.eh_news.owner_type</code>. ORGANIZATION
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.Byte> SOURCE_TYPE = createField("source_type", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "the source type who refers the link, 0: none, 1: post");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.String> OWNER_TYPE = createField("owner_type", org.jooq.impl.SQLDataType.VARCHAR.length(32).defaulted(true), this, "ORGANIZATION");
 
 	/**
-	 * The column <code>ehcore.eh_news.source_id</code>. the source id depends on source type
+	 * The column <code>ehcore.eh_news.owner_id</code>. organization_id
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.Long> SOURCE_ID = createField("source_id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "the source id depends on source type");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.Long> OWNER_ID = createField("owner_id", org.jooq.impl.SQLDataType.BIGINT.defaulted(true), this, "organization_id");
 
 	/**
-	 * The column <code>ehcore.eh_news.title</code>.
+	 * The column <code>ehcore.eh_news.post_id</code>. post id
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.String> TITLE = createField("title", org.jooq.impl.SQLDataType.VARCHAR.length(1024), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.Long> POST_ID = createField("post_id", org.jooq.impl.SQLDataType.BIGINT.defaulted(true), this, "post id");
 
 	/**
-	 * The column <code>ehcore.eh_news.author</code>.
+	 * The column <code>ehcore.eh_news.title</code>. title
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.String> AUTHOR = createField("author", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.String> TITLE = createField("title", org.jooq.impl.SQLDataType.VARCHAR.length(1024), this, "title");
+
+	/**
+	 * The column <code>ehcore.eh_news.author</code>. author
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.String> AUTHOR = createField("author", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "author");
 
 	/**
 	 * The column <code>ehcore.eh_news.cover_uri</code>. cover image uri
@@ -77,14 +82,29 @@ public class EhNews extends org.jooq.impl.TableImpl<com.everhomes.server.schema.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.String> CONTENT_ABSTRACT = createField("content_abstract", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "abstract of content data");
 
 	/**
-	 * The column <code>ehcore.eh_news.original</code>. where the news comes from
+	 * The column <code>ehcore.eh_news.source_desc</code>. where the news comes from
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.String> ORIGINAL = createField("original", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "where the news comes from");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.String> SOURCE_DESC = createField("source_desc", org.jooq.impl.SQLDataType.VARCHAR.length(128), this, "where the news comes from");
 
 	/**
-	 * The column <code>ehcore.eh_news.original_link</code>. the url of original
+	 * The column <code>ehcore.eh_news.source_url</code>. the url of source
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.String> ORIGINAL_LINK = createField("original_link", org.jooq.impl.SQLDataType.VARCHAR.length(256), this, "the url of original");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.String> SOURCE_URL = createField("source_url", org.jooq.impl.SQLDataType.VARCHAR.length(256), this, "the url of source");
+
+	/**
+	 * The column <code>ehcore.eh_news.publish_time</code>. the time when the news was created, now equals to create_time
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.sql.Timestamp> PUBLISH_TIME = createField("publish_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "the time when the news was created, now equals to create_time");
+
+	/**
+	 * The column <code>ehcore.eh_news.top_index</code>. if has this value, go to first, order from big to small
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.Long> TOP_INDEX = createField("top_index", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "if has this value, go to first, order from big to small");
+
+	/**
+	 * The column <code>ehcore.eh_news.top_flag</code>. whether it is top
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.Byte> TOP_FLAG = createField("top_flag", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "whether it is top");
 
 	/**
 	 * The column <code>ehcore.eh_news.status</code>. 0: inactive, 1: waitingForConfirmation, 2: active
@@ -92,29 +112,24 @@ public class EhNews extends org.jooq.impl.TableImpl<com.everhomes.server.schema.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.Byte> STATUS = createField("status", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: inactive, 1: waitingForConfirmation, 2: active");
 
 	/**
-	 * The column <code>ehcore.eh_news.release_time</code>. the time when the news was created, now equals to create_time
+	 * The column <code>ehcore.eh_news.creator_uid</code>. news creator uid
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.sql.Timestamp> RELEASE_TIME = createField("release_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "the time when the news was created, now equals to create_time");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.Long> CREATOR_UID = createField("creator_uid", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "news creator uid");
 
 	/**
-	 * The column <code>ehcore.eh_news.create_time</code>.
+	 * The column <code>ehcore.eh_news.create_time</code>. create time
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "create time");
 
 	/**
-	 * The column <code>ehcore.eh_news.deleter_uid</code>. deleter id
+	 * The column <code>ehcore.eh_news.deleter_uid</code>. deletor id
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.Long> DELETER_UID = createField("deleter_uid", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "deleter id");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.Long> DELETER_UID = createField("deleter_uid", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "deletor id");
 
 	/**
 	 * The column <code>ehcore.eh_news.delete_time</code>. mark-deletion policy. historic data may be useful
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.sql.Timestamp> DELETE_TIME = createField("delete_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "mark-deletion policy. historic data may be useful");
-
-	/**
-	 * The column <code>ehcore.eh_news.sort_index</code>. if has this value, go to first, order from big to small
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.Long> SORT_INDEX = createField("sort_index", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "if has this value, go to first, order from big to small");
 
 	/**
 	 * Create a <code>ehcore.eh_news</code> table reference

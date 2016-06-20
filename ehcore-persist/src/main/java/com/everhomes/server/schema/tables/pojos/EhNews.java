@@ -11,67 +11,76 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhNews implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1812631466;
+	private static final long serialVersionUID = -358114900;
 
 	private java.lang.Long     id;
-	private java.lang.Long     ownerUid;
-	private java.lang.Byte     sourceType;
-	private java.lang.Long     sourceId;
+	private java.lang.Integer  namespaceId;
+	private java.lang.String   ownerType;
+	private java.lang.Long     ownerId;
+	private java.lang.Long     postId;
 	private java.lang.String   title;
 	private java.lang.String   author;
 	private java.lang.String   coverUri;
 	private java.lang.String   contentType;
 	private java.lang.String   content;
 	private java.lang.String   contentAbstract;
-	private java.lang.String   original;
-	private java.lang.String   originalLink;
+	private java.lang.String   sourceDesc;
+	private java.lang.String   sourceUrl;
+	private java.sql.Timestamp publishTime;
+	private java.lang.Long     topIndex;
+	private java.lang.Byte     topFlag;
 	private java.lang.Byte     status;
-	private java.sql.Timestamp releaseTime;
+	private java.lang.Long     creatorUid;
 	private java.sql.Timestamp createTime;
 	private java.lang.Long     deleterUid;
 	private java.sql.Timestamp deleteTime;
-	private java.lang.Long     sortIndex;
 
 	public EhNews() {}
 
 	public EhNews(
 		java.lang.Long     id,
-		java.lang.Long     ownerUid,
-		java.lang.Byte     sourceType,
-		java.lang.Long     sourceId,
+		java.lang.Integer  namespaceId,
+		java.lang.String   ownerType,
+		java.lang.Long     ownerId,
+		java.lang.Long     postId,
 		java.lang.String   title,
 		java.lang.String   author,
 		java.lang.String   coverUri,
 		java.lang.String   contentType,
 		java.lang.String   content,
 		java.lang.String   contentAbstract,
-		java.lang.String   original,
-		java.lang.String   originalLink,
+		java.lang.String   sourceDesc,
+		java.lang.String   sourceUrl,
+		java.sql.Timestamp publishTime,
+		java.lang.Long     topIndex,
+		java.lang.Byte     topFlag,
 		java.lang.Byte     status,
-		java.sql.Timestamp releaseTime,
+		java.lang.Long     creatorUid,
 		java.sql.Timestamp createTime,
 		java.lang.Long     deleterUid,
-		java.sql.Timestamp deleteTime,
-		java.lang.Long     sortIndex
+		java.sql.Timestamp deleteTime
 	) {
 		this.id = id;
-		this.ownerUid = ownerUid;
-		this.sourceType = sourceType;
-		this.sourceId = sourceId;
+		this.namespaceId = namespaceId;
+		this.ownerType = ownerType;
+		this.ownerId = ownerId;
+		this.postId = postId;
 		this.title = title;
 		this.author = author;
 		this.coverUri = coverUri;
 		this.contentType = contentType;
 		this.content = content;
 		this.contentAbstract = contentAbstract;
-		this.original = original;
-		this.originalLink = originalLink;
+		this.sourceDesc = sourceDesc;
+		this.sourceUrl = sourceUrl;
+		this.publishTime = publishTime;
+		this.topIndex = topIndex;
+		this.topFlag = topFlag;
 		this.status = status;
-		this.releaseTime = releaseTime;
+		this.creatorUid = creatorUid;
 		this.createTime = createTime;
 		this.deleterUid = deleterUid;
 		this.deleteTime = deleteTime;
-		this.sortIndex = sortIndex;
 	}
 
 	public java.lang.Long getId() {
@@ -82,28 +91,36 @@ public class EhNews implements java.io.Serializable {
 		this.id = id;
 	}
 
-	public java.lang.Long getOwnerUid() {
-		return this.ownerUid;
+	public java.lang.Integer getNamespaceId() {
+		return this.namespaceId;
 	}
 
-	public void setOwnerUid(java.lang.Long ownerUid) {
-		this.ownerUid = ownerUid;
+	public void setNamespaceId(java.lang.Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
-	public java.lang.Byte getSourceType() {
-		return this.sourceType;
+	public java.lang.String getOwnerType() {
+		return this.ownerType;
 	}
 
-	public void setSourceType(java.lang.Byte sourceType) {
-		this.sourceType = sourceType;
+	public void setOwnerType(java.lang.String ownerType) {
+		this.ownerType = ownerType;
 	}
 
-	public java.lang.Long getSourceId() {
-		return this.sourceId;
+	public java.lang.Long getOwnerId() {
+		return this.ownerId;
 	}
 
-	public void setSourceId(java.lang.Long sourceId) {
-		this.sourceId = sourceId;
+	public void setOwnerId(java.lang.Long ownerId) {
+		this.ownerId = ownerId;
+	}
+
+	public java.lang.Long getPostId() {
+		return this.postId;
+	}
+
+	public void setPostId(java.lang.Long postId) {
+		this.postId = postId;
 	}
 
 	public java.lang.String getTitle() {
@@ -154,20 +171,44 @@ public class EhNews implements java.io.Serializable {
 		this.contentAbstract = contentAbstract;
 	}
 
-	public java.lang.String getOriginal() {
-		return this.original;
+	public java.lang.String getSourceDesc() {
+		return this.sourceDesc;
 	}
 
-	public void setOriginal(java.lang.String original) {
-		this.original = original;
+	public void setSourceDesc(java.lang.String sourceDesc) {
+		this.sourceDesc = sourceDesc;
 	}
 
-	public java.lang.String getOriginalLink() {
-		return this.originalLink;
+	public java.lang.String getSourceUrl() {
+		return this.sourceUrl;
 	}
 
-	public void setOriginalLink(java.lang.String originalLink) {
-		this.originalLink = originalLink;
+	public void setSourceUrl(java.lang.String sourceUrl) {
+		this.sourceUrl = sourceUrl;
+	}
+
+	public java.sql.Timestamp getPublishTime() {
+		return this.publishTime;
+	}
+
+	public void setPublishTime(java.sql.Timestamp publishTime) {
+		this.publishTime = publishTime;
+	}
+
+	public java.lang.Long getTopIndex() {
+		return this.topIndex;
+	}
+
+	public void setTopIndex(java.lang.Long topIndex) {
+		this.topIndex = topIndex;
+	}
+
+	public java.lang.Byte getTopFlag() {
+		return this.topFlag;
+	}
+
+	public void setTopFlag(java.lang.Byte topFlag) {
+		this.topFlag = topFlag;
 	}
 
 	public java.lang.Byte getStatus() {
@@ -178,12 +219,12 @@ public class EhNews implements java.io.Serializable {
 		this.status = status;
 	}
 
-	public java.sql.Timestamp getReleaseTime() {
-		return this.releaseTime;
+	public java.lang.Long getCreatorUid() {
+		return this.creatorUid;
 	}
 
-	public void setReleaseTime(java.sql.Timestamp releaseTime) {
-		this.releaseTime = releaseTime;
+	public void setCreatorUid(java.lang.Long creatorUid) {
+		this.creatorUid = creatorUid;
 	}
 
 	public java.sql.Timestamp getCreateTime() {
@@ -208,13 +249,5 @@ public class EhNews implements java.io.Serializable {
 
 	public void setDeleteTime(java.sql.Timestamp deleteTime) {
 		this.deleteTime = deleteTime;
-	}
-
-	public java.lang.Long getSortIndex() {
-		return this.sortIndex;
-	}
-
-	public void setSortIndex(java.lang.Long sortIndex) {
-		this.sortIndex = sortIndex;
 	}
 }
