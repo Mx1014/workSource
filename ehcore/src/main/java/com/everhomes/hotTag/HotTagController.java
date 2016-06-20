@@ -40,7 +40,7 @@ public class HotTagController extends ControllerBase {
     	
     	List<TagDTO> tags = hotTagService.listHotTag(cmd);
         
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(tags);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

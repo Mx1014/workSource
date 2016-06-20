@@ -50,7 +50,7 @@ public class HotTagProviderImpl implements HotTagProvider {
 		SelectQuery<EhHotTagsRecord> query = context.selectQuery(Tables.EH_HOT_TAGS);
 		query.addConditions(Tables.EH_HOT_TAGS.SERVICE_TYPE.eq(serviceType));
 		
-		query.addConditions(Tables.EH_HOT_TAGS.STATUS.eq(QualityStandardStatus.ACTIVE.getCode()));
+		query.addConditions(Tables.EH_HOT_TAGS.STATUS.eq(HotTagStatus.ACTIVE.getCode()));
 		query.addOrderBy(Tables.EH_HOT_TAGS.DEFAULT_ORDER.desc());
 		query.addLimit(pageSize);
 		
