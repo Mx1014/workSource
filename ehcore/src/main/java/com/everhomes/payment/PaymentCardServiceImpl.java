@@ -413,7 +413,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     		if(pageSize != null && list.size() != pageSize){
         		response.setNextPageAnchor(null);
         	}else{
-        		response.setNextPageAnchor(list.get(list.size()-1).getRechargeTime().getTime());
+        		response.setNextPageAnchor(list.get(list.size()-1).getCreateTime().getTime());
         	}
     	}
     	
@@ -543,7 +543,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 			tempRow.createCell(3).setCellValue(order.getAmount().doubleValue());
 			tempRow.createCell(4).setCellValue(order.getRechargeTime()!=null?datetimeSF.format(order.getRechargeTime()):"");
 			tempRow.createCell(5).setCellValue(order.getPaidType());
-			tempRow.createCell(6).setCellValue(order.getRechargeStatus());
+			tempRow.createCell(6).setCellValue(CardOrderStatus.fromCode(order.getRechargeStatus()).toString());
 		}
 		ByteArrayOutputStream out = null;
 		try {
@@ -598,12 +598,12 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 			tempRow.createCell(0).setCellValue(transaction.getMobile());
 			tempRow.createCell(1).setCellValue(transaction.getUserName());
 			tempRow.createCell(2).setCellValue(transaction.getCardNo());
-			tempRow.createCell(3).setCellValue("");
+			tempRow.createCell(3).setCellValue(transaction.getConsumeType());
 			tempRow.createCell(4).setCellValue(transaction.getItemName());
-			tempRow.createCell(5).setCellValue(transaction.getId());
+			tempRow.createCell(5).setCellValue(transaction.getOrderNo());
 			tempRow.createCell(6).setCellValue(datetimeSF.format(transaction.getTransactionTime()));
 			tempRow.createCell(7).setCellValue(transaction.getAmount().doubleValue());
-			tempRow.createCell(8).setCellValue(transaction.getStatus());
+			tempRow.createCell(8).setCellValue(CardTransactionStatus.fromCode(transaction.getStatus()).toString());
 		}
 		ByteArrayOutputStream out = null;
 		try {
