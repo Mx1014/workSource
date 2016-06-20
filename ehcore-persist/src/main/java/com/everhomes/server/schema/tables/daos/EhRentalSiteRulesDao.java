@@ -200,4 +200,11 @@ public class EhRentalSiteRulesDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchByLaunchPadItemId(java.lang.Long... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES.LAUNCH_PAD_ITEM_ID, values);
 	}
+
+	/**
+	 * Fetch records that have <code>site_number IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchBySiteNumber(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES.SITE_NUMBER, values);
+	}
 }

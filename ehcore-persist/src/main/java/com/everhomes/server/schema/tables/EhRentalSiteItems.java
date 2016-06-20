@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteItems extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalSiteItemsRecord> {
 
-	private static final long serialVersionUID = 622279081;
+	private static final long serialVersionUID = 1483583390;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_site_items</code>
@@ -85,6 +85,11 @@ public class EhRentalSiteItems extends org.jooq.impl.TableImpl<com.everhomes.ser
 	 * The column <code>ehcore.eh_rental_site_items.img_uri</code>. 图片uri
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteItemsRecord, java.lang.String> IMG_URI = createField("img_uri", org.jooq.impl.SQLDataType.VARCHAR.length(1024), this, "图片uri");
+
+	/**
+	 * The column <code>ehcore.eh_rental_site_items.item_type</code>. 1购买型 2租用型
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteItemsRecord, java.lang.Byte> ITEM_TYPE = createField("item_type", org.jooq.impl.SQLDataType.TINYINT, this, "1购买型 2租用型");
 
 	/**
 	 * Create a <code>ehcore.eh_rental_site_items</code> table reference

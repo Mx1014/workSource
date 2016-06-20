@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteRules implements java.io.Serializable {
 
-	private static final long serialVersionUID = 738814871;
+	private static final long serialVersionUID = 1021954811;
 
 	private java.lang.Long       id;
 	private java.lang.Long       rentalSiteId;
@@ -36,6 +36,7 @@ public class EhRentalSiteRules implements java.io.Serializable {
 	private java.lang.Byte       multiUnit;
 	private java.lang.Byte       multiTimeInterval;
 	private java.lang.Long       launchPadItemId;
+	private java.lang.Integer    siteNumber;
 
 	public EhRentalSiteRules() {}
 
@@ -62,7 +63,8 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		java.lang.Byte       autoAssign,
 		java.lang.Byte       multiUnit,
 		java.lang.Byte       multiTimeInterval,
-		java.lang.Long       launchPadItemId
+		java.lang.Long       launchPadItemId,
+		java.lang.Integer    siteNumber
 	) {
 		this.id = id;
 		this.rentalSiteId = rentalSiteId;
@@ -87,6 +89,7 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		this.multiUnit = multiUnit;
 		this.multiTimeInterval = multiTimeInterval;
 		this.launchPadItemId = launchPadItemId;
+		this.siteNumber = siteNumber;
 	}
 
 	public java.lang.Long getId() {
@@ -271,5 +274,13 @@ public class EhRentalSiteRules implements java.io.Serializable {
 
 	public void setLaunchPadItemId(java.lang.Long launchPadItemId) {
 		this.launchPadItemId = launchPadItemId;
+	}
+
+	public java.lang.Integer getSiteNumber() {
+		return this.siteNumber;
+	}
+
+	public void setSiteNumber(java.lang.Integer siteNumber) {
+		this.siteNumber = siteNumber;
 	}
 }

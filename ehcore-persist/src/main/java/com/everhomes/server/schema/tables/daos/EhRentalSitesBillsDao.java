@@ -109,4 +109,46 @@ public class EhRentalSitesBillsDao extends org.jooq.impl.DAOImpl<com.everhomes.s
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSitesBills> fetchByLaunchPadItemId(java.lang.Long... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalSitesBills.EH_RENTAL_SITES_BILLS.LAUNCH_PAD_ITEM_ID, values);
 	}
+
+	/**
+	 * Fetch records that have <code>begin_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSitesBills> fetchByBeginTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalSitesBills.EH_RENTAL_SITES_BILLS.BEGIN_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>end_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSitesBills> fetchByEndTime(java.sql.Timestamp... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalSitesBills.EH_RENTAL_SITES_BILLS.END_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>price IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSitesBills> fetchByPrice(java.math.BigDecimal... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalSitesBills.EH_RENTAL_SITES_BILLS.PRICE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>site_rental_date IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSitesBills> fetchBySiteRentalDate(java.sql.Date... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalSitesBills.EH_RENTAL_SITES_BILLS.SITE_RENTAL_DATE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>amorpm IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSitesBills> fetchByAmorpm(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalSitesBills.EH_RENTAL_SITES_BILLS.AMORPM, values);
+	}
+
+	/**
+	 * Fetch records that have <code>rental_step IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSitesBills> fetchByRentalStep(java.lang.Integer... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalSitesBills.EH_RENTAL_SITES_BILLS.RENTAL_STEP, values);
+	}
 }

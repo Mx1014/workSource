@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSitesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhRentalSitesRecord> {
 
-	private static final long serialVersionUID = -984004259;
+	private static final long serialVersionUID = 629118070;
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_sites.id</code>. id
@@ -406,17 +406,17 @@ public class EhRentalSitesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_sites.rental_step</code>. how many time_step must be rental every time
+	 * Setter for <code>ehcore.eh_rental_sites.rental_step</code>. 按小时预约：最小单元格是多少小时，浮点型
 	 */
-	public void setRentalStep(java.lang.Integer value) {
+	public void setRentalStep(java.lang.Double value) {
 		setValue(28, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_sites.rental_step</code>. how many time_step must be rental every time
+	 * Getter for <code>ehcore.eh_rental_sites.rental_step</code>. 按小时预约：最小单元格是多少小时，浮点型
 	 */
-	public java.lang.Integer getRentalStep() {
-		return (java.lang.Integer) getValue(28);
+	public java.lang.Double getRentalStep() {
+		return (java.lang.Double) getValue(28);
 	}
 
 	/**
@@ -629,6 +629,34 @@ public class EhRentalSitesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 		return (java.lang.Long) getValue(43);
 	}
 
+	/**
+	 * Setter for <code>ehcore.eh_rental_sites.day_begin_time</code>. 对于按小时预定的每天开始时间
+	 */
+	public void setDayBeginTime(java.sql.Time value) {
+		setValue(44, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_rental_sites.day_begin_time</code>. 对于按小时预定的每天开始时间
+	 */
+	public java.sql.Time getDayBeginTime() {
+		return (java.sql.Time) getValue(44);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_rental_sites.day_end_time</code>. 对于按小时预定的每天结束时间
+	 */
+	public void setDayEndTime(java.sql.Time value) {
+		setValue(45, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_rental_sites.day_end_time</code>. 对于按小时预定的每天结束时间
+	 */
+	public java.sql.Time getDayEndTime() {
+		return (java.sql.Time) getValue(45);
+	}
+
 	// -------------------------------------------------------------------------
 	// Primary key information
 	// -------------------------------------------------------------------------
@@ -655,7 +683,7 @@ public class EhRentalSitesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 	/**
 	 * Create a detached, initialised EhRentalSitesRecord
 	 */
-	public EhRentalSitesRecord(java.lang.Long id, java.lang.Long parentId, java.lang.String siteName, java.lang.Byte siteType2, java.lang.String buildingName, java.lang.Long buildingId, java.lang.String address, java.lang.Long addressId, java.lang.String spec, java.lang.String ownCompanyName, java.lang.String contactName, java.lang.String contactPhonenum, java.lang.String contactPhonenum2, java.lang.String contactPhonenum3, java.lang.Byte status, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.String introduction, java.lang.String notice, java.lang.Long chargeUid, java.lang.String coverUri, java.lang.Byte discountType, java.math.BigDecimal fullPrice, java.math.BigDecimal cutPrice, java.lang.Double discountRatio, java.lang.Byte rentalType, java.lang.Integer rentalStep, java.lang.Byte exclusiveFlag, java.lang.Byte autoAssign, java.lang.Byte multiUnit, java.lang.Byte multiTimeInterval, java.lang.Byte cancelFlag, java.lang.Byte needPay, java.lang.Long launchPadItemId, java.lang.Long cancelTime, java.lang.Long rentalStartTime, java.lang.Long rentalEndTime, java.lang.Byte refundFlag, java.lang.Integer refundRatio, java.lang.Double longitude, java.lang.Double latitude, java.lang.Long organizationId) {
+	public EhRentalSitesRecord(java.lang.Long id, java.lang.Long parentId, java.lang.String siteName, java.lang.Byte siteType2, java.lang.String buildingName, java.lang.Long buildingId, java.lang.String address, java.lang.Long addressId, java.lang.String spec, java.lang.String ownCompanyName, java.lang.String contactName, java.lang.String contactPhonenum, java.lang.String contactPhonenum2, java.lang.String contactPhonenum3, java.lang.Byte status, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.String introduction, java.lang.String notice, java.lang.Long chargeUid, java.lang.String coverUri, java.lang.Byte discountType, java.math.BigDecimal fullPrice, java.math.BigDecimal cutPrice, java.lang.Double discountRatio, java.lang.Byte rentalType, java.lang.Double rentalStep, java.lang.Byte exclusiveFlag, java.lang.Byte autoAssign, java.lang.Byte multiUnit, java.lang.Byte multiTimeInterval, java.lang.Byte cancelFlag, java.lang.Byte needPay, java.lang.Long launchPadItemId, java.lang.Long cancelTime, java.lang.Long rentalStartTime, java.lang.Long rentalEndTime, java.lang.Byte refundFlag, java.lang.Integer refundRatio, java.lang.Double longitude, java.lang.Double latitude, java.lang.Long organizationId, java.sql.Time dayBeginTime, java.sql.Time dayEndTime) {
 		super(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES);
 
 		setValue(0, id);
@@ -702,5 +730,7 @@ public class EhRentalSitesRecord extends org.jooq.impl.UpdatableRecordImpl<com.e
 		setValue(41, longitude);
 		setValue(42, latitude);
 		setValue(43, organizationId);
+		setValue(44, dayBeginTime);
+		setValue(45, dayEndTime);
 	}
 }

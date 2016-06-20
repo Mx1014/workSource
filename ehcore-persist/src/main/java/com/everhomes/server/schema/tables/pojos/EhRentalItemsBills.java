@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalItemsBills implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1807506351;
+	private static final long serialVersionUID = -2104607547;
 
 	private java.lang.Long       id;
 	private java.lang.Long       rentalBillId;
@@ -23,6 +23,9 @@ public class EhRentalItemsBills implements java.io.Serializable {
 	private java.lang.Long       operatorUid;
 	private java.sql.Timestamp   operateTime;
 	private java.lang.Long       launchPadItemId;
+	private java.lang.String     itemName;
+	private java.lang.String     imgUri;
+	private java.lang.Byte       itemType;
 
 	public EhRentalItemsBills() {}
 
@@ -36,7 +39,10 @@ public class EhRentalItemsBills implements java.io.Serializable {
 		java.sql.Timestamp   createTime,
 		java.lang.Long       operatorUid,
 		java.sql.Timestamp   operateTime,
-		java.lang.Long       launchPadItemId
+		java.lang.Long       launchPadItemId,
+		java.lang.String     itemName,
+		java.lang.String     imgUri,
+		java.lang.Byte       itemType
 	) {
 		this.id = id;
 		this.rentalBillId = rentalBillId;
@@ -48,6 +54,9 @@ public class EhRentalItemsBills implements java.io.Serializable {
 		this.operatorUid = operatorUid;
 		this.operateTime = operateTime;
 		this.launchPadItemId = launchPadItemId;
+		this.itemName = itemName;
+		this.imgUri = imgUri;
+		this.itemType = itemType;
 	}
 
 	public java.lang.Long getId() {
@@ -128,5 +137,29 @@ public class EhRentalItemsBills implements java.io.Serializable {
 
 	public void setLaunchPadItemId(java.lang.Long launchPadItemId) {
 		this.launchPadItemId = launchPadItemId;
+	}
+
+	public java.lang.String getItemName() {
+		return this.itemName;
+	}
+
+	public void setItemName(java.lang.String itemName) {
+		this.itemName = itemName;
+	}
+
+	public java.lang.String getImgUri() {
+		return this.imgUri;
+	}
+
+	public void setImgUri(java.lang.String imgUri) {
+		this.imgUri = imgUri;
+	}
+
+	public java.lang.Byte getItemType() {
+		return this.itemType;
+	}
+
+	public void setItemType(java.lang.Byte itemType) {
+		this.itemType = itemType;
 	}
 }

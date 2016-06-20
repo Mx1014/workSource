@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteRulesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord> {
 
-	private static final long serialVersionUID = -400720990;
+	private static final long serialVersionUID = -856130623;
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_site_rules.id</code>. id
@@ -335,6 +335,20 @@ public class EhRentalSiteRulesRecord extends org.jooq.impl.UpdatableRecordImpl<c
 		return (java.lang.Long) getValue(22);
 	}
 
+	/**
+	 * Setter for <code>ehcore.eh_rental_site_rules.site_number</code>. 场所号
+	 */
+	public void setSiteNumber(java.lang.Integer value) {
+		setValue(23, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_rental_site_rules.site_number</code>. 场所号
+	 */
+	public java.lang.Integer getSiteNumber() {
+		return (java.lang.Integer) getValue(23);
+	}
+
 	// -------------------------------------------------------------------------
 	// Primary key information
 	// -------------------------------------------------------------------------
@@ -361,7 +375,7 @@ public class EhRentalSiteRulesRecord extends org.jooq.impl.UpdatableRecordImpl<c
 	/**
 	 * Create a detached, initialised EhRentalSiteRulesRecord
 	 */
-	public EhRentalSiteRulesRecord(java.lang.Long id, java.lang.Long rentalSiteId, java.lang.Byte rentalType, java.lang.Byte amorpm, java.lang.Integer rentalStep, java.sql.Timestamp beginTime, java.sql.Timestamp endTime, java.lang.Double counts, java.lang.Double unit, java.math.BigDecimal price, java.sql.Date siteRentalDate, java.lang.Byte status, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.Double timeStep, java.math.BigDecimal originalPrice, java.lang.Byte exclusiveFlag, java.lang.Byte autoAssign, java.lang.Byte multiUnit, java.lang.Byte multiTimeInterval, java.lang.Long launchPadItemId) {
+	public EhRentalSiteRulesRecord(java.lang.Long id, java.lang.Long rentalSiteId, java.lang.Byte rentalType, java.lang.Byte amorpm, java.lang.Integer rentalStep, java.sql.Timestamp beginTime, java.sql.Timestamp endTime, java.lang.Double counts, java.lang.Double unit, java.math.BigDecimal price, java.sql.Date siteRentalDate, java.lang.Byte status, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.Double timeStep, java.math.BigDecimal originalPrice, java.lang.Byte exclusiveFlag, java.lang.Byte autoAssign, java.lang.Byte multiUnit, java.lang.Byte multiTimeInterval, java.lang.Long launchPadItemId, java.lang.Integer siteNumber) {
 		super(com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES);
 
 		setValue(0, id);
@@ -387,5 +401,6 @@ public class EhRentalSiteRulesRecord extends org.jooq.impl.UpdatableRecordImpl<c
 		setValue(20, multiUnit);
 		setValue(21, multiTimeInterval);
 		setValue(22, launchPadItemId);
+		setValue(23, siteNumber);
 	}
 }

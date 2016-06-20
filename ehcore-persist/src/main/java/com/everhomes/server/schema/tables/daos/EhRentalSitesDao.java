@@ -239,7 +239,7 @@ public class EhRentalSitesDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	/**
 	 * Fetch records that have <code>rental_step IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchByRentalStep(java.lang.Integer... values) {
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchByRentalStep(java.lang.Double... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.RENTAL_STEP, values);
 	}
 
@@ -346,5 +346,19 @@ public class EhRentalSitesDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchByOrganizationId(java.lang.Long... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.ORGANIZATION_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>day_begin_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchByDayBeginTime(java.sql.Time... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.DAY_BEGIN_TIME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>day_end_time IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchByDayEndTime(java.sql.Time... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.DAY_END_TIME, values);
 	}
 }

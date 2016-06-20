@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSites extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalSitesRecord> {
 
-	private static final long serialVersionUID = -1306914106;
+	private static final long serialVersionUID = -1261876580;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_sites</code>
@@ -167,9 +167,9 @@ public class EhRentalSites extends org.jooq.impl.TableImpl<com.everhomes.server.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.Byte> RENTAL_TYPE = createField("rental_type", org.jooq.impl.SQLDataType.TINYINT, this, "0: as hour:min 1-as half day 2-as day 3-支持晚上的半天");
 
 	/**
-	 * The column <code>ehcore.eh_rental_sites.rental_step</code>. how many time_step must be rental every time
+	 * The column <code>ehcore.eh_rental_sites.rental_step</code>. 按小时预约：最小单元格是多少小时，浮点型
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.Integer> RENTAL_STEP = createField("rental_step", org.jooq.impl.SQLDataType.INTEGER, this, "how many time_step must be rental every time");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.Double> RENTAL_STEP = createField("rental_step", org.jooq.impl.SQLDataType.DOUBLE, this, "按小时预约：最小单元格是多少小时，浮点型");
 
 	/**
 	 * The column <code>ehcore.eh_rental_sites.exclusive_flag</code>. 是否为独占资源0否 1 是
@@ -245,6 +245,16 @@ public class EhRentalSites extends org.jooq.impl.TableImpl<com.everhomes.server.
 	 * The column <code>ehcore.eh_rental_sites.organization_id</code>. 所属公司的ID
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.Long> ORGANIZATION_ID = createField("organization_id", org.jooq.impl.SQLDataType.BIGINT, this, "所属公司的ID");
+
+	/**
+	 * The column <code>ehcore.eh_rental_sites.day_begin_time</code>. 对于按小时预定的每天开始时间
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.sql.Time> DAY_BEGIN_TIME = createField("day_begin_time", org.jooq.impl.SQLDataType.TIME, this, "对于按小时预定的每天开始时间");
+
+	/**
+	 * The column <code>ehcore.eh_rental_sites.day_end_time</code>. 对于按小时预定的每天结束时间
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.sql.Time> DAY_END_TIME = createField("day_end_time", org.jooq.impl.SQLDataType.TIME, this, "对于按小时预定的每天结束时间");
 
 	/**
 	 * Create a <code>ehcore.eh_rental_sites</code> table reference

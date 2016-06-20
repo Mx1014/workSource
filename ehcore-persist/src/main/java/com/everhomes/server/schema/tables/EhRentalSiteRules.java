@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteRules extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord> {
 
-	private static final long serialVersionUID = -1976451781;
+	private static final long serialVersionUID = 1666876440;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_site_rules</code>
@@ -140,6 +140,11 @@ public class EhRentalSiteRules extends org.jooq.impl.TableImpl<com.everhomes.ser
 	 * The column <code>ehcore.eh_rental_site_rules.launch_pad_item_id</code>. 广场图标id
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Long> LAUNCH_PAD_ITEM_ID = createField("launch_pad_item_id", org.jooq.impl.SQLDataType.BIGINT, this, "广场图标id");
+
+	/**
+	 * The column <code>ehcore.eh_rental_site_rules.site_number</code>. 场所号
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Integer> SITE_NUMBER = createField("site_number", org.jooq.impl.SQLDataType.INTEGER, this, "场所号");
 
 	/**
 	 * Create a <code>ehcore.eh_rental_site_rules</code> table reference

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSitesBills implements java.io.Serializable {
 
-	private static final long serialVersionUID = 637365467;
+	private static final long serialVersionUID = 47431083;
 
 	private java.lang.Long       id;
 	private java.lang.Long       rentalBillId;
@@ -23,6 +23,12 @@ public class EhRentalSitesBills implements java.io.Serializable {
 	private java.lang.Long       operatorUid;
 	private java.sql.Timestamp   operateTime;
 	private java.lang.Long       launchPadItemId;
+	private java.sql.Timestamp   beginTime;
+	private java.sql.Timestamp   endTime;
+	private java.math.BigDecimal price;
+	private java.sql.Date        siteRentalDate;
+	private java.lang.Byte       amorpm;
+	private java.lang.Integer    rentalStep;
 
 	public EhRentalSitesBills() {}
 
@@ -36,7 +42,13 @@ public class EhRentalSitesBills implements java.io.Serializable {
 		java.sql.Timestamp   createTime,
 		java.lang.Long       operatorUid,
 		java.sql.Timestamp   operateTime,
-		java.lang.Long       launchPadItemId
+		java.lang.Long       launchPadItemId,
+		java.sql.Timestamp   beginTime,
+		java.sql.Timestamp   endTime,
+		java.math.BigDecimal price,
+		java.sql.Date        siteRentalDate,
+		java.lang.Byte       amorpm,
+		java.lang.Integer    rentalStep
 	) {
 		this.id = id;
 		this.rentalBillId = rentalBillId;
@@ -48,6 +60,12 @@ public class EhRentalSitesBills implements java.io.Serializable {
 		this.operatorUid = operatorUid;
 		this.operateTime = operateTime;
 		this.launchPadItemId = launchPadItemId;
+		this.beginTime = beginTime;
+		this.endTime = endTime;
+		this.price = price;
+		this.siteRentalDate = siteRentalDate;
+		this.amorpm = amorpm;
+		this.rentalStep = rentalStep;
 	}
 
 	public java.lang.Long getId() {
@@ -128,5 +146,53 @@ public class EhRentalSitesBills implements java.io.Serializable {
 
 	public void setLaunchPadItemId(java.lang.Long launchPadItemId) {
 		this.launchPadItemId = launchPadItemId;
+	}
+
+	public java.sql.Timestamp getBeginTime() {
+		return this.beginTime;
+	}
+
+	public void setBeginTime(java.sql.Timestamp beginTime) {
+		this.beginTime = beginTime;
+	}
+
+	public java.sql.Timestamp getEndTime() {
+		return this.endTime;
+	}
+
+	public void setEndTime(java.sql.Timestamp endTime) {
+		this.endTime = endTime;
+	}
+
+	public java.math.BigDecimal getPrice() {
+		return this.price;
+	}
+
+	public void setPrice(java.math.BigDecimal price) {
+		this.price = price;
+	}
+
+	public java.sql.Date getSiteRentalDate() {
+		return this.siteRentalDate;
+	}
+
+	public void setSiteRentalDate(java.sql.Date siteRentalDate) {
+		this.siteRentalDate = siteRentalDate;
+	}
+
+	public java.lang.Byte getAmorpm() {
+		return this.amorpm;
+	}
+
+	public void setAmorpm(java.lang.Byte amorpm) {
+		this.amorpm = amorpm;
+	}
+
+	public java.lang.Integer getRentalStep() {
+		return this.rentalStep;
+	}
+
+	public void setRentalStep(java.lang.Integer rentalStep) {
+		this.rentalStep = rentalStep;
 	}
 }

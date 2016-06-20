@@ -109,4 +109,25 @@ public class EhRentalItemsBillsDao extends org.jooq.impl.DAOImpl<com.everhomes.s
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalItemsBills> fetchByLaunchPadItemId(java.lang.Long... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalItemsBills.EH_RENTAL_ITEMS_BILLS.LAUNCH_PAD_ITEM_ID, values);
 	}
+
+	/**
+	 * Fetch records that have <code>item_name IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalItemsBills> fetchByItemName(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalItemsBills.EH_RENTAL_ITEMS_BILLS.ITEM_NAME, values);
+	}
+
+	/**
+	 * Fetch records that have <code>img_uri IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalItemsBills> fetchByImgUri(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalItemsBills.EH_RENTAL_ITEMS_BILLS.IMG_URI, values);
+	}
+
+	/**
+	 * Fetch records that have <code>item_type IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalItemsBills> fetchByItemType(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalItemsBills.EH_RENTAL_ITEMS_BILLS.ITEM_TYPE, values);
+	}
 }

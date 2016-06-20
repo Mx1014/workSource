@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteItems implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1630315694;
+	private static final long serialVersionUID = -476980932;
 
 	private java.lang.Long       id;
 	private java.lang.Long       rentalSiteId;
@@ -25,6 +25,7 @@ public class EhRentalSiteItems implements java.io.Serializable {
 	private java.sql.Timestamp   operateTime;
 	private java.lang.Integer    defaultOrder;
 	private java.lang.String     imgUri;
+	private java.lang.Byte       itemType;
 
 	public EhRentalSiteItems() {}
 
@@ -40,7 +41,8 @@ public class EhRentalSiteItems implements java.io.Serializable {
 		java.lang.Long       operatorUid,
 		java.sql.Timestamp   operateTime,
 		java.lang.Integer    defaultOrder,
-		java.lang.String     imgUri
+		java.lang.String     imgUri,
+		java.lang.Byte       itemType
 	) {
 		this.id = id;
 		this.rentalSiteId = rentalSiteId;
@@ -54,6 +56,7 @@ public class EhRentalSiteItems implements java.io.Serializable {
 		this.operateTime = operateTime;
 		this.defaultOrder = defaultOrder;
 		this.imgUri = imgUri;
+		this.itemType = itemType;
 	}
 
 	public java.lang.Long getId() {
@@ -150,5 +153,13 @@ public class EhRentalSiteItems implements java.io.Serializable {
 
 	public void setImgUri(java.lang.String imgUri) {
 		this.imgUri = imgUri;
+	}
+
+	public java.lang.Byte getItemType() {
+		return this.itemType;
+	}
+
+	public void setItemType(java.lang.Byte itemType) {
+		this.itemType = itemType;
 	}
 }

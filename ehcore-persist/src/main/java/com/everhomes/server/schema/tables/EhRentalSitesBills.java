@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSitesBills extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalSitesBillsRecord> {
 
-	private static final long serialVersionUID = 953572415;
+	private static final long serialVersionUID = 353547283;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_sites_bills</code>
@@ -75,6 +75,36 @@ public class EhRentalSitesBills extends org.jooq.impl.TableImpl<com.everhomes.se
 	 * The column <code>ehcore.eh_rental_sites_bills.launch_pad_item_id</code>. 广场图标id
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesBillsRecord, java.lang.Long> LAUNCH_PAD_ITEM_ID = createField("launch_pad_item_id", org.jooq.impl.SQLDataType.BIGINT, this, "广场图标id");
+
+	/**
+	 * The column <code>ehcore.eh_rental_sites_bills.begin_time</code>. 开始时间 对于按时间定
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesBillsRecord, java.sql.Timestamp> BEGIN_TIME = createField("begin_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "开始时间 对于按时间定");
+
+	/**
+	 * The column <code>ehcore.eh_rental_sites_bills.end_time</code>. 结束时间 对于按时间定
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesBillsRecord, java.sql.Timestamp> END_TIME = createField("end_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "结束时间 对于按时间定");
+
+	/**
+	 * The column <code>ehcore.eh_rental_sites_bills.price</code>. 折后价
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesBillsRecord, java.math.BigDecimal> PRICE = createField("price", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "折后价");
+
+	/**
+	 * The column <code>ehcore.eh_rental_sites_bills.site_rental_date</code>. which day
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesBillsRecord, java.sql.Date> SITE_RENTAL_DATE = createField("site_rental_date", org.jooq.impl.SQLDataType.DATE, this, "which day");
+
+	/**
+	 * The column <code>ehcore.eh_rental_sites_bills.amorpm</code>. 0:am 1:pm 2:night
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesBillsRecord, java.lang.Byte> AMORPM = createField("amorpm", org.jooq.impl.SQLDataType.TINYINT, this, "0:am 1:pm 2:night");
+
+	/**
+	 * The column <code>ehcore.eh_rental_sites_bills.rental_step</code>. how many time_step must be rental every time
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesBillsRecord, java.lang.Integer> RENTAL_STEP = createField("rental_step", org.jooq.impl.SQLDataType.INTEGER, this, "how many time_step must be rental every time");
 
 	/**
 	 * Create a <code>ehcore.eh_rental_sites_bills</code> table reference

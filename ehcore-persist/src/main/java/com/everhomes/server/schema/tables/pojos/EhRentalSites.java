@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSites implements java.io.Serializable {
 
-	private static final long serialVersionUID = 505830861;
+	private static final long serialVersionUID = -502194493;
 
 	private java.lang.Long       id;
 	private java.lang.Long       parentId;
@@ -41,7 +41,7 @@ public class EhRentalSites implements java.io.Serializable {
 	private java.math.BigDecimal cutPrice;
 	private java.lang.Double     discountRatio;
 	private java.lang.Byte       rentalType;
-	private java.lang.Integer    rentalStep;
+	private java.lang.Double     rentalStep;
 	private java.lang.Byte       exclusiveFlag;
 	private java.lang.Byte       autoAssign;
 	private java.lang.Byte       multiUnit;
@@ -57,6 +57,8 @@ public class EhRentalSites implements java.io.Serializable {
 	private java.lang.Double     longitude;
 	private java.lang.Double     latitude;
 	private java.lang.Long       organizationId;
+	private java.sql.Time        dayBeginTime;
+	private java.sql.Time        dayEndTime;
 
 	public EhRentalSites() {}
 
@@ -89,7 +91,7 @@ public class EhRentalSites implements java.io.Serializable {
 		java.math.BigDecimal cutPrice,
 		java.lang.Double     discountRatio,
 		java.lang.Byte       rentalType,
-		java.lang.Integer    rentalStep,
+		java.lang.Double     rentalStep,
 		java.lang.Byte       exclusiveFlag,
 		java.lang.Byte       autoAssign,
 		java.lang.Byte       multiUnit,
@@ -104,7 +106,9 @@ public class EhRentalSites implements java.io.Serializable {
 		java.lang.Integer    refundRatio,
 		java.lang.Double     longitude,
 		java.lang.Double     latitude,
-		java.lang.Long       organizationId
+		java.lang.Long       organizationId,
+		java.sql.Time        dayBeginTime,
+		java.sql.Time        dayEndTime
 	) {
 		this.id = id;
 		this.parentId = parentId;
@@ -150,6 +154,8 @@ public class EhRentalSites implements java.io.Serializable {
 		this.longitude = longitude;
 		this.latitude = latitude;
 		this.organizationId = organizationId;
+		this.dayBeginTime = dayBeginTime;
+		this.dayEndTime = dayEndTime;
 	}
 
 	public java.lang.Long getId() {
@@ -376,11 +382,11 @@ public class EhRentalSites implements java.io.Serializable {
 		this.rentalType = rentalType;
 	}
 
-	public java.lang.Integer getRentalStep() {
+	public java.lang.Double getRentalStep() {
 		return this.rentalStep;
 	}
 
-	public void setRentalStep(java.lang.Integer rentalStep) {
+	public void setRentalStep(java.lang.Double rentalStep) {
 		this.rentalStep = rentalStep;
 	}
 
@@ -502,5 +508,21 @@ public class EhRentalSites implements java.io.Serializable {
 
 	public void setOrganizationId(java.lang.Long organizationId) {
 		this.organizationId = organizationId;
+	}
+
+	public java.sql.Time getDayBeginTime() {
+		return this.dayBeginTime;
+	}
+
+	public void setDayBeginTime(java.sql.Time dayBeginTime) {
+		this.dayBeginTime = dayBeginTime;
+	}
+
+	public java.sql.Time getDayEndTime() {
+		return this.dayEndTime;
+	}
+
+	public void setDayEndTime(java.sql.Time dayEndTime) {
+		this.dayEndTime = dayEndTime;
 	}
 }
