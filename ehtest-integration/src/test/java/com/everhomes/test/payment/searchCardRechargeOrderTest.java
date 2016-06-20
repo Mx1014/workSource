@@ -19,6 +19,9 @@ import org.junit.Test;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.rest.payment.CardOrderStatus;
+import com.everhomes.rest.payment.CardRechargeStatus;
+import com.everhomes.rest.payment.PaidTypeStatus;
+import com.everhomes.rest.payment.SearchCardRechargeOrderCommand;
 import com.everhomes.rest.payment.SearchCardRechargeOrderRestResponse;
 import com.everhomes.rest.user.GetUserInfoRestResponse;
 import com.everhomes.rest.user.IdentifierClaimStatus;
@@ -46,14 +49,29 @@ public class searchCardRechargeOrderTest extends BaseLoginAuthTestCase {
         String keyword = "";
         Long pageAnchor = null;
         Integer pageSize = 5;
+        String paidType = PaidTypeStatus.ALIPAY.getCode();
+        Long startDate = null;
+        Long endDate = null;
+        Byte rechargeStatus = CardRechargeStatus.RECHARGED.getCode();
         
         String userIdentifier = "12000000001";
         String plainTexPassword = "123456";
         // 登录时不传namepsace，默认为左邻域空间
         logon(null, userIdentifier, plainTexPassword);
         
+        SearchCardRechargeOrderCommand cmd = new SearchCardRechargeOrderCommand();
+        cmd.setOwnerId(ownerId);
+        cmd.setOwnerType(ownerType);
+        cmd.setKeyword(keyword);
+        cmd.setRechargeStatus(rechargeStatus);
+        cmd.setRechargeType(paidType);
+        cmd.setStartDate(startDate);
+        cmd.setEndDate(endDate);
+        cmd.setPageAnchor(pageAnchor);
+        cmd.setPageSize(pageSize);
+        
         String commandRelativeUri = "/payment/searchCardRechargeOrder";
-        SearchCardRechargeOrderRestResponse response = httpClientService.restGet(commandRelativeUri, null, SearchCardRechargeOrderRestResponse.class,context);
+        SearchCardRechargeOrderRestResponse response = httpClientService.restGet(commandRelativeUri, cmd, SearchCardRechargeOrderRestResponse.class,context);
         
         assertNotNull("The reponse of getting card issuer may not be null", response);
         assertTrue("The user info should be get from server, response=" + 
@@ -64,21 +82,20 @@ public class searchCardRechargeOrderTest extends BaseLoginAuthTestCase {
         DSLContext context = dbProvider.getDslContext();
 		SelectQuery<EhPaymentCardRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS);
     	
-//		if (pageAnchor != null && pageAnchor != 0)
-//			query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.CREATE_TIME.lt(new Timestamp(pageAnchor)));
-//        	query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.OWNER_TYPE.eq(ownerType));
-//        	query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.OWNER_ID.eq(ownerId));
-//        	query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.USER_NAME.eq(keyword)
-//        			.or(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.MOBILE.eq(keyword)));
-//        	query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.PAID_TYPE.eq(rechargeType));
-//        
-//        	query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.RECHARGE_TIME.gt(startDate));
-//        	query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.RECHARGE_TIME.lt(endDate));
-//        	query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.RECHARGE_STATUS.eq(rechargeStatus));
-//        
-//    	query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.PAY_STATUS.eq(CardOrderStatus.PAID.getCode()));
+		if (pageAnchor != null && pageAnchor != 0)
+			query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.CREATE_TIME.lt(new Timestamp(pageAnchor)));
+        	query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.OWNER_TYPE.eq(ownerType));
+        	query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.OWNER_ID.eq(ownerId));
+        	query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.USER_NAME.eq(keyword)
+        			.or(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.MOBILE.eq(keyword)));
+        	query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.PAID_TYPE.eq(paidType));
+        
+        	query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.RECHARGE_TIME.gt(new Timestamp(startDate)));
+        	query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.RECHARGE_TIME.lt(new Timestamp(endDate)));
+        	query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.RECHARGE_STATUS.eq(rechargeStatus));
+        
+    	query.addConditions(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.PAY_STATUS.eq(CardOrderStatus.PAID.getCode()));
         query.addOrderBy(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.CREATE_TIME.desc());
-        if(pageSize != null)
         	query.addLimit(pageSize);
         
         List<EhPaymentCardRechargeOrders> result =  query.fetch().map(r -> 

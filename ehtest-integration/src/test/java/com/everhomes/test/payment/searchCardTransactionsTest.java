@@ -1,27 +1,23 @@
 // @formatter:off
 package com.everhomes.test.payment;
 
-import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
 
-import java.util.ArrayList;
+import java.sql.Timestamp;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectJoinStep;
+import org.jooq.SelectQuery;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
+import com.everhomes.rest.payment.CardTransactionStatus;
+import com.everhomes.rest.payment.SearchCardTransactionsCommand;
 import com.everhomes.rest.payment.SearchCardTransactionsRestResponse;
-import com.everhomes.rest.user.GetUserInfoRestResponse;
-import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhUsersDao;
-import com.everhomes.server.schema.tables.pojos.EhPaymentCardIssuers;
-import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
-import com.everhomes.server.schema.tables.pojos.EhUsers;
+import com.everhomes.server.schema.tables.pojos.EhPaymentCardTransactions;
+import com.everhomes.server.schema.tables.records.EhPaymentCardTransactionsRecord;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
@@ -33,17 +29,35 @@ public class searchCardTransactionsTest extends BaseLoginAuthTestCase {
     }
     
     @Test
-    public void testCardIssuer() {
-        Integer namespaceId = 0;
-        String ownerType = "";
+    public void testSearchCardTransactions() {
+    	String ownerType = "";
         Long ownerId = 0L;
+        String keyword = "";
+        Long pageAnchor = null;
+        Integer pageSize = 5;
+        String consumeType = "";
+        Long startDate = null;
+        Long endDate = null;
+        Byte status = CardTransactionStatus.PAIDED.getCode();
+        
         String userIdentifier = "12000000001";
         String plainTexPassword = "123456";
         // 登录时不传namepsace，默认为左邻域空间
         logon(null, userIdentifier, plainTexPassword);
         
-        String commandRelativeUri = "/payment/listCardIssuer";
-        SearchCardTransactionsRestResponse response = httpClientService.restGet(commandRelativeUri, null, SearchCardTransactionsRestResponse.class,context);
+        SearchCardTransactionsCommand cmd = new SearchCardTransactionsCommand();
+        cmd.setOwnerId(ownerId);
+        cmd.setOwnerType(ownerType);
+        cmd.setKeyword(keyword);
+        cmd.setStatus(status);
+        cmd.setConsumeType(consumeType);
+        cmd.setStartDate(startDate);
+        cmd.setEndDate(endDate);
+        cmd.setPageAnchor(pageAnchor);
+        cmd.setPageSize(pageSize);
+        
+        String commandRelativeUri = "/payment/searchCardTransactions";
+        SearchCardTransactionsRestResponse response = httpClientService.restGet(commandRelativeUri, cmd, SearchCardTransactionsRestResponse.class,context);
         
         assertNotNull("The reponse of getting card issuer may not be null", response);
         assertTrue("The user info should be get from server, response=" + 
@@ -52,30 +66,34 @@ public class searchCardTransactionsTest extends BaseLoginAuthTestCase {
 //        assertEquals("左邻李四", response.getResponse().getNickName());
         
         DSLContext context = dbProvider.getDslContext();
-        SelectJoinStep<Record> query = context.select(Tables.EH_PAYMENT_CARD_ISSUERS.fields()).from(Tables.EH_PAYMENT_CARD_ISSUERS);
-    	query.join(Tables.EH_PAYMENT_CARD_ISSUER_COMMUNITIES).on(Tables.EH_PAYMENT_CARD_ISSUER_COMMUNITIES.ISSUER_ID
-    			.eq(Tables.EH_PAYMENT_CARD_ISSUERS.ID));
-        query.where(Tables.EH_PAYMENT_CARD_ISSUER_COMMUNITIES.OWNER_TYPE.eq(ownerType))
-        	.and(Tables.EH_PAYMENT_CARD_ISSUER_COMMUNITIES.OWNER_ID.eq(ownerId));
+        SelectQuery<EhPaymentCardTransactionsRecord> query = context.selectQuery(Tables.EH_PAYMENT_CARD_TRANSACTIONS);
+    	
+		if (pageAnchor != null && pageAnchor != 0)
+			query.addConditions(Tables.EH_PAYMENT_CARD_TRANSACTIONS.CREATE_TIME.lt(new Timestamp(pageAnchor)));
+        if(StringUtils.isNotBlank(ownerType))
+        	query.addConditions(Tables.EH_PAYMENT_CARD_TRANSACTIONS.OWNER_TYPE.eq(ownerType));
+        if(ownerId != null)
+        	query.addConditions(Tables.EH_PAYMENT_CARD_TRANSACTIONS.OWNER_ID.eq(ownerId));
+        if(StringUtils.isNotBlank(keyword))
+        	query.addConditions(Tables.EH_PAYMENT_CARD_TRANSACTIONS.USER_NAME.eq(keyword)
+        			.or(Tables.EH_PAYMENT_CARD_TRANSACTIONS.MOBILE.eq(keyword)));
+//        if(StringUtils.isNotBlank(consumeType))
+//        	query.addConditions(Tables.EH_PAYMENT_CARD_TRANSACTIONS.CONSUME_TYPE.eq(consumeType));
         
-        List<EhPaymentCardIssuers> result = new ArrayList<>();
+        if(startDate != null)
+        	query.addConditions(Tables.EH_PAYMENT_CARD_TRANSACTIONS.TRANSACTION_TIME.gt(new Timestamp(startDate)));
+        if(endDate != null)
+        	query.addConditions(Tables.EH_PAYMENT_CARD_TRANSACTIONS.TRANSACTION_TIME.lt(new Timestamp(endDate)));
+        if(status != null)
+        	query.addConditions(Tables.EH_PAYMENT_CARD_TRANSACTIONS.STATUS.eq(status));
         
-        query.fetch().forEach(
-        		r -> {
-        			EhPaymentCardIssuers issuer = new EhPaymentCardIssuers();
-        			issuer.setId(r.getValue(Tables.EH_PAYMENT_CARD_ISSUERS.ID));
-        			issuer.setName(r.getValue(Tables.EH_PAYMENT_CARD_ISSUERS.NAME));
-        			issuer.setDescription(r.getValue(Tables.EH_PAYMENT_CARD_ISSUERS.DESCRIPTION));
-        			issuer.setPayUrl(r.getValue(Tables.EH_PAYMENT_CARD_ISSUERS.PAY_URL));
-        			issuer.setAlipayRechargeAccount(r.getValue(Tables.EH_PAYMENT_CARD_ISSUERS.ALIPAY_RECHARGE_ACCOUNT));
-        			issuer.setWeixinRechargeAccount(r.getValue(Tables.EH_PAYMENT_CARD_ISSUERS.WEIXIN_RECHARGE_ACCOUNT));
-        			issuer.setVendorName(r.getValue(Tables.EH_PAYMENT_CARD_ISSUERS.VENDOR_NAME));
-        			issuer.setVendorData(r.getValue(Tables.EH_PAYMENT_CARD_ISSUERS.VENDOR_DATA));
-        			issuer.setCreateTime(r.getValue(Tables.EH_PAYMENT_CARD_ISSUERS.CREATE_TIME));
-        			issuer.setStatus(r.getValue(Tables.EH_PAYMENT_CARD_ISSUERS.STATUS));
-        			result.add(issuer);
-        		});
-        assertEquals(2, result.size());
+        query.addOrderBy(Tables.EH_PAYMENT_CARD_TRANSACTIONS.CREATE_TIME.desc());
+        if(pageSize != null)
+        	query.addLimit(pageSize);
+        
+        List<EhPaymentCardTransactions> result =  query.fetch().map(r -> 
+			ConvertHelper.convert(r, EhPaymentCardTransactions.class));
+        assertEquals(1, result.size());
         
     }
     
