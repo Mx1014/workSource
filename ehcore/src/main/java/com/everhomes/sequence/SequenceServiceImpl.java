@@ -585,6 +585,9 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhWifiSettings.class, Tables.EH_WIFI_SETTINGS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_WIFI_SETTINGS.ID.max()).from(Tables.EH_WIFI_SETTINGS).fetchOne().value1(); 
         });
+        syncTableSequence(null, EhHotTags.class, Tables.EH_HOT_TAGS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_HOT_TAGS.ID.max()).from(Tables.EH_HOT_TAGS).fetchOne().value1(); 
+        });
     }
     
     @SuppressWarnings("rawtypes")

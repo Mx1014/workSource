@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.elasticsearch.action.WriteConsistencyLevel;
+import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -41,23 +43,12 @@ public class HotTagSearcherImpl extends AbstractElasticSearch implements HotTagS
     @Autowired
     private ConfigurationProvider  configProvider;
 	
-	@Override
-	public void deleteById(Long id) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void bulkUpdate(List<HotTags> tags) {
-		// TODO Auto-generated method stub
-		
-	}
 
 	@Override
 	public void feedDoc(HotTags tag) {
 		XContentBuilder source = createDoc(tag);
         
-        feedDoc(tag.getName()+"-"+tag.getServiceType(), source);
+		feedDoc(tag.getName()+"-"+tag.getServiceType(), source);
 		
 	}
 
@@ -68,16 +59,13 @@ public class HotTagSearcherImpl extends AbstractElasticSearch implements HotTagS
         
         QueryBuilder qb;
         
+        FilterBuilder fb = null;
         if(StringUtils.isEmpty(cmd.getKeyword())) {
-            qb = QueryBuilders.matchAllQuery();
+        	qb = QueryBuilders.matchAllQuery();
         } else {
-        	qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
-                    .field("name", 5.0f)
-                    .field("name.pinyin_prefix", 2.0f)
-                    .field("name.pinyin_gram", 1.0f);      
+        	qb = QueryBuilders.termQuery("name", cmd.getKeyword());
         }
         
-        FilterBuilder fb = null;
         if(!StringUtils.isEmpty(cmd.getServiceType())) {
         	fb = FilterBuilders.termFilter("serviceType", cmd.getServiceType());
         }
