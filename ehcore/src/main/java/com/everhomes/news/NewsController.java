@@ -14,6 +14,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.news.BriefNewsDTO;
 import com.everhomes.rest.news.CreateNewsCommand;
+import com.everhomes.rest.news.DeleteNewsCommand;
 import com.everhomes.rest.news.ImportNewsCommand;
 import com.everhomes.rest.news.ListNewsCommand;
 import com.everhomes.rest.news.NewsContentDTO;
@@ -62,7 +63,7 @@ public class NewsController extends ControllerBase {
 	/**
 	 * <b>URL: /news/listNews</b>
 	 * <p>
-	 * 后台查询新闻列表
+	 * 后台查询新闻列表（可关键字搜索）
 	 * </p>
 	 */
 	@RequestMapping("listNews")
@@ -107,4 +108,15 @@ public class NewsController extends ControllerBase {
 		return new RestResponse();
 	}
 
+	
+	/**
+	 * <b>URL: /news/deleteNews</b>
+	 * <p>删除一条新闻</p>
+	 */
+	@RequestMapping("deleteNews")
+	@RestReturn(String.class)
+	public RestResponse deleteNews(DeleteNewsCommand cmd){
+		return new RestResponse();
+	}
+	
 }

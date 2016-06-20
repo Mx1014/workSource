@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>newsToken: 新闻标识</li>
  * </ul>
  */
-public class NewsDetailInfoAdminCommand {
+public class DeleteNewsCommand {
 	@NotNull
 	private String ownerType;
 	@NotNull

@@ -41,6 +41,7 @@ public interface AppConstants {
     public static final long APPID_ENTERPRISE = 31;
     public static final long APPID_PARK_ADMIN = 32;
     public static final long APPID_ACLINK = 33;
+    public static final long APPID_NEWS = 34; //新闻
     
     public static final int PAGINATION_DEFAULT_SIZE = 20;
     public static final int PAGINATION_MAX_SIZE = 2000;

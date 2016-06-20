@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * 参数
  * <li>ownerType: 所属类型，参考{@link com.everhomes.rest.news.NewsOwnerType}</li>
  * <li>ownerId: 所属ID</li>
+ * <li>keyword: 搜索关键字</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页的数量</li>
  * </ul>
@@ -20,6 +21,7 @@ public class ListNewsCommand {
 	private String ownerType;
 	@NotNull
 	private Long ownerId;
+	private String keyword;
 	private Long pageAnchor;
 	private Long pageSize;
 
@@ -53,6 +55,14 @@ public class ListNewsCommand {
 
 	public void setPageSize(Long pageSize) {
 		this.pageSize = pageSize;
+	}
+
+	public String getKeyword() {
+		return keyword;
+	}
+
+	public void setKeyword(String keyword) {
+		this.keyword = keyword;
 	}
 
 	@Override
