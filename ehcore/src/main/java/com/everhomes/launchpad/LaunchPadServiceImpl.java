@@ -564,7 +564,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	private List<LaunchPadItemDTO> getItemsByCommunity(GetLaunchPadItemsCommand cmd, HttpServletRequest request, ItemDisplayFlag itemDisplayFlag){
 		User user = UserContext.current().getUser();
 		long userId = user.getId();
-        Integer namespaceId = (user.getNamespaceId() == null) ? 0 : user.getNamespaceId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         //String sceneType = cmd.getCurrentSceneType();
 		String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
 		
@@ -721,12 +721,17 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
             if(defaultItems == null || defaultItems.isEmpty()){
                 defaultItems = orgDefaultItems;
+                if(orgItems == null || orgItems.isEmpty())
+					defaultItems = orgItems;
             }
             if(defaultItems != null && !defaultItems.isEmpty()){
                 allItems = defaultItems;
                 if(orgDefaultItems != null && !orgDefaultItems.isEmpty())
                     allItems = overrideOrRevertItems(allItems, orgDefaultItems);
+                if(orgItems != null && !orgItems.isEmpty())
+					allItems = overrideOrRevertItems(allItems, orgItems);
             }
+            
             if(allItems!=null&&!allItems.isEmpty()){
             	List<UserLaunchPadItem> userLaunchPadItems = this.launchPadProvider.findUserLaunchPadItemByUserId(userId, sceneType, EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId());
 				allItems = overrideUserItems(allItems, userLaunchPadItems);
@@ -1622,12 +1627,21 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	    Community community = null;
 	    GetLaunchPadItemsCommand command = new GetLaunchPadItemsCommand();
 	    command.setNamespaceId(UserContext.getCurrentNamespaceId());
-	    command.setItemGroup(ItemGroup.GOVAGENCIES.getCode());
+	    command.setItemGroup(ItemGroup.BIZS.getCode());
         command.setItemLocation("/home");
 	    GetLaunchPadItemsCommandResponse response = null;
 	    List<LaunchPadItemDTO> launchPadItemDTOs = null;
-	    Integer order = 0;
 	    UserLaunchPadItem userItem = null;
+	    SceneTypeInfo sceneInfo = sceneService.getBaseSceneTypeByName(sceneToken.getNamespaceId(), sceneToken.getScene());
+	    String baseScene = sceneToken.getScene();
+	    if(sceneInfo != null) {
+	    	baseScene = sceneInfo.getName();
+	           if(LOGGER.isDebugEnabled()) {
+	               LOGGER.debug("Scene type is changed, sceneToken={}, newScene={}", sceneToken, sceneInfo.getName());
+	           }
+	    } else {
+	           LOGGER.error("Scene is not found, cmd={}, sceneToken={}", cmd, sceneToken);
+	    }
 	    SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
 	       switch(sceneType) {
 	       case DEFAULT:
@@ -1639,14 +1653,10 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	   					"community not found.");
 	           }
 	           command.setCommunityId(community.getId());
-	           command.setSceneType(sceneType.getCode());
+	           command.setSceneType(baseScene);
 	           response = this.getMoreItems(command, null);
 	           launchPadItemDTOs = response.getLaunchPadItems();
-	           
-	           if(null != launchPadItemDTOs && launchPadItemDTOs.size() > 0){
-	        	   order = launchPadItemDTOs.get(launchPadItemDTOs.size() - 1).getDefaultOrder();
-	           }
-	           userItem = this.updateUserLaunchPadItem(userId, EntityType.COMMUNITY.getCode(), community.getId(), sceneType.getCode(), order, cmd.getId(), ItemDisplayFlag.HIDE);
+	           userItem = this.updateUserLaunchPadItem(userId, EntityType.COMMUNITY.getCode(), community.getId(), baseScene, this.maxOrder(launchPadItemDTOs), cmd.getId(), ItemDisplayFlag.HIDE);
 	           break;
 	       case FAMILY:
 	           FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
@@ -1661,29 +1671,23 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	        	   LOGGER.error("community not found, sceneToken=" + sceneToken);
 	           }
 	           command.setCommunityId(community.getId());
-	           command.setSceneType(sceneType.getCode());
+	           command.setSceneType(baseScene);
 	           response = this.getMoreItems(command, null);
 	           launchPadItemDTOs = response.getLaunchPadItems();
-	           if(null != launchPadItemDTOs && launchPadItemDTOs.size() > 0){
-	        	   order = launchPadItemDTOs.get(launchPadItemDTOs.size() - 1).getDefaultOrder();
-	           }
-	           userItem = this.updateUserLaunchPadItem(userId, EntityType.COMMUNITY.getCode(), community.getId(), sceneType.getCode(), order, cmd.getId(), ItemDisplayFlag.HIDE);
+	           userItem = this.updateUserLaunchPadItem(userId, EntityType.COMMUNITY.getCode(), community.getId(), baseScene, this.maxOrder(launchPadItemDTOs), cmd.getId(), ItemDisplayFlag.HIDE);
 	           break;
 	       case PM_ADMIN:
 	       case ENTERPRISE: 
 	       case ENTERPRISE_NOAUTH: 
 	    	   GetLaunchPadItemsByOrgCommand orgCommand = new GetLaunchPadItemsByOrgCommand();
-	    	   orgCommand.setItemGroup(ItemGroup.GOVAGENCIES.getCode());
+	    	   orgCommand.setItemGroup(ItemGroup.BIZS.getCode());
 	    	   orgCommand.setItemLocation("/home");
 	    	   orgCommand.setNamespaceId(sceneToken.getNamespaceId());
-	    	   orgCommand.setSceneType(sceneType.getCode());
+	    	   orgCommand.setSceneType(baseScene);
 	    	   orgCommand.setOrganizationId(sceneToken.getEntityId());
 	    	   response = this.getMoreItems(orgCommand, null);
 	    	   launchPadItemDTOs = response.getLaunchPadItems();
-	           if(null != launchPadItemDTOs && launchPadItemDTOs.size() > 0){
-	        	   order = launchPadItemDTOs.get(launchPadItemDTOs.size() - 1).getDefaultOrder();
-	           }
-	           this.updateUserLaunchPadItem(userId, EntityType.ORGANIZATIONS.getCode(), sceneToken.getEntityId(), sceneType.getCode(), order, cmd.getId(), ItemDisplayFlag.HIDE);
+	           this.updateUserLaunchPadItem(userId, EntityType.ORGANIZATIONS.getCode(), sceneToken.getEntityId(), baseScene, this.maxOrder(launchPadItemDTOs), cmd.getId(), ItemDisplayFlag.HIDE);
 	           break;
 	       default:
 	           LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
@@ -1701,12 +1705,21 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	    Community community = null;
 	    GetLaunchPadItemsCommand command = new GetLaunchPadItemsCommand();
 	    command.setNamespaceId(UserContext.getCurrentNamespaceId());
-	    command.setItemGroup(ItemGroup.GOVAGENCIES.getCode());
+	    command.setItemGroup(ItemGroup.BIZS.getCode());
         command.setItemLocation("/home");
 	    GetLaunchPadItemsCommandResponse response = null;
 	    List<LaunchPadItemDTO> launchPadItemDTOs = null;
-	    Integer order = 0;
 	    UserLaunchPadItem userItem = null;
+	    SceneTypeInfo sceneInfo = sceneService.getBaseSceneTypeByName(sceneToken.getNamespaceId(), sceneToken.getScene());
+	    String baseScene = sceneToken.getScene();
+	    if(sceneInfo != null) {
+	    	baseScene = sceneInfo.getName();
+	           if(LOGGER.isDebugEnabled()) {
+	               LOGGER.debug("Scene type is changed, sceneToken={}, newScene={}", sceneToken, sceneInfo.getName());
+	           }
+	    } else {
+	           LOGGER.error("Scene is not found, cmd={}, sceneToken={}", cmd, sceneToken);
+	    }
 	    SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
 	       switch(sceneType) {
 	       case DEFAULT:
@@ -1719,14 +1732,10 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	           }
 	           
 	           command.setCommunityId(community.getId());
-	           command.setSceneType(sceneType.getCode());
+	           command.setSceneType(baseScene);
 	           response = this.getLaunchPadItems(command, null);
 	           launchPadItemDTOs = response.getLaunchPadItems();
-	           
-	           if(null != launchPadItemDTOs && launchPadItemDTOs.size() > 0){
-	        	   order = launchPadItemDTOs.get(launchPadItemDTOs.size() - 1).getDefaultOrder();
-	           }
-	           this.updateUserLaunchPadItem(userId, EntityType.COMMUNITY.getCode(), community.getId(), sceneType.getCode(), order, cmd.getId(), ItemDisplayFlag.DISPLAY);
+	           this.updateUserLaunchPadItem(userId, EntityType.COMMUNITY.getCode(), community.getId(), baseScene, this.maxOrder(launchPadItemDTOs), cmd.getId(), ItemDisplayFlag.DISPLAY);
 	           break;
 	       case FAMILY:
 	           FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
@@ -1741,30 +1750,24 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	        	   LOGGER.error("community not found, sceneToken=" + sceneToken);
 	           }
 	           command.setCommunityId(community.getId());
-	           command.setSceneType(sceneType.getCode());
+	           command.setSceneType(baseScene);
 	           response = this.getLaunchPadItems(command, null);
 	           launchPadItemDTOs = response.getLaunchPadItems();
-	           
-	           if(null != launchPadItemDTOs && launchPadItemDTOs.size() > 0){
-	        	   order = launchPadItemDTOs.get(launchPadItemDTOs.size() - 1).getDefaultOrder();
-	           }
-	           userItem = this.updateUserLaunchPadItem(userId, EntityType.COMMUNITY.getCode(), community.getId(), sceneType.getCode(), order, cmd.getId(), ItemDisplayFlag.DISPLAY);
+	          
+	           userItem = this.updateUserLaunchPadItem(userId, EntityType.COMMUNITY.getCode(), community.getId(), baseScene, this.maxOrder(launchPadItemDTOs), cmd.getId(), ItemDisplayFlag.DISPLAY);
 	           break;
 	       case PM_ADMIN:
 	       case ENTERPRISE: 
 	       case ENTERPRISE_NOAUTH: 
 	    	   GetLaunchPadItemsByOrgCommand orgCommand = new GetLaunchPadItemsByOrgCommand();
-	    	   orgCommand.setItemGroup(ItemGroup.GOVAGENCIES.getCode());
+	    	   orgCommand.setItemGroup(ItemGroup.BIZS.getCode());
 	    	   orgCommand.setItemLocation("/home");
 	    	   orgCommand.setNamespaceId(sceneToken.getNamespaceId());
-	    	   orgCommand.setSceneType(sceneType.getCode());
+	    	   orgCommand.setSceneType(baseScene);
 	    	   orgCommand.setOrganizationId(sceneToken.getEntityId());
 	    	   response = this.getLaunchPadItems(orgCommand, null);
 	    	   launchPadItemDTOs = response.getLaunchPadItems();
-	           if(null != launchPadItemDTOs && launchPadItemDTOs.size() > 0){
-	        	   order = launchPadItemDTOs.get(launchPadItemDTOs.size() - 1).getDefaultOrder();
-	           }
-	           userItem = this.updateUserLaunchPadItem(userId, EntityType.ORGANIZATIONS.getCode(), sceneToken.getEntityId(), sceneType.getCode(), order, cmd.getId(), ItemDisplayFlag.DISPLAY);
+	           userItem = this.updateUserLaunchPadItem(userId, EntityType.ORGANIZATIONS.getCode(), sceneToken.getEntityId(), baseScene,  this.maxOrder(launchPadItemDTOs), cmd.getId(), ItemDisplayFlag.DISPLAY);
 	           break;
 	       default:
 	           LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
@@ -1772,6 +1775,26 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	       }
 	       
 	       return ConvertHelper.convert(userItem, UserLaunchPadItemDTO.class);
+	}
+	
+	private Integer maxOrder(List<LaunchPadItemDTO> launchPadItemDTOs){
+		Integer order = 0;
+		if(null != launchPadItemDTOs && launchPadItemDTOs.size() > 0){
+     	   LaunchPadItemDTO launchPadItemDTO = launchPadItemDTOs.get(launchPadItemDTOs.size() - 1);
+     	   if(ActionType.fromCode(launchPadItemDTO.getActionType()) == ActionType.MORE_BUTTON){
+     		   if(launchPadItemDTOs.size() > 1){
+     			   order = launchPadItemDTOs.get(launchPadItemDTOs.size() - 2).getDefaultOrder();
+     		   }
+     	   }else{
+     		   order = launchPadItemDTOs.get(launchPadItemDTOs.size() - 1).getDefaultOrder();
+     	   }
+        }
+        if(null != order){
+     	   order = order + 1;
+        }else{
+     	   order = 1;
+        }
+        return order;
 	}
 	
 	private UserLaunchPadItem updateUserLaunchPadItem(Long userId, String ownerType, Long ownerId, String sceneType, Integer order, Long itemId, ItemDisplayFlag itemDisplayFlag){
