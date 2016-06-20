@@ -33,7 +33,7 @@ public class getCardUserStatisticsTest extends BaseLoginAuthTestCase {
     }
     
     @Test
-    public void testCardIssuer() {
+    public void testGetCardUserStatistics() {
         Integer namespaceId = 0;
         String ownerType = "";
         Long ownerId = 0L;
@@ -42,7 +42,7 @@ public class getCardUserStatisticsTest extends BaseLoginAuthTestCase {
         // 登录时不传namepsace，默认为左邻域空间
         logon(null, userIdentifier, plainTexPassword);
         
-        String commandRelativeUri = "/payment/listCardIssuer";
+        String commandRelativeUri = "/payment/getCardUserStatistics";
         GetCardUserStatisticsRestResponse response = httpClientService.restGet(commandRelativeUri, null, GetCardUserStatisticsRestResponse.class,context);
         
         assertNotNull("The reponse of getting card issuer may not be null", response);

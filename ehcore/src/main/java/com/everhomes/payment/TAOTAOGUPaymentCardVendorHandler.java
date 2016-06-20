@@ -410,7 +410,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				dto.setTransactionTime(StrTotimestamp2(recvTime));
 				
 				for(CardTransactionOfMonth ctm:resultList){
-					if(ctm.getDate().getTime() == StrTotimestamp(recvTime).getTime()){
+					if(ctm.getDate().getTime() == StrTotimestamp2(recvTime).getTime()){
 						List<CardTransactionFromVendorDTO> requests = ctm.getRequests();
 						ctm.setConsumeAmount(ctm.getConsumeAmount().add(consumeAmount));
 						ctm.setRechargeAmount(ctm.getRechargeAmount().add(rechargeAmount));
@@ -422,7 +422,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				List<CardTransactionFromVendorDTO> cardTransactionList = new ArrayList<>();
 				cardTransactionList.add(dto);
 				cardTransactionOfMonth.setRequests(cardTransactionList);
-				cardTransactionOfMonth.setDate(StrTotimestamp(recvTime));
+				cardTransactionOfMonth.setDate(StrTotimestamp2(recvTime));
 				cardTransactionOfMonth.setConsumeAmount(consumeAmount);
 				cardTransactionOfMonth.setRechargeAmount(rechargeAmount);
 				resultList.add(cardTransactionOfMonth);
@@ -432,13 +432,10 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 	}
 	
 	private static Timestamp StrTotimestamp(String date){
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyyMM");
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 		Date d = null;
 		try {
 			d = sdf.parse(date);
-			String s = sdf1.format(d);
-			d = sdf1.parse(s);
 		} catch (ParseException e) {
 			return null;
 		}
