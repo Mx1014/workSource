@@ -1,11 +1,13 @@
 // @formatter:off
 package com.everhomes.news;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
@@ -25,6 +27,9 @@ import com.everhomes.rest.news.SetNewsTopFlagCommand;
 @RequestMapping("/news")
 public class NewsController extends ControllerBase {
 
+	@Autowired
+	private NewsService newsService;
+	
 	/**
 	 * <b>URL: /news/createNews</b>
 	 * <p>
@@ -34,7 +39,12 @@ public class NewsController extends ControllerBase {
 	@RequestMapping("createNews")
 	@RestReturn(BriefNewsDTO.class)
 	public RestResponse createNews(CreateNewsCommand cmd) {
-		return new RestResponse();
+		BriefNewsDTO briefNewsDTO = newsService.createNews(cmd);
+		
+		RestResponse response = new RestResponse(briefNewsDTO);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 
 	/**

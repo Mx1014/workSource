@@ -1,3 +1,5 @@
+// @formatter:off
+
 package com.everhomes.rest.news;
 
 import javax.validation.constraints.NotNull;
@@ -17,11 +19,6 @@ public class ImportNewsCommand {
 	@NotNull
 	private Long ownerId;
 
-	@Override
-	public String toString() {
-		return StringHelper.toJsonString(this);
-	}
-
 	public String getOwnerType() {
 		return ownerType;
 	}
@@ -36,6 +33,11 @@ public class ImportNewsCommand {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
 	}
 
 }

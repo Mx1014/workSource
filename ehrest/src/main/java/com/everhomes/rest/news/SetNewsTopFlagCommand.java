@@ -1,3 +1,5 @@
+// @formatter:off
+
 package com.everhomes.rest.news;
 
 import javax.validation.constraints.NotNull;
@@ -23,19 +25,6 @@ public class SetNewsTopFlagCommand {
 	@NotNull
 	private Byte topFlag;
 
-	@Override
-	public String toString() {
-		return StringHelper.toJsonString(this);
-	}
-
-	public String getNewsToken() {
-		return newsToken;
-	}
-
-	public void setNewsToken(String newsToken) {
-		this.newsToken = newsToken;
-	}
-
 	public String getOwnerType() {
 		return ownerType;
 	}
@@ -52,12 +41,25 @@ public class SetNewsTopFlagCommand {
 		this.ownerId = ownerId;
 	}
 
+	public String getNewsToken() {
+		return newsToken;
+	}
+
+	public void setNewsToken(String newsToken) {
+		this.newsToken = newsToken;
+	}
+
 	public Byte getTopFlag() {
 		return topFlag;
 	}
 
 	public void setTopFlag(Byte topFlag) {
 		this.topFlag = topFlag;
+	}
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
 	}
 
 }

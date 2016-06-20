@@ -1,3 +1,5 @@
+// @formatter:off
+
 package com.everhomes.rest.news;
 
 import com.everhomes.util.StringHelper;
@@ -11,17 +13,17 @@ import com.everhomes.util.StringHelper;
 public class NewsContentDTO {
 	private String content;
 
-	@Override
-	public String toString() {
-		return StringHelper.toJsonString(this);
-	}
-
 	public String getContent() {
 		return content;
 	}
 
 	public void setContent(String content) {
 		this.content = content;
+	}
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
 	}
 
 }

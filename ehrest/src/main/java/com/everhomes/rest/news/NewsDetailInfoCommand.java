@@ -1,3 +1,5 @@
+// @formatter:off
+
 package com.everhomes.rest.news;
 
 import javax.validation.constraints.NotNull;
@@ -14,17 +16,17 @@ public class NewsDetailInfoCommand {
 	@NotNull
 	private String newsToken;
 
-	@Override
-	public String toString() {
-		return StringHelper.toJsonString(this);
-	}
-
 	public String getNewsToken() {
 		return newsToken;
 	}
 
 	public void setNewsToken(String newsToken) {
 		this.newsToken = newsToken;
+	}
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
 	}
 
 }

@@ -1,3 +1,5 @@
+// @formatter:off
+
 package com.everhomes.rest.news;
 
 import javax.validation.constraints.NotNull;
@@ -21,9 +23,20 @@ public class ListNewsCommand {
 	private Long pageAnchor;
 	private Long pageSize;
 
-	@Override
-	public String toString() {
-		return StringHelper.toJsonString(this);
+	public String getOwnerType() {
+		return ownerType;
+	}
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
 	}
 
 	public Long getPageAnchor() {
@@ -42,20 +55,9 @@ public class ListNewsCommand {
 		this.pageSize = pageSize;
 	}
 
-	public String getOwnerType() {
-		return ownerType;
-	}
-
-	public void setOwnerType(String ownerType) {
-		this.ownerType = ownerType;
-	}
-
-	public Long getOwnerId() {
-		return ownerId;
-	}
-
-	public void setOwnerId(Long ownerId) {
-		this.ownerId = ownerId;
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
 	}
 
 }

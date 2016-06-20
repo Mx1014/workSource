@@ -1,3 +1,5 @@
+// @formatter:off
+
 package com.everhomes.rest.news;
 
 import java.sql.Timestamp;
@@ -30,11 +32,6 @@ public class BriefNewsDTO {
 	private Long likeCount;
 	private Long childCount;
 	private Byte topFlag;
-
-	@Override
-	public String toString() {
-		return StringHelper.toJsonString(this);
-	}
 
 	public String getNewsToken() {
 		return newsToken;
@@ -114,6 +111,11 @@ public class BriefNewsDTO {
 
 	public void setTopFlag(Byte topFlag) {
 		this.topFlag = topFlag;
+	}
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
 	}
 
 }

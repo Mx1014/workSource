@@ -1,3 +1,5 @@
+// @formatter:off
+
 package com.everhomes.rest.news;
 
 import javax.validation.constraints.NotNull;
@@ -19,11 +21,6 @@ public class NewsDetailInfoAdminCommand {
 	private Long ownerId;
 	@NotNull
 	private String newsToken;
-
-	@Override
-	public String toString() {
-		return StringHelper.toJsonString(this);
-	}
 
 	public String getOwnerType() {
 		return ownerType;
@@ -47,6 +44,11 @@ public class NewsDetailInfoAdminCommand {
 
 	public void setNewsToken(String newsToken) {
 		this.newsToken = newsToken;
+	}
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
 	}
 
 }

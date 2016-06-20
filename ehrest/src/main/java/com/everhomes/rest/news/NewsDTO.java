@@ -1,3 +1,5 @@
+// @formatter:off
+
 package com.everhomes.rest.news;
 
 import java.sql.Timestamp;
@@ -32,11 +34,6 @@ public class NewsDTO {
 	private Long likeCount;
 	private Long childCount;
 	private Long viewCount;
-
-	@Override
-	public String toString() {
-		return StringHelper.toJsonString(this);
-	}
 
 	public Long getPostId() {
 		return postId;
@@ -78,6 +75,14 @@ public class NewsDTO {
 		this.sourceDesc = sourceDesc;
 	}
 
+	public String getSourceUrl() {
+		return sourceUrl;
+	}
+
+	public void setSourceUrl(String sourceUrl) {
+		this.sourceUrl = sourceUrl;
+	}
+
 	public String getContentUrl() {
 		return contentUrl;
 	}
@@ -86,12 +91,12 @@ public class NewsDTO {
 		this.contentUrl = contentUrl;
 	}
 
-	public String getSourceUrl() {
-		return sourceUrl;
+	public String getContent() {
+		return content;
 	}
 
-	public void setSourceUrl(String sourceUrl) {
-		this.sourceUrl = sourceUrl;
+	public void setContent(String content) {
+		this.content = content;
 	}
 
 	public Long getLikeCount() {
@@ -118,12 +123,9 @@ public class NewsDTO {
 		this.viewCount = viewCount;
 	}
 
-	public String getContent() {
-		return content;
-	}
-
-	public void setContent(String content) {
-		this.content = content;
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
 	}
 
 }

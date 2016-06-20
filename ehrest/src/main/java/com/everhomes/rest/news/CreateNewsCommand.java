@@ -1,3 +1,5 @@
+// @formatter:off
+
 package com.everhomes.rest.news;
 
 import javax.validation.constraints.NotNull;
@@ -33,9 +35,20 @@ public class CreateNewsCommand {
 	private String sourceDesc;
 	private String sourceUrl;
 
-	@Override
-	public String toString() {
-		return StringHelper.toJsonString(this);
+	public String getOwnerType() {
+		return ownerType;
+	}
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
 	}
 
 	public String getTitle() {
@@ -94,20 +107,9 @@ public class CreateNewsCommand {
 		this.sourceUrl = sourceUrl;
 	}
 
-	public String getOwnerType() {
-		return ownerType;
-	}
-
-	public void setOwnerType(String ownerType) {
-		this.ownerType = ownerType;
-	}
-
-	public Long getOwnerId() {
-		return ownerId;
-	}
-
-	public void setOwnerId(Long ownerId) {
-		this.ownerId = ownerId;
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
 	}
 
 }

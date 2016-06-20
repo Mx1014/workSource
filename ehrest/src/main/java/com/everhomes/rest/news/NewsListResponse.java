@@ -1,3 +1,5 @@
+// @formatter:off
+
 package com.everhomes.rest.news;
 
 import java.util.List;
@@ -17,11 +19,6 @@ public class NewsListResponse {
 	@ItemType(BriefNewsDTO.class)
 	private List<BriefNewsDTO> newsList;
 
-	@Override
-	public String toString() {
-		return StringHelper.toJsonString(this);
-	}
-
 	public Long getNextPageAnchor() {
 		return nextPageAnchor;
 	}
@@ -36,6 +33,11 @@ public class NewsListResponse {
 
 	public void setNewsList(List<BriefNewsDTO> newsList) {
 		this.newsList = newsList;
+	}
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
 	}
 
 }

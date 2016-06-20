@@ -1,3 +1,5 @@
+// @formatter:off
+
 package com.everhomes.rest.news;
 
 import javax.validation.constraints.NotNull;
@@ -17,11 +19,6 @@ public class ListNewsBySceneCommand {
 	private String sceneToken;
 	private Long pageAnchor;
 	private Long pageSize;
-
-	@Override
-	public String toString() {
-		return StringHelper.toJsonString(this);
-	}
 
 	public String getSceneToken() {
 		return sceneToken;
@@ -45,6 +42,11 @@ public class ListNewsBySceneCommand {
 
 	public void setPageSize(Long pageSize) {
 		this.pageSize = pageSize;
+	}
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
 	}
 
 }
