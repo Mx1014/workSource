@@ -1,10 +1,4 @@
 
-ALTER TABLE `eh_payment_card_transactions` ADD COLUMN `comsume_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'the type of consume';
-ALTER TABLE `eh_payment_card_transactions` ADD COLUMN `token` VARCHAR(512) NOT NULL COMMENT 'the token of card token to pay';
-ALTER TABLE `eh_payment_card_transactions` ADD COLUMN `card_no` VARCHAR(256) NOT NULL COMMENT 'the number of card';
-ALTER TABLE `eh_payment_card_transactions` ADD COLUMN `order_no` BIGINT(30) NOT NULL DEFAULT '0' COMMENT 'order no';
-
-
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES 
 ('91', 'taotaogu.keystore', 'taotaogu.keystore', 'the keystore for taotaogu(chuneng)', '0', NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES 
@@ -28,6 +22,15 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 ('180', 'paymentCard', '10002', 'zh_CN', '验证码错误，请重新输入！');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES 
 ('181', 'paymentCard', '10003', 'zh_CN', '当前卡不存在！');
+
+
+INSERT INTO `eh_payment_card_issuer_communities` (`id`, `owner_type`, `owner_id`, `issuer_id`, `create_time`) VALUES 
+('1', 'community', '240111044331051500', '1', '2016-06-14 17:06:44');
+
+INSERT INTO `eh_payment_card_issuers` (`id`, `name`, `description`, `pay_url`, `alipay_recharge_account`, `weixin_recharge_account`, `vendor_name`, `vendor_data`, `create_time`, `status`) VALUES 
+('1', 'chuneng', 'chuneng', 'adfasdf', 'adfasdf', 'asdfsdfasdf', 'TAOTAOGU', '{\"BranchCode\":\"10002900\",\"AppName\":\"ICCard\",\"Version\":\"V0.01\",\"DstId\":\"00000000\",\"chnl_type\":\"WEB\",\"chnl_id\":\"12345679\",\"merch_id\":\"862900000000001\",\"termnl_id\":\"00011071\",\"init_password\":\"111111\"}', '2016-06-14 17:07:20', '1');
+
+
 
 
 
