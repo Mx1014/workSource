@@ -32,6 +32,8 @@ import com.everhomes.aclink.lingling.AclinkLinglingMakeSdkKey;
 import com.everhomes.aclink.lingling.AclinkLinglingQRCode;
 import com.everhomes.aclink.lingling.AclinkLinglingQrCodeRequest;
 import com.everhomes.aclink.lingling.AclinkLinglingService;
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.border.Border;
@@ -46,8 +48,10 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.aclink.AclinkConnectingCommand;
 import com.everhomes.rest.aclink.AclinkCreateDoorAuthListCommand;
@@ -116,6 +120,8 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessageMetaConstant;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.messaging.MetaObjectType;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.rpc.server.AclinkRemotePdu;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.MessageChannelType;
@@ -215,6 +221,12 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     
     @Autowired
     private BorderConnectionProvider borderConnectionProvider;
+    
+    @Autowired
+    private OrganizationService organizationService;
+    
+    @Autowired
+    private AddressProvider addressProvider;
     
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
     
@@ -1499,10 +1511,6 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         DoorAccessQRKeyDTO qr = new DoorAccessQRKeyDTO();
         List<String> hardwares = new ArrayList<String>();
         List<String> sdkKeys = new ArrayList<String>();
-        List<Long> storeyAuthList = new ArrayList<Long>();
-        storeyAuthList.add(8l);
-        storeyAuthList.add(9l);
-        storeyAuthList.add(11l);
         
         //TODO 支持后台配置有效时间
         Long validTime = System.currentTimeMillis() + 1*1*60*60*1000;
@@ -1575,11 +1583,23 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         qr.setQrCodeKey("11223344");
         qr.setId(auth.getId());
         
-        //TODO if the user is Vip?
         DoorLinglingExtraKeyDTO extra = new DoorLinglingExtraKeyDTO();
         extra.setAuthLevel(0l);
-        extra.setAuthStorey(8l);
-        extra.setStoreyAuthList(storeyAuthList);
+        extra.setStoreyAuthList(new ArrayList<Long>());
+        
+        try {
+            if(checkDoorAccessRole(doorAccess)) {
+                extra.setAuthLevel(1l);    
+            }            
+            List<Long> storeyAuthList = getDoorListbyUser(user, doorAccess);
+            if(storeyAuthList != null && storeyAuthList.size() > 0) {
+                extra.setAuthStorey(storeyAuthList.get(0));    
+            }
+            
+            extra.setStoreyAuthList(storeyAuthList);
+        } catch(Exception ex) {
+            LOGGER.error("storeyAuth failed", ex);
+        }
         extra.setKeys(sdkKeys);
         
         qr.setExtra(StringHelper.toJsonString(extra));
@@ -2093,5 +2113,26 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         pdu.setUuid(doorAccess.getUuid());
         long requestId = LocalSequenceGenerator.getNextSequence();
         borderConnectionProvider.broadcastToAllBorders(requestId, pdu);
+    }
+    
+    private List<Long> getDoorListbyUser(User user, DoorAccess doorAccess) {
+        List<OrganizationDTO> orgs = organizationService.listUserRelateOrganizations(0, user.getId(), OrganizationGroupType.ENTERPRISE);
+        List<Long> floors = new ArrayList<Long>();
+        
+        for(OrganizationDTO dto : orgs) {
+            List<OrganizationAddress> addrs = organizationProvider.findOrganizationAddressByOrganizationId(dto.getId());
+            for(OrganizationAddress addr  : addrs) {
+                Address addr2 = addressProvider.findAddressById(addr.getAddressId());
+                
+                try {
+                    Long l = Long.parseLong(addr2.getApartmentFloor());
+                    floors.add(l);
+                } catch(Exception ex) {
+                    LOGGER.error("error  for get apartment floor", ex);
+                }
+            }
+        }
+        
+        return floors;
     }
 }
