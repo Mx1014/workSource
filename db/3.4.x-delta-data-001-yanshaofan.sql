@@ -191,7 +191,7 @@ INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show
 VALUES (126,757,58140,'修改记录',1,1,'修改记录 全部权限',760);
 
 #
-#20160618
+#20160621
 #
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
 VALUES (760,0,'开卡用户','开卡用户 全部功能',null);
