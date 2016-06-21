@@ -444,6 +444,16 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhNews EH_NEWS = com.everhomes.server.schema.tables.EhNews.EH_NEWS;
 
 	/**
+	 * The table ehcore.eh_news_attachments
+	 */
+	public static final com.everhomes.server.schema.tables.EhNewsAttachments EH_NEWS_ATTACHMENTS = com.everhomes.server.schema.tables.EhNewsAttachments.EH_NEWS_ATTACHMENTS;
+
+	/**
+	 * The table ehcore.eh_news_comment
+	 */
+	public static final com.everhomes.server.schema.tables.EhNewsComment EH_NEWS_COMMENT = com.everhomes.server.schema.tables.EhNewsComment.EH_NEWS_COMMENT;
+
+	/**
 	 * The table ehcore.eh_oauth2_codes
 	 */
 	public static final com.everhomes.server.schema.tables.EhOauth2Codes EH_OAUTH2_CODES = com.everhomes.server.schema.tables.EhOauth2Codes.EH_OAUTH2_CODES;
