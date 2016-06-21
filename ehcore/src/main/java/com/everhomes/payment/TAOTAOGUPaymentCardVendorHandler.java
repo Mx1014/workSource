@@ -144,9 +144,10 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		Map vendorDataMap = gson.fromJson(vendorData, Map.class);
 
 		String brandCode = (String) vendorDataMap.get("BranchCode");
+		String cardPatternid = (String) vendorDataMap.get("CardPatternid");
 		Map<String, Object> applyCardParam = new HashMap<String, Object>();
 		applyCardParam.put("BranchCode", brandCode);
-		applyCardParam.put("CardPatternid", "887093");
+		applyCardParam.put("CardPatternid", cardPatternid);
 		applyCardParam.put("CardNum", "1");
 		applyCardParam.put("DeliveryUser", "");
 		applyCardParam.put("DeliveryContact", cmd.getMobile());
@@ -555,7 +556,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		Map<String, Object> param = new HashMap<String, Object>();
 
 		param.put("BranchCode", brandCode);
-		param.put("CardId", card.getId());
+		param.put("CardId", card.getCardNo());
 		param.put("EndCardId", "");
 		param.put("RechargeNum", "");
 		param.put("RechargeType", "0");
