@@ -19,6 +19,7 @@ import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.server.schema.tables.pojos.EhUserLaunchPadItems;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.StringHelper;
 
 public class DeleteLaunchPadItemBySceneTest extends BaseLoginAuthTestCase {
     @Before
@@ -43,6 +44,9 @@ public class DeleteLaunchPadItemBySceneTest extends BaseLoginAuthTestCase {
         RestResponseBase response = httpClientService.restGet(commandRelativeUri, cmd, RestResponseBase.class, context);
         
         assertNotNull("The reponse of may not be null", response);
+        
+        assertTrue("The user scenes should be get from server, response=" + 
+                StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
       
         List<EhUserLaunchPadItems> resultItem = new ArrayList<>();
         
@@ -70,7 +74,7 @@ public class DeleteLaunchPadItemBySceneTest extends BaseLoginAuthTestCase {
         
     }
     
-    @Test
+    @Ignore @Test
     public void testDeleteLaunchPadItemByScene2() {
         Integer namespaceId = 0;
         String userIdentifier = "12000000001"; // 管理员帐号
@@ -87,6 +91,9 @@ public class DeleteLaunchPadItemBySceneTest extends BaseLoginAuthTestCase {
         RestResponseBase response = httpClientService.restGet(commandRelativeUri, cmd, RestResponseBase.class, context);
         
         assertNotNull("The reponse of may not be null", response);
+        
+        assertTrue("The user scenes should be get from server, response=" + 
+                StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
       
         List<EhUserLaunchPadItems> resultItem = new ArrayList<>();
         
@@ -131,6 +138,9 @@ public class DeleteLaunchPadItemBySceneTest extends BaseLoginAuthTestCase {
         RestResponseBase response = httpClientService.restGet(commandRelativeUri, cmd, RestResponseBase.class, context);
         
         assertNotNull("The reponse of may not be null", response);
+        
+        assertTrue("The user scenes should be get from server, response=" + 
+                StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
       
         List<EhUserLaunchPadItems> resultItem = new ArrayList<>();
         
@@ -223,6 +233,10 @@ public class DeleteLaunchPadItemBySceneTest extends BaseLoginAuthTestCase {
         dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
         
         jsonFilePath = "data/json/3.4.x-test-data-family_160605.txt";
+        fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
+        dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
+        
+        jsonFilePath = "data/json/3.4.x-test-data-organization_member_160605.txt";
         fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
         dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
         

@@ -172,7 +172,7 @@ public class GetMoreItemsBySceneTest extends BaseLoginAuthTestCase {
         List<Long> ids = new ArrayList<Long>();
         ids.add(24L);
         ids.add(25L);
-        ids.add(33L);
+        ids.add(36L);
         ids.add(45L);
         
         Integer order = -1;
@@ -286,6 +286,10 @@ public class GetMoreItemsBySceneTest extends BaseLoginAuthTestCase {
         dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
         
         jsonFilePath = "data/json/3.4.x-test-data-scene_types_160607.txt";
+        fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
+        dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
+        
+        jsonFilePath = "data/json/3.4.x-test-data-organization_member_160605.txt";
         fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
         dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
         

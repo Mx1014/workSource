@@ -1593,6 +1593,16 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		User user = UserContext.current().getUser();
 		Long userId = user.getId();
 	    SceneTokenDTO sceneToken = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
+	    SceneTypeInfo sceneInfo = sceneService.getBaseSceneTypeByName(sceneToken.getNamespaceId(), sceneToken.getScene());
+	    String baseScene = sceneToken.getScene();
+	    if(sceneInfo != null) {
+	    	baseScene = sceneInfo.getName();
+	           if(LOGGER.isDebugEnabled()) {
+	               LOGGER.debug("Scene type is changed, sceneToken={}, newScene={}", sceneToken, sceneInfo.getName());
+	           }
+	    } else {
+	           LOGGER.error("Scene is not found, cmd={}, sceneToken={}", cmd, sceneToken);
+	    }
 	    Community community = null;
 	    SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
 	       switch(sceneType) {
@@ -1605,7 +1615,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	   					"community not found.");
 	           }
 	           
-	           this.reorderLaunchPadItem(userId, EntityType.COMMUNITY.getCode(), community.getId(), sceneType.getCode(), cmd.getSorts());
+	           this.reorderLaunchPadItem(userId, EntityType.COMMUNITY.getCode(), community.getId(), baseScene, cmd.getSorts());
 	           break;
 	       case FAMILY:
 	           FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
@@ -1620,12 +1630,12 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	        	   LOGGER.error("community not found, sceneToken=" + sceneToken);
 	           }
 	           
-	           this.reorderLaunchPadItem(userId, EntityType.COMMUNITY.getCode(), community.getId(), sceneType.getCode(), cmd.getSorts());
+	           this.reorderLaunchPadItem(userId, EntityType.COMMUNITY.getCode(), community.getId(), baseScene, cmd.getSorts());
 	           break;
 	       case PM_ADMIN:
 	       case ENTERPRISE: 
 	       case ENTERPRISE_NOAUTH: 
-	    	   this.reorderLaunchPadItem(userId, EntityType.ORGANIZATIONS.getCode(), sceneToken.getEntityId(), sceneType.getCode(), cmd.getSorts());
+	    	   this.reorderLaunchPadItem(userId, EntityType.ORGANIZATIONS.getCode(), sceneToken.getEntityId(), baseScene, cmd.getSorts());
 	           break;
 	       default:
 	           LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);

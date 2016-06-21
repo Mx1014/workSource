@@ -296,7 +296,6 @@ public class GetLaunchPadItemsBySceneTest extends BaseLoginAuthTestCase {
         String fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
         dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
         
-        
         jsonFilePath = "data/json/3.4.x-test-data-userinfo_160618.txt";
         fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
         dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
@@ -310,6 +309,10 @@ public class GetLaunchPadItemsBySceneTest extends BaseLoginAuthTestCase {
         dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
         
         jsonFilePath = "data/json/3.4.x-test-data-scene_types_160607.txt";
+        fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
+        dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
+        
+        jsonFilePath = "data/json/3.4.x-test-data-organization_member_160605.txt";
         fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
         dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
         

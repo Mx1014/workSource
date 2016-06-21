@@ -421,11 +421,7 @@
       "action_type": "23",
       "action_data": "",
       "default_order": "5",
-<<<<<<< HEAD
       "apply_policy": "0",
-=======
-      "apply_policy": "3",
->>>>>>> master
       "min_version": "1",
       "display_flag": "1",
       "display_layout": "",
@@ -452,11 +448,7 @@
       "action_type": "23",
       "action_data": "",
       "default_order": "5",
-<<<<<<< HEAD
       "apply_policy": "0",
-=======
-      "apply_policy": "3",
->>>>>>> master
       "min_version": "1",
       "display_flag": "1",
       "display_layout": "",
@@ -483,11 +475,7 @@
       "action_type": "23",
       "action_data": "",
       "default_order": "5",
-<<<<<<< HEAD
       "apply_policy": "0",
-=======
-      "apply_policy": "3",
->>>>>>> master
       "min_version": "1",
       "display_flag": "1",
       "display_layout": "",
@@ -972,7 +960,7 @@
       "item_height": "1",
       "action_type": "45",
       "action_data": "",
-      "default_order": "2",
+      "default_order": "5",
       "apply_policy": "0",
       "min_version": "1",
       "display_flag": "0",
@@ -983,7 +971,6 @@
       "target_id": 0,
       "delete_flag": "0",
       "scene_type": "default"
-<<<<<<< HEAD
     },
     {
       "id": "37",
@@ -1281,8 +1268,6 @@
       "target_id": 0,
       "delete_flag": "1",
       "scene_type": "pm_admin"
-=======
->>>>>>> master
     }
   ]
 }
