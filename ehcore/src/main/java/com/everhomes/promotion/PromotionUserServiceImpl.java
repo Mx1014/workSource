@@ -189,6 +189,12 @@ public class PromotionUserServiceImpl implements PromotionUserService {
     }
     
     @Override
+    public void listUserByUserId(OpPromotionUserVisitor visitor, OpPromotionUserCallback callback) {
+        User user = userProvider.findUserById((Long)visitor.getValue());
+        callback.userFound(user, visitor);
+    }
+    
+    @Override
     public Boolean checkOrganizationMember(OpPromotionActivity promotion, OrganizationMember member) {       
         Map<String, Integer> checkExists = new HashMap<String, Integer>();
         
