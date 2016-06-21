@@ -2,41 +2,27 @@
 
 package com.everhomes.rest.news;
 
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
  * 参数
- * <li>ownerType: 所属类型，参考{@link com.everhomes.rest.news.NewsOwnerType}</li>
- * <li>ownerId: 所属ID</li>
+ * <li>newsToken: 新闻标识</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页的数量</li>
  * </ul>
  */
-public class ListNewsCommand {
-	@NotNull
-	private String ownerType;
-	@NotNull
-	private Long ownerId;
+public class ListNewsCommentCommand {
+	private String newsToken;
 	private Long pageAnchor;
 	private Long pageSize;
 
-	public String getOwnerType() {
-		return ownerType;
+	public String getNewsToken() {
+		return newsToken;
 	}
 
-	public void setOwnerType(String ownerType) {
-		this.ownerType = ownerType;
-	}
-
-	public Long getOwnerId() {
-		return ownerId;
-	}
-
-	public void setOwnerId(Long ownerId) {
-		this.ownerId = ownerId;
+	public void setNewsToken(String newsToken) {
+		this.newsToken = newsToken;
 	}
 
 	public Long getPageAnchor() {

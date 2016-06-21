@@ -19,6 +19,7 @@ import com.everhomes.util.StringHelper;
  * <li>likeCount: 赞数量</li>
  * <li>childCount: 评论数量</li>
  * <li>topFlag: 置顶标记，0未置顶，1已置顶，参考{@link com.everhomes.rest.news.NewsTopFlag}</li>
+ * <li>likeFlag: 点赞状态，0未点赞，1已点赞，参考{@link com.everhomes.rest.news.NewsLikeFlag}</li>
  * </ul>
  */
 public class BriefNewsDTO {
@@ -32,6 +33,7 @@ public class BriefNewsDTO {
 	private Long likeCount;
 	private Long childCount;
 	private Byte topFlag;
+	private Byte likeFlag;
 
 	public String getNewsToken() {
 		return newsToken;
@@ -111,6 +113,14 @@ public class BriefNewsDTO {
 
 	public void setTopFlag(Byte topFlag) {
 		this.topFlag = topFlag;
+	}
+
+	public Byte getLikeFlag() {
+		return likeFlag;
+	}
+
+	public void setLikeFlag(Byte likeFlag) {
+		this.likeFlag = likeFlag;
 	}
 
 	@Override

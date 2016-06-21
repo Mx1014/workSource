@@ -1,14 +1,15 @@
+// @formatter:off
 package com.everhomes.rest.news;
 
 /**
  * 
  * <ul>
- * <li>UNTOPPED: 未置顶</li>
- * <li>TOPPED: 已置顶</li>
+ * <li>NONE: 未置顶</li>
+ * <li>TOP: 已置顶</li>
  * </ul>
  */
 public enum NewsTopFlag {
-	UNTOPPED((byte)0),TOPPED((byte)1);
+	NONE((byte)0), TOP((byte)1);
 	private byte code;
 	private NewsTopFlag(byte code) {
 		this.code = code;

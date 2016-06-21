@@ -1,7 +1,6 @@
 package com.everhomes.news;
 
 import org.jooq.DSLContext;
-import org.jooq.InsertQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -9,11 +8,10 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
-import com.everhomes.server.schema.Tables;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhNewsDao;
 import com.everhomes.server.schema.tables.pojos.EhNews;
-import com.everhomes.server.schema.tables.records.EhNewsRecord;
-import com.everhomes.util.ConvertHelper;
 
 @Component
 public class NewsProviderImpl implements NewsProvider {
@@ -21,15 +19,16 @@ public class NewsProviderImpl implements NewsProvider {
 	@Autowired
 	private DbProvider dbProvider;
 	
+	@Autowired 
+	private SequenceProvider sequenceProvider;
+	
 	@Override
 	public void createNews(News news) {
+		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhNews.class));
+		news.setId(id);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		EhNewsRecord record = ConvertHelper.convert(news, EhNewsRecord.class);
-		InsertQuery<EhNewsRecord> insertQuery = context.insertQuery(Tables.EH_NEWS);
-		insertQuery.setRecord(record);
-		insertQuery.setReturning(Tables.EH_NEWS.ID);
-		insertQuery.execute();
-		news.setId(insertQuery.getReturnedRecord().getId());
+		EhNewsDao dao = new EhNewsDao(context.configuration());
+		dao.insert(news);
 		
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhNews.class, null);
 	}

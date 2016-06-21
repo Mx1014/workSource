@@ -6,8 +6,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.news.AddNewsCommentBySceneCommand;
+import com.everhomes.rest.news.DeleteNewsCommentBySceneCommand;
 import com.everhomes.rest.news.ListNewsBySceneCommand;
+import com.everhomes.rest.news.NewsCommentDTO;
 import com.everhomes.rest.news.NewsListResponse;
+import com.everhomes.rest.news.SetNewsLikeFlagBySceneCommand;
 
 /**
  * <ul>
@@ -20,7 +24,7 @@ import com.everhomes.rest.news.NewsListResponse;
 public class NewsUiController {
 
 	/**
-	 * <b>URL: /news/listNewsByScene<b>
+	 * <b>URL: /ui/news/listNewsByScene</b>
 	 * <p>
 	 * APP端查询新闻列表
 	 * </p>
@@ -30,4 +34,37 @@ public class NewsUiController {
 	public RestResponse listNewsByScene(ListNewsBySceneCommand cmd) {
 		return new RestResponse();
 	}
+	
+	/**
+	 * <b>URL: /ui/news/setNewsLikeFlagByScene</b>
+	 * <p>APP点赞/取消点赞</p>
+	 */
+	@RequestMapping("setNewsLikeFlagByScene")
+	@RestReturn(String.class)
+	public RestResponse setNewsLikeFlagByScene(SetNewsLikeFlagBySceneCommand cmd){
+		return new RestResponse();
+	}
+	
+	
+	/**
+	 * <b>URL: /ui/news/addNewsCommentByScene</b>
+	 * <p>APP添加一条评论</p>
+	 */
+	@RequestMapping("addNewsCommentByScene")
+	@RestReturn(NewsCommentDTO.class)
+	public RestResponse addNewsCommentByScene(AddNewsCommentBySceneCommand cmd){
+		return new RestResponse();
+	}
+		
+	/**
+	 * <b>URL: /ui/news/deleteNewsCommentByScene</b>
+	 * <p>APP删除评论</p>
+	 */
+	@RequestMapping("deleteNewsCommentByScene")
+	@RestReturn(String.class)
+	public RestResponse deleteNewsCommentByScene(DeleteNewsCommentBySceneCommand cmd){
+		return new RestResponse();
+	}
+	
+	
 }

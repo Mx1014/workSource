@@ -16,13 +16,18 @@ import com.everhomes.forum.Post;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.forum.PostContentType;
 import com.everhomes.rest.forum.PostEntityTag;
+import com.everhomes.rest.forum.PostStatus;
 import com.everhomes.rest.news.BriefNewsDTO;
 import com.everhomes.rest.news.CreateNewsCommand;
 import com.everhomes.rest.news.NewsContentType;
 import com.everhomes.rest.news.NewsOwnerType;
 import com.everhomes.rest.news.NewsServiceErrorCode;
+import com.everhomes.rest.news.NewsStatus;
+import com.everhomes.rest.news.NewsTopFlag;
+import com.everhomes.rest.organization.PrivateFlag;
 import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -40,50 +45,21 @@ public class NewsServiceImpl implements NewsService {
 	private NewsProvider newsProvider;
 
 	@Autowired
-	private CategoryProvider categoryProvider;
-
-	@Autowired
-	private ForumProvider forumProvider;
-
-	@Autowired
 	private DbProvider dbProvider;
 
 	@Override
 	public BriefNewsDTO createNews(CreateNewsCommand cmd) {
-		long startTime = System.currentTimeMillis();
-
-		Long userId = UserContext.current().getUser().getId();
+		final Long userId = UserContext.current().getUser().getId();
 
 		// 检查参数等信息
 		checkNewsParameter(userId, cmd);
 		Organization organization = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
 
 		News news = processNewsCommand(userId, organization, cmd);
-		Post post = processNewsPost(userId, organization, news);
+		// 创建一条新闻记录，会返回新闻Id，稍后更新到帖子表中
+		newsProvider.createNews(news);
 
-		dbProvider.execute(s -> {
-			// 创建一条新闻记录，会返回新闻Id，稍后更新到帖子表中
-			newsProvider.createNews(news);
-
-			// 创建一条帖子记录，会返回帖子id，稍后更新到新闻表中
-			post.setEmbeddedId(news.getId());
-			forumProvider.createPost(post);
-
-			// 更新新闻表中的帖子id
-			news.setPostId(post.getId());
-			newsProvider.updateNews(news);
-
-			return true;
-		});
-
-		BriefNewsDTO newsDTO = ConvertHelper.convert(news, BriefNewsDTO.class);
-
-		long endTime = System.currentTimeMillis();
-		if (LOGGER.isInfoEnabled()) {
-			LOGGER.info("Create a new news, userId=" + userId + ", newsId=" + news.getId() + ", elapse="
-					+ (endTime - startTime));
-		}
-		return newsDTO;
+		return ConvertHelper.convert(news, BriefNewsDTO.class);
 	}
 
 	private News processNewsCommand(Long userId, Organization organization, CreateNewsCommand cmd) {
@@ -94,48 +70,11 @@ public class NewsServiceImpl implements NewsService {
 		news.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		news.setPublishTime(news.getCreateTime());
 		news.setTopIndex(0L);
-		news.setTopFlag((byte) 0);
-		news.setStatus((byte) 2);
+		news.setTopFlag(NewsTopFlag.NONE.getCode());
+		news.setStatus(NewsStatus.ACTIVE.getCode());
 		news.setCreatorUid(userId);
 		news.setDeleterUid(0L);
 		return news;
-	}
-
-	private Post processNewsPost(Long userId, Organization organization, News news) {
-		Post post = new Post();
-		post.setAppId(2L);
-		post.setForumId(0L); // 待定
-		post.setParentPostId(0L);
-		post.setCreatorUid(userId);
-		post.setCreatorTag(PostEntityTag.PM.getCode());
-		post.setTargetTag(PostEntityTag.USER.getCode());
-		post.setVisibleRegionType(VisibleRegionType.REGION.getCode());
-		post.setVisibleRegionId(organization.getId());
-		Long categoryId = 1110L;
-		post.setCategoryId(categoryId);
-		post.setCategoryPath(categoryProvider.findCategoryById(categoryId).getPath());
-		post.setChildCount(0L);
-		post.setForwardCount(0L);
-		post.setLikeCount(0L);
-		post.setViewCount(0L);
-		post.setSubject(news.getTitle());
-		post.setContentType(PostContentType.TEXT.getCode());
-		post.setContent(news.getContentAbstract());
-		post.setContentAbstract(news.getContentAbstract());
-		post.setEmbeddedAppId(AppConstants.APPID_NEWS);
-		post.setEmbeddedId(news.getId());
-		News newsWithoutContent = ConvertHelper.convert(news, News.class);
-		newsWithoutContent.setContent(news.getContentAbstract());
-		post.setEmbeddedJson(newsWithoutContent.toString());
-		post.setEmbeddedVersion(1);
-		post.setPrivateFlag((byte) 0);
-		post.setAssignedFlag((byte) 0);
-		post.setFloorNumber(0L);
-		post.setStatus((byte) 2);
-		post.setCreateTime(news.getCreateTime());
-		post.setUpdateTime(news.getCreateTime());
-		post.setDeleterUid(0L);
-		return post;
 	}
 
 	private void checkNewsParameter(Long userId, CreateNewsCommand cmd) {

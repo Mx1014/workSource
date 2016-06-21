@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * 返回值
- * <li>postId: 帖子id</li>
+ * <li>newsToken: 新闻标识</li>
  * <li>title: 标题</li>
  * <li>releaseTime: 发布时间</li>
  * <li>author: 作者</li>
@@ -20,10 +20,11 @@ import com.everhomes.util.StringHelper;
  * <li>likeCount: 赞数量</li>
  * <li>childCount: 评论数量</li>
  * <li>viewCount: 查看数量</li>
+ * <li>likeFlag: 点赞状态，0未点赞，1已点赞，参考{@link com.everhomes.rest.news.NewsLikeFlag}</li>
  * </ul>
  */
 public class NewsDTO {
-	private Long postId;
+	private String newsToken;
 	private String title;
 	private Timestamp releaseTime;
 	private String author;
@@ -34,13 +35,14 @@ public class NewsDTO {
 	private Long likeCount;
 	private Long childCount;
 	private Long viewCount;
+	private Byte likeFlag;
 
-	public Long getPostId() {
-		return postId;
+	public String getNewsToken() {
+		return newsToken;
 	}
 
-	public void setPostId(Long postId) {
-		this.postId = postId;
+	public void setNewsToken(String newsToken) {
+		this.newsToken = newsToken;
 	}
 
 	public String getTitle() {
@@ -121,6 +123,14 @@ public class NewsDTO {
 
 	public void setViewCount(Long viewCount) {
 		this.viewCount = viewCount;
+	}
+
+	public Byte getLikeFlag() {
+		return likeFlag;
+	}
+
+	public void setLikeFlag(Byte likeFlag) {
+		this.likeFlag = likeFlag;
 	}
 
 	@Override

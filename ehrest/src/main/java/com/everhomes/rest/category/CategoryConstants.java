@@ -69,6 +69,9 @@ public interface CategoryConstants {
     /** 帖子/紧急求助 */
     public static final long CATEGORY_ID_EMERGENCY_HELP = 1012L;
     
+    /** 帖子/新闻 */
+    public static final long CATEGORY_ID_NEWS = 1110L;
+    
     public static final long CATEGORY_ID_CONF = 200001L;
     
     public static final long CATEGORY_ID_CONF_CAPACITY = 200101L;

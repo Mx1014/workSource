@@ -12,15 +12,22 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.news.AddNewsCommentCommand;
 import com.everhomes.rest.news.BriefNewsDTO;
 import com.everhomes.rest.news.CreateNewsCommand;
 import com.everhomes.rest.news.DeleteNewsCommand;
+import com.everhomes.rest.news.DeleteNewsCommentCommand;
 import com.everhomes.rest.news.ImportNewsCommand;
 import com.everhomes.rest.news.ListNewsCommand;
+import com.everhomes.rest.news.ListNewsCommentCommand;
+import com.everhomes.rest.news.ListNewsCommentResponse;
+import com.everhomes.rest.news.NewsCommentDTO;
 import com.everhomes.rest.news.NewsContentDTO;
 import com.everhomes.rest.news.NewsDTO;
 import com.everhomes.rest.news.NewsDetailInfoCommand;
 import com.everhomes.rest.news.NewsListResponse;
+import com.everhomes.rest.news.SearchNewsCommand;
+import com.everhomes.rest.news.SetNewsLikeFlagCommand;
 import com.everhomes.rest.news.SetNewsTopFlagCommand;
 
 @RestDoc(value = "News Controller", site = "core")
@@ -30,7 +37,7 @@ public class NewsController extends ControllerBase {
 
 	@Autowired
 	private NewsService newsService;
-	
+
 	/**
 	 * <b>URL: /news/createNews</b>
 	 * <p>
@@ -41,7 +48,7 @@ public class NewsController extends ControllerBase {
 	@RestReturn(BriefNewsDTO.class)
 	public RestResponse createNews(CreateNewsCommand cmd) {
 		BriefNewsDTO briefNewsDTO = newsService.createNews(cmd);
-		
+
 		RestResponse response = new RestResponse(briefNewsDTO);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -63,7 +70,7 @@ public class NewsController extends ControllerBase {
 	/**
 	 * <b>URL: /news/listNews</b>
 	 * <p>
-	 * 后台查询新闻列表（可关键字搜索）
+	 * 后台查询新闻列表
 	 * </p>
 	 */
 	@RequestMapping("listNews")
@@ -73,9 +80,21 @@ public class NewsController extends ControllerBase {
 	}
 
 	/**
+	 * <b>URL: /news/searchNews</b>
+	 * <p>
+	 * 后台关键字搜索新闻列表
+	 * </p>
+	 */
+	@RequestMapping("searchNews")
+	@RestReturn(NewsListResponse.class)
+	public RestResponse searchNews(SearchNewsCommand cmd) {
+		return new RestResponse();
+	}
+
+	/**
 	 * <b>URL: /news/getNewsDetailInfo</b>
 	 * <p>
-	 * 查询新闻详情
+	 * 查询新闻详情（共用）
 	 * </p>
 	 */
 	@RequestMapping("getNewsDetailInfo")
@@ -87,7 +106,7 @@ public class NewsController extends ControllerBase {
 	/**
 	 * <b>URL: /news/setNewsTopFlag</b>
 	 * <p>
-	 * 置顶新闻
+	 * 新闻置顶/取消置顶
 	 * </p>
 	 */
 	@RequestMapping("setNewsTopFlag")
@@ -95,11 +114,11 @@ public class NewsController extends ControllerBase {
 	public RestResponse setNewsTopFlag(SetNewsTopFlagCommand cmd) {
 		return new RestResponse();
 	}
-	
+
 	/**
 	 * <b>URL: /news/getNewsContent</b>
 	 * <p>
-	 * 查询新闻正文
+	 * 查询新闻正文（共用）
 	 * </p>
 	 */
 	@RequestMapping("getNewsContent")
@@ -108,15 +127,63 @@ public class NewsController extends ControllerBase {
 		return new RestResponse();
 	}
 
-	
 	/**
 	 * <b>URL: /news/deleteNews</b>
-	 * <p>删除一条新闻</p>
+	 * <p>
+	 * 删除一条新闻
+	 * </p>
 	 */
 	@RequestMapping("deleteNews")
 	@RestReturn(String.class)
-	public RestResponse deleteNews(DeleteNewsCommand cmd){
+	public RestResponse deleteNews(DeleteNewsCommand cmd) {
 		return new RestResponse();
 	}
-	
+
+	/**
+	 * <b>URL: /news/setNewsLikeFlag</b>
+	 * <p>
+	 * 点赞/取消点赞
+	 * </p>
+	 */
+	@RequestMapping("setNewsLikeFlag")
+	@RestReturn(String.class)
+	public RestResponse setNewsLikeFlag(SetNewsLikeFlagCommand cmd) {
+		return new RestResponse();
+	}
+
+	/**
+	 * <b>URL: /news/addNewsComment</b>
+	 * <p>
+	 * 添加一条评论
+	 * </p>
+	 */
+	@RequestMapping("addNewsComment")
+	@RestReturn(NewsCommentDTO.class)
+	public RestResponse addNewsComment(AddNewsCommentCommand cmd) {
+		return new RestResponse();
+	}
+
+	/**
+	 * <b>URL: /news/listNewsComment</b>
+	 * <p>
+	 * 评论列表（共用）
+	 * </p>
+	 */
+	@RequestMapping("listNewsComment")
+	@RestReturn(ListNewsCommentResponse.class)
+	public RestResponse listNewsComment(ListNewsCommentCommand cmd) {
+		return new RestResponse();
+	}
+
+	/**
+	 * <b>URL: /news/deleteNewsComment</b>
+	 * <p>
+	 * 删除评论
+	 * </p>
+	 */
+	@RequestMapping("deleteNewsComment")
+	@RestReturn(String.class)
+	public RestResponse deleteNewsComment(DeleteNewsCommentCommand cmd) {
+		return new RestResponse();
+	}
 }

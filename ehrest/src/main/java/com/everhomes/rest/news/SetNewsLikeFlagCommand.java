@@ -11,17 +11,19 @@ import com.everhomes.util.StringHelper;
  * 参数
  * <li>ownerType: 所属类型，参考{@link com.everhomes.rest.news.NewsOwnerType}</li>
  * <li>ownerId: 所属ID</li>
- * <li>pageAnchor: 锚点</li>
- * <li>pageSize: 每页的数量</li>
+ * <li>newsToken: 新闻标识</li>
+ * <li>likeFlag: 现在的点赞状态，0未点赞，1已点赞，参考{@link com.everhomes.rest.news.NewsLikeFlag}</li>
  * </ul>
  */
-public class ListNewsCommand {
+public class SetNewsLikeFlagCommand {
 	@NotNull
 	private String ownerType;
 	@NotNull
 	private Long ownerId;
-	private Long pageAnchor;
-	private Long pageSize;
+	@NotNull
+	private String newsToken;
+	@NotNull
+	private Byte likeFlag;
 
 	public String getOwnerType() {
 		return ownerType;
@@ -39,20 +41,20 @@ public class ListNewsCommand {
 		this.ownerId = ownerId;
 	}
 
-	public Long getPageAnchor() {
-		return pageAnchor;
+	public String getNewsToken() {
+		return newsToken;
 	}
 
-	public void setPageAnchor(Long pageAnchor) {
-		this.pageAnchor = pageAnchor;
+	public void setNewsToken(String newsToken) {
+		this.newsToken = newsToken;
 	}
 
-	public Long getPageSize() {
-		return pageSize;
+	public Byte getLikeFlag() {
+		return likeFlag;
 	}
 
-	public void setPageSize(Long pageSize) {
-		this.pageSize = pageSize;
+	public void setLikeFlag(Byte likeFlag) {
+		this.likeFlag = likeFlag;
 	}
 
 	@Override
