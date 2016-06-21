@@ -869,11 +869,11 @@ VALUES (762,0,'消费记录','消费记录 全部功能',null);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
 VALUES (43600,'一卡通',40000,null,null,1,2,'/40000/43500','park',440);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (43610,'开卡用户',43600,null,'card_user',0,2,'/40000/43500/43610','park',441);
+VALUES (43610,'开卡用户',43600,null,'card_user',0,2,'/40000/43600/43610','park',441);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (43620,'充值记录',43600,null,'card_recharge_record',0,2,'/40000/43500/43620','park',442);
+VALUES (43620,'充值记录',43600,null,'card_recharge_record',0,2,'/40000/43600/43620','park',442);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
-VALUES (43630,'消费记录',43600,null,'card_purchase_record',0,2,'/40000/43500/43630','park',443);
+VALUES (43630,'消费记录',43600,null,'card_purchase_record',0,2,'/40000/43600/43630','park',443);
 
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),760,43610,'开卡用户',1,1,'开卡用户 全部权限',345);
