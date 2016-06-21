@@ -9,7 +9,7 @@ import com.everhomes.discover.ItemType;
 public class AclinkFirmwareDTO {
     private String     infoUrl;
     private Byte     status;
-    private Byte     major;
+    private Integer     major;
     private Byte     firmwareType;
     private Long     checksum;
     private String     md5sum;
@@ -19,8 +19,8 @@ public class AclinkFirmwareDTO {
     private Long     creatorId;
     private Long     ownerId;
     private Long     id;
-    private Byte     minor;
-    private Byte     revision;
+    private Integer     minor;
+    private Integer     revision;
 
     
 
@@ -45,20 +45,6 @@ public class AclinkFirmwareDTO {
     public void setStatus(Byte status) {
         this.status = status;
     }
-
-
-
-    public Byte getMajor() {
-        return major;
-    }
-
-
-
-    public void setMajor(Byte major) {
-        this.major = major;
-    }
-
-
 
     public Byte getFirmwareType() {
         return firmwareType;
@@ -167,26 +153,37 @@ public class AclinkFirmwareDTO {
     }
 
 
+    public Integer getMajor() {
+        return major;
+    }
 
-    public Byte getMinor() {
+
+
+    public void setMajor(Integer major) {
+        this.major = major;
+    }
+
+
+
+    public Integer getMinor() {
         return minor;
     }
 
 
 
-    public void setMinor(Byte minor) {
+    public void setMinor(Integer minor) {
         this.minor = minor;
     }
 
 
 
-    public Byte getRevision() {
+    public Integer getRevision() {
         return revision;
     }
 
 
 
-    public void setRevision(Byte revision) {
+    public void setRevision(Integer revision) {
         this.revision = revision;
     }
 

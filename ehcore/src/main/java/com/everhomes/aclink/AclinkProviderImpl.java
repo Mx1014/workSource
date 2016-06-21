@@ -13,10 +13,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.rest.aclink.DoorAccessStatus;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhAclinksDao;
@@ -150,5 +152,27 @@ public class AclinkProviderImpl implements AclinkProvider {
     }
 
     private void prepareObj(Aclink obj) {
+    }
+    
+    @Override
+    public Aclink getAclinkByDoorId(Long doorId) {
+        ListingLocator locator = new ListingLocator();
+        List<Aclink> aclinks = this.queryAclinkByDoorId(locator, doorId, 1, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                query.addConditions(Tables.EH_ACLINKS.DOOR_ID.eq(doorId));
+                query.addConditions(Tables.EH_ACLINKS.STATUS.ne(DoorAccessStatus.INVALID.getCode()));
+                return query;
+            }
+            
+        });
+        
+        if(aclinks != null && aclinks.size() > 0) {
+            return aclinks.get(0);
+        }
+        
+        return null;
     }
 }

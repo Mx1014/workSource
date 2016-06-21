@@ -742,7 +742,17 @@ public class LaunchPadServiceImpl implements LaunchPadService {
       	}
         
         
-        return processLaunchPadItems(token, userId, null, allItems, request);
+        // 产品规则每个公司都有一个办公地点所在的园区/小区，故在公司场景也可以拿到小区ID
+        // 把这个小区ID补回来，是为了物业相关的服务（报修、投诉建议等）在发帖时可以由服务器提供visible_region_type/id  by lqs 20160617
+        Long communityId = null;
+        OrganizationDTO org = organizationService.getOrganizationById(cmd.getOrganizationId());
+        if(org != null) {
+            communityId = org.getCommunityId();
+        } else {
+            LOGGER.error("Organization id not found, userId={}, cmd={}", userId, cmd);
+        }
+        
+        return processLaunchPadItems(token, userId, communityId, allItems, request);
     }
 	
 	private List<LaunchPadItemDTO> processLaunchPadItems(String token, Long userId, Long communityId, List<LaunchPadItem> allItems, HttpServletRequest request) {
@@ -901,10 +911,14 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			actionDataJson.put(LaunchPadConstants.CREATOR_TAG, tag);
 		}
 
-		long visibleRegionType = (long) actionDataJson.get(LaunchPadConstants.VISIBLE_REGION_TYPE);
+		Byte visibleRegionType = null;
+		Object regionType = actionDataJson.get(LaunchPadConstants.VISIBLE_REGION_TYPE);
+		if(regionType != null) {
+		    visibleRegionType = Byte.valueOf(regionType.toString());
+		}
 
 		//给GANC（居委）或GAPS（公安）发帖，visibleRegionType填片区、visibleRegionId填居委或公安所管理的片区ID
-		if(visibleRegionType == VisibleRegionType.REGION.getCode()){
+		if(VisibleRegionType.fromCode(visibleRegionType) == VisibleRegionType.REGION){
 			GetOrgDetailCommand cmd = new GetOrgDetailCommand();
 			cmd.setCommunityId(communityId);
 			cmd.setOrganizationType(targetEntityTag);
@@ -913,10 +927,10 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 				LOGGER.error("Organization is not exists,communityId=" + communityId+",targetEntityTag="+targetEntityTag);
 				return actionDataJson;
 			}
-			//actionDataJson.put(LaunchPadConstants.VISIBLE_REGION_TYPE, VisibleRegionType.REGION.getCode());
+			actionDataJson.put(LaunchPadConstants.VISIBLE_REGION_TYPE, VisibleRegionType.REGION.getCode());
 			actionDataJson.put(LaunchPadConstants.VISIBLE_REGIONID,organization.getId());
 		}else{
-			//actionDataJson.put(LaunchPadConstants.VISIBLE_REGION_TYPE, VisibleRegionType.COMMUNITY.getCode());
+			actionDataJson.put(LaunchPadConstants.VISIBLE_REGION_TYPE, VisibleRegionType.COMMUNITY.getCode());
 			actionDataJson.put(LaunchPadConstants.VISIBLE_REGIONID,communityId);
 		}
 		return actionDataJson;

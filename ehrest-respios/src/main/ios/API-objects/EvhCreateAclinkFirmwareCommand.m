@@ -36,6 +36,8 @@
         [jsonObject setObject: self.checksum forKey: @"checksum"];
     if(self.md5sum)
         [jsonObject setObject: self.md5sum forKey: @"md5sum"];
+    if(self.firmwareType)
+        [jsonObject setObject: self.firmwareType forKey: @"firmwareType"];
     if(self.downloadUrl)
         [jsonObject setObject: self.downloadUrl forKey: @"downloadUrl"];
     if(self.major)
@@ -60,6 +62,10 @@
         self.md5sum = [jsonObject objectForKey: @"md5sum"];
         if(self.md5sum && [self.md5sum isEqual:[NSNull null]])
             self.md5sum = nil;
+
+        self.firmwareType = [jsonObject objectForKey: @"firmwareType"];
+        if(self.firmwareType && [self.firmwareType isEqual:[NSNull null]])
+            self.firmwareType = nil;
 
         self.downloadUrl = [jsonObject objectForKey: @"downloadUrl"];
         if(self.downloadUrl && [self.downloadUrl isEqual:[NSNull null]])

@@ -52,6 +52,8 @@ public class CreateOpPromotionCommand {
     @NotNull
     private Long     endTime;
     
+    private String   iconUri;
+    
     @ItemType(OpPromotionAssignedScopeDTO.class)
     private List<OpPromotionAssignedScopeDTO> assignedScopes;
     
@@ -160,6 +162,16 @@ public class CreateOpPromotionCommand {
 
     public void setPolicyData(String policyData) {
         this.policyData = policyData;
+    }
+
+
+    public String getIconUri() {
+        return iconUri;
+    }
+
+
+    public void setIconUri(String iconUri) {
+        this.iconUri = iconUri;
     }
 
 

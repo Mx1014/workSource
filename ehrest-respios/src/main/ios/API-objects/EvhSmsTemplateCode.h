@@ -22,3 +22,4 @@
 #define EvhSmsTemplateCode_WY_SEND_MSG_CODE 5
 #define EvhSmsTemplateCode_PM_TASK_PROCESS_MSG_CODE 6
 #define EvhSmsTemplateCode_PM_TASK_PUSH_MSG_CODE 7
+#define EvhSmsTemplateCode_ACLINK_VISITOR_MSG_CODE 8

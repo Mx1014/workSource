@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhDoorAuth implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1121798175;
+	private static final long serialVersionUID = -1515588675;
 
 	private java.lang.Long     id;
 	private java.lang.Long     doorId;
@@ -28,6 +28,21 @@ public class EhDoorAuth implements java.io.Serializable {
 	private java.lang.String   phone;
 	private java.sql.Timestamp createTime;
 	private java.lang.Byte     status;
+	private java.lang.String   driver;
+	private java.lang.Long     integralTag1;
+	private java.lang.Long     integralTag2;
+	private java.lang.Long     integralTag3;
+	private java.lang.Long     integralTag4;
+	private java.lang.Long     integralTag5;
+	private java.lang.String   stringTag1;
+	private java.lang.String   stringTag2;
+	private java.lang.String   stringTag3;
+	private java.lang.String   stringTag4;
+	private java.lang.String   stringTag5;
+	private java.lang.String   stringTag6;
+	private java.lang.Byte     rightOpen;
+	private java.lang.Byte     rightVisitor;
+	private java.lang.Byte     rightRemote;
 
 	public EhDoorAuth() {}
 
@@ -46,7 +61,22 @@ public class EhDoorAuth implements java.io.Serializable {
 		java.lang.String   nickname,
 		java.lang.String   phone,
 		java.sql.Timestamp createTime,
-		java.lang.Byte     status
+		java.lang.Byte     status,
+		java.lang.String   driver,
+		java.lang.Long     integralTag1,
+		java.lang.Long     integralTag2,
+		java.lang.Long     integralTag3,
+		java.lang.Long     integralTag4,
+		java.lang.Long     integralTag5,
+		java.lang.String   stringTag1,
+		java.lang.String   stringTag2,
+		java.lang.String   stringTag3,
+		java.lang.String   stringTag4,
+		java.lang.String   stringTag5,
+		java.lang.String   stringTag6,
+		java.lang.Byte     rightOpen,
+		java.lang.Byte     rightVisitor,
+		java.lang.Byte     rightRemote
 	) {
 		this.id = id;
 		this.doorId = doorId;
@@ -63,6 +93,21 @@ public class EhDoorAuth implements java.io.Serializable {
 		this.phone = phone;
 		this.createTime = createTime;
 		this.status = status;
+		this.driver = driver;
+		this.integralTag1 = integralTag1;
+		this.integralTag2 = integralTag2;
+		this.integralTag3 = integralTag3;
+		this.integralTag4 = integralTag4;
+		this.integralTag5 = integralTag5;
+		this.stringTag1 = stringTag1;
+		this.stringTag2 = stringTag2;
+		this.stringTag3 = stringTag3;
+		this.stringTag4 = stringTag4;
+		this.stringTag5 = stringTag5;
+		this.stringTag6 = stringTag6;
+		this.rightOpen = rightOpen;
+		this.rightVisitor = rightVisitor;
+		this.rightRemote = rightRemote;
 	}
 
 	public java.lang.Long getId() {
@@ -183,5 +228,125 @@ public class EhDoorAuth implements java.io.Serializable {
 
 	public void setStatus(java.lang.Byte status) {
 		this.status = status;
+	}
+
+	public java.lang.String getDriver() {
+		return this.driver;
+	}
+
+	public void setDriver(java.lang.String driver) {
+		this.driver = driver;
+	}
+
+	public java.lang.Long getIntegralTag1() {
+		return this.integralTag1;
+	}
+
+	public void setIntegralTag1(java.lang.Long integralTag1) {
+		this.integralTag1 = integralTag1;
+	}
+
+	public java.lang.Long getIntegralTag2() {
+		return this.integralTag2;
+	}
+
+	public void setIntegralTag2(java.lang.Long integralTag2) {
+		this.integralTag2 = integralTag2;
+	}
+
+	public java.lang.Long getIntegralTag3() {
+		return this.integralTag3;
+	}
+
+	public void setIntegralTag3(java.lang.Long integralTag3) {
+		this.integralTag3 = integralTag3;
+	}
+
+	public java.lang.Long getIntegralTag4() {
+		return this.integralTag4;
+	}
+
+	public void setIntegralTag4(java.lang.Long integralTag4) {
+		this.integralTag4 = integralTag4;
+	}
+
+	public java.lang.Long getIntegralTag5() {
+		return this.integralTag5;
+	}
+
+	public void setIntegralTag5(java.lang.Long integralTag5) {
+		this.integralTag5 = integralTag5;
+	}
+
+	public java.lang.String getStringTag1() {
+		return this.stringTag1;
+	}
+
+	public void setStringTag1(java.lang.String stringTag1) {
+		this.stringTag1 = stringTag1;
+	}
+
+	public java.lang.String getStringTag2() {
+		return this.stringTag2;
+	}
+
+	public void setStringTag2(java.lang.String stringTag2) {
+		this.stringTag2 = stringTag2;
+	}
+
+	public java.lang.String getStringTag3() {
+		return this.stringTag3;
+	}
+
+	public void setStringTag3(java.lang.String stringTag3) {
+		this.stringTag3 = stringTag3;
+	}
+
+	public java.lang.String getStringTag4() {
+		return this.stringTag4;
+	}
+
+	public void setStringTag4(java.lang.String stringTag4) {
+		this.stringTag4 = stringTag4;
+	}
+
+	public java.lang.String getStringTag5() {
+		return this.stringTag5;
+	}
+
+	public void setStringTag5(java.lang.String stringTag5) {
+		this.stringTag5 = stringTag5;
+	}
+
+	public java.lang.String getStringTag6() {
+		return this.stringTag6;
+	}
+
+	public void setStringTag6(java.lang.String stringTag6) {
+		this.stringTag6 = stringTag6;
+	}
+
+	public java.lang.Byte getRightOpen() {
+		return this.rightOpen;
+	}
+
+	public void setRightOpen(java.lang.Byte rightOpen) {
+		this.rightOpen = rightOpen;
+	}
+
+	public java.lang.Byte getRightVisitor() {
+		return this.rightVisitor;
+	}
+
+	public void setRightVisitor(java.lang.Byte rightVisitor) {
+		this.rightVisitor = rightVisitor;
+	}
+
+	public java.lang.Byte getRightRemote() {
+		return this.rightRemote;
+	}
+
+	public void setRightRemote(java.lang.Byte rightRemote) {
+		this.rightRemote = rightRemote;
 	}
 }
