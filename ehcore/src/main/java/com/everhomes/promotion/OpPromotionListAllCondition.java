@@ -54,6 +54,7 @@ public class OpPromotionListAllCondition implements OpPromotionCondition, OpProm
                 break;
             case USER:
                 visitor.setValue(scope.getScopeId());
+                promotionUserService.listUserByUserId(visitor, this);
             default:
                 LOGGER.error("scopeType not found");
                 break;
