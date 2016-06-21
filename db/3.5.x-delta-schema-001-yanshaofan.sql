@@ -4,7 +4,7 @@
 DROP TABLE IF EXISTS `eh_user_launch_pad_items`;
 
 CREATE TABLE `eh_user_launch_pad_items`(
-    `id` BIGINT NOT NULL,
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
     `item_id` BIGINT NOT NULL,
     `owner_type` varchar(64) NOT NULL COMMENT 'community, organization',
     `owner_id` BIGINT(4) NOT NULL,
@@ -17,3 +17,5 @@ CREATE TABLE `eh_user_launch_pad_items`(
     `create_time` DATETIME,
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
+
+
