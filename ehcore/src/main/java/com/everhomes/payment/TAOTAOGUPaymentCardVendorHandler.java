@@ -350,9 +350,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		
 		Map<String, Object> param = new HashMap<String, Object>();
 		param.put("BranchCode", brandCode);
-		//param.put("CardId", "5882572900500000182");
-		//param.put("CardId", "5882572900500005884");
-		param.put("CardId", "");
+		param.put("CardId", card.getCardNo());
 		param.put("EndCardId", "");
 		param.put("MerchId", "");
 		param.put("TerminalId", "");
@@ -470,6 +468,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		}
 		Calendar c = Calendar.getInstance();
 		c.setTime(d);
+		c.set(Calendar.DAY_OF_MONTH, 1);
 		c.set(Calendar.HOUR_OF_DAY, 0);
 		c.set(Calendar.MINUTE, 0);
 		c.set(Calendar.SECOND, 0);
