@@ -1,23 +1,17 @@
 //
-// EvhListDoorAccessResponse.h
+// EvhAclinkRemoteOpenCommand.h
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
-#import "EvhDoorAccessDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhListDoorAccessResponse
+// EvhAclinkRemoteOpenCommand
 //
-@interface EvhListDoorAccessResponse
+@interface EvhAclinkRemoteOpenCommand
     : NSObject<EvhJsonSerializable>
 
 
-@property(nonatomic, copy) NSNumber* nextPageAnchor;
-
-@property(nonatomic, copy) NSNumber* role;
-
-// item type EvhDoorAccessDTO*
-@property(nonatomic, strong) NSMutableArray* doors;
+@property(nonatomic, copy) NSNumber* authId;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
