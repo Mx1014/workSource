@@ -8,6 +8,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -357,13 +358,16 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		param.put("TerminalId", "");
 		param.put("StartDate", "");
 		param.put("Enddate", "");
-		param.put("TransType", "");
+		param.put("TransType", "203");
 		param.put("PageNumber", cmd.getPageAnchor()==null?"1":String.valueOf(cmd.getPageAnchor()));
 		param.put("PageSize", cmd.getPageSize()==null?"10":String.valueOf(cmd.getPageSize()));
 		
-		ResponseEntiy responseEntiy = null;
+		ResponseEntiy rechargeResponseEntiy = null;
+		ResponseEntiy consumeResponseEntiy = null;
 		try {
-			responseEntiy = TAOTAOGUHttpUtil.post(vendorDataMap,"1030",param);
+			rechargeResponseEntiy = TAOTAOGUHttpUtil.post(vendorDataMap,"1030",param);
+			param.put("TransType", "101");
+			consumeResponseEntiy = TAOTAOGUHttpUtil.post(vendorDataMap,"1030",param);
 		} catch (Exception e) {
 			LOGGER.error("the listCardTransactions request of taotaogu is failed {}.",e);
 			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
@@ -371,21 +375,24 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 							String.valueOf(PaymentCardErrorCode.ERROR_SERVER_REQUEST),
 							UserContext.current().getUser().getLocale(),"the listCardTransactions request of taotaogu is failed."));
 		}
-		if(!responseEntiy.isSuccess()){
-			LOGGER.error("the listCardTransactions request of taotaogu is failed {}.",responseEntiy.toString());
+		if(!rechargeResponseEntiy.isSuccess() || !consumeResponseEntiy.isSuccess()){
+			LOGGER.error("the listCardTransactions request of taotaogu is failed {}.",rechargeResponseEntiy.toString());
 			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
 					localeStringService.getLocalizedString(String.valueOf(PaymentCardErrorCode.SCOPE), 
 							String.valueOf(PaymentCardErrorCode.ERROR_SERVER_REQUEST),
 							UserContext.current().getUser().getLocale(),"the listCardTransactions request of taotaogu is failed."));
 		}
-		Map map = responseEntiy.getData();
+		Map rechargeMap = rechargeResponseEntiy.getData();
+		Map consumeMap = consumeResponseEntiy.getData();
 		List<CardTransactionOfMonth> resultList = new ArrayList<>();
-		if(map != null){
+		if(rechargeMap != null && consumeMap != null){
 			
-			Double count = (Double)map.get("Count");
-			List<Map<String,Object>> list = (List<Map<String, Object>>) map.get("Row");
+			Double count = (Double)rechargeMap.get("Count");
+			List<Map<String,Object>> rechargeList = (List<Map<String, Object>>) rechargeMap.get("Row");
+			List<Map<String,Object>> consumeList = (List<Map<String, Object>>) consumeMap.get("Row");
+			rechargeList.addAll(consumeList);
 			outer:
-			for(Map<String,Object> m:list){
+			for(Map<String,Object> m:rechargeList){
 				
 				BigDecimal consumeAmount = new BigDecimal(0);
 				BigDecimal rechargeAmount = new BigDecimal(0);
@@ -407,10 +414,10 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				
 				dto.setStatus((String)m.get("ProcStatus"));
 				String recvTime = (String)m.get("RecvTime");
-				dto.setTransactionTime(StrTotimestamp2(recvTime));
+				dto.setTransactionTime(StrToLong(recvTime));
 				
 				for(CardTransactionOfMonth ctm:resultList){
-					if(ctm.getDate().getTime() == StrTotimestamp2(recvTime).getTime()){
+					if(ctm.getDate().equals(StrToDate(recvTime))){
 						List<CardTransactionFromVendorDTO> requests = ctm.getRequests();
 						ctm.setConsumeAmount(ctm.getConsumeAmount().add(consumeAmount));
 						ctm.setRechargeAmount(ctm.getRechargeAmount().add(rechargeAmount));
@@ -422,7 +429,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				List<CardTransactionFromVendorDTO> cardTransactionList = new ArrayList<>();
 				cardTransactionList.add(dto);
 				cardTransactionOfMonth.setRequests(cardTransactionList);
-				cardTransactionOfMonth.setDate(StrTotimestamp2(recvTime));
+				cardTransactionOfMonth.setDate(StrToDate(recvTime));
 				cardTransactionOfMonth.setConsumeAmount(consumeAmount);
 				cardTransactionOfMonth.setRechargeAmount(rechargeAmount);
 				resultList.add(cardTransactionOfMonth);
@@ -442,7 +449,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		return new Timestamp(d.getTime());
 	}
  
-	private Timestamp StrTotimestamp2(String date){
+	private Long StrToLong(String date){
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 		Date d = null;
 		try {
@@ -450,7 +457,23 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		} catch (ParseException e) {
 			return null;
 		}
-		return new Timestamp(d.getTime());
+		return d.getTime();
+	}
+	
+	private Long StrToDate(String date){
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+		Date d = null;
+		try {
+			d = sdf.parse(date);
+		} catch (ParseException e) {
+			return null;
+		}
+		Calendar c = Calendar.getInstance();
+		c.setTime(d);
+		c.set(Calendar.HOUR_OF_DAY, 0);
+		c.set(Calendar.MINUTE, 0);
+		c.set(Calendar.SECOND, 0);
+		return c.getTime().getTime();
 	}
 
 	@Override

@@ -8,15 +8,16 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 public class CardTransactionOfMonth implements Comparable<CardTransactionOfMonth>{
-	private Timestamp date;
+	private Long date;
 	private BigDecimal consumeAmount;
 	private BigDecimal rechargeAmount;
 	@ItemType(CardTransactionFromVendorDTO.class)
 	private List<CardTransactionFromVendorDTO> requests;
-	public Timestamp getDate() {
+	
+	public Long getDate() {
 		return date;
 	}
-	public void setDate(Timestamp date) {
+	public void setDate(Long date) {
 		this.date = date;
 	}
 	public BigDecimal getConsumeAmount() {
@@ -44,9 +45,9 @@ public class CardTransactionOfMonth implements Comparable<CardTransactionOfMonth
     }
 	@Override
 	public int compareTo(CardTransactionOfMonth o) {
-		if(this.date.getTime() < o.date.getTime())
+		if(this.date < o.date)
 			return 1;
-		if(this.date.getTime() > o.date.getTime())
+		if(this.date > o.date)
 			return -1;
 		return 0;
 	}
@@ -56,7 +57,7 @@ public class CardTransactionOfMonth implements Comparable<CardTransactionOfMonth
         if(this == obj)
         	return true;
         if(obj instanceof CardTransactionOfMonth)
-        	return this.date.getTime() == ((CardTransactionOfMonth)obj).date.getTime();
+        	return this.date == ((CardTransactionOfMonth)obj).date;
         return false;
     }
 }

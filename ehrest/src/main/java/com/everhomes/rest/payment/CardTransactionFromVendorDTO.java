@@ -34,7 +34,7 @@ public class CardTransactionFromVendorDTO {
 	private java.lang.Byte       consumeType;
 	private java.lang.String     itemName;
 	private java.math.BigDecimal amount;
-	private java.sql.Timestamp   transactionTime;
+	private Long   transactionTime;
 	private String status;
 	
 	private String merchant;
@@ -108,11 +108,11 @@ public class CardTransactionFromVendorDTO {
 		this.amount = amount;
 	}
 
-	public java.sql.Timestamp getTransactionTime() {
+	public Long getTransactionTime() {
 		return transactionTime;
 	}
 
-	public void setTransactionTime(java.sql.Timestamp transactionTime) {
+	public void setTransactionTime(Long transactionTime) {
 		this.transactionTime = transactionTime;
 	}
 
