@@ -1585,6 +1585,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         DoorLinglingExtraKeyDTO extra = new DoorLinglingExtraKeyDTO();
         extra.setAuthLevel(0l);
+        extra.setAuthStorey(1l);
         extra.setStoreyAuthList(new ArrayList<Long>());
         
         try {
