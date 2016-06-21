@@ -40,6 +40,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhRentalBillsDao;
 import com.everhomes.server.schema.tables.daos.EhRentalRulesDao;
 import com.everhomes.server.schema.tables.daos.EhRentalSiteItemsDao;
+import com.everhomes.server.schema.tables.daos.EhRentalSiteRulesDao;
 import com.everhomes.server.schema.tables.daos.EhRentalSitesDao;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhRentalBillAttachments;
@@ -1387,6 +1388,25 @@ public class RentalProviderImpl implements RentalProvider {
 		step.where(condition);
 		Integer result = step.fetchOne().value1().intValue();
 		return result;
+	}
+
+	@Override
+	public List<RentalSiteRule> findRentalSiteRuleByDate(Long rentalSiteId,
+			Integer siteNumber, Timestamp beginTime, Timestamp endTime,
+			List<Byte> ampmList, String rentalDate) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void updateRentalSiteRule(RentalSiteRule rsr) {
+		assert (rsr.getId() == null);
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRentalSiteRulesDao dao = new EhRentalSiteRulesDao(context.configuration());
+		dao.update(rsr);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRentalSiteRules.class,
+				rsr.getId());
 	}
 
 	

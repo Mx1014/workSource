@@ -192,7 +192,8 @@ CREATE TABLE `eh_rental_site_rules` (
 `multi_time_interval` TINYINT(4)    COMMENT '是否允许预约多个时段 1是 0否',
 `launch_pad_item_id` BIGINT(20)    COMMENT '广场图标id',
 `site_number` INT  COMMENT '场所号',
-
+`halfsite_price` DECIMAL(10,2)   COMMENT '半场折后价',
+`halfsite_original_price` DECIMAL(10,2)   COMMENT '半场原价（如果不为null则price为打折价）',
  PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4	
 ;

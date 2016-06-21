@@ -207,4 +207,18 @@ public class EhRentalSiteRulesDao extends org.jooq.impl.DAOImpl<com.everhomes.se
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchBySiteNumber(java.lang.Integer... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES.SITE_NUMBER, values);
 	}
+
+	/**
+	 * Fetch records that have <code>halfsite_price IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchByHalfsitePrice(java.math.BigDecimal... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES.HALFSITE_PRICE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>halfsite_original_price IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSiteRules> fetchByHalfsiteOriginalPrice(java.math.BigDecimal... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalSiteRules.EH_RENTAL_SITE_RULES.HALFSITE_ORIGINAL_PRICE, values);
+	}
 }

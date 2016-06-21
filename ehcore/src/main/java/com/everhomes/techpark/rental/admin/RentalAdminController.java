@@ -237,7 +237,7 @@ public class RentalAdminController extends ControllerBase {
 	@RequestMapping("addRentalSiteRules")
 	@RestReturn(value = String.class)
 	public RestResponse addRentalSiteRules(@Valid AddRentalSiteRulesAdminCommand cmd) {
-//		rentalService.addRentalSiteSimpleRules(cmd);
+		rentalService.addRentalSiteSimpleRules(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteRules extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord> {
 
-	private static final long serialVersionUID = 1666876440;
+	private static final long serialVersionUID = -1335225856;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_site_rules</code>
@@ -145,6 +145,16 @@ public class EhRentalSiteRules extends org.jooq.impl.TableImpl<com.everhomes.ser
 	 * The column <code>ehcore.eh_rental_site_rules.site_number</code>. 场所号
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.lang.Integer> SITE_NUMBER = createField("site_number", org.jooq.impl.SQLDataType.INTEGER, this, "场所号");
+
+	/**
+	 * The column <code>ehcore.eh_rental_site_rules.halfsite_price</code>. 半场折后价
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.math.BigDecimal> HALFSITE_PRICE = createField("halfsite_price", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "半场折后价");
+
+	/**
+	 * The column <code>ehcore.eh_rental_site_rules.halfsite_original_price</code>. 半场原价（如果不为null则price为打折价）
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSiteRulesRecord, java.math.BigDecimal> HALFSITE_ORIGINAL_PRICE = createField("halfsite_original_price", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "半场原价（如果不为null则price为打折价）");
 
 	/**
 	 * Create a <code>ehcore.eh_rental_site_rules</code> table reference

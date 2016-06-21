@@ -14,8 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>rentalDate：预定日期</li>
  * <li>startTime：开始时间</li>
  * <li>endTime：结束时间</li>
- * <li>rentalSiteRuleIds：预定单元格列表List<Long></li> 
- * <li>rentalcount：预定场所数量</li> 
+ * <li>rules：预定单元格列表{@link com.everhomes.rest.techpark.rental.rentalBillRuleDTO}</li>  
  * </ul>
  */
 public class AddRentalBillCommand {
@@ -27,10 +26,8 @@ public class AddRentalBillCommand {
 	@NotNull
 	private Long endTime;
 	@NotNull
-	@ItemType(Long.class)
-	private List<Long> rentalSiteRuleIds;
-	@NotNull
-	private Double rentalCount;
+	@ItemType(rentalBillRuleDTO.class)
+	private List<rentalBillRuleDTO> rules; 
 //	@ItemType(SiteItemDTO.class)
 //	private List<SiteItemDTO> rentalItems;
 

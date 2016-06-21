@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * 给资源增加单元格
- * <li>rentalSiteId: 资源id</li> 
+ * <li>ruleId: 选取单元格id</li> 
  * <li>beginTime: 开始时间对于按小时则是N或者N.5，对于半天则是0早上1下午2晚上</li>
  * <li>endTime: 结束时间对于按小时则是N或者N.5，对于半天则是0早上1下午2晚上</li>
  * <li>status: 状态，0启用 -1停用参考{@link com.everhomes.rest.techpark.rental.RentalSiteStatus}</li>
@@ -18,7 +18,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class UpdateRentalSiteRulesAdminCommand {
-	private Long rentalSiteId;
+	private Long ruleId;
 	//按小时或者半天
 	private Double beginTime;
 	private Double endTime;
@@ -27,6 +27,8 @@ public class UpdateRentalSiteRulesAdminCommand {
 
 	private java.math.BigDecimal originalPrice;
 	private java.math.BigDecimal price;
+	private java.math.BigDecimal halfsitePrice;
+	private java.math.BigDecimal halfsiteOriginalPrice;
 
 
 	private java.lang.Double     counts;
@@ -38,12 +40,6 @@ public class UpdateRentalSiteRulesAdminCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-	public Long getRentalSiteId() {
-		return rentalSiteId;
-	}
-	public void setRentalSiteId(Long rentalSiteId) {
-		this.rentalSiteId = rentalSiteId;
-	}
 	public Double getBeginTime() {
 		return beginTime;
 	}
@@ -97,6 +93,24 @@ public class UpdateRentalSiteRulesAdminCommand {
 	}
 	public void setEndDate(Long endDate) {
 		this.endDate = endDate;
+	}
+	public java.math.BigDecimal getHalfsitePrice() {
+		return halfsitePrice;
+	}
+	public void setHalfsitePrice(java.math.BigDecimal halfsitePrice) {
+		this.halfsitePrice = halfsitePrice;
+	}
+	public java.math.BigDecimal getHalfsiteOriginalPrice() {
+		return halfsiteOriginalPrice;
+	}
+	public void setHalfsiteOriginalPrice(java.math.BigDecimal halfsiteOriginalPrice) {
+		this.halfsiteOriginalPrice = halfsiteOriginalPrice;
+	}
+	public Long getRuleId() {
+		return ruleId;
+	}
+	public void setRuleId(Long ruleId) {
+		this.ruleId = ruleId;
 	}
 	
 }

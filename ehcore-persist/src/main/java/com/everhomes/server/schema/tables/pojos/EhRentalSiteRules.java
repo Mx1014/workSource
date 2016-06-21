@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSiteRules implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1021954811;
+	private static final long serialVersionUID = 2144808127;
 
 	private java.lang.Long       id;
 	private java.lang.Long       rentalSiteId;
@@ -37,6 +37,8 @@ public class EhRentalSiteRules implements java.io.Serializable {
 	private java.lang.Byte       multiTimeInterval;
 	private java.lang.Long       launchPadItemId;
 	private java.lang.Integer    siteNumber;
+	private java.math.BigDecimal halfsitePrice;
+	private java.math.BigDecimal halfsiteOriginalPrice;
 
 	public EhRentalSiteRules() {}
 
@@ -64,7 +66,9 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		java.lang.Byte       multiUnit,
 		java.lang.Byte       multiTimeInterval,
 		java.lang.Long       launchPadItemId,
-		java.lang.Integer    siteNumber
+		java.lang.Integer    siteNumber,
+		java.math.BigDecimal halfsitePrice,
+		java.math.BigDecimal halfsiteOriginalPrice
 	) {
 		this.id = id;
 		this.rentalSiteId = rentalSiteId;
@@ -90,6 +94,8 @@ public class EhRentalSiteRules implements java.io.Serializable {
 		this.multiTimeInterval = multiTimeInterval;
 		this.launchPadItemId = launchPadItemId;
 		this.siteNumber = siteNumber;
+		this.halfsitePrice = halfsitePrice;
+		this.halfsiteOriginalPrice = halfsiteOriginalPrice;
 	}
 
 	public java.lang.Long getId() {
@@ -282,5 +288,21 @@ public class EhRentalSiteRules implements java.io.Serializable {
 
 	public void setSiteNumber(java.lang.Integer siteNumber) {
 		this.siteNumber = siteNumber;
+	}
+
+	public java.math.BigDecimal getHalfsitePrice() {
+		return this.halfsitePrice;
+	}
+
+	public void setHalfsitePrice(java.math.BigDecimal halfsitePrice) {
+		this.halfsitePrice = halfsitePrice;
+	}
+
+	public java.math.BigDecimal getHalfsiteOriginalPrice() {
+		return this.halfsiteOriginalPrice;
+	}
+
+	public void setHalfsiteOriginalPrice(java.math.BigDecimal halfsiteOriginalPrice) {
+		this.halfsiteOriginalPrice = halfsiteOriginalPrice;
 	}
 }

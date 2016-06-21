@@ -15,6 +15,8 @@ import com.everhomes.util.StringHelper;
  * <li>TimeStep：坐标轴单位时间（小时）</li> 
  * <li>price：场所价格</li> 
  * <li>	originalPrice：     	原价（如果不为null则price为打折价）	</li>
+ * <li>halfsitePrice：半场价格</li> 
+ * <li>	halfsiteOriginalPrice：     	半场原价（如果不为null则price为打折价）	</li>
  * <li>	exclusiveFlag：     	是否为独占资源0否 1 是	</li>
  * <li>	autoAssign：        	是否动态分配 1是 0否	</li>
  * <li>	multiUnit：         	是否允许预约多个场所 1是 0否	</li>
@@ -35,6 +37,8 @@ public class RentalSiteRulesDTO {
 	private Double unit;
 	private java.math.BigDecimal price;
 	private java.math.BigDecimal originalPrice;
+	private java.math.BigDecimal halfsitePrice;
+	private java.math.BigDecimal halfsiteOriginalPrice;
 	private java.lang.Byte       exclusiveFlag;
 	private java.lang.Byte       autoAssign;
 	private java.lang.Byte       multiUnit;
@@ -281,5 +285,29 @@ public class RentalSiteRulesDTO {
 
 	public void setSiteNumber(String siteNumber) {
 		this.siteNumber = siteNumber;
+	}
+
+
+
+	public java.math.BigDecimal getHalfsitePrice() {
+		return halfsitePrice;
+	}
+
+
+
+	public void setHalfsitePrice(java.math.BigDecimal halfsitePrice) {
+		this.halfsitePrice = halfsitePrice;
+	}
+
+
+
+	public java.math.BigDecimal getHalfsiteOriginalPrice() {
+		return halfsiteOriginalPrice;
+	}
+
+
+
+	public void setHalfsiteOriginalPrice(java.math.BigDecimal halfsiteOriginalPrice) {
+		this.halfsiteOriginalPrice = halfsiteOriginalPrice;
 	}
 }

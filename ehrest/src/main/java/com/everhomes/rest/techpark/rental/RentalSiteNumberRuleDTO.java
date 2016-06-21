@@ -6,12 +6,13 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 /**
  * <ul>
- * <li>rentalDate：Long 日期</li>
+ * <li>siteNumber：场所号</li>
  * <li>siteRules：单元格列表{@link com.everhomes.rest.techpark.rental.RentalSiteRulesDTO}</li> 
  * </ul>
  */
-public class RentalSiteDayRulesDTO {
-	private Long rentalDate;
+public class RentalSiteNumberRuleDTO {
+
+	private String siteNumber;
 	@ItemType(RentalSiteRulesDTO.class)
 	private List<RentalSiteRulesDTO> siteRules;
 	
@@ -20,6 +21,14 @@ public class RentalSiteDayRulesDTO {
         return StringHelper.toJsonString(this);
     }
 
+	public String getSiteNumber() {
+		return siteNumber;
+	}
+
+	public void setSiteNumber(String siteNumber) {
+		this.siteNumber = siteNumber;
+	}
+
 	public List<RentalSiteRulesDTO> getSiteRules() {
 		return siteRules;
 	}
@@ -27,14 +36,5 @@ public class RentalSiteDayRulesDTO {
 	public void setSiteRules(List<RentalSiteRulesDTO> siteRules) {
 		this.siteRules = siteRules;
 	}
-
-	public Long getRentalDate() {
-		return rentalDate;
-	}
-
-	public void setRentalDate(Long rentalDate) {
-		this.rentalDate = rentalDate;
-	}
- 
- 
+	
 }

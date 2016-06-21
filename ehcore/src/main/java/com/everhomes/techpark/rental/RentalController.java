@@ -17,15 +17,16 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.techpark.rental.AddRentalBillCommand;
 import com.everhomes.rest.techpark.rental.AddRentalBillItemCommand;
 import com.everhomes.rest.techpark.rental.AddRentalBillItemCommandResponse;
-import com.everhomes.rest.techpark.rental.AddRentalSiteCommand;
 import com.everhomes.rest.techpark.rental.CancelRentalBillCommand;
-import com.everhomes.rest.techpark.rental.ConfirmBillCommand;
 import com.everhomes.rest.techpark.rental.DeleteItemAdminCommand;
 import com.everhomes.rest.techpark.rental.DeleteRentalBillCommand;
-import com.everhomes.rest.techpark.rental.DeleteRentalSiteCommand;
 import com.everhomes.rest.techpark.rental.DeleteRentalSiteRulesCommand;
 import com.everhomes.rest.techpark.rental.DisableRentalSiteCommand;
 import com.everhomes.rest.techpark.rental.EnableRentalSiteCommand;
+import com.everhomes.rest.techpark.rental.FindAutoAssignRentalSiteDayStatusCommand;
+import com.everhomes.rest.techpark.rental.FindAutoAssignRentalSiteDayStatusResponse;
+import com.everhomes.rest.techpark.rental.FindAutoAssignRentalSiteWeekStatusCommand;
+import com.everhomes.rest.techpark.rental.FindAutoAssignRentalSiteWeekStatusResponse;
 import com.everhomes.rest.techpark.rental.FindRentalBillsCommand;
 import com.everhomes.rest.techpark.rental.FindRentalBillsCommandResponse;
 import com.everhomes.rest.techpark.rental.FindRentalSiteItemsCommand;
@@ -36,20 +37,10 @@ import com.everhomes.rest.techpark.rental.FindRentalSiteWeekStatusCommand;
 import com.everhomes.rest.techpark.rental.FindRentalSiteWeekStatusCommandResponse;
 import com.everhomes.rest.techpark.rental.FindRentalSitesCommand;
 import com.everhomes.rest.techpark.rental.FindRentalSitesCommandResponse;
-import com.everhomes.rest.techpark.rental.FindRentalSitesStatusCommand;
-import com.everhomes.rest.techpark.rental.FindRentalSitesStatusCommandResponse;
-import com.everhomes.rest.techpark.rental.GetRentalSiteTypeResponse;
-import com.everhomes.rest.techpark.rental.GetRentalTypeRuleCommand;
-import com.everhomes.rest.techpark.rental.GetRentalTypeRuleCommandResponse;
-import com.everhomes.rest.techpark.rental.ListRentalBillCountCommand;
-import com.everhomes.rest.techpark.rental.ListRentalBillCountCommandResponse;
 import com.everhomes.rest.techpark.rental.ListRentalBillsCommand;
 import com.everhomes.rest.techpark.rental.ListRentalBillsCommandResponse;
 import com.everhomes.rest.techpark.rental.OnlinePayCallbackCommand;
 import com.everhomes.rest.techpark.rental.RentalBillDTO;
-import com.everhomes.rest.techpark.rental.UpdateRentalRuleCommand;
-import com.everhomes.rest.techpark.rental.UpdateRentalSiteCommand;
-import com.everhomes.rest.techpark.rental.VerifyRentalBillCommandResponse;
 import com.everhomes.techpark.punch.PunchController;
 
 /**
@@ -305,7 +296,7 @@ public class RentalController extends ControllerBase {
 //	}
 	
 	/**
-	 * <b>URL: /rental/deleteRentalSiteSimpleRules</b>
+	 * <b>URL: /rental/deleteRentalSiteRules</b>
 	 * <p>
 	 * 关闭日期-删除某些日期的rules
 	 * </p>
@@ -521,7 +512,43 @@ public class RentalController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+	/**
+	 * <b>URL: /rental/findAutoAssignRentalSiteWeekStatus</b>
+	 * <p>
+	 * 查询带场所编号的资源一周的单元格
+	 * </p>
+	 */
+
+	@RequestMapping("findAutoAssignRentalSiteWeekStatus")
+	@RestReturn(value = FindAutoAssignRentalSiteWeekStatusResponse.class)
+	public RestResponse findAutoAssignRentalSiteWeekStatus(@Valid FindAutoAssignRentalSiteWeekStatusCommand cmd) {
+		FindAutoAssignRentalSiteWeekStatusResponse findRentalSiteDayStatusCommandResponse = rentalService
+				.findAutoAssignRentalSiteWeekStatus(cmd);
+		RestResponse response = new RestResponse(
+				findRentalSiteDayStatusCommandResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	/**
+	 * <b>URL: /rental/findAutoAssignRentalSiteDayStatus</b>
+	 * <p>
+	 * 查询带场所编号的资源一天的单元格
+	 * </p>
+	 */
+
+	@RequestMapping("findAutoAssignRentalSiteDayStatus")
+	@RestReturn(value = FindAutoAssignRentalSiteDayStatusResponse.class)
+	public RestResponse findAutoAssignRentalSiteDayStatus(@Valid FindAutoAssignRentalSiteDayStatusCommand cmd) {
+		FindAutoAssignRentalSiteDayStatusResponse findRentalSiteDayStatusCommandResponse = rentalService
+				.findAutoAssignRentalSiteDayStatus(cmd);
+		RestResponse response = new RestResponse(
+				findRentalSiteDayStatusCommandResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+		
 //	
 //	/**
 //	 * <b>URL: /rental/findRentalSitesStatus</b>
