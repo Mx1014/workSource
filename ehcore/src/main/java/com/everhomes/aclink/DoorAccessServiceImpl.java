@@ -1206,6 +1206,11 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         switch(t) {
         case ENTERPRISE:
             orgId = da.getOwnerId();
+            try {
+                rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), orgId, PrivilegeConstants.AclinkInnerManager);
+                return true;
+            } catch(Exception ex) {
+            }
             break;
         case COMMUNITY:
             List<OrganizationCommunity> orgs = organizationProvider.listOrganizationByCommunityId(da.getOwnerId());
@@ -1213,15 +1218,14 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 return false;
             }
             orgId = orgs.get(0).getId();
+            try {
+                rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), orgId, PrivilegeConstants.AclinkManager);
+                return true;
+            } catch(Exception ex) {
+            }
             break;
         case FAMILY:
             return true;
-        }
-        
-        try {
-            rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), orgId, PrivilegeConstants.AclinkManager);
-            return true;
-        } catch(Exception ex) {
         }
         
         return false;
