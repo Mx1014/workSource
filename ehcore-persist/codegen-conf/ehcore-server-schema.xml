@@ -82,7 +82,7 @@
 		eh_organization_task_targets | eh_business_assigned_namespaces |
 		eh_op_promotion_activities | eh_schedule_tasks | eh_schedule_task_logs | eh_op_promotion_messages | eh_op_promotion_assigned_scopes |
 		eh_pmsy_orders | eh_pmsy_order_items | eh_pmsy_payers | eh_pmsy_communities |
-		eh_namespace_details | eh_wifi_settings | eh_user_launch_pad_items | eh_hot_tags |
+		eh_namespace_details | eh_wifi_settings | eh_user_launch_pad_items | eh_hot_tags | eh_app_urls |
 	
 
         </includes>

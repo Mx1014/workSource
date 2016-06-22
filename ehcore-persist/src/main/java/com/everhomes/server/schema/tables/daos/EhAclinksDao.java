@@ -90,6 +90,13 @@ public class EhAclinksDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sch
 	}
 
 	/**
+	 * Fetch records that have <code>driver IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAclinks> fetchByDriver(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhAclinks.EH_ACLINKS.DRIVER, values);
+	}
+
+	/**
 	 * Fetch records that have <code>integral_tag1 IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAclinks> fetchByIntegralTag1(java.lang.Long... values) {
@@ -157,12 +164,5 @@ public class EhAclinksDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sch
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAclinks> fetchByStringTag5(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhAclinks.EH_ACLINKS.STRING_TAG5, values);
-	}
-
-	/**
-	 * Fetch records that have <code>driver IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhAclinks> fetchByDriver(java.lang.String... values) {
-		return fetch(com.everhomes.server.schema.tables.EhAclinks.EH_ACLINKS.DRIVER, values);
 	}
 }

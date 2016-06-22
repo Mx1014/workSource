@@ -64,6 +64,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhAppPromotions EH_APP_PROMOTIONS = com.everhomes.server.schema.tables.EhAppPromotions.EH_APP_PROMOTIONS;
 
 	/**
+	 * The table ehcore.eh_app_urls
+	 */
+	public static final com.everhomes.server.schema.tables.EhAppUrls EH_APP_URLS = com.everhomes.server.schema.tables.EhAppUrls.EH_APP_URLS;
+
+	/**
 	 * The table ehcore.eh_audit_logs
 	 */
 	public static final com.everhomes.server.schema.tables.EhAuditLogs EH_AUDIT_LOGS = com.everhomes.server.schema.tables.EhAuditLogs.EH_AUDIT_LOGS;
