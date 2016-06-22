@@ -30,3 +30,14 @@ UPDATE eh_user_posts SET target_type = 'activity' WHERE target_id IN (
   AND category_id = 1010);
 
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'hottag', '10001', 'zh_CN', '该标签已是热门标签');
+
+CREATE TABLE `eh_app_urls` (
+`id` BIGINT NOT NULL,
+`namespace_id` INTEGER,
+`name` VARCHAR(128) NOT NULL,
+`os_type` TINYINT(4) NOT NULL DEFAULT '0',
+`download_url` VARCHAR(128) DEFAULT NULL,
+`logo_url` VARCHAR(128) DEFAULT NULL,
+`description` TEXT,
+PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
