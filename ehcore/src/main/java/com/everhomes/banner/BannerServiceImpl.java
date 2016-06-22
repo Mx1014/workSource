@@ -43,6 +43,7 @@ import com.everhomes.rest.banner.admin.ListBannersAdminCommand;
 import com.everhomes.rest.banner.admin.ListBannersAdminCommandResponse;
 import com.everhomes.rest.banner.admin.UpdateBannerAdminCommand;
 import com.everhomes.rest.common.ScopeType;
+import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.organization.pm.ListPropCommunityContactCommand;
@@ -106,7 +107,16 @@ public class BannerServiceImpl implements BannerService {
         User user = UserContext.current().getUser();
         long userId = user.getId();
         Integer namespaceId = (user.getNamespaceId() == null) ? 0 : user.getNamespaceId();
-        String sceneType = cmd.getCurrentSceneType();
+        // 对于老版本客户端，没有场景概念，此时它传过来的场景为null，但数据却已经有场景，需要根据小区类型来区分场景 by lqs 20160601
+        // String sceneType = cmd.getCurrentSceneType();
+        String sceneType = cmd.getSceneType();
+        if(sceneType == null) {
+            if(CommunityType.fromCode(community.getCommunityType()) == CommunityType.COMMERCIAL) {
+                sceneType = SceneType.PARK_TOURIST.getCode();
+            } else {
+                sceneType = SceneType.DEFAULT.getCode();
+            }
+        }
         //String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
         //query user relate banners
         List<Banner> countryBanners = bannerProvider.findBannersByTagAndScope(namespaceId, sceneType, cmd.getBannerLocation(), cmd.getBannerGroup(),
@@ -336,7 +346,7 @@ public class BannerServiceImpl implements BannerService {
                 }
             }
         }catch(Exception e){
-            LOGGER.error("Parser json is error,communityId=" + communityId,e.getMessage());
+            LOGGER.error("Parser json is error, communityId={}, banner={}", communityId, banner, e);
         }
         
         return jsonObject.toJSONString();
@@ -441,40 +451,46 @@ public class BannerServiceImpl implements BannerService {
         }
         
         // 增加场景信息，由于jooq生成的pojo不带默认值，场景类型是not null类型，故在没值时需要补充默认值 by lqs 2010505
-        SceneType sceneType = SceneType.fromCode(cmd.getSceneType());
+        List<String> sceneTypeList = cmd.getSceneTypeList();
+        if(sceneTypeList == null) {
+            sceneTypeList = new ArrayList<String>();
+            sceneTypeList.add(SceneType.DEFAULT.getCode());
+        }
         
         User user = UserContext.current().getUser();
         long userId = user.getId();
         List<BannerScope> scopes = cmd.getScopes();
-        scopes.forEach(scope ->{
-            Banner banner = new Banner();
-            banner.setActionType(cmd.getActionType());
-            banner.setActionData(cmd.getActionData());
-            banner.setAppid(cmd.getAppid());
-            banner.setCreatorUid(userId);
-            banner.setBannerLocation(cmd.getBannerLocation());
-            banner.setBannerGroup(cmd.getBannerGroup());
-            banner.setName(cmd.getName());
-            banner.setNamespaceId(cmd.getNamespaceId());
-            if(cmd.getStartTime() != null)
-                banner.setStartTime(new Timestamp(cmd.getStartTime()));
-            if(cmd.getEndTime() != null)
-                banner.setEndTime(new Timestamp(cmd.getEndTime()));
-            banner.setStatus(cmd.getStatus());
-            banner.setPosterPath(cmd.getPosterPath());
-            banner.setScopeCode(scope.getScopeCode());
-            banner.setScopeId(scope.getScopeId());
-            banner.setOrder(scope.getOrder());
-            banner.setVendorTag(cmd.getVendorTag());
-            
-            // 增加场景信息，由于jooq生成的pojo不带默认值，场景类型是not null类型，故在没值时需要补充默认值 by lqs 2010505
+        for(String sceneStr : sceneTypeList) {
+            SceneType sceneType = SceneType.fromCode(sceneStr);
             if(sceneType == null) {
-                banner.setSceneType(SceneType.DEFAULT.getCode());
-            } else {
-                banner.setSceneType(sceneType.getCode());
+                LOGGER.error("Invalid scene type, userId={}, sceneType={}, cmd={}", userId, sceneStr, cmd);
+                continue;
             }
-            bannerProvider.createBanner(banner);
-        });
+            scopes.forEach(scope ->{
+                Banner banner = new Banner();
+                banner.setActionType(cmd.getActionType());
+                banner.setActionData(cmd.getActionData());
+                banner.setAppid(cmd.getAppid());
+                banner.setCreatorUid(userId);
+                banner.setBannerLocation(cmd.getBannerLocation());
+                banner.setBannerGroup(cmd.getBannerGroup());
+                banner.setName(cmd.getName());
+                banner.setNamespaceId(cmd.getNamespaceId());
+                if(cmd.getStartTime() != null)
+                    banner.setStartTime(new Timestamp(cmd.getStartTime()));
+                if(cmd.getEndTime() != null)
+                    banner.setEndTime(new Timestamp(cmd.getEndTime()));
+                banner.setStatus(cmd.getStatus());
+                banner.setPosterPath(cmd.getPosterPath());
+                banner.setScopeCode(scope.getScopeCode());
+                banner.setScopeId(scope.getScopeId());
+                banner.setOrder(scope.getOrder());
+                banner.setVendorTag(cmd.getVendorTag());
+                
+                banner.setSceneType(sceneType.getCode());
+                bannerProvider.createBanner(banner);
+            });
+        }
     }
     
     @Override

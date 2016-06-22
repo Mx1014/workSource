@@ -163,7 +163,8 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
 //            qb = QueryBuilders.filteredQuery(qb, fb);
 //        }
         
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
+      //namespaceId by xiongying 20160613
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         FilterBuilder fb = FilterBuilders.termFilter("namespaceId", namespaceId);
         
         // 每个企业（含物业管理公司）都有可能在某个园区内，当客户端提供园区作为过滤条件时，则在园区范围内挑选园区 by lqs 20160512
@@ -173,7 +174,8 @@ public class OrganizationSearcherImpl extends AbstractElasticSearch implements O
         }
         
         // 用于一些场景下只能搜索出普通公司 by sfyan 20160523
-        if(null != cmd.getOrganizationType()) {
+        //empty判断 by xiongying 20160613
+        if(!StringUtils.isEmpty(cmd.getOrganizationType())) {
         	//转小写查 by xiongying 20160524
             FilterBuilder cmntyFilter = FilterBuilders.termFilter("organizationType", cmd.getOrganizationType().toLowerCase());
             fb = FilterBuilders.andFilter(fb, cmntyFilter);

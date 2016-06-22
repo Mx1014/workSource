@@ -19,6 +19,12 @@
 
 @property(nonatomic, copy) NSNumber* authType;
 
+@property(nonatomic, copy) NSNumber* rightOpen;
+
+@property(nonatomic, copy) NSNumber* rightVisitor;
+
+@property(nonatomic, copy) NSNumber* rightRemote;
+
 @property(nonatomic, copy) NSNumber* validFromMs;
 
 @property(nonatomic, copy) NSNumber* validEndMs;

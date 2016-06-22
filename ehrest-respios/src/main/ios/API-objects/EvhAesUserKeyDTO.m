@@ -54,6 +54,8 @@
         [jsonObject setObject: self.hardwareId forKey: @"hardwareId"];
     if(self.doorName)
         [jsonObject setObject: self.doorName forKey: @"doorName"];
+    if(self.authId)
+        [jsonObject setObject: self.authId forKey: @"authId"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -106,6 +108,10 @@
         self.doorName = [jsonObject objectForKey: @"doorName"];
         if(self.doorName && [self.doorName isEqual:[NSNull null]])
             self.doorName = nil;
+
+        self.authId = [jsonObject objectForKey: @"authId"];
+        if(self.authId && [self.authId isEqual:[NSNull null]])
+            self.authId = nil;
 
         return self;
     }

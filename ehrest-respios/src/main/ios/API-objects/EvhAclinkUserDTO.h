@@ -19,9 +19,13 @@
 
 @property(nonatomic, copy) NSString* nickName;
 
-@property(nonatomic, copy) NSNumber* status;
-
 @property(nonatomic, copy) NSNumber* authId;
+
+@property(nonatomic, copy) NSNumber* rightOpen;
+
+@property(nonatomic, copy) NSNumber* rightVisitor;
+
+@property(nonatomic, copy) NSNumber* rightRemote;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

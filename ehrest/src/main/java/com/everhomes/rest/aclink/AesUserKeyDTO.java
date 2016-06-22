@@ -19,6 +19,7 @@ public class AesUserKeyDTO {
     private Long     id;
     private String hardwareId;
     private String doorName;
+    private Long authId;
 
     
 
@@ -162,6 +163,18 @@ public class AesUserKeyDTO {
 
     public void setDoorName(String doorName) {
         this.doorName = doorName;
+    }
+
+
+
+    public Long getAuthId() {
+        return authId;
+    }
+
+
+
+    public void setAuthId(Long authId) {
+        this.authId = authId;
     }
 
 

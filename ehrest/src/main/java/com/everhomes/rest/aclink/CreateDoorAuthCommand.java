@@ -30,6 +30,10 @@ public class CreateDoorAuthCommand {
     @NotNull
     private Byte     authType;
     
+    private Byte rightOpen;
+    private Byte rightVisitor;
+    private Byte rightRemote;
+    
     private Long     validFromMs;
     private Long     validEndMs;
     private String organization;
@@ -98,6 +102,25 @@ public class CreateDoorAuthCommand {
     }
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public Byte getRightOpen() {
+        return rightOpen;
+    }
+    public void setRightOpen(Byte rightOpen) {
+        this.rightOpen = rightOpen;
+    }
+    public Byte getRightVisitor() {
+        return rightVisitor;
+    }
+    public void setRightVisitor(Byte rightVisitor) {
+        this.rightVisitor = rightVisitor;
+    }
+    public Byte getRightRemote() {
+        return rightRemote;
+    }
+    public void setRightRemote(Byte rightRemote) {
+        this.rightRemote = rightRemote;
     }
     @Override
     public String toString() {

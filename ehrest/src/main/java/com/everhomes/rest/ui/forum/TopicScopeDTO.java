@@ -30,6 +30,9 @@ public class TopicScopeDTO {
     private String targetTag;
     private Byte leafFlag;
     private Byte defaultFlag;
+    private Long visibleRegionId;
+    
+    private Byte visibleRegionType;
 
     public Long getId() {
         return id;
@@ -117,6 +120,22 @@ public class TopicScopeDTO {
 
 	public void setDefaultFlag(Byte defaultFlag) {
 		this.defaultFlag = defaultFlag;
+	}
+
+	public Long getVisibleRegionId() {
+		return visibleRegionId;
+	}
+
+	public void setVisibleRegionId(Long visibleRegionId) {
+		this.visibleRegionId = visibleRegionId;
+	}
+
+	public Byte getVisibleRegionType() {
+		return visibleRegionType;
+	}
+
+	public void setVisibleRegionType(Byte visibleRegionType) {
+		this.visibleRegionType = visibleRegionType;
 	}
 
 	@Override

@@ -26,6 +26,7 @@ import javax.validation.Valid;
 
 import net.greghaines.jesque.Job;
 
+import org.apache.commons.lang.time.DateUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -93,6 +94,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.OrganizationTask;
 import com.everhomes.organization.pm.pay.ResultHolder;
+import com.everhomes.promotion.PromotionService;
 import com.everhomes.pusher.PusherAction;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
@@ -228,6 +230,8 @@ import com.everhomes.rest.organization.pm.UpdatePmBillCommand;
 import com.everhomes.rest.organization.pm.UpdatePmBillsCommand;
 import com.everhomes.rest.organization.pm.UpdatePmBillsDto;
 import com.everhomes.rest.organization.pm.applyPropertyMemberCommand;
+import com.everhomes.rest.promotion.OpPromotionRegionPushingCommand;
+import com.everhomes.rest.promotion.OpPromotionScopeType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.user.IdentifierType;
@@ -341,6 +345,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	
     @Autowired
     WorkerPoolFactory workerPoolFactory;
+    
+    @Autowired
+    private PromotionService promotionService;
     
     private String queueName = "property-mgr-push";
 	
@@ -1246,29 +1253,59 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 		this.checkCommunityIdIsNull(cmd.getCommunityId());
 		
-//		this.pushMessage(cmd);
+		List<String> buildingNames = cmd.getBuildingNames();
+		List<Long> buildingIds = cmd.getBuildingIds();
+		List<Long> addressIds = cmd.getAddressIds();
+		List<String> phones = cmd.getMobilePhones();
+		Integer namespaceId = UserContext.getCurrentNamespaceId(null);
+		
+		if(null != addressIds && 0 != addressIds.size()){
+
+			/** 根据楼栋Id获取要推送的企业  **/
+		}else if(null != buildingIds && 0 != buildingIds.size()){
+
+			/** 根据楼栋名称获取要推送的企业**/
+		}else if(null != buildingNames && 0 != buildingNames.size()){
+
+		/** 根据电话号码推送   **/
+		}else if(null != phones && 0 != phones.size()){
+			
+		/** 根据小区获取要推送的企业  **/
+		}else if(null != cmd.getCommunityId()){
+			OpPromotionRegionPushingCommand command = new OpPromotionRegionPushingCommand();
+			Date now = new Date();
+			command.setScopeCode(OpPromotionScopeType.COMMUNITY.getCode());
+			command.setScopeId(cmd.getCommunityId());
+			command.setNamespaceId(namespaceId);
+			command.setContent(cmd.getMessage());
+			command.setStartTime(now.getTime());
+			command.setEndTime(DateUtils.addDays(now, 1).getTime());
+			promotionService.createRegionPushing(command);
+			
+			return;
+		}
 		
 		/**
 		 * 调度执行一键推送
 		 */
 		Job job = new Job(SendNoticeAction.class.getName(),
-                new Object[]{StringHelper.toJsonString(cmd)});
+                new Object[]{StringHelper.toJsonString(cmd), StringHelper.toJsonString(UserContext.current().getUser())});
 		
         jesqueClientFactory.getClientPool().enqueue(queueName, job);
 
 	}
 	
 	@Override
-	public void pushMessage(PropCommunityBuildAddessCommand cmd){
+	public void pushMessage(PropCommunityBuildAddessCommand cmd,User user){
 		Community community = this.checkCommunity(cmd.getCommunityId());
 		
 		if(community.getCommunityType() == CommunityType.RESIDENTIAL.getCode()) {
-			sendNoticeToCommunityPmOwner(cmd);
+			sendNoticeToCommunityPmOwner(cmd, user);
 		} 
 
 		else if(community.getCommunityType() == CommunityType.COMMERCIAL.getCode()) {
 			//sendNoticeToEnterpriseContactor(cmd);
-			this.sendNoticeToOrganizationMember(cmd);
+			this.sendNoticeToOrganizationMember(cmd, user);
 		}
 	}
 
@@ -1340,7 +1377,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 
 	@Override
-	public void sendNoticeToOrganizationMember(PropCommunityBuildAddessCommand cmd) {
+	public void sendNoticeToOrganizationMember(PropCommunityBuildAddessCommand cmd, User user) {
 		Long communityId = cmd.getCommunityId();
 		List<String> buildingNames = cmd.getBuildingNames();
 		List<Long> buildingIds = cmd.getBuildingIds();
@@ -1406,7 +1443,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		}
 		
 		/** 推送消息 **/
-		this.processSmsByMembers(members, cmd.getMessage());
+		this.processSmsByMembers(members, cmd.getMessage(), user);
 	}
 
 	/**
@@ -1468,7 +1505,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	}
 
-	private void processSmsByMembers(List<OrganizationMember> members,String message) {
+	private void processSmsByMembers(List<OrganizationMember> members,String message, User user) {
 
 		List<String> phones = new ArrayList<String>();
 		List<Long> userIds = new ArrayList<Long>();
@@ -1491,13 +1528,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_MSG, message);
 		String templateScope = SmsTemplateCode.SCOPE;
 		int templateId = SmsTemplateCode.WY_SEND_MSG_CODE;
-		String templateLocale = UserContext.current().getUser().getLocale();
 		String[] phoneArray = new String[phones.size()];  
 		phones.toArray(phoneArray);  
-		smsProvider.sendSms(UserContext.current().getUser().getNamespaceId(),phoneArray , templateScope, templateId, templateLocale, variables);
+		smsProvider.sendSms(user.getNamespaceId(),phoneArray , templateScope, templateId, user.getLocale(), variables);
 	}
 
-	public void sendNoticeToCommunityPmOwner(PropCommunityBuildAddessCommand cmd) {
+	public void sendNoticeToCommunityPmOwner(PropCommunityBuildAddessCommand cmd,User user) {
 
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
@@ -1529,7 +1565,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				members.add(member);
 			}
 			if(members.size() > 0)
-				this.processSmsByMembers(members, cmd.getMessage());
+				this.processSmsByMembers(members, cmd.getMessage(), user);
 		//按门牌地址发送：
 		}if(addressIds != null && addressIds.size()  > 0){
 			for (Long addressId : addressIds) {

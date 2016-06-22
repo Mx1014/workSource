@@ -10,7 +10,9 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
@@ -35,10 +37,17 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.locale.LocaleStringService;
+import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.messaging.MessagingService;
 import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
@@ -65,6 +74,8 @@ import com.everhomes.rest.parking.ParkingCardRequestDTO;
 import com.everhomes.rest.parking.ParkingCardRequestStatus;
 import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.parking.ParkingLotDTO;
+import com.everhomes.rest.parking.ParkingLotVendor;
+import com.everhomes.rest.parking.ParkingNotificationTemplateCode;
 import com.everhomes.rest.parking.ParkingOwnerType;
 import com.everhomes.rest.parking.ParkingRechargeOrderDTO;
 import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
@@ -79,6 +90,7 @@ import com.everhomes.rest.parking.SetParkingCardReserveDaysCommand;
 import com.everhomes.rest.techpark.park.ParkingServiceErrorCode;
 import com.everhomes.rest.techpark.punch.PunchServiceErrorCode;
 import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -126,6 +138,12 @@ public class ParkingServiceImpl implements ParkingService {
     @Autowired
 	private OrderUtil commonOrderUtil;
     
+    @Autowired
+	private MessagingService messagingService;
+    
+    @Autowired
+	private LocaleTemplateService localeTemplateService;
+    
     @Override
     public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
     	checkPlateNumber(cmd.getPlateNumber());
@@ -142,13 +160,34 @@ public class ParkingServiceImpl implements ParkingService {
     @Override
     public List<ParkingRechargeRateDTO> listParkingRechargeRates(ListParkingRechargeRatesCommand cmd){
     	Long parkingLotId = cmd.getParkingLotId();
-           
+//    	if(StringUtils.isBlank(cmd.getPlateNumber())) {
+//        	LOGGER.error("plateNumber cannot be null.");
+//        	throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_NULL,
+//					localeStringService.getLocalizedString(String.valueOf(ParkingErrorCode.SCOPE), 
+//							String.valueOf(ParkingErrorCode.ERROR_PLATE_NULL),
+//							UserContext.current().getUser().getLocale(),"plateNumber cannot be null."));
+//        }
+    	List<ParkingRechargeRateDTO> parkingRechargeRateList = null;
+    	if(StringUtils.isBlank(cmd.getPlateNumber())) {
+    		List<ParkingRechargeRate> list = parkingProvider.listParkingRechargeRates(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId,null);
+    		
+    		parkingRechargeRateList = list.stream().map(r->{
+    			ParkingRechargeRateDTO dto = new ParkingRechargeRateDTO();
+    			dto = ConvertHelper.convert(r, ParkingRechargeRateDTO.class);
+    			dto.setRateName(dto.getMonthCount().intValue()+"个月");
+    			dto.setRateToken(r.getId().toString());
+    			dto.setVendorName(ParkingLotVendor.BOSIGAO.getCode());
+    			return dto;
+    		}
+    		).collect(Collectors.toList());
+    		return parkingRechargeRateList;
+    	}
         ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId);
         
-        List<ParkingRechargeRateDTO> parkingRechargeRateList = null;
+        
         String venderName = parkingLot.getVendorName();
         ParkingVendorHandler handler = getParkingVendorHandler(venderName);
-        parkingRechargeRateList = handler.getParkingRechargeRates(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId);
+        parkingRechargeRateList = handler.getParkingRechargeRates(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId,cmd.getPlateNumber(),cmd.getCardNo());
         
         return parkingRechargeRateList;
     }
@@ -222,14 +261,13 @@ public class ParkingServiceImpl implements ParkingService {
 	public CommonOrderDTO createParkingRechargeOrder(CreateParkingRechargeOrderCommand cmd){
 		
 		checkPlateNumber(cmd.getPlateNumber());
-        checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
 		ParkingRechargeOrder parkingRechargeOrder = new ParkingRechargeOrder();
 		
 		User user = UserContext.current().getUser();
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 		
-		ParkingLot parkingLot = parkingProvider.findParkingLotById(cmd.getParkingLotId());
 		try{
 		parkingRechargeOrder.setOwnerType(cmd.getOwnerType());
 		parkingRechargeOrder.setOwnerId(cmd.getOwnerId());
@@ -350,7 +388,7 @@ public class ParkingServiceImpl implements ParkingService {
     		if(pageSize != null && list.size() != pageSize){
         		response.setNextPageAnchor(null);
         	}else{
-        		response.setNextPageAnchor(list.get(list.size()-1).getRechargeTime().getTime());
+        		response.setNextPageAnchor(list.get(list.size()-1).getCreateTime().getTime());
         	}
     	}
     	
@@ -429,7 +467,7 @@ public class ParkingServiceImpl implements ParkingService {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     				"count cannot be null.");
         }
-        checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
         
     	List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(null,null, 
     			null, null, null,ParkingCardRequestStatus.QUEUEING.getCode(),
@@ -440,8 +478,46 @@ public class ParkingServiceImpl implements ParkingService {
     			}).collect(Collectors.toList());
     	
     	parkingProvider.updateParkingCardRequest(list);
+    	Map<String, Object> map = new HashMap<String, Object>();
+		String deadline = deadline(parkingLot.getCardReserveDays());
+	    map.put("deadline", deadline);
+		String scope = ParkingNotificationTemplateCode.SCOPE;
+		int code = ParkingNotificationTemplateCode.USER_APPLY_CARD;
+		String locale = "zh_CN";
+		String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+		list.forEach(applier -> {
+			sendMessageToUser(applier.getRequestorUid(), notifyTextForApplicant);
+		});
+    	
+    	
 	}
 
+	private String deadline(Integer day) {
+		long time = System.currentTimeMillis();
+
+		Timestamp ts = new Timestamp(time);
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(ts);
+		calendar.add(Calendar.DATE, day);
+		return sdf.format(calendar.getTime());
+	}
+	
+	private void sendMessageToUser(Long userId, String content) {
+//		User user = UserContext.current().getUser();
+		MessageDTO messageDto = new MessageDTO();
+        messageDto.setAppId(AppConstants.APPID_MESSAGING);
+        messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()));
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+        messageDto.setBody(content);
+        messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+        
+        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
+                userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+	}
+	
 	@Override
 	public void notifyParkingRechargeOrderPayment(PayCallbackCommand cmd) {
 		
@@ -529,13 +605,13 @@ public class ParkingServiceImpl implements ParkingService {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     				"plateNumber cannot be null.");
         }
-    	if(plateNumber.length() != 7) {
+    	/*if(plateNumber.length() != 7) {
 			LOGGER.error("the length of plateNumber is wrong.");
 			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_LENGTH,
 					localeStringService.getLocalizedString(String.valueOf(ParkingErrorCode.SCOPE), 
 							String.valueOf(ParkingErrorCode.ERROR_PLATE_LENGTH),
 							UserContext.current().getUser().getLocale(),"the length of plateNumber is wrong."));
-		}
+		}*/
     }
     
     @Scheduled(cron="0 0 2 * * ? ")

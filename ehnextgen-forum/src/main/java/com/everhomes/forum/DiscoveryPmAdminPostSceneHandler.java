@@ -36,6 +36,7 @@ import com.everhomes.rest.ui.forum.TopicScopeDTO;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.visibility.VisibilityScope;
+import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.user.User;
 import com.everhomes.util.WebTokenGenerator;
 
@@ -333,6 +334,8 @@ public class DiscoveryPmAdminPostSceneHandler implements PostSceneHandler {
                 avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.organization", "");
                 sentScopeDto.setAvatar(avatarUri);
                 sentScopeDto.setAvatarUrl(getPostFilterDefaultAvatar(namespaceId, user.getId(), avatarUri));
+                sentScopeDto.setVisibleRegionType(VisibleRegionType.REGION.getCode());
+                sentScopeDto.setVisibleRegionId(organization.getId());
                 tmpSentScopeList.add(sentScopeDto);
             }
 
@@ -358,6 +361,8 @@ public class DiscoveryPmAdminPostSceneHandler implements PostSceneHandler {
                         avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.organization", "");
                         sentScopeDto.setAvatar(avatarUri);
                         sentScopeDto.setAvatarUrl(getPostFilterDefaultAvatar(namespaceId, user.getId(), avatarUri));
+                        sentScopeDto.setVisibleRegionType(VisibleRegionType.REGION.getCode());
+                        sentScopeDto.setVisibleRegionId(organization.getId());
                         tmpSentScopeList.add(sentScopeDto);
                     }
                 }
@@ -399,6 +404,8 @@ public class DiscoveryPmAdminPostSceneHandler implements PostSceneHandler {
                 avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.organization", "");
                 sentScopeDto.setAvatar(avatarUri);
                 sentScopeDto.setAvatarUrl(getPostFilterDefaultAvatar(namespaceId, user.getId(), avatarUri));
+                sentScopeDto.setVisibleRegionType(VisibleRegionType.COMMUNITY.getCode());
+                sentScopeDto.setVisibleRegionId(community.getId());
                 tmpSentScopeList.add(sentScopeDto);
             }
             
@@ -439,7 +446,7 @@ public class DiscoveryPmAdminPostSceneHandler implements PostSceneHandler {
         			hasDefault = true;
         			break;
         		} else {
-        			if(firstUndefaultScopeDto != null) {
+        			if(firstUndefaultScopeDto == null) {
         				firstUndefaultScopeDto = sentScopeDto;
         			}
         		}

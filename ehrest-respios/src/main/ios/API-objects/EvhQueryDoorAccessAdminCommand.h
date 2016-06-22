@@ -15,6 +15,8 @@
 
 @property(nonatomic, copy) NSNumber* ownerType;
 
+@property(nonatomic, copy) NSNumber* groupId;
+
 @property(nonatomic, copy) NSString* search;
 
 @property(nonatomic, copy) NSNumber* linkStatus;

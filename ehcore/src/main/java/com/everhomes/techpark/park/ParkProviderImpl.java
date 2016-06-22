@@ -1,12 +1,13 @@
 package com.everhomes.techpark.park;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.InsertQuery;
@@ -15,7 +16,6 @@ import org.jooq.SelectConditionStep;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
@@ -23,6 +23,8 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.parking.ParkingRechargeOrder;
+import com.everhomes.parking.ParkingRechargeRate;
 import com.everhomes.rest.techpark.onlinePay.PayStatus;
 import com.everhomes.rest.techpark.onlinePay.RechargeStatus;
 import com.everhomes.rest.techpark.park.ApplyParkingCardStatus;
@@ -31,6 +33,7 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhParkApplyCardDao;
 import com.everhomes.server.schema.tables.daos.EhParkChargeDao;
+import com.everhomes.server.schema.tables.daos.EhParkingRechargeOrdersDao;
 import com.everhomes.server.schema.tables.daos.EhPreferentialRulesDao;
 import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
@@ -40,6 +43,8 @@ import com.everhomes.server.schema.tables.pojos.EhPreferentialRules;
 import com.everhomes.server.schema.tables.pojos.EhRechargeInfo;
 import com.everhomes.server.schema.tables.records.EhParkApplyCardRecord;
 import com.everhomes.server.schema.tables.records.EhParkChargeRecord;
+import com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord;
+import com.everhomes.server.schema.tables.records.EhParkingRechargeRatesRecord;
 import com.everhomes.server.schema.tables.records.EhPreferentialRulesRecord;
 import com.everhomes.server.schema.tables.records.EhRechargeInfoRecord;
 import com.everhomes.sharding.ShardIterator;
@@ -548,5 +553,28 @@ public class ParkProviderImpl implements ParkProvider {
         dao.update(preferentialRule);
 	}
 	
+	@Override
+    public ParkingRechargeRate findParkingRechargeRates(String ownerType,Long ownerId,Long parkingLotId,BigDecimal monthCount,BigDecimal price) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(ParkingRechargeRate.class));
+        
+        SelectQuery<EhParkingRechargeRatesRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_RATES);
+        query.addConditions(Tables.EH_PARKING_RECHARGE_RATES.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_PARKING_RECHARGE_RATES.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_PARKING_RECHARGE_RATES.PARKING_LOT_ID.eq(parkingLotId));
+        query.addConditions(Tables.EH_PARKING_RECHARGE_RATES.MONTH_COUNT.eq(monthCount));
+        query.addConditions(Tables.EH_PARKING_RECHARGE_RATES.PRICE.eq(price));
 
+        
+        return ConvertHelper.convert(query.fetchOne(), ParkingRechargeRate.class);
+    }
+	
+	@Override
+    public ParkingRechargeOrder findParkingRechargeOrderByOrderNo(Long orderNo) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(ParkingRechargeOrder.class));
+        
+        SelectQuery<EhParkingRechargeOrdersRecord> query = context.selectQuery(Tables.EH_PARKING_RECHARGE_ORDERS);
+        query.addConditions(Tables.EH_PARKING_RECHARGE_ORDERS.ORDER_NO.eq(orderNo));
+        
+        return ConvertHelper.convert(query.fetchOne(), ParkingRechargeOrder.class);
+    }
 }

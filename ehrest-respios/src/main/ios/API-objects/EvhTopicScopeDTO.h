@@ -33,6 +33,10 @@
 
 @property(nonatomic, copy) NSNumber* defaultFlag;
 
+@property(nonatomic, copy) NSNumber* visibleRegionId;
+
+@property(nonatomic, copy) NSNumber* visibleRegionType;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 

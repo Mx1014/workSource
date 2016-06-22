@@ -164,7 +164,21 @@ public class RentalProviderImpl implements RentalProvider {
 		return result;
 
 	}
-
+	@Override
+	public RentalSiteItem getRentalSiteItemById(Long rentalSiteItemId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTAL_SITE_ITEMS);
+		Condition condition = Tables.EH_RENTAL_SITE_ITEMS.ID.equal(rentalSiteItemId);
+		step.where(condition);
+		List<RentalSiteItem> result = step
+				.orderBy(Tables.EH_RENTAL_SITE_ITEMS.ID.desc()).fetch().map((r) -> {
+					return ConvertHelper.convert(r, RentalSiteItem.class);
+				});
+		if (null != result && result.size() > 0)
+			return result.get(0);
+		return null;
+	}
 	@Override
 	public void createRentalSiteItem(RentalSiteItem siteItem) {
 		long id = sequenceProvider.getNextSequence(NameMapper
@@ -500,7 +514,9 @@ public class RentalProviderImpl implements RentalProvider {
             LOGGER.debug("Query rental item bills by site bill id, sql=" + step.getSQL());
             LOGGER.debug("Query rental item bills by site bill id, bindValues=" + step.getBindValues());
         }
-		return result;
+		if (null != result && result.size() > 0)
+			return result;
+		return null;
 	}
 
 	@Override

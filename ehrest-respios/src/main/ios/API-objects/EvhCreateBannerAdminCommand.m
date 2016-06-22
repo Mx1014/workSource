@@ -25,6 +25,7 @@
     self = [super init];
     if(self) {
         _scopes = [NSMutableArray new];
+        _sceneTypeList = [NSMutableArray new];
         return self;
     }
     return nil;
@@ -67,8 +68,13 @@
         [jsonObject setObject: self.status forKey: @"status"];
     if(self.order)
         [jsonObject setObject: self.order forKey: @"order"];
-    if(self.sceneType)
-        [jsonObject setObject: self.sceneType forKey: @"sceneType"];
+    if(self.sceneTypeList) {
+        NSMutableArray* jsonArray = [NSMutableArray new];
+        for(NSString* item in self.sceneTypeList) {
+            [jsonArray addObject:item];
+        }
+        [jsonObject setObject: jsonArray forKey: @"sceneTypeList"];
+    }
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -135,10 +141,12 @@
         if(self.order && [self.order isEqual:[NSNull null]])
             self.order = nil;
 
-        self.sceneType = [jsonObject objectForKey: @"sceneType"];
-        if(self.sceneType && [self.sceneType isEqual:[NSNull null]])
-            self.sceneType = nil;
-
+        {
+            NSArray* jsonArray = [jsonObject objectForKey: @"sceneTypeList"];
+            for(id itemJson in jsonArray) {
+                [self.sceneTypeList addObject: itemJson];
+            }
+        }
         return self;
     }
     

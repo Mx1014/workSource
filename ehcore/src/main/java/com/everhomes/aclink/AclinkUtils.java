@@ -25,6 +25,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import com.everhomes.rest.aclink.DataUtil;
+import com.everhomes.rest.aclink.DoorAccessType;
 import com.everhomes.rest.aclink.DoorMessage;
 import com.everhomes.util.StringHelper;
 
@@ -130,5 +131,20 @@ public class AclinkUtils {
         byte[] key = Base64.decodeBase64(aesKey);
         byte[] binaryData = CmdUtil.upgrade(key, ver, firmVersion, checksum, uuid);
         return Base64.encodeBase64String(binaryData);
+    }
+    
+    public static String packWifiCmd(Byte ver, String aesKey, String ssid, String pwd, String borderUrl) {
+        byte[] key = Base64.decodeBase64(aesKey);
+        byte[] binaryData = CmdUtil.wifiCmd(key, ver, ssid, pwd, borderUrl);
+        return Base64.encodeBase64String(binaryData);
+    }
+    
+    public static boolean isZuolinDevice(DoorAccess doorAccess) {
+        DoorAccessType dt = DoorAccessType.fromCode(doorAccess.getDoorType());
+        if(dt == DoorAccessType.ACLINK_ZL_GROUP || dt == DoorAccessType.ZLACLINK_WIFI || dt == DoorAccessType.ZLACLINK_NOWIFI) {
+            return true;
+        }
+        
+        return false;
     }
 }

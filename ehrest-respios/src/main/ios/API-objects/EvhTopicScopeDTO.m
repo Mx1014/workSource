@@ -52,6 +52,10 @@
         [jsonObject setObject: self.leafFlag forKey: @"leafFlag"];
     if(self.defaultFlag)
         [jsonObject setObject: self.defaultFlag forKey: @"defaultFlag"];
+    if(self.visibleRegionId)
+        [jsonObject setObject: self.visibleRegionId forKey: @"visibleRegionId"];
+    if(self.visibleRegionType)
+        [jsonObject setObject: self.visibleRegionType forKey: @"visibleRegionType"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -100,6 +104,14 @@
         self.defaultFlag = [jsonObject objectForKey: @"defaultFlag"];
         if(self.defaultFlag && [self.defaultFlag isEqual:[NSNull null]])
             self.defaultFlag = nil;
+
+        self.visibleRegionId = [jsonObject objectForKey: @"visibleRegionId"];
+        if(self.visibleRegionId && [self.visibleRegionId isEqual:[NSNull null]])
+            self.visibleRegionId = nil;
+
+        self.visibleRegionType = [jsonObject objectForKey: @"visibleRegionType"];
+        if(self.visibleRegionType && [self.visibleRegionType isEqual:[NSNull null]])
+            self.visibleRegionType = nil;
 
         return self;
     }

@@ -1,7 +1,17 @@
 package com.everhomes.rest.aclink;
 
+/**
+ * <ul>
+ * <li>ZLACLINK_WIFI: 0, 带 WIFI</li>
+ * <li>ZLACLINK_NOWIFI: 1, 不带 WIFI</li>
+ * <li>ACLINK_GROUP: 5, 分组设备</li>
+ * <li>ACLINK_LINGLING: 6, 令令开门设备</li>
+ * </ul>
+ * @author janson
+ *
+ */
 public enum DoorAccessType {
-    ZLACLINK_WIFI((byte)0), ZLACLINK_NOWIFI((byte)1);
+    ZLACLINK_WIFI((byte)0), ZLACLINK_NOWIFI((byte)1), ACLINK_ZL_GROUP((byte)5), ACLINK_LINGLING_GROUP((byte)6), ACLINK_LINGLING((byte)11);
     
     private byte code;
     

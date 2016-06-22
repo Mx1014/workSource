@@ -34,6 +34,8 @@
         [jsonObject setObject: self.longitude forKey: @"longitude"];
     if(self.latigtue)
         [jsonObject setObject: self.latigtue forKey: @"latigtue"];
+    if(self.communityType)
+        [jsonObject setObject: self.communityType forKey: @"communityType"];
     if(self.pageAnchor)
         [jsonObject setObject: self.pageAnchor forKey: @"pageAnchor"];
     if(self.pageSize)
@@ -50,6 +52,10 @@
         self.latigtue = [jsonObject objectForKey: @"latigtue"];
         if(self.latigtue && [self.latigtue isEqual:[NSNull null]])
             self.latigtue = nil;
+
+        self.communityType = [jsonObject objectForKey: @"communityType"];
+        if(self.communityType && [self.communityType isEqual:[NSNull null]])
+            self.communityType = nil;
 
         self.pageAnchor = [jsonObject objectForKey: @"pageAnchor"];
         if(self.pageAnchor && [self.pageAnchor isEqual:[NSNull null]])

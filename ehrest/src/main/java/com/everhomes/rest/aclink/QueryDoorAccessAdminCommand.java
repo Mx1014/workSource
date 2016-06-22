@@ -22,6 +22,8 @@ public class QueryDoorAccessAdminCommand {
     @NotNull
     private Byte ownerType;
     
+    private Long groupId;
+    
     private String search;
     private Byte linkStatus;
     private Byte doorType;
@@ -70,6 +72,13 @@ public class QueryDoorAccessAdminCommand {
     }
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+    
+    public Long getGroupId() {
+        return groupId;
+    }
+    public void setGroupId(Long groupId) {
+        this.groupId = groupId;
     }
     @Override
     public String toString() {
