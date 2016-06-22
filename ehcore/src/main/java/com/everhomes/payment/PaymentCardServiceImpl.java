@@ -233,7 +233,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 //		}
     	boolean flag = true;
     	int i = 1;
-    	while(flag&&i<=5){
+    	while(flag&&i<=10){
     		i++;
     		PaymentCardTransaction paymentCardTransaction = paymentCardProvider.findPaymentCardTransactionByCondition(cmd.getCode(),paymentCard.getCardNo());
         	if(paymentCardTransaction != null){
@@ -246,6 +246,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
         		dto.setStatus(paymentCardTransaction.getStatus().equals(CardTransactionStatus.PAIDED.getCode())
         				?PaidResultStatus.SUCCESS.getCode():PaidResultStatus.FAIL.getCode());
         		flag = false;
+        		break;
         	}
         	try {
 				Thread.sleep(1000);
@@ -258,7 +259,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
 					localeStringService.getLocalizedString(String.valueOf(PaymentCardErrorCode.SCOPE), 
 							String.valueOf(PaymentCardErrorCode.ERROR_SERVER_REQUEST),
-							UserContext.current().getUser().getLocale(),"the listCardTransactions request of taotaogu is failed."));
+							UserContext.current().getUser().getLocale(),"the getCardPaidResult request of taotaogu is failed."));
     	}
     	
     	return dto;
