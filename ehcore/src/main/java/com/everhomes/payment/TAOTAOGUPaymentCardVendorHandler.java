@@ -119,7 +119,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				for(int i=0;i<list.size();i++){
 					Map map = (Map) list.get(i);
 					if("fund".equals(((String)map.get("SubAcctType")).trim())){
-						cardInfo.setBalance(new BigDecimal((Double)map.get("AvlbBal")).setScale(2,RoundingMode.DOWN));
+						cardInfo.setBalance(new BigDecimal((Double)map.get("AvlbBal")));
 						break;
 					}
 				}
@@ -399,19 +399,29 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				CardTransactionFromVendorDTO dto = new CardTransactionFromVendorDTO();
 				dto.setVendorResult(VendorConstant.CARD_TRANSACTION_STATUS_JSON);
 				dto.setMerchant((String)m.get("MerchId"));
-				BigDecimal amount = new BigDecimal((Double)m.get("TransAmt"));
-				dto.setAmount(amount);
+				BigDecimal amount = null;
+				
 				String transactionType = (String)m.get("TransType");
 				if("101".equals(transactionType)){
 					dto.setTransactionType(CardTransactionTypeStatus.CONSUME.getCode());
-					consumeAmount = consumeAmount.add(amount);
+					amount = new BigDecimal((Double)m.get("ChdrPdpAmt"));
+					dto.setAmount(amount);
+					String status = (String)m.get("ProcStatus");
+					dto.setStatus(status);
+					if("01".equals(status))
+						consumeAmount = consumeAmount.add(amount);
 				}else if("203".equals(transactionType)){
 					dto.setTransactionType(CardTransactionTypeStatus.RECHARGE.getCode());
-					rechargeAmount = rechargeAmount.add(amount);
+					amount = new BigDecimal((Double)m.get("TransAmt"));
+					dto.setAmount(amount);
+					String status = (String)m.get("ProcStatus");
+					dto.setStatus(status);
+					if("01".equals(status))
+						rechargeAmount = rechargeAmount.add(amount);
 				}else
 					continue outer;
 				
-				dto.setStatus((String)m.get("ProcStatus"));
+				
 				String recvTime = (String)m.get("RecvTime");
 				dto.setTransactionTime(StrToLong(recvTime));
 				

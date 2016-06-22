@@ -76,7 +76,7 @@ public class Testselectka3 {
 		param.put("TerminalId", "");
 		param.put("StartDate", "");
 		param.put("Enddate", "");
-		param.put("TransType", "203");
+		param.put("TransType", "");
 		param.put("PageNumber", "1");
 		param.put("PageSize", "10");
 
