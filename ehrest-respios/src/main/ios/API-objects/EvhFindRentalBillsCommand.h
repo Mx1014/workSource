@@ -11,13 +11,7 @@
     : NSObject<EvhJsonSerializable>
 
 
-@property(nonatomic, copy) NSString* ownerType;
-
-@property(nonatomic, copy) NSNumber* ownerId;
-
-@property(nonatomic, copy) NSNumber* communityId;
-
-@property(nonatomic, copy) NSString* siteType;
+@property(nonatomic, copy) NSNumber* launchPadItemId;
 
 @property(nonatomic, copy) NSNumber* pageAnchor;
 

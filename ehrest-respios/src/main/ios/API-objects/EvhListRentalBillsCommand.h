@@ -11,25 +11,23 @@
     : NSObject<EvhJsonSerializable>
 
 
-@property(nonatomic, copy) NSString* ownerType;
-
-@property(nonatomic, copy) NSNumber* ownerId;
-
-@property(nonatomic, copy) NSString* siteType;
+@property(nonatomic, copy) NSNumber* organizationId;
 
 @property(nonatomic, copy) NSNumber* rentalSiteId;
+
+@property(nonatomic, copy) NSNumber* launchPadItemId;
 
 @property(nonatomic, copy) NSNumber* startTime;
 
 @property(nonatomic, copy) NSNumber* endTime;
 
-@property(nonatomic, copy) NSNumber* pageOffset;
-
-@property(nonatomic, copy) NSNumber* pageSize;
+@property(nonatomic, copy) NSString* vendorType;
 
 @property(nonatomic, copy) NSNumber* billStatus;
 
-@property(nonatomic, copy) NSNumber* invoiceFlag;
+@property(nonatomic, copy) NSNumber* pageAnchor;
+
+@property(nonatomic, copy) NSNumber* pageSize;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

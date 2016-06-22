@@ -9,7 +9,8 @@
 typedef enum {
 
     EvhAmorpmFlag_AM = 0, 
-    EvhAmorpmFlag_PM = 1
+    EvhAmorpmFlag_PM = 1, 
+    EvhAmorpmFlag_NIGHT = 2
 
 } EvhAmorpmFlag;
 

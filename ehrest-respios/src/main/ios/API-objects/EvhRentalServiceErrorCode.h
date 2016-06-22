@@ -15,3 +15,7 @@
 #define EvhRentalServiceErrorCode_ERROR_ORDER_DUPLICATE 10010
 #define EvhRentalServiceErrorCode_ERROR_CREATE_EXCEL 10011
 #define EvhRentalServiceErrorCode_ERROR_DOWNLOAD_EXCEL 10012
+#define EvhRentalServiceErrorCode_ERROR_NO_ENOUGH_ITEMS 10020
+#define EvhRentalServiceErrorCode_ERROR_REPEAT_SITE_ASSGIN 11000
+#define EvhRentalServiceErrorCode_ERROR_SITE_ASSGIN_NULL 11001
+#define EvhRentalServiceErrorCode_ERROR_LOOP_TOOMUCH 12000

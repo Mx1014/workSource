@@ -38,6 +38,8 @@
         [jsonObject setObject: self.latigtue forKey: @"latigtue"];
     if(self.pageOffset)
         [jsonObject setObject: self.pageOffset forKey: @"pageOffset"];
+    if(self.communityType)
+        [jsonObject setObject: self.communityType forKey: @"communityType"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -58,6 +60,10 @@
         self.pageOffset = [jsonObject objectForKey: @"pageOffset"];
         if(self.pageOffset && [self.pageOffset isEqual:[NSNull null]])
             self.pageOffset = nil;
+
+        self.communityType = [jsonObject objectForKey: @"communityType"];
+        if(self.communityType && [self.communityType isEqual:[NSNull null]])
+            self.communityType = nil;
 
         return self;
     }

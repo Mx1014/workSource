@@ -1,0 +1,52 @@
+{
+  "eh_scene_types": [
+    {
+      "namespace_id": "0",
+      "create_time": "2016-03-06 10:50:32",
+      "parent_id": "0",
+      "name": "default",
+      "id": "1",
+      "display_name": "默认场景"
+    },
+    {
+      "namespace_id": "0",
+      "create_time": "2016-03-06 10:50:32",
+      "parent_id": "0",
+      "name": "pm_admin",
+      "id": "2",
+      "display_name": "物业管理员场景"
+    },
+    {
+      "namespace_id": "0",
+      "create_time": "2016-05-11 09:15:50",
+      "parent_id": "1",
+      "name": "family",
+      "id": "3",
+      "display_name": "家庭场景"
+    },
+    {
+      "namespace_id": "0",
+      "create_time": "2016-05-11 09:15:50",
+      "parent_id": "0",
+      "name": "park_tourist",
+      "id": "4",
+      "display_name": "园区游客场景"
+    },
+    {
+      "namespace_id": "0",
+      "create_time": "2016-05-11 09:15:50",
+      "parent_id": "4",
+      "name": "enterprise",
+      "id": "5",
+      "display_name": "加入公司且认证通过的场景（不分小区和园区）"
+    },
+    {
+      "namespace_id": "0",
+      "create_time": "2016-05-11 09:15:50",
+      "parent_id": "4",
+      "name": "enterprise_noauth",
+      "id": "6",
+      "display_name": "区加入公司且未认证通过的场景（不分小区和园区）"
+    }
+  ]
+}

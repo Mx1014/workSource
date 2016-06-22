@@ -4,21 +4,20 @@ package com.everhomes.rest.wifi;
 
 import com.everhomes.rest.RestResponseBase;
 
-import java.util.List;
 import com.everhomes.rest.wifi.ListWifiSettingResponse;
 
 public class ListWifiSettingRestResponse extends RestResponseBase {
 
-    private List<ListWifiSettingResponse> response;
+    private ListWifiSettingResponse response;
 
     public ListWifiSettingRestResponse () {
     }
 
-    public List<ListWifiSettingResponse> getResponse() {
+    public ListWifiSettingResponse getResponse() {
         return response;
     }
 
-    public void setResponse(List<ListWifiSettingResponse> response) {
+    public void setResponse(ListWifiSettingResponse response) {
         this.response = response;
     }
 }

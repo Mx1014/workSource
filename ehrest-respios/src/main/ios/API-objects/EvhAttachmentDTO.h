@@ -11,19 +11,9 @@
     : NSObject<EvhJsonSerializable>
 
 
-@property(nonatomic, copy) NSNumber* id;
+@property(nonatomic, copy) NSNumber* attachmentType;
 
-@property(nonatomic, copy) NSNumber* postId;
-
-@property(nonatomic, copy) NSString* contentType;
-
-@property(nonatomic, copy) NSString* contentUri;
-
-@property(nonatomic, copy) NSString* contentUrl;
-
-@property(nonatomic, copy) NSNumber* size;
-
-@property(nonatomic, copy) NSString* metadata;
+@property(nonatomic, copy) NSNumber* mustOptions;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

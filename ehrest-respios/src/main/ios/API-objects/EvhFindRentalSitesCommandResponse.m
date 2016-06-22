@@ -32,8 +32,8 @@
 
 -(void) toJson: (NSMutableDictionary*) jsonObject 
 {
-    if(self.nextPageOffset)
-        [jsonObject setObject: self.nextPageOffset forKey: @"nextPageOffset"];
+    if(self.nextPageAnchor)
+        [jsonObject setObject: self.nextPageAnchor forKey: @"nextPageAnchor"];
     if(self.rentalSites) {
         NSMutableArray* jsonArray = [NSMutableArray new];
         for(EvhRentalSiteDTO* item in self.rentalSites) {
@@ -48,9 +48,9 @@
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
 {
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
-        self.nextPageOffset = [jsonObject objectForKey: @"nextPageOffset"];
-        if(self.nextPageOffset && [self.nextPageOffset isEqual:[NSNull null]])
-            self.nextPageOffset = nil;
+        self.nextPageAnchor = [jsonObject objectForKey: @"nextPageAnchor"];
+        if(self.nextPageAnchor && [self.nextPageAnchor isEqual:[NSNull null]])
+            self.nextPageAnchor = nil;
 
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"rentalSites"];

@@ -67,23 +67,15 @@ public class AddRentalBillCommand {
 	public void setEndTime(Long endTime) {
 		this.endTime = endTime;
 	}
+
+	public List<rentalBillRuleDTO> getRules() {
+		return rules;
+	}
+
+	public void setRules(List<rentalBillRuleDTO> rules) {
+		this.rules = rules;
+	}
   
-
-	public List<Long> getRentalSiteRuleIds() {
-		return rentalSiteRuleIds;
-	}
-
-	public void setRentalSiteRuleIds(List<Long> rentalSiteRuleIds) {
-		this.rentalSiteRuleIds = rentalSiteRuleIds;
-	}
-
-	public Double getRentalCount() {
-		return rentalCount;
-	}
-
-	public void setRentalCount(Double rentalCount) {
-		this.rentalCount = rentalCount;
-	}
  
 //	public List<SiteItemDTO> getRentalItems() {
 //		return rentalItems;

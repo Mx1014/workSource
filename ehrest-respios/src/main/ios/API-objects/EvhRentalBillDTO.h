@@ -16,14 +16,6 @@
 
 @property(nonatomic, copy) NSNumber* rentalBillId;
 
-@property(nonatomic, copy) NSString* ownerType;
-
-@property(nonatomic, copy) NSNumber* ownerId;
-
-@property(nonatomic, copy) NSNumber* communityId;
-
-@property(nonatomic, copy) NSString* siteType;
-
 @property(nonatomic, copy) NSString* siteName;
 
 @property(nonatomic, copy) NSString* buildingName;
@@ -76,6 +68,12 @@
 
 @property(nonatomic, copy) NSNumber* rentalCount;
 
+@property(nonatomic, copy) NSString* useTime;
+
+@property(nonatomic, copy) NSString* vendorType;
+
+@property(nonatomic, copy) NSNumber* launchPadItemId;
+
 // item type EvhSiteItemDTO*
 @property(nonatomic, strong) NSMutableArray* siteItems;
 
@@ -84,6 +82,8 @@
 
 // item type EvhBillAttachmentDTO*
 @property(nonatomic, strong) NSMutableArray* billAttachments;
+
+@property(nonatomic, copy) NSNumber* toastFlag;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
