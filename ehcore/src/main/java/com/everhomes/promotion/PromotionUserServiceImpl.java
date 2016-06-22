@@ -62,7 +62,7 @@ public class PromotionUserServiceImpl implements PromotionUserService {
                 callback.userFound(user, visitor);    
             }
             
-            if(locator.getAnchor() == null) {
+            if(locator.getAnchor() == null || users == null || users.size() < pageSize) {
                 break;
             }
             
@@ -93,7 +93,7 @@ public class PromotionUserServiceImpl implements PromotionUserService {
             }
             
             //Break after first process
-            if(locator.getAnchor() == null) {
+            if(locator.getAnchor() == null || comunities == null || comunities.size() < pageSize) {
                 break;
             }
             
@@ -126,7 +126,7 @@ public class PromotionUserServiceImpl implements PromotionUserService {
                 }
                 
                 //break after first process
-                if(resp.getNextPageAnchor() == null) {
+                if(resp.getNextPageAnchor() == null || resp.getDtos() == null || resp.getDtos().size() < cmd.getPageSize()) {
                     break;
                 }
                 
@@ -167,6 +167,7 @@ public class PromotionUserServiceImpl implements PromotionUserService {
         //groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
         groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
         cmd.setGroupTypes(groupTypes);
+        cmd.setPageSize(100);
         
         ListOrganizationMemberCommandResponse resp = organizationService.ListParentOrganizationPersonnels(cmd);
         while((resp != null) && (resp.getMembers() != null) && (resp.getMembers().size() > 0)) {
@@ -178,7 +179,7 @@ public class PromotionUserServiceImpl implements PromotionUserService {
                 }
             }
             
-            if(resp.getNextPageAnchor() == null) {
+            if(resp.getNextPageAnchor() == null || resp.getMembers() == null || resp.getMembers().size() < cmd.getPageSize()) {
                 break;
             }
             
@@ -186,6 +187,12 @@ public class PromotionUserServiceImpl implements PromotionUserService {
             resp = organizationService.ListParentOrganizationPersonnels(cmd);
             
         }   
+    }
+    
+    @Override
+    public void listUserByUserId(OpPromotionUserVisitor visitor, OpPromotionUserCallback callback) {
+        User user = userProvider.findUserById((Long)visitor.getValue());
+        callback.userFound(user, visitor);
     }
     
     @Override

@@ -1585,6 +1585,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         DoorLinglingExtraKeyDTO extra = new DoorLinglingExtraKeyDTO();
         extra.setAuthLevel(0l);
+        extra.setAuthStorey(1l);
         extra.setStoreyAuthList(new ArrayList<Long>());
         
         try {
@@ -1593,10 +1594,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             }            
             List<Long> storeyAuthList = getDoorListbyUser(user, doorAccess);
             if(storeyAuthList != null && storeyAuthList.size() > 0) {
-                extra.setAuthStorey(storeyAuthList.get(0));    
+                extra.setAuthStorey(storeyAuthList.get(0));
+                extra.setStoreyAuthList(storeyAuthList);
             }
-            
-            extra.setStoreyAuthList(storeyAuthList);
         } catch(Exception ex) {
             LOGGER.error("storeyAuth failed", ex);
         }

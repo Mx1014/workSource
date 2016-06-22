@@ -73,10 +73,13 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
     public void aclinkRemote(WebSocketSession serverSession, AclinkRemotePdu pdu) {
         if(null == pdu) {
             LOGGER.error("aclinkRemote pdu is null");
+            return;
         }
+        
         AclinkSessionInfo aclinkSession = uuid2Session.get(pdu.getUuid());
         if(aclinkSession == null) {
             LOGGER.error("aclink session is null uuid=" + pdu.getUuid());
+            return;
         }
         
         WebSocketSession session = aclinkSession.getSession();
