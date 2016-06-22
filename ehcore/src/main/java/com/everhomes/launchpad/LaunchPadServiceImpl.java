@@ -1850,31 +1850,10 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		
 		dbProvider.execute((TransactionStatus status) ->{
 			/**
-			 * 先删除所有用户排序
-			 */
-			List<UserLaunchPadItem> userItems = launchPadProvider.findUserLaunchPadItemByUserId(userId, sceneType, ownerType, ownerId);
-			for (UserLaunchPadItem userItem : userItems) {
-				if(ItemDisplayFlag.fromCode(userItem.getDisplayFlag()) == ItemDisplayFlag.DISPLAY){
-					launchPadProvider.deleteUserLaunchPadItemById(userItem.getId());
-				}
-			}
-			
-			/**
 			 * 重新添加用户排序
 			 */
 			for (LaunchPadItemSort launchPadItemSort : sorts) {
-				UserLaunchPadItem userItem = new UserLaunchPadItem();
-				userItem.setApplyPolicy(ApplyPolicy.OVERRIDE.getCode());
-				userItem.setDefaultOrder(launchPadItemSort.getDefaultOrder());
-				userItem.setDisplayFlag(ItemDisplayFlag.DISPLAY.getCode());
-				userItem.setItemId(launchPadItemSort.getId());
-				userItem.setOwnerId(ownerId);
-				userItem.setOwnerType(ownerType);
-				userItem.setSceneType(sceneType);
-				userItem.setUserId(userId);
-				userItem.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-				userItem.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-				launchPadProvider.createUserLaunchPadItem(userItem);
+				this.updateUserLaunchPadItem(userId, ownerType, ownerId, sceneType, launchPadItemSort.getDefaultOrder(), launchPadItemSort.getId(), ItemDisplayFlag.DISPLAY);
 			}
 			
 			return null;
