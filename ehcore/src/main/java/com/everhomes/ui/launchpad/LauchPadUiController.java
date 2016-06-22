@@ -18,8 +18,12 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.launchpad.LaunchPadService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.business.CancelFavoriteBusinessCommand;
+import com.everhomes.rest.business.FavoriteBusinessesCommand;
 import com.everhomes.rest.launchpad.GetLaunchPadItemsCommandResponse;
 import com.everhomes.rest.launchpad.LaunchPadLayoutDTO;
+import com.everhomes.rest.ui.launchpad.CancelFavoriteBusinessBySceneCommand;
+import com.everhomes.rest.ui.launchpad.FavoriteBusinessesBySceneCommand;
 import com.everhomes.rest.ui.launchpad.GetLaunchPadItemsBySceneCommand;
 import com.everhomes.rest.ui.launchpad.GetLaunchPadLayoutBySceneCommand;
 import com.everhomes.util.EtagHelper;
@@ -43,7 +47,7 @@ public class LauchPadUiController extends ControllerBase {
     
     @Autowired
     private LaunchPadService launchPadService;
- 
+    
     /**
      * <b>URL: /ui/launchpad/getLaunchPadItemsByScene</b>
      * <p>根据位置、layout组、指定场景和相应的实体对象获取item列表</p>
@@ -89,5 +93,35 @@ public class LauchPadUiController extends ControllerBase {
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
         return resp;
+    }
+    
+    /**
+     * <b>URL: /ui/launchpad/favoriteBusinessesByScene</b>
+     * <p>店铺收藏（放到服务市场首页）</p>
+     */
+    @RequestMapping("favoriteBusinessesByScene")
+    @RestReturn(value=String.class)
+    public RestResponse favoriteBusinessesByScene(FavoriteBusinessesBySceneCommand cmd) {
+        
+        this.launchPadService.favoriteBusinessesByScene(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /ui/launchpad/cancelFavoriteBusinessByScene</b>
+     * <p>用户取消收藏</p>
+     */
+    @RequestMapping("cancelFavoriteBusinessByScene")
+    @RestReturn(value=String.class)
+    public RestResponse cancelFavoriteBusinessByScene(CancelFavoriteBusinessBySceneCommand cmd) {
+        
+    	this.launchPadService.cancelFavoriteBusinessByScene(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
 }

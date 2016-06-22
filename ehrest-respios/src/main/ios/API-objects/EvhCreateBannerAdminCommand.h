@@ -41,7 +41,8 @@
 
 @property(nonatomic, copy) NSNumber* order;
 
-@property(nonatomic, copy) NSString* sceneType;
+// item type NSString*
+@property(nonatomic, strong) NSMutableArray* sceneTypeList;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

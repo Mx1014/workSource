@@ -116,6 +116,7 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
             doc.setCityName((String)source.get("cityName"));
             doc.setRegionId(SearchUtils.getLongField(source.get("regionId")));
             doc.setNamespaceId(SearchUtils.getLongField(source.get("namespaceId")).intValue());
+            doc.setCommunityType(SearchUtils.getLongField(source.get("communityType")).byteValue());
             
             return doc;
         }
@@ -143,7 +144,7 @@ public class CommunitySearcherImpl extends AbstractElasticSearch implements Comm
         int namespaceId = UserContext.getCurrentNamespaceId();
         fb = FilterBuilders.termFilter("namespaceId", namespaceId);
         if(null != communityType) {
-            fb = FilterBuilders.termFilter("communityType", communityType);
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("communityType", communityType));
         }
         if((null != cityId) && (cityId > 0)) {
             fb = FilterBuilders.termFilter("cityId", cityId);

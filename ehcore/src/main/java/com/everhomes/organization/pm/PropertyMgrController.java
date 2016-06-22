@@ -85,6 +85,7 @@ import com.everhomes.rest.organization.pm.applyPropertyMemberCommand;
 import com.everhomes.rest.user.SetCurrentCommunityCommand;
 import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.WebTokenGenerator;
 
@@ -1352,7 +1353,7 @@ public class PropertyMgrController extends ControllerBase {
 	@RequestMapping("sendNoticeToOrganizationMember")
     @RestReturn(value=String.class)
     public RestResponse sendNoticeToOrganizationMember(@Valid PropCommunityBuildAddessCommand cmd){
-		propertyMgrService.sendNoticeToOrganizationMember(cmd);
+		propertyMgrService.sendNoticeToOrganizationMember(cmd,UserContext.current().getUser());
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

@@ -144,4 +144,109 @@ public class EhDoorAuthDao extends org.jooq.impl.DAOImpl<com.everhomes.server.sc
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAuth> fetchByStatus(java.lang.Byte... values) {
 		return fetch(com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH.STATUS, values);
 	}
+
+	/**
+	 * Fetch records that have <code>driver IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAuth> fetchByDriver(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH.DRIVER, values);
+	}
+
+	/**
+	 * Fetch records that have <code>integral_tag1 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAuth> fetchByIntegralTag1(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH.INTEGRAL_TAG1, values);
+	}
+
+	/**
+	 * Fetch records that have <code>integral_tag2 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAuth> fetchByIntegralTag2(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH.INTEGRAL_TAG2, values);
+	}
+
+	/**
+	 * Fetch records that have <code>integral_tag3 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAuth> fetchByIntegralTag3(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH.INTEGRAL_TAG3, values);
+	}
+
+	/**
+	 * Fetch records that have <code>integral_tag4 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAuth> fetchByIntegralTag4(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH.INTEGRAL_TAG4, values);
+	}
+
+	/**
+	 * Fetch records that have <code>integral_tag5 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAuth> fetchByIntegralTag5(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH.INTEGRAL_TAG5, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag1 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAuth> fetchByStringTag1(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH.STRING_TAG1, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag2 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAuth> fetchByStringTag2(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH.STRING_TAG2, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag3 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAuth> fetchByStringTag3(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH.STRING_TAG3, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag4 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAuth> fetchByStringTag4(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH.STRING_TAG4, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag5 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAuth> fetchByStringTag5(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH.STRING_TAG5, values);
+	}
+
+	/**
+	 * Fetch records that have <code>string_tag6 IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAuth> fetchByStringTag6(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH.STRING_TAG6, values);
+	}
+
+	/**
+	 * Fetch records that have <code>right_open IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAuth> fetchByRightOpen(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH.RIGHT_OPEN, values);
+	}
+
+	/**
+	 * Fetch records that have <code>right_visitor IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAuth> fetchByRightVisitor(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH.RIGHT_VISITOR, values);
+	}
+
+	/**
+	 * Fetch records that have <code>right_remote IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhDoorAuth> fetchByRightRemote(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhDoorAuth.EH_DOOR_AUTH.RIGHT_REMOTE, values);
+	}
 }

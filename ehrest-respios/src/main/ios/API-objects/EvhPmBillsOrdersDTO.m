@@ -54,6 +54,8 @@
         [jsonObject setObject: self.createTime forKey: @"createTime"];
     if(self.paidType)
         [jsonObject setObject: self.paidType forKey: @"paidType"];
+    if(self.billDate)
+        [jsonObject setObject: self.billDate forKey: @"billDate"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -106,6 +108,10 @@
         self.paidType = [jsonObject objectForKey: @"paidType"];
         if(self.paidType && [self.paidType isEqual:[NSNull null]])
             self.paidType = nil;
+
+        self.billDate = [jsonObject objectForKey: @"billDate"];
+        if(self.billDate && [self.billDate isEqual:[NSNull null]])
+            self.billDate = nil;
 
         return self;
     }

@@ -247,37 +247,88 @@ public class CmdUtil {
         return resultArr;
     }
 
-    public static byte[] openDoorCmd(byte[] aesRandomKey) {
+//    public static byte[] openDoorCmd(byte[] aesRandomKey) {
+//        byte cmd = 0x8;
+//        byte ver = 0x0;
+//        byte[] dataArr = new byte[16];
+//        int curTime = (int) Math.ceil((System.currentTimeMillis() / 1000));
+//        byte[] curTimeBytes = DataUtil.intToByteArray(curTime);
+//        System.arraycopy(curTimeBytes, 0, dataArr, 0, curTimeBytes.length);
+//        byte[] uidBytes = {1, 2, 3, 4};
+//        System.arraycopy(uidBytes, 0, dataArr, curTimeBytes.length, uidBytes.length);
+//        byte[] uidPadding = {1, 1, 1};
+//        System.arraycopy(uidPadding, 0, dataArr, curTimeBytes.length + uidBytes.length, uidPadding.length);
+//        byte[] type = {0x3a};
+//        System.arraycopy(type, 0, dataArr, curTimeBytes.length + uidBytes.length + uidPadding.length, type.length);
+//        byte[] keyId = {1, 2};
+//        System.arraycopy(keyId, 0, dataArr, curTimeBytes.length + uidBytes.length + uidPadding.length + type.length, keyId.length);
+//        byte[] checkSum = DataUtil.shortToByteArray(getCheckSum(dataArr));
+//        System.arraycopy(checkSum, 0, dataArr, curTimeBytes.length + uidBytes.length + uidPadding.length + type.length + keyId.length, checkSum.length);
+//        try {
+//            byte[] curServerKey = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+//            byte[] serverkeyEncryptResult = AESUtil.encrypt(dataArr, curServerKey);
+//            byte[] serverkeyEncryptPaddingResult = addPaddingTo16Bytes(serverkeyEncryptResult);
+//            byte[] aeskeyEncryptResult = AESUtil.encrypt(serverkeyEncryptPaddingResult, aesRandomKey);
+//
+//            byte[] resultArr = new byte[2 + aeskeyEncryptResult.length];
+//            resultArr[0] = cmd;
+//            resultArr[1] = ver;
+//            System.arraycopy(aeskeyEncryptResult, 0, resultArr, 2, aeskeyEncryptResult.length);
+//
+//
+//            return resultArr;
+//        } catch (Exception e) {
+//        }
+//        return null;
+//    }
+    
+    public static byte[] openDoorCmd(byte[] aesUserKey) {
         byte cmd = 0x8;
         byte ver = 0x0;
-        byte[] dataArr = new byte[16];
-        int curTime = (int) Math.ceil((System.currentTimeMillis() / 1000));
-        byte[] curTimeBytes = DataUtil.intToByteArray(curTime);
-        System.arraycopy(curTimeBytes, 0, dataArr, 0, curTimeBytes.length);
-        byte[] uidBytes = {1, 2, 3, 4};
-        System.arraycopy(uidBytes, 0, dataArr, curTimeBytes.length, uidBytes.length);
-        byte[] uidPadding = {1, 1, 1};
-        System.arraycopy(uidPadding, 0, dataArr, curTimeBytes.length + uidBytes.length, uidPadding.length);
-        byte[] type = {0x3a};
-        System.arraycopy(type, 0, dataArr, curTimeBytes.length + uidBytes.length + uidPadding.length, type.length);
-        byte[] keyId = {1, 2};
-        System.arraycopy(keyId, 0, dataArr, curTimeBytes.length + uidBytes.length + uidPadding.length + type.length, keyId.length);
-        byte[] checkSum = DataUtil.shortToByteArray(getCheckSum(dataArr));
-        System.arraycopy(checkSum, 0, dataArr, curTimeBytes.length + uidBytes.length + uidPadding.length + type.length + keyId.length, checkSum.length);
         try {
-            byte[] curServerKey = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
-            byte[] serverkeyEncryptResult = AESUtil.encrypt(dataArr, curServerKey);
-            byte[] serverkeyEncryptPaddingResult = addPaddingTo16Bytes(serverkeyEncryptResult);
-            byte[] aeskeyEncryptResult = AESUtil.encrypt(serverkeyEncryptPaddingResult, aesRandomKey);
+            if (null != aesUserKey) {
+                byte[] serverkeyEncryptPaddingResult = addPaddingTo16Bytes(aesUserKey);
+                byte[] resultArr = new byte[2 + serverkeyEncryptPaddingResult.length];
+                resultArr[0] = cmd;
+                resultArr[1] = ver;
+                System.arraycopy(serverkeyEncryptPaddingResult, 0, resultArr, 2, serverkeyEncryptPaddingResult.length);
+                return resultArr;
+            }
+        } catch (Exception e) {
+            LOGGER.error("openDoorCmd error", e);
+        }
+        return null;
+    }
+    
+    public static byte[] wifiCmd(byte[] curServerKey, byte ver, String wifiSsid, String wifiPwd, String borderUrl) {
+        byte cmd = 0xB;
 
+        int time = (int) Math.ceil((System.currentTimeMillis() / 1000)) + EXPIRE_TIME;
+        
+        byte[] timeBytes = DataUtil.intToByteArray(time);
+        byte[] ssidData = wifiSsid.getBytes();
+        byte[] pwdData = wifiPwd.getBytes();
+        byte[] serverUrlData = borderUrl.getBytes();
+        byte[] len = {(byte) ssidData.length, (byte) pwdData.length, (byte) serverUrlData.length};
+        byte[] dataArr = new byte[timeBytes.length + len.length + ssidData.length + pwdData.length + serverUrlData.length];
+        System.arraycopy(timeBytes, 0, dataArr, 0, timeBytes.length);
+        System.arraycopy(len, 0, dataArr, timeBytes.length, len.length);
+        System.arraycopy(ssidData, 0, dataArr, timeBytes.length + len.length, ssidData.length);
+        System.arraycopy(pwdData, 0, dataArr, timeBytes.length + len.length + ssidData.length, pwdData.length);
+        System.arraycopy(serverUrlData, 0, dataArr, timeBytes.length + len.length + ssidData.length + pwdData.length, serverUrlData.length);
+        
+        try {
+            byte[] odata = addPaddingTo16Bytes(dataArr);
+            LOGGER.error(StringHelper.toHexString(odata));
+            byte[] aeskeyEncryptResult = AESUtil.encrypt(odata, curServerKey);
             byte[] resultArr = new byte[2 + aeskeyEncryptResult.length];
             resultArr[0] = cmd;
             resultArr[1] = ver;
             System.arraycopy(aeskeyEncryptResult, 0, resultArr, 2, aeskeyEncryptResult.length);
-
-
+            LOGGER.error(StringHelper.toHexString(resultArr));
             return resultArr;
         } catch (Exception e) {
+            LOGGER.error("wifiCmd()...", e);
         }
         return null;
     }

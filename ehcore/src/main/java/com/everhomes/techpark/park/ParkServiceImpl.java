@@ -1,5 +1,6 @@
 package com.everhomes.techpark.park;
 
+import java.math.BigDecimal;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
@@ -40,11 +41,21 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.organization.pm.pay.ResultHolder;
+import com.everhomes.parking.ParkingCardRequest;
+import com.everhomes.parking.ParkingLot;
+import com.everhomes.parking.ParkingProvider;
+import com.everhomes.parking.ParkingRechargeOrder;
+import com.everhomes.parking.ParkingRechargeRate;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.parking.ParkingCardIssueFlag;
+import com.everhomes.rest.parking.ParkingCardRequestStatus;
+import com.everhomes.rest.parking.ParkingOwnerType;
+import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
+import com.everhomes.rest.parking.ParkingRechargeOrderStatus;
 import com.everhomes.rest.techpark.onlinePay.OnlinePayBillCommand;
 import com.everhomes.rest.techpark.onlinePay.PayStatus;
 import com.everhomes.rest.techpark.onlinePay.RechargeStatus;
@@ -131,6 +142,9 @@ public class ParkServiceImpl implements ParkService {
 	
 	@Autowired
 	private AppProvider appProvider;
+	
+	@Autowired
+    private ParkingProvider parkingProvider;
 	
 	private static final QName SERVICE_NAME = new QName("http://tempuri.org/", "Service1");
 	
@@ -222,6 +236,45 @@ public class ParkServiceImpl implements ParkService {
 		order.setNewValidityperiod(addMonth(cmd.getValidityPeriod(), cmd.getMonths()));;
 		
 		this.parkProvider.createRechargeOrder(order);
+		//向2.0版本的表中添加充值数据
+		ParkingRechargeOrder parkingRechargeOrder = new ParkingRechargeOrder();		
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+		
+		Long parkingLotId = configProvider.getLongValue("parking.parkingLotId", 10001L);
+		ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotId);
+		try{
+		parkingRechargeOrder.setOwnerType(ParkingOwnerType.COMMUNITY.getCode());
+		Long ownerId = configProvider.getLongValue("parking.communityId", 240111044331048623L);
+		parkingRechargeOrder.setOwnerId(ownerId);
+		parkingRechargeOrder.setParkingLotId(parkingLot.getId());
+		parkingRechargeOrder.setPlateNumber(cmd.getPlateNumber());
+		parkingRechargeOrder.setPlateOwnerName(cmd.getOwnerName());
+		parkingRechargeOrder.setPlateOwnerPhone(null);
+		parkingRechargeOrder.setPayerEnterpriseId(null);
+		parkingRechargeOrder.setPayerUid(user.getId());
+		parkingRechargeOrder.setPayerPhone(userIdentifier.getIdentifierToken());
+		parkingRechargeOrder.setVendorName(parkingLot.getVendorName());
+		ParkingRechargeRate rate = parkProvider.findParkingRechargeRates(ParkingOwnerType.COMMUNITY.getCode(), ownerId, parkingLotId,
+				new BigDecimal(cmd.getMonths()), new BigDecimal(cmd.getAmount()));
+		//parkingRechargeOrder.setCardNumber(cmd.getCardNumber());
+		parkingRechargeOrder.setRateToken(String.valueOf(rate.getId()));
+		parkingRechargeOrder.setRateName(rate.getRateName());
+		parkingRechargeOrder.setMonthCount(new BigDecimal(cmd.getMonths()));
+		parkingRechargeOrder.setPrice(new BigDecimal(cmd.getAmount()));
+		parkingRechargeOrder.setStatus(ParkingRechargeOrderStatus.UNPAID.getCode());
+		parkingRechargeOrder.setRechargeStatus(ParkingRechargeOrderRechargeStatus.UNRECHARGED.getCode());
+		parkingRechargeOrder.setCreatorUid(user.getId());
+		parkingRechargeOrder.setCreateTime(new Timestamp(time));
+		parkingRechargeOrder.setOrderNo(bill);
+		parkingRechargeOrder.setNewExpiredTime(addMonth(cmd.getValidityPeriod(), cmd.getMonths()));
+		parkingRechargeOrder.setOldExpiredTime(addDays(cmd.getValidityPeriod(), 1));
+		
+		parkingProvider.createParkingRechargeOrder(parkingRechargeOrder);
+		}catch(Exception e) {
+			LOGGER.error("createParkingRechargeOrder is fail. {}",e);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"createParkingRechargeOrder is fail.");
+		}
 		
 		RechargeOrderDTO dto = new RechargeOrderDTO();
 		dto.setBillId(order.getBillId());
@@ -391,8 +444,33 @@ public class ParkServiceImpl implements ParkService {
 			apply.setCommunityId(cmd.getCommunityId());
 			
 			parkProvider.applyParkingCard(apply);
-			String count = parkProvider.waitingCardCount(cmd.getCommunityId()) - 1 + "";
-			return count;
+			//兼容1.0版本，想2.0版本中添加申请数据
+			ParkingCardRequest parkingCardRequest = new ParkingCardRequest();
+			User user = UserContext.current().getUser();
+			Long parkingLotId = configProvider.getLongValue("parking.parkingLotId", 10001L);
+			ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotId);
+			
+			Long ownerId = configProvider.getLongValue("parking.communityId", 240111044331048623L);
+			parkingCardRequest.setOwnerId(ownerId);
+			parkingCardRequest.setOwnerType(ParkingOwnerType.COMMUNITY.getCode());
+			parkingCardRequest.setParkingLotId(parkingLot.getId());
+			//parkingCardRequest.setRequestorEnterpriseId(cmd.getRequestorEnterpriseId());
+			parkingCardRequest.setPlateNumber(cmd.getPlateNumber());
+			parkingCardRequest.setPlateOwnerEntperiseName(cmd.getCompanyName());
+			parkingCardRequest.setPlateOwnerName(cmd.getUserName());
+			parkingCardRequest.setPlateOwnerPhone(cmd.getPhoneNumber());
+			parkingCardRequest.setRequestorUid(user.getId());
+			//设置一些初始状态
+			parkingCardRequest.setIssueFlag(ParkingCardIssueFlag.UNISSUED.getCode());
+			parkingCardRequest.setStatus(ParkingCardRequestStatus.QUEUEING.getCode());
+			parkingCardRequest.setCreatorUid(user.getId());
+			parkingCardRequest.setCreateTime(new Timestamp(System.currentTimeMillis()));
+			
+			parkingProvider.requestParkingCard(parkingCardRequest);
+			Integer count = parkingProvider.waitingCardCount(ParkingOwnerType.COMMUNITY.getCode(), 
+					ownerId, parkingLot.getId(), parkingCardRequest.getCreateTime());
+			//String count = parkProvider.waitingCardCount(cmd.getCommunityId()) - 1 + "";
+			return String.valueOf(count);
 		} catch(Exception e) {
 			throw RuntimeErrorException.errorWith(ParkingServiceErrorCode.SCOPE, ParkingServiceErrorCode.ERROR_PLATE_APPLIED_SERVER,
 					localeStringService.getLocalizedString(String.valueOf(ParkingServiceErrorCode.SCOPE), 
@@ -616,7 +694,32 @@ public class ParkServiceImpl implements ParkService {
 				}
 			}
 		}
+		
 		RechargeSuccessResponse rechargeResponse = getRechargeStatus(Long.valueOf(cmd.getOrderNo()));
+		//PayStatus.WAITING_FOR_PAY.getCode();
+		//RechargeStatus.HANDING.getCode();
+		ParkingRechargeOrder order = parkProvider.findParkingRechargeOrderByOrderNo(Long.valueOf(cmd.getOrderNo()));
+		//1.0订单
+		RechargeInfo order_1_0 = onlinePayProvider.findRechargeInfoByOrderId(Long.valueOf(cmd.getOrderNo()));
+		Timestamp payTimeStamp = new Timestamp(System.currentTimeMillis());
+		order.setStatus(order_1_0.getPaymentStatus());
+		if(order_1_0.getRechargeStatus().equals(RechargeStatus.INACTIVE.getCode())){
+			order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.NONE.getCode());
+		}
+		if(order_1_0.getRechargeStatus().equals(RechargeStatus.HANDING.getCode())){
+			order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.UNRECHARGED.getCode());
+		}
+		if(order_1_0.getRechargeStatus().equals(RechargeStatus.UPDATING.getCode())){
+			order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.UNRECHARGED.getCode());
+		}
+		if(order_1_0.getRechargeStatus().equals(RechargeStatus.SUCCESS.getCode())){
+			order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode());
+		}
+		order.setPaidTime(payTimeStamp);
+		order.setPaidType(cmd.getVendorType());
+		order.setRechargeTime(payTimeStamp);
+		//order.setPaidTime(cmd.getPayTime());
+		parkingProvider.updateParkingRechargeOrder(order);
 		return rechargeResponse;
 		
 	}

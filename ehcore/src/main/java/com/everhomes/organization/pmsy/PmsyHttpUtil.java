@@ -28,12 +28,12 @@ import com.everhomes.util.RuntimeErrorException;
 public class PmsyHttpUtil {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PmsyHttpUtil.class);
 
-	public static String post(String p0, String p1, String p2, String p3, String p4, String p5, String p6, String p7){
+	public static String post(String url,String p0, String p1, String p2, String p3, String p4, String p5, String p6, String p7){
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		String result = null;
         try {
 
-            HttpPost httpPost = new HttpPost("http://sysuser.kmdns.net:9090/NetApp/SYS86Service.asmx/GetSYS86Service");
+            HttpPost httpPost = new HttpPost(url);
             List <NameValuePair> nvps = new ArrayList <NameValuePair>();
             nvps.add(new BasicNameValuePair("strToken", "syswin"));
             nvps.add(new BasicNameValuePair("p0", p0));
@@ -92,8 +92,8 @@ public class PmsyHttpUtil {
 	}
 	public static void main(String[] args) {
 		
-String json1 = PmsyHttpUtil.post("UserRev_GetFeeList", "00100120091000000001", "","", "00100020090900000003", "01", "", "");
-System.out.println(json1);
+//String json1 = PmsyHttpUtil.post("UserRev_GetFeeList", "00100120091000000001", "","", "00100020090900000003", "01", "", "");
+//System.out.println(json1);
 //Gson gson = new Gson();
 //		System.out.println(json1);
 //		Map map_ = gson.fromJson(json1, Map.class);

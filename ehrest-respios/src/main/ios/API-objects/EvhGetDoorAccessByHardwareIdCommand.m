@@ -38,6 +38,8 @@
         }
         [jsonObject setObject: jsonArray forKey: @"hardwareIds"];
     }
+    if(self.organizationId)
+        [jsonObject setObject: self.organizationId forKey: @"organizationId"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -49,6 +51,10 @@
                 [self.hardwareIds addObject: itemJson];
             }
         }
+        self.organizationId = [jsonObject objectForKey: @"organizationId"];
+        if(self.organizationId && [self.organizationId isEqual:[NSNull null]])
+            self.organizationId = nil;
+
         return self;
     }
     

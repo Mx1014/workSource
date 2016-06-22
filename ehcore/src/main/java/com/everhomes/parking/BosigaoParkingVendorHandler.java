@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,10 +89,13 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 			String plateOwnerPhone = (String) card.get("mobile");
 			Timestamp endTime = strToTimestamp(validEnd);
 			
+			if(!validStatus){
+				return resultList;
+			}
 			parkingCardDTO.setOwnerType(ParkingOwnerType.COMMUNITY.getCode());
 			parkingCardDTO.setOwnerId(ownerId);
 			parkingCardDTO.setParkingLotId(parkingLotId);
-			parkingCardDTO.setPlateOwnerName(plateOwnerName);
+			parkingCardDTO.setPlateOwnerName(StringUtils.isBlank(plateOwnerName)?"默认昵称":plateOwnerName);
 			parkingCardDTO.setPlateNumber(carNumber);
 			//parkingCardDTO.setStartTime(startTime);
 			parkingCardDTO.setEndTime(endTime.getTime());
@@ -99,30 +103,36 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 			parkingCardDTO.setCardNumber(cardNumber);
 			parkingCardDTO.setPlateOwnerPhone(plateOwnerPhone);
 			
-			if(!validStatus){
-				parkingCardDTO.setIsValid(false);
-				resultList.add(parkingCardDTO);
-				return resultList;
-			}
-			else if(validStatus){
 				parkingCardDTO.setIsValid(true);
 				resultList.add(parkingCardDTO);
 				
-				return resultList;
-			}
 		}
         
         return resultList;
     }
 
     @Override
-    public List<ParkingRechargeRateDTO> getParkingRechargeRates(String ownerType, Long ownerId, Long parkingLotId) {
+    public List<ParkingRechargeRateDTO> getParkingRechargeRates(String ownerType, Long ownerId, Long parkingLotId,String plateNumber,String cardNo) {
+        URL wsdlURL = Service1.WSDL_LOCATION;
+        Service1 ss = new Service1(wsdlURL, Service1.SERVICE);
+        Service1Soap port = ss.getService1Soap12();
+        LOGGER.info("verifyRechargedPlate");
+        String json = port.getCardInfo("", plateNumber, "2", "sign");
         
-		List<ParkingRechargeRate> parkingRechargeRateList = parkingProvider.listParkingRechargeRates(ownerType, ownerId, parkingLotId);
+        ResultHolder resultHolder = GsonUtil.fromJson(json, ResultHolder.class);
+        this.checkResultHolderIsNull(resultHolder,plateNumber);
+        Map<String,Object> data = (Map<String, Object>) resultHolder.getData();
+		Map<String,Object> card = (Map<String, Object>) data.get("card");
+		Boolean validStatus =  (Boolean) card.get("valid");
+		this.checkValidStatusIsNull(validStatus,plateNumber);
+
+		String cardType = (String) card.get("cardDescript");
+		List<ParkingRechargeRate> parkingRechargeRateList = parkingProvider.listParkingRechargeRates(ownerType, ownerId, parkingLotId,cardType);
 		
 		List<ParkingRechargeRateDTO> result = parkingRechargeRateList.stream().map(r->{
 			ParkingRechargeRateDTO dto = new ParkingRechargeRateDTO();
 			dto = ConvertHelper.convert(r, ParkingRechargeRateDTO.class);
+			dto.setRateName(dto.getMonthCount().intValue()+"个月");
 			dto.setRateToken(r.getId().toString());
 			dto.setVendorName(ParkingLotVendor.BOSIGAO.getCode());
 			return dto;
@@ -140,7 +150,7 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 			}
 			else {
 				String carNumber = order.getPlateNumber();
-				String cost = order.getPrice().intValue() + "";
+				String cost = (order.getPrice().intValue()*100) + "";
 				String flag = "2"; //停车场系统接口的传入参数，2表示是车牌号
 				String payTime = order.getPaidTime().toString();
 				String validStart = timestampToStr(order.getOldExpiredTime());
@@ -266,13 +276,6 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
         	}
         }
 		
-		if(cmd.getPlateNumber().length() != 7) {
-			LOGGER.error("the length of plateNumber is wrong.");
-			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_LENGTH,
-					localeStringService.getLocalizedString(String.valueOf(ParkingErrorCode.SCOPE), 
-							String.valueOf(ParkingErrorCode.ERROR_PLATE_LENGTH),
-							UserContext.current().getUser().getLocale(),"the length of plateNumber is wrong."));
-		}
 		ParkingCardRequestDTO parkingCardRequestDTO = new ParkingCardRequestDTO();
 		try {
 			ParkingCardRequest parkingCardRequest = new ParkingCardRequest();

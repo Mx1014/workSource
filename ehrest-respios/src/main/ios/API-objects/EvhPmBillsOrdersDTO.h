@@ -35,6 +35,8 @@
 
 @property(nonatomic, copy) NSString* paidType;
 
+@property(nonatomic, copy) NSNumber* billDate;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 

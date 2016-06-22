@@ -17,6 +17,8 @@
 
 @property(nonatomic, copy) NSString* md5sum;
 
+@property(nonatomic, copy) NSString* firmwareType;
+
 @property(nonatomic, copy) NSString* downloadUrl;
 
 @property(nonatomic, copy) NSNumber* major;

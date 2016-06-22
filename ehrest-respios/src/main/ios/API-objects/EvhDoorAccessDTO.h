@@ -53,6 +53,10 @@
 
 @property(nonatomic, copy) NSString* version;
 
+@property(nonatomic, copy) NSString* groupName;
+
+@property(nonatomic, copy) NSNumber* groupId;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 

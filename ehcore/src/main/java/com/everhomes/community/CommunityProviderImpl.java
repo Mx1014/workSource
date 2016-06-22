@@ -1101,24 +1101,31 @@ public class CommunityProviderImpl implements CommunityProvider {
             return null;
         });
         
-        if(communities.size() > 0) {
+        if(communities.size() >= count) {
             locator.setAnchor(communities.get(communities.size() -1).getId());
+        } else {
+            locator.setAnchor(null);
         }
         
         return communities;
     }
 
 	@Override
-	public List<CommunityDTO> listCommunitiesByNamespaceId(Integer namespaceId,ListingLocator locator, int pageSize) {
+	public List<CommunityDTO> listCommunitiesByNamespaceId(Byte communityType, Integer namespaceId,ListingLocator locator, int pageSize) {
 		final List<CommunityDTO> results = new ArrayList<>();
 		
 		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhCommunities.class), null, 
 	            (DSLContext context, Object reducingContext)-> {
-	            
+	            	
+	            	Condition cond = Tables.EH_COMMUNITIES.ID.gt(locator.getAnchor());
+	        		cond = cond.and(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId));
+	        		cond = cond.and(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
+	        		if(null != communityType){
+	        			cond = cond.and(Tables.EH_COMMUNITIES.COMMUNITY_TYPE.eq(communityType));
+	        		}
+	        		
 	            context.select().from(Tables.EH_COMMUNITIES)
-	                .where(Tables.EH_COMMUNITIES.ID.gt(locator.getAnchor())
-	                .and(Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId))
-	                .and(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode())))
+	                .where(cond)
 	                .limit(pageSize)
 	                .fetch().map((r) -> {
 	                CommunityDTO community = ConvertHelper.convert(r, CommunityDTO.class);

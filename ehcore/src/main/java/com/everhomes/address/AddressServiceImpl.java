@@ -1631,7 +1631,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         	resp = listMixCommunitiesByDistance(cmd, locator, pageSize);
         	return resp;
         }else {
-        	results = this.communityProvider.listCommunitiesByNamespaceId(namespaceId, locator, pageSize+1);
+        	results = this.communityProvider.listCommunitiesByNamespaceId(cmd.getCommunityType(), namespaceId, locator, pageSize+1);
         	
         	if(results != null && results.size() > pageSize){
             	results.remove(results.size()-1);
@@ -1654,64 +1654,80 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 		List<CommunityGeoPoint> pointList = this.communityProvider.findCommunityGeoPointByGeoHash(cmd.getLatigtue(),cmd.getLongitude(), 5);
         List<Long> communityIds = getAllCommunityIds(pointList);
         
-        
-		
-		if(cmd.getPageAnchor() != 0) {
-			Community anchorCommunity = this.communityProvider.findCommunityById(cmd.getPageAnchor());
-			if(anchorCommunity != null && anchorCommunity.getCommunityType() == CommunityType.COMMERCIAL.getCode()) {
-				//园区 Anchor
-				List<CommunityDTO> commercials = this.communityProvider.listCommunitiesByType(communityIds, 
-						CommunityType.COMMERCIAL.getCode(), locator, pageSize+1);
-				if(commercials != null) {
-					results.addAll(commercials);
-				} 
+        if(cmd.getCommunityType() == null) {
+        	if(cmd.getPageAnchor() != 0) {
+    			Community anchorCommunity = this.communityProvider.findCommunityById(cmd.getPageAnchor());
+    			if(anchorCommunity != null && anchorCommunity.getCommunityType() == CommunityType.COMMERCIAL.getCode()) {
+    				//园区 Anchor
+    				List<CommunityDTO> commercials = this.communityProvider.listCommunitiesByType(communityIds, 
+    						CommunityType.COMMERCIAL.getCode(), locator, pageSize+1);
+    				if(commercials != null) {
+    					results.addAll(commercials);
+    				} 
 
-				if(commercials == null || (commercials != null && commercials.size() <= pageSize)){
-					int count = pageSize;
-					if(commercials != null) {
-						count = pageSize-commercials.size();
-					}
-					//小区  从0开始
-					ListingLocator residentialsLocator = new CrossShardListingLocator();
-					residentialsLocator.setAnchor(0L);
-					List<CommunityDTO> residentials = this.communityProvider.listCommunitiesByType(communityIds, 
-							CommunityType.RESIDENTIAL.getCode(), residentialsLocator, count+1);
-					if(residentials != null) {
-						results.addAll(residentials);
-					}
-				}
-				
-			} else {
-				//小区 Anchor
-				List<CommunityDTO> residentials = this.communityProvider.listCommunitiesByType(communityIds, 
-						CommunityType.RESIDENTIAL.getCode(), locator, pageSize+1);
-				if(residentials != null) {
-					results.addAll(residentials);
-				}
-			}
-		} else {
-			//园区  从0开始
-			List<CommunityDTO> commercials = this.communityProvider.listCommunitiesByType(communityIds, 
+    				if(commercials == null || (commercials != null && commercials.size() <= pageSize)){
+    					int count = pageSize;
+    					if(commercials != null) {
+    						count = pageSize-commercials.size();
+    					}
+    					//小区  从0开始
+    					ListingLocator residentialsLocator = new CrossShardListingLocator();
+    					residentialsLocator.setAnchor(0L);
+    					List<CommunityDTO> residentials = this.communityProvider.listCommunitiesByType(communityIds, 
+    							CommunityType.RESIDENTIAL.getCode(), residentialsLocator, count+1);
+    					if(residentials != null) {
+    						results.addAll(residentials);
+    					}
+    				}
+    				
+    			} else {
+    				//小区 Anchor
+    				List<CommunityDTO> residentials = this.communityProvider.listCommunitiesByType(communityIds, 
+    						CommunityType.RESIDENTIAL.getCode(), locator, pageSize+1);
+    				if(residentials != null) {
+    					results.addAll(residentials);
+    				}
+    			}
+    		} else {
+    			//园区  从0开始
+    			List<CommunityDTO> commercials = this.communityProvider.listCommunitiesByType(communityIds, 
+    					CommunityType.COMMERCIAL.getCode(), locator, pageSize+1);
+    			if(commercials != null) {
+    				results.addAll(commercials);
+    			} 
+    			
+    			if(commercials == null || (commercials != null && commercials.size() <= pageSize)){
+    				int count = pageSize;
+    				if(commercials != null) {
+    					count = pageSize-commercials.size();
+    				}
+    				//小区  从0开始
+    				List<CommunityDTO> residentials = this.communityProvider.listCommunitiesByType(communityIds, 
+    						CommunityType.RESIDENTIAL.getCode(), locator, count+1);
+    				if(residentials != null) {
+    					results.addAll(residentials);
+    				}
+    			}
+    		}
+        }
+        
+        else if(cmd.getCommunityType() != null && cmd.getCommunityType().equals(CommunityType.COMMERCIAL.getCode())) {
+        	List<CommunityDTO> commercials = this.communityProvider.listCommunitiesByType(communityIds, 
 					CommunityType.COMMERCIAL.getCode(), locator, pageSize+1);
 			if(commercials != null) {
 				results.addAll(commercials);
 			} 
-			
-			if(commercials == null || (commercials != null && commercials.size() <= pageSize)){
-				int count = pageSize;
-				if(commercials != null) {
-					count = pageSize-commercials.size();
-				}
-				//小区  从0开始
-				List<CommunityDTO> residentials = this.communityProvider.listCommunitiesByType(communityIds, 
-						CommunityType.RESIDENTIAL.getCode(), locator, count+1);
-				if(residentials != null) {
-					results.addAll(residentials);
-				}
-			}
-		}
-		
+        }
         
+        else if(cmd.getCommunityType() != null && cmd.getCommunityType().equals(CommunityType.RESIDENTIAL.getCode())) {
+        	List<CommunityDTO> residentials = this.communityProvider.listCommunitiesByType(communityIds, 
+					CommunityType.RESIDENTIAL.getCode(), locator, pageSize+1);
+			if(residentials != null) {
+				results.addAll(residentials);
+			}
+        }
+		
+		
         if(results != null && results.size() > pageSize){
         	results.remove(results.size()-1);
         	resp.setNextPageAnchor(results.get(results.size()-1).getId());

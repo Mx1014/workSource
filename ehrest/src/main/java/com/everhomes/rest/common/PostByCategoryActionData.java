@@ -1,7 +1,9 @@
 package com.everhomes.rest.common;
 
 import java.io.Serializable;
+import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 
@@ -27,6 +29,10 @@ public class PostByCategoryActionData implements Serializable{
     private Long actionCategory;
     private Long organizationId;
     private Long communityId;
+    private Long embeddedAppId;
+    
+    @ItemType(Long.class)
+    private List<Long> excludeCategories;
 
 
     public Long getForumId() {
@@ -84,8 +90,25 @@ public class PostByCategoryActionData implements Serializable{
     public void setCommunityId(Long communityId) {
         this.communityId = communityId;
     }
+    
 
-    @Override
+    public Long getEmbeddedAppId() {
+		return embeddedAppId;
+	}
+
+	public void setEmbeddedAppId(Long embeddedAppId) {
+		this.embeddedAppId = embeddedAppId;
+	}
+
+	public List<Long> getExcludeCategories() {
+		return excludeCategories;
+	}
+
+	public void setExcludeCategories(List<Long> excludeCategories) {
+		this.excludeCategories = excludeCategories;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

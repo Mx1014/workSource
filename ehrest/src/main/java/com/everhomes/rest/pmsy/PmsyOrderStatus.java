@@ -2,14 +2,14 @@
 package com.everhomes.rest.pmsy;
 
 /**
- * <ul>停车充值订单状态
+ * <ul>物业缴费订单状态
  * <li>INACTIVE(0): 无效</li>
  * <li>UNPAID(1): 未支付</li>
  * <li>PAID(2): 已支付</li>
  * </ul>
  */
 public enum PmsyOrderStatus {
-    INACTIVE((byte)0), UNPAID((byte)1), PAID((byte)2);
+    INACTIVE((byte)0), UNPAID((byte)1), PAID((byte)2),FAIL((byte)3),SUCCESS((byte)4);
     
     private byte code;
     

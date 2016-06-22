@@ -30,6 +30,7 @@ import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.rest.visibility.VisibilityScope;
+import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.user.User;
 import com.everhomes.util.WebTokenGenerator;
 
@@ -86,23 +87,23 @@ public class DiscoveryDefaultPostSceneHandler implements PostSceneHandler {
         Integer namespaceId = sceneToken.getNamespaceId();
         if(community != null) {
             long menuId = 1;
-            
+            //产品要求只留周边小区 mod by xiongying 20160601
             // 菜单：小区圈
-            long group1Id = menuId++;
+ //           long group1Id = menuId++;
             TopicFilterDTO filterDto = new TopicFilterDTO();
-            filterDto.setId(group1Id);
-            filterDto.setParentId(0L);
-            code = String.valueOf(ForumLocalStringCode.POST_MEMU_COMMUNITY_GROUP);
-            menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
-            filterDto.setName(menuName);
-            filterDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());
-            filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());;
-            filterList.add(filterDto);
+//            filterDto.setId(group1Id);
+//            filterDto.setParentId(0L);
+//            code = String.valueOf(ForumLocalStringCode.POST_MEMU_COMMUNITY_GROUP);
+//            menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
+//            filterDto.setName(menuName);
+//            filterDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());
+//            filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());;
+//            filterList.add(filterDto);
 
             // 菜单：周边小区
             filterDto = new TopicFilterDTO();
             filterDto.setId(menuId++);
-            filterDto.setParentId(group1Id);
+            filterDto.setParentId(0L);
             code = String.valueOf(ForumLocalStringCode.POST_MEMU_COMMUNITY_NEARBY);
             menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
             filterDto.setName(menuName);
@@ -117,21 +118,21 @@ public class DiscoveryDefaultPostSceneHandler implements PostSceneHandler {
             filterList.add(filterDto);
 
             // 菜单：本小区
-            filterDto = new TopicFilterDTO();
-            filterDto.setId(menuId++);
-            filterDto.setParentId(group1Id);
-            code = String.valueOf(ForumLocalStringCode.POST_MEMU_COMMUNITY_ONLY);
-            menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
-            filterDto.setName(menuName);
-            filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());
-            filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());
-            actionUrl = String.format("%s%s?forumId=%s&visibilityScope=%s&communityId=%s&excludeCategories[0]=%s", serverContectPath, 
-                "/forum/listTopics", community.getDefaultForumId(), VisibilityScope.COMMUNITY.getCode(), community.getId(), CategoryConstants.CATEGORY_ID_TOPIC_ACTIVITY);
-            filterDto.setActionUrl(actionUrl);
-            avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.community_only", "");
-            filterDto.setAvatar(avatarUri);
-            filterDto.setAvatarUrl(getPostFilterDefaultAvatar(namespaceId, user.getId(), avatarUri));
-            filterList.add(filterDto);
+//            filterDto = new TopicFilterDTO();
+//            filterDto.setId(menuId++);
+//            filterDto.setParentId(group1Id);
+//            code = String.valueOf(ForumLocalStringCode.POST_MEMU_COMMUNITY_ONLY);
+//            menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
+//            filterDto.setName(menuName);
+//            filterDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());
+//            filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());
+//            actionUrl = String.format("%s%s?forumId=%s&visibilityScope=%s&communityId=%s&excludeCategories[0]=%s", serverContectPath, 
+//                "/forum/listTopics", community.getDefaultForumId(), VisibilityScope.COMMUNITY.getCode(), community.getId(), CategoryConstants.CATEGORY_ID_TOPIC_ACTIVITY);
+//            filterDto.setActionUrl(actionUrl);
+//            avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.community_only", "");
+//            filterDto.setAvatar(avatarUri);
+//            filterDto.setAvatarUrl(getPostFilterDefaultAvatar(namespaceId, user.getId(), avatarUri));
+//            filterList.add(filterDto);
 
 
 //            long group2Id = menuId++;
@@ -246,12 +247,16 @@ public class DiscoveryDefaultPostSceneHandler implements PostSceneHandler {
             menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
             sentScopeDto.setName(menuName);
             sentScopeDto.setLeafFlag(SelectorBooleanFlag.TRUE.getCode());;
+            sentScopeDto.setDefaultFlag(SelectorBooleanFlag.TRUE.getCode());
             sentScopeDto.setForumId(community.getDefaultForumId());
             sentScopeDto.setSceneToken(sceneToken);
             sentScopeDto.setTargetTag(PostEntityTag.USER.getCode());
             String avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.community_nearby", "");
             sentScopeDto.setAvatar(avatarUri);
             sentScopeDto.setAvatarUrl(getPostFilterDefaultAvatar(namespaceId, user.getId(), avatarUri));
+            
+            sentScopeDto.setVisibleRegionType(VisibleRegionType.COMMUNITY.getCode());
+            sentScopeDto.setVisibleRegionId(community.getId());
             scopeList.add(sentScopeDto);
 
             // 菜单：本小区
@@ -268,6 +273,9 @@ public class DiscoveryDefaultPostSceneHandler implements PostSceneHandler {
             avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.community_only", "");
             sentScopeDto.setAvatar(avatarUri);
             sentScopeDto.setAvatarUrl(getPostFilterDefaultAvatar(namespaceId, user.getId(), avatarUri));
+            
+            sentScopeDto.setVisibleRegionType(VisibleRegionType.COMMUNITY.getCode());
+            sentScopeDto.setVisibleRegionId(community.getId());
             scopeList.add(sentScopeDto);
 
             // 各兴趣圈
@@ -333,7 +341,7 @@ public class DiscoveryDefaultPostSceneHandler implements PostSceneHandler {
         			hasDefault = true;
         			break;
         		} else {
-        			if(firstUndefaultScopeDto != null) {
+        			if(firstUndefaultScopeDto == null) {
         				firstUndefaultScopeDto = sentScopeDto;
         			}
         		}

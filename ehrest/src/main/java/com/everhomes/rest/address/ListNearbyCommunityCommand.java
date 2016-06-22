@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>cityId: 城市Id</li>
  * <li>longitude: 经度</li>
+ * <li>communityType: 类型 communityType: 园区小区类型{@link com.everhomes.rest.community.CommunityType}</li>
  * <li>latigtue: 纬度</li>
  * <li>pageOffset: 页码</li>
  * </ul>

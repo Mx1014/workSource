@@ -28,41 +28,48 @@ public class OpPromotionListAllCondition implements OpPromotionCondition, OpProm
     
     @Override
     public void createCondition(OpPromotionContext ctx) {
-        OpPromotionUserVisitor visitor = new OpPromotionUserVisitor();
-        
-        //TODO use OpPromotionActivityContext directly
-        OpPromotionActivityContext c = (OpPromotionActivityContext) ctx;
-        visitor.setPromotion(c.getPromotion());
-        
-        List<OpPromotionAssignedScope> scopes = promotionAssignedScopeProvider.getOpPromotionScopeByPromotionId(c.getPromotion().getId());
-        for(OpPromotionAssignedScope scope : scopes) {
-            OpPromotionScopeType scopeType = OpPromotionScopeType.fromCode(scope.getScopeCode());
-            switch(scopeType) {
-            case ALL:
-                promotionUserService.listAllUser(visitor, this);
-                break;
-            case COMMUNITY:
-                visitor.setValue(scope.getScopeId());
-                promotionUserService.listUserByCommunity(visitor, this);
-                break;
-            case CITY:
-                visitor.setValue(scope.getScopeId());
-                promotionUserService.listUserByCity(visitor, this);
-                break;
-            case ORGANIZATION:
-                visitor.setValue(scope.getScopeId());
-                promotionUserService.listUserByCompany(visitor, this);
-                break;
-            default:
-                LOGGER.error("scopeType not found");
-                break;
+        try {
+            OpPromotionUserVisitor visitor = new OpPromotionUserVisitor();
+            
+            //TODO use OpPromotionActivityContext directly
+            OpPromotionActivityContext c = (OpPromotionActivityContext) ctx;
+            visitor.setPromotion(c.getPromotion());
+            List<OpPromotionAssignedScope> scopes = promotionAssignedScopeProvider.getOpPromotionScopeByPromotionId(c.getPromotion().getId());
+            for(OpPromotionAssignedScope scope : scopes) {
+                OpPromotionScopeType scopeType = OpPromotionScopeType.fromCode(scope.getScopeCode());
+                switch(scopeType) {
+                case ALL:
+                    promotionUserService.listAllUser(visitor, this);
+                    break;
+                case COMMUNITY:
+                    visitor.setValue(scope.getScopeId());
+                    promotionUserService.listUserByCommunity(visitor, this);
+                    break;
+                case CITY:
+                    visitor.setValue(scope.getScopeId());
+                    promotionUserService.listUserByCity(visitor, this);
+                    break;
+                case ORGANIZATION:
+                    visitor.setValue(scope.getScopeId());
+                    promotionUserService.listUserByCompany(visitor, this);
+                    break;
+                case USER:
+                    visitor.setValue(scope.getScopeId());
+                    promotionUserService.listUserByUserId(visitor, this);
+                default:
+                    LOGGER.error("scopeType not found");
+                    break;
+                }
             }
+            
+            if(visitor.getPushCount() > 0) {
+                promotionService.addPushCountByPromotionId(visitor.getPromotion().getId(), (int)visitor.getPushCount());
+                visitor.setPushCount(0);
+            }            
+        } catch(Exception ex) {
+            LOGGER.error("promotion list all error", ex);
         }
-        
-        if(visitor.getPushCount() > 0) {
-            promotionService.addPushCountByPromotionId(visitor.getPromotion().getId(), (int)visitor.getPushCount());
-            visitor.setPushCount(0);
-        }
+
     }
 
 //    @Override
@@ -83,6 +90,12 @@ public class OpPromotionListAllCondition implements OpPromotionCondition, OpProm
         if(visitor.getPushCount() % 100 == 0) {
             promotionService.addPushCountByPromotionId(visitor.getPromotion().getId(), (int)visitor.getPushCount());
             visitor.setPushCount(0);
+            try {
+            	Thread.sleep(10*1000L);
+			} catch (Exception e) {
+				LOGGER.error("sleep error", e);
+			}
+            
         }
     }
 

@@ -21,6 +21,8 @@ public class AclinkWebSocketState {
     private long sendingTick;
     private int waitingAck;
     
+    private int loopCnt;
+    
     private static final long TIMEOUT_TICK = 20*1000;
 
     public Long getId() {
@@ -46,13 +48,15 @@ public class AclinkWebSocketState {
     public void setHardwareId(String hardwareId) {
         this.hardwareId = hardwareId;
     }
-    
+
     public void onIncomeMessage(AclinkWebSocketMessage msg, AclinkWebSocketHandler handler) {
         
     }
     
     public void onTick(WebSocketSession session, AclinkWebSocketHandler handler) {
         this.lastTick = System.currentTimeMillis();
+        this.loopCnt = 0;
+        
         if( (-1 == this.waitingAck) || (this.sendingTick + TIMEOUT_TICK) < this.lastTick ) {
             //already timeout or not waiting, got next message and send it
             this.waitingAck = -1;
@@ -60,6 +64,7 @@ public class AclinkWebSocketState {
             AclinkWebSocketMessage cmd = new AclinkWebSocketMessage();
             cmd.setId(this.getId());
             handler.nextMessage(cmd, session, this);
+            this.loopCnt++;
         }
     }
     
@@ -73,12 +78,18 @@ public class AclinkWebSocketState {
             //Not waiting now
             this.waitingAck = -1;
             
+            if(this.loopCnt > 10) {
+                //wait for next tick
+                return;
+            }
+            
             AclinkWebSocketMessage cmd = new AclinkWebSocketMessage();
             cmd.setId(this.getId());
             cmd.setSeq(new Long(seq));
             cmd.setType(new Integer(0));
             cmd.setPayload(Base64.encodeBase64String(Arrays.copyOfRange(buf, 10, buf.length)));
             handler.nextMessage(cmd, session, this);
+            this.loopCnt++;
         }
     }
     

@@ -25,6 +25,11 @@
 
 @property(nonatomic, copy) NSNumber* communityId;
 
+@property(nonatomic, copy) NSNumber* embeddedAppId;
+
+// item type NSNumber*
+@property(nonatomic, strong) NSMutableArray* excludeCategories;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 

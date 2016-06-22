@@ -26,6 +26,7 @@ import org.springframework.transaction.TransactionStatus;
 
 import com.everhomes.business.Business;
 import com.everhomes.business.BusinessProvider;
+import com.everhomes.business.BusinessService;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -36,11 +37,17 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceDetail;
+import com.everhomes.namespace.NamespaceResourceProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.business.BusinessTargetType;
+import com.everhomes.rest.business.CancelFavoriteBusinessCommand;
+import com.everhomes.rest.business.FavoriteBusinessDTO;
+import com.everhomes.rest.business.FavoriteFlagType;
 import com.everhomes.rest.common.ScopeType;
+import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.PostEntityTag;
 import com.everhomes.rest.launchpad.ActionType;
@@ -74,10 +81,14 @@ import com.everhomes.rest.launchpad.admin.LaunchPadItemAdminDTO;
 import com.everhomes.rest.launchpad.admin.ListLaunchPadLayoutAdminCommand;
 import com.everhomes.rest.launchpad.admin.UpdateLaunchPadItemAdminCommand;
 import com.everhomes.rest.launchpad.admin.UpdateLaunchPadLayoutAdminCommand;
+import com.everhomes.rest.namespace.NamespaceCommunityType;
+import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.organization.GetOrgDetailCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.pm.ListPropCommunityContactCommand;
 import com.everhomes.rest.organization.pm.PropCommunityContactDTO;
+import com.everhomes.rest.ui.launchpad.CancelFavoriteBusinessBySceneCommand;
+import com.everhomes.rest.ui.launchpad.FavoriteBusinessesBySceneCommand;
 import com.everhomes.rest.ui.launchpad.GetLaunchPadItemsBySceneCommand;
 import com.everhomes.rest.ui.launchpad.GetLaunchPadLayoutBySceneCommand;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
@@ -140,6 +151,12 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	@Autowired
 	private SceneService sceneService;
 
+	@Autowired
+	private BusinessService businessService;
+	
+	@Autowired
+	private NamespaceResourceProvider namespaceResourceProvider;
+	
 	@Override
 	public GetLaunchPadItemsCommandResponse getLaunchPadItems(GetLaunchPadItemsCommand cmd, HttpServletRequest request){
 		if(cmd.getItemLocation() == null){
@@ -341,7 +358,16 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		User user = UserContext.current().getUser();
 		long userId = user.getId();
 		Integer namespaceId = (user.getNamespaceId() == null) ? 0 : user.getNamespaceId();
-		String sceneType = cmd.getCurrentSceneType();
+		// 对于老版本客户端，没有场景概念，此时它传过来的场景为null，但数据却已经有场景，需要根据小区类型来区分场景 by lqs 20160601
+        // String sceneType = cmd.getCurrentSceneType();
+        String sceneType = cmd.getSceneType();
+        if(sceneType == null) {
+            if(CommunityType.fromCode(community.getCommunityType()) == CommunityType.COMMERCIAL) {
+                sceneType = SceneType.PARK_TOURIST.getCode();
+            } else {
+                sceneType = SceneType.DEFAULT.getCode();
+            }
+        }
 		List<LaunchPadItemDTO> result = new ArrayList<LaunchPadItemDTO>();
 
 		//TODO get the businesses with the user create
@@ -431,7 +457,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		User user = UserContext.current().getUser();
 		long userId = user.getId();
         Integer namespaceId = (user.getNamespaceId() == null) ? 0 : user.getNamespaceId();
-        String sceneType = cmd.getCurrentSceneType();
+        //String sceneType = cmd.getCurrentSceneType();
 		String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
 		
 		Long communityId = cmd.getCommunityId();
@@ -444,6 +470,15 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         	community = new Community();
         	community.setId(0L);
         	community.setCityId(0L);
+        }
+        // 对于老版本客户端，没有场景概念，此时它传过来的场景为null，但数据却已经有场景，需要根据小区类型来区分场景 by lqs 20160601
+        String sceneType = cmd.getSceneType();
+        if(sceneType == null) {
+            if(CommunityType.fromCode(community.getCommunityType()) == CommunityType.COMMERCIAL) {
+                sceneType = SceneType.PARK_TOURIST.getCode();
+            } else {
+                sceneType = SceneType.DEFAULT.getCode();
+            }
         }
 		
 		List<LaunchPadItemDTO> result = new ArrayList<LaunchPadItemDTO>();
@@ -546,7 +581,17 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         if(allItems!=null&&!allItems.isEmpty())
             allItems = allItems.stream().filter(r -> r.getDisplayFlag()==ItemDisplayFlag.DISPLAY.getCode()).collect(Collectors.toList());
         
-        return processLaunchPadItems(token, userId, null, allItems, request);
+        // 产品规则每个公司都有一个办公地点所在的园区/小区，故在公司场景也可以拿到小区ID
+        // 把这个小区ID补回来，是为了物业相关的服务（报修、投诉建议等）在发帖时可以由服务器提供visible_region_type/id  by lqs 20160617
+        Long communityId = null;
+        OrganizationDTO org = organizationService.getOrganizationById(cmd.getOrganizationId());
+        if(org != null) {
+            communityId = org.getCommunityId();
+        } else {
+            LOGGER.error("Organization id not found, userId={}, cmd={}", userId, cmd);
+        }
+        
+        return processLaunchPadItems(token, userId, communityId, allItems, request);
     }
 	
 	private List<LaunchPadItemDTO> processLaunchPadItems(String token, Long userId, Long communityId, List<LaunchPadItem> allItems, HttpServletRequest request) {
@@ -575,7 +620,11 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                             itemDTO.setItemLabel(b.getName() == null ? itemDTO.getItemLabel() : b.getName());
                     }
                 }else{
-                    itemDTO.setIconUrl(parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId));
+                    String url = parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId);
+                    itemDTO.setIconUrl(url);
+//                    if(LOGGER.isDebugEnabled()) {
+//                        LOGGER.debug("Parse uri while processing launchpad items, item=" + itemDTO);
+//                    }
                 }
                 
                 distinctDto.add(itemDTO);
@@ -636,7 +685,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			//            if(jsonObject != null)
 			//                jsonObject.put(LaunchPadConstants.COMMUNITY_ID, communityId);
 		}catch(Exception e){
-			LOGGER.error("Parser json is error,communityId=" + communityId,e.getMessage());
+			LOGGER.error("Parser json is error,communityId=" + communityId, e);
 		}
 
 		return jsonObject.toJSONString();
@@ -699,10 +748,14 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			actionDataJson.put(LaunchPadConstants.CREATOR_TAG, tag);
 		}
 
-		long visibleRegionType = (long) actionDataJson.get(LaunchPadConstants.VISIBLE_REGION_TYPE);
+		Byte visibleRegionType = null;
+		Object regionType = actionDataJson.get(LaunchPadConstants.VISIBLE_REGION_TYPE);
+		if(regionType != null) {
+		    visibleRegionType = Byte.valueOf(regionType.toString());
+		}
 
 		//给GANC（居委）或GAPS（公安）发帖，visibleRegionType填片区、visibleRegionId填居委或公安所管理的片区ID
-		if(visibleRegionType == VisibleRegionType.REGION.getCode()){
+		if(VisibleRegionType.fromCode(visibleRegionType) == VisibleRegionType.REGION){
 			GetOrgDetailCommand cmd = new GetOrgDetailCommand();
 			cmd.setCommunityId(communityId);
 			cmd.setOrganizationType(targetEntityTag);
@@ -711,10 +764,10 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 				LOGGER.error("Organization is not exists,communityId=" + communityId+",targetEntityTag="+targetEntityTag);
 				return actionDataJson;
 			}
-			//actionDataJson.put(LaunchPadConstants.VISIBLE_REGION_TYPE, VisibleRegionType.REGION.getCode());
+			actionDataJson.put(LaunchPadConstants.VISIBLE_REGION_TYPE, VisibleRegionType.REGION.getCode());
 			actionDataJson.put(LaunchPadConstants.VISIBLE_REGIONID,organization.getId());
 		}else{
-			//actionDataJson.put(LaunchPadConstants.VISIBLE_REGION_TYPE, VisibleRegionType.COMMUNITY.getCode());
+			actionDataJson.put(LaunchPadConstants.VISIBLE_REGION_TYPE, VisibleRegionType.COMMUNITY.getCode());
 			actionDataJson.put(LaunchPadConstants.VISIBLE_REGIONID,communityId);
 		}
 		return actionDataJson;
@@ -1088,7 +1141,20 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 		User user = UserContext.current().getUser();
 		Integer namespaceId = (cmd.getNamespaceId() == null) ? 0 : cmd.getNamespaceId(); 
-		String sceneType = cmd.getCurrentSceneType();
+		// 对于老版本客户端，没有场景概念，此时它传过来的场景为null，但数据却已经有场景，需要根据小区类型来区分场景，
+		// 由于该接口客户端并没有传小区信息过来，只能通过域空间配置的资源类型来定 by lqs 20160601
+		// String sceneType = cmd.getCurrentSceneType();
+		String sceneType = cmd.getSceneType();
+		if(sceneType == null) {
+		    NamespaceDetail namespaceDetail = namespaceResourceProvider.findNamespaceDetailByNamespaceId(namespaceId);
+		    if(namespaceDetail != null 
+		        && NamespaceCommunityType.fromCode(namespaceDetail.getResourceType()) == NamespaceCommunityType.COMMUNITY_COMMERCIAL) {
+		        sceneType = SceneType.PARK_TOURIST.getCode();
+            } else {
+                sceneType = SceneType.DEFAULT.getCode();
+            }
+		}
+		
 		List<LaunchPadLayoutDTO> results = new ArrayList<LaunchPadLayoutDTO>();
 		this.launchPadProvider.findLaunchPadItemsByVersionCode(namespaceId, sceneType, cmd.getName(),cmd.getVersionCode()).stream().map((r) ->{;
 		results.add(ConvertHelper.convert(r, LaunchPadLayoutDTO.class));
@@ -1302,6 +1368,37 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"propterty id paramter can not be null or empty.");
 		}
+	}
+
+	@Override
+	public void favoriteBusinessesByScene(FavoriteBusinessesBySceneCommand cmd) {
+		User user = UserContext.current().getUser();
+		long userId = user.getId();
+		SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+		
+		SceneTypeInfo sceneInfo = sceneService.getBaseSceneTypeByName(sceneToken.getNamespaceId(), sceneToken.getScene());
+        String baseScene = sceneToken.getScene();
+        if(sceneInfo != null) {
+            baseScene = sceneInfo.getName();
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Scene type is changed, sceneToken={}, newScene={}", sceneToken, sceneInfo.getName());
+            }
+        } else {
+            LOGGER.error("Scene is not found, cmd={}, sceneToken={}", cmd, sceneToken);
+        }
+        
+        this.businessService.favoriteBusinessesByScene(cmd, baseScene);
+	}
+
+	@Override
+	public void cancelFavoriteBusinessByScene(
+			CancelFavoriteBusinessBySceneCommand cmd) {
+		User user = UserContext.current().getUser();
+		SceneTokenDTO sceneToken = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
+		
+		CancelFavoriteBusinessCommand command = new CancelFavoriteBusinessCommand();
+		command.setId(cmd.getId());
+		this.businessService.cancelFavoriteBusiness(command);
 	}
 
 

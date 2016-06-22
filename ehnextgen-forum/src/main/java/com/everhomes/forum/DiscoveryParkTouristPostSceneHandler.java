@@ -30,6 +30,7 @@ import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.rest.visibility.VisibilityScope;
+import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.user.User;
 import com.everhomes.util.WebTokenGenerator;
 
@@ -87,18 +88,18 @@ public class DiscoveryParkTouristPostSceneHandler implements PostSceneHandler {
         List<TopicFilterDTO> filterList = new ArrayList<TopicFilterDTO>();
         if(community != null) {
             long menuId = 1;
-            
+          //产品要求只留园区 mod by xiongying 20160601
             // 菜单：小区圈
-            long group1Id = menuId++;
+//            long group1Id = menuId++;
             TopicFilterDTO filterDto = new TopicFilterDTO();
-            filterDto.setId(group1Id);
-            filterDto.setParentId(0L);
-            code = String.valueOf(ForumLocalStringCode.POST_MEMU_COMMUNITY_GROUP);
-            menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
-            filterDto.setName(menuName);
-            filterDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());
-            filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());;
-            filterList.add(filterDto);
+//            filterDto.setId(group1Id);
+//            filterDto.setParentId(0L);
+//            code = String.valueOf(ForumLocalStringCode.POST_MEMU_COMMUNITY_GROUP);
+//            menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
+//            filterDto.setName(menuName);
+//            filterDto.setLeafFlag(SelectorBooleanFlag.FALSE.getCode());
+//            filterDto.setDefaultFlag(SelectorBooleanFlag.FALSE.getCode());;
+//            filterList.add(filterDto);
 
             // 菜单：周边小区 （园区场景暂无周边小区）
 //            filterDto = new TopicFilterDTO();
@@ -120,7 +121,7 @@ public class DiscoveryParkTouristPostSceneHandler implements PostSceneHandler {
             // 菜单：园区
             filterDto = new TopicFilterDTO();
             filterDto.setId(menuId++);
-            filterDto.setParentId(group1Id);
+            filterDto.setParentId(0L);
             code = String.valueOf(ForumLocalStringCode.POST_MEMU_PARK_ONLY);
             menuName = localeStringService.getLocalizedString(scope, code, user.getLocale(), "");
             filterDto.setName(menuName);
@@ -270,6 +271,8 @@ public class DiscoveryParkTouristPostSceneHandler implements PostSceneHandler {
             avatarUri = configProvider.getValue(namespaceId, "post.menu.avatar.community_only", "");
             sentScopeDto.setAvatar(avatarUri);
             sentScopeDto.setAvatarUrl(getPostFilterDefaultAvatar(namespaceId, user.getId(), avatarUri));
+            sentScopeDto.setVisibleRegionType(VisibleRegionType.COMMUNITY.getCode());
+            sentScopeDto.setVisibleRegionId(community.getId());
             scopeList.add(sentScopeDto);
 
             // 各兴趣圈
@@ -335,7 +338,7 @@ public class DiscoveryParkTouristPostSceneHandler implements PostSceneHandler {
         			hasDefault = true;
         			break;
         		} else {
-        			if(firstUndefaultScopeDto != null) {
+        			if(firstUndefaultScopeDto == null) {
         				firstUndefaultScopeDto = sentScopeDto;
         			}
         		}
