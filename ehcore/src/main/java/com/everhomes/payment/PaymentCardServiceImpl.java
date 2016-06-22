@@ -220,12 +220,12 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     	}else{
     		long time = (long) entity.getEntity();
     		long now = System.currentTimeMillis();
-    		entity.setEntity(now);
     		if(now < (30 * 1000 + time) ){
     			LOGGER.error("the get Code request is frequently,the time is less than 50s.");
     			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     					"the get Code request is frequently,the time is less than 50s.");
     		}
+    		entity.setEntity(now);
     	}
     	PaymentCardVendorHandler handler = getPaymentCardVendorHandler(paymentCard.getVendorName());
 		String code = handler.getCardPaidQrCodeByVendor(paymentCard);
