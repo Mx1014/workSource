@@ -789,7 +789,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 //                        LOGGER.debug("Parse uri while processing launchpad items, item=" + itemDTO);
 //                    }
                 }
-                
+                itemDTO.setEditFlag(r.getDeleteFlag());
                 distinctDto.add(itemDTO);
             });
             if(distinctDto != null && !distinctDto.isEmpty()){
