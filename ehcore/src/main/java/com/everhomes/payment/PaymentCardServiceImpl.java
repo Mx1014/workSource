@@ -253,11 +253,11 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 			}
     	}
     	if(flag){
-    		LOGGER.error("the old password is not correctly.");
-    		throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_OLD_PASSWORD,
-    				localeStringService.getLocalizedString(String.valueOf(PaymentCardErrorCode.SCOPE), 
-    						String.valueOf(PaymentCardErrorCode.ERROR_OLD_PASSWORD),
-    						UserContext.current().getUser().getLocale(),"the old password is not correctly."));
+			LOGGER.error("the getCardPaidResult request of taotaogu is failed .");
+			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
+					localeStringService.getLocalizedString(String.valueOf(PaymentCardErrorCode.SCOPE), 
+							String.valueOf(PaymentCardErrorCode.ERROR_SERVER_REQUEST),
+							UserContext.current().getUser().getLocale(),"the listCardTransactions request of taotaogu is failed."));
     	}
     	
     	return dto;

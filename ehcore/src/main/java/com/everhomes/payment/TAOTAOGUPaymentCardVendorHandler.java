@@ -561,8 +561,8 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		param.put("RechargeNum", "");
 		param.put("RechargeType", "0");
 		param.put("RechargeAcctType", "fund");
-		param.put("Amt", order.getAmount().doubleValue());
-		param.put("RealAmt", order.getAmount().doubleValue());
+		param.put("Amt", order.getAmount().toString());
+		param.put("RealAmt", order.getAmount().toString());
 		
 		param.put("PayAccNo", "");
 		param.put("PayAccName", "");

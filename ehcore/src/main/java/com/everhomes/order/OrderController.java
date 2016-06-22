@@ -9,14 +9,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.order.PayCallbackCommand;
+import com.everhomes.util.RequireAuthentication;
 
 
 @RestController
 @RequestMapping("/order")
-public class OrderController {
+public class OrderController extends ControllerBase {
 	private static final Logger LOGGER = LoggerFactory.getLogger(OrderController.class);
 	
 	@Autowired
