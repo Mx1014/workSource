@@ -1101,8 +1101,10 @@ public class CommunityProviderImpl implements CommunityProvider {
             return null;
         });
         
-        if(communities.size() > 0) {
+        if(communities.size() >= count) {
             locator.setAnchor(communities.get(communities.size() -1).getId());
+        } else {
+            locator.setAnchor(null);
         }
         
         return communities;

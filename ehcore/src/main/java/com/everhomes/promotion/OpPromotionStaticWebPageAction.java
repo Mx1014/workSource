@@ -97,8 +97,9 @@ public class OpPromotionStaticWebPageAction implements OpPromotionAction {
         MessageDTO messageDto = new MessageDTO();
         messageDto.setAppId(AppConstants.APPID_MESSAGING);
         messageDto.setSenderUid(User.SYSTEM_UID);
+//        messageDto.set
         messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()), 
-                new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.BIZ_USER_LOGIN.getUserId())));
+                new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_UID)));
         
         messageDto.setBodyType(MessageBodyType.LINK.getCode());
         LinkBody linkBody = new LinkBody();
