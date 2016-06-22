@@ -7,28 +7,37 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
-import com.everhomes.category.CategoryProvider;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.db.DbProvider;
-import com.everhomes.forum.ForumProvider;
-import com.everhomes.forum.Post;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.category.CategoryConstants;
-import com.everhomes.rest.forum.PostContentType;
-import com.everhomes.rest.forum.PostEntityTag;
-import com.everhomes.rest.forum.PostStatus;
+import com.everhomes.rest.news.AddNewsCommentBySceneCommand;
+import com.everhomes.rest.news.AddNewsCommentCommand;
 import com.everhomes.rest.news.BriefNewsDTO;
 import com.everhomes.rest.news.CreateNewsCommand;
+import com.everhomes.rest.news.DeleteNewsCommand;
+import com.everhomes.rest.news.DeleteNewsCommentBySceneCommand;
+import com.everhomes.rest.news.DeleteNewsCommentCommand;
+import com.everhomes.rest.news.ImportNewsCommand;
+import com.everhomes.rest.news.ListNewsBySceneCommand;
+import com.everhomes.rest.news.ListNewsCommand;
+import com.everhomes.rest.news.ListNewsCommentCommand;
+import com.everhomes.rest.news.ListNewsCommentResponse;
+import com.everhomes.rest.news.NewsCommentDTO;
+import com.everhomes.rest.news.NewsContentDTO;
 import com.everhomes.rest.news.NewsContentType;
+import com.everhomes.rest.news.NewsDTO;
+import com.everhomes.rest.news.NewsDetailInfoCommand;
+import com.everhomes.rest.news.NewsListResponse;
 import com.everhomes.rest.news.NewsOwnerType;
 import com.everhomes.rest.news.NewsServiceErrorCode;
 import com.everhomes.rest.news.NewsStatus;
 import com.everhomes.rest.news.NewsTopFlag;
-import com.everhomes.rest.organization.PrivateFlag;
-import com.everhomes.rest.visibility.VisibleRegionType;
+import com.everhomes.rest.news.SearchNewsCommand;
+import com.everhomes.rest.news.SetNewsLikeFlagBySceneCommand;
+import com.everhomes.rest.news.SetNewsLikeFlagCommand;
+import com.everhomes.rest.news.SetNewsTopFlagCommand;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -43,9 +52,6 @@ public class NewsServiceImpl implements NewsService {
 
 	@Autowired
 	private NewsProvider newsProvider;
-
-	@Autowired
-	private DbProvider dbProvider;
 
 	@Override
 	public BriefNewsDTO createNews(CreateNewsCommand cmd) {
@@ -104,6 +110,96 @@ public class NewsServiceImpl implements NewsService {
 		}
 
 		return organization;
+	}
+
+	@Override
+	public void importNews(ImportNewsCommand cmd, MultipartFile[] files) {
+		
+		
+	}
+
+	@Override
+	public NewsListResponse listNews(ListNewsCommand cmd) {
+		
+		return null;
+	}
+
+	@Override
+	public NewsListResponse searchNews(SearchNewsCommand cmd) {
+		
+		return null;
+	}
+
+	@Override
+	public NewsDTO getNewsDetailInfo(NewsDetailInfoCommand cmd) {
+		
+		return null;
+	}
+
+	@Override
+	public void setNewsTopFlag(SetNewsTopFlagCommand cmd) {
+		
+		
+	}
+
+	@Override
+	public NewsContentDTO getNewsContent(NewsDetailInfoCommand cmd) {
+		
+		return null;
+	}
+
+	@Override
+	public void deleteNews(DeleteNewsCommand cmd) {
+		
+		
+	}
+
+	@Override
+	public void setNewsLikeFlag(SetNewsLikeFlagCommand cmd) {
+		
+		
+	}
+
+	@Override
+	public NewsCommentDTO addNewsComment(AddNewsCommentCommand cmd) {
+		
+		return null;
+	}
+
+	@Override
+	public ListNewsCommentResponse listNewsComment(ListNewsCommentCommand cmd) {
+		
+		return null;
+	}
+
+	@Override
+	public void deleteNewsComment(DeleteNewsCommentCommand cmd) {
+		
+		
+	}
+
+	@Override
+	public NewsListResponse listNewsByScene(ListNewsBySceneCommand cmd) {
+		
+		return null;
+	}
+
+	@Override
+	public void setNewsLikeFlagByScene(SetNewsLikeFlagBySceneCommand cmd) {
+		
+		
+	}
+
+	@Override
+	public NewsCommentDTO addNewsCommentByScene(AddNewsCommentBySceneCommand cmd) {
+		
+		return null;
+	}
+
+	@Override
+	public void deleteNewsCommentByScene(DeleteNewsCommentBySceneCommand cmd) {
+		
+		
 	}
 
 }

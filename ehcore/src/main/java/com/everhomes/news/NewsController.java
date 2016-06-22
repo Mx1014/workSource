@@ -64,7 +64,12 @@ public class NewsController extends ControllerBase {
 	@RequestMapping("importNews")
 	@RestReturn(String.class)
 	public RestResponse importNews(ImportNewsCommand cmd, @RequestParam("attachment") MultipartFile[] files) {
-		return new RestResponse();
+		newsService.importNews(cmd,files);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 
 	/**
@@ -76,7 +81,12 @@ public class NewsController extends ControllerBase {
 	@RequestMapping("listNews")
 	@RestReturn(NewsListResponse.class)
 	public RestResponse listNews(ListNewsCommand cmd) {
-		return new RestResponse();
+		NewsListResponse newsListResponse = newsService.listNews(cmd);
+
+		RestResponse response = new RestResponse(newsListResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 
 	/**
@@ -88,7 +98,12 @@ public class NewsController extends ControllerBase {
 	@RequestMapping("searchNews")
 	@RestReturn(NewsListResponse.class)
 	public RestResponse searchNews(SearchNewsCommand cmd) {
-		return new RestResponse();
+		NewsListResponse newsListResponse = newsService.searchNews(cmd);
+
+		RestResponse response = new RestResponse(newsListResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 
 	/**
@@ -100,7 +115,12 @@ public class NewsController extends ControllerBase {
 	@RequestMapping("getNewsDetailInfo")
 	@RestReturn(NewsDTO.class)
 	public RestResponse getNewsDetailInfo(NewsDetailInfoCommand cmd) {
-		return new RestResponse();
+		NewsDTO newsDTO = newsService.getNewsDetailInfo(cmd);
+
+		RestResponse response = new RestResponse(newsDTO);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 
 	/**
@@ -112,7 +132,12 @@ public class NewsController extends ControllerBase {
 	@RequestMapping("setNewsTopFlag")
 	@RestReturn(String.class)
 	public RestResponse setNewsTopFlag(SetNewsTopFlagCommand cmd) {
-		return new RestResponse();
+		newsService.setNewsTopFlag(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 
 	/**
@@ -124,7 +149,12 @@ public class NewsController extends ControllerBase {
 	@RequestMapping("getNewsContent")
 	@RestReturn(NewsContentDTO.class)
 	public RestResponse getNewsContent(NewsDetailInfoCommand cmd) {
-		return new RestResponse();
+		NewsContentDTO newsContentDTO = newsService.getNewsContent(cmd);
+
+		RestResponse response = new RestResponse(newsContentDTO);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 
 	/**
@@ -136,7 +166,12 @@ public class NewsController extends ControllerBase {
 	@RequestMapping("deleteNews")
 	@RestReturn(String.class)
 	public RestResponse deleteNews(DeleteNewsCommand cmd) {
-		return new RestResponse();
+		newsService.deleteNews(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 
 	/**
@@ -148,7 +183,12 @@ public class NewsController extends ControllerBase {
 	@RequestMapping("setNewsLikeFlag")
 	@RestReturn(String.class)
 	public RestResponse setNewsLikeFlag(SetNewsLikeFlagCommand cmd) {
-		return new RestResponse();
+		newsService.setNewsLikeFlag(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 
 	/**
@@ -160,7 +200,12 @@ public class NewsController extends ControllerBase {
 	@RequestMapping("addNewsComment")
 	@RestReturn(NewsCommentDTO.class)
 	public RestResponse addNewsComment(AddNewsCommentCommand cmd) {
-		return new RestResponse();
+		NewsCommentDTO newsCommentDTO = newsService.addNewsComment(cmd);
+
+		RestResponse response = new RestResponse(newsCommentDTO);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 
 	/**
@@ -172,7 +217,12 @@ public class NewsController extends ControllerBase {
 	@RequestMapping("listNewsComment")
 	@RestReturn(ListNewsCommentResponse.class)
 	public RestResponse listNewsComment(ListNewsCommentCommand cmd) {
-		return new RestResponse();
+		ListNewsCommentResponse listNewsCommentResponse = newsService.listNewsComment(cmd);
+
+		RestResponse response = new RestResponse(listNewsCommentResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 
 	/**
@@ -184,6 +234,11 @@ public class NewsController extends ControllerBase {
 	@RequestMapping("deleteNewsComment")
 	@RestReturn(String.class)
 	public RestResponse deleteNewsComment(DeleteNewsCommentCommand cmd) {
-		return new RestResponse();
+		newsService.deleteNewsComment(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 }

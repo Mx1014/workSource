@@ -1,10 +1,13 @@
 package com.everhomes.ui.news;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.news.NewsService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.news.AddNewsCommentBySceneCommand;
 import com.everhomes.rest.news.DeleteNewsCommentBySceneCommand;
@@ -23,6 +26,9 @@ import com.everhomes.rest.news.SetNewsLikeFlagBySceneCommand;
 @RequestMapping("/ui/news")
 public class NewsUiController {
 
+	@Autowired
+	private NewsService newsService;
+	
 	/**
 	 * <b>URL: /ui/news/listNewsByScene</b>
 	 * <p>
@@ -32,7 +38,12 @@ public class NewsUiController {
 	@RequestMapping("listNewsByScene")
 	@RestReturn(NewsListResponse.class)
 	public RestResponse listNewsByScene(ListNewsBySceneCommand cmd) {
-		return new RestResponse();
+		NewsListResponse newsListResponse = newsService.listNewsByScene(cmd);
+
+		RestResponse response = new RestResponse(newsListResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 	
 	/**
@@ -42,7 +53,12 @@ public class NewsUiController {
 	@RequestMapping("setNewsLikeFlagByScene")
 	@RestReturn(String.class)
 	public RestResponse setNewsLikeFlagByScene(SetNewsLikeFlagBySceneCommand cmd){
-		return new RestResponse();
+		newsService.setNewsLikeFlagByScene(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 	
 	
@@ -53,7 +69,12 @@ public class NewsUiController {
 	@RequestMapping("addNewsCommentByScene")
 	@RestReturn(NewsCommentDTO.class)
 	public RestResponse addNewsCommentByScene(AddNewsCommentBySceneCommand cmd){
-		return new RestResponse();
+		NewsCommentDTO newsCommentDTO = newsService.addNewsCommentByScene(cmd);
+
+		RestResponse response = new RestResponse(newsCommentDTO);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 		
 	/**
@@ -63,7 +84,12 @@ public class NewsUiController {
 	@RequestMapping("deleteNewsCommentByScene")
 	@RestReturn(String.class)
 	public RestResponse deleteNewsCommentByScene(DeleteNewsCommentBySceneCommand cmd){
-		return new RestResponse();
+		newsService.deleteNewsCommentByScene(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
 	}
 	
 	
