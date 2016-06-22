@@ -2,6 +2,7 @@ package com.everhomes.payment;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -625,43 +626,50 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 		String aesKey = cachePool.getStringValue(VendorConstant.TAOTAOGU_AESKEY);
 		String token = cachePool.getStringValue(VendorConstant.TAOTAOGU_TOKEN);
     	Gson gson = new Gson();
-		Map map = gson.fromJson(cmd.getMsg(), Map.class);
-		String data = (String) map.get("data");
-		String data1 = null;
+		String msg = null;
+		NotifyEntityDTO dto = new NotifyEntityDTO();
 		try {
-			data1 = new String (AESCoder.decrypt(Base64.decodeBase64(data), aesKey.getBytes()), "GBK");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		NotifyEntity result = gson.fromJson(data1, NotifyEntity.class);
-       	User user = UserContext.current().getUser();
-    	UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-    	PaymentCard paymentCard = paymentCardProvider.findPaymentCardByCardNo(result.getCard_id(), VendorConstant.TAOTAOGU);
-    	transaction.setOwnerId(paymentCard.getOwnerId());
-    	transaction.setOwnerType(paymentCard.getOwnerType());
-    	transaction.setNamespaceId(user.getNamespaceId());
-    	transaction.setItemName("");
-    	transaction.setMerchantNo(result.getMerch_id());
-    	transaction.setMerchantName(result.getMerch_name());
-    	transaction.setAmount(new BigDecimal(result.getTrade_amt()));
-    	transaction.setTransactionNo(result.getAcct_sn());
-    	transaction.setTransactionTime(StrTotimestamp(result.getFinal_time()));
-    	transaction.setCardId(paymentCard.getId());
-    	transaction.setStatus(convertTransaction(result.getTrade_status()));
-    	transaction.setCreatorUid(user.getId());
-    	transaction.setCreateTime(new Timestamp(System.currentTimeMillis()));
-    	transaction.setVendorName(VendorConstant.TAOTAOGU);
-    	String extraData = VendorConstant.CARD_TRADE_STATUS_JSON;
-    	transaction.setVendorResult(extraData);
-    	transaction.setToken(result.getToken());
-    	transaction.setCardNo(result.getCard_id());
-    	//transaction.setOrderNo(createOrderNo());
+			if(StringUtils.isBlank(cmd.getToken()) || StringUtils.isBlank(cmd.getSign()) ||
+					StringUtils.isBlank(cmd.getMsg()) || !cmd.getToken().equals(token)){
+				dto.setMsg_sn("invalid parameter");
+				dto.setReturn_code("01");
+				return dto;
+			}
+			msg = new String (AESCoder.decrypt(Base64.decodeBase64(cmd.getMsg()), aesKey.getBytes()), "GBK");
+			NotifyEntity result = gson.fromJson(msg, NotifyEntity.class);
+			
+			User user = UserContext.current().getUser();
+			PaymentCard paymentCard = paymentCardProvider.findPaymentCardByCardNo(result.getCard_id(), VendorConstant.TAOTAOGU);
+			transaction.setOwnerId(paymentCard.getOwnerId());
+			transaction.setOwnerType(paymentCard.getOwnerType());
+			transaction.setNamespaceId(user.getNamespaceId());
+			transaction.setPayerUid(paymentCard.getUserId());
+			transaction.setUserName(paymentCard.getUserName());
+			transaction.setMobile(paymentCard.getMobile());
+			transaction.setItemName("");
+			transaction.setMerchantNo(result.getMerch_id());
+			transaction.setMerchantName(result.getMerch_name());
+			transaction.setAmount(new BigDecimal(result.getTrade_amt()));
+			transaction.setTransactionNo(result.getAcct_sn());
+			transaction.setTransactionTime(StrTotimestamp(result.getFinal_time()));
+			transaction.setCardId(paymentCard.getId());
+			transaction.setStatus(convertTransaction(result.getTrade_status()));
+			transaction.setCreatorUid(user.getId());
+			transaction.setCreateTime(new Timestamp(System.currentTimeMillis()));
+			transaction.setVendorName(VendorConstant.TAOTAOGU);
+			String extraData = VendorConstant.CARD_TRADE_STATUS_JSON;
+			transaction.setVendorResult(extraData);
+			transaction.setToken(result.getToken());
+			transaction.setCardNo(result.getCard_id());
+			//transaction.setOrderNo(createOrderNo());
+			paymentCardProvider.createPaymentCardTransaction(transaction);
     	
-    	paymentCardProvider.createPaymentCardTransaction(transaction);
-    	NotifyEntityDTO dto = new NotifyEntityDTO();
-    	dto.setMsg_sn(result.getMsg_sn());
-    	dto.setReturn_code("00");
+			dto.setMsg_sn(result.getMsg_sn());
+			dto.setReturn_code("00");
+		} catch (Exception e) {
+			dto.setReturn_code("01");
+		}
+    	
     	return dto;
     }
 
