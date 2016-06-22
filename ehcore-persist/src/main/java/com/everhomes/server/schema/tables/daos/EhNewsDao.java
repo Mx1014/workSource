@@ -69,13 +69,6 @@ public class EhNewsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.schema
 	}
 
 	/**
-	 * Fetch records that have <code>post_id IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhNews> fetchByPostId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhNews.EH_NEWS.POST_ID, values);
-	}
-
-	/**
 	 * Fetch records that have <code>title IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhNews> fetchByTitle(java.lang.String... values) {
@@ -129,6 +122,34 @@ public class EhNewsDao extends org.jooq.impl.DAOImpl<com.everhomes.server.schema
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhNews> fetchBySourceUrl(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhNews.EH_NEWS.SOURCE_URL, values);
+	}
+
+	/**
+	 * Fetch records that have <code>child_count IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhNews> fetchByChildCount(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhNews.EH_NEWS.CHILD_COUNT, values);
+	}
+
+	/**
+	 * Fetch records that have <code>forward_count IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhNews> fetchByForwardCount(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhNews.EH_NEWS.FORWARD_COUNT, values);
+	}
+
+	/**
+	 * Fetch records that have <code>like_count IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhNews> fetchByLikeCount(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhNews.EH_NEWS.LIKE_COUNT, values);
+	}
+
+	/**
+	 * Fetch records that have <code>view_count IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhNews> fetchByViewCount(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhNews.EH_NEWS.VIEW_COUNT, values);
 	}
 
 	/**

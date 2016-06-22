@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhNews extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhNewsRecord> {
 
-	private static final long serialVersionUID = -1197544784;
+	private static final long serialVersionUID = 488435264;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_news</code>
@@ -45,11 +45,6 @@ public class EhNews extends org.jooq.impl.TableImpl<com.everhomes.server.schema.
 	 * The column <code>ehcore.eh_news.owner_id</code>. organization_id
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.Long> OWNER_ID = createField("owner_id", org.jooq.impl.SQLDataType.BIGINT.defaulted(true), this, "organization_id");
-
-	/**
-	 * The column <code>ehcore.eh_news.post_id</code>. post id
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.Long> POST_ID = createField("post_id", org.jooq.impl.SQLDataType.BIGINT.defaulted(true), this, "post id");
 
 	/**
 	 * The column <code>ehcore.eh_news.title</code>. title
@@ -92,6 +87,26 @@ public class EhNews extends org.jooq.impl.TableImpl<com.everhomes.server.schema.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.String> SOURCE_URL = createField("source_url", org.jooq.impl.SQLDataType.VARCHAR.length(256), this, "the url of source");
 
 	/**
+	 * The column <code>ehcore.eh_news.child_count</code>. comment count
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.Long> CHILD_COUNT = createField("child_count", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "comment count");
+
+	/**
+	 * The column <code>ehcore.eh_news.forward_count</code>. forward count
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.Long> FORWARD_COUNT = createField("forward_count", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "forward count");
+
+	/**
+	 * The column <code>ehcore.eh_news.like_count</code>. like count
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.Long> LIKE_COUNT = createField("like_count", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "like count");
+
+	/**
+	 * The column <code>ehcore.eh_news.view_count</code>. view count
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.Long> VIEW_COUNT = createField("view_count", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "view count");
+
+	/**
 	 * The column <code>ehcore.eh_news.publish_time</code>. the time when the news was created, now equals to create_time
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.sql.Timestamp> PUBLISH_TIME = createField("publish_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "the time when the news was created, now equals to create_time");
@@ -122,9 +137,9 @@ public class EhNews extends org.jooq.impl.TableImpl<com.everhomes.server.schema.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "create time");
 
 	/**
-	 * The column <code>ehcore.eh_news.deleter_uid</code>. deletor id
+	 * The column <code>ehcore.eh_news.deleter_uid</code>. deleter uid
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.Long> DELETER_UID = createField("deleter_uid", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "deletor id");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.Long> DELETER_UID = createField("deleter_uid", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "deleter uid");
 
 	/**
 	 * The column <code>ehcore.eh_news.delete_time</code>. mark-deletion policy. historic data may be useful
@@ -151,14 +166,6 @@ public class EhNews extends org.jooq.impl.TableImpl<com.everhomes.server.schema.
 
 	private EhNews(java.lang.String alias, org.jooq.Table<com.everhomes.server.schema.tables.records.EhNewsRecord> aliased, org.jooq.Field<?>[] parameters) {
 		super(alias, com.everhomes.server.schema.Ehcore.EHCORE, aliased, parameters, "");
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public org.jooq.Identity<com.everhomes.server.schema.tables.records.EhNewsRecord, java.lang.Long> getIdentity() {
-		return com.everhomes.server.schema.Keys.IDENTITY_EH_NEWS;
 	}
 
 	/**

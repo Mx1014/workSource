@@ -11,13 +11,12 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhNews implements java.io.Serializable {
 
-	private static final long serialVersionUID = -358114900;
+	private static final long serialVersionUID = -1979163714;
 
 	private java.lang.Long     id;
 	private java.lang.Integer  namespaceId;
 	private java.lang.String   ownerType;
 	private java.lang.Long     ownerId;
-	private java.lang.Long     postId;
 	private java.lang.String   title;
 	private java.lang.String   author;
 	private java.lang.String   coverUri;
@@ -26,6 +25,10 @@ public class EhNews implements java.io.Serializable {
 	private java.lang.String   contentAbstract;
 	private java.lang.String   sourceDesc;
 	private java.lang.String   sourceUrl;
+	private java.lang.Long     childCount;
+	private java.lang.Long     forwardCount;
+	private java.lang.Long     likeCount;
+	private java.lang.Long     viewCount;
 	private java.sql.Timestamp publishTime;
 	private java.lang.Long     topIndex;
 	private java.lang.Byte     topFlag;
@@ -42,7 +45,6 @@ public class EhNews implements java.io.Serializable {
 		java.lang.Integer  namespaceId,
 		java.lang.String   ownerType,
 		java.lang.Long     ownerId,
-		java.lang.Long     postId,
 		java.lang.String   title,
 		java.lang.String   author,
 		java.lang.String   coverUri,
@@ -51,6 +53,10 @@ public class EhNews implements java.io.Serializable {
 		java.lang.String   contentAbstract,
 		java.lang.String   sourceDesc,
 		java.lang.String   sourceUrl,
+		java.lang.Long     childCount,
+		java.lang.Long     forwardCount,
+		java.lang.Long     likeCount,
+		java.lang.Long     viewCount,
 		java.sql.Timestamp publishTime,
 		java.lang.Long     topIndex,
 		java.lang.Byte     topFlag,
@@ -64,7 +70,6 @@ public class EhNews implements java.io.Serializable {
 		this.namespaceId = namespaceId;
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;
-		this.postId = postId;
 		this.title = title;
 		this.author = author;
 		this.coverUri = coverUri;
@@ -73,6 +78,10 @@ public class EhNews implements java.io.Serializable {
 		this.contentAbstract = contentAbstract;
 		this.sourceDesc = sourceDesc;
 		this.sourceUrl = sourceUrl;
+		this.childCount = childCount;
+		this.forwardCount = forwardCount;
+		this.likeCount = likeCount;
+		this.viewCount = viewCount;
 		this.publishTime = publishTime;
 		this.topIndex = topIndex;
 		this.topFlag = topFlag;
@@ -113,14 +122,6 @@ public class EhNews implements java.io.Serializable {
 
 	public void setOwnerId(java.lang.Long ownerId) {
 		this.ownerId = ownerId;
-	}
-
-	public java.lang.Long getPostId() {
-		return this.postId;
-	}
-
-	public void setPostId(java.lang.Long postId) {
-		this.postId = postId;
 	}
 
 	public java.lang.String getTitle() {
@@ -185,6 +186,38 @@ public class EhNews implements java.io.Serializable {
 
 	public void setSourceUrl(java.lang.String sourceUrl) {
 		this.sourceUrl = sourceUrl;
+	}
+
+	public java.lang.Long getChildCount() {
+		return this.childCount;
+	}
+
+	public void setChildCount(java.lang.Long childCount) {
+		this.childCount = childCount;
+	}
+
+	public java.lang.Long getForwardCount() {
+		return this.forwardCount;
+	}
+
+	public void setForwardCount(java.lang.Long forwardCount) {
+		this.forwardCount = forwardCount;
+	}
+
+	public java.lang.Long getLikeCount() {
+		return this.likeCount;
+	}
+
+	public void setLikeCount(java.lang.Long likeCount) {
+		this.likeCount = likeCount;
+	}
+
+	public java.lang.Long getViewCount() {
+		return this.viewCount;
+	}
+
+	public void setViewCount(java.lang.Long viewCount) {
+		this.viewCount = viewCount;
 	}
 
 	public java.sql.Timestamp getPublishTime() {
