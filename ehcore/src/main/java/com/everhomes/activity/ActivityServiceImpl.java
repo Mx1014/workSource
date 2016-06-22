@@ -62,8 +62,11 @@ import com.everhomes.rest.activity.ActivityNotificationTemplateCode;
 import com.everhomes.rest.activity.ActivityPostCommand;
 import com.everhomes.rest.activity.ActivityRejectCommand;
 import com.everhomes.rest.activity.ActivityServiceErrorCode;
+import com.everhomes.rest.activity.ActivityShareDetailResponse;
 import com.everhomes.rest.activity.ActivitySignupCommand;
+import com.everhomes.rest.activity.ActivityTokenDTO;
 import com.everhomes.rest.activity.GeoLocation;
+import com.everhomes.rest.activity.GetActivityShareDetailCommand;
 import com.everhomes.rest.activity.ListActivitiesByLocationCommand;
 import com.everhomes.rest.activity.ListActivitiesByNamespaceIdAndTagCommand;
 import com.everhomes.rest.activity.ListActivitiesByTagCommand;
@@ -79,6 +82,7 @@ import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.AttachmentDTO;
+import com.everhomes.rest.forum.GetTopicCommand;
 import com.everhomes.rest.forum.ListActivityTopicByCategoryAndTagCommand;
 import com.everhomes.rest.forum.ListPostCommandResponse;
 import com.everhomes.rest.forum.PostContentType;
@@ -1819,4 +1823,52 @@ public class ActivityServiceImpl implements ActivityService {
         
         return listActivitiesByLocation(execCmd);
    }
+
+	@Override
+	public ActivityShareDetailResponse getActivityShareDetail(
+			ActivityTokenDTO postToken) {
+		
+        Activity activity = activityProvider.findSnapshotByPostId(postToken.getPostId());
+        if (activity == null) {
+            LOGGER.error("handle activity error ,the activity does not exsit.postId={}", postToken.getPostId());
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                    ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid activity postId " + postToken.getPostId());
+        }
+        GetTopicCommand command = new GetTopicCommand();
+        command.setTopicId(postToken.getPostId());
+        command.setForumId(postToken.getForumId());
+        PostDTO post = forumService.getTopic(command);
+        if (post == null) {
+            LOGGER.error("handle post failed,maybe post be deleted.postId={}", activity.getPostId());
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                    ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id " + activity.getPostId());
+        }
+        
+        ActivityShareDetailResponse response = new ActivityShareDetailResponse();
+        ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+        dto.setForumId(post.getForumId());
+        dto.setActivityId(activity.getId());
+        dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
+        dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+        dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
+        dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
+        dto.setActivityId(activity.getId());
+        dto.setProcessStatus(getStatus(activity).getCode());
+        dto.setStartTime(activity.getStartTime().toString());
+        dto.setStopTime(activity.getEndTime().toString());
+        dto.setFamilyId(activity.getCreatorFamilyId());
+        dto.setGroupId(activity.getGroupId());
+        dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
+        dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
+        dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
+        response.setActivity(dto);
+        
+        response.setContent(post.getContent());
+        response.setChildCount(post.getChildCount());
+        response.setViewCount(post.getViewCount());
+        response.setNamespaceId(activity.getNamespaceId());
+        response.setAttachments(post.getAttachments());
+        
+		return response;
+	}
 }

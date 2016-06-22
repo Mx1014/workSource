@@ -63,7 +63,7 @@ public class HotTagSearcherImpl extends AbstractElasticSearch implements HotTagS
         if(StringUtils.isEmpty(cmd.getKeyword())) {
         	qb = QueryBuilders.matchAllQuery();
         } else {
-        	qb = QueryBuilders.termQuery("name", cmd.getKeyword());
+        	qb = QueryBuilders.multiMatchQuery(cmd.getKeyword(), "name");
         }
         
         if(!StringUtils.isEmpty(cmd.getServiceType())) {

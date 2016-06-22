@@ -63,6 +63,7 @@ import com.everhomes.point.UserPointService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.activity.ActivityTokenDTO;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
@@ -546,7 +547,8 @@ public class ForumServiceImpl implements ForumService {
         for(Long topicId : topicIds) {
             try {
                 postDto = getTopicById(topicId, communityId, isDetail, getByOwnerId);
-                postDtoList.add(postDto);
+                if(postDto != null) 
+                	postDtoList.add(postDto);
             } catch(Exception e) {
                 LOGGER.error(e.toString());
             }
@@ -3042,7 +3044,17 @@ public class ForumServiceImpl implements ForumService {
                     LOGGER.error("Invalid home url or post sharing url, homeUrl=" + homeUrl 
                         + ", relativeUrl=" + relativeUrl + ", postId=" + post.getId());
                 } else {
-                    post.setShareUrl(homeUrl + relativeUrl + "?forumId=" + post.getForumId() + "&topicId=" + post.getId());
+                	//单独处理活动的分享链接 modified by xiongying 20160622
+                	if(post.getCategoryId() == 1010) {
+                		String api = "/activity/getActivityShareDetail";
+                		ActivityTokenDTO dto = new ActivityTokenDTO();
+                		dto.setPostId(post.getId());
+                		dto.setForumId(post.getForumId());
+                		String encodeStr = WebTokenGenerator.getInstance().toWebToken(dto);
+                		post.setShareUrl(homeUrl + relativeUrl + api + "?" + encodeStr);
+                	} else {
+                		post.setShareUrl(homeUrl + relativeUrl + "?forumId=" + post.getForumId() + "&topicId=" + post.getId());
+                	}
                 }
             } catch(Exception e) {
                 LOGGER.error("Failed to populate the post info, userId=" + userId + ", postId=" + post.getId(), e);
