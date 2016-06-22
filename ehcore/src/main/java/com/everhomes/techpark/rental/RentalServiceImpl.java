@@ -129,6 +129,7 @@ import com.everhomes.rest.techpark.rental.UpdateRentalSiteCommand;
 import com.everhomes.rest.techpark.rental.VisibleFlag;
 import com.everhomes.rest.techpark.rental.getItemListAdminCommand;
 import com.everhomes.rest.techpark.rental.getItemListCommandResponse;
+import com.everhomes.rest.techpark.rental.rentalBillRuleDTO;
 import com.everhomes.rest.techpark.rental.admin.AddDefaultRuleAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.AddRentalSiteRulesAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.AddResourceAdminCommand;
@@ -778,15 +779,15 @@ public class RentalServiceImpl implements RentalService {
 			rentalBill.setRentalUid(userId);
 			rentalBill.setInvoiceFlag(InvoiceFlag.NONEED.getCode());
 			rentalBill.setRentalDate(new Date(cmd.getRentalDate()));
-			this.valiRentalBill(cmd.getRentalCount(), cmd.getRentalSiteRuleIds());
-			rentalBill.setRentalCount(cmd.getRentalCount());
+			this.valiRentalBill(cmd.getRules());
+//			rentalBill.setRentalCount(cmd.getRentalCount());
 			java.math.BigDecimal siteTotalMoney = new java.math.BigDecimal(0);
 			Map<java.sql.Date  , Set<Byte>> dayMap= new HashMap<Date, Set<Byte>>();
-			for (Long siteRuleId : cmd.getRentalSiteRuleIds()) {
-				if (null == siteRuleId)
+			for (rentalBillRuleDTO siteRule : cmd.getRules()) {
+				if (null == siteRule)
 					continue;
 				RentalSiteRule rentalSiteRule = rentalProvider
-						.findRentalSiteRuleById(siteRuleId);
+						.findRentalSiteRuleById(siteRule.getRuleId());
 				//给半天预定的日期map加入am和pm的byte
 				if(rs.getRentalType().equals(RentalType.HALFDAY)||rs.getRentalType().equals(RentalType.THREETIMEADAY)){
 					if(null==dayMap.get(rentalSiteRule.getSiteRentalDate()))
@@ -823,9 +824,21 @@ public class RentalServiceImpl implements RentalService {
 						rentalBill.setEndTime(rentalSiteRule.getEndTime());
 					}
 				}
-				siteTotalMoney = siteTotalMoney.add(  (null == rentalSiteRule.getPrice()?new java.math.BigDecimal(0):rentalSiteRule.getPrice()).multiply(
-					new   java.math.BigDecimal(cmd.getRentalCount() / rentalSiteRule.getUnit())));
- 
+				if((siteRule.getRentalCount()-siteRule.getRentalCount().intValue())>0){
+					//有半个
+					//整数部分计算
+					if(siteRule.getRentalCount().intValue()>0)
+						siteTotalMoney = siteTotalMoney.add(  (null == rentalSiteRule.getPrice()?new java.math.BigDecimal(0):rentalSiteRule.getPrice()).multiply(
+								new   java.math.BigDecimal(siteRule.getRentalCount().intValue() )));
+					//小数部分计算
+					siteTotalMoney = siteTotalMoney.add(  (null == rentalSiteRule.getHalfsitePrice()?new java.math.BigDecimal(0):rentalSiteRule.getPrice()));
+				}
+				else{
+					siteTotalMoney = siteTotalMoney.add(  (null == rentalSiteRule.getPrice()?new java.math.BigDecimal(0):rentalSiteRule.getPrice()).multiply(
+							new   java.math.BigDecimal(siteRule.getRentalCount() )));
+		 
+				}
+				
 			}
 
 			//优惠
@@ -893,8 +906,7 @@ public class RentalServiceImpl implements RentalService {
 					.getNamedLock(CoordinationLocks.CREATE_RENTAL_BILL.getCode())
 					.enter(() -> {
 						// this.groupProvider.updateGroup(group);
-						this.valiRentalBill(cmd.getRentalCount(),
-								cmd.getRentalSiteRuleIds());
+						this.valiRentalBill(cmd.getRules());
 						return this.rentalProvider.createRentalBill(rentalBill);
 					});
 			Long rentalBillId = tuple.first();
@@ -946,11 +958,28 @@ public class RentalServiceImpl implements RentalService {
 	//					rentalBill.getEndTime().getTime() + rs.getOvertimeTime());
 	//		}
 			// 循环存site订单
-			for (RentalSiteRule rsr : rentalSiteRules) {
+			for (rentalBillRuleDTO siteRule : cmd.getRules())  {
+				BigDecimal money = new BigDecimal(0);
+				RentalSiteRule  rsr = rentalProvider.findRentalSiteRuleById(siteRule.getRuleId() );
+				if((siteRule.getRentalCount()-siteRule.getRentalCount().intValue())>0){
+					//有半个
+					//整数部分计算
+					if(siteRule.getRentalCount().intValue()>0)
+						money = money.add(  (null == rsr.getPrice()?new java.math.BigDecimal(0):rsr.getPrice()).multiply(
+								new   java.math.BigDecimal(siteRule.getRentalCount().intValue() )));
+					//小数部分计算
+					siteTotalMoney = siteTotalMoney.add(  (null == rsr.getHalfsitePrice()?new java.math.BigDecimal(0):rsr.getPrice()));
+				}
+				else{
+					siteTotalMoney = siteTotalMoney.add(  (null == rsr.getPrice()?new java.math.BigDecimal(0):rsr.getPrice()).multiply(
+							new   java.math.BigDecimal(siteRule.getRentalCount() )));
+		 
+				}
 				RentalSitesBill rsb = new RentalSitesBill();
 				rsb.setRentalBillId(rentalBillId);
-				rsb.setTotalMoney( (null ==rsr.getPrice()?new java.math.BigDecimal(0):rsr.getPrice()).multiply (new java.math.BigDecimal(cmd.getRentalCount() / rsr.getUnit())));
-				rsb.setRentalCount(cmd.getRentalCount());
+				
+				rsb.setTotalMoney(  money);
+				rsb.setRentalCount(siteRule.getRentalCount());
 				rsb.setRentalSiteRuleId(rsr.getId());
 				rsb.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 						.getTime()));
@@ -964,70 +993,132 @@ public class RentalServiceImpl implements RentalService {
 //				}
 			}
 			//验证site订单是否超过了site数量，如果有，抛异常，回滚操作
-			this.valiRentalBill(0.0, cmd.getRentalSiteRuleIds());
+			this.valiRentalBill(0.0, cmd.getRules());
 			mappingRentalBillDTO(billDTO, rentalBill);
 			return billDTO;
 		});
 		return billDTO;
 	}
 	
-	private void assignSiteNumber(RentalSitesBill rsb ,RentalSiteRule rsr, RentalBillDTO billDTO,Integer loopCnt) {
-		
-		if(loopCnt++>20){
-			throw RuntimeErrorException
-			.errorWith(
-					RentalServiceErrorCode.SCOPE,
-					RentalServiceErrorCode.ERROR_LOOP_TOOMUCH,"动态分配循环次数过多 ");
-		}
-		try{
-			this.dbProvider.execute((TransactionStatus status) -> {
-				Map<Integer, Double> siteNumberMap = new HashMap<Integer, Double> ();
-				//查询已预定的number 装入Map
-				List<RentalSitesBillNumber> siteNumbers = this.rentalProvider.findSitesBillNumbersBySiteId(rsb.getRentalSiteRuleId());
-				if(null!=siteNumbers){
-					for(RentalSitesBillNumber siteNumber : siteNumbers){
-						if(null == siteNumberMap.get(siteNumber.getSiteNumber()))
-							siteNumberMap.put(siteNumber.getSiteNumber() , siteNumber.getRentalCount());
-						else
-							siteNumberMap.put(siteNumber.getSiteNumber() , siteNumberMap.get(siteNumber.getSiteNumber())+siteNumber.getRentalCount());
-					}
-				}
-				//资源编号
-				int site_number =1;
-				//分配到第几个资源
-				double siteCount = 1.0;
-				//先给整数个site_rule 分配number
-				for( ;siteCount <=rsb.getRentalCount();siteCount++){
-					while(true){
-						if(null == siteNumberMap.get(site_number))
-							break;
-						else
-							site_number++;
-					}
-					//如果编号超出资源退出循环
-					if(site_number > rsr.getCounts())
-						break;
-					RentalSitesBillNumber sitesBillNumber = new RentalSitesBillNumber();
-					sitesBillNumber.setRentalCount(1.0);
-					sitesBillNumber.setRentalSiteBillId(rsb.getId());
-					sitesBillNumber.setRentalSiteRuleId(rsb.getRentalSiteRuleId());
-					sitesBillNumber.setSiteNumber(site_number);
-					this.rentalProvider.createRentalSitesBillNumber(sitesBillNumber);
-					siteNumberMap.put(site_number, 1.0);		
-				}
-				//分配半个
-				for( siteCount=siteCount-0.5;siteCount <=rsb.getRentalCount();){
-					if (siteCount <rsb.getRentalCount())
-						billDTO.setToastFlag(NormalFlag.NEED.getCode());
-					while(true){
-						if( siteNumberMap.get(site_number)==0.5)
-							break;
-						else
-							site_number++;
-					}
-					//资源编号超出单元格的个数,直接异常-应该不会有这种情况
-					if(site_number > rsr.getCounts())
-						throw RuntimeErrorException
+//	private void assignSiteNumber(RentalSitesBill rsb ,RentalSiteRule rsr, RentalBillDTO billDTO,Integer loopCnt) {
+//		
+//		if(loopCnt++>20){
+//			throw RuntimeErrorException
+//			.errorWith(
+//					RentalServiceErrorCode.SCOPE,
+//					RentalServiceErrorCode.ERROR_LOOP_TOOMUCH,"动态分配循环次数过多 ");
+//		}
+//		try{
+//			this.dbProvider.execute((TransactionStatus status) -> {
+//				Map<Integer, Double> siteNumberMap = new HashMap<Integer, Double> ();
+//				//查询已预定的number 装入Map
+//				List<RentalSitesBillNumber> siteNumbers = this.rentalProvider.findSitesBillNumbersBySiteId(rsb.getRentalSiteRuleId());
+//				if(null!=siteNumbers){
+//					for(RentalSitesBillNumber siteNumber : siteNumbers){
+//						if(null == siteNumberMap.get(siteNumber.getSiteNumber()))
+//							siteNumberMap.put(siteNumber.getSiteNumber() , siteNumber.getRentalCount());
+//						else
+//							siteNumberMap.put(siteNumber.getSiteNumber() , siteNumberMap.get(siteNumber.getSiteNumber())+siteNumber.getRentalCount());
+//					}
+//				}
+//				//资源编号
+//				int site_number =1;
+//				//分配到第几个资源
+//				double siteCount = 1.0;
+//				//先给整数个site_rule 分配number
+//				for( ;siteCount <=rsb.getRentalCount();siteCount++){
+//					while(true){
+//						if(null == siteNumberMap.get(site_number))
+//							break;
+//						else
+//							site_number++;
+//					}
+//					//如果编号超出资源退出循环
+//					if(site_number > rsr.getCounts())
+//						break;
+//					RentalSitesBillNumber sitesBillNumber = new RentalSitesBillNumber();
+//					sitesBillNumber.setRentalCount(1.0);
+//					sitesBillNumber.setRentalSiteBillId(rsb.getId());
+//					sitesBillNumber.setRentalSiteRuleId(rsb.getRentalSiteRuleId());
+//					sitesBillNumber.setSiteNumber(site_number);
+//					this.rentalProvider.createRentalSitesBillNumber(sitesBillNumber);
+//					siteNumberMap.put(site_number, 1.0);		
+//				}
+//				//分配半个
+//				for( siteCount=siteCount-0.5;siteCount <=rsb.getRentalCount();){
+//					if (siteCount <rsb.getRentalCount())
+//						billDTO.setToastFlag(NormalFlag.NEED.getCode());
+//					while(true){
+//						if( siteNumberMap.get(site_number)==0.5)
+//							break;
+//						else
+//							site_number++;
+//					}
+//					//资源编号超出单元格的个数,直接异常-应该不会有这种情况
+//					if(site_number > rsr.getCounts())
+//						throw RuntimeErrorException
+//						.errorWith(
+//								RentalServiceErrorCode.SCOPE,
+//								RentalServiceErrorCode.ERROR_NO_ENOUGH_SITES,
+//								localeStringService.getLocalizedString(
+//										String.valueOf(RentalServiceErrorCode.SCOPE),
+//										String.valueOf(RentalServiceErrorCode.ERROR_NO_ENOUGH_SITES),
+//										UserContext.current().getUser()
+//												.getLocale(),
+//										" has no enough sites to rental "));
+//					RentalSitesBillNumber sitesBillNumber = new RentalSitesBillNumber();
+//					sitesBillNumber.setRentalCount(0.5);
+//					sitesBillNumber.setRentalSiteBillId(rsb.getId());
+//					sitesBillNumber.setRentalSiteRuleId(rsb.getRentalSiteRuleId());
+//					sitesBillNumber.setSiteNumber(site_number);
+//					this.rentalProvider.createRentalSitesBillNumber(sitesBillNumber);
+//					siteNumberMap.put(site_number, 0.5);
+//					siteCount= siteCount+0.5;
+//				}
+//				//验证是否有冲突，如果有抛出异常
+//				siteNumbers = this.rentalProvider.findSitesBillNumbersBySiteId(rsb.getRentalSiteRuleId());
+//				siteNumberMap = new HashMap<Integer, Double> ();
+//				for(RentalSitesBillNumber siteNumber : siteNumbers){
+//					if(null == siteNumberMap.get(siteNumber.getSiteNumber()))
+//						siteNumberMap.put(siteNumber.getSiteNumber() , siteNumber.getRentalCount());
+//					else
+//						siteNumberMap.put(siteNumber.getSiteNumber() , siteNumberMap.get(siteNumber.getSiteNumber())+siteNumber.getRentalCount());
+//					//如果超过1.1个也就是1.5或者更多,说明冲突，重新分配
+//					if(siteNumberMap.get(siteNumber.getSiteNumber())>1.1)
+//						throw RuntimeErrorException
+//						.errorWith(
+//								RentalServiceErrorCode.SCOPE,
+//								RentalServiceErrorCode.ERROR_REPEAT_SITE_ASSGIN,"资源编号重复，重新分配资源 ");
+//				}
+//				return null;
+//			});
+//		}catch(RuntimeErrorException e){
+//			if(e.getErrorCode()==RentalServiceErrorCode.ERROR_REPEAT_SITE_ASSGIN){
+//				//如果是分配到重复资源编号的就重新分配
+//				LOGGER.info("assign rental site repeat,loop again ;time = "+loopCnt);
+//				assignSiteNumber(rsb,rsr,billDTO,loopCnt);
+//			}else{
+//				throw e;
+//			}
+//			
+//		}
+//	
+//}
+
+	@Override
+	public void valiRentalBill(Double rentalcount, List<rentalBillRuleDTO> ruleDTOs) {
+		// 如果有一个规则，剩余的数量少于预定的数量
+		for (rentalBillRuleDTO dto  : ruleDTOs) {
+			if (dto == null)
+				continue;
+			Double totalCount = Double.valueOf(this.rentalProvider
+					.findRentalSiteRuleById(dto.getRuleId()).getCounts());
+			Double rentaledCount = this.rentalProvider
+					.sumRentalRuleBillSumCounts(dto.getRuleId());
+			if (null == rentaledCount)
+				rentaledCount = 0.0;
+			if ((totalCount - rentaledCount) < rentalcount) {
+				throw RuntimeErrorException
 						.errorWith(
 								RentalServiceErrorCode.SCOPE,
 								RentalServiceErrorCode.ERROR_NO_ENOUGH_SITES,
@@ -1037,58 +1128,24 @@ public class RentalServiceImpl implements RentalService {
 										UserContext.current().getUser()
 												.getLocale(),
 										" has no enough sites to rental "));
-					RentalSitesBillNumber sitesBillNumber = new RentalSitesBillNumber();
-					sitesBillNumber.setRentalCount(0.5);
-					sitesBillNumber.setRentalSiteBillId(rsb.getId());
-					sitesBillNumber.setRentalSiteRuleId(rsb.getRentalSiteRuleId());
-					sitesBillNumber.setSiteNumber(site_number);
-					this.rentalProvider.createRentalSitesBillNumber(sitesBillNumber);
-					siteNumberMap.put(site_number, 0.5);
-					siteCount= siteCount+0.5;
-				}
-				//验证是否有冲突，如果有抛出异常
-				siteNumbers = this.rentalProvider.findSitesBillNumbersBySiteId(rsb.getRentalSiteRuleId());
-				siteNumberMap = new HashMap<Integer, Double> ();
-				for(RentalSitesBillNumber siteNumber : siteNumbers){
-					if(null == siteNumberMap.get(siteNumber.getSiteNumber()))
-						siteNumberMap.put(siteNumber.getSiteNumber() , siteNumber.getRentalCount());
-					else
-						siteNumberMap.put(siteNumber.getSiteNumber() , siteNumberMap.get(siteNumber.getSiteNumber())+siteNumber.getRentalCount());
-					//如果超过1.1个也就是1.5或者更多,说明冲突，重新分配
-					if(siteNumberMap.get(siteNumber.getSiteNumber())>1.1)
-						throw RuntimeErrorException
-						.errorWith(
-								RentalServiceErrorCode.SCOPE,
-								RentalServiceErrorCode.ERROR_REPEAT_SITE_ASSGIN,"资源编号重复，重新分配资源 ");
-				}
-				return null;
-			});
-		}catch(RuntimeErrorException e){
-			if(e.getErrorCode()==RentalServiceErrorCode.ERROR_REPEAT_SITE_ASSGIN){
-				//如果是分配到重复资源编号的就重新分配
-				LOGGER.info("assign rental site repeat,loop again ;time = "+loopCnt);
-				assignSiteNumber(rsb,rsr,billDTO,loopCnt);
-			}else{
-				throw e;
 			}
-			
 		}
-	
-}
+
+	}
 
 	@Override
-	public void valiRentalBill(Double rentalcount, List<Long> rentalSiteRuleIds) {
+	public void valiRentalBill(List<rentalBillRuleDTO> ruleDTOs) {
 		// 如果有一个规则，剩余的数量少于预定的数量
-		for (Long siteRuleId : rentalSiteRuleIds) {
-			if (siteRuleId == null)
+		for (rentalBillRuleDTO dto : ruleDTOs) {
+			if (dto.getRuleId() == null)
 				continue;
 			Double totalCount = Double.valueOf(this.rentalProvider
-					.findRentalSiteRuleById(siteRuleId).getCounts());
+					.findRentalSiteRuleById(dto.getRuleId()).getCounts());
 			Double rentaledCount = this.rentalProvider
-					.sumRentalRuleBillSumCounts(siteRuleId);
+					.sumRentalRuleBillSumCounts(dto.getRuleId());
 			if (null == rentaledCount)
 				rentaledCount = 0.0;
-			if ((totalCount - rentaledCount) < rentalcount) {
+			if ((totalCount - rentaledCount) < dto.getRentalCount()) {
 				throw RuntimeErrorException
 						.errorWith(
 								RentalServiceErrorCode.SCOPE,

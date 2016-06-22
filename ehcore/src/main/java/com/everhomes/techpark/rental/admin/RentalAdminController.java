@@ -253,7 +253,7 @@ public class RentalAdminController extends ControllerBase {
 	@RequestMapping("updateRentalSiteRules")
 	@RestReturn(value = String.class)
 	public RestResponse updateRentalSiteSimpleRules(@Valid  UpdateRentalSiteRulesAdminCommand cmd) {
-//		rentalService.updateRentalSiteRules(cmd);
+		rentalService.updateRentalSiteSimpleRules(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -270,7 +270,7 @@ public class RentalAdminController extends ControllerBase {
 	@RequestMapping("updateRentalSiteDiscount")
 	@RestReturn(value = String.class)
 	public RestResponse updateRentalSiteDiscount(@Valid  UpdateRentalSiteDiscountAdminCommand cmd) {
-//		rentalService.updateRentalSiteRules(cmd);
+		rentalService.updateRentalSiteDiscount(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
