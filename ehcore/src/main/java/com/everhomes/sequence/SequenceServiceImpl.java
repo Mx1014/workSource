@@ -588,6 +588,9 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhNews.class, Tables.EH_NEWS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_NEWS.ID.max()).from(Tables.EH_NEWS).fetchOne().value1(); 
         });
+        syncTableSequence(null, EhNewsComment.class, Tables.EH_NEWS_COMMENT.getName(), (dbContext) -> { 
+        	return dbContext.select(Tables.EH_NEWS_COMMENT.ID.max()).from(Tables.EH_NEWS_COMMENT).fetchOne().value1(); 
+        });
     }
     
     @SuppressWarnings("rawtypes")

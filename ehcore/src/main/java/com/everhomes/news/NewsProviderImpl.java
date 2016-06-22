@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.news;
 
 import org.jooq.DSLContext;
@@ -35,7 +36,7 @@ public class NewsProviderImpl implements NewsProvider {
 
 	@Override
 	public void updateNews(News news) {
-		assert(news.getId()==null);
+		assert(news.getId()!=null);
 		
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhNewsDao dao = new EhNewsDao(context.configuration());

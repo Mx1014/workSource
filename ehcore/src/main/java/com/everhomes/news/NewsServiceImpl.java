@@ -1,3 +1,4 @@
+// @formatter:off
 package com.everhomes.news;
 
 import java.sql.Timestamp;
@@ -15,6 +16,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.news.AddNewsCommentBySceneCommand;
 import com.everhomes.rest.news.AddNewsCommentCommand;
 import com.everhomes.rest.news.BriefNewsDTO;
+import com.everhomes.rest.news.CommentStatus;
 import com.everhomes.rest.news.CreateNewsCommand;
 import com.everhomes.rest.news.DeleteNewsCommand;
 import com.everhomes.rest.news.DeleteNewsCommentBySceneCommand;
@@ -38,10 +40,12 @@ import com.everhomes.rest.news.SearchNewsCommand;
 import com.everhomes.rest.news.SetNewsLikeFlagBySceneCommand;
 import com.everhomes.rest.news.SetNewsLikeFlagCommand;
 import com.everhomes.rest.news.SetNewsTopFlagCommand;
+import com.everhomes.server.schema.tables.pojos.EhNewsComment;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.WebTokenGenerator;
 
 @Component
 public class NewsServiceImpl implements NewsService {
@@ -52,6 +56,9 @@ public class NewsServiceImpl implements NewsService {
 
 	@Autowired
 	private NewsProvider newsProvider;
+
+	@Autowired
+	private CommentProvider commentProvider;
 
 	@Override
 	public BriefNewsDTO createNews(CreateNewsCommand cmd) {
@@ -114,92 +121,105 @@ public class NewsServiceImpl implements NewsService {
 
 	@Override
 	public void importNews(ImportNewsCommand cmd, MultipartFile[] files) {
-		
-		
+
 	}
 
 	@Override
 	public NewsListResponse listNews(ListNewsCommand cmd) {
-		
+
 		return null;
 	}
 
 	@Override
 	public NewsListResponse searchNews(SearchNewsCommand cmd) {
-		
+
 		return null;
 	}
 
 	@Override
 	public NewsDTO getNewsDetailInfo(NewsDetailInfoCommand cmd) {
-		
+
 		return null;
 	}
 
 	@Override
 	public void setNewsTopFlag(SetNewsTopFlagCommand cmd) {
-		
-		
+
 	}
 
 	@Override
 	public NewsContentDTO getNewsContent(NewsDetailInfoCommand cmd) {
-		
+
 		return null;
 	}
 
 	@Override
 	public void deleteNews(DeleteNewsCommand cmd) {
-		
-		
+
 	}
 
 	@Override
 	public void setNewsLikeFlag(SetNewsLikeFlagCommand cmd) {
-		
-		
+
 	}
 
 	@Override
 	public NewsCommentDTO addNewsComment(AddNewsCommentCommand cmd) {
+		final Long userId = UserContext.current().getUser().getId();
+		final Long newsId = WebTokenGenerator.getInstance().fromWebToken(cmd.getNewsToken(), News.class).getId();
+		
+		//检查参数
+		
+		
+		Comment comment = processComment(userId, newsId, cmd);
+		commentProvider.createComment(EhNewsComment.class, comment);
+		
 		
 		return null;
 	}
 
+	private Comment processComment(Long userId, Long newsId, AddNewsCommentCommand cmd) {
+		Comment comment = new Comment();
+		comment.setOwnerId(newsId);
+		comment.setContentType(cmd.getContentType().toLowerCase());
+		comment.setContent(cmd.getContent());
+		comment.setStatus(CommentStatus.ACTIVE.getCode());
+		comment.setCreatorUid(userId);
+		comment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		return comment;
+	}
+
 	@Override
 	public ListNewsCommentResponse listNewsComment(ListNewsCommentCommand cmd) {
-		
+
 		return null;
 	}
 
 	@Override
 	public void deleteNewsComment(DeleteNewsCommentCommand cmd) {
-		
-		
+
 	}
 
 	@Override
 	public NewsListResponse listNewsByScene(ListNewsBySceneCommand cmd) {
-		
+
 		return null;
 	}
 
 	@Override
 	public void setNewsLikeFlagByScene(SetNewsLikeFlagBySceneCommand cmd) {
-		
-		
+
 	}
 
 	@Override
 	public NewsCommentDTO addNewsCommentByScene(AddNewsCommentBySceneCommand cmd) {
-		
+
 		return null;
 	}
 
 	@Override
 	public void deleteNewsCommentByScene(DeleteNewsCommentBySceneCommand cmd) {
-		
-		
+
 	}
 
 }
