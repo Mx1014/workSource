@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.order.OrderUtil;
@@ -64,6 +65,9 @@ public class PmsyServiceImpl implements PmsyService{
 	
 	@Autowired
 	private OrderUtil commonOrderUtil;
+	
+	@Autowired
+    private ConfigurationProvider configProvider;
 	
 	@Override
 	public List<PmsyPayerDTO> listPmPayers(){
@@ -113,7 +117,7 @@ public class PmsyServiceImpl implements PmsyService{
 			}
 		}
 		List<AddressDTO> resultList = new ArrayList<>();
-		String json = PmsyHttpUtil.post("UserRev_OwnerVerify", cmd.getUserName(), cmd.getUserContact(), "", "", "", "", "");
+		String json = PmsyHttpUtil.post(configProvider.getValue("haian.siyuan", ""),"UserRev_OwnerVerify", cmd.getUserName(), cmd.getUserContact(), "", "", "", "", "");
 		if(json == null){
 			LOGGER.error("the request of siyuan is fail.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, 
@@ -144,9 +148,6 @@ public class PmsyServiceImpl implements PmsyService{
 			dto.setResourceName(resourceName.toString());
 			return dto;
 		}).collect(Collectors.toList());
-		if(resultList.size()>0 && cmd.getUserContact().equals("13800010001")){
-			resultList.add(resultList.get(0));
-		}
 		return resultList;
 	}
 	@Override
@@ -174,7 +175,7 @@ public class PmsyServiceImpl implements PmsyService{
 		if(cmd.getEndDate() != null)
 			endDate = TimeToString(cmd.getEndDate());
 		String json = null;
-		json = PmsyHttpUtil.post("UserRev_GetFeeList", cmd.getCustomerId(), startDate,
+		json = PmsyHttpUtil.post(configProvider.getValue("haian.siyuan", ""),"UserRev_GetFeeList", cmd.getCustomerId(), startDate,
 				endDate, cmd.getProjectId(), cmd.getBillType().getCode(), "", "");
 		Gson gson = new Gson();
 		Map map = gson.fromJson(json, Map.class);
@@ -262,7 +263,7 @@ public class PmsyServiceImpl implements PmsyService{
 		if(monthlyDebtAmount == null)
 			monthlyDebtAmount = new BigDecimal(0);
 		
-		String json = PmsyHttpUtil.post("UserRev_GetFeeList", cmd.getCustomerId(), TimeToString(cmd.getBillDateStr()),
+		String json = PmsyHttpUtil.post(configProvider.getValue("haian.siyuan", ""),"UserRev_GetFeeList", cmd.getCustomerId(), TimeToString(cmd.getBillDateStr()),
 				TimeToString(cmd.getBillDateStr()), cmd.getProjectId(), "01", "", "");
 		Gson gson = new Gson();
 		Map map = gson.fromJson(json, Map.class);
@@ -323,15 +324,20 @@ public class PmsyServiceImpl implements PmsyService{
 		List<PmsyOrderItem> orderItemList = pmsyProvider.ListBillOrderItems(ids);
 		outer:
 		for(PmsyOrder order:list){
+			long billdate = 0;
 			for(PmsyOrderItem item:orderItemList){
 				if(order.getId().equals(item.getOrderId())){
+					
 					List<PmsyOrderItem> items = order.getItems();
 					if(items == null)
 						items = new ArrayList<PmsyOrderItem>();
 					items.add(item);
 					order.setItems(items);
 					order.setBillDate(item.getBillDate().getTime());
-					if(items.size()>1){
+					if(items.size()==1){
+						billdate = item.getBillDate().getTime();
+					}
+					if(billdate != item.getBillDate().getTime()){
 						order.setBillDate(0L);
 						continue outer;
 					}
@@ -407,7 +413,7 @@ public class PmsyServiceImpl implements PmsyService{
 		order.setCustomerId(cmd.getCustomerId());
 		pmsyProvider.createPmsyOrder(order);
 		
-		String json = PmsyHttpUtil.post("UserRev_GetFeeList", cmd.getCustomerId(), "",
+		String json = PmsyHttpUtil.post(configProvider.getValue("haian.siyuan", ""),"UserRev_GetFeeList", cmd.getCustomerId(), "",
 				"", cmd.getProjectId(), PmsyBillType.UNPAID.getCode(), "", "");
 		Gson gson = new Gson();
 		Map map = gson.fromJson(json, Map.class);

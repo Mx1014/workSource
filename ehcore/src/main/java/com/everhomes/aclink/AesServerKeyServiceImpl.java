@@ -89,7 +89,7 @@ public class AesServerKeyServiceImpl implements AesServerKeyService {
         String ver = getRedisValue(key);
         if(ver == null) {
             DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(doorAccId);
-            if(doorAccess == null) {
+            if(doorAccess == null || (!AclinkUtils.isZuolinDevice(doorAccess))) {
                 return null;
             }
             Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");

@@ -14,6 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>name: 门禁名字， 16字节以内英文</li>
  * <li>description: 描述</li>
  * <li>address: 地址信息</li>
+ * <li>groupId: 分组信息</li>
  * </ul>
  * @author janson
  *
@@ -35,6 +36,8 @@ public class DoorAccessActivingCommand {
     
     @NotNull
     String name;
+    
+    Long groupId;
     
     String description;
     String address;
@@ -87,6 +90,13 @@ public class DoorAccessActivingCommand {
     }
     public void setAddress(String address) {
         this.address = address;
+    }
+    
+    public Long getGroupId() {
+        return groupId;
+    }
+    public void setGroupId(Long groupId) {
+        this.groupId = groupId;
     }
     @Override
     public String toString() {

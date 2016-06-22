@@ -23,6 +23,7 @@ import com.everhomes.server.schema.tables.pojos.EhOpPromotionActivities;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.ExecutorUtil;
 
 @Component
 @Scope("prototype")
@@ -68,6 +69,8 @@ public class OpPromotionNewUserCondition implements OpPromotionCondition, LocalB
 
     @Override
     public Action onLocalBusMessage(Object arg0, String arg1, Object arg2, String arg3) {
+        final OpPromotionActivity cacheActivity = this.cacheActivity;
+        
         try {
             Date now = DateHelper.currentGMTTime();
             Date endTime = this.cacheActivity.getEndTime();
@@ -82,45 +85,62 @@ public class OpPromotionNewUserCondition implements OpPromotionCondition, LocalB
             } else if(arg1.indexOf("OrganizationMember") >= 0) {
                 Long memberId = (Long)arg2;
                 
-                OrganizationMember member = organizationProvider.findOrganizationMemberById(memberId);
-                OrganizationMemberTargetType targetType = OrganizationMemberTargetType.fromCode(member.getTargetType());
-                if(targetType != OrganizationMemberTargetType.USER) {
-                    return Action.none;
-                }
-                
-                if(promotionUserService.checkOrganizationMember(this.cacheActivity, member)) {
-                    OpPromotionAction action = OpPromotionUtils.getActionFromPromotion(this.cacheActivity);
-                    
-                    OpPromotionActivityContext ctx = new OpPromotionActivityContext(this.cacheActivity);
-                    User u = userProvider.findUserById(member.getTargetId());
-                    if(u != null) {
-                        ctx.setUser(u);
-                        ctx.setNeedUpdate(true);
-                        action.fire(ctx);
+                ExecutorUtil.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        OrganizationMember member = organizationProvider.findOrganizationMemberById(memberId);
+                        OrganizationMemberTargetType targetType = OrganizationMemberTargetType.fromCode(member.getTargetType());
+                        if(targetType != OrganizationMemberTargetType.USER) {
+                            return;
+                        }
+                        
+                        if(promotionUserService.checkOrganizationMember(cacheActivity, member)) {
+                            OpPromotionAction action = OpPromotionUtils.getActionFromPromotion(cacheActivity);
+                            
+                            OpPromotionActivityContext ctx = new OpPromotionActivityContext(cacheActivity);
+                            User u = userProvider.findUserById(member.getTargetId());
+                            if(u != null) {
+                                ctx.setUser(u);
+                                ctx.setNeedUpdate(true);
+                                action.fire(ctx);
+                            }
+                        }
                     }
-                }
+                    
+                });
+
                     
             } else {
                 Long groupMemberId = (Long)arg2;
-                GroupMember groupMember = this.groupProvider.findGroupMemberById(groupMemberId);
-                if(null == groupMember) {
-                    LOGGER.error("None of groupMember");
-                    return Action.none;
+                
+                ExecutorUtil.submit(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        // TODO Auto-generated method stub
+                        GroupMember groupMember = groupProvider.findGroupMemberById(groupMemberId);
+                        if(null == groupMember) {
+                            LOGGER.error("None of groupMember");
+                            return;
+                            }
+                        
+                        if(groupMember.getMemberStatus() != GroupMemberStatus.ACTIVE.getCode()) {
+                            return;
+                            }
+                        
+                        OpPromotionAction action = OpPromotionUtils.getActionFromPromotion(cacheActivity);
+                        
+                        OpPromotionActivityContext ctx = new OpPromotionActivityContext(cacheActivity);
+                        User u = userProvider.findUserById(groupMember.getMemberId());
+                        if(u != null) {
+                            ctx.setUser(u);
+                            ctx.setNeedUpdate(true);
+                            action.fire(ctx);
+                        }                        
                     }
-                
-                if(groupMember.getMemberStatus() != GroupMemberStatus.ACTIVE.getCode()) {
-                    return Action.none;
-                    }
-                
-                OpPromotionAction action = OpPromotionUtils.getActionFromPromotion(this.cacheActivity);
-                
-                OpPromotionActivityContext ctx = new OpPromotionActivityContext(this.cacheActivity);
-                User u = userProvider.findUserById(groupMember.getMemberId());
-                if(u != null) {
-                    ctx.setUser(u);
-                    ctx.setNeedUpdate(true);
-                    action.fire(ctx);
-                }
+                    
+                });
+
             }
 
         } catch(Exception e) {

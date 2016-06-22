@@ -14,6 +14,8 @@
 
 @property(nonatomic, copy) NSNumber* nextPageAnchor;
 
+@property(nonatomic, copy) NSNumber* role;
+
 // item type EvhDoorAccessDTO*
 @property(nonatomic, strong) NSMutableArray* doors;
 

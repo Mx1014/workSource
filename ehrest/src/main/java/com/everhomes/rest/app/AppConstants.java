@@ -40,7 +40,7 @@ public interface AppConstants {
     public static final long APPID_LOST_AND_FOUND = 30;   // 失物招领
     public static final long APPID_ENTERPRISE = 31;
     public static final long APPID_PARK_ADMIN = 32;
-    public static final long APPID_ACLINK = 33;
+    public static final long APPID_ACLINK = 33;             // 门禁推送
     
     public static final int PAGINATION_DEFAULT_SIZE = 20;
     public static final int PAGINATION_MAX_SIZE = 2000;

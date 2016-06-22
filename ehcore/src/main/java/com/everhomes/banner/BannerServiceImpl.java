@@ -346,7 +346,7 @@ public class BannerServiceImpl implements BannerService {
                 }
             }
         }catch(Exception e){
-            LOGGER.error("Parser json is error,communityId=" + communityId,e.getMessage());
+            LOGGER.error("Parser json is error, communityId={}, banner={}", communityId, banner, e);
         }
         
         return jsonObject.toJSONString();

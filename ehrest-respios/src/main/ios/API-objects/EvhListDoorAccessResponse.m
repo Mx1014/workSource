@@ -34,6 +34,8 @@
 {
     if(self.nextPageAnchor)
         [jsonObject setObject: self.nextPageAnchor forKey: @"nextPageAnchor"];
+    if(self.role)
+        [jsonObject setObject: self.role forKey: @"role"];
     if(self.doors) {
         NSMutableArray* jsonArray = [NSMutableArray new];
         for(EvhDoorAccessDTO* item in self.doors) {
@@ -51,6 +53,10 @@
         self.nextPageAnchor = [jsonObject objectForKey: @"nextPageAnchor"];
         if(self.nextPageAnchor && [self.nextPageAnchor isEqual:[NSNull null]])
             self.nextPageAnchor = nil;
+
+        self.role = [jsonObject objectForKey: @"role"];
+        if(self.role && [self.role isEqual:[NSNull null]])
+            self.role = nil;
 
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"doors"];

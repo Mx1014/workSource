@@ -41,6 +41,8 @@ public class DoorAccessDTO {
     private String creatorPhone;
     private Byte linkStatus;
     private String  version;
+    private String groupName;
+    private Long groupId;
     
 
     public Byte getStatus() {
@@ -284,6 +286,30 @@ public class DoorAccessDTO {
 
     public void setVersion(String version) {
         this.version = version;
+    }
+
+
+
+    public String getGroupName() {
+        return groupName;
+    }
+
+
+
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
+    }
+
+
+
+    public Long getGroupId() {
+        return groupId;
+    }
+
+
+
+    public void setGroupId(Long groupId) {
+        this.groupId = groupId;
     }
 
 

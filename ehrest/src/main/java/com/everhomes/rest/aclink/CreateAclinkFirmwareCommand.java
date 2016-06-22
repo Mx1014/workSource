@@ -6,22 +6,37 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>infoUrl: 固件说明页面</li>
+ * <li>checksum: 固件校验码</li>
+ * <li>md5sum: 固件md5值</li>
+ * <li>firmwareType: 固件类型，默认 zuolin </li>
+ * <li>downloadUrl: 下载url </li>
+ * <li>major: 主版本号 </li>
+ * <li>minor: 次版本好 </li>
+ * <li>revision: 修订版本号 </li>
+ * </ul>
+ * @author janson
+ *
+ */
 public class CreateAclinkFirmwareCommand {
     private String     infoUrl;
     private Long     checksum;
     private String     md5sum;
+    private String firmwareType;
     
     @NotNull
     private String     downloadUrl;
     
     @NotNull
-    private Byte     major;
+    private Integer     major;
     
     @NotNull
-    private Byte     minor;
+    private Integer     minor;
     
     
-    private Byte     revision;
+    private Integer     revision;
     
     public String getInfoUrl() {
         return infoUrl;
@@ -47,24 +62,30 @@ public class CreateAclinkFirmwareCommand {
     public void setDownloadUrl(String downloadUrl) {
         this.downloadUrl = downloadUrl;
     }
-    
-    public Byte getMajor() {
+
+    public Integer getMajor() {
         return major;
     }
-    public void setMajor(Byte major) {
+    public void setMajor(Integer major) {
         this.major = major;
     }
-    public Byte getMinor() {
+    public Integer getMinor() {
         return minor;
     }
-    public void setMinor(Byte minor) {
+    public void setMinor(Integer minor) {
         this.minor = minor;
     }
-    public Byte getRevision() {
+    public Integer getRevision() {
         return revision;
     }
-    public void setRevision(Byte revision) {
+    public void setRevision(Integer revision) {
         this.revision = revision;
+    }
+    public String getFirmwareType() {
+        return firmwareType;
+    }
+    public void setFirmwareType(String firmwareType) {
+        this.firmwareType = firmwareType;
     }
     @Override
     public String toString() {

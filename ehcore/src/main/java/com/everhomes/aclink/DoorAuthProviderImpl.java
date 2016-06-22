@@ -16,6 +16,7 @@ import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.rest.aclink.DoorAccessDriverType;
 import com.everhomes.rest.aclink.DoorAuthStatus;
 import com.everhomes.rest.aclink.DoorAuthType;
 import com.everhomes.server.schema.Tables;
@@ -171,7 +172,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
     }
     
     @Override
-    public List<DoorAuth> queryValidDoorAuthByUserId(ListingLocator locator, long userId, int count) {
+    public List<DoorAuth> queryValidDoorAuthByUserId(ListingLocator locator, long userId, String driver, int count) {
         
         long now = DateHelper.currentGMTTime().getTime();
         
@@ -186,6 +187,11 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                 Condition c2 = Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode());
                 query.addConditions(Tables.EH_DOOR_AUTH.USER_ID.eq(userId));
                 query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
+                
+                if(driver != null) {
+                    query.addConditions(Tables.EH_DOOR_AUTH.DRIVER.eq(driver));    
+                }
+                
                 query.addConditions(c1.or(c2));
                 return query;
             }
@@ -195,6 +201,11 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
     
     @Override
     public DoorAuth queryValidDoorAuthForever(Long doorId, Long userId) {
+        return queryValidDoorAuthForever(doorId, userId, null, null, null);
+    }
+    
+    @Override
+    public DoorAuth queryValidDoorAuthForever(Long doorId, Long userId, Byte rightOpen, Byte rightVisitor, Byte rightRemote) {
         ListingLocator locator = new ListingLocator();
         
         List<DoorAuth> auths = queryDoorAuth(locator, 1, new ListingQueryBuilderCallback() {
@@ -206,6 +217,16 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                 query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.eq(doorId));
                 query.addConditions(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode()));
                 query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
+                if(rightOpen != null) {
+                    query.addConditions(Tables.EH_DOOR_AUTH.RIGHT_OPEN.eq(rightOpen.byteValue()));
+                }
+                if(rightVisitor != null) {
+                    query.addConditions(Tables.EH_DOOR_AUTH.RIGHT_VISITOR.eq(rightVisitor.byteValue()));
+                }
+                if(rightRemote != null) {
+                    query.addConditions(Tables.EH_DOOR_AUTH.RIGHT_REMOTE.eq(rightRemote.byteValue()));
+                }
+                
                 return query;
             }
         }); 
@@ -261,9 +282,9 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
     }
     
     @Override
-    public List<DoorAuth> searchDoorAuthByAdmin(ListingLocator locator, String keyword, Byte status, int count) {
+    public List<DoorAuth> searchDoorAuthByAdmin(ListingLocator locator, Long doorId, String keyword, Byte status, int count) {
         
-        return queryDoorAuth(locator, count, new ListingQueryBuilderCallback() {
+        return queryDoorAuthByTime(locator, count, new ListingQueryBuilderCallback() {
 
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
@@ -272,9 +293,41 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                     query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(status));    
                 }
                 
+                if(doorId != null) {
+                    query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.eq(doorId));
+                }
+                
                 if(keyword != null) {
                     query.addConditions(Tables.EH_DOOR_AUTH.NICKNAME.like(keyword+"%").or(Tables.EH_DOOR_AUTH.PHONE.like(keyword+"%")));                    
                 }
+
+                return query;
+            }
+            
+        });        
+    }
+    
+    @Override
+    public List<DoorAuth> searchVisitorDoorAuthByAdmin(ListingLocator locator, Long doorId, String keyword, Byte status, int count) {
+        
+        return queryDoorAuthByTime(locator, count, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                if(status != null) {
+                    query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(status));    
+                }
+                
+                if(doorId != null) {
+                    query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.eq(doorId));
+                }
+                
+                if(keyword != null) {
+                    query.addConditions(Tables.EH_DOOR_AUTH.NICKNAME.like(keyword+"%").or(Tables.EH_DOOR_AUTH.PHONE.like(keyword+"%")));                    
+                }
+                
+                query.addConditions(Tables.EH_DOOR_AUTH.AUTH_TYPE.ne(DoorAuthType.FOREVER.getCode()));
 
                 return query;
             }
@@ -296,6 +349,33 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
             }
             
         });    
+    }
+    
+    @Override
+    public DoorAuth getLinglingDoorAuthByUuid(String uuid) {
+        
+        ListingLocator locator = new ListingLocator();
+        
+        List<DoorAuth> auths = queryDoorAuth(locator, 1, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                
+                query.addConditions(Tables.EH_DOOR_AUTH.STATUS.ne(DoorAuthStatus.INVALID.getCode()));
+                query.addConditions(Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.LINGLING_VISITOR.getCode()));
+                query.addConditions(AclinkAuthCustomField.AUTH_LINGLING_UUID.getField().eq(uuid));
+
+                return query;
+            }
+            
+        });
+        
+        if(auths == null || auths.size() == 0) {
+            return null;
+        }
+        
+        return auths.get(0);
     }
     
 }
