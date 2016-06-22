@@ -1,3 +1,4 @@
+#!/bin/sh
 # setup-ehcore-db.sh -- deploys database configuration.
 # set -x
 
@@ -22,10 +23,10 @@ if [ ! -f ehcore-database.sql ]; then
     exit 2
 fi
 
-if [ ! -f ehcore-platform-schema.sql ]; then
-    printf "Error: Unable to find ehcore-platform-schema.sql\n"
-    exit 3
-fi
+# if [ ! -f ehcore-platform-schema.sql ]; then
+#    printf "Error: Unable to find ehcore-platform-schema.sql\n"
+#    exit 3
+# fi
 
 handle_error() {
     mysqlout=$?
@@ -49,11 +50,11 @@ echo "Creating Database ehcore."
 mysql --user=root --password=$PASSWORD < ehcore-database.sql > /dev/null 2>/dev/null
 handle_error ehcore-database.sql
 
-mysql --user=ehcore --password=ehcore ehcore < ehcore-platform-schema.sql
-if [ $? -ne 0 ]; then
-  printf "Error: Cannot execute ehcore-platform-schema.sql\n"
-  exit 7
-fi
+# mysql --user=ehcore --password=ehcore ehcore < ehcore-platform-schema.sql
+# if [ $? -ne 0 ]; then
+#  printf "Error: Cannot execute ehcore-platform-schema.sql\n"
+#  exit 7
+# fi
   
 mysql --user=ehcore --password=ehcore ehcore < ehcore-server-schema.sql
 if [ $? -ne 0 ]; then
@@ -67,17 +68,17 @@ fi
 #   exit 7
 # fi
 
-mysql --user=ehcore --password=ehcore ehcore < ehcore-park-schema.sql
-if [ $? -ne 0 ]; then
-  printf "Error: Cannot execute ehcore-park-schema.sql\n"
-  exit 7
-fi
+# mysql --user=ehcore --password=ehcore ehcore < ehcore-park-schema.sql
+# if [ $? -ne 0 ]; then
+#  printf "Error: Cannot execute ehcore-park-schema.sql\n"
+#  exit 7
+# fi
 
-mysql --user=ehcore --password=ehcore ehcore < ehcore-conf-schema.sql
-if [ $? -ne 0 ]; then
-  printf "Error: Cannot execute ehcore-conf-schema.sql\n"
-  exit 7
-fi
+# mysql --user=ehcore --password=ehcore ehcore < ehcore-conf-schema.sql
+# if [ $? -ne 0 ]; then
+#  printf "Error: Cannot execute ehcore-conf-schema.sql\n"
+#  exit 7
+# fi
   
 echo "Initializing Database ehcore."
 mysql --user=ehcore --password=ehcore < ehcore-system-init.sql
