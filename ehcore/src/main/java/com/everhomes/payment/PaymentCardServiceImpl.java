@@ -36,6 +36,7 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.payment.taotaogu.AESCoder;
 import com.everhomes.payment.taotaogu.NotifyEntity;
+import com.everhomes.payment.util.CacheConstant;
 import com.everhomes.payment.util.CacheItem;
 import com.everhomes.payment.util.CachePool;
 import com.everhomes.payment.util.DownloadUtil;
@@ -208,11 +209,34 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     	GetCardPaidQrCodeDTO dto = new GetCardPaidQrCodeDTO();
     	PaymentCard paymentCard = checkPaymentCard(cmd.getCardId());
     	checkPaymentCardIsNull(paymentCard,cmd.getCardId());
+    	CachePool cachePool = CachePool.getInstance();
+
+    	CacheItem entity = cachePool.getCacheItem(CacheConstant.GET_VERIFY_CODE_TIME+cmd.getCardId());
+    	//防止请求过于频繁
+    	if(entity == null){
+    		//缓存保持24小时
+    		long now = System.currentTimeMillis();
+    		cachePool.putCacheItem(CacheConstant.GET_VERIFY_CODE_TIME+cmd.getCardId(), now, 24 * 60 *60 * 1000);
+    	}else{
+    		long time = (long) entity.getEntity();
+    		long now = System.currentTimeMillis();
+    		entity.setEntity(now);
+    		if(now < (45 * 1000 + time) ){
+    			LOGGER.error("the get Code request is frequently,the time is less than 50s.");
+    			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    					"the get Code request is frequently,the time is less than 50s.");
+    		}
+    	}
     	PaymentCardVendorHandler handler = getPaymentCardVendorHandler(paymentCard.getVendorName());
 		String code = handler.getCardPaidQrCodeByVendor(paymentCard);
 		dto.setCode(code);
     	return dto;
     }
+    public static void main(String[] args) {
+		System.out.println(new Date(1466590569513L));
+		System.out.println(new Date(1466590656439L));
+
+	}
     @Override
     public GetCardPaidResultDTO getCardPaidResult(GetCardPaidResultCommand cmd){
     	GetCardPaidResultDTO dto = null;

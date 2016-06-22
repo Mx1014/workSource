@@ -77,7 +77,7 @@ public class Testselectka {
 		Map<String, Object> param = new HashMap<String, Object>();
 		param.put("BranchCode", "10002900");
 		//param.put("CardId", "5882572900500000182");
-		param.put("CardId", "5882572900500005884");
+		param.put("CardId", "5882572900500006205");
 		param.put("AcctType", "00");
 		param.put("SubAcctType", "");
 	

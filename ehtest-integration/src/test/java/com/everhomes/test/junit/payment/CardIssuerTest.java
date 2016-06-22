@@ -12,7 +12,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.everhomes.rest.payment.CardIssuerDTO;
-import com.everhomes.rest.payment.CardUserDTO;
 import com.everhomes.rest.payment.ListCardIssuerRestResponse;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhPaymentCardIssuers;

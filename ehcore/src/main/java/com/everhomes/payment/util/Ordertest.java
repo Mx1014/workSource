@@ -84,8 +84,8 @@ public class Ordertest {
 	
 	public static void main(String[] args) {
 		try {
-			System.out.println(post());
-			
+			//System.out.println(post());
+			orderLogin();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -399,7 +399,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				CardTransactionFromVendorDTO dto = new CardTransactionFromVendorDTO();
 				dto.setVendorResult(VendorConstant.CARD_TRANSACTION_STATUS_JSON);
 				dto.setMerchant((String)m.get("MerchId"));
-				BigDecimal amount = new BigDecimal((Double)m.get("ChdrRvaAmt"));
+				BigDecimal amount = new BigDecimal((Double)m.get("TransAmt"));
 				dto.setAmount(amount);
 				String transactionType = (String)m.get("TransType");
 				if("101".equals(transactionType)){
