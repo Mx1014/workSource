@@ -830,6 +830,7 @@
 #define EVH_UI_LAUNCHPAD_GETLAUNCHPADITEMSBYSCENE_URL @"/ui/launchpad/getLaunchPadItemsByScene"
 #define EVH_UI_LAUNCHPAD_GETMOREITEMSBYSCENE_URL @"/ui/launchpad/getMoreItemsByScene"
 #define EVH_UI_LAUNCHPAD_REORDERLAUNCHPADITEMBYSCENE_URL @"/ui/launchpad/reorderLaunchPadItemByScene"
+#define EVH_UI_LAUNCHPAD_REORDERMOREITEMBYSCENE_URL @"/ui/launchpad/reorderMoreItemByScene"
 #define EVH_UI_ORG_ACCEPTTASK_URL @"/ui/org/acceptTask"
 #define EVH_UI_ORG_GRABTASK_URL @"/ui/org/grabTask"
 #define EVH_UI_ORG_LISTGRABTASKTOPICS_URL @"/ui/org/listGrabTaskTopics"

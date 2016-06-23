@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-06-23 09:34:22
+// generated at 2016-06-23 12:43:39
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -833,6 +833,7 @@ public interface ApiConstants {
     public static final String UI_LAUNCHPAD_GETLAUNCHPADITEMSBYSCENE_URL = "/ui/launchpad/getLaunchPadItemsByScene";
     public static final String UI_LAUNCHPAD_GETMOREITEMSBYSCENE_URL = "/ui/launchpad/getMoreItemsByScene";
     public static final String UI_LAUNCHPAD_REORDERLAUNCHPADITEMBYSCENE_URL = "/ui/launchpad/reorderLaunchPadItemByScene";
+    public static final String UI_LAUNCHPAD_REORDERMOREITEMBYSCENE_URL = "/ui/launchpad/reorderMoreItemByScene";
     public static final String UI_ORG_ACCEPTTASK_URL = "/ui/org/acceptTask";
     public static final String UI_ORG_GRABTASK_URL = "/ui/org/grabTask";
     public static final String UI_ORG_LISTGRABTASKTOPICS_URL = "/ui/org/listGrabTaskTopics";
