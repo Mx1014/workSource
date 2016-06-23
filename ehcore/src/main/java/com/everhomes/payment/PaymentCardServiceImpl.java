@@ -250,11 +250,13 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 //			}
 //		}
     	boolean flag = true;
-    	long start = System.currentTimeMillis();
-    	while(flag){
-    		long now = System.currentTimeMillis();
-    		if(now - start > 50 * 1000)
-    			break;
+    	//long start = System.currentTimeMillis();
+    	int i = 1;
+    	while(flag&&i<=10){
+//    		long now = System.currentTimeMillis();
+//    		if(now - start > 50 * 1000)
+//    			break;
+    		i++;
     		PaymentCardTransaction paymentCardTransaction = paymentCardProvider.findPaymentCardTransactionByCondition(cmd.getCode(),paymentCard.getCardNo());
         	if(paymentCardTransaction != null){
         		dto = new GetCardPaidResultDTO();
