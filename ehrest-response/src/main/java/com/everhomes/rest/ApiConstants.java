@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-06-22 14:41:39
+// generated at 2016-06-23 09:34:22
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -30,6 +30,7 @@ public interface ApiConstants {
     public static final String ACTIVITY_CHECKIN_URL = "/activity/checkin";
     public static final String ACTIVITY_CONFIRM_URL = "/activity/confirm";
     public static final String ACTIVITY_FINDACTIVITYDETAILS_URL = "/activity/findActivityDetails";
+    public static final String ACTIVITY_GETACTIVITYSHAREDETAIL_URL = "/activity/getActivityShareDetail";
     public static final String ACTIVITY_LIST_URL = "/activity/list";
     public static final String ACTIVITY_LISTACTIVITIESBYNAMESPACEIDANDTAG_URL = "/activity/listActivitiesByNamespaceIdAndTag";
     public static final String ACTIVITY_LISTACTIVITIESBYTAG_URL = "/activity/listActivitiesByTag";
@@ -289,6 +290,7 @@ public interface ApiConstants {
     public static final String ADMIN_USER_SENDUSERRICHLINKMESSAGE_URL = "/admin/user/sendUserRichLinkMessage";
     public static final String ADMIN_USER_SENDUSERTESTMAIL_URL = "/admin/user/sendUserTestMail";
     public static final String ADMIN_USER_SENDUSERTESTSMS_URL = "/admin/user/sendUserTestSms";
+    public static final String APPURL_GETAPPINFO_URL = "/appUrl/getAppInfo";
     public static final String APPKEY_ISTRUSTEDAPP_URL = "/appkey/isTrustedApp";
     public static final String APPKEY_ISVALIDAPPURLBINDING_URL = "/appkey/isValidAppUrlBinding";
     public static final String BANNER_CLICKBANNER_URL = "/banner/clickBanner";

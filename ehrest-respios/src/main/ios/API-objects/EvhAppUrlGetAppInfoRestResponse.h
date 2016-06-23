@@ -1,15 +1,15 @@
 //
-// EvhPmListPropBuildingsByKeywordRestResponse.h
+// EvhAppUrlGetAppInfoRestResponse.h
 //
 #import "RestResponseBase.h"
+#import "EvhAppUrlDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhPmListPropBuildingsByKeywordRestResponse
+// EvhAppUrlGetAppInfoRestResponse
 //
-@interface EvhPmListPropBuildingsByKeywordRestResponse : EvhRestResponseBase
+@interface EvhAppUrlGetAppInfoRestResponse : EvhRestResponseBase
 
-// array of EvhBuildingDTO* objects
-@property(nonatomic, strong) NSMutableArray* response;
+@property(nonatomic, strong) EvhAppUrlDTO* response;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

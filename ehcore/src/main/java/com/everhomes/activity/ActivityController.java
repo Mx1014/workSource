@@ -24,7 +24,10 @@ import com.everhomes.rest.activity.ActivityDTO;
 import com.everhomes.rest.activity.ActivityListCommand;
 import com.everhomes.rest.activity.ActivityListResponse;
 import com.everhomes.rest.activity.ActivityRejectCommand;
+import com.everhomes.rest.activity.ActivityShareDetailResponse;
 import com.everhomes.rest.activity.ActivitySignupCommand;
+import com.everhomes.rest.activity.ActivityTokenDTO;
+import com.everhomes.rest.activity.GetActivityShareDetailCommand;
 import com.everhomes.rest.activity.ListActivitiesByNamespaceIdAndTagCommand;
 import com.everhomes.rest.activity.ListActivitiesByTagCommand;
 import com.everhomes.rest.activity.ListActivitiesCommand;
@@ -35,14 +38,9 @@ import com.everhomes.rest.activity.ListNearByActivitiesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
 import com.everhomes.rest.activity.ListNearbyActivitiesResponse;
 import com.everhomes.rest.category.CategoryDTO;
-import com.everhomes.rest.forum.GetTopicCommand;
-import com.everhomes.rest.forum.PostDTO;
-import com.everhomes.rest.hotTag.SearchTagCommand;
-import com.everhomes.rest.hotTag.TagDTO;
-import com.everhomes.rest.hotTag.DeleteHotTagCommand;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.Tuple;
+import com.everhomes.util.WebTokenGenerator;
 
 @RestController
 @RequestMapping("/activity")
@@ -246,5 +244,20 @@ public class ActivityController extends ControllerBase {
         response.setErrorDescription("OK");
        return response;
    }
+    
+    /**
+     * 查询分享出去的活动信息
+     */
+    @RequestMapping("getActivityShareDetail")
+    @RestReturn(value=ActivityShareDetailResponse.class)
+    public RestResponse getActivityShareDetail(@Valid GetActivityShareDetailCommand cmd) {
+    	WebTokenGenerator webToken = WebTokenGenerator.getInstance();
+ 	    ActivityTokenDTO postToken = webToken.fromWebToken(cmd.getPostToken(), ActivityTokenDTO.class);
+        ActivityShareDetailResponse activity = activityService.getActivityShareDetail(postToken);
+        RestResponse response = new RestResponse(activity);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
 }
