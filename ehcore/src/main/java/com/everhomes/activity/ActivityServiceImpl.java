@@ -229,6 +229,7 @@ public class ActivityServiceImpl implements ActivityService {
         if(convertEndTime!=null){
             endTimeMs=convertEndTime.getTime();
         }
+        activity.setPosterUri(cmd.getPosterUri());
         activity.setStartTime(new Timestamp(startTimeMs));
         activity.setEndTime(new Timestamp(endTimeMs));
         activity.setStartTimeMs(startTimeMs);
