@@ -15,7 +15,6 @@ import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.payment.taotaogu.ResponseEntiy;
-import com.everhomes.payment.taotaogu.TAOTAOGUHttpUtil;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.organization.VendorType;

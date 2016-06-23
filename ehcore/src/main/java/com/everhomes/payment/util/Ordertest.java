@@ -57,7 +57,7 @@ public class Ordertest {
 		HttpResponse rsp = httpClient.execute(request);
 		StatusLine status = rsp.getStatusLine();
 		String rspText = EntityUtils.toString(rsp.getEntity(), "GBK");
-		
+		System.out.println(rspText);
 		if(rspText.indexOf("return_code") != -1){
 			int a = rspText.indexOf("\"return_code\":\"");
 			int b = rspText.indexOf("\"",a+15);
@@ -111,8 +111,8 @@ public class Ordertest {
 		json.put("reserved", "00011071");
 		json.put("request_time", timeStr);		
 
-		String token = "86135e19f36ad0146bb723c252a6968b";
-		String aesKey = "b90cfc8ff64de647dfc8c58b27327336";		
+		String token = "f23a13686009fe8be5453268c48d3a71";
+		String aesKey = "1cf4e54c4cb9c6e3d8d60a6dbe0133b8";		
 		
 		pairs.add(new BasicNameValuePair("token", token));
 		String msg = Base64.encodeBase64String(AESCoder.encrypt(json.toString().getBytes("GBK"), aesKey.getBytes()));
@@ -134,7 +134,6 @@ public class Ordertest {
 		Gson gson = new Gson();
 		Map map = gson.fromJson(msg, Map.class);
 		String newSign = SHA1.EnCodeSHA1(msg + aesKey + token);
-		System.out.println(msg + "\n" + sign + "\n" + newSign);
 		String data = (String) map.get("data");
 		String data1 = new String (AESCoder.decrypt(Base64.decodeBase64(data), aesKey.getBytes()), "GBK");
 		System.out.println(data1);

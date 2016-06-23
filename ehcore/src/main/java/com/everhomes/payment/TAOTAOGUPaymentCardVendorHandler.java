@@ -14,22 +14,35 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.StatusLine;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.cert.Cert;
 import com.everhomes.cert.CertProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.locale.LocaleStringService;
+import com.everhomes.payment.taotaogu.AESCoder;
 import com.everhomes.payment.taotaogu.ByteTools;
 import com.everhomes.payment.taotaogu.CertCoder;
+import com.everhomes.payment.taotaogu.OrderCertCoder;
 import com.everhomes.payment.taotaogu.ResponseEntiy;
-import com.everhomes.payment.taotaogu.TAOTAOGUHttpUtil;
-import com.everhomes.payment.taotaogu.TAOTAOGUOrderHttpUtil;
+import com.everhomes.payment.taotaogu.SHA1;
 import com.everhomes.payment.util.CachePool;
 import com.everhomes.rest.payment.ApplyCardCommand;
 import com.everhomes.rest.payment.CardInfoDTO;
@@ -83,8 +96,8 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 			getAccountParam.put("CardId", card.getCardNo());
 			getAccountParam.put("AcctType", "00");
 			getAccountParam.put("SubAcctType", "");
-			ResponseEntiy cardResponseEntiy = TAOTAOGUHttpUtil.post(vendorDataMap,"1020",getCardParam);
-			ResponseEntiy accountResponseEntiy = TAOTAOGUHttpUtil.post(vendorDataMap,"1010",getAccountParam);
+			ResponseEntiy cardResponseEntiy = post(vendorDataMap,"1020",getCardParam);
+			ResponseEntiy accountResponseEntiy = post(vendorDataMap,"1010",getAccountParam);
 		
 			if(!cardResponseEntiy.isSuccess())
 				return null;
@@ -101,8 +114,8 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				cardInfo.setCardType((String)cardMap.get("CardSubClass"));
 				String effDate = (String)cardMap.get("EffDate");
 				String expirDate = (String)cardMap.get("ExpirDate");
-				cardInfo.setActivedTime(StrTotimestamp(effDate));
-				cardInfo.setExpiredTime(StrTotimestamp(expirDate));
+				cardInfo.setActivedTime(strTotimestamp(effDate));
+				cardInfo.setExpiredTime(strTotimestamp(expirDate));
 				
 				String cardStatus = (String)cardMap.get("CardStatus");
 				cardInfo.setStatus(cardStatus);
@@ -119,7 +132,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				for(int i=0;i<list.size();i++){
 					Map map = (Map) list.get(i);
 					if("fund".equals(((String)map.get("SubAcctType")).trim())){
-						cardInfo.setBalance(new BigDecimal((Double)map.get("AvlbBal")));
+						cardInfo.setBalance(new BigDecimal(map.get("AvlbBal").toString()));
 						break;
 					}
 				}
@@ -153,7 +166,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		applyCardParam.put("DeliveryContact", cmd.getMobile());
 		
 		try {
-			ResponseEntiy applyCardResponseEntiy = TAOTAOGUHttpUtil.post(vendorDataMap,"0000",applyCardParam);
+			ResponseEntiy applyCardResponseEntiy = post(vendorDataMap,"0000",applyCardParam);
 		
 			if(!applyCardResponseEntiy.isSuccess())
 				return null;
@@ -177,7 +190,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				param.put("DiscountAmt", "");
 				param.put("GiveAmt", "");
 				param.put("SaleUser", "");
-				ResponseEntiy saleCardResponseEntiy = TAOTAOGUHttpUtil.post(vendorDataMap,"0010",param);
+				ResponseEntiy saleCardResponseEntiy = post(vendorDataMap,"0010",param);
 				if(!saleCardResponseEntiy.isSuccess())
 					return null;
 				
@@ -193,7 +206,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				byte[] newpsd = CertCoder.encryptByPublicKey(cmd.getPassword().getBytes(), in);
 				changePasswordParam.put("NewPassWord", ByteTools.BytesToHexStr(newpsd));
 				changePasswordParam.put("Remark", "");
-				ResponseEntiy changePasswordResponseEntiy = TAOTAOGUHttpUtil.post(vendorDataMap,"0050",changePasswordParam);
+				ResponseEntiy changePasswordResponseEntiy = post(vendorDataMap,"0050",changePasswordParam);
 				if(!changePasswordResponseEntiy.isSuccess())
 					return null;
 				
@@ -201,7 +214,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				getCardParam.put("BranchCode", brandCode);
 				getCardParam.put("CardId", cardId);
 				
-				ResponseEntiy cardResponseEntiy = TAOTAOGUHttpUtil.post(vendorDataMap,"1020",getCardParam);
+				ResponseEntiy cardResponseEntiy = post(vendorDataMap,"1020",getCardParam);
 				if(!cardResponseEntiy.isSuccess())
 					return null;
 				Map getCardMap = cardResponseEntiy.getData();
@@ -222,8 +235,8 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 					paymentCard.setPassword(EncryptionUtils.hashPassword(cmd.getPassword()));
 					paymentCard.setUserId(user.getId());
 					paymentCard.setCreateTime(new Timestamp(System.currentTimeMillis()));
-					paymentCard.setActivateTime(StrTotimestamp(effDate));
-					paymentCard.setExpiredTime(StrTotimestamp(expirDate));
+					paymentCard.setActivateTime(strTotimestamp(effDate));
+					paymentCard.setExpiredTime(strTotimestamp(expirDate));
 					paymentCard.setCreatorUid(user.getId());
 					paymentCard.setStatus(PaymentCardStatus.ACTIVE.getCode());
 					paymentCard.setVendorName(VendorConstant.TAOTAOGU);
@@ -263,7 +276,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 			newpsd = CertCoder.encryptByPublicKey(cmd.getNewPassword().getBytes(), in);
 			changePasswordParam.put("NewPassWord", ByteTools.BytesToHexStr(newpsd));
 			changePasswordParam.put("Remark", "");
-			changePasswordResponseEntiy = TAOTAOGUHttpUtil.post(vendorDataMap,"0050",changePasswordParam);
+			changePasswordResponseEntiy = post(vendorDataMap,"0050",changePasswordParam);
 		} catch (Exception e) {
 			LOGGER.error("the change password request of taotaogu is failed {}.",e);
 			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
@@ -300,7 +313,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		param.put("CardId", paymentCard.getCardNo());
 		param.put("Remark", "");
 		
-		resetPasswordResponseEntiy = TAOTAOGUHttpUtil.post(vendorDataMap,"0040",param);
+		resetPasswordResponseEntiy = post(vendorDataMap,"0040",param);
 		if(!resetPasswordResponseEntiy.isSuccess()){
 			LOGGER.error("the reset password request of taotaogu is failed {}.",resetPasswordResponseEntiy.toString());
 			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
@@ -322,7 +335,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 			newpsd = CertCoder.encryptByPublicKey(cmd.getNewPassword().getBytes(), in);
 			changePasswordParam.put("NewPassWord", ByteTools.BytesToHexStr(newpsd));
 			changePasswordParam.put("Remark", "");
-			changePasswordResponseEntiy = TAOTAOGUHttpUtil.post(vendorDataMap,"0050",changePasswordParam);
+			changePasswordResponseEntiy = post(vendorDataMap,"0050",changePasswordParam);
 		} catch (Exception e) {
 			LOGGER.error("the change password request of taotaogu is failed {}.",e);
 			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
@@ -364,9 +377,9 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		ResponseEntiy rechargeResponseEntiy = null;
 		ResponseEntiy consumeResponseEntiy = null;
 		try {
-			rechargeResponseEntiy = TAOTAOGUHttpUtil.post(vendorDataMap,"1030",param);
+			rechargeResponseEntiy = post(vendorDataMap,"1030",param);
 			param.put("TransType", "101");
-			consumeResponseEntiy = TAOTAOGUHttpUtil.post(vendorDataMap,"1030",param);
+			consumeResponseEntiy = post(vendorDataMap,"1030",param);
 		} catch (Exception e) {
 			LOGGER.error("the listCardTransactions request of taotaogu is failed {}.",e);
 			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
@@ -386,7 +399,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		List<CardTransactionOfMonth> resultList = new ArrayList<>();
 		if(rechargeMap != null && consumeMap != null){
 			
-			Double count = (Double)rechargeMap.get("Count");
+			String count = rechargeMap.get("Count").toString();
 			List<Map<String,Object>> rechargeList = (List<Map<String, Object>>) rechargeMap.get("Row");
 			List<Map<String,Object>> consumeList = (List<Map<String, Object>>) consumeMap.get("Row");
 			rechargeList.addAll(consumeList);
@@ -404,7 +417,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				String transactionType = (String)m.get("TransType");
 				if("101".equals(transactionType)){
 					dto.setTransactionType(CardTransactionTypeStatus.CONSUME.getCode());
-					amount = new BigDecimal((Double)m.get("ChdrPdpAmt"));
+					amount = new BigDecimal(m.get("ChdrPdpAmt").toString());
 					dto.setAmount(amount);
 					String status = (String)m.get("ProcStatus");
 					dto.setStatus(status);
@@ -412,7 +425,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 						consumeAmount = consumeAmount.add(amount);
 				}else if("203".equals(transactionType)){
 					dto.setTransactionType(CardTransactionTypeStatus.RECHARGE.getCode());
-					amount = new BigDecimal((Double)m.get("TransAmt"));
+					amount = new BigDecimal(m.get("TransAmt").toString());
 					dto.setAmount(amount);
 					String status = (String)m.get("ProcStatus");
 					dto.setStatus(status);
@@ -423,10 +436,10 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				
 				
 				String recvTime = (String)m.get("RecvTime");
-				dto.setTransactionTime(StrToLong(recvTime));
+				dto.setTransactionTime(strToLong(recvTime));
 				
 				for(CardTransactionOfMonth ctm:resultList){
-					if(ctm.getDate().equals(StrToDate(recvTime))){
+					if(ctm.getDate().equals(strToDate(recvTime))){
 						List<CardTransactionFromVendorDTO> requests = ctm.getRequests();
 						ctm.setConsumeAmount(ctm.getConsumeAmount().add(consumeAmount));
 						ctm.setRechargeAmount(ctm.getRechargeAmount().add(rechargeAmount));
@@ -438,7 +451,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				List<CardTransactionFromVendorDTO> cardTransactionList = new ArrayList<>();
 				cardTransactionList.add(dto);
 				cardTransactionOfMonth.setRequests(cardTransactionList);
-				cardTransactionOfMonth.setDate(StrToDate(recvTime));
+				cardTransactionOfMonth.setDate(strToDate(recvTime));
 				cardTransactionOfMonth.setConsumeAmount(consumeAmount);
 				cardTransactionOfMonth.setRechargeAmount(rechargeAmount);
 				resultList.add(cardTransactionOfMonth);
@@ -447,7 +460,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		return resultList;
 	}
 	
-	private static Timestamp StrTotimestamp(String date){
+	private static Timestamp strTotimestamp(String date){
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 		Date d = null;
 		try {
@@ -458,7 +471,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		return new Timestamp(d.getTime());
 	}
  
-	private Long StrToLong(String date){
+	private Long strToLong(String date){
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 		Date d = null;
 		try {
@@ -469,7 +482,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		return d.getTime();
 	}
 	
-	private Long StrToDate(String date){
+	private Long strToDate(String date){
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 		Date d = null;
 		try {
@@ -511,20 +524,18 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		json.put("reserved", "");
 		json.put("request_time", timeStr);
 		
-		try {
-				Map codeMap = TAOTAOGUOrderHttpUtil.post("/iips2/order/tokenrequest",token, aesKey, json);
-				if(codeMap != null){
-					String returnCode = (String) codeMap.get("return_code");
-					if("00".equals(returnCode)){
-						result = (String) codeMap.get("token");
-					}else{
-						throwGetCardCodeException(null);
-					}
-				}else{
-					throwGetCardCodeException(null);
-				}
-		} catch (Exception e) {
-			throwGetCardCodeException(e);
+		Map codeMap = post("/iips2/order/tokenrequest",token, aesKey, json);
+		if(codeMap != null){
+			String returnCode = (String) codeMap.get("return_code");
+			if("00".equals(returnCode)){
+				result = (String) codeMap.get("token");
+			}else{
+				LOGGER.error("the getCardPaidQrCode request of taotaogu is failed {}.",codeMap);
+				throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_GET_CARD_CODE,
+						localeStringService.getLocalizedString(String.valueOf(PaymentCardErrorCode.SCOPE), 
+								String.valueOf(PaymentCardErrorCode.ERROR_GET_CARD_CODE),
+								UserContext.current().getUser().getLocale(),"the orderLogin request of taotaogu is failed."));
+			}
 		}
 		return result;
 	}
@@ -536,22 +547,13 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		if(aesKey == null || token == null){
 			//丢到缓存中
 				Map map = null;
-				try {
-					map = TAOTAOGUOrderHttpUtil.orderLogin(vendorDataMap);
-				} catch (Exception e) {
-					throwGetTokenException(e);
-				}
-				if(map == null){
-					throwGetTokenException(null);
-				}
+				map = orderLogin(vendorDataMap);
 				if(map != null){
 					cachePool.putCacheItem(VendorConstant.TAOTAOGU_AESKEY, (String) map.get("aes_key"), 24*60*60*1000);
 					cachePool.putCacheItem(VendorConstant.TAOTAOGU_TOKEN, (String) map.get("token"), 24*60*60*1000);
 				}
 		}
 	}
-
-	
 	
 	@Override
 	public void rechargeCard(PaymentCardRechargeOrder order, PaymentCard card) {
@@ -580,7 +582,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		
 		ResponseEntiy responseEntiy = null;
 		try {
-			responseEntiy = TAOTAOGUHttpUtil.post(vendorDataMap,"0020",param);
+			responseEntiy = post(vendorDataMap,"0020",param);
 			if(responseEntiy.isSuccess()){
 				order.setRechargeStatus(CardRechargeStatus.RECHARGED.getCode());
 				order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
@@ -595,7 +597,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				queryParam.put("OrigMsgId", responseEntiy.getMsgID());
 				while(flag&&i<=10){
 					i++;
-					ResponseEntiy selectResponseEntiy = TAOTAOGUHttpUtil.post(vendorDataMap,"9990",param);
+					ResponseEntiy selectResponseEntiy = post(vendorDataMap,"9990",param);
 					if(selectResponseEntiy.isSuccess()){
 						
 						Map map = selectResponseEntiy.getData();
@@ -643,18 +645,172 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 			map.putAll(map1);
 			return gson.toJson(map);
 	 }
-	private void throwGetTokenException(Exception e){
-			LOGGER.error("the orderLogin request of taotaogu is failed {}.",e);
+	
+	private Map orderLogin(Map vendorDataMap){
+		Map result = null;
+		String rspText = null;
+		try{
+			CloseableHttpClient httpClient = HttpClients.createDefault();
+			Gson gson = new Gson();
+			String url = configProvider.getValue("taotaogu.order.url", "");
+			HttpPost request = new HttpPost(url+"/iips2/order/login");
+			JSONObject json = new JSONObject();
+			List<NameValuePair> pairs = new ArrayList<NameValuePair>();
+			Date now = new Date();
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");// 可以方便地修改日期格式
+			String timeStr = dateFormat.format(now);
+			
+			String chnl_type = (String) vendorDataMap.get(VendorConstant.CHNL_TYPE);
+			String chnl_id = (String) vendorDataMap.get(VendorConstant.CHNL_ID);
+			String merch_id = (String) vendorDataMap.get(VendorConstant.MERCH_ID);
+			String termnl_id = (String) vendorDataMap.get(VendorConstant.TERMNL_ID);
+			json.put("chnl_type", chnl_type);
+			json.put("chnl_id", chnl_id);
+			json.put("chnl_sn", System.currentTimeMillis());
+			json.put("merch_id", merch_id);
+			json.put("termnl_id", termnl_id);
+		
+			CertProvider certProvider =  PlatformContext.getComponent("certProviderImpl");
+			Cert serverCer = certProvider.findCertByName(configProvider.getValue(VendorConstant.SERVER_CER, ""));
+			InputStream serverCerIn = new ByteArrayInputStream(serverCer.getData());
+			Cert clientPfx = certProvider.findCertByName(configProvider.getValue(VendorConstant.CLIENT_PFX, ""));
+			InputStream clientPfxIn = new ByteArrayInputStream(clientPfx.getData());
+			
+			String msg = json.toString();
+			msg = Base64.encodeBase64String(OrderCertCoder.encryptByPublicKey(msg.getBytes(), serverCerIn));
+			
+			byte[] r=  OrderCertCoder.sign(msg.getBytes(), clientPfxIn,null, clientPfx.getCertPass());
+			String sign = Base64.encodeBase64String(r);
+			
+			pairs.add(new BasicNameValuePair("msg", msg));
+			pairs.add(new BasicNameValuePair("sign", sign));
+			
+			request.setEntity(new UrlEncodedFormEntity(pairs, "GBK"));
+			HttpResponse rsp = httpClient.execute(request);
+			StatusLine status = rsp.getStatusLine();
+			rspText = EntityUtils.toString(rsp.getEntity(), "GBK");
+			
+			int a = rspText.indexOf("msg=");
+			int b = rspText.indexOf("&sign=");
+			String r1 = null; //结果字符串
+			if(b != -1){
+				msg = rspText.substring(a + 4, b);
+				sign = rspText.substring(b + 6);
+				boolean bSign = OrderCertCoder.verifySign(msg.getBytes(), Base64.decodeBase64(sign), serverCerIn);
+				r = OrderCertCoder.decryptByPrivateKey(Base64.decodeBase64(msg), clientPfxIn, null, clientPfx.getCertPass());
+				r1 = new String(r, "GBK");
+			}else{
+				r1 = rspText.substring(a + 4);
+			}
+			result = gson.fromJson(r1, Map.class);
+		}catch(Exception e){
+			LOGGER.error("the orderLogin request of taotaogu is failed rspText={}, e={}.",rspText,e.toString());
 			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
 					localeStringService.getLocalizedString(String.valueOf(PaymentCardErrorCode.SCOPE), 
 							String.valueOf(PaymentCardErrorCode.ERROR_SERVER_REQUEST),
 							UserContext.current().getUser().getLocale(),"the orderLogin request of taotaogu is failed."));
+		}
+		return result;
 	}
-	private void throwGetCardCodeException(Exception e){
-		LOGGER.error("the cardPaidQrCode request of taotaogu is failed {}.",e);
-		throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_GET_CARD_CODE,
-				localeStringService.getLocalizedString(String.valueOf(PaymentCardErrorCode.SCOPE), 
-						String.valueOf(PaymentCardErrorCode.ERROR_GET_CARD_CODE),
-						UserContext.current().getUser().getLocale(),"the orderLogin request of taotaogu is failed."));
+
+	private Map post(String method,String token,String aesKey,JSONObject json){
+		CloseableHttpClient httpClient = HttpClients.createDefault();
+		Gson gson = new Gson();
+		Map result = null;
+		String rspText = null;
+		try{
+			String url = configProvider.getValue("taotaogu.order.url", "");
+			HttpPost request = new HttpPost(url+method);
+			
+			List<NameValuePair> pairs = new ArrayList<NameValuePair>();
+				
+			pairs.add(new BasicNameValuePair("token", token));
+			String msg = Base64.encodeBase64String(AESCoder.encrypt(json.toString().getBytes("GBK"), aesKey.getBytes()));
+			pairs.add(new BasicNameValuePair("msg", msg));
+			pairs.add(new BasicNameValuePair("sign", SHA1.EnCodeSHA1(msg + aesKey + token)));
+			
+			request.setEntity(new UrlEncodedFormEntity(pairs, "GBK"));
+			HttpResponse rsp = httpClient.execute(request);
+			@SuppressWarnings("unused")
+			StatusLine status = rsp.getStatusLine();
+			rspText = EntityUtils.toString(rsp.getEntity(), "GBK");
+			
+			int a = rspText.indexOf("msg=");
+			int b = rspText.indexOf("&sign=");
+			
+			String data1 = null; //结果字符串
+			if(b != -1){
+				msg = rspText.substring(a + 4, b);
+				String sign = rspText.substring(b + 6);
+				Map map = gson.fromJson(msg, Map.class);
+				String data = (String) map.get("data");
+				data1 = new String (AESCoder.decrypt(Base64.decodeBase64(data), aesKey.getBytes()), "GBK");
+			}else{
+				data1 = rspText.substring(a + 4);
+			}
+			result = gson.fromJson(data1, Map.class);
+		}catch(Exception e){
+			LOGGER.error("the orderLogin request of taotaogu is failed rspText={}, e={}.",rspText,e.toString());
+			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
+					localeStringService.getLocalizedString(String.valueOf(PaymentCardErrorCode.SCOPE), 
+							String.valueOf(PaymentCardErrorCode.ERROR_SERVER_REQUEST),
+							UserContext.current().getUser().getLocale(),"the orderLogin request of taotaogu is failed."));
+		}
+		return result;
+	}
+	
+	public ResponseEntiy post(Map vendorDataMap,String msgType,Map<String, Object> param) throws Exception {
+		CloseableHttpClient httpClient = HttpClients.createDefault();
+		String url = configProvider.getValue("taotaogu.card.url", "");
+		HttpPost request = new HttpPost(url);
+		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
+		String msg = getJson(vendorDataMap,msgType,param);
+		pairs.add(new BasicNameValuePair("msg", msg));
+		request.setEntity(new UrlEncodedFormEntity(pairs, "UTF-8"));
+		HttpResponse rsp = httpClient.execute(request);
+		StatusLine status = rsp.getStatusLine();
+		if(status.getStatusCode() == 200){
+			String rspText = EntityUtils.toString(rsp.getEntity(), "UTF-8");
+			Gson gson = new Gson();
+			ResponseEntiy resp = gson.fromJson(rspText, ResponseEntiy.class);
+			
+			return resp;	
+		}
+		return null;
+	}
+	
+	private String getJson(Map vendorDataMap,String msgType,Map<String, Object> param) throws Exception{
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+		Gson gson = new Gson();
+		
+		Map<String, Object> requestParam = new HashMap<String, Object>();
+		String appName = (String) vendorDataMap.get(VendorConstant.APP_NAME);
+		String version = (String) vendorDataMap.get(VendorConstant.VERSION);
+		String dstId = (String) vendorDataMap.get(VendorConstant.DSTID);
+		String brandCode = (String) vendorDataMap.get(VendorConstant.BRANCH_CODE);
+		requestParam.put("AppName", appName);
+		requestParam.put("Version",version);
+		requestParam.put("ClientDt",sdf.format(new Date()));
+		requestParam.put("SrcId",brandCode);
+		requestParam.put("DstId",dstId);
+		requestParam.put("MsgType",msgType);
+		requestParam.put("MsgID",brandCode + StringUtils.leftPad(String.valueOf(System.currentTimeMillis()), 24, "0"));
+		requestParam.put("Sign", "");
+
+		requestParam.put("Param",param);
+		byte[] data = gson.toJson(requestParam).getBytes();
+		
+		CertProvider certProvider = PlatformContext.getComponent("certProviderImpl");
+		
+		Cert cert = certProvider.findCertByName(configProvider.getValue(VendorConstant.KEY_STORE, ""));
+		InputStream in = new ByteArrayInputStream(cert.getData());
+		
+		String pass = cert.getCertPass();
+		String[] passArr = pass.split(",");
+		
+		byte[] sign = CertCoder.sign(data, in,passArr[0], passArr[1], passArr[2]);
+		requestParam.put("Sign",ByteTools.BytesToHexStr(sign));
+		
+		return gson.toJson(requestParam);
 	}
 }

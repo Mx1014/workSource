@@ -20,6 +20,8 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
     VALUES (200, 'paymentCard', '10002', 'zh_CN', '验证码错误，请重新输入！');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
     VALUES (201, 'paymentCard', '10003', 'zh_CN', '当前卡不存在！');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
+    VALUES (202, 'paymentCard', '10004', 'zh_CN', '二维码获取失败！');
 
 INSERT INTO `eh_payment_card_issuer_communities` (`id`, `owner_type`, `owner_id`, `issuer_id`, `create_time`) 
     VALUES (100001, 'community', '240111044331051500', 100001, '2016-06-14 17:06:44');
