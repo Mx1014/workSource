@@ -4,20 +4,20 @@ package com.everhomes.rest.news;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.rest.news.NewsListResponse;
+import com.everhomes.rest.news.ListNewsResponse;
 
 public class ListNewsRestResponse extends RestResponseBase {
 
-    private NewsListResponse response;
+    private ListNewsResponse response;
 
     public ListNewsRestResponse () {
     }
 
-    public NewsListResponse getResponse() {
+    public ListNewsResponse getResponse() {
         return response;
     }
 
-    public void setResponse(NewsListResponse response) {
+    public void setResponse(ListNewsResponse response) {
         this.response = response;
     }
 }

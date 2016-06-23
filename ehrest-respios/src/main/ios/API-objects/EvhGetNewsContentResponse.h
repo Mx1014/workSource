@@ -1,21 +1,17 @@
 //
-// EvhListBuildingsByStatusCommandResponse.h
+// EvhGetNewsContentResponse.h
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
-#import "EvhCommunityBuildingDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhListBuildingsByStatusCommandResponse
+// EvhGetNewsContentResponse
 //
-@interface EvhListBuildingsByStatusCommandResponse
+@interface EvhGetNewsContentResponse
     : NSObject<EvhJsonSerializable>
 
 
-@property(nonatomic, copy) NSNumber* nextPageAnchor;
-
-// item type EvhCommunityBuildingDTO*
-@property(nonatomic, strong) NSMutableArray* buildings;
+@property(nonatomic, copy) NSString* content;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

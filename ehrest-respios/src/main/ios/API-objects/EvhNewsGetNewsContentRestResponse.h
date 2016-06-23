@@ -2,14 +2,14 @@
 // EvhNewsGetNewsContentRestResponse.h
 //
 #import "RestResponseBase.h"
-#import "EvhNewsContentDTO.h"
+#import "EvhGetNewsContentResponse.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhNewsGetNewsContentRestResponse
 //
 @interface EvhNewsGetNewsContentRestResponse : EvhRestResponseBase
 
-@property(nonatomic, strong) EvhNewsContentDTO* response;
+@property(nonatomic, strong) EvhGetNewsContentResponse* response;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

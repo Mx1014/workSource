@@ -2,7 +2,7 @@
 // EvhNewsGetNewsDetailInfoRestResponse.m
 //
 #import "EvhNewsGetNewsDetailInfoRestResponse.h"
-#import "EvhNewsDTO.h"
+#import "EvhGetNewsDetailInfoResponse.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhNewsGetNewsDetailInfoRestResponse
@@ -45,7 +45,7 @@
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
         [super fromJson: jsonObject];
         NSMutableDictionary* dic =  (NSMutableDictionary*)[jsonObject objectForKey: @"response"];
-        self.response = [EvhNewsDTO new];
+        self.response = [EvhGetNewsDetailInfoResponse new];
         self.response = [self.response fromJson: dic];
         return self;
     }

@@ -4,20 +4,20 @@ package com.everhomes.rest.news;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.rest.news.NewsContentDTO;
+import com.everhomes.rest.news.GetNewsContentResponse;
 
 public class GetNewsContentRestResponse extends RestResponseBase {
 
-    private NewsContentDTO response;
+    private GetNewsContentResponse response;
 
     public GetNewsContentRestResponse () {
     }
 
-    public NewsContentDTO getResponse() {
+    public GetNewsContentResponse getResponse() {
         return response;
     }
 
-    public void setResponse(NewsContentDTO response) {
+    public void setResponse(GetNewsContentResponse response) {
         this.response = response;
     }
 }

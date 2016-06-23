@@ -1,20 +1,19 @@
 //
-// EvhNewsGetNewsContentRestResponse.m
+// EvhGetNewsContentResponse.m
 //
-#import "EvhNewsGetNewsContentRestResponse.h"
 #import "EvhGetNewsContentResponse.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhNewsGetNewsContentRestResponse
+// EvhGetNewsContentResponse
 //
 
-@implementation EvhNewsGetNewsContentRestResponse
+@implementation EvhGetNewsContentResponse
 
 +(id) withJsonString: (NSString*) jsonString
 {
     id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
     if(jsonObject != nil) {
-        EvhNewsGetNewsContentRestResponse* obj = [EvhNewsGetNewsContentRestResponse new];
+        EvhGetNewsContentResponse* obj = [EvhGetNewsContentResponse new];
         return [obj fromJson:jsonObject];
     }
     return nil;
@@ -31,22 +30,17 @@
 
 -(void) toJson: (NSMutableDictionary*) jsonObject 
 {
-    [super toJson: jsonObject];
-    
-    if(self.response) {
-        NSMutableDictionary* dic = [NSMutableDictionary new];
-        [self.response toJson: dic];
-        [jsonObject setObject: dic forKey: @"response"];
-    }
+    if(self.content)
+        [jsonObject setObject: self.content forKey: @"content"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
 {
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
-        [super fromJson: jsonObject];
-        NSMutableDictionary* dic =  (NSMutableDictionary*)[jsonObject objectForKey: @"response"];
-        self.response = [EvhGetNewsContentResponse new];
-        self.response = [self.response fromJson: dic];
+        self.content = [jsonObject objectForKey: @"content"];
+        if(self.content && [self.content isEqual:[NSNull null]])
+            self.content = nil;
+
         return self;
     }
     

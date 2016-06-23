@@ -2,14 +2,14 @@
 // EvhNewsAddNewsCommentRestResponse.h
 //
 #import "RestResponseBase.h"
-#import "EvhNewsCommentDTO.h"
+#import "EvhAddNewsCommentResponse.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhNewsAddNewsCommentRestResponse
 //
 @interface EvhNewsAddNewsCommentRestResponse : EvhRestResponseBase
 
-@property(nonatomic, strong) EvhNewsCommentDTO* response;
+@property(nonatomic, strong) EvhAddNewsCommentResponse* response;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

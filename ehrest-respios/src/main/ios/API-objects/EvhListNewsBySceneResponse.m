@@ -1,20 +1,20 @@
 //
-// EvhListBuildingsByStatusCommandResponse.m
+// EvhListNewsBySceneResponse.m
 //
-#import "EvhListBuildingsByStatusCommandResponse.h"
-#import "EvhCommunityBuildingDTO.h"
+#import "EvhListNewsBySceneResponse.h"
+#import "EvhBriefNewsDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhListBuildingsByStatusCommandResponse
+// EvhListNewsBySceneResponse
 //
 
-@implementation EvhListBuildingsByStatusCommandResponse
+@implementation EvhListNewsBySceneResponse
 
 +(id) withJsonString: (NSString*) jsonString
 {
     id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
     if(jsonObject != nil) {
-        EvhListBuildingsByStatusCommandResponse* obj = [EvhListBuildingsByStatusCommandResponse new];
+        EvhListNewsBySceneResponse* obj = [EvhListNewsBySceneResponse new];
         return [obj fromJson:jsonObject];
     }
     return nil;
@@ -24,7 +24,7 @@
 {
     self = [super init];
     if(self) {
-        _buildings = [NSMutableArray new];
+        _theNewsList = [NSMutableArray new];
         return self;
     }
     return nil;
@@ -34,14 +34,14 @@
 {
     if(self.nextPageAnchor)
         [jsonObject setObject: self.nextPageAnchor forKey: @"nextPageAnchor"];
-    if(self.buildings) {
+    if(self.theNewsList) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhCommunityBuildingDTO* item in self.buildings) {
+        for(EvhBriefNewsDTO* item in self.theNewsList) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
         }
-        [jsonObject setObject: jsonArray forKey: @"buildings"];
+        [jsonObject setObject: jsonArray forKey: @"newsList"];
     }
 }
 
@@ -53,12 +53,12 @@
             self.nextPageAnchor = nil;
 
         {
-            NSArray* jsonArray = [jsonObject objectForKey: @"buildings"];
+            NSArray* jsonArray = [jsonObject objectForKey: @"newsList"];
             for(id itemJson in jsonArray) {
-                EvhCommunityBuildingDTO* item = [EvhCommunityBuildingDTO new];
+                EvhBriefNewsDTO* item = [EvhBriefNewsDTO new];
                 
                 [item fromJson: itemJson];
-                [self.buildings addObject: item];
+                [self.theNewsList addObject: item];
             }
         }
         return self;

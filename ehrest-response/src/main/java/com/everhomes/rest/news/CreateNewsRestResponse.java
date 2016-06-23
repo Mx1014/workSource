@@ -4,20 +4,20 @@ package com.everhomes.rest.news;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.rest.news.BriefNewsDTO;
+import com.everhomes.rest.news.CreateNewsResponse;
 
 public class CreateNewsRestResponse extends RestResponseBase {
 
-    private BriefNewsDTO response;
+    private CreateNewsResponse response;
 
     public CreateNewsRestResponse () {
     }
 
-    public BriefNewsDTO getResponse() {
+    public CreateNewsResponse getResponse() {
         return response;
     }
 
-    public void setResponse(BriefNewsDTO response) {
+    public void setResponse(CreateNewsResponse response) {
         this.response = response;
     }
 }
