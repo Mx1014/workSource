@@ -3,7 +3,6 @@ package com.everhomes.news;
 import java.sql.Timestamp;
 import java.util.List;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -19,7 +18,6 @@ public class CommentTest extends CoreServerTestCase {
 	/**
 	 * 测试通过 
 	 */
-	@Ignore
 	@Test
 	public void testCreateComment(){
 		Comment comment = new Comment();
@@ -35,7 +33,6 @@ public class CommentTest extends CoreServerTestCase {
 	/**
 	 * 测试通过 
 	 */
-	@Ignore
 	@Test
 	public void testUpdateComment(){
 		Comment comment = commentProvider.findCommentById(EhNewsComment.class, 1L);
@@ -46,11 +43,10 @@ public class CommentTest extends CoreServerTestCase {
 	/**
 	 * 测试通过 
 	 */
-	@Ignore
 	@Test
 	public void testListComment(){
 		System.err.println("testListComment=============================");
-		List<Comment> list = commentProvider.listComment(EhNewsComment.class, 3L);
+		List<Comment> list = commentProvider.listCommentByOwnerId(EhNewsComment.class, 3L);
 		list.forEach(c->System.err.println(c));
 		System.err.println("testListComment=============================");
 	}

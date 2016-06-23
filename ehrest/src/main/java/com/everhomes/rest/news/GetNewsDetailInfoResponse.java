@@ -23,7 +23,7 @@ import com.everhomes.util.StringHelper;
  * <li>likeFlag: 点赞状态，0未点赞，1已点赞，参考{@link com.everhomes.rest.news.NewsLikeFlag}</li>
  * </ul>
  */
-public class NewsDTO {
+public class GetNewsDetailInfoResponse {
 	private String newsToken;
 	private String title;
 	private Timestamp releaseTime;

@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>newsToken: 新闻标识</li>
  * </ul>
  */
-public class NewsDetailInfoCommand {
+public class GetNewsDetailInfoCommand {
 	@NotNull
 	private String newsToken;
 

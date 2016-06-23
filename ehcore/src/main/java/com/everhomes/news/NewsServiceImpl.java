@@ -2,6 +2,11 @@
 package com.everhomes.news;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,38 +15,58 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerResource;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.news.AddNewsCommentBySceneCommand;
+import com.everhomes.rest.news.AddNewsCommentBySceneResponse;
 import com.everhomes.rest.news.AddNewsCommentCommand;
+import com.everhomes.rest.news.AddNewsCommentResponse;
+import com.everhomes.rest.news.AttachmentDescriptor;
 import com.everhomes.rest.news.BriefNewsDTO;
 import com.everhomes.rest.news.CommentStatus;
 import com.everhomes.rest.news.CreateNewsCommand;
+import com.everhomes.rest.news.CreateNewsResponse;
 import com.everhomes.rest.news.DeleteNewsCommand;
 import com.everhomes.rest.news.DeleteNewsCommentBySceneCommand;
 import com.everhomes.rest.news.DeleteNewsCommentCommand;
+import com.everhomes.rest.news.GetNewsContentCommand;
+import com.everhomes.rest.news.GetNewsContentResponse;
+import com.everhomes.rest.news.GetNewsDetailInfoCommand;
+import com.everhomes.rest.news.GetNewsDetailInfoResponse;
 import com.everhomes.rest.news.ImportNewsCommand;
 import com.everhomes.rest.news.ListNewsBySceneCommand;
+import com.everhomes.rest.news.ListNewsBySceneResponse;
 import com.everhomes.rest.news.ListNewsCommand;
 import com.everhomes.rest.news.ListNewsCommentCommand;
 import com.everhomes.rest.news.ListNewsCommentResponse;
+import com.everhomes.rest.news.ListNewsResponse;
+import com.everhomes.rest.news.NewsAttachmentDTO;
+import com.everhomes.rest.news.NewsCommentContentType;
 import com.everhomes.rest.news.NewsCommentDTO;
-import com.everhomes.rest.news.NewsContentDTO;
 import com.everhomes.rest.news.NewsContentType;
-import com.everhomes.rest.news.NewsDTO;
-import com.everhomes.rest.news.NewsDetailInfoCommand;
-import com.everhomes.rest.news.NewsListResponse;
+import com.everhomes.rest.news.NewsLikeFlag;
 import com.everhomes.rest.news.NewsOwnerType;
 import com.everhomes.rest.news.NewsServiceErrorCode;
 import com.everhomes.rest.news.NewsStatus;
 import com.everhomes.rest.news.NewsTopFlag;
 import com.everhomes.rest.news.SearchNewsCommand;
+import com.everhomes.rest.news.SearchNewsResponse;
 import com.everhomes.rest.news.SetNewsLikeFlagBySceneCommand;
 import com.everhomes.rest.news.SetNewsLikeFlagCommand;
 import com.everhomes.rest.news.SetNewsTopFlagCommand;
+import com.everhomes.server.schema.tables.pojos.EhNewsAttachments;
 import com.everhomes.server.schema.tables.pojos.EhNewsComment;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserLike;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -60,8 +85,23 @@ public class NewsServiceImpl implements NewsService {
 	@Autowired
 	private CommentProvider commentProvider;
 
+	@Autowired
+	private ConfigurationProvider configurationProvider;
+
+	@Autowired
+	private UserProvider userProvider;
+
+	@Autowired
+	private AttachmentProvider attachmentProvider;
+
+	@Autowired
+	private DbProvider dbProvider;
+
+	@Autowired
+	private ContentServerService contentServerService;
+
 	@Override
-	public BriefNewsDTO createNews(CreateNewsCommand cmd) {
+	public CreateNewsResponse createNews(CreateNewsCommand cmd) {
 		final Long userId = UserContext.current().getUser().getId();
 
 		// 检查参数等信息
@@ -72,7 +112,7 @@ public class NewsServiceImpl implements NewsService {
 		// 创建一条新闻记录，会返回新闻Id，稍后更新到帖子表中
 		newsProvider.createNews(news);
 
-		return ConvertHelper.convert(news, BriefNewsDTO.class);
+		return ConvertHelper.convert(news, CreateNewsResponse.class);
 	}
 
 	private News processNewsCommand(Long userId, Organization organization, CreateNewsCommand cmd) {
@@ -91,8 +131,7 @@ public class NewsServiceImpl implements NewsService {
 	}
 
 	private void checkNewsParameter(Long userId, CreateNewsCommand cmd) {
-		if (cmd.getOwnerId() == null || StringUtils.isEmpty(cmd.getOwnerType()) || StringUtils.isEmpty(cmd.getTitle())
-				|| StringUtils.isEmpty(cmd.getContent())) {
+		if (StringUtils.isEmpty(cmd.getTitle()) || StringUtils.isEmpty(cmd.getContent())) {
 			LOGGER.error("Invalid parameters, operatorId=" + userId + ", cmd=" + cmd);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid parameters");
@@ -100,6 +139,13 @@ public class NewsServiceImpl implements NewsService {
 	}
 
 	private Organization checkOwner(Long userId, Long ownerId, String ownerType) {
+		if (ownerId == null || StringUtils.isEmpty(ownerType)) {
+			LOGGER.error(
+					"Invalid parameters, operatorId=" + userId + ", ownerType=" + ownerType + ", ownerId=" + ownerId);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters");
+		}
+
 		NewsOwnerType newsOwnerType = NewsOwnerType.fromCode(ownerType);
 		if (newsOwnerType == null) {
 			LOGGER.error("Invalid owner type, operatorId=" + userId + ", ownerType=" + ownerType);
@@ -125,57 +171,220 @@ public class NewsServiceImpl implements NewsService {
 	}
 
 	@Override
-	public NewsListResponse listNews(ListNewsCommand cmd) {
+	public ListNewsResponse listNews(ListNewsCommand cmd) {
+		final Long userId = UserContext.current().getUser().getId();
+		Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType()).getNamespaceId();
+		return listNews(userId, namespaceId, cmd.getPageAnchor(), cmd.getPageSize());
+	}
+
+	private ListNewsResponse listNews(Long userId, Integer namespaceId, Long pageAnchor, Integer pageSize) {
+		pageSize = PaginationConfigHelper.getPageSize(configurationProvider, pageSize);
+		pageAnchor = pageAnchor < 1 ? 1 : pageAnchor;
+		Long from = (pageAnchor - 1) * pageSize;
+		List<BriefNewsDTO> list = newsProvider.listNews(namespaceId, from, pageSize).stream()
+				.map(news -> convertNewsToBriefNewsDTO(userId, news)).collect(Collectors.toList());
+
+		if (list.size() < pageSize) {
+			pageAnchor = null;
+		} else {
+			pageAnchor += 1;
+		}
+
+		ListNewsResponse response = new ListNewsResponse();
+		response.setNextPageAnchor(pageAnchor);
+		response.setNewsList(list);
+
+		return response;
+	}
+
+	private BriefNewsDTO convertNewsToBriefNewsDTO(Long userId, News news) {
+		BriefNewsDTO newsDTO = ConvertHelper.convert(news, BriefNewsDTO.class);
+		newsDTO.setNewsToken(WebTokenGenerator.getInstance().toWebToken(news));
+		newsDTO.setLikeFlag(getUserLikeFlag(userId, news.getId()).getCode());
+		return newsDTO;
+	}
+
+	private NewsLikeFlag getUserLikeFlag(Long userId, Long newsId) {
+		if (userId.longValue() == 0) {
+			return NewsLikeFlag.NONE;
+		}
+		UserLike userLike = findUserLike(userId, newsId);
+		if (userLike == null) {
+			return NewsLikeFlag.NONE;
+		}
+		if (userLike.getLikeType().byteValue() == NewsLikeFlag.LIKE.getCode()) {
+			return NewsLikeFlag.LIKE;
+		}
+		return NewsLikeFlag.NONE;
+	}
+
+	private UserLike findUserLike(Long userId, Long newsId) {
+		return userProvider.findUserLike(userId, EntityType.NEWS.getCode(), newsId);
+	}
+
+	@Override
+	public SearchNewsResponse searchNews(SearchNewsCommand cmd) {
 
 		return null;
 	}
 
 	@Override
-	public NewsListResponse searchNews(SearchNewsCommand cmd) {
-
-		return null;
+	public GetNewsDetailInfoResponse getNewsDetailInfo(GetNewsDetailInfoCommand cmd) {
+		Long userId = UserContext.current().getUser().getId();
+		Long newsId = checkNewsToken(userId, cmd.getNewsToken());
+		News news = findNewsById(userId, newsId);
+		news.setViewCount(news.getViewCount() + 1L);
+		newsProvider.updateNews(news);
+		return convertNewsToNewsDTO(userId, news);
 	}
 
-	@Override
-	public NewsDTO getNewsDetailInfo(NewsDetailInfoCommand cmd) {
-
-		return null;
+	private GetNewsDetailInfoResponse convertNewsToNewsDTO(Long userId, News news) {
+		GetNewsDetailInfoResponse newsDTO = ConvertHelper.convert(news, GetNewsDetailInfoResponse.class);
+		newsDTO.setNewsToken(WebTokenGenerator.getInstance().toWebToken(news));
+		newsDTO.setContent(null);
+		newsDTO.setLikeFlag(getUserLikeFlag(userId, news.getId()).getCode());// 未登录用户id为0
+		return newsDTO;
 	}
 
 	@Override
 	public void setNewsTopFlag(SetNewsTopFlagCommand cmd) {
+		Long userId = UserContext.current().getUser().getId();
+		Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType()).getNamespaceId();
+		Long newsId = checkNewsToken(userId, cmd.getNewsToken());
+		News news = findNewsById(userId, newsId);
+		if (NewsTopFlag.fromCode(news.getTopFlag()) == NewsTopFlag.NONE) {
+			news.setTopFlag(NewsTopFlag.TOP.getCode());
+			news.setTopIndex(newsProvider.getMaxTopIndex(namespaceId).longValue() + 1L);
+		} else {
+			news.setTopFlag(NewsTopFlag.NONE.getCode());
+			news.setTopIndex(0L);
+		}
+		newsProvider.updateNews(news);
+	}
 
+	private News findNewsById(Long userId, Long newsId) {
+		News news = newsProvider.findNewsById(newsId);
+		if (news == null) {
+			LOGGER.error("News not found, operatorId=" + userId + ", newsId=" + newsId);
+			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+					NewsServiceErrorCode.ERROR_NEWS_OWNER_ID_INVALID, "News not found");
+		}
+		return news;
+	}
+
+	private Long checkNewsToken(Long userId, String newsToken) {
+		Long newsId = WebTokenGenerator.getInstance().fromWebToken(newsToken, News.class).getId();
+		if (newsId == null) {
+			LOGGER.error("Invalid newsToken, operatorId=" + userId + ", newsToken=" + newsToken);
+			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+					NewsServiceErrorCode.ERROR_NEWS_NEWSTOKEN_INVALID, "Invalid newsToken");
+		}
+		return newsId;
 	}
 
 	@Override
-	public NewsContentDTO getNewsContent(NewsDetailInfoCommand cmd) {
-
-		return null;
+	public GetNewsContentResponse getNewsContent(GetNewsContentCommand cmd) {
+		String content = newsProvider
+				.findNewsById(checkNewsToken(UserContext.current().getUser().getId(), cmd.getNewsToken())).getContent();
+		return new GetNewsContentResponse(content);
 	}
 
 	@Override
 	public void deleteNews(DeleteNewsCommand cmd) {
-
+		Long userId = UserContext.current().getUser().getId();
+		checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
+		Long newsId = checkNewsToken(userId, cmd.getNewsToken());
+		News news = findNewsById(userId, newsId);
+		news.setDeleterUid(userId);
+		news.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		news.setStatus(NewsStatus.INACTIVE.getCode());
+		newsProvider.updateNews(news);
 	}
 
 	@Override
 	public void setNewsLikeFlag(SetNewsLikeFlagCommand cmd) {
-
+		Long userId = UserContext.current().getUser().getId();
+		checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
+		Long newsId = checkNewsToken(userId, cmd.getNewsToken());
+		News news = findNewsById(userId, newsId);
+		UserLike userLike = findUserLike(userId, newsId);
+		if (userLike == null) {
+			news.setLikeCount(news.getLikeCount() + 1L);
+			newsProvider.updateNews(news);
+			userLike = new UserLike();
+			userLike.setLikeType(NewsLikeFlag.LIKE.getCode());
+			userLike.setOwnerUid(userId);
+			userLike.setTargetId(newsId);
+			userLike.setTargetType(EntityType.NEWS.getCode());
+			userProvider.createUserLike(userLike);
+		} else if (userLike.getLikeType() == NewsLikeFlag.NONE.getCode()) {
+			news.setLikeCount(news.getLikeCount() + 1L);
+			newsProvider.updateNews(news);
+			userLike.setLikeType(NewsLikeFlag.LIKE.getCode());
+			userProvider.updateUserLike(userLike);
+		} else {
+			news.setLikeCount(news.getLikeCount() - 1L);
+			newsProvider.updateNews(news);
+			userLike.setLikeType(NewsLikeFlag.NONE.getCode());
+			userProvider.updateUserLike(userLike);
+		}
 	}
 
 	@Override
-	public NewsCommentDTO addNewsComment(AddNewsCommentCommand cmd) {
+	public AddNewsCommentResponse addNewsComment(final AddNewsCommentCommand cmd) {
 		final Long userId = UserContext.current().getUser().getId();
-		final Long newsId = WebTokenGenerator.getInstance().fromWebToken(cmd.getNewsToken(), News.class).getId();
-		
-		//检查参数
-		
-		
-		Comment comment = processComment(userId, newsId, cmd);
-		commentProvider.createComment(EhNewsComment.class, comment);
-		
-		
-		return null;
+		final Long newsId = checkNewsToken(userId, cmd.getNewsToken());
+		// 检查参数
+		checkCommentParameter(userId, newsId, cmd);
+
+		final List<Comment> comments = new ArrayList<>();
+		final List<Attachment> attachments = new ArrayList<>();
+		dbProvider.execute(s -> {
+			// 创建评论
+			Comment comment = processComment(userId, newsId, cmd);
+			comments.add(comment);
+			commentProvider.createComment(EhNewsComment.class, comment);
+
+			// 创建附件
+			if (cmd.getAttachments() != null && cmd.getAttachments().size() != 0) {
+				attachments.addAll(processAttachments(userId, comment.getId(), cmd.getAttachments()));
+				attachmentProvider.createAttachments(EhNewsAttachments.class, attachments);
+			}
+			return true;
+		});
+
+		AddNewsCommentResponse commentDTO = ConvertHelper.convert(comments.get(0), AddNewsCommentResponse.class);
+		commentDTO.setAttachments(attachments.stream().map(a -> ConvertHelper.convert(a, NewsAttachmentDTO.class))
+				.collect(Collectors.toList()));
+
+		return commentDTO;
+	}
+
+	private void checkCommentParameter(Long userId, Long newsId, AddNewsCommentCommand cmd) {
+		// 检查owner是否存在
+		checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
+		// 检查News是否存在
+		findNewsById(userId, newsId);
+		// 检查评论类型
+		checkCommentType(userId, cmd.getContentType());
+		// 检查附件类型
+		if (cmd.getAttachments() != null && cmd.getAttachments().size() != 0) {
+			cmd.getAttachments().forEach(a -> checkCommentType(userId, a.getContentType()));
+		}
+	}
+
+	private void checkCommentType(Long userId, String contentType) {
+		if (StringUtils.isEmpty(contentType)) {
+			LOGGER.error("Invalid parameters, operatorId=" + userId + ", contentType=" + contentType);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters");
+		}
+		NewsCommentContentType commentContentType = NewsCommentContentType.fromCode(contentType);
+		if (commentContentType == null) {
+			LOGGER.error("Invalid content type, operatorId=" + userId + ", contentType=" + contentType);
+			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+					NewsServiceErrorCode.ERROR_NEWS_COMMENT_CONTENT_TYPE_INVALID, "Invalid content type");
+		}
 	}
 
 	private Comment processComment(Long userId, Long newsId, AddNewsCommentCommand cmd) {
@@ -185,23 +394,144 @@ public class NewsServiceImpl implements NewsService {
 		comment.setContent(cmd.getContent());
 		comment.setStatus(CommentStatus.ACTIVE.getCode());
 		comment.setCreatorUid(userId);
-		comment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		return comment;
+	}
+
+	private List<Attachment> processAttachments(Long userId, Long commentId, List<AttachmentDescriptor> attachments) {
+		if (attachments == null || attachments.size() == 0) {
+			return null;
+		}
+		return attachments.stream().map(attachmentDescriptor -> {
+			Attachment attachment = ConvertHelper.convert(attachmentDescriptor, Attachment.class);
+			attachment.setOwnerId(commentId);
+			attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			attachment.setCreatorUid(userId);
+			return attachment;
+		}).collect(Collectors.toList());
 	}
 
 	@Override
 	public ListNewsCommentResponse listNewsComment(ListNewsCommentCommand cmd) {
+		Long userId = UserContext.current().getUser().getId();
+		Long newsId = checkNewsToken(userId, cmd.getNewsToken());
+		Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		Long pageAnchor = cmd.getPageAnchor() < 1 ? 1 : cmd.getPageAnchor();
 
-		return null;
+		List<Comment> comments = commentProvider.listCommentByOwnerIdWithPage(EhNewsComment.class, newsId, pageAnchor,
+				pageSize);
+		ListNewsCommentResponse response = new ListNewsCommentResponse();
+		if (comments != null && comments.size() > 0) {
+			List<NewsCommentDTO> list = new ArrayList<>();
+			populateCommentAttachment(userId, comments, list);
+			populateCommentUser(userId, list);
+
+			response.setNextPageAnchor(list.get(list.size() - 1).getId());
+			response.setCommentList(list);
+		}
+
+		return response;
+	}
+
+	private void populateCommentUser(Long userId, List<NewsCommentDTO> list) {
+		list.forEach(c -> {
+			User creator = userProvider.findUserById(c.getCreatorUid());
+			if (creator != null) {
+				String creatorNickName = creator.getNickName();
+				String creatorAvatar = creator.getAvatar();
+				c.setCreatorNickName(creatorNickName);
+				c.setCreatorAvatar(creatorAvatar);
+				if (creatorAvatar != null && creatorAvatar.length() > 0) {
+					String avatarUrl = getResourceUrlByUir(userId, creatorAvatar, EntityType.USER.getCode(),
+							c.getCreatorUid());
+					c.setCreatorAvatarUrl(avatarUrl);
+				}
+			}
+		});
+	}
+
+	private void populateCommentAttachment(Long userId, List<Comment> comments, List<NewsCommentDTO> list) {
+		Map<Long, NewsCommentDTO> commentMap = new HashMap<>();
+		List<Long> commentIds = new ArrayList<>();
+		list.addAll(comments.stream().map(c -> {
+			NewsCommentDTO commentDTO = ConvertHelper.convert(c, NewsCommentDTO.class);
+			commentMap.put(c.getId(), commentDTO);
+			commentIds.add(c.getId());
+			return commentDTO;
+		}).collect(Collectors.toList()));
+
+		attachmentProvider.listAttachmentByOwnerIds(EhNewsAttachments.class, commentIds).forEach(a -> {
+			NewsAttachmentDTO attachmentDTO = convertAttachmentToNewsAttachmentDTO(userId, a);
+			commentMap.get(a.getOwnerId()).getAttachments().add(attachmentDTO);
+		});
+	}
+
+	private NewsAttachmentDTO convertAttachmentToNewsAttachmentDTO(Long userId, Attachment a) {
+		NewsAttachmentDTO attachment = ConvertHelper.convert(a, NewsAttachmentDTO.class);
+
+		String contentUri = attachment.getContentUri();
+		if (contentUri != null && contentUri.length() > 0) {
+			try {
+				String url = contentServerService.parserUri(contentUri, EntityType.NEWS.getCode(),
+						attachment.getOwnerId());
+				attachment.setContentUrl(url);
+
+				ContentServerResource resource = contentServerService.findResourceByUri(contentUri);
+				if (resource != null) {
+					attachment.setSize(resource.getResourceSize());
+					attachment.setMetadata(resource.getMetadata());
+				}
+			} catch (Exception e) {
+				LOGGER.error("Failed to parse attachment uri, userId=" + userId + ", commentId="
+						+ attachment.getOwnerId() + ", attachmentId=" + attachment.getId(), e);
+			}
+		} else {
+			if (LOGGER.isWarnEnabled()) {
+				LOGGER.warn("The content uri is empty, userId=" + userId + ", attchmentId=" + attachment.getId());
+			}
+		}
+		return attachment;
+	}
+
+	private String getResourceUrlByUir(long userId, String uri, String ownerType, Long ownerId) {
+		String url = null;
+		if (uri != null && uri.length() > 0) {
+			try {
+				url = contentServerService.parserUri(uri, ownerType, ownerId);
+			} catch (Exception e) {
+				LOGGER.error("Failed to parse uri, userId=" + userId + ", uri=" + uri + ", ownerType=" + ownerType
+						+ ", ownerId=" + ownerId, e);
+			}
+		}
+
+		return url;
 	}
 
 	@Override
 	public void deleteNewsComment(DeleteNewsCommentCommand cmd) {
-
+		Long userId = UserContext.current().getUser().getId();
+		checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
+		Long newsId = checkNewsToken(userId, cmd.getNewsToken());
+		Comment comment = commentProvider.findCommentById(EhNewsComment.class, cmd.getId());
+		if (comment.getOwnerId().longValue() != newsId.longValue()) {
+			LOGGER.error("newsId and commentId not match, operatorId=" + userId + ", newsId=" + newsId + ", commentId"
+					+ cmd.getId());
+			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+					NewsServiceErrorCode.ERROR_NEWS_NEWSID_COMMENTID_NOT_MATCH, "newsId and commentId not match");
+		}
+		if (comment.getCreatorUid().longValue() != userId.longValue()) {
+			LOGGER.error("userId and commentId not match, operatorId=" + userId + ", userId=" + userId + ", commentId"
+					+ cmd.getId());
+			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+					NewsServiceErrorCode.ERROR_NEWS_NEWSID_COMMENTID_NOT_MATCH, "userId and commentId not match");
+		}
+		comment.setDeleterUid(userId);
+		comment.setStatus(CommentStatus.INACTIVE.getCode());
+		comment.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		commentProvider.updateComment(EhNewsComment.class, comment);
 	}
 
 	@Override
-	public NewsListResponse listNewsByScene(ListNewsBySceneCommand cmd) {
+	public ListNewsBySceneResponse listNewsByScene(ListNewsBySceneCommand cmd) {
 
 		return null;
 	}
@@ -212,7 +542,7 @@ public class NewsServiceImpl implements NewsService {
 	}
 
 	@Override
-	public NewsCommentDTO addNewsCommentByScene(AddNewsCommentBySceneCommand cmd) {
+	public AddNewsCommentBySceneResponse addNewsCommentByScene(AddNewsCommentBySceneCommand cmd) {
 
 		return null;
 	}

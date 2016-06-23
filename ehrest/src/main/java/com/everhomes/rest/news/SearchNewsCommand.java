@@ -23,7 +23,7 @@ public class SearchNewsCommand {
 	private Long ownerId;
 	private String keyword;
 	private Long pageAnchor;
-	private Long pageSize;
+	private Integer pageSize;
 
 	public String getOwnerType() {
 		return ownerType;
@@ -49,11 +49,11 @@ public class SearchNewsCommand {
 		this.pageAnchor = pageAnchor;
 	}
 
-	public Long getPageSize() {
+	public Integer getPageSize() {
 		return pageSize;
 	}
 
-	public void setPageSize(Long pageSize) {
+	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
 	}
 

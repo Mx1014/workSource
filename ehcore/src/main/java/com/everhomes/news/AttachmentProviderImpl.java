@@ -3,6 +3,7 @@ package com.everhomes.news;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -21,64 +22,78 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.jooq.JooqDiscover;
 import com.everhomes.jooq.JooqMetaInfo;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.news.CommentStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 
 @Component
-public class CommentProviderImpl implements CommentProvider {
-	private static final Logger LOGGER = LoggerFactory.getLogger(CommentProviderImpl.class);
-
-	@Autowired
-	private SequenceProvider sequenceProvider;
+public class AttachmentProviderImpl implements AttachmentProvider {
+	private static final Logger LOGGER = LoggerFactory.getLogger(AttachmentProviderImpl.class);
 
 	@Autowired
 	private DbProvider dbProvider;
 
+	@Autowired
+	private SequenceProvider sequenceProvider;
+
 	@Override
-	@SuppressWarnings({ "unchecked" })
-	public void createComment(Class<?> pojoClass, Comment comment) {
+	@SuppressWarnings("unchecked")
+	public void createAttachment(Class<?> pojoClass, Attachment attachment) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(pojoClass));
-		comment.setId(id);
-		comment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));  //为了使id与create_time同序，最好放一起set
-		
-		getReadWriteDao(pojoClass).insert(ConvertHelper.convert(comment, pojoClass));
-		
+		attachment.setId(id);
+		attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+		getReadWriteDao(pojoClass).insert(ConvertHelper.convert(attachment, pojoClass));
+
 		DaoHelper.publishDaoAction(DaoAction.CREATE, pojoClass, null);
 	}
 
 	@Override
-	@SuppressWarnings({ "unchecked" })
-	public void updateComment(Class<?> pojoClass, Comment comment) {
-		assert (comment.getId() != null);
-		
-		getReadWriteDao(pojoClass).update(ConvertHelper.convert(comment, pojoClass));
-		
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, pojoClass, comment.getId());
+	@SuppressWarnings("unchecked")
+	public void createAttachments(Class<?> pojoClass, List<Attachment> attachments) {
+		List<Object> list = attachments.stream().map(attachment -> {
+			Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(pojoClass));
+			attachment.setId(id);
+			attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			return ConvertHelper.convert(attachment, pojoClass);
+		}).collect(Collectors.toList());
+
+		getReadWriteDao(pojoClass).insert(list);
+
+		DaoHelper.publishDaoAction(DaoAction.CREATE, pojoClass, null);
 	}
 
 	@Override
-	@SuppressWarnings({ "unchecked" })
-	public void deleteComment(Class<?> pojoClass, Long id) {
+	@SuppressWarnings("unchecked")
+	public void updateAttachment(Class<?> pojoClass, Attachment attachment) {
+		assert (attachment.getId() != null);
+
+		getReadWriteDao(pojoClass).update(attachment);
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, pojoClass, attachment.getId());
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public void deleteAttachment(Class<?> pojoClass, Long id) {
 		assert (id != null);
-		
+
 		getReadWriteDao(pojoClass).deleteById(id);
-		
+
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, pojoClass, id);
 	}
 
 	@Override
-	@SuppressWarnings({ "unchecked" })
-	public Comment findCommentById(Class<?> pojoClass, Long id) {
+	@SuppressWarnings("unchecked")
+	public Attachment findAttachmentById(Class<?> pojoClass, Long id) {
 		assert (id != null);
-		
-		return ConvertHelper.convert(getReadOnlyDao(pojoClass).findById(id), Comment.class);
+
+		return ConvertHelper.convert(getReadOnlyDao(pojoClass).findById(id), Attachment.class);
 	}
 
 	@Override
-	@SuppressWarnings({ "unchecked" })
-	public List<Comment> listCommentByOwnerId(Class<?> pojoClass, Long ownerId) {
+	@SuppressWarnings("unchecked")
+	public List<Attachment> listAttachmentByOwnerId(Class<?> pojoClass, Long ownerId) {
 		assert (ownerId != null);
 
 		DSLContext context = getReadOnlyContext();
@@ -90,32 +105,26 @@ public class CommentProviderImpl implements CommentProvider {
 		assert (blankRecord != null);
 		// 下面where的写法与 where("owner_id = ?", ownerId)是一样的
 		return context.select().from(meta.getTableName())
-				.where(((Field<Long>) blankRecord.field("owner_id")).eq(ownerId)).fetch().map(new MyCommentRecordMapper());
+				.where(((Field<Long>) blankRecord.field("owner_id")).eq(ownerId)).fetch()
+				.map(new MyAttachmentRecordMapper());
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<Comment> listCommentByOwnerIdWithPage(Class<?> pojoClass, Long ownerId, Long pageAnchor, Integer pageSize){
-		assert (ownerId != null);
-
-		DSLContext context = getReadOnlyContext();
+	public List<Attachment> listAttachmentByOwnerIds(Class<?> pojoClass, List<Long> ownerIds) {
+		assert (ownerIds != null && ownerIds.size() > 0);
 
 		JooqMetaInfo meta = JooqDiscover.jooqMetaFromPojo(pojoClass);
 		assert (meta != null);
 
 		Record blankRecord = meta.getBlankRecordObject();
 		assert (blankRecord != null);
-		// 下面where的写法与 where("owner_id = ?", ownerId)是一样的
-		return context.select().from(meta.getTableName())
-				.where(((Field<Long>) blankRecord.field("owner_id")).eq(ownerId))
-				.and(((Field<Byte>) blankRecord.field("status")).eq(CommentStatus.ACTIVE.getCode()))
-				.and(((Field<Long>)blankRecord.field("id")).lt(pageAnchor))
-				.orderBy(((Field<Timestamp>)blankRecord.field("create_time")).desc())
-				.limit(pageSize.intValue())
-				.fetch().map(new MyCommentRecordMapper());
+
+		return (List<Attachment>) getReadOnlyDao(pojoClass)
+				.fetch((Field<Long>) blankRecord.field("owner_id"), ownerIds).stream()
+				.map(p -> ConvertHelper.convert(p, Attachment.class)).collect(Collectors.toList());
 	}
-	
-	
+
 	@SuppressWarnings("rawtypes")
 	private DAOImpl getDao(Class<?> pojoClass, DSLContext context) {
 		try {
@@ -153,23 +162,20 @@ public class CommentProviderImpl implements CommentProvider {
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
 	}
-	
-	private class MyCommentRecordMapper implements RecordMapper<Record, Comment>{
+
+	private class MyAttachmentRecordMapper implements RecordMapper<Record, Attachment> {
 
 		@Override
-		public Comment map(Record r) {
-			Comment comment = new Comment();
-			comment.setId(r.getValue("id", Long.class));
-			comment.setOwnerId(r.getValue("owner_id", Long.class));
-			comment.setContentType(r.getValue("content_type", String.class));
-			comment.setContent(r.getValue("content", String.class));
-			comment.setStatus(r.getValue("status", Byte.class));
-			comment.setCreatorUid(r.getValue("creator_uid", Long.class));
-			comment.setDeleterUid(r.getValue("deleter_uid", Long.class));
-			comment.setCreateTime(r.getValue("create_time", Timestamp.class));
-			comment.setDeleteTime(r.getValue("delete_time", Timestamp.class));
-			return comment;
+		public Attachment map(Record r) {
+			Attachment attachment = new Attachment();
+			attachment.setId(r.getValue("id", Long.class));
+			attachment.setOwnerId(r.getValue("owner_id", Long.class));
+			attachment.setContentType(r.getValue("content_type", String.class));
+			attachment.setContentUri(r.getValue("content_uri", String.class));
+			attachment.setCreatorUid(r.getValue("creator_uid", Long.class));
+			attachment.setCreateTime(r.getValue("create_time", Timestamp.class));
+			return attachment;
 		}
-		
+
 	}
 }

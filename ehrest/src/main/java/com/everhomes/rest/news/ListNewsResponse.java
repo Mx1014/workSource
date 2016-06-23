@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  * <li>newsList: 新闻列表，参考{@link com.everhomes.rest.news.BriefNewsDTO}</li>
  * </ul>
  */
-public class NewsListResponse {
+public class ListNewsResponse {
 	private Long nextPageAnchor;
 	@ItemType(BriefNewsDTO.class)
 	private List<BriefNewsDTO> newsList;

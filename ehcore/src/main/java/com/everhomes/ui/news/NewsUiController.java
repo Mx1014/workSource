@@ -11,10 +11,10 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.news.NewsService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.news.AddNewsCommentBySceneCommand;
+import com.everhomes.rest.news.AddNewsCommentBySceneResponse;
 import com.everhomes.rest.news.DeleteNewsCommentBySceneCommand;
 import com.everhomes.rest.news.ListNewsBySceneCommand;
-import com.everhomes.rest.news.NewsCommentDTO;
-import com.everhomes.rest.news.NewsListResponse;
+import com.everhomes.rest.news.ListNewsBySceneResponse;
 import com.everhomes.rest.news.SetNewsLikeFlagBySceneCommand;
 
 /**
@@ -37,9 +37,9 @@ public class NewsUiController {
 	 * </p>
 	 */
 	@RequestMapping("listNewsByScene")
-	@RestReturn(NewsListResponse.class)
+	@RestReturn(ListNewsBySceneResponse.class)
 	public RestResponse listNewsByScene(ListNewsBySceneCommand cmd) {
-		NewsListResponse newsListResponse = newsService.listNewsByScene(cmd);
+		ListNewsBySceneResponse newsListResponse = newsService.listNewsByScene(cmd);
 
 		RestResponse response = new RestResponse(newsListResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -68,9 +68,9 @@ public class NewsUiController {
 	 * <p>APP添加一条评论</p>
 	 */
 	@RequestMapping("addNewsCommentByScene")
-	@RestReturn(NewsCommentDTO.class)
+	@RestReturn(AddNewsCommentBySceneResponse.class)
 	public RestResponse addNewsCommentByScene(AddNewsCommentBySceneCommand cmd){
-		NewsCommentDTO newsCommentDTO = newsService.addNewsCommentByScene(cmd);
+		AddNewsCommentBySceneResponse newsCommentDTO = newsService.addNewsCommentByScene(cmd);
 
 		RestResponse response = new RestResponse(newsCommentDTO);
 		response.setErrorCode(ErrorCodes.SUCCESS);

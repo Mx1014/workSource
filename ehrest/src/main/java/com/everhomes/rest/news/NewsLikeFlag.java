@@ -20,7 +20,7 @@ public enum NewsLikeFlag {
 		return code;
 	}
 
-	public NewsLikeFlag fromCode(Byte code) {
+	public static NewsLikeFlag fromCode(Byte code) {
 		if (code != null) {
 			for (NewsLikeFlag flag : NewsLikeFlag.values()) {
 				if (flag.getCode() == code.byteValue()) {

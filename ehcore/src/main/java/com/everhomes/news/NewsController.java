@@ -13,22 +13,25 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.news.AddNewsCommentCommand;
-import com.everhomes.rest.news.BriefNewsDTO;
+import com.everhomes.rest.news.AddNewsCommentResponse;
 import com.everhomes.rest.news.CreateNewsCommand;
+import com.everhomes.rest.news.CreateNewsResponse;
 import com.everhomes.rest.news.DeleteNewsCommand;
 import com.everhomes.rest.news.DeleteNewsCommentCommand;
+import com.everhomes.rest.news.GetNewsContentCommand;
+import com.everhomes.rest.news.GetNewsContentResponse;
+import com.everhomes.rest.news.GetNewsDetailInfoCommand;
+import com.everhomes.rest.news.GetNewsDetailInfoResponse;
 import com.everhomes.rest.news.ImportNewsCommand;
 import com.everhomes.rest.news.ListNewsCommand;
 import com.everhomes.rest.news.ListNewsCommentCommand;
 import com.everhomes.rest.news.ListNewsCommentResponse;
-import com.everhomes.rest.news.NewsCommentDTO;
-import com.everhomes.rest.news.NewsContentDTO;
-import com.everhomes.rest.news.NewsDTO;
-import com.everhomes.rest.news.NewsDetailInfoCommand;
-import com.everhomes.rest.news.NewsListResponse;
+import com.everhomes.rest.news.ListNewsResponse;
 import com.everhomes.rest.news.SearchNewsCommand;
+import com.everhomes.rest.news.SearchNewsResponse;
 import com.everhomes.rest.news.SetNewsLikeFlagCommand;
 import com.everhomes.rest.news.SetNewsTopFlagCommand;
+import com.everhomes.util.RequireAuthentication;
 
 @RestDoc(value = "News Controller", site = "core")
 @RestController
@@ -45,11 +48,11 @@ public class NewsController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("createNews")
-	@RestReturn(BriefNewsDTO.class)
+	@RestReturn(CreateNewsResponse.class)
 	public RestResponse createNews(CreateNewsCommand cmd) {
-		BriefNewsDTO briefNewsDTO = newsService.createNews(cmd);
+		CreateNewsResponse createNewsResponse = newsService.createNews(cmd);
 
-		RestResponse response = new RestResponse(briefNewsDTO);
+		RestResponse response = new RestResponse(createNewsResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -79,11 +82,11 @@ public class NewsController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("listNews")
-	@RestReturn(NewsListResponse.class)
+	@RestReturn(ListNewsResponse.class)
 	public RestResponse listNews(ListNewsCommand cmd) {
-		NewsListResponse newsListResponse = newsService.listNews(cmd);
+		ListNewsResponse listNewsResponse = newsService.listNews(cmd);
 
-		RestResponse response = new RestResponse(newsListResponse);
+		RestResponse response = new RestResponse(listNewsResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -96,11 +99,11 @@ public class NewsController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("searchNews")
-	@RestReturn(NewsListResponse.class)
+	@RestReturn(SearchNewsResponse.class)
 	public RestResponse searchNews(SearchNewsCommand cmd) {
-		NewsListResponse newsListResponse = newsService.searchNews(cmd);
+		SearchNewsResponse searchNewsResponse = newsService.searchNews(cmd);
 
-		RestResponse response = new RestResponse(newsListResponse);
+		RestResponse response = new RestResponse(searchNewsResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -113,11 +116,12 @@ public class NewsController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("getNewsDetailInfo")
-	@RestReturn(NewsDTO.class)
-	public RestResponse getNewsDetailInfo(NewsDetailInfoCommand cmd) {
-		NewsDTO newsDTO = newsService.getNewsDetailInfo(cmd);
+	@RestReturn(GetNewsDetailInfoResponse.class)
+	@RequireAuthentication(false)
+	public RestResponse getNewsDetailInfo(GetNewsDetailInfoCommand cmd) {
+		GetNewsDetailInfoResponse getNewsDetailInfoResponse = newsService.getNewsDetailInfo(cmd);
 
-		RestResponse response = new RestResponse(newsDTO);
+		RestResponse response = new RestResponse(getNewsDetailInfoResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -147,9 +151,10 @@ public class NewsController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("getNewsContent")
-	@RestReturn(NewsContentDTO.class)
-	public RestResponse getNewsContent(NewsDetailInfoCommand cmd) {
-		NewsContentDTO newsContentDTO = newsService.getNewsContent(cmd);
+	@RestReturn(GetNewsContentResponse.class)
+	@RequireAuthentication(false)
+	public RestResponse getNewsContent(GetNewsContentCommand cmd) {
+		GetNewsContentResponse newsContentDTO = newsService.getNewsContent(cmd);
 
 		RestResponse response = new RestResponse(newsContentDTO);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -198,9 +203,9 @@ public class NewsController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("addNewsComment")
-	@RestReturn(NewsCommentDTO.class)
+	@RestReturn(AddNewsCommentResponse.class)
 	public RestResponse addNewsComment(AddNewsCommentCommand cmd) {
-		NewsCommentDTO newsCommentDTO = newsService.addNewsComment(cmd);
+		AddNewsCommentResponse newsCommentDTO = newsService.addNewsComment(cmd);
 
 		RestResponse response = new RestResponse(newsCommentDTO);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -216,6 +221,7 @@ public class NewsController extends ControllerBase {
 	 */
 	@RequestMapping("listNewsComment")
 	@RestReturn(ListNewsCommentResponse.class)
+	@RequireAuthentication(false)
 	public RestResponse listNewsComment(ListNewsCommentCommand cmd) {
 		ListNewsCommentResponse listNewsCommentResponse = newsService.listNewsComment(cmd);
 

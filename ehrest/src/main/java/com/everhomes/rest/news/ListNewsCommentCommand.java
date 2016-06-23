@@ -15,7 +15,7 @@ import com.everhomes.util.StringHelper;
 public class ListNewsCommentCommand {
 	private String newsToken;
 	private Long pageAnchor;
-	private Long pageSize;
+	private Integer pageSize;
 
 	public String getNewsToken() {
 		return newsToken;
@@ -33,11 +33,11 @@ public class ListNewsCommentCommand {
 		this.pageAnchor = pageAnchor;
 	}
 
-	public Long getPageSize() {
+	public Integer getPageSize() {
 		return pageSize;
 	}
 
-	public void setPageSize(Long pageSize) {
+	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
 	}
 

@@ -10,9 +10,17 @@ import com.everhomes.util.StringHelper;
  * <li>content: 正文</li>
  * </ul>
  */
-public class NewsContentDTO {
+public class GetNewsContentResponse {
 	private String content;
 
+	
+	public GetNewsContentResponse() {
+	}
+
+	public GetNewsContentResponse(String content){
+		this.content = content;
+	}
+	
 	public String getContent() {
 		return content;
 	}
