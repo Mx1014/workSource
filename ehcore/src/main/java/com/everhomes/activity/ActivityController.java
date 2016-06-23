@@ -8,6 +8,7 @@ import javax.validation.Valid;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -253,6 +254,9 @@ public class ActivityController extends ControllerBase {
     @RequestMapping("getActivityShareDetail")
     @RestReturn(value=ActivityShareDetailResponse.class)
     public RestResponse getActivityShareDetail(@Valid GetActivityShareDetailCommand cmd) {
+    	if(cmd == null || StringUtils.isEmpty(cmd.getPostToken())) {
+    		return new RestResponse();
+    	}
     	WebTokenGenerator webToken = WebTokenGenerator.getInstance();
  	    ActivityTokenDTO postToken = webToken.fromWebToken(cmd.getPostToken(), ActivityTokenDTO.class);
         ActivityShareDetailResponse activity = activityService.getActivityShareDetail(postToken);
