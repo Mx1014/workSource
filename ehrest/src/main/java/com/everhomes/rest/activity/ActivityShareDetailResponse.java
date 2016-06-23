@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  *<ul>
- * <li>activity: 活动</li>
+ * <li>activity: 活动 参见{@link com.everhomes.rest.activity.ActivityDTO}</li>
  * <li>childCount: 孩子数目，如帖子下的评论数目</li>
  * <li>viewCount: 浏览的数目</li>
  * <li>attachments: 帖子或评论的附件信息，参见{@link com.everhomes.rest.forum.AttachmentDTO}</li>
