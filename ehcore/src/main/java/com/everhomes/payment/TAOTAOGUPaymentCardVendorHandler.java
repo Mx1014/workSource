@@ -512,21 +512,19 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		json.put("request_time", timeStr);
 		
 		try {
-			boolean getTokenFlag = true;
-			while(getTokenFlag){
 				Map codeMap = TAOTAOGUOrderHttpUtil.post("/iips2/order/tokenrequest",token, aesKey, json);
 				if(codeMap != null){
 					String returnCode = (String) codeMap.get("return_code");
 					if("00".equals(returnCode)){
-						getTokenFlag = false;
 						result = (String) codeMap.get("token");
+					}else{
+						throwGetCardCodeException(null);
 					}
+				}else{
+					throwGetCardCodeException(null);
 				}
-			}
 		} catch (Exception e) {
-			LOGGER.error("the cardPaidQrCode request of taotaogu is failed {}.",e);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"the cardPaidQrCode request of taotaogu is failed.");
+			throwGetCardCodeException(e);
 		}
 		return result;
 	}
@@ -536,26 +534,25 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		String aesKey = cachePool.getStringValue(VendorConstant.TAOTAOGU_AESKEY);
 		String token = cachePool.getStringValue(VendorConstant.TAOTAOGU_TOKEN);
 		if(aesKey == null || token == null){
-			boolean flag = true;
 			//丢到缓存中
-			while(flag){
 				Map map = null;
 				try {
 					map = TAOTAOGUOrderHttpUtil.orderLogin(vendorDataMap);
 				} catch (Exception e) {
-					LOGGER.error("the orderLogin request of taotaogu is failed {}.",e);
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-							"the orderLogin request of taotaogu is failed.");
+					throwGetTokenException(e);
+				}
+				if(map == null){
+					throwGetTokenException(null);
 				}
 				if(map != null){
-					flag = false;
 					cachePool.putCacheItem(VendorConstant.TAOTAOGU_AESKEY, (String) map.get("aes_key"), 24*60*60*1000);
 					cachePool.putCacheItem(VendorConstant.TAOTAOGU_TOKEN, (String) map.get("token"), 24*60*60*1000);
 				}
-			}
 		}
 	}
 
+	
+	
 	@Override
 	public void rechargeCard(PaymentCardRechargeOrder order, PaymentCard card) {
 		PaymentCardIssuer issuer = paymentCardProvider.findPaymentCardIssuerById(card.getIssuerId());
@@ -645,5 +642,19 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 			Map map1 = gson.fromJson(json2, Map.class);
 			map.putAll(map1);
 			return gson.toJson(map);
-	    }
+	 }
+	private void throwGetTokenException(Exception e){
+			LOGGER.error("the orderLogin request of taotaogu is failed {}.",e);
+			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
+					localeStringService.getLocalizedString(String.valueOf(PaymentCardErrorCode.SCOPE), 
+							String.valueOf(PaymentCardErrorCode.ERROR_SERVER_REQUEST),
+							UserContext.current().getUser().getLocale(),"the orderLogin request of taotaogu is failed."));
+	}
+	private void throwGetCardCodeException(Exception e){
+		LOGGER.error("the cardPaidQrCode request of taotaogu is failed {}.",e);
+		throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_GET_CARD_CODE,
+				localeStringService.getLocalizedString(String.valueOf(PaymentCardErrorCode.SCOPE), 
+						String.valueOf(PaymentCardErrorCode.ERROR_GET_CARD_CODE),
+						UserContext.current().getUser().getLocale(),"the orderLogin request of taotaogu is failed."));
+	}
 }
