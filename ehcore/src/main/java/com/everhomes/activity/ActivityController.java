@@ -39,6 +39,7 @@ import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
 import com.everhomes.rest.activity.ListNearbyActivitiesResponse;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.WebTokenGenerator;
 
@@ -248,6 +249,7 @@ public class ActivityController extends ControllerBase {
     /**
      * 查询分享出去的活动信息
      */
+    @RequireAuthentication(false)
     @RequestMapping("getActivityShareDetail")
     @RestReturn(value=ActivityShareDetailResponse.class)
     public RestResponse getActivityShareDetail(@Valid GetActivityShareDetailCommand cmd) {
