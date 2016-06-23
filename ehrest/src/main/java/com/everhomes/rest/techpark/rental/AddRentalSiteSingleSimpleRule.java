@@ -6,7 +6,7 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.techpark.rental.admin.AttachmentDTO;
+import com.everhomes.rest.techpark.rental.admin.AdminAttachmentDTO;
 import com.everhomes.rest.techpark.rental.admin.TimeIntervalDTO;
 import com.everhomes.util.StringHelper;
 /**
@@ -51,8 +51,8 @@ public class AddRentalSiteSingleSimpleRule {
 	private Byte multiUnit;
 	private Byte needPay;
 	private Byte multiTimeInterval;
-	@ItemType(AttachmentDTO.class)
-	private List<AttachmentDTO> attachments;
+	@ItemType(AdminAttachmentDTO.class)
+	private List<AdminAttachmentDTO> attachments;
 	private Byte rentalType;
 	private Long rentalEndTime;
 	private Long rentalStartTime;
@@ -170,12 +170,12 @@ public class AddRentalSiteSingleSimpleRule {
 	}
 
 
-	public List<AttachmentDTO> getAttachments() {
+	public List<AdminAttachmentDTO> getAttachments() {
 		return attachments;
 	}
 
 
-	public void setAttachments(List<AttachmentDTO> attachments) {
+	public void setAttachments(List<AdminAttachmentDTO> attachments) {
 		this.attachments = attachments;
 	}
 

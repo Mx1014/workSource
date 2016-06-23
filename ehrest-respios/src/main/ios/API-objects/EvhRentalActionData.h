@@ -1,19 +1,19 @@
 //
-// EvhAttachmentDTO.h
+// EvhRentalActionData.h
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhAttachmentDTO
+// EvhRentalActionData
 //
-@interface EvhAttachmentDTO
+@interface EvhRentalActionData
     : NSObject<EvhJsonSerializable>
 
 
-@property(nonatomic, copy) NSNumber* attachmentType;
+@property(nonatomic, copy) NSNumber* launchPadItemId;
 
-@property(nonatomic, copy) NSNumber* mustOptions;
+@property(nonatomic, copy) NSNumber* pageType;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

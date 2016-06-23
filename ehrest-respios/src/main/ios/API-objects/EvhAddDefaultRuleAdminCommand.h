@@ -3,7 +3,7 @@
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
-#import "EvhAdminAttachmentDTO.h"
+#import "EvhAttachmentDTO.h"
 #import "EvhTimeIntervalDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -31,7 +31,7 @@
 
 @property(nonatomic, copy) NSNumber* multiTimeInterval;
 
-// item type EvhAdminAttachmentDTO*
+// item type EvhAttachmentDTO*
 @property(nonatomic, strong) NSMutableArray* attachments;
 
 @property(nonatomic, copy) NSNumber* rentalType;

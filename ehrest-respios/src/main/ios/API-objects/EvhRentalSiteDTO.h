@@ -6,7 +6,7 @@
 #import "EvhSiteItemDTO.h"
 #import "EvhRentalSitePicDTO.h"
 #import "EvhSiteOwnerDTO.h"
-#import "EvhAdminAttachmentDTO.h"
+#import "EvhAttachmentDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhRentalSiteDTO
@@ -82,7 +82,7 @@
 // item type EvhSiteOwnerDTO*
 @property(nonatomic, strong) NSMutableArray* owners;
 
-// item type EvhAdminAttachmentDTO*
+// item type EvhAttachmentDTO*
 @property(nonatomic, strong) NSMutableArray* attachments;
 
 -(id) init;

@@ -5,7 +5,7 @@
 #import "JsonSerializable.h"
 #import "EvhRentalSiteDayRulesDTO.h"
 #import "EvhRentalSitePicDTO.h"
-#import "EvhAdminAttachmentDTO.h"
+#import "EvhAttachmentDTO.h"
 #import "EvhSiteItemDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -61,7 +61,7 @@
 // item type EvhRentalSitePicDTO*
 @property(nonatomic, strong) NSMutableArray* sitePics;
 
-// item type EvhAdminAttachmentDTO*
+// item type EvhAttachmentDTO*
 @property(nonatomic, strong) NSMutableArray* attachments;
 
 // item type EvhSiteItemDTO*

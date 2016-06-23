@@ -2,7 +2,7 @@
 // EvhPostDTO.m
 //
 #import "EvhPostDTO.h"
-#import "EvhAttachmentDTO.h"
+#import "EvhForumAttachmentDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhPostDTO
@@ -98,7 +98,7 @@
         [jsonObject setObject: self.createTime forKey: @"createTime"];
     if(self.attachments) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhAttachmentDTO* item in self.attachments) {
+        for(EvhForumAttachmentDTO* item in self.attachments) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -261,7 +261,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"attachments"];
             for(id itemJson in jsonArray) {
-                EvhAttachmentDTO* item = [EvhAttachmentDTO new];
+                EvhForumAttachmentDTO* item = [EvhForumAttachmentDTO new];
                 
                 [item fromJson: itemJson];
                 [self.attachments addObject: item];

@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.techpark.rental.admin.AttachmentDTO;
+import com.everhomes.rest.techpark.rental.admin.AdminAttachmentDTO;
 import com.everhomes.rest.techpark.rental.admin.SiteOwnerDTO;
 import com.everhomes.util.StringHelper;
 /**
@@ -27,7 +27,7 @@ import com.everhomes.util.StringHelper;
  * <li>	cutPrice：         	减XX元	</li>
  * <li>	discountRatio：    	折扣比例	</li>
  * <li>	rentalType：0: 按小时预定  1-半天 2-天 3-支持晚上的半天	</li>
- * <li>	rentalStep：按小时预定步长，每个单元格代表多少小时，浮点型</li>
+ * <li>	timeStep：按小时预定步长，每个单元格代表多少小时，浮点型</li>
  * <li>	dayBeginTime：按小时预定，每天最早时间</li>
  * <li>	dayEndTime：按小时预定，每天最晚时间</li>
  * <li>	exclusiveFlag：    	是否为独占资源0否 1 是	</li>
@@ -41,7 +41,7 @@ import com.everhomes.util.StringHelper;
  * <li>	siteItems：资源物品列表 {@link com.everhomes.rest.techpark.rental.SiteItemDTO}</li>
  * <li>	sitePics： List资源图片列表 {@link com.everhomes.rest.techpark.rental.RentalSitePicDTO}</li>
  * <li>	owners： List资源可显示的园区范围列表 {@link com.everhomes.rest.techpark.rental.SiteOwnerDTO}</li> 
- * <li>attachments: 可添加的附件{@link com.everhomes.rest.techpark.rental.admin.AttachmentDTO}</li>
+ * <li>attachments: 可添加的附件{@link com.everhomes.rest.techpark.rental.admin.AdminAttachmentDTO}</li>
  * </ul>
  */
 public class RentalSiteDTO {
@@ -63,7 +63,7 @@ public class RentalSiteDTO {
 	private java.math.BigDecimal cutPrice;
 	private java.lang.Double     discountRatio;
 	private java.lang.Byte       rentalType;
-	private Double   rentalStep;
+	private Double   timeStep;
 	private java.sql.Time        dayBeginTime;
 	private java.sql.Time        dayEndTime;
 	private java.lang.Byte       exclusiveFlag;
@@ -82,8 +82,8 @@ public class RentalSiteDTO {
 	private List<RentalSitePicDTO> sitePics;
 	@ItemType(SiteOwnerDTO.class)
 	private List<SiteOwnerDTO> owners;
-	@ItemType(AttachmentDTO.class)
-	private List<AttachmentDTO> attachments;
+	@ItemType(AdminAttachmentDTO.class)
+	private List<AdminAttachmentDTO> attachments;
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -274,15 +274,15 @@ public class RentalSiteDTO {
 	}
 
 
-	 
+	  
 
-	public Double getRentalStep() {
-		return rentalStep;
+	public Double getTimeStep() {
+		return timeStep;
 	}
 
 
-	public void setRentalStep(Double rentalStep) {
-		this.rentalStep = rentalStep;
+	public void setTimeStep(Double timeStep) {
+		this.timeStep = timeStep;
 	}
 
 
@@ -406,12 +406,12 @@ public class RentalSiteDTO {
 	}
 
 
-	public List<AttachmentDTO> getAttachments() {
+	public List<AdminAttachmentDTO> getAttachments() {
 		return attachments;
 	}
 
 
-	public void setAttachments(List<AttachmentDTO> attachments) {
+	public void setAttachments(List<AdminAttachmentDTO> attachments) {
 		this.attachments = attachments;
 	}
  

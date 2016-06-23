@@ -1,19 +1,21 @@
 //
-// EvhAttachmentDTO.h
+// EvhVideoconfUpdateContactorCommand.h
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhAttachmentDTO
+// EvhVideoconfUpdateContactorCommand
 //
-@interface EvhAttachmentDTO
+@interface EvhVideoconfUpdateContactorCommand
     : NSObject<EvhJsonSerializable>
 
 
-@property(nonatomic, copy) NSNumber* attachmentType;
+@property(nonatomic, copy) NSString* contactorName;
 
-@property(nonatomic, copy) NSNumber* mustOptions;
+@property(nonatomic, copy) NSString* contactor;
+
+@property(nonatomic, copy) NSNumber* enterpriseId;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

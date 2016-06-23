@@ -19,7 +19,7 @@ import com.everhomes.util.StringHelper;
  * <li>rentalType: 预约类型，参考{@link com.everhomes.rest.techpark.rental.admin.RentalType}</li>
  * <li>rentalEndTime: 至少提前预约时间</li>
  * <li>rentalStartTime: 最多提前预约时间</li>
- * <li>rentalStep: 最短可预约时长</li>
+ * <li>timeStep: 最短可预约时长</li>
  * <li>timeIntervals: 开放时段</li>
  * <li>beginDate: 开放日期始</li>
  * <li>endDate: 开放日期终</li>
@@ -40,12 +40,12 @@ public class QueryDefaultRuleAdminResponse {
 	private Byte multiUnit;
 	private Byte needPay;
 	private Byte multiTimeInterval;
-	@ItemType(AttachmentDTO.class)
-	private List<AttachmentDTO> attachments;
+	@ItemType(AdminAttachmentDTO.class)
+	private List<AdminAttachmentDTO> attachments;
 	private Byte rentalType;
 	private Long rentalEndTime;
 	private Long rentalStartTime;
-	private Integer rentalStep;
+	private Double timeStep;
 	@ItemType(TimeIntervalDTO.class)
 	private List<TimeIntervalDTO> timeIntervals;
 	private Long beginDate;
@@ -113,11 +113,11 @@ public class QueryDefaultRuleAdminResponse {
 		this.multiTimeInterval = multiTimeInterval;
 	}
 
-	public List<AttachmentDTO> getAttachments() {
+	public List<AdminAttachmentDTO> getAttachments() {
 		return attachments;
 	}
 
-	public void setAttachments(List<AttachmentDTO> attachments) {
+	public void setAttachments(List<AdminAttachmentDTO> attachments) {
 		this.attachments = attachments;
 	}
 
@@ -144,15 +144,14 @@ public class QueryDefaultRuleAdminResponse {
 	public void setRentalStartTime(Long rentalStartTime) {
 		this.rentalStartTime = rentalStartTime;
 	}
+	
 
-	public Integer getRentalStep() {
-		return rentalStep;
+	public Double getTimeStep() {
+		return timeStep;
 	}
-
-	public void setRentalStep(Integer rentalStep) {
-		this.rentalStep = rentalStep;
+	public void setTimeStep(Double timeStep) {
+		this.timeStep = timeStep;
 	}
-
 	public List<TimeIntervalDTO> getTimeIntervals() {
 		return timeIntervals;
 	}

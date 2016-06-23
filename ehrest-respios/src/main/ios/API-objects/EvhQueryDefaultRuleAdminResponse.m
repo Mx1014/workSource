@@ -2,7 +2,7 @@
 // EvhQueryDefaultRuleAdminResponse.m
 //
 #import "EvhQueryDefaultRuleAdminResponse.h"
-#import "EvhAdminAttachmentDTO.h"
+#import "EvhAttachmentDTO.h"
 #import "EvhTimeIntervalDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -50,7 +50,7 @@
         [jsonObject setObject: self.multiTimeInterval forKey: @"multiTimeInterval"];
     if(self.attachments) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhAdminAttachmentDTO* item in self.attachments) {
+        for(EvhAttachmentDTO* item in self.attachments) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -136,7 +136,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"attachments"];
             for(id itemJson in jsonArray) {
-                EvhAdminAttachmentDTO* item = [EvhAdminAttachmentDTO new];
+                EvhAttachmentDTO* item = [EvhAttachmentDTO new];
                 
                 [item fromJson: itemJson];
                 [self.attachments addObject: item];

@@ -3,7 +3,7 @@ package com.everhomes.rest.techpark.rental;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.techpark.rental.admin.AttachmentDTO;
+import com.everhomes.rest.techpark.rental.admin.AdminAttachmentDTO;
 import com.everhomes.util.StringHelper;
 /**
  * <ul> 
@@ -58,8 +58,8 @@ public class FindAutoAssignRentalSiteDayStatusResponse {
 	private List<RentalSiteNumberRuleDTO> siteNumbers;
 	@ItemType(RentalSitePicDTO.class)
 	private List<RentalSitePicDTO> sitePics;
-	@ItemType(AttachmentDTO.class)
-	private List<AttachmentDTO> attachments;
+	@ItemType(AdminAttachmentDTO.class)
+	private List<AdminAttachmentDTO> attachments;
 	@ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> siteItems;
 	
@@ -112,12 +112,12 @@ public class FindAutoAssignRentalSiteDayStatusResponse {
 	}
 
 
-	public List<AttachmentDTO> getAttachments() {
+	public List<AdminAttachmentDTO> getAttachments() {
 		return attachments;
 	}
 
 
-	public void setAttachments(List<AttachmentDTO> attachments) {
+	public void setAttachments(List<AdminAttachmentDTO> attachments) {
 		this.attachments = attachments;
 	}
 
