@@ -236,26 +236,9 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     	GetCardPaidResultDTO dto = null;
     	PaymentCard paymentCard = checkPaymentCard(cmd.getCardId());
     	checkPaymentCardIsNull(paymentCard,cmd.getCardId());
-    	//dto.setToken(cmd.getCode());
-//    	ExecutorService service = PaidResultThreadPool.getInstance();
-//    	PaidResultThread thread = new PaidResultThread(dto);
-//    	service.execute(thread);
-//    	synchronized (dto) {
-//			try {
-//				dto.wait();
-//			} catch (InterruptedException e) {
-//				LOGGER.error("card id can not be null.");
-//				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-//						"card id can not be null.");
-//			}
-//		}
     	boolean flag = true;
-    	//long start = System.currentTimeMillis();
     	int i = 1;
     	while(flag&&i<=10){
-//    		long now = System.currentTimeMillis();
-//    		if(now - start > 50 * 1000)
-//    			break;
     		i++;
     		PaymentCardTransaction paymentCardTransaction = paymentCardProvider.findPaymentCardTransactionByCondition(cmd.getCode(),paymentCard.getCardNo());
         	if(paymentCardTransaction != null){
@@ -276,14 +259,6 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 				continue;
 			}
     	}
-    	if(flag){
-			LOGGER.error("the getCardPaidResult request of taotaogu is failed .");
-			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
-					localeStringService.getLocalizedString(String.valueOf(PaymentCardErrorCode.SCOPE), 
-							String.valueOf(PaymentCardErrorCode.ERROR_SERVER_REQUEST),
-							UserContext.current().getUser().getLocale(),"the getCardPaidResult request of taotaogu is failed."));
-    	}
-    	
     	return dto;
     }
     
