@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.everhomes.util.StringHelper;
-import com.google.gson.Gson;
 
 public class ResponseEntiy {
 	private String RespCode;

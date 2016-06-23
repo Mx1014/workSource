@@ -1,9 +1,8 @@
-package com.everhomes.payment;
+package com.everhomes.payment.taotaogu;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -37,12 +36,11 @@ import com.everhomes.cert.CertProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.locale.LocaleStringService;
-import com.everhomes.payment.taotaogu.AESCoder;
-import com.everhomes.payment.taotaogu.ByteTools;
-import com.everhomes.payment.taotaogu.CertCoder;
-import com.everhomes.payment.taotaogu.OrderCertCoder;
-import com.everhomes.payment.taotaogu.ResponseEntiy;
-import com.everhomes.payment.taotaogu.SHA1;
+import com.everhomes.payment.PaymentCard;
+import com.everhomes.payment.PaymentCardIssuer;
+import com.everhomes.payment.PaymentCardProvider;
+import com.everhomes.payment.PaymentCardRechargeOrder;
+import com.everhomes.payment.PaymentCardVendorHandler;
 import com.everhomes.payment.util.CachePool;
 import com.everhomes.rest.payment.ApplyCardCommand;
 import com.everhomes.rest.payment.CardInfoDTO;
@@ -197,10 +195,10 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				Map<String, Object> changePasswordParam = new HashMap<String, Object>();
 				changePasswordParam.put("BranchCode", brandCode);
 				changePasswordParam.put("CardId", cardId);
-				Cert cert = certProvider.findCertByName(configProvider.getValue(VendorConstant.PIN3_CRT, ""));
+				Cert cert = certProvider.findCertByName(configProvider.getValue(TAOTAOGUVendorConstant.PIN3_CRT, ""));
 				InputStream in = new ByteArrayInputStream(cert.getData());
 				
-				String initPassword = (String) vendorDataMap.get(VendorConstant.INITIAL_PASSWORD);
+				String initPassword = (String) vendorDataMap.get(TAOTAOGUVendorConstant.INITIAL_PASSWORD);
 				byte[] oldpsd = CertCoder.encryptByPublicKey(initPassword.getBytes(), in);
 				changePasswordParam.put("OrigPassWord", ByteTools.BytesToHexStr(oldpsd));
 				byte[] newpsd = CertCoder.encryptByPublicKey(cmd.getPassword().getBytes(), in);
@@ -239,8 +237,8 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 					paymentCard.setExpiredTime(strTotimestamp(expirDate));
 					paymentCard.setCreatorUid(user.getId());
 					paymentCard.setStatus(PaymentCardStatus.ACTIVE.getCode());
-					paymentCard.setVendorName(VendorConstant.TAOTAOGU);
-					paymentCard.setVendorCardData(VendorConstant.CARD__STATUS_JSON);
+					paymentCard.setVendorName(TAOTAOGUVendorConstant.TAOTAOGU);
+					paymentCard.setVendorCardData(TAOTAOGUVendorConstant.CARD__STATUS_JSON);
 					paymentCardProvider.createPaymentCard(paymentCard);
 					cardInfoDTO = ConvertHelper.convert(paymentCard, CardInfoDTO.class);
 				}
@@ -269,7 +267,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		byte[] newpsd = null;
 		ResponseEntiy changePasswordResponseEntiy = null;
 		try {
-			Cert cert = certProvider.findCertByName(configProvider.getValue(VendorConstant.PIN3_CRT, ""));
+			Cert cert = certProvider.findCertByName(configProvider.getValue(TAOTAOGUVendorConstant.PIN3_CRT, ""));
 			InputStream in = new ByteArrayInputStream(cert.getData());
 			oldpsd = CertCoder.encryptByPublicKey(cmd.getOldPassword().getBytes(), in);		
 			changePasswordParam.put("OrigPassWord", ByteTools.BytesToHexStr(oldpsd));
@@ -327,9 +325,9 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		changePasswordParam.put("CardId", paymentCard.getCardNo());
 		byte[] oldpsd = null;
 		byte[] newpsd = null;
-		Cert cert = certProvider.findCertByName(configProvider.getValue(VendorConstant.PIN3_CRT, ""));
+		Cert cert = certProvider.findCertByName(configProvider.getValue(TAOTAOGUVendorConstant.PIN3_CRT, ""));
 		InputStream in = new ByteArrayInputStream(cert.getData());
-			String initPassword = (String) vendorDataMap.get(VendorConstant.INITIAL_PASSWORD);
+			String initPassword = (String) vendorDataMap.get(TAOTAOGUVendorConstant.INITIAL_PASSWORD);
 			oldpsd = CertCoder.encryptByPublicKey(initPassword.getBytes(), in);		
 			changePasswordParam.put("OrigPassWord", ByteTools.BytesToHexStr(oldpsd));
 			newpsd = CertCoder.encryptByPublicKey(cmd.getNewPassword().getBytes(), in);
@@ -410,7 +408,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				BigDecimal rechargeAmount = new BigDecimal(0);
 				
 				CardTransactionFromVendorDTO dto = new CardTransactionFromVendorDTO();
-				dto.setVendorResult(VendorConstant.CARD_TRANSACTION_STATUS_JSON);
+				dto.setVendorResult(TAOTAOGUVendorConstant.CARD_TRANSACTION_STATUS_JSON);
 				dto.setMerchant((String)m.get("MerchId"));
 				BigDecimal amount = null;
 				
@@ -460,7 +458,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		return resultList;
 	}
 	
-	private static Timestamp strTotimestamp(String date){
+	private Timestamp strTotimestamp(String date){
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 		Date d = null;
 		try {
@@ -508,15 +506,15 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		String result = null;
 		getToken(vendorDataMap);
 		CachePool cachePool = CachePool.getInstance();
-		String aesKey = cachePool.getStringValue(VendorConstant.TAOTAOGU_AESKEY);
-		String token = cachePool.getStringValue(VendorConstant.TAOTAOGU_TOKEN);
+		String aesKey = cachePool.getStringValue(TAOTAOGUVendorConstant.TAOTAOGU_AESKEY);
+		String token = cachePool.getStringValue(TAOTAOGUVendorConstant.TAOTAOGU_TOKEN);
 		
 		JSONObject json = new JSONObject();
 		Date now = new Date();
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");// 可以方便地修改日期格式
 		String timeStr = dateFormat.format(now);
-		String chnl_type = (String) vendorDataMap.get(VendorConstant.CHNL_TYPE);
-		String chnl_id = (String) vendorDataMap.get(VendorConstant.CHNL_ID);
+		String chnl_type = (String) vendorDataMap.get(TAOTAOGUVendorConstant.CHNL_TYPE);
+		String chnl_id = (String) vendorDataMap.get(TAOTAOGUVendorConstant.CHNL_ID);
 		json.put("chnl_type", chnl_type);
 		json.put("chnl_id", chnl_id);
 		json.put("chnl_sn", System.currentTimeMillis());
@@ -542,15 +540,15 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 	
 	private void getToken(Map vendorDataMap){
 		CachePool cachePool = CachePool.getInstance();
-		String aesKey = cachePool.getStringValue(VendorConstant.TAOTAOGU_AESKEY);
-		String token = cachePool.getStringValue(VendorConstant.TAOTAOGU_TOKEN);
+		String aesKey = cachePool.getStringValue(TAOTAOGUVendorConstant.TAOTAOGU_AESKEY);
+		String token = cachePool.getStringValue(TAOTAOGUVendorConstant.TAOTAOGU_TOKEN);
 		if(aesKey == null || token == null){
 			//丢到缓存中
 				Map map = null;
 				map = orderLogin(vendorDataMap);
 				if(map != null){
-					cachePool.putCacheItem(VendorConstant.TAOTAOGU_AESKEY, (String) map.get("aes_key"), 24*60*60*1000);
-					cachePool.putCacheItem(VendorConstant.TAOTAOGU_TOKEN, (String) map.get("token"), 24*60*60*1000);
+					cachePool.putCacheItem(TAOTAOGUVendorConstant.TAOTAOGU_AESKEY, (String) map.get("aes_key"), 24*60*60*1000);
+					cachePool.putCacheItem(TAOTAOGUVendorConstant.TAOTAOGU_TOKEN, (String) map.get("token"), 24*60*60*1000);
 				}
 		}
 	}
@@ -660,10 +658,10 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");// 可以方便地修改日期格式
 			String timeStr = dateFormat.format(now);
 			
-			String chnl_type = (String) vendorDataMap.get(VendorConstant.CHNL_TYPE);
-			String chnl_id = (String) vendorDataMap.get(VendorConstant.CHNL_ID);
-			String merch_id = (String) vendorDataMap.get(VendorConstant.MERCH_ID);
-			String termnl_id = (String) vendorDataMap.get(VendorConstant.TERMNL_ID);
+			String chnl_type = (String) vendorDataMap.get(TAOTAOGUVendorConstant.CHNL_TYPE);
+			String chnl_id = (String) vendorDataMap.get(TAOTAOGUVendorConstant.CHNL_ID);
+			String merch_id = (String) vendorDataMap.get(TAOTAOGUVendorConstant.MERCH_ID);
+			String termnl_id = (String) vendorDataMap.get(TAOTAOGUVendorConstant.TERMNL_ID);
 			json.put("chnl_type", chnl_type);
 			json.put("chnl_id", chnl_id);
 			json.put("chnl_sn", System.currentTimeMillis());
@@ -671,9 +669,9 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 			json.put("termnl_id", termnl_id);
 		
 			CertProvider certProvider =  PlatformContext.getComponent("certProviderImpl");
-			Cert serverCer = certProvider.findCertByName(configProvider.getValue(VendorConstant.SERVER_CER, ""));
+			Cert serverCer = certProvider.findCertByName(configProvider.getValue(TAOTAOGUVendorConstant.SERVER_CER, ""));
 			InputStream serverCerIn = new ByteArrayInputStream(serverCer.getData());
-			Cert clientPfx = certProvider.findCertByName(configProvider.getValue(VendorConstant.CLIENT_PFX, ""));
+			Cert clientPfx = certProvider.findCertByName(configProvider.getValue(TAOTAOGUVendorConstant.CLIENT_PFX, ""));
 			InputStream clientPfxIn = new ByteArrayInputStream(clientPfx.getData());
 			
 			String msg = json.toString();
@@ -784,10 +782,10 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		Gson gson = new Gson();
 		
 		Map<String, Object> requestParam = new HashMap<String, Object>();
-		String appName = (String) vendorDataMap.get(VendorConstant.APP_NAME);
-		String version = (String) vendorDataMap.get(VendorConstant.VERSION);
-		String dstId = (String) vendorDataMap.get(VendorConstant.DSTID);
-		String brandCode = (String) vendorDataMap.get(VendorConstant.BRANCH_CODE);
+		String appName = (String) vendorDataMap.get(TAOTAOGUVendorConstant.APP_NAME);
+		String version = (String) vendorDataMap.get(TAOTAOGUVendorConstant.VERSION);
+		String dstId = (String) vendorDataMap.get(TAOTAOGUVendorConstant.DSTID);
+		String brandCode = (String) vendorDataMap.get(TAOTAOGUVendorConstant.BRANCH_CODE);
 		requestParam.put("AppName", appName);
 		requestParam.put("Version",version);
 		requestParam.put("ClientDt",sdf.format(new Date()));
@@ -802,7 +800,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		
 		CertProvider certProvider = PlatformContext.getComponent("certProviderImpl");
 		
-		Cert cert = certProvider.findCertByName(configProvider.getValue(VendorConstant.KEY_STORE, ""));
+		Cert cert = certProvider.findCertByName(configProvider.getValue(TAOTAOGUVendorConstant.KEY_STORE, ""));
 		InputStream in = new ByteArrayInputStream(cert.getData());
 		
 		String pass = cert.getCertPass();

@@ -2,7 +2,6 @@ package com.everhomes.payment;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -36,6 +35,7 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.payment.taotaogu.AESCoder;
 import com.everhomes.payment.taotaogu.NotifyEntity;
+import com.everhomes.payment.taotaogu.TAOTAOGUVendorConstant;
 import com.everhomes.payment.util.CacheConstant;
 import com.everhomes.payment.util.CacheItem;
 import com.everhomes.payment.util.CachePool;
@@ -120,7 +120,6 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     @Override
     public List<CardInfoDTO> listCardInfo(ListCardInfoCommand cmd){
     	User user = UserContext.current().getUser();
-		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 
 		List<CardInfoDTO> result = new ArrayList<CardInfoDTO>();
 		List<PaymentCard> cardList = paymentCardProvider.listPaymentCard(cmd.getOwnerId(),cmd.getOwnerType(),user.getId());
@@ -191,7 +190,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     	orderCmd.setBody(paymentCardRechargeOrder.getMobile());
     	orderCmd.setOrderNo(paymentCardRechargeOrder.getId().toString());
     	orderCmd.setOrderType(OrderType.OrderTypeEnum.PAYMENTCARD.getPycode());
-    	orderCmd.setSubject("一卡通充值订单简要描述");
+    	orderCmd.setSubject("一卡通充值订单");
     	orderCmd.setTotalFee(paymentCardRechargeOrder.getAmount());
     	CommonOrderDTO dto = null;
     	try {
@@ -232,11 +231,6 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 		dto.setCode(code);
     	return dto;
     }
-    public static void main(String[] args) {
-		System.out.println(new Date(1466590569513L));
-		System.out.println(new Date(1466590656439L));
-
-	}
     @Override
     public GetCardPaidResultDTO getCardPaidResult(GetCardPaidResultCommand cmd){
     	GetCardPaidResultDTO dto = null;
@@ -648,8 +642,8 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     public NotifyEntityDTO notifyPaidResult(NotifyEntityCommand cmd){
     	PaymentCardTransaction transaction = new PaymentCardTransaction();
     	CachePool cachePool = CachePool.getInstance();
-		String aesKey = cachePool.getStringValue(VendorConstant.TAOTAOGU_AESKEY);
-		String token = cachePool.getStringValue(VendorConstant.TAOTAOGU_TOKEN);
+		String aesKey = cachePool.getStringValue(TAOTAOGUVendorConstant.TAOTAOGU_AESKEY);
+		String token = cachePool.getStringValue(TAOTAOGUVendorConstant.TAOTAOGU_TOKEN);
     	Gson gson = new Gson();
 		String msg = null;
 		NotifyEntityDTO dto = new NotifyEntityDTO();
@@ -664,7 +658,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 			NotifyEntity result = gson.fromJson(msg, NotifyEntity.class);
 			
 			User user = UserContext.current().getUser();
-			PaymentCard paymentCard = paymentCardProvider.findPaymentCardByCardNo(result.getCard_id(), VendorConstant.TAOTAOGU);
+			PaymentCard paymentCard = paymentCardProvider.findPaymentCardByCardNo(result.getCard_id(), TAOTAOGUVendorConstant.TAOTAOGU);
 			transaction.setOwnerId(paymentCard.getOwnerId());
 			transaction.setOwnerType(paymentCard.getOwnerType());
 			transaction.setNamespaceId(user.getNamespaceId());
@@ -681,8 +675,8 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 			transaction.setStatus(convertTransaction(result.getTrade_status()));
 			transaction.setCreatorUid(user.getId());
 			transaction.setCreateTime(new Timestamp(System.currentTimeMillis()));
-			transaction.setVendorName(VendorConstant.TAOTAOGU);
-			String extraData = VendorConstant.CARD_TRADE_STATUS_JSON;
+			transaction.setVendorName(TAOTAOGUVendorConstant.TAOTAOGU);
+			String extraData = TAOTAOGUVendorConstant.CARD_TRADE_STATUS_JSON;
 			transaction.setVendorResult(extraData);
 			transaction.setToken(result.getToken());
 			transaction.setCardNo(result.getCard_id());
@@ -761,14 +755,6 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 							String.valueOf(PaymentCardErrorCode.ERROR_NOT_EXISTS_CARD),
 							UserContext.current().getUser().getLocale(),"paymentCard is not exists ."));
     	}
-    }
-    
-    private String mergeJson(String json1,String json2){
-    	Gson gson = new Gson();
-		Map map = gson.fromJson(json1, Map.class);
-		Map map1 = gson.fromJson(json2, Map.class);
-		map.putAll(map1);
-		return gson.toJson(map);
     }
     
 }

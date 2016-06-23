@@ -1,7 +1,6 @@
 package com.everhomes.payment.taotaogu;
 
 
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;
@@ -13,9 +12,6 @@ import java.security.cert.X509Certificate;
 import java.util.Enumeration;
 
 import javax.crypto.Cipher;
-
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.IOUtils;
 
 /**
  * 数字证书.
