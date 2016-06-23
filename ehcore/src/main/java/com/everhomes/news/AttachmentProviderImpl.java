@@ -2,6 +2,7 @@
 package com.everhomes.news;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,13 +52,14 @@ public class AttachmentProviderImpl implements AttachmentProvider {
 	@Override
 	@SuppressWarnings("unchecked")
 	public void createAttachments(Class<?> pojoClass, List<Attachment> attachments) {
-		List<Object> list = attachments.stream().map(attachment -> {
+	    List<Object> list = attachments.stream().map(attachment -> {
 			Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(pojoClass));
 			attachment.setId(id);
 			attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			return ConvertHelper.convert(attachment, pojoClass);
+			// 必须强制转换，否则List<R>转不成List<Object> by lqs 20160623
+			return (Object)ConvertHelper.convert(attachment, pojoClass);
 		}).collect(Collectors.toList());
-
+	    
 		getReadWriteDao(pojoClass).insert(list);
 
 		DaoHelper.publishDaoAction(DaoAction.CREATE, pojoClass, null);
