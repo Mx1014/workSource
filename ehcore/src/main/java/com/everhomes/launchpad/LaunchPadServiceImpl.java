@@ -1589,7 +1589,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	
 
 	@Override
-	public void reorderLaunchPadItemByScene(ReorderLaunchPadItemBySceneCommand cmd){
+	public void reorderLaunchPadItemByScene(ReorderLaunchPadItemBySceneCommand cmd, ItemDisplayFlag itemDisplayFlag){
 		User user = UserContext.current().getUser();
 		Long userId = user.getId();
 	    SceneTokenDTO sceneToken = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
@@ -1615,7 +1615,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	   					"community not found.");
 	           }
 	           
-	           this.reorderLaunchPadItem(userId, EntityType.COMMUNITY.getCode(), community.getId(), baseScene, cmd.getSorts());
+	           this.reorderLaunchPadItem(userId, EntityType.COMMUNITY.getCode(), community.getId(), baseScene, cmd.getSorts(), itemDisplayFlag);
 	           break;
 	       case FAMILY:
 	           FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
@@ -1630,12 +1630,12 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	        	   LOGGER.error("community not found, sceneToken=" + sceneToken);
 	           }
 	           
-	           this.reorderLaunchPadItem(userId, EntityType.COMMUNITY.getCode(), community.getId(), baseScene, cmd.getSorts());
+	           this.reorderLaunchPadItem(userId, EntityType.COMMUNITY.getCode(), community.getId(), baseScene, cmd.getSorts(), itemDisplayFlag);
 	           break;
 	       case PM_ADMIN:
 	       case ENTERPRISE: 
 	       case ENTERPRISE_NOAUTH: 
-	    	   this.reorderLaunchPadItem(userId, EntityType.ORGANIZATIONS.getCode(), sceneToken.getEntityId(), baseScene, cmd.getSorts());
+	    	   this.reorderLaunchPadItem(userId, EntityType.ORGANIZATIONS.getCode(), sceneToken.getEntityId(), baseScene, cmd.getSorts(), itemDisplayFlag);
 	           break;
 	       default:
 	           LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
@@ -1846,14 +1846,14 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		return userItem;
 	}
 	
-	private void reorderLaunchPadItem(Long userId, String ownerType, Long ownerId, String sceneType, List<LaunchPadItemSort> sorts){
+	private void reorderLaunchPadItem(Long userId, String ownerType, Long ownerId, String sceneType, List<LaunchPadItemSort> sorts, ItemDisplayFlag itemDisplayFlag){
 		
 		dbProvider.execute((TransactionStatus status) ->{
 			/**
 			 * 重新添加用户排序
 			 */
 			for (LaunchPadItemSort launchPadItemSort : sorts) {
-				this.updateUserLaunchPadItem(userId, ownerType, ownerId, sceneType, launchPadItemSort.getDefaultOrder(), launchPadItemSort.getId(), ItemDisplayFlag.DISPLAY);
+				this.updateUserLaunchPadItem(userId, ownerType, ownerId, sceneType, launchPadItemSort.getDefaultOrder(), launchPadItemSort.getId(), itemDisplayFlag);
 			}
 			
 			return null;
