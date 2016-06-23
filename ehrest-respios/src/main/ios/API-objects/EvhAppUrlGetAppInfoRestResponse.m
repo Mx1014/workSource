@@ -1,20 +1,20 @@
 //
-// EvhAdminCommunityUpdateBuildingRestResponse.m
+// EvhAppUrlGetAppInfoRestResponse.m
 //
-#import "EvhAdminCommunityUpdateBuildingRestResponse.h"
-#import "EvhCommunityBuildingDTO.h"
+#import "EvhAppUrlGetAppInfoRestResponse.h"
+#import "EvhAppUrlDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhAdminCommunityUpdateBuildingRestResponse
+// EvhAppUrlGetAppInfoRestResponse
 //
 
-@implementation EvhAdminCommunityUpdateBuildingRestResponse
+@implementation EvhAppUrlGetAppInfoRestResponse
 
 +(id) withJsonString: (NSString*) jsonString
 {
     id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
     if(jsonObject != nil) {
-        EvhAdminCommunityUpdateBuildingRestResponse* obj = [EvhAdminCommunityUpdateBuildingRestResponse new];
+        EvhAppUrlGetAppInfoRestResponse* obj = [EvhAppUrlGetAppInfoRestResponse new];
         return [obj fromJson:jsonObject];
     }
     return nil;
@@ -45,7 +45,7 @@
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
         [super fromJson: jsonObject];
         NSMutableDictionary* dic =  (NSMutableDictionary*)[jsonObject objectForKey: @"response"];
-        self.response = [EvhCommunityBuildingDTO new];
+        self.response = [EvhAppUrlDTO new];
         self.response = [self.response fromJson: dic];
         return self;
     }

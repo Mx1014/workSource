@@ -21,6 +21,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.business.CancelFavoriteBusinessCommand;
 import com.everhomes.rest.business.FavoriteBusinessesCommand;
 import com.everhomes.rest.launchpad.GetLaunchPadItemsCommandResponse;
+import com.everhomes.rest.launchpad.ItemDisplayFlag;
 import com.everhomes.rest.launchpad.LaunchPadLayoutDTO;
 import com.everhomes.rest.launchpad.UserLaunchPadItemDTO;
 import com.everhomes.rest.ui.launchpad.AddLaunchPadItemBySceneCommand;
@@ -178,11 +179,24 @@ public class LauchPadUiController extends ControllerBase {
     @RequestMapping("reorderLaunchPadItemByScene")
     @RestReturn(value=String.class)
     public RestResponse reorderLaunchPadItemByScene(ReorderLaunchPadItemBySceneCommand cmd) {
-    	this.launchPadService.reorderLaunchPadItemByScene(cmd);
+    	this.launchPadService.reorderLaunchPadItemByScene(cmd, ItemDisplayFlag.DISPLAY);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
     
+    /**
+     * <b>URL: /ui/launchpad/reorderMoreItemByScene</b>
+     * <p>排序更多的item</p>
+     */
+    @RequestMapping("reorderMoreItemByScene")
+    @RestReturn(value=String.class)
+    public RestResponse reorderMoreItemByScene(ReorderLaunchPadItemBySceneCommand cmd) {
+    	this.launchPadService.reorderLaunchPadItemByScene(cmd, ItemDisplayFlag.HIDE);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
