@@ -52,6 +52,8 @@
         [jsonObject setObject: self.policyData forKey: @"policyData"];
     if(self.endTime)
         [jsonObject setObject: self.endTime forKey: @"endTime"];
+    if(self.iconUri)
+        [jsonObject setObject: self.iconUri forKey: @"iconUri"];
     if(self.assignedScopes) {
         NSMutableArray* jsonArray = [NSMutableArray new];
         for(EvhOpPromotionAssignedScopeDTO* item in self.assignedScopes) {
@@ -105,6 +107,10 @@
         self.endTime = [jsonObject objectForKey: @"endTime"];
         if(self.endTime && [self.endTime isEqual:[NSNull null]])
             self.endTime = nil;
+
+        self.iconUri = [jsonObject objectForKey: @"iconUri"];
+        if(self.iconUri && [self.iconUri isEqual:[NSNull null]])
+            self.iconUri = nil;
 
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"assignedScopes"];
