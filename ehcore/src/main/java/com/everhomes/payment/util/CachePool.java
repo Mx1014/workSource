@@ -4,9 +4,15 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import com.everhomes.payment.PaymentCardServiceImpl;
+
 public class CachePool {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CachePool.class);
+
 	private static CachePool instance;//缓存池唯一实例
 	  private ConcurrentHashMap<String,Object> cacheItems;//缓存Map
 	  private CachePool(){
@@ -109,4 +115,13 @@ public class CachePool {
 	    return cacheItems.size();
 	  }
 	  
+	  public void quartzClearMap(){
+		  Enumeration<String> keys =  cacheItems.keys();
+		  while(keys.hasMoreElements()){
+			  String key = keys.nextElement();
+			  CacheItem item = (CacheItem) cacheItems.get(key);
+			  if(item.isExpired())
+				  cacheItems.remove(key);
+		  }
+	  }
 }

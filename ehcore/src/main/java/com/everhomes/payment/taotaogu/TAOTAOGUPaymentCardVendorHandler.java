@@ -538,7 +538,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		return result;
 	}
 	
-	private void getToken(Map vendorDataMap){
+	private synchronized void getToken(Map vendorDataMap){
 		CachePool cachePool = CachePool.getInstance();
 		String aesKey = cachePool.getStringValue(TAOTAOGUVendorConstant.TAOTAOGU_AESKEY);
 		String token = cachePool.getStringValue(TAOTAOGUVendorConstant.TAOTAOGU_TOKEN);
@@ -750,11 +750,12 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		return result;
 	}
 	
-	public ResponseEntiy post(Map vendorDataMap,String msgType,Map<String, Object> param) throws Exception {
+	public ResponseEntiy post(Map vendorDataMap,String msgType,Map<String, Object> param){
 		CloseableHttpClient httpClient = HttpClients.createDefault();
 		String url = configProvider.getValue("taotaogu.card.url", "");
 		HttpPost request = new HttpPost(url);
 		List<NameValuePair> pairs = new ArrayList<NameValuePair>();
+		try{
 		String msg = getJson(vendorDataMap,msgType,param);
 		pairs.add(new BasicNameValuePair("msg", msg));
 		request.setEntity(new UrlEncodedFormEntity(pairs, "UTF-8"));
@@ -766,6 +767,13 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 			ResponseEntiy resp = gson.fromJson(rspText, ResponseEntiy.class);
 			
 			return resp;	
+		}
+		}catch(Exception e){
+			LOGGER.error("the getCardInfo request of taotaogu is failed {}.",e.toString());
+			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
+					localeStringService.getLocalizedString(String.valueOf(PaymentCardErrorCode.SCOPE), 
+							String.valueOf(PaymentCardErrorCode.ERROR_SERVER_REQUEST),
+							UserContext.current().getUser().getLocale(),"the getCardInfo request of taotaogu is failed."));
 		}
 		return null;
 	}

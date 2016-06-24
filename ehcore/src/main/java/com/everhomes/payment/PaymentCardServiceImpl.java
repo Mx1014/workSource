@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -26,6 +27,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.bootstrap.PlatformContext;
@@ -735,5 +737,13 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 							UserContext.current().getUser().getLocale(),"paymentCard is not exists ."));
     	}
     }
+    
+    @Scheduled(cron="0 0 0 * * ? ")
+	  void quartzClearMap(){
+    	CachePool cachePool = CachePool.getInstance();
+    	if(LOGGER.isDebugEnabled())
+		  LOGGER.debug("start quartzClearMap");
+		  cachePool.quartzClearMap();
+	  }
     
 }

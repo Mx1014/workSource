@@ -84,8 +84,8 @@ public class Ordertest {
 	
 	public static void main(String[] args) {
 		try {
-			//System.out.println(post());
-			orderLogin();
+			System.out.println(post());
+			//orderLogin();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -111,8 +111,8 @@ public class Ordertest {
 		json.put("reserved", "00011071");
 		json.put("request_time", timeStr);		
 
-		String token = "f23a13686009fe8be5453268c48d3a71";
-		String aesKey = "1cf4e54c4cb9c6e3d8d60a6dbe0133b8";		
+		String token = "efe51f69045d8d78408ebe4c5691a040";
+		String aesKey = "203ad5ccfd18c41942be64822c102b4c";		
 		
 		pairs.add(new BasicNameValuePair("token", token));
 		String msg = Base64.encodeBase64String(AESCoder.encrypt(json.toString().getBytes("GBK"), aesKey.getBytes()));
