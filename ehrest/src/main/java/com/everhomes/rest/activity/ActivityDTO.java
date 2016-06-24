@@ -28,6 +28,7 @@ import com.everhomes.util.StringHelper;
  *<li>processStatus：处理状态，0 未知,1 未开始，2 进行中，3 已结束</li>
  *<li>uuid:活动唯一的标识</li>
  *<li>mediaUrl:活动url</li>
+ *<li>favoriteFlag: 是否收藏标记，参见{@link com.everhomes.rest.forum.PostFavoriteFlag}</li>
  *</ul>
  */
 public class ActivityDTO {
@@ -61,6 +62,8 @@ public class ActivityDTO {
     private String guest;
     
     private String mediaUrl;
+    
+    private Byte favoriteFlag;
     
     public ActivityDTO() {
     }
@@ -298,6 +301,14 @@ public class ActivityDTO {
 
 	public void setMediaUrl(String mediaUrl) {
 		this.mediaUrl = mediaUrl;
+	}
+
+	public Byte getFavoriteFlag() {
+		return favoriteFlag;
+	}
+
+	public void setFavoriteFlag(Byte favoriteFlag) {
+		this.favoriteFlag = favoriteFlag;
 	}
 
 	public String toString() {

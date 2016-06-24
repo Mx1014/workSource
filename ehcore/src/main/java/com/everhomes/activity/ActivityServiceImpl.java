@@ -87,6 +87,7 @@ import com.everhomes.rest.forum.ListActivityTopicByCategoryAndTagCommand;
 import com.everhomes.rest.forum.ListPostCommandResponse;
 import com.everhomes.rest.forum.PostContentType;
 import com.everhomes.rest.forum.PostDTO;
+import com.everhomes.rest.forum.PostFavoriteFlag;
 import com.everhomes.rest.group.LeaveGroupCommand;
 import com.everhomes.rest.group.ListNearbyGroupCommand;
 import com.everhomes.rest.group.ListNearbyGroupCommandResponse;
@@ -104,8 +105,11 @@ import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserCurrentEntityType;
+import com.everhomes.rest.user.UserFavoriteDTO;
+import com.everhomes.rest.user.UserFavoriteTargetType;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.User;
+import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserLogin;
@@ -188,6 +192,9 @@ public class ActivityServiceImpl implements ActivityService {
     
     @Autowired
     private OrganizationProvider organizationProvider;
+    
+    @Autowired
+    private UserActivityProvider userActivityProvider;
 
     @Override
     public void createPost(ActivityPostCommand cmd, Long postId) {
@@ -1375,6 +1382,8 @@ public class ActivityServiceImpl implements ActivityService {
 	
 	@Override
 	public ListActivitiesReponse listActivitiesByLocation(ListActivitiesByLocationCommand cmd) {
+		User user = UserContext.current().getUser();
+		Long uid = user.getId();
 	    ListActivitiesReponse response = null;
 	    List<GeoLocation> geoLocationList = cmd.getLocationPointList();
 	    if(geoLocationList == null || geoLocationList.size() == 0) {
@@ -1424,6 +1433,12 @@ public class ActivityServiceImpl implements ActivityService {
             dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
             if(post != null) {
                 dto.setForumId(post.getForumId());
+            }
+            List<UserFavoriteDTO> favorite = userActivityProvider.findFavorite(uid, UserFavoriteTargetType.ACTIVITY.getCode(), activity.getId());
+            if(favorite == null || favorite.size() == 0) {
+            	dto.setFavoriteFlag(PostFavoriteFlag.NONE.getCode());
+            } else {
+            	dto.setFavoriteFlag(PostFavoriteFlag.FAVORITE.getCode());
             }
             
             return dto;
