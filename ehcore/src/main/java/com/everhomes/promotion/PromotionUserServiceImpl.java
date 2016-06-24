@@ -30,6 +30,7 @@ import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.promotion.OpPromotionScopeType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
 
 @Component
 public class PromotionUserServiceImpl implements PromotionUserService {
@@ -50,6 +51,9 @@ public class PromotionUserServiceImpl implements PromotionUserService {
     
     @Autowired
     private OpPromotionAssignedScopeProvider promotionAssignedScopeProvider;
+    
+    @Autowired
+    private UserService userService;
     
     @Override
     public void listAllUser(OpPromotionUserVisitor visitor, OpPromotionUserCallback callback) {
@@ -191,8 +195,17 @@ public class PromotionUserServiceImpl implements PromotionUserService {
     
     @Override
     public void listUserByUserId(OpPromotionUserVisitor visitor, OpPromotionUserCallback callback) {
-        User user = userProvider.findUserById((Long)visitor.getValue());
-        callback.userFound(user, visitor);
+        Long userId = (Long)visitor.getValue();
+        User user = userProvider.findUserById(userId);
+        if(user != null) {
+            callback.userFound(user, visitor);    
+        } else {
+            user = userService.findUserByIndentifier(visitor.getPromotion().getNamespaceId(), userId.toString());
+            if(user != null) {
+                callback.userFound(user, visitor);    
+            }
+        }
+        
     }
     
     @Override
