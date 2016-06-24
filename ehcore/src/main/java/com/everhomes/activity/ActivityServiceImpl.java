@@ -1869,6 +1869,9 @@ public class ActivityServiceImpl implements ActivityService {
         response.setViewCount(post.getViewCount());
         response.setNamespaceId(activity.getNamespaceId());
         response.setAttachments(post.getAttachments());
+        response.setSubject(post.getSubject());
+        response.setCreatorNickName(post.getCreatorNickName());
+        response.setCreateTime(post.getCreateTime());
         
 		return response;
 	}
