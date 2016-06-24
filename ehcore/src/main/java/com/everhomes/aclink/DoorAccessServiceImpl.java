@@ -1594,13 +1594,16 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         DoorLinglingExtraKeyDTO extra = new DoorLinglingExtraKeyDTO();
         extra.setAuthLevel(0l);
         extra.setAuthStorey(1l);
-        extra.setStoreyAuthList(new ArrayList<Long>());
+        
+        List<Long> storeyAuthList = new ArrayList<Long>();
+        storeyAuthList.add(1l);
+        extra.setStoreyAuthList(storeyAuthList);
         
         try {
             if(checkDoorAccessRole(doorAccess)) {
                 extra.setAuthLevel(1l);    
             }            
-            List<Long> storeyAuthList = getDoorListbyUser(user, doorAccess);
+            storeyAuthList = getDoorListbyUser(user, doorAccess);
             if(storeyAuthList != null && storeyAuthList.size() > 0) {
                 extra.setAuthStorey(storeyAuthList.get(0));
                 extra.setStoreyAuthList(storeyAuthList);
