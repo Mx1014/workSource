@@ -528,11 +528,11 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 			if("00".equals(returnCode)){
 				result = (String) codeMap.get("token");
 			}else{
-				LOGGER.error("the getCardPaidQrCode request of taotaogu is failed {}.",codeMap);
+				LOGGER.error("the getCardPaidQrCode request of taotaogu is failed codeMap={},json={},token={},aesKey={}.",codeMap,json,token,aesKey);
 				throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_GET_CARD_CODE,
 						localeStringService.getLocalizedString(String.valueOf(PaymentCardErrorCode.SCOPE), 
 								String.valueOf(PaymentCardErrorCode.ERROR_GET_CARD_CODE),
-								UserContext.current().getUser().getLocale(),"the orderLogin request of taotaogu is failed."));
+								UserContext.current().getUser().getLocale(),"the getCardPaidQrCode request of taotaogu is failed ."));
 			}
 		}
 		return result;
@@ -639,12 +639,13 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 	private Map orderLogin(Map vendorDataMap){
 		Map result = null;
 		String rspText = null;
+		JSONObject json = new JSONObject();
 		try{
 			CloseableHttpClient httpClient = HttpClients.createDefault();
 			Gson gson = new Gson();
 			String url = configProvider.getValue("taotaogu.order.url", "");
 			HttpPost request = new HttpPost(url+"/iips2/order/login");
-			JSONObject json = new JSONObject();
+			
 			List<NameValuePair> pairs = new ArrayList<NameValuePair>();
 			Date now = new Date();
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");// 可以方便地修改日期格式
@@ -694,7 +695,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 			}
 			result = gson.fromJson(r1, Map.class);
 		}catch(Exception e){
-			LOGGER.error("the orderLogin request of taotaogu is failed rspText={}, e={}.",rspText,e.toString());
+			LOGGER.error("the orderLogin request of taotaogu is failed rspText={}, e={},json={}.",rspText,e.toString(),json);
 			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
 					localeStringService.getLocalizedString(String.valueOf(PaymentCardErrorCode.SCOPE), 
 							String.valueOf(PaymentCardErrorCode.ERROR_SERVER_REQUEST),
