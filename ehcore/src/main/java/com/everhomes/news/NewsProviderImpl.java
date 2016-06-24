@@ -1,7 +1,9 @@
 // @formatter:off
 package com.everhomes.news;
 
+import java.sql.Timestamp;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhNewsDao;
 import com.everhomes.server.schema.tables.pojos.EhNews;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 
 @Component
 public class NewsProviderImpl implements NewsProvider {
@@ -32,9 +35,28 @@ public class NewsProviderImpl implements NewsProvider {
 	public void createNews(News news) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhNews.class));
 		news.setId(id);
+		news.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		news.setPublishTime(news.getCreateTime());
 		getReadWriteDao().insert(news);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhNews.class, null);
 	}
+
+	
+	
+	@Override
+	public void createNewsList(List<News> newsList) {
+		List<EhNews> list = newsList.stream().map(news->{
+			Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhNews.class));
+			news.setId(id);
+			news.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			news.setPublishTime(news.getCreateTime());
+			return ConvertHelper.convert(news, EhNews.class);
+		}).collect(Collectors.toList());
+		getReadWriteDao().insert(list);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhNews.class, null);
+	}
+
+
 
 	@Override
 	public void updateNews(News news) {
@@ -47,6 +69,13 @@ public class NewsProviderImpl implements NewsProvider {
 	public News findNewsById(Long id) {
 		assert (id != null);
 		return ConvertHelper.convert(getReadOnlyDao().findById(id), News.class);
+	}
+	
+	@Override
+	public List<News> findAllActiveNewsByPage(Long from, Integer pageSize){
+		return getReadOnlyContext().select().from(Tables.EH_NEWS)
+		.where(Tables.EH_NEWS.STATUS.eq(NewsStatus.ACTIVE.getCode()))
+		.limit(from.intValue(), pageSize.intValue()).fetch().map(r -> ConvertHelper.convert(r, News.class));
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.news;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerResource;
@@ -60,7 +63,9 @@ import com.everhomes.rest.news.SearchNewsResponse;
 import com.everhomes.rest.news.SetNewsLikeFlagBySceneCommand;
 import com.everhomes.rest.news.SetNewsLikeFlagCommand;
 import com.everhomes.rest.news.SetNewsTopFlagCommand;
+import com.everhomes.rest.news.SyncNewsCommand;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
+import com.everhomes.search.SearchUtils;
 import com.everhomes.server.schema.tables.pojos.EhNewsAttachments;
 import com.everhomes.server.schema.tables.pojos.EhNewsComment;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -72,6 +77,8 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.WebTokenGenerator;
+import com.everhomes.util.excel.RowResult;
+import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
 @Component
 public class NewsServiceImpl implements NewsService {
@@ -101,28 +108,30 @@ public class NewsServiceImpl implements NewsService {
 	@Autowired
 	private ContentServerService contentServerService;
 
+	@Autowired
+	private SearchProvider searchProvider;
+
 	@Override
 	public CreateNewsResponse createNews(CreateNewsCommand cmd) {
 		final Long userId = UserContext.current().getUser().getId();
 
 		// 检查参数等信息
 		checkNewsParameter(userId, cmd);
-		Organization organization = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
+		Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType()).getNamespaceId();
 
-		News news = processNewsCommand(userId, organization, cmd);
-		// 创建一条新闻记录，会返回新闻Id，稍后更新到帖子表中
+		News news = processNewsCommand(userId, namespaceId, cmd);
 		newsProvider.createNews(news);
-
+		
+		syncNews(news.getId());
+		
 		return ConvertHelper.convert(news, CreateNewsResponse.class);
 	}
 
-	private News processNewsCommand(Long userId, Organization organization, CreateNewsCommand cmd) {
+	private News processNewsCommand(Long userId, Integer namespaceId, CreateNewsCommand cmd) {
 		News news = ConvertHelper.convert(cmd, News.class);
-		news.setNamespaceId(organization.getNamespaceId());
+		news.setNamespaceId(namespaceId);
 		news.setOwnerType(cmd.getOwnerType().toLowerCase());
 		news.setContentType(NewsContentType.RICH_TEXT.getCode());
-		news.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		news.setPublishTime(news.getCreateTime());
 		news.setTopIndex(0L);
 		news.setTopFlag(NewsTopFlag.NONE.getCode());
 		news.setStatus(NewsStatus.ACTIVE.getCode());
@@ -168,31 +177,88 @@ public class NewsServiceImpl implements NewsService {
 
 	@Override
 	public void importNews(ImportNewsCommand cmd, MultipartFile[] files) {
+		Long userId = UserContext.current().getUser().getId();
+		Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType()).getNamespaceId();
+		// 读取Excel数据
+		List<News> newsList = getNewsFromExcel(userId, namespaceId, cmd, files);
+		newsProvider.createNewsList(newsList);
 		
+		newsList.forEach(n->syncNews(n.getId()));
+	}
+
+	@SuppressWarnings("unchecked")
+	private List<News> getNewsFromExcel(Long userId, Integer namespaceId, ImportNewsCommand cmd,
+			MultipartFile[] files) {
+		List<RowResult> resultList = null;
+		try {
+			resultList = PropMrgOwnerHandler.processorExcel(files[0].getInputStream());
+		} catch (IOException e) {
+			LOGGER.error("process Excel error, operatorId=" + userId + ", cmd=" + cmd);
+			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+					NewsServiceErrorCode.ERROR_NEWS_PROCESS_EXCEL_ERROR, "process Excel error");
+		}
+
+		if (resultList != null && resultList.size() > 0) {
+			final List<News> newsList = new ArrayList<>();
+			resultList.forEach(r -> {
+				RowResult result = (RowResult) r;
+				String title = RowResult.trimString(result.getA());
+				String contentAbstract = RowResult.trimString(result.getB());
+				String coverUri = RowResult.trimString(result.getC());
+				String content = RowResult.trimString(result.getD());
+				String author = RowResult.trimString(result.getE());
+				String sourceDesc = RowResult.trimString(result.getF());
+				String sourceUrl = RowResult.trimString(result.getG());
+
+				// 判断有效行，有一个单元格不为空即为有效行
+				if (!StringUtils.isEmpty(title) || !StringUtils.isEmpty(contentAbstract)
+						|| !StringUtils.isEmpty(coverUri) || !StringUtils.isEmpty(content)
+						|| !StringUtils.isEmpty(author) || !StringUtils.isEmpty(sourceDesc)
+						|| !StringUtils.isEmpty(sourceUrl)) {
+					CreateNewsCommand command = new CreateNewsCommand();
+					command.setOwnerId(cmd.getOwnerId());
+					command.setOwnerType(cmd.getOwnerType());
+					command.setTitle(title);
+					command.setContentAbstract(contentAbstract);
+					command.setCoverUri(coverUri);
+					command.setAuthor(author);
+					command.setSourceDesc(sourceDesc);
+					command.setSourceUrl(sourceUrl);
+					checkNewsParameter(userId, command);
+					newsList.add(processNewsCommand(userId, namespaceId, command));
+				}
+			});
+			return newsList;
+		}
+		LOGGER.error("excel data format is not correct.rowCount=" + resultList.size());
+		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+				"excel data format is not correct");
 	}
 
 	@Override
 	public ListNewsResponse listNews(ListNewsCommand cmd) {
 		final Long userId = UserContext.current().getUser().getId();
-		Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType()).getNamespaceId();
+		final Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType()).getNamespaceId();
 		return listNews(userId, namespaceId, cmd.getPageAnchor(), cmd.getPageSize());
 	}
 
 	private ListNewsResponse listNews(Long userId, Integer namespaceId, Long pageAnchor, Integer pageSize) {
 		return listNews(userId, namespaceId, pageAnchor, pageSize, false);
 	}
-	
-	private ListNewsResponse listNews(Long userId, Integer namespaceId, Long pageAnchor, Integer pageSize, boolean isScene) {
+
+	private ListNewsResponse listNews(Long userId, Integer namespaceId, Long pageAnchor, Integer pageSize,
+			boolean isScene) {
 		pageSize = PaginationConfigHelper.getPageSize(configurationProvider, pageSize);
-		pageAnchor = pageAnchor < 1 ? 1 : pageAnchor;
-		Long from = (pageAnchor - 1) * pageSize;
-		List<BriefNewsDTO> list = newsProvider.listNews(namespaceId, from, pageSize).stream()
+		pageAnchor = pageAnchor == null ? 0 : pageAnchor;
+		Long from = pageAnchor * pageSize;
+		List<BriefNewsDTO> list = newsProvider.listNews(namespaceId, from, pageSize + 1).stream()
 				.map(news -> convertNewsToBriefNewsDTO(userId, news, isScene)).collect(Collectors.toList());
 
-		if (list.size() < pageSize) {
-			pageAnchor = null;
-		} else {
+		if (list.size() > pageSize) {
 			pageAnchor += 1;
+			list.remove(list.size() - 1);
+		} else {
+			pageAnchor = null;
 		}
 
 		ListNewsResponse response = new ListNewsResponse();
@@ -231,8 +297,81 @@ public class NewsServiceImpl implements NewsService {
 
 	@Override
 	public SearchNewsResponse searchNews(SearchNewsCommand cmd) {
+		if (StringUtils.isEmpty(cmd.getKeyword())) {
+			return ConvertHelper.convert(listNews(ConvertHelper.convert(cmd, ListNewsCommand.class)),
+					SearchNewsResponse.class);
+		}
+		final Long userId = UserContext.current().getUser().getId();
+		final Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType()).getNamespaceId();
+		Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		Long pageAnchor = cmd.getPageAnchor() == null ? 0 : cmd.getPageAnchor();
 
-		return null;
+		return searchNews(userId, namespaceId, cmd.getKeyword(), pageAnchor, pageSize);
+	}
+
+	private SearchNewsResponse searchNews(Long userId, Integer namespaceId, String keyword, Long pageAnchor,
+			Integer pageSize) {
+		Long from = pageAnchor * pageSize;
+
+		// {\"from\":0,\"size\":15,\"sort\":[],\"query\":{\"filtered\":{\"query\":{},\"filter\":{\"bool\":{\"must\":[],\"should\":[]}}}}}
+		JSONObject json = JSONObject.parseObject(
+				"{\"from\":0,\"size\":0,\"sort\":[],\"query\":{\"filtered\":{\"query\":{},\"filter\":{\"bool\":{\"must\":[]}}}}}");
+		// 设置from和size
+		json.put("from", from);
+		json.put("size", pageSize + 1);
+
+		// 设置排序条件
+		JSONArray sort = json.getJSONArray("sort");
+		sort.add(JSONObject.parseObject("{\"topIndex\":{\"order\":\"desc\"}}"));
+		sort.add(JSONObject.parseObject("{\"createTime\":{\"order\":\"desc\"}}"));
+
+		// 设置查询关键字
+		JSONObject query = json.getJSONObject("query").getJSONObject("filtered").getJSONObject("query");
+		query.put("query_string",
+				JSONObject.parse("{\"query\":\"" + keyword + "\",\"fields\":[\"title\",\"content\"]}"));
+
+		// 设置条件
+		JSONArray must = json.getJSONObject("query").getJSONObject("filtered").getJSONObject("filter")
+				.getJSONObject("bool").getJSONArray("must");
+		must.add(JSONObject.parse("{\"term\":{\"namespaceId\":" + namespaceId + "}}"));
+		must.add(JSONObject.parse("{\"term\":{\"status\":" + NewsStatus.ACTIVE.getCode() + "}}"));
+
+		// 需要查询的字段
+		String fields = "id,title,publishTime,author,sourceDesc,coverUri,contentAbstract,likeCount,childCount,topFlag";
+
+		// 从es查询
+		JSONArray result = searchProvider.query(SearchUtils.NEWS, json.toJSONString(), fields);
+
+		// 处理分页
+		Long nextPageAnchor = null;
+		if (result.size() > pageSize) {
+			result.remove(result.size() - 1);
+			nextPageAnchor = pageAnchor + 1;
+		}
+
+		// 转换结果到返回值
+		List<BriefNewsDTO> list = result.stream().map(r -> {
+			JSONObject o = (JSONObject) r;
+			BriefNewsDTO newsDTO = new BriefNewsDTO();
+			newsDTO.setNewsToken(WebTokenGenerator.getInstance().toWebToken(new News(o.getLong("id"))));
+			newsDTO.setTitle(o.getString("title"));
+			newsDTO.setPublishTime(o.getTimestamp("publishTime"));
+			newsDTO.setAuthor(o.getString("author"));
+			newsDTO.setSourceDesc(o.getString("sourceDesc"));
+			newsDTO.setCoverUri(o.getString("coverUri"));
+			newsDTO.setContentAbstract(o.getString("contentAbstract"));
+			newsDTO.setLikeCount(o.getLong("likeCount"));
+			newsDTO.setChildCount(o.getLong("childCount"));
+			newsDTO.setTopFlag(o.getByte("topFlag"));
+			newsDTO.setLikeFlag(getUserLikeFlag(userId, o.getLong("id")).getCode());
+			return newsDTO;
+		}).collect(Collectors.toList());
+
+		SearchNewsResponse response = new SearchNewsResponse();
+		response.setNextPageAnchor(nextPageAnchor);
+		response.setNewsList(list);
+
+		return response;
 	}
 
 	@Override
@@ -267,6 +406,8 @@ public class NewsServiceImpl implements NewsService {
 			news.setTopIndex(0L);
 		}
 		newsProvider.updateNews(news);
+		
+		syncNews(news.getId());
 	}
 
 	private News findNewsById(Long userId, Long newsId) {
@@ -306,6 +447,8 @@ public class NewsServiceImpl implements NewsService {
 		news.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		news.setStatus(NewsStatus.INACTIVE.getCode());
 		newsProvider.updateNews(news);
+		
+		syncNewsWhenDelete(news.getId());
 	}
 
 	@Override
@@ -314,7 +457,7 @@ public class NewsServiceImpl implements NewsService {
 		checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
 		setNewsLikeFlag(userId, cmd.getNewsToken());
 	}
-	
+
 	private void setNewsLikeFlag(Long userId, String newsToken) {
 		Long newsId = checkNewsToken(userId, newsToken);
 		News news = findNewsById(userId, newsId);
@@ -339,6 +482,8 @@ public class NewsServiceImpl implements NewsService {
 			userLike.setLikeType(NewsLikeFlag.NONE.getCode());
 			userProvider.updateUserLike(userLike);
 		}
+		
+		syncNews(news.getId());
 	}
 
 	@Override
@@ -363,7 +508,7 @@ public class NewsServiceImpl implements NewsService {
 			}
 			return true;
 		});
-
+		
 		AddNewsCommentResponse commentDTO = ConvertHelper.convert(comments.get(0), AddNewsCommentResponse.class);
 		commentDTO.setAttachments(attachments.stream().map(a -> ConvertHelper.convert(a, NewsAttachmentDTO.class))
 				.collect(Collectors.toList()));
@@ -426,17 +571,24 @@ public class NewsServiceImpl implements NewsService {
 		Long userId = UserContext.current().getUser().getId();
 		Long newsId = checkNewsToken(userId, cmd.getNewsToken());
 		Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		Long pageAnchor = cmd.getPageAnchor() < 1 ? 1 : cmd.getPageAnchor();
+		Long pageAnchor = cmd.getPageAnchor() == null ? 0 : cmd.getPageAnchor();
 
 		List<Comment> comments = commentProvider.listCommentByOwnerIdWithPage(EhNewsComment.class, newsId, pageAnchor,
-				pageSize);
+				pageSize + 1);
 		ListNewsCommentResponse response = new ListNewsCommentResponse();
 		if (comments != null && comments.size() > 0) {
+			if (comments.size() > pageSize) {
+				comments.remove(comments.size() - 1);
+				pageAnchor = comments.get(comments.size() - 1).getId();
+			} else {
+				pageAnchor = null;
+			}
+
 			List<NewsCommentDTO> list = new ArrayList<>();
 			populateCommentAttachment(userId, comments, list);
 			populateCommentUser(userId, list);
 
-			response.setNextPageAnchor(list.get(list.size() - 1).getId());
+			response.setNextPageAnchor(pageAnchor);
 			response.setCommentList(list);
 		}
 
@@ -528,25 +680,25 @@ public class NewsServiceImpl implements NewsService {
 	public ListNewsBySceneResponse listNewsByScene(ListNewsBySceneCommand cmd) {
 		Long userId = UserContext.current().getUser().getId();
 		Integer namespaceId = getNamespaceFromSceneToken(userId, cmd.getSceneToken());
-		return ConvertHelper.convert(listNews(userId, namespaceId, cmd.getPageAnchor(), cmd.getPageSize(), true), ListNewsBySceneResponse.class);
+		return ConvertHelper.convert(listNews(userId, namespaceId, cmd.getPageAnchor(), cmd.getPageSize(), true),
+				ListNewsBySceneResponse.class);
 	}
 
-	private Integer getNamespaceFromSceneToken(Long userId, String sceneToken){
+	private Integer getNamespaceFromSceneToken(Long userId, String sceneToken) {
 		if (StringUtils.isEmpty(sceneToken)) {
-			LOGGER.error(
-					"Invalid parameters, operatorId=" + userId + ", sceneToken=" + sceneToken);
+			LOGGER.error("Invalid parameters, operatorId=" + userId + ", sceneToken=" + sceneToken);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid parameters");
 		}
 		SceneTokenDTO sceneTokenDTO = WebTokenGenerator.getInstance().fromWebToken(sceneToken, SceneTokenDTO.class);
-		if (sceneTokenDTO == null || sceneTokenDTO.getNamespaceId()== null) {
+		if (sceneTokenDTO == null || sceneTokenDTO.getNamespaceId() == null) {
 			LOGGER.error("scene token invalid, operatorId=" + userId + ", sceneToken=" + sceneToken);
 			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
 					NewsServiceErrorCode.ERROR_NEWS_SCENETOKEN_INVALID, "scene token invalid");
 		}
 		return sceneTokenDTO.getNamespaceId();
 	}
-	
+
 	@Override
 	public void setNewsLikeFlagByScene(SetNewsLikeFlagBySceneCommand cmd) {
 		Long userId = UserContext.current().getUser().getId();
@@ -577,13 +729,14 @@ public class NewsServiceImpl implements NewsService {
 			return true;
 		});
 
-		AddNewsCommentBySceneResponse commentDTO = ConvertHelper.convert(comments.get(0), AddNewsCommentBySceneResponse.class);
+		AddNewsCommentBySceneResponse commentDTO = ConvertHelper.convert(comments.get(0),
+				AddNewsCommentBySceneResponse.class);
 		commentDTO.setAttachments(attachments.stream().map(a -> ConvertHelper.convert(a, NewsAttachmentDTO.class))
 				.collect(Collectors.toList()));
 
 		return commentDTO;
 	}
-	
+
 	private Comment processComment(Long userId, Long newsId, AddNewsCommentBySceneCommand cmd) {
 		Comment comment = new Comment();
 		comment.setOwnerId(newsId);
@@ -593,7 +746,7 @@ public class NewsServiceImpl implements NewsService {
 		comment.setCreatorUid(userId);
 		return comment;
 	}
-	
+
 	private void checkCommentParameter(Long userId, Long newsId, AddNewsCommentBySceneCommand cmd) {
 		// 检查namespace是否存在
 		getNamespaceFromSceneToken(userId, cmd.getSceneToken());
@@ -613,8 +766,8 @@ public class NewsServiceImpl implements NewsService {
 		getNamespaceFromSceneToken(userId, cmd.getSceneToken());
 		deleteNewsComment(userId, cmd.getNewsToken(), cmd.getId());
 	}
-	
-	private void deleteNewsComment(Long userId, String newsToken, Long commentId){
+
+	private void deleteNewsComment(Long userId, String newsToken, Long commentId) {
 		Long newsId = checkNewsToken(userId, newsToken);
 		Comment comment = commentProvider.findCommentById(EhNewsComment.class, commentId);
 		if (comment.getOwnerId().longValue() != newsId.longValue()) {
@@ -635,4 +788,44 @@ public class NewsServiceImpl implements NewsService {
 		commentProvider.updateComment(EhNewsComment.class, comment);
 	}
 
+	@Override
+	public void syncNews(SyncNewsCommand cmd) {
+		if (cmd.getId() != null) {
+			syncNews(cmd.getId());
+		} else {
+			// 一次同步200条，防止一次同步太多内存被压爆
+			Integer pageSize = 200;
+			int i = 0;
+			while (true) {
+				Long from = (long) (i * pageSize);
+				List<News> list = newsProvider.findAllActiveNewsByPage(from, pageSize);
+				if (list != null && list.size() >= 0) {
+					StringBuilder sb = new StringBuilder();
+					list.forEach(n->{
+						sb.append("{\"index\":{\"_id\":\"").append(n.getId()).append("\"}}\n").append(JSONObject.toJSONString(n)).append("\n");
+					});
+					
+					searchProvider.bulk(SearchUtils.NEWS, sb.toString());
+					
+					if (list.size()<pageSize) {
+						break;
+					}
+					i++;
+				}else {
+					break;
+				}
+			}
+		}
+	}
+	
+	private void syncNews(Long id){
+		News news = newsProvider.findNewsById(id);
+		if (news != null) {
+			searchProvider.insertOrUpdate(SearchUtils.NEWS, news.getId().toString(), JSONObject.toJSONString(news));
+		}
+	}
+
+	private void syncNewsWhenDelete(Long id){
+		searchProvider.deleteById(SearchUtils.NEWS, id.toString());
+	}
 }

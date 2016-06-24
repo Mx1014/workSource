@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * 返回值
  * <li>newsToken: 新闻标识</li>
  * <li>title: 标题</li>
- * <li>releaseTime: 发布时间</li>
+ * <li>publishTime: 发布时间</li>
  * <li>author: 作者</li>
  * <li>sourceDesc: 来源</li>
  * <li>sourceUrl: 原文链接</li>
@@ -26,7 +26,7 @@ import com.everhomes.util.StringHelper;
 public class GetNewsDetailInfoResponse {
 	private String newsToken;
 	private String title;
-	private Timestamp releaseTime;
+	private Timestamp publishTime;
 	private String author;
 	private String sourceDesc;
 	private String sourceUrl;
@@ -53,12 +53,12 @@ public class GetNewsDetailInfoResponse {
 		this.title = title;
 	}
 
-	public Timestamp getReleaseTime() {
-		return releaseTime;
+	public Timestamp getPublishTime() {
+		return publishTime;
 	}
 
-	public void setReleaseTime(Timestamp releaseTime) {
-		this.releaseTime = releaseTime;
+	public void setPublishTime(Timestamp publishTime) {
+		this.publishTime = publishTime;
 	}
 
 	public String getAuthor() {

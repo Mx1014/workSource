@@ -31,6 +31,7 @@ import com.everhomes.rest.news.SearchNewsCommand;
 import com.everhomes.rest.news.SearchNewsResponse;
 import com.everhomes.rest.news.SetNewsLikeFlagCommand;
 import com.everhomes.rest.news.SetNewsTopFlagCommand;
+import com.everhomes.rest.news.SyncNewsCommand;
 import com.everhomes.util.RequireAuthentication;
 
 @RestDoc(value = "News Controller", site = "core")
@@ -241,6 +242,23 @@ public class NewsController extends ControllerBase {
 	@RestReturn(String.class)
 	public RestResponse deleteNewsComment(DeleteNewsCommentCommand cmd) {
 		newsService.deleteNewsComment(cmd);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /news/syncNews</b>
+	 * <p>
+	 * 同步新闻
+	 * </p>
+	 */
+	@RequestMapping("syncNews")
+	@RestReturn(String.class)
+	public RestResponse syncNews(SyncNewsCommand cmd){
+		newsService.syncNews(cmd);
 
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
