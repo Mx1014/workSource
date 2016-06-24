@@ -109,15 +109,4 @@ public class CachePool {
 	    return cacheItems.size();
 	  }
 	  
-	  @Scheduled(cron="0 0 2 * * ? ")
-	  void quartzClearMap(){
-		  Enumeration<String> keys =  cacheItems.keys();
-		  while(keys.hasMoreElements()){
-			  String key = keys.nextElement();
-			  CacheItem item = (CacheItem) cacheItems.get(key);
-			  if(item.isExpired())
-				  cacheItems.remove(key);
-		  }
-	  }
-	  
 }
