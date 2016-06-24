@@ -2149,7 +2149,10 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                         if(m != null && m.find()) {
                             aname = m.group(0);
                             Long l = Long.parseLong(aname);
-                            floors.add(l);
+                            if(l >= -255 && l <= 255) {
+                                floors.add(l);    
+                                }
+                            
                         }
                     }
                     
