@@ -122,10 +122,6 @@ objc.header.ext: .h
 objc.source.ext: .m
 objc.response.base: EvhRestResponseBase
 
-biz.serverUrl: http://biz.zuolin.com/zl-ec
-biz.appKey: 39628d1c-0646-4ff6-9691-2c327b03f9c4
-biz.secretKey: PSsIB9nZm3ENS3stei8oAvGa2afRW7wT+UxBn9li4C7JCfjCtHYJY6x76XDtUCUcXOUhkPYK9V/5r03pD2rquQ==
-
 class.name.prefix: Evh
 
 source.jars: ${EVH_HOME}/ehrest/target/ehrest-3.4.0-SNAPSHOT.jar
