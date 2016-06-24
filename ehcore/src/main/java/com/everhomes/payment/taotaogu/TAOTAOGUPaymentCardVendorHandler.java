@@ -547,8 +547,8 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 				Map map = null;
 				map = orderLogin(vendorDataMap);
 				if(map != null){
-					cachePool.putCacheItem(TAOTAOGUVendorConstant.TAOTAOGU_AESKEY, (String) map.get("aes_key"), 24*60*60*1000);
-					cachePool.putCacheItem(TAOTAOGUVendorConstant.TAOTAOGU_TOKEN, (String) map.get("token"), 24*60*60*1000);
+					cachePool.putCacheItem(TAOTAOGUVendorConstant.TAOTAOGU_AESKEY, (String) map.get("aes_key"), 20*60*60*1000);
+					cachePool.putCacheItem(TAOTAOGUVendorConstant.TAOTAOGU_TOKEN, (String) map.get("token"), 20*60*60*1000);
 				}
 		}
 	}
