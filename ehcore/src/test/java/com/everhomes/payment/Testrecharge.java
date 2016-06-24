@@ -1,4 +1,4 @@
-package com.everhomes.payment.util;
+package com.everhomes.payment;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
