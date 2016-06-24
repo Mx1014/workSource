@@ -636,14 +636,6 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		
 	}
 	
-	 private String mergeJson(String json1,String json2){
-	    	Gson gson = new Gson();
-			Map map = gson.fromJson(json1, Map.class);
-			Map map1 = gson.fromJson(json2, Map.class);
-			map.putAll(map1);
-			return gson.toJson(map);
-	 }
-	
 	private Map orderLogin(Map vendorDataMap){
 		Map result = null;
 		String rspText = null;

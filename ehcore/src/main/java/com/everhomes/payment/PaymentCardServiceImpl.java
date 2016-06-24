@@ -208,24 +208,24 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     	GetCardPaidQrCodeDTO dto = new GetCardPaidQrCodeDTO();
     	PaymentCard paymentCard = checkPaymentCard(cmd.getCardId());
     	checkPaymentCardIsNull(paymentCard,cmd.getCardId());
-    	CachePool cachePool = CachePool.getInstance();
-
-    	CacheItem entity = cachePool.getCacheItem(CacheConstant.GET_VERIFY_CODE_TIME+cmd.getCardId());
-    	//防止请求过于频繁
-    	if(entity == null){
-    		//缓存保持24小时
-    		long now = System.currentTimeMillis();
-    		cachePool.putCacheItem(CacheConstant.GET_VERIFY_CODE_TIME+cmd.getCardId(), now, 24 * 60 *60 * 1000);
-    	}else{
-    		long time = (long) entity.getEntity();
-    		long now = System.currentTimeMillis();
-    		if(now < (30 * 1000 + time) ){
-    			LOGGER.error("the get Code request is frequently,the time is less than 50s.");
-    			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    					"the get Code request is frequently,the time is less than 50s.");
-    		}
-    		entity.setEntity(now);
-    	}
+    	
+//    	CachePool cachePool = CachePool.getInstance();
+//    	CacheItem entity = cachePool.getCacheItem(CacheConstant.GET_VERIFY_CODE_TIME+cmd.getCardId());
+//    	//防止请求过于频繁
+//    	if(entity == null){
+//    		//缓存保持24小时
+//    		long now = System.currentTimeMillis();
+//    		cachePool.putCacheItem(CacheConstant.GET_VERIFY_CODE_TIME+cmd.getCardId(), now, 24 * 60 *60 * 1000);
+//    	}else{
+//    		long time = (long) entity.getEntity();
+//    		long now = System.currentTimeMillis();
+//    		if(now < (30 * 1000 + time) ){
+//    			LOGGER.error("the get Code request is frequently,the time is less than 50s.");
+//    			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//    					"the get Code request is frequently,the time is less than 50s.");
+//    		}
+//    		entity.setEntity(now);
+//    	}
     	PaymentCardVendorHandler handler = getPaymentCardVendorHandler(paymentCard.getVendorName());
 		String code = handler.getCardPaidQrCodeByVendor(paymentCard);
 		dto.setCode(code);
