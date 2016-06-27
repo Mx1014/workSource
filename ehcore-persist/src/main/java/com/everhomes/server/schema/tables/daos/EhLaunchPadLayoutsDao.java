@@ -102,4 +102,25 @@ public class EhLaunchPadLayoutsDao extends org.jooq.impl.DAOImpl<com.everhomes.s
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadLayouts> fetchBySceneType(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhLaunchPadLayouts.EH_LAUNCH_PAD_LAYOUTS.SCENE_TYPE, values);
 	}
+
+	/**
+	 * Fetch records that have <code>scope_code IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadLayouts> fetchByScopeCode(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLaunchPadLayouts.EH_LAUNCH_PAD_LAYOUTS.SCOPE_CODE, values);
+	}
+
+	/**
+	 * Fetch records that have <code>scope_id IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadLayouts> fetchByScopeId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLaunchPadLayouts.EH_LAUNCH_PAD_LAYOUTS.SCOPE_ID, values);
+	}
+
+	/**
+	 * Fetch records that have <code>apply_policy IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhLaunchPadLayouts> fetchByApplyPolicy(java.lang.Byte... values) {
+		return fetch(com.everhomes.server.schema.tables.EhLaunchPadLayouts.EH_LAUNCH_PAD_LAYOUTS.APPLY_POLICY, values);
+	}
 }

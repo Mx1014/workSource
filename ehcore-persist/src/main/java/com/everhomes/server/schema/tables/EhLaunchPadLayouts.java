@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhLaunchPadLayouts extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhLaunchPadLayoutsRecord> {
 
-	private static final long serialVersionUID = 2008275841;
+	private static final long serialVersionUID = 1711116266;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_launch_pad_layouts</code>
@@ -70,6 +70,21 @@ public class EhLaunchPadLayouts extends org.jooq.impl.TableImpl<com.everhomes.se
 	 * The column <code>ehcore.eh_launch_pad_layouts.scene_type</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadLayoutsRecord, java.lang.String> SCENE_TYPE = createField("scene_type", org.jooq.impl.SQLDataType.VARCHAR.length(64).nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_launch_pad_layouts.scope_code</code>. 0: all, 1: community, 2: city, 3: user
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadLayoutsRecord, java.lang.Byte> SCOPE_CODE = createField("scope_code", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: all, 1: community, 2: city, 3: user");
+
+	/**
+	 * The column <code>ehcore.eh_launch_pad_layouts.scope_id</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadLayoutsRecord, java.lang.Long> SCOPE_ID = createField("scope_id", org.jooq.impl.SQLDataType.BIGINT.defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_launch_pad_layouts.apply_policy</code>. 0: default, 1: override, 2: revert 3:customized
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhLaunchPadLayoutsRecord, java.lang.Byte> APPLY_POLICY = createField("apply_policy", org.jooq.impl.SQLDataType.TINYINT.nullable(false).defaulted(true), this, "0: default, 1: override, 2: revert 3:customized");
 
 	/**
 	 * Create a <code>ehcore.eh_launch_pad_layouts</code> table reference
