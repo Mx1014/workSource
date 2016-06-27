@@ -402,11 +402,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         locator.setAnchor(cmd.getPageAnchor());
         
         List<User> users = null;
-        if(cmd.getKeyword() == null) {
-            users = userProvider.listUserByKeyword("", cmd.getNamespaceId(), locator, pageSize);
-        } else {
-            users = userProvider.listUserByKeyword(cmd.getKeyword(), cmd.getNamespaceId(), locator, pageSize);
-        }
+        users = userProvider.searchDoorUsers(cmd.getNamespaceId(), cmd.getOrganizationId(), cmd.getBuildingId(),
+                cmd.getIsAuth(), cmd.getKeyword(), locator, pageSize);
         
         List<AclinkUserDTO> userDTOs = new ArrayList<AclinkUserDTO>();
         for(User u : users) {
