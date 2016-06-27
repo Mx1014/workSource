@@ -18,6 +18,7 @@ import com.everhomes.util.StringHelper;
  * <li>creatorNickName: 创建者昵称</li>
  * <li>attachments: 帖子或评论的附件信息，参见{@link com.everhomes.rest.forum.AttachmentDTO}</li>
  * <li>createTime:创建时间</li>
+ * <li>creatorAvatarUrl: 创建者在圈内的头像URL</li>
  *</ul>
  */
 public class ActivityShareDetailResponse {
@@ -40,6 +41,8 @@ public class ActivityShareDetailResponse {
 	
 	@ItemType(AttachmentDTO.class)
     private List<AttachmentDTO> attachments;
+	
+	private String creatorAvatarUrl;
 	
 	public ActivityDTO getActivity() {
 		return activity;
@@ -129,8 +132,18 @@ public class ActivityShareDetailResponse {
 	public void setAttachments(List<AttachmentDTO> attachments) {
 		this.attachments = attachments;
 	}
-
 	
+	
+	public String getCreatorAvatarUrl() {
+		return creatorAvatarUrl;
+	}
+
+
+	public void setCreatorAvatarUrl(String creatorAvatarUrl) {
+		this.creatorAvatarUrl = creatorAvatarUrl;
+	}
+
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

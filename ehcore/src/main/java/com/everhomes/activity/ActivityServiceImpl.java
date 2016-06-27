@@ -1887,6 +1887,7 @@ public class ActivityServiceImpl implements ActivityService {
         response.setSubject(post.getSubject());
         response.setCreatorNickName(post.getCreatorNickName());
         response.setCreateTime(post.getCreateTime());
+        response.setCreatorAvatarUrl(post.getCreatorAvatarUrl());
         
 		return response;
 	}
