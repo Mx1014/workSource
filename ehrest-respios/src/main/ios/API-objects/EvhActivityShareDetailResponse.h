@@ -32,6 +32,8 @@
 // item type EvhAttachmentDTO*
 @property(nonatomic, strong) NSMutableArray* attachments;
 
+@property(nonatomic, copy) NSString* creatorAvatarUrl;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 

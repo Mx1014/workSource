@@ -1,20 +1,21 @@
 //
-// EvhUserGetBizSignatureRestResponse.m
+// EvhBizOrderHolder.m
 //
-#import "EvhUserGetBizSignatureRestResponse.h"
-#import "EvhUserGetSignatureCommandResponse.h"
+#import "EvhBizOrderHolder.h"
+#import "EvhObject.h"
+#import "EvhBoolean.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhUserGetBizSignatureRestResponse
+// EvhBizOrderHolder
 //
 
-@implementation EvhUserGetBizSignatureRestResponse
+@implementation EvhBizOrderHolder
 
 +(id) withJsonString: (NSString*) jsonString
 {
     id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
     if(jsonObject != nil) {
-        EvhUserGetBizSignatureRestResponse* obj = [EvhUserGetBizSignatureRestResponse new];
+        EvhBizOrderHolder* obj = [EvhBizOrderHolder new];
         return [obj fromJson:jsonObject];
     }
     return nil;
@@ -31,22 +32,27 @@
 
 -(void) toJson: (NSMutableDictionary*) jsonObject 
 {
-    [super toJson: jsonObject];
-    
-    if(self.response) {
+    if(self.body)
+        [jsonObject setObject: self.body forKey: @"body"];
+    if(self.result) {
         NSMutableDictionary* dic = [NSMutableDictionary new];
-        [self.response toJson: dic];
-        [jsonObject setObject: dic forKey: @"response"];
+        [self.result toJson: dic];
+        
+        [jsonObject setObject: dic forKey: @"result"];
     }
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
 {
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
-        [super fromJson: jsonObject];
-        NSMutableDictionary* dic =  (NSMutableDictionary*)[jsonObject objectForKey: @"response"];
-        self.response = [EvhUserGetSignatureCommandResponse new];
-        self.response = [self.response fromJson: dic];
+        self.body = [jsonObject objectForKey: @"body"];
+        if(self.body && [self.body isEqual:[NSNull null]])
+            self.body = nil;
+
+        NSMutableDictionary* itemJson =  (NSMutableDictionary*)[jsonObject objectForKey: @"result"];
+
+        self.result = [EvhBoolean new];
+        self.result = [self.result fromJson: itemJson];
         return self;
     }
     
