@@ -523,7 +523,7 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		json.put("request_time", timeStr);
 		
 		if(LOGGER.isDebugEnabled())
-			LOGGER.debug("json={},token={},aesKey={}",json,token,aesKey);
+			LOGGER.debug(" getCardPaidQrCodeByVendor json={},token={},aesKey={}",json,token,aesKey);
 		Map codeMap = post("/iips2/order/tokenrequest",token, aesKey, json);
 		if(codeMap != null){
 			String returnCode = (String) codeMap.get("return_code");
