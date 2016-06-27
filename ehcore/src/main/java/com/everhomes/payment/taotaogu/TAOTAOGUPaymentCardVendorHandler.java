@@ -522,6 +522,8 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 		json.put("reserved", "");
 		json.put("request_time", timeStr);
 		
+		if(LOGGER.isDebugEnabled())
+			LOGGER.debug("json={},token={},aesKey={}",json,token,aesKey);
 		Map codeMap = post("/iips2/order/tokenrequest",token, aesKey, json);
 		if(codeMap != null){
 			String returnCode = (String) codeMap.get("return_code");
@@ -680,7 +682,8 @@ public class TAOTAOGUPaymentCardVendorHandler implements PaymentCardVendorHandle
 			HttpResponse rsp = httpClient.execute(request);
 			StatusLine status = rsp.getStatusLine();
 			rspText = EntityUtils.toString(rsp.getEntity(), "GBK");
-			
+			if(LOGGER.isDebugEnabled())
+				LOGGER.debug("rspText={}",rspText);
 			int a = rspText.indexOf("msg=");
 			int b = rspText.indexOf("&sign=");
 			String r1 = null; //结果字符串
