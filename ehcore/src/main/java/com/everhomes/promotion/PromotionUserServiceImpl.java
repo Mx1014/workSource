@@ -30,6 +30,7 @@ import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.promotion.OpPromotionScopeType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
 
 @Component
 public class PromotionUserServiceImpl implements PromotionUserService {
@@ -51,6 +52,9 @@ public class PromotionUserServiceImpl implements PromotionUserService {
     @Autowired
     private OpPromotionAssignedScopeProvider promotionAssignedScopeProvider;
     
+    @Autowired
+    private UserService userService;
+    
     @Override
     public void listAllUser(OpPromotionUserVisitor visitor, OpPromotionUserCallback callback) {
         CrossShardListingLocator locator = new CrossShardListingLocator();
@@ -62,7 +66,7 @@ public class PromotionUserServiceImpl implements PromotionUserService {
                 callback.userFound(user, visitor);    
             }
             
-            if(locator.getAnchor() == null) {
+            if(locator.getAnchor() == null || users == null || users.size() < pageSize) {
                 break;
             }
             
@@ -93,7 +97,7 @@ public class PromotionUserServiceImpl implements PromotionUserService {
             }
             
             //Break after first process
-            if(locator.getAnchor() == null) {
+            if(locator.getAnchor() == null || comunities == null || comunities.size() < pageSize) {
                 break;
             }
             
@@ -126,7 +130,7 @@ public class PromotionUserServiceImpl implements PromotionUserService {
                 }
                 
                 //break after first process
-                if(resp.getNextPageAnchor() == null) {
+                if(resp.getNextPageAnchor() == null || resp.getDtos() == null || resp.getDtos().size() < cmd.getPageSize()) {
                     break;
                 }
                 
@@ -167,6 +171,7 @@ public class PromotionUserServiceImpl implements PromotionUserService {
         //groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
         groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
         cmd.setGroupTypes(groupTypes);
+        cmd.setPageSize(100);
         
         ListOrganizationMemberCommandResponse resp = organizationService.ListParentOrganizationPersonnels(cmd);
         while((resp != null) && (resp.getMembers() != null) && (resp.getMembers().size() > 0)) {
@@ -178,7 +183,7 @@ public class PromotionUserServiceImpl implements PromotionUserService {
                 }
             }
             
-            if(resp.getNextPageAnchor() == null) {
+            if(resp.getNextPageAnchor() == null || resp.getMembers() == null || resp.getMembers().size() < cmd.getPageSize()) {
                 break;
             }
             
@@ -186,6 +191,21 @@ public class PromotionUserServiceImpl implements PromotionUserService {
             resp = organizationService.ListParentOrganizationPersonnels(cmd);
             
         }   
+    }
+    
+    @Override
+    public void listUserByUserId(OpPromotionUserVisitor visitor, OpPromotionUserCallback callback) {
+        Long userId = (Long)visitor.getValue();
+        User user = userProvider.findUserById(userId);
+        if(user != null) {
+            callback.userFound(user, visitor);    
+        } else {
+            user = userService.findUserByIndentifier(visitor.getPromotion().getNamespaceId(), userId.toString());
+            if(user != null) {
+                callback.userFound(user, visitor);    
+            }
+        }
+        
     }
     
     @Override

@@ -1,6 +1,7 @@
 //
 // EvhApiConstants.h
 //
+#define EVH_ACLINK_ACLINKMESSAGETEST_URL @"/aclink/aclinkMessageTest"
 #define EVH_ACLINK_ACTIVE_URL @"/aclink/active"
 #define EVH_ACLINK_ACTIVING_URL @"/aclink/activing"
 #define EVH_ACLINK_CONNECTING_URL @"/aclink/connecting"
@@ -13,11 +14,14 @@
 #define EVH_ACLINK_LISTADMINAESUSERKEY_URL @"/aclink/listAdminAesUserKey"
 #define EVH_ACLINK_LISTAESUSERKEY_URL @"/aclink/listAesUserKey"
 #define EVH_ACLINK_LISTAUTHHISTORY_URL @"/aclink/listAuthHistory"
+#define EVH_ACLINK_LISTDOORACCESSGROUP_URL @"/aclink/listDoorAccessGroup"
 #define EVH_ACLINK_LISTDOORACCESSQRKEY_URL @"/aclink/listDoorAccessQRKey"
 #define EVH_ACLINK_QUERYMESSAGES_URL @"/aclink/queryMessages"
+#define EVH_ACLINK_REMOTEOPEN_URL @"/aclink/remoteOpen"
 #define EVH_ACLINK_SYNCWEBSOCKETMESSAGES_URL @"/aclink/syncWebsocketMessages"
 #define EVH_ACLINK_UPGRATEAUTH_URL @"/aclink/upgrateAuth"
 #define EVH_ACLINK_UPGRATEVERIFY_URL @"/aclink/upgrateVerify"
+#define EVH_ACLINK_V_URL @"/aclink/v"
 #define EVH_ACLINK_WIFIMGMT_URL @"/aclink/wifiMgmt"
 #define EVH_ACTIVITY_CANCELSIGNUP_URL @"/activity/cancelSignup"
 #define EVH_ACTIVITY_CHECKIN_URL @"/activity/checkin"
@@ -80,6 +84,7 @@
 #define EVH_ADMIN_ACLINK_LISTUSERKEY_URL @"/admin/aclink/listUserKey"
 #define EVH_ADMIN_ACLINK_SEARCHDOORACCESS_URL @"/admin/aclink/searchDoorAccess"
 #define EVH_ADMIN_ACLINK_SEARCHDOORAUTH_URL @"/admin/aclink/searchDoorAuth"
+#define EVH_ADMIN_ACLINK_SEARCHVISITORDOORAUTH_URL @"/admin/aclink/searchVisitorDoorAuth"
 #define EVH_ADMIN_ACLINK_UPDATEDOORACCESS_URL @"/admin/aclink/updateDoorAccess"
 #define EVH_ADMIN_ACTIVITY_LIST_URL @"/admin/activity/list"
 #define EVH_ADMIN_ADDBORDER_URL @"/admin/addBorder"

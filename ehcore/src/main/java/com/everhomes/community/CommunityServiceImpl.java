@@ -234,10 +234,11 @@ public class CommunityServiceImpl implements CommunityService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"Invalid communityId parameter");
 		}
-		if(cmd.getGeoPointList() == null || cmd.getGeoPointList().size() <= 0){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"Invalid geoPointList parameter");
-		}
+		
+//		if(cmd.getGeoPointList() == null || cmd.getGeoPointList().size() <= 0){
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+//					"Invalid geoPointList parameter");
+//		}
 
 		Community community = this.communityProvider.findCommunityById(cmd.getCommunityId());
 		if(community == null){
@@ -269,6 +270,7 @@ public class CommunityServiceImpl implements CommunityService {
 		community.setStatus(CommunityAdminStatus.CONFIRMING.getCode());
 		community.setAreaName(area.getName());
 		community.setCityName(city.getName());
+		community.setAreaSize(cmd.getAreaSize());
 		this.dbProvider.execute((TransactionStatus status) ->  {
 			this.communityProvider.updateCommunity(community);
 
@@ -1283,7 +1285,7 @@ public class CommunityServiceImpl implements CommunityService {
             query.addConditions(c);
             if(null != locator.getAnchor())
             	query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_ID.lt(locator.getAnchor()));
-            query.addGroupBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID);
+            //query.addGroupBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID);
 			query.addOrderBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID.desc());
 			query.addOrderBy(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.desc());
             return query;

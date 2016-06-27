@@ -35,6 +35,8 @@
 
 @property(nonatomic, copy) NSString* doorName;
 
+@property(nonatomic, copy) NSNumber* authId;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 

@@ -51,11 +51,12 @@ public class BannerUiController extends ControllerBase {
     public RestResponse getBannersByScene(@Valid GetBannersBySceneCommand cmd,HttpServletRequest request,HttpServletResponse response) {
         
         List<BannerDTO> result = bannerService.getBannersByScene(cmd, request);
-        RestResponse resp =  new RestResponse();
-        int hashCode = configurationProvider.getIntValue(MARKETDATA_ITEM_VERSION, 0);
-        if(EtagHelper.checkHeaderEtagOnly(30,hashCode+"", request, response)) {
-            resp.setResponseObject(result);
-        }
+        RestResponse resp =  new RestResponse(result);
+        // 在多场景的情况下，etag不能使用，以免不同的场景拿不到数据 by lqs 20160617
+//        int hashCode = configurationProvider.getIntValue(MARKETDATA_ITEM_VERSION, 0);
+//        if(EtagHelper.checkHeaderEtagOnly(30,hashCode+"", request, response)) {
+//            resp.setResponseObject(result);
+//        }
         
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");

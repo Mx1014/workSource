@@ -24,6 +24,8 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.enterprise.Enterprise;
 import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.videoconf.ConfOrderDTO;
 import com.everhomes.rest.videoconf.ListVideoConfAccountOrderCommand;
 import com.everhomes.rest.videoconf.ListVideoConfAccountOrderResponse;
@@ -45,7 +47,7 @@ public class ConfOrderSearcherImpl extends AbstractElasticSearch implements
 	private VideoConfProvider vcProvider;
 	
 	@Autowired
-	private EnterpriseProvider enterpriseProvider;
+	private OrganizationProvider organizationProvider;
 
 	@Override
 	public void deleteById(Long id) {
@@ -174,9 +176,9 @@ public class ConfOrderSearcherImpl extends AbstractElasticSearch implements
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
             b.field("enterpriseId", order.getOwnerId());
 
-            Enterprise enterprise = enterpriseProvider.findEnterpriseById(order.getOwnerId());
-            if(null != enterprise) {
-                b.field("enterpriseName", enterprise.getName());
+            Organization org = organizationProvider.findOrganizationById(order.getOwnerId());
+            if(null != org) {
+                b.field("enterpriseName", org.getName());
             } else {
                 b.field("enterpriseName", "");
             }
@@ -194,9 +196,9 @@ public class ConfOrderSearcherImpl extends AbstractElasticSearch implements
 		ConfOrderDTO dto = new ConfOrderDTO();
 		dto.setId(order.getId());
 		dto.setEnterpriseId(order.getOwnerId());
-		Enterprise enterprise = enterpriseProvider.findEnterpriseById(order.getOwnerId());
-		if(enterprise != null)
-			dto.setEnterpriseName(enterprise.getName());
+		Organization org = organizationProvider.findOrganizationById(order.getOwnerId());
+		if(org != null)
+			dto.setEnterpriseName(org.getName());
 
 		ConfEnterprises enterpriseContact = vcProvider.findByEnterpriseId(order.getOwnerId());
 		if(enterpriseContact != null) {

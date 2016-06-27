@@ -99,10 +99,11 @@ public class OpPromotionActivitieProviderImpl implements OpPromotionActivityProv
             queryBuilderCallback.buildCondition(locator, query);
 
         if(locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_OP_PROMOTION_ACTIVITIES.ID.gt(locator.getAnchor()));
+            query.addConditions(Tables.EH_OP_PROMOTION_ACTIVITIES.ID.lt(locator.getAnchor()));
             }
 
         query.addLimit(count);
+        query.addOrderBy(Tables.EH_OP_PROMOTION_ACTIVITIES.ID.desc());
         List<OpPromotionActivity> objs = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, OpPromotionActivity.class);
         });
@@ -143,7 +144,7 @@ public class OpPromotionActivitieProviderImpl implements OpPromotionActivityProv
                     SelectQuery<? extends Record> query) {
                 query.addConditions(Tables.EH_OP_PROMOTION_ACTIVITIES.POLICY_TYPE.eq(OpPromotionConditionType.ORDER_RANGE_VALUE.getCode()));
                 query.addConditions(Tables.EH_OP_PROMOTION_ACTIVITIES.INTEGRAL_TAG1.le(value));
-                query.addConditions(Tables.EH_OP_PROMOTION_ACTIVITIES.INTEGRAL_TAG2.ge(value));
+                query.addConditions(Tables.EH_OP_PROMOTION_ACTIVITIES.INTEGRAL_TAG2.gt(value));
                 query.addConditions(Tables.EH_OP_PROMOTION_ACTIVITIES.STATUS.ne(OpPromotionStatus.INACTIVE.getCode()));
                 return query;
             }

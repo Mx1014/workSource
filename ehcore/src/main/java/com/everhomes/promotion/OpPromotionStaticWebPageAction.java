@@ -11,7 +11,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.messaging.LinkBody;
@@ -49,6 +51,9 @@ public class OpPromotionStaticWebPageAction implements OpPromotionAction {
     @Autowired
     ScheduleTaskLogProvider scheduleTaskLogProvider;
     
+    @Autowired
+    ContentServerService contentServerService;
+    
     @Override
     public void fire(OpPromotionContext ctx) {
         OpPromotionActivityContext activityContext = (OpPromotionActivityContext)ctx;
@@ -83,21 +88,26 @@ public class OpPromotionStaticWebPageAction implements OpPromotionAction {
         });
         
         if(promotion != null) {
-            LOGGER.error("already pushed to user=" + promotion.getTargetUid() + ", promotionId=" + promotion.getOwnerId());
+        	if(LOGGER.isDebugEnabled()){
+        		LOGGER.error("already pushed to user=" + promotion.getTargetUid() + ", promotionId=" + promotion.getOwnerId());
+        	}
             return;
         }
         
         MessageDTO messageDto = new MessageDTO();
         messageDto.setAppId(AppConstants.APPID_MESSAGING);
         messageDto.setSenderUid(User.SYSTEM_UID);
+//        messageDto.set
         messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()), 
-                new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.BIZ_USER_LOGIN.getUserId())));
+                new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_UID)));
         
         messageDto.setBodyType(MessageBodyType.LINK.getCode());
         LinkBody linkBody = new LinkBody();
         linkBody.setActionUrl(data.getUrl());
         linkBody.setContent(activityContext.getPromotion().getDescription());
         linkBody.setTitle(activityContext.getPromotion().getTitle());
+        String url = contentServerService.parserUri(activityContext.getPromotion().getIconUri(), EntityType.USER.getCode(), userId);
+        linkBody.setCoverUrl(url);
         String bodyStr = StringHelper.toJsonString(linkBody);
         
         messageDto.setBody(bodyStr);

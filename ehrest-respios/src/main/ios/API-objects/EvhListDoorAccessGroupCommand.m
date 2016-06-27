@@ -34,6 +34,8 @@
         [jsonObject setObject: self.ownerId forKey: @"ownerId"];
     if(self.ownerType)
         [jsonObject setObject: self.ownerType forKey: @"ownerType"];
+    if(self.search)
+        [jsonObject setObject: self.search forKey: @"search"];
     if(self.pageAnchor)
         [jsonObject setObject: self.pageAnchor forKey: @"pageAnchor"];
     if(self.pageSize)
@@ -50,6 +52,10 @@
         self.ownerType = [jsonObject objectForKey: @"ownerType"];
         if(self.ownerType && [self.ownerType isEqual:[NSNull null]])
             self.ownerType = nil;
+
+        self.search = [jsonObject objectForKey: @"search"];
+        if(self.search && [self.search isEqual:[NSNull null]])
+            self.search = nil;
 
         self.pageAnchor = [jsonObject objectForKey: @"pageAnchor"];
         if(self.pageAnchor && [self.pageAnchor isEqual:[NSNull null]])

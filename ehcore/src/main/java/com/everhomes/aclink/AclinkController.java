@@ -35,6 +35,7 @@ import com.everhomes.rest.aclink.AclinkDeleteByIdCommand;
 import com.everhomes.rest.aclink.AclinkDisconnectedCommand;
 import com.everhomes.rest.aclink.AclinkMessageTestCommand;
 import com.everhomes.rest.aclink.AclinkMgmtCommand;
+import com.everhomes.rest.aclink.AclinkRemoteOpenCommand;
 import com.everhomes.rest.aclink.AclinkUpgradeCommand;
 import com.everhomes.rest.aclink.AclinkUpgradeResponse;
 import com.everhomes.rest.aclink.AclinkWebSocketMessage;
@@ -196,8 +197,17 @@ public class AclinkController extends ControllerBase {
         Long role = 0l;
         
         if(cmd.getOrganizationId() != null) {
+            
+            //Only for active door
             try {
                 rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.AclinkManager);
+                role = 1l;
+            } catch(Exception e) {
+                
+            }
+            
+            try {
+                rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.AclinkInnerManager);
                 role = 1l;
             } catch(Exception e) {
                 
@@ -408,8 +418,8 @@ public class AclinkController extends ControllerBase {
     
     /**
      * 
-     * <b>URL: /aclink/listDoorAccessQRKey</b>
-     * <p>列出所有二维码门禁列表 </p>
+     * <b>URL: /aclink/wifiMgmt</b>
+     * <p> wifi 配置命令 </p>
      * @return
      */
     @RequestMapping("wifiMgmt")
@@ -451,4 +461,21 @@ public class AclinkController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;        
     }
+    
+    /**
+     * 
+     * <b>URL: /aclink/remoteOpen</b>
+     * <p>删除一个组或者单独一个门禁设备</p>
+     * @return
+     */
+    @RequestMapping("remoteOpen")
+    @RestReturn(value=String.class)
+    public RestResponse remoteOpen(@Valid AclinkRemoteOpenCommand cmd) {
+        doorAccessService.remoteOpenDoor(cmd.getAuthId());
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;        
+    }
+    
 }

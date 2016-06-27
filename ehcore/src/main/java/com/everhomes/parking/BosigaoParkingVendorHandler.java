@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,7 +95,7 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 			parkingCardDTO.setOwnerType(ParkingOwnerType.COMMUNITY.getCode());
 			parkingCardDTO.setOwnerId(ownerId);
 			parkingCardDTO.setParkingLotId(parkingLotId);
-			parkingCardDTO.setPlateOwnerName(plateOwnerName);
+			parkingCardDTO.setPlateOwnerName(StringUtils.isBlank(plateOwnerName)?"默认昵称":plateOwnerName);
 			parkingCardDTO.setPlateNumber(carNumber);
 			//parkingCardDTO.setStartTime(startTime);
 			parkingCardDTO.setEndTime(endTime.getTime());
@@ -131,6 +132,7 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 		List<ParkingRechargeRateDTO> result = parkingRechargeRateList.stream().map(r->{
 			ParkingRechargeRateDTO dto = new ParkingRechargeRateDTO();
 			dto = ConvertHelper.convert(r, ParkingRechargeRateDTO.class);
+			dto.setRateName(dto.getMonthCount().intValue()+"个月");
 			dto.setRateToken(r.getId().toString());
 			dto.setVendorName(ParkingLotVendor.BOSIGAO.getCode());
 			return dto;

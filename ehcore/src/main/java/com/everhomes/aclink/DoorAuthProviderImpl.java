@@ -172,7 +172,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
     }
     
     @Override
-    public List<DoorAuth> queryValidDoorAuthByUserId(ListingLocator locator, long userId, DoorAccessDriverType driver, int count) {
+    public List<DoorAuth> queryValidDoorAuthByUserId(ListingLocator locator, long userId, String driver, int count) {
         
         long now = DateHelper.currentGMTTime().getTime();
         
@@ -187,7 +187,11 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                 Condition c2 = Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode());
                 query.addConditions(Tables.EH_DOOR_AUTH.USER_ID.eq(userId));
                 query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
-                query.addConditions(Tables.EH_DOOR_AUTH.DRIVER.eq(driver.getCode()));
+                
+                if(driver != null) {
+                    query.addConditions(Tables.EH_DOOR_AUTH.DRIVER.eq(driver));    
+                }
+                
                 query.addConditions(c1.or(c2));
                 return query;
             }

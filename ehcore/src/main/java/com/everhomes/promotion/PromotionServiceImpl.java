@@ -25,6 +25,7 @@ import com.everhomes.bus.BusBridgeProvider;
 import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusSubscriber;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
@@ -57,6 +58,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.ExecutorUtil;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 
 @Component
@@ -119,6 +121,11 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
         User user = UserContext.current().getUser();
         
         List<OpPromotionAssignedScopeDTO> scopes = cmd.getAssignedScopes();
+        if(scopes == null) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Scopes is null");    
+        }
+        
         cmd.setAssignedScopes(null);
         
         OpPromotionActivity promotion = this.dbProvider.execute(new TransactionCallback<OpPromotionActivity>() {
