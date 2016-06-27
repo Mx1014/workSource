@@ -2,7 +2,7 @@
 // EvhUserGetBizSignatureRestResponse.m
 //
 #import "EvhUserGetBizSignatureRestResponse.h"
-#import "EvhUserGetSignatureCommandResponse.h"
+#import "EvhGetSignatureCommandResponse.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhUserGetBizSignatureRestResponse
@@ -45,7 +45,7 @@
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
         [super fromJson: jsonObject];
         NSMutableDictionary* dic =  (NSMutableDictionary*)[jsonObject objectForKey: @"response"];
-        self.response = [EvhUserGetSignatureCommandResponse new];
+        self.response = [EvhGetSignatureCommandResponse new];
         self.response = [self.response fromJson: dic];
         return self;
     }
