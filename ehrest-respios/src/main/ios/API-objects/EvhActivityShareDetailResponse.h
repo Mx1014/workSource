@@ -23,6 +23,12 @@
 
 @property(nonatomic, copy) NSNumber* namespaceId;
 
+@property(nonatomic, copy) NSString* subject;
+
+@property(nonatomic, copy) NSString* creatorNickName;
+
+@property(nonatomic, copy) NSNumber* createTime;
+
 // item type EvhAttachmentDTO*
 @property(nonatomic, strong) NSMutableArray* attachments;
 

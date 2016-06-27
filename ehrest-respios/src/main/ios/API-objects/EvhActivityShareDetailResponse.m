@@ -47,6 +47,12 @@
         [jsonObject setObject: self.viewCount forKey: @"viewCount"];
     if(self.namespaceId)
         [jsonObject setObject: self.namespaceId forKey: @"namespaceId"];
+    if(self.subject)
+        [jsonObject setObject: self.subject forKey: @"subject"];
+    if(self.creatorNickName)
+        [jsonObject setObject: self.creatorNickName forKey: @"creatorNickName"];
+    if(self.createTime)
+        [jsonObject setObject: self.createTime forKey: @"createTime"];
     if(self.attachments) {
         NSMutableArray* jsonArray = [NSMutableArray new];
         for(EvhAttachmentDTO* item in self.attachments) {
@@ -80,6 +86,18 @@
         self.namespaceId = [jsonObject objectForKey: @"namespaceId"];
         if(self.namespaceId && [self.namespaceId isEqual:[NSNull null]])
             self.namespaceId = nil;
+
+        self.subject = [jsonObject objectForKey: @"subject"];
+        if(self.subject && [self.subject isEqual:[NSNull null]])
+            self.subject = nil;
+
+        self.creatorNickName = [jsonObject objectForKey: @"creatorNickName"];
+        if(self.creatorNickName && [self.creatorNickName isEqual:[NSNull null]])
+            self.creatorNickName = nil;
+
+        self.createTime = [jsonObject objectForKey: @"createTime"];
+        if(self.createTime && [self.createTime isEqual:[NSNull null]])
+            self.createTime = nil;
 
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"attachments"];
