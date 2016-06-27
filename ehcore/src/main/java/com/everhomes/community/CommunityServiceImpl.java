@@ -1285,7 +1285,7 @@ public class CommunityServiceImpl implements CommunityService {
             query.addConditions(c);
             if(null != locator.getAnchor())
             	query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_ID.lt(locator.getAnchor()));
-            query.addGroupBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID);
+            //query.addGroupBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID);
 			query.addOrderBy(Tables.EH_GROUP_MEMBERS.MEMBER_ID.desc());
 			query.addOrderBy(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.desc());
             return query;

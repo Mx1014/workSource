@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 import javax.crypto.KeyGenerator;
@@ -227,6 +229,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     
     @Autowired
     private AddressProvider addressProvider;
+    
+    final Pattern npattern = Pattern.compile("\\d+");
     
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
     
@@ -1590,13 +1594,16 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         DoorLinglingExtraKeyDTO extra = new DoorLinglingExtraKeyDTO();
         extra.setAuthLevel(0l);
         extra.setAuthStorey(1l);
-        extra.setStoreyAuthList(new ArrayList<Long>());
+        
+        List<Long> storeyAuthList = new ArrayList<Long>();
+        storeyAuthList.add(1l);
+        extra.setStoreyAuthList(storeyAuthList);
         
         try {
             if(checkDoorAccessRole(doorAccess)) {
                 extra.setAuthLevel(1l);    
             }            
-            List<Long> storeyAuthList = getDoorListbyUser(user, doorAccess);
+            storeyAuthList = getDoorListbyUser(user, doorAccess);
             if(storeyAuthList != null && storeyAuthList.size() > 0) {
                 extra.setAuthStorey(storeyAuthList.get(0));
                 extra.setStoreyAuthList(storeyAuthList);
@@ -2129,8 +2136,29 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 Address addr2 = addressProvider.findAddressById(addr.getAddressId());
                 
                 try {
-                    Long l = Long.parseLong(addr2.getApartmentFloor());
-                    floors.add(l);
+                    if(addr2.getApartmentFloor() != null) {
+                        Long l = Long.parseLong(addr2.getApartmentFloor());
+                        floors.add(l);    
+                    } else {
+                        String aname = addr2.getAddress();
+                        String[] as = aname.split("-");
+                        if(as.length > 1) {
+                            aname = as[1];
+                        } else {
+                            aname = as[0];
+                            }
+                        
+                        Matcher m = npattern.matcher(aname);
+                        if(m != null && m.find()) {
+                            aname = m.group(0);
+                            Long l = Long.parseLong(aname);
+                            if(l >= -255 && l <= 255) {
+                                floors.add(l);    
+                                }
+                            
+                        }
+                    }
+                    
                 } catch(Exception ex) {
                     LOGGER.error("error  for get apartment floor", ex);
                 }
