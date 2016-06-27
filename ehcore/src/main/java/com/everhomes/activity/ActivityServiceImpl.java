@@ -1434,7 +1434,7 @@ public class ActivityServiceImpl implements ActivityService {
             if(post != null) {
                 dto.setForumId(post.getForumId());
             }
-            List<UserFavoriteDTO> favorite = userActivityProvider.findFavorite(uid, UserFavoriteTargetType.ACTIVITY.getCode(), activity.getId());
+            List<UserFavoriteDTO> favorite = userActivityProvider.findFavorite(uid, UserFavoriteTargetType.ACTIVITY.getCode(), activity.getPostId());
             if(favorite == null || favorite.size() == 0) {
             	dto.setFavoriteFlag(PostFavoriteFlag.NONE.getCode());
             } else {
