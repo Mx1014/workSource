@@ -35,7 +35,7 @@ CREATE TABLE `eh_app_urls` (
 
 -- add by yanshaofan
 -- user items
---
+-- 
 CREATE TABLE `eh_user_launch_pad_items`(
   `id` BIGINT NOT NULL AUTO_INCREMENT,
   `item_id` BIGINT NOT NULL,
@@ -51,3 +51,11 @@ CREATE TABLE `eh_user_launch_pad_items`(
   
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- 20160627
+ALTER TABLE `eh_banners` ADD COLUMN `apply_policy` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: default, 1: override, 2: revert 3:customized';
+ALTER TABLE `eh_launch_pad_layouts` ADD COLUMN `scope_code` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: all, 1: community, 2: city, 3: user';
+ALTER TABLE `eh_launch_pad_layouts` ADD COLUMN `scope_id` bigint(20) DEFAULT 0;
+ALTER TABLE `eh_launch_pad_layouts` ADD COLUMN `apply_policy` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: default, 1: override, 2: revert 3:customized';
+
