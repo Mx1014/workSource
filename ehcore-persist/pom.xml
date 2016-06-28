@@ -4,7 +4,7 @@
 
     <groupId>com.everhomes</groupId>
     <artifactId>ehcore-persist</artifactId>
-    <version>3.4.0-SNAPSHOT</version>
+    <version>3.7.0-SNAPSHOT</version>
 
     <name>ehcore-persist</name>
     <url>http://www.everhomes.com</url>

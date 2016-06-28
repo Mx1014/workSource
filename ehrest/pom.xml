@@ -4,7 +4,7 @@
 
     <groupId>com.everhomes</groupId>
     <artifactId>ehrest</artifactId>
-    <version>3.4.0-SNAPSHOT</version>
+    <version>3.7.0-SNAPSHOT</version>
 
     <name>ehrest</name>
     <url>http://www.everhomes.com</url>
