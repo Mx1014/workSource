@@ -1,5 +1,6 @@
 package com.everhomes.test.junit.news;
 
+import java.io.File;
 import java.util.List;
 
 import org.jooq.DSLContext;
@@ -10,9 +11,11 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.rest.RestResponseBase;
 import com.everhomes.rest.news.CreateNewsCommand;
 import com.everhomes.rest.news.CreateNewsResponse;
 import com.everhomes.rest.news.CreateNewsRestResponse;
+import com.everhomes.rest.news.ImportNewsCommand;
 import com.everhomes.rest.news.NewsServiceErrorCode;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.server.schema.Tables;
@@ -220,9 +223,19 @@ public class NewsTest extends BaseLoginAuthTestCase {
 
 	@Test
 	public void testImportNews(){
-		
+		logon();
+		String uri = "/news/importNews";
+		ImportNewsCommand cmd = new ImportNewsCommand();
+		cmd.setOwnerId(1L);
+		cmd.setOwnerType("organization");
+		File file = new File("E:\\news_template.xlsx");
+		RestResponseBase response = httpClientService.postFile(uri, cmd, file, RestResponseBase.class);
+		assertNotNull(response);
+		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+		assertTrue("errorCode should be 200", response.getErrorCode().intValue()==ErrorCodes.SUCCESS);
 	}
 	
+	@Ignore
 	@Test
 	public void testClearType(){
 		searchProvider.clearType(SearchConstant.NEWS);

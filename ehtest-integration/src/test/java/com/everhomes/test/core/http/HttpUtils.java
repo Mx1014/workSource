@@ -1,14 +1,17 @@
 // @formatter:off
 package com.everhomes.test.core.http;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.StopWatch;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.annotation.NotThreadSafe;
@@ -22,11 +25,17 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -536,8 +545,64 @@ public class HttpUtils {
 		}
 		logger.debug(retVal);
 		return retVal;
-		
-		
+	}
+	
+	/**
+	 * 带上传文件的请求
+	 * @param url
+	 * @param params
+	 * @param timeout
+	 * @param context
+	 * @param objects 其中0号是字符集，后面为文件列表
+	 * @return 返回请求结果
+	 */
+	@SuppressWarnings("resource")
+	public static String postFile(String url, Map<String, String> params, int timeout, HttpContext context, Object... objects) throws IOException {
+		HttpClient httpclient = new DefaultHttpClient();
+		httpclient.getParams().setIntParameter("http.socket.timeout", timeout * 1000);
+		httpclient.getParams().setBooleanParameter("http.protocol.expect-continue", false);
+		String retVal = "";
+		try {
+			String encoding = HTTP.UTF_8;
+			if (objects != null && objects.length > 0) { 
+				encoding = objects[0].toString();
+			}
+			HttpPost httppost = new HttpPost(url);
+			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+			builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+			for (Entry<String, String> entry : params.entrySet()) {
+				StringBody stringBody = new StringBody(entry.getValue(), ContentType.MULTIPART_FORM_DATA);
+				builder.addPart(entry.getKey(), stringBody);
+			}
+			for(int i=1, len=objects.length; i<len; i++){
+				if (objects[i] instanceof File) {
+					File file = (File) objects[i];
+					FileBody fileBody = new FileBody(file);
+					builder.addPart("attachment", fileBody);
+				}
+			}
+			HttpEntity entity = builder.build();
+			
+			httppost.setEntity(entity);
+			
+			ResponseHandler<String> responseHandler = new BasicResponseHandler();
+			if (objects == null || objects.length == 0) {
+				retVal = new String(httpclient.execute(httppost, responseHandler, context).getBytes(HTTP.ISO_8859_1),
+						HTTP.UTF_8);
+			} else if (objects != null && objects[0].equals(HTTP.UTF_8)) {
+				retVal = httpclient.execute(httppost, responseHandler, context);
+			} else if (objects != null && objects[0].equals("gb2312")) {
+				retVal = new String(httpclient.execute(httppost, responseHandler, context).getBytes("iso-8859-1"), "gb2312");
+			} else {
+				retVal = new String(httpclient.execute(httppost, responseHandler, context).getBytes(), HTTP.UTF_8);
+			}
+		} catch (IOException e) {
+			throw e;
+		} finally {
+			httpclient.getConnectionManager().shutdown();
+		}
+		logger.debug(retVal);
+		return retVal;
 	}
 	
 }

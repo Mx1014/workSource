@@ -206,8 +206,8 @@ public class NewsServiceImpl implements NewsService {
 
 		if (resultList != null && resultList.size() > 0) {
 			final List<News> newsList = new ArrayList<>();
-			resultList.forEach(r -> {
-				RowResult result = (RowResult) r;
+			for (int i=1,len=resultList.size();i<len;i++) {
+				RowResult result = resultList.get(i);
 				String title = RowResult.trimString(result.getA());
 				String contentAbstract = RowResult.trimString(result.getB());
 				String coverUri = RowResult.trimString(result.getC());
@@ -226,6 +226,7 @@ public class NewsServiceImpl implements NewsService {
 					command.setOwnerType(cmd.getOwnerType());
 					command.setTitle(title);
 					command.setContentAbstract(contentAbstract);
+					command.setContent(content);
 					command.setCoverUri(coverUri);
 					command.setAuthor(author);
 					command.setSourceDesc(sourceDesc);
@@ -233,7 +234,7 @@ public class NewsServiceImpl implements NewsService {
 					checkNewsParameter(userId, command);
 					newsList.add(processNewsCommand(userId, namespaceId, command));
 				}
-			});
+			}
 			return newsList;
 		}
 		LOGGER.error("excel data format is not correct.rowCount=" + resultList.size());
