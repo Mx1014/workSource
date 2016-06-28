@@ -46,7 +46,7 @@ public class LaunchPadController extends ControllerBase {
     @RequestMapping("getLaunchPadItems")
     @RestReturn(value=GetLaunchPadItemsCommandResponse.class)
     public RestResponse getLaunchPadItems(@Valid GetLaunchPadItemsCommand cmd,HttpServletRequest request,HttpServletResponse response) {
-        
+    	
         GetLaunchPadItemsCommandResponse commandResponse = launchPadService.getLaunchPadItems(cmd,request);
         RestResponse resp =  new RestResponse(commandResponse);
 //        if(commandResponse.getLaunchPadItems() != null && !commandResponse.getLaunchPadItems().isEmpty()){

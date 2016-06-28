@@ -1,5 +1,6 @@
 package com.everhomes.test.core.http;
 
+import java.io.File;
 import java.util.Map;
 
 import com.everhomes.rest.RestResponseBase;
@@ -61,4 +62,6 @@ public interface HttpClientService {
     String getServerAddress();
 
     void setServerAddress(String serverAddress);
+    
+    <T extends RestResponseBase> T postFile(String commandRelativeUri, Object cmd, File file, Class<T> responseClz);
 }

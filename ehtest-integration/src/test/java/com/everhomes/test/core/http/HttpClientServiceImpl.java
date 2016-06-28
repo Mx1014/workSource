@@ -1,9 +1,11 @@
 // @formatter:off
 package com.everhomes.test.core.http;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -267,5 +269,35 @@ public class HttpClientServiceImpl implements HttpClientService {
         else
             sb.append(commandRelativeUri);
         return sb.toString();
+    }
+    
+    private <T extends RestResponseBase>  T postFile(String commandRelativeUri, Object cmd, Class<T> responseClz, File... files){
+    	try {
+	    	if(commandRelativeUri == null || commandRelativeUri.trim().length() == 0) {
+	            throw new IllegalArgumentException("The command relative uri may not be empty");
+	        }
+	    	
+	        String uri = composeFullUri(commandRelativeUri);
+	        
+	        Map<String, String> params = new HashMap<String, String>();
+	        StringHelper.toStringMap(null, cmd, params);
+	        List<Object> list = new ArrayList<>();
+	        list.add(Consts.UTF_8);
+	        list.addAll(Arrays.asList(files));
+			String response = HttpUtils.postFile(uri, params, 30, httpClientContext, list.toArray());
+			
+			return gson.fromJson(response, responseClz);
+		} catch (IOException e) {
+			return SimpleConvertHelper.convert(new RestResponseBase("HTTP", HttpStatus.SC_BAD_REQUEST, e.getMessage()),
+	                responseClz);
+		}
+	}
+    
+    /**
+     * 带文件上传的请求
+     */
+    @Override
+    public <T extends RestResponseBase>  T postFile(String commandRelativeUri, Object cmd, File file, Class<T> responseClz){
+    	return postFile(commandRelativeUri, cmd, responseClz, file);
     }
 }
