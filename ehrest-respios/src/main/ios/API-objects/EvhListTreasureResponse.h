@@ -31,6 +31,8 @@
 
 @property(nonatomic, copy) NSNumber* isAppliedShop;
 
+@property(nonatomic, copy) NSNumber* orderCount;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 

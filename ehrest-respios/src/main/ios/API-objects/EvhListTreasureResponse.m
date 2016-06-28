@@ -50,6 +50,8 @@
         [jsonObject setObject: self.applyShopUrl forKey: @"applyShopUrl"];
     if(self.isAppliedShop)
         [jsonObject setObject: self.isAppliedShop forKey: @"isAppliedShop"];
+    if(self.orderCount)
+        [jsonObject setObject: self.orderCount forKey: @"orderCount"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -94,6 +96,10 @@
         self.isAppliedShop = [jsonObject objectForKey: @"isAppliedShop"];
         if(self.isAppliedShop && [self.isAppliedShop isEqual:[NSNull null]])
             self.isAppliedShop = nil;
+
+        self.orderCount = [jsonObject objectForKey: @"orderCount"];
+        if(self.orderCount && [self.orderCount isEqual:[NSNull null]])
+            self.orderCount = nil;
 
         return self;
     }

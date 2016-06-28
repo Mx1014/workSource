@@ -62,6 +62,8 @@
         }
         [jsonObject setObject: jsonArray forKey: @"attachments"];
     }
+    if(self.creatorAvatarUrl)
+        [jsonObject setObject: self.creatorAvatarUrl forKey: @"creatorAvatarUrl"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -108,6 +110,10 @@
                 [self.attachments addObject: item];
             }
         }
+        self.creatorAvatarUrl = [jsonObject objectForKey: @"creatorAvatarUrl"];
+        if(self.creatorAvatarUrl && [self.creatorAvatarUrl isEqual:[NSNull null]])
+            self.creatorAvatarUrl = nil;
+
         return self;
     }
     
