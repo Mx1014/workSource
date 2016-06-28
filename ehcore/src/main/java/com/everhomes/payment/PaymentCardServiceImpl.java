@@ -9,9 +9,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
@@ -27,20 +27,23 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.payment.taotaogu.AESCoder;
 import com.everhomes.payment.taotaogu.NotifyEntity;
-import com.everhomes.payment.taotaogu.TAOTAOGUVendorConstant;
-import com.everhomes.payment.util.CacheConstant;
-import com.everhomes.payment.util.CacheItem;
-import com.everhomes.payment.util.CachePool;
+import com.everhomes.payment.taotaogu.TaotaoguTokenCacheItem;
+import com.everhomes.payment.taotaogu.TaotaoguVendorConstant;
 import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
@@ -93,6 +96,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RandomGenerator;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.google.gson.Gson;
 
@@ -115,10 +119,14 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     
     @Autowired
 	private SmsProvider smsProvider;
-    
+    @Autowired
+    BigCollectionProvider bigCollectionProvider;
     @Autowired
 	private LocaleStringService localeStringService;
     
+    @Autowired
+    private CoordinationProvider coordinationProvider;
+    final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
     @Override
     public List<CardInfoDTO> listCardInfo(ListCardInfoCommand cmd){
     	User user = UserContext.current().getUser();
@@ -274,8 +282,19 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 		sendVerificationCodeSms(userIdentifier.getNamespaceId(), userIdentifier.getIdentifierToken(),verifyCode);
 		dto.setVerifyCode(verifyCode);
 		//丢到缓存中
-		CachePool cachePool = CachePool.getInstance();
-		cachePool.putCacheItem(userIdentifier.getIdentifierToken(), verifyCode,10*60*1000);
+		this.coordinationProvider.getNamedLock(CoordinationLocks.PAYMENT_CARD.getCode()).enter(()-> {
+			String key = userIdentifier.getIdentifierToken();
+	        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+	        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+	      
+	        TaotaoguTokenCacheItem cacheItem = new TaotaoguTokenCacheItem();
+	        cacheItem.setCreateTime(new Date());
+	        cacheItem.setExpireTime(10 * 60 * 1000);
+	        cacheItem.setVerifyCode(verifyCode);
+	        redisTemplate.opsForValue().setIfAbsent(key,StringHelper.toJsonString(cacheItem));
+	        redisTemplate.expire(key, 10, TimeUnit.MINUTES);
+            return null;
+        });
 		
     	return dto;
     }
@@ -309,38 +328,47 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"verifyCode cannot be null.");
     	}
-		CachePool cachePool = CachePool.getInstance();
+    	Object result = this.coordinationProvider.getNamedLock(CoordinationLocks.PAYMENT_CARD.getCode()).enter(()-> {
+			String key = cmd.getMobile();
+	        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+	        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+	      
+	        Object obj = redisTemplate.opsForValue().get(key);
+            return obj;
+        }).first();
 
-    	CacheItem entity = cachePool.getCacheItem(cmd.getMobile());
-    	if(entity == null){
+    	
+    	if(result == null){
     		LOGGER.error("verifyCode is not exists.");
 			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_VERIFY_CODE,
-					localeStringService.getLocalizedString(String.valueOf(PaymentCardErrorCode.SCOPE), 
-							String.valueOf(PaymentCardErrorCode.ERROR_VERIFY_CODE),
-							UserContext.current().getUser().getLocale(),"verifyCode is not exists."));
+					"verifyCode is not exists.");
     	}
-    	if(!((String)entity.getEntity()).equals(cmd.getVerifyCode())){
+    	Object o =  StringHelper.fromJsonString(result.toString(), Object.class);
+    	TaotaoguTokenCacheItem cacheItem = (TaotaoguTokenCacheItem) StringHelper.fromJsonString(o.toString(),TaotaoguTokenCacheItem.class);
+    	if(!(cacheItem.getVerifyCode()).equals(cmd.getVerifyCode())){
     		LOGGER.error("verifyCode is not correctly.");
     		throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_VERIFY_CODE,
-					localeStringService.getLocalizedString(String.valueOf(PaymentCardErrorCode.SCOPE), 
-							String.valueOf(PaymentCardErrorCode.ERROR_VERIFY_CODE),
-							UserContext.current().getUser().getLocale(),"verifyCode is not correctly."));
+					"verifyCode is not correctly.");
     	}
-    	if(entity.isExpired()){
+    	if(cacheItem.isExpired()){
     		LOGGER.error("verifyCode is expired.");
     		throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_VERIFY_CODE,
-					localeStringService.getLocalizedString(String.valueOf(PaymentCardErrorCode.SCOPE), 
-							String.valueOf(PaymentCardErrorCode.ERROR_VERIFY_CODE),
-							UserContext.current().getUser().getLocale(),"verifyCode is expired."));
+					"verifyCode is expired.");
     	}
-    	cachePool.removeCacheItem(cmd.getMobile());
     	PaymentCard paymentCard = checkPaymentCard(cmd.getCardId());
     	checkPaymentCardIsNull(paymentCard,cmd.getCardId());
     		
     	PaymentCardVendorHandler handler = getPaymentCardVendorHandler(paymentCard.getVendorName());
 		handler.resetCardPassword(cmd,paymentCard);
+		this.coordinationProvider.getNamedLock(CoordinationLocks.PAYMENT_CARD.getCode()).enter(()-> {
+			String key = cmd.getMobile();
+	        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+	        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+	      
+	        redisTemplate.delete(key);
+            return null;
+        });
     }
-    
     @Override
     public ListCardTransactionsResponse listCardTransactions(ListCardTransactionsCommand cmd){
     	if(cmd.getPageAnchor() == null)
@@ -612,7 +640,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 			wb.write(out);
 			DownloadUtil.download(out, response);
 		} catch (IOException e) {
-			LOGGER.error("exportCardUsers is fail. {}",e);
+			LOGGER.error("exportCardUsers is fail.",e);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"exportCardUsers is fail.");
 		}
@@ -622,9 +650,24 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     @Override
     public NotifyEntityDTO notifyPaidResult(NotifyEntityCommand cmd){
     	PaymentCardTransaction transaction = new PaymentCardTransaction();
-    	CachePool cachePool = CachePool.getInstance();
-		String aesKey = cachePool.getStringValue(TAOTAOGUVendorConstant.TAOTAOGU_AESKEY);
-		String token = cachePool.getStringValue(TAOTAOGUVendorConstant.TAOTAOGU_TOKEN);
+    	String key = "taotaogu-token-1";
+    	Object cache = this.coordinationProvider.getNamedLock(CoordinationLocks.PAYMENT_CARD.getCode()).enter(()-> {
+			
+	        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+	        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+	      
+	        Object obj = redisTemplate.opsForValue().get(key);
+            return obj;
+        }).first();
+    	if(cache == null){
+    		LOGGER.error("notifyPaidResult failed duing to token and aesKey is null.key={}",key);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"notifyPaidResult failed.");
+    	}
+    	Object o =  StringHelper.fromJsonString(cache.toString(), Object.class);
+    	TaotaoguTokenCacheItem cacheItem = (TaotaoguTokenCacheItem) StringHelper.fromJsonString(o.toString(),TaotaoguTokenCacheItem.class);
+		String aesKey = cacheItem.getAesKey();
+		String token = cacheItem.getToken();
     	Gson gson = new Gson();
 		String msg = null;
 		NotifyEntityDTO dto = new NotifyEntityDTO();
@@ -639,7 +682,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 			NotifyEntity result = gson.fromJson(msg, NotifyEntity.class);
 			
 			User user = UserContext.current().getUser();
-			PaymentCard paymentCard = paymentCardProvider.findPaymentCardByCardNo(result.getCard_id(), TAOTAOGUVendorConstant.TAOTAOGU);
+			PaymentCard paymentCard = paymentCardProvider.findPaymentCardByCardNo(result.getCard_id(), TaotaoguVendorConstant.TAOTAOGU);
 			transaction.setOwnerId(paymentCard.getOwnerId());
 			transaction.setOwnerType(paymentCard.getOwnerType());
 			transaction.setNamespaceId(user.getNamespaceId());
@@ -656,8 +699,8 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 			transaction.setStatus(convertTransaction(result.getTrade_status()));
 			transaction.setCreatorUid(user.getId());
 			transaction.setCreateTime(new Timestamp(System.currentTimeMillis()));
-			transaction.setVendorName(TAOTAOGUVendorConstant.TAOTAOGU);
-			String extraData = TAOTAOGUVendorConstant.CARD_TRADE_STATUS_JSON;
+			transaction.setVendorName(TaotaoguVendorConstant.TAOTAOGU);
+			String extraData = TaotaoguVendorConstant.CARD_TRADE_STATUS_JSON;
 			transaction.setVendorResult(extraData);
 			transaction.setToken(result.getToken());
 			transaction.setCardNo(result.getCard_id());
@@ -737,13 +780,5 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 							UserContext.current().getUser().getLocale(),"paymentCard is not exists ."));
     	}
     }
-    
-    @Scheduled(cron="0 0 0 * * ? ")
-	  void quartzClearMap(){
-    	CachePool cachePool = CachePool.getInstance();
-    	if(LOGGER.isDebugEnabled())
-		  LOGGER.debug("start quartzClearMap");
-		  cachePool.quartzClearMap();
-	  }
     
 }
