@@ -5,7 +5,7 @@ import java.util.Map;
 
 import com.everhomes.util.StringHelper;
 
-public class ResponseEntiy {
+public class TaotaoguResponseEntiy {
 	private String RespCode;
 	private String AppName;
 	private String Version;
@@ -56,14 +56,13 @@ public class ResponseEntiy {
 			return true;
 		return false;
 	}
-	@SuppressWarnings("rawtypes")
-	public Map getData(){
+	public Map<String,Object> getData(){
 		if(null == this.Result)
 			return null;
-		List list = (List) this.Result;
-		Map map = null;
+		List<Map<String,Object>> list = (List) this.Result;
+		Map<String,Object> map = null;
 		if(!list.isEmpty()){
-			map = (Map) list.get(0);
+			map = (Map<String,Object>) list.get(0);
 		}
 		return map;
 	}

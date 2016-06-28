@@ -1,6 +1,6 @@
 package com.everhomes.payment.taotaogu;
 
-public interface TAOTAOGUVendorConstant {
+public interface TaotaoguVendorConstant {
 	//淘淘谷
 	String TAOTAOGU = "TAOTAOGU";
 	
