@@ -1,7 +1,8 @@
 // @formatter:off
-package com.everhomes.news;
+package com.everhomes.http;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -10,11 +11,13 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.annotation.NotThreadSafe;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
@@ -464,4 +467,77 @@ public class HttpUtils {
 		return retVal;
 	}
 
+	/**
+	 * delete请求
+	 * 
+	 * @param url
+	 * @param json
+	 * @param timeout
+	 * @param objects
+	 * @return
+	 * @throws IOException
+	 */
+	@SuppressWarnings("resource")
+	public static String deleteJson(String url, String json, int timeout, Object... objects) throws IOException {
+		
+		/**
+		 * 没有现成的delete可以带json的，自己实现一个，参考HttpPost的实现
+		 */
+		@NotThreadSafe
+		class HttpDeleteWithBody extends HttpEntityEnclosingRequestBase {
+			public static final String METHOD_NAME = "DELETE";
+
+			@SuppressWarnings("unused")
+			public HttpDeleteWithBody() {
+			}
+
+			@SuppressWarnings("unused")
+			public HttpDeleteWithBody(URI uri) {
+				setURI(uri);
+			}
+
+			public HttpDeleteWithBody(String uri) {
+				setURI(URI.create(uri));
+			}
+
+			public String getMethod() {
+				return METHOD_NAME;
+			}
+		}
+		
+		HttpClient httpclient = new DefaultHttpClient();
+		httpclient.getParams().setIntParameter("http.socket.timeout", timeout * 1000);
+		httpclient.getParams().setBooleanParameter("http.protocol.expect-continue", false);
+		String retVal = "";
+		try {
+			String encoding = HTTP.UTF_8;
+			if (objects != null && objects.length > 0) { 
+				encoding = objects[0].toString();
+			}
+			HttpDeleteWithBody httpdelete = new HttpDeleteWithBody(url);
+			StringEntity params = new StringEntity(json, encoding);
+			httpdelete.addHeader("content-type", "application/json");
+			httpdelete.setEntity(params);
+			ResponseHandler<String> responseHandler = new BasicResponseHandler();
+			if (objects == null || objects.length == 0) {
+				retVal = new String(httpclient.execute(httpdelete, responseHandler).getBytes(HTTP.ISO_8859_1),
+						HTTP.UTF_8);
+			} else if (objects != null && objects[0].equals(HTTP.UTF_8)) {
+				retVal = httpclient.execute(httpdelete, responseHandler);
+			} else if (objects != null && objects[0].equals("gb2312")) {
+				retVal = new String(httpclient.execute(httpdelete, responseHandler).getBytes("iso-8859-1"), "gb2312");
+			} else {
+				retVal = new String(httpclient.execute(httpdelete, responseHandler).getBytes(), HTTP.UTF_8);
+			}
+		} catch (IOException e) {
+			throw e;
+		} finally {
+			httpclient.getConnectionManager().shutdown();
+		}
+		logger.debug(retVal);
+		return retVal;
+		
+		
+	}
+	
 }

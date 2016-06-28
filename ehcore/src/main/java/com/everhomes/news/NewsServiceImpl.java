@@ -65,6 +65,7 @@ import com.everhomes.rest.news.SetNewsLikeFlagCommand;
 import com.everhomes.rest.news.SetNewsTopFlagCommand;
 import com.everhomes.rest.news.SyncNewsCommand;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
+import com.everhomes.search.SearchProvider;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.server.schema.tables.pojos.EhNewsAttachments;
 import com.everhomes.server.schema.tables.pojos.EhNewsComment;
@@ -124,7 +125,9 @@ public class NewsServiceImpl implements NewsService {
 		
 		syncNews(news.getId());
 		
-		return ConvertHelper.convert(news, CreateNewsResponse.class);
+		CreateNewsResponse response = ConvertHelper.convert(news, CreateNewsResponse.class);
+		response.setNewsToken(WebTokenGenerator.getInstance().toWebToken(news));
+		return response;
 	}
 
 	private News processNewsCommand(Long userId, Integer namespaceId, CreateNewsCommand cmd) {
@@ -137,6 +140,9 @@ public class NewsServiceImpl implements NewsService {
 		news.setStatus(NewsStatus.ACTIVE.getCode());
 		news.setCreatorUid(userId);
 		news.setDeleterUid(0L);
+		if (StringUtils.isEmpty(news.getContentAbstract())) {
+			news.setContentAbstract(news.getContent().substring(0, news.getContent().length()>100?100:news.getContent().length()));
+		}
 		return news;
 	}
 
@@ -491,7 +497,7 @@ public class NewsServiceImpl implements NewsService {
 		final Long userId = UserContext.current().getUser().getId();
 		final Long newsId = checkNewsToken(userId, cmd.getNewsToken());
 		// 检查参数
-		checkCommentParameter(userId, newsId, cmd);
+		News news = checkCommentParameter(userId, newsId, cmd);
 
 		final List<Comment> comments = new ArrayList<>();
 		final List<Attachment> attachments = new ArrayList<>();
@@ -512,21 +518,26 @@ public class NewsServiceImpl implements NewsService {
 		AddNewsCommentResponse commentDTO = ConvertHelper.convert(comments.get(0), AddNewsCommentResponse.class);
 		commentDTO.setAttachments(attachments.stream().map(a -> ConvertHelper.convert(a, NewsAttachmentDTO.class))
 				.collect(Collectors.toList()));
+		
+		news.setChildCount(news.getChildCount()+1L);
+		newsProvider.updateNews(news);
 
 		return commentDTO;
 	}
 
-	private void checkCommentParameter(Long userId, Long newsId, AddNewsCommentCommand cmd) {
+	private News checkCommentParameter(Long userId, Long newsId, AddNewsCommentCommand cmd) {
 		// 检查owner是否存在
 		checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType());
 		// 检查News是否存在
-		findNewsById(userId, newsId);
+		News news = findNewsById(userId, newsId);
 		// 检查评论类型
 		checkCommentType(userId, cmd.getContentType());
 		// 检查附件类型
 		if (cmd.getAttachments() != null && cmd.getAttachments().size() != 0) {
 			cmd.getAttachments().forEach(a -> checkCommentType(userId, a.getContentType()));
 		}
+		
+		return news;
 	}
 
 	private void checkCommentType(Long userId, String contentType) {
@@ -711,7 +722,7 @@ public class NewsServiceImpl implements NewsService {
 		final Long userId = UserContext.current().getUser().getId();
 		final Long newsId = checkNewsToken(userId, cmd.getNewsToken());
 		// 检查参数
-		checkCommentParameter(userId, newsId, cmd);
+		News news = checkCommentParameter(userId, newsId, cmd);
 
 		final List<Comment> comments = new ArrayList<>();
 		final List<Attachment> attachments = new ArrayList<>();
@@ -734,6 +745,9 @@ public class NewsServiceImpl implements NewsService {
 		commentDTO.setAttachments(attachments.stream().map(a -> ConvertHelper.convert(a, NewsAttachmentDTO.class))
 				.collect(Collectors.toList()));
 
+		news.setChildCount(news.getChildCount()+1L);
+		newsProvider.updateNews(news);
+		
 		return commentDTO;
 	}
 
@@ -747,17 +761,18 @@ public class NewsServiceImpl implements NewsService {
 		return comment;
 	}
 
-	private void checkCommentParameter(Long userId, Long newsId, AddNewsCommentBySceneCommand cmd) {
+	private News checkCommentParameter(Long userId, Long newsId, AddNewsCommentBySceneCommand cmd) {
 		// 检查namespace是否存在
 		getNamespaceFromSceneToken(userId, cmd.getSceneToken());
 		// 检查News是否存在
-		findNewsById(userId, newsId);
+		News news = findNewsById(userId, newsId);
 		// 检查评论类型
 		checkCommentType(userId, cmd.getContentType());
 		// 检查附件类型
 		if (cmd.getAttachments() != null && cmd.getAttachments().size() != 0) {
 			cmd.getAttachments().forEach(a -> checkCommentType(userId, a.getContentType()));
 		}
+		return news;
 	}
 
 	@Override
@@ -769,6 +784,7 @@ public class NewsServiceImpl implements NewsService {
 
 	private void deleteNewsComment(Long userId, String newsToken, Long commentId) {
 		Long newsId = checkNewsToken(userId, newsToken);
+		News news = findNewsById(userId, newsId);
 		Comment comment = commentProvider.findCommentById(EhNewsComment.class, commentId);
 		if (comment.getOwnerId().longValue() != newsId.longValue()) {
 			LOGGER.error("newsId and commentId not match, operatorId=" + userId + ", newsId=" + newsId + ", commentId"
@@ -786,6 +802,9 @@ public class NewsServiceImpl implements NewsService {
 		comment.setStatus(CommentStatus.INACTIVE.getCode());
 		comment.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		commentProvider.updateComment(EhNewsComment.class, comment);
+		
+		news.setChildCount(news.getChildCount()-1L);
+		newsProvider.updateNews(news);
 	}
 
 	@Override
@@ -799,7 +818,7 @@ public class NewsServiceImpl implements NewsService {
 			while (true) {
 				Long from = (long) (i * pageSize);
 				List<News> list = newsProvider.findAllActiveNewsByPage(from, pageSize);
-				if (list != null && list.size() >= 0) {
+				if (list != null && list.size() > 0) {
 					StringBuilder sb = new StringBuilder();
 					list.forEach(n->{
 						sb.append("{\"index\":{\"_id\":\"").append(n.getId()).append("\"}}\n").append(JSONObject.toJSONString(n)).append("\n");

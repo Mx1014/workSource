@@ -1,5 +1,5 @@
 // @formatter:off
-package com.everhomes.news;
+package com.everhomes.search;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -14,7 +14,9 @@ import org.springframework.util.StringUtils;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.http.HttpUtils;
 import com.everhomes.rest.news.NewsServiceErrorCode;
+import com.everhomes.search.SearchProvider;
 import com.everhomes.util.RuntimeErrorException;
 
 /**
@@ -184,7 +186,56 @@ public class SearchProviderImpl implements SearchProvider {
 	public String deleteById(String type, String id) {
 		return deleteById(esIndex, type, id);
 	}
-
+	
+	/**
+	 * delete请求（主要用来处理按条件删除）
+	 * 
+	 * @param url
+	 * @param json
+	 * @return 服务器返回的原始结果
+	 */
+	public String delete(String url, String json) {
+		try {
+			return HttpUtils.deleteJson(url, json, TIME_OUT, CHARSET);
+		} catch (IOException e) {
+			LOGGER.error("request to elasticsearch error: url=" + url + ", json=" + json);
+			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+					NewsServiceErrorCode.ERROR_REQUEST_ELASTICSEARCH_ERROR, "request to elasticsearch error");
+		}
+	}
+	
+	/**
+	 * 清除整个type的数据
+	 * @param type
+	 * @return 服务器返回的原始结果
+	 */
+	@Override
+	public String clearType(String type){
+		return clearType(type, "{\"query\":{\"match_all\":{}}}");
+	}
+	
+	/**
+	 * 按条件清除type的数据
+	 * @param type
+	 * @param json
+	 * @return 服务器返回的原始结果
+	 */
+	public String clearType(String type, String json){
+		return clearType(esIndex, type, json);
+	}
+	
+	/**
+	 * 
+	 * 按条件清除指定index下的某type的数据
+	 * @param index
+	 * @param type
+	 * @param json
+	 * @return 服务器返回的原始结果
+	 */
+	public String clearType(String index, String type, String json){
+		return delete("http://"+nodeHosts+":"+nodePorts + "/" + index + "/" + type + "/_query", json);
+	}
+	
 	/**
 	 * 批量操作
 	 * 
