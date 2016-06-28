@@ -48,6 +48,12 @@ public class OpPromotionScheduleJob extends QuartzJobBean {
         }
         
         if(jobMap.get(OpPromotionConstant.SCHEDULE_TYPE).equals(OpPromotionConstant.SCHEDULE_START)) {
+            
+            if(promotion.getStatus().equals(OpPromotionStatus.INACTIVE.getCode())) {
+                LOGGER.info("OpPromotion already closed");
+                return;
+            }
+            
             OpPromotionConditionType conditionType = OpPromotionConditionType.fromCode(promotion.getPolicyType());
             switch(conditionType) {
             case NEW_USER:

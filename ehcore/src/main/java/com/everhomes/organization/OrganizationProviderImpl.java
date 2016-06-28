@@ -2189,4 +2189,43 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return ConvertHelper.convert(query.fetchAny(), Organization.class);
 		
 	}
+	
+	/**
+	 * List organization by name. by Janson
+	 */
+	@Override
+	public List<Organization> listOrganizationByName(ListingLocator locator, int count, Integer namespaceId, String name) {
+	       DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+	        List<Organization> result  = new ArrayList<Organization>();
+	        SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
+	        
+	        query.addConditions(Tables.EH_ORGANIZATIONS.ORGANIZATION_TYPE.eq(OrganizationType.ENTERPRISE.getCode()));
+	        if(namespaceId != null) {
+	            query.addConditions(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId));
+	        }
+	        
+	        if(name != null && !"".equals(name)) {
+	            query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like("%" + name + "%"));
+	        }
+	        
+	        if(locator.getAnchor() != null) {
+	            query.addConditions(Tables.EH_ORGANIZATIONS.ID.lt(locator.getAnchor()));
+	        }
+	        query.addLimit(count);
+	        query.addOrderBy(Tables.EH_ORGANIZATIONS.ID.desc());
+	        
+	        query.fetch().map((r) -> {
+	            result.add(ConvertHelper.convert(r, Organization.class));
+	            return null;
+	        });
+	        
+	        if(result.size() >= count) {
+	            locator.setAnchor(result.get(result.size() - 1).getId());
+	        } else {
+	            locator.setAnchor(null);
+	        }
+	        
+	        return result;
+	}
 }

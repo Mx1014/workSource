@@ -54,6 +54,8 @@ import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
 import com.everhomes.rest.organization.ListOrganizationContactCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
+import com.everhomes.rest.organization.ListOrganizationsByNameCommand;
+import com.everhomes.rest.organization.ListOrganizationsByNameResponse;
 import com.everhomes.rest.organization.ListOrganizationsCommand;
 import com.everhomes.rest.organization.ListOrganizationsCommandResponse;
 import com.everhomes.rest.organization.ListPersonnelNotJoinGroupCommand;
@@ -1032,5 +1034,16 @@ public class OrganizationAdminController extends ControllerBase {
               return response;
           }
           
-          
+          /**
+           * <b>URL: /admin/org/importOwnerData</b>
+           * <p>导入业主信息</p>
+           */
+          @RequestMapping("listOrganizationByName")
+          @RestReturn(value=ListOrganizationsByNameResponse.class)
+          public RestResponse listOrganizationByName(@Valid ListOrganizationsByNameCommand cmd) {
+              RestResponse response = new RestResponse(organizationService.listOrganizationByName(cmd));
+              response.setErrorCode(ErrorCodes.SUCCESS);
+              response.setErrorDescription("OK");
+              return response;              
+          }
 }

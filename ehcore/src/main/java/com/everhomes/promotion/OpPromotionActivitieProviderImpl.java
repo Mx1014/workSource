@@ -129,7 +129,7 @@ public class OpPromotionActivitieProviderImpl implements OpPromotionActivityProv
             @Override
             public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
                     SelectQuery<? extends Record> query) {
-                query.addConditions(Tables.EH_OP_PROMOTION_ACTIVITIES.STATUS.ne(OpPromotionStatus.INACTIVE.getCode()));
+                //query.addConditions(Tables.EH_OP_PROMOTION_ACTIVITIES.STATUS.ne(OpPromotionStatus.INACTIVE.getCode()));
                 return query;
             }
             
@@ -174,7 +174,7 @@ public class OpPromotionActivitieProviderImpl implements OpPromotionActivityProv
                         .or(Tables.EH_OP_PROMOTION_ACTIVITIES.DESCRIPTION.like("%" + keyword + "%"))
                         .or(Tables.EH_OP_PROMOTION_ACTIVITIES.ID.eq(searchId)));
                 
-                query.addConditions(Tables.EH_OP_PROMOTION_ACTIVITIES.STATUS.ne(OpPromotionStatus.INACTIVE.getCode()));
+                //query.addConditions(Tables.EH_OP_PROMOTION_ACTIVITIES.STATUS.ne(OpPromotionStatus.INACTIVE.getCode()));
                 return query;
             }
             

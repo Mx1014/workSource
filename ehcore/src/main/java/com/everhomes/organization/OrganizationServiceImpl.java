@@ -165,6 +165,8 @@ import com.everhomes.rest.organization.ListOrganizationContactCommand;
 import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
 import com.everhomes.rest.organization.ListOrganizationMemberCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
+import com.everhomes.rest.organization.ListOrganizationsByNameCommand;
+import com.everhomes.rest.organization.ListOrganizationsByNameResponse;
 import com.everhomes.rest.organization.ListOrganizationsCommand;
 import com.everhomes.rest.organization.ListOrganizationsCommandResponse;
 import com.everhomes.rest.organization.ListPersonnelNotJoinGroupCommand;
@@ -6474,5 +6476,28 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    resp.setDtos(olt.getDtos());
 	    resp.setNextPageAnchor(olt.getPageAnchor());
 		return resp;
+	}
+	
+	@Override
+	public ListOrganizationsByNameResponse listOrganizationByName(ListOrganizationsByNameCommand cmd) {
+	    ListOrganizationsByNameResponse resp = new ListOrganizationsByNameResponse();
+	    ListingLocator locator = new ListingLocator();
+	    locator.setAnchor(cmd.getPageAnchor());
+	    int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+	    List<Organization> orgs = organizationProvider.listOrganizationByName(locator, pageSize, cmd.getNamespaceId(), cmd.getName());
+	    List<OrganizationDTO> dtos = new ArrayList<OrganizationDTO>();
+	    if(orgs != null) {
+	        for(Organization org : orgs) {
+	            OrganizationDTO dto = ConvertHelper.convert(org, OrganizationDTO.class);
+	            if(dto != null) {
+	                dtos.add(dto);
+	            }
+	        }
+	    }
+	    
+	    resp.setDtos(dtos);
+	    resp.setNextPageAnchor(locator.getAnchor());
+	    
+	    return resp;
 	}
 }
