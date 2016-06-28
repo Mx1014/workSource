@@ -1022,6 +1022,38 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	 * 1、applyPolicy=1(覆盖)，小范围覆盖大范围，
 	 * 用户自定义的，直接根据itemId比较，系统配置的覆盖，根据itemName进行比较
 	 * 2、applyPolicy=2(恢复)，直接忽略即可
+	 * @param defalultLayouts
+	 * @param overrideLayouts
+	 * @return
+	 */
+	private List<LaunchPadLayout> overrideOrRevertLayouts(List<LaunchPadLayout> defalultLayouts, List<LaunchPadLayout> overrideLayouts) {
+
+		if(defalultLayouts == null || overrideLayouts == null) return null;
+		boolean flag = false;
+		List<LaunchPadLayout> allLayouts = new ArrayList<LaunchPadLayout>();
+		for(LaunchPadLayout d : defalultLayouts){
+			for(LaunchPadLayout o : overrideLayouts){
+				//非覆盖
+				if(o.getApplyPolicy() == ApplyPolicy.DEFAULT.getCode() && !allLayouts.contains(o)){
+					allLayouts.add(o);
+				}else if(!allLayouts.contains(o)&&o.getApplyPolicy()== ApplyPolicy.OVERRIDE.getCode()&&d.getName().equals(o.getName()) && d.getNamespaceId().equals(o.getNamespaceId())){
+					o.setId(d.getId());
+					allLayouts.add(o);
+					flag = true;
+					break;
+				}
+			}
+			if(!flag)
+				allLayouts.add(d);
+			flag = false;
+		}
+		return allLayouts;
+	}
+	
+	/**
+	 * 1、applyPolicy=1(覆盖)，小范围覆盖大范围，
+	 * 用户自定义的，直接根据itemId比较，系统配置的覆盖，根据itemName进行比较
+	 * 2、applyPolicy=2(恢复)，直接忽略即可
 	 * @param defalultItems
 	 * @param userItems
 	 * @return
@@ -1276,14 +1308,14 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		return ConvertHelper.convert(launchPadLayout, LaunchPadLayoutDTO.class);
 	}
 	@Override
-	public LaunchPadLayoutDTO getLastLaunchPadLayoutByVersionCode(GetLaunchPadLayoutByVersionCodeCommand cmd){
+	public LaunchPadLayoutDTO getLastLaunchPadLayoutByVersionCode(GetLaunchPadLayoutByVersionCodeCommand cmd, ScopeType scopeType, Long scopeId){
 		if(cmd.getName() == null){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid name paramter.name is null");
 		}
 		if(cmd.getVersionCode() == null)
 			cmd.setVersionCode(0L);
-		List<LaunchPadLayoutDTO> results = getLaunchPadLayoutByVersionCode(cmd);
+		List<LaunchPadLayoutDTO> results = getLaunchPadLayoutByVersionCode(cmd, scopeType,scopeId);
 		if(results != null && !results.isEmpty()){
 			LaunchPadLayoutDTO dto =  results.get(0);
 			return dto;
@@ -1296,7 +1328,6 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	    User user = UserContext.current().getUser();
         SceneTokenDTO sceneToken = userService.checkSceneToken(user.getId(), cmd.getSceneToken());
         
-        // 当场景有继承时，使用base场景对应的layout by lqs 20160513
         SceneTypeInfo sceneInfo = sceneService.getBaseSceneTypeByName(sceneToken.getNamespaceId(), sceneToken.getScene());
         String baseScene = sceneToken.getScene();
         if(sceneInfo != null) {
@@ -1307,6 +1338,47 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         } else {
             LOGGER.error("Scene is not found, cmd={}, sceneToken={}", cmd, sceneToken);
         }
+        SceneType sceneType = SceneType.fromCode(sceneToken.getScene());
+        Community community = null;
+        ScopeType scopeType = null;
+        Long scopeId = null;
+        switch(sceneType) {
+        case DEFAULT:
+        case PARK_TOURIST:
+            community = communityProvider.findCommunityById(sceneToken.getEntityId());
+            if(community != null) {
+            	scopeId = sceneToken.getEntityId();
+            	scopeType = ScopeType.COMMUNITY;
+            }else{
+            	LOGGER.warn("community not found, sceneToken=" + sceneToken);
+            }
+            break;
+        case FAMILY:
+            FamilyDTO family = familyProvider.getFamilyById(sceneToken.getEntityId());
+            if(family != null) {
+                community = communityProvider.findCommunityById(family.getCommunityId());
+            } else {
+                if(LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("Family not found, sceneToken=" + sceneToken);
+                }
+            }
+            if(community != null) {
+            	scopeId = community.getId();
+            	scopeType = ScopeType.COMMUNITY;
+            }else{
+            	LOGGER.warn("community not found, sceneToken=" + sceneToken);
+            }
+            break;
+        case PM_ADMIN:// 无小区ID
+        case ENTERPRISE: // 增加两场景，与园区企业保持一致 by lqs 20160517
+        case ENTERPRISE_NOAUTH: // 增加两场景，与园区企业保持一致 by lqs 20160517
+        	scopeId = sceneToken.getEntityId();
+        	scopeType = ScopeType.ORGANIZATION;
+            break;
+        default:
+            LOGGER.error("Unsupported scene for simple user, sceneToken=" + sceneToken);
+            break;
+        }
         
         GetLaunchPadLayoutByVersionCodeCommand getCmd = new GetLaunchPadLayoutByVersionCodeCommand();
         getCmd.setVersionCode(cmd.getVersionCode());
@@ -1314,11 +1386,11 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         getCmd.setNamespaceId(sceneToken.getNamespaceId());
         getCmd.setSceneType(baseScene);
         
-        return getLastLaunchPadLayoutByVersionCode(getCmd);
+        return getLastLaunchPadLayoutByVersionCode(getCmd, scopeType, scopeId);
 	}
 
 	@Override
-	public List<LaunchPadLayoutDTO> getLaunchPadLayoutByVersionCode(GetLaunchPadLayoutByVersionCodeCommand cmd){
+	public List<LaunchPadLayoutDTO> getLaunchPadLayoutByVersionCode(GetLaunchPadLayoutByVersionCodeCommand cmd, ScopeType scopeType, Long scopeId){
 		if(cmd.getVersionCode() == null){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid versionCode paramter.versionCode is null");
@@ -1340,11 +1412,29 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             }
 		}
 		
+		//先看社区或者机构是否有定制的layout，没有则查询All的layout，然后看社区或者机构的场景下是否有覆盖新增的layout，再看特定的园区和社区有覆盖新增的layout，合并起来。 by sfyan 20160628
 		List<LaunchPadLayoutDTO> results = new ArrayList<LaunchPadLayoutDTO>();
-		this.launchPadProvider.findLaunchPadItemsByVersionCode(namespaceId, sceneType, cmd.getName(),cmd.getVersionCode()).stream().map((r) ->{;
-		results.add(ConvertHelper.convert(r, LaunchPadLayoutDTO.class));
-		return null;
-		}).collect(Collectors.toList());
+		List<LaunchPadLayout> launchPadLayouts = this.launchPadProvider.findLaunchPadItemsByVersionCode(namespaceId, sceneType, cmd.getName(),cmd.getVersionCode(), scopeType, scopeId);
+		
+		for (LaunchPadLayout launchPadLayout : launchPadLayouts) {
+			if(ApplyPolicy.fromCode(launchPadLayout.getApplyPolicy()) == ApplyPolicy.CUSTOMIZED){
+				results.add(ConvertHelper.convert(launchPadLayout, LaunchPadLayoutDTO.class));
+			}
+		}
+		if(results.size() == 0){
+			List<LaunchPadLayout> allLaunchPadLayouts = this.launchPadProvider.findLaunchPadItemsByVersionCode(namespaceId, sceneType, cmd.getName(),cmd.getVersionCode(), ScopeType.ALL, 0L);
+			List<LaunchPadLayout> defLaunchPadLayouts = this.launchPadProvider.findLaunchPadItemsByVersionCode(namespaceId, sceneType, cmd.getName(),cmd.getVersionCode(), scopeType, 0L);
+			if(defLaunchPadLayouts.size() > 0)
+				allLaunchPadLayouts = overrideOrRevertLayouts(allLaunchPadLayouts, defLaunchPadLayouts);
+			
+			if(launchPadLayouts.size() > 0)
+				allLaunchPadLayouts = overrideOrRevertLayouts(allLaunchPadLayouts, launchPadLayouts);
+			
+			for (LaunchPadLayout launchPadLayout : allLaunchPadLayouts) {
+				results.add(ConvertHelper.convert(launchPadLayout, LaunchPadLayoutDTO.class));
+			}
+		}
+		
 		return results;
 	}
 
@@ -1847,6 +1937,12 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	}
 	
 	private void reorderLaunchPadItem(Long userId, String ownerType, Long ownerId, String sceneType, List<LaunchPadItemSort> sorts, ItemDisplayFlag itemDisplayFlag){
+		
+		if(null == sorts){
+			LOGGER.debug("LaunchPadItemSort list is null");
+			return;
+		}
+		
 		
 		dbProvider.execute((TransactionStatus status) ->{
 			/**

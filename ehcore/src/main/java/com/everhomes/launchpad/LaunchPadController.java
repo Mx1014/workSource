@@ -16,6 +16,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.launchpad.DeleteLaunchPadByIdCommand;
 import com.everhomes.rest.launchpad.GetLaunchPadItemByIdCommand;
 import com.everhomes.rest.launchpad.GetLaunchPadItemsCommand;
@@ -102,7 +103,7 @@ public class LaunchPadController extends ControllerBase {
     @RestReturn(value=LaunchPadLayoutDTO.class)
     public RestResponse getLastLaunchPadLayoutByVersionCode(@Valid GetLaunchPadLayoutByVersionCodeCommand cmd, HttpServletRequest request,HttpServletResponse response) {
         
-        LaunchPadLayoutDTO launchPadLayoutDTO = this.launchPadService.getLastLaunchPadLayoutByVersionCode(cmd);
+        LaunchPadLayoutDTO launchPadLayoutDTO = this.launchPadService.getLastLaunchPadLayoutByVersionCode(cmd, ScopeType.ALL, 0L);
         RestResponse resp =  new RestResponse();
         if(launchPadLayoutDTO != null){
             long hashCode = launchPadLayoutDTO.getVersionCode();
