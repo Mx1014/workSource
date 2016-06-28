@@ -16,6 +16,12 @@ public class ListAclinkUserCommand {
     private Integer namespaceId;
     
     private String keyword;
+    
+    private Long organizationId;
+    
+    private Long buildingId;
+    
+    private Byte isAuth;
 
     public Long getPageAnchor() {
         return pageAnchor;
@@ -56,6 +62,31 @@ public class ListAclinkUserCommand {
     public void setDoorId(Long doorId) {
         this.doorId = doorId;
     }
+    
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
+    }
+
+    public Long getBuildingId() {
+        return buildingId;
+    }
+
+    public void setBuildingId(Long buildingId) {
+        this.buildingId = buildingId;
+    }
+
+    public Byte getIsAuth() {
+        return isAuth;
+    }
+
+    public void setIsAuth(Byte isAuth) {
+        this.isAuth = isAuth;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
