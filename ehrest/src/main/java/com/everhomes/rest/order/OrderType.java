@@ -12,11 +12,13 @@ public class OrderType {
 	public static final int WU_YE_TEST_CODE = 10000001;
 	public static final int PARKING_CODE = 10000002;
 	public static final int PM_SIYUAN_CODE = 10000003;
+	public static final int PAYMENT_CARD_CODE = 10000004;
 	
 	public static enum OrderTypeEnum{
 		WUYETEST(OrderType.WU_YE_TEST_CODE,"wuyetest","物业支付-测试用"),
 		PARKING(OrderType.PARKING_CODE,"parking","停车充值支付"),
-		PMSIYUAN(OrderType.PM_SIYUAN_CODE,"pmsy","思源物业");
+		PMSIYUAN(OrderType.PM_SIYUAN_CODE,"pmsy","思源物业"),
+		PAYMENTCARD(OrderType.PAYMENT_CARD_CODE,"paymentCard","一卡通");
 
 		private int code;
 		private String pycode;

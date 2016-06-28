@@ -309,7 +309,7 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 		return parkingCardRequestDTO;
 	}
 	
-	@Scheduled(cron="0 0 2 * * ? ")
+	@Scheduled(cron="0 0 0/2 * * ? ")
 	@Override
 	public void refreshParkingRechargeOrderStatus() {
 		LOGGER.info("refresh recharge status.");

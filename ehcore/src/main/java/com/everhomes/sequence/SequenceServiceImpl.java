@@ -585,6 +585,22 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhWifiSettings.class, Tables.EH_WIFI_SETTINGS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_WIFI_SETTINGS.ID.max()).from(Tables.EH_WIFI_SETTINGS).fetchOne().value1(); 
         });
+        
+        syncTableSequence(null, EhPaymentCards.class, Tables.EH_PAYMENT_CARDS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_PAYMENT_CARDS.ID.max()).from(Tables.EH_PAYMENT_CARDS).fetchOne().value1(); 
+        });
+        syncTableSequence(null, EhPaymentCardIssuers.class, Tables.EH_PAYMENT_CARD_ISSUERS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_PAYMENT_CARD_ISSUERS.ID.max()).from(Tables.EH_PAYMENT_CARD_ISSUERS).fetchOne().value1(); 
+        });
+        syncTableSequence(null, EhPaymentCardIssuerCommunities.class, Tables.EH_PAYMENT_CARD_ISSUER_COMMUNITIES.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_PAYMENT_CARD_ISSUER_COMMUNITIES.ID.max()).from(Tables.EH_PAYMENT_CARD_ISSUER_COMMUNITIES).fetchOne().value1(); 
+        });
+        syncTableSequence(null, EhPaymentCardRechargeOrders.class, Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS.ID.max()).from(Tables.EH_PAYMENT_CARD_RECHARGE_ORDERS).fetchOne().value1(); 
+        });
+        syncTableSequence(null, EhPaymentCardTransactions.class, Tables.EH_PAYMENT_CARD_TRANSACTIONS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_PAYMENT_CARD_TRANSACTIONS.ID.max()).from(Tables.EH_PAYMENT_CARD_TRANSACTIONS).fetchOne().value1(); 
+        });
     }
     
     @SuppressWarnings("rawtypes")

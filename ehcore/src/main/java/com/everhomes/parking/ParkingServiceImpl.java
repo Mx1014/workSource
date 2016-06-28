@@ -87,8 +87,6 @@ import com.everhomes.rest.parking.SearchParkingRechargeOrdersCommand;
 import com.everhomes.rest.parking.SetParkingActivityCommand;
 import com.everhomes.rest.parking.SetParkingCardIssueFlagCommand;
 import com.everhomes.rest.parking.SetParkingCardReserveDaysCommand;
-import com.everhomes.rest.techpark.park.ParkingServiceErrorCode;
-import com.everhomes.rest.techpark.punch.PunchServiceErrorCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -665,7 +663,7 @@ public class ParkingServiceImpl implements ParkingService {
 		LOGGER.debug("orderTypeCode="+code);
 		return String.valueOf(code);
 	}
-	
+	@Override
 	public HttpServletResponse exportParkingRechageOrders(SearchParkingRechargeOrdersCommand cmd,
 			HttpServletResponse response){
 		Timestamp startDate = null;
@@ -747,8 +745,8 @@ public class ParkingServiceImpl implements ParkingService {
             
         } catch (IOException ex) { 
  			LOGGER.error(ex.getMessage());
- 			throw RuntimeErrorException.errorWith(ParkingServiceErrorCode.SCOPE,
- 					PunchServiceErrorCode.ERROR_PUNCH_ADD_DAYLOG,
+ 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+ 					ErrorCodes.ERROR_GENERAL_EXCEPTION,
  					ex.getLocalizedMessage());
      		 
         }
@@ -760,7 +758,7 @@ public class ParkingServiceImpl implements ParkingService {
 		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(cmd.getId());
 		if(order == null){
 			LOGGER.error("order {} is not exist",cmd.getId());
- 			throw RuntimeErrorException.errorWith(ParkingServiceErrorCode.SCOPE,
+ 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
  					ErrorCodes.ERROR_GENERAL_EXCEPTION,
  					"order is not exist");
 		}

@@ -1,5 +1,7 @@
 // @formatter:off
+
 // generated at 2016-06-20 15:02:06
+
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -629,6 +631,25 @@ public interface ApiConstants {
     public static final String PARKING_SETPARKINGACTIVITY_URL = "/parking/setParkingActivity";
     public static final String PARKING_SETPARKINGCARDISSUEFLAG_URL = "/parking/setParkingCardIssueFlag";
     public static final String PARKING_SETPARKINGCARDRESERVEDAYS_URL = "/parking/setParkingCardReserveDays";
+    public static final String PAYMENT_APPLYCARD_URL = "/payment/applyCard";
+    public static final String PAYMENT_EXPORTCARDRECHARGEORDER_URL = "/payment/exportCardRechargeOrder";
+    public static final String PAYMENT_EXPORTCARDTRANSACTIONS_URL = "/payment/exportCardTransactions";
+    public static final String PAYMENT_EXPORTCARDUSERS_URL = "/payment/exportCardUsers";
+    public static final String PAYMENT_GETCARDPAIDQRCODE_URL = "/payment/getCardPaidQrCode";
+    public static final String PAYMENT_GETCARDPAIDRESULT_URL = "/payment/getCardPaidResult";
+    public static final String PAYMENT_GETCARDUSERSTATISTICS_URL = "/payment/getCardUserStatistics";
+    public static final String PAYMENT_LISTCARDINFO_URL = "/payment/listCardInfo";
+    public static final String PAYMENT_LISTCARDISSUER_URL = "/payment/listCardIssuer";
+    public static final String PAYMENT_LISTCARDTRANSACTIONS_URL = "/payment/listCardTransactions";
+    public static final String PAYMENT_NOTIFYPAIDRESULT_URL = "/payment/notifyPaidResult";
+    public static final String PAYMENT_RECHARGECARD_URL = "/payment/rechargeCard";
+    public static final String PAYMENT_RESETCARDPASSWORD_URL = "/payment/resetCardPassword";
+    public static final String PAYMENT_SEARCHCARDRECHARGEORDER_URL = "/payment/searchCardRechargeOrder";
+    public static final String PAYMENT_SEARCHCARDTRANSACTIONS_URL = "/payment/searchCardTransactions";
+    public static final String PAYMENT_SEARCHCARDUSERS_URL = "/payment/searchCardUsers";
+    public static final String PAYMENT_SENDCARDVERIFYCODE_URL = "/payment/sendCardVerifyCode";
+    public static final String PAYMENT_SETCARDPASSWORD_URL = "/payment/setCardPassword";
+    public static final String PAYMENT_UPDATECARDRECHARGEORDER_URL = "/payment/updateCardRechargeOrder";
     public static final String PKG_ADD_URL = "/pkg/add";
     public static final String PKG_DOWNLOAD_URL = "/pkg/download";
     public static final String PKG_GETUPGRADEFILEINFO_URL = "/pkg/getUpgradeFileInfo";

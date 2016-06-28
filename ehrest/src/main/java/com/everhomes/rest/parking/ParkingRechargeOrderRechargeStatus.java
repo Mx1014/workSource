@@ -3,7 +3,7 @@ package com.everhomes.rest.parking;
 
 /**
  * <ul>停车充值订单的充值状态
- * <li>INACTIVE(0): 无效</li>
+ * <li>NONE(0): 无效</li>
  * <li>UNRECHARGED(1): 未充值</li>
  * <li>RECHARGED(2): 已充值</li>
  * </ul>

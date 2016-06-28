@@ -11,7 +11,7 @@ package com.everhomes.server.schema;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Ehcore extends org.jooq.impl.SchemaImpl {
 
-	private static final long serialVersionUID = -344010237;
+	private static final long serialVersionUID = 568719622;
 
 	/**
 	 * The singleton instance of <code>ehcore</code>
@@ -152,6 +152,11 @@ public class Ehcore extends org.jooq.impl.SchemaImpl {
 			com.everhomes.server.schema.tables.EhParkingVendors.EH_PARKING_VENDORS,
 			com.everhomes.server.schema.tables.EhParkApplyCard.EH_PARK_APPLY_CARD,
 			com.everhomes.server.schema.tables.EhParkCharge.EH_PARK_CHARGE,
+			com.everhomes.server.schema.tables.EhPaymentCards.EH_PAYMENT_CARDS,
+			com.everhomes.server.schema.tables.EhPaymentCardIssuers.EH_PAYMENT_CARD_ISSUERS,
+			com.everhomes.server.schema.tables.EhPaymentCardIssuerCommunities.EH_PAYMENT_CARD_ISSUER_COMMUNITIES,
+			com.everhomes.server.schema.tables.EhPaymentCardRechargeOrders.EH_PAYMENT_CARD_RECHARGE_ORDERS,
+			com.everhomes.server.schema.tables.EhPaymentCardTransactions.EH_PAYMENT_CARD_TRANSACTIONS,
 			com.everhomes.server.schema.tables.EhPmsyCommunities.EH_PMSY_COMMUNITIES,
 			com.everhomes.server.schema.tables.EhPmsyOrders.EH_PMSY_ORDERS,
 			com.everhomes.server.schema.tables.EhPmsyOrderItems.EH_PMSY_ORDER_ITEMS,
