@@ -402,11 +402,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         locator.setAnchor(cmd.getPageAnchor());
         
         List<User> users = null;
-        if(cmd.getKeyword() == null) {
-            users = userProvider.listUserByKeyword("", cmd.getNamespaceId(), locator, pageSize);
-        } else {
-            users = userProvider.listUserByKeyword(cmd.getKeyword(), cmd.getNamespaceId(), locator, pageSize);
-        }
+        users = userProvider.searchDoorUsers(cmd.getNamespaceId(), cmd.getOrganizationId(), cmd.getBuildingId(),
+                cmd.getIsAuth(), cmd.getKeyword(), locator, pageSize);
         
         List<AclinkUserDTO> userDTOs = new ArrayList<AclinkUserDTO>();
         for(User u : users) {
@@ -1594,13 +1591,16 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         DoorLinglingExtraKeyDTO extra = new DoorLinglingExtraKeyDTO();
         extra.setAuthLevel(0l);
         extra.setAuthStorey(1l);
-        extra.setStoreyAuthList(new ArrayList<Long>());
+        
+        List<Long> storeyAuthList = new ArrayList<Long>();
+        storeyAuthList.add(1l);
+        extra.setStoreyAuthList(storeyAuthList);
         
         try {
             if(checkDoorAccessRole(doorAccess)) {
                 extra.setAuthLevel(1l);    
             }            
-            List<Long> storeyAuthList = getDoorListbyUser(user, doorAccess);
+            storeyAuthList = getDoorListbyUser(user, doorAccess);
             if(storeyAuthList != null && storeyAuthList.size() > 0) {
                 extra.setAuthStorey(storeyAuthList.get(0));
                 extra.setStoreyAuthList(storeyAuthList);

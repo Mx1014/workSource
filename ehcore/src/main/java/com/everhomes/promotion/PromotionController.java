@@ -33,11 +33,11 @@ public class PromotionController extends ControllerBase {
 //        DaoHelper.publishDaoAction(DaoAction.CREATE, OrganizationMember.class, 2101341l);
         
         
-        OpPromotionActivity act = promotionActivityProvider.getOpPromotionActivityById(69l);
-        OpPromotionCondition cond = OpPromotionUtils.getConditionFromPromotion(act);
+//        OpPromotionActivity act = promotionActivityProvider.getOpPromotionActivityById(69l);
+//        OpPromotionCondition cond = OpPromotionUtils.getConditionFromPromotion(act);
         
-        OpPromotionActivityContext ctx = new OpPromotionActivityContext(act);
-        cond.createCondition(ctx);;
+//        OpPromotionActivityContext ctx = new OpPromotionActivityContext(act);
+//        cond.createCondition(ctx);;
         
         return new RestResponse();
     }
