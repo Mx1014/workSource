@@ -298,4 +298,11 @@ public class EhActivitiesDao extends org.jooq.impl.DAOImpl<com.everhomes.server.
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByGuest(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.GUEST, values);
 	}
+
+	/**
+	 * Fetch records that have <code>media_url IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhActivities> fetchByMediaUrl(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhActivities.EH_ACTIVITIES.MEDIA_URL, values);
+	}
 }

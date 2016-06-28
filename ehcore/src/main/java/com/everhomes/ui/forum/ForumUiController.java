@@ -22,6 +22,7 @@ import com.everhomes.rest.forum.ListPostCommandResponse;
 import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.ui.forum.GetTopicQueryFilterCommand;
 import com.everhomes.rest.ui.forum.GetTopicSentScopeCommand;
+import com.everhomes.rest.ui.forum.ListNoticeBySceneCommand;
 import com.everhomes.rest.ui.forum.NewTopicBySceneCommand;
 import com.everhomes.rest.ui.forum.SearchTopicBySceneCommand;
 import com.everhomes.rest.ui.forum.TopicFilterDTO;
@@ -109,4 +110,20 @@ public class ForumUiController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /ui/forum/listNoticeByScene</b>
+     * <p>根据场景查询公告</p>
+     */
+    @RequestMapping("listNoticeByScene")
+    @RestReturn(value=ListPostCommandResponse.class)
+    public RestResponse listNoticeByScene(ListNoticeBySceneCommand cmd) {
+    	ListPostCommandResponse res = forumService.listNoticeByScene(cmd);
+        RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    
 }

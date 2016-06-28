@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhAclinks implements java.io.Serializable {
 
-	private static final long serialVersionUID = 42267988;
+	private static final long serialVersionUID = 1148888052;
 
 	private java.lang.Long     id;
 	private java.lang.Long     doorId;
@@ -20,6 +20,7 @@ public class EhAclinks implements java.io.Serializable {
 	private java.lang.String   firwareVer;
 	private java.sql.Timestamp createTime;
 	private java.lang.Byte     status;
+	private java.lang.String   driver;
 	private java.lang.Long     integralTag1;
 	private java.lang.Long     integralTag2;
 	private java.lang.Long     integralTag3;
@@ -30,7 +31,6 @@ public class EhAclinks implements java.io.Serializable {
 	private java.lang.String   stringTag3;
 	private java.lang.String   stringTag4;
 	private java.lang.String   stringTag5;
-	private java.lang.String   driver;
 
 	public EhAclinks() {}
 
@@ -42,6 +42,7 @@ public class EhAclinks implements java.io.Serializable {
 		java.lang.String   firwareVer,
 		java.sql.Timestamp createTime,
 		java.lang.Byte     status,
+		java.lang.String   driver,
 		java.lang.Long     integralTag1,
 		java.lang.Long     integralTag2,
 		java.lang.Long     integralTag3,
@@ -51,8 +52,7 @@ public class EhAclinks implements java.io.Serializable {
 		java.lang.String   stringTag2,
 		java.lang.String   stringTag3,
 		java.lang.String   stringTag4,
-		java.lang.String   stringTag5,
-		java.lang.String   driver
+		java.lang.String   stringTag5
 	) {
 		this.id = id;
 		this.doorId = doorId;
@@ -61,6 +61,7 @@ public class EhAclinks implements java.io.Serializable {
 		this.firwareVer = firwareVer;
 		this.createTime = createTime;
 		this.status = status;
+		this.driver = driver;
 		this.integralTag1 = integralTag1;
 		this.integralTag2 = integralTag2;
 		this.integralTag3 = integralTag3;
@@ -71,7 +72,6 @@ public class EhAclinks implements java.io.Serializable {
 		this.stringTag3 = stringTag3;
 		this.stringTag4 = stringTag4;
 		this.stringTag5 = stringTag5;
-		this.driver = driver;
 	}
 
 	public java.lang.Long getId() {
@@ -128,6 +128,14 @@ public class EhAclinks implements java.io.Serializable {
 
 	public void setStatus(java.lang.Byte status) {
 		this.status = status;
+	}
+
+	public java.lang.String getDriver() {
+		return this.driver;
+	}
+
+	public void setDriver(java.lang.String driver) {
+		this.driver = driver;
 	}
 
 	public java.lang.Long getIntegralTag1() {
@@ -208,13 +216,5 @@ public class EhAclinks implements java.io.Serializable {
 
 	public void setStringTag5(java.lang.String stringTag5) {
 		this.stringTag5 = stringTag5;
-	}
-
-	public java.lang.String getDriver() {
-		return this.driver;
-	}
-
-	public void setDriver(java.lang.String driver) {
-		this.driver = driver;
 	}
 }

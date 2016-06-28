@@ -21,6 +21,8 @@ public class SearchUtils {
     
     public static final String CONFORDERINDEXTYPE = "conforder";
     
+    public static final String HOTTAGINDEXTYPE = "hottag";
+    
     public static Long getLongField(Object o) {
         Long v = -1l;
         String s = "";

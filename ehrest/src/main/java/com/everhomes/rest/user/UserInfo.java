@@ -39,6 +39,7 @@ import com.everhomes.util.StringHelper;
  *         <li>defaultForumId: 默认论坛ID，每个园区都有一个自己的默认论坛用于放园区整体的帖子（如公告）</li>
  *         <li>feedbackForumId: 意见论坛ID，每个园区都有一个自己的意见反馈论坛用于放园区意见反馈帖子</li>
  *         <li>sceneToken: 场景标识，用一个标识代替原来用多个字段共同表示的标识，以使传参数简单一些（只需要传一个参数）</li>
+ *         <li>registerDays: 用户注册天数</li>
  *         </ul>
  **/
 public class UserInfo {
@@ -79,6 +80,7 @@ public class UserInfo {
     private List<UserCurrentEntity> entityList;
     
     private String sceneToken;
+    private String registerDaysDesc;
 
     public UserInfo() {
     }
@@ -307,7 +309,15 @@ public class UserInfo {
         this.sceneToken = sceneToken;
     }
 
-    @Override
+	public String getRegisterDaysDesc() {
+		return registerDaysDesc;
+	}
+
+	public void setRegisterDaysDesc(String registerDaysDesc) {
+		this.registerDaysDesc = registerDaysDesc;
+	}
+
+	@Override
     public int hashCode() {
         return HashCodeBuilder.reflectionHashCode(this);
     }

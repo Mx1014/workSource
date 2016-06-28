@@ -29,6 +29,7 @@
 #define EvhVersionRealmType_IOS_JINDI @"iOS_Jindi"
 #define EvhVersionRealmType_ANDROID_CHUNENG @"Android_Chuneng"
 #define EvhVersionRealmType_IOS_CHUNENG @"iOS_Chuneng"
+#define EvhVersionRealmType_ACTIVITY_SHARE @"activity_share"
 
 ///////////////////////////////////////////////////////////////////////////////
 

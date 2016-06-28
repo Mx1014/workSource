@@ -21,11 +21,16 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.business.CancelFavoriteBusinessCommand;
 import com.everhomes.rest.business.FavoriteBusinessesCommand;
 import com.everhomes.rest.launchpad.GetLaunchPadItemsCommandResponse;
+import com.everhomes.rest.launchpad.ItemDisplayFlag;
 import com.everhomes.rest.launchpad.LaunchPadLayoutDTO;
+import com.everhomes.rest.launchpad.UserLaunchPadItemDTO;
+import com.everhomes.rest.ui.launchpad.AddLaunchPadItemBySceneCommand;
 import com.everhomes.rest.ui.launchpad.CancelFavoriteBusinessBySceneCommand;
+import com.everhomes.rest.ui.launchpad.DeleteLaunchPadItemBySceneCommand;
 import com.everhomes.rest.ui.launchpad.FavoriteBusinessesBySceneCommand;
 import com.everhomes.rest.ui.launchpad.GetLaunchPadItemsBySceneCommand;
 import com.everhomes.rest.ui.launchpad.GetLaunchPadLayoutBySceneCommand;
+import com.everhomes.rest.ui.launchpad.ReorderLaunchPadItemBySceneCommand;
 import com.everhomes.util.EtagHelper;
 
 /**
@@ -119,6 +124,76 @@ public class LauchPadUiController extends ControllerBase {
     public RestResponse cancelFavoriteBusinessByScene(CancelFavoriteBusinessBySceneCommand cmd) {
         
     	this.launchPadService.cancelFavoriteBusinessByScene(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /ui/launchpad/getMoreItemsByScene</b>
+     * <p>根据位置、layout组、指定场景和相应的实体对象更多的item</p>
+     */
+    @RequestMapping("getMoreItemsByScene")
+    @RestReturn(value=GetLaunchPadItemsCommandResponse.class)
+    public RestResponse getMoreItemsByScene(@Valid GetLaunchPadItemsBySceneCommand cmd,HttpServletRequest request,HttpServletResponse response) {
+    	GetLaunchPadItemsCommandResponse commandResponse = this.launchPadService.getMoreItemsByScene(cmd, request);
+    	RestResponse resp =  new RestResponse(commandResponse);
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+    
+    /**
+     * <b>URL: /ui/launchpad/addLaunchPadItemByScene</b>
+     * <p>添加item到桌面</p>
+     */
+    @RequestMapping("addLaunchPadItemByScene")
+    @RestReturn(value=UserLaunchPadItemDTO.class)
+    public RestResponse addLaunchPadItemByScene(AddLaunchPadItemBySceneCommand cmd) {
+    	UserLaunchPadItemDTO userItemDTO = this.launchPadService.addLaunchPadItemByScene(cmd);
+        RestResponse response =  new RestResponse(userItemDTO);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /ui/launchpad/deleteLaunchPadItemByScene</b>
+     * <p>删除桌面的item</p>
+     */
+    @RequestMapping("deleteLaunchPadItemByScene")
+    @RestReturn(value=UserLaunchPadItemDTO.class)
+    public RestResponse deleteLaunchPadItemByScene(DeleteLaunchPadItemBySceneCommand cmd) {
+    	UserLaunchPadItemDTO userItemDTO = this.launchPadService.deleteLaunchPadItemByScene(cmd);
+        RestResponse response =  new RestResponse(userItemDTO);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /ui/launchpad/reorderLaunchPadItemByScene</b>
+     * <p>排序桌面的item</p>
+     */
+    @RequestMapping("reorderLaunchPadItemByScene")
+    @RestReturn(value=String.class)
+    public RestResponse reorderLaunchPadItemByScene(ReorderLaunchPadItemBySceneCommand cmd) {
+    	this.launchPadService.reorderLaunchPadItemByScene(cmd, ItemDisplayFlag.DISPLAY);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /ui/launchpad/reorderMoreItemByScene</b>
+     * <p>排序更多的item</p>
+     */
+    @RequestMapping("reorderMoreItemByScene")
+    @RestReturn(value=String.class)
+    public RestResponse reorderMoreItemByScene(ReorderLaunchPadItemBySceneCommand cmd) {
+    	this.launchPadService.reorderLaunchPadItemByScene(cmd, ItemDisplayFlag.HIDE);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

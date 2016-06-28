@@ -9,10 +9,11 @@ package com.everhomes.rest.launchpad;
  * <li>POSTS：帖</li>
  * <li>ACTIONBARS：工具栏</li>
  * <li>CALLPHONES：电话组件</li>
+ * <li>BULLETINS：滚动广告组件</li>
  * </ul>
  */
 public enum Widget {
-    NAVIGATOR("Navigator"),BANNERS("Banners"),COUPONS("Coupons"),POSTS("Posts"),ACTIONBARS("ActionBars"),CALLPHONES("CallPhones");
+    NAVIGATOR("Navigator"),BANNERS("Banners"),COUPONS("Coupons"),POSTS("Posts"),ACTIONBARS("ActionBars"),CALLPHONES("CallPhones"), BULLETINS("Bulletins");
     
     private String code;
        

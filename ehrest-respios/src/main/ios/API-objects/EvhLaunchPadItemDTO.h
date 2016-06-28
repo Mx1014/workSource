@@ -57,6 +57,8 @@
 
 @property(nonatomic, copy) NSNumber* deleteFlag;
 
+@property(nonatomic, copy) NSNumber* editFlag;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 

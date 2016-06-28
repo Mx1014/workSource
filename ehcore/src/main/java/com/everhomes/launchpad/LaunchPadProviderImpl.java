@@ -23,8 +23,10 @@ import com.everhomes.rest.launchpad.LaunchPadLayoutStatus;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhLaunchPadItemsDao;
 import com.everhomes.server.schema.tables.daos.EhLaunchPadLayoutsDao;
+import com.everhomes.server.schema.tables.daos.EhUserLaunchPadItemsDao;
 import com.everhomes.server.schema.tables.pojos.EhLaunchPadItems;
 import com.everhomes.server.schema.tables.pojos.EhLaunchPadLayouts;
+import com.everhomes.server.schema.tables.pojos.EhUserLaunchPadItems;
 import com.everhomes.util.ConvertHelper;
 
 @Component
@@ -324,5 +326,72 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
         
         return items;
 	}
+	
+	@Override
+	public List<UserLaunchPadItem> findUserLaunchPadItemByUserId(Long userId, String sceneType, String ownerType, Long ownerId) {
+		List<UserLaunchPadItem> items = new ArrayList<UserLaunchPadItem>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUserLaunchPadItems.class));
+        SelectJoinStep<Record> step = context.select().from(Tables.EH_USER_LAUNCH_PAD_ITEMS);
 
+        Condition condition = Tables.EH_USER_LAUNCH_PAD_ITEMS.USER_ID.eq(userId);
+        condition = condition.and(Tables.EH_USER_LAUNCH_PAD_ITEMS.OWNER_TYPE.eq(ownerType));
+        condition = condition.and(Tables.EH_USER_LAUNCH_PAD_ITEMS.OWNER_ID.eq(ownerId));
+        condition = condition.and(Tables.EH_USER_LAUNCH_PAD_ITEMS.SCENE_TYPE.eq(sceneType));
+       
+        step.where(condition).fetch().map(r ->{
+            items.add(ConvertHelper.convert(r, UserLaunchPadItem.class));
+            return null;
+        });
+        
+        return items;
+	}
+	
+	@Override
+	public UserLaunchPadItem getUserLaunchPadItemByOwner(Long userId, String sceneType, String ownerType, Long ownerId, Long itemId) {
+		List<UserLaunchPadItem> items = new ArrayList<UserLaunchPadItem>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUserLaunchPadItems.class));
+        SelectJoinStep<Record> step = context.select().from(Tables.EH_USER_LAUNCH_PAD_ITEMS);
+
+        Condition condition = Tables.EH_USER_LAUNCH_PAD_ITEMS.USER_ID.eq(userId);
+        condition = condition.and(Tables.EH_USER_LAUNCH_PAD_ITEMS.OWNER_TYPE.eq(ownerType));
+        condition = condition.and(Tables.EH_USER_LAUNCH_PAD_ITEMS.OWNER_ID.eq(ownerId));
+        condition = condition.and(Tables.EH_USER_LAUNCH_PAD_ITEMS.SCENE_TYPE.eq(sceneType));
+        condition = condition.and(Tables.EH_USER_LAUNCH_PAD_ITEMS.ITEM_ID.eq(itemId));
+       
+        step.where(condition).fetch().map(r ->{
+            items.add(ConvertHelper.convert(r, UserLaunchPadItem.class));
+            return null;
+        });
+        
+        if(items.size() > 0){
+        	return items.get(0);
+        }
+        
+        return null;
+	}
+	
+	@Override
+	public void deleteUserLaunchPadItemById(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhUserLaunchPadItemsDao dao = new EhUserLaunchPadItemsDao(context.configuration()); 
+		dao.deleteById(id);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserLaunchPadItems.class, null);
+	}
+	
+	@Override
+	public void createUserLaunchPadItem(UserLaunchPadItem userItem) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhUserLaunchPadItemsDao dao = new EhUserLaunchPadItemsDao(context.configuration()); 
+		dao.insert(userItem); 
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhUserLaunchPadItems.class, null);
+	}
+	
+	@Override
+	public void updateUserLaunchPadItemById(UserLaunchPadItem userItem) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhUserLaunchPadItemsDao dao = new EhUserLaunchPadItemsDao(context.configuration()); 
+		dao.update(userItem); 
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserLaunchPadItems.class, null);
+	}
+	
 }

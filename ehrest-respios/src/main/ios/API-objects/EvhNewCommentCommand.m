@@ -36,6 +36,8 @@
         [jsonObject setObject: self.forumId forKey: @"forumId"];
     if(self.topicId)
         [jsonObject setObject: self.topicId forKey: @"topicId"];
+    if(self.parentId)
+        [jsonObject setObject: self.parentId forKey: @"parentId"];
     if(self.contentType)
         [jsonObject setObject: self.contentType forKey: @"contentType"];
     if(self.content)
@@ -67,6 +69,10 @@
         self.topicId = [jsonObject objectForKey: @"topicId"];
         if(self.topicId && [self.topicId isEqual:[NSNull null]])
             self.topicId = nil;
+
+        self.parentId = [jsonObject objectForKey: @"parentId"];
+        if(self.parentId && [self.parentId isEqual:[NSNull null]])
+            self.parentId = nil;
 
         self.contentType = [jsonObject objectForKey: @"contentType"];
         if(self.contentType && [self.contentType isEqual:[NSNull null]])

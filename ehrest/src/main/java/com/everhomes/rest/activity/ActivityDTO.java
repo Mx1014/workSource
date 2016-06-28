@@ -27,6 +27,8 @@ import com.everhomes.util.StringHelper;
  *<li>userActivityStatus:活动登记状态,1 未报名,2 已报名,3 已签到，4 已确认</li>
  *<li>processStatus：处理状态，0 未知,1 未开始，2 进行中，3 已结束</li>
  *<li>uuid:活动唯一的标识</li>
+ *<li>mediaUrl:活动url</li>
+ *<li>favoriteFlag: 是否收藏标记，参见{@link com.everhomes.rest.forum.PostFavoriteFlag}</li>
  *</ul>
  */
 public class ActivityDTO {
@@ -58,6 +60,10 @@ public class ActivityDTO {
     private Integer processStatus;
     private String uuid;
     private String guest;
+    
+    private String mediaUrl;
+    
+    private Byte favoriteFlag;
     
     public ActivityDTO() {
     }
@@ -289,7 +295,23 @@ public class ActivityDTO {
 		this.guest = guest;
 	}
 	
-    public String toString() {
+    public String getMediaUrl() {
+		return mediaUrl;
+	}
+
+	public void setMediaUrl(String mediaUrl) {
+		this.mediaUrl = mediaUrl;
+	}
+
+	public Byte getFavoriteFlag() {
+		return favoriteFlag;
+	}
+
+	public void setFavoriteFlag(Byte favoriteFlag) {
+		this.favoriteFlag = favoriteFlag;
+	}
+
+	public String toString() {
         return StringHelper.toJsonString(this);
     }
 }

@@ -32,6 +32,8 @@
 
 @property(nonatomic, copy) NSNumber* endTime;
 
+@property(nonatomic, copy) NSString* iconUri;
+
 // item type EvhOpPromotionAssignedScopeDTO*
 @property(nonatomic, strong) NSMutableArray* assignedScopes;
 

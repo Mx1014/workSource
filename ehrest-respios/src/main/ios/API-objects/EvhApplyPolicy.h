@@ -10,7 +10,8 @@ typedef enum {
 
     EvhApplyPolicy_DEFAULT = 0, 
     EvhApplyPolicy_OVERRIDE = 1, 
-    EvhApplyPolicy_REVERT = 2
+    EvhApplyPolicy_REVERT = 2, 
+    EvhApplyPolicy_CUSTOMIZED = 3
 
 } EvhApplyPolicy;
 
