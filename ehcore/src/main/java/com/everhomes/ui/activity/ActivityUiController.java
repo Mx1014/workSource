@@ -11,7 +11,7 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.activity.ListActivitiesReponse;
-import com.everhomes.ui.activity.ListNearbyActivitiesBySceneCommand;
+import com.everhomes.rest.ui.activity.ListNearbyActivitiesBySceneCommand;
 import com.everhomes.util.ConvertHelper;
 
 @RestDoc(value="ActivityUi controller", site="activityui")

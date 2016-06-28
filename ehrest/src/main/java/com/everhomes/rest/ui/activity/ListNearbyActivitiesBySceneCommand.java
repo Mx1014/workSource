@@ -1,4 +1,4 @@
-package com.everhomes.ui.activity;
+package com.everhomes.rest.ui.activity;
 
 import com.everhomes.util.StringHelper;
 /**
