@@ -440,6 +440,17 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
                     }
                     dto.setAssignedScopes(scopeDtos);
                     
+                    if(dto.getCreatorUid() != null) {
+                        User user = userProvider.findUserById(dto.getCreatorUid());
+                        if(user != null) {
+                            if(user.getNickName() != null && user.getNickName() != "") {
+                                dto.setNickName(user.getNickName());
+                            } else {
+                                dto.setNickName(user.getAccountName());
+                            }
+                        }
+                    }
+                    
                     dtos.add(dto);
                 }
             }
