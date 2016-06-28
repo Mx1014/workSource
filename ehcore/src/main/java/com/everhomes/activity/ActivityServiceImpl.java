@@ -304,7 +304,9 @@ public class ActivityServiceImpl implements ActivityService {
                 }
                
             }
-            activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()+cmd.getAdultCount()+cmd.getChildCount());
+            int adult = cmd.getAdultCount() == null ? 0 : cmd.getAdultCount();
+            int child = cmd.getChildCount() == null ? 0 : cmd.getChildCount();
+            activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()+adult+child);
             if(user.getAddressId()!=null){
                 activity.setSignupFamilyCount(activity.getSignupFamilyCount()+1);
             }
