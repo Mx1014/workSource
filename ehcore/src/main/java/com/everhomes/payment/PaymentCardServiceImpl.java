@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -129,6 +128,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
     @Override
     public List<CardInfoDTO> listCardInfo(ListCardInfoCommand cmd){
+    	checkParam(cmd.getOwnerType(), cmd.getOwnerId());
     	User user = UserContext.current().getUser();
 
 		List<CardInfoDTO> result = new ArrayList<CardInfoDTO>();
@@ -144,6 +144,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     }
     @Override
     public List<CardIssuerDTO> listCardIssuer(ListCardIssuerCommand cmd){
+    	checkParam(cmd.getOwnerType(), cmd.getOwnerId());
     	List<CardIssuerDTO> result = new ArrayList<>();
     	List<PaymentCardIssuer> list = paymentCardProvider.listPaymentCardIssuer(cmd.getOwnerId(),cmd.getOwnerType());
     	result = list.stream().map(r -> ConvertHelper.convert(r, CardIssuerDTO.class)).collect(Collectors.toList());
@@ -151,6 +152,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     }
     @Override
     public CardInfoDTO applyCard(ApplyCardCommand cmd){
+    	checkParam(cmd.getOwnerType(), cmd.getOwnerId());
     	User user = UserContext.current().getUser();
     	Integer count = paymentCardProvider.countPaymentCard(cmd.getOwnerId(), cmd.getOwnerType(), user.getId());
     	if(count > 0){
@@ -170,7 +172,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     }
     @Override
     public CommonOrderDTO rechargeCard(RechargeCardCommand cmd){
-    	
+    	checkParam(cmd.getOwnerType(), cmd.getOwnerId());
     	PaymentCard paymentCard = checkPaymentCard(cmd.getCardId());
     	checkPaymentCardIsNull(paymentCard,cmd.getCardId());
     	User user = UserContext.current().getUser();
@@ -215,6 +217,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     
     @Override
     public GetCardPaidQrCodeDTO getCardPaidQrCode(GetCardPaidQrCodeCommand cmd){
+    	checkParam(cmd.getOwnerType(), cmd.getOwnerId());
     	GetCardPaidQrCodeDTO dto = new GetCardPaidQrCodeDTO();
     	PaymentCard paymentCard = checkPaymentCard(cmd.getCardId());
     	checkPaymentCardIsNull(paymentCard,cmd.getCardId());
@@ -243,6 +246,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     }
     @Override
     public GetCardPaidResultDTO getCardPaidResult(GetCardPaidResultCommand cmd){
+    	checkParam(cmd.getOwnerType(), cmd.getOwnerId());
     	GetCardPaidResultDTO dto = null;
     	PaymentCard paymentCard = checkPaymentCard(cmd.getCardId());
     	checkPaymentCardIsNull(paymentCard,cmd.getCardId());
@@ -274,6 +278,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     
     @Override
     public SendCardVerifyCodeDTO sendCardVerifyCode(SendCardVerifyCodeCommand cmd){
+    	checkParam(cmd.getOwnerType(), cmd.getOwnerId());
     	SendCardVerifyCodeDTO dto = new SendCardVerifyCodeDTO();
     	String verifyCode = RandomGenerator.getRandomDigitalString(6);
     	User user = UserContext.current().getUser();
@@ -307,14 +312,13 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 	}
     @Override
     public void setCardPassword(SetCardPasswordCommand cmd){
+    	checkParam(cmd.getOwnerType(), cmd.getOwnerId());
     	PaymentCard paymentCard = checkPaymentCard(cmd.getCardId());
     	checkPaymentCardIsNull(paymentCard,cmd.getCardId());
     	if(!paymentCard.getPassword().equals(EncryptionUtils.hashPassword(cmd.getOldPassword()))){
     		LOGGER.error("the old password is not correctly.");
 			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_OLD_PASSWORD,
-					localeStringService.getLocalizedString(String.valueOf(PaymentCardErrorCode.SCOPE), 
-							String.valueOf(PaymentCardErrorCode.ERROR_OLD_PASSWORD),
-							UserContext.current().getUser().getLocale(),"the old password is not correctly."));
+					"the old password is not correctly.");
     	}
     		
     	PaymentCardVendorHandler handler = getPaymentCardVendorHandler(paymentCard.getVendorName());
@@ -323,6 +327,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     
     @Override
     public void resetCardPassword(ResetCardPasswordCommand cmd){
+    	checkParam(cmd.getOwnerType(), cmd.getOwnerId());
     	if(StringUtils.isBlank(cmd.getVerifyCode())){
     		LOGGER.error("verifyCode cannot be null.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -371,6 +376,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     }
     @Override
     public ListCardTransactionsResponse listCardTransactions(ListCardTransactionsCommand cmd){
+    	checkParam(cmd.getOwnerType(), cmd.getOwnerId());
     	if(cmd.getPageAnchor() == null)
     		cmd.setPageAnchor(1L);
     	User user = UserContext.current().getUser();
@@ -413,6 +419,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     }
     @Override
     public GetCardUserStatisticsDTO getCardUserStatistics(GetCardUserStatisticsCommand cmd){
+    	checkParam(cmd.getOwnerType(), cmd.getOwnerId());
     	GetCardUserStatisticsDTO dto = new GetCardUserStatisticsDTO();
     	User user = UserContext.current().getUser();
 		int communityUserCount = userProvider.countUserByNamespaceId(user.getNamespaceId(), null);
@@ -796,5 +803,17 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 							UserContext.current().getUser().getLocale(),"paymentCard is not exists ."));
     	}
     }
-    
+    private void checkParam(String ownerType,Long ownerId){
+    	if(ownerId == null ) {
+        	LOGGER.error("ownerId cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"ownerId cannot be null.");
+        }
+    	
+    	if(StringUtils.isBlank(ownerType)) {
+        	LOGGER.error("ownerType cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"ownerType cannot be null.");
+        }
+    }
 }
