@@ -197,8 +197,17 @@ public class AclinkController extends ControllerBase {
         Long role = 0l;
         
         if(cmd.getOrganizationId() != null) {
+            
+            //Only for active door
             try {
                 rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.AclinkManager);
+                role = 1l;
+            } catch(Exception e) {
+                
+            }
+            
+            try {
+                rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.AclinkInnerManager);
                 role = 1l;
             } catch(Exception e) {
                 

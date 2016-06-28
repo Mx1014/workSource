@@ -49,4 +49,6 @@ public interface PrivilegeConstants {
     public static final long OrgAdminUpdate = 605L;
     
     public static final long AclinkManager = 720L;
+    
+    public static final long AclinkInnerManager = 725L;
 }

@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -20,23 +21,30 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.client.AsyncRestTemplate;
 
+import com.everhomes.aclink.AclinkConstant;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
 
 @Component
 public class BizHttpRestCallProviderImpl implements BizHttpRestCallProvider {    
-    @Value("${biz.serverUrl}")
-    private String bizServerUrl;
+//    @Value("${biz.serverUrl}")
+//    private String bizServerUrl;
+//    
+//    @Value("${biz.appKey}")
+//    private String appKey;
+//    
+//    @Value("${biz.secretKey}")
+//    private String secretKey;
     
-    @Value("${biz.appKey}")
-    private String appKey;
-    
-    @Value("${biz.secretKey}")
-    private String secretKey;
+    @Autowired
+    private ConfigurationProvider  configProvider;
     
     private String getRestUri(String relativeUri) {
-        StringBuffer sb = new StringBuffer(this.bizServerUrl);
-        if(!this.bizServerUrl.endsWith("/"))
+        
+        String bizServerUrl = configProvider.getValue(OpPromotionConstant.BIZ_SERVER_URL, "");
+        StringBuffer sb = new StringBuffer(bizServerUrl);
+        if(!bizServerUrl.endsWith("/"))
             sb.append("/");
         
         if(relativeUri.startsWith("/"))
@@ -54,8 +62,10 @@ public class BizHttpRestCallProviderImpl implements BizHttpRestCallProvider {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         
-        params.put("appKey", this.appKey);
-        String signature = SignatureHelper.computeSignature(params, this.secretKey);
+        String appKey = configProvider.getValue(OpPromotionConstant.BIZ_APPKEY, "");
+        String secretKey = configProvider.getValue(OpPromotionConstant.BIZ_SECRET_KEY, "");
+        params.put("appKey", appKey);
+        String signature = SignatureHelper.computeSignature(params, secretKey);
         params.put("signature", URLEncoder.encode(signature,"UTF-8"));
         
 //        MultiValueMap<String, String> paramMap = new LinkedMultiValueMap<>();
@@ -77,8 +87,10 @@ public class BizHttpRestCallProviderImpl implements BizHttpRestCallProvider {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         
-        params.put("appKey", this.appKey);
-        String signature = SignatureHelper.computeSignature(params, this.secretKey);
+        String appKey = configProvider.getValue(OpPromotionConstant.BIZ_APPKEY, "");
+        String secretKey = configProvider.getValue(OpPromotionConstant.BIZ_SECRET_KEY, "");
+        params.put("appKey", appKey);
+        String signature = SignatureHelper.computeSignature(params, secretKey);
         params.put("signature", URLEncoder.encode(signature,"UTF-8"));
         
 //        MultiValueMap<String, String> paramMap = new LinkedMultiValueMap<>();
