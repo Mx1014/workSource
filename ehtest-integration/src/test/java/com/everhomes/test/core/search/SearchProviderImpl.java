@@ -14,7 +14,7 @@ import org.springframework.util.StringUtils;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.everhomes.rest.news.NewsServiceErrorCode;
+import com.everhomes.rest.search.SearchErrorCode;
 import com.everhomes.test.core.http.HttpUtils;
 import com.everhomes.util.RuntimeErrorException;
 
@@ -52,8 +52,8 @@ public class SearchProviderImpl implements SearchProvider {
 			return HttpUtils.postJson(url, json, TIME_OUT, CHARSET);
 		} catch (IOException e) {
 			LOGGER.error("request to elasticsearch error: url=" + url + ", json=" + json);
-			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
-					NewsServiceErrorCode.ERROR_REQUEST_ELASTICSEARCH_ERROR, "request to elasticsearch error");
+			throw RuntimeErrorException.errorWith(SearchErrorCode.SCOPE,
+					SearchErrorCode.ERROR_REQUEST_ELASTICSEARCH_ERROR, "request to elasticsearch error");
 		}
 	}
 
@@ -68,8 +68,8 @@ public class SearchProviderImpl implements SearchProvider {
 			return HttpUtils.get(url, null, TIME_OUT, CHARSET);
 		} catch (Exception e) {
 			LOGGER.error("request to elasticsearch error: url=" + url);
-			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
-					NewsServiceErrorCode.ERROR_REQUEST_ELASTICSEARCH_ERROR, "request to elasticsearch error");
+			throw RuntimeErrorException.errorWith(SearchErrorCode.SCOPE,
+					SearchErrorCode.ERROR_REQUEST_ELASTICSEARCH_ERROR, "request to elasticsearch error");
 		}
 	}
 
@@ -85,8 +85,8 @@ public class SearchProviderImpl implements SearchProvider {
 			return HttpUtils.putJson(url, json, TIME_OUT, CHARSET);
 		} catch (IOException e) {
 			LOGGER.error("request to elasticsearch error: url=" + url + ", json=" + json);
-			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
-					NewsServiceErrorCode.ERROR_REQUEST_ELASTICSEARCH_ERROR, "request to elasticsearch error");
+			throw RuntimeErrorException.errorWith(SearchErrorCode.SCOPE,
+					SearchErrorCode.ERROR_REQUEST_ELASTICSEARCH_ERROR, "request to elasticsearch error");
 		}
 	}
 
@@ -101,8 +101,8 @@ public class SearchProviderImpl implements SearchProvider {
 			return HttpUtils.delete(url, TIME_OUT, CHARSET);
 		} catch (IOException e) {
 			LOGGER.error("request to elasticsearch error: url=" + url);
-			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
-					NewsServiceErrorCode.ERROR_REQUEST_ELASTICSEARCH_ERROR, "request to elasticsearch error");
+			throw RuntimeErrorException.errorWith(SearchErrorCode.SCOPE,
+					SearchErrorCode.ERROR_REQUEST_ELASTICSEARCH_ERROR, "request to elasticsearch error");
 		}
 	}
 
@@ -198,8 +198,8 @@ public class SearchProviderImpl implements SearchProvider {
 			return HttpUtils.deleteJson(url, json, TIME_OUT, CHARSET);
 		} catch (IOException e) {
 			LOGGER.error("request to elasticsearch error: url=" + url + ", json=" + json);
-			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
-					NewsServiceErrorCode.ERROR_REQUEST_ELASTICSEARCH_ERROR, "request to elasticsearch error");
+			throw RuntimeErrorException.errorWith(SearchErrorCode.SCOPE,
+					SearchErrorCode.ERROR_REQUEST_ELASTICSEARCH_ERROR, "request to elasticsearch error");
 		}
 	}
 	

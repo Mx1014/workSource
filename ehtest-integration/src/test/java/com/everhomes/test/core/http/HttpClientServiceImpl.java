@@ -272,7 +272,6 @@ public class HttpClientServiceImpl implements HttpClientService {
         return sb.toString();
     }
     
-    
     private <T extends RestResponseBase>  T postFile(String commandRelativeUri, Object cmd, Class<T> responseClz, File... files){
     	try {
 	    	if(commandRelativeUri == null || commandRelativeUri.trim().length() == 0) {

@@ -233,6 +233,10 @@ public class NewsTest extends BaseLoginAuthTestCase {
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 		assertTrue("errorCode should be 200", response.getErrorCode().intValue()==ErrorCodes.SUCCESS);
+		
+		DSLContext context = dbProvider.getDslContext();
+		Integer count = (Integer)context.selectCount().from(Tables.EH_NEWS).fetchOne().getValue(0);
+		assertTrue("the count should be 5", count.intValue() == 5);
 	}
 	
 	@Ignore
