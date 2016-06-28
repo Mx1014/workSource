@@ -65,6 +65,7 @@ public class OpPromotionListAllCondition implements OpPromotionCondition, OpProm
             if(visitor.getPushCount() > 0) {
                 promotionService.addPushCountByPromotionId(visitor.getPromotion().getId(), (int)visitor.getPushCount());
                 visitor.setPushCount(0);
+                promotionService.finishOpPromotion(c.getPromotion());
             }            
         } catch(Exception ex) {
             LOGGER.error("promotion list all error", ex);

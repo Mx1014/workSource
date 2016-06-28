@@ -391,6 +391,15 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
     }
     
     @Override
+    public void finishOpPromotion(OpPromotionActivity promotion) {
+        if(promotion != null) {
+            promotion.setStatus(OpPromotionStatus.COMPLETE.getCode());
+            updateOpPromotionActivity(promotion);    
+        }
+        
+    }
+    
+    @Override
     public void closeOpPromotion(GetOpPromotionActivityByPromotionId cmd) {
         OpPromotionActivity promotion = promotionActivityProvider.getOpPromotionActivityById(cmd.getPromotionId());
         closeOpPromotion(promotion);
