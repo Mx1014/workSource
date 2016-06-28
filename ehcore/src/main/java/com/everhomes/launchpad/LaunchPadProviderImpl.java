@@ -18,6 +18,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.launchpad.LaunchPadLayoutDTO;
 import com.everhomes.rest.launchpad.LaunchPadLayoutStatus;
 import com.everhomes.server.schema.Tables;
@@ -147,7 +148,7 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 	}
 
 	@Override
-	public List<LaunchPadLayout> findLaunchPadItemsByVersionCode(Integer namespaceId, String sceneType, String name,long versionCode) {
+	public List<LaunchPadLayout> findLaunchPadItemsByVersionCode(Integer namespaceId, String sceneType, String name,long versionCode, ScopeType scopeType, Long scopeId) {
 		List<LaunchPadLayout> layouts = new ArrayList<LaunchPadLayout>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLaunchPadLayouts.class));
 		SelectJoinStep<Record> step = context.select().from(Tables.EH_LAUNCH_PAD_LAYOUTS);
@@ -159,8 +160,8 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
         condition = condition.and(Tables.EH_LAUNCH_PAD_LAYOUTS.NAMESPACE_ID.eq(namespaceId));
         condition = condition.and(Tables.EH_LAUNCH_PAD_LAYOUTS.SCENE_TYPE.eq(sceneType));
 		condition = condition.and(Tables.EH_LAUNCH_PAD_LAYOUTS.STATUS.eq(LaunchPadLayoutStatus.ACTIVE.getCode()));
-
-        
+		condition = condition.and(Tables.EH_LAUNCH_PAD_LAYOUTS.SCOPE_CODE.eq(scopeType.getCode()));
+		condition = condition.and(Tables.EH_LAUNCH_PAD_LAYOUTS.SCOPE_ID.eq(scopeId));
 		step.where(condition).orderBy(Tables.EH_LAUNCH_PAD_LAYOUTS.VERSION_CODE.desc()).fetch().map((r) ->{
 			layouts.add(ConvertHelper.convert(r, LaunchPadLayout.class));
 			return null;
