@@ -22,7 +22,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
 import com.everhomes.payment.taotaogu.ByteTools;
-import com.everhomes.payment.taotaogu.ResponseEntiy;
 import com.google.gson.Gson;
 
 public class Testselectka {
@@ -45,8 +44,8 @@ public class Testselectka {
 		
 		
 		Gson gson = new Gson();
-		ResponseEntiy r = gson.fromJson(rspText, ResponseEntiy.class);
-		List list = (List) r.getResult();
+		//ResponseEntiy r = gson.fromJson(rspText, ResponseEntiy.class);
+		//List list = (List) r.getResult();
 		System.out.println(rspText);
 		return true;
 	}
