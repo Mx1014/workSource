@@ -1440,7 +1440,9 @@ public class ActivityServiceImpl implements ActivityService {
             } else {
             	dto.setFavoriteFlag(PostFavoriteFlag.FAVORITE.getCode());
             }
-            
+            //add UserActivityStatus by xiongying 20160628
+            ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), uid);
+            dto.setUserActivityStatus(getActivityStatus(roster).getCode());
             return dto;
         }).filter(r->r!=null).collect(Collectors.toList());
         
