@@ -293,7 +293,7 @@ public class ActivityServiceImpl implements ActivityService {
 //                comment.setContent(template);
 //                forumProvider.createPost(comment);
 //            }
-            if (activity.getGroupId() != null) {
+            if (activity.getGroupId() != null && activity.getGroupId() != 0) {
                 RequestToJoinGroupCommand joinCmd = new RequestToJoinGroupCommand();
                 joinCmd.setGroupId(activity.getGroupId());
                 joinCmd.setRequestText("request to join activity group");
