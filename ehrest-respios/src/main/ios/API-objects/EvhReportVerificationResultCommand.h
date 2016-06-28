@@ -27,6 +27,8 @@
 
 @property(nonatomic, copy) NSString* message;
 
+@property(nonatomic, copy) NSNumber* categoryId;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 

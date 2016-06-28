@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  *  <li>ownerType: 标准类型所属组织类型，如enterprise</li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
+ *  <li>parentId: 父节点id。全要则不填</li>
  * </ul>
  */
 public class ListQualityCategoriesCommand {
@@ -23,6 +24,8 @@ public class ListQualityCategoriesCommand {
 	private Long pageAnchor;
 	
 	private Integer pageSize;
+	
+	private Long parentId;
 
 	public Long getOwnerId() {
 		return ownerId;
@@ -55,7 +58,15 @@ public class ListQualityCategoriesCommand {
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
 	}
-	
+
+	public Long getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(Long parentId) {
+		this.parentId = parentId;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

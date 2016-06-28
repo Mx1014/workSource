@@ -2,6 +2,7 @@
 // EvhQualityCategoriesDTO.m
 //
 #import "EvhQualityCategoriesDTO.h"
+#import "EvhQualityCategoriesDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhQualityCategoriesDTO
@@ -23,6 +24,7 @@
 {
     self = [super init];
     if(self) {
+        _childrens = [NSMutableArray new];
         return self;
     }
     return nil;
@@ -46,6 +48,19 @@
         [jsonObject setObject: self.defaultOrder forKey: @"defaultOrder"];
     if(self.status)
         [jsonObject setObject: self.status forKey: @"status"];
+    if(self.score)
+        [jsonObject setObject: self.score forKey: @"score"];
+    if(self.description_)
+        [jsonObject setObject: self.description_ forKey: @"description"];
+    if(self.childrens) {
+        NSMutableArray* jsonArray = [NSMutableArray new];
+        for(EvhQualityCategoriesDTO* item in self.childrens) {
+            NSMutableDictionary* dic = [NSMutableDictionary new];
+            [item toJson:dic];
+            [jsonArray addObject:dic];
+        }
+        [jsonObject setObject: jsonArray forKey: @"childrens"];
+    }
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -83,6 +98,23 @@
         if(self.status && [self.status isEqual:[NSNull null]])
             self.status = nil;
 
+        self.score = [jsonObject objectForKey: @"score"];
+        if(self.score && [self.score isEqual:[NSNull null]])
+            self.score = nil;
+
+        self.description_ = [jsonObject objectForKey: @"description"];
+        if(self.description_ && [self.description_ isEqual:[NSNull null]])
+            self.description_ = nil;
+
+        {
+            NSArray* jsonArray = [jsonObject objectForKey: @"childrens"];
+            for(id itemJson in jsonArray) {
+                EvhQualityCategoriesDTO* item = [EvhQualityCategoriesDTO new];
+                
+                [item fromJson: itemJson];
+                [self.childrens addObject: item];
+            }
+        }
         return self;
     }
     

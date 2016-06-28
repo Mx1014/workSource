@@ -15,7 +15,9 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.quality.QualityService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.quality.CreatQualityStandardCommand;
+import com.everhomes.rest.quality.CreateQualityInspectionTaskCommand;
 import com.everhomes.rest.quality.DeleteQualityCategoryCommand;
 import com.everhomes.rest.quality.DeleteQualityStandardCommand;
 import com.everhomes.rest.quality.DeleteFactorCommand;
@@ -32,6 +34,8 @@ import com.everhomes.rest.quality.ListQualityInspectionTasksResponse;
 import com.everhomes.rest.quality.ListFactorsCommand;
 import com.everhomes.rest.quality.ListFactorsResponse;
 import com.everhomes.rest.quality.ListRecordsByTaskIdCommand;
+import com.everhomes.rest.quality.ListQualityInspectionLogsCommand;
+import com.everhomes.rest.quality.ListQualityInspectionLogsResponse;
 import com.everhomes.rest.quality.QualityInspectionTaskDTO;
 import com.everhomes.rest.quality.QualityInspectionTaskRecordsDTO;
 import com.everhomes.rest.quality.QualityStandardsDTO;
@@ -361,5 +365,52 @@ public class QualityController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	/**
+	 * <b>URL: /quality/listUserRelateOrgGroups</b>
+	 * <p>查看用户所在的业务组</p>
+	 */
+	@RequestMapping("listUserRelateOrgGroups")
+	@RestReturn(value = OrganizationDTO.class, collection = true)
+	public RestResponse listUserRelateOrgGroups() {
+		
+		List<OrganizationDTO> groupDtos = qualityService.listUserRelateOrgGroups();
+		
+		RestResponse response = new RestResponse(groupDtos);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
+	/**
+	 * <b>URL: /quality/listQualityInspectionLogs</b>
+	 * <p>查看品质核查的操作记录</p>
+	 */
+	@RequestMapping("listQualityInspectionLogs")
+	@RestReturn(value = ListQualityInspectionLogsResponse.class)
+	public RestResponse listQualityInspectionLogs(ListQualityInspectionLogsCommand cmd) {
+		
+		ListQualityInspectionLogsResponse recordDtos = qualityService.listQualityInspectionLogs(cmd);
+		
+		RestResponse response = new RestResponse(recordDtos);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /quality/createQualityInspectionTask</b>
+	 * <p>主动创建品质核查任务</p>
+	 */
+	@RequestMapping("createQualityInspectionTask")
+	@RestReturn(value = QualityInspectionTaskDTO.class)
+	public RestResponse createQualityInspectionTask(CreateQualityInspectionTaskCommand cmd) {
+		
+		QualityInspectionTaskDTO task = qualityService.createQualityInspectionTask(cmd);
+		
+		RestResponse response = new RestResponse(task);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

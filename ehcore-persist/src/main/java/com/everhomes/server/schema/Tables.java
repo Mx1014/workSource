@@ -734,6 +734,11 @@ public class Tables {
 	public static final com.everhomes.server.schema.tables.EhQualityInspectionEvaluationFactors EH_QUALITY_INSPECTION_EVALUATION_FACTORS = com.everhomes.server.schema.tables.EhQualityInspectionEvaluationFactors.EH_QUALITY_INSPECTION_EVALUATION_FACTORS;
 
 	/**
+	 * The table ehcore.eh_quality_inspection_logs
+	 */
+	public static final com.everhomes.server.schema.tables.EhQualityInspectionLogs EH_QUALITY_INSPECTION_LOGS = com.everhomes.server.schema.tables.EhQualityInspectionLogs.EH_QUALITY_INSPECTION_LOGS;
+
+	/**
 	 * The table ehcore.eh_quality_inspection_standards
 	 */
 	public static final com.everhomes.server.schema.tables.EhQualityInspectionStandards EH_QUALITY_INSPECTION_STANDARDS = com.everhomes.server.schema.tables.EhQualityInspectionStandards.EH_QUALITY_INSPECTION_STANDARDS;

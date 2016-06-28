@@ -585,7 +585,6 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhWifiSettings.class, Tables.EH_WIFI_SETTINGS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_WIFI_SETTINGS.ID.max()).from(Tables.EH_WIFI_SETTINGS).fetchOne().value1(); 
         });
-        
         syncTableSequence(null, EhPaymentCards.class, Tables.EH_PAYMENT_CARDS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_PAYMENT_CARDS.ID.max()).from(Tables.EH_PAYMENT_CARDS).fetchOne().value1(); 
         });
@@ -600,6 +599,9 @@ public class SequenceServiceImpl implements SequenceService {
         });
         syncTableSequence(null, EhPaymentCardTransactions.class, Tables.EH_PAYMENT_CARD_TRANSACTIONS.getName(), (dbContext) -> { 
             return dbContext.select(Tables.EH_PAYMENT_CARD_TRANSACTIONS.ID.max()).from(Tables.EH_PAYMENT_CARD_TRANSACTIONS).fetchOne().value1(); 
+        });
+        syncTableSequence(null, EhQualityInspectionLogs.class, Tables.EH_QUALITY_INSPECTION_LOGS.getName(), (dbContext) -> { 
+            return dbContext.select(Tables.EH_QUALITY_INSPECTION_LOGS.ID.max()).from(Tables.EH_QUALITY_INSPECTION_LOGS).fetchOne().value1();
         });
     }
     

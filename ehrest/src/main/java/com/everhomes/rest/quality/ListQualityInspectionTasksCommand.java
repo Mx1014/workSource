@@ -18,6 +18,7 @@ import com.everhomes.util.StringHelper;
  *  <li>reviewStatus: 审阅状态</li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
+ *  <li>manualFlag: 是否手动添加 0：自动生成，1：手动添加</li>
  * </ul>
  */
 public class ListQualityInspectionTasksCommand {
@@ -44,6 +45,8 @@ public class ListQualityInspectionTasksCommand {
 	private Byte executeStatus;
 	
 	private Byte reviewStatus;
+	
+	private Byte manualFlag;
 	
 	private Long pageAnchor;
 	
@@ -127,6 +130,14 @@ public class ListQualityInspectionTasksCommand {
 
 	public void setReviewStatus(Byte reviewStatus) {
 		this.reviewStatus = reviewStatus;
+	}
+
+	public Byte getManualFlag() {
+		return manualFlag;
+	}
+
+	public void setManualFlag(Byte manualFlag) {
+		this.manualFlag = manualFlag;
 	}
 
 	public Long getPageAnchor() {

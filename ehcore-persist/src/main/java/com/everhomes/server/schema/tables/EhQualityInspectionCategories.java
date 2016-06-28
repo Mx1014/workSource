@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhQualityInspectionCategories extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhQualityInspectionCategoriesRecord> {
 
-	private static final long serialVersionUID = 1574820581;
+	private static final long serialVersionUID = 1821439015;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_quality_inspection_categories</code>
@@ -75,6 +75,16 @@ public class EhQualityInspectionCategories extends org.jooq.impl.TableImpl<com.e
 	 * The column <code>ehcore.eh_quality_inspection_categories.create_time</code>.
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionCategoriesRecord, java.sql.Timestamp> CREATE_TIME = createField("create_time", org.jooq.impl.SQLDataType.TIMESTAMP, this, "");
+
+	/**
+	 * The column <code>ehcore.eh_quality_inspection_categories.score</code>.
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionCategoriesRecord, java.lang.Double> SCORE = createField("score", org.jooq.impl.SQLDataType.DOUBLE.nullable(false).defaulted(true), this, "");
+
+	/**
+	 * The column <code>ehcore.eh_quality_inspection_categories.description</code>. content data
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhQualityInspectionCategoriesRecord, java.lang.String> DESCRIPTION = createField("description", org.jooq.impl.SQLDataType.CLOB.length(65535), this, "content data");
 
 	/**
 	 * Create a <code>ehcore.eh_quality_inspection_categories</code> table reference

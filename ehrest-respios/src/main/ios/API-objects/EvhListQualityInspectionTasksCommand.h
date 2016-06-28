@@ -31,6 +31,8 @@
 
 @property(nonatomic, copy) NSNumber* reviewStatus;
 
+@property(nonatomic, copy) NSNumber* manualFlag;
+
 @property(nonatomic, copy) NSNumber* pageAnchor;
 
 @property(nonatomic, copy) NSNumber* pageSize;
