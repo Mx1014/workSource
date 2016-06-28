@@ -571,8 +571,8 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 			tempRow.createCell(2).setCellValue(order.getCardNo());
 			tempRow.createCell(3).setCellValue(order.getAmount().doubleValue());
 			tempRow.createCell(4).setCellValue(order.getRechargeTime()!=null?datetimeSF.format(order.getRechargeTime()):"");
-			tempRow.createCell(5).setCellValue(order.getPaidType());
-			tempRow.createCell(6).setCellValue(CardRechargeStatus.fromCode(order.getRechargeStatus()).toString());
+			tempRow.createCell(5).setCellValue("10001".equals(order.getPaidType())?"支付宝":"微信");
+			tempRow.createCell(6).setCellValue(convertOrderStatus(CardRechargeStatus.fromCode(order.getRechargeStatus()).getCode()));
 		}
 		ByteArrayOutputStream out = null;
 		try {
@@ -585,6 +585,22 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 					"exportCardUsers is fail.");
 		}
 		
+	}
+	private String convertOrderStatus(Byte b){
+		switch (b) {
+		case 0:
+			return "充值失败";
+		case 1:
+			return "处理中";
+		case 2:
+			return "充值成功";
+		case 3:
+			return "处理完成";
+		case 4:
+			return "已退款";
+		default:
+			return "";
+		}
 	}
 	@Override
 	public void exportCardTransactions(SearchCardTransactionsCommand cmd,
