@@ -38,6 +38,7 @@ public class OpPromotionActivityDTO {
     private Timestamp     endTime;
     private Long     id;
     private Integer     processCount;
+    private String nickName;
     
     @ItemType(OpPromotionAssignedScopeDTO.class)
     private List<OpPromotionAssignedScopeDTO> assignedScopes;
@@ -229,6 +230,16 @@ public class OpPromotionActivityDTO {
 
     public void setProcessCount(Integer processCount) {
         this.processCount = processCount;
+    }
+
+
+    public String getNickName() {
+        return nickName;
+    }
+
+
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
     }
 
 
