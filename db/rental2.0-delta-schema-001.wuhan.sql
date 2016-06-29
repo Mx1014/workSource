@@ -1,14 +1,14 @@
-#
-#保存一个公司的一个场所图标的默认设置
-#
-#
+-- 
+-- 保存一个公司的一个场所图标的默认设置
+-- 
+-- 
 DROP TABLE IF EXISTS eh_rental_default_rules;
 
 CREATE TABLE `eh_rental_default_rules` (
 `id` BIGINT(20)    COMMENT 'id',
 `owner_type` VARCHAR(255)  COMMENT 'owner type : community ; organization',
 `owner_id` BIGINT(20)    COMMENT 'community id or organization id',
-`site_type` BIGINT(20)    COMMENT 'rule for what function',
+`launch_pad_item_id` BIGINT(20)    COMMENT '广场图标id',
 `rental_start_time` BIGINT(20)    COMMENT '最多提前多少时间预定',
 `rental_end_time` BIGINT(20)    COMMENT '最少提前多少时间预定',
 `pay_start_time` BIGINT(20)    COMMENT '',
@@ -31,23 +31,23 @@ CREATE TABLE `eh_rental_default_rules` (
 `multi_time_interval` TINYINT(4)    COMMENT '是否允许预约多个时段 1是 0否',
 `cancel_flag` TINYINT(4)    COMMENT '是否允许取消 1是 0否',
 `rental_step` INT(11)       COMMENT 'how many time_step must be rental every time',
-`need_pay` TINYINT(4)    COMMENT '是否需要支付 1是 0否',
-`launch_pad_item_id` BIGINT(20)    COMMENT '广场图标id',
+`need_pay` TINYINT(4)    COMMENT '是否需要支付 1是 0否', 
 `workday_price` DECIMAL(10,2)  COMMENT '工作日价格',
 `weekend_price` DECIMAL(10,2)  COMMENT '周末价格',
 `site_counts` DOUBLE  COMMENT '可预约个数',
 `begin_date` DATE  COMMENT '开始日期',
 `end_date` DATE  COMMENT '结束日期',
 `open_weekday` VARCHAR(7)   COMMENT '7位二进制，0000000每一位表示星期7123456',
+`time_step` DOUBLE  COMMENT '步长，每个单元格是多少小时（半小时是0.5）',
 
 
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4	
 ;
 
-#
-#对于按小时预定的场所默认设置，保存时间段
-#
+-- 
+-- 对于按小时预定的场所默认设置，保存时间段
+-- 
 DROP TABLE IF EXISTS eh_rental_time_interval;
 
 CREATE TABLE `eh_rental_time_interval` (
@@ -60,9 +60,9 @@ CREATE TABLE `eh_rental_time_interval` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4	
 ;
 
-#
-#保存默认设置的关闭时间
-#
+-- 
+-- 保存默认设置的关闭时间
+-- 
 DROP TABLE IF EXISTS eh_rental_close_dates;
 
 CREATE TABLE `eh_rental_close_dates` (
@@ -75,9 +75,9 @@ CREATE TABLE `eh_rental_close_dates` (
 ;
 
 
-#
-#场所表
-#
+-- 
+-- 场所表
+-- 
 DROP TABLE IF EXISTS eh_rental_sites;
 
 CREATE TABLE `eh_rental_sites` (
@@ -109,7 +109,7 @@ CREATE TABLE `eh_rental_sites` (
 `cut_price` DECIMAL(10,2)  COMMENT '减XX元',
 `discount_ratio` DOUBLE  COMMENT '折扣比例',
 `rental_type` TINYINT(4)   COMMENT '0: as hour:min 1-as half day 2-as day 3-支持晚上的半天',
-`rental_step` DOUBLE   COMMENT '按小时预约：最小单元格是多少小时，浮点型',
+`time_step` DOUBLE   COMMENT '按小时预约：最小单元格是多少小时，浮点型',
 `exclusive_flag` TINYINT(4)    COMMENT '是否为独占资源0否 1 是',
 `auto_assign` TINYINT(4)    COMMENT '是否动态分配 1是 0否',
 `multi_unit` TINYINT(4)    COMMENT '是否允许预约多个场所 1是 0否',
@@ -132,9 +132,9 @@ CREATE TABLE `eh_rental_sites` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4	
 ;
 
-#
-#场所和归属园区的关联表
-#
+-- 
+-- 场所和归属园区的关联表
+-- 
 DROP TABLE IF EXISTS eh_rental_site_owners;
 
 CREATE TABLE `eh_rental_site_owners` (
@@ -148,9 +148,9 @@ CREATE TABLE `eh_rental_site_owners` (
 ;
 
 
-#
-#保存场所详情图片
-#
+-- 
+-- 保存场所详情图片
+-- 
 DROP TABLE IF EXISTS eh_rental_site_pics;
 
 CREATE TABLE `eh_rental_site_pics` (
@@ -162,9 +162,9 @@ CREATE TABLE `eh_rental_site_pics` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4	
 ;
 
-#
-#场所设定好的单元格表
-#
+-- 
+-- 场所设定好的单元格表
+-- 
 DROP TABLE IF EXISTS eh_rental_site_rules;
 
 CREATE TABLE `eh_rental_site_rules` (
@@ -198,9 +198,9 @@ CREATE TABLE `eh_rental_site_rules` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4	
 ;
 
-#
-#保存场所附件设置
-#
+-- 
+-- 保存场所附件设置
+-- 
 DROP TABLE IF EXISTS eh_rental_config_attachments;
 
 CREATE TABLE `eh_rental_config_attachments` (
@@ -214,9 +214,9 @@ PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4	
 ;
 
-#
-#物品表
-#
+-- 
+-- 物品表
+-- 
 DROP TABLE IF EXISTS eh_rental_site_items;
 
 CREATE TABLE `eh_rental_site_items` (
@@ -238,13 +238,14 @@ CREATE TABLE `eh_rental_site_items` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4	
 ;
 
-#
-#订单主表
-#
+-- 
+-- 订单主表
+-- 
 DROP TABLE IF EXISTS eh_rental_bills;
 
 CREATE TABLE `eh_rental_bills` (
 `id` BIGINT(20) NOT NULL  COMMENT 'id',
+`bill_number` VARCHAR(20) NOT NULL COMMENT '订单编号',
 `rental_site_id` BIGINT(20) NOT NULL  COMMENT 'id',
 `rental_uid` BIGINT(20) NULL  COMMENT 'rental user id',
 `rental_date` DATE NULL  COMMENT '使用日期',
@@ -276,9 +277,9 @@ CREATE TABLE `eh_rental_bills` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4	
 ;
 
-#
-#订单分表-场所订单表
-#
+-- 
+-- 订单分表-场所订单表
+-- 
 DROP TABLE IF EXISTS eh_rental_sites_bills;
 
 CREATE TABLE `eh_rental_sites_bills` (
@@ -291,15 +292,14 @@ CREATE TABLE `eh_rental_sites_bills` (
 `create_time` DATETIME NULL  COMMENT '',
 `operator_uid` BIGINT(20) NULL  COMMENT '',
 `operate_time` DATETIME NULL  COMMENT '',
-`launch_pad_item_id` BIGINT(20)    COMMENT '广场图标id',
-
+`launch_pad_item_id` BIGINT(20)    COMMENT '广场图标id', 
  PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4	
 ;
 
-#
-#订单分表-场所订单-对应资源编号表
-#
+-- 
+-- 订单分表-场所订单-对应资源编号表
+-- 
 DROP TABLE IF EXISTS eh_rental_sites_bill_numbers;
 
 CREATE TABLE `eh_rental_sites_bill_numbers` (
@@ -314,9 +314,9 @@ CREATE TABLE `eh_rental_sites_bill_numbers` (
 ;
 
 
-#
-#订单分表-物品订单表
-#
+-- 
+-- 订单分表-物品订单表
+-- 
 DROP TABLE IF EXISTS eh_rental_items_bills;
 
 CREATE TABLE `eh_rental_items_bills` (
@@ -337,9 +337,9 @@ CREATE TABLE `eh_rental_items_bills` (
 ;
 
 
-#
-#订单附件表
-#
+-- 
+-- 订单附件表
+-- 
 DROP TABLE IF EXISTS eh_rental_bill_attachments;
 
 CREATE TABLE `eh_rental_bill_attachments` (
@@ -359,9 +359,9 @@ CREATE TABLE `eh_rental_bill_attachments` (
 ;
 
 
-#
-#订单-支付关联表
-#
+-- 
+-- 订单-支付关联表
+-- 
 DROP TABLE IF EXISTS eh_rental_bill_paybill_maps;
 
 CREATE TABLE `eh_rental_bill_paybill_maps` (
