@@ -1387,7 +1387,7 @@ public class ForumServiceImpl implements ForumService {
         Forum forum = checkForumParameter(operatorId, forumId, tag);
         
         Long topicId = cmd.getTopicId();
-        checkPostParameter(operatorId, forumId, topicId, tag);
+        Post post = checkPostParameter(operatorId, forumId, topicId, tag);
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator(forumId);
@@ -1414,8 +1414,12 @@ public class ForumServiceImpl implements ForumService {
           return ConvertHelper.convert(r, PostDTO.class);  
         }).collect(Collectors.toList());
         
-        
-        return new ListPostCommandResponse(nextPageAnchor, postDtoList);
+        //add commentCount when listTopicComments modified by xiongying 20160629
+        ListPostCommandResponse response = new ListPostCommandResponse();
+        response.setNextPageAnchor(nextPageAnchor);
+        response.setPosts(postDtoList);
+        response.setCommentCount(post.getChildCount());
+        return response;
     }
     
     public void updatePostPrivacy(Long forumId, Long postId, PostPrivacy privacy) {
