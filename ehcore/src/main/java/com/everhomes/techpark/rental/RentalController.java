@@ -245,21 +245,21 @@ public class RentalController extends ControllerBase {
 //	}
 
 	
-	/**
-	 * <b>URL: /rental/deleteRentalSiteItem</b>
-	 * <p>
-	 * 删除具体场所商品信息
-	 * </p>
-	 */
-	@RequestMapping("deleteRentalSiteItem")
-	@RestReturn(value = String.class)
-	public RestResponse deleteRentalSiteItem(@Valid DeleteItemAdminCommand cmd) {
-		rentalService.deleteRentalSiteItem(cmd);
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+//	/**
+//	 * <b>URL: /rental/deleteRentalSiteItem</b>
+//	 * <p>
+//	 * 删除具体场所商品信息
+//	 * </p>
+//	 */
+//	@RequestMapping("deleteRentalSiteItem")
+//	@RestReturn(value = String.class)
+//	public RestResponse deleteRentalSiteItem(@Valid DeleteItemAdminCommand cmd) {
+//		rentalService.deleteRentalSiteItem(cmd);
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
 
 //	/**
 //	 * <b>URL: /rental/addRentalSiteRules</b>
@@ -295,39 +295,39 @@ public class RentalController extends ControllerBase {
 //		return response;
 //	}
 	
-	/**
-	 * <b>URL: /rental/deleteRentalSiteRules</b>
-	 * <p>
-	 * 关闭日期-删除某些日期的rules
-	 * </p>
-	 */
-
-	@RequestMapping("deleteRentalSiteRules")
-	@RestReturn(value = String.class)
-	public RestResponse deleteRentalSiteRules(@Valid DeleteRentalSiteRulesCommand cmd) {
-		rentalService.deleteRentalSiteRules(cmd);
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	/**
-	 * <b>URL: /rental/findRentalSiteRules</b>
-	 * <p>
-	 * 查询某场所的预定规则
-	 * </p>
-	 */
-	@RequestMapping("findRentalSiteRules")
-	@RestReturn(value = FindRentalSiteRulesCommandResponse.class)
-	public RestResponse findRentalSiteRules(@Valid FindRentalSiteRulesCommand cmd) {
-		FindRentalSiteRulesCommandResponse findRentalSiteRulesCommandResponse = rentalService
-				.findRentalSiteRules(cmd);
-		RestResponse response = new RestResponse(
-				findRentalSiteRulesCommandResponse);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+//	/**
+//	 * <b>URL: /rental/deleteRentalSiteRules</b>
+//	 * <p>
+//	 * 关闭日期-删除某些日期的rules
+//	 * </p>
+//	 */
+//
+//	@RequestMapping("deleteRentalSiteRules")
+//	@RestReturn(value = String.class)
+//	public RestResponse deleteRentalSiteRules(@Valid DeleteRentalSiteRulesCommand cmd) {
+//		rentalService.deleteRentalSiteRules(cmd);
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+//	/**
+//	 * <b>URL: /rental/findRentalSiteRules</b>
+//	 * <p>
+//	 * 查询某场所的预定规则
+//	 * </p>
+//	 */
+//	@RequestMapping("findRentalSiteRules")
+//	@RestReturn(value = FindRentalSiteRulesCommandResponse.class)
+//	public RestResponse findRentalSiteRules(@Valid FindRentalSiteRulesCommand cmd) {
+//		FindRentalSiteRulesCommandResponse findRentalSiteRulesCommandResponse = rentalService
+//				.findRentalSiteRules(cmd);
+//		RestResponse response = new RestResponse(
+//				findRentalSiteRulesCommandResponse);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
 
 	/**
 	 * <b>URL: /rental/addRentalBill</b>

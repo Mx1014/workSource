@@ -1,8 +1,5 @@
 package com.everhomes.techpark.rental.admin;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -26,15 +23,15 @@ import com.everhomes.rest.techpark.rental.ListRentalBillsCommand;
 import com.everhomes.rest.techpark.rental.ListRentalBillsCommandResponse;
 import com.everhomes.rest.techpark.rental.RentalBillDTO;
 import com.everhomes.rest.techpark.rental.UpdateItemAdminCommand;
-import com.everhomes.rest.techpark.rental.getItemListAdminCommand;
-import com.everhomes.rest.techpark.rental.getItemListCommandResponse;
-import com.everhomes.rest.techpark.rental.admin.AddDefaultRuleAdminCommand;
+import com.everhomes.rest.techpark.rental.GetItemListAdminCommand;
+import com.everhomes.rest.techpark.rental.GetItemListCommandResponse;
 import com.everhomes.rest.techpark.rental.admin.AddRentalSiteRulesAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.AddResourceAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.GetResourceListAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.GetResourceListAdminResponse;
 import com.everhomes.rest.techpark.rental.admin.QueryDefaultRuleAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.QueryDefaultRuleAdminResponse;
+import com.everhomes.rest.techpark.rental.admin.UpdateDefaultRuleAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.UpdateItemsAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.UpdateRentalSiteDiscountAdminCommand;
 import com.everhomes.rest.techpark.rental.admin.UpdateRentalSiteRulesAdminCommand;
@@ -57,22 +54,22 @@ public class RentalAdminController extends ControllerBase {
 	@Autowired
 	private RentalService rentalService;
 	
-	/**
-	 * 
-	 * <b>URL: /rental/admin/addDefaultRule<b>
-	 * <p>
-	 * 添加默认规则
-	 * </p>
-	 */
-	@RequestMapping("addDefaultRule")
-	@RestReturn(String.class)
-	public RestResponse addDefaultRule(@Valid AddDefaultRuleAdminCommand cmd) {
-
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+//	/**
+//	 * 
+//	 * <b>URL: /rental/admin/addDefaultRule<b>
+//	 * <p>
+//	 * 添加默认规则
+//	 * </p>
+//	 */
+//	@RequestMapping("addDefaultRule")
+//	@RestReturn(String.class)
+//	public RestResponse addDefaultRule(@Valid AddDefaultRuleAdminCommand cmd) {
+//		this.rentalService.addDefaultRule(cmd);
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
 
 	/**
 	 * 
@@ -91,6 +88,23 @@ public class RentalAdminController extends ControllerBase {
 		return response;
 	}
 
+	/**
+	 * 
+	 * <b>URL: /rental/admin/updateDefaultRule<b>
+	 * <p>
+	 * 修改默认规则
+	 * </p>
+	 */
+	@RequestMapping("updateDefaultRule")
+	@RestReturn(String.class)
+	public RestResponse updateDefaultRule(@Valid UpdateDefaultRuleAdminCommand cmd) {
+		this.rentalService.updateDefaultRule(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 	/**
 	 * 
 	 * <b>URL: /rental/admin/getResourceList<b>
@@ -149,9 +163,9 @@ public class RentalAdminController extends ControllerBase {
 	 * </p>
 	 */
 	@RequestMapping("getItemList")
-	@RestReturn(value = getItemListCommandResponse.class)
-	public RestResponse getItemList(@Valid getItemListAdminCommand cmd) {
-		getItemListCommandResponse listRentalSiteItemsCommandResponse =  rentalService.listRentalSiteItems(cmd);
+	@RestReturn(value = GetItemListCommandResponse.class)
+	public RestResponse getItemList(@Valid GetItemListAdminCommand cmd) {
+		GetItemListCommandResponse listRentalSiteItemsCommandResponse =  rentalService.listRentalSiteItems(cmd);
 		RestResponse response = new RestResponse(listRentalSiteItemsCommandResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -160,12 +174,12 @@ public class RentalAdminController extends ControllerBase {
 
 
 	/**
-	 * <b>URL: /rental/admin/addItems</b>
+	 * <b>URL: /rental/admin/addItem</b>
 	 * <p>
 	 * 添加具体资源的商品信息
 	 * </p>
 	 */
-	@RequestMapping("addItems")
+	@RequestMapping("addItem")
 	@RestReturn(value = String.class)
 	public RestResponse addRentalSiteItem(@Valid AddItemAdminCommand cmd) {
 		rentalService.addItem(cmd);

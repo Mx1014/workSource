@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -32,12 +33,14 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.techpark.rental.DateLength;
+import com.everhomes.rest.techpark.rental.RentalSiteStatus;
 import com.everhomes.rest.techpark.rental.RentalType;
 import com.everhomes.rest.techpark.rental.SiteBillStatus;
 import com.everhomes.rest.techpark.rental.VisibleFlag;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhRentalBillsDao;
+import com.everhomes.server.schema.tables.daos.EhRentalDefaultRulesDao;
 import com.everhomes.server.schema.tables.daos.EhRentalRulesDao;
 import com.everhomes.server.schema.tables.daos.EhRentalSiteItemsDao;
 import com.everhomes.server.schema.tables.daos.EhRentalSiteRulesDao;
@@ -163,22 +166,7 @@ public class RentalProviderImpl implements RentalProvider {
 
 		return result;
 
-	}
-	@Override
-	public RentalSiteItem getRentalSiteItemById(Long rentalSiteItemId) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		SelectJoinStep<Record> step = context.select().from(
-				Tables.EH_RENTAL_SITE_ITEMS);
-		Condition condition = Tables.EH_RENTAL_SITE_ITEMS.ID.equal(rentalSiteItemId);
-		step.where(condition);
-		List<RentalSiteItem> result = step
-				.orderBy(Tables.EH_RENTAL_SITE_ITEMS.ID.desc()).fetch().map((r) -> {
-					return ConvertHelper.convert(r, RentalSiteItem.class);
-				});
-		if (null != result && result.size() > 0)
-			return result.get(0);
-		return null;
-	}
+	} 
 	@Override
 	public void createRentalSiteItem(RentalSiteItem siteItem) {
 		long id = sequenceProvider.getNextSequence(NameMapper
@@ -216,17 +204,62 @@ public class RentalProviderImpl implements RentalProvider {
 	}
 
 	@Override
+	public List<RentalSiteRule> findRentalSiteRuleByDate(Long rentalSiteId,
+			Integer siteNumber, Timestamp beginTime, Timestamp endTime,
+			List<Byte> ampmList, String rentalDate) throws ParseException {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTAL_SITE_RULES);
+		Condition condition = Tables.EH_RENTAL_SITE_RULES.RENTAL_SITE_ID.equal(rentalSiteId);
+		if (null != siteNumber) {
+			condition = condition.and(Tables.EH_RENTAL_SITE_RULES.SITE_NUMBER.equal(siteNumber));
+		}
+
+		if (null != beginTime) {
+			condition = condition.and(Tables.EH_RENTAL_SITE_RULES.BEGIN_TIME.greaterOrEqual(beginTime));
+		}
+		if (null != endTime) {
+			condition = condition.and(Tables.EH_RENTAL_SITE_RULES.END_TIME.lessOrEqual(endTime));
+		}
+		if(null!=ampmList){
+			condition = condition.and(Tables.EH_RENTAL_SITE_RULES.AMORPM.in(ampmList));
+		}
+		if(null!=rentalDate){
+
+			SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
+			condition = condition.and(Tables.EH_RENTAL_SITE_RULES.SITE_RENTAL_DATE.eq(new Date(dateSF.parse(rentalDate).getTime())));
+		}
+		step.where(condition);
+		List<RentalSiteRule> result = step
+				.orderBy(Tables.EH_RENTAL_SITE_RULES.ID.desc()).fetch()
+				.map((r) -> {
+					return ConvertHelper.convert(r, RentalSiteRule.class);
+				});
+
+		return result;
+	}
+	@Override
 	public List<RentalSiteRule> findRentalSiteRules(Long rentalSiteId,
-			String ruleDate, Timestamp beginDate, Byte rentalType, Byte dateLength) {
+			String ruleDate, Timestamp beginDate, Byte rentalType, Byte dateLength,Byte status) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_RENTAL_SITE_RULES);
 		Condition condition = Tables.EH_RENTAL_SITE_RULES.RENTAL_TYPE
 				.eq(rentalType);
+		if(null!=status)
+			condition = condition
+					.and(Tables.EH_RENTAL_SITE_RULES.STATUS
+				.equal(status));
+		else
+			condition = condition
+					.and(Tables.EH_RENTAL_SITE_RULES.STATUS
+			.equal(RentalSiteStatus.NORMAL.getCode()));
+		
 		if (null != ruleDate) {
 			if (dateLength.equals(DateLength.DAY.getCode())) {
-				condition = Tables.EH_RENTAL_SITE_RULES.SITE_RENTAL_DATE
-						.equal(Date.valueOf(ruleDate));
+				condition = condition
+						.and(Tables.EH_RENTAL_SITE_RULES.SITE_RENTAL_DATE
+						.equal(Date.valueOf(ruleDate)));
 			} else if (dateLength.equals(DateLength.MONTH.getCode())) {
 				Calendar calendar = Calendar.getInstance();
 				calendar.setTime(Date.valueOf(ruleDate));
@@ -311,6 +344,15 @@ public class RentalProviderImpl implements RentalProvider {
 		long id = sequenceProvider.getNextSequence(NameMapper
 				.getSequenceDomainFromTablePojo(EhRentalBills.class));
 		rentalBill.setId(id);
+		//生成订单编号
+		SimpleDateFormat sdf = new SimpleDateFormat("YYYYMMddHHmmssSSS");
+		String numberEnd = String.valueOf(id%1000);
+		if(numberEnd.length()==1)
+			numberEnd="00"+numberEnd;
+		if(numberEnd.length()==2)
+			numberEnd="0"+numberEnd;
+		String billNo = sdf.format(new java.util.Date())+numberEnd;
+		rentalBill.setBillNumber(billNo);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhRentalBillsRecord record = ConvertHelper.convert(rentalBill,
 				EhRentalBillsRecord.class);
@@ -422,7 +464,7 @@ public class RentalProviderImpl implements RentalProvider {
 
 	@Override
 	public List<RentalBill> listRentalBills(Long userId,Long launchPadItemId,
-			ListingLocator locator, int count, Byte status) {
+			ListingLocator locator, int count, List<Byte> status) {
 		final List<RentalBill> result = new ArrayList<RentalBill>();
 		Condition condition = Tables.EH_RENTAL_BILLS.ID.lt(locator.getAnchor());
 		//TODO:
@@ -439,7 +481,7 @@ public class RentalProviderImpl implements RentalProvider {
 					.eq(userId));
 		}
 		if (null != status)
-			condition = condition.and(Tables.EH_RENTAL_BILLS.STATUS.eq(status));
+			condition = condition.and(Tables.EH_RENTAL_BILLS.STATUS.in(status));
 		condition = condition.and(Tables.EH_RENTAL_BILLS.VISIBLE_FLAG
 				.eq(VisibleFlag.VISIBLE.getCode()));
 		final Condition condition2 = condition;
@@ -1100,7 +1142,7 @@ public class RentalProviderImpl implements RentalProvider {
 				.equal(ownerType));
 		step.where(condition);
 		List<RentalSitePic> result = step
-				.orderBy(Tables.EH_RENTAL_SITE_OWNERS.ID.desc()).fetch()
+				.orderBy(Tables.EH_RENTAL_SITE_PICS.ID.desc()).fetch()
 				.map((r) -> {
 					return ConvertHelper.convert(r, RentalSitePic.class);
 				});
@@ -1192,6 +1234,16 @@ public class RentalProviderImpl implements RentalProvider {
 		
 	}
 
+	@Override
+	public void updateRentalDefaultRule(RentalDefaultRule newDefaultRule) {
+		assert (newDefaultRule.getId() == null);
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhRentalDefaultRulesDao dao = new EhRentalDefaultRulesDao(context.configuration());
+		dao.update(newDefaultRule);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRentalDefaultRules.class,
+				newDefaultRule.getId());
+	}
 	@Override
 	public void createTimeInterval(RentalTimeInterval timeInterval) {
 
@@ -1310,14 +1362,14 @@ public class RentalProviderImpl implements RentalProvider {
 			String ownerType, Long ownerId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
-				Tables.EH_RENTAL_TIME_INTERVAL);
-		Condition condition = Tables.EH_RENTAL_TIME_INTERVAL.OWNER_ID
+				Tables.EH_RENTAL_CONFIG_ATTACHMENTS);
+		Condition condition = Tables.EH_RENTAL_CONFIG_ATTACHMENTS.OWNER_ID
 				.equal(ownerId);
-		condition = condition.and(Tables.EH_RENTAL_TIME_INTERVAL.OWNER_TYPE
+		condition = condition.and(Tables.EH_RENTAL_CONFIG_ATTACHMENTS.OWNER_TYPE
 				.equal(ownerType));
 		step.where(condition);
 		List<RentalConfigAttachment> result = step
-				.orderBy(Tables.EH_RENTAL_TIME_INTERVAL.ID.desc()).fetch().map((r) -> {
+				.orderBy(Tables.EH_RENTAL_CONFIG_ATTACHMENTS.ID.desc()).fetch().map((r) -> {
 					return ConvertHelper.convert(r, RentalConfigAttachment.class);
 				});
 		if (null != result && result.size() > 0)
@@ -1402,17 +1454,13 @@ public class RentalProviderImpl implements RentalProvider {
 				.equal(itemId);
 		 
 		step.where(condition);
-		Integer result = step.fetchOne().value1().intValue();
+		Record1<BigDecimal> record1 = step.fetchOne();
+		if(null == record1||null == record1.value1())
+			return 0;
+		Integer result = record1.value1().intValue();
 		return result;
 	}
 
-	@Override
-	public List<RentalSiteRule> findRentalSiteRuleByDate(Long rentalSiteId,
-			Integer siteNumber, Timestamp beginTime, Timestamp endTime,
-			List<Byte> ampmList, String rentalDate) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
 	public void updateRentalSiteRule(RentalSiteRule rsr) {
@@ -1424,6 +1472,90 @@ public class RentalProviderImpl implements RentalProvider {
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRentalSiteRules.class,
 				rsr.getId());
 	}
+
+	@Override
+	public Integer deleteTimeIntervalsByOwnerId(String ownerType, Long id) { 
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DeleteWhereStep<EhRentalTimeIntervalRecord> step = context
+				.delete(Tables.EH_RENTAL_TIME_INTERVAL);
+		Condition condition = Tables.EH_RENTAL_TIME_INTERVAL.OWNER_TYPE
+				.equal(ownerType).and(Tables.EH_RENTAL_TIME_INTERVAL.OWNER_ID
+				.equal(id));
+		 
+		step.where(condition);
+		Integer deleteCount = step.execute();
+		return deleteCount;
+	}
+
+	@Override
+	public Integer deleteRentalCloseDatesByOwnerId(String ownerType, Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DeleteWhereStep<EhRentalCloseDatesRecord> step = context
+				.delete(Tables.EH_RENTAL_CLOSE_DATES);
+		Condition condition = Tables.EH_RENTAL_CLOSE_DATES.OWNER_TYPE
+				.equal(ownerType).and(Tables.EH_RENTAL_CLOSE_DATES.OWNER_ID
+				.equal(id));
+		 
+		step.where(condition);
+		Integer deleteCount = step.execute();
+		return deleteCount;
+		
+	}
+
+	@Override
+	public Integer deleteRentalConfigAttachmentsByOwnerId(String ownerType,
+			Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DeleteWhereStep<EhRentalConfigAttachmentsRecord> step = context
+				.delete(Tables.EH_RENTAL_CONFIG_ATTACHMENTS);
+		Condition condition = Tables.EH_RENTAL_CONFIG_ATTACHMENTS.OWNER_TYPE
+				.equal(ownerType).and(Tables.EH_RENTAL_CONFIG_ATTACHMENTS.OWNER_ID
+				.equal(id));
+		 
+		step.where(condition);
+		Integer deleteCount = step.execute();
+		return deleteCount;
+		
+	}
+
+	@Override
+	public List<RentalSiteOwner> findRentalSiteOwnersBySiteId(Long siteId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTAL_SITE_OWNERS);
+		Condition condition = Tables.EH_RENTAL_SITE_OWNERS.RENTAL_SITE_ID
+				.equal(siteId); 
+		step.where(condition);
+		List<RentalSiteOwner> result = step
+				.orderBy(Tables.EH_RENTAL_SITE_OWNERS.ID.desc()).fetch()
+				.map((r) -> {
+					return ConvertHelper.convert(r, RentalSiteOwner.class);
+				});
+		if (null != result && result.size() > 0)
+			return result ;
+		return null;
+	}
+
+	@Override
+	public RentalSiteRule findRentalSiteRulesByRuleId(Long rentalSiteRuleId) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTAL_SITE_RULES);
+		Condition condition = Tables.EH_RENTAL_SITE_RULES.ID.eq(rentalSiteRuleId);
+
+		step.where(condition);
+		List<RentalSiteRule> result = step
+				.orderBy(Tables.EH_RENTAL_SITE_RULES.ID.desc()).fetch()
+				.map((r) -> {
+					return ConvertHelper.convert(r, RentalSiteRule.class);
+				});
+
+		if (null != result && result.size() > 0)
+			return result.get(0) ;
+		return null;
+	}
+
 
 	
 }
