@@ -22,6 +22,8 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.organization.Organization;
@@ -53,7 +55,6 @@ import com.everhomes.rest.news.NewsAttachmentDTO;
 import com.everhomes.rest.news.NewsCommentContentType;
 import com.everhomes.rest.news.NewsCommentDTO;
 import com.everhomes.rest.news.NewsContentType;
-import com.everhomes.rest.news.NewsLikeFlag;
 import com.everhomes.rest.news.NewsOwnerType;
 import com.everhomes.rest.news.NewsServiceErrorCode;
 import com.everhomes.rest.news.NewsStatus;
@@ -65,6 +66,7 @@ import com.everhomes.rest.news.SetNewsLikeFlagCommand;
 import com.everhomes.rest.news.SetNewsTopFlagCommand;
 import com.everhomes.rest.news.SyncNewsCommand;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
+import com.everhomes.rest.user.UserLikeType;
 import com.everhomes.search.SearchProvider;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.server.schema.tables.pojos.EhNewsAttachments;
@@ -105,6 +107,9 @@ public class NewsServiceImpl implements NewsService {
 
 	@Autowired
 	private DbProvider dbProvider;
+	
+	@Autowired
+	private CoordinationProvider coordinationProvider;
 
 	@Autowired
 	private ContentServerService contentServerService;
@@ -284,18 +289,18 @@ public class NewsServiceImpl implements NewsService {
 		return newsDTO;
 	}
 
-	private NewsLikeFlag getUserLikeFlag(Long userId, Long newsId) {
+	private UserLikeType getUserLikeFlag(Long userId, Long newsId) {
 		if (userId.longValue() == 0) {
-			return NewsLikeFlag.NONE;
+			return UserLikeType.NONE;
 		}
 		UserLike userLike = findUserLike(userId, newsId);
 		if (userLike == null) {
-			return NewsLikeFlag.NONE;
+			return UserLikeType.NONE;
 		}
-		if (userLike.getLikeType().byteValue() == NewsLikeFlag.LIKE.getCode()) {
-			return NewsLikeFlag.LIKE;
+		if (userLike.getLikeType().byteValue() == UserLikeType.LIKE.getCode()) {
+			return UserLikeType.LIKE;
 		}
-		return NewsLikeFlag.NONE;
+		return UserLikeType.NONE;
 	}
 
 	private UserLike findUserLike(Long userId, Long newsId) {
@@ -387,7 +392,7 @@ public class NewsServiceImpl implements NewsService {
 		Long newsId = checkNewsToken(userId, cmd.getNewsToken());
 		News news = findNewsById(userId, newsId);
 		news.setViewCount(news.getViewCount() + 1L);
-		newsProvider.updateNews(news);
+		updateNews(news);
 		return convertNewsToNewsDTO(userId, news);
 	}
 
@@ -412,7 +417,7 @@ public class NewsServiceImpl implements NewsService {
 			news.setTopFlag(NewsTopFlag.NONE.getCode());
 			news.setTopIndex(0L);
 		}
-		newsProvider.updateNews(news);
+		updateNews(news);
 		
 		syncNews(news.getId());
 	}
@@ -453,7 +458,7 @@ public class NewsServiceImpl implements NewsService {
 		news.setDeleterUid(userId);
 		news.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		news.setStatus(NewsStatus.INACTIVE.getCode());
-		newsProvider.updateNews(news);
+		updateNews(news);
 		
 		syncNewsWhenDelete(news.getId());
 	}
@@ -466,29 +471,34 @@ public class NewsServiceImpl implements NewsService {
 	}
 
 	private void setNewsLikeFlag(Long userId, String newsToken) {
-		Long newsId = checkNewsToken(userId, newsToken);
-		News news = findNewsById(userId, newsId);
-		UserLike userLike = findUserLike(userId, newsId);
-		if (userLike == null) {
-			news.setLikeCount(news.getLikeCount() + 1L);
-			newsProvider.updateNews(news);
-			userLike = new UserLike();
-			userLike.setLikeType(NewsLikeFlag.LIKE.getCode());
-			userLike.setOwnerUid(userId);
-			userLike.setTargetId(newsId);
-			userLike.setTargetType(EntityType.NEWS.getCode());
-			userProvider.createUserLike(userLike);
-		} else if (userLike.getLikeType() == NewsLikeFlag.NONE.getCode()) {
-			news.setLikeCount(news.getLikeCount() + 1L);
-			newsProvider.updateNews(news);
-			userLike.setLikeType(NewsLikeFlag.LIKE.getCode());
-			userProvider.updateUserLike(userLike);
-		} else {
-			news.setLikeCount(news.getLikeCount() - 1L);
-			newsProvider.updateNews(news);
-			userLike.setLikeType(NewsLikeFlag.NONE.getCode());
-			userProvider.updateUserLike(userLike);
-		}
+		final Long newsId = checkNewsToken(userId, newsToken);
+		final News news = findNewsById(userId, newsId);
+		
+		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_NEWS.getCode()).enter(()->{
+			dbProvider.execute(s->{
+				UserLike userLike = findUserLike(userId, newsId);
+				if (userLike == null) {
+					news.setLikeCount(news.getLikeCount() + 1L);
+					userLike = new UserLike();
+					userLike.setLikeType(UserLikeType.LIKE.getCode());
+					userLike.setOwnerUid(userId);
+					userLike.setTargetId(newsId);
+					userLike.setTargetType(EntityType.NEWS.getCode());
+					userProvider.createUserLike(userLike);
+				} else if (userLike.getLikeType() == UserLikeType.NONE.getCode()) {
+					news.setLikeCount(news.getLikeCount() + 1L);
+					userLike.setLikeType(UserLikeType.LIKE.getCode());
+					userProvider.updateUserLike(userLike);
+				} else {
+					news.setLikeCount(news.getLikeCount() - 1L);
+					userLike.setLikeType(UserLikeType.NONE.getCode());
+					userProvider.updateUserLike(userLike);
+				}
+				newsProvider.updateNews(news);
+				return true;
+			});
+			return null;
+		});
 		
 		syncNews(news.getId());
 	}
@@ -513,6 +523,9 @@ public class NewsServiceImpl implements NewsService {
 				attachments.addAll(processAttachments(userId, comment.getId(), cmd.getAttachments()));
 				attachmentProvider.createAttachments(EhNewsAttachments.class, attachments);
 			}
+
+			news.setChildCount(news.getChildCount()+1L);
+			updateNews(news);
 			return true;
 		});
 		
@@ -520,8 +533,6 @@ public class NewsServiceImpl implements NewsService {
 		commentDTO.setAttachments(attachments.stream().map(a -> ConvertHelper.convert(a, NewsAttachmentDTO.class))
 				.collect(Collectors.toList()));
 		
-		news.setChildCount(news.getChildCount()+1L);
-		newsProvider.updateNews(news);
 
 		return commentDTO;
 	}
@@ -738,6 +749,10 @@ public class NewsServiceImpl implements NewsService {
 				attachments.addAll(processAttachments(userId, comment.getId(), cmd.getAttachments()));
 				attachmentProvider.createAttachments(EhNewsAttachments.class, attachments);
 			}
+			
+			news.setChildCount(news.getChildCount()+1L);
+			updateNews(news);
+			
 			return true;
 		});
 
@@ -746,9 +761,6 @@ public class NewsServiceImpl implements NewsService {
 		commentDTO.setAttachments(attachments.stream().map(a -> ConvertHelper.convert(a, NewsAttachmentDTO.class))
 				.collect(Collectors.toList()));
 
-		news.setChildCount(news.getChildCount()+1L);
-		newsProvider.updateNews(news);
-		
 		return commentDTO;
 	}
 
@@ -805,9 +817,17 @@ public class NewsServiceImpl implements NewsService {
 		commentProvider.updateComment(EhNewsComment.class, comment);
 		
 		news.setChildCount(news.getChildCount()-1L);
-		newsProvider.updateNews(news);
+		updateNews(news);
 	}
 
+	private void updateNews(News news){
+		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_NEWS.getCode()).enter(()->{
+			newsProvider.updateNews(news);
+			return null;
+		});
+	}
+	
+	
 	@Override
 	public void syncNews(SyncNewsCommand cmd) {
 		if (cmd.getId() != null) {

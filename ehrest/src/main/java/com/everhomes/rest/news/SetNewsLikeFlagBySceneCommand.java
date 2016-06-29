@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * 参数
  * <li>sceneToken: 场景标识</li>
  * <li>newsToken: 新闻标识</li>
- * <li>likeFlag: 现在的点赞状态，0未点赞，1已点赞，参考{@link com.everhomes.rest.news.NewsLikeFlag}</li>
+ * <li>likeFlag: 现在的点赞状态，0未点赞，1已点赞，参考{@link com.everhomes.rest.user.UserLikeType}</li>
  * </ul>
  */
 public class SetNewsLikeFlagBySceneCommand {

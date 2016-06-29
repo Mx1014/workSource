@@ -30,5 +30,35 @@
       "organization_type": "PM",
       "status": "2"
     }
+  ],
+  "eh_organization_members": [
+    {
+      "gender": "0",
+      "contact_type": "0",
+      "id": "1",
+      "contact_token": "12000001192",
+      "contact_name": "扬帆起航",
+      "target_type": "USER",
+      "target_id": "1",
+      "member_group": "manager",
+      "namespace_id": "0",
+      "group_id": "0",
+      "organization_id": "1",
+      "status": "2"
+    },
+    {
+      "gender": "0",
+      "contact_type": "0",
+      "id": "2",
+      "contact_token": "12000002480",
+      "contact_name": "天鹅堡管理服务中心",
+      "target_type": "USER",
+      "target_id": "2",
+      "member_group": "manager",
+      "namespace_id": "0",
+      "group_id": "0",
+      "organization_id": "2",
+      "status": "2"
+    }
   ]
 }
