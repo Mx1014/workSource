@@ -596,10 +596,11 @@ public class ForumServiceImpl implements ForumService {
             this.forumProvider.populatePostAttachments(post);
             populatePost(userId, post, communityId, isDetail, getByOwnerId);
             
-            //add favoriteflag of topic modified by xiongying 20160629
+            //add favoriteflag of topic and activity is also a topic modified by xiongying 20160629
             PostDTO dto = ConvertHelper.convert(post, PostDTO.class);
-            List<UserFavoriteDTO> favorite = userActivityProvider.findFavorite(userId, UserFavoriteTargetType.TOPIC.getCode(), post.getId());
-            if(favorite == null || favorite.size() == 0) {
+            List<UserFavoriteDTO> favoriteTopic = userActivityProvider.findFavorite(userId, UserFavoriteTargetType.TOPIC.getCode(), post.getId());
+            List<UserFavoriteDTO> favoriteActivity = userActivityProvider.findFavorite(userId, UserFavoriteTargetType.ACTIVITY.getCode(), post.getId());
+            if((favoriteTopic == null || favoriteTopic.size() == 0) && (favoriteActivity == null || favoriteActivity.size() == 0)) {
             	dto.setFavoriteFlag(PostFavoriteFlag.NONE.getCode());
             } else {
             	dto.setFavoriteFlag(PostFavoriteFlag.FAVORITE.getCode());
