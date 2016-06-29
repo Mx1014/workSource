@@ -66,6 +66,7 @@ public class GetLaunchPadLayoutByVersionCodeCommand {
         return (sceneType == null) ? SceneType.DEFAULT.getCode() : sceneType;
     }
 
+    
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
