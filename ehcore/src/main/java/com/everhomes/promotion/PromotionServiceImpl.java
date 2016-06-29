@@ -26,9 +26,11 @@ import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusSubscriber;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.messaging.AddressMessageRoutingHandler;
 import com.everhomes.pusher.PusherAction;
@@ -101,6 +103,9 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
     @Autowired
     JesqueClientFactory jesqueClientFactory;
     
+    @Autowired
+    private ContentServerService contentServerService;
+    
     private String queueName = "promotion-push";
     
     @PostConstruct
@@ -123,7 +128,14 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
         List<OpPromotionAssignedScopeDTO> scopes = cmd.getAssignedScopes();
         if(scopes == null) {
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "Scopes is null");    
+                    "Scopes is null");
+        }
+        
+        for(OpPromotionAssignedScopeDTO scope : scopes) {
+            if(scope.getScopeId() == null || scope.getScopeCode() == null) {
+                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                        "Scopes is null");        
+            }
         }
         
         cmd.setAssignedScopes(null);
@@ -330,6 +342,23 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
             }
             dto.setAssignedScopes(scopeDtos);
             
+            if(dto.getCreatorUid() != null) {
+                User user = userProvider.findUserById(dto.getCreatorUid());
+                if(user != null) {
+                    if(user.getNickName() != null && user.getNickName() != "") {
+                        dto.setNickName(user.getNickName());
+                    } else {
+                        dto.setNickName(user.getAccountName());
+                    }
+                }
+            }
+            
+            if(promotion.getIconUri() != null) {
+                String url = contentServerService.parserUri(promotion.getIconUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+                dto.setIconUrl(url);
+            }
+            
+            
             return dto;
         }
         
@@ -458,6 +487,11 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
                                 dto.setNickName(user.getAccountName());
                             }
                         }
+                    }
+                    
+                    if(dto.getIconUri() != null) {
+                        String url = contentServerService.parserUri(dto.getIconUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+                        dto.setIconUrl(url);
                     }
                     
                     dtos.add(dto);
