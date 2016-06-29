@@ -47,6 +47,7 @@ import com.everhomes.rest.promotion.OpPromotionConditionType;
 import com.everhomes.rest.promotion.OpPromotionOrderRangeCommand;
 import com.everhomes.rest.promotion.OpPromotionRangePriceData;
 import com.everhomes.rest.promotion.OpPromotionRegionPushingCommand;
+import com.everhomes.rest.promotion.OpPromotionScopeType;
 import com.everhomes.rest.promotion.OpPromotionSearchCommand;
 import com.everhomes.rest.promotion.OpPromotionStatus;
 import com.everhomes.rest.promotion.ScheduleTaskResourceType;
@@ -132,7 +133,7 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
         }
         
         for(OpPromotionAssignedScopeDTO scope : scopes) {
-            if(scope.getScopeId() == null || scope.getScopeCode() == null) {
+            if(scope.getScopeCode() == null || (scope.getScopeId() == null && (!scope.getScopeCode().equals(OpPromotionScopeType.ALL.getCode())))) {
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                         "Scopes is null");        
             }
