@@ -596,10 +596,11 @@ public class ForumServiceImpl implements ForumService {
             this.forumProvider.populatePostAttachments(post);
             populatePost(userId, post, communityId, isDetail, getByOwnerId);
             
-            //add favoriteflag of topic modified by xiongying 20160629
+            //add favoriteflag of topic and activity is also a topic modified by xiongying 20160629
             PostDTO dto = ConvertHelper.convert(post, PostDTO.class);
-            List<UserFavoriteDTO> favorite = userActivityProvider.findFavorite(userId, UserFavoriteTargetType.TOPIC.getCode(), post.getId());
-            if(favorite == null || favorite.size() == 0) {
+            List<UserFavoriteDTO> favoriteTopic = userActivityProvider.findFavorite(userId, UserFavoriteTargetType.TOPIC.getCode(), post.getId());
+            List<UserFavoriteDTO> favoriteActivity = userActivityProvider.findFavorite(userId, UserFavoriteTargetType.ACTIVITY.getCode(), post.getId());
+            if((favoriteTopic == null || favoriteTopic.size() == 0) && (favoriteActivity == null || favoriteActivity.size() == 0)) {
             	dto.setFavoriteFlag(PostFavoriteFlag.NONE.getCode());
             } else {
             	dto.setFavoriteFlag(PostFavoriteFlag.FAVORITE.getCode());
@@ -1386,7 +1387,7 @@ public class ForumServiceImpl implements ForumService {
         Forum forum = checkForumParameter(operatorId, forumId, tag);
         
         Long topicId = cmd.getTopicId();
-        checkPostParameter(operatorId, forumId, topicId, tag);
+        Post post = checkPostParameter(operatorId, forumId, topicId, tag);
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator(forumId);
@@ -1413,8 +1414,12 @@ public class ForumServiceImpl implements ForumService {
           return ConvertHelper.convert(r, PostDTO.class);  
         }).collect(Collectors.toList());
         
-        
-        return new ListPostCommandResponse(nextPageAnchor, postDtoList);
+        //add commentCount when listTopicComments modified by xiongying 20160629
+        ListPostCommandResponse response = new ListPostCommandResponse();
+        response.setNextPageAnchor(nextPageAnchor);
+        response.setPosts(postDtoList);
+        response.setCommentCount(post.getChildCount());
+        return response;
     }
     
     public void updatePostPrivacy(Long forumId, Long postId, PostPrivacy privacy) {
