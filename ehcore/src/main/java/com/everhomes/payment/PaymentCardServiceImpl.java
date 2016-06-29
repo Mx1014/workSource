@@ -129,17 +129,15 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     @Override
     public List<CardInfoDTO> listCardInfo(ListCardInfoCommand cmd){
     	checkParam(cmd.getOwnerType(), cmd.getOwnerId());
-    	User user = UserContext.current().getUser();
+
+    	List<PaymentCardIssuer> cardIssuerList = paymentCardProvider.listPaymentCardIssuer(cmd.getOwnerId(),cmd.getOwnerType());
 
 		List<CardInfoDTO> result = new ArrayList<CardInfoDTO>();
-		List<PaymentCard> cardList = paymentCardProvider.listPaymentCard(cmd.getOwnerId(),cmd.getOwnerType(),user.getId());
-		for(PaymentCard card:cardList){
-			PaymentCardVendorHandler handler = getPaymentCardVendorHandler(card.getVendorName());
-			CardInfoDTO dto = handler.getCardInfoByVendor(card);
-			if(null != dto)
-				result.add(dto);
+		for(PaymentCardIssuer cardIssuer:cardIssuerList){
+			PaymentCardVendorHandler handler = getPaymentCardVendorHandler(cardIssuer.getVendorName());
+			List<CardInfoDTO> cardList = handler.getCardInfoByVendor(cmd);
+			result.addAll(cardList);
 		}
-    	
     	return result;
     }
     @Override

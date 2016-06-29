@@ -35,7 +35,6 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.cert.Cert;
 import com.everhomes.cert.CertProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -54,6 +53,7 @@ import com.everhomes.rest.payment.CardRechargeStatus;
 import com.everhomes.rest.payment.CardTransactionFromVendorDTO;
 import com.everhomes.rest.payment.CardTransactionOfMonth;
 import com.everhomes.rest.payment.CardTransactionTypeStatus;
+import com.everhomes.rest.payment.ListCardInfoCommand;
 import com.everhomes.rest.payment.ListCardTransactionsCommand;
 import com.everhomes.rest.payment.PaymentCardErrorCode;
 import com.everhomes.rest.payment.PaymentCardStatus;
@@ -93,55 +93,60 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 	@Autowired
     private CoordinationProvider coordinationProvider;
 	
-	static CloseableHttpClient httpClient = HttpClients.createDefault();
-	@SuppressWarnings("rawtypes")
+	private static CloseableHttpClient httpClient = HttpClients.createDefault();
+
 	@Override
-	public CardInfoDTO getCardInfoByVendor(PaymentCard card) {
-		PaymentCardIssuer issuer = paymentCardProvider.findPaymentCardIssuerById(card.getIssuerId());
-		String vendorData = issuer.getVendorData();
+	public List<CardInfoDTO> getCardInfoByVendor(ListCardInfoCommand cmd) {
+		User user = UserContext.current().getUser();
+		List<CardInfoDTO> result = new ArrayList<CardInfoDTO>();
+		List<PaymentCard> cardList = paymentCardProvider.listPaymentCard(cmd.getOwnerId(),cmd.getOwnerType(),user.getId());
+		for(PaymentCard card:cardList){
+			PaymentCardIssuer issuer = paymentCardProvider.findPaymentCardIssuerById(card.getIssuerId());
+			String vendorData = issuer.getVendorData();
 
-		TaotaoguVendorData taotaoguVendorData = (TaotaoguVendorData) StringHelper.fromJsonString(vendorData, TaotaoguVendorData.class);
-		String brandCode = taotaoguVendorData.getBranchCode();
-		CardInfoDTO cardInfo = new CardInfoDTO();
+			TaotaoguVendorData taotaoguVendorData = (TaotaoguVendorData) StringHelper.fromJsonString(vendorData, TaotaoguVendorData.class);
+			String brandCode = taotaoguVendorData.getBranchCode();
+			CardInfoDTO cardInfo = new CardInfoDTO();
 
-		try {
-			Map<String, Object> cardQuertParam = new HashMap<String, Object>();
-			cardQuertParam.put("BranchCode", brandCode);
-			cardQuertParam.put("CardId", card.getCardNo());
-			Map<String, Object> queryCardResultMap = queryCard(taotaoguVendorData, brandCode, card.getCardNo());
-			Map<String, Object> queryAccountResultMap = queryAccount(taotaoguVendorData, brandCode, card.getCardNo());
-		
-			if(queryCardResultMap != null){
-				cardInfo.setCardId(card.getId());
-				cardInfo.setCardNo((String)queryCardResultMap.get("CardId"));
-				cardInfo.setCardType((String)queryCardResultMap.get("CardSubClass"));
-				String effDate = (String)queryCardResultMap.get("EffDate");
-				String expirDate = (String)queryCardResultMap.get("ExpirDate");
-				cardInfo.setActivedTime(strTotimestamp(effDate));
-				cardInfo.setExpiredTime(strTotimestamp(expirDate));
-				String cardStatus = (String)queryCardResultMap.get("CardStatus");
-				cardInfo.setStatus(cardStatus);
-				cardInfo.setMobile(card.getMobile());
-				cardInfo.setVendorCardData(card.getVendorCardData());
-			}
-			if(queryAccountResultMap != null){
-				cardInfo.setCardId(card.getId());
-				List list = (List) queryAccountResultMap.get("Row");
-				for(int i=0;i<list.size();i++){
-					Map map = (Map) list.get(i);
-					if("fund".equals(((String)map.get("SubAcctType")).trim())){
-						cardInfo.setBalance(new BigDecimal(map.get("AvlbBal").toString()));
-						break;
+			try {
+				Map<String, Object> cardQuertParam = new HashMap<String, Object>();
+				cardQuertParam.put("BranchCode", brandCode);
+				cardQuertParam.put("CardId", card.getCardNo());
+				Map<String, Object> queryCardResultMap = queryCard(taotaoguVendorData, brandCode, card.getCardNo());
+				Map<String, Object> queryAccountResultMap = queryAccount(taotaoguVendorData, brandCode, card.getCardNo());
+			
+				if(queryCardResultMap != null){
+					cardInfo.setCardId(card.getId());
+					cardInfo.setCardNo((String)queryCardResultMap.get("CardId"));
+					cardInfo.setCardType((String)queryCardResultMap.get("CardSubClass"));
+					String effDate = (String)queryCardResultMap.get("EffDate");
+					String expirDate = (String)queryCardResultMap.get("ExpirDate");
+					cardInfo.setActivedTime(strTotimestamp(effDate));
+					cardInfo.setExpiredTime(strTotimestamp(expirDate));
+					String cardStatus = (String)queryCardResultMap.get("CardStatus");
+					cardInfo.setStatus(cardStatus);
+					cardInfo.setMobile(card.getMobile());
+					cardInfo.setVendorCardData(card.getVendorCardData());
+				}
+				if(queryAccountResultMap != null){
+					cardInfo.setCardId(card.getId());
+					List list = (List) queryAccountResultMap.get("Row");
+					for(int i=0;i<list.size();i++){
+						Map map = (Map) list.get(i);
+						if("fund".equals(((String)map.get("SubAcctType")).trim())){
+							cardInfo.setBalance(new BigDecimal(map.get("AvlbBal").toString()));
+							break;
+						}
 					}
 				}
+			} catch (Exception e) {
+				LOGGER.error("the getCardInfo request of taotaogu failed card={}.",card,e);
+				throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
+						"the getCardInfo request of taotaogu failed.");
 			}
-		} catch (Exception e) {
-			LOGGER.error("the getCardInfo request of taotaogu failed card={}.",card,e);
-			throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_SERVER_REQUEST,
-					"the getCardInfo request of taotaogu failed.");
+			result.add(cardInfo);
 		}
-		
-		return cardInfo;
+		return result;
 	}
 	
 	@Override
