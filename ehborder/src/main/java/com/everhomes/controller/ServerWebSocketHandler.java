@@ -143,6 +143,8 @@ public class ServerWebSocketHandler implements WebSocketHandler {
             CloseStatus closeStatus) throws Exception {
         LOGGER.info("Connection closed. session: " + session.getId());
         this.sessionStatsMap.remove(session);
+        
+        this.clientWebSocketHandler.closeClientSessions();
     }
 
     @Override
