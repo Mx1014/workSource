@@ -62,10 +62,10 @@ public class EhRentalDefaultRulesDao extends org.jooq.impl.DAOImpl<com.everhomes
 	}
 
 	/**
-	 * Fetch records that have <code>site_type IN (values)</code>
+	 * Fetch records that have <code>launch_pad_item_id IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalDefaultRules> fetchBySiteType(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRentalDefaultRules.EH_RENTAL_DEFAULT_RULES.SITE_TYPE, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalDefaultRules> fetchByLaunchPadItemId(java.lang.Long... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalDefaultRules.EH_RENTAL_DEFAULT_RULES.LAUNCH_PAD_ITEM_ID, values);
 	}
 
 	/**
@@ -230,13 +230,6 @@ public class EhRentalDefaultRulesDao extends org.jooq.impl.DAOImpl<com.everhomes
 	}
 
 	/**
-	 * Fetch records that have <code>launch_pad_item_id IN (values)</code>
-	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalDefaultRules> fetchByLaunchPadItemId(java.lang.Long... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRentalDefaultRules.EH_RENTAL_DEFAULT_RULES.LAUNCH_PAD_ITEM_ID, values);
-	}
-
-	/**
 	 * Fetch records that have <code>workday_price IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalDefaultRules> fetchByWorkdayPrice(java.math.BigDecimal... values) {
@@ -276,5 +269,12 @@ public class EhRentalDefaultRulesDao extends org.jooq.impl.DAOImpl<com.everhomes
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalDefaultRules> fetchByOpenWeekday(java.lang.String... values) {
 		return fetch(com.everhomes.server.schema.tables.EhRentalDefaultRules.EH_RENTAL_DEFAULT_RULES.OPEN_WEEKDAY, values);
+	}
+
+	/**
+	 * Fetch records that have <code>time_step IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalDefaultRules> fetchByTimeStep(java.lang.Double... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalDefaultRules.EH_RENTAL_DEFAULT_RULES.TIME_STEP, values);
 	}
 }

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalDefaultRules extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord> {
 
-	private static final long serialVersionUID = 1069697107;
+	private static final long serialVersionUID = 131145453;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_default_rules</code>
@@ -29,7 +29,7 @@ public class EhRentalDefaultRules extends org.jooq.impl.TableImpl<com.everhomes.
 	/**
 	 * The column <code>ehcore.eh_rental_default_rules.id</code>. id
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "id");
 
 	/**
 	 * The column <code>ehcore.eh_rental_default_rules.owner_type</code>. owner type : community ; organization
@@ -42,9 +42,9 @@ public class EhRentalDefaultRules extends org.jooq.impl.TableImpl<com.everhomes.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord, java.lang.Long> OWNER_ID = createField("owner_id", org.jooq.impl.SQLDataType.BIGINT, this, "community id or organization id");
 
 	/**
-	 * The column <code>ehcore.eh_rental_default_rules.site_type</code>. rule for what function
+	 * The column <code>ehcore.eh_rental_default_rules.launch_pad_item_id</code>. 广场图标id
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord, java.lang.Long> SITE_TYPE = createField("site_type", org.jooq.impl.SQLDataType.BIGINT, this, "rule for what function");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord, java.lang.Long> LAUNCH_PAD_ITEM_ID = createField("launch_pad_item_id", org.jooq.impl.SQLDataType.BIGINT, this, "广场图标id");
 
 	/**
 	 * The column <code>ehcore.eh_rental_default_rules.rental_start_time</code>. 最多提前多少时间预定
@@ -162,11 +162,6 @@ public class EhRentalDefaultRules extends org.jooq.impl.TableImpl<com.everhomes.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord, java.lang.Byte> NEED_PAY = createField("need_pay", org.jooq.impl.SQLDataType.TINYINT, this, "是否需要支付 1是 0否");
 
 	/**
-	 * The column <code>ehcore.eh_rental_default_rules.launch_pad_item_id</code>. 广场图标id
-	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord, java.lang.Long> LAUNCH_PAD_ITEM_ID = createField("launch_pad_item_id", org.jooq.impl.SQLDataType.BIGINT, this, "广场图标id");
-
-	/**
 	 * The column <code>ehcore.eh_rental_default_rules.workday_price</code>. 工作日价格
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord, java.math.BigDecimal> WORKDAY_PRICE = createField("workday_price", org.jooq.impl.SQLDataType.DECIMAL.precision(10, 2), this, "工作日价格");
@@ -195,6 +190,11 @@ public class EhRentalDefaultRules extends org.jooq.impl.TableImpl<com.everhomes.
 	 * The column <code>ehcore.eh_rental_default_rules.open_weekday</code>. 7位二进制，0000000每一位表示星期7123456
 	 */
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord, java.lang.String> OPEN_WEEKDAY = createField("open_weekday", org.jooq.impl.SQLDataType.VARCHAR.length(7), this, "7位二进制，0000000每一位表示星期7123456");
+
+	/**
+	 * The column <code>ehcore.eh_rental_default_rules.time_step</code>. 步长，每个单元格是多少小时（半小时是0.5）
+	 */
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord, java.lang.Double> TIME_STEP = createField("time_step", org.jooq.impl.SQLDataType.DOUBLE, this, "步长，每个单元格是多少小时（半小时是0.5）");
 
 	/**
 	 * Create a <code>ehcore.eh_rental_default_rules</code> table reference

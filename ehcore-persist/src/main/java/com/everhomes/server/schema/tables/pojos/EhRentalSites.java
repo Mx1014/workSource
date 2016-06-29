@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSites implements java.io.Serializable {
 
-	private static final long serialVersionUID = -502194493;
+	private static final long serialVersionUID = -853733149;
 
 	private java.lang.Long       id;
 	private java.lang.Long       parentId;
@@ -41,7 +41,7 @@ public class EhRentalSites implements java.io.Serializable {
 	private java.math.BigDecimal cutPrice;
 	private java.lang.Double     discountRatio;
 	private java.lang.Byte       rentalType;
-	private java.lang.Double     rentalStep;
+	private java.lang.Double     timeStep;
 	private java.lang.Byte       exclusiveFlag;
 	private java.lang.Byte       autoAssign;
 	private java.lang.Byte       multiUnit;
@@ -91,7 +91,7 @@ public class EhRentalSites implements java.io.Serializable {
 		java.math.BigDecimal cutPrice,
 		java.lang.Double     discountRatio,
 		java.lang.Byte       rentalType,
-		java.lang.Double     rentalStep,
+		java.lang.Double     timeStep,
 		java.lang.Byte       exclusiveFlag,
 		java.lang.Byte       autoAssign,
 		java.lang.Byte       multiUnit,
@@ -138,7 +138,7 @@ public class EhRentalSites implements java.io.Serializable {
 		this.cutPrice = cutPrice;
 		this.discountRatio = discountRatio;
 		this.rentalType = rentalType;
-		this.rentalStep = rentalStep;
+		this.timeStep = timeStep;
 		this.exclusiveFlag = exclusiveFlag;
 		this.autoAssign = autoAssign;
 		this.multiUnit = multiUnit;
@@ -382,12 +382,12 @@ public class EhRentalSites implements java.io.Serializable {
 		this.rentalType = rentalType;
 	}
 
-	public java.lang.Double getRentalStep() {
-		return this.rentalStep;
+	public java.lang.Double getTimeStep() {
+		return this.timeStep;
 	}
 
-	public void setRentalStep(java.lang.Double rentalStep) {
-		this.rentalStep = rentalStep;
+	public void setTimeStep(java.lang.Double timeStep) {
+		this.timeStep = timeStep;
 	}
 
 	public java.lang.Byte getExclusiveFlag() {

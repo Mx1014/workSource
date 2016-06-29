@@ -237,10 +237,10 @@ public class EhRentalSitesDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	}
 
 	/**
-	 * Fetch records that have <code>rental_step IN (values)</code>
+	 * Fetch records that have <code>time_step IN (values)</code>
 	 */
-	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchByRentalStep(java.lang.Double... values) {
-		return fetch(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.RENTAL_STEP, values);
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalSites> fetchByTimeStep(java.lang.Double... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalSites.EH_RENTAL_SITES.TIME_STEP, values);
 	}
 
 	/**

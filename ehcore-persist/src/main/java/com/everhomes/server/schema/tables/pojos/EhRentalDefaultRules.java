@@ -11,12 +11,12 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalDefaultRules implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1570389761;
+	private static final long serialVersionUID = 311067817;
 
 	private java.lang.Long       id;
 	private java.lang.String     ownerType;
 	private java.lang.Long       ownerId;
-	private java.lang.Long       siteType;
+	private java.lang.Long       launchPadItemId;
 	private java.lang.Long       rentalStartTime;
 	private java.lang.Long       rentalEndTime;
 	private java.lang.Long       payStartTime;
@@ -40,13 +40,13 @@ public class EhRentalDefaultRules implements java.io.Serializable {
 	private java.lang.Byte       cancelFlag;
 	private java.lang.Integer    rentalStep;
 	private java.lang.Byte       needPay;
-	private java.lang.Long       launchPadItemId;
 	private java.math.BigDecimal workdayPrice;
 	private java.math.BigDecimal weekendPrice;
 	private java.lang.Double     siteCounts;
 	private java.sql.Date        beginDate;
 	private java.sql.Date        endDate;
 	private java.lang.String     openWeekday;
+	private java.lang.Double     timeStep;
 
 	public EhRentalDefaultRules() {}
 
@@ -54,7 +54,7 @@ public class EhRentalDefaultRules implements java.io.Serializable {
 		java.lang.Long       id,
 		java.lang.String     ownerType,
 		java.lang.Long       ownerId,
-		java.lang.Long       siteType,
+		java.lang.Long       launchPadItemId,
 		java.lang.Long       rentalStartTime,
 		java.lang.Long       rentalEndTime,
 		java.lang.Long       payStartTime,
@@ -78,18 +78,18 @@ public class EhRentalDefaultRules implements java.io.Serializable {
 		java.lang.Byte       cancelFlag,
 		java.lang.Integer    rentalStep,
 		java.lang.Byte       needPay,
-		java.lang.Long       launchPadItemId,
 		java.math.BigDecimal workdayPrice,
 		java.math.BigDecimal weekendPrice,
 		java.lang.Double     siteCounts,
 		java.sql.Date        beginDate,
 		java.sql.Date        endDate,
-		java.lang.String     openWeekday
+		java.lang.String     openWeekday,
+		java.lang.Double     timeStep
 	) {
 		this.id = id;
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;
-		this.siteType = siteType;
+		this.launchPadItemId = launchPadItemId;
 		this.rentalStartTime = rentalStartTime;
 		this.rentalEndTime = rentalEndTime;
 		this.payStartTime = payStartTime;
@@ -113,13 +113,13 @@ public class EhRentalDefaultRules implements java.io.Serializable {
 		this.cancelFlag = cancelFlag;
 		this.rentalStep = rentalStep;
 		this.needPay = needPay;
-		this.launchPadItemId = launchPadItemId;
 		this.workdayPrice = workdayPrice;
 		this.weekendPrice = weekendPrice;
 		this.siteCounts = siteCounts;
 		this.beginDate = beginDate;
 		this.endDate = endDate;
 		this.openWeekday = openWeekday;
+		this.timeStep = timeStep;
 	}
 
 	public java.lang.Long getId() {
@@ -146,12 +146,12 @@ public class EhRentalDefaultRules implements java.io.Serializable {
 		this.ownerId = ownerId;
 	}
 
-	public java.lang.Long getSiteType() {
-		return this.siteType;
+	public java.lang.Long getLaunchPadItemId() {
+		return this.launchPadItemId;
 	}
 
-	public void setSiteType(java.lang.Long siteType) {
-		this.siteType = siteType;
+	public void setLaunchPadItemId(java.lang.Long launchPadItemId) {
+		this.launchPadItemId = launchPadItemId;
 	}
 
 	public java.lang.Long getRentalStartTime() {
@@ -338,14 +338,6 @@ public class EhRentalDefaultRules implements java.io.Serializable {
 		this.needPay = needPay;
 	}
 
-	public java.lang.Long getLaunchPadItemId() {
-		return this.launchPadItemId;
-	}
-
-	public void setLaunchPadItemId(java.lang.Long launchPadItemId) {
-		this.launchPadItemId = launchPadItemId;
-	}
-
 	public java.math.BigDecimal getWorkdayPrice() {
 		return this.workdayPrice;
 	}
@@ -392,5 +384,13 @@ public class EhRentalDefaultRules implements java.io.Serializable {
 
 	public void setOpenWeekday(java.lang.String openWeekday) {
 		this.openWeekday = openWeekday;
+	}
+
+	public java.lang.Double getTimeStep() {
+		return this.timeStep;
+	}
+
+	public void setTimeStep(java.lang.Double timeStep) {
+		this.timeStep = timeStep;
 	}
 }

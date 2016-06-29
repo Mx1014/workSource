@@ -48,6 +48,13 @@ public class EhRentalBillsDao extends org.jooq.impl.DAOImpl<com.everhomes.server
 	}
 
 	/**
+	 * Fetch records that have <code>bill_number IN (values)</code>
+	 */
+	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBills> fetchByBillNumber(java.lang.String... values) {
+		return fetch(com.everhomes.server.schema.tables.EhRentalBills.EH_RENTAL_BILLS.BILL_NUMBER, values);
+	}
+
+	/**
 	 * Fetch records that have <code>rental_site_id IN (values)</code>
 	 */
 	public java.util.List<com.everhomes.server.schema.tables.pojos.EhRentalBills> fetchByRentalSiteId(java.lang.Long... values) {

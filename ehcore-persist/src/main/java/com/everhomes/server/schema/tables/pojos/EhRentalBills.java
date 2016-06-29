@@ -11,9 +11,10 @@ package com.everhomes.server.schema.tables.pojos;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalBills implements java.io.Serializable {
 
-	private static final long serialVersionUID = -1759543909;
+	private static final long serialVersionUID = 1325872675;
 
 	private java.lang.Long       id;
+	private java.lang.String     billNumber;
 	private java.lang.Long       rentalSiteId;
 	private java.lang.Long       rentalUid;
 	private java.sql.Date        rentalDate;
@@ -46,6 +47,7 @@ public class EhRentalBills implements java.io.Serializable {
 
 	public EhRentalBills(
 		java.lang.Long       id,
+		java.lang.String     billNumber,
 		java.lang.Long       rentalSiteId,
 		java.lang.Long       rentalUid,
 		java.sql.Date        rentalDate,
@@ -75,6 +77,7 @@ public class EhRentalBills implements java.io.Serializable {
 		java.lang.Long       organizationId
 	) {
 		this.id = id;
+		this.billNumber = billNumber;
 		this.rentalSiteId = rentalSiteId;
 		this.rentalUid = rentalUid;
 		this.rentalDate = rentalDate;
@@ -110,6 +113,14 @@ public class EhRentalBills implements java.io.Serializable {
 
 	public void setId(java.lang.Long id) {
 		this.id = id;
+	}
+
+	public java.lang.String getBillNumber() {
+		return this.billNumber;
+	}
+
+	public void setBillNumber(java.lang.String billNumber) {
+		this.billNumber = billNumber;
 	}
 
 	public java.lang.Long getRentalSiteId() {

@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalSites extends org.jooq.impl.TableImpl<com.everhomes.server.schema.tables.records.EhRentalSitesRecord> {
 
-	private static final long serialVersionUID = -1261876580;
+	private static final long serialVersionUID = -1599371638;
 
 	/**
 	 * The singleton instance of <code>ehcore.eh_rental_sites</code>
@@ -29,7 +29,7 @@ public class EhRentalSites extends org.jooq.impl.TableImpl<com.everhomes.server.
 	/**
 	 * The column <code>ehcore.eh_rental_sites.id</code>. id
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false), this, "id");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.Long> ID = createField("id", org.jooq.impl.SQLDataType.BIGINT.nullable(false).defaulted(true), this, "id");
 
 	/**
 	 * The column <code>ehcore.eh_rental_sites.parent_id</code>.
@@ -167,9 +167,9 @@ public class EhRentalSites extends org.jooq.impl.TableImpl<com.everhomes.server.
 	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.Byte> RENTAL_TYPE = createField("rental_type", org.jooq.impl.SQLDataType.TINYINT, this, "0: as hour:min 1-as half day 2-as day 3-支持晚上的半天");
 
 	/**
-	 * The column <code>ehcore.eh_rental_sites.rental_step</code>. 按小时预约：最小单元格是多少小时，浮点型
+	 * The column <code>ehcore.eh_rental_sites.time_step</code>. 按小时预约：最小单元格是多少小时，浮点型
 	 */
-	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.Double> RENTAL_STEP = createField("rental_step", org.jooq.impl.SQLDataType.DOUBLE, this, "按小时预约：最小单元格是多少小时，浮点型");
+	public final org.jooq.TableField<com.everhomes.server.schema.tables.records.EhRentalSitesRecord, java.lang.Double> TIME_STEP = createField("time_step", org.jooq.impl.SQLDataType.DOUBLE, this, "按小时预约：最小单元格是多少小时，浮点型");
 
 	/**
 	 * The column <code>ehcore.eh_rental_sites.exclusive_flag</code>. 是否为独占资源0否 1 是

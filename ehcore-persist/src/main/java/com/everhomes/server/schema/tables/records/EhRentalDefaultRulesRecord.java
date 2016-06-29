@@ -11,7 +11,7 @@ package com.everhomes.server.schema.tables.records;
 @java.lang.SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class EhRentalDefaultRulesRecord extends org.jooq.impl.UpdatableRecordImpl<com.everhomes.server.schema.tables.records.EhRentalDefaultRulesRecord> {
 
-	private static final long serialVersionUID = 285946898;
+	private static final long serialVersionUID = 231466854;
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_default_rules.id</code>. id
@@ -56,16 +56,16 @@ public class EhRentalDefaultRulesRecord extends org.jooq.impl.UpdatableRecordImp
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_default_rules.site_type</code>. rule for what function
+	 * Setter for <code>ehcore.eh_rental_default_rules.launch_pad_item_id</code>. 广场图标id
 	 */
-	public void setSiteType(java.lang.Long value) {
+	public void setLaunchPadItemId(java.lang.Long value) {
 		setValue(3, value);
 	}
 
 	/**
-	 * Getter for <code>ehcore.eh_rental_default_rules.site_type</code>. rule for what function
+	 * Getter for <code>ehcore.eh_rental_default_rules.launch_pad_item_id</code>. 广场图标id
 	 */
-	public java.lang.Long getSiteType() {
+	public java.lang.Long getLaunchPadItemId() {
 		return (java.lang.Long) getValue(3);
 	}
 
@@ -392,101 +392,101 @@ public class EhRentalDefaultRulesRecord extends org.jooq.impl.UpdatableRecordImp
 	}
 
 	/**
-	 * Setter for <code>ehcore.eh_rental_default_rules.launch_pad_item_id</code>. 广场图标id
-	 */
-	public void setLaunchPadItemId(java.lang.Long value) {
-		setValue(27, value);
-	}
-
-	/**
-	 * Getter for <code>ehcore.eh_rental_default_rules.launch_pad_item_id</code>. 广场图标id
-	 */
-	public java.lang.Long getLaunchPadItemId() {
-		return (java.lang.Long) getValue(27);
-	}
-
-	/**
 	 * Setter for <code>ehcore.eh_rental_default_rules.workday_price</code>. 工作日价格
 	 */
 	public void setWorkdayPrice(java.math.BigDecimal value) {
-		setValue(28, value);
+		setValue(27, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_default_rules.workday_price</code>. 工作日价格
 	 */
 	public java.math.BigDecimal getWorkdayPrice() {
-		return (java.math.BigDecimal) getValue(28);
+		return (java.math.BigDecimal) getValue(27);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_default_rules.weekend_price</code>. 周末价格
 	 */
 	public void setWeekendPrice(java.math.BigDecimal value) {
-		setValue(29, value);
+		setValue(28, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_default_rules.weekend_price</code>. 周末价格
 	 */
 	public java.math.BigDecimal getWeekendPrice() {
-		return (java.math.BigDecimal) getValue(29);
+		return (java.math.BigDecimal) getValue(28);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_default_rules.site_counts</code>. 可预约个数
 	 */
 	public void setSiteCounts(java.lang.Double value) {
-		setValue(30, value);
+		setValue(29, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_default_rules.site_counts</code>. 可预约个数
 	 */
 	public java.lang.Double getSiteCounts() {
-		return (java.lang.Double) getValue(30);
+		return (java.lang.Double) getValue(29);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_default_rules.begin_date</code>. 开始日期
 	 */
 	public void setBeginDate(java.sql.Date value) {
-		setValue(31, value);
+		setValue(30, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_default_rules.begin_date</code>. 开始日期
 	 */
 	public java.sql.Date getBeginDate() {
-		return (java.sql.Date) getValue(31);
+		return (java.sql.Date) getValue(30);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_default_rules.end_date</code>. 结束日期
 	 */
 	public void setEndDate(java.sql.Date value) {
-		setValue(32, value);
+		setValue(31, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_default_rules.end_date</code>. 结束日期
 	 */
 	public java.sql.Date getEndDate() {
-		return (java.sql.Date) getValue(32);
+		return (java.sql.Date) getValue(31);
 	}
 
 	/**
 	 * Setter for <code>ehcore.eh_rental_default_rules.open_weekday</code>. 7位二进制，0000000每一位表示星期7123456
 	 */
 	public void setOpenWeekday(java.lang.String value) {
-		setValue(33, value);
+		setValue(32, value);
 	}
 
 	/**
 	 * Getter for <code>ehcore.eh_rental_default_rules.open_weekday</code>. 7位二进制，0000000每一位表示星期7123456
 	 */
 	public java.lang.String getOpenWeekday() {
-		return (java.lang.String) getValue(33);
+		return (java.lang.String) getValue(32);
+	}
+
+	/**
+	 * Setter for <code>ehcore.eh_rental_default_rules.time_step</code>. 步长，每个单元格是多少小时（半小时是0.5）
+	 */
+	public void setTimeStep(java.lang.Double value) {
+		setValue(33, value);
+	}
+
+	/**
+	 * Getter for <code>ehcore.eh_rental_default_rules.time_step</code>. 步长，每个单元格是多少小时（半小时是0.5）
+	 */
+	public java.lang.Double getTimeStep() {
+		return (java.lang.Double) getValue(33);
 	}
 
 	// -------------------------------------------------------------------------
@@ -515,13 +515,13 @@ public class EhRentalDefaultRulesRecord extends org.jooq.impl.UpdatableRecordImp
 	/**
 	 * Create a detached, initialised EhRentalDefaultRulesRecord
 	 */
-	public EhRentalDefaultRulesRecord(java.lang.Long id, java.lang.String ownerType, java.lang.Long ownerId, java.lang.Long siteType, java.lang.Long rentalStartTime, java.lang.Long rentalEndTime, java.lang.Long payStartTime, java.lang.Long payEndTime, java.lang.Integer paymentRatio, java.lang.Byte refundFlag, java.lang.Integer refundRatio, java.lang.String contactNum, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.Byte rentalType, java.lang.Long cancelTime, java.lang.Long overtimeTime, java.lang.Byte exclusiveFlag, java.lang.Double unit, java.lang.Byte autoAssign, java.lang.Byte multiUnit, java.lang.Byte multiTimeInterval, java.lang.Byte cancelFlag, java.lang.Integer rentalStep, java.lang.Byte needPay, java.lang.Long launchPadItemId, java.math.BigDecimal workdayPrice, java.math.BigDecimal weekendPrice, java.lang.Double siteCounts, java.sql.Date beginDate, java.sql.Date endDate, java.lang.String openWeekday) {
+	public EhRentalDefaultRulesRecord(java.lang.Long id, java.lang.String ownerType, java.lang.Long ownerId, java.lang.Long launchPadItemId, java.lang.Long rentalStartTime, java.lang.Long rentalEndTime, java.lang.Long payStartTime, java.lang.Long payEndTime, java.lang.Integer paymentRatio, java.lang.Byte refundFlag, java.lang.Integer refundRatio, java.lang.String contactNum, java.lang.Long creatorUid, java.sql.Timestamp createTime, java.lang.Long operatorUid, java.sql.Timestamp operateTime, java.lang.Byte rentalType, java.lang.Long cancelTime, java.lang.Long overtimeTime, java.lang.Byte exclusiveFlag, java.lang.Double unit, java.lang.Byte autoAssign, java.lang.Byte multiUnit, java.lang.Byte multiTimeInterval, java.lang.Byte cancelFlag, java.lang.Integer rentalStep, java.lang.Byte needPay, java.math.BigDecimal workdayPrice, java.math.BigDecimal weekendPrice, java.lang.Double siteCounts, java.sql.Date beginDate, java.sql.Date endDate, java.lang.String openWeekday, java.lang.Double timeStep) {
 		super(com.everhomes.server.schema.tables.EhRentalDefaultRules.EH_RENTAL_DEFAULT_RULES);
 
 		setValue(0, id);
 		setValue(1, ownerType);
 		setValue(2, ownerId);
-		setValue(3, siteType);
+		setValue(3, launchPadItemId);
 		setValue(4, rentalStartTime);
 		setValue(5, rentalEndTime);
 		setValue(6, payStartTime);
@@ -545,12 +545,12 @@ public class EhRentalDefaultRulesRecord extends org.jooq.impl.UpdatableRecordImp
 		setValue(24, cancelFlag);
 		setValue(25, rentalStep);
 		setValue(26, needPay);
-		setValue(27, launchPadItemId);
-		setValue(28, workdayPrice);
-		setValue(29, weekendPrice);
-		setValue(30, siteCounts);
-		setValue(31, beginDate);
-		setValue(32, endDate);
-		setValue(33, openWeekday);
+		setValue(27, workdayPrice);
+		setValue(28, weekendPrice);
+		setValue(29, siteCounts);
+		setValue(30, beginDate);
+		setValue(31, endDate);
+		setValue(32, openWeekday);
+		setValue(33, timeStep);
 	}
 }
