@@ -1,11 +1,14 @@
 // @formatter:off
 
-package com.everhomes.rest.news;
+package com.everhomes.rest.ui.news;
 
 import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.news.NewsAttachmentDTO;
+import com.everhomes.rest.news.NewsCommentContentType;
+import com.everhomes.rest.news.NewsCommentDeleteFlag;
 import com.everhomes.util.StringHelper;
 
 /**

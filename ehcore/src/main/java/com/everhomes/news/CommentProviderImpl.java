@@ -8,6 +8,7 @@ import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
+import org.jooq.SelectConditionStep;
 import org.jooq.impl.DAOImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,10 +42,10 @@ public class CommentProviderImpl implements CommentProvider {
 	public void createComment(Class<?> pojoClass, Comment comment) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(pojoClass));
 		comment.setId(id);
-		comment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));  //为了使id与create_time同序，最好放一起set
-		
+		comment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime())); // 为了使id与create_time同序，最好放一起set
+
 		getReadWriteDao(pojoClass).insert(ConvertHelper.convert(comment, pojoClass));
-		
+
 		DaoHelper.publishDaoAction(DaoAction.CREATE, pojoClass, null);
 	}
 
@@ -52,9 +53,9 @@ public class CommentProviderImpl implements CommentProvider {
 	@SuppressWarnings({ "unchecked" })
 	public void updateComment(Class<?> pojoClass, Comment comment) {
 		assert (comment.getId() != null);
-		
+
 		getReadWriteDao(pojoClass).update(ConvertHelper.convert(comment, pojoClass));
-		
+
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, pojoClass, comment.getId());
 	}
 
@@ -62,9 +63,9 @@ public class CommentProviderImpl implements CommentProvider {
 	@SuppressWarnings({ "unchecked" })
 	public void deleteComment(Class<?> pojoClass, Long id) {
 		assert (id != null);
-		
+
 		getReadWriteDao(pojoClass).deleteById(id);
-		
+
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, pojoClass, id);
 	}
 
@@ -72,7 +73,7 @@ public class CommentProviderImpl implements CommentProvider {
 	@SuppressWarnings({ "unchecked" })
 	public Comment findCommentById(Class<?> pojoClass, Long id) {
 		assert (id != null);
-		
+
 		return ConvertHelper.convert(getReadOnlyDao(pojoClass).findById(id), Comment.class);
 	}
 
@@ -90,12 +91,14 @@ public class CommentProviderImpl implements CommentProvider {
 		assert (blankRecord != null);
 		// 下面where的写法与 where("owner_id = ?", ownerId)是一样的
 		return context.select().from(meta.getTableName())
-				.where(((Field<Long>) blankRecord.field("owner_id")).eq(ownerId)).fetch().map(new MyCommentRecordMapper());
+				.where(((Field<Long>) blankRecord.field("owner_id")).eq(ownerId)).fetch()
+				.map(new MyCommentRecordMapper());
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<Comment> listCommentByOwnerIdWithPage(Class<?> pojoClass, Long ownerId, Long pageAnchor, Integer pageSize){
+	public List<Comment> listCommentByOwnerIdWithPage(Class<?> pojoClass, Long ownerId, Long pageAnchor,
+			Integer pageSize) {
 		assert (ownerId != null);
 
 		DSLContext context = getReadOnlyContext();
@@ -106,16 +109,16 @@ public class CommentProviderImpl implements CommentProvider {
 		Record blankRecord = meta.getBlankRecordObject();
 		assert (blankRecord != null);
 		// 下面where的写法与 where("owner_id = ?", ownerId)是一样的
-		return context.select().from(meta.getTableName())
+		SelectConditionStep<Record> selectConditionStep = context.select().from(meta.getTableName())
 				.where(((Field<Long>) blankRecord.field("owner_id")).eq(ownerId))
-				.and(((Field<Byte>) blankRecord.field("status")).eq(CommentStatus.ACTIVE.getCode()))
-				.and(((Field<Long>)blankRecord.field("id")).lt(pageAnchor))
-				.orderBy(((Field<Timestamp>)blankRecord.field("create_time")).desc())
-				.limit(pageSize.intValue())
-				.fetch().map(new MyCommentRecordMapper());
+				.and(((Field<Byte>) blankRecord.field("status")).eq(CommentStatus.ACTIVE.getCode()));
+		if (pageAnchor.longValue() != 0L) {
+			selectConditionStep.and(((Field<Long>) blankRecord.field("id")).lt(pageAnchor));
+		}
+		return selectConditionStep.orderBy(((Field<Timestamp>) blankRecord.field("create_time")).desc(),((Field<Long>) blankRecord.field("id")).desc())
+				.limit(pageSize.intValue()).fetch().map(new MyCommentRecordMapper());
 	}
-	
-	
+
 	@SuppressWarnings("rawtypes")
 	private DAOImpl getDao(Class<?> pojoClass, DSLContext context) {
 		try {
@@ -153,8 +156,8 @@ public class CommentProviderImpl implements CommentProvider {
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
 	}
-	
-	private class MyCommentRecordMapper implements RecordMapper<Record, Comment>{
+
+	private class MyCommentRecordMapper implements RecordMapper<Record, Comment> {
 
 		@Override
 		public Comment map(Record r) {
@@ -170,6 +173,6 @@ public class CommentProviderImpl implements CommentProvider {
 			comment.setDeleteTime(r.getValue("delete_time", Timestamp.class));
 			return comment;
 		}
-		
+
 	}
 }

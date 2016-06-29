@@ -1,12 +1,14 @@
 // @formatter:off
 
-package com.everhomes.rest.news;
+package com.everhomes.rest.ui.news;
 
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.news.AttachmentDescriptor;
+import com.everhomes.rest.news.NewsCommentContentType;
 import com.everhomes.util.StringHelper;
 
 /**

@@ -49,6 +49,9 @@ public class SearchProviderImpl implements SearchProvider {
 	 */
 	public String post(String url, String json) {
 		try {
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("url:"+url+", json:"+json);
+			}
 			return HttpUtils.postJson(url, json, TIME_OUT, CHARSET);
 		} catch (IOException e) {
 			LOGGER.error("request to elasticsearch error: url=" + url + ", json=" + json);

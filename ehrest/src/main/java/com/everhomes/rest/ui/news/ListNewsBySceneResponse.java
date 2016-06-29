@@ -1,10 +1,11 @@
 // @formatter:off
 
-package com.everhomes.rest.news;
+package com.everhomes.rest.ui.news;
 
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.news.BriefNewsDTO;
 import com.everhomes.util.StringHelper;
 
 /**

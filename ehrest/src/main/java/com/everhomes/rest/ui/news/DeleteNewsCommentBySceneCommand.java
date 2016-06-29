@@ -1,6 +1,6 @@
 // @formatter:off
 
-package com.everhomes.rest.news;
+package com.everhomes.rest.ui.news;
 
 import javax.validation.constraints.NotNull;
 
@@ -10,15 +10,17 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * 参数
  * <li>sceneToken: 场景标识</li>
- * <li>pageAnchor: 锚点</li>
- * <li>pageSize: 每页的数量</li>
+ * <li>newsToken: 新闻标识</li>
+ * <li>id: 评论id</li>
  * </ul>
  */
-public class ListNewsBySceneCommand {
+public class DeleteNewsCommentBySceneCommand {
 	@NotNull
 	private String sceneToken;
-	private Long pageAnchor;
-	private Integer pageSize;
+	@NotNull
+	private String newsToken;
+	@NotNull
+	private Long id;
 
 	public String getSceneToken() {
 		return sceneToken;
@@ -28,20 +30,20 @@ public class ListNewsBySceneCommand {
 		this.sceneToken = sceneToken;
 	}
 
-	public Long getPageAnchor() {
-		return pageAnchor;
+	public String getNewsToken() {
+		return newsToken;
 	}
 
-	public void setPageAnchor(Long pageAnchor) {
-		this.pageAnchor = pageAnchor;
+	public void setNewsToken(String newsToken) {
+		this.newsToken = newsToken;
 	}
 
-	public Integer getPageSize() {
-		return pageSize;
+	public Long getId() {
+		return id;
 	}
 
-	public void setPageSize(Integer pageSize) {
-		this.pageSize = pageSize;
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	@Override

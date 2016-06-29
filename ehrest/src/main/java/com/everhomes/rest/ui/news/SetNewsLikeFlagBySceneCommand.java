@@ -1,6 +1,6 @@
 // @formatter:off
 
-package com.everhomes.rest.news;
+package com.everhomes.rest.ui.news;
 
 import javax.validation.constraints.NotNull;
 
@@ -11,16 +11,16 @@ import com.everhomes.util.StringHelper;
  * 参数
  * <li>sceneToken: 场景标识</li>
  * <li>newsToken: 新闻标识</li>
- * <li>id: 评论id</li>
+ * <li>likeFlag: 现在的点赞状态，0未点赞，1已点赞，参考{@link com.everhomes.rest.user.UserLikeType}</li>
  * </ul>
  */
-public class DeleteNewsCommentBySceneCommand {
+public class SetNewsLikeFlagBySceneCommand {
 	@NotNull
 	private String sceneToken;
 	@NotNull
 	private String newsToken;
 	@NotNull
-	private Long id;
+	private Byte likeFlag;
 
 	public String getSceneToken() {
 		return sceneToken;
@@ -38,12 +38,12 @@ public class DeleteNewsCommentBySceneCommand {
 		this.newsToken = newsToken;
 	}
 
-	public Long getId() {
-		return id;
+	public Byte getLikeFlag() {
+		return likeFlag;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
+	public void setLikeFlag(Byte likeFlag) {
+		this.likeFlag = likeFlag;
 	}
 
 	@Override

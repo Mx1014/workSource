@@ -6,16 +6,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.news.NewsService;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.news.AddNewsCommentBySceneCommand;
-import com.everhomes.rest.news.AddNewsCommentBySceneResponse;
-import com.everhomes.rest.news.DeleteNewsCommentBySceneCommand;
-import com.everhomes.rest.news.ListNewsBySceneCommand;
-import com.everhomes.rest.news.ListNewsBySceneResponse;
-import com.everhomes.rest.news.SetNewsLikeFlagBySceneCommand;
+import com.everhomes.rest.ui.news.AddNewsCommentBySceneCommand;
+import com.everhomes.rest.ui.news.AddNewsCommentBySceneResponse;
+import com.everhomes.rest.ui.news.DeleteNewsCommentBySceneCommand;
+import com.everhomes.rest.ui.news.ListNewsBySceneCommand;
+import com.everhomes.rest.ui.news.ListNewsBySceneResponse;
+import com.everhomes.rest.ui.news.SetNewsLikeFlagBySceneCommand;
 
 /**
  * <ul>
@@ -25,7 +26,7 @@ import com.everhomes.rest.news.SetNewsLikeFlagBySceneCommand;
 @RestDoc(value="NewsUi controller", site="newsUi")
 @RestController
 @RequestMapping("/ui/news")
-public class NewsUiController {
+public class NewsUiController extends ControllerBase{
 
 	@Autowired
 	private NewsService newsService;

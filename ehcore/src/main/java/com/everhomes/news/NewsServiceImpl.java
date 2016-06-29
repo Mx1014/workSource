@@ -28,8 +28,6 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rest.news.AddNewsCommentBySceneCommand;
-import com.everhomes.rest.news.AddNewsCommentBySceneResponse;
 import com.everhomes.rest.news.AddNewsCommentCommand;
 import com.everhomes.rest.news.AddNewsCommentResponse;
 import com.everhomes.rest.news.AttachmentDescriptor;
@@ -38,15 +36,12 @@ import com.everhomes.rest.news.CommentStatus;
 import com.everhomes.rest.news.CreateNewsCommand;
 import com.everhomes.rest.news.CreateNewsResponse;
 import com.everhomes.rest.news.DeleteNewsCommand;
-import com.everhomes.rest.news.DeleteNewsCommentBySceneCommand;
 import com.everhomes.rest.news.DeleteNewsCommentCommand;
 import com.everhomes.rest.news.GetNewsContentCommand;
 import com.everhomes.rest.news.GetNewsContentResponse;
 import com.everhomes.rest.news.GetNewsDetailInfoCommand;
 import com.everhomes.rest.news.GetNewsDetailInfoResponse;
 import com.everhomes.rest.news.ImportNewsCommand;
-import com.everhomes.rest.news.ListNewsBySceneCommand;
-import com.everhomes.rest.news.ListNewsBySceneResponse;
 import com.everhomes.rest.news.ListNewsCommand;
 import com.everhomes.rest.news.ListNewsCommentCommand;
 import com.everhomes.rest.news.ListNewsCommentResponse;
@@ -54,6 +49,7 @@ import com.everhomes.rest.news.ListNewsResponse;
 import com.everhomes.rest.news.NewsAttachmentDTO;
 import com.everhomes.rest.news.NewsCommentContentType;
 import com.everhomes.rest.news.NewsCommentDTO;
+import com.everhomes.rest.news.NewsCommentDeleteFlag;
 import com.everhomes.rest.news.NewsContentType;
 import com.everhomes.rest.news.NewsOwnerType;
 import com.everhomes.rest.news.NewsServiceErrorCode;
@@ -61,10 +57,15 @@ import com.everhomes.rest.news.NewsStatus;
 import com.everhomes.rest.news.NewsTopFlag;
 import com.everhomes.rest.news.SearchNewsCommand;
 import com.everhomes.rest.news.SearchNewsResponse;
-import com.everhomes.rest.news.SetNewsLikeFlagBySceneCommand;
 import com.everhomes.rest.news.SetNewsLikeFlagCommand;
 import com.everhomes.rest.news.SetNewsTopFlagCommand;
 import com.everhomes.rest.news.SyncNewsCommand;
+import com.everhomes.rest.ui.news.AddNewsCommentBySceneCommand;
+import com.everhomes.rest.ui.news.AddNewsCommentBySceneResponse;
+import com.everhomes.rest.ui.news.DeleteNewsCommentBySceneCommand;
+import com.everhomes.rest.ui.news.ListNewsBySceneCommand;
+import com.everhomes.rest.ui.news.ListNewsBySceneResponse;
+import com.everhomes.rest.ui.news.SetNewsLikeFlagBySceneCommand;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.user.UserLikeType;
 import com.everhomes.search.SearchProvider;
@@ -632,6 +633,7 @@ public class NewsServiceImpl implements NewsService {
 					c.setCreatorAvatarUrl(avatarUrl);
 				}
 			}
+			c.setDeleteFlag(userId.longValue() == c.getCreatorUid().longValue()?NewsCommentDeleteFlag.DELETE.getCode():NewsCommentDeleteFlag.NONE.getCode());
 		});
 	}
 
@@ -647,7 +649,12 @@ public class NewsServiceImpl implements NewsService {
 
 		attachmentProvider.listAttachmentByOwnerIds(EhNewsAttachments.class, commentIds).forEach(a -> {
 			NewsAttachmentDTO attachmentDTO = convertAttachmentToNewsAttachmentDTO(userId, a);
-			commentMap.get(a.getOwnerId()).getAttachments().add(attachmentDTO);
+			NewsCommentDTO commentDTO = commentMap.get(a.getOwnerId());
+			List<NewsAttachmentDTO> attachments = commentDTO.getAttachments();
+			if (attachments==null) {
+				commentDTO.setAttachments(new ArrayList<>());
+			}
+			commentDTO.getAttachments().add(attachmentDTO);
 		});
 	}
 
@@ -799,7 +806,7 @@ public class NewsServiceImpl implements NewsService {
 		Long newsId = checkNewsToken(userId, newsToken);
 		News news = findNewsById(userId, newsId);
 		Comment comment = commentProvider.findCommentById(EhNewsComment.class, commentId);
-		if (comment.getOwnerId().longValue() != newsId.longValue()) {
+		if (comment == null || comment.getOwnerId().longValue() != newsId.longValue()) {
 			LOGGER.error("newsId and commentId not match, operatorId=" + userId + ", newsId=" + newsId + ", commentId"
 					+ commentId);
 			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
