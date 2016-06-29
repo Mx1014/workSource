@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-06-27 15:32:28
+// generated at 2016-06-29 16:10:25
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -224,6 +224,7 @@ public interface ApiConstants {
     public static final String ADMIN_ORG_LISTMYTASKTOPICS_URL = "/admin/org/listMyTaskTopics";
     public static final String ADMIN_ORG_LISTORGAUTHPERSONNELS_URL = "/admin/org/listOrgAuthPersonnels";
     public static final String ADMIN_ORG_LISTORGMEMBERS_URL = "/admin/org/listOrgMembers";
+    public static final String ADMIN_ORG_LISTORGANIZATIONBYNAME_URL = "/admin/org/listOrganizationByName";
     public static final String ADMIN_ORG_LISTORGANIZATIONPERSONNELS_URL = "/admin/org/listOrganizationPersonnels";
     public static final String ADMIN_ORG_LISTORGANIZATIONS_URL = "/admin/org/listOrganizations";
     public static final String ADMIN_ORG_LISTPERSONNELNOTJOINGROUPS_URL = "/admin/org/listPersonnelNotJoinGroups";
@@ -521,6 +522,8 @@ public interface ApiConstants {
     public static final String LAUNCHPAD_GETLAUNCHPADLAYOUT_URL = "/launchpad/getLaunchPadLayout";
     public static final String LAUNCHPAD_USERDEFINEDLAUNCHPAD_URL = "/launchpad/userDefinedLaunchPad";
     public static final String LINK_FINDLINKBYID_URL = "/link/findLinkById";
+    public static final String LIVECHECK_HOME_URL = "/livecheck/home";
+    public static final String LIVECHECK_LOGINDETAIL_URL = "/livecheck/loginDetail";
     public static final String LOCALE_GETLOCALIZEDSTRING_URL = "/locale/getLocalizedString";
     public static final String NAMESPACE_GETNAMESPACEDETAIL_URL = "/namespace/getNamespaceDetail";
     public static final String NAMESPACE_LISTCOMMUNITYBYNAMESPACE_URL = "/namespace/listCommunityByNamespace";
@@ -567,6 +570,7 @@ public interface ApiConstants {
     public static final String OPENAPI_UPDATERECEIVEDCOUPONCOUNT_URL = "/openapi/updateReceivedCouponCount";
     public static final String OPENAPI_USER_INITCOUPON_URL = "/openapi/user/initCoupon";
     public static final String OPENAPI_USER_TESTGETTHIRDSIGNATURE_URL = "/openapi/user/testGetThirdSignature";
+    public static final String ORDER_PAYCALLBACK_URL = "/order/payCallback";
     public static final String ORG_ADDORGMEMBERBYPHONE_URL = "/org/addOrgMemberByPhone";
     public static final String ORG_APPLYFORENTERPRISECONTACT_URL = "/org/applyForEnterpriseContact";
     public static final String ORG_APPLYORGANIZATIONMEMBER_URL = "/org/applyOrganizationMember";

@@ -21,6 +21,14 @@
 
 @property(nonatomic, copy) NSString* keyword;
 
+@property(nonatomic, copy) NSNumber* organizationId;
+
+@property(nonatomic, copy) NSNumber* buildingId;
+
+@property(nonatomic, copy) NSString* buildingName;
+
+@property(nonatomic, copy) NSNumber* isAuth;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 

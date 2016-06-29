@@ -1,20 +1,19 @@
 //
-// EvhUserGetBizSignatureRestResponse.m
+// EvhFetchRecentToPastMessageAdminCommand.m
 //
-#import "EvhUserGetBizSignatureRestResponse.h"
-#import "EvhGetSignatureCommandResponse.h"
+#import "EvhFetchRecentToPastMessageAdminCommand.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhUserGetBizSignatureRestResponse
+// EvhFetchRecentToPastMessageAdminCommand
 //
 
-@implementation EvhUserGetBizSignatureRestResponse
+@implementation EvhFetchRecentToPastMessageAdminCommand
 
 +(id) withJsonString: (NSString*) jsonString
 {
     id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
     if(jsonObject != nil) {
-        EvhUserGetBizSignatureRestResponse* obj = [EvhUserGetBizSignatureRestResponse new];
+        EvhFetchRecentToPastMessageAdminCommand* obj = [EvhFetchRecentToPastMessageAdminCommand new];
         return [obj fromJson:jsonObject];
     }
     return nil;
@@ -32,21 +31,24 @@
 -(void) toJson: (NSMutableDictionary*) jsonObject 
 {
     [super toJson: jsonObject];
-    
-    if(self.response) {
-        NSMutableDictionary* dic = [NSMutableDictionary new];
-        [self.response toJson: dic];
-        [jsonObject setObject: dic forKey: @"response"];
-    }
+    if(self.userId)
+        [jsonObject setObject: self.userId forKey: @"userId"];
+    if(self.loginId)
+        [jsonObject setObject: self.loginId forKey: @"loginId"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
 {
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
         [super fromJson: jsonObject];
-        NSMutableDictionary* dic =  (NSMutableDictionary*)[jsonObject objectForKey: @"response"];
-        self.response = [EvhGetSignatureCommandResponse new];
-        self.response = [self.response fromJson: dic];
+        self.userId = [jsonObject objectForKey: @"userId"];
+        if(self.userId && [self.userId isEqual:[NSNull null]])
+            self.userId = nil;
+
+        self.loginId = [jsonObject objectForKey: @"loginId"];
+        if(self.loginId && [self.loginId isEqual:[NSNull null]])
+            self.loginId = nil;
+
         return self;
     }
     

@@ -1,20 +1,20 @@
 //
-// EvhListPostCommandResponse.m
+// EvhListOrganizationsByNameResponse.m
 //
-#import "EvhListPostCommandResponse.h"
-#import "EvhPostDTO.h"
+#import "EvhListOrganizationsByNameResponse.h"
+#import "EvhOrganizationDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhListPostCommandResponse
+// EvhListOrganizationsByNameResponse
 //
 
-@implementation EvhListPostCommandResponse
+@implementation EvhListOrganizationsByNameResponse
 
 +(id) withJsonString: (NSString*) jsonString
 {
     id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
     if(jsonObject != nil) {
-        EvhListPostCommandResponse* obj = [EvhListPostCommandResponse new];
+        EvhListOrganizationsByNameResponse* obj = [EvhListOrganizationsByNameResponse new];
         return [obj fromJson:jsonObject];
     }
     return nil;
@@ -24,7 +24,7 @@
 {
     self = [super init];
     if(self) {
-        _posts = [NSMutableArray new];
+        _dtos = [NSMutableArray new];
         return self;
     }
     return nil;
@@ -34,19 +34,15 @@
 {
     if(self.nextPageAnchor)
         [jsonObject setObject: self.nextPageAnchor forKey: @"nextPageAnchor"];
-    if(self.posts) {
+    if(self.dtos) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhPostDTO* item in self.posts) {
+        for(EvhOrganizationDTO* item in self.dtos) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
         }
-        [jsonObject setObject: jsonArray forKey: @"posts"];
+        [jsonObject setObject: jsonArray forKey: @"dtos"];
     }
-    if(self.commentCount)
-        [jsonObject setObject: self.commentCount forKey: @"commentCount"];
-    if(self.keywords)
-        [jsonObject setObject: self.keywords forKey: @"keywords"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -57,22 +53,14 @@
             self.nextPageAnchor = nil;
 
         {
-            NSArray* jsonArray = [jsonObject objectForKey: @"posts"];
+            NSArray* jsonArray = [jsonObject objectForKey: @"dtos"];
             for(id itemJson in jsonArray) {
-                EvhPostDTO* item = [EvhPostDTO new];
+                EvhOrganizationDTO* item = [EvhOrganizationDTO new];
                 
                 [item fromJson: itemJson];
-                [self.posts addObject: item];
+                [self.dtos addObject: item];
             }
         }
-        self.commentCount = [jsonObject objectForKey: @"commentCount"];
-        if(self.commentCount && [self.commentCount isEqual:[NSNull null]])
-            self.commentCount = nil;
-
-        self.keywords = [jsonObject objectForKey: @"keywords"];
-        if(self.keywords && [self.keywords isEqual:[NSNull null]])
-            self.keywords = nil;
-
         return self;
     }
     

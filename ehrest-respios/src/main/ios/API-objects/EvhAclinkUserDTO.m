@@ -46,6 +46,14 @@
         [jsonObject setObject: self.rightVisitor forKey: @"rightVisitor"];
     if(self.rightRemote)
         [jsonObject setObject: self.rightRemote forKey: @"rightRemote"];
+    if(self.companyId)
+        [jsonObject setObject: self.companyId forKey: @"companyId"];
+    if(self.buildingName)
+        [jsonObject setObject: self.buildingName forKey: @"buildingName"];
+    if(self.buildingId)
+        [jsonObject setObject: self.buildingId forKey: @"buildingId"];
+    if(self.company)
+        [jsonObject setObject: self.company forKey: @"company"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -82,6 +90,22 @@
         self.rightRemote = [jsonObject objectForKey: @"rightRemote"];
         if(self.rightRemote && [self.rightRemote isEqual:[NSNull null]])
             self.rightRemote = nil;
+
+        self.companyId = [jsonObject objectForKey: @"companyId"];
+        if(self.companyId && [self.companyId isEqual:[NSNull null]])
+            self.companyId = nil;
+
+        self.buildingName = [jsonObject objectForKey: @"buildingName"];
+        if(self.buildingName && [self.buildingName isEqual:[NSNull null]])
+            self.buildingName = nil;
+
+        self.buildingId = [jsonObject objectForKey: @"buildingId"];
+        if(self.buildingId && [self.buildingId isEqual:[NSNull null]])
+            self.buildingId = nil;
+
+        self.company = [jsonObject objectForKey: @"company"];
+        if(self.company && [self.company isEqual:[NSNull null]])
+            self.company = nil;
 
         return self;
     }

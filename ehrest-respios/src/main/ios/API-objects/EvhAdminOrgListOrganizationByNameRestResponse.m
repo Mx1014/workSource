@@ -1,20 +1,20 @@
 //
-// EvhUserGetBizSignatureRestResponse.m
+// EvhAdminOrgListOrganizationByNameRestResponse.m
 //
-#import "EvhUserGetBizSignatureRestResponse.h"
-#import "EvhGetSignatureCommandResponse.h"
+#import "EvhAdminOrgListOrganizationByNameRestResponse.h"
+#import "EvhListOrganizationsByNameResponse.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhUserGetBizSignatureRestResponse
+// EvhAdminOrgListOrganizationByNameRestResponse
 //
 
-@implementation EvhUserGetBizSignatureRestResponse
+@implementation EvhAdminOrgListOrganizationByNameRestResponse
 
 +(id) withJsonString: (NSString*) jsonString
 {
     id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
     if(jsonObject != nil) {
-        EvhUserGetBizSignatureRestResponse* obj = [EvhUserGetBizSignatureRestResponse new];
+        EvhAdminOrgListOrganizationByNameRestResponse* obj = [EvhAdminOrgListOrganizationByNameRestResponse new];
         return [obj fromJson:jsonObject];
     }
     return nil;
@@ -45,7 +45,7 @@
     if([jsonObject isKindOfClass:[NSDictionary class]]) {
         [super fromJson: jsonObject];
         NSMutableDictionary* dic =  (NSMutableDictionary*)[jsonObject objectForKey: @"response"];
-        self.response = [EvhGetSignatureCommandResponse new];
+        self.response = [EvhListOrganizationsByNameResponse new];
         self.response = [self.response fromJson: dic];
         return self;
     }
