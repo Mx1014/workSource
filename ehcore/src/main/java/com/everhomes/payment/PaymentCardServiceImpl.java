@@ -294,7 +294,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 	        cacheItem.setCreateTime(new Date());
 	        cacheItem.setExpireTime(10 * 60 * 1000);
 	        cacheItem.setVerifyCode(verifyCode);
-	        redisTemplate.opsForValue().setIfAbsent(key,StringHelper.toJsonString(cacheItem));
+	        redisTemplate.opsForValue().set(key,StringHelper.toJsonString(cacheItem));
 	        redisTemplate.expire(key, 10, TimeUnit.MINUTES);
             return null;
         });

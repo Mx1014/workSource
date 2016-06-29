@@ -447,6 +447,30 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 		TaotaoguTokenCacheItem cacheItem = getToken(paymentCard.getIssuerId(),taotaoguVendorData);
 		String aesKey = cacheItem.getAesKey();
 		String token = cacheItem.getToken();
+		Map<String,Object> codeMap = getCardPaidQrCode(taotaoguVendorData, paymentCard.getCardNo(), paymentCard.getIssuerId(),token,aesKey);
+		if(codeMap != null){
+			String returnCode = (String) codeMap.get("return_code");
+			if("00".equals(returnCode)){
+				result = (String) codeMap.get("token");
+			}else{
+				cacheItem = getRefreshToken(paymentCard.getIssuerId(), taotaoguVendorData);
+				aesKey = cacheItem.getAesKey();
+				token = cacheItem.getToken();
+				codeMap = getCardPaidQrCode(taotaoguVendorData, paymentCard.getCardNo(), paymentCard.getIssuerId(),token,aesKey);
+				returnCode = (String) codeMap.get("return_code");
+				if("00".equals(returnCode)){
+					result = (String) codeMap.get("token");
+				}else{
+					LOGGER.error("the getCardPaidQrCode request of taotaogu failed codeMap={},token={},aesKey={}.",codeMap,token,aesKey);
+					throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_GET_CARD_CODE,
+							"the getCardPaidQrCode request of taotaogu failed .");
+				}
+			}
+		}
+		return result;
+	}
+	
+	private Map<String,Object> getCardPaidQrCode(TaotaoguVendorData taotaoguVendorData,String cardId,Long issuerId,String token,String aesKey){
 		
 		JSONObject json = new JSONObject();
 		Date now = new Date();
@@ -457,24 +481,14 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 		json.put("chnl_type", chnl_type);
 		json.put("chnl_id", chnl_id);
 		json.put("chnl_sn", System.currentTimeMillis());
-		json.put("card_id", paymentCard.getCardNo());
+		json.put("card_id", cardId);
 		json.put("reserved", "");
 		json.put("request_time", timeStr);
 		
 		if(LOGGER.isDebugEnabled())
 			LOGGER.debug(" getCardPaidQrCodeByVendor json={},token={},aesKey={}",json,token,aesKey);
 		Map codeMap = post("/iips2/order/tokenrequest",token, aesKey, json);
-		if(codeMap != null){
-			String returnCode = (String) codeMap.get("return_code");
-			if("00".equals(returnCode)){
-				result = (String) codeMap.get("token");
-			}else{
-				LOGGER.error("the getCardPaidQrCode request of taotaogu failed codeMap={},json={},token={},aesKey={}.",codeMap,json,token,aesKey);
-				throw RuntimeErrorException.errorWith(PaymentCardErrorCode.SCOPE, PaymentCardErrorCode.ERROR_GET_CARD_CODE,
-						"the getCardPaidQrCode request of taotaogu failed .");
-			}
-		}
-		return result;
+		return codeMap;
 	}
 	
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
@@ -502,6 +516,14 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
     	
     }
     
+    private TaotaoguTokenCacheItem getRefreshToken(Long issuerId,TaotaoguVendorData taotaoguVendorData) {
+    	this.coordinationProvider.getNamedLock(CoordinationLocks.PAYMENT_CARD.getCode()).enter(()-> {
+    		refreshToken(issuerId,taotaoguVendorData);
+            return null;
+        });
+    	return getToken(issuerId, taotaoguVendorData);
+    }
+    
     private void refreshToken(Long issuerId,TaotaoguVendorData taotaoguVendorData) {
         String key = getTokenKey(issuerId);
         Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
@@ -513,7 +535,7 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
         cacheItem.setExpireTime(20 * 60 * 60 * 1000);
         cacheItem.setAesKey((String) map.get("aes_key"));
         cacheItem.setToken((String) map.get("token"));
-        redisTemplate.opsForValue().setIfAbsent(key,StringHelper.toJsonString(cacheItem));
+        redisTemplate.opsForValue().set(key,StringHelper.toJsonString(cacheItem));
         redisTemplate.expire(key, 20, TimeUnit.HOURS);
     }
     
