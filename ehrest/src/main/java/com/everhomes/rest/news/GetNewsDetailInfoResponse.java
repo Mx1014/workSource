@@ -20,7 +20,7 @@ import com.everhomes.util.StringHelper;
  * <li>likeCount: 赞数量</li>
  * <li>childCount: 评论数量</li>
  * <li>viewCount: 查看数量</li>
- * <li>likeFlag: 点赞状态，0未点赞，1已点赞，参考{@link com.everhomes.rest.user.UserLikeType}</li>
+ * <li>likeFlag: 点赞状态，0未点赞，1不喜欢，2已点赞，参考{@link com.everhomes.rest.user.UserLikeType}</li>
  * </ul>
  */
 public class GetNewsDetailInfoResponse {

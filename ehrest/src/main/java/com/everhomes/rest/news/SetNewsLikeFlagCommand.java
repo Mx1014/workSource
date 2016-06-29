@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType: 所属类型，参考{@link com.everhomes.rest.news.NewsOwnerType}</li>
  * <li>ownerId: 所属ID</li>
  * <li>newsToken: 新闻标识</li>
- * <li>likeFlag: 现在的点赞状态，0未点赞，1已点赞，参考{@link com.everhomes.rest.user.UserLikeType}</li>
+ * <li>likeFlag: 现在的点赞状态，0未点赞，1不喜欢，2已点赞，参考{@link com.everhomes.rest.user.UserLikeType}</li>
  * </ul>
  */
 public class SetNewsLikeFlagCommand {
