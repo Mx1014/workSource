@@ -118,6 +118,36 @@ public class MessageDTO implements Cloneable {
     public void setBodyType(String bodyType) {
         this.bodyType = bodyType;
     }
+    
+    public String getContentDisplayText() {
+        MessageBodyType type = MessageBodyType.fromCode(this.bodyType);
+        if(type != null) {
+            switch(type) {
+            case TEXT:
+                break;
+                
+            case IMAGE:
+                return "[Image]";
+                
+            case AUDIO: 
+                return "[Audio]";
+                
+            case VIDEO:
+                return "[Video]";
+                
+            case LINK: 
+                return "[Link]";
+                
+            case NOTIFY:  
+                return "[Notify]";
+                
+            case RICH_LINK:
+                return "[RichLink]";
+            }
+        }
+        
+        return this.body;
+    }
 
     public Map<String, String> getMeta() {
         return meta;
