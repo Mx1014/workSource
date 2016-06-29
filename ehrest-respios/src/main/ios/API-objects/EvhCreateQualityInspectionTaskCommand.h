@@ -22,6 +22,8 @@
 
 @property(nonatomic, strong) EvhStandardGroupDTO* group;
 
+@property(nonatomic, copy) NSNumber* executiveExpireTime;
+
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;
 

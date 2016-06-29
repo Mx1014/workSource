@@ -7,3 +7,4 @@
 #define EvhPaymentCardErrorCode_ERROR_OLD_PASSWORD 10001
 #define EvhPaymentCardErrorCode_ERROR_VERIFY_CODE 10002
 #define EvhPaymentCardErrorCode_ERROR_NOT_EXISTS_CARD 10003
+#define EvhPaymentCardErrorCode_ERROR_GET_CARD_CODE 10004

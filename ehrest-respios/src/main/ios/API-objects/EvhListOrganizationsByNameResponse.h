@@ -1,25 +1,21 @@
 //
-// EvhListPostCommandResponse.h
+// EvhListOrganizationsByNameResponse.h
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
-#import "EvhPostDTO.h"
+#import "EvhOrganizationDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhListPostCommandResponse
+// EvhListOrganizationsByNameResponse
 //
-@interface EvhListPostCommandResponse
+@interface EvhListOrganizationsByNameResponse
     : NSObject<EvhJsonSerializable>
 
 
 @property(nonatomic, copy) NSNumber* nextPageAnchor;
 
-// item type EvhPostDTO*
-@property(nonatomic, strong) NSMutableArray* posts;
-
-@property(nonatomic, copy) NSNumber* commentCount;
-
-@property(nonatomic, copy) NSString* keywords;
+// item type EvhOrganizationDTO*
+@property(nonatomic, strong) NSMutableArray* dtos;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

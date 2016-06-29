@@ -2,14 +2,14 @@
 // EvhUserGetBizSignatureRestResponse.h
 //
 #import "RestResponseBase.h"
-#import "EvhUserGetSignatureCommandResponse.h"
+#import "EvhGetSignatureCommandResponse.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhUserGetBizSignatureRestResponse
 //
 @interface EvhUserGetBizSignatureRestResponse : EvhRestResponseBase
 
-@property(nonatomic, strong) EvhUserGetSignatureCommandResponse* response;
+@property(nonatomic, strong) EvhGetSignatureCommandResponse* response;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

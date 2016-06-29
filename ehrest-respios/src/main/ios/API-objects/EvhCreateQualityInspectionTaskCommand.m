@@ -45,6 +45,8 @@
         
         [jsonObject setObject: dic forKey: @"group"];
     }
+    if(self.executiveExpireTime)
+        [jsonObject setObject: self.executiveExpireTime forKey: @"executiveExpireTime"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -70,6 +72,10 @@
 
         self.group = [EvhStandardGroupDTO new];
         self.group = [self.group fromJson: itemJson];
+        self.executiveExpireTime = [jsonObject objectForKey: @"executiveExpireTime"];
+        if(self.executiveExpireTime && [self.executiveExpireTime isEqual:[NSNull null]])
+            self.executiveExpireTime = nil;
+
         return self;
     }
     
