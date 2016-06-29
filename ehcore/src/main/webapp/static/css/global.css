@@ -1,0 +1,88 @@
+*{ margin:0; padding:0;}
+
+html, body, div, span, applet, object, iframe, blockquote, pre, abbr, acronym, address, big, cite, code, del, dfn, em, font, img, ins, kbd, q, s, samp, strike, sub, sup, tt, var, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td 
+{
+	outline: 0;	border: none; font-weight: inherit;	font-style: inherit; font-size: 13px; line-height: 1; font-family: Arial, Helvetica, sans-serif; text-align: left;vertical-align: baseline;
+}
+body {border-top:0px solid #6079A1;}
+blockquote:before, blockquote:after, q:before, q:after {content:"";}
+blockquote, q {quotes:"" "";}
+p.wrappable {display: inline-block; overflow:hidden; text-overflow: ellipsis; width:100%; word-break: break-all;}
+
+a img {border:none;vertical-align:middle;}
+table {border-collapse:separate;border-spacing:0;}
+
+/* format for fonts */
+h1, h2, h3, h4, h5{color:#333; background:none;}
+h1 img, h2 img, h3 img, h4 img, h5 img, h6 img {margin:0;}
+h1,h2 {font-size:130%;font-family: Geneva, Arial, Helvetica, sans-serif;}
+h3 {font-size:13px;}
+h4,h5 {font-size:100%;font-weight:bold;}
+
+/* format for links */
+a,a:link{color:#06c; background:none; text-decoration:none;}
+a:visited{color:#4b6bc6;}
+a:hover{color:#fff;background-color:#06c;}
+a:active{color:#CFE7FF;}
+
+/* format for list */
+p {margin:0 0 18px; line-height:18px;}
+ul, ol,li ul, li ol {margin:0;}
+ul {list-style:none;}
+li:hover {background-color: #319CEE}
+
+.odd {background-color: #e0e0e0}
+.even {background-color: #f0f0f0}
+
+ol {list-style-type: decimal;}
+
+/* format for table */
+table {border-collapse:separate;border-spacing:0;}
+table {margin-top:5px;width:100%;}
+th, tr, td {padding:5px;}
+th {font: bold 11px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;color: #4f6b72;letter-spacing:1px;text-transform: uppercase;text-align:left;background: #DDF0FF;border-left: 1px solid #BDDEDB;}	
+th:first-child {border:none;}
+tr.alt, th.alt {background: #F5FAFA;}
+td {color: #333;}
+
+/* default fonts style */
+.small {font-size:.8em;margin-bottom:1.875em;line-height:1.875em;}
+.large {font-size:1.2em;line-height:2.5em;margin-bottom:1.25em;}
+.font90{font-size:90%;}
+.gray {color:#999;font-size:95%;}
+.red{color:#ff0000;}
+.bold{font-weight:bold;}
+.loud {color:#000;}
+.highlight {background:#ff0;}
+.added {background:#060;color:#fff;}
+.removed {background:#900;color:#fff;}
+
+/* default position style */
+.vmid {vertical-align: middle;}
+.vtop {vertical-align: top; }
+.vbottom {vertical-align:bottom;}
+.fright{float:right;}
+.fleft{float:left;}
+.tleft{text-align:left;}
+.tcenter{text-align:center;}
+.tright{text-align:right;}
+.dropshadow{box-shadow: 10px 10px 5px #888888; border-style: solid; border-color: #888888; border-width: 1px;}
+.padding{padding: 5px 10px 5px 10px;}
+
+/* word-breaking */
+.word_break{word-break:break-all; text-overflow:ellipsis; overflow:hidden;}
+.word_break2{word-break:break-all; text-overflow:ellipsis; overflow:auto;}
+.white_space{white-space:nowrap;}
+
+.hide {display:none;}
+.clearfix {clear:both;}
+
+/* form input style */
+input {padding:2px;}
+input, textarea, select {font:13px Arial, Helvetica, sans-serif;color:#666;}
+.inputbutton, input[type="button"], input[type="submit"]{ background:#319CEE none repeat scroll 0%; border:1px solid #0465B0; color:#fff; cursor:pointer; 
+font-size:12px; height:24px; padding:0px 10px; margin:0; text-align:center;}
+input[type="text"], input[type="password"]{ background:#fff url(../images/textbox_graybg.gif) repeat-x scroll 0%; border:1px solid #d0d0d0;}
+select {height:21px;}
+textarea {width:280px;border:1px solid #d0d0d0;}
+

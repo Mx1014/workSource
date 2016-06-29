@@ -2,7 +2,9 @@
 package com.everhomes.controller;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -65,6 +67,19 @@ public class ClientWebSocketHandler implements WebSocketHandler {
     public ClientWebSocketHandler() {
     }
     
+    private void tearDownSession(WebSocketSession session) {
+        try {
+            session.close();
+        } catch (IOException ex) {
+            LOGGER.warn("Exception when closing client connection");
+        }
+        
+        LOGGER.info("Close connection due to unavailability of core server. session: " + session.getId());
+
+        unregisterSession(session);
+        sessionStatsMap.remove(session);                
+    }
+    
     @Override
     public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
         //LOGGER.info("Received client message. session= " + session.getId() + ", message: " + message.getPayload());
@@ -110,6 +125,30 @@ public class ClientWebSocketHandler implements WebSocketHandler {
     public boolean supportsPartialMessages() {
         return false;
     }
+    
+    public void closeClientSessions() {
+        List<WebSocketSession> sessions = new ArrayList<>();
+        synchronized(this) {
+            for(WebSocketSession session: sessionStatsMap.keySet()) {
+                sessions.add(session);
+            }
+            sessionStatsMap.clear();
+            tokenToSessionMap.clear();
+            sessionToTokenMap.clear();
+        }
+        
+        for(WebSocketSession session: sessions) {
+            synchronized(session) {
+                try {
+                    session.close();
+                } catch(IOException e) {
+                    LOGGER.warn("Exception when closing client web socket, will go ahead to close anyway", e);
+                }
+            }
+        }
+        
+        sessions.clear();
+    }    
     
     public void forward(ClientForwardPdu pdu) {
        String token = pdu.getLoginToken();
@@ -185,12 +224,13 @@ public class ClientWebSocketHandler implements WebSocketHandler {
                 LOGGER.info("REST call /admin/registerLogin, session=" + session.getId() + ", result=" + result.getBody());
                 JsonParser parser = new JsonParser();
                 JsonElement root = parser.parse(result.getBody());
+                boolean tearDown = true;
                 if(root != null) {
                     JsonAccessor accessor = new JsonAccessor(root);
                     int id = accessor.getAsInt("response.loginBorderId");
                     if(borderId == id) {
                         registerSession(cmd.getLoginToken(), session);
-                            }
+                    }
                     
                     PduFrame pdu = new PduFrame();
                     RegistedOkResponse respPdu = new RegistedOkResponse();
@@ -199,6 +239,7 @@ public class ClientWebSocketHandler implements WebSocketHandler {
                     try {
                         synchronized(session) {
                             session.sendMessage(new TextMessage(pdu.toJson()));
+                            tearDown = false;
                         }
                     } catch (IOException e) {
                         LOGGER.error("Send registedOk message error, session=" + session.getId());
@@ -207,11 +248,16 @@ public class ClientWebSocketHandler implements WebSocketHandler {
                 } else {
                     LOGGER.error("Invalid REST call response, session=" + session.getId());
                 }
+                
+                if(tearDown) 
+                    tearDownSession(session);
             }
 
             @Override
             public void onFailure(Throwable ex) {
                 LOGGER.info("Failed to make REST call /admin/registerLogin, session=" + session.getId(), ex);
+
+                tearDownSession(session);
             }
         });
     }
@@ -264,6 +310,7 @@ public class ClientWebSocketHandler implements WebSocketHandler {
                         }
                     } catch (IOException e) {
                         LOGGER.error("Session send error, session=" + session.getId() + ", appId= " + appId.toString(), e);
+                        tearDownSession(session);
                     }    
                 }
             }
@@ -271,6 +318,7 @@ public class ClientWebSocketHandler implements WebSocketHandler {
             @Override
             public void onFailure(Throwable ex) {
                 LOGGER.info("Failed to make REST call /user/appIdStatus, session=" + session.getId(), ex);
+                tearDownSession(session);
             }
         });
     }
