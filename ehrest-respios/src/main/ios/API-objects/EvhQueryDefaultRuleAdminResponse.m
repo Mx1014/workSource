@@ -2,7 +2,7 @@
 // EvhQueryDefaultRuleAdminResponse.m
 //
 #import "EvhQueryDefaultRuleAdminResponse.h"
-#import "EvhAttachmentDTO.h"
+#import "EvhAttachmentConfigDTO.h"
 #import "EvhTimeIntervalDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -50,7 +50,7 @@
         [jsonObject setObject: self.multiTimeInterval forKey: @"multiTimeInterval"];
     if(self.attachments) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhAttachmentDTO* item in self.attachments) {
+        for(EvhAttachmentConfigDTO* item in self.attachments) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -63,8 +63,8 @@
         [jsonObject setObject: self.rentalEndTime forKey: @"rentalEndTime"];
     if(self.rentalStartTime)
         [jsonObject setObject: self.rentalStartTime forKey: @"rentalStartTime"];
-    if(self.rentalStep)
-        [jsonObject setObject: self.rentalStep forKey: @"rentalStep"];
+    if(self.timeStep)
+        [jsonObject setObject: self.timeStep forKey: @"timeStep"];
     if(self.timeIntervals) {
         NSMutableArray* jsonArray = [NSMutableArray new];
         for(EvhTimeIntervalDTO* item in self.timeIntervals) {
@@ -136,7 +136,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"attachments"];
             for(id itemJson in jsonArray) {
-                EvhAttachmentDTO* item = [EvhAttachmentDTO new];
+                EvhAttachmentConfigDTO* item = [EvhAttachmentConfigDTO new];
                 
                 [item fromJson: itemJson];
                 [self.attachments addObject: item];
@@ -154,9 +154,9 @@
         if(self.rentalStartTime && [self.rentalStartTime isEqual:[NSNull null]])
             self.rentalStartTime = nil;
 
-        self.rentalStep = [jsonObject objectForKey: @"rentalStep"];
-        if(self.rentalStep && [self.rentalStep isEqual:[NSNull null]])
-            self.rentalStep = nil;
+        self.timeStep = [jsonObject objectForKey: @"timeStep"];
+        if(self.timeStep && [self.timeStep isEqual:[NSNull null]])
+            self.timeStep = nil;
 
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"timeIntervals"];

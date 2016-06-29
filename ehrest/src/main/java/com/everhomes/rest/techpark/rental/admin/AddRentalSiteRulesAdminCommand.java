@@ -46,8 +46,8 @@ public class AddRentalSiteRulesAdminCommand {
 	private Byte multiUnit;
 	private Byte needPay;
 	private Byte multiTimeInterval;
-	@ItemType(AdminAttachmentDTO.class)
-	private List<AdminAttachmentDTO> attachments;
+	@ItemType(AttachmentConfigDTO.class)
+	private List<AttachmentConfigDTO> attachments;
 	private Byte rentalType;
 	private Long rentalEndTime;
 	private Long rentalStartTime;
@@ -129,11 +129,11 @@ public class AddRentalSiteRulesAdminCommand {
 		this.multiTimeInterval = multiTimeInterval;
 	}
 
-	public List<AdminAttachmentDTO> getAttachments() {
+	public List<AttachmentConfigDTO> getAttachments() {
 		return attachments;
 	}
 
-	public void setAttachments(List<AdminAttachmentDTO> attachments) {
+	public void setAttachments(List<AttachmentConfigDTO> attachments) {
 		this.attachments = attachments;
 	}
 

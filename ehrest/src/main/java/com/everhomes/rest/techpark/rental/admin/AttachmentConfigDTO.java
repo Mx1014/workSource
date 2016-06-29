@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>mustOptions: 是否必选，1是0否</li>
  * </ul>
  */
-public class AdminAttachmentDTO {
+public class AttachmentConfigDTO {
 	private Byte attachmentType;
 	private Byte mustOptions;
 

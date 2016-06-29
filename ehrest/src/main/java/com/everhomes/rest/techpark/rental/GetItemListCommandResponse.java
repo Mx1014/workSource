@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>nextPageAnchor：下页锚点</li>
  * </ul>
  */
-public class getItemListCommandResponse {
+public class GetItemListCommandResponse {
 
     @ItemType(SiteItemDTO.class)
 	private List<SiteItemDTO> siteItems;

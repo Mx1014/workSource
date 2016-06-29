@@ -5,7 +5,7 @@
 #import "EvhSiteItemDTO.h"
 #import "EvhRentalSitePicDTO.h"
 #import "EvhSiteOwnerDTO.h"
-#import "EvhAttachmentDTO.h"
+#import "EvhAttachmentConfigDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhRentalSiteDTO
@@ -74,8 +74,8 @@
         [jsonObject setObject: self.discountRatio forKey: @"discountRatio"];
     if(self.rentalType)
         [jsonObject setObject: self.rentalType forKey: @"rentalType"];
-    if(self.rentalStep)
-        [jsonObject setObject: self.rentalStep forKey: @"rentalStep"];
+    if(self.timeStep)
+        [jsonObject setObject: self.timeStep forKey: @"timeStep"];
     if(self.dayBeginTime)
         [jsonObject setObject: self.dayBeginTime forKey: @"dayBeginTime"];
     if(self.dayEndTime)
@@ -125,7 +125,7 @@
     }
     if(self.attachments) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhAttachmentDTO* item in self.attachments) {
+        for(EvhAttachmentConfigDTO* item in self.attachments) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -209,9 +209,9 @@
         if(self.rentalType && [self.rentalType isEqual:[NSNull null]])
             self.rentalType = nil;
 
-        self.rentalStep = [jsonObject objectForKey: @"rentalStep"];
-        if(self.rentalStep && [self.rentalStep isEqual:[NSNull null]])
-            self.rentalStep = nil;
+        self.timeStep = [jsonObject objectForKey: @"timeStep"];
+        if(self.timeStep && [self.timeStep isEqual:[NSNull null]])
+            self.timeStep = nil;
 
         self.dayBeginTime = [jsonObject objectForKey: @"dayBeginTime"];
         if(self.dayBeginTime && [self.dayBeginTime isEqual:[NSNull null]])
@@ -283,7 +283,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"attachments"];
             for(id itemJson in jsonArray) {
-                EvhAttachmentDTO* item = [EvhAttachmentDTO new];
+                EvhAttachmentConfigDTO* item = [EvhAttachmentConfigDTO new];
                 
                 [item fromJson: itemJson];
                 [self.attachments addObject: item];

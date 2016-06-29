@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.techpark.rental.admin.AdminAttachmentDTO;
+import com.everhomes.rest.techpark.rental.admin.AttachmentConfigDTO;
 import com.everhomes.rest.techpark.rental.admin.SiteOwnerDTO;
 import com.everhomes.util.StringHelper;
 /**
@@ -41,7 +41,7 @@ import com.everhomes.util.StringHelper;
  * <li>	siteItems：资源物品列表 {@link com.everhomes.rest.techpark.rental.SiteItemDTO}</li>
  * <li>	sitePics： List资源图片列表 {@link com.everhomes.rest.techpark.rental.RentalSitePicDTO}</li>
  * <li>	owners： List资源可显示的园区范围列表 {@link com.everhomes.rest.techpark.rental.SiteOwnerDTO}</li> 
- * <li>attachments: 可添加的附件{@link com.everhomes.rest.techpark.rental.admin.AdminAttachmentDTO}</li>
+ * <li>attachments: 可添加的附件{@link com.everhomes.rest.techpark.rental.admin.AttachmentConfigDTO}</li>
  * </ul>
  */
 public class RentalSiteDTO {
@@ -82,8 +82,8 @@ public class RentalSiteDTO {
 	private List<RentalSitePicDTO> sitePics;
 	@ItemType(SiteOwnerDTO.class)
 	private List<SiteOwnerDTO> owners;
-	@ItemType(AdminAttachmentDTO.class)
-	private List<AdminAttachmentDTO> attachments;
+	@ItemType(AttachmentConfigDTO.class)
+	private List<AttachmentConfigDTO> attachments;
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -406,12 +406,12 @@ public class RentalSiteDTO {
 	}
 
 
-	public List<AdminAttachmentDTO> getAttachments() {
+	public List<AttachmentConfigDTO> getAttachments() {
 		return attachments;
 	}
 
 
-	public void setAttachments(List<AdminAttachmentDTO> attachments) {
+	public void setAttachments(List<AttachmentConfigDTO> attachments) {
 		this.attachments = attachments;
 	}
  

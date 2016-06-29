@@ -25,11 +25,11 @@ import com.everhomes.util.StringHelper;
  * <li>rentalType: 预约类型，参考{@link com.everhomes.rest.techpark.rental.RentalType}</li>
  * <li>rentalEndTime: 至少提前预约时间</li>
  * <li>rentalStartTime: 最多提前预约时间</li>
- * <li>rentalStep: 最短可预约时长</li>
+ * <li>timeStep: 最短可预约时长</li>
  * <li>timeIntervals: 开放时段</li>
  * <li>beginDate: 开放日期始</li>
  * <li>endDate: 开放日期终</li>
- * <li>openWeekday: 周几开放，字符串0000000每一位分别表示星期日一二三四五六，1代表开放，0代表关闭</li>
+ * <li>openWeekday: 开放日期，从周日到周六是0123456，开放哪天就在数组传哪天</li>
  * <li>closeDates: 关闭日期</li>
  * <li>workdayPrice: 工作日价格</li>
  * <li>weekendPrice: 周末价格</li>
@@ -39,8 +39,7 @@ import com.everhomes.util.StringHelper;
  * <li>refundRatio: 退款比例</li>
  * </ul>
  */
-public class DefaultRuleDTO {
-	private Long id;
+public class UpdateDefaultRuleAdminCommand {
 	@NotNull
 	private String ownerType;
 	@NotNull
@@ -58,7 +57,7 @@ public class DefaultRuleDTO {
 	private Byte rentalType;
 	private Long rentalEndTime;
 	private Long rentalStartTime;
-	private Integer rentalStep;
+	private Double timeStep;
 	@ItemType(TimeIntervalDTO.class)
 	private List<TimeIntervalDTO> timeIntervals;
 	private Long beginDate;
@@ -182,15 +181,14 @@ public class DefaultRuleDTO {
 	public void setRentalStartTime(Long rentalStartTime) {
 		this.rentalStartTime = rentalStartTime;
 	}
-
-	public Integer getRentalStep() {
-		return rentalStep;
+ 
+	
+	public Double getTimeStep() {
+		return timeStep;
 	}
-
-	public void setRentalStep(Integer rentalStep) {
-		this.rentalStep = rentalStep;
+	public void setTimeStep(Double timeStep) {
+		this.timeStep = timeStep;
 	}
-
 	public List<TimeIntervalDTO> getTimeIntervals() {
 		return timeIntervals;
 	}
@@ -275,12 +273,6 @@ public class DefaultRuleDTO {
 
 	public void setRefundRatio(Integer refundRatio) {
 		this.refundRatio = refundRatio;
-	}
-	public Long getId() {
-		return id;
-	}
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 }

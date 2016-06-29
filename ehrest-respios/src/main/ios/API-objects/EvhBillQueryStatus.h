@@ -1,19 +1,18 @@
 //
-// EvhAccountType.h
+// EvhBillQueryStatus.h
 //
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhAccountType
+// EvhBillQueryStatus
 //
 typedef enum {
 
-    EvhAccountType_NONE = 0, 
-    EvhAccountType_USER = 1, 
-    EvhAccountType_FAMILY = 2, 
-    EvhAccountType_ORGANIZATION = 3
+    EvhBillQueryStatus_VALID = 0, 
+    EvhBillQueryStatus_CANCELED = 1, 
+    EvhBillQueryStatus_FINISHED = 2
 
-} EvhAccountType;
+} EvhBillQueryStatus;
 
 ///////////////////////////////////////////////////////////////////////////////
 

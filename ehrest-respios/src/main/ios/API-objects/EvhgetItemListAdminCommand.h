@@ -1,13 +1,13 @@
 //
-// EvhgetItemListAdminCommand.h
+// EvhGetItemListAdminCommand.h
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhgetItemListAdminCommand
+// EvhGetItemListAdminCommand
 //
-@interface EvhgetItemListAdminCommand
+@interface EvhGetItemListAdminCommand
     : NSObject<EvhJsonSerializable>
 
 

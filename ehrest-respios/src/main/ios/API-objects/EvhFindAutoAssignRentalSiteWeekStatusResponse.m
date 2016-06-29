@@ -4,7 +4,7 @@
 #import "EvhFindAutoAssignRentalSiteWeekStatusResponse.h"
 #import "EvhRentalSiteNumberDayRulesDTO.h"
 #import "EvhRentalSitePicDTO.h"
-#import "EvhAttachmentDTO.h"
+#import "EvhAttachmentConfigDTO.h"
 #import "EvhSiteItemDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -98,7 +98,7 @@
     }
     if(self.attachments) {
         NSMutableArray* jsonArray = [NSMutableArray new];
-        for(EvhAttachmentDTO* item in self.attachments) {
+        for(EvhAttachmentConfigDTO* item in self.attachments) {
             NSMutableDictionary* dic = [NSMutableDictionary new];
             [item toJson:dic];
             [jsonArray addObject:dic];
@@ -220,7 +220,7 @@
         {
             NSArray* jsonArray = [jsonObject objectForKey: @"attachments"];
             for(id itemJson in jsonArray) {
-                EvhAttachmentDTO* item = [EvhAttachmentDTO new];
+                EvhAttachmentConfigDTO* item = [EvhAttachmentConfigDTO new];
                 
                 [item fromJson: itemJson];
                 [self.attachments addObject: item];

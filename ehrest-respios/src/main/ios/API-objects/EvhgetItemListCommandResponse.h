@@ -1,14 +1,14 @@
 //
-// EvhgetItemListCommandResponse.h
+// EvhGetItemListCommandResponse.h
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
 #import "EvhSiteItemDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhgetItemListCommandResponse
+// EvhGetItemListCommandResponse
 //
-@interface EvhgetItemListCommandResponse
+@interface EvhGetItemListCommandResponse
     : NSObject<EvhJsonSerializable>
 
 

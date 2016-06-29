@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  */
 public class SiteOwnerDTO {
 	private String ownerType;
-	private String ownerId;
+	private Long ownerId;
 
 	@Override
     public String toString() {
@@ -25,11 +25,11 @@ public class SiteOwnerDTO {
 		this.ownerType = ownerType;
 	}
 
-	public String getOwnerId() {
+	public Long getOwnerId() {
 		return ownerId;
 	}
 
-	public void setOwnerId(String ownerId) {
+	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
 	}
 

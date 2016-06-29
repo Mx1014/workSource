@@ -2,14 +2,14 @@
 // EvhRentalAdminGetItemListRestResponse.h
 //
 #import "RestResponseBase.h"
-#import "EvhgetItemListCommandResponse.h"
+#import "EvhGetItemListCommandResponse.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhRentalAdminGetItemListRestResponse
 //
 @interface EvhRentalAdminGetItemListRestResponse : EvhRestResponseBase
 
-@property(nonatomic, strong) EvhgetItemListCommandResponse* response;
+@property(nonatomic, strong) EvhGetItemListCommandResponse* response;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

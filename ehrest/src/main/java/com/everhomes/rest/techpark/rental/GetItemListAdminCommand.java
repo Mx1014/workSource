@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>pageSize:每页数量 </li>
  * </ul>
  */
-public class getItemListAdminCommand {
+public class GetItemListAdminCommand {
 
 	private Long rentalSiteId;
 

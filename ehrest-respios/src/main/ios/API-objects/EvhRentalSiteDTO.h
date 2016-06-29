@@ -6,7 +6,7 @@
 #import "EvhSiteItemDTO.h"
 #import "EvhRentalSitePicDTO.h"
 #import "EvhSiteOwnerDTO.h"
-#import "EvhAttachmentDTO.h"
+#import "EvhAttachmentConfigDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // EvhRentalSiteDTO
@@ -51,7 +51,7 @@
 
 @property(nonatomic, copy) NSNumber* rentalType;
 
-@property(nonatomic, copy) NSNumber* rentalStep;
+@property(nonatomic, copy) NSNumber* timeStep;
 
 @property(nonatomic, copy) NSNumber* dayBeginTime;
 
@@ -82,7 +82,7 @@
 // item type EvhSiteOwnerDTO*
 @property(nonatomic, strong) NSMutableArray* owners;
 
-// item type EvhAttachmentDTO*
+// item type EvhAttachmentConfigDTO*
 @property(nonatomic, strong) NSMutableArray* attachments;
 
 -(id) init;

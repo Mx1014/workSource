@@ -1,21 +1,21 @@
 //
-// EvhAddDefaultRuleAdminCommand.m
+// EvhUpdateDefaultRuleAdminCommand.m
 //
-#import "EvhAddDefaultRuleAdminCommand.h"
+#import "EvhUpdateDefaultRuleAdminCommand.h"
 #import "EvhAttachmentConfigDTO.h"
 #import "EvhTimeIntervalDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhAddDefaultRuleAdminCommand
+// EvhUpdateDefaultRuleAdminCommand
 //
 
-@implementation EvhAddDefaultRuleAdminCommand
+@implementation EvhUpdateDefaultRuleAdminCommand
 
 +(id) withJsonString: (NSString*) jsonString
 {
     id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
     if(jsonObject != nil) {
-        EvhAddDefaultRuleAdminCommand* obj = [EvhAddDefaultRuleAdminCommand new];
+        EvhUpdateDefaultRuleAdminCommand* obj = [EvhUpdateDefaultRuleAdminCommand new];
         return [obj fromJson:jsonObject];
     }
     return nil;

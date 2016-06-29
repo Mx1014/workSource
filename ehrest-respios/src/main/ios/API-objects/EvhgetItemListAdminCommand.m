@@ -1,19 +1,19 @@
 //
-// EvhgetItemListAdminCommand.m
+// EvhGetItemListAdminCommand.m
 //
-#import "EvhgetItemListAdminCommand.h"
+#import "EvhGetItemListAdminCommand.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhgetItemListAdminCommand
+// EvhGetItemListAdminCommand
 //
 
-@implementation EvhgetItemListAdminCommand
+@implementation EvhGetItemListAdminCommand
 
 +(id) withJsonString: (NSString*) jsonString
 {
     id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
     if(jsonObject != nil) {
-        EvhgetItemListAdminCommand* obj = [EvhgetItemListAdminCommand new];
+        EvhGetItemListAdminCommand* obj = [EvhGetItemListAdminCommand new];
         return [obj fromJson:jsonObject];
     }
     return nil;

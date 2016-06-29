@@ -1,5 +1,5 @@
 //
-// EvhQueryDefaultRuleAdminResponse.h
+// EvhUpdateDefaultRuleAdminCommand.h
 //
 #import <Foundation/Foundation.h>
 #import "JsonSerializable.h"
@@ -7,11 +7,17 @@
 #import "EvhTimeIntervalDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhQueryDefaultRuleAdminResponse
+// EvhUpdateDefaultRuleAdminCommand
 //
-@interface EvhQueryDefaultRuleAdminResponse
+@interface EvhUpdateDefaultRuleAdminCommand
     : NSObject<EvhJsonSerializable>
 
+
+@property(nonatomic, copy) NSString* ownerType;
+
+@property(nonatomic, copy) NSNumber* ownerId;
+
+@property(nonatomic, copy) NSNumber* launchPadItemId;
 
 @property(nonatomic, copy) NSNumber* exclusiveFlag;
 

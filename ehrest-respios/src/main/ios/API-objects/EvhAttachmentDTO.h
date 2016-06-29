@@ -13,7 +13,7 @@
 
 @property(nonatomic, copy) NSNumber* attachmentType;
 
-@property(nonatomic, copy) NSNumber* mustOptions;
+@property(nonatomic, copy) NSString* content;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

@@ -4,20 +4,20 @@ package com.everhomes.rest.techpark.rental.admin;
 
 import com.everhomes.rest.RestResponseBase;
 
-import com.everhomes.rest.techpark.rental.getItemListCommandResponse;
+import com.everhomes.rest.techpark.rental.GetItemListCommandResponse;
 
 public class AdminGetItemListRestResponse extends RestResponseBase {
 
-    private getItemListCommandResponse response;
+    private GetItemListCommandResponse response;
 
     public AdminGetItemListRestResponse () {
     }
 
-    public getItemListCommandResponse getResponse() {
+    public GetItemListCommandResponse getResponse() {
         return response;
     }
 
-    public void setResponse(getItemListCommandResponse response) {
+    public void setResponse(GetItemListCommandResponse response) {
         this.response = response;
     }
 }

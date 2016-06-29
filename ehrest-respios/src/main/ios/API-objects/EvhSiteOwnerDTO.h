@@ -13,7 +13,7 @@
 
 @property(nonatomic, copy) NSString* ownerType;
 
-@property(nonatomic, copy) NSString* ownerId;
+@property(nonatomic, copy) NSNumber* ownerId;
 
 -(id) init;
 +(id) withJsonString: (NSString*) jsonString;

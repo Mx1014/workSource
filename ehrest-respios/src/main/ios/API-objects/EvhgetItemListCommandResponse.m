@@ -1,20 +1,20 @@
 //
-// EvhgetItemListCommandResponse.m
+// EvhGetItemListCommandResponse.m
 //
-#import "EvhgetItemListCommandResponse.h"
+#import "EvhGetItemListCommandResponse.h"
 #import "EvhSiteItemDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhgetItemListCommandResponse
+// EvhGetItemListCommandResponse
 //
 
-@implementation EvhgetItemListCommandResponse
+@implementation EvhGetItemListCommandResponse
 
 +(id) withJsonString: (NSString*) jsonString
 {
     id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
     if(jsonObject != nil) {
-        EvhgetItemListCommandResponse* obj = [EvhgetItemListCommandResponse new];
+        EvhGetItemListCommandResponse* obj = [EvhGetItemListCommandResponse new];
         return [obj fromJson:jsonObject];
     }
     return nil;

@@ -1,19 +1,19 @@
 //
-// EvhAttachmentDTO.m
+// EvhAttachmentConfigDTO.m
 //
-#import "EvhAttachmentDTO.h"
+#import "EvhAttachmentConfigDTO.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// EvhAttachmentDTO
+// EvhAttachmentConfigDTO
 //
 
-@implementation EvhAttachmentDTO
+@implementation EvhAttachmentConfigDTO
 
 +(id) withJsonString: (NSString*) jsonString
 {
     id jsonObject = [EvhJsonSerializationHelper fromJsonString:jsonString];
     if(jsonObject != nil) {
-        EvhAttachmentDTO* obj = [EvhAttachmentDTO new];
+        EvhAttachmentConfigDTO* obj = [EvhAttachmentConfigDTO new];
         return [obj fromJson:jsonObject];
     }
     return nil;
@@ -32,8 +32,8 @@
 {
     if(self.attachmentType)
         [jsonObject setObject: self.attachmentType forKey: @"attachmentType"];
-    if(self.content)
-        [jsonObject setObject: self.content forKey: @"content"];
+    if(self.mustOptions)
+        [jsonObject setObject: self.mustOptions forKey: @"mustOptions"];
 }
 
 -(id<EvhJsonSerializable>) fromJson: (id) jsonObject 
@@ -43,9 +43,9 @@
         if(self.attachmentType && [self.attachmentType isEqual:[NSNull null]])
             self.attachmentType = nil;
 
-        self.content = [jsonObject objectForKey: @"content"];
-        if(self.content && [self.content isEqual:[NSNull null]])
-            self.content = nil;
+        self.mustOptions = [jsonObject objectForKey: @"mustOptions"];
+        if(self.mustOptions && [self.mustOptions isEqual:[NSNull null]])
+            self.mustOptions = nil;
 
         return self;
     }

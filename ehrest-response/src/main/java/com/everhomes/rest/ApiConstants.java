@@ -1,5 +1,5 @@
 // @formatter:off
-// generated at 2016-06-23 14:29:09
+// generated at 2016-06-28 14:56:17
 package com.everhomes.rest;
 
 public interface ApiConstants {
@@ -734,8 +734,7 @@ public interface ApiConstants {
     public static final String REGION_LISTREGIONBYKEYWORD_URL = "/region/listRegionByKeyword";
     public static final String RENTAL_ADDRENTALBILL_URL = "/rental/addRentalBill";
     public static final String RENTAL_ADDRENTALITEMBILL_URL = "/rental/addRentalItemBill";
-    public static final String RENTAL_ADMIN_ADDDEFAULTRULE_URL = "/rental/admin/addDefaultRule";
-    public static final String RENTAL_ADMIN_ADDITEMS_URL = "/rental/admin/addItems";
+    public static final String RENTAL_ADMIN_ADDITEM_URL = "/rental/admin/addItem";
     public static final String RENTAL_ADMIN_ADDRENTALSITERULES_URL = "/rental/admin/addRentalSiteRules";
     public static final String RENTAL_ADMIN_ADDRESOURCE_URL = "/rental/admin/addResource";
     public static final String RENTAL_ADMIN_BATCHCOMPLETEBILL_URL = "/rental/admin/batchCompleteBill";
@@ -748,6 +747,7 @@ public interface ApiConstants {
     public static final String RENTAL_ADMIN_INCOMPLETEBILL_URL = "/rental/admin/incompleteBill";
     public static final String RENTAL_ADMIN_LISTRENTALBILLS_URL = "/rental/admin/listRentalBills";
     public static final String RENTAL_ADMIN_QUERYDEFAULTRULE_URL = "/rental/admin/queryDefaultRule";
+    public static final String RENTAL_ADMIN_UPDATEDEFAULTRULE_URL = "/rental/admin/updateDefaultRule";
     public static final String RENTAL_ADMIN_UPDATEITEM_URL = "/rental/admin/updateItem";
     public static final String RENTAL_ADMIN_UPDATEITEMS_URL = "/rental/admin/updateItems";
     public static final String RENTAL_ADMIN_UPDATERENTALSITEDISCOUNT_URL = "/rental/admin/updateRentalSiteDiscount";
