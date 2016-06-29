@@ -50,6 +50,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
@@ -401,13 +402,20 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         
-        List<User> users = null;
+        List<AclinkUser> users = null;
         users = userProvider.searchDoorUsers(cmd.getNamespaceId(), cmd.getOrganizationId(), cmd.getBuildingId(),
-                cmd.getIsAuth(), cmd.getKeyword(), locator, pageSize);
+                cmd.getBuildingName(), cmd.getIsAuth(), cmd.getKeyword(), locator, pageSize);
         
         List<AclinkUserDTO> userDTOs = new ArrayList<AclinkUserDTO>();
-        for(User u : users) {
+        for(AclinkUser u : users) {
             AclinkUserDTO dto = ConvertHelper.convert(u, AclinkUserDTO.class);
+            if(dto.getCompanyId() != null) {
+                Organization org = organizationProvider.findOrganizationById(dto.getCompanyId());    
+                if(org != null) {
+                    dto.setCompany(org.getName());
+                }
+            }
+            
             dto.setPhone(u.getIdentifierToken());
             DoorAuth doorAuth = doorAuthProvider.queryValidDoorAuthForever(cmd.getDoorId(), dto.getId());
             if(doorAuth != null) {
