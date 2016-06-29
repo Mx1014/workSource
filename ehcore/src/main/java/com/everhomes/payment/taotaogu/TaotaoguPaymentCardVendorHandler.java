@@ -187,7 +187,7 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 					paymentCard.setCreatorUid(user.getId());
 					paymentCard.setStatus(PaymentCardStatus.ACTIVE.getCode());
 					paymentCard.setVendorName(TaotaoguVendorConstant.TAOTAOGU);
-					paymentCard.setVendorCardData(TaotaoguVendorConstant.CARD__STATUS_JSON);
+					paymentCard.setVendorCardData(TaotaoguVendorConstant.TAOTAOGU_CARD__STATUS_JSON);
 					paymentCardProvider.createPaymentCard(paymentCard);
 					cardInfoDTO = ConvertHelper.convert(paymentCard, CardInfoDTO.class);
 				}
@@ -249,7 +249,7 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 				BigDecimal rechargeAmount = new BigDecimal(0);
 				
 				CardTransactionFromVendorDTO dto = new CardTransactionFromVendorDTO();
-				dto.setVendorResult(TaotaoguVendorConstant.CARD_TRANSACTION_STATUS_JSON);
+				dto.setVendorResult(TaotaoguVendorConstant.TAOTAOGU_APP_CARD_TRANSACTION_STATUS_JSON);
 				dto.setMerchant((String)m.get("MerchId"));
 				BigDecimal amount = null;
 				

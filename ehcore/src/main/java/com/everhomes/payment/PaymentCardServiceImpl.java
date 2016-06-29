@@ -713,7 +713,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 			transaction.setItemName("");
 			transaction.setMerchantNo(result.getMerch_id());
 			transaction.setMerchantName(result.getMerch_name());
-			transaction.setAmount(new BigDecimal(result.getTrade_amt()));
+			transaction.setAmount(new BigDecimal(result.getReal_amt()));
 			transaction.setTransactionNo(result.getAcct_sn());
 			transaction.setTransactionTime(StrTotimestamp(result.getFinal_time()));
 			transaction.setCardId(paymentCard.getId());
@@ -721,7 +721,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 			transaction.setCreatorUid(user.getId());
 			transaction.setCreateTime(new Timestamp(System.currentTimeMillis()));
 			transaction.setVendorName(TaotaoguVendorConstant.TAOTAOGU);
-			String extraData = TaotaoguVendorConstant.CARD_TRADE_STATUS_JSON;
+			String extraData = TaotaoguVendorConstant.TAOTAOGU_WEB_CARD_TRANSACTION_STATUS_JSON;
 			transaction.setVendorResult(extraData);
 			transaction.setToken(result.getToken());
 			transaction.setCardNo(result.getCard_id());
@@ -736,7 +736,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
     	
     	return dto;
     }
-
+    //转换一下淘淘谷的状态
     private Byte convertTransaction(String status){
     	Byte result = null;
     	switch (status) {
