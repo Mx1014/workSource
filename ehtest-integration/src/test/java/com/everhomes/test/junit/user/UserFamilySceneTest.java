@@ -56,6 +56,10 @@ public class UserFamilySceneTest extends BaseLoginAuthTestCase {
         jsonFilePath = "data/json/3.4.x-test-data-family_160605.txt";
         fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
         dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
+        
+        jsonFilePath = "data/json/3.4.x-test-data-organization_member_160605.txt";
+        fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
+        dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
     }
 }
 

@@ -27,6 +27,9 @@ import com.everhomes.core.AppConfig;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.launchpad.LaunchPadConstants;
+import com.everhomes.launchpad.LaunchPadItem;
+import com.everhomes.organization.OrganizationCommunityRequest;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.rest.banner.BannerClickDTO;
@@ -46,6 +49,7 @@ import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.rest.launchpad.ApplyPolicy;
 import com.everhomes.rest.organization.pm.ListPropCommunityContactCommand;
 import com.everhomes.rest.organization.pm.PropCommunityContactDTO;
 import com.everhomes.rest.ui.banner.GetBannersBySceneCommand;
@@ -89,6 +93,9 @@ public class BannerServiceImpl implements BannerService {
     @Autowired
     private SceneService sceneService;
     
+    @Autowired
+    private OrganizationProvider organizationProvider;
+    
     @Override
     public List<BannerDTO> getBanners(GetBannersCommand cmd, HttpServletRequest request){
         if(cmd.getCommunityId() == null){
@@ -117,19 +124,39 @@ public class BannerServiceImpl implements BannerService {
                 sceneType = SceneType.DEFAULT.getCode();
             }
         }
-        //String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
-        //query user relate banners
-        List<Banner> countryBanners = bannerProvider.findBannersByTagAndScope(namespaceId, sceneType, cmd.getBannerLocation(), cmd.getBannerGroup(),
-                ScopeType.ALL.getCode(), 0L);
-        List<Banner> cityBanners = bannerProvider.findBannersByTagAndScope(namespaceId, sceneType, cmd.getBannerLocation(), cmd.getBannerGroup(), ScopeType.CITY.getCode(), cityId);
-        List<Banner> communityBanners = bannerProvider.findBannersByTagAndScope(namespaceId, sceneType, cmd.getBannerLocation(), cmd.getBannerGroup(), ScopeType.COMMUNITY.getCode(), communityId);
+        
         List<Banner> allBanners = new ArrayList<Banner>();
-        if(countryBanners != null)
-            allBanners.addAll(countryBanners);
-        if(cityBanners != null)
-            allBanners.addAll(cityBanners);
-        if(communityBanners != null)
-            allBanners.addAll(communityBanners);
+        List<Banner> communityBanners = bannerProvider.findBannersByTagAndScope(namespaceId, sceneType, cmd.getBannerLocation(), cmd.getBannerGroup(), ScopeType.COMMUNITY.getCode(), communityId);
+        List<Banner> customizedBanners = new ArrayList<Banner>();
+        
+        for (Banner banner : communityBanners) {
+			if(ApplyPolicy.fromCode(banner.getApplyPolicy()) == ApplyPolicy.CUSTOMIZED){
+				customizedBanners.add(banner);
+			}
+		}
+        
+        if(customizedBanners.size() > 0){
+        	allBanners = customizedBanners;
+        }else{
+        	//String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
+            //query user relate banners
+            List<Banner> countryBanners = bannerProvider.findBannersByTagAndScope(namespaceId, sceneType, cmd.getBannerLocation(), cmd.getBannerGroup(),
+                    ScopeType.ALL.getCode(), 0L);
+            
+            List<Banner> cityBanners = bannerProvider.findBannersByTagAndScope(namespaceId, sceneType, cmd.getBannerLocation(), cmd.getBannerGroup(), ScopeType.CITY.getCode(), cityId);
+            
+            List<Banner> communityDefBanners = bannerProvider.findBannersByTagAndScope(namespaceId, sceneType, cmd.getBannerLocation(), cmd.getBannerGroup(), ScopeType.COMMUNITY.getCode(), 0L);
+            
+            if(countryBanners != null)
+                allBanners.addAll(countryBanners);
+            if(cityBanners != null)
+                allBanners = overrideOrRevertBanners(allBanners, cityBanners);
+            if(communityDefBanners != null)
+                allBanners = overrideOrRevertBanners(allBanners, communityDefBanners);
+            if(communityBanners != null)
+            	allBanners = overrideOrRevertBanners(allBanners, communityBanners);
+        }
+        
         List<BannerDTO> result = allBanners.stream().map((Banner r) ->{
            BannerDTO dto = ConvertHelper.convert(r, BannerDTO.class);
            //third url add user token
@@ -158,35 +185,95 @@ public class BannerServiceImpl implements BannerService {
         long startTime = System.currentTimeMillis();
         User user = UserContext.current().getUser();
         long userId = user.getId();
-        Integer namespaceId = (user.getNamespaceId() == null) ? 0 : user.getNamespaceId();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         String sceneTypeStr = cmd.getCurrentSceneType();
-        //String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
-        //query user relate banners
-        List<Banner> countryBanners = bannerProvider.findBannersByTagAndScope(namespaceId, sceneTypeStr, cmd.getBannerLocation(), cmd.getBannerGroup(),
-                ScopeType.ALL.getCode(), 0L);
+        
+        Long communityId = null;
+        OrganizationCommunityRequest  organizationCommunityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(cmd.getOrganizationId());
+		if(null != organizationCommunityRequest){
+			communityId = organizationCommunityRequest.getCommunityId();
+		}
+		
+		Long commId = communityId;
+		
+		List<Banner> allBanners = new ArrayList<Banner>();
+		
         List<Banner> orgBanners = bannerProvider.findBannersByTagAndScope(namespaceId, sceneTypeStr, cmd.getBannerLocation(), cmd.getBannerGroup(), ScopeType.ORGANIZATION.getCode(), organizationId);
-        List<Banner> allBanners = new ArrayList<Banner>();
-        if(countryBanners != null)
-            allBanners.addAll(countryBanners);
-        if(orgBanners != null)
-            allBanners.addAll(orgBanners);
+		
+        List<Banner> customizedBanners = new ArrayList<Banner>();
+        
+        for (Banner banner : orgBanners) {
+			if(ApplyPolicy.fromCode(banner.getApplyPolicy()) == ApplyPolicy.CUSTOMIZED){
+				customizedBanners.add(banner);
+			}
+		}
+        
+        if(customizedBanners.size() > 0){
+        	allBanners = customizedBanners;
+        }else{
+        	//String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
+            //query user relate banners
+            List<Banner> countryBanners = bannerProvider.findBannersByTagAndScope(namespaceId, sceneTypeStr, cmd.getBannerLocation(), cmd.getBannerGroup(),
+                    ScopeType.ALL.getCode(), 0L);
+            List<Banner> orgDefBanners = bannerProvider.findBannersByTagAndScope(namespaceId, sceneTypeStr, cmd.getBannerLocation(), cmd.getBannerGroup(), ScopeType.ORGANIZATION.getCode(), 0L);
+
+            if(countryBanners != null)
+                allBanners.addAll(countryBanners);
+            if(orgDefBanners != null)
+            	allBanners = this.overrideOrRevertBanners(allBanners, orgDefBanners);
+            if(orgBanners != null)
+            	allBanners = this.overrideOrRevertBanners(allBanners, orgBanners);
+        }
+        
         List<BannerDTO> result = allBanners.stream().map((Banner r) ->{
-           BannerDTO dto = ConvertHelper.convert(r, BannerDTO.class);
-           //third url add user token
-//           if(dto.getActionType().byteValue() == ActionType.THIRDPART_URL.getCode()){
-//               dto.setActionData(parserJson(communityId,dto));
-//           }
-           dto.setActionData(parserJson(userId, null,dto,request));
-           dto.setPosterPath(parserUri(dto.getPosterPath(),EntityType.USER.getCode(),userId));
-           return dto;
-        }).collect(Collectors.toList());
-        if(result != null && !result.isEmpty())
-            sortBanner(result);
-        long endTime = System.currentTimeMillis();
-        int size = result == null ? 0 : result.size();
-        LOGGER.info("Query banner by communityId complete,cmd=" + cmd + ",size=" + size + ",esplse=" + (endTime - startTime));
-        return result;
+            BannerDTO dto = ConvertHelper.convert(r, BannerDTO.class);
+            //third url add user token
+//            if(dto.getActionType().byteValue() == ActionType.THIRDPART_URL.getCode()){
+//                dto.setActionData(parserJson(communityId,dto));
+//            }
+            if(null != commId){
+         	   dto.setActionData(parserJson(userId, null,dto,request));
+            }else{
+         	   LOGGER.error("communityId is null. organizationId = {}", cmd.getOrganizationId());
+            }
+            dto.setPosterPath(parserUri(dto.getPosterPath(),EntityType.USER.getCode(),userId));
+            return dto;
+         }).collect(Collectors.toList());
+         if(result != null && !result.isEmpty())
+             sortBanner(result);
+         long endTime = System.currentTimeMillis();
+         int size = result == null ? 0 : result.size();
+         LOGGER.info("Query banner by communityId complete,cmd=" + cmd + ",size=" + size + ",esplse=" + (endTime - startTime));
+         return result;
     }
+    
+    
+    /**
+	 * 1、applyPolicy=1(覆盖)，小范围覆盖大范围，
+	 * 用户自定义的，直接根据itemId比较，系统配置的覆盖，根据itemName进行比较
+	 * 2、applyPolicy=2(恢复)，直接忽略即可
+	 * @param defalultBanners
+	 * @param overrideBanners
+	 * @return
+	 */
+	private List<Banner> overrideOrRevertBanners(List<Banner> defalultBanners, List<Banner> overrideBanners) {
+
+		if(defalultBanners == null || overrideBanners == null) return null;
+		boolean flag = false;
+		List<Banner> allBanners = new ArrayList<Banner>();
+		for(Banner b : defalultBanners){
+			for(Banner o : overrideBanners){
+				//非覆盖
+				if(o.getApplyPolicy() == ApplyPolicy.DEFAULT.getCode() && !allBanners.contains(o)){
+					allBanners.add(o);
+				}
+			}
+			if(!flag)
+				allBanners.add(b);
+			flag = false;
+		}
+		return allBanners;
+	}
     
     // 场景需要同时支持小区和园区 by lqs 20160511
 //    @Override

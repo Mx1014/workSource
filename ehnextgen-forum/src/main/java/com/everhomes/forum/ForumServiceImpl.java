@@ -103,6 +103,7 @@ import com.everhomes.rest.forum.OrganizationTopicMixType;
 import com.everhomes.rest.forum.PostAssignedFlag;
 import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.forum.PostEntityTag;
+import com.everhomes.rest.forum.PostFavoriteFlag;
 import com.everhomes.rest.forum.PostPrivacy;
 import com.everhomes.rest.forum.PostStatus;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
@@ -146,6 +147,7 @@ import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserCurrentEntityType;
+import com.everhomes.rest.user.UserFavoriteDTO;
 import com.everhomes.rest.user.UserFavoriteTargetType;
 import com.everhomes.rest.user.UserLikeType;
 import com.everhomes.rest.visibility.VisibilityScope;
@@ -593,7 +595,17 @@ public class ForumServiceImpl implements ForumService {
 //            
             this.forumProvider.populatePostAttachments(post);
             populatePost(userId, post, communityId, isDetail, getByOwnerId);
-            return ConvertHelper.convert(post, PostDTO.class);
+            
+            //add favoriteflag of topic modified by xiongying 20160629
+            PostDTO dto = ConvertHelper.convert(post, PostDTO.class);
+            List<UserFavoriteDTO> favorite = userActivityProvider.findFavorite(userId, UserFavoriteTargetType.TOPIC.getCode(), post.getId());
+            if(favorite == null || favorite.size() == 0) {
+            	dto.setFavoriteFlag(PostFavoriteFlag.NONE.getCode());
+            } else {
+            	dto.setFavoriteFlag(PostFavoriteFlag.FAVORITE.getCode());
+            }
+            
+            return dto;
         } else {
             LOGGER.error("Forum post not found, userId=" + userId + ", topicId=" + topicId);
             return null;
