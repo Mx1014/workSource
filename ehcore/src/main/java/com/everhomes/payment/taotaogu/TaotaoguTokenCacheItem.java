@@ -4,7 +4,7 @@ import java.util.Date;
 
 public class TaotaoguTokenCacheItem {
 	
-	private Date createTime;//创建缓存的时间
+	private Date createTime;
 	private long expireTime;
 	private String token;
 	private String aesKey;
