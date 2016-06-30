@@ -770,11 +770,10 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             categoryIds.add(CategoryConstants.CATEGORY_ID_BUSINESS_NEXTDOOR);
             List<BusinessDTO> businessDTOs = businessService.getBusinesses(categoryIds, communityId);
             List<Long> businessIds = new ArrayList<Long>();
-            LOGGER.debug("need business item size = {} id = {},", businessIds.size(), businessIds);
             if(null != businessDTOs && businessDTOs.size() > 0){
             	businessIds = businessDTOs.stream().map( r->r.getId()).collect(Collectors.toList());
         	}
-            
+            LOGGER.debug("need business item size = {} id = {},", businessIds.size(), businessIds);
             List<Long> bizIds = businessIds;
             allItems.forEach(r ->{
                 LaunchPadItemDTO itemDTO = ConvertHelper.convert(r, LaunchPadItemDTO.class);
