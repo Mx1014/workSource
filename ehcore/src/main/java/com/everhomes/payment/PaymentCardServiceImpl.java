@@ -385,8 +385,7 @@ public class PaymentCardServiceImpl implements PaymentCardService{
 			PaymentCardVendorHandler handler = getPaymentCardVendorHandler(card.getVendorName());
 			List<CardTransactionOfMonth> list = handler.listCardTransactions(cmd,card);
 		//}
-			//按时间排序
-			Collections.sort(list);
+			
 			response.setRequests(list);
 			if(list.size()==0)
 				response.setNextPageAnchor(null);

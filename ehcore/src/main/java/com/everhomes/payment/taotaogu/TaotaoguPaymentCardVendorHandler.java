@@ -8,6 +8,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -296,6 +297,11 @@ public class TaotaoguPaymentCardVendorHandler implements PaymentCardVendorHandle
 				resultList.add(cardTransactionOfMonth);
 			}
 		}
+		//按时间排序
+		for( CardTransactionOfMonth cardTransactionOfMonth:resultList) {
+			Collections.sort(cardTransactionOfMonth.getRequests());
+		}
+		Collections.sort(resultList);
 		return resultList;
 	}
 	//制卡
