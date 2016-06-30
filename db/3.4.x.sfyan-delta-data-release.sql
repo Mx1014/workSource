@@ -61,4 +61,16 @@ VALUES ('10341', '999999', '0', '0', '0', '/home/life', 'GaActions', '百味外�
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`)
 VALUES ('10342', '999999', '0', '0', '0', '/home/life', 'GaActions', '快递查询', '快递查询', 'cs://1/image/aW1hZ2UvTVRwaVl6ZGtPVFE0TURZd1pUZzRZekppTTJNMVl6QmlPVFprTWpWbFpHRXlNUQ', 1, 1, 14, '{"url":"http://m.kuaidi100.com"}', 0, 0, 1, 1, NULL, 0, NULL, NULL, NULL, 0, 'pm_admin');
  
+update eh_launch_pad_items set delete_flag = 1 where id in (901,902,903,904,905,908,909,910,911,912);
+
+update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRvNE5EUmpaVGxpWkdKalptTTNZVFU1Tm1FMFl6UXhOekUyTkdGbFpERXpOdw' where id = 19;
+update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRvek1USmlabVpqTVRSbU16Z3dOVGsyWTJRNU9HSmlPR0poT1dabE4yVTFZUQ' where id = 20;
+update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRvNE5XWXlOelE0T0dJMk5tRXlZelkzWVRCaU56VXlNalkwTWpobU5qZzVOUQ' where id = 21;
+update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRwaE9HWXlNVEUxTm1NMFlUVmxaakJtWVRBME5Ua3lZemN6TTJVek5EWTVOUQ' where id = 22;
+update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRvM016STVOMkV3WkRVMk1ETXdNbUk0TXpNNU1EWmhZV1EzTlRreU5qY3hOUQ' where id = 23;
+update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRvNE5EUmpaVGxpWkdKalptTTNZVFU1Tm1FMFl6UXhOekUyTkdGbFpERXpOdw' where id = 1007;
+update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRvek1USmlabVpqTVRSbU16Z3dOVGsyWTJRNU9HSmlPR0poT1dabE4yVTFZUQ' where id = 1008;
+update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRvNE5XWXlOelE0T0dJMk5tRXlZelkzWVRCaU56VXlNalkwTWpobU5qZzVOUQ' where id = 1009;
+update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRwaE9HWXlNVEUxTm1NMFlUVmxaakJtWVRBME5Ua3lZemN6TTJVek5EWTVOUQ' where id = 1010;
+update eh_banners set poster_path = 'cs://1/image/aW1hZ2UvTVRvM016STVOMkV3WkRVMk1ETXdNbUk0TXpNNU1EWmhZV1EzTlRreU5qY3hOUQ' where id = 1011;
 
