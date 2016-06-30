@@ -775,6 +775,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         	}
             LOGGER.debug("need business item size = {} id = {},", businessIds.size(), businessIds);
             List<Long> bizIds = businessIds;
+            
             allItems.forEach(r ->{
                 LaunchPadItemDTO itemDTO = ConvertHelper.convert(r, LaunchPadItemDTO.class);
                 if(null != request){
@@ -783,9 +784,13 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 itemDTO.setScaleType(ScaleType.TAILOR.getCode());
                 if(r.getTargetType() != null && r.getTargetType().equalsIgnoreCase(ItemTargetType.BIZ.getCode())){
                 	
-                	if(ItemDisplayFlag.fromCode(r.getDisplayFlag()) == ItemDisplayFlag.DISPLAY || (bizIds.contains(r.getTargetId()) && ItemDisplayFlag.fromCode(r.getDisplayFlag()) == ItemDisplayFlag.HIDE)){
-                		Business b = this.businessProvider.findBusinessById(r.getTargetId());
-                        if(b != null){
+                	
+                	Business b = this.businessProvider.findBusinessById(r.getTargetId());
+                	if(b != null){
+                		 
+                		if( ItemDisplayFlag.fromCode(r.getDisplayFlag()) == ItemDisplayFlag.DISPLAY
+                				|| BusinessTargetType.fromCode(b.getTargetType()) != BusinessTargetType.ZUOLIN 
+                				|| (bizIds.contains(r.getTargetId()) && ItemDisplayFlag.fromCode(r.getDisplayFlag()) == ItemDisplayFlag.HIDE)){
                             itemDTO.setIconUrl(processLogoUrl(b,userId,imageUrl));
                             JSONObject jsonObject = new JSONObject();
                             jsonObject.put(LaunchPadConstants.URL, processUrl(b, prefixUrl,businessDetailUrl));
