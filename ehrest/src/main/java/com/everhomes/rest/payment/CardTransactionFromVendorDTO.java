@@ -24,7 +24,7 @@ import com.everhomes.util.StringHelper;
  * <li>payerUid: </li>
  * </ul>
  */
-public class CardTransactionFromVendorDTO {
+public class CardTransactionFromVendorDTO implements Comparable<CardTransactionFromVendorDTO>{
 	
 	private java.lang.Long       id;
 	private java.lang.String     userName;
@@ -169,4 +169,21 @@ public class CardTransactionFromVendorDTO {
         return StringHelper.toJsonString(this);
     }
 	
+	@Override
+	public int compareTo(CardTransactionFromVendorDTO o) {
+		if(this.transactionTime.longValue() < o.transactionTime.longValue())
+			return 1;
+		if(this.transactionTime.longValue() > o.transactionTime.longValue())
+			return -1;
+		return 0;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+        if(this == obj)
+        	return true;
+        if(obj instanceof CardTransactionFromVendorDTO)
+        	return this.transactionTime.longValue() == ((CardTransactionFromVendorDTO)obj).transactionTime.longValue();
+        return false;
+    }
 }

@@ -1,7 +1,6 @@
 package com.everhomes.rest.payment;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
@@ -45,9 +44,9 @@ public class CardTransactionOfMonth implements Comparable<CardTransactionOfMonth
     }
 	@Override
 	public int compareTo(CardTransactionOfMonth o) {
-		if(this.date < o.date)
+		if(this.date.longValue() < o.date.longValue())
 			return 1;
-		if(this.date > o.date)
+		if(this.date.longValue() > o.date.longValue())
 			return -1;
 		return 0;
 	}
@@ -57,7 +56,7 @@ public class CardTransactionOfMonth implements Comparable<CardTransactionOfMonth
         if(this == obj)
         	return true;
         if(obj instanceof CardTransactionOfMonth)
-        	return this.date == ((CardTransactionOfMonth)obj).date;
+        	return this.date.longValue() == ((CardTransactionOfMonth)obj).date.longValue();
         return false;
     }
 }

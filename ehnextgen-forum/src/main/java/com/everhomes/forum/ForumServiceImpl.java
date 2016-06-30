@@ -3064,12 +3064,11 @@ public class ForumServiceImpl implements ForumService {
                 	//单独处理活动的分享链接 modified by xiongying 20160622
                 	if(post.getCategoryId() == 1010) {
                 		relativeUrl = configProvider.getValue(ConfigConstants.ACTIVITY_SHARE_URL, "");
-                		String api = "/activity/getActivityShareDetail";
                 		ActivityTokenDTO dto = new ActivityTokenDTO();
                 		dto.setPostId(post.getId());
                 		dto.setForumId(post.getForumId());
                 		String encodeStr = WebTokenGenerator.getInstance().toWebToken(dto);
-                		post.setShareUrl(homeUrl + relativeUrl + "/evh" + api + "?postToken=" + encodeStr);
+                		post.setShareUrl(homeUrl + relativeUrl + "?id=" + encodeStr);
                 	} else {
                 		post.setShareUrl(homeUrl + relativeUrl + "?forumId=" + post.getForumId() + "&topicId=" + post.getId());
                 	}
