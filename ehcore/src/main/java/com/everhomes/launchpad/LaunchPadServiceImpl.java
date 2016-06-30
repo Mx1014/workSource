@@ -774,6 +774,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
             if(null != businessDTOs && businessDTOs.size() > 0){
             	businessIds = businessDTOs.stream().map( r->r.getId()).collect(Collectors.toList());
         	}
+            
             List<Long> bizIds = businessIds;
             allItems.forEach(r ->{
                 LaunchPadItemDTO itemDTO = ConvertHelper.convert(r, LaunchPadItemDTO.class);
@@ -783,7 +784,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 itemDTO.setScaleType(ScaleType.TAILOR.getCode());
                 if(r.getTargetType() != null && r.getTargetType().equalsIgnoreCase(ItemTargetType.BIZ.getCode())){
                 	
-                	if(bizIds.contains(r.getTargetId())){
+                	if(ItemDisplayFlag.fromCode(r.getDisplayFlag()) == ItemDisplayFlag.DISPLAY || (bizIds.contains(r.getTargetId()) && ItemDisplayFlag.fromCode(r.getDisplayFlag()) == ItemDisplayFlag.HIDE)){
                 		Business b = this.businessProvider.findBusinessById(r.getTargetId());
                         if(b != null){
                             itemDTO.setIconUrl(processLogoUrl(b,userId,imageUrl));
