@@ -28,6 +28,7 @@ import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityGeoPoint;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -1432,7 +1433,9 @@ public class ActivityServiceImpl implements ActivityService {
             dto.setStartTime(activity.getStartTime().toString());
             dto.setStopTime(activity.getEndTime().toString());
             dto.setGroupId(activity.getGroupId());
-            dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
+//            dto.setPosterUrl(activity.getPosterUri()==null?null:contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId()));
+            String posterUrl = getActivityPosterUrl(activity);
+            dto.setPosterUrl(posterUrl);
             if(post != null) {
                 dto.setForumId(post.getForumId());
             }
@@ -1456,6 +1459,18 @@ public class ActivityServiceImpl implements ActivityService {
         
         response = new ListActivitiesReponse(nextPageAnchor, activityDtos);
         return response;
+	}
+	
+	private String getActivityPosterUrl(Activity activity) {
+		
+		if(activity.getPosterUri() == null) {
+			String posterUrl = contentServerService.parserUri(configurationProvider.getValue(ConfigConstants.ACTIVITY_POSTER_DEFAULT_URL, ""), EntityType.ACTIVITY.getCode(), activity.getId());
+			return posterUrl;
+		} else {
+			String posterUrl = contentServerService.parserUri(activity.getPosterUri(), EntityType.ACTIVITY.getCode(), activity.getId());
+			return posterUrl;
+		}
+		
 	}
 	
 	private Condition buildNearbyActivityCondition(Integer namespaceId, List<String> geoHashCodes, String tag) {
